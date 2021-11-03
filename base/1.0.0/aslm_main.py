@@ -11,17 +11,19 @@ import glob
 
 from gui.main_window import MultiScope_MainGui
 from multiScope import multiScopeModel
-import auxiliary_code.concurrency_tools as ct
-import auxiliary_code.write_parameters as write_params
-from constants import Camera_parameters
-from constants import NI_board_parameters
-from constants import FileSave_parameters
-from constants import ASLM_parameters
+import src.auxiliary_code.concurrency_tools as ct
+import src.auxiliary_code.write_parameters as write_params
+
+# Import Hardware Configuration Information
+from src.constants import CameraParameters
+from src.constants import NI_board_parameters
+from src.constants import FileSave_parameters
+from src.constants import ASLM_parameters
 
 
 class MultiScale_Microscope_Controller():
     """
-    This is the controller in an MVC-scheme for mediating the interaction between the View (GUI) and the model (multiScope.py).
+    This is the controller in an MVC-scheme for mediating the interaction between the View (GUI) and the model (aslm.py).
     Use: https://www.python-course.eu/tkinter_events_binds.php
     """
 
@@ -41,7 +43,7 @@ class MultiScale_Microscope_Controller():
         self.root = tk.Tk()
 
         # Create scope object as model
-        self.model = multiScopeModel()
+        self.model = ASLMModel()
 
         #create the gui as view
         all_tabs_mainGUI = ttk.Notebook(self.root)

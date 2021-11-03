@@ -1,0 +1,9 @@
+name: ASLM
+channels:
+    -defaults
+dependencies:
+    -blas 1.0 mkl
+
+
+numpy==1.17.0
+

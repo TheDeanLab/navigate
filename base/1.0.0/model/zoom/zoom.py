@@ -1,11 +1,9 @@
-""" multiscale Module for controlling a discrete zoom changer
+"""  Module for controlling a discrete zoom changer
 Author: Fabian Voigt
 #TODO
 """
 
 import time
-
-from PyQt5 import QtWidgets, QtCore, QtGui
 
 class DemoZoom(QtCore.QObject):
     def __init__(self, zoomdict):
@@ -19,11 +17,13 @@ class DemoZoom(QtCore.QObject):
                 time.sleep(1)
    
 
-class DynamixelZoom(QtCore.QObject):
+class DynamixelZoom():
+    #TODO: Move Zoom Pareamters to Config File
     def __init__(self, zoomdict, COMport, identifier=2, baudrate=1000000):
         super().__init__()
         from .dynamixel import dynamixel_functions as dynamixel
 
+        self.verbose = True
         self.zoomdict = zoomdict
         self.dynamixel = dynamixel
         self.id = identifier
@@ -39,6 +39,7 @@ class DynamixelZoom(QtCore.QObject):
 
         ''' Specifies how much the goal position can be off (+/-) from the target '''
         self.goal_position_offset = 10
+
         ''' Specifies how long to sleep for the wait until done function'''
         self.sleeptime = 0.05
         self.timeout = 15
@@ -62,18 +63,23 @@ class DynamixelZoom(QtCore.QObject):
         # open port and set baud rate
         self.dynamixel.openPort(self.port_num)
         self.dynamixel.setBaudRate(self.port_num, self.baudrate)
+
         # Enable servo
         self.dynamixel.write1ByteTxRx(self.port_num, 1, self.id, self.addr_mx_torque_enable, self.torque_enable)
+
         # Write Moving Speed
         self.dynamixel.write2ByteTxRx(self.port_num, 1, self.id, self.addr_mx_moving_speed, 100)
+
         # Write Torque Limit
         self.dynamixel.write2ByteTxRx(self.port_num, 1, self.id, self.addr_mx_torque_limit, 200)
+
         # Write P Gain
         self.dynamixel.write1ByteTxRx(self.port_num, 1, self.id, self.addr_mx_p_gain, 44)
+
         # Write Goal Position
         self.dynamixel.write2ByteTxRx(self.port_num, 1, self.id, self.addr_mx_goal_position, position)
-        # Check position
 
+        # Check position
         ''' This works even though the positions returned during movement are just crap
         - they have 7 to 8 digits. Only when the motor stops, positions are accurate
         -
@@ -81,31 +87,33 @@ class DynamixelZoom(QtCore.QObject):
         if wait_until_done:
             start_time = time.time()
             upper_limit = position + self.goal_position_offset
-            # print('Upper Limit: ', upper_limit)
+            if self.verbose:
+                print('Upper Limit: ', upper_limit)
             lower_limit = position - self.goal_position_offset
-            # print('lower_limit: ', lower_limit)
+            if self.verbose:
+                print('lower_limit: ', lower_limit)
             cur_position = self.dynamixel.read4ByteTxRx(self.port_num, 1, self.id, self.addr_mx_present_position)
 
             while (cur_position < lower_limit) or (cur_position > upper_limit):
-                ''' Timeout '''
+                # Timeout function
                 if time.time()-start_time > self.timeout:
                     break
                 time.sleep(0.05)
                 cur_position = self.dynamixel.read4ByteTxRx(self.port_num, 1, self.id, self.addr_mx_present_position)
-                # print(cur_position)
-
+                if self.verbose:
+                    print(cur_position)
         self.dynamixel.closePort(self.port_num)
 
     def read_position(self):
         '''
         Returns position as an int between 0 and 4096
-
         Opens & closes the port
         '''
         self.dynamixel.openPort(self.port_num)
         self.dynamixel.setBaudRate(self.port_num, self.baudrate)
         cur_position = self.dynamixel.read4ByteTxRx(self.port_num, 1, self.id, self.addr_mx_present_position)
-
         self.dynamixel.closePort(self.port_num)
-
         return cur_position
+
+if (__name__ == "__main__"):
+    print("Testing Section - DynamixelZoom Class")

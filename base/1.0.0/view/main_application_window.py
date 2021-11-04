@@ -1,6 +1,9 @@
 #Think of tkinter as HTML, ttk as CSS, and Python as javascript
 '''
-A main window is created and passed to the mainapp class.
+A main window is created and passed to the mainapp class. This class will init as a frame then config the main window. It then 
+creates a menubar using the menubar class. Adds the options for each file menu. It then sets up the frames, then grids the frames.
+Finally it uses the notebook classes to put them into the respective frames on the grid. Each of the notebook classes includes tab 
+classes and inits those etc.
 '''
 
 import tkinter as tk

@@ -6,7 +6,7 @@
 
 from .dcamapi4 import *
 import numpy as np
-
+import cv2 
 
 # ==== DCAMAPI helper functions ====
 
@@ -714,6 +714,7 @@ class Dcam:
 
 if __name__ == '__main__':
     ''' Testing and Examples Section '''
+    
     def dcamtest_show_framedata(data, windowtitle, iShown):
         """
         Show numpy buffer as an image

@@ -36,13 +36,30 @@ class ASLMParameters:
     ASLM_alignment_on = 0  # param=1 if ASLM alignment mode is on, otherwise zero
     ASLM_delay_before_voltage_return = 0.001  # 1ms
     ASLM_additional_return_time = 0.001  # 1ms
-    ASLM_scan_width = ASLM_parameters.simultaneous_lines
+    #ASLM_scan_width = ASLM_parameters.simultaneous_lines
 
 class StageParameters:
+    stage_type = 'PI'
     controllername = 'C-884'
     stages = ('L-509.20DG10', 'L-509.40DG10', 'L-509.20DG10', 'M-060.DG', 'M-406.4PD', 'NOSTAGE')
     refmode = ('FRF', 'FRF', 'FRF', 'FRF', 'FRF', 'FRF',)
     serialnum = '119060508'
+    y_unload_position = 10000
+    y_load_position = 90000
+    startfocus = 70700
+    x_max = 50000
+    x_min = 2000
+    y_max = 100000
+    y_min = 2000
+    z_max = 50000
+    z_min = 2000
+    f_max = 100000
+    f_min = 2000
+    theta_max = 360
+    theta_min = 0
+    x_rot_position = 2000
+    y_rot_position = 2000
+    z_rot_position = 2000
 
 class ZoomParameters:
     zoom_type = 'Dynamixel'

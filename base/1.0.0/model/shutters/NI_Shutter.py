@@ -1,13 +1,26 @@
-"""
-multiscale Module for controlling a shutter via NI-DAQmx
+""" Module for controlling a shutter via NI-DAQmx
 Author: Fabian Voigt
-#TODO
 """
 
 import nidaqmx
 from nidaqmx.constants import LineGrouping
 
-class NI_Shutter:
+class DemoShutter:
+    def __init__(self, shutterline):
+        self.shutterline =  shutterline
+        self.shutterstate = False
+
+    def open(self, *args):
+        self.shutterstate = True
+
+    def close(self, *args):
+        self.shutterstate = False
+
+    def state(self, *args):
+        return self.shutterstate
+
+
+class NIShutter:
     """
     Slow shutter, intended more as a gating device than a fast open/close because the
     NI task is recreated and deleted every time a shutter is actuated.

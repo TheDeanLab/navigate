@@ -1,5 +1,6 @@
 from hamamatsu.dcam import Dcam as Dcam
-from hamamatsu.dcam import *
+
+
 
 # TODO: Import CameraParameter and set proper parameters below...  Hardcoded now.
 # from ..constants import CameraParameters and camera_configuration
@@ -7,17 +8,35 @@ import numpy as np
 import cv2
 
 
-
-class HamamatsuCamera:
-    def __init__(self):
-        #super().__init__()
-        self.camera_id = 0
-        print("Initializing CameraID:", self.camera_id)
+class HamamatsuCamera(Dcam):
+    def __init__(self, camera_id=0):
+        #Need to add getter methods to dcam to access methods or just use Dcam separately
+        super().__init__(camera_id)
+        #self.camera_id = camera_id
+        #print("Initializing CameraID:", self.camera_id)
 
     def open_camera(self):
-        self.hcam = Dcam(self)
-        self.hcam.dev_open(self.camera_id)
-        self.hcam.prop_setvalue('SENSORMODE', 12)
+        if Dcamapi.init() is not False:
+            if self.hcam.dev_open() is not False:
+                self.hcam.prop_setvalue('SENSORMODE', 1)
+                self.hcam.prop_setvalue('DEFECTCORRECT_MODE', 2)
+                self.hcam.prop_setvalue('EXPOSURE TIME', 0.01)
+                self.hcam.prop_setvalue('BINNING', 1)
+                self.hcam.prop_setvalue('READOUTSPEED', 1)
+                self.hcam.prop_setvalue('TRIGGERACTIVE', 1)
+                self.hcam.prop_setvalue('TRIGGERMODE', 1)
+                self.hcam.prop_setvalue('TRIGGERPOLARITY', 2)
+                self.hcam.prop_setvalue('TRIGGERSOURCE', 2)
+                self.hcam.prop_setvalue('INTERNAL LINE INTERVAL', 0.000075)
+            else:
+                print('-NG: hcam.dev_open() fails with error {}'.format(hcam.lasterr()))
+        else:
+            print('-NG: Dcamapi.init() fails with error {}'.format(Dcamapi.lasterr()))
+
+    def open_camera_v2(self):
+        hcam = Dcam(self.camera_id)
+        self.hcam.dev_open()
+        self.hcam.prop_setvalue('SENSOR MODE', 12)
         self.hcam.prop_setvalue('DEFECTCORRECT_MODE', 2)
         self.hcam.prop_setvalue('EXPOSURE TIME', 0.01)
         self.hcam.prop_setvalue('BINNING', 1)
@@ -27,32 +46,35 @@ class HamamatsuCamera:
         self.hcam.prop_setvalue('TRIGGERPOLARITY', 2)
         self.hcam.prop_setvalue('TRIGGERSOURCE', 2)
         self.hcam.prop_setvalue('INTERNAL LINE INTERVAL', 0.000075)
+        # else:
+        # print('-NG: hcam.dev_open() fails with error {}'.format(hcam.lasterr()))
+        # else:
+        # print('-NG: Dcamapi.init() fails with error {}'.format(Dcamapi.lasterr()))
 
     def close_camera(self):
         self.hcam.dev_close()
+        # Dcamapi.uninit()
 
     def set_camera_sensor_mode(self, mode):
         if mode == 'Area':
-            self.hcam.prop_setvalue('SENSORMODE', 1)
+            self.prop_setvalue('SENSORMODE', 1)
             print("Camera Mode:", mode)
         elif mode == 'ASLM':
-            self.hcam.prop_setvalue('SENSORMODE', 12)
-            print("Camera mode:", mode)
+            self.prop_setvalue('SENSORMODE', 12)
         else:
             print('Camera mode not supported')
 
     def get_camera_sensor_mode(self):
-        #TODO: Not working.
-        sensor_mode = self.hcam.prop_getvalue('SENSORMODE')
-        print("Sensor Mode:", sensor_mode)
-        return sensor_mode
+        # TODO: Not working.
+        return str(self.prop_getvalue(DCAM_IDPROP.SENSORMODE))
+
 
     def set_exposure_time(self, time):
         print("Setting Exposure Time:", time)
         self.hcam.prop_setvalue('EXPOSURE TIME', time)
 
     def get_exposure_time(self):
-        #TODO: Not working.
+        # TODO: Not working.
         exposure_time = self.hcam.prop_getvalue('EXPOSURE TIME')
         print("Exposure Time:", exposure_time)
         return exposure_time
@@ -65,7 +87,6 @@ class HamamatsuCamera:
         line_interval = self.hcam.prop_getvalue('INTERNAL LINE INTERVAL')
         print("Internal Line Interval:", line_interval)
         return line_interval
-
 
     def set_binning(self, binning=1):
         self.hcam.prop_setvalue('BINNING', binning)
@@ -118,6 +139,7 @@ class HamamatsuCamera:
      self.hcam.stopAcquisition()
     '''
 
+
 if __name__ == '__main__':
     def dcam_show_device_list():
         """  Show device list  """
@@ -146,6 +168,7 @@ if __name__ == '__main__':
 
         Dcamapi.uninit()
 
+
     def dcam_show_properties(iDevice=0):
         """
         Show supported properties
@@ -156,14 +179,11 @@ if __name__ == '__main__':
                 idprop = dcam.prop_getnextid(0)
                 while idprop is not False:
                     output = '0x{:08X}: '.format(idprop)
-
                     propname = dcam.prop_getname(idprop)
-
                     propval = dcam.prop_getvalue(idprop)
 
                     if propname is not False:
                         output = output + propname + ' ' + str(propval)
-
 
                     print(output)
                     idprop = dcam.prop_getnextid(idprop)
@@ -176,17 +196,22 @@ if __name__ == '__main__':
 
         Dcamapi.uninit()
 
-    #dcam_show_device_list()
+
+    # dcam_show_device_list()
+
     camera = HamamatsuCamera()
-    camera.open_camera()
-    camera.set_camera_sensor_mode('Area')
-    camera.get_camera_sensor_mode()
-    camera.show_camera_properties()
-    #camera.set_exposure_time(0.02)
-    #camera.get_exposure_time()
-    #camera.set_line_interval()
-    #camera.close_camera()
-    #dcam_show_properties(0)
+    propid = camera.prop_getnextid(0)
+    camera.prop_getname(propid)
+    # camera.hcam.open()
+    # camera.set_camera_sensor_mode('Area')
+
+
+    # camera.show_camera_properties()
+    # camera.set_exposure_time(0.02)
+    # camera.get_exposure_time()
+    # camera.set_line_interval()
+    # camera.close_camera()
+    # dcam_show_properties(0)
 
 # HamamatsuCamera.dcam_show_device_list()
 # HamamatsuCamera.dcam_show_properties()

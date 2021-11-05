@@ -3,11 +3,8 @@ Original Author: Fabian Voigt
 
 #TODO
 * Usage of amplitude is not consistent (peak-to-peak in single_pulse)
+* Add smoothing parameter.
 """
-
-#import nidaqmx
-# from nidaqmx.constants import AcquisitionType, TaskMode
-# from nidaqmx.constants import LineGrouping
 
 from scipy import signal
 import numpy as np
@@ -175,19 +172,18 @@ def square(
 
     return waveform
 
+def smooth_waveform(waveform, percent_smoothing):
+    waveform_length = np.size(waveform)
+    window_len = int(np.floor(waveform_length*percent_smoothing/100))
+    smoothed_waveform = np.convolve(waveform, np.ones(window_len), 'valid') / window_len
+    return smoothed_waveform
+
 if (__name__ == "__main__"):
-    
+    # Test the waveform functions:
     import matplotlib.pyplot as plt
-
-    samplerate = 100000    # in samples/second
-    sweeptime = 0.4        # in seconds
-    frequency = 10         # in Hz
-    amplitude = 1          # in V
-    offset = 1             # in V
-    dutycycle = 90          # dutycycle in percent
-    phase = np.pi/2          # in rad
-
-    demo_waveform = sawtooth(samplerate, sweeptime, frequency, amplitude, offset, dutycycle, phase)
+    demo_waveform = sawtooth(samplerate = 100000, sweeptime = 0.4, frequency = 5,
+                             amplitude = 1, offset = 1, dutycycle = 80 , phase = np.pi/4)
+    demo_waveform = smooth_waveform(demo_waveform, percent_smoothing = 5)
 
     plt.plot(demo_waveform)
     plt.show()

@@ -1,13 +1,18 @@
 '''
+TODO: Has to be completely revamped to remove PyQT software.
+Added a large number of pass statements, and commented out PyQT
+
 Contains the joystick handlers
 
 Because the signals emitted can only be processed when a QEventLoop is running, you
 need something with an eventloop (e.g. a QApplication) even for testing.
 '''
-from PyQt5 import QtCore
 
-from .Demo_SidePanel import Demo_SidePanel
 from .logitech import FarmSimulatorSidePanel
+
+class Demo_SidePanel:
+    def __init__(self):
+        self.mode = 'undefined'
 
 class Demo_JoystickHandler(QtCore.QObject):
     def __init__(self, parent = None):
@@ -16,9 +21,8 @@ class Demo_JoystickHandler(QtCore.QObject):
 
         self.parent = parent
         self.cfg = parent.cfg
-
     
-class multiscale_JoystickHandler(QtCore.QObject):
+class JoystickHandler(QtCore.QObject):
 
     def __init__(self, parent = None):
         super().__init__()
@@ -26,25 +30,25 @@ class multiscale_JoystickHandler(QtCore.QObject):
 
         self.parent = parent
         self.cfg = parent.cfg
+        self.verbose = True
 
         ''' parent is the window '''
-
+        # Select if Demo mode is enabled, or the Logitech Farm Simulator
         if self.cfg.sidepanel == 'FarmSimulator':
             self.joystick = FarmSimulatorSidePanel()
-
-            self.joystick.sig_button_pressed.connect(self.button_handler)
-            self.joystick.sig_mode_changed.connect(self.mode_handler)
-            self.joystick.sig_axis_moved.connect(self.axis_handler)
+            #self.joystick.sig_button_pressed.connect(self.button_handler)
+            #self.joystick.sig_mode_changed.connect(self.mode_handler)
+            #self.joystick.sig_axis_moved.connect(self.axis_handler)
         elif self.cfg.sidepanel == 'Demo':
             self.joystick = Demo_SidePanel()
 
         ''' '''
         self.SliderChangeCount = 0
 
-    @QtCore.pyqtSlot(int)
+    #@QtCore.pyqtSlot(int)
     def button_handler(self, button_id):
-        ''' Debugging print statement '''
-        # print('Button pressed: ', button_id)
+        if self.verbose:
+            print('Button pressed: ', button_id)
 
         ''' Laser switching buttons '''
         if button_id == 1:
@@ -92,11 +96,14 @@ class multiscale_JoystickHandler(QtCore.QObject):
         ''' Live button '''
         if button_id == 21:
             current_state = self.parent.get_state_parameter('state')
-            print('Current state: ',current_state)
+            if self.verbose:
+                print('Current state: ',current_state)
             if current_state == ('live'):
-                self.parent.StopButton.clicked.emit(True)
+                pass
+                #self.parent.StopButton.clicked.emit(True)
             elif current_state == 'idle':
-                self.parent.LiveButton.clicked.emit(True)
+                pass
+                #self.parent.LiveButton.clicked.emit(True)
 
         ''' Increase & decrease laser intensity '''
         if button_id == 26:
@@ -107,7 +114,7 @@ class multiscale_JoystickHandler(QtCore.QObject):
 
         ''' Stop movement button '''
         if button_id == 28:
-            self.parent.sig_stop_movement.emit()
+            #self.parent.sig_stop_movement.emit()
 
         if button_id == 29:
             pass
@@ -118,8 +125,8 @@ class multiscale_JoystickHandler(QtCore.QObject):
 
     def set_combobox_to_string(self, combobox, string):
         index = combobox.findText(string)
-        ''' Debugging print statement '''
-        # print('Index: ', index)
+        if self.verbose:
+            print('Index: ', index)
         if index != -1:
             combobox.setCurrentIndex(index)
 
@@ -166,20 +173,18 @@ class multiscale_JoystickHandler(QtCore.QObject):
             else:
                 slider.setValue(0)
 
-    @QtCore.pyqtSlot(str)
+    # @QtCore.pyqtSlot(str)
     def mode_handler(self, str):
         '''
         Helper method to handle mode changes of the joystick.
-
         The FarmSimulatorSidePanel has 6 movement axes, 0 to 2 in "blue"
         LED mode (grey button on the joystick) and 3 to 5 in "red" mode.
-
         When starting up, the mode is unknown and has to be found out by
         registering which axes produce joystick events. 
         '''
 
-        ''' Debugging print statement '''
-        print('New joystick mode: ', str)
+        if self.verbose:
+            print('New joystick mode: ', str)
 
         if str == '012':
             self.parent.display_status_message('Joystick Mode: XY Mode')
@@ -188,27 +193,26 @@ class multiscale_JoystickHandler(QtCore.QObject):
         else:
             self.parent.display_status_message('Joystick Mode: Undefined')
 
-    @QtCore.pyqtSlot(int, int)
+    # @QtCore.pyqtSlot(int, int)
     def axis_handler(self, axis_id, value):
         ''' The axis handler deals with joystick movements.
-
         The FarmSimulatorSidePanel has 6 movement axes, 0 to 2 in "blue"
         LED mode (grey button on the joystick) and 3 to 5 in "red" mode.
-
         When starting up, the mode is unknown and has to be found out by
         registering which axes produce joystick events.
         '''
 
-        ''' Debugging print statement '''
-        # print('Axis: ', axis_id, ',Value: ', value)
+        if self.verbose:
+            print('Axis: ', axis_id, ',Value: ', value)
 
-        ''' '''
         value = value - 128
 
         if axis_id == 0:
-            self.parent.sig_move_relative.emit({'x_rel':value/5})
+            pass
+            # self.parent.sig_move_relative.emit({'x_rel':value/5})
         elif axis_id == 1:
-            self.parent.sig_move_relative.emit({'y_rel':value/5})
+            pass
+            # self.parent.sig_move_relative.emit({'y_rel':value/5})
         elif axis_id == 3:
             ''' Some FarmSimulatorSidePanel have a bug which lets them
             send axis 2 and axis 3 (both rotation motions) at the same time.
@@ -217,8 +221,11 @@ class multiscale_JoystickHandler(QtCore.QObject):
             if self.joystick.mode == '123':
                 pass
             else:
-                self.parent.sig_move_relative.emit({'f_rel':value/30})
+                pass
+                #self.parent.sig_move_relative.emit({'f_rel':value/30})
         elif axis_id == 4:
-            self.parent.sig_move_relative.emit({'f_rel': value/5})
+            pass
+            # self.parent.sig_move_relative.emit({'f_rel': value/5})
         elif axis_id == 5:
-            self.parent.sig_move_relative.emit({'z_rel': value/5})
+            pass
+            # self.parent.sig_move_relative.emit({'z_rel': value/5})

@@ -3,6 +3,8 @@ mesoSPIM Module for controlling Sutter Lambda Filter Wheels
 Author: Kevin Dean,
 Command byte = (wheel * 128) + (speed * 16) + position
 https://www.sutter.com/manuals/LB10-3_OpMan.pdf
+
+TODO: Independent control of multiple filter wheels?
 """
 
 import serial
@@ -17,34 +19,43 @@ class Lambda10B:
         self.baudrate = baudrate
         self.filterdict = filterdict
         self.number_of_filter_wheels = number_of_filter_wheels
+        self.verbose = True
 
         ''' Delay in s for the wait until done function '''
         self.wait_until_done_delay = 0.25
 
         # Open Serial Port
         try:
+            if self.verbose:
+                print('Opening Serial Port')
             self.serial = serial.Serial(self.COMport, self.baudrate, timeout=.25)
         except serial.SerialException:
             raise UserWarning('Could not communicate with Sutter Lambda 10-B.')
 
         # Place Controller Into 'Online' Mode
+        if self.verbose:
+            print('Putting Controller Into Online Mode')
         self.serial.write(bytes.fromhex('ee'))
 
         # Check to see if the initialization sequence has finished.
         if read_on_init:
             self.read(2)  # class 'bytes'
             self.init_finished = True
-            print('Done initializing filter wheel')
+            if self.verbose:
+                print('Done initializing filter wheel.')
         else:
             self.init_finished = False
 
-        ''' Set the filter to a default 'empty alignment' filter position. '''
+        if self.verbose:
+            print('Setting Filter to Default Filter Position')
         self.set_filter('Empty-Alignment')
 
     def __enter__(self):
         return self
 
     def __exit__(self, type, value, traceback):
+        if self.verbose:
+            print('Closing the Filter Wheel Serial Port')
         self.close()
 
     def _check_if_filter_in_filterdict(self, filterposition):
@@ -61,30 +72,33 @@ class Lambda10B:
             # Identify the Filter Number from the Filter Dictionary
             self.wheel_position = self.filterdict[filterposition]
 
-            # Make sure you are moving it to a reasonable filter position, at a reasonable speed.
+            # Make sure you are moving it to a reasonable filter position
             assert self.wheel_position in range(10)
+
+            # Make sure you are moving it at a reasonable speed
             assert speed in range(8)
 
             # If previously we did not confirm that the initialization was complete, check now.
             if not self.init_finished:
                 self.read(2)
                 self.init_finished = True
-                print('Done initializing filter wheel.')
-
+                if self.verbose:
+                    print('Done initializing filter wheel.')
 
             for wheel_idx in range(self.number_of_filter_wheels):
                 ''' Loop through each filter, and send the binary sequence via serial to move to the desired filter 
                 wheel position
                 When number_of_filter_wheels = 1, loop executes once, and only wheel A changes.
                 When number_of_filter_wheels = 2, loop executes twice, with both wheel A and B moving to the same position sequentially
-                
                 Filter Wheel Command Byte Encoding = wheel + (speed*16) + position = command byte'''
 
-                print("Moving Filter Wheel:", wheel_idx)
+                if self.verbose:
+                    print("Moving Filter Wheel:", wheel_idx)
                 outputcommand = wheel_idx*128+self.wheel_position + 16 * speed
                 outputcommand = outputcommand.to_bytes(1, 'little')
 
-                # Send out Command for Wheel A
+                if self.verbose:
+                    print('Sending Filter Wheel Command:', outputcommand)
                 self.serial.write(outputcommand)
                 if wait_until_done:
                     time.sleep(self.wait_until_done_delay)
@@ -100,6 +114,8 @@ class Lambda10B:
         return self.serial.read(num_bytes)
 
     def close(self):
+        if self.verbose:
+            print('Closing the Filter Wheel Serial Port')
         self.set_filter()
         self.serial.close()
 

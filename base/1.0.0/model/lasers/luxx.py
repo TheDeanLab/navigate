@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 """
 This module uses **pyserial** module for communication with OMICRON LuxX
 laser. The class **Laser** provides convenient methods for control of one

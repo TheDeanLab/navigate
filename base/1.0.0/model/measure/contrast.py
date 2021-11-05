@@ -1,11 +1,8 @@
 import numpy as np
 from scipy.fftpack import dctn, fft2
-import matplotlib.pyplot as plt
-from preprocessing import downscale, mean, variance, normalize_norm_L2, normalize_norm_L1, norm_L2, norm_L1, normalize_DC
+from preprocessing import *
 
-__all__ = ['downscale', 'vollath_F4', 'mean', 'variance', 'normalized_dct_shannon_entropy',
-           'entropy_shannon_sub_triangle_2D',
-           'normalize_norm_L2', 'norm_L2', 'norm_L1', 'normalize_DC']
+__all__ = ['downscale', 'vollath_F4', 'normalized_dct_shannon_entropy', 'entropy_shannon_sub_triangle_2D']
 
 def brenner(input_array):
     normalized_array = normalize_norm_L1(input_array)
@@ -116,3 +113,6 @@ def entropy_shannon_sub_triangle_2D(normalized_array, OTF_support_x, OTF_support
         print("Range of OTF_support_y = " + str())
     return entropy
 
+if (__name__ == "__main__"):
+    import matplotlib.pyplot as plt
+    # Contrast metrics testing

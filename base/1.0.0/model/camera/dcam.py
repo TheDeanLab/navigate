@@ -740,14 +740,22 @@ class Dcam:
         if final_exposure_duration == exposure:
             return True
         else:
-            print("Configuration Failed")
+            print("Camera Exposure Configuration Failed")
             return False
 
     def dcam_set_camera_sensor_mode(self, sensor_mode=1):
         """
         Change the camera sensor mode.
         Arg:
-            arg1(int)   Sensor mode. 1 = Area, Light-Sheet Mode = 12
+            arg1(int)   Sensor mode.
+            AREA = 1
+            LINE = 3
+            TDI = 4
+            TDI_EXTENDED = 10
+            PROGRESSIVE = 12
+            SPLITVIEW = 14
+            DUAL LIGHTSHEET = 16
+            PHOTON NUMBER RESOLVING = 18
         Returns:
            True:   configuration set
            False:  error happened.
@@ -770,14 +778,16 @@ class Dcam:
         if final_configuration == sensor_mode:
             return True
         else:
-            print("Configuration Failed")
+            print("Camera Sensor Mode Configuration Failed")
             return False
 
     def dcam_set_camera_defect_correction_mode(self, correction_mode=2):
         """
         Change the camera defect correction mode.
         Arg:
-            arg1(int)   Defect correction mode. 2 = ...
+            arg1(int)   Defect correction mode.
+            OFF = 1
+            ON = 2
         Returns:
            True:   configuration set
            False:  error happened.
@@ -800,19 +810,27 @@ class Dcam:
         if final_configuration == correction_mode:
             return True
         else:
-            print("Configuration Failed")
+            print("Defect Correction Configuration Failed")
             return False
 
     def dcam_set_camera_binning_mode(self, binning=1):
         """
         Change the camera binning mode.
         Arg:
-            arg1(float)   binning mode. 1.0 = 1x1, 2.0 = 2x2, 4.0 = 4x4
-        Returns:
+            arg1(int)   binning mode.
+            _1 = 1
+            _2 = 2
+            _4 = 4
+            _8 = 8
+            _16 = 16
+            _1_2 = 102
+            _2_4 = 204
+            Returns:
            True:   configuration set
            False:  error happened.
-        TODO: Troubleshoot.  Binning not working.
         """
+
+        binning = int(binning)
         idprop = 4198672
 
         # Get the current binning mode
@@ -820,10 +838,10 @@ class Dcam:
         if self.verbose:
             print("Original Binning Mode: {}".format(initial_configuration))
 
-        # Change the exposure duration
+        # Change the binning mode
         self.prop_setvalue(idprop, binning)
 
-        # Confirm the exposure was changed.
+        # Confirm the binning mode was changed.
         final_configuration = self.prop_getvalue(idprop)
         if self.verbose:
             print("Current Binning Mode: {}".format(final_configuration))
@@ -831,23 +849,25 @@ class Dcam:
         if final_configuration == binning:
             return True
         else:
-            print("Configuration Failed")
+            print("Camera Binning Mode Configuration Failed")
             return False
-
-    #TODO: Finish these...
 
     def dcam_set_camera_readout_speed(self, speed_mode=1):
         """
-        Change the camera defect correction mode.
+        Change the camera readout speed.
+        This property allows you to specify the speed of reading out sensor.
+        Usually slower speed has better signal noise ratio (SNR).
         Arg:
-            arg1(int)   Defect correction mode. 2 = ...
+            arg1(int)   camera readout speed.
+            SLOWEST = 1
+            FASTEST = 0x7FFFFFFF2
         Returns:
            True:   configuration set
            False:  error happened.
         """
         idprop = 4194576
 
-        # Get the current exposure duration
+        # Get the current readout speed
         initial_configuration = self.prop_getvalue(idprop)
         if self.verbose:
             print("Original Camera Readout Speed: {}".format(initial_configuration))
@@ -863,21 +883,25 @@ class Dcam:
         if final_configuration == speed_mode:
             return True
         else:
-            print("Configuration Failed")
+            print("Readout Speed Configuration Failed")
             return False
 
     def dcam_set_camera_trigger_active(self, mode=1):
         """
         Change the camera defect correction mode.
         Arg:
-            arg1(int)   Defect correction mode. 2 = ...
+            arg1(int)   Trigger active mode.
+            EDGE = 1
+            LEVEL = 2
+            SYNCREADOUT = 3
+            POINT = 4
         Returns:
            True:   configuration set
            False:  error happened.
         """
         idprop = 1048864
 
-        # Get the current exposure duration
+        # Get the current trigger active mode
         initial_configuration = self.prop_getvalue(idprop)
         if self.verbose:
             print("Original Trigger Active Mode: {}".format(initial_configuration))
@@ -893,14 +917,17 @@ class Dcam:
         if final_configuration == mode:
             return True
         else:
-            print("Configuration Failed")
+            print("Camera Trigger Active Configuration Failed")
             return False
 
     def dcam_set_camera_trigger_mode(self, mode=1):
         """
         Change the camera defect correction mode.
         Arg:
-            arg1(int)   Defect correction mode. 2 = ...
+            arg1(int)   Camera trigger mode.
+            NORMAL = 1
+            PIV = 3
+            START = 6
         Returns:
            True:   configuration set
            False:  error happened.
@@ -923,14 +950,16 @@ class Dcam:
         if final_configuration == mode:
             return True
         else:
-            print("Configuration Failed")
+            print("Camera Trigger Mode Configuration Failed")
             return False
 
     def dcam_set_camera_trigger_polarity(self, mode=2):
         """
-        Change the camera defect correction mode.
+        Change the camera trigger polarity.
         Arg:
-            arg1(int)   Defect correction mode. 2 = ...
+            arg1(int)   Trigger polarity mode
+            NEGATIVE = 1
+            POSITIVE = 2
         Returns:
            True:   configuration set
            False:  error happened.
@@ -953,21 +982,25 @@ class Dcam:
         if final_configuration == mode:
             return True
         else:
-            print("Configuration Failed")
+            print("Camera Trigger Polarity Configuration Failed")
             return False
 
     def dcam_set_camera_trigger_source(self, mode=2):
         """
         Change the camera defect correction mode.
         Arg:
-            arg1(int)   Defect correction mode. 2 = ...
+            arg1(int)   Camera trigger source
+            INTERNAL = 1
+            EXTERNAL = 2
+            SOFTWARE = 3
+            MASTERPULSE = 4
         Returns:
            True:   configuration set
            False:  error happened.
         """
         idprop = 1048848
 
-        # Get the current exposure duration
+        # Get the current trigger source
         initial_configuration = self.prop_getvalue(idprop)
         if self.verbose:
             print("Original Trigger Source: {}".format(initial_configuration))
@@ -983,14 +1016,14 @@ class Dcam:
         if final_configuration == mode:
             return True
         else:
-            print("Configuration Failed")
+            print("Camera Trigger Source Configuration Failed")
             return False
 
     def dcam_set_camera_internal_line_interval(self, mode=0.000075):
         """
         Change the camera defect correction mode.
         Arg:
-            arg1(int)   Defect correction mode. 2 = ...
+            arg1(float)   Camera internal line interval.
         Returns:
            True:   configuration set
            False:  error happened.
@@ -1013,11 +1046,48 @@ class Dcam:
         if final_configuration == mode:
             return True
         else:
-            print("Configuration Failed")
+            print("Camera Internal Line Interval Configuration Failed")
             return False
 
-    def decam_set_default_camera_parameters(self):
-        print("Setting Default Camera Parameters")
+    def dcam_set_default_light_sheet_mode_parameters(self):
+        """
+        Change the camera to the default light-sheet mode.
+        Arg:
+        Returns:
+        """
+        if self.verbose:
+            print("Setting Default Camera Light-Sheet Mode Parameters")
+        self.dcam_set_camera_exposure_time(0.2)
+        self.dcam_set_camera_sensor_mode(12)
+        self.dcam_set_camera_defect_correction_mode(1)
+        self.dcam_set_camera_binning_mode(1)
+        self.dcam_set_camera_readout_speed(1)
+        self.dcam_set_camera_trigger_active(1)
+        self.dcam_set_camera_trigger_mode(2)
+        self.dcam_set_camera_trigger_polarity(2)
+        self.dcam_set_camera_trigger_source(2)
+        self.dcam_set_camera_internal_line_interval(0.000075)
+
+    def dcam_set_default_area_mode_parameters(self):
+        """
+        Change the camera to the default area mode paramters.
+        Arg:
+        Returns:
+        """
+        if self.verbose:
+            print("Setting Default Camera Area Mode Parameters")
+        self.dcam_set_camera_exposure_time(0.2)
+        self.dcam_set_camera_sensor_mode(1)
+        self.dcam_set_camera_defect_correction_mode(1)
+        self.dcam_set_camera_binning_mode(1)
+        self.dcam_set_camera_readout_speed(1)
+        self.dcam_set_camera_trigger_active(1)
+        self.dcam_set_camera_trigger_mode(2)
+        self.dcam_set_camera_trigger_polarity(2)
+        self.dcam_set_camera_trigger_source(2)
+
+
+
 
 if __name__ == '__main__':
     ''' Testing and Examples Section '''

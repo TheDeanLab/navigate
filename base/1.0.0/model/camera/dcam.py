@@ -4,7 +4,7 @@
 #
 # The declarations of classes and functions in this file are subject to change without notice.
 
-from .dcamapi4 import *
+from dcamapi4 import *
 import numpy as np
 import cv2 
 
@@ -145,6 +145,7 @@ class Dcam:
         self.__hdcam = 0
         self.__hdcamwait = 0
         self.__bufframe = DCAMBUF_FRAME()
+        self.verbose = True
 
     def __repr__(self):
         return 'Dcam()'
@@ -711,6 +712,312 @@ class Dcam:
 
         return True
 
+    # custom functions
+    def dcam_set_camera_exposure(self, exposure=0.1):
+        """
+        Change the camera exposure time.
+        Arg:
+            arg1(float)   exposure time in seconds.
+        Returns:
+           True:   exposure set
+           False:  error happened.
+        """
+        exposure_idprop = 2031888
+
+        # Get the current exposure duration
+        initial_exposure_duration = self.prop_getvalue(exposure_idprop)
+        if self.verbose:
+            print("Original Exposure Time: {}".format(initial_exposure_duration))
+
+        # Change the exposure duration
+        self.prop_setvalue(exposure_idprop, exposure)
+
+        # Confirm the exposure was changed.
+        final_exposure_duration = self.prop_getvalue(exposure_idprop)
+        if self.verbose:
+            print("Current Exposure Time: {}".format(final_exposure_duration))
+
+        if final_exposure_duration == exposure:
+            return True
+        else:
+            print("Configuration Failed")
+            return False
+
+    def dcam_set_camera_sensor_mode(self, sensor_mode=1):
+        """
+        Change the camera sensor mode.
+        Arg:
+            arg1(int)   Sensor mode. 1 = Area, Light-Sheet Mode = 12
+        Returns:
+           True:   configuration set
+           False:  error happened.
+        """
+        idprop = 4194832
+
+        # Get the current exposure duration
+        initial_configuration = self.prop_getvalue(idprop)
+        if self.verbose:
+            print("Original Sensor Mode: {}".format(initial_configuration))
+
+        # Change the exposure duration
+        self.prop_setvalue(idprop, sensor_mode)
+
+        # Confirm the exposure was changed.
+        final_configuration = self.prop_getvalue(idprop)
+        if self.verbose:
+            print("Current Sensor Time: {}".format(final_configuration))
+
+        if final_configuration == sensor_mode:
+            return True
+        else:
+            print("Configuration Failed")
+            return False
+
+    def dcam_set_camera_defect_correction_mode(self, correction_mode=2):
+        """
+        Change the camera defect correction mode.
+        Arg:
+            arg1(int)   Defect correction mode. 2 = ...
+        Returns:
+           True:   configuration set
+           False:  error happened.
+        """
+        idprop = 4653072
+
+        # Get the current exposure duration
+        initial_configuration = self.prop_getvalue(idprop)
+        if self.verbose:
+            print("Original Defect Correction Mode: {}".format(initial_configuration))
+
+        # Change the exposure duration
+        self.prop_setvalue(idprop, correction_mode)
+
+        # Confirm the exposure was changed.
+        final_configuration = self.prop_getvalue(idprop)
+        if self.verbose:
+            print("Current Defect Correction Mode: {}".format(final_configuration))
+
+        if final_configuration == correction_mode:
+            return True
+        else:
+            print("Configuration Failed")
+            return False
+
+    def dcam_set_camera_binning_mode(self, binning=1):
+        """
+        Change the camera binning mode.
+        Arg:
+            arg1(float)   binning mode. 1.0 = 1x1, 2.0 = 2x2, 4.0 = 4x4
+        Returns:
+           True:   configuration set
+           False:  error happened.
+        TODO: Troubleshoot.  Binning not working.
+        """
+        idprop = 4198672
+
+        # Get the current binning mode
+        initial_configuration = self.prop_getvalue(idprop)
+        if self.verbose:
+            print("Original Binning Mode: {}".format(initial_configuration))
+
+        # Change the exposure duration
+        self.prop_setvalue(idprop, binning)
+
+        # Confirm the exposure was changed.
+        final_configuration = self.prop_getvalue(idprop)
+        if self.verbose:
+            print("Current Binning Mode: {}".format(final_configuration))
+
+        if final_configuration == binning:
+            return True
+        else:
+            print("Configuration Failed")
+            return False
+
+    #TODO: Finish these...
+
+    def dcam_set_camera_readout_speed(self, speed_mode=1):
+        """
+        Change the camera defect correction mode.
+        Arg:
+            arg1(int)   Defect correction mode. 2 = ...
+        Returns:
+           True:   configuration set
+           False:  error happened.
+        """
+        idprop = 4194576
+
+        # Get the current exposure duration
+        initial_configuration = self.prop_getvalue(idprop)
+        if self.verbose:
+            print("Original Camera Readout Speed: {}".format(initial_configuration))
+
+        # Change the exposure duration
+        self.prop_setvalue(idprop, speed_mode)
+
+        # Confirm the exposure was changed.
+        final_configuration = self.prop_getvalue(idprop)
+        if self.verbose:
+            print("Current Camera Readout Speed: {}".format(final_configuration))
+
+        if final_configuration == speed_mode:
+            return True
+        else:
+            print("Configuration Failed")
+            return False
+
+    def dcam_set_camera_trigger_active(self, mode=1):
+        """
+        Change the camera defect correction mode.
+        Arg:
+            arg1(int)   Defect correction mode. 2 = ...
+        Returns:
+           True:   configuration set
+           False:  error happened.
+        """
+        idprop = 1048864
+
+        # Get the current exposure duration
+        initial_configuration = self.prop_getvalue(idprop)
+        if self.verbose:
+            print("Original Trigger Active Mode: {}".format(initial_configuration))
+
+        # Change the exposure duration
+        self.prop_setvalue(idprop, mode)
+
+        # Confirm the exposure was changed.
+        final_configuration = self.prop_getvalue(idprop)
+        if self.verbose:
+            print("Current Trigger Active Mode: {}".format(final_configuration))
+
+        if final_configuration == mode:
+            return True
+        else:
+            print("Configuration Failed")
+            return False
+
+    def dcam_set_camera_trigger_mode(self, mode=1):
+        """
+        Change the camera defect correction mode.
+        Arg:
+            arg1(int)   Defect correction mode. 2 = ...
+        Returns:
+           True:   configuration set
+           False:  error happened.
+        """
+        idprop = 1049104
+
+        # Get the current exposure duration
+        initial_configuration = self.prop_getvalue(idprop)
+        if self.verbose:
+            print("Original Trigger Mode: {}".format(initial_configuration))
+
+        # Change the exposure duration
+        self.prop_setvalue(idprop, mode)
+
+        # Confirm the exposure was changed.
+        final_configuration = self.prop_getvalue(idprop)
+        if self.verbose:
+            print("Current Trigger Mode: {}".format(final_configuration))
+
+        if final_configuration == mode:
+            return True
+        else:
+            print("Configuration Failed")
+            return False
+
+    def dcam_set_camera_trigger_polarity(self, mode=2):
+        """
+        Change the camera defect correction mode.
+        Arg:
+            arg1(int)   Defect correction mode. 2 = ...
+        Returns:
+           True:   configuration set
+           False:  error happened.
+        """
+        idprop = 1049120
+
+        # Get the current exposure duration
+        initial_configuration = self.prop_getvalue(idprop)
+        if self.verbose:
+            print("Original Trigger Polarity: {}".format(initial_configuration))
+
+        # Change the exposure duration
+        self.prop_setvalue(idprop, mode)
+
+        # Confirm the exposure was changed.
+        final_configuration = self.prop_getvalue(idprop)
+        if self.verbose:
+            print("Current Trigger Polarity: {}".format(final_configuration))
+
+        if final_configuration == mode:
+            return True
+        else:
+            print("Configuration Failed")
+            return False
+
+    def dcam_set_camera_trigger_source(self, mode=2):
+        """
+        Change the camera defect correction mode.
+        Arg:
+            arg1(int)   Defect correction mode. 2 = ...
+        Returns:
+           True:   configuration set
+           False:  error happened.
+        """
+        idprop = 1048848
+
+        # Get the current exposure duration
+        initial_configuration = self.prop_getvalue(idprop)
+        if self.verbose:
+            print("Original Trigger Source: {}".format(initial_configuration))
+
+        # Change the exposure duration
+        self.prop_setvalue(idprop, mode)
+
+        # Confirm the exposure was changed.
+        final_configuration = self.prop_getvalue(idprop)
+        if self.verbose:
+            print("Current Trigger Source: {}".format(final_configuration))
+
+        if final_configuration == mode:
+            return True
+        else:
+            print("Configuration Failed")
+            return False
+
+    def dcam_set_camera_internal_line_interval(self, mode=0.000075):
+        """
+        Change the camera defect correction mode.
+        Arg:
+            arg1(int)   Defect correction mode. 2 = ...
+        Returns:
+           True:   configuration set
+           False:  error happened.
+        """
+        idprop = 4208720
+
+        # Get the current exposure duration
+        initial_configuration = self.prop_getvalue(idprop)
+        if self.verbose:
+            print("Original Internal line Interval: {}".format(initial_configuration))
+
+        # Change the exposure duration
+        self.prop_setvalue(idprop, mode)
+
+        # Confirm the exposure was changed.
+        final_configuration = self.prop_getvalue(idprop)
+        if self.verbose:
+            print("Current Internal Line Interval: {}".format(final_configuration))
+
+        if final_configuration == mode:
+            return True
+        else:
+            print("Configuration Failed")
+            return False
+
+    def decam_set_default_camera_parameters(self):
+        print("Setting Default Camera Parameters")
 
 if __name__ == '__main__':
     ''' Testing and Examples Section '''
@@ -834,13 +1141,21 @@ if __name__ == '__main__':
         if Dcamapi.init() is not False:
             dcam = Dcam(iDevice)
             if dcam.dev_open() is not False:
+                dcam.dcam_set_camera_exposure(0.2)
+                dcam.dcam_set_camera_sensor_mode(12)
+                dcam.dcam_set_camera_defect_correction_mode(2)
+                dcam.dcam_set_camera_binning_mode(2)
                 idprop = dcam.prop_getnextid(0)
+                print(" IDPROP - BINARY - PROPNAME - PROPVAL")
                 while idprop is not False:
-                    output = '0x{:08X}: '.format(idprop)
+                    output = '0x{:08X}'.format(idprop)
 
                     propname = dcam.prop_getname(idprop)
+
+                    propval = dcam.prop_getvalue(idprop)
+
                     if propname is not False:
-                        output = output + propname
+                        output = str(idprop) + " - " + output + " - " + propname + " - " + str(propval)
 
                     print(output)
                     idprop = dcam.prop_getnextid(idprop)
@@ -853,5 +1168,37 @@ if __name__ == '__main__':
 
         Dcamapi.uninit()
 
+    def dcam_set_camera_exposure(iDevice=0, exposure=0.1):
+        """
+        Show supported properties
+        """
+        if Dcamapi.init() is not False:
+            dcam = Dcam(iDevice)
+            if dcam.dev_open() is not False:
+                idprop = 2031888
+                # Get the current exposure duration
+                propval = dcam.prop_getvalue(idprop)
+                print("Original Exposure Time: {}".format(propval))
 
-    dcam_live_capturing()
+                # Change the exposure duration
+                dcam.prop_setvalue(idprop, exposure)
+
+                # Confirm the exposure was changed.
+                propval = dcam.prop_getvalue(idprop)
+                print("Current Exposure Time: {}".format(propval))
+
+                dcam.dev_close()
+            else:
+                print('-NG: Dcam.dev_open() fails with error {}'.format(dcam.lasterr()))
+        else:
+            print('-NG: Dcamapi.init() fails with error {}'.format(Dcamapi.lasterr()))
+
+        Dcamapi.uninit()
+
+    # dcam_set_camera_exposure(0, 0.1)
+    dcam_show_properties()
+    # dcam_show_device_list()
+    # dcam_live_capturing()
+
+
+

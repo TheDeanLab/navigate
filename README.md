@@ -1,13 +1,14 @@
 # Axially Swept Light-Sheet Microscopy Project
 
 [![Auto-Docker functionality testing CI](https://github.com/AdvancedImagingUTSW/ASLM/actions/workflows/autodocker-ci.yml/badge.svg?branch=main)](https://github.com/AdvancedImagingUTSW/ASLM/actions/workflows/autodocker-ci.yml)
+
 [![Image building and testing CI](https://github.com/AdvancedImagingUTSW/ASLM/actions/workflows/container-ci.yml/badge.svg)](https://github.com/AdvancedImagingUTSW/ASLM/actions/workflows/container-ci.yml)
 
 ### Project Outline
 Adopts an MVC architecture for microscope control. Includes key code contributions from a number of open-source projects, including:
 * https://github.com/mesoSPIM/mesoSPIM-control
 * https://github.com/bicarlsen/obis_laser_controller
-* *
+* https://github.com/utsw-bicf/auto-docker/
 
 
 ### Continuous Integration

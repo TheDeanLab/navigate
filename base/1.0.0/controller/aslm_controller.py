@@ -8,36 +8,21 @@ import datetime as dt
 import os
 import glob
 
+# from gui.main_window import MultiScope_MainGui
+from .model.aslm_model import ASLMModel
 
-from gui.main_window import MultiScope_MainGui
-from multiScope import multiScopeModel
-import src.auxiliary_code.concurrency_tools as ct
-import src.auxiliary_code.write_parameters as write_params
+import concurrency.concurrency_tools as ct
 
 # Import Hardware Configuration Information
-from src.constants import CameraParameters
-from src.constants import NI_board_parameters
-from src.constants import FileSave_parameters
-from src.constants import ASLM_parameters
+from .config.constants import CameraParameters
+from .config.constants import AcquisitionHardware
+from .config.constants import ASLMParameters
 
-
-class MultiScale_Microscope_Controller():
+class ASLMController():
     """
-    This is the controller in an MVC-scheme for mediating the interaction between the View (GUI) and the model (aslm.py).
+    This is the controller in an MVC-scheme for mediating the interaction between the View (GUI) and the model (./model/aslm_model.py).
     Use: https://www.python-course.eu/tkinter_events_binds.php
     """
-
-    #todo: check that stage values - e.g. with plane spacing, plane number don't expand beyond the possible travel range
-    #todo: ROI selection tool - in napari
-    #todo: move to selected region in high resolution.
-
-    #todo: pixel width to 60 pixel
-    #512x512 running - adjust
-    #SPIM and ASLM - intensity changes: counts
-    #timelapse saving - wrong!
-    #
-    #todo> startup guide. https://www.drivereasy.com/knowledge/fixed-ntkrnlmp-exe-blue-screen-error/
-
 
     def __init__(self):
         self.root = tk.Tk()
@@ -45,15 +30,15 @@ class MultiScale_Microscope_Controller():
         # Create scope object as model
         self.model = ASLMModel()
 
-        #create the gui as view
+        # Create the gui as view
         all_tabs_mainGUI = ttk.Notebook(self.root)
         self.view = MultiScope_MainGui(all_tabs_mainGUI, self.model)
 
-        #init param file writer class
-        self.paramwriter = write_params.write_Params(self.view)
+        # init param file writer class
+        # self.paramwriter = write_params.write_Params(self.view)
 
         #define here which buttons run which function in the multiScope model
-        self.continuetimelapse = 1 #enable functionality to stop timelapse
+        self.continue_timelapse = 1 #enable functionality to stop timelapse
 
         #######connect buttons / variables from GUI with functions here-----------------------------------
         # connect all the buttons that start a functionality like preview, stack acquisition, etc.
@@ -61,8 +46,8 @@ class MultiScale_Microscope_Controller():
         # don't connect buttons that you want to be "static" during a stack acquisition, such as number of planes, plane spacing
         # those parameters, you can get at the beginning of e.g. a stack acquisition call
 
-        self.view.runtab.bt_preview_lowres.bind("<ButtonRelease>", self.run_lowrespreview)
-        self.view.runtab.bt_preview_highres.bind("<ButtonRelease>", self.run_highrespreview)
+        self.view.runtab.bt_preview_lowres.bind("<ButtonRelease>", self.run_low_res_preview)
+        self.view.runtab.bt_preview_highres.bind("<ButtonRelease>", self.run_high_res_preview)
         self.view.runtab.bt_preview_stop.bind("<Button>", self.run_stop_preview)
         self.view.runtab.bt_changeTo488.bind("<Button>", lambda event: self.changefilter(event, '488'))
         self.view.runtab.bt_changeTo552.bind("<Button>", lambda event: self.changefilter(event, '552'))
@@ -70,17 +55,16 @@ class MultiScale_Microscope_Controller():
         self.view.runtab.bt_changeTo640.bind("<Button>", lambda event: self.changefilter(event, '640'))
         self.view.runtab.bt_changeTo_block.bind("<Button>", lambda event: self.changefilter(event, 'None'))
         self.view.runtab.bt_changeTo_trans.bind("<Button>", lambda event: self.changefilter(event, 'LED'))
-        self.view.runtab.preview_autoIntensity.trace_add("write", self.updatepreview)
-
+        self.view.runtab.preview_autoIntensity.trace_add("write", self.update_preview)
 
         self.view.runtab.stack_aq_bt_run_stack.bind("<Button>", self.acquire_stack)
         self.view.runtab.timelapse_aq_bt_run_timelapse.bind("<Button>", self.acquire_timelapse)
         self.view.runtab.timelapse_aq_bt_abort_timelapse.bind("<Button>", self.abort_timelapse)
 
-        self.view.runtab.laser488_percentage.trace_add("read", self.updateLaserParameters)
-        self.view.runtab.laser552_percentage.trace_add("read", self.updateLaserParameters)
-        self.view.runtab.laser594_percentage.trace_add("read", self.updateLaserParameters)
-        self.view.runtab.laser640_percentage.trace_add("read", self.updateLaserParameters)
+        self.view.runtab.laser488_percentage.trace_add("read", self.update_laser_parameters)
+        self.view.runtab.laser552_percentage.trace_add("read", self.update_laser_parameters)
+        self.view.runtab.laser594_percentage.trace_add("read", self.update_laser_parameters)
+        self.view.runtab.laser640_percentage.trace_add("read", self.update_laser_parameters)
         self.view.runtab.cam_lowresExposure.trace_add("write", self.updateExposureParameters)
         self.view.runtab.cam_highresExposure.trace_add("write", self.updateExposureParameters)
 
@@ -91,16 +75,14 @@ class MultiScale_Microscope_Controller():
 
         self.view.runtab.roi_applybutton.bind("<Button>", self.changeROI)
 
-
-
         #stage settings tab
-        self.view.stagessettingstab.stage_moveto_axial.trace_add("write", self.movestage)
-        self.view.stagessettingstab.stage_moveto_lateral.trace_add("write", self.movestage)
-        self.view.stagessettingstab.stage_moveto_updown.trace_add("write", self.movestage)
-        self.view.stagessettingstab.stage_moveto_angle.trace_add("write", self.movestage)
+        self.view.stagessettingstab.stage_moveto_axial.trace_add("write", self.move_stage)
+        self.view.stagessettingstab.stage_moveto_lateral.trace_add("write", self.move_stage)
+        self.view.stagessettingstab.stage_moveto_updown.trace_add("write", self.move_stage)
+        self.view.stagessettingstab.stage_moveto_angle.trace_add("write", self.move_stage)
         self.view.stagessettingstab.keyboard_input_on_bt.bind("<Button>", self.enable_keyboard_movement)
         self.view.stagessettingstab.keyboard_input_off_bt.bind("<Button>", self.disable_keyboard_movement)
-        self.view.stagessettingstab.move_to_specificPosition_Button.bind("<Button>", self.movestageToPosition)
+        self.view.stagessettingstab.move_to_specificPosition_Button.bind("<Button>", self.move_stageToPosition)
 
         #advanced settings tab
         self.view.advancedSettingstab.slit_currentsetting.trace_add("write", self.slit_opening_move)
@@ -129,7 +111,7 @@ class MultiScale_Microscope_Controller():
         Run the Tkinter Gui in the main loop
         :return:
         """
-        self.root.title("Multi-scale microscope V1")
+        self.root.title("Multi-Scale ASLM")
         self.root.geometry("800x600")
         self.root.resizable(width=False, height=False)
         #self.automatically_update_stackbuffer()
@@ -138,11 +120,11 @@ class MultiScale_Microscope_Controller():
     def close(self):
         self.model.close()
 
-    def wait_forInput(self):
+    def wait_for_Input(self):
         print("All 'snap' threads finished execution.")
         input('Hit enter to close napari...')
 
-    def updateLaserParameters(self, var, indx, mode):
+    def update_laser_parameters(self, var, indx, mode):
         """
         update the laser power
         """
@@ -154,7 +136,7 @@ class MultiScale_Microscope_Controller():
         power_settings = [voltage488, voltage552, voltage594, voltage640]
 
         # change laser power
-        self.model.set_laserpower(power_settings)
+        self.model.set_laser_power(power_settings)
 
     def updateSlitParameters(self, var, indx, mode):
         # set the low resolution and high-resolution slit openings
@@ -232,7 +214,7 @@ class MultiScale_Microscope_Controller():
 
     def updateGUItext(self):
         '''
-        update text labes in GUI here
+        update text labels in GUI here
         :return:
         '''
         self.model.currentFPS #todo
@@ -310,7 +292,7 @@ class MultiScale_Microscope_Controller():
                     self.model.highres_camera.set_imageroi(startx, startx + self.model.current_highresROI_width, starty,
                                                           starty + self.model.current_highresROI_height)
 
-    def run_lowrespreview(self, event):
+    def run_low_res_preview(self, event):
         '''
         Runs the execution of a low resolution preview.
         Required:
@@ -335,7 +317,7 @@ class MultiScale_Microscope_Controller():
             self.model.preview_lowres()
             print("running lowres preview")
 
-    def run_highrespreview(self, event):
+    def run_high_res_preview(self, event):
         '''
         Runs the execution of a high resolution preview.
         Required:
@@ -366,7 +348,7 @@ class MultiScale_Microscope_Controller():
                 self.model.preview_highres_ASLM()
                 print("running high res ASLM preview")
 
-    def updatepreview(self, var, indx, mode):
+    def update_preview(self, var, indx, mode):
         '''
         Updates preview functionalities: auto-scaling of intensity values
         '''
@@ -388,7 +370,7 @@ class MultiScale_Microscope_Controller():
             self.model.continue_preview_highres = False
             self.view.runtab.preview_change(self.view.runtab.bt_preview_highres)
 
-    def movestage(self, var,indx, mode):
+    def move_stage(self, var,indx, mode):
         """
         moves the stage to a certain position
         """
@@ -405,7 +387,7 @@ class MultiScale_Microscope_Controller():
         #move
         self.model.move_to_position(moveToPosition)
 
-    def movestageToPosition(self, event):
+    def move_stageToPosition(self, event):
         """
         moves the stage to a saved position, indicated by a field in the GUI
         """
@@ -519,8 +501,8 @@ class MultiScale_Microscope_Controller():
 
         #save acquistition parameters and construct file name to save (only if not time-lapse)
         stackfilepath = self.parentfolder
-        if self.continuetimelapse != 0:
-            #generate file path
+        if self.continue_timelapse != 0:
+            # Generate file path
             nbfiles_folder = len(glob.glob(os.path.join(self.parentfolder, 'Experiment*')))
             print("foldernumber:" + str(nbfiles_folder))
             newfolderind = nbfiles_folder + 1
@@ -642,7 +624,7 @@ class MultiScale_Microscope_Controller():
         self.model.continue_preview_lowres = False
         self.model.continue_preview_highres = False
 
-        self.continuetimelapse = 0
+        self.continue_timelapse = 0
         print("acquiring timelapse")
 
         #(1) NOTE: You cannot use a While loop here as it makes the Tkinter mainloop freeze - put the time-lapse instead into a thread
@@ -699,7 +681,7 @@ class MultiScale_Microscope_Controller():
             print("time interval:"  + str(timeinterval))
 
             ## stop time-lapse acquisition if you stop it
-            if self.continuetimelapse == 1:
+            if self.continue_timelapse == 1:
                 break  # Break while loop when stop = 1
 
             stackacquisitionthread = ct.ResultThread(target=self.acquire_stack_task).start()
@@ -714,13 +696,13 @@ class MultiScale_Microscope_Controller():
                 t1 = time.perf_counter() - t0
                 remaining_waittime = totaltime - t1
 
-        self.continuetimelapse = 1
+        self.continue_timelapse = 1
         self.view.runtab.timelapse_aq_bt_run_timelapse.config(relief="raised")
         self.view.update()
 
 
     def abort_timelapse(self,event):
-        self.continuetimelapse = 1
+        self.continue_timelapse = 1
 
 
 #enable keyboard movements ---------------------------------------------------------------------------------------------
@@ -760,9 +742,11 @@ class MultiScale_Microscope_Controller():
 
 
 if __name__ == '__main__':
-    c = MultiScale_Microscope_Controller()
-    c.run()
-    c.close()
+    #c = MultiScale_Microscope_Controller()
+    #c.run()
+    #c.close()
+
+    print("done")
 
 
 

@@ -1,3 +1,8 @@
+'''
+Luxx Laser Class
+LUXX488, 200 mW, is COM19
+LUXX642, 140 mW, is COM20
+'''
 
 import serial
 import sys
@@ -309,8 +314,8 @@ def print_hex(hex_code):
     return decimals
 
 
-# Filter Wheel Testing.
 if (__name__ == "__main__"):
+    # Luxx Laser Testing.
 
     laser1 = Laser()
     #TODO: Add a close class method to Laser class

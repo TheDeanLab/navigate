@@ -55,7 +55,7 @@ class Obis_Laser():
         # self.obis.read()
         self.rm = visa.ResourceManager()
         self.obis = self.rm.open_resource(port)
-        self.turnoff=False
+        self.turnoff = False
 
     def on(self):
         # self.obis.write("sour1:am:stat ON")

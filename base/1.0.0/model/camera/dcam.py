@@ -145,7 +145,7 @@ class Dcam:
         self.__hdcam = 0
         self.__hdcamwait = 0
         self.__bufframe = DCAMBUF_FRAME()
-        self.verbose = True
+        self.verbose = False
 
     def __repr__(self):
         return 'Dcam()'
@@ -924,7 +924,7 @@ class Dcam:
         """
         Change the camera defect correction mode.
         Arg:
-            arg1(int)   Camera trigger mode.
+            arg1(float)   Camera trigger mode.
             NORMAL = 1
             PIV = 3
             START = 6
@@ -933,6 +933,7 @@ class Dcam:
            False:  error happened.
         """
         idprop = 1049104
+        mode = float(mode)
 
         # Get the current exposure duration
         initial_configuration = self.prop_getvalue(idprop)
@@ -1057,7 +1058,7 @@ class Dcam:
         """
         if self.verbose:
             print("Setting Default Camera Light-Sheet Mode Parameters")
-        self.dcam_set_camera_exposure_time(0.2)
+        self.dcam_set_camera_exposure(0.2)
         self.dcam_set_camera_sensor_mode(12)
         self.dcam_set_camera_defect_correction_mode(1)
         self.dcam_set_camera_binning_mode(1)
@@ -1076,7 +1077,7 @@ class Dcam:
         """
         if self.verbose:
             print("Setting Default Camera Area Mode Parameters")
-        self.dcam_set_camera_exposure_time(0.2)
+        self.dcam_set_camera_exposure(0.2)
         self.dcam_set_camera_sensor_mode(1)
         self.dcam_set_camera_defect_correction_mode(1)
         self.dcam_set_camera_binning_mode(1)
@@ -1211,10 +1212,11 @@ if __name__ == '__main__':
         if Dcamapi.init() is not False:
             dcam = Dcam(iDevice)
             if dcam.dev_open() is not False:
-                dcam.dcam_set_camera_exposure(0.2)
-                dcam.dcam_set_camera_sensor_mode(12)
-                dcam.dcam_set_camera_defect_correction_mode(2)
-                dcam.dcam_set_camera_binning_mode(2)
+                # dcam.dcam_set_camera_exposure(0.2)
+                # dcam.dcam_set_camera_sensor_mode(12)
+                # dcam.dcam_set_camera_defect_correction_mode(2)
+                # dcam.dcam_set_camera_binning_mode(2)
+                dcam.dcam_set_default_light_sheet_mode_parameters()
                 idprop = dcam.prop_getnextid(0)
                 print(" IDPROP - BINARY - PROPNAME - PROPVAL")
                 while idprop is not False:

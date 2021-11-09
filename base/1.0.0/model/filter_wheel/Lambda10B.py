@@ -1,6 +1,7 @@
 """
 mesoSPIM Module for controlling Sutter Lambda Filter Wheels
 Author: Kevin Dean,
+
 Command byte = (wheel * 128) + (speed * 16) + position
 https://www.sutter.com/manuals/LB10-3_OpMan.pdf
 
@@ -11,7 +12,13 @@ import serial
 import time
 
 class Lambda10B:
-    def __init__(self,number_of_filter_wheels, comport, filterdict, baudrate=9600, read_on_init=True):
+    def __init__(self,
+                 number_of_filter_wheels,
+                 comport,
+                 filterdict,
+                 baudrate=9600,
+                 read_on_init=True):
+
         super().__init__()
 
         ''' Load the Default Parameters '''
@@ -116,7 +123,7 @@ class Lambda10B:
     def close(self):
         if self.verbose:
             print('Closing the Filter Wheel Serial Port')
-        self.set_filter()
+        self.set_filter('Empty-Alignment')
         self.serial.close()
 
 # Filter Wheel Testing.
@@ -136,6 +143,9 @@ if (__name__ == "__main__"):
                   'Blocked6': 9}
     try:
         filter = Lambda10B(number_of_filter_wheels, comport, filterdict)
+        filter.set_filter('GFP - FF01-515/30-32')
+        filter.close()
+        print('Success!')
     except serial.SerialException:
         print("Failed: ", comport)
 

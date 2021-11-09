@@ -1,24 +1,62 @@
-"""
-This module uses **pyserial** module for communication with OMICRON LuxX
-laser. The class **Laser** provides convenient methods for control of one
-or several lasers, connected to the computer. Author: Roman Kiselev, January 2014
-License : GNU GPL - use it for any purpose
-"""
-
 
 import serial
 import sys
 import re
 from time import time
 
-class Laser(port, baudrate):
-    def __init__(self, port, baudrate=500000):
-        self.verbose = True
-        self.port = serial.Serial(port, baudrate, timeout=0.3)
-        self.wavelength = float(self.ask("GSI").split()[0])
-        self.serial = self.ask("GSN")
-        self.hours = self.ask("GWH")
-        self.pmax = float(self.ask("GMP"))
+class LuxxLaser():
+    def __init__(self, port='COM19', baudrate=500000):
+        self.verbose = False
+        """
+        Open port (*auto* stands for **/dev/ttyUSB0** in Linux or **COM17**
+        in Windows, because it is what I use); then get device model;
+        finally, get maximum output power and store it in **pmax** variable.
+        """
+        try:
+            self.port = serial.Serial(port, baudrate, timeout=0.3)
+            self.firmware = self.ask("GFw")
+            if self.firmware.find(b"LuxX") < 0 & \
+               self.firmware.find(b"BrixX") < 0 & \
+               self.firmware.find(b"PhoxX") < 0:
+                print("The LuxX | BrixX | PhoxX laser is not connected. " + \
+                      "The received answer for '?GFw\\r' command is:\n" + \
+                      self.firmware)
+                raise serial.SerialException
+            print("The laser is connected via Com port %s" % port)
+
+            # Confirm the Laser Wavelength
+            wavelength = self.ask("GSI") #.split()[0]
+            wavelength = wavelength.replace(b"\xa7200", str("\n").encode())
+            wavelength = float(wavelength.decode())
+            self.wavelength = wavelength
+            if self.verbose:
+                print("The Wavelength is:", wavelength)
+
+            # Confirm the Laser Serial Number
+            serial_number = self.ask("GSN")
+            serial_number = serial_number.decode()
+            self.serial = serial_number
+            if self.verbose:
+                print("Serial Number is: ", serial_number)
+
+            # Confirm the Laser Working Hours
+            laser_working_hours = self.ask("GWH")
+            laser_working_hours = laser_working_hours.decode()
+            self.hours = laser_working_hours
+            if self.verbose:
+                print("Laser working hours: ", laser_working_hours)
+
+            # Confirm the Laser Maximum Power
+            power_max = float(self.ask("GMP"))
+            self.pmax = power_max
+            if self.verbose:
+                print("Laser maximum power: ", power_max)
+
+        except serial.SerialException:
+            raise OSError('Port "%s" is unavailable.\n' % port + \
+                          'May be the laser is not connected, the wrong' + \
+                          ' port is specified or the port is already opened')
+
 
     def __del__(self):
         """Close the port before exit."""
@@ -28,32 +66,50 @@ class Laser(port, baudrate):
         except serial.SerialException:
             print('could not close the port')
 
+
     def write(self, command):
         """Send *command* to device. Preceed it with "?" und end with CR."""
-        self.port.write("?" + command + "\r")
+        command = str("?").encode() + str(command).encode() + str("\r").encode()
+        self.port.write(command)
+
 
     def read(self):
         """Read all information from the port and return it as string."""
         answer = self.port.readall()
-        return answer.replace("\r", "\n").replace("\xa7", " | ")
+        if self.verbose:
+            print("The 'read' answer = ", answer)
+        answer = answer.replace(str("\r").encode(), str("\n").encode())
+        answer = answer.replace(str("\xa7").encode(), str(" | ").encode())
+        if self.verbose:
+            print("The cleaned up read answer is:", answer)
+        return answer
+
 
     def ask(self, command):
         """Write, then read. However, return only the relevant info."""
         self.write(command)
         response = self.read()
-        if re.findall("!UK\n", response):
+        # Use regular expressions to clean up response
+        # An unknown command or an incomplete command is followed by a “!UK” answer
+        search_string = str("!UK\n").encode()
+        if re.findall(search_string, response):
             print("Command '%s' is unknown for this device" % command)
         else:
-            response = re.findall("!%s(.+)\n" % command[:3], response)[-1]
+            search_string = "!%s(.+)\n" % command[:3]
+            search_string = search_string.encode()
+            if self.verbose:
+                print("The search string is:", search_string)
+            response = re.findall(search_string, response)[-1]
             if response[0] == "x":
                 print("Laser responded with error to command '%s'" % command)
             return response
+
 
     def smart_ask(self, command):
         """
         Several commands return information coded in ASCII HEX numbers.
         The relevant are bits in the registers. For convenient
-        representation, we will print these bytes in tables.
+        representation, we will print(these bytes in tables.
         This is relevant for the following commands:
             * GOM
             * GFB
@@ -66,28 +122,34 @@ class Laser(port, baudrate):
         else:
             return self.ask(command)
 
+
     def start(self):
         """Start the emission (takes about 3 seconds)"""
         self.write("LOn")
+
 
     def stop(self):
         """Stop the emission immediately"""
         self.write("LOf")
 
+
     def set_power(self, power):
         """Set the desired power in mW"""
         # Calculate the corresponding HEX code and transmit it
         if power > self.pmax:
-            print("Laser provides %imW only. The maximum power is set" % self.pmax)
+            print("Laser provides %imW only. The maximum power is set" % \
+                                                            self.pmax)
             self.write("SLPFFF")
         else:
             code = hex(int(4095*power/self.pmax))[2:].upper().zfill(3)
             stopwatch(self.ask, "SLP%s" % code)
 
+
     def get_power(self):
         """Get the current power value in mW"""
         code = stopwatch(self.ask, "GLP")
         return int(code, 16)*self.pmax/4095.
+
 
     def set_mode(self, mode):
         """
@@ -114,10 +176,11 @@ class Laser(port, baudrate):
         elif mode == "Analog" or mode == 3:
             mode = 3
         else:
-            print("**mode** must be one of 'Standby', 'CW-ACC', " + 
-            "'CW-APC', 'Analog' or number 0-3. Nothing changed.")
+            print("**mode** must be one of 'Standby', 'CW-ACC', " + \
+                        "'CW-APC', 'Analog' or number 0-3. Nothing changed.")
             return
         stopwatch(self.ask, "ROM%i" % mode)
+
 
     def get_mode(self):
         """
@@ -144,6 +207,7 @@ class Laser(port, baudrate):
         else:
             return mode
 
+
     def set_autostart(self, state):
         """Decide if light is emitted on powerup."""
         if state:
@@ -151,14 +215,16 @@ class Laser(port, baudrate):
         else:
             self.ask("SAS0")
 
+
     def get_autostart(self):
         """Check if light is emitted on powerup."""
         return self.ask("SAS")
 
+
     def get_parameters(self):
-        """Print a table showing laser status."""
+        """print a table showing laser status."""
         self.smart_ask("GOM")
-        print("""Bit description:
+        """Bit description:
         15  Auto PowerUP if ONE
         14  Autostart (emission at powerup) if ONE
         13  Adhoc USB - Laser sends info messages from time to time if ONE
@@ -168,12 +234,13 @@ class Laser(port, baudrate):
         3   Bias level: ONE - active; ZERO - not active
 
         Bits 0, 1, 2, 5, 6, 9, 10, 11, 12 are reserved
-        """)
+        """
+
 
     def get_errors(self):
-        """Print contents of failure byte"""
+        """print contents of failure byte"""
         self.smart_ask("GFB")
-        print("""Bit description:
+        """Bit description:
         15  Diode power exceeded maximum value
         14  An internal error occured
         12  The temperature at the diode exceeded the valid temperature range
@@ -189,7 +256,8 @@ class Laser(port, baudrate):
             not present anymore.
 
         Bits 1, 2, 3, 5, 6, 7, 13 are reserved
-        """)
+        """
+
 
 def stopwatch(func, *func_args, **func_kwargs):
     """Call **func** and print elapsed time"""
@@ -198,9 +266,10 @@ def stopwatch(func, *func_args, **func_kwargs):
     print("Time elapsed: %5.2f ms" % ((time() - start_time)*1000.0))
     return result
 
+
 def print_hex(hex_code):
     """
-    Print a nice table that represents *hex_code* (ASCII HEX string)
+    print a nice table that represents *hex_code* (ASCII HEX string)
     in a binary code.
 
     Returns
@@ -223,7 +292,7 @@ def print_hex(hex_code):
     for hex_number in hex_numbers:
         decimals.append(int(hex_number, 16))
 
-    # Print a table
+    # print a table
     table = """BYTE ##  :  '?'
     | ## | ## | ## | ## | ## | ## | ## | ## |
     |----|----|----|----|----|----|----|----|
@@ -239,17 +308,14 @@ def print_hex(hex_code):
         print(table % tuple([byte, hex_numbers[i]] + content))
     return decimals
 
-if __name__ == '__main__':
-    ''' Testing and Examples Section '''
-    port = 'COM19'
-    baudrate = 500000
-    laser1 = Laser(port, baudrate)
-    laser1.smart_ask("GSI")
-    laser1.smart_ask("GOM")
-    laser1.start()
-    laser1.set_power(24)
-    laser1.stop()
-    del laser1
+
+# Filter Wheel Testing.
+if (__name__ == "__main__"):
+
+    laser1 = Laser()
+    #TODO: Add a close class method to Laser class
+    laser1.close()
+    print('Done')
 
 
 
@@ -259,139 +325,4 @@ if __name__ == '__main__':
 
 
 
-"""
-LUXX488, 200 mW, is COM19
-LUXX642, 140 mW, is COM20
 
-This class represents OMICRON LuxX laser. It opens the communication
-port upon object creation and asks the device for model and maximum
-power.
-
-Functions
----------
-* __init__(port="auto", baudrate=500000)
-constructor. Open port, get model name and power
-* __del__()
-destructor. Close the port upon completion
-* write(command)
-send command to device
-* read()
-read all data from port buffer
-* ask(command)
-send command and get only the relevant answer, as well as time
-* smart_ask(command)
-ask, which prints HEX answers in a table
-* print_HEX(HEXstring)
-print a nice table representing bits in a HEX number
-* start()
-start emission (takes 3 seconds)
-* stop()
-stop emission immediately
-* setPower(power_value)
-change the emitted power
-* getPower()
-ask for the current power (seting point, not actual emitted power)
-* setMode
-set an operating mode: standby, current control, power control
-or analog modulation.
-* getMode
-determine current operating mode
-* setAutostart
-if set, the laser will start emission on key turn event or on
-powerup. Otherwise, it can be started only from software with
-*LOn* command (**start** function).
-* getAutostart
-determine if autostart is active
-
-
-Laser control
--------------
-The device itself contains FTDI microchip, which emulates serial port
-via USB. In Linux it appears as **\dev\ttyUSB#** file, where **#**
-is a number. In Windows, it leads to appearance of an additional COM
-port (**COM##**).
-
-If the laser is connected via USB cable, the baudrate is 500000; it can
-also be connected via RS-232 interface with a special cable, then the
-baudrate should be set to 57600.
-
-The laser is controlled with short commands (register matters!). The
-full desciption of commands can be found in the file
-*PhoxX_LuxX_BrixX_command_list V1.0.pdf*. Here is a list of commands
-that are relevant to the LuxX model:
-* RsC
-Reset Controller
-* GFw
-Get Firmware
-* GSN
-Get Serial Number
-* GSI
-Get Spec Info
-* GMP
-Get Maximum Power
-* GWH
-Get Working Hours
-* ROM
-Recall Operating Mode (Standby, CW-ACC, CW-APC, Analog)
-* GOM
-Get Operating Mode (**ASCII HEX**)
-* SOM
-Set Operating Mode (**ASCII HEX**)
-* SAS
-Set Auto Start (Laser will emit after startup)
-* SAP
-Set Auto Powerup
-* LOn
-Laser On - start emission
-* LOf
-Laser Off
-* POn
-Power On
-* POf
-Power Off
-* GAS
-Get Actual Status
-* GFB
-Get Failure Byte (**ASCII HEX**)
-* GLF
-Get Last Failurebyte (**ASCII HEX**)
-* MDP
-Measure Diode Power
-* MTD
-Measure Temperature Diode
-* MTA
-Measure Temperature Ambient
-* CLD
-Calibrate Laser Diode
-* SLP
-Set Level Power - set the emitted power (**ASCII HEX up to 0xFFF**)
-* GLP
-Get Level Power (**ASCII HEX**)
-
-"""
-
-
-'''def __init__(self, port, baudrate=500000):
-self.verbose = True
-try:
-if self.verbose:
-    print("Attempting to Open port %s" % port)
-self.port = serial.Serial(port, baudrate, timeout=0.3)
-self.firmware = self.ask("GFw")
-if self.firmware.find("LuxX")  < 0 & \
-   self.firmware.find("BrixX") < 0 & \
-   self.firmware.find("PhoxX") < 0:
-    print("The LuxX | BrixX | PhoxX laser is not connected. " + \
-          "The received answer for '?GFw\\r' command is:\n" + \
-          self.firmware)
-    raise serial.SerialException
-# From this point we know, that the right laser is connected
-self.wavelength = float(self.ask("GSI").split()[0])
-self.serial = self.ask("GSN")
-self.hours = self.ask("GWH")
-self.pmax = float(self.ask("GMP"))
-except serial.SerialException:
-raise OSError('Port "%s" is unavailable.\n' % port + \
-              'May be the laser is not connected, the wrong' + \
-              ' port is specified or the port is already opened')
-'''

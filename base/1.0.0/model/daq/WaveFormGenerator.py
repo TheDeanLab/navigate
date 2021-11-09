@@ -4,31 +4,30 @@ import numpy as np
 import csv
 import time
 
-'''National Instruments Imports'''
+''' National Instruments Imports '''
 import nidaqmx
 from nidaqmx.constants import AcquisitionType, TaskMode
 from nidaqmx.constants import LineGrouping, DigitalWidthUnits
 from nidaqmx.types import CtrTime
 
-'''multiscale imports'''
-#from .multiscale_State import multiscale_StateSingleton
-from .waveforms import single_pulse, tunable_lens_ramp, sawtooth, square, dc_value
+from .config import constants
+from waveforms import single_pulse, tunable_lens_ramp, sawtooth, square, dc_value
 
 class WaveFormGenerator():
-    '''This class contains the microscope state
+    '''
+    This class contains the microscope state
     Any access to this global state should only be done via signals sent by
     the responsible class for actually causing that state change in hardware.
     '''
 
     def __init__(self, parent):
         super().__init__()
-
         self.cfg = parent.cfg
         self.parent = parent
         self.verbose = True
 
         #TODO: Must get state from parent
-        self.state = multiscale_StateSingleton()
+        # self.state = multiscale_StateSingleton()
 
         #TODO: Load the ETL configuration file.
         # Will need to move the ETL configuration file to the config folder
@@ -436,3 +435,4 @@ class WaveFormGenerator():
 
 if (__name__ == "__main__"):
     print("Testing Mode - WaveFormGenerator Class")
+    print(constants.AcquisitionHardware.hardware_type)

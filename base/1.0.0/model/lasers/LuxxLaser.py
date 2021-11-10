@@ -1,7 +1,8 @@
 '''
 Luxx Laser Class
 LUXX488, 200 mW, is COM19
-LUXX642, 140 mW, is COM20
+LUXX642, 140 mW, is COM17
+LIGHTHUB ULTRA, is COM20
 '''
 
 import serial
@@ -11,7 +12,7 @@ from time import time, sleep
 
 class LuxxLaser():
     def __init__(self, port='COM19', baudrate=500000):
-        self.verbose = True
+        self.verbose = False
 
         """
         Open port (*auto* stands for **/dev/ttyUSB0** in Linux or **COM17**
@@ -19,20 +20,26 @@ class LuxxLaser():
         finally, get maximum output power and store it in **pmax** variable.
         """
         try:
+            # Open serial port
             self.port = serial.Serial(port, baudrate, timeout=0.3)
+
+            # Confirm that we are operating with the appropriate firmware
             self.firmware = self.ask("GFw")
-            if self.firmware.find(b"LuxX") < 0 & \
-               self.firmware.find(b"BrixX") < 0 & \
-               self.firmware.find(b"PhoxX") < 0:
-                print("The LuxX | BrixX | PhoxX laser is not connected. " + \
-                      "The received answer for '?GFw\\r' command is:\n" + \
-                      self.firmware)
-                raise serial.SerialException
-            print("The laser is connected via COM port %s" % port)
+            model_vector = ['LuxX', 'BrixX', 'PhoxX', 'LHU']
+            device_present = [re.findall(str(x).encode(), self.firmware)
+                              for x in model_vector]
+            if any(device_present[3]):
+                print("This is the LightHub Ultra")
+            if not any(device_present[0:2]):
+                print("This is not a Luxx, BrixX, PhoxX Laser")
+                sys.exit(1)
+            print("The laser is connected via %s" % port)
 
             # Confirm the Laser Wavelength
+            # Must remove non-standard ASCII codes that cause errors in the utf-8 codec
             wavelength = self.ask("GSI")
-            wavelength = wavelength.replace(b"\xa7200", str("\n").encode())
+            wavelength = wavelength.replace(b"\xa7200", str(" ").encode())
+            wavelength = wavelength.replace(b"\xa7140", str(" ").encode())
             wavelength = float(wavelength.decode())
             self.wavelength = wavelength
             if self.verbose:
@@ -60,7 +67,7 @@ class LuxxLaser():
 
         except serial.SerialException:
             raise OSError('Port "%s" is unavailable.\n' % port + \
-                          'May be the laser is not connected, the wrong' + \
+                          'Maybe the laser is not connected, the wrong' + \
                           ' port is specified or the port is already opened')
 
     def __del__(self):
@@ -237,7 +244,6 @@ class LuxxLaser():
         Bits 0, 1, 2, 5, 6, 9, 10, 11, 12 are reserved
         """
 
-
     def get_errors(self):
         """print contents of failure byte"""
         self.smart_ask("GFB")
@@ -259,6 +265,13 @@ class LuxxLaser():
         Bits 1, 2, 3, 5, 6, 7, 13 are reserved
         """
 
+    def initialize_laser(self):
+        self.set_autostart(True)
+        self.set_power(laser1.pmax)
+        self.set_mode("Analog")
+        self.start()
+        print((self.wavelength, "nm Laser Initialized - Max Power: ", self.pmax, "mW"))
+
 
 def stopwatch(func, *func_args, **func_kwargs):
     """Call **func** and print elapsed time"""
@@ -266,7 +279,6 @@ def stopwatch(func, *func_args, **func_kwargs):
     result = func(*func_args, **func_kwargs)
     print("Time elapsed: %5.2f ms" % ((time() - start_time)*1000.0))
     return result
-
 
 def print_hex(hex_code):
     """
@@ -317,35 +329,47 @@ def print_hex(hex_code):
         print(table % tuple([byte, hex_numbers[i]] + content))
     return decimals
 
-
 if (__name__ == "__main__"):
     # Luxx Laser Testing.
-    laser1 = LuxxLaser(port = "COM20")
-    print("LuxxLaser Class Initiated")
+    test_case = 2
 
-    laser1.set_autostart(True)
-    print("Autostart:", laser1.get_autostart())
+    if test_case == 1:
+        laser1 = LuxxLaser(port="COM17")
+        print("LuxxLaser Class Initiated")
 
-    print("Maximum laser power:", laser1.pmax)
+        laser1.set_autostart(True)
+        print("Autostart:", laser1.get_autostart())
 
-    laser1.set_power(laser1.pmax)
-    print("laser power set to:", laser1.pmax)
-    print("Laser power at ", laser1.get_power())
+        print("Maximum laser power:", laser1.pmax)
 
-    laser1.set_mode("CW-APC")
-    print("laser mode set to CW-APC")
-    print("laser mode at ", laser1.get_mode())
+        laser1.set_power(laser1.pmax)
+        print("laser power set to:", laser1.pmax)
+        print("Laser power at ", laser1.get_power())
 
-    laser1.start()
-    print("laser started")
+        laser1.set_mode("CW-APC")
+        print("laser mode set to CW-APC")
+        print("laser mode at ", laser1.get_mode())
 
-    sleep(10)
+        laser1.start()
+        print("laser started")
 
-    laser1.stop()
-    print("laser stopped")
+        sleep(10)
 
-    laser1.close()
-    print('Done')
+        laser1.stop()
+        print("laser stopped")
+
+        laser1.close()
+        print('Done')
+    elif test_case == 2:
+        laser1 = LuxxLaser(port="COM17")
+        laser1.initialize_laser()
+        laser2 = LuxxLaser(port="COM19")
+        laser2.initialize_laser()
+        sleep(10)
+        laser1.close()
+        laser2.close()
+        print("Done")
+
 
 
 

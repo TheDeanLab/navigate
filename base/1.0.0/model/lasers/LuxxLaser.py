@@ -7,11 +7,12 @@ LUXX642, 140 mW, is COM20
 import serial
 import sys
 import re
-from time import time
+from time import time, sleep
 
 class LuxxLaser():
     def __init__(self, port='COM19', baudrate=500000):
-        self.verbose = False
+        self.verbose = True
+
         """
         Open port (*auto* stands for **/dev/ttyUSB0** in Linux or **COM17**
         in Windows, because it is what I use); then get device model;
@@ -27,10 +28,10 @@ class LuxxLaser():
                       "The received answer for '?GFw\\r' command is:\n" + \
                       self.firmware)
                 raise serial.SerialException
-            print("The laser is connected via Com port %s" % port)
+            print("The laser is connected via COM port %s" % port)
 
             # Confirm the Laser Wavelength
-            wavelength = self.ask("GSI") #.split()[0]
+            wavelength = self.ask("GSI")
             wavelength = wavelength.replace(b"\xa7200", str("\n").encode())
             wavelength = float(wavelength.decode())
             self.wavelength = wavelength
@@ -62,21 +63,27 @@ class LuxxLaser():
                           'May be the laser is not connected, the wrong' + \
                           ' port is specified or the port is already opened')
 
-
     def __del__(self):
         """Close the port before exit."""
         try:
             self.port.close()
             print("Port closed")
         except serial.SerialException:
-            print('could not close the port')
+            print('Could not close the port')
 
+    def close(self):
+        """Close the port before exit."""
+        try:
+            self.port.close()
+            if self.verbose:
+                print("Port Closed")
+        except serial.SerialException:
+            print('could not close the port')
 
     def write(self, command):
         """Send *command* to device. Preceed it with "?" und end with CR."""
         command = str("?").encode() + str(command).encode() + str("\r").encode()
         self.port.write(command)
-
 
     def read(self):
         """Read all information from the port and return it as string."""
@@ -88,7 +95,6 @@ class LuxxLaser():
         if self.verbose:
             print("The cleaned up read answer is:", answer)
         return answer
-
 
     def ask(self, command):
         """Write, then read. However, return only the relevant info."""
@@ -104,14 +110,16 @@ class LuxxLaser():
             search_string = search_string.encode()
             if self.verbose:
                 print("The search string is:", search_string)
+                print("The response string is:", response)
+
             response = re.findall(search_string, response)[-1]
             if response[0] == "x":
                 print("Laser responded with error to command '%s'" % command)
             return response
 
-
     def smart_ask(self, command):
         """
+        #TODO: Not working.  Depends on broken print_hex function.
         Several commands return information coded in ASCII HEX numbers.
         The relevant are bits in the registers. For convenient
         representation, we will print(these bytes in tables.
@@ -123,38 +131,36 @@ class LuxxLaser():
         For all other commands the behavior is identical to **ask** function
         """
         if command in ["GOM", "GFB", "GLF", "GLP"]:
+            #command = str(command).encode()
             return print_hex(self.ask(command))
         else:
             return self.ask(command)
-
 
     def start(self):
         """Start the emission (takes about 3 seconds)"""
         self.write("LOn")
 
-
     def stop(self):
         """Stop the emission immediately"""
         self.write("LOf")
 
-
     def set_power(self, power):
-        """Set the desired power in mW"""
+        """
+        Set the desired power in mW
+        TODO: Intermittent failure due to list index out of range in self.ask (line 115)
+        """
         # Calculate the corresponding HEX code and transmit it
         if power > self.pmax:
-            print("Laser provides %imW only. The maximum power is set" % \
-                                                            self.pmax)
+            print("Laser provides %imW only. The maximum power is set", self.pmax)
             self.write("SLPFFF")
         else:
             code = hex(int(4095*power/self.pmax))[2:].upper().zfill(3)
             stopwatch(self.ask, "SLP%s" % code)
 
-
     def get_power(self):
         """Get the current power value in mW"""
         code = stopwatch(self.ask, "GLP")
         return int(code, 16)*self.pmax/4095.
-
 
     def set_mode(self, mode):
         """
@@ -186,19 +192,9 @@ class LuxxLaser():
             return
         stopwatch(self.ask, "ROM%i" % mode)
 
-
     def get_mode(self):
         """
-        The device is able to work in the following modes:
-          * Standby
-              turned off
-          * CW-ACC
-              constant wave, automatic current control
-          * CW-APC
-              constant wave, automatic power control
-          * Analog
-              the output power is dependent on the analog input; however,
-              it cannot exceed the specified with **set_power** value.
+        Get the current mode.
         """
         mode = int(stopwatch(self.ask, "ROM"))
         if mode == 0:
@@ -212,7 +208,6 @@ class LuxxLaser():
         else:
             return mode
 
-
     def set_autostart(self, state):
         """Decide if light is emitted on powerup."""
         if state:
@@ -220,11 +215,12 @@ class LuxxLaser():
         else:
             self.ask("SAS0")
 
-
     def get_autostart(self):
         """Check if light is emitted on powerup."""
-        return self.ask("SAS")
-
+        if self.ask("GAS") == "1":
+            return True
+        else:
+            return False
 
     def get_parameters(self):
         """print a table showing laser status."""
@@ -274,6 +270,7 @@ def stopwatch(func, *func_args, **func_kwargs):
 
 def print_hex(hex_code):
     """
+    TODO: Not working.  Concatenation of list and range?
     print a nice table that represents *hex_code* (ASCII HEX string)
     in a binary code.
 
@@ -289,7 +286,7 @@ def print_hex(hex_code):
 
     # Split it into 8-bit numbers coded in ASCII HEX
     hex_numbers = []
-    for i in range(byte_number):
+    for i in range(int(byte_number)):
         hex_numbers.append(hex_code[i*2 : i*2+2])
 
     # Convert each of them into decimal
@@ -308,17 +305,45 @@ def print_hex(hex_code):
     print("\nRepresentation of ASCII HEX '%s'" % hex_code)
     for i, number in enumerate(decimals):
         byte = len(decimals) - i - 1
-        content = range(byte*8, byte*8+8)[::-1] + \
-                                          list(bin(number)[2:].zfill(8))
+
+        # data_range is type Range
+        data_range = range(byte*8, byte*8+8)[::-1]
+
+        # data_list is type list
+        data_list = list(bin(number)[2:].zfill(8))
+        print("data list:", data_list)
+
+        content = data_range + data_list
         print(table % tuple([byte, hex_numbers[i]] + content))
     return decimals
 
 
 if (__name__ == "__main__"):
     # Luxx Laser Testing.
+    laser1 = LuxxLaser(port = "COM20")
+    print("LuxxLaser Class Initiated")
 
-    laser1 = Laser()
-    #TODO: Add a close class method to Laser class
+    laser1.set_autostart(True)
+    print("Autostart:", laser1.get_autostart())
+
+    print("Maximum laser power:", laser1.pmax)
+
+    laser1.set_power(laser1.pmax)
+    print("laser power set to:", laser1.pmax)
+    print("Laser power at ", laser1.get_power())
+
+    laser1.set_mode("CW-APC")
+    print("laser mode set to CW-APC")
+    print("laser mode at ", laser1.get_mode())
+
+    laser1.start()
+    print("laser started")
+
+    sleep(10)
+
+    laser1.stop()
+    print("laser stopped")
+
     laser1.close()
     print('Done')
 

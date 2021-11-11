@@ -1,122 +1,225 @@
 '''
-pip install pyvisa.
-VISA is standard for interacting with instruments from a computer.
-VISA uses SCPI commands which is even more common.
-pyVISA essentially  uses SCPI (skippy!) commands (e.g "syst1:diod:hour?")
-https://github.com/brae-pete/ObisTimer/blob/main/OBIS_TIMER.py
-
+Obis Laser Class
 OBIS561, 150 mW, is COM22
-Visa Resource Name: ASRL22::INSTR
-
+Useful information can be found on Page C-22 of the OBIS_LX_LS Operators Manual
 '''
 
-# Import standard libraries
-import pyvisa as visa
-from threading import Timer
+import serial
+import sys
+import re
+from time import time, sleep
 
 class ObisLaser():
-    def __init__(self, port="COM22"):
-        baudrate = 115200
-        parity = None
-        data_bits = 8
-        stop_bits = 1
-        flow_control = False
+    def __init__(self, port='COM22'):
         self.verbose = False
-        self.resource_manager = visa.ResourceManager()
+        self.timeout = 0.05
+        self.end_of_line = '\r'
 
-        self.obis = self.resource_manager.open_resource(port)
-        self.obis.timeout = 1000
-        self.turnoff = False
-        print("Connected to", self.obis.query('*IDN?'))
+        try:
+            # Open serial port
+            self.port = serial.Serial()
+            self.port.port = port
+            self.port.baudrate = 115200
+            self.port.parity = 'N'
+            self.port.stopbits = 1
+            self.port.bytesize = 8
+            self.port.timeout = self.timeout
+            self.port.open()
+            if self.verbose:
+                print("Port opened")
 
-    def get_pyvisa_resources(self):
-        print("Available VISA Resources:", self.resource_manager.list_resources())
+        except serial.SerialException:
+            raise OSError('Port "%s" is unavailable.\n' % port + \
+                          'Maybe the laser is not connected, the wrong' + \
+                          ' port is specified or the port is already opened')
 
-    def get_diode_hours(self):
-        hour = self.obis.query("syst1:diod:hour?", 0.1).split('\r')
-        self.obis.read()
-        if self.verbose:
-            print("Laser Diode Hours:", hour[0])
-        return hour[0]
-
-    def get_model(self):
-        model = self.obis.query("*IDN?").split('\r')
-        self.obis.read()
-        return model[0]
-
-    def get_mode(self):
-        """Only returns two of the possible modes"""
-        modes = {"CWP":'Constant Power', "CWC":'Constant Current'}
-        mode = self.obis.query("sour1:am:sour?", 0.1).split('\r')
-        self.obis.read()
-        return modes[mode[0]]
-
-    def get_status(self):
-        status = self.obis.query("sour1:am:stat?", 0.1).split('\r')
-        self.obis.read()
-        return status[0]
-
-    def get_max_power_level(self):
-        power = self.obis.query("sour1:pow:nom?", 0.1).split('\r')
-        self.obis.read()
-        return power[0]
-
-    def get_power_level(self):
-        power = self.obis.query("sour1:pow:lev:imm:ampl?", 0.1).split('\r')
-        self.obis.read()
-        return power[0]
-
-    def get_wavelength(self):
-        wavelength = self.obis.query("syst1:inf:wav?", 0.1).split('\r')
-        self.obis.read()
-        print("The Wavelength is:", wavelength)
-        return wavelength[0]
-
-    def change_status(self, on=False):
-        if on:
-            command = "ON"
-        else:
-            command = "OFF"
-        self.obis.write("sour1:am:stat {}".format(command))
-        self.obis.read()
-
-    def set_power_level(self, level):
-        """mW input and is converted to watts"""
-        level=level/1000 # convert to watts
-        max1=self.get_max_power_level()
-        #self.obis.read()
-        if eval(max1) < level:
-            return ("ERROR: Power Level Too High!!")
-        else:
-            power = self.obis.write("sour1:pow:lev:imm:ampl {}".format(level))
-            self.obis.read()
-            return ("Change Succesful")
-
-    def set_timer(self, minutes=60):
-        seconds = minutes*60
-        self.t = Timer(seconds, self.change_status)
-        self.t.start()
-
-    def gui_set_timer(self, minutes=60):
-        seconds = minutes*60
-        self.t = Timer(seconds, self.change_flag)
-        self.t.start()
-
-    def change_flag(self):
-        self.turnoff = True
+    def __del__(self):
+        """Close the port before exit."""
+        try:
+            self.port.close()
+            print("Port closed")
+        except serial.SerialException:
+            print('Could not close the port')
 
     def close(self):
-        self.obis.close()
+        """Close the port before exit."""
+        try:
+            self.port.close()
+            if self.verbose:
+                print("Port Closed")
+        except serial.SerialException:
+            print('could not close the port')
 
+    def get_laser_model(self):
+        """Get the laser model."""
+        command = "?SYSTem:INFormation:MODel?"
+        laser_model = self.ask(command)
+        if self.verbose:
+            print("Laser Model:", laser_model)
+        self.laser_model = laser_model
+        return laser_model
 
+    def get_laser_wavelength(self):
+        """Get the current laser wavelength in nm."""
+        command = "SYSTem:INFormation:WAVelength?"
+        laser_wavelength = self.ask(command)
+        if self.verbose:
+            print("Laser Wavelength:", laser_wavelength)
+        self.laser_wavelength = laser_wavelength
+        return laser_wavelength
+
+    def get_minimum_laser_power(self):
+        """Get the maximum laser power in mW."""
+        command = "SOURce:POWer:LIMit:LOW?"
+        minimum_laser_power = self.ask(command)
+        if self.verbose:
+            print("Minimum Laser Power:", minimum_laser_power)
+        self.minimum_laser_power = minimum_laser_power
+        return minimum_laser_power
+
+    def get_maximum_laser_power(self):
+        """Get the maximum laser power in mW."""
+        command = "SOURce:POWer:LIMit:HIGH?"
+        maximum_laser_power = self.ask(command)
+        if self.verbose:
+            print("Maximum Laser Power:", maximum_laser_power)
+        self.maximum_laser_power = maximum_laser_power
+        return maximum_laser_power
+
+    def get_laser_power(self):
+        """Get the current laser power in mW."""
+        command = "SOURce:POWer:LEVel?"
+        laser_power = self.ask(command)
+        if self.verbose:
+            print("Laser Power:", laser_power)
+        self.laser_power = laser_power
+        return laser_power
+
+    def get_ext_control(self):
+        """Get the external control status."""
+        command = "SYSTem:EXTernal:CONTRol?"
+        ext_control = self.ask(command)
+        if self.verbose:
+            print("External Control:", ext_control)
+        self.ext_control = ext_control
+        return ext_control
+
+    def get_laser_status(self):
+        """Get the current laser status."""
+        command = "SOURce:STATus?"
+        laser_status = self.ask(command)
+        if self.verbose:
+            print("Laser Status:", laser_status)
+        self.laser_status = laser_status
+        return laser_status
+
+    def set_laser_operating_mode(self, mode):
+        """Set the laser operating mode. Seven mutually exclusive operating modes are available
+        • CWP (continuous wave, constant power)
+        • CWC (continuous wave, constant current)
+        • DIGITAL (CW with external digital modulation)
+        • ANALOG (CW with external analog modulation)
+        • MIXED (CW with external digital + analog modulation)
+        • DIGSO (External digital modulation with power feedback) Note: This
+        operating mode is not supported in some device models.
+        • MIXSO (External mixed modulation with power feedback) Note: This
+        operating mode is not supported in some device models.
+        """
+        if mode == 'cwp':
+            command = "SOURce:AM:INTernal CWP"
+        elif mode == 'cwc':
+            command = "SOURce:AM:INTernal CWC"
+        elif mode == 'digital':
+            command = "SOURce:AM:EXTernal DIGital"
+        elif mode == 'analog':
+            command = "SOURce:AM:EXTernal ANALog"
+        elif mode == 'mixed':
+            command = "SOURce:AM:EXTernal MIXed"
+        elif mode == 'digso':
+            command = "SOURce:AM:EXTernal DIGSO"
+        elif mode == 'mixso':
+            command = "SOURce:AM:EXTernal MIXSO"
+        else:
+            print("Invalid mode")
+            return
+
+        self.port.write(command.encode())
+        if self.verbose:
+            print("Set Laser Operating Mode to:", self.laser_operating_mode)
+
+    def get_laser_operating_mode(self):
+        """Get the laser operating mode."""
+        #TODO: FIx
+
+        command = "SOURce:AM:SOURce?"
+        laser_operating_mode = self.ask(command)
+        if ("CWP" in laser_operating_mode):
+            self.laser_operating_mode = "cwp"
+        elif ("CWC" in laser_operating_mode):
+            self.laser_operating_mode = "cwc"
+        elif ("DIGITAL" in laser_operating_mode):
+            self.laser_operating_mode = "digital"
+        elif ("ANALOG" in laser_operating_mode):
+            self.laser_operating_mode = "analog"
+        elif ("MIXED" in laser_operating_mode):
+            self.laser_operating_mode = "mixed"
+        elif ("DIGSO" in laser_operating_mode):
+            self.laser_operating_mode = "digso"
+        elif ("MIXSO" in laser_operating_mode):
+            self.laser_operating_mode = "mixso"
+        else:
+            print("Invalid Laser Operating Mode")
+            return
+        if self.verbose:
+            print("Laser Operating Mode:", laser_operating_mode)
+        return laser_operating_mode
+
+    def ask(self, command):
+        self.port.write(str(command + self.end_of_line).encode())
+        response = ''
+        read_iteration = self.port.read()
+        while read_iteration != b'\r':
+            response += read_iteration.decode()
+            sleep(self.timeout)
+            read_iteration = self.port.read()
+        if self.verbose:
+            print("Command:", command, "Response:", response)
+        return response
+
+    #def initialize_laser(self):
+        #TODO: Finish this function
+        # self.set_autostart(True)
+        # self.set_power(laser1.pmax)
+        # self.set_mode("Analog")
+        # self.start()
+        # print((self.wavelength, "nm Laser Initialized - Max Power: ", self.pmax, "mW"))
 
 if (__name__ == "__main__"):
-    # Obis Laser Testing.
-    laser = ObisLaser()
-    print(laser.get_diode_hours())
-    print(laser.get_wavelength())
+    # OBIS Laser Testing.
+    test_case = 1
 
-    laser.close()
-    print("Done")
-    print("OBIS OFF & CLOSED")
+    if test_case == 1:
+        laser1 = ObisLaser(port="COM22")
+        print("OBIS Class Initiated")
+        print("Laser Model:", laser1.get_laser_model())
+        print("Laser Operating Mode:", laser1.get_laser_operating_mode())
+        print("Laser Status:", laser1.get_laser_status())
+        laser1.close()
+        print('Done')
+    elif test_case == 2:
+        laser1 = LuxxLaser(port="COM17")
+        laser1.initialize_laser()
+        sleep(10)
+        laser1.close()
+        print("Done")
+
+
+
+
+
+
+
+
+
+
 

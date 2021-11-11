@@ -120,11 +120,19 @@ class CameraParameters:
                          }
     exposure_time = 200
 
-
 class FileSaveParameters:
+    # HDF5 can have subsampling of ((1, 1, 1), (2, 2, 2), ...) for (z, y, x)
+    # Compression can be None, 'gzip', 'lzf'
+    # flip_xy can be True or False, to match BigStitcher coordinates
+    hdf5 = {'subsampling': ((1, 1, 1),),
+             'compression': None,
+             'flip_xyz': (True, True, False)
+             }
+
     parentdir = "E:/"
 
 
+'''
 class NI_board_parameters:
     # "ao0/highrescamera", "ao1/lowrescamera", "ao3/stage", "ao5/laser488TTL",
     # "ao6/laser552_TTL", "ao8/laser594_TTL", "ao11/laser640_TTL", "ao12/voicecoil"
@@ -164,3 +172,5 @@ class NI_board_parameters:
 #     images_per_buffer = 1
 #     bytes_per_data_buffer = images_per_buffer * 6000 * 4000 * 2
 #     bytes_per_preview_buffer = bytes_per_data_buffer * 3
+
+'''

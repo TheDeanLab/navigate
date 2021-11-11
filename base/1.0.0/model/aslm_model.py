@@ -1,39 +1,42 @@
+# Standard Python libraries
 import queue
 import time
 import os
 import atexit
 import threading
+#from multiprocessing import shared_memory
+
+# External libraries
 import numpy as np
-from multiprocessing import shared_memory
 from tifffile import imread, imwrite
 
 # Import Concurrency Classes
-import auxiliary_code.concurrency_tools as ct
-import acquisition_array_class as acq_arrays
+#TODO: Relative import with no known parent package error...
+from .controller.concurrency import concurrency_tools as ct
+from .controller.concurrency import acquisition_array_class as acq_arrays
 
 # Import Hardware Classes
-from src.camera.hamamatsu import Dcam
-#import src.ni_board.vni as ni
-#import src.stages.rotation_stage_cmd as RotStage
-#import src.stages.translation_stage_cmd as TransStage
-#import src.filter_wheel.ludlcontrol as FilterWheel
-#import src.slit.slit_cmd as SlitControl
+from camera import dcam as Dcam
+from daq import WaveFormGenerator as waveform_generator
+from filter_wheel import Lambda10B as filter_wheel
+from lasers import LuxxLaser as luxx_laser
+from lasers import ObisLaser as obis_laser
+from stages import PIStage as pi_stage
 
-from constants import FilterWheelParameters
-from constants import StageParameters
-from constants import AcquisitionHardware
-from constants import CameraParameters
-from constants import ZoomParameters
-from constants import ASLMParameters
+from .config.constants import AcquisitionHardware
+from .config.constants import ASLMParameters
+from .config.constants import StageParameters
+from .config.constants import ZoomParameters
+from .config.constants import FilterWheelParameters
+from .config.constants import CameraParameters
 
 class ASLMModel:
-    def __init__(
-        self
-        ):
+    def __init__(self):
         """
         We use bytes_per_buffer to specify the shared_memory_sizes for the
         child processes.
         """
+        self.verbose = True
         self.unfinished_tasks = queue.Queue()
         self.num_frames = 0
         self.initial_time = time.perf_counter()
@@ -72,7 +75,7 @@ class ASLMModel:
         self.high_res_memory_names = None
         self.low_res_memory_names = None
 
-        self.delay_cameratrigger = 0.001  # the time given for the stage to move to the new position
+        self.delay_camera_trigger = 0.001  # the time given for the stage to move to the new position
 
         # Initialize ASLM Parameters from constants
         self.ASLM_acquisition_time = ASLMParameters.ASLM_acquisition_time

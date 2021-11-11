@@ -1,5 +1,6 @@
 """ Module for controlling a shutter via NI-DAQmx
 Author: Fabian Voigt
+TODO: Why is this not in the WaveformGenerator module?
 """
 
 import nidaqmx

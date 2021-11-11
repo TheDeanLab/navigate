@@ -1,6 +1,4 @@
-import tkinter as tk
-from tkinter import ttk
-
+# Import Standard Python Packages
 import time
 from threading import Thread
 import numpy as np
@@ -8,10 +6,18 @@ import datetime as dt
 import os
 import glob
 
-# from gui.main_window import MultiScope_MainGui
-from .model.aslm_model import ASLMModel
+# Import GUI Packages
+import tkinter as tk
+from tkinter import ttk
 
-import concurrency.concurrency_tools as ct
+# Import Concurrency Packages
+import .controller.concurrency.concurrency_tools as ct
+
+# Import GUI Windows
+# from gui.main_window import MultiScope_MainGui
+
+# Import ASLM Model
+from .model.aslm_model import ASLMModel
 
 # Import Hardware Configuration Information
 from .config.constants import CameraParameters

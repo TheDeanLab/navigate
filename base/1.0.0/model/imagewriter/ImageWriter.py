@@ -26,17 +26,18 @@ class ImageWriter():
         # TODO: Assign state here.
         # self.state = mesoSPIM_StateSingleton()
 
+        # Retrieve default x_pixels, y_pixels and binning from config.constants.CameraParameters
         self.x_pixels = self.cfg.camera_parameters['x_pixels']
         self.y_pixels = self.cfg.camera_parameters['y_pixels']
-
-        # Should return a string in the form '2x4'
         self.binning_string = self.cfg.camera_parameters['binning']
+
+        # Calculate the image size after binning
         self.x_binning = int(self.binning_string[0])
         self.y_binning = int(self.binning_string[2])
-
         self.x_pixels = int(self.x_pixels / self.x_binning)
         self.y_pixels = int(self.y_pixels / self.y_binning)
 
+        # Specify file parameters
         self.file_extension = ''
         self.bdv_writer = self.tiff_writer = self.tiff_mip_writer = self.mip_image = None
         self.tiff_aliases = ('.tif', '.tiff')
@@ -53,48 +54,51 @@ class ImageWriter():
         tifffile.TiffWriter.write = self.tiff_write  # rename the entire class method if necessary
 
     def prepare_acquisition(self, acq, acq_list):
+        # Specify save path
         self.folder = acq['folder']
         self.filename = acq['filename']
         self.path = self.folder + '/' + self.filename
         self.file_root, self.file_extension = os.path.splitext(self.path)
-        logger.info(f'Image Writer: Save path: {self.path}')
 
-        # Should return a string in the form '2x4'
-        self.binning_string = self.state['camera_binning']
-        self.x_binning = int(self.binning_string[0])
-        self.y_binning = int(self.binning_string[2])
-
-        self.x_pixels = int(self.x_pixels / self.x_binning)
-        self.y_pixels = int(self.y_pixels / self.y_binning)
+        # Identify how many z-planes to save
         self.max_frame = acq.get_image_count()
 
+        # .HDF5 file saving Parameters
+        # Load from config.constants.FileSaveParameters
         if self.file_extension == '.h5':
             if hasattr(self.cfg, "hdf5"):
-                subsamp = self.cfg.hdf5['subsamp']
+                # HDF5 File
+                subsampling = self.cfg.hdf5['subsampling']
                 compression = self.cfg.hdf5['compression']
                 flip_flags = self.cfg.hdf5['flip_xyz']
             else:
-                subsamp = ((1, 1, 1),)
+                # Tiff File
+                subsampling = ((1, 1, 1),)
                 compression = None
                 flip_flags = (False, False, False)
-            # create writer object if the view is first in the list
+
+            # create writer object if the image is the first image plane in the stack
             if acq == acq_list[0]:
-                self.bdv_writer = npy2bdv.BdvWriter(self.path,
-                                                    nilluminations=acq_list.get_n_shutter_configs(),
+                self.bdv_writer = npy2bdv.BdvWriter(self.path, nilluminations=acq_list.get_n_shutter_configs(),
                                                     nchannels=acq_list.get_n_lasers(),
                                                     nangles=acq_list.get_n_angles(),
                                                     ntiles=acq_list.get_n_tiles(),
                                                     blockdim=((1, 256, 256),),
-                                                    subsamp=subsamp,
+                                                    subsampling=subsampling,
                                                     compression=compression)
 
             # x and y need to be exchanged to account for the image rotation
             shape = (self.max_frame, self.y_pixels, self.x_pixels)
+
+            # Load physical pixel size from config.constants.ZoomParameters
             px_size_um = self.cfg.pixelsize[acq['zoom']]
+
+            # Generate Affine Matrix
             sign_xyz = (1 - np.array(flip_flags)) * 2 - 1
             affine_matrix = np.array(((1.0, 0.0, 0.0, sign_xyz[0] * acq['x_pos'] / px_size_um),
                                       (0.0, 1.0, 0.0, sign_xyz[1] * acq['y_pos'] / px_size_um),
                                       (0.0, 0.0, 1.0, sign_xyz[2] * acq['z_start'] / acq['z_step'])))
+
             self.bdv_writer.append_view(stack=None, virtual_stack_dim=shape,
                                         illumination=acq_list.find_value_index(acq['shutterconfig'], 'shutterconfig'),
                                         channel=acq_list.find_value_index(acq['laser'], 'laser'),
@@ -107,12 +111,16 @@ class ImageWriter():
                                         name_affine="Translation to Regular Grid"
                                         )
         elif self.file_extension == '.raw':
+            # Raw file format
             self.fsize = self.x_pixels * self.y_pixels
             self.xy_stack = np.memmap(self.path, mode="write", dtype=np.uint16, shape=self.fsize * self.max_frame)
-
         elif self.file_extension in self.tiff_aliases:
+            # Tiff file format
             self.tiff_writer = tifffile.TiffWriter(self.path, imagej=True)
+        else:
+            raise ValueError('Unknown file extension: {}'.format(self.file_extension))
 
+        # Maximum Intensity Projection
         if acq['processing'] == 'MAX' and self.file_extension in ('.raw', '.tiff', '.tif'):
             self.tiff_mip_writer = tifffile.TiffWriter(self.file_root + "_MAX.tiff", imagej=True)
             self.mip_image = np.zeros((self.y_pixels, self.x_pixels), 'uint16')
@@ -195,6 +203,7 @@ class ImageWriter():
             file.write('\n')
 
     def write_snap_metadata(self, path):
+        # Write metadata to the text file
         metadata_path = os.path.dirname(path) + '/' + os.path.basename(path) + '_meta.txt'
         with open(metadata_path, 'w') as file:
             self.write_line(file, 'CFG')

@@ -1,30 +1,22 @@
 """ Module for creating waveforms and analog output signals
 Original Author: Fabian Voigt
-
-#TODO
-* Usage of amplitude is not consistent (peak-to-peak in single_pulse)
-* Add smoothing parameter.
+Modified by Kevin Dean
 """
 
 from scipy import signal
 import numpy as np
 
-def single_pulse(
-    samplerate=100000,  # in samples/second
-    sweeptime=0.4,      # in seconds
-    delay=10,           # in percent
-    pulsewidth=1,       # in percent
-    amplitude=0,        # in volts
-    offset=0            # in volts
-    ):
+__all__ = ['single_pulse', 'tunable_lens_ramp', 'sawtooth', 'dc_value', 'square', 'sine_wave', 'smooth_waveform']
 
+def single_pulse(samplerate=100000, sweeptime=0.4, delay=10,
+                 pulsewidth=1, amplitude=1, offset=0):
     '''
     Returns a numpy array with a single pulse
     Used for creating TTL pulses out of analog outputs and laser intensity
     pulses.
 
     Units:
-    samplerate: Integer
+    samplerate (samples/second): Integer
     sweeptime:  Seconds
     delay:      Percent
     pulsewidth: Percent
@@ -50,15 +42,8 @@ def single_pulse(
     array[pulsedelaysamples:pulsesamples+pulsedelaysamples] = amplitude
     return np.array(array)
 
-def tunable_lens_ramp(
-    samplerate = 100000,    # in samples/second
-    sweeptime = 0.4,        # in seconds
-    delay = 7.5,            # in percent
-    rise = 85,              # in percent
-    fall = 2.5,             # in percent
-    amplitude = 0,          # in volts
-    offset = 0              # in volts
-    ):
+def tunable_lens_ramp(samplerate=100000, sweeptime=0.4, delay=7.5,
+                      rise = 85, fall = 2.5, amplitude = 1, offset = 0):
 
     '''
     Returns a numpy array with a ETL ramp
@@ -103,15 +88,8 @@ def tunable_lens_ramp(
 
     return np.array(array)
 
-def sawtooth(
-    samplerate = 100000,    # in samples/second
-    sweeptime = 0.4,        # in seconds
-    frequency = 10,         # in Hz
-    amplitude = 0,          # in V
-    offset = 0,             # in V
-    dutycycle = 50,          # dutycycle in percent
-    phase = np.pi/2,          # in rad
-    ):
+def sawtooth(samplerate=100000, sweeptime=0.4, frequency=10, amplitude=1,
+             offset=0, dutycycle=50, phase=np.pi/2):
     '''
     Returns a numpy array with a sawtooth function. Used for creating the galvo signal. Example:
     galvosignal =  sawtooth(100000, 0.4, 199, 3.67, 0, 50, np.pi)
@@ -129,12 +107,7 @@ def sawtooth(
 
     return waveform
 
-def dc_value(
-        samplerate = 100000,    # in samples/second
-        sweeptime = 0.4,        # in seconds
-        amplitude = 0,          # in V
-        offset = 0,             # in V
-    ):
+def dc_value(samplerate=100000, sweeptime=0.4, amplitude=1, offset=0):
     '''
     Returns a numpy array with a DC value
     Used for creating the resonant galvo drive voltage.
@@ -142,24 +115,12 @@ def dc_value(
 
     samples =  int(samplerate*sweeptime)
     t = np.linspace(0, sweeptime, samples)
-
-    # Using the signal toolbox from scipy for the sawtooth:
-    waveform = np.ones(shape(t))
-
-    # Scale the waveform to a certain amplitude and apply an offset:
-    waveform = waveform*amplitude + offset
+    waveform = np.ones(np.shape(t))*amplitude + offset
     return waveform
 
-def square(
-    samplerate = 100000,    # in samples/second
-    sweeptime = 0.4,        # in seconds
-    frequency = 10,         # in Hz
-    amplitude = 0,          # in V
-    offset = 0,             # in V
-    dutycycle = 50,         # dutycycle in percent
-    phase = np.pi,          # in rad
-    ):
-    """    Returns a numpy array with a rectangular waveform """
+def square(samplerate=100000, sweeptime=0.4, frequency=10,
+           amplitude=1, offset=0, dutycycle=50, phase=np.pi):
+    # Returns a numpy array with a rectangular waveform
     samples =  int(samplerate*sweeptime)
     dutycycle = dutycycle/100       # the signal.square duty parameter has to be between 0 and 1
     t = np.linspace(0, sweeptime, samples)
@@ -169,10 +130,20 @@ def square(
     
     # Scale the waveform to a certain amplitude and apply an offset:
     waveform = amplitude * waveform + offset
-
     return waveform
 
-def smooth_waveform(waveform, percent_smoothing):
+def sine_wave(samplerate=100000, sweeptime=0.4, frequency=10,
+              amplitude=1, offset=0, phase=0):         # in rad, np.pi/2 is 90 degrees
+
+    #Returns a numpy array with a sine waveform
+    samples =  int(samplerate*sweeptime)
+    t = np.linspace(0, sweeptime, samples)
+
+    # Using the signal toolbox from scipy for the sawtooth:
+    waveform = amplitude*np.sin((2*np.pi*frequency*t)-phase)+offset
+    return waveform
+
+def smooth_waveform(waveform, percent_smoothing=10):
     waveform_length = np.size(waveform)
     window_len = int(np.floor(waveform_length*percent_smoothing/100))
     smoothed_waveform = np.convolve(waveform, np.ones(window_len), 'valid') / window_len
@@ -181,9 +152,5 @@ def smooth_waveform(waveform, percent_smoothing):
 if (__name__ == "__main__"):
     # Test the waveform functions:
     import matplotlib.pyplot as plt
-    demo_waveform = sawtooth(samplerate = 100000, sweeptime = 0.4, frequency = 5,
-                             amplitude = 1, offset = 1, dutycycle = 80 , phase = np.pi/4)
-    demo_waveform = smooth_waveform(demo_waveform, percent_smoothing = 5)
-
-    plt.plot(demo_waveform)
+    plt.plot(smooth_waveform(tunable_lens_ramp(), 10))
     plt.show()

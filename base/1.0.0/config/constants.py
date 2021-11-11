@@ -120,6 +120,20 @@ class CameraParameters:
                          }
     exposure_time = 200
 
+class SavingParameters:
+    saving_dict = {
+    'auto_save' : False,
+    'auto_save_waterfall' : True,
+    'directory' : 'E:\',
+    'filename_video' : 'Video',  # Can be the same filename for video and photo
+    'filename_photo' : 'Snap',
+    'filename_waterfall' : 'Waterfall',
+    'filename_trajectory' : 'Trajectory',
+    'filename_log' : 'Log',
+    'max_memory' : 800  # In megabytes
+    }
+
+
 class FileSaveParameters:
     # HDF5 can have subsampling of ((1, 1, 1), (2, 2, 2), ...) for (z, y, x)
     # Compression can be None, 'gzip', 'lzf'

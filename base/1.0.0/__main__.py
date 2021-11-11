@@ -1,14 +1,19 @@
 """   Starting point for running the program. """
+# Import built-in modules
 import os
-
-from UUTrack.startMonitor import start
 from multiprocessing import Process
+
+# Import local modules
+from StartMonitor import start
+from config import constants
 
 if __name__ == '__main__':
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    #confDir = os.path.join(BASE_DIR, 'Config')  
-    #confFile = 'Config_simulate.yml'
-    #start(confDir, confFile)
-#    p = Process(target = start, args=(confDir,confFile))
-#    p.start()
-#    p.join()
+    verbose = True
+    if verbose:
+        print("The Base Directory is:", BASE_DIR)
+
+    # Start the monitor
+    start(constants, verbose)
+    if verbose:
+        print("Launching the StartMonitor")

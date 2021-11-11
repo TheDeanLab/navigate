@@ -9,6 +9,7 @@ Adopts an MVC architecture for microscope control. Includes key code contributio
 * https://github.com/mesoSPIM/mesoSPIM-control
 * https://github.com/bicarlsen/obis_laser_controller
 * https://github.com/utsw-bicf/auto-docker/
+* https://github.com/uetke/UUTrack
 
 
 ### Continuous Integration

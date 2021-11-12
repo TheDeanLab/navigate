@@ -141,17 +141,19 @@ class position_frame(ttk.Frame):
         position_frame.focus_entry_frame.grid(row=0, column=4, padx=5, sticky=(NSEW))
         
 class x_y_frame(ttk.Frame):
+    def print_up():
+            print('Up was pressed')
     def __init__(x_y_frame, stage_control_tab, *args, **kwargs):
         #Init Frame
         ttk.Frame.__init__(x_y_frame, stage_control_tab, *args, **kwargs) 
 
         #Setting up buttons for up, down, left, right, zero and increment spinbox
-
+    
         #Up button
         x_y_frame.positive_y_btn = ttk.Button(
             x_y_frame,
-            text="\N{UPWARDS BLACK ARROW}",
-            #TODO command=function from connector
+            text="\N{UPWARDS BLACK ARROW}"
+            #command=
         )
 
         #Down button
@@ -221,6 +223,7 @@ class x_y_frame(ttk.Frame):
         x_y_frame.negative_x_btn.grid(row=2, column=0, rowspan=2, columnspan=2, padx=2, pady=2, sticky=(NSEW)) #LEFT
         x_y_frame.zero_x_y_btn.grid(row=2, column=2, rowspan=1, columnspan=2, padx=2, pady=2, sticky=(NSEW)) #Zero xy
         x_y_frame.increment_box.grid(row=3, column=2, rowspan=1, columnspan=2, padx=2, pady=2, sticky=(NSEW)) #Increment spinbox
+
 
 class z_frame(ttk.Frame):
     def __init__(z_frame, stage_control_tab, *args, **kwargs):

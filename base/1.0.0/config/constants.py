@@ -124,7 +124,7 @@ class SavingParameters:
     saving_dict = {
     'auto_save' : False,
     'auto_save_waterfall' : True,
-    'directory' : 'E:\',
+    'directory' : 'C:\\',
     'filename_video' : 'Video',  # Can be the same filename for video and photo
     'filename_photo' : 'Snap',
     'filename_waterfall' : 'Waterfall',

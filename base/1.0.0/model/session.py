@@ -35,7 +35,7 @@ class _session():
     Stores variables and other classes that are common to several UI or instances of the code.
     """
 
-    def __init__(self, ConfigurationClass, verbose):
+    def __init__(self, ConfigurationClass, SavingClass, verbose):
         """
         The class is prepared to load values from a Yaml file
         :param file: Path to the file where the config file

@@ -18,6 +18,9 @@ import sys
 from datetime import datetime
 
 from model.session import _session
+from model.camera.dcam import Dcam as dcam
+from view.main_application_window import Main_App as mainwin
+import tkinter as tk
 # from UUTrack.View.Monitor.monitorMain import monitorMain
 
 
@@ -30,15 +33,17 @@ def start(constants, verbose=False):
     """
 
     camera_config = constants.CameraParameters
+    saving_config = constants.SavingParameters
     if verbose:
         print("The Camera Configuration is:", camera_config)
+        print("The Saving Parameters are:", saving_config)
 
-    session = _session(camera_config.camera_parameters, verbose)
+    session = _session(camera_config.camera_parameters, saving_config, verbose)
 
-    ''' 
     # Load the GUI
     # monitorMain(session)
     
+    '''
     # Make the Path for Saving the Data
     if session.Saving['directory'] == '':
         savedir = os.path.join(base_dir, str(datetime.now().date()))
@@ -49,33 +54,25 @@ def start(constants, verbose=False):
         os.makedirs(savedir)
 
     session.Saving = {'directory': savedir}
+    '''
+    
+    # Initialize Cameras
+    low_resolution_camera = dcam(0)
+    high_resolution_camera = dcam(1)
 
-    if session.Camera['camera'] == 'dummyCamera':
-        from UUTrack.Model.Cameras.dummyCamera import camera
-        cam = camera(0)
-    elif session.Camera['camera'] == 'Hamamatsu':
-        from UUTrack.Model.Cameras.Hamamatsu import camera
-        cam = camera(0)
-    elif session.Camera['camera'] == 'PSI':
-        from UUTrack.Model.Cameras.PSI import camera
-        cam = camera('UUTrack\\Controller\\devices\\PhotonicScience')
-    elif session.Camera['camera'] == 'Basler':
-        from UUTrack.Model.Cameras.Basler import camera
-        cam = camera(session.Camera['camera_idx'])
-    else:
-        raise Exception('That particular camera has not been implemented yet.\n Please check your config file')
-    print(session.Camera['camera'])
+    # Set default camera properties
+    low_resolution_camera.dcam_set_default_light_sheet_mode_parameters()
+    high_resolution_camera.dcam_set_default_light_sheet_mode_parameters()
 
-    cam.initializeCamera()
-    cam.setExposure(session.Camera['exposure_time'])
-    app = QApplication(sys.argv)
-    win = monitorMain(session, cam)
-    win.show()
-    #    sys.exit(app.exec_())
-    app.exec_()
+    if verbose:
+        print("Cameras Initialized")
 
+    #Starts the GUI event loop and presents gui to user
+    root = tk.Tk() #Instance of the main window any additional windows will be toplevel classes
+    mainwin(root) #Runs the view code which will call controller code to adjust and present the model
+    root.mainloop() #GUI event handler
 
     if __name__ == "__main__":
         start('Config', 'Config_Pritam.yml')
         
-    '''
+    

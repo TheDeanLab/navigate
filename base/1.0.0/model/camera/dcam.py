@@ -1268,8 +1268,9 @@ if __name__ == '__main__':
         Dcamapi.uninit()
 
     # dcam_set_camera_exposure(0, 0.1)
-    dcam_show_properties()
-    # dcam_show_device_list()
+    dcam = Dcam(0)
+    dcam.dcam_set_default_light_sheet_mode_parameters()
+    dcam.dcam_show_properties()   # dcam_show_device_list() 
     # dcam_live_capturing()
 
 

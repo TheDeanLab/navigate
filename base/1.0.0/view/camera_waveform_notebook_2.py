@@ -1,5 +1,6 @@
 from tkinter import *
 from tkinter import ttk
+#import camera_view_for_tab as controller
 
 class camera_waveform_notebook(ttk.Notebook):
     def __init__(cam_wave, frame_top_right, *args, **kwargs):
@@ -19,7 +20,7 @@ class camera_tab(ttk.Frame):
    def __init__(camera_tab, cam_wave, *args, **kwargs):
         #Init Frame
         ttk.Frame.__init__(camera_tab, cam_wave, *args, **kwargs) 
-        #Need to add image code here
+        #Need to add image code here, using a label to hold the image.
         #image_viewer = ttk.Label(camera_tab)
         #image_viewer.grid(row=0, column=0, sticky=NSEW) 
 

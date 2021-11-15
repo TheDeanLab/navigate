@@ -18,8 +18,14 @@ import sys
 from datetime import datetime
 
 from model.session import _session
-from model.camera.dcam import Dcam as dcam
-from view.main_application_window import Main_App as mainwin
+
+# Camera Imports
+from model.camera.dcam import Dcam
+from model.camera.dcam import Dcamapi
+
+# Import View
+from view.main_application_window import Main_App as main_window
+
 import tkinter as tk
 # from UUTrack.View.Monitor.monitorMain import monitorMain
 
@@ -56,23 +62,48 @@ def start(constants, verbose=False):
     session.Saving = {'directory': savedir}
     '''
     
-    # Initialize Cameras
-    low_resolution_camera = dcam(0)
-    high_resolution_camera = dcam(1)
+    # Initialize Dcamapi
+    if Dcamapi.init() is not False:
+        n = Dcamapi.get_devicecount()
+        if verbose:
+            print("Found %d cameras" % n)
 
-    # Set default camera properties
-    low_resolution_camera.dcam_set_default_light_sheet_mode_parameters()
-    high_resolution_camera.dcam_set_default_light_sheet_mode_parameters()
+        # Initialize the cameras
+        low_resolution_camera = Dcam(0)
+        high_resolution_camera = Dcam(1)
 
-    if verbose:
-        print("Cameras Initialized")
+        # Confirm cameras are open, and set default parameters
+        if low_resolution_camera.dev_open() is not False:
+            low_resolution_camera.dcam_set_default_light_sheet_mode_parameters()
+        else:
+            print('-NG: low_resolution_camera.dev_open() fails with error {}'.format(low_resolution_camera.lasterr()))
+            sys.exit()
 
-    #Starts the GUI event loop and presents gui to user
-    root = tk.Tk() #Instance of the main window any additional windows will be toplevel classes
-    mainwin(root) #Runs the view code which will call controller code to adjust and present the model
-    root.mainloop() #GUI event handler
+        if high_resolution_camera.dev_open() is not False:
+            high_resolution_camera.dcam_set_default_light_sheet_mode_parameters()
+        else:
+            print('-NG: high_resolution_camera.dev_open() fails with error {}'.format(high_resolution_camera.lasterr()))
+            sys.exit()
 
-    if __name__ == "__main__":
-        start('Config', 'Config_Pritam.yml')
+        if verbose:
+            print("Cameras Initialized")
+
+    else:
+        print('-NG: Dcamapi.init() fails with error {}'.format(Dcamapi.lasterr()))
+        sys.exit()
+
+    # Starts the GUI event loop and presents gui to user
+    # Instance of the main window any additional windows will be toplevel classes
+    root = tk.Tk()
+
+    # Runs the view code which will call controller code to adjust and present the model
+    main_window(root)
+
+    # GUI event handler
+    root.mainloop()
+
+if __name__ == "__main__":
+        #start('Config', 'Config_Pritam.yml')
+    pass
         
     

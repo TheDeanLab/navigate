@@ -4,7 +4,7 @@
 #
 # The declarations of classes and functions in this file are subject to change without notice.
 
-from dcamapi4 import *
+from .dcamapi4 import *
 import numpy as np
 import cv2 
 
@@ -1087,12 +1087,41 @@ class Dcam:
         self.dcam_set_camera_trigger_polarity(2)
         self.dcam_set_camera_trigger_source(2)
 
+    def dcam_show_properties(self):
+        """
+        Show supported properties
+        """
+        if self.dev_open() is not False:
+            idprop = self.prop_getnextid(0)
+            print(" IDPROP - BINARY - PROPNAME - PROPVAL")
+            while idprop is not False:
+                output = '0x{:08X}'.format(idprop)
+                propname = self.prop_getname(idprop)
+                propval = self.prop_getvalue(idprop)
+                if propname is not False:
+                    output = str(idprop) + " - " + output + " - " + propname + " - " + str(propval)
+
+                print(output)
+                idprop = self.prop_getnextid(idprop)
+
+            self.dev_close()
+        else:
+            print('-NG: Dcam.dev_open() fails with error {}'.format(self.lasterr()))
 
 
 
 if __name__ == '__main__':
+    from dcamapi4 import *
+
     ''' Testing and Examples Section '''
-    
+    # dcam_set_camera_exposure(0, 0.1)
+    if Dcamapi.init() is not False:
+        camera = Dcam(iDevice=0)
+        camera.dcam_show_properties()
+        #dcam.dcam_set_default_light_sheet_mode_parameters()
+        #dcam_show_properties()   # dcam_show_device_list()
+        #dcam_live_capturing()
+
     def dcamtest_show_framedata(data, windowtitle, iShown):
         """
         Show numpy buffer as an image
@@ -1267,11 +1296,7 @@ if __name__ == '__main__':
 
         Dcamapi.uninit()
 
-    # dcam_set_camera_exposure(0, 0.1)
-    dcam = Dcam(0)
-    dcam.dcam_set_default_light_sheet_mode_parameters()
-    dcam.dcam_show_properties()   # dcam_show_device_list() 
-    # dcam_live_capturing()
+
 
 
 

@@ -83,7 +83,8 @@ ZoomParameters:
     servo_id: 1
     COM_port: COM21
     baudrate: 1000000
-    zoom_position: {0.63x: 0,
+    zoom_position: {
+                0.63x: 0,
                 1x: 627,
                 2x: 1711,
                 3x: 2301,
@@ -91,13 +92,14 @@ ZoomParameters:
                 5x: 3079,
                 6x: 3383}
 
-    low_res_zoom_pixel_size: {0.63x: 9.7,
-             1x: 6.38,
-             2x: 3.14,
-             3x: 2.12,
-             4x: 1.609,
-             5x: 1.255,
-             6x: 1.044}
+    low_res_zoom_pixel_size: {
+                0.63x: 9.7,
+                1x: 6.38,
+                2x: 3.14,
+                3x: 2.12,
+                4x: 1.609,
+                5x: 1.255,
+                6x: 1.044}
 
     high_res_zoom_pixel_size: 0.167
 
@@ -149,45 +151,11 @@ class FileSaveParameters:
 
     parentdir: E:/
 
-
-
-NI_board_parameters:
-    # ao0/highrescamera, ao1/lowrescamera, ao3/stage, ao5/laser488TTL,
-    # ao6/laser552_TTL, ao8/laser594_TTL, ao11/laser640_TTL, ao12/voicecoil
-    line_selection: Dev1/ao0, Dev1/ao1, Dev1/ao3, Dev1/ao5, Dev1/ao6, Dev1/ao8, Dev1/ao11, Dev1/ao12
-    ao_type: 6738
-    ao_nchannels: 8
-    rate: 2e4
-    highres_camera: 0
-    lowres_camera: 1
-    stage: 2
-    laser488: 3
-    laser552: 4
-    laser594: 5
-    laser640: 6
-    voicecoil: 7
-
-
-    #constant values for laser power etc...
-    ao_type_constant: 6738_constant
-    power_488_line: Dev1/ao17
-    power_552_line: Dev1/ao18
-    power_594_line: Dev1/ao22
-    power_640_line: Dev1/ao25
-    flip_mirror_line: Dev1/ao26
-    mSPIM_mirror_line: Dev1/ao29
-    mSPIM_mirror_voltage: 0.1
-    minVol_constant: 0
-    maxVol_constant: 5
-    max_mSPIM_constant: 2
-
-
-# class SharedMemory_allocation:
-#     # Acquisition:
-#     vol_per_buffer: 1
-#     num_data_buffers: 2  # increase for multiprocessing
-#     num_snap: 1  # interbuffer time limited by ao play
-#     images_per_buffer: 1
-#     bytes_per_data_buffer: images_per_buffer * 6000 * 4000 * 2
-#     bytes_per_preview_buffer: bytes_per_data_buffer * 3
+class SharedMemory_allocation:
+  vol_per_buffer: 1
+  num_data_buffers: 2  # increase for multiprocessing
+  num_snap: 1  # interbuffer time limited by ao play
+  images_per_buffer: 1
+  bytes_per_data_buffer: images_per_buffer * 6000 * 4000 * 2
+  bytes_per_preview_buffer: bytes_per_data_buffer * 3
 

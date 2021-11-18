@@ -1,5 +1,7 @@
 from tkinter import *
+import tkinter as tk
 from tkinter import ttk
+from acquire_popup import Acquire_PopUp
 
 #Class for the acquisition bar found at the top of the main application window. Main function is to change acq setting and then call the acquisition top level window
 
@@ -15,11 +17,16 @@ class AcquireBar(ttk.Frame):
 
         #Creating each feature of bar
 
+        #Create command for popup to be called
+        def callPop():
+            top = tk.Toplevel()
+            Acquire_PopUp(top) 
+
         #Acquire Button
         AcqBar.acquire_btn = ttk.Button(
             AcqBar,
-            text="Acquire"
-            #command=
+            text="Acquire",
+            command=callPop
         )
 
         #Pulldown menu: continuous, z-stack, single acquisition, projection. Uses a combobox that restricts item choice

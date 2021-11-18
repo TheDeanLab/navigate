@@ -7,7 +7,7 @@ class camera_waveform_notebook(ttk.Notebook):
         #Init notebook
         ttk.Notebook.__init__(cam_wave, frame_top_right, *args, **kwargs)
         #Putting notebook 2 into top right frame
-        cam_wave.pack(anchor=W)
+        cam_wave.grid(row=0,column=0)
         #Creating the camera tab
         cam_wave.camera_tab = camera_tab(cam_wave)
         #Creating the waveform settings tab

@@ -7,7 +7,7 @@ class settings_notebook(ttk.Notebook):
         #Init notebook
         ttk.Notebook.__init__(setntbk, frame_left, *args, **kwargs)
         #Putting notebook 1 into left frame
-        setntbk.pack(anchor=W)
+        setntbk.grid(row=0,column=0)
         #Creating the settings tab
         setntbk.settings_tab = settings_tab(setntbk)
         #Creating the advanced settings tab

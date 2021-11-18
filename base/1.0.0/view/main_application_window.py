@@ -16,7 +16,7 @@ from tkinter.constants import NSEW
 from .settings_notebook_1 import settings_notebook as notebook_1
 from .camera_waveform_notebook_2 import camera_waveform_notebook as notebook_2
 from .stagecontrol_maxintensity_notebook_3 import stagecontrol_maxintensity_notebook as notebook_3
-
+from .acquire_bar import AcquireBar
 
 #Creates the frame that will hold the GUI content, its parent is the main window or root Tk object
 class Main_App(ttk.Frame):
@@ -47,20 +47,25 @@ class Main_App(ttk.Frame):
                 mainapp.menu_edit.add_command(label='Copy')
                 mainapp.menu_edit.add_command(label='Paste')
 
+                #Top Frame Acquire Bar
+                mainapp.top_frame = ttk.Frame(mainapp)
+                #mainapp.top_frame_label = ttk.Label(mainapp.top_frame, text="Acquire Bar")
+                #mainapp.top_frame_label.grid(row=0,column=0)
+
                 #Left Frame Notebook 1 setup
                 mainapp.frame_left = ttk.Frame(mainapp)
-                mainapp.left_frame_label = ttk.Label(mainapp.frame_left, text="Notebook #1")
-                mainapp.left_frame_label.pack()
+                #mainapp.left_frame_label = ttk.Label(mainapp.frame_left, text="Notebook #1")
+                #mainapp.left_frame_label.grid(row=0,column=0)
 
                 #Top right Frame Notebook 2 setup
                 mainapp.frame_top_right = ttk.Frame(mainapp)
-                mainapp.top_right_frame_label = ttk.Label(mainapp.frame_top_right, text="Notebook #2")
-                mainapp.top_right_frame_label.pack()
+                #mainapp.top_right_frame_label = ttk.Label(mainapp.frame_top_right, text="Notebook #2")
+                #mainapp.top_right_frame_label.grid(row=0,column=0)
 
                 #Bottom right Frame Notebook 3 setup
                 mainapp.frame_bottom_right = ttk.Frame(mainapp)
-                mainapp.bottom_right_frame_label = ttk.Label(mainapp.frame_bottom_right, text="Notebook #3")
-                mainapp.bottom_right_frame_label.pack()
+                #mainapp.bottom_right_frame_label = ttk.Label(mainapp.frame_bottom_right, text="Notebook #3")
+                #mainapp.bottom_right_frame_label.grid(row=0,column=0)
 
                 '''
                 Placing the notebooks using grid. While the grid is called on each frame it is actually calling 
@@ -68,17 +73,19 @@ class Main_App(ttk.Frame):
                 frame so can be ignored in the grid setup. This layout uses a 2x2 grid to start. 
 
                         1   2
-                        3   4 
+                        3   4
+                        5   6 
 
-                The above is the grid "spots" the left frame will take spots 1 & 3 while top right takes
-                spot 2 and bottom right frame takes spot 4.
+                The above is the grid "spots" the left frame will take spots 3 & 5 while top right takes
+                spot 4 and bottom right frame takes spot 6. Top frame will be spots 1 & 2
                 '''
 
                 #Gridding out foundational frames
                 mainapp.grid(column=0, row=0, sticky=(NSEW)) #Sticky tells which walls of gridded cell the widget should stick to, in this case its sticking to the main window on all sides
-                mainapp.frame_left.grid(row=0, column=0, rowspan=2, sticky=(NSEW))
-                mainapp.frame_top_right.grid(row=0, column=1, sticky=(NSEW))
-                mainapp.frame_bottom_right.grid(row=1, column=1, sticky=(NSEW))
+                mainapp.top_frame.grid(row=0, column=0, columnspan=2, sticky=(NSEW))
+                mainapp.frame_left.grid(row=1, column=0, rowspan=2, sticky=(NSEW))
+                mainapp.frame_top_right.grid(row=1, column=1, sticky=(NSEW))
+                mainapp.frame_bottom_right.grid(row=2, column=1, sticky=(NSEW))
 
                 #This dictates how to weight each piece of the grid, so that when the window is resized the notebooks get the proper screen space. 
                 # mainapp or mainapp is the frame holding all the other frames that hold the notebooks to help modularize the code
@@ -91,6 +98,8 @@ class Main_App(ttk.Frame):
                 mainapp.notebook_1 = notebook_1(mainapp.frame_left)
                 mainapp.notebook_2 = notebook_2(mainapp.frame_top_right)
                 mainapp.notebook_3 = notebook_3(mainapp.frame_bottom_right)
+                mainapp.acqbar = AcquireBar(mainapp.top_frame)
+
 
 
 

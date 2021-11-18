@@ -8,7 +8,7 @@ class stagecontrol_maxintensity_notebook(ttk.Notebook):
         #Init notebook
         ttk.Notebook.__init__(stagecontrol_maxintensity, frame_bot_right, *args, **kwargs)
         #Putting notebook 3 into bottom right frame
-        stagecontrol_maxintensity.pack()
+        stagecontrol_maxintensity.grid(row=0,column=0)
         #Creating Stage Control Tab
         stagecontrol_maxintensity.stage_control_tab = stage_control_tab(stagecontrol_maxintensity)
         #Creating Max intensity projection Tab
@@ -34,15 +34,12 @@ class stage_control_tab(ttk.Frame):
         #Z Frame
         stage_control_tab.z_frame = z_frame(stage_control_tab)
         
-
         #Theta Frame
         stage_control_tab.theta_frame = theta_frame(stage_control_tab)
         
-
         #Focus Frame
         stage_control_tab.focus_frame = focus_frame(stage_control_tab)
         
-
         #GoTo Frame
         stage_control_tab.goto_frame = goto_frame(stage_control_tab)
         stage_control_tab.goto_frame_label = ttk.Label(stage_control_tab.goto_frame, text="Goto Frame")

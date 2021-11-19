@@ -5,7 +5,7 @@ creates a menubar using the menubar class. Adds the options for each file menu. 
 Finally it uses the notebook classes to put them into the respective frames on the grid. Each of the notebook classes includes tab 
 classes and inits those etc. The second parameter in each classes __init__ function is the parent. I used the name of the parent
 so that it would be easier to keep track of inheritances. Once you have the parent name you can look to the parents class in the 
-class definition. For example for class Main_App(ttk.Frame) the parent to Main_App is a frame and its name is mainwin. I also used
+class definition. For example for class Main_App(ttk.Frame) the parent to Main_App is a frame and its name is root. I also used
 the name of the class instead of self to make things easier to read. So for Main_App self is now mainapp.
 '''
 
@@ -13,26 +13,26 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import *
 from tkinter.constants import NSEW
-from .settings_notebook_1 import settings_notebook as notebook_1
-from .camera_waveform_notebook_2 import camera_waveform_notebook as notebook_2
-from .stagecontrol_maxintensity_notebook_3 import stagecontrol_maxintensity_notebook as notebook_3
-from .acquire_bar import AcquireBar
+from settings_notebook_1 import settings_notebook as notebook_1
+from camera_waveform_notebook_2 import camera_waveform_notebook as notebook_2
+from stagecontrol_maxintensity_notebook_3 import stagecontrol_maxintensity_notebook as notebook_3
+from acquire_bar import AcquireBar
 
 #Creates the frame that will hold the GUI content, its parent is the main window or root Tk object
 class Main_App(ttk.Frame):
         #Takes a Tk object should be something like root = Tk() then root_window(root)
-        def __init__(mainapp, mainwin, *args, **kwargs):
-                #Inits this class as a frame subclass with the root/mainwin as its parent
-                ttk.Frame.__init__(mainapp, mainwin, *args, **kwargs)
+        def __init__(mainapp, root, *args, **kwargs):
+                #Inits this class as a frame subclass with the root as its parent
+                ttk.Frame.__init__(mainapp, root, *args, **kwargs)
                 #This starts the main window config, and makes sure that any child widgets can be resized with the window
-                mainapp.mainwin = mainwin
-                mainapp.mainwin.title("Super Ultimate Multiscale Microscope of the FUTURE!")
-                mainapp.mainwin.minsize(1400,700)
-                mainapp.mainwin.columnconfigure(0,weight=1)
-                mainapp.mainwin.rowconfigure(0,weight=1)
+                mainapp.root = root
+                mainapp.root.title("Super Ultimate Multiscale Microscope of the FUTURE!")
+                mainapp.root.minsize(1400,700)
+                mainapp.root.columnconfigure(0,weight=1)
+                mainapp.root.rowconfigure(0,weight=1)
 
                 #Creating and linking menu to main window/app
-                mainapp.menubar = menubar(mainwin)
+                mainapp.menubar = menubar(root)
 
                 #File Menu
                 mainapp.menu_file = Menu(mainapp.menubar)
@@ -98,7 +98,7 @@ class Main_App(ttk.Frame):
                 mainapp.notebook_1 = notebook_1(mainapp.frame_left)
                 mainapp.notebook_2 = notebook_2(mainapp.frame_top_right)
                 mainapp.notebook_3 = notebook_3(mainapp.frame_bottom_right)
-                mainapp.acqbar = AcquireBar(mainapp.top_frame)
+                mainapp.acqbar = AcquireBar(mainapp.top_frame, mainapp.root)
 
 
 
@@ -117,6 +117,7 @@ class menubar(Menu):
 
 
 if __name__ == '__main__':
+        global root
         root = tk.Tk()
         Main_App(root)
         root.mainloop()

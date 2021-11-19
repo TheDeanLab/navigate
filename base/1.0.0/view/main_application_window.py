@@ -8,7 +8,7 @@ so that it would be easier to keep track of inheritances. Once you have the pare
 class definition. For example for class Main_App(ttk.Frame) the parent to Main_App is a frame and its name is root. I also used
 the name of the class instead of self to make things easier to read. So for Main_App self is now mainapp.
 '''
-
+import sys, os
 import tkinter as tk
 from tkinter import ttk
 from tkinter import *
@@ -16,7 +16,8 @@ from tkinter.constants import NSEW
 from settings_notebook_1 import settings_notebook as notebook_1
 from camera_waveform_notebook_2 import camera_waveform_notebook as notebook_2
 from stagecontrol_maxintensity_notebook_3 import stagecontrol_maxintensity_notebook as notebook_3
-from acquire_bar import AcquireBar
+from acquire_bar_frame.acquire_bar import AcquireBar
+
 
 #Creates the frame that will hold the GUI content, its parent is the main window or root Tk object
 class Main_App(ttk.Frame):
@@ -27,6 +28,8 @@ class Main_App(ttk.Frame):
                 #This starts the main window config, and makes sure that any child widgets can be resized with the window
                 mainapp.root = root
                 mainapp.root.title("Super Ultimate Multiscale Microscope of the FUTURE!")
+                program_directory=sys.path[0] #refers to script directory ie gets all the way down to view
+                mainapp.root.iconphoto(True, PhotoImage(file=os.path.join(program_directory, "icon\mic.png")))
                 mainapp.root.minsize(1400,700)
                 mainapp.root.columnconfigure(0,weight=1)
                 mainapp.root.rowconfigure(0,weight=1)

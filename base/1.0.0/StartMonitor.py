@@ -1,49 +1,52 @@
 """
-    Main starting point of the program. It imports the base classes and defines the function (:meth:`~UUTrack.startCamera.start`)
-    To start the program you can run either from the command prompt or embed into your own code.
-
-        >>> from UUTrack import startMonitor
-        >>> config_dir = 'Path/To/Config_Dir'
-        >>> config_file = 'config.yml'
-        >>> startMonitor.start(config_dir,config_file)
-
+    Main starting point of the program.
+    It imports the base classes and defines the function (:meth:`~UUTrack.startCamera.start`)
     The config file is passed to a :class:`~UUTrack.Model.Session` variable.
     That will be shared with the rest of the program.
     The session variable idea comes from programming websites, but is useful in other kind of programs as well.
-
     :copyright: 2017
-
     .. sectionauthor:: Aquiles Carattino <aquiles@aquicarattino.com>
 """
+
+# Standard library imports
 import os
 import sys
 from datetime import datetime
 
+# Local imports
 from model.session import Session
 
-# Import View
+# Import view
 from view.main_application_window import Main_App as main_window
-
 import tkinter as tk
+
+
 # from UUTrack.View.Monitor.monitorMain import monitorMain
 
-
-def start(constants, verbose=False):
+def start(configuration_directory, configuration_file, verbose=False):
     """
     Starts the main window of the program and loads the appropriate configuration file.
-    :param str configDir: Folder where the config file is stored
-    :param str configFile: Name of the config file
+    :param str configuration_directory: Folder where the config file is stored
+    :param str configuration_file: Name of the config file
     :return: Window for the camera
     """
     initialize_camera = False
+    global Session
 
-    camera_config = constants.CameraParameters
-    saving_config = constants.SavingParameters
+    config_path = os.path.join(configuration_directory, configuration_file)
     if verbose:
-        print("The Camera Configuration is:", camera_config)
-        print("The Saving Parameters are:", saving_config)
+        print("Loading configuration file: " + config_path)
 
-    #session = Session(camera_config.camera_parameters, saving_config, verbose)
+    session = Session(config_path)
+
+
+    #config_path = constants.CameraParameters
+    #saving_config = constants.SavingParameters
+    #if verbose:
+        #print("The Camera Configuration is:", config_path)
+        #print("The Saving Parameters are:", saving_config)
+
+    #session = Session(config_path.camera_parameters, saving_config, verbose)
 
     # Load the GUI
     # monitorMain(session)

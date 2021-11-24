@@ -3,17 +3,21 @@
 import os
 from multiprocessing import Process
 
+# Import third-party modules
+import pretty_errors
+
 # Import local modules
 from StartMonitor import start
 from config import constants
 
 if __name__ == '__main__':
-    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    base_directory = os.path.dirname(os.path.abspath(__file__))
     verbose = True
     if verbose:
-        print("The Base Directory is:", BASE_DIR)
+        print("The Base Directory is:", base_directory)
 
     # Start the monitor
-    start(constants, verbose)
+    configuration_directory = os.path.join(base_directory, 'config')
+    start(configuration_directory, 'configuration.yml', verbose)
     if verbose:
         print("Launching the StartMonitor")

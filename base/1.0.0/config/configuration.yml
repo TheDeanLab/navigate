@@ -1,13 +1,12 @@
 %YAML 1.2
 ---
-
 User:
   name: Kevin_Dean
 
 Saving:
   auto_save: False
   auto_save_waterfall: True
-  directory: E:\
+  directory: ~\Desktop\
   filename_video: Video # Can be the same filename for video and photo
   filename_photo: Snap
   filename_waterfall: Waterfall
@@ -21,12 +20,9 @@ AcquisitionHardware:
     # triggers
     master_trigger_out_line: PXI6259/port0/line1
     camera_trigger_out_line: /PXI6259/ctr0
-    camera_trigger_source: /PXI6259/PFI0
-    laser_task_trigger_source: /PXI6259/PFI0
-    galvo_etl_task_trigger_source: /PXI6259/PFI0
+    trigger_source: /PXI6259/PFI0
 
     # galvos
-    galvo_etl_task_line: PXI6259/ao0:3
     galvo_left: ao0
     galvo_right: ao1
 
@@ -43,17 +39,34 @@ AcquisitionHardware:
     shutter_left: PXI6259/port0/line0
     shutter_right: PXI6259/port2/line0
 
-ASLMParameters:
-    ASLM_acquisition_time: 0.3
-    ASLM_from_volt: 0  # first voltage applied at remote mirror
-    ASLM_to_volt: 1  # voltage applied at remote mirror at the end of sawtooth
-    ASLM_current_volt: 0  # current voltage applied to remote mirror
-    ASLM_static_low_res_volt: 0  # default ASLM low res voltage
-    ASLM_static_high_res_volt: 0  # default ASLM high res voltage
-    ASLM_alignment_on: 0  # param=1 if ASLM alignment mode is on, otherwise zero
-    ASLM_delay_before_voltage_return: 0.001  # 1ms
-    ASLM_additional_return_time: 0.001  # 1ms
-    #ASLM_scan_width: ASLM_parameters.simultaneous_lines
+CameraParameters:
+  type: HamamatsuOrca
+  number_of_cameras: 2
+  x_pixels: 2048
+  y_pixels: 2048
+  x_pixel_size_in_microns: 6.5
+  y_pixel_size_in_microns: 6.5
+  subsampling: [1, 2, 4]
+  sensor_mode: 12  # 12 for progressive
+  defect_correct_mode: 2
+  binning: 1x1
+  readout_speed: 1
+  trigger_active: 1
+  trigger_mode: 1 # it is unclear if this is the external lightsheeet mode - how to check this?
+  trigger_polarity: 2  # positive pulse
+  trigger_source: 2  # external
+  camera_line_interval: 0.000075
+  camera_exposure_time: 0.01
+  exposure_time: 200
+  ASLM_from_volt: 0  # first voltage applied at remote mirror
+  ASLM_to_volt: 1  # voltage applied at remote mirror at the end of sawtooth
+  ASLM_current_volt: 0  # current voltage applied to remote mirror
+  ASLM_static_low_res_volt: 0  # default ASLM low res voltage
+  ASLM_static_high_res_volt: 0  # default ASLM high res voltage
+  ASLM_alignment_on: 0  # param=1 if ASLM alignment mode is on, otherwise zero
+  ASLM_delay_before_voltage_return: 0.001  # 1ms
+  ASLM_additional_return_time: 0.001  # 1ms
+
 
 StageParameters:
     stage_type: PI
@@ -84,72 +97,43 @@ ZoomParameters:
     COM_port: COM21
     baudrate: 1000000
     zoom_position: {
-                0.63x: 0,
-                1x: 627,
-                2x: 1711,
-                3x: 2301,
-                4x: 2710,
-                5x: 3079,
-                6x: 3383}
+      0.63x: 0,
+      1x: 627,
+      2x: 1711,
+      3x: 2301,
+      4x: 2710,
+      5x: 3079,
+      6x: 3383
+    }
 
     low_res_zoom_pixel_size: {
-                0.63x: 9.7,
-                1x: 6.38,
-                2x: 3.14,
-                3x: 2.12,
-                4x: 1.609,
-                5x: 1.255,
-                6x: 1.044}
+      0.63x: 9.7,
+      1x: 6.38,
+      2x: 3.14,
+      3x: 2.12,
+      4x: 1.609
+      5x: 1.255
+      6x: 1.044
+    }
 
     high_res_zoom_pixel_size: 0.167
 
 FilterWheelParameters:
-    available_filters: {Empty-Alignment: 0,
-                  GFP - FF01-515/30-32: 1,
-                  RFP - FF01-595/31-32: 2,
-                  Far-Red - BLP01-647R/31-32: 3,
-                  Blocked1: 4,
-                  Blocked2: 5,
-                  Blocked3: 6,
-                  Blocked4: 7,
-                  Blocked5: 8,
-                  Blocked6: 9}
-
-    filterwheel_parameters: {filterwheel_type: Sutter, COMport: COM9}
+    filter_wheel_type: Sutter
+    filter_wheel_port: COM9
     number_of_filter_wheels: 2
-
-CameraParameters:
-    type: HamamatsuOrca
-    number_of_cameras: 2
-    camera_parameters: {x_pixels: 2048,
-                         y_pixels: 2048,
-                         x_pixel_size_in_microns: 6.5,
-                         y_pixel_size_in_microns: 6.5,
-                         subsampling: [1, 2, 4],
-                         sensor_mode: 12,  # 12 for progressive
-                         defect_correct_mode: 2,
-                         binning: 1x1,
-                         readout_speed: 1,
-                         trigger_active: 1,
-                         trigger_mode: 1, # it is unclear if this is the external lightsheeet mode - how to check this?
-                         trigger_polarity: 2,  # positive pulse
-                         trigger_source: 2,  # external
-                         camera_line_interval: 0.000075,
-                         camera_exposure_time: 0.01,
-                         }
-    exposure_time: 200
-
-
-class FileSaveParameters:
-    # HDF5 can have subsampling of ((1, 1, 1), (2, 2, 2), ...) for (z, y, x)
-    # Compression can be None, gzip, lzf
-    # flip_xy can be True or False, to match BigStitcher coordinates
-    hdf5: {subsampling: ((1, 1, 1),),
-             compression: None,
-             flip_xyz: (True, True, False)
-             }
-
-    parentdir: E:/
+    available_filters: {
+      Empty-Alignment: 0,
+      GFP - FF01-515/30-32: 1,
+      RFP - FF01-595/31-32: 2,
+      Far-Red - BLP01-647R/31-32: 3,
+      Blocked1: 4,
+      Blocked2: 5,
+      Blocked3: 6,
+      Blocked4: 7,
+      Blocked5: 8,
+      Blocked6: 9
+    }
 
 class SharedMemory_allocation:
   vol_per_buffer: 1

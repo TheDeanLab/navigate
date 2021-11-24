@@ -36,37 +36,50 @@ class Session:
     """
 
     def __init__(self, file=None):
-        """The class is prepared to load values from a Yaml file
-        :param file: Path to the file where the config file is or a dictionary with the data to load. """
+        """
+        The class is prepared to load values from a Yaml file
+        :param file: Path to the file where the config file is or a dictionary with the data to load.
+        """
 
         super(Session, self).__init__()
         super().__setattr__('params', dict())
 
-        # Load the yaml configuration file
-        data = load_yaml_config(file)
+        if file != None:
+            if type(file) == type('path'):
+                try:
+                    with open(file,'r') as f:
+                        data = yaml.load(f)
+                except:
+                    print('STRING YAML')
+                    print(file)
+                    data = yaml.load(file)
+                    print('LOADED STRING')
+            elif type(file) == type({}):
+                data = file
 
-        # Set the attributes with the custom __setattr__
-        for d in data:
-            self.__setattr__(d, data[d])
+            # Set the attributes with the custom __setattr__
+            for d in data:
+                print(d)
+                #self.__setattr__(d, data[d])
 
-        def __setattr__(self, key, value):
-            if type(value) != type({}):
-                raise Exception('Everything passed to a session has to be a dictionary')
-            if key not in self.params:
-                self.params[key] = dict()
-                self.__setattr__(key,value)
-            else:
-                for k in value:
-                    if k in self.params[key]:
-                        val = value[k]
-                        # Update value
-                        self.params[key][k] = value[k]
-                        self.emit(SIGNAL('Updated'))
-                    else:
-                        self.params[key][k] = value[k]
-                        self.emit(SIGNAL('New'))
+    def __setattr__(self, key, value):
+        if type(value) != type({}):
+            raise Exception('Everything passed to a session has to be a dictionary')
+        if key not in self.params:
+            self.params[key] = dict()
+            self.__setattr__(key,value)
+        else:
+            for k in value:
+                if k in self.params[key]:
+                    val = value[k]
+                    # Update value
+                    self.params[key][k] = value[k]
+                    self.emit(SIGNAL('Updated'))
+                else:
+                    self.params[key][k] = value[k]
+                    self.emit(SIGNAL('New'))
 
-                super(Session, self).__setattr__(k, value[k])
+            super(Session, self).__setattr__(k, value[k])
 
 
         def load_yaml_config(file):

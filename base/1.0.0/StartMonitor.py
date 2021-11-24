@@ -23,37 +23,43 @@ import tkinter as tk
 
 # from UUTrack.View.Monitor.monitorMain import monitorMain
 
-def start(configuration_directory, configuration_file, verbose=False):
+def start(configuration_directory, configuration_file, Verbose=False):
     """
     Starts the main window of the program and loads the appropriate configuration file.
     :param str configuration_directory: Folder where the config file is stored
     :param str configuration_file: Name of the config file
     :return: Window for the camera
     """
+
     initialize_camera = False
+    initialize_GUI = False
+
+    # Initialize the Session
     global Session
-
     config_path = os.path.join(configuration_directory, configuration_file)
-    if verbose:
-        print("Loading configuration file: " + config_path)
+    if Verbose:
+        print("The Configuration Path is:", config_path)
 
-    session = Session(config_path)
+    session = Session(config_path, Verbose)
 
+    # Initialize GUI
+    if initialize_GUI:
+        if Verbose:
+            print("Initializing GUI")
 
-    #config_path = constants.CameraParameters
-    #saving_config = constants.SavingParameters
-    #if verbose:
-        #print("The Camera Configuration is:", config_path)
-        #print("The Saving Parameters are:", saving_config)
+        # Starts the GUI event loop and presents gui to user
+        # Instance of the main window any additional windows will be toplevel classes
+        root = tk.Tk()
 
-    #session = Session(config_path.camera_parameters, saving_config, verbose)
+        # Runs the view code which will call controller code to adjust and present the model
+        main_window(root)
 
-    # Load the GUI
-    # monitorMain(session)
-    
-    '''
-    # Make the Path for Saving the Data
+        # GUI event handler
+        root.mainloop()
+
+    # Specify Saving Directory
     if session.Saving['directory'] == '':
+        # Default Saving Directory if not specified
         savedir = os.path.join(base_dir, str(datetime.now().date()))
     else:
         savedir = os.path.join(session.Saving['directory'], str(datetime.now().date()))
@@ -61,10 +67,14 @@ def start(configuration_directory, configuration_file, verbose=False):
     if not os.path.exists(savedir):
         os.makedirs(savedir)
 
+    # Update the Session with the new save path
     session.Saving = {'directory': savedir}
-    '''
 
+    # Initialize Camera
     if initialize_camera == True:
+        if Verbose:
+            print("Initializing Cameras")
+
         # Camera Imports
         from model.camera.dcam import Dcam
         from model.camera.dcam import Dcamapi
@@ -72,7 +82,7 @@ def start(configuration_directory, configuration_file, verbose=False):
         # Initialize Dcamapi
         if Dcamapi.init() is not False:
             n = Dcamapi.get_devicecount()
-            if verbose:
+            if Verbose:
                 print("Found %d cameras" % n)
 
             # Initialize the cameras
@@ -92,27 +102,20 @@ def start(configuration_directory, configuration_file, verbose=False):
                 print('-NG: high_resolution_camera.dev_open() fails with error {}'.format(high_resolution_camera.lasterr()))
                 sys.exit()
 
-            if verbose:
+            if Verbose:
                 print("Cameras Initialized")
 
         else:
             print('-NG: Dcamapi.init() fails with error {}'.format(Dcamapi.lasterr()))
             sys.exit()
     else:
+        if Verbose:
+            print("Cameras not initialized")
         pass
 
-    # Starts the GUI event loop and presents gui to user
-    # Instance of the main window any additional windows will be toplevel classes
-    root = tk.Tk()
 
-    # Runs the view code which will call controller code to adjust and present the model
-    main_window(root)
-
-    # GUI event handler
-    root.mainloop()
 
 if __name__ == "__main__":
-        #start('Config', 'Config_Pritam.yml')
     pass
         
     

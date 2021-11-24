@@ -12,12 +12,12 @@ from config import constants
 
 if __name__ == '__main__':
     base_directory = os.path.dirname(os.path.abspath(__file__))
-    verbose = True
-    if verbose:
+    Verbose = True
+    if Verbose:
         print("The Base Directory is:", base_directory)
 
     # Start the monitor
     configuration_directory = os.path.join(base_directory, 'config')
-    start(configuration_directory, 'configuration.yml', verbose)
-    if verbose:
+    start(configuration_directory, 'configuration.yml', Verbose)
+    if Verbose:
         print("Launching the StartMonitor")

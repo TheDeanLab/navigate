@@ -6,7 +6,7 @@ User:
 Saving:
   auto_save: False
   auto_save_waterfall: True
-  directory: ~\Desktop\
+  directory: /Users/S155475/Desktop
   filename_video: Video # Can be the same filename for video and photo
   filename_photo: Snap
   filename_waterfall: Waterfall
@@ -111,8 +111,8 @@ ZoomParameters:
       1x: 6.38,
       2x: 3.14,
       3x: 2.12,
-      4x: 1.609
-      5x: 1.255
+      4x: 1.609,
+      5x: 1.255,
       6x: 1.044
     }
 
@@ -135,7 +135,7 @@ FilterWheelParameters:
       Blocked6: 9
     }
 
-class SharedMemory_allocation:
+SharedMemoryAllocation:
   vol_per_buffer: 1
   num_data_buffers: 2  # increase for multiprocessing
   num_snap: 1  # interbuffer time limited by ao play

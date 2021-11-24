@@ -35,7 +35,7 @@ class Session:
     Stores variables and other classes that are common to several UI or instances of the code.
     """
 
-    def __init__(self, file=None):
+    def __init__(self, file_path=None, Verbose=False):
         """
         The class is prepared to load values from a Yaml file
         :param file: Path to the file where the config file is or a dictionary with the data to load.
@@ -44,168 +44,132 @@ class Session:
         super(Session, self).__init__()
         super().__setattr__('params', dict())
 
-        if file != None:
-            if type(file) == type('path'):
-                try:
-                    with open(file,'r') as f:
-                        data = yaml.load(f)
-                except:
-                    print('STRING YAML')
-                    print(file)
-                    data = yaml.load(file)
-                    print('LOADED STRING')
-            elif type(file) == type({}):
-                data = file
+        """
+        Load a Yaml file and stores the values in the object.
+        :param file: Path to the file where the config file is.
+        """
+        if file_path == None:
+            print("No file provided to load_yaml_config()")
+            sys.exit(1)
+        else:
+            # If the file exists, load it
+            if type(file_path) == type('path'):
+                with open(file_path) as f:
+                    try:
+                        config_data = yaml.load(f, Loader=yaml.FullLoader)
+                    except yaml.YAMLError as yaml_error:
+                        print(yaml_error)
 
-            # Set the attributes with the custom __setattr__
-            for d in data:
-                print(d)
-                #self.__setattr__(d, data[d])
+            if Verbose:
+                for data_iterator in config_data:
+                    print("Loaded:", data_iterator)
 
-    def __setattr__(self, key, value):
+        # Set the attributes with the custom __setattr__
+        for data_iterator in config_data:
+            self.__setattr__(data_iterator, config_data[data_iterator], Verbose)
+            if Verbose:
+                print("Set:", data_iterator)
+
+    def __setattr__(self, key, value, Verbose=False):
+        """
+        Custom setter for the attributes.
+        :param key: Name of the attribute.
+        :param value: Value of the attribute.
+        """
         if type(value) != type({}):
-            raise Exception('Everything passed to a session has to be a dictionary')
+            raise Exception('Everything passed to a session must be a dictionary')
+
         if key not in self.params:
             self.params[key] = dict()
-            self.__setattr__(key,value)
+            self.__setattr__(key, value)
+            if Verbose:
+                print("Added:", key)
+                print("Value:", value)
+
         else:
             for k in value:
                 if k in self.params[key]:
                     val = value[k]
+
                     # Update value
                     self.params[key][k] = value[k]
-                    self.emit(SIGNAL('Updated'))
+                    if Verbose:
+                        print("Updated:", key)
+                        print("Value:", val)
+                    #TODO: Update GUI?
+                    #self.emit(SIGNAL('Updated'))
+
                 else:
                     self.params[key][k] = value[k]
-                    self.emit(SIGNAL('New'))
+                    if Verbose:
+                        print("Updated:", key)
+                        print("Value:", value)
+                    #TODO: Update GUI?
+                    #self.emit(SIGNAL('New'))
 
             super(Session, self).__setattr__(k, value[k])
 
 
-        def load_yaml_config(file):
-            """
-            Loads a Yaml file and stores the values in the object.
-            :param file: Path to the file where the config file is.
-            """
-            if file == None:
-                print("No file provided to load_yaml_config()")
-                sys.exit(1)
-            else:
-                # If the file exists, load it
-                if type(file) == type('path'):
-                    try:
-                        with open(file,'r') as f:
-                            data = yaml.load(f)
-                    except:
-                        print('STRING YAML')
-                        print(file)
-                        data = yaml.load(file)
-                        print('LOADED STRING')
-                elif type(file) == type({}):
-                    data = file
-            return data
+    def __getattr__(self, item):
+        if item not in self.params:
+            return None
+        else:
+            return self.params[item]
 
+    def __str__(self):
+        """ Overrides the print(class).
+        :return: a Yaml-ready string.
+        """
 
-            '''
-            # Modified by Kevin Dean
-            def __init__(self, ConfigurationClass, SavingClass, verbose):
-            """
-            The class is prepared to load values from a Yaml file
-            :param file: Path to the file where the config file
-            is or a dictionary with the data to load.
-            """
-            
-            super(Session, self).__init__()
-            super().__setattr__('params', dict())
-            data = ConfigurationClass
-            self.verbose = verbose
-    
-            # Expects a dictionary to iterate through.
-            for d in data:
-                if self.verbose:
-                    print("Setting Attribute: ", d, "Value:", data[d])
-                self.__setattr__(d, data[d])
-                #TODO: Update View
-            '''
+        s = ''
+        for key in self.params:
+            s += '%s:\n' % key
+            for kkey in self.params[key]:
+                s += '  %s: %s\n' % (kkey, self.params[key][kkey])
+        return s
 
+    def serialize(self):
+        """
+        Function kept for compatibility. Now it only outputs the same information than print(class).
+        :return: string Yaml-ready.
+        """
+        return self.__str__()
 
-        '''def __setattr__(self, key, value):
-            if type(value) != type({}):
-                raise Exception('Everything passed to a session has to be a dictionary')
-            if key not in self.params:
-                self.params[key] = dict()
-                self.__setattr__(key, value)
-            else:
-                for k in value:
-                    if k in self.params[key]:
-                        val = value[k]
-                        self.params[key][k] = value[k]  # Update value
-                        self.emit(SIGNAL('Updated'))
-                    else:
-                        self.params[key][k] = value[k]
-                        self.emit(SIGNAL('New'))
-    
-                super(Session, self).__setattr__(k, value[k])
-    
-        def __getattr__(self, item):
-            if item not in self.params:
-                return None
-            else:
-                return self.params[item]
-    
-        def __str__(self):
-            """ Overrides the print(class).
-            :return: a Yaml-ready string.
-            """
-    
-            s = ''
-            for key in self.params:
-                s += '%s:\n' % key
-                for kkey in self.params[key]:
-                    s += '  %s: %s\n' % (kkey, self.params[key][kkey])
-            return s
-    
-        def serialize(self):
-            """
-            Function kept for compatibility. Now it only outputs the same information than print(class).
-            :return: string Yaml-ready.
-            """
-            return self.__str__()
-    
-        def getParams(self):
-            """Special class for setting up the ParamTree from PyQtGraph. It saves the iterating over all the variables directly
-            on the GUI.
-            :return: a list with the parameters and their types.
-            """
-            p = []
-            for k in self.params:
-                c = []
-                for m in self.params[k]:
-                    if type(self.params[k][m]) == type([]):
-                        s = {'name': m.replace('_', ' '), 'type': type(self.params[k][m]).__name__,
-                             'values': self.params[k][m]}
-                    elif type(self.params[k][m]).__name__ == 'NoneType':
-                        s = {'name': m.replace('_', ' '), 'type': "str", 'values': self.params[k][m]}
-                    elif type(self.params[k][m]).__name__ == 'long':
-                        s = {'name': m.replace('_', ' '), 'type': "float", 'values': self.params[k][m]}
-                    else:
-                        s = {'name': m.replace('_', ' '), 'type': type(self.params[k][m]).__name__,
-                             'value': self.params[k][m], 'decimals': 6}
-                    c.append(s)
-    
-                a = {'name': k.replace('_', ' '), 'type': 'group', 'children': c}
-                p.append(a)
-            return p
-    
-        def copy(self):
-            """Copies this class. Important not to overwrite the memory of a previously created session.
-            :return: a session exactly the same as this one.
-            """
-            return Session(self.params)
+    def getParams(self):
+        """Special class for setting up the ParamTree from PyQtGraph. It saves the iterating over all the variables directly
+        on the GUI.
+        :return: a list with the parameters and their types.
+        """
+        p = []
+        for k in self.params:
+            c = []
+            for m in self.params[k]:
+                if type(self.params[k][m]) == type([]):
+                    s = {'name': m.replace('_', ' '), 'type': type(self.params[k][m]).__name__,
+                         'values': self.params[k][m]}
+                elif type(self.params[k][m]).__name__ == 'NoneType':
+                    s = {'name': m.replace('_', ' '), 'type': "str", 'values': self.params[k][m]}
+                elif type(self.params[k][m]).__name__ == 'long':
+                    s = {'name': m.replace('_', ' '), 'type': "float", 'values': self.params[k][m]}
+                else:
+                    s = {'name': m.replace('_', ' '), 'type': type(self.params[k][m]).__name__,
+                         'value': self.params[k][m], 'decimals': 6}
+                c.append(s)
+
+            a = {'name': k.replace('_', ' '), 'type': 'group', 'children': c}
+            p.append(a)
+        return p
+
+    def copy(self):
+        """Copies this class. Important not to overwrite the memory of a previously created session.
+        :return: a session exactly the same as this one.
+        """
+        return Session(self.params)
 
 
 if __name__ == '__main__':
-    s = Session(file='../Config/Camera_defaults_example.yml')
+    """ Testing Section """
+    s = Session(file='../config/configuration.yml')
     print('NEW')
     s.Camera = {'new': 'New'}
     print('OLD')
@@ -224,4 +188,3 @@ if __name__ == '__main__':
     session2 = Session(ss)
     print('=========SESSION2=============')
     print(session2)
-    '''

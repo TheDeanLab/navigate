@@ -31,7 +31,7 @@ def start(configuration_directory, configuration_file, Verbose=False):
     :return: Window for the camera
     """
 
-    initialize_camera = False
+    initialize_camera = True
     initialize_GUI = False
 
     # Initialize the Session
@@ -73,44 +73,63 @@ def start(configuration_directory, configuration_file, Verbose=False):
     # Initialize Camera
     if initialize_camera == True:
         if Verbose:
-            print("Initializing Cameras")
+            print("Attempting to Initialize Cameras")
 
-        # Camera Imports
-        from model.camera.dcam import Dcam
-        from model.camera.dcam import Dcamapi
-
-        # Initialize Dcamapi
-        if Dcamapi.init() is not False:
-            n = Dcamapi.get_devicecount()
+        if session.CameraParameters['type'] == 'SyntheticCamera':
             if Verbose:
-                print("Found %d cameras" % n)
+                print("Initializing Synthetic Camera")
 
-            # Initialize the cameras
-            low_resolution_camera = Dcam(0)
-            high_resolution_camera = Dcam(1)
+            # Import the SyntheticCamera Class
+            from model.camera.synthetic_camera import Camera
 
-            # Confirm cameras are open, and set default parameters
-            if low_resolution_camera.dev_open() is not False:
-                low_resolution_camera.dcam_set_default_light_sheet_mode_parameters()
-            else:
-                print('-NG: low_resolution_camera.dev_open() fails with error {}'.format(low_resolution_camera.lasterr()))
-                sys.exit()
+            # Create an instance of the camera class with the CameraParameters
+            cam = Camera(session.CameraParameters)
 
-            if high_resolution_camera.dev_open() is not False:
-                high_resolution_camera.dcam_set_default_light_sheet_mode_parameters()
-            else:
-                print('-NG: high_resolution_camera.dev_open() fails with error {}'.format(high_resolution_camera.lasterr()))
-                sys.exit()
-
+        elif session.CameraParameters['type'] == 'HamamatsuCamera':
+            #TODO: Implement Hamamatsu Camera as a subclass of CameraBase
+            # Initialize Hamamatsu Camera
             if Verbose:
-                print("Cameras Initialized")
+                print("Initializing Hamamatsu Camera")
 
+            # Camera Imports
+            from model.camera.dcam import Dcam
+            from model.camera.dcam import Dcamapi
+
+            # Initialize Dcamapi
+            if Dcamapi.init() is not False:
+                n = Dcamapi.get_devicecount()
+                if Verbose:
+                    print("Found %d cameras" % n)
+
+                # Initialize the cameras
+                low_resolution_camera = Dcam(0)
+                high_resolution_camera = Dcam(1)
+
+                # Confirm cameras are open, and set default parameters
+                if low_resolution_camera.dev_open() is not False:
+                    low_resolution_camera.dcam_set_default_light_sheet_mode_parameters()
+                else:
+                    print('-NG: low_resolution_camera.dev_open() fails with error {}'.format(low_resolution_camera.lasterr()))
+                    sys.exit()
+
+                if high_resolution_camera.dev_open() is not False:
+                    high_resolution_camera.dcam_set_default_light_sheet_mode_parameters()
+                else:
+                    print('-NG: high_resolution_camera.dev_open() fails with error {}'.format(high_resolution_camera.lasterr()))
+                    sys.exit()
+
+                if Verbose:
+                    print("Cameras Initialized")
+
+            else:
+                print('-NG: Dcamapi.init() fails with error {}'.format(Dcamapi.lasterr()))
+                sys.exit()
         else:
-            print('-NG: Dcamapi.init() fails with error {}'.format(Dcamapi.lasterr()))
+            print("Camera Type Not Recognized - Initialization Failed")
             sys.exit()
     else:
         if Verbose:
-            print("Cameras not initialized")
+            print("Did not attempt to initialize the cameras")
         pass
 
 

@@ -120,7 +120,6 @@ class menubar(Menu):
 
 
 if __name__ == '__main__':
-        global root
         root = tk.Tk()
         Main_App(root)
         root.mainloop()

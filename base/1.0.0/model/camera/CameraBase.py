@@ -1,5 +1,5 @@
 """
-    UUTrack.Model.Cameras._skeleton.py
+    UUTrack.Model.CameraBase.py
     ==================================
     Camera class with the skeleton functions. Important to keep track of the methods that are
     exposed to the View. The class cameraBase should be subclassed when developing new Models.

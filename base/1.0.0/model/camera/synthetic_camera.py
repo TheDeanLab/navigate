@@ -8,7 +8,7 @@
 
 import time
 import numpy as np
-from .skeleton import CameraBase
+from .CameraBase import CameraBase
 
 class Camera(CameraBase):
     MODE_CONTINUOUS = 1

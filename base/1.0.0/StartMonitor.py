@@ -32,7 +32,7 @@ def start(configuration_directory, configuration_file, Verbose=False):
     """
 
     initialize_camera = True
-    initialize_GUI = False
+    initialize_GUI = True
 
     # Initialize the Session
     global Session

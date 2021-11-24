@@ -24,7 +24,7 @@ class settings_tab(ttk.Frame):
 
         #Gridding Major frames
         settings.channels_label_frame = channels_label_frame(settings)
-        settings.channels_label_frame.grid_columnconfigure(0, weight=1)
+        settings.channels_label_frame.grid_columnconfigure(0, weight=1) #Each of these is an attempt to get the labels lined up
         settings.channels_label_frame.grid_columnconfigure(1, weight=1)
         settings.channels_label_frame.grid_columnconfigure(2, weight=1)
         settings.channels_label_frame.grid_columnconfigure(3, weight=1)

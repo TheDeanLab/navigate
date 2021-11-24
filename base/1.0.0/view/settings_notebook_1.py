@@ -18,51 +18,109 @@ class settings_notebook(ttk.Notebook):
 
 class settings_tab(ttk.Frame):
     def __init__(settings, setntbk, *args, **kwargs):
+
         #Init Frame
         ttk.Frame.__init__(settings, setntbk, *args, **kwargs)
 
-        #Pulldown menu for laser
-        settings.laser_pulldown_frame = ttk.Frame(settings)
-        settings.laser_options = StringVar()
-        settings.laser_pull_down = ttk.Combobox(settings.laser_pulldown_frame, textvariable=settings.laser_options)
-        settings.laser_pull_down['values'] = ('a', 'f', 's', 'e')
-        settings.laser_pull_down.state(["readonly"]) #Makes it so the user cannot type a choice into combobox
-        settings.laser_pulldown_label = ttk.Label(settings.laser_pulldown_frame, text="Laser")
-        settings.laser_pulldown_label.grid(row=0, column=0, sticky="e")
-        settings.laser_pull_down.grid(row=0, column=1, sticky="w")
+        #Gridding Major frames
+        settings.channels_label_frame = channels_label_frame(settings)
+        settings.channels_label_frame.grid_columnconfigure(0, weight=1)
+        settings.channels_label_frame.grid_columnconfigure(1, weight=1)
+        settings.channels_label_frame.grid_columnconfigure(2, weight=1)
+        settings.channels_label_frame.grid_columnconfigure(3, weight=1)
+        settings.channels_label_frame.grid_rowconfigure(0, weight=1)
+        settings.channels_label_frame.grid(row=0,column=1, columnspan=3, sticky=(NSEW))
+        settings.channel_1_frame = channel_frame(settings, "1")
+        settings.channel_1_frame.grid(row=1,column=0, columnspan=4, sticky=(NSEW))
+        settings.channel_2_frame = channel_frame(settings, "2")
+        settings.channel_2_frame.grid(row=2,column=0, columnspan=4, sticky=(NSEW))
+        settings.channel_3_frame = channel_frame(settings, "3")
+        settings.channel_3_frame.grid(row=3,column=0, columnspan=4, sticky=(NSEW))
+        settings.channel_4_frame = channel_frame(settings, "4")
+        settings.channel_4_frame.grid(row=4,column=0, columnspan=4, sticky=(NSEW))
+        settings.channel_5_frame = channel_frame(settings, "5")
+        settings.channel_5_frame.grid(row=5,column=0, columnspan=4, sticky=(NSEW))
 
-        #Pulldown menu for filter wheel
-        settings.filterwheel_pulldown_frame = ttk.Frame(settings)
-        settings.filterwheel_options = StringVar()
-        settings.filterwheel_pull_down = ttk.Combobox(settings.filterwheel_pulldown_frame, textvariable=settings.filterwheel_options)
-        settings.filterwheel_pull_down['values'] = ('a', 'f', 's', 'e')
-        settings.filterwheel_pull_down.state(["readonly"]) #Makes it so the user cannot type a choice into combobox
-        settings.filterwheel_pulldown_label = ttk.Label(settings.filterwheel_pulldown_frame, text="Filterwheel")
-        settings.filterwheel_pulldown_label.grid(row=0, column=0, sticky="e")
-        settings.filterwheel_pull_down.grid(row=0, column=1, sticky="w")
 
-        #Spinbox for exposure time
-        settings.exp_time_spinbox_frame = ttk.Frame(settings)
-        settings.exp_time_spinval = StringVar() #Will be changed by spinbox buttons, but is can also be changed by functions. This value is shown in the entry
-        settings.exp_time_spinbox = ttk.Spinbox(
-            settings.exp_time_spinbox_frame, 
+'''
+Settings Tab Classes
+'''
+
+class channels_label_frame(ttk.Frame):
+    def __init__(chan_label_frame, settings_tab, *args, **kwargs):
+
+        #Init Frame
+        ttk.Frame.__init__(chan_label_frame, settings_tab, *args, **kwargs)
+
+        #Adding Labels to frame
+
+        #Laser Label
+        chan_label_frame.laser_label = ttk.Label(chan_label_frame, text='Laser')
+        chan_label_frame.laser_label.grid(row=0, column=0, sticky=(NSEW))
+
+        #FilterWheel Label
+        chan_label_frame.filterwheel_label = ttk.Label(chan_label_frame, text='Filterwheel')
+        chan_label_frame.filterwheel_label.grid(row=0, column=1, sticky=(NSEW))
+
+        #Exposure Time Label
+        chan_label_frame.exp_time_label = ttk.Label(chan_label_frame, text='Exposure Time in ms')
+        chan_label_frame.exp_time_label.grid(row=0, column=2, sticky=(NSEW))
+        
+class channel_frame(ttk.Frame):
+    def __init__(channel, settings_tab, num, *args, **kwargs):
+
+        #Init Frame
+        ttk.Frame.__init__(channel, settings_tab, *args, **kwargs)
+
+        #Creating checkbox
+        on_off = StringVar()
+        channel.chan_check = ttk.Checkbutton(
+            channel,
+            text='CH'+ num,
+            variable=on_off
+            #command=
+            #onvalue=
+            #offvalue=
+            #state=
+            #instate=
+        )
+        channel.chan_check.grid(row=0, column=0, sticky=(NSEW))
+
+        #Creating Dropdowns
+
+        #Laser
+        channel.laser_options = StringVar()
+        channel.laser_pull_down = ttk.Combobox(channel, textvariable=channel.laser_options)
+        channel.laser_pull_down['values'] = ('a', 'f', 's', 'e')
+        channel.laser_pull_down.state(["readonly"]) #Makes it so the user cannot type a choice into combobox
+        channel.laser_pull_down.grid(row=0, column=1, sticky=(NSEW))
+
+        #FilterWheel
+        channel.filterwheel_options = StringVar()
+        channel.filterwheel_pull_down = ttk.Combobox(channel, textvariable=channel.filterwheel_options)
+        channel.filterwheel_pull_down['values'] = ('a', 'f', 's', 'e')
+        channel.filterwheel_pull_down.state(["readonly"]) #Makes it so the user cannot type a choice into combobox
+        channel.filterwheel_pull_down.grid(row=0, column=2, sticky=(NSEW))
+        
+        #Exposure Time spinbox
+        channel.exp_time_spinval = StringVar() #Will be changed by spinbox buttons, but is can also be changed by functions. This value is shown in the entry
+        channel.exp_time_spinbox = ttk.Spinbox(
+            channel,
             from_=0, 
             to=5000.0, 
-            textvariable=settings.exp_time_spinval, #this holds the data in the entry
+            textvariable=channel.exp_time_spinval, #this holds the data in the entry
             increment=25, 
             width=9
             #TODO command= function from connector
         )
-        settings.exp_time_spinbox_label = ttk.Label(settings.exp_time_spinbox_frame, text='Exposure\nTime\nin ms')
-        settings.exp_time_spinbox_label.grid(row=0, column=0, sticky="e")
-        settings.exp_time_spinbox.grid(row=0, column=1, sticky='w')
-        
+        channel.exp_time_spinbox.grid(row=0, column=3, sticky=(NSEW))
 
-        #Gridding out frames for each piece
-        settings.laser_pulldown_frame.grid(row=0,column=0,sticky=(NSEW))
-        settings.filterwheel_pulldown_frame.grid(row=1,column=0,sticky=(NSEW))
-        settings.exp_time_spinbox_frame.grid(row=2,column=0,sticky=(NSEW))
 
+
+
+'''
+End of Settings Tab Classes
+'''
 
 
 

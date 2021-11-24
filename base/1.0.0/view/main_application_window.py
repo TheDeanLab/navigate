@@ -28,8 +28,8 @@ class Main_App(ttk.Frame):
                 #This starts the main window config, and makes sure that any child widgets can be resized with the window
                 mainapp.root = root
                 mainapp.root.title("Super Ultimate Multiscale Microscope of the FUTURE!")
-                program_directory=sys.path[0] #refers to script directory ie gets all the way down to view
-                mainapp.root.iconphoto(True, PhotoImage(file=os.path.join(program_directory, "icon\mic.png")))
+                #program_directory=sys.path[0] #refers to script directory ie gets all the way down to view
+                #mainapp.root.iconphoto(True, PhotoImage(file=os.path.join(program_directory, "icon\mic.png")))
                 mainapp.root.minsize(1400,700)
                 mainapp.root.columnconfigure(0,weight=1)
                 mainapp.root.rowconfigure(0,weight=1)
@@ -120,7 +120,6 @@ class menubar(Menu):
 
 
 if __name__ == '__main__':
-        global root
         root = tk.Tk()
         Main_App(root)
         root.mainloop()

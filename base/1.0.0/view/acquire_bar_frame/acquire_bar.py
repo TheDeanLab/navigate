@@ -2,6 +2,7 @@ from tkinter import *
 import tkinter as tk
 from tkinter import ttk
 from .acquire_popup import Acquire_PopUp
+#from controller.acq_bar.acq_bar_controller import acqbar_controller
 
 
 #Class for the acquisition bar found at the top of the main application window. Main function is to change acq setting and then call the acquisition top level window
@@ -35,6 +36,7 @@ class AcquireBar(ttk.Frame):
         AcqBar.pull_down = ttk.Combobox(AcqBar, textvariable=AcqBar.options)
         AcqBar.pull_down['values'] = ('Continuous Scan', 'Z-Stack', 'Single Acquisition', 'Projection')
         AcqBar.pull_down.state(["readonly"]) #Makes it so the user cannot type a choice into combobox
+        
 
         #Progess Bar: Current Acquitiions and Overall
         AcqBar.progBar_frame = ttk.Frame(AcqBar) #This is used to hold and grid the two progess bars.Now when this is loaded into Acbar the progress bars will follow
@@ -58,3 +60,6 @@ class AcquireBar(ttk.Frame):
         AcqBar.pull_down.grid(row=0, column=1, sticky=(NSEW))
         AcqBar.progBar_frame.grid(row=0, column=2, sticky=(NSEW))
         AcqBar.exit_btn.grid(row=0, column=3, sticky=(NSEW))
+
+        #Passing controller the setup frame
+        #acqbar_controller(AcqBar)

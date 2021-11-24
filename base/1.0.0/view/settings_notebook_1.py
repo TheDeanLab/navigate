@@ -1,5 +1,6 @@
 from tkinter import *
 from tkinter import ttk
+import numpy as np
 
 
 class settings_notebook(ttk.Notebook):
@@ -22,24 +23,31 @@ class settings_tab(ttk.Frame):
         #Init Frame
         ttk.Frame.__init__(settings, setntbk, *args, **kwargs)
 
+        #Channel Settings
         #Gridding Major frames
-        settings.channels_label_frame = channels_label_frame(settings)
+        settings.channel_main = ttk.Labelframe(settings, text='Channel Settings')
+        settings.channel_main.grid(row=0,column=0,sticky=(NSEW))
+        settings.channels_label_frame = channels_label_frame(settings.channel_main)
         settings.channels_label_frame.grid_columnconfigure(0, weight=1) #Each of these is an attempt to get the labels lined up
         settings.channels_label_frame.grid_columnconfigure(1, weight=1)
         settings.channels_label_frame.grid_columnconfigure(2, weight=1)
         settings.channels_label_frame.grid_columnconfigure(3, weight=1)
         settings.channels_label_frame.grid_rowconfigure(0, weight=1)
         settings.channels_label_frame.grid(row=0,column=1, columnspan=3, sticky=(NSEW))
-        settings.channel_1_frame = channel_frame(settings, "1")
+        settings.channel_1_frame = channel_frame(settings.channel_main, "1")
         settings.channel_1_frame.grid(row=1,column=0, columnspan=4, sticky=(NSEW))
-        settings.channel_2_frame = channel_frame(settings, "2")
+        settings.channel_2_frame = channel_frame(settings.channel_main, "2")
         settings.channel_2_frame.grid(row=2,column=0, columnspan=4, sticky=(NSEW))
-        settings.channel_3_frame = channel_frame(settings, "3")
+        settings.channel_3_frame = channel_frame(settings.channel_main, "3")
         settings.channel_3_frame.grid(row=3,column=0, columnspan=4, sticky=(NSEW))
-        settings.channel_4_frame = channel_frame(settings, "4")
+        settings.channel_4_frame = channel_frame(settings.channel_main, "4")
         settings.channel_4_frame.grid(row=4,column=0, columnspan=4, sticky=(NSEW))
-        settings.channel_5_frame = channel_frame(settings, "5")
+        settings.channel_5_frame = channel_frame(settings.channel_main, "5")
         settings.channel_5_frame.grid(row=5,column=0, columnspan=4, sticky=(NSEW))
+
+        #Stack Acquisition Settings
+        settings.stack_acq_frame = stack_acq_frame(settings)
+        settings.stack_acq_frame.grid(row=6, column=0,columnspan=4,sticky=(NSEW), pady=10)
 
 
 '''
@@ -114,6 +122,84 @@ class channel_frame(ttk.Frame):
             #TODO command= function from connector
         )
         channel.exp_time_spinbox.grid(row=0, column=3, sticky=(NSEW))
+
+class stack_acq_frame(ttk.Labelframe):
+    def __init__(stack_acq, settings_tab, *args, **kwargs):
+
+        #Init Frame
+        ttk.Labelframe.__init__(stack_acq, settings_tab, text='Stack Aquisition Settings', *args, **kwargs)
+
+        #Step Size Frame (Vertically oriented)
+        stack_acq.step_size_frame = ttk.Frame(stack_acq)
+        stack_acq.step_size_label = ttk.Label(stack_acq.step_size_frame, text='Step Size')
+        stack_acq.step_size_label.grid(row=0, column=0, sticky=(S))
+        stack_acq.step_size_spinval = StringVar()
+        stack_acq.step_size_spinbox = ttk.Spinbox(
+            stack_acq.step_size_frame,
+            from_=0, 
+            to=500.0, 
+            textvariable=stack_acq.step_size_spinval, #this holds the data in the entry
+            increment=0.5, 
+            width=14
+            #TODO command= function from connector
+        )
+        stack_acq.step_size_spinbox.grid(row=1, column=0, sticky=(N))
+
+        #Start Pos Frame (Vertically oriented)
+        stack_acq.start_pos_frame = ttk.Frame(stack_acq)
+        stack_acq.start_pos_label = ttk.Label(stack_acq.start_pos_frame, text='Start Pos')
+        stack_acq.start_pos_label.grid(row=0, column=0, sticky=(S))
+        stack_acq.start_pos_spinval = StringVar()
+        stack_acq.start_pos_spinbox = ttk.Spinbox(
+            stack_acq.start_pos_frame,
+            from_=0, 
+            to=500.0, 
+            textvariable=stack_acq.start_pos_spinval, #this holds the data in the entry
+            increment=0.5, 
+            width=14
+            #TODO command= function from connector
+        )
+        stack_acq.start_pos_spinbox.grid(row=1, column=0, sticky=(N))
+
+        #End Pos Frame (Vertically oriented)
+        stack_acq.end_pos_frame = ttk.Frame(stack_acq)
+        stack_acq.end_pos_label = ttk.Label(stack_acq.end_pos_frame, text='End Pos')
+        stack_acq.end_pos_label.grid(row=0, column=0, sticky=(S))
+        stack_acq.end_pos_spinval = StringVar()
+        stack_acq.end_pos_spinbox = ttk.Spinbox(
+            stack_acq.end_pos_frame,
+            from_=0, 
+            to=500.0, 
+            textvariable=stack_acq.end_pos_spinval, #this holds the data in the entry
+            increment=0.5, 
+            width=14
+            #TODO command= function from connector
+        )
+        stack_acq.end_pos_spinbox.state(['disabled']) #Starts it disabled
+        stack_acq.end_pos_spinbox.grid(row=1, column=0, sticky=(N))
+
+        #Slice Frame (Vertically oriented)
+        stack_acq.slice_frame = ttk.Frame(stack_acq)
+        stack_acq.slice_label = ttk.Label(stack_acq.slice_frame, text='Slice')
+        stack_acq.slice_label.grid(row=0, column=0, sticky=(S))
+        stack_acq.slice_spinval = StringVar() #Attempts to get slice value with
+        stack_acq.slice_spinbox = ttk.Spinbox(
+            stack_acq.slice_frame,
+            from_=0, 
+            to=500.0, 
+            textvariable=stack_acq.slice_spinval, #this holds the data in the entry
+            increment=0.5, 
+            width=14
+            #TODO command= function from connector
+        )
+        stack_acq.slice_spinbox.state(['disabled']) #Starts it disabled
+        stack_acq.slice_spinbox.grid(row=1, column=0, sticky=(N))
+
+        #Gridding Each Holder Frame
+        stack_acq.step_size_frame.grid(row=0, column=0, sticky=(NSEW))
+        stack_acq.start_pos_frame.grid(row=0, column=1, sticky=(NSEW))
+        stack_acq.end_pos_frame.grid(row=0, column=2, sticky=(NSEW))
+        stack_acq.slice_frame.grid(row=0, column=3, sticky=(NSEW))
 
 
 

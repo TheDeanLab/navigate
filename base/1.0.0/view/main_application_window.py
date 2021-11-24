@@ -13,10 +13,10 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import *
 from tkinter.constants import NSEW
-from settings_notebook_1 import settings_notebook as notebook_1
-from camera_waveform_notebook_2 import camera_waveform_notebook as notebook_2
-from stagecontrol_maxintensity_notebook_3 import stagecontrol_maxintensity_notebook as notebook_3
-from acquire_bar_frame.acquire_bar import AcquireBar
+from .settings_notebook_1 import settings_notebook as notebook_1
+from .camera_waveform_notebook_2 import camera_waveform_notebook as notebook_2
+from .stagecontrol_maxintensity_notebook_3 import stagecontrol_maxintensity_notebook as notebook_3
+from .acquire_bar_frame.acquire_bar import AcquireBar
 
 
 #Creates the frame that will hold the GUI content, its parent is the main window or root Tk object

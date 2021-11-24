@@ -7,7 +7,9 @@
         >>> config_file = 'config.yml'
         >>> startMonitor.start(config_dir,config_file)
 
-    The config file is passed to a :class:`~UUTrack.Model.Session` variable. That will be shared with the rest of the program. The session variable idea comes from programming websites, but is useful in other kind of programs as well.
+    The config file is passed to a :class:`~UUTrack.Model.Session` variable.
+    That will be shared with the rest of the program.
+    The session variable idea comes from programming websites, but is useful in other kind of programs as well.
 
     :copyright: 2017
 

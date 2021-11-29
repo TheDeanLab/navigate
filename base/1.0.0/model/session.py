@@ -35,7 +35,7 @@ class Session:
     Stores variables and other classes that are common to several UI or instances of the code.
     """
 
-    def __init__(self, file_path=None, Verbose=False):
+    def __init__(self, file_path=None, verbose=False):
         """
         The class is prepared to load values from a Yaml file
         :param file: Path to the file where the config file is or a dictionary with the data to load.
@@ -60,17 +60,17 @@ class Session:
                     except yaml.YAMLError as yaml_error:
                         print(yaml_error)
 
-            if Verbose:
+            if verbose:
                 for data_iterator in config_data:
                     print("Loaded:", data_iterator)
 
         # Set the attributes with the custom __setattr__
         for data_iterator in config_data:
-            self.__setattr__(data_iterator, config_data[data_iterator], Verbose)
-            if Verbose:
+            self.__setattr__(data_iterator, config_data[data_iterator], verbose)
+            if verbose:
                 print("Set:", data_iterator)
 
-    def __setattr__(self, key, value, Verbose=False):
+    def __setattr__(self, key, value, verbose=False):
         """
         Custom setter for the attributes.
         :param key: Name of the attribute.
@@ -82,7 +82,7 @@ class Session:
         if key not in self.params:
             self.params[key] = dict()
             self.__setattr__(key, value)
-            if Verbose:
+            if verbose:
                 print("Added:", key)
                 print("Value:", value)
 
@@ -93,7 +93,7 @@ class Session:
 
                     # Update value
                     self.params[key][k] = value[k]
-                    if Verbose:
+                    if verbose:
                         print("Updated:", key)
                         print("Value:", val)
                     #TODO: Update GUI?
@@ -101,7 +101,7 @@ class Session:
 
                 else:
                     self.params[key][k] = value[k]
-                    if Verbose:
+                    if verbose:
                         print("Updated:", key)
                         print("Value:", value)
                     #TODO: Update GUI?
@@ -135,7 +135,7 @@ class Session:
         """
         return self.__str__()
 
-    def getParams(self):
+    def get_parameters(self):
         """Special class for setting up the ParamTree from PyQtGraph. It saves the iterating over all the variables directly
         on the GUI.
         :return: a list with the parameters and their types.

@@ -11,7 +11,7 @@ import tkinter as tk
 from tkinter import ttk
 
 # Import Concurrency Packages
-import .controller.concurrency.concurrency_tools as ct
+import concurrency.concurrency_tools as ct
 
 # Import GUI Windows
 # from gui.main_window import MultiScope_MainGui

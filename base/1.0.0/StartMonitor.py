@@ -23,7 +23,7 @@ import tkinter as tk
 
 # from UUTrack.View.Monitor.monitorMain import monitorMain
 
-def start(configuration_directory, configuration_file, Verbose=False):
+def start(configuration_directory, configuration_file, verbose=False):
     """
     Starts the main window of the program and loads the appropriate configuration file.
     :param str configuration_directory: Folder where the config file is stored
@@ -35,16 +35,16 @@ def start(configuration_directory, configuration_file, Verbose=False):
     initialize_GUI = True
 
     # Initialize the Session
-    global Session
     config_path = os.path.join(configuration_directory, configuration_file)
-    if Verbose:
+    if verbose:
         print("The Configuration Path is:", config_path)
 
-    session = Session(config_path, Verbose)
+    global session
+    session = Session(config_path, verbose)
 
     # Initialize GUI
     if initialize_GUI:
-        if Verbose:
+        if verbose:
             print("Initializing GUI")
 
         # Starts the GUI event loop and presents gui to user
@@ -52,31 +52,31 @@ def start(configuration_directory, configuration_file, Verbose=False):
         root = tk.Tk()
 
         # Runs the view code which will call controller code to adjust and present the model
-        main_window(root)
+        main_window(root, session)
 
         # GUI event handler
         root.mainloop()
 
-    # Specify Saving Directory
-    if session.Saving['directory'] == '':
+    # Specify Root Saving Directory
+    if session.Saving['save_directory'] == '':
         # Default Saving Directory if not specified
-        savedir = os.path.join(base_dir, str(datetime.now().date()))
+        save_directory = base_dir
     else:
-        savedir = os.path.join(session.Saving['directory'], str(datetime.now().date()))
+        save_directory = session.Saving['save_directory']
 
-    if not os.path.exists(savedir):
-        os.makedirs(savedir)
+    if not os.path.exists(save_directory):
+        os.makedirs(save_directory)
 
     # Update the Session with the new save path
-    session.Saving = {'directory': savedir}
+    session.Saving = {'save_directory': save_directory}
 
     # Initialize Camera
     if initialize_camera == True:
-        if Verbose:
+        if verbose:
             print("Attempting to Initialize Cameras")
 
         if session.CameraParameters['type'] == 'SyntheticCamera':
-            if Verbose:
+            if verbose:
                 print("Initializing Synthetic Camera")
 
             # Import the SyntheticCamera Class
@@ -88,7 +88,7 @@ def start(configuration_directory, configuration_file, Verbose=False):
         elif session.CameraParameters['type'] == 'HamamatsuCamera':
             #TODO: Implement Hamamatsu Camera as a subclass of CameraBase
             # Initialize Hamamatsu Camera
-            if Verbose:
+            if verbose:
                 print("Initializing Hamamatsu Camera")
 
             # Camera Imports
@@ -98,7 +98,7 @@ def start(configuration_directory, configuration_file, Verbose=False):
             # Initialize Dcamapi
             if Dcamapi.init() is not False:
                 n = Dcamapi.get_devicecount()
-                if Verbose:
+                if verbose:
                     print("Found %d cameras" % n)
 
                 # Initialize the cameras
@@ -118,7 +118,7 @@ def start(configuration_directory, configuration_file, Verbose=False):
                     print('-NG: high_resolution_camera.dev_open() fails with error {}'.format(high_resolution_camera.lasterr()))
                     sys.exit()
 
-                if Verbose:
+                if verbose:
                     print("Cameras Initialized")
 
             else:
@@ -128,7 +128,7 @@ def start(configuration_directory, configuration_file, Verbose=False):
             print("Camera Type Not Recognized - Initialization Failed")
             sys.exit()
     else:
-        if Verbose:
+        if verbose:
             print("Did not attempt to initialize the cameras")
         pass
 

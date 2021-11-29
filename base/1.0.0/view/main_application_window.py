@@ -22,12 +22,13 @@ from .acquire_bar_frame.acquire_bar import AcquireBar
 #Creates the frame that will hold the GUI content, its parent is the main window or root Tk object
 class Main_App(ttk.Frame):
         #Takes a Tk object should be something like root = Tk() then root_window(root)
-        def __init__(mainapp, root, *args, **kwargs):
+
+        def __init__(mainapp, root, session, *args, **kwargs):
                 #Inits this class as a frame subclass with the root as its parent
                 ttk.Frame.__init__(mainapp, root, *args, **kwargs)
                 #This starts the main window config, and makes sure that any child widgets can be resized with the window
                 mainapp.root = root
-                mainapp.root.title("Super Ultimate Multiscale Microscope of the FUTURE!")
+                mainapp.root.title("Multiscale Axially Swept Light-Sheet Microscope")
                 program_directory=sys.path[0] #refers to script directory ie gets all the way down to view
                 #mainapp.root.iconphoto(True, PhotoImage(file=os.path.join(program_directory, "icon\mic.png")))
                 mainapp.root.minsize(1400,700)
@@ -98,10 +99,10 @@ class Main_App(ttk.Frame):
                 mainapp.rowconfigure(1,weight=1)
 
                 #Putting Notebooks into frames, tabs are held within the class of each notebook
-                mainapp.notebook_1 = notebook_1(mainapp.frame_left)
+                mainapp.notebook_1 = notebook_1(mainapp.frame_left, session)
                 mainapp.notebook_2 = notebook_2(mainapp.frame_top_right)
                 mainapp.notebook_3 = notebook_3(mainapp.frame_bottom_right)
-                mainapp.acqbar = AcquireBar(mainapp.top_frame, mainapp.root)
+                mainapp.acqbar = AcquireBar(mainapp.top_frame, mainapp.root, session)
 
 
 

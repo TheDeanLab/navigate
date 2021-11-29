@@ -1,24 +1,30 @@
 from tkinter import *
 from tkinter import ttk
+from tkinter.font import Font
+
 import numpy as np
 
 
 class settings_notebook(ttk.Notebook):
-    def __init__(setntbk, frame_left, *args, **kwargs):
+    def __init__(setntbk, frame_left, session, *args, **kwargs):
         #Init notebook
         ttk.Notebook.__init__(setntbk, frame_left, *args, **kwargs)
+
         #Putting notebook 1 into left frame
         setntbk.grid(row=0,column=0)
+
         #Creating the settings tab
-        setntbk.settings_tab = settings_tab(setntbk)
+        setntbk.settings_tab = settings_tab(setntbk, session)
+
         #Creating the advanced settings tab
         setntbk.adv_settings_tab = adv_settings_tab(setntbk)
+
         #Adding tabs to settings notebook
-        setntbk.add(setntbk.settings_tab, text='Settings',sticky=NSEW)
+        setntbk.add(setntbk.settings_tab, text='Settings', sticky=NSEW)
         setntbk.add(setntbk.adv_settings_tab, text='Advanced Settings', sticky=NSEW)
 
 class settings_tab(ttk.Frame):
-    def __init__(settings, setntbk, *args, **kwargs):
+    def __init__(settings, setntbk, session, *args, **kwargs):
 
         #Init Frame
         ttk.Frame.__init__(settings, setntbk, *args, **kwargs)
@@ -26,23 +32,26 @@ class settings_tab(ttk.Frame):
         #Channel Settings
         #Gridding Major frames
         settings.channel_main = ttk.Labelframe(settings, text='Channel Settings')
-        settings.channel_main.grid(row=0,column=0,sticky=(NSEW))
+        settings.channel_main.grid(row=0, column=0, sticky=(NSEW))
         settings.channels_label_frame = channels_label_frame(settings.channel_main)
-        settings.channels_label_frame.grid_columnconfigure(0, weight=1) #Each of these is an attempt to get the labels lined up
+
+        #Each of these is an attempt to get the labels lined up
+        settings.channels_label_frame.grid_columnconfigure(0, weight=1)
         settings.channels_label_frame.grid_columnconfigure(1, weight=1)
         settings.channels_label_frame.grid_columnconfigure(2, weight=1)
         settings.channels_label_frame.grid_columnconfigure(3, weight=1)
         settings.channels_label_frame.grid_rowconfigure(0, weight=1)
         settings.channels_label_frame.grid(row=0,column=1, columnspan=3, sticky=(NSEW))
-        settings.channel_1_frame = channel_frame(settings.channel_main, "1")
+
+        settings.channel_1_frame = channel_frame(settings.channel_main, "1", session)
         settings.channel_1_frame.grid(row=1,column=0, columnspan=4, sticky=(NSEW))
-        settings.channel_2_frame = channel_frame(settings.channel_main, "2")
+        settings.channel_2_frame = channel_frame(settings.channel_main, "2", session)
         settings.channel_2_frame.grid(row=2,column=0, columnspan=4, sticky=(NSEW))
-        settings.channel_3_frame = channel_frame(settings.channel_main, "3")
+        settings.channel_3_frame = channel_frame(settings.channel_main, "3", session)
         settings.channel_3_frame.grid(row=3,column=0, columnspan=4, sticky=(NSEW))
-        settings.channel_4_frame = channel_frame(settings.channel_main, "4")
+        settings.channel_4_frame = channel_frame(settings.channel_main, "4", session)
         settings.channel_4_frame.grid(row=4,column=0, columnspan=4, sticky=(NSEW))
-        settings.channel_5_frame = channel_frame(settings.channel_main, "5")
+        settings.channel_5_frame = channel_frame(settings.channel_main, "5", session)
         settings.channel_5_frame.grid(row=5,column=0, columnspan=4, sticky=(NSEW))
 
         #Stack Acquisition Settings
@@ -71,11 +80,11 @@ class channels_label_frame(ttk.Frame):
         chan_label_frame.filterwheel_label.grid(row=0, column=1, sticky=(NSEW))
 
         #Exposure Time Label
-        chan_label_frame.exp_time_label = ttk.Label(chan_label_frame, text='Exposure Time in ms')
+        chan_label_frame.exp_time_label = ttk.Label(chan_label_frame, text='Exposure Time (ms)')
         chan_label_frame.exp_time_label.grid(row=0, column=2, sticky=(NSEW))
         
 class channel_frame(ttk.Frame):
-    def __init__(channel, settings_tab, num, *args, **kwargs):
+    def __init__(channel, settings_tab, num, session, *args, **kwargs):
 
         #Init Frame
         ttk.Frame.__init__(channel, settings_tab, *args, **kwargs)
@@ -94,24 +103,35 @@ class channel_frame(ttk.Frame):
         )
         channel.chan_check.grid(row=0, column=0, sticky=(NSEW))
 
-        #Creating Dropdowns
-
-        #Laser
+        # Creating Dropdowns
+        # Lasers - Gets values from the configuration file and populates pulldown.
+        number_of_lasers = session.AcquisitionHardware['number_of_lasers']
+        laser_list = []
+        for i in range(number_of_lasers):
+            laser_wavelength = session.AcquisitionHardware['laser_'+str(i)+'_wavelength']
+            laser_list.append(laser_wavelength)
         channel.laser_options = StringVar()
         channel.laser_pull_down = ttk.Combobox(channel, textvariable=channel.laser_options)
-        channel.laser_pull_down['values'] = ('a', 'f', 's', 'e')
-        channel.laser_pull_down.state(["readonly"]) #Makes it so the user cannot type a choice into combobox
+        channel.laser_pull_down['values'] = laser_list
+        channel.laser_pull_down.state(["readonly"]) # Makes it so the user cannot type a choice into combobox
         channel.laser_pull_down.grid(row=0, column=1, sticky=(NSEW))
+        #TODO: Have it save the parameters to session.
 
-        #FilterWheel
+        # FilterWheel - Gets values from the configuration file and populates pulldown.
+        filter_dictionary = session.FilterWheelParameters['available_filters']
         channel.filterwheel_options = StringVar()
         channel.filterwheel_pull_down = ttk.Combobox(channel, textvariable=channel.filterwheel_options)
-        channel.filterwheel_pull_down['values'] = ('a', 'f', 's', 'e')
-        channel.filterwheel_pull_down.state(["readonly"]) #Makes it so the user cannot type a choice into combobox
+        channel.filterwheel_pull_down['values'] = list(filter_dictionary.keys())
+        channel.filterwheel_pull_down.state(["readonly"]) # Makes it so the user cannot type a choice into combobox
         channel.filterwheel_pull_down.grid(row=0, column=2, sticky=(NSEW))
+        #TODO: Have it save the parameters to session.
         
-        #Exposure Time spinbox
-        channel.exp_time_spinval = StringVar() #Will be changed by spinbox buttons, but is can also be changed by functions. This value is shown in the entry
+        # Exposure Time spinbox
+        # Will be changed by spinbox buttons, but is can also be changed by functions. This value is shown in the entry
+        channel.exp_time_spinval = StringVar()
+        # Set default exposure time in milliseconds
+        if channel.exp_time_spinval.get() == '':
+            channel.exp_time_spinval.set('200')
         channel.exp_time_spinbox = ttk.Spinbox(
             channel,
             from_=0, 
@@ -119,7 +139,7 @@ class channel_frame(ttk.Frame):
             textvariable=channel.exp_time_spinval, #this holds the data in the entry
             increment=25, 
             width=9
-            #TODO command= function from connector
+            #TODO command= function from connector.  Also, have it save parameters to session.
         )
         channel.exp_time_spinbox.grid(row=0, column=3, sticky=(NSEW))
 
@@ -127,13 +147,17 @@ class stack_acq_frame(ttk.Labelframe):
     def __init__(stack_acq, settings_tab, *args, **kwargs):
 
         #Init Frame
-        ttk.Labelframe.__init__(stack_acq, settings_tab, text='Stack Aquisition Settings', *args, **kwargs)
+        text_label = 'Stack Acquisition Settings (' + "\N{GREEK SMALL LETTER MU}" + 'm)'
+        ttk.Labelframe.__init__(stack_acq, settings_tab, text=text_label, *args, **kwargs)
 
         #Step Size Frame (Vertically oriented)
         stack_acq.step_size_frame = ttk.Frame(stack_acq)
         stack_acq.step_size_label = ttk.Label(stack_acq.step_size_frame, text='Step Size')
         stack_acq.step_size_label.grid(row=0, column=0, sticky=(S))
         stack_acq.step_size_spinval = StringVar()
+        # Set default step size to 160nm
+        if stack_acq.step_size_spinval.get() == '':
+            stack_acq.step_size_spinval.set('0.160')
         stack_acq.step_size_spinbox = ttk.Spinbox(
             stack_acq.step_size_frame,
             from_=0, 
@@ -150,6 +174,9 @@ class stack_acq_frame(ttk.Labelframe):
         stack_acq.start_pos_label = ttk.Label(stack_acq.start_pos_frame, text='Start Pos')
         stack_acq.start_pos_label.grid(row=0, column=0, sticky=(S))
         stack_acq.start_pos_spinval = StringVar()
+        # set default start value to 0 nm
+        if stack_acq.start_pos_spinval.get() == '':
+            stack_acq.start_pos_spinval.set('0')
         stack_acq.start_pos_spinbox = ttk.Spinbox(
             stack_acq.start_pos_frame,
             from_=0, 
@@ -166,6 +193,9 @@ class stack_acq_frame(ttk.Labelframe):
         stack_acq.end_pos_label = ttk.Label(stack_acq.end_pos_frame, text='End Pos')
         stack_acq.end_pos_label.grid(row=0, column=0, sticky=(S))
         stack_acq.end_pos_spinval = StringVar()
+        # Set default end position to 200 microns
+        if stack_acq.end_pos_spinval.get() == '':
+            stack_acq.end_pos_spinval.set('200')
         stack_acq.end_pos_spinbox = ttk.Spinbox(
             stack_acq.end_pos_frame,
             from_=0, 

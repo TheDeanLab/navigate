@@ -6,13 +6,20 @@ User:
 Saving:
   auto_save: False
   auto_save_waterfall: True
-  directory: /Users/S155475/Desktop
+  root_directory: /Users/S155475/Desktop
   filename_video: Video # Can be the same filename for video and photo
   filename_photo: Snap
   filename_waterfall: Waterfall
   filename_trajectory: Trajectory
   filename_log: Log
   max_memory: 800 # In megabytes
+  # These are filled by the GUI
+  save_directory:
+  user:
+  tissue:
+  celltype:
+  label:
+  date:
 
 AcquisitionHardware:
     hardware_type: NI
@@ -31,9 +38,15 @@ AcquisitionHardware:
     etl_right: ao3
 
     # lasers
-    laser_488: PXI6733/port0/line2
-    laser_561: PXI6733/port0/line3
-    laser_647: PXI6733/port0/line4
+    number_of_lasers : 3
+    laser_0_wavelength: 488nm
+    laser_0: PXI6733/port0/line2
+
+    laser_1_wavelength: 562nm
+    laser_1: PXI6733/port0/line3
+
+    laser_2_wavelength: 642nm
+    laser_2: PXI6733/port0/line4
 
     # shutters
     shutter_left: PXI6259/port0/line0

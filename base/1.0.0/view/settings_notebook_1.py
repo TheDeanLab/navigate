@@ -56,8 +56,11 @@ class settings_tab(ttk.Frame):
 
         #Stack Acquisition Settings
         settings.stack_acq_frame = stack_acq_frame(settings)
-        settings.stack_acq_frame.grid(row=6, column=0,columnspan=4,sticky=(NSEW), pady=10)
+        settings.stack_acq_frame.grid(row=5, column=0, columnspan=5, sticky=(NSEW), pady=10)
 
+        #Stack Cycling Settings
+        settings.stack_cycling_frame = stack_cycling_frame(settings)
+        settings.stack_cycling_frame.grid(row=6, column=0, columnspan=5, sticky=(NSEW), pady=10)
 
 '''
 Settings Tab Classes
@@ -154,6 +157,8 @@ class stack_acq_frame(ttk.Labelframe):
         stack_acq.step_size_frame = ttk.Frame(stack_acq)
         stack_acq.step_size_label = ttk.Label(stack_acq.step_size_frame, text='Step Size')
         stack_acq.step_size_label.grid(row=0, column=0, sticky=(S))
+
+
         stack_acq.step_size_spinval = StringVar()
         # Set default step size to 160nm
         if stack_acq.step_size_spinval.get() == '':
@@ -231,7 +236,24 @@ class stack_acq_frame(ttk.Labelframe):
         stack_acq.end_pos_frame.grid(row=0, column=2, sticky=(NSEW))
         stack_acq.slice_frame.grid(row=0, column=3, sticky=(NSEW))
 
+class stack_cycling_frame(ttk.Labelframe):
+    def __init__(stack_acq, settings_tab, *args, **kwargs):
 
+        #Init Frame
+        text_label = 'Laser Cycling Settings'
+        ttk.Labelframe.__init__(stack_acq, settings_tab, text=text_label, *args, **kwargs)
+
+        #Laser Cycling Frame (Vertically oriented)
+        stack_acq.cycling_frame = ttk.Frame(stack_acq)
+        stack_acq.cycling_options = StringVar()
+        stack_acq.cycling_pull_down = ttk.Combobox(stack_acq, textvariable=stack_acq.cycling_options)
+        stack_acq.cycling_pull_down['values'] = ['Per Z', 'Per Stack']
+        stack_acq.cycling_pull_down.current(0)
+        stack_acq.cycling_pull_down.state(["readonly"]) # Makes it so the user cannot type a choice into combobox
+        stack_acq.cycling_pull_down.grid(row=0, column=1, sticky=(NSEW))
+
+        #Gridding Each Holder Frame
+        stack_acq.cycling_frame.grid(row=0, column=0, sticky=(NSEW))
 
 
 '''

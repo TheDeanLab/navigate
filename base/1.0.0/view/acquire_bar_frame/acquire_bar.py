@@ -32,6 +32,7 @@ class AcquireBar(ttk.Frame):
         AcqBar.options = StringVar()
         AcqBar.pull_down = ttk.Combobox(AcqBar, textvariable=AcqBar.options)
         AcqBar.pull_down['values'] = ('Continuous Scan', 'Z-Stack', 'Single Acquisition', 'Projection')
+        AcqBar.pull_down.current(0)
         AcqBar.pull_down.state(["readonly"]) #Makes it so the user cannot type a choice into combobox
         
 

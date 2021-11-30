@@ -66,19 +66,25 @@ class Camera(CameraBase):
         return self.exposure
 
     def read_camera(self):
-        X,Y = self.get_size()
+        #TODO: Hacking this just to see if it works.  Need to fix it.
+        #X,Y = self.get_size()
+        X = 512
+        Y = 512
         moment = time.time()
-        sample = np.random.normal(size=(self.xsize, self.ysize))*100
-        sample = np.around(data).astype('uint16')
+        # sample = np.random.normal(size=(self.xsize, self.ysize))*100
+        sample = np.random.normal(size=(X, Y))*100
+        #sample = np.around(data).astype('uint16')
+        sample = np.around(sample).astype('uint16')
         elapsed = time.time() - moment
         try:
             # to simulate exposure time corrected for data generation delay
-            time.sleep(self.exposure.magnitude/1000-elapsed)
+            # time.sleep(self.exposure.magnitude/1000-elapsed)
+            pass
         except:
             time.sleep(0)
         return sample
 
-    def set_ROI(self,X,Y):
+    def set_ROI(self, X, Y):
         """
         Sets up the ROI. Not all cameras are 0-indexed, so this is an important
         place to define the proper ROI.

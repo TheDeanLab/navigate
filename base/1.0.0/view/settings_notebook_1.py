@@ -96,7 +96,7 @@ class channel_frame(ttk.Frame):
         on_off = StringVar()
         channel.chan_check = ttk.Checkbutton(
             channel,
-            text='CH'+ num,
+            text='CH' + num,
             variable=on_off
             #command=
             #onvalue=

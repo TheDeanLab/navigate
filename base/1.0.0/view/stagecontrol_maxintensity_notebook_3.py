@@ -79,8 +79,6 @@ class maximum_intensity_projection_tab(ttk.Frame):
         #TODO: Be able to change the channel number, load the data, and perform maximum intensity projection in parallel.
         #TODO: May need a button that specifies when to perform the maximum intensity projection.
 
-        #Gridding Each Holder Frame
-        stack_acq.cycling_frame.grid(row=0, column=0, sticky=(NSEW))
         # the figure that will contain the plot
         fig = Figure(figsize=(8, 3), dpi=100)
 

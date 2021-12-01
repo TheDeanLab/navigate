@@ -1,21 +1,19 @@
-FROM ubuntu:18.04
-LABEL author="Kevin Dean"
+# syntax=docker/dockerfile:1
 
-ENV DEBIAN_FRONTEND=noninteractive
+#FROM ubuntu:18.04
+#LABEL author="Kevin Dean"
+#ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update -y --fix-missing && \
-  apt-get upgrade -y && \
-  apt-get dist-upgrade -y && \
-  apt-get autoremove -y && \
-  apt-get update -y --fix-missing && \
-  apt-get upgrade -y
-RUN locale
-RUN apt-get install -y gcc g++ apt-utils wget gzip pigz pbzip2 zip software-properties-common make parallel pandoc git
+# Install miniconda
+#RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+# RUN bash Miniconda3-latest-Linux-x86_64.sh -b -p /miniconda
+# ENV PATH=$PATH:/miniconda/condabin:/miniconda/bin
 
-RUN while parallel --citation; do echo "will cite"; done
+FROM python:3.7-alpine AS base
+WORKDIR /1.0.0
+RUN pip3 install -r requirements.txt
 
-ENV LC_ALL=C.UTF-8
-ENV LANG=C.UTF-8
-
-VOLUME /var/tmp/results
-VOLUME /var/tmp/data
+# Install miniconda environment
+#RUN conda create -n ASLM python=3.7.11
+#RUN conda activate ASLM
+#RUN python -m pip install -r requirements.txt

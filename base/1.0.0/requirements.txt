@@ -1,9 +1,11 @@
-name: ASLM
-channels:
-    -defaults
-dependencies:
-    -blas 1.0 mkl
-
-
-numpy==1.17.0
-
+matplotlib==3.4.3
+matplotlib-inline==0.1.2
+PyYAML==5.4.1
+pyserial==3.5
+PIPython==2.6.0.1
+pretty-errors==1.2.25
+nidaqmx==0.5.7
+tifffile==2021.8.30
+scipy==1.7.3
+pyusb==1.2.1
+opencv-python==4.5.4.60

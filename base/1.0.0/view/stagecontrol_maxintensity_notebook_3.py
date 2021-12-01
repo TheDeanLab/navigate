@@ -2,6 +2,11 @@ from tkinter import *
 from tkinter import ttk
 from tkinter.font import Font
 
+from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
+
+from model.camera.synthetic_camera import Camera as camera
 
 class stagecontrol_maxintensity_notebook(ttk.Notebook):
     def __init__(stagecontrol_maxintensity, frame_bot_right, *args, **kwargs):
@@ -69,7 +74,40 @@ class stage_control_tab(ttk.Frame):
 class maximum_intensity_projection_tab(ttk.Frame):
     def __init__(maximum_intensity_projection_tab, note3, *args, **kwargs):
         #Init Frame
-        ttk.Frame.__init__(maximum_intensity_projection_tab, note3, *args, **kwargs) 
+        ttk.Frame.__init__(maximum_intensity_projection_tab, note3, *args, **kwargs)
+
+        #TODO: Be able to change the channel number, load the data, and perform maximum intensity projection in parallel.
+        #TODO: May need a button that specifies when to perform the maximum intensity projection.
+
+        #Gridding Each Holder Frame
+        stack_acq.cycling_frame.grid(row=0, column=0, sticky=(NSEW))
+        # the figure that will contain the plot
+        fig = Figure(figsize=(8, 3), dpi=100)
+
+        # Generate Waveform
+        synthetic_image = camera.read_camera(camera)
+
+        # XY
+        plot1 = fig.add_subplot(131, title='XY')
+        plot1.axis('off')
+        plot1.imshow(synthetic_image, cmap='gray')
+
+        # YZ
+        plot2 = fig.add_subplot(132, title='YZ')
+        plot2.axis('off')
+        plot2.imshow(synthetic_image, cmap='gray')
+
+        # XZ
+        plot3 = fig.add_subplot(133, title='XZ')
+        plot3.axis('off')
+        plot3.imshow(synthetic_image, cmap='gray')
+
+        # creating the Tkinter canvas containing the Matplotlib figure
+        canvas = FigureCanvasTkAgg(fig, master=maximum_intensity_projection_tab)
+        canvas.draw()
+
+        # placing the canvas on the Tkinter window
+        canvas.get_tk_widget().pack()
 
 '''
 Stage Control Tab Frame Classes

@@ -16,3 +16,20 @@ Adopts an MVC architecture for microscope control. Includes key code contributio
 Includes functionality from Auto-Docker for remote building and testing of Docker images from a Docker build file (Dockerfile) and a unit test file (unittest.yml). Allows users to build, test and maintain Docker images outside of firewalls, proxies and machine limitations. Additionally, it is a storage repository, and can act as a functional archive and version control for all your Dockerfile recipes (though not the images themselves). Pipeline was developed by BICF from funding provided by **Cancer Prevention and Research Institute of Texas (RP150596)**.
 
 [![Auto-docker DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4555891.svg)](https://doi.org/10.5281/zenodo.4555891)
+
+### Equipment
+Laser source - Omicron LightHUB Ultra.  Requires ACC operating mode with analog modulation enabled for 488 nm and 642 nm lasers.  561, which operates separately, requires the mixed modulation mode (Obis).
+Sample Scanning System - L-509.20DG10.  Has a unidirectional repeatability of 100 nm, bidirectional repeatablility of 2 microns, and a minimum incremental motion of 100 nm.  This is borderline too coarse.
+
+### Installation with Conda
+conda create -n ASLM python=3.7.11
+conda activate ASLM
+python -m pip install -r requirements.txt
+
+### Hardware Dependencies
+* DLL for Dynamixel Servo Motor
+
+### Authors
+Kevin Dean
+Dax Collision
+Sampath Rampuri

@@ -45,12 +45,16 @@ class settings_tab(ttk.Frame):
 
         settings.channel_1_frame = channel_frame(settings.channel_main, "1", session)
         settings.channel_1_frame.grid(row=1,column=0, columnspan=4, sticky=(NSEW))
+
         settings.channel_2_frame = channel_frame(settings.channel_main, "2", session)
         settings.channel_2_frame.grid(row=2,column=0, columnspan=4, sticky=(NSEW))
+
         settings.channel_3_frame = channel_frame(settings.channel_main, "3", session)
         settings.channel_3_frame.grid(row=3,column=0, columnspan=4, sticky=(NSEW))
+
         settings.channel_4_frame = channel_frame(settings.channel_main, "4", session)
         settings.channel_4_frame.grid(row=4,column=0, columnspan=4, sticky=(NSEW))
+
         settings.channel_5_frame = channel_frame(settings.channel_main, "5", session)
         settings.channel_5_frame.grid(row=5,column=0, columnspan=4, sticky=(NSEW))
 

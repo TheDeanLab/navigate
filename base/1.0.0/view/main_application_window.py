@@ -13,8 +13,8 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import *
 from tkinter.constants import NSEW
-from .settings_notebook_1 import settings_notebook as notebook_1
-from .camera_waveform_notebook_2 import camera_waveform_notebook as notebook_2
+from .settings_notebook import settings_notebook as notebook_1
+from .camera_notebook import camera_waveform_notebook as notebook_2
 from .stagecontrol_maxintensity_notebook_3 import stagecontrol_maxintensity_notebook as notebook_3
 from .acquire_bar_frame.acquire_bar import AcquireBar
 
@@ -30,7 +30,7 @@ class Main_App(ttk.Frame):
                 mainapp.root = root
                 mainapp.root.title("Multiscale Axially Swept Light-Sheet Microscope")
                 program_directory=sys.path[0] #refers to script directory ie gets all the way down to view
-                #mainapp.root.iconphoto(True, PhotoImage(file=os.path.join(program_directory, "icon\mic.png")))
+                mainapp.root.iconphoto(True, PhotoImage(file=os.path.join(program_directory, "view", "icon", "mic.png")))
                 mainapp.root.minsize(1400,700)
                 mainapp.root.columnconfigure(0,weight=1)
                 mainapp.root.rowconfigure(0,weight=1)

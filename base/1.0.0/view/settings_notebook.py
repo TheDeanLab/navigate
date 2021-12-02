@@ -9,6 +9,7 @@ from view.settings_subframes.channel_settings import channels_label_frame, chann
 from view.settings_subframes.stack_settings import stack_acq_frame
 from view.settings_subframes.stack_cycling_settings import stack_cycling_frame
 from view.settings_subframes.stack_timepoint_settings import stack_timepoint_frame
+from view.settings_subframes.multipoint_settings import multipoint_frame, multipoint_list
 
 class settings_notebook(ttk.Notebook):
     def __init__(setntbk, frame_left, session, *args, **kwargs):
@@ -75,10 +76,13 @@ class settings_tab(ttk.Frame):
         settings.stack_timepoint_frame = stack_timepoint_frame(settings)
         settings.stack_timepoint_frame.grid(row=6, column=0, columnspan=5, sticky=(NSEW), pady=10)
 
-        #Multipoint Settings
-        #TODO: Add multipoint frame.
+        #Multipoint Enable
+        settings.multipoint_frame = multipoint_frame(settings)
+        settings.multipoint_frame.grid(row=7, column=0, columnspan=5, sticky=(NSEW), pady=10)
 
-
+        #Multipoint List
+        settings.multipoint_list = multipoint_list(settings)
+        settings.multipoint_list.grid(row=8, column=0, columnspan=5, sticky=(NSEW), pady=10)
 
 class adv_settings_tab(ttk.Frame):
     def __init__(adv_settings, setntbk, *args, **kwargs):

@@ -3,7 +3,7 @@ from tkinter import ttk
 from tkinter.font import Font
 import numpy as np
 
-class camera_roi_frame(ttk.Frame):
+class camera_mode_frame(ttk.Frame):
     def __init__(self, cam_settings, *args, **kwargs):
 
         #Init Frame
@@ -28,3 +28,12 @@ class camera_roi_label_frame(ttk.Frame):
         self.laser_label = ttk.Label(self, text='Camera ROI')
         self.laser_label.grid(row=0, column=0, sticky=(NSEW))
 
+class camera_mode_label_frame(ttk.Frame):
+    def __init__(self, settings_tab, *args, **kwargs):
+
+        #Init Frame
+        ttk.Frame.__init__(self, settings_tab, *args, **kwargs)
+
+        #Adding Labels to frame
+        self.laser_label = ttk.Label(self, text='Camera Readout Mode')
+        self.laser_label.grid(row=0, column=0, sticky=(NSEW))

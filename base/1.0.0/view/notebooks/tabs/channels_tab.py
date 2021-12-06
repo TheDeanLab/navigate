@@ -28,6 +28,7 @@ class channels_tab(ttk.Frame):
         self.channels_label_frame.grid_columnconfigure(1, weight=1)
         self.channels_label_frame.grid_columnconfigure(2, weight=1)
         self.channels_label_frame.grid_columnconfigure(3, weight=1)
+
         self.channels_label_frame.grid_rowconfigure(0, weight=1)
         self.channels_label_frame.grid(row=0,column=1, columnspan=3, sticky=(NSEW))
 

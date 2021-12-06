@@ -8,15 +8,18 @@ so that it would be easier to keep track of inheritances. Once you have the pare
 class definition. For example for class Main_App(ttk.Frame) the parent to Main_App is a frame and its name is root. I also used
 the name of the class instead of self to make things easier to read. So for Main_App self is now mainapp.
 '''
+# Import Standard Libraries
 import sys, os
 import tkinter as tk
 from tkinter import ttk
 from tkinter import *
 from tkinter.constants import NSEW
-from .settings_notebook import settings_notebook as notebook_1
-from .camera_notebook import camera_waveform_notebook as notebook_2
-from .stagecontrol_maxintensity_notebook_3 import stagecontrol_maxintensity_notebook as notebook_3
-from .acquire_bar_frame.acquire_bar import AcquireBar
+
+# Import Notebooks
+from .notebooks.settings_notebook import settings_notebook as notebook_1
+from .notebooks.camera_notebook import camera_waveform_notebook as notebook_2
+from .notebooks.stagecontrol_maxintensity_notebook import stagecontrol_maxintensity_notebook as notebook_3
+from .notebooks.acquire_bar_frame.acquire_bar import AcquireBar
 
 
 #Creates the frame that will hold the GUI content, its parent is the main window or root Tk object

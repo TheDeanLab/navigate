@@ -3,7 +3,7 @@ from tkinter import ttk
 from tkinter.font import Font
 
 import numpy as np
-from view.tabs.camera_settings.camera_roi import camera_roi_frame, camera_roi_label_frame
+from view.notebooks.tabs.camera_settings.camera_roi import camera_roi_frame, camera_roi_label_frame
 
 class camera_settings_tab(ttk.Frame):
     def __init__(self, setntbk, session, *args, **kwargs):

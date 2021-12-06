@@ -4,11 +4,11 @@ from tkinter.font import Font
 
 import numpy as np
 
-from view.tabs.channels.channel_settings import channels_label_frame, channel_frame
-from view.tabs.channels.stack_settings import stack_acq_frame
-from view.tabs.channels.stack_cycling_settings import stack_cycling_frame
-from view.tabs.channels.stack_timepoint_settings import stack_timepoint_frame
-from view.tabs.channels.multipoint_settings import multipoint_frame, multipoint_list
+from view.notebooks.tabs.channels.channel_settings import channels_label_frame, channel_frame
+from view.notebooks.tabs.channels.stack_settings import stack_acq_frame
+from view.notebooks.tabs.channels.stack_cycling_settings import stack_cycling_frame
+from view.notebooks.tabs.channels.stack_timepoint_settings import stack_timepoint_frame
+from view.notebooks.tabs.channels.multipoint_settings import multipoint_frame, multipoint_list
 
 
 class channels_tab(ttk.Frame):

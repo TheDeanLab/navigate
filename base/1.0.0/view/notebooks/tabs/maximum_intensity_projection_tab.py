@@ -7,7 +7,7 @@ from tkinter.font import Font
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
-from model.camera.synthetic_camera import Camera as camera
+from model.camera.SyntheticCamera import Camera as camera
 
 
 class maximum_intensity_projection_tab(ttk.Frame):

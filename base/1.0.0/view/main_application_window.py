@@ -26,7 +26,7 @@ from .notebooks.acquire_bar_frame.acquire_bar import AcquireBar
 class Main_App(ttk.Frame):
         #Takes a Tk object should be something like root = Tk() then root_window(root)
 
-        def __init__(mainapp, root, session, *args, **kwargs):
+        def __init__(mainapp, root, session, cam, *args, **kwargs):
                 #Inits this class as a frame subclass with the root as its parent
                 ttk.Frame.__init__(mainapp, root, *args, **kwargs)
                 #This starts the main window config, and makes sure that any child widgets can be resized with the window

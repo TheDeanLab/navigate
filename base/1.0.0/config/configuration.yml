@@ -53,7 +53,7 @@ AcquisitionHardware:
     shutter_right: PXI6259/port2/line0
 
 CameraParameters:
-  type: SyntheticCamera #HamamatsuOrca or SyntheticCamera
+  type: HamamatsuOrca #HamamatsuOrca or SyntheticCamera
   number_of_cameras: 2
   x_pixels: 2048
   y_pixels: 2048
@@ -69,8 +69,7 @@ CameraParameters:
   trigger_polarity: 2  # positive pulse
   trigger_source: 2  # external
   camera_line_interval: 0.000075
-  camera_exposure_time: 0.01
-  exposure_time: 200
+  camera_exposure_time: 200 # in ms
   ASLM_from_volt: 0  # first voltage applied at remote mirror
   ASLM_to_volt: 1  # voltage applied at remote mirror at the end of sawtooth
   ASLM_current_volt: 0  # current voltage applied to remote mirror

@@ -8,15 +8,20 @@ from view.notebooks.tabs.stage_control_tab import stage_control_tab
 from view.notebooks.tabs.maximum_intensity_projection_tab import maximum_intensity_projection_tab
 
 class stagecontrol_maxintensity_notebook(ttk.Notebook):
-    def __init__(stagecontrol_maxintensity, frame_bot_right, *args, **kwargs):
+    def __init__(stagecontrol_maxintensity, frame_bot_right, session, verbose, *args, **kwargs):
+
         #Init notebook
         ttk.Notebook.__init__(stagecontrol_maxintensity, frame_bot_right, *args, **kwargs)
+
         #Putting notebook 3 into bottom right frame
         stagecontrol_maxintensity.grid(row=0,column=0)
+
         #Creating Stage Control Tab
         stagecontrol_maxintensity.stage_control_tab = stage_control_tab(stagecontrol_maxintensity)
+
         #Creating Max intensity projection Tab
         stagecontrol_maxintensity.maximum_intensity_projection_tab = maximum_intensity_projection_tab(stagecontrol_maxintensity)
+
         #Adding tabs to stagecontrol_maxintensity notebook
         stagecontrol_maxintensity.add(stagecontrol_maxintensity.stage_control_tab, text='Stage Control', sticky=NSEW)
         stagecontrol_maxintensity.add(stagecontrol_maxintensity.maximum_intensity_projection_tab, text='MIPs', sticky=NSEW)

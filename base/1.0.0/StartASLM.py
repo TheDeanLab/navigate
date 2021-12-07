@@ -75,7 +75,7 @@ def start(configuration_directory, configuration_file, verbose=False):
     root = tk.Tk()
 
     # Runs the view code which will call controller code to adjust and present the model
-    main_window(root, session, cam)
+    main_window(root, session, cam, verbose)
 
     # GUI event handler
     root.mainloop()

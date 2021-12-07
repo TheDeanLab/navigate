@@ -9,7 +9,7 @@ class definition. For example for class Main_App(ttk.Frame) the parent to Main_A
 the name of the class instead of self to make things easier to read. So for Main_App self is now mainapp.
 '''
 # Import Standard Libraries
-import sys, os
+import os
 import tkinter as tk
 from tkinter import ttk
 from tkinter import *
@@ -26,9 +26,10 @@ from .notebooks.acquire_bar_frame.acquire_bar import AcquireBar
 class Main_App(ttk.Frame):
         #Takes a Tk object should be something like root = Tk() then root_window(root)
 
-        def __init__(mainapp, root, session, cam, *args, **kwargs):
+        def __init__(mainapp, root, session, cam, verbose, *args, **kwargs):
                 #Inits this class as a frame subclass with the root as its parent
                 ttk.Frame.__init__(mainapp, root, *args, **kwargs)
+
                 #This starts the main window config, and makes sure that any child widgets can be resized with the window
                 mainapp.root = root
                 mainapp.root.title("Multiscale Axially Swept Light-Sheet Microscope")
@@ -102,10 +103,10 @@ class Main_App(ttk.Frame):
                 mainapp.rowconfigure(1,weight=1)
 
                 #Putting Notebooks into frames, tabs are held within the class of each notebook
-                mainapp.notebook_1 = notebook_1(mainapp.frame_left, session)
-                mainapp.notebook_2 = notebook_2(mainapp.frame_top_right)
-                mainapp.notebook_3 = notebook_3(mainapp.frame_bottom_right)
-                mainapp.acqbar = AcquireBar(mainapp.top_frame, mainapp.root, session)
+                mainapp.notebook_1 = notebook_1(mainapp.frame_left, session, verbose)
+                mainapp.notebook_2 = notebook_2(mainapp.frame_top_right, session, verbose)
+                mainapp.notebook_3 = notebook_3(mainapp.frame_bottom_right, session, verbose)
+                mainapp.acqbar = AcquireBar(mainapp.top_frame, mainapp.root, session, verbose)
 
 
 

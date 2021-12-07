@@ -155,3 +155,9 @@ SharedMemoryAllocation:
   bytes_per_data_buffer: images_per_buffer * 6000 * 4000 * 2
   bytes_per_preview_buffer: bytes_per_data_buffer * 3
 
+MicroscopeState:
+  image_mode: Continuous
+  stack_cycling_mode: dummy_value
+  save_data: 0
+  timepoints: 1
+  stack_pause: 0

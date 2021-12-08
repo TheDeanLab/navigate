@@ -48,7 +48,7 @@ class channels_tab(ttk.Frame):
         self.channel_5_frame.grid(row=5, column=0, columnspan=4, sticky=(NSEW))
 
         #Stack Acquisition Settings
-        self.stack_acq_frame = stack_acq_frame(self)
+        self.stack_acq_frame = stack_acq_frame(self, session, verbose)
         self.stack_acq_frame.grid(row=5, column=0, columnspan=5, sticky=(NSEW), pady=10)
 
         #Stack Cycling Settings

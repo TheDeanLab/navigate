@@ -71,7 +71,6 @@ class stack_timepoint_frame(ttk.Frame):
             textvariable=stack_timepoint_label_frame.exp_time_spinval, #this holds the data in the entry
             increment=1,
             width=9
-            #TODO command= function from connector.  Also, have it save parameters to session.
         )
         stack_timepoint_label_frame.exp_time_spinbox.grid(row=1, column=input_position, sticky=(NSEW))
 
@@ -98,7 +97,6 @@ class stack_timepoint_frame(ttk.Frame):
             textvariable=stack_timepoint_label_frame.stack_acq_spinval, #this holds the data in the entry
             increment=25,
             width=9
-            #TODO command= function from connector.  Also, have it save parameters to session.
         )
         stack_timepoint_label_frame.stack_acq_spinval.grid(row=2, column=input_position, sticky=(NSEW))
         stack_timepoint_label_frame.stack_acq_spinval.state(['disabled']) #Starts it disabled

@@ -161,3 +161,4 @@ MicroscopeState:
   save_data: 0
   timepoints: 1
   stack_pause: 0
+  step_size: 1

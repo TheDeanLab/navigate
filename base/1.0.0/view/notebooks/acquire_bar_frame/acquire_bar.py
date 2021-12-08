@@ -6,7 +6,7 @@ from .acquire_popup import Acquire_PopUp
 
 #Class for the acquisition bar found at the top of the main application window.
 #Main function is to change acq setting and then call the acquisition top level window
-from view.notebooks.tabs.channels.stack_cycling_settings.stack_cycling_frame import cycling_options
+#BROKE: from view.notebooks.tabs.channels.stack_cycling_settings.stack_cycling_frame import cycling_options
 
 class AcquireBar(ttk.Frame):
 
@@ -50,7 +50,7 @@ class AcquireBar(ttk.Frame):
         # call_popup = detect_microscope_save_and_acquisition_state(session, verbose)
 
         #Acquire Button
-        AcqBar.acquire_btn = ttk.Button(AcqBar, text="Acquire", command=call_popup(session, verbose))
+        AcqBar.acquire_btn = ttk.Button(AcqBar, text="Acquire", command=Acquire_PopUp(root, session))
 
         #Read Only Pulldown menu: continuous, z-stack, single acquisition, projection.
         AcqBar.options = StringVar()

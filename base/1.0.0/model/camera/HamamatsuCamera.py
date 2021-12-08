@@ -1,5 +1,5 @@
 """
-Hamamatsu Cameara Class
+Hamamatsu Camera Class
 
 Model class for controlling Hamamatsu cameras via the DCAM-API. At the time of writing this class,
 little documentation on the DCAM-API was available. Hamamatsu has a different time schedule regarding support of

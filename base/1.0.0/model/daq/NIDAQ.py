@@ -1,61 +1,56 @@
-''' Creates and allows control of waveform generation '''
+"""
+NI DAQ Class
+
+Model class for controlling National Instruments DAQ devices.
+
+Adopted and modified from mesoSPIM.
+
+"""
+# Standard Imports
 import os
 import numpy as np
 import csv
 import time
 
-''' National Instruments Imports '''
+# Third Party Imports
 import nidaqmx
 from nidaqmx.constants import AcquisitionType, TaskMode
 from nidaqmx.constants import LineGrouping, DigitalWidthUnits
 from nidaqmx.types import CtrTime
 
-from .config import constants
-from waveforms import single_pulse, tunable_lens_ramp, sawtooth, square, dc_value
+# Local Imports
+from waveforms import *
 
-class WaveFormGenerator():
-    '''
-    This class contains the microscope state
-    Any access to this global state should only be done via signals sent by
-    the responsible class for actually causing that state change in hardware.
-    '''
-
-    def __init__(self, parent):
-        super().__init__()
-        self.cfg = parent.cfg
-        self.parent = parent
+class NIDAQ(DAQBase):
+    def __init__(self, session, verbose):
         self.verbose = True
-
-        #TODO: Must get state from parent
-        # self.state = multiscale_StateSingleton()
 
         #TODO: Load the ETL configuration file.
         # Will need to move the ETL configuration file to the config folder
-        cfg_file = self.cfg.startup['ETL_cfg_file']
-        self.state['ETL_cfg_file'] = cfg_file
+        cfg_file = session.StartupParameters['ETL_cfg_file']
         self.update_etl_parameters_from_csv(cfg_file, self.state['laser'], self.state['zoom'])
 
         # Specify the Galvo Waveform Parameters
-        self.state['galvo_l_amplitude'] = self.cfg.startup['galvo_l_amplitude']
-        self.state['galvo_r_amplitude'] = self.cfg.startup['galvo_r_amplitude']
-        self.state['galvo_l_frequency'] = self.cfg.startup['galvo_l_frequency']
-        self.state['galvo_r_frequency'] = self.cfg.startup['galvo_r_frequency']
-        self.state['galvo_l_offset'] = self.cfg.startup['galvo_l_offset']
-        self.state['galvo_r_offset'] = self.cfg.startup['galvo_r_offset']
+        self.state['galvo_l_amplitude'] = session.StartupParameters['galvo_l_amplitude']
+        self.state['galvo_r_amplitude'] = session.StartupParameters['galvo_r_amplitude']
+        self.state['galvo_l_frequency'] = session.StartupParameters['galvo_l_frequency']
+        self.state['galvo_r_frequency'] = session.StartupParameters['galvo_r_frequency']
+        self.state['galvo_l_offset'] = session.StartupParameters['galvo_l_offset']
+        self.state['galvo_r_offset'] = session.StartupParameters['galvo_r_offset']
 
     def state_request_handler(self, dict):
-        for key, value in zip(dict.keys(),dict.values()):
+        for key, value in zip(dict.keys(), dict.values()):
             if key in ('samplerate',
                        'sweeptime',
                        'intensity',
-                       'etl_l_delay_%',
-                       'etl_l_ramp_rising_%',
-                       'etl_l_ramp_falling_%',
+                       'etl_l_delay_percent',
+                       'etl_l_ramp_rising_percent',
+                       'etl_l_ramp_falling_percent',
                        'etl_l_amplitude',
                        'etl_l_offset',
-                       'etl_r_delay_%',
-                       'etl_r_ramp_rising_%',
-                       'etl_r_ramp_falling_%',
+                       'etl_r_delay_percent',
+                       'etl_r_ramp_rising_percent',
+                       'etl_r_ramp_falling_percent',
                        'etl_r_amplitude',
                        'etl_r_offset',
                        'galvo_l_frequency',
@@ -68,14 +63,14 @@ class WaveFormGenerator():
                        'galvo_r_offset',
                        'galvo_r_duty_cycle',
                        'galvo_r_phase',
-                       'laser_l_delay_%',
-                       'laser_l_pulse_%',
+                       'laser_l_delay_percent',
+                       'laser_l_pulse_percent',
                        'laser_l_max_amplitude',
-                       'laser_r_delay_%',
-                       'laser_r_pulse_%',
+                       'laser_r_delay_percent',
+                       'laser_r_pulse_percent',
                        'laser_r_max_amplitude',
-                       'camera_delay_%',
-                       'camera_pulse_%'):
+                       'camera_delay_percent',
+                       'camera_pulse_percent'):
 
                 # Update the state
                 self.state[key] = value
@@ -90,14 +85,14 @@ class WaveFormGenerator():
             elif key in ('set_etls_according_to_zoom'):
                 self.update_etl_parameters_from_zoom(value)
                 if self.verbose:
-                    print('zoom change')
+                    print('Updated ETL Parameters Owing to Zoom Change')
 
             elif key in ('set_etls_according_to_laser'):
                 self.state['laser'] = value
                 self.create_waveforms()
                 self.update_etl_parameters_from_laser(value)
                 if self.verbose:
-                    print('laser change')
+                    print('Updated ETL Parameters Owing to Laser Change')
 
             elif key in ('laser'):
                 self.state['laser'] = value
@@ -110,7 +105,7 @@ class WaveFormGenerator():
     def calculate_samples(self):
         # Calculate the number of samples for the waveforms.
         # Simply the sampling frequency times the duration of the waveform.
-        samplerate, sweeptime = self.state.get_parameter_list(['samplerate','sweeptime'])
+        samplerate, sweeptime = self.state.get_parameter_list(['samplerate', 'sweeptime'])
         self.samples = int(samplerate*sweeptime)
         if self.verbose:
             print('Number of samples: ' + str(self.samples))
@@ -129,29 +124,28 @@ class WaveFormGenerator():
         # Calculate the waveforms for the ETLs.
         samplerate, sweeptime = self.state.get_parameter_list(['samplerate','sweeptime'])
         etl_l_delay, etl_l_ramp_rising, etl_l_ramp_falling, etl_l_amplitude, etl_l_offset =\
-        self.state.get_parameter_list(['etl_l_delay_%','etl_l_ramp_rising_%','etl_l_ramp_falling_%',
+        self.state.get_parameter_list(['etl_l_delay_percent','etl_l_ramp_rising_percent','etl_l_ramp_falling_percent',
         'etl_l_amplitude','etl_l_offset'])
 
         etl_r_delay, etl_r_ramp_rising, etl_r_ramp_falling, etl_r_amplitude, etl_r_offset =\
-        self.state.get_parameter_list(['etl_r_delay_%','etl_r_ramp_rising_%','etl_r_ramp_falling_%',
+        self.state.get_parameter_list(['etl_r_delay_percent','etl_r_ramp_rising_percent','etl_r_ramp_falling_percent',
         'etl_r_amplitude','etl_r_offset'])
 
+        self.etl_l_waveform = tunable_lens_ramp(samplerate=samplerate,
+                                                sweeptime=sweeptime,
+                                                delay=etl_l_delay,
+                                                rise=etl_l_ramp_rising,
+                                                fall=etl_l_ramp_falling,
+                                                amplitude=etl_l_amplitude,
+                                                offset=etl_l_offset)
 
-        self.etl_l_waveform = tunable_lens_ramp(samplerate = samplerate,
-                                                sweeptime = sweeptime,
-                                                delay = etl_l_delay,
-                                                rise = etl_l_ramp_rising,
-                                                fall = etl_l_ramp_falling,
-                                                amplitude = etl_l_amplitude,
-                                                offset = etl_l_offset)
-
-        self.etl_r_waveform = tunable_lens_ramp(samplerate = samplerate,
-                                                sweeptime = sweeptime,
-                                                delay = etl_r_delay,
-                                                rise = etl_r_ramp_rising,
-                                                fall = etl_r_ramp_falling,
-                                                amplitude = etl_r_amplitude,
-                                                offset = etl_r_offset)
+        self.etl_r_waveform = tunable_lens_ramp(samplerate=samplerate,
+                                                sweeptime=sweeptime,
+                                                delay=etl_r_delay,
+                                                rise=etl_r_ramp_rising,
+                                                fall=etl_r_ramp_falling,
+                                                amplitude=etl_r_amplitude,
+                                                offset=etl_r_offset)
 
     def create_low_res_galvo_waveforms(self):
         # Calculate the sawtooth waveforms for the low-resolution digitally scanned galvo.
@@ -161,21 +155,21 @@ class WaveFormGenerator():
         self.state.get_parameter_list(['galvo_l_frequency', 'galvo_l_amplitude', 'galvo_l_offset',
         'galvo_l_duty_cycle', 'galvo_l_phase'])
 
-        self.galvo_l_waveform = sawtooth(samplerate = samplerate,
-                                         sweeptime = sweeptime,
-                                         frequency = galvo_l_frequency,
-                                         amplitude = galvo_l_amplitude,
-                                         offset = galvo_l_offset,
-                                         dutycycle = galvo_l_duty_cycle,
-                                         phase = galvo_l_phase)
+        self.galvo_l_waveform = sawtooth(samplerate=samplerate,
+                                         sweeptime=sweeptime,
+                                         frequency=galvo_l_frequency,
+                                         amplitude=galvo_l_amplitude,
+                                         offset=galvo_l_offset,
+                                         dutycycle=galvo_l_duty_cycle,
+                                         phase=galvo_l_phase)
 
     def create_high_res_galvo_waveforms(self):
         # Calculate the DC waveform for the resonant galvanometer drive signal.
         samplerate, sweeptime = self.state.get_parameter_list(['samplerate','sweeptime'])
-        self.galvo_r_waveform = dc_value(samplerate = samplerate,
-                                         sweeptime = sweeptime,
-                                         amplitude = 0.5,
-                                         offset = 0)
+        self.galvo_r_waveform = dc_value(samplerate=samplerate,
+                                         sweeptime=sweeptime,
+                                         amplitude=0.5,
+                                         offset=0)
 
 
     def create_laser_waveforms(self):
@@ -184,7 +178,7 @@ class WaveFormGenerator():
 
         # Get the laser parameters.
         laser_l_delay, laser_l_pulse, max_laser_voltage, intensity = \
-        self.state.get_parameter_list(['laser_l_delay_%','laser_l_pulse_%',
+        self.state.get_parameter_list(['laser_l_delay_percent','laser_l_pulse_percent',
         'max_laser_voltage','intensity'])
 
         # Create a zero waveform
@@ -197,12 +191,12 @@ class WaveFormGenerator():
         # Convert from intensity to voltage
         laser_voltage = max_laser_voltage * intensity / 100
 
-        self.laser_template_waveform = single_pulse(samplerate = samplerate,
-                                                    sweeptime = sweeptime,
-                                                    delay = laser_l_delay,
-                                                    pulsewidth = laser_l_pulse,
-                                                    amplitude = laser_voltage,
-                                                    offset = 0)
+        self.laser_template_waveform = single_pulse(samplerate=samplerate,
+                                                    sweeptime=sweeptime,
+                                                    delay=laser_l_delay,
+                                                    pulsewidth=laser_l_pulse,
+                                                    amplitude=laser_voltage,
+                                                    offset=0)
 
         # The key: replace the waveform in the waveform list with this new template
         current_laser_index = self.cfg.laser_designation[self.state['laser']]
@@ -233,7 +227,8 @@ class WaveFormGenerator():
         self.update_etl_parameters_from_csv(etl_cfg_file, laser, zoom)
 
     def update_etl_parameters_from_csv(self, cfg_path, laser, zoom):
-        ''' Updates the internal ETL left/right offsets and amplitudes from the
+        '''
+        Updates the internal ETL left/right offsets and amplitudes from the
         values in the ETL csv files. The .csv file needs to contain the following columns:
 
         Wavelength
@@ -247,7 +242,7 @@ class WaveFormGenerator():
             print('Updating ETL parameters from file:', cfg_path)
 
         with open(cfg_path) as file:
-            reader = csv.DictReader(file,delimiter=';')
+            reader = csv.DictReader(file, delimiter=';')
             if self.verbose:
                 print('Opened ETL Configuration File')
             for row in reader:
@@ -263,18 +258,16 @@ class WaveFormGenerator():
                     etl_r_offset = float(row['ETL-Right-Offset'])
                     etl_r_amplitude = float(row['ETL-Right-Amp'])
 
-                    parameter_dict = {'etl_l_offset': etl_l_offset,
-                                      'etl_l_amplitude' : etl_l_amplitude,
-                                      'etl_r_offset' : etl_r_offset,
-                                      'etl_r_amplitude' : etl_r_amplitude}
+                    parameter_dict = {'etl_l_offset':etl_l_offset,
+                                      'etl_l_amplitude':etl_l_amplitude,
+                                      'etl_r_offset':etl_r_offset,
+                                      'etl_r_amplitude':etl_r_amplitude}
 
                     if self.verbose:
                         print('Parameters Updated from ETL Configuration File')
 
                     # Update the internal state.
                     self.state.set_parameters(parameter_dict)
-
-        '''Update waveforms with the new parameters'''
 
         self.create_waveforms()
         # self.sig_update_gui_from_state.emit(False)
@@ -315,13 +308,13 @@ class WaveFormGenerator():
             for row in reader:
                 if row['Wavelength'] == laser and row['Zoom'] == zoom:
 
-                        writer.writerow({'Objective' : '1x',
-                                         'Wavelength' : laser,
-                                         'Zoom' : zoom,
-                                         'ETL-Left-Offset' : etl_l_offset,
-                                         'ETL-Left-Amp' : etl_l_amplitude,
-                                         'ETL-Right-Offset' : etl_r_offset,
-                                         'ETL-Right-Amp' : etl_r_amplitude,
+                        writer.writerow({'Objective':'1x',
+                                         'Wavelength':laser,
+                                         'Zoom':zoom,
+                                         'ETL-Left-Offset':etl_l_offset,
+                                         'ETL-Left-Amp':etl_l_amplitude,
+                                         'ETL-Right-Offset':etl_r_offset,
+                                         'ETL-Right-Amp':etl_r_amplitude,
                                          })
 
                 else:
@@ -333,8 +326,8 @@ class WaveFormGenerator():
             print('Saved current ETL parameters')
 
     def create_tasks(self):
-        '''Creates a total of four tasks for the microscope:
-
+        '''
+        Creates a total of four tasks for the microscope:
         These are:
         - the master trigger task, a digital out task that only provides a trigger pulse for the others
         - the camera trigger task, a counter task that triggers the camera in lightsheet mode
@@ -350,7 +343,7 @@ class WaveFormGenerator():
         self.calculate_samples()
         samplerate, sweeptime = self.state.get_parameter_list(['samplerate','sweeptime'])
         samples = self.samples
-        camera_pulse_percent, camera_delay_percent = self.state.get_parameter_list(['camera_pulse_%','camera_delay_%'])
+        camera_pulse_percent, camera_delay_percent = self.state.get_parameter_list(['camera_pulse_percent','camera_delay_percent'])
 
         # Create the master trigger, camera trigger, etl, and laser tasks
         self.master_trigger_task = nidaqmx.Task()
@@ -394,13 +387,17 @@ class WaveFormGenerator():
         self.laser_task.triggers.start_trigger.cfg_dig_edge_start_trig(ah['laser_task_trigger_source'])
 
     def write_waveforms_to_tasks(self):
-        # Write the waveforms to the slave tasks
+        '''
+        Write the waveforms to the slave tasks
+        '''
         self.galvo_etl_task.write(self.galvo_and_etl_waveforms)
         self.laser_task.write(self.laser_waveforms)
 
     def start_tasks(self):
-        # Start the tasks for camera triggering and analog outputs
-        # If the tasks are configured to be triggered, they won't output any signals until run_tasks() is called.
+        '''
+        Start the tasks for camera triggering and analog outputs
+        If the tasks are configured to be triggered, they won't output any signals until run_tasks() is called.
+        '''
         self.camera_trigger_task.start()
         self.galvo_etl_task.start()
         self.laser_task.start()
@@ -410,10 +407,10 @@ class WaveFormGenerator():
         Run the tasks for triggering, analog and counter outputs.
         the master trigger initiates all other tasks via a shared trigger
         For this to work, all analog output and counter tasks have to be started so
-        that they are waiting for the trigger signal. '''
+        that they are waiting for the trigger signal.
+        '''
 
         self.master_trigger_task.write([False, True, True, True, False], auto_start=True)
-
         # Wait until waveforms have been output
         self.galvo_etl_task.wait_until_done()
         self.laser_task.wait_until_done()

@@ -17,6 +17,7 @@ import tkinter as tk
 from model.session import Session
 from view.main_application_window import Main_App as main_window
 from view.Monitor.ASLMMain import ASLMMain
+from initialization_functions import *
 
 def start(configuration_directory, configuration_file, verbose=False):
     """
@@ -43,27 +44,9 @@ def start(configuration_directory, configuration_file, verbose=False):
         save_directory = session.Saving['save_directory']
     session.Saving = {'save_directory': save_directory}
 
-    # Initialize Camera
-    if session.CameraParameters['type'] == 'HamamatsuOrca':
-        from model.camera.HamamatsuCamera import Camera as CameraModel
-        cam = CameraModel(0, verbose)
-        cam.initialize_camera()
-        cam.set_exposure(session.CameraParameters['camera_exposure_time'])
-        if verbose:
-            print("Initialized ", session.CameraParameters['type'])
-    elif session.CameraParameters['type'] == 'SyntheticCamera':
-        from model.camera.SyntheticCamera import Camera as CameraModel
-        cam = CameraModel(0)
-        cam.initialize_camera()
-        cam.set_exposure(session.CameraParameters['camera_exposure_time'])
-        if verbose:
-            print("Initialized ", session.CameraParameters['type'])
-    else:
-        print("Camera Type in Configuration.yml Not Recognized - Initialization Failed")
-        sys.exit()
-        if verbose:
-            print("Did not attempt to initialize the cameras")
-        pass
+    # Start the devices
+    cam = start_camera(session, 0, verbose)
+    stages = start_stages(session, verbose)
 
 
     # Initialize GUI

@@ -1,32 +1,35 @@
 """
-    UUTrack.Model.CameraBase.py
-    ==================================
-    Camera class with the skeleton functions. Important to keep track of the methods that are
-    exposed to the View. The class cameraBase should be subclassed when developing new Models.
-    This ensures that all the methods are automatically inherited and there is no breaks downstream.
-    .. note:: **IMPORTANT** Whatever new function is implemented in a specific model,
-    it should be first declared in the cameraBase class.
-    In this way the other models will have access to the method and the
-    program will keep running (perhaps with non intended behavior though).
-    .. sectionauthor:: Aquiles Carattino <aquiles@aquicarattino.com>
+CameraBase Class
+
+Camera class with the skeleton functions. Important to keep track of the methods that are
+exposed to the View. The class cameraBase should be subclassed when developing new Models.
+This ensures that all the methods are automatically inherited and there is no breaks downstream.
+
+**IMPORTANT** Whatever new function is implemented in a specific model,
+it should be first declared in the cameraBase class.
+In this way the other models will have access to the method and the
+program will keep running (perhaps with non intended behavior though).
+
+Adopted and modified from UUTrack
+
 """
 
 class CameraBase():
     MODE_CONTINUOUS = 1
     MODE_SINGLE_SHOT = 0
-    def __init__(self, camera):
-        self.camera = camera
+    def __init__(self, camera_id, session, verbose):
+        self.cam_id = camera_id
         self.running = False
-        self.maxWidth = 0
-        self.maxHeight = 0
+        self.max_width = 0
+        self.max_height = 0
         self.exposure = 0
 
     def initialize_camera(self):
         """
         Initializes the camera.
         """
-        self.maxWidth = self.get_CCD_width()
-        self.maxHeight = self.get_CCD_height()
+        self.max_width = self.get_CCD_width()
+        self.max_height = self.get_CCD_height()
         return True
 
     def trigger_camera(self):
@@ -88,7 +91,7 @@ class CameraBase():
         """
         Clears the ROI from the camera.
         """
-        self.set_ROI(self.maxWidth, self.maxHeight)
+        self.set_ROI(self.max_width, self.max_height)
 
     def get_size(self):
         """Returns the size in pixels of the image being acquired. This is useful for checking the ROI settings.

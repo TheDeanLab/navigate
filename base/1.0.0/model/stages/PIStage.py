@@ -1,31 +1,47 @@
-class PIstage(Stage):
+"""
+Physik Instrumente Stage Class
 
-    def __init__(self, parent=None):
-        super().__init__(parent)
+Model class for controlling Physik Instrumente stages via the PIPython package.
 
-        ''' Physik Instrumente Specific Code    '''
+Adopted and modified from mesoSPIM
+"""
+
+import time
+import numpy as np
+from .StageBase import StageBase
+
+class Stage(StageBase):
+    def __init__(self, session, verbose):
+        '''
+        Physik Instrumente Code    
+        '''
+        self.verbose = verbose
         from pipython import GCSDevice, pitools
         self.pitools = pitools
 
-        ''' Setting up the PI stages '''
-        #self.pi = self.cfg.pi_parameters
-        self.controllername = self.cfg.controllername
-        self.pi_stages = self.cfg.stages
-        self.refmode = self.cfg.refmode
-        self.serialnum = self.cfg.serialnum
+        ''' 
+        Setting up the PI stages 
+        '''
+        self.controllername = session.StageParameters['controllername']
+        self.pi_stages = session.StageParameters['stages']
+        self.refmode = session.StageParameters['refmode']
+        self.serialnum = session.StageParameters['serialnum']
         self.pidevice = GCSDevice(self.controllername)
         self.pidevice.ConnectUSB(serialnum=self.serialnum)
         self.pitools.startup(self.pidevice, stages=list(self.pi_stages), refmodes=list(self.refmode))
         self.block_till_controller_is_ready()
-        self.startfocus = self.cfg.startfocus
+        self.startfocus = session.StageParameters['startfocus']
         # Move the Focusing Stage to the Start Position
         self.pidevice.MOV(5, self.startfocus / 1000)
 
     def __del__(self):
         try:
-            '''Close the PI connection'''
+            '''
+            Close the PI connection
+            '''
             self.pidevice.unload()
-            print('Stage disconnected')
+            if self.verbose:
+                print('PI connection closed')
         except:
             print('Error while disconnecting the PI stage')
 
@@ -48,7 +64,8 @@ class PIstage(Stage):
         print(self.int_position_dict)
 
     def move_relative(self, dict, wait_until_done=False):
-        ''' PI move relative method
+        '''
+        PI move relative method
         Lots of implementation details in here, should be replaced by a facade
         '''
         if 'x_rel' in dict:
@@ -96,11 +113,7 @@ class PIstage(Stage):
     def move_absolute(self, dict, wait_until_done=False):
         '''
         PI move absolute method
-
         Lots of implementation details in here, should be replaced by a facade
-
-        TODO: Also lots of repeating code.
-        TODO: DRY principle violated
         '''
 
         if 'x_abs' in dict:
@@ -159,11 +172,11 @@ class PIstage(Stage):
         self.pidevice.STP(noraise=True)
 
     def load_sample(self):
-        y_abs = self.cfg.y_load_position / 1000
+        y_abs = session.StageParameters['y_load_position'] / 1000
         self.pidevice.MOV({2: y_abs})
 
     def unload_sample(self):
-        y_abs = self.cfg.y_unload_position / 1000
+        y_abs = session.StageParameters['y_unload_position'] / 1000
         self.pidevice.MOV({2: y_abs})
 
     def go_to_rotation_position(self, wait_until_done=False):

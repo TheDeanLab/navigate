@@ -3,10 +3,8 @@ import tkinter as tk
 from tkinter import ttk
 from .acquire_popup import Acquire_PopUp
 
-
 #Class for the acquisition bar found at the top of the main application window.
 #Main function is to change acq setting and then call the acquisition top level window
-#BROKE: from view.notebooks.tabs.channels.stack_cycling_settings.stack_cycling_frame import cycling_options
 
 class AcquireBar(ttk.Frame):
 
@@ -18,39 +16,11 @@ class AcquireBar(ttk.Frame):
         AcqBar.grid(row=0, column=0)
 
         #Create command for popup to be called
-        #TODO: Need an event tracker to update this. Should not pop up unless we are saving the data.
-        # Should not pop up in the continuous mode.
-        # def detect_microscope_save_and_acquisition_state(session, verbose):
-        #     if session.MicroscopeState['save_data'] == 0:
-        #         def call_popup(session, verbose):
-        #             # Dummy function to not call the acquire_popup window.
-        #             pass
-        #         if session.MicroscopeState['image_mode'] == 'continuous':
-        #             # Call function for continuous mode.
-        #             print("Continuous Mode")
-        #         elif session.MicroscopeState['image_mode'] == 'z-stack':
-        #             # Call function for z-stack mode
-        #             print("Z-Stack Mode")
-        #         elif session.MicroscopeState['image_mode'] == 'single':
-        #             # Call function for single acquisition mode
-        #             print("Single Mode")
-        #         elif session.MicroscopeState['image_mode'] == 'projection':
-        #             # Call function for projection mode
-        #             print("Projection Mode")
-        #     elif session.MicroscopeState['save_data'] == 1:
-        #         if session.MicroscopeState['image_mode'] == 'continuous':
-        #             def call_popup(session, verbose):
-        #                 # Dummy function to not call the acquire_popup window.
-        #                 pass
-        #         else:
-        #             def call_popup(session, verbose):
-        #                 Acquire_PopUp(root, session)
-        #     return call_popup
-        #
-        # call_popup = detect_microscope_save_and_acquisition_state(session, verbose)
+        def call_popup(session):
+            Acquire_PopUp(root, session)
 
         #Acquire Button
-        AcqBar.acquire_btn = ttk.Button(AcqBar, text="Acquire", command=Acquire_PopUp(root, session))
+        AcqBar.acquire_btn = ttk.Button(AcqBar, text="Acquire", command=call_popup)
 
         #Read Only Pulldown menu: continuous, z-stack, single acquisition, projection.
         AcqBar.options = StringVar()

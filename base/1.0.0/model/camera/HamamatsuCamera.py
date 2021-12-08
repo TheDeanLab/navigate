@@ -1,26 +1,25 @@
 """
-    UUTrack.Model.Cameras.Hamamatsu.py
-    ==================================
+Hamamatsu Cameara Class
 
-    Model class for controlling Hamamatsu cameras via de DCAM-API. At the time of writing this class,
-    little documentation on the DCAM-API was available. Hamamatsu has a different time schedule regardin support of
-    their own API. However, Zhuang's lab Github repository had a python driver for the Orca camera and with a bit of
-    tinkering things worked out.
+Model class for controlling Hamamatsu cameras via the DCAM-API. At the time of writing this class,
+little documentation on the DCAM-API was available. Hamamatsu has a different time schedule regarding support of
+their own API. However, Zhuang's lab Github repository had a python driver for the Orca camera and with a bit of
+tinkering things worked out.
 
-    DCAM-API relies mostly on setting parameters into the camera. The correct data type of each parameter is not well
-    documented; however it is possible to print all the available properties and work from there. The properties are
-    stored in a filed named params.txt next to the :mod:`Hamamatsu Driver
-    <UUTrack.Controller.devices.hamamatsu.hamamatsu_camera>`
+DCAM-API relies mostly on setting parameters into the camera. The correct data type of each parameter is not well
+documented; however it is possible to print all the available properties and work from there.
+The properties are stored in a filed named params.txt next to the Hamamatsu Driver located in Controller.
 
-    .. note:: When setting the ROI, Hamamatsu only allows to set multiples of 4 for every setting (X,Y and vsize,
-        hsize). This is checked in the function. Changing the ROI cannot be done directly, one first needs to disable it
-        and then re-enable.
+note:: When setting the ROI, Hamamatsu only allows to set multiples of 4 for every setting (X,Y and vsize,
+hsize). This is checked in the function. Changing the ROI cannot be done directly, one first needs to disable it
+and then re-enable.
 
-
-    .. sectionauthor:: Aquiles Carattino <aquiles@aquicarattino.com>
+Adopted and modified from UUTrack
 """
+# External Dependencies
 import numpy as np
 
+# Internal Dependencies
 from controller.devices.camera.hamamatsu.HamamatsuCamera import HamamatsuCamera as HamamatsuController
 from .CameraBase import CameraBase
 
@@ -30,18 +29,18 @@ class Camera(CameraBase):
     MODE_SINGLE_SHOT = 0
     MODE_EXTERNAL = 2
 
-    def __init__(self, Camera, verbose):
+    def __init__(self, camera_id, session, verbose):
         # Monitor ID
-        self.cam_id = Camera
-        self.camera_controller = HamamatsuController(Camera)
+        self.cam_id = camera_id
+        self.camera_controller = HamamatsuController(camera_id)
         self.running = False
         self.mode = self.MODE_SINGLE_SHOT
         if verbose:
             print("Camera initialized")
 
     def initialize_camera(self):
-        """ Initializes the camera.
-
+        """
+        Initializes the camera.
         :return:
         """
 
@@ -54,7 +53,8 @@ class Camera(CameraBase):
         self.camera_controller.setPropertyValue("defect_correct_mode", 1)
 
     def trigger_camera(self):
-        """Triggers the camera.
+        """
+        Triggers the camera.
         """
         if self.get_acquisition_mode() == self.MODE_CONTINUOUS:
             self.camera_controller.startAcquisition()
@@ -84,12 +84,14 @@ class Camera(CameraBase):
         return self.getAcquisitionMode()
 
     def get_acquisition_mode(self):
-        """Returns the acquisition mode, either continuous or single shot.
+        """
+        Returns the acquisition mode, either continuous or single shot.
         """
         return self.mode
 
     def acquisition_ready(self):
-        """Checks if the acquisition in the camera is over.
+        """
+        Checks if the acquisition in the camera is over.
         """
         return True
 

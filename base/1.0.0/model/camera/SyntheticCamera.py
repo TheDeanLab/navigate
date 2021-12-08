@@ -13,8 +13,8 @@ from .CameraBase import CameraBase
 class Camera(CameraBase):
     MODE_CONTINUOUS = 1
     MODE_SINGLE_SHOT = 0
-    def __init__(self, camera):
-        self.camera = camera
+    def __init__(self, camera_id, session, verbose):
+        self.cam_id = camera_id
         self.running = False
         self.xsize = 600
         self.ysize = 250

@@ -33,4 +33,4 @@ class stack_cycling_frame(ttk.Labelframe):
             if verbose:
                 print("The Microscope State is now:", session.MicroscopeState['stack_cycling'])
 
-        stack_acq.cycling_pull_down.bind('<<ComboboxSelected>>', lambda event: save_to_session(stack_acq, session, verbose))
+        #stack_acq.cycling_pull_down.bind('<<ComboboxSelected>>', lambda event: save_to_session(stack_acq, session, verbose))

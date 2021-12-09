@@ -1,34 +1,36 @@
 """
     Best place to store variables that can be shared between different classes.
-    It defines an object that inherits from QObject, mainly to be able to emit signals.
-    It overwrites the :meth:`~UUTrack.Model.Session.__setattr__` for functionality,
-    as well as the :meth:`~UUTrack.Model.Session.__str__` for handy serialization.
+    It defines an object that inherits observables, which the controller is notified of.
+
     Storing of data is done via dictionaries.
-        >>> session = Session()
-        >>> session.Param1 = {'Value': 1}
-        >>> print(session)
-        Param1:
-          Value: 1
-        >>> session.Param1 = {'Value2': 2}
-        >>> print(session)
-        Param1:
-          Value: 1
-          Value2: 2
+
+    IMPORTANT: The __setattr__ method is overriden to add additional functionality.
+
+    IMPORTANT: The __str__ method is overriden to add serialization. For example:
+        session = Session()
+        session.Param1 = {'Value': 1}
+        print(session) results in Param1: Value: 1
+
+       If you set Param1 again...
+        session.Param1 = {'Value2': 2}
+        print(session) results in Param1: Value: 1, Param1: Value2: 2
+
     Note that assigning a second value to Param1 does not overwrite the value, but appends it.
     Also note that the output of printing the session is a Yaml-ready text (2 space indentation, etc.).
-    :copyright: 2017
-    .. sectionauthor:: Aquiles Carattino <aquiles@aquicarattino.com>
+
+    Adopted and modified from UUTrack
 """
 
+# Standard Imports
 from __future__ import (absolute_import, division, print_function)
 
 from builtins import (bytes, int, list, object, range, str,
     ascii, chr, hex, input, next, oct, open, pow, round, super,
     filter, map, zip)
 
+# Third Party Imports
 import yaml
-# PyYAML is a YAML parser and emitter for Python
-# https://pyyaml.org/wiki/PyYAMLDocumentation
+
 
 class Session:
     """
@@ -48,6 +50,7 @@ class Session:
         Load a Yaml file and stores the values in the object.
         :param file: Path to the file where the config file is.
         """
+
         if file_path == None:
             print("No file provided to load_yaml_config()")
             sys.exit(1)
@@ -76,9 +79,12 @@ class Session:
         :param key: Name of the attribute.
         :param value: Value of the attribute.
         """
+
+        # Confirm that the value is a dictionary
         if type(value) != type({}):
             raise Exception('Everything passed to a session must be a dictionary')
 
+        # If the key does not exist in self.params, add it
         if key not in self.params:
             self.params[key] = dict()
             self.__setattr__(key, value)
@@ -94,18 +100,19 @@ class Session:
                     # Update value
                     self.params[key][k] = value[k]
                     if verbose:
-                        print("Updated:", key)
-                        print("Value:", val)
-                    #TODO: Update GUI?
-                    #self.emit(SIGNAL('Updated'))
+                        print("Updated:", key, "Value:", val)
 
+                    #TODO: Anytime one of these observables changes, any interested listener
+                    # should be notified through a callback mechanism here!
+                    # Previously: self.emit(SIGNAL('Updated'))
                 else:
                     self.params[key][k] = value[k]
                     if verbose:
-                        print("Updated:", key)
-                        print("Value:", value)
-                    #TODO: Update GUI?
-                    #self.emit(SIGNAL('New'))
+                        print("Updated:", key, "Value:", val)
+
+                    #TODO: Anytime one of these observables changes, any interested listener
+                    # should be notified through a callback mechanism here!
+                    # Previously: self.emit(SIGNAL('New'))
 
             super(Session, self).__setattr__(k, value[k])
 
@@ -117,7 +124,8 @@ class Session:
             return self.params[item]
 
     def __str__(self):
-        """ Overrides the print(class).
+        """
+        Overrides the print(class).
         :return: a Yaml-ready string.
         """
 
@@ -136,7 +144,8 @@ class Session:
         return self.__str__()
 
     def get_parameters(self):
-        """Special class for setting up the ParamTree from PyQtGraph. It saves the iterating over all the variables directly
+        """
+        Special class for setting up the ParamTree from PyQtGraph. It saves the iterating over all the variables directly
         on the GUI.
         :return: a list with the parameters and their types.
         """
@@ -161,7 +170,8 @@ class Session:
         return p
 
     def copy(self):
-        """Copies this class. Important not to overwrite the memory of a previously created session.
+        """
+        Copies this class. Important not to overwrite the memory of a previously created session.
         :return: a session exactly the same as this one.
         """
         return Session(self.params)

@@ -1,4 +1,4 @@
-__all__ = ['start_camera']
+__all__ = ['start_camera', 'start_stages']
 
 def start_camera(session, camera_id, verbose):
     """
@@ -33,18 +33,18 @@ def start_stages(session, verbose):
     Initializes the Stage.
     """
     # Physik Instrumente Stage
-    if session.StageParameters['type'] == 'PI':
+    if session.StageParameters['stage_type'] == 'PI':
         from model.stages.PIStage import Stage as StageModel
         stage = StageModel(session, verbose)
         if verbose:
-            print("Initialized ", session.StageParameters['type'])
+            print("Initialized ", session.StageParameters['stage_type'])
             print("Stage Position:", stage.report_position())
 
     # Synthetic Stage
-    elif session.StageParameters['type'] == 'SyntheticStage':
+    elif session.StageParameters['stage_type'] == 'SyntheticStage':
         from model.stages.SyntheticStage import Stage as StageModel
         if verbose:
-            print("Initialized ", session.StageParameters['type'])
+            print("Initialized ", session.StageParameters['stage_type'])
 
     # Failed to Initialize
     else:

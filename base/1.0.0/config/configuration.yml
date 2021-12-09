@@ -26,8 +26,8 @@ DAQParameters:
 
     # triggers
     master_trigger_out_line: PXI6259/port0/line1
-    camera_trigger_out_line: /PXI6259/ctr0
-    trigger_source: /PXI6259/PFI0
+    camera_trigger_out_line: PXI6259/ctr0
+    trigger_source: PXI6259/PFI0
 
     # galvos
     galvo_left: ao0

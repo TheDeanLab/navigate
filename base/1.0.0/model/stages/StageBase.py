@@ -51,7 +51,6 @@ class StageBase():
         ''' 
         Setting movement limits: currently hardcoded: Units are in microns 
         '''
-        #TODO: Reference configuration file?
         self.x_max = session.StageParameters['x_max']
         self.x_min = session.StageParameters['x_min']
         self.y_max = session.StageParameters['y_max']
@@ -65,7 +64,6 @@ class StageBase():
         self.x_rot_position = session.StageParameters['x_rot_position']
         self.y_rot_position = session.StageParameters['y_rot_position']
         self.z_rot_position = session.StageParameters['z_rot_position']
-
 
     def create_position_dict(self):
         self.position_dict = {'x_pos': self.x_pos,
@@ -183,8 +181,8 @@ class StageBase():
         if wait_until_done == True:
             time.sleep(3)
 
-    # def stop(self):
-        # self.sig_status_message.emit('Stopped', 0)
+    def stop(self):
+        pass #self.sig_status_message.emit('Stopped', 0)
 
     def zero_axes(self, list):
         for axis in list:

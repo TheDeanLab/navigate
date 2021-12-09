@@ -38,7 +38,7 @@ def start_stages(session, verbose):
         stage = StageModel(session, verbose)
         if verbose:
             print("Initialized ", session.StageParameters['stage_type'])
-            print("Stage Position:", stage.report_position())
+        stage.report_position()
 
     # Synthetic Stage
     elif session.StageParameters['stage_type'] == 'SyntheticStage':
@@ -51,3 +51,14 @@ def start_stages(session, verbose):
         print("Stage Type in Configuration.yml Not Recognized - Initialization Failed")
         sys.exit()
     return stage
+
+def start_zoom_servo(session, verbose):
+    pass
+
+def start_filter_wheel(session, verbose):
+    pass
+
+def start_lasers(session, verbose):
+    pass
+
+

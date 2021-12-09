@@ -1,6 +1,6 @@
 from tkinter import *
 from tkinter import ttk
-from tkinter.font import Font
+import numpy as np
 
 class channels_label_frame(ttk.Frame):
     def __init__(chan_label_frame, settings_tab, *args, **kwargs):
@@ -44,10 +44,10 @@ class channel_frame(ttk.Frame):
 
         # Creating Dropdowns
         # Lasers - Gets values from the configuration file and populates pulldown.
-        number_of_lasers = session.AcquisitionHardware['number_of_lasers']
+        number_of_lasers = np.int(session.DAQParameters['number_of_lasers'])
         laser_list = []
         for i in range(number_of_lasers):
-            laser_wavelength = session.AcquisitionHardware['laser_'+str(i)+'_wavelength']
+            laser_wavelength = session.DAQParameters['laser_'+str(i)+'_wavelength']
             laser_list.append(laser_wavelength)
         channel.laser_options = StringVar()
         channel.laser_pull_down = ttk.Combobox(channel, textvariable=channel.laser_options)

@@ -86,9 +86,9 @@ ETLParameters:
 
 StageParameters:
     stage_type: PI
-    controllername: C-884
-    stages: (L-509.20DG10, L-509.40DG10, L-509.20DG10, M-060.DG, M-406.4PD, NOSTAGE)
-    refmode: (FRF, FRF, FRF, FRF, FRF, FRF,)
+    controllername: 'C-884'
+    stages: ('L-509.20DG10', 'L-509.40DG10', 'L-509.20DG10', 'M-060.DG', 'M-406.4PD', 'NOSTAGE')
+    refmode: ('FRF', 'FRF', 'FRF', 'FRF', 'FRF', 'FRF',)
     serialnum: 119060508
     y_unload_position: 10000
     y_load_position: 90000

@@ -23,9 +23,11 @@ class Stage(StageBase):
         Setting up the PI stages 
         '''
         self.controllername = session.StageParameters['controllername']
-        self.pi_stages = session.StageParameters['stages']
-        self.refmode = session.StageParameters['refmode']
-        self.serialnum = session.StageParameters['serialnum']
+        #TODO: Figure out why these are not being imported properly from the yaml file.
+        self.pi_stages = ('L-509.20DG10', 'L-509.40DG10', 'L-509.20DG10', 'M-060.DG', 'M-406.4PD', 'NOSTAGE') #session.StageParameters['stages']
+        self.refmode = ('FRF', 'FRF', 'FRF', 'FRF', 'FRF', 'FRF',) #session.StageParameters['refmode']
+        self.serialnum = '119060508' #session.StageParameters['serialnum']
+
         self.pidevice = GCSDevice(self.controllername)
         self.pidevice.ConnectUSB(serialnum=self.serialnum)
         self.pitools.startup(self.pidevice, stages=list(self.pi_stages), refmodes=list(self.refmode))
@@ -33,6 +35,50 @@ class Stage(StageBase):
         self.startfocus = session.StageParameters['startfocus']
         # Move the Focusing Stage to the Start Position
         self.pidevice.MOV(5, self.startfocus / 1000)
+
+        self.x_pos = 0
+        self.y_pos = 0
+        self.z_pos = 0
+        self.f_pos = 0
+        self.theta_pos = 0
+
+        '''
+        Internal (software) positions
+        '''
+        self.int_x_pos = 0
+        self.int_y_pos = 0
+        self.int_z_pos = 0
+        self.int_f_pos = 0
+        self.int_theta_pos = 0
+
+        '''
+        Create offsets. It should be: int_x_pos = x_pos + int_x_pos_offset
+        self.int_x_pos = self.x_pos + self.int_x_pos_offset
+        OR x_pos = int_x_pos - int_x_pos_offset
+        self.x_pos = self.int_x_pos - self.int_x_pos_offset
+        '''
+        self.int_x_pos_offset = 0
+        self.int_y_pos_offset = 0
+        self.int_z_pos_offset = 0
+        self.int_f_pos_offset = 0
+        self.int_theta_pos_offset = 0
+
+        ''' 
+        Setting movement limits: currently hardcoded: Units are in microns 
+        '''
+        self.x_max = session.StageParameters['x_max']
+        self.x_min = session.StageParameters['x_min']
+        self.y_max = session.StageParameters['y_max']
+        self.y_min = session.StageParameters['y_min']
+        self.z_max = session.StageParameters['z_max']
+        self.z_min = session.StageParameters['z_min']
+        self.f_max = session.StageParameters['f_max']
+        self.f_min = session.StageParameters['f_min']
+        self.theta_max = session.StageParameters['theta_max']
+        self.theta_min = session.StageParameters['theta_min']
+        self.x_rot_position = session.StageParameters['x_rot_position']
+        self.y_rot_position = session.StageParameters['y_rot_position']
+        self.z_rot_position = session.StageParameters['z_rot_position']
 
     def __del__(self):
         try:
@@ -44,6 +90,22 @@ class Stage(StageBase):
                 print('PI connection closed')
         except:
             print('Error while disconnecting the PI stage')
+
+    def create_position_dict(self):
+        self.position_dict = {'x_pos': self.x_pos,
+                              'y_pos': self.y_pos,
+                              'z_pos': self.z_pos,
+                              'f_pos': self.f_pos,
+                              'theta_pos': self.theta_pos,
+                              }
+
+    def create_internal_position_dict(self):
+        self.int_position_dict = {'x_pos': self.int_x_pos,
+                                  'y_pos': self.int_y_pos,
+                                  'z_pos': self.int_z_pos,
+                                  'f_pos': self.int_f_pos,
+                                  'theta_pos': self.int_theta_pos,
+                                  }
 
     def report_position(self):
         positions = self.pidevice.qPOS(self.pidevice.axes)
@@ -61,7 +123,7 @@ class Stage(StageBase):
         self.int_theta_pos = self.theta_pos + self.int_theta_pos_offset
         self.create_internal_position_dict()
 
-        print(self.int_position_dict)
+        print("Stage Positions:", self.int_position_dict)
 
     def move_relative(self, dict, wait_until_done=False):
         '''
@@ -171,6 +233,20 @@ class Stage(StageBase):
     def stop(self):
         self.pidevice.STP(noraise=True)
 
+    def zero_axes(self, list):
+        for axis in list:
+            try:
+                exec('self.int_' + axis + '_pos_offset = -self.' + axis + '_pos')
+            except:
+                print('Zeroing of axis: ', axis, 'failed')
+
+    def unzero_axes(self, list):
+        for axis in list:
+            try:
+                exec('self.int_' + axis + '_pos_offset = 0')
+            except:
+                print('Unzeroing of axis: ', axis, 'failed')
+
     def load_sample(self):
         y_abs = session.StageParameters['y_load_position'] / 1000
         self.pidevice.MOV({2: y_abs})
@@ -178,6 +254,16 @@ class Stage(StageBase):
     def unload_sample(self):
         y_abs = session.StageParameters['y_unload_position'] / 1000
         self.pidevice.MOV({2: y_abs})
+
+    def mark_rotation_position(self):
+        '''
+        Take the current position and mark it as rotation location
+        '''
+        self.x_rot_position = self.x_pos
+        self.y_rot_position = self.y_pos
+        self.z_rot_position = self.z_pos
+        if self.verbose:
+            print('Marking new rotation position (absolute coordinates): X: ', self.x_pos, ' Y: ', self.y_pos, ' Z: ', self.z_pos)
 
     def go_to_rotation_position(self, wait_until_done=False):
         x_abs = self.x_rot_position / 1000

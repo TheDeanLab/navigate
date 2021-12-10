@@ -1,0 +1,385 @@
+﻿<html>
+  <head>
+    <META http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>DCAM-SDK4 code samples </title>
+    <style type="text/css">
+            body {
+                font-family: sans-serif;
+            }
+            .arg-name {
+              font-style: italic;
+            }
+            .arg-decl {
+              text-indent: 5ex;
+            }
+            .arg-help {
+              text-indent: 2ex;
+            }
+            .fileinformation {
+                text-align: right;
+                color: #808080;
+            }
+            .chapter {
+                font-size: 200%;
+                line-height: 2em;
+                text-align: center;
+                border:	1px solid gray;
+                background-color: #C0FFC0;
+            }
+            .section {
+                font-size: 175%;
+                font-family: serif;
+                font-style: italic;
+            }
+            .title {
+                font-size: 125%;
+                color: #008080;
+            }
+            .fname {
+                font-family: serif;
+                font-style: italic;
+                font-size: 200%;
+                font-weight: bold;
+            }
+            .formula {
+                font-size: 150%;
+                line-height: 2em;
+                text-align: center;
+                font-family: serif;
+                font-style: italic;
+            }
+            .proplist {
+                font-family: sans-serif;
+            }
+            .prop_groupname {
+                font-size: 150%;
+                line-height: 2em;
+            }
+            .prop_id {
+                background-color: #FFFFC0;
+            }
+            .prop_indent {
+                background-color: #C0C0C0;
+            }
+            .pname
+            {
+                font-family: serif;
+                font-style: italic;
+                font-size: 150%;
+                font-weight: bold;
+            }
+            .psection
+            {
+                font-size: 130%;
+                font-family: serif;
+                font-style: italic;
+            }
+            .chaptercontent
+            {
+                font-size: 125%;
+            }
+            table {
+              text-indent: 0;
+            }
+            a.go-top   { text-decoration:none;}
+            a.go-top:link { color: #000080; }
+            a.go-top:hover { color: #808080; }
+            a.go-top:visited { color: #000080; }
+			txtind1 {
+         	 text-indent: 1em;
+          	}
+          	txtindhalf {
+          	text-indent: 50%;
+          	}
+        </style>
+  </head>
+  <body>
+    <div>
+      <div class="fileinformation">
+		<div>v21.6.6291</div>
+	</div>
+    </div>
+    <div><a class="go-top" href="#Chapter_appendix_detail"></a></div>
+    <hr>
+    <div id="Chapter_sampledcam4_detail">
+      <div class="chapter">DCAM-SDK4 code samples</div>
+      <p></p>
+      <table width="100%">
+        <tr>
+          <td width="1%"></td>
+          <td>
+            <hr>
+            <div class="section">
+            </div>
+            <table width="96%">
+              <tr>
+                <td width="1%"></td>
+                <td>
+				<div class="title">CPP</div>
+                  <div></div>
+                  <div>
+                    <div class="samplelist">
+                      <table width="100%" border="1" rules="all">
+                        <tr>
+                          <th bgcolor="#BBBBBB" width="25%" align="left">Sample</th>
+                          <th bgcolor="#BBBBBB" width="75%" align="left">Explanation</th>
+                        </tr>
+                        <tr>
+                          <td width="25%"><a class="go-top" href="cpp/init_uninit">init_uninit</a></td>
+                          <td width="75%">
+                            <div><b>initialize and uninitialize DCAM-API</b><br>Initialize DCAM and display device information by using index. Enable directives to set OPTION and GUID.<br></div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="25%"><a class="go-top" href="cpp/open_show_modelinfo">open_show_modelinfo</a></td>
+                          <td width="75%">
+                            <div><b>open device and show device information</b><br>Open device and display device information using DCAM handle.<br></div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="25%"><a class="go-top" href="cpp/propertylist">propertylist</a></td>
+                          <td width="75%">
+                            <div><b>show property list that the device supports</b><br>Display name and ID of all supported properties. Enable detectives to show the property details.<br></div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="25%"><a class="go-top" href="cpp/live_average">live_average</a></td>
+                          <td width="75%">
+                            <div><b>capture image and show average of image</b><br>Retrieve images and display the average of each image. Enable directives to change stop timing.<br></div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="25%"><a class="go-top" href="cpp/access_image">access_image</a></td>
+                          <td width="75%">
+                            <div><b>access image with several function</b><br>Capture and acceess image. Enable directive to change access method.<br></div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="25%"><a class="go-top" href="cpp/binning_subarray">binning_subarray</a></td>
+                          <td width="75%">
+                            <div><b>set binning and subarray</b><br>Set the values of binning and subarray . Each value is defined by the directive. <br></div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="25%"><a class="go-top" href="cpp/software_trigger">software_trigger</a></td>
+                          <td width="75%">
+                            <div><b>get image with software trigger</b><br>Capture images using software trigger. Fire trigger using key-press.<br></div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="25%"><a class="go-top" href="cpp/framebundle">framebundle</a></td>
+                          <td width="75%">
+                            <div><b>access images and meta data on setting framebundle</b><br>Access each image and meta data after setting the values of framebundle.<br></div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="25%"><a class="go-top" href="cpp/recording">recording</a></td>
+                          <td width="75%">
+                            <div><b>record image to the harddisk automatically</b><br>Record images to the designated file. Enable directive to write meta data for file, session or frame. Support on Windows only.<br></div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="25%"><a class="go-top" href="cpp/copymetadata">copymetadata</a></td>
+                          <td width="75%">
+                            <div><b>get image and copy meta data block</b><br>Copy and display image meta data(time stamp and frame stamp).<br></div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="25%"><a class="go-top" href="cpp/attach_imagebuf">attach_imagebuf</a></td>
+                          <td width="75%">
+                            <div><b>attach buffer to receive image data</b><br>Attach a buffer to receive the image data<br></div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="25%"><a class="go-top" href="cpp/attach_metadatabuf">attach_metadatabuf</a></td>
+                          <td width="75%">
+                            <div><b>attach buffer to receive meta data</b><br>Attach a buffer to receive the meta data(time stamp or frame stamp). Enable directive to change the buffer format.<br></div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="25%"><a class="go-top" href="cpp/splitview">splitview</a></td>
+                          <td width="75%">
+                            <div><b>set parameter and access image on spiltview</b><br>Set split view mode and retrieve split image. Not supported by all cameras.<br></div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="25%"><a class="go-top" href="cpp/setdata_lut">setdata_lut</a></td>
+                          <td width="75%">
+                            <div><b>set look up table</b><br>Apply LUT to camera output. Not supported by all cameras;<br></div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="25%"><a class="go-top" href="cpp/setdata_region">setdata_region</a></td>
+                          <td width="75%">
+                            <div><b>set region for data reduction</b><br>Reduce output data by applying rectangle region or byte mask. Not supported by all cameras.<br></div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="25%"><a class="go-top" href="cpp/unpack_mono12">unpack_mono12</a></td>
+                          <td width="75%">
+                            <div><b>unpack mono12 data</b><br>Retrieve mono 12 packed data from DCAM. Unpack the data. Not supported by all cameras.<br></div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="25%"><a class="go-top" href="cpp/imageproc_option">imageproc_option</a></td>
+                          <td width="75%">
+                            <div><b>process image on access image</b><br>Retrieve high contrast image from DCAM. Not supported by all cameras.<br></div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="25%"><a class="go-top" href="cpp/control_calibration">control_calibration</a></td>
+                          <td width="75%">
+                            <div><b>get and store calibration data</b><br>Control camera to make calibration data and store in memory. Not supported by all cameras.<br></div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="25%"><a class="go-top" href="cpp/devicebuffermode">devicebuffermode</a></td>
+                          <td width="75%">
+                            <div><b>set parameter related device buffer mode and access image</b><br>Set and get parameters related device buffer mode and access all images in the shortest time. Not supported by all cameras.<br></div>
+                          </td>
+                        </tr>
+                      </table>
+                    </div>
+                  </div>
+                  <div>
+                    <p></p>
+                  </div>
+				<div class="title">MFC</div>
+                  <div></div>
+                  <div>
+                    <div class="samplelist">
+                      <table width="100%" border="1" rules="all">
+                        <tr>
+                          <th bgcolor="#BBBBBB" width="25%" align="left">Sample</th>
+                          <th bgcolor="#BBBBBB" width="75%" align="left">Explanation</th>
+                        </tr>
+                        <tr>
+                          <td width="25%"><a class="go-top" href="mfc/ExCap4">ExCap4</a></td>
+                          <td width="75%">
+                            <div>Application inclueded in DCAM-API runtime. Only basic DCAM4.0 control is implemented.<br></div>
+                          </td>
+                        </tr>
+                      </table>
+                    </div>
+                  </div>
+                  <div>
+                    <p></p>
+                  </div>
+				<div class="title">C#</div>
+                  <div></div>
+                  <div>
+                    <div class="samplelist">
+                      <table width="100%" border="1" rules="all">
+                        <tr>
+                          <th bgcolor="#BBBBBB" width="25%" align="left">Sample</th>
+                          <th bgcolor="#BBBBBB" width="75%" align="left">Explanation</th>
+                        </tr>
+                        <tr>
+                          <td width="25%"><a class="go-top" href="cs/csAcq4">csAcq4</a></td>
+                          <td width="75%">
+                            <div>Display image using the basic functions of DCAM4.0.<br></div>
+                          </td>
+                        </tr>
+                      </table>
+                    </div>
+                  </div>
+                  <div>
+                    <p></p>
+                  </div>
+				<div class="title">VB.NET</div>
+                  <div></div>
+                  <div>
+                    <div class="samplelist">
+                      <table width="100%" border="1" rules="all">
+                        <tr>
+                          <th bgcolor="#BBBBBB" width="25%" align="left">Sample</th>
+                          <th bgcolor="#BBBBBB" width="75%" align="left">Explanation</th>
+                        </tr>
+                        <tr>
+                          <td width="25%"><a class="go-top" href="vbnet/vbAcq4">vbAcq4</a></td>
+                          <td width="75%">
+                            <div>Display image using the basic functions of DCAM4.0.<br></div>
+                          </td>
+                        </tr>
+                      </table>
+                    </div>
+                  </div>
+                  <div>
+                    <p></p>
+                  </div>
+				<div class="title">Python</div>
+                  <div></div>
+                  <div>
+                    <div class="samplelist">
+                      <table width="100%" border="1" rules="all">
+                        <tr>
+                          <th bgcolor="#BBBBBB" width="25%" align="left">Sample</th>
+                          <th bgcolor="#BBBBBB" width="75%" align="left">Explanation</th>
+                        </tr>
+                        <tr>
+                          <td width="25%"><a class="go-top" href="python">Source Folder</a></td>
+                          <td width="75%">
+                            <div>The linked directory contains the following sources.<br></div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="25%">dcam_show_device_list.py</td>
+                          <td width="75%">
+                            <div>show the list of detected device<br></div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="25%">dcam_show_properties.py</td>
+                          <td width="75%">
+                            <div>show the property list that the opened device supports.<br></div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="25%">dcam_show_single_captured_image.py</td>
+                          <td width="75%">
+                            <div>capture a single frame and show the image by OpenCV.<br></div>
+                          </td>
+                        </tr>
+                      </table>
+                    </div>
+                  </div>
+                  <div>
+                    <p></p>
+                  </div>
+				<div class="title">CUDA</div>
+                  <div>
+                    <div>
+						<div>Sample code using CUDA. We made with CUDA Toolkit 10.2 and Visual Studio 2019.</div>
+					</div>
+                  </div>
+                  <div>
+                    <div class="samplelist">
+                      <table width="100%" border="1" rules="all">
+                        <tr>
+                          <th bgcolor="#BBBBBB" width="25%" align="left">Sample</th>
+                          <th bgcolor="#BBBBBB" width="75%" align="left">Explanation</th>
+                        </tr>
+                        <tr>
+                          <td width="25%"><a class="go-top" href="cuda/cuda_live_attach">cuda_live_attach</a></td>
+                          <td width="75%">
+                            <div>Retrieve images and display the average of each image with GPU. Enable directives to change GPU buffer type for use.<br></div>
+                          </td>
+                        </tr>
+                      </table>
+                    </div>
+                  </div>
+                  <div>
+                    <p></p>
+                  </div>
+			</td>
+              </tr>
+            </table>
+            <p></p>
+            <p><a class="go-top" href="#Chapter_sampledcam4_detail">Go to top of this chapter</a></p>
+          </td>
+          <td width="2%"></td>
+        </tr>
+      </table>
+    </div>
+  </body>
+</html>

@@ -6,7 +6,7 @@ def start_camera(session, camera_id, verbose):
     """
     # Hamamatsu Camera
     if session.CameraParameters['type'] == 'HamamatsuOrca':
-        from model.camera.HamamatsuCamera import Camera as CameraModel
+        from model.camera.Hamamatsu.HamamatsuCamera import Camera as CameraModel
         cam = CameraModel(camera_id, session, verbose)
         cam.initialize_camera()
         cam.set_exposure(session.CameraParameters['camera_exposure_time'])
@@ -34,7 +34,7 @@ def start_stages(session, verbose):
     """
     # Physik Instrumente Stage
     if session.StageParameters['stage_type'] == 'PI':
-        from model.stages.PIStage import Stage as StageModel
+        from model.stages.PI.PIStage import Stage as StageModel
         stage = StageModel(session, verbose)
         if verbose:
             print("Initialized ", session.StageParameters['stage_type'])

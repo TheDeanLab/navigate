@@ -170,7 +170,7 @@ StartupParameters:
 ZoomParameters:
     zoom_type: Dynamixel
     servo_id: 1
-    COM_port: COM21
+    COMport: COM21
     baudrate: 1000000
     zoom_position: {
       0.63x: 0,

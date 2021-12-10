@@ -65,7 +65,7 @@ class Lambda10B:
             print('Closing the Filter Wheel Serial Port')
         self.close()
 
-    def _check_if_filter_in_filterdict(self, filterposition):
+    def check_if_filter_in_filterdict(self, filterposition):
         # Checks if the filter designation (string) given as argument exists in the filterdict
         if filterposition in self.filterdict:
             return True

@@ -47,6 +47,7 @@ def start(configuration_directory, configuration_file, verbose=False):
     # Start the devices
     cam = start_camera(session, 0, verbose)
     stages = start_stages(session, verbose)
+    zoom = start_zoom_servo(session, verbose)
 
 
     # Initialize GUI

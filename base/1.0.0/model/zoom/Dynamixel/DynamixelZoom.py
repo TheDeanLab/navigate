@@ -1,35 +1,26 @@
-"""  Module for controlling a discrete zoom changer
-Author: Fabian Voigt
-#TODO
 """
+Module for controlling Dynamixel discrete zoom changer
 
-import time
+Previously initialize as:
+def __init__(self, zoomdict, COMport, identifier=2, baudrate=1000000):
 
-class DemoZoom(QtCore.QObject):
-    def __init__(self, zoomdict):
-        super().__init__()
-        self.zoomdict = zoomdict
+Adopted from mesoSPIM
 
-    def set_zoom(self, zoom, wait_until_done=False):
-        if zoom in self.zoomdict:
-            print('Zoom set to: ', str(zoom))
-            if wait_until_done:
-                time.sleep(1)
-   
+"""
+# Local Imports
+from model.zoom.ZoomBase import ZoomBase
+from model.zoom.Dynamixel import dynamixel_functions as dynamixel
 
-class DynamixelZoom():
-    #TODO: Move Zoom Pareamters to Config File
-    def __init__(self, zoomdict, COMport, identifier=2, baudrate=1000000):
-        super().__init__()
-        from .dynamixel import dynamixel_functions as dynamixel
-
-        self.verbose = True
-        self.zoomdict = zoomdict
+class Zoom(ZoomBase):
+    def __init__(self, session, verbose):
+        self.verbose = verbose
+        comport = session.ZoomParameters['COMport']
+        self.comport = comport
+        self.devicename = comport.encode('utf-8')
+        self.zoomdict = session.ZoomParameters['zoom_position']
+        self.id = 2
         self.dynamixel = dynamixel
-        self.id = identifier
-        self.devicename = COMport.encode('utf-8') # bad naming convention
-        self.baudrate = baudrate
-
+        self.baudrate = session.ZoomParameters['baudrate']
         self.addr_mx_torque_enable = 24
         self.addr_mx_goal_position = 30
         self.addr_mx_present_position = 36
@@ -52,14 +43,16 @@ class DynamixelZoom():
         self.dynamixel.packetHandler()
 
     def set_zoom(self, zoom, wait_until_done=False):
-        """Changes zoom after checking that the commanded value exists"""
+        """
+        Changes zoom after checking that the commanded value exists
+        """
         if zoom in self.zoomdict:
             self._move(self.zoomdict[zoom], wait_until_done)
             self.zoomvalue = zoom
         else:
             raise ValueError('Zoom designation not in the configuration')
 
-    def _move(self, position, wait_until_done=False):
+    def move(self, position, wait_until_done=False):
         # open port and set baud rate
         self.dynamixel.openPort(self.port_num)
         self.dynamixel.setBaudRate(self.port_num, self.baudrate)
@@ -80,7 +73,8 @@ class DynamixelZoom():
         self.dynamixel.write2ByteTxRx(self.port_num, 1, self.id, self.addr_mx_goal_position, position)
 
         # Check position
-        ''' This works even though the positions returned during movement are just crap
+        ''' 
+        This works even though the positions returned during movement are just crap
         - they have 7 to 8 digits. Only when the motor stops, positions are accurate
         -
         '''
@@ -114,6 +108,3 @@ class DynamixelZoom():
         cur_position = self.dynamixel.read4ByteTxRx(self.port_num, 1, self.id, self.addr_mx_present_position)
         self.dynamixel.closePort(self.port_num)
         return cur_position
-
-if (__name__ == "__main__"):
-    print("Testing Section - DynamixelZoom Class")

@@ -11,7 +11,7 @@ from StartASLM import start
 
 if __name__ == '__main__':
     base_directory = os.path.dirname(os.path.abspath(__file__))
-    verbose = True
+    verbose = False
     if verbose:
         print("The Base Directory is:", base_directory)
 

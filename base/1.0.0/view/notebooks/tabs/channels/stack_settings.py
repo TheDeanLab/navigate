@@ -11,27 +11,6 @@ class stack_acq_frame(ttk.Labelframe):
         text_label = 'Stack Acquisition Settings (' + "\N{GREEK SMALL LETTER MU}" + 'm)'
         ttk.Labelframe.__init__(stack_acq, settings_tab, text=text_label, *args, **kwargs)
 
-        # Functions
-        # Calculate number of steps for slice frame
-        def calculate_number_of_steps(stack_acq, session, verbose):
-            #Calculate number of steps
-            start_position = np.float(stack_acq.start_pos_spinval.get())
-            end_position = np.float(stack_acq.end_pos_spinval.get())
-            step_size = np.float(stack_acq.step_size_spinval.get())
-            number_of_steps = np.floor((end_position - start_position)/step_size)
-
-            # Save Values to Session
-            session.MicroscopeState['step_size'] = step_size
-            session.MicroscopeState['start_position'] = start_position
-            session.MicroscopeState['end_position'] = end_position
-
-            # Update GUI
-            stack_acq.slice_spinval.set(number_of_steps)
-            if verbose:
-                print("number of steps", number_of_steps)
-
-            return number_of_steps
-
         #Step Size Frame (Vertically oriented)
         stack_acq.step_size_frame = ttk.Frame(stack_acq)
         stack_acq.step_size_label = ttk.Label(stack_acq.step_size_frame, text='Step Size')
@@ -49,7 +28,7 @@ class stack_acq_frame(ttk.Labelframe):
             width=14
         )
         stack_acq.step_size_spinbox.grid(row=1, column=0, sticky=(N))
-        stack_acq.step_size_spinval.trace_add('write', lambda *args: calculate_number_of_steps(stack_acq, session, verbose))
+        #stack_acq.step_size_spinval.trace_add('write', lambda *args: calculate_number_of_steps(stack_acq, session, verbose))
 
 
     #Start Pos Frame (Vertically oriented)
@@ -69,7 +48,7 @@ class stack_acq_frame(ttk.Labelframe):
             width=14
         )
         stack_acq.start_pos_spinbox.grid(row=1, column=0, sticky=(N))
-        stack_acq.start_pos_spinval.trace_add('write', lambda *args: calculate_number_of_steps(stack_acq, session, verbose))
+        #TODO: Move to Controller. stack_acq.start_pos_spinval.trace_add('write', lambda *args: calculate_number_of_steps(stack_acq, session, verbose))
 
 
     #End Pos Frame (Vertically oriented)
@@ -89,7 +68,7 @@ class stack_acq_frame(ttk.Labelframe):
             width=14
         )
         stack_acq.end_pos_spinbox.grid(row=1, column=0, sticky=(N))
-        stack_acq.end_pos_spinval.trace_add('write', lambda *args: calculate_number_of_steps(stack_acq, session, verbose))
+        #TODO: Move to controller stack_acq.end_pos_spinval.trace_add('write', lambda *args: calculate_number_of_steps(stack_acq, session, verbose))
 
 
 
@@ -98,7 +77,8 @@ class stack_acq_frame(ttk.Labelframe):
         stack_acq.slice_label = ttk.Label(stack_acq.slice_frame, text='Slice')
         stack_acq.slice_label.grid(row=0, column=0, sticky=(S))
         stack_acq.slice_spinval = StringVar() #Attempts to get slice value with
-        stack_acq.slice_spinval.set(calculate_number_of_steps(stack_acq, session, verbose))
+        stack_acq.slice_spinval.set(int(1))
+        # stack_acq.slice_spinval.set(calculate_number_of_steps(stack_acq, session, verbose))
         stack_acq.slice_spinbox = ttk.Spinbox(
             stack_acq.slice_frame,
             from_=0,

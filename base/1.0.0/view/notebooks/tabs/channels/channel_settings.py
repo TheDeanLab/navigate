@@ -33,13 +33,7 @@ class channel_frame(ttk.Frame):
         channel.chan_check = ttk.Checkbutton(
             channel,
             text='CH' + num,
-            variable=on_off
-            #command=
-            #onvalue=
-            #offvalue=
-            #state=
-            #instate=
-        )
+            variable=on_off)
         channel.chan_check.grid(row=0, column=0, sticky=(NSEW))
 
         # Creating Dropdowns

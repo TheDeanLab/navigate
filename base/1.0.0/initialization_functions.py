@@ -17,7 +17,7 @@ def start_camera(session, camera_id, verbose):
     # Synthetic Camera
     elif session.CameraParameters['type'] == 'SyntheticCamera':
         from model.camera.SyntheticCamera import Camera as CameraModel
-        cam = CameraModel(0)
+        cam = CameraModel(0, session, verbose)
         cam.initialize_camera()
         cam.set_exposure(session.CameraParameters['camera_exposure_time'])
         if verbose:

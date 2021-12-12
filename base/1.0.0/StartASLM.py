@@ -16,7 +16,8 @@ import tkinter as tk
 # Local imports
 from model.session import Session
 from view.main_application_window import Main_App as main_window
-from view.Monitor.ASLMMain import ASLMMain
+from controller.aslm_controller import ASLM_controller
+
 from initialization_functions import *
 
 def start(configuration_directory, configuration_file, verbose=False):
@@ -34,6 +35,7 @@ def start(configuration_directory, configuration_file, verbose=False):
 
     # Initialize the Session
     global session
+    controller = ASLM_controller
     session = Session(config_path, verbose)
 
     # Specify Root Saving Directory.  The Default saving directory is pulled from the
@@ -46,8 +48,8 @@ def start(configuration_directory, configuration_file, verbose=False):
 
     # Start the devices
     cam = start_camera(session, 0, verbose)
-    stages = start_stages(session, verbose)
-    zoom = start_zoom_servo(session, verbose)
+    #stages = start_stages(session, verbose)
+    #zoom = start_zoom_servo(session, verbose)
 
 
     # Initialize GUI

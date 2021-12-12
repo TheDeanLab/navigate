@@ -4,16 +4,7 @@ User:
   name: Kevin_Dean
 
 Saving:
-  auto_save: False
-  auto_save_waterfall: True
   root_directory: /Users/S155475/Desktop
-  filename_video: Video # Can be the same filename for video and photo
-  filename_photo: Snap
-  filename_waterfall: Waterfall
-  filename_trajectory: Trajectory
-  filename_log: Log
-  max_memory: 800 # In megabytes
-  # These are filled by the GUI
   save_directory:
   user:
   tissue:
@@ -53,7 +44,7 @@ DAQParameters:
     shutter_right: PXI6259/port2/line0
 
 CameraParameters:
-  type: HamamatsuOrca #HamamatsuOrca or SyntheticCamera
+  type: SyntheticCamera #HamamatsuOrca or SyntheticCamera
   number_of_cameras: 2
   x_pixels: 2048
   y_pixels: 2048

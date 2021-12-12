@@ -4,74 +4,67 @@ Use: https://www.python-course.eu/tkinter_events_binds.php
 """
 
 # Import Standard Python Packages
-import time
-from threading import Thread
 import numpy as np
-import datetime as dt
-import os
-import glob
 
-# Import GUI Packages
-import tkinter as tk
-from tkinter import ttk
-
-# Import Local Packages
-# import concurrency.concurrency_tools as ct
+# Local Imports
 from view.main_application_window import Main_App as ASLM_view
-from model import session as ASLM_model
+from controller.initialization_functions import *
 
 class ASLM_controller():
-    def __init__(self, root):
-        self.model = ASLM_model()
-        self.model.addCallback(self.model)
-        self.view = ASLM_view(root)
+    def __init__(self, root, configuration_path, verbose):
+        if verbose:
+            print("Starting ASLM_controller")
 
-        ####### Connect buttons / variables from GUI with functions here-----------------------------------
-        # connect all the buttons that start a functionality like preview, stack acquisition, etc.
-        # connect all the buttons that you want to dynamically change, e.g. during preview
-        # don't connect buttons that you want to be "static" during a stack acquisition, such as number of planes, plane spacing
-        # those parameters, you can get at the beginning of e.g. a stack acquisition call
+        # Initialize the Model
+        self.configuration_path = configuration_path
+        self.model = start_model(self.configuration_path, verbose)
 
-        #self.view.frame_left.settings_notebook.channels_tab.stack_cycling_frame.cycling_pull_down.bind("<<ComboboxSelected>>", self.update_cycling_pull_down)
-        #self.view.frame_left.settings_notebook.channels_tab.stack_cycling_frame.cycling_pull_down.bind('<<ComboboxSelected>>', lambda event: save_to_session(stack_acq, session, verbose))
+        # Initialize Hardware Devices
+        self.camera_id = 0
+        self.cam = start_camera(self.model, self.camera_id, verbose)
 
-        # Stack_Settings
-        # If the step size is changed (default = 0.16), the number of slices is recalculated
-        self.view.frame_left.settings_notebook.channels_tab.stack_acq_frame.step_size_spinval.trace_add('write', lambda *args: calculate_number_of_z_steps())
+        # Initialize the View
+        self.view = ASLM_view(root, self.model, self.cam, verbose)
 
-        # If the start position is changed (default = 0), the number of slices is recalculated
-        self.view.frame_left.settings_notebook.channels_tab.stack_acq_frame.start_pos_spinval.trace_add('write', lambda *args: calculate_number_of_z_steps())
+        # CALLBACKS
 
-        # If the end position is changed (default = 200), the number of slices is recalculated
-        self.view.frame_left.settings_notebook.channels_tab.stack_acq_frame.end_pos_spinval.trace_add('write', lambda *args: calculate_number_of_z_steps())
+        # Channels Tab, Channel Settings
 
-    def calculate_number_of_z_steps(self):
-        print("We are trying to calculate the number of z steps!")
-        #Calculate number of steps
-        start_position = np.float(self.view.frame_left.settings_notebook.channels_tab.stack_acq_frame.start_pos_spinval.get())
-        end_position = np.float(self.view.frame_left.settings_notebook.channels_tab.stack_acq_frame.end_pos_spinval.get())
-        step_size = np.float(self.view.frame_left.settings_notebook.channels_tab.stack_acq_frame.step_size_spinval.get())
-        number_of_steps = np.floor((end_position - start_position)/step_size)
+        # Channels Tab, Stack Acquisition Settings
+        self.view.notebook_1.channels_tab.stack_acq_frame.start_pos_spinval.trace_add('write', lambda *args: self.update_z_steps())
+        self.view.notebook_1.channels_tab.stack_acq_frame.step_size_spinval.trace_add('write', lambda *args: self.update_z_steps())
+        self.view.notebook_1.channels_tab.stack_acq_frame.end_pos_spinval.trace_add('write', lambda *args: self.update_z_steps())
 
-        # Save Values to Session
-        session.MicroscopeState['step_size'] = step_size
-        session.MicroscopeState['start_position'] = start_position
-        session.MicroscopeState['end_position'] = end_position
+        # Channels Tab, Laser Cycling Settings
 
-        # Update GUI
-        self.view.frame_left.settings_notebook.channels_tab.stack_acq_frame.slice_spinval.set(number_of_steps)
+        # Channels Tab, Timepoint Settings
+
+        # Channels Tab, Multi-position Acquisition Settings
+
+        # Camera Tab, Camera Settings
+
+        # Advanced Tab
+
+    def update_z_steps(self):
+        '''
+        Recalculates the number of slices that will be acquired in a z-stack whenever the GUI
+        has the start position, end position, or step size changed.
+        Sets the number of slices in the model and the GUI.
+        '''
+        # Calculate the number of slices and set GUI
+        start_position = np.float(self.view.notebook_1.channels_tab.stack_acq_frame.start_pos_spinval.get())
+        end_position = np.float(self.view.notebook_1.channels_tab.stack_acq_frame.end_pos_spinval.get())
+        step_size = np.float(self.view.notebook_1.channels_tab.stack_acq_frame.step_size_spinval.get())
+        number_z_steps = np.floor((end_position - start_position)/step_size)
+        self.view.notebook_1.channels_tab.stack_acq_frame.slice_spinbox.set(number_z_steps)
+
+        # Update model
+        self.model.MicroscopeState['step_size'] = step_size
+        self.model.MicroscopeState['start_position'] = start_position
+        self.model.MicroscopeState['end_position'] = end_position
+        self.model.MicroscopeState['number_z_steps'] = number_z_steps
 
 
-        # Signal changes to the pull down menu
-        def save_to_session(stack_acq, session, verbose):
-            stack_cycling_state = stack_acq.cycling_pull_down.get()
-            if stack_cycling_state == 'Per Z':
-                session.MicroscopeState['stack_cycling_state'] = 'Per_Z'
-            elif stack_cycling_state == 'Per Stack':
-                session.MicroscopeState['stack_cycling_state'] = 'Per_Stack'
-            session.MicroscopeState['stack_cycling'] = stack_acq.cycling_pull_down.get()
-            if verbose:
-                print("The Microscope State is now:", session.MicroscopeState['stack_cycling'])
 
 
 

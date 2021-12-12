@@ -1,27 +1,30 @@
 __all__ = ['start_camera', 'start_stages', 'start_zoom_servo',
-           'start_filter_wheel', 'start_lasers']
+           'start_filter_wheel', 'start_lasers', 'start_model']
+import sys
 
-def start_camera(session, camera_id, verbose):
+from model.aslm_model import Model
+
+def start_camera(model, camera_id, verbose):
     """
     Initializes the camera.
     """
     # Hamamatsu Camera
-    if session.CameraParameters['type'] == 'HamamatsuOrca':
+    if model.CameraParameters['type']== 'HamamatsuOrca':
         from model.camera.Hamamatsu.HamamatsuCamera import Camera as CameraModel
-        cam = CameraModel(camera_id, session, verbose)
+        cam = CameraModel(camera_id, model, verbose)
         cam.initialize_camera()
-        cam.set_exposure(session.CameraParameters['camera_exposure_time'])
+        cam.set_exposure(model.CameraParameters['camera_exposure_time'])
         if verbose:
-            print("Initialized ", session.CameraParameters['type'])
+            print("Initialized ", model.CameraParameters['type'])
 
     # Synthetic Camera
-    elif session.CameraParameters['type'] == 'SyntheticCamera':
+    elif model.CameraParameters['type'] == 'SyntheticCamera':
         from model.camera.SyntheticCamera import Camera as CameraModel
-        cam = CameraModel(0, session, verbose)
+        cam = CameraModel(0, model, verbose)
         cam.initialize_camera()
-        cam.set_exposure(session.CameraParameters['camera_exposure_time'])
+        cam.set_exposure(model.CameraParameters['camera_exposure_time'])
         if verbose:
-            print("Initialized ", session.CameraParameters['type'])
+            print("Initialized ", model.CameraParameters['type'])
 
     # Failed to Initialize
     else:
@@ -29,23 +32,23 @@ def start_camera(session, camera_id, verbose):
         sys.exit()
     return cam
 
-def start_stages(session, verbose):
+def start_stages(model, verbose):
     """
     Initializes the Stage.
     """
     # Physik Instrumente Stage
-    if session.StageParameters['stage_type'] == 'PI':
+    if model.StageParameters['stage_type'] == 'PI':
         from model.stages.PI.PIStage import Stage as StageModel
-        stage = StageModel(session, verbose)
+        stage = StageModel(model, verbose)
         if verbose:
-            print("Initialized ", session.StageParameters['stage_type'])
+            print("Initialized ", model.StageParameters['stage_type'])
         stage.report_position()
 
     # Synthetic Stage
-    elif session.StageParameters['stage_type'] == 'SyntheticStage':
+    elif model.StageParameters['stage_type'] == 'SyntheticStage':
         from model.stages.SyntheticStage import Stage as StageModel
         if verbose:
-            print("Initialized ", session.StageParameters['stage_type'])
+            print("Initialized ", model.StageParameters['stage_type'])
 
     # Failed to Initialize
     else:
@@ -53,36 +56,39 @@ def start_stages(session, verbose):
         sys.exit()
     return stage
 
-def start_zoom_servo(session, verbose):
+def start_zoom_servo(model, verbose):
     """
     Initializes the Zoom Servo Motor
     """
 
     # Dynamixel Servo
-    if session.ZoomParameters['zoom_type'] == 'Dynamixel':
+    if model.ZoomParameters['zoom_type'] == 'Dynamixel':
         from model.zoom.Dynamixel.DynamixelZoom import Zoom as ZoomModel
-        zoom = ZoomModel(session, verbose)
+        zoom = ZoomModel(model, verbose)
         if verbose:
-            print("Initialized ", session.ZoomParameters['zoom_type'])
+            print("Initialized ", model.ZoomParameters['zoom_type'])
         print("Zoom Position", zoom.read_position())
 
     # Synthetic Servo
     #TODO: Make the synthetic servo class.
-    elif session.ZoomParameters['zoom_type'] == 'SyntheticZoom':
+    elif model.ZoomParameters['zoom_type'] == 'SyntheticZoom':
         from model.zoom.SyntheticZoom import Zoom as ZoomModel
-        zoom = ZoomModel(session, verbose)
+        zoom = ZoomModel(model, verbose)
         if verbose:
-            print("Initialized ", session.ZoomParameters['zoom_type'])
+            print("Initialized ", model.ZoomParameters['zoom_type'])
         print("Zoom Position", zoom.read_position())
     else :
         print("Zoom Type in Configuration.yml Not Recognized - Initialization Failed")
         sys.exit()
     return zoom
 
-def start_filter_wheel(session, verbose):
+def start_filter_wheel(model, verbose):
     pass
 
-def start_lasers(session, verbose):
+def start_lasers(model, verbose):
     pass
 
-
+def start_model(configuration_path, verbose):
+    global model
+    model = Model(configuration_path, verbose)
+    return model

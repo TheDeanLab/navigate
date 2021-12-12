@@ -213,6 +213,10 @@ SharedMemoryAllocation:
 MicroscopeState:
   image_mode: Continuous
   stack_cycling_mode: dummy_value
+  start_position: 0
+  end_position: 0
+  step_size: 0
+  number_z_steps: 0
   save_data: 0
   timepoints: 1
   stack_pause: 0

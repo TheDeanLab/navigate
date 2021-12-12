@@ -10,7 +10,6 @@
 
 # Standard library imports
 import os
-import sys
 import tkinter as tk
 
 # Local imports
@@ -35,7 +34,7 @@ def start(configuration_directory, configuration_file, verbose=False):
 
     # Initialize the Session
     global session
-    controller = ASLM_controller
+
     session = Session(config_path, verbose)
 
     # Specify Root Saving Directory.  The Default saving directory is pulled from the
@@ -56,10 +55,11 @@ def start(configuration_directory, configuration_file, verbose=False):
     if verbose:
         print("Initializing GUI")
 
+
     # Starts the GUI event loop and presents gui to user
     # Instance of the main window any additional windows will be toplevel classes
     root = tk.Tk()
-
+    controller = ASLM_controller(root, session, cam, verbose)
     # Runs the view code which will call controller code to adjust and present the model
     main_window(root, session, cam, verbose)
 

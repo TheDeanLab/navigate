@@ -26,7 +26,7 @@ from .notebooks.acquire_bar_frame.acquire_bar import AcquireBar
 class Main_App(ttk.Frame):
         #Takes a Tk object should be something like root = Tk() then root_window(root)
 
-        def __init__(mainapp, root, session, cam, verbose, *args, **kwargs):
+        def __init__(mainapp, root, model, cam, verbose, *args, **kwargs):
                 #Inits this class as a frame subclass with the root as its parent
                 ttk.Frame.__init__(mainapp, root, *args, **kwargs)
 
@@ -103,10 +103,10 @@ class Main_App(ttk.Frame):
                 mainapp.rowconfigure(1,weight=1)
 
                 #Putting Notebooks into frames, tabs are held within the class of each notebook
-                mainapp.notebook_1 = notebook_1(mainapp.frame_left, session, verbose)
-                mainapp.notebook_2 = notebook_2(mainapp.frame_top_right, session, verbose)
-                mainapp.notebook_3 = notebook_3(mainapp.frame_bottom_right, session, verbose)
-                mainapp.acqbar = AcquireBar(mainapp.top_frame, mainapp.root, session, verbose)
+                mainapp.notebook_1 = notebook_1(mainapp.frame_left, model, verbose)
+                mainapp.notebook_2 = notebook_2(mainapp.frame_top_right, model, verbose)
+                mainapp.notebook_3 = notebook_3(mainapp.frame_bottom_right, model, verbose)
+                mainapp.acqbar = AcquireBar(mainapp.top_frame, mainapp.root, model, verbose)
 
 
 

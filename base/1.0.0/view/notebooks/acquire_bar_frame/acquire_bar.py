@@ -8,19 +8,15 @@ from .acquire_popup import Acquire_PopUp
 
 class AcquireBar(ttk.Frame):
 
-    def __init__(AcqBar, top_frame, root, session, verbose, *args, **kwargs):
+    def __init__(AcqBar, top_frame, root, *args, **kwargs):
         #Init bar with frame attr
         ttk.Frame.__init__(AcqBar, top_frame, *args, **kwargs)
 
         #Putting bar into frame
         AcqBar.grid(row=0, column=0)
 
-        #Create command for popup to be called
-        def call_popup(session):
-            Acquire_PopUp(root, session)
-
         #Acquire Button
-        AcqBar.acquire_btn = ttk.Button(AcqBar, text="Acquire", command=call_popup)
+        AcqBar.acquire_btn = ttk.Button(AcqBar, text="Acquire")
 
         #Read Only Pulldown menu: continuous, z-stack, single acquisition, projection.
         AcqBar.options = StringVar()
@@ -28,23 +24,6 @@ class AcquireBar(ttk.Frame):
         AcqBar.pull_down['values'] = ('Continuous Scan', 'Z-Stack', 'Single Acquisition', 'Projection')
         AcqBar.pull_down.current(0)
         AcqBar.pull_down.state(["readonly"])
-
-        # Signal changes to the Acquisition Bar Pull Down Menu
-        def signal_microscope_mode(AcqBar, session, verbose):
-            microscope_state = AcqBar.pull_down.get()
-            if microscope_state == 'Continuous Scan':
-                session.MicroscopeState['image_mode'] = 'continuous'
-            elif microscope_state == 'Z-Stack':
-                session.MicroscopeState['image_mode'] = 'z-stack'
-            elif microscope_state == 'Single Acquisition':
-                session.MicroscopeState['image_mode'] = 'single'
-            elif microscope_state == 'Projection':
-                session.MicroscopeState['image_mode'] = 'projection'
-            if verbose:
-                print("The Microscope State is now:", session.MicroscopeState['image_mode'])
-
-        #Update Session
-        AcqBar.pull_down.bind('<<ComboboxSelected>>', lambda event: signal_microscope_mode(AcqBar, session, verbose))
 
         #Progess Bar: Current Acquitiions and Overall
         AcqBar.progBar_frame = ttk.Frame(AcqBar)
@@ -57,12 +36,8 @@ class AcquireBar(ttk.Frame):
         AcqBar.CurAcq.grid(row=0,column=0)
         AcqBar.OvrAcq.grid(row=1,column=0)
 
-        def exit_program():
-            print("Shutting Down Program")
-            sys.exit()
-
         #Exit Button
-        AcqBar.exit_btn = ttk.Button(AcqBar, text="Exit", command=exit_program)
+        AcqBar.exit_btn = ttk.Button(AcqBar, text="Exit")
 
         #Gridding out Bar
         '''
@@ -72,6 +47,3 @@ class AcquireBar(ttk.Frame):
         AcqBar.pull_down.grid(row=0, column=1, sticky=(NSEW))
         AcqBar.progBar_frame.grid(row=0, column=2, sticky=(NSEW))
         AcqBar.exit_btn.grid(row=0, column=3, sticky=(NSEW))
-
-        #Passing controller the setup frame
-        #acqbar_controller(AcqBar)

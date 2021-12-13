@@ -9,7 +9,6 @@ class channels_label_frame(ttk.Frame):
         ttk.Frame.__init__(chan_label_frame, settings_tab, *args, **kwargs)
 
         #Adding Labels to frame
-
         #Laser Label
         chan_label_frame.laser_label = ttk.Label(chan_label_frame, text='Laser')
         chan_label_frame.laser_label.grid(row=0, column=0, sticky=(NSEW))
@@ -23,37 +22,24 @@ class channels_label_frame(ttk.Frame):
         chan_label_frame.exp_time_label.grid(row=0, column=2, sticky=(NSEW))
 
 class channel_frame(ttk.Frame):
-    def __init__(channel, settings_tab, num, model, *args, **kwargs):
+    def __init__(channel, settings_tab, num, *args, **kwargs):
 
         #Init Frame
         ttk.Frame.__init__(channel, settings_tab, *args, **kwargs)
 
         #Creating checkbox
         on_off = StringVar()
-        channel.chan_check = ttk.Checkbutton(
-            channel,
-            text='CH' + num,
-            variable=on_off)
+        channel.chan_check = ttk.Checkbutton(channel, text='CH' + num, variable=on_off)
         channel.chan_check.grid(row=0, column=0, sticky=(NSEW))
 
         # Creating Dropdowns
-        # Lasers - Gets values from the configuration file and populates pulldown.
-        number_of_lasers = np.int(model.DAQParameters['number_of_lasers'])
-        laser_list = []
-        for i in range(number_of_lasers):
-            laser_wavelength = model.DAQParameters['laser_'+str(i)+'_wavelength']
-            laser_list.append(laser_wavelength)
         channel.laser_options = StringVar()
         channel.laser_pull_down = ttk.Combobox(channel, textvariable=channel.laser_options)
-        channel.laser_pull_down['values'] = laser_list
         channel.laser_pull_down.state(["readonly"]) # Makes it so the user cannot type a choice into combobox
         channel.laser_pull_down.grid(row=0, column=1, sticky=(NSEW))
 
-        # FilterWheel - Gets values from the configuration file and populates pulldown.
-        filter_dictionary = model.FilterWheelParameters['available_filters']
         channel.filterwheel_options = StringVar()
         channel.filterwheel_pull_down = ttk.Combobox(channel, textvariable=channel.filterwheel_options)
-        channel.filterwheel_pull_down['values'] = list(filter_dictionary.keys())
         channel.filterwheel_pull_down.state(["readonly"]) # Makes it so the user cannot type a choice into combobox
         channel.filterwheel_pull_down.grid(row=0, column=2, sticky=(NSEW))
 

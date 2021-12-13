@@ -5,7 +5,7 @@ import numpy as np
 
 
 class stack_acq_frame(ttk.Labelframe):
-    def __init__(stack_acq, settings_tab, model, verbose, *args, **kwargs):
+    def __init__(stack_acq, settings_tab, *args, **kwargs):
 
         #Init Frame
         text_label = 'Stack Acquisition Settings (' + "\N{GREEK SMALL LETTER MU}" + 'm)'

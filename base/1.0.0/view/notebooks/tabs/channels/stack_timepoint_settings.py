@@ -18,12 +18,12 @@ import numpy as np
         settings.channels_label_frame.grid_rowconfigure(0, weight=1)
         settings.channels_label_frame.grid(row=0,column=1, columnspan=3, sticky=(NSEW))
 
-        settings.channel_1_frame = channel_frame(settings.channel_main, "1", session)
+        settings.channel_1_frame = channel_frame(settings.channel_main, "1")
         settings.channel_1_frame.grid(row=1,column=0, columnspan=4, sticky=(NSEW))
         """
 
 class stack_timepoint_frame(ttk.Frame):
-    def __init__(stack_timepoint_label_frame, settings_tab, session, verbose, *args, **kwargs):
+    def __init__(stack_timepoint_label_frame, settings_tab, *args, **kwargs):
 
         #Init Frame
         ttk.Frame.__init__(stack_timepoint_label_frame, settings_tab, *args, **kwargs)
@@ -40,47 +40,21 @@ class stack_timepoint_frame(ttk.Frame):
         #Save Data Checkbox
         on_off = BooleanVar()
         on_off.set(False)
-        stack_timepoint_label_frame.save_check = ttk.Checkbutton(
-            stack_timepoint_label_frame,
-            text='',
-            variable=on_off)
+        stack_timepoint_label_frame.save_check = ttk.Checkbutton(stack_timepoint_label_frame, text='', variable=on_off)
         stack_timepoint_label_frame.save_check.grid(row=0, column=input_position, sticky=(NSEW))
 
-        #Update Session
-        def update_session_save_data(on_off, session, verbose):
-            if on_off.get() == False:
-                session.MicroscopeState['save_data'] = 0
-            elif on_off.get() == True:
-                session.MicroscopeState['save_data'] = 1
-            if verbose:
-                print("Save Data State:", session.MicroscopeState['save_data'])
-        on_off.trace_add('write', lambda *args: update_session_save_data(on_off, session, verbose))
 
-        #Timepoints Label
+        # Timepoints Label, spinbox defaults to 1.
         stack_timepoint_label_frame.filterwheel_label = ttk.Label(stack_timepoint_label_frame, text='Timepoints')
         stack_timepoint_label_frame.filterwheel_label.grid(row=1, column=label_position, sticky=(NSEW))
-
-        # Number of Timepoints Spinbox.  Defaults to 1
         stack_timepoint_label_frame.exp_time_spinval = StringVar()
         if stack_timepoint_label_frame.exp_time_spinval.get() == '':
             stack_timepoint_label_frame.exp_time_spinval.set('1')
         stack_timepoint_label_frame.exp_time_spinbox = ttk.Spinbox(
-            stack_timepoint_label_frame,
-            from_=0,
-            to=5000.0,
-            textvariable=stack_timepoint_label_frame.exp_time_spinval, #this holds the data in the entry
+            stack_timepoint_label_frame, from_=0, to=5000.0, textvariable=stack_timepoint_label_frame.exp_time_spinval,
             increment=1,
-            width=9
-        )
+            width=9)
         stack_timepoint_label_frame.exp_time_spinbox.grid(row=1, column=input_position, sticky=(NSEW))
-
-        #Update Session
-        def update_session_timepoints(stack_timepoint_label_frame, session, verbose):
-            number_of_timepoints = stack_timepoint_label_frame.exp_time_spinval.get()
-            session.MicroscopeState['timepoints'] = number_of_timepoints
-            if verbose:
-                print("Number of Timepoints:", session.MicroscopeState['timepoints'])
-        stack_timepoint_label_frame.exp_time_spinval.trace_add('write', lambda *args: update_session_timepoints(stack_timepoint_label_frame, session, verbose))
 
         #Stack Acq. Time Label
         stack_timepoint_label_frame.exp_time_label = ttk.Label(stack_timepoint_label_frame, text='Stack Acq. Time')
@@ -110,24 +84,9 @@ class stack_timepoint_frame(ttk.Frame):
         if stack_timepoint_label_frame.stack_pause_spinval.get() == '':
             stack_timepoint_label_frame.stack_pause_spinval.set('0')
         stack_timepoint_label_frame.stack_pause_spinval = ttk.Spinbox(
-            stack_timepoint_label_frame,
-            from_=0,
-            to=5000.0,
-            textvariable=stack_timepoint_label_frame.stack_pause_spinval, #this holds the data in the entry
-            increment=25,
-            width=9
-            #TODO command= function from connector.  Also, have it save parameters to session.
-        )
+            stack_timepoint_label_frame, from_=0,to=5000.0,
+            textvariable=stack_timepoint_label_frame.stack_pause_spinval, increment=25, width=9)
         stack_timepoint_label_frame.stack_pause_spinval.grid(row=3, column=input_position, sticky=(NSEW))
-
-        # Update Session
-        def update_session_stack_pause(stack_timepoint_label_frame, session, verbose):
-            stack_pause = stack_timepoint_label_frame.stack_pause_spinval.get()
-            session.MicroscopeState['stack_pause'] = stack_pause
-            if verbose:
-                print("Stack Pause Duration:", session.MicroscopeState['stack_pause'])
-        #stack_timepoint_label_frame.stack_pause_spinval.trace_add('write', lambda *args: update_session_stack_pause(
-            #stack_timepoint_label_frame, session, verbose))
 
         #Timepoint Interval Label
         stack_timepoint_label_frame.exp_time_label = ttk.Label(stack_timepoint_label_frame, text='Timepoint Interval (hh:mm:ss)')
@@ -138,14 +97,8 @@ class stack_timepoint_frame(ttk.Frame):
         if stack_timepoint_label_frame.timepoint_interval_spinval.get() == '':
             stack_timepoint_label_frame.timepoint_interval_spinval.set('0')
         stack_timepoint_label_frame.timepoint_interval_spinval = ttk.Spinbox(
-            stack_timepoint_label_frame,
-            from_=0,
-            to=5000.0,
-            textvariable=stack_timepoint_label_frame.timepoint_interval_spinval, #this holds the data in the entry
-            increment=25,
-            width=9
-            #TODO command= function from connector.  Also, have it save parameters to session.
-        )
+            stack_timepoint_label_frame, from_=0, to=5000.0,
+            textvariable=stack_timepoint_label_frame.timepoint_interval_spinval, increment=25, width=9)
         stack_timepoint_label_frame.timepoint_interval_spinval.grid(row=4, column=input_position, sticky=(NSEW))
         stack_timepoint_label_frame.timepoint_interval_spinval.state(['disabled']) #Starts it disabled
 
@@ -160,13 +113,8 @@ class stack_timepoint_frame(ttk.Frame):
             stack_timepoint_label_frame.total_time_spinval.set('0')
         stack_timepoint_label_frame.total_time_spinval = ttk.Spinbox(
             stack_timepoint_label_frame,
-            from_=0,
-            to=5000.0,
-            textvariable=stack_timepoint_label_frame.total_time_spinval, #this holds the data in the entry
-            increment=25,
-            width=9
-            #TODO command= function from connector.  Also, have it save parameters to session.
-        )
+            from_=0, to=5000.0, textvariable=stack_timepoint_label_frame.total_time_spinval,
+            increment=25, width=9)
         stack_timepoint_label_frame.total_time_spinval.grid(row=5, column=input_position, sticky=(NSEW))
         stack_timepoint_label_frame.total_time_spinval.state(['disabled'])
 

@@ -8,7 +8,7 @@ from view.notebooks.tabs.stage_control_tab import stage_control_tab
 from view.notebooks.tabs.maximum_intensity_projection_tab import maximum_intensity_projection_tab
 
 class stagecontrol_maxintensity_notebook(ttk.Notebook):
-    def __init__(stagecontrol_maxintensity, frame_bot_right, session, verbose, *args, **kwargs):
+    def __init__(stagecontrol_maxintensity, frame_bot_right, *args, **kwargs):
 
         #Init notebook
         ttk.Notebook.__init__(stagecontrol_maxintensity, frame_bot_right, *args, **kwargs)

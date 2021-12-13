@@ -6,7 +6,7 @@ import numpy as np
 from view.notebooks.tabs.camera_settings.camera_roi import camera_mode_label_frame, camera_roi_label_frame, camera_mode_label_frame
 
 class camera_settings_tab(ttk.Frame):
-    def __init__(self, setntbk, session, *args, **kwargs):
+    def __init__(self, setntbk, *args, **kwargs):
         #Init Frame
         ttk.Frame.__init__(self, setntbk, *args, **kwargs)
 

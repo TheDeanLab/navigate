@@ -4,7 +4,7 @@ from tkinter.font import Font
 import numpy as np
 
 class stack_cycling_frame(ttk.Labelframe):
-    def __init__(stack_acq, settings_tab, session, verbose, *args, **kwargs):
+    def __init__(stack_acq, settings_tab, *args, **kwargs):
 
         #Init Frame
         text_label = 'Laser Cycling Settings'

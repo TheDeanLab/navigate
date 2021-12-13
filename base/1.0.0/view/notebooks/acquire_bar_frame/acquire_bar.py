@@ -1,5 +1,4 @@
 from tkinter import *
-import tkinter as tk
 from tkinter import ttk
 from .acquire_popup import Acquire_PopUp
 
@@ -33,8 +32,8 @@ class AcquireBar(ttk.Frame):
 
         #Change mode to determinate and set steps for more intuitive usage
         AcqBar.OvrAcq = ttk.Progressbar(AcqBar.progBar_frame, orient=HORIZONTAL, length=200, mode='indeterminate')
-        AcqBar.CurAcq.grid(row=0,column=0)
-        AcqBar.OvrAcq.grid(row=1,column=0)
+        AcqBar.CurAcq.grid(row=0, column=0)
+        AcqBar.OvrAcq.grid(row=1, column=0)
 
         #Exit Button
         AcqBar.exit_btn = ttk.Button(AcqBar, text="Exit")

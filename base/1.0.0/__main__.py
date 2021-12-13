@@ -7,7 +7,7 @@ if __name__ == '__main__':
     import pretty_errors
     import tkinter as tk
     from controller.aslm_controller import ASLM_controller as controller
-    verbose = False
+    verbose = True
 
     # Specify the Configuration Directory
     base_directory = os.path.dirname(os.path.abspath(__file__))

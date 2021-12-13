@@ -28,8 +28,9 @@ class channel_frame(ttk.Frame):
         ttk.Frame.__init__(channel, settings_tab, *args, **kwargs)
 
         #Creating checkbox
-        on_off = StringVar()
-        channel.chan_check = ttk.Checkbutton(channel, text='CH' + num, variable=on_off)
+        #on_off = StringVar()
+        channel.on_off = BooleanVar()
+        channel.chan_check = ttk.Checkbutton(channel, text='CH' + num, variable=channel.on_off)
         channel.chan_check.grid(row=0, column=0, sticky=(NSEW))
 
         # Creating Dropdowns

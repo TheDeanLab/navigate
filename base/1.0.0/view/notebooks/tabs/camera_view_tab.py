@@ -6,7 +6,7 @@ import numpy as np
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
-from model.camera.SyntheticCamera import Camera as camera
+from controller.devices.camera.SyntheticCamera import Camera as camera
 
 
 class camera_tab(ttk.Frame):

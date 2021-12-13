@@ -5,7 +5,8 @@
 [![Image building and testing CI](https://github.com/AdvancedImagingUTSW/ASLM/actions/workflows/container-ci.yml/badge.svg)](https://github.com/AdvancedImagingUTSW/ASLM/actions/workflows/container-ci.yml)
 
 ### Project Outline
-Adopts an MVC architecture for microscope control. Includes key code contributions from a number of open-source projects, including:
+Adopts an MVC architecture for microscope control. 
+Includes key code contributions from a number of open-source projects, including:
 * https://github.com/mesoSPIM/mesoSPIM-control
 * https://github.com/bicarlsen/obis_laser_controller
 * https://github.com/utsw-bicf/auto-docker/
@@ -29,7 +30,17 @@ python -m pip install -r requirements.txt
 ### Hardware Dependencies
 * DLL for Dynamixel Servo Motor
 
+### Software Overview
+The software is started by launching __main__.py. This configures the path to the base and configuration directories,
+starts the tkinter GUi, instantiates the controller, and then begins the main loop. The controller then:
+* Builds the Model from the configuration yaml file.
+* Starts the hardware (camera, stages, etc.)
+* Starts the View
+* Begins the callbacks to trace GUI events.  Any changes are updated in both the GUI and the model.
+
 ### Authors
 Kevin Dean
 Dax Collision
 Sampath Rapuri
+Andrew Jamieson
+Xiaoding 'Annie' Wang

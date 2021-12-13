@@ -38,9 +38,9 @@ class stack_timepoint_frame(ttk.Frame):
         stack_timepoint_label_frame.laser_label.grid(row=0, column=label_position, sticky=(NSEW))
 
         #Save Data Checkbox
-        on_off = BooleanVar()
-        on_off.set(False)
-        stack_timepoint_label_frame.save_check = ttk.Checkbutton(stack_timepoint_label_frame, text='', variable=on_off)
+        stack_timepoint_label_frame.save_data = BooleanVar()
+        stack_timepoint_label_frame.save_data.set(False)
+        stack_timepoint_label_frame.save_check = ttk.Checkbutton(stack_timepoint_label_frame, text='', variable=stack_timepoint_label_frame.save_data)
         stack_timepoint_label_frame.save_check.grid(row=0, column=input_position, sticky=(NSEW))
 
 

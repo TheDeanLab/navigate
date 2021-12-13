@@ -32,4 +32,4 @@ python -m pip install -r requirements.txt
 ### Authors
 Kevin Dean
 Dax Collision
-Sampath Rampuri
+Sampath Rapuri

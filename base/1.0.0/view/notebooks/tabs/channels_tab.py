@@ -12,7 +12,7 @@ from view.notebooks.tabs.channels.multipoint_settings import multipoint_frame, m
 
 
 class channels_tab(ttk.Frame):
-    def __init__(self, setntbk, session, verbose, *args, **kwargs):
+    def __init__(self, setntbk, *args, **kwargs):
 
         #Init Frame
         ttk.Frame.__init__(self, setntbk, *args, **kwargs)
@@ -32,31 +32,31 @@ class channels_tab(ttk.Frame):
         self.channels_label_frame.grid_rowconfigure(0, weight=1)
         self.channels_label_frame.grid(row=0, column=1, columnspan=3, sticky=(NSEW))
 
-        self.channel_1_frame = channel_frame(self.channel_main, "1", session)
+        self.channel_1_frame = channel_frame(self.channel_main, "1")
         self.channel_1_frame.grid(row=1, column=0, columnspan=4, sticky=(NSEW))
 
-        self.channel_2_frame = channel_frame(self.channel_main, "2", session)
+        self.channel_2_frame = channel_frame(self.channel_main, "2")
         self.channel_2_frame.grid(row=2, column=0, columnspan=4, sticky=(NSEW))
 
-        self.channel_3_frame = channel_frame(self.channel_main, "3", session)
+        self.channel_3_frame = channel_frame(self.channel_main, "3")
         self.channel_3_frame.grid(row=3, column=0, columnspan=4, sticky=(NSEW))
 
-        self.channel_4_frame = channel_frame(self.channel_main, "4", session)
+        self.channel_4_frame = channel_frame(self.channel_main, "4")
         self.channel_4_frame.grid(row=4, column=0, columnspan=4, sticky=(NSEW))
 
-        self.channel_5_frame = channel_frame(self.channel_main, "5", session)
+        self.channel_5_frame = channel_frame(self.channel_main, "5")
         self.channel_5_frame.grid(row=5, column=0, columnspan=4, sticky=(NSEW))
 
         #Stack Acquisition Settings
-        self.stack_acq_frame = stack_acq_frame(self, session, verbose)
+        self.stack_acq_frame = stack_acq_frame(self)
         self.stack_acq_frame.grid(row=5, column=0, columnspan=5, sticky=(NSEW), pady=10)
 
         #Stack Cycling Settings
-        self.stack_cycling_frame = stack_cycling_frame(self, session, verbose)
+        self.stack_cycling_frame = stack_cycling_frame(self)
         self.stack_cycling_frame.grid(row=6, column=0, columnspan=5, sticky=(NSEW), pady=10)
 
         #Time Settings
-        self.stack_timepoint_frame = stack_timepoint_frame(self, session, verbose)
+        self.stack_timepoint_frame = stack_timepoint_frame(self)
         self.stack_timepoint_frame.grid(row=7, column=0, columnspan=5, sticky=(NSEW), pady=10)
 
         #Multipoint Enable

@@ -1,22 +1,20 @@
-"""   Starting point for running the program. """
-# Import built-in modules
-import os
-from multiprocessing import Process
-
-# Import third-party modules
-import pretty_errors
-
-# Import local modules
-from StartASLM import start
+"""
+Starting point for running the program.
+"""
 
 if __name__ == '__main__':
-    base_directory = os.path.dirname(os.path.abspath(__file__))
+    import os
+    import pretty_errors
+    import tkinter as tk
+    from controller.aslm_controller import ASLM_controller as controller
     verbose = False
-    if verbose:
-        print("The Base Directory is:", base_directory)
 
-    # Start the monitor
+    # Specify the Configuration Directory
+    base_directory = os.path.dirname(os.path.abspath(__file__))
     configuration_directory = os.path.join(base_directory, 'config')
-    start(configuration_directory, 'configuration.yml', verbose)
-    if verbose:
-        print("Launching the StartMonitor")
+    configuration_path = os.path.join(configuration_directory, 'configuration.yml')
+
+    # Start the GUI
+    root = tk.Tk()
+    app = controller(root, configuration_path, verbose)
+    root.mainloop()

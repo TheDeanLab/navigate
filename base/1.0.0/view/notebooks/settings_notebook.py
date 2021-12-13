@@ -13,7 +13,7 @@ from view.notebooks.tabs.channels_tab import channels_tab
 
 
 class settings_notebook(ttk.Notebook):
-    def __init__(setntbk, frame_left, session, verbose, *args, **kwargs):
+    def __init__(setntbk, frame_left, *args, **kwargs):
         #Init notebook
         ttk.Notebook.__init__(setntbk, frame_left, *args, **kwargs)
 
@@ -21,13 +21,13 @@ class settings_notebook(ttk.Notebook):
         setntbk.grid(row=0,column=0)
 
         #Creating the Channels tab
-        setntbk.channels_tab = channels_tab(setntbk, session, verbose)
+        setntbk.channels_tab = channels_tab(setntbk)
 
         #Creating the Camera tab
-        setntbk.camera_settings_tab = camera_settings_tab(setntbk, session)
+        setntbk.camera_settings_tab = camera_settings_tab(setntbk)
 
         #Creating the advanced settings tab
-        setntbk.advanced_settings_tab = advanced_settings_tab(setntbk, session)
+        setntbk.advanced_settings_tab = advanced_settings_tab(setntbk)
 
         #Adding tabs to settings notebook
         setntbk.add(setntbk.channels_tab, text='Channels', sticky=NSEW)

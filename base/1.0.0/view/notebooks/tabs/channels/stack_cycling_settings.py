@@ -4,7 +4,7 @@ from tkinter.font import Font
 import numpy as np
 
 class stack_cycling_frame(ttk.Labelframe):
-    def __init__(stack_acq, settings_tab, session, verbose, *args, **kwargs):
+    def __init__(stack_acq, settings_tab, *args, **kwargs):
 
         #Init Frame
         text_label = 'Laser Cycling Settings'
@@ -22,15 +22,3 @@ class stack_cycling_frame(ttk.Labelframe):
         #Gridding Each Holder Frame
         stack_acq.cycling_frame.grid(row=0, column=0, sticky=(NSEW))
 
-        # Signal changes to the pull down menu
-        def save_to_session(stack_acq, session, verbose):
-            stack_cycling_state = stack_acq.cycling_pull_down.get()
-            if stack_cycling_state == 'Per Z':
-                session.MicroscopeState['stack_cycling_state'] = 'Per_Z'
-            elif stack_cycling_state == 'Per Stack':
-                session.MicroscopeState['stack_cycling_state'] = 'Per_Stack'
-            session.MicroscopeState['stack_cycling'] = stack_acq.cycling_pull_down.get()
-            if verbose:
-                print("The Microscope State is now:", session.MicroscopeState['stack_cycling'])
-
-        #stack_acq.cycling_pull_down.bind('<<ComboboxSelected>>', lambda event: save_to_session(stack_acq, session, verbose))

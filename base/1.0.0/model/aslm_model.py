@@ -31,8 +31,7 @@ from builtins import (bytes, int, list, object, range, str,
 # Third Party Imports
 import yaml
 
-
-class Session:
+class Model:
     """
     Stores variables and other classes that are common to several UI or instances of the code.
     """
@@ -43,7 +42,7 @@ class Session:
         :param file: Path to the file where the config file is or a dictionary with the data to load.
         """
 
-        super(Session, self).__init__()
+        super(Model, self).__init__()
         super().__setattr__('params', dict())
 
         """
@@ -102,19 +101,12 @@ class Session:
                     if verbose:
                         print("Updated:", key, "Value:", val)
 
-                    #TODO: Anytime one of these observables changes, any interested listener
-                    # should be notified through a callback mechanism here!
-                    # Previously: self.emit(SIGNAL('Updated'))
                 else:
                     self.params[key][k] = value[k]
                     if verbose:
                         print("Updated:", key, "Value:", val)
 
-                    #TODO: Anytime one of these observables changes, any interested listener
-                    # should be notified through a callback mechanism here!
-                    # Previously: self.emit(SIGNAL('New'))
-
-            super(Session, self).__setattr__(k, value[k])
+            super(Model, self).__setattr__(k, value[k])
 
 
     def __getattr__(self, item):
@@ -174,27 +166,9 @@ class Session:
         Copies this class. Important not to overwrite the memory of a previously created session.
         :return: a session exactly the same as this one.
         """
-        return Session(self.params)
+        return Model(self.params)
 
 
 if __name__ == '__main__':
     """ Testing Section """
-    s = Session(file='../config/configuration.yml')
-    print('NEW')
-    s.Camera = {'new': 'New'}
-    print('OLD')
-    s.Camera = {'model': 'Old'}
-    # print(s.Monitor)
-    # for k in s.params:
-    #     print(k)
-    #     for m in s.params[k]:
-    #         print('   %s:  %s'%(m,s.params[k][m]))
-    # print(s)
-
-    print('SERIALIZE')
-    ss = s.serialize()
-    print(ss)
-
-    session2 = Session(ss)
-    print('=========SESSION2=============')
-    print(session2)
+    pass

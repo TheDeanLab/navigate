@@ -21,6 +21,7 @@ class ASLM_controller():
         # Initialize Hardware Devices
         self.camera_id = 0
         self.cam = start_camera(self.model, self.camera_id, verbose)
+        self.stage = start_stage(self.model, verbose)
 
         # Initialize the View
         self.view = view(root)

@@ -29,28 +29,29 @@ class Camera(CameraBase):
     MODE_SINGLE_SHOT = 0
     MODE_EXTERNAL = 2
 
-    def __init__(self, camera_id, session, verbose):
+    def __init__(self, camera_id, verbose):
         # Monitor ID
+        self.verbose = verbose
         self.cam_id = camera_id
         self.camera_controller = HamamatsuController(camera_id)
         self.running = False
         self.mode = self.MODE_SINGLE_SHOT
-        if verbose:
-            print("Camera initialized")
+        if self.verbose:
+            print("Hamamatsu Camera Class Initialized")
 
     def initialize_camera(self):
         """
         Initializes the camera.
+        This is important to not have shufled patches of the CCD.
         :return:
         """
-
         self.camera_controller.initCamera()
         self.max_width = self.get_ccd_width()
         self.max_height = self.get_ccd_height()
-        #This is important to not have shufled patches of the CCD.
-        #Have to check documentation!!
         self.camera_controller.setPropertyValue("readout_speed", 1)
         self.camera_controller.setPropertyValue("defect_correct_mode", 1)
+        if self.verbose:
+            print("Camera Initialized")
 
     def trigger_camera(self):
         """
@@ -61,6 +62,8 @@ class Camera(CameraBase):
         elif self.get_acquisition_mode() == self.MODE_SINGLE_SHOT:
             self.camera_controller.startAcquisition()
             self.camera_controller.stopAcquisition()
+        if self.verbose:
+            print("Camera Triggered")
 
     def set_acquisition_mode(self, mode):
         """
@@ -81,18 +84,24 @@ class Camera(CameraBase):
         elif mode == self.MODE_EXTERNAL:
             #self.camera_controller.setPropertyValue("trigger_source", 2)
             self.camera_controller.settrigger(2)
+        if self.verbose:
+            print("Camera Acquisition Mode Set:", mode)
         return self.getAcquisitionMode()
 
     def get_acquisition_mode(self):
         """
         Returns the acquisition mode, either continuous or single shot.
         """
+        if self.verbose:
+            print("Camera Acquisition Mode:", self.mode)
         return self.mode
 
     def acquisition_ready(self):
         """
         Checks if the acquisition in the camera is over.
         """
+        if self.verbose:
+            print("Camera Acquisition Ready")
         return True
 
     def set_exposure(self, exposure):
@@ -100,13 +109,18 @@ class Camera(CameraBase):
         Sets the exposure of the camera.
         """
         self.camera_controller.setPropertyValue("exposure_time", exposure/1000)
+        if self.verbose:
+            print("Camera Exposure Set:", exposure)
         return self.get_exposure()
 
     def get_exposure(self):
         """
         Gets the exposure time of the camera.
         """
-        return self.camera_controller.getPropertyValue("exposure_time")[0]*1000
+        exposure = self.camera_controller.getPropertyValue("exposure_time")[0]*1000
+        if self.verbose:
+            print("Camera Exposure:", exposure)
+        return exposure
 
     def read_camera(self):
         """
@@ -121,6 +135,8 @@ class Camera(CameraBase):
             img.append(d)
 #        img = frames[-1].getData()
 #        img = np.reshape(img,(dims[0],dims[1]))
+        if self.verbose:
+            print("Camera Read")
         return img
 
     def set_ROI(self, X ,Y):
@@ -149,10 +165,14 @@ class Camera(CameraBase):
         self.camera_controller.setPropertyValue("subarray_vsize", vsize)
         self.camera_controller.setPropertyValue("subarray_hsize", hsize)
         self.camera_controller.setSubArrayMode()
+        if self.verbose:
+            print("Camera ROI Set.")
         return self.getSize()
 
     def get_size(self):
-        """Returns the size in pixels of the image being acquired. This is useful for checking the ROI settings.
+        """
+        Returns the size in pixels of the image being acquired.
+        This is useful for checking the ROI settings.
         """
         X = self.camera_controller.getPropertyValue("subarray_hsize")
         Y = self.camera_controller.getPropertyValue("subarray_vsize")
@@ -161,34 +181,44 @@ class Camera(CameraBase):
     def get_serial_number(self):
         """Returns the serial number of the camera.
         """
-        return self.camera_controller.getModelInfo(self.cam_id)
+        serial_number = self.camera_controller.getModelInfo(self.cam_id)
+        if self.verbose:
+            print("Camera Serial Number:", serial_number)
+        return
 
     def get_ccd_width(self):
         """
-        Returns
         The CCD width in pixels
-
         """
-        return self.camera_controller.max_width
+        ccd_width = self.camera_controller.max_width
+        if self.verbose:
+            print("Camera CCD Width:", ccd_width)
+        return ccd_width
 
     def get_ccd_height(self):
         """
-        Returns
         The CCD height in pixels
-
         """
-        return self.camera_controller.max_height
+        ccd_height = self.camera_controller.max_height
+        if self.verbose:
+            print("Camera CCD Height:", ccd_height)
+        return ccd_height
 
     def stop_acq(self):
+        if self.verbose:
+            print("Camera Acquisition Stopped.")
         self.camera_controller.stopAcquisition()
 
     def stop_camera(self):
-        """Stops the acquisition and closes the connection with the camera.
+        """
+        Stops the acquisition and closes the connection with the camera.
         """
         try:
             #Closing the camera
             self.camera_controller.stopAcquisition()
             self.camera_controller.shutdown()
+            if self.verbose:
+                print("Camera Stopped.")
             return True
         except:
             #Monitor failed to close

@@ -17,12 +17,16 @@ Adopted and modified from UUTrack
 class CameraBase():
     MODE_CONTINUOUS = 1
     MODE_SINGLE_SHOT = 0
-    def __init__(self, camera_id, session, verbose):
+    def __init__(self, camera_id, verbose):
         self.cam_id = camera_id
+        self.verbose = verbose
         self.running = False
         self.max_width = 0
         self.max_height = 0
         self.exposure = 0
+
+        if self.verbose:
+            print("CameraBase class initialized.")
 
     def initialize_camera(self):
         """
@@ -36,7 +40,9 @@ class CameraBase():
         """
         Triggers the camera.
         """
-        print("Not Implemented")
+        if self.verbose:
+            print("Not Implemented")
+        pass
 
     def set_acquisition_mode(self, mode):
         """
@@ -45,11 +51,15 @@ class CameraBase():
         :return:
         """
         self.mode = mode
+        if self.verbose:
+            print("Acquisition Mode:", self.mode)
 
     def get_acquisition_mode(self):
         """
         Returns the acquisition mode, either continuous or single shot.
         """
+        if self.verbose:
+            print("Acquisition Mode:", self.mode)
         return self.mode
 
     def acquisition_ready(self):
@@ -58,18 +68,20 @@ class CameraBase():
         """
         print("Not Implemented")
 
-    def set_exposure(self,exposure):
+    def set_exposure(self, exposure):
         """
         Sets the exposure of the camera.
         """
+        if self.verbose:
+            print("Exposure Time:", self.exposure)
         self.exposure = exposure
-        print("Not Implemented")
 
     def get_exposure(self):
         """
         Gets the exposure time of the camera.
         """
-        print("Not Implemented")
+        if self.verbose:
+            print("Exposure Time:", self.exposure)
         return self.exposure
 
     def read_camera(self):
@@ -79,7 +91,8 @@ class CameraBase():
         print("Not Implemented")
 
     def set_ROI(self,X,Y):
-        """ Sets up the ROI. Not all cameras are 0-indexed, so this is an important
+        """
+        Sets up the ROI. Not all cameras are 0-indexed, so this is an important
         place to define the proper ROI.
         :param array X: array type with the coordinates for the ROI X[0], X[1]
         :param array Y: array type with the coordinates for the ROI Y[0], Y[1]
@@ -94,12 +107,14 @@ class CameraBase():
         self.set_ROI(self.max_width, self.max_height)
 
     def get_size(self):
-        """Returns the size in pixels of the image being acquired. This is useful for checking the ROI settings.
+        """
+        Returns the size in pixels of the image being acquired. This is useful for checking the ROI settings.
         """
         print("Not Implemented")
 
     def get_serial_number(self):
-        """Returns the serial number of the camera.
+        """
+        Returns the serial number of the camera.
         """
         print("Not Implemented")
 

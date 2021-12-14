@@ -14,28 +14,23 @@ Saving:
 
 DAQParameters:
     hardware_type: NI
-
-    # triggers
+    samplerate: 100000
+  # triggers
     master_trigger_out_line: PXI6259/port0/line1
     camera_trigger_out_line: PXI6259/ctr0
     trigger_source: PXI6259/PFI0
-
     # galvos
     galvo_left: ao0
     galvo_right: ao1
-
     # ETL
     etl_left: ao2
     etl_right: ao3
-
     # lasers
     number_of_lasers : 3
     laser_0_wavelength: 488nm
     laser_0: PXI6733/port0/line2
-
     laser_1_wavelength: 562nm
     laser_1: PXI6733/port0/line3
-
     laser_2_wavelength: 642nm
     laser_2: PXI6733/port0/line4
 
@@ -69,11 +64,43 @@ CameraParameters:
   ASLM_alignment_on: 0  # param=1 if ASLM alignment mode is on, otherwise zero
   ASLM_delay_before_voltage_return: 0.001  # 1ms
   ASLM_additional_return_time: 0.001  # 1ms
+  camera_delay_percent: 10
+  camera_pulse_percent: 1
+  camera_exposure_time: 0.01
+  camera_line_interval: 0.000075
+  camera_display_live_subsampling: 1
+  camera_display_snap_subsampling: 1
+  camera_display_acquisition_subsampling: 2
+  camera_binning: 1x1
+  camera_sensor_mode: ASLM
+  average_frame_rate: 4.969
 
 ETLParameters:
   type: SyntheticETL
   number_of_etls: 2
+  etl_l_delay_percent: 7.5
+  etl_l_ramp_rising_percent: 85
+  etl_l_ramp_falling_percent: 2.5
+  etl_l_amplitude: 0.7
+  etl_l_offset: 2.3
+  etl_r_delay_percent: 2.5
+  etl_r_ramp_rising_percent: 5
+  etl_r_ramp_falling_percent: 85
+  etl_r_amplitude: 0.65
+  etl_r_offset: 2.36
+  ETL_cfg_file: C:/Users/Spectral/Documents/GitHub/multiscale_microscope/base/1.0.0/config/etl_parameters/ETL-parameters.csv
 
+GalvoParameters:
+  galvo_l_frequency: 99.9
+  galvo_l_amplitude: 2.5
+  galvo_l_offset: 0
+  galvo_l_duty_cycle: 50
+  galvo_l_phase: np.pi / 2
+  galvo_r_frequency: 99.9
+  galvo_r_amplitude: 2.5
+  galvo_r_offset: 0
+  galvo_r_duty_cycle: 50
+  galvo_r_phase: np.pi / 2
 
 StageParameters:
     stage_type: PI
@@ -97,19 +124,17 @@ StageParameters:
     x_rot_position: 2000
     y_rot_position: 2000
     z_rot_position: 2000
+    position: {
+      x_pos: 0,
+      y_pos: 0,
+      z_pos: 0,
+      f_pos: 0,
+      theta_pos: 0
+    }
 
 StartupParameters:
   state: init  # init, idle, live, snap, running_script
-  samplerate: 100000
   sweeptime: 0.2
-  position: {
-    x_pos: 0,
-    y_pos: 0,
-    z_pos: 0,
-    f_pos: 0,
-    theta_pos: 0
-  }
-  ETL_cfg_file: C:/Users/Spectral/Documents/GitHub/multiscale_microscope/base/1.0.0/config/etl_parameters/ETL-parameters.csv
   file_prefix:
   file_suffix: 000001
   zoom: 1x
@@ -119,44 +144,12 @@ StartupParameters:
   intensity: 10
   shutterstate: False  # Is the shutter open or not?
   shutterconfig: Left  # Can be "Left" "Right" "Both" "Interleaved"
-  etl_l_delay_percent: 7.5
-  etl_l_ramp_rising_percent: 85
-  etl_l_ramp_falling_percent: 2.5
-  etl_l_amplitude: 0.7
-  etl_l_offset: 2.3
-  etl_r_delay_percent: 2.5
-  etl_r_ramp_rising_percent: 5
-  etl_r_ramp_falling_percent: 85
-  etl_r_amplitude: 0.65
-  etl_r_offset: 2.36
-  galvo_l_frequency: 99.9
-  galvo_l_amplitude: 2.5
-  galvo_l_offset: 0
-  galvo_l_duty_cycle: 50
-  galvo_l_phase: np.pi / 2
-  galvo_r_frequency: 99.9
-  galvo_r_amplitude: 2.5
-  galvo_r_offset: 0
-  galvo_r_duty_cycle: 50
-  galvo_r_phase: np.pi / 2
   laser_l_delay_percent: 10
   laser_l_pulse_percent: 87
   laser_l_max_amplitude_percent: 100
   laser_r_delay_percent: 10
   laser_r_pulse_percent: 87
   laser_r_max_amplitude_percent: 100
-  camera_delay_percent: 10
-  camera_pulse_percent: 1
-  camera_exposure_time: 0.01
-  camera_line_interval: 0.000075
-  camera_display_live_subsampling: 1
-  camera_display_snap_subsampling: 1
-  camera_display_acquisition_subsampling: 2
-  camera_binning: 1x1
-  camera_sensor_mode: ASLM
-  average_frame_rate: 4.969
-
-
 
 ZoomParameters:
     zoom_type: Dynamixel
@@ -172,7 +165,6 @@ ZoomParameters:
       5x: 3079,
       6x: 3383
     }
-
     low_res_zoom_pixel_size: {
       0.63x: 9.7,
       1x: 6.38,
@@ -182,7 +174,6 @@ ZoomParameters:
       5x: 1.255,
       6x: 1.044
     }
-
     high_res_zoom_pixel_size: 0.167
 
 FilterWheelParameters:

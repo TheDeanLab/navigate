@@ -22,23 +22,23 @@ def start_model(configuration_path, verbose):
     return model
 
 
-def start_camera(model, camera_id, verbose):
+def start_camera(self, camera_id, verbose):
     """
     Initializes the camera.
     """
     # Hamamatsu Camera
-    if model.CameraParameters['type'] == 'HamamatsuOrca':
+    if self.model.CameraParameters['type'] == 'HamamatsuOrca':
         from controller.devices.camera.Hamamatsu.HamamatsuCamera import Camera as CameraModel
-        cam = CameraModel(camera_id, model, verbose)
+        cam = CameraModel(camera_id, verbose)
         cam.initialize_camera()
         cam.set_exposure(model.CameraParameters['camera_exposure_time'])
         if verbose:
             print("Initialized ", model.CameraParameters['type'])
 
     # Synthetic Camera
-    elif model.CameraParameters['type'] == 'SyntheticCamera':
+    elif self.model.CameraParameters['type'] == 'SyntheticCamera':
         from controller.devices.camera.SyntheticCamera import Camera as CameraModel
-        cam = CameraModel(0, model, verbose)
+        cam = CameraModel(0, verbose)
         cam.initialize_camera()
         cam.set_exposure(model.CameraParameters['camera_exposure_time'])
         if verbose:
@@ -50,21 +50,22 @@ def start_camera(model, camera_id, verbose):
         sys.exit()
     return cam
 
-def start_stages(model, verbose):
+def start_stages(self, verbose):
     """
     Initializes the Stage.
     """
     # Physik Instrumente Stage
-    if model.StageParameters['stage_type'] == 'PI':
+    if self.model.StageParameters['stage_type'] == 'PI':
         from controller.devices.stages.PI.PIStage import Stage as StageModel
-        stage = StageModel(model, verbose)
+        stage = StageModel(self, verbose)
         if verbose:
             print("Initialized ", model.StageParameters['stage_type'])
         stage.report_position()
 
     # Synthetic Stage
-    elif model.StageParameters['stage_type'] == 'SyntheticStage':
+    elif self.model.StageParameters['stage_type'] == 'SyntheticStage':
         from controller.devices.stages.SyntheticStage import Stage as StageModel
+        stage = StageModel(self, verbose)
         if verbose:
             print("Initialized ", model.StageParameters['stage_type'])
 
@@ -74,28 +75,27 @@ def start_stages(model, verbose):
         sys.exit()
     return stage
 
-def start_zoom_servo(model, verbose):
+def start_zoom_servo(self, verbose):
     """
     Initializes the Zoom Servo Motor
     """
 
     # Dynamixel Servo
-    if model.ZoomParameters['zoom_type'] == 'Dynamixel':
+    if self.model.ZoomParameters['zoom_type'] == 'Dynamixel':
         from controller.devices.zoom.Dynamixel.DynamixelZoom import Zoom as ZoomModel
-        zoom = ZoomModel(model, verbose)
+        zoom = ZoomModel(self.model, verbose)
         if verbose:
-            print("Initialized ", model.ZoomParameters['zoom_type'])
+            print("Initialized ", self.model.ZoomParameters['zoom_type'])
         print("Zoom Position", zoom.read_position())
 
     # Synthetic Servo
-    #TODO: Make the synthetic servo class.
-    elif model.ZoomParameters['zoom_type'] == 'SyntheticZoom':
+    elif self.model.ZoomParameters['zoom_type'] == 'SyntheticZoom':
         from controller.devices.zoom.SyntheticZoom import Zoom as ZoomModel
-        zoom = ZoomModel(model, verbose)
+        zoom = ZoomModel(self.model, verbose)
         if verbose:
-            print("Initialized ", model.ZoomParameters['zoom_type'])
+            print("Initialized ", self.model.ZoomParameters['zoom_type'])
         print("Zoom Position", zoom.read_position())
-    else :
+    else:
         print("Zoom Type in Configuration.yml Not Recognized - Initialization Failed")
         sys.exit()
     return zoom

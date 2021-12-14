@@ -7,20 +7,23 @@ def __init__(self, zoomdict, COMport, identifier=2, baudrate=1000000):
 Adopted from mesoSPIM
 
 """
+# Standard library imports
+import time
+
 # Local Imports
 from model.zoom.ZoomBase import ZoomBase
 from model.zoom.Dynamixel import dynamixel_functions as dynamixel
 
 class Zoom(ZoomBase):
-    def __init__(self, session, verbose):
+    def __init__(self, model, verbose):
         self.verbose = verbose
-        comport = session.ZoomParameters['COMport']
+        comport = model.ZoomParameters['COMport']
         self.comport = comport
         self.devicename = comport.encode('utf-8')
-        self.zoomdict = session.ZoomParameters['zoom_position']
+        self.zoomdict = self.model.ZoomParameters['zoom_position']
         self.id = 2
         self.dynamixel = dynamixel
-        self.baudrate = session.ZoomParameters['baudrate']
+        self.baudrate = self.model.ZoomParameters['baudrate']
         self.addr_mx_torque_enable = 24
         self.addr_mx_goal_position = 30
         self.addr_mx_present_position = 36
@@ -42,6 +45,9 @@ class Zoom(ZoomBase):
         self.port_num = dynamixel.portHandler(self.devicename)
         self.dynamixel.packetHandler()
 
+        if self.verbose:
+            print('Dynamixel Zoom initialized')
+
     def set_zoom(self, zoom, wait_until_done=False):
         """
         Changes zoom after checking that the commanded value exists
@@ -51,6 +57,8 @@ class Zoom(ZoomBase):
             self.zoomvalue = zoom
         else:
             raise ValueError('Zoom designation not in the configuration')
+        if self.verbose:
+            print('Zoom set to {}'.format(zoom))
 
     def move(self, position, wait_until_done=False):
         # open port and set baud rate
@@ -76,7 +84,6 @@ class Zoom(ZoomBase):
         ''' 
         This works even though the positions returned during movement are just crap
         - they have 7 to 8 digits. Only when the motor stops, positions are accurate
-        -
         '''
         if wait_until_done:
             start_time = time.time()
@@ -97,6 +104,8 @@ class Zoom(ZoomBase):
                 if self.verbose:
                     print(cur_position)
         self.dynamixel.closePort(self.port_num)
+        if self.verbose:
+            print('Zoom moved to {}'.format(position))
 
     def read_position(self):
         '''
@@ -107,4 +116,6 @@ class Zoom(ZoomBase):
         self.dynamixel.setBaudRate(self.port_num, self.baudrate)
         cur_position = self.dynamixel.read4ByteTxRx(self.port_num, 1, self.id, self.addr_mx_present_position)
         self.dynamixel.closePort(self.port_num)
+        if self.verbose:
+            print('Zoom position: {}'.format(cur_position))
         return cur_position

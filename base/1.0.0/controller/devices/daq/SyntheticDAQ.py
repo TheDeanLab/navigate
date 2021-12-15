@@ -1,8 +1,7 @@
 """
-NI DAQ Class
-Model class for controlling National Instruments DAQ devices.
-Adopted and modified from mesoSPIM.
+NI Synthetic DAQ Class
 """
+
 # Standard Imports
 import os
 import numpy as np
@@ -19,13 +18,21 @@ from nidaqmx.types import CtrTime
 from waveforms import *
 
 class DAQ(DAQBase):
-    def __init__(self, model, verbose):
-        self.verbose = verbose
+    def __init__(self, session, verbose):
+        self.verbose = True
 
         #TODO: Load the ETL configuration file.
         # Will need to move the ETL configuration file to the config folder
-        #cfg_file = model.ETLParameters['ETL_cfg_file']
-        #self.update_etl_parameters_from_csv(cfg_file, self.state['laser'], self.state['zoom'])
+        cfg_file = session.StartupParameters['ETL_cfg_file']
+        self.update_etl_parameters_from_csv(cfg_file, self.state['laser'], self.state['zoom'])
+
+        # Specify the Galvo Waveform Parameters
+        self.state['galvo_l_amplitude'] = session.StartupParameters['galvo_l_amplitude']
+        self.state['galvo_r_amplitude'] = session.StartupParameters['galvo_r_amplitude']
+        self.state['galvo_l_frequency'] = session.StartupParameters['galvo_l_frequency']
+        self.state['galvo_r_frequency'] = session.StartupParameters['galvo_r_frequency']
+        self.state['galvo_l_offset'] = session.StartupParameters['galvo_l_offset']
+        self.state['galvo_r_offset'] = session.StartupParameters['galvo_r_offset']
 
     def state_request_handler(self, dict):
         for key, value in zip(dict.keys(), dict.values()):
@@ -86,7 +93,7 @@ class DAQ(DAQBase):
             elif key in ('laser'):
                 self.state['laser'] = value
                 self.create_waveforms()
-                
+
             elif key == 'state':
                 if value == 'live':
                     print('Live mode')
@@ -112,29 +119,37 @@ class DAQ(DAQBase):
     def create_etl_waveforms(self):
         # Calculate the waveforms for the ETLs.
         samplerate, sweeptime = self.state.get_parameter_list(['samplerate','sweeptime'])
-        etl_l_delay, etl_l_ramp_rising, etl_l_ramp_falling, etl_l_amplitude, etl_l_offset =\
-        self.state.get_parameter_list(['etl_l_delay_percent', 'etl_l_ramp_rising_percent',
-                                       'etl_l_ramp_falling_percent', 'etl_l_amplitude', 'etl_l_offset'])
+        etl_l_delay, etl_l_ramp_rising, etl_l_ramp_falling, etl_l_amplitude, etl_l_offset = \
+            self.state.get_parameter_list(['etl_l_delay_percent','etl_l_ramp_rising_percent','etl_l_ramp_falling_percent',
+                                           'etl_l_amplitude','etl_l_offset'])
 
-        etl_r_delay, etl_r_ramp_rising, etl_r_ramp_falling, etl_r_amplitude, etl_r_offset =\
-        self.state.get_parameter_list(['etl_r_delay_percent','etl_r_ramp_rising_percent',
-                                       'etl_r_ramp_falling_percent', 'etl_r_amplitude','etl_r_offset'])
+        etl_r_delay, etl_r_ramp_rising, etl_r_ramp_falling, etl_r_amplitude, etl_r_offset = \
+            self.state.get_parameter_list(['etl_r_delay_percent','etl_r_ramp_rising_percent','etl_r_ramp_falling_percent',
+                                           'etl_r_amplitude','etl_r_offset'])
 
-        self.etl_l_waveform = tunable_lens_ramp(samplerate=samplerate, sweeptime=sweeptime, delay=etl_l_delay,
-                                                rise=etl_l_ramp_rising, fall=etl_l_ramp_falling, amplitude=etl_l_amplitude,
+        self.etl_l_waveform = tunable_lens_ramp(samplerate=samplerate,
+                                                sweeptime=sweeptime,
+                                                delay=etl_l_delay,
+                                                rise=etl_l_ramp_rising,
+                                                fall=etl_l_ramp_falling,
+                                                amplitude=etl_l_amplitude,
                                                 offset=etl_l_offset)
 
-        self.etl_r_waveform = tunable_lens_ramp(samplerate=samplerate, sweeptime=sweeptime, delay=etl_r_delay,
-                                                rise=etl_r_ramp_rising, fall=etl_r_ramp_falling, amplitude=etl_r_amplitude,
+        self.etl_r_waveform = tunable_lens_ramp(samplerate=samplerate,
+                                                sweeptime=sweeptime,
+                                                delay=etl_r_delay,
+                                                rise=etl_r_ramp_rising,
+                                                fall=etl_r_ramp_falling,
+                                                amplitude=etl_r_amplitude,
                                                 offset=etl_r_offset)
 
     def create_low_res_galvo_waveforms(self):
         # Calculate the sawtooth waveforms for the low-resolution digitally scanned galvo.
         samplerate, sweeptime = self.state.get_parameter_list(['samplerate','sweeptime'])
 
-        galvo_l_frequency, galvo_l_amplitude, galvo_l_offset, galvo_l_duty_cycle, galvo_l_phase =\
-        self.state.get_parameter_list(['galvo_l_frequency', 'galvo_l_amplitude', 'galvo_l_offset',
-        'galvo_l_duty_cycle', 'galvo_l_phase'])
+        galvo_l_frequency, galvo_l_amplitude, galvo_l_offset, galvo_l_duty_cycle, galvo_l_phase = \
+            self.state.get_parameter_list(['galvo_l_frequency', 'galvo_l_amplitude', 'galvo_l_offset',
+                                           'galvo_l_duty_cycle', 'galvo_l_phase'])
 
         self.galvo_l_waveform = sawtooth(samplerate=samplerate,
                                          sweeptime=sweeptime,
@@ -159,8 +174,8 @@ class DAQ(DAQBase):
 
         # Get the laser parameters.
         laser_l_delay, laser_l_pulse, max_laser_voltage, intensity = \
-        self.state.get_parameter_list(['laser_l_delay_percent','laser_l_pulse_percent',
-        'max_laser_voltage','intensity'])
+            self.state.get_parameter_list(['laser_l_delay_percent','laser_l_pulse_percent',
+                                           'max_laser_voltage','intensity'])
 
         # Create a zero waveform
         self.zero_waveform = np.zeros((self.samples))
@@ -257,8 +272,8 @@ class DAQ(DAQBase):
         ''' Saves the current ETL left/right offsets and amplitudes '''
 
         etl_cfg_file, laser, zoom, etl_l_offset, etl_l_amplitude, etl_r_offset, etl_r_amplitude = \
-        self.state.get_parameter_list(['ETL_cfg_file', 'laser', 'zoom',
-        'etl_l_offset', 'etl_l_amplitude', 'etl_r_offset','etl_r_amplitude'])
+            self.state.get_parameter_list(['ETL_cfg_file', 'laser', 'zoom',
+                                           'etl_l_offset', 'etl_l_amplitude', 'etl_r_offset','etl_r_amplitude'])
 
         # Generate the temporary file name
         tmp_etl_cfg_file = etl_cfg_file+'_tmp'
@@ -289,17 +304,17 @@ class DAQ(DAQBase):
             for row in reader:
                 if row['Wavelength'] == laser and row['Zoom'] == zoom:
 
-                        writer.writerow({'Objective':'1x',
-                                         'Wavelength':laser,
-                                         'Zoom':zoom,
-                                         'ETL-Left-Offset':etl_l_offset,
-                                         'ETL-Left-Amp':etl_l_amplitude,
-                                         'ETL-Right-Offset':etl_r_offset,
-                                         'ETL-Right-Amp':etl_r_amplitude,
-                                         })
+                    writer.writerow({'Objective':'1x',
+                                     'Wavelength':laser,
+                                     'Zoom':zoom,
+                                     'ETL-Left-Offset':etl_l_offset,
+                                     'ETL-Left-Amp':etl_l_amplitude,
+                                     'ETL-Right-Offset':etl_r_offset,
+                                     'ETL-Right-Amp':etl_r_amplitude,
+                                     })
 
                 else:
-                        writer.writerow(row)
+                    writer.writerow(row)
             writer.writerows(reader)
         os.remove(etl_cfg_file)
         os.rename(tmp_etl_cfg_file, etl_cfg_file)
@@ -352,8 +367,8 @@ class DAQ(DAQBase):
         # Set up the Galvo and setting the trigger input
         self.galvo_etl_task.ao_channels.add_ao_voltage_chan(ah['galvo_etl_task_line'])
         self.galvo_etl_task.timing.cfg_samp_clk_timing(rate=samplerate,
-                                                   sample_mode=AcquisitionType.FINITE,
-                                                   samps_per_chan=samples)
+                                                       sample_mode=AcquisitionType.FINITE,
+                                                       samps_per_chan=samples)
 
         # Set up the ETL to be triggered by the master trigger
         self.galvo_etl_task.triggers.start_trigger.cfg_dig_edge_start_trig(ah['galvo_etl_task_trigger_source'])
@@ -361,8 +376,8 @@ class DAQ(DAQBase):
         # Set up the ETL and lasers
         self.laser_task.ao_channels.add_ao_voltage_chan(ah['laser_task_line'])
         self.laser_task.timing.cfg_samp_clk_timing(rate=samplerate,
-                                                    sample_mode=AcquisitionType.FINITE,
-                                                    samps_per_chan=samples)
+                                                   sample_mode=AcquisitionType.FINITE,
+                                                   samps_per_chan=samples)
 
         # Configure ETL and Lasers to ber triggered by the master trigger
         self.laser_task.triggers.start_trigger.cfg_dig_edge_start_trig(ah['laser_task_trigger_source'])

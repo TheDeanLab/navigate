@@ -23,9 +23,11 @@ Laser source - Omicron LightHUB Ultra.  Requires ACC operating mode with analog 
 Sample Scanning System - L-509.20DG10.  Has a unidirectional repeatability of 100 nm, bidirectional repeatablility of 2 microns, and a minimum incremental motion of 100 nm.  This is borderline too coarse.
 
 ### Installation with Conda
-conda create -n ASLM python=3.7.11
-conda activate ASLM
-python -m pip install -r requirements.txt
+* conda create -n ASLM python=3.7.11
+* conda activate ASLM
+* python -m pip install -r requirements.txt
+* cd into the right damn folder
+* python __main__.py
 
 ### Hardware Dependencies
 * DLL for Dynamixel Servo Motor

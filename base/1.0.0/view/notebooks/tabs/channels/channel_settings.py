@@ -50,12 +50,6 @@ class channel_frame(ttk.Frame):
         # Set default exposure time in milliseconds
         if channel.exp_time_spinval == '':
             channel.exp_time_spinval.set('200')
-        channel.exp_time_spinbox = ttk.Spinbox(
-            channel,
-            from_=0,
-            to=5000.0,
-            textvariable=channel.exp_time_spinval,
-            increment=25,
-            width=9
-        )
+        channel.exp_time_spinbox = ttk.Spinbox(channel, from_=0, to=5000.0, textvariable=channel.exp_time_spinval,
+            increment=25, width=9)
         channel.exp_time_spinbox.grid(row=0, column=3, sticky=(NSEW))

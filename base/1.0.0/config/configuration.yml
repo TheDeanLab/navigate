@@ -13,33 +13,37 @@ Saving:
   date:
 
 DAQParameters:
-    hardware_type: NI
-    samplerate: 100000
-  # triggers
-    master_trigger_out_line: PXI6259/port0/line1
-    camera_trigger_out_line: PXI6259/ctr0
-    trigger_source: PXI6259/PFI0
-    # galvos
-    galvo_left: ao0
-    galvo_right: ao1
-    # ETL
-    etl_left: ao2
-    etl_right: ao3
-    # lasers
-    number_of_lasers : 3
-    laser_0_wavelength: 488nm
-    laser_0: PXI6733/port0/line2
-    laser_1_wavelength: 562nm
-    laser_1: PXI6733/port0/line3
-    laser_2_wavelength: 642nm
-    laser_2: PXI6733/port0/line4
+  hardware_type: SyntheticDAQ #NI or SyntheticDAQ
+  samplerate: 100000
 
-    # shutters
-    shutter_left: PXI6259/port0/line0
-    shutter_right: PXI6259/port2/line0
+  # triggers
+  master_trigger_out_line: PXI6259/port0/line1
+  camera_trigger_out_line: PXI6259/ctr0
+  trigger_source: PXI6259/PFI0
+
+  # galvos
+  galvo_left: ao0
+  galvo_right: ao1
+
+  # ETL
+  etl_left: ao2
+  etl_right: ao3
+
+  # lasers
+  number_of_lasers : 3
+  laser_0_wavelength: 488nm
+  laser_0: PXI6733/port0/line2
+  laser_1_wavelength: 562nm
+  laser_1: PXI6733/port0/line3
+  laser_2_wavelength: 642nm
+  laser_2: PXI6733/port0/line4
+
+  # shutters
+  shutter_left: PXI6259/port0/line0
+  shutter_right: PXI6259/port2/line0
 
 CameraParameters:
-  type: HamamatsuOrca #HamamatsuOrca or SyntheticCamera
+  type: SyntheticCamera #SyntheticCamera or SyntheticCamera
   number_of_cameras: 2
   x_pixels: 2048
   y_pixels: 2048
@@ -76,7 +80,7 @@ CameraParameters:
   average_frame_rate: 4.969
 
 ETLParameters:
-  type: SyntheticETL
+  type: SyntheticETL #ETL or SyntheticETL
   number_of_etls: 2
   etl_l_delay_percent: 7.5
   etl_l_ramp_rising_percent: 85
@@ -90,6 +94,23 @@ ETLParameters:
   etl_r_offset: 2.36
   ETL_cfg_file: C:/Users/Spectral/Documents/GitHub/multiscale_microscope/base/1.0.0/config/etl_parameters/ETL-parameters.csv
 
+FilterWheelParameters:
+  filter_wheel_type: SyntheticFilterWheel #Sutter or SyntheticFilterWheel
+  filter_wheel_port: COM9
+  baudrate: 9600
+  number_of_filter_wheels: 2
+  available_filters: {
+    Empty-Alignment: 0,
+    GFP - FF01-515/30-32: 1,
+    RFP - FF01-595/31-32: 2,
+    Far-Red - BLP01-647R/31-32: 3,
+    Blocked1: 4,
+    Blocked2: 5,
+    Blocked3: 6,
+    Blocked4: 7,
+    Blocked5: 8,
+    Blocked6: 9
+  }
 GalvoParameters:
   galvo_l_frequency: 99.9
   galvo_l_amplitude: 2.5
@@ -103,7 +124,7 @@ GalvoParameters:
   galvo_r_phase: np.pi / 2
 
 StageParameters:
-    stage_type: PI
+    stage_type: SyntheticStage # PI or SyntheticStage
     controllername: 'C-884'
     stages: L-509.20DG10 L-509.40DG10 L-509.20DG10 M-060.DG M-406.4PD NOSTAGE #('L-509.20DG10', 'L-509.40DG10', 'L-509.20DG10', 'M-060.DG', 'M-406.4PD', 'NOSTAGE')
     refmode: FRF FRF FRF FRF FRF FRF
@@ -124,6 +145,10 @@ StageParameters:
     x_rot_position: 2000
     y_rot_position: 2000
     z_rot_position: 2000
+    xy_step: 500
+    z_step: 500
+    theta_step: 30
+    f_step: 500
     position: {
       x_pos: 0,
       y_pos: 0,
@@ -132,27 +157,8 @@ StageParameters:
       theta_pos: 0
     }
 
-StartupParameters:
-  state: init  # init, idle, live, snap, running_script
-  sweeptime: 0.2
-  file_prefix:
-  file_suffix: 000001
-  zoom: 1x
-  pixelsize: 6.55
-  laser: 488 nm
-  max_laser_voltage: 10
-  intensity: 10
-  shutterstate: False  # Is the shutter open or not?
-  shutterconfig: Left  # Can be "Left" "Right" "Both" "Interleaved"
-  laser_l_delay_percent: 10
-  laser_l_pulse_percent: 87
-  laser_l_max_amplitude_percent: 100
-  laser_r_delay_percent: 10
-  laser_r_pulse_percent: 87
-  laser_r_max_amplitude_percent: 100
-
 ZoomParameters:
-    zoom_type: Dynamixel
+    zoom_type: SyntheticZoom #Dynamixel or SyntheticZoom
     servo_id: 1
     COMport: COM21
     baudrate: 1000000
@@ -176,22 +182,6 @@ ZoomParameters:
     }
     high_res_zoom_pixel_size: 0.167
 
-FilterWheelParameters:
-    filter_wheel_type: Sutter
-    filter_wheel_port: COM9
-    number_of_filter_wheels: 2
-    available_filters: {
-      Empty-Alignment: 0,
-      GFP - FF01-515/30-32: 1,
-      RFP - FF01-595/31-32: 2,
-      Far-Red - BLP01-647R/31-32: 3,
-      Blocked1: 4,
-      Blocked2: 5,
-      Blocked3: 6,
-      Blocked4: 7,
-      Blocked5: 8,
-      Blocked6: 9
-    }
 
 SharedMemoryAllocation:
   vol_per_buffer: 1
@@ -212,3 +202,23 @@ MicroscopeState:
   timepoints: 1
   stack_pause: 0
   step_size: 1
+
+
+StartupParameters:
+  state: init  # init, idle, live, snap, running_script
+  sweeptime: 0.2
+  file_prefix:
+  file_suffix: 000001
+  zoom: 1x
+  pixelsize: 6.55
+  laser: 488 nm
+  max_laser_voltage: 10
+  intensity: 10
+  shutterstate: False  # Is the shutter open or not?
+  shutterconfig: Left  # Can be "Left" "Right" "Both" "Interleaved"
+  laser_l_delay_percent: 10
+  laser_l_pulse_percent: 87
+  laser_l_max_amplitude_percent: 100
+  laser_r_delay_percent: 10
+  laser_r_pulse_percent: 87
+  laser_r_max_amplitude_percent: 100

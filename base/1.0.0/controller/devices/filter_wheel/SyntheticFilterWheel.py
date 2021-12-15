@@ -1,10 +1,17 @@
+"""
+Module for synthetic Filter Wheels
+Author: Kevin Dean,
+"""
+#Standard Library Imports
+import time
 
+# Local Imports
+from controller.devices.filter_wheel.FilterWheelBase import FilterWheelBase
 
-class SyntheticFilterWheel():
-    def __init__(self, filterdict):
-        super().__init__()
-        self.filterdict = filterdict
-        self.verbose = True
+class SyntheticFilterWheel(FilterWheelBase):
+    def __init__(self, model, verbose):
+        self.filterdict = model.FilterWheelParameters['available_filters']
+        self.verbose = verbose
 
     def check_if_filter_in_filterdict(self, filter):
         '''

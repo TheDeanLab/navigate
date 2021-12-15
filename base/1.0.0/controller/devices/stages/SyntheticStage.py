@@ -8,12 +8,13 @@ import numpy as np
 from .StageBase import StageBase
 
 class Stage(StageBase):
-    def __init__(self, session, verbose):
+    def __init__(self, model, verbose):
         '''
         Initial setting of all positions
         self.x_pos, self.y_pos etc are the true axis positions, no matter whether
         the stages are zeroed or not.
         '''
+        self.verbose = verbose
         self.x_pos = 0
         self.y_pos = 0
         self.z_pos = 0
@@ -44,20 +45,19 @@ class Stage(StageBase):
         ''' 
         Setting movement limits: currently hardcoded: Units are in microns 
         '''
-        #TODO: Reference configuration file?
-        self.x_max = self.cfg.x_max
-        self.x_min = self.cfg.x_min
-        self.y_max = self.cfg.y_max
-        self.y_min = self.cfg.y_min
-        self.z_max = self.cfg.z_max
-        self.z_min = self.cfg.z_min
-        self.f_max = self.cfg.f_max
-        self.f_min = self.cfg.f_min
-        self.theta_max = self.cfg.theta_max
-        self.theta_min = self.cfg.theta_min
-        self.x_rot_position = self.cfg.x_rot_position
-        self.y_rot_position = self.cfg.y_rot_position
-        self.z_rot_position = self.cfg.z_rot_position
+        self.x_max = model.StageParameters['x_max']
+        self.x_min = model.StageParameters['x_min']
+        self.y_max = model.StageParameters['y_max']
+        self.y_min = model.StageParameters['y_min']
+        self.z_max = model.StageParameters['z_max']
+        self.z_min = model.StageParameters['z_min']
+        self.f_max = model.StageParameters['f_max']
+        self.f_min = model.StageParameters['f_min']
+        self.theta_max = model.StageParameters['theta_max']
+        self.theta_min = model.StageParameters['theta_min']
+        self.x_rot_position = model.StageParameters['x_rot_position']
+        self.y_rot_position = model.StageParameters['y_rot_position']
+        self.z_rot_position = model.StageParameters['z_rot_position']
 
     def create_position_dict(self):
         return True

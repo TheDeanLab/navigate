@@ -1,60 +1,57 @@
 """
-mesoSPIM Module for controlling Sutter Lambda Filter Wheels
+Module for controlling Sutter Lambda Filter Wheels
 Author: Kevin Dean,
 
 Command byte = (wheel * 128) + (speed * 16) + position
 https://www.sutter.com/manuals/LB10-3_OpMan.pdf
 
-TODO: Independent control of multiple filter wheels?
+TODO: Currently moves multiple filter wheels to the same position.  In the future, it may be nice to have
+      a way to move multiple filter wheels to different positions independently.
 """
-
+# Standard Imports
 import serial
 import time
 
-class Lambda10B:
-    def __init__(self,
-                 number_of_filter_wheels,
-                 comport,
-                 filterdict,
-                 baudrate=9600,
-                 read_on_init=True):
+# Local Imports
+from controller.devices.filter_wheel.FilterWheelBase import FilterWheelBase
 
-        super().__init__()
-
-        ''' Load the Default Parameters '''
-        self.COMport = comport
-        self.baudrate = baudrate
-        self.filterdict = filterdict
-        self.number_of_filter_wheels = number_of_filter_wheels
-        self.verbose = True
-
-        ''' Delay in s for the wait until done function '''
-        self.wait_until_done_delay = 0.25
+class FilterWheel(FilterWheelBase):
+    def __init__(self, model, verbose):
+        '''
+        Load the Default Parameters
+        '''
+        self.comport = model.FilterWheelParameters['filter_wheel_port']
+        self.baudrate = model.FilterWheelParameters['baudrate']
+        self.filterdict = model.FilterWheelParameters['available_filters']
+        self.number_of_filter_wheels = model.FilterWheelParameters['number_of_filter_wheels']
+        self.read_on_init = True
+        self.verbose = verbose
+        self.wait_until_done_delay = 0.25 # Delay in s for the wait until done function
 
         # Open Serial Port
         try:
             if self.verbose:
-                print('Opening Serial Port')
-            self.serial = serial.Serial(self.COMport, self.baudrate, timeout=.25)
+                print('Opening Filter Wheel on Serial Port', self.comport)
+            self.serial = serial.Serial(self.comport, self.baudrate, timeout=.25)
         except serial.SerialException:
             raise UserWarning('Could not communicate with Sutter Lambda 10-B.')
 
         # Place Controller Into 'Online' Mode
         if self.verbose:
-            print('Putting Controller Into Online Mode')
+            print('Putting Sutter Lambda 10-B Into Online Mode')
         self.serial.write(bytes.fromhex('ee'))
 
         # Check to see if the initialization sequence has finished.
-        if read_on_init:
+        if self.read_on_init:
             self.read(2)  # class 'bytes'
             self.init_finished = True
             if self.verbose:
-                print('Done initializing filter wheel.')
+                print('Done initializing the Sutter Lambda 10-B filter wheel.')
         else:
             self.init_finished = False
 
         if self.verbose:
-            print('Setting Filter to Default Filter Position')
+            print('Setting Sutter Lambda 10-B Filter to Default Filter Position')
         self.set_filter('Empty-Alignment')
 
     def __enter__(self):
@@ -65,23 +62,25 @@ class Lambda10B:
             print('Closing the Filter Wheel Serial Port')
         self.close()
 
-    def _check_if_filter_in_filterdict(self, filterposition):
-        # Checks if the filter designation (string) given as argument exists in the filterdict
+    def check_if_filter_in_filterdict(self, filterposition):
+        '''
+        Checks if the filter designation (string) given as argument
+        exists in the filterdict
+        '''
         if filterposition in self.filterdict:
             return True
         else:
             raise ValueError('Filter designation not in the configuration')
 
     def set_filter(self, filterposition=0, speed=2, wait_until_done=False):
-        # Confirm that the filter is present in the filter dictionary
-        if self._check_if_filter_in_filterdict(filterposition) is True:
-
+        '''
+        Change the filter wheel to the filter designated by the filterposition argument.
+        '''
+        if self.check_if_filter_in_filterdict(filterposition) is True:
             # Identify the Filter Number from the Filter Dictionary
             self.wheel_position = self.filterdict[filterposition]
-
             # Make sure you are moving it to a reasonable filter position
             assert self.wheel_position in range(10)
-
             # Make sure you are moving it at a reasonable speed
             assert speed in range(8)
 
@@ -93,11 +92,12 @@ class Lambda10B:
                     print('Done initializing filter wheel.')
 
             for wheel_idx in range(self.number_of_filter_wheels):
-                ''' Loop through each filter, and send the binary sequence via serial to move to the desired filter 
-                wheel position
+                ''' 
+                Loop through each filter, and send the binary sequence via serial to move to the desired filter wheel position
                 When number_of_filter_wheels = 1, loop executes once, and only wheel A changes.
                 When number_of_filter_wheels = 2, loop executes twice, with both wheel A and B moving to the same position sequentially
-                Filter Wheel Command Byte Encoding = wheel + (speed*16) + position = command byte'''
+                Filter Wheel Command Byte Encoding = wheel + (speed*16) + position = command byte
+                '''
 
                 if self.verbose:
                     print("Moving Filter Wheel:", wheel_idx)

@@ -18,15 +18,22 @@ class ASLM_controller():
         self.configuration_path = configuration_path
         self.model = start_model(self.configuration_path, verbose)
 
-        # Initialize Hardware Devices
+        # Initialize Camera
         self.camera_id = 0
         self.cam = start_camera(self.model, self.camera_id, verbose)
 
+        # Initialize Stages
         self.stages = start_stages(self.model, verbose)
         self.stages.report_position()
         self.stages.create_internal_position_dict()
 
-        # Initialize the View
+        # Initialize Filter Wheel
+        self.filter_wheel = start_filter_wheel(self.model, verbose)
+
+        # Initialize DAQ
+        #self.daq = start_daq(self.model, verbose)
+
+        # Initialize View
         self.view = view(root)
 
         #TODO: camera_view_tab, maximum intensity tab, waveform_tab
@@ -101,8 +108,30 @@ class ASLM_controller():
         self.view.notebook_3.stage_control_tab.position_frame.focus_val.set(self.stages.f_pos)
 
         # Prepopulate the stage step size.
+        self.view.notebook_3.stage_control_tab.x_y_frame.increment_box.set(self.model.StageParameters['xy_step'])
+        self.view.notebook_3.stage_control_tab.z_frame.increment_box.set(self.model.StageParameters['z_step'])
+        self.view.notebook_3.stage_control_tab.theta_frame.increment_box.set(self.model.StageParameters['theta_step'])
+        self.view.notebook_3.stage_control_tab.focus_frame.increment_box.set(self.model.StageParameters['f_step'])
 
         # Configure event control for the buttons
+        #TODO: Replace print functions with calls to the stage controller.
+        self.view.notebook_3.stage_control_tab.x_y_frame.negative_x_btn.config(command=lambda: print("x-"))
+        self.view.notebook_3.stage_control_tab.x_y_frame.positive_x_btn.config(command=lambda: print("x+"))
+        self.view.notebook_3.stage_control_tab.x_y_frame.negative_y_btn.config(command=lambda: print("y-"))
+        self.view.notebook_3.stage_control_tab.x_y_frame.positive_y_btn.config(command=lambda: print("y+"))
+        self.view.notebook_3.stage_control_tab.x_y_frame.zero_x_y_btn.config(command=lambda: print("Zero x-y"))
+
+        self.view.notebook_3.stage_control_tab.z_frame.down_btn.config(command=lambda: print("z-"))
+        self.view.notebook_3.stage_control_tab.z_frame.up_btn.config(command=lambda: print("z+"))
+        self.view.notebook_3.stage_control_tab.z_frame.zero_z_btn.config(command=lambda: print("Zero z"))
+
+        self.view.notebook_3.stage_control_tab.theta_frame.up_btn.config(command=lambda: print("theta-"))
+        self.view.notebook_3.stage_control_tab.theta_frame.down_btn.config(command=lambda: print("theta+"))
+        self.view.notebook_3.stage_control_tab.theta_frame.zero_theta_btn.config(command=lambda: print("Zero theta"))
+
+        self.view.notebook_3.stage_control_tab.focus_frame.up_btn.config(command=lambda: print("focus-"))
+        self.view.notebook_3.stage_control_tab.focus_frame.down_btn.config(command=lambda: print("focus+"))
+        self.view.notebook_3.stage_control_tab.focus_frame.zero_focus_btn.config(command=lambda: print("Zero Focus"))
 
         #self.view.notebook_3.goto_frame.goto_btn.config(command=lambda: self.stages.goto_position(self.view.notebook_3.goto_frame.goto_entry.get()))
         #x_y_frame.x_pos_spinval.trace_add('write', lambda *args: self.stages.update_x_position(verbose))

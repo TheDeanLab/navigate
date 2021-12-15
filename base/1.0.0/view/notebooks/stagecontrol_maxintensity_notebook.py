@@ -14,7 +14,7 @@ class stagecontrol_maxintensity_notebook(ttk.Notebook):
         ttk.Notebook.__init__(stagecontrol_maxintensity, frame_bot_right, *args, **kwargs)
 
         #Putting notebook 3 into bottom right frame
-        stagecontrol_maxintensity.grid(row=0,column=0)
+        stagecontrol_maxintensity.grid(row=0, column=0)
 
         #Creating Stage Control Tab
         stagecontrol_maxintensity.stage_control_tab = stage_control_tab(stagecontrol_maxintensity)

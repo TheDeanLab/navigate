@@ -21,7 +21,10 @@ class ASLM_controller():
         # Initialize Hardware Devices
         self.camera_id = 0
         self.cam = start_camera(self.model, self.camera_id, verbose)
-        self.stage = start_stage(self.model, verbose)
+
+        self.stages = start_stages(self.model, verbose)
+        self.stages.report_position()
+        self.stages.create_internal_position_dict()
 
         # Initialize the View
         self.view = view(root)
@@ -88,6 +91,22 @@ class ASLM_controller():
         # Camera Tab, Camera Settings
 
         # Advanced Tab
+
+        # Stage Notebook
+        # Prepopulate the stage positions.
+        self.view.notebook_3.stage_control_tab.position_frame.x_val.set(self.stages.x_pos)
+        self.view.notebook_3.stage_control_tab.position_frame.y_val.set(self.stages.y_pos)
+        self.view.notebook_3.stage_control_tab.position_frame.z_val.set(self.stages.z_pos)
+        self.view.notebook_3.stage_control_tab.position_frame.theta_val.set(self.stages.theta_pos)
+        self.view.notebook_3.stage_control_tab.position_frame.focus_val.set(self.stages.f_pos)
+
+        # Prepopulate the stage step size.
+
+        # Configure event control for the buttons
+
+        #self.view.notebook_3.goto_frame.goto_btn.config(command=lambda: self.stages.goto_position(self.view.notebook_3.goto_frame.goto_entry.get()))
+        #x_y_frame.x_pos_spinval.trace_add('write', lambda *args: self.stages.update_x_position(verbose))
+            #.stage_frame.stage_x_spinval.trace_add('write', lambda *args: update_stage_position(self, verbose))
 
 
     def launch_acquisition(self, popup_window, verbose=False):

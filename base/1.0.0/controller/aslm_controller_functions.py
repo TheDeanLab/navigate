@@ -22,12 +22,13 @@ def start_model(configuration_path, verbose):
     return model
 
 
-def start_camera(self, camera_id, verbose):
+def start_camera(model, camera_id, verbose):
     """
     Initializes the camera.
+    self.cam = start_camera(self.model, self.camera_id, verbose)
     """
     # Hamamatsu Camera
-    if self.model.CameraParameters['type'] == 'HamamatsuOrca':
+    if model.CameraParameters['type'] == 'HamamatsuOrca':
         from controller.devices.camera.Hamamatsu.HamamatsuCamera import Camera as CameraModel
         cam = CameraModel(camera_id, verbose)
         cam.initialize_camera()
@@ -36,7 +37,7 @@ def start_camera(self, camera_id, verbose):
             print("Initialized ", model.CameraParameters['type'])
 
     # Synthetic Camera
-    elif self.model.CameraParameters['type'] == 'SyntheticCamera':
+    elif model.CameraParameters['type'] == 'SyntheticCamera':
         from controller.devices.camera.SyntheticCamera import Camera as CameraModel
         cam = CameraModel(0, verbose)
         cam.initialize_camera()
@@ -53,19 +54,20 @@ def start_camera(self, camera_id, verbose):
 def start_stages(self, verbose):
     """
     Initializes the Stage.
+    self.stage = start_stages(self.model, verbose)
     """
     # Physik Instrumente Stage
-    if self.model.StageParameters['stage_type'] == 'PI':
+    if model.StageParameters['stage_type'] == 'PI':
         from controller.devices.stages.PI.PIStage import Stage as StageModel
-        stage = StageModel(self, verbose)
+        stage = StageModel(model, verbose)
         if verbose:
             print("Initialized ", model.StageParameters['stage_type'])
         stage.report_position()
 
     # Synthetic Stage
-    elif self.model.StageParameters['stage_type'] == 'SyntheticStage':
+    elif model.StageParameters['stage_type'] == 'SyntheticStage':
         from controller.devices.stages.SyntheticStage import Stage as StageModel
-        stage = StageModel(self, verbose)
+        stage = StageModel(model, verbose)
         if verbose:
             print("Initialized ", model.StageParameters['stage_type'])
 

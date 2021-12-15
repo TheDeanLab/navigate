@@ -14,7 +14,7 @@ class Camera(CameraBase):
     MODE_CONTINUOUS = 1
     MODE_SINGLE_SHOT = 0
 
-    def __init__(self, camera_id, verbose):
+    def __init__(self, camera_id, verbose=False):
         self.verbose = verbose
         self.cam_id = camera_id
         self.running = False
@@ -178,7 +178,7 @@ class Camera(CameraBase):
         """
         try:
             #Closing the camera
-            if self.verbose
+            if self.verbose:
                 print('Closing camera')
             return True
         except:

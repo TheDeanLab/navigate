@@ -39,7 +39,7 @@ DAQParameters:
     shutter_right: PXI6259/port2/line0
 
 CameraParameters:
-  type: SyntheticCamera #HamamatsuOrca or SyntheticCamera
+  type: HamamatsuOrca #HamamatsuOrca or SyntheticCamera
   number_of_cameras: 2
   x_pixels: 2048
   y_pixels: 2048

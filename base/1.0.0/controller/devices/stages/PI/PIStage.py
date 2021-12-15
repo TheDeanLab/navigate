@@ -14,10 +14,10 @@ Adopted and modified from mesoSPIM
 """
 
 import time
-from model.stages.StageBase import StageBase
+from controller.devices.stages.StageBase import StageBase
 
 class Stage(StageBase):
-    def __init__(self, session, verbose):
+    def __init__(self, model, verbose):
         '''
         Physik Instrumente Code    
         '''
@@ -29,21 +29,21 @@ class Stage(StageBase):
         Setting up the PI stages 
         '''
         # Convert YAML import to list
-        pi_stages = session.StageParameters['stages']
-        pi_refmodes = session.StageParameters['refmode']
+        pi_stages = model.StageParameters['stages']
+        pi_refmodes = model.StageParameters['refmode']
         pi_stages = pi_stages.split()
         pi_refmodes = pi_refmodes.split()
 
-        self.controllername = session.StageParameters['controllername']
+        self.controllername = model.StageParameters['controllername']
         self.pi_stages = pi_stages
         self.refmode = pi_refmodes
-        self.serialnum = str(session.StageParameters['serialnum'])
+        self.serialnum = str(model.StageParameters['serialnum'])
         self.pidevice = GCSDevice(self.controllername)
         self.pidevice.ConnectUSB(serialnum=self.serialnum)
         self.pitools.startup(self.pidevice, stages=list(self.pi_stages), refmodes=list(self.refmode))
 
         self.block_till_controller_is_ready()
-        self.startfocus = session.StageParameters['startfocus']
+        self.startfocus = model.StageParameters['startfocus']
         # Move the Focusing Stage to the Start Position
         self.pidevice.MOV(5, self.startfocus / 1000)
 
@@ -77,19 +77,19 @@ class Stage(StageBase):
         ''' 
         Setting movement limits: currently hardcoded: Units are in microns 
         '''
-        self.x_max = session.StageParameters['x_max']
-        self.x_min = session.StageParameters['x_min']
-        self.y_max = session.StageParameters['y_max']
-        self.y_min = session.StageParameters['y_min']
-        self.z_max = session.StageParameters['z_max']
-        self.z_min = session.StageParameters['z_min']
-        self.f_max = session.StageParameters['f_max']
-        self.f_min = session.StageParameters['f_min']
-        self.theta_max = session.StageParameters['theta_max']
-        self.theta_min = session.StageParameters['theta_min']
-        self.x_rot_position = session.StageParameters['x_rot_position']
-        self.y_rot_position = session.StageParameters['y_rot_position']
-        self.z_rot_position = session.StageParameters['z_rot_position']
+        self.x_max = model.StageParameters['x_max']
+        self.x_min = model.StageParameters['x_min']
+        self.y_max = model.StageParameters['y_max']
+        self.y_min = model.StageParameters['y_min']
+        self.z_max = model.StageParameters['z_max']
+        self.z_min = model.StageParameters['z_min']
+        self.f_max = model.StageParameters['f_max']
+        self.f_min = model.StageParameters['f_min']
+        self.theta_max = model.StageParameters['theta_max']
+        self.theta_min = model.StageParameters['theta_min']
+        self.x_rot_position = model.StageParameters['x_rot_position']
+        self.y_rot_position = model.StageParameters['y_rot_position']
+        self.z_rot_position = model.StageParameters['z_rot_position']
 
     def __del__(self):
         try:
@@ -259,11 +259,11 @@ class Stage(StageBase):
                 print('Unzeroing of axis: ', axis, 'failed')
 
     def load_sample(self):
-        y_abs = session.StageParameters['y_load_position'] / 1000
+        y_abs = model.StageParameters['y_load_position'] / 1000
         self.pidevice.MOV({2: y_abs})
 
     def unload_sample(self):
-        y_abs = session.StageParameters['y_unload_position'] / 1000
+        y_abs = model.StageParameters['y_unload_position'] / 1000
         self.pidevice.MOV({2: y_abs})
 
     def mark_rotation_position(self):

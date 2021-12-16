@@ -26,8 +26,19 @@ Sample Scanning System - L-509.20DG10.  Has a unidirectional repeatability of 10
 * conda create -n ASLM python=3.7.11
 * conda activate ASLM
 * python -m pip install -r requirements.txt
-* cd into the right damn folder
+* cd into the right damn folder (ex C:\Users\UserProfile\Documents\GitHub\ASLM\base\1.0.0)
 * python __main__.py
+
+### Trouble Shooting
+If running the software on campus at UTSW you may need to update some of your proxy settings to allow pip/conda to install the proper packages.
+* This can be done by going to Environment Variables for Windows, or another OS equivalent.
+* Create the following variables at the system level: 
+    Variable = HTTP_PROXY; Value = http://proxy.swmed.edu:3128
+    Variable = HTTPS_PROXY; Value = http://proxy.swmed.edu:3128 (please see that they are both http, this is purposeful and not a typo)
+* If you continue to have issues then change the value of Variable HTTPS_PROXY to https://proxy.swmed.edu:3128
+* If you still have issues then you will need to create/update both configuration files for conda and pip to include proxy settings, if they are not in the paths below you will need to create them. This assumes a Windows perspective. Mac/Linux users will have different paths, they can be found online.
+    Conda's Config file = C:\Users\UserProfile\.condarc
+    Pip's Config file = C:\Users\UserProfile\pip\pip.ini
 
 ### Hardware Dependencies
 * DLL for Dynamixel Servo Motor
@@ -42,7 +53,7 @@ starts the tkinter GUi, instantiates the controller, and then begins the main lo
 
 ### Authors
 Kevin Dean
-Dax Collision
+Dax Collison
 Sampath Rapuri
 Andrew Jamieson
 Xiaoding 'Annie' Wang

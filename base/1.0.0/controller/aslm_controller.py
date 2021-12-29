@@ -10,28 +10,38 @@ from view.main_application_window import Main_App as view
 from controller.aslm_controller_functions import *
 
 class ASLM_controller():
-    def __init__(self, root, configuration_path, verbose):
-        if verbose:
-            print("Starting ASLM_controller")
+    def __init__(self, root, configuration_path, args):
+        self.verbose = args.verbose
 
         # Initialize the Model
         self.configuration_path = configuration_path
-        self.model = start_model(self.configuration_path, verbose)
+        self.model = start_model(self.configuration_path, self.verbose)
+
+        # Synthetic Mode
+        if args.synthetic_hardware:
+            # Overwrites the model parameters with synthetic hardware
+            self.model.DAQParameters['hardware_type'] = 'SyntheticDAQ'
+            self.model.CameraParameters['type'] = 'SyntheticCamera'
+            self.model.ETLParameters['type'] = 'SyntheticETL'
+            self.model.FilterWheelParameters['type'] = 'SyntheticFilterWheel'
+            self.model.StageParameters['type'] = 'SyntheticStage'
+            self.model.ZoomParameters['type'] = 'SyntheticZoom'
+
 
         # Initialize Camera
         self.camera_id = 0
-        self.cam = start_camera(self.model, self.camera_id, verbose)
+        self.cam = start_camera(self.model, self.camera_id, self.verbose)
 
         # Initialize Stages
-        self.stages = start_stages(self.model, verbose)
+        self.stages = start_stages(self.model, self.verbose)
         self.stages.report_position()
         self.stages.create_internal_position_dict()
 
         # Initialize Filter Wheel
-        self.filter_wheel = start_filter_wheel(self.model, verbose)
+        self.filter_wheel = start_filter_wheel(self.model, self.verbose)
 
         # Initialize DAQ
-        #self.daq = start_daq(self.model, verbose)
+        #self.daq = start_daq(self.model, self.verbose)
 
         # Initialize View
         self.view = view(root)
@@ -50,7 +60,7 @@ class ASLM_controller():
         self.view.notebook_1.channels_tab.channel_5_frame.on_off.set(False)
 
         # Populate the lasers in the GUI
-        self.view.notebook_1.channels_tab.channel_1_frame.laser_pull_down['values'] = populate_lasers(self, verbose)
+        self.view.notebook_1.channels_tab.channel_1_frame.laser_pull_down['values'] = populate_lasers(self, self.verbose)
         self.view.notebook_1.channels_tab.channel_2_frame.laser_pull_down['values'] = populate_lasers(self)
         self.view.notebook_1.channels_tab.channel_3_frame.laser_pull_down['values'] = populate_lasers(self)
         self.view.notebook_1.channels_tab.channel_4_frame.laser_pull_down['values'] = populate_lasers(self)
@@ -77,20 +87,20 @@ class ASLM_controller():
 
         # Define all of the callbacks/events.
         # Acquire bar
-        self.view.acqbar.acquire_btn.config(command=lambda: launch_popup_window(self, root, verbose))
-        self.view.acqbar.exit_btn.config(command=lambda: exit_program(verbose))
-        self.view.acqbar.pull_down.bind('<<ComboboxSelected>>', lambda *args: update_microscope_mode(self, verbose))
+        self.view.acqbar.acquire_btn.config(command=lambda: launch_popup_window(self, root, self.verbose))
+        self.view.acqbar.exit_btn.config(command=lambda: exit_program(self.verbose))
+        self.view.acqbar.pull_down.bind('<<ComboboxSelected>>', lambda *args: update_microscope_mode(self, self.verbose))
 
         # Channels Tab, Stack Acquisition Settings
-        self.view.notebook_1.channels_tab.stack_acq_frame.start_pos_spinval.trace_add('write', lambda *args: update_z_steps(self, verbose))
-        self.view.notebook_1.channels_tab.stack_acq_frame.step_size_spinval.trace_add('write', lambda *args: update_z_steps(self, verbose))
-        self.view.notebook_1.channels_tab.stack_acq_frame.end_pos_spinval.trace_add('write', lambda *args: update_z_steps(self, verbose))
+        self.view.notebook_1.channels_tab.stack_acq_frame.start_pos_spinval.trace_add('write', lambda *args: update_z_steps(self, self.verbose))
+        self.view.notebook_1.channels_tab.stack_acq_frame.step_size_spinval.trace_add('write', lambda *args: update_z_steps(self, self.verbose))
+        self.view.notebook_1.channels_tab.stack_acq_frame.end_pos_spinval.trace_add('write', lambda *args: update_z_steps(self, self.verbose))
 
         # Channels Tab, Laser Cycling Settings
-        self.view.notebook_1.channels_tab.stack_cycling_frame.cycling_options.trace_add('write', lambda *args: update_cycling_settings(self, verbose))
+        self.view.notebook_1.channels_tab.stack_cycling_frame.cycling_options.trace_add('write', lambda *args: update_cycling_settings(self, self.verbose))
 
         # Channels Tab, Timepoint Settings
-        self.view.notebook_1.channels_tab.stack_timepoint_frame.exp_time_spinval.trace_add('write', lambda *args: update_time_points(self, verbose))
+        self.view.notebook_1.channels_tab.stack_timepoint_frame.exp_time_spinval.trace_add('write', lambda *args: update_time_points(self, self.verbose))
         #TODO: Automatically calculate the stack acquisition time based on the number of timepoints, channels, and exposure time.
 
         # Channels Tab, Multi-position Acquisition Settings
@@ -136,18 +146,18 @@ class ASLM_controller():
         self.view.notebook_3.stage_control_tab.focus_frame.zero_focus_btn.config(command=lambda: print("Zero Focus"))
 
         #self.view.notebook_3.goto_frame.goto_btn.config(command=lambda: self.stages.goto_position(self.view.notebook_3.goto_frame.goto_entry.get()))
-        #x_y_frame.x_pos_spinval.trace_add('write', lambda *args: self.stages.update_x_position(verbose))
-            #.stage_frame.stage_x_spinval.trace_add('write', lambda *args: update_stage_position(self, verbose))
+        #x_y_frame.x_pos_spinval.trace_add('write', lambda *args: self.stages.update_x_position(self.verbose))
+            #.stage_frame.stage_x_spinval.trace_add('write', lambda *args: update_stage_position(self, self.verbose))
 
 
-    def launch_acquisition(self, popup_window, verbose=False):
+    def launch_acquisition(self, popup_window):
         # Need to create the save path, and update the model from the entries.
-        save_directory = create_save_path(self, popup_window, verbose)
+        save_directory = create_save_path(self, popup_window, self.verbose)
 
         #TODO: Acquire data according to the operating mode.
 
         # Close the window
-        popup_window.dismiss(verbose)
+        popup_window.dismiss(self.verbose)
 
 
 

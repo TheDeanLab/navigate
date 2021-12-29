@@ -17,7 +17,6 @@ def main():
     input_args = parser.add_argument_group('Input Arguments')
     input_args.add_argument('--verbose', required=False, default=False, action='store_true', help='Verbose output')
     input_args.add_argument('--synthetic_hardware', required=False, default=False, action='store_true', help='Synthetic hardware modules')
-    input_args.add_argument('--no_GUI', required=False, default=False, action='store_true', help='Debug mode')
     args = parser.parse_args()
 
     # Specify the Configuration Directory
@@ -27,7 +26,7 @@ def main():
 
     # Start the GUI
     root = tk.Tk()
-    app = controller(root, configuration_path, args.verbose)
+    app = controller(root, configuration_path, args)
     root.mainloop()
 
 

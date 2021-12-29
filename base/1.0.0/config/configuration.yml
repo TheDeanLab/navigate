@@ -13,7 +13,7 @@ Saving:
   date:
 
 DAQParameters:
-  hardware_type: SyntheticDAQ #NI or SyntheticDAQ
+  hardware_type: NI #NI or SyntheticDAQ
   samplerate: 100000
 
   # triggers
@@ -43,7 +43,7 @@ DAQParameters:
   shutter_right: PXI6259/port2/line0
 
 CameraParameters:
-  type: SyntheticCamera #SyntheticCamera or SyntheticCamera
+  type: HamamatsuOrca #SyntheticCamera or HamamatsuOrca
   number_of_cameras: 2
   x_pixels: 2048
   y_pixels: 2048
@@ -95,7 +95,7 @@ ETLParameters:
   ETL_cfg_file: C:/Users/Spectral/Documents/GitHub/multiscale_microscope/base/1.0.0/config/etl_parameters/ETL-parameters.csv
 
 FilterWheelParameters:
-  filter_wheel_type: SyntheticFilterWheel #Sutter or SyntheticFilterWheel
+  type: SyntheticFilterWheel #Sutter or SyntheticFilterWheel
   filter_wheel_port: COM9
   baudrate: 9600
   number_of_filter_wheels: 2
@@ -124,7 +124,7 @@ GalvoParameters:
   galvo_r_phase: np.pi / 2
 
 StageParameters:
-    stage_type: SyntheticStage # PI or SyntheticStage
+    type: SyntheticStage # PI or SyntheticStage
     controllername: 'C-884'
     stages: L-509.20DG10 L-509.40DG10 L-509.20DG10 M-060.DG M-406.4PD NOSTAGE #('L-509.20DG10', 'L-509.40DG10', 'L-509.20DG10', 'M-060.DG', 'M-406.4PD', 'NOSTAGE')
     refmode: FRF FRF FRF FRF FRF FRF
@@ -158,7 +158,7 @@ StageParameters:
     }
 
 ZoomParameters:
-    zoom_type: SyntheticZoom #Dynamixel or SyntheticZoom
+    type: SyntheticZoom #Dynamixel or SyntheticZoom
     servo_id: 1
     COMport: COM21
     baudrate: 1000000

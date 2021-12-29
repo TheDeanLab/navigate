@@ -52,36 +52,36 @@ def start_stages(model, verbose):
     Initializes the Stage.
     """
     # Physik Instrumente Stage
-    if model.StageParameters['stage_type'] == 'PI':
+    if model.StageParameters['type'] == 'PI':
         from controller.devices.stages.PI.PIStage import Stage as StageModel
         stage = StageModel(model, verbose)
         stage.report_position()
     # Synthetic Stage
-    elif model.StageParameters['stage_type'] == 'SyntheticStage':
+    elif model.StageParameters['type'] == 'SyntheticStage':
         from controller.devices.stages.SyntheticStage import Stage as StageModel
         stage = StageModel(model, verbose)
     else:
         print("Stage Type in Configuration.yml Not Recognized - Initialization Failed")
         sys.exit()
     if verbose:
-        print("Initialized ", model.StageParameters['stage_type'])
+        print("Initialized ", model.StageParameters['type'])
     return stage
 
 def start_zoom_servo(model, verbose):
     """
     Initializes the Zoom Servo Motor. Dynamixel of SyntheticZoom
     """
-    if model.ZoomParameters['zoom_type'] == 'Dynamixel':
+    if model.ZoomParameters['type'] == 'Dynamixel':
         from controller.devices.zoom.Dynamixel.DynamixelZoom import Zoom as ZoomModel
         zoom = ZoomModel(self.model, verbose)
-    elif self.model.ZoomParameters['zoom_type'] == 'SyntheticZoom':
+    elif self.model.ZoomParameters['type'] == 'SyntheticZoom':
         from controller.devices.zoom.SyntheticZoom import Zoom as ZoomModel
         zoom = ZoomModel(self.model, verbose)
     else:
         print("Zoom Type in Configuration.yml Not Recognized - Initialization Failed")
         sys.exit()
     if verbose:
-        print("Initialized ", self.model.ZoomParameters['zoom_type'])
+        print("Initialized ", self.model.ZoomParameters['type'])
         print("Zoom Position", zoom.read_position())
     return zoom
 
@@ -89,17 +89,17 @@ def start_filter_wheel(model, verbose):
     """
     Initializes the Filter Wheel. Sutter or SyntheticFilterWheel
     """
-    if model.FilterWheelParameters['filter_wheel_type'] == 'Sutter':
+    if model.FilterWheelParameters['type'] == 'Sutter':
         from controller.devices.filter_wheel.Sutter.Lambda10B import FilterWheel as FilterWheelModel
         filter_wheel = FilterWheelModel(model, verbose)
-    elif model.FilterWheelParameters['filter_wheel_type'] == 'SyntheticFilterWheel':
+    elif model.FilterWheelParameters['type'] == 'SyntheticFilterWheel':
         from controller.devices.filter_wheel.SyntheticFilterWheel import SyntheticFilterWheel as FilterWheelModel
         filter_wheel = FilterWheelModel(model, verbose)
     else:
         print("Filter Wheel Type in Configuration.yml Not Recognized - Initialization Failed")
         sys.exit()
     if verbose:
-        print("Initialized ", model.FilterWheelParameters['filter_wheel_type'])
+        print("Initialized ", model.FilterWheelParameters['type'])
     return filter_wheel
 
 def start_lasers(model, verbose):

@@ -6,12 +6,12 @@
 
 ### Project Outline
 Adopts an MVC architecture for microscope control. 
-Includes key code contributions from a number of open-source projects, including:
+Includes key inspiration and code contributions from a number of open-source projects, including:
 * https://github.com/mesoSPIM/mesoSPIM-control
 * https://github.com/bicarlsen/obis_laser_controller
 * https://github.com/utsw-bicf/auto-docker/
 * https://github.com/uetke/UUTrack
-
+* https://github.com/MouseLand/cellpose/blob/master/README.md
 
 ### Continuous Integration
 Includes functionality from Auto-Docker for remote building and testing of Docker images from a Docker build file (Dockerfile) and a unit test file (unittest.yml). Allows users to build, test and maintain Docker images outside of firewalls, proxies and machine limitations. Additionally, it is a storage repository, and can act as a functional archive and version control for all your Dockerfile recipes (though not the images themselves). Pipeline was developed by BICF from funding provided by **Cancer Prevention and Research Institute of Texas (RP150596)**.
@@ -56,15 +56,14 @@ starts the tkinter GUi, instantiates the controller, and then begins the main lo
 ### Command Line Input Arguments (optional)
 * --verbose: Verbose mode.
 * --synthetic_hardware: Use simulated hardware.
-* --no_GUI: Run without GUI.
 
 ~~~
-python __main__.py --verbose --synthetic_hardware --no_GUI
+python __main__.py --verbose --synthetic_hardware
 ~~~
 
 ### Authors
-Kevin Dean
-Dax Collison
-Sampath Rapuri
-Andrew Jamieson
-Xiaoding 'Annie' Wang
+* Kevin Dean
+* Dax Collison
+* Sampath Rapuri
+* Andrew Jamieson
+* Xiaoding 'Annie' Wang

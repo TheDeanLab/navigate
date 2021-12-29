@@ -55,6 +55,16 @@ class Main_App(ttk.Frame):
                 mainapp.menu_edit.add_command(label='Copy')
                 mainapp.menu_edit.add_command(label='Paste')
 
+                #Zoom Menu
+                mainapp.menu_zoom = Menu(mainapp.menubar)
+                mainapp.menubar.add_cascade(menu=mainapp.menu_zoom, label='Zoom')
+                mainapp.menu_zoom.add_command(label='1x')
+                mainapp.menu_zoom.add_command(label='2x')
+                mainapp.menu_zoom.add_command(label='3x')
+                mainapp.menu_zoom.add_command(label='4x')
+                mainapp.menu_zoom.add_command(label='5x')
+                mainapp.menu_zoom.add_command(label='6x')
+
                 #Top Frame Acquire Bar
                 mainapp.top_frame = ttk.Frame(mainapp)
                 #mainapp.top_frame_label = ttk.Label(mainapp.top_frame, text="Acquire Bar")

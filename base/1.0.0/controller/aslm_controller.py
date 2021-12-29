@@ -114,6 +114,8 @@ class ASLM_controller():
         self.view.notebook_3.stage_control_tab.focus_frame.increment_box.set(self.model.StageParameters['f_step'])
 
         # Configure event control for the buttons
+        self.view.menu_zoom.bind("<<MenuSelect>>", lambda *args: print("Zoom Selected", *args))
+
         #TODO: Replace print functions with calls to the stage controller.
         self.view.notebook_3.stage_control_tab.x_y_frame.negative_x_btn.config(command=lambda: print("x-"))
         self.view.notebook_3.stage_control_tab.x_y_frame.positive_x_btn.config(command=lambda: print("x+"))

@@ -19,15 +19,17 @@ Includes functionality from Auto-Docker for remote building and testing of Docke
 [![Auto-docker DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4555891.svg)](https://doi.org/10.5281/zenodo.4555891)
 
 ### Equipment
-Laser source - Omicron LightHUB Ultra.  Requires ACC operating mode with analog modulation enabled for 488 nm and 642 nm lasers.  561, which operates separately, requires the mixed modulation mode (Obis).
-Sample Scanning System - L-509.20DG10.  Has a unidirectional repeatability of 100 nm, bidirectional repeatablility of 2 microns, and a minimum incremental motion of 100 nm.  This is borderline too coarse.
+* Laser source - Omicron LightHUB Ultra.  Requires ACC operating mode with analog modulation enabled for 488 nm and 642 nm lasers.  561, which operates separately, requires the mixed modulation mode (Obis).
+* Sample Scanning System - L-509.20DG10.  Has a unidirectional repeatability of 100 nm, bidirectional repeatablility of 2 microns, and a minimum incremental motion of 100 nm.  This is borderline too coarse.
 
 ### Installation with Conda
-* conda create -n ASLM python=3.7.11
-* conda activate ASLM
-* python -m pip install -r requirements.txt
-* cd into the right damn folder (ex C:\Users\UserProfile\Documents\GitHub\ASLM\base\1.0.0)
-* python __main__.py
+~~~
+conda create -n ASLM python=3.7.11
+conda activate ASLM
+python -m pip install -r requirements.txt
+cd into the right damn folder (ex C:\Users\UserProfile\Documents\GitHub\ASLM\base\1.0.0)
+python __main__.py
+~~~
 
 ### Trouble Shooting
 If running the software on campus at UTSW you may need to update some of your proxy settings to allow pip/conda to install the proper packages.
@@ -50,6 +52,15 @@ starts the tkinter GUi, instantiates the controller, and then begins the main lo
 * Starts the hardware (camera, stages, etc.)
 * Starts the View
 * Begins the callbacks to trace GUI events.  Any changes are updated in both the GUI and the model.
+
+### Command Line Input Arguments (optional)
+* --verbose: Verbose mode.
+* --synthetic_hardware: Use simulated hardware.
+* --no_GUI: Run without GUI.
+
+~~~
+python __main__.py --verbose --synthetic_hardware --no_GUI
+~~~
 
 ### Authors
 Kevin Dean

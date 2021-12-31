@@ -4,7 +4,7 @@ from tkinter import ttk
 from tkinter.font import Font
 
 # Local Imports
-from view.notebooks.tabs.stage_control_tab import stage_control_tab
+from view.notebooks.stage_control.stage_control_tab import stage_control_tab
 from view.notebooks.tabs.maximum_intensity_projection_tab import maximum_intensity_projection_tab
 
 class stagecontrol_maxintensity_notebook(ttk.Notebook):

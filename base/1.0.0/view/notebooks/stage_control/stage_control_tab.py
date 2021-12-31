@@ -4,13 +4,10 @@ from tkinter import ttk
 from tkinter.font import Font
 
 # Local Imports
-
-from view.notebooks.tabs.stage_control.position_frame import position_frame
-from view.notebooks.tabs.stage_control.x_y_frame import x_y_frame
-from view.notebooks.tabs.stage_control.z_frame import z_frame
-from view.notebooks.tabs.stage_control.theta_frame import theta_frame
-from view.notebooks.tabs.stage_control.focus_frame import focus_frame
-from view.notebooks.tabs.stage_control.goto_frame import goto_frame
+from view.notebooks.stage_control.tabs.other_axis_frame import other_axis_frame
+from view.notebooks.stage_control.tabs.position_frame import position_frame
+from view.notebooks.stage_control.tabs.x_y_frame import x_y_frame
+from view.notebooks.stage_control.tabs.goto_frame import goto_frame
 
 class stage_control_tab(ttk.Frame):
     def __init__(stage_control_tab, note3, *args, **kwargs):
@@ -27,18 +24,19 @@ class stage_control_tab(ttk.Frame):
         stage_control_tab.x_y_frame = x_y_frame(stage_control_tab)
 
         #Z Frame
-        stage_control_tab.z_frame = z_frame(stage_control_tab)
+        stage_control_tab.z_frame = other_axis_frame(stage_control_tab, 'Z')
 
         #Theta Frame
-        stage_control_tab.theta_frame = theta_frame(stage_control_tab)
+        stage_control_tab.theta_frame = other_axis_frame(stage_control_tab, 'Theta')
 
         #Focus Frame
-        stage_control_tab.focus_frame = focus_frame(stage_control_tab)
+        stage_control_tab.focus_frame = other_axis_frame(stage_control_tab, 'Focus')
 
         #GoTo Frame
         stage_control_tab.goto_frame = goto_frame(stage_control_tab)
         stage_control_tab.goto_frame_label = ttk.Label(stage_control_tab.goto_frame, text="Goto Frame")
         stage_control_tab.goto_frame_label.pack() #For visual mockup purposes
+
 
         '''
         Grid for frames

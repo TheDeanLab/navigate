@@ -48,7 +48,7 @@ class x_y_frame(ttk.Frame):
         )
 
         #Increment spinbox
-        x_y_frame.spinval = StringVar() #Will be changed by spinbox buttons, but is can also be changed by functions. This value is shown in the entry
+        x_y_frame.spinval = DoubleVar() #Will be changed by spinbox buttons, but is can also be changed by functions. This value is shown in the entry
         x_y_frame.increment_box = ttk.Spinbox(
             x_y_frame,
             from_=0,

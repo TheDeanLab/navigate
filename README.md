@@ -13,6 +13,14 @@ Includes key inspiration and code contributions from a number of open-source pro
 * https://github.com/uetke/UUTrack
 * https://github.com/MouseLand/cellpose/blob/master/README.md
 
+### Project Philosophy
+* Want to have a minimal amount of dependencies. Predominantly local Python imports for maximum stability.
+* Want it to be sufficiently generic that it can drive all of our microscopes (with a few tweaks here and there), different camera types, etc.
+* Want it to be brutally obvious and well documented so that it can be understood up with by future grad students, postdocs, etc., years from now.
+* Want it to resemble Danuser/Dean/Fiolka LabView software, so that people do not have to relearn a new GUI for every microscope.  Maximize productivity for our more biological users.
+* Want it to be performant.  Will implement Andrew York's concurrency tools.
+* Want to adopt proven architectures, such as the Model-View-Controller architecture.  
+
 ### Continuous Integration
 Includes functionality from Auto-Docker for remote building and testing of Docker images from a Docker build file (Dockerfile) and a unit test file (unittest.yml). Allows users to build, test and maintain Docker images outside of firewalls, proxies and machine limitations. Additionally, it is a storage repository, and can act as a functional archive and version control for all your Dockerfile recipes (though not the images themselves). Pipeline was developed by BICF from funding provided by **Cancer Prevention and Research Institute of Texas (RP150596)**.
 

@@ -35,7 +35,12 @@ class Main_App(ttk.Frame):
                 mainapp.root.title("Multiscale Axially Swept Light-Sheet Microscope")
                 program_directory = sys.path[0] #refers to script directory ie gets all the way down to view
                 mainapp.root.iconphoto(True, PhotoImage(file=os.path.join(program_directory, "view", "icon", "mic.png")))
-                mainapp.root.minsize(1400,700)
+                mainapp.root.minsize(1400, 700)
+                # getting screen width and height of display
+                width= mainapp.root.winfo_screenwidth() 
+                height= mainapp.root.winfo_screenheight()
+                #setting tkinter window size
+                mainapp.root.geometry("%dx%d" % (width, height)) # sets window to start fullscreen
                 mainapp.root.columnconfigure(0,weight=1)
                 mainapp.root.rowconfigure(0,weight=1)
 

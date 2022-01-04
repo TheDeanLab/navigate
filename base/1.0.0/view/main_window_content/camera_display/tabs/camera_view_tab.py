@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import ttk
 from tkinter.font import Font
 from view.main_window_content.camera_display.camera_view.cam_counts import cam_counts
+from view.main_window_content.camera_display.camera_view.pallete import 
 
 class camera_tab(ttk.Frame):
     def __init__(self, cam_wave, *args, **kwargs):
@@ -13,14 +14,16 @@ class camera_tab(ttk.Frame):
         #Init Frame
         ttk.Frame.__init__(self, cam_wave, *args, **kwargs)
 
-        # #Frame that will hold camera image
-        # self.cam_image = ttk.Frame(self)
-        # self.cam_image.grid(row=0, column=0, sticky=(NSEW))
+        #Frame that will hold camera image
+        self.cam_image = ttk.Frame(self)
+        self.cam_image.grid(row=0, column=0, sticky=(NSEW))
+        self.image = ttk.Label(self.cam_image, text="Image goes here")
+        self.image.grid(row=0, column=0, sticky=(NSEW))
 
-        # #Frame for camera selection and counts
-        # self.cam_counts = ttk.Frame(self)
-        # self.cam_counts.grid(row=0, column=1, sticky=(NSEW))
+        #Frame for camera selection and counts
+        self.cam_counts = cam_counts(self)
+        self.cam_counts.grid(row=0, column=1, sticky=(NSEW))
 
-        # #Frame for scale settings/pallete color
-        # self.scale_pallete = ttk.Frame(self)
-        # self.scale_pallete.grid(row=0, column=2, sticky=(NSEW))
+        #Frame for scale settings/pallete color
+        self.scale_pallete = ttk.Frame(self)
+        self.scale_pallete.grid(row=0, column=2, sticky=(NSEW))

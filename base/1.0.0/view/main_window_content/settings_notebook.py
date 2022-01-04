@@ -7,9 +7,9 @@ from tkinter.font import Font
 import numpy as np
 
 # Import Sub-Frames
-from view.notebooks.tabs.camera_settings_tab import camera_settings_tab
-from view.notebooks.tabs.advanced_settings_tab import advanced_settings_tab
-from view.notebooks.tabs.channels_tab import channels_tab
+from view.main_window_content.camera_display.tabs.camera_settings_tab import camera_settings_tab
+from view.main_window_content.tabs.advanced_settings_tab import advanced_settings_tab
+from view.main_window_content.tabs.channels_tab import channels_tab
 
 
 class settings_notebook(ttk.Notebook):

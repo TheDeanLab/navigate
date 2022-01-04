@@ -2,8 +2,8 @@ from tkinter import *
 from tkinter import ttk
 
 # Import Sub-Frames
-from view.notebooks.tabs.camera_view_tab import camera_tab
-from view.notebooks.tabs.waveform_tab import waveform_tab
+from view.main_window_content.camera_display.tabs.camera_view_tab import camera_tab
+from view.main_window_content.tabs.waveform_tab import waveform_tab
 
 class camera_waveform_notebook(ttk.Notebook):
     def __init__(cam_wave, frame_top_right, *args, **kwargs):

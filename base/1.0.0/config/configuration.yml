@@ -205,6 +205,7 @@ MicroscopeState:
 
 
 StartupParameters:
+  number_of_channels: 5
   state: init  # init, idle, live, snap, running_script
   sweeptime: 0.2
   file_prefix:

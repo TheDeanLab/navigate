@@ -17,10 +17,10 @@ from tkinter import *
 from tkinter.constants import NSEW
 
 # Import Notebooks
-from .notebooks.settings_notebook import settings_notebook as notebook_1
-from .notebooks.camera_notebook import camera_waveform_notebook as notebook_2
-from .notebooks.stagecontrol_maxintensity_notebook import stagecontrol_maxintensity_notebook as notebook_3
-from .notebooks.acquire_bar_frame.acquire_bar import AcquireBar
+from .main_window_content.settings_notebook import settings_notebook as notebook_1
+from .main_window_content.camera_display.camera_notebook import camera_waveform_notebook as notebook_2
+from .main_window_content.stagecontrol_notebook import stagecontrol_maxintensity_notebook as notebook_3
+from .main_window_content.acquire_bar_frame.acquire_bar import AcquireBar
 
 #Creates the frame that will hold the GUI content, its parent is the main window or root Tk object
 class Main_App(ttk.Frame):

@@ -11,7 +11,7 @@ import numpy as np
 
 # Local application imports
 from model.aslm_model import Model
-from view.notebooks.acquire_bar_frame.acquire_popup import Acquire_PopUp as acquire_popup
+from view.main_window_content.acquire_bar_frame.acquire_popup import Acquire_PopUp as acquire_popup
 
 def start_model(configuration_path, verbose):
     """

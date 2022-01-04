@@ -5,12 +5,12 @@ from tkinter.font import Font
 
 # Local Imports
 
-from view.notebooks.tabs.stage_control.position_frame import position_frame
-from view.notebooks.tabs.stage_control.x_y_frame import x_y_frame
-from view.notebooks.tabs.stage_control.z_frame import z_frame
-from view.notebooks.tabs.stage_control.theta_frame import theta_frame
-from view.notebooks.tabs.stage_control.focus_frame import focus_frame
-from view.notebooks.tabs.stage_control.goto_frame import goto_frame
+from view.main_window_content.tabs.stage_control.position_frame import position_frame
+from view.main_window_content.tabs.stage_control.x_y_frame import x_y_frame
+from view.main_window_content.tabs.stage_control.z_frame import z_frame
+from view.main_window_content.tabs.stage_control.theta_frame import theta_frame
+from view.main_window_content.tabs.stage_control.focus_frame import focus_frame
+from view.main_window_content.tabs.stage_control.goto_frame import goto_frame
 
 class stage_control_tab(ttk.Frame):
     def __init__(stage_control_tab, note3, *args, **kwargs):

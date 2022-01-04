@@ -21,4 +21,11 @@ class pallete(ttk.Frame):
         self.rainbow.grid(row=2, column=0, sticky=(NSEW))
 
         #Autoscale checkbox
-        
+        self.autoscale = BooleanVar()
+        self.autoscale_check = ttk.Checkbutton(self, text="Autoscale Z", variable=self.autoscale)
+        self.autoscale_check.grid(row=1, column=0, sticky=(NSEW))
+
+        #Scale to counts
+        self.count_scale = BooleanVar()
+        self.count_check = ttk.Checkbutton(self, text="Scale to Counts", variable=self.count_scale)
+        self.count_check.grid(row=2, column=0, sticky=(NSEW))

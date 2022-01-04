@@ -2,7 +2,7 @@ from tkinter import *
 from tkinter import ttk
 from tkinter.font import Font
 from view.main_window_content.camera_display.camera_view.cam_counts import cam_counts
-from view.main_window_content.camera_display.camera_view.pallete import 
+from view.main_window_content.camera_display.camera_view.pallete import pallete
 
 class camera_tab(ttk.Frame):
     def __init__(self, cam_wave, *args, **kwargs):
@@ -25,5 +25,5 @@ class camera_tab(ttk.Frame):
         self.cam_counts.grid(row=0, column=1, sticky=(NSEW))
 
         #Frame for scale settings/pallete color
-        self.scale_pallete = ttk.Frame(self)
+        self.scale_pallete = pallete(self)
         self.scale_pallete.grid(row=0, column=2, sticky=(NSEW))

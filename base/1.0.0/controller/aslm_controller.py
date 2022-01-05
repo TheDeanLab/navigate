@@ -8,42 +8,17 @@ import numpy as np
 # Local Imports
 from view.main_application_window import Main_App as view
 from controller.aslm_controller_functions import *
+from model.aslm_model import Model
 
 class ASLM_controller():
     def __init__(self, root, configuration_path, args):
         self.verbose = args.verbose
 
         # Initialize the Model
-        self.configuration_path = configuration_path
-        self.model = start_model(self.configuration_path, self.verbose)
+        global model
+        self.model = Model(args, configuration_path)
 
-        # Synthetic Mode
-        if args.synthetic_hardware:
-            # Overwrites the model parameters with synthetic hardware
-            self.model.DAQParameters['hardware_type'] = 'SyntheticDAQ'
-            self.model.CameraParameters['type'] = 'SyntheticCamera'
-            self.model.ETLParameters['type'] = 'SyntheticETL'
-            self.model.FilterWheelParameters['type'] = 'SyntheticFilterWheel'
-            self.model.StageParameters['type'] = 'SyntheticStage'
-            self.model.ZoomParameters['type'] = 'SyntheticZoom'
-
-
-        # Initialize Camera
-        self.camera_id = 0
-        self.cam = start_camera(self.model, self.camera_id, self.verbose)
-
-        # Initialize Stages
-        self.stages = start_stages(self.model, self.verbose)
-        self.stages.report_position()
-        self.stages.create_internal_position_dict()
-
-        # Initialize Filter Wheel
-        self.filter_wheel = start_filter_wheel(self.model, self.verbose)
-
-        # Initialize DAQ
-        #self.daq = start_daq(self.model, self.verbose)
-
-        # Initialize View
+        # Initialize the View
         self.view = view(root)
 
         #TODO: camera_view_tab, maximum intensity tab, waveform_tab
@@ -68,22 +43,22 @@ class ASLM_controller():
 
         # Populate the filters in the GUI
         self.view.notebook_1.channels_tab.channel_1_frame.filterwheel_pull_down['values'] = \
-            list(self.model.FilterWheelParameters['available_filters'].keys())
+            list(self.model.session.FilterWheelParameters['available_filters'].keys())
         self.view.notebook_1.channels_tab.channel_2_frame.filterwheel_pull_down['values'] = \
-            list(self.model.FilterWheelParameters['available_filters'].keys())
+            list(self.model.session.FilterWheelParameters['available_filters'].keys())
         self.view.notebook_1.channels_tab.channel_3_frame.filterwheel_pull_down['values'] = \
-            list(self.model.FilterWheelParameters['available_filters'].keys())
+            list(self.model.session.FilterWheelParameters['available_filters'].keys())
         self.view.notebook_1.channels_tab.channel_4_frame.filterwheel_pull_down['values'] = \
-            list(self.model.FilterWheelParameters['available_filters'].keys())
+            list(self.model.session.FilterWheelParameters['available_filters'].keys())
         self.view.notebook_1.channels_tab.channel_5_frame.filterwheel_pull_down['values'] = \
-            list(self.model.FilterWheelParameters['available_filters'].keys())
+            list(self.model.session.FilterWheelParameters['available_filters'].keys())
 
         # Populate the exposure times in the GUI
-        self.view.notebook_1.channels_tab.channel_1_frame.exp_time_spinval.set(self.model.CameraParameters['camera_exposure_time'])
-        self.view.notebook_1.channels_tab.channel_2_frame.exp_time_spinval.set(self.model.CameraParameters['camera_exposure_time'])
-        self.view.notebook_1.channels_tab.channel_3_frame.exp_time_spinval.set(self.model.CameraParameters['camera_exposure_time'])
-        self.view.notebook_1.channels_tab.channel_4_frame.exp_time_spinval.set(self.model.CameraParameters['camera_exposure_time'])
-        self.view.notebook_1.channels_tab.channel_5_frame.exp_time_spinval.set(self.model.CameraParameters['camera_exposure_time'])
+        self.view.notebook_1.channels_tab.channel_1_frame.exp_time_spinval.set(self.model.session.CameraParameters['camera_exposure_time'])
+        self.view.notebook_1.channels_tab.channel_2_frame.exp_time_spinval.set(self.model.session.CameraParameters['camera_exposure_time'])
+        self.view.notebook_1.channels_tab.channel_3_frame.exp_time_spinval.set(self.model.session.CameraParameters['camera_exposure_time'])
+        self.view.notebook_1.channels_tab.channel_4_frame.exp_time_spinval.set(self.model.session.CameraParameters['camera_exposure_time'])
+        self.view.notebook_1.channels_tab.channel_5_frame.exp_time_spinval.set(self.model.session.CameraParameters['camera_exposure_time'])
 
         # Define all of the callbacks/events.
         # Acquire bar
@@ -111,17 +86,17 @@ class ASLM_controller():
 
         # Stage Notebook
         # Prepopulate the stage positions.
-        self.view.notebook_3.stage_control_tab.position_frame.x_val.set(self.stages.x_pos)
-        self.view.notebook_3.stage_control_tab.position_frame.y_val.set(self.stages.y_pos)
-        self.view.notebook_3.stage_control_tab.position_frame.z_val.set(self.stages.z_pos)
-        self.view.notebook_3.stage_control_tab.position_frame.theta_val.set(self.stages.theta_pos)
-        self.view.notebook_3.stage_control_tab.position_frame.focus_val.set(self.stages.f_pos)
+        self.view.notebook_3.stage_control_tab.position_frame.x_val.set(self.model.stages.x_pos)
+        self.view.notebook_3.stage_control_tab.position_frame.y_val.set(self.model.stages.y_pos)
+        self.view.notebook_3.stage_control_tab.position_frame.z_val.set(self.model.stages.z_pos)
+        self.view.notebook_3.stage_control_tab.position_frame.theta_val.set(self.model.stages.theta_pos)
+        self.view.notebook_3.stage_control_tab.position_frame.focus_val.set(self.model.stages.f_pos)
 
         # Prepopulate the stage step size.
-        self.view.notebook_3.stage_control_tab.x_y_frame.increment_box.set(self.model.StageParameters['xy_step'])
-        self.view.notebook_3.stage_control_tab.z_frame.increment_box.set(self.model.StageParameters['z_step'])
-        self.view.notebook_3.stage_control_tab.theta_frame.increment_box.set(self.model.StageParameters['theta_step'])
-        self.view.notebook_3.stage_control_tab.focus_frame.increment_box.set(self.model.StageParameters['f_step'])
+        self.view.notebook_3.stage_control_tab.x_y_frame.increment_box.set(self.model.session.StageParameters['xy_step'])
+        self.view.notebook_3.stage_control_tab.z_frame.increment_box.set(self.model.session.StageParameters['z_step'])
+        self.view.notebook_3.stage_control_tab.theta_frame.increment_box.set(self.model.session.StageParameters['theta_step'])
+        self.view.notebook_3.stage_control_tab.focus_frame.increment_box.set(self.model.session.StageParameters['f_step'])
 
         # Configure event control for the buttons
         self.view.menu_zoom.bind("<<MenuSelect>>", lambda *args: print("Zoom Selected", *args))
@@ -145,8 +120,8 @@ class ASLM_controller():
         self.view.notebook_3.stage_control_tab.focus_frame.down_btn.config(command=lambda: print("focus+"))
         self.view.notebook_3.stage_control_tab.focus_frame.zero_focus_btn.config(command=lambda: print("Zero Focus"))
 
-        #self.view.notebook_3.goto_frame.goto_btn.config(command=lambda: self.stages.goto_position(self.view.notebook_3.goto_frame.goto_entry.get()))
-        #x_y_frame.x_pos_spinval.trace_add('write', lambda *args: self.stages.update_x_position(self.verbose))
+        #self.view.notebook_3.goto_frame.goto_btn.config(command=lambda: self.model.stages.goto_position(self.view.notebook_3.goto_frame.goto_entry.get()))
+        #x_y_frame.x_pos_spinval.trace_add('write', lambda *args: self.model.stages.update_x_position(self.verbose))
             #.stage_frame.stage_x_spinval.trace_add('write', lambda *args: update_stage_position(self, self.verbose))
 
 

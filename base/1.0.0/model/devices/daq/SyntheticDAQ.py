@@ -15,7 +15,8 @@ from nidaqmx.constants import LineGrouping, DigitalWidthUnits
 from nidaqmx.types import CtrTime
 
 # Local Imports
-from waveforms import *
+from .waveforms import *
+from .DAQBase import DAQBase as DAQBase
 
 class DAQ(DAQBase):
     def __init__(self, session, verbose):

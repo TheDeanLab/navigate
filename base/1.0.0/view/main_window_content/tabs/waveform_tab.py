@@ -4,7 +4,8 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
 
-from controller.devices.daq import waveforms as waveforms
+from model.devices.daq import waveforms as waveforms
+    #.devices.daq import waveforms as waveforms
 
 class waveform_tab(ttk.Frame):
     def __init__(waveform_tab, cam_wave, *args, **kwargs):

@@ -6,7 +6,7 @@ Author: Kevin Dean,
 import time
 
 # Local Imports
-from controller.devices.filter_wheel.FilterWheelBase import FilterWheelBase
+from model.devices.filter_wheel.FilterWheelBase import FilterWheelBase
 
 class SyntheticFilterWheel(FilterWheelBase):
     def __init__(self, model, verbose):

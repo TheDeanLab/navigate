@@ -13,7 +13,7 @@ Saving:
   date:
 
 DAQParameters:
-  hardware_type: NI #NI or SyntheticDAQ
+  hardware_type: SyntheticDAQ #NI or SyntheticDAQ
   samplerate: 100000
 
   # triggers
@@ -43,7 +43,7 @@ DAQParameters:
   shutter_right: PXI6259/port2/line0
 
 CameraParameters:
-  type: HamamatsuOrca #SyntheticCamera or HamamatsuOrca
+  type: SyntheticCamera #SyntheticCamera or HamamatsuOrca
   number_of_cameras: 2
   x_pixels: 2048
   y_pixels: 2048

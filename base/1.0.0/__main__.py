@@ -13,6 +13,7 @@ import pretty_errors
 from controller.aslm_controller import ASLM_controller as controller
 
 def main():
+    # Parse command line arguments
     parser = argparse.ArgumentParser(description='Microscope Control Arguments')
     input_args = parser.add_argument_group('Input Arguments')
     input_args.add_argument('--verbose', required=False, default=False, action='store_true', help='Verbose output')
@@ -28,8 +29,6 @@ def main():
     root = tk.Tk()
     app = controller(root, configuration_path, args)
     root.mainloop()
-
-
 
 if __name__ == '__main__':
     main()

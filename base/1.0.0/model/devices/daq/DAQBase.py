@@ -21,11 +21,12 @@ class DAQBase():
         """"
         Demo version of the actual DAQmx-based function.
         """
-        self.calculate_samples()
+        #self.calculate_samples()
         #samplerate, sweeptime = self.state.get_parameter_list(['samplerate','sweeptime'])
         #camera_pulse_percent, camera_delay_percent = self.state.get_parameter_list(['camera_pulse_%','camera_delay_%'])
         #self.camera_high_time = camera_pulse_percent*0.01*sweeptime
         #self.camera_delay = camera_delay_percent*0.01*sweeptime
+        pass
 
     def write_waveforms_to_tasks(self):
         """

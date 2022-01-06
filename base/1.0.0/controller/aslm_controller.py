@@ -103,20 +103,21 @@ class ASLM_controller():
         self.stage_gui_controller = Stage_GUI_Controller(self.view.notebook_3.stage_control_tab, self)
         
         # Prepopulate the stage positions.
+        stage_postion = self.model.session.StageParameters['position']
         self.stage_gui_controller.set_position({
-            'x': self.stages.x_pos,
-            'y': self.stages.y_pos,
-            'z': self.stages.z_pos,
-            'theta': self.stages.theta_pos,
-            'f': self.stages.f_pos
+            'x': stage_postion['x_pos'],
+            'y': stage_postion['y_pos'],
+            'z': stage_postion['z_pos'],
+            'theta': stage_postion['theta_pos'],
+            'f': stage_postion['f_pos']
         })
 
         # Prepopulate the stage step size.
         self.stage_gui_controller.set_step_size({
-            'x': self.model.StageParameters['xy_step'],
-            'z': self.model.StageParameters['z_step'],
-            'theta': self.model.StageParameters['theta_step'],
-            'f': self.model.StageParameters['f_step']
+            'x': self.model.session.StageParameters['xy_step'],
+            'z': self.model.session.StageParameters['z_step'],
+            'theta': self.model.session.StageParameters['theta_step'],
+            'f': self.model.session.StageParameters['f_step']
         })
 
         # Configure event control for the buttons

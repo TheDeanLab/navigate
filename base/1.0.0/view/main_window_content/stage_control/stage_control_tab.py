@@ -4,20 +4,10 @@ from tkinter import ttk
 from tkinter.font import Font
 
 # Local Imports
-<<<<<<< HEAD:base/1.0.0/view/main_window_content/tabs/stage_control_tab.py
-
-from view.main_window_content.tabs.stage_control.position_frame import position_frame
-from view.main_window_content.tabs.stage_control.x_y_frame import x_y_frame
-from view.main_window_content.tabs.stage_control.z_frame import z_frame
-from view.main_window_content.tabs.stage_control.theta_frame import theta_frame
-from view.main_window_content.tabs.stage_control.focus_frame import focus_frame
-from view.main_window_content.tabs.stage_control.goto_frame import goto_frame
-=======
-from view.notebooks.stage_control.tabs.other_axis_frame import other_axis_frame
-from view.notebooks.stage_control.tabs.position_frame import position_frame
-from view.notebooks.stage_control.tabs.x_y_frame import x_y_frame
-from view.notebooks.stage_control.tabs.goto_frame import goto_frame
->>>>>>> origin/sub_gui_controller:base/1.0.0/view/main_window_content/stage_control/stage_control_tab.py
+from view.main_window_content.stage_control.tabs.other_axis_frame import other_axis_frame
+from view.main_window_content.stage_control.tabs.position_frame import position_frame
+from view.main_window_content.stage_control.tabs.x_y_frame import x_y_frame
+from view.main_window_content.stage_control.tabs.goto_frame import goto_frame
 
 class stage_control_tab(ttk.Frame):
     def __init__(stage_control_tab, note3, *args, **kwargs):

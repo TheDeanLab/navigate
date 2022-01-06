@@ -1,4 +1,4 @@
-from view.notebooks.stage_control.gui_controller import GUI_Controller
+from view.gui_controller import GUI_Controller
 
 class Stage_GUI_Controller(GUI_Controller):
     def __init__(self, view, parent_controller):

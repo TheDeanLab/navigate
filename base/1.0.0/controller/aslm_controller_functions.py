@@ -15,22 +15,21 @@ from view.main_window_content.acquire_bar_frame.acquire_popup import Acquire_Pop
 
 def launch_popup_window(self, root, verbose=False):
     """
-    The popup window should only be launched if the microscope is set to save the data,
-    with the exception of the continuous acquisition mode.
+    # The popup window should only be launched if the microscope is set to save the data,
+    # with the exception of the continuous acquisition mode.
+    # The popup window provides the user with the opportunity to fill in fields that describe the experiment and also
+    # dictate the save path of the data in a standardized format.
     """
     # Is the save data checkbox checked?
     save_data = self.view.notebook_1.channels_tab.stack_timepoint_frame.save_data.get()
     if save_data:
-
-        # Are we in the continuous acquisition mode?
         if self.model.MicroscopeState['image_mode'] != 'continuous':
-
-            # Launch the popup window
             popup_window = acquire_popup(root, verbose)
 
             # Configure the button callbacks on the popup window
             popup_window.content.cancel_btn.config(command=lambda: popup_window.dismiss(verbose))
             popup_window.content.done_btn.config(command=lambda: self.launch_acquisition(popup_window, verbose))
+            #TODO: The launch_acquisition function should be called here and operate in the mode specified by the user.
 
             # Populate the base path
             popup_window.content.root_entry_string.set(self.model.Saving['root_directory'])
@@ -50,6 +49,10 @@ def launch_popup_window(self, root, verbose=False):
             # Populate the Label Type
             if self.model.Saving['label'] is not None:
                 popup_window.content.label_string.set(self.model.Saving['label'])
+    else:
+        # Launch the acquisition without the popup window. Data will not be saved.  Only displayed to the user in
+        # the camera window of the view.
+        self.launch_acquisition(None, verbose)
 
 def populate_lasers(self, verbose=False):
     # Populate the laser list

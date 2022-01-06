@@ -45,10 +45,21 @@ class Model:
         number_of_channels = len(channel_settings)
 
         # Set the laser.  Controlled by the DAQ card.  Delivered as  a digital signal for on/off, analog for intensity.
-        #set.d
 
         # Set the filter wheel
         self.filter_wheel.set_filter(channel_settings[0]['filter'])
+
+        # Set the exposure time - Need to make sure that the units are correct (millseconds, microseconds, etc.)
+        self.camera.set_exposure(channel_settings[0]['exposure'])
+
+        # Prepare the data acquisition card (sends and receives voltages)
+        # self.daq.calculate_samples() # calculates how many data points
+        # self.daq.create_waveforms() # calculates the waveforms. Many of these values are stored in the View.
+        # self.daq.start_tasks() # starts the tasks.
+
+        # Grab the image and send it to the view.
+
+
 
 if __name__ == '__main__':
     """ Testing Section """

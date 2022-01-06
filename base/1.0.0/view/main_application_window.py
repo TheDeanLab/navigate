@@ -10,6 +10,7 @@ the name of the class instead of self to make things easier to read. So for Main
 '''
 # Import Standard Libraries
 import os
+import sys
 import tkinter as tk
 from tkinter import ttk
 from tkinter import *

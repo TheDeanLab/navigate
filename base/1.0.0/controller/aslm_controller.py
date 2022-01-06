@@ -28,37 +28,53 @@ class ASLM_controller():
 
         # Channels Tab, Channel Settings
         # Select only a single channel by default.
-        self.view.notebook_1.channels_tab.channel_1_frame.on_off.set(True)
-        self.view.notebook_1.channels_tab.channel_2_frame.on_off.set(False)
-        self.view.notebook_1.channels_tab.channel_3_frame.on_off.set(False)
-        self.view.notebook_1.channels_tab.channel_4_frame.on_off.set(False)
-        self.view.notebook_1.channels_tab.channel_5_frame.on_off.set(False)
+        self.view.notebook_1.channels_tab.channel_widgets_frame.channel_variables[0].set(True)
+        # self.view.notebook_1.channels_tab.channel_widgets_frame.channel_variables[1].set(False)
+        # self.view.notebook_1.channels_tab.channel_widgets_frame.channel_variables[2].set(False)
+        # self.view.notebook_1.channels_tab.channel_widgets_frame.channel_variables[3].set(False)
+        # self.view.notebook_1.channels_tab.channel_widgets_frame.channel_variables[4].set(False)
+
+        '''
+        Loop to populate the channel settings******************************
+        Code above and below that is commented out is no longer needed
+        '''
+        
+        for x in range(5):
+            self.view.notebook_1.channels_tab.channel_widgets_frame.laser_pulldowns[x]['values'] = populate_lasers(self, self.verbose)
+            self.view.notebook_1.channels_tab.channel_widgets_frame.filterwheel_pulldowns[x]['values'] = \
+                list(self.model.session.FilterWheelParameters['available_filters'].keys())
+            self.view.notebook_1.channels_tab.channel_widgets_frame.exptime_variables[x].set(self.model.session.CameraParameters['camera_exposure_time'])
+
+        '''
+        End of loop
+        '''
 
         # Populate the lasers in the GUI
-        self.view.notebook_1.channels_tab.channel_1_frame.laser_pull_down['values'] = populate_lasers(self, self.verbose)
-        self.view.notebook_1.channels_tab.channel_2_frame.laser_pull_down['values'] = populate_lasers(self)
-        self.view.notebook_1.channels_tab.channel_3_frame.laser_pull_down['values'] = populate_lasers(self)
-        self.view.notebook_1.channels_tab.channel_4_frame.laser_pull_down['values'] = populate_lasers(self)
-        self.view.notebook_1.channels_tab.channel_5_frame.laser_pull_down['values'] = populate_lasers(self)
-
+        # self.view.notebook_1.channels_tab.channel_widgets_frame.laser_pulldowns[0]['values'] = populate_lasers(self, self.verbose)
+        # self.view.notebook_1.channels_tab.channel_widgets_frame.laser_pulldowns[1]['values'] = populate_lasers(self)
+        # self.view.notebook_1.channels_tab.channel_widgets_frame.laser_pulldowns[2]['values'] = populate_lasers(self)
+        # self.view.notebook_1.channels_tab.channel_widgets_frame.laser_pulldowns[3]['values'] = populate_lasers(self)
+        # self.view.notebook_1.channels_tab.channel_widgets_frame.laser_pulldowns[4]['values'] = populate_lasers(self)
+        
+            
         # Populate the filters in the GUI
-        self.view.notebook_1.channels_tab.channel_1_frame.filterwheel_pull_down['values'] = \
-            list(self.model.session.FilterWheelParameters['available_filters'].keys())
-        self.view.notebook_1.channels_tab.channel_2_frame.filterwheel_pull_down['values'] = \
-            list(self.model.session.FilterWheelParameters['available_filters'].keys())
-        self.view.notebook_1.channels_tab.channel_3_frame.filterwheel_pull_down['values'] = \
-            list(self.model.session.FilterWheelParameters['available_filters'].keys())
-        self.view.notebook_1.channels_tab.channel_4_frame.filterwheel_pull_down['values'] = \
-            list(self.model.session.FilterWheelParameters['available_filters'].keys())
-        self.view.notebook_1.channels_tab.channel_5_frame.filterwheel_pull_down['values'] = \
-            list(self.model.session.FilterWheelParameters['available_filters'].keys())
+        # self.view.notebook_1.channels_tab.channel_widgets_frame.filterwheel_pulldowns[0]['values'] = \
+        #     list(self.model.session.FilterWheelParameters['available_filters'].keys())
+        # self.view.notebook_1.channels_tab.channel_widgets_frame.filterwheel_pulldowns[1]['values'] = \
+        #     list(self.model.session.FilterWheelParameters['available_filters'].keys())
+        # self.view.notebook_1.channels_tab.channel_widgets_frame.filterwheel_pulldowns[2]['values'] = \
+        #     list(self.model.session.FilterWheelParameters['available_filters'].keys())
+        # self.view.notebook_1.channels_tab.channel_widgets_frame.filterwheel_pulldowns[3]['values'] = \
+        #     list(self.model.session.FilterWheelParameters['available_filters'].keys())
+        # self.view.notebook_1.channels_tab.channel_widgets_frame.filterwheel_pulldowns[4]['values'] = \
+        #     list(self.model.session.FilterWheelParameters['available_filters'].keys())
 
         # Populate the exposure times in the GUI
-        self.view.notebook_1.channels_tab.channel_1_frame.exp_time_spinval.set(self.model.session.CameraParameters['camera_exposure_time'])
-        self.view.notebook_1.channels_tab.channel_2_frame.exp_time_spinval.set(self.model.session.CameraParameters['camera_exposure_time'])
-        self.view.notebook_1.channels_tab.channel_3_frame.exp_time_spinval.set(self.model.session.CameraParameters['camera_exposure_time'])
-        self.view.notebook_1.channels_tab.channel_4_frame.exp_time_spinval.set(self.model.session.CameraParameters['camera_exposure_time'])
-        self.view.notebook_1.channels_tab.channel_5_frame.exp_time_spinval.set(self.model.session.CameraParameters['camera_exposure_time'])
+        # self.view.notebook_1.channels_tab.channel_widgets_frame.exptime_variables[0].set(self.model.session.CameraParameters['camera_exposure_time'])
+        # self.view.notebook_1.channels_tab.channel_widgets_frame.exptime_variables[1].set(self.model.session.CameraParameters['camera_exposure_time'])
+        # self.view.notebook_1.channels_tab.channel_widgets_frame.exptime_variables[2].set(self.model.session.CameraParameters['camera_exposure_time'])
+        # self.view.notebook_1.channels_tab.channel_widgets_frame.exptime_variables[3].set(self.model.session.CameraParameters['camera_exposure_time'])
+        # self.view.notebook_1.channels_tab.channel_widgets_frame.exptime_variables[4].set(self.model.session.CameraParameters['camera_exposure_time'])
 
         # Define all of the callbacks/events.
         # Acquire bar

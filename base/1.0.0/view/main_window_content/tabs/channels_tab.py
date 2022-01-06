@@ -4,7 +4,7 @@ from tkinter.font import Font
 
 import numpy as np
 
-from view.main_window_content.tabs.channels.channel_settings import channels_label_frame, channel_frame
+from view.main_window_content.tabs.channels.channel_settings import channel_creator
 from view.main_window_content.tabs.channels.stack_settings import stack_acq_frame
 from view.main_window_content.tabs.channels.stack_cycling_settings import stack_cycling_frame
 from view.main_window_content.tabs.channels.stack_timepoint_settings import stack_timepoint_frame
@@ -21,31 +21,10 @@ class channels_tab(ttk.Frame):
         #Gridding Major frames
         self.channel_main = ttk.Labelframe(self, text='Channel Settings')
         self.channel_main.grid(row=0, column=0, sticky=(NSEW))
-        self.channels_label_frame = channels_label_frame(self.channel_main)
 
-        #Each of these is an attempt to get the labels lined up
-        self.channels_label_frame.grid_columnconfigure(0, weight=1)
-        self.channels_label_frame.grid_columnconfigure(1, weight=1)
-        self.channels_label_frame.grid_columnconfigure(2, weight=1)
-        self.channels_label_frame.grid_columnconfigure(3, weight=1)
-
-        self.channels_label_frame.grid_rowconfigure(0, weight=1)
-        self.channels_label_frame.grid(row=0, column=1, columnspan=3, sticky=(NSEW))
-
-        self.channel_1_frame = channel_frame(self.channel_main, "1")
-        self.channel_1_frame.grid(row=1, column=0, columnspan=4, sticky=(NSEW))
-
-        self.channel_2_frame = channel_frame(self.channel_main, "2")
-        self.channel_2_frame.grid(row=2, column=0, columnspan=4, sticky=(NSEW))
-
-        self.channel_3_frame = channel_frame(self.channel_main, "3")
-        self.channel_3_frame.grid(row=3, column=0, columnspan=4, sticky=(NSEW))
-
-        self.channel_4_frame = channel_frame(self.channel_main, "4")
-        self.channel_4_frame.grid(row=4, column=0, columnspan=4, sticky=(NSEW))
-
-        self.channel_5_frame = channel_frame(self.channel_main, "5")
-        self.channel_5_frame.grid(row=5, column=0, columnspan=4, sticky=(NSEW))
+        #Channel Creation
+        self.channel_widgets_frame = channel_creator(self.channel_main)
+        self.channel_widgets_frame.grid(row=1, column=0, columnspan=5, sticky=(NSEW), pady=10)
 
         #Stack Acquisition Settings
         self.stack_acq_frame = stack_acq_frame(self)

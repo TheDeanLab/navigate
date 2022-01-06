@@ -61,6 +61,8 @@ starts the tkinter GUi, instantiates the controller, and then begins the main lo
 * Starts the View
 * Begins the callbacks to trace GUI events.  Any changes are updated in both the GUI and the model.
 
+![alt text](https://github.com/AdvancedImagingUTSW/ASLM/blob/develop/aslm_architecture.jpg?raw=true)
+
 ### Command Line Input Arguments (optional)
 * --verbose: Verbose mode.
 * --synthetic_hardware: Use simulated hardware.

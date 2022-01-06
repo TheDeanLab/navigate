@@ -4,27 +4,30 @@ from .aslm_model_functions import *
 from .aslm_model_config import Session as session
 
 class Model:
-    def __init__(self, args, file_path=None):
+    def __init__(self, args, configuration_path=None, experiment_path=None):
         # Retrieve the initial configuration from the yaml file
         self.verbose = args.verbose
 
         # Loads the YAML file for all of the microscope parameters
-        self.session = session(file_path, args.verbose)
+        self.configuration = session(configuration_path, args.verbose)
+
+        # Loads the YAML file for all of the experiment parameters
+        self.experiment = session(experiment_path, args.verbose)
 
         # Initialize all Hardware
         if args.synthetic_hardware:
             # If command line entry provided, overwrites the model parameters with synthetic hardware
-            self.session.DAQParameters['hardware_type'] = 'SyntheticDAQ'
-            self.session.CameraParameters['type'] = 'SyntheticCamera'
-            self.session.ETLParameters['type'] = 'SyntheticETL'
-            self.session.FilterWheelParameters['type'] = 'SyntheticFilterWheel'
-            self.session.StageParameters['type'] = 'SyntheticStage'
-            self.session.ZoomParameters['type'] = 'SyntheticZoom'
+            self.configuration.DAQParameters['hardware_type'] = 'SyntheticDAQ'
+            self.configuration.CameraParameters['type'] = 'SyntheticCamera'
+            self.configuration.ETLParameters['type'] = 'SyntheticETL'
+            self.configuration.FilterWheelParameters['type'] = 'SyntheticFilterWheel'
+            self.configuration.StageParameters['type'] = 'SyntheticStage'
+            self.configuration.ZoomParameters['type'] = 'SyntheticZoom'
 
-        # self.daq = start_daq(self.session, self.verbose)
-        self.cam = start_camera(self.session, 0, self.verbose)
-        self.stages = start_stages(self.session, self.verbose)
-        self.filter_wheel = start_filter_wheel(self.session, self.verbose)
+        # self.daq = start_daq(self.configuration, self.verbose)
+        self.cam = start_camera(self.configuration, 0, self.verbose)
+        self.stages = start_stages(self.configuration, self.verbose)
+        self.filter_wheel = start_filter_wheel(self.configuration, self.verbose)
 
 
     def continuous_acquisition_mode(channel_settings):

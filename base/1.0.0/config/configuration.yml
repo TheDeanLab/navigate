@@ -1,16 +1,5 @@
 %YAML 1.2
 ---
-User:
-  name: Kevin_Dean
-
-Saving:
-  root_directory: E:\
-  save_directory:
-  user:
-  tissue:
-  celltype:
-  label:
-  date:
 
 DAQParameters:
   #NI or SyntheticDAQ
@@ -198,19 +187,6 @@ SharedMemoryAllocation:
   images_per_buffer: 1
   bytes_per_data_buffer: images_per_buffer * 6000 * 4000 * 2
   bytes_per_preview_buffer: bytes_per_data_buffer * 3
-
-MicroscopeState:
-  image_mode: continuous
-  stack_cycling_mode: per_z
-  start_position: 0
-  end_position: 0
-  step_size: 0
-  number_z_steps: 0
-  save_data: 0
-  timepoints: 1
-  stack_pause: 0
-  step_size: 1
-
 
 StartupParameters:
   number_of_channels: 5

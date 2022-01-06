@@ -10,12 +10,12 @@ from controller.aslm_controller_functions import *
 from model.aslm_model import Model
 
 class ASLM_controller():
-    def __init__(self, root, configuration_path, args):
+    def __init__(self, root, configuration_path, experiment_path, args):
         self.verbose = args.verbose
 
         # Initialize the Model
         global model
-        self.model = Model(args, configuration_path)
+        self.model = Model(args, configuration_path, experiment_path)
 
         # Initialize the View
         self.view = view(root)
@@ -41,8 +41,8 @@ class ASLM_controller():
         for x in range(5):
             self.view.notebook_1.channels_tab.channel_widgets_frame.laser_pulldowns[x]['values'] = populate_lasers(self, self.verbose)
             self.view.notebook_1.channels_tab.channel_widgets_frame.filterwheel_pulldowns[x]['values'] = \
-                list(self.model.session.FilterWheelParameters['available_filters'].keys())
-            self.view.notebook_1.channels_tab.channel_widgets_frame.exptime_variables[x].set(self.model.session.StartupParameters['camera_exposure_time'])
+                list(self.model.configuration.FilterWheelParameters['available_filters'].keys())
+            self.view.notebook_1.channels_tab.channel_widgets_frame.exptime_variables[x].set(self.model.configuration.StartupParameters['camera_exposure_time'])
 
         '''
         End of loop
@@ -103,7 +103,7 @@ class ASLM_controller():
         self.stage_gui_controller = Stage_GUI_Controller(self.view.notebook_3.stage_control_tab, self)
         
         # Prepopulate the stage positions.
-        stage_postion = self.model.session.StageParameters['position']
+        stage_postion = self.model.configuration.StageParameters['position']
         self.stage_gui_controller.set_position({
             'x': stage_postion['x_pos'],
             'y': stage_postion['y_pos'],
@@ -114,10 +114,10 @@ class ASLM_controller():
 
         # Prepopulate the stage step size.
         self.stage_gui_controller.set_step_size({
-            'x': self.model.session.StageParameters['xy_step'],
-            'z': self.model.session.StageParameters['z_step'],
-            'theta': self.model.session.StageParameters['theta_step'],
-            'f': self.model.session.StageParameters['f_step']
+            'x': self.model.configuration.StageParameters['xy_step'],
+            'z': self.model.configuration.StageParameters['z_step'],
+            'theta': self.model.configuration.StageParameters['theta_step'],
+            'f': self.model.configuration.StageParameters['f_step']
         })
 
         # Configure event control for the buttons
@@ -125,6 +125,12 @@ class ASLM_controller():
 
 
     def launch_acquisition(self, popup_window):
+        '''
+        # Once the popup window has been filled out, we first create the save path using the create_save_path function.
+        # This automatically removes spaces and replaces them with underscores.
+        # Then it makes the directory.
+        # Thereafter, the experiment is ready to go.
+        '''
         # Need to create the save path, and update the model from the entries.
         save_directory = create_save_path(self, popup_window, self.verbose)
 

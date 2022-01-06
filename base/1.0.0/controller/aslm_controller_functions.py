@@ -68,9 +68,9 @@ def populate_lasers(self, verbose=False):
 def update_time_points(self, verbose=False):
     print("Updating time points")
     number_of_timepoints = self.view.notebook_1.channels_tab.stack_timepoint_frame.exp_time_spinval.get()
-    self.model.MicroscopeState['timepoints'] = number_of_timepoints
+    self.model.session.MicroscopeState['timepoints'] = number_of_timepoints
     if verbose:
-        print("Number of Timepoints:", session.MicroscopeState['timepoints'])
+        print("Number of Timepoints:", model.session.MicroscopeState['timepoints'])
 
 def update_z_steps(self, verbose=False):
     '''
@@ -86,35 +86,35 @@ def update_z_steps(self, verbose=False):
     self.view.notebook_1.channels_tab.stack_acq_frame.slice_spinbox.set(number_z_steps)
 
     # Update model
-    self.model.MicroscopeState['step_size'] = step_size
-    self.model.MicroscopeState['start_position'] = start_position
-    self.model.MicroscopeState['end_position'] = end_position
-    self.model.MicroscopeState['number_z_steps'] = number_z_steps
+    self.model.session.MicroscopeState['step_size'] = step_size
+    self.model.session.MicroscopeState['start_position'] = start_position
+    self.model.session.MicroscopeState['end_position'] = end_position
+    self.model.session.MicroscopeState['number_z_steps'] = number_z_steps
 
     if verbose:
-        print("Number of Z-Steps:", self.model.MicroscopeState['number_z_steps'])
+        print("Number of Z-Steps:", self.model.session.MicroscopeState['number_z_steps'])
 
 def update_cycling_settings(self, verbose=False):
     '''
     Updates the cycling settings in the model and the GUI.
     '''
     # Update model
-    self.model.MicroscopeState['stack_cycling_mode'] = self.view.notebook_1.channels_tab.stack_cycling_frame.cycling_options.get()
+    self.model.session.MicroscopeState['stack_cycling_mode'] = self.view.notebook_1.channels_tab.stack_cycling_frame.cycling_options.get()
     if verbose:
         print("Cycling Mode:", self.model.MicroscopeState['stack_cycling_mode'])
 
 def update_microscope_mode(self, verbose):
     microscope_state = self.view.acqbar.pull_down.get()
     if microscope_state == 'Continuous Scan':
-        self.model.MicroscopeState['image_mode'] = 'continuous'
+        self.model.session.MicroscopeState['image_mode'] = 'continuous'
     elif microscope_state == 'Z-Stack':
-        self.model.MicroscopeState['image_mode'] = 'z-stack'
+        self.model.session.MicroscopeState['image_mode'] = 'z-stack'
     elif microscope_state == 'Single Acquisition':
-        self.model.MicroscopeState['image_mode'] = 'single'
+        self.model.session.MicroscopeState['image_mode'] = 'single'
     elif microscope_state == 'Projection':
-        self.model.MicroscopeState['image_mode'] = 'projection'
+        self.model.session.MicroscopeState['image_mode'] = 'projection'
     if verbose:
-        print("The Microscope State is now:", self.model.MicroscopeState['image_mode'])
+        print("The Microscope State is now:", self.model.session.MicroscopeState['image_mode'])
 
 def exit_program(self, verbose=False):
     if verbose:
@@ -166,7 +166,7 @@ def create_save_path(self, popup_window, verbose=False):
         print("Data Will be Saved To:", save_directory)
 
     # Update the Model
-    self.model.Saving = {
+    self.model.session.Saving = {
         'save_directory': save_directory,
         'user': user_string,
         'tissue': tissue_string,
@@ -174,5 +174,4 @@ def create_save_path(self, popup_window, verbose=False):
         'label': label_string,
         'date': date_string
     }
-
     return save_directory

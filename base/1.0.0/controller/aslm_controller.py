@@ -5,6 +5,7 @@ Use: https://www.python-course.eu/tkinter_events_binds.php
 
 # Local Imports
 from view.main_application_window import Main_App as view
+from view.main_window_content.stage_control.stage_gui_controller import Stage_GUI_Controller
 from controller.aslm_controller_functions import *
 from model.aslm_model import Model
 
@@ -98,45 +99,28 @@ class ASLM_controller():
 
         # Advanced Tab
 
-        # Stage Notebook
+        # Stage Controller
+        self.stage_gui_controller = Stage_GUI_Controller(self.view.notebook_3.stage_control_tab, self)
+        
         # Prepopulate the stage positions.
-        self.view.notebook_3.stage_control_tab.position_frame.x_val.set(self.model.stages.x_pos)
-        self.view.notebook_3.stage_control_tab.position_frame.y_val.set(self.model.stages.y_pos)
-        self.view.notebook_3.stage_control_tab.position_frame.z_val.set(self.model.stages.z_pos)
-        self.view.notebook_3.stage_control_tab.position_frame.theta_val.set(self.model.stages.theta_pos)
-        self.view.notebook_3.stage_control_tab.position_frame.focus_val.set(self.model.stages.f_pos)
+        self.stage_gui_controller.set_position({
+            'x': self.stages.x_pos,
+            'y': self.stages.y_pos,
+            'z': self.stages.z_pos,
+            'theta': self.stages.theta_pos,
+            'f': self.stages.f_pos
+        })
 
         # Prepopulate the stage step size.
-        self.view.notebook_3.stage_control_tab.x_y_frame.increment_box.set(self.model.session.StageParameters['xy_step'])
-        self.view.notebook_3.stage_control_tab.z_frame.increment_box.set(self.model.session.StageParameters['z_step'])
-        self.view.notebook_3.stage_control_tab.theta_frame.increment_box.set(self.model.session.StageParameters['theta_step'])
-        self.view.notebook_3.stage_control_tab.focus_frame.increment_box.set(self.model.session.StageParameters['f_step'])
+        self.stage_gui_controller.set_step_size({
+            'x': self.model.StageParameters['xy_step'],
+            'z': self.model.StageParameters['z_step'],
+            'theta': self.model.StageParameters['theta_step'],
+            'f': self.model.StageParameters['f_step']
+        })
 
         # Configure event control for the buttons
         self.view.menu_zoom.bind("<<MenuSelect>>", lambda *args: print("Zoom Selected", *args))
-
-        #TODO: Replace print functions with calls to the stage controller.
-        self.view.notebook_3.stage_control_tab.x_y_frame.negative_x_btn.config(command=lambda: print("x-"))
-        self.view.notebook_3.stage_control_tab.x_y_frame.positive_x_btn.config(command=lambda: print("x+"))
-        self.view.notebook_3.stage_control_tab.x_y_frame.negative_y_btn.config(command=lambda: print("y-"))
-        self.view.notebook_3.stage_control_tab.x_y_frame.positive_y_btn.config(command=lambda: print("y+"))
-        self.view.notebook_3.stage_control_tab.x_y_frame.zero_x_y_btn.config(command=lambda: print("Zero x-y"))
-
-        self.view.notebook_3.stage_control_tab.z_frame.down_btn.config(command=lambda: print("z-"))
-        self.view.notebook_3.stage_control_tab.z_frame.up_btn.config(command=lambda: print("z+"))
-        self.view.notebook_3.stage_control_tab.z_frame.zero_z_btn.config(command=lambda: print("Zero z"))
-
-        self.view.notebook_3.stage_control_tab.theta_frame.up_btn.config(command=lambda: print("theta-"))
-        self.view.notebook_3.stage_control_tab.theta_frame.down_btn.config(command=lambda: print("theta+"))
-        self.view.notebook_3.stage_control_tab.theta_frame.zero_theta_btn.config(command=lambda: print("Zero theta"))
-
-        self.view.notebook_3.stage_control_tab.focus_frame.up_btn.config(command=lambda: print("focus-"))
-        self.view.notebook_3.stage_control_tab.focus_frame.down_btn.config(command=lambda: print("focus+"))
-        self.view.notebook_3.stage_control_tab.focus_frame.zero_focus_btn.config(command=lambda: print("Zero Focus"))
-
-        #self.view.notebook_3.goto_frame.goto_btn.config(command=lambda: self.model.stages.goto_position(self.view.notebook_3.goto_frame.goto_entry.get()))
-        #x_y_frame.x_pos_spinval.trace_add('write', lambda *args: self.model.stages.update_x_position(self.verbose))
-            #.stage_frame.stage_x_spinval.trace_add('write', lambda *args: update_stage_position(self, self.verbose))
 
 
     def launch_acquisition(self, popup_window):
@@ -147,6 +131,15 @@ class ASLM_controller():
 
         # Close the window
         popup_window.dismiss(self.verbose)
+
+    def execute(self, command, *args):
+        '''
+        This function listens to sub_gui_controllers
+        '''
+        print('command passed from child', command, args)
+        if command == 'stage':
+            # todo: call the model to move stage
+            print('stage should move to', args[0], 'on', args[1])
 
 
 

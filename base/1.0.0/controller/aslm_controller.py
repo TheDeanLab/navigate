@@ -2,8 +2,6 @@
 This is the controller in an MVC-scheme for mediating the interaction between the View (GUI) and the model (./model/aslm_model.py).
 Use: https://www.python-course.eu/tkinter_events_binds.php
 """
-# Import Standard Python Packages
-import numpy as np
 
 # Local Imports
 from view.main_application_window import Main_App as view
@@ -43,7 +41,7 @@ class ASLM_controller():
             self.view.notebook_1.channels_tab.channel_widgets_frame.laser_pulldowns[x]['values'] = populate_lasers(self, self.verbose)
             self.view.notebook_1.channels_tab.channel_widgets_frame.filterwheel_pulldowns[x]['values'] = \
                 list(self.model.session.FilterWheelParameters['available_filters'].keys())
-            self.view.notebook_1.channels_tab.channel_widgets_frame.exptime_variables[x].set(self.model.session.CameraParameters['camera_exposure_time'])
+            self.view.notebook_1.channels_tab.channel_widgets_frame.exptime_variables[x].set(self.model.session.StartupParameters['camera_exposure_time'])
 
         '''
         End of loop

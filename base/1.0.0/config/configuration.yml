@@ -13,7 +13,8 @@ Saving:
   date:
 
 DAQParameters:
-  hardware_type: SyntheticDAQ #NI or SyntheticDAQ
+  #NI or SyntheticDAQ
+  hardware_type: SyntheticDAQ
   samplerate: 100000
 
   # triggers
@@ -22,29 +23,53 @@ DAQParameters:
   trigger_source: PXI6259/PFI0
 
   # galvos
+  galvo_left_min_ao: -5
+  galvo_left_max_ao: 5
   galvo_left: ao0
+
+  galvo_right_min_ao: -5
+  galvo_right_max_ao: 5
   galvo_right: ao1
 
-  # ETL
-  etl_left: ao2
-  etl_right: ao3
+  # Remote Focusing Systems
+  etl_min_ao: 0
+  etl_max_ao: 5
+  etl: ao2
 
-  # lasers
+  voice_coil_min_ao: -10
+  voice_coil_max_ao: 10
+  voice_coil: ao3
+
+  # lasers - DO for on/off, AO for intensity control.
   number_of_lasers : 3
+  laser_min_ao: 0
+  laser_max_ao: 5
+
+  laser_min_do: 0
+  laser_max_do: 5
+
   laser_0_wavelength: 488nm
-  laser_0: PXI6733/port0/line2
+  laser_0_do: PXI6733/port0/line2
+  laser_0_ao: PXI6733/port0/line5
+
   laser_1_wavelength: 562nm
-  laser_1: PXI6733/port0/line3
+  laser_1_do: PXI6733/port0/line3
+  laser_1_ao: PXI6733/port0/line6
+
   laser_2_wavelength: 642nm
-  laser_2: PXI6733/port0/line4
+  laser_2_do: PXI6733/port0/line4
+  laser_2_ao: PXI6733/port0/line7
 
   # shutters
+  shutter_min_do: 0
+  shutter_max_do: 5
   shutter_left: PXI6259/port0/line0
   shutter_right: PXI6259/port2/line0
 
 CameraParameters:
-  type: SyntheticCamera #SyntheticCamera or HamamatsuOrca
-  number_of_cameras: 2
+  # SyntheticCamera or HamamatsuOrca
+  type: SyntheticCamera
+  number_of_cameras: 1
   x_pixels: 2048
   y_pixels: 2048
   x_pixel_size_in_microns: 6.5
@@ -55,32 +80,13 @@ CameraParameters:
   binning: 1x1
   readout_speed: 1
   trigger_active: 1
-  trigger_mode: 1 # it is unclear if this is the external lightsheeet mode - how to check this?
+  trigger_mode: 1 # it is unclear if this is the external lightsheet mode - how to check this?
   trigger_polarity: 2  # positive pulse
   trigger_source: 2  # external
-  camera_line_interval: 0.000075
-  camera_exposure_time: 200 # in ms
-  ASLM_from_volt: 0  # first voltage applied at remote mirror
-  ASLM_to_volt: 1  # voltage applied at remote mirror at the end of sawtooth
-  ASLM_current_volt: 0  # current voltage applied to remote mirror
-  ASLM_static_low_res_volt: 0  # default ASLM low res voltage
-  ASLM_static_high_res_volt: 0  # default ASLM high res voltage
-  ASLM_alignment_on: 0  # param=1 if ASLM alignment mode is on, otherwise zero
-  ASLM_delay_before_voltage_return: 0.001  # 1ms
-  ASLM_additional_return_time: 0.001  # 1ms
-  camera_delay_percent: 10
-  camera_pulse_percent: 1
-  camera_exposure_time: 0.01
-  camera_line_interval: 0.000075
-  camera_display_live_subsampling: 1
-  camera_display_snap_subsampling: 1
-  camera_display_acquisition_subsampling: 2
-  camera_binning: 1x1
-  camera_sensor_mode: ASLM
-  average_frame_rate: 4.969
 
 ETLParameters:
-  type: SyntheticETL #ETL or SyntheticETL
+  #ETL or SyntheticETL
+  type: SyntheticETL
   number_of_etls: 2
   etl_l_delay_percent: 7.5
   etl_l_ramp_rising_percent: 85
@@ -95,7 +101,8 @@ ETLParameters:
   ETL_cfg_file: C:/Users/Spectral/Documents/GitHub/multiscale_microscope/base/1.0.0/config/etl_parameters/ETL-parameters.csv
 
 FilterWheelParameters:
-  type: SyntheticFilterWheel #Sutter or SyntheticFilterWheel
+  #Sutter or SyntheticFilterWheel
+  type: SyntheticFilterWheel
   filter_wheel_port: COM9
   baudrate: 9600
   number_of_filter_wheels: 2
@@ -124,64 +131,65 @@ GalvoParameters:
   galvo_r_phase: np.pi / 2
 
 StageParameters:
-    type: SyntheticStage # PI or SyntheticStage
-    controllername: 'C-884'
-    stages: L-509.20DG10 L-509.40DG10 L-509.20DG10 M-060.DG M-406.4PD NOSTAGE #('L-509.20DG10', 'L-509.40DG10', 'L-509.20DG10', 'M-060.DG', 'M-406.4PD', 'NOSTAGE')
-    refmode: FRF FRF FRF FRF FRF FRF
-    serialnum: 119060508
-    y_unload_position: 10000
-    y_load_position: 90000
-    startfocus: 70700
-    x_max: 50000
-    x_min: 2000
-    y_max: 100000
-    y_min: 2000
-    z_max: 50000
-    z_min: 2000
-    f_max: 100000
-    f_min: 2000
-    theta_max: 360
-    theta_min: 0
-    x_rot_position: 2000
-    y_rot_position: 2000
-    z_rot_position: 2000
-    xy_step: 500
-    z_step: 500
-    theta_step: 30
-    f_step: 500
-    position: {
-      x_pos: 0,
-      y_pos: 0,
-      z_pos: 0,
-      f_pos: 0,
-      theta_pos: 0
-    }
+  # PI or SyntheticStage
+  type: SyntheticStage
+  controllername: 'C-884'
+  stages: L-509.20DG10 L-509.40DG10 L-509.20DG10 M-060.DG M-406.4PD NOSTAGE #('L-509.20DG10', 'L-509.40DG10', 'L-509.20DG10', 'M-060.DG', 'M-406.4PD', 'NOSTAGE')
+  refmode: FRF FRF FRF FRF FRF FRF
+  serialnum: 119060508
+  y_unload_position: 10000
+  y_load_position: 90000
+  startfocus: 70700
+  x_max: 50000
+  x_min: 2000
+  y_max: 100000
+  y_min: 2000
+  z_max: 50000
+  z_min: 2000
+  f_max: 100000
+  f_min: 2000
+  theta_max: 360
+  theta_min: 0
+  x_rot_position: 2000
+  y_rot_position: 2000
+  z_rot_position: 2000
+  xy_step: 500
+  z_step: 500
+  theta_step: 30
+  f_step: 500
+  position: {
+    x_pos: 0,
+    y_pos: 0,
+    z_pos: 0,
+    f_pos: 0,
+    theta_pos: 0
+  }
 
 ZoomParameters:
-    type: SyntheticZoom #Dynamixel or SyntheticZoom
-    servo_id: 1
-    COMport: COM21
-    baudrate: 1000000
-    zoom_position: {
-      0.63x: 0,
-      1x: 627,
-      2x: 1711,
-      3x: 2301,
-      4x: 2710,
-      5x: 3079,
-      6x: 3383
-    }
-    low_res_zoom_pixel_size: {
-      0.63x: 9.7,
-      1x: 6.38,
-      2x: 3.14,
-      3x: 2.12,
-      4x: 1.609,
-      5x: 1.255,
-      6x: 1.044
-    }
-    high_res_zoom_pixel_size: 0.167
-
+  #Dynamixel or SyntheticZoom
+  type: SyntheticZoom
+  servo_id: 1
+  COMport: COM21
+  baudrate: 1000000
+  zoom_position: {
+    0.63x: 0,
+    1x: 627,
+    2x: 1711,
+    3x: 2301,
+    4x: 2710,
+    5x: 3079,
+    6x: 3383
+  }
+  low_res_zoom_pixel_size: {
+    0.63x: 9.7,
+    1x: 6.38,
+    2x: 3.14,
+    3x: 2.12,
+    4x: 1.609,
+    5x: 1.255,
+    6x: 1.044
+  }
+  high_res_zoom_pixel_size: 0.167
 
 SharedMemoryAllocation:
   vol_per_buffer: 1
@@ -208,18 +216,37 @@ StartupParameters:
   number_of_channels: 5
   state: init  # init, idle, live, snap, running_script
   sweeptime: 0.2
-  file_prefix:
-  file_suffix: 000001
   zoom: 1x
   pixelsize: 6.55
-  laser: 488 nm
-  max_laser_voltage: 10
-  intensity: 10
   shutterstate: False  # Is the shutter open or not?
   shutterconfig: Left  # Can be "Left" "Right" "Both" "Interleaved"
+
+  # Default Laser Parameters
+  laser: 488 nm
+  intensity: 10
   laser_l_delay_percent: 10
   laser_l_pulse_percent: 87
-  laser_l_max_amplitude_percent: 100
   laser_r_delay_percent: 10
   laser_r_pulse_percent: 87
-  laser_r_max_amplitude_percent: 100
+
+  # Camera Specific Startup Parameters
+  camera_line_interval: 0.000075
+  camera_exposure_time: 200 # in ms
+  ASLM_from_volt: 0  # first voltage applied at remote mirror
+  ASLM_to_volt: 1  # voltage applied at remote mirror at the end of sawtooth
+  ASLM_current_volt: 0  # current voltage applied to remote mirror
+  ASLM_static_low_res_volt: 0  # default ASLM low res voltage
+  ASLM_static_high_res_volt: 0  # default ASLM high res voltage
+  ASLM_alignment_on: 0  # param=1 if ASLM alignment mode is on, otherwise zero
+  ASLM_delay_before_voltage_return: 0.001  # 1ms
+  ASLM_additional_return_time: 0.001  # 1ms
+  camera_delay_percent: 10
+  camera_pulse_percent: 1
+  camera_exposure_time: 200 #milliseconds
+  camera_line_interval: 0.000075
+  camera_display_live_subsampling: 1
+  camera_display_snap_subsampling: 1
+  camera_display_acquisition_subsampling: 2
+  camera_binning: 1x1
+  camera_sensor_mode: ASLM
+  average_frame_rate: 4.969

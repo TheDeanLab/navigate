@@ -29,6 +29,18 @@ class Model:
 
     def continuous_acquisition_mode(channel_settings):
         """
+        FOR ANNIE: We control different hardware elements using different mechanisms.  The laser is controlled by
+        The laser is turned on/off by sending a digital signal.  This is either 0V or 5V.  This signal is sent by the
+        daq card.  You can see in the configuration file where these signals are physically connected.
+        Likewise, the intensity is controlled by an analog signal.  0V is the lowest intensity and 5V is the highest.
+        We need to make sure that we do not send signals that are negative, or greater than 5V.  This is also specified
+        in the configuration file.
+
+        For example, the wavelength, laser_0_wavelength, is 488 nm.
+        The digital output channel for laser_0 is PXI6733/port0/line2
+        The analog output channel for laser_0 is PXI6733/line5.
+
+
         Continuous acquisition mode.
         channel_settings[ch] = [laser, filter, exposure, laser_power, interval]
 
@@ -49,7 +61,7 @@ class Model:
         # Set the filter wheel
         self.filter_wheel.set_filter(channel_settings[0]['filter'])
 
-        # Set the exposure time - Need to make sure that the units are correct (millseconds, microseconds, etc.)
+        # Set the exposure time - Need to make sure that the units are correct (milliseconds, microseconds, etc.)
         self.camera.set_exposure(channel_settings[0]['exposure'])
 
         # Prepare the data acquisition card (sends and receives voltages)

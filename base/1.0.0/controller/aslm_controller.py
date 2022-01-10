@@ -9,7 +9,9 @@ from view.main_application_window import Main_App as view
 # Local Sub-Controller Imports
 from view.main_window_content.stage_control.stage_gui_controller import Stage_GUI_Controller
 from view.main_window_content.acquire_bar_frame.acquire_bar_controller import Acquire_Bar_Controller
+from view.main_window_content.tabs.channels.channel_setting_controller import Channel_Setting_Controller
 from controller.aslm_controller_functions import *
+from controller.aslm_configuration_controller import ASLM_Configuration_Controller
 
 # Local Model Imports
 from model.aslm_model import Model
@@ -25,63 +27,37 @@ class ASLM_controller():
         # Initialize the View
         self.view = view(root)
 
+        # sub gui controllers
+        # Acquire bar
+        self.acquire_bar_controller = Acquire_Bar_Controller(self.view.acqbar, self)
+        # Channels Controller
+        self.channel_setting_controller = Channel_Setting_Controller(self.view.notebook_1.channels_tab.channel_widgets_frame, self)
+        # Stage Controller
+        self.stage_gui_controller = Stage_GUI_Controller(self.view.notebook_3.stage_control_tab, self)
+
+        # Initialize view based on model.configuration
+        # configuration
+        configuration_controller = ASLM_Configuration_Controller(self.model.configuration)
+        # Channels Tab, Channel Settings
+        self.initialize_channels(configuration_controller)
+        # Stage Control Tab
+        self.initialize_stage(configuration_controller)
+
+        # Set view based on model.experiment
+        # todo
+        # Select only a single channel by default.
+        # todo: other channel settings? like laser, filter.....
+        self.channel_setting_controller.set_values(0, {
+            'is_selected': True
+        })
+
+
+
+
         #TODO: camera_view_tab, maximum intensity tab, waveform_tab
         # still need to be changed so that they are populated here.
 
-        # Populate the View with the Model
 
-        # Channels Tab, Channel Settings
-        # Select only a single channel by default.
-        self.view.notebook_1.channels_tab.channel_widgets_frame.channel_variables[0].set(True)
-        # self.view.notebook_1.channels_tab.channel_widgets_frame.channel_variables[1].set(False)
-        # self.view.notebook_1.channels_tab.channel_widgets_frame.channel_variables[2].set(False)
-        # self.view.notebook_1.channels_tab.channel_widgets_frame.channel_variables[3].set(False)
-        # self.view.notebook_1.channels_tab.channel_widgets_frame.channel_variables[4].set(False)
-
-        '''
-        Loop to populate the channel settings******************************
-        Code above and below that is commented out is no longer needed
-        '''
-        
-        for x in range(5):
-            self.view.notebook_1.channels_tab.channel_widgets_frame.laser_pulldowns[x]['values'] = populate_lasers(self, self.verbose)
-            self.view.notebook_1.channels_tab.channel_widgets_frame.filterwheel_pulldowns[x]['values'] = \
-                list(self.model.configuration.FilterWheelParameters['available_filters'].keys())
-            self.view.notebook_1.channels_tab.channel_widgets_frame.exptime_variables[x].set(self.model.configuration.StartupParameters['camera_exposure_time'])
-
-        '''
-        End of loop
-        '''
-
-        # Populate the lasers in the GUI
-        # self.view.notebook_1.channels_tab.channel_widgets_frame.laser_pulldowns[0]['values'] = populate_lasers(self, self.verbose)
-        # self.view.notebook_1.channels_tab.channel_widgets_frame.laser_pulldowns[1]['values'] = populate_lasers(self)
-        # self.view.notebook_1.channels_tab.channel_widgets_frame.laser_pulldowns[2]['values'] = populate_lasers(self)
-        # self.view.notebook_1.channels_tab.channel_widgets_frame.laser_pulldowns[3]['values'] = populate_lasers(self)
-        # self.view.notebook_1.channels_tab.channel_widgets_frame.laser_pulldowns[4]['values'] = populate_lasers(self)
-        
-            
-        # Populate the filters in the GUI
-        # self.view.notebook_1.channels_tab.channel_widgets_frame.filterwheel_pulldowns[0]['values'] = \
-        #     list(self.model.session.FilterWheelParameters['available_filters'].keys())
-        # self.view.notebook_1.channels_tab.channel_widgets_frame.filterwheel_pulldowns[1]['values'] = \
-        #     list(self.model.session.FilterWheelParameters['available_filters'].keys())
-        # self.view.notebook_1.channels_tab.channel_widgets_frame.filterwheel_pulldowns[2]['values'] = \
-        #     list(self.model.session.FilterWheelParameters['available_filters'].keys())
-        # self.view.notebook_1.channels_tab.channel_widgets_frame.filterwheel_pulldowns[3]['values'] = \
-        #     list(self.model.session.FilterWheelParameters['available_filters'].keys())
-        # self.view.notebook_1.channels_tab.channel_widgets_frame.filterwheel_pulldowns[4]['values'] = \
-        #     list(self.model.session.FilterWheelParameters['available_filters'].keys())
-
-        # Populate the exposure times in the GUI
-        # self.view.notebook_1.channels_tab.channel_widgets_frame.exptime_variables[0].set(self.model.session.CameraParameters['camera_exposure_time'])
-        # self.view.notebook_1.channels_tab.channel_widgets_frame.exptime_variables[1].set(self.model.session.CameraParameters['camera_exposure_time'])
-        # self.view.notebook_1.channels_tab.channel_widgets_frame.exptime_variables[2].set(self.model.session.CameraParameters['camera_exposure_time'])
-        # self.view.notebook_1.channels_tab.channel_widgets_frame.exptime_variables[3].set(self.model.session.CameraParameters['camera_exposure_time'])
-        # self.view.notebook_1.channels_tab.channel_widgets_frame.exptime_variables[4].set(self.model.session.CameraParameters['camera_exposure_time'])
-
-        # Acquire Bar Controller
-        self.acquire_bar_controller = Acquire_Bar_Controller(self.view.acqbar, self)
 
         # self.view.acqbar.acquire_btn.config(command=lambda: launch_popup_window(self, root, self.verbose))
         # self.view.acqbar.exit_btn.config(command=lambda: exit_program(self.verbose))
@@ -105,26 +81,9 @@ class ASLM_controller():
 
         # Advanced Tab
 
-        # Stage Controller
-        self.stage_gui_controller = Stage_GUI_Controller(self.view.notebook_3.stage_control_tab, self)
         
-        # Prepopulate the stage positions.
-        stage_postion = self.model.configuration.StageParameters['position']
-        self.stage_gui_controller.set_position({
-            'x': stage_postion['x_pos'],
-            'y': stage_postion['y_pos'],
-            'z': stage_postion['z_pos'],
-            'theta': stage_postion['theta_pos'],
-            'f': stage_postion['f_pos']
-        })
-
-        # Prepopulate the stage step size.
-        self.stage_gui_controller.set_step_size({
-            'x': self.model.configuration.StageParameters['xy_step'],
-            'z': self.model.configuration.StageParameters['z_step'],
-            'theta': self.model.configuration.StageParameters['theta_step'],
-            'f': self.model.configuration.StageParameters['f_step']
-        })
+        
+        
 
         # Configure event control for the buttons
         self.view.menu_zoom.bind("<<MenuSelect>>", lambda *args: print("Zoom Selected", *args))
@@ -144,6 +103,23 @@ class ASLM_controller():
 
         # Close the window
         popup_window.dismiss(self.verbose)
+
+    def initialize_channels(self, configuration_controller):
+        # populate the lasers in the GUI
+        self.channel_setting_controller.initialize('laser', configuration_controller.get_lasers_info())
+        
+        # populate the filters in the GUI
+        self.channel_setting_controller.initialize('filter', configuration_controller.get_filters_info())
+
+        # todo: camera_exposure_time is a configuration or experiment?
+        self.channel_setting_controller.initialize('camera_exposure_time', configuration_controller.get_exposure_time())
+
+    def initialize_stage(self, configuration_controller):
+        # Prepopulate the stage positions.
+        self.stage_gui_controller.set_position(configuration_controller.get_stage_position())
+
+        # Prepopulate the stage step size.
+        self.stage_gui_controller.set_step_size(configuration_controller.get_stage_step())
 
     def execute(self, command, *args):
         '''

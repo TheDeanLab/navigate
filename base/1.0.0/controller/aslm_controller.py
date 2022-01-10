@@ -51,9 +51,6 @@ class ASLM_controller():
             'is_selected': True
         })
 
-
-
-
         #TODO: camera_view_tab, maximum intensity tab, waveform_tab
         # still need to be changed so that they are populated here.
 
@@ -80,10 +77,6 @@ class ASLM_controller():
         # Camera Tab, Camera Settings
 
         # Advanced Tab
-
-        
-        
-        
 
         # Configure event control for the buttons
         self.view.menu_zoom.bind("<<MenuSelect>>", lambda *args: print("Zoom Selected", *args))

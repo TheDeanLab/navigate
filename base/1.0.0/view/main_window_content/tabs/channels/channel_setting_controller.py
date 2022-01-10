@@ -3,7 +3,7 @@ from view.gui_controller import GUI_Controller
 class Channel_Setting_Controller(GUI_Controller):
     def __init__(self, view, parent_controller=None):
         super().__init__(view, parent_controller)
-        # num: nummbers of channels
+        # num: numbers of channels
         self.num = 5
         # 'instant': acquire mode is set to 'continuous'
         self.mode = 'instant'

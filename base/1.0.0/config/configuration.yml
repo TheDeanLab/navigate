@@ -31,6 +31,8 @@ DAQParameters:
 
   # lasers - DO for on/off, AO for intensity control.
   number_of_lasers : 3
+  laser_port_switcher: PXI6733/port0/line0
+
   laser_min_ao: 0
   laser_max_ao: 5
 

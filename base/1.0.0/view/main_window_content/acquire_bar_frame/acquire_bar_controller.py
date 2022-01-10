@@ -1,9 +1,10 @@
 '''
 Sub-controller for the acquire popup window
+When the mode is changed, we need to communicate this to the central controller.
+Central controller then communicates these changes to the channel_setting_controller.
 '''
 
 from view.gui_controller import GUI_Controller
-import inspect
 
 class Acquire_Bar_Controller(GUI_Controller):
     def __init__(self, view, parent_controller):

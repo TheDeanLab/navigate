@@ -1,5 +1,8 @@
 import numpy as np
-from concurrency_tools import ObjectInSubprocess, CustodyThread, SharedNDArray
+from concurrency_tools import ObjectInSubprocess, CustodyThread, ResultThread, SharedNDArray
+import time
+import threading
+import os
 
 # Tune these values to get reliable operation on your machine:
 fps =    500           # Camera frames per second
@@ -39,6 +42,7 @@ def with_concurrency():
     # Camera spends 323 ms working, but only spends 12 ms waiting.
     ####################################################################
     print("\nSimulating acquiring WITH concurrency...\n" + description)
+    start_time = time.perf_counter()
     ####################################################################
     camera =        ObjectInSubprocess(Camera) # Can't tolerate threadswitching
     preprocessor =  ObjectInSubprocess(Preprocessor) # CPU-bound
@@ -65,8 +69,42 @@ def with_concurrency():
             first_resource=camera, target=timelapse, args=(db,)).start())
     for th in threads: # Wait for all our threads to finish
         th.get_result()
+    end_time = time.perf_counter()
     print("Camera spends %0.0f ms working, but only spends %0.0f ms waiting."%(
         camera.time_working*1000, camera.time_waiting*1000))
+    print("total time cost: ", (end_time - start_time)*1000)
+
+def with_concurrency_lock():
+    # On my machine, this prints:
+    # Camera spends 323 ms working, but only spends 12 ms waiting.
+    ####################################################################
+    print("\nSimulating acquiring WITH concurrency_lock...\n" + description)
+    start_time = time.perf_counter()
+    ####################################################################
+    camera =        ObjectInSubprocess(Camera, with_lock=True) # Can't tolerate threadswitching
+    preprocessor =  ObjectInSubprocess(Preprocessor, with_lock=True) # CPU-bound
+    display =       ObjectInSubprocess(Display, with_lock=True) # Slightly CPU-bound
+    postprocessor = ObjectInSubprocess(Postprocessor, with_lock=True) # CPU-bound
+    storage =       Storage() # IO-bound, not CPU-bound
+    data_buffers = [SharedNDArray(shape, dtype='uint16') for x in range(N)]
+
+    def timelapse(data_buffer):
+        camera.record(data_buffer, fps)
+        preprocessor.deconvolve(data_buffer)
+        display.show(data_buffer)
+        postprocessor.detect_motion(data_buffer)
+        storage.save(data_buffer)
+
+    threads = []
+    for db in data_buffers:
+        threads.append(ResultThread( # This provides the "custody" object above
+            target=timelapse, args=(db,)).start())
+    for th in threads: # Wait for all our threads to finish
+        th.get_result()
+    end_time = time.perf_counter()
+    print("Camera spends %0.0f ms working, but only spends %0.0f ms waiting."%(
+        camera.time_working*1000, camera.time_waiting*1000))
+    print("total time cost: ", (end_time - start_time)*1000)
     ####################################################################
     # We got huge performance gains using threads, subprocesses, and
     # shared memory. The code only got ~1.5x longer, and didn't get too
@@ -135,8 +173,9 @@ class Storage:
             np.save(f, x)
 
 if __name__ == '__main__':
-    without_concurrency()
+    # without_concurrency()
     with_concurrency()
+    with_concurrency_lock()
     ######################
     #  END EXAMPLE CODE  #
     ######################

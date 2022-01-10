@@ -470,7 +470,7 @@ PoliteThread = CustodyThread
 class ObjectInSubprocess:
     def __init__(self, initializer, *initargs, custom_loop=None,
                  close_method_name=None, closeargs=None, closekwargs=None,
-                 **initkwargs):
+                 with_lock=False, **initkwargs):
         """Make an object in a child process, that acts like it isn't.
 
         As much as possible, we try to make instances of ObjectInSubprocess
@@ -505,6 +505,10 @@ class ObjectInSubprocess:
         self._.child_pipe = child_pipe
         self._.child_process = child_process
         self._.waiting_list = _WaitingList()
+        if with_lock:
+            self._.resource_lock = threading.Lock()
+        else:
+            self._.resource_lock = None
         # Make sure the child process initialized successfully:
         with self._.parent_pipe_lock:
             self._.child_process.start()
@@ -525,6 +529,8 @@ class ObjectInSubprocess:
         possible, even though they actually involve asking the child
         process over a pipe.
         """
+        if self._.resource_lock:
+            self._.resource_lock.acquire()
         with self._.parent_pipe_lock:
             self._.parent_pipe.send(("__getattribute__", (name,), {}))
             attr = _get_response(self)
@@ -532,7 +538,9 @@ class ObjectInSubprocess:
             def attr(*args, **kwargs):
                 with self._.parent_pipe_lock:
                     self._.parent_pipe.send((name, args, kwargs))
-                    return _get_response(self)
+                    return _get_response(self, True)
+        elif self._.resource_lock:
+            self._.resource_lock.release()
         return attr
 
     def __setattr__(self, name, value):
@@ -540,7 +548,7 @@ class ObjectInSubprocess:
             self._.parent_pipe.send(("__setattr__", (name, value), {}))
             return _get_response(self)
 
-def _get_response(object_in_subprocess):
+def _get_response(object_in_subprocess, release=False):
     """Effectively a method of ObjectInSubprocess, but defined externally to
     minimize shadowing of the object's namespace
     """
@@ -549,6 +557,9 @@ def _get_response(object_in_subprocess):
         print(printed_output, end='')
     if isinstance(resp, Exception):
         raise resp
+    if release and object_in_subprocess._.resource_lock and \
+        object_in_subprocess._.resource_lock.locked():
+        object_in_subprocess._.resource_lock.release()
     return resp
 
 def _close(dummy_namespace):
@@ -723,7 +734,7 @@ class _Custody:
         else:
             if self.target_resource is None:
                 return
-            waiting_list, waiting_list_lock = _get_list_and_lock(resource)
+            waiting_list, waiting_list_lock = _get_list_and_lock(self.target_resource)
             with waiting_list_lock:
                 waiting_list.remove(self)
 

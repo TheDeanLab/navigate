@@ -3,10 +3,15 @@ This is the controller in an MVC-scheme for mediating the interaction between th
 Use: https://www.python-course.eu/tkinter_events_binds.php
 """
 
-# Local Imports
+# Local View Imports
 from view.main_application_window import Main_App as view
+
+# Local Sub-Controller Imports
 from view.main_window_content.stage_control.stage_gui_controller import Stage_GUI_Controller
+from view.main_window_content.acquire_bar_frame.acquire_bar_controller import Acquire_Bar_Controller
 from controller.aslm_controller_functions import *
+
+# Local Model Imports
 from model.aslm_model import Model
 
 class ASLM_controller():
@@ -75,11 +80,12 @@ class ASLM_controller():
         # self.view.notebook_1.channels_tab.channel_widgets_frame.exptime_variables[3].set(self.model.session.CameraParameters['camera_exposure_time'])
         # self.view.notebook_1.channels_tab.channel_widgets_frame.exptime_variables[4].set(self.model.session.CameraParameters['camera_exposure_time'])
 
-        # Define all of the callbacks/events.
-        # Acquire bar
-        self.view.acqbar.acquire_btn.config(command=lambda: launch_popup_window(self, root, self.verbose))
-        self.view.acqbar.exit_btn.config(command=lambda: exit_program(self.verbose))
-        self.view.acqbar.pull_down.bind('<<ComboboxSelected>>', lambda *args: update_microscope_mode(self, self.verbose))
+        # Acquire Bar Controller
+        self.acquire_bar_controller = Acquire_Bar_Controller(self.view.acqbar, self)
+
+        # self.view.acqbar.acquire_btn.config(command=lambda: launch_popup_window(self, root, self.verbose))
+        # self.view.acqbar.exit_btn.config(command=lambda: exit_program(self.verbose))
+        # self.view.acqbar.pull_down.bind('<<ComboboxSelected>>', lambda *args: update_microscope_mode(self, self.verbose))
 
         # Channels Tab, Stack Acquisition Settings
         self.view.notebook_1.channels_tab.stack_acq_frame.start_pos_spinval.trace_add('write', lambda *args: update_z_steps(self, self.verbose))

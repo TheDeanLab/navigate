@@ -453,3 +453,16 @@ def _idct2d(mtrx: np.array):
         raise ValueError("Passed object should be a matrix or a numpy array with dimension of two.")
 
     return idct(idct(mtrx.T, norm='ortho').T, norm='ortho')
+
+if (__name__ == '__main__'):
+    ''' 
+    Testing section for the flatfield correction 
+    In a windows command prompt, typing nvidia-smi will all you to confirm the 
+    CUDA Version.  Here, on the acquisition computer, we have 11.4
+    GPU Type: Quadro K420
+    '''
+    from tifffile import imread, imsave
+    image_path = "E:\test_data\CH01_003.tif"
+    image_data = imread(image_path)
+    corrected_image_data = flatfield_correct(image_data)
+    imsave("E:\test_data\CH01_003_corrected.tif", corrected_image_data)

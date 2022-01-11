@@ -3,7 +3,7 @@ Synthetic Zoom Device
 Adopted from mesoSPIM
 """
 # Local Imports
-from model.zoom.ZoomBase import ZoomBase
+from model.devices.zoom.ZoomBase import ZoomBase
 
 class Zoom(ZoomBase):
     def __init__(self, model, verbose):

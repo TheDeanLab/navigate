@@ -30,16 +30,19 @@ class ASLM_controller():
         # sub gui controllers
         # Acquire bar
         self.acquire_bar_controller = Acquire_Bar_Controller(self.view.acqbar, self)
+
         # Channels Controller
         self.channel_setting_controller = Channel_Setting_Controller(self.view.notebook_1.channels_tab.channel_widgets_frame, self)
+
         # Stage Controller
         self.stage_gui_controller = Stage_GUI_Controller(self.view.notebook_3.stage_control_tab, self)
 
         # Initialize view based on model.configuration
-        # configuration
         configuration_controller = ASLM_Configuration_Controller(self.model.configuration)
+
         # Channels Tab, Channel Settings
         self.initialize_channels(configuration_controller)
+
         # Stage Control Tab
         self.initialize_stage(configuration_controller)
 
@@ -55,12 +58,13 @@ class ASLM_controller():
         # still need to be changed so that they are populated here.
 
 
-
+        # Moved to the acquisition bar sub-controller...  Not functional yet.
         # self.view.acqbar.acquire_btn.config(command=lambda: launch_popup_window(self, root, self.verbose))
         # self.view.acqbar.exit_btn.config(command=lambda: exit_program(self.verbose))
         # self.view.acqbar.pull_down.bind('<<ComboboxSelected>>', lambda *args: update_microscope_mode(self, self.verbose))
 
         # Channels Tab, Stack Acquisition Settings
+        #TODO: Move to a sub-controller.
         self.view.notebook_1.channels_tab.stack_acq_frame.start_pos_spinval.trace_add('write', lambda *args: update_z_steps(self, self.verbose))
         self.view.notebook_1.channels_tab.stack_acq_frame.step_size_spinval.trace_add('write', lambda *args: update_z_steps(self, self.verbose))
         self.view.notebook_1.channels_tab.stack_acq_frame.end_pos_spinval.trace_add('write', lambda *args: update_z_steps(self, self.verbose))
@@ -79,6 +83,7 @@ class ASLM_controller():
         # Advanced Tab
 
         # Configure event control for the buttons
+        #TODO: Move to a sub-controller.
         self.view.menu_zoom.bind("<<MenuSelect>>", lambda *args: print("Zoom Selected", *args))
 
 

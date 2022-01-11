@@ -16,6 +16,7 @@ Adopted and modified from mesoSPIM
 
 class DAQBase():
     def __init__(self, session, verbose):
+        self.verbose = verbose
 
     def create_tasks(self):
         """"

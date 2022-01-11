@@ -13,7 +13,7 @@ import serial
 import time
 
 # Local Imports
-from controller.devices.filter_wheel.FilterWheelBase import FilterWheelBase
+from model.devices.filter_wheel.FilterWheelBase import FilterWheelBase
 
 class FilterWheel(FilterWheelBase):
     def __init__(self, model, verbose):

@@ -20,8 +20,8 @@ Adopted and modified from UUTrack
 import numpy as np
 
 # Internal Dependencies
-from controller.devices.camera.Hamamatsu.API.HamamatsuAPI import HamamatsuCamera as HamamatsuController
-from controller.devices.camera.CameraBase import CameraBase
+from model.devices.camera.Hamamatsu.API.HamamatsuAPI import HamamatsuCamera as HamamatsuController
+from model.devices.camera.CameraBase import CameraBase
 
 
 class Camera(CameraBase):

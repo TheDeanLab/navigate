@@ -14,7 +14,7 @@ Adopted and modified from mesoSPIM
 """
 
 import time
-from controller.devices.stages.StageBase import StageBase
+from model.devices.stages.StageBase import StageBase
 
 class Stage(StageBase):
     def __init__(self, model, verbose):

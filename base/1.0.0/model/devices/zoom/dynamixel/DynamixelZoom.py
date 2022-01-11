@@ -11,8 +11,8 @@ Adopted from mesoSPIM
 import time
 
 # Local Imports
-from model.zoom.ZoomBase import ZoomBase
-from model.zoom.Dynamixel import dynamixel_functions as dynamixel
+from model.devices.zoom.ZoomBase import ZoomBase
+from model.devices.zoom.dynamixel import dynamixel_functions as dynamixel
 
 class Zoom(ZoomBase):
     def __init__(self, model, verbose):
@@ -20,10 +20,10 @@ class Zoom(ZoomBase):
         comport = model.ZoomParameters['COMport']
         self.comport = comport
         self.devicename = comport.encode('utf-8')
-        self.zoomdict = self.model.ZoomParameters['zoom_position']
+        self.zoomdict = model.ZoomParameters['zoom_position']
         self.id = 2
         self.dynamixel = dynamixel
-        self.baudrate = self.model.ZoomParameters['baudrate']
+        self.baudrate = model.ZoomParameters['baudrate']
         self.addr_mx_torque_enable = 24
         self.addr_mx_goal_position = 30
         self.addr_mx_present_position = 36

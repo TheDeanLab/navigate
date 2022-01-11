@@ -47,16 +47,16 @@ def start_zoom_servo(session, verbose):
     Initializes the Zoom Servo Motor. Dynamixel of SyntheticZoom
     """
     if session.ZoomParameters['type'] == 'Dynamixel':
-        from model.devices.zoom.Dynamixel.DynamixelZoom import Zoom as ZoomModel
-        zoom = ZoomModel(self.model, verbose)
-    elif self.session.ZoomParameters['type'] == 'SyntheticZoom':
+        from model.devices.zoom.dynamixel.DynamixelZoom import Zoom as ZoomModel
+        zoom = ZoomModel(session, verbose)
+    elif session.ZoomParameters['type'] == 'SyntheticZoom':
         from model.devices.zoom.SyntheticZoom import Zoom as ZoomModel
-        zoom = ZoomModel(self.model, verbose)
+        zoom = ZoomModel(session, verbose)
     else:
         print("Zoom Type in Configuration.yml Not Recognized - Initialization Failed")
         sys.exit()
     if verbose:
-        print("Initialized ", self.session.ZoomParameters['type'])
+        print("Initialized ", session.ZoomParameters['type'])
         print("Zoom Position", zoom.read_position())
     return zoom
 
@@ -100,7 +100,7 @@ def start_daq(session, verbose):
     """
     if session.DAQParameters['hardware_type'] == 'NI':
         from model.devices.daq.NI.NIDAQ import DAQ as DAQModel
-        daq = DAQModel(model, verbose)
+        daq = DAQModel(session, verbose)
     elif session.DAQParameters['hardware_type'] == 'SyntheticDAQ':
         from model.devices.daq.SyntheticDAQ import DAQ as DAQModel
         daq = DAQModel(session, verbose)
@@ -108,5 +108,5 @@ def start_daq(session, verbose):
         print("DAQ Type in Configuration.yml Not Recognized - Initialization Failed")
         sys.exit()
     if verbose:
-        print("Initialized ", self.session.DAQParameters['hardware_type'])
+        print("Initialized ", session.DAQParameters['hardware_type'])
     return daq

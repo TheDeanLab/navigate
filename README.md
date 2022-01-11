@@ -1,9 +1,5 @@
 # Axially Swept Light-Sheet Microscopy Project
 
-[![Auto-Docker functionality testing CI](https://github.com/AdvancedImagingUTSW/ASLM/actions/workflows/autodocker-ci.yml/badge.svg?branch=main)](https://github.com/AdvancedImagingUTSW/ASLM/actions/workflows/autodocker-ci.yml)
-
-[![Image building and testing CI](https://github.com/AdvancedImagingUTSW/ASLM/actions/workflows/container-ci.yml/badge.svg)](https://github.com/AdvancedImagingUTSW/ASLM/actions/workflows/container-ci.yml)
-
 ### Project Outline
 Adopts an MVC architecture for microscope control. 
 Includes key inspiration and code contributions from a number of open-source projects, including:
@@ -20,11 +16,6 @@ Includes key inspiration and code contributions from a number of open-source pro
 * Want it to resemble Danuser/Dean/Fiolka LabView software, so that people do not have to relearn a new GUI for every microscope.  Maximize productivity for our more biological users.
 * Want it to be performant.  Will implement Andrew York's concurrency tools.
 * Want to adopt proven architectures, such as the Model-View-Controller architecture.  
-
-### Continuous Integration
-Includes functionality from Auto-Docker for remote building and testing of Docker images from a Docker build file (Dockerfile) and a unit test file (unittest.yml). Allows users to build, test and maintain Docker images outside of firewalls, proxies and machine limitations. Additionally, it is a storage repository, and can act as a functional archive and version control for all your Dockerfile recipes (though not the images themselves). Pipeline was developed by BICF from funding provided by **Cancer Prevention and Research Institute of Texas (RP150596)**.
-
-[![Auto-docker DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4555891.svg)](https://doi.org/10.5281/zenodo.4555891)
 
 ### Equipment
 * Laser source - Omicron LightHUB Ultra.  Requires ACC operating mode with analog modulation enabled for 488 nm and 642 nm lasers.  561, which operates separately, requires the mixed modulation mode (Obis).

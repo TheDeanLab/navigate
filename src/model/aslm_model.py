@@ -28,7 +28,7 @@ class Model:
         self.stages = start_stages(self.configuration, self.verbose)
         self.filter_wheel = start_filter_wheel(self.configuration, self.verbose)
         self.zoom = start_zoom_servo(self.configuration, self.verbose)
-        self.daq = start_daq(self.configuration, self.verbose)
+        #self.daq = start_daq(self.configuration, self.verbose)
         #self.laser = start_lasers(self.configuration, self.verbose)
 
     def continuous_acquisition_mode(channel_settings):

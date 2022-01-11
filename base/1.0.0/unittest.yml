@@ -1,8 +1,0 @@
-commands:
-  - cmd: "parallel --version | head -n1"
-    expect_text: |
-      GNU parallel 20161222
-  - cmd: "pandoc --version | head -n2"
-    expect_text: |
-      pandoc 1.19.2.4
-      Compiled with pandoc-types 1.17.0.5, texmath 0.9.4.4, skylighting 0.3.3.1

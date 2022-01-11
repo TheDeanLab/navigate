@@ -59,7 +59,7 @@ starts the tkinter GUi, instantiates the controller, and then begins the main lo
 * --synthetic_hardware: Use simulated hardware.
 
 ~~~
-python __main__.py --verbose --synthetic_hardware
+python main.py --verbose --synthetic_hardware
 ~~~
 
 ### Authors

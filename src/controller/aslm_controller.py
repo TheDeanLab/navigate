@@ -17,12 +17,12 @@ from controller.aslm_configuration_controller import ASLM_Configuration_Controll
 from model.aslm_model import Model
 
 class ASLM_controller():
-    def __init__(self, root, configuration_path, experiment_path, args):
+    def __init__(self, root, configuration_path, experiment_path, etl_constants_path, args):
         self.verbose = args.verbose
 
         # Initialize the Model
         global model
-        self.model = Model(args, configuration_path, experiment_path)
+        self.model = Model(args, configuration_path, experiment_path, etl_constants_path)
 
         # Initialize the View
         self.view = view(root)

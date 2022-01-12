@@ -94,16 +94,16 @@ def start_lasers(session, verbose):
         print("Initialized ", self.session.LaserParameters['laser_type'])
     return lasers
 
-def start_daq(session, verbose):
+def start_daq(session, etl_constants_path, verbose):
     """
     Start the data acquisition device (DAQ):  NI or SyntheticDAQ
     """
     if session.DAQParameters['hardware_type'] == 'NI':
         from model.devices.daq.NI.NIDAQ import DAQ as DAQModel
-        daq = DAQModel(session, verbose)
+        daq = DAQModel(session, etl_constants_path, verbose)
     elif session.DAQParameters['hardware_type'] == 'SyntheticDAQ':
         from model.devices.daq.SyntheticDAQ import DAQ as DAQModel
-        daq = DAQModel(session, verbose)
+        daq = DAQModel(session, etl_constants_path, verbose)
     else:
         print("DAQ Type in Configuration.yml Not Recognized - Initialization Failed")
         sys.exit()

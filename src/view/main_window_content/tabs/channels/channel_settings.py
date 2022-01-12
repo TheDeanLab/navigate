@@ -34,67 +34,55 @@ class channel_creator(ttk.Frame):
         self.interval_variables = []
         self.interval_spins = []
 
-        #Label Creation for each larger widget ie all the laser dropdowns, all the filterwheel dropdowns etc
-        #Grids them across the top row
-        #TODO create a custom class or function that will make "title" frames so that a label can be associated with a column of widgets
-        labels = ["Channel", "Laser", "Laser Power", "Filter", "Exp. Time (ms)", "Interval"]
-        self.labels_frame = ttk.Frame(self)
-        self.labels_frame.grid(row=0, column=0, sticky=(NSEW))
-        #Junky way to format stuff, will need to find more elegant solution
-        for idx in range(len(labels)):
-            if idx == 0: #To make sure the first label stays put
-                ttk.Label(self.labels_frame, text=labels[idx]).grid(row=0, column=idx, sticky=(W))
-            else:
-                if idx == 5: #To bring the last label back to the left
-                    ttk.Label(self.labels_frame, text=labels[idx]).grid(row=0, column=idx, sticky=(W))
-                else:
-                    ttk.Label(self.labels_frame, text=labels[idx]).grid(row=0, column=idx, sticky=(NSEW), padx=45)
-            
-
         #Channel Creation
-        self.channels = []
+
+        #Grids labels them across the top row of each column
+        self.label_text = ["Channel", "Laser", "Laser Power", "Filter", "Exp. Time (ms)", "Interval"]
+        self.labels = []
+        self.frame_columns = []
+        for idx in range(len(self.label_text)):
+            self.frame_columns.append(ttk.Frame(self)) #Creates a column frame for each widget, this is to help with the lables lining up
+            self.frame_columns[idx].grid(row=0, column=idx, sticky=(NSEW))
+            self.labels.append(ttk.Label(self.frame_columns[idx], text=self.label_text[idx]))
+            self.labels[idx].grid(row=0, column=0, sticky=(N), pady=1, padx=1)
+            
+        
+        #Adds and grids widgets to respective column
         #TODO add connection to config file to specify the range. This will allow custom selection of amount of channels. Also may need further refactoring
         for num in range(0, 5):
-            #This will create a frame for each channel and then grid each widget into this new frame, each channel frame will be grid into this larger class widget
-
-            #Creating Channel Frame for ease of use
-            self.channels.append(ttk.Frame(self))
-            self.channels[num].grid(row=num+1, column=0, sticky=(NSEW))
-
+            #This will add a widget to each column frame for the respecitive types
             #Channel Checkboxes
             self.channel_variables.append(BooleanVar())
-            self.channel_checks.append(ttk.Checkbutton(self.channels[num], text='CH' + str(num+1), variable=self.channel_variables[num]))
-            self.channel_checks[num].grid(row=0, column=0, sticky=(NSEW), padx=13)
+            self.channel_checks.append(ttk.Checkbutton(self.frame_columns[0], text='CH' + str(num+1), variable=self.channel_variables[num]))
+            self.channel_checks[num].grid(row=num+1, column=0, sticky=(NSEW), padx=1)
 
             #Laser Dropdowns
             self.laser_variables.append(StringVar())
-            self.laser_pulldowns.append(ttk.Combobox(self.channels[num], textvariable=self.laser_variables[num]))
+            self.laser_pulldowns.append(ttk.Combobox(self.frame_columns[1], textvariable=self.laser_variables[num], width=8))
             self.laser_pulldowns[num].state(["readonly"]) # Makes it so the user cannot type a choice into combobox
-            self.laser_pulldowns[num].grid(row=0, column=1, sticky=(NSEW), padx=10)
+            self.laser_pulldowns[num].grid(row=num+1, column=0, sticky=(NSEW), padx=1)
 
-            #Laser Power Dropdowns
+            #Laser Power Spinbox
             self.laserpower_variables.append(StringVar())
-            self.laserpower_pulldowns.append(ttk.Spinbox(self.channels[num],from_=0, to=100.0, textvariable=self.laserpower_variables[num], increment=25, width=9))
-            self.laserpower_pulldowns[num].state(["readonly"]) # Makes it so the user cannot type a choice into combobox
-            self.laserpower_pulldowns[num].grid(row=0, column=2, sticky=(NSEW), padx=10)
+            self.laserpower_pulldowns.append(ttk.Spinbox(self.frame_columns[2], style='My.TSpinbox',from_=0, to=100.0, textvariable=self.laserpower_variables[num], increment=25, width=8))
+            self.laserpower_pulldowns[num].grid(row=num+1, column=0, sticky=(NSEW), padx=1)
 
             #FilterWheel Dropdowns
             self.filterwheel_variables.append(StringVar())
-            self.filterwheel_pulldowns.append(ttk.Combobox(self.channels[num], textvariable=self.filterwheel_variables[num]))
+            self.filterwheel_pulldowns.append(ttk.Combobox(self.frame_columns[3], textvariable=self.filterwheel_variables[num], width=8))
             self.filterwheel_pulldowns[num].state(["readonly"]) # Makes it so the user cannot type a choice into combobox
-            self.filterwheel_pulldowns[num].grid(row=0, column=3, sticky=(NSEW), padx=13)
+            self.filterwheel_pulldowns[num].grid(row=num+1, column=0, sticky=(NSEW), padx=1)
 
             #Exposure Time Spinboxes
             self.exptime_variables.append(StringVar())
-            self.exptime_pulldowns.append(ttk.Spinbox(self.channels[num], from_=0, to=5000.0, textvariable=self.exptime_variables[num], increment=25, width=9))
-            self.exptime_pulldowns[num].grid(row=0, column=4, sticky=(NSEW), padx=13)
+            self.exptime_pulldowns.append(ttk.Spinbox(self.frame_columns[4], from_=0, to=5000.0, textvariable=self.exptime_variables[num], increment=25, width=8))
+            self.exptime_pulldowns[num].grid(row=num+1, column=0, sticky=(NSEW), padx=1)
 
             #Time Interval Spinboxes
             self.interval_variables.append(StringVar())
-            self.interval_spins.append(ttk.Spinbox(self.channels[num], from_=0, to=5000.0, textvariable=self.interval_variables[num], increment=5, width=9))
-            self.interval_spins[num].grid(row=0, column=5, sticky=(NSEW), padx=10)
+            self.interval_spins.append(ttk.Spinbox(self.frame_columns[5], from_=0, to=5000.0, textvariable=self.interval_variables[num], increment=5, width=8))
+            self.interval_spins[num].grid(row=num+1, column=0, sticky=(NSEW), padx=1)
 
-    #def default_settings():
 
 
 if __name__ == '__main__':

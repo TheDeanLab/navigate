@@ -27,7 +27,7 @@ conda create -n ASLM python=3.7.11
 conda activate ASLM
 python -m pip install -r requirements.txt
 cd into the right damn folder (ex C:\Users\UserProfile\Documents\GitHub\ASLM\base\1.0.0)
-python __main__.py
+python main.py
 ~~~
 
 ### Trouble Shooting

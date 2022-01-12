@@ -17,91 +17,87 @@ from nidaqmx.types import CtrTime
 # Local Imports
 from .waveforms import *
 from .DAQBase import DAQBase as DAQBase
+from model.aslm_model_config import Session as session
 
 class DAQ(DAQBase):
-    def __init__(self, session, verbose):
-        self.verbose = True
+    def __init__(self, model, etl_constants_path, verbose=False):
+        self.verbose = verbose
+        self.etl_constants = session(etl_constants_path, self.verbose)
 
-        #TODO: Load the ETL configuration file.
-        # Will need to move the ETL configuration file to the config folder
-        cfg_file = session.StartupParameters['ETL_cfg_file']
-        self.update_etl_parameters_from_csv(cfg_file, self.state['laser'], self.state['zoom'])
-
-        # Specify the Galvo Waveform Parameters
-        self.state['galvo_l_amplitude'] = session.StartupParameters['galvo_l_amplitude']
-        self.state['galvo_r_amplitude'] = session.StartupParameters['galvo_r_amplitude']
-        self.state['galvo_l_frequency'] = session.StartupParameters['galvo_l_frequency']
-        self.state['galvo_r_frequency'] = session.StartupParameters['galvo_r_frequency']
-        self.state['galvo_l_offset'] = session.StartupParameters['galvo_l_offset']
-        self.state['galvo_r_offset'] = session.StartupParameters['galvo_r_offset']
-
-    def state_request_handler(self, dict):
-        for key, value in zip(dict.keys(), dict.values()):
-            if key in ('samplerate',
-                       'sweeptime',
-                       'intensity',
-                       'etl_l_delay_percent',
-                       'etl_l_ramp_rising_percent',
-                       'etl_l_ramp_falling_percent',
-                       'etl_l_amplitude',
-                       'etl_l_offset',
-                       'etl_r_delay_percent',
-                       'etl_r_ramp_rising_percent',
-                       'etl_r_ramp_falling_percent',
-                       'etl_r_amplitude',
-                       'etl_r_offset',
-                       'galvo_l_frequency',
-                       'galvo_l_amplitude',
-                       'galvo_l_offset',
-                       'galvo_l_duty_cycle',
-                       'galvo_l_phase',
-                       'galvo_r_frequency',
-                       'galvo_r_amplitude',
-                       'galvo_r_offset',
-                       'galvo_r_duty_cycle',
-                       'galvo_r_phase',
-                       'laser_l_delay_percent',
-                       'laser_l_pulse_percent',
-                       'laser_l_max_amplitude',
-                       'laser_r_delay_percent',
-                       'laser_r_pulse_percent',
-                       'laser_r_max_amplitude',
-                       'camera_delay_percent',
-                       'camera_pulse_percent'):
-
-                # Update the state
-                self.state[key] = value
-                self.create_waveforms()
-
-            elif key in ('ETL_cfg_file'):
-                self.state[key] = value
-                self.update_etl_parameters_from_csv(value, self.state['laser'], self.state['zoom'])
-                if self.verbose:
-                    print('ETL CFG File changed')
-
-            elif key in ('set_etls_according_to_zoom'):
-                self.update_etl_parameters_from_zoom(value)
-                if self.verbose:
-                    print('Updated ETL Parameters Owing to Zoom Change')
-
-            elif key in ('set_etls_according_to_laser'):
-                self.state['laser'] = value
-                self.create_waveforms()
-                self.update_etl_parameters_from_laser(value)
-                if self.verbose:
-                    print('Updated ETL Parameters Owing to Laser Change')
-
-            elif key in ('laser'):
-                self.state['laser'] = value
-                self.create_waveforms()
-
-            elif key == 'state':
-                if value == 'live':
-                    print('Live mode')
+    #     # Specify the Galvo Waveform Parameters
+    #     self.state['galvo_l_amplitude'] = model.GalvoParameters['galvo_l_amplitude']
+    #     self.state['galvo_l_frequency'] = model.GalvoParameters['galvo_l_frequency']
+    #     self.state['galvo_l_offset'] = model.GalvoParameters['galvo_l_offset']
+    #
+    # def state_request_handler(self, dict):
+    #     for key, value in zip(dict.keys(), dict.values()):
+    #         if key in ('samplerate',
+    #                    'sweeptime',
+    #                    'intensity',
+    #                    'etl_l_delay_percent',
+    #                    'etl_l_ramp_rising_percent',
+    #                    'etl_l_ramp_falling_percent',
+    #                    'etl_l_amplitude',
+    #                    'etl_l_offset',
+    #                    'etl_r_delay_percent',
+    #                    'etl_r_ramp_rising_percent',
+    #                    'etl_r_ramp_falling_percent',
+    #                    'etl_r_amplitude',
+    #                    'etl_r_offset',
+    #                    'galvo_l_frequency',
+    #                    'galvo_l_amplitude',
+    #                    'galvo_l_offset',
+    #                    'galvo_l_duty_cycle',
+    #                    'galvo_l_phase',
+    #                    'galvo_r_frequency',
+    #                    'galvo_r_amplitude',
+    #                    'galvo_r_offset',
+    #                    'galvo_r_duty_cycle',
+    #                    'galvo_r_phase',
+    #                    'laser_l_delay_percent',
+    #                    'laser_l_pulse_percent',
+    #                    'laser_l_max_amplitude',
+    #                    'laser_r_delay_percent',
+    #                    'laser_r_pulse_percent',
+    #                    'laser_r_max_amplitude',
+    #                    'camera_delay_percent',
+    #                    'camera_pulse_percent'):
+    #
+    #             # Update the state
+    #             self.state[key] = value
+    #             self.create_waveforms()
+    #
+    #         elif key in ('ETL_cfg_file'):
+    #             self.state[key] = value
+    #             self.update_etl_parameters_from_csv(value, self.state['laser'], self.state['zoom'])
+    #             if self.verbose:
+    #                 print('ETL CFG File changed')
+    #
+    #         elif key in ('set_etls_according_to_zoom'):
+    #             self.update_etl_parameters_from_zoom(value)
+    #             if self.verbose:
+    #                 print('Updated ETL Parameters Owing to Zoom Change')
+    #
+    #         elif key in ('set_etls_according_to_laser'):
+    #             self.state['laser'] = value
+    #             self.create_waveforms()
+    #             self.update_etl_parameters_from_laser(value)
+    #             if self.verbose:
+    #                 print('Updated ETL Parameters Owing to Laser Change')
+    #
+    #         elif key in ('laser'):
+    #             self.state['laser'] = value
+    #             self.create_waveforms()
+    #
+    #         elif key == 'state':
+    #             if value == 'live':
+    #                 print('Live mode')
 
     def calculate_samples(self):
+        '''
         # Calculate the number of samples for the waveforms.
         # Simply the sampling frequency times the duration of the waveform.
+        '''
         samplerate, sweeptime = self.state.get_parameter_list(['samplerate', 'sweeptime'])
         self.samples = int(samplerate*sweeptime)
         if self.verbose:
@@ -168,7 +164,6 @@ class DAQ(DAQBase):
                                          amplitude=0.5,
                                          offset=0)
 
-
     def create_laser_waveforms(self):
         # Calculate the waveforms for the lasers.
         samplerate, sweeptime = self.state.get_parameter_list(['samplerate','sweeptime'])
@@ -222,105 +217,6 @@ class DAQ(DAQBase):
         zoom = self.state['zoom']
         etl_cfg_file = self.state['ETL_cfg_file']
         self.update_etl_parameters_from_csv(etl_cfg_file, laser, zoom)
-
-    def update_etl_parameters_from_csv(self, cfg_path, laser, zoom):
-        '''
-        Updates the internal ETL left/right offsets and amplitudes from the
-        values in the ETL csv files. The .csv file needs to contain the following columns:
-
-        Wavelength
-        Zoom
-        ETL-Left-Offset
-        ETL-Left-Amp
-        ETL-Right-Offset
-        ETL-Right-Amp
-        '''
-        if self.verbose:
-            print('Updating ETL parameters from file:', cfg_path)
-
-        with open(cfg_path) as file:
-            reader = csv.DictReader(file, delimiter=';')
-            if self.verbose:
-                print('Opened ETL Configuration File')
-            for row in reader:
-                if row['Wavelength'] == laser and row['Zoom'] == zoom:
-                    if self.verbose:
-                        print(row)
-                        print('updating parameters')
-                        print(self.etl_l['amplitude'])
-
-                    # Update the internal state.
-                    etl_l_offset = float(row['ETL-Left-Offset'])
-                    etl_l_amplitude = float(row['ETL-Left-Amp'])
-                    etl_r_offset = float(row['ETL-Right-Offset'])
-                    etl_r_amplitude = float(row['ETL-Right-Amp'])
-
-                    parameter_dict = {'etl_l_offset':etl_l_offset,
-                                      'etl_l_amplitude':etl_l_amplitude,
-                                      'etl_r_offset':etl_r_offset,
-                                      'etl_r_amplitude':etl_r_amplitude}
-
-                    if self.verbose:
-                        print('Parameters Updated from ETL Configuration File')
-
-                    # Update the internal state.
-                    self.state.set_parameters(parameter_dict)
-
-        self.create_waveforms()
-        # self.sig_update_gui_from_state.emit(False)
-
-    def save_etl_parameters_to_csv(self):
-        ''' Saves the current ETL left/right offsets and amplitudes '''
-
-        etl_cfg_file, laser, zoom, etl_l_offset, etl_l_amplitude, etl_r_offset, etl_r_amplitude = \
-            self.state.get_parameter_list(['ETL_cfg_file', 'laser', 'zoom',
-                                           'etl_l_offset', 'etl_l_amplitude', 'etl_r_offset','etl_r_amplitude'])
-
-        # Generate the temporary file name
-        tmp_etl_cfg_file = etl_cfg_file+'_tmp'
-
-        if self.verbose:
-            print('saving current ETL parameters')
-
-        with open(etl_cfg_file,'r') as input_file, open(tmp_etl_cfg_file,'w') as outputfile:
-            reader = csv.DictReader(input_file,delimiter=';')
-            if self.verbose:
-                print('Opened DictReader')
-            fieldnames = ['Objective',
-                          'Wavelength',
-                          'Zoom',
-                          'ETL-Left-Offset',
-                          'ETL-Left-Amp',
-                          'ETL-Right-Offset',
-                          'ETL-Right-Amp']
-
-            writer = csv.DictWriter(outputfile,fieldnames=fieldnames,dialect='excel',delimiter=';')
-            if self.verbose:
-                print('Opened DictWriter')
-
-            writer.writeheader()
-            if self.verbose:
-                print('Wrotet he header')
-
-            for row in reader:
-                if row['Wavelength'] == laser and row['Zoom'] == zoom:
-
-                    writer.writerow({'Objective':'1x',
-                                     'Wavelength':laser,
-                                     'Zoom':zoom,
-                                     'ETL-Left-Offset':etl_l_offset,
-                                     'ETL-Left-Amp':etl_l_amplitude,
-                                     'ETL-Right-Offset':etl_r_offset,
-                                     'ETL-Right-Amp':etl_r_amplitude,
-                                     })
-
-                else:
-                    writer.writerow(row)
-            writer.writerows(reader)
-        os.remove(etl_cfg_file)
-        os.rename(tmp_etl_cfg_file, etl_cfg_file)
-        if self.verbose:
-            print('Saved current ETL parameters')
 
     def create_tasks(self):
         '''

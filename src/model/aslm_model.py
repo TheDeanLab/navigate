@@ -4,7 +4,7 @@ from .aslm_model_functions import *
 from .aslm_model_config import Session as session
 
 class Model:
-    def __init__(self, args, configuration_path=None, experiment_path=None):
+    def __init__(self, args, configuration_path=None, experiment_path=None, etl_constants_path=None):
         # Retrieve the initial configuration from the yaml file
         self.verbose = args.verbose
 
@@ -28,7 +28,7 @@ class Model:
         self.stages = start_stages(self.configuration, self.verbose)
         self.filter_wheel = start_filter_wheel(self.configuration, self.verbose)
         self.zoom = start_zoom_servo(self.configuration, self.verbose)
-        #self.daq = start_daq(self.configuration, self.verbose)
+        self.daq = start_daq(self.configuration, etl_constants_path, self.verbose)
         #self.laser = start_lasers(self.configuration, self.verbose)
 
     def continuous_acquisition_mode(channel_settings):

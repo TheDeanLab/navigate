@@ -1,0 +1,102 @@
+%YAML 1.2
+---
+
+ETLConstants:
+  0.63x: {
+    488: {
+      amplitude: 2.336,
+        offset: 0
+    } ,
+    562: {
+      amplitude: 2.336,
+        offset: 0
+    } ,
+    642: {
+      amplitude: 2.336,
+        offset: 0
+    }
+  }
+  1x: {
+    488: {
+      amplitude: 2.336,
+      offset: 0
+    } ,
+    562: {
+      amplitude: 2.336,
+      offset: 0
+    } ,
+    642: {
+      amplitude: 2.336,
+      offset: 0
+    }
+  }
+  2x: {
+    488: {
+      amplitude: 2.336,
+      offset: 0
+    } ,
+    562: {
+      amplitude: 2.336,
+      offset: 0
+    } ,
+    642: {
+      amplitude: 2.336,
+      offset: 0
+    }
+  }
+  3x: {
+    488: {
+      amplitude: 2.336,
+      offset: 0
+    } ,
+    562: {
+      amplitude: 2.336,
+      offset: 0
+    } ,
+    642: {
+      amplitude: 2.336,
+      offset: 0
+    }
+  }
+  4x: {
+    488: {
+      amplitude: 2.336,
+      offset: 0
+    } ,
+    562: {
+      amplitude: 2.336,
+      offset: 0
+    } ,
+    642: {
+      amplitude: 2.336,
+      offset: 0
+    }
+  }
+  5x: {
+    488: {
+      amplitude: 2.336,
+      offset: 0
+    } ,
+    562: {
+      amplitude: 2.336,
+      offset: 0
+    } ,
+    642: {
+      amplitude: 2.336,
+      offset: 0
+    }
+  }
+  6x: {
+    488: {
+      amplitude: 2.336,
+      offset: 0
+    } ,
+    562: {
+      amplitude: 2.336,
+      offset: 0
+    } ,
+    642: {
+      amplitude: 2.336,
+      offset: 0
+    }
+  }

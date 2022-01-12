@@ -26,10 +26,10 @@ def main():
     configuration_directory = os.path.join(base_directory, 'config')
     configuration_path = os.path.join(configuration_directory, 'configuration.yml')
     experiment_path = os.path.join(configuration_directory, 'experiment.yml')
-
+    etl_constants_path = os.path.join(configuration_directory, 'etl_constants.yml')
     # Start the GUI
     root = tk.Tk()
-    app = controller(root, configuration_path, experiment_path, args)
+    app = controller(root, configuration_path, experiment_path, etl_constants_path, args)
     root.mainloop()
 
 if __name__ == '__main__':

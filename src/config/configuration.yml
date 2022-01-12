@@ -4,7 +4,6 @@
 DAQParameters:
   #NI or SyntheticDAQ
   hardware_type: NI
-  samplerate: 100000
 
   # triggers
   master_trigger_out_line: PXI6259/port0/line1
@@ -12,32 +11,18 @@ DAQParameters:
   trigger_source: PXI6259/PFI0
 
   # galvos
-  galvo_left_min_ao: -5
-  galvo_left_max_ao: 5
-  galvo_left: ao0
-
-  galvo_right_min_ao: -5
-  galvo_right_max_ao: 5
-  galvo_right: ao1
+  galvo_l_ao: PXI6259/ao0
+  galvo_r_ao: PXI6259/ao1
 
   # Remote Focusing Systems
-  etl_min_ao: 0
-  etl_max_ao: 5
-  etl: ao2
+  etl_l_ao: PXI6259/ao2
 
   voice_coil_min_ao: -10
   voice_coil_max_ao: 10
-  voice_coil: ao3
+  voice_coil: PXI6259/ao3
 
-  # lasers - DO for on/off, AO for intensity control.
   number_of_lasers : 3
   laser_port_switcher: PXI6733/port0/line0
-
-  laser_min_ao: 0
-  laser_max_ao: 5
-
-  laser_min_do: 0
-  laser_max_do: 5
 
   laser_0_wavelength: 488nm
   laser_0_do: PXI6733/port0/line2
@@ -78,18 +63,14 @@ CameraParameters:
 ETLParameters:
   #ETL or SyntheticETL
   type: ETL
-  number_of_etls: 2
+  number_of_etls: 1
   etl_l_delay_percent: 7.5
   etl_l_ramp_rising_percent: 85
   etl_l_ramp_falling_percent: 2.5
   etl_l_amplitude: 0.7
   etl_l_offset: 2.3
-  etl_r_delay_percent: 2.5
-  etl_r_ramp_rising_percent: 5
-  etl_r_ramp_falling_percent: 85
-  etl_r_amplitude: 0.65
-  etl_r_offset: 2.36
-  ETL_cfg_file: C:/Users/Spectral/Documents/GitHub/multiscale_microscope/base/1.0.0/config/etl_parameters/ETL-parameters.csv
+  etl_l_min_ao: 0
+  etl_l_max_ao: 5
 
 FilterWheelParameters:
   #Sutter or SyntheticFilterWheel
@@ -109,17 +90,23 @@ FilterWheelParameters:
     Blocked5: 8,
     Blocked6: 9
   }
+
 GalvoParameters:
+  # Digitally Scanned Galvo for MesoSPIM Module
   galvo_l_frequency: 99.9
   galvo_l_amplitude: 2.5
   galvo_l_offset: 0
   galvo_l_duty_cycle: 50
   galvo_l_phase: np.pi / 2
-  galvo_r_frequency: 99.9
-  galvo_r_amplitude: 2.5
-  galvo_r_offset: 0
-  galvo_r_duty_cycle: 50
-  galvo_r_phase: np.pi / 2
+  galvo_l_min_ao: -5
+  galvo_l_max_ao: 5
+
+  # Shadow Reduction Galvo for NanoSPIM Module
+  galvo_r_amplitude: 0.5
+  galvo_r_min_ao: -5
+  galvo_r_max_ao: 5
+
+
 
 StageParameters:
   # PI or SyntheticStage
@@ -194,6 +181,7 @@ StartupParameters:
   number_of_channels: 5
   state: init  # init, idle, live, snap, running_script
   sweeptime: 0.2
+  samplerate: 100000
   zoom: 1x
   pixelsize: 6.55
   shutterstate: False  # Is the shutter open or not?
@@ -206,6 +194,10 @@ StartupParameters:
   laser_l_pulse_percent: 87
   laser_r_delay_percent: 10
   laser_r_pulse_percent: 87
+  laser_min_ao: 0
+  laser_max_ao: 5
+  laser_min_do: 0
+  laser_max_do: 5
 
   # Camera Specific Startup Parameters
   camera_line_interval: 0.000075

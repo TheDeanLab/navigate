@@ -3,99 +3,99 @@
 
 ETLConstants:
   0.63x: {
-    488: {
+    488nm: {
       amplitude: 2.336,
         offset: 0
     } ,
-    562: {
+    562nm: {
       amplitude: 2.336,
         offset: 0
     } ,
-    642: {
+    642nm: {
       amplitude: 2.336,
         offset: 0
     }
   }
   1x: {
-    488: {
+    488nm: {
       amplitude: 2.336,
       offset: 0
     } ,
-    562: {
+    562nm: {
       amplitude: 2.336,
       offset: 0
     } ,
-    642: {
+    642nm: {
       amplitude: 2.336,
       offset: 0
     }
   }
   2x: {
-    488: {
+    488nm: {
       amplitude: 2.336,
       offset: 0
     } ,
-    562: {
+    562nm: {
       amplitude: 2.336,
       offset: 0
     } ,
-    642: {
+    642nm: {
       amplitude: 2.336,
       offset: 0
     }
   }
   3x: {
-    488: {
+    488nm: {
       amplitude: 2.336,
       offset: 0
     } ,
-    562: {
+    562nm: {
       amplitude: 2.336,
       offset: 0
     } ,
-    642: {
+    642nm: {
       amplitude: 2.336,
       offset: 0
     }
   }
   4x: {
-    488: {
+    488nm: {
       amplitude: 2.336,
       offset: 0
     } ,
-    562: {
+    562nm: {
       amplitude: 2.336,
       offset: 0
     } ,
-    642: {
+    642nm: {
       amplitude: 2.336,
       offset: 0
     }
   }
   5x: {
-    488: {
+    488nm: {
       amplitude: 2.336,
       offset: 0
     } ,
-    562: {
+    562nm: {
       amplitude: 2.336,
       offset: 0
     } ,
-    642: {
+    642nm: {
       amplitude: 2.336,
       offset: 0
     }
   }
   6x: {
-    488: {
+    488nm: {
       amplitude: 2.336,
       offset: 0
     } ,
-    562: {
+    562nm: {
       amplitude: 2.336,
       offset: 0
     } ,
-    642: {
+    642nm: {
       amplitude: 2.336,
       offset: 0
     }

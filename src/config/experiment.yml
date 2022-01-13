@@ -14,6 +14,12 @@ Saving:
 
 MicroscopeState:
   image_mode: continuous
+  fiber: 0
+  zoom: 1
+  current_laser: 488nm
+  488_laser: True
+  562_laser: False
+  642_laser: False
   stack_cycling_mode: per_z
   start_position: 0
   end_position: 0
@@ -23,3 +29,5 @@ MicroscopeState:
   timepoints: 1
   stack_pause: 0
   step_size: 1
+  etl_amplitude: 0
+  etl_offset: 0

@@ -2,17 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="405f1ad6-40af-4156-8765-c2a7e6280228" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/ASLM.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/ASLM.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/other.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/.idea/1.0.0.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/config/configuration.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/config/configuration.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/config/etl_constants.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/config/etl_constants.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/config/experiment.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/config/experiment.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/model/devices/daq/DAQBase.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/devices/daq/DAQBase.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/model/devices/daq/NI/NIDAQ.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/devices/daq/NI/NIDAQ.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/model/devices/daq/SyntheticDAQ.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/devices/daq/SyntheticDAQ.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -47,6 +43,7 @@
       <option name="presentableId" value="Default" />
       <updated>1642001725128</updated>
       <workItem from="1642001728076" duration="186000" />
+      <workItem from="1642088096587" duration="8099000" />
     </task>
     <servers />
   </component>
@@ -63,5 +60,6 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
 </project>

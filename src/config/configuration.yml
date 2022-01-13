@@ -9,6 +9,8 @@ DAQParameters:
   master_trigger_out_line: PXI6259/port0/line1
   camera_trigger_out_line: PXI6259/ctr0
   trigger_source: PXI6259/PFI0
+  galvo_etl_task_line: PXI625/ao0:3
+  laser_task_line: PXI6733/ao0:7
 
   # galvos
   galvo_l_ao: PXI6259/ao0
@@ -22,17 +24,26 @@ DAQParameters:
   voice_coil: PXI6259/ao3
 
   number_of_lasers : 3
+
+  laser_min_ao: 0
+  laser_max_ao: 5
+  laser_min_do: 0
+  laser_max_do: 5
+
   laser_port_switcher: PXI6733/port0/line0
 
   laser_0_wavelength: 488nm
+  laser_0_index: 0
   laser_0_do: PXI6733/port0/line2
   laser_0_ao: PXI6733/port0/line5
 
   laser_1_wavelength: 562nm
+  laser_1_index: 1
   laser_1_do: PXI6733/port0/line3
   laser_1_ao: PXI6733/port0/line6
 
   laser_2_wavelength: 642nm
+  laser_2_index: 2
   laser_2_do: PXI6733/port0/line4
   laser_2_ao: PXI6733/port0/line7
 
@@ -105,8 +116,6 @@ GalvoParameters:
   galvo_r_amplitude: 0.5
   galvo_r_min_ao: -5
   galvo_r_max_ao: 5
-
-
 
 StageParameters:
   # PI or SyntheticStage
@@ -194,10 +203,7 @@ StartupParameters:
   laser_l_pulse_percent: 87
   laser_r_delay_percent: 10
   laser_r_pulse_percent: 87
-  laser_min_ao: 0
-  laser_max_ao: 5
-  laser_min_do: 0
-  laser_max_do: 5
+
 
   # Camera Specific Startup Parameters
   camera_line_interval: 0.000075

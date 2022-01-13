@@ -1,40 +1,37 @@
 import tkinter as tk
 from tkinter import ttk
-from tkinter.font import Font
 from tkinter.constants import NSEW
 
 import pandas as pd
 from pandastable import Table
 
-import numpy as np
-
 
 class multipoint_frame(ttk.Frame):
     def __init__(multipoint_frame, settings_tab, *args, **kwargs):
 
-        #Init Frame
+        # Init Frame
         ttk.Frame.__init__(multipoint_frame, settings_tab, *args, **kwargs)
 
         text_label = 'Multi-position Acquisition'
         ttk.Labelframe.__init__(multipoint_frame, settings_tab, text=text_label, *args, **kwargs)
 
-        #Save Data Label
+        # Save Data Label
         label_position = 0
         input_position = 4
         multipoint_frame.laser_label = ttk.Label(multipoint_frame, text='Enable')
         multipoint_frame.laser_label.grid(row=0, column=label_position, sticky=(NSEW))
 
-        #Save Data Checkbox
+        # Save Data Checkbox
         on_off = tk.StringVar()
         multipoint_frame.save_check = ttk.Checkbutton(
             multipoint_frame,
             text='',
             variable=on_off
-            #command=
-            #onvalue=
-            #offvalue=
-            #state=
-            #instate=
+            # command=
+            # onvalue=
+            # offvalue=
+            # state=
+            # instate=
         )
         multipoint_frame.save_check.grid(row=0, column=input_position, sticky=(NSEW))
 

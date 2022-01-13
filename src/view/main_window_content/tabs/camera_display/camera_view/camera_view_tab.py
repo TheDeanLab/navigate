@@ -1,8 +1,8 @@
 from tkinter import *
 from tkinter import ttk
 from tkinter.font import Font
-from view.main_window_content.camera_display.camera_view.cam_counts import cam_counts
-from view.main_window_content.camera_display.camera_view.pallete import pallete
+from view.main_window_content.tabs.camera_display.camera_view.cam_counts import cam_counts
+from view.main_window_content.tabs.camera_display.camera_view.pallete import pallete
 
 class camera_tab(ttk.Frame):
     def __init__(self, cam_wave, *args, **kwargs):

@@ -9,10 +9,10 @@ import csv
 import time
 
 # Third Party Imports
-import nidaqmx
-from nidaqmx.constants import AcquisitionType, TaskMode
-from nidaqmx.constants import LineGrouping, DigitalWidthUnits
-from nidaqmx.types import CtrTime
+#import nidaqmx
+#from nidaqmx.constants import AcquisitionType, TaskMode
+#from nidaqmx.constants import LineGrouping, DigitalWidthUnits
+#from nidaqmx.types import CtrTime
 
 # Local Imports
 from .waveforms import *

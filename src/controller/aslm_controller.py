@@ -120,14 +120,24 @@ class ASLM_controller():
         # Prepopulate the stage step size.
         self.stage_gui_controller.set_step_size(configuration_controller.get_stage_step())
 
+        # Set stage movement limites
+        # todo: min position is 2000? not 0?
+        # todo: should we initialize default position to 2000?
+        position_min = configuration_controller.get_stage_position_limits('_min')
+        position_max = configuration_controller.get_stage_position_limits('_max')
+        self.stage_gui_controller.set_position_limits(position_min, position_max)
+
     def execute(self, command, *args):
         '''
         This function listens to sub_gui_controllers
         '''
         print('command passed from child', command, args)
         if command == 'stage':
-            # todo: call the model to move stage
-            print('stage should move to', args[0], 'on', args[1])
+            # call the model to move stage
+            abs_postion = {
+                "{}_abs".format(args[1]) : args[0]
+            }
+            self.model.stages.move_absolute(abs_postion)
 
 
 

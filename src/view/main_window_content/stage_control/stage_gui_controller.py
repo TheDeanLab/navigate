@@ -61,6 +61,29 @@ class Stage_GUI_Controller(GUI_Controller):
             'f': None
         }
 
+        # state movement limits
+        self.position_min = {
+            'x': 0,
+            'y': 0,
+            'z': 0,
+            'theta': 0,
+            'f': 0
+        }
+        self.position_max = {
+            'x': 10000,
+            'y': 10000,
+            'z': 10000,
+            'theta': 10000,
+            'f': 10000
+        }
+
+    def set_position_limits(self, position_min, position_max):
+        '''
+        # this function sets position limits
+        '''
+        self.position_min = position_min
+        self.position_max = position_max
+
     def set_position(self, postion):
         '''
         # This function is to populate(set) position
@@ -105,7 +128,13 @@ class Stage_GUI_Controller(GUI_Controller):
         position_val = self.get_position_val(axis)
         step_val = self.get_step_val(axis)
         def handler():
-            position_val.set(position_val.get() + step_val.get())
+            # guarantee stage won't move out of limits
+            if position_val.get() == self.position_max[axis]:
+                return
+            temp = position_val.get() + step_val.get()
+            if temp >= self.position_max[axis]:
+                temp = self.position_max[axis]
+            position_val.set(temp)
         return handler
 
     def down_btn_handler(self, axis):
@@ -117,7 +146,13 @@ class Stage_GUI_Controller(GUI_Controller):
         position_val = self.get_position_val(axis)
         step_val = self.get_step_val(axis)
         def handler():
-            position_val.set(position_val.get() - step_val.get())
+            # guarantee stage won't move out of limits
+            if position_val.get() == self.position_min[axis]:
+                return
+            temp = position_val.get() - step_val.get()
+            if temp < self.position_min[axis]:
+                temp = self.position_min[axis]
+            position_val.set(temp)
         return handler
 
     def zero_btn_handler(self, axis):

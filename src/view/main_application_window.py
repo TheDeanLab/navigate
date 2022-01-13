@@ -18,7 +18,7 @@ from tkinter.constants import NSEW
 
 # Import Notebooks
 from .main_window_content.settings_notebook import settings_notebook as notebook_1
-from .main_window_content.camera_display.camera_notebook import camera_waveform_notebook as notebook_2
+from .main_window_content.camera_notebook import camera_waveform_notebook as notebook_2
 from .main_window_content.stagecontrol_notebook import stagecontrol_maxintensity_notebook as notebook_3
 from .main_window_content.acquire_bar_frame.acquire_bar import AcquireBar
 

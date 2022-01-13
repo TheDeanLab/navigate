@@ -72,6 +72,8 @@ class Stage(StageBase):
         return True
 
     def move_absolute(self, dict, wait_until_done=False):
+        for axis in dict:
+            assert axis in ['x_abs', 'y_abs', 'z_abs', 'theta_abs', 'f_abs']
         return True
 
     def zero_axes(self, list):

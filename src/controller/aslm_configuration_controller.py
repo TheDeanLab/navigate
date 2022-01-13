@@ -42,3 +42,10 @@ class ASLM_Configuration_Controller:
             'f': self.configuration.StageParameters['f_step']
         }
         return steps
+
+    def get_stage_position_limits(self, suffix):
+        axis = ['x', 'y', 'z', 'theta', 'f']
+        position_limits = {}
+        for a in axis:
+            position_limits[a] = self.configuration.StageParameters[a+suffix]
+        return position_limits

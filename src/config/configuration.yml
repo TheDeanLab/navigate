@@ -145,10 +145,10 @@ StageParameters:
   theta_step: 30
   f_step: 500
   position: {
-    x_pos: 0,
-    y_pos: 0,
-    z_pos: 0,
-    f_pos: 0,
+    x_pos: 35000,
+    y_pos: 42000,
+    z_pos: 15500,
+    f_pos: 70000,
     theta_pos: 0
   }
 

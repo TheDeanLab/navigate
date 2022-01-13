@@ -219,6 +219,7 @@ if __name__ == '__main__':
     main()
 '''
 
+# was SharedNDArray(np.ndarray)
 class SharedNDArray(np.ndarray):
     """A numpy array that lives in shared memory
 

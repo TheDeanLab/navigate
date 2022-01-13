@@ -13,6 +13,7 @@ from view.main_window_content.tabs.channels.channel_setting_controller import Ch
 from controller.aslm_controller_functions import *
 from controller.aslm_configuration_controller import ASLM_Configuration_Controller
 
+
 # Local Model Imports
 from model.aslm_model import Model
 
@@ -120,7 +121,7 @@ class ASLM_controller():
         # Prepopulate the stage step size.
         self.stage_gui_controller.set_step_size(configuration_controller.get_stage_step())
 
-        # Set stage movement limites
+        # Set stage movement limits
         # todo: min position is 2000? not 0?
         # todo: should we initialize default position to 2000?
         position_min = configuration_controller.get_stage_position_limits('_min')

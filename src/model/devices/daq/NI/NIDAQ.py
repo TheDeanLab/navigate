@@ -18,6 +18,7 @@ from nidaqmx.types import CtrTime
 # Local Imports
 from model.devices.daq.waveforms import *
 from model.devices.daq.DAQBase import DAQBase as DAQBase
+from model.aslm_model_config import Session as session
 
 
 class DAQ(DAQBase):

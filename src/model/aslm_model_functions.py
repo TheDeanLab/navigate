@@ -1,15 +1,21 @@
+from model.concurrency.concurrency_tools import ObjectInSubprocess
+import platform
+import sys
+
 def start_camera(session, camera_id, verbose):
     """
     Initializes the camera.
     self.cam = start_camera(self.session, self.camera_id, verbose)
     """
     # Hamamatsu Camera
-    if session.CameraParameters['type'] == 'HamamatsuOrca':
+    if session.CameraParameters['type'] == 'HamamatsuOrca' and platform.system() == 'Windows':
         from model.devices.camera.Hamamatsu.HamamatsuCamera import Camera as CameraModel
-        cam = CameraModel(camera_id, verbose)
+        cam = ObjectInSubprocess(CameraModel, camera_id, verbose)
         cam.initialize_camera()
         cam.set_exposure(session.StartupParameters['camera_exposure_time'])
-    # Synthetic Camera
+    elif session.CameraParameters['type'] == 'HamamatsuOrca' and platform.system() != 'Windows':
+        print("Hamamatsu Camera is only supported on Windows operating systems.")
+        sys.exit()
     elif session.CameraParameters['type'] == 'SyntheticCamera':
         from model.devices.camera.SyntheticCamera import Camera as CameraModel
         cam = CameraModel(0, verbose)
@@ -27,7 +33,7 @@ def start_stages(session, verbose):
     Initializes the Stage.
     """
     # Physik Instrumente Stage
-    if session.StageParameters['type'] == 'PI':
+    if session.StageParameters['type'] == 'PI' and platform.system() == 'Windows':
         from model.devices.stages.PI.PIStage import Stage as StageModel
         stage = StageModel(session, verbose)
         stage.report_position()

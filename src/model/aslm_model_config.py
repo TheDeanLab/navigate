@@ -57,9 +57,8 @@ class Session:
             print("No file provided to load_yaml_config()")
             sys.exit(1)
         else:
-            # if type(file_path) == type('path'):
-            # assert os. file_path
             if isinstance(file_path, Path):
+                assert file_path.exists(), 'Configuration File not found: {}'.format(file_path)
                 with open(file_path) as f:
                     try:
                         config_data = yaml.load(f, Loader=yaml.FullLoader)

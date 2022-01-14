@@ -37,11 +37,9 @@ def main():
        assert args.config_file.exists(), "Configuration file Path {} not valid".format(args.config_file)
        configuration_path = args.config_file
     if args.experiment_file is not None:
-        #TODO: #TODO: Possibly make sub-routine to check properties of file before launching
         assert args.experiment_file.exists(), "experiment_file file Path {} not valid".format(args.experiment_file)
         experiment_path = args.experiment_file
     if args.etl_const_file is not None:
-        #TODO: Possibly make sub-routine to check properties of file before launching
         assert args.etl_const_file.exists(), "etl_const_file Path {} not valid".format(args.etl_const_file)
         etl_constants_path = args.etl_const_file
 

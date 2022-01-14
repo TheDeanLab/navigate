@@ -16,7 +16,7 @@ class framerate_info(ttk.LabelFrame):
 
         #Init Frame
         text_label = 'Framerate Info'
-        ttk.Labelframe.__init__(self, settings_tab, text=text_label, *args, **kwargs)
+        ttk.LabelFrame.__init__(self, settings_tab, text=text_label, *args, **kwargs)
 
         #Holds widgests, this is done in case more widgets are to be added in a different frame, these can be grouped together
         content_frame = ttk.Frame(self)

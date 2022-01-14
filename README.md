@@ -23,7 +23,7 @@ Includes key inspiration and code contributions from a number of open-source pro
 
 ### Installation with Conda
 ~~~
-conda create -n ASLM python=3.7.11
+conda create -n ASLM python=3.9.7
 conda activate ASLM
 python -m pip install -r requirements.txt
 cd into the right damn folder (ex C:\Users\UserProfile\Documents\GitHub\ASLM\src\)

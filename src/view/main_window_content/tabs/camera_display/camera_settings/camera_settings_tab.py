@@ -22,7 +22,7 @@ class camera_settings_tab(ttk.Frame):
         
         #Framerate Label Frame
         self.framerate_info_frame = framerate_info(self)
-        self.framerate_info_frame.grid(row=0, column=0, sticky=(NSEW), padx=10, pady=10)
+        self.framerate_info_frame.grid(row=0, column=1, sticky=(NSEW), padx=10, pady=10)
 
         #Region of Interest Settings
 

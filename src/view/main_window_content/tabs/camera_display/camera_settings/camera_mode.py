@@ -24,7 +24,7 @@ class camera_mode(ttk.LabelFrame):
         #Holds dropdowns, this is done in case more widgets are to be added in a different frame, these can be grouped together
         content_frame = ttk.Frame(self)
         content_frame.grid(row=0, column=0, sticky=(NSEW))
-        content_frame.columnconfigure(0, weight=0)
+        
 
         #Dictionary for all the variables, this will be used by the controller
         self.inputs = {}

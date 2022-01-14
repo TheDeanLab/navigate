@@ -2,19 +2,23 @@
 Starting point for running the program.
 """
 # Standard Library Imports
-import os
 import argparse
 from pathlib import Path
 import tkinter as tk
 
-
 # Third Party Imports
-import pretty_errors
 
 # Local Imports
 from controller.aslm_controller import ASLM_controller as controller
 
 def main():
+    # Specify the Default Configuration Files (located in src/config)
+    base_directory = Path(__file__).parent
+    configuration_directory = Path.joinpath(base_directory, 'config')
+    configuration_path = Path.joinpath(configuration_directory, 'configuration.yml')
+    experiment_path = Path.joinpath(configuration_directory, 'experiment.yml')
+    etl_constants_path = Path.joinpath(configuration_directory, 'etl_constants.yml')
+
     # Parse command line arguments
     parser = argparse.ArgumentParser(description='Microscope Control Arguments')
     input_args = parser.add_argument_group('Input Arguments')
@@ -26,15 +30,7 @@ def main():
     input_args.add_argument('--experiment_file', type=Path, required=False, default=None, help='path to experiment.yml file')
     input_args.add_argument('--etl_const_file', type=Path, required=False, default=None, help='path to etl_constants.yml file')
 
-    #TODO: Add path to experiment file if user wants to load previous settings.
     args = parser.parse_args()
-
-    # Specify the Default Configuration Files (located in src/config)
-    base_directory = Path(os.path.dirname(os.path.abspath(__file__)))
-    configuration_directory = Path(os.path.join(base_directory, 'config'))
-    configuration_path = Path(os.path.join(configuration_directory, 'configuration.yml'))
-    experiment_path = Path(os.path.join(configuration_directory, 'experiment.yml'))
-    etl_constants_path = Path(os.path.join(configuration_directory, 'etl_constants.yml'))
 
     if args.config_file is not None:
        #TODO: #TODO: Possibly make sub-routine to check properties of file before launching

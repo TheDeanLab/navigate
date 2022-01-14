@@ -23,7 +23,7 @@ Includes key inspiration and code contributions from a number of open-source pro
 
 ### Installation with Conda
 ~~~
-conda create -n ASLM python=3.7.11
+conda create -n ASLM python=3.9
 conda activate ASLM
 python -m pip install -r requirements.txt
 cd into the right damn folder (ex C:\Users\UserProfile\Documents\GitHub\ASLM\src\)
@@ -45,7 +45,7 @@ If running the software on campus at UTSW you may need to update some of your pr
 * DLL for Dynamixel Servo Motor
 
 ### Software Overview
-The software is started by launching __main__.py. This configures the path to the base and configuration directories,
+The software is started by launching `main.py`. This configures the path to the base and configuration directories,
 starts the tkinter GUi, instantiates the controller, and then begins the main loop. The controller then:
 * Builds the Model from the configuration yaml file.
 * Starts the hardware (camera, stages, etc.)

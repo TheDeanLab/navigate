@@ -23,7 +23,8 @@
 
 # Standard Imports
 from __future__ import (absolute_import, division, print_function)
-
+import sys
+from pathlib import Path
 from builtins import (bytes, int, list, object, range, str,
                       ascii, chr, hex, input, next, oct, open, pow, round, super,
                       filter, map, zip)
@@ -56,7 +57,9 @@ class Session:
             print("No file provided to load_yaml_config()")
             sys.exit(1)
         else:
-            if type(file_path) == type('path'):
+            # if type(file_path) == type('path'):
+            # assert os. file_path
+            if isinstance(file_path, Path):
                 with open(file_path) as f:
                     try:
                         config_data = yaml.load(f, Loader=yaml.FullLoader)
@@ -80,7 +83,7 @@ class Session:
         """
         #
         # # Confirm that the value is a dictionary
-        if type(value) != type({}):
+        if not isinstance(value, dict):
             raise Exception('Everything passed to a the configuration must be a dictionary')
 
         # If the key does not exist in self.params, add it

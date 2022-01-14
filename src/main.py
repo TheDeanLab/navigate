@@ -13,7 +13,7 @@ from controller.aslm_controller import ASLM_controller as controller
 
 def main():
     # Specify the Default Configuration Files (located in src/config)
-    base_directory = Path(__file__).parent
+    base_directory = Path(__file__).absolute().parent
     configuration_directory = Path.joinpath(base_directory, 'config')
     configuration_path = Path.joinpath(configuration_directory, 'configuration.yml')
     experiment_path = Path.joinpath(configuration_directory, 'experiment.yml')

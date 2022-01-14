@@ -2,11 +2,12 @@ import tkinter as tk
 from tkinter import *
 from tkinter import ttk
 
-class channel_creator(ttk.Frame):
+class channel_creator(ttk.LabelFrame):
     def __init__(self, channels_tab, *args, **kwargs):
 
         #Init Frame
-        ttk.Frame.__init__(self, channels_tab, *args, **kwargs)
+        self.title = 'Channel Settings'
+        ttk.LabelFrame.__init__(self, channels_tab, text=self.title, *args, **kwargs)
 
         #Arrays with Widget Variables and widgets themselves
         #TODO refactor using dicts for variables and one for widgets, allow access to arrays via a key. might be overly complicated. Below way is clear just a bit repetitive

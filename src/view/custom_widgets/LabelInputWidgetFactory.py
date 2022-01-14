@@ -46,8 +46,8 @@ class LabelInput(ttk.Frame):
 
     def __init__(self, parent, label_pos="left", label='', input_class=ttk.Entry, input_var=None, input_args=None, label_args=None, **kwargs):
         super().__init__(parent, **kwargs) #Calls frame constructor using parent and keyword args
-        input_args = input_args #creating access point to input args for input type constructor (uses these args to create the combobox etc)
-        label_args = label_args #same for label args (args to create label etc)
+        input_args = input_args or {} #creating access point to input args for input type constructor (uses these args to create the combobox etc)
+        label_args = label_args or {} #same for label args (args to create label etc)
         self.variable = input_var #same for variable of the input, typically this will be a Tk style var like StringVar which can be accessed by any widget in the app
 
         '''This if statement will check for the type of widget being created and will create it based on that, since certain
@@ -60,7 +60,7 @@ class LabelInput(ttk.Frame):
             self.label.grid(row=0, column=0, sticky=(tk.W + tk.E))
             input_args["textvariable"] = input_var
 
-        '''This will call the passed in widge types constructor, the **input_args is the dict passed in with the arguments needed for 
+        '''This will call the passed in widget types constructor, the **input_args is the dict passed in with the arguments needed for 
         that type if desired, its totally optional'''
         self.input = input_class(self, **input_args)
         #This if will change the pos of the label based on what is passed in top will put label on top of widge, while left will put it on the left
@@ -106,4 +106,12 @@ class LabelInput(ttk.Frame):
             else:
                 self.input.delete(0, tk.END)
                 self.input.insert(0, value) #Basic entry widget formatting, dont need the string as the first arg
-        
+
+        def set_values(self, values):
+            '''Values should be a list of strings or numbers that you want to be options in the specific widget'''
+
+            if input_class in (ttk.Combobox, tk.Listbox, ttk.Spinbox):
+                self.input['values'] = values
+            else:
+                print("This widget class does not support list options: " + input_class)
+                

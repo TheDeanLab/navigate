@@ -14,8 +14,6 @@ class stack_cycling_frame(ttk.Labelframe):
         stack_acq.cycling_frame = ttk.Frame(stack_acq)
         stack_acq.cycling_options = StringVar()
         stack_acq.cycling_pull_down = ttk.Combobox(stack_acq, textvariable=stack_acq.cycling_options)
-        stack_acq.cycling_pull_down['values'] = ['Per Z', 'Per Stack']
-        stack_acq.cycling_pull_down.current(0)
         stack_acq.cycling_pull_down.state(["readonly"]) # Makes it so the user cannot type a choice into combobox
         stack_acq.cycling_pull_down.grid(row=0, column=1, sticky=(NSEW))
 

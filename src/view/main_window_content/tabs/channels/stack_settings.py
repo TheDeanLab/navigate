@@ -15,10 +15,7 @@ class stack_acq_frame(ttk.Labelframe):
         stack_acq.step_size_frame = ttk.Frame(stack_acq)
         stack_acq.step_size_label = ttk.Label(stack_acq.step_size_frame, text='Step Size')
         stack_acq.step_size_label.grid(row=0, column=0, sticky=(S))
-        stack_acq.step_size_spinval = StringVar()
-        # Set default step size to 160nm
-        if stack_acq.step_size_spinval.get() == '':
-            stack_acq.step_size_spinval.set('0.160')
+        stack_acq.step_size_spinval = DoubleVar()
         stack_acq.step_size_spinbox = ttk.Spinbox(
             stack_acq.step_size_frame,
             from_=0,
@@ -33,10 +30,7 @@ class stack_acq_frame(ttk.Labelframe):
         stack_acq.start_pos_frame = ttk.Frame(stack_acq)
         stack_acq.start_pos_label = ttk.Label(stack_acq.start_pos_frame, text='Start Pos')
         stack_acq.start_pos_label.grid(row=0, column=0, sticky=(S))
-        stack_acq.start_pos_spinval = StringVar()
-        # set default start value to 0 nm
-        if stack_acq.start_pos_spinval.get() == '':
-            stack_acq.start_pos_spinval.set('0')
+        stack_acq.start_pos_spinval = DoubleVar()
         stack_acq.start_pos_spinbox = ttk.Spinbox(
             stack_acq.start_pos_frame,
             from_=0,
@@ -52,10 +46,7 @@ class stack_acq_frame(ttk.Labelframe):
         stack_acq.end_pos_frame = ttk.Frame(stack_acq)
         stack_acq.end_pos_label = ttk.Label(stack_acq.end_pos_frame, text='End Pos')
         stack_acq.end_pos_label.grid(row=0, column=0, sticky=(S))
-        stack_acq.end_pos_spinval = StringVar()
-        # Set default end position to 200 microns
-        if stack_acq.end_pos_spinval.get() == '':
-            stack_acq.end_pos_spinval.set('200')
+        stack_acq.end_pos_spinval = DoubleVar()
         stack_acq.end_pos_spinbox = ttk.Spinbox(
             stack_acq.end_pos_frame,
             from_=0,
@@ -70,9 +61,7 @@ class stack_acq_frame(ttk.Labelframe):
         stack_acq.slice_frame = ttk.Frame(stack_acq)
         stack_acq.slice_label = ttk.Label(stack_acq.slice_frame, text='Slice')
         stack_acq.slice_label.grid(row=0, column=0, sticky=(S))
-        stack_acq.slice_spinval = StringVar()
-        stack_acq.slice_spinval.set(int(1))
-        stack_acq.slice_spinval.set(np.int(1250))
+        stack_acq.slice_spinval = DoubleVar()
         stack_acq.slice_spinbox = ttk.Spinbox(
             stack_acq.slice_frame,
             from_=0,

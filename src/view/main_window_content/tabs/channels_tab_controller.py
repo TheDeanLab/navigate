@@ -38,21 +38,31 @@ class Channels_Tab_Controller(GUI_Controller):
             'timepoint_interval': self.view.stack_timepoint_frame.timepoint_interval_spinval,
             'experiment_duration': self.view.stack_timepoint_frame.total_time_spinval
         }
-        
-        # save data event binds
+        # timepoint event id
+        self.timepoint_event_id = None
+        # timepoint event binds
         self.timepoint_vals['is_save'].trace_add('write', self.update_save_setting)
+        self.timepoint_vals['timepoint'].trace_add('write', self.update_timepoint_setting)
+        self.timepoint_vals['stack_pause'].trace_add('write', self.update_timepoint_setting)
 
     def initialize(self, name, value):
         if name == 'channels':
             for col_name in value:
                 self.channel_setting_controller.initialize(col_name, value[col_name])
-        elif name == 'stack_acquisition':
-            for col_name in value:
-                if col_name not in self.stack_acq_vals:
-                    continue
-                self.stack_acq_vals[col_name].set(value[col_name])
         elif name == 'laser_cycling':
             self.view.stack_cycling_frame.cycling_pull_down['values'] = value
+        else:
+            self.set_values(name, value)
+        
+    def set_values(self, name, value):
+        if name == 'stack_acquisition':
+            self.set_info(self.stack_acq_vals, value)
+        elif name == 'timepoint':
+            self.set_info(self.timepoint_vals, value)
+        elif name == 'laser_cycling':
+            self.laser_cycling_val.set(value)
+        elif name == 'channels':
+            self.channel_setting_controller.set_values(value)
 
     def update_z_steps(self, *args):
         '''
@@ -64,6 +74,10 @@ class Channels_Tab_Controller(GUI_Controller):
         start_position = np.float(self.stack_acq_vals['start_pos'].get())
         end_position = np.float(self.stack_acq_vals['end_pos'].get())
         step_size = np.float(self.stack_acq_vals['step_size'].get())
+        if step_size < 0.001:
+            step_size = 0.001
+            self.stack_acq_vals['step_size'].set(step_size)
+            
         number_z_steps = np.floor((end_position - start_position)/step_size)
         self.stack_acq_vals['slice'].set(number_z_steps)
 
@@ -71,7 +85,7 @@ class Channels_Tab_Controller(GUI_Controller):
         if self.stack_acq_event_id:
             self.view.after_cancel(self.stack_acq_event_id)
         self.stack_acq_event_id = self.view.after(1000, \
-            lambda: self.parent_controller.execute('stack_acquisition', self.get_stack_acq_info()))
+            lambda: self.parent_controller.execute('stack_acquisition', self.get_info(self.stack_acq_vals)))
 
     def update_cycling_setting(self, *args):
         '''
@@ -85,10 +99,35 @@ class Channels_Tab_Controller(GUI_Controller):
 
     def update_save_setting(self, *args):
         self.is_save = self.timepoint_vals['is_save'].get()
+        # tell the centrol/parent controller 'save_data' is selected
         self.parent_controller.execute('save', self.is_save)
 
-    def get_stack_acq_info(self):
-        stack_acq_info = {}
-        for name in self.stack_acq_vals:
-            stack_acq_info[name] = self.stack_acq_vals[name].get()
-        return stack_acq_info
+    def update_timepoint_setting(self, *args):
+        # todo:
+        # Kevin
+        # Automatically calculate the stack acquisition time based on the number of timepoints, channels, and exposure time.
+        # add necessary computation for 'Stack Acq.Time', 'Timepoint Interval', 'Experiment Duration'?
+        # you may need self.timepoint_vals['timepoint'], ...
+        # if you need some values from channel_settings, you could use
+        # self.channel_setting_controller.get_values()
+        if self.timepoint_event_id:
+            self.view.after_cancel(self.timepoint_event_id)
+        self.timepoint_event_id = self.view.after(1000, lambda: self.parent_controller.execute('timepoint', \
+            self.get_info(self.timepoint_vals)))
+
+    def set_info(self, vals, values):
+        '''
+        # set values to a list of variables
+        '''
+        for name in values:
+            if name in vals:
+                vals[name].set(values[name])
+
+    def get_info(self, vals):
+        '''
+        # get values from a list of variables
+        '''
+        info = {}
+        for name in vals:
+            info[name] = vals[name].get()
+        return info

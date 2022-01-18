@@ -57,9 +57,11 @@ class ASLM_controller():
         # todo
         # Select only a single channel by default.
         # todo: other channel settings? like laser, filter.....
-        # self.channel_setting_controller.set_values(0, {
-        #     'is_selected': True
-        # })
+        self.channels_tab_controller.set_values('channels', {
+            'channel_1': {
+                'is_selected': True
+            }
+        })
 
         #TODO: camera_view_tab, maximum intensity tab, waveform_tab
         # still need to be changed so that they are populated here.
@@ -69,13 +71,6 @@ class ASLM_controller():
         # self.view.acqbar.acquire_btn.config(command=lambda: launch_popup_window(self, root, self.verbose))
         # self.view.acqbar.exit_btn.config(command=lambda: exit_program(self.verbose))
         # self.view.acqbar.pull_down.bind('<<ComboboxSelected>>', lambda *args: update_microscope_mode(self, self.verbose))
-
-
-        # Channels Tab, Timepoint Settings
-        self.view.notebook_1.channels_tab.stack_timepoint_frame.exp_time_spinval.trace_add('write', lambda *args: update_time_points(self, self.verbose))
-        #TODO: Automatically calculate the stack acquisition time based on the number of timepoints, channels, and exposure time.
-
-        # Channels Tab, Multi-position Acquisition Settings
 
         # Camera Tab, Camera Settings
 
@@ -107,7 +102,7 @@ class ASLM_controller():
         self.channels_tab_controller.initialize('channels', channels_setting)
         
         # populate stack acquisition
-        # todo: should those setting from configuration/experiments?
+        # todo: should those settings from configuration/experiments?
         stack_acq_setting = {
             'step_size': 0.160,
             'start_pos': 0,
@@ -119,6 +114,16 @@ class ASLM_controller():
         # populate laser cycling settings
         laser_cycling_values = ['Per Z', 'Per Stack']
         self.channels_tab_controller.initialize('laser_cycling', laser_cycling_values)
+
+        # populate timepoint settings
+        # todo: should those settings from configuration/experiments?
+        timepoint_setting = {
+            'is_save': False,
+            'timepoint': 1,
+            'stack_acq_time': 200,
+            'stack_pause': 0
+        }
+        self.channels_tab_controller.initialize('timepoint', timepoint_setting)
         
 
     def initialize_stage(self, configuration_controller):
@@ -129,8 +134,6 @@ class ASLM_controller():
         self.stage_gui_controller.set_step_size(configuration_controller.get_stage_step())
 
         # Set stage movement limits
-        # todo: min position is 2000? not 0?
-        # todo: should we initialize default position to 2000?
         position_min = configuration_controller.get_stage_position_limits('_min')
         position_max = configuration_controller.get_stage_position_limits('_max')
         self.stage_gui_controller.set_position_limits(position_min, position_max)

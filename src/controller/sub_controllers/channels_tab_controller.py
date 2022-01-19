@@ -1,6 +1,6 @@
 import numpy as np
-from view.gui_controller import GUI_Controller
-from view.main_window_content.tabs.channels.channel_setting_controller import Channel_Setting_Controller
+from controller.sub_controllers.gui_controller import GUI_Controller
+from controller.sub_controllers.channel_setting_controller import Channel_Setting_Controller
 
 class Channels_Tab_Controller(GUI_Controller):
     def __init__(self, view, parent_controller=None):

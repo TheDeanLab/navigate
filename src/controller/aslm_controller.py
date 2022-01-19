@@ -7,10 +7,9 @@ Use: https://www.python-course.eu/tkinter_events_binds.php
 from view.main_application_window import Main_App as view
 
 # Local Sub-Controller Imports
-from view.main_window_content.stage_control.stage_gui_controller import Stage_GUI_Controller
-from view.main_window_content.acquire_bar_frame.acquire_bar_controller import Acquire_Bar_Controller
-from view.main_window_content.tabs.channels_tab_controller import Channels_Tab_Controller
-from controller.aslm_controller_functions import *
+from controller.sub_controllers.stage_gui_controller import Stage_GUI_Controller
+from controller.sub_controllers.acquire_bar_controller import Acquire_Bar_Controller
+from controller.sub_controllers.channels_tab_controller import Channels_Tab_Controller
 from controller.aslm_configuration_controller import ASLM_Configuration_Controller
 from controller.thread_pool import SynchronizedThreadPool
 

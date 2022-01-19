@@ -1,4 +1,4 @@
-from view.gui_controller import GUI_Controller
+from controller.sub_controllers.gui_controller import GUI_Controller
 
 class Channel_Setting_Controller(GUI_Controller):
     def __init__(self, view, parent_controller=None):

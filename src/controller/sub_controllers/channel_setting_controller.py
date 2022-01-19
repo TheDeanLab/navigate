@@ -1,4 +1,4 @@
-from view.gui_controller import GUI_Controller
+from controller.sub_controllers.gui_controller import GUI_Controller
 
 class Channel_Setting_Controller(GUI_Controller):
     def __init__(self, view, parent_controller=None):
@@ -31,28 +31,52 @@ class Channel_Setting_Controller(GUI_Controller):
             else:
                 widgets[i]['values'] = value
 
-    def set_values(self, channel_id, value):
+    def set_values(self, value):
         '''
         # set channel values according to channel id
         # the value should be a dict {
+        # 'channel_id': {
             'is_selected': True(False),
             'laser': ,
             'filter': ,
             'camera_exposure_time': ,
             'laser_power': ,
             'interval_time':}
+        }
         '''
-        channel_vals = self.get_vals_by_channel(channel_id)
-        if not channel_vals:
-            return
-        for name in value:
-            channel_vals[name].set(value[name])
+        prefix = 'channel_'
+        for channel in value:
+            channel_id = int(channel[len(prefix):]) - 1
+            channel_vals = self.get_vals_by_channel(channel_id)
+            if not channel_vals:
+                return
+            channel_value = value[channel]
+            for name in channel_value:
+                channel_vals[name].set(channel_value[name])
 
     def get_values(self):
         '''
-        # return all the channels' setting values
-        # todo: only the selected channel ?
+        # return all the selected channels' setting values
+        # for example, if channel_1 and channel_2 is selected, it will return
+        # { 'channel_1': {
+        #           'is_selected': True,
+        #           'laser': ,
+        #           'filter': ,
+        #           'camera_exposure_time': ,
+        #           'laser_power': ,
+        #           'interval_time': 
+        #        },
+        # 'channel_2': {
+        #           'is_selected': True,
+        #           'laser': ,
+        #           'filter': ,
+        #           'camera_exposure_time': ,
+        #           'laser_power': ,
+        #           'interval_time': 
+        #        }
+        # }
         '''
+        prefix = 'channel_'
         channel_settings = {}
         for i in range(self.num):
             channel_vals = self.get_vals_by_channel(i)
@@ -66,7 +90,7 @@ class Channel_Setting_Controller(GUI_Controller):
                     'laser_power': channel_vals['laser_power'].get(),
                     'interval_time': channel_vals['interval_time'].get()
                 }
-                channel_settings['channel'+str(i)] = temp
+                channel_settings[prefix+str(i+1)] = temp
         return channel_settings
 
     def channel_callback(self, channel_id, widget_name):

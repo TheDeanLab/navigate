@@ -4,7 +4,7 @@ When the mode is changed, we need to communicate this to the central controller.
 Central controller then communicates these changes to the channel_setting_controller.
 '''
 
-from view.gui_controller import GUI_Controller
+from controller.sub_controllers.gui_controller import GUI_Controller
 
 class Acquire_Bar_Controller(GUI_Controller):
     def __init__(self, view, parent_controller):

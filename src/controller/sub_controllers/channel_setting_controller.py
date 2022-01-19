@@ -1,8 +1,9 @@
 from controller.sub_controllers.gui_controller import GUI_Controller
 
 class Channel_Setting_Controller(GUI_Controller):
-    def __init__(self, view, parent_controller=None):
-        super().__init__(view, parent_controller)
+    def __init__(self, view, parent_controller=None, verbose=False):
+        super().__init__(view, parent_controller, verbose)
+
         # num: numbers of channels
         self.num = 5
         # 'instant': acquire mode is set to 'continuous'
@@ -31,6 +32,8 @@ class Channel_Setting_Controller(GUI_Controller):
             else:
                 widgets[i]['values'] = value
 
+        self.show_verbose_info(name, 'in channel has been initialized')
+
     def set_values(self, value):
         '''
         # set channel values according to channel id
@@ -53,6 +56,8 @@ class Channel_Setting_Controller(GUI_Controller):
             channel_value = value[channel]
             for name in channel_value:
                 channel_vals[name].set(channel_value[name])
+
+        self.show_verbose_info('channel has been set new value')
 
     def get_values(self):
         '''
@@ -103,6 +108,8 @@ class Channel_Setting_Controller(GUI_Controller):
         def func(*args):
             if self.mode == 'instant' and channel_vals['is_selected'].get():
                 self.parent_controller.execute('channel', widget_name, channel_vals[widget_name].get())
+
+            self.show_verbose_info('channel setting has been changed')
         return func
 
     def get_widgets(self, name):

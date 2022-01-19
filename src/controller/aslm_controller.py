@@ -4,6 +4,7 @@ Use: https://www.python-course.eu/tkinter_events_binds.php
 """
 
 # Local View Imports
+from tabnanny import verbose
 from view.main_application_window import Main_App as view
 
 # Local Sub-Controller Imports
@@ -38,10 +39,10 @@ class ASLM_controller():
         self.acquire_bar_controller = Acquire_Bar_Controller(self.view.acqbar, self)
 
         # Channels Controller
-        self.channels_tab_controller = Channels_Tab_Controller(self.view.notebook_1.channels_tab, self)
+        self.channels_tab_controller = Channels_Tab_Controller(self.view.notebook_1.channels_tab, self, self.verbose)
 
         # Stage Controller
-        self.stage_gui_controller = Stage_GUI_Controller(self.view.notebook_3.stage_control_tab, self)
+        self.stage_gui_controller = Stage_GUI_Controller(self.view.notebook_3.stage_control_tab, self, self.verbose)
 
         # Initialize view based on model.configuration
         configuration_controller = ASLM_Configuration_Controller(self.model.configuration)
@@ -141,7 +142,8 @@ class ASLM_controller():
         '''
         This function listens to sub_gui_controllers
         '''
-        print('command passed from child', command, args)
+        if self.verbose:
+            print('command passed from child', command, args)
         if command == 'stage':
             # call the model to move stage
             abs_postion = {

@@ -3,12 +3,12 @@ from controller.sub_controllers.gui_controller import GUI_Controller
 from controller.sub_controllers.channel_setting_controller import Channel_Setting_Controller
 
 class Channels_Tab_Controller(GUI_Controller):
-    def __init__(self, view, parent_controller=None):
-        super().__init__(view, parent_controller)
+    def __init__(self, view, parent_controller=None, verbose=False):
+        super().__init__(view, parent_controller, verbose)
 
         self.is_save = False
 
-        self.channel_setting_controller = Channel_Setting_Controller(self.view.channel_widgets_frame, self)
+        self.channel_setting_controller = Channel_Setting_Controller(self.view.channel_widgets_frame, self, self.verbose)
         
         # stack acquisition variables
         self.stack_acq_vals = {
@@ -53,6 +53,8 @@ class Channels_Tab_Controller(GUI_Controller):
             self.view.stack_cycling_frame.cycling_pull_down['values'] = value
         else:
             self.set_values(name, value)
+
+        self.show_verbose_info(name, 'on channels tab has been initialized')
         
     def set_values(self, name, value):
         if name == 'stack_acquisition':
@@ -63,6 +65,8 @@ class Channels_Tab_Controller(GUI_Controller):
             self.laser_cycling_val.set(value)
         elif name == 'channels':
             self.channel_setting_controller.set_values(value)
+
+        self.show_verbose_info(name, 'on channels tab has been set new values')
 
     def update_z_steps(self, *args):
         '''
@@ -87,6 +91,8 @@ class Channels_Tab_Controller(GUI_Controller):
         self.stack_acq_event_id = self.view.after(1000, \
             lambda: self.parent_controller.execute('stack_acquisition', self.get_info(self.stack_acq_vals)))
 
+        self.show_verbose_info('stack acquisition settings on channels tab have been changed and recalculated')
+
     def update_cycling_setting(self, *args):
         '''
         # Updates the cycling settings in the model and the GUI.
@@ -96,11 +102,15 @@ class Channels_Tab_Controller(GUI_Controller):
         '''
         # tell the central/parent controller that laser cycling setting is changed
         self.parent_controller.execute('laser_cycling', self.laser_cycling_val.get())
+        
+        self.show_verbose_info('cycling setting on channels tab has been changed')
 
     def update_save_setting(self, *args):
         self.is_save = self.timepoint_vals['is_save'].get()
         # tell the centrol/parent controller 'save_data' is selected
         self.parent_controller.execute('save', self.is_save)
+
+        self.show_verbose_info('save data option has been changed to', self.is_save)
 
     def update_timepoint_setting(self, *args):
         # todo:
@@ -110,10 +120,15 @@ class Channels_Tab_Controller(GUI_Controller):
         # you may need self.timepoint_vals['timepoint'], ...
         # if you need some values from channel_settings, you could use
         # self.channel_setting_controller.get_values()
+        
+        # calculaate here
+
         if self.timepoint_event_id:
             self.view.after_cancel(self.timepoint_event_id)
         self.timepoint_event_id = self.view.after(1000, lambda: self.parent_controller.execute('timepoint', \
             self.get_info(self.timepoint_vals)))
+
+        self.show_verbose_info('timepoint settings on channels tab have been changed and recalculated')
 
     def set_info(self, vals, values):
         '''

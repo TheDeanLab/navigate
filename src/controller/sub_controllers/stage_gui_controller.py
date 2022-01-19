@@ -1,8 +1,8 @@
 from controller.sub_controllers.gui_controller import GUI_Controller
 
 class Stage_GUI_Controller(GUI_Controller):
-    def __init__(self, view, parent_controller):
-        super().__init__(view, parent_controller)
+    def __init__(self, view, parent_controller, verbose=False):
+        super().__init__(view, parent_controller, verbose)
 
         # gui event bind
         self.view.x_y_frame.positive_x_btn.configure(
@@ -94,6 +94,8 @@ class Stage_GUI_Controller(GUI_Controller):
             val = self.get_position_val(axis)
             if val:
                 val.set(postion[axis])
+        
+        self.show_verbose_info('set stage position')
 
     def get_position(self):
         '''
@@ -118,6 +120,8 @@ class Stage_GUI_Controller(GUI_Controller):
             val = self.get_step_val(axis)
             if val:
                 val.set(steps[axis])
+
+        self.show_verbose_info('set step size')
 
     def up_btn_handler(self, axis):
         '''
@@ -191,6 +195,8 @@ class Stage_GUI_Controller(GUI_Controller):
                 self.view.after_cancel(self.event_id[axis])
             self.event_id[axis] = self.view.after(1000, \
                 lambda: self.parent_controller.execute('stage', position_var.get(), axis))
+
+            self.show_verbose_info('stage position is changed')
         
         return handler
 

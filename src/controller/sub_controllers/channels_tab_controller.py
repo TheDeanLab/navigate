@@ -1,3 +1,4 @@
+import time
 import numpy as np
 from controller.sub_controllers.gui_controller import GUI_Controller
 from controller.sub_controllers.channel_setting_controller import Channel_Setting_Controller
@@ -103,13 +104,82 @@ class Channels_Tab_Controller(GUI_Controller):
         self.parent_controller.execute('save', self.is_save)
 
     def update_timepoint_setting(self, *args):
-        # todo:
-        # Kevin
+        '''
         # Automatically calculate the stack acquisition time based on the number of timepoints, channels, and exposure time.
         # add necessary computation for 'Stack Acq.Time', 'Timepoint Interval', 'Experiment Duration'?
         # you may need self.timepoint_vals['timepoint'], ...
-        # if you need some values from channel_settings, you could use
-        # self.channel_setting_controller.get_values()
+        '''
+
+        # Order of priority for perStack: timepoints > positions > channels > z-steps > delay
+        # ORder of priority for perZ: timepoints > positions > z-steps > delays > channels
+
+        channel_settings = self.channel_setting_controller.get_values()
+        number_of_channels = len(channel_settings)
+        number_of_timepoints = self.timepoint_vals['timepoint']
+        number_of_positions = 0
+
+        number_of_slices = self.stack_acq_vals['slice']
+        stage_velocity = self.model.configuration.StageParameters.['velocity']
+        filter_wheel_delay = self.model.configuration.FilterWheelParameters['filter_wheel_delay']
+
+        perStack = True  # TODO: Retrieve this from the View.
+
+        # Initialize variable to keep track of how long the entire experiment will take. Includes time, positions, channels...
+        experiment_duration = 0
+
+        # Initialize variable to calculate how long it takes to acquire a single volume for all of the channels.
+        # Only calculate once at the beginning.
+        stack_acquisition_duration = 0
+
+        for timepoint_idx in range(number_of_timepoints):
+
+            for position_idx in range(number_of_positions):
+                # For multiple positions, need to account for the time necessary to move the stages that distance.
+                # In theory, these positions would be populated in that 'pandastable' or some other data structure.
+
+                # Determine the largest distance to travel between positions.  Assume all axes move the same velocity
+                # This assumes that we are in a multi-position mode. Not yet implemented.
+                # x1, y1, z1, theta1, f1, = position_start.values()
+                # x2, y2, z1, theta2, f1 = position_end.values()
+                # distance = [x2-x1, y2-y1, z2-z1, theta2-theta1, f2-f1]
+                # max_distance_idx = np.argmax(distance)
+                # Now if we are going to do this properly, we would need to do this for all of the positions so that we can
+                # calculate the total experiment time.  Probably assemble a matrix of all the positions and then do the
+                # calculations.
+
+                stage_delay = 0  # distance[max_distance_idx]/stage_velocity #TODO False value.
+
+                # If we were actually acquiring the data, we would call the function to move the stage here.
+                experiment_duration = experiment_duration + stage_delay
+
+                for channel_idx in range(number_of_channels):
+                    # Change the filter wheel here before the start of the acquisition.
+                    if perStack:
+                        # In the perStack mode, we only need to account for the time necessary for the filter wheel
+                        # to change between each image stack.
+                        experiment_duration = experiment_duration + filter_wheel_delay
+
+                    for slice_idx in range(number_of_slices):
+                        # Now we need to know the exposure time of each channel.
+                        # Assumes no delay between individual slices at this point.
+                        # Convert from milliseconds to seconds.
+                        experiment_duration = experiment_duration + channel_settings['channel_' + str(channel_idx+1)]['camera_exposure_time']/1000
+
+                        if channel_idx == 0 and position_idx == 0 and timepoint_idx == 0:
+                            stack_acquisition_duration = stack_acquisition_duration + channel_settings['channel_' + str(channel_idx+1)]['camera_exposure_time']/1000
+
+                        if not perStack:
+                            # In the perZ mode, we need to account for the time necessary to move the filter wheel
+                            # at each slice
+                            experiment_duration = experiment_duration + filter_wheel_delay
+
+                            if channel_idx == 0 and position_idx == 0 and timepoint_idx == 0:
+                                stack_acquisition_duration = stack_acquisition_duration + channel_settings['channel_' + str(channel_idx+1)]['camera_exposure_time']/1000
+
+        print("Experiment Duration:", experiment_duration)
+        print("Stack Acquisition:", stack_acquisition_duration)
+
+
         if self.timepoint_event_id:
             self.view.after_cancel(self.timepoint_event_id)
         self.timepoint_event_id = self.view.after(1000, lambda: self.parent_controller.execute('timepoint', \

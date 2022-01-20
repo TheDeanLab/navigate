@@ -89,6 +89,7 @@ FilterWheelParameters:
   filter_wheel_port: COM9
   baudrate: 9600
   number_of_filter_wheels: 2
+  filter_wheel_delay: .030 # in seconds
   available_filters: {
     Empty-Alignment: 0,
     GFP - FF01-515/30-32: 1,
@@ -151,6 +152,7 @@ StageParameters:
     f_pos: 70000,
     theta_pos: 0
   }
+  velocity: 1000
 
 ZoomParameters:
   #Dynamixel or SyntheticZoom

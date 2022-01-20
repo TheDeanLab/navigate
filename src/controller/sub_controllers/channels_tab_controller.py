@@ -119,7 +119,7 @@ class Channels_Tab_Controller(GUI_Controller):
         number_of_positions = 0
 
         number_of_slices = self.stack_acq_vals['slice']
-        stage_velocity = self.model.configuration.StageParameters.['velocity']
+        stage_velocity = self.model.configuration.StageParameters['velocity']
         filter_wheel_delay = self.model.configuration.FilterWheelParameters['filter_wheel_delay']
 
         perStack = True  # TODO: Retrieve this from the View.

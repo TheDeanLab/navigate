@@ -12,6 +12,7 @@ from controller.sub_controllers.stage_gui_controller import Stage_GUI_Controller
 from controller.sub_controllers.acquire_bar_controller import Acquire_Bar_Controller
 from controller.sub_controllers.channels_tab_controller import Channels_Tab_Controller
 from controller.aslm_configuration_controller import ASLM_Configuration_Controller
+from controller.aslm_controller_functions import *
 from controller.thread_pool import SynchronizedThreadPool
 
 # Local Model Imports
@@ -36,7 +37,7 @@ class ASLM_controller():
 
         # sub gui controllers
         # Acquire bar
-        self.acquire_bar_controller = Acquire_Bar_Controller(self.view.acqbar, self)
+        self.acquire_bar_controller = Acquire_Bar_Controller(self.view.acqbar, self, self.verbose)
 
         # Channels Controller
         self.channels_tab_controller = Channels_Tab_Controller(self.view.notebook_1.channels_tab, self, self.verbose)
@@ -54,23 +55,27 @@ class ASLM_controller():
         self.initialize_stage(configuration_controller)
 
         # Set view based on model.experiment
-        # todo
+        # TODO
         # Select only a single channel by default.
-        # todo: other channel settings? like laser, filter.....
+        # TODO: other channel settings? like laser, filter.....
         self.channels_tab_controller.set_values('channels', {
             'channel_1': {
                 'is_selected': True
             }
         })
 
+        # set mode according to model.experiment
+        mode = self.model.experiment.MicroscopeState['image_mode']
+        self.acquire_bar_controller.set_mode(mode)
+        self.channels_tab_controller.set_mode(mode)
+
+        # set saving settings to acquire bar
+        for name in self.model.experiment.Saving:
+            if self.model.experiment.Saving[name] is None:
+                self.model.experiment.Saving[name] = ''
+        self.acquire_bar_controller.set_saving_settings(self.model.experiment.Saving)
+
         #TODO: camera_view_tab, maximum intensity tab, waveform_tab
-        # still need to be changed so that they are populated here.
-
-
-        # Moved to the acquisition bar sub-controller...  Not functional yet.
-        # self.view.acqbar.acquire_btn.config(command=lambda: launch_popup_window(self, root, self.verbose))
-        # self.view.acqbar.exit_btn.config(command=lambda: exit_program(self.verbose))
-        # self.view.acqbar.pull_down.bind('<<ComboboxSelected>>', lambda *args: update_microscope_mode(self, self.verbose))
 
         # Camera Tab, Camera Settings
 
@@ -80,29 +85,18 @@ class ASLM_controller():
         #TODO: Move to a sub-controller.
         self.view.menu_zoom.bind("<<MenuSelect>>", lambda *args: print("Zoom Selected", *args))
 
-
-    def launch_acquisition(self, popup_window):
-        '''
-        # Once the popup window has been filled out, we first create the save path using the create_save_path function.
-        # This automatically removes spaces and replaces them with underscores.
-        # Then it makes the directory.
-        # Thereafter, the experiment is ready to go.
-        '''
-        # Need to create the save path, and update the model from the entries.
-        save_directory = create_save_path(self, popup_window, self.verbose)
-
-        #TODO: Acquire data according to the operating mode.
-
-        # Close the window
-        popup_window.dismiss(self.verbose)
-
     def initialize_channels(self, configuration_controller):
+        # set some other information needed by channels_tab_controller
+        self.channels_tab_controller.settings_from_configuration = {
+            'stage_velocity': self.model.configuration.StageParameters['velocity'],
+            'filter_wheel_delay': self.model.configuration.FilterWheelParameters['filter_wheel_delay']
+        }
         # populate channels in the GUI
         channels_setting = configuration_controller.get_channels_info(self.verbose)
         self.channels_tab_controller.initialize('channels', channels_setting)
         
         # populate stack acquisition
-        # todo: should those settings from configuration/experiments?
+        # TODO: should those settings from configuration/experiments?
         stack_acq_setting = {
             'step_size': 0.160,
             'start_pos': 0,
@@ -116,7 +110,7 @@ class ASLM_controller():
         self.channels_tab_controller.initialize('laser_cycling', laser_cycling_values)
 
         # populate timepoint settings
-        # todo: should those settings from configuration/experiments?
+        # TODO: should those settings from configuration/experiments?
         timepoint_setting = {
             'is_save': False,
             'timepoint': 1,
@@ -142,8 +136,6 @@ class ASLM_controller():
         '''
         This function listens to sub_gui_controllers
         '''
-        if self.verbose:
-            print('command passed from child', command, args)
         if command == 'stage':
             # call the model to move stage
             abs_postion = {
@@ -151,6 +143,23 @@ class ASLM_controller():
             }
             self.threads_pool.createThread('stage', self.model.stages.move_absolute, (abs_postion,))
             # self.model.stages.move_absolute(abs_postion)
+        elif command == 'image_mode':
+            # tell channel the mode is changed
+            self.channels_tab_controller.set_mode('instant' if args[0] == 'continuous' else 'uninstant')
+            # update model.experiment
+            self.model.experiment.MicroscopeState['image_mode'] = args[0]
+        elif command == 'set_save':
+            self.acquire_bar_controller.set_save_option(args[0])
+        elif command == 'acquisite_and_save':
+            # TODO
+            file_name = create_save_path(self.model.experiment.Saving, self.verbose)
+            pass
+        elif command == 'acquisite':
+            # TODO
+            pass
+
+        if self.verbose:
+            print('In central controller: command passed from child', command, args)
 
 
 

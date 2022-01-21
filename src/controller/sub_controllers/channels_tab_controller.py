@@ -8,7 +8,8 @@ class Channels_Tab_Controller(GUI_Controller):
         super().__init__(view, parent_controller, verbose)
 
         self.is_save = False
-
+        self.mode = 'instant'
+        self.settings_from_configuration = {}
         self.channel_setting_controller = Channel_Setting_Controller(self.view.channel_widgets_frame, self, self.verbose)
         
         # stack acquisition variables
@@ -69,6 +70,23 @@ class Channels_Tab_Controller(GUI_Controller):
 
         self.show_verbose_info(name, 'on channels tab has been set new values')
 
+    def set_channel_num(self, num):
+        '''
+        # change the number of channels
+        '''
+        self.channel_setting_controller.set_num(num)
+
+        self.show_verbose_info('channel number is', num)
+
+    def set_mode(self, mode):
+        '''
+        # change acquisition mode
+        '''
+        self.mode = mode
+        self.channel_setting_controller.set_mode(mode)
+
+        self.show_verbose_info('acquisition mode has been changed to', mode)
+
     def update_z_steps(self, *args):
         '''
         # Recalculates the number of slices that will be acquired in a z-stack whenever the GUI
@@ -101,6 +119,9 @@ class Channels_Tab_Controller(GUI_Controller):
         # In the perZ format: Slice 0/Ch0, Slice0/Ch1, Slice1/Ch0, Slice1/Ch1, etc
         # in the perStack format: Slice 0/Ch0, Slice1/Ch0... SliceN/Ch0.  Then it repeats with Ch1
         '''
+        # recalculate timepoint settings
+        self.update_timepoint_setting()
+        
         # tell the central/parent controller that laser cycling setting is changed
         self.parent_controller.execute('laser_cycling', self.laser_cycling_val.get())
         
@@ -109,7 +130,7 @@ class Channels_Tab_Controller(GUI_Controller):
     def update_save_setting(self, *args):
         self.is_save = self.timepoint_vals['is_save'].get()
         # tell the centrol/parent controller 'save_data' is selected
-        self.parent_controller.execute('save', self.is_save)
+        self.parent_controller.execute('set_save', self.is_save)
 
         self.show_verbose_info('save data option has been changed to', self.is_save)
 
@@ -125,14 +146,14 @@ class Channels_Tab_Controller(GUI_Controller):
 
         channel_settings = self.channel_setting_controller.get_values()
         number_of_channels = len(channel_settings)
-        number_of_timepoints = self.timepoint_vals['timepoint']
-        number_of_positions = 0
+        number_of_timepoints = self.timepoint_vals['timepoint'].get()
+        number_of_positions = 1 #TODO: multiple position
 
-        number_of_slices = self.stack_acq_vals['slice']
-        stage_velocity = self.model.configuration.StageParameters['velocity']
-        filter_wheel_delay = self.model.configuration.FilterWheelParameters['filter_wheel_delay']
+        number_of_slices = int(self.stack_acq_vals['slice'].get())
+        stage_velocity = self.settings_from_configuration['stage_velocity']
+        filter_wheel_delay = self.settings_from_configuration['filter_wheel_delay']
 
-        perStack = True  # TODO: Retrieve this from the View.
+        perStack = self.laser_cycling_val.get() == 'Per Stack'
 
         # Initialize variable to keep track of how long the entire experiment will take. Includes time, positions, channels...
         experiment_duration = 0
@@ -186,8 +207,8 @@ class Channels_Tab_Controller(GUI_Controller):
                             if channel_idx == 0 and position_idx == 0 and timepoint_idx == 0:
                                 stack_acquisition_duration = stack_acquisition_duration + channel_settings['channel_' + str(channel_idx+1)]['camera_exposure_time']/1000
 
-        print("Experiment Duration:", experiment_duration)
-        print("Stack Acquisition:", stack_acquisition_duration)
+        self.timepoint_vals['experiment_duration'].set(experiment_duration)
+        self.timepoint_vals['stack_acq_time'].set(stack_acquisition_duration)
 
         if self.timepoint_event_id:
             self.view.after_cancel(self.timepoint_event_id)
@@ -212,3 +233,9 @@ class Channels_Tab_Controller(GUI_Controller):
         for name in vals:
             info[name] = vals[name].get()
         return info
+
+    def execute(self, command, *args):
+        if command == 'recalculate_timepoint':
+            self.update_timepoint_setting()
+        elif command == 'channel':
+            self.parent_controller.execute(command, *args)

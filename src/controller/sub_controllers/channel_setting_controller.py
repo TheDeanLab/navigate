@@ -91,7 +91,7 @@ class Channel_Setting_Controller(GUI_Controller):
                     'is_selected': True,
                     'laser': channel_vals['laser'].get(),
                     'filter': channel_vals['filter'].get(),
-                    'camera_exposure_time': channel_vals['camera_exposure_time'].get(),
+                    'camera_exposure_time': int(channel_vals['camera_exposure_time'].get()),
                     'laser_power': channel_vals['laser_power'].get(),
                     'interval_time': channel_vals['interval_time'].get()
                 }
@@ -106,7 +106,11 @@ class Channel_Setting_Controller(GUI_Controller):
         '''
         channel_vals = self.get_vals_by_channel(channel_id)
         def func(*args):
-            if self.mode == 'instant' and channel_vals['is_selected'].get():
+            if not channel_vals['is_selected'].get():
+                return
+            if widget_name == 'camera_exposure_time':
+                self.parent_controller.execute('recalculate_timepoint')
+            if self.mode == 'instant':
                 self.parent_controller.execute('channel', widget_name, channel_vals[widget_name].get())
 
             self.show_verbose_info('channel setting has been changed')

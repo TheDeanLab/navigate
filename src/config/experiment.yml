@@ -22,12 +22,12 @@ MicroscopeState:
   642_laser: False
   stack_cycling_mode: per_z
   start_position: 0
-  end_position: 0
-  step_size: 0
+  end_position: 200
+  step_size: 0.160
   number_z_steps: 0
   save_data: 0
   timepoints: 1
   stack_pause: 0
-  step_size: 1
+  #step_size: 1
   etl_amplitude: 0
   etl_offset: 0

@@ -54,3 +54,13 @@ def create_save_path(saving_settings, verbose=False):
     saving_settings['date'] = date_string
 
     return save_directory
+
+def save_experiment_file(file_directory, experiment):
+    try:
+        file_name = os.path.join(file_directory, 'experiment.yml')
+        with open(file_name, 'w') as f:
+            f.write(experiment)
+    except:
+        return False
+    return True
+    

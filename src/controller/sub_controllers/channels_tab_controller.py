@@ -15,16 +15,16 @@ class Channels_Tab_Controller(GUI_Controller):
         # stack acquisition variables
         self.stack_acq_vals = {
             'step_size': self.view.stack_acq_frame.step_size_spinval,
-            'start_pos': self.view.stack_acq_frame.start_pos_spinval,
-            'end_pos': self.view.stack_acq_frame.end_pos_spinval,
-            'slice':  self.view.stack_acq_frame.slice_spinval
+            'start_position': self.view.stack_acq_frame.start_pos_spinval,
+            'end_position': self.view.stack_acq_frame.end_pos_spinval,
+            'number_z_steps':  self.view.stack_acq_frame.slice_spinval
         }
         # stack acquisition event id
         self.stack_acq_event_id = None
         # stack acquisition event binds
         self.stack_acq_vals['step_size'].trace_add('write', self.update_z_steps)
-        self.stack_acq_vals['start_pos'].trace_add('write', self.update_z_steps)
-        self.stack_acq_vals['end_pos'].trace_add('write', self.update_z_steps)
+        self.stack_acq_vals['start_position'].trace_add('write', self.update_z_steps)
+        self.stack_acq_vals['end_position'].trace_add('write', self.update_z_steps)
 
         # laser cycling variable
         self.laser_cycling_val = self.view.stack_cycling_frame.cycling_options
@@ -34,7 +34,7 @@ class Channels_Tab_Controller(GUI_Controller):
         # timepoint setting variables
         self.timepoint_vals =  {
             'is_save': self.view.stack_timepoint_frame.save_data,
-            'timepoint': self.view.stack_timepoint_frame.exp_time_spinval,
+            'timepoints': self.view.stack_timepoint_frame.exp_time_spinval,
             'stack_acq_time': self.view.stack_timepoint_frame.stack_acq_spinval,
             'stack_pause': self.view.stack_timepoint_frame.stack_pause_spinval,
             'timepoint_interval': self.view.stack_timepoint_frame.timepoint_interval_spinval,
@@ -44,7 +44,7 @@ class Channels_Tab_Controller(GUI_Controller):
         self.timepoint_event_id = None
         # timepoint event binds
         self.timepoint_vals['is_save'].trace_add('write', self.update_save_setting)
-        self.timepoint_vals['timepoint'].trace_add('write', self.update_timepoint_setting)
+        self.timepoint_vals['timepoints'].trace_add('write', self.update_timepoint_setting)
         self.timepoint_vals['stack_pause'].trace_add('write', self.update_timepoint_setting)
 
     def initialize(self, name, value):
@@ -70,6 +70,14 @@ class Channels_Tab_Controller(GUI_Controller):
 
         self.show_verbose_info(name, 'on channels tab has been set new values')
 
+    def get_values(self):
+        settings = {}
+        settings['stack_acquisition'] = self.get_info(self.stack_acq_vals)
+        settings['stack_cycling_mode'] = 'per_stack' if self.laser_cycling_val.get() == 'Per Stack' else 'per_z'
+        settings['timepoints'] = self.get_info(self.timepoint_vals)
+        settings['channels'] = self.channel_setting_controller.get_values()
+        return settings
+
     def set_channel_num(self, num):
         '''
         # change the number of channels
@@ -92,23 +100,34 @@ class Channels_Tab_Controller(GUI_Controller):
         # Recalculates the number of slices that will be acquired in a z-stack whenever the GUI
         # has the start position, end position, or step size changed.
         # Sets the number of slices in the model and the GUI.
+        # send the current values to central/parent controller
+        # the values is a dict as follows
+        # {
+            'step_size': ,
+            'start_position': ,
+            'end_possition': ,
+            'number_z_steps':
+        # }
         '''
         # Calculate the number of slices and set GUI
-        start_position = np.float(self.stack_acq_vals['start_pos'].get())
-        end_position = np.float(self.stack_acq_vals['end_pos'].get())
+        start_position = np.float(self.stack_acq_vals['start_position'].get())
+        end_position = np.float(self.stack_acq_vals['end_position'].get())
         step_size = np.float(self.stack_acq_vals['step_size'].get())
         if step_size < 0.001:
             step_size = 0.001
             self.stack_acq_vals['step_size'].set(step_size)
             
         number_z_steps = np.floor((end_position - start_position)/step_size)
-        self.stack_acq_vals['slice'].set(number_z_steps)
+        self.stack_acq_vals['number_z_steps'].set(number_z_steps)
 
+        self.update_timepoint_setting()
+
+        # TODO: comment it now
         # tell central controller that stack acquisition setting is changed
-        if self.stack_acq_event_id:
-            self.view.after_cancel(self.stack_acq_event_id)
-        self.stack_acq_event_id = self.view.after(1000, \
-            lambda: self.parent_controller.execute('stack_acquisition', self.get_info(self.stack_acq_vals)))
+        # if self.stack_acq_event_id:
+        #     self.view.after_cancel(self.stack_acq_event_id)
+        # self.stack_acq_event_id = self.view.after(1000, \
+        #     lambda: self.parent_controller.execute('stack_acquisition', self.get_info(self.stack_acq_vals)))
 
         self.show_verbose_info('stack acquisition settings on channels tab have been changed and recalculated')
 
@@ -122,8 +141,9 @@ class Channels_Tab_Controller(GUI_Controller):
         # recalculate timepoint settings
         self.update_timepoint_setting()
         
+        # TODO: comment it now, we may not to tell the central controller each time it changed
         # tell the central/parent controller that laser cycling setting is changed
-        self.parent_controller.execute('laser_cycling', self.laser_cycling_val.get())
+        # self.parent_controller.execute('laser_cycling', self.laser_cycling_val.get())
         
         self.show_verbose_info('cycling setting on channels tab has been changed')
 
@@ -138,7 +158,6 @@ class Channels_Tab_Controller(GUI_Controller):
         '''
         # Automatically calculate the stack acquisition time based on the number of timepoints, channels, and exposure time.
         # add necessary computation for 'Stack Acq.Time', 'Timepoint Interval', 'Experiment Duration'?
-        # you may need self.timepoint_vals['timepoint'], ...
         '''
 
         # Order of priority for perStack: timepoints > positions > channels > z-steps > delay
@@ -146,10 +165,10 @@ class Channels_Tab_Controller(GUI_Controller):
 
         channel_settings = self.channel_setting_controller.get_values()
         number_of_channels = len(channel_settings)
-        number_of_timepoints = self.timepoint_vals['timepoint'].get()
+        number_of_timepoints = self.timepoint_vals['timepoints'].get()
         number_of_positions = 1 #TODO: multiple position
 
-        number_of_slices = int(self.stack_acq_vals['slice'].get())
+        number_of_slices = int(self.stack_acq_vals['number_z_steps'].get())
         stage_velocity = self.settings_from_configuration['stage_velocity']
         filter_wheel_delay = self.settings_from_configuration['filter_wheel_delay']
 
@@ -210,10 +229,13 @@ class Channels_Tab_Controller(GUI_Controller):
         self.timepoint_vals['experiment_duration'].set(experiment_duration)
         self.timepoint_vals['stack_acq_time'].set(stack_acquisition_duration)
 
-        if self.timepoint_event_id:
-            self.view.after_cancel(self.timepoint_event_id)
-        self.timepoint_event_id = self.view.after(1000, lambda: self.parent_controller.execute('timepoint', \
-            self.get_info(self.timepoint_vals)))
+        # TODO: comment it now
+        # it seems we do not need to update the device everytime when something changed
+        # we may update those info to model.experiment/ or tell the device when we try to acquire data
+        # if self.timepoint_event_id:
+        #     self.view.after_cancel(self.timepoint_event_id)
+        # self.timepoint_event_id = self.view.after(1000, lambda: self.parent_controller.execute('timepoint', \
+        #     self.get_info(self.timepoint_vals)))
 
         self.show_verbose_info('timepoint settings on channels tab have been changed and recalculated')
 

@@ -3,6 +3,8 @@ This is the controller in an MVC-scheme for mediating the interaction between th
 Use: https://www.python-course.eu/tkinter_events_binds.php
 """
 
+from pathlib import Path
+
 # Local View Imports
 from tabnanny import verbose
 from view.main_application_window import Main_App as view
@@ -64,16 +66,7 @@ class ASLM_controller():
             }
         })
 
-        # set mode according to model.experiment
-        mode = self.model.experiment.MicroscopeState['image_mode']
-        self.acquire_bar_controller.set_mode(mode)
-        self.channels_tab_controller.set_mode(mode)
-
-        # set saving settings to acquire bar
-        for name in self.model.experiment.Saving:
-            if self.model.experiment.Saving[name] is None:
-                self.model.experiment.Saving[name] = ''
-        self.acquire_bar_controller.set_saving_settings(self.model.experiment.Saving)
+        self.populate_experiment_setting()
 
         #TODO: camera_view_tab, maximum intensity tab, waveform_tab
 
@@ -94,16 +87,6 @@ class ASLM_controller():
         # populate channels in the GUI
         channels_setting = configuration_controller.get_channels_info(self.verbose)
         self.channels_tab_controller.initialize('channels', channels_setting)
-        
-        # populate stack acquisition
-        # TODO: should those settings from configuration/experiments?
-        stack_acq_setting = {
-            'step_size': 0.160,
-            'start_pos': 0,
-            'end_pos': 200,
-            # 'slice': 1250
-        }
-        self.channels_tab_controller.initialize('stack_acquisition', stack_acq_setting)
 
         # populate laser cycling settings
         laser_cycling_values = ['Per Z', 'Per Stack']
@@ -113,7 +96,7 @@ class ASLM_controller():
         # TODO: should those settings from configuration/experiments?
         timepoint_setting = {
             'is_save': False,
-            'timepoint': 1,
+            'timepoints': 1,
             'stack_acq_time': 200,
             'stack_pause': 0
         }
@@ -131,6 +114,60 @@ class ASLM_controller():
         position_min = configuration_controller.get_stage_position_limits('_min')
         position_max = configuration_controller.get_stage_position_limits('_max')
         self.stage_gui_controller.set_position_limits(position_min, position_max)
+
+    def populate_experiment_setting(self, file_name=None):
+        '''
+        # if file_name is specified and exists, this function will load an experiment file to model.experiment
+        # populate model.experiment to view
+        '''
+        # TODO: model will load new experiment file
+        if file_name:
+            file_path = Path(file_name)
+            if file_path.exists():
+                pass
+
+        # populate stack acquisition from model.experiment
+        stack_acq_setting = {
+            'step_size': self.model.experiment.MicroscopeState['step_size'],
+            'start_position': self.model.experiment.MicroscopeState['start_position'],
+            'end_position': self.model.experiment.MicroscopeState['end_position'],
+            # 'number_z_steps': 1250
+        }
+        self.channels_tab_controller.set_values('stack_acquisition', stack_acq_setting)
+
+        #set laser cycling mode
+        laser_cycling = 'per_z' if self.model.experiment.MicroscopeState['stack_cycling_mode'] == 'Per Z' else 'Per Stack'
+        self.channels_tab_controller.set_values('laser_cycling', laser_cycling)
+        
+        # set mode according to model.experiment
+        mode = self.model.experiment.MicroscopeState['image_mode']
+        self.acquire_bar_controller.set_mode(mode)
+        self.channels_tab_controller.set_mode(mode)
+
+        # set saving settings to acquire bar
+        for name in self.model.experiment.Saving:
+            if self.model.experiment.Saving[name] is None:
+                self.model.experiment.Saving[name] = ''
+        self.acquire_bar_controller.set_saving_settings(self.model.experiment.Saving)
+
+    def update_experiment_setting(self):
+        '''
+        # This function will update model.experiment according values in the View(GUI)
+        '''
+        # get settings from channels tab
+        settings = self.channels_tab_controller.get_values()
+        self.model.experiment.MicroscopeState['stack_cycling_mode'] = settings['stack_cycling_mode']
+        for k in settings['stack_acquisition']:
+            self.model.experiment.MicroscopeState[k] = settings['stack_acquisition'][k]
+        for k in settings['timepoints']:
+            self.model.experiment.MicroscopeState[k] = settings['timepoints'][k]
+        # channels
+        for channel_id in settings['channels']:
+            self.model.experiment.MicroscopeState[channel_id] = settings['channels'][channel_id]
+
+        # get position information from stage tab
+        self.model.experiment.MicroscopeState['stage_position'] = self.stage_gui_controller.get_position()
+            
 
     def execute(self, command, *args):
         '''
@@ -153,6 +190,9 @@ class ASLM_controller():
         elif command == 'acquisite_and_save':
             # TODO
             file_directory = create_save_path(args[0], self.verbose)
+            # update model.experiment and save it to file
+            self.update_experiment_setting()
+            save_experiment_file(file_directory, self.model.experiment.serialize())
             pass
         elif command == 'acquisite':
             # TODO

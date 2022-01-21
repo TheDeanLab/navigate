@@ -80,8 +80,6 @@ class Acquire_Bar_Controller(GUI_Controller):
         # The popup window provides the user with the opportunity to fill in fields that describe the experiment and also
         # dictate the save path of the data in a standardized format.
         """
-        # Is the save data checkbox checked?
-        #TODO: Fix this.  I broke it. Kevin
         if self.is_save and self.mode != 'continuous':
             popup_window = acquire_popup(self.view)
 
@@ -110,7 +108,7 @@ class Acquire_Bar_Controller(GUI_Controller):
         # Then it makes the directory.
         # Thereafter, the experiment is ready to go.
         '''
-        # validate user input
+        # update saving settings according to user's input
         self.update_saving_settings(popup_window)
         
         is_valid = True
@@ -149,7 +147,6 @@ class Acquire_Bar_Controller(GUI_Controller):
         for name in popup_values:
             self.saving_settings[name] = popup_values[name]
 
-# create_save_path - This can also be broken up into more reasonable smaller functions
 
 def get_popup_vals(popup_window):
     popup_vals = {

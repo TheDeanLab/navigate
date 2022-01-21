@@ -152,7 +152,7 @@ class ASLM_controller():
             self.acquire_bar_controller.set_save_option(args[0])
         elif command == 'acquisite_and_save':
             # TODO
-            file_name = create_save_path(self.model.experiment.Saving, self.verbose)
+            file_directory = create_save_path(args[0], self.verbose)
             pass
         elif command == 'acquisite':
             # TODO

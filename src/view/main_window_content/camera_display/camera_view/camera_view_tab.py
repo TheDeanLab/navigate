@@ -1,8 +1,9 @@
+import tkinter as tk
 from tkinter import *
 from tkinter import ttk
 from tkinter.font import Font
-from view.main_window_content.tabs.camera_display.camera_view.cam_counts import cam_counts
-from view.main_window_content.tabs.camera_display.camera_view.pallete import pallete
+from view.main_window_content.camera_display.camera_view.tabs.cam_counts import cam_counts
+from view.main_window_content.camera_display.camera_view.tabs.pallete import pallete
 
 class camera_tab(ttk.Frame):
     def __init__(self, cam_wave, *args, **kwargs):
@@ -17,8 +18,9 @@ class camera_tab(ttk.Frame):
         #Frame that will hold camera image
         self.cam_image = ttk.Frame(self)
         self.cam_image.grid(row=0, column=0, sticky=(NSEW))
-        self.image = ttk.Label(self.cam_image, text="Image goes here")
-        self.image.grid(row=0, column=0, sticky=(NSEW))
+        self.canvas = tk.Canvas(self.cam_image, width=500, height=400)
+        self.canvas.grid(row=0, column=0, sticky=(NSEW))
+
 
         #Frame for camera selection and counts
         self.cam_counts = cam_counts(self)

@@ -88,7 +88,15 @@ class Acquire_Bar_Controller(GUI_Controller):
             popup_window.content.done_btn.config(command=lambda: self.launch_acquisition(popup_window))
 
             initialize_popup_window(popup_window, self.saving_settings)
+        elif self.view.acquire_btn['text'] == 'Stop':
+            # change the button to 'Acquire'
+            self.view.acquire_btn.configure(text='Acquire')
+            # tell the controller to stop acquire(continuous mode)
+            self.parent_controller.execute('stop_acquire')
         else:
+            # if the mode is 'continuous'
+            if self.mode == 'continuous':
+                self.view.acquire_btn.configure(text='Stop')
             self.parent_controller.execute('acquire')
 
     def update_microscope_mode(self, *args):
@@ -134,7 +142,7 @@ class Acquire_Bar_Controller(GUI_Controller):
 
         if is_valid:
             # tell central controller, save the image/data
-            self.parent_controller.execute('acquisite_and_save', self.saving_settings)
+            self.parent_controller.execute('acquire_and_save', self.saving_settings)
             # Close the window
             popup_window.dismiss(self.verbose)
 

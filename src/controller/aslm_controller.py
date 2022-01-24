@@ -167,6 +167,8 @@ class ASLM_controller():
 
         # get position information from stage tab
         self.model.experiment.MicroscopeState['stage_position'] = self.stage_gui_controller.get_position()
+
+        # 
             
 
     def execute(self, command, *args):
@@ -187,15 +189,18 @@ class ASLM_controller():
             self.model.experiment.MicroscopeState['image_mode'] = args[0]
         elif command == 'set_save':
             self.acquire_bar_controller.set_save_option(args[0])
-        elif command == 'acquisite_and_save':
-            # TODO
+        elif command == 'acquire_and_save':
+            # create file directory
             file_directory = create_save_path(args[0], self.verbose)
             # update model.experiment and save it to file
             self.update_experiment_setting()
             save_experiment_file(file_directory, self.model.experiment.serialize())
             pass
-        elif command == 'acquisite':
+        elif command == 'acquire':
             # TODO
+            pass
+        elif command == 'stop_acquire':
+            # TODO: stop continuous acquire from camera
             pass
 
         if self.verbose:

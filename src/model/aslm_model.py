@@ -18,12 +18,12 @@ class Model:
         # Initialize all Hardware
         if args.synthetic_hardware:
             # If command line entry provided, overwrites the model parameters with synthetic hardware
-            self.configuration.DAQParameters['hardware_type'] = 'SyntheticDAQ'
-            self.configuration.CameraParameters['type'] = 'SyntheticCamera'
-            self.configuration.ETLParameters['type'] = 'SyntheticETL'
-            self.configuration.FilterWheelParameters['type'] = 'SyntheticFilterWheel'
-            self.configuration.StageParameters['type'] = 'SyntheticStage'
-            self.configuration.ZoomParameters['type'] = 'SyntheticZoom'
+            self.configuration.Devices['daq'] = 'SyntheticDAQ'
+            self.configuration.Devices['camera'] = 'SyntheticCamera'
+            self.configuration.Devices['etl'] = 'SyntheticETL'
+            self.configuration.Devices['filter_wheel'] = 'SyntheticFilterWheel'
+            self.configuration.Devices['stage'] = 'SyntheticStage'
+            self.configuration.Devices['zoom'] = 'SyntheticZoom'
 
         self.cam = start_camera(self.configuration, 0, self.verbose)
         self.stages = start_stages(self.configuration, self.verbose)

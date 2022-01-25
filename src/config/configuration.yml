@@ -7,6 +7,7 @@ Devices:
   filter_wheel: Sutter #Sutter or SyntheticFilterWheel
   stage: PI  # PI or SyntheticStage
   zoom: Dynamixel  #Dynamixel or SyntheticZoom
+  lasers: Omicron #Omicron or SyntheticLasers
 
 DAQParameters:
   # NI PCIe-1073 Chassis with PXI-6259 and PXI-6733 DAQ Boards.
@@ -57,7 +58,7 @@ CameraParameters:
   trigger_mode: 1 # external light-sheet mode
   trigger_polarity: 2  # positive pulse
   trigger_source: 2  # external
-  exposure_time: .02
+  exposure_time: 200 # in milliseconds
   delay_percent: 10
   pulse_percent: 1
   line_interval: 0.000075
@@ -151,8 +152,10 @@ StageParameters:
   stages: L-509.20DG10 L-509.40DG10 L-509.20DG10 M-060.DG M-406.4PD NOSTAGE
   refmode: FRF FRF FRF FRF FRF FRF
   serialnum: 119060508
+
   y_unload_position: 10000
   y_load_position: 90000
+
   startfocus: 70700
   x_max: 50000
   x_min: 2000
@@ -164,13 +167,16 @@ StageParameters:
   f_min: 2000
   theta_max: 360
   theta_min: 0
+
   x_rot_position: 2000
   y_rot_position: 2000
   z_rot_position: 2000
+
   xy_step: 500
   z_step: 500
   theta_step: 30
   f_step: 500
+
   position: {
     x_pos: 35000,
     y_pos: 42000,

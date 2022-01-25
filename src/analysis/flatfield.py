@@ -204,13 +204,13 @@ def baseline_drift(images_list,
         ent1 = 1
         _iter = 0
         total_svd = 0
-        converged = False;
+        converged = False
         A1_hat = np.zeros(resized_images.shape)
         E1_hat = np.zeros(resized_images.shape)
         Y1 = 0
 
         while not converged:
-            _iter = _iter + 1;
+            _iter = _iter + 1
             A1_hat = W_idct_hat * A1_coeff + A_offset
 
             # update E1 using l0 norm

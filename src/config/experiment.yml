@@ -1,33 +1,75 @@
-%YAML 1.2
----
 User:
   name: Kevin_Dean
-
 Saving:
-  root_directory: E:\
-  save_directory:
-  user:
-  tissue:
-  celltype:
-  label:
-  date:
+  root_directory: a
+  save_directory: a/b/c/d/e/2022-01-24/Cell-000000
+  user: b
+  tissue: c
+  celltype: d
+  label: e
+  date: 2022-01-24
+
+Devices:
+  daq: NI
+  camera: HamamatsuOrca
+  etl: ETL
+  filter_wheel: Sutter
+  stage: PI
+  zoom: Dynamixel
+
+CameraParameters:
+  number_of_cameras: 1
+  x_pixels: 2048
+  y_pixels: 2048
+  sensor_mode: 12
+  binning: 1x1
+
+RemoteFocusParameters:
+  remote_focus_l_delay_percent: 7.5
+  remote_focus_l_ramp_rising_percent: 85
+  remote_focus_l_ramp_falling_percent: 2.5
+  remote_focus_l_amplitude: 0.7
+  remote_focus_l_offset: 2.3
+  remote_focus_r_delay_percent: 7.5
+  remote_focus_r_ramp_rising_percent: 85
+  remote_focus_r_ramp_falling_percent: 2.5
+  remote_focus_r_amplitude: 0.7
+  remote_focus_r_offset: 2.3
+
+GalvoParameters:
+  galvo_l_frequency: 99.9
+  galvo_l_amplitude: 2.5
+  galvo_l_offset: 0
+  galvo_r_amplitude: 0.5
+
+StageParameters:
+  xy_step: 500
+  z_step: 500
+  theta_step: 30
+  f_step: 500
 
 MicroscopeState:
-  image_mode: continuous
+  image_mode: z-stack
   fiber: 0
-  zoom: 1
-  current_laser: 488nm
-  488_laser: True
-  562_laser: False
-  642_laser: False
-  stack_cycling_mode: per_z
-  start_position: 0
-  end_position: 200
-  step_size: 0.160
-  number_z_steps: 0
-  save_data: 0
+  zoom_position: 1
+  stack_cycling_mode: per_stack
+  start_position: 0.0
+  end_position: 200.0
+  step_size: 0.16
+  number_z_steps: 1250.0
   timepoints: 1
-  stack_pause: 0
-  #step_size: 1
+  stack_pause: 0.0
   etl_amplitude: 0
   etl_offset: 0
+  is_save: True
+  stack_acq_time: 249.99999999999434
+  timepoint_interval: 0
+  experiment_duration: 250.02999999999435
+
+  channel_1: {'is_selected': True, 'laser': '488nm', laser_index: 1, 'filter': 'GFP - FF01-515/30-32', 'filter_position', 0, 'camera_exposure_time': 200, 'laser_power': '75', 'interval_time': '1'}
+  channel_2: {'is_selected': True, 'laser': '488nm', laser_index: 1, 'filter': 'RFP - FF01-595/31-32', 'filter_position', 0, 'camera_exposure_time': 100, 'laser_power': '50', 'interval_time': '1'}
+  channel_3: {'is_selected': True, 'laser': '562nm', laser_index: 2, 'filter': 'RFP - FF01-595/31-32', 'filter_position', 0, 'camera_exposure_time': 200, 'laser_power': '50', 'interval_time': '1'}
+  stage_position: {
+    0: {'x': 35000.0, 'y': 42000.0, 'z': 15500.0, 'theta': 0.0, 'f': 70000.0}
+    1: {'x': 35000.0, 'y': 42000.0, 'z': 15500.0, 'theta': 0.0, 'f': 70000.0}
+  }

@@ -2,6 +2,7 @@ import time
 import numpy as np
 from controller.sub_controllers.gui_controller import GUI_Controller
 from controller.sub_controllers.channel_setting_controller import Channel_Setting_Controller
+from controller.sub_controllers.multi_position_controller import Multi_Position_Controller
 
 class Channels_Tab_Controller(GUI_Controller):
     def __init__(self, view, parent_controller=None, verbose=False):
@@ -11,6 +12,7 @@ class Channels_Tab_Controller(GUI_Controller):
         self.mode = 'instant'
         self.settings_from_configuration = {}
         self.channel_setting_controller = Channel_Setting_Controller(self.view.channel_widgets_frame, self, self.verbose)
+        self.multi_position_controller = Multi_Position_Controller(self.view.multipoint_list, self, self.verbose)
         
         # stack acquisition variables
         self.stack_acq_vals = {
@@ -47,6 +49,11 @@ class Channels_Tab_Controller(GUI_Controller):
         self.timepoint_vals['timepoints'].trace_add('write', self.update_timepoint_setting)
         self.timepoint_vals['stack_pause'].trace_add('write', self.update_timepoint_setting)
 
+        # multiposition
+        self.is_multiposition = False
+        self.is_multiposition_val = self.view.multipoint_frame.on_off
+        self.view.multipoint_frame.save_check.configure(command=self.toggle_multiposition)
+        
     def initialize(self, name, value):
         if name == 'channels':
             for col_name in value:
@@ -166,7 +173,7 @@ class Channels_Tab_Controller(GUI_Controller):
         channel_settings = self.channel_setting_controller.get_values()
         number_of_channels = len(channel_settings)
         number_of_timepoints = self.timepoint_vals['timepoints'].get()
-        number_of_positions = 1 #TODO: multiple position
+        number_of_positions = self.multi_position_controller.get_position_num() if self.is_multiposition else 1
 
         number_of_slices = int(self.stack_acq_vals['number_z_steps'].get())
         stage_velocity = self.settings_from_configuration['stage_velocity']
@@ -239,6 +246,12 @@ class Channels_Tab_Controller(GUI_Controller):
 
         self.show_verbose_info('timepoint settings on channels tab have been changed and recalculated')
 
+    def toggle_multiposition(self):
+        self.is_multiposition = self.is_multiposition_val.get()
+        # recalculate experiment time
+        self.update_timepoint_setting()
+        self.show_verbose_info('multi-position:', self.is_multiposition)
+    
     def set_info(self, vals, values):
         '''
         # set values to a list of variables
@@ -261,3 +274,7 @@ class Channels_Tab_Controller(GUI_Controller):
             self.update_timepoint_setting()
         elif command == 'channel':
             self.parent_controller.execute(command, *args)
+        elif command == 'move_stage_and_update_info':
+            self.parent_controller.execute(command, *args)
+        elif command == 'get_stage_position':
+            return self.parent_controller.execute(command)

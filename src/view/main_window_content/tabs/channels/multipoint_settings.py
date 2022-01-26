@@ -4,6 +4,7 @@ from tkinter.constants import NSEW
 
 import pandas as pd
 from pandastable import Table
+from .multi_position_table import Multi_Position_Table as MPTable
 
 
 class multipoint_frame(ttk.Frame):
@@ -22,11 +23,11 @@ class multipoint_frame(ttk.Frame):
         multipoint_frame.laser_label.grid(row=0, column=label_position, sticky=(NSEW))
 
         # Save Data Checkbox
-        on_off = tk.StringVar()
+        multipoint_frame.on_off = tk.BooleanVar()
         multipoint_frame.save_check = ttk.Checkbutton(
             multipoint_frame,
             text='',
-            variable=on_off
+            variable=multipoint_frame.on_off
             # command=
             # onvalue=
             # offvalue=
@@ -52,7 +53,8 @@ class multipoint_list(ttk.Frame):
             'R': [0],
             'F': [0]
         })
-        pt = Table(multipoint_frame, showtoolbar=False)
-        pt.show()
-        pt.model.df = df
+        # pt = Table(multipoint_frame, showtoolbar=False)
+        multipoint_frame.pt = MPTable(multipoint_frame, showtoolbar=False)
+        multipoint_frame.pt.show()
+        multipoint_frame.pt.model.df = df
 

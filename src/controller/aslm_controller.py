@@ -191,6 +191,8 @@ class ASLM_controller():
             self.channels_tab_controller.set_mode('instant' if args[0] == 'continuous' else 'uninstant')
             # update model.experiment
             self.model.experiment.MicroscopeState['image_mode'] = args[0]
+            # set camera view mode to change
+            self.camera_view_controller.set_mode(args[0])
         elif command == 'set_save':
             self.acquire_bar_controller.set_save_option(args[0])
         elif command == 'acquire_and_save':

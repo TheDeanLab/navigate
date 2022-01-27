@@ -46,7 +46,7 @@ class ASLM_controller():
         self.channels_tab_controller = Channels_Tab_Controller(self.view.notebook_1.channels_tab, self, self.verbose)
 
         # Camera View Controller
-        self.camera_view_controller = Camera_View_Controller(self.view.notebook_2.camera_tab, self, self.verbose)
+        self.camera_view_controller = Camera_View_Controller(self.view.notebook_2.camera_tab, self.model.cam, self, self.verbose)
 
         # Stage Controller
         self.stage_gui_controller = Stage_GUI_Controller(self.view.notebook_3.stage_control_tab, self, self.verbose)
@@ -204,16 +204,13 @@ class ASLM_controller():
             pass
         elif command == 'acquire':
             # TODO
-            #This can be changed but this is just an if to catch all active functionality when in continuous mode and the acquire button is pressed
-            if self.mode == 'continuous':
-                #Create a thread for the camera to use to display live feed
-                self.threads_pool.createThread('camera', self.camera_view_controller.live_feed)
-                
+            #Create a thread for the camera to use to display live feed
+            self.threads_pool.createThread('camera', self.camera_view_controller.live_feed)
+
         elif command == 'stop_acquire':
             # TODO: stop continuous acquire from camera
-            if self.mode == 'continuous':
-                # Do I need to lock the thread here or how do I stop the process with the thread pool? Or is it something with the ObjectSubProcess? Or both depending on if synthetic or real
-                pass
+            # Do I need to lock the thread here or how do I stop the process with the thread pool? Or is it something with the ObjectSubProcess? Or both depending on if synthetic or real
+            self.camera_view_controller.set_mode('stop')
             pass
 
         if self.verbose:

@@ -17,6 +17,7 @@ from controller.sub_controllers.camera_view_controller import Camera_View_Contro
 from controller.aslm_configuration_controller import ASLM_Configuration_Controller
 from controller.aslm_controller_functions import *
 from controller.thread_pool import SynchronizedThreadPool
+import time
 
 # Local Model Imports
 from model.aslm_model import Model
@@ -210,8 +211,9 @@ class ASLM_controller():
         elif command == 'stop_acquire':
             # TODO: stop continuous acquire from camera
             # Do I need to lock the thread here or how do I stop the process with the thread pool? Or is it something with the ObjectSubProcess? Or both depending on if synthetic or real
-            self.camera_view_controller.set_mode('stop')
-            pass
+            self.camera_view_controller.set_mode('stop') #Breaks live feed loop
+            
+            
 
         if self.verbose:
             print('In central controller: command passed from child', command, args)

@@ -1,9 +1,18 @@
 %YAML 1.2
 ---
+Devices:
+  daq: NI #NI or SyntheticDAQ
+  camera: HamamatsuOrca # SyntheticCamera or HamamatsuOrca
+  etl: ETL  #ETL or SyntheticETL
+  filter_wheel: Sutter #Sutter or SyntheticFilterWheel
+  stage: PI  # PI or SyntheticStage
+  zoom: Dynamixel  #Dynamixel or SyntheticZoom
+  lasers: Omicron #Omicron or SyntheticLasers
 
 DAQParameters:
-  #NI or SyntheticDAQ
-  hardware_type: NI
+  # NI PCIe-1073 Chassis with PXI-6259 and PXI-6733 DAQ Boards.
+  # Sampling rate in Hz
+  samplerate: 100000
 
   # triggers
   master_trigger_out_line: PXI6259/port0/line1
@@ -12,50 +21,29 @@ DAQParameters:
   galvo_etl_task_line: PXI625/ao0:3
   laser_task_line: PXI6733/ao0:7
 
-  # galvos
+  # Galvos
   galvo_l_ao: PXI6259/ao0
   galvo_r_ao: PXI6259/ao1
 
   # Remote Focusing Systems
-  etl_l_ao: PXI6259/ao2
+  remote_focus_l_ao: PXI6259/ao2
+  remote_focus_r_ao: PXI6259/ao3
 
-  voice_coil_min_ao: -10
-  voice_coil_max_ao: 10
-  voice_coil: PXI6259/ao3
-
-  number_of_lasers : 3
-
-  laser_min_ao: 0
-  laser_max_ao: 5
-  laser_min_do: 0
-  laser_max_do: 5
-
+  # Lasers
   laser_port_switcher: PXI6733/port0/line0
-
-  laser_0_wavelength: 488nm
-  laser_0_index: 0
   laser_0_do: PXI6733/port0/line2
   laser_0_ao: PXI6733/port0/line5
-
-  laser_1_wavelength: 562nm
-  laser_1_index: 1
   laser_1_do: PXI6733/port0/line3
   laser_1_ao: PXI6733/port0/line6
-
-  laser_2_wavelength: 642nm
-  laser_2_index: 2
   laser_2_do: PXI6733/port0/line4
   laser_2_ao: PXI6733/port0/line7
 
   # shutters
-  shutter_min_do: 0
-  shutter_max_do: 5
   shutter_left: PXI6259/port0/line0
   shutter_right: PXI6259/port2/line0
 
 CameraParameters:
-  # SyntheticCamera or HamamatsuOrca
-  type: HamamatsuOrca
+  # Hamamatsu Orca Flash 4.0
   number_of_cameras: 1
   x_pixels: 2048
   y_pixels: 2048
@@ -67,25 +55,39 @@ CameraParameters:
   binning: 1x1
   readout_speed: 1
   trigger_active: 1
-  trigger_mode: 1 # it is unclear if this is the external lightsheet mode - how to check this?
+  trigger_mode: 1 # external light-sheet mode
   trigger_polarity: 2  # positive pulse
   trigger_source: 2  # external
+  exposure_time: 200 # in milliseconds
+  delay_percent: 10
+  pulse_percent: 1
+  line_interval: 0.000075
+  display_live_subsampling: 2
+  display_acquisition_subsampling: 2
+  average_frame_rate: 4.969
 
-ETLParameters:
-  #ETL or SyntheticETL
-  type: ETL
-  number_of_etls: 1
-  etl_l_delay_percent: 7.5
-  etl_l_ramp_rising_percent: 85
-  etl_l_ramp_falling_percent: 2.5
-  etl_l_amplitude: 0.7
-  etl_l_offset: 2.3
-  etl_l_min_ao: 0
-  etl_l_max_ao: 5
+RemoteFocusParameters:
+  # Remote Focusing Systems
+  # remote_focus_l is an Optotune EL-16-40-TC-VIS-5D-1-C
+  remote_focus_l_delay_percent: 7.5
+  remote_focus_l_ramp_rising_percent: 85
+  remote_focus_l_ramp_falling_percent: 2.5
+  remote_focus_l_amplitude: 0.7
+  remote_focus_l_offset: 2.3
+  remote_focus_l_min_ao: 0
+  remote_focus_l_min_ao: 5
+
+  # remote_focus_r is a ThorLabs BLINK High-Speed Focuser
+  remote_focus_r_delay_percent: 7.5
+  remote_focus_r_ramp_rising_percent: 85
+  remote_focus_r_ramp_falling_percent: 2.5
+  remote_focus_r_amplitude: 0.7
+  remote_focus_r_offset: 2.3
+  remote_focus_r_min_ao: -10
+  remote_focus_r_max_ao: 10
 
 FilterWheelParameters:
-  #Sutter or SyntheticFilterWheel
-  type: Sutter
+  # Sutter Lambda 10-3 Filter Wheel Controller with 2x LB10-W32 10-position Filter Wheels
   filter_wheel_port: COM9
   baudrate: 9600
   number_of_filter_wheels: 2
@@ -105,6 +107,7 @@ FilterWheelParameters:
 
 GalvoParameters:
   # Digitally Scanned Galvo for MesoSPIM Module
+  # Thorlabs GVS211/M 10 mm system.
   galvo_l_frequency: 99.9
   galvo_l_amplitude: 2.5
   galvo_l_offset: 0
@@ -114,19 +117,45 @@ GalvoParameters:
   galvo_l_max_ao: 5
 
   # Shadow Reduction Galvo for NanoSPIM Module
+  # Cambridge Technology CRS 4 kHz system.
   galvo_r_amplitude: 0.5
   galvo_r_min_ao: -5
   galvo_r_max_ao: 5
 
+LaserParameters:
+  # Omicron LightHub Ultra
+  # 488 and 640 are LuxX+ Lasers
+  # 561 is a Coherent OBIS Laser
+  number_of_lasers: 3
+
+  laser_min_ao: 0
+  laser_max_ao: 5
+  laser_min_do: 0
+  laser_max_do: 5
+
+  laser_0_index: 0 # I did this, and it seems stupid.
+  laser_1_index: 1
+  laser_2_index: 2
+
+  laser_0_wavelength: 488nm
+  laser_1_wavelength: 562nm
+  laser_2_wavelength: 642nm
+
+  laser_l_delay_percent: 10
+  laser_l_pulse_percent: 87
+  laser_r_delay_percent: 10
+  laser_r_pulse_percent: 87
+
 StageParameters:
-  # PI or SyntheticStage
-  type: PI
+  # Physik Instrumente C-884 Controller with 5x Stages, listed below.
   controllername: 'C-884'
-  stages: L-509.20DG10 L-509.40DG10 L-509.20DG10 M-060.DG M-406.4PD NOSTAGE #('L-509.20DG10', 'L-509.40DG10', 'L-509.20DG10', 'M-060.DG', 'M-406.4PD', 'NOSTAGE')
+  stages: L-509.20DG10 L-509.40DG10 L-509.20DG10 M-060.DG M-406.4PD NOSTAGE
   refmode: FRF FRF FRF FRF FRF FRF
   serialnum: 119060508
+
   y_unload_position: 10000
   y_load_position: 90000
+
   startfocus: 70700
   x_max: 50000
   x_min: 2000
@@ -138,13 +167,16 @@ StageParameters:
   f_min: 2000
   theta_max: 360
   theta_min: 0
+
   x_rot_position: 2000
   y_rot_position: 2000
   z_rot_position: 2000
+
   xy_step: 500
   z_step: 500
   theta_step: 30
   f_step: 500
+
   position: {
     x_pos: 35000,
     y_pos: 42000,
@@ -155,8 +187,7 @@ StageParameters:
   velocity: 1000
 
 ZoomParameters:
-  #Dynamixel or SyntheticZoom
-  type: Dynamixel
+  # Robotis Dynamixel MX-28R Robot Servo
   servo_id: 1
   COMport: COM21
   baudrate: 1000000
@@ -180,51 +211,10 @@ ZoomParameters:
   }
   high_res_zoom_pixel_size: 0.167
 
-SharedMemoryAllocation:
-  vol_per_buffer: 1
-  num_data_buffers: 2  # increase for multiprocessing
-  num_snap: 1  # interbuffer time limited by ao play
-  images_per_buffer: 1
-  bytes_per_data_buffer: images_per_buffer * 6000 * 4000 * 2
-  bytes_per_preview_buffer: bytes_per_data_buffer * 3
+ShutterParameters:
+  # 2x ThorLabs SHB1T 1" Shutters
+  shutter_min_do: 0
+  shutter_max_do: 5
 
-StartupParameters:
+GUIParameters:
   number_of_channels: 5
-  state: init  # init, idle, live, snap, running_script
-  sweeptime: 0.2
-  samplerate: 100000
-  zoom: 1x
-  pixelsize: 6.55
-  shutterstate: False  # Is the shutter open or not?
-  shutterconfig: Left  # Can be "Left" "Right" "Both" "Interleaved"
-
-  # Default Laser Parameters
-  laser: 488 nm
-  intensity: 10
-  laser_l_delay_percent: 10
-  laser_l_pulse_percent: 87
-  laser_r_delay_percent: 10
-  laser_r_pulse_percent: 87
-
-
-  # Camera Specific Startup Parameters
-  camera_line_interval: 0.000075
-  camera_exposure_time: 200 # in ms
-  ASLM_from_volt: 0  # first voltage applied at remote mirror
-  ASLM_to_volt: 1  # voltage applied at remote mirror at the end of sawtooth
-  ASLM_current_volt: 0  # current voltage applied to remote mirror
-  ASLM_static_low_res_volt: 0  # default ASLM low res voltage
-  ASLM_static_high_res_volt: 0  # default ASLM high res voltage
-  ASLM_alignment_on: 0  # param=1 if ASLM alignment mode is on, otherwise zero
-  ASLM_delay_before_voltage_return: 0.001  # 1ms
-  ASLM_additional_return_time: 0.001  # 1ms
-  camera_delay_percent: 10
-  camera_pulse_percent: 1
-  camera_exposure_time: 200 #milliseconds
-  camera_line_interval: 0.000075
-  camera_display_live_subsampling: 1
-  camera_display_snap_subsampling: 1
-  camera_display_acquisition_subsampling: 2
-  camera_binning: 1x1
-  camera_sensor_mode: ASLM
-  average_frame_rate: 4.969

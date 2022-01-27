@@ -211,6 +211,9 @@ class ASLM_controller():
             
         elif command == 'stop_acquire':
             # TODO: stop continuous acquire from camera
+            if self.mode == 'continuous':
+                # Do I need to lock the thread here or how do I stop the process with the thread pool? Or is it something with the ObjectSubProcess? Or both depending on if synthetic or real
+                pass
             pass
 
         if self.verbose:

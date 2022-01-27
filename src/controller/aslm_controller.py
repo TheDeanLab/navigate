@@ -192,7 +192,7 @@ class ASLM_controller():
             # update model.experiment
             self.model.experiment.MicroscopeState['image_mode'] = args[0]
             # set camera view mode to change
-            self.camera_view_controller.set_mode(args[0])
+            self.camera_view_controller.set_mode('live' if args[0] == 'continuous' else 'stop')
         elif command == 'set_save':
             self.acquire_bar_controller.set_save_option(args[0])
         elif command == 'acquire_and_save':
@@ -208,7 +208,7 @@ class ASLM_controller():
             if self.mode == 'continuous':
                 #Create a thread for the camera to use to display live feed
                 self.threads_pool.createThread('camera', self.camera_view_controller.live_feed)
-            
+                
         elif command == 'stop_acquire':
             # TODO: stop continuous acquire from camera
             if self.mode == 'continuous':

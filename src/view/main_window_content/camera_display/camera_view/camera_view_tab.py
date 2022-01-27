@@ -4,6 +4,9 @@ from tkinter import ttk
 from tkinter.font import Font
 from view.main_window_content.camera_display.camera_view.tabs.cam_counts import cam_counts
 from view.main_window_content.camera_display.camera_view.tabs.pallete import pallete
+import numpy as np
+from PIL import Image, ImageTk
+
 
 class camera_tab(ttk.Frame):
     def __init__(self, cam_wave, *args, **kwargs):
@@ -18,8 +21,13 @@ class camera_tab(ttk.Frame):
         #Frame that will hold camera image
         self.cam_image = ttk.Frame(self)
         self.cam_image.grid(row=0, column=0, sticky=(NSEW))
-        self.canvas = tk.Canvas(self.cam_image, width=500, height=400)
+        self.canvas = tk.Canvas(self.cam_image, width=1000, height=1000)
         self.canvas.grid(row=0, column=0, sticky=(NSEW))
+
+        #Putting starting image into canvas, change the number before the * to make it one color. ex 255 = white 
+        #https://stackoverflow.com/questions/10465747/how-to-create-a-white-image-in-python
+        self.image = ImageTk.PhotoImage(Image.fromarray(0 * np.ones((1000,1000,3), np.uint8)))
+        self.canvas.create_image(0, 0, image=self.image, anchor='nw') # creates image and anchors to top left starting at 0,0
 
 
         #Frame for camera selection and counts

@@ -13,6 +13,7 @@ from view.main_application_window import Main_App as view
 from controller.sub_controllers.stage_gui_controller import Stage_GUI_Controller
 from controller.sub_controllers.acquire_bar_controller import Acquire_Bar_Controller
 from controller.sub_controllers.channels_tab_controller import Channels_Tab_Controller
+from controller.sub_controllers.camera_view_controller import Camera_View_Controller
 from controller.aslm_configuration_controller import ASLM_Configuration_Controller
 from controller.aslm_controller_functions import *
 from controller.thread_pool import SynchronizedThreadPool

@@ -7,7 +7,7 @@ class Camera_View_Controller(GUI_Controller):
         super().__init__(view, parent_controller, verbose)
 
         #Starting Mode
-        self.mode = 'live'
+        self.mode = 'stop'
         self.camera = camera
         self.canvas = self.view.canvas
         #Widget Command Binds for displaying live feed of camera

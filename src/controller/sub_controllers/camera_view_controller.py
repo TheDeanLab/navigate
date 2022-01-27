@@ -24,7 +24,7 @@ class Camera_View_Controller(GUI_Controller):
         #This will display the image to the view doesnt necessarily process logic
         reads = 0
         images = 0
-        time.sleep(3.0) # Trying to give main window time to fully load, i guess tkinter doesnt play well with threads
+        time.sleep(3.0) # Trying to give main window time to fully load, i guess tkinter doesnt play well with threads or a new thread cant be created until the main app is loaded
         while self.mode == 'live':
             #Reading frames from camera, this is an array of numpy arrays, each element is a frame
             feed = self.camera.read_camera()

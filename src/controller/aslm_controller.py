@@ -13,6 +13,7 @@ from view.main_application_window import Main_App as view
 from controller.sub_controllers.stage_gui_controller import Stage_GUI_Controller
 from controller.sub_controllers.acquire_bar_controller import Acquire_Bar_Controller
 from controller.sub_controllers.channels_tab_controller import Channels_Tab_Controller
+from controller.sub_controllers.camera_view_controller import Camera_View_Controller
 from controller.aslm_configuration_controller import ASLM_Configuration_Controller
 from controller.aslm_controller_functions import *
 from controller.thread_pool import SynchronizedThreadPool
@@ -43,6 +44,9 @@ class ASLM_controller():
 
         # Channels Controller
         self.channels_tab_controller = Channels_Tab_Controller(self.view.notebook_1.channels_tab, self, self.verbose)
+
+        # Camera View Controller
+        self.camera_view_controller = Camera_View_Controller(self.view.notebook_2.camera_tab, self.model.cam, self, self.verbose)
 
         # Stage Controller
         self.stage_gui_controller = Stage_GUI_Controller(self.view.notebook_3.stage_control_tab, self, self.verbose)
@@ -187,6 +191,8 @@ class ASLM_controller():
             self.channels_tab_controller.set_mode('instant' if args[0] == 'continuous' else 'uninstant')
             # update model.experiment
             self.model.experiment.MicroscopeState['image_mode'] = args[0]
+            # set camera view mode to change
+            self.camera_view_controller.set_mode('live' if args[0] == 'continuous' else 'stop')
         elif command == 'set_save':
             self.acquire_bar_controller.set_save_option(args[0])
         elif command == 'acquire_and_save':
@@ -198,9 +204,13 @@ class ASLM_controller():
             pass
         elif command == 'acquire':
             # TODO
-            pass
+            #Create a thread for the camera to use to display live feed
+            self.threads_pool.createThread('camera', self.camera_view_controller.live_feed)
+
         elif command == 'stop_acquire':
             # TODO: stop continuous acquire from camera
+            # Do I need to lock the thread here or how do I stop the process with the thread pool? Or is it something with the ObjectSubProcess? Or both depending on if synthetic or real
+            self.camera_view_controller.set_mode('stop')
             pass
 
         if self.verbose:

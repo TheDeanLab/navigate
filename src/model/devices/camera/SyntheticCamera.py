@@ -9,6 +9,7 @@
 import time
 import numpy as np
 from .CameraBase import CameraBase
+from PIL import Image, ImageTk
 
 class Camera(CameraBase):
     MODE_CONTINUOUS = 1
@@ -85,23 +86,31 @@ class Camera(CameraBase):
     def read_camera(self):
         #TODO: Hacking this just to see if it works.  Need to fix it.
         #X,Y = self.get_size()
-        X = 512
-        Y = 512
-        moment = time.time()
-        # sample = np.random.normal(size=(self.xsize, self.ysize))*100
-        sample = np.random.normal(size=(X, Y))*100
-        #sample = np.around(data).astype('uint16')
-        sample = np.around(sample).astype('uint16')
-        elapsed = time.time() - moment
-        try:
-            # to simulate exposure time corrected for data generation delay
-            # time.sleep(self.exposure.magnitude/1000-elapsed)
-            pass
-        except:
-            time.sleep(0)
-        if self.verbose:
-            print('Reading camera')
-        return sample
+        # X = 512
+        # Y = 512
+        # moment = time.time()
+        # # sample = np.random.normal(size=(self.xsize, self.ysize))*100
+        # sample = np.random.normal(size=(X, Y))*100
+        # #sample = np.around(data).astype('uint16')
+        # sample = np.around(sample).astype('uint16')
+        # elapsed = time.time() - moment
+        # try:
+        #     # to simulate exposure time corrected for data generation delay
+        #     # time.sleep(self.exposure.magnitude/1000-elapsed)
+        #     pass
+        # except:
+        #     time.sleep(0)
+        # if self.verbose:
+        #     print('Reading camera')
+        # return sample
+
+        # Creates a synthetic image using random numpy arrays in a list, similar to frames
+        img = []
+        for i in range(10):
+            img.append(np.random.randint(low=255, size=(1000, 1000, 3), dtype=np.uint8) )
+        
+        return img
+
 
     def set_ROI(self, X, Y):
         """

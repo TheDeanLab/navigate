@@ -87,8 +87,7 @@ RemoteFocusParameters:
   remote_focus_r_max_ao: 10
 
 FilterWheelParameters:
-  # Sutter Lambda 10-3 Filter Wheel Controller with 2x LB10-W32 10-position Filter Wheels
-  filter_wheel_port: COM9
+  filter_wheel_port: COM13
   baudrate: 9600
   number_of_filter_wheels: 2
   filter_wheel_delay: .030 # in seconds

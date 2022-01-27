@@ -10,7 +10,7 @@ def start_camera(session, camera_id, verbose):
     # Hamamatsu Camera
     if session.CameraParameters['type'] == 'HamamatsuOrca' and platform.system() == 'Windows':
         from model.devices.camera.Hamamatsu.HamamatsuCamera import Camera as CameraModel
-        cam = ObjectInSubprocess(CameraModel, camera_id, verbose)
+        cam = ObjectInSubprocess(CameraModel, camera_id, verbose) #Do we still need to do this when we have the thread pool? Or do we need both? Have not investigated yet
         cam.initialize_camera()
         cam.set_exposure(session.StartupParameters['camera_exposure_time'])
     elif session.CameraParameters['type'] == 'HamamatsuOrca' and platform.system() != 'Windows':

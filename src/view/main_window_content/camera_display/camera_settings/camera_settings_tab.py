@@ -3,9 +3,9 @@ from tkinter import ttk
 from tkinter.font import Font
 
 import numpy as np
-from view.main_window_content.tabs.camera_display.camera_settings.camera_mode import camera_mode
-from view.main_window_content.tabs.camera_display.camera_settings.framerate_info import framerate_info
-from view.main_window_content.tabs.camera_display.camera_settings.camera_roi import camera_roi
+from view.main_window_content.camera_display.camera_settings.tabs.camera_mode import camera_mode
+from view.main_window_content.camera_display.camera_settings.tabs.framerate_info import framerate_info
+from view.main_window_content.camera_display.camera_settings.tabs.camera_roi import camera_roi
 
 
 class camera_settings_tab(ttk.Frame):

@@ -204,7 +204,11 @@ class ASLM_controller():
             pass
         elif command == 'acquire':
             # TODO
-            pass
+            #This can be changed but this is just an if to catch all active functionality when in continuous mode and the acquire button is pressed
+            if self.mode == 'continuous':
+                #Create a thread for the camera to use to display live feed
+                self.threads_pool.createThread('camera', self.camera_view_controller.live_feed)
+            
         elif command == 'stop_acquire':
             # TODO: stop continuous acquire from camera
             pass

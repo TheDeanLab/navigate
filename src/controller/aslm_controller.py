@@ -44,6 +44,9 @@ class ASLM_controller():
         # Channels Controller
         self.channels_tab_controller = Channels_Tab_Controller(self.view.notebook_1.channels_tab, self, self.verbose)
 
+        # Camera View Controller
+        self.camera_view_controller = Camera_View_Controller(self.view.notebook_2.camera_tab, self, self.verbose)
+
         # Stage Controller
         self.stage_gui_controller = Stage_GUI_Controller(self.view.notebook_3.stage_control_tab, self, self.verbose)
 

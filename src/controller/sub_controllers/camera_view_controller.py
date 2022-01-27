@@ -17,4 +17,5 @@ class Camera_View_Controller(GUI_Controller):
         self.mode = mode
     
     def live_feed(self):
+        #This will display the image to the view doesnt necessarily process logic
         pass

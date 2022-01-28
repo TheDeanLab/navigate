@@ -8,16 +8,17 @@ import os
 class popup_entries(ttk.Frame):
 
     def __init__(self, popup, toplevel, *args, **kwargs):
-        #Init self with frame attr
+        # Init self with frame attr
         ttk.Frame.__init__(self, popup, *args, **kwargs)
         frame_width = 25
 
-        #Setting up entries and Done/Cancel button
+        # Setting up entries and Done/Cancel button
 
-        #Label for entries
+        # Label for entries
         self.entries_label = ttk.Label(self, text="Please fill out the fields below")
 
-        #Root Save Path - Provided by configuration file
+        # Root Save Path - Provided by configuration file
+        # TODO add ability to access directory/file explorer to select paths
         self.root_entry_frame = ttk.Frame(self)
         self.root_entry_string = StringVar()
         self.root_entry = ttk.Entry(self.root_entry_frame, textvariable=self.root_entry_string, width=frame_width)
@@ -25,7 +26,7 @@ class popup_entries(ttk.Frame):
         self.root_entry_label.grid(row=0, column=0, sticky="e")
         self.root_entry.grid(row=0, column=1, sticky="w")
 
-        #User Entry
+        # User Entry
         self.user_entry_frame = ttk.Frame(self)
         self.user_string = tk.StringVar()
         self.user_entry = ttk.Entry(self.user_entry_frame, textvariable=self.user_string, width=frame_width)
@@ -33,7 +34,7 @@ class popup_entries(ttk.Frame):
         self.user_entry_label.grid(row=0, column=0, sticky="e")
         self.user_entry.grid(row=0, column=1, sticky="w")
 
-        #Tissue Entry
+        # Tissue Entry
         self.tissue_entry_frame = ttk.Frame(self)
         self.tissue_string = tk.StringVar()
         self.tissue_entry = ttk.Entry(self.tissue_entry_frame, textvariable=self.tissue_string, width=frame_width)
@@ -41,7 +42,7 @@ class popup_entries(ttk.Frame):
         self.tissue_entry_label.grid(row=0, column=0, sticky="e")
         self.tissue_entry.grid(row=0, column=1, sticky="w")
 
-        #Cell Type Entry
+        # Cell Type Entry
         self.celltype_entry_frame = ttk.Frame(self)
         self.celltype_string = tk.StringVar()
         self.celltype_entry = ttk.Entry(self.celltype_entry_frame, textvariable=self.celltype_string, width=frame_width)
@@ -49,7 +50,7 @@ class popup_entries(ttk.Frame):
         self.celltype_entry_label.grid(row=0, column=0, sticky="e")
         self.celltype_entry.grid(row=0, column=1, sticky="w")
 
-        #Label Entry
+        # Label Entry
         self.label_entry_frame = ttk.Frame(self)
         self.label_string = tk.StringVar()
         self.label_entry = ttk.Entry(self.label_entry_frame, textvariable=self.label_string, width=frame_width)
@@ -57,7 +58,7 @@ class popup_entries(ttk.Frame):
         self.label_entry_label.grid(row=0, column=0, sticky="e")
         self.label_entry.grid(row=0, column=1, sticky="w")
 
-        #Misc. Information to be saved into the metadata.
+        # Misc. Information to be saved into the metadata.
         self.meta_entry_frame = ttk.Frame(self)
         self.meta_entry = ttk.Entry(self.meta_entry_frame, width=frame_width)
         self.meta_entry_label = ttk.Label(self.meta_entry_frame, text="Misc. Information:")
@@ -71,10 +72,10 @@ class popup_entries(ttk.Frame):
         self.done_btn = ttk.Button(self, text="Acquire Data")
         self.cancel_btn = ttk.Button(self, text="Cancel Acquisition")
 
-        #Assign a lambda to the button command, passing whatever you want into that function.
-        #command=lambda: whatever(pass_your_data_from_entry)
+        # Assign a lambda to the button command, passing whatever you want into that function.
+        # command=lambda: whatever(pass_your_data_from_entry)
 
-        #Gridding out entries and buttons
+        # Gridding out entries and buttons
         '''
         Grid for buttons
 

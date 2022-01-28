@@ -31,7 +31,7 @@ class Acquire_Bar_Controller(GUI_Controller):
             'Projection': 'projection'
         }
 
-        #gui event bind
+        # gui event bind
         self.view.acquire_btn.config(command=self.launch_popup_window)
 
         self.view.pull_down.bind('<<ComboboxSelected>>', self.update_microscope_mode)
@@ -80,7 +80,7 @@ class Acquire_Bar_Controller(GUI_Controller):
         # The popup window provides the user with the opportunity to fill in fields that describe the experiment and also
         # dictate the save path of the data in a standardized format.
         """
-        if self.is_save and self.mode != 'continuous':
+        if self.is_save and self.mode is not 'continuous':
             popup_window = acquire_popup(self.view)
 
             # Configure the button callbacks on the popup window

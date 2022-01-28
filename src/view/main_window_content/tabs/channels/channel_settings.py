@@ -85,7 +85,6 @@ class channel_creator(ttk.LabelFrame):
             self.interval_spins[num].grid(row=num+1, column=0, sticky=(NSEW), padx=1)
 
 
-
 if __name__ == '__main__':
     root = tk.Tk()
     channel_creator(root).grid(row=0, column=0, sticky=(NSEW))

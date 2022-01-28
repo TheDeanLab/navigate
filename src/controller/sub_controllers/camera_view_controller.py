@@ -19,7 +19,7 @@ class Camera_View_Controller(GUI_Controller):
     def set_mode(self, mode=''):
         self.mode = mode
     
-    #TODO Currently works for synthetic image, however if you try to reacquire another live feed it will not display
+    # TODO Currently works for synthetic image, however if you try to reacquire another live feed it will not display
     def live_feed(self):
         go = False
         if self.mode == 'live':

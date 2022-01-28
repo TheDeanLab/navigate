@@ -48,6 +48,7 @@ def main():
     app = controller(root, configuration_path, experiment_path, etl_constants_path, args)
     root.mainloop()
 
+
 if __name__ == '__main__':
     main()
 

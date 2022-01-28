@@ -11,6 +11,7 @@ import tkinter as tk
 # Local Imports
 from controller.aslm_controller import ASLM_controller as controller
 
+
 def main():
     # Specify the Default Configuration Files (located in src/config)
     base_directory = Path(__file__).absolute().parent
@@ -23,19 +24,23 @@ def main():
     parser = argparse.ArgumentParser(description='Microscope Control Arguments')
     input_args = parser.add_argument_group('Input Arguments')
     input_args.add_argument('--verbose', required=False, default=False, action='store_true', help='Verbose output')
-    input_args.add_argument('--synthetic_hardware', required=False, default=False, action='store_true', help='Synthetic hardware modules')
+    input_args.add_argument('--synthetic_hardware', required=False, default=False, action='store_true',
+                            help='Synthetic hardware modules')
 
     # Configuration and Experiment input arguments
-    input_args.add_argument('--config_file', type=Path, required=False, default=None, help='path to configuration.yml file')
-    input_args.add_argument('--experiment_file', type=Path, required=False, default=None, help='path to experiment.yml file')
-    input_args.add_argument('--etl_const_file', type=Path, required=False, default=None, help='path to etl_constants.yml file')
+    input_args.add_argument('--config_file', type=Path, required=False, default=None,
+                            help='path to configuration.yml file')
+    input_args.add_argument('--experiment_file', type=Path, required=False, default=None,
+                            help='path to experiment.yml file')
+    input_args.add_argument('--etl_const_file', type=Path, required=False, default=None,
+                            help='path to etl_constants.yml file')
 
     args = parser.parse_args()
 
     if args.config_file:
-       #TODO: Possibly make sub-routine to check properties of file before launching
-       assert args.config_file.exists(), "Configuration file Path {} not valid".format(args.config_file)
-       configuration_path = args.config_file
+        # TODO: Possibly make sub-routine to check properties of file before launching
+        assert args.config_file.exists(), "Configuration file Path {} not valid".format(args.config_file)
+        configuration_path = args.config_file
     if args.experiment_file:
         assert args.experiment_file.exists(), "experiment_file file Path {} not valid".format(args.experiment_file)
         experiment_path = args.experiment_file
@@ -51,4 +56,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

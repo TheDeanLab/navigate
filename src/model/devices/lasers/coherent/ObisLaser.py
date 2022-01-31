@@ -1,6 +1,6 @@
 '''
 Obis Laser Class
-OBIS561, 150 mW, is COM22
+OBIS561, 150 mW, is COM4
 Useful information can be found on Page C-22 of the OBIS_LX_LS Operators Manual
 '''
 
@@ -10,7 +10,7 @@ import re
 from time import time, sleep
 
 class ObisLaser():
-    def __init__(self, port='COM22'):
+    def __init__(self, port='COM4'):
         self.verbose = False
         self.timeout = 0.05
         self.end_of_line = '\r'
@@ -34,15 +34,21 @@ class ObisLaser():
                           ' port is specified or the port is already opened')
 
     def __del__(self):
-        """Close the port before exit."""
+        """
+        # Close the port before exit.
+        """
         try:
+            # self.set_power(0)
             self.port.close()
-            print("Port closed")
+            if self.verbose:
+                print("Port closed")
         except serial.SerialException:
             print('Could not close the port')
 
     def close(self):
-        """Close the port before exit."""
+        """
+        # Close the port before exit.
+        """
         try:
             self.port.close()
             if self.verbose:
@@ -51,7 +57,9 @@ class ObisLaser():
             print('could not close the port')
 
     def get_laser_model(self):
-        """Get the laser model."""
+        """
+        # Get the laser model.
+        """
         command = "?SYSTem:INFormation:MODel?"
         laser_model = self.ask(command)
         if self.verbose:
@@ -60,7 +68,9 @@ class ObisLaser():
         return laser_model
 
     def get_laser_wavelength(self):
-        """Get the current laser wavelength in nm."""
+        """
+        # Get the current laser wavelength in nm.
+        """
         command = "SYSTem:INFormation:WAVelength?"
         laser_wavelength = self.ask(command)
         if self.verbose:
@@ -69,7 +79,9 @@ class ObisLaser():
         return laser_wavelength
 
     def get_minimum_laser_power(self):
-        """Get the maximum laser power in mW."""
+        """
+        # Get the maximum laser power in mW.
+        """
         command = "SOURce:POWer:LIMit:LOW?"
         minimum_laser_power = self.ask(command)
         if self.verbose:
@@ -78,7 +90,9 @@ class ObisLaser():
         return minimum_laser_power
 
     def get_maximum_laser_power(self):
-        """Get the maximum laser power in mW."""
+        """
+        # Get the maximum laser power in mW.
+        """
         command = "SOURce:POWer:LIMit:HIGH?"
         maximum_laser_power = self.ask(command)
         if self.verbose:
@@ -87,7 +101,9 @@ class ObisLaser():
         return maximum_laser_power
 
     def get_laser_power(self):
-        """Get the current laser power in mW."""
+        """
+        # Get the current laser power in mW.
+        """
         command = "SOURce:POWer:LEVel?"
         laser_power = self.ask(command)
         if self.verbose:
@@ -96,7 +112,9 @@ class ObisLaser():
         return laser_power
 
     def get_ext_control(self):
-        """Get the external control status."""
+        """
+        # Get the external control status.
+        """
         command = "SYSTem:EXTernal:CONTRol?"
         ext_control = self.ask(command)
         if self.verbose:
@@ -105,7 +123,9 @@ class ObisLaser():
         return ext_control
 
     def get_laser_status(self):
-        """Get the current laser status."""
+        """
+        # Get the current laser status.
+        """
         command = "SOURce:STATus?"
         laser_status = self.ask(command)
         if self.verbose:
@@ -114,16 +134,17 @@ class ObisLaser():
         return laser_status
 
     def set_laser_operating_mode(self, mode):
-        """Set the laser operating mode. Seven mutually exclusive operating modes are available
-        • CWP (continuous wave, constant power)
-        • CWC (continuous wave, constant current)
-        • DIGITAL (CW with external digital modulation)
-        • ANALOG (CW with external analog modulation)
-        • MIXED (CW with external digital + analog modulation)
-        • DIGSO (External digital modulation with power feedback) Note: This
-        operating mode is not supported in some device models.
-        • MIXSO (External mixed modulation with power feedback) Note: This
-        operating mode is not supported in some device models.
+        """
+        # Set the laser operating mode. Seven mutually exclusive operating modes are available
+        # CWP (continuous wave, constant power)
+        # CWC (continuous wave, constant current)
+        # DIGITAL (CW with external digital modulation)
+        # ANALOG (CW with external analog modulation)
+        # MIXED (CW with external digital + analog modulation)
+        # DIGSO (External digital modulation with power feedback) Note: This
+        # operating mode is not supported in some device models.
+        # MIXSO (External mixed modulation with power feedback) Note: This
+        # operating mode is not supported in some device models.
         """
         if mode == 'cwp':
             command = "SOURce:AM:INTernal CWP"
@@ -148,8 +169,10 @@ class ObisLaser():
             print("Set Laser Operating Mode to:", self.laser_operating_mode)
 
     def get_laser_operating_mode(self):
-        """Get the laser operating mode."""
-        #TODO: FIx
+        """
+        # Get the laser operating mode.
+        """
+        #  TODO: Fix
 
         command = "SOURce:AM:SOURce?"
         laser_operating_mode = self.ask(command)
@@ -196,22 +219,8 @@ class ObisLaser():
 
 if (__name__ == "__main__"):
     # OBIS Laser Testing.
-    test_case = 1
+    pass
 
-    if test_case == 1:
-        laser1 = ObisLaser(port="COM22")
-        print("OBIS Class Initiated")
-        print("Laser Model:", laser1.get_laser_model())
-        print("Laser Operating Mode:", laser1.get_laser_operating_mode())
-        print("Laser Status:", laser1.get_laser_status())
-        laser1.close()
-        print('Done')
-    elif test_case == 2:
-        laser1 = LuxxLaser(port="COM17")
-        laser1.initialize_laser()
-        sleep(10)
-        laser1.close()
-        print("Done")
 
 
 

@@ -78,18 +78,18 @@ class Stage_GUI_Controller(GUI_Controller):
         }
 
     def set_position_limits(self, position_min, position_max):
-        '''
+        """
         # this function sets position limits
-        '''
+        """
         self.position_min = position_min
         self.position_max = position_max
 
     def set_position(self, postion):
-        '''
+        """
         # This function is to populate(set) position
         # position should be a dict
         # {'x': value, 'y': value, 'z': value, 'theta': value, 'f': value}
-        '''
+        """
         for axis in postion:
             val = self.get_position_val(axis)
             if val:
@@ -98,9 +98,9 @@ class Stage_GUI_Controller(GUI_Controller):
         self.show_verbose_info('set stage position')
 
     def get_position(self):
-        '''
+        """
         # This function returns current postion
-        '''
+        """
         position = {
             'x': self.get_position_val('x').get(),
             'y': self.get_position_val('y').get(),
@@ -111,11 +111,11 @@ class Stage_GUI_Controller(GUI_Controller):
         return position
 
     def set_step_size(self, steps):
-        '''
+        """
         # This function is to populate(set) step sizes
         # steps should be a dict
         # {'x': value, 'z': value, 'theta': value, 'f': value}
-        '''
+        """
         for axis in steps:
             val = self.get_step_val(axis)
             if val:
@@ -124,13 +124,14 @@ class Stage_GUI_Controller(GUI_Controller):
         self.show_verbose_info('set step size')
 
     def up_btn_handler(self, axis):
-        '''
+        """
         # This function generates command functions according to axis
         # axis should be one of 'x', 'y', 'z', 'theta', 'f'
         # position_axis += step_axis
-        '''
+        """
         position_val = self.get_position_val(axis)
         step_val = self.get_step_val(axis)
+
         def handler():
             # guarantee stage won't move out of limits
             if position_val.get() == self.position_max[axis]:
@@ -142,13 +143,14 @@ class Stage_GUI_Controller(GUI_Controller):
         return handler
 
     def down_btn_handler(self, axis):
-        '''
+        """
         # This function generates command functions according to axis
         # axis should be one of 'x', 'y', 'z', 'theta', 'f'
         # position_axis -= step_axis
-        '''
+        """
         position_val = self.get_position_val(axis)
         step_val = self.get_step_val(axis)
+
         def handler():
             # guarantee stage won't move out of limits
             if position_val.get() == self.position_min[axis]:
@@ -160,40 +162,42 @@ class Stage_GUI_Controller(GUI_Controller):
         return handler
 
     def zero_btn_handler(self, axis):
-        '''
+        """
         # This function generates command functions according to axis
         # axis should be one of 'z', 'theta', 'f'
         # position_axis = 0
-        '''
+        """
         position_val = self.get_position_val(axis)
+
         def handler():
             position_val.set(0)
         return handler
 
     def xy_zero_btn_handler(self):
-        '''
+        """
         # This function generates command functions to set xy postion to zero
-        '''
+        """
         x_val = self.get_position_val('x')
         y_val = self.get_position_val('y')
+
         def handler():
             x_val.set(0)
             y_val.set(0)
         return handler
 
     def position_callback(self, axis):
-        '''
+        """
         # callback functions bind to position variables
         # axis can be 'x', 'y', 'z', 'theta', 'f'
         # this function considers debouncing user inputs(or click buttons)
         # to reduce time costs of moving stage device
-        '''
+        """
         position_var = self.get_position_val(axis)
 
         def handler(*args):
             if self.event_id[axis]:
                 self.view.after_cancel(self.event_id[axis])
-            self.event_id[axis] = self.view.after(1000, \
+            self.event_id[axis] = self.view.after(1000,
                 lambda: self.parent_controller.execute('stage', position_var.get(), axis))
 
             self.show_verbose_info('stage position is changed')
@@ -201,10 +205,10 @@ class Stage_GUI_Controller(GUI_Controller):
         return handler
 
     def get_step_val(self, axis):
-        '''
+        """
         # get increment step variable accroding to axis name
         # axis can be: 'x', 'y', 'z', 'theta', 'f'
-        '''
+        """
         if axis == 'x' or axis == 'y':
             return self.view.x_y_frame.spinval
         elif axis == 'z':
@@ -216,10 +220,10 @@ class Stage_GUI_Controller(GUI_Controller):
         return None
 
     def get_position_val(self, axis):
-        '''
+        """
         # get position variable according to axis name
         # axis can be 'x', 'y', 'z', 'theta', 'f'
-        '''
+        """
         if axis == 'x':
             return self.view.position_frame.x_val
         elif axis == 'y':

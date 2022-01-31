@@ -24,13 +24,15 @@ class Model:
             self.configuration.Devices['filter_wheel'] = 'SyntheticFilterWheel'
             self.configuration.Devices['stage'] = 'SyntheticStage'
             self.configuration.Devices['zoom'] = 'SyntheticZoom'
+            self.configuration.Devices['laser'] = 'SyntheticLaser'
 
         self.cam = start_camera(self.configuration, 0, self.verbose)
         self.stages = start_stages(self.configuration, self.verbose)
         self.filter_wheel = start_filter_wheel(self.configuration, self.verbose)
         self.zoom = start_zoom_servo(self.configuration, self.verbose)
         self.daq = start_daq(self.configuration, etl_constants_path, self.verbose)
-        #self.laser = start_lasers(self.configuration, self.verbose)
+        self.laser = start_lasers(self.configuration, self.verbose)
+        #self.etl = start_etl(self.configuration, self.verbose)
 
     def continuous_acquisition_mode(channel_settings):
         """
@@ -75,8 +77,6 @@ class Model:
         # self.daq.start_tasks() # starts the tasks.
 
         # Grab the image and send it to the view.
-
-
 
 if __name__ == '__main__':
     """ Testing Section """

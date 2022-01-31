@@ -20,7 +20,7 @@ Includes key inspiration and code contributions from a number of open-source pro
 ### Equipment
 * Laser source - Omicron LightHUB Ultra.  Requires ACC operating mode with analog modulation enabled for 488 nm and 642 nm lasers.  561, which operates separately, requires the mixed modulation mode (Obis).
 * Sample Scanning System - L-509.20DG10.  Has a unidirectional repeatability of 100 nm, bidirectional repeatablility of 2 microns, and a minimum incremental motion of 100 nm.  This is borderline too coarse.
-* GPUs - 2x NVIDIA Titan RTX with an NVLINK bridge.  NVIDIA CUDA Version 11.6 installed on OS.
+* GPUs - 2x NVIDIA Titan RTX with an NVLINK bridge.  NVIDIA CUDA Version 11.5.1, cuTENSOR v1.3, cuDNN v8.3, and cuSPRASELt v0.10 installed on OS. THe NCCL v2.1 library is not yet available for Windows OS, but will potentially be valuable for multi-GPU support.
 * Camera - 2x Hamamatsu Flash 4.0 with framegrabbers.
 * Remote Focusing Units - Optotune Electrotunable Lens for low-resolution imaging and a ThorLabs BLINK for high-resolution imaging.
 

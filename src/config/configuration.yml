@@ -132,9 +132,17 @@ LaserParameters:
   laser_min_do: 0
   laser_max_do: 5
 
-  laser_0_index: 0 # I did this, and it seems stupid.
+  laser_0_index: 0
   laser_1_index: 1
   laser_2_index: 2
+
+  laser_0_type: LuxX
+  laser_1_type: Obis
+  laser_2_type: LuxX
+
+  laser_0_comport: COM19
+  laser_1_comport: COM4
+  laser_2_comport: COM17
 
   laser_0_wavelength: 488nm
   laser_1_wavelength: 562nm

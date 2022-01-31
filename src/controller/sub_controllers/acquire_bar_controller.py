@@ -80,7 +80,7 @@ class Acquire_Bar_Controller(GUI_Controller):
         # The popup window provides the user with the opportunity to fill in fields that describe the experiment and also
         # dictate the save path of the data in a standardized format.
         """
-        if self.is_save and self.mode is not 'continuous':
+        if self.is_save and self.mode != 'continuous':
             popup_window = acquire_popup(self.view)
 
             # Configure the button callbacks on the popup window

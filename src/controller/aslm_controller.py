@@ -29,6 +29,7 @@ class ASLM_controller():
 
         # Creat a thread pool
         self.threads_pool = SynchronizedThreadPool()
+
         # register resource
         self.threads_pool.registerResource('stage')
 
@@ -39,7 +40,7 @@ class ASLM_controller():
         # Initialize the View
         self.view = view(root)
 
-        # sub gui controllers
+        # Sub Gui Controllers
         # Acquire bar
         self.acquire_bar_controller = Acquire_Bar_Controller(self.view.acqbar, self, self.verbose)
 
@@ -47,7 +48,8 @@ class ASLM_controller():
         self.channels_tab_controller = Channels_Tab_Controller(self.view.notebook_1.channels_tab, self, self.verbose)
 
         # Camera View Controller
-        self.camera_view_controller = Camera_View_Controller(self.view.notebook_2.camera_tab, self.model.cam, self, self.verbose)
+        self.camera_view_controller = Camera_View_Controller(self.view.notebook_2.camera_tab, self.model.cam, self,
+                                                             self.verbose)
 
         # Stage Controller
         self.stage_gui_controller = Stage_GUI_Controller(self.view.notebook_3.stage_control_tab, self, self.verbose)
@@ -73,18 +75,20 @@ class ASLM_controller():
 
         self.populate_experiment_setting()
 
-        #TODO: camera_view_tab, maximum intensity tab, waveform_tab
+        #  TODO: camera_view_tab, maximum intensity tab, waveform_tab
 
         # Camera Tab, Camera Settings
 
         # Advanced Tab
 
         # Configure event control for the buttons
-        #TODO: Move to a sub-controller.
+        #  TODO: Move to a sub-controller.
         self.view.menu_zoom.bind("<<MenuSelect>>", lambda *args: print("Zoom Selected", *args))
 
     def initialize_channels(self, configuration_controller):
+        """
         # set some other information needed by channels_tab_controller
+        """
         self.channels_tab_controller.settings_from_configuration = {
             'stage_velocity': self.model.configuration.StageParameters['velocity'],
             'filter_wheel_delay': self.model.configuration.FilterWheelParameters['filter_wheel_delay']
@@ -106,10 +110,11 @@ class ASLM_controller():
             'stack_pause': 0
         }
         self.channels_tab_controller.initialize('timepoint', timepoint_setting)
-        
 
     def initialize_stage(self, configuration_controller):
+        """
         # Prepopulate the stage positions.
+        """
         self.stage_gui_controller.set_position(configuration_controller.get_stage_position())
 
         # Prepopulate the stage step size.
@@ -121,10 +126,10 @@ class ASLM_controller():
         self.stage_gui_controller.set_position_limits(position_min, position_max)
 
     def populate_experiment_setting(self, file_name=None):
-        '''
+        """
         # if file_name is specified and exists, this function will load an experiment file to model.experiment
         # populate model.experiment to view
-        '''
+        """
         # TODO: model will load new experiment file
         if file_name:
             file_path = Path(file_name)
@@ -140,10 +145,11 @@ class ASLM_controller():
         }
         self.channels_tab_controller.set_values('stack_acquisition', stack_acq_setting)
 
-        #set laser cycling mode
-        laser_cycling = 'per_z' if self.model.experiment.MicroscopeState['stack_cycling_mode'] == 'Per Z' else 'Per Stack'
+        # set laser cycling mode
+        laser_cycling = 'per_z' if self.model.experiment.MicroscopeState[
+                                       'stack_cycling_mode'] == 'Per Z' else 'Per Stack'
         self.channels_tab_controller.set_values('laser_cycling', laser_cycling)
-        
+
         # set mode according to model.experiment
         mode = self.model.experiment.MicroscopeState['image_mode']
         self.acquire_bar_controller.set_mode(mode)
@@ -156,9 +162,9 @@ class ASLM_controller():
         self.acquire_bar_controller.set_saving_settings(self.model.experiment.Saving)
 
     def update_experiment_setting(self):
-        '''
+        """
         # This function will update model.experiment according values in the View(GUI)
-        '''
+        """
         # get settings from channels tab
         settings = self.channels_tab_controller.get_values()
         self.model.experiment.MicroscopeState['stack_cycling_mode'] = settings['stack_cycling_mode']
@@ -172,16 +178,15 @@ class ASLM_controller():
 
         # get position information from stage tab
         self.model.experiment.MicroscopeState['stage_position'] = self.stage_gui_controller.get_position()
-            
 
     def execute(self, command, *args):
-        '''
-        This function listens to sub_gui_controllers
-        '''
+        """
+        # This function listens to sub_gui_controllers
+        """
         if command == 'stage':
             # call the model to move stage
             abs_postion = {
-                "{}_abs".format(args[1]) : args[0]
+                "{}_abs".format(args[1]): args[0]
             }
             self.threads_pool.createThread('stage', self.model.stages.move_absolute, (abs_postion,))
             # self.model.stages.move_absolute(abs_postion)
@@ -191,7 +196,7 @@ class ASLM_controller():
             # call the model to move stage
             abs_postion = {}
             for axis in args[0]:
-                abs_postion[axis+'_abs'] = args[0][axis]
+                abs_postion[axis + '_abs'] = args[0][axis]
             self.threads_pool.createThread('stage', self.model.stages.move_absolute, (abs_postion,))
             # self.model.stages.move_absolte(abs_position)
         elif command == 'get_stage_position':
@@ -214,19 +219,17 @@ class ASLM_controller():
             pass
         elif command == 'acquire':
             # TODO
-            #Create a thread for the camera to use to display live feed
+            # Create a thread for the camera to use to display live feed
             self.threads_pool.createThread('camera', self.camera_view_controller.live_feed)
 
         elif command == 'stop_acquire':
             # TODO: stop continuous acquire from camera
-            # Do I need to lock the thread here or how do I stop the process with the thread pool? Or is it something with the ObjectSubProcess? Or both depending on if synthetic or real
-            self.camera_view_controller.set_mode('stop') #Breaks live feed loop
-            
-            
+            # Do I need to lock the thread here or how do I stop the process with the thread pool?
+            # Or is it something with the ObjectSubProcess? Or both depending on if synthetic or real
+            self.camera_view_controller.set_mode('stop')  # Breaks live feed loop
 
         if self.verbose:
             print('In central controller: command passed from child', command, args)
-
 
 
 if __name__ == '__main__':

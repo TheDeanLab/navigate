@@ -13,8 +13,6 @@ class Camera_View_Controller(GUI_Controller):
         #Widget Command Binds for displaying live feed of camera
 
 
-
-
     #Set mode for the execute statement in main controller
     def set_mode(self, mode=''):
         self.mode = mode

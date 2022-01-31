@@ -78,6 +78,10 @@ class Model:
 
         # Grab the image and send it to the view.
 
+    def load_experiment_file(self, experiment_path):
+        # Loads the YAML file for all of the experiment parameters
+        self.experiment = session(experiment_path, self.verbose)
+
 if __name__ == '__main__':
     """ Testing Section """
     pass

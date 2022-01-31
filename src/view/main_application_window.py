@@ -21,6 +21,7 @@ from .main_window_content.settings_notebook import settings_notebook as notebook
 from .main_window_content.camera_notebook import camera_waveform_notebook as notebook_2
 from .main_window_content.stagecontrol_notebook import stagecontrol_maxintensity_notebook as notebook_3
 from .main_window_content.acquire_bar_frame.acquire_bar import AcquireBar
+from .main_window_content.menus import menubar
 
 #Creates the frame that will hold the GUI content, its parent is the main window or root Tk object
 class Main_App(ttk.Frame):
@@ -41,29 +42,6 @@ class Main_App(ttk.Frame):
 
                 #Creating and linking menu to main window/app
                 mainapp.menubar = menubar(root)
-
-                #File Menu
-                mainapp.menu_file = Menu(mainapp.menubar)
-                mainapp.menubar.add_cascade(menu=mainapp.menu_file, label='File')
-                mainapp.menu_file.add_command(label='New')
-                mainapp.menu_file.add_command(label='Open...')
-                mainapp.menu_file.add_command(label='Close') #command=closeFile need this or some version to run action code
-
-                #Edit Menu
-                mainapp.menu_edit = Menu(mainapp.menubar)
-                mainapp.menubar.add_cascade(menu=mainapp.menu_edit, label='Edit')
-                mainapp.menu_edit.add_command(label='Copy')
-                mainapp.menu_edit.add_command(label='Paste')
-
-                #Zoom Menu
-                mainapp.menu_zoom = Menu(mainapp.menubar)
-                mainapp.menubar.add_cascade(menu=mainapp.menu_zoom, label='Zoom')
-                mainapp.menu_zoom.add_command(label='1x')
-                mainapp.menu_zoom.add_command(label='2x')
-                mainapp.menu_zoom.add_command(label='3x')
-                mainapp.menu_zoom.add_command(label='4x')
-                mainapp.menu_zoom.add_command(label='5x')
-                mainapp.menu_zoom.add_command(label='6x')
 
                 #Top Frame Acquire Bar
                 mainapp.top_frame = ttk.Frame(mainapp)
@@ -118,20 +96,6 @@ class Main_App(ttk.Frame):
                 mainapp.notebook_3 = notebook_3(mainapp.frame_bottom_right)
                 mainapp.acqbar = AcquireBar(mainapp.top_frame, mainapp.root)
 
-
-
-
-#Menubar class
-class menubar(Menu):
-        def __init__(self, window, *args, **kwargs):
-                #Init Menu with parent
-                Menu.__init__(self, window, *args, **kwargs)
-                #Creates operating system attribute
-                self.opsystem = window.tk.call('tk', 'windowingsystem')
-                #Prevents menu from tearing off bar
-                window.option_add('*tearOff', False)
-                #Linking menu to option of parent to this menu class
-                window['menu'] = self
 
 
 if __name__ == '__main__':

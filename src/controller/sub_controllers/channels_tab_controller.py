@@ -252,6 +252,23 @@ class Channels_Tab_Controller(GUI_Controller):
         self.update_timepoint_setting()
         self.show_verbose_info('multi-position:', self.is_multiposition)
     
+    def load_positions(self):
+        self.multi_position_controller.load_csv_func()
+
+    def export_positions(self):
+        self.multi_position_controller.export_csv_func()
+
+    def move_to_position(self):
+        event = type('MyEvent', (object,), {})
+        event.x, event.y = 0, 0
+        self.multi_position_controller.handle_double_click(event)
+
+    def append_current_position(self):
+        self.multi_position_controller.add_stage_position_func()
+
+    def generate_positions(self):
+        self.multi_position_controller.generate_positions_func()
+    
     def set_info(self, vals, values):
         '''
         # set values to a list of variables

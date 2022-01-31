@@ -7,6 +7,7 @@ from pathlib import Path
 
 # Local View Imports
 from tabnanny import verbose
+from tkinter import filedialog
 from view.main_application_window import Main_App as view
 
 # Local Sub-Controller Imports
@@ -37,6 +38,9 @@ class ASLM_controller():
         global model
         self.model = Model(args, configuration_path, experiment_path, etl_constants_path)
 
+        # save default experiment file
+        self.default_experiment_file = experiment_path
+
         # Initialize the View
         self.view = view(root)
 
@@ -54,6 +58,9 @@ class ASLM_controller():
         # Stage Controller
         self.stage_gui_controller = Stage_GUI_Controller(self.view.notebook_3.stage_control_tab, self, self.verbose)
 
+        # initialize menu bar
+        self.initialize_menus()
+        
         # Initialize view based on model.configuration
         configuration_controller = ASLM_Configuration_Controller(self.model.configuration)
 
@@ -81,9 +88,6 @@ class ASLM_controller():
 
         # Advanced Tab
 
-        # Configure event control for the buttons
-        #  TODO: Move to a sub-controller.
-        self.view.menu_zoom.bind("<<MenuSelect>>", lambda *args: print("Zoom Selected", *args))
 
     def initialize_channels(self, configuration_controller):
         """
@@ -125,6 +129,57 @@ class ASLM_controller():
         position_max = configuration_controller.get_stage_position_limits('_max')
         self.stage_gui_controller.set_position_limits(position_min, position_max)
 
+    def initialize_menus(self):
+        '''
+        # this function defines all the menus in the menubar
+        '''
+        def new_experiment():
+            self.populate_experiment_setting(self.default_experiment_file)
+
+        def load_experiment():
+            filename = filedialog.askopenfilenames(defaultextension='.yml', \
+                                        filetypes=[('Yaml files', '*.yml')])
+            if not filename:
+                return
+            self.populate_experiment_setting(filename[0])
+
+        def save_experiment():
+            filename = filedialog.asksaveasfilename(defaultextension='.yml', \
+                                        filetypes=[('Yaml file', '*.yml')])
+            if not filename:
+                return
+            # update model.experiment and save it to file
+            self.update_experiment_setting()
+            save_experiment_file('', self.model.experiment.serialize(), filename)
+
+        menus_dic = {
+            self.view.menubar.menu_file: {
+                'New Experiment': new_experiment,
+                'Load Experiment': load_experiment,
+                'Save Experiment': save_experiment
+            },
+            self.view.menubar.menu_multi_positions: {
+            'Load Positions': self.channels_tab_controller.load_positions,
+            'Export Positions': self.channels_tab_controller.export_positions,
+            'Append Current Position': self.channels_tab_controller.append_current_position,
+            'Generate Positions': self.channels_tab_controller.generate_positions,
+            'Move to Selected Position': self.channels_tab_controller.move_to_position,
+            # 'Sort Positions': ,
+            },
+            self.view.menubar.menu_zoom: {
+                '1x': lambda: self.execute('zoom', 1),
+                '2x': lambda: self.execute('zoom', 2),
+                '3x': lambda: self.execute('zoom', 3),
+                '4x': lambda: self.execute('zoom', 4),
+                '5x': lambda: self.execute('zoom', 5),
+                '6x': lambda: self.execute('zoom', 6)
+            }
+        }
+        for menu in menus_dic:
+            menuitems = menus_dic[menu]
+            for label in menuitems:
+                menu.add_command(label=label, command=menuitems[label])
+
     def populate_experiment_setting(self, file_name=None):
         """
         # if file_name is specified and exists, this function will load an experiment file to model.experiment
@@ -134,7 +189,7 @@ class ASLM_controller():
         if file_name:
             file_path = Path(file_name)
             if file_path.exists():
-                pass
+                self.model.load_experiment_file(file_path)
 
         # populate stack acquisition from model.experiment
         stack_acq_setting = {
@@ -146,8 +201,8 @@ class ASLM_controller():
         self.channels_tab_controller.set_values('stack_acquisition', stack_acq_setting)
 
         # set laser cycling mode
-        laser_cycling = 'per_z' if self.model.experiment.MicroscopeState[
-                                       'stack_cycling_mode'] == 'Per Z' else 'Per Stack'
+        laser_cycling = 'Per Z' if self.model.experiment.MicroscopeState[
+                                       'stack_cycling_mode'] == 'per_z' else 'Per Stack'
         self.channels_tab_controller.set_values('laser_cycling', laser_cycling)
 
         # set mode according to model.experiment
@@ -178,6 +233,7 @@ class ASLM_controller():
 
         # get position information from stage tab
         self.model.experiment.MicroscopeState['stage_position'] = self.stage_gui_controller.get_position()
+
 
     def execute(self, command, *args):
         """

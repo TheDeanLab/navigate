@@ -71,7 +71,8 @@ class Model:
         self.daq.start_tasks()
         self.daq.run_tasks()
 
-        image = self.camera.read_camera()
+        #TODO: if the one of the args is 'save to device' then you could save it to device.
+        #image = self.camera.read_camera()
 
         save_path = os.path.join('C:', 'Users','Spectral','Desktop','test.tif')
         imsave(args.output_path, image)

@@ -34,8 +34,9 @@ class Main_App(ttk.Frame):
                 #This starts the main window config, and makes sure that any child widgets can be resized with the window
                 mainapp.root = root
                 mainapp.root.title("Multiscale Axially Swept Light-Sheet Microscope")
-                program_directory = sys.path[0] #refers to script directory ie gets all the way down to view
-                mainapp.root.iconphoto(True, PhotoImage(file=os.path.join(program_directory, "view", "icon", "mic.png")))
+                view_directory = Path(__file__).resolve().parent  # keep icons relative to view directory structure
+                photo_image = view_directory.joinpath("icon", "mic.png")
+                mainapp.root.iconphoto(True, PhotoImage(file=photo_image))
                 mainapp.root.minsize(1400, 700)
                 mainapp.root.columnconfigure(0,weight=1)
                 mainapp.root.rowconfigure(0,weight=1)

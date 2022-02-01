@@ -121,9 +121,8 @@ def start_lasers(configuration, verbose):
                 sys.exit()
 
     elif configuration.Devices['lasers'] == 'SyntheticLasers':
-        # from model.devices.lasers
-            # as SyntheticLasersModel
-        laser = {} # SyntheticLasersModel(configuration, verbose)
+        from model.devices.lasers.SyntheticLaser import SyntheticLaser
+        laser = SyntheticLaser(configuration, verbose)
 
     else:
         print("Laser Type in Configuration.yml Not Recognized - Initialization Failed")

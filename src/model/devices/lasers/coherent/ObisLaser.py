@@ -5,11 +5,11 @@ Useful information can be found on Page C-22 of the OBIS_LX_LS Operators Manual
 '''
 
 import serial
-import sys
-import re
 from time import time, sleep
 
-class ObisLaser():
+from model.devices.lasers.LaserBase import LaserBase
+
+class ObisLaser(LaserBase):
     def __init__(self, port='COM4'):
         self.verbose = False
         self.timeout = 0.05
@@ -209,13 +209,13 @@ class ObisLaser():
             print("Command:", command, "Response:", response)
         return response
 
-    #def initialize_laser(self):
-        #TODO: Finish this function
-        # self.set_autostart(True)
-        # self.set_power(laser1.pmax)
-        # self.set_mode("Analog")
-        # self.start()
-        # print((self.wavelength, "nm Laser Initialized - Max Power: ", self.pmax, "mW"))
+    def initialize_laser(self):
+        """
+        # Initialize the laser.
+        """
+        self.set_laser_operating_mode('mixed')
+        self.set_laser_power(self.get_maximum_laser_power())
+
 
 if (__name__ == "__main__"):
     # OBIS Laser Testing.

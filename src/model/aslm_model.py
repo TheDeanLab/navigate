@@ -24,7 +24,7 @@ class Model:
             self.configuration.Devices['filter_wheel'] = 'SyntheticFilterWheel'
             self.configuration.Devices['stage'] = 'SyntheticStage'
             self.configuration.Devices['zoom'] = 'SyntheticZoom'
-            self.configuration.Devices['laser'] = 'SyntheticLaser'
+            self.configuration.Devices['lasers'] = 'SyntheticLasers'
 
         self.cam = start_camera(self.configuration, 0, self.verbose)
         self.stages = start_stages(self.configuration, self.verbose)

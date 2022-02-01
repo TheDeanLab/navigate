@@ -9,8 +9,7 @@ class definition. For example for class Main_App(ttk.Frame) the parent to Main_A
 the name of the class instead of self to make things easier to read. So for Main_App self is now mainapp.
 '''
 # Import Standard Libraries
-import os
-import sys
+from pathlib import Path
 import tkinter as tk
 from tkinter import ttk
 from tkinter import *
@@ -96,7 +95,6 @@ class Main_App(ttk.Frame):
                 mainapp.notebook_2 = notebook_2(mainapp.frame_top_right)
                 mainapp.notebook_3 = notebook_3(mainapp.frame_bottom_right)
                 mainapp.acqbar = AcquireBar(mainapp.top_frame, mainapp.root)
-
 
 
 if __name__ == '__main__':

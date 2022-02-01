@@ -17,9 +17,9 @@ DAQParameters:
 
   # triggers
   master_trigger_out_line: PXI6259/port0/line1
-  camera_trigger_out_line: PXI6259/ctr0
-  trigger_source: PXI6259/PFI0
-  galvo_etl_task_line: PXI625/ao0:3
+  camera_trigger_out_line: /PXI6259/ctr0
+  trigger_source: /PXI6259/PFI0
+  galvo_etl_task_line: PXI6259/ao0:3
   laser_task_line: PXI6733/ao0:7
 
   # Galvos

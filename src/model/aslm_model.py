@@ -1,3 +1,8 @@
+# Standard Library Imports
+import os
+
+# Third Party Imports
+from tifffile import imsave
 
 # Local Imports
 from .aslm_model_functions import *
@@ -29,7 +34,7 @@ class Model:
             self.configuration.Devices['zoom'] = 'SyntheticZoom'
             self.configuration.Devices['laser'] = 'SyntheticLaser'
 
-        self.cam = start_camera(self.configuration, 0, self.verbose)
+        self.camera = start_camera(self.configuration, 0, self.verbose)
         self.stages = start_stages(self.configuration, self.verbose)
         self.filter_wheel = start_filter_wheel(self.configuration, self.verbose)
         self.zoom = start_zoom_servo(self.configuration, self.verbose)
@@ -37,7 +42,7 @@ class Model:
         self.laser = start_lasers(self.configuration, self.verbose)
         #self.etl = start_etl(self.configuration, self.verbose)
 
-    def continuous_acquisition_mode(self, args):
+    def acquire_image(self):
         """
         Runs the continuous acquisition mode.
         """
@@ -50,14 +55,14 @@ class Model:
         # Single Channel
         # Set the filter wheel
         # TODO: Generate method that knows how long it will take for the filter wheel to move.
-        self.filter_wheel.set_filter(self.Experiment.MicroscopeState['channel_1']['filter'])
+        self.filter_wheel.set_filter(self.experiment.MicroscopeState['channel_1']['filter'])
 
         #  Set the camera exposure time.
         #  TODO: Need to make sure that the units are correct (milliseconds, microseconds, etc.)
-        self.camera.set_exposure(self.Experiment['MicroscopeState']['channel_1']['camera_exposure_time'])
+        self.camera.set_exposure(self.experiment.MicroscopeState['channel_1']['camera_exposure_time'])
 
         # Set the laser and laser intensity
-        self.daq.identify_laser_idx(self.Experiment['MicroscopeState']['channel_1']['laser'])
+        self.daq.identify_laser_idx(self.experiment.MicroscopeState['channel_1']['laser'])
 
         #  Prepare the data acquisition card (sends and receives voltages)
         #  TODO: Seems to be a disconnect between waveform generation and the camera exposure time.
@@ -67,6 +72,9 @@ class Model:
         self.daq.run_tasks()
 
         image = self.camera.read_camera()
+
+        save_path = os.path.join('C:', 'Users','Spectral','Desktop','test.tif')
+        imsave(args.output_path, image)
 
         # Send the image to the GUI
 

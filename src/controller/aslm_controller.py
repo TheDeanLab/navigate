@@ -52,7 +52,7 @@ class ASLM_controller():
         self.channels_tab_controller = Channels_Tab_Controller(self.view.notebook_1.channels_tab, self, self.verbose)
 
         # Camera View Controller
-        self.camera_view_controller = Camera_View_Controller(self.view.notebook_2.camera_tab, self.model.cam, self,
+        self.camera_view_controller = Camera_View_Controller(self.view.notebook_2.camera_tab, self.model.camera, self,
                                                              self.verbose)
 
         # Stage Controller
@@ -276,7 +276,8 @@ class ASLM_controller():
         elif command == 'acquire':
             # TODO
             # Create a thread for the camera to use to display live feed
-            self.threads_pool.createThread('camera', self.camera_view_controller.live_feed)
+            self.threads_pool.createThread('camera', self.model.acquire_image())
+            #self.threads_pool.createThread('camera', self.camera_view_controller.live_feed)
 
         elif command == 'stop_acquire':
             # TODO: stop continuous acquire from camera

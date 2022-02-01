@@ -274,7 +274,8 @@ class ASLM_controller():
             save_experiment_file(file_directory, self.model.experiment.serialize())
             pass
         elif command == 'acquire':
-            # TODO
+            # TODO: according to image_mode to move devices
+            self.model.continuous_acquisition_mode()
             # Create a thread for the camera to use to display live feed
             self.threads_pool.createThread('camera', self.camera_view_controller.live_feed)
 

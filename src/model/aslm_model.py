@@ -66,7 +66,8 @@ class Model:
         self.daq.start_tasks()
         self.daq.run_tasks()
 
-        image = self.camera.read_camera()
+        #TODO: if the one of the args is 'save to device' then you could save it to device.
+        #image = self.camera.read_camera()
 
         # Send the image to the GUI
 

@@ -12,7 +12,8 @@ Devices:
 DAQParameters:
   # NI PCIe-1073 Chassis with PXI-6259 and PXI-6733 DAQ Boards.
   # Sampling rate in Hz
-  samplerate: 100000
+  sample_rate: 100000
+  sweep_time: 0.2
 
   # triggers
   master_trigger_out_line: PXI6259/port0/line1
@@ -75,7 +76,7 @@ RemoteFocusParameters:
   remote_focus_l_amplitude: 0.7
   remote_focus_l_offset: 2.3
   remote_focus_l_min_ao: 0
-  remote_focus_l_min_ao: 5
+  remote_focus_l_max_ao: 5
 
   # remote_focus_r is a ThorLabs BLINK High-Speed Focuser
   remote_focus_r_delay_percent: 7.5

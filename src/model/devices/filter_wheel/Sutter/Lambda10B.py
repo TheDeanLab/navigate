@@ -65,7 +65,7 @@ class FilterWheel(FilterWheelBase):
     def check_if_filter_in_filterdict(self, filterposition):
         """
         # Checks if the filter designation (string) given as argument
-        # exists in the filterdict
+        # exists in the filter dictionary
         """
         if filterposition in self.filterdict:
             return True
@@ -74,7 +74,7 @@ class FilterWheel(FilterWheelBase):
 
     def set_filter(self, filterposition=0, speed=2, wait_until_done=False):
         """
-        # Change the filter wheel to the filter designated by the filterposition argument.
+        # Change the filter wheel to the filter designated by the filter position argument.
         """
         if self.check_if_filter_in_filterdict(filterposition) is True:
             # Identify the Filter Number from the Filter Dictionary

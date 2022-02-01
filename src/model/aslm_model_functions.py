@@ -133,16 +133,16 @@ def start_lasers(configuration, verbose):
 
     return laser
 
-def start_daq(configuration, etl_constants_path, verbose):
+def start_daq(configuration, experiment, etl_constants, verbose):
     """
     # Start the data acquisition device (DAQ):  NI or SyntheticDAQ
     """
     if configuration.Devices['daq'] == 'NI':
         from model.devices.daq.NI.NIDAQ import DAQ as DAQModel
-        daq = DAQModel(configuration, etl_constants_path, verbose)
+        daq = DAQModel(configuration, experiment, etl_constants, verbose)
     elif configuration.Devices['daq'] == 'SyntheticDAQ':
         from model.devices.daq.SyntheticDAQ import DAQ as DAQModel
-        daq = DAQModel(configuration, etl_constants_path, verbose)
+        daq = DAQModel(configuration, experiment, etl_constants, verbose)
     else:
         print("DAQ Type in Configuration.yml Not Recognized - Initialization Failed")
         sys.exit()

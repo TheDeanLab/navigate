@@ -14,8 +14,13 @@ Adopted and modified from mesoSPIM
 
 """
 
+import time
+
 class DAQBase():
-    def __init__(self, session, verbose):
+    def __init__(self, model, experiment, etl_constants, verbose=False):
+        self.model = model
+        self.experiment = experiment
+        self.etl_constants = etl_constants
         self.verbose = verbose
 
     def create_tasks(self):
@@ -40,7 +45,7 @@ class DAQBase():
         """
         Demo: runs the tasks for triggering, analog and counter outputs.
         """
-        time.sleep(self.state['sweeptime'])
+        time.sleep(self.model.sweeptime)
 
     def stop_tasks(self):
         """"

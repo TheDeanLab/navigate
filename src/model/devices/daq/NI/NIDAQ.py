@@ -12,8 +12,9 @@ from nidaqmx.constants import LineGrouping
 import numpy as np
 
 # Local Imports
-from model.aslm_model_waveforms import *
 from model.devices.daq.DAQBase import DAQBase as DAQBase
+from model.aslm_model_waveforms import tunable_lens_ramp, sawtooth, dc_value, single_pulse
+
 
 class DAQ(DAQBase):
     def __init__(self, model, experiment, etl_constants, verbose=False):
@@ -40,10 +41,18 @@ class DAQ(DAQBase):
         self.etl_l_ramp_falling = self.model.RemoteFocusParameters['remote_focus_l_ramp_falling_percent']
         self.etl_l_amplitude = self.model.RemoteFocusParameters['remote_focus_l_amplitude']
         self.etl_l_offset = self.model.RemoteFocusParameters['remote_focus_l_offset']
+        self.etl_l_min_ao = self.model.RemoteFocusParameters['remote_focus_l_min_ao']
+        self.etl_l_max_ao = self.model.RemoteFocusParameters['remote_focus_l_max_ao']
 
         # Remote Focus Parameters
-        self.remote_focus_l_min_ao = self.model.RemoteFocusParameters['remote_focus_l_min_ao']
-        self.remote_focus_l_max_ao = self.model.RemoteFocusParameters['remote_focus_l_max_ao']
+        self.etl_r_waveform = None
+        self.etl_r_delay = self.model.RemoteFocusParameters['remote_focus_r_delay_percent']
+        self.etl_r_ramp_rising = self.model.RemoteFocusParameters['remote_focus_r_ramp_rising_percent']
+        self.etl_r_ramp_falling = self.model.RemoteFocusParameters['remote_focus_r_ramp_falling_percent']
+        self.etl_r_amplitude = self.model.RemoteFocusParameters['remote_focus_r_amplitude']
+        self.etl_r_offset = self.model.RemoteFocusParameters['remote_focus_r_offset']
+        self.etl_r_min_ao = self.model.RemoteFocusParameters['remote_focus_r_min_ao']
+        self.etl_r_max_ao = self.model.RemoteFocusParameters['remote_focus_r_max_ao']
 
         # Left Galvo Parameters
         self.galvo_l_waveform = None
@@ -81,6 +90,7 @@ class DAQ(DAQBase):
         self.laser_min_do = self.model.LaserParameters['laser_min_do']
         self.laser_max_do = self.model.LaserParameters['laser_max_do']
         self.fiber_idx = self.experiment.MicroscopeState['fiber']
+        self.laser_power = 0
 
     def calculate_samples(self):
         """
@@ -99,7 +109,7 @@ class DAQ(DAQBase):
         """
         self.calculate_samples()
 
-        # ETL
+        # ETL - Currently creates both ETL L and ETL R
         self.create_etl_waveform()
 
         # Galvos
@@ -107,7 +117,7 @@ class DAQ(DAQBase):
         self.create_low_res_galvo_waveform()
 
         # Lasers
-        self.create_analog_laser_waveforms()
+        self.create_analog_laser_waveforms(self.laser_power)
         self.create_digital_laser_waveforms()
         self.create_laser_switching_waveform()
 
@@ -119,30 +129,27 @@ class DAQ(DAQBase):
         # Create the waveforms for the Electrotunable Lens
         """
         self.calculate_samples()
-        self.etl_l_waveform = tunable_lens_ramp(sample_rate=self.sample_rate,
-                                                sweep_time=self.sweep_time,
-                                                delay=self.etl_l_delay,
-                                                rise=self.etl_l_ramp_rising,
-                                                fall=self.etl_l_ramp_falling,
-                                                amplitude=self.etl_l_amplitude,
-                                                offset=self.etl_l_offset)
+        self.etl_l_waveform = tunable_lens_ramp(self.sample_rate, self.sweep_time, self.etl_l_delay,
+                                                self.etl_l_ramp_rising, self.etl_l_ramp_falling,
+                                                self.etl_l_amplitude, self.etl_l_offset)
 
+        self.etl_r_waveform = tunable_lens_ramp(self.sample_rate, self.sweep_time, self.etl_r_delay,
+                                                self.etl_r_ramp_rising, self.etl_r_ramp_falling,
+                                                self.etl_r_amplitude, self.etl_r_offset)
         # Scale the ETL waveforms to the AO range.
-        self.etl_l_waveform[self.etl_l_waveform < self.remote_focus_l_min_ao] = self.remote_focus_l_min_ao
-        self.etl_l_waveform[self.etl_l_waveform > self.remote_focus_l_max_ao] = self.remote_focus_l_max_ao
+        self.etl_l_waveform[self.etl_l_waveform < self.etl_l_min_ao] = self.etl_l_min_ao
+        self.etl_l_waveform[self.etl_l_waveform > self.etl_l_max_ao] = self.etl_l_max_ao
+        self.etl_r_waveform[self.etl_r_waveform < self.etl_r_min_ao] = self.etl_r_min_ao
+        self.etl_r_waveform[self.etl_r_waveform > self.etl_r_max_ao] = self.etl_r_max_ao
 
     def create_low_res_galvo_waveform(self):
         """
         # Calculate the sawtooth waveforms for the low-resolution digitally scanned galvo.
         """
         self.calculate_samples()
-        self.galvo_l_waveform = sawtooth(sample_rate=self.sample_rate,
-                                         sweep_time=self.sweep_time,
-                                         frequency=self.galvo_l_frequency,
-                                         amplitude=self.galvo_l_amplitude,
-                                         offset=self.galvo_l_offset,
-                                         dutycycle=self.galvo_l_duty_cycle,
-                                         phase=self.galvo_l_phase)
+        self.galvo_l_waveform = sawtooth(self.sample_rate, self.sweep_time, self.galvo_l_frequency,
+                                         self.galvo_l_amplitude, self.galvo_l_offset,
+                                         self.galvo_l_duty_cycle, self.galvo_l_phase)
 
         # Scale the Galvo waveforms to the AO range.
         self.galvo_l_waveform[self.galvo_l_waveform < self.galvo_l_min_ao] = self.galvo_l_min_ao
@@ -153,10 +160,7 @@ class DAQ(DAQBase):
         # Calculate the DC waveform for the resonant galvanometer drive signal.
         """
         self.calculate_samples()
-        self.galvo_r_waveform = dc_value(sample_rate=self.sample_rate,
-                                         sweep_time=self.sweep_time,
-                                         amplitude=self.galvo_r_amplitude,
-                                         offset=0)
+        self.galvo_r_waveform = dc_value(self.sample_rate, self.sweep_time, self.galvo_r_amplitude, 0)
 
         # Scale the Galvo waveforms to the AO range.
         self.galvo_r_waveform[self.galvo_r_waveform < self.galvo_r_min_ao] = self.galvo_r_min_ao
@@ -188,10 +192,7 @@ class DAQ(DAQBase):
             amplitude = self.model.LaserParameters['laser_min_do']
         else:
             amplitude = self.model.LaserParameters['laser_max_do']
-        self.laser_switching_waveform = dc_value(sample_rate=self.sample_rate,
-                                                 sweep_time=self.sweep_time,
-                                                 amplitude=amplitude,
-                                                 offset=0)
+        self.laser_switching_waveform = dc_value(self.sample_rate, self.sweep_time, amplitude, 0)
 
     def create_analog_laser_waveforms(self, laser_power):
         """
@@ -201,19 +202,15 @@ class DAQ(DAQBase):
         """
         self.calculate_samples()
         laser_voltage = self.laser_max_ao * laser_power / 100
-        laser_template_waveform = single_pulse(sample_rate=self.sample_rate,
-                                                    sweep_time=self.sweep_time,
-                                                    delay=self.laser_l_delay,
-                                                    pulsewidth=self.laser_l_pulse,
-                                                    amplitude=laser_voltage,
-                                                    offset=0)
+        laser_template_waveform = single_pulse(self.sample_rate, self.sweep_time, self.laser_l_delay,
+                                                    self.laser_l_pulse, laser_voltage, 0)
 
         # Scale the waveforms to the AO range.
         laser_template_waveform[laser_template_waveform < self.laser_min_ao] = self.laser_min_ao
         laser_template_waveform[laser_template_waveform > self.laser_max_ao] = self.laser_max_ao
 
         # Pre-allocate the waveforms.
-        laser_waveform_list = [np.zeros(self.samples) for i in self.number_of_lasers]
+        laser_waveform_list = [np.zeros(self.samples) for i in range(self.number_of_lasers)]
         laser_waveform_list[self.laser_idx] = laser_template_waveform
         self.laser_ao_waveforms = np.stack(laser_waveform_list)
 
@@ -224,19 +221,15 @@ class DAQ(DAQBase):
         # Digital output for left or right fiber.
         """
         self.calculate_samples()
-        laser_template_waveform = single_pulse(sample_rate=self.sample_rate,
-                                                    sweep_time=self.sweep_time,
-                                                    delay=self.laser_l_delay,
-                                                    pulsewidth=self.laser_l_pulse,
-                                                    amplitude=self.laser_max_do,
-                                                    offset=0)
+        laser_template_waveform = single_pulse(self.sample_rate, self.sweep_time, self.laser_l_delay,
+                                                    self.laser_l_pulse, self.laser_max_do, 0)
 
         # Scale the waveforms to the DO range.
         laser_template_waveform[laser_template_waveform < self.laser_min_do] = self.laser_min_do
         laser_template_waveform[laser_template_waveform > self.laser_max_do] = self.laser_max_do
 
         # Pre-allocate the waveforms.
-        laser_waveform_list = [np.zeros(self.samples) for i in self.number_of_lasers]
+        laser_waveform_list = [np.zeros(self.samples) for i in range(self.number_of_lasers)]
         laser_waveform_list[self.laser_idx] = laser_template_waveform
         self.laser_do_waveforms = np.stack(laser_waveform_list)
 
@@ -248,7 +241,8 @@ class DAQ(DAQBase):
         """
         self.galvo_and_etl_waveforms = np.stack((self.galvo_l_waveform,
                                                  self.galvo_r_waveform,
-                                                 self.etl_l_waveform))
+                                                 self.etl_l_waveform,
+                                                 self.etl_r_waveform))
 
     def update_etl_parameters(self):
         """

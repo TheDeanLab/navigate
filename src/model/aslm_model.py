@@ -66,16 +66,17 @@ class Model:
 
         #  Prepare the data acquisition card (sends and receives voltages)
         #  TODO: Seems to be a disconnect between waveform generation and the camera exposure time.
+        self.daq.create_waveforms()
         self.daq.create_tasks()
         self.daq.write_waveforms_to_tasks()
         self.daq.start_tasks()
         self.daq.run_tasks()
 
         #TODO: if the one of the args is 'save to device' then you could save it to device.
-        #image = self.camera.read_camera()
+        image = self.camera.read_camera()
 
         save_path = os.path.join('C:', 'Users','Spectral','Desktop','test.tif')
-        imsave(args.output_path, image)
+        imsave(save_path, image)
 
         # Send the image to the GUI
 

@@ -275,7 +275,6 @@ class ASLM_controller():
             pass
         elif command == 'acquire':
             # TODO: according to image_mode to move devices
-            self.model.continuous_acquisition_mode()
             # Create a thread for the camera to use to display live feed
             self.threads_pool.createThread('camera', self.model.acquire_image())
             #self.threads_pool.createThread('camera', self.camera_view_controller.live_feed)

@@ -4,19 +4,14 @@ Model class for controlling National Instruments DAQ devices.
 Adopted and modified from mesoSPIM.
 """
 # Standard Imports
-import os
-import numpy as np
-import csv
-import time
 
 # Third Party Imports
 import nidaqmx
-from nidaqmx.constants import AcquisitionType, TaskMode
-from nidaqmx.constants import LineGrouping, DigitalWidthUnits
-from nidaqmx.types import CtrTime
+from nidaqmx.constants import AcquisitionType
+from nidaqmx.constants import LineGrouping
 
 # Local Imports
-from model.devices.daq.waveforms import *
+from model.aslm_model_waveforms import *
 from model.devices.daq.DAQBase import DAQBase as DAQBase
 from model.aslm_model_config import Session as session
 

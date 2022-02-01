@@ -4,11 +4,11 @@ Starting point for running the program.
 ASLM software modified code and/or took inspiration from a number of sources with different licenses.
 Listed here for bookkeeping purposes.
 
-https://github.com/uetke/UUTrack    - GNU GPL v3.0
+https://github.com/uetke/UUTrack    - GNU GPL v3.0      - Architecture, camera.
 https://github.com/mesoSPIM/mesoSPIM-control    - GNU GPL v3.0
 https://github.com/MicroscopeAutoPilot/autopilot    - NPOSL-3.0
-https://github.com/bicarlsen/obis_laser_controller  - GNU GPL v3.0
-
+https://github.com/bicarlsen/obis_laser_controller  - GNU GPL v3.0  - Laser Controller
+https://github.com/AndrewGYork/tools - GNU GPL v2.0 - Sutter Filter Wheel
 """
 # Standard Library Imports
 import argparse

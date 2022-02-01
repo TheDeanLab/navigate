@@ -1,4 +1,5 @@
-""" Module for creating waveforms and analog output signals
+"""
+Module for creating waveforms and analog output signals
 Original Author: Fabian Voigt
 Modified by Kevin Dean
 """

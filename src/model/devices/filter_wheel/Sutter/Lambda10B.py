@@ -17,9 +17,9 @@ from model.devices.filter_wheel.FilterWheelBase import FilterWheelBase
 
 class FilterWheel(FilterWheelBase):
     def __init__(self, model, verbose):
-        '''
+        """
         Load the Default Parameters
-        '''
+        """
         self.comport = model.FilterWheelParameters['filter_wheel_port']
         self.baudrate = model.FilterWheelParameters['baudrate']
         self.filterdict = model.FilterWheelParameters['available_filters']
@@ -63,19 +63,19 @@ class FilterWheel(FilterWheelBase):
         self.close()
 
     def check_if_filter_in_filterdict(self, filterposition):
-        '''
-        Checks if the filter designation (string) given as argument
-        exists in the filterdict
-        '''
+        """
+        # Checks if the filter designation (string) given as argument
+        # exists in the filterdict
+        """
         if filterposition in self.filterdict:
             return True
         else:
             raise ValueError('Filter designation not in the configuration')
 
     def set_filter(self, filterposition=0, speed=2, wait_until_done=False):
-        '''
-        Change the filter wheel to the filter designated by the filterposition argument.
-        '''
+        """
+        # Change the filter wheel to the filter designated by the filterposition argument.
+        """
         if self.check_if_filter_in_filterdict(filterposition) is True:
             # Identify the Filter Number from the Filter Dictionary
             self.wheel_position = self.filterdict[filterposition]
@@ -92,12 +92,12 @@ class FilterWheel(FilterWheelBase):
                     print('Done initializing filter wheel.')
 
             for wheel_idx in range(self.number_of_filter_wheels):
-                ''' 
+                """ 
                 Loop through each filter, and send the binary sequence via serial to move to the desired filter wheel position
                 When number_of_filter_wheels = 1, loop executes once, and only wheel A changes.
                 When number_of_filter_wheels = 2, loop executes twice, with both wheel A and B moving to the same position sequentially
                 Filter Wheel Command Byte Encoding = wheel + (speed*16) + position = command byte
-                '''
+                """
 
                 if self.verbose:
                     print("Moving Filter Wheel:", wheel_idx)
@@ -111,6 +111,9 @@ class FilterWheel(FilterWheelBase):
                     time.sleep(self.wait_until_done_delay)
 
     def read(self, num_bytes):
+        """
+        # Reads the specified number of bytes from the serial port.
+        """
         for i in range(100):
             num_waiting = self.serial.inWaiting()
             if num_waiting == num_bytes:
@@ -121,6 +124,9 @@ class FilterWheel(FilterWheelBase):
         return self.serial.read(num_bytes)
 
     def close(self):
+        """
+        # Closes the serial port.
+        """
         if self.verbose:
             print('Closing the Filter Wheel Serial Port')
         self.set_filter('Empty-Alignment')

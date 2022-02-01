@@ -3,15 +3,11 @@ NI Synthetic DAQ Class
 """
 
 # Standard Imports
-import os
-import numpy as np
-import csv
-import time
 
 # Local Imports
-from .waveforms import *
-from .DAQBase import DAQBase as DAQBase
+from model.aslm_model_waveforms import *
 from model.aslm_model_config import Session as session
+from .DAQBase import DAQBase as DAQBase
 
 class DAQ(DAQBase):
     def __init__(self, model, etl_constants_path, verbose=False):

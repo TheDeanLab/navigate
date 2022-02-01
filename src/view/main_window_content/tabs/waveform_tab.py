@@ -1,11 +1,11 @@
-from tkinter import *
 from tkinter import ttk
 from matplotlib.figure import Figure
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
+from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg)
 
-from model.devices.daq import waveforms as waveforms
-    #.devices.daq import waveforms as waveforms
+from model import aslm_model_waveforms as waveforms
+
+
+#.devices.daq import waveforms as waveforms
 
 class waveform_tab(ttk.Frame):
     def __init__(waveform_tab, cam_wave, *args, **kwargs):

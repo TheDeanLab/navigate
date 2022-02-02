@@ -1,4 +1,5 @@
 from tkinter import filedialog
+import math
 import pandas as pd
 from pandastable import TableModel
 
@@ -17,6 +18,27 @@ class Multi_Position_Controller(GUI_Controller):
         self.table.insertRow = self.insert_row_func
         self.table.generatePositions = self.generate_positions_func
         self.table.addStagePosition = self.add_stage_position_func
+
+    def set_positions(self, positions):
+        '''
+        # This function set positions to multi-position's table
+        '''
+        data = {}
+        for name in ['X', 'Y', 'Z', 'R', 'F']:
+            data[name] = list(map(lambda pos: positions[pos][name], positions))
+        self.table.model.df = pd.DataFrame(data)
+
+    def get_positions(self):
+        '''
+        # This function will return all positions
+        '''
+        positions = {}
+        rows = self.table.model.df.shape[0]
+        for i in range(rows):
+            temp = list(self.table.model.df.iloc[i])
+            if len(list(filter(lambda v: type(v)==float and not math.isnan(v), temp))) == 5:
+                positions[i] = dict(self.table.model.df.iloc[i])
+        return positions
 
     def handle_double_click(self, event):
         '''
@@ -39,12 +61,6 @@ class Multi_Position_Controller(GUI_Controller):
         }
         self.parent_controller.execute('move_stage_and_update_info', position)
         self.show_verbose_info('move stage to', position)
-
-    def get_values(self):
-        '''
-        # it will return all the positions
-        '''
-        pass
 
     def get_position_num(self):
         '''

@@ -71,15 +71,6 @@ class ASLM_controller():
         self.initialize_stage(configuration_controller)
 
         # Set view based on model.experiment
-        # TODO
-        # Select only a single channel by default.
-        # TODO: other channel settings? like laser, filter.....
-        self.channels_tab_controller.set_values('channels', {
-            'channel_1': {
-                'is_selected': True
-            }
-        })
-
         self.populate_experiment_setting()
 
         #  TODO: camera_view_tab, maximum intensity tab, waveform_tab
@@ -105,25 +96,10 @@ class ASLM_controller():
         laser_cycling_values = ['Per Z', 'Per Stack']
         self.channels_tab_controller.initialize('laser_cycling', laser_cycling_values)
 
-        # populate timepoint settings
-        # TODO: should those settings from configuration/experiments?
-        timepoint_setting = {
-            'is_save': False,
-            'timepoints': 1,
-            'stack_acq_time': 200,
-            'stack_pause': 0
-        }
-        self.channels_tab_controller.initialize('timepoint', timepoint_setting)
-
     def initialize_stage(self, configuration_controller):
         """
         # Prepopulate the stage positions.
         """
-        self.stage_gui_controller.set_position(configuration_controller.get_stage_position())
-
-        # Prepopulate the stage step size.
-        self.stage_gui_controller.set_step_size(configuration_controller.get_stage_step())
-
         # Set stage movement limits
         position_min = configuration_controller.get_stage_position_limits('_min')
         position_max = configuration_controller.get_stage_position_limits('_max')
@@ -152,7 +128,7 @@ class ASLM_controller():
             self.update_experiment_setting()
             save_experiment_file('', self.model.experiment.serialize(), filename)
 
-        menus_dic = {
+        menus_dict = {
             self.view.menubar.menu_file: {
                 'New Experiment': new_experiment,
                 'Load Experiment': load_experiment,
@@ -175,8 +151,8 @@ class ASLM_controller():
                 '6x': lambda: self.execute('zoom', 6)
             }
         }
-        for menu in menus_dic:
-            menuitems = menus_dic[menu]
+        for menu in menus_dict:
+            menuitems = menus_dict[menu]
             for label in menuitems:
                 menu.add_command(label=label, command=menuitems[label])
 
@@ -185,7 +161,7 @@ class ASLM_controller():
         # if file_name is specified and exists, this function will load an experiment file to model.experiment
         # populate model.experiment to view
         """
-        # TODO: model will load new experiment file
+        # model will load the spcified experiment file
         if file_name:
             file_path = Path(file_name)
             if file_path.exists():
@@ -200,10 +176,21 @@ class ASLM_controller():
         }
         self.channels_tab_controller.set_values('stack_acquisition', stack_acq_setting)
 
-        # set laser cycling mode
+        # populate laser cycling mode
         laser_cycling = 'Per Z' if self.model.experiment.MicroscopeState[
                                        'stack_cycling_mode'] == 'per_z' else 'Per Stack'
         self.channels_tab_controller.set_values('laser_cycling', laser_cycling)
+
+        # populate timepoints settings
+        timepoints_setting = {
+            'is_save': self.model.experiment.MicroscopeState['is_save'],
+            'timepoints': self.model.experiment.MicroscopeState['timepoints'],
+            'stack_pause': self.model.experiment.MicroscopeState['stack_pause']
+        }
+        self.channels_tab_controller.set_values('timepoint', timepoints_setting)
+
+        # populate channels
+        self.channels_tab_controller.set_values('channels', self.model.experiment.MicroscopeState['channels'])
 
         # set mode according to model.experiment
         mode = self.model.experiment.MicroscopeState['image_mode']
@@ -215,6 +202,21 @@ class ASLM_controller():
             if self.model.experiment.Saving[name] is None:
                 self.model.experiment.Saving[name] = ''
         self.acquire_bar_controller.set_saving_settings(self.model.experiment.Saving)
+
+        # populate StageParameters
+        position = {}
+        for axis in ['x', 'y', 'z', 'theta', 'f']:
+            position[axis] = self.model.experiment.StageParameters[axis]
+        self.stage_gui_controller.set_position(position)
+        # Prepopulate the stage step size.
+        step_size = {}
+        for axis in ['xy', 'z', 'theta', 'f']:
+            step_size[axis] = self.model.experiment.StageParameters[axis+'_step']
+        self.stage_gui_controller.set_step_size(step_size)
+
+        # populate multi_positions
+        self.channels_tab_controller.set_positions(self.model.experiment.MicroscopeState['stage_positions'])
+
 
     def update_experiment_setting(self):
         """
@@ -228,11 +230,17 @@ class ASLM_controller():
         for k in settings['timepoints']:
             self.model.experiment.MicroscopeState[k] = settings['timepoints'][k]
         # channels
-        for channel_id in settings['channels']:
-            self.model.experiment.MicroscopeState[channel_id] = settings['channels'][channel_id]
+        self.model.experiment.MicroscopeState['channels'] = settings['channels']
+        # get all positions
+        self.model.experiment.MicroscopeState['stage_positions'] = self.channels_tab_controller.get_positions()
 
         # get position information from stage tab
-        self.model.experiment.MicroscopeState['stage_position'] = self.stage_gui_controller.get_position()
+        position = self.stage_gui_controller.get_position()
+        for axis in position:
+            self.model.experiment.StageParameters[axis] = position[axis]
+        step_size = self.stage_gui_controller.get_step_size()
+        for axis in step_size:
+            self.model.experiment.StageParameters[axis+'_step'] = step_size[axis]
 
 
     def execute(self, command, *args):

@@ -1,5 +1,6 @@
 # Standard Library Imports
 import os
+import time
 
 # Third Party Imports
 from tifffile import imsave
@@ -34,13 +35,17 @@ class Model:
             self.configuration.Devices['zoom'] = 'SyntheticZoom'
             self.configuration.Devices['laser'] = 'SyntheticLaser'
 
-        self.camera = start_camera(self.configuration, 0, self.verbose)
+        self.camera = start_camera(self.configuration, self.experiment, self.verbose)
         self.stages = start_stages(self.configuration, self.verbose)
         self.filter_wheel = start_filter_wheel(self.configuration, self.verbose)
         self.zoom = start_zoom_servo(self.configuration, self.verbose)
         self.daq = start_daq(self.configuration, self.experiment, self.etl_constants, self.verbose)
         self.laser = start_lasers(self.configuration, self.verbose)
         #self.etl = start_etl(self.configuration, self.verbose)
+
+
+    def live(self):
+        pass
 
     def acquire_image(self):
         """
@@ -59,7 +64,9 @@ class Model:
 
         #  Set the camera exposure time.
         #  TODO: Need to make sure that the units are correct (milliseconds, microseconds, etc.)
-        self.camera.set_exposure(self.experiment.MicroscopeState['channel_1']['camera_exposure_time'])
+        self.camera.set_exposure_time(self.experiment.MicroscopeState['channel_1']['camera_exposure_time']/1000)
+        self.camera.initialize_image_series()
+        #self.camera.report_camera_settings()
 
         # Set the laser and laser intensity
         self.daq.identify_laser_idx(self.experiment.MicroscopeState['channel_1']['laser'])
@@ -67,16 +74,16 @@ class Model:
         #  Prepare the data acquisition card (sends and receives voltages)
         #  TODO: Seems to be a disconnect between waveform generation and the camera exposure time.
         self.daq.create_waveforms()
-        self.daq.create_tasks()
         self.daq.write_waveforms_to_tasks()
         self.daq.start_tasks()
-        self.daq.run_tasks()
+        self.daq.run_tasks()  #Automatically waits until it is done
+        self.daq.stop_tasks()
 
-        #TODO: if the one of the args is 'save to device' then you could save it to device.
-        image = self.camera.read_camera()
-
-        save_path = os.path.join('C:', 'Users', 'Spectral', 'Desktop', 'test.tif')
+        image = self.camera.get_image()
+        print("Image acquired")
+        save_path = os.path.join('E:', 'PLEASE', 'test.tif')
         imsave(save_path, image)
+        print("Image saved")
 
         # Send the image to the GUI
 

@@ -23,12 +23,6 @@ class DAQ(DAQBase):
         self.etl_constants = etl_constants
         self.verbose = verbose
 
-        # Initialize the nidaqmx tasks.
-        self.camera_trigger_task = nidaqmx.Task()
-        self.master_trigger_task = nidaqmx.Task()
-        self.galvo_etl_task = nidaqmx.Task()
-        self.laser_task = nidaqmx.Task()
-
         # Initialize Variables
         self.sample_rate = self.model.DAQParameters['sample_rate']
         self.sweep_time = self.model.DAQParameters['sweep_time']
@@ -91,6 +85,19 @@ class DAQ(DAQBase):
         self.laser_max_do = self.model.LaserParameters['laser_max_do']
         self.fiber_idx = self.experiment.MicroscopeState['fiber']
         self.laser_power = 0
+
+        # Initialize the nidaqmx tasks.
+        self.camera_trigger_task = nidaqmx.Task()
+        self.master_trigger_task = nidaqmx.Task()
+        self.galvo_etl_task = nidaqmx.Task()
+        self.laser_task = nidaqmx.Task()
+
+        # Add the corresponding lines to each task
+        self.create_tasks()
+
+
+    def __del__(self):
+        self.close_tasks()
 
     def calculate_samples(self):
         """
@@ -281,24 +288,26 @@ class DAQ(DAQBase):
         """
         # Set up the Galvo and electrotunable lens - Each start with the trigger_source.
         """
-        trigger_source = self.model.DAQParameters['trigger_source']
         galvo_etl_task_line = self.model.DAQParameters['galvo_etl_task_line']
         self.galvo_etl_task.ao_channels.add_ao_voltage_chan(galvo_etl_task_line)
         self.galvo_etl_task.timing.cfg_samp_clk_timing(rate=self.sample_rate,
                                                        sample_mode=AcquisitionType.FINITE,
                                                        samps_per_chan=self.samples)
+
+        trigger_source = self.model.DAQParameters['trigger_source']
         self.galvo_etl_task.triggers.start_trigger.cfg_dig_edge_start_trig(trigger_source)
 
     def create_laser_task(self):
         """
         # Set up the lasers - Each start with the trigger_source.
         """
-        trigger_source = self.model.DAQParameters['trigger_source']
         laser_task_line = self.model.DAQParameters['laser_task_line']
         self.laser_task.ao_channels.add_ao_voltage_chan(laser_task_line)
         self.laser_task.timing.cfg_samp_clk_timing(rate=self.sample_rate,
                                                    sample_mode=AcquisitionType.FINITE,
                                                    samps_per_chan=self.samples)
+
+        trigger_source = self.model.DAQParameters['trigger_source']
         self.laser_task.triggers.start_trigger.cfg_dig_edge_start_trig(trigger_source)
 
     def create_tasks(self):
@@ -313,8 +322,8 @@ class DAQ(DAQBase):
         # be on when the camera is acquiring) and the left/right ETL waveforms
         """
         self.calculate_samples()
-        self.create_camera_task()
         self.create_master_trigger_task()
+        self.create_camera_task()
         self.create_galvo_etl_task()
         self.create_laser_task()
 

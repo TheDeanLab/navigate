@@ -101,11 +101,10 @@ class DCAMException(Exception):
 
 
 
-# dcam = ctypes.windll.dcamapi
-#
-# temp = ctypes.c_int32(0)
-# if (dcam.dcam_init(None, ctypes.byref(temp), None) != DCAMERR_NOERROR):
-#     raise DCAMException("DCAM initialization failed.")
+dcam = ctypes.windll.dcamapi
+temp = ctypes.c_int32(0)
+if (dcam.dcam_init(None, ctypes.byref(temp), None) != DCAMERR_NOERROR):
+    raise DCAMException("DCAM initialization failed.")
 # n_cameras = temp.value
 
 class HCamData():
@@ -153,7 +152,6 @@ class HCamData():
     #
     def getDataPtr(self):
         return self.np_array.ctypes.data
-
 
 class HamamatsuCamera():
     CAPTUREMODE_SNAP = 0
@@ -721,9 +719,7 @@ class HamamatsuCameraMR(HamamatsuCamera):
         # We need to attach & release for each acquisition otherwise
         # we'll get an error if we try to change the ROI in any way
         # between acquisitions.
-        self.checkStatus(dcam.dcam_attachbuffer(self.camera_handle,
-                                                self.hcam_ptr,
-                                                ctypes.sizeof(self.hcam_ptr)),
+        self.checkStatus(dcam.dcam_attachbuffer(self.camera_handle, self.hcam_ptr, ctypes.sizeof(self.hcam_ptr)),
                          "dcam_attachbuffer")
 
         # Start acquisition.

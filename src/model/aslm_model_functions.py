@@ -2,24 +2,23 @@ from model.concurrency.concurrency_tools import ObjectInSubprocess
 import platform
 import sys
 
-def start_camera(configuration, camera_id, verbose):
+def start_camera(configuration, experiment, verbose):
     """
     # Initializes the camera as a sub-process using concurrency tools.
     """
     # Hamamatsu Camera
     if configuration.Devices['camera'] == 'HamamatsuOrca' and platform.system() == 'Windows':
         from model.devices.camera.Hamamatsu.HamamatsuCamera import Camera as CameraModel
-        cam = ObjectInSubprocess(CameraModel, camera_id, verbose) #Do we still need to do this when we have the thread pool? Or do we need both? Have not investigated yet
-        cam.initialize_camera()
-        cam.set_exposure(configuration.CameraParameters['exposure_time'])
+        camera_id = 0
+        # @Annie - I still don't understand why this is throwing the __name__ error.
+        # cam = ObjectInSubprocess(camera_id, configuration, experiment, verbose)
+        cam = CameraModel(camera_id, configuration, experiment, verbose)
     elif configuration.Devices['camera'] == 'HamamatsuOrca' and platform.system() != 'Windows':
         print("Hamamatsu Camera is only supported on Windows operating systems.")
         sys.exit()
     elif configuration.Devices['camera'] == 'SyntheticCamera':
         from model.devices.camera.SyntheticCamera import Camera as CameraModel
         cam = CameraModel(0, verbose)
-        cam.initialize_camera()
-        cam.set_exposure(1000*configuration.CameraParameters['exposure_time'])
     else:
         print("Camera Type in Configuration.yml Not Recognized - Initialization Failed")
         sys.exit()

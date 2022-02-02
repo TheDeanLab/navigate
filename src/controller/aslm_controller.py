@@ -276,7 +276,7 @@ class ASLM_controller():
         elif command == 'acquire':
             # TODO: according to image_mode to move devices
             # Create a thread for the camera to use to display live feed
-            self.threads_pool.createThread('camera', self.model.acquire_image())
+            self.threads_pool.createThread('camera', self.model.acquire_with_waveform_update())
             #self.threads_pool.createThread('camera', self.camera_view_controller.live_feed)
 
         elif command == 'stop_acquire':

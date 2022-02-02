@@ -149,4 +149,21 @@ def start_daq(configuration, experiment, etl_constants, verbose):
         print("Initialized ", configuration.Devices['daq'])
     return daq
 
+def start_shutters(configuration, experiment, verbose):
+    """
+    # Initializes the shutters:
+    """
+    # ThorLabs shutters triggered via NI DAQ card.
+    if configuration.Devices['shutters'] == 'NI':
+        from model.devices.shutters.NIShutter import NIShutter as ShutterModel
+        shutter = ShutterModel(configuration, experiment, verbose)
+    elif configuration.Devices['shutters'] == 'SyntheticShutter':
+        from model.devices.shutters.SyntheticShutter import DemoShutter as ShutterModel
+        shutter = ShutterModel(configuration, experiment, verbose)
+    else:
+        print("Shutter Type in Configuration.yml Not Recognized - Initialization Failed")
+        sys.exit()
+    if verbose:
+        print("Initialized ", configuration.Devices['shutters'])
+    return shutter
 

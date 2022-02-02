@@ -8,6 +8,7 @@ Devices:
   stage: PI  # PI or SyntheticStage
   zoom: Dynamixel  #Dynamixel or SyntheticZoom
   lasers: Omicron #Omicron or SyntheticLasers
+  shutters: NI #NI or SyntheticShutters
 
 DAQParameters:
   # NI PCIe-1073 Chassis with PXI-6259 and PXI-6733 DAQ Boards.

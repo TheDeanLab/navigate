@@ -72,7 +72,6 @@ class DAQ(DAQBase):
         self.camera_delay = self.camera_delay_percent * 0.01 * self.sweep_time
 
         # Laser Parameters
-        self.laser_idx = None
         self.laser_switching_waveform = None
         self.laser_ao_waveforms = None
         self.laser_do_waveforms = None
@@ -85,6 +84,7 @@ class DAQ(DAQBase):
         self.laser_max_do = self.model.LaserParameters['laser_max_do']
         self.fiber_idx = self.experiment.MicroscopeState['fiber']
         self.laser_power = 0
+        self.laser_idx = 0
 
         # Initialize the nidaqmx tasks.
         self.camera_trigger_task = nidaqmx.Task()
@@ -112,7 +112,7 @@ class DAQ(DAQBase):
 
     def create_waveforms(self):
         """
-        # Create the waveforms for the ETL, Galvos, and Lasers.
+        # Create the waveforms for the ETL, Galvos, and Lasers, and sends it to the tasks for execution.
         """
         self.calculate_samples()
 
@@ -130,6 +130,9 @@ class DAQ(DAQBase):
 
         # Bundle the waveforms into a single waveform.
         self.bundle_galvo_and_etl_waveforms()
+
+        # Write the waveforms to the tasks.
+        self.write_waveforms_to_tasks()
 
     def create_etl_waveform(self):
         """
@@ -373,4 +376,12 @@ class DAQ(DAQBase):
         self.camera_trigger_task.close()
         self.master_trigger_task.close()
 
+    def initialize_tasks(self):
+        """
+        # Initialize the nidaqmx tasks.
+        """
+        self.camera_trigger_task = nidaqmx.Task()
+        self.master_trigger_task = nidaqmx.Task()
+        self.galvo_etl_task = nidaqmx.Task()
+        self.laser_task = nidaqmx.Task()
 

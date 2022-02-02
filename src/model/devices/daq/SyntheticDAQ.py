@@ -321,3 +321,8 @@ class DAQ(DAQBase):
         """
         pass
 
+    def initialize_tasks(self):
+        """
+        # Initialize the nidaqmx tasks.
+        """
+        pass

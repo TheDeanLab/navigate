@@ -54,7 +54,7 @@ class Channel_Setting_Controller(GUI_Controller):
             if not channel_vals:
                 return
             channel_value = value[channel]
-            for name in channel_value:
+            for name in channel_vals:
                 channel_vals[name].set(channel_value[name])
 
         self.show_verbose_info('channel has been set new value')
@@ -66,7 +66,9 @@ class Channel_Setting_Controller(GUI_Controller):
         # { 'channel_1': {
         #           'is_selected': True,
         #           'laser': ,
+        #           'laser_index': ,
         #           'filter': ,
+        #           'filter_position': ,
         #           'camera_exposure_time': ,
         #           'laser_power': ,
         #           'interval_time': 
@@ -74,7 +76,9 @@ class Channel_Setting_Controller(GUI_Controller):
         # 'channel_2': {
         #           'is_selected': True,
         #           'laser': ,
+        #           'laser_index': ,
         #           'filter': ,
+        #           'filter_position': ,
         #           'camera_exposure_time': ,
         #           'laser_power': ,
         #           'interval_time': 
@@ -90,7 +94,9 @@ class Channel_Setting_Controller(GUI_Controller):
                 temp = {
                     'is_selected': True,
                     'laser': channel_vals['laser'].get(),
+                    'laser_index': self.get_index('laser', channel_vals['laser'].get()), 
                     'filter': channel_vals['filter'].get(),
+                    'filter_position': self.get_index('filter', channel_vals['filter'].get()),
                     'camera_exposure_time': int(channel_vals['camera_exposure_time'].get()),
                     'laser_power': channel_vals['laser_power'].get(),
                     'interval_time': channel_vals['interval_time'].get()
@@ -157,3 +163,9 @@ class Channel_Setting_Controller(GUI_Controller):
         }
         return result
 
+    def get_index(self, dropdown_name, value):
+        type, widget = self.get_widgets(dropdown_name)
+        if type != 'variable':
+            values = widget[0]['values']
+            return values.index(value)
+        return 0

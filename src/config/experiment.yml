@@ -47,6 +47,11 @@ StageParameters:
   z_step: 500
   theta_step: 30
   f_step: 500
+  x: 35000.0
+  y: 42000.0
+  z: 15500.0
+  theta: 0.0
+  f: 70000.0
 
 MicroscopeState:
   image_mode: z-stack
@@ -65,11 +70,14 @@ MicroscopeState:
   stack_acq_time: 249.99999999999434
   timepoint_interval: 0
   experiment_duration: 250.02999999999435
-
-  channel_1: {'is_selected': True, 'laser': '488nm', laser_index: 1, 'filter': 'GFP - FF01-515/30-32', 'filter_position', 0, 'camera_exposure_time': 200, 'laser_power': '75', 'interval_time': '1'}
-  channel_2: {'is_selected': True, 'laser': '488nm', laser_index: 1, 'filter': 'RFP - FF01-595/31-32', 'filter_position', 0, 'camera_exposure_time': 100, 'laser_power': '50', 'interval_time': '1'}
+  
+  channels: {
+  channel_1: {'is_selected': True, 'laser': '488nm', laser_index: 1, 'filter': 'GFP - FF01-515/30-32', 'filter_position', 0, 'camera_exposure_time': 200, 'laser_power': '75', 'interval_time': '1'},
+  channel_2: {'is_selected': True, 'laser': '488nm', laser_index: 1, 'filter': 'RFP - FF01-595/31-32', 'filter_position', 0, 'camera_exposure_time': 100, 'laser_power': '50', 'interval_time': '1'},
   channel_3: {'is_selected': True, 'laser': '562nm', laser_index: 2, 'filter': 'RFP - FF01-595/31-32', 'filter_position', 0, 'camera_exposure_time': 200, 'laser_power': '50', 'interval_time': '1'}
-  stage_position: {
-    0: {'x': 35000.0, 'y': 42000.0, 'z': 15500.0, 'theta': 0.0, 'f': 70000.0},
-    1: {'x': 35000.0, 'y': 42000.0, 'z': 15500.0, 'theta': 0.0, 'f': 70000.0}
+  }
+
+  stage_positions: {
+    0: {'X': 35000.0, 'Y': 42000.0, 'Z': 15500.0, 'R': 0.0, 'F': 70000.0},
+    1: {'X': 35000.0, 'Y': 42000.0, 'Z': 15500.0, 'R': 0.0, 'F': 70000.0}
   }

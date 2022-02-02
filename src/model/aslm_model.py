@@ -75,7 +75,7 @@ class Model:
         #TODO: if the one of the args is 'save to device' then you could save it to device.
         image = self.camera.read_camera()
 
-        save_path = os.path.join('C:', 'Users','Spectral','Desktop','test.tif')
+        save_path = os.path.join('C:', 'Users', 'Spectral', 'Desktop', 'test.tif')
         imsave(save_path, image)
 
         # Send the image to the GUI

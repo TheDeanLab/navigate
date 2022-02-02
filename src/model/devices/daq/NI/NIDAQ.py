@@ -365,5 +365,3 @@ class DAQ(DAQBase):
         self.master_trigger_task.close()
 
 
-if __name__ == "__main__":
-    print("Testing Mode - WaveFormGenerator Class")

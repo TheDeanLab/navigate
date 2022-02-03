@@ -1,3 +1,9 @@
+# Standard Library Imports
+import os
+import time
+
+# Third Party Imports
+from tifffile import imsave
 
 # Local Imports
 from .aslm_model_functions import *
@@ -15,6 +21,9 @@ class Model:
         # Loads the YAML file for all of the experiment parameters
         self.experiment = session(experiment_path, args.verbose)
 
+        # Loads the YAML file for all of the ETL constants
+        self.etl_constants = session(etl_constants_path, args.verbose)
+
         # Initialize all Hardware
         if args.synthetic_hardware:
             # If command line entry provided, overwrites the model parameters with synthetic hardware
@@ -24,59 +33,85 @@ class Model:
             self.configuration.Devices['filter_wheel'] = 'SyntheticFilterWheel'
             self.configuration.Devices['stage'] = 'SyntheticStage'
             self.configuration.Devices['zoom'] = 'SyntheticZoom'
+            self.configuration.Devices['shutter'] = 'SyntheticShutter'
             self.configuration.Devices['lasers'] = 'SyntheticLasers'
 
-        self.cam = start_camera(self.configuration, 0, self.verbose)
+        self.camera = start_camera(self.configuration, self.experiment, self.verbose)
         self.stages = start_stages(self.configuration, self.verbose)
         self.filter_wheel = start_filter_wheel(self.configuration, self.verbose)
         self.zoom = start_zoom_servo(self.configuration, self.verbose)
-        self.daq = start_daq(self.configuration, etl_constants_path, self.verbose)
+        self.daq = start_daq(self.configuration, self.experiment, self.etl_constants, self.verbose)
         self.laser = start_lasers(self.configuration, self.verbose)
+        self.shutter = start_shutters(self.configuration, self.experiment, self.verbose)
         #self.etl = start_etl(self.configuration, self.verbose)
 
-    def continuous_acquisition_mode(channel_settings):
+    #  Basic Image Acquisition Functions
+    #  - These functions are used to acquire images from the camera
+    #  - Tasks for delivering analog and digital outputs are already initiated by the DAQ object
+    #  - daq.create_waveforms() calculates the waveforms and writes them to tasks.
+    #  - daq.start_tasks() starts the tasks, which then wait for an external trigger.
+    #  - daq.run_tasks() delivers the external trigger which synchronously starts the tasks and waits for completion.
+    #  - daq.stop_tasks() stops the tasks and cleans up.
+
+    def open_shutter(self):
         """
-        FOR ANNIE: We control different hardware elements using different mechanisms.  The laser is controlled by
-        The laser is turned on/off by sending a digital signal.  This is either 0V or 5V.  This signal is sent by the
-        daq card.  You can see in the configuration file where these signals are physically connected.
-        Likewise, the intensity is controlled by an analog signal.  0V is the lowest intensity and 5V is the highest.
-        We need to make sure that we do not send signals that are negative, or greater than 5V.  This is also specified
-        in the configuration file.
-
-        For example, the wavelength, laser_0_wavelength, is 488 nm.
-        The digital output channel for laser_0 is PXI6733/port0/line2
-        The analog output channel for laser_0 is PXI6733/line5.
-
-
-        Continuous acquisition mode.
-        channel_settings[ch] = [laser, filter, exposure, laser_power, interval]
-
-        Get the channel properties (laser, filter wheel, exposure time).
-        Set laser
-        Set the filter wheel
-        Set the exposure time
-        Prepare the data acquisition card (sends and receives voltages)
-        Once everything has prepared itself, send out the voltage that triggers the camera.
-
-
+        # Evaluates the experiment parameters and opens the proper shutter.
+        # 'low' is the low-resolution mode of the microscope, or the left shutter.
+        # 'high' is the high-resolution mode of the microscope, or the right shutter.
         """
-        # Determine the number of channels to image
-        number_of_channels = len(channel_settings)
+        resolution_mode = self.experiment.MicroscopeState['resolution_mode']
+        if resolution_mode == 'low':
+            self.shutter.open_left()
+        else:  # High Resolution Mode = Right
+            self.shutter.open_right()
 
-        # Set the laser.  Controlled by the DAQ card.  Delivered as  a digital signal for on/off, analog for intensity.
+    def close_shutter(self):
+        """
+        # Automatically closes both shutters
+        """
+        self.shutter.close_shutters()
 
-        # Set the filter wheel
-        self.filter_wheel.set_filter(channel_settings[0]['filter'])
+    def acquire_with_waveform_update(self):
+        """
+        # Acquires an image without updating the waveforms.
+        # Tasks are initialized during the daq __init__ function.
+        """
+        # Set the camera in a state where it can be triggered.
+        self.camera.set_exposure_time(self.experiment.MicroscopeState['channel_1']['camera_exposure_time']/1000)
+        self.camera.initialize_image_series()
 
-        # Set the exposure time - Need to make sure that the units are correct (milliseconds, microseconds, etc.)
-        self.camera.set_exposure(channel_settings[0]['exposure'])
+        # Change the Filter Wheel to the correct position
+        self.filter_wheel.set_filter(self.experiment.MicroscopeState['channel_1']['filter'])
 
-        # Prepare the data acquisition card (sends and receives voltages)
-        # self.daq.calculate_samples() # calculates how many data points
-        # self.daq.create_waveforms() # calculates the waveforms. Many of these values are stored in the View.
-        # self.daq.start_tasks() # starts the tasks.
+        # Specify the laser
+        self.daq.identify_laser_idx(self.experiment.MicroscopeState['channel_1']['laser'])
 
-        # Grab the image and send it to the view.
+        # Open the shutter as specified by the experiment parameters.
+        self.open_shutter()
+
+        # The NIDAQ tasks are initialized during the daq __init__ function.
+        # Not sure if we have to close them in order to get a fresh waveform.
+        # if so, self.daq.close_tasks() and self.daq.initialize_tasks() need to be called.
+        self.daq.create_waveforms()
+        self.daq.start_tasks()
+        self.daq.run_tasks()
+        self.daq.stop_tasks()
+
+        # Grab the image from the camera and save it.
+        image = self.camera.get_image()
+        self.save_test_image(image)
+
+        # Close the shutter
+        self.close_shutter()
+
+        # Disable the camera
+        self.camera.close_image_series()
+
+    def save_test_image(self, image):
+        save_path = os.path.join('E:', 'PLEASE', 'test.tif')
+        imsave(save_path, image)
+        if self.verbose:
+            print("Image saved")
 
     def load_experiment_file(self, experiment_path):
         # Loads the YAML file for all of the experiment parameters

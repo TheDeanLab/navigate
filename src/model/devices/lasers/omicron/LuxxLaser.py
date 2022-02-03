@@ -6,11 +6,12 @@ LIGHTHUB ULTRA, is COM20
 '''
 
 import serial
-import sys
 import re
 from time import time, sleep
 
-class LuxxLaser():
+from model.devices.lasers.LaserBase import LaserBase
+
+class LuxxLaser(LaserBase):
     def __init__(self, port='COM19', baudrate=500000):
         """
         # Open port (*auto* stands for **/dev/ttyUSB0** in Linux or **COM17**
@@ -290,7 +291,6 @@ class LuxxLaser():
         # Initialize lasers.
         # Sets the laser to the maximum power, and sets the mode to CW-APC.
         """
-        # self.set_autostart(True)
         self.set_power(self.pmax)
         self.set_mode("CW-APC") #  Analog, tried CW-APC
         self.start()

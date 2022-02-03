@@ -1,4 +1,3 @@
-from model.concurrency.concurrency_tools import ObjectInSubprocess
 import platform
 import sys
 
@@ -8,14 +7,12 @@ def start_camera(configuration, experiment, verbose):
     """
     # Hamamatsu Camera
     if configuration.Devices['camera'] == 'HamamatsuOrca' and platform.system() == 'Windows':
+        from model.concurrency.concurrency_tools import ObjectInSubprocess
         from model.devices.camera.Hamamatsu.HamamatsuCamera import Camera as CameraModel
         camera_id = 0
-        # @Annie - I still don't understand why this is throwing the __name__ error.
+        #  TODO: @Annie - I still don't understand why this is throwing the __name__ error.
         # cam = ObjectInSubprocess(camera_id, configuration, experiment, verbose)
         cam = CameraModel(camera_id, configuration, experiment, verbose)
-    elif configuration.Devices['camera'] == 'HamamatsuOrca' and platform.system() != 'Windows':
-        print("Hamamatsu Camera is only supported on Windows operating systems.")
-        sys.exit()
     elif configuration.Devices['camera'] == 'SyntheticCamera':
         from model.devices.camera.SyntheticCamera import Camera as CameraModel
         cam = CameraModel(0, verbose)
@@ -155,16 +152,11 @@ def start_shutters(configuration, experiment, verbose):
     # Initializes the shutters:
     """
     # ThorLabs shutters triggered via NI DAQ card.
-    if configuration.Devices['shutters'] == 'NI':
+    if configuration.Devices['shutters'] == 'NI' and platform.system() == 'Windows':
         from model.devices.shutters.NIShutter import NIShutter as ShutterModel
         shutter = ShutterModel(configuration, experiment, verbose)
-    elif configuration.Devices['shutters'] == 'SyntheticShutter':
+    else:
         from model.devices.shutters.SyntheticShutter import DemoShutter as ShutterModel
         shutter = ShutterModel(configuration, experiment, verbose)
-    else:
-        print("Shutter Type in Configuration.yml Not Recognized - Initialization Failed")
-        sys.exit()
-    if verbose:
-        print("Initialized ", configuration.Devices['shutters'])
     return shutter
 

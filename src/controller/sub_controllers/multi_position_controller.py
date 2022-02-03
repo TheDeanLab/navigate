@@ -27,6 +27,9 @@ class Multi_Position_Controller(GUI_Controller):
         for name in ['X', 'Y', 'Z', 'R', 'F']:
             data[name] = list(map(lambda pos: positions[pos][name], positions))
         self.table.model.df = pd.DataFrame(data)
+        self.table.redraw()
+
+        self.show_verbose_info('loaded new positions')
 
     def get_positions(self):
         '''

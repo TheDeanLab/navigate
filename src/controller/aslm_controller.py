@@ -249,20 +249,21 @@ class ASLM_controller():
         """
         if command == 'stage':
             # call the model to move stage
+            axis_dict = {
+                'x': 'X',
+                'y': 'Y',
+                'z': 'Z',
+                'theta': 'R',
+                'f': 'F'
+            }
             abs_postion = {
-                "{}_abs".format(args[1]): args[0]
+                axis_dict[args[1]]: args[0]
             }
             self.threads_pool.createThread('stage', self.model.stages.move_absolute, (abs_postion,))
             # self.model.stages.move_absolute(abs_postion)
         elif command == 'move_stage_and_update_info':
             # update stage view to show the position
             self.stage_gui_controller.set_position(args[0])
-            # call the model to move stage
-            abs_postion = {}
-            for axis in args[0]:
-                abs_postion[axis + '_abs'] = args[0][axis]
-            self.threads_pool.createThread('stage', self.model.stages.move_absolute, (abs_postion,))
-            # self.model.stages.move_absolte(abs_position)
         elif command == 'get_stage_position':
             return self.stage_gui_controller.get_position()
         elif command == 'image_mode':

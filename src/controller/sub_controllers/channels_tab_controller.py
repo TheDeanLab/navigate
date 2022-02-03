@@ -268,6 +268,12 @@ class Channels_Tab_Controller(GUI_Controller):
 
     def generate_positions(self):
         self.multi_position_controller.generate_positions_func()
+
+    def set_positions(self, positions):
+        self.multi_position_controller.set_positions(positions)
+
+    def get_positions(self):
+        return self.multi_position_controller.get_positions()
     
     def set_info(self, vals, values):
         '''

@@ -114,7 +114,7 @@ class Stage_GUI_Controller(GUI_Controller):
         """
         # This function is to populate(set) step sizes
         # steps should be a dict
-        # {'x': value, 'z': value, 'theta': value, 'f': value}
+        # {'xy': value, 'z': value, 'theta': value, 'f': value}
         """
         for axis in steps:
             val = self.get_step_val(axis)
@@ -122,6 +122,21 @@ class Stage_GUI_Controller(GUI_Controller):
                 val.set(steps[axis])
 
         self.show_verbose_info('set step size')
+
+    def get_step_size(self):
+        '''
+        # This function returns step sizes as a dictionary
+        # {
+        #    'xy': ,
+        #    'z': ,
+        #    'theta': ,
+        #    'f': 
+        # }
+        '''
+        step_size = {}
+        for axis in ['xy', 'z', 'theta', 'f']:
+            step_size[axis] = self.get_step_val(axis).get()
+        return step_size
 
     def up_btn_handler(self, axis):
         """
@@ -209,15 +224,14 @@ class Stage_GUI_Controller(GUI_Controller):
         # get increment step variable accroding to axis name
         # axis can be: 'x', 'y', 'z', 'theta', 'f'
         """
-        if axis == 'x' or axis == 'y':
-            return self.view.x_y_frame.spinval
-        elif axis == 'z':
+        if axis == 'z':
             return self.view.z_frame.spinval
         elif axis == 'theta':
             return self.view.theta_frame.spinval
         elif axis == 'f':
             return self.view.focus_frame.spinval
-        return None
+        else:
+            return self.view.x_y_frame.spinval
 
     def get_position_val(self, axis):
         """

@@ -33,8 +33,8 @@ class Model:
             self.configuration.Devices['filter_wheel'] = 'SyntheticFilterWheel'
             self.configuration.Devices['stage'] = 'SyntheticStage'
             self.configuration.Devices['zoom'] = 'SyntheticZoom'
-            self.configuration.Devices['laser'] = 'SyntheticLaser'
             self.configuration.Devices['shutter'] = 'SyntheticShutter'
+            self.configuration.Devices['lasers'] = 'SyntheticLasers'
 
         self.camera = start_camera(self.configuration, self.experiment, self.verbose)
         self.stages = start_stages(self.configuration, self.verbose)

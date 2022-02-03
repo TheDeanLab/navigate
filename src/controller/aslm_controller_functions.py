@@ -2,19 +2,18 @@
            #'start_filter_wheel', 'start_lasers', 'start_model']
 
 # Standard library imports
-import sys
 from datetime import datetime
 import os
 
 # Third party imports
-import numpy as np
+
 
 def create_save_path(saving_settings, verbose=False):
-    '''
+    """
     # haven't finished
     # This function retrieves the user inputs from the popup save window.
     # It then creates a new directory in the user specified path.
-    '''
+    """
     root_directory = saving_settings['root_directory']
     user_string = saving_settings['user']
     tissue_string = saving_settings['tissue']
@@ -54,6 +53,7 @@ def create_save_path(saving_settings, verbose=False):
     saving_settings['date'] = date_string
 
     return save_directory
+
 
 def save_experiment_file(file_directory, experiment, filename='experiment.yml'):
     try:

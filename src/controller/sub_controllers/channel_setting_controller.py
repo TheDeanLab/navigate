@@ -91,7 +91,11 @@ class Channel_Setting_Controller(GUI_Controller):
             channel_vals = self.get_vals_by_channel(i)
             # if this channel is selected, then get all the settings of it
             if channel_vals['is_selected'].get():
-                temp = {
+                if len(channel_vals['camera_exposure_time'].get()) == 0:
+                    #  Empty string throws an error
+                    pass
+                else:
+                    temp = {
                     'is_selected': True,
                     'laser': channel_vals['laser'].get(),
                     'laser_index': self.get_index('laser', channel_vals['laser'].get()), 
@@ -100,8 +104,8 @@ class Channel_Setting_Controller(GUI_Controller):
                     'camera_exposure_time': int(channel_vals['camera_exposure_time'].get()),
                     'laser_power': channel_vals['laser_power'].get(),
                     'interval_time': channel_vals['interval_time'].get()
-                }
-                channel_settings[prefix+str(i+1)] = temp
+                    }
+                    channel_settings[prefix+str(i+1)] = temp
         return channel_settings
 
     def channel_callback(self, channel_id, widget_name):

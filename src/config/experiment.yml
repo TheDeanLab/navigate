@@ -30,6 +30,7 @@ RemoteFocusParameters:
   remote_focus_l_ramp_falling_percent: 2.5
   remote_focus_l_amplitude: 0.7
   remote_focus_l_offset: 2.3
+
   remote_focus_r_delay_percent: 7.5
   remote_focus_r_ramp_rising_percent: 85
   remote_focus_r_ramp_falling_percent: 2.5
@@ -54,6 +55,7 @@ StageParameters:
   f: 70000.0
 
 MicroscopeState:
+  resolution_mode: low
   image_mode: z-stack
   fiber: 0
   zoom_position: 1

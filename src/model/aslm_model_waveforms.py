@@ -89,18 +89,18 @@ def tunable_lens_ramp(samplerate=100000, sweeptime=0.4, delay=7.5,
     return np.array(array)
 
 def sawtooth(samplerate=100000, sweeptime=0.4, frequency=10, amplitude=1,
-             offset=0, dutycycle=50, phase=np.pi/2):
+             offset=0, duty_cycle=50, phase=np.pi/2):
     '''
     Returns a numpy array with a sawtooth function. Used for creating the galvo signal. Example:
     galvosignal =  sawtooth(100000, 0.4, 199, 3.67, 0, 50, np.pi)
     '''
 
-    samples =  int(samplerate*sweeptime)
-    dutycycle = dutycycle/100       # the signal.sawtooth width parameter has to be between 0 and 1
-    t = np.linspace(0, sweeptime, samples)
+    samples = samplerate*sweeptime
+    duty_cycle = duty_cycle/100       # the signal.sawtooth width parameter has to be between 0 and 1
+    t = np.linspace(0, int(sweeptime), int(samples))
 
     # Using the signal toolbox from scipy for the sawtooth:
-    waveform = signal.sawtooth(2 * np.pi * frequency * t + phase, width=dutycycle)
+    waveform = signal.sawtooth(2 * np.pi * frequency * t + phase, width=duty_cycle)
 
     # Scale the waveform to a certain amplitude and apply an offset:
     waveform = amplitude * waveform + offset
@@ -119,14 +119,14 @@ def dc_value(samplerate=100000, sweeptime=0.4, amplitude=1, offset=0):
     return waveform
 
 def square(samplerate=100000, sweeptime=0.4, frequency=10,
-           amplitude=1, offset=0, dutycycle=50, phase=np.pi):
+           amplitude=1, offset=0, duty_cycle=50, phase=np.pi):
     # Returns a numpy array with a rectangular waveform
     samples =  int(samplerate*sweeptime)
-    dutycycle = dutycycle/100       # the signal.square duty parameter has to be between 0 and 1
+    duty_cycle = duty_cycle/100       # the signal.square duty parameter has to be between 0 and 1
     t = np.linspace(0, sweeptime, samples)
 
     # Using the signal toolbox from scipy for the sawtooth:
-    waveform = signal.square(2 * np.pi * frequency * t + phase, duty=dutycycle)
+    waveform = signal.square(2 * np.pi * frequency * t + phase, duty=duty_cycle)
     
     # Scale the waveform to a certain amplitude and apply an offset:
     waveform = amplitude * waveform + offset

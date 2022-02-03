@@ -1,24 +1,5 @@
-""" Module for controlling a shutter via NI-DAQmx
-Author: Fabian Voigt
-TODO: Why is this not in the WaveformGenerator module?
-"""
-
 import nidaqmx
 from nidaqmx.constants import LineGrouping
-
-class DemoShutter:
-    def __init__(self, shutterline):
-        self.shutterline =  shutterline
-        self.shutterstate = False
-
-    def open(self, *args):
-        self.shutterstate = True
-
-    def close(self, *args):
-        self.shutterstate = False
-
-    def state(self, *args):
-        return self.shutterstate
 
 
 class NIShutter:
@@ -34,29 +15,60 @@ class NIShutter:
 
     https://nidaqmx-python.readthedocs.io/en/latest/do_channel_collection.html#nidaqmx._task_modules.do_channel_collection.DOChannelCollection
     """
-    def __init__(self, shutterline):
-        self.shutterline =  shutterline
+    def __init__(self, model, experiment, verbose=False):
+        self.model = model
+        self.experiment = experiment
+        self.verbose = verbose
 
-        # Make sure that the Shutter is closed upon initialization
-        with nidaqmx.Task() as task:
-            task.do_channels.add_do_chan(self.shutterline,line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
-            task.write([False], auto_start=True)
-            self.shutterstate = False
+        # Right Shutter - High Resolution Mode
+        self.shutter_right = self.model.DAQParameters['shutter_right']
+        self.shutter_right_state = False
+        self.shutter_right_task = nidaqmx.Task()
+        self.shutter_right_task.do_channels.add_do_chan(self.shutter_right,
+                                                        line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
+        self.shutter_right_task.write(self.shutter_right_state, auto_start=True)
 
-    # Open and close shutter take an optional argument to deal with the on_click method of Jupyter Widgets
+        # Left Shutter - Low Resolution Mode
+        self.shutter_left = self.model.DAQParameters['shutter_left']
+        self.shutter_left_state = False
+        self.shutter_left_task = nidaqmx.Task()
+        self.shutter_left_task.do_channels.add_do_chan(self.shutter_left,
+                                                        line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
+        self.shutter_left_task.write(self.shutter_left_state, auto_start=True)
 
-    def open(self, *args):
-        with nidaqmx.Task() as task:
-            task.do_channels.add_do_chan(self.shutterline,line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
-            task.write([True], auto_start=True)
-            self.shutterstate = True
+    def __del__(self):
+        self.shutter_right_task.close()
+        self.shutter_left_task.close()
 
-    def close(self, *args):
-        with nidaqmx.Task() as task:
-            task.do_channels.add_do_chan(self.shutterline,line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
-            task.write([False], auto_start=True)
-            self.shutterstate = False
+    def open_left(self, *args):
+        self.shutter_right_state = False
+        self.shutter_right_task.write(self.shutter_right_state, auto_start=True)
+
+        self.shutter_left_state = True
+        self.shutter_left_task.write(self.shutter_left_state, auto_start=True)
+
+        if self.verbose:
+            print('Shutter left opened')
+
+    def open_right(self, *args):
+        self.shutter_right_state = True
+        self.shutter_right_task.write(self.shutter_right_state, auto_start=True)
+
+        self.shutter_left_state = False
+        self.shutter_left_task.write(self.shutter_left_state, auto_start=True)
+
+        if self.verbose:
+            print('Shutter left opened')
+
+    def close_shutters(self, *args):
+        self.shutter_right_state = False
+        self.shutter_right_task.write(self.shutter_right_state, auto_start=True)
+
+        self.shutter_left_state = False
+        self.shutter_left_task.write(self.shutter_left_state, auto_start=True)
+
+        if self.verbose:
+            print('Both shutters closed')
 
     def state(self, *args):
-        """ Returns "True" if the shutter is open, otherwise "False" """
-        return self.shutterstate
+        return self.shutter_left_state, self.shutter_right_state

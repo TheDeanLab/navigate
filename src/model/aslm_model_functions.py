@@ -1,25 +1,21 @@
-from model.concurrency.concurrency_tools import ObjectInSubprocess
 import platform
 import sys
 
-def start_camera(configuration, camera_id, verbose):
+def start_camera(configuration, experiment, verbose):
     """
     # Initializes the camera as a sub-process using concurrency tools.
     """
     # Hamamatsu Camera
     if configuration.Devices['camera'] == 'HamamatsuOrca' and platform.system() == 'Windows':
+        from model.concurrency.concurrency_tools import ObjectInSubprocess
         from model.devices.camera.Hamamatsu.HamamatsuCamera import Camera as CameraModel
-        cam = ObjectInSubprocess(CameraModel, camera_id, verbose) #Do we still need to do this when we have the thread pool? Or do we need both? Have not investigated yet
-        cam.initialize_camera()
-        cam.set_exposure(configuration.CameraParameters['exposure_time'])
-    elif configuration.Devices['camera'] == 'HamamatsuOrca' and platform.system() != 'Windows':
-        print("Hamamatsu Camera is only supported on Windows operating systems.")
-        sys.exit()
+        camera_id = 0
+        #  TODO: @Annie - I still don't understand why this is throwing the __name__ error.
+        # cam = ObjectInSubprocess(camera_id, configuration, experiment, verbose)
+        cam = CameraModel(camera_id, configuration, experiment, verbose)
     elif configuration.Devices['camera'] == 'SyntheticCamera':
         from model.devices.camera.SyntheticCamera import Camera as CameraModel
         cam = CameraModel(0, verbose)
-        cam.initialize_camera()
-        cam.set_exposure(1000*configuration.CameraParameters['exposure_time'])
     else:
         print("Camera Type in Configuration.yml Not Recognized - Initialization Failed")
         sys.exit()
@@ -134,16 +130,16 @@ def start_lasers(configuration, verbose):
 
     return laser
 
-def start_daq(configuration, etl_constants_path, verbose):
+def start_daq(configuration, experiment, etl_constants, verbose):
     """
     # Start the data acquisition device (DAQ):  NI or SyntheticDAQ
     """
     if configuration.Devices['daq'] == 'NI':
         from model.devices.daq.NI.NIDAQ import DAQ as DAQModel
-        daq = DAQModel(configuration, etl_constants_path, verbose)
+        daq = DAQModel(configuration, experiment, etl_constants, verbose)
     elif configuration.Devices['daq'] == 'SyntheticDAQ':
         from model.devices.daq.SyntheticDAQ import DAQ as DAQModel
-        daq = DAQModel(configuration, etl_constants_path, verbose)
+        daq = DAQModel(configuration, experiment, etl_constants, verbose)
     else:
         print("DAQ Type in Configuration.yml Not Recognized - Initialization Failed")
         sys.exit()
@@ -151,4 +147,16 @@ def start_daq(configuration, etl_constants_path, verbose):
         print("Initialized ", configuration.Devices['daq'])
     return daq
 
+def start_shutters(configuration, experiment, verbose):
+    """
+    # Initializes the shutters:
+    """
+    # ThorLabs shutters triggered via NI DAQ card.
+    if configuration.Devices['shutters'] == 'NI' and platform.system() == 'Windows':
+        from model.devices.shutters.NIShutter import NIShutter as ShutterModel
+        shutter = ShutterModel(configuration, experiment, verbose)
+    else:
+        from model.devices.shutters.SyntheticShutter import DemoShutter as ShutterModel
+        shutter = ShutterModel(configuration, experiment, verbose)
+    return shutter
 

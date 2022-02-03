@@ -84,22 +84,22 @@ class Stage_GUI_Controller(GUI_Controller):
         self.position_min = position_min
         self.position_max = position_max
 
-    def set_position(self, postion):
+    def set_position(self, position):
         """
         # This function is to populate(set) position
         # position should be a dict
         # {'x': value, 'y': value, 'z': value, 'theta': value, 'f': value}
         """
-        for axis in postion:
+        for axis in position:
             val = self.get_position_val(axis)
             if val:
-                val.set(postion[axis])
+                val.set(position[axis])
         
         self.show_verbose_info('set stage position')
 
     def get_position(self):
         """
-        # This function returns current postion
+        # This function returns current position
         """
         position = {
             'x': self.get_position_val('x').get(),
@@ -190,7 +190,7 @@ class Stage_GUI_Controller(GUI_Controller):
 
     def xy_zero_btn_handler(self):
         """
-        # This function generates command functions to set xy postion to zero
+        # This function generates command functions to set xy position to zero
         """
         x_val = self.get_position_val('x')
         y_val = self.get_position_val('y')

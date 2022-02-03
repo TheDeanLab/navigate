@@ -3,6 +3,7 @@ NI Synthetic DAQ Class
 """
 
 # Standard Imports
+import numpy as np
 
 # Local Imports
 from model.aslm_model_waveforms import tunable_lens_ramp, sawtooth, dc_value, single_pulse
@@ -75,8 +76,9 @@ class DAQ(DAQBase):
         self.laser_max_ao = self.model.LaserParameters['laser_max_ao']
         self.laser_min_do = self.model.LaserParameters['laser_min_do']
         self.laser_max_do = self.model.LaserParameters['laser_max_do']
-        self.fiber_idx = self.experiment.MicroscopeState['fiber']
         self.laser_power = 0
+        self.resolution_mode = self.experiment.MicroscopeState['resolution_mode']
+
 
     def calculate_samples(self):
         """
@@ -174,7 +176,7 @@ class DAQ(DAQBase):
         # 0V is the left fiber, 5V is the right.
         """
         self.calculate_samples()
-        if self.fiber_idx == 0:
+        if self.resolution_mode == 'low':
             amplitude = self.model.LaserParameters['laser_min_do']
         else:
             amplitude = self.model.LaserParameters['laser_max_do']

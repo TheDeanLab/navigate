@@ -15,7 +15,8 @@ def start_camera(configuration, experiment, verbose):
         cam = CameraModel(camera_id, configuration, experiment, verbose)
     elif configuration.Devices['camera'] == 'SyntheticCamera':
         from model.devices.camera.SyntheticCamera import Camera as CameraModel
-        cam = CameraModel(0, verbose)
+        camera_id = 0
+        cam = CameraModel(camera_id, configuration, experiment, verbose)
     else:
         print("Camera Type in Configuration.yml Not Recognized - Initialization Failed")
         sys.exit()

@@ -27,7 +27,7 @@ class SyntheticFilterWheel(FilterWheelBase):
         """
         # Change the filter wheel to the filter designated by the filterposition argument.
         """
-        if self._check_if_filter_in_filterdict(filter) is True:
+        if self.check_if_filter_in_filterdict(filter) is True:
             if self.verbose:
                 print('Filter set to: ', str(filter))
             if wait_until_done:

@@ -190,7 +190,7 @@ class Stage(StageBase):
         '''
 
         if 'x_abs' in dict:
-            x_abs = dict['x_abs']
+            x_abs = dict['X']
             x_abs = x_abs - self.int_x_pos_offset
             if self.x_min < x_abs and self.x_max > x_abs:
                 ''' Conversion to mm and command emission'''
@@ -200,7 +200,7 @@ class Stage(StageBase):
                 print('Absolute movement stopped: X Motion limit would be reached!', 1000)
 
         if 'y_abs' in dict:
-            y_abs = dict['y_abs']
+            y_abs = dict['Y']
             y_abs = y_abs - self.int_y_pos_offset
             if self.y_min < y_abs and self.y_max > y_abs:
                 ''' Conversion to mm and command emission'''
@@ -210,7 +210,7 @@ class Stage(StageBase):
                 print('Absolute movement stopped: Y Motion limit would be reached!', 1000)
 
         if 'z_abs' in dict:
-            z_abs = dict['z_abs']
+            z_abs = dict['Z']
             z_abs = z_abs - self.int_z_pos_offset
             if self.z_min < z_abs and self.z_max > z_abs:
                 ''' Conversion to mm and command emission'''
@@ -220,7 +220,7 @@ class Stage(StageBase):
                 print('Absolute movement stopped: Z Motion limit would be reached!', 1000)
 
         if 'f_abs' in dict:
-            f_abs = dict['f_abs']
+            f_abs = dict['F']
             f_abs = f_abs - self.int_f_pos_offset
             if self.f_min < f_abs and self.f_max > f_abs:
                 ''' Conversion to mm and command emission'''
@@ -230,7 +230,7 @@ class Stage(StageBase):
                 print('Absolute movement stopped: F Motion limit would be reached!', 1000)
 
         if 'theta_abs' in dict:
-            theta_abs = dict['theta_abs']
+            theta_abs = dict['R']
             theta_abs = theta_abs - self.int_theta_pos_offset
             if self.theta_min < theta_abs and self.theta_max > theta_abs:
                 ''' No Conversion to mm !!!! and command emission'''

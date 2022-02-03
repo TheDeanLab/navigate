@@ -82,7 +82,7 @@ class DAQ(DAQBase):
         self.laser_max_ao = self.model.LaserParameters['laser_max_ao']
         self.laser_min_do = self.model.LaserParameters['laser_min_do']
         self.laser_max_do = self.model.LaserParameters['laser_max_do']
-        self.fiber_idx = self.experiment.MicroscopeState['fiber']
+        self.resolution_mode = self.experiment.MicroscopeState['resolution_mode']
         self.laser_power = 0
         self.laser_idx = 0
 
@@ -198,7 +198,7 @@ class DAQ(DAQBase):
         # 0V is the left fiber, 5V is the right.
         """
         self.calculate_samples()
-        if self.fiber_idx == 0:
+        if self.resolution_mode == 'low':
             amplitude = self.model.LaserParameters['laser_min_do']
         else:
             amplitude = self.model.LaserParameters['laser_max_do']

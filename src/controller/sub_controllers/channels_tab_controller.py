@@ -117,9 +117,9 @@ class Channels_Tab_Controller(GUI_Controller):
         # }
         '''
         # Calculate the number of slices and set GUI
-        start_position = np.float(self.stack_acq_vals['start_position'].get())
-        end_position = np.float(self.stack_acq_vals['end_position'].get())
-        step_size = np.float(self.stack_acq_vals['step_size'].get())
+        start_position = float(self.stack_acq_vals['start_position'].get())
+        end_position = float(self.stack_acq_vals['end_position'].get())
+        step_size = float(self.stack_acq_vals['step_size'].get())
         if step_size < 0.001:
             step_size = 0.001
             self.stack_acq_vals['step_size'].set(step_size)

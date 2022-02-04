@@ -234,7 +234,7 @@ def entropy_shannon_sub_triangle_2D(normalized_array, OTF_support_x, OTF_support
     
     (p_height, p_width) = normalized_array.shape    
     for y in range(int(OTF_support_y)):
-        yi = np.int(y * p_width)
+        yi = int(y * p_width)
         xend = OTF_support_x - y * (OTF_support_x/OTF_support_y)
 
         for x in range(int(xend)):

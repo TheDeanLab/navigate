@@ -20,7 +20,7 @@ class ASLM_Configuration_Controller:
         '''
         # Populates the laser combobox with the lasers that are available in the model.configuration
         '''
-        number_of_lasers = np.int(self.configuration.LaserParameters['number_of_lasers'])
+        number_of_lasers = int(self.configuration.LaserParameters['number_of_lasers'])
         laser_list = []
         for i in range(number_of_lasers):
             laser_wavelength = self.configuration.LaserParameters['laser_'+str(i)+'_wavelength']

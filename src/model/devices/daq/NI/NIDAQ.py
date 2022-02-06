@@ -265,7 +265,7 @@ class DAQ(DAQBase):
 
     def write_waveforms_to_tasks(self):
         """
-        # Write the waveforms to the slave tasks
+        # Write the galvo, etl, and laser waveforms to the NI DAQ tasks
         """
         self.galvo_etl_task.write(self.galvo_and_etl_waveforms)
         self.laser_task.write(self.laser_ao_waveforms)

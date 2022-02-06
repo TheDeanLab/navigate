@@ -46,6 +46,15 @@ class Model:
         self.shutter = start_shutters(self.configuration, self.experiment, self.verbose)
         #self.etl = start_etl(self.configuration, self.verbose)
 
+        # Acquisition Housekeeping
+        self.stop_flag = False
+        self.image_count = 0
+        self.acquisition_count = 0
+        self.total_acquisition_count = None
+        self.total_image_count = None
+        self.start_time = None
+        self.image_acq_start_time_string = time.strftime("%Y%m%d-%H%M%S")
+
     #  Basic Image Acquisition Functions
     #  - These functions are used to acquire images from the camera
     #  - Tasks for delivering analog and digital outputs are already initiated by the DAQ object
@@ -72,11 +81,138 @@ class Model:
         """
         self.shutter.close_shutters()
 
-    def calculate_number_of_channels(self):
-        channel_state = self.experiment.MicroscopeState['channels']
+    def snap_image(self):
+        """
+        # Snaps a single image after updating the waveforms.
+        #
+        # Can be used in acquisitions where changing waveforms are required,
+        # but there is additional overhead due to the need to write the
+        # waveforms into the buffers of the NI cards.
+        #
+        """
 
-    def acquire_live_image(self):
-        pass
+        self.daq.create_tasks()
+        self.daq.write_waveforms_to_tasks()
+        self.daq.start_tasks()
+        self.daq.run_tasks()
+        self.daq.stop_tasks()
+        self.daq.close_tasks()
+
+    def prepare_image_series(self):
+        """
+        #  Prepares an image series without waveform update
+        """
+        self.daq.create_tasks()
+        self.daq.write_waveforms_to_tasks()
+
+    def snap_image_in_series(self):
+        """
+        # Snaps and image from a series without waveform update
+        """
+        self.daq.start_tasks()
+        self.daq.run_tasks()
+        self.daq.stop_tasks()
+
+    def close_image_series(self):
+        """
+        #  Cleans up after series without waveform update
+        """
+        self.daq.close_tasks()
+
+    def live(self):
+        """
+        #  Stream live image to the GUI.
+        #  Recalculates the waveforms for each image, thereby allowing people to adjust
+        #  acquisition parameters in real-time.
+        """
+        self.stop_flag = False
+        self.open_shutter()
+        while self.stop_flag is False:
+            self.snap_image()
+        self.close_shutters()
+
+    def calculate_number_of_channels(self):
+        """
+        #  Calculates the total number of channels that are selected.
+        """
+        number_of_channels = 0
+        for channel_idx in range(len(self.experiment.MicroscopeState['channels'])):
+            # Check if it is selected.
+            if self.experiment.MicroscopeState['channels']['is_selected']:
+                number_of_channels = number_of_channels + 1
+        return number_of_channels
+
+    def prepare_acquisition_list(self):
+        """
+        #  Calculates the total number of acquisitions, images, etc.  Initializes the counters.
+        """
+
+        number_of_channels = self.calculate_number_of_channels()
+        number_of_positions = len(self.experiment.MicroscopeState['stage_positions'])
+        number_of_slices = self.experiment.MicroscopeState['number_z_steps']
+        number_of_time_points = self.experiment.MicroscopeState['timepoints']
+
+        self.image_count = 0
+        self.acquisition_count = 0
+        self.total_acquisition_count = number_of_channels * number_of_positions * number_of_time_points
+        self.total_image_count = self.total_acquisition_count * number_of_slices
+        self.start_time = time.time()
+
+    def run_acquisition(self, acq):
+        """
+        # Acquire all of the image volumes in the acquisition list.
+        # Meant more to be an example of how it was performed in the mesoSPIM software
+        """
+        self.prepare_acquisition_list()
+        self.open_shutter()
+
+        # for i in range(self.total_image_count):
+        #     if self.stopflag is True:
+        #         self.close_image_series()
+        #         break
+        #     else:
+        #         self.snap_image_in_series()
+        #         # move_dict = acq.get_delta_dict()
+        #         # f_step = self.f_step_generator.__next__()
+        #         if f_step != 0:
+        #             move_dict.update({'f_rel': f_step})
+        #
+        #         self.move_relative(move_dict)
+        #         self.image_count += 1
+        #
+        #         ''' Keep track of passed time and predict remaining time '''
+        #         time_passed = time.time() - self.start_time
+        #         # time_remaining = self.state['predicted_acq_list_time'] - time_passed
+        #
+        #         ''' If the time to set up everything is longer than the predicted
+        #         acq time, the remaining time turns negative - here a different
+        #         calculation should be employed here: '''
+        #         if time_remaining < 0:
+        #             time_passed = time.time() - self.image_acq_start_time
+        #             time_remaining = self.state['predicted_acq_list_time'] - time_passed
+        #
+        #         self.state['remaining_acq_list_time'] = time_remaining
+        #         framerate = self.image_count / time_passed
+        #
+        #         ''' Every 100 images, update the predicted acquisition time '''
+        #         if self.image_count % 100 == 0:
+        #             framerate = self.image_count / time_passed
+        #             self.state['predicted_acq_list_time'] = self.total_image_count / framerate
+        #
+        #
+        #         self.send_progress(self.acquisition_count,
+        #                            self.total_acquisition_count,
+        #                            i,
+        #                            self.total_image_count,
+        #                            self.total_image_count,
+        #                            self.image_count,
+        #                            convert_seconds_to_string(time_passed),
+        #                            convert_seconds_to_string(time_remaining))
+        #
+        # self.image_acq_end_time = time.time()
+        # self.image_acq_end_time_string = time.strftime("%Y%m%d-%H%M%S")
+
+        self.close_shutters()
 
     def acquire_z_stack(self):
         microscope_state = self.experiment.MicroscopeState
@@ -92,7 +228,7 @@ class Model:
                 microscope_position = microscope_state['stage_positions'][position_idx]
                 self.stages.move_absolute(microscope_position)
 
-                if microscope_state['stack_cycling_mode']  == 'per_stack':
+                if microscope_state['stack_cycling_mode'] == 'per_stack':
                     for channel_idx in range(len(microscope_state['channels'])):
                         # Check if it is selected.
                         if microscope_state['channels']['is_selected']:

@@ -2,12 +2,14 @@
 Filterwheel Base Class
 """
 
-class FilterWheelBase():
+
+class FilterWheelBase:
     def __init__(self, model, verbose):
         self.comport = model.FilterWheelParameters['filter_wheel_port']
         self.baudrate = model.FilterWheelParameters['baudrate']
         self.filterdict = model.FilterWheelParameters['available_filters']
         self.number_of_filter_wheels = model.FilterWheelParameters['number_of_filter_wheels']
+        self.wheel_position = 0
         self.verbose = verbose
 
     def check_if_filter_in_filterdict(self, filterposition):
@@ -17,7 +19,7 @@ class FilterWheelBase():
         """
         print("FilterWheelBase: Not Implemented")
 
-    def set_filter(self, filterposition=0, speed=2, wait_until_done=False):
+    def set_filter(self, filterposition, speed=2, wait_until_done=False):
         """
         # Change the filter wheel to the filter designated by the filterposition argument.
         """

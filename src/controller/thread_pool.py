@@ -1,6 +1,7 @@
 import threading
 from collections import deque
 
+
 class SelfLockThread(threading.Thread):
     def __init__(self, group=None, target=None, name=None, args=(), kwargs={}, *, daemon=None):
         super().__init__(group, target, name, args, kwargs, daemon=daemon)
@@ -22,6 +23,7 @@ class SelfLockThread(threading.Thread):
 
     def isLocked(self):
         return self.selfLock.locked()
+
 
 class SynchronizedThreadPool:
     def __init__(self):
@@ -64,6 +66,7 @@ class SynchronizedThreadPool:
             if callback:
                 callback(*cbArgs, **cbKargs)
         return func
+
 
 class ThreadWaitlist:
     def __init__(self):

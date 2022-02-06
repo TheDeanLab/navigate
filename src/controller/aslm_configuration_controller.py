@@ -1,13 +1,11 @@
-import numpy as np
-
 class ASLM_Configuration_Controller:
     def __init__(self, configuration):
         self.configuration = configuration
 
     def get_channels_info(self, verbose=False):
-        '''
+        """
         # Populates the channel combobox with the channels that are available in the model.configuration
-        '''
+        """
 
         setting = {
             'laser': self.get_lasers_info(verbose),
@@ -17,9 +15,9 @@ class ASLM_Configuration_Controller:
         return setting
 
     def get_lasers_info(self, verbose=False):
-        '''
+        """
         # Populates the laser combobox with the lasers that are available in the model.configuration
-        '''
+        """
         number_of_lasers = int(self.configuration.LaserParameters['number_of_lasers'])
         laser_list = []
         for i in range(number_of_lasers):
@@ -30,23 +28,23 @@ class ASLM_Configuration_Controller:
         return laser_list
 
     def get_stage_position(self):
-        '''
+        """
         # Returns the current position of the stage
-        '''
-        stage_postion = self.configuration.StageParameters['position']
+        """
+        stage_position = self.configuration.StageParameters['position']
         position = {
-            'x': stage_postion['x_pos'],
-            'y': stage_postion['y_pos'],
-            'z': stage_postion['z_pos'],
-            'theta': stage_postion['theta_pos'],
-            'f': stage_postion['f_pos']
+            'x': stage_position['x_pos'],
+            'y': stage_position['y_pos'],
+            'z': stage_position['z_pos'],
+            'theta': stage_position['theta_pos'],
+            'f': stage_position['f_pos']
         }
         return position
 
     def get_stage_step(self):
-        '''
+        """
         # Returns the step size of the stage
-        '''
+        """
         steps = {
             'x': self.configuration.StageParameters['xy_step'],
             'z': self.configuration.StageParameters['z_step'],
@@ -56,9 +54,9 @@ class ASLM_Configuration_Controller:
         return steps
 
     def get_stage_position_limits(self, suffix):
-        '''
+        """
         # Returns the position limits of the stage
-        '''
+        """
         axis = ['x', 'y', 'z', 'theta', 'f']
         position_limits = {}
         for a in axis:

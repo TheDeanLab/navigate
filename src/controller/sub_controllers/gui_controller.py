@@ -1,5 +1,5 @@
 class GUI_Controller:
-    def __init__(self, view, parent_controller = None, verbose=False):
+    def __init__(self, view, parent_controller=None, verbose=False):
         self.view = view
         self.parent_controller = parent_controller
         self.verbose = verbose

@@ -1,6 +1,6 @@
 """
-This is the controller in an MVC-scheme for mediating the interaction between the View (GUI) and the model (./model/aslm_model.py).
-Use: https://www.python-course.eu/tkinter_events_binds.php
+This is the controller in an MVC-scheme for mediating the interaction between the View (GUI) and the model
+(./model/aslm_model.py). Use: https://www.python-course.eu/tkinter_events_binds.php
 """
 
 from pathlib import Path
@@ -18,13 +18,12 @@ from controller.sub_controllers.camera_view_controller import Camera_View_Contro
 from controller.aslm_configuration_controller import ASLM_Configuration_Controller
 from controller.aslm_controller_functions import *
 from controller.thread_pool import SynchronizedThreadPool
-import time
 
 # Local Model Imports
 from model.aslm_model import Model
 
 
-class ASLM_controller():
+class ASLM_controller:
     def __init__(self, root, configuration_path, experiment_path, etl_constants_path, args):
         self.verbose = args.verbose
 
@@ -79,7 +78,6 @@ class ASLM_controller():
 
         # Advanced Tab
 
-
     def initialize_channels(self, configuration_controller):
         """
         # set some other information needed by channels_tab_controller
@@ -106,22 +104,20 @@ class ASLM_controller():
         self.stage_gui_controller.set_position_limits(position_min, position_max)
 
     def initialize_menus(self):
-        '''
+        """
         # this function defines all the menus in the menubar
-        '''
+        """
         def new_experiment():
             self.populate_experiment_setting(self.default_experiment_file)
 
         def load_experiment():
-            filename = filedialog.askopenfilenames(defaultextension='.yml', \
-                                        filetypes=[('Yaml files', '*.yml')])
+            filename = filedialog.askopenfilenames(defaultextension='.yml', filetypes=[('Yaml files', '*.yml')])
             if not filename:
                 return
             self.populate_experiment_setting(filename[0])
 
         def save_experiment():
-            filename = filedialog.asksaveasfilename(defaultextension='.yml', \
-                                        filetypes=[('Yaml file', '*.yml')])
+            filename = filedialog.asksaveasfilename(defaultextension='.yml', filetypes=[('Yaml file', '*.yml')])
             if not filename:
                 return
             # update model.experiment and save it to file
@@ -135,12 +131,12 @@ class ASLM_controller():
                 'Save Experiment': save_experiment
             },
             self.view.menubar.menu_multi_positions: {
-            'Load Positions': self.channels_tab_controller.load_positions,
-            'Export Positions': self.channels_tab_controller.export_positions,
-            'Append Current Position': self.channels_tab_controller.append_current_position,
-            'Generate Positions': self.channels_tab_controller.generate_positions,
-            'Move to Selected Position': self.channels_tab_controller.move_to_position,
-            # 'Sort Positions': ,
+                'Load Positions': self.channels_tab_controller.load_positions,
+                'Export Positions': self.channels_tab_controller.export_positions,
+                'Append Current Position': self.channels_tab_controller.append_current_position,
+                'Generate Positions': self.channels_tab_controller.generate_positions,
+                'Move to Selected Position': self.channels_tab_controller.move_to_position,
+                # 'Sort Positions': ,
             },
             self.view.menubar.menu_zoom: {
                 '1x': lambda: self.execute('zoom', 1),
@@ -149,6 +145,10 @@ class ASLM_controller():
                 '4x': lambda: self.execute('zoom', 4),
                 '5x': lambda: self.execute('zoom', 5),
                 '6x': lambda: self.execute('zoom', 6)
+            },
+            self.view.menubar.menu_resolution: {
+                'Mesoscale Mode': lambda: self.execute('resolution', 'low-res'),
+                'Nanoscale Mode': lambda: self.execute('resolution', 'high-res')
             }
         }
         for menu in menus_dict:
@@ -208,7 +208,8 @@ class ASLM_controller():
         for axis in ['x', 'y', 'z', 'theta', 'f']:
             position[axis] = self.model.experiment.StageParameters[axis]
         self.stage_gui_controller.set_position(position)
-        # Prepopulate the stage step size.
+
+        # Pre-populate the stage step size.
         step_size = {}
         for axis in ['xy', 'z', 'theta', 'f']:
             step_size[axis] = self.model.experiment.StageParameters[axis+'_step']
@@ -216,7 +217,6 @@ class ASLM_controller():
 
         # populate multi_positions
         self.channels_tab_controller.set_positions(self.model.experiment.MicroscopeState['stage_positions'])
-
 
     def update_experiment_setting(self):
         """
@@ -242,7 +242,6 @@ class ASLM_controller():
         for axis in step_size:
             self.model.experiment.StageParameters[axis+'_step'] = step_size[axis]
 
-
     def execute(self, command, *args):
         """
         # This function listens to sub_gui_controllers
@@ -261,20 +260,41 @@ class ASLM_controller():
             }
             self.threads_pool.createThread('stage', self.model.stages.move_absolute, (abs_postion,))
             # self.model.stages.move_absolute(abs_postion)
+
         elif command == 'move_stage_and_update_info':
             # update stage view to show the position
             self.stage_gui_controller.set_position(args[0])
+
         elif command == 'get_stage_position':
             return self.stage_gui_controller.get_position()
+
+        elif command == 'zoom':
+            self.model.zoom.set_zoom(args[0])
+            print("Zoom set to:", args[0])
+
+        elif command == 'resolution':
+            """
+            # Upon switching modes, we will need to:
+            #   - Initialize the second camera.
+            #   - Change the focus axis.
+            #   - Use a different remote focusing waveform.
+            #   - Open a different shutter.
+            """
+            print("Changing the Resolution Mode to:", args[0])
+
         elif command == 'image_mode':
             # tell channel the mode is changed
             self.channels_tab_controller.set_mode('instant' if args[0] == 'continuous' else 'uninstant')
+
             # update model.experiment
             self.model.experiment.MicroscopeState['image_mode'] = args[0]
+
             # set camera view mode to change
             self.camera_view_controller.set_mode('live' if args[0] == 'continuous' else 'stop')
+
         elif command == 'set_save':
             self.acquire_bar_controller.set_save_option(args[0])
+
         elif command == 'acquire_and_save':
             # create file directory
             file_directory = create_save_path(args[0], self.verbose)
@@ -282,11 +302,14 @@ class ASLM_controller():
             self.update_experiment_setting()
             save_experiment_file(file_directory, self.model.experiment.serialize())
             pass
+
         elif command == 'acquire':
             # TODO: according to image_mode to move devices
             # Create a thread for the camera to use to display live feed
-            self.threads_pool.createThread('camera', self.model.acquire_multiposition())
-            #self.threads_pool.createThread('camera', self.camera_view_controller.live_feed)
+            self.threads_pool.createThread('camera', self.model.acquire_with_waveform_update())
+            self.threads_pool.createThread('camera_display',
+                                           self.camera_view_controller.display_image(self.model.camera.image))
+            #  self.threads_pool.createThread('camera', self.camera_view_controller.live_feed)
 
         elif command == 'stop_acquire':
             # TODO: stop continuous acquire from camera

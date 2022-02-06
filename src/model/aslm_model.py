@@ -75,47 +75,82 @@ class Model:
     def calculate_number_of_channels(self):
         channel_state = self.experiment.MicroscopeState['channels']
 
-    def acquire_multiposition(self):
+    def acquire_live_image(self):
+        pass
+
+    def acquire_z_stack(self):
         microscope_state = self.experiment.MicroscopeState
         pass
 
-        # self.camera.initialize_image_series()
-        #
-        # for time_idx in range(microscope_state['timepoints']):
-        #     for position_idx in range(len(microscope_state['stage_positions'])):
-        #         print("Position :", position_idx)
-        #         microscope_position = microscope_state['stage_positions'][position_idx]
-        #         self.stages.move_absolute(microscope_position)
-        #
-        #         for channel_idx in range(len(microscope_state['channels'])):
-        #             # Check if it is selected.
-        #             if microscope_state['channels']['is_selected']:
-        #                 print("Channel :", channel_idx)
-        #                 self.camera.set_exposure_time(microscope_state['channels']
-        #                                               ['channel_' + str(channel_idx + 1)]
-        #                                               ['camera_exposure_time']/1000)
-        #                 self.filter_wheel.set_filter(microscope_state['channels']
-        #                                              ['channel_' + str(channel_idx + 1)]
-        #                                              ['filter'])
-        #                 self.daq.identify_laser_idx(self.experiment.MicroscopeState['channels']
-        #                                             ['channel_' + str(channel_idx + 1)]
-        #                                             ['laser'])
-        #                 self.open_shutter()
-        #                 self.daq.create_waveforms()
-        #                 self.daq.start_tasks()
-        #
-        #                 for z_idx in range(int(microscope_state['number_z_steps'])):
-        #                     print("Z slice :", z_idx)
-        #                     self.daq.run_tasks()
-        #                     image = self.camera.get_image()
-        #                     if microscope_state['is_save']:
-        #                         # Save the data.
-        #                         pass
-        #                     microscope_position['Z'] = microscope_position['Z'] + microscope_state['step_size']
-        #                     self.stages.move_absolute(microscope_position)
-        #
-        #             self.close_shutter()
-        # self.camera.close_image_series()
+        self.camera.initialize_image_series()
+
+        for time_idx in range(microscope_state['timepoints']):
+            #  TODO: Should evaluate if the multiposition checkbox is selected.
+            for position_idx in range(len(microscope_state['stage_positions'])):
+                if self.verbose:
+                    print("Position :", position_idx)
+                microscope_position = microscope_state['stage_positions'][position_idx]
+                self.stages.move_absolute(microscope_position)
+
+                if microscope_state['stack_cycling_mode']  == 'per_stack':
+                    for channel_idx in range(len(microscope_state['channels'])):
+                        # Check if it is selected.
+                        if microscope_state['channels']['is_selected']:
+                            print("Channel :", channel_idx)
+                            self.camera.set_exposure_time(microscope_state['channels']
+                                                          ['channel_' + str(channel_idx + 1)]
+                                                          ['camera_exposure_time']/1000)
+                            self.filter_wheel.set_filter(microscope_state['channels']
+                                                         ['channel_' + str(channel_idx + 1)]
+                                                         ['filter'])
+                            self.daq.identify_laser_idx(self.experiment.MicroscopeState['channels']
+                                                        ['channel_' + str(channel_idx + 1)]
+                                                        ['laser'])
+                            self.open_shutter()
+                            self.daq.create_waveforms()
+                            self.daq.start_tasks()
+
+                            for z_idx in range(int(microscope_state['number_z_steps'])):
+                                print("Z slice :", z_idx)
+                                self.daq.run_tasks()
+                                image = self.camera.get_image()
+                                if microscope_state['is_save']:
+                                    # Save the data.
+                                    pass
+                                microscope_position['Z'] = microscope_position['Z'] + microscope_state['step_size']
+                                self.stages.move_absolute(microscope_position)
+
+                        self.close_shutter()
+                elif microscope_state['stack_cycling_mode']  == 'per_z':
+                    for z_idx in range(int(microscope_state['number_z_steps'])):
+                        for channel_idx in range(len(microscope_state['channels'])):
+                            # Check if it is selected.
+                            if microscope_state['channels']['is_selected']:
+                                print("Channel :", channel_idx)
+                                self.camera.set_exposure_time(microscope_state['channels']
+                                                              ['channel_' + str(channel_idx + 1)]
+                                                              ['camera_exposure_time']/1000)
+                                self.filter_wheel.set_filter(microscope_state['channels']
+                                                             ['channel_' + str(channel_idx + 1)]
+                                                             ['filter'])
+                                self.daq.identify_laser_idx(self.experiment.MicroscopeState['channels']
+                                                            ['channel_' + str(channel_idx + 1)]
+                                                            ['laser'])
+                                self.open_shutter()
+                                self.daq.create_waveforms()
+                                self.daq.start_tasks()
+                                self.daq.run_tasks()
+                                image = self.camera.get_image()
+                                if microscope_state['is_save']:
+                                    # Save the data.
+                                    pass
+                                microscope_position['Z'] = microscope_position['Z'] + microscope_state['step_size']
+                                self.stages.move_absolute(microscope_position)
+                else:
+                    raise UserWarning('Stack Cycling Mode Not Recognized')
+                    break
+
+        self.camera.close_image_series()
 
     def acquire_with_waveform_update(self):
         """

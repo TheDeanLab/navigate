@@ -1,5 +1,6 @@
 from controller.sub_controllers.gui_controller import GUI_Controller
 
+
 class Channel_Setting_Controller(GUI_Controller):
     def __init__(self, view, parent_controller=None, verbose=False):
         super().__init__(view, parent_controller, verbose)
@@ -16,7 +17,6 @@ class Channel_Setting_Controller(GUI_Controller):
             for name in channel_vals:
                 channel_vals[name].trace_add('write', self.channel_callback(i, name))
 
-
     def set_num(self, num):
         self.num = num
 
@@ -25,7 +25,8 @@ class Channel_Setting_Controller(GUI_Controller):
 
     def initialize(self, name, value):
         type, widgets = self.get_widgets(name)
-        if not widgets: return
+        if not widgets:
+            return
         for i in range(self.num):
             if type == 'variable':
                 widgets[i].set(value)
@@ -35,7 +36,7 @@ class Channel_Setting_Controller(GUI_Controller):
         self.show_verbose_info(name, 'in channel has been initialized')
 
     def set_values(self, value):
-        '''
+        """
         # set channel values according to channel id
         # the value should be a dict {
         # 'channel_id': {
@@ -46,7 +47,7 @@ class Channel_Setting_Controller(GUI_Controller):
             'laser_power': ,
             'interval_time':}
         }
-        '''
+        """
         prefix = 'channel_'
         for channel in value:
             channel_id = int(channel[len(prefix):]) - 1
@@ -60,7 +61,7 @@ class Channel_Setting_Controller(GUI_Controller):
         self.show_verbose_info('channel has been set new value')
 
     def get_values(self):
-        '''
+        """
         # return all the selected channels' setting values
         # for example, if channel_1 and channel_2 is selected, it will return
         # { 'channel_1': {
@@ -84,7 +85,7 @@ class Channel_Setting_Controller(GUI_Controller):
         #           'interval_time': 
         #        }
         # }
-        '''
+        """
         prefix = 'channel_'
         channel_settings = {}
         for i in range(self.num):
@@ -96,25 +97,26 @@ class Channel_Setting_Controller(GUI_Controller):
                     pass
                 else:
                     temp = {
-                    'is_selected': True,
-                    'laser': channel_vals['laser'].get(),
-                    'laser_index': self.get_index('laser', channel_vals['laser'].get()), 
-                    'filter': channel_vals['filter'].get(),
-                    'filter_position': self.get_index('filter', channel_vals['filter'].get()),
-                    'camera_exposure_time': int(channel_vals['camera_exposure_time'].get()),
-                    'laser_power': channel_vals['laser_power'].get(),
-                    'interval_time': channel_vals['interval_time'].get()
+                        'is_selected': True,
+                        'laser': channel_vals['laser'].get(),
+                        'laser_index': self.get_index('laser', channel_vals['laser'].get()),
+                        'filter': channel_vals['filter'].get(),
+                        'filter_position': self.get_index('filter', channel_vals['filter'].get()),
+                        'camera_exposure_time': int(channel_vals['camera_exposure_time'].get()),
+                        'laser_power': channel_vals['laser_power'].get(),
+                        'interval_time': channel_vals['interval_time'].get()
                     }
                     channel_settings[prefix+str(i+1)] = temp
         return channel_settings
 
     def channel_callback(self, channel_id, widget_name):
-        '''
+        """
         # in 'instant' mode (when acquire mode is set to 'continuous') and a channel is selected,
         # any change of the channel setting will influence devices instantly
         # this function will call the central controller to response user's request
-        '''
+        """
         channel_vals = self.get_vals_by_channel(channel_id)
+
         def func(*args):
             if not channel_vals['is_selected'].get():
                 return
@@ -127,10 +129,10 @@ class Channel_Setting_Controller(GUI_Controller):
         return func
 
     def get_widgets(self, name):
-        '''
+        """
         # get all the widgets according to name
         # name should be: is_selected, laser, filter, camera_exposure_time, laser_power, interval_time
-        '''
+        """
         result = None
         type = 'widget'
         if name == 'laser':
@@ -149,12 +151,12 @@ class Channel_Setting_Controller(GUI_Controller):
             result = self.view.channel_variables
             type = 'variable'
 
-        return (type, result)
+        return type, result
 
     def get_vals_by_channel(self, index):
-        '''
+        """
         # this function return all the variables according channel_id
-        '''
+        """
         if index < 0 or index >= self.num:
             return {}
         result = {

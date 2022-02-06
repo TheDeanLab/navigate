@@ -1,6 +1,3 @@
-#__all__ = ['start_camera', 'start_stages', 'start_zoom_servo',
-           #'start_filter_wheel', 'start_lasers', 'start_model']
-
 # Standard library imports
 from datetime import datetime
 import os
@@ -34,7 +31,7 @@ def create_save_path(saving_settings, verbose=False):
         os.makedirs(save_directory)
 
     # Determine Number of Cells in Directory
-    cell_directories = list(filter(lambda v: v[:5]=='Cell-', os.listdir(save_directory)))
+    cell_directories = list(filter(lambda v: v[:5] == 'Cell-', os.listdir(save_directory)))
     if cell_directories:
         cell_directories.sort()
         cell_index = int(cell_directories[-1][5:]) + 1

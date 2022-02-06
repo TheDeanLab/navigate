@@ -15,18 +15,16 @@ import time
 # Local Imports
 from model.devices.filter_wheel.FilterWheelBase import FilterWheelBase
 
+
 class FilterWheel(FilterWheelBase):
     def __init__(self, model, verbose):
-        """
-        Load the Default Parameters
-        """
-        self.comport = model.FilterWheelParameters['filter_wheel_port']
-        self.baudrate = model.FilterWheelParameters['baudrate']
-        self.filterdict = model.FilterWheelParameters['available_filters']
-        self.number_of_filter_wheels = model.FilterWheelParameters['number_of_filter_wheels']
+        super().__init__(model, verbose)
+
+        # Sutter Lambda 10-B Specific Initializations
         self.read_on_init = True
         self.verbose = verbose
-        self.wait_until_done_delay = 0.25 # Delay in s for the wait until done function
+        self.wait_until_done_delay = 0.25
+        # Delay in s for the wait until done function
 
         # Open Serial Port
         try:
@@ -72,15 +70,17 @@ class FilterWheel(FilterWheelBase):
         else:
             raise ValueError('Filter designation not in the configuration')
 
-    def set_filter(self, filterposition=0, speed=2, wait_until_done=False):
+    def set_filter(self, filterposition, speed=2, wait_until_done=False):
         """
         # Change the filter wheel to the filter designated by the filter position argument.
         """
         if self.check_if_filter_in_filterdict(filterposition) is True:
             # Identify the Filter Number from the Filter Dictionary
             self.wheel_position = self.filterdict[filterposition]
+
             # Make sure you are moving it to a reasonable filter position
             assert self.wheel_position in range(10)
+
             # Make sure you are moving it at a reasonable speed
             assert speed in range(8)
 
@@ -93,10 +93,12 @@ class FilterWheel(FilterWheelBase):
 
             for wheel_idx in range(self.number_of_filter_wheels):
                 """ 
-                Loop through each filter, and send the binary sequence via serial to move to the desired filter wheel position
-                When number_of_filter_wheels = 1, loop executes once, and only wheel A changes.
-                When number_of_filter_wheels = 2, loop executes twice, with both wheel A and B moving to the same position sequentially
-                Filter Wheel Command Byte Encoding = wheel + (speed*16) + position = command byte
+                # Loop through each filter, and send the binary sequence via serial to 
+                # move to the desired filter wheel position
+                # When number_of_filter_wheels = 1, loop executes once, and only wheel A changes.
+                # When number_of_filter_wheels = 2, loop executes twice, with both wheel A and 
+                # B moving to the same position sequentially
+                # Filter Wheel Command Byte Encoding = wheel + (speed*16) + position = command byte
                 """
 
                 if self.verbose:
@@ -131,27 +133,3 @@ class FilterWheel(FilterWheelBase):
             print('Closing the Filter Wheel Serial Port')
         self.set_filter('Empty-Alignment')
         self.serial.close()
-
-# Filter Wheel Testing.
-if (__name__ == "__main__"):
-    number_of_filter_wheels = 2
-    comport = 'COM9'
-    print("Attempting: ", comport)
-    filterdict = {'Empty-Alignment': 0,
-                  'GFP - FF01-515/30-32': 1,
-                  'RFP - FF01-595/31-32': 2,
-                  'Far-Red - BLP01-647R/31-32': 3,
-                  'Blocked1': 4,
-                  'Blocked2': 5,
-                  'Blocked3': 6,
-                  'Blocked4': 7,
-                  'Blocked5': 8,
-                  'Blocked6': 9}
-    try:
-        filter = Lambda10B(number_of_filter_wheels, comport, filterdict)
-        filter.set_filter('GFP - FF01-515/30-32')
-        filter.close()
-        print('Success!')
-    except serial.SerialException:
-        print("Failed: ", comport)
-

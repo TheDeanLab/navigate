@@ -2,7 +2,7 @@
 Laser Base Class
 """
 
-class LaserBase():
+class LaserBase:
     def __init__(self, model, verbose):
         self.model = model
         self.verbose = verbose

@@ -3,10 +3,10 @@ Synthetic Laser Class
 """
 from model.devices.lasers.LaserBase import LaserBase
 
+
 class SyntheticLaser(LaserBase):
     def __init__(self, model, verbose):
-        self.model = model
-        self.verbose = verbose
+        super().__init__(model, verbose)
 
     def close(self):
         """

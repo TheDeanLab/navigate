@@ -2,16 +2,16 @@
 Module for synthetic Filter Wheels
 Author: Kevin Dean,
 """
-#Standard Library Imports
+#  Standard Library Imports
 import time
 
 # Local Imports
 from model.devices.filter_wheel.FilterWheelBase import FilterWheelBase
 
+
 class SyntheticFilterWheel(FilterWheelBase):
     def __init__(self, model, verbose):
-        self.filterdict = model.FilterWheelParameters['available_filters']
-        self.verbose = verbose
+        super().__init__(model, verbose)
 
     def check_if_filter_in_filterdict(self, filter):
         """
@@ -23,7 +23,7 @@ class SyntheticFilterWheel(FilterWheelBase):
         else:
             raise ValueError('Filter designation not in the configuration')
 
-    def set_filter(self, filter, wait_until_done=False):
+    def set_filter(self, filterposition, speed=2, wait_until_done=False):
         """
         # Change the filter wheel to the filter designated by the filterposition argument.
         """
@@ -33,7 +33,7 @@ class SyntheticFilterWheel(FilterWheelBase):
             if wait_until_done:
                 time.sleep(1)
 
-    def read(selfself, num_bytes):
+    def read(self, num_bytes):
         """
         # Reads the specified number of bytes from the serial port.
         """

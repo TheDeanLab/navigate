@@ -1,5 +1,6 @@
 from controller.sub_controllers.gui_controller import GUI_Controller
 
+
 class Stage_GUI_Controller(GUI_Controller):
     def __init__(self, view, parent_controller, verbose=False):
         super().__init__(view, parent_controller, verbose)
@@ -124,7 +125,7 @@ class Stage_GUI_Controller(GUI_Controller):
         self.show_verbose_info('set step size')
 
     def get_step_size(self):
-        '''
+        """
         # This function returns step sizes as a dictionary
         # {
         #    'xy': ,
@@ -132,7 +133,7 @@ class Stage_GUI_Controller(GUI_Controller):
         #    'theta': ,
         #    'f': 
         # }
-        '''
+        """
         step_size = {}
         for axis in ['xy', 'z', 'theta', 'f']:
             step_size[axis] = self.get_step_val(axis).get()
@@ -212,8 +213,9 @@ class Stage_GUI_Controller(GUI_Controller):
         def handler(*args):
             if self.event_id[axis]:
                 self.view.after_cancel(self.event_id[axis])
-            self.event_id[axis] = self.view.after(1000,
-                lambda: self.parent_controller.execute('stage', position_var.get(), axis))
+            self.event_id[axis] = self.view.after(1000, lambda: self.parent_controller.execute('stage',
+                                                                                               position_var.get(),
+                                                                                               axis))
 
             self.show_verbose_info('stage position is changed')
         
@@ -221,7 +223,7 @@ class Stage_GUI_Controller(GUI_Controller):
 
     def get_step_val(self, axis):
         """
-        # get increment step variable accroding to axis name
+        # get increment step variable according to axis name
         # axis can be: 'x', 'y', 'z', 'theta', 'f'
         """
         if axis == 'z':

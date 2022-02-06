@@ -1,25 +1,22 @@
-'''
-Luxx Laser Class
-LUXX488, 200 mW, is COM19
-LUXX642, 140 mW, is COM17
-LIGHTHUB ULTRA, is COM20
-'''
-
 import serial
 import re
-from time import time, sleep
+from time import time
 
 from model.devices.lasers.LaserBase import LaserBase
+
 
 class LuxxLaser(LaserBase):
     def __init__(self, port='COM19', baudrate=500000):
         """
+        # Luxx Laser Class
+        # LUXX488, 200 mW, is COM19
+        # LUXX642, 140 mW, is COM17
+        # LIGHTHUB ULTRA, is COM20
         # Open port (*auto* stands for **/dev/ttyUSB0** in Linux or **COM17**
         # in Windows, because it is what I use); then get device model;
         # finally, get maximum output power and store it in **pmax** variable.
         """
-        self.verbose = False
-        self.super_verbose = False
+        super().__init__(model, verbose)
 
         try:
             # Open serial port
@@ -58,8 +55,8 @@ class LuxxLaser(LaserBase):
                 print("Laser maximum power: ", power_max)
 
         except serial.SerialException:
-            raise OSError('Port "%s" is unavailable.\n' % port + \
-                          'Maybe the laser is not connected, the wrong' + \
+            raise OSError('Port "%s" is unavailable.\n' % port +
+                          'Maybe the laser is not connected, the wrong' +
                           ' port is specified or the port is already opened')
 
     def __del__(self):
@@ -101,12 +98,8 @@ class LuxxLaser(LaserBase):
         # Read all information from the port and return it as string.
         """
         answer = self.port.readall()
-        if self.super_verbose:
-            print("The 'read' answer = ", answer)
         answer = answer.replace(str("\r").encode(), str("\n").encode())
         answer = answer.replace(str("\xa7").encode(), str(" | ").encode())
-        if self.super_verbose:
-            print("The cleaned up read answer is:", answer)
         return answer
 
     def ask(self, command):
@@ -136,23 +129,22 @@ class LuxxLaser(LaserBase):
             return response
 
     def smart_ask(self, command):
-            """
-            #  TODO: Not working.  Depends on broken print_hex function.
-            Several commands return information coded in ASCII HEX numbers.
-            The relevant are bits in the registers. For convenient
-            representation, we will print(these bytes in tables.
-            This is relevant for the following commands:
-                * GOM
-                * GFB
-                * GLF
-                * GLP
-            For all other commands the behavior is identical to **ask** function
-            """
-            if command in ["GOM", "GFB", "GLF", "GLP"]:
-                #command = str(command).encode()
-                return print_hex(self.ask(command))
-            else:
-                return self.ask(command)
+        """
+        #  TODO: Not working.  Depends on broken print_hex function.
+        Several commands return information coded in ASCII HEX numbers.
+        The relevant are bits in the registers. For convenient
+        representation, we will print(these bytes in tables.
+        This is relevant for the following commands:
+            * GOM
+            * GFB
+            * GLF
+            * GLP
+        For all other commands the behavior is identical to **ask** function
+        """
+        if command in ["GOM", "GFB", "GLF", "GLP"]:
+            return print_hex(self.ask(command))
+        else:
+            return self.ask(command)
 
     def start(self):
         """
@@ -211,8 +203,8 @@ class LuxxLaser(LaserBase):
         elif mode == "Analog" or mode == 3:
             mode = 3
         else:
-            print("**mode** must be one of 'Standby', 'CW-ACC', " + \
-                        "'CW-APC', 'Analog' or number 0-3. Nothing changed.")
+            print("**mode** must be one of 'Standby', 'CW-ACC', " +
+                  "'CW-APC', 'Analog' or number 0-3. Nothing changed.")
             return
         stopwatch(self.ask, "ROM%i" % mode)
 
@@ -292,7 +284,7 @@ class LuxxLaser(LaserBase):
         # Sets the laser to the maximum power, and sets the mode to CW-APC.
         """
         self.set_power(self.pmax)
-        self.set_mode("CW-APC") #  Analog, tried CW-APC
+        self.set_mode("CW-APC")
         self.start()
         if self.verbose:
             print((self.wavelength, "nm Laser Initialized - Max Power: ", self.pmax, "mW"))
@@ -306,6 +298,7 @@ def stopwatch(func, *func_args, **func_kwargs):
     result = func(*func_args, **func_kwargs)
     # print("Time elapsed: %5.2f ms" % ((time() - start_time)*1000.0))
     return result
+
 
 def print_hex(hex_code):
     """
@@ -326,7 +319,7 @@ def print_hex(hex_code):
     # Split it into 8-bit numbers coded in ASCII HEX
     hex_numbers = []
     for i in range(int(byte_number)):
-        hex_numbers.append(hex_code[i*2 : i*2+2])
+        hex_numbers.append(hex_code[i*2:i*2+2])
 
     # Convert each of them into decimal
     decimals = []
@@ -355,16 +348,3 @@ def print_hex(hex_code):
         content = data_range + data_list
         print(table % tuple([byte, hex_numbers[i]] + content))
     return decimals
-
-
-
-
-
-
-
-
-
-
-
-
-

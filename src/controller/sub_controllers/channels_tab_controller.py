@@ -1,8 +1,8 @@
-import time
 import numpy as np
 from controller.sub_controllers.gui_controller import GUI_Controller
 from controller.sub_controllers.channel_setting_controller import Channel_Setting_Controller
 from controller.sub_controllers.multi_position_controller import Multi_Position_Controller
+
 
 class Channels_Tab_Controller(GUI_Controller):
     def __init__(self, view, parent_controller=None, verbose=False):
@@ -11,15 +11,16 @@ class Channels_Tab_Controller(GUI_Controller):
         self.is_save = False
         self.mode = 'instant'
         self.settings_from_configuration = {}
-        self.channel_setting_controller = Channel_Setting_Controller(self.view.channel_widgets_frame, self, self.verbose)
+        self.channel_setting_controller = Channel_Setting_Controller(self.view.channel_widgets_frame, self,
+                                                                     self.verbose)
         self.multi_position_controller = Multi_Position_Controller(self.view.multipoint_list, self, self.verbose)
-        
+
         # stack acquisition variables
         self.stack_acq_vals = {
             'step_size': self.view.stack_acq_frame.step_size_spinval,
             'start_position': self.view.stack_acq_frame.start_pos_spinval,
             'end_position': self.view.stack_acq_frame.end_pos_spinval,
-            'number_z_steps':  self.view.stack_acq_frame.slice_spinval
+            'number_z_steps': self.view.stack_acq_frame.slice_spinval
         }
         # stack acquisition event id
         self.stack_acq_event_id = None
@@ -34,7 +35,7 @@ class Channels_Tab_Controller(GUI_Controller):
         self.laser_cycling_val.trace_add('write', self.update_cycling_setting)
 
         # timepoint setting variables
-        self.timepoint_vals =  {
+        self.timepoint_vals = {
             'is_save': self.view.stack_timepoint_frame.save_data,
             'timepoints': self.view.stack_timepoint_frame.exp_time_spinval,
             'stack_acq_time': self.view.stack_timepoint_frame.stack_acq_spinval,
@@ -53,7 +54,7 @@ class Channels_Tab_Controller(GUI_Controller):
         self.is_multiposition = False
         self.is_multiposition_val = self.view.multipoint_frame.on_off
         self.view.multipoint_frame.save_check.configure(command=self.toggle_multiposition)
-        
+
     def initialize(self, name, value):
         if name == 'channels':
             for col_name in value:
@@ -64,7 +65,7 @@ class Channels_Tab_Controller(GUI_Controller):
             self.set_values(name, value)
 
         self.show_verbose_info(name, 'on channels tab has been initialized')
-        
+
     def set_values(self, name, value):
         if name == 'stack_acquisition':
             self.set_info(self.stack_acq_vals, value)
@@ -86,24 +87,24 @@ class Channels_Tab_Controller(GUI_Controller):
         return settings
 
     def set_channel_num(self, num):
-        '''
+        """
         # change the number of channels
-        '''
+        """
         self.channel_setting_controller.set_num(num)
 
         self.show_verbose_info('channel number is', num)
 
     def set_mode(self, mode):
-        '''
+        """
         # change acquisition mode
-        '''
+        """
         self.mode = mode
         self.channel_setting_controller.set_mode(mode)
 
         self.show_verbose_info('acquisition mode has been changed to', mode)
 
     def update_z_steps(self, *args):
-        '''
+        """
         # Recalculates the number of slices that will be acquired in a z-stack whenever the GUI
         # has the start position, end position, or step size changed.
         # Sets the number of slices in the model and the GUI.
@@ -115,7 +116,7 @@ class Channels_Tab_Controller(GUI_Controller):
             'end_possition': ,
             'number_z_steps':
         # }
-        '''
+        """
         # Calculate the number of slices and set GUI
         start_position = float(self.stack_acq_vals['start_position'].get())
         end_position = float(self.stack_acq_vals['end_position'].get())
@@ -123,8 +124,8 @@ class Channels_Tab_Controller(GUI_Controller):
         if step_size < 0.001:
             step_size = 0.001
             self.stack_acq_vals['step_size'].set(step_size)
-            
-        number_z_steps = np.floor((end_position - start_position)/step_size)
+
+        number_z_steps = np.floor((end_position - start_position) / step_size)
         self.stack_acq_vals['number_z_steps'].set(number_z_steps)
 
         self.update_timepoint_setting()
@@ -139,19 +140,19 @@ class Channels_Tab_Controller(GUI_Controller):
         self.show_verbose_info('stack acquisition settings on channels tab have been changed and recalculated')
 
     def update_cycling_setting(self, *args):
-        '''
+        """
         # Updates the cycling settings in the model and the GUI.
         # You can collect different channels in different formats.
         # In the perZ format: Slice 0/Ch0, Slice0/Ch1, Slice1/Ch0, Slice1/Ch1, etc
         # in the perStack format: Slice 0/Ch0, Slice1/Ch0... SliceN/Ch0.  Then it repeats with Ch1
-        '''
+        """
         # recalculate timepoint settings
         self.update_timepoint_setting()
-        
+
         # TODO: comment it now, we may not to tell the central controller each time it changed
         # tell the central/parent controller that laser cycling setting is changed
         # self.parent_controller.execute('laser_cycling', self.laser_cycling_val.get())
-        
+
         self.show_verbose_info('cycling setting on channels tab has been changed')
 
     def update_save_setting(self, *args):
@@ -162,10 +163,11 @@ class Channels_Tab_Controller(GUI_Controller):
         self.show_verbose_info('save data option has been changed to', self.is_save)
 
     def update_timepoint_setting(self, *args):
-        '''
-        # Automatically calculate the stack acquisition time based on the number of timepoints, channels, and exposure time.
-        # add necessary computation for 'Stack Acq.Time', 'Timepoint Interval', 'Experiment Duration'?
-        '''
+        """
+        # Automatically calculate the stack acquisition time based on the number of timepoints,
+        #  channels, and exposure time.  Add necessary computation for 'Stack Acq.Time',
+        #  'Timepoint Interval', 'Experiment Duration'?
+        """
 
         # Order of priority for perStack: timepoints > positions > channels > z-steps > delay
         # ORder of priority for perZ: timepoints > positions > z-steps > delays > channels
@@ -181,7 +183,8 @@ class Channels_Tab_Controller(GUI_Controller):
 
         perStack = self.laser_cycling_val.get() == 'Per Stack'
 
-        # Initialize variable to keep track of how long the entire experiment will take. Includes time, positions, channels...
+        # Initialize variable to keep track of how long the entire experiment will take.
+        # Includes time, positions, channels...
         experiment_duration = 0
 
         # Initialize variable to calculate how long it takes to acquire a single volume for all of the channels.
@@ -200,9 +203,9 @@ class Channels_Tab_Controller(GUI_Controller):
                 # x2, y2, z1, theta2, f1 = position_end.values()
                 # distance = [x2-x1, y2-y1, z2-z1, theta2-theta1, f2-f1]
                 # max_distance_idx = np.argmax(distance)
-                # Now if we are going to do this properly, we would need to do this for all of the positions so that we can
-                # calculate the total experiment time.  Probably assemble a matrix of all the positions and then do the
-                # calculations.
+                # Now if we are going to do this properly, we would need to do this for all of the positions
+                # so that we can calculate the total experiment time.
+                # Probably assemble a matrix of all the positions and then do the calculations.
 
                 stage_delay = 0  # distance[max_distance_idx]/stage_velocity #TODO False value.
 
@@ -220,10 +223,13 @@ class Channels_Tab_Controller(GUI_Controller):
                         # Now we need to know the exposure time of each channel.
                         # Assumes no delay between individual slices at this point.
                         # Convert from milliseconds to seconds.
-                        experiment_duration = experiment_duration + channel_settings['channel_' + str(channel_idx+1)]['camera_exposure_time']/1000
+                        experiment_duration = experiment_duration + channel_settings['channel_' + str(channel_idx + 1)][
+                            'camera_exposure_time'] / 1000
 
                         if channel_idx == 0 and position_idx == 0 and timepoint_idx == 0:
-                            stack_acquisition_duration = stack_acquisition_duration + channel_settings['channel_' + str(channel_idx+1)]['camera_exposure_time']/1000
+                            stack_acquisition_duration = stack_acquisition_duration + \
+                                                         channel_settings['channel_' + str(channel_idx + 1)][
+                                                             'camera_exposure_time'] / 1000
 
                         if not perStack:
                             # In the perZ mode, we need to account for the time necessary to move the filter wheel
@@ -231,7 +237,9 @@ class Channels_Tab_Controller(GUI_Controller):
                             experiment_duration = experiment_duration + filter_wheel_delay
 
                             if channel_idx == 0 and position_idx == 0 and timepoint_idx == 0:
-                                stack_acquisition_duration = stack_acquisition_duration + channel_settings['channel_' + str(channel_idx+1)]['camera_exposure_time']/1000
+                                stack_acquisition_duration = stack_acquisition_duration + \
+                                                             channel_settings['channel_' + str(channel_idx + 1)][
+                                                                 'camera_exposure_time'] / 1000
 
         self.timepoint_vals['experiment_duration'].set(experiment_duration)
         self.timepoint_vals['stack_acq_time'].set(stack_acquisition_duration)
@@ -251,7 +259,7 @@ class Channels_Tab_Controller(GUI_Controller):
         # recalculate experiment time
         self.update_timepoint_setting()
         self.show_verbose_info('multi-position:', self.is_multiposition)
-    
+
     def load_positions(self):
         self.multi_position_controller.load_csv_func()
 
@@ -274,19 +282,19 @@ class Channels_Tab_Controller(GUI_Controller):
 
     def get_positions(self):
         return self.multi_position_controller.get_positions()
-    
+
     def set_info(self, vals, values):
-        '''
+        """
         # set values to a list of variables
-        '''
+        """
         for name in values:
             if name in vals:
                 vals[name].set(values[name])
 
     def get_info(self, vals):
-        '''
+        """
         # get values from a list of variables
-        '''
+        """
         info = {}
         for name in vals:
             info[name] = vals[name].get()

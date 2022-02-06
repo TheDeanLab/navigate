@@ -1,21 +1,4 @@
-"""
-Hamamatsu Camera Class
 
-Model class for controlling Hamamatsu cameras via the DCAM-API. At the time of writing this class,
-little documentation on the DCAM-API was available. Hamamatsu has a different time schedule regarding support of
-their own API. However, Zhuang's lab Github repository had a python driver for the Orca camera and with a bit of
-tinkering things worked out.
-
-DCAM-API relies mostly on setting parameters into the camera. The correct data type of each parameter is not well
-documented; however it is possible to print all the available properties and work from there.
-The properties are stored in a filed named params.txt next to the Hamamatsu Driver located in Controller.
-
-note:: When setting the ROI, Hamamatsu only allows to set multiples of 4 for every setting (X,Y and vsize,
-hsize). This is checked in the function. Changing the ROI cannot be done directly, one first needs to disable it
-and then re-enable.
-
-Adopted and modified from UUTrack
-"""
 # External Dependencies
 import numpy as np
 
@@ -26,34 +9,9 @@ from model.devices.camera.CameraBase import CameraBase
 
 
 # CameraBase - Test without the base class.
-class Camera:
-    MODE_CONTINUOUS = 1
-    MODE_SINGLE_SHOT = 0
-    MODE_EXTERNAL = 2
-
+class Camera(CameraBase):
     def __init__(self, camera_id, model, experiment, verbose=False):
-        self.model = model
-        self.experiment = experiment
-        self.camera_id = camera_id
-        self.verbose = verbose
-        self.stop_flag = False
-
-        # Initialize Pixel Information
-        self.x_pixel_size_in_microns = self.model.CameraParameters['x_pixel_size_in_microns']
-        self.y_pixel_size_in_microns = self.model.CameraParameters['y_pixel_size_in_microns']
-        self.binning_string = self.model.CameraParameters['binning']
-        self.x_binning = int(self.binning_string[0])
-        self.y_binning = int(self.binning_string[2])
-        self.x_pixels = self.model.CameraParameters['x_pixels']
-        self.y_pixels = self.model.CameraParameters['y_pixels']
-        self.x_pixels = int(self.x_pixels / self.x_binning)
-        self.y_pixels = int(self.y_pixels / self.y_binning)
-
-        # Initialize Exposure and Display Information
-        self.camera_line_interval = self.model.CameraParameters['line_interval']
-        self.camera_exposure_time = self.model.CameraParameters['exposure_time']
-        self.camera_display_live_subsampling = self.model.CameraParameters['display_live_subsampling']
-        self.camera_display_acquisition_subsampling = self.model.CameraParameters['display_acquisition_subsampling']
+        super().__init__(camera_id, model, experiment, verbose)
 
         # Initialize Camera Controller
         self.camera_controller = HamamatsuController(self.camera_id)
@@ -153,4 +111,3 @@ class Camera:
 
         # self.running = False
         # self.mode = self.MODE_SINGLE_SHOT
-

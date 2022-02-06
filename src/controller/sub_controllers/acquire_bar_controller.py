@@ -1,12 +1,13 @@
-'''
+"""
 Sub-controller for the acquire popup window
 When the mode is changed, we need to communicate this to the central controller.
 Central controller then communicates these changes to the channel_setting_controller.
-'''
+"""
 import sys
 
 from controller.sub_controllers.gui_controller import GUI_Controller
 from view.main_window_content.acquire_bar_frame.acquire_popup import Acquire_PopUp as acquire_popup
+
 
 class Acquire_Bar_Controller(GUI_Controller):
     def __init__(self, view, parent_controller, verbose=False):
@@ -39,10 +40,10 @@ class Acquire_Bar_Controller(GUI_Controller):
         self.view.exit_btn.config(command=self.exit_program)
 
     def set_mode(self, mode):
-        '''
+        """
         # set image mode
         # mode could be: 'continuous', 'z-stack', 'single', 'projection'
-        '''
+        """
         self.mode = mode
         # update pull down combobox
         reverse_dict = dict(map(lambda v: (v[1], v[0]), self.mode_dict.items()))
@@ -51,24 +52,24 @@ class Acquire_Bar_Controller(GUI_Controller):
         self.show_verbose_info('image mode is set to', mode)
     
     def get_mode(self):
-        '''
+        """
         # return right now image mode setting
-        '''
+        """
         return self.mode
 
     def set_save_option(self, is_save):
-        '''
+        """
         # set whether the image will be saved
-        '''
+        """
         self.is_save = is_save
 
         self.show_verbose_info('set save data option:', is_save)
 
     def set_saving_settings(self, saving_settings):
-        '''
+        """
         # set saving settings
         # right now it is a reference to the model.exprement.Saving
-        '''
+        """
         self.saving_settings = saving_settings
 
         self.show_verbose_info('set saving settings')
@@ -77,8 +78,8 @@ class Acquire_Bar_Controller(GUI_Controller):
         """
         # The popup window should only be launched if the microscope is set to save the data,
         # with the exception of the continuous acquisition mode.
-        # The popup window provides the user with the opportunity to fill in fields that describe the experiment and also
-        # dictate the save path of the data in a standardized format.
+        # The popup window provides the user with the opportunity to fill in fields that describe the experiment and
+        # also dictate the save path of the data in a standardized format.
         """
         if self.is_save and self.mode != 'continuous':
             popup_window = acquire_popup(self.view)
@@ -100,22 +101,22 @@ class Acquire_Bar_Controller(GUI_Controller):
             self.parent_controller.execute('acquire')
 
     def update_microscope_mode(self, *args):
-        '''
+        """
         # Gets the state of the pull-down menu and tell the central controller
 
-        '''
+        """
         self.mode = self.mode_dict[self.view.pull_down.get()]
         self.parent_controller.execute('image_mode', self.mode)
         
         self.show_verbose_info("The Microscope State is now:", self.get_mode())
 
     def launch_acquisition(self, popup_window):
-        '''
+        """
         # Once the popup window has been filled out, we first create the save path using the create_save_path function.
         # This automatically removes spaces and replaces them with underscores.
         # Then it makes the directory.
         # Thereafter, the experiment is ready to go.
-        '''
+        """
         # update saving settings according to user's input
         self.update_saving_settings(popup_window)
         
@@ -167,6 +168,7 @@ def get_popup_vals(popup_window):
     }
     return popup_vals
 
+
 def get_popup_values(popup_window):
     popup_vals = get_popup_vals(popup_window)
     settings = {}
@@ -175,8 +177,9 @@ def get_popup_values(popup_window):
             settings[name] = popup_vals[name].get()
     return settings
 
+
 def initialize_popup_window(popup_window, values):
-    '''
+    """
     # this function will initialize popup window
     # values should be a dict {
     #    'root_directory':,
@@ -186,7 +189,7 @@ def initialize_popup_window(popup_window, values):
     #    'celltype':,
     #    'label':
     # }
-    '''
+    """
     popup_vals = get_popup_vals(popup_window)
 
     for name in values:

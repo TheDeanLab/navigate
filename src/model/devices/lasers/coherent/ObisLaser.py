@@ -10,8 +10,8 @@ from time import time, sleep
 from model.devices.lasers.LaserBase import LaserBase
 
 class ObisLaser(LaserBase):
-    def __init__(self, port='COM4'):
-        self.verbose = False
+    def __init__(self, model, verbose, port='COM4'):
+        super().__init__(model, verbose)
         self.timeout = 0.05
         self.end_of_line = '\r'
 
@@ -216,10 +216,6 @@ class ObisLaser(LaserBase):
         self.set_laser_operating_mode('mixed')
         self.set_laser_power(self.get_maximum_laser_power())
 
-
-if (__name__ == "__main__"):
-    # OBIS Laser Testing.
-    pass
 
 
 

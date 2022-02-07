@@ -106,7 +106,9 @@ class Acquire_Bar_Controller(GUI_Controller):
 
         """
         self.mode = self.mode_dict[self.view.pull_down.get()]
-        self.parent_controller.execute('image_mode', self.mode)
+        # TODO: comment it now
+        # it seems that we do not need to tell the central controller that mode is changed until the user clicked 'Acquire' button
+        # self.parent_controller.execute('image_mode', self.mode)
         
         self.show_verbose_info("The Microscope State is now:", self.get_mode())
 

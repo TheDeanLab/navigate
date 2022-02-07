@@ -37,7 +37,7 @@ class Camera_View_Controller(GUI_Controller):
             self.view.cam_counts.count.set(np.max(image))
         elif self.rolling_frames == 1:
             self.view.cam_counts.count.set(np.max(image))
-        else self.rolling_frames > 1:
+        else:
             self.image_count = self.image_count + 1
             if self.image_count == 1:
                 self.temp_array = image

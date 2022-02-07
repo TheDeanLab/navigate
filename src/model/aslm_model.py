@@ -304,17 +304,17 @@ class Model:
         # Closes the shutter
         # Disables the camera
         """
-        self.camera.set_exposure_time(self.experiment.MicroscopeState['channel_1']['camera_exposure_time']/1000)
+        self.camera.set_exposure_time(self.experiment.MicroscopeState['channels']['channel_1']['camera_exposure_time']/1000)
         self.camera.initialize_image_series()
-        self.filter_wheel.set_filter(self.experiment.MicroscopeState['channel_1']['filter'])
-        self.daq.identify_laser_idx(self.experiment.MicroscopeState['channel_1']['laser'])
+        #  self.filter_wheel.set_filter(self.experiment.MicroscopeState['channels']['channel_1']['filter'])
+        self.daq.identify_laser_idx(self.experiment.MicroscopeState['channels']['channel_1']['laser'])
         self.open_shutter()
         self.daq.create_waveforms()
         self.daq.start_tasks()
         self.daq.run_tasks()
         self.daq.stop_tasks()
         image = self.camera.get_image()
-        self.save_test_image(image)
+        #  self.save_test_image(image)
         self.close_shutter()
         self.camera.close_image_series()
 

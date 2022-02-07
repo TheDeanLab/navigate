@@ -92,7 +92,7 @@ class ASLM_controller:
         }
         # populate channels in the GUI
         channels_setting = configuration_controller.get_channels_info(self.verbose)
-        self.channels_tab_controller.initialize('channels', channels_setting)
+        self.channels_tab_controller.initialize('channel', channels_setting)
 
         # populate laser cycling settings
         laser_cycling_values = ['Per Z', 'Per Stack']
@@ -194,12 +194,11 @@ class ASLM_controller:
         self.channels_tab_controller.set_values('timepoint', timepoints_setting)
 
         # populate channels
-        self.channels_tab_controller.set_values('channels', self.model.experiment.MicroscopeState['channels'])
+        self.channels_tab_controller.set_values('channel', self.model.experiment.MicroscopeState['channels'])
 
         # set mode according to model.experiment
         mode = self.model.experiment.MicroscopeState['image_mode']
         self.acquire_bar_controller.set_mode(mode)
-        self.channels_tab_controller.set_mode(mode)
 
         # set saving settings to acquire bar
         for name in self.model.experiment.Saving:
@@ -226,15 +225,18 @@ class ASLM_controller:
         """
         # This function will update model.experiment according values in the View(GUI)
         """
+        # update image mode from acquire bar
+        self.model.experiment.MicroscopeState['image_mode'] = self.acquire_bar_controller.get_mode()
+
         # get settings from channels tab
         settings = self.channels_tab_controller.get_values()
         self.model.experiment.MicroscopeState['stack_cycling_mode'] = settings['stack_cycling_mode']
         for k in settings['stack_acquisition']:
             self.model.experiment.MicroscopeState[k] = settings['stack_acquisition'][k]
-        for k in settings['timepoints']:
-            self.model.experiment.MicroscopeState[k] = settings['timepoints'][k]
+        for k in settings['timepoint']:
+            self.model.experiment.MicroscopeState[k] = settings['timepoint'][k]
         # channels
-        self.model.experiment.MicroscopeState['channels'] = settings['channels']
+        self.model.experiment.MicroscopeState['channels'] = settings['channel']
         # get all positions
         self.model.experiment.MicroscopeState['stage_positions'] = self.channels_tab_controller.get_positions()
 
@@ -246,6 +248,21 @@ class ASLM_controller:
         for axis in step_size:
             self.model.experiment.StageParameters[axis+'_step'] = step_size[axis]
 
+    def prepare_acquire_data(self):
+        """
+        # this function do preparations before acquiring data
+        # first, update model.experiment
+        # second, set sub-controllers' mode to 'live' when 'continuous' was selected, or 'stop'
+        """
+        self.update_experiment_setting()
+        
+        if self.model.experiment.MicroscopeState['image_mode'] == 'continuous':
+            self.channels_tab_controller.set_mode('live')
+            self.camera_view_controller.set_mode('live')
+        else:
+            self.channels_tab_controller.set_mode('stop')
+            self.camera_view_controller.set_mode('stop')
+    
     def execute(self, command, *args):
         """
         # This function listens to sub_gui_controllers
@@ -286,30 +303,54 @@ class ASLM_controller:
             """
             print("Changing the Resolution Mode to:", args[0])
 
-        elif command == 'image_mode':
-            # tell channel the mode is changed
-            self.channels_tab_controller.set_mode('instant' if args[0] == 'continuous' else 'uninstant')
-
-            # update model.experiment
-            self.model.experiment.MicroscopeState['image_mode'] = args[0]
-
-            # set camera view mode to change
-            self.camera_view_controller.set_mode('live' if args[0] == 'continuous' else 'stop')
-
         elif command == 'set_save':
             self.acquire_bar_controller.set_save_option(args[0])
 
+        elif command == 'stack_acquisition':
+            settings = self.channels_tab_controller.get_values('stack_acquisition')
+            for k in settings:
+                self.model.experiment.MicroscopeState[k] = settings[k]
+            print('in continuous mode:the stack acquisition setting is changed')
+            print('you could get the new setting from model.experiment')
+            print('you could also get the changes from args')
+            print(self.model.experiment.MicroscopeState)
+            pass
+
+        elif command == 'laser_cycling':
+            self.model.experiment.MicroscopeState['stack_cycling_mode'] = self.channels_tab_controller.get_values('stack_cycling_mode')
+            print('in continuous mode:the laser cycling setting is changed')
+            print('you could get the new setting from model.experiment')
+            print('you could also get the changes from args')
+            print(self.model.experiment.MicroscopeState['stack_cycling_mode'])
+            pass
+
+        elif command == 'channel':
+            self.model.experiment.MicroscopeState['channels'] = self.channels_tab_controller.get_values('channel')
+            print('in continuous mode:the channel setting is changed')
+            print('you could get the new setting from model.experiment')
+            print('you could also get the changes from args')
+            print(self.model.experiment.MicroscopeState['channels'])
+            pass
+
+        elif command == 'timepoint':
+            settings = self.channels_tab_controller.get_values('timepoint')
+            for k in settings:
+                self.model.experiment.MicroscopeState[k] = settings[k]
+        
         elif command == 'acquire_and_save':
+            self.prepare_acquire_data()
             # create file directory
             file_directory = create_save_path(args[0], self.verbose)
 
             # update model.experiment and save it to file
             self.update_experiment_setting()
+
             save_experiment_file(file_directory, self.model.experiment.serialize())
             pass
 
         elif command == 'acquire':
-            # TODO: according to image_mode to move devices
+            self.prepare_acquire_data()
+            # if 'continuous' is selected
             # Create a thread for the camera to use to display live feed
             self.model.stop_flag = False
             self.threads_pool.createThread('camera', self.model.snap_image())
@@ -320,6 +361,13 @@ class ASLM_controller:
             # TODO: stop continuous acquire from camera
             # Do I need to lock the thread here or how do I stop the process with the thread pool?
             # Or is it something with the ObjectSubProcess? Or both depending on if synthetic or real
+            self.threads_pool.createThread('camera', self.model.acquire_with_waveform_update())
+            # self.threads_pool.createThread('camera_display',
+            #                                self.camera_view_controller.display_image(self.model.camera.image))
+            #  self.threads_pool.createThread('camera', self.camera_view_controller.live_feed)
+
+        elif command == 'stop_acquire':
+            # stop continuous acquire from camera
             self.camera_view_controller.set_mode('stop')  # Breaks live feed loop
 
         if self.verbose:

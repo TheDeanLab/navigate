@@ -341,10 +341,7 @@ class ASLM_controller:
             self.prepare_acquire_data()
             # create file directory
             file_directory = create_save_path(args[0], self.verbose)
-
-            # update model.experiment and save it to file
-            self.update_experiment_setting()
-
+            # save experiment file
             save_experiment_file(file_directory, self.model.experiment.serialize())
             pass
 

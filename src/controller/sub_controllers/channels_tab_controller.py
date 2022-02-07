@@ -9,7 +9,7 @@ class Channels_Tab_Controller(GUI_Controller):
         super().__init__(view, parent_controller, verbose)
 
         self.is_save = False
-        self.mode = 'instant'
+        self.mode = 'live'
         self.settings_from_configuration = {}
         self.channel_setting_controller = Channel_Setting_Controller(self.view.channel_widgets_frame, self,
                                                                      self.verbose)

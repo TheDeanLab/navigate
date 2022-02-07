@@ -7,8 +7,8 @@ class Channel_Setting_Controller(GUI_Controller):
 
         # num: numbers of channels
         self.num = 5
-        # 'instant': acquire mode is set to 'continuous'
-        self.mode = 'instant'
+        # 'live': acquire mode is set to 'continuous'
+        self.mode = 'live'
         self.channel_controllers = []
 
         # widget command binds
@@ -111,7 +111,7 @@ class Channel_Setting_Controller(GUI_Controller):
 
     def channel_callback(self, channel_id, widget_name):
         """
-        # in 'instant' mode (when acquire mode is set to 'continuous') and a channel is selected,
+        # in 'live' mode (when acquire mode is set to 'continuous') and a channel is selected,
         # any change of the channel setting will influence devices instantly
         # this function will call the central controller to response user's request
         """
@@ -122,7 +122,7 @@ class Channel_Setting_Controller(GUI_Controller):
                 return
             if widget_name == 'camera_exposure_time':
                 self.parent_controller.execute('recalculate_timepoint')
-            if self.mode == 'instant':
+            if self.mode == 'live':
                 self.parent_controller.execute('channel', widget_name, channel_vals[widget_name].get())
 
             self.show_verbose_info('channel setting has been changed')

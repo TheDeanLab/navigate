@@ -284,7 +284,7 @@ class ASLM_controller:
 
         elif command == 'image_mode':
             # tell channel the mode is changed
-            self.channels_tab_controller.set_mode('instant' if args[0] == 'continuous' else 'uninstant')
+            self.channels_tab_controller.set_mode('live' if args[0] == 'continuous' else 'stop')
 
             # update model.experiment
             self.model.experiment.MicroscopeState['image_mode'] = args[0]

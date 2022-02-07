@@ -2,8 +2,11 @@
 This is the controller in an MVC-scheme for mediating the interaction between the View (GUI) and the model
 (./model/aslm_model.py). Use: https://www.python-course.eu/tkinter_events_binds.php
 """
-
+#  Standard Library Imports
 from pathlib import Path
+
+#  External Library Imports
+import numpy as np
 
 # Local View Imports
 from tabnanny import verbose
@@ -53,6 +56,7 @@ class ASLM_controller:
         # Camera View Controller
         self.camera_view_controller = Camera_View_Controller(self.view.notebook_2.camera_tab, self.model.camera, self,
                                                              self.verbose)
+        self.camera_view_controller.populate_view()
 
         # Stage Controller
         self.stage_gui_controller = Stage_GUI_Controller(self.view.notebook_3.stage_control_tab, self, self.verbose)
@@ -96,7 +100,7 @@ class ASLM_controller:
 
     def initialize_stage(self, configuration_controller):
         """
-        # Prepopulate the stage positions.
+        # Pre-populate the stage positions.
         """
         # Set stage movement limits
         position_min = configuration_controller.get_stage_position_limits('_min')
@@ -298,6 +302,7 @@ class ASLM_controller:
         elif command == 'acquire_and_save':
             # create file directory
             file_directory = create_save_path(args[0], self.verbose)
+
             # update model.experiment and save it to file
             self.update_experiment_setting()
             save_experiment_file(file_directory, self.model.experiment.serialize())
@@ -306,12 +311,12 @@ class ASLM_controller:
         elif command == 'acquire':
             # TODO: according to image_mode to move devices
             # Create a thread for the camera to use to display live feed
-            self.threads_pool.createThread('camera', self.model.acquire_with_waveform_update())
-            self.threads_pool.createThread('camera_display',
-                                           self.camera_view_controller.display_image(self.model.camera.image))
-            #  self.threads_pool.createThread('camera', self.camera_view_controller.live_feed)
+            self.model.stop_flag = False
+            self.threads_pool.createThread('camera', self.model.snap_image())
+            self.camera_view_controller.display_image(self.model.data)
 
         elif command == 'stop_acquire':
+            self.model.stop_flag = True
             # TODO: stop continuous acquire from camera
             # Do I need to lock the thread here or how do I stop the process with the thread pool?
             # Or is it something with the ObjectSubProcess? Or both depending on if synthetic or real

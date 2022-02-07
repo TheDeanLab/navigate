@@ -54,6 +54,7 @@ class Model:
         self.total_image_count = None
         self.start_time = None
         self.image_acq_start_time_string = time.strftime("%Y%m%d-%H%M%S")
+        self.data = np.zeros(np.shape((self.camera.y_pixels, self.camera.x_pixels)))
 
     #  Basic Image Acquisition Functions
     #  - These functions are used to acquire images from the camera
@@ -90,11 +91,11 @@ class Model:
         # waveforms into the buffers of the NI cards.
         #
         """
-
         self.daq.create_tasks()
         self.daq.write_waveforms_to_tasks()
         self.daq.start_tasks()
         self.daq.run_tasks()
+        self.data = self.camera.get_image()
         self.daq.stop_tasks()
         self.daq.close_tasks()
 
@@ -111,6 +112,7 @@ class Model:
         """
         self.daq.start_tasks()
         self.daq.run_tasks()
+        self.data = self.camera.get_image()
         self.daq.stop_tasks()
 
     def close_image_series(self):

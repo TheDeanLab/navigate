@@ -1,4 +1,4 @@
-
+import time
 import numpy as np
 from .CameraBase import CameraBase
 
@@ -50,8 +50,9 @@ class Camera(CameraBase):
         pass
 
     def get_image(self):
-        image = np.random.normal(size=(self.x_pixels, self.x_pixels))*100
-        image = np.around(image).astype('uint16')
+        image = np.random.normal(1000, 400, (self.y_pixels, self.x_pixels))
+        image = np.around(image)
+        time.sleep(self.camera_exposure_time/1000)
         return image
 
     def initialize_live_mode(self):

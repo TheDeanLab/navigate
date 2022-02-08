@@ -12,7 +12,8 @@ def start_camera(configuration, experiment, verbose):
         camera_id = 0
         #  TODO: @Annie - I still don't understand why this is throwing the __name__ error.
         #  Only can take in dictionaries.
-        # cam = ObjectInSubprocess(camera_id, configuration.CameraParameters, experiment, verbose)
+
+        #  cam = ObjectInSubprocess(camera_id, configuration.CameraParameters, experiment, verbose)
         cam = CameraModel(camera_id, configuration, experiment, verbose)
     elif configuration.Devices['camera'] == 'SyntheticCamera':
         from model.devices.camera.SyntheticCamera import Camera as CameraModel
@@ -97,21 +98,21 @@ def start_lasers(configuration, verbose):
                 # 488 nm LuxX laser
                 print("Initializing 488 nm LuxX Laser")
                 comport = 'COM19'
-                laser[laser_idx] = luxx(comport)
+                laser[laser_idx] = luxx(comport, verbose)
                 laser[laser_idx].initialize_laser()
 
             elif laser_idx == 1:
                 # 561 nm Obis laser
                 print("Initializing 561 nm Obis Laser")
                 comport = 'COM4'
-                laser[laser_idx] = obis(comport)
+                laser[laser_idx] = obis(comport, verbose)
                 laser[laser_idx].set_laser_operating_mode('mixed')
 
             elif laser_idx == 2:
                 # 642 nm LuxX laser
                 print("Initializing 642 nm LuxX Laser")
                 comport = 'COM17'
-                laser[laser_idx] = luxx(comport)
+                laser[laser_idx] = luxx(comport, verbose)
                 laser[laser_idx].initialize_laser()
 
             else:

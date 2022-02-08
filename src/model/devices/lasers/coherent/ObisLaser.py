@@ -10,21 +10,20 @@ from time import time, sleep
 from model.devices.lasers.LaserBase import LaserBase
 
 class ObisLaser(LaserBase):
-    def __init__(self, model, verbose, port='COM4'):
-        super().__init__(model, verbose)
+    def __init__(self, verbose, port='COM4'):
         self.timeout = 0.05
         self.end_of_line = '\r'
 
         try:
             # Open serial port
-            self.port = serial.Serial()
-            self.port.port = port
-            self.port.baudrate = 115200
-            self.port.parity = 'N'
-            self.port.stopbits = 1
-            self.port.bytesize = 8
-            self.port.timeout = self.timeout
-            self.port.open()
+            self.laser = serial.Serial()
+            self.laser.port = port
+            self.laser.baudrate = 115200
+            self.laser.parity = 'N'
+            self.laser.stopbits = 1
+            self.laser.bytesize = 8
+            self.laser.timeout = self.timeout
+            self.laser.open()
             if self.verbose:
                 print("Port opened")
 
@@ -39,7 +38,7 @@ class ObisLaser(LaserBase):
         """
         try:
             # self.set_power(0)
-            self.port.close()
+            self.laser.close()
             if self.verbose:
                 print("Port closed")
         except serial.SerialException:
@@ -50,7 +49,7 @@ class ObisLaser(LaserBase):
         # Close the port before exit.
         """
         try:
-            self.port.close()
+            self.laser.close()
             if self.verbose:
                 print("Port Closed")
         except serial.SerialException:
@@ -164,7 +163,7 @@ class ObisLaser(LaserBase):
             print("Invalid mode")
             return
 
-        self.port.write(command.encode())
+        self.laser.write(command.encode())
         if self.verbose:
             print("Set Laser Operating Mode to:", self.laser_operating_mode)
 
@@ -198,13 +197,13 @@ class ObisLaser(LaserBase):
         return laser_operating_mode
 
     def ask(self, command):
-        self.port.write(str(command + self.end_of_line).encode())
+        self.laser.write(str(command + self.end_of_line).encode())
         response = ''
-        read_iteration = self.port.read()
+        read_iteration = self.laser.read()
         while read_iteration != b'\r':
             response += read_iteration.decode()
             sleep(self.timeout)
-            read_iteration = self.port.read()
+            read_iteration = self.laser.read()
         if self.verbose:
             print("Command:", command, "Response:", response)
         return response

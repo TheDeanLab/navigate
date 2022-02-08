@@ -3,7 +3,6 @@
 import numpy as np
 
 # Internal Dependencies
-# from model.devices.camera.Hamamatsu.API.HamamatsuAPI import HamamatsuCamera as HamamatsuController
 from model.devices.camera.Hamamatsu.API.HamamatsuAPI import HamamatsuCameraMR as HamamatsuController
 from model.devices.camera.CameraBase import CameraBase
 
@@ -67,7 +66,10 @@ class Camera(CameraBase):
             print('Camera mode not supported')
 
     def set_exposure_time(self, time):
-        time = time/1000
+        """
+        #  Need to figure out what the units are in the DCAM API
+        """
+        time = time/1E6
         self.camera_controller.setPropertyValue("exposure_time", time)
 
     def set_line_interval(self, time):

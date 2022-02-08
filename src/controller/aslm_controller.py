@@ -349,19 +349,52 @@ class ASLM_controller:
             pass
 
         elif command == 'acquire':
-            self.prepare_acquire_data()
-            # if 'continuous' is selected
-            # Create a thread for the camera to use to display live feed
-            self.model.stop_flag = False
-            self.threads_pool.createThread('camera', self.model.snap_image())
-            self.camera_view_controller.display_image(self.model.data)
+            # Acquisition modes can be: 'continuous', 'z-stack', 'single', 'projection'
+
+            if self.acquire_bar_controller.mode == 'single':
+                #  TODO: Should be in the model.  Common language.  run_single_acquisition function() name.
+                #  TODO: Should be on a thread.
+                #  TODO: Should iterate through each selected channel, toggle each laser,
+                #   at each laser power, filter, exposure time.
+                self.prepare_acquire_data()
+                self.model.stop_flag = False
+                self.model.snap_image()
+                self.camera_view_controller.display_image(self.model.data)
+
+
+            elif self.acquire_bar_controller.mode == 'continuous':
+                #  TODO: run_continuous_acquisition()
+                pass
+
+            elif self.acquire_bar_controller.mode == 'z-stack':
+                #  TODO: run_z_stack_acquisition()
+                pass
+
+            elif self.acquire_bar_controller.mode == 'projection':
+                pass
+
+            else:
+                print("Wrong acquisition mode.  Not recognized.")
+                pass
+
+
+
+
+
+            #  self.model.camera.report_camera_settings()
+            # self.threads_pool.createThread('camera', self.model.snap_image())
+            # self.model.snap_image()
+
 
         elif command == 'stop_acquire':
             self.model.stop_flag = True
+            pass
+
             # TODO: stop continuous acquire from camera
             # Do I need to lock the thread here or how do I stop the process with the thread pool?
             # Or is it something with the ObjectSubProcess? Or both depending on if synthetic or real
-            self.threads_pool.createThread('camera', self.model.acquire_with_waveform_update())
+            #  self.threads_pool.createThread('camera', self.model.acquire_with_waveform_update())
+
             # self.threads_pool.createThread('camera_display',
             #                                self.camera_view_controller.display_image(self.model.camera.image))
             #  self.threads_pool.createThread('camera', self.camera_view_controller.live_feed)

@@ -42,7 +42,7 @@ class Model:
         self.filter_wheel = start_filter_wheel(self.configuration, self.verbose)
         self.zoom = start_zoom_servo(self.configuration, self.verbose)
         self.daq = start_daq(self.configuration, self.experiment, self.etl_constants, self.verbose)
-        self.laser = start_lasers(self.configuration, self.verbose)
+        # self.laser = start_lasers(self.configuration, self.verbose)
         self.shutter = start_shutters(self.configuration, self.experiment, self.verbose)
         #self.etl = start_etl(self.configuration, self.verbose)
 
@@ -91,13 +91,25 @@ class Model:
         # waveforms into the buffers of the NI cards.
         #
         """
+        #  Initialize the DAQ Tasks and the Camera.
+        self.daq.initialize_tasks()
+        self.camera.initialize_image_series()
+
+        #  Prepare the DAQ for Waveform Delivery
         self.daq.create_tasks()
-        self.daq.write_waveforms_to_tasks()
+        self.daq.create_waveforms()
         self.daq.start_tasks()
+
+        #  Trigger everything and grab the image.
         self.daq.run_tasks()
         self.data = self.camera.get_image()
+        #  self.view.camera_view_controller(display_image(self.data))
+        time.sleep(0.2)
+
+        #  Close everything.
         self.daq.stop_tasks()
         self.daq.close_tasks()
+        self.camera.close_image_series()
 
     def prepare_image_series(self):
         """
@@ -160,7 +172,7 @@ class Model:
         self.total_image_count = self.total_acquisition_count * number_of_slices
         self.start_time = time.time()
 
-    def run_acquisition(self, acq):
+    def run_z_stack_acquisition(self, acq):
         """
         # Acquire all of the image volumes in the acquisition list.
         # Meant more to be an example of how it was performed in the mesoSPIM software

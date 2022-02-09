@@ -1,9 +1,7 @@
 # Standard Library Imports
-import os
 import time
 
 # Third Party Imports
-from tifffile import imsave
 import numpy as np
 
 # Local Imports
@@ -58,7 +56,7 @@ class Model:
         self.current_channel = 0
         self.current_filter = 'Empty'
         self.current_laser = '488nm'
-        self.current_exposure_time = 0.2
+        self.current_exposure_time = 200  # milliseconds
         self.start_time = None
         self.image_acq_start_time_string = time.strftime("%Y%m%d-%H%M%S")
         self.data = np.zeros(np.shape((self.camera.y_pixels, self.camera.x_pixels)))
@@ -179,13 +177,16 @@ class Model:
         # Closes the shutter
         # Disables the camera
         """
-        self.camera.set_exposure_time(self.experiment.MicroscopeState['channels']['channel_1']['camera_exposure_time']/1000)
+        self.camera.set_exposure_time(self.experiment.MicroscopeState['channels']
+                                      ['channel_1']['camera_exposure_time']/1000)
         self.camera.initialize_image_series()
-        #  self.filter_wheel.set_filter(self.experiment.MicroscopeState['channels']['channel_1']['filter'])
+        self.daq.initialize_tasks()
+
+        self.filter_wheel.set_filter(self.experiment.MicroscopeState['channels']['channel_1']['filter'])
         self.daq.identify_laser_idx(self.experiment.MicroscopeState['channels']['channel_1']['laser'])
         self.open_shutter()
-        self.daq.create_waveforms()
         self.daq.start_tasks()
+        self.daq.create_waveforms()
         self.daq.run_tasks()
         self.daq.stop_tasks()
         image = self.camera.get_image()
@@ -198,6 +199,11 @@ class Model:
         self.experiment = session(experiment_path, self.verbose)
 
     def run_single_acquisition(self, update_view=None):
+        """
+        This function retrieves the state of the microscope from the GUI, iterates through each selected channel,
+        and snaps an image for each channel setting.  In each iteration, the camera is initialized and closed.
+        """
+
         #  Interrogate the Experiment Settings
         microscope_state = self.experiment.MicroscopeState
         for channel_idx in range(len(microscope_state['channels'])):
@@ -207,7 +213,7 @@ class Model:
 
                 #  Get the parameters
                 self.current_channel = channel_idx
-                self.current_exposure_time = channel['camera_exposure_time']/1000
+                self.current_exposure_time = channel['camera_exposure_time']
                 self.current_filter = channel['filter']
                 self.current_laser = channel['laser']
 
@@ -220,9 +226,7 @@ class Model:
                     print("Camera Exposure Time:", self.current_exposure_time)
                     print("Filter Wheel:", self.current_filter)
 
-                #  Execute the acquisition
-                self.daq.create_waveforms()
-                self.daq.start_tasks()
+                #  Acquire the Image
                 self.snap_image()
 
                 #  Update the View
@@ -241,45 +245,53 @@ class Model:
         while self.stop_acquisition is False:
             self.run_single_acquisition(update_view)
 
-    def run_z_stack_acquisition(self, is_multiposition):
+    def run_z_stack_acquisition(self, is_multi_position, update_view):
         self.camera.initialize_image_series()
 
         microscope_state = self.experiment.MicroscopeState
         for time_idx in range(microscope_state['timepoints']):
-            if is_multiposition is True:
+            if is_multi_position is True:
                 for position_idx in range(len(microscope_state['stage_positions'])):
                     if self.verbose:
                         print("Position :", position_idx)
                     microscope_position = microscope_state['stage_positions'][position_idx]
                     self.stages.move_absolute(microscope_position)
                     if microscope_state['stack_cycling_mode'] == 'per_stack':
-                        self.per_stack_acquisition()
-                    elif microscope_state['stack_cycling_mode']  == 'per_z':
-                        self.per_z_acquisition()
-                else:
-                    raise UserWarning('Stack Cycling Mode Not Recognized')
-                    break
-            else:
+                        #  self.per_stack_acquisition(microscope_state, microscope_position)
+                        pass
+                    elif microscope_state['stack_cycling_mode'] == 'per_z':
+                        #  self.per_z_acquisition(microscope_state, microscope_position)
+                        pass
+            elif is_multi_position is False:
+                self.stages.create_position_dict()
+                microscope_position = self.stages.position_dict
+                print(microscope_position)
                 if microscope_state['stack_cycling_mode'] == 'per_stack':
-                    self.per_stack_acquisition()
-                elif microscope_state['stack_cycling_mode']  == 'per_z':
-                    self.per_z_acquisition()
+                    #  self.per_stack_acquisition(microscope_state, microscope_position)
+                    pass
+                elif microscope_state['stack_cycling_mode'] == 'per_z':
+                    #  self.per_z_acquisition(microscope_state, microscope_position)
+                    pass
         self.camera.close_image_series()
 
-    def per_stack_acquisition(self):
+    def per_stack_acquisition(self, microscope_state, microscope_position):
         for channel_idx in range(len(microscope_state['channels'])):
-            if microscope_state['channels']['is_selected']:
+            channel_key = list(microscope_state['channels'].keys())[channel_idx]
+            channel = microscope_state['channels'][channel_key]
+            if channel['is_selected'] is True:
                 if self.verbose:
                     print("Channel :", channel_idx)
-                self.camera.set_exposure_time(microscope_state['channels']
-                                              ['channel_' + str(channel_idx + 1)]
-                                              ['camera_exposure_time']/1000)
-                self.filter_wheel.set_filter(microscope_state['channels']
-                                             ['channel_' + str(channel_idx + 1)]
-                                             ['filter'])
-                self.daq.identify_laser_idx(self.experiment.MicroscopeState['channels']
-                                            ['channel_' + str(channel_idx + 1)]
-                                            ['laser'])
+
+                self.current_channel = channel_idx
+                self.current_exposure_time = channel['camera_exposure_time']
+                self.current_filter = channel['filter']
+                self.current_laser = channel['laser']
+
+                #  Set the parameters
+                self.camera.set_exposure_time(self.current_exposure_time)
+                self.filter_wheel.set_filter(self.current_filter)
+                self.daq.identify_laser_idx(self.current_laser)
+
                 self.open_shutter()
                 self.daq.create_waveforms()
                 self.daq.start_tasks()
@@ -295,7 +307,7 @@ class Model:
                     self.stages.move_absolute(microscope_position)
             self.close_shutter()
 
-    def per_z_acquisition(self):
+    def per_z_acquisition(self, microscope_state, microscope_position):
         for z_idx in range(int(microscope_state['number_z_steps'])):
             for channel_idx in range(len(microscope_state['channels'])):
                 # Check if it is selected.

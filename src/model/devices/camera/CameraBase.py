@@ -20,7 +20,7 @@ class CameraBase:
 
         # Initialize Exposure and Display Information
         self.camera_line_interval = self.model.CameraParameters['line_interval']
-        self.camera_exposure_time = self.model.CameraParameters['exposure_time']
+        self.camera_exposure_time = self.model.CameraParameters['exposure_time']/1000  # milliseconds to seconds
         self.camera_display_live_subsampling = self.model.CameraParameters['display_live_subsampling']
         self.camera_display_acquisition_subsampling = self.model.CameraParameters['display_acquisition_subsampling']
 

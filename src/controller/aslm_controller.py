@@ -400,10 +400,10 @@ class ASLM_controller:
             elif self.acquire_bar_controller.mode == 'z-stack':
                 if self.verbose:
                     print("Starting Z-Stack Acquisition")
-                is_multiposition = self.channels_tab_controller.is_multiposition_val.get()
+                is_multi_position = self.channels_tab_controller.is_multiposition_val.get()
                 self.prepare_acquire_data()
                 self.model.open_shutter()
-                self.model.run_z_stack_acquisition(is_multiposition)
+                self.model.run_z_stack_acquisition(is_multi_position, self.update_camera_view())
                 self.model.close_shutter()
 
             elif self.acquire_bar_controller.mode == 'projection':

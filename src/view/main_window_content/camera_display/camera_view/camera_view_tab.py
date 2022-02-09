@@ -22,7 +22,7 @@ class camera_tab(ttk.Frame):
 
         self.canvas = tk.Canvas(self.cam_image, width=1000, height=1000)
         self.canvas.grid(row=0, column=0, sticky=NSEW)
-        self.matplotlib_figure = Figure(figsize=[8.5, 8.5], tight_layout=True)
+        self.matplotlib_figure = Figure(figsize=[7, 7], tight_layout=True)
         self.matplotlib_canvas = FigureCanvasTkAgg(self.matplotlib_figure, self.canvas)
 
         #  Frame for camera selection and counts

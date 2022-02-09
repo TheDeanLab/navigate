@@ -17,7 +17,7 @@ class Camera(CameraBase):
         self.camera_controller.setPropertyValue("sensor_mode", self.model.CameraParameters['sensor_mode'])
         self.camera_controller.setPropertyValue("defect_correct_mode",
                                                 self.model.CameraParameters['defect_correct_mode'])
-        self.camera_controller.setPropertyValue("exposure_time", self.camera_exposure_time/1E6)  # ms -> s or us?
+        self.camera_controller.setPropertyValue("exposure_time", self.camera_exposure_time)
         self.camera_controller.setPropertyValue("binning", self.x_binning)
         self.camera_controller.setPropertyValue("readout_speed", self.model.CameraParameters['readout_speed'])
         self.camera_controller.setPropertyValue("trigger_active", self.model.CameraParameters['trigger_active'])
@@ -67,9 +67,9 @@ class Camera(CameraBase):
 
     def set_exposure_time(self, time):
         """
-        #  Need to figure out what the units are in the DCAM API
+        #  Units of the Hamamatsu API are in seconds.
+        #  All of our units are in milliseconds.
         """
-        time = time/1E6
         self.camera_controller.setPropertyValue("exposure_time", time)
 
     def set_line_interval(self, time):

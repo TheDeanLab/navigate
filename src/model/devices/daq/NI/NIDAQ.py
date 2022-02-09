@@ -38,8 +38,6 @@ class DAQ(DAQBase):
         self.sample_rate = self.model.DAQParameters['sample_rate']
         self.sweep_time = self.model.DAQParameters['sweep_time']
         self.samples = int(self.sample_rate * self.sweep_time)
-        if self.verbose:
-            print('Number of samples: ' + str(self.samples))
 
     def create_waveforms(self):
         """

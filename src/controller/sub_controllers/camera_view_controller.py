@@ -62,3 +62,6 @@ class Camera_View_Controller(GUI_Controller):
         self.figure.add_subplot(111).imshow(image, self.colormap)
         self.figure.gca().set_axis_off()
         self.canvas.draw()
+
+    def update_channel_idx(self, channel_idx):
+        self.view.cam_counts.channel_idx.set(channel_idx)

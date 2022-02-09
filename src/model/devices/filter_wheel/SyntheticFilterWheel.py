@@ -18,12 +18,12 @@ class SyntheticFilterWheel(FilterWheelBase):
         # Checks if the filter designation (string) given as argument
         # exists in the filterdict
         """
-        if filter in self.filterdict:
+        if filter in self.filterdict.keys():
             return True
         else:
             raise ValueError('Filter designation not in the configuration')
 
-    def set_filter(self, filterposition, speed=2, wait_until_done=False):
+    def set_filter(self, filter, speed=2, wait_until_done=False):
         """
         # Change the filter wheel to the filter designated by the filterposition argument.
         """
@@ -31,7 +31,7 @@ class SyntheticFilterWheel(FilterWheelBase):
             if self.verbose:
                 print('Filter set to: ', str(filter))
             if wait_until_done:
-                time.sleep(1)
+                time.sleep(0.03)
 
     def read(self, num_bytes):
         """

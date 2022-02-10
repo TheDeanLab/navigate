@@ -71,47 +71,58 @@ class LabelInput(ttk.Frame):
             self.input.grid(row=0, column=1, sticky=(tk.W + tk.E))
             self.rowconfigure(0, weight=1)
 
-        '''Creating a custom grid function that will default LabelInput.grid() to sticky=tk.W + tk.E'''
-        def grid(self, sticky=(tk.E + tk.W), **kwargs):
-            super().grid(sticky=sticky, **kwargs)
+    
+    def grid(self, sticky=(tk.E + tk.W), **kwargs):
+        '''
+        #### Creating a custom grid function that will default LabelInput.grid() to sticky=tk.W + tk.E
+        '''
+        super().grid(sticky=sticky, **kwargs)
 
-        '''Creating a generic get function to catch all types of widgets, this uses the try except block for instances when tkintervariables fails'''
-        def get(self):
-            try:
-                if self.variable:
-                    return self.variable.get() #Catches widgets that don't have text
-                elif type(self.input) == tk.Text:
-                    return self.input.get('1.0', tk.END) #This is to account for the different formatting with Text widgets
-                else:
-                    return self.input.get() #Cathces all others like the normal entry widget
-            except(TypeError, tk.TclError):
-                # Catches times when a numeric entry input has a blank, since this cannot be converted into a numeric value
-                return ''
-        
-        '''Creating a generic set funciton to complement the above get'''
-        def set(self, value, *args, **kwargs):
-            if type(self.variable) == tk.BooleanVar:
-                    self.variable.set(bool(value)) #This will cast the value to bool if the variable is a Tk BooleanVar, bc Boolean.Var().set() can only accept bool type values
-            elif self.variable:
-                    self.variable.set(value, *args, **kwargs) #No casting needed this will set any of the other var types (String, Int, etc)
-            elif type(self.input).__name__.endswith('button'): #Catches button style widgets
-                #The below if statment is needed for button types because it needs to be selected or enabled based on some value
-                if value:
-                    self.input.select() #If there is a value select the button
-                else:
-                    self.input.deselect() #If there is not deselect it
-            elif type(self.input) == tk.Text: #Catches Text type objects so the Multiline Text widget and the Entry widget
-                self.input.delete('1.0', tk.END)
-                self.input.insert('1.0', value) #These lines are used for the specfic formatting of the Text widget, 1 is the line and 0 is the char pos of that line
+    
+    def get(self):
+        '''
+        #### Creating a generic get function to catch all types of widgets, this uses the try except block for instances when tkintervariables fails
+        '''
+        try:
+            if self.variable:
+                return self.variable.get() #Catches widgets that don't have text
+            elif type(self.input) == tk.Text:
+                return self.input.get('1.0', tk.END) #This is to account for the different formatting with Text widgets
             else:
-                self.input.delete(0, tk.END)
-                self.input.insert(0, value) #Basic entry widget formatting, dont need the string as the first arg
-
-        def set_values(self, values):
-            '''Values should be a list of strings or numbers that you want to be options in the specific widget'''
-
-            if input_class in (ttk.Combobox, tk.Listbox, ttk.Spinbox):
-                self.input['values'] = values
+                return self.input.get() #Cathces all others like the normal entry widget
+        except(TypeError, tk.TclError):
+            # Catches times when a numeric entry input has a blank, since this cannot be converted into a numeric value
+            return ''
+    
+    
+    def set(self, value, *args, **kwargs):
+        '''
+        #### Creating a generic set funciton to complement the above get
+        '''
+        if type(self.variable) == tk.BooleanVar:
+                self.variable.set(bool(value)) #This will cast the value to bool if the variable is a Tk BooleanVar, bc Boolean.Var().set() can only accept bool type values
+        elif self.variable:
+                self.variable.set(value, *args, **kwargs) #No casting needed this will set any of the other var types (String, Int, etc)
+        elif type(self.input).__name__.endswith('button'): #Catches button style widgets
+            #The below if statment is needed for button types because it needs to be selected or enabled based on some value
+            if value:
+                self.input.select() #If there is a value select the button
             else:
-                print("This widget class does not support list options: " + input_class)
+                self.input.deselect() #If there is not deselect it
+        elif type(self.input) == tk.Text: #Catches Text type objects so the Multiline Text widget and the Entry widget
+            self.input.delete('1.0', tk.END)
+            self.input.insert('1.0', value) #These lines are used for the specfic formatting of the Text widget, 1 is the line and 0 is the char pos of that line
+        else:
+            self.input.delete(0, tk.END)
+            self.input.insert(0, value) #Basic entry widget formatting, dont need the string as the first arg
+
+    def set_values(self, values):
+        '''
+        #### Values should be a list of strings or numbers that you want to be options in the specific widget
+        '''
+
+        if self.input_class in (ttk.Combobox, tk.Listbox, ttk.Spinbox):
+            self.input['values'] = values
+        else:
+            print("This widget class does not support list options: " + self.input_class)
                 

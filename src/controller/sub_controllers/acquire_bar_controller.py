@@ -4,7 +4,8 @@ When the mode is changed, we need to communicate this to the central controller.
 Central controller then communicates these changes to the channel_setting_controller.
 """
 import sys
-
+import tkinter as tk
+from tkinter import ttk
 from controller.sub_controllers.gui_controller import GUI_Controller
 from view.main_window_content.acquire_bar_frame.acquire_popup import Acquire_PopUp as acquire_popup
 
@@ -82,13 +83,15 @@ class Acquire_Bar_Controller(GUI_Controller):
         # also dictate the save path of the data in a standardized format.
         """
         if self.is_save and self.mode != 'continuous':
-            popup_window = acquire_popup(self.view)
+            acquire_pop = acquire_popup(self.view)
+            buttons = acquire_pop.get_buttons() # This holds all the buttons in the popup
 
             # Configure the button callbacks on the popup window
-            popup_window.content.cancel_btn.config(command=lambda: popup_window.dismiss(self.verbose))
-            popup_window.content.done_btn.config(command=lambda: self.launch_acquisition(popup_window))
+            buttons['Cancel'].config(command=lambda: acquire_pop.popup.dismiss(self.verbose))
+            buttons['Done'].config(command=lambda: self.launch_acquisition(acquire_pop))
+            
+            initialize_popup_window(acquire_pop, self.saving_settings)
 
-            initialize_popup_window(popup_window, self.saving_settings)
         elif self.view.acquire_btn['text'] == 'Stop':
             # change the button to 'Acquire'
             self.view.acquire_btn.configure(text='Acquire')
@@ -147,7 +150,7 @@ class Acquire_Bar_Controller(GUI_Controller):
             # tell central controller, save the image/data
             self.parent_controller.execute('acquire_and_save', self.saving_settings)
             # Close the window
-            popup_window.dismiss(self.verbose)
+            popup_window.popup.dismiss(self.verbose)
 
     def exit_program(self):
         self.show_verbose_info("Exiting Program")
@@ -160,13 +163,14 @@ class Acquire_Bar_Controller(GUI_Controller):
 
 
 def get_popup_vals(popup_window):
+    vars = popup_window.get_variables()
     popup_vals = {
-        'root_directory': popup_window.content.root_entry_string,
+        'root_directory': vars['Root'],
         'save_directory': None,
-        'user': popup_window.content.user_string,
-        'tissue': popup_window.content.tissue_string,
-        'celltype': popup_window.content.celltype_string,
-        'label': popup_window.content.label_string
+        'user': vars['User'],
+        'tissue': vars['Tissue'],
+        'celltype': vars['Cell'],
+        'label': vars['Label']
     }
     return popup_vals
 
@@ -192,6 +196,7 @@ def initialize_popup_window(popup_window, values):
     #    'label':
     # }
     """
+
     popup_vals = get_popup_vals(popup_window)
 
     for name in values:

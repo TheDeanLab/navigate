@@ -1,3 +1,4 @@
+from controller.sub_controllers.widget_functions import validate_float_wrapper
 from controller.sub_controllers.gui_controller import GUI_Controller
 
 
@@ -10,6 +11,12 @@ class Channel_Setting_Controller(GUI_Controller):
         # 'live': acquire mode is set to 'continuous'
         self.mode = 'stop'
         self.channel_controllers = []
+
+        # add validation functions to spinbox
+        for i in range(self.num):
+            validate_float_wrapper(self.view.exptime_pulldowns[i])
+            validate_float_wrapper(self.view.interval_spins[i])
+            validate_float_wrapper(self.view.laserpower_pulldowns[i])
 
         # widget command binds
         for i in range(self.num):
@@ -57,6 +64,12 @@ class Channel_Setting_Controller(GUI_Controller):
             channel_value = value[channel]
             for name in channel_vals:
                 channel_vals[name].set(channel_value[name])
+                if name == 'camera_exposure_time':
+                    self.view.exptime_pulldowns[channel_id].validate()
+                elif name == 'interval_time':
+                    self.view.interval_spins[channel_id].validate()
+                elif name == 'laser_power':
+                    self.view.laserpower_pulldowns[channel_id].validate()
 
         self.show_verbose_info('channel has been set new value')
 
@@ -171,7 +184,7 @@ class Channel_Setting_Controller(GUI_Controller):
 
     def get_index(self, dropdown_name, value):
         type, widget = self.get_widgets(dropdown_name)
-        if type != 'variable':
+        if type != 'variable' and value:
             values = widget[0]['values']
             return values.index(value)
-        return 0
+        return -1

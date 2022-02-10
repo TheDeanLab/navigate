@@ -1,3 +1,5 @@
+import _tkinter
+from controller.sub_controllers.widget_functions import validate_float_wrapper
 from controller.sub_controllers.gui_controller import GUI_Controller
 
 
@@ -5,6 +7,42 @@ class Stage_GUI_Controller(GUI_Controller):
     def __init__(self, view, parent_controller, verbose=False):
         super().__init__(view, parent_controller, verbose)
 
+        self.event_id = {
+            'x': None,
+            'y': None,
+            'z': None,
+            'theta': None,
+            'f': None
+        }
+
+        # state movement limits
+        self.position_min = {
+            'x': 0,
+            'y': 0,
+            'z': 0,
+            'theta': 0,
+            'f': 0
+        }
+        self.position_max = {
+            'x': 10000,
+            'y': 10000,
+            'z': 10000,
+            'theta': 10000,
+            'f': 10000
+        }
+
+        # add validations to widgets
+        validate_float_wrapper(self.view.x_y_frame.increment_box)
+        validate_float_wrapper(self.view.z_frame.increment_box)
+        validate_float_wrapper(self.view.theta_frame.increment_box)
+        validate_float_wrapper(self.view.focus_frame.increment_box)
+        validate_float_wrapper(self.view.position_frame.x_entry, True, True)
+        validate_float_wrapper(self.view.position_frame.y_entry, True, True)
+        validate_float_wrapper(self.view.position_frame.z_entry, True, True)
+        validate_float_wrapper(self.view.position_frame.theta_entry, True, True)
+        validate_float_wrapper(self.view.position_frame.f_entry, True, True)
+
+        
         # gui event bind
         self.view.x_y_frame.positive_x_btn.configure(
             command=self.up_btn_handler('x')
@@ -48,35 +86,10 @@ class Stage_GUI_Controller(GUI_Controller):
         self.view.focus_frame.zero_btn.configure(
             command=self.zero_btn_handler('f')
         )
-        self.view.position_frame.x_val.trace_add('write', self.position_callback('x'))
-        self.view.position_frame.y_val.trace_add('write', self.position_callback('y'))
-        self.view.position_frame.z_val.trace_add('write', self.position_callback('z'))
-        self.view.position_frame.theta_val.trace_add('write', self.position_callback('theta'))
-        self.view.position_frame.focus_val.trace_add('write', self.position_callback('f'))
 
-        self.event_id = {
-            'x': None,
-            'y': None,
-            'z': None,
-            'theta': None,
-            'f': None
-        }
-
-        # state movement limits
-        self.position_min = {
-            'x': 0,
-            'y': 0,
-            'z': 0,
-            'theta': 0,
-            'f': 0
-        }
-        self.position_max = {
-            'x': 10000,
-            'y': 10000,
-            'z': 10000,
-            'theta': 10000,
-            'f': 10000
-        }
+        for axis in ['x', 'y', 'z', 'theta', 'f']:
+            # add event bind to position entry variables
+            self.get_position_val(axis).trace_add('write', self.position_callback(axis))
 
     def set_position_limits(self, position_min, position_max):
         """
@@ -84,6 +97,11 @@ class Stage_GUI_Controller(GUI_Controller):
         """
         self.position_min = position_min
         self.position_max = position_max
+        
+        for axis in ['x', 'y', 'z', 'theta', 'f']:
+            exec('self.view.position_frame.{}_entry.from_={}'.format(axis, position_min[axis]))
+            exec('self.view.position_frame.{}_entry.to={}'.format(axis, position_max[axis]))
+
 
     def set_position(self, position):
         """
@@ -121,6 +139,11 @@ class Stage_GUI_Controller(GUI_Controller):
             val = self.get_step_val(axis)
             if val:
                 val.set(steps[axis])
+        # validate
+        self.view.x_y_frame.increment_box.validate()
+        self.view.z_frame.increment_box.validate()
+        self.view.focus_frame.increment_box.validate()
+        self.view.theta_frame.increment_box.validate()
 
         self.show_verbose_info('set step size')
 
@@ -135,8 +158,11 @@ class Stage_GUI_Controller(GUI_Controller):
         # }
         """
         step_size = {}
-        for axis in ['xy', 'z', 'theta', 'f']:
-            step_size[axis] = self.get_step_val(axis).get()
+        try:
+            for axis in ['xy', 'z', 'theta', 'f']:
+                step_size[axis] = self.get_step_val(axis).get()
+        except:
+            return None
         return step_size
 
     def up_btn_handler(self, axis):
@@ -152,8 +178,12 @@ class Stage_GUI_Controller(GUI_Controller):
             # guarantee stage won't move out of limits
             if position_val.get() == self.position_max[axis]:
                 return
-            temp = position_val.get() + step_val.get()
-            if temp >= self.position_max[axis]:
+            try:
+                temp = position_val.get() + step_val.get()
+            except:
+                #TODO: maybe a popup
+                return
+            if temp > self.position_max[axis]:
                 temp = self.position_max[axis]
             position_val.set(temp)
         return handler
@@ -171,7 +201,11 @@ class Stage_GUI_Controller(GUI_Controller):
             # guarantee stage won't move out of limits
             if position_val.get() == self.position_min[axis]:
                 return
-            temp = position_val.get() - step_val.get()
+            try:
+                temp = position_val.get() - step_val.get()
+            except:
+                #TODO: maybe a popup
+                return
             if temp < self.position_min[axis]:
                 temp = self.position_min[axis]
             position_val.set(temp)
@@ -213,6 +247,11 @@ class Stage_GUI_Controller(GUI_Controller):
         def handler(*args):
             if self.event_id[axis]:
                 self.view.after_cancel(self.event_id[axis])
+            # if position is not a number, then do not move stage
+            try:
+                position_var.get()
+            except:
+                return
             self.event_id[axis] = self.view.after(1000, lambda: self.parent_controller.execute('stage',
                                                                                                position_var.get(),
                                                                                                axis))

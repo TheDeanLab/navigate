@@ -47,10 +47,10 @@ class position_frame(ttk.Frame):
         #Focus Entry
         position_frame.focus_val = DoubleVar()
         position_frame.focus_entry_frame = ttk.Frame(position_frame)
-        position_frame.focus_entry = ttk.Entry(position_frame.focus_entry_frame, textvariable=position_frame.focus_val, width=15)
+        position_frame.f_entry = ttk.Entry(position_frame.focus_entry_frame, textvariable=position_frame.focus_val, width=15)
         position_frame.focus_entry_label = ttk.Label(position_frame.focus_entry_frame, text="Focus")
         position_frame.focus_entry_label.grid(row=0, column=0, sticky="e")
-        position_frame.focus_entry.grid(row=0, column=1, sticky="w")
+        position_frame.f_entry.grid(row=0, column=1, sticky="w")
 
         '''
         Grid for frames

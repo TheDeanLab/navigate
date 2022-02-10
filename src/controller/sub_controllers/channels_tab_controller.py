@@ -1,4 +1,6 @@
+import _tkinter
 import numpy as np
+from controller.sub_controllers.widget_functions import validate_float_wrapper
 from controller.sub_controllers.gui_controller import GUI_Controller
 from controller.sub_controllers.channel_setting_controller import Channel_Setting_Controller
 from controller.sub_controllers.multi_position_controller import Multi_Position_Controller
@@ -14,6 +16,19 @@ class Channels_Tab_Controller(GUI_Controller):
         self.channel_setting_controller = Channel_Setting_Controller(self.view.channel_widgets_frame, self,
                                                                      self.verbose)
         self.multi_position_controller = Multi_Position_Controller(self.view.multipoint_list, self, self.verbose)
+
+        # add validation functions to spinbox
+        # this function validate user's input (not from experiment file)
+        # and will stop propagating errors to any 'parent' functions
+        # the only thing is that when the user's input is smaller than the limits, 
+        # it will show inputs in red, but still let the function know the inputs changed
+        # I can not block it since the Tkinter's working strategy
+        validate_float_wrapper(self.view.stack_acq_frame.step_size_spinbox)
+        validate_float_wrapper(self.view.stack_acq_frame.start_pos_spinbox)
+        validate_float_wrapper(self.view.stack_acq_frame.end_pos_spinbox)
+
+        validate_float_wrapper(self.view.stack_timepoint_frame.stack_pause_spinbox)
+        validate_float_wrapper(self.view.stack_timepoint_frame.exp_time_spinbox)
 
         # stack acquisition variables
         self.stack_acq_vals = {
@@ -122,12 +137,20 @@ class Channels_Tab_Controller(GUI_Controller):
         # }
         """
         # Calculate the number of slices and set GUI
-        start_position = float(self.stack_acq_vals['start_position'].get())
-        end_position = float(self.stack_acq_vals['end_position'].get())
-        step_size = float(self.stack_acq_vals['step_size'].get())
-        if step_size < 0.001:
-            step_size = 0.001
-            self.stack_acq_vals['step_size'].set(step_size)
+        try:
+            # validate the spinbox's value
+            start_position = float(self.stack_acq_vals['start_position'].get())
+            end_position = float(self.stack_acq_vals['end_position'].get())
+            step_size = float(self.stack_acq_vals['step_size'].get())
+            if step_size < 0.001:
+                self.stack_acq_vals['number_z_steps'].set('')
+                return
+        except:
+            self.stack_acq_vals['number_z_steps'].set('')
+            return
+        # if step_size < 0.001:
+        #     step_size = 0.001
+        #     self.stack_acq_vals['step_size'].set(step_size)
 
         number_z_steps = np.floor((end_position - start_position) / step_size)
         self.stack_acq_vals['number_z_steps'].set(number_z_steps)
@@ -178,12 +201,21 @@ class Channels_Tab_Controller(GUI_Controller):
 
         channel_settings = self.channel_setting_controller.get_values()
         number_of_channels = len(channel_settings)
-        number_of_timepoints = self.timepoint_vals['timepoints'].get()
         number_of_positions = self.multi_position_controller.get_position_num() if self.is_multiposition else 1
-
-        number_of_slices = int(self.stack_acq_vals['number_z_steps'].get())
         stage_velocity = self.settings_from_configuration['stage_velocity']
         filter_wheel_delay = self.settings_from_configuration['filter_wheel_delay']
+        channel_exposure_time = []
+        # validate the spinbox's value
+        try:
+            number_of_timepoints = self.timepoint_vals['timepoints'].get()
+            number_of_slices = int(self.stack_acq_vals['number_z_steps'].get())
+            for channel_id in channel_settings:
+                channel = channel_settings[channel_id]
+                channel_exposure_time.append(channel['camera_exposure_time'].get())
+        except:
+            self.timepoint_vals['experiment_duration'].set('')
+            self.timepoint_vals['stack_acq_time'].set('')
+            return
 
         perStack = self.laser_cycling_val.get() == 'Per Stack'
 
@@ -216,7 +248,7 @@ class Channels_Tab_Controller(GUI_Controller):
                 # If we were actually acquiring the data, we would call the function to move the stage here.
                 experiment_duration = experiment_duration + stage_delay
 
-                for channel_idx in range(number_of_channels):
+                for channel_idx in range(len(channel_exposure_time)):
                     # Change the filter wheel here before the start of the acquisition.
                     if perStack:
                         # In the perStack mode, we only need to account for the time necessary for the filter wheel
@@ -227,13 +259,10 @@ class Channels_Tab_Controller(GUI_Controller):
                         # Now we need to know the exposure time of each channel.
                         # Assumes no delay between individual slices at this point.
                         # Convert from milliseconds to seconds.
-                        experiment_duration = experiment_duration + channel_settings['channel_' + str(channel_idx + 1)][
-                            'camera_exposure_time'] / 1000
+                        experiment_duration = experiment_duration + channel_exposure_time[channel_idx] / 1000
 
                         if channel_idx == 0 and position_idx == 0 and timepoint_idx == 0:
-                            stack_acquisition_duration = stack_acquisition_duration + \
-                                                         channel_settings['channel_' + str(channel_idx + 1)][
-                                                             'camera_exposure_time'] / 1000
+                            stack_acquisition_duration = stack_acquisition_duration + channel_exposure_time[channel_idx] / 1000
 
                         if not perStack:
                             # In the perZ mode, we need to account for the time necessary to move the filter wheel
@@ -241,9 +270,7 @@ class Channels_Tab_Controller(GUI_Controller):
                             experiment_duration = experiment_duration + filter_wheel_delay
 
                             if channel_idx == 0 and position_idx == 0 and timepoint_idx == 0:
-                                stack_acquisition_duration = stack_acquisition_duration + \
-                                                             channel_settings['channel_' + str(channel_idx + 1)][
-                                                                 'camera_exposure_time'] / 1000
+                                stack_acquisition_duration = stack_acquisition_duration + channel_exposure_time[channel_idx] / 1000
 
         self.timepoint_vals['experiment_duration'].set(experiment_duration)
         self.timepoint_vals['stack_acq_time'].set(stack_acquisition_duration)
@@ -303,8 +330,12 @@ class Channels_Tab_Controller(GUI_Controller):
         # get values from a list of variables
         """
         info = {}
-        for name in vals:
-            info[name] = vals[name].get()
+        try:
+            for name in vals:
+                info[name] = vals[name].get()
+        except _tkinter.TclError:
+            print('invalid inputs')
+            return None
         return info
 
     def execute(self, command, *args):

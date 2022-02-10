@@ -1,6 +1,6 @@
 from tkinter import *
 from tkinter import ttk
-from .acquire_popup import Acquire_PopUp
+
 
 
 class AcquireBar(ttk.Frame):

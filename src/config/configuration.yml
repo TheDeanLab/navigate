@@ -61,7 +61,7 @@ CameraParameters:
   trigger_mode: 1 # external light-sheet mode
   trigger_polarity: 2  # positive pulse
   trigger_source: 2  # external
-  exposure_time: 200 # in milliseconds
+  exposure_time: 0.02
   delay_percent: 10
   pulse_percent: 1
   line_interval: 0.000075

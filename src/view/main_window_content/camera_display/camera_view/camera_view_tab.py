@@ -22,13 +22,13 @@ class camera_tab(ttk.Frame):
 
         self.canvas = tk.Canvas(self.cam_image, width=1000, height=1000)
         self.canvas.grid(row=0, column=0, sticky=NSEW)
-        self.matplotlib_figure = Figure(figsize=[7.5, 7.5], tight_layout=True)
+        self.matplotlib_figure = Figure(figsize=[7, 7], tight_layout=True)
         self.matplotlib_canvas = FigureCanvasTkAgg(self.matplotlib_figure, self.canvas)
 
         #  Frame for camera selection and counts
         self.cam_counts = cam_counts(self)
-        self.cam_counts.grid(row=0, column=2, sticky=NSEW)
+        self.cam_counts.grid(row=1, column=0, sticky=NSEW)
 
         #  Frame for scale settings/pallete color
         self.scale_pallete = pallete(self)
-        self.scale_pallete.grid(row=1, column=2, sticky=NSEW)
+        self.scale_pallete.grid(row=0, column=1, sticky=NSEW)

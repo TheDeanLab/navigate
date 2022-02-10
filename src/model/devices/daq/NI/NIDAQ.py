@@ -20,14 +20,12 @@ class DAQ(DAQBase):
     def __init__(self, model, experiment, etl_constants, verbose=False):
         super().__init__(model, experiment, etl_constants, verbose)
 
-        # Initialize the nidaqmx tasks.
-        self.camera_trigger_task = nidaqmx.Task()
-        self.master_trigger_task = nidaqmx.Task()
-        self.galvo_etl_task = nidaqmx.Task()
-        self.laser_task = nidaqmx.Task()
+        # # Initialize the nidaqmx tasks.
+        # self.camera_trigger_task = nidaqmx.Task()
+        # self.master_trigger_task = nidaqmx.Task()
+        # self.galvo_etl_task = nidaqmx.Task()
+        # self.laser_task = nidaqmx.Task()
 
-        # Add the corresponding lines to each task
-        self.create_tasks()
 
     def __del__(self):
         self.close_tasks()
@@ -40,8 +38,6 @@ class DAQ(DAQBase):
         self.sample_rate = self.model.DAQParameters['sample_rate']
         self.sweep_time = self.model.DAQParameters['sweep_time']
         self.samples = int(self.sample_rate * self.sweep_time)
-        if self.verbose:
-            print('Number of samples: ' + str(self.samples))
 
     def create_waveforms(self):
         """
@@ -223,6 +219,7 @@ class DAQ(DAQBase):
     def create_galvo_etl_task(self):
         """
         # Set up the Galvo and electrotunable lens - Each start with the trigger_source.
+        PXI6259/ao0:3 -> 4 channels
         """
         galvo_etl_task_line = self.model.DAQParameters['galvo_etl_task_line']
         self.galvo_etl_task.ao_channels.add_ao_voltage_chan(galvo_etl_task_line)

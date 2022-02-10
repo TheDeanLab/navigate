@@ -6,7 +6,7 @@ from model.devices.lasers.LaserBase import LaserBase
 
 
 class LuxxLaser(LaserBase):
-    def __init__(self, port='COM19', baudrate=500000):
+    def __init__(self, comport, verbose):
         """
         # Luxx Laser Class
         # LUXX488, 200 mW, is COM19
@@ -16,13 +16,15 @@ class LuxxLaser(LaserBase):
         # in Windows, because it is what I use); then get device model;
         # finally, get maximum output power and store it in **pmax** variable.
         """
-        super().__init__(model, verbose)
+        self.comport = comport
+        self.baudrate = 500000
+        self.timeout = 0.3
 
         try:
             # Open serial port
-            self.port = serial.Serial(port, baudrate, timeout=0.3)
+            self.laser = serial.Serial(self.comport, self.baudrate, timeout=self.timeout)
             if self.verbose:
-                print("The laser is connected via %s" % port)
+                print("The laser is connected via %s" % self.comport)
 
             # Confirm the Laser Wavelength
             # Must remove non-standard ASCII codes that cause errors in the utf-8 codec
@@ -65,10 +67,10 @@ class LuxxLaser(LaserBase):
         """
         try:
             # Turn off the laser emission
-            self.write("LOf")
+            # self.write("LOf")
 
             # Close the port
-            self.port.close()
+            self.laser.close()
 
             if self.verbose:
                 print("Port closed")
@@ -80,7 +82,7 @@ class LuxxLaser(LaserBase):
         # Close the port before exit.
         """
         try:
-            self.port.close()
+            self.laser.close()
             if self.verbose:
                 print("Port Closed")
         except serial.SerialException:
@@ -91,13 +93,13 @@ class LuxxLaser(LaserBase):
         # Send *command* to device. Preceed it with "?" und end with CR.
         """
         command = str("?").encode() + str(command).encode() + str("\r").encode()
-        self.port.write(command)
+        self.laser.write(command)
 
     def read(self):
         """
         # Read all information from the port and return it as string.
         """
-        answer = self.port.readall()
+        answer = self.laser.readall()
         answer = answer.replace(str("\r").encode(), str("\n").encode())
         answer = answer.replace(str("\xa7").encode(), str(" | ").encode())
         return answer

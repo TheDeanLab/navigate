@@ -3,7 +3,6 @@
 import numpy as np
 
 # Internal Dependencies
-# from model.devices.camera.Hamamatsu.API.HamamatsuAPI import HamamatsuCamera as HamamatsuController
 from model.devices.camera.Hamamatsu.API.HamamatsuAPI import HamamatsuCameraMR as HamamatsuController
 from model.devices.camera.CameraBase import CameraBase
 
@@ -18,7 +17,7 @@ class Camera(CameraBase):
         self.camera_controller.setPropertyValue("sensor_mode", self.model.CameraParameters['sensor_mode'])
         self.camera_controller.setPropertyValue("defect_correct_mode",
                                                 self.model.CameraParameters['defect_correct_mode'])
-        self.camera_controller.setPropertyValue("exposure_time", self.camera_exposure_time/1E6)  # ms -> s or us?
+        self.camera_controller.setPropertyValue("exposure_time", self.camera_exposure_time)
         self.camera_controller.setPropertyValue("binning", self.x_binning)
         self.camera_controller.setPropertyValue("readout_speed", self.model.CameraParameters['readout_speed'])
         self.camera_controller.setPropertyValue("trigger_active", self.model.CameraParameters['trigger_active'])
@@ -67,7 +66,10 @@ class Camera(CameraBase):
             print('Camera mode not supported')
 
     def set_exposure_time(self, time):
-        time = time/1000
+        """
+        #  Units of the Hamamatsu API are in seconds.
+        #  All of our units are in milliseconds.
+        """
         self.camera_controller.setPropertyValue("exposure_time", time)
 
     def set_line_interval(self, time):

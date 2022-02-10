@@ -22,8 +22,6 @@ class DAQ(DAQBase):
         self.sample_rate = self.model.DAQParameters['sample_rate']
         self.sweep_time = self.model.DAQParameters['sweep_time']
         self.samples = int(self.sample_rate * self.sweep_time)
-        if self.verbose:
-            print('Number of samples: ' + str(self.samples))
 
     def create_waveforms(self):
         """
@@ -101,8 +99,8 @@ class DAQ(DAQBase):
                 self.laser_idx = self.model.LaserParameters['laser_2_index']
             else:
                 print('Laser name not found.')
-            if self.verbose:
-                print('Laser index: {}'.format(self.laser_idx))
+        if self.verbose:
+            print('Laser index: {}'.format(self.laser_idx))
 
     def create_laser_switching_waveform(self):
         """

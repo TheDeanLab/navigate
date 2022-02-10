@@ -3,8 +3,7 @@ Laser Base Class
 """
 
 class LaserBase:
-    def __init__(self, model, verbose):
-        self.model = model
+    def __init__(self, port, verbose):
         self.verbose = verbose
 
     def close(self):

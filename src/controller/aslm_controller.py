@@ -29,6 +29,7 @@ from model.aslm_model import Model
 class ASLM_controller:
     def __init__(self, root, configuration_path, experiment_path, etl_constants_path, args):
         self.verbose = args.verbose
+        self.stop_acquisition = True
 
         # Creat a thread pool
         self.threads_pool = SynchronizedThreadPool()
@@ -262,13 +263,30 @@ class ASLM_controller:
         else:
             self.channels_tab_controller.set_mode('stop')
             self.camera_view_controller.set_mode('stop')
-    
+
+    def update_camera_view(self):
+        """
+        # Function aims to update the real-time parameters in the camera view, including the
+        # channel number, the max counts, the image, etc.
+        """
+        create_threads = False
+        if create_threads:
+            self.threads_pool.createThread('camera_display',
+                                           self.camera_view_controller.display_image(self.model.data))
+            self.threads_pool.createThread('update_GUI',
+                                           self.camera_view_controller.update_channel_idx(self.model.current_channel))
+        else:
+            self.camera_view_controller.display_image(self.model.data)
+            self.camera_view_controller.update_channel_idx(self.model.current_channel)
+
     def execute(self, command, *args):
         """
         # This function listens to sub_gui_controllers
         """
         if command == 'stage':
+            """
             # call the model to move stage
+            """
             axis_dict = {
                 'x': 'X',
                 'y': 'Y',
@@ -280,18 +298,26 @@ class ASLM_controller:
                 axis_dict[args[1]]: args[0]
             }
             self.threads_pool.createThread('stage', self.model.stages.move_absolute, (abs_postion,))
-            # self.model.stages.move_absolute(abs_postion)
 
         elif command == 'move_stage_and_update_info':
+            """
             # update stage view to show the position
+            """
             self.stage_gui_controller.set_position(args[0])
 
         elif command == 'get_stage_position':
+            """
+            #  Returns the current stage position
+            """
             return self.stage_gui_controller.get_position()
 
         elif command == 'zoom':
+            """
+            #  Changes the zoom position
+            """
             self.model.zoom.set_zoom(args[0])
-            print("Zoom set to:", args[0])
+            if self.verbose:
+                print("Zoom set to:", args[0])
 
         elif command == 'resolution':
             """
@@ -301,7 +327,8 @@ class ASLM_controller:
             #   - Use a different remote focusing waveform.
             #   - Open a different shutter.
             """
-            print("Changing the Resolution Mode to:", args[0])
+            if self.verbose:
+                print("Changing the Resolution Mode to:", args[0])
 
         elif command == 'set_save':
             self.acquire_bar_controller.set_save_option(args[0])
@@ -346,26 +373,57 @@ class ASLM_controller:
             pass
 
         elif command == 'acquire':
-            self.prepare_acquire_data()
-            # if 'continuous' is selected
-            # Create a thread for the camera to use to display live feed
-            self.model.stop_flag = False
-            self.threads_pool.createThread('camera', self.model.snap_image())
-            self.camera_view_controller.display_image(self.model.data)
+            # Acquisition modes can be: 'continuous', 'z-stack', 'single', 'projection'
+            if self.acquire_bar_controller.mode == 'single':
+                """
+                #  Acquires a single image at the current position for each chnanel configuration
+                """
+                if self.verbose:
+                    print("Starting Single Acquisition")
+                self.prepare_acquire_data()
+                self.model.open_shutter()
+                self.model.run_single_acquisition(self.update_camera_view)
+                self.model.close_shutter()
+                self.execute('stop_acquire')
 
-        elif command == 'stop_acquire':
-            self.model.stop_flag = True
-            # TODO: stop continuous acquire from camera
-            # Do I need to lock the thread here or how do I stop the process with the thread pool?
-            # Or is it something with the ObjectSubProcess? Or both depending on if synthetic or real
-            self.threads_pool.createThread('camera', self.model.acquire_with_waveform_update())
-            # self.threads_pool.createThread('camera_display',
-            #                                self.camera_view_controller.display_image(self.model.camera.image))
-            #  self.threads_pool.createThread('camera', self.camera_view_controller.live_feed)
+            elif self.acquire_bar_controller.mode == 'continuous':
+                if self.verbose:
+                    print('Starting Continuous Acquisition')
+                self.prepare_acquire_data()
+                self.model.open_shutter()
+                self.threads_pool.createThread(self.model.run_live_acquisition(self.update_camera_view))
+                self.model.close_shutter()
+
+            elif self.acquire_bar_controller.mode == 'z-stack':
+                if self.verbose:
+                    print("Starting Z-Stack Acquisition")
+                is_multi_position = self.channels_tab_controller.is_multiposition_val.get()
+                self.prepare_acquire_data()
+                self.model.open_shutter()
+                self.model.run_z_stack_acquisition(is_multi_position, self.update_camera_view())
+                self.model.close_shutter()
+
+            elif self.acquire_bar_controller.mode == 'projection':
+                pass
+
+            else:
+                print("Wrong acquisition mode.  Not recognized.")
+                pass
 
         elif command == 'stop_acquire':
             # stop continuous acquire from camera
+
+            self.model.stop_acquisition = True
             self.camera_view_controller.set_mode('stop')  # Breaks live feed loop
+
+            # TODO: stop continuous acquire from camera
+            # Do I need to lock the thread here or how do I stop the process with the thread pool?
+            # Or is it something with the ObjectSubProcess? Or both depending on if synthetic or real
+            #  self.threads_pool.createThread('camera', self.model.acquire_with_waveform_update())
+
+            # self.threads_pool.createThread('camera_display',
+            #                                self.camera_view_controller.display_image(self.model.camera.image))
+            #  self.threads_pool.createThread('camera', self.camera_view_controller.live_feed)
 
         if self.verbose:
             print('In central controller: command passed from child', command, args)

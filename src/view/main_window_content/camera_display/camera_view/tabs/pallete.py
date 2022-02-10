@@ -31,3 +31,33 @@ class pallete(ttk.Frame):
         self.count_scale = BooleanVar()
         self.count_check = ttk.Checkbutton(self, text="Scale to Counts", variable=self.count_scale)
         self.count_check.grid(row=2, column=0, sticky=NSEW)
+
+        #  Minimum Counts
+        self.min_counts = IntVar()
+        self.min_counts.set(110)
+        self.min_counts_holder = ttk.Frame(self)
+        self.min_counts_label = ttk.Label(self.min_counts_holder, text="Min. Counts")
+        self.min_counts_spinbox = ttk.Spinbox(self.min_counts_holder,
+                                              from_=1,
+                                              to=65000,
+                                              textvariable=self.min_counts,
+                                              increment=1,
+                                              width=5)
+        self.min_counts_label.grid(row=3, column=0, sticky=NSEW)
+        self.min_counts_spinbox.grid(row=3, column=1, sticky=NSEW)
+        self.min_counts_holder.grid(row=3, column=0, sticky=NSEW)
+
+        #  Maximum Counts
+        self.max_counts = IntVar()
+        self.max_counts.set(5000)
+        self.max_counts_holder = ttk.Frame(self)
+        self.max_counts_label = ttk.Label(self.max_counts_holder, text="Max. Counts")
+        self.max_counts_spinbox = ttk.Spinbox(self.max_counts_holder,
+                                              from_=1,
+                                              to=65000,
+                                              textvariable=self.max_counts,
+                                              increment=1,
+                                              width=5)
+        self.max_counts_label.grid(row=4, column=0, sticky=NSEW)
+        self.max_counts_spinbox.grid(row=4, column=1, sticky=NSEW)
+        self.max_counts_holder.grid(row=4, column=0, sticky=NSEW)

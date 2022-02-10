@@ -8,10 +8,9 @@ from model import aslm_model_waveforms as waveforms
 #.devices.daq import waveforms as waveforms
 
 class waveform_tab(ttk.Frame):
-    def __init__(waveform_tab, cam_wave, *args, **kwargs):
+    def __init__(self, cam_wave, *args, **kwargs):
         #Init Frame
-        ttk.Frame.__init__(waveform_tab, cam_wave, *args, **kwargs)
-
+        ttk.Frame.__init__(self, cam_wave, *args, **kwargs)
         #TODO: Update waveforms according to the current model?
         #TODO: How do you detect changes to the model to rerun the code?
         #TODO: Convert waveforms so that they can take different exposure times.
@@ -36,7 +35,7 @@ class waveform_tab(ttk.Frame):
 
         # creating the Tkinter canvas
         # containing the Matplotlib figure
-        canvas = FigureCanvasTkAgg(fig, master=waveform_tab)
+        canvas = FigureCanvasTkAgg(fig, master=self)
         canvas.draw()
 
         # placing the canvas on the Tkinter window
@@ -46,4 +45,4 @@ class waveform_tab(ttk.Frame):
         # placing the toolbar on the Tkinter window
         #canvas.get_tk_widget().pack()
 
-    #plot(waveform_tab)
+    #plot(self)

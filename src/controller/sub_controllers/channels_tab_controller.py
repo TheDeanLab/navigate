@@ -86,8 +86,15 @@ class Channels_Tab_Controller(GUI_Controller):
     def set_values(self, name, value):
         if name == 'stack_acquisition':
             self.set_info(self.stack_acq_vals, value)
+            # validate
+            self.view.stack_acq_frame.step_size_spinbox.validate()
+            self.view.stack_acq_frame.start_pos_spinbox.validate()
+            self.view.stack_acq_frame.end_pos_spinbox.validate()
         elif name == 'timepoint':
             self.set_info(self.timepoint_vals, value)
+            # validate
+            self.view.stack_timepoint_frame.stack_pause_spinbox.validate()
+            self.view.stack_timepoint_frame.exp_time_spinbox.validate()
         elif name == 'laser_cycling':
             self.laser_cycling_val.set(value)
         elif name == 'channel':
@@ -147,6 +154,8 @@ class Channels_Tab_Controller(GUI_Controller):
                 return
         except:
             self.stack_acq_vals['number_z_steps'].set('')
+            if self.stack_acq_event_id:
+                self.view.after_cancel(self.stack_acq_event_id)
             return
         # if step_size < 0.001:
         #     step_size = 0.001
@@ -200,7 +209,6 @@ class Channels_Tab_Controller(GUI_Controller):
         # ORder of priority for perZ: timepoints > positions > z-steps > delays > channels
 
         channel_settings = self.channel_setting_controller.get_values()
-        number_of_channels = len(channel_settings)
         number_of_positions = self.multi_position_controller.get_position_num() if self.is_multiposition else 1
         stage_velocity = self.settings_from_configuration['stage_velocity']
         filter_wheel_delay = self.settings_from_configuration['filter_wheel_delay']
@@ -211,7 +219,9 @@ class Channels_Tab_Controller(GUI_Controller):
             number_of_slices = int(self.stack_acq_vals['number_z_steps'].get())
             for channel_id in channel_settings:
                 channel = channel_settings[channel_id]
-                channel_exposure_time.append(channel['camera_exposure_time'].get())
+                channel_exposure_time.append(float(channel['camera_exposure_time']))
+            if len(channel_exposure_time) == 0:
+                return
         except:
             self.timepoint_vals['experiment_duration'].set('')
             self.timepoint_vals['stack_acq_time'].set('')
@@ -285,8 +295,10 @@ class Channels_Tab_Controller(GUI_Controller):
         if self.mode == 'live':
             if self.timepoint_event_id:
                 self.view.after_cancel(self.timepoint_event_id)
-            self.timepoint_event_id = self.view.after(1000, lambda: self.parent_controller.execute('timepoint', \
-                self.get_info(self.timepoint_vals)))
+            temp = self.get_info(self.timepoint_vals)
+            if not temp:
+                return
+            self.timepoint_event_id = self.view.after(1000, lambda: self.parent_controller.execute('timepoint', temp))
 
     def toggle_multiposition(self):
         self.is_multiposition = self.is_multiposition_val.get()

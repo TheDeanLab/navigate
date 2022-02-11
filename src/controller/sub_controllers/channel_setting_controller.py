@@ -105,21 +105,20 @@ class Channel_Setting_Controller(GUI_Controller):
             channel_vals = self.get_vals_by_channel(i)
             # if this channel is selected, then get all the settings of it
             if channel_vals['is_selected'].get():
-                if len(channel_vals['camera_exposure_time'].get()) == 0:
-                    #  Empty string throws an error
-                    pass
-                else:
+                try:
                     temp = {
                         'is_selected': True,
                         'laser': channel_vals['laser'].get(),
                         'laser_index': self.get_index('laser', channel_vals['laser'].get()),
                         'filter': channel_vals['filter'].get(),
                         'filter_position': self.get_index('filter', channel_vals['filter'].get()),
-                        'camera_exposure_time': int(channel_vals['camera_exposure_time'].get()),
+                        'camera_exposure_time': float(channel_vals['camera_exposure_time'].get()),
                         'laser_power': channel_vals['laser_power'].get(),
                         'interval_time': channel_vals['interval_time'].get()
                     }
-                    channel_settings[prefix+str(i+1)] = temp
+                except:
+                    return None
+                channel_settings[prefix+str(i+1)] = temp
         return channel_settings
 
     def channel_callback(self, channel_id, widget_name):
@@ -136,7 +135,9 @@ class Channel_Setting_Controller(GUI_Controller):
             if widget_name == 'camera_exposure_time':
                 self.parent_controller.execute('recalculate_timepoint')
             if self.mode == 'live':
-                self.parent_controller.execute('channel', channel_id+1, widget_name, channel_vals[widget_name].get())
+                #TODO: validate values
+                if channel_vals[widget_name].get():
+                    self.parent_controller.execute('channel', channel_id+1, widget_name, channel_vals[widget_name].get())
 
             self.show_verbose_info('channel setting has been changed')
         return func

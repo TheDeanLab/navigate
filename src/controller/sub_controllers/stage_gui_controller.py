@@ -113,6 +113,10 @@ class Stage_GUI_Controller(GUI_Controller):
             val = self.get_position_val(axis)
             if val:
                 val.set(position[axis])
+
+        # validate position
+        for axis in ['x', 'y', 'z', 'theta', 'f']:
+            exec('self.view.position_frame.{}_entry.validate()'.format(axis))
         
         self.show_verbose_info('set stage position')
 
@@ -249,6 +253,7 @@ class Stage_GUI_Controller(GUI_Controller):
                 self.view.after_cancel(self.event_id[axis])
             # if position is not a number, then do not move stage
             try:
+                exec('self.view.position_frame.{}_entry.validate()'.format(axis))
                 position_var.get()
             except:
                 return

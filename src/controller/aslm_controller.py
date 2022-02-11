@@ -4,6 +4,7 @@ This is the controller in an MVC-scheme for mediating the interaction between th
 """
 #  Standard Library Imports
 from pathlib import Path
+import tkinter
 
 #  External Library Imports
 import numpy as np
@@ -122,11 +123,12 @@ class ASLM_controller:
             self.populate_experiment_setting(filename[0])
 
         def save_experiment():
+            # update model.experiment and save it to file
+            if not self.update_experiment_setting():
+                return
             filename = filedialog.asksaveasfilename(defaultextension='.yml', filetypes=[('Yaml file', '*.yml')])
             if not filename:
                 return
-            # update model.experiment and save it to file
-            self.update_experiment_setting()
             save_experiment_file('', self.model.experiment.serialize(), filename)
 
         menus_dict = {
@@ -231,6 +233,12 @@ class ASLM_controller:
 
         # get settings from channels tab
         settings = self.channels_tab_controller.get_values()
+        # if there is something wrong, it will popup a window and return false
+        for k in settings:
+            if not settings[k]:
+                #TODO: popup error window
+                tkinter.messagebox.showerror(title='Warning', message='There is some missing/wrong settings!')
+                return False
         self.model.experiment.MicroscopeState['stack_cycling_mode'] = settings['stack_cycling_mode']
         for k in settings['stack_acquisition']:
             self.model.experiment.MicroscopeState[k] = settings['stack_acquisition'][k]
@@ -248,6 +256,8 @@ class ASLM_controller:
         step_size = self.stage_gui_controller.get_step_size()
         for axis in step_size:
             self.model.experiment.StageParameters[axis+'_step'] = step_size[axis]
+        
+        return True
 
     def prepare_acquire_data(self):
         """
@@ -255,14 +265,16 @@ class ASLM_controller:
         # first, update model.experiment
         # second, set sub-controllers' mode to 'live' when 'continuous' was selected, or 'stop'
         """
-        self.update_experiment_setting()
-        
+        if not self.update_experiment_setting():
+            return False
+
         if self.model.experiment.MicroscopeState['image_mode'] == 'continuous':
             self.channels_tab_controller.set_mode('live')
             self.camera_view_controller.set_mode('live')
         else:
             self.channels_tab_controller.set_mode('stop')
             self.camera_view_controller.set_mode('stop')
+        return True
 
     def update_camera_view(self):
         """
@@ -334,7 +346,7 @@ class ASLM_controller:
             self.acquire_bar_controller.set_save_option(args[0])
 
         elif command == 'stack_acquisition':
-            settings = self.channels_tab_controller.get_values('stack_acquisition')
+            settings = args[0]
             for k in settings:
                 self.model.experiment.MicroscopeState[k] = settings[k]
             print('in continuous mode:the stack acquisition setting is changed')
@@ -344,7 +356,7 @@ class ASLM_controller:
             pass
 
         elif command == 'laser_cycling':
-            self.model.experiment.MicroscopeState['stack_cycling_mode'] = self.channels_tab_controller.get_values('stack_cycling_mode')
+            self.model.experiment.MicroscopeState['stack_cycling_mode'] = args[0]
             print('in continuous mode:the laser cycling setting is changed')
             print('you could get the new setting from model.experiment')
             print('you could also get the changes from args')
@@ -360,12 +372,15 @@ class ASLM_controller:
             pass
 
         elif command == 'timepoint':
-            settings = self.channels_tab_controller.get_values('timepoint')
+            settings = args[0]
             for k in settings:
                 self.model.experiment.MicroscopeState[k] = settings[k]
-        
+            print('timepoint is changed', args[0])
+
         elif command == 'acquire_and_save':
-            self.prepare_acquire_data()
+            if not self.prepare_acquire_data():
+                self.acquire_bar_controller.stop_acquire()
+                return
             # create file directory
             file_directory = create_save_path(args[0], self.verbose)
             # save experiment file
@@ -373,6 +388,9 @@ class ASLM_controller:
             pass
 
         elif command == 'acquire':
+            if not self.prepare_acquire_data():
+                self.acquire_bar_controller.stop_acquire()
+                return
             # Acquisition modes can be: 'continuous', 'z-stack', 'single', 'projection'
             if self.acquire_bar_controller.mode == 'single':
                 """
@@ -380,7 +398,6 @@ class ASLM_controller:
                 """
                 if self.verbose:
                     print("Starting Single Acquisition")
-                self.prepare_acquire_data()
                 self.model.open_shutter()
                 self.model.run_single_acquisition(self.update_camera_view)
                 self.model.close_shutter()
@@ -389,7 +406,6 @@ class ASLM_controller:
             elif self.acquire_bar_controller.mode == 'continuous':
                 if self.verbose:
                     print('Starting Continuous Acquisition')
-                self.prepare_acquire_data()
                 self.model.open_shutter()
                 self.threads_pool.createThread(self.model.run_live_acquisition(self.update_camera_view))
                 self.model.close_shutter()
@@ -398,7 +414,6 @@ class ASLM_controller:
                 if self.verbose:
                     print("Starting Z-Stack Acquisition")
                 is_multi_position = self.channels_tab_controller.is_multiposition_val.get()
-                self.prepare_acquire_data()
                 self.model.open_shutter()
                 self.model.run_z_stack_acquisition(is_multi_position, self.update_camera_view())
                 self.model.close_shutter()

@@ -41,14 +41,25 @@ def validate_float_wrapper(widget, negative=False, is_entry=False):
             valid = check_range_func(value)
         return valid
 
-    def show_error():
-        widget.configure(foreground="red")
-        if not re.match(FLOAT_REGEX, widget.get()):
-            widget.set(0)
+    def show_error_func(is_entry=False):
+        def func():
+            widget.configure(foreground="red")
+            if not re.match(FLOAT_REGEX, widget.get()):
+                widget.set(0)
+        def entry_func():
+            widget.configure(foreground="red")
+            if not re.match(FLOAT_REGEX, widget.get()):
+                widget.delete(0, len(widget.get()))
+                widget.insert(0, 0)
+
+        if is_entry:
+            return entry_func
+        else:
+            return func
 
     if is_entry:
         widget.from_ = None
         widget.to = None
 
     widget.configure(validate='all', validatecommand=(widget.register(check_float), '%P'))
-    widget.configure(invalidcommand=show_error)
+    widget.configure(invalidcommand=show_error_func(is_entry))

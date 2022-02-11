@@ -58,6 +58,9 @@ class Acquire_Bar_Controller(GUI_Controller):
         """
         return self.mode
 
+    def stop_acquire(self):
+        self.view.acquire_btn.configure(text='Acquire')
+
     def set_save_option(self, is_save):
         """
         # set whether the image will be saved

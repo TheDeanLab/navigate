@@ -29,7 +29,7 @@ class Acquire_PopUp():
         self.entries_label.grid(row=0, column=0, columnspan=2, sticky=(NSEW))
 
         # Creating Entry Widgets
-        entry_names = ['Root', 'User', 'Tissue', 'Cell', 'Label', 'Misc']
+        entry_names = ['root_directory', 'user', 'tissue', 'celltype', 'label', 'misc']
         entry_labels = ['Root Directory', 'User', 'Tissue Type', 'Cell Type', 'Label', 'Misc. Info']
 
         # Loop for each entry and label

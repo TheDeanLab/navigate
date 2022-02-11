@@ -165,26 +165,21 @@ class Acquire_Bar_Controller(GUI_Controller):
             self.saving_settings[name] = popup_values[name]
 
 
-def get_popup_vals(popup_window):
+def get_popup_values(popup_window):
     vars = popup_window.get_variables()
     popup_vals = {
-        'root_directory': vars['Root'],
+        'root_directory': vars['root_directory'],
         'save_directory': None,
-        'user': vars['User'],
-        'tissue': vars['Tissue'],
-        'celltype': vars['Cell'],
-        'label': vars['Label']
+        'user': vars['user'],
+        'tissue': vars['tissue'],
+        'celltype': vars['celltype'],
+        'label': vars['label']
     }
     return popup_vals
 
 
-def get_popup_values(popup_window):
-    popup_vals = get_popup_vals(popup_window)
-    settings = {}
-    for name in popup_vals:
-        if popup_vals[name]:
-            settings[name] = popup_vals[name].get()
-    return settings
+def get_popup_vals(popup_window):
+    return popup_window.get_widgets()
 
 
 def initialize_popup_window(popup_window, values):

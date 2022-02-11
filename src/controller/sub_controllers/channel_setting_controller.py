@@ -122,6 +122,22 @@ class Channel_Setting_Controller(GUI_Controller):
                 channel_settings[prefix+str(i+1)] = temp
         return channel_settings
 
+    def set_spinbox_range_limits(self, settings):
+        """
+        # this function will set the spinbox widget's values of from_, to, step
+        """
+        temp_dict = {
+            'laser_power': self.view.laserpower_pulldowns,
+            'camera_exposure_time': self.view.exptime_pulldowns,
+            'interval_time': self.view.interval_spins
+        }
+        for k in temp_dict:
+            widgets = temp_dict[k]
+            for i in range(self.num):
+                widgets[i].configure(from_=settings[k]['min'])
+                widgets[i].configure(to=settings[k]['max'])
+                widgets[i].configure(increment=settings[k]['step'])
+
     def channel_callback(self, channel_id, widget_name):
         """
         # in 'live' mode (when acquire mode is set to 'continuous') and a channel is selected,
@@ -131,6 +147,8 @@ class Channel_Setting_Controller(GUI_Controller):
         channel_vals = self.get_vals_by_channel(channel_id)
 
         def func(*args):
+            if self.in_initialization:
+                return
             if widget_name != 'is_selected' and channel_vals['is_selected'].get() is False:
                 return
             if widget_name == 'camera_exposure_time':

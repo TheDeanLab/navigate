@@ -121,6 +121,25 @@ class Channels_Tab_Controller(GUI_Controller):
 
         self.show_verbose_info('channel number is', num)
 
+    def set_spinbox_range_limits(self, settings):
+        """
+        # this function will set the spinbox widget's values of from_, to, step
+        """
+        temp_dict = {
+            self.view.stack_acq_frame.step_size_spinbox: settings['stack_acquisition']['step_size'],
+            self.view.stack_acq_frame.start_pos_spinbox: settings['stack_acquisition']['start_pos'],
+            self.view.stack_acq_frame.end_pos_spinbox: settings['stack_acquisition']['end_pos'],
+            self.view.stack_timepoint_frame.stack_pause_spinbox: settings['timepoint']['stack_pause'],
+            self.view.stack_timepoint_frame.exp_time_spinbox: settings['timepoint']['timepoints']
+        }
+        for widget in temp_dict:
+            widget.configure(from_=temp_dict[widget]['min'])
+            widget.configure(to=temp_dict[widget]['max'])
+            widget.configure(increment=temp_dict[widget]['step'])
+
+        # channels setting
+        self.channel_setting_controller.set_spinbox_range_limits(settings['channel'])
+    
     def set_mode(self, mode):
         """
         # change acquisition mode

@@ -88,6 +88,8 @@ class ASLM_controller:
         """
         # set some other information needed by channels_tab_controller
         """
+        self.channels_tab_controller.set_channel_num(self.model.configuration.GUIParameters['number_of_channels'])
+
         self.channels_tab_controller.settings_from_configuration = {
             'stage_velocity': self.model.configuration.StageParameters['velocity'],
             'filter_wheel_delay': self.model.configuration.FilterWheelParameters['filter_wheel_delay']
@@ -100,6 +102,9 @@ class ASLM_controller:
         laser_cycling_values = ['Per Z', 'Per Stack']
         self.channels_tab_controller.initialize('laser_cycling', laser_cycling_values)
 
+        # set widgets' range limits
+        self.channels_tab_controller.set_spinbox_range_limits(self.model.configuration.GUIParameters)
+
     def initialize_stage(self, configuration_controller):
         """
         # Pre-populate the stage positions.
@@ -108,6 +113,8 @@ class ASLM_controller:
         position_min = configuration_controller.get_stage_position_limits('_min')
         position_max = configuration_controller.get_stage_position_limits('_max')
         self.stage_gui_controller.set_position_limits(position_min, position_max)
+        # set widgets' range limits
+        self.stage_gui_controller.set_spinbox_range_limits(self.model.configuration.GUIParameters['stage'])
 
     def initialize_menus(self):
         """

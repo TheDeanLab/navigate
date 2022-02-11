@@ -173,6 +173,8 @@ class ASLM_controller:
             file_path = Path(file_name)
             if file_path.exists():
                 self.model.load_experiment_file(file_path)
+        # set sub-controllers in 'in_itialization' status
+        self.channels_tab_controller.in_initialization = True
 
         # populate stack acquisition from model.experiment
         stack_acq_setting = {
@@ -223,6 +225,9 @@ class ASLM_controller:
 
         # populate multi_positions
         self.channels_tab_controller.set_positions(self.model.experiment.MicroscopeState['stage_positions'])
+
+        # after initialization, let sub-controllers do necessary computation
+        self.channels_tab_controller.after_intialization()
 
     def update_experiment_setting(self):
         """

@@ -11,6 +11,7 @@ class Channel_Setting_Controller(GUI_Controller):
         # 'live': acquire mode is set to 'continuous'
         self.mode = 'stop'
         self.channel_controllers = []
+        self.in_initialization = True
 
         # add validation functions to spinbox
         for i in range(self.num):

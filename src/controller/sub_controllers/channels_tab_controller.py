@@ -12,6 +12,7 @@ class Channels_Tab_Controller(GUI_Controller):
 
         self.is_save = False
         self.mode = 'stop'
+        self.in_initialization = True
         self.settings_from_configuration = {}
         self.channel_setting_controller = Channel_Setting_Controller(self.view.channel_widgets_frame, self,
                                                                      self.verbose)
@@ -143,6 +144,9 @@ class Channels_Tab_Controller(GUI_Controller):
             'number_z_steps':
         # }
         """
+        # won't do any calculation when inialization
+        if self.in_initialization:
+            return
         # Calculate the number of slices and set GUI
         try:
             # validate the spinbox's value
@@ -182,6 +186,9 @@ class Channels_Tab_Controller(GUI_Controller):
         # In the perZ format: Slice 0/Ch0, Slice0/Ch1, Slice1/Ch0, Slice1/Ch1, etc
         # in the perStack format: Slice 0/Ch0, Slice1/Ch0... SliceN/Ch0.  Then it repeats with Ch1
         """
+        # won't do any calculation when inialization
+        if self.in_initialization:
+            return
         # recalculate timepoint settings
         self.update_timepoint_setting()
 
@@ -192,6 +199,9 @@ class Channels_Tab_Controller(GUI_Controller):
         self.show_verbose_info('cycling setting on channels tab has been changed')
 
     def update_save_setting(self, *args):
+        # won't do any calculation when inialization
+        if self.in_initialization:
+            return
         self.is_save = self.timepoint_vals['is_save'].get()
         # tell the centrol/parent controller 'save_data' is selected
         self.parent_controller.execute('set_save', self.is_save)
@@ -204,7 +214,9 @@ class Channels_Tab_Controller(GUI_Controller):
         #  channels, and exposure time.  Add necessary computation for 'Stack Acq.Time',
         #  'Timepoint Interval', 'Experiment Duration'?
         """
-
+        # won't do any calculation when inialization
+        if self.in_initialization:
+            return
         # Order of priority for perStack: timepoints > positions > channels > z-steps > delay
         # ORder of priority for perZ: timepoints > positions > z-steps > delays > channels
 
@@ -291,6 +303,9 @@ class Channels_Tab_Controller(GUI_Controller):
         """
         # this function call central controller that timepoint setting has been changed
         """
+        # won't do any calculation when inialization
+        if self.in_initialization:
+            return
         # tell the central controller that timepoint's setting has changed when mode is 'live'
         if self.mode == 'live':
             if self.timepoint_event_id:
@@ -328,6 +343,11 @@ class Channels_Tab_Controller(GUI_Controller):
 
     def get_positions(self):
         return self.multi_position_controller.get_positions()
+
+    def after_intialization(self):
+        self.in_initialization = False
+        self.channel_setting_controller.in_initialization = False
+        self.update_z_steps()
 
     def set_info(self, vals, values):
         """

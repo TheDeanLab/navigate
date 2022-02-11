@@ -1,4 +1,5 @@
 import re
+import tkinter as Tk
 from traceback import format_exception
 
 FLOAT_REGEX = '(^-?$)|(^-?[0-9]+\.?[0-9]*$)'
@@ -10,6 +11,7 @@ def validate_float_wrapper(widget, negative=False, is_entry=False):
         if widget['from'] and float(value) < widget['from']:
             widget.configure(foreground='red')
         elif widget['to'] and float(value) > widget['to']:
+            widget.set(widget['to'])
             valid = False
         else:
             widget.configure(foreground='black')
@@ -20,6 +22,8 @@ def validate_float_wrapper(widget, negative=False, is_entry=False):
         if widget.from_ and float(value) < widget.from_:
             widget.configure(foreground='red')
         elif widget.to and float(value) > widget.to:
+            widget.delete(0, Tk.END)
+            widget.insert(0, widget.to)
             valid = False
         else:
             widget.configure(foreground='black')
@@ -49,7 +53,7 @@ def validate_float_wrapper(widget, negative=False, is_entry=False):
         def entry_func():
             widget.configure(foreground="red")
             if not re.match(FLOAT_REGEX, widget.get()):
-                widget.delete(0, len(widget.get()))
+                widget.delete(0, Tk.END)
                 widget.insert(0, 0)
 
         if is_entry:

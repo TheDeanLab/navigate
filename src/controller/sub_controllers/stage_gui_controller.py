@@ -36,11 +36,11 @@ class Stage_GUI_Controller(GUI_Controller):
         validate_float_wrapper(self.view.z_frame.increment_box)
         validate_float_wrapper(self.view.theta_frame.increment_box)
         validate_float_wrapper(self.view.focus_frame.increment_box)
-        validate_float_wrapper(self.view.position_frame.x_entry, True, True)
-        validate_float_wrapper(self.view.position_frame.y_entry, True, True)
-        validate_float_wrapper(self.view.position_frame.z_entry, True, True)
-        validate_float_wrapper(self.view.position_frame.theta_entry, True, True)
-        validate_float_wrapper(self.view.position_frame.f_entry, True, True)
+        validate_float_wrapper(self.view.position_frame.x_entry, is_entry=True)
+        validate_float_wrapper(self.view.position_frame.y_entry, is_entry=True)
+        validate_float_wrapper(self.view.position_frame.z_entry, is_entry=True)
+        validate_float_wrapper(self.view.position_frame.theta_entry, is_entry=True)
+        validate_float_wrapper(self.view.position_frame.f_entry, is_entry=True)
 
         
         # gui event bind
@@ -254,8 +254,15 @@ class Stage_GUI_Controller(GUI_Controller):
             # if position is not a number, then do not move stage
             try:
                 exec('self.view.position_frame.{}_entry.validate()'.format(axis))
-                position_var.get()
+                position = position_var.get()
+                # if position is not inside limits do not move stage
+                if position < self.position_min[axis] or position > self.position_max[axis]:
+                    if self.event_id[axis]:
+                        self.view.after_cancel(self.event_id[axis])
+                    return
             except:
+                if self.event_id[axis]:
+                    self.view.after_cancel(self.event_id[axis])
                 return
             self.event_id[axis] = self.view.after(1000, lambda: self.parent_controller.execute('stage',
                                                                                                position_var.get(),

@@ -169,6 +169,21 @@ class Stage_GUI_Controller(GUI_Controller):
             return None
         return step_size
 
+    def set_spinbox_range_limits(self, settings):
+        """
+        # this function will set the spinbox widget's values of from_, to, step
+        """
+        temp_dict = {
+            'x_y_step': self.view.x_y_frame.increment_box,
+            'z_step': self.view.z_frame.increment_box,
+            'theta_step': self.view.theta_frame.increment_box,
+            'f_step': self.view.focus_frame.increment_box
+        }
+        for k in temp_dict:
+            temp_dict[k].configure(from_=settings[k]['min'])
+            temp_dict[k].configure(to=settings[k]['max'])
+            temp_dict[k].configure(increment=settings[k]['step'])
+
     def up_btn_handler(self, axis):
         """
         # This function generates command functions according to axis

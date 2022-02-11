@@ -1,5 +1,5 @@
 import _tkinter
-from controller.sub_controllers.widget_functions import validate_float_wrapper
+from controller.sub_controllers.widget_functions import validate_wrapper
 from controller.sub_controllers.gui_controller import GUI_Controller
 
 
@@ -32,15 +32,15 @@ class Stage_GUI_Controller(GUI_Controller):
         }
 
         # add validations to widgets
-        validate_float_wrapper(self.view.x_y_frame.increment_box)
-        validate_float_wrapper(self.view.z_frame.increment_box)
-        validate_float_wrapper(self.view.theta_frame.increment_box)
-        validate_float_wrapper(self.view.focus_frame.increment_box)
-        validate_float_wrapper(self.view.position_frame.x_entry, is_entry=True)
-        validate_float_wrapper(self.view.position_frame.y_entry, is_entry=True)
-        validate_float_wrapper(self.view.position_frame.z_entry, is_entry=True)
-        validate_float_wrapper(self.view.position_frame.theta_entry, is_entry=True)
-        validate_float_wrapper(self.view.position_frame.f_entry, is_entry=True)
+        validate_wrapper(self.view.x_y_frame.increment_box)
+        validate_wrapper(self.view.z_frame.increment_box)
+        validate_wrapper(self.view.theta_frame.increment_box)
+        validate_wrapper(self.view.focus_frame.increment_box)
+        validate_wrapper(self.view.position_frame.x_entry, is_entry=True)
+        validate_wrapper(self.view.position_frame.y_entry, is_entry=True)
+        validate_wrapper(self.view.position_frame.z_entry, is_entry=True)
+        validate_wrapper(self.view.position_frame.theta_entry, is_entry=True)
+        validate_wrapper(self.view.position_frame.f_entry, is_entry=True)
 
         
         # gui event bind
@@ -124,13 +124,15 @@ class Stage_GUI_Controller(GUI_Controller):
         """
         # This function returns current position
         """
-        position = {
-            'x': self.get_position_val('x').get(),
-            'y': self.get_position_val('y').get(),
-            'z': self.get_position_val('z').get(),
-            'theta': self.get_position_val('theta').get(),
-            'f': self.get_position_val('f').get()
-        }
+        position = {}
+        try:
+            for axis in ['x', 'y', 'z', 'theta', 'f']:
+                position[axis] = self.get_position_val(axis).get()
+                if position[axis] < self.position_min[axis] or position[axis] > self.position_max[axis]:
+                    return None
+        except:
+            # Tkinter will raise error when the variable is DoubleVar and the value is empty
+            return None
         return position
 
     def set_step_size(self, steps):

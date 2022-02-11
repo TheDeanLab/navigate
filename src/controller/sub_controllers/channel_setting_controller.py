@@ -1,4 +1,4 @@
-from controller.sub_controllers.widget_functions import validate_float_wrapper
+from controller.sub_controllers.widget_functions import validate_wrapper
 from controller.sub_controllers.gui_controller import GUI_Controller
 
 
@@ -12,12 +12,13 @@ class Channel_Setting_Controller(GUI_Controller):
         self.mode = 'stop'
         self.channel_controllers = []
         self.in_initialization = True
+        self.event_id = None
 
         # add validation functions to spinbox
         for i in range(self.num):
-            validate_float_wrapper(self.view.exptime_pulldowns[i])
-            validate_float_wrapper(self.view.interval_spins[i])
-            validate_float_wrapper(self.view.laserpower_pulldowns[i])
+            validate_wrapper(self.view.exptime_pulldowns[i])
+            validate_wrapper(self.view.interval_spins[i])
+            validate_wrapper(self.view.laserpower_pulldowns[i])
 
         # widget command binds
         for i in range(self.num):
@@ -154,9 +155,21 @@ class Channel_Setting_Controller(GUI_Controller):
             if widget_name == 'camera_exposure_time':
                 self.parent_controller.execute('recalculate_timepoint')
             if self.mode == 'live':
-                #TODO: validate values
-                if channel_vals[widget_name].get():
-                    self.parent_controller.execute('channel', channel_id+1, widget_name, channel_vals[widget_name].get())
+                # validate values: all the selected channel should not be empty if 'is_selcted'
+                if channel_vals['is_selected'].get():
+                    try:
+                        assert(channel_vals['laser'].get() and channel_vals['filter'].get())
+                        float(channel_vals['laser_power'].get())
+                        float(channel_vals['camera_exposure_time'].get())
+                        float(channel_vals['interval_time'].get())
+                    except:
+                        if self.event_id:
+                            self.view.after_cancel(self.event_id)
+                        return
+                # call central controller
+                if self.event_id:
+                    self.view.after_cancel(self.event_id)
+                self.event_id = self.view.after(500, lambda: self.parent_controller.execute('channel', channel_id+1, widget_name, channel_vals[widget_name].get()))
 
             self.show_verbose_info('channel setting has been changed')
         return func

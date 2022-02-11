@@ -47,7 +47,7 @@ class stack_timepoint_frame(ttk.Frame):
         # Timepoints Label, spinbox defaults to 1.
         stack_timepoint_label_frame.filterwheel_label = ttk.Label(stack_timepoint_label_frame, text='Timepoints')
         stack_timepoint_label_frame.filterwheel_label.grid(row=1, column=label_position, sticky=(NSEW))
-        stack_timepoint_label_frame.exp_time_spinval = IntVar()
+        stack_timepoint_label_frame.exp_time_spinval = StringVar()
         stack_timepoint_label_frame.exp_time_spinbox = ttk.Spinbox(
             stack_timepoint_label_frame, from_=0, to=5000, textvariable=stack_timepoint_label_frame.exp_time_spinval,
             increment=1,
@@ -59,7 +59,7 @@ class stack_timepoint_frame(ttk.Frame):
         stack_timepoint_label_frame.exp_time_label.grid(row=2, column=label_position, sticky=(NSEW))
 
         # Stack Acq. Time Spinbox
-        stack_timepoint_label_frame.stack_acq_spinval = DoubleVar()
+        stack_timepoint_label_frame.stack_acq_spinval = StringVar()
         stack_timepoint_label_frame.stack_acq_spinbox = ttk.Spinbox(
             stack_timepoint_label_frame,
             from_=0,
@@ -76,7 +76,7 @@ class stack_timepoint_frame(ttk.Frame):
         stack_timepoint_label_frame.exp_time_label.grid(row=3, column=label_position, sticky=(NSEW))
 
         # Stack Pause Spinbox
-        stack_timepoint_label_frame.stack_pause_spinval = DoubleVar()
+        stack_timepoint_label_frame.stack_pause_spinval = StringVar()
         stack_timepoint_label_frame.stack_pause_spinbox = ttk.Spinbox(
             stack_timepoint_label_frame, from_=0,to=5000.0,
             textvariable=stack_timepoint_label_frame.stack_pause_spinval, increment=25, width=9)

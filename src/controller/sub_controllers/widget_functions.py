@@ -2,10 +2,14 @@ import re
 import tkinter as Tk
 from traceback import format_exception
 
-FLOAT_REGEX = '(^-?$)|(^-?[0-9]+\.?[0-9]*$)'
-FLOAT_REGEX_NONNEGATIVE = '(^$)|(^-?[0-9]+\.?[0-9]*$)'
+REGEX_DICT = {
+    'float': '(^-?$)|(^-?[0-9]+\.?[0-9]*$)',
+    'float_nonnegative': '(^$)|(^[0-9]+\.?[0-9]*$)',
+    'int': '^-?[0-9]*$',
+    'int_nonnegative': '^[0-9]*$'
+}
 
-def validate_float_wrapper(widget, negative=False, is_entry=False):
+def validate_wrapper(widget, negative=False, is_entry=False, is_integer=False):
     def check_range_spinbox(value):
         valid = True
         if widget['from'] and float(value) < widget['from']:
@@ -30,12 +34,14 @@ def validate_float_wrapper(widget, negative=False, is_entry=False):
         check_range_func = check_range_entry
     else:
         check_range_func = check_range_spinbox
+
+    float_or_integer = 'int' if is_integer else 'float'
+    is_negative = '' if negative else '_nonnegative'
+    match_string = REGEX_DICT[float_or_integer+is_negative]
+    print(widget, match_string)
         
     def check_float(value):
-        if negative:
-            valid = re.match(FLOAT_REGEX, value) is not None
-        else:
-            valid = re.match(FLOAT_REGEX_NONNEGATIVE, value) is not None
+        valid = re.match(match_string, value) is not None
         if negative and value == '-':
             widget.configure(foreground='red')
         elif valid and value:
@@ -45,14 +51,14 @@ def validate_float_wrapper(widget, negative=False, is_entry=False):
     def show_error_func(is_entry=False):
         def func():
             widget.configure(foreground="red")
-            if not re.match(FLOAT_REGEX, widget.get()):
+            if not re.match(match_string, widget.get()):
                 widget.set(0)
             elif widget.get() and widget.get() != '-' and float(widget.get()) > widget['to']:
                 widget.set(widget['to'])
 
         def entry_func():
             widget.configure(foreground="red")
-            if not re.match(FLOAT_REGEX, widget.get()):
+            if not re.match(match_string, widget.get()):
                 widget.delete(0, Tk.END)
                 widget.insert(0, 0)
             elif widget.get() and widget.get() != '-' and float(widget.get()) > widget.to:

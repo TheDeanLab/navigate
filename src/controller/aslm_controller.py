@@ -248,9 +248,19 @@ class ASLM_controller:
         # if there is something wrong, it will popup a window and return false
         for k in settings:
             if not settings[k]:
-                #TODO: popup error window
-                tkinter.messagebox.showerror(title='Warning', message='There is some missing/wrong settings!')
+                tkinter.messagebox.showerror(title='Warning', message='There are some missing/wrong settings!')
                 return False
+        # validate channels
+        try:
+            for k in settings['channel']:
+                float(settings['channel'][k]['laser_power'])
+                float(settings['channel'][k]['interval_time'])
+                if settings['channel'][k]['laser_index'] < 0 or settings['channel'][k]['filter_position'] < 0:
+                    raise
+        except:
+            tkinter.messagebox.showerror(title='Warning', message='There are some missing/wrong settings!')
+            return False
+        
         self.model.experiment.MicroscopeState['stack_cycling_mode'] = settings['stack_cycling_mode']
         for k in settings['stack_acquisition']:
             self.model.experiment.MicroscopeState[k] = settings['stack_acquisition'][k]
@@ -263,6 +273,11 @@ class ASLM_controller:
 
         # get position information from stage tab
         position = self.stage_gui_controller.get_position()
+        # validate positions
+        if not position:
+            tkinter.messagebox.showerror(title='Warning', message='There are some missing/wrong settings!')
+            return False
+        
         for axis in position:
             self.model.experiment.StageParameters[axis] = position[axis]
         step_size = self.stage_gui_controller.get_step_size()
@@ -418,9 +433,9 @@ class ASLM_controller:
             elif self.acquire_bar_controller.mode == 'continuous':
                 if self.verbose:
                     print('Starting Continuous Acquisition')
-                self.model.open_shutter()
-                self.threads_pool.createThread(self.model.run_live_acquisition(self.update_camera_view))
-                self.model.close_shutter()
+                # self.model.open_shutter()
+                # self.threads_pool.createThread(self.model.run_live_acquisition(self.update_camera_view))
+                # self.model.close_shutter()
 
             elif self.acquire_bar_controller.mode == 'z-stack':
                 if self.verbose:
@@ -441,6 +456,7 @@ class ASLM_controller:
             # stop continuous acquire from camera
 
             self.model.stop_acquisition = True
+            self.channels_tab_controller.set_mode('stop')
             self.camera_view_controller.set_mode('stop')  # Breaks live feed loop
 
             # TODO: stop continuous acquire from camera

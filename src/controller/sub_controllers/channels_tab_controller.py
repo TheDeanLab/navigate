@@ -1,6 +1,6 @@
 import _tkinter
 import numpy as np
-from controller.sub_controllers.widget_functions import validate_float_wrapper
+from controller.sub_controllers.widget_functions import validate_wrapper
 from controller.sub_controllers.gui_controller import GUI_Controller
 from controller.sub_controllers.channel_setting_controller import Channel_Setting_Controller
 from controller.sub_controllers.multi_position_controller import Multi_Position_Controller
@@ -24,12 +24,12 @@ class Channels_Tab_Controller(GUI_Controller):
         # the only thing is that when the user's input is smaller than the limits, 
         # it will show inputs in red, but still let the function know the inputs changed
         # I can not block it since the Tkinter's working strategy
-        validate_float_wrapper(self.view.stack_acq_frame.step_size_spinbox)
-        validate_float_wrapper(self.view.stack_acq_frame.start_pos_spinbox)
-        validate_float_wrapper(self.view.stack_acq_frame.end_pos_spinbox)
+        validate_wrapper(self.view.stack_acq_frame.step_size_spinbox)
+        validate_wrapper(self.view.stack_acq_frame.start_pos_spinbox)
+        validate_wrapper(self.view.stack_acq_frame.end_pos_spinbox)
 
-        validate_float_wrapper(self.view.stack_timepoint_frame.stack_pause_spinbox)
-        validate_float_wrapper(self.view.stack_timepoint_frame.exp_time_spinbox)
+        validate_wrapper(self.view.stack_timepoint_frame.stack_pause_spinbox)
+        validate_wrapper(self.view.stack_timepoint_frame.exp_time_spinbox, is_integer=True)
 
         # stack acquisition variables
         self.stack_acq_vals = {
@@ -63,10 +63,8 @@ class Channels_Tab_Controller(GUI_Controller):
         self.timepoint_event_id = None
         # timepoint event binds
         self.timepoint_vals['is_save'].trace_add('write', self.update_save_setting)
-        self.timepoint_vals['timepoints'].trace_add('write', self.update_timepoint_setting)
-        self.timepoint_vals['stack_pause'].trace_add('write', self.update_timepoint_setting)
-        self.timepoint_vals['timepoints'].trace_add('write', self.timepoint_callback)
-        self.timepoint_vals['stack_pause'].trace_add('write', self.timepoint_callback)
+        self.timepoint_vals['timepoints'].trace_add('write', lambda *args: self.update_timepoint_setting(True))
+        self.timepoint_vals['stack_pause'].trace_add('write', lambda *args: self.update_timepoint_setting(True))
 
         # multiposition
         self.is_multiposition = False
@@ -227,7 +225,7 @@ class Channels_Tab_Controller(GUI_Controller):
 
         self.show_verbose_info('save data option has been changed to', self.is_save)
 
-    def update_timepoint_setting(self, *args):
+    def update_timepoint_setting(self, call_parent=False):
         """
         # Automatically calculate the stack acquisition time based on the number of timepoints,
         #  channels, and exposure time.  Add necessary computation for 'Stack Acq.Time',
@@ -246,7 +244,7 @@ class Channels_Tab_Controller(GUI_Controller):
         channel_exposure_time = []
         # validate the spinbox's value
         try:
-            number_of_timepoints = self.timepoint_vals['timepoints'].get()
+            number_of_timepoints = int(float(self.timepoint_vals['timepoints'].get()))
             number_of_slices = int(self.stack_acq_vals['number_z_steps'].get())
             for channel_id in channel_settings:
                 channel = channel_settings[channel_id]
@@ -256,6 +254,8 @@ class Channels_Tab_Controller(GUI_Controller):
         except:
             self.timepoint_vals['experiment_duration'].set('')
             self.timepoint_vals['stack_acq_time'].set('')
+            if call_parent and self.timepoint_event_id:
+                self.view.after_cancel(self.timepoint_event_id)
             return
 
         perStack = self.laser_cycling_val.get() == 'Per Stack'
@@ -316,15 +316,16 @@ class Channels_Tab_Controller(GUI_Controller):
         self.timepoint_vals['experiment_duration'].set(experiment_duration)
         self.timepoint_vals['stack_acq_time'].set(stack_acquisition_duration)
 
+        # call central controller
+        if call_parent:
+            self.timepoint_callback()
+
         self.show_verbose_info('timepoint settings on channels tab have been changed and recalculated')
 
-    def timepoint_callback(self, *args):
+    def timepoint_callback(self):
         """
         # this function call central controller that timepoint setting has been changed
         """
-        # won't do any calculation when inialization
-        if self.in_initialization:
-            return
         # tell the central controller that timepoint's setting has changed when mode is 'live'
         if self.mode == 'live':
             if self.timepoint_event_id:
@@ -381,12 +382,10 @@ class Channels_Tab_Controller(GUI_Controller):
         # get values from a list of variables
         """
         info = {}
-        try:
-            for name in vals:
-                info[name] = vals[name].get()
-        except _tkinter.TclError:
-            print('invalid inputs')
-            return None
+        for name in vals:
+            info[name] = vals[name].get()
+            if info[name] == '':
+                return None
         return info
 
     def execute(self, command, *args):

@@ -23,3 +23,98 @@ class remote_popup():
         self.inputs = {}
         self.buttons = {}
 
+        # Frames for widgets
+        self.mode_mag_frame = ttk.Frame(content_frame)
+        self.save_frame = ttk.Frame(content_frame)
+        self.laser_frame = ttk.Frame(content_frame)
+        self.high_low_frame = ttk.Frame(content_frame)
+
+        # Gridding Frames
+        self.mode_mag_frame.grid(row=0, column=0, sticky=(NSEW))
+        self.save_frame.grid(row=0, column=1, sticky=(NSEW))
+        self.laser_frame.grid(row=1, column=0, columnspan=2, sticky=(NSEW))
+        self.high_low_frame.grid(row=2, column=0, columnspan=2, sticky=(NSEW))
+
+        '''Filling Frames with widgets'''
+
+        # Mode/Mag Frame
+        self.inputs["Mode"] = LabelInput(parent=content_frame,
+                                         label="Mode",
+                                         input_class=ttk.Combobox,
+                                         input_var=StringVar()                           
+                                        )
+        self.inputs["Mode"].grid(row=0, column=0)
+        self.inputs["Mode"].state(['readonly'])
+
+        self.inputs["Mag"] = LabelInput(parent=content_frame,
+                                         label="Magnification",
+                                         input_class=ttk.Combobox,
+                                         input_var=StringVar()                           
+                                        )
+        self.inputs["Mag"].grid(row=1, column=0)
+        self.inputs["Mag"].state(['readonly'])
+
+        # Save Frame
+        self.buttons['Save'] = ttk.Button(content_frame, text="Save Configuration")
+        self.buttons['Save'].grid(row=0,column=0,sticky=(NSEW))
+
+        # Laser Frame
+        title_labels = ['Laser', 'Amplitude', 'Offset']
+        laser_labels = ['488nm', '561nm', '642nm']
+        #Loop for widgets
+        for i in range(3):
+            # Title labels
+            title = ttk.Label(content_frame, text=title_labels[i])
+            title.grid(row=0, column=i, sticky=(NSEW))
+            # Laser labels
+            laser = ttk.Label(content_frame, text=laser_labels[i])
+            laser.grid(row=i+1, column=0, sticky=(NSEW))
+            # Entry Widgets
+            self.inputs[laser_labels[i] + ' Amp'] = LabelInput(parent=content_frame,
+                                                                input_class=ttk.Entry,
+                                                                input_var=StringVar()                          
+                                                                )
+            self.inputs[laser_labels[i] + ' Amp'].grid(row=i+1, column=i+1, sticky=(NSEW))
+            self.inputs[laser_labels[i] + ' Off'] = LabelInput(parent=content_frame,
+                                                                input_class=ttk.Entry,
+                                                                input_var=StringVar()                          
+                                                                )
+            self.inputs[laser_labels[i] + ' Off'].grid(row=i+1, column=i+1, sticky=(NSEW))
+
+        # High/Low Resolution
+        hi_lo_labels = ['Percent Delay', 'Duty Cycle', 'Percent Smoothing']
+        dict_labels = ['Percent', 'Duty', 'Percent']
+        # The below code could be in the loop above but I thought it was best to make it separate since they are different frames                                               
+        for i in range(3):
+            self.inputs[dict_labels[i]] = LabelInput(parent=content_frame,
+                                                                input_class=ttk.Entry,
+                                                                label= hi_lo_labels[i],
+                                                                input_var=StringVar()                          
+                                                                )
+            self.inputs[dict_labels[i]].grid(row=i, column=0, sticky=(NSEW))
+
+
+    # Getters
+    def get_variables(self):
+        '''
+        # This function returns a dictionary of all the variables that are tied to each widget name.
+        The key is the widget name, value is the variable associated.
+        '''
+        variables = {}
+        for key, widget in self.inputs.items():
+            variables[key] = widget.get()
+        return variables
+
+    def get_widgets(self):
+        '''
+        # This function returns the dictionary that holds the input widgets.
+        The key is the widget name, value is the LabelInput class that has all the data.
+        '''
+        return self.inputs
+
+    def get_buttons(self):
+        '''
+        # This function returns the dictionary that holds the buttons.
+        The key is the button name, value is the button.
+        '''
+        return self.buttons

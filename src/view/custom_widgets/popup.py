@@ -46,11 +46,10 @@ class PopUp(tk.Toplevel):
         #Checks if you want transience
         if transient == True:
             self.transient(root) #Prevents clicking outside of window
+            self.wait_visibility() # Can't grab until window appears, so we wait
+            self.grab_set()   #Ensures any input goes to this window
 
-        # The two below functions are examples of what we can use during testing
-        self.wait_visibility() # Can't grab until window appears, so we wait
-        self.grab_set()   #Ensures any input goes to this window
-
+      
         #Putting popup frame into toplevel window
         self.content_frame = ttk.Frame(self)
         self.content_frame.grid(row=0, column=0, sticky=(NSEW))

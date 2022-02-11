@@ -1,10 +1,9 @@
-from cProfile import label
 from tkinter import *
 import tkinter as tk
 from tkinter import ttk
 from view.custom_widgets.popup import PopUp
 from view.custom_widgets.LabelInputWidgetFactory import LabelInput
-from .popup_entries import popup_entries
+
 
 #Class that handles the dialog box that has all the user entry stuff when you press the Acquisition button
 class Acquire_PopUp():

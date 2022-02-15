@@ -206,8 +206,9 @@ class Model:
 
         #  Interrogate the Experiment Settings
         microscope_state = self.experiment.MicroscopeState
-        for channel_idx in range(len(microscope_state['channels'])):
-            channel_key = list(microscope_state['channels'].keys())[channel_idx]
+        prefix_len = len('channel_')
+        for channel_key in microscope_state['channels']:
+            channel_idx = int(channel_key[prefix_len:])
             channel = microscope_state['channels'][channel_key]
             if channel['is_selected'] is True:
 
@@ -275,8 +276,9 @@ class Model:
         self.camera.close_image_series()
 
     def per_stack_acquisition(self, microscope_state, microscope_position):
-        for channel_idx in range(len(microscope_state['channels'])):
-            channel_key = list(microscope_state['channels'].keys())[channel_idx]
+        prefix_len = len('channel_')
+        for channel_key in microscope_state['channels']:
+            channel_idx = int(channel_key[prefix_len:])
             channel = microscope_state['channels'][channel_key]
             if channel['is_selected'] is True:
                 if self.verbose:

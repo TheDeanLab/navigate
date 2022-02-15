@@ -107,19 +107,19 @@ class DAQ(DAQBase):
 
     def identify_laser_idx(self, laser_wavelength):
         """
-        # TODO: Make this so that it automatically grows with the number of lasers in the model
+        # TODO: May not need this function, since the laser_idx is saved in the experiment
         """
         for laser_idx in range(self.number_of_lasers):
-            if laser_wavelength == self.model.LaserParameters['laser_0_wavelength']:
-                self.laser_idx = self.model.LaserParameters['laser_0_index']
-            elif laser_wavelength == self.model.LaserParameters['laser_1_wavelength']:
-                self.laser_idx = self.model.LaserParameters['laser_1_index']
-            elif laser_wavelength == self.model.LaserParameters['laser_2_wavelength']:
-                self.laser_idx = self.model.LaserParameters['laser_2_index']
-            else:
-                print('Laser name not found.')
-            if self.verbose:
-                print('Laser index: {}'.format(self.laser_idx))
+            temp = 'laser_' + laser_idx + + '_wavelength'
+            if laser_wavelength == self.model.LaserParameters[temp]:
+                self.laser_idx = self.model.LaserParameters[temp]
+                if self.verbose:
+                    print('Laser index: {}'.format(self.laser_idx))
+                break
+        else:
+            # TODO: set a default laser?
+            self.laser_idx = 0
+            print('Laser name not found.')
 
     def create_laser_switching_waveform(self):
         """

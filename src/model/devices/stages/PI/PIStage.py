@@ -93,7 +93,7 @@ class Stage(StageBase):
         """
         if 'x_rel' in move_dictionary:
             x_rel = move_dictionary['x_rel']
-            if (self.x_min < self.x_pos + x_rel) and (self.x_max > self.x_pos + x_rel):
+            if (self.x_min <= self.x_pos + x_rel) and (self.x_max >= self.x_pos + x_rel):
                 x_rel = x_rel / 1000
                 self.pidevice.MVR({1: x_rel})
             else:
@@ -101,7 +101,7 @@ class Stage(StageBase):
 
         if 'y_rel' in move_dictionary:
             y_rel = move_dictionary['y_rel']
-            if (self.y_min < self.y_pos + y_rel) and (self.y_max > self.y_pos + y_rel):
+            if (self.y_min <= self.y_pos + y_rel) and (self.y_max >= self.y_pos + y_rel):
                 y_rel = y_rel / 1000
                 self.pidevice.MVR({2: y_rel})
             else:
@@ -109,7 +109,7 @@ class Stage(StageBase):
 
         if 'z_rel' in move_dictionary:
             z_rel = move_dictionary['z_rel']
-            if (self.z_min < self.z_pos + z_rel) and (self.z_max > self.z_pos + z_rel):
+            if (self.z_min <= self.z_pos + z_rel) and (self.z_max >= self.z_pos + z_rel):
                 z_rel = z_rel / 1000
                 self.pidevice.MVR({3: z_rel})
             else:
@@ -117,14 +117,14 @@ class Stage(StageBase):
 
         if 'theta_rel' in move_dictionary:
             theta_rel = move_dictionary['theta_rel']
-            if (self.theta_min < self.theta_pos + theta_rel) and (self.theta_max > self.theta_pos + theta_rel):
+            if (self.theta_min <= self.theta_pos + theta_rel) and (self.theta_max >= self.theta_pos + theta_rel):
                 self.pidevice.MVR({4: theta_rel})
             else:
                 print('Relative movement stopped: theta Motion limit would be reached!', 1000)
 
         if 'f_rel' in move_dictionary:
             f_rel = move_dictionary['f_rel']
-            if (self.f_min < self.f_pos + f_rel) and (self.f_max > self.f_pos + f_rel):
+            if (self.f_min <= self.f_pos + f_rel) and (self.f_max >= self.f_pos + f_rel):
                 f_rel = f_rel / 1000
                 self.pidevice.MVR({5: f_rel})
             else:
@@ -141,45 +141,45 @@ class Stage(StageBase):
         """
 
         if 'x_abs' in move_dictionary:
-            x_abs = move_dictionary['X']
+            x_abs = move_dictionary['x_abs']
             x_abs = x_abs - self.int_x_pos_offset
-            if (self.x_min < x_abs) and (self.x_max > x_abs):
+            if (self.x_min <= x_abs) and (self.x_max >= x_abs):
                 x_abs = x_abs / 1000
                 self.pidevice.MOV({1: x_abs})
             else:
                 print('Absolute movement stopped: X Motion limit would be reached!', 1000)
 
         if 'y_abs' in move_dictionary:
-            y_abs = move_dictionary['Y']
+            y_abs = move_dictionary['y_abs']
             y_abs = y_abs - self.int_y_pos_offset
-            if (self.y_min < y_abs) and (self.y_max > y_abs):
+            if (self.y_min <= y_abs) and (self.y_max >= y_abs):
                 y_abs = y_abs / 1000
                 self.pidevice.MOV({2: y_abs})
             else:
                 print('Absolute movement stopped: Y Motion limit would be reached!', 1000)
 
         if 'z_abs' in move_dictionary:
-            z_abs = move_dictionary['Z']
+            z_abs = move_dictionary['z_abs']
             z_abs = z_abs - self.int_z_pos_offset
-            if (self.z_min < z_abs) and (self.z_max > z_abs):
+            if (self.z_min <= z_abs) and (self.z_max >= z_abs):
                 z_abs = z_abs / 1000
                 self.pidevice.MOV({3: z_abs})
             else:
                 print('Absolute movement stopped: Z Motion limit would be reached!', 1000)
 
         if 'f_abs' in move_dictionary:
-            f_abs = move_dictionary['F']
+            f_abs = move_dictionary['f_abs']
             f_abs = f_abs - self.int_f_pos_offset
-            if (self.f_min < f_abs) and (self.f_max > f_abs):
+            if (self.f_min <= f_abs) and (self.f_max >= f_abs):
                 f_abs = f_abs / 1000
                 self.pidevice.MOV({5: f_abs})
             else:
                 print('Absolute movement stopped: F Motion limit would be reached!', 1000)
 
         if 'theta_abs' in move_dictionary:
-            theta_abs = move_dictionary['R']
+            theta_abs = move_dictionary['theta_abs']
             theta_abs = theta_abs - self.int_theta_pos_offset
-            if (self.theta_min < theta_abs) and (self.theta_max > theta_abs):
+            if (self.theta_min <= theta_abs) and (self.theta_max >= theta_abs):
                 self.pidevice.MOV({4: theta_abs})
             else:
                 print('Absolute movement stopped: Theta Motion limit would be reached!', 1000)

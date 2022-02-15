@@ -38,7 +38,6 @@ def validate_wrapper(widget, negative=False, is_entry=False, is_integer=False):
     float_or_integer = 'int' if is_integer else 'float'
     is_negative = '' if negative else '_nonnegative'
     match_string = REGEX_DICT[float_or_integer+is_negative]
-    print(widget, match_string)
         
     def check_float(value):
         valid = re.match(match_string, value) is not None

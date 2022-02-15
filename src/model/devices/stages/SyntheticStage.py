@@ -45,35 +45,35 @@ class Stage(StageBase):
 
         if 'x_rel' in move_dictionary:
             x_rel = move_dictionary['x_rel']
-            if (self.x_min < self.x_pos + x_rel) and (self.x_max > self.x_pos + x_rel):
+            if (self.x_min <= self.x_pos + x_rel) and (self.x_max >= self.x_pos + x_rel):
                 self.x_pos = self.x_pos + x_rel
             else:
                 print('Relative movement stopped: X limit would be reached!', 1000)
 
         if 'y_rel' in move_dictionary:
             y_rel = move_dictionary['y_rel']
-            if (self.y_min < self.y_pos + y_rel) and (self.y_max > self.y_pos + y_rel):
+            if (self.y_min <= self.y_pos + y_rel) and (self.y_max >= self.y_pos + y_rel):
                 self.y_pos = self.y_pos + y_rel
             else:
                 print('Relative movement stopped: Y limit would be reached!', 1000)
 
         if 'z_rel' in move_dictionary:
             z_rel = move_dictionary['z_rel']
-            if (self.z_min < self.z_pos + z_rel) and (self.z_max > self.z_pos + z_rel):
+            if (self.z_min <= self.z_pos + z_rel) and (self.z_max >= self.z_pos + z_rel):
                 self.z_pos = self.z_pos + z_rel
             else:
                 print('Relative movement stopped: Z limit would be reached!', 1000)
 
         if 'theta_rel' in move_dictionary:
             theta_rel = move_dictionary['theta_rel']
-            if (self.theta_min < self.theta_pos + theta_rel) and (self.theta_max > self.theta_pos + theta_rel):
+            if (self.theta_min <= self.theta_pos + theta_rel) and (self.theta_max >= self.theta_pos + theta_rel):
                 self.theta_pos = self.theta_pos + theta_rel
             else:
                 print('Relative movement stopped: Rotation limit would be reached!', 1000)
 
         if 'f_rel' in move_dictionary:
             f_rel = move_dictionary['f_rel']
-            if (self.f_min < self.f_pos + f_rel) and (self.f_max > self.f_pos + f_rel):
+            if (self.f_min <= self.f_pos + f_rel) and (self.f_max >= self.f_pos + f_rel):
                 self.f_pos = self.f_pos + f_rel
             else:
                 print('Relative movement stopped: Focus limit would be reached!', 1000)
@@ -87,47 +87,50 @@ class Stage(StageBase):
         """
 
         if 'x_abs' in move_dictionary:
-            x_abs = move_dictionary['X']
+            x_abs = move_dictionary['x_abs']
             x_abs = x_abs - self.int_x_pos_offset
-            if (self.x_min < x_abs) and (self.x_max > x_abs):
+            if (self.x_min <= x_abs) and (self.x_max >= x_abs):
                 self.x_pos = x_abs
             else:
                 print('Absolute movement stopped: X limit would be reached!', 1000)
 
         if 'y_abs' in move_dictionary:
-            y_abs = move_dictionary['Y']
+            y_abs = move_dictionary['y_abs']
             y_abs = y_abs - self.int_y_pos_offset
-            if (self.y_min < y_abs) and (self.y_max > y_abs):
+            if (self.y_min <= y_abs) and (self.y_max >= y_abs):
                 self.y_pos = y_abs
             else:
                 print('Absolute movement stopped: Y limit would be reached!', 1000)
 
         if 'z_abs' in move_dictionary:
-            z_abs = move_dictionary['Z']
+            z_abs = move_dictionary['z_abs']
             z_abs = z_abs - self.int_z_pos_offset
-            if (self.z_min < z_abs) and (self.z_max > z_abs):
+            if (self.z_min <= z_abs) and (self.z_max >= z_abs):
                 self.z_pos = z_abs
             else:
                 print('Absolute movement stopped: Z limit would be reached!', 1000)
 
         if 'f_abs' in move_dictionary:
-            f_abs = move_dictionary['F']
+            f_abs = move_dictionary['f_abs']
             f_abs = f_abs - self.int_f_pos_offset
-            if (self.f_min < f_abs) and (self.f_max > f_abs):
+            if (self.f_min <= f_abs) and (self.f_max >= f_abs):
                 self.f_pos = f_abs
             else:
                 print('Absolute movement stopped: Focus limit would be reached!', 1000)
 
         if 'theta_abs' in move_dictionary:
-            theta_abs = move_dictionary['R']
+            theta_abs = move_dictionary['theta_abs']
             theta_abs = theta_abs - self.int_theta_pos_offset
-            if (self.theta_min < theta_abs) and (self.theta_max > theta_abs):
+            if (self.theta_min <= theta_abs) and (self.theta_max >= theta_abs):
                 self.theta_pos = theta_abs
             else:
                 print('Absolute movement stopped: Rotation limit would be reached!', 1000)
 
         if wait_until_done is True:
             time.sleep(.25)
+
+        if self.verbose:
+            print('stage moved to ', move_dictionary)
 
     def zero_axes(self, list):
         for axis in list:

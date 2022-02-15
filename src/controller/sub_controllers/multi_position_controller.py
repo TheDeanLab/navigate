@@ -24,9 +24,16 @@ class Multi_Position_Controller(GUI_Controller):
         """
         # This function set positions to multi-position's table
         """
+        axis_dict = {
+            'x': 'X',
+            'y': 'Y',
+            'z': 'Z',
+            'theta': 'R',
+            'f': 'F'
+        }
         data = {}
-        for name in ['X', 'Y', 'Z', 'R', 'F']:
-            data[name] = list(map(lambda pos: positions[pos][name], positions))
+        for name in axis_dict:
+            data[axis_dict[name]] = list(map(lambda pos: positions[pos][name], positions))
         self.table.model.df = pd.DataFrame(data)
         self.table.redraw()
 
@@ -36,12 +43,22 @@ class Multi_Position_Controller(GUI_Controller):
         """
         # This function will return all positions
         """
+        axis_dict = {
+            'X': 'x',
+            'Y': 'y',
+            'Z': 'z',
+            'R': 'theta',
+            'F': 'f'
+        }
         positions = {}
         rows = self.table.model.df.shape[0]
         for i in range(rows):
             temp = list(self.table.model.df.iloc[i])
             if len(list(filter(lambda v: type(v) == float and not math.isnan(v), temp))) == 5:
-                positions[i] = dict(self.table.model.df.iloc[i])
+                temp = dict(self.table.model.df.iloc[i])
+                positions[i] = {}
+                for k in axis_dict:
+                    positions[i][axis_dict[k]] = temp[k]
         return positions
 
     def handle_double_click(self, event):

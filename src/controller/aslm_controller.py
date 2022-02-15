@@ -326,17 +326,7 @@ class ASLM_controller:
             """
             # call the model to move stage
             """
-            axis_dict = {
-                'x': 'X',
-                'y': 'Y',
-                'z': 'Z',
-                'theta': 'R',
-                'f': 'F'
-            }
-            abs_postion = {
-                axis_dict[args[1]]: args[0]
-            }
-            self.threads_pool.createThread('stage', self.model.stages.move_absolute, (abs_postion,))
+            self.threads_pool.createThread('stage', self.model.stages.move_absolute, ({args[1]+'_abs': args[0]},))
 
         elif command == 'move_stage_and_update_info':
             """

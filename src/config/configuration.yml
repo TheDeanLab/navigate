@@ -231,46 +231,46 @@ GUIParameters:
   channel: {
     laser_power: {
       min: 0,
-      max: 200,
+      max: 100,
       step: 10
     },
     camera_exposure_time: {
-      min: 0,
-      max: 300,
+      min: 1,
+      max: 1000,
       step: 5
     },
     interval_time: {
       min: 0,
-      max: 100,
+      max: 1000,
       step: 5
     }
   }
   stack_acquisition: {
     step_size: {
-      min: 0.001,
-      max: 10,
+      min: 0.200,
+      max: 1000,
       step: 0.1
     },
     start_pos: {
       min: 0,
-      max: 100,
+      max: 5000,
       step: 1
     },
     end_pos: {
-      min: 10,
-      max: 100,
-      step: 1
+      min: 0,
+      max: 10000,
+      step: 10
     }
   }
   timepoint: {
     timepoints: {
       min: 1,
-      max: 100,
+      max: 1000,
       step: 1
     },
     stack_pause: {
-      min: 1,
-      max: 100,
+      min: 0,
+      max: 1000,
       step: 1
     }
   }
@@ -282,17 +282,17 @@ GUIParameters:
     },
     z_step: {
       min: 1,
-      max: 1000,
+      max: 10000,
       step: 10
     },
     theta_step: {
-      min: 1,
-      max: 1000,
+      min: 0.1,
+      max: 180,
       step: 10
     },
     f_step: {
       min: 1,
-      max: 1000,
+      max: 10000,
       step: 10
     }
   }

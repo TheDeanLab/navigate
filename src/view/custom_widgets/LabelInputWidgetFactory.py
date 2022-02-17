@@ -49,6 +49,7 @@ class LabelInput(ttk.Frame):
         input_args = input_args or {} #creating access point to input args for input type constructor (uses these args to create the combobox etc)
         label_args = label_args or {} #same for label args (args to create label etc)
         self.variable = input_var #same for variable of the input, typically this will be a Tk style var like StringVar which can be accessed by any widget in the app
+        self.input_class = input_class
 
         '''This if statement will check for the type of widget being created and will create it based on that, since certain
         widgets need different formatting, like how button types don't need a textvariable like a StringVar()'''

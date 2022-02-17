@@ -13,3 +13,6 @@ class Camera_Setting_Controller(GUI_Controller):
 
 
         # Setting Preset options for widgets
+        self.sensor_values = ['Normal', 'Light Sheet']
+        self.mode_widgets['Sensor'].set_values(self.sensor_values)
+        self.mode_widgets['Sensor'].set('Normal')

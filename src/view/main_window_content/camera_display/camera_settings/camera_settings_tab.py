@@ -18,15 +18,15 @@ class camera_settings_tab(ttk.Frame):
         ttk.Frame.__init__(self, setntbk, *args, **kwargs)
 
         #Camera Modes Frame
-        self.camera_mode_frame = camera_mode(self)
-        self.camera_mode_frame.grid(row=0, column=0, sticky=(NSEW), padx=10, pady=10)
+        self.camera_mode = camera_mode(self)
+        self.camera_mode.grid(row=0, column=0, sticky=(NSEW), padx=10, pady=10)
         
         #Framerate Label Frame
-        self.framerate_info_frame = framerate_info(self)
-        self.framerate_info_frame.grid(row=0, column=1, sticky=(NSEW), padx=10, pady=10)
+        self.framerate_info = framerate_info(self)
+        self.framerate_info.grid(row=0, column=1, sticky=(NSEW), padx=10, pady=10)
 
         #Region of Interest Settings
-        self.camera_roi_frame = camera_roi(self)
-        self.camera_roi_frame.grid(row=1, column=0,columnspan=2, sticky=(NSEW), padx=10, pady=10)
+        self.camera_roi = camera_roi(self)
+        self.camera_roi.grid(row=1, column=0,columnspan=2, sticky=(NSEW), padx=10, pady=10)
 
 

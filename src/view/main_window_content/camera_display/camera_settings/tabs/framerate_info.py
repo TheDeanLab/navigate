@@ -24,48 +24,26 @@ class framerate_info(ttk.LabelFrame):
 
         #Dictionary for all the variables, this will be used by the controller
         self.inputs = {}
-        
-        #Temporary Ms 1
-        self.inputs['Temp1'] = LabelInput(parent=content_frame,
-                                            label='Temp1 ms',
-                                            input_class=ttk.Entry,
-                                            input_var=tk.StringVar()
-                                            )                               
-        self.inputs['Temp1'].grid(row=0, column=0, pady=1)
+        self.labels = ['Temp1 ms', 'Temp2 ms', 'Temp3 Hz', 'Exposure(s):', '# of Integrations']
+        self.names = ['Temp1', 'Temp2', 'Temp3', 'Exposure', 'Integration']
 
-        #Temporary Ms 2
-        self.inputs['Temp2'] = LabelInput(parent=content_frame,
-                                           label='Temp2 ms',
-                                           input_class=ttk.Entry,
-                                           input_var=tk.StringVar()
-                                           )
-        self.inputs['Temp2'].grid(row=1, column=0, pady=1)
-
-        #Temporary Ms Hz
-        self.inputs['Temp3'] = LabelInput(parent=content_frame,
-                                         label='Temp3 Hz',
-                                         input_class=ttk.Entry,
-                                         input_var=tk.StringVar()
-                                         )                                
-        self.inputs['Temp3'].grid(row=2, column=0, pady=1)
-
-        #Exposure(s) Entry
-        self.inputs['Exposure'] = LabelInput(parent=content_frame,
-                                          label='Exposure(s):',
-                                          input_class=ttk.Entry,
-                                          input_var=tk.StringVar()
-                                          )                               
-        self.inputs['Exposure'].grid(row=3, column=0, pady=1)
-
-        #Number of Integrations Spinbox
-        self.inputs['Integration'] = LabelInput(parent=content_frame,
-                                          label='# of Integrations',
-                                          input_class=ttk.Spinbox,
-                                          input_var=tk.IntVar(),
-                                          input_args={"from_": 1, "to": 1000, "increment": 1.0}
-                                          )                                  
-        self.inputs['Integration'].grid(row=4, column=0, pady=1)
-
+        #Dropdown loop
+        for i in range(5):
+            if i < 4:
+                self.inputs[self.names[i]] = LabelInput(parent=content_frame,
+                                                        label=self.labels[i],
+                                                        input_class=ttk.Entry,
+                                                        input_var=tk.StringVar()                                          
+                                                        )
+                self.inputs[self.names[i]].grid(row=i, column=0, pady=1)
+            else:
+                self.inputs[self.names[i]] = LabelInput(parent=content_frame,
+                                                        label=self.labels[i],
+                                                        input_class=ttk.Spinbox,
+                                                        input_var=tk.IntVar(),
+                                                        input_args={"from_": 1, "to": 1000, "increment": 1.0}                                          
+                                                        )
+                self.inputs[self.names[i]].grid(row=i, column=0, pady=1)
 
     def get_variables(self):
         '''

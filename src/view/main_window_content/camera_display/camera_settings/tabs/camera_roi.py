@@ -5,7 +5,7 @@ from tkinter.font import Font
 
 from view.custom_widgets.LabelInputWidgetFactory import LabelInput
 
-class camera_roi(ttk.LabelFrame):
+class camera_roi(ttk.Labelframe):
     '''
     # This class generates the camera roi label frame. 
     Widgets can be adjusted below. Dropdown values need to be set in the controller.
@@ -15,131 +15,82 @@ class camera_roi(ttk.LabelFrame):
     '''
     def __init__(self, settings_tab, *args, **kwargs):
 
-        #Init Frame
+        # Init Frame
         text_label = 'Region of Interest Settings'
-        ttk.LabelFrame.__init__(self, settings_tab, text=text_label, *args, **kwargs)
+        ttk.Labelframe.__init__(self, settings_tab, text=text_label, *args, **kwargs)
 
-        #Parent Label Frames for widgets
-        #ROI
+        # Parent Label Frames for widgets
+        # ROI
         self.roi_frame = ttk.LabelFrame(self, text='ROI')
         self.roi_frame.grid(row=0, column=0, sticky=(NSEW))
-        #Pix Num
+        # Pix Num
         self.num_pix_frame = ttk.LabelFrame(self, text='Number of pixels')
         self.num_pix_frame.grid(row=0, column=1, sticky=(NSEW))
-        #FOV
+        # FOV
         self.fov_frame = ttk.LabelFrame(self, text='FOV')
         self.fov_frame.grid(row=1, column=0, sticky=(NSEW))
-        #ROI Center
+        # ROI Center
         self.center_roi_frame = ttk.LabelFrame(self, text='ROI Center')
         self.center_roi_frame.grid(row=2, column=0, sticky=(NSEW))
-        #Button Frame
+        # Button Frame
         self.btn_frame = ttk.LabelFrame(self)
         self.btn_frame.grid(row=1, column=1, rowspan=2, sticky=(NSEW))
 
         
 
-        #Dictionary for all the variables, this will be used by the controller
+        # Dictionary for all the variables, this will be used by the controller
         self.inputs = {}
+        self.buttons = {}
 
-        #ROI frame
-        self.inputs['Left'] = LabelInput(parent=self.roi_frame,
-                                            label='Left',
-                                            input_class=ttk.Spinbox,
-                                            input_var=tk.IntVar(),
-                                            input_args={"from_": 0, "to": 1000, "increment": 1.0}
-                                            )                                 
-        self.inputs['Left'].grid(row=0, column=0, pady=1)
-
-        self.inputs['Right'] = LabelInput(parent=self.roi_frame,
-                                            label='Right',
-                                            input_class=ttk.Spinbox,
-                                            input_var=tk.IntVar(),
-                                            input_args={"from_": 0, "to": 1000, "increment": 1.0}
-                                            )                                 
-        self.inputs['Right'].grid(row=1, column=0, pady=1)
-
-        self.inputs['Top'] = LabelInput(parent=self.roi_frame,
-                                            label='Top',
-                                            input_class=ttk.Spinbox,
-                                            input_var=tk.IntVar(),
-                                            input_args={"from_": 0, "to": 1000, "increment": 1.0}
-                                            )                                 
-        self.inputs['Top'].grid(row=2, column=0, pady=1)
-
-        self.inputs['Bottom'] = LabelInput(parent=self.roi_frame,
-                                            label='Bottom',
-                                            input_class=ttk.Spinbox,
-                                            input_var=tk.IntVar(),
-                                            input_args={"from_": 0, "to": 1000, "increment": 1.0}
-                                            )                                 
-        self.inputs['Bottom'].grid(row=3, column=0, pady=1)
-
-        #FOV frame
-        self.inputs['FOV_X'] = LabelInput(parent=self.fov_frame,
-                                            label='X',
-                                            input_class=ttk.Entry,
-                                            input_var=tk.IntVar()
-                                            )                                 
-        self.inputs['FOV_X'].grid(row=0, column=0, pady=1)
-
-        self.inputs['FOV_Y'] = LabelInput(parent=self.fov_frame,
-                                            label='FOV_Y',
-                                            input_class=ttk.Entry,
-                                            input_var=tk.IntVar()
-                                            )                                 
-        self.inputs['FOV_Y'].grid(row=1, column=0, pady=1)
-
-        #ROI Center
-        self.inputs['Center_X'] = LabelInput(parent=self.center_roi_frame,
-                                            label='X',
-                                            input_class=ttk.Spinbox,
-                                            input_var=tk.IntVar(),
-                                            input_args={"from_": 0, "to": 1000, "increment": 1.0}
-                                            )                                 
-        self.inputs['Center_X'].grid(row=0, column=0, pady=1)
-
-        self.inputs['Center_Y'] = LabelInput(parent=self.center_roi_frame,
-                                            label='Y',
-                                            input_class=ttk.Spinbox,
-                                            input_var=tk.IntVar(),
-                                            input_args={"from_": 0, "to": 1000, "increment": 1.0}
-                                            )                                 
-        self.inputs['Center_Y'].grid(row=1, column=0, pady=1)
-
-        #Number of pixels
-        self.inputs['Pixels_X'] = LabelInput(parent=self.num_pix_frame,
-                                            label='X',
-                                            input_class=ttk.Spinbox,
-                                            input_var=tk.IntVar(),
-                                            input_args={"from_": 0, "to": 1000, "increment": 1.0}
-                                            )                                 
-        self.inputs['Pixels_X'].grid(row=0, column=0, pady=1)
-
-        self.inputs['Pixels_Y'] = LabelInput(parent=self.num_pix_frame,
-                                            label='Y',
-                                            input_class=ttk.Spinbox,
-                                            input_var=tk.IntVar(),
-                                            input_args={"from_": 0, "to": 1000, "increment": 1.0}
-                                            )                                 
-        self.inputs['Pixels_Y'].grid(row=1, column=0, pady=1)
-
-        #Buttons           
-        self.inputs['Center_ROI'] = ttk.Button(self.btn_frame, text='Center ROI')                     
-        self.inputs['Center_ROI'].grid(row=0, column=0, pady=1)
-
-        self.inputs['Center_At'] = ttk.Button(self.btn_frame, text='Center ROI At:')                                  
-        self.inputs['Center_At'].grid(row=1, column=0, pady=1)
-
-        self.inputs['Use_Pixels'] = ttk.Button(self.btn_frame, text='Use All Pixels')                               
-        self.inputs['Use_Pixels'].grid(row=2, column=0, pady=1)
-
-        self.inputs['1024'] = ttk.Button(self.btn_frame, text='1024x1024')                              
-        self.inputs['1024'].grid(row=3, column=0, pady=1)
-
-        self.inputs['512'] = ttk.Button(self.btn_frame, text='512x512')                               
-        self.inputs['512'].grid(row=4, column=0, pady=1)
-
+        # Labels and names
+        self.roi_labels = ['Left', 'Right', 'Top', 'Bottom'] # names are the same, can be reused
+        self.xy_labels = ['X', 'Y']
+        self.fov_names = ['FOV_X', 'FOV_Y']
+        self.center_names = ['Center_X', 'Center_Y']
+        self.num_pix_names = ['Pixels_X', 'Pixels_Y']
+        self.btn_labels = ['Center ROI', 'Center ROI @', 'Use All Pixels', '1024x1024', '512x512']
+        self.btn_names = ['Center_ROI', 'Center_At', 'Use_Pixels', '1024', '512']  
         
+        # Loop for each frame
+        for i in range(5):
+            if i < 4:
+                # ROI frame
+                self.inputs[self.roi_labels[i]] = LabelInput(parent=self.roi_frame,
+                                                    label=self.roi_labels[i],
+                                                    input_class=ttk.Spinbox,
+                                                    input_var=tk.IntVar(),
+                                                    input_args={"from_": 0, "to": 1000, "increment": 1.0}
+                                                    )                                 
+                self.inputs[self.roi_labels[i]].grid(row=i, column=0, pady=1)
+            if i < 2:
+                # FOV Frame
+                self.inputs[self.fov_names[i]] = LabelInput(parent=self.fov_frame,
+                                            label=self.xy_labels[i],
+                                            input_class=ttk.Entry,
+                                            input_var=tk.IntVar()
+                                            )                                 
+                self.inputs[self.fov_names[i]].grid(row=i, column=0, pady=1)
+                # ROI Center
+                self.inputs[self.center_names[i]] = LabelInput(parent=self.center_roi_frame,
+                                                    label=self.xy_labels,
+                                                    input_class=ttk.Spinbox,
+                                                    input_var=tk.IntVar(),
+                                                    input_args={"from_": 0, "to": 1000, "increment": 1.0}
+                                                    )                                 
+                self.inputs[self.center_names[i]].grid(row=i, column=0, pady=1)
+                # Number of pixels
+                self.inputs[self.num_pix_names[i]] = LabelInput(parent=self.num_pix_frame,
+                                                    label=self.xy_labels,
+                                                    input_class=ttk.Spinbox,
+                                                    input_var=tk.IntVar(),
+                                                    input_args={"from_": 0, "to": 1000, "increment": 1.0}
+                                                    )                                 
+                self.inputs[self.num_pix_names[i]].grid(row=i, column=0, pady=1)
+            
+            # Button Frame
+            self.buttons[self.btn_names[i]] = ttk.Button(self.btn_frame, text=self.btn_labels[i])
+            self.buttons[self.btn_names[i]].grid(row=i, column=0, pady=1)
+
     def get_variables(self):
         '''
         # This function returns a dictionary of all the variables that are tied to each widget name.
@@ -156,43 +107,10 @@ class camera_roi(ttk.LabelFrame):
         The key is the widget name, value is the LabelInput class that has all the data.
         '''
         return self.inputs
-
-
-
-
-
-
-# class camera_mode_frame(ttk.Frame):
-#     def __init__(self, cam_settings, *args, **kwargs):
-
-#         #Init Frame
-#         ttk.Frame.__init__(self, cam_settings, *args, **kwargs)
-
-#         # Creating Dropdowns
-#         cam_settings.laser_options = StringVar()
-#         cam_settings.laser_pull_down = ttk.Combobox(cam_settings)
-#         cam_settings.laser_pull_down['values'] = ['Normal Mode', 'Light-Sheet Mode']
-#         cam_settings.laser_pull_down.current(0)
-#         cam_settings.laser_pull_down.grid(row=0, column=1, sticky=(NSEW))
-#         #TODO: Have it save the parameters to session.
-
-
-# class camera_roi_label_frame(ttk.Frame):
-#     def __init__(self, settings_tab, *args, **kwargs):
-
-#         #Init Frame
-#         ttk.Frame.__init__(self, settings_tab, *args, **kwargs)
-
-#         #Adding Labels to frame
-#         self.laser_label = ttk.Label(self, text='Camera ROI')
-#         self.laser_label.grid(row=0, column=0, sticky=(NSEW))
-
-# class camera_mode_label_frame(ttk.Frame):
-#     def __init__(self, settings_tab, *args, **kwargs):
-
-#         #Init Frame
-#         ttk.Frame.__init__(self, settings_tab, *args, **kwargs)
-
-#         #Adding Labels to frame
-#         self.laser_label = ttk.Label(self, text='Camera Readout Mode')
-#         self.laser_label.grid(row=0, column=0, sticky=(NSEW))
+    
+    def get_buttons(self):
+        '''
+        # This function returns the dictionary that holds the buttons.
+        The key is the widget name, value is the LabelInput class that has all the data.
+        '''
+        return self.buttons

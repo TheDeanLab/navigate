@@ -19,6 +19,7 @@ from controller.sub_controllers.stage_gui_controller import Stage_GUI_Controller
 from controller.sub_controllers.acquire_bar_controller import Acquire_Bar_Controller
 from controller.sub_controllers.channels_tab_controller import Channels_Tab_Controller
 from controller.sub_controllers.camera_view_controller import Camera_View_Controller
+from controller.sub_controllers.camera_setting_controller import Camera_Setting_Controller
 from controller.aslm_configuration_controller import ASLM_Configuration_Controller
 from controller.aslm_controller_functions import *
 from controller.thread_pool import SynchronizedThreadPool
@@ -59,6 +60,9 @@ class ASLM_controller:
         self.camera_view_controller = Camera_View_Controller(self.view.camera_waveform.camera_tab, self.model.camera, self,
                                                              self.verbose)
         self.camera_view_controller.populate_view()
+
+        # Camera Settings Controller
+        self.camera_setting_controller = Camera_Setting_Controller(self.view.settings.camera_settings_tab, self, self.verbose)
 
         # Stage Controller
         self.stage_gui_controller = Stage_GUI_Controller(self.view.stage_control.stage_control_tab, self, self.verbose)

@@ -138,6 +138,10 @@ class ASLM_controller:
                 return
             save_experiment_file('', self.model.experiment.serialize(), filename)
 
+        # TODO this is temporary until we find a place to control the remote focus popup
+        from view.remote_focus_popup import remote_popup
+        
+
         menus_dict = {
             self.view.menubar.menu_file: {
                 'New Experiment': new_experiment,
@@ -163,6 +167,10 @@ class ASLM_controller:
             self.view.menubar.menu_resolution: {
                 'Mesoscale Mode': lambda: self.execute('resolution', 'low-res'),
                 'Nanoscale Mode': lambda: self.execute('resolution', 'high-res')
+            },
+            # TODO temporary placement
+            self.view.menubar.menu_etlpop: {
+                'View': lambda: remote_popup(self.view)
             }
         }
         for menu in menus_dict:

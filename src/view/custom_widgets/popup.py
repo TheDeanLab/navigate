@@ -11,7 +11,7 @@ from tkinter import ttk
 #Class that handles the dialog box that has all the user entry stuff when you press the Acquisition button
 class PopUp(tk.Toplevel):
 
-    def __init__(self, root, name, size, transient=True, *args, **kwargs):
+    def __init__(self, root, name, size, top=True, transient=True, *args, **kwargs):
         '''
         #### Creates the popup window based on the root window being passed, title that you want the window to have and the size of the window.
         Some important things to consider:
@@ -28,7 +28,9 @@ class PopUp(tk.Toplevel):
 
         - If a '-' is used insetead of '+' it will be from the opposite edge.
 
-        - Transient is a boolean
+        - Top is a boolean that if true means popup will always be on top of other windows
+
+        - Transient is a boolean that if true means the main app will not be usable until popup is closed
 
         - The parent frame for any widgets you add to the popup will be retrieved with the get_frame() function
         '''
@@ -39,7 +41,8 @@ class PopUp(tk.Toplevel):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         self.resizable(FALSE, FALSE) #Makes it so user cannot resize
-        self.attributes("-topmost", 1) #Makes it be on top of mainapp when called
+        if top == True:
+            self.attributes("-topmost", 1) #Makes it be on top of mainapp when called
         
         self.protocol("WM_DELETE_WINDOW", self.dismiss) #Intercepting close button
 

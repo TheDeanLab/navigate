@@ -16,9 +16,9 @@ from tkinter import *
 from tkinter.constants import NSEW
 
 # Import Notebooks
-from .main_window_content.settings_notebook import settings_notebook as notebook_1
-from .main_window_content.camera_notebook import camera_waveform_notebook as notebook_2
-from .main_window_content.stagecontrol_notebook import stagecontrol_maxintensity_notebook as notebook_3
+from .main_window_content.settings_notebook import settings_notebook
+from .main_window_content.camera_notebook import camera_waveform_notebook
+from .main_window_content.stagecontrol_notebook import stagecontrol_maxintensity_notebook
 from .main_window_content.acquire_bar_frame.acquire_bar import AcquireBar
 from .main_window_content.menus import menubar
 
@@ -94,9 +94,9 @@ class Main_App(ttk.Frame):
         mainapp.rowconfigure(1, weight=1)
 
         # Putting Notebooks into frames, tabs are held within the class of each notebook
-        mainapp.notebook_1 = notebook_1(mainapp.frame_left)
-        mainapp.notebook_2 = notebook_2(mainapp.frame_top_right)
-        mainapp.notebook_3 = notebook_3(mainapp.frame_bottom_right)
+        mainapp.settings = settings_notebook(mainapp.frame_left)
+        mainapp.camera_waveform = camera_waveform_notebook(mainapp.frame_top_right)
+        mainapp.stage_control = stagecontrol_maxintensity_notebook(mainapp.frame_bottom_right)
         mainapp.acqbar = AcquireBar(mainapp.top_frame, mainapp.root)
 
 

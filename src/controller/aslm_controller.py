@@ -53,15 +53,15 @@ class ASLM_controller:
         self.acquire_bar_controller = Acquire_Bar_Controller(self.view.acqbar, self, self.verbose)
 
         # Channels Controller
-        self.channels_tab_controller = Channels_Tab_Controller(self.view.notebook_1.channels_tab, self, self.verbose)
+        self.channels_tab_controller = Channels_Tab_Controller(self.view.settings.channels_tab, self, self.verbose)
 
         # Camera View Controller
-        self.camera_view_controller = Camera_View_Controller(self.view.notebook_2.camera_tab, self.model.camera, self,
+        self.camera_view_controller = Camera_View_Controller(self.view.camera_waveform.camera_tab, self.model.camera, self,
                                                              self.verbose)
         self.camera_view_controller.populate_view()
 
         # Stage Controller
-        self.stage_gui_controller = Stage_GUI_Controller(self.view.notebook_3.stage_control_tab, self, self.verbose)
+        self.stage_gui_controller = Stage_GUI_Controller(self.view.stage_control.stage_control_tab, self, self.verbose)
 
         # initialize menu bar
         self.initialize_menus()

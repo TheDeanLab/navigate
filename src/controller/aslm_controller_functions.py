@@ -2,9 +2,6 @@
 from datetime import datetime
 import os
 
-# Third party imports
-
-
 def create_save_path(saving_settings, verbose=False):
     """
     # haven't finished
@@ -25,19 +22,23 @@ def create_save_path(saving_settings, verbose=False):
     label_string = label_string.replace(" ", "-")
 
     # Create the save directory on disk.
-    save_directory = os.path.join(saving_settings['root_directory'], user_string, tissue_string,
-                                  celltype_string, label_string, date_string)
+    save_directory = os.path.join(saving_settings['root_directory'],
+                                  user_string,
+                                  tissue_string,
+                                  celltype_string,
+                                  label_string,
+                                  date_string)
     if not os.path.exists(save_directory):
         os.makedirs(save_directory)
 
     # Determine Number of Cells in Directory
-    cell_directories = list(filter(lambda v: v[:5] == 'Cell-', os.listdir(save_directory)))
-    if cell_directories:
+    cell_directories = list(filter(lambda v: v[:5] == 'Cell_', os.listdir(save_directory)))
+    if len(cell_directories) != 0:
         cell_directories.sort()
         cell_index = int(cell_directories[-1][5:]) + 1
     else:
-        cell_index = 0
-    cell_string = "Cell-" + str(cell_index).zfill(6)
+        cell_index = 1
+    cell_string = "Cell_" + str(cell_index).zfill(3)
 
     save_directory = os.path.join(save_directory, cell_string)
     if not os.path.exists(save_directory):

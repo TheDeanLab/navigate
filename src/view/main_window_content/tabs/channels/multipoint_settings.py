@@ -24,16 +24,7 @@ class multipoint_frame(ttk.Frame):
 
         # Save Data Checkbox
         multipoint_frame.on_off = tk.BooleanVar()
-        multipoint_frame.save_check = ttk.Checkbutton(
-            multipoint_frame,
-            text='',
-            variable=multipoint_frame.on_off
-            # command=
-            # onvalue=
-            # offvalue=
-            # state=
-            # instate=
-        )
+        multipoint_frame.save_check = ttk.Checkbutton(multipoint_frame, text='', variable=multipoint_frame.on_off)
         multipoint_frame.save_check.grid(row=0, column=input_position, sticky=(NSEW))
 
 class multipoint_list(ttk.Frame):

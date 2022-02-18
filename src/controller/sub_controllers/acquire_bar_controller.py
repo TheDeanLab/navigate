@@ -4,8 +4,6 @@ When the mode is changed, we need to communicate this to the central controller.
 Central controller then communicates these changes to the channel_setting_controller.
 """
 import sys
-import tkinter as tk
-from tkinter import ttk
 from controller.sub_controllers.gui_controller import GUI_Controller
 from view.main_window_content.acquire_bar_frame.acquire_popup import Acquire_PopUp as acquire_popup
 
@@ -98,6 +96,7 @@ class Acquire_Bar_Controller(GUI_Controller):
         elif self.view.acquire_btn['text'] == 'Stop':
             # change the button to 'Acquire'
             self.view.acquire_btn.configure(text='Acquire')
+
             # tell the controller to stop acquire(continuous mode)
             self.parent_controller.execute('stop_acquire')
         else:
@@ -109,7 +108,6 @@ class Acquire_Bar_Controller(GUI_Controller):
     def update_microscope_mode(self, *args):
         """
         # Gets the state of the pull-down menu and tell the central controller
-
         """
         self.mode = self.mode_dict[self.view.pull_down.get()]
         # TODO: comment it now
@@ -152,6 +150,7 @@ class Acquire_Bar_Controller(GUI_Controller):
         if is_valid:
             # tell central controller, save the image/data
             self.parent_controller.execute('acquire_and_save', self.saving_settings)
+
             # Close the window
             popup_window.popup.dismiss(self.verbose)
 

@@ -110,7 +110,7 @@ class DAQ(DAQBase):
         # TODO: May not need this function, since the laser_idx is saved in the experiment
         """
         for laser_idx in range(self.number_of_lasers):
-            temp = 'laser_' + laser_idx + + '_wavelength'
+            temp = 'laser_' + str(laser_idx) + '_wavelength'
             if laser_wavelength == self.model.LaserParameters[temp]:
                 self.laser_idx = self.model.LaserParameters[temp]
                 if self.verbose:

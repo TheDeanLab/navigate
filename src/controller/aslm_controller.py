@@ -6,9 +6,6 @@ This is the controller in an MVC-scheme for mediating the interaction between th
 from pathlib import Path
 import tkinter
 
-#  External Library Imports
-import numpy as np
-
 # Local View Imports
 from tabnanny import verbose
 from tkinter import filedialog
@@ -209,7 +206,7 @@ class ASLM_controller:
                                        'stack_cycling_mode'] == 'per_z' else 'Per Stack'
         self.channels_tab_controller.set_values('laser_cycling', laser_cycling)
 
-        # populate timepoints settings
+        # populate time-points settings
         timepoints_setting = {
             'is_save': self.model.experiment.MicroscopeState['is_save'],
             'timepoints': self.model.experiment.MicroscopeState['timepoints'],
@@ -330,6 +327,17 @@ class ASLM_controller:
             self.camera_view_controller.display_image(self.model.data)
             self.camera_view_controller.update_channel_idx(self.model.current_channel)
 
+    def acquire_single(self):
+        """
+        #  Acquires a single image at the current position for each channel configuration
+        """
+        if self.verbose:
+            print("Starting Single Acquisition")
+        self.model.open_shutter()
+        self.model.run_single_acquisition(self.update_camera_view)
+        self.model.close_shutter()
+        self.execute('stop_acquire')
+
     def execute(self, command, *args):
         """
         # This function listens to sub_gui_controllers
@@ -410,11 +418,15 @@ class ASLM_controller:
             if not self.prepare_acquire_data():
                 self.acquire_bar_controller.stop_acquire()
                 return
+
             # create file directory
             file_directory = create_save_path(args[0], self.verbose)
+
             # save experiment file
             save_experiment_file(file_directory, self.model.experiment.serialize())
-            pass
+
+            if self.acquire_bar_controller.mode == 'single':
+                self.acquire_single()
 
         elif command == 'acquire':
             if not self.prepare_acquire_data():
@@ -422,15 +434,7 @@ class ASLM_controller:
                 return
             # Acquisition modes can be: 'continuous', 'z-stack', 'single', 'projection'
             if self.acquire_bar_controller.mode == 'single':
-                """
-                #  Acquires a single image at the current position for each chnanel configuration
-                """
-                if self.verbose:
-                    print("Starting Single Acquisition")
-                self.model.open_shutter()
-                self.model.run_single_acquisition(self.update_camera_view)
-                self.model.close_shutter()
-                self.execute('stop_acquire')
+                self.acquire_single()
 
             elif self.acquire_bar_controller.mode == 'continuous':
                 if self.verbose:

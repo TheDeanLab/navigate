@@ -1,5 +1,6 @@
 # Standard Library Imports
 import time
+import os
 
 # Third Party Imports
 import numpy as np
@@ -8,8 +9,8 @@ import numpy as np
 from .aslm_model_functions import *
 from .aslm_model_config import Session as session
 from controller.thread_pool import SynchronizedThreadPool
+from tifffile import imsave
 
-# from model.concurrency.concurrency_tools import ObjectInSubprocess
 
 class Model:
     def __init__(self, args, configuration_path=None, experiment_path=None, etl_constants_path=None):
@@ -53,9 +54,11 @@ class Model:
         self.acquisition_count = 0
         self.total_acquisition_count = None
         self.total_image_count = None
+        self.current_time_point = 0
         self.current_channel = 0
         self.current_filter = 'Empty'
         self.current_laser = '488nm'
+        self.current_laser_index = 1
         self.current_exposure_time = 200  # milliseconds
         self.start_time = None
         self.image_acq_start_time_string = time.strftime("%Y%m%d-%H%M%S")
@@ -113,6 +116,8 @@ class Model:
         self.daq.stop_tasks()
         self.daq.close_tasks()
         self.camera.close_image_series()
+
+        return self.data
 
     def prepare_image_series(self):
         """
@@ -202,6 +207,8 @@ class Model:
         """
         This function retrieves the state of the microscope from the GUI, iterates through each selected channel,
         and snaps an image for each channel setting.  In each iteration, the camera is initialized and closed.
+        TODO:  Make sure that there is no disconnect between the waveform generation and the exposure time.
+        TODO:  Add ability to save the data.
         """
 
         #  Interrogate the Experiment Settings
@@ -217,24 +224,31 @@ class Model:
                 self.current_exposure_time = channel['camera_exposure_time']
                 self.current_filter = channel['filter']
                 self.current_laser = channel['laser']
+                self.current_laser_index = channel['laser_index']
 
                 #  Set the parameters
                 self.camera.set_exposure_time(self.current_exposure_time)
                 self.filter_wheel.set_filter(self.current_filter)
-                self.daq.identify_laser_idx(self.current_laser)
+                self.daq.laser_idx = self.current_laser_index
+                # self.daq.identify_laser_idx(self.current_laser)
                 if self.verbose:
                     print("Channel:", self.current_channel)
                     print("Camera Exposure Time:", self.current_exposure_time)
                     print("Filter Wheel:", self.current_filter)
 
                 #  Acquire the Image
-                self.snap_image()
+                image_data = self.snap_image()
 
                 #  Update the View
                 if update_view is not None:
                     update_view()
                     if self.verbose:
                         print("Updated the Camera View Panel")
+
+            #  Save the Data
+            if microscope_state['is_save']:
+                image_name = self.generate_image_name()
+                imsave(os.path.join(self.experiment.Saving['save_directory'], image_name), image_data)
 
     def run_live_acquisition(self, update_view):
         """
@@ -334,6 +348,14 @@ class Model:
                         pass
                     microscope_position['Z'] = microscope_position['Z'] + microscope_state['step_size']
                     self.stages.move_absolute(microscope_position)
+
+    def generate_image_name(self):
+        """
+        #  Generates a string for the filename
+        #  e.g., CH00_000000.tif
+        """
+        image_name = "CH0" + str(self.current_channel) + "_" + str(self.current_time_point).zfill(6) + ".tif"
+        return image_name
 
 if __name__ == '__main__':
     """ Testing Section """

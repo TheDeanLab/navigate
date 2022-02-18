@@ -27,12 +27,12 @@ class settings_notebook(ttk.Notebook):
         setntbk.camera_settings_tab = camera_settings_tab(setntbk)
 
         #Creating the advanced settings tab
-        setntbk.advanced_settings_tab = advanced_settings_tab(setntbk)
+        # setntbk.advanced_settings_tab = advanced_settings_tab(setntbk)
 
         #Adding tabs to settings notebook
         setntbk.add(setntbk.channels_tab, text='Channels', sticky=NSEW)
         setntbk.add(setntbk.camera_settings_tab, text='Camera Settings', sticky=NSEW)
-        setntbk.add(setntbk.advanced_settings_tab, text='Advanced Configuration', sticky=NSEW)
+        # setntbk.add(setntbk.advanced_settings_tab, text='Advanced Configuration', sticky=NSEW)
 
 
 

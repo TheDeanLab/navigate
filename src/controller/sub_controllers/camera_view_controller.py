@@ -1,6 +1,8 @@
 from controller.sub_controllers.gui_controller import GUI_Controller
 import tkinter as tk
 import numpy as np
+import cv2
+
 
 class Camera_View_Controller(GUI_Controller):
     def __init__(self, view, camera, parent_controller=None, verbose=False):
@@ -15,6 +17,8 @@ class Camera_View_Controller(GUI_Controller):
         self.image_count = 0
         self.temp_array = None
         self.rolling_frames = 1
+        self.live_subsampling = self.parent_controller.model.camera.camera_display_live_subsampling
+        # self.view.scale_pallete.autoscale.trace_add(self.update_counts_display())
 
     #  Set mode for the execute statement in main controller
     def set_mode(self, mode=''):
@@ -22,6 +26,19 @@ class Camera_View_Controller(GUI_Controller):
 
     def populate_view(self):
         self.canvas.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH, expand=1.5)
+
+    # def update_counts_display(self):
+    # """
+    # Would ideally like to have the ability to change whether or not the state is normal, disabled, or read only,
+    # depending upon the autoscale checkbox state...
+    # """
+    #     if self.view.scale_pallete.autoscale.get() is True:
+    #         self.view.scale_pallete.min_counts_spinbox(state="readonly")
+    #         self.view.scale_pallete.max_counts_spinbox(state="readonly")
+    #     else:
+    #         self.view.scale_pallete.min_counts_spinbox(state=NORMAL)
+    #         self.view.scale_pallete.max_counts_spinbox(state=NORMAL)
+
 
     def update_max_counts(self, image):
         """
@@ -47,19 +64,36 @@ class Camera_View_Controller(GUI_Controller):
                     self.temp_array = np.delete(self.temp_array, 0, 2)
             self.view.cam_counts.count.set(np.max(self.temp_array))
 
-    def lookup_table_range(self):
-        """
-        #  Specify the minimum and maximum intensity values to display in the image
-        #  Will need to see if the self.view.scale_pallete.count_scale is checked.
-        #  If so, the user will need to provide inputs for the lookup table.
-        """
-        pass
-
     def display_image(self, image):
+        """
+        #  Displays a camera image using the Lookup Table specified in the View.
+        #  If Autoscale is selected, automatically calculates the min and max values for the data.
+        #  If Autoscale is not selected, takes the user values as specified in the min and max counts.
+        """
         self.image_count = 0
+
+        #  Update the colorbar.
         self.colormap = self.view.scale_pallete.color.get()
+
+        #  Update the GUI according to the instantaneous or rolling average max counts.
         self.update_max_counts(image)
-        self.figure.add_subplot(111).imshow(image, self.colormap)
+
+        #  Down-sample the data according to the configuration file.
+        ds = self.live_subsampling
+        if ds != 1:
+            #  Down-sampling values taken from configuration yaml file to decrease overhead in displaying images.
+            image = cv2.resize(image, (int(np.shape(image)[0]/ds), int(np.shape(image)[1]/ds)))
+
+        #  Specify the lookup table min and maximum.
+        autoscale = self.view.scale_pallete.autoscale.get()
+        if autoscale is True:
+            min = np.min(image)
+            max = np.max(image)
+        else:
+            min = self.view.scale_pallete.min_counts.get()
+            max = self.view.scale_pallete.max_counts.get()
+
+        self.figure.add_subplot(111).imshow(image, self.colormap, vmin=min, vmax=max)
         self.figure.gca().set_axis_off()
         self.canvas.draw()
 

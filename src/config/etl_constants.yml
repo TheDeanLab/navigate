@@ -2,6 +2,20 @@
 ---
 
 ETLConstants:
+  high_resolution: {
+    488nm: {
+      amplitude: 2.336,
+      offset: 0
+    } ,
+    562nm: {
+      amplitude: 2.336,
+      offset: 0
+    } ,
+    642nm: {
+      amplitude: 2.336,
+      offset: 0
+    }
+  }
   0.63x: {
     488nm: {
       amplitude: 2.336,
@@ -100,3 +114,4 @@ ETLConstants:
       offset: 0
     }
   }
+  

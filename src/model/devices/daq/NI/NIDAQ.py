@@ -20,13 +20,6 @@ class DAQ(DAQBase):
     def __init__(self, model, experiment, etl_constants, verbose=False):
         super().__init__(model, experiment, etl_constants, verbose)
 
-        # # Initialize the nidaqmx tasks.
-        # self.camera_trigger_task = nidaqmx.Task()
-        # self.master_trigger_task = nidaqmx.Task()
-        # self.galvo_etl_task = nidaqmx.Task()
-        # self.laser_task = nidaqmx.Task()
-
-
     def __del__(self):
         self.close_tasks()
 
@@ -67,7 +60,6 @@ class DAQ(DAQBase):
         """
         # Create the waveforms for the Electrotunable Lens
         """
-        self.calculate_samples()
         self.etl_l_waveform = tunable_lens_ramp(self.sample_rate, self.sweep_time, self.etl_l_delay,
                                                 self.etl_l_ramp_rising, self.etl_l_ramp_falling,
                                                 self.etl_l_amplitude, self.etl_l_offset)

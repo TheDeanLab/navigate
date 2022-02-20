@@ -195,7 +195,6 @@ class Model:
         self.daq.run_tasks()
         self.daq.stop_tasks()
         image = self.camera.get_image()
-        #  self.save_test_image(image)
         self.close_shutter()
         self.camera.close_image_series()
 
@@ -207,8 +206,6 @@ class Model:
         """
         This function retrieves the state of the microscope from the GUI, iterates through each selected channel,
         and snaps an image for each channel setting.  In each iteration, the camera is initialized and closed.
-        TODO:  Make sure that there is no disconnect between the waveform generation and the exposure time.
-        TODO:  Add ability to save the data.
         """
 
         #  Interrogate the Experiment Settings
@@ -230,11 +227,14 @@ class Model:
                 self.camera.set_exposure_time(self.current_exposure_time)
                 self.filter_wheel.set_filter(self.current_filter)
                 self.daq.laser_idx = self.current_laser_index
+                self.daq.sweep_time = self.current_exposure_time
+
                 # self.daq.identify_laser_idx(self.current_laser)
                 if self.verbose:
                     print("Channel:", self.current_channel)
                     print("Camera Exposure Time:", self.current_exposure_time)
                     print("Filter Wheel:", self.current_filter)
+                    print("Waveform Sweeptime:", self.daq.sweep_time)
 
                 #  Acquire the Image
                 image_data = self.snap_image()

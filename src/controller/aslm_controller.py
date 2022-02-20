@@ -18,6 +18,7 @@ from controller.sub_controllers.channels_tab_controller import Channels_Tab_Cont
 from controller.sub_controllers.camera_view_controller import Camera_View_Controller
 from controller.sub_controllers.camera_setting_controller import Camera_Setting_Controller
 from controller.aslm_configuration_controller import ASLM_Configuration_Controller
+from controller.sub_controllers.waveform_tab_controller import Waveform_Tab_Controller
 from controller.aslm_controller_functions import *
 from controller.thread_pool import SynchronizedThreadPool
 
@@ -63,6 +64,9 @@ class ASLM_controller:
 
         # Stage Controller
         self.stage_gui_controller = Stage_GUI_Controller(self.view.stage_control.stage_control_tab, self, self.verbose)
+
+        # Waveform Controller
+        self.waveform_tab_controller = Waveform_Tab_Controller(self.view.camera_waveform.waveform_tab, self, self.verbose)
 
         # initialize menu bar
         self.initialize_menus()

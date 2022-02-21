@@ -7,8 +7,11 @@ import numpy as np
 from skimage.filters import threshold_otsu
 from skimage.morphology import dilation, erosion, remove_small_objects
 from skimage.measure import label, regionprops
+from skimage.feature import blob_log, blob_dog, blob_doh
 from scipy.ndimage import gaussian_filter, binary_fill_holes
 from scipy import ndimage, signal
+import matplotlib.pyplot as plt
+
 
 def add_median_border(image_data):
     '''
@@ -151,36 +154,64 @@ def combine_images(inside_image, normalized_cell, surface_cell):
     final_image[labeled_image==max_label+1] = 1
     return final_image
 
-def log_detection(image_data):
-    # https://github.com/scikit-image/scikit-image/blob/v0.19.0/skimage/feature/blob.py#L401-L564
-    pass
-
-if (__name__ == "__main__"):
-    # Import Additional Modules
-    import os
-    import time
-    from tifffile import imread, imsave
-
-    start_time = time.perf_counter()
-
-    # Define Inputs
-    scales = [1, 2, 4]
-    nSTDsurface = 2
-    insideGamma = 0.7
-    insideBlur = 1
-    insideDilateRadius = 3
-    insideErodeRadius = 4
-
-    image_directory = '/archive/MIL/morrison/20201105_mitochondria_quantification/ilastik'
-    image_name = 'ControlCell8_cyto.tif'
-    image_path = os.path.join(image_directory, image_name)
-    image_data = np.array(imread(image_path))
-    print('The Image Dimensions Are: ' + str(image_data.shape))
-
+def three_level_segmentation(image_data):
     padded_image_data = add_median_border(image_data)
     inside_image = make_inside_image(padded_image_data, insideGamma, insideBlur, insideDilateRadius, insideErodeRadius)
     normalized_cell = make_normalized_image(padded_image_data)
     surface_cell = multiscale_surface_filter_3D(padded_image_data, scales)
     final_image = combine_images(inside_image, normalized_cell, surface_cell)
-    end_time = time.perf_counter()
-    print("Image Segmentation took:", end_time - start_time)
+    return final_image
+
+def log_detection(image_data, image_threshold=None, pixel_size=0.206):
+    # https://github.com/scikit-image/scikit-image/blob/v0.19.0/skimage/feature/blob.py#L401-L564
+    blobs_log = blob_log(image_data, max_sigma=20, num_sigma=3, threshold=image_threshold)
+    blobs_log[:, 2] = blobs_log[:, 2] * np.sqrt(2) * pixel_size
+
+    blobs_dog = blob_dog(image_data, max_sigma=20, threshold=image_threshold)
+    blobs_dog[:, 2] = blobs_dog[:, 2] * np.sqrt(2) * pixel_size
+
+    blobs_list = [blobs_log, blobs_dog]
+    colors = ['yellow', 'lime']
+    titles = ['Laplacian of Gaussian', 'Difference of Gaussian']
+    sequence = zip(blobs_list, colors, titles)
+
+    fig, axes = plt.subplots(1, 2, figsize=(9, 3), sharex=True, sharey=True)
+    ax = axes.ravel()
+
+    image = np.amax(image_data, axis=0)
+
+    for idx, (blobs, color, title) in enumerate(sequence):
+        ax[idx].set_title(title)
+        ax[idx].imshow(image)
+        for blob in blobs:
+            z, y, x, r = blob
+            c = plt.Circle((x, y), r, color=color, linewidth=2, fill=False)
+            ax[idx].add_patch(c)
+            print("FWHM of Particle:", r)
+        ax[idx].set_axis_off()
+
+    plt.tight_layout()
+    plt.show()
+
+if (__name__ == "__main__"):
+    from tifffile import imread
+
+    # # Define Inputs
+    # scales = [1, 2, 4]
+    # nSTDsurface = 2
+    # insideGamma = 0.7
+    # insideBlur = 1
+    # insideDilateRadius = 3
+    # insideErodeRadius = 4
+    #
+    # image_directory = '/archive/MIL/morrison/20201105_mitochondria_quantification/ilastik'
+    # image_name = 'ControlCell8_cyto.tif'
+    # image_path = os.path.join(image_directory, image_name)
+    # image_data = np.array(imread(image_path))
+    # print('The Image Dimensions Are: ' + str(image_data.shape))
+    #
+
+    image_directory = '/Users/S155475/Downloads/1_CH00_000000-1.tif'
+    image_data = np.array(imread(image_directory))
+    log_detection(image_data, image_threshold=None, pixel_size=0.206)
+

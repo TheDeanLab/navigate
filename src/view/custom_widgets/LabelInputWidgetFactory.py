@@ -63,13 +63,13 @@ class LabelInput(ttk.Frame):
 
         '''This will call the passed in widget types constructor, the **input_args is the dict passed in with the arguments needed for 
         that type if desired, its totally optional'''
-        self.input = input_class(self, **input_args)
+        self.widget = input_class(self, **input_args)
         #This if will change the pos of the label based on what is passed in top will put label on top of widge, while left will put it on the left
         if label_pos == "top":
-            self.input.grid(row=1, column=0, sticky=(tk.W + tk.E))
+            self.widget.grid(row=1, column=0, sticky=(tk.W + tk.E))
             self.columnconfigure(0, weight=1)
         else:
-            self.input.grid(row=0, column=1, sticky=(tk.W + tk.E))
+            self.widget.grid(row=0, column=1, sticky=(tk.W + tk.E))
             self.rowconfigure(0, weight=1)
 
     
@@ -123,10 +123,12 @@ class LabelInput(ttk.Frame):
         '''
 
         if self.input_class in (ttk.Combobox, tk.Listbox, ttk.Spinbox):
-            self.input['values'] = values
+            self.widget['values'] = values
         else:
             print("This widget class does not support list options: " + self.input_class)
     
     def pad_input(self, left, up, right, down):
         self.input.grid(padx=(left, right), pady=(up, down))
+    
+
                 

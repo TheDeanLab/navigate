@@ -28,18 +28,29 @@ class camera_mode(ttk.Labelframe):
 
         #Dictionary for all the variables, this will be used by the controller
         self.inputs = {}
-        self.labels = ['Sensor Mode', 'Readout Direction', 'Dual View Modes', 'Split Pixel Number']
-        self.names = ['Sensor', 'Readout', 'Dual', 'Split']
+        self.labels = ['Sensor Mode', 'Readout Direction', 'Number of Pixels']
+        self.names = ['Sensor', 'Readout', 'Pixels']
 
         #Dropdown loop
         for i in range(len(self.labels)):
-            self.inputs[self.names[i]] = LabelInput(parent=content_frame,
-                                                    label=self.labels[i],
-                                                    input_class=ttk.Combobox,
-                                                    input_var=tk.StringVar()                                          
-                                                    )
-            self.inputs[self.names[i]].state(['readonly'])
-            self.inputs[self.names[i]].grid(row=i, column=0, pady=1)
+            if i < len(self.labels) - 1:
+                self.inputs[self.names[i]] = LabelInput(parent=content_frame,
+                                                        label=self.labels[i],
+                                                        input_class=ttk.Combobox,
+                                                        input_var=tk.StringVar()                                          
+                                                        )
+                self.inputs[self.names[i]].grid(row=i, column=0, pady=1)
+            else:
+                self.inputs[self.names[i]] = LabelInput(parent=content_frame,
+                                                        label=self.labels[i],
+                                                        input_class=ttk.Spinbox,
+                                                        input_var=tk.StringVar()                                          
+                                                        )
+                self.inputs[self.names[i]].grid(row=i, column=0, pady=1)
+        
+        # Additional widget settings
+       
+        
 
     def get_variables(self):
         '''

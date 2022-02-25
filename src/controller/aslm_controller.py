@@ -77,6 +77,9 @@ class ASLM_controller:
         # Channels Tab
         self.initialize_channels(configuration_controller)
 
+        # Camera Settings Tab
+        self.initialize_cam_settings(configuration_controller)
+
         # Stage Control Tab
         self.initialize_stage(configuration_controller)
 
@@ -109,6 +112,28 @@ class ASLM_controller:
 
         # set widgets' range limits
         self.channels_tab_controller.set_spinbox_range_limits(self.model.configuration.GUIParameters)
+
+    def initialize_cam_settings(self, configuration_controller):
+        """
+        # Populate widgets with necessary data from config file via config controller. For the entire settings tab.
+        """
+
+        # Populating Camera Mode
+        sensor_values = ['Normal', 'Light Sheet']
+        self.camera_setting_controller.initialize('sensor mode', sensor_values)
+        readout_values = [' ', 'Top to Bottom', 'Bottom to Top']
+        self.camera_setting_controller.initialize('readout', readout_values)
+
+
+        #If sensor mode == normal, readout direction should be blank and read only.
+        #If sensor mode == light-sheet, readout direction should default to “top to bottom”, but have the option to also be “bottom to top”, and should not be read only.
+
+
+
+
+
+
+
 
     def initialize_stage(self, configuration_controller):
         """

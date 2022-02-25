@@ -124,17 +124,7 @@ class ASLM_controller:
         readout_values = [' ', 'Top to Bottom', 'Bottom to Top']
         self.camera_setting_controller.initialize('readout', readout_values)
 
-
-        #If sensor mode == normal, readout direction should be blank and read only.
-        #If sensor mode == light-sheet, readout direction should default to “top to bottom”, but have the option to also be “bottom to top”, and should not be read only.
-
-
-
-
-
-
-
-
+ 
     def initialize_stage(self, configuration_controller):
         """
         # Pre-populate the stage positions.
@@ -145,6 +135,7 @@ class ASLM_controller:
         self.stage_gui_controller.set_position_limits(position_min, position_max)
         # set widgets' range limits
         self.stage_gui_controller.set_spinbox_range_limits(self.model.configuration.GUIParameters['stage'])
+
 
     def initialize_menus(self):
         """

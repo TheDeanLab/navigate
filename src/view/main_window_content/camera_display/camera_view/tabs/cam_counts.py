@@ -1,6 +1,9 @@
 #Adds the contents of the camera selection/counts frame
 from tkinter import *
 from tkinter import ttk
+import tkinter as tk
+
+from view.custom_widgets.LabelInputWidgetFactory import LabelInput
 
 
 class cam_counts(ttk.Frame):

@@ -8,6 +8,10 @@ class Camera_View_Controller(GUI_Controller):
     def __init__(self, view, camera, parent_controller=None, verbose=False):
         super().__init__(view, parent_controller, verbose)
 
+        # Getting Widgets/Buttons
+        #self.camcounts_widgets = view.cam_counts.get_widgets() # keys = ['Image Max Counts', 'Frames to Avg', 'Channel'] TODO needs refactoring with labelinputs
+        #self.pallete = view.scale_pallete.get_widgets() # keys = ['] TODO needs labelinputs
+
         #  Starting Mode
         self.mode = 'stop'
         self.camera = camera

@@ -2,34 +2,42 @@
 
 ### Project Outline
 Adopts an MVC architecture for microscope control. 
-Includes key inspiration and code contributions from a number of open-source projects, including:
+Includes inspiration from a number of open-source projects, including:
 * https://github.com/mesoSPIM/mesoSPIM-control
 * https://github.com/bicarlsen/obis_laser_controller
 * https://github.com/utsw-bicf/auto-docker/
 * https://github.com/uetke/UUTrack
 * https://github.com/MouseLand/cellpose/blob/master/README.md
+* https://github.com/AndrewGYork/tools
 
 ### Project Philosophy
-* Want to have a minimal amount of dependencies. Predominantly local Python imports for maximum stability.
-* Want it to be sufficiently generic that it can drive all of our microscopes (with a few tweaks here and there), different camera types, etc.
-* Want it to be brutally obvious and well documented so that it can be understood up with by future grad students, postdocs, etc., years from now.
-* Want it to resemble Danuser/Dean/Fiolka LabView software, so that people do not have to relearn a new GUI for every microscope.  Maximize productivity for our more biological users.
-* Want it to be performant.  Will implement Andrew York's concurrency tools.
-* Want to adopt proven architectures, such as the Model-View-Controller architecture.  
+* Minimal number of dependencies. Predominantly local Python imports for maximum stability.
+* Sufficiently generic that it can drive all of our microscopes (with a few tweaks here and there), different camera types, etc.
+* Brutally obvious and well documented so that it can be understood up with by future grad students, postdocs, etc., years from now.
+* Should resemble Danuser/Dean/Fiolka LabView software, so that people do not have to relearn a new GUI for every microscope.  Maximize productivity for our more biological users.
+* Want it to be performant.  Will implement threading approaches inspired by Andrew York's concurrency tools.
+* Based upon proven architectures, such as the Model-View-Controller architecture.  
 
 ### Equipment
 * Laser source - Omicron LightHUB Ultra.  Requires ACC operating mode with analog modulation enabled for 488 nm and 642 nm lasers.  561, which operates separately, requires the mixed modulation mode (Obis).
 * Sample Scanning System - L-509.20DG10.  Has a unidirectional repeatability of 100 nm, bidirectional repeatablility of 2 microns, and a minimum incremental motion of 100 nm.  This is borderline too coarse.
-* GPUs - 2x NVIDIA Titan RTX with an NVLINK bridge.  NVIDIA CUDA Version 11.5.1, cuTENSOR v1.3, cuDNN v8.3, and cuSPRASELt v0.10 installed on OS. THe NCCL v2.1 library is not yet available for Windows OS, but will potentially be valuable for multi-GPU support.
+* GPUs - 2x NVIDIA Titan RTX with an NVLINK bridge - CUDA Architecture = 7.5, Driver Version = 456.71. 
 * Camera - 2x Hamamatsu Flash 4.0 with framegrabbers.
 * Remote Focusing Units - Optotune Electrotunable Lens for low-resolution imaging and a ThorLabs BLINK for high-resolution imaging.
 
+### GPU Dependencies for TensorFlow (1.15), PyTorch (1.10.2), CliJ, ...
+ * NVIDIA CUDA Version 11.2
+ * cuDNN SDK 8.1.0
+ * NVIDIA Greaphics Driver >450.80.02
+ * TensorRT 7
+ * Microsoft Visual C++ Redistributable for Visual Studio 2015, 2017 and 2019 
+ 
 ### Installation with Conda
 ~~~
 conda create -n ASLM python=3.9.7
 conda activate ASLM
 python -m pip install -r requirements.txt
-cd into the right damn folder (ex C:\Users\UserProfile\Documents\GitHub\ASLM\src\)
+cd C:\Users\UserProfile\Documents\GitHub\ASLM\src\
 python main.py
 ~~~
 

@@ -9,7 +9,7 @@ Maybe need to write our own DCT operator for use on GPU?Last updated: Shepherd 0
 
 import numpy as np
 from skimage.transform import resize as skresize
-from scipy.fftpack import dct, idct
+# from scipy.fftpack import dct, idct
 import cupy as cp
 
 RESIZE_ORDER = 1
@@ -20,176 +20,168 @@ FIRST_CYCLE = "First Cycle"
 LAST_CYCLE = "Last Cycle"
 
 
-def flatfield_correct(image_data: np.ndarray):
+def correct_flat_field(image_data: np.ndarray):
     """
-    Calculates flat and darkfield image from the input image using the default parameters.
+    Calculates flat and dark_field image from the input image using the default parameters.
     Corrects the input image using a 32-bit float data type.
     Returns the corrected image as 16-bit float data type.
     :param image_data: ndarray
         image to be corrected.
 
     :return corrected_image_data: ndarray
-        flatfield corrected image data
+        flat_field corrected image data
     """
-    flatfield, darkfield = calc_flatfield(stack)
+    flat_field, dark_field = calculate_flat_field(image_data)
 
-    # If you want darkfield correction.
-    # corrected_stack = stack.astype(np.float32) - flatfield
+    # If you want dark_field correction.
+    # corrected_stack = stack.astype(np.float32) - flat_field
 
     corrected_image_data = image_data.astype(np.float32)
     corrected_image_data[corrected_image_data < 0] = 0
-    corrected_image_data = corrected_image_data / flatfield
+    corrected_image_data = corrected_image_data / flat_field
     corrected_image_data = corrected_image_data.astype(np.float16)
     return corrected_image_data
 
-def calc_flatfield(images,
-                   if_darkfield=True,
-                   if_baseline_drift=False,
-                   lambda_flatfield=0,
-                   lambda_darkfield=0,
-                   max_iterations=100,
-                   optimization_tolerance=1.0e-6,
-                   max_reweight_iterations=10,
-                   eplson=0.1,
-                   varying_coeff=True,
-                   reweight_tolerance=1.0e-3):
+
+def calculate_flat_field(images, if_dark_field=True, lambda_flat_field=0, lambda_dark_field=0,
+                   max_iterations=100, optimization_tolerance=1.0e-6, max_reweight_iterations=10, epsilon=0.1,
+                   varying_coeff=True, reweight_tolerance=1.0e-3):
     """
-    Function to calculate darkfield and brightfield correction from an image stack
+    Function to calculate dark_field and brightfield correction from an image stack
 
     :param images: ndarray
-    :param calc_darkfield: boolean
-    :param lambda_flatfield: float
-    :param lambda_darkfield: float
+    :param if_dark_field: boolean
+    :param lambda_flat_field: float
+    :param lambda_dark_field: float
     :param max_iterations: int
     :param optimization_tolerance: float
     :param max_reweight_iterations: int
     :param epsilon: float
-    :param varying_coeff: float
+    :param varying_coeff: boolean
     :param reweight_tolerance: float
 
-    :return darkfield: ndarray
-    :return flatfield: ndarray
+    :return dark_field: ndarray
+    :return flat_field: ndarray
     """
 
     _saved_size = images[0].shape
-    nrows = _saved_size[0] // 16
-    ncols = _saved_size[1] // 16
+    number_of_rows = _saved_size[0] // 16
+    number_of_columns = _saved_size[1] // 16
 
-    D = np.zeros((images.shape[0], nrows, ncols), dtype=np.uint16)
+    D = np.zeros((images.shape[0], number_of_rows, number_of_columns), dtype=np.uint16)
 
     for i in range(images.shape[0]):
-        D[i, :, :] = _resize_image(image=images[i, :], y_side_size=ncols, x_side_size=nrows)
+        D[i, :, :] = _resize_image(image=images[i, :], y_side_size=number_of_columns, x_side_size=number_of_rows)
 
     meanD = np.mean(D, axis=2)
     meanD = meanD / np.mean(meanD)
     W_meanD = _dct2d(meanD.T)
 
-    # setting lambda_flatfield and lambda_darkfield if they are not set by the user
-    if lambda_flatfield <= 0:
-        lambda_flatfield = np.sum(np.abs(W_meanD)) / 400 * 0.5
-    if lambda_darkfield <= 0:
-        lambda_darkfield = lambda_flatfield * 0.2
+    # setting lambda_flat_field and lambda_dark_field if they are not set by the user
+    if lambda_flat_field <= 0:
+        lambda_flat_field = np.sum(np.abs(W_meanD)) / 400 * 0.5
+    if lambda_dark_field <= 0:
+        lambda_dark_field = lambda_flat_field * 0.2
 
     D = np.sort(D, axis=2)
 
-    XAoffset = np.zeros((nrows, ncols))
+    XAoffset = np.zeros((number_of_rows, number_of_columns))
     weight = np.ones(D.shape)
 
     reweighting_iter = 0
     flag_reweighting = True
-    flatfield_last = np.ones((nrows, ncols))
-    darkfield_last = np.random.randn(nrows, ncols)
+    flat_field_last = np.ones((number_of_rows, number_of_columns))
+    dark_field_last = np.random.randn(number_of_rows, number_of_columns)
 
     while flag_reweighting:
         reweighting_iter += 1
 
-        initial_flatfield = False
-        if initial_flatfield:
-            raise IOError('Initial flatfield option not implemented yet!')
+        initial_flat_field = False
+        if initial_flat_field:
+            raise IOError('Initial flat_field option not implemented yet!')
         else:
             X_k_A, X_k_E, X_k_Aoffset = _inexact_alm_rspca_l1(
                 images=D,
-                lambda_flatfield=lambda_flatfield,
-                if_darkfield=if_darkfield,
-                lambda_darkfield=lambda_darkfield,
+                lambda_flat_field=lambda_flat_field,
+                if_dark_field=if_dark_field,
+                lambda_dark_field=lambda_dark_field,
                 optimization_tolerance=optimization_tolerance,
                 max_iterations=max_iterations,
                 weight=weight
             )
 
-        XA = np.reshape(X_k_A, [nrows, ncols, -1], order='F')
-        XE = np.reshape(X_k_E, [nrows, ncols, -1], order='F')
-        XAoffset = np.reshape(X_k_Aoffset, [nrows, ncols], order='F')
+        XA = np.reshape(X_k_A, [number_of_rows, number_of_columns, -1], order='F')
+        XE = np.reshape(X_k_E, [number_of_rows, number_of_columns, -1], order='F')
+        XAoffset = np.reshape(X_k_Aoffset, [number_of_rows, number_of_columns], order='F')
         XE_norm = XE / np.mean(XA, axis=(0, 1))
 
-        weight = np.ones_like(XE_norm) / (np.abs(XE_norm) + eplson)
+        weight = np.ones_like(XE_norm) / (np.abs(XE_norm) + epsilon)
 
         weight = weight * weight.size / np.sum(weight)
 
         temp = np.mean(XA, axis=2) - XAoffset
-        flatfield_current = temp / np.mean(temp)
-        darkfield_current = XAoffset
-        mad_flatfield = np.sum(np.abs(flatfield_current - flatfield_last)) / np.sum(np.abs(flatfield_last))
-        temp_diff = np.sum(np.abs(darkfield_current - darkfield_last))
+        flat_field_current = temp / np.mean(temp)
+        dark_field_current = XAoffset
+        mad_flat_field = np.sum(np.abs(flat_field_current - flat_field_last)) / np.sum(np.abs(flat_field_last))
+        temp_diff = np.sum(np.abs(dark_field_current - dark_field_last))
         if temp_diff < 1e-7:
-            mad_darkfield = 0
+            mad_dark_field = 0
         else:
-            mad_darkfield = temp_diff / np.maximum(np.sum(np.abs(darkfield_last)), 1e-6)
-        flatfield_last = flatfield_current
-        darkfield_last = darkfield_current
-        if np.maximum(mad_flatfield,
-                      mad_darkfield) <= reweight_tolerance or \
+            mad_dark_field = temp_diff / np.maximum(np.sum(np.abs(dark_field_last)), 1e-6)
+        flat_field_last = flat_field_current
+        dark_field_last = dark_field_current
+        if np.maximum(mad_flat_field,
+                      mad_dark_field) <= reweight_tolerance or \
                 reweighting_iter >= max_reweight_iterations:
             flag_reweighting = False
 
     shading = np.mean(XA, 2) - XAoffset
-    flatfield = _resize_image(
+    flat_field = _resize_image(
         image=shading,
         x_side_size=_saved_size[0],
         y_side_size=_saved_size[1]
     )
-    flatfield = flatfield / np.mean(flatfield)
+    flat_field = flat_field / np.mean(flat_field)
 
-    if if_darkfield:
-        darkfield = _resize_image(
+    if if_dark_field:
+        dark_field = _resize_image(
             image=XAoffset,
             x_side_size=_saved_size[0],
             y_side_size=_saved_size[1]
         )
     else:
-        darkfield = np.zeros_like(flatfield)
+        dark_field = np.zeros_like(flat_field)
 
-    return flatfield.astype(np.float32), darkfield.astype(np.float32)
+    return flat_field.astype(np.float32), dark_field.astype(np.float32)
 
 
 def baseline_drift(images_list,
                    working_size=128,
-                   flatfield: np.ndarray = None,
-                   darkfield: np.ndarray = None,
-                   **kwargs):
+                   flat_field: np.ndarray = None,
+                   dark_field: np.ndarray = None):
     # TODO: Rename s.t. fluorescence is included? E.g. background_fluorescence?
 
     """
     Estimation of background fluorescence signal for time-lapse movie.
     Used in conjunction with BaSiC.
     """
-    nrows = ncols = working_size
+    number_of_rows = number_of_columns = working_size
 
     # Preparing input images
     resized_images = np.stack(_resize_images_list(images_list=images_list, side_size=working_size))
-    resized_images = resized_images.reshape([-1, nrows * nrows], order='F')
+    resized_images = resized_images.reshape([-1, number_of_rows * number_of_rows], order='F')
 
-    # Reszing flat- and dark-field
-    resized_flatfield = _resize_image(image=flatfield, side_size=working_size)
-    resized_darkfield = _resize_image(image=darkfield, side_size=working_size)
+    # Resizing flat- and dark-field
+    resized_flat_field = _resize_image(image=flat_field, side_size=working_size)
+    resized_dark_field = _resize_image(image=dark_field, side_size=working_size)
 
     # reweighting
     _weights = np.ones(resized_images.shape)
-    eplson = 0.1
+    epsilon = 0.1
     tol = 1e-6
     for reweighting_iter in range(1, 6):
-        W_idct_hat = np.reshape(resized_flatfield, (1, -1), order='F')
-        A_offset = np.reshape(resized_darkfield, (1, -1), order='F')
+        W_idct_hat = np.reshape(resized_flat_field, (1, -1), order='F')
+        A_offset = np.reshape(resized_dark_field, (1, -1), order='F')
         A1_coeff = np.mean(resized_images, 1).reshape([-1, 1])
 
         # main iteration loop starts:
@@ -205,27 +197,26 @@ def baseline_drift(images_list,
         _iter = 0
         total_svd = 0
         converged = False
-        A1_hat = np.zeros(resized_images.shape)
-        E1_hat = np.zeros(resized_images.shape)
+        a1_hat = np.zeros(resized_images.shape)
+        e1_hat = np.zeros(resized_images.shape)
         Y1 = 0
 
         while not converged:
             _iter = _iter + 1
-            A1_hat = W_idct_hat * A1_coeff + A_offset
+            a1_hat = W_idct_hat * A1_coeff + A_offset
 
             # update E1 using l0 norm
-            E1_hat = E1_hat + np.divide((resized_images - A1_hat - E1_hat + (1 / mu) * Y1), ent1)
-            E1_hat = np.maximum(E1_hat - _weights / (ent1 * mu), 0) + \
-                     np.minimum(E1_hat + _weights / (ent1 * mu), 0)
+            e1_hat = e1_hat + np.divide((resized_images - a1_hat - e1_hat + (1 / mu) * Y1), ent1)
+            e1_hat = np.maximum(e1_hat - _weights / (ent1 * mu), 0) + np.minimum(e1_hat + _weights / (ent1 * mu), 0)
             # update A1_coeff, A2_coeff and A_offset
             # if coeff_flag
 
-            R1 = resized_images - E1_hat
+            R1 = resized_images - e1_hat
             A1_coeff = np.mean(R1, 1).reshape(-1, 1) - np.mean(A_offset, 1)
 
             A1_coeff[A1_coeff < 0] = 0
 
-            Z1 = resized_images - A1_hat - E1_hat
+            Z1 = resized_images - a1_hat - e1_hat
 
             Y1 = Y1 + mu * Z1
 
@@ -237,20 +228,20 @@ def baseline_drift(images_list,
                 converged = True
 
         # updating weight
-        # XE_norm = E1_hat / np.mean(A1_hat)
-        XE_norm = E1_hat
-        mean_vec = np.mean(A1_hat, axis=1)
+        # XE_norm = e1_hat / np.mean(a1_hat)
+        XE_norm = e1_hat
+        mean_vec = np.mean(a1_hat, axis=1)
         XE_norm = np.transpose(np.tile(mean_vec, (16384, 1))) / XE_norm
-        _weights = 1. / (abs(XE_norm) + eplson)
+        _weights = 1. / (abs(XE_norm) + epsilon)
 
         _weights = np.divide(np.multiply(_weights, _weights.shape[0] * _weights.shape[1]), np.sum(_weights))
 
     return A1_coeff
 
 def _inexact_alm_rspca_l1(images,
-                          lambda_flatfield,
-                          if_darkfield,
-                          lambda_darkfield,
+                          lambda_flat_field,
+                          if_dark_field,
+                          lambda_dark_field,
                           optimization_tolerance,
                           max_iterations,
                           weight=None):
@@ -280,10 +271,10 @@ def _inexact_alm_rspca_l1(images,
     ent1 = 1
     ent2 = 10
 
-    A1_hat = np.zeros_like(images)
+    a1_hat = np.zeros_like(images)
     A1_coeff = np.ones((1, images.shape[1]))
 
-    E1_hat = np.zeros_like(images)
+    e1_hat = np.zeros_like(images)
     W_hat = _dct2d(np.zeros((p, q)).T)
     mu = 12.5 / norm_two
     mu_bar = mu * 1e7
@@ -313,33 +304,33 @@ def _inexact_alm_rspca_l1(images,
         if len(A_offset.shape) == 1:
             A_offset = np.expand_dims(A_offset, 1)
         W_idct_hat = _idct2d(W_hat.T)
-        A1_hat = np.dot(np.reshape(W_idct_hat, (-1, 1), order='F'), A1_coeff) + A_offset
+        a1_hat = np.dot(np.reshape(W_idct_hat, (-1, 1), order='F'), A1_coeff) + A_offset
 
-        temp_W = (images - A1_hat - E1_hat + (1 / mu) * Y1) / ent1
+        temp_W = (images - a1_hat - e1_hat + (1 / mu) * Y1) / ent1
         temp_W = np.reshape(temp_W, (p, q, n), order='F')
         temp_W = np.mean(temp_W, axis=2)
         W_hat = W_hat + _dct2d(temp_W.T)
-        W_hat = np.maximum(W_hat - lambda_flatfield / (ent1 * mu), 0) + np.minimum(
-            W_hat + lambda_flatfield / (ent1 * mu), 0)
+        W_hat = np.maximum(W_hat - lambda_flat_field / (ent1 * mu), 0) + np.minimum(
+            W_hat + lambda_flat_field / (ent1 * mu), 0)
         W_idct_hat = _idct2d(W_hat.T)
         if len(A1_coeff.shape) == 1:
             A1_coeff = np.expand_dims(A1_coeff, 0)
         if len(A_offset.shape) == 1:
             A_offset = np.expand_dims(A_offset, 1)
-        A1_hat = np.dot(np.reshape(W_idct_hat, (-1, 1), order='F'), A1_coeff) + A_offset
-        E1_hat = images - A1_hat + (1 / mu) * Y1 / ent1
-        E1_hat = _shrinkageOperator(E1_hat, weight / (ent1 * mu))
-        R1 = images - E1_hat
+        a1_hat = np.dot(np.reshape(W_idct_hat, (-1, 1), order='F'), A1_coeff) + A_offset
+        e1_hat = images - a1_hat + (1 / mu) * Y1 / ent1
+        e1_hat = _shrinkageOperator(e1_hat, weight / (ent1 * mu))
+        R1 = images - e1_hat
         A1_coeff = np.mean(R1, 0) / np.mean(R1)
         A1_coeff[A1_coeff < 0] = 0
 
-        if if_darkfield:
+        if if_dark_field:
             validA1coeff_idx = np.where(A1_coeff < 1)
 
             B1_coeff = (np.mean(
-                R1[np.reshape(W_idct_hat, -1, order='F') > np.mean(W_idct_hat) - 1e-6][:, validA1coeff_idx[0]], 0) - \
-                        np.mean(R1[np.reshape(W_idct_hat, -1, order='F') < np.mean(W_idct_hat) + 1e-6][:,
-                                validA1coeff_idx[0]], 0)) / np.mean(R1)
+                R1[np.reshape(W_idct_hat, -1, order='F') > np.mean(W_idct_hat) - 1e-6][:, validA1coeff_idx[0]], 0) -
+                        np.mean(R1[np.reshape(W_idct_hat, -1, order='F') <
+                                   np.mean(W_idct_hat) + 1e-6][:, validA1coeff_idx[0]], 0)) / np.mean(R1)
             k = np.array(validA1coeff_idx).shape[1]
             temp1 = np.sum(A1_coeff[validA1coeff_idx[0]] ** 2)
             temp2 = np.sum(A1_coeff[validA1coeff_idx[0]])
@@ -365,17 +356,16 @@ def _inexact_alm_rspca_l1(images,
 
             # smooth A_offset
             W_offset = _dct2d(np.reshape(A_offset, (p, q), order='F').T)
-            W_offset = np.maximum(W_offset - lambda_darkfield / (ent2 * mu), 0) + \
-                       np.minimum(W_offset + lambda_darkfield / (ent2 * mu), 0)
+            W_offset = np.maximum(W_offset - lambda_dark_field / (ent2 * mu), 0) + np.minimum(W_offset + lambda_dark_field / (ent2 * mu), 0)
             A_offset = _idct2d(W_offset.T)
             A_offset = np.reshape(A_offset, -1, order='F')
 
             # encourage sparse A_offset
-            A_offset = np.maximum(A_offset - lambda_darkfield / (ent2 * mu), 0) + \
-                       np.minimum(A_offset + lambda_darkfield / (ent2 * mu), 0)
-            A_offset = A_offset + B_offset
+            A_offset = np.maximum(A_offset - lambda_dark_field / (ent2 * mu), 0) + \
+                       np.minimum(A_offset + lambda_dark_field / (ent2 * mu), 0)
+            A_offset = A_offset + B_offsetD
 
-        Z1 = images - A1_hat - E1_hat
+        Z1 = images - a1_hat - e1_hat
         Y1 = Y1 + mu * Z1
         mu = np.minimum(mu * rho, mu_bar)
 
@@ -389,7 +379,7 @@ def _inexact_alm_rspca_l1(images,
     A_offset = np.squeeze(A_offset)
     A_offset = A_offset + B1_offset * np.reshape(W_idct_hat, -1, order='F')
 
-    return A1_hat, E1_hat, A_offset
+    return a1_hat, e1_hat, A_offset
 
 def _resize_image(image: np.ndarray,
                   x_side_size: float = None,
@@ -432,7 +422,20 @@ def _dct2d(mtrx: np.array):
     if mtrx.ndim != 2:
         raise ValueError("Passed object should be a matrix or a numpy array with dimension of two.")
 
-    return dct(dct(mtrx.T, norm='ortho').T, norm='ortho')
+    CPU = False
+    if CPU:
+        from scipy.fftpack import dct
+        result = dct(mtrx.T, norm='ortho').T
+        result = dct(result, norm='ortho')
+    else:
+        import tensorflow as tf
+        from tensorflow.signal import dct
+        print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
+        mtrx = tf.convert_to_tensor(mtrx)
+        result = dct(tf.transpose(mtrx), norm='ortho')
+        result = dct(result, norm='ortho')
+        result = result.numpy()
+    return result
 
 def _idct2d(mtrx: np.array):
     """
@@ -447,22 +450,43 @@ def _idct2d(mtrx: np.array):
     -------
     Inverse of discrete cosine transform of the input matrix.
     """
-
     # Check if input object is 2D.
     if mtrx.ndim != 2:
         raise ValueError("Passed object should be a matrix or a numpy array with dimension of two.")
 
-    return idct(idct(mtrx.T, norm='ortho').T, norm='ortho')
+    CPU = False
+    if CPU:
+        from scipy.fftpack import idct
+        result = idct(mtrx.T, norm='ortho').T
+        result = idct(result, norm='ortho')
+    else:
+        import tensorflow as tf
+        from tensorflow.signal import idct
+        mtrx = tf.convert_to_tensor(mtrx)
+        print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
+        result = idct(tf.transpose(mtrx), norm='ortho')
+        result = idct(result, norm='ortho')
+        result = result.numpy()
+    return result
 
 if (__name__ == '__main__'):
     ''' 
-    Testing section for the flatfield correction 
+    Testing section for the flat_field correction 
     In a windows command prompt, typing nvidia-smi will all you to confirm the 
     CUDA Version.  Here, on the acquisition computer, we have 11.4
     GPU Type: Quadro K420
     '''
     from tifffile import imread, imsave
-    image_path = "E:\test_data\CH01_003.tif"
-    image_data = imread(image_path)
-    corrected_image_data = flatfield_correct(image_data)
-    imsave("E:\test_data\CH01_003_corrected.tif", corrected_image_data)
+    import time
+    import os
+
+    #image_path = "E:\test_data\CH01_003.tif"
+    input_path = os.path.join("E:", "test_data", "CH01_003b.tif")
+    data = imread(input_path)
+    start = time.time()
+    corrected_data = correct_flat_field(data)
+    end = time.time()
+    print("The time of execution of above program is :", end - start)
+
+    output_path = os.path.join("E:", "test_data", "corrected_CH01_003.tif")
+    imsave(output_path, corrected_data)

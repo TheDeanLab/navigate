@@ -139,7 +139,6 @@ def normalize_DC(input_array, new_DC, verbose=False):
         print("The Image Average Intensity: " + str(image_average_value))
     return corrected_array
 
-
 def brenner(input_array):
     '''
     # Function accepts a 2D or 3D image, and returns the Brenner's method

@@ -39,68 +39,45 @@ def normalized_dct_shannon_entropy(input_array, PSF_support_diameter_xy, use_CPU
     #  Preallocate Array
     entropy = np.zeros(number_of_images)
     execution_time = np.zeros(number_of_images)
+    tensor = tf.convert_to_tensor(input_array)
 
     #  Measure Entropy for each 2D Image
     for image_idx in range(int(number_of_images)):
         if verbose:
             start_time = time.time()
 
-        if use_CPU:
-            # Use CPU/Numpy to Calculate Entropy
-            if image_dimensions == 2:
-                numpy_array = input_array
-            else:
-                numpy_array = np.array(input_array[image_idx, :, :])
+        tensor_array = tensor[image_idx, :, :]
 
-            # Forward 2D DCT
-            dct_array = dctn(numpy_array, type=2)
+        # Forward DCT  - e.g., dct(dct(mtrx.T, norm='ortho').T, norm='ortho')
+        tensor_array = tf.signal.dct(tensor_array, type=2)
+        tensor_array = tf.signal.dct(tf.transpose(tensor_array), type=2)
 
-            # Normalize the DCT
-            dct_array = np.divide(dct_array, np.linalg.norm(dct_array, ord=2))
+        # Normalize DCT - dtype = 'float64'
+        tensor_array = tf.math.divide(tensor_array, tf.norm(tensor_array, ord=2))
 
-            # Calculate Entropy
+        # Calculate Entropy
+        tensorflow_math = True
+        if tensorflow_math:
+            #  Use TensorFlow Math Operations.  Still returns a NaN.  Need to figure out why...
+            data_type = tf.float32
+            entropy_threshold = tf.convert_to_tensor([1], dtype=data_type)
+            tensor_array = tf.cast(tensor_array, dtype=data_type)
+            i = tf.math.greater(tensor_array, entropy_threshold)
+            image_entropy = tf.math.reduce_sum(tensor_array[i] * tf.math.log(tensor_array[i]))
+            image_entropy = tf.math.add(image_entropy,
+                                        tf.math.reduce_sum(-tensor_array[~i] * tf.math.log(-tensor_array[~i])))
+
+            otf_constant = tf.constant([OTF_support_x * OTF_support_y], dtype=data_type)
+            image_entropy = tf.math.divide(image_entropy, otf_constant)
+            image_entropy = tf.multiply(tf.constant([-2], dtype=data_type), image_entropy)
+            image_entropy = image_entropy.numpy()
+        else:
+            #  Switch back to Numpy for Math Operations
+            dct_array = tensor_array.numpy()
             i = dct_array > 0
             image_entropy = np.sum(dct_array[i] * np.log(dct_array[i]))
             image_entropy = image_entropy + np.sum(-dct_array[~i] * np.log(-dct_array[~i]))
-            image_entropy = -2*image_entropy / (OTF_support_x * OTF_support_y)
-
-        else:
-            # Use TensorFlow
-            if image_dimensions == 2:
-                tensor_array = tf.convert_to_tensor(input_array)
-            else:
-                tensor_array = tf.convert_to_tensor(input_array[image_idx, :, :])
-
-            # Forward DCT  - e.g., dct(dct(mtrx.T, norm='ortho').T, norm='ortho')
-            tensor_array = tf.signal.dct(tensor_array, type=2)
-            tensor_array = tf.signal.dct(tf.transpose(tensor_array), type=2)
-
-            # Normalize DCT - dtype = 'float64'
-            tensor_array = tf.math.divide(tensor_array, tf.norm(tensor_array, ord=2))
-
-            # Calculate Entropy
-            tensorflow_math = True
-            if tensorflow_math:
-                #  Use TensorFlow Math Operations.  Still returns a NaN.  Need to figure out why...
-                data_type = tf.float32
-                entropy_threshold = tf.convert_to_tensor([1], dtype=data_type)
-                tensor_array = tf.cast(tensor_array, dtype=data_type)
-                i = tf.math.greater(tensor_array, entropy_threshold)
-                image_entropy = tf.math.reduce_sum(tensor_array[i] * tf.math.log(tensor_array[i]))
-                image_entropy = tf.math.add(image_entropy,
-                                            tf.math.reduce_sum(-tensor_array[~i] * tf.math.log(-tensor_array[~i])))
-
-                otf_constant = tf.constant([OTF_support_x * OTF_support_y], dtype=data_type)
-                image_entropy = tf.math.divide(image_entropy, otf_constant)
-                image_entropy = tf.multiply(tf.constant([-2], dtype=data_type), image_entropy)
-                image_entropy = image_entropy.numpy()
-            else:
-                #  Switch back to Numpy for Math Operations
-                dct_array = tensor_array.numpy()
-                i = dct_array > 0
-                image_entropy = np.sum(dct_array[i] * np.log(dct_array[i]))
-                image_entropy = image_entropy + np.sum(-dct_array[~i] * np.log(-dct_array[~i]))
-                image_entropy = -2 * image_entropy / (OTF_support_x * OTF_support_y)
+            image_entropy = -2 * image_entropy / (OTF_support_x * OTF_support_y)
 
         if verbose:
             print("DCTS Entropy:", image_entropy)
@@ -138,6 +115,6 @@ if (__name__ == "__main__"):
     image_data = imread(os.path.join("E:", "test_data", "CH01_003b.tif"))
     PSF_support = 3
     verbose = True
-    use_CPU = True
+    use_CPU = False
 
     entropy = normalized_dct_shannon_entropy(image_data, PSF_support, use_CPU, verbose)

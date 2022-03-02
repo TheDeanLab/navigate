@@ -46,6 +46,7 @@ def normalized_dct_shannon_entropy(input_array, PSF_support_diameter_xy, use_CPU
         if verbose:
             start_time = time.time()
 
+        # Get single 2D image.
         tensor_array = tensor[image_idx, :, :]
 
         # Forward DCT  - e.g., dct(dct(mtrx.T, norm='ortho').T, norm='ortho')
@@ -55,29 +56,12 @@ def normalized_dct_shannon_entropy(input_array, PSF_support_diameter_xy, use_CPU
         # Normalize DCT - dtype = 'float64'
         tensor_array = tf.math.divide(tensor_array, tf.norm(tensor_array, ord=2))
 
-        # Calculate Entropy
-        tensorflow_math = True
-        if tensorflow_math:
-            #  Use TensorFlow Math Operations.  Still returns a NaN.  Need to figure out why...
-            data_type = tf.float32
-            entropy_threshold = tf.convert_to_tensor([1], dtype=data_type)
-            tensor_array = tf.cast(tensor_array, dtype=data_type)
-            i = tf.math.greater(tensor_array, entropy_threshold)
-            image_entropy = tf.math.reduce_sum(tensor_array[i] * tf.math.log(tensor_array[i]))
-            image_entropy = tf.math.add(image_entropy,
-                                        tf.math.reduce_sum(-tensor_array[~i] * tf.math.log(-tensor_array[~i])))
-
-            otf_constant = tf.constant([OTF_support_x * OTF_support_y], dtype=data_type)
-            image_entropy = tf.math.divide(image_entropy, otf_constant)
-            image_entropy = tf.multiply(tf.constant([-2], dtype=data_type), image_entropy)
-            image_entropy = image_entropy.numpy()
-        else:
-            #  Switch back to Numpy for Math Operations
-            dct_array = tensor_array.numpy()
-            i = dct_array > 0
-            image_entropy = np.sum(dct_array[i] * np.log(dct_array[i]))
-            image_entropy = image_entropy + np.sum(-dct_array[~i] * np.log(-dct_array[~i]))
-            image_entropy = -2 * image_entropy / (OTF_support_x * OTF_support_y)
+        #  Switch back to Numpy for Math Operations
+        dct_array = tensor_array.numpy()
+        i = dct_array > 0
+        image_entropy = np.sum(dct_array[i] * np.log(dct_array[i]))
+        image_entropy = image_entropy + np.sum(-dct_array[~i] * np.log(-dct_array[~i]))
+        image_entropy = -2 * image_entropy / (OTF_support_x * OTF_support_y)
 
         if verbose:
             print("DCTS Entropy:", image_entropy)
@@ -107,7 +91,6 @@ def initiate_gpu():
             print(e)
 
 if (__name__ == "__main__"):
-
     # Contrast metrics testing
     import os
 

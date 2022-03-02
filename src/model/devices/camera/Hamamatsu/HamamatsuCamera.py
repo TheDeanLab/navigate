@@ -13,7 +13,7 @@ class Camera(CameraBase):
         super().__init__(camera_id, model, experiment, verbose)
 
         # Initialize Camera Controller
-        self.camera_controller = HamamatsuController(self.camera_id)
+        self.camera_controller = HamamatsuController(camera_id)
         self.camera_controller.setPropertyValue("sensor_mode", self.model.CameraParameters['sensor_mode'])
         self.camera_controller.setPropertyValue("defect_correct_mode",
                                                 self.model.CameraParameters['defect_correct_mode'])

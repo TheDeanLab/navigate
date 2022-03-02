@@ -57,7 +57,7 @@ def normalized_dct_shannon_entropy(input_array, psf_support_diameter_xy, verbose
 
             if verbose:
                 print("DCTS Entropy:", image_entropy)
-                execution_time[image_idx] = time.time() - start_time
+                execution_time[image_idx] =
                 print("Execution Time:", execution_time[image_idx])
 
         entropy[image_idx] = image_entropy

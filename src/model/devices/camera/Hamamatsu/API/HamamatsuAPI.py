@@ -711,7 +711,7 @@ class HamamatsuCameraMR(HamamatsuCamera):
 
         return [frames, [self.frame_x, self.frame_y]]
 
-    def startAcquisition(self):
+    def startAcquisition(self, hcam_ptr=None, number_of_frames=100):
         """
         # Allocate as many frames as will fit in 2GB of memory and start data acquisition.
         """
@@ -719,7 +719,10 @@ class HamamatsuCameraMR(HamamatsuCamera):
 
         # Allocate new image buffers if necessary.
         # Allocate as many frames as can fit in 2GB of memory.
-        if (self.old_frame_bytes != self.frame_bytes):
+        if hcam_ptr:
+            self.hcam_ptr = hcam_ptr
+            self.number_image_buffers = number_of_frames
+        elif (self.old_frame_bytes != self.frame_bytes):
 
             n_buffers = int((0.1 * 1024 * 1024 * 1024)/self.frame_bytes)
             self.number_image_buffers = n_buffers

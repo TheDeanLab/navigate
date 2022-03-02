@@ -83,8 +83,8 @@ class Camera(CameraBase):
         self.y_pixels = int(self.y_pixels / self.y_binning)
         self.experiment.CameraParameters['camera_binning'] = str(self.x_binning) + 'x' + str(self.y_binning)
 
-    def initialize_image_series(self):
-        self.camera_controller.startAcquisition()
+    def initialize_image_series(self, data_ptr=None, number_of_frames=100):
+        self.camera_controller.startAcquisition(data_ptr, number_of_frames)
 
     def get_images_in_series(self):
         [frames, _] = self.camera_controller.getFrames()
@@ -113,3 +113,6 @@ class Camera(CameraBase):
 
         # self.running = False
         # self.mode = self.MODE_SINGLE_SHOT
+
+    def get_new_frame(self):
+        return self.camera_controller.newFrames()

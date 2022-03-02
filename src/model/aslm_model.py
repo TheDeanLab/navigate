@@ -253,7 +253,8 @@ class Model:
         #
         """
         #  Initialize the DAQ Tasks and the Camera.
-        self.daq.initialize_tasks()        
+        self.daq.initialize_tasks()
+        self.camera.initialize_image_series()
 
         #  Prepare the DAQ for Waveform Delivery
         self.daq.create_tasks()
@@ -262,11 +263,14 @@ class Model:
 
         #  Trigger everything and grab the image.
         self.daq.run_tasks()
+        self.data = self.camera.get_image()
 
         #  Close everything.
         self.daq.stop_tasks()
         self.daq.close_tasks()
+        self.camera.close_image_series()
 
+        return self.data
 
     def prepare_image_series(self):
         """

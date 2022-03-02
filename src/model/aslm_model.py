@@ -2,6 +2,7 @@
 import time
 import os
 import threading
+import ctypes
 
 # Third Party Imports
 import numpy as np
@@ -106,7 +107,11 @@ class Model:
 
     def set_data_buffer(self, data_buffer):
         self.data_buffer = data_buffer
-        self.data_ptr = [np_array.ctypes.data for np_array in self.data_buffer]
+        ptr_array= ctypes.c_void_p * NUM_OF_FRAMES
+        self.data_ptr = ptr_array()
+        for i in range(NUM_OF_FRAMES):
+            np_array = self.data_buffer[i]
+            self.data_ptr[i] = np_array.ctypes.data
     
     #  Basic Image Acquisition Functions
     #  - These functions are used to acquire images from the camera

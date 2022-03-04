@@ -4,8 +4,8 @@
 #
 # The declarations of classes and functions in this file are subject to change without notice.
 
-# from model.devices.camera.Hamamatsu.dcamapi4 import *
-from dcamapi4 import *
+from model.devices.camera.Hamamatsu.dcamapi4 import *
+#  from dcamapi4 import *
 import numpy as np
 import cv2 
 
@@ -147,6 +147,7 @@ class Dcam:
         self.__hdcamwait = 0
         self.__bufframe = DCAMBUF_FRAME()
         self.verbose = True
+        Dcamapi.init()
 
 
     def __repr__(self):
@@ -193,7 +194,9 @@ class Dcam:
             True:   if dcamdev_open() succeeded.
             False:  if dcamdev_open() returned DCAMERR except SUCCESS.  lasterr() returns the DCAMERR value.
         """
+        print("Opening Camera")
         if self.is_opened():
+            print("Camera already open")
             return self.__result(DCAMERR.ALREADYOPENED)  # instance is already opened. New Error.
 
         paramopen = DCAMDEV_OPEN()
@@ -204,7 +207,10 @@ class Dcam:
 
         ret = self.__result(dcamdev_open(byref(paramopen)))
         if ret is False:
+            print("Camera dev_open failed")
             return False
+        else:
+            print("Camera Open")
 
         self.__hdcam = paramopen.hdcam
         return True
@@ -1123,8 +1129,6 @@ if __name__ == '__main__':
         #dcam.dcam_set_default_light_sheet_mode_parameters()
         #dcam_show_properties()   # dcam_show_device_list()
 
-
-
     def dcamtest_show_framedata(data, windowtitle, iShown):
         """
         Show numpy buffer as an image
@@ -1274,7 +1278,5 @@ if __name__ == '__main__':
             print('-NG: Dcamapi.init() fails with error {}'.format(Dcamapi.lasterr()))
 
         Dcamapi.uninit()
-
-
 
     dcam_live_capturing()

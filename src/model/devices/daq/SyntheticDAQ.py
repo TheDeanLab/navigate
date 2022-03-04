@@ -3,6 +3,7 @@ NI Synthetic DAQ Class
 """
 
 # Standard Imports
+import time
 import numpy as np
 
 # Local Imports
@@ -241,7 +242,8 @@ class DAQ(DAQBase):
         # For this to work, all analog output and counter tasks have to be started so
         # that they are waiting for the trigger signal.
         """
-        pass
+        time.sleep(0.1)
+        self.camera.generate_new_frame()
 
     def stop_tasks(self):
         """
@@ -260,3 +262,9 @@ class DAQ(DAQBase):
         # Initialize the nidaqmx tasks.
         """
         pass
+
+    def set_camera(self, camera):
+        """
+        # connect camera with daq: only in syntheticDAQ
+        """
+        self.camera = camera

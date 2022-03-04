@@ -14,7 +14,6 @@ def start_camera(configuration, experiment, verbose):
         from model.devices.camera.Hamamatsu.dcam import Dcam as CameraModel
         cam = CameraModel()
         cam.dev_open()
-        cam.dcam_show_properties()
 
         # if Dcamapi.init() is not False:
         #     dcam = Dcam(iDevice)

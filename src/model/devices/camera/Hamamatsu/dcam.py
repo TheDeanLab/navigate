@@ -723,8 +723,10 @@ class Dcam:
            True:   exposure set
            False:  error happened.
         """
-        # exposure_idprop = 2031888
+        # idprop = 2031888
         idprop = DCAM_IDPROP.EXPOSURETIME
+        if self.verbose:
+            print("The Exposure IDPROP is:, ", idprop)
 
         # Get the current exposure duration
         initial_exposure_duration = self.prop_getvalue(idprop)
@@ -735,7 +737,7 @@ class Dcam:
         self.prop_setvalue(idprop, exposure)
 
         # Confirm the exposure was changed.
-        final_exposure_duration = self.prop_getvalue(exposure_idprop)
+        final_exposure_duration = self.prop_getvalue(idprop)
         if self.verbose:
             print("Current Exposure Time: {}".format(final_exposure_duration))
 

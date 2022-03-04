@@ -64,6 +64,9 @@ class Model:
         if args.synthetic_hardware:
             self.daq.set_camera(self.camera)
 
+        # Set Default Camera Settings
+        self.camera.dcam_set_default_light_sheet_mode_parameters()
+
         # Acquisition Housekeeping
         self.threads_pool = SynchronizedThreadPool()
         self.stop_acquisition = False
@@ -214,7 +217,8 @@ class Model:
         """
         count_frame = num_of_frames > 0
         while True:
-            frame_ids = self.camera.get_new_frame()
+            # frame_ids = self.camera.get_new_frame()
+            frame_ids = self.camera.buf_getlastframedata()
             if self.verbose:
                 print('running data process, get frames', frame_ids)
             # if there is at least one frame available
@@ -266,12 +270,12 @@ class Model:
 
         #  Trigger everything and grab the image.
         self.daq.run_tasks()
-        self.data = self.camera.get_image()
+        # self.data = self.camera.get_image()
 
         #  Close everything.
         self.daq.stop_tasks()
         self.daq.close_tasks()
-        self.camera.close_image_series()
+        # self.camera.close_image_series()
 
         return self.data
 

@@ -131,6 +131,8 @@ class Model:
         if command == 'single':
             self.experiment.MicroscopeState = args[0]
             self.is_save = self.experiment.MicroscopeState['is_save']
+            if self.is_save:
+                self.experiment.Saving = kwargs['saving_info']
             self.stop_acquisition = False
             self.prepare_acquisition()
             self.run_single_acquisition()
@@ -220,7 +222,8 @@ class Model:
 
                 # show image
                 if self.show_img_pipe:
-                    print('sent through pipe', frame_ids[0])
+                    if self.verbose:
+                        print('sent through pipe', frame_ids[0])
                     self.show_img_pipe.send(frame_ids[0])
                 # save image
                 if self.is_save:
@@ -232,16 +235,13 @@ class Model:
                 num_of_frames -= 1
                 if num_of_frames == 0:
                     break
+            
             if self.stop_acquisition:
                 self.show_img_pipe.send('stop')
                 if self.verbose:
                     print('data thread is stopped, send stop to parent pipe')
                 break
 
-
-    def end_acquisition(self):
-        """
-        """
 
     def snap_image(self):
         """
@@ -254,7 +254,6 @@ class Model:
         """
         #  Initialize the DAQ Tasks and the Camera.
         self.daq.initialize_tasks()
-        self.camera.initialize_image_series()
 
         #  Prepare the DAQ for Waveform Delivery
         self.daq.create_tasks()
@@ -263,14 +262,11 @@ class Model:
 
         #  Trigger everything and grab the image.
         self.daq.run_tasks()
-        self.data = self.camera.get_image()
 
         #  Close everything.
         self.daq.stop_tasks()
         self.daq.close_tasks()
-        self.camera.close_image_series()
 
-        return self.data
 
     def prepare_image_series(self):
         """

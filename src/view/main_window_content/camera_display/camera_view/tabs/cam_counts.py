@@ -9,13 +9,10 @@ from view.custom_widgets.LabelInputWidgetFactory import LabelInput
 class cam_counts(ttk.Frame):
     def __init__(self, cam_view, *args, **kwargs):
         ttk.Frame.__init__(self, cam_view, *args, **kwargs)
-
-        # Creating Dropdown for camera select
-        # self.cam_num = StringVar()
-        # self.camera_pulldown = ttk.Combobox(self, textvariable=self.cam_num)
-        # self.camera_pulldown.state(["readonly"])
-        # # Makes it so the user cannot type a choice into combobox
-        # self.camera_pulldown.grid(row=0, column=0, sticky=NSEW)
+        text_label = 'Image Metrics'
+        ttk.Labelframe.__init__(self, cam_view, text=text_label, *args, **kwargs)
+        self.metrics = ttk.Frame(self)
+        self.metrics.grid(row=0, column=0, sticky=NSEW)
 
         #  Max Counts Entry
         self.count = DoubleVar()

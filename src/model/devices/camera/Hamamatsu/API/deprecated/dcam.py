@@ -4,7 +4,7 @@
 #
 # The declarations of classes and functions in this file are subject to change without notice.
 
-from .dcamapi4 import *
+from dcamapi4 import *
 import numpy as np
 import cv2 
 
@@ -1115,12 +1115,13 @@ if __name__ == '__main__':
 
     ''' Testing and Examples Section '''
     # dcam_set_camera_exposure(0, 0.1)
-    if Dcamapi.init() is not False:
-        camera = Dcam(iDevice=0)
-        camera.dcam_show_properties()
+    #if Dcamapi.init() is not False:
+        #camera = Dcam(iDevice=0)
+        #camera.dcam_show_properties()
         #dcam.dcam_set_default_light_sheet_mode_parameters()
         #dcam_show_properties()   # dcam_show_device_list()
-        #dcam_live_capturing()
+
+
 
     def dcamtest_show_framedata(data, windowtitle, iShown):
         """
@@ -1297,6 +1298,4 @@ if __name__ == '__main__':
         Dcamapi.uninit()
 
 
-
-
-
+    dcam_live_capturing()

@@ -2,116 +2,120 @@
 ---
 
 ETLConstants:
+  low_resolution: {
+    one: {
+      488nm: {
+        amplitude: 2.336,
+        offset: 0
+      } ,
+      562nm: {
+        amplitude: 2.336,
+        offset: 0
+      } ,
+      642nm: {
+        amplitude: 2.336,
+        offset: 0
+      }
+    }
+  }
   high_resolution: {
-    488nm: {
-      amplitude: 2.336,
-      offset: 0
-    } ,
-    562nm: {
-      amplitude: 2.336,
-      offset: 0
-    } ,
-    642nm: {
-      amplitude: 2.336,
-      offset: 0
-    }
-  }
-  0.63x: {
-    488nm: {
-      amplitude: 2.5,
-      offset: 2.336
-    } ,
-    562nm: {
-      amplitude: 2.5,
-      offset: 2.336
-    } ,
-    642nm: {
-      amplitude: 2.5,
-      offset: 2.336
-    }
-  }
-  1x: {
-    488nm: {
-      amplitude: 2.2,
-      offset: 2.5
-    } ,
-    562nm: {
-      amplitude: 2.2,
-      offset: 2.5
-    } ,
-    642nm: {
-      amplitude: 2.2,
-      offset: 2.5
-    }
-  }
-  2x: {
-    488nm: {
-      amplitude: 0.466,
-      offset: 1.534
-    } ,
-    562nm: {
-      amplitude: 0.466,
-      offset: 1.534
-    } ,
-    642nm: {
-      amplitude: 0.466,
-      offset: 1.534
-    }
-  }
-  3x: {
-    488nm: {
-      amplitude: 0.141,
-      offset: 2.392
-    } ,
-    562nm: {
-      amplitude: 0.141,
-      offset: 2.392
-    } ,
-    642nm: {
-      amplitude: 0.141,
-      offset: 2.392
-    }
-  }
-  4x: {
-    488nm: {
-      amplitude: 0.141,
-      offset: 2.392
-    } ,
-    562nm: {
-      amplitude: 0.141,
-      offset: 2.392
-    } ,
-    642nm: {
-      amplitude: 0.141,
-      offset: 2.392
-    }
-  }
-  5x: {
-    488nm: {
-      amplitude: 0.141,
-      offset: 2.392
-    } ,
-    562nm: {
-      amplitude: 0.141,
-      offset: 2.392
-    } ,
-    642nm: {
-      amplitude: 0.141,
-      offset: 2.392
-    }
-  }
-  6x: {
-    488nm: {
-      amplitude: 0.141,
-      offset: 2.392
-    } ,
-    562nm: {
-      amplitude: 0.141,
-      offset: 2.392
-    } ,
-    642nm: {
-      amplitude: 0.141,
-      offset: 2.392
+    0.63x: {
+      488nm: {
+        amplitude: 2.5,
+        offset: 2.336
+      } ,
+      562nm: {
+        amplitude: 2.5,
+        offset: 2.336
+      } ,
+      642nm: {
+        amplitude: 2.5,
+        offset: 2.336
+      }
+    },
+    1x: {
+      488nm: {
+        amplitude: 2.2,
+        offset: 2.5
+      } ,
+      562nm: {
+        amplitude: 2.2,
+        offset: 2.5
+      } ,
+      642nm: {
+        amplitude: 2.2,
+        offset: 2.5
+      }
+    },
+    2x: {
+      488nm: {
+        amplitude: 0.466,
+        offset: 1.534
+      } ,
+      562nm: {
+        amplitude: 0.466,
+        offset: 1.534
+      } ,
+      642nm: {
+        amplitude: 0.466,
+        offset: 1.534
+      }
+    },
+    3x: {
+      488nm: {
+        amplitude: 0.141,
+        offset: 2.392
+      } ,
+      562nm: {
+        amplitude: 0.141,
+        offset: 2.392
+      } ,
+      642nm: {
+        amplitude: 0.141,
+        offset: 2.392
+      }
+    },
+    4x: {
+      488nm: {
+        amplitude: 0.141,
+        offset: 2.392
+      } ,
+      562nm: {
+        amplitude: 0.141,
+        offset: 2.392
+      } ,
+      642nm: {
+        amplitude: 0.141,
+        offset: 2.392
+      }
+    },
+    5x: {
+      488nm: {
+        amplitude: 0.141,
+        offset: 2.392
+      } ,
+      562nm: {
+        amplitude: 0.141,
+        offset: 2.392
+      } ,
+      642nm: {
+        amplitude: 0.141,
+        offset: 2.392
+      }
+    },
+    6x: {
+      488nm: {
+        amplitude: 0.141,
+        offset: 2.392
+      } ,
+      562nm: {
+        amplitude: 0.141,
+        offset: 2.392
+      } ,
+      642nm: {
+        amplitude: 0.141,
+        offset: 2.392
+      }
     }
   }
   

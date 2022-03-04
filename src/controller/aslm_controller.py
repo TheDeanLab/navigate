@@ -20,6 +20,7 @@ from controller.sub_controllers.camera_view_controller import Camera_View_Contro
 from controller.sub_controllers.camera_setting_controller import Camera_Setting_Controller
 from controller.aslm_configuration_controller import ASLM_Configuration_Controller
 from controller.sub_controllers.waveform_tab_controller import Waveform_Tab_Controller
+from controller.sub_controllers.etl_popup_controller import Etl_Popup_Controller
 from controller.aslm_controller_functions import *
 from controller.thread_pool import SynchronizedThreadPool
 
@@ -44,6 +45,8 @@ class ASLM_controller:
 
         # save default experiment file
         self.default_experiment_file = experiment_path
+        # etl setting file
+        self.etl_constants_path = etl_constants_path
 
         # Initialize the View
         self.view = view(root)
@@ -172,6 +175,11 @@ class ASLM_controller:
 
         # TODO this is temporary until we find a place to control the remote focus popup
         from view.remote_focus_popup import remote_popup
+        def popup_etl_setting():
+            etl_setting = session(self.etl_constants_path, self.verbose)
+            etl_setting_popup = remote_popup(self.view)
+            etl_controller = Etl_Popup_Controller(etl_setting_popup, self, self.verbose)
+            etl_controller.initialize('resolution', etl_setting.ETLConstants)
         
 
         menus_dict = {
@@ -202,7 +210,7 @@ class ASLM_controller:
             },
             # TODO temporary placement
             self.view.menubar.menu_etlpop: {
-                'View': lambda: remote_popup(self.view)
+                'View': popup_etl_setting
             }
         }
         for menu in menus_dict:

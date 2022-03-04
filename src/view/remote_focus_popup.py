@@ -67,7 +67,7 @@ class remote_popup():
 
         # Laser Frame
         title_labels = ['Laser', 'Amplitude', 'Offset']
-        laser_labels = ['488nm', '561nm', '642nm']
+        laser_labels = ['488nm', '562nm', '642nm']
         #Loop for widgets
         for i in range(3):
             # Title labels

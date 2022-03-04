@@ -4,7 +4,8 @@
 #
 # The declarations of classes and functions in this file are subject to change without notice.
 
-from dcamapi4 import *
+from model.devices.camera.Hamamatsu.dcamapi4 import *
+# from dcamapi4 import *
 import numpy as np
 import cv2 
 
@@ -145,7 +146,7 @@ class Dcam:
         self.__hdcam = 0
         self.__hdcamwait = 0
         self.__bufframe = DCAMBUF_FRAME()
-        self.verbose = False
+        self.verbose = True
 
     def __repr__(self):
         return 'Dcam()'
@@ -722,15 +723,16 @@ class Dcam:
            True:   exposure set
            False:  error happened.
         """
-        exposure_idprop = 2031888
+        # exposure_idprop = 2031888
+        idprop = DCAM_IDPROP.EXPOSURETIME
 
         # Get the current exposure duration
-        initial_exposure_duration = self.prop_getvalue(exposure_idprop)
+        initial_exposure_duration = self.prop_getvalue(idprop)
         if self.verbose:
             print("Original Exposure Time: {}".format(initial_exposure_duration))
 
         # Change the exposure duration
-        self.prop_setvalue(exposure_idprop, exposure)
+        self.prop_setvalue(idprop, exposure)
 
         # Confirm the exposure was changed.
         final_exposure_duration = self.prop_getvalue(exposure_idprop)
@@ -1109,7 +1111,6 @@ class Dcam:
             print('-NG: Dcam.dev_open() fails with error {}'.format(self.lasterr()))
 
 
-
 if __name__ == '__main__':
     from dcamapi4 import *
 
@@ -1270,32 +1271,6 @@ if __name__ == '__main__':
 
         Dcamapi.uninit()
 
-    def dcam_set_camera_exposure(iDevice=0, exposure=0.1):
-        """
-        Show supported properties
-        """
-        if Dcamapi.init() is not False:
-            dcam = Dcam(iDevice)
-            if dcam.dev_open() is not False:
-                idprop = 2031888
-                # Get the current exposure duration
-                propval = dcam.prop_getvalue(idprop)
-                print("Original Exposure Time: {}".format(propval))
-
-                # Change the exposure duration
-                dcam.prop_setvalue(idprop, exposure)
-
-                # Confirm the exposure was changed.
-                propval = dcam.prop_getvalue(idprop)
-                print("Current Exposure Time: {}".format(propval))
-
-                dcam.dev_close()
-            else:
-                print('-NG: Dcam.dev_open() fails with error {}'.format(dcam.lasterr()))
-        else:
-            print('-NG: Dcamapi.init() fails with error {}'.format(Dcamapi.lasterr()))
-
-        Dcamapi.uninit()
 
 
     dcam_live_capturing()

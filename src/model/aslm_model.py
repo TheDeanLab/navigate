@@ -80,7 +80,10 @@ class Model:
         self.current_exposure_time = 200  # milliseconds
         self.start_time = None
         self.image_acq_start_time_string = time.strftime("%Y%m%d-%H%M%S")
-        self.data = np.zeros(np.shape((self.camera.y_pixels, self.camera.x_pixels)))
+        #  TODO: Find a way to pull out the image size from the new dcamp API. Hardcoded here.
+        # self.data = np.zeros(np.shape((self.camera.y_pixels, self.camera.x_pixels)))
+        self.data = np.zeros(np.shape((2048, 2048)))
+
         # data buffer
         self.data_buffer = None
         # self.data_buffer = [SharedNDArray(shape=(self.camera.y_pixels, self.camera.x_pixels), dtype='uint16') for i in range(NUM_OF_FRAMES)]
@@ -193,7 +196,7 @@ class Model:
         """
         self.open_shutter()
         # attach buffer to camera
-        self.camera.initialize_image_series(self.data_ptr)
+        #  self.camera.initialize_image_series(self.data_ptr)
 
     def end_acquisition(self):
         """
@@ -254,7 +257,7 @@ class Model:
         """
         #  Initialize the DAQ Tasks and the Camera.
         self.daq.initialize_tasks()
-        self.camera.initialize_image_series()
+        # self.camera.initialize_image_series()
 
         #  Prepare the DAQ for Waveform Delivery
         self.daq.create_tasks()
@@ -330,9 +333,11 @@ class Model:
         # Closes the shutter
         # Disables the camera
         """
-        self.camera.set_exposure_time(self.experiment.MicroscopeState['channels']
+        self.camera.dcam_set_camera_exposure(self.experiment.MicroscopeState['channels']
                                       ['channel_1']['camera_exposure_time']/1000)
-        self.camera.initialize_image_series(self.data_ptr)
+        # self.camera.set_exposure_time(self.experiment.MicroscopeState['channels']
+        #                               ['channel_1']['camera_exposure_time']/1000)
+        # self.camera.initialize_image_series(self.data_ptr)
         self.daq.initialize_tasks()
 
         self.filter_wheel.set_filter(self.experiment.MicroscopeState['channels']['channel_1']['filter'])
@@ -342,10 +347,10 @@ class Model:
         self.daq.create_waveforms()
         self.daq.run_tasks()
         self.daq.stop_tasks()
-        image = self.camera.get_image()
+        # image = self.camera.get_image()
         #  self.save_test_image(image)
         self.close_shutter()
-        self.camera.close_image_series()
+        # self.camera.close_image_series()
 
     def load_experiment_file(self, experiment_path):
         # Loads the YAML file for all of the experiment parameters
@@ -377,7 +382,8 @@ class Model:
                 self.current_laser_index = channel['laser_index']
 
                 #  Set the parameters
-                self.camera.set_exposure_time(self.current_exposure_time)
+                # self.camera.set_exposure_time(self.current_exposure_time)
+                self.camera.dcam_set_camera_exposure(self.current_exposure_time)
                 self.filter_wheel.set_filter(self.current_filter)
                 self.daq.laser_idx = self.current_laser_index
                 if self.verbose:
@@ -401,7 +407,7 @@ class Model:
             self.run_single_acquisition()
 
     def run_z_stack_acquisition(self, is_multi_position, update_view):
-        self.camera.initialize_image_series(self.data_ptr)
+        # self.camera.initialize_image_series(self.data_ptr)
 
         microscope_state = self.experiment.MicroscopeState
         for time_idx in range(microscope_state['timepoints']):
@@ -427,7 +433,7 @@ class Model:
                 elif microscope_state['stack_cycling_mode'] == 'per_z':
                     #  self.per_z_acquisition(microscope_state, microscope_position)
                     pass
-        self.camera.close_image_series()
+        # self.camera.close_image_series()
 
     def per_stack_acquisition(self, microscope_state, microscope_position):
         prefix_len = len('channel_')
@@ -444,7 +450,7 @@ class Model:
                 self.current_laser = channel['laser']
 
                 #  Set the parameters
-                self.camera.set_exposure_time(self.current_exposure_time)
+                # self.camera.set_exposure_time(self.current_exposure_time)
                 self.filter_wheel.set_filter(self.current_filter)
                 self.daq.identify_laser_idx(self.current_laser)
 
@@ -469,9 +475,9 @@ class Model:
                 # Check if it is selected.
                 if microscope_state['channels']['is_selected']:
                     print("Channel :", channel_idx)
-                    self.camera.set_exposure_time(microscope_state['channels']
-                                                  ['channel_' + str(channel_idx + 1)]
-                                                  ['camera_exposure_time']/1000)
+                    # self.camera.set_exposure_time(microscope_state['channels']
+                    #                               ['channel_' + str(channel_idx + 1)]
+                    #                               ['camera_exposure_time']/1000)
                     self.filter_wheel.set_filter(microscope_state['channels']
                                                  ['channel_' + str(channel_idx + 1)]
                                                  ['filter'])
@@ -482,7 +488,7 @@ class Model:
                     self.daq.create_waveforms()
                     self.daq.start_tasks()
                     self.daq.run_tasks()
-                    image = self.camera.get_image()
+                    # image = self.camera.get_image()
                     if microscope_state['is_save']:
                         # Save the data.
                         pass

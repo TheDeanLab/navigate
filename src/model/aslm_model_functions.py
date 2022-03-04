@@ -7,14 +7,20 @@ def start_camera(configuration, experiment, verbose):
     """
     # Hamamatsu Camera
     if configuration.Devices['camera'] == 'HamamatsuOrca' and platform.system() == 'Windows':
-        from model.concurrency.concurrency_tools import ObjectInSubprocess
-        from model.devices.camera.Hamamatsu.HamamatsuCamera import Camera as CameraModel
-        camera_id = 0
-        #  TODO: @Annie - I still don't understand why this is throwing the __name__ error.
-        #  Only can take in dictionaries.
+        #from model.devices.camera.Hamamatsu.HamamatsuCamera import Camera as CameraModel
+        #camera_id = 0
+        #cam = CameraModel(camera_id, configuration, experiment, verbose)
 
-        #  cam = ObjectInSubprocess(camera_id, configuration.CameraParameters, experiment, verbose)
-        cam = CameraModel(camera_id, configuration, experiment, verbose)
+        from model.devices.camera.Hamamatsu.dcam import Dcam as CameraModel
+        cam = CameraModel()
+        cam.dev_open()
+        cam.dcam_show_properties()
+
+        # if Dcamapi.init() is not False:
+        #     dcam = Dcam(iDevice)
+        #     if dcam.dev_open() is not False:
+
+
     elif configuration.Devices['camera'] == 'SyntheticCamera':
         from model.devices.camera.SyntheticCamera import Camera as CameraModel
         camera_id = 0

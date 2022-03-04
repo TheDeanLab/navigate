@@ -356,7 +356,8 @@ class ObjectInSubprocess:
             return _get_response(self)
 
 def _get_response(object_in_subprocess, release=False):
-    """Effectively a method of ObjectInSubprocess, but defined externally to
+    """
+    Effectively a method of ObjectInSubprocess, but defined externally to
     minimize shadowing of the object's namespace
     """
     resp, printed_output = object_in_subprocess._.parent_pipe.recv()

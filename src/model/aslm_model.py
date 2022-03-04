@@ -65,6 +65,7 @@ class Model:
             self.daq.set_camera(self.camera)
 
         # Set Default Camera Settings
+        self.camera.dev_open()
         self.camera.dcam_set_default_light_sheet_mode_parameters()
 
         # Acquisition Housekeeping
@@ -208,7 +209,7 @@ class Model:
         # 
         """
         # dettach buffer
-        self.camera.close_image_series()
+        # self.camera.close_image_series()
         
         # close shutter
         self.close_shutter()

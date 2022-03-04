@@ -13,12 +13,6 @@ def start_camera(configuration, experiment, verbose):
 
         from model.devices.camera.Hamamatsu.dcam import Dcam as CameraModel
         cam = CameraModel()
-        cam.dev_open()
-
-        # if Dcamapi.init() is not False:
-        #     dcam = Dcam(iDevice)
-        #     if dcam.dev_open() is not False:
-
 
     elif configuration.Devices['camera'] == 'SyntheticCamera':
         from model.devices.camera.SyntheticCamera import Camera as CameraModel

@@ -4,8 +4,8 @@
 #
 # The declarations of classes and functions in this file are subject to change without notice.
 
-from model.devices.camera.Hamamatsu.dcamapi4 import *
-# from dcamapi4 import *
+# from model.devices.camera.Hamamatsu.dcamapi4 import *
+from dcamapi4 import *
 import numpy as np
 import cv2 
 
@@ -147,6 +147,7 @@ class Dcam:
         self.__hdcamwait = 0
         self.__bufframe = DCAMBUF_FRAME()
         self.verbose = True
+
 
     def __repr__(self):
         return 'Dcam()'
@@ -723,10 +724,7 @@ class Dcam:
            True:   exposure set
            False:  error happened.
         """
-        # idprop = 2031888
-        idprop = DCAM_IDPROP.EXPOSURETIME
-        if self.verbose:
-            print("The Exposure IDPROP is:, ", idprop)
+        idprop = 2031888
 
         # Get the current exposure duration
         initial_exposure_duration = self.prop_getvalue(idprop)
@@ -1115,6 +1113,7 @@ class Dcam:
 
 if __name__ == '__main__':
     from dcamapi4 import *
+    import time
 
     ''' Testing and Examples Section '''
     # dcam_set_camera_exposure(0, 0.1)
@@ -1143,6 +1142,7 @@ if __name__ == '__main__':
             return -1  # Window is already closed.
 
         if data.dtype == np.uint16:
+            start_time = time.time()
             imax = np.amax(data)
             if imax > 0:
                 imul = int(65535 / imax)
@@ -1150,6 +1150,8 @@ if __name__ == '__main__':
                 data = data * imul
 
             cv2.imshow(windowtitle, data)
+            stop_time = time.time()
+            print("Time to show image:", stop_time - start_time)
             return 1
         else:
             print('-NG: dcamtest_show_image(data) only support Numpy.uint16 data')

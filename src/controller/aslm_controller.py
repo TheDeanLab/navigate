@@ -5,6 +5,7 @@ This is the controller in an MVC-scheme for mediating the interaction between th
 #  Standard Library Imports
 from pathlib import Path
 import tkinter
+import threading
 import multiprocessing as mp
 
 # Local View Imports
@@ -441,8 +442,7 @@ class ASLM_controller:
             # save experiment file
             save_experiment_file(file_directory, self.experiment.serialize())
 
-            if self.acquire_bar_controller.mode == 'single':
-                self.threads_pool.createThread('camera', self.model.run_command, args=('single', self.camera_view_controller.display_image,))
+            self.execute('acquire')
 
         elif command == 'acquire':
             if not self.prepare_acquire_data():
@@ -494,7 +494,7 @@ class ASLM_controller:
             print('In central controller: command passed from child', command, args)
 
     def capture_single_image(self):
-        self.model.run_command('single', self.experiment.MicroscopeState)
+        self.model.run_command('single', self.experiment.MicroscopeState, saving_info=self.experiment.Saving)
         image_id = self.show_img_pipe_parent.recv()
         self.camera_view_controller.display_image(self.data_buffer[image_id])
 
@@ -503,12 +503,18 @@ class ASLM_controller:
         self.stop_acquisition = False
         while True:
             image_id = self.show_img_pipe_parent.recv()
-            print('receive', image_id)
+            if self.verbose:
+                print('receive', image_id)
             if image_id == 'stop':
                 break
+            if type(image_id) is not int:
+                print('some thing wrong happened, stop the model!', image_id)
+                self.stop_acquisition = True
             self.camera_view_controller.display_image(self.data_buffer[image_id])
             if self.stop_acquisition:
                 self.model.run_command('stop')
+                if self.verbose:
+                    print('call the model to stop!')
             
 
 if __name__ == '__main__':

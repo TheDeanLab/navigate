@@ -38,9 +38,9 @@ class Camera(CameraBase):
         self.x_pixels = int(self.x_pixels / self.x_binning)
         self.y_pixels = int(self.y_pixels / self.y_binning)
 
-    def initialize_image_series(self, data_ptr=None):
+    def initialize_image_series(self, data_ptr=None, number_of_frames=100):
         self.data_ptr = data_ptr
-        self.num_of_frame = 1 # len(data_ptr)
+        self.num_of_frame = number_of_frames
         self.current_frame_idx = 0
         self.pre_frame_idx = 0
 

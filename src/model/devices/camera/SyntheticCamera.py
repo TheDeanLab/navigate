@@ -74,7 +74,7 @@ class Camera(CameraBase):
     def generate_new_frame(self):
         # time.sleep(self.camera_exposure_time / 1000)
         image = np.random.randint(low=255, size=(self.x_pixels, self.y_pixels), dtype=np.uint16)
-        # ctypes.memmove(self.data_ptr[self.current_frame_idx], image.ctypes.data, self.x_pixels*self.y_pixels*2)
+        ctypes.memmove(self.data_ptr[self.current_frame_idx], image.ctypes.data, self.x_pixels*self.y_pixels*2)
         self.current_frame_idx = (self.current_frame_idx + 1) % self.num_of_frame
 
     def get_new_frame(self):

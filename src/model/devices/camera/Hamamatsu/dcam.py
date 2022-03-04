@@ -153,6 +153,10 @@ class Dcam:
     def __repr__(self):
         return 'Dcam()'
 
+    def __del__(self):
+        Dcamapi.uninit()
+        self.dev_close()
+
     def __result(self, errvalue):
         """
         Internal use. Keep last error code
@@ -1066,7 +1070,6 @@ class Dcam:
         """
         if self.verbose:
             print("Setting Default Camera Light-Sheet Mode Parameters")
-        self.dcam_set_camera_exposure(0.2)
         self.dcam_set_camera_sensor_mode(12)
         self.dcam_set_camera_defect_correction_mode(1)
         self.dcam_set_camera_binning_mode(1)

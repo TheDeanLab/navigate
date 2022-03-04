@@ -66,7 +66,8 @@ class Model:
 
         # Set Default Camera Settings
         self.camera.dev_open(0)
-        self.camera.dcam_set_default_light_sheet_mode_parameters()
+        # self.camera.dcam_set_default_light_sheet_mode_parameters()
+        self.camera.dcam_set_default_area_mode_parameters()
 
         # Acquisition Housekeeping
         self.threads_pool = SynchronizedThreadPool()
@@ -262,6 +263,8 @@ class Model:
         """
         #  Initialize the DAQ Tasks and the Camera.
         self.daq.initialize_tasks()
+        self.camera.buf_alloc(10)
+        self.camera.cap_start(True)
         # self.camera.initialize_image_series()
 
         #  Prepare the DAQ for Waveform Delivery
@@ -271,12 +274,18 @@ class Model:
 
         #  Trigger everything and grab the image.
         self.daq.run_tasks()
+        self.data = self.camera.buf_getlastframedata()
         # self.data = self.camera.get_image()
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        print("Shape of data:", np.shape(self.data))
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
 
         #  Close everything.
         self.daq.stop_tasks()
         self.daq.close_tasks()
+        self.camera.cap_stop()
+        self.camera.buf_release()
         # self.camera.close_image_series()
 
 

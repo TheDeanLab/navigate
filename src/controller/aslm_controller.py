@@ -375,7 +375,7 @@ class ASLM_controller:
             """
             # call the model to move stage
             """
-            self.model.move_stage({args[1]+'_abs': args[0]})
+            self.threads_pool.createThread('stage', self.move_stage, args=({args[1]+'_abs': args[0]},))
 
         elif command == 'move_stage_and_update_info':
             """
@@ -523,6 +523,9 @@ class ASLM_controller:
                 self.model.run_command('stop')
                 if self.verbose:
                     print('call the model to stop!')
+
+    def move_stage(self, args):
+        self.model.move_stage(args)
             
 
 if __name__ == '__main__':

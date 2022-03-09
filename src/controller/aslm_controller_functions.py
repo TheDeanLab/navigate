@@ -53,7 +53,7 @@ def create_save_path(saving_settings, verbose=False):
     return save_directory
 
 
-def save_experiment_file(file_directory, experiment, filename='experiment.yml'):
+def save_yaml_file(file_directory, experiment, filename='experiment.yml'):
     try:
         file_name = os.path.join(file_directory, filename)
         with open(file_name, 'w') as f:

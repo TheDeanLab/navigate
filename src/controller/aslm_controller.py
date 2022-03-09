@@ -88,6 +88,9 @@ class ASLM_controller:
         # Stage Control Tab
         self.initialize_stage(configuration_controller, configuration)
 
+        # get etl information from configuration file
+        self.etl_other_info = configuration_controller.get_etl_info()
+
         # Set view based on model.experiment
         self.experiment = session(experiment_path, args.verbose)
         self.populate_experiment_setting()
@@ -171,7 +174,7 @@ class ASLM_controller:
             filename = filedialog.asksaveasfilename(defaultextension='.yml', filetypes=[('Yaml file', '*.yml')])
             if not filename:
                 return
-            save_experiment_file('', self.experiment.serialize(), filename)
+            save_yaml_file('', self.experiment.serialize(), filename)
 
         # TODO this is temporary until we find a place to control the remote focus popup
         from view.remote_focus_popup import remote_popup
@@ -179,7 +182,8 @@ class ASLM_controller:
             etl_setting = session(self.etl_constants_path, self.verbose)
             etl_setting_popup = remote_popup(self.view)
             etl_controller = Etl_Popup_Controller(etl_setting_popup, self, self.verbose)
-            etl_controller.initialize('resolution', etl_setting.ETLConstants)
+            etl_controller.initialize('resolution', etl_setting)
+            etl_controller.initialize('other', self.etl_other_info)
         
 
         menus_dict = {
@@ -448,7 +452,7 @@ class ASLM_controller:
             file_directory = create_save_path(args[0], self.verbose)
 
             # save experiment file
-            save_experiment_file(file_directory, self.experiment.serialize())
+            save_yaml_file(file_directory, self.experiment.serialize())
 
             self.execute('acquire')
 

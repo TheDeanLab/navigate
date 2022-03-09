@@ -2,7 +2,7 @@
 ---
 
 ETLConstants:
-  low_resolution: {
+  low: {
     one: {
       488nm: {
         amplitude: 2.336,
@@ -18,7 +18,7 @@ ETLConstants:
       }
     }
   }
-  high_resolution: {
+  high: {
     0.63x: {
       488nm: {
         amplitude: 2.5,

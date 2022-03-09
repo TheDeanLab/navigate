@@ -62,3 +62,15 @@ class ASLM_Configuration_Controller:
         for a in axis:
             position_limits[a] = self.configuration.StageParameters[a+suffix]
         return position_limits
+
+    def get_etl_info(self):
+        """
+        # return delay_percent, pulse_percent
+        """
+        temp = {
+            'laser_l_delay_percent': self.configuration.LaserParameters['laser_l_delay_percent'],
+            'laser_l_pulse_percent': self.configuration.LaserParameters['laser_l_pulse_percent'],
+            'laser_r_delay_percent': self.configuration.LaserParameters['laser_r_delay_percent'],
+            'laser_r_pulse_percent': self.configuration.LaserParameters['laser_r_pulse_percent']
+        }
+        return temp

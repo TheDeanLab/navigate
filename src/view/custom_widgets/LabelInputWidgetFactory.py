@@ -95,7 +95,12 @@ class LabelInput(ttk.Frame):
             # Catches times when a numeric entry input has a blank, since this cannot be converted into a numeric value
             return ''
     
-    
+    def get_variable(self):
+        '''
+        # return varaible tied with the widget if any
+        '''
+        return self.variable
+
     def set(self, value, *args, **kwargs):
         '''
         #### Creating a generic set funciton to complement the above get

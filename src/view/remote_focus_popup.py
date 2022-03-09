@@ -90,7 +90,7 @@ class remote_popup():
 
         # High/Low Resolution
         hi_lo_labels = ['Percent Delay', 'Duty Cycle', 'Percent Smoothing']
-        dict_labels = ['Percent', 'Duty', 'Smoothing']
+        dict_labels = ['Delay', 'Duty', 'Smoothing']
         # The below code could be in the loop above but I thought it was best to make it separate since they are different frames                                               
         for i in range(3):
             self.inputs[dict_labels[i]] = LabelInput(parent=self.high_low_frame,
@@ -102,7 +102,7 @@ class remote_popup():
             self.inputs[dict_labels[i]].grid(row=i, column=0, sticky=(NSEW), padx=(2,5))
 
         # Padding Entry Widgets
-        self.inputs['Percent'].pad_input(30,0,0,0)
+        self.inputs['Delay'].pad_input(30,0,0,0)
         self.inputs['Duty'].pad_input(45,0,0,0)
         #self.inputs['Smoothing'].pad_input(0,0,0,0)
     
@@ -114,7 +114,7 @@ class remote_popup():
         '''
         variables = {}
         for key, widget in self.inputs.items():
-            variables[key] = widget.get()
+            variables[key] = widget.get_variable()
         return variables
 
     def get_widgets(self):

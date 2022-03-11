@@ -20,19 +20,28 @@ class Etl_Popup_Controller(GUI_Controller):
         self.lasers = ['488nm', '562nm', '642nm']
         self.mode = None
         self.mag = None
+        self.other_info_dict = {
+            'Delay': 'delay_percent',
+            'Duty': '',
+            'Smoothing': ''
+        }
 
         # add validations to widgets
         for laser in self.lasers:
             validate_wrapper(widgets[laser + ' Amp'].widget, is_entry=True)
             validate_wrapper(widgets[laser + ' Off'].widget, is_entry=True)
+        for key in self.other_info_dict.keys():
+            validate_wrapper(widgets[key].widget, is_entry=True)
 
         # event combination
-        self.mode_widget.widget.bind('<<ComboboxSelected>>', self.update_magnification)
-        self.mag_widget.widget.bind('<<ComboboxSelected>>', self.update_laser)
+        self.mode_widget.widget.bind('<<ComboboxSelected>>', self.show_magnification)
+        self.mag_widget.widget.bind('<<ComboboxSelected>>', self.show_laser_info)
 
         for laser in self.lasers:
             self.variables[laser + ' Amp'].trace_add('write', self.update_etl_setting(laser+' Amp', laser, 'amplitude'))
             self.variables[laser + ' Off'].trace_add('write', self.update_etl_setting(laser+' Off', laser, 'offset'))
+
+        self.variables['Delay'].trace_add('write', self.update_other_setting('Delay'))
 
         self.view.get_buttons()['Save'].configure(command=self.save_etl_info)
 
@@ -46,9 +55,9 @@ class Etl_Popup_Controller(GUI_Controller):
         else:
             self.other_info = data
 
-    def update_magnification(self, *args):
+    def show_magnification(self, *args):
         """
-        # update magnification options when the user changes the focus mode
+        # show magnification options when the user changes the focus mode
         """
         # get mode setting
         self.mode = self.mode_widget.widget.get()
@@ -56,12 +65,12 @@ class Etl_Popup_Controller(GUI_Controller):
         self.mag_widget.widget['values'] = temp
         self.mag_widget.widget.set(temp[0])
         # update laser info
-        self.update_laser()
-        self.update_other_info(self.mode)
+        self.show_laser_info()
+        self.show_other_info(self.mode)
 
-    def update_laser(self, *args):
+    def show_laser_info(self, *args):
         """
-        # update laser info when the user changes magnification setting
+        # show laser info when the user changes magnification setting
         """
         # get magnification setting
         self.mag = self.mag_widget.widget.get()
@@ -69,14 +78,14 @@ class Etl_Popup_Controller(GUI_Controller):
             self.variables[laser + ' Amp'].set(self.resolution_info.ETLConstants[self.mode][self.mag][laser]['amplitude'])
             self.variables[laser + ' Off'].set(self.resolution_info.ETLConstants[self.mode][self.mag][laser]['offset'])
         
-    def update_other_info(self, mode):
+    def show_other_info(self, mode):
         """
-        # update delay_percent, pulse_percent.
+        # show delay_percent, pulse_percent.
         """
         if mode == 'low':
-            prefix = 'laser_l_'
+            prefix = 'remote_focus_l_'
         else:
-            prefix = 'laser_r_'
+            prefix = 'remote_focus_r_'
         self.variables['Delay'].set(self.other_info[prefix+'delay_percent'])
         self.variables['Smoothing'].set(self.other_info[prefix+'pulse_percent'])
 
@@ -90,6 +99,23 @@ class Etl_Popup_Controller(GUI_Controller):
             self.resolution_info.ETLConstants[self.mode][self.mag][laser][etl_name] = variable.get()
 
         return func_laser
+
+    def update_other_setting(self, name):
+        """
+        # this function will update Delay, Duty, and Smoothing setting when something is changed
+        """
+        variable = self.variables[name]
+        info_name = self.other_info_dict[name]
+        
+        def func(*args):
+            if self.mode == 'low':
+                prefix = 'remote_focus_l_'
+            else:
+                prefix = 'remote_focus_r_'
+
+            self.other_info[prefix + info_name] = variable.get()
+        return func
+
     
     def save_etl_info(self):
         """

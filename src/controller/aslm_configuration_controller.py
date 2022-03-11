@@ -68,9 +68,9 @@ class ASLM_Configuration_Controller:
         # return delay_percent, pulse_percent
         """
         temp = {
-            'laser_l_delay_percent': self.configuration.LaserParameters['laser_l_delay_percent'],
-            'laser_l_pulse_percent': self.configuration.LaserParameters['laser_l_pulse_percent'],
-            'laser_r_delay_percent': self.configuration.LaserParameters['laser_r_delay_percent'],
-            'laser_r_pulse_percent': self.configuration.LaserParameters['laser_r_pulse_percent']
+            'remote_focus_l_delay_percent': self.configuration.LaserParameters['laser_l_delay_percent'],
+            'remote_focus_l_pulse_percent': self.configuration.LaserParameters['laser_l_pulse_percent'],
+            'remote_focus_r_delay_percent': self.configuration.LaserParameters['laser_r_delay_percent'],
+            'remote_focus_r_pulse_percent': self.configuration.LaserParameters['laser_r_pulse_percent']
         }
         return temp

@@ -213,7 +213,7 @@ class ASLM_controller:
 
         # add resolution menu
         self.resolution_value = tkinter.StringVar()
-        self.view.menubar.menu_resolution.add_radiobutton(label='Mesoscale Mode', variable=self.resolution_value, value='low-res')
+        self.view.menubar.menu_resolution.add_radiobutton(label='Mesoscale Mode', variable=self.resolution_value, value='low')
         # high resolution sub menu
         high_res_sub_menu = tkinter.Menu(self.view.menubar.menu_resolution)
         self.view.menubar.menu_resolution.add_cascade(menu=high_res_sub_menu, label='Nanoscale Mode')
@@ -238,6 +238,7 @@ class ASLM_controller:
             file_path = Path(file_name)
             if file_path.exists():
                 self.model.load_experiment_file(file_path)
+                self.experiment = session(file_path, self.verbose)
         # set sub-controllers in 'in_itialization' status
         self.channels_tab_controller.in_initialization = True
 
@@ -294,6 +295,18 @@ class ASLM_controller:
         # after initialization, let sub-controllers do necessary computation
         self.channels_tab_controller.after_intialization()
 
+        # zoom menu
+        self.zoom_value.set(self.experiment.MicroscopeState['zoom_position'])
+
+        # resolution menu
+        self.resolution_value.set(self.experiment.MicroscopeState['resolution_mode'])
+
+        # etl parameters
+        self.etl_other_info['remote_focus_l_delay_percent'] = self.experiment.RemoteFocusParameters['remote_focus_l_delay_percent']
+        self.etl_other_info['remote_focus_r_delay_percent'] = self.experiment.RemoteFocusParameters['remote_focus_r_delay_percent']
+        # TODO: other parameters: duty, smoothing percent
+
+
     def update_experiment_setting(self):
         """
         # This function will update model.experiment according values in the View(GUI)
@@ -341,6 +354,18 @@ class ASLM_controller:
         step_size = self.stage_gui_controller.get_step_size()
         for axis in step_size:
             self.experiment.StageParameters[axis+'_step'] = step_size[axis]
+
+        # get zoom info from zoom menu
+        self.experiment.MicroscopeState['zoom_position'] = self.zoom_value.get()
+
+        # get resolution info from resolution menu and etl setting
+        if self.resolution_value.get() == 'low':
+            self.experiment.MicroscopeState['resolution_mode'] = 'low'
+        else:
+            self.experiment.MicroscopeState['resolution_mode'] = 'high'
+        self.experiment.RemoteFocusParameters['remote_focus_l_delay_percent'] = self.etl_other_info['remote_focus_l_delay_percent']
+        self.experiment.RemoteFocusParameters['remote_focus_r_delay_percent'] = self.etl_other_info['remote_focus_r_delay_percent']
+        # TODO: other parameters
         
         return True
 

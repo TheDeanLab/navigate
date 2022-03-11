@@ -42,7 +42,6 @@ class Etl_Popup_Controller(GUI_Controller):
         """
         if name == 'resolution':
             self.resolution_info = data
-            print(data.ETLConstants)
             self.mode_widget.widget['values'] = list(data.ETLConstants.keys())
         else:
             self.other_info = data

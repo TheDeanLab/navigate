@@ -32,6 +32,3 @@ class menubar(Menu):
         self.menu_resolution = Menu(self)
         self.add_cascade(menu=self.menu_resolution, label='Resolution Mode')
 
-        # ETL Parameters Popup
-        self.menu_etlpop = Menu(self)
-        self.add_cascade(menu=self.menu_etlpop, label='ETL Parameters')

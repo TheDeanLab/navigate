@@ -47,6 +47,7 @@ class ASLM_controller:
         self.default_experiment_file = experiment_path
         # etl setting file
         self.etl_constants_path = etl_constants_path
+        self.etl_setting = session(self.etl_constants_path, self.verbose)
 
         # Initialize the View
         self.view = view(root)
@@ -176,13 +177,11 @@ class ASLM_controller:
                 return
             save_yaml_file('', self.experiment.serialize(), filename)
 
-        # TODO this is temporary until we find a place to control the remote focus popup
         from view.remote_focus_popup import remote_popup
         def popup_etl_setting():
-            etl_setting = session(self.etl_constants_path, self.verbose)
             etl_setting_popup = remote_popup(self.view)
             etl_controller = Etl_Popup_Controller(etl_setting_popup, self, self.verbose)
-            etl_controller.initialize('resolution', etl_setting)
+            etl_controller.initialize('resolution', self.etl_setting)
             etl_controller.initialize('other', self.etl_other_info)
         
 
@@ -199,28 +198,35 @@ class ASLM_controller:
                 'Generate Positions': self.channels_tab_controller.generate_positions,
                 'Move to Selected Position': self.channels_tab_controller.move_to_position,
                 # 'Sort Positions': ,
-            },
-            self.view.menubar.menu_zoom: {
-                '1x': lambda: self.execute('zoom', 1),
-                '2x': lambda: self.execute('zoom', 2),
-                '3x': lambda: self.execute('zoom', 3),
-                '4x': lambda: self.execute('zoom', 4),
-                '5x': lambda: self.execute('zoom', 5),
-                '6x': lambda: self.execute('zoom', 6)
-            },
-            self.view.menubar.menu_resolution: {
-                'Mesoscale Mode': lambda: self.execute('resolution', 'low-res'),
-                'Nanoscale Mode': lambda: self.execute('resolution', 'high-res')
-            },
-            # TODO temporary placement
-            self.view.menubar.menu_etlpop: {
-                'View': popup_etl_setting
             }
         }
         for menu in menus_dict:
             menuitems = menus_dict[menu]
             for label in menuitems:
                 menu.add_command(label=label, command=menuitems[label])
+
+        # add zoom menu
+        self.zoom_value = tkinter.IntVar()
+        for i in range(1, 7):
+            self.view.menubar.menu_zoom.add_radiobutton(label=str(i)+'x', variable=self.zoom_value, value=i)
+        self.zoom_value.trace_add('write', lambda *args: self.execute('zoom', self.zoom_value.get()))
+
+        # add resolution menu
+        self.resolution_value = tkinter.StringVar()
+        self.view.menubar.menu_resolution.add_radiobutton(label='Mesoscale Mode', variable=self.resolution_value, value='low-res')
+        # high resolution sub menu
+        high_res_sub_menu = tkinter.Menu(self.view.menubar.menu_resolution)
+        self.view.menubar.menu_resolution.add_cascade(menu=high_res_sub_menu, label='Nanoscale Mode')
+        for res in self.etl_setting.ETLConstants['high'].keys():
+            high_res_sub_menu.add_radiobutton(label=res, variable=self.resolution_value, value=res)
+        # add seperator
+        self.view.menubar.menu_resolution.add_separator()
+        # etl popup
+        self.view.menubar.menu_resolution.add_command(label='ETL Parameters', command=popup_etl_setting)
+        # event binding
+        self.resolution_value.trace_add('write', lambda *args: self.execute('resolution', self.resolution_value.get()))
+
+
 
     def populate_experiment_setting(self, file_name=None):
         """
@@ -397,7 +403,7 @@ class ASLM_controller:
             """
             #  Changes the zoom position
             """
-            self.model.zoom.set_zoom(args[0])
+            self.model.set_zoom(args[0])
             if self.verbose:
                 print("Zoom set to:", args[0])
 

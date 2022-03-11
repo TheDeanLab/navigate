@@ -179,6 +179,9 @@ class Model:
     def move_stage(self, pos_dict):
         self.stages.move_absolute(pos_dict)
 
+    def set_zoom(self, value):
+        self.zoom.set_zoom(value)
+
     def open_shutter(self):
         """
         # Evaluates the experiment parameters and opens the proper shutter.

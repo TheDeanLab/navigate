@@ -85,16 +85,10 @@ class Model:
         self.current_exposure_time = 200  # milliseconds
         self.start_time = None
         self.image_acq_start_time_string = time.strftime("%Y%m%d-%H%M%S")
-        #  TODO: Find a way to pull out the image size from the new dcamp API. Hardcoded here.
-        # self.data = np.zeros(np.shape((self.camera.y_pixels, self.camera.x_pixels)))
-        self.data = np.zeros(np.shape((2048, 2048)))
 
         # data buffer
         self.data_buffer = None
         # self.data_buffer = [SharedNDArray(shape=(self.camera.y_pixels, self.camera.x_pixels), dtype='uint16') for i in range(NUM_OF_FRAMES)]
-        # frame buffer pointer array: used to link camera with the data buffer
-        self.data_ptr = None
-        # self.data_ptr = [np_array.ctypes.data for np_array in self.data_buffer]
         # show image function/pipe handler
         self.show_img_pipe = None
 
@@ -115,11 +109,6 @@ class Model:
 
     def set_data_buffer(self, data_buffer):
         self.data_buffer = data_buffer
-        ptr_array= ctypes.c_void_p * NUM_OF_FRAMES
-        self.data_ptr = ptr_array()
-        for i in range(NUM_OF_FRAMES):
-            np_array = self.data_buffer[i]
-            self.data_ptr[i] = np_array.ctypes.data
     
     #  Basic Image Acquisition Functions
     #  - These functions are used to acquire images from the camera
@@ -206,7 +195,7 @@ class Model:
         """
         self.open_shutter()
         # attach buffer to camera
-        self.camera.initialize_image_series(self.data_ptr)
+        self.camera.initialize_image_series(self.data_buffer)
 
     def end_acquisition(self):
         """
@@ -266,9 +255,6 @@ class Model:
         """
         #  Initialize the DAQ Tasks and the Camera.
         self.daq.initialize_tasks()
-        # self.camera.buf_alloc(10)
-        # self.camera.cap_start(True)
-        # self.camera.initialize_image_series()
 
         #  Prepare the DAQ for Waveform Delivery
         self.daq.create_tasks()
@@ -277,19 +263,10 @@ class Model:
 
         #  Trigger everything and grab the image.
         self.daq.run_tasks()
-        # self.data = self.camera.buf_getlastframedata()
-        # self.data = self.camera.get_image()
-        # print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-        # print("Shape of data:", np.shape(self.data))
-        # print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-
 
         #  Close everything.
         self.daq.stop_tasks()
         self.daq.close_tasks()
-        # self.camera.cap_stop()
-        # self.camera.buf_release()
-        # self.camera.close_image_series()
 
 
     def prepare_image_series(self):
@@ -350,7 +327,7 @@ class Model:
         # Closes the shutter
         # Disables the camera
         """
-        self.camera.dcam_set_camera_exposure(self.experiment.MicroscopeState['channels']
+        self.camera.set_property_value('exposure_time', self.experiment.MicroscopeState['channels']
                                       ['channel_1']['camera_exposure_time']/1000)
         # self.camera.set_exposure_time(self.experiment.MicroscopeState['channels']
         #                               ['channel_1']['camera_exposure_time']/1000)

@@ -32,14 +32,14 @@ class Camera(CameraBase):
     def set_line_interval(self, time):
         pass
 
-    def set_binning(self, binningstring):
+    def set_binning(self, binning_string):
         self.x_binning = int(binning_string[0])
         self.y_binning = int(binning_string[2])
         self.x_pixels = int(self.x_pixels / self.x_binning)
         self.y_pixels = int(self.y_pixels / self.y_binning)
 
-    def initialize_image_series(self, data_ptr=None, number_of_frames=100):
-        self.data_ptr = data_ptr
+    def initialize_image_series(self, data_buffer=None, number_of_frames=100):
+        self.data_buffer = data_buffer
         self.num_of_frame = number_of_frames
         self.current_frame_idx = 0
         self.pre_frame_idx = 0
@@ -74,7 +74,7 @@ class Camera(CameraBase):
     def generate_new_frame(self):
         # time.sleep(self.camera_exposure_time / 1000)
         image = np.random.randint(low=255, size=(self.x_pixels, self.y_pixels), dtype=np.uint16)
-        ctypes.memmove(self.data_ptr[self.current_frame_idx], image.ctypes.data, self.x_pixels*self.y_pixels*2)
+        ctypes.memmove(self.data_buffer[self.current_frame_idx].ctypes.data, image.ctypes.data, self.x_pixels*self.y_pixels*2)
         self.current_frame_idx = (self.current_frame_idx + 1) % self.num_of_frame
 
     def get_new_frame(self):

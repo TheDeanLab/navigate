@@ -83,8 +83,6 @@ class ASLM_controller:
         # Channels Tab
         self.initialize_channels(configuration_controller, configuration)
 
-        # Camera Settings Tab
-        self.initialize_cam_settings(configuration_controller)
 
         # Stage Control Tab
         self.initialize_stage(configuration_controller, configuration)
@@ -95,6 +93,9 @@ class ASLM_controller:
         # Set view based on model.experiment
         self.experiment = session(experiment_path, args.verbose)
         self.populate_experiment_setting()
+
+        # Camera Settings Tab
+        self.initialize_cam_settings(configuration_controller, configuration)
 
         #  TODO: camera_view_tab, maximum intensity tab, waveform_tab
 
@@ -131,7 +132,7 @@ class ASLM_controller:
         # set widgets' range limits
         self.channels_tab_controller.set_spinbox_range_limits(configuration.GUIParameters)
 
-    def initialize_cam_settings(self, configuration_controller):
+    def initialize_cam_settings(self, configuration_controller, configuration):
         """
         # Populate widgets with necessary data from config file via config controller. For the entire settings tab.
         """
@@ -141,6 +142,25 @@ class ASLM_controller:
         self.camera_setting_controller.initialize('sensor mode', sensor_values)
         readout_values = [' ', 'Top to Bottom', 'Bottom to Top']
         self.camera_setting_controller.initialize('readout', readout_values)
+
+        # Populating Framerate
+        #framerate_values = []  TODO Kevin this is where you put the default values, use get_framerate from aslm_configuration_controller
+        #self.camera_setting_controller.initialize('framerate', framerate_values) TODO Kevin this is where you pass default values to the sub controller
+
+        # Populating ROI Mode
+        pixels = configuration_controller.get_pixels(self.verbose)
+        self.camera_setting_controller.initialize('pixels', pixels)
+
+        # Populating FOV Mode
+        mode = self.experiment.MicroscopeState['resolution_mode']
+        zoom = self.experiment.MicroscopeState['zoom_position']
+        if mode == 'low':
+            pixel_size = configuration.ZoomParameters['low_res_zoom_pixel_size'][str(zoom) + 'x']
+        elif mode == 'high':
+            pixel_size = configuration.ZoomParameters['high_res_zoom_pixel_size']
+        fov = [mode, pixel_size]
+        self.camera_setting_controller.initialize('fov', fov)
+
 
  
     def initialize_stage(self, configuration_controller, configuration):
@@ -305,6 +325,9 @@ class ASLM_controller:
         self.etl_other_info['remote_focus_l_delay_percent'] = self.experiment.RemoteFocusParameters['remote_focus_l_delay_percent']
         self.etl_other_info['remote_focus_r_delay_percent'] = self.experiment.RemoteFocusParameters['remote_focus_r_delay_percent']
         # TODO: other parameters: duty, smoothing percent
+
+        
+
 
 
     def update_experiment_setting(self):

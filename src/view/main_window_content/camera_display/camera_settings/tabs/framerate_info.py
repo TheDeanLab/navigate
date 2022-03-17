@@ -33,14 +33,15 @@ class framerate_info(ttk.LabelFrame):
                 self.inputs[self.names[i]] = LabelInput(parent=content_frame,
                                                         label=self.labels[i],
                                                         input_class=ttk.Entry,
-                                                        input_var=tk.StringVar()                                          
+                                                        input_var=tk.DoubleVar()                                          
                                                         )
+                self.inputs[self.names[i]].widget['state'] = 'readonly'
                 self.inputs[self.names[i]].grid(row=i, column=0, pady=1)
             else:
                 self.inputs[self.names[i]] = LabelInput(parent=content_frame,
                                                         label=self.labels[i],
                                                         input_class=ttk.Spinbox,
-                                                        input_var=tk.IntVar(),
+                                                        input_var=tk.DoubleVar(),
                                                         input_args={"from_": 1, "to": 1000, "increment": 1.0}                                          
                                                         )
                 self.inputs[self.names[i]].grid(row=i, column=0, pady=1)

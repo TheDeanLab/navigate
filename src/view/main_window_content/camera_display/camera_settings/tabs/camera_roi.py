@@ -48,6 +48,7 @@ class camera_roi(ttk.Labelframe):
         self.fov_names = ['FOV_X', 'FOV_Y']
         self.center_names = ['Center_X', 'Center_Y']
         self.num_pix_names = ['Pixels_X', 'Pixels_Y']
+        # Buttons
         self.btn_labels = ['Center ROI', 'Center ROI @', 'Use All Pixels', '1024x1024', '512x512']
         self.btn_names = ['Center_ROI', 'Center_At', 'Use_Pixels', '1024', '512']  
         
@@ -59,7 +60,7 @@ class camera_roi(ttk.Labelframe):
                                                     label=self.roi_labels[i],
                                                     input_class=ttk.Spinbox,
                                                     input_var=tk.IntVar(),
-                                                    input_args={"from_": 0, "to": 1000, "increment": 1.0}
+                                                    input_args={"from_": 0, "to": 2048, "increment": 1.0}
                                                     )                                 
                 self.inputs[self.roi_labels[i]].grid(row=i, column=0, pady=1)
             if i < 2:
@@ -72,18 +73,18 @@ class camera_roi(ttk.Labelframe):
                 self.inputs[self.fov_names[i]].grid(row=i, column=0, pady=1)
                 # ROI Center
                 self.inputs[self.center_names[i]] = LabelInput(parent=self.center_roi_frame,
-                                                    label=self.xy_labels,
+                                                    label=self.xy_labels[i],
                                                     input_class=ttk.Spinbox,
                                                     input_var=tk.IntVar(),
-                                                    input_args={"from_": 0, "to": 1000, "increment": 1.0}
+                                                    input_args={"from_": 0, "to": 2048, "increment": 1.0}
                                                     )                                 
                 self.inputs[self.center_names[i]].grid(row=i, column=0, pady=1)
                 # Number of pixels
                 self.inputs[self.num_pix_names[i]] = LabelInput(parent=self.num_pix_frame,
-                                                    label=self.xy_labels,
+                                                    label=self.xy_labels[i],
                                                     input_class=ttk.Spinbox,
                                                     input_var=tk.IntVar(),
-                                                    input_args={"from_": 0, "to": 1000, "increment": 1.0}
+                                                    input_args={"from_": 0, "to": 2048, "increment": 1.0}
                                                     )                                 
                 self.inputs[self.num_pix_names[i]].grid(row=i, column=0, pady=1)
             

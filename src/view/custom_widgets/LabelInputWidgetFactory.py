@@ -34,6 +34,7 @@ Please note that these values are arbitrary and just to show usage.
 
 Typically this class will be called as a child of a LabelFrame for a related grouping of data or fields.
 Each widget you need to create will be a new instance of the LabelInput class. 
+The widget within a LabelInput class can be directly referenced with self.widget, this allows base tkinter calls to be made on the internal widget (ex grid or when setting readonly)
 
 '''
 

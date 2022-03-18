@@ -59,9 +59,11 @@ class DCAMWAIT_START(Structure):
 class DCAMERR(IntEnum):
     # success
     SUCCESS = 1  # 1, no error, general success code, app should check the value is positive
+    ALREADYOPENED = -520093694  # 0xE1000002
     INVALIDHANDLE = -2147481593  # 0x80000807, invalid camera handle
     INVALIDWAITHANDLE = -2080366591  # 0x84002001, DCAMWAIT is invalid handle
-    ALREADYOPENED = -520093694  # 0xE1000002
+    INVALIDPARAM = -2147481592  # 0x80000808, invalid parameter
+    NOTSUPPORT = -2147479805  # 0x80000f03, camera does not support the function or property with current settings
 
 class DCAMPROP_ATTR(Structure):
     _pack_ = 8
@@ -148,6 +150,7 @@ dcamcap_stop = __dll.dcamcap_stop
 dcamcap_transferinfo = __dll.dcamcap_transferinfo
 dcamwait_start = __dll.dcamwait_start
 dcamwait_abort = __dll.dcamwait_abort
+dcamcap_firetrigger = __dll.dcamcap_firetrigger
 
 
 class DCAM:
@@ -366,9 +369,9 @@ class DCAM:
         """
         # initialize buffer index
         self.pre_index = -1
-        self.number_of_frame = number_of_frames
+        self.number_of_frames = number_of_frames
 
-        # prepare butter pointer array
+        # prepare buffer pointer array
         self.data_buffer = data_buffer
         ptr_array= c_void_p * number_of_frames
         self.data_ptr = ptr_array()
@@ -380,7 +383,7 @@ class DCAM:
         attach_param = DCAMBUF_ATTACH()
         attach_param.iKind = DCAMBUF_ATTACHKIND_FRAME
         attach_param.buffer = self.data_ptr
-        attach_param.buffercount = self.number_of_frame
+        attach_param.buffercount = self.number_of_frames
         if self.__result(dcambuf_attach(self.__hdcam, attach_param)):
             # start capture
             return self.__result(dcamcap_start(self.__hdcam, DCAMCAP_START_SEQUENCE))
@@ -422,11 +425,80 @@ class DCAM:
             if cap_info.nFrameCount <= cap_info.nNewestFrameIndex + 1:
                 frame_idx_list = list(range(cap_info.nNewestFrameIndex - cap_info.nFrameCount + 1, cap_info.nNewestFrameIndex + 1))
             else:
-                frame_idx_list = list(range(self.number_of_frame - cap_info.nFrameCount + cap_info.nNewestFrameIndex + 1, self.number_of_frame)) + list(range(0, cap_info.nNewestFrameIndex + 1))
+                frame_idx_list = list(range(self.number_of_frames - cap_info.nFrameCount + cap_info.nNewestFrameIndex + 1, self.number_of_frames)) + list(range(0, cap_info.nNewestFrameIndex + 1))
 
             # check if backlog happens
-            if (self.pre_index+1)%self.number_of_frame != frame_idx_list[0]:
+            if (self.pre_index+1)%self.number_of_frames != frame_idx_list[0]:
                 print('backlog happens!')
             self.pre_index = cap_info.nNewestFrameIndex
 
         return frame_idx_list
+
+if __name__ == '__main__':
+    print('start testing Hamamatsu API!')
+
+    number_of_frames = 1000
+    # create shared memory buffer
+    from model.concurrency.concurrency_tools import SharedNDArray
+
+    data_buffer = [SharedNDArray(shape=(2048, 2048), dtype='uint16') for i in range(number_of_frames)]
+
+    # start camera
+    camera = DCAM(0)
+    # initialize camera
+    configuration = {
+        'x_pixels': 2048,
+        'y_pixels': 2048,
+        'sensor_mode': 12,  # 12 for progressive
+        'defect_correct_mode': 2,
+        'binning': '1x1',
+        'readout_speed': 1,
+        'trigger_active': 1,
+        'trigger_mode': 1, # external light-sheet mode
+        'trigger_polarity': 2, # positive pulse
+        'trigger_source': 3,  # software
+        'exposure_time': 0.02,
+        'line_interval': 0.000075
+    }
+    camera.prop_setgetvalue("sensor_mode", configuration['sensor_mode'])
+    camera.prop_setgetvalue("defect_correct_mode", configuration['defect_correct_mode'])
+    camera.prop_setgetvalue("exposure_time", configuration['exposure_time'])
+    camera.prop_setgetvalue("binning", int(configuration['binning'][0]))
+    camera.prop_setgetvalue("readout_speed", configuration['readout_speed'])
+    camera.prop_setgetvalue("trigger_active", configuration['trigger_active'])
+    camera.prop_setgetvalue("trigger_mode", configuration['trigger_mode'])
+    camera.prop_setgetvalue("trigger_polarity", configuration['trigger_polarity'])
+    camera.prop_setgetvalue("trigger_source", configuration['trigger_source'])
+    camera.prop_setgetvalue("internal_line_interval", configuration['line_interval'])
+    camera.prop_setgetvalue("image_height", configuration['y_pixels'])
+    camera.prop_setgetvalue("image_width", configuration['x_pixels'])
+    # start Acquisition
+    camera.start_acquisition(data_buffer, number_of_frames)
+    # start data process
+    def data_func():
+        while True:
+            frames = camera.get_frames()
+            if not frames:
+                break
+            print('get image frame:', frames)
+
+    import threading
+    import time
+    data_process = threading.Thread(target=data_func)
+    data_process.start()
+
+    # set camera that trigger from software
+    TRIGGERSOURCE_SOFTWARE = 3
+    if camera.prop_setgetvalue('trigger_source', TRIGGERSOURCE_SOFTWARE):
+
+        # fire trigger to camera
+        for i in range(2000):
+            err = dcamcap_firetrigger(camera.__hdcam, 0)
+            if err < 0:
+                print('an error happened when sending trigger to the camera', err)
+                break
+            time.sleep(configuration['exposure_time'] + 0.005)
+    # end acquisition
+    dcamwait_abort()
+    data_process.join()
+    camera.stop_acquisition()

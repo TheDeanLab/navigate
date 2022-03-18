@@ -226,6 +226,9 @@ class Model:
                     if self.verbose:
                         print('sent through pipe', frame_ids[0])
                     self.show_img_pipe.send(frame_ids[0])
+                else:
+                    if self.verbose:
+                        print('get image frames:', frame_ids)
                 # save image
                 if self.is_save:
                     for idx in frame_ids:
@@ -238,7 +241,8 @@ class Model:
                     break
             
             if self.stop_acquisition:
-                self.show_img_pipe.send('stop')
+                if self.show_img_pipe:
+                    self.show_img_pipe.send('stop')
                 if self.verbose:
                     print('data thread is stopped, send stop to parent pipe')
                 break

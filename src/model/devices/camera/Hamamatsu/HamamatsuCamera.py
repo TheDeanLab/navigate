@@ -76,7 +76,7 @@ class Camera(CameraBase):
         self.camera_controller.set_property_value("internal_line_interval", self.camera_line_interval)
 
     def set_binning(self, binning_string):
-        self.camera_controller.set_property_value("binning", binningstring)
+        self.camera_controller.set_property_value("binning", binning_string)
         self.x_binning = int(binning_string[0])
         self.y_binning = int(binning_string[2])
         self.x_pixels = int(self.x_pixels / self.x_binning)

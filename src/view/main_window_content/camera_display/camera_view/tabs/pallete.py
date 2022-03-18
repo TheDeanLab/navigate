@@ -1,81 +1,74 @@
 from tkinter import *
 from tkinter import ttk
 
+from pyparsing import col
+
+from view.custom_widgets.LabelInputWidgetFactory import LabelInput
+
 
 class pallete(ttk.Labelframe):
     def __init__(self, cam_view, *args, **kwargs):
-        ttk.Frame.__init__(self, cam_view, *args, **kwargs)
-
         #Init Frame
         text_label = 'Lookup Table'
         ttk.Labelframe.__init__(self, cam_view, text=text_label, *args, **kwargs)
 
-        self.pallete = ttk.Frame(self)
-        self.pallete.grid(row=0, column=0, sticky=NSEW)
+        # Dictionary for widgets
+        self.inputs = {}
+        
 
-        #  Radiobuttons for pallete - Gray set by default.
+        # Labels and names
+        self.color_labels = ['Gray', 'Gradient', 'Rainbow']
+        self.color_values = ['gray', 'hot', 'viridis']
         self.color = StringVar()
-        self.gray = ttk.Radiobutton(self.pallete,
-                                    text="Gray",
-                                    variable=self.color,
-                                    value='gray')
+        self.minmax = ['Min Counts', 'Max Counts']
+        self.minmax_names = ['Min', 'Max']
 
-        self.gradient = ttk.Radiobutton(self.pallete,
-                                        text="Gradient",
-                                        variable=self.color,
-                                        value='hot')
 
-        self.rainbow = ttk.Radiobutton(self.pallete,
-                                       text="Rainbow",
-                                       variable=self.color,
-                                       value='viridis')
-        self.gray.invoke()
-        self.gray.grid(row=0, column=0, sticky=NSEW)
-        self.gradient.grid(row=1, column=0, sticky=NSEW)
-        self.rainbow.grid(row=2, column=0, sticky=NSEW)
-
+        # Radiobuttons - Gray is default
+        for i in range(len(self.color_labels)):
+            self.inputs[self.color_labels[i]] = LabelInput(parent=self,
+                                                    label=self.color_labels[i],
+                                                    input_class=ttk.Radiobutton,
+                                                    input_var=self.color,
+                                                    input_args={'value':self.color_values[i]}
+                                                    )
+            self.inputs[self.color_labels[i]].grid(row=i, column=0, sticky=(NSEW))                                         
+        
+        
         #  Autoscale checkbox - Invoked by default.
         self.autoscale = BooleanVar()
-        self.autoscale_check = ttk.Checkbutton(self,
+        self.inputs['Autoscale'] = ttk.Checkbutton(self,
                                                text="Autoscale",
                                                variable=self.autoscale)
-        self.autoscale_check.invoke()
-        self.autoscale_check.grid(row=1, column=0, sticky=NSEW)
+        self.inputs['Autoscale'].grid(row=3, column=0, sticky=NSEW)
 
-        #  Minimum Counts
-        self.min_counts = IntVar()
-        self.min_counts.set(110)
-        self.min_counts_holder = ttk.Frame(self)
-        self.min_counts_label = ttk.Label(self.min_counts_holder,
-                                          text="Min. Counts")
-        self.min_counts_spinbox = ttk.Spinbox(self.min_counts_holder,
-                                              from_=1,
-                                              to=65000,
-                                              textvariable=self.min_counts,
-                                              increment=1,
-                                              width=5,
-                                              state=NORMAL)
-        self.min_counts_label.grid(row=3, column=0, sticky=NSEW)
-        self.min_counts_spinbox.grid(row=3, column=1, sticky=NSEW)
-        self.min_counts_holder.grid(row=3, column=0, sticky=NSEW)
+        # Max and Min Counts
+        for i in range(len(self.minmax)):
+            self.inputs[self.minmax_names[i]] = LabelInput(parent=self,
+                                                    label=self.minmax[i],
+                                                    input_class=ttk.Spinbox,
+                                                    input_var=IntVar(),
+                                                    input_args={'from_':1,'to':65000,'increment':1,'width':5}
+                                                    )
+            self.inputs[self.minmax_names[i]].grid(row=i+4, column=0, sticky=(NSEW))
 
-        #  Maximum Counts
-        self.max_counts = IntVar()
-        self.max_counts.set(5000)
-        self.max_counts_holder = ttk.Frame(self)
-        self.max_counts_label = ttk.Label(self.max_counts_holder,
-                                          text="Max. Counts")
-        self.max_counts_spinbox = ttk.Spinbox(self.max_counts_holder,
-                                              from_=1,
-                                              to=65000,
-                                              textvariable=self.max_counts,
-                                              increment=1,
-                                              width=5,
-                                              state=NORMAL)
-        self.max_counts_label.grid(row=4, column=0, sticky=NSEW)
-        self.max_counts_spinbox.grid(row=4, column=1, sticky=NSEW)
-        self.max_counts_holder.grid(row=4, column=0, sticky=NSEW)
-
+        
+    def get_variables(self):
+        '''
+        # This function returns a dictionary of all the variables that are tied to each widget name.
+        The key is the widget name, value is the variable associated.
+        '''
+        variables = {}
+        for key, widget in self.inputs.items():
+            variables[key] = widget.get()
+        return variables
+    
+    def get_widgets(self):
+        '''
+        # This function returns the dictionary that holds the widgets.
+        The key is the widget name, value is the LabelInput class that has all the data.
+        '''
+        return self.inputs
 
 
 

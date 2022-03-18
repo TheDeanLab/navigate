@@ -97,6 +97,9 @@ class ASLM_controller:
         # Camera Settings Tab
         self.initialize_cam_settings(configuration_controller, configuration)
 
+        # Camera View Tab
+        self.initialize_cam_view(configuration_controller, configuration)
+
         #  TODO: camera_view_tab, maximum intensity tab, waveform_tab
 
         # Camera Tab, Camera Settings
@@ -161,7 +164,18 @@ class ASLM_controller:
         fov = [mode, pixel_size]
         self.camera_setting_controller.initialize('fov', fov)
 
+    def initialize_cam_view(self, configuration_controller, configuration):
+        """
+        # Populate widgets with necessary data from config file via config controller. For the entire view tab.
+        """
+        # Populating Min and Max Counts
+        minmax_values = [110, 5000]
+        self.camera_view_controller.initialize('minmax', minmax_values)
+        image_metrics = [1,0,0]
+        self.camera_view_controller.initialize('image', image_metrics)
 
+
+        pass
  
     def initialize_stage(self, configuration_controller, configuration):
         """

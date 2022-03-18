@@ -24,7 +24,7 @@ class Camera_Setting_Controller(GUI_Controller):
 
     def initialize(self, name, data):
         '''
-        #### Function that sets widgest based on data given from main controller/config
+        #### Function that sets widgets based on data given from main controller/config
         '''
         # Camera Mode
         if name == 'sensor mode':

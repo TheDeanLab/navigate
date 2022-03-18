@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import *
 from tkinter import ttk
-from view.main_window_content.camera_display.camera_view.tabs.cam_counts import cam_counts
+from view.main_window_content.camera_display.camera_view.tabs.image_metrics import image_metrics
 from view.main_window_content.camera_display.camera_view.tabs.pallete import pallete
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
@@ -20,14 +20,14 @@ class camera_tab(ttk.Frame):
         self.cam_image = ttk.Frame(self)
         self.cam_image.grid(row=0, column=0, sticky=NSEW)
 
-        self.canvas = tk.Canvas(self.cam_image, width=800, height=800)
+        self.canvas = tk.Canvas(self.cam_image, width=800, height=500) # TODO decide on height, width original was 800x800
         self.canvas.grid(row=0, column=0, sticky=NSEW)
         self.matplotlib_figure = Figure(figsize=[6, 6], tight_layout=True)
         self.matplotlib_canvas = FigureCanvasTkAgg(self.matplotlib_figure, self.canvas)
 
         #  Frame for camera selection and counts
-        self.cam_counts = cam_counts(self)
-        self.cam_counts.grid(row=1, column=0, sticky=NSEW)
+        self.image_metrics = image_metrics(self)
+        self.image_metrics.grid(row=1, column=0, sticky=NSEW)
 
         #  Frame for scale settings/pallete color
         self.scale_pallete = pallete(self)

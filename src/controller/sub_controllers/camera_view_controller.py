@@ -11,9 +11,10 @@ class Camera_View_Controller(GUI_Controller):
         super().__init__(view, parent_controller, verbose)
 
         # Getting Widgets/Buttons
-        #self.camcounts_widgets = view.cam_counts.get_widgets() # keys = ['Image Max Counts', 'Frames to Avg', 'Channel'] TODO needs refactoring with labelinputs
-        #self.pallete = view.scale_pallete.get_widgets() # keys = ['] TODO needs labelinputs
+        self.image_metrics = view.image_metrics.get_widgets() # keys = ['Frames to Avg', 'Image Max Counts', 'Channel'] 
+        self.pallete = view.scale_pallete.get_widgets() # keys = ['Gray','Gradient','Rainbow','Min','Max'] 
 
+        
         #  Starting Mode
         self.mode = 'stop'
 
@@ -29,6 +30,28 @@ class Camera_View_Controller(GUI_Controller):
         self.rolling_frames = 1
         # self.live_subsampling = self.parent_controller.model.camera.camera_display_live_subsampling
         # self.view.scale_pallete.autoscale.trace_add(self.update_counts_display())
+
+    def initialize(self, name, data):
+        '''
+        #### Function that sets widgets based on data given from main controller/config
+        '''
+        # Pallete section (colors, autoscale, min/max counts)
+        if name == 'minmax':
+            min = data[0]
+            max = data[1]
+            # Invoking defaults
+            self.pallete['Gray'].widget.invoke()
+            self.pallete['Autoscale'].invoke()
+            # Populating defaults
+            self.pallete['Min'].set(min)
+            self.pallete['Max'].set(max)
+        
+        # Image Metrics section
+        if name == 'image':
+            frames = data[0]
+            # Populating defaults
+            self.image_metrics['Frames'].set(frames)
+
 
     #  Set mode for the execute statement in main controller
     def set_mode(self, mode=''):

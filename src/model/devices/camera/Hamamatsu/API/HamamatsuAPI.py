@@ -499,6 +499,5 @@ if __name__ == '__main__':
                 break
             time.sleep(configuration['exposure_time'] + 0.005)
     # end acquisition
-    dcamwait_abort()
-    data_process.join()
     camera.stop_acquisition()
+    data_process.join()

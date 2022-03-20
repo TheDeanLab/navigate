@@ -1,6 +1,9 @@
 import tkinter as tk
 from tkinter import ttk
 
+# Base design courtesy of below book.
+# Learning Path: Python GUI Programming - A Complete Reference Guide by Alan D. Moore and B. M. Harwani 
+
 '''If you need a reference for the types of arguments that different widgets accept you can use the below:
 https://tkdocs.com/shipman/
 It will help with creating the input_args and label_args dictionaries if you so choose to use them

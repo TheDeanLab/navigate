@@ -28,9 +28,23 @@ class DCAMDEV_OPEN(Structure):
         ('hdcam', c_void_p)  # out
     ]
 
-    def __init__(self, index):
+    def __init__(self):
         self.size = sizeof(DCAMDEV_OPEN)
         self.index = 0
+
+class DCAMAPI_INIT(Structure):
+    _pack_ = 8
+    _fields_ = [
+        ('size', c_int32),
+        ('iDeviceCount', c_int32),  # out
+        ('reserved', c_int32),
+        ('initoptionbytes', c_int32),
+        ('initoption', POINTER(c_int32)),
+        ('guid', c_void_p)  # const DCAM_GUID*
+    ]
+
+    def __init__(self):
+        self.size = sizeof(DCAMAPI_INIT)
 
 class DCAMWAIT_OPEN(Structure):
     _pack_ = 8
@@ -93,7 +107,7 @@ class DCAMPROP_ATTR(Structure):
 
 class DCAMBUF_ATTACH(Structure):
     _pack_ = 8
-    _field_ = [
+    _fields_ = [
         ('size', c_int32), # sizeof(*this)
         ('iKind', c_int32), # DCAMBUF_ATTAHKIND: DCAMBUF_ATTACHKIND_FRAME = 0
         ('buffer', POINTER(c_void_p)), # array of buffer pointers
@@ -135,6 +149,7 @@ property_dict = {
 
 
 # ==== api function references ====
+dcamapi_init = __dll.dcamapi_init
 dcamdev_open = __dll.dcamdev_open
 dcamdev_close = __dll.dcamdev_close
 dcamwait_open = __dll.dcamwait_open
@@ -157,6 +172,14 @@ class DCAM:
     def __init__(self, index=0):
         self.__hdcam = 0
         self.__hdcamwait = 0
+
+        self.pre_frame_count = 0
+        self.pre_index = 0
+
+        # initialize api
+        paraminit = DCAMAPI_INIT()
+        dcamapi_init(byref(paraminit))
+
         # open camera
         self.dev_open(index)
         self.__open_hdcamwait()
@@ -167,6 +190,7 @@ class DCAM:
         """
         if errvalue < 0:
             self.__lasterr = errvalue
+            print('error message: ', errvalue)
             return False
 
         return True
@@ -189,7 +213,7 @@ class DCAM:
         if paramwaitopen.hwait == 0:
             return self.__result(DCAMERR.INVALIDWAITHANDLE)
 
-        self.__hdcamwait = paramwaitopen.hwait
+        self.__hdcamwait = c_void_p(paramwaitopen.hwait)
         return True
 
     def __close_hdcamwait(self):
@@ -237,7 +261,8 @@ class DCAM:
         else:
             print("Camera Open")
 
-        self.__hdcam = paramopen.hdcam
+        print("paramopen.hdcam:", paramopen.hdcam)
+        self.__hdcam = c_void_p(paramopen.hdcam)
         return True
 
     def dev_close(self):
@@ -295,6 +320,8 @@ class DCAM:
 
         cDouble = c_double()
         ret = self.__result(dcamprop_getvalue(self.__hdcam, idprop, byref(cDouble)))
+        print("prop_getvalue response:", cDouble.value)
+        print("property id:", idprop)
         if ret is False:
             return False
 
@@ -315,6 +342,7 @@ class DCAM:
         if not self.__hdcam:
             return self.__result(DCAMERR.INVALIDHANDLE)  # instance is not opened yet.
 
+        fValue = c_double(fValue)
         ret = self.__result(dcamprop_setvalue(self.__hdcam, idprop, fValue))
         if ret is False:
             return False
@@ -373,7 +401,7 @@ class DCAM:
 
         # prepare buffer pointer array
         self.data_buffer = data_buffer
-        ptr_array= c_void_p * number_of_frames
+        ptr_array = c_void_p * number_of_frames
         self.data_ptr = ptr_array()
         for i in range(number_of_frames):
             np_array = data_buffer[i]
@@ -385,6 +413,8 @@ class DCAM:
         attach_param.buffer = self.data_ptr
         attach_param.buffercount = self.number_of_frames
         if self.__result(dcambuf_attach(self.__hdcam, attach_param)):
+            self.pre_frame_count = 0
+            self.pre_index = 0
             # start capture
             return self.__result(dcamcap_start(self.__hdcam, DCAMCAP_START_SEQUENCE))
         return False
@@ -396,8 +426,10 @@ class DCAM:
         """
         # stop capture
         dcamcap_stop(self.__hdcam)
+
         # abort any waiting event
-        dcamwait_abort(self.__hdcamwait)
+        # dcamwait_abort(self.__hdcamwait)
+
         # detach buffer
         return self.__result(dcamcap_stop(self.__hdcam, DCAMBUF_ATTACHKIND_FRAME))
 
@@ -417,63 +449,188 @@ class DCAM:
         frame_idx_list = []
         wait_param = DCAMWAIT_START()
         wait_param.eventmask = DCAMWAIT_CAPEVENT_FRAMEREADY | DCAMWAIT_CAPEVENT_STOPPED
-        wait_param.timeout = 100 # 100ms
-        if self.__result(dcamwait_start(self.__hdcamwait, POINTER(wait_param))):
+        wait_param.timeout = 100  # 100ms
+        if self.__result(dcamwait_start(self.__hdcamwait, byref(wait_param))):
             cap_info = DCAMCAP_TRANSFERINFO()
-            dcamcap_transferinfo(self.__hdcam, POINTER(cap_info))
+            dcamcap_transferinfo(self.__hdcam, byref(cap_info))
+            frame_count = cap_info.nFrameCount - self.pre_frame_count
+            print("Frame Count - cap_info", cap_info.nFrameCount, frame_count)
+            print("Newest Frame Index - cap_info", cap_info.nNewestFrameIndex)
             #TODO: assume the index is from 0, but need to test on the camera device
-            if cap_info.nFrameCount <= cap_info.nNewestFrameIndex + 1:
-                frame_idx_list = list(range(cap_info.nNewestFrameIndex - cap_info.nFrameCount + 1, cap_info.nNewestFrameIndex + 1))
+            if frame_count <= cap_info.nNewestFrameIndex + 1:
+                frame_idx_list = list(range(cap_info.nNewestFrameIndex - frame_count + 1,
+                                            cap_info.nNewestFrameIndex + 1))
             else:
-                frame_idx_list = list(range(self.number_of_frames - cap_info.nFrameCount + cap_info.nNewestFrameIndex + 1, self.number_of_frames)) + list(range(0, cap_info.nNewestFrameIndex + 1))
+                frame_idx_list = list(range(self.number_of_frames - frame_count + cap_info.nNewestFrameIndex +
+                                            1, self.number_of_frames)) + list(range(0, cap_info.nNewestFrameIndex + 1))
 
+            print("Number of Frames:", self.number_of_frames)
+            print("frame_idx_list:", frame_idx_list)
             # check if backlog happens
-            if (self.pre_index+1)%self.number_of_frames != frame_idx_list[0]:
-                print('backlog happens!')
+            # if (self.pre_index+1) % self.number_of_frames != frame_idx_list[0]:
+            #    print('backlog happens!')
             self.pre_index = cap_info.nNewestFrameIndex
+            self.pre_frame_count = cap_info.nFrameCount
 
         return frame_idx_list
 
+    def get_camera_handler(self):
+        return self.__hdcam
+
+
 if __name__ == '__main__':
+    import numpy as np
+    from multiprocessing import shared_memory
+    import weakref
+
     print('start testing Hamamatsu API!')
 
-    number_of_frames = 1000
+    number_of_frames = 20
     # create shared memory buffer
-    from model.concurrency.concurrency_tools import SharedNDArray
+    # from model.concurrency.concurrency_tools import SharedNDArray
+
+    class SharedNDArray(np.ndarray):
+        """A numpy array that lives in shared memory
+
+        Inputs and outputs to/from ObjectInSubprocess are 'serialized', which
+        is pretty fast - except for large in-memory objects. The only large
+        in-memory objects we regularly deal with are numpy arrays, so it
+        makes sense to provide a way to pass large numpy arrays via shared memory
+        (which avoids slow serialization).
+
+        Maybe you wanted to write code that looks like this:
+
+            data_buf = np.zeros((400, 2000, 2000), dtype='uint16')
+            display_buf = np.zeros((2000, 2000), dtype='uint8')
+
+            camera = Camera()
+            preprocessor = Preprocessor()
+            display = Display()
+
+            camera.record(num_images=400, out=data_buf)
+            preprocessor.process(in=data_buf, out=display_buf)
+            display.show(display_buf)
+
+        ...but instead you write code that looks like this:
+
+            data_buf = SharedNDArray(shape=(400, 2000, 2000), dtype='uint16')
+            display_buf = SharedNDArray(shape=(2000, 2000), dtype='uint8')
+
+            camera = ObjectInSubprocess(Camera)
+            preprocessor = ObjectInSubprocess(Preprocessor)
+            display = ObjectInSubprocess(Display)
+
+            camera.record(num_images=400, out=data_buf)
+            preprocessor.process(in=data_buf, out=display_buf)
+            display.show(display_buf)
+
+        ...and your payoff is, each object gets its own CPU core, AND passing
+        large numpy arrays between the processes is still really fast!
+
+        To implement this we used memmap from numpy.core as a template.
+        """
+
+        def __new__(cls, shape=None, dtype=float, shared_memory_name=None,
+                    offset=0, strides=None, order=None):
+            if shared_memory_name is None:
+                dtype = np.dtype(dtype)
+                requested_bytes = np.prod(shape, dtype='uint64') * dtype.itemsize
+                requested_bytes = int(requested_bytes)
+                try:
+                    shm = shared_memory.SharedMemory(
+                        create=True, size=requested_bytes)
+                except OSError as e:
+                    if e.args == (24, "Too many open files"):
+                        raise OSError(
+                            "You tried to simultaneously open more "
+                            "SharedNDArrays than are allowed by your system!"
+                        ) from e
+                    else:
+                        raise e
+                must_unlink = True  # This process is responsible for unlinking
+            else:
+                shm = shared_memory.SharedMemory(
+                    name=shared_memory_name, create=False)
+                must_unlink = False
+            obj = super(SharedNDArray, cls).__new__(
+                cls, shape, dtype, shm.buf, offset, strides, order)
+            obj.shared_memory = shm
+            obj.offset = offset
+            if must_unlink:
+                weakref.finalize(obj, shm.unlink)
+            return obj
+
+        def __array_finalize__(self, obj):
+            if obj is None:
+                return
+            if not isinstance(obj, SharedNDArray):
+                raise ValueError(
+                    "You can't view non-shared memory as shared memory.")
+            if hasattr(obj, "shared_memory") and np.may_share_memory(self, obj):
+                self.shared_memory = obj.shared_memory
+                self.offset = obj.offset
+                self.offset += (self.__array_interface__["data"][0] -
+                                obj.__array_interface__["data"][0])
+
+        def __array_wrap__(self, arr, context=None):
+            arr = super().__array_wrap__(arr, context)
+
+            # Return a SharedNDArray if a SharedNDArray was given as the
+            # output of the ufunc. Leave the arr class unchanged if self is not
+            # a SharedNDArray to keep original SharedNDArray subclasses
+            # behavior.
+
+            if self is arr or type(self) is not SharedNDArray:
+                return arr
+            # Return scalar instead of 0d SharedMemory, e.g. for np.sum with
+            # axis=None
+            if arr.shape == ():
+                return arr[()]
+            # Return ndarray otherwise
+            return arr.view(np.ndarray)
+
+        def __getitem__(self, index):
+            res = super().__getitem__(index)
+            if type(res) is SharedNDArray and not hasattr(res, "shared_memory"):
+                return res.view(type=np.ndarray)
+            return res
+
+        def __reduce__(self):
+            args = (self.shape, self.dtype, self.shared_memory.name,
+                    self.offset, self.strides, None)
+            return (SharedNDArray, args)
 
     data_buffer = [SharedNDArray(shape=(2048, 2048), dtype='uint16') for i in range(number_of_frames)]
 
     # start camera
     camera = DCAM(0)
+
     # initialize camera
     configuration = {
-        'x_pixels': 2048,
-        'y_pixels': 2048,
-        'sensor_mode': 12,  # 12 for progressive
-        'defect_correct_mode': 2,
-        'binning': '1x1',
-        'readout_speed': 1,
-        'trigger_active': 1,
-        'trigger_mode': 1, # external light-sheet mode
-        'trigger_polarity': 2, # positive pulse
-        'trigger_source': 3,  # software
-        'exposure_time': 0.02,
-        'line_interval': 0.000075
+        'image_width': 2048.0,
+        'image_height': 2048.0,
+        'sensor_mode': 12.0,  # 12 for progressive
+        'defect_correct_mode': 2.0,
+        'binning': 1.0,
+        'readout_speed': 1.0,
+        'trigger_active': 1.0,
+        'trigger_mode': 1.0,  # external light-sheet mode
+        'trigger_polarity': 2.0,  # positive pulse
+        'trigger_source': 3.0,  # software
+        'exposure_time': 0.02
+        #'internal_line_interval': 0.000075
     }
-    camera.prop_setgetvalue("sensor_mode", configuration['sensor_mode'])
-    camera.prop_setgetvalue("defect_correct_mode", configuration['defect_correct_mode'])
-    camera.prop_setgetvalue("exposure_time", configuration['exposure_time'])
-    camera.prop_setgetvalue("binning", int(configuration['binning'][0]))
-    camera.prop_setgetvalue("readout_speed", configuration['readout_speed'])
-    camera.prop_setgetvalue("trigger_active", configuration['trigger_active'])
-    camera.prop_setgetvalue("trigger_mode", configuration['trigger_mode'])
-    camera.prop_setgetvalue("trigger_polarity", configuration['trigger_polarity'])
-    camera.prop_setgetvalue("trigger_source", configuration['trigger_source'])
-    camera.prop_setgetvalue("internal_line_interval", configuration['line_interval'])
-    camera.prop_setgetvalue("image_height", configuration['y_pixels'])
-    camera.prop_setgetvalue("image_width", configuration['x_pixels'])
+
+    # configure camera
+    for key in configuration:
+        # INVALIDVALUE = -2147481567  # 0x80000821, invalid property value
+        # INVALIDPROPERTYID = -2147481563  # 0x80000825, the property id is invalid
+        print("property:", property_dict[key], " key:", key)
+        camera.prop_setvalue(property_dict[key], configuration[key])
+
     # start Acquisition
     camera.start_acquisition(data_buffer, number_of_frames)
+
     # start data process
     def data_func():
         while True:
@@ -489,11 +646,11 @@ if __name__ == '__main__':
 
     # set camera that trigger from software
     TRIGGERSOURCE_SOFTWARE = 3
-    if camera.prop_setgetvalue('trigger_source', TRIGGERSOURCE_SOFTWARE):
+    if camera.prop_setgetvalue(property_dict['trigger_source'], TRIGGERSOURCE_SOFTWARE):
 
         # fire trigger to camera
-        for i in range(2000):
-            err = dcamcap_firetrigger(camera.__hdcam, 0)
+        for i in range(100):
+            err = dcamcap_firetrigger(camera.get_camera_handler(), 0)
             if err < 0:
                 print('an error happened when sending trigger to the camera', err)
                 break

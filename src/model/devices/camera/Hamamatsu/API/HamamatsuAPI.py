@@ -172,14 +172,11 @@ class DCAM:
     def __init__(self, index=0):
         self.__hdcam = 0
         self.__hdcamwait = 0
-
-        self.pre_frame_count = 0
-        self.pre_index = 0
-
+        
         # initialize api
         paraminit = DCAMAPI_INIT()
         dcamapi_init(byref(paraminit))
-
+        
         # open camera
         self.dev_open(index)
         self.__open_hdcamwait()
@@ -261,7 +258,6 @@ class DCAM:
         else:
             print("Camera Open")
 
-        print("paramopen.hdcam:", paramopen.hdcam)
         self.__hdcam = c_void_p(paramopen.hdcam)
         return True
 
@@ -426,10 +422,6 @@ class DCAM:
         """
         # stop capture
         dcamcap_stop(self.__hdcam)
-
-        # abort any waiting event
-        # dcamwait_abort(self.__hdcamwait)
-
         # detach buffer
         return self.__result(dcamcap_stop(self.__hdcam, DCAMBUF_ATTACHKIND_FRAME))
 
@@ -443,9 +435,7 @@ class DCAM:
         # These functions are useful for polling however this is stressful to the CPU. 
         # We recommend using dcamwait functions to wait for events such as the arrival of new frames, then calling these functions to check status and/or transferred information.
         """
-        # need to test with camera device
-        # solution 1: wait for a new frame, then call dcamcap_transferinfo()
-        # solution 2: get status; if busy, wait for a new frame; call dcamcap_transferinfo()
+        # current solution: wait for a new frame, then call dcamcap_transferinfo()
         frame_idx_list = []
         wait_param = DCAMWAIT_START()
         wait_param.eventmask = DCAMWAIT_CAPEVENT_FRAMEREADY | DCAMWAIT_CAPEVENT_STOPPED
@@ -453,10 +443,12 @@ class DCAM:
         if self.__result(dcamwait_start(self.__hdcamwait, byref(wait_param))):
             cap_info = DCAMCAP_TRANSFERINFO()
             dcamcap_transferinfo(self.__hdcam, byref(cap_info))
+            # after testing with the camera, we find out that:
+            # nNewestFrameIndex starts from 0;
+            # nFrameCount increments all the frames from beginning even we have already pulled the info out
             frame_count = cap_info.nFrameCount - self.pre_frame_count
             print("Frame Count - cap_info", cap_info.nFrameCount, frame_count)
             print("Newest Frame Index - cap_info", cap_info.nNewestFrameIndex)
-            #TODO: assume the index is from 0, but need to test on the camera device
             if frame_count <= cap_info.nNewestFrameIndex + 1:
                 frame_idx_list = list(range(cap_info.nNewestFrameIndex - frame_count + 1,
                                             cap_info.nNewestFrameIndex + 1))
@@ -477,128 +469,15 @@ class DCAM:
     def get_camera_handler(self):
         return self.__hdcam
 
-
 if __name__ == '__main__':
-    import numpy as np
-    from multiprocessing import shared_memory
-    import weakref
 
     print('start testing Hamamatsu API!')
 
     number_of_frames = 20
     # create shared memory buffer
-    # from model.concurrency.concurrency_tools import SharedNDArray
-
-    class SharedNDArray(np.ndarray):
-        """A numpy array that lives in shared memory
-
-        Inputs and outputs to/from ObjectInSubprocess are 'serialized', which
-        is pretty fast - except for large in-memory objects. The only large
-        in-memory objects we regularly deal with are numpy arrays, so it
-        makes sense to provide a way to pass large numpy arrays via shared memory
-        (which avoids slow serialization).
-
-        Maybe you wanted to write code that looks like this:
-
-            data_buf = np.zeros((400, 2000, 2000), dtype='uint16')
-            display_buf = np.zeros((2000, 2000), dtype='uint8')
-
-            camera = Camera()
-            preprocessor = Preprocessor()
-            display = Display()
-
-            camera.record(num_images=400, out=data_buf)
-            preprocessor.process(in=data_buf, out=display_buf)
-            display.show(display_buf)
-
-        ...but instead you write code that looks like this:
-
-            data_buf = SharedNDArray(shape=(400, 2000, 2000), dtype='uint16')
-            display_buf = SharedNDArray(shape=(2000, 2000), dtype='uint8')
-
-            camera = ObjectInSubprocess(Camera)
-            preprocessor = ObjectInSubprocess(Preprocessor)
-            display = ObjectInSubprocess(Display)
-
-            camera.record(num_images=400, out=data_buf)
-            preprocessor.process(in=data_buf, out=display_buf)
-            display.show(display_buf)
-
-        ...and your payoff is, each object gets its own CPU core, AND passing
-        large numpy arrays between the processes is still really fast!
-
-        To implement this we used memmap from numpy.core as a template.
-        """
-
-        def __new__(cls, shape=None, dtype=float, shared_memory_name=None,
-                    offset=0, strides=None, order=None):
-            if shared_memory_name is None:
-                dtype = np.dtype(dtype)
-                requested_bytes = np.prod(shape, dtype='uint64') * dtype.itemsize
-                requested_bytes = int(requested_bytes)
-                try:
-                    shm = shared_memory.SharedMemory(
-                        create=True, size=requested_bytes)
-                except OSError as e:
-                    if e.args == (24, "Too many open files"):
-                        raise OSError(
-                            "You tried to simultaneously open more "
-                            "SharedNDArrays than are allowed by your system!"
-                        ) from e
-                    else:
-                        raise e
-                must_unlink = True  # This process is responsible for unlinking
-            else:
-                shm = shared_memory.SharedMemory(
-                    name=shared_memory_name, create=False)
-                must_unlink = False
-            obj = super(SharedNDArray, cls).__new__(
-                cls, shape, dtype, shm.buf, offset, strides, order)
-            obj.shared_memory = shm
-            obj.offset = offset
-            if must_unlink:
-                weakref.finalize(obj, shm.unlink)
-            return obj
-
-        def __array_finalize__(self, obj):
-            if obj is None:
-                return
-            if not isinstance(obj, SharedNDArray):
-                raise ValueError(
-                    "You can't view non-shared memory as shared memory.")
-            if hasattr(obj, "shared_memory") and np.may_share_memory(self, obj):
-                self.shared_memory = obj.shared_memory
-                self.offset = obj.offset
-                self.offset += (self.__array_interface__["data"][0] -
-                                obj.__array_interface__["data"][0])
-
-        def __array_wrap__(self, arr, context=None):
-            arr = super().__array_wrap__(arr, context)
-
-            # Return a SharedNDArray if a SharedNDArray was given as the
-            # output of the ufunc. Leave the arr class unchanged if self is not
-            # a SharedNDArray to keep original SharedNDArray subclasses
-            # behavior.
-
-            if self is arr or type(self) is not SharedNDArray:
-                return arr
-            # Return scalar instead of 0d SharedMemory, e.g. for np.sum with
-            # axis=None
-            if arr.shape == ():
-                return arr[()]
-            # Return ndarray otherwise
-            return arr.view(np.ndarray)
-
-        def __getitem__(self, index):
-            res = super().__getitem__(index)
-            if type(res) is SharedNDArray and not hasattr(res, "shared_memory"):
-                return res.view(type=np.ndarray)
-            return res
-
-        def __reduce__(self):
-            args = (self.shape, self.dtype, self.shared_memory.name,
-                    self.offset, self.strides, None)
-            return (SharedNDArray, args)
+    import sys
+    sys.path.append('../../../../concurrency')
+    from concurrency_tools import SharedNDArray
 
     data_buffer = [SharedNDArray(shape=(2048, 2048), dtype='uint16') for i in range(number_of_frames)]
 

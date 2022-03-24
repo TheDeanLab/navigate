@@ -7,26 +7,43 @@ from model.devices.camera.Hamamatsu.API.HamamatsuAPI import DCAM as HamamatsuCon
 from model.devices.camera.CameraBase import CameraBase
 
 
-# CameraBase - Test without the base class.
 class Camera(CameraBase):
     def __init__(self, camera_id, model, experiment, verbose=False):
         super().__init__(camera_id, model, experiment, verbose)
 
         # Initialize Camera Controller
+        # Values are pulled from the CameraParameters section of the configuration.yml file.
+        # Exposure time converted here from milliseconds to seconds.
         self.camera_controller = HamamatsuController(camera_id)
-        self.camera_controller.set_property_value("sensor_mode", self.model.CameraParameters['sensor_mode'])
+        self.camera_controller.set_property_value("sensor_mode",
+                                                  self.model.CameraParameters['sensor_mode'])
         self.camera_controller.set_property_value("defect_correct_mode",
-                                                self.model.CameraParameters['defect_correct_mode'])
-        self.camera_controller.set_property_value("exposure_time", self.camera_exposure_time)
-        self.camera_controller.set_property_value("binning", self.x_binning)
-        self.camera_controller.set_property_value("readout_speed", self.model.CameraParameters['readout_speed'])
-        self.camera_controller.set_property_value("trigger_active", self.model.CameraParameters['trigger_active'])
-        self.camera_controller.set_property_value("trigger_mode", self.model.CameraParameters['trigger_mode'])
-        self.camera_controller.set_property_value("trigger_polarity", self.model.CameraParameters['trigger_polarity'])
-        self.camera_controller.set_property_value("trigger_source", self.model.CameraParameters['trigger_source'])
-        self.camera_controller.set_property_value("internal_line_interval", self.camera_line_interval)
-        self.camera_controller.set_property_value("image_height", self.y_pixels)
-        self.camera_controller.set_property_value("image_width", self.x_pixels)
+                                                  self.model.CameraParameters['defect_correct_mode'])
+        # self.camera_controller.set_property_value("exposure_control",
+        #                                           1)
+        self.camera_controller.set_property_value("binning",
+                                                  int(self.model.CameraParameters['binning'][0]))
+        self.camera_controller.set_property_value("readout_speed",
+                                                  self.model.CameraParameters['readout_speed'])
+        self.camera_controller.set_property_value("trigger_active",
+                                                  self.model.CameraParameters['trigger_active'])
+        self.camera_controller.set_property_value("trigger_mode",
+                                                  self.model.CameraParameters['trigger_mode'])
+        self.camera_controller.set_property_value("trigger_polarity",
+                                                  self.model.CameraParameters['trigger_polarity'])
+        self.camera_controller.set_property_value("trigger_source",
+                                                  self.model.CameraParameters['trigger_source'])
+        self.camera_controller.set_property_value("exposure_time",
+                                                  self.model.CameraParameters['exposure_time'] / 1000)
+        self.camera_controller.set_property_value("internal_line_interval",
+                                                  self.model.CameraParameters['line_interval'])
+        # self.camera_controller.set_property_value("image_height",
+        #                                           self.model.CameraParameters['y_pixels'])
+        # self.camera_controller.set_property_value("image_width",
+        #                                           self.model.CameraParameters['x_pixels'])
+
+        print("Initialization Exposure!:", self.model.CameraParameters['exposure_time'] / 1000)
+        print("Initialization Line Interval!:", self.model.CameraParameters['line_interval'])
 
         if self.verbose:
             print("Hamamatsu Camera Class Initialized")
@@ -50,9 +67,10 @@ class Camera(CameraBase):
                   "trigger_source",
                   "internal_line_interval",
                   "image_height",
-                  "image_width"]
+                  "image_width",
+                  "exposure_time"]
         for param in params:
-            print(param, self.camera_controller.getPropertyValue(param))
+            print(param, self.camera_controller.get_property_value(param))
 
     def close_camera(self):
         self.camera_controller.shutdown()
@@ -69,7 +87,9 @@ class Camera(CameraBase):
         """
         #  Units of the Hamamatsu API are in seconds.
         #  All of our units are in milliseconds.
+        #  Must convert to seconds.
         """
+        time = time/1000
         self.camera_controller.set_property_value("exposure_time", time)
 
     def set_line_interval(self, time):

@@ -109,6 +109,7 @@ class Model:
 
     def set_data_buffer(self, data_buffer):
         self.data_buffer = data_buffer
+        self.camera.initialize_image_series(self.data_buffer)
     
     #  Basic Image Acquisition Functions
     #  - These functions are used to acquire images from the camera
@@ -136,6 +137,7 @@ class Model:
             self.stop_acquisition = True
             self.run_data_process(1)
             self.end_acquisition()
+
         elif command == 'live':
             self.is_save = False
             self.stop_acquisition = False
@@ -191,11 +193,10 @@ class Model:
 
     def prepare_acquisition(self):
         """
-        # 
+        # Open shutter and attaches buffer to the camera.
         """
         self.open_shutter()
-        # attach buffer to camera
-        self.camera.initialize_image_series(self.data_buffer)
+        # self.camera.initialize_image_series(self.data_buffer)
 
     def end_acquisition(self):
         """
@@ -247,30 +248,6 @@ class Model:
                     print('data thread is stopped, send stop to parent pipe')
                 break
 
-
-    def snap_image(self):
-        """
-        # Snaps a single image after updating the waveforms.
-        #
-        # Can be used in acquisitions where changing waveforms are required,
-        # but there is additional overhead due to the need to write the
-        # waveforms into the buffers of the NI cards.
-        #
-        """
-        #  Initialize the DAQ Tasks and the Camera.
-        self.daq.initialize_tasks()
-
-        #  Prepare the DAQ for Waveform Delivery
-        self.daq.create_tasks()
-        self.daq.create_waveforms()
-        self.daq.start_tasks()
-
-        #  Trigger everything and grab the image.
-        self.daq.run_tasks()
-
-        #  Close everything.
-        self.daq.stop_tasks()
-        self.daq.close_tasks()
 
 
     def prepare_image_series(self):
@@ -332,7 +309,7 @@ class Model:
         # Disables the camera
         """
         self.camera.set_property_value('exposure_time', self.experiment.MicroscopeState['channels']
-                                      ['channel_1']['camera_exposure_time']/1000)
+                                      ['channel_1']['camera_exposure_time'])
         # self.camera.set_exposure_time(self.experiment.MicroscopeState['channels']
         #                               ['channel_1']['camera_exposure_time']/1000)
         # self.camera.initialize_image_series(self.data_ptr)
@@ -380,8 +357,7 @@ class Model:
                 self.current_laser_index = channel['laser_index']
 
                 #  Set the parameters
-                # self.camera.set_exposure_time(self.current_exposure_time)
-                # self.camera.dcam_set_camera_exposure(self.current_exposure_time)
+                self.camera.set_exposure_time(self.current_exposure_time)
                 self.filter_wheel.set_filter(self.current_filter)
                 self.daq.laser_idx = self.current_laser_index
                 if self.verbose:
@@ -390,9 +366,34 @@ class Model:
                     print("Filter Wheel:", self.current_filter)
 
                 self.snap_image()
+                # print("Image Acquired with These CAMERA Settings!")
+                # self.camera.report_camera_settings()
                 # may need to add some wait time
                 # if (readout time + exposure time) > (time to move filter_wheel + daq), then add a wait time
 
+    def snap_image(self):
+        """
+        # Snaps a single image after updating the waveforms.
+        #
+        # Can be used in acquisitions where changing waveforms are required,
+        # but there is additional overhead due to the need to write the
+        # waveforms into the buffers of the NI cards.
+        #
+        """
+        #  Initialize the DAQ Tasks and the Camera.
+        self.daq.initialize_tasks()
+
+        #  Prepare the DAQ for Waveform Delivery
+        self.daq.create_tasks()
+        self.daq.create_waveforms()
+        self.daq.start_tasks()
+
+        #  Trigger everything and grab the image.
+        self.daq.run_tasks()
+
+        #  Close everything.
+        self.daq.stop_tasks()
+        self.daq.close_tasks()
 
     def run_live_acquisition(self):
         """

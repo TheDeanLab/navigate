@@ -140,11 +140,12 @@ property_dict = {
     'readout_speed': 4194576,  # 0x00400110, R/W, long,    "READOUT SPEED"
     'trigger_active': 1048864,  # 0x00100120, R/W, mode,   "TRIGGER ACTIVE"
     'trigger_mode': 1049104,  # 0x00100210, R/W, mode,    "TRIGGER MODE"
-    'trigger_polarity': 1049120, # 0x00100220, R/W, mode, "TRIGGER POLARITY"
+    'trigger_polarity': 1049120,  # 0x00100220, R/W, mode, "TRIGGER POLARITY"
     'trigger_source': 1048848,  # 0x00100110, R/W, mode,   "TRIGGER SOURCE"
     'internal_line_interval': 4208720,  # 0x00403850, R/W, sec,    "INTERNAL LINE INTERVAL"
     'image_width': 4325904,  # 0x00420210, R/O, long, "IMAGE WIDTH"
-    'image_height': 4325920  # 0x00420220, R/O, long,    "IMAGE HEIGHT"
+    'image_height': 4325920,  # 0x00420220, R/O, long,    "IMAGE HEIGHT"
+    'exposuretime_control': 2031920  # 0x001F0130, R/W, mode,    "EXPOSURE TIME CONTROL"
 }
 
 
@@ -373,8 +374,10 @@ class DCAM:
         # this function will set property value according to property name
         """
         if name not in property_dict:
-            print('could not set value for', name, 'please make sure the property name is correct and is added to property_dict!')
+            print('could not set value for', name,
+                  'please make sure the property name is correct and is added to property_dict!')
             return False
+
         # get property code
         idprop = property_dict[name]
 
@@ -384,8 +387,11 @@ class DCAM:
         if final_configuration == value:
             return True
         else:
-            print(name, "Configuration Failed")
+            print(name, "Configuration Failed", value, final_configuration)
             return False
+
+    def get_property_value(self, name):
+        return self.prop_getvalue(property_dict[name])
 
     def start_acquisition(self, data_buffer, number_of_frames=100):
         """
@@ -422,6 +428,7 @@ class DCAM:
         """
         # stop capture
         dcamcap_stop(self.__hdcam)
+
         # detach buffer
         return self.__result(dcamcap_stop(self.__hdcam, DCAMBUF_ATTACHKIND_FRAME))
 
@@ -439,7 +446,10 @@ class DCAM:
         frame_idx_list = []
         wait_param = DCAMWAIT_START()
         wait_param.eventmask = DCAMWAIT_CAPEVENT_FRAMEREADY | DCAMWAIT_CAPEVENT_STOPPED
-        wait_param.timeout = 100  # 100ms
+        wait_param.timeout = 500  # 100ms
+        #  Timeout Duration - Will throw an error if the timeout is too small.
+        #  Currently set to a value > maximum typical integration time.
+
         if self.__result(dcamwait_start(self.__hdcamwait, byref(wait_param))):
             cap_info = DCAMCAP_TRANSFERINFO()
             dcamcap_transferinfo(self.__hdcam, byref(cap_info))
@@ -469,6 +479,7 @@ class DCAM:
     def get_camera_handler(self):
         return self.__hdcam
 
+
 if __name__ == '__main__':
 
     print('start testing Hamamatsu API!')
@@ -496,9 +507,10 @@ if __name__ == '__main__':
         'trigger_mode': 1.0,  # external light-sheet mode
         'trigger_polarity': 2.0,  # positive pulse
         'trigger_source': 3.0,  # software
-        'exposure_time': 0.02
-        #'internal_line_interval': 0.000075
+        'exposure_time': 0.02,
+        'internal_line_interval': 0.000075
     }
+    camera.prop_getvalue(property_dict['exposuretime_control'])
 
     # configure camera
     for key in configuration:

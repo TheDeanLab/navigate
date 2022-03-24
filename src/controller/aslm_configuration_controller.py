@@ -11,6 +11,7 @@ class ASLM_Configuration_Controller:
             'laser': self.get_lasers_info(verbose),
             'filter': list(self.configuration.FilterWheelParameters['available_filters'].keys()),
             'camera_exposure_time': self.configuration.CameraParameters['exposure_time']
+            # Populated in units milliseconds
         }
         return setting
 

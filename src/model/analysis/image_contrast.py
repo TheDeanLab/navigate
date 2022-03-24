@@ -17,7 +17,8 @@ def normalized_dct_shannon_entropy(input_array, psf_support_diameter_xy, verbose
     # Returns the entropy value.
     '''
 
-    use_cpu = initiate_gpu()
+    #use_cpu = initiate_gpu()
+    use_cpu = False
 
     # Image Attributes
     input_array = np.double(input_array)
@@ -116,7 +117,6 @@ def initiate_gpu():
                                                        [tf.config.LogicalDeviceConfiguration(memory_limit=23000),
                                                         tf.config.LogicalDeviceConfiguration(memory_limit=23000)])
             logical_gpus = tf.config.list_logical_devices('GPU')
-            print(len(gpus), "Physical GPU,", len(logical_gpus), "Logical GPUs")
         except RuntimeError as e:
             # Virtual devices must be set before GPUs have been initialized
             print(e)

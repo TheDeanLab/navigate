@@ -1,7 +1,8 @@
-from fcntl import F_ADD_SEALS
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk        
 from decimal import Decimal, InvalidOperation
+from hoverbar import Tooltip
+from LabelInputWidgetFactory import LabelInput
 
 # Base design courtesy of below book.
 # Learning Path: Python GUI Programming - A Complete Reference Guide by Alan D. Moore and B. M. Harwani 
@@ -66,7 +67,7 @@ class ValidatedMixin:
 
     # Error handler - where you can customize color or what happens to widget
     def _toggle_error(self, on=False):
-        self.config(background=('red' if on else 'white')) # Changes background to red on error TODO foreground?
+        self.config(foreground=('red' if on else 'black')) # Changes background to red on error TODO foreground?
 
     # Validation, args are the sub codes. This just sets up validation then runs based on event type
     def _validate(self, proposed, current, char, event, index, action):
@@ -269,4 +270,79 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         else:
             self.variable.set(current)
         self.trigger_focusout_validation() # Revalidate with the new maximum
+
+if __name__ == '__main__':
+
+
+
+    root = tk.Tk()
+    frame = ttk.Frame(root)
+
+    val = ['Hello', "World", "Science"]
+    evar = tk.DoubleVar()
+    wvar = tk.DoubleVar()
+
+    btn_ne = RequiredEntry(frame)
+    btn_se = ValidatedCombobox(frame)
+    btn_se['values'] = val
+    btn_sw = ValidatedCombobox(frame)
+    btn_sw['values'] = val
+    btn_nw = RequiredEntry(frame)
+
+    btn_center = LabelInput(frame,
+                            label_pos="top",
+                            label='Dynamic Range',
+                            input_class=ValidatedSpinbox,
+                            input_var=tk.DoubleVar,
+                            input_args={"from_":'0', "to":'25', "increment": '1.0', "min_var":wvar, "max_var":evar}
+    )
+    # btn_center = ValidatedSpinbox(frame, min_var=wvar,max_var=evar)
+
+
+    btn_n = RequiredEntry(frame)
+    btn_e = ValidatedSpinbox(frame, from_=0,to=20,increment=1,min_var=wvar, focus_update_var=evar)
+    btn_s = ValidatedCombobox()
+    btn_s['values'] = val
+    btn_w = ValidatedSpinbox(frame, from_=0,to=20,increment=1, max_var=evar, focus_update_var=wvar)
+
+
+    r = 0
+    c = 0
+    pad = 10
+    btn_nw.grid(row=r, column=c, padx=pad, pady=pad, sticky=tk.NW)
+    btn_n.grid(row=r, column=c + 1, padx=pad, pady=pad, sticky=tk.N)
+    btn_ne.grid(row=r, column=c + 2, padx=pad, pady=pad, sticky=tk.NE)
+
+    r += 1
+    btn_w.grid(row=r, column=c + 0, padx=pad, pady=pad, sticky=tk.W)
+    btn_center.grid(row=r, column=c + 1, padx=pad, pady=pad,
+                sticky=tk.NSEW)
+    btn_e.grid(row=r, column=c + 2, padx=pad, pady=pad, sticky=tk.E)
+
+    r += 1
+    btn_sw.grid(row=r, column=c, padx=pad, pady=pad, sticky=tk.SW)
+    btn_s.grid(row=r, column=c + 1, padx=pad, pady=pad, sticky=tk.S)
+    btn_se.grid(row=r, column=c + 2, padx=pad, pady=pad, sticky=tk.SE)
+
+    frame.grid(sticky=tk.NSEW)
+    for i in (0, 2):
+        frame.rowconfigure(i, weight=1)
+        frame.columnconfigure(i, weight=1)
+
+    root.rowconfigure(0, weight=1)
+    root.columnconfigure(0, weight=1)
+
+    bt = Tooltip(btn_center, text="Value is not between {} and {}".format(wvar.get(),evar.get()), wraplength=200)
+    
+    def get_val():
+        left = wvar.get()
+        right = evar.get()
+        Tooltip(btn_center, text="Value is not between {} and {}".format(left,right), wraplength=200)
+    bt.widget.bind('<<Increment>>', get_val)
+    bt.widget.bind('<<Decrement>>', get_val)
+
+    root.title('Validation Tests')
+    root.mainloop()
+
+    
 

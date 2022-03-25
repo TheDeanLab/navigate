@@ -57,9 +57,6 @@ class PopUp(tk.Toplevel):
         self.content_frame = ttk.Frame(self)
         self.content_frame.grid(row=0, column=0, sticky=(NSEW))
 
-        # #Creating content to put into popup frame
-        # self.content = popup_widgets(self.popup_frame, self)
-        # self.content.grid(row=0, column=0, sticky=(NSEW))
         
     #Catching close buttons/destroying window procedures
         #Dismiss function for destroying window when done

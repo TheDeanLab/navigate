@@ -1,4 +1,3 @@
-from curses.panel import top_panel
 import tkinter as tk
 from tkinter import ttk        
 from decimal import Decimal, InvalidOperation

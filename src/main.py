@@ -65,7 +65,7 @@ def main():
     parser = argparse.ArgumentParser(description='Microscope Control Arguments')
     input_args = parser.add_argument_group('Input Arguments')
     input_args.add_argument('--verbose', required=False, default=False, action='store_true', help='Verbose output')
-    input_args.add_argument('--synthetic_hardware', required=False, default=False, action='store_true',
+    input_args.add_argument('--sh', '--synthetic_hardware', required=False, default=False, action='store_true',
                             help='Synthetic hardware modules')
 
     # Configuration and Experiment input arguments

@@ -1,7 +1,9 @@
+from curses.panel import top_panel
 import tkinter as tk
 from tkinter import ttk        
 from decimal import Decimal, InvalidOperation
 from hoverbar import Tooltip
+from LabelInputWidgetFactory import LabelInput
 
 # Base design courtesy of below book.
 # Learning Path: Python GUI Programming - A Complete Reference Guide by Alan D. Moore and B. M. Harwani 
@@ -281,27 +283,29 @@ if __name__ == '__main__':
     evar = tk.DoubleVar()
     wvar = tk.DoubleVar()
 
-    btn_ne = RequiredEntry()
-    btn_se = ValidatedCombobox()
+    btn_ne = RequiredEntry(frame)
+    btn_se = ValidatedCombobox(frame)
     btn_se['values'] = val
-    btn_sw = ValidatedCombobox()
+    btn_sw = ValidatedCombobox(frame)
     btn_sw['values'] = val
-    btn_nw = RequiredEntry()
-    btn_center = ValidatedSpinbox(min_var=wvar,max_var=evar)
-    btn_n = RequiredEntry()
-    btn_e = ValidatedSpinbox(from_=0,to=20,increment=1, textvariable=evar)
+    btn_nw = RequiredEntry(frame)
+
+    btn_center = LabelInput(frame,
+                            label_pos="top",
+                            label='Dynamic Range',
+                            input_class=ValidatedSpinbox,
+                            input_var=tk.DoubleVar,
+                            input_args={"from_":'0', "to":'25', "increment": '1.0', "min_var":wvar, "max_var":evar}
+    )
+    # btn_center = ValidatedSpinbox(frame, min_var=wvar,max_var=evar)
+
+
+    btn_n = RequiredEntry(frame)
+    btn_e = ValidatedSpinbox(frame, from_=0,to=20,increment=1,min_var=wvar, focus_update_var=evar)
     btn_s = ValidatedCombobox()
     btn_s['values'] = val
-    btn_w = ValidatedSpinbox(from_=0,to=20,increment=1, textvariable=wvar)
+    btn_w = ValidatedSpinbox(frame, from_=0,to=20,increment=1, max_var=evar, focus_update_var=wvar)
 
-    bt = Tooltip(btn_center, text="Value is not between {} and {}".format(wvar.get(),evar.get()), wraplength=200)
-    
-    def get_val():
-        left = wvar.get()
-        right = evar.get()
-        bt.text = "Value is not between {} and {}".format(left,right)
-    bt.widget.bind('<<Increment>>', get_val)
-    bt.widget.bind('<<Decrement>>', get_val)
 
     r = 0
     c = 0
@@ -328,6 +332,15 @@ if __name__ == '__main__':
 
     root.rowconfigure(0, weight=1)
     root.columnconfigure(0, weight=1)
+
+    bt = Tooltip(btn_center, text="Value is not between {} and {}".format(wvar.get(),evar.get()), wraplength=200)
+    
+    def get_val():
+        left = wvar.get()
+        right = evar.get()
+        Tooltip(btn_center, text="Value is not between {} and {}".format(left,right), wraplength=200)
+    bt.widget.bind('<<Increment>>', get_val)
+    bt.widget.bind('<<Decrement>>', get_val)
 
     root.title('Validation Tests')
     root.mainloop()

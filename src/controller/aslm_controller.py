@@ -40,7 +40,12 @@ class ASLM_controller:
         self.threads_pool = SynchronizedThreadPool()
 
         # Initialize the Model
-        self.model = ObjectInSubprocess(Model, args, configuration_path=configuration_path, experiment_path=experiment_path, etl_constants_path=etl_constants_path)
+        self.model = ObjectInSubprocess(Model,
+                                        args,
+                                        configuration_path=configuration_path,
+                                        experiment_path=experiment_path,
+                                        etl_constants_path=etl_constants_path)
+
         # self.model = Model(args, configuration_path, experiment_path, etl_constants_path)
 
         # save default experiment file
@@ -235,9 +240,9 @@ class ASLM_controller:
             }
         }
         for menu in menus_dict:
-            menuitems = menus_dict[menu]
-            for label in menuitems:
-                menu.add_command(label=label, command=menuitems[label])
+            menu_items = menus_dict[menu]
+            for label in menu_items:
+                menu.add_command(label=label, command=menu_items[label])
 
         # add zoom menu
         self.zoom_value = tkinter.IntVar()

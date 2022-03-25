@@ -78,18 +78,25 @@ class Main_App(ttk.Frame):
                 '''
 
         # Gridding out foundational frames
-        mainapp.grid(column=0, row=0, sticky=(NSEW))  # Sticky tells which walls of gridded cell the widget should stick to, in this case its sticking to the main window on all sides
+        mainapp.grid(column=0, row=0, sticky=(NSEW))
+        # Sticky tells which walls of gridded cell the widget should stick to,
+        # in this case its sticking to the main window on all sides
         mainapp.top_frame.grid(row=0, column=0, columnspan=2, sticky=(NSEW))
         mainapp.frame_left.grid(row=1, column=0, rowspan=2, sticky=(NSEW))
         mainapp.frame_top_right.grid(row=1, column=1, sticky=(NSEW))
         mainapp.frame_bottom_right.grid(row=2, column=1, sticky=(NSEW))
 
-        # This dictates how to weight each piece of the grid, so that when the window is resized the notebooks get the proper screen space.
-        # mainapp or mainapp is the frame holding all the other frames that hold the notebooks to help modularize the code
+        # This dictates how to weight each piece of the grid,
+        # so that when the window is resized the notebooks get the proper screen space.
+        # mainapp or mainapp is the frame holding all the other frames that hold the
+        # notebooks to help modularize the code
         mainapp.columnconfigure(0,
-                                weight=1)  # can add an arg called min or max size to give starting point for each frame
+                                weight=1)
+        # can add an arg called min or max size to give starting point for each frame
         mainapp.columnconfigure(1,
-                                weight=1)  # weights are relative to each other so if there is a 3 and 1 the 3 weight will give that col/row 3 pixels for every one the others get
+                                weight=1)
+        # weights are relative to each other so if there is a 3 and 1 the 3 weight
+        # will give that col/row 3 pixels for every one the others get
         mainapp.rowconfigure(0, weight=1)
         mainapp.rowconfigure(1, weight=1)
 

@@ -278,7 +278,8 @@ class ObjectInSubprocess:
     def __init__(self, initializer, *initargs, custom_loop=None,
                  close_method_name=None, closeargs=None, closekwargs=None,
                  with_lock=False, **initkwargs):
-        """Make an object in a child process, that acts like it isn't.
+        """
+        Make an object in a child process, that acts like it isn't.
 
         As much as possible, we try to make instances of ObjectInSubprocess
         behave as if they're an instance of the object living in the parent

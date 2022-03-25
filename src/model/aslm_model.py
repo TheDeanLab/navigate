@@ -21,6 +21,8 @@ class Model:
     def __init__(self, args, configuration_path=None, experiment_path=None, etl_constants_path=None):
         # Retrieve the initial configuration from the yaml file
         self.verbose = args.verbose
+        print("verbose set as:", args.verbose)
+        print("synthetic hardware set as:", args.synthetic_hardware)
 
         # Loads the YAML file for all of the microscope parameters
         self.configuration = session(configuration_path, args.verbose)
@@ -32,7 +34,7 @@ class Model:
         self.etl_constants = session(etl_constants_path, args.verbose)
 
         # Initialize all Hardware
-        if args.synthetic_hardware:
+        if args.synthetic_hardware or args.sh:
             # If command line entry provided, overwrites the model parameters with synthetic hardware
             self.configuration.Devices['daq'] = 'SyntheticDAQ'
             self.configuration.Devices['camera'] = 'SyntheticCamera'

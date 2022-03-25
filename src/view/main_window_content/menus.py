@@ -24,7 +24,7 @@ class menubar(Menu):
         self.menu_multi_positions = Menu(self)
         self.add_cascade(menu=self.menu_multi_positions, label='Multi-Position')
 
-        #  Zoom Menu
+        # Zoom Menu
         self.menu_zoom = Menu(self)
         self.add_cascade(menu=self.menu_zoom, label='Zoom')
 

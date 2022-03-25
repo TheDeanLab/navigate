@@ -64,16 +64,37 @@ def main():
     # Parse command line arguments
     parser = argparse.ArgumentParser(description='Microscope Control Arguments')
     input_args = parser.add_argument_group('Input Arguments')
-    input_args.add_argument('--verbose', required=False, default=False, action='store_true', help='Verbose output')
-    input_args.add_argument('--sh', '--synthetic_hardware', required=False, default=False, action='store_true',
+    input_args.add_argument('--verbose',
+                            required=False,
+                            default=False,
+                            action='store_true',
+                            help='Verbose output')
+    input_args.add_argument('--synthetic_hardware',
+                            required=False,
+                            default=False,
+                            action='store_true',
+                            help='Synthetic hardware modules')
+    input_args.add_argument('--sh',
+                            required=False,
+                            default=False,
+                            action='store_true',
                             help='Synthetic hardware modules')
 
     # Configuration and Experiment input arguments
-    input_args.add_argument('--config_file', type=Path, required=False, default=None,
+    input_args.add_argument('--config_file',
+                            type=Path,
+                            required=False,
+                            default=None,
                             help='path to configuration.yml file')
-    input_args.add_argument('--experiment_file', type=Path, required=False, default=None,
+    input_args.add_argument('--experiment_file',
+                            type=Path,
+                            required=False,
+                            default=None,
                             help='path to experiment.yml file')
-    input_args.add_argument('--etl_const_file', type=Path, required=False, default=None,
+    input_args.add_argument('--etl_const_file',
+                            type=Path,
+                            required=False,
+                            default=None,
                             help='path to etl_constants.yml file')
 
     args = parser.parse_args()

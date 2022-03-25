@@ -1,11 +1,5 @@
 """
 Module for controlling Dynamixel discrete zoom changer
-
-Previously initialize as:
-def __init__(self, zoomdict, COMport, identifier=2, baudrate=1000000):
-
-Adopted from mesoSPIM
-
 """
 # Standard library imports
 import time
@@ -18,9 +12,8 @@ from model.devices.zoom.dynamixel import dynamixel_functions as dynamixel
 class Zoom(ZoomBase):
     def __init__(self, model, verbose):
         super().__init__(model, verbose)
-
         self.dynamixel = dynamixel
-        self.id = 2
+        self.id = model.ZoomParameters['servo_id']
         self.comport = model.ZoomParameters['COMport']
         self.devicename = self.comport.encode('utf-8')
         self.baudrate = model.ZoomParameters['baudrate']
@@ -60,9 +53,11 @@ class Zoom(ZoomBase):
             raise ValueError('Zoom designation not in the configuration')
         if self.verbose:
             print('Zoom set to {}'.format(zoom))
+            print("Zoom position:", self.read_position())
 
     def move(self, position, wait_until_done=False):
-        # open port and set baud rate
+
+        # Open port and set baud rate
         self.dynamixel.openPort(self.port_num)
         self.dynamixel.setBaudRate(self.port_num, self.baudrate)
 

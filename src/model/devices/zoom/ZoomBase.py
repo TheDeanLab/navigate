@@ -14,7 +14,6 @@ class ZoomBase:
         self.zoomdict = model.ZoomParameters['zoom_position']
         self.zoomvalue = None
 
-
     def set_zoom(self, zoom_position, wait_until_done=False):
         if zoom_position in self.zoomdict:
             if self.verbose:

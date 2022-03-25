@@ -202,13 +202,13 @@ ZoomParameters:
   COMport: COM21
   baudrate: 1000000
   zoom_position: {
-    0.63: 0,
-    1: 627,
-    2: 1711,
-    3: 2301,
-    4: 2710,
-    5: 3079,
-    6: 3383
+    0.63x: 0,
+    1x: 627,
+    2x: 1711,
+    3x: 2301,
+    4x: 2710,
+    5x: 3079,
+    6x: 3383
   }
   low_res_zoom_pixel_size: {
     0.63x: 9.7,

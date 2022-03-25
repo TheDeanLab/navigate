@@ -2,7 +2,7 @@
 ---
 
 ETLConstants:
-  low: {
+  high: {
     one: {
       488nm: {
         amplitude: 2.336,
@@ -18,7 +18,7 @@ ETLConstants:
       }
     }
   }
-  high: {
+  low: {
     0.63x: {
       488nm: {
         amplitude: 2.5,

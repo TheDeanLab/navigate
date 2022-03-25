@@ -49,7 +49,8 @@ class Model:
         # we start serial devices in function self.start_serial_devices()
         # TODO: make sure all serial devices connected to the same computer serial port moved to self.start_serial_device()
         threads_dict = {
-            'serial_devices': ResultThread(target=self.start_serial_devices).start(),
+            'filter_wheel': ResultThread(target=start_filter_wheel, args=(self.configuration, self.verbose)).start(),
+            'zoom': ResultThread(target=start_zoom_servo, args=(self.configuration, self.verbose)).start(),
             'camera': ResultThread(target=start_camera, args=(self.configuration, self.experiment, self.verbose,)).start(),
             'stages': ResultThread(target=start_stages, args=(self.configuration, self.verbose,)).start(),
             'shutter': ResultThread(target=start_shutters, args=(self.configuration, self.experiment, self.verbose,)).start(),
@@ -94,15 +95,6 @@ class Model:
         # show image function/pipe handler
         self.show_img_pipe = None
 
-    def start_serial_devices(self):
-        """
-        # This function used to start serial devices
-        # TODO:If other devices connect to the same computer serial port, we could add it here
-        """
-        self.filter_wheel = start_filter_wheel(self.configuration, self.verbose)
-        self.zoom = start_zoom_servo(self.configuration, self.verbose)
-        # self.laser=start_lasers(self.configuration, self.verbose)
-
     def set_show_img_pipe(self, handler):
         """
         # wire up show image function/pipe
@@ -124,10 +116,12 @@ class Model:
     def run_command(self, command, *args, **kwargs):
         if self.verbose:
             print('in the model(get the command from controller):', command, args)
+
         if not self.data_buffer:
             if self.verbose:
                 print('Error: have not set up data buffer!')
             return
+
         if command == 'single':
             self.experiment.MicroscopeState = args[0]
             self.is_save = self.experiment.MicroscopeState['is_save']
@@ -149,8 +143,10 @@ class Model:
             self.data_thread = threading.Thread(target=self.run_data_process)
             self.live_thread.start()
             self.data_thread.start()
+
         elif command == 'series':
             pass
+
         elif command == 'update setting':
             # stop live thread
             self.stop_send_signal = True
@@ -162,6 +158,7 @@ class Model:
             self.prepare_acquisition()
             self.live_thread = threading.Thread(target=self.run_live_acquisition)
             self.live_thread.start()
+
         elif command == 'stop':
             # stop live thread
             self.stop_acquisition = True

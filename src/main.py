@@ -112,7 +112,7 @@ def main():
 
     # Start the GUI
     root = tk.Tk()
-    app = controller(root, configuration_path, experiment_path, etl_constants_path, args)
+    controller(root, configuration_path, experiment_path, etl_constants_path, args)
     root.mainloop()
 
 

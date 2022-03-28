@@ -74,10 +74,24 @@ class DCAMERR(IntEnum):
     # success
     SUCCESS = 1  # 1, no error, general success code, app should check the value is positive
     ALREADYOPENED = -520093694  # 0xE1000002
-    INVALIDHANDLE = -2147481593  # 0x80000807, invalid camera handle
-    INVALIDWAITHANDLE = -2080366591  # 0x84002001, DCAMWAIT is invalid handle
-    INVALIDPARAM = -2147481592  # 0x80000808, invalid parameter
     NOTSUPPORT = -2147479805  # 0x80000f03, camera does not support the function or property with current settings
+    TIMEOUT = -2147483386  # 0x80000106, timeout
+
+    # status error
+    BUSY = -2147483391  # 0x80000101, API cannot process in busy state.
+    NOTREADY = -2147483389  # 0x80000103, API requires ready state.
+    NOTSTABLE = -2147483388  # 0x80000104, API requires stable or unstable state.
+    UNSTABLE = -2147483387  # 0x80000105, API does not support in unstable state.
+
+    # calling error
+    INVALIDCAMERA = -2147481594  # 0x80000806, invalid camera
+    INVALIDHANDLE = -2147481593  # 0x80000807, invalid camera handle
+    INVALIDPARAM = -2147481592  # 0x80000808, invalid parameter
+    INVALIDVALUE = -2147481567  # 0x80000821, invalid property value
+    OUTOFRANGE = -2147481566  # 0x80000822, value is out of range
+    NOTWRITABLE = -2147481565  # 0x80000823, the property is not writable
+    NOTREADABLE = -2147481564  # 0x80000824, the property is not readable
+    INVALIDPROPERTYID = -2147481563  # 0x80000825, the property id is invalid
 
 class DCAMPROP_ATTR(Structure):
     _pack_ = 8
@@ -187,8 +201,10 @@ class DCAM:
         Internal use. Keep last error code
         """
         if errvalue < 0:
-            self.__lasterr = errvalue
-            print('error message: ', errvalue)
+            try:
+                print('error message: ', DCAMERR(errvalue))
+            except:
+                print('error message: ', errvalue)
             return False
 
         return True
@@ -430,7 +446,7 @@ class DCAM:
         dcamcap_stop(self.__hdcam)
 
         # detach buffer
-        return self.__result(dcamcap_stop(self.__hdcam, DCAMBUF_ATTACHKIND_FRAME))
+        return self.__result(dcambuf_release(self.__hdcam, DCAMBUF_ATTACHKIND_FRAME))
 
     def get_frames(self):
         """
@@ -446,7 +462,7 @@ class DCAM:
         frame_idx_list = []
         wait_param = DCAMWAIT_START()
         wait_param.eventmask = DCAMWAIT_CAPEVENT_FRAMEREADY | DCAMWAIT_CAPEVENT_STOPPED
-        wait_param.timeout = 500  # 100ms
+        wait_param.timeout = 500  # 500ms
         #  Timeout Duration - Will throw an error if the timeout is too small.
         #  Currently set to a value > maximum typical integration time.
 
@@ -459,14 +475,14 @@ class DCAM:
             frame_count = cap_info.nFrameCount - self.pre_frame_count
             print("Frame Count - cap_info", cap_info.nFrameCount, frame_count)
             print("Newest Frame Index - cap_info", cap_info.nNewestFrameIndex)
+            
             if frame_count <= cap_info.nNewestFrameIndex + 1:
                 frame_idx_list = list(range(cap_info.nNewestFrameIndex - frame_count + 1,
                                             cap_info.nNewestFrameIndex + 1))
             else:
                 frame_idx_list = list(range(self.number_of_frames - frame_count + cap_info.nNewestFrameIndex +
                                             1, self.number_of_frames)) + list(range(0, cap_info.nNewestFrameIndex + 1))
-
-            print("Number of Frames:", self.number_of_frames)
+            
             print("frame_idx_list:", frame_idx_list)
             # check if backlog happens
             # if (self.pre_index+1) % self.number_of_frames != frame_idx_list[0]:

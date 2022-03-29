@@ -90,7 +90,7 @@ RemoteFocusParameters:
   remote_focus_r_max_ao: 10
 
 FilterWheelParameters:
-  filter_wheel_port: COM13
+  filter_wheel_port: COM19
   baudrate: 9600
   number_of_filter_wheels: 2
   filter_wheel_delay: .030 # in seconds

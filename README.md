@@ -51,6 +51,9 @@ If running the software on campus at UTSW you may need to update some of your pr
 * If you still have issues then you will need to create/update both configuration files for conda and pip to include proxy settings, if they are not in the paths below you will need to create them. This assumes a Windows perspective. Mac/Linux users will have different paths, they can be found online.
     Conda's Config file = C:\Users\UserProfile\.condarc
     Pip's Config file = C:\Users\UserProfile\pip\pip.ini
+* You can also try to set the proxy from within the Anaconda Prompt:
+	set https_proxy=http://username:password@proxy.example.com:8080
+	set http_proxy=http://username:password@proxy.example.com:8080
 
 ### Hardware Dependencies
 * DLL for Dynamixel Servo Motor

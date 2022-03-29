@@ -32,7 +32,7 @@ class FilterWheel(FilterWheelBase):
                 print('Opening Filter Wheel on Serial Port', self.comport)
             self.serial = serial.Serial(self.comport, self.baudrate, timeout=.25)
         except serial.SerialException:
-            raise UserWarning('Could not communicate with Sutter Lambda 10-B.')
+            raise UserWarning('Could not communicate with Sutter Lambda 10-B via COMPORT', self.comport)
 
         # Place Controller Into 'Online' Mode
         if self.verbose:
@@ -133,3 +133,6 @@ class FilterWheel(FilterWheelBase):
             print('Closing the Filter Wheel Serial Port')
         self.set_filter('Empty-Alignment')
         self.serial.close()
+
+if __name__ == "__main__":
+    pass

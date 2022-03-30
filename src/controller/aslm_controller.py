@@ -24,6 +24,9 @@ from controller.sub_controllers.etl_popup_controller import Etl_Popup_Controller
 from controller.aslm_controller_functions import *
 from controller.thread_pool import SynchronizedThreadPool
 
+# Local View Imports
+from view.remote_focus_popup import remote_popup
+
 # Local Model Imports
 from model.concurrency.concurrency_tools import ObjectInSubprocess, SharedNDArray
 from model.aslm_model import Model
@@ -36,8 +39,11 @@ class ASLM_controller:
         self.verbose = args.verbose
         self.stop_acquisition = True
 
-        # Creat a thread pool
+        # Create a thread pool
         self.threads_pool = SynchronizedThreadPool()
+
+        # Load the Configuration File to Populate the GUI
+        configuration = session(configuration_path, args.verbose)
 
         # Initialize the Model
         self.model = ObjectInSubprocess(Model, args,
@@ -91,7 +97,6 @@ class ASLM_controller:
         self.initialize_menus()
         
         # Initialize view based on model.configuration
-        configuration = session(configuration_path, args.verbose)
         configuration_controller = ASLM_Configuration_Controller(configuration)
 
         # Channels Tab
@@ -104,8 +109,7 @@ class ASLM_controller:
         self.etl_other_info = configuration_controller.get_etl_info()
 
         # Set view based on model.experiment
-        self.experiment = session(experiment_path, args.verbose)
-        self.populate_experiment_setting()
+        self.populate_experiment_setting(experiment_path)
 
         # Camera Settings Tab
         self.initialize_cam_settings(configuration_controller, configuration)
@@ -134,12 +138,9 @@ class ASLM_controller:
         # Populating Min and Max Counts
         minmax_values = [110, 5000]
         self.camera_view_controller.initialize('minmax', minmax_values)
-        image_metrics = [1,0,0]
+        image_metrics = [1, 0, 0]
         self.camera_view_controller.initialize('image', image_metrics)
 
-
-        pass
- 
     def initialize_stage(self, configuration_controller, configuration):
         """
         # Pre-populate the stage positions.
@@ -174,8 +175,6 @@ class ASLM_controller:
                 return
             save_yaml_file('', self.experiment.serialize(), filename)
 
-        from view.remote_focus_popup import remote_popup
-
         def popup_etl_setting():
             etl_setting_popup = remote_popup(self.view)
             etl_controller = Etl_Popup_Controller(etl_setting_popup, self, self.verbose)
@@ -209,6 +208,7 @@ class ASLM_controller:
                                                           value='high')
 
         # low resolution sub menu
+        # TODO: Should only be one checkbox selected, depending on what mode we are initialized in.
         meso_res_sub_menu = tkinter.Menu(self.view.menubar.menu_resolution)
         self.view.menubar.menu_resolution.add_cascade(menu=meso_res_sub_menu,
                                                       label='Mesoscale')
@@ -216,10 +216,11 @@ class ASLM_controller:
         self.zoom_value = tkinter.StringVar()
         for res in self.etl_setting.ETLConstants['low'].keys():
             meso_res_sub_menu.add_radiobutton(label=res,
-                                              variable=self.resolution_value,
+                                              variable=self.zoom_value,
                                               value=res)
         # event binding
-        self.resolution_value.trace_add('write', lambda *args: self.execute('resolution', self.resolution_value.get()))
+        self.resolution_value.trace_add('write', lambda *args: self.execute('resolution', self.resolution_value.get(), self.zoom_value.get()))
+        self.zoom_value.trace_add('write', lambda *args: self.execute('resolution', self.resolution_value.get(), self.zoom_value.get()))
 
         # add separator
         self.view.menubar.menu_resolution.add_separator()
@@ -289,13 +290,15 @@ class ASLM_controller:
         # if file_name is specified and exists, this function will load an experiment file to model.experiment
         # populate model.experiment to view
         """
-        # model will load the spcified experiment file
+        # model will load the specified experiment file
         if file_name:
             file_path = Path(file_name)
             if file_path.exists():
+                # Loads experiment file within the model, then the controller.
                 self.model.load_experiment_file(file_path)
                 self.experiment = session(file_path, self.verbose)
-        # set sub-controllers in 'in_itialization' status
+
+        # set sub-controllers in 'initialization' status
         self.channels_tab_controller.in_initialization = True
 
         # populate stack acquisition from model.experiment
@@ -308,8 +311,7 @@ class ASLM_controller:
         self.channels_tab_controller.set_values('stack_acquisition', stack_acq_setting)
 
         # populate laser cycling mode
-        laser_cycling = 'Per Z' if self.experiment.MicroscopeState[
-                                       'stack_cycling_mode'] == 'per_z' else 'Per Stack'
+        laser_cycling = 'Per Z' if self.experiment.MicroscopeState['stack_cycling_mode'] == 'per_z' else 'Per Stack'
         self.channels_tab_controller.set_values('laser_cycling', laser_cycling)
 
         # populate time-points settings
@@ -365,11 +367,13 @@ class ASLM_controller:
 
         # get settings from channels tab
         settings = self.channels_tab_controller.get_values()
+
         # if there is something wrong, it will popup a window and return false
         for k in settings:
             if not settings[k]:
                 tkinter.messagebox.showerror(title='Warning', message='There are some missing/wrong settings!')
                 return False
+
         # validate channels
         try:
             for k in settings['channel']:
@@ -386,13 +390,16 @@ class ASLM_controller:
             self.experiment.MicroscopeState[k] = settings['stack_acquisition'][k]
         for k in settings['timepoint']:
             self.experiment.MicroscopeState[k] = settings['timepoint'][k]
+
         # channels
         self.experiment.MicroscopeState['channels'] = settings['channel']
+
         # get all positions
         self.experiment.MicroscopeState['stage_positions'] = self.channels_tab_controller.get_positions()
 
         # get position information from stage tab
         position = self.stage_gui_controller.get_position()
+
         # validate positions
         if not position:
             tkinter.messagebox.showerror(title='Warning', message='There are some missing/wrong settings!')
@@ -405,7 +412,10 @@ class ASLM_controller:
             self.experiment.StageParameters[axis+'_step'] = step_size[axis]
 
         # get zoom info from zoom menu
-        self.experiment.MicroscopeState['zoom_position'] = self.zoom_value.get()
+        if self.resolution_value.get() == 'low':
+            self.experiment.MicroscopeState['zoom_position'] = self.zoom_value.get()
+        else:
+            self.experiment.MicroscopeState['zoom_position'] = 'N/A'
 
         # get resolution info from resolution menu and etl setting
         if self.resolution_value.get() == 'low':
@@ -475,20 +485,11 @@ class ASLM_controller:
 
         elif command == 'resolution':
             """
-            #  Low Resolution Mode
-            #  Changes the zoom position.
+            #  Changes the resolution mode and zoom position.
+            #  1st Argument = self.resolution_value
+            #  2nd Argument = self.zoom_value
             """
-
-            mode = args[0]
-            if mode == 'high':
-                print("High Resolution Mode")
-                self.experiment.MicroscopeState['resolution_mode'] = 'high'
-            else:
-                print("Low Resolution Mode")
-                print("Zoom:", args[0])
-                self.experiment.MicroscopeState['resolution_mode'] = 'low'
-                self.experiment.MicroscopeState['zoom'] = args[0]
-                self.model.set_zoom(args[0])
+            self.model.change_resolution(args)
 
         elif command == 'set_save':
             self.acquire_bar_controller.set_save_option(args[0])
@@ -515,6 +516,7 @@ class ASLM_controller:
             if self.verbose:
                 print('channel settings have been changed, calling model', args)
             self.model.run_command('update setting', 'channel', args, channels = self.channels_tab_controller.get_values('channel'))
+
         elif command == 'timepoint':
             settings = args[0]
             for k in settings:
@@ -538,6 +540,7 @@ class ASLM_controller:
             if not self.prepare_acquire_data():
                 self.acquire_bar_controller.stop_acquire()
                 return
+
             # Acquisition modes can be: 'continuous', 'z-stack', 'single', 'projection'
             if self.acquire_bar_controller.mode == 'single':
                 self.threads_pool.createThread('camera', self.capture_single_image)
@@ -584,7 +587,10 @@ class ASLM_controller:
             print('In central controller: command passed from child', command, args)
 
     def capture_single_image(self):
-        self.model.run_command('single', self.experiment.MicroscopeState, saving_info=self.experiment.Saving)
+        """
+        # Trigger model to capture a single image
+        """
+        self.model.run_command('single', saving_info=self.experiment.Saving)
         image_id = self.show_img_pipe_parent.recv()
         self.camera_view_controller.display_image(self.data_buffer[image_id])
 

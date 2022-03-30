@@ -2,7 +2,7 @@
 Module for controlling Sutter Lambda Filter Wheels
 Author: Kevin Dean,
 
-Command byte = (wheel * 128) + (speed * 16) + position
+Command byte = (wheel * 128) + (self.speed * 16) + position
 https://www.sutter.com/manuals/LB10-3_OpMan.pdf
 
 TODO: Currently moves multiple filter wheels to the same position.  In the future, it may be nice to have
@@ -11,6 +11,7 @@ TODO: Currently moves multiple filter wheels to the same position.  In the futur
 # Standard Imports
 import serial
 import time
+import numpy as np
 
 # Local Imports
 from model.devices.filter_wheel.FilterWheelBase import FilterWheelBase
@@ -21,10 +22,21 @@ class FilterWheel(FilterWheelBase):
         super().__init__(model, verbose)
 
         # Sutter Lambda 10-B Specific Initializations
-        self.read_on_init = True
         self.verbose = verbose
+        self.read_on_init = True
+        self.wait_until_done = True
         self.wait_until_done_delay = 0.25
+        self.speed = 2
+
         # Delay in s for the wait until done function
+        self.delay_matrix = np.matrix([[0, 0.031, 0.051, 0.074, 0.095, 0.115],
+                                       [0, 0.040, 0.065, 0.095, 0.120, 0.148],
+                                       [0, 0.044, 0.075, 0.105, 0.136, 0.168],
+                                       [0, 0.050, 0.088, 0.127, 0.165, 0.205],
+                                       [0, 0.060, 0.108, 0.156, 0.205, 0.250],
+                                       [0, 0.068, 0.123, 0.178, 0.235, 0.290],
+                                       [0, 0.124, 0.235, 0.350, 0.460, 0.580],
+                                       [0, 0.230, 0.440, 0.650, 0.860, 1.100]])
 
         # Open Serial Port
         try:
@@ -60,29 +72,44 @@ class FilterWheel(FilterWheelBase):
             print('Closing the Filter Wheel Serial Port')
         self.close()
 
-    def check_if_filter_in_filterdict(self, filterposition):
+    def check_if_filter_in_filter_dictionary(self, filter_name):
         """
         # Checks if the filter designation (string) given as argument
         # exists in the filter dictionary
         """
-        if filterposition in self.filterdict:
+        if filter_name in self.filter_dictionary:
             return True
         else:
             raise ValueError('Filter designation not in the configuration')
 
-    def set_filter(self, filterposition, speed=2, wait_until_done=False):
+    def filter_change_delay(self, filter_name):
+        """
+        # The Sutter Filter wheels require ~40 ms to change between adjacent filter positions
+        # See page 38: https://www.sutter.com/manuals/LB10-3_OpMan.pdf
+        """
+        # Old Position
+        old_position = self.wheel_position
+
+        # New Position
+        self.wheel_position = self.filter_dictionary[filter_name]
+        delta_position = int(abs(old_position-self.wheel_position))
+
+        # Calculate Delay
+        self.wait_until_done_delay = (self.delay_matrix[self.speed, delta_position])
+
+    def set_filter(self, filter_name, wait_until_done=True):
         """
         # Change the filter wheel to the filter designated by the filter position argument.
         """
-        if self.check_if_filter_in_filterdict(filterposition) is True:
-            # Identify the Filter Number from the Filter Dictionary
-            self.wheel_position = self.filterdict[filterposition]
+        if self.check_if_filter_in_filter_dictionary(filter_name) is True:
+            # Calculate the Delay Needed to Change the Positions
+            self.filter_change_delay(filter_name)
 
             # Make sure you are moving it to a reasonable filter position
             assert self.wheel_position in range(10)
 
-            # Make sure you are moving it at a reasonable speed
-            assert speed in range(8)
+            # Make sure you are moving it at a reasonable self.speed
+            assert self.speed in range(8)
 
             # If previously we did not confirm that the initialization was complete, check now.
             if not self.init_finished:
@@ -98,19 +125,22 @@ class FilterWheel(FilterWheelBase):
                 # When number_of_filter_wheels = 1, loop executes once, and only wheel A changes.
                 # When number_of_filter_wheels = 2, loop executes twice, with both wheel A and 
                 # B moving to the same position sequentially
-                # Filter Wheel Command Byte Encoding = wheel + (speed*16) + position = command byte
+                # Filter Wheel Command Byte Encoding = wheel + (self.speed*16) + position = command byte
                 """
 
                 if self.verbose:
                     print("Moving Filter Wheel:", wheel_idx)
-                outputcommand = wheel_idx*128+self.wheel_position + 16 * speed
-                outputcommand = outputcommand.to_bytes(1, 'little')
+
+                output_command = wheel_idx*128+self.wheel_position + 16 * self.speed
+                output_command = output_command.to_bytes(1, 'little')
 
                 if self.verbose:
-                    print('Sending Filter Wheel Command:', outputcommand)
-                self.serial.write(outputcommand)
-                if wait_until_done:
-                    time.sleep(self.wait_until_done_delay)
+                    print('Sending Filter Wheel Command:', output_command)
+                self.serial.write(output_command)
+
+            #  Wheel Position Change Delay
+            if wait_until_done:
+                time.sleep(self.wait_until_done_delay)
 
     def read(self, num_bytes):
         """

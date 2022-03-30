@@ -21,57 +21,8 @@ class DAQ(DAQBase):
         super().__init__(model, experiment, etl_constants, verbose)
 
     def __del__(self):
-        self.close_tasks()
-
-    def calculate_samples(self):
-        """
-        # Calculate the number of samples for the waveforms.
-        # Product of the sampling frequency and the duration of the waveform.
-        """
-        self.sample_rate = self.model.DAQParameters['sample_rate']
-        self.sweep_time = self.model.DAQParameters['sweep_time']
-        self.samples = int(self.sample_rate * self.sweep_time)
-
-    def create_waveforms(self):
-        """
-        # Create the waveforms for the ETL, Galvos, and Lasers, and sends it to the tasks for execution.
-        """
-        self.calculate_samples()
-
-        # ETL - Currently creates both ETL L and ETL R
-        self.create_etl_waveform()
-
-        # Galvos
-        self.create_high_res_galvo_waveform()
-        self.create_low_res_galvo_waveform()
-
-        # Lasers
-        self.create_analog_laser_waveforms(self.laser_power)
-        self.create_digital_laser_waveforms()
-        self.create_laser_switching_waveform()
-
-        # Bundle the waveforms into a single waveform.
-        self.bundle_galvo_and_etl_waveforms()
-
-        # Write the waveforms to the tasks.
-        self.write_waveforms_to_tasks()
-
-    def create_etl_waveform(self):
-        """
-        # Create the waveforms for the Electrotunable Lens
-        """
-        self.etl_l_waveform = tunable_lens_ramp(self.sample_rate, self.sweep_time, self.etl_l_delay,
-                                                self.etl_l_ramp_rising, self.etl_l_ramp_falling,
-                                                self.etl_l_amplitude, self.etl_l_offset)
-
-        self.etl_r_waveform = tunable_lens_ramp(self.sample_rate, self.sweep_time, self.etl_r_delay,
-                                                self.etl_r_ramp_rising, self.etl_r_ramp_falling,
-                                                self.etl_r_amplitude, self.etl_r_offset)
-        # Scale the ETL waveforms to the AO range.
-        self.etl_l_waveform[self.etl_l_waveform < self.etl_l_min_ao] = self.etl_l_min_ao
-        self.etl_l_waveform[self.etl_l_waveform > self.etl_l_max_ao] = self.etl_l_max_ao
-        self.etl_r_waveform[self.etl_r_waveform < self.etl_r_min_ao] = self.etl_r_min_ao
-        self.etl_r_waveform[self.etl_r_waveform > self.etl_r_max_ao] = self.etl_r_max_ao
+        pass
+        # self.close_tasks()
 
     def create_low_res_galvo_waveform(self):
         """
@@ -235,23 +186,6 @@ class DAQ(DAQBase):
         trigger_source = self.model.DAQParameters['trigger_source']
         self.laser_task.triggers.start_trigger.cfg_dig_edge_start_trig(trigger_source)
 
-    def create_tasks(self):
-        """
-        # Creates a total of four tasks for the microscope:
-        # These are:
-        # - the master trigger task, a digital out task that only provides a trigger pulse for the others
-        # - the camera trigger task, a counter task that triggers the camera in lightsheet mode
-        # - the galvo task (analog out) that controls the left & right galvos for creation of
-        #  the light-sheet and shadow avoidance
-        # - the ETL & Laser task (analog out) that controls all the laser intensities (Laser should only
-        # be on when the camera is acquiring) and the left/right ETL waveforms
-        """
-        self.calculate_samples()
-        self.create_master_trigger_task()
-        self.create_camera_task()
-        self.create_galvo_etl_task()
-        self.create_laser_task()
-
     def write_waveforms_to_tasks(self):
         """
         # Write the galvo, etl, and laser waveforms to the NI DAQ tasks
@@ -306,3 +240,69 @@ class DAQ(DAQBase):
         self.master_trigger_task = nidaqmx.Task()
         self.galvo_etl_task = nidaqmx.Task()
         self.laser_task = nidaqmx.Task()
+
+    def create_tasks(self):
+        """
+        # Creates a total of four tasks for the microscope:
+        # These are:
+        # - the master trigger task, a digital out task that only provides a trigger pulse for the others
+        # - the camera trigger task, a counter task that triggers the camera in lightsheet mode
+        # - the galvo task (analog out) that controls the left & right galvos for creation of
+        #  the light-sheet and shadow avoidance
+        # - the ETL & Laser task (analog out) that controls all the laser intensities (Laser should only
+        # be on when the camera is acquiring) and the left/right ETL waveforms
+        """
+        self.create_master_trigger_task()
+        self.create_camera_task()
+        self.create_galvo_etl_task()
+        self.create_laser_task()
+
+    def create_waveforms(self):
+        """
+        # Create the waveforms for the ETL, Galvos, and Lasers, and sends it to the tasks for execution.
+        """
+        self.calculate_samples()
+
+        # ETL - Currently creates both ETL L and ETL R
+        self.create_etl_waveform()
+
+        # Galvos
+        self.create_high_res_galvo_waveform()
+        self.create_low_res_galvo_waveform()
+
+        # Lasers
+        self.create_analog_laser_waveforms(self.laser_power)
+        self.create_digital_laser_waveforms()
+        self.create_laser_switching_waveform()
+
+        # Bundle the waveforms into a single waveform.
+        self.bundle_galvo_and_etl_waveforms()
+
+        # Write the waveforms to the tasks.
+        self.write_waveforms_to_tasks()
+
+    def calculate_samples(self):
+        """
+        # Calculate the number of samples for the waveforms.
+        # Product of the sampling frequency and the duration of the waveform/exposure time.
+        # Sweeptime units originally seconds.
+        """
+        self.samples = int(self.sample_rate * self.sweep_time)
+
+    def create_etl_waveform(self):
+        """
+        # Create the waveforms for the Electrotunable Lens
+        """
+        self.etl_l_waveform = tunable_lens_ramp(self.sample_rate, self.sweep_time, self.etl_l_delay,
+                                                self.etl_l_ramp_rising, self.etl_l_ramp_falling,
+                                                self.etl_l_amplitude, self.etl_l_offset)
+
+        self.etl_r_waveform = tunable_lens_ramp(self.sample_rate, self.sweep_time, self.etl_r_delay,
+                                                self.etl_r_ramp_rising, self.etl_r_ramp_falling,
+                                                self.etl_r_amplitude, self.etl_r_offset)
+
+        # Scale the ETL waveforms to the AO range.
+        self.etl_l_waveform[self.etl_l_waveform < self.etl_l_min_ao] = self.etl_l_min_ao
+        self.etl_l_waveform[self.etl_l_waveform > self.etl_l_max_ao] = self.etl_l_max_ao
+        self.etl_r_waveform[self.etl_r_waveform < self.etl_r_min_ao] = self.etl_r_min_ao
+        self.etl_r_waveform[self.etl_r_waveform > self.etl_r_max_ao] = self.etl_r_max_ao

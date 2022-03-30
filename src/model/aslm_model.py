@@ -356,19 +356,24 @@ class Model:
                 self.current_laser_index = channel['laser_index']
 
                 #  Set the parameters
+                # Camera Exposure Time (ms)
                 self.camera.set_exposure_time(self.current_exposure_time)
-                self.filter_wheel.set_filter(self.current_filter)
+
+                # DAQ Waveform Generation (s)
+                self.daq.sweep_time = self.current_exposure_time/1000
+
+                # Laser
                 self.daq.laser_idx = self.current_laser_index
+
+                # Filter Wheel
+                self.filter_wheel.set_filter(self.current_filter)
+                # TODO: Add delay to filter wheel switching
                 if self.verbose:
                     print("Channel:", self.current_channel)
                     print("Camera Exposure Time:", self.current_exposure_time)
                     print("Filter Wheel:", self.current_filter)
-
                 self.snap_image()
-                # print("Image Acquired with These CAMERA Settings!")
-                # self.camera.report_camera_settings()
-                # may need to add some wait time
-                # if (readout time + exposure time) > (time to move filter_wheel + daq), then add a wait time
+
 
     def snap_image(self):
         """

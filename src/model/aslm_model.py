@@ -123,22 +123,21 @@ class Model:
             return
 
         if command == 'single':
-            self.experiment.MicroscopeState = args[0]
             self.is_save = self.experiment.MicroscopeState['is_save']
             if self.is_save:
                 self.experiment.Saving = kwargs['saving_info']
             self.stop_acquisition = False
-            self.prepare_acquisition()
+            self.open_shutter()
             self.run_single_acquisition()
             self.stop_acquisition = True
             self.run_data_process(1)
-            self.end_acquisition()
+            self.close_shutter()
 
         elif command == 'live':
             self.is_save = False
             self.stop_acquisition = False
             self.stop_send_signal = False
-            self.prepare_acquisition()
+            self.open_shutter()
             self.live_thread = threading.Thread(target=self.run_live_acquisition)
             self.data_thread = threading.Thread(target=self.run_data_process)
             self.live_thread.start()
@@ -155,7 +154,6 @@ class Model:
                 self.experiment.MicroscopeState['channels'] = kwargs['channels']
             # prepare devices based on updated info
             self.stop_send_signal = False
-            self.prepare_acquisition()
             self.live_thread = threading.Thread(target=self.run_live_acquisition)
             self.live_thread.start()
 
@@ -164,38 +162,16 @@ class Model:
             self.stop_acquisition = True
             self.live_thread.join()
             self.data_thread.join()
-            self.end_acquisition()
+            self.close_shutter()
 
     def move_stage(self, pos_dict):
         self.stages.move_absolute(pos_dict)
-
-    def set_zoom(self, value):
-        self.zoom.set_zoom(value)
-
-    def open_shutter(self):
-        """
-        # Evaluates the experiment parameters and opens the proper shutter.
-        # 'low' is the low-resolution mode of the microscope, or the left shutter.
-        # 'high' is the high-resolution mode of the microscope, or the right shutter.
-        """
-        resolution_mode = self.experiment.MicroscopeState['resolution_mode']
-        if resolution_mode == 'low':
-            self.shutter.open_left()
-        else:  # High Resolution Mode = Right
-            self.shutter.open_right()
 
     def close_shutter(self):
         """
         # Automatically closes both shutters
         """
         self.shutter.close_shutters()
-
-    def prepare_acquisition(self):
-        """
-        # Open shutter and attaches buffer to the camera.
-        """
-        self.open_shutter()
-        # self.camera.initialize_image_series(self.data_buffer)
 
     def end_acquisition(self):
         """
@@ -248,7 +224,6 @@ class Model:
                 break
 
 
-
     def prepare_image_series(self):
         """
         #  Prepares an image series without waveform update
@@ -293,39 +268,6 @@ class Model:
         self.total_image_count = self.total_acquisition_count * number_of_slices
         self.start_time = time.time()
 
-    def acquire_with_waveform_update(self):
-        """
-        # Sets the camera in a state where it can be triggered.
-        # Changes the Filter Wheel to the correct position
-        # Specifies the laser
-        # Open the shutter as specified by the experiment parameters.
-        # The NIDAQ tasks are initialized during the daq __init__ function.
-        # Not sure if we have to self.daq.close_tasks() them in order to load a fresh waveform.
-        # if so, self.daq.initialize_tasks() need to be called after.
-
-        # Grab the image from the camera and save it.
-        # Closes the shutter
-        # Disables the camera
-        """
-        self.camera.set_property_value('exposure_time', self.experiment.MicroscopeState['channels']
-                                      ['channel_1']['camera_exposure_time'])
-        # self.camera.set_exposure_time(self.experiment.MicroscopeState['channels']
-        #                               ['channel_1']['camera_exposure_time']/1000)
-        # self.camera.initialize_image_series(self.data_ptr)
-        self.daq.initialize_tasks()
-
-        self.filter_wheel.set_filter(self.experiment.MicroscopeState['channels']['channel_1']['filter'])
-        self.daq.identify_laser_idx(self.experiment.MicroscopeState['channels']['channel_1']['laser'])
-        self.open_shutter()
-        self.daq.start_tasks()
-        self.daq.create_waveforms()
-        self.daq.run_tasks()
-        self.daq.stop_tasks()
-        # image = self.camera.get_image()
-        #  self.save_test_image(image)
-        self.close_shutter()
-        # self.camera.close_image_series()
-
     def load_experiment_file(self, experiment_path):
         # Loads the YAML file for all of the experiment parameters
         self.experiment = session(experiment_path, self.verbose)
@@ -334,7 +276,6 @@ class Model:
         """
         This function retrieves the state of the microscope from the GUI, iterates through each selected channel,
         and snaps an image for each channel setting.  In each iteration, the camera is initialized and closed.
-        TODO:  Make sure that there is no disconnect between the waveform generation and the exposure time.
         TODO:  Add ability to save the data.
         """
 
@@ -367,13 +308,9 @@ class Model:
 
                 # Filter Wheel
                 self.filter_wheel.set_filter(self.current_filter)
-                # TODO: Add delay to filter wheel switching
-                if self.verbose:
-                    print("Channel:", self.current_channel)
-                    print("Camera Exposure Time:", self.current_exposure_time)
-                    print("Filter Wheel:", self.current_filter)
-                self.snap_image()
 
+                # Acquire an Image
+                self.snap_image()
 
     def snap_image(self):
         """
@@ -409,95 +346,6 @@ class Model:
         while self.stop_acquisition is False and self.stop_send_signal is False:
             self.run_single_acquisition()
 
-    def run_z_stack_acquisition(self, is_multi_position, update_view):
-        # self.camera.initialize_image_series(self.data_ptr)
-
-        microscope_state = self.experiment.MicroscopeState
-        for time_idx in range(microscope_state['timepoints']):
-            if is_multi_position is True:
-                for position_idx in range(len(microscope_state['stage_positions'])):
-                    if self.verbose:
-                        print("Position :", position_idx)
-                    microscope_position = microscope_state['stage_positions'][position_idx]
-                    self.stages.move_absolute(microscope_position)
-                    if microscope_state['stack_cycling_mode'] == 'per_stack':
-                        #  self.per_stack_acquisition(microscope_state, microscope_position)
-                        pass
-                    elif microscope_state['stack_cycling_mode'] == 'per_z':
-                        #  self.per_z_acquisition(microscope_state, microscope_position)
-                        pass
-            elif is_multi_position is False:
-                self.stages.create_position_dict()
-                microscope_position = self.stages.position_dict
-                print(microscope_position)
-                if microscope_state['stack_cycling_mode'] == 'per_stack':
-                    #  self.per_stack_acquisition(microscope_state, microscope_position)
-                    pass
-                elif microscope_state['stack_cycling_mode'] == 'per_z':
-                    #  self.per_z_acquisition(microscope_state, microscope_position)
-                    pass
-        # self.camera.close_image_series()
-
-    def per_stack_acquisition(self, microscope_state, microscope_position):
-        prefix_len = len('channel_')
-        for channel_key in microscope_state['channels']:
-            channel_idx = int(channel_key[prefix_len:])
-            channel = microscope_state['channels'][channel_key]
-            if channel['is_selected'] is True:
-                if self.verbose:
-                    print("Channel :", channel_idx)
-
-                self.current_channel = channel_idx
-                self.current_exposure_time = channel['camera_exposure_time']
-                self.current_filter = channel['filter']
-                self.current_laser = channel['laser']
-
-                #  Set the parameters
-                # self.camera.set_exposure_time(self.current_exposure_time)
-                self.filter_wheel.set_filter(self.current_filter)
-                self.daq.identify_laser_idx(self.current_laser)
-
-                self.open_shutter()
-                self.daq.create_waveforms()
-                self.daq.start_tasks()
-
-                for z_idx in range(int(microscope_state['number_z_steps'])):
-                    print("Z slice :", z_idx)
-                    self.daq.run_tasks()
-                    image = self.camera.get_image()
-                    if microscope_state['is_save']:
-                        # Save the data.
-                        pass
-                    microscope_position['Z'] = microscope_position['Z'] + microscope_state['step_size']
-                    self.stages.move_absolute(microscope_position)
-            self.close_shutter()
-
-    def per_z_acquisition(self, microscope_state, microscope_position):
-        for z_idx in range(int(microscope_state['number_z_steps'])):
-            for channel_idx in range(len(microscope_state['channels'])):
-                # Check if it is selected.
-                if microscope_state['channels']['is_selected']:
-                    print("Channel :", channel_idx)
-                    # self.camera.set_exposure_time(microscope_state['channels']
-                    #                               ['channel_' + str(channel_idx + 1)]
-                    #                               ['camera_exposure_time']/1000)
-                    self.filter_wheel.set_filter(microscope_state['channels']
-                                                 ['channel_' + str(channel_idx + 1)]
-                                                 ['filter'])
-                    self.daq.identify_laser_idx(self.experiment.MicroscopeState['channels']
-                                                ['channel_' + str(channel_idx + 1)]
-                                                ['laser'])
-                    self.open_shutter()
-                    self.daq.create_waveforms()
-                    self.daq.start_tasks()
-                    self.daq.run_tasks()
-                    # image = self.camera.get_image()
-                    if microscope_state['is_save']:
-                        # Save the data.
-                        pass
-                    microscope_position['Z'] = microscope_position['Z'] + microscope_state['step_size']
-                    self.stages.move_absolute(microscope_position)
-
     def generate_image_name(self):
         """
         #  Generates a string for the filename
@@ -506,6 +354,32 @@ class Model:
         image_name = "CH0" + str(self.current_channel) + "_" + str(self.current_time_point).zfill(6) + ".tif"
         self.current_time_point += 1
         return image_name
+
+    def change_resolution(self, args):
+        resolution_mode = args[0]
+        zoom_value = args[1]
+        if resolution_mode == 'high':
+            print("High Resolution Mode")
+            self.experiment.MicroscopeState['resolution_mode'] = 'high'
+        else:
+            print("Low Resolution Mode, Zoom:", resolution_mode)
+            self.experiment.MicroscopeState['resolution_mode'] = 'low'
+            self.experiment.MicroscopeState['zoom'] = zoom_value
+            self.zoom.set_zoom(zoom_value)
+
+    def open_shutter(self):
+        """
+        # Evaluates the experiment parameters and opens the proper shutter.
+        # 'low' is the low-resolution mode of the microscope, or the left shutter.
+        # 'high' is the high-resolution mode of the microscope, or the right shutter.
+        """
+        resolution_mode = self.experiment.MicroscopeState['resolution_mode']
+        if resolution_mode == 'low':
+            self.shutter.open_left()
+        elif resolution_mode == 'high':
+            self.shutter.open_right()
+        else:
+            print("Shutter Command Invalid")
 
 if __name__ == '__main__':
     """ Testing Section """

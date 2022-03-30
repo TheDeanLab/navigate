@@ -400,7 +400,7 @@ class DCAM:
         # Set value and get what is set
         final_configuration = self.prop_setgetvalue(idprop, value)
         
-        if final_configuration == value:
+        if final_configuration >= value - value/100 and final_configuration <= value + value/100:
             return True
         else:
             print(name, "Configuration Failed", value, final_configuration)

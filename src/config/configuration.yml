@@ -199,7 +199,7 @@ StageParameters:
 ZoomParameters:
   # Robotis Dynamixel MX-28R Robot Servo
   servo_id: 1
-  COMport: COM21
+  COMport: COM18
   baudrate: 1000000
   zoom_position: {
     0.63x: 0,

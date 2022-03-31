@@ -379,8 +379,8 @@ class DCAM:
 
         cDouble = c_double()
         ret = self.__result(dcamprop_getvalue(self.__hdcam, idprop, byref(cDouble)))
-        print("prop_getvalue response:", cDouble.value)
-        print("property id:", idprop)
+        # print("prop_getvalue response:", cDouble.value)
+        # print("property id:", idprop)
         if ret is False:
             return False
 
@@ -458,28 +458,43 @@ class DCAM:
     def set_ROI(self, left, top, right, bottom):
         """
         # this function set 'subarray' properties.
+        # Width - Can be an even or odd number.
+        # Height - Can be an even number.
+        # Horizontal Position - Can be even or odd number.
+        # Vertical Position - Can be even number.
+        # Bottom must be even number.
         """
         # TODO: parameter verification
-
+        if top % 2 or bottom % 2 == 0 or (right-left+1) > self.max_image_width or (bottom-top+1) > self.max_image_height:
+            print("Invalid size")
+            return (0, 0)
         # test if hsize and vsize equal to maximum image width and height
         # if the same, set subarray_mode to DCAMPROP_MODE__OFF
-        if right-left == self.max_image_width and bottom-top == self.max_image_height:
+        if right-left+1 == self.max_image_width and bottom-top+1 == self.max_image_height:
             self.prop_setgetvalue(property_dict['subarray_mode'], DCAMPROP_MODE__OFF)
+            self.prop_setvalue(property_dict['image_width'], self.max_image_width)
+            self.prop_setvalue(property_dict['image_height'], self.max_image_height)
             return (self.max_image_width, self.max_image_height)
         
         width = self.prop_getvalue(property_dict['image_width'])
         height = self.prop_getvalue(property_dict['image_height'])
-        if right-left == width and bottom-top == height:
+        if right-left+1 == width and bottom-top+1 == height:
             self.prop_setvalue(property_dict['subarray_hpos'], left)
             self.prop_setvalue(property_dict['subarray_vpos'], top)
         else:
             # set DCAM_IDPROP_SUBARRAYMODE to 'OFF'
             if self.prop_setgetvalue(property_dict['subarray_mode'], DCAMPROP_MODE__OFF):
                 # set hpos, hsize, vpos, vsize
+                # self.prop_setvalue(property_dict['subarray_hpos'], 0)
                 self.prop_setvalue(property_dict['subarray_hpos'], left)
-                self.prop_setvalue(property_dict['subarray_hsize'], right-left)
+
+                # hsize works.
+                self.prop_setvalue(property_dict['subarray_hsize'], right-left+1)
+
                 self.prop_setvalue(property_dict['subarray_vpos'], top)
-                self.prop_setvalue(property_dict['subarray_vsize'], bottom-top)
+
+                # vsize must be an even number? Probably need a mod statement.
+                self.prop_setvalue(property_dict['subarray_vsize'], bottom-top+1)
         
         # set DCAM_IDPROP_SUBARRAYMODE to 'ON'
         self.prop_setgetvalue(property_dict['subarray_mode'], DCAMPROP_MODE__ON)
@@ -617,7 +632,7 @@ if __name__ == '__main__':
         'exposure_time': 0.02,
         'internal_line_interval': 0.000075
     }
-    camera.prop_getvalue(property_dict['exposuretime_control'])
+    # camera.prop_getvalue(property_dict['exposuretime_control'])
 
     # configure camera
     for key in configuration:
@@ -648,7 +663,7 @@ if __name__ == '__main__':
             if err < 0:
                 print('an error happened when sending trigger to the camera', err)
                 break
-            time.sleep(configuration['exposure_time'] + 0.005)
+            time.sleep(configuration['exposure_time'] + 0.010)
     start_time = time.time()
 
     # start Acquisition
@@ -660,7 +675,7 @@ if __name__ == '__main__':
     print("Duration of time to attach the buffer:", stop_time-start_time)
 
     data_process.join()
-    for i in range(20):
+    for i in range(5):
         number_of_frames += 100
         data_buffer = [SharedNDArray(shape=(2048, 2048), dtype='uint16') for i in range(number_of_frames)]
         start_time = time.time()
@@ -703,20 +718,31 @@ if __name__ == '__main__':
             print('time cost to attach a buffer(', number_of_frames, '):', end_time - start_time )
 
     # test ROI setting
-    def test_ROI(left, top, right, bottom):
-        width, height = camera.set_ROI(left, top, right, bottom)
-        print('width, height:', width, height, right-left, bottom-top)
-        assert(camera.prop_getvalue(property_dict['subarray_hpos']) == left)
-        assert(camera.prop_getvalue(property_dict['subarray_hsize']) == right-left)
-        assert(camera.prop_getvalue(property_dict['subarray_vpos']) == top)
-        assert(camera.prop_getvalue(property_dict['subarray_vsize']) == bottom-top)
+    def test_ROI(roi_height=2048, roi_width=2048):
+        camera_height = 2048
+        camera_width = 2048
+
+        roi_top = (camera_height - roi_height) / 2
+        roi_bottom = roi_top + roi_height - 1
+        roi_left = (camera_width - roi_width) / 2
+        roi_right = roi_left + roi_width - 1
+
+        width, height = camera.set_ROI(roi_left, roi_top, roi_right, roi_bottom)
+
+        # assert(camera.prop_getvalue(property_dict['subarray_hpos']) == left)
+        # assert(camera.prop_getvalue(property_dict['subarray_hsize']) == right-left+1)
+        # assert(camera.prop_getvalue(property_dict['subarray_vpos']) == top)
+        # assert(camera.prop_getvalue(property_dict['subarray_vsize']) == bottom-top+1)
+
+        print("subarray_hpos", camera.prop_getvalue(property_dict['subarray_hpos']))
+        print("subarray_hsize", camera.prop_getvalue(property_dict['subarray_hsize']))
+        print("subarray_vpos", camera.prop_getvalue(property_dict['subarray_vpos']))
+        print("subarray_vsize", camera.prop_getvalue(property_dict['subarray_vsize']))
         print('sub array mode(1: OFF, 2: ON): ', camera.prop_getvalue(property_dict['subarray_mode']))
 
-    test_ROI(0, 0, 2048, 2048)
-    test_ROI(0, 0, 1024, 1024)
-    test_ROI(100, 100, 1124, 1124)
-    test_ROI(100, 200, 1124, 1224)
-    test_ROI(100, 200, 1000, 1000)
-    test_ROI(100, 100, 1124, 1124)
-    test_ROI(0, 0, 1024, 1024)
-    test_ROI(0, 0, 2048, 2048)
+    test_ROI(1024, 1024)
+
+    # test_ROI(512, 512, 512+1024-1, 512+1024-1)
+    # test_ROI(100, 100, 1124, 1123)
+    # test_ROI(0, 0, 1024, 1023)
+    # test_ROI(0, 0, 2047, 2047)

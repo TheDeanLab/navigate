@@ -100,6 +100,29 @@ class Camera(CameraBase):
         self.y_pixels = int(self.y_pixels / self.y_binning)
         self.experiment.CameraParameters['camera_binning'] = str(self.x_binning) + 'x' + str(self.y_binning)
 
+    def set_ROI(self, roi_height=2048, roi_width=2048):
+        """
+        # Change the size of the region of interest on the camera.
+        """
+        # Get the Maximum Number of Pixels from the Configuration File
+        camera_height = self.model.CameraParameters['y_pixels']
+        camera_width = self.model.CameraParameters['x_pixels']
+
+        # Calculate Location of Image Edges
+        roi_top = (camera_height - roi_height) / 2
+        roi_bottom = roi_top + roi_height - 1
+        roi_left = (camera_width - roi_width) / 2
+        roi_right = roi_left + roi_width - 1
+
+        # Set ROI
+        self.x_pixels, self.y_pixels = self.camera_controller.set_ROI(roi_left, roi_top, roi_right, roi_bottom)
+        if self.verbose:
+            print("subarray_hpos", self.camera_controller.prop_getvalue(property_dict['subarray_hpos']))
+            print("subarray_hsize", self.camera_controller.prop_getvalue(property_dict['subarray_hsize']))
+            print("subarray_vpos", self.camera_controller.prop_getvalue(property_dict['subarray_vpos']))
+            print("subarray_vsize", self.camera_controller.prop_getvalue(property_dict['subarray_vsize']))
+            print('sub array mode(1: OFF, 2: ON): ', self.camera_controller.prop_getvalue(property_dict['subarray_mode']))
+
     def initialize_image_series(self, data_buffer=None, number_of_frames=100):
         self.camera_controller.start_acquisition(data_buffer, number_of_frames)
 

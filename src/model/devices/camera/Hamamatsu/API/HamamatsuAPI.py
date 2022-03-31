@@ -3,7 +3,7 @@
     This file refers to `ZhuangLab <https://github.com/ZhuangLab/storm-control>`, 'dcamapi4.py' and 'dcam.py'
     This is a simplified version.
 
-    Constants can be found at 'dcamsdk4/inc/dcamapi4.h'
+    Constants can be found at 'dcamsdk4/inc/dcamapi4.h' and 'dcamsdk4/inc/dcamprop.h'
     Function definitions can be found at 'dcamsdk4/doc/api_reference/dcamapi4_en.html'
 """
 
@@ -19,6 +19,8 @@ DCAMBUF_ATTACHKIND_FRAME = 0
 DCAMCAP_START_SEQUENCE = -1
 DCAMWAIT_CAPEVENT_FRAMEREADY = 2
 DCAMWAIT_CAPEVENT_STOPPED = 16
+DCAMPROP_MODE__OFF = 1 # OFF
+DCAMPROP_MODE__ON = 2  # ON
 
 class DCAMDEV_OPEN(Structure):
     _pack_ = 8
@@ -169,6 +171,17 @@ class DCAMDATA_REGIONRECT(Structure):
         ('bottom', c_short)
     ]
 
+class DCAMDATA_REGION(Structure):
+    _pack_ = 8
+    _fields_ = [
+        ('hdr', POINTER(DCAMDATA_HDR)),
+        ('option', c_int32),
+        ('type', c_int32),
+        ('data', c_void_p),
+        ('datasize', c_int32),
+        ('reserved', c_int32)
+    ]
+
 property_dict = {
     'exposure_time': 2031888, # 0x001F0110, R/W, sec, "EXPOSURE TIME"
     'sensor_mode': 4194832, # 0x00400210, R/W, mode,  "SENSOR MODE"
@@ -182,7 +195,12 @@ property_dict = {
     'internal_line_interval': 4208720,  # 0x00403850, R/W, sec,    "INTERNAL LINE INTERVAL"
     'image_width': 4325904,  # 0x00420210, R/O, long, "IMAGE WIDTH"
     'image_height': 4325920,  # 0x00420220, R/O, long,    "IMAGE HEIGHT"
-    'exposuretime_control': 2031920  # 0x001F0130, R/W, mode,    "EXPOSURE TIME CONTROL"
+    'exposuretime_control': 2031920,  # 0x001F0130, R/W, mode,    "EXPOSURE TIME CONTROL"
+    'subarray_hpos': 4202768,  # 0x00402110, R/W, long,    "SUBARRAY HPOS"
+    'subarray_hsize': 4202784,  # 0x00402120, R/W, long,   "SUBARRAY HSIZE"
+    'subarray_vpos': 4202800,  # 0x00402130, R/W, long,    "SUBARRAY VPOS"
+    'subarray_vsize': 4202816,  # 0x00402140, R/W, long,   "SUBARRAY VSIZE"
+    'subarray_mode': 4202832  # 0x00402150, R/W, mode,    "SUBARRAY MODE"
 }
 
 
@@ -219,6 +237,10 @@ class DCAM:
         # open camera
         self.dev_open(index)
         self.__open_hdcamwait()
+
+        # TODO: get maximum supported image width and height
+        self.max_image_width = 2048
+        self.max_image_height = 2048
 
     def __result(self, errvalue):
         """
@@ -433,6 +455,39 @@ class DCAM:
     def get_property_value(self, name):
         return self.prop_getvalue(property_dict[name])
 
+    def set_ROI(self, left, top, right, bottom):
+        """
+        # this function set 'subarray' properties.
+        """
+        # TODO: parameter verification
+
+        # test if hsize and vsize equal to maximum image width and height
+        # if the same, set subarray_mode to DCAMPROP_MODE__OFF
+        if right-left == self.max_image_width and bottom-top == self.max_image_height:
+            self.prop_setgetvalue(property_dict['subarray_mode'], DCAMPROP_MODE__OFF)
+            return (self.max_image_width, self.max_image_height)
+        
+        width = self.prop_getvalue(property_dict['image_width'])
+        height = self.prop_getvalue(property_dict['image_height'])
+        if right-left == width and bottom-top == height:
+            self.prop_setvalue(property_dict['subarray_hpos'], left)
+            self.prop_setvalue(property_dict['subarray_vpos'], top)
+        else:
+            # set DCAM_IDPROP_SUBARRAYMODE to 'OFF'
+            if self.prop_setgetvalue(property_dict['subarray_mode'], DCAMPROP_MODE__OFF):
+                # set hpos, hsize, vpos, vsize
+                self.prop_setvalue(property_dict['subarray_hpos'], left)
+                self.prop_setvalue(property_dict['subarray_hsize'], right-left)
+                self.prop_setvalue(property_dict['subarray_vpos'], top)
+                self.prop_setvalue(property_dict['subarray_vsize'], bottom-top)
+        
+        # set DCAM_IDPROP_SUBARRAYMODE to 'ON'
+        self.prop_setgetvalue(property_dict['subarray_mode'], DCAMPROP_MODE__ON)
+        # TODO:return new image width and height
+        # will changing hsize and vsize affect iamge width and height?
+        # not sure, need to test
+        return (self.prop_getvalue(property_dict['image_width']), self.prop_getvalue(property_dict['image_height']))
+
     def start_acquisition(self, data_buffer, number_of_frames=100):
         """
         # this function will initialize parameters, attach buffer, start capture
@@ -614,3 +669,55 @@ if __name__ == '__main__':
         end_time = time.time()
         duration = end_time - start_time
         print("the duration of time necessary to start and stop acquisition:", duration, 'buffer size:', number_of_frames)
+
+    import threading
+    import time
+
+    def test_acquisition():
+        data_process = threading.Thread(target=data_func)
+        data_process.start()
+
+        # set camera that trigger from software
+        TRIGGERSOURCE_SOFTWARE = 3
+        if camera.prop_setgetvalue(property_dict['trigger_source'], TRIGGERSOURCE_SOFTWARE):
+
+            # fire trigger to camera
+            for i in range(10):
+                err = dcamcap_firetrigger(camera.get_camera_handler(), 0)
+                if err < 0:
+                    print('an error happened when sending trigger to the camera', err)
+                    break
+                time.sleep(configuration['exposure_time'] + 0.005)
+        # end acquisition
+        camera.stop_acquisition()
+        data_process.join()
+    
+    def get_buffer_duration():
+        # get time cost of attaching and detaching buffer
+        for i in range(20):
+            number_of_frames += 100
+            start_time = time.perf_counter()
+            camera.start_acquisition()
+            camera.stop_acquisition()
+            end_time = time.perf_counter()
+            print('time cost to attach a buffer(', number_of_frames, '):', end_time - start_time )
+
+    # test ROI setting
+    def test_ROI(left, top, right, bottom):
+        width, height = camera.set_ROI(left, top, right, bottom)
+        print('width, height:', width, height, right-left, bottom-top)
+        assert(camera.prop_getvalue(property_dict['subarray_hpos']) == left)
+        assert(camera.prop_getvalue(property_dict['subarray_hsize']) == right-left)
+        assert(camera.prop_getvalue(property_dict['subarray_vpos']) == top)
+        assert(camera.prop_getvalue(property_dict['subarray_vsize']) == bottom-top)
+        print('sub array mode(1: OFF, 2: ON): ', camera.prop_getvalue(property_dict['subarray_mode']))
+
+    test_ROI(0, 0, 2048, 2048)
+    test_ROI(0, 0, 1024, 1024)
+    test_ROI(100, 100, 1124, 1124)
+    test_ROI(100, 200, 1124, 1224)
+    test_ROI(100, 200, 1000, 1000)
+    test_ROI(100, 100, 1124, 1124)
+    test_ROI(0, 0, 1024, 1024)
+    test_ROI(0, 0, 2048, 2048)
+    

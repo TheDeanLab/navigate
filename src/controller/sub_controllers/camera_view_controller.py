@@ -11,24 +11,35 @@ class Camera_View_Controller(GUI_Controller):
         super().__init__(view, parent_controller, verbose)
 
         # Getting Widgets/Buttons
-        self.image_metrics = view.image_metrics.get_widgets() # keys = ['Frames to Avg', 'Image Max Counts', 'Channel'] 
-        self.pallete = view.scale_pallete.get_widgets() # keys = ['Gray','Gradient','Rainbow','Min','Max'] 
+        self.image_metrics = view.image_metrics.get_widgets()
+        # keys = ['Frames to Avg', 'Image Max Counts', 'Channel']
 
-        
+        self.pallete = view.scale_pallete.get_widgets()
+        # keys = ['Gray','Gradient','Rainbow','Min','Max']
+
+        self.display = 'PIL'
+        # PIL or Matplotlib
+
         #  Starting Mode
         self.mode = 'stop'
-
-        # PIL
-        self.canvas = self.view.canvas
-
-        # Matplot
-        # self.canvas = self.view.matplotlib_canvas
-        # self.figure = self.view.matplotlib_figure
         self.colormap = 'gray'
         self.image_count = 0
         self.temp_array = None
         self.rolling_frames = 1
-        # self.live_subsampling = self.parent_controller.model.camera.camera_display_live_subsampling
+        self.live_subsampling = self.parent_controller.configuration.CameraParameters['display_live_subsampling']
+
+        if self.display == 'PIL':
+            # PIL
+            self.canvas = self.view.canvas
+
+        elif self.display == 'Matplotlib':
+            # Matplot
+            self.canvas = self.view.matplotlib_canvas
+            self.figure = self.view.matplotlib_figure
+        else:
+            print("Image Display Configured Improperly in camera_view_controller")
+
+
         # self.view.scale_pallete.autoscale.trace_add(self.update_counts_display())
 
     def initialize(self, name, data):
@@ -39,9 +50,11 @@ class Camera_View_Controller(GUI_Controller):
         if name == 'minmax':
             min = data[0]
             max = data[1]
+
             # Invoking defaults
             self.pallete['Gray'].widget.invoke()
             self.pallete['Autoscale'].invoke()
+
             # Populating defaults
             self.pallete['Min'].set(min)
             self.pallete['Max'].set(max)
@@ -104,7 +117,6 @@ class Camera_View_Controller(GUI_Controller):
         #  If Autoscale is selected, automatically calculates the min and max values for the data.
         #  If Autoscale is not selected, takes the user values as specified in the min and max counts.
         """
-        begin_time = time.perf_counter()
         self.image_count = 0
 
         # #  Update the colorbar.
@@ -113,12 +125,10 @@ class Camera_View_Controller(GUI_Controller):
         # #  Update the GUI according to the instantaneous or rolling average max counts.
         # self.update_max_counts(image)
 
-        # #  Down-sample the data according to the configuration file.
-        # # ds = self.live_subsampling
-        # ds = 2
-        # if ds != 1:
-        #     #  Down-sampling values taken from configuration yaml file to decrease overhead in displaying images.
-        #     image = cv2.resize(image, (int(np.shape(image)[0]/ds), int(np.shape(image)[1]/ds)))
+        #  Down-sample the data according to the configuration file.
+        if self.live_subsampling != 1:
+            image = cv2.resize(image, (int(np.shape(image)[0]/self.live_subsampling),
+                                       int(np.shape(image)[1]/self.live_subsampling)))
 
         # #  Specify the lookup table min and maximum.
         # autoscale = self.view.scale_pallete.autoscale.get()
@@ -129,16 +139,23 @@ class Camera_View_Controller(GUI_Controller):
         #     min = self.view.scale_pallete.min_counts.get()
         #     max = self.view.scale_pallete.max_counts.get()
 
-        # self.figure.add_subplot(111).imshow(image, self.colormap, vmin=min, vmax=max)
-        # self.figure.gca().set_axis_off()
-        # self.canvas.draw()
+        if self.display == 'Matplotlib':
+            begin_time = time.perf_counter()
+            self.figure.add_subplot(111).imshow(image, self.colormap, vmin=min, vmax=max)
+            self.figure.gca().set_axis_off()
+            self.canvas.draw()
+            end_time = time.perf_counter()
 
-        # PIL
-        self.img = ImageTk.PhotoImage(Image.fromarray(image))
-        self.canvas.create_image(0, 0, image=self.img, anchor='nw')
-        
-        end_time = time.perf_counter()
-        print('draw an image need:', (end_time - begin_time) * 1000)
+        elif self.display == 'PIL':
+            begin_time = time.perf_counter()
+            self.img = ImageTk.PhotoImage(Image.fromarray(image))
+            self.canvas.create_image(0, 0, image=self.img, anchor='nw')
+            end_time = time.perf_counter()
+            print("PIL display")
+
+        # if self.verbose:
+        print('Time necessary to display an image:', (end_time - begin_time) * 1000)
+
 
     def update_channel_idx(self, channel_idx):
         self.view.cam_counts.channel_idx.set(channel_idx)

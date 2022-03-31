@@ -42,9 +42,6 @@ class Camera(CameraBase):
         # self.camera_controller.set_property_value("image_width",
         #                                           self.model.CameraParameters['x_pixels'])
 
-        print("Initialization Exposure!:", self.model.CameraParameters['exposure_time'] / 1000)
-        print("Initialization Line Interval!:", self.model.CameraParameters['line_interval'])
-
         if self.verbose:
             print("Hamamatsu Camera Class Initialized")
 

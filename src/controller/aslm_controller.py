@@ -43,7 +43,7 @@ class ASLM_controller:
         self.threads_pool = SynchronizedThreadPool()
 
         # Load the Configuration to Populate the GUI
-        configuration = session(configuration_path, args.verbose)
+        self.configuration = session(configuration_path, args.verbose)
 
         # Initialize the Model
         self.model = ObjectInSubprocess(Model, args,
@@ -97,13 +97,13 @@ class ASLM_controller:
         self.initialize_menus()
         
         # Initialize view based on model.configuration
-        configuration_controller = ASLM_Configuration_Controller(configuration)
+        configuration_controller = ASLM_Configuration_Controller(self.configuration)
 
         # Channels Tab
-        self.initialize_channels(configuration_controller, configuration)
+        self.initialize_channels(configuration_controller)
 
         # Stage Control Tab
-        self.initialize_stage(configuration_controller, configuration)
+        self.initialize_stage(configuration_controller)
 
         # get etl information from configuration file
         self.etl_other_info = configuration_controller.get_etl_info()
@@ -113,10 +113,10 @@ class ASLM_controller:
         self.populate_experiment_setting()
 
         # Camera Settings Tab
-        self.initialize_cam_settings(configuration_controller, configuration)
+        self.initialize_cam_settings(configuration_controller)
 
         # Camera View Tab
-        self.initialize_cam_view(configuration_controller, configuration)
+        self.initialize_cam_view(configuration_controller)
 
         #  TODO: camera_view_tab, maximum intensity tab, waveform_tab
 
@@ -134,7 +134,7 @@ class ASLM_controller:
         self.data_buffer = [SharedNDArray(shape=(2048, 2048), dtype='uint16') for i in range(NUM_OF_FRAMES)]
         self.model.set_data_buffer(self.data_buffer)
         
-    def initialize_cam_view(self, configuration_controller, configuration):
+    def initialize_cam_view(self, configuration_controller):
         """
         # Populate widgets with necessary data from config file via config controller. For the entire view tab.
         """
@@ -144,7 +144,7 @@ class ASLM_controller:
         image_metrics = [1, 0, 0]
         self.camera_view_controller.initialize('image', image_metrics)
 
-    def initialize_stage(self, configuration_controller, configuration):
+    def initialize_stage(self, configuration_controller):
         """
         # Pre-populate the stage positions.
         """
@@ -154,7 +154,7 @@ class ASLM_controller:
         self.stage_gui_controller.set_position_limits(position_min, position_max)
 
         # set widgets' range limits
-        self.stage_gui_controller.set_spinbox_range_limits(configuration.GUIParameters['stage'])
+        self.stage_gui_controller.set_spinbox_range_limits(self.configuration.GUIParameters['stage'])
 
     def initialize_menus(self):
         """
@@ -232,7 +232,7 @@ class ASLM_controller:
         self.view.menubar.menu_resolution.add_command(label='ETL Parameters',
                                                       command=popup_etl_setting)
 
-    def initialize_cam_settings(self, configuration_controller, configuration):
+    def initialize_cam_settings(self, configuration_controller):
         """
         # Populate widgets with necessary data from config file via config controller. For the entire settings tab.
         """
@@ -259,23 +259,23 @@ class ASLM_controller:
         # zoom = '1x'
 
         if self.experiment.MicroscopeState['resolution_mode'] == 'high':
-            pixel_size = configuration.ZoomParameters['high_res_zoom_pixel_size']
+            pixel_size = self.configuration.ZoomParameters['high_res_zoom_pixel_size']
 
         if self.experiment.MicroscopeState['resolution_mode'] == 'low':
-            pixel_size = configuration.ZoomParameters['low_res_zoom_pixel_size'][zoom]
+            pixel_size = self.configuration.ZoomParameters['low_res_zoom_pixel_size'][zoom]
 
         fov = [mode, pixel_size]
         self.camera_setting_controller.initialize('fov', fov)
 
-    def initialize_channels(self, configuration_controller, configuration):
+    def initialize_channels(self, configuration_controller):
         """
         # set some other information needed by channels_tab_controller
         """
-        self.channels_tab_controller.set_channel_num(configuration.GUIParameters['number_of_channels'])
+        self.channels_tab_controller.set_channel_num(self.configuration.GUIParameters['number_of_channels'])
 
         self.channels_tab_controller.settings_from_configuration = {
-            'stage_velocity': configuration.StageParameters['velocity'],
-            'filter_wheel_delay': configuration.FilterWheelParameters['filter_wheel_delay']
+            'stage_velocity': self.configuration.StageParameters['velocity'],
+            'filter_wheel_delay': self.configuration.FilterWheelParameters['filter_wheel_delay']
         }
         # populate channels in the GUI
         channels_setting = configuration_controller.get_channels_info(self.verbose)
@@ -286,7 +286,7 @@ class ASLM_controller:
         self.channels_tab_controller.initialize('laser_cycling', laser_cycling_values)
 
         # set widgets' range limits
-        self.channels_tab_controller.set_spinbox_range_limits(configuration.GUIParameters)
+        self.channels_tab_controller.set_spinbox_range_limits(self.configuration.GUIParameters)
 
     def populate_experiment_setting(self, file_name=None):
         """
@@ -367,54 +367,35 @@ class ASLM_controller:
         """
         # This function will update model.experiment according values in the View(GUI)
         """
-        # update image mode from acquire bar
+
+        # acquire_bar_controller
+        # update image mode
         self.experiment.MicroscopeState['image_mode'] = self.acquire_bar_controller.get_mode()
 
-        # get settings from channels tab
-        settings = self.channels_tab_controller.get_values()
+        #camera_setting_controller
+        update_from_camera_setting_controller(self)
 
-        # if there is something wrong, it will popup a window and return false
-        for k in settings:
-            if not settings[k]:
-                tkinter.messagebox.showerror(title='Warning', message='There are some missing/wrong settings!')
-                return False
+        #camera_view_controller
 
-        # validate channels
-        try:
-            for k in settings['channel']:
-                float(settings['channel'][k]['laser_power'])
-                float(settings['channel'][k]['interval_time'])
-                if settings['channel'][k]['laser_index'] < 0 or settings['channel'][k]['filter_position'] < 0:
-                    raise
-        except:
-            tkinter.messagebox.showerror(title='Warning', message='There are some missing/wrong settings!')
-            return False
-        
-        self.experiment.MicroscopeState['stack_cycling_mode'] = settings['stack_cycling_mode']
-        for k in settings['stack_acquisition']:
-            self.experiment.MicroscopeState[k] = settings['stack_acquisition'][k]
-        for k in settings['timepoint']:
-            self.experiment.MicroscopeState[k] = settings['timepoint'][k]
+        #channel_setting_controller
 
-        # channels
-        self.experiment.MicroscopeState['channels'] = settings['channel']
+        #channels_tab_controller
+        update_from_channels_tab_controller(self)
 
-        # get all positions
-        self.experiment.MicroscopeState['stage_positions'] = self.channels_tab_controller.get_positions()
+        #etl_popup_controller
 
-        # get position information from stage tab
-        position = self.stage_gui_controller.get_position()
+        #gui_controller
 
-        # validate positions
-        if not position:
-            tkinter.messagebox.showerror(title='Warning', message='There are some missing/wrong settings!')
-            return False
-        
-        for axis in position:
-            self.experiment.StageParameters[axis] = position[axis]
-        step_size = self.stage_gui_controller.get_step_size()
-        for axis in step_size:
-            self.experiment.StageParameters[axis+'_step'] = step_size[axis]
+        #multi_position_controller
+
+        #stage_gui_controller
+
+        #waveform_tab_controller
+
+        #widget_functions
+
+
+
 
         # get zoom info from zoom menu
         if self.resolution_value.get() == 'low':
@@ -431,8 +412,7 @@ class ASLM_controller:
         self.experiment.RemoteFocusParameters['remote_focus_l_delay_percent'] = self.etl_other_info['remote_focus_l_delay_percent']
         self.experiment.RemoteFocusParameters['remote_focus_r_delay_percent'] = self.etl_other_info['remote_focus_r_delay_percent']
 
-        #  CAMERA SETTING CONTROLLERS
-        self.experiment.CameraParameters['sensor_mode'] = self.camera_setting_controller.sensor_mode
+
 
         # TODO: other parameters
         
@@ -440,7 +420,7 @@ class ASLM_controller:
 
     def prepare_acquire_data(self):
         """
-        # this function do preparations before acquiring data
+        # this function does preparations before acquiring data
         # first, update model.experiment
         # second, set sub-controllers' mode to 'live' when 'continuous' was selected, or 'stop'
         """

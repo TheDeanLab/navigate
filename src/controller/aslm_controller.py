@@ -42,7 +42,7 @@ class ASLM_controller:
         # Create a thread pool
         self.threads_pool = SynchronizedThreadPool()
 
-        # Load the Configuration File to Populate the GUI
+        # Load the Configuration to Populate the GUI
         configuration = session(configuration_path, args.verbose)
 
         # Initialize the Model
@@ -109,7 +109,8 @@ class ASLM_controller:
         self.etl_other_info = configuration_controller.get_etl_info()
 
         # Set view based on model.experiment
-        self.populate_experiment_setting(experiment_path)
+        self.experiment = session(experiment_path, args.verbose)
+        self.populate_experiment_setting()
 
         # Camera Settings Tab
         self.initialize_cam_settings(configuration_controller, configuration)
@@ -128,6 +129,8 @@ class ASLM_controller:
         self.model.set_show_img_pipe(self.show_img_pipe_child)
 
         # data buffer
+        # TODO: Update if changes in the buffer size or image size occur.
+        # self.data_buffer = [SharedNDArray(shape=(self.model.camera.y_pixels, self.model.camera.x_pixels), dtype='uint16') for i in range(NUM_OF_FRAMES)]
         self.data_buffer = [SharedNDArray(shape=(2048, 2048), dtype='uint16') for i in range(NUM_OF_FRAMES)]
         self.model.set_data_buffer(self.data_buffer)
         
@@ -296,6 +299,8 @@ class ASLM_controller:
             if file_path.exists():
                 # Loads experiment file within the model, then the controller.
                 self.model.load_experiment_file(file_path)
+
+                # Create experiment instance here.
                 self.experiment = session(file_path, self.verbose)
 
         # set sub-controllers in 'initialization' status
@@ -425,6 +430,10 @@ class ASLM_controller:
 
         self.experiment.RemoteFocusParameters['remote_focus_l_delay_percent'] = self.etl_other_info['remote_focus_l_delay_percent']
         self.experiment.RemoteFocusParameters['remote_focus_r_delay_percent'] = self.etl_other_info['remote_focus_r_delay_percent']
+
+        #  CAMERA SETTING CONTROLLERS
+        self.experiment.CameraParameters['sensor_mode'] = self.camera_setting_controller.sensor_mode
+
         # TODO: other parameters
         
         return True
@@ -464,6 +473,8 @@ class ASLM_controller:
     def execute(self, command, *args):
         """
         # This function listens to sub_gui_controllers
+        # In general, the controller.experiment is passed as an argument to the model, which then overwrites
+        # the model.experiment.  Workaround due to model being in a sub-process.
         """
         if command == 'stage':
             """

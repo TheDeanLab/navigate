@@ -6,14 +6,19 @@ class Camera_Setting_Controller(GUI_Controller):
         super().__init__(view, parent_controller, verbose)
 
         # Getting Widgets/Buttons
-        self.mode_widgets = view.camera_mode.get_widgets() # keys = ['Sensor', 'Readout', 'Pixels']
-        self.framerate_widgets = view.framerate_info.get_widgets() # keys = ['Temp1', 'Temp2', 'Temp3', 'Exposure', 'Integration']
-        self.roi_widgets = view.camera_roi.get_widgets() # roi_keys = ['Left', 'Right', 'Top', 'Bottom'], fov_keys = ['FOV_X', 'FOV_Y'], center_keys = ['Center_X', 'Center_Y'], num_pix_keys = ['Pixels_X', 'Pixels_Y']
-        self.roi_btns = view.camera_roi.get_buttons() # keys = ['Center_ROI', 'Center_At', 'Use_Pixels', '1024', '512'] 
+        self.mode_widgets = view.camera_mode.get_widgets()  # keys = ['Sensor', 'Readout', 'Pixels']
+        self.framerate_widgets = view.framerate_info.get_widgets()  # keys = ['Temp1', 'Temp2', 'Temp3', 'Exposure', 'Integration']
+        self.roi_widgets = view.camera_roi.get_widgets()  # roi_keys = ['Left', 'Right', 'Top', 'Bottom'], fov_keys = ['FOV_X', 'FOV_Y'], center_keys = ['Center_X', 'Center_Y'], num_pix_keys = ['Pixels_X', 'Pixels_Y']
+        self.roi_btns = view.camera_roi.get_buttons()  # keys = ['Center_ROI', 'Center_At', 'Use_Pixels', '1024', '512']
+        self.sensor_mode = 12
+        self.readout_direction = None
 
         # Binding for Camera Mode
         self.mode_widgets['Sensor'].widget.bind('<<ComboboxSelected>>', self.update_readout)
+
+        # Binding for Readout Mode
         self.mode_widgets['Readout'].widget.bind('<<ComboboxSelected>>', self.action_readout)
+        # TODO: Make abstraction for cameras.  Need a function to call in Hamamatsu.
 
         # Binding for ROI Mode
         self.roi_widgets['Right'].widget.config(command=self.update_pixels)
@@ -50,22 +55,24 @@ class Camera_Setting_Controller(GUI_Controller):
             # self.framerate_widgets['Integration'].set(data[4])
             pass
 
-        # Roi Mode
+        # ROI Mode
         if name == 'pixels':
             right = data[0]
             bottom = data[1]
             top = 1
             left = 1
             # Setting default roi widgets
-            self.roi_widgets['Right'].set(right) # Image width aka X pixels
-            self.roi_widgets['Bottom'].set(bottom) # Imgage height aka Y pixels
-            self.roi_widgets['Left'].set(left) # Base value of 1 pixel to start
-            self.roi_widgets['Top'].set(top) # Same as above
+            self.roi_widgets['Right'].set(right)  # Image width aka X pixels
+            self.roi_widgets['Bottom'].set(bottom)  # Imgage height aka Y pixels
+            self.roi_widgets['Left'].set(left)  # Base value of 1 pixel to start
+            self.roi_widgets['Top'].set(top)  # Same as above
+
             # Setting num of pixels
             self.roi_widgets['Pixels_X'].set(right - left - 1)
             self.roi_widgets['Pixels_Y'].set(bottom - top - 1)
             self.roi_widgets['Pixels_X'].widget['state'] = 'disabled' # This should not be edited for now
             self.roi_widgets['Pixels_Y'].widget['state'] = 'disabled'
+
             # ROI Center
             self.roi_widgets['Center_X'].set(right/2)
             self.roi_widgets['Center_Y'].set(bottom/2)
@@ -84,7 +91,14 @@ class Camera_Setting_Controller(GUI_Controller):
         
     def update_readout(self, *args):
         '''
-        #### Updates text in readout widget based on what sensor mode is selected
+        Updates text in readout widget based on what sensor mode is selected
+        If we are in the Light Sheet mode, then we want the camera
+        self.model.CameraParameters['sensor_mode']) == 12
+
+        If we are in the normal mode, then we want the camera
+        self.model.CameraParameters['sensor_mode']) == 1
+
+        Should initialize from the configuration file to the default version
         '''
         # Camera Mode
         sensor_value = self.mode_widgets['Sensor'].widget.get()
@@ -93,17 +107,27 @@ class Camera_Setting_Controller(GUI_Controller):
             self.mode_widgets['Readout'].widget['state'] = 'disabled'
             self.mode_widgets['Pixels'].widget['state'] = 'disabled'
             self.mode_widgets['Sensor'].widget.selection_clear()
+            print("Normal Camera Readout Mode")
+            # TODO: Abstraction
+            self.sensor_mode = 1
+
+
         if sensor_value == 'Light Sheet':
             self.mode_widgets['Readout'].widget.set('Top to Bottom')
             self.mode_widgets['Readout'].widget['state'] = 'readonly'
-            self.mode_widgets['Pixels'].set(10) # Default to 10 pixels
+            self.mode_widgets['Pixels'].set(10)  # Default to 10 pixels
             self.mode_widgets['Pixels'].widget['state'] = 'normal'
+            print("Light Sheet Camera Readout Mode")
+            # TODO: Abstraction
+            self.sensor_mode = 12
+
 
     def action_readout(self, *args):
         '''
-        #### Logic for controlling what backend data needs changing based on readout setting
+        #### Logic for controlling the readout direction
         '''
-        pass
+        self.readout_direction = self.mode_widgets['Readout'].widget.get()
+        print("Readout Direction:", self.readout_direction)
 
     def update_pixels(self, *args):
         '''

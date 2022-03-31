@@ -146,6 +146,29 @@ class DCAMCAP_TRANSFERINFO(Structure):
         self.nNewestFrameIndex = -1
         self.nFrameCount = 0
 
+class DCAMDATA_HDR(Structure):
+    _pack_ = 8
+    _fields_ = [
+        ('size', c_int32),
+        ('iKind', c_int32),
+        ('option', c_int32),
+        ('reserved2', c_int32)
+    ]
+    def __init__(self):
+        self.size = sizeof(DCAMDATA_HDR)
+        self.iKind = 0
+        self.option = 0
+        self.reserved2 = 0
+
+class DCAMDATA_REGIONRECT(Structure):
+    _pack_ = 8
+    _fields_ = [
+        ('left', c_short),
+        ('top', c_short),
+        ('right', c_short),
+        ('bottom', c_short)
+    ]
+
 property_dict = {
     'exposure_time': 2031888, # 0x001F0110, R/W, sec, "EXPOSURE TIME"
     'sensor_mode': 4194832, # 0x00400210, R/W, mode,  "SENSOR MODE"
@@ -181,6 +204,7 @@ dcamcap_transferinfo = __dll.dcamcap_transferinfo
 dcamwait_start = __dll.dcamwait_start
 dcamwait_abort = __dll.dcamwait_abort
 dcamcap_firetrigger = __dll.dcamcap_firetrigger
+dcamdev_setdata = __dll.dcamdev_setdata
 
 
 class DCAM:
@@ -497,16 +521,28 @@ class DCAM:
 
 
 if __name__ == '__main__':
-
     print('start testing Hamamatsu API!')
 
-    number_of_frames = 20
     # create shared memory buffer
     import sys
     sys.path.append('../../../../concurrency')
     from concurrency_tools import SharedNDArray
+    import threading
+    import time
 
+    number_of_frames = 200
+    # TODO: Get the shape of the image from the configuration file (at least for the real software not testing)
+    # CameraParameters:
+    # # Hamamatsu Orca Flash 4.0
+    # number_of_cameras: 1
+    # x_pixels: 2048.0
+    # y_pixels: 2048.0
+
+    start_time = time.time()
     data_buffer = [SharedNDArray(shape=(2048, 2048), dtype='uint16') for i in range(number_of_frames)]
+    stop_time = time.time()
+    print("Duration of time to create a buffer for ", number_of_frames, stop_time - start_time)
+    # Grows linearly with the number of frames.
 
     # start camera
     camera = DCAM(0)
@@ -532,11 +568,8 @@ if __name__ == '__main__':
     for key in configuration:
         # INVALIDVALUE = -2147481567  # 0x80000821, invalid property value
         # INVALIDPROPERTYID = -2147481563  # 0x80000825, the property id is invalid
-        print("property:", property_dict[key], " key:", key)
+        # print("property:", property_dict[key], " key:", key)
         camera.prop_setvalue(property_dict[key], configuration[key])
-
-    # start Acquisition
-    camera.start_acquisition(data_buffer, number_of_frames)
 
     # start data process
     def data_func():
@@ -544,10 +577,9 @@ if __name__ == '__main__':
             frames = camera.get_frames()
             if not frames:
                 break
-            print('get image frame:', frames)
+            # print('get image frame:', frames)
 
-    import threading
-    import time
+
     data_process = threading.Thread(target=data_func)
     data_process.start()
 
@@ -556,12 +588,29 @@ if __name__ == '__main__':
     if camera.prop_setgetvalue(property_dict['trigger_source'], TRIGGERSOURCE_SOFTWARE):
 
         # fire trigger to camera
-        for i in range(100):
+        for i in range(4):
             err = dcamcap_firetrigger(camera.get_camera_handler(), 0)
             if err < 0:
                 print('an error happened when sending trigger to the camera', err)
                 break
             time.sleep(configuration['exposure_time'] + 0.005)
+    start_time = time.time()
+
+    # start Acquisition
+    camera.start_acquisition(data_buffer, number_of_frames)
+
     # end acquisition
     camera.stop_acquisition()
+    stop_time = time.time()
+    print("Duration of time to attach the buffer:", stop_time-start_time)
+
     data_process.join()
+    for i in range(20):
+        number_of_frames += 100
+        data_buffer = [SharedNDArray(shape=(2048, 2048), dtype='uint16') for i in range(number_of_frames)]
+        start_time = time.time()
+        camera.start_acquisition(data_buffer, number_of_frames)
+        camera.stop_acquisition()
+        end_time = time.time()
+        duration = end_time - start_time
+        print("the duration of time necessary to start and stop acquisition:", duration, 'buffer size:', number_of_frames)

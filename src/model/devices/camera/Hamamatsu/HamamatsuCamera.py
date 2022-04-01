@@ -117,11 +117,11 @@ class Camera(CameraBase):
         # Set ROI
         self.x_pixels, self.y_pixels = self.camera_controller.set_ROI(roi_left, roi_top, roi_right, roi_bottom)
         if self.verbose:
-            print("subarray_hpos", self.camera_controller.prop_getvalue(property_dict['subarray_hpos']))
-            print("subarray_hsize", self.camera_controller.prop_getvalue(property_dict['subarray_hsize']))
-            print("subarray_vpos", self.camera_controller.prop_getvalue(property_dict['subarray_vpos']))
-            print("subarray_vsize", self.camera_controller.prop_getvalue(property_dict['subarray_vsize']))
-            print('sub array mode(1: OFF, 2: ON): ', self.camera_controller.prop_getvalue(property_dict['subarray_mode']))
+            print("subarray_hpos", self.camera_controller.get_property_value('subarray_hpos'))
+            print("subarray_hsize", self.camera_controller.prop_getget_property_valuevalue('subarray_hsize'))
+            print("subarray_vpos", self.camera_controller.get_property_value('subarray_vpos'))
+            print("subarray_vsize", self.camera_controller.get_property_value('subarray_vsize'))
+            print('sub array mode(1: OFF, 2: ON): ', self.camera_controller.get_property_value('subarray_mode'))
 
     def initialize_image_series(self, data_buffer=None, number_of_frames=100):
         self.camera_controller.start_acquisition(data_buffer, number_of_frames)

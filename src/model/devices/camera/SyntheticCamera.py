@@ -90,3 +90,8 @@ class Camera(CameraBase):
         if self.verbose:
             print('get a new frame from camera', frames)
         return frames
+
+    def set_ROI(self, roi_height=2048, roi_width=2048):
+        self.x_pixels = roi_width
+        self.y_pixels = roi_height
+        

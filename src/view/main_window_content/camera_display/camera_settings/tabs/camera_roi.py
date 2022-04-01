@@ -23,18 +23,19 @@ class camera_roi(ttk.Labelframe):
         # ROI
         self.roi_frame = ttk.LabelFrame(self, text='ROI')
         self.roi_frame.grid(row=0, column=0, sticky=(NSEW))
-        # Pix Num
-        self.num_pix_frame = ttk.LabelFrame(self, text='Number of pixels')
-        self.num_pix_frame.grid(row=0, column=1, sticky=(NSEW))
+        # Button Frame
+        self.btn_frame = ttk.LabelFrame(self, text="Resizing Actions")
+        self.btn_frame.grid(row=0, column=1, rowspan=2, sticky=(NSEW))
         # FOV
         self.fov_frame = ttk.LabelFrame(self, text='FOV')
         self.fov_frame.grid(row=1, column=0, sticky=(NSEW))
         # ROI Center
         self.center_roi_frame = ttk.LabelFrame(self, text='ROI Center')
         self.center_roi_frame.grid(row=2, column=0, sticky=(NSEW))
-        # Button Frame
-        self.btn_frame = ttk.LabelFrame(self)
-        self.btn_frame.grid(row=1, column=1, rowspan=2, sticky=(NSEW))
+        # Binning
+        self.binning_frame = ttk.Labelframe(self, text="Binning Settings")
+        self.center_roi_frame.grid(row=1, column=1, sticky=(NSEW))
+        
 
         
 
@@ -43,18 +44,22 @@ class camera_roi(ttk.Labelframe):
         self.buttons = {}
 
         # Labels and names
-        self.roi_labels = ['Left', 'Right', 'Top', 'Bottom'] # names are the same, can be reused
+        self.roi_labels = ['Width', 'Height'] # names are the same, can be reused
         self.xy_labels = ['X', 'Y']
         self.fov_names = ['FOV_X', 'FOV_Y']
         self.center_names = ['Center_X', 'Center_Y']
-        self.num_pix_names = ['Pixels_X', 'Pixels_Y']
+        self.binning = 'Binning'
         # Buttons
-        self.btn_labels = ['Center ROI', 'Center ROI @', 'Use All Pixels', '1024x1024', '512x512']
-        self.btn_names = ['Center_ROI', 'Center_At', 'Use_Pixels', '1024', '512']  
+        self.btn_labels = ['Use All Pixels', '1024x1024', '512x512']
+        self.btn_names = ['Use_Pixels', '1024', '512']  
         
         # Loop for each frame
-        for i in range(5):
-            if i < 4:
+        for i in range(3):
+            if i < 3:
+                # Button Frame
+                self.buttons[self.btn_names[i]] = ttk.Button(self.btn_frame, text=self.btn_labels[i])
+                self.buttons[self.btn_names[i]].grid(row=i, column=0, pady=1)
+            if i < 2:
                 # ROI frame
                 self.inputs[self.roi_labels[i]] = LabelInput(parent=self.roi_frame,
                                                     label=self.roi_labels[i],
@@ -63,7 +68,6 @@ class camera_roi(ttk.Labelframe):
                                                     input_args={"from_": 0, "to": 2048, "increment": 1.0}
                                                     )                                 
                 self.inputs[self.roi_labels[i]].grid(row=i, column=0, pady=1)
-            if i < 2:
                 # FOV Frame
                 self.inputs[self.fov_names[i]] = LabelInput(parent=self.fov_frame,
                                             label=self.xy_labels[i],
@@ -79,18 +83,16 @@ class camera_roi(ttk.Labelframe):
                                                     input_args={"from_": 0, "to": 2048, "increment": 1.0}
                                                     )                                 
                 self.inputs[self.center_names[i]].grid(row=i, column=0, pady=1)
-                # Number of pixels
-                self.inputs[self.num_pix_names[i]] = LabelInput(parent=self.num_pix_frame,
-                                                    label=self.xy_labels[i],
-                                                    input_class=ttk.Spinbox,
-                                                    input_var=tk.IntVar(),
-                                                    input_args={"from_": 0, "to": 2048, "increment": 1.0}
-                                                    )                                 
-                self.inputs[self.num_pix_names[i]].grid(row=i, column=0, pady=1)
+            if i == 0:
+                self.inputs[self.binning] = LabelInput(parent=self.binning_frame,
+                                                    label=self.binning,
+                                                    input_class=ttk.Combobox,
+                                                    input_var=tk.StringVar()
+                                                )                                 
+                self.inputs[self.binning].grid(row=0, column=0, pady=1)
+                
             
-            # Button Frame
-            self.buttons[self.btn_names[i]] = ttk.Button(self.btn_frame, text=self.btn_labels[i])
-            self.buttons[self.btn_names[i]].grid(row=i, column=0, pady=1)
+            
 
     def get_variables(self):
         '''

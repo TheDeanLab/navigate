@@ -21,10 +21,14 @@ class Camera_Setting_Controller(GUI_Controller):
         # TODO: Make abstraction for cameras.  Need a function to call in Hamamatsu.
 
         # Binding for ROI Mode
-        self.roi_widgets['Right'].widget.config(command=self.update_pixels)
-        self.roi_widgets['Left'].widget.config(command=self.update_pixels)
-        self.roi_widgets['Top'].widget.config(command=self.update_pixels)
-        self.roi_widgets['Bottom'].widget.config(command=self.update_pixels)
+        # Trace examples
+        #self.roi_widgets['Right'].widget.config(command=self.update_pixels, relief="sunken") # TODO change button style during transitions
+        #self.roi_widgets['Right'].widget.trace('w', command=self.update_pixels)
+        #self.roi_widgets['Right'].widget.bind('<<ComboboxSelected>>', self.action_readout)
+        
+        # self.roi_widgets['Left'].widget.config(command=self.update_pixels)
+        # self.roi_widgets['Top'].widget.config(command=self.update_pixels)
+        # self.roi_widgets['Bottom'].widget.config(command=self.update_pixels)
 
 
     def initialize(self, name, data):
@@ -62,16 +66,16 @@ class Camera_Setting_Controller(GUI_Controller):
             top = 1
             left = 1
             # Setting default roi widgets
-            self.roi_widgets['Right'].set(right)  # Image width aka X pixels
-            self.roi_widgets['Bottom'].set(bottom)  # Imgage height aka Y pixels
-            self.roi_widgets['Left'].set(left)  # Base value of 1 pixel to start
-            self.roi_widgets['Top'].set(top)  # Same as above
+            # self.roi_widgets['Right'].set(right)  # Image width aka X pixels
+            # self.roi_widgets['Bottom'].set(bottom)  # Imgage height aka Y pixels
+            # self.roi_widgets['Left'].set(left)  # Base value of 1 pixel to start
+            # self.roi_widgets['Top'].set(top)  # Same as above
 
             # Setting num of pixels
-            self.roi_widgets['Pixels_X'].set(right - left - 1)
-            self.roi_widgets['Pixels_Y'].set(bottom - top - 1)
-            self.roi_widgets['Pixels_X'].widget['state'] = 'disabled' # This should not be edited for now
-            self.roi_widgets['Pixels_Y'].widget['state'] = 'disabled'
+            # self.roi_widgets['Pixels_X'].set(right - left - 1)
+            # self.roi_widgets['Pixels_Y'].set(bottom - top - 1)
+            # self.roi_widgets['Pixels_X'].widget['state'] = 'disabled' # This should not be edited for now
+            # self.roi_widgets['Pixels_Y'].widget['state'] = 'disabled'
 
             # ROI Center
             self.roi_widgets['Center_X'].set(right/2)
@@ -129,6 +133,7 @@ class Camera_Setting_Controller(GUI_Controller):
         self.readout_direction = self.mode_widgets['Readout'].widget.get()
         print("Readout Direction:", self.readout_direction)
 
+    
     def update_pixels(self, *args):
         '''
         #### Updates number of pixels in ROI based on Right, Left, Top, Bottom

@@ -20,6 +20,8 @@ class pallete(ttk.Labelframe):
         self.color_labels = ['Gray', 'Gradient', 'Rainbow']
         self.color_values = ['gray', 'hot', 'viridis']
         self.color = StringVar()
+        self.autoscale = BooleanVar()
+        self.auto = 'Autoscale'
         self.minmax = ['Min Counts', 'Max Counts']
         self.minmax_names = ['Min', 'Max']
 
@@ -36,11 +38,17 @@ class pallete(ttk.Labelframe):
         
         
         #  Autoscale checkbox - Invoked by default.
-        self.autoscale = BooleanVar()
-        self.inputs['Autoscale'] = ttk.Checkbutton(self,
-                                               text="Autoscale",
-                                               variable=self.autoscale)
-        self.inputs['Autoscale'].grid(row=3, column=0, sticky=NSEW)
+        # self.autoscale = BooleanVar()
+        # self.inputs['Autoscale'] = ttk.Checkbutton(self,
+        #                                        text="Autoscale",
+        #                                        variable=self.autoscale)
+        # self.inputs['Autoscale'].grid(row=3, column=0, sticky=NSEW)
+        self.inputs[self.auto] = LabelInput(parent=self,
+                                                    label=self.auto,
+                                                    input_class=ttk.Checkbutton,
+                                                    input_var=self.autoscale
+                                                    )
+        self.inputs[self.auto].grid(row=3, column=0, sticky=(NSEW)) 
 
         # Max and Min Counts
         for i in range(len(self.minmax)):

@@ -15,7 +15,10 @@ class Camera_View_Controller(GUI_Controller):
         # keys = ['Frames to Avg', 'Image Max Counts', 'Channel']
 
         self.pallete = view.scale_pallete.get_widgets()
-        # keys = ['Gray','Gradient','Rainbow','Min','Max']
+        # keys = ['Gray','Gradient','Rainbow', 'Autoscale', 'Min','Max']
+
+        # Binding for Pallete
+        self.pallete['Autoscale'].widget.config(command=self.update_minmax)
 
         self.display = 'PIL'
         # PIL or Matplotlib
@@ -53,11 +56,13 @@ class Camera_View_Controller(GUI_Controller):
 
             # Invoking defaults
             self.pallete['Gray'].widget.invoke()
-            self.pallete['Autoscale'].invoke()
+            self.pallete['Autoscale'].widget.invoke()
 
             # Populating defaults
             self.pallete['Min'].set(min)
             self.pallete['Max'].set(max)
+            self.pallete['Min'].widget['state'] = 'disabled'
+            self.pallete['Max'].widget['state'] = 'disabled'
         
         # Image Metrics section
         if name == 'image':
@@ -159,3 +164,12 @@ class Camera_View_Controller(GUI_Controller):
 
     def update_channel_idx(self, channel_idx):
         self.view.cam_counts.channel_idx.set(channel_idx)
+
+    def update_minmax(self):
+        on_off = self.pallete['Autoscale'].get()
+        if on_off == True: # Checkbox selected
+            self.pallete['Min'].widget['state'] = 'disabled'
+            self.pallete['Max'].widget['state'] = 'disabled'
+        elif on_off == False: # Checkbox unselected
+            self.pallete['Min'].widget['state'] = 'normal'
+            self.pallete['Max'].widget['state'] = 'normal'

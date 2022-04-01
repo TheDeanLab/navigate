@@ -1,8 +1,16 @@
+import re
 import tkinter as tk
 from tkinter import ttk        
 from decimal import Decimal, InvalidOperation
 from hoverbar import Tooltip
 from LabelInputWidgetFactory import LabelInput
+
+REGEX_DICT = {
+    'float': '(^-?$)|(^-?[0-9]+\.?[0-9]*$)',
+    'float_nonnegative': '(^$)|(^[0-9]+\.?[0-9]*$)',
+    'int': '^-?[0-9]*$',
+    'int_nonnegative': '^[0-9]*$'
+}
 
 # Base design courtesy of below book.
 # Learning Path: Python GUI Programming - A Complete Reference Guide by Alan D. Moore and B. M. Harwani 
@@ -38,8 +46,8 @@ validation_function = (wrapped_function, '%P') # Can use any amount of substitut
 invalid = (other_function, '%P', '%s')
 widget.config(
             validate='all',
-            validatecommand=validation_function,
-            invalidcommand=invalid
+            validatecommand=validation_function with args,
+            invalidcommand=invalid_function with args
 )
 
 '''
@@ -67,7 +75,7 @@ class ValidatedMixin:
 
     # Error handler - where you can customize color or what happens to widget
     def _toggle_error(self, on=False):
-        self.config(foreground=('red' if on else 'black')) # Changes background to red on error TODO foreground?
+        self.config(foreground=('red' if on else 'black')) # Changes text to red on error
 
     # Validation, args are the sub codes. This just sets up validation then runs based on event type
     def _validate(self, proposed, current, char, event, index, action):
@@ -109,15 +117,130 @@ class ValidatedMixin:
 
 
 # Entry class that requires Entry
-class RequiredEntry(ValidatedMixin, ttk.Entry):
+# Can optionally pass in a precision, min value, max value and a boolean for whether the entry requires a value. The min_var, max_var and focus_update_var are the same as spinbox
+class ValidatedEntry(ValidatedMixin, ttk.Entry):
+    def __init__(self, *args, precision=0, required=False, min_var=None, max_var=None, focus_update_var=None, min='-Infinity', max='Infinity', **kwargs):
+        super().__init__(*args, **kwargs)
+        self.resolution = Decimal(precision) # Number for precision given on creation
+        self.precision = (self.resolution.normalize().as_tuple().exponent) # Precision of number as exponent
+        self.variable = kwargs.get('textvariable') or tk.StringVar
+        self.min = min
+        self.max = max
+        self.required = required
+        
+    # Dynamic range checker
+        if min_var:
+            self.min_var = min_var
+            self.min_var.trace('w', self._set_minimum)
+        if max_var:
+            self.max_var = max_var
+            self.max_var.trace('w', self._set_maximum)
+        self.focus_update_var = focus_update_var
+        self.bind('<FocusOut>', self._set_focus_update_var)
+
+    def _key_validate(self, char, index, current, proposed, action, **kwargs):
+
+        valid = True
+        min_val = self.min
+        max_val = self.max
+        no_negative = int(min_val) >= 0
+        no_decimal = self.precision >= 0
+
+
+        # Allow deletion
+        if action == '0':
+            return True
+
+        # Testing keystroke for validity
+        # Filter out obviously bad keystrokes
+        if any([
+            (char not in ('-1234567890.')),
+            (char == '-' and (no_negative or index != '0')),
+            (char == '.' and (no_decimal or '.' in current))
+        ]):
+            return False
+
+        # Proposed is either a Decimal, '-', '.', or '-.' need one final check for '-' and '.' 
+        if proposed in '-.':
+            return True
+
+        # Proposed value is a Decimal, so convert and check further
+        proposed = Decimal(proposed)
+        proposed_precision = proposed.as_tuple().exponent
+        if any([
+            (proposed > int(max_val)),
+            (proposed_precision < self.precision)
+        ]):
+            return False
+        
+        return valid
+
+    
 
     # If entry widget is empty set the error string and return False TODO add hover bubble with error message
     def _focusout_validate(self, event):
         valid = True
-        if not self.get():
+        value = self.get()
+        max_val = self.max
+        min_val = self.min
+        # Check for error upon leaving widget
+        
+        try:
+            value = Decimal(value)
+        except InvalidOperation:
+            if self.required == True:
+                self.error.set('A value is required')
+            else:
+                self.error.set('Invalid number string: {}'.format(value))
+            return False
+
+        # Checking if greater than minimum
+        if value < int(min_val):
+            self.error.set('Value is too low (min {})'.format(min_val))
             valid = False
-            self.error.set('A value is required')
+
+        # Checking if less than max
+        if value > int(max_val):
+            self.error.set('Value is too high (max {})'.format(max_val))
+
+        
+
         return valid
+    
+    # Gets current value of widget and if focus_update_var is present it sets it to the same value
+    def _set_focus_update_var(self, event):
+        value = self.get()
+        if self.focus_update_var and not self.error.get():
+            self.focus_update_var.set(value)
+    
+    # Update minimum based on given variable
+    def _set_minimum(self, *args):
+        current = self.get()
+        try:
+            new_min = self.min_var.get()
+            self.min = new_min
+            print(self.max)
+        except (tk.TclError, ValueError):
+            pass
+        if not current:
+            self.delete(0, tk.END)
+        else:
+            self.variable.set(current)
+        self.trigger_focusout_validation() # Revalidate with the new minimum
+    
+    # Update maximum based on given variable
+    def _set_maximum(self, *args):
+        current = self.get()
+        try:
+            new_max = self.max_var.get()
+            self.max = new_max
+        except (tk.TclError, ValueError):
+            pass
+        if not current:
+            self.delete(0, tk.END)
+        else:
+            self.variable.set(current)
+        self.trigger_focusout_validation() # Revalidate with the new maximum
 
 # Clears box on backspace, allows fully typed words that match values to be accepted, and an option to require a value
 class ValidatedCombobox(ValidatedMixin, ttk.Combobox):
@@ -282,16 +405,22 @@ if __name__ == '__main__':
     evar = tk.DoubleVar()
     wvar = tk.DoubleVar()
 
-    btn_ne = RequiredEntry(frame)
+    btn_ne = LabelInput(frame,
+                            label_pos="top",
+                            label='Dynamic Range Entry',
+                            input_class=ValidatedEntry,
+                            input_var=tk.StringVar,
+                            input_args={"min":'0', "max":'25', "min_var":wvar, "max_var":evar}
+    )
     btn_se = ValidatedCombobox(frame)
     btn_se['values'] = val
     btn_sw = ValidatedCombobox(frame)
     btn_sw['values'] = val
-    btn_nw = RequiredEntry(frame)
+    btn_nw = ValidatedEntry(frame)
 
     btn_center = LabelInput(frame,
                             label_pos="top",
-                            label='Dynamic Range',
+                            label='Dynamic Range Spinbox',
                             input_class=ValidatedSpinbox,
                             input_var=tk.DoubleVar,
                             input_args={"from_":'0', "to":'25', "increment": '1.0', "min_var":wvar, "max_var":evar}
@@ -299,7 +428,13 @@ if __name__ == '__main__':
     # btn_center = ValidatedSpinbox(frame, min_var=wvar,max_var=evar)
 
 
-    btn_n = RequiredEntry(frame)
+    btn_n = LabelInput(frame,
+                            label_pos="top",
+                            label='Validated Entry (4-15)',
+                            input_class=ValidatedEntry,
+                            input_var=tk.StringVar,
+                            input_args={"min":'4', "max":'15', 'precision':'2', 'required':True}
+    )
     btn_e = ValidatedSpinbox(frame, from_=0,to=20,increment=1,min_var=wvar, focus_update_var=evar)
     btn_s = ValidatedCombobox()
     btn_s['values'] = val

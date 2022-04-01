@@ -127,9 +127,9 @@ class Model:
             if self.is_save:
                 self.experiment.Saving = kwargs['saving_info']
             self.stop_acquisition = False
+            self.stop_send_signal = False
             self.open_shutter()
             self.run_single_acquisition()
-            self.stop_acquisition = True
             self.run_data_process(1)
             self.close_shutter()
 
@@ -250,7 +250,7 @@ class Model:
         """
         #  Calculates the total number of channels that are selected.
         """
-        return len(self.experiment.MicroscopeState['channels'].keys())
+        return len(self.experiment.MicroscopeState['channels'])
 
     def prepare_acquisition_list(self):
         """
@@ -356,16 +356,15 @@ class Model:
         return image_name
 
     def change_resolution(self, args):
-        resolution_mode = args[0]
-        zoom_value = args[1]
-        if resolution_mode == 'high':
+        resolution_value = args[0]
+        if resolution_value == 'high':
             print("High Resolution Mode")
             self.experiment.MicroscopeState['resolution_mode'] = 'high'
         else:
-            print("Low Resolution Mode, Zoom:", resolution_mode)
+            print("Low Resolution Mode, Zoom:", resolution_value)
             self.experiment.MicroscopeState['resolution_mode'] = 'low'
-            self.experiment.MicroscopeState['zoom'] = zoom_value
-            self.zoom.set_zoom(zoom_value)
+            self.experiment.MicroscopeState['zoom'] = resolution_value
+            self.zoom.set_zoom(resolution_value)
 
     def open_shutter(self):
         """

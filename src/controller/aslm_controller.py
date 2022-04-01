@@ -42,15 +42,15 @@ class ASLM_controller:
         # Create a thread pool
         self.threads_pool = SynchronizedThreadPool()
 
-        # Load the Configuration to Populate the GUI
-        self.configuration = session(configuration_path, args.verbose)
-
         # Initialize the Model
         self.model = ObjectInSubprocess(Model, args,
                                         configuration_path=configuration_path,
                                         experiment_path=experiment_path,
                                         etl_constants_path=etl_constants_path)
 
+        # Load the Configuration to Populate the GUI
+        self.configuration = session(configuration_path, args.verbose)
+        
         # save default experiment file
         self.default_experiment_file = experiment_path
 
@@ -211,19 +211,18 @@ class ASLM_controller:
                                                           value='high')
 
         # low resolution sub menu
-        # TODO: Should only be one checkbox selected, depending on what mode we are initialized in.
+        # Should only be one checkbox selected, depending on what mode we are initialized in.
+        # In order to make sure only one checkbox would be selected, they need to share one variable: resolution_value
         meso_res_sub_menu = tkinter.Menu(self.view.menubar.menu_resolution)
         self.view.menubar.menu_resolution.add_cascade(menu=meso_res_sub_menu,
                                                       label='Mesoscale')
 
-        self.zoom_value = tkinter.StringVar()
         for res in self.etl_setting.ETLConstants['low'].keys():
             meso_res_sub_menu.add_radiobutton(label=res,
-                                              variable=self.zoom_value,
+                                              variable=self.resolution_value,
                                               value=res)
         # event binding
-        self.resolution_value.trace_add('write', lambda *args: self.execute('resolution', self.resolution_value.get(), self.zoom_value.get()))
-        self.zoom_value.trace_add('write', lambda *args: self.execute('resolution', self.resolution_value.get(), self.zoom_value.get()))
+        self.resolution_value.trace_add('write', lambda *args: self.execute('resolution', self.resolution_value.get()))
 
         # add separator
         self.view.menubar.menu_resolution.add_separator()
@@ -358,6 +357,13 @@ class ASLM_controller:
         # after initialization, let sub-controllers do necessary computation
         self.channels_tab_controller.after_intialization()
 
+        # resolution/zoom menu
+        resolution_mode = self.experiment.MicroscopeState['resolution_mode']
+        if resolution_mode == 'high':
+            self.resolution_value.set('high')
+        else:
+            self.resolution_value.set(self.experiment.MicroscopeState['zoom'])
+
         # etl parameters
         self.etl_other_info['remote_focus_l_delay_percent'] = self.experiment.RemoteFocusParameters['remote_focus_l_delay_percent']
         self.etl_other_info['remote_focus_r_delay_percent'] = self.experiment.RemoteFocusParameters['remote_focus_r_delay_percent']
@@ -397,17 +403,13 @@ class ASLM_controller:
 
 
 
-        # get zoom info from zoom menu
-        if self.resolution_value.get() == 'low':
-            self.experiment.MicroscopeState['zoom_position'] = self.zoom_value.get()
-        else:
-            self.experiment.MicroscopeState['zoom_position'] = 'N/A'
-
-        # get resolution info from resolution menu and etl setting
-        if self.resolution_value.get() == 'low':
-            self.experiment.MicroscopeState['resolution_mode'] = 'low'
-        else:
+        # get zoom and resolution info from resolution menu
+        if self.resolution_value.get() == 'high':
             self.experiment.MicroscopeState['resolution_mode'] = 'high'
+            self.experiment.MicroscopeState['zoom'] = 'N/A'
+        else:
+            self.experiment.MicroscopeState['resolution_mode'] = 'low'
+            self.experiment.MicroscopeState['zoom'] = self.resolution_value.get()
 
         self.experiment.RemoteFocusParameters['remote_focus_l_delay_percent'] = self.etl_other_info['remote_focus_l_delay_percent']
         self.experiment.RemoteFocusParameters['remote_focus_r_delay_percent'] = self.etl_other_info['remote_focus_r_delay_percent']
@@ -477,8 +479,8 @@ class ASLM_controller:
         elif command == 'resolution':
             """
             #  Changes the resolution mode and zoom position.
-            #  1st Argument = self.resolution_value
-            #  2nd Argument = self.zoom_value
+            #  one Argument = self.resolution_value
+            #  values: 'high', '0.63x', '1x', '2x'...'6x' 
             """
             self.model.change_resolution(args)
 
@@ -539,10 +541,6 @@ class ASLM_controller:
                 if self.verbose:
                     print('Starting Continuous Acquisition')
                 self.threads_pool.createThread('camera', self.capture_live_image)
-
-                # self.model.open_shutter()
-                # self.threads_pool.createThread(self.model.run_live_acquisition(self.update_camera_view))
-                # self.model.close_shutter()
 
             elif self.acquire_bar_controller.mode == 'z-stack':
                 if self.verbose:

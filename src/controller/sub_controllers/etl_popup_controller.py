@@ -12,9 +12,9 @@ class Etl_Popup_Controller(GUI_Controller):
         self.resolution_info = None
         self.other_info = None
         # get mode and mag widgets
-        widgets = self.view.get_widgets()
-        self.mode_widget = widgets['Mode']
-        self.mag_widget = widgets['Mag']
+        self.widgets = self.view.get_widgets()
+        self.mode_widget = self.widgets['Mode']
+        self.mag_widget = self.widgets['Mag']
 
         self.variables = self.view.get_variables()
         self.lasers = ['488nm', '562nm', '642nm']
@@ -28,11 +28,12 @@ class Etl_Popup_Controller(GUI_Controller):
 
         # add validations to widgets
         for laser in self.lasers:
-            validate_wrapper(widgets[laser + ' Amp'].widget, is_entry=True)
-            validate_wrapper(widgets[laser + ' Off'].widget, is_entry=True)
+            validate_wrapper(self.widgets[laser + ' Amp'].widget, is_entry=True)
+            validate_wrapper(self.widgets[laser + ' Off'].widget, is_entry=True)
         for key in self.other_info_dict.keys():
-            validate_wrapper(widgets[key].widget, is_entry=True)
+            validate_wrapper(self.widgets[key].widget, is_entry=True)
 
+        
         # event combination
         self.mode_widget.widget.bind('<<ComboboxSelected>>', self.show_magnification)
         self.mag_widget.widget.bind('<<ComboboxSelected>>', self.show_laser_info)
@@ -121,7 +122,25 @@ class Etl_Popup_Controller(GUI_Controller):
         """
         # this function will save etl to new yaml file.
         """
+        errors = self.get_errors()
+        if errors:
+            return # Dont save if any errors TODO needs testing
         filename = filedialog.asksaveasfilename(defaultextension='.yml', filetypes=[('Yaml file', '*.yml')])
         if not filename:
             return
         save_yaml_file('', self.resolution_info.serialize(), filename)
+
+    '''
+        Example for preventing submission of a field/controller. So if there is an error in any field that is supposed to have validation then the config cannot be saved
+    '''
+    # TODO needs testing may also need to be moved to the remote_focus_popup class. Opinions welcome
+    def get_errors(self):
+        '''Get a list of field errors in popup'''
+
+        errors = {}
+        for key, labelInput in self.widgets.items():
+            if hasattr(labelInput.widget,'trigger_focusout_validation'):
+                labelInput.widget.trigger_focusout_validation()
+            if labelInput.error.get():
+                errors[key] = labelInput.error.get()
+        return errors

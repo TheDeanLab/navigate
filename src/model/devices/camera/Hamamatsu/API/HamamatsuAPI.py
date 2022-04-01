@@ -649,48 +649,15 @@ if __name__ == '__main__':
                 break
             # print('get image frame:', frames)
 
-
-    data_process = threading.Thread(target=data_func)
-    data_process.start()
-
-    # set camera that trigger from software
-    TRIGGERSOURCE_SOFTWARE = 3
-    if camera.prop_setgetvalue(property_dict['trigger_source'], TRIGGERSOURCE_SOFTWARE):
-
-        # fire trigger to camera
-        for i in range(4):
-            err = dcamcap_firetrigger(camera.get_camera_handler(), 0)
-            if err < 0:
-                print('an error happened when sending trigger to the camera', err)
-                break
-            time.sleep(configuration['exposure_time'] + 0.010)
-    start_time = time.time()
-
-    # start Acquisition
-    camera.start_acquisition(data_buffer, number_of_frames)
-
-    # end acquisition
-    camera.stop_acquisition()
-    stop_time = time.time()
-    print("Duration of time to attach the buffer:", stop_time-start_time)
-
-    data_process.join()
-    for i in range(5):
-        number_of_frames += 100
-        data_buffer = [SharedNDArray(shape=(2048, 2048), dtype='uint16') for i in range(number_of_frames)]
-        start_time = time.time()
-        camera.start_acquisition(data_buffer, number_of_frames)
-        camera.stop_acquisition()
-        end_time = time.time()
-        duration = end_time - start_time
-        print("the duration of time necessary to start and stop acquisition:", duration, 'buffer size:', number_of_frames)
-
     import threading
     import time
 
     def test_acquisition():
         data_process = threading.Thread(target=data_func)
         data_process.start()
+
+        # start acquisition
+        camera.start_acquisition(data_buffer, number_of_frames)
 
         # set camera that trigger from software
         TRIGGERSOURCE_SOFTWARE = 3
@@ -734,6 +701,7 @@ if __name__ == '__main__':
         # assert(camera.prop_getvalue(property_dict['subarray_vpos']) == top)
         # assert(camera.prop_getvalue(property_dict['subarray_vsize']) == bottom-top+1)
 
+        print('image width and height:', width, height)
         print("subarray_hpos", camera.prop_getvalue(property_dict['subarray_hpos']))
         print("subarray_hsize", camera.prop_getvalue(property_dict['subarray_hsize']))
         print("subarray_vpos", camera.prop_getvalue(property_dict['subarray_vpos']))

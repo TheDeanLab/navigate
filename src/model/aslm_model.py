@@ -55,6 +55,7 @@ class Model:
             'stages': ResultThread(target=start_stages, args=(self.configuration, self.verbose,)).start(),
             'shutter': ResultThread(target=start_shutters, args=(self.configuration, self.experiment, self.verbose,)).start(),
             'daq': ResultThread(target=start_daq, args=(self.configuration, self.experiment, self.etl_constants, self.verbose,)).start(),
+            'laser_switch': ResultThread(target=start_laser_switcher, args=(self.configuration, self.experiment, self.verbose,)).start(),
             # 'etl': ResultThread(target=start_etl, args=(self.configuration, self.verbose,)).start()
         }
         for k in threads_dict:
@@ -360,11 +361,14 @@ class Model:
         if resolution_value == 'high':
             print("High Resolution Mode")
             self.experiment.MicroscopeState['resolution_mode'] = 'high'
+            self.laser_switch.enable_high_resolution_laser()
         else:
+            # Can be 0.63, 1, 2, 3, 4, 5, and 6x.
             print("Low Resolution Mode, Zoom:", resolution_value)
             self.experiment.MicroscopeState['resolution_mode'] = 'low'
             self.experiment.MicroscopeState['zoom'] = resolution_value
             self.zoom.set_zoom(resolution_value)
+            self.laser_switch.enable_low_resolution_laser()
 
     def open_shutter(self):
         """

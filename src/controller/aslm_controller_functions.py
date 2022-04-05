@@ -111,6 +111,6 @@ def update_from_channels_tab_controller(self):
 def update_from_camera_setting_controller(self):
     self.experiment.CameraParameters['sensor_mode'] = self.camera_setting_controller.sensor_mode
     self.experiment.CameraParameters['binning'] = 1
-    self.experiment.CameraParameters['x_pixels'] = self.camera_setting_controller.roi_widgets['Pixels_X'].get()
-    self.experiment.CameraParameters['y_pixels'] = self.camera_setting_controller.roi_widgets['Pixels_Y'].get()
+    # self.experiment.CameraParameters['x_pixels'] = self.camera_setting_controller.roi_widgets['Pixels_X'].get()
+    # self.experiment.CameraParameters['y_pixels'] = self.camera_setting_controller.roi_widgets['Pixels_Y'].get()
     self.experiment.CameraParameters['number_of_cameras'] = 1

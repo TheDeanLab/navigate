@@ -161,3 +161,14 @@ def start_shutters(configuration, experiment, verbose):
         shutter = ShutterModel(configuration, experiment, verbose)
     return shutter
 
+def start_laser_switcher(configuration, experiment, verbose):
+    """
+    # Initializes the Laser Switching DAQ Output:
+    """
+    if configuration.Devices['daq'] == 'NI':
+        from model.devices.lasers.LaserSwitching import LaserSwitching
+        laser_switch = LaserSwitching(configuration, experiment, verbose)
+    else:
+        from model.devices.lasers.LaserSwitching import SyntheticLaserSwitching
+        laser_switch = SyntheticLaserSwitching(configuration, experiment, verbose)
+    return laser_switch

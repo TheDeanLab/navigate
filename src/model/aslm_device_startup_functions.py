@@ -72,12 +72,12 @@ def start_filter_wheel(configuration, verbose):
     """
     # Initializes the Filter Wheel. Sutter or SyntheticFilterWheel
     """
-    if configuration.Devices['filter_wheel'] == 'Sutter':
-        from model.devices.filter_wheel.Sutter.Lambda10B import FilterWheel as FilterWheelModel
-        filter_wheel = FilterWheelModel(configuration, verbose)
+    if configuration.Devices['filter_wheel'] == 'SutterFilterWheel':
+        from model.devices.filter_wheels import SutterFilterWheel
+        filter_wheel = SutterFilterWheel(configuration, verbose)
     elif configuration.Devices['filter_wheel'] == 'SyntheticFilterWheel':
-        from model.devices.filter_wheel.SyntheticFilterWheel import SyntheticFilterWheel as FilterWheelModel
-        filter_wheel = FilterWheelModel(configuration, verbose)
+        from model.devices.filter_wheel import SyntheticFilterWheel
+        filter_wheel = SyntheticFilterWheel(configuration, verbose)
     else:
         print("Filter Wheel Type in Configuration.yml Not Recognized - Initialization Failed")
         sys.exit()

@@ -1,23 +1,101 @@
 """
-Module for controlling Sutter Lambda Filter Wheels
-Author: Kevin Dean,
-
-Command byte = (wheel * 128) + (self.speed * 16) + position
-https://www.sutter.com/manuals/LB10-3_OpMan.pdf
-
-TODO: Currently moves multiple filter wheels to the same position.  In the future, it may be nice to have
-      a way to move multiple filter wheels to different positions independently.
+Filter Wheel Base Class
 """
-# Standard Imports
-import serial
+#  Standard Library Imports
 import time
+import serial
+
+# Third Party Imports
 import numpy as np
 
 # Local Imports
-from model.devices.filter_wheel.FilterWheelBase import FilterWheelBase
+
+class FilterWheelBase:
+    def __init__(self, model, verbose):
+        self.comport = model.FilterWheelParameters['filter_wheel_port']
+        self.baudrate = model.FilterWheelParameters['baudrate']
+        self.filter_dictionary = model.FilterWheelParameters['available_filters']
+        self.number_of_filter_wheels = model.FilterWheelParameters['number_of_filter_wheels']
+        self.wheel_position = 0
+        self.verbose = verbose
+
+    def check_if_filter_in_filterdict(self, filterposition):
+        """
+        # Checks if the filter designation (string) given as argument
+        # exists in the filterdict
+        """
+        print("FilterWheelBase: Not Implemented")
+
+    def filter_change_delay(self, filter_name):
+        print("FilterWheelBase: Not Implemented")
+
+    def set_filter(self, filter_name, wait_until_done=True):
+        """
+        # Change the filter wheel to the filter designated by the filterposition argument.
+        """
+        print("FilterWheelBase: Not Implemented")
+
+    def read(self, num_bytes):
+        """
+        # Reads the specified number of bytes from the serial port.
+        """
+        print("FilterWheelBase: Not Implemented")
+
+    def close(self):
+        """
+        # Closes the serial port.
+        """
+        print("FilterWheelBase: Not Implemented")
 
 
-class FilterWheel(FilterWheelBase):
+class SyntheticFilterWheel(FilterWheelBase):
+    def __init__(self, model, verbose):
+        super().__init__(model, verbose)
+
+    def check_if_filter_in_filterdict(self, filter):
+        """
+        # Checks if the filter designation (string) given as argument
+        # exists in the filterdict
+        """
+        if filter in self.filterdict.keys():
+            return True
+        else:
+            raise ValueError('Filter designation not in the configuration')
+
+    def set_filter(self, filter, speed=2, wait_until_done=False):
+        """
+        # Change the filter wheel to the filter designated by the filterposition argument.
+        """
+        if self.check_if_filter_in_filterdict(filter) is True:
+            if self.verbose:
+                print('Filter set to: ', str(filter))
+            if wait_until_done:
+                time.sleep(0.03)
+
+    def read(self, num_bytes):
+        """
+        # Reads the specified number of bytes from the serial port.
+        """
+        pass
+
+    def close(self):
+        """
+        # Closes the serial port.
+        """
+        pass
+
+
+class SutterFilterWheel(FilterWheelBase):
+    """
+    Module for controlling Sutter Lambda Filter Wheels
+
+    Command byte = (wheel * 128) + (self.speed * 16) + position
+    https://www.sutter.com/manuals/LB10-3_OpMan.pdf
+
+    TODO: Currently moves multiple filter wheels to the same position.  In the future, it may be nice to have
+          a way to move multiple filter wheels to different positions independently.
+    """
+
     def __init__(self, model, verbose):
         super().__init__(model, verbose)
 

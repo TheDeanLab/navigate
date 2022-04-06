@@ -4,7 +4,7 @@ Devices:
   daq: NI #NI or SyntheticDAQ
   camera: HamamatsuOrca # SyntheticCamera or HamamatsuOrca
   etl: ETL  #ETL or SyntheticETL
-  filter_wheel: Sutter #Sutter or SyntheticFilterWheel
+  filter_wheel: SutterFilterWheel #SutterFilterWheel or SyntheticFilterWheel
   stage: PI  # PI or SyntheticStage
   zoom: DynamixelZoom  #DynamixelZoom or SyntheticZoom
   lasers: Omicron #Omicron or SyntheticLasers

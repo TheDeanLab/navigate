@@ -7,6 +7,7 @@ import sys
 # Local Imports
 from model.devices.zoom import DynamixelZoom, SyntheticZoom
 from model.devices.filter_wheels import SutterFilterWheel, SyntheticFilterWheel
+from model.devices.laser_shutters import ThorlabsShutter, SyntheticShutter
 
 
 def start_camera(configuration, experiment, verbose):
@@ -149,13 +150,12 @@ def start_shutters(configuration, experiment, verbose):
     # Shutters are triggered via digital outputs on the NI DAQ Card
     # Thus, requires both to be enabled.
     """
-    if configuration.Devices['shutters'] == 'ThorLabsShutter' and configuration.Devices['daq'] == 'NI':
-        from model.devices.laser_shutters import ThorLabsShutter as ThorLabsShutter
-        shutter = ThorLabsShutter(configuration, experiment, verbose)
+    if configuration.Devices['shutters'] == 'ThorlabsShutter' and configuration.Devices['daq'] == 'NI':
+        return ThorlabsShutter(configuration, experiment, verbose)
+    elif configuration.Devices['shutters'] == 'SyntheticShutter':
+        return SyntheticShutter(configuration, experiment, verbose)
     else:
-        from model.devices.laser_shutters import SyntheticShutter as SyntheticShutter
-        shutter = SyntheticShutter(configuration, experiment, verbose)
-    return shutter
+        device_not_found(configuration.Devices['shutters'])
 
 def start_laser_switcher(configuration, experiment, verbose):
     """

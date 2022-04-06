@@ -52,14 +52,14 @@ def start_stages(configuration, verbose):
 
 def start_zoom_servo(configuration, verbose):
     """
-    # Initializes the Zoom Servo Motor. Dynamixel of SyntheticZoom
+    # Initializes the Zoom Servo Motor. DynamixelZoom of SyntheticZoom
     """
-    if configuration.Devices['zoom'] == 'Dynamixel':
-        from model.devices.zoom.dynamixel.DynamixelZoom import Zoom as ZoomModel
-        zoom = ZoomModel(configuration, verbose)
+    if configuration.Devices['zoom'] == 'DynamixelZoom':
+        from model.devices.zoom import DynamixelZoom as DynamixelZoom
+        zoom = DynamixelZoom(configuration, verbose)
     elif configuration.Devices['zoom'] == 'SyntheticZoom':
-        from model.devices.zoom.SyntheticZoom import Zoom as ZoomModel
-        zoom = ZoomModel(configuration, verbose)
+        from model.devices.zoom import SyntheticZoom as SyntheticZoom
+        zoom = SyntheticZoom(configuration, verbose)
     else:
         print("Zoom Type in Configuration.yml Not Recognized - Initialization Failed")
         sys.exit()
@@ -159,11 +159,11 @@ def start_shutters(configuration, experiment, verbose):
     # Shutters are triggered via digital outputs on the NI DAQ Card
     # Thus, requires both to be enabled.
     """
-    if configuration.Devices['shutters'] == 'ThorlabsShutter' and configuration.Devices['daq'] == 'NI':
-        from model.devices.laser_shutters import ThorlabsShutter
-        shutter = ThorlabsShutter(configuration, experiment, verbose)
+    if configuration.Devices['shutters'] == 'ThorLabsShutter' and configuration.Devices['daq'] == 'NI':
+        from model.devices.laser_shutters import ThorLabsShutter as ThorLabsShutter
+        shutter = ThorLabsShutter(configuration, experiment, verbose)
     else:
-        from model.devices.laser_shutters import SyntheticShutter
+        from model.devices.laser_shutters import SyntheticShutter as SyntheticShutter
         shutter = SyntheticShutter(configuration, experiment, verbose)
     return shutter
 

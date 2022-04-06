@@ -70,7 +70,7 @@ class SyntheticShutter(ShutterBase):
         return self.shutter_left_state, self.shutter_right_state
 
 
-class ThorlabsShutter(ShutterBase):
+class ThorLabsShutter(ShutterBase):
     """
     Triggers Thorlabs-based shutter device using National Instruments DAQ
     Requires 5V signal for triggering

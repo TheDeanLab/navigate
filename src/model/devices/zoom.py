@@ -1,15 +1,70 @@
 """
-Module for controlling Dynamixel discrete zoom changer
+Parent class for controlling a discrete zoom changer
 """
-# Standard library imports
+
+# Standard Library Imports
 import time
 
+# Third Party Imports
+
 # Local Imports
-from model.devices.zoom.ZoomBase import ZoomBase
-from model.devices.zoom.dynamixel import dynamixel_functions as dynamixel
+from model.devices.APIs.dynamixel import dynamixel_functions as dynamixel
+
+class ZoomBase:
+    def __init__(self, model, verbose):
+        self.model = model
+        self.verbose = verbose
+        self.zoomdict = model.ZoomParameters['zoom_position']
+        self.zoomvalue = None
+
+    def set_zoom(self, zoom_position, wait_until_done=False):
+        if zoom_position in self.zoomdict:
+            if self.verbose:
+                print('Setting zoom to {}'.format(zoom_position))
+            if wait_until_done:
+                time.sleep(1)
+
+    def move(self, position, wait_until_done=False):
+        return True
+
+    def read_position(self):
+        return True
 
 
-class Zoom(ZoomBase):
+class SyntheticZoom(ZoomBase):
+    """
+    Virtual Zoom Device
+    """
+    def __init__(self, model, verbose):
+        super().__init__(model, verbose)
+        if self.verbose:
+            print('Synthetic Zoom Initialized')
+
+    def set_zoom(self, zoom, wait_until_done=False):
+        """
+        # Changes zoom after checking that the commanded value exists
+        """
+        if zoom in self.zoomdict:
+            self.zoomvalue = zoom
+        else:
+            raise ValueError('Zoom designation not in the configuration')
+        if self.verbose:
+            print('Zoom set to {}'.format(zoom))
+
+    def move(self, position=0, wait_until_done=False):
+        if self.verbose:
+            print("Changing Virtual Zoom")
+
+    def read_position(self):
+        """
+        # Returns position as an int between 0 and 4096
+        # Opens & closes the port
+        """
+        if self.verbose:
+            print("Reading Virtual Zoom Position")
+
+
+class DynamixelZoom(ZoomBase):
     def __init__(self, model, verbose):
         super().__init__(model, verbose)
         self.dynamixel = dynamixel
@@ -56,7 +111,9 @@ class Zoom(ZoomBase):
             print("Zoom position:", self.read_position())
 
     def move(self, position, wait_until_done=False):
-
+        """
+        # Moves the Dynamixel Zoom Device
+        """
         # Open port and set baud rate
         self.dynamixel.openPort(self.port_num)
         self.dynamixel.setBaudRate(self.port_num, self.baudrate)
@@ -77,10 +134,6 @@ class Zoom(ZoomBase):
         self.dynamixel.write2ByteTxRx(self.port_num, 1, self.id, self.addr_mx_goal_position, position)
 
         # Check position
-        """ 
-        This works even though the positions returned during movement are just crap
-        - they have 7 to 8 digits. Only when the motor stops, positions are accurate
-        """
         if wait_until_done:
             start_time = time.time()
             upper_limit = position + self.goal_position_offset

@@ -19,58 +19,63 @@ class FilterWheelBase:
         self.wheel_position = 0
         self.verbose = verbose
 
-    def check_if_filter_in_filterdict(self, filterposition):
+    def check_if_filter_in_filter_dictionary(self, filter_name):
         """
         # Checks if the filter designation (string) given as argument
-        # exists in the filterdict
+        # exists in the filter dictionary
         """
-        print("FilterWheelBase: Not Implemented")
+        if filter_name in self.filter_dictionary:
+            return True
+        else:
+            raise ValueError('Filter designation not in the configuration')
 
     def filter_change_delay(self, filter_name):
-        print("FilterWheelBase: Not Implemented")
+        """
+        # Calculate duration of time needed for filter wheel to change.
+        """
+        pass
 
     def set_filter(self, filter_name, wait_until_done=True):
         """
-        # Change the filter wheel to the filter designated by the filterposition argument.
+        # Change the filter wheel to the filter designated by the filter position argument.
         """
-        print("FilterWheelBase: Not Implemented")
+        pass
 
     def read(self, num_bytes):
         """
         # Reads the specified number of bytes from the serial port.
         """
-        print("FilterWheelBase: Not Implemented")
+        pass
 
     def close(self):
         """
         # Closes the serial port.
         """
-        print("FilterWheelBase: Not Implemented")
+        pass
 
 
 class SyntheticFilterWheel(FilterWheelBase):
     def __init__(self, model, verbose):
         super().__init__(model, verbose)
 
-    def check_if_filter_in_filterdict(self, filter):
+    def check_if_filter_in_filter_dictionary(self, filter_name):
         """
         # Checks if the filter designation (string) given as argument
-        # exists in the filterdict
+        # exists in the filter dictionary
         """
-        if filter in self.filterdict.keys():
+        if filter_name in self.filter_dictionary:
             return True
         else:
             raise ValueError('Filter designation not in the configuration')
 
-    def set_filter(self, filter, speed=2, wait_until_done=False):
+    def filter_change_delay(self, filter_name):
+        pass
+
+    def set_filter(self, filter_name, wait_until_done=True):
         """
-        # Change the filter wheel to the filter designated by the filterposition argument.
+        # Change the filter wheel to the filter designated by the filter position argument.
         """
-        if self.check_if_filter_in_filterdict(filter) is True:
-            if self.verbose:
-                print('Filter set to: ', str(filter))
-            if wait_until_done:
-                time.sleep(0.03)
+        pass
 
     def read(self, num_bytes):
         """

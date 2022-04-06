@@ -5,6 +5,9 @@ import sys
 # Third Party Imports
 
 # Local Imports
+from model.devices.zoom import DynamixelZoom, SyntheticZoom
+from model.devices.filter_wheels import SutterFilterWheel, SyntheticFilterWheel
+
 
 def start_camera(configuration, experiment, verbose):
     """
@@ -55,35 +58,22 @@ def start_zoom_servo(configuration, verbose):
     # Initializes the Zoom Servo Motor. DynamixelZoom of SyntheticZoom
     """
     if configuration.Devices['zoom'] == 'DynamixelZoom':
-        from model.devices.zoom import DynamixelZoom as DynamixelZoom
-        zoom = DynamixelZoom(configuration, verbose)
+        return DynamixelZoom(configuration, verbose)
     elif configuration.Devices['zoom'] == 'SyntheticZoom':
-        from model.devices.zoom import SyntheticZoom as SyntheticZoom
-        zoom = SyntheticZoom(configuration, verbose)
+        return SyntheticZoom(configuration, verbose)
     else:
-        print("Zoom Type in Configuration.yml Not Recognized - Initialization Failed")
-        sys.exit()
-    if verbose:
-        print("Initialized ", configuration.Devices['zoom'])
-        print("Zoom Position", zoom.read_position())
-    return zoom
+        device_not_found(configuration.Devices['zoom'])
 
 def start_filter_wheel(configuration, verbose):
     """
     # Initializes the Filter Wheel. Sutter or SyntheticFilterWheel
     """
     if configuration.Devices['filter_wheel'] == 'SutterFilterWheel':
-        from model.devices.filter_wheels import SutterFilterWheel
-        filter_wheel = SutterFilterWheel(configuration, verbose)
+        return SutterFilterWheel(configuration, verbose)
     elif configuration.Devices['filter_wheel'] == 'SyntheticFilterWheel':
-        from model.devices.filter_wheel import SyntheticFilterWheel
-        filter_wheel = SyntheticFilterWheel(configuration, verbose)
+        return SyntheticFilterWheel(configuration, verbose)
     else:
-        print("Filter Wheel Type in Configuration.yml Not Recognized - Initialization Failed")
-        sys.exit()
-    if verbose:
-        print("Initialized ", configuration.Devices['filter_wheel'])
-    return filter_wheel
+        device_not_found(configuration.Devices['filter_wheel'])
 
 def start_lasers(configuration, verbose):
     '''
@@ -178,3 +168,8 @@ def start_laser_switcher(configuration, experiment, verbose):
         from model.devices.lasers.LaserSwitching import SyntheticLaserSwitching
         laser_switch = SyntheticLaserSwitching(configuration, experiment, verbose)
     return laser_switch
+
+
+def device_not_found(args):
+    print("Device Not Found in Configuration.YML:", args)
+    sys.exit()

@@ -1,5 +1,10 @@
+# Standard Library Imports
 import platform
 import sys
+
+# Third Party Imports
+
+# Local Imports
 
 def start_camera(configuration, experiment, verbose):
     """
@@ -150,15 +155,16 @@ def start_daq(configuration, experiment, etl_constants, verbose):
 
 def start_shutters(configuration, experiment, verbose):
     """
-    # Initializes the shutters:
+    # Initializes the shutters: ThorlabsShutter or SyntheticShutter
+    # Shutters are triggered via digital outputs on the NI DAQ Card
+    # Thus, requires both to be enabled.
     """
-    # ThorLabs shutters triggered via NI DAQ card.
-    if configuration.Devices['shutters'] == 'NI' and platform.system() == 'Windows':
-        from model.devices.shutters.NIShutter import NIShutter as ShutterModel
-        shutter = ShutterModel(configuration, experiment, verbose)
+    if configuration.Devices['shutters'] == 'ThorlabsShutter' and configuration.Devices['daq'] == 'NI':
+        from model.devices.laser_shutters import ThorlabsShutter
+        shutter = ThorlabsShutter(configuration, experiment, verbose)
     else:
-        from model.devices.shutters.SyntheticShutter import DemoShutter as ShutterModel
-        shutter = ShutterModel(configuration, experiment, verbose)
+        from model.devices.laser_shutters import SyntheticShutter
+        shutter = SyntheticShutter(configuration, experiment, verbose)
     return shutter
 
 def start_laser_switcher(configuration, experiment, verbose):

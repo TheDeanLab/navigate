@@ -8,7 +8,7 @@ Devices:
   stage: PI  # PI or SyntheticStage
   zoom: Dynamixel  #Dynamixel or SyntheticZoom
   lasers: Omicron #Omicron or SyntheticLasers
-  shutters: NI #NI or SyntheticShutters
+  shutters: ThorlabsShutter #ThorlabsShutter or SyntheticShutter
 
 DAQParameters:
   # NI PCIe-1073 Chassis with PXI-6259 and PXI-6733 DAQ Boards.

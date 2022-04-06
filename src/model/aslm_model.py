@@ -8,7 +8,7 @@ import ctypes
 import numpy as np
 
 # Local Imports
-from .aslm_model_functions import *
+from .aslm_device_startup_functions import *
 from .aslm_model_config import Session as session
 from controller.thread_pool import SynchronizedThreadPool
 from tifffile import imsave

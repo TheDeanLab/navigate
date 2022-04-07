@@ -32,16 +32,18 @@ DAQParameters:
   remote_focus_l_ao: PXI6259/ao2
   remote_focus_r_ao: PXI6259/ao3
 
-  # Lasers
+  # Digital Laser Outputs
   laser_port_switcher: PXI6733/port0/line0
   laser_0_do: PXI6733/port0/line2
-  laser_0_ao: PXI6733/port0/line5
   laser_1_do: PXI6733/port0/line3
-  laser_1_ao: PXI6733/port0/line6
   laser_2_do: PXI6733/port0/line4
-  laser_2_ao: PXI6733/port0/line7
 
-  # shutters
+  # Analog Laser Outputs
+  laser_0_ao: PXI6733/ao0
+  laser_1_ao: PXI6733/ao1
+  laser_2_ao: PXI6733/ao2
+
+  # Digital Shutter Outputs
   shutter_left: PXI6259/port0/line0
   shutter_right: PXI6259/port2/line0
 

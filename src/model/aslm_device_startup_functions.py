@@ -8,6 +8,7 @@ import sys
 from model.devices.zoom import DynamixelZoom, SyntheticZoom
 from model.devices.filter_wheels import SutterFilterWheel, SyntheticFilterWheel
 from model.devices.laser_shutters import ThorlabsShutter, SyntheticShutter
+from model.devices.laser_triggers import LaserTriggers, SyntheticLaserTriggers
 
 
 def start_camera(configuration, experiment, verbose):
@@ -34,6 +35,7 @@ def start_camera(configuration, experiment, verbose):
         print("Initialized ", configuration.Devices['camera'])
     return cam
 
+
 def start_stages(configuration, verbose):
     """
     # Initializes the Stage.
@@ -54,6 +56,7 @@ def start_stages(configuration, verbose):
         print("Initialized ", configuration.Devices['stage'])
     return stage
 
+
 def start_zoom_servo(configuration, verbose):
     """
     # Initializes the Zoom Servo Motor. DynamixelZoom of SyntheticZoom
@@ -65,6 +68,7 @@ def start_zoom_servo(configuration, verbose):
     else:
         device_not_found(configuration.Devices['zoom'])
 
+
 def start_filter_wheel(configuration, verbose):
     """
     # Initializes the Filter Wheel. Sutter or SyntheticFilterWheel
@@ -75,6 +79,7 @@ def start_filter_wheel(configuration, verbose):
         return SyntheticFilterWheel(configuration, verbose)
     else:
         device_not_found(configuration.Devices['filter_wheel'])
+
 
 def start_lasers(configuration, verbose):
     '''
@@ -127,22 +132,20 @@ def start_lasers(configuration, verbose):
 
     return laser
 
+
 def start_daq(configuration, experiment, etl_constants, verbose):
     """
     # Start the data acquisition device (DAQ):  NI or SyntheticDAQ
     """
     if configuration.Devices['daq'] == 'NI':
         from model.devices.daq.NI.NIDAQ import DAQ as DAQModel
-        daq = DAQModel(configuration, experiment, etl_constants, verbose)
+        return DAQModel(configuration, experiment, etl_constants, verbose)
     elif configuration.Devices['daq'] == 'SyntheticDAQ':
         from model.devices.daq.SyntheticDAQ import DAQ as DAQModel
-        daq = DAQModel(configuration, experiment, etl_constants, verbose)
+        return DAQModel(configuration, experiment, etl_constants, verbose)
     else:
-        print("DAQ Type in Configuration.yml Not Recognized - Initialization Failed")
-        sys.exit()
-    if verbose:
-        print("Initialized ", configuration.Devices['daq'])
-    return daq
+        device_not_found(configuration.Devices['daq'])
+
 
 def start_shutters(configuration, experiment, verbose):
     """
@@ -157,17 +160,17 @@ def start_shutters(configuration, experiment, verbose):
     else:
         device_not_found(configuration.Devices['shutters'])
 
-def start_laser_switcher(configuration, experiment, verbose):
+
+def start_laser_triggers(configuration, experiment, verbose):
     """
     # Initializes the Laser Switching DAQ Output:
     """
     if configuration.Devices['daq'] == 'NI':
-        from model.devices.lasers.LaserSwitching import LaserSwitching
-        laser_switch = LaserSwitching(configuration, experiment, verbose)
+        return LaserTriggers(configuration, experiment, verbose)
+    elif configuration.Devices['daq'] == 'SyntheticDAQ':
+        return SyntheticLaserTriggers(configuration, experiment, verbose)
     else:
-        from model.devices.lasers.LaserSwitching import SyntheticLaserSwitching
-        laser_switch = SyntheticLaserSwitching(configuration, experiment, verbose)
-    return laser_switch
+        device_not_found(configuration.Devices['daq'])
 
 
 def device_not_found(args):

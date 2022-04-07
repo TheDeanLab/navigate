@@ -57,17 +57,12 @@ class DAQBase:
         self.camera_delay = self.camera_delay_percent * 0.01 * self.sweep_time
 
         # Laser Parameters
-        self.laser_switching_waveform = None
         self.laser_ao_waveforms = None
         self.laser_do_waveforms = None
         self.number_of_lasers = self.model.LaserParameters['number_of_lasers']
         self.laser_l_delay = self.model.LaserParameters['laser_l_delay_percent']
         self.laser_l_pulse = self.model.LaserParameters['laser_l_pulse_percent']
-        self.laser_min_ao = self.model.LaserParameters['laser_min_ao']
-        self.laser_max_ao = self.model.LaserParameters['laser_max_ao']
-        self.laser_min_do = self.model.LaserParameters['laser_min_do']
-        self.laser_max_do = self.model.LaserParameters['laser_max_do']
-        self.resolution_mode = self.experiment.MicroscopeState['resolution_mode']
+
         self.laser_power = 0
         self.laser_idx = 0
 

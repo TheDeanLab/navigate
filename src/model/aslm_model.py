@@ -46,20 +46,33 @@ class Model:
             self.configuration.Devices['lasers'] = 'SyntheticLasers'
 
         # Move device initialization steps to multiple threads
-        # we start serial devices in function self.start_serial_devices()
-        # TODO: make sure all serial devices connected to the same computer serial port moved to self.start_serial_device()
         threads_dict = {
-            'filter_wheel': ResultThread(target=start_filter_wheel, args=(self.configuration, self.verbose)).start(),
-            'zoom': ResultThread(target=start_zoom_servo, args=(self.configuration, self.verbose)).start(),
-            'camera': ResultThread(target=start_camera, args=(self.configuration, self.experiment, self.verbose,)).start(),
-            'stages': ResultThread(target=start_stages, args=(self.configuration, self.verbose,)).start(),
-            'shutter': ResultThread(target=start_shutters, args=(self.configuration, self.experiment, self.verbose,)).start(),
-            'daq': ResultThread(target=start_daq, args=(self.configuration, self.experiment, self.etl_constants, self.verbose,)).start(),
-            'laser_switch': ResultThread(target=start_laser_switcher, args=(self.configuration, self.experiment, self.verbose,)).start(),
+            'filter_wheel': ResultThread(target=start_filter_wheel,
+                                         args=(self.configuration, self.verbose)).start(),
+
+            'zoom': ResultThread(target=start_zoom_servo,
+                                 args=(self.configuration, self.verbose)).start(),
+
+            'camera': ResultThread(target=start_camera,
+                                   args=(self.configuration, self.experiment, self.verbose,)).start(),
+
+            'stages': ResultThread(target=start_stages,
+                                   args=(self.configuration, self.verbose,)).start(),
+
+            'shutter': ResultThread(target=start_shutters,
+                                    args=(self.configuration, self.experiment, self.verbose,)).start(),
+
+            'daq': ResultThread(target=start_daq,
+                                args=(self.configuration, self.experiment, self.etl_constants, self.verbose,)).start(),
+
+            'laser_triggers': ResultThread(target=start_laser_triggers,
+                                         args=(self.configuration, self.experiment, self.verbose,)).start(),
+
             # 'etl': ResultThread(target=start_etl, args=(self.configuration, self.verbose,)).start()
         }
         for k in threads_dict:
             if k != 'serial_devices':
+                print("Starting ", threads_dict[k], " on independent thread.")
                 setattr(self, k, threads_dict[k].get_result())
             else:
                 threads_dict[k].get_result()
@@ -115,6 +128,9 @@ class Model:
     #  - daq.stop_tasks() stops the tasks and cleans up.
     
     def run_command(self, command, *args, **kwargs):
+        """
+        Receives commands from the controller.
+        """
         if self.verbose:
             print('in the model(get the command from controller):', command, args)
 
@@ -124,6 +140,11 @@ class Model:
             return
 
         if command == 'single':
+            """ 
+            # Acquire a single image.
+            # First overwrites the model instance of the MicroscopeState
+            """
+            self.experiment.MicroscopeState = args[0]
             self.is_save = self.experiment.MicroscopeState['is_save']
             if self.is_save:
                 self.experiment.Saving = kwargs['saving_info']
@@ -296,6 +317,7 @@ class Model:
                 self.current_filter = channel['filter']
                 self.current_laser = channel['laser']
                 self.current_laser_index = channel['laser_index']
+                self.current_laser_intensity = channel['laser_power']
 
                 #  Set the parameters
                 # Camera Exposure Time (ms)
@@ -305,7 +327,8 @@ class Model:
                 self.daq.sweep_time = self.current_exposure_time/1000
 
                 # Laser
-                self.daq.laser_idx = self.current_laser_index
+                self.laser_triggers.trigger_digital_laser(self.current_laser_index)
+                self.laser_triggers.set_laser_analog_voltage(self.current_laser_index, self.current_laser_intensity)
 
                 # Filter Wheel
                 self.filter_wheel.set_filter(self.current_filter)
@@ -361,14 +384,14 @@ class Model:
         if resolution_value == 'high':
             print("High Resolution Mode")
             self.experiment.MicroscopeState['resolution_mode'] = 'high'
-            self.laser_switch.enable_high_resolution_laser()
+            self.laser_triggers.enable_high_resolution_laser()
         else:
             # Can be 0.63, 1, 2, 3, 4, 5, and 6x.
             print("Low Resolution Mode, Zoom:", resolution_value)
             self.experiment.MicroscopeState['resolution_mode'] = 'low'
             self.experiment.MicroscopeState['zoom'] = resolution_value
             self.zoom.set_zoom(resolution_value)
-            self.laser_switch.enable_low_resolution_laser()
+            self.laser_triggers.enable_low_resolution_laser()
 
     def open_shutter(self):
         """

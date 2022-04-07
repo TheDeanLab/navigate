@@ -400,9 +400,6 @@ class ASLM_controller:
 
         #widget_functions
 
-
-
-
         # get zoom and resolution info from resolution menu
         if self.resolution_value.get() == 'high':
             self.experiment.MicroscopeState['resolution_mode'] = 'high'
@@ -508,7 +505,7 @@ class ASLM_controller:
         elif command == 'channel':
             if self.verbose:
                 print('channel settings have been changed, calling model', args)
-            self.model.run_command('update setting', 'channel', args, channels = self.channels_tab_controller.get_values('channel'))
+            self.model.run_command('update setting', 'channel', args, channels=self.channels_tab_controller.get_values('channel'))
 
         elif command == 'timepoint':
             settings = args[0]
@@ -530,13 +527,17 @@ class ASLM_controller:
             self.execute('acquire')
 
         elif command == 'acquire':
+            """
+            # Acquisition Button Triggered by User.
+            # Acquisition modes can be: 'continuous', 'z-stack', 'single', 'projection'
+            """
             if not self.prepare_acquire_data():
                 self.acquire_bar_controller.stop_acquire()
                 return
 
-            # Acquisition modes can be: 'continuous', 'z-stack', 'single', 'projection'
             if self.acquire_bar_controller.mode == 'single':
                 self.threads_pool.createThread('camera', self.capture_single_image)
+
             elif self.acquire_bar_controller.mode == 'continuous':
                 if self.verbose:
                     print('Starting Continuous Acquisition')
@@ -579,7 +580,7 @@ class ASLM_controller:
         """
         # Trigger model to capture a single image
         """
-        self.model.run_command('single', saving_info=self.experiment.Saving)
+        self.model.run_command('single', self.experiment.MicroscopeState)
         image_id = self.show_img_pipe_parent.recv()
         self.camera_view_controller.display_image(self.data_buffer[image_id])
 

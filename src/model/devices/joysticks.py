@@ -10,11 +10,11 @@ need something with an eventloop (e.g. a QApplication) even for testing.
 
 from src.model.devices.APIs.logitech import FarmSimulatorSidePanel
 
-class Demo_SidePanel:
+class JoystickBase:
     def __init__(self):
         self.mode = 'undefined'
 
-class SyntheticJoystick():
+class SyntheticJoystick(JoystickBase):
     def __init__(self, parent = None):
         super().__init__()
         self.parent = parent

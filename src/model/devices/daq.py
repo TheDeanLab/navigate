@@ -11,7 +11,7 @@ import numpy as np
 from model.aslm_model_waveforms import tunable_lens_ramp, sawtooth, dc_value, single_pulse
 
 
-class LaserScanningBase:
+class DAQBase:
     def __init__(self, model, experiment, etl_constants, verbose=False):
         self.model = model
         self.experiment = experiment
@@ -198,7 +198,7 @@ class LaserScanningBase:
         pass
 
 
-class SyntheticLaserScanning(LaserScanningBase):
+class SyntheticDAQ(DAQBase):
     def __init__(self, model, experiment, etl_constants, verbose=False):
         super().__init__(model, experiment, etl_constants, verbose)
 

@@ -21,7 +21,7 @@ DAQParameters:
   camera_trigger_out_line: /PXI6259/ctr0
   trigger_source: /PXI6259/PFI0
   galvo_etl_task_line: PXI6259/ao0:3
-  laser_task_line: PXI6733/ao0:2
+  # laser_task_line: PXI6733/ao0:2
   # Should specify here AO vs DO.
 
   # Galvos

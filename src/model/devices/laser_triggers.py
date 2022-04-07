@@ -1,5 +1,8 @@
 """
-Class for digital modulation of laser devices.
+Class for digital and analog modulation of laser devices.
+Goal is to set the DC value of the laser intensity with the analog voltage, and then rapidly turn it on and off
+with the digital signal.
+Lasers should be configured to operate in a mixed modulation mode.
 """
 
 import nidaqmx

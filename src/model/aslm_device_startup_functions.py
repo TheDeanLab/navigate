@@ -9,31 +9,20 @@ from model.devices.zoom import DynamixelZoom, SyntheticZoom
 from model.devices.filter_wheels import SutterFilterWheel, SyntheticFilterWheel
 from model.devices.laser_shutters import ThorlabsShutter, SyntheticShutter
 from model.devices.laser_triggers import LaserTriggers, SyntheticLaserTriggers
+from model.devices.cameras import HamamatsuOrca, SyntheticCamera
 
 
 def start_camera(configuration, experiment, verbose):
     """
     # Initializes the camera as a sub-process using concurrency tools.
     """
-    # Hamamatsu Camera
+    camera_id = 0 # Becomes important when a second camera must be dealth with.
     if configuration.Devices['camera'] == 'HamamatsuOrca' and platform.system() == 'Windows':
-        from model.devices.camera.Hamamatsu.HamamatsuCamera import Camera as CameraModel
-        camera_id = 0
-        cam = CameraModel(camera_id, configuration, experiment, verbose)
-
-        # from model.devices.camera.Hamamatsu.dcam import Dcam as CameraModel
-        # cam = CameraModel()
-
+        return HamamatsuOrca(camera_id, configuration, experiment, verbose)
     elif configuration.Devices['camera'] == 'SyntheticCamera':
-        from model.devices.camera.SyntheticCamera import Camera as CameraModel
-        camera_id = 0
-        cam = CameraModel(camera_id, configuration, experiment, verbose)
+        return SyntheticCamera(camera_id, configuration, experiment, verbose)
     else:
-        print("Camera Type in Configuration.yml Not Recognized - Initialization Failed")
-        sys.exit()
-    if verbose:
-        print("Initialized ", configuration.Devices['camera'])
-    return cam
+        device_not_found(configuration.Devices['camera'])
 
 
 def start_stages(configuration, verbose):

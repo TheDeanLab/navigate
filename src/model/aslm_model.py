@@ -49,30 +49,22 @@ class Model:
         threads_dict = {
             'filter_wheel': ResultThread(target=start_filter_wheel,
                                          args=(self.configuration, self.verbose)).start(),
-
             'zoom': ResultThread(target=start_zoom_servo,
                                  args=(self.configuration, self.verbose)).start(),
-
             'camera': ResultThread(target=start_camera,
                                    args=(self.configuration, self.experiment, self.verbose,)).start(),
-
             'stages': ResultThread(target=start_stages,
                                    args=(self.configuration, self.verbose,)).start(),
-
             'shutter': ResultThread(target=start_shutters,
                                     args=(self.configuration, self.experiment, self.verbose,)).start(),
-
             'daq': ResultThread(target=start_daq,
                                 args=(self.configuration, self.experiment, self.etl_constants, self.verbose,)).start(),
-
             'laser_triggers': ResultThread(target=start_laser_triggers,
                                          args=(self.configuration, self.experiment, self.verbose,)).start(),
-
             # 'etl': ResultThread(target=start_etl, args=(self.configuration, self.verbose,)).start()
         }
         for k in threads_dict:
             if k != 'serial_devices':
-                print("Starting ", threads_dict[k], " on independent thread.")
                 setattr(self, k, threads_dict[k].get_result())
             else:
                 threads_dict[k].get_result()

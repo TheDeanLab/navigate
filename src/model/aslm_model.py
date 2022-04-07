@@ -292,7 +292,7 @@ class Model:
         """
         # Called by model.run_command().
         """
-        print("in fun_single_acquisition")
+
         #  Interrogate the Experiment Settings
         microscope_state = self.experiment.MicroscopeState
         prefix_len = len('channel_')
@@ -318,40 +318,28 @@ class Model:
 
                 # Update Laser Scanning Waveforms - Exposure Time in Seconds
                 self.daq.sweep_time = self.current_exposure_time/1000
-                # self.galvo_l_frequency
-                # self.galvo_l_amplitude
-                # self.galvo_l_offset
-                # self.etl_l_amplitude
 
-                # TODO: Add ability to save the data.
-                # Save Data
+                # Update ETL Settings
+                self.daq.update_etl_parameters(microscope_state, channel)
 
                 # Acquire an Image
                 self.snap_image()
 
+                # TODO: Add ability to save the data.
+                # Save Data
+
     def snap_image(self):
         """
         # Snaps a single image after updating the waveforms.
-        #
         # Can be used in acquisitions where changing waveforms are required,
         # but there is additional overhead due to the need to write the
         # waveforms into the buffers of the NI cards.
         #
         """
-        #  Initialize the DAQ Tasks and the Camera.
-        self.daq.initialize_tasks()
-
-        #  Prepare the DAQ for Waveform Delivery
-        self.daq.create_tasks()
-        self.daq.create_waveforms()
-        self.daq.start_tasks()
-
-        #  Trigger everything and grab the image.
-        self.daq.run_tasks()
-
-        #  Close everything.
-        self.daq.stop_tasks()
-        self.daq.close_tasks()
+        #  Initialize, run, and stop the acquisition.
+        self.daq.prepare_acquisition()
+        self.daq.run_acquisition()
+        self.daq.stop_acquisition()
 
     def run_live_acquisition(self):
         """

@@ -1,22 +1,12 @@
-# Axially Swept Light-Sheet Microscopy Project
-
-### Project Outline
-Adopts an MVC architecture for microscope control. 
-Includes inspiration from a number of open-source projects, including:
-* https://github.com/mesoSPIM/mesoSPIM-control
-* https://github.com/bicarlsen/obis_laser_controller
-* https://github.com/utsw-bicf/auto-docker/
-* https://github.com/uetke/UUTrack
-* https://github.com/MouseLand/cellpose/blob/master/README.md
-* https://github.com/AndrewGYork/tools
+# Multiscale Axially Swept Light-Sheet Microscopy Project
 
 ### Project Philosophy
-* Minimal number of dependencies. Predominantly local Python imports for maximum stability.
-* Sufficiently generic that it can drive all of our microscopes (with a few tweaks here and there), different camera types, etc.
-* Brutally obvious and well documented so that it can be understood up with by future grad students, postdocs, etc., years from now.
-* Should resemble Danuser/Dean/Fiolka LabView software, so that people do not have to relearn a new GUI for every microscope.  Maximize productivity for our more biological users.
-* Want it to be performant.  Will implement threading approaches inspired by Andrew York's concurrency tools.
-* Based upon proven architectures, such as the Model-View-Controller architecture.  
+* Minimal number of dependencies. Prioritize standard library Python imports for maximum stability.
+* Sufficiently generic that it can drive all of our microscopes, different camera types, etc.
+* Brutally obvious and well documented so that it can be understood up with by future users years from now.
+* Should resemble Danuser/Dean/Fiolka LabView software so that people do not have to relearn a new GUI for every microscope.  Maximize productivity for biological users.
+* Must be high-performance and responsive.  Will implement threading approaches inspired by Andrew York's concurrency tools.
+* Based upon the proven Model-View-Controller architecture.  
 
 ### Equipment
 * Laser source - Omicron LightHUB Ultra.  Requires ACC operating mode with analog modulation enabled for 488 nm and 642 nm lasers.  561, which operates separately, requires the mixed modulation mode (Obis).
@@ -24,6 +14,8 @@ Includes inspiration from a number of open-source projects, including:
 * GPUs - 2x NVIDIA Titan RTX with an NVLINK bridge - CUDA Architecture = 7.5, Driver Version = 456.71. 
 * Camera - 2x Hamamatsu Flash 4.0 with framegrabbers.
 * Remote Focusing Units - Optotune Electrotunable Lens for low-resolution imaging and a ThorLabs BLINK for high-resolution imaging.
+* National Instruments PXIe-1073 Chassis equipped with PXI6733 and PXI6259 Data Acquisition Devices
+* Filter Wheels - 2x 32mm High-Speed Filter Wheels
 
 ### GPU Dependencies for TensorFlow (1.15), PyTorch (1.10.2), CliJ, ...
  * NVIDIA CUDA Version 11.2
@@ -82,3 +74,9 @@ python main.py --verbose --synthetic_hardware
 * Sampath Rapuri
 * Andrew Jamieson
 * Xiaoding 'Annie' Wang
+
+Includes inspiration from a number of open-source projects, including:
+* https://github.com/mesoSPIM/
+* https://github.com/bicarlsen/obis_laser_controller
+* https://github.com/uetke/UUTrack
+* https://github.com/AndrewGYork/tools

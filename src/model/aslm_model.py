@@ -21,8 +21,6 @@ class Model:
     def __init__(self, args, configuration_path=None, experiment_path=None, etl_constants_path=None):
         # Retrieve the initial configuration from the yaml file
         self.verbose = args.verbose
-        print("verbose set as:", args.verbose)
-        print("synthetic hardware set as:", args.synthetic_hardware)
 
         # Loads the YAML file for all of the microscope parameters
         self.configuration = session(configuration_path, args.verbose)
@@ -47,20 +45,20 @@ class Model:
 
         # Move device initialization steps to multiple threads
         threads_dict = {
-            'filter_wheel': ResultThread(target=start_filter_wheel,
-                                         args=(self.configuration, self.verbose)).start(),
-            'zoom': ResultThread(target=start_zoom_servo,
-                                 args=(self.configuration, self.verbose)).start(),
-            'camera': ResultThread(target=start_camera,
-                                   args=(self.configuration, self.experiment, self.verbose,)).start(),
-            'stages': ResultThread(target=start_stages,
-                                   args=(self.configuration, self.verbose,)).start(),
-            'shutter': ResultThread(target=start_shutters,
-                                    args=(self.configuration, self.experiment, self.verbose,)).start(),
-            'daq': ResultThread(target=start_daq,
-                                args=(self.configuration, self.experiment, self.etl_constants, self.verbose,)).start(),
-            'laser_triggers': ResultThread(target=start_laser_triggers,
-                                         args=(self.configuration, self.experiment, self.verbose,)).start(),
+            'filter_wheel':     ResultThread(target=start_filter_wheel,
+                                             args=(self.configuration, self.verbose)).start(),
+            'zoom':             ResultThread(target=start_zoom_servo,
+                                             args=(self.configuration, self.verbose)).start(),
+            'camera':           ResultThread(target=start_camera,
+                                             args=(self.configuration, self.experiment, self.verbose,)).start(),
+            'stages':           ResultThread(target=start_stages,
+                                             args=(self.configuration, self.verbose,)).start(),
+            'shutter':          ResultThread(target=start_shutters,
+                                             args=(self.configuration, self.experiment, self.verbose,)).start(),
+            'laser_scanning':   ResultThread(target=start_laser_scanning,
+                                             args=(self.configuration, self.experiment, self.etl_constants, self.verbose,)).start(),
+            'laser_triggers':   ResultThread(target=start_laser_triggers,
+                                             args=(self.configuration, self.experiment, self.verbose,)).start(),
             # 'etl': ResultThread(target=start_etl, args=(self.configuration, self.verbose,)).start()
         }
         for k in threads_dict:
@@ -70,6 +68,7 @@ class Model:
                 threads_dict[k].get_result()
 
         # in synthetic_hardware mode, we need to wire up camera to daq
+        # TODO: Confirm that I did not mess this up.
         if args.synthetic_hardware:
             self.daq.set_camera(self.camera)
 
@@ -144,6 +143,7 @@ class Model:
             self.stop_send_signal = False
             self.open_shutter()
             self.run_single_acquisition()
+            self.stop_acquisition = True
             self.run_data_process(1)
             self.close_shutter()
 
@@ -242,23 +242,25 @@ class Model:
         """
         #  Prepares an image series without waveform update
         """
-        self.daq.create_tasks()
-        self.daq.write_waveforms_to_tasks()
+        pass
+        # self.daq.create_tasks()
+        # self.daq.write_waveforms_to_tasks()
 
     def snap_image_in_series(self):
         """
         # Snaps and image from a series without waveform update
         """
-        self.daq.start_tasks()
-        self.daq.run_tasks()
-        self.data = self.camera.get_image()
-        self.daq.stop_tasks()
+        pass
+        # self.daq.start_tasks()
+        # self.daq.run_tasks()
+        # self.data = self.camera.get_image()
+        # self.daq.stop_tasks()
 
     def close_image_series(self):
         """
         #  Cleans up after series without waveform update
         """
-        self.daq.close_tasks()
+        pass #        self.daq.close_tasks()
 
     def calculate_number_of_channels(self):
         """
@@ -288,11 +290,9 @@ class Model:
 
     def run_single_acquisition(self):
         """
-        This function retrieves the state of the microscope from the GUI, iterates through each selected channel,
-        and snaps an image for each channel setting.  In each iteration, the camera is initialized and closed.
-        TODO:  Add ability to save the data.
+        # Called by model.run_command().
         """
-
+        print("in fun_single_acquisition")
         #  Interrogate the Experiment Settings
         microscope_state = self.experiment.MicroscopeState
         prefix_len = len('channel_')
@@ -303,54 +303,60 @@ class Model:
             channel = microscope_state['channels'][channel_key]
             if channel['is_selected'] is True:
 
-                #  Get the parameters
+                #  Get and set the parameters for Waveform Generation, Triggering, etc.
                 self.current_channel = channel_idx
-                self.current_exposure_time = channel['camera_exposure_time']
-                self.current_filter = channel['filter']
-                self.current_laser = channel['laser']
-                self.current_laser_index = channel['laser_index']
-                self.current_laser_intensity = channel['laser_power']
 
-                #  Set the parameters
-                # Camera Exposure Time (ms)
-                self.camera.set_exposure_time(self.current_exposure_time)
+                # Camera Settings - Exposure Time in Milliseconds
+                self.camera.set_exposure_time(channel['camera_exposure_time'])
 
-                # DAQ Waveform Generation (s)
-                self.daq.sweep_time = self.current_exposure_time/1000
-
-                # Laser
+                # Laser Settings
                 self.laser_triggers.trigger_digital_laser(self.current_laser_index)
-                self.laser_triggers.set_laser_analog_voltage(self.current_laser_index, self.current_laser_intensity)
+                self.laser_triggers.set_laser_analog_voltage(channel['laser_index'], channel['laser_power'])
 
-                # Filter Wheel
-                self.filter_wheel.set_filter(self.current_filter)
+                # Filter Wheel Settings
+                self.filter_wheel.set_filter(channel['filter'])
+
+                # Update Laser Scanning Waveforms - Exposure Time in Seconds
+                self.laser_scanning.sweep_time = self.current_exposure_time/1000
+                # self.galvo_l_frequency
+                # self.galvo_l_amplitude
+                # self.galvo_l_offset
+                # self.etl_l_amplitude
+
+                # Trigger the Acquisition
+                self.laser_scanning.prepare_acquisition()
+                self.laser_scanning.trigger_acquisition()
+                self.laser_scanning.stop_acquisition()
+
+                # TODO: Add ability to save the data.
+                # Save Data
 
                 # Acquire an Image
-                self.snap_image()
+                # self.snap_image()
 
-    def snap_image(self):
-        """
-        # Snaps a single image after updating the waveforms.
-        #
-        # Can be used in acquisitions where changing waveforms are required,
-        # but there is additional overhead due to the need to write the
-        # waveforms into the buffers of the NI cards.
-        #
-        """
-        #  Initialize the DAQ Tasks and the Camera.
-        self.daq.initialize_tasks()
-
-        #  Prepare the DAQ for Waveform Delivery
-        self.daq.create_tasks()
-        self.daq.create_waveforms()
-        self.daq.start_tasks()
-
-        #  Trigger everything and grab the image.
-        self.daq.run_tasks()
-
-        #  Close everything.
-        self.daq.stop_tasks()
-        self.daq.close_tasks()
+    # def snap_image(self):
+    #     """
+    #     # Snaps a single image after updating the waveforms.
+    #     #
+    #     # Can be used in acquisitions where changing waveforms are required,
+    #     # but there is additional overhead due to the need to write the
+    #     # waveforms into the buffers of the NI cards.
+    #     #
+    #     """
+    #     #  Initialize the DAQ Tasks and the Camera.
+    #     self.daq.initialize_tasks()
+    #
+    #     #  Prepare the DAQ for Waveform Delivery
+    #     self.daq.create_tasks()
+    #     self.daq.create_waveforms()
+    #     self.daq.start_tasks()
+    #
+    #     #  Trigger everything and grab the image.
+    #     self.daq.run_tasks()
+    #
+    #     #  Close everything.
+    #     self.daq.stop_tasks()
+    #     self.daq.close_tasks()
 
     def run_live_acquisition(self):
         """

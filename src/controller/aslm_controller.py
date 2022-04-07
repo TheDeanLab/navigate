@@ -580,7 +580,7 @@ class ASLM_controller:
         """
         # Trigger model to capture a single image
         """
-        self.model.run_command('single', self.experiment.MicroscopeState)
+        self.model.run_command('single', self.experiment.MicroscopeState, saving_info=self.experiment.Saving)
         image_id = self.show_img_pipe_parent.recv()
         self.camera_view_controller.display_image(self.data_buffer[image_id])
 

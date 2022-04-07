@@ -22,7 +22,6 @@ class DAQ(DAQBase):
 
     def __del__(self):
         pass
-        # self.close_tasks()
 
     def create_low_res_galvo_waveform(self):
         """
@@ -47,44 +46,6 @@ class DAQ(DAQBase):
         # Scale the Galvo waveforms to the AO range.
         self.galvo_r_waveform[self.galvo_r_waveform < self.galvo_r_min_ao] = self.galvo_r_min_ao
         self.galvo_r_waveform[self.galvo_r_waveform > self.galvo_r_max_ao] = self.galvo_r_max_ao
-
-    # def identify_laser_idx(self, laser_wavelength):
-    #     """
-    #     # TODO: May not need this function, since the laser_idx is saved in the experiment
-    #     """
-    #     for laser_idx in range(self.number_of_lasers):
-    #         temp = 'laser_' + str(laser_idx) + '_wavelength'
-    #         if laser_wavelength == self.model.LaserParameters[temp]:
-    #             self.laser_idx = self.model.LaserParameters[temp]
-    #             if self.verbose:
-    #                 print('Laser index: {}'.format(self.laser_idx))
-    #             break
-    #     else:
-    #         # TODO: set a default laser?
-    #         self.laser_idx = 0
-    #         print('Laser name not found.')
-
-
-    # def create_analog_laser_waveforms(self, laser_power):
-    #     """
-    #     # Calculate the waveforms for the lasers.
-    #     # Analog output for intensity control
-    #     # Digital output for left or right fiber.
-    #     """
-    #     self.calculate_samples()
-    #     laser_voltage = self.laser_max_ao * laser_power / 100
-    #     laser_template_waveform = single_pulse(self.sample_rate, self.sweep_time, self.laser_l_delay,
-    #                                            self.laser_l_pulse, laser_voltage, 0)
-    #
-    #     # Scale the waveforms to the AO range.
-    #     laser_template_waveform[laser_template_waveform < self.laser_min_ao] = self.laser_min_ao
-    #     laser_template_waveform[laser_template_waveform > self.laser_max_ao] = self.laser_max_ao
-    #
-    #     # Pre-allocate the waveforms.
-    #     laser_waveform_list = [np.zeros(self.samples) for i in range(self.number_of_lasers)]
-    #     laser_waveform_list[self.laser_idx] = laser_template_waveform
-    #     self.laser_ao_waveforms = np.stack(laser_waveform_list)
-
 
     def bundle_galvo_and_etl_waveforms(self):
         """
@@ -144,25 +105,12 @@ class DAQ(DAQBase):
         trigger_source = self.model.DAQParameters['trigger_source']
         self.galvo_etl_task.triggers.start_trigger.cfg_dig_edge_start_trig(trigger_source)
 
-    # def create_laser_task(self):
-    #     """
-    #     # Set up the lasers - Each start with the trigger_source.
-    #     """
-    #     laser_task_line = self.model.DAQParameters['laser_task_line']
-    #     self.laser_task.ao_channels.add_ao_voltage_chan(laser_task_line)
-    #     self.laser_task.timing.cfg_samp_clk_timing(rate=self.sample_rate,
-    #                                                sample_mode=AcquisitionType.FINITE,
-    #                                                samps_per_chan=self.samples)
-    #
-    #     trigger_source = self.model.DAQParameters['trigger_source']
-    #     self.laser_task.triggers.start_trigger.cfg_dig_edge_start_trig(trigger_source)
 
     def write_waveforms_to_tasks(self):
         """
         # Write the galvo, etl, and laser waveforms to the NI DAQ tasks
         """
         self.galvo_etl_task.write(self.galvo_and_etl_waveforms)
-        # self.laser_task.write(self.laser_ao_waveforms)
 
     def start_tasks(self):
         """
@@ -171,7 +119,6 @@ class DAQ(DAQBase):
         """
         self.camera_trigger_task.start()
         self.galvo_etl_task.start()
-        #self.laser_task.start()
 
     def run_tasks(self):
         """
@@ -182,7 +129,6 @@ class DAQ(DAQBase):
         """
         self.master_trigger_task.write([False, True, True, True, False], auto_start=True)
         self.galvo_etl_task.wait_until_done()
-        #self.laser_task.wait_until_done()
         self.camera_trigger_task.wait_until_done()
 
     def stop_tasks(self):
@@ -190,7 +136,6 @@ class DAQ(DAQBase):
         # Stop the tasks for triggering, analog and counter outputs.
         """
         self.galvo_etl_task.stop()
-        #self.laser_task.stop()
         self.camera_trigger_task.stop()
         self.master_trigger_task.stop()
 
@@ -199,7 +144,6 @@ class DAQ(DAQBase):
         # Close the tasks for triggering, analog, and counter outputs.
         """
         self.galvo_etl_task.close()
-        #self.laser_task.close()
         self.camera_trigger_task.close()
         self.master_trigger_task.close()
 
@@ -210,7 +154,6 @@ class DAQ(DAQBase):
         self.camera_trigger_task = nidaqmx.Task()
         self.master_trigger_task = nidaqmx.Task()
         self.galvo_etl_task = nidaqmx.Task()
-        #self.laser_task = nidaqmx.Task()
 
     def create_tasks(self):
         """
@@ -226,7 +169,6 @@ class DAQ(DAQBase):
         self.create_master_trigger_task()
         self.create_camera_task()
         self.create_galvo_etl_task()
-        #self.create_laser_task()
 
     def create_waveforms(self):
         """
@@ -240,9 +182,6 @@ class DAQ(DAQBase):
         # Galvos
         self.create_high_res_galvo_waveform()
         self.create_low_res_galvo_waveform()
-
-        # Lasers
-        #self.create_analog_laser_waveforms(self.laser_power)
 
         # Bundle the waveforms into a single waveform.
         self.bundle_galvo_and_etl_waveforms()

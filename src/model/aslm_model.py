@@ -55,7 +55,7 @@ class Model:
                                              args=(self.configuration, self.verbose,)).start(),
             'shutter':          ResultThread(target=start_shutters,
                                              args=(self.configuration, self.experiment, self.verbose,)).start(),
-            'laser_scanning':   ResultThread(target=start_laser_scanning,
+            'daq':              ResultThread(target=start_daq,
                                              args=(self.configuration, self.experiment, self.etl_constants, self.verbose,)).start(),
             'laser_triggers':   ResultThread(target=start_laser_triggers,
                                              args=(self.configuration, self.experiment, self.verbose,)).start(),
@@ -317,46 +317,41 @@ class Model:
                 self.filter_wheel.set_filter(channel['filter'])
 
                 # Update Laser Scanning Waveforms - Exposure Time in Seconds
-                self.laser_scanning.sweep_time = self.current_exposure_time/1000
+                self.daq.sweep_time = self.current_exposure_time/1000
                 # self.galvo_l_frequency
                 # self.galvo_l_amplitude
                 # self.galvo_l_offset
                 # self.etl_l_amplitude
 
-                # Trigger the Acquisition
-                self.laser_scanning.prepare_acquisition()
-                self.laser_scanning.trigger_acquisition()
-                self.laser_scanning.stop_acquisition()
-
                 # TODO: Add ability to save the data.
                 # Save Data
 
                 # Acquire an Image
-                # self.snap_image()
+                self.snap_image()
 
-    # def snap_image(self):
-    #     """
-    #     # Snaps a single image after updating the waveforms.
-    #     #
-    #     # Can be used in acquisitions where changing waveforms are required,
-    #     # but there is additional overhead due to the need to write the
-    #     # waveforms into the buffers of the NI cards.
-    #     #
-    #     """
-    #     #  Initialize the DAQ Tasks and the Camera.
-    #     self.daq.initialize_tasks()
-    #
-    #     #  Prepare the DAQ for Waveform Delivery
-    #     self.daq.create_tasks()
-    #     self.daq.create_waveforms()
-    #     self.daq.start_tasks()
-    #
-    #     #  Trigger everything and grab the image.
-    #     self.daq.run_tasks()
-    #
-    #     #  Close everything.
-    #     self.daq.stop_tasks()
-    #     self.daq.close_tasks()
+    def snap_image(self):
+        """
+        # Snaps a single image after updating the waveforms.
+        #
+        # Can be used in acquisitions where changing waveforms are required,
+        # but there is additional overhead due to the need to write the
+        # waveforms into the buffers of the NI cards.
+        #
+        """
+        #  Initialize the DAQ Tasks and the Camera.
+        self.daq.initialize_tasks()
+
+        #  Prepare the DAQ for Waveform Delivery
+        self.daq.create_tasks()
+        self.daq.create_waveforms()
+        self.daq.start_tasks()
+
+        #  Trigger everything and grab the image.
+        self.daq.run_tasks()
+
+        #  Close everything.
+        self.daq.stop_tasks()
+        self.daq.close_tasks()
 
     def run_live_acquisition(self):
         """

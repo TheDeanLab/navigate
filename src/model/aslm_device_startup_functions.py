@@ -11,7 +11,9 @@ from model.devices.laser_shutters import ThorlabsShutter, SyntheticShutter
 from model.devices.laser_triggers import LaserTriggers, SyntheticLaserTriggers
 from model.devices.cameras import HamamatsuOrca, SyntheticCamera
 from model.devices.stages import PIStage, SyntheticStage
-from model.devices.laser_scanning import LaserScanning
+# from model.devices.laser_scanning import LaserScanning
+from model.devices.daq import NIDAQ, SyntheticDAQ
+
 
 def start_camera(configuration, experiment, verbose):
     """
@@ -114,18 +116,16 @@ def start_lasers(configuration, verbose):
     return laser
 
 
-# def start_daq(configuration, experiment, etl_constants, verbose):
-#     """
-#     # Start the data acquisition device (DAQ):  NI or SyntheticDAQ
-#     """
-#     if configuration.Devices['daq'] == 'NI':
-#         from model.devices.daq.NI.NIDAQ import DAQ as DAQModel
-#         return DAQModel(configuration, experiment, etl_constants, verbose)
-#     elif configuration.Devices['daq'] == 'SyntheticDAQ':
-#         from model.devices.daq.SyntheticDAQ import DAQ as DAQModel
-#         return DAQModel(configuration, experiment, etl_constants, verbose)
-#     else:
-#         device_not_found(configuration.Devices['daq'])
+def start_daq(configuration, experiment, etl_constants, verbose):
+    """
+    # Start the data acquisition device (DAQ):  NI or SyntheticDAQ
+    """
+    if configuration.Devices['daq'] == 'NI':
+        return NIDAQ(configuration, experiment, etl_constants, verbose)
+    elif configuration.Devices['daq'] == 'SyntheticDAQ':
+        return SyntheticDAQ(configuration, experiment, etl_constants, verbose)
+    else:
+        device_not_found(configuration.Devices['daq'])
 
 
 def start_shutters(configuration, experiment, verbose):

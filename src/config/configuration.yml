@@ -5,7 +5,7 @@ Devices:
   camera: HamamatsuOrca # SyntheticCamera or HamamatsuOrca
   etl: ETL  #ETL or SyntheticETL
   filter_wheel: SutterFilterWheel #SutterFilterWheel or SyntheticFilterWheel
-  stage: SyntheticStage  # PI or SyntheticStage
+  stage: SyntheticStage  # PIStage or SyntheticStage
   zoom: DynamixelZoom  #DynamixelZoom or SyntheticZoom
   lasers: Omicron #Omicron or SyntheticLasers
   shutters: ThorlabsShutter #ThorlabsShutter or SyntheticShutter
@@ -67,8 +67,8 @@ CameraParameters:
   delay_percent: 10
   pulse_percent: 1
   line_interval: 0.000075
-  display_live_subsampling: 2
-  display_acquisition_subsampling: 2
+  display_live_subsampling: 4
+  display_acquisition_subsampling: 4
   average_frame_rate: 4.969
 
 RemoteFocusParameters:

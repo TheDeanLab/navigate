@@ -34,6 +34,7 @@ class CameraBase:
         self.camera_display_live_subsampling = self.model.CameraParameters['display_live_subsampling']
         self.camera_display_acquisition_subsampling = self.model.CameraParameters['display_acquisition_subsampling']
 
+
     def __del__(self):
         pass
 

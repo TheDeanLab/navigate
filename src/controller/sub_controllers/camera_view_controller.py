@@ -156,10 +156,9 @@ class Camera_View_Controller(GUI_Controller):
             self.img = ImageTk.PhotoImage(Image.fromarray(image))
             self.canvas.create_image(0, 0, image=self.img, anchor='nw')
             end_time = time.perf_counter()
-            print("PIL display")
 
-        # if self.verbose:
-        print('Time necessary to display an image:', (end_time - begin_time) * 1000)
+        if self.verbose:
+            print('Time necessary to display an image:', (end_time - begin_time) * 1000)
 
 
     def update_channel_idx(self, channel_idx):

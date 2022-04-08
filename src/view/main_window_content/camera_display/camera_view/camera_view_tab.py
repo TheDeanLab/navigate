@@ -20,7 +20,7 @@ class camera_tab(ttk.Frame):
         self.cam_image = ttk.Frame(self)
         self.cam_image.grid(row=0, column=0, sticky=NSEW)
 
-        self.canvas = tk.Canvas(self.cam_image, width=800, height=500) # TODO decide on height, width original was 800x800
+        self.canvas = tk.Canvas(self.cam_image, width=500, height=500) # TODO decide on height, width original was 800x800
         self.canvas.grid(row=0, column=0, sticky=NSEW)
         self.matplotlib_figure = Figure(figsize=[6, 6], tight_layout=True)
         self.matplotlib_canvas = FigureCanvasTkAgg(self.matplotlib_figure, self.canvas)

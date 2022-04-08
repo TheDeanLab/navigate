@@ -5,6 +5,7 @@ import time
 import nidaqmx
 from nidaqmx.constants import AcquisitionType
 from nidaqmx.constants import LineGrouping
+from scipy import signal
 import numpy as np
 
 # Local Imports
@@ -76,144 +77,17 @@ class DAQBase:
         self.laser_power = 0
         self.laser_idx = 0
 
-    def create_low_res_galvo_waveform(self):
-        """
-        # Calculate the sawtooth waveforms for the low-resolution digitally scanned galvo.
-        """
-        pass
-
-    def create_high_res_galvo_waveform(self):
-        """
-        # Calculate the DC waveform for the resonant galvanometer drive signal.
-        """
-        pass
-
-    def bundle_galvo_and_etl_waveforms(self):
-        """
-        # Stacks the Galvo and ETL waveforms into a numpy array adequate for
-        # the NI cards. In here, the assignment of output channels of the Galvo / ETL card to the
-        # corresponding output channel is hardcoded: This could be improved.
-        """
-        pass
-
-    def update_etl_parameters(self):
-        """
-        # Update the ETL parameters according to the zoom and excitation wavelength.
-        # TODO: Need some sort of system here...
-        """
-        pass
-
-    def create_camera_task(self):
-        """
-        # Set up the camera trigger
-        # Calculate camera high time and initial delay.
-        # Disadvantage: high time and delay can only be set after a task has been created
-        """
-        pass
-
-    def create_master_trigger_task(self):
-        """
-        # Set up the DO master trigger task
-        """
-        pass
-
-    def create_galvo_etl_task(self):
-        """
-        # Set up the Galvo and electrotunable lens - Each start with the trigger_source.
-        PXI6259/ao0:3 -> 4 channels
-        """
-        pass
-
-    def write_waveforms_to_tasks(self):
-        """
-        # Write the galvo, etl, and laser waveforms to the NI DAQ tasks
-        """
-        pass
-
-    def start_tasks(self):
-        """
-        # Start the tasks for camera triggering and analog outputs
-        # If the tasks are configured to be triggered, they won't output any signals until run_tasks() is called.
-        """
-        pass
-
-    def run_tasks(self):
-        """
-        # Run the tasks for triggering, analog and counter outputs.
-        # the master trigger initiates all other tasks via a shared trigger
-        # For this to work, all analog output and counter tasks have to be started so
-        # that they are waiting for the trigger signal.
-        """
-        pass
-
-    def stop_tasks(self):
-        """
-        # Stop the tasks for triggering, analog and counter outputs.
-        """
-        pass
-
-    def close_tasks(self):
-        """
-        # Close the tasks for triggering, analog, and counter outputs.
-        """
-        pass
-
-    def initialize_tasks(self):
-        """
-        # Initialize the nidaqmx tasks.
-        """
-        pass
-
-    def create_tasks(self):
-        """
-        # Creates a total of four tasks for the microscope:
-        # These are:
-        # - the master trigger task, a digital out task that only provides a trigger pulse for the others
-        # - the camera trigger task, a counter task that triggers the camera in lightsheet mode
-        # - the galvo task (analog out) that controls the left & right galvos for creation of
-        #  the light-sheet and shadow avoidance
-        # - the ETL & Laser task (analog out) that controls all the laser intensities (Laser should only
-        # be on when the camera is acquiring) and the left/right ETL waveforms
-        """
-        pass
-
-    def create_waveforms(self):
-        """
-        # Create the waveforms for the ETL, Galvos, and sends it to the tasks for execution.
-        """
-        pass
-
     def calculate_samples(self):
         """
         # Calculate the number of samples for the waveforms.
         # Product of the sampling frequency and the duration of the waveform/exposure time.
-        # Sweeptime units originally seconds.
+        # sweep_time units originally seconds.
         """
-        pass
-
-    def create_etl_waveform(self):
-        """
-        # Create the waveforms for the Electrotunable Lens
-        """
-        pass
-
-
-class SyntheticDAQ(DAQBase):
-    def __init__(self, model, experiment, etl_constants, verbose=False):
-        super().__init__(model, experiment, etl_constants, verbose)
-
-    def calculate_samples(self):
-        """
-        # Calculate the number of samples for the waveforms.
-        # Product of the sampling frequency and the duration of the waveform.
-        """
-        self.sample_rate = self.model.DAQParameters['sample_rate']
-        self.sweep_time = self.model.DAQParameters['sweep_time']
         self.samples = int(self.sample_rate * self.sweep_time)
 
     def create_waveforms(self):
         """
-        # Create the waveforms for the ETL, Galvos, and Lasers.
+        # Create the waveforms for the ETL, Galvos, and sends it to the tasks for execution.
         """
         self.calculate_samples()
 
@@ -224,13 +98,33 @@ class SyntheticDAQ(DAQBase):
         self.create_high_res_galvo_waveform()
         self.create_low_res_galvo_waveform()
 
-        # Lasers
-        self.create_analog_laser_waveforms(self.laser_power)
-        self.create_digital_laser_waveforms()
-        self.create_laser_switching_waveform()
-
         # Bundle the waveforms into a single waveform.
         self.bundle_galvo_and_etl_waveforms()
+
+        # Write the waveforms to the tasks.
+        self.write_waveforms_to_tasks()
+
+    def update_etl_parameters(self, microscope_state, channel):
+        """
+        # Update the ETL parameters according to the zoom and excitation wavelength.
+        """
+        laser = channel['laser']
+        resolution_mode = microscope_state['resolution_mode']
+
+        if resolution_mode == 'high':
+            zoom = 'one'
+            self.etl_r_amplitude = float(self.etl_constants.ETLConstants[resolution_mode][zoom][laser]['amplitude'])
+            self.etl_r_offset = float(self.etl_constants.ETLConstants[resolution_mode][zoom][laser]['offset'])
+            print("High Resolution Mode.  Amp/Off:", self.etl_r_amplitude, self.etl_r_offset)
+
+        elif resolution_mode == 'low':
+            zoom = microscope_state['zoom']
+            self.etl_l_amplitude = float(self.etl_constants.ETLConstants[resolution_mode][zoom][laser]['amplitude'])
+            self.etl_l_offset = float(self.etl_constants.ETLConstants[resolution_mode][zoom][laser]['offset'])
+            print("Low Resolution Mode.  Amp/Off:", self.etl_l_amplitude, self.etl_l_offset)
+
+        else:
+            print("ETL setting not pulled properly.")
 
     def create_etl_waveform(self):
         """
@@ -254,7 +148,6 @@ class SyntheticDAQ(DAQBase):
         """
         # Calculate the sawtooth waveforms for the low-resolution digitally scanned galvo.
         """
-        self.calculate_samples()
         self.galvo_l_waveform = sawtooth(self.sample_rate, self.sweep_time, self.galvo_l_frequency,
                                          self.galvo_l_amplitude, self.galvo_l_offset,
                                          self.galvo_l_duty_cycle, self.galvo_l_phase)
@@ -267,79 +160,11 @@ class SyntheticDAQ(DAQBase):
         """
         # Calculate the DC waveform for the resonant galvanometer drive signal.
         """
-        self.calculate_samples()
         self.galvo_r_waveform = dc_value(self.sample_rate, self.sweep_time, self.galvo_r_amplitude, 0)
 
         # Scale the Galvo waveforms to the AO range.
         self.galvo_r_waveform[self.galvo_r_waveform < self.galvo_r_min_ao] = self.galvo_r_min_ao
         self.galvo_r_waveform[self.galvo_r_waveform > self.galvo_r_max_ao] = self.galvo_r_max_ao
-
-    def identify_laser_idx(self, laser_wavelength):
-        """
-        # TODO: Make this so that it automatically grows with the number of lasers in the model
-        """
-        for laser_idx in range(self.number_of_lasers):
-            if laser_wavelength == self.model.LaserParameters['laser_0_wavelength']:
-                self.laser_idx = self.model.LaserParameters['laser_0_index']
-            elif laser_wavelength == self.model.LaserParameters['laser_1_wavelength']:
-                self.laser_idx = self.model.LaserParameters['laser_1_index']
-            elif laser_wavelength == self.model.LaserParameters['laser_2_wavelength']:
-                self.laser_idx = self.model.LaserParameters['laser_2_index']
-            else:
-                print('Laser name not found.')
-        if self.verbose:
-            print('Laser index: {}'.format(self.laser_idx))
-
-    def create_laser_switching_waveform(self):
-        """
-        # TTL for switching between laser fibers.
-        # 0V is the left fiber, 5V is the right.
-        """
-        self.calculate_samples()
-        if self.resolution_mode == 'low':
-            amplitude = self.model.LaserParameters['laser_min_do']
-        else:
-            amplitude = self.model.LaserParameters['laser_max_do']
-        self.laser_switching_waveform = dc_value(self.sample_rate, self.sweep_time, amplitude, 0)
-
-    def create_analog_laser_waveforms(self, laser_power):
-        """
-        # Calculate the waveforms for the lasers.
-        # Analog output for intensity control
-        # Digital output for left or right fiber.
-        """
-        self.calculate_samples()
-        laser_voltage = self.laser_max_ao * laser_power / 100
-        laser_template_waveform = single_pulse(self.sample_rate, self.sweep_time, self.laser_l_delay,
-                                               self.laser_l_pulse, laser_voltage, 0)
-
-        # Scale the waveforms to the AO range.
-        laser_template_waveform[laser_template_waveform < self.laser_min_ao] = self.laser_min_ao
-        laser_template_waveform[laser_template_waveform > self.laser_max_ao] = self.laser_max_ao
-
-        # Pre-allocate the waveforms.
-        laser_waveform_list = [np.zeros(self.samples) for i in range(self.number_of_lasers)]
-        laser_waveform_list[self.laser_idx] = laser_template_waveform
-        self.laser_ao_waveforms = np.stack(laser_waveform_list)
-
-    def create_digital_laser_waveforms(self):
-        """
-        # Calculate the waveforms for the lasers.
-        # Digital output for on/off.
-        # Digital output for left or right fiber.
-        """
-        self.calculate_samples()
-        laser_template_waveform = single_pulse(self.sample_rate, self.sweep_time, self.laser_l_delay,
-                                               self.laser_l_pulse, self.laser_max_do, 0)
-
-        # Scale the waveforms to the DO range.
-        laser_template_waveform[laser_template_waveform < self.laser_min_do] = self.laser_min_do
-        laser_template_waveform[laser_template_waveform > self.laser_max_do] = self.laser_max_do
-
-        # Pre-allocate the waveforms.
-        laser_waveform_list = [np.zeros(self.samples) for i in range(self.number_of_lasers)]
-        laser_waveform_list[self.laser_idx] = laser_template_waveform
-        self.laser_do_waveforms = np.stack(laser_waveform_list)
 
     def bundle_galvo_and_etl_waveforms(self):
         """
@@ -352,16 +177,10 @@ class SyntheticDAQ(DAQBase):
                                                  self.etl_l_waveform,
                                                  self.etl_r_waveform))
 
-    def update_etl_parameters(self):
-        """
-        # Update the ETL parameters according to the zoom and excitation wavelength.
-        # TODO: Need some sort of system here...
-        """
-        #  laser = self.model.experiment.current_laser
-        #  zoom = self.model.experiment.zoom
-        #  self.etl_amplitude = self.etl_constants[zoom][laser]['amplitude']
-        #  self.etl_offset = self.etl_constants[zoom][laser]['offset']
-        pass
+
+class SyntheticDAQ(DAQBase):
+    def __init__(self, model, experiment, etl_constants, verbose=False):
+        super().__init__(model, experiment, etl_constants, verbose)
 
     def create_camera_task(self):
         """
@@ -383,36 +202,10 @@ class SyntheticDAQ(DAQBase):
     def create_galvo_etl_task(self):
         """
         # Set up the Galvo and electrotunable lens - Each start with the trigger_source.
+        PXI6259/ao0:3 -> 4 channels
         """
+        galvo_etl_task_line = self.model.DAQParameters['galvo_etl_task_line']
         trigger_source = self.model.DAQParameters['trigger_source']
-        pass
-
-    def create_laser_task(self):
-        """
-        # Set up the lasers - Each start with the trigger_source.
-        """
-        trigger_source = self.model.DAQParameters['trigger_source']
-        laser_task_line = self.model.DAQParameters['laser_task_line']
-        pass
-
-    def create_tasks(self):
-        """
-        # Creates a total of four tasks for the microscope:
-        # These are:
-        # - the master trigger task, a digital out task that only provides a trigger pulse for the others
-        # - the camera trigger task, a counter task that triggers the camera in lightsheet mode
-        # - the galvo task (analog out) that controls the left & right galvos for creation of
-        #  the light-sheet and shadow avoidance
-        # - the ETL & Laser task (analog out) that controls all the laser intensities (Laser should only
-        # be on when the camera is acquiring) and the left/right ETL waveforms
-        """
-        self.calculate_samples()
-        pass
-
-    def write_waveforms_to_tasks(self):
-        """
-        # Write the waveforms to the slave tasks
-        """
         pass
 
     def start_tasks(self):
@@ -421,16 +214,6 @@ class SyntheticDAQ(DAQBase):
         # If the tasks are configured to be triggered, they won't output any signals until run_tasks() is called.
         """
         pass
-
-    def run_tasks(self):
-        """
-        # Run the tasks for triggering, analog and counter outputs.
-        # the master trigger initiates all other tasks via a shared trigger
-        # For this to work, all analog output and counter tasks have to be started so
-        # that they are waiting for the trigger signal.
-        """
-        time.sleep(0.1)
-        self.camera.generate_new_frame()
 
     def stop_tasks(self):
         """
@@ -444,9 +227,27 @@ class SyntheticDAQ(DAQBase):
         """
         pass
 
-    def initialize_tasks(self):
+    def prepare_acquisition(self):
         """
         # Initialize the nidaqmx tasks.
+        """
+        pass
+
+    def run_acquisition(self):
+        """
+        # Run the tasks for triggering, analog and counter outputs.
+        # the master trigger initiates all other tasks via a shared trigger
+        # For this to work, all analog output and counter tasks have to be started so
+        # that they are waiting for the trigger signal.
+        """
+        pass
+
+    def stop_acquisition(self):
+        pass
+
+    def write_waveforms_to_tasks(self):
+        """
+        # Write the galvo, etl, and laser waveforms to the NI DAQ tasks
         """
         pass
 
@@ -463,29 +264,6 @@ class NIDAQ(DAQBase):
 
     def __del__(self):
         pass
-
-    def update_etl_parameters(self, microscope_state, channel):
-        """
-        # Update the ETL parameters according to the zoom and excitation wavelength.
-        """
-        laser = channel['laser']
-        resolution_mode = microscope_state['resolution_mode']
-
-        if resolution_mode == 'high':
-            zoom = 'one'
-            self.etl_r_amplitude = self.etl_constants.ETLConstants[resolution_mode][zoom][laser]['amplitude']
-            self.etl_r_offset = self.etl_constants.ETLConstants[resolution_mode][zoom][laser]['offset']
-            print("High Resolution Mode.  Amp/Off:", self.etl_r_amplitude, self.etl_r_offset)
-
-        elif resolution_mode == 'low':
-            zoom = microscope_state['zoom']
-            self.etl_l_amplitude = self.etl_constants.ETLConstants[resolution_mode][zoom][laser]['amplitude']
-            self.etl_l_offset = self.etl_constants.ETLConstants[resolution_mode][zoom][laser]['offset']
-            print("Low Resolution Mode.  Amp/Off:", self.etl_l_amplitude, self.etl_l_offset)
-
-        else:
-            print("ETL setting not pulled properly.")
-
 
     def create_camera_task(self):
         """
@@ -579,86 +357,15 @@ class NIDAQ(DAQBase):
         self.stop_tasks()
         self.close_tasks()
 
-    def create_waveforms(self):
-        """
-        # Create the waveforms for the ETL, Galvos, and sends it to the tasks for execution.
-        """
-        self.calculate_samples()
-
-        # ETL - Currently creates both ETL L and ETL R
-        self.create_etl_waveform()
-
-        # Galvos
-        self.create_high_res_galvo_waveform()
-        self.create_low_res_galvo_waveform()
-
-        # Bundle the waveforms into a single waveform.
-        self.bundle_galvo_and_etl_waveforms()
-
-        # Write the waveforms to the tasks.
-        self.write_waveforms_to_tasks()
-
-    def calculate_samples(self):
-        """
-        # Calculate the number of samples for the waveforms.
-        # Product of the sampling frequency and the duration of the waveform/exposure time.
-        # Sweeptime units originally seconds.
-        """
-        self.samples = int(self.sample_rate * self.sweep_time)
-
-    def create_etl_waveform(self):
-        """
-        # Create the waveforms for the Electrotunable Lens
-        """
-        self.etl_l_waveform = tunable_lens_ramp(self.sample_rate, self.sweep_time, self.etl_l_delay,
-                                                self.etl_l_ramp_rising, self.etl_l_ramp_falling,
-                                                self.etl_l_amplitude, self.etl_l_offset)
-
-        self.etl_r_waveform = tunable_lens_ramp(self.sample_rate, self.sweep_time, self.etl_r_delay,
-                                                self.etl_r_ramp_rising, self.etl_r_ramp_falling,
-                                                self.etl_r_amplitude, self.etl_r_offset)
-
-        # Scale the ETL waveforms to the AO range.
-        self.etl_l_waveform[self.etl_l_waveform < self.etl_l_min_ao] = self.etl_l_min_ao
-        self.etl_l_waveform[self.etl_l_waveform > self.etl_l_max_ao] = self.etl_l_max_ao
-        self.etl_r_waveform[self.etl_r_waveform < self.etl_r_min_ao] = self.etl_r_min_ao
-        self.etl_r_waveform[self.etl_r_waveform > self.etl_r_max_ao] = self.etl_r_max_ao
-
-    def create_low_res_galvo_waveform(self):
-        """
-        # Calculate the sawtooth waveforms for the low-resolution digitally scanned galvo.
-        """
-        self.galvo_l_waveform = sawtooth(self.sample_rate, self.sweep_time, self.galvo_l_frequency,
-                                         self.galvo_l_amplitude, self.galvo_l_offset,
-                                         self.galvo_l_duty_cycle, self.galvo_l_phase)
-
-        # Scale the Galvo waveforms to the AO range.
-        self.galvo_l_waveform[self.galvo_l_waveform < self.galvo_l_min_ao] = self.galvo_l_min_ao
-        self.galvo_l_waveform[self.galvo_l_waveform > self.galvo_r_max_ao] = self.galvo_r_max_ao
-
-    def create_high_res_galvo_waveform(self):
-        """
-        # Calculate the DC waveform for the resonant galvanometer drive signal.
-        """
-        self.galvo_r_waveform = dc_value(self.sample_rate, self.sweep_time, self.galvo_r_amplitude, 0)
-
-        # Scale the Galvo waveforms to the AO range.
-        self.galvo_r_waveform[self.galvo_r_waveform < self.galvo_r_min_ao] = self.galvo_r_min_ao
-        self.galvo_r_waveform[self.galvo_r_waveform > self.galvo_r_max_ao] = self.galvo_r_max_ao
-
-    def bundle_galvo_and_etl_waveforms(self):
-        """
-        # Stacks the Galvo and ETL waveforms into a numpy array adequate for
-        # the NI cards. In here, the assignment of output channels of the Galvo / ETL card to the
-        # corresponding output channel is hardcoded: This could be improved.
-        """
-        self.galvo_and_etl_waveforms = np.stack((self.galvo_l_waveform,
-                                                 self.galvo_r_waveform,
-                                                 self.etl_l_waveform,
-                                                 self.etl_r_waveform))
-
     def write_waveforms_to_tasks(self):
         """
         # Write the galvo, etl, and laser waveforms to the NI DAQ tasks
         """
         self.galvo_etl_task.write(self.galvo_and_etl_waveforms)
+
+    def set_camera(self, camera):
+        """
+        # connect camera with daq: only in syntheticDAQ
+        """
+    pass
+

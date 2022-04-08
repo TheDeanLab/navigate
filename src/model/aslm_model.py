@@ -148,6 +148,7 @@ class Model:
             self.close_shutter()
 
         elif command == 'live':
+            self.experiment.MicroscopeState = args[0]
             self.is_save = False
             self.stop_acquisition = False
             self.stop_send_signal = False
@@ -158,6 +159,8 @@ class Model:
             self.data_thread.start()
 
         elif command == 'series':
+            self.experiment.MicroscopeState = args[0]
+
             pass
 
         elif command == 'update setting':

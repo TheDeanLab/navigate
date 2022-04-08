@@ -32,19 +32,15 @@ class Channel_Setting_Controller(GUI_Controller):
     def set_mode(self, mode=''):
         self.mode = mode
 
-    def initialize(self, name, value):
-        type, widgets = self.get_widgets(name)
-        if not widgets:
-            return
+    def initialize(self, config):
+        setting_dict = config.get_channels_info(self.verbose)
         for i in range(self.num):
-            if type == 'variable':
-                widgets[i].set(value)
-            else:
-                widgets[i]['values'] = value
+            self.view.laser_pulldowns[i]['values'] = setting_dict['laser']
+            self.view.filterwheel_pulldowns[i]['values'] = setting_dict['filter']
 
-        self.show_verbose_info(name, 'in channel has been initialized')
+        self.show_verbose_info('channel has been initialized')
 
-    def set_values(self, value):
+    def set_experiment_values(self, setting_dict):
         """
         # set channel values according to channel id
         # the value should be a dict {
@@ -58,20 +54,18 @@ class Channel_Setting_Controller(GUI_Controller):
         }
         """
         prefix = 'channel_'
-        for channel in value:
+        for channel in setting_dict:
             channel_id = int(channel[len(prefix):]) - 1
             channel_vals = self.get_vals_by_channel(channel_id)
             if not channel_vals:
                 return
-            channel_value = value[channel]
+            channel_value = setting_dict[channel]
             for name in channel_vals:
                 channel_vals[name].set(channel_value[name])
-                if name == 'camera_exposure_time':
-                    self.view.exptime_pulldowns[channel_id].validate()
-                elif name == 'interval_time':
-                    self.view.interval_spins[channel_id].validate()
-                elif name == 'laser_power':
-                    self.view.laserpower_pulldowns[channel_id].validate()
+            # validate exposure_time, interval, laser_power
+            self.view.exptime_pulldowns[channel_id].validate()
+            self.view.interval_spins[channel_id].validate()
+            self.view.laserpower_pulldowns[channel_id].validate()
 
         self.show_verbose_info('channel has been set new value')
 
@@ -174,31 +168,6 @@ class Channel_Setting_Controller(GUI_Controller):
             self.show_verbose_info('channel setting has been changed')
         return func
 
-    def get_widgets(self, name):
-        """
-        # get all the widgets according to name
-        # name should be: is_selected, laser, filter, camera_exposure_time, laser_power, interval_time
-        """
-        result = None
-        type = 'widget'
-        if name == 'laser':
-            result = self.view.laser_pulldowns
-        elif name == 'filter':
-            result = self.view.filterwheel_pulldowns
-        elif name == 'camera_exposure_time':
-            result = self.view.exptime_variables
-            type = 'variable'
-        elif name == 'laser_power':
-            result = self.view.laserpower_pulldowns
-        elif name == 'interval_time':
-            result = self.view.interval_variables
-            type = 'variable'
-        elif name == 'is_selected':
-            result = self.view.channel_variables
-            type = 'variable'
-
-        return type, result
-
     def get_vals_by_channel(self, index):
         """
         # this function return all the variables according channel_id
@@ -216,8 +185,10 @@ class Channel_Setting_Controller(GUI_Controller):
         return result
 
     def get_index(self, dropdown_name, value):
-        type, widget = self.get_widgets(dropdown_name)
-        if type != 'variable' and value:
-            values = widget[0]['values']
-            return values.index(value)
+        if not value:
+            return -1
+        if dropdown_name == 'laser':
+            return self.view.laser_pulldowns[0]['values'].index(value)
+        elif dropdown_name == 'filter':
+            return self.view.filterwheel_pulldowns[0]['values'].index(value)
         return -1

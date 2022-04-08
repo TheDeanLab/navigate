@@ -47,12 +47,17 @@ class ASLM_controller:
                                         configuration_path=configuration_path,
                                         experiment_path=experiment_path,
                                         etl_constants_path=etl_constants_path)
-
-        # Load the Configuration to Populate the GUI
-        self.configuration = session(configuration_path, args.verbose)
         
         # save default experiment file
         self.default_experiment_file = experiment_path
+
+        # Load the Configuration to Populate the GUI
+        self.configuration = session(configuration_path, self.verbose)
+        # Initialize view based on model.configuration
+        configuration_controller = ASLM_Configuration_Controller(self.configuration)
+
+        # get etl information from configuration file
+        self.etl_other_info = configuration_controller.get_etl_info()
 
         # etl setting file
         self.etl_constants_path = etl_constants_path
@@ -70,7 +75,8 @@ class ASLM_controller:
         # Channels Controller
         self.channels_tab_controller = Channels_Tab_Controller(self.view.settings.channels_tab,
                                                                self,
-                                                               self.verbose)
+                                                               self.verbose,
+                                                               configuration_controller)
 
         # Camera View Controller
         self.camera_view_controller = Camera_View_Controller(self.view.camera_waveform.camera_tab,
@@ -81,12 +87,14 @@ class ASLM_controller:
         # Camera Settings Controller
         self.camera_setting_controller = Camera_Setting_Controller(self.view.settings.camera_settings_tab,
                                                                    self,
-                                                                   self.verbose)
+                                                                   self.verbose,
+                                                                   configuration_controller)
 
         # Stage Controller
         self.stage_gui_controller = Stage_GUI_Controller(self.view.stage_control.stage_control_tab,
                                                          self,
-                                                         self.verbose)
+                                                         self.verbose,
+                                                         configuration_controller)
 
         # Waveform Controller
         self.waveform_tab_controller = Waveform_Tab_Controller(self.view.camera_waveform.waveform_tab,
@@ -95,25 +103,13 @@ class ASLM_controller:
 
         # initialize menu bar
         self.initialize_menus()
-        
-        # Initialize view based on model.configuration
-        configuration_controller = ASLM_Configuration_Controller(self.configuration)
-
-        # Channels Tab
-        self.initialize_channels(configuration_controller)
-
-        # Stage Control Tab
-        self.initialize_stage(configuration_controller)
-
-        # get etl information from configuration file
-        self.etl_other_info = configuration_controller.get_etl_info()
 
         # Set view based on model.experiment
         self.experiment = session(experiment_path, args.verbose)
         self.populate_experiment_setting()
 
         # Camera Settings Tab
-        self.initialize_cam_settings(configuration_controller)
+        # self.initialize_cam_settings(configuration_controller)
 
         # Camera View Tab
         self.initialize_cam_view(configuration_controller)
@@ -133,7 +129,7 @@ class ASLM_controller:
         # self.data_buffer = [SharedNDArray(shape=(self.model.camera.y_pixels, self.model.camera.x_pixels), dtype='uint16') for i in range(NUM_OF_FRAMES)]
         self.data_buffer = [SharedNDArray(shape=(2048, 2048), dtype='uint16') for i in range(NUM_OF_FRAMES)]
         self.model.set_data_buffer(self.data_buffer)
-        
+    
     def initialize_cam_view(self, configuration_controller):
         """
         # Populate widgets with necessary data from config file via config controller. For the entire view tab.
@@ -144,17 +140,6 @@ class ASLM_controller:
         image_metrics = [1, 0, 0]
         self.camera_view_controller.initialize('image', image_metrics)
 
-    def initialize_stage(self, configuration_controller):
-        """
-        # Pre-populate the stage positions.
-        """
-        # Set stage movement limits
-        position_min = configuration_controller.get_stage_position_limits('_min')
-        position_max = configuration_controller.get_stage_position_limits('_max')
-        self.stage_gui_controller.set_position_limits(position_min, position_max)
-
-        # set widgets' range limits
-        self.stage_gui_controller.set_spinbox_range_limits(self.configuration.GUIParameters['stage'])
 
     def initialize_menus(self):
         """
@@ -181,8 +166,8 @@ class ASLM_controller:
         def popup_etl_setting():
             etl_setting_popup = remote_popup(self.view)
             etl_controller = Etl_Popup_Controller(etl_setting_popup, self, self.verbose)
-            etl_controller.initialize('resolution', self.etl_setting)
-            etl_controller.initialize('other', self.etl_other_info)
+            etl_controller.initialize(self.etl_setting)
+            etl_controller.set_experiment_values(self.experiment.RemoteFocusParameters)
 
         menus_dict = {
             self.view.menubar.menu_file: {
@@ -231,62 +216,6 @@ class ASLM_controller:
         self.view.menubar.menu_resolution.add_command(label='ETL Parameters',
                                                       command=popup_etl_setting)
 
-    def initialize_cam_settings(self, configuration_controller):
-        """
-        # Populate widgets with necessary data from config file via config controller. For the entire settings tab.
-        """
-
-        # Populating Camera Mode
-        sensor_values = ['Normal', 'Light Sheet']
-        self.camera_setting_controller.initialize('sensor mode', sensor_values)
-
-        readout_values = [' ', 'Top to Bottom', 'Bottom to Top']
-        self.camera_setting_controller.initialize('readout', readout_values)
-
-        # Populating Framerate
-        #framerate_values = []  TODO Kevin this is where you put the default values, use get_framerate from aslm_configuration_controller
-        #self.camera_setting_controller.initialize('framerate', framerate_values) TODO Kevin this is where you pass default values to the sub controller
-
-        # Populating ROI Mode
-        pixels = configuration_controller.get_pixels(self.verbose)
-        self.camera_setting_controller.initialize('pixels', pixels)
-
-        # Populating FOV Mode
-        # TODO: Not sure why zoom is being populated as low.  Cannot currently track down. Hardcoded.
-        mode = self.experiment.MicroscopeState['resolution_mode']
-        zoom = self.experiment.MicroscopeState['zoom']
-        # zoom = '1x'
-
-        if self.experiment.MicroscopeState['resolution_mode'] == 'high':
-            pixel_size = self.configuration.ZoomParameters['high_res_zoom_pixel_size']
-
-        if self.experiment.MicroscopeState['resolution_mode'] == 'low':
-            pixel_size = self.configuration.ZoomParameters['low_res_zoom_pixel_size'][zoom]
-
-        fov = [mode, pixel_size]
-        self.camera_setting_controller.initialize('fov', fov)
-
-    def initialize_channels(self, configuration_controller):
-        """
-        # set some other information needed by channels_tab_controller
-        """
-        self.channels_tab_controller.set_channel_num(self.configuration.GUIParameters['number_of_channels'])
-
-        self.channels_tab_controller.settings_from_configuration = {
-            'stage_velocity': self.configuration.StageParameters['velocity'],
-            'filter_wheel_delay': self.configuration.FilterWheelParameters['filter_wheel_delay']
-        }
-        # populate channels in the GUI
-        channels_setting = configuration_controller.get_channels_info(self.verbose)
-        self.channels_tab_controller.initialize('channel', channels_setting)
-
-        # populate laser cycling settings
-        laser_cycling_values = ['Per Z', 'Per Stack']
-        self.channels_tab_controller.initialize('laser_cycling', laser_cycling_values)
-
-        # set widgets' range limits
-        self.channels_tab_controller.set_spinbox_range_limits(self.configuration.GUIParameters)
-
     def populate_experiment_setting(self, file_name=None):
         """
         # if file_name is specified and exists, this function will load an experiment file to model.experiment
@@ -302,60 +231,19 @@ class ASLM_controller:
                 # Create experiment instance here.
                 self.experiment = session(file_path, self.verbose)
 
-        # set sub-controllers in 'initialization' status
-        self.channels_tab_controller.in_initialization = True
-
-        # populate stack acquisition from model.experiment
-        stack_acq_setting = {
-            'step_size': self.experiment.MicroscopeState['step_size'],
-            'start_position': self.experiment.MicroscopeState['start_position'],
-            'end_position': self.experiment.MicroscopeState['end_position'],
-            # 'number_z_steps': 1250
-        }
-        self.channels_tab_controller.set_values('stack_acquisition', stack_acq_setting)
-
-        # populate laser cycling mode
-        laser_cycling = 'Per Z' if self.experiment.MicroscopeState['stack_cycling_mode'] == 'per_z' else 'Per Stack'
-        self.channels_tab_controller.set_values('laser_cycling', laser_cycling)
-
-        # populate time-points settings
-        timepoints_setting = {
-            'is_save': self.experiment.MicroscopeState['is_save'],
-            'timepoints': self.experiment.MicroscopeState['timepoints'],
-            'stack_pause': self.experiment.MicroscopeState['stack_pause']
-        }
-        self.channels_tab_controller.set_values('timepoint', timepoints_setting)
-
-        # populate channels
-        self.channels_tab_controller.set_values('channel', self.experiment.MicroscopeState['channels'])
-
         # set mode according to model.experiment
         mode = self.experiment.MicroscopeState['image_mode']
         self.acquire_bar_controller.set_mode(mode)
-
-        # set saving settings to acquire bar
-        for name in self.experiment.Saving:
-            if self.experiment.Saving[name] is None:
-                self.experiment.Saving[name] = ''
         self.acquire_bar_controller.set_saving_settings(self.experiment.Saving)
 
         # populate StageParameters
-        position = {}
-        for axis in ['x', 'y', 'z', 'theta', 'f']:
-            position[axis] = self.experiment.StageParameters[axis]
-        self.stage_gui_controller.set_position(position)
+        self.stage_gui_controller.set_experiment_values(self.experiment.StageParameters)
 
-        # Pre-populate the stage step size.
-        step_size = {}
-        for axis in ['xy', 'z', 'theta', 'f']:
-            step_size[axis] = self.experiment.StageParameters[axis+'_step']
-        self.stage_gui_controller.set_step_size(step_size)
+        # channels tab
+        self.channels_tab_controller.set_experiment_values(self.experiment.MicroscopeState)
 
-        # populate multi_positions
-        self.channels_tab_controller.set_positions(self.experiment.MicroscopeState['stage_positions'])
-
-        # after initialization, let sub-controllers do necessary computation
-        self.channels_tab_controller.after_intialization()
+        # camera setting tab
+        self.camera_setting_controller.set_experiment_values(self.experiment.CameraParameters)
 
         # resolution/zoom menu
         resolution_mode = self.experiment.MicroscopeState['resolution_mode']
@@ -363,11 +251,6 @@ class ASLM_controller:
             self.resolution_value.set('high')
         else:
             self.resolution_value.set(self.experiment.MicroscopeState['zoom'])
-
-        # etl parameters
-        self.etl_other_info['remote_focus_l_delay_percent'] = self.experiment.RemoteFocusParameters['remote_focus_l_delay_percent']
-        self.etl_other_info['remote_focus_r_delay_percent'] = self.experiment.RemoteFocusParameters['remote_focus_r_delay_percent']
-        # TODO: other parameters: duty, smoothing percent
 
     def update_experiment_setting(self):
         """
@@ -378,23 +261,15 @@ class ASLM_controller:
         # update image mode
         self.experiment.MicroscopeState['image_mode'] = self.acquire_bar_controller.get_mode()
 
-        #camera_setting_controller
-        update_from_camera_setting_controller(self)
-
         #camera_view_controller
 
         #channel_setting_controller
 
-        #channels_tab_controller
-        update_from_channels_tab_controller(self)
+        
 
         #etl_popup_controller
 
         #gui_controller
-
-        #multi_position_controller
-
-        #stage_gui_controller
 
         #waveform_tab_controller
 
@@ -408,14 +283,13 @@ class ASLM_controller:
             self.experiment.MicroscopeState['resolution_mode'] = 'low'
             self.experiment.MicroscopeState['zoom'] = self.resolution_value.get()
 
-        self.experiment.RemoteFocusParameters['remote_focus_l_delay_percent'] = self.etl_other_info['remote_focus_l_delay_percent']
-        self.experiment.RemoteFocusParameters['remote_focus_r_delay_percent'] = self.etl_other_info['remote_focus_r_delay_percent']
 
 
-
-        # TODO: other parameters
-        
-        return True
+        # collect settings from sub-controllers
+        # sub-controllers will validate the value, if something wrong, it will return False
+        return self.channels_tab_controller.update_experiment_values(self.experiment.MicroscopeState) \
+            and self.stage_gui_controller.update_experiment_values(self.experiment.MicroscopeState) \
+            and self.camera_setting_controller.update_experiment_values(self.experiment.CameraParameters)
 
     def prepare_acquire_data(self):
         """

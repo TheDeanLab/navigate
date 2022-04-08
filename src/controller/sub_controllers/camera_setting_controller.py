@@ -2,7 +2,7 @@ from controller.sub_controllers.gui_controller import GUI_Controller
 
 
 class Camera_Setting_Controller(GUI_Controller):
-    def __init__(self, view, parent_controller=None, verbose=False):
+    def __init__(self, view, parent_controller=None, verbose=False, configuration_controller=None):
         super().__init__(view, parent_controller, verbose)
 
         # Getting Widgets/Buttons
@@ -30,69 +30,82 @@ class Camera_Setting_Controller(GUI_Controller):
         # self.roi_widgets['Top'].widget.config(command=self.update_pixels)
         # self.roi_widgets['Bottom'].widget.config(command=self.update_pixels)
 
+        self.initialize(configuration_controller)
 
-    def initialize(self, name, data):
+
+    def initialize(self, config):
         '''
         #### Function that sets widgets based on data given from main controller/config
         '''
         # Camera Mode
-        if name == 'sensor mode':
-            self.mode_widgets['Sensor'].widget['values'] = data
-            self.mode_widgets['Sensor'].set('Normal')
-            self.mode_widgets['Sensor'].widget['state'] = 'readonly'
-            self.mode_widgets['Sensor'].widget.selection_clear()
-            self.mode_widgets['Pixels'].widget['state'] = 'disabled'
+        self.mode_widgets['Sensor'].widget['values'] = ['Normal', 'Light Sheet']
+        self.mode_widgets['Sensor'].widget['state'] = 'readonly'
+        self.mode_widgets['Sensor'].widget.selection_clear()
+        self.mode_widgets['Pixels'].widget['state'] = 'disabled'
 
-        if name == 'readout':
-            self.mode_widgets['Readout'].widget['values'] = data
-            self.mode_widgets['Readout'].set(' ')
-            self.mode_widgets['Readout'].widget['state'] = 'disabled'
-            self.mode_widgets['Readout'].selection_clear()
+        self.mode_widgets['Readout'].widget['values'] = [' ', 'Top to Bottom', 'Bottom to Top']
+        self.mode_widgets['Readout'].widget['state'] = 'disabled'
+        self.mode_widgets['Readout'].selection_clear()
 
-        # Framerate
-        if name == 'framerate':
-            # TODO Kevin this is where the widgets have their default values set, uncomment what you want set initially
-            # self.framerate_widgets['Temp1'].set(data[0])
-            # self.framerate_widgets['Temp2'].set(data[1])
-            # self.framerate_widgets['Temp3'].set(data[2])
-            # self.framerate_widgets['Exposure'].set(data[3])
-            # self.framerate_widgets['Integration'].set(data[4])
-            pass
-
-        # ROI Mode
-        if name == 'pixels':
-            right = data[0]
-            bottom = data[1]
-            top = 1
-            left = 1
-            # Setting default roi widgets
-            # self.roi_widgets['Right'].set(right)  # Image width aka X pixels
-            # self.roi_widgets['Bottom'].set(bottom)  # Imgage height aka Y pixels
-            # self.roi_widgets['Left'].set(left)  # Base value of 1 pixel to start
-            # self.roi_widgets['Top'].set(top)  # Same as above
-
-            # Setting num of pixels
-            # self.roi_widgets['Pixels_X'].set(right - left - 1)
-            # self.roi_widgets['Pixels_Y'].set(bottom - top - 1)
-            # self.roi_widgets['Pixels_X'].widget['state'] = 'disabled' # This should not be edited for now
-            # self.roi_widgets['Pixels_Y'].widget['state'] = 'disabled'
-
-            # ROI Center
-            self.roi_widgets['Center_X'].set(right/2)
-            self.roi_widgets['Center_Y'].set(bottom/2)
-            self.roi_widgets['Center_X'].widget['state'] = 'disabled' # This should not be edited for now
-            self.roi_widgets['Center_Y'].widget['state'] = 'disabled'
+        # set range value
+        width, height = config.get_pixels(self.verbose)
+        self.roi_widgets['Width'].widget.config(to=width)
+        self.roi_widgets['Height'].widget.config(to=height)
+        self.roi_widgets['Center_X'].widget['state'] = 'disabled' # This should not be edited for now
+        self.roi_widgets['Center_Y'].widget['state'] = 'disabled'
+        self.roi_widgets['Center_X'].widget['state'] = 'disabled' # This should not be edited for now
+        self.roi_widgets['Center_Y'].widget['state'] = 'disabled'
 
         # FOV
-        if name == 'fov':
-            mode = data[0]
-            pixel_size = data[1]
-            self.roi_widgets['FOV_X'].set(pixel_size)
-            self.roi_widgets['FOV_Y'].set(pixel_size)
-            self.roi_widgets['FOV_X'].widget['state'] = 'disabled'
-            self.roi_widgets['FOV_Y'].widget['state'] = 'disabled'
+        self.roi_widgets['FOV_X'].widget['state'] = 'disabled'
+        self.roi_widgets['FOV_Y'].widget['state'] = 'disabled'
+
+    def set_experiment_values(self, setting_dict):
+        self.mode_widgets['Sensor'].set(setting_dict['sensor_mode'])
+        self.mode_widgets['Readout'].set(' ')
 
         
+
+        # populate pixels {
+        #   'low': self.configuration.ZoomParameters['high_res_zoom_pixel_size'],
+        #   'high': self.configuration.ZoomParameters['low_res_zoom_pixel_size']
+        # }
+
+        # Populating FOV Mode
+        # TODO: Not sure why zoom is being populated as low.  Cannot currently track down. Hardcoded.
+
+        # ROI Mode: 'pixels'
+        # width = setting_dict['width']
+        # height = setting_dict['height']
+        # top = 1
+        # left = 1
+        
+        # ROI Center
+        # self.roi_widgets['Center_X'].set(width/2)
+        # self.roi_widgets['Center_Y'].set(height/2)
+
+        # Framerate
+        # TODO Kevin this is where the widgets have their default values set, uncomment what you want set initially
+        # self.framerate_widgets['Temp1'].set(data[0])
+        # self.framerate_widgets['Temp2'].set(data[1])
+        # self.framerate_widgets['Temp3'].set(data[2])
+        # self.framerate_widgets['Exposure'].set(data[3])
+        # self.framerate_widgets['Integration'].set(data[4])
+
+        # FOV
+        pixel_size = setting_dict['pixel_size']
+        self.roi_widgets['FOV_X'].set(pixel_size)
+        self.roi_widgets['FOV_Y'].set(pixel_size)
+        
+    def update_experiment_values(self, setting_dict):
+        setting_dict['sensor_mode'] = self.mode_widgets['Sensor'].get()
+        setting_dict['binning'] = 1
+        # setting_dict['x_pixels'] = self.roi_widgets['Pixels_X'].get()
+        # setting_dict['y_pixels'] = self.roi_widgets['Pixels_Y'].get()
+        setting_dict['number_of_cameras'] = 1
+        setting_dict['pixel_size'] = self.roi_widgets['FOV_X'].get()
+        return True
+
     def update_readout(self, *args):
         '''
         Updates text in readout widget based on what sensor mode is selected

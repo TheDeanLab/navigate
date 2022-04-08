@@ -21,6 +21,7 @@ CameraParameters:
   y_pixels: 2048
   sensor_mode: 12
   binning: 1x1
+  pixel_size: 6.38
 RemoteFocusParameters:
   remote_focus_l_delay_percent: 7.5
   remote_focus_l_ramp_rising_percent: 85

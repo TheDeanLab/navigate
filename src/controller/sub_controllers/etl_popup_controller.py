@@ -46,15 +46,18 @@ class Etl_Popup_Controller(GUI_Controller):
 
         self.view.get_buttons()['Save'].configure(command=self.save_etl_info)
 
-    def initialize(self, name, data):
+    def initialize(self, setting_dict):
         """
         # initialize widgets with data
         """
-        if name == 'resolution':
-            self.resolution_info = data
-            self.mode_widget.widget['values'] = list(data.ETLConstants.keys())
-        else:
-            self.other_info = data
+        self.resolution_info = setting_dict
+        self.mode_widget.widget['values'] = list(setting_dict.ETLConstants.keys())
+
+    def set_experiment_values(self, setting_dict):
+        """
+        # set experiment values
+        """
+        self.other_info = setting_dict
 
     def show_magnification(self, *args):
         """

@@ -1,4 +1,3 @@
-import _tkinter
 import numpy as np
 from controller.sub_controllers.widget_functions import validate_wrapper
 from controller.sub_controllers.gui_controller import GUI_Controller
@@ -7,13 +6,13 @@ from controller.sub_controllers.multi_position_controller import Multi_Position_
 
 
 class Channels_Tab_Controller(GUI_Controller):
-    def __init__(self, view, parent_controller=None, verbose=False):
+    def __init__(self, view, parent_controller=None, verbose=False, configuration_controller=None):
         super().__init__(view, parent_controller, verbose)
 
         self.is_save = False
         self.mode = 'stop'
         self.in_initialization = True
-        self.settings_from_configuration = {}
+        # sub-controllers
         self.channel_setting_controller = Channel_Setting_Controller(self.view.channel_widgets_frame, self,
                                                                      self.verbose)
         self.multi_position_controller = Multi_Position_Controller(self.view.multipoint_list, self, self.verbose)
@@ -45,10 +44,10 @@ class Channels_Tab_Controller(GUI_Controller):
         self.stack_acq_vals['start_position'].trace_add('write', self.update_z_steps)
         self.stack_acq_vals['end_position'].trace_add('write', self.update_z_steps)
 
-        # laser cycling variable
-        self.laser_cycling_val = self.view.stack_cycling_frame.cycling_options
-        # laser cycling event binds
-        self.laser_cycling_val.trace_add('write', self.update_cycling_setting)
+        # laser/stack cycling variable
+        self.stack_cycling_val = self.view.stack_cycling_frame.cycling_options
+        # laser/stack cycling event binds
+        self.stack_cycling_val.trace_add('write', self.update_cycling_setting)
 
         # timepoint setting variables
         self.timepoint_vals = {
@@ -71,40 +70,62 @@ class Channels_Tab_Controller(GUI_Controller):
         self.is_multiposition_val = self.view.multipoint_frame.on_off
         self.view.multipoint_frame.save_check.configure(command=self.toggle_multiposition)
 
-    def initialize(self, name, value):
-        if name == 'channel':
-            for col_name in value:
-                self.channel_setting_controller.initialize(col_name, value[col_name])
-        elif name == 'laser_cycling':
-            self.view.stack_cycling_frame.cycling_pull_down['values'] = value
-        else:
-            self.set_values(name, value)
+        if configuration_controller:
+            self.initialize(configuration_controller)
 
-        self.show_verbose_info(name, 'on channels tab has been initialized')
 
-    def set_values(self, name, value):
-        if name == 'stack_acquisition':
-            self.set_info(self.stack_acq_vals, value)
-            # validate
-            self.view.stack_acq_frame.step_size_spinbox.validate()
-            self.view.stack_acq_frame.start_pos_spinbox.validate()
-            self.view.stack_acq_frame.end_pos_spinbox.validate()
-        elif name == 'timepoint':
-            self.set_info(self.timepoint_vals, value)
-            # validate
-            self.view.stack_timepoint_frame.stack_pause_spinbox.validate()
-            self.view.stack_timepoint_frame.exp_time_spinbox.validate()
-        elif name == 'laser_cycling':
-            self.laser_cycling_val.set(value)
-        elif name == 'channel':
-            self.channel_setting_controller.set_values(value)
+    def initialize(self, config):
+        """
+        # This function initializes widgets and gets other necessary configuration
+        """
+        self.set_channel_num(config.configuration.GUIParameters['number_of_channels'])
+        self.view.stack_cycling_frame.cycling_pull_down['values'] = ['Per Z', 'Per Stack']
+        self.stage_velocity = config.configuration.StageParameters['velocity']
+        self.filter_wheel_delay = config.configuration.FilterWheelParameters['filter_wheel_delay']
+        self.channel_setting_controller.initialize(config)
+        
+        self.set_spinbox_range_limits(config.configuration.GUIParameters)
+        self.show_verbose_info('channels tab has been initialized')
 
-        self.show_verbose_info(name, 'on channels tab has been set new values')
+    def set_experiment_values(self, setting_dict):
+        self.in_initialization = True
+        self.set_info(self.stack_acq_vals, setting_dict)
+        # validate
+        self.view.stack_acq_frame.step_size_spinbox.validate()
+        self.view.stack_acq_frame.start_pos_spinbox.validate()
+        self.view.stack_acq_frame.end_pos_spinbox.validate()
 
-    def get_values(self, name=None):
-        settings = {}
+        self.set_info(self.timepoint_vals, setting_dict)
+        # validate
+        self.view.stack_timepoint_frame.stack_pause_spinbox.validate()
+        self.view.stack_timepoint_frame.exp_time_spinbox.validate()
+
+        self.stack_cycling_val.set(setting_dict['stack_cycling_mode'])
+        self.channel_setting_controller.set_experiment_values(setting_dict['channels'])
+
+        # positions
+        self.multi_position_controller.set_positions(setting_dict['stage_positions'])
+        
+        # after initialization
+        self.in_initialization = False
+        self.channel_setting_controller.in_initialization = False
+        self.update_z_steps()
+
+        self.show_verbose_info('channels tab has been set new values')
+
+    def update_experiment_values(self, setting_dict):
+        self.get_values(settings=setting_dict)
+        setting_dict['stage_positions'] = self.multi_position_controller.get_positions()
+
+        # validate
+        return setting_dict['stack_acquisition'] is not None \
+            and setting_dict['timepoint'] is not None \
+            and setting_dict['channel'] is not None
+        
+
+    def get_values(self, name=None, settings={}):
         settings['stack_acquisition'] = self.get_info(self.stack_acq_vals)
-        settings['stack_cycling_mode'] = 'per_stack' if self.laser_cycling_val.get() == 'Per Stack' else 'per_z'
+        settings['stack_cycling_mode'] = 'per_stack' if self.stack_cycling_val.get() == 'Per Stack' else 'per_z'
         settings['timepoint'] = self.get_info(self.timepoint_vals)
         settings['channel'] = self.channel_setting_controller.get_values()
         if name in settings:
@@ -211,7 +232,7 @@ class Channels_Tab_Controller(GUI_Controller):
 
         # tell the central/parent controller that laser cycling setting is changed when mode is 'live'
         if self.mode == 'live':
-            self.parent_controller.execute('laser_cycling', self.laser_cycling_val.get())
+            self.parent_controller.execute('laser_cycling', self.stack_cycling_val.get())
 
         self.show_verbose_info('cycling setting on channels tab has been changed')
 
@@ -239,8 +260,6 @@ class Channels_Tab_Controller(GUI_Controller):
 
         channel_settings = self.channel_setting_controller.get_values()
         number_of_positions = self.multi_position_controller.get_position_num() if self.is_multiposition else 1
-        stage_velocity = self.settings_from_configuration['stage_velocity']
-        filter_wheel_delay = self.settings_from_configuration['filter_wheel_delay']
         channel_exposure_time = []
         # validate the spinbox's value
         try:
@@ -258,7 +277,7 @@ class Channels_Tab_Controller(GUI_Controller):
                 self.view.after_cancel(self.timepoint_event_id)
             return
 
-        perStack = self.laser_cycling_val.get() == 'Per Stack'
+        perStack = self.stack_cycling_val.get() == 'Per Stack'
 
         # Initialize variable to keep track of how long the entire experiment will take.
         # Includes time, positions, channels...
@@ -284,7 +303,7 @@ class Channels_Tab_Controller(GUI_Controller):
                 # so that we can calculate the total experiment time.
                 # Probably assemble a matrix of all the positions and then do the calculations.
 
-                stage_delay = 0  # distance[max_distance_idx]/stage_velocity #TODO False value.
+                stage_delay = 0  # distance[max_distance_idx]/self.stage_velocity #TODO False value.
 
                 # If we were actually acquiring the data, we would call the function to move the stage here.
                 experiment_duration = experiment_duration + stage_delay
@@ -294,7 +313,7 @@ class Channels_Tab_Controller(GUI_Controller):
                     if perStack:
                         # In the perStack mode, we only need to account for the time necessary for the filter wheel
                         # to change between each image stack.
-                        experiment_duration = experiment_duration + filter_wheel_delay
+                        experiment_duration = experiment_duration + self.filter_wheel_delay
 
                     for slice_idx in range(number_of_slices):
                         # Now we need to know the exposure time of each channel.
@@ -308,7 +327,7 @@ class Channels_Tab_Controller(GUI_Controller):
                         if not perStack:
                             # In the perZ mode, we need to account for the time necessary to move the filter wheel
                             # at each slice
-                            experiment_duration = experiment_duration + filter_wheel_delay
+                            experiment_duration = experiment_duration + self.filter_wheel_delay
 
                             if channel_idx == 0 and position_idx == 0 and timepoint_idx == 0:
                                 stack_acquisition_duration = stack_acquisition_duration + channel_exposure_time[channel_idx] / 1000
@@ -357,17 +376,6 @@ class Channels_Tab_Controller(GUI_Controller):
 
     def generate_positions(self):
         self.multi_position_controller.generate_positions_func()
-
-    def set_positions(self, positions):
-        self.multi_position_controller.set_positions(positions)
-
-    def get_positions(self):
-        return self.multi_position_controller.get_positions()
-
-    def after_intialization(self):
-        self.in_initialization = False
-        self.channel_setting_controller.in_initialization = False
-        self.update_z_steps()
 
     def set_info(self, vals, values):
         """

@@ -72,6 +72,11 @@ class Acquire_Bar_Controller(GUI_Controller):
         # set saving settings
         # right now it is a reference to the model.exprement.Saving
         """
+        # if value is None, set to ''
+        for name in saving_settings:
+            if saving_settings[name] is None:
+                saving_settings[name] = ''
+        
         self.saving_settings = saving_settings
 
         self.show_verbose_info('set saving settings')

@@ -19,8 +19,9 @@ def start_camera(configuration, experiment, verbose):
     """
     # Initializes the camera as a sub-process using concurrency tools.
     """
-    camera_id = 0 # Becomes important when a second camera must be dealth with.
-    if configuration.Devices['camera'] == 'HamamatsuOrca' and platform.system() == 'Windows':
+    camera_id = 0  # Becomes important when a second camera must be dealth with.
+    if configuration.Devices['camera'] == 'HamamatsuOrca' and platform.system(
+    ) == 'Windows':
         return HamamatsuOrca(camera_id, configuration, experiment, verbose)
     elif configuration.Devices['camera'] == 'SyntheticCamera':
         return SyntheticCamera(camera_id, configuration, experiment, verbose)
@@ -32,7 +33,8 @@ def start_stages(configuration, verbose):
     """
     # Initializes the Stage.
     """
-    if configuration.Devices['stage'] == 'PI' and platform.system() == 'Windows':
+    if configuration.Devices['stage'] == 'PI' and platform.system(
+    ) == 'Windows':
         return PIStage(configuration, verbose)
     elif configuration.Devices['stage'] == 'SyntheticStage':
         return SyntheticStage(configuration, verbose)
@@ -69,14 +71,16 @@ def start_lasers(configuration, verbose):
     # Start the lasers: Lasers or SyntheticLasers
     '''
     if configuration.Devices['lasers'] == 'Omicron':
-        # This is the Omicron LightHUB Ultra Launch - consists of both Obis and Luxx lasers.
+        # This is the Omicron LightHUB Ultra Launch - consists of both Obis and
+        # Luxx lasers.
         from model.devices.lasers.coherent.ObisLaser import ObisLaser as obis
         from model.devices.lasers.omicron.LuxxLaser import LuxxLaser as luxx
 
         # Iteratively go through the configuration file and turn on each of the lasers,
         # and make sure that they are in appropriate external control mode.
         laser = {}
-        for laser_idx in range(configuration.LaserParameters['number_of_lasers']):
+        for laser_idx in range(
+                configuration.LaserParameters['number_of_lasers']):
             if laser_idx == 0:
                 # 488 nm LuxX laser
                 print("Initializing 488 nm LuxX Laser")
@@ -153,6 +157,7 @@ def start_laser_triggers(configuration, experiment, verbose):
     else:
         device_not_found(configuration.Devices['daq'])
 
+
 def start_laser_scanning(configuration, experiment, etl_constants, verbose):
     """
     # Initializes the Laser Switching, Analog, and Digital DAQ Outputs:
@@ -160,7 +165,8 @@ def start_laser_scanning(configuration, experiment, etl_constants, verbose):
     if configuration.Devices['daq'] == 'NI':
         return LaserScanning(configuration, experiment, etl_constants, verbose)
     elif configuration.Devices['daq'] == 'SyntheticDAQ':
-        return SyntheticLaserTriggers(configuration, experiment, etl_constants, verbose)
+        return SyntheticLaserTriggers(
+            configuration, experiment, etl_constants, verbose)
     else:
         device_not_found(configuration.Devices['daq'])
 

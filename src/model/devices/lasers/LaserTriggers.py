@@ -9,6 +9,7 @@ Author: Fabian Voigt
 import nidaqmx
 from nidaqmx.constants import LineGrouping
 
+
 class LaserTriggers():
     ''' Class for interacting with the laser enable DO lines via NI-DAQmx
     Works only with NI-PXI 6733s with all lasers on 6 output lines.
@@ -22,6 +23,7 @@ class LaserTriggers():
     in the form:
     {'488 nm': 'PXI6259/line0/port0', '515 nm': 'PXI6259/line0/port1'}
     '''
+
     def __init__(self, laser_dict):
         self.laser_enable_state = 'None'
         self.laser_dict = laser_dict
@@ -55,25 +57,27 @@ class LaserTriggers():
         Turns the line number into a command integer via 2^n
         '''
         self.line = self.laser_dict[laser][-1]
-        return pow(2,int(self.line))
+        return pow(2, int(self.line))
 
     def enable(self, laser):
         '''
         Enables a single laser line.
         If another laser was on beforehand, this one is switched off.
         '''
-        if self.check_if_laser_in_laser_dict(laser) == True:
+        if self.check_if_laser_in_laser_dict(laser):
             if self.verbose:
                 print(self.laser_dict[laser])
             self.cmd = self.build_cmd_int(laser)
 
             with nidaqmx.Task() as task:
-                task.do_channels.add_do_chan(self.laser_enable_device,line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
+                task.do_channels.add_do_chan(
+                    self.laser_enable_device,
+                    line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
                 task.write(self.cmd, auto_start=True)
 
             self.laser_enable_state = laser
             if self.verbose:
-                print('Enabled '+ laser)
+                print('Enabled ' + laser)
         else:
             pass
 
@@ -82,7 +86,9 @@ class LaserTriggers():
         Enables all laser lines.
         '''
         with nidaqmx.Task() as task:
-            task.do_channels.add_do_chan(self.laser_enable_device,line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
+            task.do_channels.add_do_chan(
+                self.laser_enable_device,
+                line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
             task.write(255, auto_start=True)
 
         self.laser_enable_state = 'all on'
@@ -94,7 +100,9 @@ class LaserTriggers():
         Disables all laser lines.
         '''
         with nidaqmx.Task() as task:
-            task.do_channels.add_do_chan(self.laser_enable_device,line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
+            task.do_channels.add_do_chan(
+                self.laser_enable_device,
+                line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
             task.write(0, auto_start=True)
 
         self.laser_enable_state = 'off'
@@ -106,6 +114,7 @@ class LaserTriggers():
         Returns laser line if a laser is on, otherwise "False"
         """
         return self.laser_enable_state
+
 
 class DemoLaserEnabler:
     def __init__(self, laser_dict):
@@ -119,7 +128,7 @@ class DemoLaserEnabler:
             raise ValueError('Laser not in the configuration')
 
     def enable(self, laser):
-        if self.check_if_laser_in_laser_dict(laser) == True:
+        if self.check_if_laser_in_laser_dict(laser):
             self.laser_enable_state = laser
         else:
             pass

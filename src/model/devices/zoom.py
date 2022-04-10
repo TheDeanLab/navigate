@@ -10,6 +10,7 @@ import time
 # Local Imports
 from model.devices.APIs.dynamixel import dynamixel_functions as dynamixel
 
+
 class ZoomBase:
     def __init__(self, model, verbose):
         self.model = model
@@ -35,6 +36,7 @@ class SyntheticZoom(ZoomBase):
     """
     Virtual Zoom Device
     """
+
     def __init__(self, model, verbose):
         super().__init__(model, verbose)
         if self.verbose:
@@ -79,7 +81,7 @@ class DynamixelZoom(ZoomBase):
         self.addr_mx_torque_limit = 34
         self.addr_mx_moving_speed = 32
 
-        #  Specifies how much the goal position can be off (+/-) from the target
+        # Specifies how much the goal position can be off (+/-) from the target
         self.goal_position_offset = 10
 
         # Specifies how long to sleep for the wait until done function
@@ -87,7 +89,8 @@ class DynamixelZoom(ZoomBase):
         self.sleeptime = 0.05
         self.timeout = 15
 
-        # the dynamixel library uses integers instead of booleans for binary information
+        # the dynamixel library uses integers instead of booleans for binary
+        # information
         self.torque_enable = 1
         self.torque_disable = 0
 
@@ -119,19 +122,32 @@ class DynamixelZoom(ZoomBase):
         self.dynamixel.setBaudRate(self.port_num, self.baudrate)
 
         # Enable servo
-        self.dynamixel.write1ByteTxRx(self.port_num, 1, self.id, self.addr_mx_torque_enable, self.torque_enable)
+        self.dynamixel.write1ByteTxRx(
+            self.port_num,
+            1,
+            self.id,
+            self.addr_mx_torque_enable,
+            self.torque_enable)
 
         # Write Moving Speed
-        self.dynamixel.write2ByteTxRx(self.port_num, 1, self.id, self.addr_mx_moving_speed, 100)
+        self.dynamixel.write2ByteTxRx(
+            self.port_num, 1, self.id, self.addr_mx_moving_speed, 100)
 
         # Write Torque Limit
-        self.dynamixel.write2ByteTxRx(self.port_num, 1, self.id, self.addr_mx_torque_limit, 200)
+        self.dynamixel.write2ByteTxRx(
+            self.port_num, 1, self.id, self.addr_mx_torque_limit, 200)
 
         # Write P Gain
-        self.dynamixel.write1ByteTxRx(self.port_num, 1, self.id, self.addr_mx_p_gain, 44)
+        self.dynamixel.write1ByteTxRx(
+            self.port_num, 1, self.id, self.addr_mx_p_gain, 44)
 
         # Write Goal Position
-        self.dynamixel.write2ByteTxRx(self.port_num, 1, self.id, self.addr_mx_goal_position, position)
+        self.dynamixel.write2ByteTxRx(
+            self.port_num,
+            1,
+            self.id,
+            self.addr_mx_goal_position,
+            position)
 
         # Check position
         if wait_until_done:
@@ -142,14 +158,16 @@ class DynamixelZoom(ZoomBase):
             lower_limit = position - self.goal_position_offset
             if self.verbose:
                 print('lower_limit: ', lower_limit)
-            cur_position = self.dynamixel.read4ByteTxRx(self.port_num, 1, self.id, self.addr_mx_present_position)
+            cur_position = self.dynamixel.read4ByteTxRx(
+                self.port_num, 1, self.id, self.addr_mx_present_position)
 
             while (cur_position < lower_limit) or (cur_position > upper_limit):
                 # Timeout function
-                if time.time()-start_time > self.timeout:
+                if time.time() - start_time > self.timeout:
                     break
                 time.sleep(0.05)
-                cur_position = self.dynamixel.read4ByteTxRx(self.port_num, 1, self.id, self.addr_mx_present_position)
+                cur_position = self.dynamixel.read4ByteTxRx(
+                    self.port_num, 1, self.id, self.addr_mx_present_position)
                 if self.verbose:
                     print(cur_position)
         self.dynamixel.closePort(self.port_num)
@@ -163,7 +181,8 @@ class DynamixelZoom(ZoomBase):
         """
         self.dynamixel.openPort(self.port_num)
         self.dynamixel.setBaudRate(self.port_num, self.baudrate)
-        cur_position = self.dynamixel.read4ByteTxRx(self.port_num, 1, self.id, self.addr_mx_present_position)
+        cur_position = self.dynamixel.read4ByteTxRx(
+            self.port_num, 1, self.id, self.addr_mx_present_position)
         self.dynamixel.closePort(self.port_num)
         if self.verbose:
             print('Zoom position: {}'.format(cur_position))

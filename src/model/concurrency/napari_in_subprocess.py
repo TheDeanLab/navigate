@@ -27,6 +27,7 @@ def display(display_type=None):
                                  close_method_name='close')
     return display
 
+
 class _NapariDisplay:
     """This is a barebones example of a simplified napari viewer.
 
@@ -36,19 +37,27 @@ class _NapariDisplay:
     We encourage you to define your own version of this class to suit your
     purposes. The only requirement is that it has a `close` method.
     """
+
     def __init__(self):
         self.viewer = napari.Viewer()
-        self.lowrespreview = self.viewer.add_image(np.zeros((Camera_parameters.LR_height_pixel, Camera_parameters.LR_width_pixel)), name="lowres_preview")
-        self.lowrespreview.contrast_limits=(0,10000)
+        self.lowrespreview = self.viewer.add_image(
+            np.zeros(
+                (Camera_parameters.LR_height_pixel,
+                 Camera_parameters.LR_width_pixel)),
+            name="lowres_preview")
+        self.lowrespreview.contrast_limits = (0, 10000)
         self.highrespreview = self.viewer.add_image(
-            np.zeros((Camera_parameters.HR_height_pixel, Camera_parameters.HR_width_pixel)), name="highres_preview")
-        self.highrespreview.contrast_limits=(0, 10000)
+            np.zeros(
+                (Camera_parameters.HR_height_pixel,
+                 Camera_parameters.HR_width_pixel)),
+            name="highres_preview")
+        self.highrespreview.contrast_limits = (0, 10000)
 
     def show_image_lowres(self, im):
-            self.lowrespreview.data = im
+        self.lowrespreview.data = im
 
     def show_image_highres(self, im):
-            self.highrespreview.data = im
+        self.highrespreview.data = im
 
     def show_stack(self, im):
         if not hasattr(self, 'stack_image'):
@@ -58,7 +67,8 @@ class _NapariDisplay:
 
     def show_maxproj(self, im):
         if not hasattr(self, 'stack_maxproj_image'):
-            self.stack_maxproj_image = self.viewer.add_image(im, name="stack max projections")
+            self.stack_maxproj_image = self.viewer.add_image(
+                im, name="stack max projections")
         else:
             self.stack_maxproj_image.data = im
 
@@ -82,6 +92,7 @@ class _NapariDisplay:
 # this can probably be done by creating your own modified version of the
 # _NapariDisplay class above.
 
+
 def _napari_child_loop(child_pipe, initializer, initargs, initkwargs,
                        close_method_name, closeargs, closekwargs):
     """Teach Qt's event loop how to act like an ObjectInSubprocess's child
@@ -89,7 +100,7 @@ def _napari_child_loop(child_pipe, initializer, initargs, initkwargs,
     """
     closeargs = tuple() if closeargs is None else closeargs
     closekwargs = dict() if closekwargs is None else closekwargs
-    state = { # Mutable, to store the state of the child object.
+    state = {  # Mutable, to store the state of the child object.
         'keep_launching_napari': True,
         'initial_init': True}
     while state['keep_launching_napari']:
@@ -98,7 +109,7 @@ def _napari_child_loop(child_pipe, initializer, initargs, initkwargs,
         with napari.gui_qt():
             # Initialize a napari-specific object
             printed_output = io.StringIO()
-            try: # Create an instance of our napari object...
+            try:  # Create an instance of our napari object...
                 with redirect_stdout(printed_output):
                     obj = initializer(*initargs, **initkwargs)
                     if close_method_name is not None:
@@ -107,7 +118,7 @@ def _napari_child_loop(child_pipe, initializer, initargs, initkwargs,
                     child_pipe.send(('Successfully initialized',
                                      printed_output.getvalue()))
                     state['initial_init'] = False
-            except Exception as e: # If we fail to initialize, just give up.
+            except Exception as e:  # If we fail to initialize, just give up.
                 # If this isn't the initial init, this exception will substitute
                 # for the response to the next method call of the proxied napari
                 # object.
@@ -118,6 +129,7 @@ def _napari_child_loop(child_pipe, initializer, initargs, initkwargs,
                 return None
 
             command_timer = QTimer()
+
             def communicate():
                 """Execute commands from the main process.
 
@@ -143,7 +155,7 @@ def _napari_child_loop(child_pipe, initializer, initargs, initkwargs,
                     if close_method_name is not None:
                         close_method(*closeargs, **closekwargs)
                     return
-                if cmd is None: # This is how the parent signals us to exit.
+                if cmd is None:  # This is how the parent signals us to exit.
                     state['keep_launching_napari'] = False
                     if close_method_name is not None:
                         close_method(*closeargs, **closekwargs)
@@ -153,7 +165,7 @@ def _napari_child_loop(child_pipe, initializer, initargs, initkwargs,
                     with redirect_stdout(printed_output):
                         result = getattr(obj, method_name)(*args, **kwargs)
                     if callable(result):
-                        result = _dummy_function # Cheaper than a real callable
+                        result = _dummy_function  # Cheaper than a real callable
                     child_pipe.send((result, printed_output.getvalue()))
                 except Exception as e:
                     e.child_traceback_string = traceback.format_exc()
@@ -172,6 +184,8 @@ def _napari_child_loop(child_pipe, initializer, initargs, initkwargs,
 
 # A mocked "microscope" object for testing and demonstrating proxied
 # Napari displays. Since this is just for testing our imports are ugly:
+
+
 class _Microscope:
     def __init__(self):
         import queue
@@ -192,6 +206,7 @@ class _Microscope:
     def snap(self):
         import time
         from concurrency_tools import CustodyThread
+
         def snap_task(custody):
             custody.switch_from(None, to=self.camera)
             which_buffer = self.data_buffer_queue.get()
@@ -203,18 +218,20 @@ class _Microscope:
             self.data_buffer_queue.put(which_buffer)
             self.num_frames += 1
             if self.num_frames == 100:
-                time_elapsed =  time.perf_counter() - self.initial_time
-                print("%0.2f average FPS"%(self.num_frames / time_elapsed))
+                time_elapsed = time.perf_counter() - self.initial_time
+                print("%0.2f average FPS" % (self.num_frames / time_elapsed))
                 self.num_frames = 0
                 self.initial_time = time.perf_counter()
         th = CustodyThread(first_resource=self.camera, target=snap_task)
         return th.start()
+
 
 class _Camera:
     def record(self, out):
         import numpy as np
         out[:] = np.random.randint(
             0, 2**16, size=out.shape, dtype='uint16')
+
 
 if __name__ == '__main__':
     scope = _Microscope()
@@ -234,10 +251,5 @@ if __name__ == '__main__':
     # If you want to stop the child process before the end of the script,
     # all you have to do is remove all references to the object:
     con = getattr(scope.display, '_')
-    scope.display = None # or del scope.display
+    scope.display = None  # or del scope.display
     assert not con.child_process.is_alive(), 'Napari process should be dead!'
-
-
-
-
-

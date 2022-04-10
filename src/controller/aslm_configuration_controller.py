@@ -7,20 +7,20 @@ class ASLM_Configuration_Controller:
         # Populates the channel combobox with the channels that are available in the model.configuration
         """
 
-        setting = {
-            'laser': self.get_lasers_info(verbose),
-            'filter': list(self.configuration.FilterWheelParameters['available_filters'].keys()),
-        }
+        setting = {'laser': self.get_lasers_info(verbose), 'filter': list(
+            self.configuration.FilterWheelParameters['available_filters'].keys()), }
         return setting
 
     def get_lasers_info(self, verbose=False):
         """
         # Populates the laser combobox with the lasers that are available in the model.configuration
         """
-        number_of_lasers = int(self.configuration.LaserParameters['number_of_lasers'])
+        number_of_lasers = int(
+            self.configuration.LaserParameters['number_of_lasers'])
         laser_list = []
         for i in range(number_of_lasers):
-            laser_wavelength = self.configuration.LaserParameters['laser_'+str(i)+'_wavelength']
+            laser_wavelength = self.configuration.LaserParameters['laser_' + str(
+                i) + '_wavelength']
             laser_list.append(laser_wavelength)
         if verbose:
             print('Laser list: ', laser_list)
@@ -30,13 +30,14 @@ class ASLM_Configuration_Controller:
         """
         # Gets default pixel values from camera
         """
-        return [self.configuration.CameraParameters['x_pixels'], self.configuration.CameraParameters['y_pixels']]
+        return [self.configuration.CameraParameters['x_pixels'],
+                self.configuration.CameraParameters['y_pixels']]
 
     def get_framerate(self, verbose=False):
         '''
         # Gets default framerate info from camera
         '''
-        pass # TODO Kevin this is where you pull in and then calculate the info from the config file to initializing the framerate widgets
+        pass  # TODO Kevin this is where you pull in and then calculate the info from the config file to initializing the framerate widgets
 
     def get_stage_position(self):
         """
@@ -71,7 +72,7 @@ class ASLM_Configuration_Controller:
         axis = ['x', 'y', 'z', 'theta', 'f']
         position_limits = {}
         for a in axis:
-            position_limits[a] = self.configuration.StageParameters[a+suffix]
+            position_limits[a] = self.configuration.StageParameters[a + suffix]
         return position_limits
 
     def get_etl_info(self):
@@ -82,6 +83,5 @@ class ASLM_Configuration_Controller:
             'remote_focus_l_delay_percent': self.configuration.LaserParameters['laser_l_delay_percent'],
             'remote_focus_l_pulse_percent': self.configuration.LaserParameters['laser_l_pulse_percent'],
             'remote_focus_r_delay_percent': self.configuration.LaserParameters['laser_r_delay_percent'],
-            'remote_focus_r_pulse_percent': self.configuration.LaserParameters['laser_r_pulse_percent']
-        }
+            'remote_focus_r_pulse_percent': self.configuration.LaserParameters['laser_r_pulse_percent']}
         return temp

@@ -25,12 +25,30 @@
 from __future__ import (absolute_import, division, print_function)
 import sys
 from pathlib import Path
-from builtins import (bytes, int, list, object, range, str,
-                      ascii, chr, hex, input, next, oct, open, pow, round, super,
-                      filter, map, zip)
+from builtins import (
+    bytes,
+    int,
+    list,
+    object,
+    range,
+    str,
+    ascii,
+    chr,
+    hex,
+    input,
+    next,
+    oct,
+    open,
+    pow,
+    round,
+    super,
+    filter,
+    map,
+    zip)
 
 # Third Party Imports
 import yaml
+
 
 class Session:
     """
@@ -53,7 +71,7 @@ class Session:
         :param file: Path to the file where the config file is.
         """
 
-        if file_path == None:
+        if file_path is None:
             print("No file provided to load_yaml_config()")
             sys.exit(1)
         else:
@@ -70,7 +88,10 @@ class Session:
 
         # Set the attributes with the custom __setattr__
         for data_iterator in config_data:
-            self.__setattr__(data_iterator, config_data[data_iterator], verbose)
+            self.__setattr__(
+                data_iterator,
+                config_data[data_iterator],
+                verbose)
             if verbose:
                 print("Set:", data_iterator)
 
@@ -83,7 +104,8 @@ class Session:
         #
         # # Confirm that the value is a dictionary
         if not isinstance(value, dict):
-            raise Exception('Everything passed to a the configuration must be a dictionary')
+            raise Exception(
+                'Everything passed to a the configuration must be a dictionary')
 
         # If the key does not exist in self.params, add it
         if key not in self.params:
@@ -144,16 +166,34 @@ class Session:
         for k in self.params:
             c = []
             for m in self.params[k]:
-                if type(self.params[k][m]) == type([]):
-                    s = {'name': m.replace('_', ' '), 'type': type(self.params[k][m]).__name__,
-                         'values': self.params[k][m]}
+                if isinstance(self.params[k][m], type([])):
+                    s = {
+                        'name': m.replace(
+                            '_', ' '), 'type': type(
+                            self.params[k][m]).__name__, 'values': self.params[k][m]}
                 elif type(self.params[k][m]).__name__ == 'NoneType':
-                    s = {'name': m.replace('_', ' '), 'type': "str", 'values': self.params[k][m]}
+                    s = {
+                        'name': m.replace(
+                            '_',
+                            ' '),
+                        'type': "str",
+                        'values': self.params[k][m]}
                 elif type(self.params[k][m]).__name__ == 'long':
-                    s = {'name': m.replace('_', ' '), 'type': "float", 'values': self.params[k][m]}
+                    s = {
+                        'name': m.replace(
+                            '_',
+                            ' '),
+                        'type': "float",
+                        'values': self.params[k][m]}
                 else:
-                    s = {'name': m.replace('_', ' '), 'type': type(self.params[k][m]).__name__,
-                         'value': self.params[k][m], 'decimals': 6}
+                    s = {
+                        'name': m.replace(
+                            '_',
+                            ' '),
+                        'type': type(
+                            self.params[k][m]).__name__,
+                        'value': self.params[k][m],
+                        'decimals': 6}
                 c.append(s)
 
             a = {'name': k.replace('_', ' '), 'type': 'group', 'children': c}
@@ -166,6 +206,7 @@ class Session:
         :return: a  exactly the same as this one.
         """
         return Session(self.params)
+
 
 if __name__ == '__main__':
     """ Testing Section """

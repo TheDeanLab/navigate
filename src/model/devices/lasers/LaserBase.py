@@ -2,6 +2,7 @@
 Laser Base Class
 """
 
+
 class LaserBase:
     def __init__(self, port, verbose):
         self.verbose = verbose

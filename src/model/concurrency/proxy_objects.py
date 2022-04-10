@@ -125,6 +125,7 @@ if __name__ == '__main__':
     main()
 """
 
+
 class ProxyManager:
     """Allocates shared memory and spawns proxy objects
 
@@ -132,6 +133,7 @@ class ProxyManager:
     process (and each other), allocate a ProxyManager first, and use it
     to spawn your ProxyObjects.
     """
+
     def __init__(self, shared_memory_sizes=tuple()):
         """Allocate shared memory as multiprocessing Arrays.
         """
@@ -147,7 +149,7 @@ class ProxyManager:
         *initargs,
         custom_loop=None,
         **initkwargs
-        ):
+    ):
         """Spawn a ProxyObject that has access to shared memory.
         """
         return ProxyObject(initializer, *initargs, **initkwargs,
@@ -164,6 +166,7 @@ class ProxyManager:
         return _SharedNumpyArray(arrays=self.shared_mp_arrays, shape=shape,
                                  dtype=dtype, buffer=which_mp_array)
 
+
 class ProxyObject:
     def __init__(
         self,
@@ -175,7 +178,7 @@ class ProxyObject:
         closeargs=None,
         closekwargs=None,
         **initkwargs,
-        ):
+    ):
         """Make an object in a child process, that acts like it isn't.
 
         As much as possible, we try to make instances of ProxyObject
@@ -204,7 +207,7 @@ class ProxyObject:
         # __setattr__, and because we use a dummy object's namespace to
         # hold our attributes so we shadow as little of the proxied
         # object's namespace as possible:
-        super().__setattr__('_', _DummyClass()) # Weird, but for a reason.
+        super().__setattr__('_', _DummyClass())  # Weird, but for a reason.
         self._.parent_pipe = parent_pipe
         self._.parent_pipe_lock = _ProxyObjectPipeLock()
         self._.child_pipe = child_pipe
@@ -219,8 +222,8 @@ class ProxyObject:
         atexit.register(lambda: _close(self))
         try:
             signal.signal(signal.SIGTERM, lambda s, f: _close(self))
-        except ValueError: # We are probably starting from  a thread.
-            pass # Signal handling can only happen from main thread
+        except ValueError:  # We are probably starting from  a thread.
+            pass  # Signal handling can only happen from main thread
 
     def __getattr__(self, name):
         """Access attributes of the child-process object in the parent process.
@@ -248,6 +251,7 @@ class ProxyObject:
             self._.parent_pipe.send(('__setattr__', (name, value), {}))
             return _get_response(self)
 
+
 def _get_response(proxy_object):
     """Effectively a method of ProxyObject, but defined externally to
     minimize shadowing of the proxied object's namespace"""
@@ -260,6 +264,7 @@ def _get_response(proxy_object):
         resp = resp._reconnect(proxy_object._.shared_mp_arrays)
     return resp
 
+
 def _close(proxy_object):
     """Effectively a method of ProxyObject, but defined externally to
     minimize shadowing of the proxied object's namespace"""
@@ -268,6 +273,7 @@ def _close(proxy_object):
     with proxy_object._.parent_pipe_lock:
         proxy_object._.parent_pipe.send(None)
         proxy_object._.child_process.join()
+
 
 def _child_loop(child_pipe, shared_arrays,
                 initializer, initargs, initkwargs,
@@ -280,7 +286,7 @@ def _child_loop(child_pipe, shared_arrays,
                                                     shared_arrays)
     # Initialization.
     printed_output = io.StringIO()
-    try: # Create an instance of our object...
+    try:  # Create an instance of our object...
         with redirect_stdout(printed_output):
             obj = initializer(*initargs, **initkwargs)
             # TODO default to "close" if it exists?
@@ -288,11 +294,15 @@ def _child_loop(child_pipe, shared_arrays,
                 close_method = getattr(obj, close_method_name)
                 closeargs = tuple() if closeargs is None else closeargs
                 closekwargs = dict() if closekwargs is None else closekwargs
-                atexit.register(lambda: close_method(*closeargs, **closekwargs))
+                atexit.register(
+                    lambda: close_method(
+                        *closeargs, **closekwargs))
                 # TODO - what happens to print statements? Are they guaranteed
                 # to print in the main process?
-        child_pipe.send(('Successfully initialized', printed_output.getvalue()))
-    except Exception as e: # If we fail to initialize, just give up.
+        child_pipe.send(
+            ('Successfully initialized',
+             printed_output.getvalue()))
+    except Exception as e:  # If we fail to initialize, just give up.
         e.child_traceback_string = traceback.format_exc()
         child_pipe.send((e, printed_output.getvalue()))
         return None
@@ -301,9 +311,9 @@ def _child_loop(child_pipe, shared_arrays,
         printed_output = io.StringIO()
         try:
             cmd = child_pipe.recv()
-        except EOFError: # This implies the parent is dead; exit.
+        except EOFError:  # This implies the parent is dead; exit.
             return None
-        if cmd is None: # This is how the parent signals us to exit.
+        if cmd is None:  # This is how the parent signals us to exit.
             return None
         attr_name, args, kwargs = cmd
         args, kwargs = _reconnect_shared_arrays(args, kwargs, shared_arrays)
@@ -311,7 +321,7 @@ def _child_loop(child_pipe, shared_arrays,
             with redirect_stdout(printed_output):
                 result = getattr(obj, attr_name)(*args, **kwargs)
             if callable(result):
-                result = _dummy_function # Cheaper than sending a real callable
+                result = _dummy_function  # Cheaper than sending a real callable
             if isinstance(result, _SharedNumpyArray):
                 result = result._disconnect()
             child_pipe.send((result, printed_output.getvalue()))
@@ -320,13 +330,18 @@ def _child_loop(child_pipe, shared_arrays,
             child_pipe.send((e, printed_output.getvalue()))
 
 # A minimal class that we use just to get another namespace:
+
+
 class _DummyClass:
     pass
 
 # If we're trying to return a (presumably worthless) "callable" to
 # the parent, it might as well be small and simple:
+
+
 def _dummy_function():
     return None
+
 
 class _WaitingList:
     """For synchronization of one-thread-at-a-time shared resources
@@ -337,8 +352,9 @@ class _WaitingList:
     a waiting_list = [] attribute, and a waiting_list_lock =
     threading.Lock() attribute.
     """
+
     def __init__(self):
-        self.waiting_list = [] # Switch to a queue/deque if speed really matters
+        self.waiting_list = []  # Switch to a queue/deque if speed really matters
         self.waiting_list_lock = threading.Lock()
 
     def __enter__(self):
@@ -348,9 +364,11 @@ class _WaitingList:
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.waiting_list_lock.release()
 
+
 class _ProxyObjectPipeLock:
     '''Raises an educational exception (rather than blocking) when you try
        to acquire a locked lock.'''
+
     def __init__(self):
         self.lock = threading.Lock()
 
@@ -366,7 +384,9 @@ class _ProxyObjectPipeLock:
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.lock.release()
 
-threading_lock_type = type(threading.Lock()) # Used for typechecking
+
+threading_lock_type = type(threading.Lock())  # Used for typechecking
+
 
 def _get_list_and_lock(resource):
     """Convenience function.
@@ -378,11 +398,12 @@ def _get_list_and_lock(resource):
     if isinstance(resource, ProxyObject):
         waiting_list = resource._.waiting_list.waiting_list
         waiting_list_lock = resource._.waiting_list.waiting_list_lock
-    else: # Either a _WaitingList, or a good enough impression
+    else:  # Either a _WaitingList, or a good enough impression
         waiting_list = resource.waiting_list
         waiting_list_lock = resource.waiting_list_lock
     assert isinstance(waiting_list_lock, threading_lock_type)
     return waiting_list, waiting_list_lock
+
 
 def launch_custody_thread(target, first_resource=None, args=(), kwargs=None):
     """A thin wrapper around threading.Thread(), useful for ProxyObjects
@@ -400,8 +421,9 @@ def launch_custody_thread(target, first_resource=None, args=(), kwargs=None):
     expected to call custody.switch_from(None, first_resource) almost
     immediately (waiting in line until the shared resource is available).
     """
-    if kwargs is None: kwargs = {}
-    custody = _Custody() # Useful for synchronization in the launched thread
+    if kwargs is None:
+        kwargs = {}
+    custody = _Custody()  # Useful for synchronization in the launched thread
     if first_resource is not None:
         # Get in line for custody of the first resource the launched
         # thread will use, but don't *wait* in that line; the launched
@@ -411,6 +433,7 @@ def launch_custody_thread(target, first_resource=None, args=(), kwargs=None):
     thread = launch_thread(target, args, kwargs)
     thread.custody = custody
     return thread
+
 
 def launch_thread(target, args=(), kwargs=None):
     """A thin wrapper around thread.Thread(), useful for ProxyObjects.
@@ -428,20 +451,22 @@ def launch_thread(target, args=(), kwargs=None):
     exception when 'join' is called to detect if an error occoured in the
     threaded process.
     """
-    if kwargs is None: kwargs = {}
+    if kwargs is None:
+        kwargs = {}
     thread = _RaiseOnJoinThread(target=target, args=args, kwargs=kwargs)
     try:
         thread.start()
     except RuntimeError as e:
         if e.args == ("can't start new thread",):
-            print('*'*80)
+            print('*' * 80)
             print('Failed to launch a custody thread.')
             print(threading.active_count(), 'threads are currently active.')
             print('You might have reached a limit of your system;')
             print('let some of your threads finish before launching more.')
-            print('*'*80)
+            print('*' * 80)
         raise
     return thread
+
 
 class _Custody:
     def __init__(self):
@@ -466,16 +491,17 @@ class _Custody:
         assert resource is not None or to is not None
         if to is not None:
             to_waiting_list, to_waiting_list_lock = _get_list_and_lock(to)
-            with to_waiting_list_lock: # Get in the line for the next lock...
-                if self not in to_waiting_list: # ...unless you're already in it
+            with to_waiting_list_lock:  # Get in the line for the next lock...
+                if self not in to_waiting_list:  # ...unless you're already in it
                     to_waiting_list.append(self)
         if resource is not None:
             assert self.has_custody
             waiting_list, waiting_list_lock = _get_list_and_lock(resource)
             with waiting_list_lock:
-                waiting_list.pop(0) # Remove ourselves from the current line
-                if len(waiting_list) > 0: # If anyone's next...
-                    waiting_list[0].permission_slip.release() # ...wake them up
+                waiting_list.pop(0)  # Remove ourselves from the current line
+                if len(waiting_list) > 0:  # If anyone's next...
+                    # ...wake them up
+                    waiting_list[0].permission_slip.release()
         self.has_custody = False
         self.target_resource = to
         if wait and self.target_resource is not None:
@@ -510,9 +536,10 @@ class _Custody:
             return
         # Wait for your number to be called
         if self is waiting_list[0] and self.permission_slip.locked():
-            self.permission_slip.release() # We arrived to an empty waiting list
-        self.permission_slip.acquire() # Blocks if we're not first in line
+            self.permission_slip.release()  # We arrived to an empty waiting list
+        self.permission_slip.acquire()  # Blocks if we're not first in line
         self.has_custody = True
+
 
 class _SharedNumpyArray(np.ndarray):
     """A numpy array that lives in shared memory
@@ -571,7 +598,7 @@ class _SharedNumpyArray(np.ndarray):
         assert buffer in range(len(arrays)), f'Invalid buffer: <{buffer}>'
         requested_bytes = np.prod(shape, dtype='uint64') * dtype.itemsize
         if requested_bytes > len(arrays[buffer]):
-            raise ValueError("Multiprocessing shared memory array is too "+
+            raise ValueError("Multiprocessing shared memory array is too " +
                              "small to hold the requested Numpy array.\n " +
                              f"{requested_bytes} > {len(arrays[buffer])}")
         obj = super(_SharedNumpyArray, cls).__new__(cls, shape, dtype,
@@ -581,7 +608,8 @@ class _SharedNumpyArray(np.ndarray):
         return obj
 
     def __array_finalize__(self, obj):
-        if obj is None: return
+        if obj is None:
+            return
         self.offset = (
             self.__array_interface__['data'][0] -
             obj.__array_interface__['data'][0])
@@ -600,8 +628,10 @@ class _SharedNumpyArray(np.ndarray):
                                      strides=self.strides,
                                      order=None)
 
+
 class _SharedNumpyArrayStub():
     """Suitable for cheaply passing through pipes to other processes"""
+
     def __init__(self, shape=None, dtype=float, buffer=None, offset=0,
                  strides=None, order=None):
         if shape is None:
@@ -621,6 +651,7 @@ class _SharedNumpyArrayStub():
         return _SharedNumpyArray(arrays, self.shape, self.dtype, self.buffer,
                                  self.offset, self.strides, self.order)
 
+
 def _disconnect_shared_arrays(args, kwargs):
     """Replaces _SharedNumpyArrays in 'args' and 'kwargs' with new stubs
     """
@@ -631,6 +662,7 @@ def _disconnect_shared_arrays(args, kwargs):
               if isinstance(v, _SharedNumpyArray) else v
               for k, v in kwargs.items()}
     return args, kwargs
+
 
 def _reconnect_shared_arrays(args, kwargs, shared_arrays):
     """Replaces stubs in 'args' and 'kwargs' with new _SharedNumpyArrays
@@ -647,6 +679,8 @@ def _reconnect_shared_arrays(args, kwargs, shared_arrays):
 # process, we'd like the parent to print the child traceback. Overriding
 # sys.excepthook and threading.excepthook seems to be the standard way
 # to do this:
+
+
 def _try_to_print_child_traceback(v):
     if hasattr(v, 'child_traceback_string'):
         print(f'{" Child Process Traceback ":v^79s}\n',
@@ -654,13 +688,16 @@ def _try_to_print_child_traceback(v):
               f'{" Child Process Traceback ":^^79s}\n',
               f'{" Main Process Traceback ":v^79s}')
 
+
 def _my_excepthook(t, v, tb):
     """Show a traceback when a child exception isn't handled by the parent.
     """
     _try_to_print_child_traceback(v)
     return sys.__excepthook__(t, v, tb)
 
+
 sys.excepthook = _my_excepthook
+
 
 class _RaiseOnJoinThread(threading.Thread):
     def join(self):
@@ -668,7 +705,9 @@ class _RaiseOnJoinThread(threading.Thread):
         if hasattr(self, 'exc_value'):
             raise self.exc_value
 
+
 _original_threading_excepthook = threading.excepthook
+
 
 def _my_threading_excepthook(args):
     """Show a traceback when a child exception isn't handled by the parent.
@@ -680,6 +719,7 @@ def _my_threading_excepthook(args):
     else:
         _try_to_print_child_traceback(args.exc_value)
     return _original_threading_excepthook(args)
+
 
 threading.excepthook = _my_threading_excepthook
 
@@ -695,6 +735,8 @@ if mp.get_start_method(allow_none=True) != 'spawn':
     mp.set_start_method('spawn')
 
 # Testing block.
+
+
 class _Tests():
     '''
     Method names that start with `test_` will be run.
@@ -722,7 +764,7 @@ class _Tests():
         def test_shared_numpy_input(self, shared_numpy_array):
             return shared_numpy_array.shape
 
-        def test_shared_numpy_return(self, shape=(5,5)):
+        def test_shared_numpy_return(self, shape=(5, 5)):
             return _SharedNumpyArray(shape=shape)
 
         def test_modify_array(self, a):
@@ -759,21 +801,21 @@ class _Tests():
             self._trial_slicing_of_shared_array(pm)
 
     def _trial_slicing_of_shared_array(self, pm):
-        ri = np.random.randint # Just to get short lines
+        ri = np.random.randint  # Just to get short lines
         dtype = np.dtype(np.random.choice(
             [np.uint16, np.uint8, float, np.float32, np.float64]))
         original_dimensions = tuple(
             ri(2, 100) for d in range(ri(2, 5)))
         slicer = tuple(
             slice(
-                ri(0, a//2),
-                ri(0, a//2)*-1,
+                ri(0, a // 2),
+                ri(0, a // 2) * -1,
                 ri(1, min(6, a))
-                )
+            )
             for a in original_dimensions)
         a = pm.shared_numpy_array(0, shape=original_dimensions, dtype=dtype)
         a.fill(0)
-        b = a[slicer] ## should be a view
+        b = a[slicer]  # should be a view
         b.fill(1)
         expected_total = int(b.sum())
         reloaded_total = b._disconnect()._reconnect(pm.shared_mp_arrays).sum()
@@ -783,7 +825,7 @@ class _Tests():
     def test_passing_normal_numpy_array(self):
         shape = (10, 10)
         dtype = int
-        sz = int(np.prod(shape, dtype='uint64')*np.dtype(int).itemsize)
+        sz = int(np.prod(shape, dtype='uint64') * np.dtype(int).itemsize)
         pm = ProxyManager((sz, sz))
         a = np.zeros(shape, dtype)
         object_with_shared_memory = pm.proxy_object(_Tests.TestClass)
@@ -792,7 +834,7 @@ class _Tests():
     def test_passing_retrieving_shared_array(self):
         shape = (10, 10)
         dtype = int
-        sz = int(np.prod(shape, dtype='uint64')*np.dtype(int).itemsize)
+        sz = int(np.prod(shape, dtype='uint64') * np.dtype(int).itemsize)
         pm = ProxyManager((sz, sz))
         object_with_shared_memory = pm.proxy_object(_Tests.TestClass)
         a = pm.shared_numpy_array(which_mp_array=0, shape=shape, dtype=dtype)
@@ -805,7 +847,7 @@ class _Tests():
         a = ProxyObject(_Tests.TestClass, 'attribute', x=4,)
         try:
             a.z
-        except AttributeError as e: # Get __this__ specific error
+        except AttributeError as e:  # Get __this__ specific error
             print("Attribute error handled by parent process:\n ", e)
 
     def test_printing_in_child_process(self):
@@ -842,7 +884,7 @@ class _Tests():
         t = self.time_it(
             n_loops, lambda: a.x, timeout_us=100, name='Attribute access')
         print(f" {t:.2f} \u03BCs per get-attribute.")
-        a.x = 4 ## test set attribute with normal syntax
+        a.x = 4  # test set attribute with normal syntax
         t = self.time_it(n_loops, lambda: setattr(a, 'x', 5),
                          timeout_us=100, name='Attribute setting')
         print(f" {t:.2f} \u03BCs per set-attribute.")
@@ -863,7 +905,7 @@ class _Tests():
 
     def _test_array_passing(self, pass_by, method_name, shape, dtype, n_loops):
         dtype = np.dtype(dtype)
-        sz = int(np.prod(shape, dtype='uint64')*np.dtype(int).itemsize)
+        sz = int(np.prod(shape, dtype='uint64') * np.dtype(int).itemsize)
         pm = ProxyManager((sz, sz))
         direction = '<->' if method_name == 'test_modify_array' else '->'
         name = f'{shape} array {direction} {pass_by}'
@@ -884,36 +926,45 @@ class _Tests():
         try:
             from tqdm import tqdm
         except ImportError:
-            tqdm = None # No progress bars :(
+            tqdm = None  # No progress bars :(
 
         camera_lock = _WaitingList()
         display_lock = _WaitingList()
 
         def snap(i, custody):
-            if not tqdm is None: pbars['camera'].update(1)
-            if not tqdm is None: pbars['camera'].refresh()
-            # We're already in line for the camera; wait until you're first in line
+            if tqdm is not None:
+                pbars['camera'].update(1)
+            if tqdm is not None:
+                pbars['camera'].refresh()
+            # We're already in line for the camera; wait until you're first in
+            # line
             custody.switch_from(None, camera_lock)
             # Use the resource
             time.sleep(0.02)
             order['camera'].append(i)
-            if not tqdm is None: pbars['camera'].update(-1)
-            if not tqdm is None: pbars['display'].update(1)
-            if not tqdm is None: pbars['camera'].refresh()
-            if not tqdm is None: pbars['display'].refresh()
+            if tqdm is not None:
+                pbars['camera'].update(-1)
+            if tqdm is not None:
+                pbars['display'].update(1)
+            if tqdm is not None:
+                pbars['camera'].refresh()
+            if tqdm is not None:
+                pbars['display'].refresh()
             custody.switch_from(camera_lock, display_lock)
             # Use the resource
             time.sleep(0.05)
             order['display'].append(i)
             # Move to the next resource
             custody.switch_from(display_lock, None)
-            if not tqdm is None: pbars['display'].update(-1)
-            if not tqdm is None: pbars['display'].refresh()
+            if tqdm is not None:
+                pbars['display'].update(-1)
+            if tqdm is not None:
+                pbars['display'].refresh()
             return None
 
         num_snaps = 100
         order = {'camera': [], 'display': []}
-        if not tqdm is None:
+        if tqdm is not None:
             f = '{desc: <30}{n: 3d}-{bar:45}|'
             pbars = {n: tqdm(total=num_snaps, unit='th',
                              bar_format=f, desc=f'Threads waiting on {n}')
@@ -924,8 +975,9 @@ class _Tests():
         for th in threads:
             th.join()
 
-        if not tqdm is None:
-            for pb in pbars.values(): pb.close()
+        if tqdm is not None:
+            for pb in pbars.values():
+                pb.close()
 
         assert order['camera'] == list(range(num_snaps))
         assert order['display'] == list(range(num_snaps))
@@ -935,10 +987,11 @@ class _Tests():
         p = ProxyObject(_Tests.TestClass)
         p.x = 5
         exceptions = [1]
+
         def t():
             try:
                 p.x
-            except RuntimeError: ## Should raise this
+            except RuntimeError:  # Should raise this
                 pass
             else:
                 exceptions.append(1)
@@ -953,27 +1006,27 @@ class _Tests():
         try:
             from tqdm import tqdm
         except ImportError:
-            tqdm = None ## No progress bars :(
+            tqdm = None  # No progress bars :(
 
         def snap(i, custody):
             prev_res = None
             itr = enumerate(zip(resources, res_names, funcs))
             for ri, (res, name, resource_funcs) in itr:
-                if not tqdm is None:
-                    pbars[name].update(1) # Be careful to access the resource
-                    pbars[name].refresh() # before you have control of it.
+                if tqdm is not None:
+                    pbars[name].update(1)  # Be careful to access the resource
+                    pbars[name].refresh()  # before you have control of it.
                 custody.switch_from(prev_res, res)
                 for fname in resource_funcs:
                     a = getattr(res, fname)(i)
                 results[i].append(a)
                 acq_order[res.name].append(i)
-                if not tqdm is None:
+                if tqdm is not None:
                     pbars[res.name].update(-1)
                     pbars[res.name].refresh()
                 prev_res = res
             custody.switch_from(res, None)
 
-        NUM_STEPS = 4 # matches the number of steps for check results.
+        NUM_STEPS = 4  # matches the number of steps for check results.
         num_snaps = 30  # Number of threads to start
 
         # Create proxy objects of resources to use.
@@ -985,17 +1038,17 @@ class _Tests():
         disk = ProxyObject(_DummyFileSaver, name='disk')
         resources = [camera, processor, display, disk]
         res_names = [str(r.name) for r in resources]
-        acq_order = {r.name:[] for r in resources}
+        acq_order = {r.name: [] for r in resources}
         results = [[] for i in range(num_snaps)]
-        funcs = [('record',), # methods to call for camera
-                 ('process', ), # methods to call for processor
-                 ('display', ), # methods to call for display
-                 ('save', ) # methods to call for for disk.
-            ]
-        if not tqdm is None:
+        funcs = [('record',),  # methods to call for camera
+                 ('process', ),  # methods to call for processor
+                 ('display', ),  # methods to call for display
+                 ('save', )  # methods to call for for disk.
+                 ]
+        if tqdm is not None:
             f = '{desc: <30}{n: 3d}-{bar:45}|'
             pbars = {n: tqdm(total=num_snaps, unit='th',
-                              bar_format=f, desc=f'Threads waiting on {n}')
+                             bar_format=f, desc=f'Threads waiting on {n}')
                      for n in acq_order.keys()}
         threads = []
         for i in range(num_snaps):
@@ -1003,12 +1056,13 @@ class _Tests():
         for th in threads:
             th.join()
 
-        if not tqdm is None:
-            for pb in pbars.values(): pb.close()
+        if tqdm is not None:
+            for pb in pbars.values():
+                pb.close()
 
         # Check results
         for i, a in enumerate(results):
-            assert sum(a) == NUM_STEPS*i, f'{i}-{a}'
+            assert sum(a) == NUM_STEPS * i, f'{i}-{a}'
         for r, th_o in acq_order.items():
             assert sorted(th_o) == th_o,\
                 f'Resource `{r}` was used out of order! -- {th_o}'
@@ -1019,7 +1073,6 @@ class _Tests():
         for i, t in enumerate(tests):
             self._run_single_test(i, t)
         self._summarize_results()
-
 
     def _run_single_test(self, i, t):
         printed_output = io.StringIO()
@@ -1036,9 +1089,9 @@ class _Tests():
                     f' Did not match expected output:\n'\
                     f'     "{repr(expected_output)}"\n'
         except Exception as e:
-            print('v'*80)
+            print('v' * 80)
             print(traceback.format_exc().strip('\n'))
-            print('^'*80)
+            print('^' * 80)
         else:
             self.passed += 1
             if printed_output.getvalue():
@@ -1048,14 +1101,13 @@ class _Tests():
 
     def _summarize_results(self):
         fill = '#' if self.passed == self.tests else '!'
-        print(f'{fill}'*80)
+        print(f'{fill}' * 80)
         message = f"Completed Tests -- passed {self.passed} of {self.tests}"
         if fill == "#":
             print(f'{f"  {message}  ":#^80s}')
         else:
             print(f'{f"  {message}  ":!^80s}')
-        print(f'{fill}'*80)
-
+        print(f'{fill}' * 80)
 
     def time_it(self, n_loops, func, args=None, kwargs=None, fail=True,
                 timeout_us=None, name=None):
@@ -1063,7 +1115,7 @@ class _Tests():
         try:
             from tqdm import tqdm
         except ImportError:
-            tqdm = None ## No progress bars :(
+            tqdm = None  # No progress bars :(
 
         start = time.perf_counter()
         if args is None:
@@ -1074,7 +1126,8 @@ class _Tests():
             f = '{desc: <38}{n: 7d}-{bar:17}|[{rate_fmt}]'
             pb = tqdm(total=n_loops, desc=name, bar_format=f)
         for i in range(n_loops):
-            if tqdm is not None: pb.update(1)
+            if tqdm is not None:
+                pb.update(1)
             try:
                 func(*args, **kwargs)
             except Exception as e:
@@ -1082,9 +1135,10 @@ class _Tests():
                     raise e
                 else:
                     pass
-        if not tqdm is None: pb.close()
+        if tqdm is not None:
+            pb.close()
         end = time.perf_counter()
-        time_per_loop_us = ((end-start) / n_loops)*1e6
+        time_per_loop_us = ((end - start) / n_loops) * 1e6
 
         if timeout_us is not None:
             if time_per_loop_us > timeout_us:
@@ -1097,10 +1151,13 @@ class _Tests():
                     f' (Allowed: {timeout_us:.2f} \u03BCs)')
         return time_per_loop_us
 
-### TODO: Remove these if I can....
+# TODO: Remove these if I can....
+
+
 class _DummyObject:
     def __init__(self, name='generic_dummy_obj'):
-        self.name=name
+        self.name = name
+
 
 class _DummyCamera(_DummyObject):
     def record(self, a):
@@ -1108,11 +1165,13 @@ class _DummyCamera(_DummyObject):
         time.sleep(.05)
         return a
 
+
 class _DummyProcessor(_DummyObject):
     def process(self, a):
         import time
         time.sleep(.2)
         return a
+
 
 class _DummyGUI(_DummyObject):
     def display(self, a):
@@ -1120,11 +1179,13 @@ class _DummyGUI(_DummyObject):
         time.sleep(.002)
         return a
 
+
 class _DummyFileSaver(_DummyObject):
     def save(self, a):
         import time
         time.sleep(.3)
         return a
+
 
 if __name__ == '__main__':
     test_prefix = 'test_proxy_with_lock_with_waitlist'

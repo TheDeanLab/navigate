@@ -1,10 +1,10 @@
 # Think of tkinter as HTML, ttk as CSS, and Python as javascript
 '''
-A main window is created and passed to the mainapp class. This class will init as a frame then config the main window. It then 
+A main window is created and passed to the mainapp class. This class will init as a frame then config the main window. It then
 creates a menubar using the menubar class. Adds the options for each file menu. It then sets up the frames, then grids the frames.
-Finally it uses the notebook classes to put them into the respective frames on the grid. Each of the notebook classes includes tab 
+Finally it uses the notebook classes to put them into the respective frames on the grid. Each of the notebook classes includes tab
 classes and inits those etc. The second parameter in each classes __init__ function is the parent. I used the name of the parent
-so that it would be easier to keep track of inheritances. Once you have the parent name you can look to the parents class in the 
+so that it would be easier to keep track of inheritances. Once you have the parent name you can look to the parents class in the
 class definition. For example for class Main_App(ttk.Frame) the parent to Main_App is a frame and its name is root. I also used
 the name of the class instead of self to make things easier to read. So for Main_App self is now mainapp.
 '''
@@ -23,18 +23,22 @@ from .main_window_content.acquire_bar_frame.acquire_bar import AcquireBar
 from .main_window_content.menus import menubar
 
 
-# Creates the frame that will hold the GUI content, its parent is the main window or root Tk object
+# Creates the frame that will hold the GUI content, its parent is the main
+# window or root Tk object
 class Main_App(ttk.Frame):
-    # Takes a Tk object should be something like root = Tk() then root_window(root)
+    # Takes a Tk object should be something like root = Tk() then
+    # root_window(root)
 
     def __init__(mainapp, root, *args, **kwargs):
         # Inits this class as a frame subclass with the root as its parent
         ttk.Frame.__init__(mainapp, root, *args, **kwargs)
 
-        # This starts the main window config, and makes sure that any child widgets can be resized with the window
+        # This starts the main window config, and makes sure that any child
+        # widgets can be resized with the window
         mainapp.root = root
         mainapp.root.title("Axially Swept Light-Sheet Microscope")
-        view_directory = Path(__file__).resolve().parent  # keep icons relative to view directory structure
+        # keep icons relative to view directory structure
+        view_directory = Path(__file__).resolve().parent
         photo_image = view_directory.joinpath("icon", "mic.png")
         mainapp.root.iconphoto(True, PhotoImage(file=photo_image))
         mainapp.root.minsize(1400, 700)
@@ -65,13 +69,13 @@ class Main_App(ttk.Frame):
         # mainapp.bottom_right_frame_label.grid(row=0,column=0)
 
         '''
-                Placing the notebooks using grid. While the grid is called on each frame it is actually calling 
+                Placing the notebooks using grid. While the grid is called on each frame it is actually calling
                 the main window since those are the parent to the frames. The labels have already been packed into each respective
-                frame so can be ignored in the grid setup. This layout uses a 2x2 grid to start. 
+                frame so can be ignored in the grid setup. This layout uses a 2x2 grid to start.
 
                         1   2
                         3   4
-                        5   6 
+                        5   6
 
                 The above is the grid "spots" the left frame will take spots 3 & 5 while top right takes
                 spot 4 and bottom right frame takes spot 6. Top frame will be spots 1 & 2
@@ -92,7 +96,8 @@ class Main_App(ttk.Frame):
         # notebooks to help modularize the code
         mainapp.columnconfigure(0,
                                 weight=1)
-        # can add an arg called min or max size to give starting point for each frame
+        # can add an arg called min or max size to give starting point for each
+        # frame
         mainapp.columnconfigure(1,
                                 weight=1)
         # weights are relative to each other so if there is a 3 and 1 the 3 weight
@@ -100,10 +105,13 @@ class Main_App(ttk.Frame):
         mainapp.rowconfigure(0, weight=1)
         mainapp.rowconfigure(1, weight=1)
 
-        # Putting Notebooks into frames, tabs are held within the class of each notebook
+        # Putting Notebooks into frames, tabs are held within the class of each
+        # notebook
         mainapp.settings = settings_notebook(mainapp.frame_left)
-        mainapp.camera_waveform = camera_waveform_notebook(mainapp.frame_top_right)
-        mainapp.stage_control = stagecontrol_maxintensity_notebook(mainapp.frame_bottom_right)
+        mainapp.camera_waveform = camera_waveform_notebook(
+            mainapp.frame_top_right)
+        mainapp.stage_control = stagecontrol_maxintensity_notebook(
+            mainapp.frame_bottom_right)
         mainapp.acqbar = AcquireBar(mainapp.top_frame, mainapp.root)
 
 

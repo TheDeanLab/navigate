@@ -5,8 +5,11 @@ This is the controller in an MVC-scheme for mediating the interaction between th
 #  Standard Library Imports
 from pathlib import Path
 import tkinter
-import threading
+import platform
 import multiprocessing as mp
+
+# Third Party Imports
+import numpy as np
 
 # Local View Imports
 from tkinter import filedialog
@@ -28,7 +31,6 @@ from controller.thread_pool import SynchronizedThreadPool
 from view.remote_focus_popup import remote_popup
 
 # Local Model Imports
-from model.concurrency.concurrency_tools import ObjectInSubprocess, SharedNDArray
 from model.aslm_model import Model
 from model.aslm_model_config import Session as session
 
@@ -50,10 +52,17 @@ class ASLM_controller:
         self.threads_pool = SynchronizedThreadPool()
 
         # Initialize the Model
-        self.model = ObjectInSubprocess(Model, args,
-                                        configuration_path=configuration_path,
-                                        experiment_path=experiment_path,
-                                        etl_constants_path=etl_constants_path)
+        if platform.system() == 'Darwin':
+            self.model = Model(args,
+                               configuration_path,
+                               experiment_path,
+                               etl_constants_path)
+        else:
+            from model.concurrency.concurrency_tools import ObjectInSubprocess, SharedNDArray
+            self.model = ObjectInSubprocess(Model, args,
+                                            configuration_path=configuration_path,
+                                            experiment_path=experiment_path,
+                                            etl_constants_path=etl_constants_path)
 
         # save default experiment file
         self.default_experiment_file = experiment_path
@@ -133,12 +142,15 @@ class ASLM_controller:
         # data buffer
         # TODO: Update if changes in the buffer size or image size occur.
         # self.data_buffer = [SharedNDArray(shape=(self.model.camera.y_pixels, self.model.camera.x_pixels), dtype='uint16') for i in range(NUM_OF_FRAMES)]
-        self.data_buffer = [
-            SharedNDArray(
-                shape=(
-                    2048,
-                    2048),
-                dtype='uint16') for i in range(NUM_OF_FRAMES)]
+        if platform.system() != 'Darwin':
+            self.data_buffer = [
+                SharedNDArray(
+                    shape=(
+                        2048,
+                        2048),
+                    dtype='uint16') for i in range(NUM_OF_FRAMES)]
+        else:
+            self.data_buffer = np.array((NUM_OF_FRAMES, 2048, 2048))
         self.model.set_data_buffer(self.data_buffer)
 
     def initialize_cam_view(self, configuration_controller):

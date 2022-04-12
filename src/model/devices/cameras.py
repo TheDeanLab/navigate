@@ -1,12 +1,14 @@
 # Standard Library Imports
 import time
 import ctypes
+import platform
 
 # Third Party Imports
 import numpy as np
 
 # Local Imports
-from model.devices.APIs.hamamatsu.HamamatsuAPI import DCAM as HamamatsuController
+if platform.system() != 'Darwin':
+    from model.devices.APIs.hamamatsu.HamamatsuAPI import DCAM as HamamatsuController
 
 
 class CameraBase:

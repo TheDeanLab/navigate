@@ -2,7 +2,7 @@
 import time
 import os
 import threading
-import ctypes
+import platform
 
 # Third Party Imports
 import numpy as np
@@ -13,7 +13,7 @@ from .aslm_model_config import Session as session
 from controller.thread_pool import SynchronizedThreadPool
 from tifffile import imsave
 
-from model.concurrency.concurrency_tools import ResultThread, SharedNDArray, ObjectInSubprocess
+
 
 NUM_OF_FRAMES = 100
 
@@ -38,9 +38,10 @@ class Model:
         self.etl_constants = session(etl_constants_path, args.verbose)
 
         # Initialize all Hardware
-        if args.synthetic_hardware or args.sh:
+        if args.synthetic_hardware or args.sh or platform.system() == 'Darwin':
             # If command line entry provided, overwrites the model parameters
-            # with synthetic hardware
+            # with synthetic hardware.
+            print("Synthetic Zoom!")
             self.configuration.Devices['daq'] = 'SyntheticDAQ'
             self.configuration.Devices['camera'] = 'SyntheticCamera'
             self.configuration.Devices['etl'] = 'SyntheticETL'
@@ -50,39 +51,47 @@ class Model:
             self.configuration.Devices['shutters'] = 'SyntheticShutter'
             self.configuration.Devices['lasers'] = 'SyntheticLasers'
 
-        # Move device initialization steps to multiple threads
-        threads_dict = {
-            'filter_wheel': ResultThread(target=start_filter_wheel,
-                                         args=(self.configuration, self.verbose)).start(),
-            'zoom': ResultThread(target=start_zoom_servo,
-                                 args=(self.configuration, self.verbose)).start(),
-            'camera': ResultThread(target=start_camera,
-                                   args=(self.configuration, self.experiment, self.verbose,)).start(),
-            'stages': ResultThread(target=start_stages,
-                                   args=(self.configuration, self.verbose,)).start(),
-            'shutter': ResultThread(target=start_shutters,
-                                    args=(self.configuration, self.experiment, self.verbose,)).start(),
-            'daq': ResultThread(target=start_daq,
-                                args=(self.configuration, self.experiment, self.etl_constants, self.verbose,)).start(),
-            'laser_triggers': ResultThread(target=start_laser_triggers,
-                                           args=(self.configuration, self.experiment, self.verbose,)).start(),
-            # 'etl': ResultThread(target=start_etl, args=(self.configuration, self.verbose,)).start()
-        }
-        for k in threads_dict:
-            if k != 'serial_devices':
-                setattr(self, k, threads_dict[k].get_result())
-            else:
-                threads_dict[k].get_result()
+        if platform.system() != 'Darwin':
+            from model.concurrency.concurrency_tools import ResultThread, SharedNDArray, ObjectInSubprocess
+
+            # Move device initialization steps to multiple threads
+            threads_dict = {
+                'filter_wheel': ResultThread(target=start_filter_wheel,
+                                             args=(self.configuration, self.verbose)).start(),
+                'zoom': ResultThread(target=start_zoom_servo,
+                                     args=(self.configuration, self.verbose)).start(),
+                'camera': ResultThread(target=start_camera,
+                                       args=(self.configuration, self.experiment, self.verbose,)).start(),
+                'stages': ResultThread(target=start_stages,
+                                       args=(self.configuration, self.verbose,)).start(),
+                'shutter': ResultThread(target=start_shutters,
+                                        args=(self.configuration, self.experiment, self.verbose,)).start(),
+                'daq': ResultThread(target=start_daq,
+                                    args=(self.configuration, self.experiment, self.etl_constants, self.verbose,)).start(),
+                'laser_triggers': ResultThread(target=start_laser_triggers,
+                                               args=(self.configuration, self.experiment, self.verbose,)).start(),
+                # 'etl': ResultThread(target=start_etl, args=(self.configuration, self.verbose,)).start()
+            }
+
+            for k in threads_dict:
+                if k != 'serial_devices':
+                    setattr(self, k, threads_dict[k].get_result())
+                else:
+                    threads_dict[k].get_result()
+
+        else:
+            # For evaluation on Mac-based systems that do not support SharedNDArrays.
+            self.filter_wheel = start_filter_wheel(self.configuration, self.verbose)
+            self.zoom = start_zoom_servo(self.configuration, self.verbose)
+            self.camera = start_camera(self.configuration, self.experiment, self.verbose)
+            self.stages = start_stages(self.configuration, self.verbose)
+            self.shutter = start_shutters(self.configuration, self.experiment, self.verbose)
+            self.daq = start_daq(self.configuration, self.experiment, self.etl_constants, self.verbose)
+            self.laser_triggers = start_laser_triggers(self.configuration, self.experiment, self.verbose)
 
         # in synthetic_hardware mode, we need to wire up camera to daq
-        # TODO: Confirm that I did not mess this up.
         if args.synthetic_hardware:
             self.daq.set_camera(self.camera)
-
-        # Set Default Camera Settings
-        # self.camera.dev_open(0)
-        # # self.camera.dcam_set_default_light_sheet_mode_parameters()
-        # self.camera.dcam_set_default_area_mode_parameters()
 
         # Acquisition Housekeeping
         self.threads_pool = SynchronizedThreadPool()
@@ -103,7 +112,7 @@ class Model:
 
         # data buffer
         self.data_buffer = None
-        # self.data_buffer = [SharedNDArray(shape=(self.camera.y_pixels, self.camera.x_pixels), dtype='uint16') for i in range(NUM_OF_FRAMES)]
+
         # show image function/pipe handler
         self.show_img_pipe = None
 

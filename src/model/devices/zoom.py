@@ -4,11 +4,13 @@ Parent class for controlling a discrete zoom changer
 
 # Standard Library Imports
 import time
+import platform
 
 # Third Party Imports
+if platform.system() != 'Darwin':
+    from model.devices.APIs.dynamixel import dynamixel_functions as dynamixel
 
 # Local Imports
-from model.devices.APIs.dynamixel import dynamixel_functions as dynamixel
 
 
 class ZoomBase:

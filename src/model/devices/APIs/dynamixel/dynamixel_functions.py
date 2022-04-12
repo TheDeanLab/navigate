@@ -22,19 +22,28 @@
 import ctypes
 from ctypes import cdll
 from pathlib import Path
+import sys
+import platform
 
-'''String for loading path name, will be machine independent by using relative path of cwd(directory file is running from) 
-then adding what file we want to config with.  Original path was as follows:
-#dxl_lib = cdll.LoadLibrary("C:/Users/Spectral/Documents/GitHub/multiscale_microscope/base/1.0.0/src/devices/zoom/dynamixel/dxl_x64_c.dll")
-'''
+is_64bits = sys.maxsize > 2**32
+if platform.system() == 'Darwin':
+    dxl_config = (str(Path(__file__).resolve().parent) + '/libdxl_mac_c.dylib').replace('\\', '/')
+elif platform.system() == 'Windows':
+    if is_64bits:
+        dxl_config = (str(Path(__file__).resolve().parent) + '/dxl_x64_c.dll').replace('\\', '/')
+    else:
+        dxl_config = (str(Path(__file__).resolve().parent) + '/dxl_x86_c.dll').replace('\\', '/')
+elif platform.system() == 'Linux':
+    if is_64bits:
+        dxl_config = (str(Path(__file__).resolve().parent) + '/libdxl_x64_c.so').replace('\\', '/')
+    else:
+        dxl_config = (str(Path(__file__).resolve().parent) + '/libdxl_x86_c.so').replace('\\', '/')
 
-dxl_config = (str(Path(__file__).resolve().parent) + '/dxl_x64_c.dll').replace('\\','/')
-print("DXL Path: ", dxl_config)
 if Path(dxl_config).exists():
     dxl_lib = cdll.LoadLibrary(dxl_config)
     print("ROBOTIS dll Loaded")
 else:
-    print("Error dxl_x64_c.dll failed to load properly.")
+    print("Error Dynamixel DLL to Failed to Load Properly.")
 
 # port_handler
 portHandler = dxl_lib.portHandler

@@ -1,20 +1,20 @@
-# import unittest
-from PIL import Image
-import matplotlib.pyplot as plt
+# Standard Library Imports
+import unittest
 import sys
 
-# sys.path.append('../../../src/model/analysis')
-# from detection import add_median_border
+# Third Party Imports
+import numpy as np
 
-# class TestDetection(unittest.TestCase):
-class TestDetection:
+# Local Imports
+sys.path.append('../../../')
+from src.model.analysis.detection import add_median_border
+
+class TestDetection(unittest.TestCase):
     def test_add_median_border(self):
-        # test_data = Image.open('https://samples.fiji.sc/blobs.png')
-        data = np.zeros(50)
-        # plt.plot(smooth_waveform(tunable_lens_ramp(), 10))
-        plt.plot(data)
-        plt.show()
+        data = np.zeros((50, 50, 50))
+        test_output = add_median_border(data)
+        print("Data Shape:", np.shape(test_output))
+        self.assertEqual(np.shape(test_output), (52, 52, 52))
 
 if (__name__ == "__main__"):
-
-    TestDetection.test_add_median_border()
+    unittest.main()

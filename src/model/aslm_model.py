@@ -140,11 +140,17 @@ class Model:
         """
         if self.verbose:
             print('in the model(get the command from controller):', command, args)
-
-        if not self.data_buffer:
-            if self.verbose:
-                print('Error: have not set up data buffer!')
+        if platform.system() == 'Darwin':
+            # Must account for the numpy generated data_buffer for Mac devices.
+            if not self.data_buffer.any():
+                if self.verbose:
+                    print("Error: The Data Buffer Has Not Been Set Up.")
             return
+        else:
+            if not self.data_buffer:
+                if self.verbose:
+                    print("Error: The Shared Memory Buffer Has Not Been Set Up.")
+                return
 
         if command == 'single':
             """

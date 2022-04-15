@@ -289,10 +289,11 @@ class ASLM_controller:
         # This function will update model.experiment according values in the View(GUI)
         """
 
-        # acquire_bar_controller
-        # update image mode
-        self.experiment.MicroscopeState['image_mode'] = self.acquire_bar_controller.get_mode(
-        )
+        # acquire_bar_controller - update image mode
+        self.experiment.MicroscopeState['image_mode'] = self.acquire_bar_controller.get_mode()
+
+        # Camera Setting Controller
+        self.camera_setting_controller.update_experiment_values()
 
         # camera_view_controller
 
@@ -399,18 +400,20 @@ class ASLM_controller:
             settings = args[0]
             for k in settings:
                 self.experiment.MicroscopeState[k] = settings[k]
-            print('in continuous mode:the stack acquisition setting is changed')
-            print('you could get the new setting from model.experiment')
-            print('you could also get the changes from args')
-            print(self.experiment.MicroscopeState)
+            if self.verbose:
+                print('in continuous mode:the stack acquisition setting is changed')
+                print('you could get the new setting from model.experiment')
+                print('you could also get the changes from args')
+                print(self.experiment.MicroscopeState)
             pass
 
         elif command == 'laser_cycling':
             self.experiment.MicroscopeState['stack_cycling_mode'] = args[0]
-            print('in continuous mode:the laser cycling setting is changed')
-            print('you could get the new setting from model.experiment')
-            print('you could also get the changes from args')
-            print(self.experiment.MicroscopeState['stack_cycling_mode'])
+            if self.verbose:
+                print('in continuous mode:the laser cycling setting is changed')
+                print('you could get the new setting from model.experiment')
+                print('you could also get the changes from args')
+                print(self.experiment.MicroscopeState['stack_cycling_mode'])
             pass
 
         elif command == 'channel':

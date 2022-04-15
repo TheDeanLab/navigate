@@ -263,9 +263,9 @@ class HamamatsuOrca(CameraBase):
         self.camera_controller.shutdown()
 
     def set_camera_sensor_mode(self, mode):
-        if mode == 'Area':
+        if mode == 'Normal':
             self.camera_controller.set_property_value("sensor_mode", 1)
-        elif mode == 'ASLM':
+        elif mode == 'Light-Sheet':
             self.camera_controller.set_property_value("sensor_mode", 12)
         else:
             print('Camera mode not supported')

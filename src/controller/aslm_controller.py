@@ -298,6 +298,7 @@ class ASLM_controller:
         # second, set sub-controllers' mode to 'live' when 'continuous' was selected, or 'stop'
         """
         if not self.update_experiment_setting():
+            tkinter.messagebox.showerror(title='Warning', message='There are some missing/wrong settings! Can not start acquisition!')
             return False
 
         if self.experiment.MicroscopeState['image_mode'] == 'continuous':

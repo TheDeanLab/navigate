@@ -240,7 +240,7 @@ class SyntheticDAQ(DAQBase):
         # For this to work, all analog output and counter tasks have to be started so
         # that they are waiting for the trigger signal.
         """
-        pass
+        self.camera.generate_new_frame()
 
     def stop_acquisition(self):
         pass

@@ -62,14 +62,11 @@ class Model:
             # 'etl': ResultThread(target=start_etl, args=(self.configuration, self.verbose,)).start()
         }
         for k in threads_dict:
-            if k != 'serial_devices':
-                setattr(self, k, threads_dict[k].get_result())
-            else:
-                threads_dict[k].get_result()
+            setattr(self, k, threads_dict[k].get_result())
 
         # in synthetic_hardware mode, we need to wire up camera to daq
         # TODO: Confirm that I did not mess this up.
-        if args.synthetic_hardware:
+        if args.synthetic_hardware or args.sh:
             self.daq.set_camera(self.camera)
 
         # Set Default Camera Settings

@@ -46,6 +46,8 @@ https://github.com/AndrewGYork/tools - GNU GPL v2.0 - Sutter Filter Wheel
 import argparse
 from pathlib import Path
 import tkinter as tk
+import platform
+import sys
 
 # Third Party Imports
 
@@ -129,4 +131,8 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    if platform.system() == 'Darwin':
+        print("Apple OS Not Supported.  Please try a Windows or Linux-based OS.")
+        sys.exit()
+    else:
+        main()

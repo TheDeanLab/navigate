@@ -52,8 +52,7 @@ CameraParameters:
   number_of_cameras: 1
   x_pixels: 2048.0
   y_pixels: 2048.0
-  x_pixel_size_in_microns: 6.5
-  y_pixel_size_in_microns: 6.5
+  pixel_size_in_microns: 6.5
   subsampling: [1, 2, 4]
   sensor_mode: Normal  # 12 for progressive, 1 for normal.
   readout_direction: Top to Bottom  # Top to Bottom', 'Bottom to Top'

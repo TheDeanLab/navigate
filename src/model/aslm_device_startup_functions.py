@@ -12,11 +12,9 @@ def start_camera(configuration, experiment, verbose):
     """
     # Initializes the camera as a sub-process using concurrency tools.
     """
-    camera_id = 0  # Becomes important when a second camera must be dealt with.
-    if configuration.Devices['camera'] == 'HamamatsuOrca' and platform.system(
-    ) == 'Windows':
+    if configuration.Devices['camera'] == 'HamamatsuOrca':
         from model.devices.cameras import HamamatsuOrca
-        return HamamatsuOrca(camera_id, configuration, experiment, verbose)
+        return HamamatsuOrca(0, configuration, experiment, verbose)
     elif configuration.Devices['camera'] == 'SyntheticCamera':
         from model.devices.cameras import SyntheticCamera
         return SyntheticCamera(camera_id, configuration, experiment, verbose)

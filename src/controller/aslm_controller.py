@@ -33,6 +33,7 @@ from view.remote_focus_popup import remote_popup
 # Local Model Imports
 from model.aslm_model import Model
 from model.aslm_model_config import Session as session
+from model.concurrency.concurrency_tools import ObjectInSubprocess, SharedNDArray
 
 NUM_OF_FRAMES = 100
 
@@ -52,17 +53,10 @@ class ASLM_controller:
         self.threads_pool = SynchronizedThreadPool()
 
         # Initialize the Model
-        if platform.system() == 'Darwin':
-            self.model = Model(args,
-                               configuration_path,
-                               experiment_path,
-                               etl_constants_path)
-        else:
-            from model.concurrency.concurrency_tools import ObjectInSubprocess, SharedNDArray
-            self.model = ObjectInSubprocess(Model, args,
-                                            configuration_path=configuration_path,
-                                            experiment_path=experiment_path,
-                                            etl_constants_path=etl_constants_path)
+        self.model = ObjectInSubprocess(Model, args,
+                                        configuration_path=configuration_path,
+                                        experiment_path=experiment_path,
+                                        etl_constants_path=etl_constants_path)
 
         # save default experiment file
         self.default_experiment_file = experiment_path
@@ -142,15 +136,12 @@ class ASLM_controller:
         # data buffer
         # TODO: Update if changes in the buffer size or image size occur.
         # self.data_buffer = [SharedNDArray(shape=(self.model.camera.y_pixels, self.model.camera.x_pixels), dtype='uint16') for i in range(NUM_OF_FRAMES)]
-        if platform.system() != 'Darwin':
-            self.data_buffer = [
-                SharedNDArray(
-                    shape=(
-                        2048,
-                        2048),
-                    dtype='uint16') for i in range(NUM_OF_FRAMES)]
-        else:
-            self.data_buffer = np.array((NUM_OF_FRAMES, 2048, 2048))
+        self.data_buffer = [
+            SharedNDArray(
+                shape=(
+                    2048,
+                    2048),
+                dtype='uint16') for i in range(NUM_OF_FRAMES)]
         self.model.set_data_buffer(self.data_buffer)
 
     def initialize_cam_view(self, configuration_controller):
@@ -293,7 +284,7 @@ class ASLM_controller:
         self.experiment.MicroscopeState['image_mode'] = self.acquire_bar_controller.get_mode()
 
         # Camera Setting Controller
-        self.camera_setting_controller.update_experiment_values()
+        self.camera_setting_controller.update_experiment_values(self.experiment.CameraParameters)
 
         # camera_view_controller
 

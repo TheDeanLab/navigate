@@ -7,14 +7,21 @@ class Camera_Setting_Controller(GUI_Controller):
 
         # Getting Widgets/Buttons
         self.mode_widgets = view.camera_mode.get_widgets()  # keys = ['Sensor', 'Readout', 'Pixels']
-        self.framerate_widgets = view.framerate_info.get_widgets()  # keys = ['Temp1', 'Temp2', 'Temp3', 'Exposure', 'Integration']
-        self.roi_widgets = view.camera_roi.get_widgets()  # roi_keys = ['Left', 'Right', 'Top', 'Bottom'], fov_keys = ['FOV_X', 'FOV_Y'], center_keys = ['Center_X', 'Center_Y'], num_pix_keys = ['Pixels_X', 'Pixels_Y']
-        self.roi_btns = view.camera_roi.get_buttons()  # keys = ['Center_ROI', 'Center_At', 'Use_Pixels', '1024', '512']
-        self.sensor_mode = self.configuration.CameraParameters['sensor_mode']
-        self.readout_direction = self.configuration.CameraParameters['sensor_mode']
-        self.pixel_size = self.configuration.CameraParameters['pixel_size']
-        self.width = self.configuration.CameraParameters['x_pixels']
-        self.height = self.configuration.CameraParameters['y_pixels']
+        self.framerate_widgets = view.framerate_info.get_widgets()
+        # keys = ['Temp1', 'Temp2', 'Temp3', 'Exposure', 'Integration']
+
+        self.roi_widgets = view.camera_roi.get_widgets()
+        # roi_keys = ['Left', 'Right', 'Top', 'Bottom'], fov_keys =
+        # ['FOV_X', 'FOV_Y'], center_keys = ['Center_X', 'Center_Y'], num_pix_keys = ['Pixels_X', 'Pixels_Y']
+
+        self.roi_btns = view.camera_roi.get_buttons()
+        # keys = ['Center_ROI', 'Center_At', 'Use_Pixels', '1024', '512']
+
+        self.sensor_mode = self.parent_controller.configuration.CameraParameters['sensor_mode']
+        self.readout_direction = self.parent_controller.configuration.CameraParameters['sensor_mode']
+        self.pixel_size = self.parent_controller.configuration.CameraParameters['pixel_size_in_microns']
+        self.width = self.parent_controller.configuration.CameraParameters['x_pixels']
+        self.height = self.parent_controller.configuration.CameraParameters['y_pixels']
 
         # Binding for Camera Mode
         self.mode_widgets['Sensor'].widget.bind('<<ComboboxSelected>>', self.update_readout)
@@ -72,8 +79,8 @@ class Camera_Setting_Controller(GUI_Controller):
         self.mode_widgets['Readout'].set(setting_dict['readout_direction'])
 
         # FOV Settings
-        self.mode_widgets['Width'].set(setting_dict['x_pixels'])
-        self.mode_widgets['Height'].set(setting_dict['y_pixels'])
+        # self.mode_widgets['Width'].set(setting_dict['x_pixels'])
+        # self.mode_widgets['Height'].set(setting_dict['y_pixels'])
 
         # Binning Settings
         # ... set(setting_dict['binning'])
@@ -94,8 +101,8 @@ class Camera_Setting_Controller(GUI_Controller):
         # left = 1
         
         # ROI Center
-        self.roi_widgets['Center_X'].set(width/2)
-        self.roi_widgets['Center_Y'].set(height/2)
+        # self.roi_widgets['Center_X'].set(width/2)
+        # self.roi_widgets['Center_Y'].set(height/2)
 
         # Framerate
         # TODO Kevin this is where the widgets have their default values set, uncomment what you want set initially
@@ -106,11 +113,11 @@ class Camera_Setting_Controller(GUI_Controller):
         # self.framerate_widgets['Integration'].set(data[4])
 
         # FOV
-        pixel_size = setting_dict['pixel_size']
-        zoom = setting_dict['zoom']
-        #TODO: Adjust to account for zoom changes.
-        self.roi_widgets['FOV_X'].set(self.pixel_size)
-        self.roi_widgets['FOV_Y'].set(self.pixel_size)
+        # pixel_size = setting_dict['pixel_size']
+        # zoom = setting_dict['zoom']
+        # #TODO: Adjust to account for zoom changes.
+        # self.roi_widgets['FOV_X'].set(self.pixel_size)
+        # self.roi_widgets['FOV_Y'].set(self.pixel_size)
         
     def update_experiment_values(self, setting_dict):
         """
@@ -126,8 +133,8 @@ class Camera_Setting_Controller(GUI_Controller):
         setting_dict['binning'] = 1
 
         # Camera FOV Size.
-        setting_dict['x_pixels'] = self.roi_widgets['Pixels_X'].get()
-        setting_dict['y_pixels'] = self.roi_widgets['Pixels_Y'].get()
+        setting_dict['x_pixels'] = self.roi_widgets['Width'].get()
+        setting_dict['y_pixels'] = self.roi_widgets['Height'].get()
 
         setting_dict['number_of_cameras'] = 1
         setting_dict['pixel_size'] = self.roi_widgets['FOV_X'].get()

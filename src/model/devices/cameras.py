@@ -7,8 +7,7 @@ import platform
 import numpy as np
 
 # Local Imports
-if platform.system() != 'Darwin':
-    from model.devices.APIs.hamamatsu.HamamatsuAPI import DCAM as HamamatsuController
+from model.devices.APIs.hamamatsu.HamamatsuAPI import DCAM as HamamatsuController
 
 
 class CameraBase:
@@ -20,8 +19,7 @@ class CameraBase:
         self.stop_flag = False
 
         # Initialize Pixel Information
-        self.x_pixel_size_in_microns = self.model.CameraParameters['x_pixel_size_in_microns']
-        self.y_pixel_size_in_microns = self.model.CameraParameters['y_pixel_size_in_microns']
+        self.pixel_size_in_microns = self.model.CameraParameters['pixel_size_in_microns']
         self.binning_string = self.model.CameraParameters['binning']
         self.x_binning = int(self.binning_string[0])
         self.y_binning = int(self.binning_string[2])
@@ -198,13 +196,17 @@ class SyntheticCamera(CameraBase):
 class HamamatsuOrca(CameraBase):
     def __init__(self, camera_id, model, experiment, verbose=False):
         super().__init__(camera_id, model, experiment, verbose)
+
         # Initialize Camera Controller
         # Values are pulled from the CameraParameters section of the configuration.yml file.
         # Exposure time converted here from milliseconds to seconds.
 
         self.camera_controller = HamamatsuController(camera_id)
         self.camera_controller.set_property_value(
-            "sensor_mode", self.model.CameraParameters['sensor_mode'])
+            "sensor_mode", 1)
+
+        # self.camera_controller.set_property_value(
+        #     "sensor_mode", self.model.CameraParameters['sensor_mode'])
         self.camera_controller.set_property_value(
             "defect_correct_mode",
             self.model.CameraParameters['defect_correct_mode'])

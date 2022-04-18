@@ -6,14 +6,13 @@ import platform
 
 # Third Party Imports
 import numpy as np
+from tifffile import imsave
 
 # Local Imports
 from .aslm_device_startup_functions import *
 from .aslm_model_config import Session as session
 from controller.thread_pool import SynchronizedThreadPool
-from tifffile import imsave
-
-
+from model.concurrency.concurrency_tools import ResultThread, SharedNDArray, ObjectInSubprocess
 
 NUM_OF_FRAMES = 100
 
@@ -38,7 +37,7 @@ class Model:
         self.etl_constants = session(etl_constants_path, args.verbose)
 
         # Initialize all Hardware
-        if args.synthetic_hardware or args.sh or platform.system() == 'Darwin':
+        if args.synthetic_hardware or args.sh:
             # If command line entry provided, overwrites the model parameters
             # with synthetic hardware.
             print("Synthetic Zoom!")
@@ -51,39 +50,26 @@ class Model:
             self.configuration.Devices['shutters'] = 'SyntheticShutter'
             self.configuration.Devices['lasers'] = 'SyntheticLasers'
 
-        if platform.system() != 'Darwin':
-            from model.concurrency.concurrency_tools import ResultThread, SharedNDArray, ObjectInSubprocess
+        # Move device initialization steps to multiple threads
+        threads_dict = {
+            'filter_wheel': ResultThread(target=start_filter_wheel,
+                                         args=(self.configuration, self.verbose)).start(),
+            'zoom': ResultThread(target=start_zoom_servo,
+                                 args=(self.configuration, self.verbose)).start(),
+            'camera': ResultThread(target=start_camera,
+                                   args=(self.configuration, self.experiment, self.verbose,)).start(),
+            'stages': ResultThread(target=start_stages,
+                                   args=(self.configuration, self.verbose,)).start(),
+            'shutter': ResultThread(target=start_shutters,
+                                    args=(self.configuration, self.experiment, self.verbose,)).start(),
+            'daq': ResultThread(target=start_daq,
+                                args=(self.configuration, self.experiment, self.etl_constants, self.verbose,)).start(),
+            'laser_triggers': ResultThread(target=start_laser_triggers,
+                                           args=(self.configuration, self.experiment, self.verbose,)).start(),
+        }
 
-            # Move device initialization steps to multiple threads
-            threads_dict = {
-                'filter_wheel': ResultThread(target=start_filter_wheel,
-                                             args=(self.configuration, self.verbose)).start(),
-                'zoom': ResultThread(target=start_zoom_servo,
-                                     args=(self.configuration, self.verbose)).start(),
-                'camera': ResultThread(target=start_camera,
-                                       args=(self.configuration, self.experiment, self.verbose,)).start(),
-                'stages': ResultThread(target=start_stages,
-                                       args=(self.configuration, self.verbose,)).start(),
-                'shutter': ResultThread(target=start_shutters,
-                                        args=(self.configuration, self.experiment, self.verbose,)).start(),
-                'daq': ResultThread(target=start_daq,
-                                    args=(self.configuration, self.experiment, self.etl_constants, self.verbose,)).start(),
-                'laser_triggers': ResultThread(target=start_laser_triggers,
-                                               args=(self.configuration, self.experiment, self.verbose,)).start(),
-            }
-
-            for k in threads_dict:
-                    setattr(self, k, threads_dict[k].get_result())
-
-        else:
-            # For evaluation on Mac-based systems that do not support SharedNDArrays.
-            self.filter_wheel = start_filter_wheel(self.configuration, self.verbose)
-            self.zoom = start_zoom_servo(self.configuration, self.verbose)
-            self.camera = start_camera(self.configuration, self.experiment, self.verbose)
-            self.stages = start_stages(self.configuration, self.verbose)
-            self.shutter = start_shutters(self.configuration, self.experiment, self.verbose)
-            self.daq = start_daq(self.configuration, self.experiment, self.etl_constants, self.verbose)
-            self.laser_triggers = start_laser_triggers(self.configuration, self.experiment, self.verbose)
+        for k in threads_dict:
+            setattr(self, k, threads_dict[k].get_result())
 
         # in synthetic_hardware mode, we need to wire up camera to daq
         if args.synthetic_hardware:
@@ -136,17 +122,10 @@ class Model:
         """
         if self.verbose:
             print('in the model(get the command from controller):', command, args)
-        if platform.system() == 'Darwin':
-            # Must account for the numpy generated data_buffer for Mac devices.
-            if not self.data_buffer.any():
-                if self.verbose:
-                    print("Error: The Data Buffer Has Not Been Set Up.")
+        if not self.data_buffer:
+            if self.verbose:
+                print("Error: The Shared Memory Buffer Has Not Been Set Up.")
             return
-        else:
-            if not self.data_buffer:
-                if self.verbose:
-                    print("Error: The Shared Memory Buffer Has Not Been Set Up.")
-                return
 
         if command == 'single':
             """

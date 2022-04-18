@@ -272,6 +272,26 @@ class HamamatsuOrca(CameraBase):
         else:
             print('Camera mode not supported')
 
+    def set_camera_readout_direction(self, mode):
+        if mode == 'Top-to-Bottom':
+            #TODO: Lookup proper property value
+            #self.camera_controller.set_property_value("sensor_mode", 1)
+            pass
+        elif mode == 'Bottom-to-Top':
+            #TODO: Lookup proper property value
+            # self.camera_controller.set_property_value("sensor_mode", 12)
+            pass
+        else:
+            print('Camera mode not supported')
+
+    def set_lightsheet_rolling_shutter_width(self, mode):
+        # TODO: Figure out how to do this.  I believe it is dictated by the exposure time and the line interval.
+        pass
+
+    def calculate_camera_readout_time(self):
+        #TODO: Look up manual directions for calculating exposure time + readout as a function of FOV geometry
+        pass
+
     def set_exposure_time(self, exposure_time):
         """
         #  Units of the Hamamatsu API are in seconds.

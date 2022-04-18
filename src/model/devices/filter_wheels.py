@@ -19,6 +19,8 @@ class FilterWheelBase:
         self.number_of_filter_wheels = model.FilterWheelParameters['number_of_filter_wheels']
         self.wheel_position = 0
         self.verbose = verbose
+        self.wait_until_done_delay = 0.03
+        self.wait_until_done = True
 
     def check_if_filter_in_filter_dictionary(self, filter_name):
         """
@@ -59,16 +61,6 @@ class SyntheticFilterWheel(FilterWheelBase):
     def __init__(self, model, verbose):
         super().__init__(model, verbose)
 
-    def check_if_filter_in_filter_dictionary(self, filter_name):
-        """
-        # Checks if the filter designation (string) given as argument
-        # exists in the filter dictionary
-        """
-        if filter_name in self.filter_dictionary:
-            return True
-        else:
-            raise ValueError('Filter designation not in the configuration')
-
     def filter_change_delay(self, filter_name):
         pass
 
@@ -106,10 +98,7 @@ class SutterFilterWheel(FilterWheelBase):
         super().__init__(model, verbose)
 
         # Sutter Lambda 10-B Specific Initializations
-        self.verbose = verbose
         self.read_on_init = True
-        self.wait_until_done = True
-        self.wait_until_done_delay = 0.25
         self.speed = 2
 
         # Delay in s for the wait until done function
@@ -158,16 +147,6 @@ class SutterFilterWheel(FilterWheelBase):
         if self.verbose:
             print('Closing the Filter Wheel Serial Port')
         self.close()
-
-    def check_if_filter_in_filter_dictionary(self, filter_name):
-        """
-        # Checks if the filter designation (string) given as argument
-        # exists in the filter dictionary
-        """
-        if filter_name in self.filter_dictionary:
-            return True
-        else:
-            raise ValueError('Filter designation not in the configuration')
 
     def filter_change_delay(self, filter_name):
         """
@@ -253,7 +232,3 @@ class SutterFilterWheel(FilterWheelBase):
             print('Closing the Filter Wheel Serial Port')
         self.set_filter('Empty-Alignment')
         self.serial.close()
-
-
-if __name__ == "__main__":
-    pass

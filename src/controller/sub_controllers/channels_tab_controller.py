@@ -63,7 +63,7 @@ class Channels_Tab_Controller(GUI_Controller):
         # timepoint event binds
         self.timepoint_vals['is_save'].trace_add('write', self.update_save_setting)
         self.timepoint_vals['timepoints'].trace_add('write', lambda *args: self.update_timepoint_setting(True))
-        self.timepoint_vals['stack_pause'].trace_add('write', lambda *args: self.update_timepoint_setting(True))
+        self.timepoint_vals['stack_pause'].trace_add('write', lambda *args: self.__timepoint_setting(True))
 
         # multiposition
         self.is_multiposition = False

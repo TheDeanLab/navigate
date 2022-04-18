@@ -10,6 +10,7 @@ import numpy as np
 
 # Local Imports
 
+
 class FilterWheelBase:
     def __init__(self, model, verbose):
         self.comport = model.FilterWheelParameters['filter_wheel_port']
@@ -125,9 +126,12 @@ class SutterFilterWheel(FilterWheelBase):
         try:
             if self.verbose:
                 print('Opening Filter Wheel on Serial Port', self.comport)
-            self.serial = serial.Serial(self.comport, self.baudrate, timeout=.25)
+            self.serial = serial.Serial(
+                self.comport, self.baudrate, timeout=.25)
         except serial.SerialException:
-            raise UserWarning('Could not communicate with Sutter Lambda 10-B via COMPORT', self.comport)
+            raise UserWarning(
+                'Could not communicate with Sutter Lambda 10-B via COMPORT',
+                self.comport)
 
         # Place Controller Into 'Online' Mode
         if self.verbose:
@@ -175,10 +179,11 @@ class SutterFilterWheel(FilterWheelBase):
 
         # New Position
         self.wheel_position = self.filter_dictionary[filter_name]
-        delta_position = int(abs(old_position-self.wheel_position))
+        delta_position = int(abs(old_position - self.wheel_position))
 
         # Calculate Delay
-        self.wait_until_done_delay = (self.delay_matrix[self.speed, delta_position])
+        self.wait_until_done_delay = (
+            self.delay_matrix[self.speed, delta_position])
 
     def set_filter(self, filter_name, wait_until_done=True):
         """
@@ -194,7 +199,8 @@ class SutterFilterWheel(FilterWheelBase):
             # Make sure you are moving it at a reasonable self.speed
             assert self.speed in range(8)
 
-            # If previously we did not confirm that the initialization was complete, check now.
+            # If previously we did not confirm that the initialization was
+            # complete, check now.
             if not self.init_finished:
                 self.read(2)
                 self.init_finished = True
@@ -202,11 +208,11 @@ class SutterFilterWheel(FilterWheelBase):
                     print('Done initializing filter wheel.')
 
             for wheel_idx in range(self.number_of_filter_wheels):
-                """ 
-                # Loop through each filter, and send the binary sequence via serial to 
+                """
+                # Loop through each filter, and send the binary sequence via serial to
                 # move to the desired filter wheel position
                 # When number_of_filter_wheels = 1, loop executes once, and only wheel A changes.
-                # When number_of_filter_wheels = 2, loop executes twice, with both wheel A and 
+                # When number_of_filter_wheels = 2, loop executes twice, with both wheel A and
                 # B moving to the same position sequentially
                 # Filter Wheel Command Byte Encoding = wheel + (self.speed*16) + position = command byte
                 """
@@ -214,7 +220,7 @@ class SutterFilterWheel(FilterWheelBase):
                 if self.verbose:
                     print("Moving Filter Wheel:", wheel_idx)
 
-                output_command = wheel_idx*128+self.wheel_position + 16 * self.speed
+                output_command = wheel_idx * 128 + self.wheel_position + 16 * self.speed
                 output_command = output_command.to_bytes(1, 'little')
 
                 if self.verbose:
@@ -235,7 +241,8 @@ class SutterFilterWheel(FilterWheelBase):
                 break
             time.sleep(0.02)
         else:
-            raise UserWarning("The serial port to the Sutter Lambda 10-B is on, but it isn't responding as expected.")
+            raise UserWarning(
+                "The serial port to the Sutter Lambda 10-B is on, but it isn't responding as expected.")
         return self.serial.read(num_bytes)
 
     def close(self):
@@ -246,6 +253,7 @@ class SutterFilterWheel(FilterWheelBase):
             print('Closing the Filter Wheel Serial Port')
         self.set_filter('Empty-Alignment')
         self.serial.close()
+
 
 if __name__ == "__main__":
     pass

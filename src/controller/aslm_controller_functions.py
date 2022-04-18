@@ -2,6 +2,7 @@
 from datetime import datetime
 import os
 
+
 def create_save_path(saving_settings, verbose=False):
     """
     # haven't finished
@@ -32,7 +33,8 @@ def create_save_path(saving_settings, verbose=False):
         os.makedirs(save_directory)
 
     # Determine Number of Cells in Directory
-    cell_directories = list(filter(lambda v: v[:5] == 'Cell_', os.listdir(save_directory)))
+    cell_directories = list(
+        filter(lambda v: v[:5] == 'Cell_', os.listdir(save_directory)))
     if len(cell_directories) != 0:
         cell_directories.sort()
         cell_index = int(cell_directories[-1][5:]) + 1
@@ -52,14 +54,16 @@ def create_save_path(saving_settings, verbose=False):
 
     return save_directory
 
+
 def save_yaml_file(file_directory, experiment, filename='experiment.yml'):
     try:
         file_name = os.path.join(file_directory, filename)
         with open(file_name, 'w') as f:
             f.write(experiment)
-    except:
+    except BaseException:
         return False
     return True
+
 
 def update_from_channels_tab_controller(self):
     # get settings from channels tab
@@ -68,7 +72,9 @@ def update_from_channels_tab_controller(self):
     # if there is something wrong, it will popup a window and return false
     for k in settings:
         if not settings[k]:
-            tkinter.messagebox.showerror(title='Warning', message='There are some missing/wrong settings!')
+            tkinter.messagebox.showerror(
+                title='Warning',
+                message='There are some missing/wrong settings!')
             return False
 
     # validate channels
@@ -78,8 +84,10 @@ def update_from_channels_tab_controller(self):
             float(settings['channel'][k]['interval_time'])
             if settings['channel'][k]['laser_index'] < 0 or settings['channel'][k]['filter_position'] < 0:
                 raise
-    except:
-        tkinter.messagebox.showerror(title='Warning', message='There are some missing/wrong settings!')
+    except BaseException:
+        tkinter.messagebox.showerror(
+            title='Warning',
+            message='There are some missing/wrong settings!')
         return False
 
     self.experiment.MicroscopeState['stack_cycling_mode'] = settings['stack_cycling_mode']
@@ -92,14 +100,17 @@ def update_from_channels_tab_controller(self):
     self.experiment.MicroscopeState['channels'] = settings['channel']
 
     # get all positions
-    self.experiment.MicroscopeState['stage_positions'] = self.channels_tab_controller.get_positions()
+    self.experiment.MicroscopeState['stage_positions'] = self.channels_tab_controller.get_positions(
+    )
 
     # get position information from stage tab
     position = self.stage_gui_controller.get_position()
 
     # validate positions
     if not position:
-        tkinter.messagebox.showerror(title='Warning', message='There are some missing/wrong settings!')
+        tkinter.messagebox.showerror(
+            title='Warning',
+            message='There are some missing/wrong settings!')
         return False
 
     for axis in position:
@@ -107,6 +118,7 @@ def update_from_channels_tab_controller(self):
     step_size = self.stage_gui_controller.get_step_size()
     for axis in step_size:
         self.experiment.StageParameters[axis + '_step'] = step_size[axis]
+
 
 def update_from_camera_setting_controller(self):
     self.experiment.CameraParameters['sensor_mode'] = self.camera_setting_controller.sensor_mode

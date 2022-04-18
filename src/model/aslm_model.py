@@ -2,7 +2,7 @@
 import time
 import os
 import threading
-import ctypes
+import platform
 
 # Third Party Imports
 import numpy as np
@@ -13,12 +13,18 @@ from .aslm_model_config import Session as session
 from controller.thread_pool import SynchronizedThreadPool
 from tifffile import imsave
 
-from model.concurrency.concurrency_tools import ResultThread, SharedNDArray, ObjectInSubprocess
+
 
 NUM_OF_FRAMES = 100
 
+
 class Model:
-    def __init__(self, args, configuration_path=None, experiment_path=None, etl_constants_path=None):
+    def __init__(
+            self,
+            args,
+            configuration_path=None,
+            experiment_path=None,
+            etl_constants_path=None):
         # Retrieve the initial configuration from the yaml file
         self.verbose = args.verbose
 
@@ -32,8 +38,10 @@ class Model:
         self.etl_constants = session(etl_constants_path, args.verbose)
 
         # Initialize all Hardware
-        if args.synthetic_hardware or args.sh:
-            # If command line entry provided, overwrites the model parameters with synthetic hardware
+        if args.synthetic_hardware or args.sh or platform.system() == 'Darwin':
+            # If command line entry provided, overwrites the model parameters
+            # with synthetic hardware.
+            print("Synthetic Zoom!")
             self.configuration.Devices['daq'] = 'SyntheticDAQ'
             self.configuration.Devices['camera'] = 'SyntheticCamera'
             self.configuration.Devices['etl'] = 'SyntheticETL'
@@ -43,36 +51,43 @@ class Model:
             self.configuration.Devices['shutters'] = 'SyntheticShutter'
             self.configuration.Devices['lasers'] = 'SyntheticLasers'
 
-        # Move device initialization steps to multiple threads
-        threads_dict = {
-            'filter_wheel':     ResultThread(target=start_filter_wheel,
+        if platform.system() != 'Darwin':
+            from model.concurrency.concurrency_tools import ResultThread, SharedNDArray, ObjectInSubprocess
+
+            # Move device initialization steps to multiple threads
+            threads_dict = {
+                'filter_wheel': ResultThread(target=start_filter_wheel,
                                              args=(self.configuration, self.verbose)).start(),
-            'zoom':             ResultThread(target=start_zoom_servo,
-                                             args=(self.configuration, self.verbose)).start(),
-            'camera':           ResultThread(target=start_camera,
-                                             args=(self.configuration, self.experiment, self.verbose,)).start(),
-            'stages':           ResultThread(target=start_stages,
-                                             args=(self.configuration, self.verbose,)).start(),
-            'shutter':          ResultThread(target=start_shutters,
-                                             args=(self.configuration, self.experiment, self.verbose,)).start(),
-            'daq':              ResultThread(target=start_daq,
-                                             args=(self.configuration, self.experiment, self.etl_constants, self.verbose,)).start(),
-            'laser_triggers':   ResultThread(target=start_laser_triggers,
-                                             args=(self.configuration, self.experiment, self.verbose,)).start(),
-            # 'etl': ResultThread(target=start_etl, args=(self.configuration, self.verbose,)).start()
-        }
-        for k in threads_dict:
-            setattr(self, k, threads_dict[k].get_result())
+                'zoom': ResultThread(target=start_zoom_servo,
+                                     args=(self.configuration, self.verbose)).start(),
+                'camera': ResultThread(target=start_camera,
+                                       args=(self.configuration, self.experiment, self.verbose,)).start(),
+                'stages': ResultThread(target=start_stages,
+                                       args=(self.configuration, self.verbose,)).start(),
+                'shutter': ResultThread(target=start_shutters,
+                                        args=(self.configuration, self.experiment, self.verbose,)).start(),
+                'daq': ResultThread(target=start_daq,
+                                    args=(self.configuration, self.experiment, self.etl_constants, self.verbose,)).start(),
+                'laser_triggers': ResultThread(target=start_laser_triggers,
+                                               args=(self.configuration, self.experiment, self.verbose,)).start(),
+            }
+
+            for k in threads_dict:
+                    setattr(self, k, threads_dict[k].get_result())
+
+        else:
+            # For evaluation on Mac-based systems that do not support SharedNDArrays.
+            self.filter_wheel = start_filter_wheel(self.configuration, self.verbose)
+            self.zoom = start_zoom_servo(self.configuration, self.verbose)
+            self.camera = start_camera(self.configuration, self.experiment, self.verbose)
+            self.stages = start_stages(self.configuration, self.verbose)
+            self.shutter = start_shutters(self.configuration, self.experiment, self.verbose)
+            self.daq = start_daq(self.configuration, self.experiment, self.etl_constants, self.verbose)
+            self.laser_triggers = start_laser_triggers(self.configuration, self.experiment, self.verbose)
 
         # in synthetic_hardware mode, we need to wire up camera to daq
-        # TODO: Confirm that I did not mess this up.
-        if args.synthetic_hardware or args.sh:
+        if args.synthetic_hardware:
             self.daq.set_camera(self.camera)
-
-        # Set Default Camera Settings
-        # self.camera.dev_open(0)
-        # # self.camera.dcam_set_default_light_sheet_mode_parameters()
-        # self.camera.dcam_set_default_area_mode_parameters()
 
         # Acquisition Housekeeping
         self.threads_pool = SynchronizedThreadPool()
@@ -93,7 +108,7 @@ class Model:
 
         # data buffer
         self.data_buffer = None
-        # self.data_buffer = [SharedNDArray(shape=(self.camera.y_pixels, self.camera.x_pixels), dtype='uint16') for i in range(NUM_OF_FRAMES)]
+
         # show image function/pipe handler
         self.show_img_pipe = None
 
@@ -106,7 +121,7 @@ class Model:
     def set_data_buffer(self, data_buffer):
         self.data_buffer = data_buffer
         self.camera.initialize_image_series(self.data_buffer)
-    
+
     #  Basic Image Acquisition Functions
     #  - These functions are used to acquire images from the camera
     #  - Tasks for delivering analog and digital outputs are already initiated by the DAQ object
@@ -114,21 +129,27 @@ class Model:
     #  - daq.start_tasks() starts the tasks, which then wait for an external trigger.
     #  - daq.run_tasks() delivers the external trigger which synchronously starts the tasks and waits for completion.
     #  - daq.stop_tasks() stops the tasks and cleans up.
-    
+
     def run_command(self, command, *args, **kwargs):
         """
         Receives commands from the controller.
         """
         if self.verbose:
             print('in the model(get the command from controller):', command, args)
-
-        if not self.data_buffer:
-            if self.verbose:
-                print('Error: have not set up data buffer!')
+        if platform.system() == 'Darwin':
+            # Must account for the numpy generated data_buffer for Mac devices.
+            if not self.data_buffer.any():
+                if self.verbose:
+                    print("Error: The Data Buffer Has Not Been Set Up.")
             return
+        else:
+            if not self.data_buffer:
+                if self.verbose:
+                    print("Error: The Shared Memory Buffer Has Not Been Set Up.")
+                return
 
         if command == 'single':
-            """ 
+            """
             # Acquire a single image.
             # First overwrites the model instance of the MicroscopeState
             """
@@ -150,7 +171,8 @@ class Model:
             self.stop_acquisition = False
             self.stop_send_signal = False
             self.open_shutter()
-            self.live_thread = threading.Thread(target=self.run_live_acquisition)
+            self.live_thread = threading.Thread(
+                target=self.run_live_acquisition)
             self.data_thread = threading.Thread(target=self.run_data_process)
             self.live_thread.start()
             self.data_thread.start()
@@ -168,7 +190,8 @@ class Model:
                 self.experiment.MicroscopeState['channels'] = kwargs['channels']
             # prepare devices based on updated info
             self.stop_send_signal = False
-            self.live_thread = threading.Thread(target=self.run_live_acquisition)
+            self.live_thread = threading.Thread(
+                target=self.run_live_acquisition)
             self.live_thread.start()
 
         elif command == 'stop':
@@ -189,11 +212,11 @@ class Model:
 
     def end_acquisition(self):
         """
-        # 
+        #
         """
         # dettach buffer
         # self.camera.close_image_series()
-        
+
         # close shutter
         self.close_shutter()
 
@@ -223,20 +246,23 @@ class Model:
                 if self.is_save:
                     for idx in frame_ids:
                         image_name = self.generate_image_name()
-                        imsave(os.path.join(self.experiment.Saving['save_directory'], image_name), self.data_buffer[idx])
+                        imsave(
+                            os.path.join(
+                                self.experiment.Saving['save_directory'],
+                                image_name),
+                            self.data_buffer[idx])
 
             if count_frame:
                 num_of_frames -= 1
                 if num_of_frames == 0:
                     break
-            
+
             if self.stop_acquisition:
                 if self.show_img_pipe:
                     self.show_img_pipe.send('stop')
                 if self.verbose:
                     print('data thread is stopped, send stop to parent pipe')
                 break
-
 
     def prepare_image_series(self):
         """
@@ -260,7 +286,7 @@ class Model:
         """
         #  Cleans up after series without waveform update
         """
-        pass #        self.daq.close_tasks()
+        pass  # self.daq.close_tasks()
 
     def calculate_number_of_channels(self):
         """
@@ -274,13 +300,15 @@ class Model:
         """
 
         number_of_channels = self.calculate_number_of_channels()
-        number_of_positions = len(self.experiment.MicroscopeState['stage_positions'])
+        number_of_positions = len(
+            self.experiment.MicroscopeState['stage_positions'])
         number_of_slices = self.experiment.MicroscopeState['number_z_steps']
         number_of_time_points = self.experiment.MicroscopeState['timepoints']
 
         self.image_count = 0
         self.acquisition_count = 0
-        self.total_acquisition_count = number_of_channels * number_of_positions * number_of_time_points
+        self.total_acquisition_count = number_of_channels * \
+            number_of_positions * number_of_time_points
         self.total_image_count = self.total_acquisition_count * number_of_slices
         self.start_time = time.time()
 
@@ -303,21 +331,24 @@ class Model:
             channel = microscope_state['channels'][channel_key]
             if channel['is_selected'] is True:
 
-                #  Get and set the parameters for Waveform Generation, Triggering, etc.
+                # Get and set the parameters for Waveform Generation,
+                # Triggering, etc.
                 self.current_channel = channel_idx
 
                 # Camera Settings - Exposure Time in Milliseconds
                 self.camera.set_exposure_time(channel['camera_exposure_time'])
 
                 # Laser Settings
-                self.laser_triggers.trigger_digital_laser(self.current_laser_index)
-                self.laser_triggers.set_laser_analog_voltage(channel['laser_index'], channel['laser_power'])
+                self.laser_triggers.trigger_digital_laser(
+                    self.current_laser_index)
+                self.laser_triggers.set_laser_analog_voltage(
+                    channel['laser_index'], channel['laser_power'])
 
                 # Filter Wheel Settings
                 self.filter_wheel.set_filter(channel['filter'])
 
                 # Update Laser Scanning Waveforms - Exposure Time in Seconds
-                self.daq.sweep_time = self.current_exposure_time/1000
+                self.daq.sweep_time = self.current_exposure_time / 1000
 
                 # Update ETL Settings
                 self.daq.update_etl_parameters(microscope_state, channel)
@@ -356,7 +387,8 @@ class Model:
         #  Generates a string for the filename
         #  e.g., CH00_000000.tif
         """
-        image_name = "CH0" + str(self.current_channel) + "_" + str(self.current_time_point).zfill(6) + ".tif"
+        image_name = "CH0" + str(self.current_channel) + \
+            "_" + str(self.current_time_point).zfill(6) + ".tif"
         self.current_time_point += 1
         return image_name
 
@@ -387,6 +419,7 @@ class Model:
             self.shutter.open_right()
         else:
             print("Shutter Command Invalid")
+
 
 if __name__ == '__main__':
     """ Testing Section """

@@ -11,7 +11,8 @@ import napari
 from qtpy.QtCore import QTimer
 # Our stuff
 from .proxy_objects import (
-ProxyManager, _dummy_function, _reconnect_shared_arrays, _SharedNumpyArray)
+    ProxyManager, _dummy_function, _reconnect_shared_arrays, _SharedNumpyArray)
+
 
 def display(proxy_manager=None):
     if proxy_manager is None:
@@ -21,9 +22,10 @@ def display(proxy_manager=None):
                                          close_method_name='close')
     return display
 
+
 class _NapariDisplay:
 
-    #modify to solve my problems
+    # modify to solve my problems
     def __init__(self):
         self.viewer = napari.Viewer()
 
@@ -33,7 +35,6 @@ class _NapariDisplay:
         else:
             self.lowresim.data = lowresim
 
-
     def show_image(self, im):
         if not hasattr(self, 'image'):
             self.image = self.viewer.add_image(im)
@@ -42,6 +43,7 @@ class _NapariDisplay:
 
     def close(self):
         self.viewer.close()
+
 
 def _napari_child_loop(child_pipe, shared_arrays,
                        initializer, initargs, initkwargs,
@@ -57,7 +59,7 @@ def _napari_child_loop(child_pipe, shared_arrays,
                                                         shared_arrays)
         # Initialization.
         printed_output = io.StringIO()
-        try: # Create an instance of our object...
+        try:  # Create an instance of our object...
             with redirect_stdout(printed_output):
                 obj = initializer(*initargs, **initkwargs)
                 # TODO default to "close"
@@ -66,10 +68,10 @@ def _napari_child_loop(child_pipe, shared_arrays,
                     closeargs = tuple() if closeargs is None else closeargs
                     closekwargs = dict() if closekwargs is None else closekwargs
                     atexit.register(lambda: close_method(*closeargs,
-                                                         **closekwargs))               
+                                                         **closekwargs))
             child_pipe.send(('Successfully initialized',
                              printed_output.getvalue()))
-        except Exception as e: # If we fail to initialize, just give up.
+        except Exception as e:  # If we fail to initialize, just give up.
             e.child_traceback_string = traceback.format_exc()
             child_pipe.send((e, printed_output.getvalue()))
             return None
@@ -79,15 +81,16 @@ def _napari_child_loop(child_pipe, shared_arrays,
             if not child_pipe.poll():
                 return
             cmd = child_pipe.recv()
-            if cmd is None: # This is how the parent signals us to exit.
-                return None ## TODO this has to kill the QTLoop
+            if cmd is None:  # This is how the parent signals us to exit.
+                return None  # TODO this has to kill the QTLoop
             attr_name, args, kwargs = cmd
-            args, kwargs = _reconnect_shared_arrays(args, kwargs, shared_arrays)
+            args, kwargs = _reconnect_shared_arrays(
+                args, kwargs, shared_arrays)
             try:
                 with redirect_stdout(printed_output):
                     result = getattr(obj, attr_name)(*args, **kwargs)
                 if callable(result):
-                    result = _dummy_function # Cheaper than a real callable
+                    result = _dummy_function  # Cheaper than a real callable
                 if isinstance(result, _SharedNumpyArray):
                     result = result._disconnect()
                 child_pipe.send((result, printed_output.getvalue()))
@@ -102,11 +105,17 @@ def _napari_child_loop(child_pipe, shared_arrays,
 
 # A mocked "microscope" object for testing and demonstrating proxied
 # Napari displays. Since this is just for testing our imports are ugly:
+
+
 class _Microscope:
     def __init__(self):
         import queue
         import time
-        self.pm = ProxyManager(shared_memory_sizes=(1*2048*2060*2,1*2048*2060*2,))
+        self.pm = ProxyManager(
+            shared_memory_sizes=(
+                1 * 2048 * 2060 * 2,
+                1 * 2048 * 2060 * 2,
+            ))
 
         self.data_buffers = [
             self.pm.shared_numpy_array(which_mp_array=0,
@@ -139,6 +148,7 @@ class _Microscope:
     def snap(self):
         import time
         from .proxy_objects import launch_custody_thread
+
         def snap_task(custody):
             custody.switch_from(None, to=self.camera)
 
@@ -152,7 +162,7 @@ class _Microscope:
             self.lowrescamera.record(out=lowres_data_buffer)
 
             custody.switch_from(self.camera, to=self.display)
-            if(self.num_frames>50):
+            if(self.num_frames > 50):
                 self.display.show_image(data_buffer)
             self.display.show_lowresimage(lowres_data_buffer)
 
@@ -162,12 +172,13 @@ class _Microscope:
 
             self.num_frames += 1
             if self.num_frames == 100:
-                time_elapsed =  time.perf_counter() - self.initial_time
-                print("%0.2f average FPS"%(self.num_frames / time_elapsed))
+                time_elapsed = time.perf_counter() - self.initial_time
+                print("%0.2f average FPS" % (self.num_frames / time_elapsed))
                 self.num_frames = 0
                 self.initial_time = time.perf_counter()
         th = launch_custody_thread(snap_task, first_resource=self.camera)
         return th
+
 
 class _Camera:
     def record(self, out):
@@ -181,6 +192,7 @@ class _lowresCamera:
         import numpy as np
         out[:] = np.random.randint(
             0, 2**16, size=out.shape, dtype='uint16')
+
 
 if __name__ == '__main__':
     scope = _Microscope()

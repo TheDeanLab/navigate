@@ -3,7 +3,15 @@ from collections import deque
 
 
 class SelfLockThread(threading.Thread):
-    def __init__(self, group=None, target=None, name=None, args=(), kwargs={}, *, daemon=None):
+    def __init__(
+            self,
+            group=None,
+            target=None,
+            name=None,
+            args=(),
+            kwargs={},
+            *,
+            daemon=None):
         super().__init__(group, target, name, args, kwargs, daemon=daemon)
         self.selfLock = threading.Lock()
         # lock itself
@@ -33,15 +41,36 @@ class SynchronizedThreadPool:
         if resourceName not in self.resources:
             self.resources[resourceName] = ThreadWaitlist()
 
-    def createThread(self, resourceName, target, args=(), kwargs={}, *, callback=None, cbArgs=(), cbKargs={}):
+    def createThread(
+            self,
+            resourceName,
+            target,
+            args=(),
+            kwargs={},
+            *,
+            callback=None,
+            cbArgs=(),
+            cbKargs={}):
         if resourceName not in self.resources:
             self.registerResource(resourceName)
-        task = self.threadTaskWrapping(resourceName, target, callback=callback, cbArgs=cbArgs, cbKargs=cbKargs)
+        task = self.threadTaskWrapping(
+            resourceName,
+            target,
+            callback=callback,
+            cbArgs=cbArgs,
+            cbKargs=cbKargs)
         taskThread = SelfLockThread(None, task, None, args, kwargs)
         taskThread.start()
         return taskThread
 
-    def threadTaskWrapping(self, resourceName, target, *, callback=None, cbArgs=(), cbKargs={}):
+    def threadTaskWrapping(
+            self,
+            resourceName,
+            target,
+            *,
+            callback=None,
+            cbArgs=(),
+            cbKargs={}):
         def func(*args, **kwargs):
             thread = kwargs.get('thread', None)
             if not thread:
@@ -72,7 +101,7 @@ class ThreadWaitlist:
     def __init__(self):
         self.waitlistLock = threading.Lock()
         self.waitlist = deque()
-    
+
     def __enter__(self):
         self.waitlistLock.acquire()
         return self

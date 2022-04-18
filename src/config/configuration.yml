@@ -55,7 +55,8 @@ CameraParameters:
   x_pixel_size_in_microns: 6.5
   y_pixel_size_in_microns: 6.5
   subsampling: [1, 2, 4]
-  sensor_mode: 12.0  # 12 for progressive
+  sensor_mode: Normal  # 12 for progressive, 1 for normal.
+  readout_direction: Top to Bottom  # Top to Bottom', 'Bottom to Top'
   defect_correct_mode: 2.0
   binning: 1x1
   readout_speed: 1.0

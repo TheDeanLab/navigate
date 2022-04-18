@@ -2,8 +2,8 @@ import re
 import tkinter as tk
 from tkinter import ttk        
 from decimal import Decimal, InvalidOperation
-from hoverbar import Tooltip
-from LabelInputWidgetFactory import LabelInput
+from .hoverbar import Tooltip
+from .LabelInputWidgetFactory import LabelInput
 
 REGEX_DICT = {
     'float': '(^-?$)|(^-?[0-9]+\.?[0-9]*$)',
@@ -143,6 +143,12 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         valid = True
         min_val = self.min
         max_val = self.max
+
+        # check if there are range limits
+        # TODO: I add a line here, please make sure is it okay?
+        if min_val == '-Infinity' or max_val == 'Infinity':
+            return True
+
         no_negative = int(min_val) >= 0
         no_decimal = self.precision >= 0
 
@@ -184,16 +190,23 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         max_val = self.max
         min_val = self.min
         # Check for error upon leaving widget
+        # TODO: I add some lines here, please make sure are they okay?
+        if value.strip() == '' and self.required:
+            self.error.set('A value is required')
+            return False
+        else:
+            self.error.set('')
         
+        # check if there are range limits
+        if min_val == '-Infinity' or max_val == 'Infinity':
+            return True
+
         try:
             value = Decimal(value)
         except InvalidOperation:
-            if self.required == True:
-                self.error.set('A value is required')
-            else:
-                self.error.set('Invalid number string: {}'.format(value))
+            self.error.set('Invalid number string: {}'.format(value))
             return False
-
+        
         # Checking if greater than minimum
         if value < int(min_val):
             self.error.set('Value is too low (min {})'.format(min_val))

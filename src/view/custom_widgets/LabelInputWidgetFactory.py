@@ -79,7 +79,7 @@ class LabelInput(ttk.Frame):
 
         # Error handling
         self.error = getattr(self.widget, 'error', tk.StringVar())
-        self.error_label = ttk.Label(self, textvariable=self.error)
+        self.error_label = ttk.Label(self, textvariable=self.error, foreground='red')
         self.error_label.grid(row=2, column=0, sticky=(tk.W + tk.E))
 
     

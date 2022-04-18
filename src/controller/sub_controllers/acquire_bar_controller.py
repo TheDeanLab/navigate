@@ -115,9 +115,6 @@ class Acquire_Bar_Controller(GUI_Controller):
         # Gets the state of the pull-down menu and tell the central controller
         """
         self.mode = self.mode_dict[self.view.pull_down.get()]
-        # TODO: comment it now
-        # it seems that we do not need to tell the central controller that mode is changed until the user clicked 'Acquire' button
-        # self.parent_controller.execute('image_mode', self.mode)
         
         self.show_verbose_info("The Microscope State is now:", self.get_mode())
 
@@ -131,26 +128,9 @@ class Acquire_Bar_Controller(GUI_Controller):
         # update saving settings according to user's input
         self.update_saving_settings(popup_window)
         
-        is_valid = True
         # Verify user's input is non-zero.
-        if len(self.saving_settings['user']) == 0:
-            is_valid = False
-            raise ValueError('Please provide a User Name')
-
-        if len(self.saving_settings['tissue']) == 0:
-            is_valid = False
-            raise ValueError('Please provide a Tissue Type')
-
-        if len(self.saving_settings['celltype']) == 0:
-            is_valid = False
-            raise ValueError('Please provide a Cell Type')
-
-        if len(self.saving_settings['label']) == 0:
-            is_valid = False
-            raise ValueError('Please provide a Label Type')
-
-        # TODO: the popup GUI should have a label or something to show the error message
-        # after GUI add such thing, then I will update here -- Annie
+        is_valid = self.saving_settings['user'] and self.saving_settings['tissue'] \
+            and self.saving_settings['celltype'] and self.saving_settings['label']
 
         if is_valid:
             # tell central controller, save the image/data
@@ -164,27 +144,10 @@ class Acquire_Bar_Controller(GUI_Controller):
         sys.exit()
 
     def update_saving_settings(self, popup_window):
-        popup_values = get_popup_values(popup_window)
-        for name in popup_values:
-            self.saving_settings[name] = popup_values[name]
-
-
-def get_popup_values(popup_window):
-    vars = popup_window.get_variables()
-    popup_vals = {
-        'root_directory': vars['root_directory'],
-        'save_directory': None,
-        'user': vars['user'],
-        'tissue': vars['tissue'],
-        'celltype': vars['celltype'],
-        'label': vars['label']
-    }
-    return popup_vals
-
-
-def get_popup_vals(popup_window):
-    return popup_window.get_widgets()
-
+        popup_vals = popup_window.get_variables()
+        for name in popup_vals:
+            # remove leading and tailing whitespaces
+            self.saving_settings[name] = popup_vals[name].strip()
 
 def initialize_popup_window(popup_window, values):
     """
@@ -198,8 +161,7 @@ def initialize_popup_window(popup_window, values):
     #    'label':
     # }
     """
-
-    popup_vals = get_popup_vals(popup_window)
+    popup_vals = popup_window.get_widgets()
 
     for name in values:
         if popup_vals.get(name, None):

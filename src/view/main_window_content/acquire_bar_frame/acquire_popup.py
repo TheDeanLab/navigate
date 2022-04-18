@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import ttk
 from view.custom_widgets.popup import PopUp
 from view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from view.custom_widgets.validation import ValidatedEntry
 
 
 #Class that handles the dialog box that has all the user entry stuff when you press the Acquisition button
@@ -35,8 +36,9 @@ class Acquire_PopUp():
         for i in range(len(entry_names)):
             self.inputs[entry_names[i]] = LabelInput(parent=content_frame,
                                          label=entry_labels[i],
-                                         input_class=ttk.Entry,
-                                         input_var=StringVar()                                        
+                                         input_class=ValidatedEntry,
+                                         input_var=StringVar(),
+                                         input_args={"required": True}                                  
                                         )
             self.inputs[entry_names[i]].grid(row=i+1, column=0, columnspan=2,sticky=(NSEW))
 

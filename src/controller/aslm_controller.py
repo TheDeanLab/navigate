@@ -172,6 +172,7 @@ class ASLM_controller:
         def save_experiment():
             # update model.experiment and save it to file
             if not self.update_experiment_setting():
+                tkinter.messagebox.showerror(title='Warning', message='There are some missing/wrong settings! Can not save this experiment setting!')
                 return
             filename = filedialog.asksaveasfilename(
                 defaultextension='.yml', filetypes=[
@@ -282,9 +283,7 @@ class ASLM_controller:
 
         # acquire_bar_controller - update image mode
         self.experiment.MicroscopeState['image_mode'] = self.acquire_bar_controller.get_mode()
-
-        # Camera Setting Controller
-        self.camera_setting_controller.update_experiment_values(self.experiment.CameraParameters)
+        self.experiment.Saving['date'] = str(datetime.now().date())
 
         # camera_view_controller
 
@@ -312,7 +311,7 @@ class ASLM_controller:
         # return False
         return self.channels_tab_controller.update_experiment_values(
             self.experiment.MicroscopeState) and self.stage_gui_controller.update_experiment_values(
-            self.experiment.MicroscopeState) and self.camera_setting_controller.update_experiment_values(
+            self.experiment.StageParameters) and self.camera_setting_controller.update_experiment_values(
             self.experiment.CameraParameters)
 
     def prepare_acquire_data(self):

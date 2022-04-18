@@ -69,8 +69,8 @@ class StageBase:
         self.int_f_pos_offset = 0
         self.int_theta_pos_offset = 0
 
-        """ 
-        Setting movement limits: currently hardcoded: Units are in microns 
+        """
+        Setting movement limits: currently hardcoded: Units are in microns
         """
         self.x_max = model.StageParameters['x_max']
         self.x_min = model.StageParameters['x_min']
@@ -166,38 +166,47 @@ class SyntheticStage(StageBase):
 
         if 'x_rel' in move_dictionary:
             x_rel = move_dictionary['x_rel']
-            if (self.x_min <= self.x_pos + x_rel) and (self.x_max >= self.x_pos + x_rel):
+            if (self.x_min <= self.x_pos +
+                    x_rel) and (self.x_max >= self.x_pos + x_rel):
                 self.x_pos = self.x_pos + x_rel
             else:
                 print('Relative movement stopped: X limit would be reached!', 1000)
 
         if 'y_rel' in move_dictionary:
             y_rel = move_dictionary['y_rel']
-            if (self.y_min <= self.y_pos + y_rel) and (self.y_max >= self.y_pos + y_rel):
+            if (self.y_min <= self.y_pos +
+                    y_rel) and (self.y_max >= self.y_pos + y_rel):
                 self.y_pos = self.y_pos + y_rel
             else:
                 print('Relative movement stopped: Y limit would be reached!', 1000)
 
         if 'z_rel' in move_dictionary:
             z_rel = move_dictionary['z_rel']
-            if (self.z_min <= self.z_pos + z_rel) and (self.z_max >= self.z_pos + z_rel):
+            if (self.z_min <= self.z_pos +
+                    z_rel) and (self.z_max >= self.z_pos + z_rel):
                 self.z_pos = self.z_pos + z_rel
             else:
                 print('Relative movement stopped: Z limit would be reached!', 1000)
 
         if 'theta_rel' in move_dictionary:
             theta_rel = move_dictionary['theta_rel']
-            if (self.theta_min <= self.theta_pos + theta_rel) and (self.theta_max >= self.theta_pos + theta_rel):
+            if (self.theta_min <= self.theta_pos +
+                    theta_rel) and (self.theta_max >= self.theta_pos + theta_rel):
                 self.theta_pos = self.theta_pos + theta_rel
             else:
-                print('Relative movement stopped: Rotation limit would be reached!', 1000)
+                print(
+                    'Relative movement stopped: Rotation limit would be reached!',
+                    1000)
 
         if 'f_rel' in move_dictionary:
             f_rel = move_dictionary['f_rel']
-            if (self.f_min <= self.f_pos + f_rel) and (self.f_max >= self.f_pos + f_rel):
+            if (self.f_min <= self.f_pos +
+                    f_rel) and (self.f_max >= self.f_pos + f_rel):
                 self.f_pos = self.f_pos + f_rel
             else:
-                print('Relative movement stopped: Focus limit would be reached!', 1000)
+                print(
+                    'Relative movement stopped: Focus limit would be reached!',
+                    1000)
 
         if wait_until_done is True:
             time.sleep(0.02)
@@ -237,7 +246,9 @@ class SyntheticStage(StageBase):
             if (self.f_min <= f_abs) and (self.f_max >= f_abs):
                 self.f_pos = f_abs
             else:
-                print('Absolute movement stopped: Focus limit would be reached!', 1000)
+                print(
+                    'Absolute movement stopped: Focus limit would be reached!',
+                    1000)
 
         if 'theta_abs' in move_dictionary:
             theta_abs = move_dictionary['theta_abs']
@@ -245,7 +256,9 @@ class SyntheticStage(StageBase):
             if (self.theta_min <= theta_abs) and (self.theta_max >= theta_abs):
                 self.theta_pos = theta_abs
             else:
-                print('Absolute movement stopped: Rotation limit would be reached!', 1000)
+                print(
+                    'Absolute movement stopped: Rotation limit would be reached!',
+                    1000)
 
         if wait_until_done is True:
             time.sleep(.25)
@@ -256,15 +269,20 @@ class SyntheticStage(StageBase):
     def zero_axes(self, list):
         for axis in list:
             try:
-                exec('self.int_' + axis + '_pos_offset = -self.' + axis + '_pos')
-            except:
+                exec(
+                    'self.int_' +
+                    axis +
+                    '_pos_offset = -self.' +
+                    axis +
+                    '_pos')
+            except BaseException:
                 print('Zeroing of axis: ', axis, 'failed')
 
     def unzero_axes(self, list):
         for axis in list:
             try:
                 exec('self.int_' + axis + '_pos_offset = 0')
-            except:
+            except BaseException:
                 print('Unzeroing of axis: ', axis, 'failed')
 
     def load_sample(self):
@@ -303,7 +321,10 @@ class PIStage(StageBase):
         self.serialnum = str(self.model.StageParameters['serialnum'])
         self.pidevice = GCSDevice(self.controllername)
         self.pidevice.ConnectUSB(serialnum=self.serialnum)
-        self.pitools.startup(self.pidevice, stages=list(self.pi_stages), refmodes=list(self.refmode))
+        self.pitools.startup(
+            self.pidevice, stages=list(
+                self.pi_stages), refmodes=list(
+                self.refmode))
         self.block_till_controller_is_ready()
 
         # Move the Focusing Stage to the Start Position
@@ -317,7 +338,7 @@ class PIStage(StageBase):
             self.pidevice.unload()
             if self.verbose:
                 print('PI connection closed')
-        except:
+        except BaseException:
             print('Error while disconnecting the PI stage')
 
     def create_position_dict(self):
@@ -374,42 +395,57 @@ class PIStage(StageBase):
         """
         if 'x_rel' in move_dictionary:
             x_rel = move_dictionary['x_rel']
-            if (self.x_min <= self.x_pos + x_rel) and (self.x_max >= self.x_pos + x_rel):
+            if (self.x_min <= self.x_pos +
+                    x_rel) and (self.x_max >= self.x_pos + x_rel):
                 x_rel = x_rel / 1000
                 self.pidevice.MVR({1: x_rel})
             else:
-                print('Relative movement stopped: X Motion limit would be reached!', 1000)
+                print(
+                    'Relative movement stopped: X Motion limit would be reached!',
+                    1000)
 
         if 'y_rel' in move_dictionary:
             y_rel = move_dictionary['y_rel']
-            if (self.y_min <= self.y_pos + y_rel) and (self.y_max >= self.y_pos + y_rel):
+            if (self.y_min <= self.y_pos +
+                    y_rel) and (self.y_max >= self.y_pos + y_rel):
                 y_rel = y_rel / 1000
                 self.pidevice.MVR({2: y_rel})
             else:
-                print('Relative movement stopped: Y Motion limit would be reached!', 1000)
+                print(
+                    'Relative movement stopped: Y Motion limit would be reached!',
+                    1000)
 
         if 'z_rel' in move_dictionary:
             z_rel = move_dictionary['z_rel']
-            if (self.z_min <= self.z_pos + z_rel) and (self.z_max >= self.z_pos + z_rel):
+            if (self.z_min <= self.z_pos +
+                    z_rel) and (self.z_max >= self.z_pos + z_rel):
                 z_rel = z_rel / 1000
                 self.pidevice.MVR({3: z_rel})
             else:
-                print('Relative movement stopped: z Motion limit would be reached!', 1000)
+                print(
+                    'Relative movement stopped: z Motion limit would be reached!',
+                    1000)
 
         if 'theta_rel' in move_dictionary:
             theta_rel = move_dictionary['theta_rel']
-            if (self.theta_min <= self.theta_pos + theta_rel) and (self.theta_max >= self.theta_pos + theta_rel):
+            if (self.theta_min <= self.theta_pos +
+                    theta_rel) and (self.theta_max >= self.theta_pos + theta_rel):
                 self.pidevice.MVR({4: theta_rel})
             else:
-                print('Relative movement stopped: theta Motion limit would be reached!', 1000)
+                print(
+                    'Relative movement stopped: theta Motion limit would be reached!',
+                    1000)
 
         if 'f_rel' in move_dictionary:
             f_rel = move_dictionary['f_rel']
-            if (self.f_min <= self.f_pos + f_rel) and (self.f_max >= self.f_pos + f_rel):
+            if (self.f_min <= self.f_pos +
+                    f_rel) and (self.f_max >= self.f_pos + f_rel):
                 f_rel = f_rel / 1000
                 self.pidevice.MVR({5: f_rel})
             else:
-                print('Relative movement stopped: f Motion limit would be reached!', 1000)
+                print(
+                    'Relative movement stopped: f Motion limit would be reached!',
+                    1000)
 
         if wait_until_done is True:
             self.pitools.waitontarget(self.pidevice)
@@ -428,7 +464,9 @@ class PIStage(StageBase):
                 x_abs = x_abs / 1000
                 self.pidevice.MOV({1: x_abs})
             else:
-                print('Absolute movement stopped: X Motion limit would be reached!', 1000)
+                print(
+                    'Absolute movement stopped: X Motion limit would be reached!',
+                    1000)
 
         if 'y_abs' in move_dictionary:
             y_abs = move_dictionary['y_abs']
@@ -437,7 +475,9 @@ class PIStage(StageBase):
                 y_abs = y_abs / 1000
                 self.pidevice.MOV({2: y_abs})
             else:
-                print('Absolute movement stopped: Y Motion limit would be reached!', 1000)
+                print(
+                    'Absolute movement stopped: Y Motion limit would be reached!',
+                    1000)
 
         if 'z_abs' in move_dictionary:
             z_abs = move_dictionary['z_abs']
@@ -446,7 +486,9 @@ class PIStage(StageBase):
                 z_abs = z_abs / 1000
                 self.pidevice.MOV({3: z_abs})
             else:
-                print('Absolute movement stopped: Z Motion limit would be reached!', 1000)
+                print(
+                    'Absolute movement stopped: Z Motion limit would be reached!',
+                    1000)
 
         if 'f_abs' in move_dictionary:
             f_abs = move_dictionary['f_abs']
@@ -455,7 +497,9 @@ class PIStage(StageBase):
                 f_abs = f_abs / 1000
                 self.pidevice.MOV({5: f_abs})
             else:
-                print('Absolute movement stopped: F Motion limit would be reached!', 1000)
+                print(
+                    'Absolute movement stopped: F Motion limit would be reached!',
+                    1000)
 
         if 'theta_abs' in move_dictionary:
             theta_abs = move_dictionary['theta_abs']
@@ -463,7 +507,9 @@ class PIStage(StageBase):
             if (self.theta_min <= theta_abs) and (self.theta_max >= theta_abs):
                 self.pidevice.MOV({4: theta_abs})
             else:
-                print('Absolute movement stopped: Theta Motion limit would be reached!', 1000)
+                print(
+                    'Absolute movement stopped: Theta Motion limit would be reached!',
+                    1000)
 
         if wait_until_done is True:
             self.pitools.waitontarget(self.pidevice)
@@ -474,15 +520,20 @@ class PIStage(StageBase):
     def zero_axes(self, list):
         for axis in list:
             try:
-                exec('self.int_' + axis + '_pos_offset = -self.' + axis + '_pos')
-            except:
+                exec(
+                    'self.int_' +
+                    axis +
+                    '_pos_offset = -self.' +
+                    axis +
+                    '_pos')
+            except BaseException:
                 print('Zeroing of axis: ', axis, 'failed')
 
     def unzero_axes(self, list):
         for axis in list:
             try:
                 exec('self.int_' + axis + '_pos_offset = 0')
-            except:
+            except BaseException:
                 print('Unzeroing of axis: ', axis, 'failed')
 
     def load_sample(self):

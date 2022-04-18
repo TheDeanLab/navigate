@@ -9,7 +9,10 @@ from scipy.fftpack import dctn
 import tensorflow as tf
 
 
-def normalized_dct_shannon_entropy(input_array, psf_support_diameter_xy, verbose=False):
+def normalized_dct_shannon_entropy(
+        input_array,
+        psf_support_diameter_xy,
+        verbose=False):
     '''
     # input_array : 2D or 3D image.  If 3D, will iterate through each 2D plane.
     # OTF_support_x : Support for the OTF in the x-dimension.
@@ -54,7 +57,8 @@ def normalized_dct_shannon_entropy(input_array, psf_support_diameter_xy, verbose
 
             # Normalize the DCT
             dct_array = np.divide(dct_array, np.linalg.norm(dct_array, ord=2))
-            image_entropy = calculate_entropy(dct_array, OTF_support_x, OTF_support_y)
+            image_entropy = calculate_entropy(
+                dct_array, OTF_support_x, OTF_support_y)
 
             if verbose:
                 print("DCTS Entropy:", image_entropy)
@@ -76,16 +80,20 @@ def normalized_dct_shannon_entropy(input_array, psf_support_diameter_xy, verbose
             else:
                 tensor_array = tensor[image_idx, :, :]
 
-            # Forward DCT  - e.g., dct(dct(mtrx.T, norm='ortho').T, norm='ortho')
+            # Forward DCT  - e.g., dct(dct(mtrx.T, norm='ortho').T,
+            # norm='ortho')
             tensor_array = tf.signal.dct(tensor_array, type=2)
             tensor_array = tf.signal.dct(tf.transpose(tensor_array), type=2)
 
             # Normalize DCT - dtype = 'float64'
-            tensor_array = tf.math.divide(tensor_array, tf.norm(tensor_array, ord=2))
+            tensor_array = tf.math.divide(
+                tensor_array, tf.norm(
+                    tensor_array, ord=2))
 
             #  Entropy Calculation
             dct_array = tensor_array.numpy()
-            image_entropy = calculate_entropy(dct_array, OTF_support_x, OTF_support_y)
+            image_entropy = calculate_entropy(
+                dct_array, OTF_support_x, OTF_support_y)
 
             if verbose:
                 print("DCTS Entropy:", image_entropy)
@@ -96,16 +104,23 @@ def normalized_dct_shannon_entropy(input_array, psf_support_diameter_xy, verbose
 
     if verbose:
         print("Mean Entropy:", np.mean(entropy), "Std. Dev:", np.std(entropy))
-        print("Mean Execution Time:", np.mean(execution_time), "Std. Dev:", np.std(execution_time))
+        print(
+            "Mean Execution Time:",
+            np.mean(execution_time),
+            "Std. Dev:",
+            np.std(execution_time))
 
     return entropy
+
 
 def calculate_entropy(dct_array, OTF_support_x, OTF_support_y):
     i = dct_array > 0
     image_entropy = np.sum(dct_array[i] * np.log(dct_array[i]))
-    image_entropy = image_entropy + np.sum(-dct_array[~i] * np.log(-dct_array[~i]))
+    image_entropy = image_entropy + \
+        np.sum(-dct_array[~i] * np.log(-dct_array[~i]))
     image_entropy = -2 * image_entropy / (OTF_support_x * OTF_support_y)
     return image_entropy
+
 
 def initiate_gpu():
     gpus = tf.config.list_physical_devices('GPU')
@@ -113,9 +128,11 @@ def initiate_gpu():
         use_cpu = False
         # Create 2 virtual GPUs with 24GB memory each
         try:
-            tf.config.set_logical_device_configuration(gpus[0],
-                                                       [tf.config.LogicalDeviceConfiguration(memory_limit=23000),
-                                                        tf.config.LogicalDeviceConfiguration(memory_limit=23000)])
+            tf.config.set_logical_device_configuration(
+                gpus[0], [
+                    tf.config.LogicalDeviceConfiguration(
+                        memory_limit=23000), tf.config.LogicalDeviceConfiguration(
+                        memory_limit=23000)])
             logical_gpus = tf.config.list_logical_devices('GPU')
         except RuntimeError as e:
             # Virtual devices must be set before GPUs have been initialized
@@ -123,6 +140,7 @@ def initiate_gpu():
     else:
         use_cpu = True
     return use_cpu
+
 
 if (__name__ == "__main__"):
     # Contrast metrics testing

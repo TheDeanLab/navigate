@@ -4,7 +4,8 @@ Camera View Tab
 import numpy as np
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
+from matplotlib.backends.backend_tkagg import (
+    FigureCanvasTkAgg, NavigationToolbar2Tk)
 from controller.devices.camera.SyntheticCamera import Camera as camera
 
 # the figure that will contain the plot
@@ -36,14 +37,11 @@ from controller.devices.camera.SyntheticCamera import Camera as camera
 Maximum intensity projection tab
 """
 # Third Party Imports
-from matplotlib.figure import Figure
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
-from controller.devices.camera.SyntheticCamera import Camera as camera
 
 
 # TODO: Be able to change the channel number, load the data, and perform maximum intensity projection in parallel.
-# TODO: May need a button that specifies when to perform the maximum intensity projection.
+# TODO: May need a button that specifies when to perform the maximum
+# intensity projection.
 
 # the figure that will contain the plot
 # fig = Figure(figsize=(8, 3), dpi=100)

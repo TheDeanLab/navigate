@@ -10,19 +10,22 @@ need something with an eventloop (e.g. a QApplication) even for testing.
 
 from src.model.devices.APIs.logitech import FarmSimulatorSidePanel
 
+
 class JoystickBase:
     def __init__(self):
         self.mode = 'undefined'
 
+
 class SyntheticJoystick(JoystickBase):
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         super().__init__()
         self.parent = parent
         self.cfg = parent.cfg
-    
+
+
 class JoystickHandler():
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         super().__init__()
         self.parent = parent
         self.cfg = parent.cfg
@@ -32,9 +35,9 @@ class JoystickHandler():
         # Select if Demo mode is enabled, or the Logitech Farm Simulator
         if self.cfg.sidepanel == 'FarmSimulator':
             self.joystick = FarmSimulatorSidePanel()
-            #self.joystick.sig_button_pressed.connect(self.button_handler)
-            #self.joystick.sig_mode_changed.connect(self.mode_handler)
-            #self.joystick.sig_axis_moved.connect(self.axis_handler)
+            # self.joystick.sig_button_pressed.connect(self.button_handler)
+            # self.joystick.sig_mode_changed.connect(self.mode_handler)
+            # self.joystick.sig_axis_moved.connect(self.axis_handler)
         elif self.cfg.sidepanel == 'Demo':
             self.joystick = Demo_SidePanel()
 
@@ -47,17 +50,17 @@ class JoystickHandler():
 
         ''' Laser switching buttons '''
         if button_id == 1:
-            self.set_combobox_to_index(self.parent.LaserComboBox,0)
+            self.set_combobox_to_index(self.parent.LaserComboBox, 0)
         if button_id == 2:
-            self.set_combobox_to_index(self.parent.LaserComboBox,1)
+            self.set_combobox_to_index(self.parent.LaserComboBox, 1)
         if button_id == 3:
-            self.set_combobox_to_index(self.parent.LaserComboBox,2)
+            self.set_combobox_to_index(self.parent.LaserComboBox, 2)
         if button_id == 6:
-            self.set_combobox_to_index(self.parent.LaserComboBox,3)
+            self.set_combobox_to_index(self.parent.LaserComboBox, 3)
         if button_id == 7:
-            self.set_combobox_to_index(self.parent.LaserComboBox,4)
+            self.set_combobox_to_index(self.parent.LaserComboBox, 4)
         if button_id == 8:
-            self.set_combobox_to_index(self.parent.LaserComboBox,5)
+            self.set_combobox_to_index(self.parent.LaserComboBox, 5)
 
         ''' Load & unload samples '''
         if button_id == 5:
@@ -92,13 +95,13 @@ class JoystickHandler():
         if button_id == 21:
             current_state = self.parent.get_state_parameter('state')
             if self.verbose:
-                print('Current state: ',current_state)
+                print('Current state: ', current_state)
             if current_state == ('live'):
                 pass
-                #self.parent.StopButton.clicked.emit(True)
+                # self.parent.StopButton.clicked.emit(True)
             elif current_state == 'idle':
                 pass
-                #self.parent.LiveButton.clicked.emit(True)
+                # self.parent.LiveButton.clicked.emit(True)
 
         ''' Increase & decrease laser intensity '''
         if button_id == 26:
@@ -109,7 +112,7 @@ class JoystickHandler():
 
         ''' Stop movement button '''
         if button_id == 28:
-            #self.parent.sig_stop_movement.emit()
+            # self.parent.sig_stop_movement.emit()
 
         if button_id == 29:
             pass
@@ -174,7 +177,7 @@ class JoystickHandler():
         The FarmSimulatorSidePanel has 6 movement axes, 0 to 2 in "blue"
         LED mode (grey button on the joystick) and 3 to 5 in "red" mode.
         When starting up, the mode is unknown and has to be found out by
-        registering which axes produce joystick events. 
+        registering which axes produce joystick events.
         '''
 
         if self.verbose:
@@ -215,7 +218,7 @@ class JoystickHandler():
                 pass
             else:
                 pass
-                #self.parent.sig_move_relative.emit({'f_rel':value/30})
+                # self.parent.sig_move_relative.emit({'f_rel':value/30})
         elif axis_id == 4:
             pass
             # self.parent.sig_move_relative.emit({'f_rel': value/5})

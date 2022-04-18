@@ -20,9 +20,11 @@ def add_median_border(image_data):
     '''
     (z_len, y_len, x_len) = image_data.shape
     median_intensity = np.median(image_data)
-    padded_image_data = np.full((z_len+2, y_len+2, x_len+2), median_intensity)
-    padded_image_data[1:z_len+1, 1:y_len+1, 1:x_len+1]=image_data
+    padded_image_data = np.full(
+        (z_len + 2, y_len + 2, x_len + 2), median_intensity)
+    padded_image_data[1:z_len + 1, 1:y_len + 1, 1:x_len + 1] = image_data
     return padded_image_data
+
 
 def make_sphere_3D(radius):
     '''
@@ -34,11 +36,17 @@ def make_sphere_3D(radius):
     for i in range(int(z_len)):
         for j in range(int(y_len)):
             for k in range(int(x_len)):
-                if ((i**2+j**2+k**2)/radius**2) < 1:
-                    sphere[i,j,k]=1
+                if ((i**2 + j**2 + k**2) / radius**2) < 1:
+                    sphere[i, j, k] = 1
     return sphere
 
-def make_inside_image(padded_image_data, insideGamma,insideBlur, insideDilateRadius, insideErodeRadius):
+
+def make_inside_image(
+        padded_image_data,
+        insideGamma,
+        insideBlur,
+        insideDilateRadius,
+        insideErodeRadius):
     '''
     # Function tries to fill the interior of a cell.
     # Gaussian blur followed by Otsu thresholding, dilation, hole filling, and erosion.
@@ -48,42 +56,48 @@ def make_inside_image(padded_image_data, insideGamma,insideBlur, insideDilateRad
     image_binary = image_blurred > threshold_otsu(image_blurred)
     image_binary = dilation(image_binary, make_sphere_3D(insideDilateRadius))
     image_binary = ndimage.binary_fill_holes(image_binary)
-    image_binary = np.double(erosion(image_binary, make_sphere_3D(insideErodeRadius)))
+    image_binary = np.double(
+        erosion(
+            image_binary,
+            make_sphere_3D(insideErodeRadius)))
     inside_image = gaussian_filter(image_binary, sigma=1)
     return inside_image
+
 
 def make_normalized_image(image_data):
     '''
     # Normalizes the image.  Subtracts Otsu threshold from the image, and normalizes it by the standard deviation.
     '''
     normalized_cell = padded_image_data - threshold_otsu(image_data)
-    normalized_cell = normalized_cell/np.std(normalized_cell)
+    normalized_cell = normalized_cell / np.std(normalized_cell)
     return normalized_cell
+
 
 def surface_filter_gauss_3D(image_data, sigma):
     '''
     # Function identifies surfaces in Z, Y, and Z directions. Returns each image.
     '''
     # Same Sigma Value for All 3 Dimensions
-    w = np.ceil(5*sigma)
+    w = np.ceil(5 * sigma)
     x = np.arange(-w, w, 1)
     g = np.zeros(x.shape)
 
     # Calculate 1D Gaussian
     for i in range(int(x.size)):
-        g[i] = np.exp(-x[i]**2/(2*sigma**2))
+        g[i] = np.exp(-x[i]**2 / (2 * sigma**2))
 
     # Calculate Second Derivative of 1D Gaussian
     d2g = np.zeros(x.shape)
     for i in range(int(x.size)):
-        d2g[i] = (-(x[i]**2/sigma**2 - 1) / sigma**2)*(np.exp(-x[i]**2/(2*sigma**2)))
+        d2g[i] = (-(x[i]**2 / sigma**2 - 1) / sigma**2) * \
+            (np.exp(-x[i]**2 / (2 * sigma**2)))
 
     gSum = np.sum(g)
 
-    #1D Gaussian Kernel
-    g = g/gSum
-    #1D Second Derivative Kernel
-    d2g = d2g/gSum
+    # 1D Gaussian Kernel
+    g = g / gSum
+    # 1D Second Derivative Kernel
+    d2g = d2g / gSum
 
     # Second Derivative of 1D Gaussian Kernel in Z
     d2z_image = signal.fftconvolve(image_data, d2g[:, None, None], mode='same')
@@ -102,6 +116,7 @@ def surface_filter_gauss_3D(image_data, sigma):
 
     return d2z_image, d2y_image, d2x_image
 
+
 def multiscale_surface_filter_3D(input, scales: list):
     '''
     # Function identifies surfaces at multiple scales.
@@ -111,7 +126,8 @@ def multiscale_surface_filter_3D(input, scales: list):
     max_response_scale = np.zeros(np.shape(input))
 
     for i in range(n_scales):
-        d2z_temp, d2y_temp, d2x_temp = surface_filter_gauss_3D(input, scales[i])
+        d2z_temp, d2y_temp, d2x_temp = surface_filter_gauss_3D(
+            input, scales[i])
         d2z_temp[d2z_temp < 0] = 0
         d2y_temp[d2y_temp < 0] = 0
         d2x_temp[d2x_temp < 0] = 0
@@ -123,18 +139,24 @@ def multiscale_surface_filter_3D(input, scales: list):
 
     surface_background_mean = np.mean(max_response)
     surface_background_std = np.std(max_response)
-    surface_threshold = surface_background_mean + (nSTDsurface*surface_background_std)
+    surface_threshold = surface_background_mean + \
+        (nSTDsurface * surface_background_std)
     surface_cell = max_response - surface_threshold
-    surface_cell = max_response/np.std(max_response)
+    surface_cell = max_response / np.std(max_response)
 
     return surface_cell
+
 
 def combine_images(inside_image, normalized_cell, surface_cell):
     '''
     # Function combines the inside image, normalized cell, and surface cell images.
     '''
     level = 0.999
-    combined_image = np.maximum(np.maximum(inside_image, normalized_cell), surface_cell);
+    combined_image = np.maximum(
+        np.maximum(
+            inside_image,
+            normalized_cell),
+        surface_cell)
     combined_image[combined_image < 0] = 0
     combined_image = combined_image > level
     combined_image = binary_fill_holes(combined_image)
@@ -151,20 +173,31 @@ def combine_images(inside_image, normalized_cell, surface_cell):
 
     # Take only the largest connected component.
     final_image = np.zeros(np.shape(labeled_image))
-    final_image[labeled_image==max_label+1] = 1
+    final_image[labeled_image == max_label + 1] = 1
     return final_image
+
 
 def three_level_segmentation(image_data):
     padded_image_data = add_median_border(image_data)
-    inside_image = make_inside_image(padded_image_data, insideGamma, insideBlur, insideDilateRadius, insideErodeRadius)
+    inside_image = make_inside_image(
+        padded_image_data,
+        insideGamma,
+        insideBlur,
+        insideDilateRadius,
+        insideErodeRadius)
     normalized_cell = make_normalized_image(padded_image_data)
     surface_cell = multiscale_surface_filter_3D(padded_image_data, scales)
     final_image = combine_images(inside_image, normalized_cell, surface_cell)
     return final_image
 
+
 def log_detection(image_data, image_threshold=None, pixel_size=0.206):
     # https://github.com/scikit-image/scikit-image/blob/v0.19.0/skimage/feature/blob.py#L401-L564
-    blobs_log = blob_log(image_data, max_sigma=20, num_sigma=3, threshold=image_threshold)
+    blobs_log = blob_log(
+        image_data,
+        max_sigma=20,
+        num_sigma=3,
+        threshold=image_threshold)
     blobs_log[:, 2] = blobs_log[:, 2] * np.sqrt(2) * pixel_size
 
     blobs_dog = blob_dog(image_data, max_sigma=20, threshold=image_threshold)
@@ -193,6 +226,7 @@ def log_detection(image_data, image_threshold=None, pixel_size=0.206):
     plt.tight_layout()
     plt.show()
 
+
 if (__name__ == "__main__"):
     from tifffile import imread
 
@@ -214,4 +248,3 @@ if (__name__ == "__main__"):
     image_directory = '/Users/S155475/Downloads/1_CH00_000000-1.tif'
     image_data = np.array(imread(image_directory))
     log_detection(image_data, image_threshold=None, pixel_size=0.206)
-

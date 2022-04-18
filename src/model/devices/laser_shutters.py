@@ -8,10 +8,12 @@ https://nidaqmx-python.readthedocs.io/en/latest/do_channel_collection.html#nidaq
 import nidaqmx
 from nidaqmx.constants import LineGrouping
 
+
 class ShutterBase:
     """
     Parent Shutter Class
     """
+
     def __init__(self, model, experiment, verbose=False):
         self.model = model
         self.experiment = experiment
@@ -45,6 +47,7 @@ class SyntheticShutter(ShutterBase):
     """
     Virtual Shutter Device
     """
+
     def __init__(self, model, experiment, verbose=False):
         super().__init__(model, experiment, verbose)
 
@@ -76,19 +79,21 @@ class ThorlabsShutter(ShutterBase):
     Requires 5V signal for triggering
     https://www.thorlabs.com/thorproduct.cfm?partnumber=SHB1#ad-image-0
     """
+
     def __init__(self, model, experiment, verbose=False):
         super().__init__(model, experiment, verbose)
 
         # Right Shutter - High Resolution Mode
         self.shutter_right_task = nidaqmx.Task()
-        self.shutter_right_task.do_channels.add_do_chan(self.shutter_right,
-                                                        line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
-        self.shutter_right_task.write(self.shutter_right_state, auto_start=True)
+        self.shutter_right_task.do_channels.add_do_chan(
+            self.shutter_right, line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
+        self.shutter_right_task.write(
+            self.shutter_right_state, auto_start=True)
 
         # Left Shutter - Low Resolution Mode
         self.shutter_left_task = nidaqmx.Task()
-        self.shutter_left_task.do_channels.add_do_chan(self.shutter_left,
-                                                       line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
+        self.shutter_left_task.do_channels.add_do_chan(
+            self.shutter_left, line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
         self.shutter_left_task.write(self.shutter_left_state, auto_start=True)
 
     def __del__(self):
@@ -104,7 +109,8 @@ class ThorlabsShutter(ShutterBase):
         Closes the Right Shutter
         """
         self.shutter_right_state = False
-        self.shutter_right_task.write(self.shutter_right_state, auto_start=True)
+        self.shutter_right_task.write(
+            self.shutter_right_state, auto_start=True)
 
         self.shutter_left_state = True
         self.shutter_left_task.write(self.shutter_left_state, auto_start=True)
@@ -118,7 +124,8 @@ class ThorlabsShutter(ShutterBase):
         Closes the Left Shutter
         """
         self.shutter_right_state = True
-        self.shutter_right_task.write(self.shutter_right_state, auto_start=True)
+        self.shutter_right_task.write(
+            self.shutter_right_state, auto_start=True)
 
         self.shutter_left_state = False
         self.shutter_left_task.write(self.shutter_left_state, auto_start=True)
@@ -131,7 +138,8 @@ class ThorlabsShutter(ShutterBase):
         Closes both Shutters
         """
         self.shutter_right_state = False
-        self.shutter_right_task.write(self.shutter_right_state, auto_start=True)
+        self.shutter_right_task.write(
+            self.shutter_right_state, auto_start=True)
 
         self.shutter_left_state = False
         self.shutter_left_task.write(self.shutter_left_state, auto_start=True)

@@ -5,8 +5,11 @@ This is the controller in an MVC-scheme for mediating the interaction between th
 #  Standard Library Imports
 from pathlib import Path
 import tkinter
-import threading
+import platform
 import multiprocessing as mp
+
+# Third Party Imports
+import numpy as np
 
 # Local View Imports
 from tkinter import filedialog
@@ -28,14 +31,21 @@ from controller.thread_pool import SynchronizedThreadPool
 from view.remote_focus_popup import remote_popup
 
 # Local Model Imports
-from model.concurrency.concurrency_tools import ObjectInSubprocess, SharedNDArray
 from model.aslm_model import Model
 from model.aslm_model_config import Session as session
+from model.concurrency.concurrency_tools import ObjectInSubprocess, SharedNDArray
 
 NUM_OF_FRAMES = 100
 
+
 class ASLM_controller:
-    def __init__(self, root, configuration_path, experiment_path, etl_constants_path, args):
+    def __init__(
+            self,
+            root,
+            configuration_path,
+            experiment_path,
+            etl_constants_path,
+            args):
         self.verbose = args.verbose
         self.stop_acquisition = True
 
@@ -47,14 +57,15 @@ class ASLM_controller:
                                         configuration_path=configuration_path,
                                         experiment_path=experiment_path,
                                         etl_constants_path=etl_constants_path)
-        
+
         # save default experiment file
         self.default_experiment_file = experiment_path
 
         # Load the Configuration to Populate the GUI
         self.configuration = session(configuration_path, self.verbose)
         # Initialize view based on model.configuration
-        configuration_controller = ASLM_Configuration_Controller(self.configuration)
+        configuration_controller = ASLM_Configuration_Controller(
+            self.configuration)
 
         # get etl information from configuration file
         self.etl_other_info = configuration_controller.get_etl_info()
@@ -73,33 +84,31 @@ class ASLM_controller:
                                                              self.verbose)
 
         # Channels Controller
-        self.channels_tab_controller = Channels_Tab_Controller(self.view.settings.channels_tab,
-                                                               self,
-                                                               self.verbose,
-                                                               configuration_controller)
+        self.channels_tab_controller = Channels_Tab_Controller(
+            self.view.settings.channels_tab, self, self.verbose, configuration_controller)
 
         # Camera View Controller
-        self.camera_view_controller = Camera_View_Controller(self.view.camera_waveform.camera_tab,
-                                                             self,
-                                                             self.verbose)
+        self.camera_view_controller = Camera_View_Controller(
+            self.view.camera_waveform.camera_tab, self, self.verbose)
         self.camera_view_controller.populate_view()
 
         # Camera Settings Controller
-        self.camera_setting_controller = Camera_Setting_Controller(self.view.settings.camera_settings_tab,
-                                                                   self,
-                                                                   self.verbose,
-                                                                   configuration_controller)
+        self.camera_setting_controller = Camera_Setting_Controller(
+            self.view.settings.camera_settings_tab,
+            self,
+            self.verbose,
+            configuration_controller)
 
         # Stage Controller
-        self.stage_gui_controller = Stage_GUI_Controller(self.view.stage_control.stage_control_tab,
-                                                         self,
-                                                         self.verbose,
-                                                         configuration_controller)
+        self.stage_gui_controller = Stage_GUI_Controller(
+            self.view.stage_control.stage_control_tab,
+            self,
+            self.verbose,
+            configuration_controller)
 
         # Waveform Controller
-        self.waveform_tab_controller = Waveform_Tab_Controller(self.view.camera_waveform.waveform_tab,
-                                                               self,
-                                                               self.verbose)
+        self.waveform_tab_controller = Waveform_Tab_Controller(
+            self.view.camera_waveform.waveform_tab, self, self.verbose)
 
         # initialize menu bar
         self.initialize_menus()
@@ -127,9 +136,14 @@ class ASLM_controller:
         # data buffer
         # TODO: Update if changes in the buffer size or image size occur.
         # self.data_buffer = [SharedNDArray(shape=(self.model.camera.y_pixels, self.model.camera.x_pixels), dtype='uint16') for i in range(NUM_OF_FRAMES)]
-        self.data_buffer = [SharedNDArray(shape=(2048, 2048), dtype='uint16') for i in range(NUM_OF_FRAMES)]
+        self.data_buffer = [
+            SharedNDArray(
+                shape=(
+                    2048,
+                    2048),
+                dtype='uint16') for i in range(NUM_OF_FRAMES)]
         self.model.set_data_buffer(self.data_buffer)
-    
+
     def initialize_cam_view(self, configuration_controller):
         """
         # Populate widgets with necessary data from config file via config controller. For the entire view tab.
@@ -140,7 +154,6 @@ class ASLM_controller:
         image_metrics = [1, 0, 0]
         self.camera_view_controller.initialize('image', image_metrics)
 
-
     def initialize_menus(self):
         """
         # this function defines all the menus in the menubar
@@ -149,7 +162,9 @@ class ASLM_controller:
             self.populate_experiment_setting(self.default_experiment_file)
 
         def load_experiment():
-            filename = filedialog.askopenfilenames(defaultextension='.yml', filetypes=[('Yaml files', '*.yml')])
+            filename = filedialog.askopenfilenames(
+                defaultextension='.yml', filetypes=[
+                    ('Yaml files', '*.yml')])
             if not filename:
                 return
             self.populate_experiment_setting(filename[0])
@@ -158,16 +173,20 @@ class ASLM_controller:
             # update model.experiment and save it to file
             if not self.update_experiment_setting():
                 return
-            filename = filedialog.asksaveasfilename(defaultextension='.yml', filetypes=[('Yaml file', '*.yml')])
+            filename = filedialog.asksaveasfilename(
+                defaultextension='.yml', filetypes=[
+                    ('Yaml file', '*.yml')])
             if not filename:
                 return
             save_yaml_file('', self.experiment.serialize(), filename)
 
         def popup_etl_setting():
             etl_setting_popup = remote_popup(self.view)
-            etl_controller = Etl_Popup_Controller(etl_setting_popup, self, self.verbose)
+            etl_controller = Etl_Popup_Controller(
+                etl_setting_popup, self, self.verbose)
             etl_controller.initialize(self.etl_setting)
-            etl_controller.set_experiment_values(self.experiment.RemoteFocusParameters)
+            etl_controller.set_experiment_values(
+                self.experiment.RemoteFocusParameters)
 
         menus_dict = {
             self.view.menubar.menu_file: {
@@ -191,13 +210,13 @@ class ASLM_controller:
 
         # add resolution menu
         self.resolution_value = tkinter.StringVar()
-        self.view.menubar.menu_resolution.add_radiobutton(label='Nanoscale',
-                                                          variable=self.resolution_value,
-                                                          value='high')
+        self.view.menubar.menu_resolution.add_radiobutton(
+            label='Nanoscale', variable=self.resolution_value, value='high')
 
         # low resolution sub menu
         # Should only be one checkbox selected, depending on what mode we are initialized in.
-        # In order to make sure only one checkbox would be selected, they need to share one variable: resolution_value
+        # In order to make sure only one checkbox would be selected, they need
+        # to share one variable: resolution_value
         meso_res_sub_menu = tkinter.Menu(self.view.menubar.menu_resolution)
         self.view.menubar.menu_resolution.add_cascade(menu=meso_res_sub_menu,
                                                       label='Mesoscale')
@@ -207,14 +226,15 @@ class ASLM_controller:
                                               variable=self.resolution_value,
                                               value=res)
         # event binding
-        self.resolution_value.trace_add('write', lambda *args: self.execute('resolution', self.resolution_value.get()))
+        self.resolution_value.trace_add(
+            'write', lambda *args: self.execute('resolution', self.resolution_value.get()))
 
         # add separator
         self.view.menubar.menu_resolution.add_separator()
 
         # etl popup
-        self.view.menubar.menu_resolution.add_command(label='ETL Parameters',
-                                                      command=popup_etl_setting)
+        self.view.menubar.menu_resolution.add_command(
+            label='ETL Parameters', command=popup_etl_setting)
 
     def populate_experiment_setting(self, file_name=None):
         """
@@ -237,13 +257,16 @@ class ASLM_controller:
         self.acquire_bar_controller.set_saving_settings(self.experiment.Saving)
 
         # populate StageParameters
-        self.stage_gui_controller.set_experiment_values(self.experiment.StageParameters)
+        self.stage_gui_controller.set_experiment_values(
+            self.experiment.StageParameters)
 
         # channels tab
-        self.channels_tab_controller.set_experiment_values(self.experiment.MicroscopeState)
+        self.channels_tab_controller.set_experiment_values(
+            self.experiment.MicroscopeState)
 
         # camera setting tab
-        self.camera_setting_controller.set_experiment_values(self.experiment.CameraParameters)
+        self.camera_setting_controller.set_experiment_values(
+            self.experiment.CameraParameters)
 
         # resolution/zoom menu
         resolution_mode = self.experiment.MicroscopeState['resolution_mode']
@@ -257,23 +280,23 @@ class ASLM_controller:
         # This function will update model.experiment according values in the View(GUI)
         """
 
-        # acquire_bar_controller
-        # update image mode
+        # acquire_bar_controller - update image mode
         self.experiment.MicroscopeState['image_mode'] = self.acquire_bar_controller.get_mode()
 
-        #camera_view_controller
+        # Camera Setting Controller
+        self.camera_setting_controller.update_experiment_values(self.experiment.CameraParameters)
 
-        #channel_setting_controller
+        # camera_view_controller
 
-        
+        # channel_setting_controller
 
-        #etl_popup_controller
+        # etl_popup_controller
 
-        #gui_controller
+        # gui_controller
 
-        #waveform_tab_controller
+        # waveform_tab_controller
 
-        #widget_functions
+        # widget_functions
 
         # get zoom and resolution info from resolution menu
         if self.resolution_value.get() == 'high':
@@ -281,15 +304,16 @@ class ASLM_controller:
             self.experiment.MicroscopeState['zoom'] = 'N/A'
         else:
             self.experiment.MicroscopeState['resolution_mode'] = 'low'
-            self.experiment.MicroscopeState['zoom'] = self.resolution_value.get()
-
-
+            self.experiment.MicroscopeState['zoom'] = self.resolution_value.get(
+            )
 
         # collect settings from sub-controllers
-        # sub-controllers will validate the value, if something wrong, it will return False
-        return self.channels_tab_controller.update_experiment_values(self.experiment.MicroscopeState) \
-            and self.stage_gui_controller.update_experiment_values(self.experiment.MicroscopeState) \
-            and self.camera_setting_controller.update_experiment_values(self.experiment.CameraParameters)
+        # sub-controllers will validate the value, if something wrong, it will
+        # return False
+        return self.channels_tab_controller.update_experiment_values(
+            self.experiment.MicroscopeState) and self.stage_gui_controller.update_experiment_values(
+            self.experiment.MicroscopeState) and self.camera_setting_controller.update_experiment_values(
+            self.experiment.CameraParameters)
 
     def prepare_acquire_data(self):
         """
@@ -316,13 +340,17 @@ class ASLM_controller:
         """
         create_threads = False
         if create_threads:
-            self.threads_pool.createThread('camera_display',
-                                           self.camera_view_controller.display_image(self.model.data))
-            self.threads_pool.createThread('update_GUI',
-                                           self.camera_view_controller.update_channel_idx(self.model.current_channel))
+            self.threads_pool.createThread(
+                'camera_display',
+                self.camera_view_controller.display_image(
+                    self.model.data))
+            self.threads_pool.createThread(
+                'update_GUI', self.camera_view_controller.update_channel_idx(
+                    self.model.current_channel))
         else:
             self.camera_view_controller.display_image(self.model.data)
-            self.camera_view_controller.update_channel_idx(self.model.current_channel)
+            self.camera_view_controller.update_channel_idx(
+                self.model.current_channel)
 
     def execute(self, command, *args):
         """
@@ -334,7 +362,8 @@ class ASLM_controller:
             """
             # call the model to move stage
             """
-            self.threads_pool.createThread('stage', self.move_stage, args=({args[1]+'_abs': args[0]},))
+            self.threads_pool.createThread(
+                'stage', self.move_stage, args=({args[1] + '_abs': args[0]},))
 
         elif command == 'move_stage_and_update_info':
             """
@@ -352,7 +381,7 @@ class ASLM_controller:
             """
             #  Changes the resolution mode and zoom position.
             #  one Argument = self.resolution_value
-            #  values: 'high', '0.63x', '1x', '2x'...'6x' 
+            #  values: 'high', '0.63x', '1x', '2x'...'6x'
             """
             self.model.change_resolution(args)
 
@@ -363,24 +392,30 @@ class ASLM_controller:
             settings = args[0]
             for k in settings:
                 self.experiment.MicroscopeState[k] = settings[k]
-            print('in continuous mode:the stack acquisition setting is changed')
-            print('you could get the new setting from model.experiment')
-            print('you could also get the changes from args')
-            print(self.experiment.MicroscopeState)
+            if self.verbose:
+                print('in continuous mode:the stack acquisition setting is changed')
+                print('you could get the new setting from model.experiment')
+                print('you could also get the changes from args')
+                print(self.experiment.MicroscopeState)
             pass
 
         elif command == 'laser_cycling':
             self.experiment.MicroscopeState['stack_cycling_mode'] = args[0]
-            print('in continuous mode:the laser cycling setting is changed')
-            print('you could get the new setting from model.experiment')
-            print('you could also get the changes from args')
-            print(self.experiment.MicroscopeState['stack_cycling_mode'])
+            if self.verbose:
+                print('in continuous mode:the laser cycling setting is changed')
+                print('you could get the new setting from model.experiment')
+                print('you could also get the changes from args')
+                print(self.experiment.MicroscopeState['stack_cycling_mode'])
             pass
 
         elif command == 'channel':
             if self.verbose:
                 print('channel settings have been changed, calling model', args)
-            self.model.run_command('update setting', 'channel', args, channels=self.channels_tab_controller.get_values('channel'))
+            self.model.run_command(
+                'update setting',
+                'channel',
+                args,
+                channels=self.channels_tab_controller.get_values('channel'))
 
         elif command == 'timepoint':
             settings = args[0]
@@ -411,19 +446,22 @@ class ASLM_controller:
                 return
 
             if self.acquire_bar_controller.mode == 'single':
-                self.threads_pool.createThread('camera', self.capture_single_image)
+                self.threads_pool.createThread(
+                    'camera', self.capture_single_image)
 
             elif self.acquire_bar_controller.mode == 'continuous':
                 if self.verbose:
                     print('Starting Continuous Acquisition')
-                self.threads_pool.createThread('camera', self.capture_live_image)
+                self.threads_pool.createThread(
+                    'camera', self.capture_live_image)
 
             elif self.acquire_bar_controller.mode == 'z-stack':
                 if self.verbose:
                     print("Starting Z-Stack Acquisition")
                 is_multi_position = self.channels_tab_controller.is_multiposition_val.get()
                 self.model.open_shutter()
-                self.model.run_z_stack_acquisition(is_multi_position, self.update_camera_view())
+                self.model.run_z_stack_acquisition(
+                    is_multi_position, self.update_camera_view())
                 self.model.close_shutter()
 
             elif self.acquire_bar_controller.mode == 'projection':
@@ -437,7 +475,8 @@ class ASLM_controller:
             # stop continuous acquire from camera
             self.stop_acquisition = True
             self.channels_tab_controller.set_mode('stop')
-            self.camera_view_controller.set_mode('stop')  # Breaks live feed loop
+            self.camera_view_controller.set_mode(
+                'stop')  # Breaks live feed loop
 
             # TODO: stop continuous acquire from camera
             # Do I need to lock the thread here or how do I stop the process with the thread pool?
@@ -449,13 +488,19 @@ class ASLM_controller:
             #  self.threads_pool.createThread('camera', self.camera_view_controller.live_feed)
 
         if self.verbose:
-            print('In central controller: command passed from child', command, args)
+            print(
+                'In central controller: command passed from child',
+                command,
+                args)
 
     def capture_single_image(self):
         """
         # Trigger model to capture a single image
         """
-        self.model.run_command('single', self.experiment.MicroscopeState, saving_info=self.experiment.Saving)
+        self.model.run_command(
+            'single',
+            self.experiment.MicroscopeState,
+            saving_info=self.experiment.Saving)
         image_id = self.show_img_pipe_parent.recv()
         self.camera_view_controller.display_image(self.data_buffer[image_id])
 
@@ -468,10 +513,11 @@ class ASLM_controller:
                 print('receive', image_id)
             if image_id == 'stop':
                 break
-            if type(image_id) is not int:
+            if not isinstance(image_id, int):
                 print('some thing wrong happened, stop the model!', image_id)
                 self.stop_acquisition = True
-            self.camera_view_controller.display_image(self.data_buffer[image_id])
+            self.camera_view_controller.display_image(
+                self.data_buffer[image_id])
             if self.stop_acquisition:
                 self.model.run_command('stop')
                 if self.verbose:
@@ -479,7 +525,7 @@ class ASLM_controller:
 
     def move_stage(self, args):
         self.model.move_stage(args)
-            
+
 
 if __name__ == '__main__':
     # Testing section.

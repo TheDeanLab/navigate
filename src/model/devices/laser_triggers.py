@@ -8,6 +8,7 @@ Lasers should be configured to operate in a mixed modulation mode.
 import nidaqmx
 from nidaqmx.constants import LineGrouping
 
+
 class LaserTriggerBase:
     def __init__(self, model, experiment, verbose=False):
         self.model = model
@@ -15,7 +16,8 @@ class LaserTriggerBase:
         self.verbose = verbose
 
         # Number of Lasers
-        # TODO: Make it so that we can iterate through each laser and create a task.
+        # TODO: Make it so that we can iterate through each laser and create a
+        # task.
         self.number_of_lasers = self.model.LaserParameters['number_of_lasers']
 
         # Minimum and Maximum Laser Voltages
@@ -23,7 +25,6 @@ class LaserTriggerBase:
         self.laser_max_do = self.model.LaserParameters['laser_max_do']
         self.laser_min_ao = self.model.LaserParameters['laser_min_ao']
         self.laser_max_ao = self.model.LaserParameters['laser_max_ao']
-
 
         # Digital Ports
         self.switching_port = self.model.DAQParameters['laser_port_switcher']
@@ -75,7 +76,10 @@ class LaserTriggerBase:
         if self.verbose:
             print("Not Implemented in LaserTriggerBase")
 
-    def set_laser_analog_voltage(self, current_laser_index, current_laser_intensity):
+    def set_laser_analog_voltage(
+            self,
+            current_laser_index,
+            current_laser_intensity):
         """
         # Sets the constant voltage on the DAQ according to the laser index and intensity, which is a percentage.
         """
@@ -99,25 +103,22 @@ class LaserTriggers(LaserTriggerBase):
         self.laser_2_ao_task = nidaqmx.Task()
 
         # Add Ports to each Digital Task
-        self.switching_task.do_channels.add_do_chan(self.switching_port,
-                                                    line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
-        self.laser_0_do_task.do_channels.add_do_chan(self.laser_0_do_port,
-                                                    line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
-        self.laser_1_do_task.do_channels.add_do_chan(self.laser_1_do_port,
-                                                    line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
-        self.laser_2_do_task.do_channels.add_do_chan(self.laser_2_do_port,
-                                                    line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
+        self.switching_task.do_channels.add_do_chan(
+            self.switching_port, line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
+        self.laser_0_do_task.do_channels.add_do_chan(
+            self.laser_0_do_port, line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
+        self.laser_1_do_task.do_channels.add_do_chan(
+            self.laser_1_do_port, line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
+        self.laser_2_do_task.do_channels.add_do_chan(
+            self.laser_2_do_port, line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
 
         # Add Ports to each Analog Task - Set Voltage Limits
-        self.laser_0_ao_task.ao_channels.add_ao_voltage_chan(self.laser_0_ao_port,
-                                                             min_val=self.laser_min_ao,
-                                                             max_val=self.laser_max_ao)
-        self.laser_1_ao_task.ao_channels.add_ao_voltage_chan(self.laser_1_ao_port,
-                                                             min_val=self.laser_min_ao,
-                                                             max_val=self.laser_max_ao)
-        self.laser_2_ao_task.ao_channels.add_ao_voltage_chan(self.laser_2_ao_port,
-                                                             min_val=self.laser_min_ao,
-                                                             max_val=self.laser_max_ao)
+        self.laser_0_ao_task.ao_channels.add_ao_voltage_chan(
+            self.laser_0_ao_port, min_val=self.laser_min_ao, max_val=self.laser_max_ao)
+        self.laser_1_ao_task.ao_channels.add_ao_voltage_chan(
+            self.laser_1_ao_port, min_val=self.laser_min_ao, max_val=self.laser_max_ao)
+        self.laser_2_ao_task.ao_channels.add_ao_voltage_chan(
+            self.laser_2_ao_port, min_val=self.laser_min_ao, max_val=self.laser_max_ao)
 
         # Write Tasks
         self.switching_task.write(self.switching_state, auto_start=True)
@@ -177,11 +178,15 @@ class LaserTriggers(LaserTriggerBase):
         self.laser_1_do_task.write(False, auto_start=True)
         self.laser_2_do_task.write(False, auto_start=True)
 
-    def set_laser_analog_voltage(self, current_laser_index, current_laser_intensity):
+    def set_laser_analog_voltage(
+            self,
+            current_laser_index,
+            current_laser_intensity):
         """
         # Sets the constant voltage on the DAQ according to the laser index and intensity, which is a percentage.
         """
-        scaled_laser_voltage = (int(current_laser_intensity) / 100) * self.laser_max_ao
+        scaled_laser_voltage = (
+            int(current_laser_intensity) / 100) * self.laser_max_ao
         if current_laser_index == 0:
             self.laser_0_ao_task.write(scaled_laser_voltage, auto_start=True)
         elif current_laser_index == 1:
@@ -222,9 +227,11 @@ class SyntheticLaserTriggers(LaserTriggerBase):
     def turn_off_lasers(self):
         pass
 
-    def set_laser_analog_voltage(self, current_laser_index, current_laser_intensity):
+    def set_laser_analog_voltage(
+            self,
+            current_laser_index,
+            current_laser_intensity):
         """
         # Sets the constant voltage on the DAQ according to the laser index and intensity, which is a percentage.
         """
         pass
-

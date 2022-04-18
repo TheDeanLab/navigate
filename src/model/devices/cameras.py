@@ -7,7 +7,7 @@ import platform
 import numpy as np
 
 # Local Imports
-from model.devices.APIs.hamamatsu.HamamatsuAPI import DCAM as HamamatsuController
+
 
 
 class CameraBase:
@@ -194,9 +194,10 @@ class SyntheticCamera(CameraBase):
 
 
 class HamamatsuOrca(CameraBase):
+
     def __init__(self, camera_id, model, experiment, verbose=False):
         super().__init__(camera_id, model, experiment, verbose)
-
+        from model.devices.APIs.hamamatsu.HamamatsuAPI import DCAM as HamamatsuController
         # Initialize Camera Controller
         # Values are pulled from the CameraParameters section of the configuration.yml file.
         # Exposure time converted here from milliseconds to seconds.

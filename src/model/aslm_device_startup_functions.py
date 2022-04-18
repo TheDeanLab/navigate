@@ -17,7 +17,7 @@ def start_camera(configuration, experiment, verbose):
         return HamamatsuOrca(0, configuration, experiment, verbose)
     elif configuration.Devices['camera'] == 'SyntheticCamera':
         from model.devices.cameras import SyntheticCamera
-        return SyntheticCamera(camera_id, configuration, experiment, verbose)
+        return SyntheticCamera(0, configuration, experiment, verbose)
     else:
         device_not_found(configuration.Devices['camera'])
 

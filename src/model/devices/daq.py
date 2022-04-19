@@ -294,6 +294,7 @@ class SyntheticDAQ(DAQBase):
         # connect camera with daq: only in syntheticDAQ
         """
         self.camera = camera
+        pass
 
 
 class NIDAQ(DAQBase):

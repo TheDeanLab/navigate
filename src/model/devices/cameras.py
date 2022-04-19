@@ -1,7 +1,7 @@
 # Standard Library Imports
 import time
 import ctypes
-import platform
+import importlib
 
 # Third Party Imports
 import numpy as np
@@ -28,9 +28,8 @@ class CameraBase:
         self.x_pixels = int(self.x_pixels / self.x_binning)
         self.y_pixels = int(self.y_pixels / self.y_binning)
 
-        # Initialize Exposure and Display Information
+        # Initialize Exposure and Display Information - Convert from milliseconds to seconds.
         self.camera_line_interval = self.model.CameraParameters['line_interval']
-        # milliseconds to seconds
         self.camera_exposure_time = self.model.CameraParameters['exposure_time'] / 1000
         self.camera_display_live_subsampling = self.model.CameraParameters[
             'display_live_subsampling']
@@ -197,12 +196,13 @@ class HamamatsuOrca(CameraBase):
 
     def __init__(self, camera_id, model, experiment, verbose=False):
         super().__init__(camera_id, model, experiment, verbose)
-        from model.devices.APIs.hamamatsu.HamamatsuAPI import DCAM as HamamatsuController
-        # Initialize Camera Controller
+
+        # Locally Import Hamamatsu API and Initialize Camera Controller
+        HamamatsuController = importlib.import_module('model.devices.APIs.hamamatsu.HamamatsuAPI')
+        self.camera_controller = HamamatsuController.DCAM(camera_id)
+
         # Values are pulled from the CameraParameters section of the configuration.yml file.
         # Exposure time converted here from milliseconds to seconds.
-
-        self.camera_controller = HamamatsuController(camera_id)
         self.camera_controller.set_property_value(
             "sensor_mode", 1)
 

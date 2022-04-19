@@ -72,7 +72,7 @@ class Model:
             setattr(self, k, threads_dict[k].get_result())
 
         # in synthetic_hardware mode, we need to wire up camera to daq
-        if args.synthetic_hardware:
+        if args.synthetic_hardware or args.sh:
             self.daq.set_camera(self.camera)
 
         # Acquisition Housekeeping

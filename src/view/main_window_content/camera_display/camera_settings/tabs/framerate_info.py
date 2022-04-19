@@ -50,17 +50,17 @@ class framerate_info(ttk.LabelFrame):
         text_label = 'Framerate Info'
         ttk.LabelFrame.__init__(self, settings_tab, text=text_label, *args, **kwargs)
 
-        #Holds widgests, this is done in case more widgets are to be added in a different frame, these can be grouped together
+        #  Holds widgests, this is done in case more widgets are to be added in a different frame, these can be grouped together
         content_frame = ttk.Frame(self)
         content_frame.grid(row=0, column=0, sticky=(NSEW))
 
-        #Dictionary for all the variables, this will be used by the controller
+        #  Dictionary for all the variables, this will be used by the controller
         self.inputs = {}
-        self.labels = ['Exposure Time (ms)', 'Readout Time (ms)', 'Framerate (Hz)', 'Images to Average']
+        self.labels = ['Exposure Time (ms)', 'Readout Time (ms)', 'Max Framerate (Hz)', 'Images to Average']
         self.names = ['exposure_time', 'readout_time', 'framerate', 'images_to_average']
         self.read_only = [True, True, True, False]
 
-        #Dropdown loop
+        #  Dropdown loop
         for i in range(len(self.labels)):
             if self.read_only[i]:
                 self.inputs[self.names[i]] = LabelInput(parent=content_frame,

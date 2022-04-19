@@ -77,13 +77,13 @@ class CameraBase:
     def stop(self):
         pass
 
-    def report_camera_settings(self):
+    def report_settings(self):
         pass
 
     def close_camera(self):
         pass
 
-    def set_camera_sensor_mode(self, mode):
+    def set_sensor_mode(self, mode):
         pass
 
     def set_exposure_time(self, time):
@@ -130,13 +130,13 @@ class SyntheticCamera(CameraBase):
     def stop(self):
         self.stop_flag = True
 
-    def report_camera_settings(self):
+    def report_settings(self):
         pass
 
     def close_camera(self):
         pass
 
-    def set_camera_sensor_mode(self, mode):
+    def set_sensor_mode(self, mode):
         pass
 
     def set_exposure_time(self, exposure_time):
@@ -281,7 +281,7 @@ class HamamatsuOrca(CameraBase):
     def stop(self):
         self.stop_flag = True
 
-    def report_camera_settings(self):
+    def report_settings(self):
         params = ["defect_correct_mode",
                   "sensor_mode",
                   "binning",
@@ -300,7 +300,7 @@ class HamamatsuOrca(CameraBase):
     def close_camera(self):
         self.camera_controller.shutdown()
 
-    def set_camera_sensor_mode(self, mode):
+    def set_sensor_mode(self, mode):
         if mode == 'Normal':
             self.camera_controller.set_property_value("sensor_mode", 1)
         elif mode == 'Light-Sheet':
@@ -308,7 +308,7 @@ class HamamatsuOrca(CameraBase):
         else:
             print('Camera mode not supported')
 
-    def set_camera_readout_direction(self, mode):
+    def set_readout_direction(self, mode):
         if mode == 'Top-to-Bottom':
             #  'Forward' readout direction
             self.camera_controller.set_property_value("readout_direction", 1)
@@ -326,7 +326,7 @@ class HamamatsuOrca(CameraBase):
         # TODO: Figure out how to do this.  I believe it is dictated by the exposure time and the line interval.
         pass
 
-    def calculate_camera_readout_time(self):
+    def calculate_readout_time(self):
         """
         # Calculates the readout time and maximum frame rate according to the camera configuration settings.
         # Assumes model C13440 with Camera Link communication from Hamamatsu.

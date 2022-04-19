@@ -46,42 +46,29 @@ class Camera_Setting_Controller(GUI_Controller):
         super().__init__(view, parent_controller, verbose)
 
         # Getting Widgets/Buttons
-        # keys = ['Sensor', 'Readout', 'Pixels']
         self.mode_widgets = view.camera_mode.get_widgets()
         self.framerate_widgets = view.framerate_info.get_widgets()
-        # keys = ['Temp1', 'Temp2', 'Temp3', 'Exposure', 'Integration']
-
         self.roi_widgets = view.camera_roi.get_widgets()
-        # roi_keys = ['Left', 'Right', 'Top', 'Bottom'], fov_keys =
-        # ['FOV_X', 'FOV_Y'], center_keys = ['Center_X', 'Center_Y'], num_pix_keys = ['Pixels_X', 'Pixels_Y']
-
         self.roi_btns = view.camera_roi.get_buttons()
-        # keys = ['Center_ROI', 'Center_At', 'Use_Pixels', '1024', '512']
 
-        self.sensor_mode = self.parent_controller.configuration.CameraParameters[
-            'sensor_mode']
-        self.readout_direction = self.parent_controller.configuration.CameraParameters[
-            'sensor_mode']
-        self.pixel_size = self.parent_controller.configuration.CameraParameters[
-            'pixel_size_in_microns']
+        # Get Default Configuration Values
+        self.sensor_mode = self.parent_controller.configuration.CameraParameters['sensor_mode']
+        self.readout_direction = self.parent_controller.configuration.CameraParameters['sensor_mode']
+        self.pixel_size = self.parent_controller.configuration.CameraParameters['pixel_size_in_microns']
         self.width = self.parent_controller.configuration.CameraParameters['x_pixels']
         self.height = self.parent_controller.configuration.CameraParameters['y_pixels']
 
         # Binding for Camera Mode
-        self.mode_widgets['Sensor'].widget.bind(
-            '<<ComboboxSelected>>', self.update_readout)
+        self.mode_widgets['Sensor'].widget.bind('<<ComboboxSelected>>', self.update_sensor_mode)
 
         # Binding for Readout Mode
-        self.mode_widgets['Readout'].widget.bind(
-            '<<ComboboxSelected>>', self.action_readout)
-        # TODO: Make abstraction for cameras.  Need a function to call in
-        # Hamamatsu.
+        self.mode_widgets['Readout'].widget.bind('<<ComboboxSelected>>', self.update_readout_direction)
 
         # Binding for ROI Mode
         # Trace examples
         # self.roi_widgets['Right'].widget.config(command=self.update_pixels, relief="sunken") # TODO change button style during transitions
         #self.roi_widgets['Right'].widget.trace('w', command=self.update_pixels)
-        #self.roi_widgets['Right'].widget.bind('<<ComboboxSelected>>', self.action_readout)
+        #self.roi_widgets['Right'].widget.bind('<<ComboboxSelected>>', self.update_readout_direction)
 
         # self.roi_widgets['Left'].widget.config(command=self.update_pixels)
         # self.roi_widgets['Top'].widget.config(command=self.update_pixels)
@@ -91,27 +78,28 @@ class Camera_Setting_Controller(GUI_Controller):
 
     def initialize(self, config):
         '''
-        #### Function that sets widgets based on data given from main controller/config
+        ## Function that sets widgets based on data given from main controller/config
         '''
         # Camera Mode
-        self.mode_widgets['Sensor'].widget['values'] = [
-            'Normal', 'Light Sheet']
+        self.mode_widgets['Sensor'].widget['values'] = ['Normal', 'Light-Sheet']
         self.mode_widgets['Sensor'].widget['state'] = 'readonly'
         self.mode_widgets['Sensor'].widget.selection_clear()
         self.mode_widgets['Pixels'].widget['state'] = 'disabled'
 
-        self.mode_widgets['Readout'].widget['values'] = [
-            ' ', 'Top to Bottom', 'Bottom to Top']
+        # Readout Mode
+        self.mode_widgets['Readout'].widget['values'] = [' ', 'Top-to-Bottom', 'Bottom-to-Top']
         self.mode_widgets['Readout'].widget['state'] = 'disabled'
         self.mode_widgets['Readout'].selection_clear()
 
-        # set range value
+        # Set range value
         width, height = config.get_pixels(self.verbose)
         self.roi_widgets['Width'].widget.config(to=width)
         self.roi_widgets['Height'].widget.config(to=height)
+
         # This should not be edited for now
         self.roi_widgets['Center_X'].widget['state'] = 'disabled'
         self.roi_widgets['Center_Y'].widget['state'] = 'disabled'
+
         # This should not be edited for now
         self.roi_widgets['Center_X'].widget['state'] = 'disabled'
         self.roi_widgets['Center_Y'].widget['state'] = 'disabled'
@@ -120,54 +108,59 @@ class Camera_Setting_Controller(GUI_Controller):
         self.roi_widgets['FOV_X'].widget['state'] = 'disabled'
         self.roi_widgets['FOV_Y'].widget['state'] = 'disabled'
 
-    def set_experiment_values(self, setting_dict):
-        # Number of Cameras.
-        # ... set(setting_dict['number_of_cameras'])
+    def calculate_physical_dimensions(self, setting_dict):
+        """
+        Calculates the size of the field of view according to the magnification of the system,
+        the physical size of the pixel, and the number of pixels.
+        """
+        if self.parent_controller.experiment.MicroscopeState['resolution_mode'] == 'high':
+            tube_lens_focal_length = 300
+            multi_immersion_focal_length = 8.4
+            magnification = tube_lens_focal_length / multi_immersion_focal_length
+        else:
+            magnification = self.parent_controller.experiment.MicroscopeState['zoom']
+            magnification = float(magnification[:-1])
+
+        physical_dimensions_x = setting_dict['x_pixels'] * self.pixel_size / magnification
+        physical_dimensions_y = setting_dict['y_pixels'] * self.pixel_size / magnification
+        return [physical_dimensions_x, physical_dimensions_y]
+
+
+    def set_experiment_values(self, experiment):
+        """
+        Experiment yaml filed passed by controller.
+        """
+        setting_dict = experiment.CameraParameters
+        microscope_state = experiment.MicroscopeState
 
         # Readout Settings
         self.mode_widgets['Sensor'].set(setting_dict['sensor_mode'])
         self.mode_widgets['Readout'].set(setting_dict['readout_direction'])
 
         # FOV Settings
-        # self.mode_widgets['Width'].set(setting_dict['x_pixels'])
-        # self.mode_widgets['Height'].set(setting_dict['y_pixels'])
+        self.roi_widgets['Center_X'].set(setting_dict['x_pixels'] / 2)
+        self.roi_widgets['Center_Y'].set(setting_dict['y_pixels'] / 2)
+        self.roi_widgets['Width'].set(setting_dict['x_pixels'])
+        self.roi_widgets['Height'].set(setting_dict['y_pixels'])
 
-        # Binning Settings
-        # ... set(setting_dict['binning'])
+        # Physical Dimensions
+        [physical_dimensions_x, physical_dimensions_y] = self.calculate_physical_dimensions(setting_dict)
+        self.roi_widgets['FOV_X'].set(physical_dimensions_x)
+        self.roi_widgets['FOV_Y'].set(physical_dimensions_y)
 
-        # populate pixels {
-        #   'low': self.configuration.ZoomParameters['high_res_zoom_pixel_size'],
-        #   'high': self.configuration.ZoomParameters['low_res_zoom_pixel_size']
-        # }
+        # Camera Framerate Info - 'exposure_time', 'readout_time', 'framerate', 'images_to_average'
+        # Currently for just the first channel
+        exposure_time = microscope_state['channels']['channel_1']['camera_exposure_time']
+        self.framerate_widgets['exposure_time'].set(exposure_time)
 
-        # Populating FOV Mode
-        # TODO: Not sure why zoom is being populated as low.  Cannot currently
-        # track down. Hardcoded.
+        # TODO: Currently the frame rate and the readout time is calculated in the model.camera class.
+        # readout_time, max_frame_rate = self.parent_controller.model.camera.calculate_readout_time()
+        # self.framerate_widgets['readout_time'].set(readout_time)
+        # self.framerate_widgets['framerate'].set(max_frame_rate)
 
-        # ROI Mode: 'pixels'
-        # width = setting_dict['width']
-        # height = setting_dict['height']
-        # top = 1
-        # left = 1
+        # Binning
+        self.framerate_widgets['images_to_average'].set(setting_dict['frames_to_average'])
 
-        # ROI Center
-        # self.roi_widgets['Center_X'].set(width/2)
-        # self.roi_widgets['Center_Y'].set(height/2)
-
-        # Framerate
-        # TODO Kevin this is where the widgets have their default values set, uncomment what you want set initially
-        # self.framerate_widgets['Temp1'].set(data[0])
-        # self.framerate_widgets['Temp2'].set(data[1])
-        # self.framerate_widgets['Temp3'].set(data[2])
-        # self.framerate_widgets['Exposure'].set(data[3])
-        # self.framerate_widgets['Integration'].set(data[4])
-
-        # FOV
-        # pixel_size = setting_dict['pixel_size']
-        # zoom = setting_dict['zoom']
-        # #TODO: Adjust to account for zoom changes.
-        # self.roi_widgets['FOV_X'].set(self.pixel_size)
-        # self.roi_widgets['FOV_Y'].set(self.pixel_size)
 
     def update_experiment_values(self, setting_dict):
         """
@@ -188,9 +181,10 @@ class Camera_Setting_Controller(GUI_Controller):
 
         setting_dict['number_of_cameras'] = 1
         setting_dict['pixel_size'] = self.roi_widgets['FOV_X'].get()
+
         return True
 
-    def update_readout(self, *args):
+    def update_sensor_mode(self, *args):
         '''
         Updates text in readout widget based on what sensor mode is selected
         If we are in the Light Sheet mode, then we want the camera
@@ -221,7 +215,7 @@ class Camera_Setting_Controller(GUI_Controller):
             if self.verbose:
                 print("Light Sheet Camera Readout Mode")
 
-    def action_readout(self, *args):
+    def update_readout_direction(self, *args):
         '''
         #### Trace function when changes to the readout direction are made.
         '''

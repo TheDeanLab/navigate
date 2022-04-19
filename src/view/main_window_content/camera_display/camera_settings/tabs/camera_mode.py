@@ -76,7 +76,7 @@ class camera_mode(ttk.Labelframe):
                 self.inputs[self.names[i]] = LabelInput(parent=content_frame,
                                                         label=self.labels[i],
                                                         input_class=ttk.Spinbox,
-                                                        input_var=tk.StringVar()   ,
+                                                        input_var=tk.StringVar(),
                                                         input_args={"from_": 0, "to": 10000, "increment": 1}                                       
                                                         )
                 self.inputs[self.names[i]].grid(row=i, column=0, pady=1)

@@ -300,12 +300,10 @@ class ASLM_controller:
             self.experiment.StageParameters)
 
         # channels tab
-        self.channels_tab_controller.set_experiment_values(
-            self.experiment.MicroscopeState)
+        self.channels_tab_controller.set_experiment_values(self.experiment.MicroscopeState)
 
         # camera setting tab
-        self.camera_setting_controller.set_experiment_values(
-            self.experiment.CameraParameters)
+        self.camera_setting_controller.set_experiment_values(self.experiment)
 
         # resolution/zoom menu
         resolution_mode = self.experiment.MicroscopeState['resolution_mode']

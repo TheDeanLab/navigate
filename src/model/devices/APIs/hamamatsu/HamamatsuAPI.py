@@ -859,11 +859,11 @@ class DCAM:
         # Find property limits and correct value if necessary
         [property_value_min, property_value_max] = self.get_property_range(idprop)
         if value < property_value_min:
-            print(" set property value", value, "is less than minimum of", property_value_min, name,
+            print(" The property value of ", value, "is less than minimum of", property_value_min, name,
                   "setting to minimum")
             value = property_value_min
         if value > property_value_max:
-            print(" set property value", value, "is greater than maximum of", property_value_max, name,
+            print(" The property value of", value, "is greater than maximum of", property_value_max, name,
                   "setting to maximum")
             value = property_value_max
 

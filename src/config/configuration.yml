@@ -299,3 +299,6 @@ GUIParameters:
       step: 10
     }
   }
+
+SharedNDArray:
+  number_of_frames: 100

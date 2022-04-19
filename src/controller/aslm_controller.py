@@ -1,19 +1,49 @@
 """
-This is the controller in an MVC-scheme for mediating the interaction between the View (GUI) and the model
-(./model/aslm_model.py). Use: https://www.python-course.eu/tkinter_events_binds.php
+ASLM Controller.
+
+Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+provided that the following conditions are met:
+
+     * Redistributions of source code must retain the above copyright notice,
+     this list of conditions and the following disclaimer.
+
+     * Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in the
+     documentation and/or other materials provided with the distribution.
+
+     * Neither the name of the copyright holders nor the names of its
+     contributors may be used to endorse or promote products derived from this
+     software without specific prior written permission.
+
+NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
+THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
 """
+
 #  Standard Library Imports
 from pathlib import Path
 import tkinter
-import platform
 import multiprocessing as mp
 
 # Third Party Imports
-import numpy as np
 
 # Local View Imports
 from tkinter import filedialog
 from view.main_application_window import Main_App as view
+from view.remote_focus_popup import remote_popup
 
 # Local Sub-Controller Imports
 from controller.sub_controllers.stage_gui_controller import Stage_GUI_Controller
@@ -27,15 +57,10 @@ from controller.sub_controllers.etl_popup_controller import Etl_Popup_Controller
 from controller.aslm_controller_functions import *
 from controller.thread_pool import SynchronizedThreadPool
 
-# Local View Imports
-from view.remote_focus_popup import remote_popup
-
 # Local Model Imports
 from model.aslm_model import Model
 from model.aslm_model_config import Session as session
 from model.concurrency.concurrency_tools import ObjectInSubprocess, SharedNDArray
-
-NUM_OF_FRAMES = 100
 
 
 class ASLM_controller:
@@ -63,6 +88,7 @@ class ASLM_controller:
 
         # Load the Configuration to Populate the GUI
         self.configuration = session(configuration_path, self.verbose)
+
         # Initialize view based on model.configuration
         configuration_controller = ASLM_Configuration_Controller(
             self.configuration)
@@ -129,19 +155,29 @@ class ASLM_controller:
 
         # Advanced Tab
 
-        # wire up show image pipe
+        # Wire up show image pipe
         self.show_img_pipe_parent, self.show_img_pipe_child = mp.Pipe()
         self.model.set_show_img_pipe(self.show_img_pipe_child)
 
-        # data buffer
-        # TODO: Update if changes in the buffer size or image size occur.
-        # self.data_buffer = [SharedNDArray(shape=(self.model.camera.y_pixels, self.model.camera.x_pixels), dtype='uint16') for i in range(NUM_OF_FRAMES)]
+        # Create default data buffer
         self.data_buffer = [
             SharedNDArray(
                 shape=(
-                    2048,
-                    2048),
-                dtype='uint16') for i in range(NUM_OF_FRAMES)]
+                    int(self.configuration.CameraParameters['y_pixels']),
+                    int(self.configuration.CameraParameters['x_pixels'])),
+                dtype='uint16') for i in range(self.configuration.SharedNDArray['number_of_frames'])]
+        self.model.set_data_buffer(self.data_buffer)
+
+    def update_buffer_size(self):
+        """
+        # Update the buffer size according to the current camera dimensions listed in the experimental parameters
+        """
+        self.data_buffer = [
+            SharedNDArray(
+                shape=(
+                    int(self.experiment.CameraParameters['y_pixels']),
+                    int(self.experiment.CameraParameters['x_pixels'])),
+                dtype='uint16') for i in range(self.configuration.SharedNDArray['number_of_frames'])]
         self.model.set_data_buffer(self.data_buffer)
 
     def initialize_cam_view(self, configuration_controller):
@@ -172,7 +208,9 @@ class ASLM_controller:
         def save_experiment():
             # update model.experiment and save it to file
             if not self.update_experiment_setting():
-                tkinter.messagebox.showerror(title='Warning', message='There are some missing/wrong settings! Can not save this experiment setting!')
+                tkinter.messagebox.showerror(
+                    title='Warning',
+                    message='There are some missing/wrong settings! Can not save this experiment setting!')
                 return
             filename = filedialog.asksaveasfilename(
                 defaultextension='.yml', filetypes=[
@@ -282,7 +320,8 @@ class ASLM_controller:
         """
 
         # acquire_bar_controller - update image mode
-        self.experiment.MicroscopeState['image_mode'] = self.acquire_bar_controller.get_mode()
+        self.experiment.MicroscopeState['image_mode'] = self.acquire_bar_controller.get_mode(
+        )
         self.experiment.Saving['date'] = str(datetime.now().date())
 
         # camera_view_controller
@@ -321,7 +360,9 @@ class ASLM_controller:
         # second, set sub-controllers' mode to 'live' when 'continuous' was selected, or 'stop'
         """
         if not self.update_experiment_setting():
-            tkinter.messagebox.showerror(title='Warning', message='There are some missing/wrong settings! Can not start acquisition!')
+            tkinter.messagebox.showerror(
+                title='Warning',
+                message='There are some missing/wrong settings! Can not start acquisition!')
             return False
 
         if self.experiment.MicroscopeState['image_mode'] == 'continuous':

@@ -1,3 +1,38 @@
+"""
+ASLM Model.
+
+Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+provided that the following conditions are met:
+
+     * Redistributions of source code must retain the above copyright notice,
+     this list of conditions and the following disclaimer.
+
+     * Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in the
+     documentation and/or other materials provided with the distribution.
+
+     * Neither the name of the copyright holders nor the names of its
+     contributors may be used to endorse or promote products derived from this
+     software without specific prior written permission.
+
+NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
+THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+"""
+
 # Standard Library Imports
 import time
 import os
@@ -9,12 +44,10 @@ import numpy as np
 from tifffile import imsave
 
 # Local Imports
-from .aslm_device_startup_functions import *
+import model.aslm_device_startup_functions as startup_functions
 from .aslm_model_config import Session as session
 from controller.thread_pool import SynchronizedThreadPool
 from model.concurrency.concurrency_tools import ResultThread, SharedNDArray, ObjectInSubprocess
-
-NUM_OF_FRAMES = 100
 
 
 class Model:
@@ -24,7 +57,7 @@ class Model:
             configuration_path=None,
             experiment_path=None,
             etl_constants_path=None):
-        # Retrieve the initial configuration from the yaml file
+        # Specify verbosity
         self.verbose = args.verbose
 
         # Loads the YAML file for all of the microscope parameters
@@ -52,20 +85,51 @@ class Model:
 
         # Move device initialization steps to multiple threads
         threads_dict = {
-            'filter_wheel': ResultThread(target=start_filter_wheel,
-                                         args=(self.configuration, self.verbose)).start(),
-            'zoom': ResultThread(target=start_zoom_servo,
-                                 args=(self.configuration, self.verbose)).start(),
-            'camera': ResultThread(target=start_camera,
-                                   args=(self.configuration, self.experiment, self.verbose,)).start(),
-            'stages': ResultThread(target=start_stages,
-                                   args=(self.configuration, self.verbose,)).start(),
-            'shutter': ResultThread(target=start_shutters,
-                                    args=(self.configuration, self.experiment, self.verbose,)).start(),
-            'daq': ResultThread(target=start_daq,
-                                args=(self.configuration, self.experiment, self.etl_constants, self.verbose,)).start(),
-            'laser_triggers': ResultThread(target=start_laser_triggers,
-                                           args=(self.configuration, self.experiment, self.verbose,)).start(),
+            'filter_wheel': ResultThread(
+                target=startup_functions.start_filter_wheel,
+                args=(
+                    self.configuration,
+                    self.verbose)).start(),
+            'zoom': ResultThread(
+                target=startup_functions.start_zoom_servo,
+                args=(
+                    self.configuration,
+                    self.verbose)).start(),
+            'camera': ResultThread(
+                        target=startup_functions.start_camera,
+                        args=(
+                            self.configuration,
+                            self.experiment,
+                            self.verbose,
+                        )).start(),
+            'stages': ResultThread(
+                target=startup_functions.start_stages,
+                args=(
+                    self.configuration,
+                    self.verbose,
+                )).start(),
+            'shutter': ResultThread(
+                target=startup_functions.start_shutters,
+                args=(
+                    self.configuration,
+                    self.experiment,
+                    self.verbose,
+                )).start(),
+            'daq': ResultThread(
+                target=startup_functions.start_daq,
+                args=(
+                    self.configuration,
+                    self.experiment,
+                    self.etl_constants,
+                    self.verbose,
+                )).start(),
+            'laser_triggers': ResultThread(
+                target=startup_functions.start_laser_triggers,
+                args=(
+                    self.configuration,
+                    self.experiment,
+                    self.verbose,
+                )).start(),
         }
 
         for k in threads_dict:

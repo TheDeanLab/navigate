@@ -19,8 +19,412 @@ DCAMBUF_ATTACHKIND_FRAME = 0
 DCAMCAP_START_SEQUENCE = -1
 DCAMWAIT_CAPEVENT_FRAMEREADY = 2
 DCAMWAIT_CAPEVENT_STOPPED = 16
-DCAMPROP_MODE__OFF = 1 # OFF
+DCAMPROP_MODE__OFF = 1  # OFF
 DCAMPROP_MODE__ON = 2  # ON
+
+class DCAMPROP:
+    """
+    Valuable reference for understanding the values returned by the camera
+    """
+    class SENSORMODE(IntEnum):
+        AREA = 1
+        LINE = 3
+        TDI = 4
+        TDI_EXTENDED = 10
+        PROGRESSIVE = 12
+        SPLITVIEW = 14
+        DUALLIGHTSHEET = 16
+        PHOTONNUMBERRESOLVING = 18
+
+    class SHUTTER_MODE(IntEnum):
+        GLOBAL = 1
+        ROLLING = 2
+
+    class READOUTSPEED(IntEnum):
+        SLOWEST = 1
+        FASTEST = 0x7FFFFFFF
+
+    class READOUT_DIRECTION(IntEnum):
+        FORWARD = 1
+        BACKWARD = 2
+        BYTRIGGER = 3
+        DIVERGE = 5
+
+    class READOUT_UNIT(IntEnum):
+        FRAME = 2
+        BUNDLEDLINE = 3
+        BUNDLEDFRAME = 4
+
+    class CMOSMODE(IntEnum):
+        NORMAL = 1
+        NONDESTRUCTIVE = 2
+
+    class OUTPUT_INTENSITY(IntEnum):
+        NORMAL = 1
+        TESTPATTERN = 2
+
+    class OUTPUTDATA_OPERATION(IntEnum):
+        RAW = 1
+        ALIGNED = 2
+
+    class TESTPATTERN_KIND(IntEnum):
+        FLAT = 2
+        IFLAT = 3
+        HORZGRADATION = 4
+        IHORZGRADATION = 5
+        VERTGRADATION = 6
+        IVERTGRADATION = 7
+        LINE = 8
+        ILINE = 9
+        DIAGONAL = 10
+        IDIAGONAL = 11
+        FRAMECOUNT = 12
+
+    class DIGITALBINNING_METHOD(IntEnum):
+        MINIMUM = 1
+        MAXIMUM = 2
+        ODD = 3
+        EVEN = 4
+        SUM = 5
+        AVERAGE = 6
+
+    class TRIGGERSOURCE(IntEnum):
+        INTERNAL = 1
+        EXTERNAL = 2
+        SOFTWARE = 3
+        MASTERPULSE = 4
+
+    class TRIGGERACTIVE(IntEnum):
+        EDGE = 1
+        LEVEL = 2
+        SYNCREADOUT = 3
+        POINT = 4
+
+    class BUS_SPEED(IntEnum):
+        SLOWEST = 1
+        FASTEST = 0x7FFFFFFF
+
+    class TRIGGER_MODE(IntEnum):
+        NORMAL = 1
+        PIV = 3
+        START = 6
+
+    class TRIGGERPOLARITY(IntEnum):
+        NEGATIVE = 1
+        POSITIVE = 2
+
+    class TRIGGER_CONNECTOR(IntEnum):
+        INTERFACE = 1
+        BNC = 2
+        MULTI = 3
+
+    class INTERNALTRIGGER_HANDLING(IntEnum):
+        SHORTEREXPOSURETIME = 1
+        FASTERFRAMERATE = 2
+        ABANDONWRONGFRAME = 3
+        BURSTMODE = 4
+        INDIVIDUALEXPOSURE = 7
+
+    class SYNCREADOUT_SYSTEMBLANK(IntEnum):
+        STANDARD = 1
+        MINIMUM = 2
+
+    class TRIGGERENABLE_ACTIVE(IntEnum):
+        DENY = 1
+        ALWAYS = 2
+        LEVEL = 3
+        START = 4
+
+    class TRIGGERENABLE_POLARITY(IntEnum):
+        NEGATIVE = 1
+        POSITIVE = 2
+        INTERLOCK = 3
+
+    class OUTPUTTRIGGER_CHANNELSYNC(IntEnum):
+        _1CHANNEL = 1
+        _2CHANNELS = 2
+        _3CHANNELS = 3
+
+    class OUTPUTTRIGGER_PROGRAMABLESTART(IntEnum):
+        FIRSTEXPOSURE = 1
+        FIRSTREADOUT = 2
+
+    class OUTPUTTRIGGER_SOURCE(IntEnum):
+        EXPOSURE = 1
+        READOUTEND = 2
+        VSYNC = 3
+        HSYNC = 4
+        TRIGGER = 6
+
+    class OUTPUTTRIGGER_POLARITY(IntEnum):
+        NEGATIVE = 1
+        POSITIVE = 2
+
+    class OUTPUTTRIGGER_ACTIVE(IntEnum):
+        EDGE = 1
+        LEVEL = 2
+
+    class OUTPUTTRIGGER_KIND(IntEnum):
+        LOW = 1
+        GLOBALEXPOSURE = 2
+        PROGRAMABLE = 3
+        TRIGGERREADY = 4
+        HIGH = 5
+        ANYROWEXPOSURE = 6
+
+    class OUTPUTTRIGGER_BASESENSOR(IntEnum):
+        VIEW1 = 1
+        VIEW2 = 2
+        ANYVIEW = 15
+        ALLVIEWS = 16
+
+    class EXPOSURETIME_CONTROL(IntEnum):
+        OFF = 1
+        NORMAL = 2
+
+    class TRIGGER_FIRSTEXPOSURE(IntEnum):
+        NEW = 1
+        CURRENT = 2
+
+    class TRIGGER_GLOBALEXPOSURE(IntEnum):
+        NONE = 1
+        ALWAYS = 2
+        DELAYED = 3
+        EMULATE = 4
+        GLOBALRESET = 5
+
+    class FIRSTTRIGGER_BEHAVIOR(IntEnum):
+        STARTEXPOSURE = 1
+        STARTREADOUT = 2
+
+    class MASTERPULSE_MODE(IntEnum):
+        CONTINUOUS = 1
+        START = 2
+        BURST = 3
+
+    class MASTERPULSE_TRIGGERSOURCE(IntEnum):
+        EXTERNAL = 1
+        SOFTWARE = 2
+
+    class MECHANICALSHUTTER(IntEnum):
+        AUTO = 1
+        CLOSE = 2
+        OPEN = 3
+
+    class LIGHTMODE(IntEnum):
+        LOWLIGHT = 1
+        HIGHLIGHT = 2
+
+    class SENSITIVITYMODE(IntEnum):
+        OFF = 1
+        ON = 2
+        INTERLOCK = 3
+
+    class EMGAINWARNING_STATUS(IntEnum):
+        NORMAL = 1
+        WARNING = 2
+        PROTECTED = 3
+
+    class PHOTONIMAGINGMODE(IntEnum):
+        _0 = 0
+        _1 = 1
+        _2 = 2
+        _3 = 3
+
+    class SENSORCOOLER(IntEnum):
+        OFF = 1
+        ON = 2
+        MAX = 4
+
+    class SENSORTEMPERATURE_STATUS(IntEnum):
+        NORMAL = 0
+        WARNING = 1
+        PROTECTION = 2
+
+    class SENSORCOOLERSTATUS(IntEnum):
+        ERROR4 = -4
+        ERROR3 = -3
+        ERROR2 = -2
+        ERROR1 = -1
+        NONE = 0
+        OFF = 1
+        READY = 2
+        BUSY = 3
+        ALWAYS = 4
+        WARNING = 5
+
+    class REALTIMEGAINCORRECT_LEVEL(IntEnum):
+        _1 = 1
+        _2 = 2
+        _3 = 3
+        _4 = 4
+        _5 = 5
+
+    class WHITEBALANCEMODE(IntEnum):
+        FLAT = 1
+        AUTO = 2
+        TEMPERATURE = 3
+        USERPRESET = 4
+
+    class DARKCALIB_TARGET(IntEnum):
+        ALL = 1
+        ANALOG = 2
+
+    class SHADINGCALIB_METHOD(IntEnum):
+        AVERAGE = 1
+        MAXIMUM = 2
+        USETARGET = 3
+
+    class CAPTUREMODE(IntEnum):
+        NORMAL = 1
+        DARKCALIB = 2
+        SHADINGCALIB = 3
+        TAPGAINCALIB = 4
+        BACKFOCUSCALIB = 5
+
+    class INTERFRAMEALU_ENABLE(IntEnum):
+        OFF = 1
+        TRIGGERSOURCE_ALL = 2
+        TRIGGERSOURCE_INTERNAL = 3
+
+    class SHADINGCALIB_DATASTATUS(IntEnum):
+        NONE = 1
+        FORWARD = 2
+        BACKWARD = 3
+        BOTH = 4
+
+    class TAPGAINCALIB_METHOD(IntEnum):
+        AVE = 1
+        MAX = 2
+        MIN = 3
+
+    class RECURSIVEFILTERFRAMES(IntEnum):
+        _2 = 2
+        _4 = 4
+        _8 = 8
+        _16 = 16
+        _32 = 32
+        _64 = 64
+
+    class INTENSITYLUT_MODE(IntEnum):
+        THROUGH = 1
+        PAGE = 2
+        CLIP = 3
+
+    class BINNING(IntEnum):
+        _1 = 1
+        _2 = 2
+        _4 = 4
+        _8 = 8
+        _16 = 16
+        _1_2 = 102
+        _2_4 = 204
+
+    class COLORTYPE(IntEnum):
+        BW = 0x00000001
+        RGB = 0x00000002
+        BGR = 0x00000003
+
+    class BITSPERCHANNEL(IntEnum):
+        _8 = 8
+        _10 = 10
+        _12 = 12
+        _14 = 14
+        _16 = 16
+
+    class DEFECTCORRECT_MODE(IntEnum):
+        OFF = 1
+        ON = 2
+
+    class DEFECTCORRECT_METHOD(IntEnum):
+        CEILING = 3
+        PREVIOUS = 4
+
+    class HOTPIXELCORRECT_LEVEL(IntEnum):
+        STANDARD = 1
+        MINIMUM = 2
+        AGGRESSIVE = 3
+
+    class DEVICEBUFFER_MODE(IntEnum):
+        THRU = 1
+        SNAPSHOT = 2
+
+    class SYSTEM_ALIVE(IntEnum):
+        OFFLINE = 1
+        ONLINE = 2
+        ERROR = 3
+
+    class TIMESTAMP_MODE(IntEnum):
+        NONE = 1
+        LINEBEFORELEFT = 2
+        LINEOVERWRITELEFT = 3
+        AREABEFORELEFT = 4
+        AREAOVERWRITELEFT = 5
+
+    class TIMING_EXPOSURE(IntEnum):
+        AFTERREADOUT = 1
+        OVERLAPREADOUT = 2
+        ROLLING = 3
+        ALWAYS = 4
+        TDI = 5
+
+    class TIMESTAMP_PRODUCER(IntEnum):
+        NONE = 1
+        DCAMMODULE = 2
+        KERNELDRIVER = 3
+        CAPTUREDEVICE = 4
+        IMAGINGDEVICE = 5
+
+    class FRAMESTAMP_PRODUCER(IntEnum):
+        NONE = 1
+        DCAMMODULE = 2
+        KERNELDRIVER = 3
+        CAPTUREDEVICE = 4
+        IMAGINGDEVICE = 5
+
+    class CAMERASTATUS_INTENSITY(IntEnum):
+        GOOD = 1
+        TOODARK = 2
+        TOOBRIGHT = 3
+        UNCARE = 4
+        EMGAIN_PROTECTION = 5
+        INCONSISTENT_OPTICS = 6
+        NODATA = 7
+
+    class CAMERASTATUS_INPUTTRIGGER(IntEnum):
+        GOOD = 1
+        NONE = 2
+        TOOFREQUENT = 3
+
+    class CAMERASTATUS_CALIBRATION(IntEnum):
+        DONE = 1
+        NOTYET = 2
+        NOTRIGGER = 3
+        TOOFREQUENTTRIGGER = 4
+        OUTOFADJUSTABLERANGE = 5
+        UNSUITABLETABLE = 6
+        TOODARK = 7
+        TOOBRIGHT = 8
+        NOTDETECTOBJECT = 9
+
+    class CONFOCAL_SCANMODE(IntEnum):
+        SIMULTANEOUS = 1
+        SEQUENTIAL = 2
+
+    class SUBUNIT_CONTROL(IntEnum):
+        NOTINSTALLED = 0
+        OFF = 1
+        ON = 2
+
+    class SUBUNIT_PINHOLESIZE(IntEnum):
+        ERROR = 1
+        SMALL = 2
+        MEDIUM = 3
+        LARGE = 4
+
+    class MODE(IntEnum):
+        OFF = 1
+        ON = 2
 
 class DCAMDEV_OPEN(Structure):
     _pack_ = 8
@@ -183,11 +587,13 @@ class DCAMDATA_REGION(Structure):
     ]
 
 property_dict = {
-    'exposure_time': 2031888, # 0x001F0110, R/W, sec, "EXPOSURE TIME"
-    'sensor_mode': 4194832, # 0x00400210, R/W, mode,  "SENSOR MODE"
-    'defect_correct_mode': 4653072, # 0x00470010, R/W, mode,  "DEFECT CORRECT MODE"
-    'binning': 4198672, # 0x00401110, R/W, mode, "BINNING"
+    'exposure_time': 2031888,  # 0x001F0110, R/W, sec, "EXPOSURE TIME"
+    'sensor_mode': 4194832,  # 0x00400210, R/W, mode,  "SENSOR MODE"
+    'defect_correct_mode': 4653072,  # 0x00470010, R/W, mode,  "DEFECT CORRECT MODE"
+    'binning': 4198672,  # 0x00401110, R/W, mode, "BINNING"
     'readout_speed': 4194576,  # 0x00400110, R/W, long,    "READOUT SPEED"
+    'readout_direction': 4194608,  # 0x00400130, R/W, mode,   "READOUT DIRECTION"
+    'readout_time': 4206608,  # 0x00403010, R/O, sec,   "TIMING READOUT TIME"
     'trigger_active': 1048864,  # 0x00100120, R/W, mode,   "TRIGGER ACTIVE"
     'trigger_mode': 1049104,  # 0x00100210, R/W, mode,    "TRIGGER MODE"
     'trigger_polarity': 1049120,  # 0x00100220, R/W, mode, "TRIGGER POLARITY"
@@ -431,6 +837,13 @@ class DCAM:
 
         return cDouble.value
 
+    def get_property_range(self, idprop):
+        """
+        # Returns the range of appropriate values
+        """
+        property_attribute = self.prop_getattr(idprop)
+        return [float(property_attribute.valuemin), float(property_attribute.valuemax)]
+
     def set_property_value(self, name, value):
         """
         # this function will set property value according to property name
@@ -440,8 +853,19 @@ class DCAM:
                   'please make sure the property name is correct and is added to property_dict!')
             return False
 
-        # get property code
+        # get property code setPropertyValue
         idprop = property_dict[name]
+
+        # Find property limits and correct value if necessary
+        [property_value_min, property_value_max] = self.get_property_range(idprop)
+        if value < property_value_min:
+            print(" set property value", value, "is less than minimum of", property_value_min, name,
+                  "setting to minimum")
+            value = property_value_min
+        if value > property_value_max:
+            print(" set property value", value, "is greater than maximum of", property_value_max, name,
+                  "setting to maximum")
+            value = property_value_max
 
         # Set value and get what is set
         final_configuration = self.prop_setgetvalue(idprop, value)
@@ -453,6 +877,9 @@ class DCAM:
             return False
 
     def get_property_value(self, name):
+        """
+        Provides the idprop value after looking it up in the property_dict
+        """
         return self.prop_getvalue(property_dict[name])
 
     def set_ROI(self, left, top, right, bottom):
@@ -595,7 +1022,7 @@ if __name__ == '__main__':
 
     # create shared memory buffer
     import sys
-    sys.path.append('../../../../concurrency')
+    sys.path.append('../../../concurrency')
     from concurrency_tools import SharedNDArray
     import threading
     import time
@@ -649,8 +1076,6 @@ if __name__ == '__main__':
                 break
             # print('get image frame:', frames)
 
-    import threading
-    import time
 
     def test_acquisition():
         data_process = threading.Thread(target=data_func)
@@ -696,11 +1121,6 @@ if __name__ == '__main__':
 
         width, height = camera.set_ROI(roi_left, roi_top, roi_right, roi_bottom)
 
-        # assert(camera.prop_getvalue(property_dict['subarray_hpos']) == left)
-        # assert(camera.prop_getvalue(property_dict['subarray_hsize']) == right-left+1)
-        # assert(camera.prop_getvalue(property_dict['subarray_vpos']) == top)
-        # assert(camera.prop_getvalue(property_dict['subarray_vsize']) == bottom-top+1)
-
         print('image width and height:', width, height)
         print("subarray_hpos", camera.prop_getvalue(property_dict['subarray_hpos']))
         print("subarray_hsize", camera.prop_getvalue(property_dict['subarray_hsize']))
@@ -708,7 +1128,14 @@ if __name__ == '__main__':
         print("subarray_vsize", camera.prop_getvalue(property_dict['subarray_vsize']))
         print('sub array mode(1: OFF, 2: ON): ', camera.prop_getvalue(property_dict['subarray_mode']))
 
-    test_ROI(1024, 1024)
+    # test_ROI(1024, 1024)
+    print("camera.prop_getvalue:")
+    print("Camera Exposure Time:", camera.prop_getvalue(property_dict['exposure_time']))
+    print("Camera Readout Time:", camera.prop_getvalue(property_dict['readout_time']))
+
+    print("camera.get_property_value:")
+    print("Camera Exposure Time:", camera.get_property_value(property_dict['exposure_time']))
+    print("Camera Readout Time:", camera.get_property_value(property_dict['readout_time']))
 
     # test_ROI(512, 512, 512+1024-1, 512+1024-1)
     # test_ROI(100, 100, 1124, 1123)

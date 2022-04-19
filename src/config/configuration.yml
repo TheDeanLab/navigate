@@ -55,7 +55,7 @@ CameraParameters:
   pixel_size_in_microns: 6.5
   subsampling: [1, 2, 4]
   sensor_mode: Normal  # 12 for progressive, 1 for normal.
-  readout_direction: Top to Bottom  # Top to Bottom', 'Bottom to Top'
+  readout_direction: Top-to-Bottom  # Top-to-Bottom', 'Bottom-to-Top'
   lightsheet_rolling_shutter_width: 20
   defect_correct_mode: 2.0
   binning: 1x1

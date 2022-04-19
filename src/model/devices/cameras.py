@@ -310,23 +310,61 @@ class HamamatsuOrca(CameraBase):
 
     def set_camera_readout_direction(self, mode):
         if mode == 'Top-to-Bottom':
-            #TODO: Lookup proper property value
-            #self.camera_controller.set_property_value("sensor_mode", 1)
-            pass
+            #  'Forward' readout direction
+            self.camera_controller.set_property_value("readout_direction", 1)
         elif mode == 'Bottom-to-Top':
-            #TODO: Lookup proper property value
-            # self.camera_controller.set_property_value("sensor_mode", 12)
-            pass
+            #  'Backward' readout direction
+            self.camera_controller.set_property_value("readout_direction", 2)
+        elif mode == 'bytrigger':
+            self.camera_controller.set_property_value("readout_direction", 3)
+        elif mode == 'diverge':
+            self.camera_controller.set_property_value("readout_direction", 4)
         else:
-            print('Camera mode not supported')
+            print('Camera readout direction not supported')
 
     def set_lightsheet_rolling_shutter_width(self, mode):
         # TODO: Figure out how to do this.  I believe it is dictated by the exposure time and the line interval.
         pass
 
     def calculate_camera_readout_time(self):
-        #TODO: Look up manual directions for calculating exposure time + readout as a function of FOV geometry
-        pass
+        """
+        # Calculates the readout time and maximum frame rate according to the camera configuration settings.
+        # Assumes model C13440 with Camera Link communication from Hamamatsu.
+        # Currently pulling values directly from the camera.
+        """
+        h = 9.74436 * 10 ** -6  # Readout timing constant
+        vn = self.camera_controller.get_property_value('subarray_vsize')
+        sensor_mode = self.camera_controller.get_property_value('sensor_mode')
+        exposure_time = self.camera_controller.get_property_value('exposure_time')
+        trigger_source = self.camera_controller.get_property_value('trigger_source')
+        trigger_active = self.camera_controller.get_property_value('trigger_active')
+
+        if sensor_mode == 1:
+            #  Area sensor mode operation
+            if trigger_source == 1:
+                # Internal Trigger Source
+                max_frame_rate = 1 / ((vn/2)*h)
+                readout_time = exposure_time - ((vn/2)*h)
+
+            if trigger_active == 1 or 2:
+                #  External Trigger Source
+                #  Edge == 1, Level == 2
+                max_frame_rate = 1 / ((vn/2) * h + exposure_time + 10*h)
+                readout_time = exposure_time - ((vn/2) * h + exposure_time + 10*h)
+
+            if trigger_active == 3:
+                #  External Trigger Source
+                #  Synchronous Readout == 3
+                max_frame_rate = 1 / ((vn/2) * h + 5*h)
+                readout_time = exposure_time - ((vn/2) * h + 5*h)
+
+        if sensor_mode == 12:
+            #  Progressive sensor mode operation
+            max_frame_rate = 1 / (exposure_time + (vn+10)*h)
+            readout_time = exposure_time - 1 / (exposure_time + (vn+10)*h)
+
+        return readout_time, max_frame_rate
+
 
     def set_exposure_time(self, exposure_time):
         """
@@ -368,19 +406,21 @@ class HamamatsuOrca(CameraBase):
         # Set ROI
         self.x_pixels, self.y_pixels = self.camera_controller.set_ROI(
             roi_left, roi_top, roi_right, roi_bottom)
+
         if self.verbose:
             print(
                 "subarray_hpos",
                 self.camera_controller.get_property_value('subarray_hpos'))
             print(
                 "subarray_hsize",
-                self.camera_controller.prop_getget_property_valuevalue('subarray_hsize'))
+                self.camera_controller.get_property_value('subarray_hsize'))
             print(
                 "subarray_vpos",
                 self.camera_controller.get_property_value('subarray_vpos'))
             print(
                 "subarray_vsize",
                 self.camera_controller.get_property_value('subarray_vsize'))
+
             print('sub array mode(1: OFF, 2: ON): ',
                   self.camera_controller.get_property_value('subarray_mode'))
 

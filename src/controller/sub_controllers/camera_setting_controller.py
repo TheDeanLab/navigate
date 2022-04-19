@@ -1,12 +1,53 @@
+"""
+ASLM sub-controller for the camera settings.
+
+Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+provided that the following conditions are met:
+
+     * Redistributions of source code must retain the above copyright notice,
+     this list of conditions and the following disclaimer.
+
+     * Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in the
+     documentation and/or other materials provided with the distribution.
+
+     * Neither the name of the copyright holders nor the names of its
+     contributors may be used to endorse or promote products derived from this
+     software without specific prior written permission.
+
+NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
+THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+"""
+
 from controller.sub_controllers.gui_controller import GUI_Controller
 
 
 class Camera_Setting_Controller(GUI_Controller):
-    def __init__(self, view, parent_controller=None, verbose=False, configuration_controller=None):
+    def __init__(
+            self,
+            view,
+            parent_controller=None,
+            verbose=False,
+            configuration_controller=None):
         super().__init__(view, parent_controller, verbose)
 
         # Getting Widgets/Buttons
-        self.mode_widgets = view.camera_mode.get_widgets()  # keys = ['Sensor', 'Readout', 'Pixels']
+        # keys = ['Sensor', 'Readout', 'Pixels']
+        self.mode_widgets = view.camera_mode.get_widgets()
         self.framerate_widgets = view.framerate_info.get_widgets()
         # keys = ['Temp1', 'Temp2', 'Temp3', 'Exposure', 'Integration']
 
@@ -17,43 +58,50 @@ class Camera_Setting_Controller(GUI_Controller):
         self.roi_btns = view.camera_roi.get_buttons()
         # keys = ['Center_ROI', 'Center_At', 'Use_Pixels', '1024', '512']
 
-        self.sensor_mode = self.parent_controller.configuration.CameraParameters['sensor_mode']
-        self.readout_direction = self.parent_controller.configuration.CameraParameters['sensor_mode']
-        self.pixel_size = self.parent_controller.configuration.CameraParameters['pixel_size_in_microns']
+        self.sensor_mode = self.parent_controller.configuration.CameraParameters[
+            'sensor_mode']
+        self.readout_direction = self.parent_controller.configuration.CameraParameters[
+            'sensor_mode']
+        self.pixel_size = self.parent_controller.configuration.CameraParameters[
+            'pixel_size_in_microns']
         self.width = self.parent_controller.configuration.CameraParameters['x_pixels']
         self.height = self.parent_controller.configuration.CameraParameters['y_pixels']
 
         # Binding for Camera Mode
-        self.mode_widgets['Sensor'].widget.bind('<<ComboboxSelected>>', self.update_readout)
+        self.mode_widgets['Sensor'].widget.bind(
+            '<<ComboboxSelected>>', self.update_readout)
 
         # Binding for Readout Mode
-        self.mode_widgets['Readout'].widget.bind('<<ComboboxSelected>>', self.action_readout)
-        # TODO: Make abstraction for cameras.  Need a function to call in Hamamatsu.
+        self.mode_widgets['Readout'].widget.bind(
+            '<<ComboboxSelected>>', self.action_readout)
+        # TODO: Make abstraction for cameras.  Need a function to call in
+        # Hamamatsu.
 
         # Binding for ROI Mode
         # Trace examples
-        #self.roi_widgets['Right'].widget.config(command=self.update_pixels, relief="sunken") # TODO change button style during transitions
+        # self.roi_widgets['Right'].widget.config(command=self.update_pixels, relief="sunken") # TODO change button style during transitions
         #self.roi_widgets['Right'].widget.trace('w', command=self.update_pixels)
         #self.roi_widgets['Right'].widget.bind('<<ComboboxSelected>>', self.action_readout)
-        
+
         # self.roi_widgets['Left'].widget.config(command=self.update_pixels)
         # self.roi_widgets['Top'].widget.config(command=self.update_pixels)
         # self.roi_widgets['Bottom'].widget.config(command=self.update_pixels)
 
         self.initialize(configuration_controller)
 
-
     def initialize(self, config):
         '''
         #### Function that sets widgets based on data given from main controller/config
         '''
         # Camera Mode
-        self.mode_widgets['Sensor'].widget['values'] = ['Normal', 'Light Sheet']
+        self.mode_widgets['Sensor'].widget['values'] = [
+            'Normal', 'Light Sheet']
         self.mode_widgets['Sensor'].widget['state'] = 'readonly'
         self.mode_widgets['Sensor'].widget.selection_clear()
         self.mode_widgets['Pixels'].widget['state'] = 'disabled'
 
-        self.mode_widgets['Readout'].widget['values'] = [' ', 'Top to Bottom', 'Bottom to Top']
+        self.mode_widgets['Readout'].widget['values'] = [
+            ' ', 'Top to Bottom', 'Bottom to Top']
         self.mode_widgets['Readout'].widget['state'] = 'disabled'
         self.mode_widgets['Readout'].selection_clear()
 
@@ -61,9 +109,11 @@ class Camera_Setting_Controller(GUI_Controller):
         width, height = config.get_pixels(self.verbose)
         self.roi_widgets['Width'].widget.config(to=width)
         self.roi_widgets['Height'].widget.config(to=height)
-        self.roi_widgets['Center_X'].widget['state'] = 'disabled'  # This should not be edited for now
+        # This should not be edited for now
+        self.roi_widgets['Center_X'].widget['state'] = 'disabled'
         self.roi_widgets['Center_Y'].widget['state'] = 'disabled'
-        self.roi_widgets['Center_X'].widget['state'] = 'disabled'  # This should not be edited for now
+        # This should not be edited for now
+        self.roi_widgets['Center_X'].widget['state'] = 'disabled'
         self.roi_widgets['Center_Y'].widget['state'] = 'disabled'
 
         # FOV
@@ -85,21 +135,21 @@ class Camera_Setting_Controller(GUI_Controller):
         # Binning Settings
         # ... set(setting_dict['binning'])
 
-
         # populate pixels {
         #   'low': self.configuration.ZoomParameters['high_res_zoom_pixel_size'],
         #   'high': self.configuration.ZoomParameters['low_res_zoom_pixel_size']
         # }
 
         # Populating FOV Mode
-        # TODO: Not sure why zoom is being populated as low.  Cannot currently track down. Hardcoded.
+        # TODO: Not sure why zoom is being populated as low.  Cannot currently
+        # track down. Hardcoded.
 
         # ROI Mode: 'pixels'
         # width = setting_dict['width']
         # height = setting_dict['height']
         # top = 1
         # left = 1
-        
+
         # ROI Center
         # self.roi_widgets['Center_X'].set(width/2)
         # self.roi_widgets['Center_Y'].set(height/2)
@@ -118,7 +168,7 @@ class Camera_Setting_Controller(GUI_Controller):
         # #TODO: Adjust to account for zoom changes.
         # self.roi_widgets['FOV_X'].set(self.pixel_size)
         # self.roi_widgets['FOV_Y'].set(self.pixel_size)
-        
+
     def update_experiment_values(self, setting_dict):
         """
         Update the dictionary so that it can be combined with all of the other
@@ -171,7 +221,6 @@ class Camera_Setting_Controller(GUI_Controller):
             if self.verbose:
                 print("Light Sheet Camera Readout Mode")
 
-
     def action_readout(self, *args):
         '''
         #### Trace function when changes to the readout direction are made.
@@ -180,7 +229,6 @@ class Camera_Setting_Controller(GUI_Controller):
         if self.verbose:
             print("Readout Direction:", self.readout_direction)
 
-    
     def update_pixels(self, *args):
         '''
         #### Updates number of pixels in ROI based on Right, Left, Top, Bottom
@@ -193,4 +241,3 @@ class Camera_Setting_Controller(GUI_Controller):
 
         self.roi_widgets['Pixels_X'].set(right - left - 1)
         self.roi_widgets['Pixels_Y'].set(bottom - top - 1)
-    

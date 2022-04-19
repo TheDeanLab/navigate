@@ -1,24 +1,37 @@
 """
-    Best place to store variables that can be shared between different classes.
-    It defines an object that inherits observables, which the controller is notified of.
+ASLM Model Configuration
+Store variables that can be shared between different classes
 
-    Storing of data is done via dictionaries.
+Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+All rights reserved.
 
-    IMPORTANT: The __setattr__ method is overriden to add additional functionality.
+Redistribution and use in source and binary forms, with or without
+modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+provided that the following conditions are met:
 
-    IMPORTANT: The __str__ method is overriden to add serialization. For example:
-         = ()
-        .Param1 = {'Value': 1}
-        print() results in Param1: Value: 1
+     * Redistributions of source code must retain the above copyright notice,
+     this list of conditions and the following disclaimer.
 
-       If you set Param1 again...
-        .Param1 = {'Value2': 2}
-        print() results in Param1: Value: 1, Param1: Value2: 2
+     * Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in the
+     documentation and/or other materials provided with the distribution.
 
-    Note that assigning a second value to Param1 does not overwrite the value, but appends it.
-    Also note that the output of printing the  is a Yaml-ready text (2 space indentation, etc.).
+     * Neither the name of the copyright holders nor the names of its
+     contributors may be used to endorse or promote products derived from this
+     software without specific prior written permission.
 
-    Adopted and modified from UUTrack
+NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
+THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
 """
 
 # Standard Imports

@@ -31,26 +31,59 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 # Standard Imports
-import tkinter as tk
-from tkinter import NSEW, ttk
+from tkinter import *
+from tkinter import ttk
+from tkinter.font import Font
 
 
-from view.custom_widgets.LabelInputWidgetFactory import LabelInput
-from view.custom_widgets.validation import ValidatedEntry
-class position_frame(ttk.Labelframe):
-    def __init__(self, stage_control_tab, *args, **kwargs):
+class position_frame(ttk.Frame):
+    def __init__(position_frame, stage_control_tab, *args, **kwargs):
 
         #Init Frame
-        text_label = 'Current Position'
-        ttk.Labelframe.__init__(self, stage_control_tab, text=text_label, *args, **kwargs)
-        
-        # Widgets
-        self.inputs = {}
+        ttk.Frame.__init__(position_frame, stage_control_tab, *args, **kwargs)
 
-        # Creation of widgets
-        self.labels = ['X', 'Y', 'Z', "\N{Greek Capital Theta Symbol}", 'Focus']
-        self.names = ['X', 'Y', 'Z', "Theta", 'Focus']
-        
+        #Creating each entry frame for a label and entry
+
+        #X Entry
+        position_frame.x_val = DoubleVar()
+        position_frame.x_entry_frame = ttk.Frame(position_frame)
+        position_frame.x_entry = ttk.Entry(position_frame.x_entry_frame, textvariable=position_frame.x_val, width=15)
+        position_frame.x_entry_label = ttk.Label(position_frame.x_entry_frame, text="X")
+        position_frame.x_entry_label.grid(row=0, column=0, sticky="e")
+        position_frame.x_entry.grid(row=0, column=1, sticky="w")
+
+        #Y Entry
+        position_frame.y_val = DoubleVar()
+        position_frame.y_entry_frame = ttk.Frame(position_frame)
+        position_frame.y_entry = ttk.Entry(position_frame.y_entry_frame, textvariable=position_frame.y_val, width=15)
+        position_frame.y_entry_label = ttk.Label(position_frame.y_entry_frame, text="Y")
+        position_frame.y_entry_label.grid(row=0, column=0, sticky="e")
+        position_frame.y_entry.grid(row=0, column=1, sticky="w")
+
+        #Z Entry
+        position_frame.z_val = DoubleVar()
+        position_frame.z_entry_frame = ttk.Frame(position_frame)
+        position_frame.z_entry = ttk.Entry(position_frame.z_entry_frame, textvariable=position_frame.z_val,width=15)
+        position_frame.z_entry_label = ttk.Label(position_frame.z_entry_frame, text="Z")
+        position_frame.z_entry_label.grid(row=0, column=0, sticky="e")
+        position_frame.z_entry.grid(row=0, column=1, sticky="w")
+
+        #Theta Entry
+        position_frame.theta_val = DoubleVar()
+        position_frame.theta_entry_frame = ttk.Frame(position_frame)
+        position_frame.theta_entry = ttk.Entry(position_frame.theta_entry_frame, textvariable=position_frame.theta_val,width=15)
+        position_frame.theta_entry_label = ttk.Label(position_frame.theta_entry_frame, text="\N{Greek Capital Theta Symbol}")
+        position_frame.theta_entry_label.grid(row=0, column=0, sticky="e")
+        position_frame.theta_entry.grid(row=0, column=1, sticky="w")
+
+        #Focus Entry
+        position_frame.focus_val = DoubleVar()
+        position_frame.focus_entry_frame = ttk.Frame(position_frame)
+        position_frame.f_entry = ttk.Entry(position_frame.focus_entry_frame, textvariable=position_frame.focus_val, width=15)
+        position_frame.focus_entry_label = ttk.Label(position_frame.focus_entry_frame, text="Focus")
+        position_frame.focus_entry_label.grid(row=0, column=0, sticky="e")
+        position_frame.f_entry.grid(row=0, column=1, sticky="w")
+
         '''
         Grid for frames
 
@@ -62,85 +95,10 @@ class position_frame(ttk.Labelframe):
         theta is 4
         focus is 5
         '''
-        
-        for i, label in enumerate(self.labels):
-            self.inputs[self.names[i]] = LabelInput(parent=self,
-                                                            label=label,
-                                                            input_class=ValidatedEntry,
-                                                            input_var=tk.DoubleVar()
-                                                            )
-            self.inputs[self.names[i]].grid(row=0, column=i, padx=5, sticky=(NSEW))
-        
-        
-        
-        
-        
-        
 
-        # #Creating each entry frame for a label and entry
-
-        # #X Entry
-        # self.x_val = DoubleVar()
-        # self.x_entry_frame = ttk.Frame(self)
-        # self.x_entry = ttk.Entry(self.x_entry_frame, textvariable=self.x_val, width=15)
-        # self.x_entry_label = ttk.Label(self.x_entry_frame, text="X")
-        # self.x_entry_label.grid(row=0, column=0, sticky="e")
-        # self.x_entry.grid(row=0, column=1, sticky="w")
-
-        # #Y Entry
-        # self.y_val = DoubleVar()
-        # self.y_entry_frame = ttk.Frame(self)
-        # self.y_entry = ttk.Entry(self.y_entry_frame, textvariable=self.y_val, width=15)
-        # self.y_entry_label = ttk.Label(self.y_entry_frame, text="Y")
-        # self.y_entry_label.grid(row=0, column=0, sticky="e")
-        # self.y_entry.grid(row=0, column=1, sticky="w")
-
-        # #Z Entry
-        # self.z_val = DoubleVar()
-        # self.z_entry_frame = ttk.Frame(self)
-        # self.z_entry = ttk.Entry(self.z_entry_frame, textvariable=self.z_val,width=15)
-        # self.z_entry_label = ttk.Label(self.z_entry_frame, text="Z")
-        # self.z_entry_label.grid(row=0, column=0, sticky="e")
-        # self.z_entry.grid(row=0, column=1, sticky="w")
-
-        # #Theta Entry
-        # self.theta_val = DoubleVar()
-        # self.theta_entry_frame = ttk.Frame(self)
-        # self.theta_entry = ttk.Entry(self.theta_entry_frame, textvariable=self.theta_val,width=15)
-        # self.theta_entry_label = ttk.Label(self.theta_entry_frame, text="\N{Greek Capital Theta Symbol}")
-        # self.theta_entry_label.grid(row=0, column=0, sticky="e")
-        # self.theta_entry.grid(row=0, column=1, sticky="w")
-
-        # #Focus Entry
-        # self.focus_val = DoubleVar()
-        # self.focus_entry_frame = ttk.Frame(self)
-        # self.f_entry = ttk.Entry(self.focus_entry_frame, textvariable=self.focus_val, width=15)
-        # self.focus_entry_label = ttk.Label(self.focus_entry_frame, text="Focus")
-        # self.focus_entry_label.grid(row=0, column=0, sticky="e")
-        # self.f_entry.grid(row=0, column=1, sticky="w")
-
-        
-
-        # #Gridding out each frame in postiion frame
-        # self.x_entry_frame.grid(row=0, column=0, padx=5, sticky=(NSEW))
-        # self.y_entry_frame.grid(row=0, column=1, padx=5, sticky=(NSEW))
-        # self.z_entry_frame.grid(row=0, column=2, padx=5, sticky=(NSEW))
-        # self.theta_entry_frame.grid(row=0, column=3, padx=5, sticky=(NSEW))
-        # self.focus_entry_frame.grid(row=0, column=4, padx=5, sticky=(NSEW))
-        
-    def get_variables(self):
-        '''
-        # This function returns a dictionary of all the variables that are tied to each widget name.
-        The key is the widget name, value is the variable associated.
-        '''
-        variables = {}
-        for key, widget in self.inputs.items():
-            variables[key] = widget.get()
-        return variables
-
-    def get_widgets(self):
-        '''
-        # This function returns the dictionary that holds the widgets.
-        The key is the widget name, value is the LabelInput class that has all the data.
-        '''
-        return self.inputs
+        #Gridding out each frame in postiion frame
+        position_frame.x_entry_frame.grid(row=0, column=0, padx=5, sticky=(NSEW))
+        position_frame.y_entry_frame.grid(row=0, column=1, padx=5, sticky=(NSEW))
+        position_frame.z_entry_frame.grid(row=0, column=2, padx=5, sticky=(NSEW))
+        position_frame.theta_entry_frame.grid(row=0, column=3, padx=5, sticky=(NSEW))
+        position_frame.focus_entry_frame.grid(row=0, column=4, padx=5, sticky=(NSEW))

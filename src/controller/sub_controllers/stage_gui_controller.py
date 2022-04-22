@@ -40,41 +40,38 @@ from controller.sub_controllers.gui_controller import GUI_Controller
 class Stage_GUI_Controller(GUI_Controller):
     def __init__(self, view, parent_controller, verbose=False, configuration_controller=None):
         super().__init__(view, parent_controller, verbose)
-        
-        # Get Widgets
-        self.pos_widgets = self.view.position_frame.get_widgets() # Keys ['X', 'Y', 'Z', "Theta", 'Focus']
 
         self.event_id = {
-            'X': None,
-            'Y': None,
-            'Z': None,
-            'Theta': None,
-            'Focus': None
+            'x': None,
+            'y': None,
+            'z': None,
+            'theta': None,
+            'f': None
         }
 
         # state movement limits
         self.position_min = {
-            'X': 0,
-            'Y': 0,
-            'Z': 0,
-            'Theta': 0,
-            'Focus': 0
+            'x': 0,
+            'y': 0,
+            'z': 0,
+            'theta': 0,
+            'f': 0
         }
         self.position_max = {
-            'X': 10000,
-            'Y': 10000,
-            'Z': 10000,
-            'Theta': 10000,
-            'Focus': 10000
+            'x': 10000,
+            'y': 10000,
+            'z': 10000,
+            'theta': 10000,
+            'f': 10000
         }
 
         # position variables
         self.position_val = {
-            'X': self.pos_widgets['X'].get_variable(),
-            'Y': self.pos_widgets['Y'].get_variable(),
-            'Z': self.pos_widgets['Z'].get_variable(),
-            'Theta': self.pos_widgets['Theta'].get_variable(),
-            'Focus': self.pos_widgets['Focus'].get_variable()
+            'x': self.view.position_frame.x_val,
+            'y': self.view.position_frame.y_val,
+            'z': self.view.position_frame.z_val,
+            'theta': self.view.position_frame.theta_val,
+            'f': self.view.position_frame.focus_val
         }
 
         # add validations to widgets
@@ -82,59 +79,58 @@ class Stage_GUI_Controller(GUI_Controller):
         validate_wrapper(self.view.z_frame.increment_box)
         validate_wrapper(self.view.theta_frame.increment_box)
         validate_wrapper(self.view.focus_frame.increment_box)
-        # TODO add validation widgets from pos frame and can remove this after
-        # validate_wrapper(self.pos_widgets['X'].widget, is_entry=True)
-        # validate_wrapper(self.pos_widgets['Y'].widget, is_entry=True)
-        # validate_wrapper(self.pos_widgets['Z'].widget, is_entry=True)
-        # validate_wrapper(self.pos_widgets['Theta'].widget, is_entry=True)
-        # validate_wrapper(self.pos_widgets['Focus'].widget, is_entry=True)
+        validate_wrapper(self.view.position_frame.x_entry, is_entry=True)
+        validate_wrapper(self.view.position_frame.y_entry, is_entry=True)
+        validate_wrapper(self.view.position_frame.z_entry, is_entry=True)
+        validate_wrapper(self.view.position_frame.theta_entry, is_entry=True)
+        validate_wrapper(self.view.position_frame.f_entry, is_entry=True)
 
         
         # gui event bind
         self.view.x_y_frame.positive_x_btn.configure(
-            command=self.up_btn_handler('X')
+            command=self.up_btn_handler('x')
         )
         self.view.x_y_frame.negative_x_btn.configure(
-            command=self.down_btn_handler('X')
+            command=self.down_btn_handler('x')
         )
         self.view.x_y_frame.positive_y_btn.configure(
-            command=self.up_btn_handler('Y')
+            command=self.up_btn_handler('y')
         )
         self.view.x_y_frame.negative_y_btn.configure(
-            command=self.down_btn_handler('Y')
+            command=self.down_btn_handler('y')
         )
         self.view.x_y_frame.zero_x_y_btn.configure(
             command=self.xy_zero_btn_handler()
         )
         self.view.z_frame.up_btn.configure(
-            command=self.up_btn_handler('Z')
+            command=self.up_btn_handler('z')
         )
         self.view.z_frame.down_btn.configure(
-            command=self.down_btn_handler('Z')
+            command=self.down_btn_handler('z')
         )
         self.view.z_frame.zero_btn.configure(
-            command=self.zero_btn_handler('Z')
+            command=self.zero_btn_handler('z')
         )
         self.view.theta_frame.up_btn.configure(
-            command=self.up_btn_handler('Theta')
+            command=self.up_btn_handler('theta')
         )
         self.view.theta_frame.down_btn.configure(
-            command=self.down_btn_handler('Theta')
+            command=self.down_btn_handler('theta')
         )
         self.view.theta_frame.zero_btn.configure(
-            command=self.zero_btn_handler('Theta')
+            command=self.zero_btn_handler('theta')
         )
         self.view.focus_frame.up_btn.configure(
-            command=self.up_btn_handler('Focus')
+            command=self.up_btn_handler('f')
         )
         self.view.focus_frame.down_btn.configure(
-            command=self.down_btn_handler('Focus')
+            command=self.down_btn_handler('f')
         )
         self.view.focus_frame.zero_btn.configure(
-            command=self.zero_btn_handler('Focus')
+            command=self.zero_btn_handler('f')
         )
 
-        for axis in ['X', 'Y', 'Z', 'Theta', 'Focus']:
+        for axis in ['x', 'y', 'z', 'theta', 'f']:
             # add event bind to position entry variables
             self.position_val[axis].trace_add('write', self.position_callback(axis))
 
@@ -149,13 +145,10 @@ class Stage_GUI_Controller(GUI_Controller):
         self.position_min = config.get_stage_position_limits('_min')
         self.position_max = config.get_stage_position_limits('_max')
 
-        # TODO test
-        for axis in ['X', 'Y', 'Z', 'Theta', 'Focus']:
-            # exec('self.view.position_frame.{}_entry.from_={}'.format(axis, self.position_min[axis]))
-            # exec('self.view.position_frame.{}_entry.to={}'.format(axis, self.position_max[axis]))
-            self.pos_widgets[axis].widget.min = self.position_min[axis]
-            self.pos_widgets[axis].widget.max = self.position_max[axis]
-            
+
+        for axis in ['x', 'y', 'z', 'theta', 'f']:
+            exec('self.view.position_frame.{}_entry.from_={}'.format(axis, self.position_min[axis]))
+            exec('self.view.position_frame.{}_entry.to={}'.format(axis, self.position_max[axis]))
 
         # set step limits
         temp_dict = {
@@ -189,12 +182,12 @@ class Stage_GUI_Controller(GUI_Controller):
         position = self.get_position()
         if position is None:
             return False
-        for axis in ['X', 'Y', 'Z', 'Theta', 'Focus']:
+        for axis in ['x', 'y', 'z', 'theta', 'f']:
             setting_dict[axis] = position[axis]
         
         # get step value
         try:
-            for axis in ['X', 'Y', 'Z', 'Theta', 'Focus']:
+            for axis in ['xy', 'z', 'theta', 'f']:
                 setting_dict[axis+'_step'] = self.get_step_val(axis).get()
         except:
             return False
@@ -207,11 +200,10 @@ class Stage_GUI_Controller(GUI_Controller):
         # position should be a dict
         # {'x': value, 'y': value, 'z': value, 'theta': value, 'f': value}
         """
-        for axis in ['X', 'Y', 'Z', 'Theta', 'Focus']:
+        for axis in ['x', 'y', 'z', 'theta', 'f']:
             self.position_val[axis].set(position.get(axis, 0))
             # validate position value if set through variable
-            # exec('self.view.position_frame.{}_entry.validate()'.format(axis))
-            self.pos_widgets[axis].widget.trigger_focusout_validation() # TODO test
+            exec('self.view.position_frame.{}_entry.validate()'.format(axis))
         
         self.show_verbose_info('set stage position')
 
@@ -221,7 +213,7 @@ class Stage_GUI_Controller(GUI_Controller):
         """
         position = {}
         try:
-            for axis in ['X', 'Y', 'Z', 'Theta', 'Focus']:
+            for axis in ['x', 'y', 'z', 'theta', 'f']:
                 position[axis] = self.position_val[axis].get()
                 if position[axis] < self.position_min[axis] or position[axis] > self.position_max[axis]:
                     return None
@@ -236,7 +228,7 @@ class Stage_GUI_Controller(GUI_Controller):
         # steps should be a dict
         # {'xy': value, 'z': value, 'theta': value, 'f': value}
         """
-        for axis in ['xy', 'Z', 'Theta', 'Focus']: # TODO this may cause errors because of XY conjoined
+        for axis in ['xy', 'z', 'theta', 'f']:
             val = self.get_step_val(axis)
             if val:
                 val.set(steps[axis+'_step'])
@@ -310,8 +302,8 @@ class Stage_GUI_Controller(GUI_Controller):
         """
         # This function generates command functions to set xy position to zero
         """
-        x_val = self.position_val['X']
-        y_val = self.position_val['Y']
+        x_val = self.position_val['x']
+        y_val = self.position_val['y']
 
         def handler():
             x_val.set(0)
@@ -356,11 +348,11 @@ class Stage_GUI_Controller(GUI_Controller):
         # get increment step variable according to axis name
         # axis can be: 'x', 'y', 'z', 'theta', 'f'
         """
-        if axis == 'Z':
+        if axis == 'z':
             return self.view.z_frame.spinval
-        elif axis == 'Theta':
+        elif axis == 'theta':
             return self.view.theta_frame.spinval
-        elif axis == 'Focus':
+        elif axis == 'f':
             return self.view.focus_frame.spinval
         else:
             return self.view.x_y_frame.spinval

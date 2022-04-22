@@ -31,8 +31,9 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 import tkinter as tk
-from tkinter import NSEW, ttk
-
+from tkinter import *
+from tkinter import ttk
+from tkinter.font import Font
 
 from view.custom_widgets.LabelInputWidgetFactory import LabelInput
 
@@ -54,19 +55,19 @@ class camera_roi(ttk.Labelframe):
 
         # Parent Label Frames for widgets
         # ROI
-        self.roi_frame = ttk.Labelframe(self, text='Number of Pixels')
+        self.roi_frame = ttk.LabelFrame(self, text='Number of Pixels')
         self.roi_frame.grid(row=0, column=0, sticky=NSEW)
 
         # Button Frame
-        self.btn_frame = ttk.Labelframe(self, text="Default FOVs")
+        self.btn_frame = ttk.LabelFrame(self, text="Default FOVs")
         self.btn_frame.grid(row=0, column=1, rowspan=4, sticky=NSEW)
 
         # FOV
-        self.fov_frame = ttk.Labelframe(self, text='FOV Dimensions (microns)')
+        self.fov_frame = ttk.LabelFrame(self, text='FOV Dimensions (microns)')
         self.fov_frame.grid(row=1, column=0, sticky=NSEW)
 
         # ROI Center
-        self.center_roi_frame = ttk.Labelframe(self, text='ROI Center')
+        self.center_roi_frame = ttk.LabelFrame(self, text='ROI Center')
         self.center_roi_frame.grid(row=2, column=0, sticky=NSEW)
 
         # Binning

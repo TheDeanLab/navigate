@@ -255,12 +255,12 @@ GUIParameters:
       max: 1000,
       step: 0.1
     },
-    start_position: {
+    start_pos: {
       min: 0,
       max: 5000,
       step: 1
     },
-    end_position: {
+    end_pos: {
       min: 0,
       max: 10000,
       step: 10

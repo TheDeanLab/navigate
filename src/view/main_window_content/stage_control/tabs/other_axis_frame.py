@@ -33,7 +33,10 @@ POSSIBILITY OF SUCH DAMAGE.
 # Standard Imports
 from tkinter import *
 from tkinter import ttk
-from tkinter.font import Font
+
+# Local Imports
+from view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from view.custom_widgets.validation import ValidatedSpinbox
 
 class other_axis_frame(ttk.Frame):
     def __init__(other_axis_frame, stage_control_tab, name, *args, **kwargs):
@@ -65,16 +68,11 @@ class other_axis_frame(ttk.Frame):
         )
 
         #Increment spinbox
-        other_axis_frame.spinval = DoubleVar() #Will be changed by spinbox buttons, but is can also be changed by functions. This value is shown in the entry
-        other_axis_frame.spinval.set('25')
-        other_axis_frame.increment_box = ttk.Spinbox(
-            other_axis_frame,
-            from_=0,
-            to=5000.0,
-            textvariable=other_axis_frame.spinval, #this holds the data in the entry
-            increment=25,
-            width=9,
-            #TODO command= function from connector
+
+        other_axis_frame.increment_box = LabelInput(
+            parent=other_axis_frame,
+            input_class=ValidatedSpinbox,
+            input_var=DoubleVar()
         )
 
 
@@ -100,3 +98,13 @@ class other_axis_frame(ttk.Frame):
         other_axis_frame.down_btn.grid(row=4, column=0, rowspan=2, pady=2, sticky=(NSEW)) #DOWN
         other_axis_frame.zero_btn.grid(row=2, column=0, pady=2, sticky=(NSEW)) #Zero Z
         other_axis_frame.increment_box.grid(row=3, column=0, pady=2, sticky=(NSEW)) #Increment spinbox
+
+    def get_widget(other_axis_frame):
+        return other_axis_frame.increment_box
+
+    def get_buttons(other_axis_frame):
+        return {
+            'up': other_axis_frame.up_btn,
+            'down': other_axis_frame.down_btn,
+            'zero': other_axis_frame.zero_btn
+        }

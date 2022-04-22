@@ -33,7 +33,10 @@ POSSIBILITY OF SUCH DAMAGE.
 # Standard Imports
 from tkinter import *
 from tkinter import ttk
-from tkinter.font import Font
+
+# Local Imports
+from view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from view.custom_widgets.validation import ValidatedEntry
 
 
 class position_frame(ttk.Frame):
@@ -43,46 +46,20 @@ class position_frame(ttk.Frame):
         ttk.Frame.__init__(position_frame, stage_control_tab, *args, **kwargs)
 
         #Creating each entry frame for a label and entry
+        position_frame.inputs = {}
+        entry_names = ['x', 'y', 'z', 'theta', 'f']
+        entry_labels = ['X', 'Y', 'Z', "\N{Greek Capital Theta Symbol}", 'F']       
 
-        #X Entry
-        position_frame.x_val = DoubleVar()
-        position_frame.x_entry_frame = ttk.Frame(position_frame)
-        position_frame.x_entry = ttk.Entry(position_frame.x_entry_frame, textvariable=position_frame.x_val, width=15)
-        position_frame.x_entry_label = ttk.Label(position_frame.x_entry_frame, text="X")
-        position_frame.x_entry_label.grid(row=0, column=0, sticky="e")
-        position_frame.x_entry.grid(row=0, column=1, sticky="w")
-
-        #Y Entry
-        position_frame.y_val = DoubleVar()
-        position_frame.y_entry_frame = ttk.Frame(position_frame)
-        position_frame.y_entry = ttk.Entry(position_frame.y_entry_frame, textvariable=position_frame.y_val, width=15)
-        position_frame.y_entry_label = ttk.Label(position_frame.y_entry_frame, text="Y")
-        position_frame.y_entry_label.grid(row=0, column=0, sticky="e")
-        position_frame.y_entry.grid(row=0, column=1, sticky="w")
-
-        #Z Entry
-        position_frame.z_val = DoubleVar()
-        position_frame.z_entry_frame = ttk.Frame(position_frame)
-        position_frame.z_entry = ttk.Entry(position_frame.z_entry_frame, textvariable=position_frame.z_val,width=15)
-        position_frame.z_entry_label = ttk.Label(position_frame.z_entry_frame, text="Z")
-        position_frame.z_entry_label.grid(row=0, column=0, sticky="e")
-        position_frame.z_entry.grid(row=0, column=1, sticky="w")
-
-        #Theta Entry
-        position_frame.theta_val = DoubleVar()
-        position_frame.theta_entry_frame = ttk.Frame(position_frame)
-        position_frame.theta_entry = ttk.Entry(position_frame.theta_entry_frame, textvariable=position_frame.theta_val,width=15)
-        position_frame.theta_entry_label = ttk.Label(position_frame.theta_entry_frame, text="\N{Greek Capital Theta Symbol}")
-        position_frame.theta_entry_label.grid(row=0, column=0, sticky="e")
-        position_frame.theta_entry.grid(row=0, column=1, sticky="w")
-
-        #Focus Entry
-        position_frame.focus_val = DoubleVar()
-        position_frame.focus_entry_frame = ttk.Frame(position_frame)
-        position_frame.f_entry = ttk.Entry(position_frame.focus_entry_frame, textvariable=position_frame.focus_val, width=15)
-        position_frame.focus_entry_label = ttk.Label(position_frame.focus_entry_frame, text="Focus")
-        position_frame.focus_entry_label.grid(row=0, column=0, sticky="e")
-        position_frame.f_entry.grid(row=0, column=1, sticky="w")
+        # entries
+        for i in range(len(entry_names)):
+            position_frame.inputs[entry_names[i]] = LabelInput(parent=position_frame,
+                                                            label=entry_labels[i],
+                                                            input_class=ValidatedEntry,
+                                                            input_var=DoubleVar(),
+                                                            input_args={'required': True, 'precision': 0.1}
+                                                            )
+            position_frame.inputs[entry_names[i]].grid(row=0, column=i, pady=1)
+       
 
         '''
         Grid for frames
@@ -95,10 +72,11 @@ class position_frame(ttk.Frame):
         theta is 4
         focus is 5
         '''
+    def get_widgets(position_frame):
+        return position_frame.inputs
 
-        #Gridding out each frame in postiion frame
-        position_frame.x_entry_frame.grid(row=0, column=0, padx=5, sticky=(NSEW))
-        position_frame.y_entry_frame.grid(row=0, column=1, padx=5, sticky=(NSEW))
-        position_frame.z_entry_frame.grid(row=0, column=2, padx=5, sticky=(NSEW))
-        position_frame.theta_entry_frame.grid(row=0, column=3, padx=5, sticky=(NSEW))
-        position_frame.focus_entry_frame.grid(row=0, column=4, padx=5, sticky=(NSEW))
+    def get_variables(position_frame):
+        variables = {}
+        for name in position_frame.inputs:
+            variables[name] = position_frame.inputs[name].get_variable()
+        return variables

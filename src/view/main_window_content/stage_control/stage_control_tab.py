@@ -53,7 +53,7 @@ class stage_control_tab(ttk.Frame):
         stage_control_tab.position_frame = position_frame(stage_control_tab)
 
         #XY Frame
-        stage_control_tab.x_y_frame = x_y_frame(stage_control_tab)
+        stage_control_tab.xy_frame = x_y_frame(stage_control_tab)
 
         #Z Frame
         stage_control_tab.z_frame = other_axis_frame(stage_control_tab, 'Z')
@@ -62,7 +62,7 @@ class stage_control_tab(ttk.Frame):
         stage_control_tab.theta_frame = other_axis_frame(stage_control_tab, 'Theta')
 
         #Focus Frame
-        stage_control_tab.focus_frame = other_axis_frame(stage_control_tab, 'Focus')
+        stage_control_tab.f_frame = other_axis_frame(stage_control_tab, 'Focus')
 
         #GoTo Frame
         stage_control_tab.goto_frame = goto_frame(stage_control_tab)
@@ -85,8 +85,37 @@ class stage_control_tab(ttk.Frame):
 
         #Gridding out frames
         stage_control_tab.position_frame.grid(row=0, column=0, columnspan=5, sticky=(NSEW))
-        stage_control_tab.x_y_frame.grid(row=1, column=0, sticky=(NSEW))
+        stage_control_tab.xy_frame.grid(row=1, column=0, sticky=(NSEW))
         stage_control_tab.z_frame.grid(row=1, column=1, sticky=(NSEW))
         stage_control_tab.theta_frame.grid(row=1, column=2, sticky=(NSEW))
-        stage_control_tab.focus_frame.grid(row=1, column=3, sticky=(NSEW))
+        stage_control_tab.f_frame.grid(row=1, column=3, sticky=(NSEW))
         stage_control_tab.goto_frame.grid(row=1, column=4, sticky=(NSEW))
+
+    def get_widgets(stage_control_tab):
+        """
+        # this function will return all the input widgets as a dictionary
+        # the reference name in the dictionary is the same as in the widget list file
+        """
+        temp = {
+            **stage_control_tab.position_frame.get_widgets()
+        }
+        for axis in ['xy', 'z', 'theta', 'f']:
+            temp[axis+'_step'] = getattr(stage_control_tab, axis+'_frame').get_widget()
+        return temp
+
+    def get_variables(stage_control_tab):
+        temp = stage_control_tab.get_widgets()
+        return {k: temp[k].get_variable() for k in temp}
+
+    def get_buttons(stage_control_tab):
+        """
+        # this function returns all the buttons in a dictionary
+        # the reference name is the same as in widget list
+        """
+        result = {
+            **stage_control_tab.xy_frame.get_buttons()
+        }
+        for axis in ['z', 'theta', 'f']:
+            temp = getattr(stage_control_tab, axis+'_frame').get_buttons()
+            result.update({k+'_'+axis+'_btn': temp[k] for k in temp})
+        return result

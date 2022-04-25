@@ -363,13 +363,18 @@ class ASLM_controller:
                 message='There are some missing/wrong settings! Can not start acquisition!')
             return False
 
-        if self.experiment.MicroscopeState['image_mode'] == 'continuous':
-            self.channels_tab_controller.set_mode('live')
-            self.camera_view_controller.set_mode('live')
-        else:
-            self.channels_tab_controller.set_mode('stop')
-            self.camera_view_controller.set_mode('stop')
+        mode = 'live' if self.experiment.MicroscopeState['image_mode'] == 'continuous' else 'stop'
+        self.set_mode_of_sub(mode)
+            
         return True
+
+    def set_mode_of_sub(self, mode):
+        """
+        # set mode to sub-controllers.
+        """
+        self.channels_tab_controller.set_mode(mode)
+        self.camera_view_controller.set_mode(mode)
+        self.camera_setting_controller.set_mode(mode)
 
     def update_camera_view(self):
         """
@@ -422,6 +427,8 @@ class ASLM_controller:
             #  values: 'high', '0.63x', '1x', '2x'...'6x'
             """
             self.model.change_resolution(args)
+            # tell camera setting tab to recalculate FOV_X and FOV_Y
+            self.camera_setting_controller.calculate_physical_dimensions(args[0])
 
         elif command == 'set_save':
             self.acquire_bar_controller.set_save_option(args[0])
@@ -512,9 +519,8 @@ class ASLM_controller:
         elif command == 'stop_acquire':
             # stop continuous acquire from camera
             self.stop_acquisition = True
-            self.channels_tab_controller.set_mode('stop')
-            self.camera_view_controller.set_mode(
-                'stop')  # Breaks live feed loop
+            self.set_mode_of_sub('stop')
+            # Breaks live feed loop
 
             # TODO: stop continuous acquire from camera
             # Do I need to lock the thread here or how do I stop the process with the thread pool?

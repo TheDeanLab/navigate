@@ -45,110 +45,105 @@ class Camera_Setting_Controller(GUI_Controller):
             configuration_controller=None):
         super().__init__(view, parent_controller, verbose)
 
+        # default values
+        self.in_initialization = True
+        self.resolution_value = '1x'
+        
         # Getting Widgets/Buttons
         self.mode_widgets = view.camera_mode.get_widgets()
         self.framerate_widgets = view.framerate_info.get_widgets()
         self.roi_widgets = view.camera_roi.get_widgets()
         self.roi_btns = view.camera_roi.get_buttons()
 
-        # Get Default Configuration Values
-        self.sensor_mode = self.parent_controller.configuration.CameraParameters['sensor_mode']
-        self.readout_direction = self.parent_controller.configuration.CameraParameters['sensor_mode']
-        self.pixel_size = self.parent_controller.configuration.CameraParameters['pixel_size_in_microns']
-        self.width = self.parent_controller.configuration.CameraParameters['x_pixels']
-        self.height = self.parent_controller.configuration.CameraParameters['y_pixels']
-
-        # Binding for Camera Mode
-        self.mode_widgets['Sensor'].widget.bind('<<ComboboxSelected>>', self.update_sensor_mode)
-
-        # Binding for Readout Mode
-        self.mode_widgets['Readout'].widget.bind('<<ComboboxSelected>>', self.update_readout_direction)
-
-        # Binding for ROI Mode
-        # Trace examples
-        # self.roi_widgets['Right'].widget.config(command=self.update_pixels, relief="sunken") # TODO change button style during transitions
-        #self.roi_widgets['Right'].widget.trace('w', command=self.update_pixels)
-        #self.roi_widgets['Right'].widget.bind('<<ComboboxSelected>>', self.update_readout_direction)
-
-        # self.roi_widgets['Left'].widget.config(command=self.update_pixels)
-        # self.roi_widgets['Top'].widget.config(command=self.update_pixels)
-        # self.roi_widgets['Bottom'].widget.config(command=self.update_pixels)
-
+        # initialize
         self.initialize(configuration_controller)
+
+        # Event binding
+        self.mode_widgets['Sensor'].widget.bind('<<ComboboxSelected>>', self.update_sensor_mode)
+        self.framerate_widgets['exposure_time'].get_variable().trace_add('write', self.update_exposure_time)
+        self.roi_widgets['Width'].get_variable().trace_add('write', self.update_fov)
+        self.roi_widgets['Height'].get_variable().trace_add('write', self.update_fov)
+        self.mode_widgets['Pixels'].get_variable().trace_add('write', self.update_fov)
+        
+        for btn_name in self.roi_btns:
+            self.roi_btns[btn_name].config(
+                command=self.update_roi(btn_name)
+            )
 
     def initialize(self, config):
         '''
         ## Function that sets widgets based on data given from main controller/config
         '''
+
+        # Get Default Configuration Values
+        self.default_pixel_size = config.configuration.CameraParameters['pixel_size_in_microns']
+        self.default_width, self.default_height = config.get_pixels()
+        self.trigger_source = config.configuration.CameraParameters['trigger_source']
+        self.trigger_active = config.configuration.CameraParameters['trigger_active']
+        
         # Camera Mode
         self.mode_widgets['Sensor'].widget['values'] = ['Normal', 'Light-Sheet']
         self.mode_widgets['Sensor'].widget['state'] = 'readonly'
+        self.mode_widgets['Sensor'].widget.set(config.configuration.CameraParameters['sensor_mode'])
         self.mode_widgets['Sensor'].widget.selection_clear()
-        self.mode_widgets['Pixels'].widget['state'] = 'disabled'
 
         # Readout Mode
         self.mode_widgets['Readout'].widget['values'] = [' ', 'Top-to-Bottom', 'Bottom-to-Top']
         self.mode_widgets['Readout'].widget['state'] = 'disabled'
         self.mode_widgets['Readout'].selection_clear()
 
+        # Pixels
+        self.mode_widgets['Pixels'].widget['state'] = 'disabled'
+        self.mode_widgets['Pixels'].set(self.default_pixel_size)
+        self.mode_widgets['Pixels'].widget.config(from_=1) # min value
+        self.mode_widgets['Pixels'].widget.config(to=config.configuration.CameraParameters['y_pixels'] / 2) # max value
+        self.mode_widgets['Pixels'].widget.config(increment=1) # step value
+
+        # framerate_widgets
+        self.framerate_widgets['exposure_time'].widget.min = config.configuration.CameraParameters['exposure_time_range']['min']
+        self.framerate_widgets['exposure_time'].widget.max = config.configuration.CameraParameters['exposure_time_range']['max']
+        self.framerate_widgets['exposure_time'].set(config.configuration.CameraParameters['exposure_time'])
+        self.framerate_widgets['exposure_time'].widget['state'] = 'normal'
+
         # Set range value
-        width, height = config.get_pixels(self.verbose)
-        self.roi_widgets['Width'].widget.config(to=width)
-        self.roi_widgets['Height'].widget.config(to=height)
+        self.roi_widgets['Width'].widget.config(to=self.default_width)
+        self.roi_widgets['Width'].widget.config(from_=2)
+        self.roi_widgets['Width'].widget.config(increment=2)
+        self.roi_widgets['Height'].widget.config(to=self.default_height)
+        self.roi_widgets['Height'].widget.config(from_=2)
+        self.roi_widgets['Height'].widget.config(increment=2)
+
+        # Center position
+        self.roi_widgets['Center_X'].set(self.default_width/2)
+        self.roi_widgets['Center_Y'].set(self.default_height/2)
 
         # This should not be edited for now
+        # Center position
         self.roi_widgets['Center_X'].widget['state'] = 'disabled'
         self.roi_widgets['Center_Y'].widget['state'] = 'disabled'
-
-        # This should not be edited for now
-        self.roi_widgets['Center_X'].widget['state'] = 'disabled'
-        self.roi_widgets['Center_Y'].widget['state'] = 'disabled'
-
         # FOV
         self.roi_widgets['FOV_X'].widget['state'] = 'disabled'
         self.roi_widgets['FOV_Y'].widget['state'] = 'disabled'
-
-    def calculate_physical_dimensions(self, setting_dict):
-        """
-        Calculates the size of the field of view according to the magnification of the system,
-        the physical size of the pixel, and the number of pixels.
-        """
-        if self.parent_controller.experiment.MicroscopeState['resolution_mode'] == 'high':
-            tube_lens_focal_length = 300
-            multi_immersion_focal_length = 8.4
-            magnification = tube_lens_focal_length / multi_immersion_focal_length
-        else:
-            magnification = self.parent_controller.experiment.MicroscopeState['zoom']
-            magnification = float(magnification[:-1])
-
-        physical_dimensions_x = setting_dict['x_pixels'] * self.pixel_size / magnification
-        physical_dimensions_y = setting_dict['y_pixels'] * self.pixel_size / magnification
-        return [physical_dimensions_x, physical_dimensions_y]
-
 
     def set_experiment_values(self, experiment):
         """
         Experiment yaml filed passed by controller.
         """
+        self.in_initialization = True
+
         setting_dict = experiment.CameraParameters
         microscope_state = experiment.MicroscopeState
+        self.resolution_value = 'high' if microscope_state['resolution_mode'] == 'high' else microscope_state['zoom']
 
         # Readout Settings
         self.mode_widgets['Sensor'].set(setting_dict['sensor_mode'])
         self.mode_widgets['Readout'].set(setting_dict['readout_direction'])
 
         # FOV Settings
-        self.roi_widgets['Center_X'].set(setting_dict['x_pixels'] / 2)
-        self.roi_widgets['Center_Y'].set(setting_dict['y_pixels'] / 2)
         self.roi_widgets['Width'].set(setting_dict['x_pixels'])
         self.roi_widgets['Height'].set(setting_dict['y_pixels'])
 
-        # Physical Dimensions
-        [physical_dimensions_x, physical_dimensions_y] = self.calculate_physical_dimensions(setting_dict)
-        self.roi_widgets['FOV_X'].set(physical_dimensions_x)
-        self.roi_widgets['FOV_Y'].set(physical_dimensions_y)
-
-        # Camera Framerate Info - 'exposure_time', 'readout_time', 'framerate', 'images_to_average'
+        # Camera Framerate Info - 'exposure_time', 'readout_time', 'framerate', 'frames_to_average'
         # Currently for just the first channel
         exposure_time = microscope_state['channels']['channel_1']['camera_exposure_time']
         self.framerate_widgets['exposure_time'].set(exposure_time)
@@ -159,7 +154,15 @@ class Camera_Setting_Controller(GUI_Controller):
         # self.framerate_widgets['framerate'].set(max_frame_rate)
 
         # Binning
-        self.framerate_widgets['images_to_average'].set(setting_dict['frames_to_average'])
+        self.framerate_widgets['frames_to_average'].set(setting_dict['frames_to_average'])
+
+        # Physical Dimensions
+        self.calculate_physical_dimensions(self.resolution_value)
+        # readout time
+        self.calculate_readout_time()
+        
+        # after initialization
+        self.in_initialization = False
 
 
     def update_experiment_values(self, setting_dict):
@@ -180,7 +183,8 @@ class Camera_Setting_Controller(GUI_Controller):
         setting_dict['y_pixels'] = self.roi_widgets['Height'].get()
 
         setting_dict['number_of_cameras'] = 1
-        setting_dict['pixel_size'] = self.roi_widgets['FOV_X'].get()
+        setting_dict['pixel_size'] = self.mode_widgets['Pixels'].get()
+        setting_dict['frames_to_average'] = self.framerate_widgets['frames_to_average'].get()
 
         return True
 
@@ -201,37 +205,128 @@ class Camera_Setting_Controller(GUI_Controller):
             self.mode_widgets['Readout'].set(' ')
             self.mode_widgets['Readout'].widget['state'] = 'disabled'
             self.mode_widgets['Pixels'].widget['state'] = 'disabled'
+            self.mode_widgets['Pixels'].widget.set(self.default_pixel_size)
             self.mode_widgets['Sensor'].widget.selection_clear()
-            self.sensor_mode = 'Normal'
-            if self.verbose:
-                print("Normal Camera Readout Mode")
+            
+            self.show_verbose_info("Normal Camera Readout Mode")
 
         if sensor_value == 'Light-Sheet':
             self.mode_widgets['Readout'].widget.set('Top to Bottom')
             self.mode_widgets['Readout'].widget['state'] = 'readonly'
             self.mode_widgets['Pixels'].set(10)  # Default to 10 pixels
             self.mode_widgets['Pixels'].widget['state'] = 'normal'
-            self.sensor_mode = 'Light-Sheet'
-            if self.verbose:
-                print("Light Sheet Camera Readout Mode")
+            
+            self.show_verbose_info("Light Sheet Camera Readout Mode")
+        
+        # calculate readout time
+        self.calculate_readout_time()
 
-    def update_readout_direction(self, *args):
-        '''
-        #### Trace function when changes to the readout direction are made.
-        '''
-        self.readout_direction = self.mode_widgets['Readout'].widget.get()
-        if self.verbose:
-            print("Readout Direction:", self.readout_direction)
+    def update_exposure_time(self, *args):
+        """
+        # when camera exposure time is changed, recalculate readout time
+        # tell central controller
+        """
+        self.calculate_readout_time()
 
-    def update_pixels(self, *args):
-        '''
-        #### Updates number of pixels in ROI based on Right, Left, Top, Bottom
-        '''
+        # TODO: tell central controller to update channel
+        
+        self.show_verbose_info('Camera exposure time is changed to', self.framerate_widgets['exposure_time'].get())
 
-        right = self.roi_widgets['Right'].get()
-        left = self.roi_widgets['Left'].get()
-        top = self.roi_widgets['Top'].get()
-        bottom = self.roi_widgets['Bottom'].get()
+    def update_roi(self, width):
+        """
+        # update roi width and height
+        """
+        width = self.default_width if width=='All' else float(width)
+        def handler(*args):
+            self.roi_widgets['Width'].set(width)
+            self.roi_widgets['Height'].set(width)
+            self.show_verbose_info("ROI width and height are changed to", width, width)
+        return handler
 
-        self.roi_widgets['Pixels_X'].set(right - left - 1)
-        self.roi_widgets['Pixels_Y'].set(bottom - top - 1)
+    def update_fov(self, *args):
+        """
+        # recalculate fov and update the widgets: FOV_X and FOV_Y
+        """
+        if self.in_initialization:
+            return
+        self.calculate_physical_dimensions(self.resolution_value)
+
+    def set_mode(self, mode):
+        """
+        # this function will change state of widgets according to different mode
+        # 'stop' mode will let the editable widget be 'normal'
+        # in 'live' and 'stack' mode, some widgets are disabled
+        # TODO: make sure all the widgets act right as more experiment modes are supported.
+        """
+        state = 'normal' if mode == 'stop' else 'disabled'
+        self.mode_widgets['Sensor'].widget['state'] = state
+        if self.mode_widgets['Sensor'].get() == 'Light-Sheet':
+            self.mode_widgets['Readout'].widget['state'] = state
+        self.framerate_widgets['exposure_time'].widget['state'] = state
+        self.framerate_widgets['frames_to_average'].widget['state'] = state
+        self.roi_widgets['Width'].widget['state'] = state
+        self.roi_widgets['Height'].widget['state'] = state
+        for btn_name in self.roi_btns:
+            self.roi_btns[btn_name]['state'] = state
+        
+    def calculate_physical_dimensions(self, resolution_value):
+        """
+        Calculates the size of the field of view according to the magnification of the system,
+        the physical size of the pixel, and the number of pixels.
+        update FOV_X and FOV_Y
+        """
+        if resolution_value == 'high':
+            tube_lens_focal_length = 300
+            multi_immersion_focal_length = 8.4
+            magnification = tube_lens_focal_length / multi_immersion_focal_length
+        else:
+            magnification = resolution_value
+            magnification = float(magnification[:-1])
+
+        pixel_size = float(self.mode_widgets['Pixels'].widget.get())
+        x_pixel = float(self.roi_widgets['Width'].get())
+        y_pixel = float(self.roi_widgets['Height'].get())
+
+        physical_dimensions_x = x_pixel * pixel_size / magnification
+        physical_dimensions_y = y_pixel * pixel_size / magnification
+
+        self.roi_widgets['FOV_X'].set(physical_dimensions_x)
+        self.roi_widgets['FOV_Y'].set(physical_dimensions_y)
+    
+    def calculate_readout_time(self):
+        """
+        # Calculates it here, what if we change to a new camera?
+        """
+        h = 9.74436 * 10 ** -6  # Readout timing constant
+        # the ROI height 'subarray_vsize'
+        vn = float(self.roi_widgets['Height'].get())
+        sensor_mode = self.mode_widgets['Sensor'].get()
+        exposure_time = float(self.framerate_widgets['exposure_time'].get())
+
+        if sensor_mode == 'Normal':
+            #  Area sensor mode operation
+            if self.trigger_source == 1:
+                # Internal Trigger Source
+                max_frame_rate = 1 / ((vn/2)*h)
+                readout_time = exposure_time - ((vn/2)*h)
+
+            if self.trigger_active in [1, 2]:
+                #  External Trigger Source
+                #  Edge == 1, Level == 2
+                max_frame_rate = 1 / ((vn/2) * h + exposure_time + 10*h)
+                readout_time = exposure_time - ((vn/2) * h + exposure_time + 10*h)
+
+            elif self.trigger_active == 3:
+                #  External Trigger Source
+                #  Synchronous Readout == 3
+                max_frame_rate = 1 / ((vn/2) * h + 5*h)
+                readout_time = exposure_time - ((vn/2) * h + 5*h)
+
+        elif sensor_mode == 'Light-Sheet':
+            #  Progressive sensor mode operation
+            max_frame_rate = 1 / (exposure_time + (vn+10)*h)
+            readout_time = exposure_time - 1 / (exposure_time + (vn+10)*h)
+
+        # return readout_time, max_frame_rate
+        self.framerate_widgets['readout_time'].set(readout_time)
+        self.framerate_widgets['max_framerate'].set(max_frame_rate)

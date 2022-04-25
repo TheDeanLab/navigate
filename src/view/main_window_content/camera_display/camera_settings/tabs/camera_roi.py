@@ -36,6 +36,7 @@ from tkinter import ttk
 from tkinter.font import Font
 
 from view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from view.custom_widgets.validation import ValidatedSpinbox
 
 
 class camera_roi(ttk.Labelframe):
@@ -86,8 +87,8 @@ class camera_roi(ttk.Labelframe):
         self.binning = 'Binning'
 
         # Buttons
-        self.btn_labels = ['Use All Pixels', '1600x1600', '1024x1024', '512x512']
-        self.btn_names = ['Use_Pixels', '1600', '1024', '512']
+        self.btn_labels = ['Use All Pixels', '1600x1600', '1024x1024', '512x512'] 
+        self.btn_names = ['All', '1600', '1024', '512'] 
 
         # Loop for each frame
         for i in range(4):
@@ -101,7 +102,7 @@ class camera_roi(ttk.Labelframe):
                 # ROI frame
                 self.inputs[self.roi_labels[i]] = LabelInput(parent=self.roi_frame,
                                                              label=self.roi_labels[i],
-                                                             input_class=ttk.Spinbox,
+                                                             input_class=ValidatedSpinbox,
                                                              input_var=tk.IntVar(),
                                                              input_args={"from_": 0, "to": 2048, "increment": 1.0}
                                                              )

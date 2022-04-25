@@ -36,6 +36,7 @@ from tkinter import ttk
 from tkinter.font import Font
 
 from view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from view.custom_widgets.validation import ValidatedEntry, ValidatedSpinbox
 
 class framerate_info(ttk.LabelFrame):
     '''
@@ -57,7 +58,7 @@ class framerate_info(ttk.LabelFrame):
         #  Dictionary for all the variables, this will be used by the controller
         self.inputs = {}
         self.labels = ['Exposure Time (ms)', 'Readout Time (ms)', 'Max Framerate (Hz)', 'Images to Average']
-        self.names = ['exposure_time', 'readout_time', 'framerate', 'images_to_average']
+        self.names = ['exposure_time', 'readout_time', 'max_framerate', 'frames_to_average']
         self.read_only = [True, True, True, False]
 
         #  Dropdown loop
@@ -65,7 +66,7 @@ class framerate_info(ttk.LabelFrame):
             if self.read_only[i]:
                 self.inputs[self.names[i]] = LabelInput(parent=content_frame,
                                                         label=self.labels[i],
-                                                        input_class=ttk.Entry,
+                                                        input_class=ValidatedEntry,
                                                         input_var=tk.DoubleVar()                                          
                                                         )
                 self.inputs[self.names[i]].widget['state'] = 'readonly'
@@ -73,7 +74,7 @@ class framerate_info(ttk.LabelFrame):
             else:
                 self.inputs[self.names[i]] = LabelInput(parent=content_frame,
                                                         label=self.labels[i],
-                                                        input_class=ttk.Spinbox,
+                                                        input_class=ValidatedSpinbox,
                                                         input_var=tk.DoubleVar(),
                                                         input_args={"from_": 1, "to": 1000, "increment": 1.0}                                          
                                                         )

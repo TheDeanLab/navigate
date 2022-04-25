@@ -72,6 +72,11 @@ CameraParameters:
   display_acquisition_subsampling: 4
   average_frame_rate: 4.969
   frames_to_average: 1
+  exposure_time_range: {
+    min: 1,
+    max: 1000,
+    step: 1
+  }
 
 RemoteFocusParameters:
   # Remote Focusing Systems

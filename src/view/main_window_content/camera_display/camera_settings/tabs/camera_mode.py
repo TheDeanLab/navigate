@@ -30,14 +30,12 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-from cProfile import label
 import tkinter as tk
 from tkinter import *
 from tkinter import ttk
-from tkinter.font import Font
-from turtle import st
 
 from view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from view.custom_widgets.validation import ValidatedSpinbox
 
 class camera_mode(ttk.Labelframe):
     '''
@@ -75,7 +73,7 @@ class camera_mode(ttk.Labelframe):
             else:
                 self.inputs[self.names[i]] = LabelInput(parent=content_frame,
                                                         label=self.labels[i],
-                                                        input_class=ttk.Spinbox,
+                                                        input_class=ValidatedSpinbox,
                                                         input_var=tk.StringVar(),
                                                         input_args={"from_": 0, "to": 10000, "increment": 1}                                       
                                                         )

@@ -129,7 +129,7 @@ class DynamixelZoom(ZoomBase):
         self.torque_enable = 1
         self.torque_disable = 0
 
-        self.port_num = dynamixel.portHandler(self.devicename)
+        self.port_num = self.dynamixel.portHandler(self.devicename)
         self.dynamixel.packetHandler()
 
         if self.verbose:

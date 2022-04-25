@@ -459,7 +459,7 @@ class ASLM_controller:
             self.model.run_command(
                 'update setting',
                 'channel',
-                args,
+                *args,
                 channels=self.channels_tab_controller.get_values('channel'))
 
         elif command == 'timepoint':
@@ -468,6 +468,13 @@ class ASLM_controller:
                 self.experiment.MicroscopeState[k] = settings[k]
             print('timepoint is changed', args[0])
 
+        elif command == 'update_setting':
+            if self.verbose:
+                print('update setting of: ', args[0])
+            self.model.run_command(
+                'update setting',
+                *args
+            )
         elif command == 'acquire_and_save':
             if not self.prepare_acquire_data():
                 self.acquire_bar_controller.stop_acquire()

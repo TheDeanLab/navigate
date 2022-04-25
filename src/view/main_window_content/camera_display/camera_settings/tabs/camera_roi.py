@@ -69,11 +69,8 @@ class camera_roi(ttk.Labelframe):
 
         # ROI Center
         self.center_roi_frame = ttk.LabelFrame(self, text='ROI Center')
-        self.center_roi_frame.grid(row=2, column=0, sticky=NSEW)
-
-        # Binning
-        self.binning_frame = ttk.Labelframe(self, text="Binning Settings")
         self.center_roi_frame.grid(row=1, column=1, sticky=NSEW)
+
 
         # Dictionary for all the variables, this will be used by the controller
         self.inputs = {}
@@ -87,51 +84,49 @@ class camera_roi(ttk.Labelframe):
         self.binning = 'Binning'
 
         # Buttons
-        self.btn_labels = ['Use All Pixels', '1600x1600', '1024x1024', '512x512'] 
-        self.btn_names = ['All', '1600', '1024', '512'] 
+        btn_labels = ['Use All Pixels', '1600x1600', '1024x1024', '512x512'] 
+        btn_names = ['All', '1600', '1024', '512'] 
 
         # Loop for each frame
-        for i in range(4):
-            if i < 4:
-                # Button Frame
-                # TODO: Number of buttons does not change as expected.
-                self.buttons[self.btn_names[i]] = ttk.Button(self.btn_frame, text=self.btn_labels[i])
-                self.buttons[self.btn_names[i]].grid(row=i, column=0, pady=1)
-
-            if i < 2:
-                # ROI frame
-                self.inputs[self.roi_labels[i]] = LabelInput(parent=self.roi_frame,
-                                                             label=self.roi_labels[i],
-                                                             input_class=ValidatedSpinbox,
-                                                             input_var=tk.IntVar(),
-                                                             input_args={"from_": 0, "to": 2048, "increment": 1.0}
-                                                             )
-                self.inputs[self.roi_labels[i]].grid(row=i, column=0, pady=1)
-
-                # FOV Frame
-                self.inputs[self.fov_names[i]] = LabelInput(parent=self.fov_frame,
-                                                            label=self.xy_labels[i],
-                                                            input_class=ttk.Entry,
-                                                            input_var=tk.IntVar()
+        # Button Frame
+        for i in range(len(btn_names)):
+            self.buttons[btn_names[i]] = ttk.Button(self.btn_frame, text=btn_labels[i])
+            self.buttons[btn_names[i]].grid(row=i, column=0, pady=1)
+        
+        for i in range(2):
+            # ROI frame
+            self.inputs[self.roi_labels[i]] = LabelInput(parent=self.roi_frame,
+                                                            label=self.roi_labels[i],
+                                                            input_class=ValidatedSpinbox,
+                                                            input_var=tk.IntVar(),
+                                                            input_args={"from_": 0, "to": 2048, "increment": 1.0}
                                                             )
-                self.inputs[self.fov_names[i]].grid(row=i, column=0, pady=1)
+            self.inputs[self.roi_labels[i]].grid(row=i, column=0, pady=1)
 
-                # ROI Center
-                self.inputs[self.center_names[i]] = LabelInput(parent=self.center_roi_frame,
-                                                               label=self.xy_labels[i],
-                                                               input_class=ttk.Spinbox,
-                                                               input_var=tk.IntVar(),
-                                                               input_args={"from_": 0, "to": 2048, "increment": 1.0}
-                                                               )
-                self.inputs[self.center_names[i]].grid(row=i, column=0, pady=1)
+            # FOV Frame
+            self.inputs[self.fov_names[i]] = LabelInput(parent=self.fov_frame,
+                                                        label=self.xy_labels[i],
+                                                        input_class=ttk.Entry,
+                                                        input_var=tk.IntVar()
+                                                        )
+            self.inputs[self.fov_names[i]].grid(row=i, column=0, pady=1)
 
-            if i == 0:
-                self.inputs[self.binning] = LabelInput(parent=self.binning_frame,
-                                                       label=self.binning,
-                                                       input_class=ttk.Combobox,
-                                                       input_var=tk.StringVar()
-                                                       )
-                self.inputs[self.binning].grid(row=0, column=0, pady=1)
+            # ROI Center
+            self.inputs[self.center_names[i]] = LabelInput(parent=self.center_roi_frame,
+                                                            label=self.xy_labels[i],
+                                                            input_class=ttk.Spinbox,
+                                                            input_var=tk.IntVar(),
+                                                            input_args={"from_": 0, "to": 2048, "increment": 1.0}
+                                                            )
+            self.inputs[self.center_names[i]].grid(row=i, column=0, pady=1)
+
+        # binning
+        self.inputs[self.binning] = LabelInput(parent=self.roi_frame,
+                                                label=self.binning,
+                                                input_class=ttk.Combobox,
+                                                input_var=tk.StringVar()
+                                                )
+        self.inputs[self.binning].grid(row=3, column=0, pady=1)
 
     def get_variables(self):
         '''

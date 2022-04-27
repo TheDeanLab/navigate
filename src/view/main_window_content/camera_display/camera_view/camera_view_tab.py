@@ -40,11 +40,7 @@ from matplotlib.figure import Figure
 
 class camera_tab(ttk.Frame):
     def __init__(self, cam_wave, *args, **kwargs):
-        #  TODO: Would like to split this Frame in half and provide some statistics on the right-hand side.
-        #  Would include a Combobox for changing the CMAP.
-        #  Would include a Spinbox for providing the maximum intensity of the image.
-        #  Would include a Spinbox for providing a rolling average maximum intensity of the image
-        #  Would include a Spinbox for providing the number of frames to include in the rolling average.
+
         #  Init Frame
         ttk.Frame.__init__(self, cam_wave, *args, **kwargs)
 
@@ -52,7 +48,8 @@ class camera_tab(ttk.Frame):
         self.cam_image = ttk.Frame(self)
         self.cam_image.grid(row=0, column=0, sticky=NSEW)
 
-        self.canvas = tk.Canvas(self.cam_image, width=500, height=500) # TODO decide on height, width original was 800x800
+        # TODO decide on height, width original was 800x800. 4x binning -> 2048 -> 512
+        self.canvas = tk.Canvas(self.cam_image, width=512, height=512)
         self.canvas.grid(row=0, column=0, sticky=NSEW)
         self.matplotlib_figure = Figure(figsize=[6, 6], tight_layout=True)
         self.matplotlib_canvas = FigureCanvasTkAgg(self.matplotlib_figure, self.canvas)

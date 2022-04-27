@@ -87,11 +87,3 @@ class image_metrics(ttk.Labelframe):
         '''
         return self.inputs
 
-        #Stack Max entry
-        # self.stack = DoubleVar()
-        # self.stack_frame = ttk.Frame(self)
-        # self.stack_entry = ttk.Entry(self.stack_frame, textvariable=self.stack, width=15)
-        # self.stack_entry_label = ttk.Label(self.stack_frame, text="Stack Max")
-        # self.stack_entry_label.grid(row=0, column=0, sticky="s")
-        # self.stack_entry.grid(row=0, column=1, sticky="n")
-        # self.stack_frame.grid(row=0, column=1, sticky=NSEW)

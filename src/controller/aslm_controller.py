@@ -548,6 +548,7 @@ class ASLM_controller:
         """
         # Trigger model to capture a single image
         """
+        self.camera_view_controller.image_count = 0
         self.model.run_command(
             'single',
             self.experiment.MicroscopeState,
@@ -556,6 +557,7 @@ class ASLM_controller:
         self.camera_view_controller.display_image(self.data_buffer[image_id])
 
     def capture_live_image(self):
+        self.camera_view_controller.image_count = 0
         self.model.run_command('live', self.experiment.MicroscopeState)
         self.stop_acquisition = False
         while True:
@@ -573,6 +575,9 @@ class ASLM_controller:
                 self.model.run_command('stop')
                 if self.verbose:
                     print('call the model to stop!')
+
+        if self.verbose:
+            print("Captured", self.camera_view_controller.image_count, "Live Images")
 
     def move_stage(self, args):
         self.model.move_stage(args)

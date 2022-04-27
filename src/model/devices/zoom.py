@@ -101,7 +101,8 @@ class DynamixelZoom(ZoomBase):
     def __init__(self, model, verbose):
         super().__init__(model, verbose)
         # from model.devices.APIs.dynamixel import dynamixel_functions as dynamixel
-        self.dynamixel = importlib.import_module('model.devices.APIs.dynamixel.dynamixel_functions')
+        self.dynamixel = importlib.import_module(
+            'model.devices.APIs.dynamixel.dynamixel_functions')
         self.id = model.ZoomParameters['servo_id']
         self.comport = model.ZoomParameters['COMport']
         self.devicename = self.comport.encode('utf-8')
@@ -112,9 +113,6 @@ class DynamixelZoom(ZoomBase):
         self.addr_mx_p_gain = 28
         self.addr_mx_torque_limit = 34
         self.addr_mx_moving_speed = 32
-
-
-
 
         # Specifies how much the goal position can be off (+/-) from the target
         self.goal_position_offset = 10

@@ -47,18 +47,25 @@ class Camera_View_Controller(GUI_Controller):
 
         # Getting Widgets/Buttons
         self.image_metrics = view.image_metrics.get_widgets()
-        # keys = ['Frames to Avg', 'Image Max Counts', 'Channel']
-
         self.pallete = view.scale_pallete.get_widgets()
-        # keys = ['Gray','Gradient','Rainbow', 'Autoscale', 'Min','Max']
 
-        # Binding for Pallete
-        self.pallete['Autoscale'].widget.config(command=self.update_minmax)
+        # Binding for adjusting the lookup table min and max counts.
+        # keys = ['Autoscale', 'Min','Max']
+        self.pallete['Autoscale'].widget.config(command=self.toggle_min_max_buttons)
+        self.pallete['Min'].widget.config(command=self.update_min_max_counts)
+        self.pallete['Max'].widget.config(command=self.update_min_max_counts)
 
-        self.display = 'PIL'
-        # PIL or Matplotlib
+        # Bindings for changes to the LUT
+        # keys = ['Gray','Gradient','Rainbow']
+        self.pallete['Gray'].widget.config(command=self.update_LUT)
+        self.pallete['Gradient'].widget.config(command=self.update_LUT)
+        self.pallete['Rainbow'].widget.config(command=self.update_LUT)
 
         #  Starting Mode
+        self.img = None
+        self.autoscale = True
+        self.max_counts = None
+        self.min_counts = None
         self.mode = 'stop'
         self.colormap = 'gray'
         self.image_count = 0
@@ -66,25 +73,14 @@ class Camera_View_Controller(GUI_Controller):
         self.rolling_frames = 1
         self.live_subsampling = self.parent_controller.configuration.CameraParameters[
             'display_live_subsampling']
-
-        if self.display == 'PIL':
-            # PIL
-            self.canvas = self.view.canvas
-
-        elif self.display == 'Matplotlib':
-            # Matplot
-            self.canvas = self.view.matplotlib_canvas
-            self.figure = self.view.matplotlib_figure
-        else:
-            print("Image Display Configured Improperly in camera_view_controller")
-
-        # self.view.scale_pallete.autoscale.trace_add(self.update_counts_display())
+        self.canvas = self.view.canvas
 
     def initialize(self, name, data):
         '''
         #### Function that sets widgets based on data given from main controller/config
         '''
         # Pallete section (colors, autoscale, min/max counts)
+        # keys = ['Frames to Avg', 'Image Max Counts', 'Channel']
         if name == 'minmax':
             min = data[0]
             max = data[1]
@@ -114,18 +110,6 @@ class Camera_View_Controller(GUI_Controller):
         # self.canvas.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH, expand=1.5)
         pass
 
-    # def update_counts_display(self):
-    # """
-    # Would ideally like to have the ability to change whether or not the state is normal, disabled, or read only,
-    # depending upon the autoscale checkbox state...
-    # """
-    #     if self.view.scale_pallete.autoscale.get() is True:
-    #         self.view.scale_pallete.min_counts_spinbox(state="readonly")
-    #         self.view.scale_pallete.max_counts_spinbox(state="readonly")
-    #     else:
-    #         self.view.scale_pallete.min_counts_spinbox(state=NORMAL)
-    #         self.view.scale_pallete.max_counts_spinbox(state=NORMAL)
-
     def update_max_counts(self, image):
         """
         #  Function gets the number of frames to average from the VIEW.
@@ -134,21 +118,33 @@ class Camera_View_Controller(GUI_Controller):
         #  Once the number of frames to average has been reached, deletes the first image in.
         #  Reports the rolling average.
         """
-        self.rolling_frames = int(self.view.cam_counts.avg_frame.get())
+        self.rolling_frames = int(self.image_metrics['Frames'].get())
         if self.rolling_frames == 0:
-            self.view.cam_counts.avg_frame.set(1)
-            self.view.cam_counts.count.set(np.max(image))
+            # Cannot average 0 frames. Set to 1, and report max intensity
+            self.image_metrics['Frames'].set(1)
+            self.image_metrics['Image'].set(self.max_counts)
+
         elif self.rolling_frames == 1:
-            self.view.cam_counts.count.set(np.max(image))
+            self.image_metrics['Image'].set(self.max_counts)
+
         else:
+            #  Rolling Average
             self.image_count = self.image_count + 1
             if self.image_count == 1:
+                # First frame of the rolling average
                 self.temp_array = image
+                self.image_metrics['Image'].set(self.max_counts)
             else:
+                # Subsequent frames of the rolling average
                 self.temp_array = np.dstack((self.temp_array, image))
                 if np.shape(self.temp_array)[2] > self.rolling_frames:
                     self.temp_array = np.delete(self.temp_array, 0, 2)
-            self.view.cam_counts.count.set(np.max(self.temp_array))
+
+                # Update GUI
+                self.image_metrics['Image'].set(np.max(self.temp_array))
+
+                if self.verbose:
+                    print("Rolling Average: ", self.image_count, self.rolling_frames)
 
     def display_image(self, image):
         """
@@ -156,13 +152,11 @@ class Camera_View_Controller(GUI_Controller):
         #  If Autoscale is selected, automatically calculates the min and max values for the data.
         #  If Autoscale is not selected, takes the user values as specified in the min and max counts.
         """
-        self.image_count = 0
-
         # #  Update the colorbar.
         # self.colormap = self.view.scale_pallete.color.get()
 
-        # #  Update the GUI according to the instantaneous or rolling average max counts.
-        # self.update_max_counts(image)
+        #  Update the GUI according to the instantaneous or rolling average max counts.
+        self.update_max_counts(image)
 
         #  Down-sample the data according to the configuration file.
         if self.live_subsampling != 1:
@@ -170,42 +164,109 @@ class Camera_View_Controller(GUI_Controller):
                                (int(np.shape(image)[0] / self.live_subsampling),
                                 int(np.shape(image)[1] / self.live_subsampling)))
 
-        # #  Specify the lookup table min and maximum.
-        # autoscale = self.view.scale_pallete.autoscale.get()
-        # if autoscale is True:
-        #     min = np.min(image)
-        #     max = np.max(image)
-        # else:
-        #     min = self.view.scale_pallete.min_counts.get()
-        #     max = self.view.scale_pallete.max_counts.get()
+        if self.autoscale is True:
+            self.max_counts = np.max(image)
+            self.min_counts = np.min(image)
 
-        if self.display == 'Matplotlib':
-            begin_time = time.perf_counter()
-            self.figure.add_subplot(111).imshow(
-                image, self.colormap, vmin=min, vmax=max)
-            self.figure.gca().set_axis_off()
-            self.canvas.draw()
-            end_time = time.perf_counter()
+        begin_time = time.perf_counter()
+        if self.autoscale is False:
+            image = self.scale_image(image)
 
-        elif self.display == 'PIL':
-            begin_time = time.perf_counter()
-            self.img = ImageTk.PhotoImage(Image.fromarray(image))
-            self.canvas.create_image(0, 0, image=self.img, anchor='nw')
-            end_time = time.perf_counter()
-
+        self.img = ImageTk.PhotoImage(Image.fromarray(image))
+        self.canvas.create_image(0,
+                                 0,
+                                 image=self.img,
+                                 anchor='nw')
+        end_time = time.perf_counter()
         if self.verbose:
             print(
-                'Time necessary to display an image:',
-                (end_time - begin_time) * 1000)
+                'PIL - Image Display took:',
+                (end_time - begin_time) * 1000, 'milliseconds.')
 
-    def update_channel_idx(self, channel_idx):
-        self.view.cam_counts.channel_idx.set(channel_idx)
+        # Update Channel Index
+        self.image_metrics['Channel'].set(self.parent_controller.model.return_channel_index())
 
-    def update_minmax(self):
-        on_off = self.pallete['Autoscale'].get()
-        if on_off:  # Checkbox selected
+        # Iterate Image Count for Rolling Average
+        self.image_count = self.image_count + 1
+
+    def update_LUT(self):
+        """
+        # When the LUT is changed in the GUI, this function is called.
+        # Updates the LUT.
+        """
+        if self.img is None:
+            pass
+        else:
+            print("Updating the LUT", self.view.scale_pallete.color.get())
+        self.canvas.create_image(0,
+                                 0,
+                                 image=self.img,
+                                 anchor='nw')
+
+    def scale_image(self, image):
+        """
+        Scales image between minimum and maximum counts on GUI
+        # TODO: Not working as anticipated.  I assume the ImageTk.PhotoImage is adding odd behavior.
+        """
+        below_threshold = image <= self.min_counts
+        above_threshold = image >= self.max_counts
+
+        # Normalize image between 0 and 1
+        image = (image - self.min_counts)/(self.max_counts - self.min_counts)
+
+        # Set limits to LUT
+        image[below_threshold] = 0
+        image[above_threshold] = 1
+
+        # Scale back to a 16-bit intensity
+        return image * 2**16-1
+
+    def toggle_min_max_buttons(self):
+        """
+        Checks the value of the autoscale widget.
+        If enabled, the min and max widgets are disabled and the image intensity is autoscaled.
+        If disabled, miu and max widgets are enabled, and image intensity scaled.
+        """
+        self.autoscale = self.pallete['Autoscale'].get()
+        if self.autoscale is True:  # Autoscale Enabled
             self.pallete['Min'].widget['state'] = 'disabled'
             self.pallete['Max'].widget['state'] = 'disabled'
-        elif on_off == False:  # Checkbox unselected
+            if self.verbose:
+                print("Autoscale Enabled")
+
+        elif self.autoscale is False:  # Autoscale Disabled
             self.pallete['Min'].widget['state'] = 'normal'
             self.pallete['Max'].widget['state'] = 'normal'
+            if self.verbose:
+                print("Autoscale Disabled")
+            self.update_min_max_counts()
+
+    def update_min_max_counts(self):
+        """
+        When the min and max counts are toggled in the GUI, this function is called.
+        Updates the min and max values.
+        """
+        self.min_counts = self.pallete['Min'].get()
+        self.max_counts = self.pallete['Max'].get()
+        if self.verbose:
+            print("Min and Max counts scaled to ", self.min_counts, self.max_counts)
+
+    def calculate_LUT(self):
+        color_bins = 256
+        LUT_idx = np.zeros(color_bins-1)
+        amplitude_red = 1
+        freq_red = 1 / ((color_bins-1) * amplitude_red)
+        values_red = np.cos(2 * np.pi * freq_red * LUT_idx)
+        values_red = (values_red - np.min(values_red)) / (np.max(values_red) - np.min(values_red))
+
+        amplitude_green = 4
+        freq_green = 1 / ((color_bins-1) * amplitude_green)
+        values_green = np.cos(2 * np.pi * freq_green * LUT_idx)
+        values_green = (values_green - np.min(values_green)) / (np.max(values_green) - np.min(values_green))
+
+        amplitude_blue = 4
+        freq_blue = 1 / ((color_bins-1) * amplitude_blue)
+        values_blue = np.cos(2 * np.pi * freq_blue * LUT_idx)
+        values_blue = (values_blue - np.min(values_blue)) / (np.max(values_blue) - np.min(values_blue))
+        pass
+    

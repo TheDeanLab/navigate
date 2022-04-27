@@ -463,6 +463,8 @@ class Model:
         else:
             print("Shutter Command Invalid")
 
+    def return_channel_index(self):
+        return self.current_channel
 
 if __name__ == '__main__':
     """ Testing Section """

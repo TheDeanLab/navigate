@@ -100,6 +100,16 @@ def save_yaml_file(file_directory, experiment, filename='experiment.yml'):
         return False
     return True
 
+def combine_funcs(*funclist):
+    """
+    # this function will combine a list of functions to a new function
+    """
+    def new_func():
+        for func in funclist:
+            if callable(func):
+                func()
+    return new_func
+
 
 def update_from_channels_tab_controller(self):
     # get settings from channels tab

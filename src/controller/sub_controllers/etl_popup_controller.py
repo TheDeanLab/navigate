@@ -38,96 +38,105 @@ from tkinter import filedialog
 
 from controller.sub_controllers.widget_functions import validate_wrapper
 from controller.sub_controllers.gui_controller import GUI_Controller
-from controller.aslm_controller_functions import save_yaml_file
+from controller.aslm_controller_functions import save_yaml_file, combine_funcs
 
 class Etl_Popup_Controller(GUI_Controller):
 
-    def __init__(self, view, parent_controller, verbose=False):
+    def __init__(self, view, parent_controller, verbose=False, etl_setting=None, etl_file_name=None):
         super().__init__(view, parent_controller, verbose)
 
         self.resolution_info = None
-        self.other_info = None
+        self.etl_file_name = etl_file_name
         # get mode and mag widgets
         self.widgets = self.view.get_widgets()
-        self.mode_widget = self.widgets['Mode']
-        self.mag_widget = self.widgets['Mag']
 
         self.variables = self.view.get_variables()
         self.lasers = ['488nm', '562nm', '642nm']
-        self.mode = None
+        self.resolution = None
         self.mag = None
-        self.other_info_dict = {
-            'Delay': 'delay_percent',
-            'Duty': '',
-            'Smoothing': ''
-        }
-
-        # add validations to widgets
-        for laser in self.lasers:
-            validate_wrapper(self.widgets[laser + ' Amp'].widget, is_entry=True)
-            validate_wrapper(self.widgets[laser + ' Off'].widget, is_entry=True)
-        for key in self.other_info_dict.keys():
-            validate_wrapper(self.widgets[key].widget, is_entry=True)
+        self.in_initialize = True
+        self.mode = 'stop'
 
         
+        # event id list
+        self.event_ids = {}
+        for mode in etl_setting.ETLConstants:
+            for mag in etl_setting.ETLConstants[mode]:
+                self.event_ids[mode+'_'+mag] = None
+
         # event combination
-        self.mode_widget.widget.bind('<<ComboboxSelected>>', self.show_magnification)
-        self.mag_widget.widget.bind('<<ComboboxSelected>>', self.show_laser_info)
+        self.widgets['Mode'].widget.bind('<<ComboboxSelected>>', self.show_magnification)
+        self.widgets['Mag'].widget.bind('<<ComboboxSelected>>', self.show_laser_info)
 
         for laser in self.lasers:
             self.variables[laser + ' Amp'].trace_add('write', self.update_etl_setting(laser+' Amp', laser, 'amplitude'))
             self.variables[laser + ' Off'].trace_add('write', self.update_etl_setting(laser+' Off', laser, 'offset'))
 
-        self.variables['Delay'].trace_add('write', self.update_other_setting('Delay'))
-
         self.view.get_buttons()['Save'].configure(command=self.save_etl_info)
+
+        # add saving function to the function closing the window
+        self.view.popup.protocol("WM_DELETE_WINDOW", combine_funcs(self.save_etl_info, self.view.popup.dismiss,
+                                                            lambda: delattr(self.parent_controller,'etl_controller')))
+        
+        self.initialize(etl_setting)
 
     def initialize(self, setting_dict):
         """
         # initialize widgets with data
         """
         self.resolution_info = setting_dict
-        self.mode_widget.widget['values'] = list(setting_dict.ETLConstants.keys())
+        self.widgets['Mode'].widget['values'] = list(setting_dict.ETLConstants.keys())
+        self.widgets['Mode'].widget['state'] = 'readonly'
+        self.widgets['Mag'].widget['state'] = 'readonly'
 
-    def set_experiment_values(self, setting_dict):
+        # set ranges of value for those lasers
+        for laser in self.lasers:
+            self.widgets[laser + ' Amp'].widget.configure(from_=0)
+            self.widgets[laser + ' Amp'].widget.configure(increment=0.1)
+            self.widgets[laser + ' Off'].widget.configure(from_=0)
+            self.widgets[laser + ' Off'].widget.configure(increment=0.1)
+
+    def set_experiment_values(self, resolution_value):
         """
         # set experiment values
         """
-        self.other_info = setting_dict
+        self.in_initialize = True
+        self.widgets['Mode'].set('high' if resolution_value == 'high' else 'low')
+        self.show_magnification()
+        self.widgets['Mag'].set('one' if resolution_value == 'high' else resolution_value)
+        self.show_laser_info()
+        
+        # end initialization
+        self.in_initialize = False
+
+    def set_mode(self, mode='stop'):
+        self.mode = mode
 
     def show_magnification(self, *args):
         """
         # show magnification options when the user changes the focus mode
         """
-        # get mode setting
-        self.mode = self.mode_widget.widget.get()
-        temp = list(self.resolution_info.ETLConstants[self.mode].keys())
-        self.mag_widget.widget['values'] = temp
-        self.mag_widget.widget.set(temp[0])
+        # get resolution setting
+        self.resolution = self.widgets['Mode'].widget.get()
+        temp = list(self.resolution_info.ETLConstants[self.resolution].keys())
+        self.widgets['Mag'].widget['values'] = temp
+        self.widgets['Mag'].widget.set(temp[0])
         # update laser info
         self.show_laser_info()
-        self.show_other_info(self.mode)
 
     def show_laser_info(self, *args):
         """
         # show laser info when the user changes magnification setting
         """
         # get magnification setting
-        self.mag = self.mag_widget.widget.get()
+        self.mag = self.widgets['Mag'].widget.get()
         for laser in self.lasers:
-            self.variables[laser + ' Amp'].set(self.resolution_info.ETLConstants[self.mode][self.mag][laser]['amplitude'])
-            self.variables[laser + ' Off'].set(self.resolution_info.ETLConstants[self.mode][self.mag][laser]['offset'])
-        
-    def show_other_info(self, mode):
-        """
-        # show delay_percent, pulse_percent.
-        """
-        if mode == 'low':
-            prefix = 'remote_focus_l_'
-        else:
-            prefix = 'remote_focus_r_'
-        self.variables['Delay'].set(self.other_info[prefix+'delay_percent'])
-        self.variables['Smoothing'].set(self.other_info[prefix+'pulse_percent'])
+            self.variables[laser + ' Amp'].set(self.resolution_info.ETLConstants[self.resolution][self.mag][laser]['amplitude'])
+            self.variables[laser + ' Off'].set(self.resolution_info.ETLConstants[self.resolution][self.mag][laser]['offset'])
+
+        if not self.in_initialize:
+            # update resolution value in central controller (menu)
+            self.parent_controller.resolution_value.set('high' if self.resolution == 'high' else self.mag)
 
     def update_etl_setting(self, name, laser, etl_name):
         """
@@ -136,26 +145,21 @@ class Etl_Popup_Controller(GUI_Controller):
         variable = self.variables[name]
 
         def func_laser(*args):
-            self.resolution_info.ETLConstants[self.mode][self.mag][laser][etl_name] = variable.get()
+            value = self.resolution_info.ETLConstants[self.resolution][self.mag][laser][etl_name]
+            if value != variable.get() and self.mode == 'live':
+                # tell parent controller (the device)
+                event_id_name = self.resolution + '_' + self.mag
+                if self.event_ids[event_id_name]:
+                    self.view.popup.after_cancel(self.event_ids[event_id_name])
+                temp = {
+                    'resolution_mode': self.resolution,
+                    'zoom': self.mag,
+                    'laser_info': self.resolution_info.ETLConstants[self.resolution][self.mag]
+                }
+                self.event_ids[event_id_name] = self.view.popup.after(1000, lambda: self.parent_controller.execute('update_setting', 'resolution', temp))
+            self.resolution_info.ETLConstants[self.resolution][self.mag][laser][etl_name] = variable.get()
 
         return func_laser
-
-    def update_other_setting(self, name):
-        """
-        # this function will update Delay, Duty, and Smoothing setting when something is changed
-        """
-        variable = self.variables[name]
-        info_name = self.other_info_dict[name]
-        
-        def func(*args):
-            if self.mode == 'low':
-                prefix = 'remote_focus_l_'
-            else:
-                prefix = 'remote_focus_r_'
-
-            self.other_info[prefix + info_name] = variable.get()
-        return func
-
     
     def save_etl_info(self):
         """
@@ -164,10 +168,8 @@ class Etl_Popup_Controller(GUI_Controller):
         errors = self.get_errors()
         if errors:
             return # Dont save if any errors TODO needs testing
-        filename = filedialog.asksaveasfilename(defaultextension='.yml', filetypes=[('Yaml file', '*.yml')])
-        if not filename:
-            return
-        save_yaml_file('', self.resolution_info.serialize(), filename)
+
+        save_yaml_file('', self.resolution_info.serialize(), self.etl_file_name)
 
     '''
         Example for preventing submission of a field/controller. So if there is an error in any field that is supposed to have validation then the config cannot be saved

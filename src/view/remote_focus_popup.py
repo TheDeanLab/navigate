@@ -36,6 +36,7 @@ import tkinter as tk
 from tkinter import ttk
 from view.custom_widgets.popup import PopUp
 from view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from view.custom_widgets.validation import ValidatedSpinbox
 
 
 class remote_popup():
@@ -136,11 +137,11 @@ class remote_popup():
             laser.grid(row=i + 1, column=0, sticky=(NSEW))
             # Entry Widgets
             self.inputs[laser_labels[i] + ' Amp'] = LabelInput(
-                parent=self.laser_frame, input_class=ttk.Entry, input_var=StringVar())
+                parent=self.laser_frame, input_class=ValidatedSpinbox, input_var=StringVar())
             self.inputs[laser_labels[i] +
                         ' Amp'].grid(row=i + 1, column=1, sticky=(NSEW))
             self.inputs[laser_labels[i] + ' Off'] = LabelInput(
-                parent=self.laser_frame, input_class=ttk.Entry, input_var=StringVar())
+                parent=self.laser_frame, input_class=ValidatedSpinbox, input_var=StringVar())
             self.inputs[laser_labels[i] +
                         ' Off'].grid(row=i + 1, column=2, sticky=(NSEW))
 

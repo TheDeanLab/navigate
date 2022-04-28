@@ -221,11 +221,11 @@ class ASLM_controller:
 
         def popup_etl_setting():
             etl_setting_popup = remote_popup(self.view)
-            etl_controller = Etl_Popup_Controller(
-                etl_setting_popup, self, self.verbose)
-            etl_controller.initialize(self.etl_setting)
-            etl_controller.set_experiment_values(
-                self.experiment.RemoteFocusParameters)
+            self.etl_controller = Etl_Popup_Controller(
+                etl_setting_popup, self, self.verbose, self.etl_setting, self.etl_constants_path)
+            self.etl_controller.set_experiment_values(
+                self.resolution_value.get())
+            self.etl_controller.set_mode('live' if self.experiment.MicroscopeState['image_mode'] == 'continuous' else 'stop')
 
         menus_dict = {
             self.view.menubar.menu_file: {
@@ -375,6 +375,8 @@ class ASLM_controller:
         self.channels_tab_controller.set_mode(mode)
         self.camera_view_controller.set_mode(mode)
         self.camera_setting_controller.set_mode(mode)
+        if hasattr(self, 'etl_controller') and self.etl_controller:
+            self.etl_controller.set_mode(mode)
 
     def update_camera_view(self):
         """
@@ -429,6 +431,9 @@ class ASLM_controller:
             self.model.change_resolution(args)
             # tell camera setting tab to recalculate FOV_X and FOV_Y
             self.camera_setting_controller.calculate_physical_dimensions(args[0])
+            # tell etl popup if there is one opened
+            if hasattr(self, 'etl_controller') and self.etl_controller:
+                self.etl_controller.set_experiment_values(args[0])
 
         elif command == 'set_save':
             self.acquire_bar_controller.set_save_option(args[0])
@@ -470,7 +475,7 @@ class ASLM_controller:
 
         elif command == 'update_setting':
             if self.verbose:
-                print('update setting of: ', args[0])
+                print('update setting of: ', args)
             self.model.run_command(
                 'update setting',
                 *args

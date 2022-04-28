@@ -1,5 +1,5 @@
 """
-ASLM image contrast estimates.
+ASLM camera communication classes.
 
 Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
@@ -33,37 +33,42 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 
+#  Standard Imports
+import os
 
+# Third Party Imports
+from tifffile import imsave
 
+# Local Imports
 
+class ImageWriter:
+    def __init__(self, configuration, experiment, verbose=False):
+        self.configuration = configuration
+        self.experiment = experiment
+        self.verbose = verbose
 
+    def __del__(self):
+        pass
 
+    def write_raw(self, image)
+        pass
 
+    def write_n5(self, image):
+        pass
 
+    def write_h5(self, image):
+        pass
 
-def initiate_gpu():
-    gpus = tf.config.list_physical_devices('GPU')
-    if gpus:
-        use_cpu = False
-        # Create 2 virtual GPUs with 24GB memory each
-        try:
-            tf.config.set_logical_device_configuration(
-                gpus[0], [
-                    tf.config.LogicalDeviceConfiguration(
-                        memory_limit=23000), tf.config.LogicalDeviceConfiguration(
-                        memory_limit=23000)])
-            logical_gpus = tf.config.list_logical_devices('GPU')
-        except RuntimeError as e:
-            # Virtual devices must be set before GPUs have been initialized
-            print(e)
-    else:
-        use_cpu = True
-    return use_cpu
+    def write_tiff(self, frame_ids, data_buffer, current_channel, current_time_point, save_directory):
+        for idx in frame_ids:
+            image_name = self.generate_image_name(current_channel, current_time_point)
+            imsave(os.path.join(save_directory, image_name), data_buffer[idx])
 
-
-if (__name__ == "__main__"):
-    # Contrast metrics testing
-    image_data = imread(os.path.join("E:", "test_data", "CH01_003b.tif"))
-    PSF_support = 3
-    verbose = True
-    entropy = normalized_dct_shannon_entropy(image_data, PSF_support, verbose)
+    def generate_image_name(self, current_channel, current_time_point):
+        """
+        #  Generates a string for the filename
+        #  e.g., CH00_000000.tif
+        """
+        image_name = "CH0" + str(current_channel) + "_" + str(current_time_point).zfill(6) + ".tif"
+        current_time_point += 1
+        return image_name

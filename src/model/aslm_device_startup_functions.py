@@ -43,6 +43,29 @@ import sys
 # Local Imports
 # from model.devices.laser_scanning import LaserScanning
 
+def start_image_writer(configuration, experiment, verbose):
+    """
+    # Initializes the image i/o on a dedicated thread
+    """
+    from model.aslm_image_writer import ImageWriter
+    return ImageWriter(configuration, experiment, verbose)
+
+
+def start_analysis(configuration, experiment, verbose):
+    """
+    # Initializes the analysis classes on a dedicated thread
+    """
+    CPU = True
+    if CPU is True:
+        from model.aslm_analysis import CPUAnalysis
+        return CPUAnalysis(configuration, experiment, verbose)
+    elif CPU is False:
+        from model.aslm_analysis import GPUAnalysis
+        return GPUAnalysis(configuration, experiment, verbose)
+    else:
+        pass
+        # device_not_found(configuration.Devices['camera'])
+
 
 def start_camera(configuration, experiment, verbose):
     """

@@ -85,6 +85,20 @@ class Model:
 
         # Move device initialization steps to multiple threads
         threads_dict = {
+            'analysis': ResultThread(
+                target=startup_functions.start_analysis,
+                args=(
+                    self.configuration,
+                    self.experiment,
+                    self.verbose,
+                )).start(),
+            'image_writer': ResultThread(
+                target=startup_functions.start_image_writer,
+                args=(
+                    self.configuration,
+                    self.experiment,
+                    self.verbose,
+                )).start(),
             'filter_wheel': ResultThread(
                 target=startup_functions.start_filter_wheel,
                 args=(
@@ -287,13 +301,11 @@ class Model:
                         print('get image frames:', frame_ids)
                 # save image
                 if self.is_save:
-                    for idx in frame_ids:
-                        image_name = self.generate_image_name()
-                        imsave(
-                            os.path.join(
-                                self.experiment.Saving['save_directory'],
-                                image_name),
-                            self.data_buffer[idx])
+                    self.image_writer.write_tiff(frame_ids,
+                                                self.data_buffer[idx],
+                                                self.current_channel,
+                                                self.current_time_point,
+                                                self.experiment.Saving['save_directory'])
 
             if count_frame:
                 num_of_frames -= 1
@@ -424,16 +436,6 @@ class Model:
         self.stop_acquisition = False
         while self.stop_acquisition is False and self.stop_send_signal is False:
             self.run_single_acquisition()
-
-    def generate_image_name(self):
-        """
-        #  Generates a string for the filename
-        #  e.g., CH00_000000.tif
-        """
-        image_name = "CH0" + str(self.current_channel) + \
-            "_" + str(self.current_time_point).zfill(6) + ".tif"
-        self.current_time_point += 1
-        return image_name
 
     def change_resolution(self, args):
         resolution_value = args[0]

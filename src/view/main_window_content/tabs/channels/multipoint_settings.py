@@ -39,12 +39,9 @@ from pandastable import Table
 from .multi_position_table import Multi_Position_Table as MPTable
 
 
-class multipoint_frame(ttk.Frame):
+class multipoint_frame(ttk.Labelframe):
     def __init__(multipoint_frame, settings_tab, *args, **kwargs):
-
-        # Init Frame
-        ttk.Frame.__init__(multipoint_frame, settings_tab, *args, **kwargs)
-
+        
         text_label = 'Multi-position Acquisition'
         ttk.Labelframe.__init__(multipoint_frame, settings_tab, text=text_label, *args, **kwargs)
 
@@ -52,12 +49,12 @@ class multipoint_frame(ttk.Frame):
         label_position = 0
         input_position = 4
         multipoint_frame.laser_label = ttk.Label(multipoint_frame, text='Enable')
-        multipoint_frame.laser_label.grid(row=0, column=label_position, sticky=(NSEW))
+        multipoint_frame.laser_label.grid(row=0, column=label_position, sticky=(NSEW), padx=(4,1), pady=(4,6))
 
         # Save Data Checkbox
         multipoint_frame.on_off = tk.BooleanVar()
         multipoint_frame.save_check = ttk.Checkbutton(multipoint_frame, text='', variable=multipoint_frame.on_off)
-        multipoint_frame.save_check.grid(row=0, column=input_position, sticky=(NSEW))
+        multipoint_frame.save_check.grid(row=0, column=input_position, sticky=(NSEW), pady=(4,6))
 
 class multipoint_list(ttk.Frame):
     """

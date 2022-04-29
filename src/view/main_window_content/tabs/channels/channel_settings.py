@@ -83,11 +83,11 @@ class channel_creator(ttk.Labelframe):
             self.frame_columns.append(ttk.Frame(self))
             self.frame_columns[idx].columnconfigure(0, weight=1, uniform=1)
             self.frame_columns[idx].rowconfigure('all', weight=1, uniform=1)
-            self.frame_columns[idx].grid(row=0, column=idx, sticky=NSEW, padx=1)
+            self.frame_columns[idx].grid(row=0, column=idx, sticky=NSEW, padx=1, pady=(4,6))
             self.labels.append(ttk.Label(self.frame_columns[idx], text=self.label_text[idx]))
             self.labels[idx].grid(row=0, column=0, sticky=N, pady=1, padx=1)
-        
-        
+        self.frame_columns[5].grid(padx=(1,4))
+        self.frame_columns[0].grid(padx=(4,1))
             
         
         #  Adds and grids widgets to respective column

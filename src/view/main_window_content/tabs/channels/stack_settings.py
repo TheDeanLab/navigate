@@ -46,7 +46,7 @@ class stack_acq_frame(ttk.Labelframe):
         # Step Size Frame (Vertically oriented)
         stack_acq.step_size_frame = ttk.Frame(stack_acq)
         stack_acq.step_size_label = ttk.Label(stack_acq.step_size_frame, text='Step Size')
-        stack_acq.step_size_label.grid(row=0, column=0, sticky=(S))
+        stack_acq.step_size_label.grid(row=0, column=0, sticky=(S), padx=(4,3), pady=(4,1))
         stack_acq.step_size_spinval = DoubleVar()
         stack_acq.step_size_spinbox = ttk.Spinbox(
             stack_acq.step_size_frame,
@@ -56,12 +56,12 @@ class stack_acq_frame(ttk.Labelframe):
             increment=0.5,
             width=14
         )
-        stack_acq.step_size_spinbox.grid(row=1, column=0, sticky=(N))
+        stack_acq.step_size_spinbox.grid(row=1, column=0, sticky=(N), padx=(4,3), pady=(3,6))
 
     # Start Pos Frame (Vertically oriented)
         stack_acq.start_pos_frame = ttk.Frame(stack_acq)
         stack_acq.start_pos_label = ttk.Label(stack_acq.start_pos_frame, text='Start Pos')
-        stack_acq.start_pos_label.grid(row=0, column=0, sticky=(S))
+        stack_acq.start_pos_label.grid(row=0, column=0, sticky=(S), padx=3, pady=(4,1))
         stack_acq.start_pos_spinval = DoubleVar()
         stack_acq.start_pos_spinbox = ttk.Spinbox(
             stack_acq.start_pos_frame,
@@ -71,13 +71,13 @@ class stack_acq_frame(ttk.Labelframe):
             increment=0.5,
             width=14
         )
-        stack_acq.start_pos_spinbox.grid(row=1, column=0, sticky=(N))
+        stack_acq.start_pos_spinbox.grid(row=1, column=0, sticky=(N), padx=3, pady=(3,6))
 
 
     # End Pos Frame (Vertically oriented)
         stack_acq.end_pos_frame = ttk.Frame(stack_acq)
         stack_acq.end_pos_label = ttk.Label(stack_acq.end_pos_frame, text='End Pos')
-        stack_acq.end_pos_label.grid(row=0, column=0, sticky=(S))
+        stack_acq.end_pos_label.grid(row=0, column=0, sticky=(S), padx=3, pady=(4,1))
         stack_acq.end_pos_spinval = DoubleVar()
         stack_acq.end_pos_spinbox = ttk.Spinbox(
             stack_acq.end_pos_frame,
@@ -87,12 +87,12 @@ class stack_acq_frame(ttk.Labelframe):
             increment=0.5,
             width=14
         )
-        stack_acq.end_pos_spinbox.grid(row=1, column=0, sticky=(N))
+        stack_acq.end_pos_spinbox.grid(row=1, column=0, sticky=(N), padx=3, pady=(3,6))
 
     # Slice Frame (Vertically oriented)
         stack_acq.slice_frame = ttk.Frame(stack_acq)
         stack_acq.slice_label = ttk.Label(stack_acq.slice_frame, text='Slice')
-        stack_acq.slice_label.grid(row=0, column=0, sticky=(S))
+        stack_acq.slice_label.grid(row=0, column=0, sticky=(S), padx=3, pady=(4,1))
         stack_acq.slice_spinval = DoubleVar()
         stack_acq.slice_spinbox = ttk.Spinbox(
             stack_acq.slice_frame,
@@ -103,7 +103,7 @@ class stack_acq_frame(ttk.Labelframe):
             width=14
         )
         stack_acq.slice_spinbox.state(['disabled'])
-        stack_acq.slice_spinbox.grid(row=1, column=0, sticky=(N))
+        stack_acq.slice_spinbox.grid(row=1, column=0, sticky=(N), padx=3, pady=(3,6))
 
         # Gridding Each Holder Frame
         stack_acq.step_size_frame.grid(row=0, column=0, sticky=(NSEW))

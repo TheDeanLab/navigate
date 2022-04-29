@@ -35,6 +35,9 @@ POSSIBILITY OF SUCH DAMAGE.
 from controller.sub_controllers.widget_functions import validate_wrapper
 from controller.sub_controllers.gui_controller import GUI_Controller
 
+'''
+TODO Create a dictionary for widgets that holds a list of widgets for each column.Will attempt after formatting.
+'''
 
 class Channel_Setting_Controller(GUI_Controller):
     def __init__(self, view, parent_controller=None, verbose=False):

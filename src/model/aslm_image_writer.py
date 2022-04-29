@@ -50,7 +50,7 @@ class ImageWriter:
     def __del__(self):
         pass
 
-    def write_raw(self, image)
+    def write_raw(self, image):
         pass
 
     def write_n5(self, image):

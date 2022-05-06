@@ -210,8 +210,12 @@ class SyntheticCamera(CameraBase):
 
     def get_new_frame(self):
         time.sleep(self.camera_exposure_time / 1000)
-        while self.pre_frame_idx == self.current_frame_idx:
+        timeout = 500
+        while self.pre_frame_idx == self.current_frame_idx and timeout:
             time.sleep(0.001)
+            timeout -= 1
+        if timeout <= 0:
+            return []
         if self.pre_frame_idx < self.current_frame_idx:
             frames = list(range(self.pre_frame_idx, self.current_frame_idx))
         else:

@@ -112,6 +112,13 @@ class Etl_Popup_Controller(GUI_Controller):
     def set_mode(self, mode='stop'):
         self.mode = mode
 
+    def showup(self):
+        """
+        # this function will let the popup window show in front
+        """
+        self.view.popup.deiconify()
+        self.view.popup.attributes("-topmost", 1)
+
     def show_magnification(self, *args):
         """
         # show magnification options when the user changes the focus mode
@@ -144,6 +151,9 @@ class Etl_Popup_Controller(GUI_Controller):
         """
         variable = self.variables[name]
 
+        def func(temp):
+            self.parent_controller.execute('update_setting', 'resolution', temp)
+
         def func_laser(*args):
             value = self.resolution_info.ETLConstants[self.resolution][self.mag][laser][etl_name]
             if value != variable.get() and self.mode == 'live':
@@ -156,7 +166,7 @@ class Etl_Popup_Controller(GUI_Controller):
                     'zoom': self.mag,
                     'laser_info': self.resolution_info.ETLConstants[self.resolution][self.mag]
                 }
-                self.event_ids[event_id_name] = self.view.popup.after(1000, lambda: self.parent_controller.execute('update_setting', 'resolution', temp))
+                self.event_ids[event_id_name] = self.view.popup.after(1000, lambda: func(temp))
             self.resolution_info.ETLConstants[self.resolution][self.mag][laser][etl_name] = variable.get()
 
         return func_laser

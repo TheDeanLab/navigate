@@ -45,7 +45,7 @@ class Acquire_Bar_Controller(GUI_Controller):
         super().__init__(view, parent_controller, verbose)
 
         # acquisition image mode variable
-        self.mode = 'continuous'
+        self.mode = 'live'
         self.is_save = False
         self.saving_settings = {
             'root_directory': 'E:\\',
@@ -57,7 +57,7 @@ class Acquire_Bar_Controller(GUI_Controller):
         }
 
         self.mode_dict = {
-            'Continuous Scan': 'continuous',
+            'Continuous Scan': 'live',
             'Z-Stack': 'z-stack',
             'Single Acquisition': 'single',
             'Projection': 'projection'
@@ -75,7 +75,7 @@ class Acquire_Bar_Controller(GUI_Controller):
     def set_mode(self, mode):
         """
         # set image mode
-        # mode could be: 'continuous', 'z-stack', 'single', 'projection'
+        # mode could be: 'live', 'z-stack', 'single', 'projection'
         """
         self.mode = mode
         # update pull down combobox
@@ -123,7 +123,7 @@ class Acquire_Bar_Controller(GUI_Controller):
         # The popup window provides the user with the opportunity to fill in fields that describe the experiment and
         # also dictate the save path of the data in a standardized format.
         """
-        if self.is_save and self.mode != 'continuous':
+        if self.is_save and self.mode != 'live':
             acquire_pop = acquire_popup(self.view)
             buttons = acquire_pop.get_buttons()  # This holds all the buttons in the popup
 
@@ -143,8 +143,8 @@ class Acquire_Bar_Controller(GUI_Controller):
             # tell the controller to stop acquire(continuous mode)
             self.parent_controller.execute('stop_acquire')
         else:
-            # if the mode is 'continuous'
-            if self.mode == 'continuous':
+            # if the mode is 'live'
+            if self.mode == 'live':
                 self.view.acquire_btn.configure(text='Stop')
             self.parent_controller.execute('acquire')
 
@@ -180,6 +180,8 @@ class Acquire_Bar_Controller(GUI_Controller):
 
     def exit_program(self):
         self.show_verbose_info("Exiting Program")
+        # call the central controller to stop all the threads
+        self.parent_controller.execute('exit')
         sys.exit()
 
     def update_saving_settings(self, popup_window):

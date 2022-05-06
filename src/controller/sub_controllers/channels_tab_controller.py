@@ -72,8 +72,6 @@ class Channels_Tab_Controller(GUI_Controller):
             'end_position': self.view.stack_acq_frame.end_pos_spinval,
             'number_z_steps': self.view.stack_acq_frame.slice_spinval
         }
-        # stack acquisition event id
-        self.stack_acq_event_id = None
         # stack acquisition event binds
         self.stack_acq_vals['step_size'].trace_add('write', self.update_z_steps)
         self.stack_acq_vals['start_position'].trace_add('write', self.update_z_steps)
@@ -135,7 +133,7 @@ class Channels_Tab_Controller(GUI_Controller):
         self.view.stack_timepoint_frame.stack_pause_spinbox.validate()
         self.view.stack_timepoint_frame.exp_time_spinbox.validate()
 
-        self.stack_cycling_val.set(setting_dict['stack_cycling_mode'])
+        self.stack_cycling_val.set('Per Z' if setting_dict['stack_cycling_mode']=='per_z' else 'Per Stack')
         self.channel_setting_controller.set_experiment_values(setting_dict['channels'])
 
         # positions
@@ -149,23 +147,13 @@ class Channels_Tab_Controller(GUI_Controller):
         self.show_verbose_info('channels tab has been set new values')
 
     def update_experiment_values(self, setting_dict):
-        self.get_values(settings=setting_dict)
         setting_dict['stage_positions'] = self.multi_position_controller.get_positions()
-
-        # validate
-        return setting_dict['stack_acquisition'] is not None \
-            and setting_dict['timepoint'] is not None \
-            and setting_dict['channel'] is not None
+        setting_dict['channels'] = self.channel_setting_controller.get_values()
+        setting_dict['stack_cycling_mode'] = 'per_stack' if self.stack_cycling_val.get() == 'Per Stack' else 'per_z'
         
-
-    def get_values(self, name=None, settings={}):
-        settings['stack_acquisition'] = self.get_info(self.stack_acq_vals)
-        settings['stack_cycling_mode'] = 'per_stack' if self.stack_cycling_val.get() == 'Per Stack' else 'per_z'
-        settings['timepoint'] = self.get_info(self.timepoint_vals)
-        settings['channel'] = self.channel_setting_controller.get_values()
-        if name in settings:
-            return settings[name]
-        return settings
+        r1 = self.get_info(self.stack_acq_vals, setting_dict)
+        r2 = self.get_info(self.timepoint_vals, setting_dict)
+        return setting_dict['channels']!=None and r1!=None and r2!=None
 
     def set_channel_num(self, num):
         """
@@ -200,6 +188,17 @@ class Channels_Tab_Controller(GUI_Controller):
         """
         self.mode = mode
         self.channel_setting_controller.set_mode(mode)
+
+        state = 'normal' if mode == 'stop' else 'disabled'
+        self.view.stack_acq_frame.step_size_spinbox['state'] = state
+        self.view.stack_acq_frame.start_pos_spinbox['state'] = state
+        self.view.stack_acq_frame.end_pos_spinbox['state'] = state
+
+        self.view.stack_timepoint_frame.save_check['state'] = state
+        self.view.stack_timepoint_frame.stack_pause_spinbox['state'] = state
+        self.view.stack_timepoint_frame.exp_time_spinbox['state'] = state
+
+        self.view.stack_cycling_frame.cycling_pull_down['state'] = 'readonly' if state=='normal' else state
 
         self.show_verbose_info('acquisition mode has been changed to', mode)
 
@@ -243,13 +242,6 @@ class Channels_Tab_Controller(GUI_Controller):
 
         self.update_timepoint_setting()
 
-        # tell the central controller that stack acquisition setting is changed when mode is 'live'
-        if self.mode == 'live':
-            if self.stack_acq_event_id:
-                self.view.after_cancel(self.stack_acq_event_id)
-            self.stack_acq_event_id = self.view.after(1000, \
-                lambda: self.parent_controller.execute('stack_acquisition', self.get_info(self.stack_acq_vals)))
-
         self.show_verbose_info('stack acquisition settings on channels tab have been changed and recalculated')
 
     def update_cycling_setting(self, *args):
@@ -267,7 +259,7 @@ class Channels_Tab_Controller(GUI_Controller):
 
         # tell the central/parent controller that laser cycling setting is changed when mode is 'live'
         if self.mode == 'live':
-            self.parent_controller.execute('laser_cycling', self.stack_cycling_val.get())
+            self.parent_controller.execute('update_setting', 'laser_cycling', self.stack_cycling_val.get())
 
         self.show_verbose_info('cycling setting on channels tab has been changed')
 
@@ -387,7 +379,7 @@ class Channels_Tab_Controller(GUI_Controller):
             temp = self.get_info(self.timepoint_vals)
             if not temp:
                 return
-            self.timepoint_event_id = self.view.after(1000, lambda: self.parent_controller.execute('timepoint', temp))
+            self.timepoint_event_id = self.view.after(1000, lambda: self.parent_controller.execute('update_setting', 'timepoint', temp))
 
     def toggle_multiposition(self):
         self.is_multiposition = self.is_multiposition_val.get()
@@ -420,16 +412,15 @@ class Channels_Tab_Controller(GUI_Controller):
             if name in vals:
                 vals[name].set(values[name])
 
-    def get_info(self, vals):
+    def get_info(self, vals, value_dict={}):
         """
         # get values from a list of variables
         """
-        info = {}
         for name in vals:
-            info[name] = vals[name].get()
-            if info[name] == '':
+            value_dict[name] = vals[name].get()
+            if value_dict[name] == '':
                 return None
-        return info
+        return value_dict
 
     def execute(self, command, *args):
         if command == 'recalculate_timepoint':

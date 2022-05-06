@@ -106,6 +106,8 @@ class Camera_Setting_Controller(GUI_Controller):
         self.framerate_widgets['exposure_time'].widget.max = config.configuration.CameraParameters['exposure_time_range']['max']
         self.framerate_widgets['exposure_time'].set(config.configuration.CameraParameters['exposure_time'])
         self.framerate_widgets['exposure_time'].widget['state'] = 'disabled'
+        self.framerate_widgets['readout_time'].widget['state'] = 'disabled'
+        self.framerate_widgets['max_framerate'].widget['state'] = 'disabled'
 
         # Set range value
         self.roi_widgets['Width'].widget.config(to=self.default_width)
@@ -264,16 +266,18 @@ class Camera_Setting_Controller(GUI_Controller):
         # in 'live' and 'stack' mode, some widgets are disabled
         """
         self.mode = mode
-        state = 'normal' if mode == 'stop' else 'disabled'
-        self.mode_widgets['Sensor'].widget['state'] = state
+        state = 'disabled' if mode == 'live' else 'normal'
+        state_readonly = 'disabled' if mode == 'live' else 'readonly'
+        self.mode_widgets['Sensor'].widget['state'] = state_readonly
         if self.mode_widgets['Sensor'].get() == 'Light-Sheet':
-            self.mode_widgets['Readout'].widget['state'] = state
+            self.mode_widgets['Readout'].widget['state'] = state_readonly
         self.framerate_widgets['frames_to_average'].widget['state'] = state
         self.roi_widgets['Width'].widget['state'] = state
         self.roi_widgets['Height'].widget['state'] = state
-        self.roi_widgets['Binning'].widget['state'] = state
+        self.roi_widgets['Binning'].widget['state'] = state_readonly
         for btn_name in self.roi_btns:
             self.roi_btns[btn_name]['state'] = state
+            
         
     def calculate_physical_dimensions(self, resolution_value):
         """

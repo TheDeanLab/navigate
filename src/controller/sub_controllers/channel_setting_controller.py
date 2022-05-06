@@ -66,8 +66,19 @@ class Channel_Setting_Controller(GUI_Controller):
     def set_num(self, num):
         self.num = num
 
-    def set_mode(self, mode=''):
+    def set_mode(self, mode='stop'):
         self.mode = mode
+        state = 'normal' if mode=='stop' else 'disabled'
+        state_readonly = 'readonly' if mode=='stop' else 'disabled'
+        for i in range(5):
+            self.view.channel_checks[i].config(state=state)
+            self.view.exptime_pulldowns[i].config(state=state)
+            self.view.interval_spins[i].config(state=state)
+            self.view.laser_pulldowns[i]['state'] = state_readonly
+            if not self.view.channel_variables[i].get():
+                self.view.laserpower_pulldowns[i].config(state=state)
+                self.view.filterwheel_pulldowns[i]['state'] = state_readonly
+                self.view.filterwheel_pulldowns[i]['state'] = state
 
     def initialize(self, config):
         setting_dict = config.get_channels_info(self.verbose)
@@ -200,7 +211,7 @@ class Channel_Setting_Controller(GUI_Controller):
                 # call central controller
                 if self.event_id:
                     self.view.after_cancel(self.event_id)
-                self.event_id = self.view.after(500, lambda: self.parent_controller.execute('channel', channel_id+1, widget_name, channel_vals[widget_name].get()))
+                self.event_id = self.view.after(500, lambda: self.parent_controller.execute('update_setting', 'channel', self.get_values()))
 
             self.show_verbose_info('channel setting has been changed')
         return func

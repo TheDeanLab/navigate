@@ -72,7 +72,6 @@ class ASLM_controller:
             etl_constants_path,
             args):
         self.verbose = args.verbose
-        self.stop_acquisition = True
 
         # Create a thread pool
         self.threads_pool = SynchronizedThreadPool()
@@ -220,12 +219,15 @@ class ASLM_controller:
             save_yaml_file('', self.experiment.serialize(), filename)
 
         def popup_etl_setting():
+            if hasattr(self, 'etl_controller'):
+                self.etl_controller.showup()
+                return
             etl_setting_popup = remote_popup(self.view)
             self.etl_controller = Etl_Popup_Controller(
                 etl_setting_popup, self, self.verbose, self.etl_setting, self.etl_constants_path)
             self.etl_controller.set_experiment_values(
                 self.resolution_value.get())
-            self.etl_controller.set_mode('live' if self.experiment.MicroscopeState['image_mode'] == 'continuous' else 'stop')
+            self.etl_controller.set_mode(self.acquire_bar_controller.mode)
 
         menus_dict = {
             self.view.menubar.menu_file: {
@@ -363,8 +365,7 @@ class ASLM_controller:
                 message='There are some missing/wrong settings! Can not start acquisition!')
             return False
 
-        mode = 'live' if self.experiment.MicroscopeState['image_mode'] == 'continuous' else 'stop'
-        self.set_mode_of_sub(mode)
+        self.set_mode_of_sub(self.acquire_bar_controller.mode)
             
         return True
 
@@ -438,46 +439,11 @@ class ASLM_controller:
         elif command == 'set_save':
             self.acquire_bar_controller.set_save_option(args[0])
 
-        elif command == 'stack_acquisition':
-            settings = args[0]
-            for k in settings:
-                self.experiment.MicroscopeState[k] = settings[k]
-            if self.verbose:
-                print('in continuous mode:the stack acquisition setting is changed')
-                print('you could get the new setting from model.experiment')
-                print('you could also get the changes from args')
-                print(self.experiment.MicroscopeState)
-            pass
-
-        elif command == 'laser_cycling':
-            self.experiment.MicroscopeState['stack_cycling_mode'] = args[0]
-            if self.verbose:
-                print('in continuous mode:the laser cycling setting is changed')
-                print('you could get the new setting from model.experiment')
-                print('you could also get the changes from args')
-                print(self.experiment.MicroscopeState['stack_cycling_mode'])
-            pass
-
-        elif command == 'channel':
-            if self.verbose:
-                print('channel settings have been changed, calling model', args)
-            self.model.run_command(
-                'update setting',
-                'channel',
-                *args,
-                channels=self.channels_tab_controller.get_values('channel'))
-
-        elif command == 'timepoint':
-            settings = args[0]
-            for k in settings:
-                self.experiment.MicroscopeState[k] = settings[k]
-            print('timepoint is changed', args[0])
-
         elif command == 'update_setting':
             if self.verbose:
                 print('update setting of: ', args)
             self.model.run_command(
-                'update setting',
+                'update_setting',
                 *args
             )
         elif command == 'acquire_and_save':
@@ -506,7 +472,7 @@ class ASLM_controller:
                 self.threads_pool.createThread(
                     'camera', self.capture_single_image)
 
-            elif self.acquire_bar_controller.mode == 'continuous':
+            elif self.acquire_bar_controller.mode == 'live':
                 if self.verbose:
                     print('Starting Continuous Acquisition')
                 self.threads_pool.createThread(
@@ -529,19 +495,15 @@ class ASLM_controller:
                 pass
 
         elif command == 'stop_acquire':
-            # stop continuous acquire from camera
-            self.stop_acquisition = True
+            self.model.run_command('stop')
             self.set_mode_of_sub('stop')
-            # Breaks live feed loop
 
-            # TODO: stop continuous acquire from camera
-            # Do I need to lock the thread here or how do I stop the process with the thread pool?
-            # Or is it something with the ObjectSubProcess? Or both depending on if synthetic or real
-            #  self.threads_pool.createThread('camera', self.model.acquire_with_waveform_update())
+        elif command == 'exit':
+            self.execute('stop')
+            self.model.terminate()
+            self.show_img_pipe_parent.close()
+            self.threads_pool.clear()
 
-            # self.threads_pool.createThread('camera_display',
-            #                                self.camera_view_controller.display_image(self.model.camera.image))
-            #  self.threads_pool.createThread('camera', self.camera_view_controller.live_feed)
 
         if self.verbose:
             print(
@@ -560,11 +522,11 @@ class ASLM_controller:
             saving_info=self.experiment.Saving)
         image_id = self.show_img_pipe_parent.recv()
         self.camera_view_controller.display_image(self.data_buffer[image_id])
+        self.execute('stop_acquire')
 
     def capture_live_image(self):
         self.camera_view_controller.image_count = 0
         self.model.run_command('live', self.experiment.MicroscopeState)
-        self.stop_acquisition = False
         while True:
             image_id = self.show_img_pipe_parent.recv()
             if self.verbose:
@@ -573,13 +535,9 @@ class ASLM_controller:
                 break
             if not isinstance(image_id, int):
                 print('some thing wrong happened, stop the model!', image_id)
-                self.stop_acquisition = True
+                self.execute('stop_acquire')
             self.camera_view_controller.display_image(
                 self.data_buffer[image_id])
-            if self.stop_acquisition:
-                self.model.run_command('stop')
-                if self.verbose:
-                    print('call the model to stop!')
 
         if self.verbose:
             print("Captured", self.camera_view_controller.image_count, "Live Images")

@@ -239,12 +239,12 @@ class Model:
 
             pass
 
-        elif command == 'update setting':
+        elif command == 'update_setting':
             # stop live thread
             self.stop_send_signal = True
             self.live_thread.join()
             if args[0] == 'channel':
-                self.experiment.MicroscopeState['channels'] = kwargs['channels']
+                self.experiment.MicroscopeState['channels'] = args[1]
             # prepare devices based on updated info
             self.stop_send_signal = False
             self.live_thread = threading.Thread(
@@ -254,8 +254,9 @@ class Model:
         elif command == 'stop':
             # stop live thread
             self.stop_acquisition = True
-            self.live_thread.join()
-            self.data_thread.join()
+            if hasattr(self, 'live_thread'):
+                self.live_thread.join()
+                self.data_thread.join()
             self.close_shutter()
 
     def move_stage(self, pos_dict):
@@ -301,11 +302,15 @@ class Model:
                         print('get image frames:', frame_ids)
                 # save image
                 if self.is_save:
-                    self.image_writer.write_tiff(frame_ids,
-                                                self.data_buffer[idx],
-                                                self.current_channel,
-                                                self.current_time_point,
-                                                self.experiment.Saving['save_directory'])
+                    print('saving image!!!!')
+                    for idx in frame_ids:
+                        threading.Thread(target=self.image_writer.write_tiff,
+                                        args=(frame_ids,
+                                                    self.data_buffer[idx],
+                                                    self.current_channel,
+                                                    self.current_time_point,
+                                                    self.experiment.Saving['save_directory'])).start()
+                        self.current_time_point += 1
 
             if count_frame:
                 num_of_frames -= 1

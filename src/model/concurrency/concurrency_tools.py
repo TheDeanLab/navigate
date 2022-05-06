@@ -351,6 +351,13 @@ class ObjectInSubprocess:
         """
         if self._.resource_lock:
             self._.resource_lock.acquire()
+        if name == 'terminate':
+            with self._.parent_pipe_lock:
+                self._.parent_pipe.send(None)
+                self._.child_process.terminate()
+            if self._.resource_lock:
+                self._.resource_lock.release()
+            return _dummy_function
         with self._.parent_pipe_lock:
             self._.parent_pipe.send(("__getattribute__", (name,), {}))
             attr = _get_response(self)

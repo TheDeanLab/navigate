@@ -36,6 +36,8 @@ POSSIBILITY OF SUCH DAMAGE.
 import threading
 import time
 import ctypes
+import sys
+import trace
 from collections import deque
 
 
@@ -55,11 +57,13 @@ class SelfLockThread(threading.Thread):
         self.selfLock.acquire()
 
     def run(self):
+        # sys.settrace(self.globaltrace)
         self._kwargs['thread'] = self
-        self._thread_id = threading.get_native_id()
         if self._target:
             try:
                 self._target(*self._args, **self._kwargs)
+            except:
+                print('thread ended because of exception!')
             finally:
                 print('thread ended!!!')
 
@@ -72,22 +76,6 @@ class SelfLockThread(threading.Thread):
 
     def isLocked(self):
         return self.selfLock.locked()
-
-    def _getId(self):
-        if hasattr(self, '_thread_id'):
-            return self._thread_id
-        for id, thread in threading._active.items():
-            if thread is self:
-                return id
-    
-    def stop(self):
-        # add an SystemExit Exception to the thread
-        # reference: https://stackoverflow.com/questions/323972/is-there-any-way-to-kill-a-thread
-        thread_id = self._getId()
-        res = ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id,
-              ctypes.py_object(SystemExit))
-        return res <= 1
-
 
 class SynchronizedThreadPool:
     def __init__(self):
@@ -154,44 +142,76 @@ class SynchronizedThreadPool:
         return func
 
     def removeThread(self, resourceName, taskThread):
+        # can only remove waiting threads
+        # do not remove running threading
         # if no such resource
         if resourceName not in self.resources:
             return False
         with self.resources[resourceName] as resource:
             # if it is the current running one, kill it and wake up next thread if any
-            if resource.waitlist[0] == taskThread:
-                while taskThread.is_alive():
-                    taskThread.stop()
-                    time.sleep(0.1)
-                resource.waitlist.popleft()
-                self.killThreadInList(resourceName, self.toDeleteList)
-                if len(resource.waitlist) > 0:
-                    resource.waitlist[0].unlock()
-            else:
+            if resource.waitlist[0] != taskThread:
                 # add the thread to toDeleteList
-                if resourceName not in self.toDeleteList:
-                    self.toDeleteList[resourceName] = ThreadWaitlist()
-                with self.toDeleteList[resourceName] as temp:
-                    temp.waitlist.append(taskThread)
+                self.moveToDelete(resourceName, taskThread)
                 resource.waitlist.remove(taskThread)
+                return
+
+    def moveToDelete(self, resourceName, taskThread):
+        if resourceName not in self.toDeleteList:
+            self.toDeleteList[resourceName] = ThreadWaitlist()
+        with self.toDeleteList[resourceName] as temp:
+            temp.waitlist.append(taskThread)
+
+    def getRunningThread(self, resourceName):
+        if resourceName not in self.resources or len(self.resources[resourceName].waitlist) < 1:
+            return None
+        return self.resources[resourceName].waitlist[0]       
 
     def clear(self):
-        # remove all the threads
+        # move all the threads except first one to toDeleteList
+        sys.settrace(self.globaltrace)
         for resourceName in self.resources:
-            self.killThreadInList(resourceName, self.resources)
+            with self.resources[resourceName] as temp:
+                headThread = temp.waitlist[0] if len(temp.waitlist) > 0 else None
+                for i in range(1, len(temp.waitlist)):
+                    self.moveToDelete(resourceName, temp.waitlist[i])
+            if headThread:
+                self._raiseError(headThread.native_id)
             self.killThreadInList(resourceName, self.toDeleteList)
 
     def killThreadInList(self, resourceName, threadList):
+        sys.settrace(self.globaltrace)
         # remove all the threads in threadList
         if resourceName in threadList:
             with threadList[resourceName] as temp:
                 while temp.waitlist:
                     thread = temp.waitlist[0]
                     thread.unlock()
-                    while thread.is_alive():
-                        thread.stop()
-                        time.sleep(0.1)
-                    temp.waitlist.popleft()
+                    self._raiseError(thread.native_id)
+                    thread.join(1)
+                    if not thread.is_alive():
+                        # move it from the list
+                        temp.waitlist.popleft()
+                    else:
+                        thread.wait()
+                        # move the thread to the end of the list
+                        temp.waitlist.popleft()
+                        temp.waitlist.append(thread)
+
+    def globaltrace(self, frame, event, arg):
+        if event == 'call':
+            return self.localtrace
+        else:
+            return None
+ 
+    def localtrace(self, frame, event, arg):
+        if event == 'exception':
+            print('****in local trace: exception stops the thread')
+            raise SystemExit()
+        return self.localtrace
+
+    def _raiseError(self, threadId):
+        ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_ulong(threadId),
+            ctypes.py_object(SystemExit))
 
 
 

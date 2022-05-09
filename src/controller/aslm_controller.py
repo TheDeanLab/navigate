@@ -92,9 +92,6 @@ class ASLM_controller:
         configuration_controller = ASLM_Configuration_Controller(
             self.configuration)
 
-        # get etl information from configuration file
-        self.etl_other_info = configuration_controller.get_etl_info()
-
         # etl setting file
         self.etl_constants_path = etl_constants_path
         self.etl_setting = session(self.etl_constants_path, self.verbose)
@@ -499,8 +496,11 @@ class ASLM_controller:
             self.set_mode_of_sub('stop')
 
         elif command == 'exit':
-            self.execute('stop')
+            self.model.run_command('stop')
+            if hasattr(self, 'etl_controller'):
+                self.etl_controller.save_etl_info()
             self.model.terminate()
+            self.model = None
             self.show_img_pipe_parent.close()
             self.threads_pool.clear()
 

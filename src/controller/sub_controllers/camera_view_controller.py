@@ -152,6 +152,8 @@ class Camera_View_Controller(GUI_Controller):
         #  If Autoscale is selected, automatically calculates the min and max values for the data.
         #  If Autoscale is not selected, takes the user values as specified in the min and max counts.
         """
+        begin_time = time.perf_counter()
+        
         # #  Update the colorbar.
         # self.colormap = self.view.scale_pallete.color.get()
 
@@ -168,7 +170,6 @@ class Camera_View_Controller(GUI_Controller):
             self.max_counts = np.max(image)
             self.min_counts = np.min(image)
 
-        begin_time = time.perf_counter()
         if self.autoscale is False:
             image = self.scale_image(image)
 

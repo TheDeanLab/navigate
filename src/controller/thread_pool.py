@@ -34,10 +34,8 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 
 import threading
-import time
 import ctypes
 import sys
-import trace
 from collections import deque
 
 
@@ -57,7 +55,6 @@ class SelfLockThread(threading.Thread):
         self.selfLock.acquire()
 
     def run(self):
-        # sys.settrace(self.globaltrace)
         self._kwargs['thread'] = self
         if self._target:
             try:

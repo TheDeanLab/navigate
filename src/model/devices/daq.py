@@ -156,10 +156,11 @@ class DAQBase:
                 self.etl_constants.ETLConstants[resolution_mode][zoom][laser]['amplitude'])
             self.etl_r_offset = float(
                 self.etl_constants.ETLConstants[resolution_mode][zoom][laser]['offset'])
-            print(
-                "High Resolution Mode.  Amp/Off:",
-                self.etl_r_amplitude,
-                self.etl_r_offset)
+            if self.verbose:
+                print(
+                    "High Resolution Mode.  Amp/Off:",
+                    self.etl_r_amplitude,
+                    self.etl_r_offset)
 
         elif resolution_mode == 'low':
             zoom = microscope_state['zoom']
@@ -167,10 +168,11 @@ class DAQBase:
                 self.etl_constants.ETLConstants[resolution_mode][zoom][laser]['amplitude'])
             self.etl_l_offset = float(
                 self.etl_constants.ETLConstants[resolution_mode][zoom][laser]['offset'])
-            print(
-                "Low Resolution Mode.  Amp/Off:",
-                self.etl_l_amplitude,
-                self.etl_l_offset)
+            if self.verbose:
+                print(
+                    "Low Resolution Mode.  Amp/Off:",
+                    self.etl_l_amplitude,
+                    self.etl_l_offset)
 
         else:
             print("ETL setting not pulled properly.")

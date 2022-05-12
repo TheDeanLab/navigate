@@ -17,8 +17,8 @@ Devices:
   zoom: Dynamixel
 CameraParameters:
   number_of_cameras: 1
-  x_pixels: 2048
-  y_pixels: 2048
+  x_pixels: 486
+  y_pixels: 639
   sensor_mode: Normal
   readout_direction: Top-to-Bottom
   number_of_pixels: 10
@@ -36,6 +36,13 @@ RemoteFocusParameters:
   remote_focus_r_ramp_falling_percent: 2.5
   remote_focus_r_amplitude: 0.7
   remote_focus_r_offset: 2.3
+AutoFocusParameters:
+  stage1_range: 500
+  stage1_step_size: 50
+  stage1_selected: True
+  stage2_range: 50
+  stage2_step_size: 5
+  stage2_selected: True
 GalvoParameters:
   galvo_l_frequency: 99.9
   galvo_l_amplitude: 2.5

@@ -44,6 +44,7 @@ import multiprocessing as mp
 from tkinter import filedialog
 from view.main_application_window import Main_App as view
 from view.remote_focus_popup import remote_popup
+from view.autofocus_setting_popup import autofocus_popup
 
 # Local Sub-Controller Imports
 from controller.sub_controllers.stage_gui_controller import Stage_GUI_Controller
@@ -54,6 +55,7 @@ from controller.sub_controllers.camera_setting_controller import Camera_Setting_
 from controller.aslm_configuration_controller import ASLM_Configuration_Controller
 from controller.sub_controllers.waveform_tab_controller import Waveform_Tab_Controller
 from controller.sub_controllers.etl_popup_controller import Etl_Popup_Controller
+from controller.sub_controllers.autofocus_popup_controller import Autofocus_Popup_Controller
 from controller.aslm_controller_functions import *
 from controller.thread_pool import SynchronizedThreadPool
 
@@ -156,15 +158,9 @@ class ASLM_controller:
         self.model.set_show_img_pipe(self.show_img_pipe_child)
 
         # Create default data buffer
-        self.data_buffer = [
-            SharedNDArray(
-                shape=(
-                    int(self.configuration.CameraParameters['y_pixels']),
-                    int(self.configuration.CameraParameters['x_pixels'])),
-                dtype='uint16') for i in range(self.configuration.SharedNDArray['number_of_frames'])]
-        self.model.set_data_buffer(self.data_buffer)
+        self.update_buffer()
 
-    def update_buffer_size(self):
+    def update_buffer(self):
         """
         # Update the buffer size according to the current camera dimensions listed in the experimental parameters
         """
@@ -226,6 +222,13 @@ class ASLM_controller:
                 self.resolution_value.get())
             self.etl_controller.set_mode(self.acquire_bar_controller.mode)
 
+        def popup_autofocus_setting():
+            if hasattr(self, 'af_popu_controller'):
+                self.af_popup_controller.showup()
+                return
+            af_popup = autofocus_popup(self.view)
+            self.af_popup_controller = Autofocus_Popup_Controller(af_popup, self, self.verbose, self.experiment.AutoFocusParameters)
+
         menus_dict = {
             self.view.menubar.menu_file: {
                 'New Experiment': new_experiment,
@@ -273,6 +276,10 @@ class ASLM_controller:
         # etl popup
         self.view.menubar.menu_resolution.add_command(
             label='ETL Parameters', command=popup_etl_setting)
+
+        # autofocus menu
+        self.view.menubar.menu_autofocus.add_command(label='Autofocus', command=lambda: self.execute('autofocus'))
+        self.view.menubar.menu_autofocus.add_command(label='setting', command=popup_autofocus_setting)
 
     def populate_experiment_setting(self, file_name=None):
         """
@@ -443,6 +450,10 @@ class ASLM_controller:
                 'update_setting',
                 *args
             )
+        elif command == 'autofocus':
+            self.threads_pool.createThread(
+                'camera', self.capture_autofocus_image)
+            
         elif command == 'acquire_and_save':
             if not self.prepare_acquire_data():
                 self.acquire_bar_controller.stop_acquire()
@@ -522,7 +533,9 @@ class ASLM_controller:
             saving_info=self.experiment.Saving)
         image_id = self.show_img_pipe_parent.recv()
         self.camera_view_controller.display_image(self.data_buffer[image_id])
-        self.execute('stop_acquire')
+        # get 'stop' from the pipe
+        self.show_img_pipe_parent.recv()
+        self.set_mode_of_sub('stop')
 
     def capture_live_image(self):
         self.camera_view_controller.image_count = 0
@@ -542,6 +555,29 @@ class ASLM_controller:
         if self.verbose:
             print("Captured", self.camera_view_controller.image_count, "Live Images")
 
+    def capture_autofocus_image(self):
+        """
+        # Trigger model to capture a single image
+        """
+        if not self.prepare_acquire_data():
+            return
+        pos = self.experiment.StageParameters['f']
+        self.camera_view_controller.image_count = 0
+        self.model.run_command(
+            'autofocus',
+            self.experiment.MicroscopeState,
+            self.experiment.AutoFocusParameters,
+            pos
+            )
+        while True:
+            image_id = self.show_img_pipe_parent.recv()
+            if image_id == 'stop':
+                break
+            self.camera_view_controller.display_image(self.data_buffer[image_id])
+            # get focus position and update it in GUI
+
+        self.set_mode_of_sub('stop')
+    
     def move_stage(self, args):
         self.model.move_stage(args)
 

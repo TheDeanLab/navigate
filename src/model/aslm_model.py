@@ -42,6 +42,7 @@ import platform
 # Third Party Imports
 import numpy as np
 from tifffile import imsave
+from queue import Queue
 
 # Local Imports
 import model.aslm_device_startup_functions as startup_functions
@@ -172,9 +173,17 @@ class Model:
 
         # data buffer
         self.data_buffer = None
+        self.number_of_frames = 0
 
         # show image function/pipe handler
         self.show_img_pipe = None
+
+        # frame signal id
+        self.frame_id = 0
+        # Queue
+        self.autofocus_frame_queue = Queue()
+        self.autofocus_pos_queue = Queue()
+        self.autofocus_on = False
 
     def set_show_img_pipe(self, handler):
         """
@@ -183,8 +192,11 @@ class Model:
         self.show_img_pipe = handler
 
     def set_data_buffer(self, data_buffer):
+        self.camera.close_image_series()
         self.data_buffer = data_buffer
-        self.camera.initialize_image_series(self.data_buffer)
+        self.number_of_frames = self.configuration.SharedNDArray['number_of_frames']
+        self.camera.initialize_image_series(self.data_buffer, self.number_of_frames)
+        self.frame_id = 0
 
     #  Basic Image Acquisition Functions
     #  - These functions are used to acquire images from the camera
@@ -214,20 +226,15 @@ class Model:
             self.is_save = self.experiment.MicroscopeState['is_save']
             if self.is_save:
                 self.experiment.Saving = kwargs['saving_info']
-            self.stop_acquisition = False
-            self.stop_send_signal = False
-            self.open_shutter()
+            self.before_acquisition()
             self.run_single_acquisition()
-            self.stop_acquisition = True
             self.run_data_process(1)
-            self.close_shutter()
+            self.end_acquisition()
 
         elif command == 'live':
             self.experiment.MicroscopeState = args[0]
             self.is_save = False
-            self.stop_acquisition = False
-            self.stop_send_signal = False
-            self.open_shutter()
+            self.before_acquisition()
             self.live_thread = threading.Thread(
                 target=self.run_live_acquisition)
             self.data_thread = threading.Thread(target=self.run_data_process)
@@ -251,22 +258,41 @@ class Model:
                 target=self.run_live_acquisition)
             self.live_thread.start()
 
+        elif command == 'autofocus':
+            self.experiment.MicroscopeState = args[0]
+            self.experiment.AutoFocusParameters = args[1]
+            frame_num = self.get_autofocus_frame_num()
+            if frame_num < 1:
+                return
+            self.before_acquisition()
+            self.autofocus_on = True
+            self.is_save = False
+            self.f_position = args[2]
+
+            self.signal_thread = threading.Thread(target=self.run_single_acquisition, kwargs={'target_channel': 1})
+            self.data_thread = threading.Thread(target=self.run_data_process, args=(frame_num,))
+            self.signal_thread.start()
+            self.data_thread.start()
+            self.signal_thread.join()
+            self.data_thread.join()
+            self.autofocus_on = False
+            self.end_acquisition()
+            
         elif command == 'stop':
             # stop live thread
             self.stop_acquisition = True
             if hasattr(self, 'live_thread'):
                 self.live_thread.join()
                 self.data_thread.join()
-            self.close_shutter()
+            self.end_acquisition()
 
     def move_stage(self, pos_dict):
         self.stages.move_absolute(pos_dict)
 
-    def close_shutter(self):
-        """
-        # Automatically closes both shutters
-        """
-        self.shutter.close_shutters()
+    def before_acquisition(self):
+        self.stop_acquisition = False
+        self.stop_send_signal = False
+        self.open_shutter()
 
     def end_acquisition(self):
         """
@@ -276,7 +302,7 @@ class Model:
         # self.camera.close_image_series()
 
         # close shutter
-        self.close_shutter()
+        self.shutter.close_shutters()
 
     def run_data_process(self, num_of_frames=0):
         """
@@ -290,8 +316,6 @@ class Model:
                 print('running data process, get frames', frame_ids)
             # if there is at least one frame available
             if frame_ids:
-                # analyse image
-
                 # show image
                 if self.show_img_pipe:
                     if self.verbose:
@@ -300,9 +324,23 @@ class Model:
                 else:
                     if self.verbose:
                         print('get image frames:', frame_ids)
+                # autofocuse analyse
+                while self.autofocus_on:
+                    try:
+                        f_frame_id, frame_num, f_pos = self.autofocus_frame_queue.get_nowait()
+                    except:
+                        break
+                    entropy = self.analysis.normalized_dct_shannon_entropy(self.data_buffer[f_frame_id], 3)
+                    if entropy > self.max_entropy:
+                        self.max_entropy = entropy
+                        self.focus_pos = f_pos
+                    if frame_num == 1:
+                        print('max shannon entropy:', self.max_entropy, self.focus_pos)
+                        # find out the focus
+                        self.autofocus_pos_queue.put(self.focus_pos)
+                        break
                 # save image
                 if self.is_save:
-                    print('saving image!!!!')
                     for idx in frame_ids:
                         threading.Thread(target=self.image_writer.write_tiff,
                                         args=(frame_ids,
@@ -313,9 +351,8 @@ class Model:
                         self.current_time_point += 1
 
             if count_frame:
-                num_of_frames -= 1
-                if num_of_frames == 0:
-                    break
+                num_of_frames -= len(frame_ids)
+                self.stop_acquisition = (num_of_frames <= 0) or self.stop_acquisition
 
             if self.stop_acquisition:
                 if self.show_img_pipe:
@@ -376,7 +413,7 @@ class Model:
         # Loads the YAML file for all of the experiment parameters
         self.experiment = session(experiment_path, self.verbose)
 
-    def run_single_acquisition(self):
+    def run_single_acquisition(self, target_channel=None):
         """
         # Called by model.run_command().
         """
@@ -388,6 +425,8 @@ class Model:
             if self.stop_acquisition or self.stop_send_signal:
                 break
             channel_idx = int(channel_key[prefix_len:])
+            if target_channel and channel_idx != target_channel:
+                continue
             channel = microscope_state['channels'][channel_key]
             if channel['is_selected'] is True:
 
@@ -414,10 +453,11 @@ class Model:
                 self.daq.update_etl_parameters(microscope_state, channel)
 
                 # Acquire an Image
-                self.snap_image()
+                if self.autofocus_on:
+                    self.snap_image_with_autofocus()
+                else:
+                    self.snap_image()
 
-                # TODO: Add ability to save the data.
-                # Save Data
 
     def snap_image(self):
         """
@@ -431,6 +471,53 @@ class Model:
         self.daq.prepare_acquisition()
         self.daq.run_acquisition()
         self.daq.stop_acquisition()
+        self.frame_id = (self.frame_id + 1) % self.number_of_frames
+
+    def snap_image_with_autofocus(self):
+        # get autofocus setting according to channel
+        settings = self.experiment.AutoFocusParameters
+        pos = self.f_position
+        if settings['stage1_selected']:
+            pos = self.send_autofocus_signals(self.f_position, int(settings['stage1_range']), int(settings['stage1_step_size']))
+
+        if settings['stage2_selected']:
+            pos = self.send_autofocus_signals(pos, int(settings['stage2_range']), int(settings['stage2_step_size']))
+
+        # move stage to the focus position
+        self.move_stage({'f': pos})
+        
+        self.autofocus_on = False
+
+        self.snap_image()
+        
+
+    def send_autofocus_signals(self, f_position, ranges, step_size):
+        steps = ranges // step_size + 1
+        pos = f_position - (steps // 2) * step_size
+
+        self.max_entropy = 0
+        self.focus_pos = f_position
+
+        for i in range(steps):
+            # move focus device
+            # low resolution move device
+            self.move_stage({'f': pos})
+            self.autofocus_frame_queue.put((self.frame_id, steps-i, pos))
+            self.snap_image()
+            pos += step_size
+
+        # wait to get the focus postion
+        pos = self.autofocus_pos_queue.get(timeout=10)
+        return pos
+
+    def get_autofocus_frame_num(self):
+        settings = self.experiment.AutoFocusParameters
+        frames = 0
+        if settings['stage1_selected']:
+            frames = int(settings['stage1_range']) // int(settings['stage1_step_size']) + 1
+        if settings['stage2_selected']:
+            frames += int(settings['stage2_range']) // int(settings['stage2_step_size']) + 1
+        return frames
 
     def run_live_acquisition(self):
         """

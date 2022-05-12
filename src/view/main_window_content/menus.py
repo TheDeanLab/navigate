@@ -60,3 +60,6 @@ class menubar(Menu):
         self.menu_resolution = Menu(self)
         self.add_cascade(menu=self.menu_resolution, label='Resolution')
 
+        # Test Menu
+        self.menu_autofocus = Menu(self)
+        self.add_cascade(menu=self.menu_autofocus, label='Autofocus')

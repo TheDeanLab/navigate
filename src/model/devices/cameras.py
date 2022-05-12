@@ -120,7 +120,10 @@ class CameraBase:
 class SyntheticCamera(CameraBase):
     def __init__(self, camera_id, model, experiment, verbose=False):
         super().__init__(camera_id, model, experiment, verbose)
-
+        
+        self.x_pixels = experiment.CameraParameters['x_pixels']
+        self.y_pixels = experiment.CameraParameters['y_pixels']
+        
         if self.verbose:
             print("Synthetic Camera Class Initialized")
 
@@ -269,6 +272,7 @@ class HamamatsuOrca(CameraBase):
         self.camera_controller.set_property_value(
             "internal_line_interval",
             self.model.CameraParameters['line_interval'])
+        self.set_ROI(experiment.CameraParameters['x_pixels'], experiment.CameraParameters['y_pixels'])
         # self.camera_controller.set_property_value("image_height",
         #                                           self.model.CameraParameters['y_pixels'])
         # self.camera_controller.set_property_value("image_width",

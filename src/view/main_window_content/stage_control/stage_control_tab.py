@@ -84,12 +84,13 @@ class stage_control_tab(ttk.Frame):
         '''
 
         #Gridding out frames
-        stage_control_tab.position_frame.grid(row=0, column=0, columnspan=5, sticky=(NSEW))
-        stage_control_tab.xy_frame.grid(row=1, column=0, sticky=(NSEW))
-        stage_control_tab.z_frame.grid(row=1, column=1, sticky=(NSEW))
-        stage_control_tab.theta_frame.grid(row=1, column=2, sticky=(NSEW))
-        stage_control_tab.f_frame.grid(row=1, column=3, sticky=(NSEW))
-        stage_control_tab.goto_frame.grid(row=1, column=4, sticky=(NSEW))
+        factor = 6
+        stage_control_tab.position_frame.grid(row=0, column=0, columnspan=5, sticky=(NSEW), pady=(2,0))
+        stage_control_tab.xy_frame.grid(row=1, column=0, sticky=(NSEW), padx=10, pady=10*factor)
+        stage_control_tab.z_frame.grid(row=1, column=1, sticky=(NSEW), padx=10, pady=10*factor)
+        stage_control_tab.theta_frame.grid(row=1, column=2, sticky=(NSEW), padx=10, pady=10*factor)
+        stage_control_tab.f_frame.grid(row=1, column=3, sticky=(NSEW), padx=10, pady=10*factor)
+        stage_control_tab.goto_frame.grid(row=1, column=4, sticky=(NSEW), padx=10, pady=10*factor)
 
     def get_widgets(stage_control_tab):
         """

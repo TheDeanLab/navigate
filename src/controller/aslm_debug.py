@@ -41,7 +41,8 @@ class Debug_Module:
         self.verbose = verbose
         
         menubar.add_command(label='ignored signal?', command=self.debug_ignored_signal)
-        menubar.add_command(label='blocked queue?', command=None)
+        menubar.add_command(label='ignored autofocus signal?', command=self.debug_autofocus)
+        menubar.add_command(label='blocked queue?', command=self.debug_blocked_queue)
         menubar.add_command(label='update image size', command=None)
         menubar.add_command(label='get shannon value?', command=None)
         menubar.add_command(label='stop acquire', command=lambda: self.central_controller.execute('stop_acquire'))
@@ -54,25 +55,23 @@ class Debug_Module:
 
         channel_num = len(self.central_controller.experiment.MicroscopeState['channels'].keys())
         signal_num = (signal_num // channel_num) * channel_num + channel_num
+
+        self.start_debug(signal_num, 'debug', 'ignored_signals', 'live', self.central_controller.experiment.MicroscopeState,
+                            signal_num, saving_info=self.central_controller.experiment.Saving)
+             
+
+    def debug_autofocus(self):
+        signal_num = simple_dialog.askinteger('Input', 'How many signals you want to send out?', parent=self.central_controller.view)
+        if not signal_num:
+            print('no input!')
+            return
         
-        def func():
-            # self.central_controller.model.run_command('debug', 'ignored_signals', 'live', self.central_controller.experiment.MicroscopeState,
-            #                 signal_num, saving_info=self.central_controller.experiment.Saving)
-
-            self.central_controller.model.run_command('debug', 'ignored_signals', 'autofocus',
-                                                      self.central_controller.experiment.MicroscopeState,
-                                                      self.central_controller.experiment.AutoFocusParameters,
-                                                      self.central_controller.experiment.StageParameters['f'],
-                                                      signal_num)
-            
-            self.get_frames()
-
-            image_num = self.central_controller.show_img_pipe_parent.recv()
-
-            print('signal num:', signal_num, 'image num:', image_num)
+        self.start_debug(signal_num, 'debug', 'ignored_signals', 'autofocus',
+                            self.central_controller.experiment.MicroscopeState,
+                            self.central_controller.experiment.AutoFocusParameters,
+                            self.central_controller.experiment.StageParameters['f'],
+                            signal_num)
         
-        self.central_controller.threads_pool.createThread('camera',
-                                    func)
 
     def get_frames(self):
         while True:
@@ -86,3 +85,33 @@ class Debug_Module:
                 self.central_controller.execute('stop_acquire')
             self.central_controller.camera_view_controller.display_image(
                 self.central_controller.data_buffer[image_id])
+
+
+    def debug_blocked_queue(self):
+        signal_num = simple_dialog.askinteger('Input', 'How many signals you want to send out?', parent=self.central_controller.view)
+        if not signal_num:
+            print('no input!')
+            return
+
+        signal_num = (signal_num // 10) * 10 + 10
+
+        self.start_debug(signal_num, 'debug', 'blocked_queue', 
+                            self.central_controller.experiment.MicroscopeState,
+                            self.central_controller.experiment.StageParameters['f'],
+                            signal_num)
+
+    def start_debug(self, signal_num, *args, **kwargs):
+
+        def func():
+
+            self.central_controller.model.run_command(*args, **kwargs)
+            
+            self.get_frames()
+
+            image_num = self.central_controller.show_img_pipe_parent.recv()
+
+            print('signal num:', signal_num, 'image num:', image_num)
+        
+        self.central_controller.threads_pool.createThread('camera',
+                                    func)
+        

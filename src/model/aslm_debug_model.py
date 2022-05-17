@@ -34,6 +34,8 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 
 import threading
+from queue import Empty
+import random
 
 class Debug_Module:
     def __init__(self, model, verbose=False):
@@ -68,6 +70,29 @@ class Debug_Module:
             self.model.signal_thread.start()
             self.model.data_thread.start()
 
+    def blocked_queue(self, *args, **kwargs):
+
+        signal_num = args[2] // 10
+
+        def func():
+            pos = args[1]
+            for i in range(10):
+                try:
+                    pos = self.send_autofocus_signals(pos, signal_num)
+                except Empty:
+                    print('blocked queue happened!!!')
+                    pos = args[1]
+                    break
+
+        self.model.experiment.MicroscopeState = args[0]
+        self.model.autofocus_on = True
+        self.model.is_save = False
+        self.model.before_acquisition()
+        self.model.signal_thread = threading.Thread(target=func)
+        self.model.data_thread = threading.Thread(target=self.get_frames, args=(signal_num*10,))
+        self.model.signal_thread.start()
+        self.model.data_thread.start()
+        
 
     def send_signals(self, signal_num):
         channel_num = len(self.model.experiment.MicroscopeState['channels'].keys())
@@ -78,11 +103,16 @@ class Debug_Module:
             print('sent out', i, 'signals!!!!!')
 
     def send_autofocus_signals(self, f_position, signal_num):
-        ranges = 5 * (signal_num-1)
-        step_size = 5
+        step_size = random.randint(5, 50)
+        ranges = step_size * (signal_num-1)
+
+        print('*************', f_position, ranges, step_size)
+
         pos = self.model.send_autofocus_signals(f_position, ranges, step_size)
 
+
         print('focus position', pos)
+        return pos
 
         
     def get_frames(self, num_of_frames=0):
@@ -148,4 +178,3 @@ class Debug_Module:
         print('received frames in total:', acquired_frame_num)
         if self.verbose:
             print('data thread is stopped, send stop to parent pipe')
-            

@@ -58,7 +58,7 @@ class Acquire_PopUp():
 
         #Label for entries
         self.entries_label = ttk.Label(content_frame, text="Please fill out the fields below")
-        self.entries_label.grid(row=0, column=0, columnspan=2, sticky=(NSEW))
+        self.entries_label.grid(row=0, column=0, columnspan=2, sticky=(NSEW), pady=5)
 
         # Creating Entry Widgets
         entry_names = ['root_directory', 'user', 'tissue', 'celltype', 'label', 'misc']
@@ -70,9 +70,13 @@ class Acquire_PopUp():
                                          label=entry_labels[i],
                                          input_class=ValidatedEntry,
                                          input_var=StringVar(),
-                                         input_args={"required": True}                                  
+                                         input_args={"required": True}
                                         )
-            self.inputs[entry_names[i]].grid(row=i+1, column=0, columnspan=2,sticky=(NSEW))
+            self.inputs[entry_names[i]].grid(row=i+1, column=0, columnspan=2, sticky=(NSEW), padx=5)
+            self.inputs[entry_names[i]].label.grid(padx=(0, 20))
+
+        # Formatting
+        self.inputs['user'].label.grid(padx=(10,0))
 
         #Done and Cancel Buttons
         self.buttons['Cancel'] = ttk.Button(content_frame, text="Cancel Acquisition")
@@ -104,4 +108,10 @@ class Acquire_PopUp():
         The key is the button name, value is the button.
         '''
         return self.buttons
+
+
+if __name__ == '__main__':
+    root = tk.Tk()
+    Acquire_PopUp(root)
+    root.mainloop()
         

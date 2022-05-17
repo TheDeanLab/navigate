@@ -56,8 +56,14 @@ class Debug_Module:
         signal_num = (signal_num // channel_num) * channel_num + channel_num
         
         def func():
-            self.central_controller.model.run_command('debug', 'ignored_signals', 'live', self.central_controller.experiment.MicroscopeState,
-                            signal_num, saving_info=self.central_controller.experiment.Saving)
+            # self.central_controller.model.run_command('debug', 'ignored_signals', 'live', self.central_controller.experiment.MicroscopeState,
+            #                 signal_num, saving_info=self.central_controller.experiment.Saving)
+
+            self.central_controller.model.run_command('debug', 'ignored_signals', 'autofocus',
+                                                      self.central_controller.experiment.MicroscopeState,
+                                                      self.central_controller.experiment.AutoFocusParameters,
+                                                      self.central_controller.experiment.StageParameters['f'],
+                                                      signal_num)
             
             self.get_frames()
 

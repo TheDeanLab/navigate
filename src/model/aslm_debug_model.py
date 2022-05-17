@@ -94,7 +94,7 @@ class Debug_Module:
             f_frame_id = -1 # to indicate if there is one frame need to calculate shannon value, but the image frame isn't ready
             frame_num = 10 # any value but not 1
 
-        wait_num = 3
+        wait_num = 10
         acquired_frame_num = 0
 
         while not self.model.stop_acquisition:
@@ -109,7 +109,7 @@ class Debug_Module:
                     break
                 continue
 
-            wait_num = 3
+            wait_num = 10
             acquired_frame_num += len(frame_ids)
 
             # show image
@@ -127,7 +127,7 @@ class Debug_Module:
                         break
                 except:
                     break
-                entropy = self.model.analysis.normalized_dct_shannon_entropy(self.data_buffer[f_frame_id], 3)
+                entropy = f_frame_id #self.model.analysis.normalized_dct_shannon_entropy(self.model.data_buffer[f_frame_id], 3)
                 f_frame_id = -1
                 if entropy > self.model.max_entropy:
                     self.model.max_entropy = entropy
@@ -136,7 +136,7 @@ class Debug_Module:
                     frame_num = 10 # any value but not 1
                     print('max shannon entropy:', self.model.max_entropy, self.model.focus_pos)
                     # find out the focus
-                    self.model.autofocus_pos_queue.put(self.focus_pos)
+                    self.model.autofocus_pos_queue.put(self.model.focus_pos)
                     break
 
             if count_frame:

@@ -64,6 +64,8 @@ from model.aslm_model import Model
 from model.aslm_model_config import Session as session
 from model.concurrency.concurrency_tools import ObjectInSubprocess, SharedNDArray
 
+# debug
+from controller.aslm_debug import Debug_Module
 
 class ASLM_controller:
     def __init__(
@@ -280,6 +282,9 @@ class ASLM_controller:
         # autofocus menu
         self.view.menubar.menu_autofocus.add_command(label='Autofocus', command=lambda: self.execute('autofocus'))
         self.view.menubar.menu_autofocus.add_command(label='setting', command=popup_autofocus_setting)
+
+        #debug menu
+        Debug_Module(self, self.view.menubar.menu_debug, self.verbose)
 
     def populate_experiment_setting(self, file_name=None):
         """

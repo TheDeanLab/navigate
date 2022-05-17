@@ -31,8 +31,9 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 # Standard Imports
-from tkinter import *
-from tkinter import ttk
+import tkinter as tk
+from tkinter import ttk, NSEW
+from tkinter.font import Font
 # Local Imports
 from view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from view.custom_widgets.validation import ValidatedSpinbox
@@ -45,48 +46,56 @@ class x_y_frame(ttk.Frame):
         ttk.Frame.__init__(x_y_frame, stage_control_tab, *args, **kwargs)
 
         #Setting up buttons for up, down, left, right, zero and increment spinbox
+        s = ttk.Style()
+        s.configure('arrow.TButton', font=(None, 20))
+
 
         #Up button
         x_y_frame.up_y_btn = ttk.Button(
             x_y_frame,
+            style='arrow.TButton',
+            width=10,
             text="\N{UPWARDS BLACK ARROW}"
-            #command=
         )
-
         #Down button
         x_y_frame.down_y_btn = ttk.Button(
             x_y_frame,
+            style='arrow.TButton',
+            width=10,
             text="\N{DOWNWARDS BLACK ARROW}"
-            #TODO command=function from connector
         )
 
         #Right button
         x_y_frame.up_x_btn = ttk.Button(
             x_y_frame,
+            style='arrow.TButton',
+            width=10,
             text="\N{RIGHTWARDS BLACK ARROW}"
-            #TODO command=function from connector
         )
 
         #Left button
         x_y_frame.down_x_btn = ttk.Button(
             x_y_frame,
+            style='arrow.TButton',
+            width=10,
             text="\N{LEFTWARDS BLACK ARROW}"
-            #TODO command=function from connector
         )
 
         #Zero button
         x_y_frame.zero_xy_btn = ttk.Button(
             x_y_frame,
             text="ZERO XY"
-            #TODO command=function from connector
         )
 
         #Increment spinbox
         x_y_frame.increment_box = LabelInput(
             parent=x_y_frame,
             input_class=ValidatedSpinbox,
-            input_var=DoubleVar()
+            input_var=tk.DoubleVar(),
+            input_args={'width': 23}
         )
+
+
 
 
         '''
@@ -108,13 +117,18 @@ class x_y_frame(ttk.Frame):
         '''
 
 
+
+
         #Gridding out buttons
-        x_y_frame.up_y_btn.grid(row=0, column=2, rowspan=2, columnspan=2, padx=2, pady=2, sticky=(NSEW)) #UP
-        x_y_frame.up_x_btn.grid(row=2, column=4, rowspan=2, columnspan=2, padx=2, pady=2, sticky=(NSEW)) #RIGHT
-        x_y_frame.down_y_btn.grid(row=4, column=2, rowspan=2, columnspan=2, padx=2, pady=2, sticky=(NSEW)) #DOWN
-        x_y_frame.down_x_btn.grid(row=2, column=0, rowspan=2, columnspan=2, padx=2, pady=2, sticky=(NSEW)) #LEFT
-        x_y_frame.zero_xy_btn.grid(row=2, column=2, rowspan=1, columnspan=2, padx=2, pady=2, sticky=(NSEW)) #Zero xy
+        x_y_frame.up_y_btn.grid(row=0, column=2, rowspan=2, columnspan=2, padx=2, pady=2) #UP
+        x_y_frame.up_x_btn.grid(row=2, column=4, rowspan=2, columnspan=2, padx=2, pady=2) #RIGHT
+        x_y_frame.down_y_btn.grid(row=4, column=2, rowspan=2, columnspan=2, padx=2, pady=2) #DOWN
+        x_y_frame.down_x_btn.grid(row=2, column=0, rowspan=2, columnspan=2, padx=2, pady=2) #LEFT
+        x_y_frame.zero_xy_btn.grid(row=2, column=2, rowspan=1, columnspan=2, padx=2, pady=(5,2), sticky=(NSEW)) #Zero xy
         x_y_frame.increment_box.grid(row=3, column=2, rowspan=1, columnspan=2, padx=2, pady=2, sticky=(NSEW)) #Increment spinbox
+
+
+
 
     def get_widget(x_y_frame):
         return x_y_frame.increment_box

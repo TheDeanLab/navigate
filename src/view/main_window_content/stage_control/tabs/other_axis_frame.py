@@ -49,22 +49,21 @@ class other_axis_frame(ttk.Frame):
         #Up button
         other_axis_frame.up_btn = ttk.Button(
             other_axis_frame,
+            style='arrow.TButton',
             text="\N{UPWARDS BLACK ARROW}",
-            #TODO command=function from connector
         )
 
         #Down button
         other_axis_frame.down_btn = ttk.Button(
             other_axis_frame,
+            style='arrow.TButton',
             text="\N{DOWNWARDS BLACK ARROW}",
-            #TODO command=function from connector
         )
 
         #Zero button
         other_axis_frame.zero_btn = ttk.Button(
             other_axis_frame,
             text="ZERO " + other_axis_frame.name,
-            #TODO command=function from connector
         )
 
         #Increment spinbox
@@ -72,7 +71,8 @@ class other_axis_frame(ttk.Frame):
         other_axis_frame.increment_box = LabelInput(
             parent=other_axis_frame,
             input_class=ValidatedSpinbox,
-            input_var=DoubleVar()
+            input_var=DoubleVar(),
+            input_args={'width': 25}
         )
 
 
@@ -94,9 +94,9 @@ class other_axis_frame(ttk.Frame):
 
 
         #Gridding out buttons
-        other_axis_frame.up_btn.grid(row=0, column=0, rowspan=2, pady=2, sticky=(NSEW)) #UP
-        other_axis_frame.down_btn.grid(row=4, column=0, rowspan=2, pady=2, sticky=(NSEW)) #DOWN
-        other_axis_frame.zero_btn.grid(row=2, column=0, pady=2, sticky=(NSEW)) #Zero Z
+        other_axis_frame.up_btn.grid(row=0, column=0, rowspan=2, pady=2) #UP
+        other_axis_frame.down_btn.grid(row=4, column=0, rowspan=2, pady=2) #DOWN
+        other_axis_frame.zero_btn.grid(row=2, column=0, pady=(5,2), sticky=(NSEW)) #Zero Z
         other_axis_frame.increment_box.grid(row=3, column=0, pady=2, sticky=(NSEW)) #Increment spinbox
 
     def get_widget(other_axis_frame):

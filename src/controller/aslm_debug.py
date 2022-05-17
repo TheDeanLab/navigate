@@ -43,7 +43,7 @@ class Debug_Module:
         menubar.add_command(label='ignored signal?', command=self.debug_ignored_signal)
         menubar.add_command(label='ignored autofocus signal?', command=self.debug_autofocus)
         menubar.add_command(label='blocked queue?', command=self.debug_blocked_queue)
-        menubar.add_command(label='update image size', command=None)
+        menubar.add_command(label='update image size', command=lambda: self.central_controller.model.run_command('debug', 'update_image_size'))
         menubar.add_command(label='get shannon value?', command=None)
         menubar.add_command(label='stop acquire', command=lambda: self.central_controller.execute('stop_acquire'))
 

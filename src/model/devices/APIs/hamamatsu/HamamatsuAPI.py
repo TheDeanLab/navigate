@@ -983,7 +983,7 @@ class DCAM:
         frame_idx_list = []
         wait_param = DCAMWAIT_START()
         wait_param.eventmask = DCAMWAIT_CAPEVENT_FRAMEREADY | DCAMWAIT_CAPEVENT_STOPPED
-        wait_param.timeout = 500  # 500ms
+        wait_param.timeout = 1000  # 500ms
         #  Timeout Duration - Will throw an error if the timeout is too small.
         #  Currently set to a value > maximum typical integration time.
 
@@ -1129,15 +1129,17 @@ if __name__ == '__main__':
         print('sub array mode(1: OFF, 2: ON): ', camera.prop_getvalue(property_dict['subarray_mode']))
 
     # test_ROI(1024, 1024)
-    print("camera.prop_getvalue:")
-    print("Camera Exposure Time:", camera.prop_getvalue(property_dict['exposure_time']))
-    print("Camera Readout Time:", camera.prop_getvalue(property_dict['readout_time']))
+    # print("camera.prop_getvalue:")
+    # print("Camera Exposure Time:", camera.prop_getvalue(property_dict['exposure_time']))
+    # print("Camera Readout Time:", camera.prop_getvalue(property_dict['readout_time']))
+    #
+    # print("camera.get_property_value:")
+    # print("Camera Exposure Time:", camera.get_property_value(property_dict['exposure_time']))
+    # print("Camera Readout Time:", camera.get_property_value(property_dict['readout_time']))
 
-    print("camera.get_property_value:")
-    print("Camera Exposure Time:", camera.get_property_value(property_dict['exposure_time']))
-    print("Camera Readout Time:", camera.get_property_value(property_dict['readout_time']))
-
-    # test_ROI(512, 512, 512+1024-1, 512+1024-1)
+    test_ROI(512, 512)
     # test_ROI(100, 100, 1124, 1123)
     # test_ROI(0, 0, 1024, 1023)
     # test_ROI(0, 0, 2047, 2047)
+    data_buffer = [SharedNDArray(shape=(512, 512), dtype='uint16') for i in range(number_of_frames)]
+    test_acquisition()

@@ -45,6 +45,12 @@ class Debug_Module:
     def debug(self, command, *args, **kwargs):
         getattr(self, command)(*args, **kwargs)
 
+    def update_image_size(self, *args, **kwargs):
+        self.model.set_data_buffer(self.model.data_buffer)
+        # self.model.camera.close_image_series()
+        # self.model.camera.set_ROI(512, 512)
+        # self.model.camera.initialize_image_series(self.model.data_buffer)
+
     def ignored_signals(self, command, *args, **kwargs):
         if command == 'live':
             print('live!!!!!!')
@@ -59,13 +65,14 @@ class Debug_Module:
         elif command == 'autofocus':
             self.model.experiment.MicroscopeState = args[0]
             self.model.experiment.AutoFocusParameters = args[1]
-            signal_num = args[3]
+            # signal_num = args[3]
+            signal_num = self.model.get_autofocus_frame_num()
             self.model.before_acquisition()
             self.model.autofocus_on = True
             self.model.is_save = False
-            f_position = args[2]
+            self.model.f_position = args[2]
 
-            self.model.signal_thread = threading.Thread(target=self.send_autofocus_signals, args=(f_position, signal_num))
+            self.model.signal_thread = threading.Thread(target=self.model.run_single_acquisition, kwargs={'target_channel': 1})
             self.model.data_thread = threading.Thread(target=self.get_frames, args=(signal_num,))
             self.model.signal_thread.start()
             self.model.data_thread.start()
@@ -124,7 +131,7 @@ class Debug_Module:
             f_frame_id = -1 # to indicate if there is one frame need to calculate shannon value, but the image frame isn't ready
             frame_num = 10 # any value but not 1
 
-        wait_num = 10
+        wait_num = 20
         acquired_frame_num = 0
 
         while not self.model.stop_acquisition:
@@ -139,7 +146,7 @@ class Debug_Module:
                     break
                 continue
 
-            wait_num = 10
+            wait_num = 20
             acquired_frame_num += len(frame_ids)
 
             # show image
@@ -157,14 +164,15 @@ class Debug_Module:
                         break
                 except:
                     break
-                entropy = f_frame_id #self.model.analysis.normalized_dct_shannon_entropy(self.model.data_buffer[f_frame_id], 3)
+                entropy = self.model.analysis.normalized_dct_shannon_entropy(self.model.data_buffer[f_frame_id], 3)
+                print('*******calculate entropy ', frame_num)
                 f_frame_id = -1
                 if entropy > self.model.max_entropy:
                     self.model.max_entropy = entropy
                     self.model.focus_pos = f_pos
                 if frame_num == 1:
                     frame_num = 10 # any value but not 1
-                    print('max shannon entropy:', self.model.max_entropy, self.model.focus_pos)
+                    print('***********max shannon entropy:', self.model.max_entropy, self.model.focus_pos)
                     # find out the focus
                     self.model.autofocus_pos_queue.put(self.model.focus_pos)
                     break

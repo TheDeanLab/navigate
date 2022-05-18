@@ -57,8 +57,8 @@ class stack_timepoint_frame(ttk.Labelframe):
         #Save Data Checkbox
         self.save_data = tk.BooleanVar()
         self.save_data.set(False)
-        self.save_check = ttk.Checkbutton(self, text='', variable=tk.BooleanVar)
-        self.save_check.grid(row=0, column=input_position, sticky=(NSEW), pady=(4,0))
+        ttk.Checkbutton(self, text='', variable=tk.BooleanVar)
+        self.inputs['is_save'].grid(row=0, column=input_position, sticky=(NSEW), pady=(4,0))
         
         # Save Data Checkbox
         # self.inputs['is_save'] = LabelInput(parent=self,

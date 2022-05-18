@@ -272,7 +272,8 @@ class HamamatsuOrca(CameraBase):
         self.camera_controller.set_property_value(
             "internal_line_interval",
             self.model.CameraParameters['line_interval'])
-        self.set_ROI(experiment.CameraParameters['x_pixels'], experiment.CameraParameters['y_pixels'])
+        # 05/16 Debugging
+        # self.set_ROI(experiment.CameraParameters['x_pixels'], experiment.CameraParameters['y_pixels'])
         # self.camera_controller.set_property_value("image_height",
         #                                           self.model.CameraParameters['y_pixels'])
         # self.camera_controller.set_property_value("image_width",

@@ -115,7 +115,7 @@ class autofocus_popup():
 
         # Plot
         fig = Figure(figsize = (5, 5), dpi = 100)
-        self.plot1 = fig.add_subplot(111)
+        self.autofocus_plot = fig.add_subplot(111)
         canvas = FigureCanvasTkAgg(fig, master=content_frame)
         canvas.draw()
         canvas.get_tk_widget().grid(row=5, column=0, columnspan=3, sticky=(NSEW), padx=(5,5), pady=(5,5))

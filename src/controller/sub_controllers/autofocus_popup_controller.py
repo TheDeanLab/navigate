@@ -43,6 +43,7 @@ class Autofocus_Popup_Controller(GUI_Controller):
 
         self.widgets = self.view.get_widgets()
         self.setting_dict = setting_dict
+        self.autofocus_plot = self.view.autofocus_plot
 
         # show the value
         for k in self.widgets:

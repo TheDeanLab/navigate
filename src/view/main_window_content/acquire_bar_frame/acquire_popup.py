@@ -30,13 +30,12 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-from tkinter import *
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, NSEW, StringVar
+from tkinter.scrolledtext import ScrolledText
 from view.custom_widgets.popup import PopUp
 from view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from view.custom_widgets.validation import ValidatedEntry
-
 
 #Class that handles the dialog box that has all the user entry stuff when you press the Acquisition button
 class Acquire_PopUp():
@@ -46,7 +45,7 @@ class Acquire_PopUp():
     def __init__(self, root, *args, **kwargs):
         
         # Creating popup window with this name and size/placement, PopUp is a Toplevel window
-        self.popup = PopUp(root, "File Saving Dialog", '600x400+320+180', transient=True)
+        self.popup = PopUp(root, "File Saving Dialog", '450x450+320+180', transient=True)
 
         # Storing the content frame of the popup, this will be the parent of the widgets
         content_frame = self.popup.get_frame()
@@ -66,23 +65,34 @@ class Acquire_PopUp():
 
         # Loop for each entry and label
         for i in range(len(entry_names)):
-            self.inputs[entry_names[i]] = LabelInput(parent=content_frame,
-                                         label=entry_labels[i],
-                                         input_class=ValidatedEntry,
-                                         input_var=StringVar(),
-                                         input_args={"required": True}
-                                        )
+            if entry_names[i] == 'misc':
+                self.inputs[entry_names[i]] = LabelInput(parent=content_frame,
+                                            label=entry_labels[i],
+                                            input_class=ScrolledText,
+                                            input_args={"wrap": tk.WORD, "width": 40, "height": 10}
+                                            )
+            else:
+                self.inputs[entry_names[i]] = LabelInput(parent=content_frame,
+                                            label=entry_labels[i],
+                                            input_class=ValidatedEntry,
+                                            input_var=StringVar(),
+                                            input_args={"required": True}
+                                            )
             self.inputs[entry_names[i]].grid(row=i+1, column=0, columnspan=2, sticky=(NSEW), padx=5)
             self.inputs[entry_names[i]].label.grid(padx=(0, 20))
 
         # Formatting
-        self.inputs['user'].label.grid(padx=(10,0))
+        self.inputs['user'].widget.grid(padx=(53,0))
+        self.inputs['tissue'].widget.grid(padx=(16,0))
+        self.inputs['celltype'].widget.grid(padx=(28,0))
+        self.inputs['label'].widget.grid(padx=(48,0))
+        self.inputs['misc'].widget.grid(padx=(24,0))
 
         #Done and Cancel Buttons
         self.buttons['Cancel'] = ttk.Button(content_frame, text="Cancel Acquisition")
-        self.buttons['Cancel'].grid(row=7, column=0, sticky=(NSEW))
+        self.buttons['Cancel'].grid(row=7, column=0, padx=5, sticky=(NSEW))
         self.buttons['Done'] = ttk.Button(content_frame, text="Acquire Data")
-        self.buttons['Done'].grid(row=7, column=1, sticky=(NSEW))
+        self.buttons['Done'].grid(row=7, column=1, padx=5, sticky=(NSEW))
         
 
     def get_variables(self):

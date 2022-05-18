@@ -41,11 +41,16 @@ class Debug_Module:
         self.verbose = verbose
         
         menubar.add_command(label='ignored signal?', command=self.debug_ignored_signal)
+        menubar.add_command(label='get timings', command=self.debug_get_timings)
         menubar.add_command(label='ignored autofocus signal?', command=self.debug_autofocus)
         menubar.add_command(label='blocked queue?', command=self.debug_blocked_queue)
         menubar.add_command(label='update image size', command=lambda: self.central_controller.model.run_command('debug', 'update_image_size'))
         menubar.add_command(label='get shannon value?', command=None)
         menubar.add_command(label='stop acquire', command=lambda: self.central_controller.execute('stop_acquire'))
+
+    def debug_get_timings(self):
+        signal_num = 0
+        self.start_debug(signal_num, 'debug', 'get_timings')
 
     def debug_ignored_signal(self):
         signal_num = simple_dialog.askinteger('Input', 'How many signals you want to send out?', parent=self.central_controller.view)

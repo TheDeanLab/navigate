@@ -606,7 +606,10 @@ property_dict = {
     'subarray_hsize': 4202784,  # 0x00402120, R/W, long,   "SUBARRAY HSIZE"
     'subarray_vpos': 4202800,  # 0x00402130, R/W, long,    "SUBARRAY VPOS"
     'subarray_vsize': 4202816,  # 0x00402140, R/W, long,   "SUBARRAY VSIZE"
-    'subarray_mode': 4202832  # 0x00402150, R/W, mode,    "SUBARRAY MODE"
+    'subarray_mode': 4202832,  # 0x00402150, R/W, mode,    "SUBARRAY MODE"
+    'cyclic_trigger_period': 4206624, # 0x00403020, R/O, sec,	"TIMING CYCLIC TRIGGER PERIOD"
+	'minimum_trigger_blank':  4206640, # 0x00403030, R/O, sec,	"TIMING MINIMUM TRIGGER BLANKING"
+    'minimum_trigger_interval': 4206672 # 0x00403050, R/O, sec,	"TIMING MINIMUM TRIGGER INTERVAL"
 }
 
 
@@ -983,7 +986,7 @@ class DCAM:
         frame_idx_list = []
         wait_param = DCAMWAIT_START()
         wait_param.eventmask = DCAMWAIT_CAPEVENT_FRAMEREADY | DCAMWAIT_CAPEVENT_STOPPED
-        wait_param.timeout = 1000  # 500ms
+        wait_param.timeout = 500  # 500ms
         #  Timeout Duration - Will throw an error if the timeout is too small.
         #  Currently set to a value > maximum typical integration time.
 

@@ -36,6 +36,7 @@ POSSIBILITY OF SUCH DAMAGE.
 import threading
 from queue import Empty
 import random
+import time
 
 class Debug_Module:
     def __init__(self, model, verbose=False):
@@ -44,6 +45,12 @@ class Debug_Module:
 
     def debug(self, command, *args, **kwargs):
         getattr(self, command)(*args, **kwargs)
+
+    def get_timings(self, *args, **kwargs):
+        cyclic_trigger = self.model.camera.camera_controller.get_property_value('cyclic_trigger_period')
+        trigger_blank = self.model.camera.camera_controller.get_property_value('minimum_trigger_blank')
+        trigger_interval = self.model.camera.camera_controller.get_property_value('minimum_trigger_interval')
+        print('***cyclic_trigger:', cyclic_trigger, ',trigger_blank:', trigger_blank, 'trigger_interval:', trigger_interval)
 
     def update_image_size(self, *args, **kwargs):
         self.model.set_data_buffer(self.model.data_buffer)
@@ -59,9 +66,11 @@ class Debug_Module:
             self.model.before_acquisition()
             self.model.signal_thread = threading.Thread(
                 target=self.send_signals(args[1]))
-            self.model.data_thread = threading.Thread(target=self.get_frames, args=(args[1],))
+            # self.model.data_thread = threading.Thread(target=self.get_frames, args=(args[1],))
             self.model.signal_thread.start()
-            self.model.data_thread.start()
+            # self.model.data_thread.start()
+            time.sleep(10)
+            self.get_frames()
         elif command == 'autofocus':
             self.model.experiment.MicroscopeState = args[0]
             self.model.experiment.AutoFocusParameters = args[1]

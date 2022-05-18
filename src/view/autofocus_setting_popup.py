@@ -120,9 +120,9 @@ class autofocus_popup():
         canvas.draw()
         canvas.get_tk_widget().grid(row=5, column=0, columnspan=3, sticky=(NSEW), padx=(5,5), pady=(5,5))
         # Adding toolbar
-        # toolbar = NavigationToolbar2Tk(canvas, content_frame)
-        # toolbar.update()
-        # canvas.get_tk_widget().pack()
+        toolbar = NavigationToolbar2Tk(canvas, content_frame, pack_toolbar=False)
+        toolbar.update()
+        toolbar.grid(row=5, column=4)
 
 
     def get_widgets(self):

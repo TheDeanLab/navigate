@@ -166,13 +166,13 @@ class ASLM_controller:
         """
         # Update the buffer size according to the current camera dimensions listed in the experimental parameters
         """
+        img_width = int(self.experiment.CameraParameters['x_pixels'])
+        img_height = int(self.experiment.CameraParameters['y_pixels'])
         self.data_buffer = [
             SharedNDArray(
-                shape=(
-                    int(self.experiment.CameraParameters['y_pixels']),
-                    int(self.experiment.CameraParameters['x_pixels'])),
+                shape=(img_height, img_width),
                 dtype='uint16') for i in range(self.configuration.SharedNDArray['number_of_frames'])]
-        self.model.set_data_buffer(self.data_buffer)
+        self.model.set_data_buffer(self.data_buffer, img_width, img_height)
 
     def initialize_cam_view(self, configuration_controller):
         """
@@ -517,9 +517,7 @@ class ASLM_controller:
                 self.etl_controller.save_etl_info()
             self.model.terminate()
             self.model = None
-            self.show_img_pipe_parent.close()
-            self.threads_pool.clear()
-
+            # self.threads_pool.clear()
 
         if self.verbose:
             print(

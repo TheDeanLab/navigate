@@ -37,12 +37,12 @@ RemoteFocusParameters:
   remote_focus_r_amplitude: 0.7
   remote_focus_r_offset: 2.3
 AutoFocusParameters:
-  stage1_range: 500
-  stage1_step_size: 50
-  stage1_selected: True
-  stage2_range: 50
-  stage2_step_size: 5
-  stage2_selected: True
+  coarse_range: 500
+  coarse_step_size: 50
+  coarse_selected: True
+  fine_range: 50
+  fine_step_size: 5
+  fine_selected: True
 GalvoParameters:
   galvo_l_frequency: 99.9
   galvo_l_amplitude: 2.5

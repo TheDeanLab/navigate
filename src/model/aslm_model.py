@@ -157,9 +157,6 @@ class Model:
             self.daq.set_camera(self.camera)
 
         # Acquisition Housekeeping
-        self.threads_pool = SynchronizedThreadPool()
-        self.stop_acquisition = False
-        self.stop_send_signal = False
         self.image_count = 0
         self.acquisition_count = 0
         self.total_acquisition_count = None
@@ -185,13 +182,21 @@ class Model:
         # Queue
         self.autofocus_frame_queue = Queue()
         self.autofocus_pos_queue = Queue()
-        self.autofocus_on = False
+        
+        # flags
+        self.autofocus_on = False # autofocus 
+        self.is_live = False # need to clear up data buffer after acquisition
+        self.is_save = False # save data
+        self.stop_acquisition = False # stop signal and data threads
+        self.stop_send_signal = False # stop signal thread
+
+        # timing
+        self.camera_minimum_waiting_time = self.camera.get_minimum_waiting_time()
+        self.trigger_waiting_time = 0
+        self.pre_trigger_time = 0
 
         # debug
         self.debug = Debug_Module(self, self.verbose)
-        # add here for now for debug
-        self.trigger_waitingtime = 0
-        self.pre_trigger_time = 0
 
     def set_show_img_pipe(self, handler):
         """
@@ -199,11 +204,9 @@ class Model:
         """
         self.show_img_pipe = handler
 
-    def set_data_buffer(self, data_buffer):
-        # 05/16 Debugging
+    def set_data_buffer(self, data_buffer, img_width=512, img_height=512):
         self.camera.close_image_series()
-        self.camera.set_ROI(512, 512)
-        # print('image width, height:', width, height)
+        self.camera.set_ROI(img_width, img_height)
         self.data_buffer = data_buffer
         self.number_of_frames = self.configuration.SharedNDArray['number_of_frames']
         self.camera.initialize_image_series(self.data_buffer, self.number_of_frames)
@@ -273,11 +276,9 @@ class Model:
         elif command == 'autofocus':
             self.experiment.MicroscopeState = args[0]
             self.experiment.AutoFocusParameters = args[1]
-            frame_num = self.get_autofocus_frame_num() + 1 # Produces 22
-            print("Frame Number: ", frame_num)
+            frame_num = self.get_autofocus_frame_num() + 1
             if frame_num < 1:
                 return
-            # frame_num = 11
             self.before_acquisition()
             self.autofocus_on = True
             self.is_save = False
@@ -302,6 +303,7 @@ class Model:
         self.stages.move_absolute(pos_dict)
 
     def before_acquisition(self):
+        # trun off flags
         self.stop_acquisition = False
         self.stop_send_signal = False
         self.autofocus_on = False
@@ -331,7 +333,7 @@ class Model:
             f_frame_id = -1  # to indicate if there is one frame need to calculate shannon value, but the image frame isn't ready
             frame_num = 10  # any value but not 1
 
-        wait_num = 20
+        wait_num = 10 # this will let this thread wait 10 * 500 ms before it ends
         acquired_frame_num = 0
 
         while not self.stop_acquisition:
@@ -343,6 +345,7 @@ class Model:
             if not frame_ids:
                 wait_num -= 1
                 if wait_num <= 0:
+                    # it has wait wait_num * 500 ms, it's sure there won't be any frame
                     break
                 continue
 
@@ -382,71 +385,10 @@ class Model:
                 self.stop_acquisition = (num_of_frames <= 0) or self.stop_acquisition
 
         self.show_img_pipe.send('stop')
-        # self.show_img_pipe.send(acquired_frame_num)
-        print('received frames in total:', acquired_frame_num)
+
         if self.verbose:
             print('data thread is stop')
-
-        # count_frame = num_of_frames > 0
-        # while True:
-        #     frame_ids = self.camera.get_new_frame()
-        #     # frame_ids = self.camera.buf_getlastframedata()
-        #     if self.verbose:
-        #         print('running data process, get frames', frame_ids)
-        #     # if there is at least one frame available
-        #     if frame_ids:
-        #         # show image
-        #         if self.show_img_pipe:
-        #             if self.verbose:
-        #                 print('sent through pipe', frame_ids[0])
-        #             self.show_img_pipe.send(frame_ids[0])
-        #         else:
-        #             if self.verbose:
-        #                 print('get image frames:', frame_ids)
-        #         # autofocus analyse
-        #         while not self.autofocus_frame_queue.empty():
-        #             try:
-        #                 print("Made it to Queue!!!!!!!!!!!!!!!!")
-        #                 f_frame_id, frame_num, f_pos = self.autofocus_frame_queue.get_nowait()
-        #                 print('get from the queue:', f_frame_id, frame_num)
-        #                 self.autofocus_pos_queue.put(1)
-        #                 break
-        #             except:
-        #                 print("Did not make it to queue/autofocus_on")
-        #                 break
-        #
-        #             # entropy = self.analysis.normalized_dct_shannon_entropy(self.data_buffer[f_frame_id], 3)
-        #             entropy = f_frame_id
-        #             if entropy > self.max_entropy:
-        #                 self.max_entropy = entropy
-        #                 self.focus_pos = f_pos
-        #             if frame_num == 1:
-        #                 print('max shannon entropy:', self.max_entropy, self.focus_pos)
-        #                 # find out the focus
-        #                 self.autofocus_pos_queue.put(self.focus_pos)
-        #                 break
-        #
-        #         # save image
-        #         if self.is_save:
-        #             for idx in frame_ids:
-        #                 threading.Thread(target=self.image_writer.write_tiff,
-        #                                 args=(frame_ids,
-        #                                             self.data_buffer[idx],
-        #                                             self.current_channel,
-        #                                             self.current_time_point,
-        #                                             self.experiment.Saving['save_directory'])).start()
-        #                 self.current_time_point += 1
-        #
-        #     if count_frame:
-        #         num_of_frames -= len(frame_ids)
-        #         self.stop_acquisition = (num_of_frames <= 0) or self.stop_acquisition
-        #
-        #     if self.stop_acquisition:
-        #         if self.show_img_pipe:
-        #             self.show_img_pipe.send('stop')
-        #         if self.verbose:
-        #             print('data thread is stopped, send stop to parent pipe')
-        #         break
+            print('received frames in total:', acquired_frame_num)
 
     def prepare_image_series(self):
         """
@@ -523,6 +465,10 @@ class Model:
 
                 # Camera Settings - Exposure Time in Milliseconds
                 self.camera.set_exposure_time(channel['camera_exposure_time'])
+                self.current_exposure_time = channel['camera_exposure_time']
+
+                # update trigger waiting time when exposure time changed
+                self.trigger_waiting_time = self.current_exposure_time/1000 + self.camera_minimum_waiting_time
 
                 # Laser Settings
                 self.laser_triggers.trigger_digital_laser(
@@ -556,14 +502,21 @@ class Model:
         """
         #  Initialize, run, and stop the acquisition.
         self.daq.prepare_acquisition()
+
+        # calculate how long has been since last trigger
         time_spent = time.perf_counter() - self.pre_trigger_time
-        print('*Timing!', time_spent, self.trigger_waitingtime)
-        if time_spent < self.trigger_waitingtime:
+
+        if time_spent < self.trigger_waiting_time:
             print('Need to wait!!!! Too much signals!!!!')
-            time.sleep(self.trigger_waitingtime - time_spent + 0.1)
-        self.trigger_waitingtime = self.current_exposure_time/1000 + 0.054
+            # add 0.1 here, there are lost signals if I don't add another short time,
+            # but we might could add time short than 0.1
+            time.sleep(self.trigger_waiting_time - time_spent + 0.1)
+        
         self.daq.run_acquisition()
+
+        # get time when send out the trigger
         self.pre_trigger_time = time.perf_counter()
+
         self.daq.stop_acquisition()
 
         self.frame_id = (self.frame_id + 1) % self.number_of_frames
@@ -572,11 +525,12 @@ class Model:
         # get autofocus setting according to channel
         settings = self.experiment.AutoFocusParameters
         pos = self.f_position
-        if settings['stage1_selected']:
-            pos = self.send_autofocus_signals(self.f_position, int(settings['stage1_range']), int(settings['stage1_step_size']))
 
-        if settings['stage2_selected']:
-            pos = self.send_autofocus_signals(pos, int(settings['stage2_range']), int(settings['stage2_step_size']))
+        if settings['coarse_selected']:
+            pos = self.send_autofocus_signals(self.f_position, int(settings['coarse_range']), int(settings['coarse_step_size']))
+
+        if settings['fine_selected']:
+            pos = self.send_autofocus_signals(pos, int(settings['fine_range']), int(settings['fine_step_size']))
 
         # move stage to the focus position
         self.move_stage({'f': pos})
@@ -596,14 +550,14 @@ class Model:
         for i in range(steps):
             # move focus device
             # low resolution move device
-            print("Frame ID: ", self.frame_id, " Position: ", pos, "frame in queue", steps-i)
+
             self.move_stage({'f': pos})
             self.autofocus_frame_queue.put((self.frame_id, steps - i, pos))
+            # add a wait time here to let the stage move to where we want
+            # TODO:we may change to 'on_target' function later when figure it out
             time.sleep(0.1)
             self.snap_image()
             pos += step_size
-
-
 
         # wait to get the focus postion
         pos = self.autofocus_pos_queue.get(timeout=steps*3)
@@ -612,10 +566,10 @@ class Model:
     def get_autofocus_frame_num(self):
         settings = self.experiment.AutoFocusParameters
         frames = 0
-        if settings['stage1_selected']:
-            frames = int(settings['stage1_range']) // int(settings['stage1_step_size']) + 1
-        if settings['stage2_selected']:
-            frames += int(settings['stage2_range']) // int(settings['stage2_step_size']) + 1
+        if settings['coarse_selected']:
+            frames = int(settings['coarse_range']) // int(settings['coarse_step_size']) + 1
+        if settings['fine_selected']:
+            frames += int(settings['fine_range']) // int(settings['fine_step_size']) + 1
         return frames
 
     def run_live_acquisition(self):

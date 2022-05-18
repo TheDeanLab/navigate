@@ -70,8 +70,8 @@ class autofocus_popup():
 
         # Label Lists
         title_labels = ['Select', 'Ranges', 'Step Size']
-        setting_names = ['stage1', 'stage2']
-        setting_labels = ['Stage 1', 'Stage 2']
+        setting_names = ['coarse', 'fine']
+        setting_labels = ['Coarse', 'Fine']
 
         # Column Titles
         for i in range(3):

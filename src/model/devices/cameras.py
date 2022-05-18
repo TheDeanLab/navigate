@@ -233,6 +233,9 @@ class SyntheticCamera(CameraBase):
         self.x_pixels = roi_width
         self.y_pixels = roi_height
 
+    def get_minimum_waiting_time(self):
+        return 0.01
+
 
 class HamamatsuOrca(CameraBase):
 
@@ -451,3 +454,19 @@ class HamamatsuOrca(CameraBase):
 
     def get_new_frame(self):
         return self.camera_controller.get_frames()
+
+    def get_minimum_waiting_time(self):
+        '''
+        # this function will get timings from the camera device
+        # cyclic_trigger_period, minimum_trigger_blank, minimum_trigger_interval
+        # 'cyclic_trigger_period' of current device is 0
+        # according to the document, trigger_blank should be bigger than trigger_interval.
+        '''
+        try:
+            # cyclic_trigger = self.camera_controller.get_property_value('cyclic_trigger_period')
+            trigger_blank = self.camera_controller.get_property_value('minimum_trigger_blank')
+            trigger_interval = self.camera_controller.get_property_value('minimum_trigger_interval')
+        except:
+            trigger_blank = 0.016
+            trigger_interval = 0.037
+        return trigger_blank + trigger_interval

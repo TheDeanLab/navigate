@@ -101,7 +101,7 @@ class SynchronizedThreadPool:
             callback=callback,
             cbArgs=cbArgs,
             cbKargs=cbKargs)
-        taskThread = SelfLockThread(None, task, None, args, kwargs)
+        taskThread = SelfLockThread(None, task, None, args, kwargs, daemon=True)
         taskThread.start()
         return taskThread
 

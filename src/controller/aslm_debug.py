@@ -49,8 +49,7 @@ class Debug_Module:
         menubar.add_command(label='stop acquire', command=lambda: self.central_controller.execute('stop_acquire'))
 
     def debug_get_timings(self):
-        signal_num = 0
-        self.start_debug(signal_num, 'debug', 'get_timings')
+        self.central_controller.model.run_command('debug', 'get_timings')
 
     def debug_ignored_signal(self):
         signal_num = simple_dialog.askinteger('Input', 'How many signals you want to send out?', parent=self.central_controller.view)

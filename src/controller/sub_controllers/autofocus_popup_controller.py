@@ -48,8 +48,8 @@ class Autofocus_Popup_Controller(GUI_Controller):
         # show the value
         for k in self.widgets:
             self.widgets[k].set(setting_dict[k])
-        self.view.stage_vars[0].set(setting_dict['stage1_selected'])
-        self.view.stage_vars[1].set(setting_dict['stage2_selected'])
+        self.view.stage_vars[0].set(setting_dict['coarse_selected'])
+        self.view.stage_vars[1].set(setting_dict['fine_selected'])
 
         # add saving function to the function closing the window
         exit_func = combine_funcs(self.update_experiment_values, self.view.popup.dismiss,
@@ -63,8 +63,8 @@ class Autofocus_Popup_Controller(GUI_Controller):
             setting_dict = self.setting_dict
         for k in self.widgets:
             setting_dict[k] = self.widgets[k].get()
-        setting_dict['stage1_selected'] = self.view.stage_vars[0].get()
-        setting_dict['stage2_selected'] = self.view.stage_vars[1].get()
+        setting_dict['coarse_selected'] = self.view.stage_vars[0].get()
+        setting_dict['fine_selected'] = self.view.stage_vars[1].get()
 
     def showup(self):
         """

@@ -64,12 +64,14 @@ class Debug_Module:
             self.model.experiment.MicroscopeState = args[0]
             self.model.is_save = False
             self.model.before_acquisition()
+            self.model.trigger_waitingtime = 0
+            self.model.pre_trigger_time = 0
             self.model.signal_thread = threading.Thread(
                 target=self.send_signals(args[1]))
             # self.model.data_thread = threading.Thread(target=self.get_frames, args=(args[1],))
             self.model.signal_thread.start()
             # self.model.data_thread.start()
-            time.sleep(10)
+            self.model.signal_thread.join()
             self.get_frames()
         elif command == 'autofocus':
             self.model.experiment.MicroscopeState = args[0]

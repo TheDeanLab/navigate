@@ -189,6 +189,9 @@ class Model:
 
         # debug
         self.debug = Debug_Module(self, self.verbose)
+        # add here for now for debug
+        self.trigger_waitingtime = 0
+        self.pre_trigger_time = 0
 
     def set_show_img_pipe(self, handler):
         """
@@ -243,6 +246,7 @@ class Model:
             self.experiment.MicroscopeState = args[0]
             self.is_save = False
             self.before_acquisition()
+            self.is_live = True
             self.signal_thread = threading.Thread(
                 target=self.run_live_acquisition)
             self.data_thread = threading.Thread(target=self.run_data_process)
@@ -301,14 +305,19 @@ class Model:
         self.stop_acquisition = False
         self.stop_send_signal = False
         self.autofocus_on = False
+        self.is_live = False
         self.open_shutter()
 
     def end_acquisition(self):
         """
         #
         """
-        # dettach buffer
-        # self.camera.close_image_series()
+        # dettach buffer in live mode in order to clear unread frames
+        if self.is_live:
+            self.camera.close_image_series()
+            self.camera.initialize_image_series(self.data_buffer, self.number_of_frames)
+            self.is_live = False
+            self.frame_id = 0
 
         # close shutter
         self.shutter.close_shutters()
@@ -547,8 +556,16 @@ class Model:
         """
         #  Initialize, run, and stop the acquisition.
         self.daq.prepare_acquisition()
+        time_spent = time.perf_counter() - self.pre_trigger_time
+        print('*Timing!', time_spent, self.trigger_waitingtime)
+        if time_spent < self.trigger_waitingtime:
+            print('Need to wait!!!! Too much signals!!!!')
+            time.sleep(self.trigger_waitingtime - time_spent + 0.1)
+        self.trigger_waitingtime = self.current_exposure_time/1000 + 0.054
         self.daq.run_acquisition()
+        self.pre_trigger_time = time.perf_counter()
         self.daq.stop_acquisition()
+
         self.frame_id = (self.frame_id + 1) % self.number_of_frames
 
     def snap_image_with_autofocus(self):

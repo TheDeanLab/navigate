@@ -37,6 +37,9 @@ from tkinter import ttk
 from view.custom_widgets.popup import PopUp
 from view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from view.custom_widgets.validation import ValidatedSpinbox
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, 
+NavigationToolbar2Tk)
 
 class autofocus_popup():
     '''
@@ -50,44 +53,31 @@ class autofocus_popup():
         self.popup = PopUp(
             root,
             "Autofocus Settings",
-            '375x345+320+180',
+            '+320+180',
             top=False,
             transient=False)
 
-        # Storing the content frame of the popup, this will be the parent of
-        # the widgets
+        # Creating content frame
         content_frame = self.popup.get_frame()
-        content_frame.columnconfigure(0, pad=5)
-        content_frame.columnconfigure(1, pad=5)
-        content_frame.rowconfigure(0, pad=5)
-        content_frame.rowconfigure(1, pad=5)
-        content_frame.rowconfigure(2, pad=5)
-
-        self.setting_frame = ttk.Frame(content_frame)
-        self.setting_frame.grid(row=1, column=0, columnspan=2, sticky=(NSEW))
+        
+        
+        
 
         '''Creating the widgets for the popup'''
         # Dictionary for all the variables
         self.inputs = {}
         self.stage_vars = [BooleanVar(False), BooleanVar(False)]
 
-        # self.inputs['channel_selector'] = LabelInput(parent=content_frame,
-        #                                  label="Channel",
-        #                                  input_class=ttk.Combobox,
-        #                                  input_var=StringVar(),
-        #                                  label_args={'padding': (20, 5, 48, 0)}
-        #                                  )
-        # self.inputs["channel_selector"].grid(row=0, column=0)
-        # self.inputs["channel_selector"].state(['readonly'])
-
-        # Setting Frame
+        # Label Lists
         title_labels = ['Select', 'Ranges', 'Step Size']
-        setting_labels = ['stage1', 'stage2']
-        # Loop for widgets
+        setting_names = ['stage1', 'stage2']
+        setting_labels = ['Stage 1', 'Stage 2']
+
+        # Column Titles
         for i in range(3):
             # Title labels
             title = ttk.Label(
-                self.setting_frame,
+                content_frame,
                 text=title_labels[i],
                 padding=(
                     2,
@@ -95,27 +85,45 @@ class autofocus_popup():
                     0,
                     0))
             title.grid(row=0, column=i, sticky=(NSEW))
+        
 
+        # Widgets
         for i in range(2):
             # Stage labels
             stage = ttk.Checkbutton(
-                self.setting_frame,
+                content_frame,
                 text=setting_labels[i],
                 variable=self.stage_vars[i]
                 )
-            stage.grid(row=i + 1, column=0, sticky=(NSEW), padx=1, pady=5)
+            stage.grid(row=i + 1, column=0, sticky=(NSEW), padx=5)
             # Entry Widgets
-            self.inputs[setting_labels[i] + '_range'] = LabelInput(
-                parent=self.setting_frame, input_class=ValidatedSpinbox, input_var=StringVar())
-            self.inputs[setting_labels[i] +
-                        '_range'].grid(row=i + 1, column=1, sticky=(NSEW))
-            self.inputs[setting_labels[i] + '_step_size'] = LabelInput(
-                parent=self.setting_frame, input_class=ValidatedSpinbox, input_var=StringVar())
-            self.inputs[setting_labels[i] +
-                        '_step_size'].grid(row=i + 1, column=2, sticky=(NSEW))
+            self.inputs[setting_names[i] + '_range'] = LabelInput(parent=content_frame,
+                                                                  input_class=ValidatedSpinbox,
+                                                                  input_var=StringVar()
+                                                                  )
+            self.inputs[setting_names[i] + '_range'].grid(row=i + 1, column=1, sticky=(NSEW), padx=(0, 5), pady=(15, 0))
 
-        self.autofocus_btn = ttk.Button(self.setting_frame, text='Autofocus')
-        self.autofocus_btn.grid(row=4, column=2)
+            self.inputs[setting_names[i] + '_step_size'] = LabelInput(parent=content_frame,
+                                                                      input_class=ValidatedSpinbox,
+                                                                      input_var=StringVar()
+                                                                      )
+            self.inputs[setting_names[i] + '_step_size'].grid(row=i + 1, column=2, sticky=(NSEW), padx=(0, 5), pady=(15, 0))
+
+        # Buttons
+        self.autofocus_btn = ttk.Button(content_frame, text='Autofocus')
+        self.autofocus_btn.grid(row=4, column=2, pady=(0, 10))
+
+        # Plot
+        fig = Figure(figsize = (5, 5), dpi = 100)
+        self.plot1 = fig.add_subplot(111)
+        canvas = FigureCanvasTkAgg(fig, master=content_frame)
+        canvas.draw()
+        canvas.get_tk_widget().grid(row=5, column=0, columnspan=3, sticky=(NSEW), padx=(5,5), pady=(5,5))
+        # Adding toolbar
+        # toolbar = NavigationToolbar2Tk(canvas, content_frame)
+        # toolbar.update()
+        # canvas.get_tk_widget().pack()
+
 
     def get_widgets(self):
         return self.inputs

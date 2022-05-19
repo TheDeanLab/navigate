@@ -72,8 +72,10 @@ class Main_App(ttk.Frame):
         view_directory = Path(__file__).resolve().parent
         photo_image = view_directory.joinpath("icon", "mic.png")
         mainapp.root.iconphoto(True, PhotoImage(file=photo_image))
-        screen_width = int(root.winfo_screenwidth() * (3/4))
-        screen_height = int(root.winfo_screenheight() * (3/4))
+        mainapp.root.resizable(True, True)
+        factor = (3/4) # This changes how much of the screen to use. 1 is essentially fullscreen on startup
+        screen_width = int(root.winfo_screenwidth() * factor)
+        screen_height = int(root.winfo_screenheight() * factor)
         mainapp.root.geometry(f"{screen_width}x{screen_height}")
         Grid.columnconfigure(root, 'all', weight=1)
         Grid.rowconfigure(root, 'all', weight=1)

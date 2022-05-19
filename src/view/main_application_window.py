@@ -120,18 +120,16 @@ class Main_App(ttk.Frame):
         mainapp.grid(column=0, row=0, sticky=(NSEW))
         # Sticky tells which walls of gridded cell the widget should stick to,
         # in this case its sticking to the main window on all sides
-        mainapp.top_frame.grid(row=0, column=0, columnspan=2, sticky=(NSEW))
-        mainapp.frame_left.grid(row=1, column=0, rowspan=2, sticky=(NSEW))
-        mainapp.frame_top_right.grid(row=1, column=1, sticky=(NSEW))
-        mainapp.frame_bottom_right.grid(row=2, column=1, sticky=(NSEW))
+        mainapp.top_frame.grid(row=0, column=0, columnspan=2, sticky=(NSEW), padx=3, pady=3)
+        mainapp.frame_left.grid(row=1, column=0, rowspan=2, sticky=(NSEW), padx=3, pady=3)
+        mainapp.frame_top_right.grid(row=1, column=1, sticky=(NSEW), padx=3, pady=3)
+        mainapp.frame_bottom_right.grid(row=2, column=1, sticky=(NSEW), padx=3, pady=3)
 
         # Putting Notebooks into frames, tabs are held within the class of each
         # notebook
         mainapp.settings = settings_notebook(mainapp.frame_left)
-        mainapp.camera_waveform = camera_waveform_notebook(
-            mainapp.frame_top_right)
-        mainapp.stage_control = stagecontrol_maxintensity_notebook(
-            mainapp.frame_bottom_right)
+        mainapp.camera_waveform = camera_waveform_notebook(mainapp.frame_top_right)
+        mainapp.stage_control = stagecontrol_maxintensity_notebook(mainapp.frame_bottom_right)
         mainapp.acqbar = AcquireBar(mainapp.top_frame, mainapp.root)
 
 

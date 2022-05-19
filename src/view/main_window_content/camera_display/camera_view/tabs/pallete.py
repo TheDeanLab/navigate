@@ -92,8 +92,7 @@ class pallete(ttk.Labelframe):
                                                                        'to': 2**16-1,
                                                                        'increment': 1,
                                                                        'width': 5})
-            self.inputs[self.minmax_names[i]].grid(
-                row=i + 4, column=0, sticky=NSEW)
+            self.inputs[self.minmax_names[i]].grid(row=i + 4, column=0, sticky=NSEW, padx=3)
 
     def get_variables(self):
         '''

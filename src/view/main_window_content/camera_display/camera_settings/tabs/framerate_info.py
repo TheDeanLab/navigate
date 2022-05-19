@@ -53,7 +53,7 @@ class framerate_info(ttk.LabelFrame):
 
         #  Holds widgests, this is done in case more widgets are to be added in a different frame, these can be grouped together
         content_frame = ttk.Frame(self)
-        content_frame.grid(row=0, column=0, sticky=(NSEW))
+        content_frame.grid(row=0, column=0, sticky=(NSEW), pady=5, padx=5)
         
         # Formatting
         Grid.columnconfigure(self, 'all', weight=1)
@@ -85,6 +85,11 @@ class framerate_info(ttk.LabelFrame):
                                                         input_args={"from_": 1, "to": 1000, "increment": 1.0}                                          
                                                         )
                 self.inputs[self.names[i]].grid(row=i, column=0, pady=1)
+            
+        self.inputs['exposure_time'].label.grid(padx=(0,10))
+        self.inputs['readout_time'].label.grid(padx=(0,14))
+        self.inputs['max_framerate'].label.grid(padx=(0,10))
+        self.inputs['frames_to_average'].label.grid(padx=(0,16))
 
     def get_variables(self):
         '''

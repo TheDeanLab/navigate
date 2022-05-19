@@ -61,19 +61,19 @@ class camera_roi(ttk.Labelframe):
         # Parent Label Frames for widgets
         # ROI
         self.roi_frame = ttk.LabelFrame(self, text='Number of Pixels')
-        self.roi_frame.grid(row=0, column=0, sticky=NSEW)
+        self.roi_frame.grid(row=0, column=0, sticky=NSEW, padx=10, pady=10)
 
         # Button Frame
         self.btn_frame = ttk.LabelFrame(self, text="Default FOVs")
-        self.btn_frame.grid(row=0, column=1, rowspan=4, sticky=NSEW)
+        self.btn_frame.grid(row=0, column=1, sticky=NSEW, padx=(40,10), pady=10)
 
         # FOV
         self.fov_frame = ttk.LabelFrame(self, text='FOV Dimensions (microns)')
-        self.fov_frame.grid(row=1, column=0, sticky=NSEW)
+        self.fov_frame.grid(row=1, column=0, sticky=NSEW, padx=10, pady=10)
 
         # ROI Center
         self.center_roi_frame = ttk.LabelFrame(self, text='ROI Center')
-        self.center_roi_frame.grid(row=1, column=1, sticky=NSEW)
+        self.center_roi_frame.grid(row=1, column=1, sticky=NSEW, padx=(40,10), pady=10)
         
         # Formatting
         Grid.columnconfigure(self.roi_frame, 'all', weight=1)
@@ -105,17 +105,17 @@ class camera_roi(ttk.Labelframe):
         # Button Frame
         for i in range(len(btn_names)):
             self.buttons[btn_names[i]] = ttk.Button(self.btn_frame, text=btn_labels[i])
-            self.buttons[btn_names[i]].grid(row=i, column=0, pady=1)
+            self.buttons[btn_names[i]].grid(row=i, column=0, pady=5, padx=35)
         
         for i in range(2):
-            # ROI frame
+            # Num Pix frame
             self.inputs[self.roi_labels[i]] = LabelInput(parent=self.roi_frame,
                                                             label=self.roi_labels[i],
                                                             input_class=ValidatedSpinbox,
                                                             input_var=tk.IntVar(),
                                                             input_args={"from_": 0, "to": 2048, "increment": 1.0}
                                                             )
-            self.inputs[self.roi_labels[i]].grid(row=i, column=0, pady=1)
+            self.inputs[self.roi_labels[i]].grid(row=i, column=0, pady=5, padx=5)
 
             # FOV Frame
             self.inputs[self.fov_names[i]] = LabelInput(parent=self.fov_frame,
@@ -123,7 +123,7 @@ class camera_roi(ttk.Labelframe):
                                                         input_class=ttk.Entry,
                                                         input_var=tk.IntVar()
                                                         )
-            self.inputs[self.fov_names[i]].grid(row=i, column=0, pady=1)
+            self.inputs[self.fov_names[i]].grid(row=i, column=0, pady=1, padx=5)
 
             # ROI Center
             self.inputs[self.center_names[i]] = LabelInput(parent=self.center_roi_frame,
@@ -132,7 +132,7 @@ class camera_roi(ttk.Labelframe):
                                                             input_var=tk.IntVar(),
                                                             input_args={"from_": 0, "to": 2048, "increment": 1.0}
                                                             )
-            self.inputs[self.center_names[i]].grid(row=i, column=0, pady=1)
+            self.inputs[self.center_names[i]].grid(row=i, column=0, pady=1, padx=5)
 
         # binning
         self.inputs[self.binning] = LabelInput(parent=self.roi_frame,
@@ -140,7 +140,22 @@ class camera_roi(ttk.Labelframe):
                                                 input_class=ttk.Combobox,
                                                 input_var=tk.StringVar()
                                                 )
-        self.inputs[self.binning].grid(row=3, column=0, pady=1)
+        self.inputs[self.binning].grid(row=3, column=0, pady=5, padx=5)
+        
+        # Additional formatting
+        #   Number of Pixels
+        self.inputs['Width'].grid(pady=(10,5))
+        self.inputs['Width'].label.grid(padx=(0,13))
+        self.inputs['Height'].label.grid(padx=(0,10))
+        self.inputs['Binning'].label.grid(padx=(0,6))
+        #   FOV
+        self.inputs['FOV_X'].grid(pady=(10,5))
+        self.inputs['FOV_X'].label.grid(padx=(0,10))
+        self.inputs['FOV_Y'].label.grid(padx=(0,10))
+        #   ROI Center
+        self.inputs['Center_X'].grid(pady=(10,5))
+        self.inputs['Center_X'].label.grid(padx=(0,10))
+        self.inputs['Center_Y'].label.grid(padx=(0,10))
 
     def get_variables(self):
         '''

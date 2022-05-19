@@ -57,7 +57,7 @@ class camera_mode(ttk.Labelframe):
 
         #Holds dropdowns, this is done in case more widgets are to be added in a different frame, these can be grouped together
         content_frame = ttk.Frame(self)
-        content_frame.grid(row=0, column=0, sticky=(NSEW))
+        content_frame.grid(row=0, column=0, sticky=(NSEW), pady=5)
         
         # Formatting
         Grid.columnconfigure(content_frame, 'all', weight=1)
@@ -77,7 +77,7 @@ class camera_mode(ttk.Labelframe):
                                                         input_class=ttk.Combobox,
                                                         input_var=tk.StringVar()                                          
                                                         )
-                self.inputs[self.names[i]].grid(row=i, column=0, pady=1)
+                self.inputs[self.names[i]].grid(row=i, column=0, pady=3, padx=5)
             else:
                 self.inputs[self.names[i]] = LabelInput(parent=content_frame,
                                                         label=self.labels[i],
@@ -85,10 +85,12 @@ class camera_mode(ttk.Labelframe):
                                                         input_var=tk.StringVar(),
                                                         input_args={"from_": 0, "to": 10000, "increment": 1}                                       
                                                         )
-                self.inputs[self.names[i]].grid(row=i, column=0, pady=1)
+                self.inputs[self.names[i]].grid(row=i, column=0, pady=3, padx=5)
         
         # Additional widget settings
-       
+        self.inputs['Sensor'].label.grid(padx=(0,36))
+        self.inputs['Readout'].label.grid(padx=(0,10))
+        self.inputs['Pixels'].label.grid(padx=(0,15))
         
 
     def get_variables(self):

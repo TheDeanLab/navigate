@@ -54,14 +54,14 @@ class camera_tab(ttk.Frame):
 
         # TODO decide on height, width original was 800x800. 4x binning -> 2048 -> 512
         self.canvas = tk.Canvas(self.cam_image, width=512, height=512)
-        self.canvas.grid(row=0, column=0, sticky=NSEW)
+        self.canvas.grid(row=0, column=0, sticky=NSEW, padx=5, pady=5)
         self.matplotlib_figure = Figure(figsize=[6, 6], tight_layout=True)
         self.matplotlib_canvas = FigureCanvasTkAgg(self.matplotlib_figure, self.canvas)
 
         #  Frame for camera selection and counts
         self.image_metrics = image_metrics(self)
-        self.image_metrics.grid(row=1, column=0, sticky=NSEW)
+        self.image_metrics.grid(row=1, column=0, sticky=W, padx=5, pady=5)
 
         #  Frame for scale settings/pallete color
         self.scale_pallete = pallete(self)
-        self.scale_pallete.grid(row=0, column=1, sticky=NSEW)
+        self.scale_pallete.grid(row=0, column=1, sticky=NSEW, padx=5, pady=5)

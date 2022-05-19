@@ -44,6 +44,10 @@ class stagecontrol_maxintensity_notebook(ttk.Notebook):
 
         #Init notebook
         ttk.Notebook.__init__(stagecontrol_maxintensity, frame_bot_right, *args, **kwargs)
+        
+        # Formatting
+        Grid.columnconfigure(stagecontrol_maxintensity, 'all', weight=1)
+        Grid.rowconfigure(stagecontrol_maxintensity, 'all', weight=1)
 
         #Putting notebook 3 into bottom right frame
         stagecontrol_maxintensity.grid(row=0, column=0)

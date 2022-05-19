@@ -44,6 +44,10 @@ class position_frame(ttk.Frame):
 
         #Init Frame
         ttk.Frame.__init__(position_frame, stage_control_tab, *args, **kwargs)
+        
+        # Formatting
+        Grid.columnconfigure(position_frame, 'all', weight=1)
+        Grid.rowconfigure(position_frame, 'all', weight=1)
 
         #Creating each entry frame for a label and entry
         position_frame.inputs = {}

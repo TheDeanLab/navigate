@@ -30,10 +30,14 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-from tkinter import ttk
+from tkinter import ttk, Grid
 
 
 class waveform_tab(ttk.Frame):
     def __init__(self, cam_wave, *args, **kwargs):
         #Init Frame
         ttk.Frame.__init__(self, cam_wave, *args, **kwargs)
+        
+        # Formatting
+        Grid.columnconfigure(self, 'all', weight=1)
+        Grid.rowconfigure(self, 'all', weight=1)

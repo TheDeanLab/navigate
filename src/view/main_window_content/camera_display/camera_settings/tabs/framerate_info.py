@@ -54,6 +54,12 @@ class framerate_info(ttk.LabelFrame):
         #  Holds widgests, this is done in case more widgets are to be added in a different frame, these can be grouped together
         content_frame = ttk.Frame(self)
         content_frame.grid(row=0, column=0, sticky=(NSEW))
+        
+        # Formatting
+        Grid.columnconfigure(self, 'all', weight=1)
+        Grid.rowconfigure(self, 'all', weight=1)
+        Grid.columnconfigure(content_frame, 'all', weight=1)
+        Grid.rowconfigure(content_frame, 'all', weight=1)
 
         #  Dictionary for all the variables, this will be used by the controller
         self.inputs = {}

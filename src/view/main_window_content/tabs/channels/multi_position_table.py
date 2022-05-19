@@ -31,7 +31,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 from pandastable import Table, Menu, RowHeader, ColumnHeader
-from tkinter import filedialog
+from tkinter import filedialog, Grid
 
 class Multi_Position_RowHeader(RowHeader):
 
@@ -112,6 +112,10 @@ class Multi_Position_Table(Table):
 
     def show(self, callback=None):
         super().show(callback)
+        
+        # Formatting
+        Grid.columnconfigure(self, 'all', weight=1)
+        Grid.rowconfigure(self, 'all', weight=1)
 
         self.rowheader = Multi_Position_RowHeader(self.parentframe, self)
         self.rowheader.grid(row=1,column=0,rowspan=1,sticky='news')

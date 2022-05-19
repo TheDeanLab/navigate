@@ -42,6 +42,10 @@ class maximum_intensity_projection_tab(ttk.Frame):
     def __init__(self, note3, *args, **kwargs):
         #Init Frame
         ttk.Frame.__init__(self, note3, *args, **kwargs)
+        
+        # Formatting
+        Grid.columnconfigure(self, 'all', weight=1)
+        Grid.rowconfigure(self, 'all', weight=1)
 
         # Generate MIPs
         def xy_mip():

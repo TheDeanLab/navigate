@@ -48,6 +48,10 @@ class pallete(ttk.Labelframe):
             text=text_label,
             *args,
             **kwargs)
+        
+        # Formatting
+        Grid.columnconfigure(self, 'all', weight=1)
+        Grid.rowconfigure(self, 'all', weight=1)
 
         # Dictionary for widgets
         self.inputs = {}

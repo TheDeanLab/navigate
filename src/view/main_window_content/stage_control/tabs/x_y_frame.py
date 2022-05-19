@@ -32,7 +32,7 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 # Standard Imports
 import tkinter as tk
-from tkinter import ttk, NSEW
+from tkinter import ttk, NSEW, Grid
 from tkinter.font import Font
 # Local Imports
 from view.custom_widgets.LabelInputWidgetFactory import LabelInput
@@ -44,6 +44,10 @@ class x_y_frame(ttk.Frame):
     def __init__(x_y_frame, stage_control_tab, *args, **kwargs):
         #Init Frame
         ttk.Frame.__init__(x_y_frame, stage_control_tab, *args, **kwargs)
+        
+        # Formatting
+        Grid.columnconfigure(x_y_frame, 'all', weight=1)
+        Grid.rowconfigure(x_y_frame, 'all', weight=1)
 
         #Setting up buttons for up, down, left, right, zero and increment spinbox
         s = ttk.Style()

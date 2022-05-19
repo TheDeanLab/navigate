@@ -72,9 +72,11 @@ class Main_App(ttk.Frame):
         view_directory = Path(__file__).resolve().parent
         photo_image = view_directory.joinpath("icon", "mic.png")
         mainapp.root.iconphoto(True, PhotoImage(file=photo_image))
-        mainapp.root.minsize(1400, 700)
-        mainapp.root.columnconfigure(0, weight=1)
-        mainapp.root.rowconfigure(0, weight=1)
+        screen_width = int(root.winfo_screenwidth() * (3/4))
+        screen_height = int(root.winfo_screenheight() * (3/4))
+        mainapp.root.geometry(f"{screen_width}x{screen_height}")
+        Grid.columnconfigure(root, 'all', weight=1)
+        Grid.rowconfigure(root, 'all', weight=1)
 
         # Creating and linking menu to main window/app
         mainapp.menubar = menubar(root)
@@ -120,21 +122,6 @@ class Main_App(ttk.Frame):
         mainapp.frame_left.grid(row=1, column=0, rowspan=2, sticky=(NSEW))
         mainapp.frame_top_right.grid(row=1, column=1, sticky=(NSEW))
         mainapp.frame_bottom_right.grid(row=2, column=1, sticky=(NSEW))
-
-        # This dictates how to weight each piece of the grid,
-        # so that when the window is resized the notebooks get the proper screen space.
-        # mainapp or mainapp is the frame holding all the other frames that hold the
-        # notebooks to help modularize the code
-        mainapp.columnconfigure(0,
-                                weight=1)
-        # can add an arg called min or max size to give starting point for each
-        # frame
-        mainapp.columnconfigure(1,
-                                weight=1)
-        # weights are relative to each other so if there is a 3 and 1 the 3 weight
-        # will give that col/row 3 pixels for every one the others get
-        mainapp.rowconfigure(0, weight=1)
-        mainapp.rowconfigure(1, weight=1)
 
         # Putting Notebooks into frames, tabs are held within the class of each
         # notebook

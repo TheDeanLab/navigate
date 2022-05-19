@@ -41,6 +41,10 @@ class stack_cycling_frame(ttk.Labelframe):
         #Init Frame
         text_label = 'Laser Cycling Settings'
         ttk.Labelframe.__init__(stack_acq, settings_tab, text=text_label, *args, **kwargs)
+        
+        # Formatting
+        Grid.columnconfigure(stack_acq, 'all', weight=1)
+        Grid.rowconfigure(stack_acq, 'all', weight=1)
 
         #Laser Cycling Frame (Vertically oriented)
         stack_acq.cycling_frame = ttk.Frame(stack_acq)

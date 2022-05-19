@@ -42,6 +42,10 @@ class stack_acq_frame(ttk.Labelframe):
         # Init Frame
         text_label = 'Stack Acquisition Settings (' + "\N{GREEK SMALL LETTER MU}" + 'm)'
         ttk.Labelframe.__init__(stack_acq, settings_tab, text=text_label, *args, **kwargs)
+        
+        # Formatting
+        Grid.columnconfigure(stack_acq, 'all', weight=1)
+        Grid.rowconfigure(stack_acq, 'all', weight=1)
 
         # Step Size Frame (Vertically oriented)
         stack_acq.step_size_frame = ttk.Frame(stack_acq)

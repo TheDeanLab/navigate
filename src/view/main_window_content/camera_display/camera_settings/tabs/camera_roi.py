@@ -53,6 +53,10 @@ class camera_roi(ttk.Labelframe):
         # Init Frame
         text_label = 'Region of Interest Settings'
         ttk.Labelframe.__init__(self, settings_tab, text=text_label, *args, **kwargs)
+        
+        # Formatting
+        Grid.columnconfigure(self, 'all', weight=1)
+        Grid.rowconfigure(self, 'all', weight=1)
 
         # Parent Label Frames for widgets
         # ROI
@@ -70,6 +74,16 @@ class camera_roi(ttk.Labelframe):
         # ROI Center
         self.center_roi_frame = ttk.LabelFrame(self, text='ROI Center')
         self.center_roi_frame.grid(row=1, column=1, sticky=NSEW)
+        
+        # Formatting
+        Grid.columnconfigure(self.roi_frame, 'all', weight=1)
+        Grid.rowconfigure(self.roi_frame, 'all', weight=1)
+        Grid.columnconfigure(self.btn_frame, 'all', weight=1)
+        Grid.rowconfigure(self.btn_frame, 'all', weight=1)
+        Grid.columnconfigure(self.fov_frame, 'all', weight=1)
+        Grid.rowconfigure(self.fov_frame, 'all', weight=1)
+        Grid.columnconfigure(self.center_roi_frame, 'all', weight=1)
+        Grid.rowconfigure(self.center_roi_frame, 'all', weight=1)
 
 
         # Dictionary for all the variables, this will be used by the controller

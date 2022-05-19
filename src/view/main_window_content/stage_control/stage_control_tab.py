@@ -46,6 +46,11 @@ class stage_control_tab(ttk.Frame):
 
         #Init Frame
         ttk.Frame.__init__(stage_control_tab, note3, *args, **kwargs)
+        
+        # Formatting
+        Grid.columnconfigure(stage_control_tab, 'all', weight=1)
+        Grid.rowconfigure(stage_control_tab, 'all', weight=1)
+        
 
         #Building out stage control elements, frame by frame
 
@@ -83,6 +88,20 @@ class stage_control_tab(ttk.Frame):
         goto is 10
         '''
 
+        # Formatting
+        Grid.columnconfigure(stage_control_tab.position_frame, 'all', weight=1)
+        Grid.rowconfigure(stage_control_tab.position_frame, 'all', weight=1)
+        Grid.columnconfigure(stage_control_tab.xy_frame, 'all', weight=1)
+        Grid.rowconfigure(stage_control_tab.xy_frame, 'all', weight=1)
+        Grid.columnconfigure(stage_control_tab.z_frame, 'all', weight=1)
+        Grid.rowconfigure(stage_control_tab.z_frame, 'all', weight=1)
+        Grid.columnconfigure(stage_control_tab.theta_frame, 'all', weight=1)
+        Grid.rowconfigure(stage_control_tab.theta_frame, 'all', weight=1)
+        Grid.columnconfigure(stage_control_tab.f_frame, 'all', weight=1)
+        Grid.rowconfigure(stage_control_tab.f_frame, 'all', weight=1)
+        Grid.columnconfigure(stage_control_tab.goto_frame, 'all', weight=1)
+        Grid.rowconfigure(stage_control_tab.goto_frame, 'all', weight=1)
+        
         #Gridding out frames
         factor = 6
         stage_control_tab.position_frame.grid(row=0, column=0, columnspan=5, sticky=(NSEW), pady=(2,0))

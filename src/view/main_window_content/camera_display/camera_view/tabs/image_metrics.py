@@ -44,6 +44,10 @@ class image_metrics(ttk.Labelframe):
         text_label = 'Image Metrics'
         ttk.Labelframe.__init__(self, cam_view, text=text_label, *args, **kwargs)
         
+        # Formatting
+        Grid.columnconfigure(self, 'all', weight=1)
+        Grid.rowconfigure(self, 'all', weight=1)
+        
         # Dictionary for widgets
         self.inputs = {}
 

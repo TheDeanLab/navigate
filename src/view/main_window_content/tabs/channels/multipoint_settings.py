@@ -31,7 +31,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, Grid
 from tkinter.constants import NSEW
 
 import pandas as pd
@@ -44,6 +44,10 @@ class multipoint_frame(ttk.Labelframe):
         
         text_label = 'Multi-position Acquisition'
         ttk.Labelframe.__init__(multipoint_frame, settings_tab, text=text_label, *args, **kwargs)
+        
+        # Formatting
+        Grid.columnconfigure(multipoint_frame, 'all', weight=1)
+        Grid.rowconfigure(multipoint_frame, 'all', weight=1)
 
         # Save Data Label
         label_position = 0

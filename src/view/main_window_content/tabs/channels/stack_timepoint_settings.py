@@ -59,6 +59,10 @@ class stack_timepoint_frame(ttk.Labelframe):
 
         text_label = 'Timepoint Settings'
         ttk.Labelframe.__init__(stack_timepoint_label_frame, settings_tab, text=text_label, *args, **kwargs)
+        
+        # Formatting
+        Grid.columnconfigure(stack_timepoint_label_frame, 'all', weight=1)
+        Grid.rowconfigure(stack_timepoint_label_frame, 'all', weight=1)
 
         #Save Data Label
         label_position = 0

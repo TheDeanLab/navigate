@@ -42,6 +42,10 @@ class channel_creator(ttk.Labelframe):
         #  Init Frame
         self.title = 'Channel Settings'
         ttk.Labelframe.__init__(self, channels_tab, text=self.title, *args, **kwargs)
+        
+        # Formatting
+        Grid.columnconfigure(self, 'all', weight=1)
+        Grid.rowconfigure(self, 'all', weight=1)
 
         #  Arrays with Widget Variables and widgets themselves
         #  TODO refactor using dicts for variables and one for widgets,

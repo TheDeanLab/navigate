@@ -43,6 +43,10 @@ class other_axis_frame(ttk.Frame):
         #Init Frame
         ttk.Frame.__init__(other_axis_frame, stage_control_tab, *args, **kwargs)
         other_axis_frame.name = name
+        
+        # Formatting
+        Grid.columnconfigure(other_axis_frame, 'all', weight=1)
+        Grid.rowconfigure(other_axis_frame, 'all', weight=1)
 
         #Setting up buttons for up, down, zero and increment spinbox
 

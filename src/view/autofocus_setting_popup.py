@@ -60,6 +60,10 @@ class autofocus_popup():
         # Creating content frame
         content_frame = self.popup.get_frame()
         
+        # Formatting
+        Grid.columnconfigure(self, 'all', weight=1)
+        Grid.rowconfigure(self, 'all', weight=1)
+        
         
         
 

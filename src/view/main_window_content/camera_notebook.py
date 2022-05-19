@@ -41,6 +41,10 @@ class camera_waveform_notebook(ttk.Notebook):
     def __init__(cam_wave, frame_top_right, *args, **kwargs):
         #Init notebook
         ttk.Notebook.__init__(cam_wave, frame_top_right, *args, **kwargs)
+        
+        # Formatting
+        Grid.columnconfigure(cam_wave, 'all', weight=1)
+        Grid.rowconfigure(cam_wave, 'all', weight=1)
 
         #Putting notebook 2 into top right frame
         cam_wave.grid(row=0, column=0)

@@ -48,6 +48,10 @@ class camera_settings_tab(ttk.Frame):
     def __init__(self, setntbk, *args, **kwargs):
         #Init Frame
         ttk.Frame.__init__(self, setntbk, *args, **kwargs)
+        
+        # Formatting
+        Grid.columnconfigure(self, 'all', weight=1)
+        Grid.rowconfigure(self, 'all', weight=1)
 
         #Camera Modes Frame
         self.camera_mode = camera_mode(self)

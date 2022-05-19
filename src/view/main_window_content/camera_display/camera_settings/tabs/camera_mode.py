@@ -50,10 +50,18 @@ class camera_mode(ttk.Labelframe):
         #Init Frame
         text_label = 'Camera Modes'
         ttk.Labelframe.__init__(self, settings_tab, text=text_label, *args, **kwargs)
+        
+        # Formatting
+        Grid.columnconfigure(self, 'all', weight=1)
+        Grid.rowconfigure(self, 'all', weight=1)
 
         #Holds dropdowns, this is done in case more widgets are to be added in a different frame, these can be grouped together
         content_frame = ttk.Frame(self)
         content_frame.grid(row=0, column=0, sticky=(NSEW))
+        
+        # Formatting
+        Grid.columnconfigure(content_frame, 'all', weight=1)
+        Grid.rowconfigure(content_frame, 'all', weight=1)
         
 
         #Dictionary for all the variables, this will be used by the controller

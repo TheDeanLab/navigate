@@ -48,6 +48,10 @@ class channels_tab(ttk.Frame):
 
         #Init Frame
         ttk.Frame.__init__(self, setntbk, *args, **kwargs)
+        
+        # Formatting
+        Grid.columnconfigure(self, 'all', weight=1)
+        Grid.rowconfigure(self, 'all', weight=1)
 
 
         #Channel Settings

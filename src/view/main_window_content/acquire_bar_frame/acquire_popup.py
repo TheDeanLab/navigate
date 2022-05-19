@@ -31,7 +31,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 import tkinter as tk
-from tkinter import ttk, NSEW, StringVar
+from tkinter import ttk, NSEW, StringVar, Grid
 from tkinter.scrolledtext import ScrolledText
 from view.custom_widgets.popup import PopUp
 from view.custom_widgets.LabelInputWidgetFactory import LabelInput
@@ -49,6 +49,10 @@ class Acquire_PopUp():
 
         # Storing the content frame of the popup, this will be the parent of the widgets
         content_frame = self.popup.get_frame()
+        
+        # Formatting
+        Grid.columnconfigure(content_frame, 'all', weight=1)
+        Grid.rowconfigure(content_frame, 'all', weight=1)
 
         '''Creating the widgets for the popup'''
         #Dictionary for all the variables

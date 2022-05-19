@@ -48,6 +48,10 @@ class settings_notebook(ttk.Notebook):
     def __init__(setntbk, frame_left, *args, **kwargs):
         #Init notebook
         ttk.Notebook.__init__(setntbk, frame_left, *args, **kwargs)
+        
+        # Formatting
+        Grid.columnconfigure(setntbk, 'all', weight=1)
+        Grid.rowconfigure(setntbk, 'all', weight=1)
 
         #Putting notebook 1 into left frame
         setntbk.grid(row=0,column=0)

@@ -43,6 +43,10 @@ class AcquireBar(ttk.Frame):
     def __init__(self, top_frame, root, *args, **kwargs):
         #  Init bar with frame attr
         ttk.Frame.__init__(self, top_frame, *args, **kwargs)
+        
+        # Formatting
+        Grid.columnconfigure(self, 'all', weight=1)
+        Grid.rowconfigure(self, 'all', weight=1)
 
         #  Putting bar into frame
         self.grid(row=0, column=0)
@@ -76,7 +80,7 @@ class AcquireBar(ttk.Frame):
         '''
             0   1   2   3
         '''
-        self.acquire_btn.grid(row=0, column=0, sticky=NSEW)
-        self.pull_down.grid(row=0, column=1, sticky=NSEW)
-        self.progBar_frame.grid(row=0, column=2, sticky=NSEW)
-        self.exit_btn.grid(row=0, column=3, sticky=NSEW)
+        self.acquire_btn.grid(row=0, column=0, sticky=NSEW, pady=(2,2), padx=(2,2))
+        self.pull_down.grid(row=0, column=1, sticky=NSEW, pady=(2,2), padx=(2,2))
+        self.progBar_frame.grid(row=0, column=2, sticky=NSEW, pady=(2,2), padx=(2,2))
+        self.exit_btn.grid(row=0, column=3, sticky=NSEW, pady=(2,2), padx=(2,2))

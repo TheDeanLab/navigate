@@ -43,6 +43,10 @@ class camera_tab(ttk.Frame):
 
         #  Init Frame
         ttk.Frame.__init__(self, cam_wave, *args, **kwargs)
+        
+        # Formatting
+        Grid.columnconfigure(self, 'all', weight=1)
+        Grid.rowconfigure(self, 'all', weight=1)
 
         #  Frame that will hold camera image
         self.cam_image = ttk.Frame(self)

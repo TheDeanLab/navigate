@@ -40,3 +40,7 @@ class advanced_settings_tab(ttk.Frame):
     def __init__(adv_settings, setntbk, *args, **kwargs):
         #Init Frame
         ttk.Frame.__init__(adv_settings, setntbk, *args, **kwargs)
+        
+        # Formatting
+        Grid.columnconfigure(adv_settings, 'all', weight=1)
+        Grid.rowconfigure(adv_settings, 'all', weight=1)

@@ -63,6 +63,10 @@ class remote_popup():
         content_frame.rowconfigure(0, pad=5)
         content_frame.rowconfigure(1, pad=5)
         content_frame.rowconfigure(2, pad=5)
+        
+        # Formatting
+        Grid.columnconfigure(content_frame, 'all', weight=1)
+        Grid.rowconfigure(content_frame, 'all', weight=1)
 
         '''Creating the widgets for the popup'''
         # Dictionary for all the variables

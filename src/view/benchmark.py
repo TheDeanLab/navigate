@@ -14,10 +14,11 @@ from PIL import Image, ImageTk
 
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
+import matplotlib as mpl
 
-import vispy
-from vispy import scene
-from vispy.app import use_app
+# import vispy
+# from vispy import scene
+# from vispy.app import use_app
 
 
 def pil_gui_test(arr):
@@ -58,44 +59,80 @@ def matplotlib_gui_test(arr):
     root.mainloop()
 
 
-def vispy_gui_test(arr):
-    # https://github.com/vispy/vispy/issues/2168
-    # https://vispy.org/gallery/scene/image.html
-
-    root = tk.Tk()
-    app = use_app("tkinter")
-    canvas = vispy.scene.SceneCanvas(
-        keys='interactive', show=True, parent=root, app=app)
-
-    # Set up a viewbox to display the image with interactive pan/zoom
-    view = canvas.central_widget.add_view()
-
-    # Set 2D camera (the camera will scale to the contents in the scene)
-    view.camera = scene.PanZoomCamera(aspect=1)
-    view.camera.flip = (0, 1, 0)
-    view.camera.zoom(1.0)
-
-    # TODO: This isn't setting the window size correctly.
-    # Need to manually expand the window to see the image
-    canvas.native.pack(side=tk.TOP, fill=tk.BOTH, expand=1)
-
-    # Create the image
-    start = time.time()
-    image = scene.visuals.Image(arr, interpolation='nearest',
-                                parent=view.scene, method='subdivide')
-    view.camera.set_range()
-    stop = time.time()
-    print(f"Vispy run took {stop-start} s")
-
-    app.run()
+# def vispy_gui_test(arr):
+#     # https://github.com/vispy/vispy/issues/2168
+#     # https://vispy.org/gallery/scene/image.html
+#
+#     root = tk.Tk()
+#     app = use_app("tkinter")
+#     canvas = vispy.scene.SceneCanvas(
+#         keys='interactive', show=True, parent=root, app=app)
+#
+#     # Set up a viewbox to display the image with interactive pan/zoom
+#     view = canvas.central_widget.add_view()
+#
+#     # Set 2D camera (the camera will scale to the contents in the scene)
+#     view.camera = scene.PanZoomCamera(aspect=1)
+#     view.camera.flip = (0, 1, 0)
+#     view.camera.zoom(1.0)
+#
+#     # TODO: This isn't setting the window size correctly.
+#     # Need to manually expand the window to see the image
+#     canvas.native.pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+#
+#     # Create the image
+#     start = time.time()
+#     image = scene.visuals.Image(arr, interpolation='nearest',
+#                                 parent=view.scene, method='subdivide')
+#     view.camera.set_range()
+#     stop = time.time()
+#     print(f"Vispy run took {stop-start} s")
+#
+#     app.run()
 
 
 if __name__ == "__main__":
     # generate image array to plot
-    arr = np.random.randint(low=255, size=(100, 100, 3), dtype=np.uint8)
+    # PIL seems to like a random uint8 matrix y, x, c.
+    # arr = np.random.randint(low=255, size=(100, 100, 3), dtype=np.uint8)
+    # arr = np.random.randint(low=1000, size=(512, 512, 3), dtype=np.uint16)
+    arr = np.random.randint(low=1000, size=(512, 512), dtype=np.uint16)
 
-    pil_gui_test(arr)
+    # Normalize the data.
+    arr_max = np.max(arr)
+    arr_min = np.min(arr)
+    scaling_factor = 2**8
+    arr = scaling_factor * ((arr - arr_min) / (arr_max - arr_min))
+    y, x = np.shape(arr)
+    arr_lut = np.zeros((y, x, 3))
 
-    matplotlib_gui_test(arr)
+    # Green LUT
+    lookup_table = 'yellow'
 
-    vispy_gui_test(arr)
+    if lookup_table == 'green':
+        arr_lut[:, :, 1] = arr
+    elif lookup_table == 'red':
+        arr_lut[:, :, 0] = arr
+    elif lookup_table == 'blue':
+        arr_lut[:, :, 2] = arr
+    elif lookup_table == 'cyan':
+        arr_lut[:, :, 1] = arr
+        arr_lut[:, :, 2] = arr
+    elif lookup_table == 'magenta':
+        arr_lut[:, :, 0] = arr
+        arr_lut[:, :, 2] = arr
+    elif lookup_table == 'yellow':
+        arr_lut[:, :, 0] = arr
+        arr_lut[:, :, 1] = arr
+
+
+
+
+    # How about displaying saturated values?
+    i = arr_lut == 256
+
+    pil_gui_test(np.uint8(arr_lut))
+
+    # matplotlib_gui_test(arr)
+
+    # vispy_gui_test(arr)

@@ -35,6 +35,8 @@ POSSIBILITY OF SUCH DAMAGE.
 
 from controller.sub_controllers.gui_controller import GUI_Controller
 from controller.aslm_controller_functions import combine_funcs
+import time
+
 
 class Autofocus_Popup_Controller(GUI_Controller):
 
@@ -43,7 +45,10 @@ class Autofocus_Popup_Controller(GUI_Controller):
 
         self.widgets = self.view.get_widgets()
         self.setting_dict = setting_dict
-        self.autofocus_plot = self.view.autofocus_plot
+        self.autofocus_fig = self.view.fig
+        self.autofocus_coarse = self.view.coarse
+        self.autofocus_fine = self.view.fine
+
 
         # show the value
         for k in self.widgets:
@@ -75,6 +80,41 @@ class Autofocus_Popup_Controller(GUI_Controller):
 
     def start_autofocus(self):
         self.update_experiment_values()
-        self.view.popup.dismiss()
-        delattr(self.parent_controller,'af_popup_controller')
+        # self.view.popup.dismiss()
+        # delattr(self.parent_controller,'af_popup_controller')
         self.parent_controller.execute('autofocus')
+        
+    def display_plot(self, data):
+        '''
+        ### Displays a plot of [focus, entropy] with data from autofocus routine
+        '''
+        
+        print("Plotting Data received from model*************")
+        
+        coarse_range = self.setting_dict['coarse_range']
+        print("Made it to range")
+        coarse_step = self.setting_dict['coarse_step_size']
+        print('Made it to step')
+
+        # Calculate the coarse portion of the data
+        coarse_steps = int(coarse_range) // int(coarse_step) + 1
+        print("Calculated coarse steps: ", coarse_steps)
+        
+        # Plotting coarse data
+        self.autofocus_coarse.clear()
+        print("Cleared coarse plot")
+        self.autofocus_coarse.plot(data[:coarse_steps, 0], data[:coarse_steps, 1], 'bo')
+        
+        
+        print('Plotted coarse data')
+        
+        # Plotting fine data
+        self.autofocus_fine.clear()
+        print("Cleared fine plot")
+        self.autofocus_fine.plot(data[coarse_steps:, 0], data[coarse_steps:, 1], 'g*')
+        
+        print('Plotted fine data')
+        
+        self.autofocus_fig.canvas.draw_idle()
+        
+        

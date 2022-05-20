@@ -176,6 +176,9 @@ class Model:
 
         # show image function/pipe handler
         self.show_img_pipe = None
+        
+        # Plot Pipe handler
+        self.plot_pipe = None
 
         # frame signal id
         self.frame_id = 0
@@ -203,6 +206,12 @@ class Model:
         # wire up show image function/pipe
         """
         self.show_img_pipe = handler
+        
+    def set_autofocus_plot_pipe(self, handler):
+        """
+        # wire up autofocus plot pipe
+        """
+        self.plot_pipe = handler
 
     def set_data_buffer(self, data_buffer, img_width=512, img_height=512):
         self.camera.close_image_series()
@@ -276,13 +285,13 @@ class Model:
         elif command == 'autofocus':
             self.experiment.MicroscopeState = args[0]
             self.experiment.AutoFocusParameters = args[1]
-            frame_num = self.get_autofocus_frame_num() + 1
+            frame_num = self.get_autofocus_frame_num() + 1 # What does adding one here again doing?
             if frame_num < 1:
                 return
-            self.before_acquisition()
+            self.before_acquisition() # Opens correct shutter and puts all signals to false
             self.autofocus_on = True
             self.is_save = False
-            self.f_position = args[2]
+            self.f_position = args[2] # Current position
 
             self.signal_thread = threading.Thread(target=self.run_single_acquisition, kwargs={'target_channel': 1})
             self.data_thread = threading.Thread(target=self.run_data_process, args=(frame_num,))
@@ -335,6 +344,9 @@ class Model:
 
         wait_num = 10 # this will let this thread wait 10 * 500 ms before it ends
         acquired_frame_num = 0
+        
+        # Plot Data list
+        plot_data = [] # Going to be a List of [focus, entropy]
 
         while not self.stop_acquisition:
             frame_ids = self.camera.get_new_frame()
@@ -367,7 +379,19 @@ class Model:
                         break
                 except:
                     break
-                entropy = self.analysis.normalized_dct_shannon_entropy(self.data_buffer[f_frame_id], 3)
+                entropy = self.analysis.normalized_dct_shannon_entropy(self.data_buffer[f_frame_id], 3) # How is this getting called without self.analysis existing in the model?
+                # TODO Pipe f_pos and entropy to controller to pass to popup plot
+                if self.verbose:
+                    print("Appending plot data focus, entropy: ", f_pos, entropy)
+                    plot_data.append([f_pos, entropy[0]])
+                    print("Testing plot data print: ", len(plot_data))
+                else:
+                    plot_data.append([f_pos, entropy[0]])
+                # Need to initialize entropy above for the first iteration of the autofocus routine.
+                # Need to initialize entropy_vector above for the first iteration of the autofocus routine.
+                # Then need to append each measurement to the entropy_vector.  First column will be the focus position, 
+                # second column would be the DCT entropy value.
+                # 
                 print('*******calculate entropy ', frame_num)
                 f_frame_id = -1
                 if entropy > self.max_entropy:
@@ -384,6 +408,12 @@ class Model:
                 num_of_frames -= len(frame_ids)
                 self.stop_acquisition = (num_of_frames <= 0) or self.stop_acquisition
 
+        # Turning plot_data into numpy array and sending
+        if self.verbose:
+            print("Model sending plot data: ", plot_data)
+        plot_data = np.asarray(plot_data)
+        self.plot_pipe.send(plot_data) # Sending controller plot data
+        
         self.show_img_pipe.send('stop')
 
         if self.verbose:

@@ -158,6 +158,10 @@ class ASLM_controller:
         # Wire up show image pipe
         self.show_img_pipe_parent, self.show_img_pipe_child = mp.Pipe()
         self.model.set_show_img_pipe(self.show_img_pipe_child)
+        
+        # Setting up Pipe for Autofocus Plot
+        self.plot_pipe_controller, self.plot_pipe_model = mp.Pipe(duplex=True)
+        self.model.set_autofocus_plot_pipe(self.plot_pipe_model)
 
         # Create default data buffer
         self.update_buffer()
@@ -579,6 +583,12 @@ class ASLM_controller:
             self.camera_view_controller.display_image(self.data_buffer[image_id])
             # get focus position and update it in GUI
 
+        # Rec plot data from model and send to sub controller to display plot
+        plot_data = self.plot_pipe_controller.recv()
+        if self.verbose:
+            print("Controller received plot data: ", plot_data)
+        self.af_popup_controller.display_plot(plot_data)
+        
         self.set_mode_of_sub('stop')
     
     def move_stage(self, args):

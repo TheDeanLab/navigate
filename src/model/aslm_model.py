@@ -357,11 +357,11 @@ class Model:
             if not frame_ids:
                 wait_num -= 1
                 if wait_num <= 0:
-                    # it has wait wait_num * 500 ms, it's sure there won't be any frame
+                    # it has waited for wait_num * 500 ms, it's sure there won't be any frame coming
                     break
                 continue
 
-            wait_num = 20
+            wait_num = 10
             acquired_frame_num += len(frame_ids)
 
             # show image
@@ -370,7 +370,6 @@ class Model:
             self.show_img_pipe.send(frame_ids[0])
 
             # autofocuse analyse
-            # debug: change something here!!!!!
             while self.autofocus_on:
                 try:
                     if f_frame_id < 0:
@@ -409,10 +408,12 @@ class Model:
                 self.stop_acquisition = (num_of_frames <= 0) or self.stop_acquisition
 
         # Turning plot_data into numpy array and sending
-        if self.verbose:
-            print("Model sending plot data: ", plot_data)
-        plot_data = np.asarray(plot_data)
-        self.plot_pipe.send(plot_data) # Sending controller plot data
+        # we could send plot_data here or we could send it in function snap_image_with_autofocus
+        if self.autofocus_on:
+            if self.verbose:
+                print("Model sending plot data: ", plot_data)
+            plot_data = np.asarray(plot_data)
+            self.plot_pipe.send(plot_data) # Sending controller plot data
         
         self.show_img_pipe.send('stop')
 

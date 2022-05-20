@@ -60,6 +60,7 @@ class Model:
             configuration_path=None,
             experiment_path=None,
             etl_constants_path=None):
+
         # Specify verbosity
         self.verbose = args.verbose
 
@@ -284,9 +285,28 @@ class Model:
                 self.experiment.MicroscopeState['channels'] = args[1]
 
             if args[0] == 'resolution':
+                """
+                args[1] is a dictionary that includes 'resolution_mode': 'low', 'zoom': '1x', 'laser_info': ...
+                ETL popup window updating the self.etl_constants.
+                Passes new self.etl_constants to the self.model.daq
+                TODO: Make sure the daq knows which etl data to use based upon wavelength, zoom, resolution mode, etc.
+                """
+                updated_settings = args[1]
+                resolution_mode = updated_settings['resolution_mode']
+                zoom = updated_settings['zoom']
+                laser_info = updated_settings['laser_info']
+
+                if resolution_mode == 'low':
+                    self.etl_constants.low[zoom] = laser_info
+                else:
+                    self.etl_constants.high[zoom] = laser_info
+                if self.verbose:
+                    print(self.etl_constants.low[zoom])
+
                 # Modify DAQ to pull the initial values from the etl_constants.yml file, or be passed it from the model.
                 # Pass to the self.model.daq to
-                print(args[1])
+                #             value = self.resolution_info.ETLConstants[self.resolution][self.mag][laser][etl_name]
+                # print(args[1])
 
             # prepare devices based on updated info
             self.stop_send_signal = False

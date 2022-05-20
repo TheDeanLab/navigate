@@ -75,8 +75,9 @@ class Etl_Popup_Controller(GUI_Controller):
         self.view.get_buttons()['Save'].configure(command=self.save_etl_info)
 
         # add saving function to the function closing the window
-        self.view.popup.protocol("WM_DELETE_WINDOW", combine_funcs(self.save_etl_info, self.view.popup.dismiss,
-                                                            lambda: delattr(self.parent_controller,'etl_controller')))
+        self.view.popup.protocol("WM_DELETE_WINDOW",
+                                 combine_funcs(self.save_etl_info, self.view.popup.dismiss,
+                                               lambda: delattr(self.parent_controller, 'etl_controller')))
         
         self.initialize(etl_setting)
 

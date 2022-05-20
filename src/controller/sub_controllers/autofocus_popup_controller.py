@@ -58,7 +58,7 @@ class Autofocus_Popup_Controller(GUI_Controller):
 
         # add saving function to the function closing the window
         exit_func = combine_funcs(self.update_experiment_values, self.view.popup.dismiss,
-                                    lambda: delattr(self.parent_controller,'af_popup_controller'))
+                                    lambda: delattr(self.parent_controller, 'af_popup_controller'))
         self.view.popup.protocol("WM_DELETE_WINDOW", exit_func)
 
         self.view.autofocus_btn.configure(command=self.start_autofocus)

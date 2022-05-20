@@ -59,8 +59,8 @@ class SelfLockThread(threading.Thread):
         if self._target:
             try:
                 self._target(*self._args, **self._kwargs)
-            except:
-                print('thread ended because of exception!')
+            except Exception as e:
+                print('thread ended because of exception!: ', e)
             finally:
                 print('thread ended!!!')
 

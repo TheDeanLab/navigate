@@ -180,6 +180,7 @@ class DAQBase:
     def create_etl_waveform(self):
         """
         # Create the waveforms for the Electrotunable Lens
+        # This needs to know what resolution mode, what channel, laser, etc...
         """
         self.etl_l_waveform = tunable_lens_ramp(
             self.sample_rate,

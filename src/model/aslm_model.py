@@ -534,10 +534,8 @@ class Model:
                 self.trigger_waiting_time = self.current_exposure_time/1000 + self.camera_minimum_waiting_time
 
                 # Laser Settings
-                self.laser_triggers.trigger_digital_laser(
-                    self.current_laser_index)
-                self.laser_triggers.set_laser_analog_voltage(
-                    channel['laser_index'], channel['laser_power'])
+                self.laser_triggers.trigger_digital_laser(self.current_laser_index)
+                self.laser_triggers.set_laser_analog_voltage(channel['laser_index'], channel['laser_power'])
 
                 # Filter Wheel Settings
                 self.filter_wheel.set_filter(channel['filter'])

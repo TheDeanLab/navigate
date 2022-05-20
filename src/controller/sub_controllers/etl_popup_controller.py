@@ -160,7 +160,9 @@ class Etl_Popup_Controller(GUI_Controller):
             value = self.resolution_info.ETLConstants[self.resolution][self.mag][laser][etl_name]
             if self.verbose:
                 print("ETL Amplitude/Offset Changed: ", value)
+
             # Will only run code if value in constants does not match whats in GUI for Amp or Off AND in Live mode
+            # TODO: Make also work in the 'single' acquisition mode.
             if value != variable.get() and self.mode == 'live':
                 # tell parent controller (the device)
                 event_id_name = self.resolution + '_' + self.mag

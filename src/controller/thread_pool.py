@@ -62,7 +62,9 @@ class SelfLockThread(threading.Thread):
             except Exception as e:
                 print('thread ended because of exception!: ', e)
             finally:
-                print('thread ended!!!')
+                # print('thread ended!!!')
+                pass
+
 
     def wait(self):
         self.selfLock.acquire()

@@ -997,17 +997,17 @@ class DCAM:
             # nNewestFrameIndex starts from 0;
             # nFrameCount increments all the frames from beginning even we have already pulled the info out
             frame_count = cap_info.nFrameCount - self.pre_frame_count
-            print("Frame Count - cap_info", cap_info.nFrameCount, frame_count)
-            print("Newest Frame Index - cap_info", cap_info.nNewestFrameIndex)
-            
+
+            # print("Frame Count - cap_info", cap_info.nFrameCount, frame_count)
+            # print("Newest Frame Index - cap_info", cap_info.nNewestFrameIndex)
+            #
             if frame_count <= cap_info.nNewestFrameIndex + 1:
                 frame_idx_list = list(range(cap_info.nNewestFrameIndex - frame_count + 1,
                                             cap_info.nNewestFrameIndex + 1))
             else:
                 frame_idx_list = list(range(self.number_of_frames - frame_count + cap_info.nNewestFrameIndex +
                                             1, self.number_of_frames)) + list(range(0, cap_info.nNewestFrameIndex + 1))
-            
-            print("frame_idx_list:", frame_idx_list)
+
             # check if backlog happens
             # if (self.pre_index+1) % self.number_of_frames != frame_idx_list[0]:
             #    print('backlog happens!')

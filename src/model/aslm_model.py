@@ -271,11 +271,23 @@ class Model:
             pass
 
         elif command == 'update_setting':
+            """
+            Called by the controller
+            Passes the string 'resolution' and a dictionary
+            consisting of the resolution_mode, the zoom, and the laser_info.
+            e.g., self.resolution_info.ETLConstants[self.resolution][self.mag]
+            """
             # stop live thread
             self.stop_send_signal = True
             self.signal_thread.join()
             if args[0] == 'channel':
                 self.experiment.MicroscopeState['channels'] = args[1]
+
+            if args[0] == 'resolution':
+                # Modify DAQ to pull the initial values from the etl_constants.yml file, or be passed it from the model.
+                # Pass to the self.model.daq to
+                print(args[1])
+
             # prepare devices based on updated info
             self.stop_send_signal = False
             self.signal_thread = threading.Thread(
@@ -537,7 +549,8 @@ class Model:
         time_spent = time.perf_counter() - self.pre_trigger_time
 
         if time_spent < self.trigger_waiting_time:
-            print('Need to wait!!!! Too much signals!!!!')
+            if self.verbose:
+                print('Need to wait!!!! Too much signals!!!!')
             # add 0.1 here, there are lost signals if I don't add another short time,
             # but we might could add time short than 0.1
             time.sleep(self.trigger_waiting_time - time_spent + 0.1)

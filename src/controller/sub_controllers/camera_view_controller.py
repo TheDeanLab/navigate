@@ -247,7 +247,6 @@ class Camera_View_Controller(GUI_Controller):
         """
         # Get the LUT
         self.update_LUT()
-        print(self.colormap)
 
         # Create the RGB array
         y, x = np.shape(image)

@@ -181,7 +181,6 @@ class DAQBase:
         """
         # Create the waveforms for the Electrotunable Lens
         """
-        self.calculate_samples()
         self.etl_l_waveform = tunable_lens_ramp(
             self.sample_rate,
             self.sweep_time,

@@ -224,8 +224,7 @@ class ASLM_controller:
             etl_setting_popup = remote_popup(self.view)
             self.etl_controller = Etl_Popup_Controller(
                 etl_setting_popup, self, self.verbose, self.etl_setting, self.etl_constants_path)
-            self.etl_controller.set_experiment_values(
-                self.resolution_value.get())
+            self.etl_controller.set_experiment_values(self.resolution_value.get())
             self.etl_controller.set_mode(self.acquire_bar_controller.mode)
 
         def popup_autofocus_setting():
@@ -280,8 +279,7 @@ class ASLM_controller:
         self.view.menubar.menu_resolution.add_separator()
 
         # etl popup
-        self.view.menubar.menu_resolution.add_command(
-            label='ETL Parameters', command=popup_etl_setting)
+        self.view.menubar.menu_resolution.add_command(label='ETL Parameters', command=popup_etl_setting)
 
         # autofocus menu
         self.view.menubar.menu_autofocus.add_command(label='Autofocus', command=lambda: self.execute('autofocus'))
@@ -453,12 +451,17 @@ class ASLM_controller:
             self.acquire_bar_controller.set_save_option(args[0])
 
         elif command == 'update_setting':
+            """
+            Called by ETL_Popup_Controller.  
+            Passes the string 'resolution' and a dictionary
+            consisting of the resolution_mode, the zoom, and the laser_info.
+            e.g., self.resolution_info.ETLConstants[self.resolution][self.mag]
+            """
+
             if self.verbose:
                 print('update setting of: ', args)
-            self.model.run_command(
-                'update_setting',
-                *args
-            )
+            self.model.run_command('update_setting', *args)
+
         elif command == 'autofocus':
             self.threads_pool.createThread(
                 'camera', self.capture_autofocus_image)

@@ -147,15 +147,19 @@ class Etl_Popup_Controller(GUI_Controller):
 
     def update_etl_setting(self, name, laser, etl_name):
         """
-        # this function will update ETLConstains in memory
+        # this function will update ETLConstants in memory
         """
         variable = self.variables[name]
 
         def func(temp):
             self.parent_controller.execute('update_setting', 'resolution', temp)
 
+        # BUG Upon startup this will always run 0.63x, and when changing magnification it will run 0.63x before whatever mag is selected
         def func_laser(*args):
             value = self.resolution_info.ETLConstants[self.resolution][self.mag][laser][etl_name]
+            if self.verbose:
+                print("ETL Amplitude/Offset Changed: ", value)
+            # Will only run code if value in constants does not match whats in GUI for Amp or Off AND in Live mode
             if value != variable.get() and self.mode == 'live':
                 # tell parent controller (the device)
                 event_id_name = self.resolution + '_' + self.mag

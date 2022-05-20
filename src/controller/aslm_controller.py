@@ -590,7 +590,8 @@ class ASLM_controller:
         plot_data = self.plot_pipe_controller.recv()
         if self.verbose:
             print("Controller received plot data: ", plot_data)
-        self.af_popup_controller.display_plot(plot_data)
+        if hasattr(self, 'af_popup_controller'):
+            self.af_popup_controller.display_plot(plot_data)
         
         self.set_mode_of_sub('stop')
     

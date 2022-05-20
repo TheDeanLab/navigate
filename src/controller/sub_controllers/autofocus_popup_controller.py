@@ -88,33 +88,24 @@ class Autofocus_Popup_Controller(GUI_Controller):
         '''
         ### Displays a plot of [focus, entropy] with data from autofocus routine
         '''
-        
-        print("Plotting Data received from model*************")
-        
+    
         coarse_range = self.setting_dict['coarse_range']
-        print("Made it to range")
         coarse_step = self.setting_dict['coarse_step_size']
-        print('Made it to step')
+
 
         # Calculate the coarse portion of the data
         coarse_steps = int(coarse_range) // int(coarse_step) + 1
-        print("Calculated coarse steps: ", coarse_steps)
+
         
         # Plotting coarse data
         self.autofocus_coarse.clear()
-        print("Cleared coarse plot")
         self.autofocus_coarse.plot(data[:coarse_steps, 0], data[:coarse_steps, 1], 'bo')
-        
-        
-        print('Plotted coarse data')
-        
+
         # Plotting fine data
         self.autofocus_fine.clear()
-        print("Cleared fine plot")
         self.autofocus_fine.plot(data[coarse_steps:, 0], data[coarse_steps:, 1], 'g*')
         
-        print('Plotted fine data')
-        
+        # To redraw the plot
         self.autofocus_fig.canvas.draw_idle()
         
         

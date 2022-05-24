@@ -49,6 +49,7 @@ import model.aslm_device_startup_functions as startup_functions
 from .aslm_model_config import Session as session
 from controller.thread_pool import SynchronizedThreadPool
 from model.concurrency.concurrency_tools import ResultThread, SharedNDArray, ObjectInSubprocess
+from tools.decorators import function_timer
 
 # debug
 from model.aslm_debug_model import Debug_Module
@@ -189,8 +190,8 @@ class Model:
         
         # flags
         self.autofocus_on = False # autofocus 
-        self.is_live = False # need to clear up data buffer after acquisition
-        self.is_save = False # save data
+        self.is_live = False  # need to clear up data buffer after acquisition
+        self.is_save = False  # save data
         self.stop_acquisition = False # stop signal and data threads
         self.stop_send_signal = False # stop signal thread
 
@@ -230,6 +231,7 @@ class Model:
     #  - daq.run_tasks() delivers the external trigger which synchronously starts the tasks and waits for completion.
     #  - daq.stop_tasks() stops the tasks and cleans up.
 
+    @function_timer
     def run_command(self, command, *args, **kwargs):
         """
         Receives commands from the controller.
@@ -256,21 +258,24 @@ class Model:
             self.end_acquisition()
 
         elif command == 'live':
+            """
+            Live Acquisition Mode
+            """
             self.experiment.MicroscopeState = args[0]
             self.is_save = False
             self.before_acquisition()
             self.is_live = True
-            self.signal_thread = threading.Thread(
-                target=self.run_live_acquisition)
+            self.signal_thread = threading.Thread(target=self.run_live_acquisition)
             self.signal_thread.name = "Live Mode Signal"
             self.data_thread = threading.Thread(target=self.run_data_process)
             self.data_thread.name = "Live Mode Data"
             self.signal_thread.start()
             self.data_thread.start()
 
-        elif command == 'series':
-            self.experiment.MicroscopeState = args[0]
+        elif command == 'z-stack':
+            pass
 
+        elif command == 'projection':
             pass
 
         elif command == 'update_setting':
@@ -320,14 +325,13 @@ class Model:
         elif command == 'autofocus':
             self.experiment.MicroscopeState = args[0]
             self.experiment.AutoFocusParameters = args[1]
-            frame_num = self.get_autofocus_frame_num() + 1 # What does adding one here again doing?
+            frame_num = self.get_autofocus_frame_num() + 1  # What does adding one here again doing?
             if frame_num < 1:
                 return
             self.before_acquisition() # Opens correct shutter and puts all signals to false
             self.autofocus_on = True
             self.is_save = False
             self.f_position = args[2] # Current position
-
             self.signal_thread = threading.Thread(target=self.run_single_acquisition, kwargs={'target_channel': 1})
             self.signal_thread.name = "Autofocus Signal"
             self.data_thread = threading.Thread(target=self.run_data_process, args=(frame_num,))
@@ -492,7 +496,6 @@ class Model:
         """
         #  Calculates the total number of acquisitions, images, etc.  Initializes the counters.
         """
-
         number_of_channels = self.calculate_number_of_channels()
         number_of_positions = len(
             self.experiment.MicroscopeState['stage_positions'])
@@ -510,6 +513,7 @@ class Model:
         # Loads the YAML file for all of the experiment parameters
         self.experiment = session(experiment_path, self.verbose)
 
+    @function_timer
     def run_single_acquisition(self, target_channel=None):
         """
         # Called by model.run_command().
@@ -558,6 +562,7 @@ class Model:
                     self.snap_image()
 
 
+    @function_timer
     def snap_image(self):
         """
         # Snaps a single image after updating the waveforms.

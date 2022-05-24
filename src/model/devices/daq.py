@@ -46,7 +46,6 @@ import numpy as np
 # Local Imports
 from model.aslm_model_waveforms import tunable_lens_ramp, sawtooth, dc_value, single_pulse
 
-
 class DAQBase:
     def __init__(self, model, experiment, etl_constants, verbose=False):
         self.model = model
@@ -62,10 +61,8 @@ class DAQBase:
         # ETL Parameters
         self.etl_l_waveform = None
         self.etl_l_delay = self.model.RemoteFocusParameters['remote_focus_l_delay_percent']
-        self.etl_l_ramp_rising = self.model.RemoteFocusParameters[
-            'remote_focus_l_ramp_rising_percent']
-        self.etl_l_ramp_falling = self.model.RemoteFocusParameters[
-            'remote_focus_l_ramp_falling_percent']
+        self.etl_l_ramp_rising = self.model.RemoteFocusParameters['remote_focus_l_ramp_rising_percent']
+        self.etl_l_ramp_falling = self.model.RemoteFocusParameters['remote_focus_l_ramp_falling_percent']
         self.etl_l_amplitude = self.model.RemoteFocusParameters['remote_focus_l_amplitude']
         self.etl_l_offset = self.model.RemoteFocusParameters['remote_focus_l_offset']
         self.etl_l_min_ao = self.model.RemoteFocusParameters['remote_focus_l_min_ao']
@@ -74,10 +71,8 @@ class DAQBase:
         # Remote Focus Parameters
         self.etl_r_waveform = None
         self.etl_r_delay = self.model.RemoteFocusParameters['remote_focus_r_delay_percent']
-        self.etl_r_ramp_rising = self.model.RemoteFocusParameters[
-            'remote_focus_r_ramp_rising_percent']
-        self.etl_r_ramp_falling = self.model.RemoteFocusParameters[
-            'remote_focus_r_ramp_falling_percent']
+        self.etl_r_ramp_rising = self.model.RemoteFocusParameters['remote_focus_r_ramp_rising_percent']
+        self.etl_r_ramp_falling = self.model.RemoteFocusParameters['remote_focus_r_ramp_falling_percent']
         self.etl_r_amplitude = self.model.RemoteFocusParameters['remote_focus_r_amplitude']
         self.etl_r_offset = self.model.RemoteFocusParameters['remote_focus_r_offset']
         self.etl_r_min_ao = self.model.RemoteFocusParameters['remote_focus_r_min_ao']
@@ -431,8 +426,7 @@ class NIDAQ(DAQBase):
         # For this to work, all analog output and counter tasks have to be started so
         # that they are waiting for the trigger signal.
         """
-        self.master_trigger_task.write(
-            [False, True, True, True, False], auto_start=True)
+        self.master_trigger_task.write([False, True, True, True, False], auto_start=True)
         self.galvo_etl_task.wait_until_done()
         self.camera_trigger_task.wait_until_done()
 

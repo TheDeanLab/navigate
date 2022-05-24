@@ -95,18 +95,10 @@ class Session:
                         config_data = yaml.load(f, Loader=yaml.FullLoader)
                     except yaml.YAMLError as yaml_error:
                         print(yaml_error)
-            if verbose:
-                for data_iterator in config_data:
-                    print("Loaded:", data_iterator)
 
         # Set the attributes with the custom __setattr__
         for data_iterator in config_data:
-            self.__setattr__(
-                data_iterator,
-                config_data[data_iterator],
-                verbose)
-            if verbose:
-                print("Set:", data_iterator)
+            self.__setattr__(data_iterator, config_data[data_iterator], verbose)
 
     def __setattr__(self, key, value, verbose=False):
         """
@@ -124,9 +116,6 @@ class Session:
         if key not in self.params:
             self.params[key] = dict()
             self.__setattr__(key, value)
-            if verbose:
-                print("Added:", key)
-                print("Value:", value)
 
         else:
             for k in value:
@@ -134,12 +123,8 @@ class Session:
                     val = value[k]
                     # Update value
                     self.params[key][k] = value[k]
-                    if verbose:
-                        print("Updated:", key, "Value:", val)
                 else:
                     self.params[key][k] = value[k]
-                    if verbose:
-                        print("Updated:", key, "Value:", val)
 
             super(Session, self).__setattr__(k, value[k])
 

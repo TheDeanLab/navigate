@@ -373,7 +373,7 @@ class ASLM_controller:
         if not self.update_experiment_setting():
             tkinter.messagebox.showerror(
                 title='Warning',
-                message='There are some missing/wrong settings! Can not start acquisition!')
+                message='There are some missing/wrong settings! Cannot start acquisition!')
             return False
 
         self.set_mode_of_sub(self.acquire_bar_controller.mode)
@@ -417,7 +417,7 @@ class ASLM_controller:
         """
         if command == 'stage':
             """
-            # call the model to move stage
+            # Creates a thread and uses it to call the model to move stage
             """
             self.threads_pool.createThread(
                 'stage', self.move_stage, args=({args[1] + '_abs': args[0]},))
@@ -441,8 +441,10 @@ class ASLM_controller:
             #  values: 'high', '0.63x', '1x', '2x'...'6x'
             """
             self.model.change_resolution(args)
+
             # tell camera setting tab to recalculate FOV_X and FOV_Y
             self.camera_setting_controller.calculate_physical_dimensions(args[0])
+
             # tell etl popup if there is one opened
             if hasattr(self, 'etl_controller') and self.etl_controller:
                 self.etl_controller.set_experiment_values(args[0])
@@ -457,9 +459,6 @@ class ASLM_controller:
             consisting of the resolution_mode, the zoom, and the laser_info.
             e.g., self.resolution_info.ETLConstants[self.resolution][self.mag]
             """
-
-            if self.verbose:
-                print('update setting of: ', args)
             self.model.run_command('update_setting', *args)
 
         elif command == 'autofocus':
@@ -489,22 +488,15 @@ class ASLM_controller:
                 return
 
             if self.acquire_bar_controller.mode == 'single':
-                self.threads_pool.createThread(
-                    'camera', self.capture_single_image)
+                self.threads_pool.createThread('camera', self.capture_single_image)
 
             elif self.acquire_bar_controller.mode == 'live':
-                if self.verbose:
-                    print('Starting Continuous Acquisition')
-                self.threads_pool.createThread(
-                    'camera', self.capture_live_image)
+                self.threads_pool.createThread('camera', self.capture_live_image)
 
             elif self.acquire_bar_controller.mode == 'z-stack':
-                if self.verbose:
-                    print("Starting Z-Stack Acquisition")
                 is_multi_position = self.channels_tab_controller.is_multiposition_val.get()
                 self.model.open_shutter()
-                self.model.run_z_stack_acquisition(
-                    is_multi_position, self.update_camera_view())
+                self.model.run_z_stack_acquisition(is_multi_position, self.update_camera_view())
                 self.model.close_shutter()
 
             elif self.acquire_bar_controller.mode == 'projection':

@@ -1082,6 +1082,7 @@ if __name__ == '__main__':
 
     def test_acquisition():
         data_process = threading.Thread(target=data_func)
+        data_process.name = "HamamatsuAPI Data Process"
         data_process.start()
 
         # start acquisition

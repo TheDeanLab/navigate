@@ -262,7 +262,9 @@ class Model:
             self.is_live = True
             self.signal_thread = threading.Thread(
                 target=self.run_live_acquisition)
+            self.signal_thread.name = "Live Mode Signal"
             self.data_thread = threading.Thread(target=self.run_data_process)
+            self.data_thread.name = "Live Mode Data"
             self.signal_thread.start()
             self.data_thread.start()
 
@@ -312,6 +314,7 @@ class Model:
             self.stop_send_signal = False
             self.signal_thread = threading.Thread(
                 target=self.run_live_acquisition)
+            self.signal_thread.name = "ETL Popup Signal"
             self.signal_thread.start()
 
         elif command == 'autofocus':
@@ -326,7 +329,9 @@ class Model:
             self.f_position = args[2] # Current position
 
             self.signal_thread = threading.Thread(target=self.run_single_acquisition, kwargs={'target_channel': 1})
+            self.signal_thread.name = "Autofocus Signal"
             self.data_thread = threading.Thread(target=self.run_data_process, args=(frame_num,))
+            self.data_thread.name = "Autofocus Data"
             self.signal_thread.start()
             self.data_thread.start()
             

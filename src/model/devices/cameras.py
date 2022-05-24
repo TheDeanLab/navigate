@@ -173,7 +173,8 @@ class SyntheticCamera(CameraBase):
         return images
 
     def close_image_series(self):
-        pass
+        self.pre_frame_idx = 0
+        self.current_frame_idx = 0
 
     def get_image(self):
         image = np.random.normal(1000, 400, (self.y_pixels, self.x_pixels))

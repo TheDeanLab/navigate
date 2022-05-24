@@ -164,6 +164,8 @@ class ASLM_controller:
         self.model.set_autofocus_plot_pipe(self.plot_pipe_model)
 
         # Create default data buffer
+        self.img_width = 0
+        self.img_height = 0
         self.update_buffer()
 
     def update_buffer(self):
@@ -172,11 +174,15 @@ class ASLM_controller:
         """
         img_width = int(self.experiment.CameraParameters['x_pixels'])
         img_height = int(self.experiment.CameraParameters['y_pixels'])
+        if img_width == self.img_width and img_height == self.img_height:
+            return
         self.data_buffer = [
             SharedNDArray(
                 shape=(img_height, img_width),
                 dtype='uint16') for i in range(self.configuration.SharedNDArray['number_of_frames'])]
         self.model.set_data_buffer(self.data_buffer, img_width, img_height)
+        self.img_width = img_width
+        self.img_height = img_height
 
     def initialize_cam_view(self, configuration_controller):
         """
@@ -228,7 +234,7 @@ class ASLM_controller:
             self.etl_controller.set_mode(self.acquire_bar_controller.mode)
 
         def popup_autofocus_setting():
-            if hasattr(self, 'af_popu_controller'):
+            if hasattr(self, 'af_popup_controller'):
                 self.af_popup_controller.showup()
                 return
             af_popup = autofocus_popup(self.view)
@@ -377,6 +383,7 @@ class ASLM_controller:
             return False
 
         self.set_mode_of_sub(self.acquire_bar_controller.mode)
+        self.update_buffer()
             
         return True
 

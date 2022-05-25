@@ -637,7 +637,7 @@ class Model:
             pos += step_size
 
         # wait to get the focus postion
-        pos = self.autofocus_pos_queue.get(timeout=steps*3)
+        pos = self.autofocus_pos_queue.get(timeout=steps*10)
         return pos
 
     def get_autofocus_frame_num(self):

@@ -157,6 +157,7 @@ class Debug_Module:
         self.model.autofocus_on = True
         self.model.is_save = False
         self.model.f_position = args[2] # Current position
+        self.model.cpu_num = args[3] # cpu cores used for analysis
 
         self.model.signal_thread = threading.Thread(target=self.model.run_single_acquisition, kwargs={'target_channel': 1})
         self.model.signal_thread.name = "Autofocus Signal"
@@ -339,8 +340,7 @@ class Debug_Module:
         plot_data = [] # Going to be a List of [focus, entropy]
         start_time = time.perf_counter()
         
-        pool = Pool(processes=3)
-        entropies = []
+        pool = Pool(processes=self.model.cpu_num)
         end_lock = Lock()
         end_lock.acquire()
         autofocus_parameters = self.model.experiment.AutoFocusParameters

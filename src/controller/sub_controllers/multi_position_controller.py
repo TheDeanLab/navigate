@@ -32,8 +32,6 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-import logging
-from pathlib import Path
 from tkinter import filedialog
 import math
 import pandas as pd
@@ -41,15 +39,16 @@ from pandastable import TableModel
 
 from controller.sub_controllers.gui_controller import GUI_Controller
 
+import logging
+from pathlib import Path
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
+
 
 class Multi_Position_Controller(GUI_Controller):
     
     def __init__(self, view, parent_controller=None, verbose=None):
-
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        logger = logging.getLogger(p)
-
         super().__init__(view, parent_controller, verbose)
 
         self.table = self.view.pt

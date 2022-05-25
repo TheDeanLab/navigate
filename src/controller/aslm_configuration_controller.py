@@ -34,15 +34,13 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 import logging
 from pathlib import Path
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
 
 
 class ASLM_Configuration_Controller:
     def __init__(self, configuration):
-
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        logger = logging.getLogger(p)
-
         self.configuration = configuration
 
     def get_channels_info(self, verbose=False):

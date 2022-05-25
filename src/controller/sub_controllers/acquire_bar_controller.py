@@ -34,21 +34,18 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-import logging
 import sys
-from pathlib import Path
-
 from controller.sub_controllers.gui_controller import GUI_Controller
 from view.main_window_content.acquire_bar_frame.acquire_popup import Acquire_PopUp as acquire_popup
 
+import logging
+from pathlib import Path
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
 
 class Acquire_Bar_Controller(GUI_Controller):
     def __init__(self, view, parent_controller, verbose=False):
-
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        logger = logging.getLogger(p)
-
         super().__init__(view, parent_controller, verbose)
 
         # acquisition image mode variable

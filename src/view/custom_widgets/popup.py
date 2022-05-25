@@ -33,6 +33,11 @@ POSSIBILITY OF SUCH DAMAGE.
 from tkinter import *
 import tkinter as tk
 from tkinter import ttk
+import logging
+from pathlib import Path
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
 
 #https://stackoverflow.com/questions/28560209/transient-input-window
 # Above link is a resource for using popups. Some helpful tips of an easy way to access the data inputted by a user into the popup

@@ -32,10 +32,15 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-
 from controller.sub_controllers.gui_controller import GUI_Controller
 from controller.aslm_controller_functions import combine_funcs
 import time
+
+import logging
+from pathlib import Path
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
 
 
 class Autofocus_Popup_Controller(GUI_Controller):

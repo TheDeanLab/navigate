@@ -1,7 +1,14 @@
 """
 Synthetic Laser Class
 """
+import logging
+from pathlib import Path
+
 from model.devices.lasers.LaserBase import LaserBase
+
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
 
 
 class SyntheticLaser(LaserBase):

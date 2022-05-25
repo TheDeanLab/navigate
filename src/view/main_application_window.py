@@ -45,6 +45,11 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import *
 from tkinter.constants import NSEW
+import logging
+from pathlib import Path
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
 
 # Import Notebooks
 from .main_window_content.settings_notebook import settings_notebook

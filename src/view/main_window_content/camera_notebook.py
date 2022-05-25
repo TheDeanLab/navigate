@@ -32,6 +32,11 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 from tkinter import *
 from tkinter import ttk
+import logging
+from pathlib import Path
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
 
 # Import Sub-Frames
 from view.main_window_content.camera_display.camera_view.camera_view_tab import camera_tab

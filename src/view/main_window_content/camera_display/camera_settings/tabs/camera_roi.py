@@ -33,10 +33,16 @@ POSSIBILITY OF SUCH DAMAGE.
 import tkinter as tk
 from tkinter import *
 from tkinter import ttk
+import logging
+from pathlib import Path
 from tkinter.font import Font
 
 from view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from view.custom_widgets.validation import ValidatedSpinbox
+
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
 
 
 class camera_roi(ttk.Labelframe):
@@ -49,7 +55,6 @@ class camera_roi(ttk.Labelframe):
     '''
 
     def __init__(self, settings_tab, *args, **kwargs):
-
         # Init Frame
         text_label = 'Region of Interest Settings'
         ttk.Labelframe.__init__(self, settings_tab, text=text_label, *args, **kwargs)

@@ -34,15 +34,22 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 
 # Standard Library Imports
+import logging
 import time
 import ctypes
 import importlib
 
 # Third Party Imports
+from pathlib import Path
+
 import numpy as np
 
 # Local Imports
 
+
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
 
 
 class CameraBase:

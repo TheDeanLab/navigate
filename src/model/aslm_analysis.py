@@ -36,6 +36,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #  Standard Imports
 import os
 import time
+import logging
+from pathlib import Path
 
 # Third Party Imports
 from tifffile import imread
@@ -44,6 +46,10 @@ from scipy.fftpack import dctn
 import tensorflow as tf
 
 # Local Imports
+
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
 
 class AnalysisBase:
     def __init__(self, verbose=False):

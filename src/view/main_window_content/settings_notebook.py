@@ -33,6 +33,11 @@ POSSIBILITY OF SUCH DAMAGE.
 # Standard Imports
 from tkinter import *
 from tkinter import ttk
+import logging
+from pathlib import Path
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
 from tkinter.font import Font
 
 # Third Party Imports

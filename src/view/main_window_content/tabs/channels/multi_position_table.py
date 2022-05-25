@@ -32,6 +32,11 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 from pandastable import Table, Menu, RowHeader, ColumnHeader
 from tkinter import filedialog, Grid
+import logging
+from pathlib import Path
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
 
 class Multi_Position_RowHeader(RowHeader):
 

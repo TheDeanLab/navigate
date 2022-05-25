@@ -31,7 +31,11 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 from tkinter import ttk, Grid
-
+import logging
+from pathlib import Path
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
 
 class waveform_tab(ttk.Frame):
     def __init__(self, cam_wave, *args, **kwargs):

@@ -48,6 +48,9 @@ from pathlib import Path
 import tkinter as tk
 import platform
 import sys
+import logging
+import logging.config
+import yaml
 
 # Third Party Imports
 
@@ -59,11 +62,13 @@ def main():
     # Specify the Default Configuration Files (located in src/config)
     base_directory = Path(__file__).resolve().parent
     configuration_directory = Path.joinpath(base_directory, 'config')
+    logging_directory = Path.joinpath(base_directory, 'logging')
     configuration_path = Path.joinpath(
         configuration_directory, 'configuration.yml')
     experiment_path = Path.joinpath(configuration_directory, 'experiment.yml')
     etl_constants_path = Path.joinpath(
         configuration_directory, 'etl_constants.yml')
+    logging_path = Path.joinpath(logging_directory, 'logging.yml')
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(
@@ -101,6 +106,11 @@ def main():
                             required=False,
                             default=None,
                             help='path to etl_constants.yml file')
+    input_args.add_argument('--logging_config',
+                            type=Path,
+                            required=False,
+                            default=None,
+                            help='path to logging.yml config file')
 
     args = parser.parse_args()
 
@@ -118,6 +128,19 @@ def main():
         assert args.etl_const_file.exists(
         ), "etl_const_file Path {} not valid".format(args.etl_const_file)
         etl_constants_path = args.etl_const_file
+
+    # Creating Loggers etc , they exist globally so no need to pass
+    if args.logging_config:
+        assert args.logging_config.exists(
+            ), "Logging Config Path {} not valid".format(args.logging_config)
+        logging_path = args.logging_config
+    with open(logging_path, 'r') as f:
+        try:
+            config_data = yaml.load(f.read(), Loader=yaml.FullLoader)
+            logging.config.dictConfig(config_data) # Configures our loggers from logging.yml
+        except yaml.YAMLError as yaml_error:
+            print(yaml_error)
+
 
     # Start the GUI
     root = tk.Tk()

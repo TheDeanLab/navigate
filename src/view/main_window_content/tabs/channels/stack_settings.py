@@ -32,13 +32,17 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 from tkinter import *
 from tkinter import ttk
+import logging
+from pathlib import Path
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
 from tkinter.font import Font
 import numpy as np
 
 
 class stack_acq_frame(ttk.Labelframe):
     def __init__(stack_acq, settings_tab, *args, **kwargs):
-
         # Init Frame
         text_label = 'Stack Acquisition Settings (' + "\N{GREEK SMALL LETTER MU}" + 'm)'
         ttk.Labelframe.__init__(stack_acq, settings_tab, text=text_label, *args, **kwargs)

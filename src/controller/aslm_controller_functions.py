@@ -37,6 +37,11 @@ POSSIBILITY OF SUCH DAMAGE.
 # Standard library imports
 from datetime import datetime
 import os
+import logging
+from pathlib import Path
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
 
 
 def create_save_path(saving_settings, verbose=False):

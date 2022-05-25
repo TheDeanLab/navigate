@@ -40,6 +40,12 @@ import time
 import numpy as np
 import tensorflow as tf
 
+import logging
+from pathlib import Path
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
+
 
 def deskew_image(image_data, shear_angle, z_pixel_size, xy_pixel_size):
     '''

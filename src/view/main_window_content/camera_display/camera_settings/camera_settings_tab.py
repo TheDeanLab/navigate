@@ -30,6 +30,8 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
+import logging
+from pathlib import Path
 from tkinter import *
 from tkinter import ttk
 from tkinter.font import Font
@@ -39,6 +41,9 @@ from view.main_window_content.camera_display.camera_settings.tabs.camera_mode im
 from view.main_window_content.camera_display.camera_settings.tabs.framerate_info import framerate_info
 from view.main_window_content.camera_display.camera_settings.tabs.camera_roi import camera_roi
 
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
 
 class camera_settings_tab(ttk.Frame):
     '''

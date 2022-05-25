@@ -1,8 +1,15 @@
+import logging
+from pathlib import Path
+
 import serial
 import re
 from time import time
 
 from model.devices.lasers.LaserBase import LaserBase
+
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
 
 
 class LuxxLaser(LaserBase):

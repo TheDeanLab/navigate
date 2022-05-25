@@ -34,9 +34,12 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 
 # Standard Imports
+import logging
 import time
 
 # Third Party Imports
+from pathlib import Path
+
 import nidaqmx
 from nidaqmx.constants import AcquisitionType
 from nidaqmx.constants import LineGrouping
@@ -45,6 +48,10 @@ import numpy as np
 
 # Local Imports
 from model.aslm_model_waveforms import tunable_lens_ramp, sawtooth, dc_value, single_pulse
+
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
 
 class DAQBase:
     def __init__(self, model, experiment, etl_constants, verbose=False):

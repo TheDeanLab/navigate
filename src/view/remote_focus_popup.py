@@ -37,6 +37,11 @@ from tkinter import ttk
 from view.custom_widgets.popup import PopUp
 from view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from view.custom_widgets.validation import ValidatedSpinbox
+import logging
+from pathlib import Path
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
+
 
 
 class remote_popup():
@@ -45,7 +50,6 @@ class remote_popup():
     '''
 
     def __init__(self, root, *args, **kwargs):
-
         # Creating popup window with this name and size/placement, PopUp is a
         # Toplevel window
         self.popup = PopUp(

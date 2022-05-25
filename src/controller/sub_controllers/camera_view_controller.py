@@ -32,13 +32,18 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-
 from controller.sub_controllers.gui_controller import GUI_Controller
 import tkinter as tk
 import numpy as np
 import cv2
 from PIL import Image, ImageTk
 from skimage.color import convert_colorspace
+
+import logging
+from pathlib import Path
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
 
 
 class Camera_View_Controller(GUI_Controller):

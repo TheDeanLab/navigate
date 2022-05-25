@@ -38,6 +38,7 @@ POSSIBILITY OF SUCH DAMAGE.
 from __future__ import (absolute_import, division, print_function)
 import sys
 from pathlib import Path
+import logging
 from builtins import (
     bytes,
     int,
@@ -61,6 +62,10 @@ from builtins import (
 
 # Third Party Imports
 import yaml
+
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
 
 
 class Session:

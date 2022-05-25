@@ -31,11 +31,17 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 #Adds the contents of the camera selection/counts frame
+import logging
+from pathlib import Path
 from tkinter import *
 from tkinter import ttk
 import tkinter as tk
 
 from view.custom_widgets.LabelInputWidgetFactory import LabelInput
+
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
 
 
 class image_metrics(ttk.Labelframe):

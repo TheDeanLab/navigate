@@ -34,7 +34,6 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 
 #  Standard Library Imports
-from pathlib import Path
 import tkinter
 import multiprocessing as mp
 
@@ -67,6 +66,12 @@ from model.concurrency.concurrency_tools import ObjectInSubprocess, SharedNDArra
 # debug
 from controller.aslm_debug import Debug_Module
 
+import logging
+from pathlib import Path
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
+
 class ASLM_controller:
     def __init__(
             self,
@@ -75,6 +80,7 @@ class ASLM_controller:
             experiment_path,
             etl_constants_path,
             args):
+
         self.verbose = args.verbose
 
         # Create a thread pool

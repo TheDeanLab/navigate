@@ -33,6 +33,11 @@ POSSIBILITY OF SUCH DAMAGE.
 # Standard Imports
 from tkinter import *
 from tkinter import ttk
+import logging
+from pathlib import Path
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
 from tkinter.font import Font
 
 # Local Imports
@@ -41,7 +46,6 @@ from view.main_window_content.tabs.stage_control.maximum_intensity_projection_ta
 
 class stagecontrol_maxintensity_notebook(ttk.Notebook):
     def __init__(stagecontrol_maxintensity, frame_bot_right, *args, **kwargs):
-
         #Init notebook
         ttk.Notebook.__init__(stagecontrol_maxintensity, frame_bot_right, *args, **kwargs)
         

@@ -30,17 +30,21 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
+import logging
 import tkinter as tk
+from pathlib import Path
 from tkinter import *
 from tkinter import ttk
 from view.main_window_content.camera_display.camera_view.tabs.image_metrics import image_metrics
 from view.main_window_content.camera_display.camera_view.tabs.pallete import pallete
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
 
 class camera_tab(ttk.Frame):
     def __init__(self, cam_wave, *args, **kwargs):
-
         #  Init Frame
         ttk.Frame.__init__(self, cam_wave, *args, **kwargs)
         

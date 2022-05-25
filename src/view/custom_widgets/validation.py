@@ -36,6 +36,12 @@ from tkinter import ttk
 from decimal import Decimal, InvalidOperation
 from .hoverbar import Tooltip
 from .LabelInputWidgetFactory import LabelInput
+import logging
+from pathlib import Path
+
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
 
 REGEX_DICT = {
     'float': '(^-?$)|(^-?[0-9]+\.?[0-9]*$)',

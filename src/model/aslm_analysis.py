@@ -46,9 +46,7 @@ import tensorflow as tf
 # Local Imports
 
 class AnalysisBase:
-    def __init__(self, configuration, experiment, verbose=False):
-        self.configuration = configuration
-        self.experiment = experiment
+    def __init__(self, verbose=False):
         self.verbose = verbose
 
     def __del__(self):
@@ -64,8 +62,8 @@ class AnalysisBase:
 
 
 class CPUAnalysis(AnalysisBase):
-    def __init__(self, configuration, experiment, verbose=False):
-        super().__init__(configuration, experiment, verbose)
+    def __init__(self, verbose=False):
+        super().__init__(verbose)
 
     def __del__(self):
         pass
@@ -78,7 +76,7 @@ class CPUAnalysis(AnalysisBase):
         # Returns the entropy value.
         '''
         # Get Image Attributes
-        input_array = np.double(input_array)
+        # input_array = np.double(input_array)
         image_dimensions = input_array.ndim
 
         if image_dimensions == 2:
@@ -120,8 +118,8 @@ class CPUAnalysis(AnalysisBase):
 
 
 class GPUAnalysis(AnalysisBase):
-    def __init__(self, configuration, experiment, verbose=False):
-        super().__init__(configuration, experiment, verbose)
+    def __init__(self, verbose=False):
+        super().__init__(verbose)
 
     def __del__(self):
         pass
@@ -155,7 +153,7 @@ class GPUAnalysis(AnalysisBase):
         #  Push to GPU, and iterate through each 2D Image.
         tensor = tf.convert_to_tensor(input_array)
         for image_idx in range(int(number_of_images)):
-            if verbose:
+            if self.verbose:
                 start_time = time.time()
 
             if image_dimensions == 2:
@@ -172,7 +170,7 @@ class GPUAnalysis(AnalysisBase):
 
             #  Entropy Calculation
             dct_array = tensor_array.numpy()
-            image_entropy = calculate_entropy(dct_array, otf_support_x, otf_support_y)
+            image_entropy = self.calculate_entropy(dct_array, otf_support_x, otf_support_y)
 
             if self.verbose:
                 print("DCTS Entropy:", image_entropy)

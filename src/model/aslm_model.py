@@ -50,6 +50,7 @@ from .aslm_model_config import Session as session
 from controller.thread_pool import SynchronizedThreadPool
 from model.concurrency.concurrency_tools import ResultThread, SharedNDArray, ObjectInSubprocess
 from tools.decorators import function_timer
+from model.aslm_analysis import CPUAnalysis
 
 # debug
 from model.aslm_debug_model import Debug_Module
@@ -90,13 +91,6 @@ class Model:
 
         # Move device initialization steps to multiple threads
         threads_dict = {
-            'analysis': ResultThread(
-                target=startup_functions.start_analysis,
-                args=(
-                    self.configuration,
-                    self.experiment,
-                    self.verbose,
-                )).start(),
             'image_writer': ResultThread(
                 target=startup_functions.start_image_writer,
                 args=(
@@ -175,6 +169,10 @@ class Model:
         # data buffer
         self.data_buffer = None
         self.number_of_frames = 0
+
+        # analysis
+        # self.analysis = ObjectInSubprocess(CPUAnalysis, verbose=self.verbose)
+        self.analysis = startup_functions.start_analysis(self.configuration, self.experiment, self.verbose)
 
         # show image function/pipe handler
         self.show_img_pipe = None
@@ -388,6 +386,7 @@ class Model:
         
         # Plot Data list
         plot_data = [] # Going to be a List of [focus, entropy]
+        start_time = time.perf_counter()
 
         while not self.stop_acquisition:
             frame_ids = self.camera.get_new_frame()
@@ -432,7 +431,6 @@ class Model:
                 # Then need to append each measurement to the entropy_vector.  First column will be the focus position, 
                 # second column would be the DCT entropy value.
                 # 
-                print('*******calculate entropy ', frame_num)
                 f_frame_id = -1
                 if entropy > self.max_entropy:
                     self.max_entropy = entropy
@@ -457,6 +455,8 @@ class Model:
             self.plot_pipe.send(plot_data) # Sending controller plot data
         
         self.show_img_pipe.send('stop')
+        end_time = time.perf_counter()
+        print('*******total time*******', end_time - start_time)
 
         if self.verbose:
             print('data thread is stop')

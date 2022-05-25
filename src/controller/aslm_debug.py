@@ -34,19 +34,27 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 
 import tkinter.simpledialog as simple_dialog
+from tkinter import StringVar
 
 class Debug_Module:
     def __init__(self, central_controller, menubar, verbose=False):
         self.central_controller = central_controller
         self.verbose = verbose
         
-        menubar.add_command(label='ignored signal?', command=self.debug_ignored_signal)
-        menubar.add_command(label='get timings', command=self.debug_get_timings)
-        menubar.add_command(label='ignored autofocus signal?', command=self.debug_autofocus)
-        menubar.add_command(label='blocked queue?', command=self.debug_blocked_queue)
-        menubar.add_command(label='update image size', command=lambda: self.central_controller.model.run_command('debug', 'update_image_size'))
-        menubar.add_command(label='get shannon value?', command=None)
-        menubar.add_command(label='stop acquire', command=lambda: self.central_controller.execute('stop_acquire'))
+        self.analysis_type = StringVar()
+        menubar.add_radiobutton(label='Normal', variable=self.analysis_type, value='normal')
+        menubar.add_radiobutton(label='ObjectInSubprocess', variable=self.analysis_type, value='subprocess')
+        menubar.add_command(label='ProcessPool', command=self.start_autofocus)
+        menubar.add_separator()
+        # menubar.add_command(label='ignored signal?', command=self.debug_ignored_signal)
+        # menubar.add_command(label='get timings', command=self.debug_get_timings)
+        # menubar.add_command(label='ignored autofocus signal?', command=self.debug_autofocus)
+        # menubar.add_command(label='blocked queue?', command=self.debug_blocked_queue)
+        # menubar.add_command(label='update image size', command=lambda: self.central_controller.model.run_command('debug', 'update_image_size'))
+        # menubar.add_command(label='get shannon value?', command=None)
+        # menubar.add_command(label='stop acquire', command=lambda: self.central_controller.execute('stop_acquire'))
+
+        self.analysis_type.trace_add('write', self.update_analysis)
 
     def debug_get_timings(self):
         self.central_controller.model.run_command('debug', 'get_timings')
@@ -89,6 +97,7 @@ class Debug_Module:
                 self.central_controller.execute('stop_acquire')
             self.central_controller.camera_view_controller.display_image(
                 self.central_controller.data_buffer[image_id])
+        print('get frame ends!!!')
 
 
     def debug_blocked_queue(self):
@@ -115,7 +124,39 @@ class Debug_Module:
             image_num = self.central_controller.show_img_pipe_parent.recv()
 
             print('signal num:', signal_num, 'image num:', image_num)
+            
+            self.central_controller.set_mode_of_sub('stop')
+
+        if not self.central_controller.prepare_acquire_data():
+            return
+        self.central_controller.threads_pool.createThread('camera', func)
         
-        self.central_controller.threads_pool.createThread('camera',
-                                    func)
-        
+    def update_analysis(self, *args):
+        self.central_controller.model.run_command('debug', 'update_analysis_type', self.analysis_type.get())
+
+    def start_autofocus(self, *args):
+        def func():
+            if hasattr(self.central_controller, 'af_popup_controller'):
+                self.central_controller.af_popup_controller.update_experiment_values()
+            self.central_controller.model.run_command('debug', 'update_analysis_type', 'pool',
+                            self.central_controller.experiment.MicroscopeState,
+                            self.central_controller.experiment.AutoFocusParameters,
+                            self.central_controller.experiment.StageParameters['f'])
+            self.get_frames()
+            image_num = self.central_controller.show_img_pipe_parent.recv()
+
+            print('image num:', image_num)
+            
+            # Rec plot data from model and send to sub controller to display plot
+            plot_data = self.central_controller.plot_pipe_controller.recv()
+            if self.verbose:
+                print("Controller received plot data: ", plot_data)
+            if hasattr(self.central_controller, 'af_popup_controller'):
+                self.central_controller.af_popup_controller.display_plot(plot_data)
+            
+            self.central_controller.set_mode_of_sub('stop')
+
+        if not self.central_controller.prepare_acquire_data():
+            return
+            
+        self.central_controller.threads_pool.createThread('camera', func)

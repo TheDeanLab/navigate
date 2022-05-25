@@ -58,10 +58,10 @@ def start_analysis(configuration, experiment, verbose):
     CPU = True
     if CPU is True:
         from model.aslm_analysis import CPUAnalysis
-        return CPUAnalysis(configuration, experiment, verbose)
+        return CPUAnalysis(verbose)
     elif CPU is False:
         from model.aslm_analysis import GPUAnalysis
-        return GPUAnalysis(configuration, experiment, verbose)
+        return GPUAnalysis(verbose)
     else:
         pass
         # device_not_found(configuration.Devices['camera'])

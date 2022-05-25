@@ -34,7 +34,9 @@ from tkinter import ttk
 import tkinter as tk
 import logging
 from pathlib import Path
-
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
 
 class ToolTip(object):
 
@@ -43,10 +45,6 @@ class ToolTip(object):
         self.tipwindow = None
         self.id = None
         self.x = self.y = 0
-
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        logger = logging.getLogger(p)
 
     def showtip(self, text):
         "Display text in tooltip window"

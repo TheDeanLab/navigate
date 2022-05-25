@@ -39,17 +39,16 @@ from view.custom_widgets.popup import PopUp
 from view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from view.custom_widgets.validation import ValidatedEntry
 
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
+
 #Class that handles the dialog box that has all the user entry stuff when you press the Acquisition button
 class Acquire_PopUp():
     '''
     #### Class creates the popup that is generated when the Acquire button is pressed and Save File checkbox is selected.
     '''
     def __init__(self, root, *args, **kwargs):
-
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        logger = logging.getLogger(p)
-
         # Creating popup window with this name and size/placement, PopUp is a Toplevel window
         self.popup = PopUp(root, "File Saving Dialog", '450x450+320+180', transient=True)
 

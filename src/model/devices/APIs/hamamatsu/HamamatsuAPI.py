@@ -9,6 +9,8 @@
 
 from ctypes import *
 from enum import IntEnum
+import logging
+from pathlib import Path
 
 # ==== load shared library ====
 
@@ -636,6 +638,10 @@ dcamdev_setdata = __dll.dcamdev_setdata
 
 class DCAM:
     def __init__(self, index=0):
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        self.logger = logging.getLogger(p)
+
         self.__hdcam = 0
         self.__hdcamwait = 0
         

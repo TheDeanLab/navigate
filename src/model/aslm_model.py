@@ -38,6 +38,8 @@ import time
 import os
 import threading
 import platform
+import logging
+from pathlib import Path
 
 # Third Party Imports
 import numpy as np
@@ -62,6 +64,10 @@ class Model:
             configuration_path=None,
             experiment_path=None,
             etl_constants_path=None):
+
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        logger = logging.getLogger(p)
 
         # Specify verbosity
         self.verbose = args.verbose
@@ -381,7 +387,7 @@ class Model:
             f_frame_id = -1  # to indicate if there is one frame need to calculate shannon value, but the image frame isn't ready
             frame_num = 10  # any value but not 1
 
-        wait_num = 10 # this will let this thread wait 10 * 500 ms before it ends
+        wait_num = 10  # this will let this thread wait 10 * 500 ms before it ends
         acquired_frame_num = 0
         
         # Plot Data list

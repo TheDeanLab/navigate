@@ -34,7 +34,8 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-
+import logging
+from pathlib import Path
 
 import nidaqmx
 from nidaqmx.constants import LineGrouping
@@ -46,6 +47,10 @@ class ShutterBase:
     """
 
     def __init__(self, model, experiment, verbose=False):
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        self.logger = logging.getLogger(p)
+
         self.model = model
         self.experiment = experiment
         self.verbose = verbose
@@ -80,6 +85,9 @@ class SyntheticShutter(ShutterBase):
     """
 
     def __init__(self, model, experiment, verbose=False):
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        self.logger = logging.getLogger(p)
         super().__init__(model, experiment, verbose)
 
     def open_left(self):
@@ -112,6 +120,9 @@ class ThorlabsShutter(ShutterBase):
     """
 
     def __init__(self, model, experiment, verbose=False):
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        self.logger = logging.getLogger(p)
         super().__init__(model, experiment, verbose)
 
         # Right Shutter - High Resolution Mode

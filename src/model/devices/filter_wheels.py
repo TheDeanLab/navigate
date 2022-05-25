@@ -33,7 +33,10 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 #  Standard Library Imports
+import logging
 import time
+from pathlib import Path
+
 import serial
 
 # Third Party Imports
@@ -44,6 +47,9 @@ import numpy as np
 
 class FilterWheelBase:
     def __init__(self, model, verbose):
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        self.logger = logging.getLogger(p)
         self.comport = model.FilterWheelParameters['filter_wheel_port']
         self.baudrate = model.FilterWheelParameters['baudrate']
         self.filter_dictionary = model.FilterWheelParameters['available_filters']
@@ -90,6 +96,9 @@ class FilterWheelBase:
 
 class SyntheticFilterWheel(FilterWheelBase):
     def __init__(self, model, verbose):
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        self.logger = logging.getLogger(p)
         super().__init__(model, verbose)
 
     def filter_change_delay(self, filter_name):
@@ -126,6 +135,9 @@ class SutterFilterWheel(FilterWheelBase):
     """
 
     def __init__(self, model, verbose):
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        self.logger = logging.getLogger(p)
         super().__init__(model, verbose)
 
         # Sutter Lambda 10-B Specific Initializations

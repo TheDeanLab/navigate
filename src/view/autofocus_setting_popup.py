@@ -44,6 +44,9 @@ NavigationToolbar2Tk)
 import numpy as np
 import logging
 from pathlib import Path
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
 
 class autofocus_popup():
     '''
@@ -51,11 +54,6 @@ class autofocus_popup():
     '''
 
     def __init__(self, root, *args, **kwargs):
-
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        logger = logging.getLogger(p)
-
         # Creating popup window with this name and size/placement, PopUp is a
         # Toplevel window
         self.popup = PopUp(

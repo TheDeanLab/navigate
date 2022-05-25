@@ -20,10 +20,15 @@
 # Author: Ryu Woon Jung (Leon)
 
 import ctypes
+import logging
 from ctypes import cdll
 from pathlib import Path
 import sys
 import platform
+
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
 
 is_64bits = sys.maxsize > 2**32
 if platform.system() == 'Darwin':

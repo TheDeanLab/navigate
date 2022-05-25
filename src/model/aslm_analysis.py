@@ -36,6 +36,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #  Standard Imports
 import os
 import time
+import logging
+from pathlib import Path
 
 # Third Party Imports
 from tifffile import imread
@@ -47,6 +49,11 @@ import tensorflow as tf
 
 class AnalysisBase:
     def __init__(self, verbose=False):
+
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        logger = logging.getLogger(p)
+
         self.verbose = verbose
 
     def __del__(self):
@@ -63,6 +70,11 @@ class AnalysisBase:
 
 class CPUAnalysis(AnalysisBase):
     def __init__(self, verbose=False):
+
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        logger = logging.getLogger(p)
+
         super().__init__(verbose)
 
     def __del__(self):
@@ -119,6 +131,11 @@ class CPUAnalysis(AnalysisBase):
 
 class GPUAnalysis(AnalysisBase):
     def __init__(self, verbose=False):
+
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        logger = logging.getLogger(p)
+
         super().__init__(verbose)
 
     def __del__(self):

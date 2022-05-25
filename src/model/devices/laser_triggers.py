@@ -35,7 +35,8 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-
+import logging
+from pathlib import Path
 
 import nidaqmx
 from nidaqmx.constants import LineGrouping
@@ -43,6 +44,11 @@ from nidaqmx.constants import LineGrouping
 
 class LaserTriggerBase:
     def __init__(self, model, experiment, verbose=False):
+
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        self.logger = logging.getLogger(p)
+
         self.model = model
         self.experiment = experiment
         self.verbose = verbose

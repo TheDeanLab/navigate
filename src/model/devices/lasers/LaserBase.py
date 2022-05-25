@@ -1,10 +1,16 @@
 """
 Laser Base Class
 """
+import logging
+from pathlib import Path
 
 
 class LaserBase:
     def __init__(self, port, verbose):
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        self.logger = logging.getLogger(p)
+
         self.verbose = verbose
 
     def close(self):

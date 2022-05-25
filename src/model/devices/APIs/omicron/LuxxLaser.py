@@ -1,3 +1,6 @@
+import logging
+from pathlib import Path
+
 import serial
 import re
 from time import time
@@ -16,6 +19,10 @@ class LuxxLaser(LaserBase):
         # in Windows, because it is what I use); then get device model;
         # finally, get maximum output power and store it in **pmax** variable.
         """
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        self.logger = logging.getLogger(p)
+
         self.comport = comport
         self.baudrate = 500000
         self.timeout = 0.3

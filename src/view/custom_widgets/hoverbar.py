@@ -34,6 +34,9 @@ import tkinter as tk
 import tkinter.ttk as ttk
 import logging
 from pathlib import Path
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
 '''
 see:
 
@@ -75,11 +78,6 @@ class Tooltip:
                  text='widget info',
                  waittime=400,
                  wraplength=250):
-
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        logger = logging.getLogger(p)
-
         self.waittime = waittime  # in miliseconds, originally 500
         self.wraplength = wraplength  # in pixels, originally 180
         self.widget = widget

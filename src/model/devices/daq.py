@@ -34,9 +34,12 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 
 # Standard Imports
+import logging
 import time
 
 # Third Party Imports
+from pathlib import Path
+
 import nidaqmx
 from nidaqmx.constants import AcquisitionType
 from nidaqmx.constants import LineGrouping
@@ -48,6 +51,9 @@ from model.aslm_model_waveforms import tunable_lens_ramp, sawtooth, dc_value, si
 
 class DAQBase:
     def __init__(self, model, experiment, etl_constants, verbose=False):
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        self.logger = logging.getLogger(p)
         self.model = model
         self.experiment = experiment
         self.etl_constants = etl_constants
@@ -250,6 +256,9 @@ class DAQBase:
 
 class SyntheticDAQ(DAQBase):
     def __init__(self, model, experiment, etl_constants, verbose=False):
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        self.logger = logging.getLogger(p)
         super().__init__(model, experiment, etl_constants, verbose)
 
     def create_camera_task(self):
@@ -332,6 +341,9 @@ class SyntheticDAQ(DAQBase):
 
 class NIDAQ(DAQBase):
     def __init__(self, model, experiment, etl_constants, verbose=False):
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        self.logger = logging.getLogger(p)
         super().__init__(model, experiment, etl_constants, verbose)
 
     def __del__(self):

@@ -37,9 +37,12 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 
 # Standard Imports
+import logging
 import time
 
 # Third Party Imports
+from pathlib import Path
+
 from pipython import GCSDevice, pitools
 
 # Local Imports
@@ -47,6 +50,10 @@ from pipython import GCSDevice, pitools
 
 class StageBase:
     def __init__(self, model, verbose):
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        self.logger = logging.getLogger(p)
+
         self.verbose = verbose
         self.model = model
 
@@ -153,6 +160,11 @@ class StageBase:
 
 class SyntheticStage(StageBase):
     def __init__(self, model, verbose):
+
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        self.logger = logging.getLogger(p)
+
         super().__init__(model, verbose)
 
     def create_position_dict(self):
@@ -331,6 +343,11 @@ class SyntheticStage(StageBase):
 
 class PIStage(StageBase):
     def __init__(self, model, verbose):
+
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        self.logger = logging.getLogger(p)
+
         super().__init__(model, verbose)
         pi_stages = self.model.StageParameters['stages']
         pi_refmodes = self.model.StageParameters['refmode']

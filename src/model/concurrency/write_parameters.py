@@ -1,7 +1,13 @@
+import logging
+from pathlib import Path
 
 
 class write_Params:
     def __init__(self, view):
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        self.logger = logging.getLogger(p)
+
         self.view = view
 
     def write_to_textfile(self, filePath):

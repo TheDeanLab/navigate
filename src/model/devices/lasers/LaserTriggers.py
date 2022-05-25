@@ -5,6 +5,8 @@ Author: Fabian Voigt
 #TODO: Make sure that the analog modulation of laser intensity is active.
 #TODO: Why isn't this in the daq.waveform module?
 """
+import logging
+from pathlib import Path
 
 import nidaqmx
 from nidaqmx.constants import LineGrouping
@@ -25,6 +27,10 @@ class LaserTriggers():
     '''
 
     def __init__(self, laser_dict):
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        self.logger = logging.getLogger(p)
+
         self.laser_enable_state = 'None'
         self.laser_dict = laser_dict
         self.verbose = True
@@ -118,6 +124,10 @@ class LaserTriggers():
 
 class DemoLaserEnabler:
     def __init__(self, laser_dict):
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        self.logger = logging.getLogger(p)
+
         self.laser_enable_state = 'None'
         self.laser_dict = laser_dict
 

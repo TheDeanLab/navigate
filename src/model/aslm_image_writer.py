@@ -35,6 +35,8 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #  Standard Imports
 import os
+import logging
+from pathlib import Path
 
 # Third Party Imports
 from tifffile import imsave
@@ -43,6 +45,11 @@ from tifffile import imsave
 
 class ImageWriter:
     def __init__(self, configuration, experiment, verbose=False):
+
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        logger = logging.getLogger(p)
+
         self.configuration = configuration
         self.experiment = experiment
         self.verbose = verbose

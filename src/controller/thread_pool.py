@@ -32,11 +32,12 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-
+import logging
 import threading
 import ctypes
 import sys
 from collections import deque
+from pathlib import Path
 
 
 class SelfLockThread(threading.Thread):
@@ -49,6 +50,11 @@ class SelfLockThread(threading.Thread):
             kwargs={},
             *,
             daemon=None):
+
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        logger = logging.getLogger(p)
+
         super().__init__(group, target, name, args, kwargs, daemon=daemon)
         self.selfLock = threading.Lock()
         # lock itself
@@ -78,6 +84,11 @@ class SelfLockThread(threading.Thread):
 
 class SynchronizedThreadPool:
     def __init__(self):
+
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        logger = logging.getLogger(p)
+
         self.resources = {}
         self.toDeleteList = {}
 
@@ -216,6 +227,11 @@ class SynchronizedThreadPool:
 
 class ThreadWaitlist:
     def __init__(self):
+
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        logger = logging.getLogger(p)
+
         self.waitlistLock = threading.Lock()
         self.waitlist = deque()
 

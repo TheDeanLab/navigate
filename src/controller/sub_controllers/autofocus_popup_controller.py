@@ -32,6 +32,8 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
+import logging
+from pathlib import Path
 
 from controller.sub_controllers.gui_controller import GUI_Controller
 from controller.aslm_controller_functions import combine_funcs
@@ -41,6 +43,11 @@ import time
 class Autofocus_Popup_Controller(GUI_Controller):
 
     def __init__(self, view, parent_controller, verbose=False, setting_dict=None):
+
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        logger = logging.getLogger(p)
+
         super().__init__(view, parent_controller, verbose)
 
         self.widgets = self.view.get_widgets()

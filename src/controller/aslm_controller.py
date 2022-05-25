@@ -34,6 +34,7 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 
 #  Standard Library Imports
+import logging
 from pathlib import Path
 import tkinter
 import multiprocessing as mp
@@ -75,6 +76,11 @@ class ASLM_controller:
             experiment_path,
             etl_constants_path,
             args):
+
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        logger = logging.getLogger(p)
+
         self.verbose = args.verbose
 
         # Create a thread pool

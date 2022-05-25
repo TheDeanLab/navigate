@@ -32,6 +32,8 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
+import logging
+from pathlib import Path
 
 from controller.sub_controllers.widget_functions import validate_wrapper
 from controller.sub_controllers.gui_controller import GUI_Controller
@@ -39,6 +41,11 @@ from controller.sub_controllers.gui_controller import GUI_Controller
 
 class Stage_GUI_Controller(GUI_Controller):
     def __init__(self, view, parent_controller, verbose=False, configuration_controller=None):
+
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        logger = logging.getLogger(p)
+
         super().__init__(view, parent_controller, verbose)
 
         self.event_id = {

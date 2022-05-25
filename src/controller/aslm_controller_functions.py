@@ -35,8 +35,10 @@ POSSIBILITY OF SUCH DAMAGE.
 
 
 # Standard library imports
+import logging
 from datetime import datetime
 import os
+from pathlib import Path
 
 
 def create_save_path(saving_settings, verbose=False):
@@ -45,6 +47,11 @@ def create_save_path(saving_settings, verbose=False):
     # This function retrieves the user inputs from the popup save window.
     # It then creates a new directory in the user specified path.
     """
+
+    # Logger Setup
+    p = Path(__file__).resolve().parts[7]
+    logger = logging.getLogger(p)
+
     root_directory = saving_settings['root_directory']
     user_string = saving_settings['user']
     tissue_string = saving_settings['tissue']
@@ -92,6 +99,10 @@ def create_save_path(saving_settings, verbose=False):
 
 
 def save_yaml_file(file_directory, experiment, filename='experiment.yml'):
+    # Logger Setup
+    p = Path(__file__).resolve().parts[7]
+    logger = logging.getLogger(p)
+
     try:
         file_name = os.path.join(file_directory, filename)
         with open(file_name, 'w') as f:
@@ -104,6 +115,11 @@ def combine_funcs(*funclist):
     """
     # this function will combine a list of functions to a new function
     """
+
+    # Logger Setup
+    p = Path(__file__).resolve().parts[7]
+    logger = logging.getLogger(p)
+
     def new_func():
         for func in funclist:
             if callable(func):
@@ -112,6 +128,10 @@ def combine_funcs(*funclist):
 
 
 def update_from_channels_tab_controller(self):
+    # Logger Setup
+    p = Path(__file__).resolve().parts[7]
+    logger = logging.getLogger(p)
+
     # get settings from channels tab
     settings = self.channels_tab_controller.get_values()
 
@@ -167,6 +187,10 @@ def update_from_channels_tab_controller(self):
 
 
 def update_from_camera_setting_controller(self):
+    # Logger Setup
+    p = Path(__file__).resolve().parts[7]
+    logger = logging.getLogger(p)
+
     self.experiment.CameraParameters['sensor_mode'] = self.camera_setting_controller.sensor_mode
     self.experiment.CameraParameters['binning'] = 1
     # self.experiment.CameraParameters['x_pixels'] = self.camera_setting_controller.roi_widgets['Pixels_X'].get()

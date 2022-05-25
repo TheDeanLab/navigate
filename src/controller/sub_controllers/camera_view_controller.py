@@ -32,6 +32,8 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
+import logging
+from pathlib import Path
 
 from controller.sub_controllers.gui_controller import GUI_Controller
 import tkinter as tk
@@ -43,6 +45,11 @@ from skimage.color import convert_colorspace
 
 class Camera_View_Controller(GUI_Controller):
     def __init__(self, view, parent_controller=None, verbose=False):
+
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        logger = logging.getLogger(p)
+
         super().__init__(view, parent_controller, verbose)
 
         # Getting Widgets/Buttons

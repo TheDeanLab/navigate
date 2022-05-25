@@ -32,8 +32,8 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-
-
+import logging
+from pathlib import Path
 from tkinter import filedialog
 
 from controller.sub_controllers.widget_functions import validate_wrapper
@@ -43,6 +43,11 @@ from controller.aslm_controller_functions import save_yaml_file, combine_funcs
 class Etl_Popup_Controller(GUI_Controller):
 
     def __init__(self, view, parent_controller, verbose=False, etl_setting=None, etl_file_name=None):
+
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        logger = logging.getLogger(p)
+
         super().__init__(view, parent_controller, verbose)
 
         self.resolution_info = None

@@ -33,6 +33,8 @@ POSSIBILITY OF SUCH DAMAGE.
 # Standard Imports
 from tkinter import *
 from tkinter import ttk
+import logging
+from pathlib import Path
 from tkinter.font import Font
 
 # Third Party Imports
@@ -46,6 +48,11 @@ from view.main_window_content.tabs.channels_tab import channels_tab
 
 class settings_notebook(ttk.Notebook):
     def __init__(setntbk, frame_left, *args, **kwargs):
+
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        logger = logging.getLogger(p)
+
         #Init notebook
         ttk.Notebook.__init__(setntbk, frame_left, *args, **kwargs)
         

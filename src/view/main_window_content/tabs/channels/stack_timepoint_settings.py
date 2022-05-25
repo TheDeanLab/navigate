@@ -32,6 +32,8 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 from tkinter import *
 from tkinter import ttk
+import logging
+from pathlib import Path
 from tkinter.font import Font
 import numpy as np
 
@@ -56,6 +58,10 @@ import numpy as np
 
 class stack_timepoint_frame(ttk.Labelframe):
     def __init__(stack_timepoint_label_frame, settings_tab, *args, **kwargs):
+
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        logger = logging.getLogger(p)
 
         text_label = 'Timepoint Settings'
         ttk.Labelframe.__init__(stack_timepoint_label_frame, settings_tab, text=text_label, *args, **kwargs)

@@ -30,6 +30,8 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
+import logging
+from pathlib import Path
 from tkinter import *
 from tkinter import ttk
 from tkinter.font import Font
@@ -46,6 +48,11 @@ class camera_settings_tab(ttk.Frame):
     # the content of the major frames. If you need to adjust anything in the frames follow the children.
     '''
     def __init__(self, setntbk, *args, **kwargs):
+
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        logger = logging.getLogger(p)
+
         #Init Frame
         ttk.Frame.__init__(self, setntbk, *args, **kwargs)
         

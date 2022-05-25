@@ -30,7 +30,9 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
+import logging
 import tkinter as tk
+from pathlib import Path
 from tkinter import ttk, NSEW, StringVar, Grid
 from tkinter.scrolledtext import ScrolledText
 from view.custom_widgets.popup import PopUp
@@ -43,7 +45,11 @@ class Acquire_PopUp():
     #### Class creates the popup that is generated when the Acquire button is pressed and Save File checkbox is selected.
     '''
     def __init__(self, root, *args, **kwargs):
-        
+
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        logger = logging.getLogger(p)
+
         # Creating popup window with this name and size/placement, PopUp is a Toplevel window
         self.popup = PopUp(root, "File Saving Dialog", '450x450+320+180', transient=True)
 

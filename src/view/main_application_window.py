@@ -45,6 +45,8 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import *
 from tkinter.constants import NSEW
+import logging
+from pathlib import Path
 
 # Import Notebooks
 from .main_window_content.settings_notebook import settings_notebook
@@ -61,6 +63,11 @@ class Main_App(ttk.Frame):
     # root_window(root)
 
     def __init__(mainapp, root, *args, **kwargs):
+
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        logger = logging.getLogger(p)
+
         # Inits this class as a frame subclass with the root as its parent
         ttk.Frame.__init__(mainapp, root, *args, **kwargs)
 

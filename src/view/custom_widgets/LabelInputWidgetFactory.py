@@ -32,6 +32,8 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 import tkinter as tk
 from tkinter import ttk
+import logging
+from pathlib import Path
 
 
 '''
@@ -85,6 +87,11 @@ class LabelInput(ttk.Frame):
             input_args=None,
             label_args=None,
             **kwargs):
+
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        logger = logging.getLogger(p)
+
         # Calls frame constructor using parent and keyword args
         super().__init__(parent, **kwargs)
         # creating access point to input args for input type constructor (uses

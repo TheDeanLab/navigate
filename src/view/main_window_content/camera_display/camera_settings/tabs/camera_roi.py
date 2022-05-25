@@ -33,6 +33,8 @@ POSSIBILITY OF SUCH DAMAGE.
 import tkinter as tk
 from tkinter import *
 from tkinter import ttk
+import logging
+from pathlib import Path
 from tkinter.font import Font
 
 from view.custom_widgets.LabelInputWidgetFactory import LabelInput
@@ -49,6 +51,10 @@ class camera_roi(ttk.Labelframe):
     '''
 
     def __init__(self, settings_tab, *args, **kwargs):
+
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        logger = logging.getLogger(p)
 
         # Init Frame
         text_label = 'Region of Interest Settings'

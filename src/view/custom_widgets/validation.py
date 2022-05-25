@@ -36,6 +36,8 @@ from tkinter import ttk
 from decimal import Decimal, InvalidOperation
 from .hoverbar import Tooltip
 from .LabelInputWidgetFactory import LabelInput
+import logging
+from pathlib import Path
 
 REGEX_DICT = {
     'float': '(^-?$)|(^-?[0-9]+\.?[0-9]*$)',
@@ -91,6 +93,12 @@ class ValidatedMixin:
     '''
     # error_var can be passed a var for error message, if not class creates its own
     def __init__(self, *args, error_var=None, **kwargs):
+
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        logger = logging.getLogger(p)
+
+
         self.error = error_var or tk.StringVar()
         super().__init__(*args, **kwargs) # Calls base class that is mixed in with this class
 

@@ -31,11 +31,18 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 from tkinter import Menu
+import logging
+from pathlib import Path
 
 
 #  Menubar class
 class menubar(Menu):
     def __init__(self, window, *args, **kwargs):
+
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        logger = logging.getLogger(p)
+
         #  Init Menu with parent
         Menu.__init__(self, window, *args, **kwargs)
 

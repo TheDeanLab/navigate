@@ -30,6 +30,8 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
+import logging
+from pathlib import Path
 from tkinter import *
 from tkinter import ttk
 
@@ -40,6 +42,11 @@ from view.custom_widgets.LabelInputWidgetFactory import LabelInput
 
 class pallete(ttk.Labelframe):
     def __init__(self, cam_view, *args, **kwargs):
+
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        logger = logging.getLogger(p)
+
         # Init Frame
         text_label = 'LUT'
         ttk.Labelframe.__init__(

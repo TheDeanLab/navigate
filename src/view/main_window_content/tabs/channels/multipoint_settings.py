@@ -33,6 +33,8 @@ POSSIBILITY OF SUCH DAMAGE.
 import tkinter as tk
 from tkinter import ttk, Grid
 from tkinter.constants import NSEW
+import logging
+from pathlib import Path
 
 import pandas as pd
 from pandastable import Table
@@ -41,7 +43,11 @@ from .multi_position_table import Multi_Position_Table as MPTable
 
 class multipoint_frame(ttk.Labelframe):
     def __init__(multipoint_frame, settings_tab, *args, **kwargs):
-        
+
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        logger = logging.getLogger(p)
+
         text_label = 'Multi-position Acquisition'
         ttk.Labelframe.__init__(multipoint_frame, settings_tab, text=text_label, *args, **kwargs)
         
@@ -66,6 +72,10 @@ class multipoint_list(ttk.Frame):
     https://pandastable.readthedocs.io/en/latest/
     """
     def __init__(multipoint_frame, settings_tab, *args, **kwargs):
+
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        logger = logging.getLogger(p)
 
         #Init Frame
         ttk.Frame.__init__(multipoint_frame, settings_tab, *args, **kwargs)

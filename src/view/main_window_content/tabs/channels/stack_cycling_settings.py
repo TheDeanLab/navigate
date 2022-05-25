@@ -32,11 +32,17 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 from tkinter import *
 from tkinter import ttk
+import logging
+from pathlib import Path
 from tkinter.font import Font
 import numpy as np
 
 class stack_cycling_frame(ttk.Labelframe):
     def __init__(stack_acq, settings_tab, *args, **kwargs):
+
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        logger = logging.getLogger(p)
 
         #Init Frame
         text_label = 'Laser Cycling Settings'

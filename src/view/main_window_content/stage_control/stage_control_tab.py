@@ -31,6 +31,8 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 # Standard Imports
+import logging
+from pathlib import Path
 from tkinter import *
 from tkinter import ttk
 from tkinter.font import Font
@@ -43,6 +45,10 @@ from view.main_window_content.stage_control.tabs.goto_frame import goto_frame
 
 class stage_control_tab(ttk.Frame):
     def __init__(stage_control_tab, note3, *args, **kwargs):
+
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        logger = logging.getLogger(p)
 
         #Init Frame
         ttk.Frame.__init__(stage_control_tab, note3, *args, **kwargs)

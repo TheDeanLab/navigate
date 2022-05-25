@@ -34,10 +34,16 @@ import tkinter as tk
 from tkinter import *
 from tkinter import ttk
 from tkinter.font import Font
+import logging
+from pathlib import Path
 
 
 class channel_creator(ttk.Labelframe):
     def __init__(self, channels_tab, *args, **kwargs):
+
+        # Logger Setup
+        p = Path(__file__).resolve().parts[7]
+        logger = logging.getLogger(p)
 
         #  Init Frame
         self.title = 'Channel Settings'

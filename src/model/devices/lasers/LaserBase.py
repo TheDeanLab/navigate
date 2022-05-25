@@ -3,14 +3,13 @@ Laser Base Class
 """
 import logging
 from pathlib import Path
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
 
 
 class LaserBase:
     def __init__(self, port, verbose):
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        self.logger = logging.getLogger(p)
-
         self.verbose = verbose
 
     def close(self):

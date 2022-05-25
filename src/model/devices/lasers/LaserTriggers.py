@@ -11,6 +11,10 @@ from pathlib import Path
 import nidaqmx
 from nidaqmx.constants import LineGrouping
 
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
+
 
 class LaserTriggers():
     ''' Class for interacting with the laser enable DO lines via NI-DAQmx
@@ -27,10 +31,6 @@ class LaserTriggers():
     '''
 
     def __init__(self, laser_dict):
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        self.logger = logging.getLogger(p)
-
         self.laser_enable_state = 'None'
         self.laser_dict = laser_dict
         self.verbose = True
@@ -124,10 +124,6 @@ class LaserTriggers():
 
 class DemoLaserEnabler:
     def __init__(self, laser_dict):
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        self.logger = logging.getLogger(p)
-
         self.laser_enable_state = 'None'
         self.laser_dict = laser_dict
 

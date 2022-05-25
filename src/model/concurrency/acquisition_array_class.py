@@ -1,6 +1,12 @@
 import numpy as np
+import logging
+from pathlib import Path
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
 from constants import NI_board_parameters
 from constants import Camera_parameters
+
 
 
 class acquisition_arrays:

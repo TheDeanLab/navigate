@@ -40,6 +40,10 @@ from pathlib import Path
 import nidaqmx
 from nidaqmx.constants import LineGrouping
 
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
+
 
 class ShutterBase:
     """
@@ -47,10 +51,6 @@ class ShutterBase:
     """
 
     def __init__(self, model, experiment, verbose=False):
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        self.logger = logging.getLogger(p)
-
         self.model = model
         self.experiment = experiment
         self.verbose = verbose
@@ -85,9 +85,6 @@ class SyntheticShutter(ShutterBase):
     """
 
     def __init__(self, model, experiment, verbose=False):
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        self.logger = logging.getLogger(p)
         super().__init__(model, experiment, verbose)
 
     def open_left(self):
@@ -120,9 +117,6 @@ class ThorlabsShutter(ShutterBase):
     """
 
     def __init__(self, model, experiment, verbose=False):
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        self.logger = logging.getLogger(p)
         super().__init__(model, experiment, verbose)
 
         # Right Shutter - High Resolution Mode

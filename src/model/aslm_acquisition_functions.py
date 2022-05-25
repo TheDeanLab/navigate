@@ -34,6 +34,9 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 import logging
 from pathlib import Path
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
 
 
 def acquire_with_waveform_update(self):
@@ -50,11 +53,6 @@ def acquire_with_waveform_update(self):
     # Closes the shutter
     # Disables the camera
     """
-
-    # Logger Setup
-    p = Path(__file__).resolve().parts[7]
-    logger = logging.getLogger(p)
-
     self.camera.set_property_value(
         'exposure_time',
         self.experiment.MicroscopeState['channels']['channel_1']['camera_exposure_time'])
@@ -79,10 +77,6 @@ def acquire_with_waveform_update(self):
 
 
 def per_z_acquisition(self, microscope_state, microscope_position):
-    # Logger Setup
-    p = Path(__file__).resolve().parts[7]
-    logger = logging.getLogger(p)
-
     for z_idx in range(int(microscope_state['number_z_steps'])):
         for channel_idx in range(len(microscope_state['channels'])):
             # Check if it is selected.
@@ -111,10 +105,6 @@ def per_z_acquisition(self, microscope_state, microscope_position):
 
 
 def per_stack_acquisition(self, microscope_state, microscope_position):
-    # Logger Setup
-    p = Path(__file__).resolve().parts[7]
-    logger = logging.getLogger(p)
-
     prefix_len = len('channel_')
     for channel_key in microscope_state['channels']:
         channel_idx = int(channel_key[prefix_len:])
@@ -151,10 +141,6 @@ def per_stack_acquisition(self, microscope_state, microscope_position):
 
 
 def run_z_stack_acquisition(self, is_multi_position, update_view):
-    # Logger Setup
-    p = Path(__file__).resolve().parts[7]
-    logger = logging.getLogger(p)
-
     # self.camera.initialize_image_series(self.data_ptr)
 
     microscope_state = self.experiment.MicroscopeState

@@ -14,6 +14,9 @@ import signal
 # Sharing memory between child processes is tricky:
 import ctypes as C
 from pathlib import Path
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
 
 try:
     import numpy as np
@@ -140,10 +143,6 @@ class ProxyManager:
     def __init__(self, shared_memory_sizes=tuple()):
         """Allocate shared memory as multiprocessing Arrays.
         """
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        self.logger = logging.getLogger(p)
-
         if np is None:
             raise ImportError("We failed to import Numpy," +
                               " so there's no point using a ProxyManager.")
@@ -199,10 +198,6 @@ class ProxyObject:
         initargs, initkwargs --  Arguments to 'initializer'
         shared_mp_arrays -- Used by a ProxyManager to pass in shared memory.
         """
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        self.logger = logging.getLogger(p)
-
         # Put an instance of the Python object returned by 'initializer'
         # in a child process:
         initargs, initkwargs = _disconnect_shared_arrays(initargs, initkwargs)
@@ -365,10 +360,6 @@ class _WaitingList:
     """
 
     def __init__(self):
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        self.logger = logging.getLogger(p)
-
         self.waiting_list = []  # Switch to a queue/deque if speed really matters
         self.waiting_list_lock = threading.Lock()
 
@@ -385,10 +376,6 @@ class _ProxyObjectPipeLock:
        to acquire a locked lock.'''
 
     def __init__(self):
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        self.logger = logging.getLogger(p)
-
         self.lock = threading.Lock()
 
     def __enter__(self):
@@ -496,10 +483,6 @@ class _Custody:
         accessed by your launched thread must be ProxyObject()s,
         _WaitingList()s, or _WaitingList-like objects.
         """
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        self.logger = logging.getLogger(p)
-
         self.permission_slip = threading.Lock()
         self.permission_slip.acquire()
         self.has_custody = False
@@ -617,10 +600,6 @@ class _SharedNumpyArray(np.ndarray):
     """
     def __new__(cls, arrays, shape=None, dtype=float, buffer=None, offset=0,
                 strides=None, order=None):
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        logger = logging.getLogger(p)
-
         dtype = np.dtype(dtype)
         assert buffer in range(len(arrays)), f'Invalid buffer: <{buffer}>'
         requested_bytes = np.prod(shape, dtype='uint64') * dtype.itemsize

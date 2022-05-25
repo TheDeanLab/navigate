@@ -7,6 +7,10 @@ from time import time
 
 from model.devices.lasers.LaserBase import LaserBase
 
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
+
 
 class LuxxLaser(LaserBase):
     def __init__(self, comport, verbose):
@@ -19,10 +23,6 @@ class LuxxLaser(LaserBase):
         # in Windows, because it is what I use); then get device model;
         # finally, get maximum output power and store it in **pmax** variable.
         """
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        self.logger = logging.getLogger(p)
-
         self.comport = comport
         self.baudrate = 500000
         self.timeout = 0.3

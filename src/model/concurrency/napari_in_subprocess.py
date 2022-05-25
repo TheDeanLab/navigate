@@ -11,7 +11,11 @@ from qtpy.QtCore import QTimer
 from .concurrency_tools import ObjectInSubprocess, SharedNDArray, _dummy_function
 import numpy as np
 from constants import Camera_parameters
-
+import logging
+from pathlib import Path
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
 
 def display(display_type=None):
     """Creates a simplified non-blocking napari viewer in a subprocess.

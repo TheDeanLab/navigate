@@ -57,6 +57,10 @@ from model.aslm_analysis import CPUAnalysis
 # debug
 from model.aslm_debug_model import Debug_Module
 
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
+
 class Model:
     def __init__(
             self,
@@ -64,11 +68,6 @@ class Model:
             configuration_path=None,
             experiment_path=None,
             etl_constants_path=None):
-
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        logger = logging.getLogger(p)
-
         # Specify verbosity
         self.verbose = args.verbose
 

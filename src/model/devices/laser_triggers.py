@@ -41,14 +41,13 @@ from pathlib import Path
 import nidaqmx
 from nidaqmx.constants import LineGrouping
 
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
+
 
 class LaserTriggerBase:
     def __init__(self, model, experiment, verbose=False):
-
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        self.logger = logging.getLogger(p)
-
         self.model = model
         self.experiment = experiment
         self.verbose = verbose

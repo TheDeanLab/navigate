@@ -34,6 +34,9 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 import logging
 from pathlib import Path
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
 
 '''
 TODO: Has to be completely revamped to remove PyQT software.
@@ -50,17 +53,11 @@ from src.model.devices.APIs.logitech import FarmSimulatorSidePanel
 
 class JoystickBase:
     def __init__(self):
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        self.logger = logging.getLogger(p)
         self.mode = 'undefined'
 
 
 class SyntheticJoystick(JoystickBase):
     def __init__(self, parent=None):
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        self.logger = logging.getLogger(p)
         super().__init__()
         self.parent = parent
         self.cfg = parent.cfg
@@ -69,9 +66,6 @@ class SyntheticJoystick(JoystickBase):
 class JoystickHandler():
 
     def __init__(self, parent=None):
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        self.logger = logging.getLogger(p)
         super().__init__()
         self.parent = parent
         self.cfg = parent.cfg

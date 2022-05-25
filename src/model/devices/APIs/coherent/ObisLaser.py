@@ -11,12 +11,12 @@ from time import time, sleep
 
 from model.devices.lasers.LaserBase import LaserBase
 
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
+
 class ObisLaser(LaserBase):
     def __init__(self, verbose, port='COM4'):
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        self.logger = logging.getLogger(p)
-
         self.timeout = 0.05
         self.end_of_line = '\r'
 

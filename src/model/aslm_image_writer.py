@@ -43,13 +43,12 @@ from tifffile import imsave
 
 # Local Imports
 
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
+
 class ImageWriter:
     def __init__(self, configuration, experiment, verbose=False):
-
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        logger = logging.getLogger(p)
-
         self.configuration = configuration
         self.experiment = experiment
         self.verbose = verbose

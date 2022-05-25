@@ -51,10 +51,11 @@ from model.aslm_device_startup_functions import start_analysis
 from model.concurrency.concurrency_tools import ObjectInSubprocess
 from model.aslm_analysis import CPUAnalysis
 
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
+
 def calculate_entropy(dct_array, otf_support_x, otf_support_y):
-    # Logger Setup
-    p = Path(__file__).resolve().parts[7]
-    logger = logging.getLogger(p)
 
     i = dct_array > 0
     image_entropy = np.sum(dct_array[i] * np.log(dct_array[i]))
@@ -70,11 +71,6 @@ def normalized_dct_shannon_entropy(input_array, psf_support_diameter_xy, verbose
     # otf_support_y : Support for the OTF in the y-dimension.
     # Returns the entropy value.
     '''
-
-    # Logger Setup
-    p = Path(__file__).resolve().parts[7]
-    logger = logging.getLogger(p)
-
     # Get Image Attributes
     # input_array = np.double(input_array)
     image_dimensions = input_array.ndim
@@ -119,10 +115,6 @@ def normalized_dct_shannon_entropy(input_array, psf_support_diameter_xy, verbose
 
 class Debug_Module:
     def __init__(self, model, verbose=False):
-
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        logger = logging.getLogger(p)
 
         self.model = model
         self.verbose = verbose

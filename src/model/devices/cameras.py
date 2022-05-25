@@ -47,13 +47,13 @@ import numpy as np
 # Local Imports
 
 
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
+
 
 class CameraBase:
     def __init__(self, camera_id, model, experiment, verbose=False):
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        self.logger = logging.getLogger(p)
-
         self.model = model
         self.experiment = experiment
         self.camera_id = camera_id
@@ -126,10 +126,6 @@ class CameraBase:
 
 class SyntheticCamera(CameraBase):
     def __init__(self, camera_id, model, experiment, verbose=False):
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        self.logger = logging.getLogger(p)
-
         super().__init__(camera_id, model, experiment, verbose)
         
         self.x_pixels = experiment.CameraParameters['x_pixels']
@@ -252,10 +248,6 @@ class SyntheticCamera(CameraBase):
 class HamamatsuOrca(CameraBase):
 
     def __init__(self, camera_id, model, experiment, verbose=False):
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        self.logger = logging.getLogger(p)
-
         super().__init__(camera_id, model, experiment, verbose)
 
         # Locally Import Hamamatsu API and Initialize Camera Controller

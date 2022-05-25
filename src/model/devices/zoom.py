@@ -42,15 +42,13 @@ import importlib
 
 # Local Imports
 from pathlib import Path
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
 
 
 class ZoomBase:
     def __init__(self, model, verbose):
-
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        self.logger = logging.getLogger(p)
-
         self.model = model
         self.verbose = verbose
         self.zoomdict = model.ZoomParameters['zoom_position']
@@ -76,11 +74,6 @@ class SyntheticZoom(ZoomBase):
     """
 
     def __init__(self, model, verbose):
-
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        self.logger = logging.getLogger(p)
-
         super().__init__(model, verbose)
         if self.verbose:
             print('Synthetic Zoom Initialized')
@@ -111,11 +104,6 @@ class SyntheticZoom(ZoomBase):
 
 class DynamixelZoom(ZoomBase):
     def __init__(self, model, verbose):
-
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        self.logger = logging.getLogger(p)
-
         super().__init__(model, verbose)
         # from model.devices.APIs.dynamixel import dynamixel_functions as dynamixel
         self.dynamixel = importlib.import_module(

@@ -37,6 +37,9 @@ from scipy import signal
 import numpy as np
 import logging
 from pathlib import Path
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
 
 
 def single_pulse(samplerate=100000, sweeptime=0.4, delay=10,
@@ -58,11 +61,6 @@ def single_pulse(samplerate=100000, sweeptime=0.4, delay=10,
     typical_TTL_pulse = single_pulse(samplerate, sweeptime, 10, 1, 5, 0)
     typical_laser_pulse = single_pulse(samplerate, sweeptime, 10, 80, 1.25, 0)
     '''
-
-    # Logger Setup
-    p = Path(__file__).resolve().parts[7]
-    logger = logging.getLogger(p)
-
     # get an integer number of samples
     samples = int(np.floor(np.multiply(samplerate, sweeptime)))
 
@@ -98,10 +96,6 @@ def tunable_lens_ramp(samplerate=100000, sweeptime=0.4, delay=7.5,
     amplitude:  Volts
     offset:     Volts
     '''
-
-    # Logger Setup
-    p = Path(__file__).resolve().parts[7]
-    logger = logging.getLogger(p)
 
     # get an integer number of samples
     samples = int(np.floor(np.multiply(samplerate, sweeptime)))
@@ -139,10 +133,6 @@ def sawtooth(samplerate=100000, sweeptime=0.4, frequency=10, amplitude=1,
     galvosignal =  sawtooth(100000, 0.4, 199, 3.67, 0, 50, np.pi)
     '''
 
-    # Logger Setup
-    p = Path(__file__).resolve().parts[7]
-    logger = logging.getLogger(p)
-
     samples = samplerate * sweeptime
     # the signal.sawtooth width parameter has to be between 0 and 1
     duty_cycle = duty_cycle / 100
@@ -165,10 +155,6 @@ def dc_value(samplerate=100000, sweeptime=0.4, amplitude=1, offset=0):
     Used for creating the resonant galvo drive voltage.
     '''
 
-    # Logger Setup
-    p = Path(__file__).resolve().parts[7]
-    logger = logging.getLogger(p)
-
     samples = int(samplerate * sweeptime)
     t = np.linspace(0, sweeptime, samples)
     waveform = np.ones(np.shape(t)) * amplitude + offset
@@ -177,9 +163,6 @@ def dc_value(samplerate=100000, sweeptime=0.4, amplitude=1, offset=0):
 
 def square(samplerate=100000, sweeptime=0.4, frequency=10,
            amplitude=1, offset=0, duty_cycle=50, phase=np.pi):
-    # Logger Setup
-    p = Path(__file__).resolve().parts[7]
-    logger = logging.getLogger(p)
 
     # Returns a numpy array with a rectangular waveform
     samples = int(samplerate * sweeptime)
@@ -200,9 +183,6 @@ def square(samplerate=100000, sweeptime=0.4, frequency=10,
 def sine_wave(samplerate=100000, sweeptime=0.4, frequency=10,
               amplitude=1, offset=0, phase=0):         # in rad, np.pi/2 is 90 degrees
 
-    # Logger Setup
-    p = Path(__file__).resolve().parts[7]
-    logger = logging.getLogger(p)
 
     # Returns a numpy array with a sine waveform
     samples = int(samplerate * sweeptime)
@@ -214,9 +194,6 @@ def sine_wave(samplerate=100000, sweeptime=0.4, frequency=10,
 
 
 def smooth_waveform(waveform, percent_smoothing=10):
-    # Logger Setup
-    p = Path(__file__).resolve().parts[7]
-    logger = logging.getLogger(p)
 
     waveform_length = np.size(waveform)
     window_len = int(np.floor(waveform_length * percent_smoothing / 100))

@@ -63,6 +63,10 @@ from builtins import (
 # Third Party Imports
 import yaml
 
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
+
 
 class Session:
     """
@@ -76,10 +80,6 @@ class Session:
         :param file: Path to the file where the config file is or a dictionary with the data to load.
         :arg args: Arguments passed to the program from the command line.
         """
-
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        logger = logging.getLogger(p)
 
         super(Session, self).__init__()
         super().__setattr__('params', dict())

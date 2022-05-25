@@ -39,6 +39,9 @@ import platform
 import sys
 import logging
 from pathlib import Path
+# Logger Setup
+p = Path(__file__).resolve().parts[7]
+logger = logging.getLogger(p)
 
 # Third Party Imports
 
@@ -49,11 +52,6 @@ def start_image_writer(configuration, experiment, verbose):
     """
     # Initializes the image i/o on a dedicated thread
     """
-
-    # Logger Setup
-    p = Path(__file__).resolve().parts[7]
-    logger = logging.getLogger(p)
-
     from model.aslm_image_writer import ImageWriter
     return ImageWriter(configuration, experiment, verbose)
 
@@ -62,10 +60,6 @@ def start_analysis(configuration, experiment, verbose):
     """
     # Initializes the analysis classes on a dedicated thread
     """
-
-    # Logger Setup
-    p = Path(__file__).resolve().parts[7]
-    logger = logging.getLogger(p)
 
     CPU = True
     if CPU is True:
@@ -84,10 +78,6 @@ def start_camera(configuration, experiment, verbose):
     # Initializes the camera as a sub-process using concurrency tools.
     """
 
-    # Logger Setup
-    p = Path(__file__).resolve().parts[7]
-    logger = logging.getLogger(p)
-
     if configuration.Devices['camera'] == 'HamamatsuOrca':
         from model.devices.cameras import HamamatsuOrca
         return HamamatsuOrca(0, configuration, experiment, verbose)
@@ -103,9 +93,6 @@ def start_stages(configuration, verbose):
     # Initializes the Stage.
     """
 
-    # Logger Setup
-    p = Path(__file__).resolve().parts[7]
-    logger = logging.getLogger(p)
 
     if configuration.Devices['stage'] == 'PI' and platform.system(
     ) == 'Windows':
@@ -123,10 +110,6 @@ def start_zoom_servo(configuration, verbose):
     # Initializes the Zoom Servo Motor. DynamixelZoom of SyntheticZoom
     """
 
-    # Logger Setup
-    p = Path(__file__).resolve().parts[7]
-    logger = logging.getLogger(p)
-
     if configuration.Devices['zoom'] == 'DynamixelZoom':
         from model.devices.zoom import DynamixelZoom
         return DynamixelZoom(configuration, verbose)
@@ -142,10 +125,6 @@ def start_filter_wheel(configuration, verbose):
     # Initializes the Filter Wheel. Sutter or SyntheticFilterWheel
     """
 
-    # Logger Setup
-    p = Path(__file__).resolve().parts[7]
-    logger = logging.getLogger(p)
-
     if configuration.Devices['filter_wheel'] == 'SutterFilterWheel':
         from model.devices.filter_wheels import SutterFilterWheel
         return SutterFilterWheel(configuration, verbose)
@@ -160,10 +139,6 @@ def start_lasers(configuration, verbose):
     '''
     # Start the lasers: Lasers or SyntheticLasers
     '''
-
-    # Logger Setup
-    p = Path(__file__).resolve().parts[7]
-    logger = logging.getLogger(p)
 
     if configuration.Devices['lasers'] == 'Omicron':
         # This is the Omicron LightHUB Ultra Launch - consists of both Obis and
@@ -220,10 +195,6 @@ def start_daq(configuration, experiment, etl_constants, verbose):
     # Start the data acquisition device (DAQ):  NI or SyntheticDAQ
     """
 
-    # Logger Setup
-    p = Path(__file__).resolve().parts[7]
-    logger = logging.getLogger(p)
-
     if configuration.Devices['daq'] == 'NI':
         from model.devices.daq import NIDAQ
         return NIDAQ(configuration, experiment, etl_constants, verbose)
@@ -241,10 +212,6 @@ def start_shutters(configuration, experiment, verbose):
     # Thus, requires both to be enabled.
     """
 
-    # Logger Setup
-    p = Path(__file__).resolve().parts[7]
-    logger = logging.getLogger(p)
-
     if configuration.Devices['shutters'] == 'ThorlabsShutter' and configuration.Devices['daq'] == 'NI':
         from model.devices.laser_shutters import ThorlabsShutter
         return ThorlabsShutter(configuration, experiment, verbose)
@@ -259,10 +226,6 @@ def start_laser_triggers(configuration, experiment, verbose):
     """
     # Initializes the Laser Switching, Analog, and Digital DAQ Outputs:
     """
-
-    # Logger Setup
-    p = Path(__file__).resolve().parts[7]
-    logger = logging.getLogger(p)
 
     if configuration.Devices['daq'] == 'NI':
         from model.devices.laser_triggers import LaserTriggers
@@ -279,10 +242,6 @@ def start_laser_scanning(configuration, experiment, etl_constants, verbose):
     # Initializes the Laser Switching, Analog, and Digital DAQ Outputs:
     """
 
-    # Logger Setup
-    p = Path(__file__).resolve().parts[7]
-    logger = logging.getLogger(p)
-
     if configuration.Devices['daq'] == 'NI':
         return LaserScanning(configuration, experiment, etl_constants, verbose)
     elif configuration.Devices['daq'] == 'SyntheticDAQ':
@@ -293,9 +252,6 @@ def start_laser_scanning(configuration, experiment, etl_constants, verbose):
 
 
 def device_not_found(args):
-    # Logger Setup
-    p = Path(__file__).resolve().parts[7]
-    logger = logging.getLogger(p)
 
     print("Device Not Found in Configuration.YML:", args)
     sys.exit()

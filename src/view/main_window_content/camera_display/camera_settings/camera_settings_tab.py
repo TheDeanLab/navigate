@@ -42,7 +42,7 @@ from view.main_window_content.camera_display.camera_settings.tabs.framerate_info
 from view.main_window_content.camera_display.camera_settings.tabs.camera_roi import camera_roi
 
 # Logger Setup
-p = Path(__file__).resolve().parts[7]
+p = __name__.split(".")[0]
 logger = logging.getLogger(p)
 
 class camera_settings_tab(ttk.Frame):

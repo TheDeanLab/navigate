@@ -70,10 +70,11 @@ python main.py --verbose --synthetic_hardware
 
 ### Authors
 * Kevin Dean
+* Xiaoding 'Annie' Wang
 * Dax Collison
 * Sampath Rapuri
 * Andrew Jamieson
-* Xiaoding 'Annie' Wang
+
 
 Includes inspiration from a number of open-source projects, including:
 * https://github.com/mesoSPIM/

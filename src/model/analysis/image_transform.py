@@ -43,7 +43,7 @@ import tensorflow as tf
 import logging
 from pathlib import Path
 # Logger Setup
-p = Path(__file__).resolve().parts[7]
+p = __name__.split(".")[0]
 logger = logging.getLogger(p)
 
 

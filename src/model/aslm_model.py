@@ -58,7 +58,7 @@ from model.aslm_analysis import CPUAnalysis
 from model.aslm_debug_model import Debug_Module
 
 # Logger Setup
-p = Path(__file__).resolve().parts[7]
+p = __name__.split(".")[0]
 logger = logging.getLogger(p)
 
 class Model:
@@ -68,6 +68,10 @@ class Model:
             configuration_path=None,
             experiment_path=None,
             etl_constants_path=None):
+        logger.info("Performance - Testing if it works")
+        logger.debug("Spec - Testing if spec works too")
+        logger.info("Made it to model")
+        
         # Specify verbosity
         self.verbose = args.verbose
 

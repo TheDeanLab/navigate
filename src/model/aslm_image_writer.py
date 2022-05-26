@@ -44,7 +44,7 @@ from tifffile import imsave
 # Local Imports
 
 # Logger Setup
-p = Path(__file__).resolve().parts[7]
+p = __name__.split(".")[0]
 logger = logging.getLogger(p)
 
 class ImageWriter:

@@ -8,7 +8,7 @@ from time import time
 from model.devices.lasers.LaserBase import LaserBase
 
 # Logger Setup
-p = Path(__file__).resolve().parts[7]
+p = __name__.split(".")[0]
 logger = logging.getLogger(p)
 
 

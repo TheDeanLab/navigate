@@ -283,3 +283,6 @@ temp-BICF-JG-LE4350.txt
 .idea/*
 .idea/
 .vscode/launch.json
+
+# Custom Ignore
+*.log

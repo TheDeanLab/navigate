@@ -40,7 +40,7 @@ from view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from view.custom_widgets.validation import ValidatedEntry
 
 # Logger Setup
-p = Path(__file__).resolve().parts[7]
+p = __name__.split(".")[0]
 logger = logging.getLogger(p)
 
 #Class that handles the dialog box that has all the user entry stuff when you press the Acquisition button

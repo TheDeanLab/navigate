@@ -40,7 +40,7 @@ from view.main_window_content.camera_display.camera_view.tabs.pallete import pal
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 # Logger Setup
-p = Path(__file__).resolve().parts[7]
+p = __name__.split(".")[0]
 logger = logging.getLogger(p)
 
 class camera_tab(ttk.Frame):

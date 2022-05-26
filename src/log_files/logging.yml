@@ -46,6 +46,12 @@ handlers:
     formatter: base
     filename: log_files/performance.log
     filters: [performance_specs]
+  model_performance:
+    class: logging.FileHandler
+    level: DEBUG
+    formatter: base
+    filename: log_files/model_performance.log
+    filters: [performance_specs]
 loggers:
   view:
     level: DEBUG
@@ -57,5 +63,5 @@ loggers:
     propagate: no
   model:
     level: DEBUG
-    handlers: [console, model_info, model_debug, performance]
+    handlers: [console, model_info, model_debug, model_performance]
     propagate: no

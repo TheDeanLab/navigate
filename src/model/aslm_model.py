@@ -68,6 +68,10 @@ class Model:
             configuration_path=None,
             experiment_path=None,
             etl_constants_path=None):
+        print("Made it to model")
+        logger.info("Performance - Testing if it works")
+        logger.debug("Spec - Testing if spec works too")
+        
         # Specify verbosity
         self.verbose = args.verbose
 

@@ -52,7 +52,7 @@ from model.concurrency.concurrency_tools import ObjectInSubprocess
 from model.aslm_analysis import CPUAnalysis
 
 # Logger Setup
-p = Path(__file__).resolve().parts[7]
+p = __name__.split(".")[0]
 logger = logging.getLogger(p)
 
 def calculate_entropy(dct_array, otf_support_x, otf_support_y):

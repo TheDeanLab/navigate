@@ -41,7 +41,7 @@ from view.main_window_content.acquire_bar_frame.acquire_popup import Acquire_Pop
 import logging
 from pathlib import Path
 # Logger Setup
-p = Path(__file__).resolve().parts[7]
+p = __name__.split(".")[0]
 logger = logging.getLogger(p)
 
 class Acquire_Bar_Controller(GUI_Controller):

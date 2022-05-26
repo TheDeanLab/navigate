@@ -50,7 +50,7 @@ import numpy as np
 from model.aslm_model_waveforms import tunable_lens_ramp, sawtooth, dc_value, single_pulse
 
 # Logger Setup
-p = Path(__file__).resolve().parts[7]
+p = __name__.split(".")[0]
 logger = logging.getLogger(p)
 
 class DAQBase:

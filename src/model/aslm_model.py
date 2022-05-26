@@ -58,7 +58,7 @@ from model.aslm_analysis import CPUAnalysis
 from model.aslm_debug_model import Debug_Module
 
 # Logger Setup
-p = Path(__file__).resolve().parts[7]
+p = __name__.split(".")[0]
 logger = logging.getLogger(p)
 
 class Model:

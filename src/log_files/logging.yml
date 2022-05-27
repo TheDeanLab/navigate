@@ -22,36 +22,42 @@ handlers:
     formatter: base
     filename: log_files/view_controller_info.log
     filters: [not_performance]
+    mode: w
   vc_debug:
     class: logging.FileHandler
     level: DEBUG
     formatter: base
     filename: log_files/view_controller_debug.log
     filters: [not_performance]
+    mode: w
   model_info:
     class: logging.FileHandler
     level: INFO
     formatter: base
     filename: log_files/model_info.log
     filters: [not_performance]
+    mode: w
   model_debug:
     class: logging.FileHandler
     level: DEBUG
     formatter: base
     filename: log_files/model_debug.log
     filters: [not_performance]
+    mode: w
   performance:
     class: logging.FileHandler
     level: DEBUG
     formatter: base
     filename: log_files/performance.log
     filters: [performance_specs]
+    mode: w
   model_performance:
     class: logging.FileHandler
     level: DEBUG
     formatter: base
     filename: log_files/model_performance.log
     filters: [performance_specs]
+    mode: w
 loggers:
   view:
     level: DEBUG
@@ -65,3 +71,6 @@ loggers:
     level: DEBUG
     handlers: [console, model_info, model_debug, model_performance]
     propagate: no
+
+
+# https://docs.python.org/3/library/logging.html#logrecord-objects

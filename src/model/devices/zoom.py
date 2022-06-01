@@ -58,6 +58,7 @@ class ZoomBase:
         if zoom_position in self.zoomdict:
             if self.verbose:
                 print('Setting zoom to {}'.format(zoom_position))
+                logger.debug('Setting zoom to {}'.format(zoom_position))
             if wait_until_done:
                 time.sleep(1)
 
@@ -77,6 +78,7 @@ class SyntheticZoom(ZoomBase):
         super().__init__(model, verbose)
         if self.verbose:
             print('Synthetic Zoom Initialized')
+            logger.debug('Synthetic Zoom Initialized')
 
     def set_zoom(self, zoom, wait_until_done=False):
         """
@@ -84,6 +86,7 @@ class SyntheticZoom(ZoomBase):
         """
         if zoom in self.zoomdict:
             self.zoomvalue = zoom
+            logger.debug('Zoom command value exists')
         else:
             raise ValueError('Zoom designation not in the configuration')
         if self.verbose:

@@ -162,6 +162,7 @@ class Model:
             self.daq.set_camera(self.camera)
 
         # Acquisition Housekeeping
+        # RG-?
         self.image_count = 0
         self.acquisition_count = 0
         self.total_acquisition_count = None

@@ -42,6 +42,11 @@ from skimage.feature import blob_log, blob_dog, blob_doh
 from scipy.ndimage import gaussian_filter, binary_fill_holes
 from scipy import ndimage, signal
 import matplotlib.pyplot as plt
+import logging
+from pathlib import Path
+# Logger Setup
+p = __name__.split(".")[0]
+logger = logging.getLogger(p)
 
 
 def add_median_border(image_data):

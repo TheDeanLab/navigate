@@ -38,15 +38,13 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import logging
 from pathlib import Path
+# Logger Setup
+p = __name__.split(".")[0]
+logger = logging.getLogger(p)
 
 
 class maximum_intensity_projection_tab(ttk.Frame):
     def __init__(self, note3, *args, **kwargs):
-
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        logger = logging.getLogger(p)
-
         #Init Frame
         ttk.Frame.__init__(self, note3, *args, **kwargs)
         

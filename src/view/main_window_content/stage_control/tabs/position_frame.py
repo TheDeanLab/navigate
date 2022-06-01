@@ -38,6 +38,12 @@ from tkinter import ttk
 from view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from view.custom_widgets.validation import ValidatedEntry
 
+import logging
+from pathlib import Path
+# Logger Setup
+p = __name__.split(".")[0]
+logger = logging.getLogger(p)
+
 
 class position_frame(ttk.Frame):
     def __init__(position_frame, stage_control_tab, *args, **kwargs):

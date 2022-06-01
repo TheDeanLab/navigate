@@ -37,12 +37,19 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 
 # Standard Imports
+import logging
 import time
 
 # Third Party Imports
+from pathlib import Path
+
 from pipython import GCSDevice, pitools
 
 # Local Imports
+
+# Logger Setup
+p = __name__.split(".")[0]
+logger = logging.getLogger(p)
 
 
 class StageBase:

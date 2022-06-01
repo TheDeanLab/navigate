@@ -1,3 +1,8 @@
+import logging
+from pathlib import Path
+# Logger Setup
+p = __name__.split(".")[0]
+logger = logging.getLogger(p)
 
 
 class write_Params:

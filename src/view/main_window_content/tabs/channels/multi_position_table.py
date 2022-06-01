@@ -34,15 +34,13 @@ from pandastable import Table, Menu, RowHeader, ColumnHeader
 from tkinter import filedialog, Grid
 import logging
 from pathlib import Path
+# Logger Setup
+p = __name__.split(".")[0]
+logger = logging.getLogger(p)
 
 class Multi_Position_RowHeader(RowHeader):
 
     def __init__(self, parent=None, table=None, width=50):
-
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        logger = logging.getLogger(p)
-
         super().__init__(parent, table, width)
 
     def popupMenu(self, event, rows=None, cols=None, outside=None):
@@ -76,11 +74,6 @@ class Multi_Position_RowHeader(RowHeader):
 class Multi_Position_ColumnHeader(ColumnHeader):
 
     def __init__(self, parent=None, table=None, bg='gray25'):
-
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        logger = logging.getLogger(p)
-
         super().__init__(parent, table, bg)
 
     def popupMenu(self, event):
@@ -114,11 +107,6 @@ class Multi_Position_ColumnHeader(ColumnHeader):
 class Multi_Position_Table(Table):
 
     def __init__(self, parent=None, **kwargs):
-
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        logger = logging.getLogger(p)
-
         super().__init__(parent, **kwargs)
 
         self.loadCSV = None

@@ -1,4 +1,5 @@
 # Multiprocessing to spread CPU load, threading for concurrency:
+import logging
 import multiprocessing as mp
 import threading
 # Printing from a child process is tricky:
@@ -12,6 +13,11 @@ import atexit
 import signal
 # Sharing memory between child processes is tricky:
 import ctypes as C
+from pathlib import Path
+# Logger Setup
+p = __name__.split(".")[0]
+logger = logging.getLogger(p)
+
 try:
     import numpy as np
 except ImportError:

@@ -41,6 +41,9 @@ from view.main_window_content.camera_display.camera_settings.tabs.camera_mode im
 from view.main_window_content.camera_display.camera_settings.tabs.framerate_info import framerate_info
 from view.main_window_content.camera_display.camera_settings.tabs.camera_roi import camera_roi
 
+# Logger Setup
+p = __name__.split(".")[0]
+logger = logging.getLogger(p)
 
 class camera_settings_tab(ttk.Frame):
     '''
@@ -48,11 +51,6 @@ class camera_settings_tab(ttk.Frame):
     # the content of the major frames. If you need to adjust anything in the frames follow the children.
     '''
     def __init__(self, setntbk, *args, **kwargs):
-
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        logger = logging.getLogger(p)
-
         #Init Frame
         ttk.Frame.__init__(self, setntbk, *args, **kwargs)
         

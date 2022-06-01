@@ -38,9 +38,14 @@ from tkinter.font import Font
 from view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from view.custom_widgets.validation import ValidatedSpinbox
 
+import logging
+from pathlib import Path
+# Logger Setup
+p = __name__.split(".")[0]
+logger = logging.getLogger(p)
+
+
 class x_y_frame(ttk.Frame):
-    def print_up():
-        print('Up was pressed')
     def __init__(x_y_frame, stage_control_tab, *args, **kwargs):
         #Init Frame
         ttk.Frame.__init__(x_y_frame, stage_control_tab, *args, **kwargs)

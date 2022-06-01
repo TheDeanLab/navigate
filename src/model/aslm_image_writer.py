@@ -35,11 +35,17 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #  Standard Imports
 import os
+import logging
+from pathlib import Path
 
 # Third Party Imports
 from tifffile import imsave
 
 # Local Imports
+
+# Logger Setup
+p = __name__.split(".")[0]
+logger = logging.getLogger(p)
 
 class ImageWriter:
     def __init__(self, configuration, experiment, verbose=False):

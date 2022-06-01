@@ -18,6 +18,12 @@ import weakref
 import atexit
 import signal
 
+import logging
+from pathlib import Path
+# Logger Setup
+p = __name__.split(".")[0]
+logger = logging.getLogger(p)
+
 # Sharing memory between child processes is tricky:
 try:
     from multiprocessing import shared_memory
@@ -25,6 +31,8 @@ try:
 except ImportError:
     shared_memory = None
     np = None
+
+
 
 
 class SharedNDArray(np.ndarray):

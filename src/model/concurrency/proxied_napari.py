@@ -12,6 +12,11 @@ from qtpy.QtCore import QTimer
 # Our stuff
 from .proxy_objects import (
     ProxyManager, _dummy_function, _reconnect_shared_arrays, _SharedNumpyArray)
+import logging
+from pathlib import Path
+# Logger Setup
+p = __name__.split(".")[0]
+logger = logging.getLogger(p)
 
 
 def display(proxy_manager=None):

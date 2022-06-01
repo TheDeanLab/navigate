@@ -34,12 +34,17 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 
 # Standard Library Imports
+import logging
 import time
 import importlib
 
 # Third Party Imports
 
 # Local Imports
+from pathlib import Path
+# Logger Setup
+p = __name__.split(".")[0]
+logger = logging.getLogger(p)
 
 
 class ZoomBase:

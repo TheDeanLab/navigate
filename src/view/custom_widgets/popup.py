@@ -35,6 +35,9 @@ import tkinter as tk
 from tkinter import ttk
 import logging
 from pathlib import Path
+# Logger Setup
+p = __name__.split(".")[0]
+logger = logging.getLogger(p)
 
 #https://stackoverflow.com/questions/28560209/transient-input-window
 # Above link is a resource for using popups. Some helpful tips of an easy way to access the data inputted by a user into the popup
@@ -68,11 +71,6 @@ class PopUp(tk.Toplevel):
 
         - The parent frame for any widgets you add to the popup will be retrieved with the get_frame() function
         '''
-
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        logger = logging.getLogger(p)
-
         tk.Toplevel.__init__(self)
         #This starts the popup window config, and makes sure that any child widgets can be resized with the window
         self.title(name)

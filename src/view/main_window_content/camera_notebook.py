@@ -34,6 +34,9 @@ from tkinter import *
 from tkinter import ttk
 import logging
 from pathlib import Path
+# Logger Setup
+p = __name__.split(".")[0]
+logger = logging.getLogger(p)
 
 # Import Sub-Frames
 from view.main_window_content.camera_display.camera_view.camera_view_tab import camera_tab
@@ -41,11 +44,6 @@ from view.main_window_content.tabs.waveform_tab import waveform_tab
 
 class camera_waveform_notebook(ttk.Notebook):
     def __init__(cam_wave, frame_top_right, *args, **kwargs):
-
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        logger = logging.getLogger(p)
-
         #Init notebook
         ttk.Notebook.__init__(cam_wave, frame_top_right, *args, **kwargs)
         

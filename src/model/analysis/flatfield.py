@@ -11,6 +11,11 @@ import numpy as np
 from skimage.transform import resize as skresize
 # from scipy.fftpack import dct, idct
 import cupy as cp
+import logging
+from pathlib import Path
+# Logger Setup
+p = __name__.split(".")[0]
+logger = logging.getLogger(p)
 
 RESIZE_ORDER = 1
 RESIZE_MODE = "symmetric"

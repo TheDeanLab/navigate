@@ -9,6 +9,11 @@
 
 from ctypes import *
 from enum import IntEnum
+import logging
+from pathlib import Path
+# Logger Setup
+p = __name__.split(".")[0]
+logger = logging.getLogger(p)
 
 # ==== load shared library ====
 

@@ -3,11 +3,17 @@ Obis Laser Class
 OBIS561, 150 mW, is COM4
 Useful information can be found on Page C-22 of the OBIS_LX_LS Operators Manual
 '''
+import logging
+from pathlib import Path
 
 import serial
 from time import time, sleep
 
 from model.devices.lasers.LaserBase import LaserBase
+
+# Logger Setup
+p = __name__.split(".")[0]
+logger = logging.getLogger(p)
 
 class ObisLaser(LaserBase):
     def __init__(self, verbose, port='COM4'):

@@ -39,14 +39,13 @@ from pyparsing import col
 
 from view.custom_widgets.LabelInputWidgetFactory import LabelInput
 
+# Logger Setup
+p = __name__.split(".")[0]
+logger = logging.getLogger(p)
+
 
 class pallete(ttk.Labelframe):
     def __init__(self, cam_view, *args, **kwargs):
-
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        logger = logging.getLogger(p)
-
         # Init Frame
         text_label = 'LUT'
         ttk.Labelframe.__init__(

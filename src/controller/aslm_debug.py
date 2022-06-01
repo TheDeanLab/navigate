@@ -32,18 +32,16 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-import logging
 import tkinter.simpledialog as simple_dialog
-from pathlib import Path
 from tkinter import StringVar
+import logging
+from pathlib import Path
+# Logger Setup
+p = __name__.split(".")[0]
+logger = logging.getLogger(p)
 
 class Debug_Module:
     def __init__(self, central_controller, menubar, verbose=False):
-
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        logger = logging.getLogger(p)
-
         self.central_controller = central_controller
         self.verbose = verbose
         
@@ -142,7 +140,7 @@ class Debug_Module:
         self.central_controller.model.run_command('debug', 'update_analysis_type', self.analysis_type.get())
 
     def start_autofocus(self, *args):
-        cpu_num = simple_dialog.askinteger('Input', 'How many cpu cores you want to use for analysis?', parent=self.central_controller.view)
+        cpu_num = simple_dialog.askinteger('Input', 'How many cpu cores do you want to use for analysis?', parent=self.central_controller.view)
         if not cpu_num:
             print('no input!')
             return

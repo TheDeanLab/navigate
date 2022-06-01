@@ -32,20 +32,18 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-import logging
-from pathlib import Path
-
 from controller.sub_controllers.gui_controller import GUI_Controller
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg)
 from matplotlib.figure import Figure
+import logging
+from pathlib import Path
+# Logger Setup
+p = __name__.split(".")[0]
+logger = logging.getLogger(p)
 
 
 class Waveform_Tab_Controller(GUI_Controller):
     def __init__(self, view, parent_controller=None, verbose=False):
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        logger = logging.getLogger(p)
-
         super().__init__(view, parent_controller, verbose)
         self.remote_focus_waveform = 0
         self.etl_r_waveform = 0

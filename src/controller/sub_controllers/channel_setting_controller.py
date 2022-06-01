@@ -36,6 +36,9 @@ from controller.sub_controllers.widget_functions import validate_wrapper
 from controller.sub_controllers.gui_controller import GUI_Controller
 import logging
 from pathlib import Path
+# Logger Setup
+p = __name__.split(".")[0]
+logger = logging.getLogger(p)
 
 '''
 TODO Create a dictionary for widgets that holds a list of widgets for each column.Will attempt after formatting.
@@ -43,11 +46,6 @@ TODO Create a dictionary for widgets that holds a list of widgets for each colum
 
 class Channel_Setting_Controller(GUI_Controller):
     def __init__(self, view, parent_controller=None, verbose=False):
-
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        logger = logging.getLogger(p)
-
         super().__init__(view, parent_controller, verbose)
 
         # num: numbers of channels

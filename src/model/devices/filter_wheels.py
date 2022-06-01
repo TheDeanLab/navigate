@@ -33,13 +33,21 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 #  Standard Library Imports
+import logging
 import time
+from pathlib import Path
+
+
 import serial
 
 # Third Party Imports
 import numpy as np
 
 # Local Imports
+
+# Logger Setup
+p = __name__.split(".")[0]
+logger = logging.getLogger(p)
 
 
 class FilterWheelBase:

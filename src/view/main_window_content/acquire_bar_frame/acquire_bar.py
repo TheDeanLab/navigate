@@ -35,6 +35,10 @@ from pathlib import Path
 from tkinter import *
 from tkinter import ttk
 
+# Logger Setup
+p = __name__.split(".")[0]
+logger = logging.getLogger(p)
+
 
 
 class AcquireBar(ttk.Frame):
@@ -43,11 +47,6 @@ class AcquireBar(ttk.Frame):
     #  Main function is to change acq setting and then call the acquisition top level window
     """
     def __init__(self, top_frame, root, *args, **kwargs):
-
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        logger = logging.getLogger(p)
-
         #  Init bar with frame attr
         ttk.Frame.__init__(self, top_frame, *args, **kwargs)
         

@@ -39,14 +39,12 @@ from view.main_window_content.camera_display.camera_view.tabs.image_metrics impo
 from view.main_window_content.camera_display.camera_view.tabs.pallete import pallete
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
+# Logger Setup
+p = __name__.split(".")[0]
+logger = logging.getLogger(p)
 
 class camera_tab(ttk.Frame):
     def __init__(self, cam_wave, *args, **kwargs):
-
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        logger = logging.getLogger(p)
-
         #  Init Frame
         ttk.Frame.__init__(self, cam_wave, *args, **kwargs)
         

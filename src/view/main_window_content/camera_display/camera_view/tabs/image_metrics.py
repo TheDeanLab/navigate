@@ -39,14 +39,13 @@ import tkinter as tk
 
 from view.custom_widgets.LabelInputWidgetFactory import LabelInput
 
+# Logger Setup
+p = __name__.split(".")[0]
+logger = logging.getLogger(p)
+
 
 class image_metrics(ttk.Labelframe):
     def __init__(self, cam_view, *args, **kwargs):
-
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        logger = logging.getLogger(p)
-
         # Init Labelframe
         text_label = 'Image Metrics'
         ttk.Labelframe.__init__(self, cam_view, text=text_label, *args, **kwargs)

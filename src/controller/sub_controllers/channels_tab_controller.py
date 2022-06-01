@@ -32,23 +32,21 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-import logging
-from pathlib import Path
-
 import numpy as np
 from controller.sub_controllers.widget_functions import validate_wrapper
 from controller.sub_controllers.gui_controller import GUI_Controller
 from controller.sub_controllers.channel_setting_controller import Channel_Setting_Controller
 from controller.sub_controllers.multi_position_controller import Multi_Position_Controller
 
+import logging
+from pathlib import Path
+# Logger Setup
+p = __name__.split(".")[0]
+logger = logging.getLogger(p)
+
 
 class Channels_Tab_Controller(GUI_Controller):
     def __init__(self, view, parent_controller=None, verbose=False, configuration_controller=None):
-
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        logger = logging.getLogger(p)
-
         super().__init__(view, parent_controller, verbose)
 
         self.is_save = False

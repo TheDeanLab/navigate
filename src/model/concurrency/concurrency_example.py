@@ -3,6 +3,12 @@ from concurrency_tools import ObjectInSubprocess, CustodyThread, ResultThread, S
 import time
 import threading
 import os
+import logging
+from pathlib import Path
+# Logger Setup
+p = __name__.split(".")[0]
+logger = logging.getLogger(p)
+
 
 # Tune these values to get reliable operation on your machine:
 fps = 500           # Camera frames per second

@@ -36,6 +36,11 @@ POSSIBILITY OF SUCH DAMAGE.
 import re
 import tkinter as Tk
 from traceback import format_exception
+import logging
+from pathlib import Path
+# Logger Setup
+p = __name__.split(".")[0]
+logger = logging.getLogger(p)
 
 REGEX_DICT = {
     'float': '(^-?$)|(^-?[0-9]+\.?[0-9]*$)',

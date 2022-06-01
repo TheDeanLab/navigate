@@ -37,7 +37,11 @@ POSSIBILITY OF SUCH DAMAGE.
 import numpy as np
 import numpy.matlib
 from tifffile import imread, imsave
-
+import logging
+from pathlib import Path
+# Logger Setup
+p = __name__.split(".")[0]
+logger = logging.getLogger(p)
 
 def image_to_polar(input_image):
     '''

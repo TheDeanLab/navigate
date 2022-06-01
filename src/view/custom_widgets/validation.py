@@ -39,6 +39,10 @@ from .LabelInputWidgetFactory import LabelInput
 import logging
 from pathlib import Path
 
+# Logger Setup
+p = __name__.split(".")[0]
+logger = logging.getLogger(p)
+
 REGEX_DICT = {
     'float': '(^-?$)|(^-?[0-9]+\.?[0-9]*$)',
     'float_nonnegative': '(^$)|(^[0-9]+\.?[0-9]*$)',
@@ -93,12 +97,6 @@ class ValidatedMixin:
     '''
     # error_var can be passed a var for error message, if not class creates its own
     def __init__(self, *args, error_var=None, **kwargs):
-
-        # Logger Setup
-        p = Path(__file__).resolve().parts[7]
-        logger = logging.getLogger(p)
-
-
         self.error = error_var or tk.StringVar()
         super().__init__(*args, **kwargs) # Calls base class that is mixed in with this class
 

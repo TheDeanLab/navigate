@@ -52,6 +52,7 @@ import logging
 import logging.config
 import yaml
 
+
 # Third Party Imports
 
 # Local Imports
@@ -62,7 +63,7 @@ def main():
     # Specify the Default Configuration Files (located in src/config)
     base_directory = Path(__file__).resolve().parent
     configuration_directory = Path.joinpath(base_directory, 'config')
-    logging_directory = Path.joinpath(base_directory, 'logging')
+    logging_directory = Path.joinpath(base_directory, 'log_files')
     configuration_path = Path.joinpath(
         configuration_directory, 'configuration.yml')
     experiment_path = Path.joinpath(configuration_directory, 'experiment.yml')

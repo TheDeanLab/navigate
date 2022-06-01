@@ -338,6 +338,7 @@ class Debug_Module:
 
         # Plot Data list
         plot_data = [] # Going to be a List of [focus, entropy]
+        pool = Pool(processes=self.model.cpu_num)
         start_time = time.perf_counter()
         
         pool = Pool(processes=self.model.cpu_num)
@@ -354,12 +355,13 @@ class Debug_Module:
         if end_length == 0:
             end_length = end_length2
             end_length2 = 0
+        
 
         def callback_func(pos, frame_idx):
             def func(entropy):
-                if entropy[0] > self.model.max_entropy:
-                    self.model.max_entropy = entropy[0]
-                    self.model.focus_pos = pos
+                #if entropy[0] > self.model.max_entropy:
+                #    self.model.max_entropy = entropy[0]
+                #    self.model.focus_pos = pos
                 plot_data.append([pos, entropy[0]])
                 if len(plot_data) == end_length:
                     end_lock.release()

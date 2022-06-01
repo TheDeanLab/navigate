@@ -39,11 +39,14 @@ import random
 import time
 import logging
 from pathlib import Path
+import platform
 
 from tifffile import imread
 import numpy as np
 from scipy.fftpack import dctn
-import tensorflow as tf
+# Only import if Linux or Windows
+if platform.system() != 'Darwin':
+    import tensorflow as tf
 
 from multiprocessing import Pool, Lock
 

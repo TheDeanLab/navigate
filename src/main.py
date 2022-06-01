@@ -156,7 +156,8 @@ def main():
 
 if __name__ == '__main__':
     if platform.system() == 'Darwin':
-        print("Apple OS Not Supported.  Please try a Windows or Linux-based OS.")
-        sys.exit()
+        print("Apple OS Not Fully Supported. Tensorflow and Cupy based analysis is not possible. Please try Linux or Windows for this functionality")
+        main()
     else:
         main()
+

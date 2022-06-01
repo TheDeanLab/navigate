@@ -38,12 +38,14 @@ import os
 import time
 import logging
 from pathlib import Path
+import platform
 
 # Third Party Imports
 from tifffile import imread
 import numpy as np
 from scipy.fftpack import dctn
-import tensorflow as tf
+if platform.system() != 'Darwin':
+    import tensorflow as tf
 
 # Local Imports
 

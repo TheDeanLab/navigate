@@ -48,6 +48,7 @@ class Debug_Module:
         self.verbose = verbose
         
         self.analysis_type = StringVar()
+        self.analysis_type.set('normal')
         menubar.add_radiobutton(label='Normal', variable=self.analysis_type, value='normal')
         menubar.add_radiobutton(label='ObjectInSubprocess', variable=self.analysis_type, value='subprocess')
         menubar.add_command(label='ProcessPool', command=self.start_autofocus)
@@ -141,13 +142,19 @@ class Debug_Module:
         self.central_controller.model.run_command('debug', 'update_analysis_type', self.analysis_type.get())
 
     def start_autofocus(self, *args):
+        cpu_num = simple_dialog.askinteger('Input', 'How many cpu cores you want to use for analysis?', parent=self.central_controller.view)
+        if not cpu_num:
+            print('no input!')
+            return
+
         def func():
             if hasattr(self.central_controller, 'af_popup_controller'):
                 self.central_controller.af_popup_controller.update_experiment_values()
             self.central_controller.model.run_command('debug', 'update_analysis_type', 'pool',
                             self.central_controller.experiment.MicroscopeState,
                             self.central_controller.experiment.AutoFocusParameters,
-                            self.central_controller.experiment.StageParameters['f'])
+                            self.central_controller.experiment.StageParameters['f'],
+                            cpu_num)
             self.get_frames()
             image_num = self.central_controller.show_img_pipe_parent.recv()
 

@@ -52,7 +52,9 @@ from .aslm_model_config import Session as session
 from controller.thread_pool import SynchronizedThreadPool
 from model.concurrency.concurrency_tools import ResultThread, SharedNDArray, ObjectInSubprocess
 from tools.decorators import function_timer
-from model.aslm_analysis import CPUAnalysis
+# Only import if Linux or Windows
+if platform.system() != 'Darwin':
+    from model.aslm_analysis import CPUAnalysis
 
 # debug
 from model.aslm_debug_model import Debug_Module
@@ -181,7 +183,9 @@ class Model:
 
         # analysis
         # self.analysis = ObjectInSubprocess(CPUAnalysis, verbose=self.verbose)
-        self.analysis = startup_functions.start_analysis(self.configuration, self.experiment, self.verbose)
+        # Only run if Linux or Windows
+        if platform.system() != 'Darwin':
+            self.analysis = startup_functions.start_analysis(self.configuration, self.experiment, self.verbose)
 
         # show image function/pipe handler
         self.show_img_pipe = None

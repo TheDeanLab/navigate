@@ -612,7 +612,7 @@ property_dict = {
     'subarray_vpos': 4202800,  # 0x00402130, R/W, long,    "SUBARRAY VPOS"
     'subarray_vsize': 4202816,  # 0x00402140, R/W, long,   "SUBARRAY VSIZE"
     'subarray_mode': 4202832,  # 0x00402150, R/W, mode,    "SUBARRAY MODE"
-    'cyclic_trigger_period': 4206624, # 0x00403020, R/O, sec,	"TIMING CYCLIC TRIGGER PERIOD"
+    'cyclic_trigger_period': 4206624,  # 0x00403020, R/O, sec,	"TIMING CYCLIC TRIGGER PERIOD"
 	'minimum_trigger_blank':  4206640, # 0x00403030, R/O, sec,	"TIMING MINIMUM TRIGGER BLANKING"
     'minimum_trigger_interval': 4206672 # 0x00403050, R/O, sec,	"TIMING MINIMUM TRIGGER INTERVAL"
 }

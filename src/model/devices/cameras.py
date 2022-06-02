@@ -478,3 +478,6 @@ class HamamatsuOrca(CameraBase):
             trigger_blank = 0.016
             trigger_interval = 0.037
         return trigger_blank + trigger_interval
+
+    def get_trigger_blank_time(self):
+        return self.camera_controller.get_property_value('minimum_trigger_blank')

@@ -173,7 +173,8 @@ class Model:
         self.current_filter = 'Empty'
         self.current_laser = '488nm'
         self.current_laser_index = 1
-        self.current_exposure_time = 200  # milliseconds
+        self.current_exposure_time = 0  # milliseconds
+        self.pre_exposure_time = 0 # milliseconds
         self.start_time = None
         self.image_acq_start_time_string = time.strftime("%Y%m%d-%H%M%S")
 
@@ -206,9 +207,9 @@ class Model:
         self.stop_acquisition = False # stop signal and data threads
         self.stop_send_signal = False # stop signal thread
 
-        # timing
+        # timing - Units in milliseconds.
         self.camera_minimum_waiting_time = self.camera.get_minimum_waiting_time()
-        self.trigger_waiting_time = 0
+        self.trigger_waiting_time = 10
         self.pre_trigger_time = 0
 
         # debug
@@ -361,10 +362,12 @@ class Model:
             self.debug.debug(*args, **kwargs)
 
     def move_stage(self, pos_dict):
+        print("Moving stage to:", pos_dict)
         self.stages.move_absolute(pos_dict)
+        self.stages.report_position()
 
     def before_acquisition(self):
-        # trun off flags
+        # turn off flags
         self.stop_acquisition = False
         self.stop_send_signal = False
         self.autofocus_on = False
@@ -549,11 +552,18 @@ class Model:
                 self.current_channel = channel_idx
 
                 # Camera Settings - Exposure Time in Milliseconds
-                self.camera.set_exposure_time(channel['camera_exposure_time'])
+                # self.camera.set_exposure_time(channel['camera_exposure_time'])
+
+                # trigger_waiting_time is the time between two signal triggers
+                # current signal trigger should not be sent out earlier than previous trigger exposure time + camera minimum waiting time.
+                self.trigger_waiting_time = self.current_exposure_time/1000 + self.camera.get_trigger_blank_time()
+                print('trigger waiting time:', self.trigger_waiting_time)
                 self.current_exposure_time = channel['camera_exposure_time']
+                print(f"Channel {self.current_channel}: {self.current_exposure_time}")
 
                 # update trigger waiting time when exposure time changed
-                self.trigger_waiting_time = self.current_exposure_time/1000 + self.camera_minimum_waiting_time
+                # self.trigger_waiting_time = self.current_exposure_time/1000 + self.camera_minimum_waiting_time
+                # self.trigger_waiting_time = self.camera_minimum_waiting_time
 
                 # Laser Settings
                 self.laser_triggers.trigger_digital_laser(self.current_laser_index)
@@ -575,7 +585,6 @@ class Model:
                     self.snap_image()
 
 
-    @function_timer
     def snap_image(self):
         """
         # Snaps a single image after updating the waveforms.
@@ -585,6 +594,7 @@ class Model:
         #
         """
         #  Initialize, run, and stop the acquisition.
+        #  Consider putting below to not block thread.
         self.daq.prepare_acquisition()
 
         # calculate how long has been since last trigger
@@ -592,16 +602,21 @@ class Model:
 
         if time_spent < self.trigger_waiting_time:
             if self.verbose:
-                print('Need to wait!!!! Too much signals!!!!')
+                print('Need to wait!!!! Camera is not ready to be triggered!!!!')
             # add 0.1 here, there are lost signals if I don't add another short time,
             # but we might could add time short than 0.1
-            time.sleep(self.trigger_waiting_time - time_spent + 0.1)
-        
-        self.daq.run_acquisition()
+            time.sleep(self.trigger_waiting_time - time_spent + 0.001)
+
+        # Camera Settings - Exposure Time in Milliseconds
+        if self.pre_exposure_time != self.current_exposure_time:
+            self.camera.set_exposure_time(self.current_exposure_time)
+            self.pre_exposure_time = self.current_exposure_time
 
         # get time when send out the trigger
         self.pre_trigger_time = time.perf_counter()
 
+        # Run the acquisition
+        self.daq.run_acquisition()
         self.daq.stop_acquisition()
 
         self.frame_id = (self.frame_id + 1) % self.number_of_frames

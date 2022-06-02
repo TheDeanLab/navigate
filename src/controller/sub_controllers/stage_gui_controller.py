@@ -282,7 +282,10 @@ class Stage_GUI_Controller(GUI_Controller):
                 if self.event_id[axis]:
                     self.view.after_cancel(self.event_id[axis])
                 return
-            self.event_id[axis] = self.view.after(1000, lambda: self.parent_controller.execute('stage',
+
+            # Debouncing wait duration - Duration of time to integrate the number of clicks that a user provides.
+            # If 1000 ms, if user hits button 10x within 1s, only moves to the final value.
+            self.event_id[axis] = self.view.after(250, lambda: self.parent_controller.execute('stage',
                                                                                                position_var.get(),
                                                                                                axis))
 

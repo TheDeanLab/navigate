@@ -141,6 +141,9 @@ class Debug_Module:
             self.analysis_type = analysis_type
 
     def get_timings(self, *args, **kwargs):
+        """
+        Gets camera timing information.  Units in seconds.
+        """
         cyclic_trigger = self.model.camera.camera_controller.get_property_value('cyclic_trigger_period')
         trigger_blank = self.model.camera.camera_controller.get_property_value('minimum_trigger_blank')
         trigger_interval = self.model.camera.camera_controller.get_property_value('minimum_trigger_interval')
@@ -153,14 +156,14 @@ class Debug_Module:
         print('start autofocus', *args)
         self.model.experiment.MicroscopeState = args[0]
         self.model.experiment.AutoFocusParameters = args[1]
-        frame_num = self.model.get_autofocus_frame_num() + 1 # What does adding one here again doing?
+        frame_num = self.model.get_autofocus_frame_num() + 1  # What does adding one here again doing?
         if frame_num <= 1:
             return
         self.model.before_acquisition() # Opens correct shutter and puts all signals to false
         self.model.autofocus_on = True
         self.model.is_save = False
         self.model.f_position = args[2] # Current position
-        self.model.cpu_num = args[3] # cpu cores used for analysis
+        self.model.cpu_num = args[3]  # cpu cores used for analysis
 
         self.model.signal_thread = threading.Thread(target=self.model.run_single_acquisition, kwargs={'target_channel': 1})
         self.model.signal_thread.name = "Autofocus Signal"
@@ -177,8 +180,8 @@ class Debug_Module:
             self.model.before_acquisition()
             self.model.trigger_waiting_time = 0
             self.model.pre_trigger_time = 0
-            self.model.signal_thread = threading.Thread(
-                target=self.send_signals(args[1]))
+            self.model.signal_thread = threading.Thread(target=self.send_signals, args=(args[1],))
+            # self.model.signal_thread = threading.Thread(target=self.send_signals(args[1]))
             self.model.data_thread = threading.Thread(target=self.get_frames, args=(args[1],))
             self.model.signal_thread.start()
             self.model.data_thread.start()

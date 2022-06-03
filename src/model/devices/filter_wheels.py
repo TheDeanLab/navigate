@@ -48,7 +48,23 @@ import numpy as np
 # Logger Setup
 p = __name__.split(".")[0]
 logger = logging.getLogger(p)
+logger.setLevel(logging.DEBUG) # setting logger to debug level
+formatter = logging.Formatter('%(asctime)s:%(name)s:%(levelname)s:%(module)s:%(message)s') # format of log
+info_file_handler = logging.fileHandler("log_files/model_info.log") # creating the file handler to send to model_info.log
+debug_file_handler = logging.fileHandler("log_files/model_debug.log") # creating the file handler to send to model_debug.log
+stream_handler = logging.streamHandler() # adding a handler to log to console
 
+info_file_handler.setLevel(logging.INFO) # setting level
+debug_file_handler.setLevel(logging.DEBUG) # setting level
+stream_handler.setLevel(logging.WARNING) # setting level
+
+info_file_handler.setFormatter(formatter) # adding format
+debug_file_handler.setFormatter(formatter) # adding format
+stream_handler.setFormatter(formatter) # adding format
+
+logger.addHandler(info_file_handler)
+logger.addHandler(debug_file_handler)
+logger.addHandler(stream_handler)
 
 class FilterWheelBase:
     def __init__(self, model, verbose):
@@ -69,7 +85,8 @@ class FilterWheelBase:
         if filter_name in self.filter_dictionary:
             return True
         else:
-            raise ValueError('Filter designation not in the configuration')
+            logger.exception('Filter designation not in the configuration')
+            #raise ValueError('Filter designation not in the configuration')
 
     def filter_change_delay(self, filter_name):
         """
@@ -157,13 +174,15 @@ class SutterFilterWheel(FilterWheelBase):
             self.serial = serial.Serial(
                 self.comport, self.baudrate, timeout=.25)
         except serial.SerialException:
-            raise UserWarning(
-                'Could not communicate with Sutter Lambda 10-B via COMPORT',
-                self.comport)
+            logger.exception(f'Could not communicate with Sutter Lambda 10-B via COMPORT, {self.comport}")
+           # raise UserWarning(
+               # 'Could not communicate with Sutter Lambda 10-B via COMPORT',
+               # self.comport)
 
         # Place Controller Into 'Online' Mode
         if self.verbose:
-            print('Putting Sutter Lambda 10-B Into Online Mode')
+            logger.debug("Putting Sutter Lambda 10-B Into Online Mode")
+            #print('Putting Sutter Lambda 10-B Into Online Mode')
         self.serial.write(bytes.fromhex('ee'))
 
         # Check to see if the initialization sequence has finished.
@@ -171,12 +190,14 @@ class SutterFilterWheel(FilterWheelBase):
             self.read(2)  # class 'bytes'
             self.init_finished = True
             if self.verbose:
-                print('Done initializing the Sutter Lambda 10-B filter wheel.')
+                logger.debug('Done initializing the Sutter Lambda 10-B filter wheel.')
+                #print('Done initializing the Sutter Lambda 10-B filter wheel.')
         else:
             self.init_finished = False
 
         if self.verbose:
-            print('Setting Sutter Lambda 10-B Filter to Default Filter Position')
+            logger.debug('Setting Sutter Lambda 10-B Filter to Default Filter Position')
+           # print('Setting Sutter Lambda 10-B Filter to Default Filter Position')
         self.set_filter('Empty-Alignment')
 
     def __enter__(self):
@@ -216,6 +237,7 @@ class SutterFilterWheel(FilterWheelBase):
 
             # Make sure you are moving it at a reasonable self.speed
             assert self.speed in range(8)
+            logger.info("reasonable self.speed and filter position")
 
             # If previously we did not confirm that the initialization was
             # complete, check now.
@@ -223,7 +245,8 @@ class SutterFilterWheel(FilterWheelBase):
                 self.read(2)
                 self.init_finished = True
                 if self.verbose:
-                    print('Done initializing filter wheel.')
+                    logger.debug("Done initializing filter wheel.")
+                    #print('Done initializing filter wheel.')
 
             for wheel_idx in range(self.number_of_filter_wheels):
                 """
@@ -236,13 +259,15 @@ class SutterFilterWheel(FilterWheelBase):
                 """
 
                 if self.verbose:
-                    print("Moving Filter Wheel:", wheel_idx)
+                    logger.debug(f"Moving Filter Wheel:, {wheel_idx}")
+                    #print("Moving Filter Wheel:", wheel_idx)
 
                 output_command = wheel_idx * 128 + self.wheel_position + 16 * self.speed
                 output_command = output_command.to_bytes(1, 'little')
 
                 if self.verbose:
-                    print('Sending Filter Wheel Command:', output_command)
+                    logger.debug(f"Sending Filter Wheel Command:, {output_command}")
+                    #print('Sending Filter Wheel Command:', output_command)
                 self.serial.write(output_command)
 
             #  Wheel Position Change Delay
@@ -259,8 +284,9 @@ class SutterFilterWheel(FilterWheelBase):
                 break
             time.sleep(0.02)
         else:
-            raise UserWarning(
-                "The serial port to the Sutter Lambda 10-B is on, but it isn't responding as expected.")
+            logger.exception("The serial port to the Sutter Lambda 10-B is on, but it isn't responding as expected.")
+            #raise UserWarning(
+              #  "The serial port to the Sutter Lambda 10-B is on, but it isn't responding as expected.")
         return self.serial.read(num_bytes)
 
     def close(self):
@@ -268,6 +294,7 @@ class SutterFilterWheel(FilterWheelBase):
         # Closes the serial port.
         """
         if self.verbose:
-            print('Closing the Filter Wheel Serial Port')
+            logger.debug("Closing the Filter Wheel Serial Port")
+           # print('Closing the Filter Wheel Serial Port')
         self.set_filter('Empty-Alignment')
         self.serial.close()

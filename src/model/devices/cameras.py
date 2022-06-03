@@ -470,14 +470,7 @@ class HamamatsuOrca(CameraBase):
         # 'cyclic_trigger_period' of current device is 0
         # according to the document, trigger_blank should be bigger than trigger_interval.
         '''
-        try:
-            # cyclic_trigger = self.camera_controller.get_property_value('cyclic_trigger_period')
-            trigger_blank = self.camera_controller.get_property_value('minimum_trigger_blank')
-            trigger_interval = self.camera_controller.get_property_value('minimum_trigger_interval')
-        except:
-            trigger_blank = 0.016
-            trigger_interval = 0.037
-        return trigger_blank + trigger_interval
-
-    def get_trigger_blank_time(self):
-        return self.camera_controller.get_property_value('minimum_trigger_blank')
+        # cyclic_trigger = self.camera_controller.get_property_value('cyclic_trigger_period')
+        trigger_blank = self.camera_controller.get_property_value('minimum_trigger_blank')
+        # trigger_interval = self.camera_controller.get_property_value('minimum_trigger_interval')
+        return trigger_blank

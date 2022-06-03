@@ -316,11 +316,11 @@ class Model:
                 laser_info = updated_settings['laser_info']
 
                 if resolution_mode == 'low':
-                    self.etl_constants.low[zoom] = laser_info
+                    self.etl_constants.ETLConstants['low'][zoom] = laser_info
                 else:
-                    self.etl_constants.high[zoom] = laser_info
+                    self.etl_constants.ETLConstants['high'][zoom] = laser_info
                 if self.verbose:
-                    print(self.etl_constants.low[zoom])
+                    print(self.etl_constants.ETLConstants['low'][zoom])
 
                 # Modify DAQ to pull the initial values from the etl_constants.yml file, or be passed it from the model.
                 # Pass to the self.model.daq to
@@ -551,12 +551,9 @@ class Model:
                 # Triggering, etc.
                 self.current_channel = channel_idx
 
-                # Camera Settings - Exposure Time in Milliseconds
-                # self.camera.set_exposure_time(channel['camera_exposure_time'])
-
                 # trigger_waiting_time is the time between two signal triggers
                 # current signal trigger should not be sent out earlier than previous trigger exposure time + camera minimum waiting time.
-                self.trigger_waiting_time = self.current_exposure_time/1000 + self.camera.get_trigger_blank_time()
+                self.trigger_waiting_time = self.current_exposure_time/1000 + self.camera_minimum_waiting_time
                 print('trigger waiting time:', self.trigger_waiting_time)
                 self.current_exposure_time = channel['camera_exposure_time']
                 print(f"Channel {self.current_channel}: {self.current_exposure_time}")
@@ -566,6 +563,7 @@ class Model:
                 # self.trigger_waiting_time = self.camera_minimum_waiting_time
 
                 # Laser Settings
+                self.current_laser_index = channel['laser_index']
                 self.laser_triggers.trigger_digital_laser(self.current_laser_index)
                 self.laser_triggers.set_laser_analog_voltage(channel['laser_index'], channel['laser_power'])
 
@@ -603,11 +601,11 @@ class Model:
         if time_spent < self.trigger_waiting_time:
             if self.verbose:
                 print('Need to wait!!!! Camera is not ready to be triggered!!!!')
-            # add 0.1 here, there are lost signals if I don't add another short time,
-            # but we might could add time short than 0.1
+            #TODO: we may remove additional 0.001 waiting time
             time.sleep(self.trigger_waiting_time - time_spent + 0.001)
 
         # Camera Settings - Exposure Time in Milliseconds
+        # only set exposure time after the previous trigger has been done.
         if self.pre_exposure_time != self.current_exposure_time:
             self.camera.set_exposure_time(self.current_exposure_time)
             self.pre_exposure_time = self.current_exposure_time

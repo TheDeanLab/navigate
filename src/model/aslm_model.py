@@ -569,7 +569,7 @@ class Model:
                 self.laser_triggers.trigger_digital_laser(self.current_laser_index)
                 self.laser_triggers.set_laser_analog_voltage(channel['laser_index'], channel['laser_power'])
 
-                # Filter Wheel Settings
+                # Filter Wheel Settings - Rate Limiting Step
                 self.filter_wheel.set_filter(channel['filter'])
 
                 # Update Laser Scanning Waveforms - Exposure Time in Seconds

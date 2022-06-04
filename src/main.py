@@ -90,6 +90,11 @@ def main():
                             default=False,
                             action='store_true',
                             help='Synthetic hardware modules')
+    input_args.add_argument('--debug',
+                            required=False,
+                            default=False,
+                            action='store_true',
+                            help='Debugging tools')
 
     # Configuration and Experiment input arguments
     input_args.add_argument('--config_file',

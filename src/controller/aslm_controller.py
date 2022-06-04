@@ -297,8 +297,9 @@ class ASLM_controller:
         self.view.menubar.menu_autofocus.add_command(label='Autofocus', command=lambda: self.execute('autofocus'))
         self.view.menubar.menu_autofocus.add_command(label='setting', command=popup_autofocus_setting)
 
-        #debug menu
-        Debug_Module(self, self.view.menubar.menu_debug, self.verbose)
+        # debug menu
+        if args.debug:
+            Debug_Module(self, self.view.menubar.menu_debug, self.verbose)
 
     def populate_experiment_setting(self, file_name=None):
         """

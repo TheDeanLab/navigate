@@ -17,10 +17,11 @@
 * National Instruments PXIe-1073 Chassis equipped with PXI6733 and PXI6259 Data Acquisition Devices
 * Filter Wheels - 2x 32mm High-Speed Filter Wheels
 
-### GPU Dependencies for TensorFlow (1.15), PyTorch (1.10.2), CliJ, ...
- * NVIDIA CUDA Version 11.2
- * cuDNN SDK 8.1.0
- * NVIDIA Greaphics Driver >450.80.02
+### GPU Dependencies for TensorFlow (1.15), PyTorch (1.10.2), CuPy, ...
+Excellent directions can be found for CuPy. https://docs.cupy.dev/en/stable/install.html
+ * [NVIDIA CUDA Version 11.2](https://developer.nvidia.com/cuda-11.2.0-download-archive?target_os=Windows&target_arch=x86_64&target_version=10&target_type=exelocal)
+ * [cuDNN SDK 8.4.1](https://developer.nvidia.com/rdp/cudnn-download)
+ * NVIDIA Graphics Driver >450.80.02
  * TensorRT 7
  * Microsoft Visual C++ Redistributable for Visual Studio 2015, 2017 and 2019 
  

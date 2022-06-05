@@ -79,15 +79,20 @@ class ASLM_controller:
             configuration_path,
             experiment_path,
             etl_constants_path,
+            USE_GPU,
             args):
 
+        # Verbosity and debugging menu
         self.verbose = args.verbose
+        self.debug = args.debug
 
         # Create a thread pool
         self.threads_pool = SynchronizedThreadPool()
 
         # Initialize the Model
-        self.model = ObjectInSubprocess(Model, args,
+        self.model = ObjectInSubprocess(Model,
+                                        USE_GPU,
+                                        args,
                                         configuration_path=configuration_path,
                                         experiment_path=experiment_path,
                                         etl_constants_path=etl_constants_path)
@@ -99,8 +104,7 @@ class ASLM_controller:
         self.configuration = session(configuration_path, self.verbose)
 
         # Initialize view based on model.configuration
-        configuration_controller = ASLM_Configuration_Controller(
-            self.configuration)
+        configuration_controller = ASLM_Configuration_Controller(self.configuration)
 
         # etl setting file
         self.etl_constants_path = etl_constants_path
@@ -116,31 +120,33 @@ class ASLM_controller:
                                                              self.verbose)
 
         # Channels Controller
-        self.channels_tab_controller = Channels_Tab_Controller(
-            self.view.settings.channels_tab, self, self.verbose, configuration_controller)
+        self.channels_tab_controller = Channels_Tab_Controller(self.view.settings.channels_tab,
+                                                               self,
+                                                               self.verbose,
+                                                               configuration_controller)
 
         # Camera View Controller
-        self.camera_view_controller = Camera_View_Controller(
-            self.view.camera_waveform.camera_tab, self, self.verbose)
+        self.camera_view_controller = Camera_View_Controller(self.view.camera_waveform.camera_tab,
+                                                             self,
+                                                             self.verbose)
         self.camera_view_controller.populate_view()
 
         # Camera Settings Controller
-        self.camera_setting_controller = Camera_Setting_Controller(
-            self.view.settings.camera_settings_tab,
-            self,
-            self.verbose,
-            configuration_controller)
+        self.camera_setting_controller = Camera_Setting_Controller(self.view.settings.camera_settings_tab,
+                                                                   self,
+                                                                   self.verbose,
+                                                                   configuration_controller)
 
         # Stage Controller
-        self.stage_gui_controller = Stage_GUI_Controller(
-            self.view.stage_control.stage_control_tab,
-            self,
-            self.verbose,
-            configuration_controller)
+        self.stage_gui_controller = Stage_GUI_Controller(self.view.stage_control.stage_control_tab,
+                                                         self,
+                                                         self.verbose,
+                                                         configuration_controller)
 
         # Waveform Controller
-        self.waveform_tab_controller = Waveform_Tab_Controller(
-            self.view.camera_waveform.waveform_tab, self, self.verbose)
+        self.waveform_tab_controller = Waveform_Tab_Controller(self.view.camera_waveform.waveform_tab,
+                                                               self,
+                                                               self.verbose)
 
         # initialize menu bar
         self.initialize_menus()
@@ -218,12 +224,10 @@ class ASLM_controller:
         def save_experiment():
             # update model.experiment and save it to file
             if not self.update_experiment_setting():
-                tkinter.messagebox.showerror(
-                    title='Warning',
-                    message='There are some missing/wrong settings! Can not save this experiment setting!')
+                tkinter.messagebox.showerror(title='Warning',
+                                             message='There are some missing/wrong settings! Can not save this experiment setting!')
                 return
-            filename = filedialog.asksaveasfilename(
-                defaultextension='.yml', filetypes=[
+            filename = filedialog.asksaveasfilename(defaultextension='.yml', filetypes=[
                     ('Yaml file', '*.yml')])
             if not filename:
                 return
@@ -298,7 +302,7 @@ class ASLM_controller:
         self.view.menubar.menu_autofocus.add_command(label='setting', command=popup_autofocus_setting)
 
         # debug menu
-        if args.debug:
+        if self.debug:
             Debug_Module(self, self.view.menubar.menu_debug, self.verbose)
 
     def populate_experiment_setting(self, file_name=None):

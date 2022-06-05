@@ -66,6 +66,7 @@ logger = logging.getLogger(p)
 class Model:
     def __init__(
             self,
+            USE_GPU,
             args,
             configuration_path=None,
             experiment_path=None,

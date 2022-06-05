@@ -96,6 +96,9 @@ class ASLM_controller:
                                         configuration_path=configuration_path,
                                         experiment_path=experiment_path,
                                         etl_constants_path=etl_constants_path)
+        logger.debug(f"Spec - Configuration Path: {configuration_path}")
+        logger.debug(f"Spec - Experiment Path: {experiment_path}")
+        logger.debug(f"Spec - ETL Constants Path: {etl_constants_path}")
 
         # save default experiment file
         self.default_experiment_file = experiment_path
@@ -188,10 +191,10 @@ class ASLM_controller:
         img_height = int(self.experiment.CameraParameters['y_pixels'])
         if img_width == self.img_width and img_height == self.img_height:
             return
-        self.data_buffer = [
-            SharedNDArray(
-                shape=(img_height, img_width),
-                dtype='uint16') for i in range(self.configuration.SharedNDArray['number_of_frames'])]
+
+        self.data_buffer = [SharedNDArray(
+            shape=(img_height, img_width),
+            dtype='uint16') for i in range(self.configuration.SharedNDArray['number_of_frames'])]
         self.model.set_data_buffer(self.data_buffer, img_width, img_height)
         self.img_width = img_width
         self.img_height = img_height
@@ -225,10 +228,10 @@ class ASLM_controller:
             # update model.experiment and save it to file
             if not self.update_experiment_setting():
                 tkinter.messagebox.showerror(title='Warning',
-                                             message='There are some missing/wrong settings! Can not save this experiment setting!')
+                                             message='Incorrect/missing settings. Cannot save current experiment file.')
                 return
-            filename = filedialog.asksaveasfilename(defaultextension='.yml', filetypes=[
-                    ('Yaml file', '*.yml')])
+            filename = filedialog.asksaveasfilename(defaultextension='.yml',
+                                                    filetypes=[('Yaml file', '*.yml')])
             if not filename:
                 return
             save_yaml_file('', self.experiment.serialize(), filename)
@@ -238,8 +241,11 @@ class ASLM_controller:
                 self.etl_controller.showup()
                 return
             etl_setting_popup = remote_popup(self.view)
-            self.etl_controller = Etl_Popup_Controller(
-                etl_setting_popup, self, self.verbose, self.etl_setting, self.etl_constants_path)
+            self.etl_controller = Etl_Popup_Controller(etl_setting_popup,
+                                                       self,
+                                                       self.verbose,
+                                                       self.etl_setting,
+                                                       self.etl_constants_path)
             self.etl_controller.set_experiment_values(self.resolution_value.get())
             self.etl_controller.set_mode(self.acquire_bar_controller.mode)
 
@@ -248,7 +254,10 @@ class ASLM_controller:
                 self.af_popup_controller.showup()
                 return
             af_popup = autofocus_popup(self.view)
-            self.af_popup_controller = Autofocus_Popup_Controller(af_popup, self, self.verbose, self.experiment.AutoFocusParameters)
+            self.af_popup_controller = Autofocus_Popup_Controller(af_popup,
+                                                                  self,
+                                                                  self.verbose,
+                                                                  self.experiment.AutoFocusParameters)
 
         menus_dict = {
             self.view.menubar.menu_file: {
@@ -272,24 +281,23 @@ class ASLM_controller:
 
         # add resolution menu
         self.resolution_value = tkinter.StringVar()
-        self.view.menubar.menu_resolution.add_radiobutton(
-            label='Nanoscale', variable=self.resolution_value, value='high')
+        self.view.menubar.menu_resolution.add_radiobutton(label='Nanoscale',
+                                                          variable=self.resolution_value,
+                                                          value='high')
 
         # low resolution sub menu
         # Should only be one checkbox selected, depending on what mode we are initialized in.
         # In order to make sure only one checkbox would be selected, they need
         # to share one variable: resolution_value
         meso_res_sub_menu = tkinter.Menu(self.view.menubar.menu_resolution)
-        self.view.menubar.menu_resolution.add_cascade(menu=meso_res_sub_menu,
-                                                      label='Mesoscale')
+        self.view.menubar.menu_resolution.add_cascade(menu=meso_res_sub_menu,label='Mesoscale')
 
         for res in self.etl_setting.ETLConstants['low'].keys():
             meso_res_sub_menu.add_radiobutton(label=res,
                                               variable=self.resolution_value,
                                               value=res)
         # event binding
-        self.resolution_value.trace_add(
-            'write', lambda *args: self.execute('resolution', self.resolution_value.get()))
+        self.resolution_value.trace_add('write', lambda *args: self.execute('resolution', self.resolution_value.get()))
 
         # add separator
         self.view.menubar.menu_resolution.add_separator()

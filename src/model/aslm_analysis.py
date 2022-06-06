@@ -34,14 +34,10 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 
 #  Standard Imports
-import os
-import time
 import logging
-from pathlib import Path
 import platform
 
 # Third Party Imports
-from tifffile import imread
 import numpy as np
 from scipy.fftpack import dctn
 if platform.system() != 'Darwin':
@@ -53,9 +49,10 @@ if platform.system() != 'Darwin':
 p = __name__.split(".")[0]
 logger = logging.getLogger(p)
 
-class AnalysisBase:
-    def __init__(self, verbose=False):
+class Analysis:
+    def __init__(self, use_gpu=False, verbose=False):
         self.verbose = verbose
+        self.use_gpu = use_gpu
 
     def __del__(self):
         pass
@@ -68,69 +65,6 @@ class AnalysisBase:
         image_entropy = -2 * image_entropy / (otf_support_x * otf_support_y)
         return image_entropy
 
-
-class CPUAnalysis(AnalysisBase):
-    def __init__(self, verbose=False):
-        super().__init__(verbose)
-
-    def __del__(self):
-        pass
-
-    def normalized_dct_shannon_entropy(self, input_array, psf_support_diameter_xy):
-        '''
-        # input_array : 2D or 3D image.  If 3D, will iterate through each 2D plane.
-        # otf_support_x : Support for the OTF in the x-dimension.
-        # otf_support_y : Support for the OTF in the y-dimension.
-        # Returns the entropy value.
-        '''
-        # Get Image Attributes
-        # input_array = np.double(input_array)
-        image_dimensions = input_array.ndim
-
-        if image_dimensions == 2:
-            (image_height, image_width) = input_array.shape
-            number_of_images = 1
-        elif image_dimensions == 3:
-            (number_of_images, image_height, image_width) = input_array.shape
-        else:
-            raise ValueError("Only 2D and 3D Images Supported.")
-
-        otf_support_x = image_width / psf_support_diameter_xy
-        otf_support_y = image_height / psf_support_diameter_xy
-
-        #  Preallocate Array
-        entropy = np.zeros(number_of_images)
-        execution_time = np.zeros(number_of_images)
-        for image_idx in range(int(number_of_images)):
-            if self.verbose:
-                start_time = time.time()
-            if image_dimensions == 2:
-                numpy_array = input_array
-            else:
-                numpy_array = np.array(input_array[image_idx, :, :])
-
-            # Forward 2D DCT
-            dct_array = dctn(numpy_array, type=2)
-
-            # Normalize the DCT
-            dct_array = np.divide(dct_array, np.linalg.norm(dct_array, ord=2))
-            image_entropy = self.calculate_entropy(dct_array, otf_support_x, otf_support_y)
-
-            if self.verbose:
-                print("DCTS Entropy:", image_entropy)
-                execution_time[image_idx] = time.time() - start_time
-                print("Execution Time:", execution_time[image_idx])
-
-            entropy[image_idx] = image_entropy
-        return entropy
-
-
-class GPUAnalysis(AnalysisBase):
-    def __init__(self, verbose=False):
-        super().__init__(verbose)
-
-    def __del__(self):
-        pass
 
     def normalized_dct_shannon_entropy(self, input_array, psf_support_diameter_xy):
         '''
@@ -156,36 +90,31 @@ class GPUAnalysis(AnalysisBase):
 
         #  Preallocate Array
         entropy = np.zeros(number_of_images)
-        execution_time = np.zeros(number_of_images)
 
-        #  Push to GPU, and iterate through each 2D Image.
-        tensor = tf.convert_to_tensor(input_array)
+        if self.use_gpu:
+            tensor = tf.convert_to_tensor(input_array)
+
         for image_idx in range(int(number_of_images)):
-            if self.verbose:
-                start_time = time.time()
-
             if image_dimensions == 2:
-                tensor_array = tensor
+                if self.use_gpu:
+                    tensor_array = tensor
+                else:
+                    numpy_array = input_array
             else:
-                tensor_array = tensor[image_idx, :, :]
+                if self.use_gpu:
+                    tensor_array = tensor[image_idx, :, :]
+                else:
+                    numpy_array = np.array(input_array[image_idx, :, :])
+            if self.use_gpu:
+                tensor_array = tf.signal.dct(tensor_array, type=2)
+                tensor_array = tf.signal.dct(tf.transpose(tensor_array), type=2)
+                tensor_array = tf.math.divide(tensor_array, tf.norm(tensor_array, ord=2))
+                dct_array = tensor_array.numpy()
+            else:
+                dct_array = dctn(numpy_array, type=2)
+                dct_array = np.divide(dct_array, np.linalg.norm(dct_array, ord=2))
 
-            #  2D DCT performed in series.
-            tensor_array = tf.signal.dct(tensor_array, type=2)
-            tensor_array = tf.signal.dct(tf.transpose(tensor_array), type=2)
-            tensor_array = tf.math.divide(
-                tensor_array, tf.norm(
-                    tensor_array, ord=2))
-
-            #  Entropy Calculation
-            dct_array = tensor_array.numpy()
             image_entropy = self.calculate_entropy(dct_array, otf_support_x, otf_support_y)
-
-            if self.verbose:
-                print("DCTS Entropy:", image_entropy)
-                execution_time[image_idx] = time.time() - start_time
-                print("Execution Time:", execution_time[image_idx])
-
             entropy[image_idx] = image_entropy
-            return entropy
-
+        return entropy
 

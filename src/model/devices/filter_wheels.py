@@ -154,12 +154,9 @@ class SutterFilterWheel(FilterWheelBase):
         try:
             if self.verbose:
                 print('Opening Filter Wheel on Serial Port', self.comport)
-            self.serial = serial.Serial(
-                self.comport, self.baudrate, timeout=.25)
+            self.serial = serial.Serial(self.comport, self.baudrate, timeout=.25)
         except serial.SerialException:
-            raise UserWarning(
-                'Could not communicate with Sutter Lambda 10-B via COMPORT',
-                self.comport)
+            raise UserWarning('Could not communicate with Sutter Lambda 10-B via COMPORT', self.comport)
 
         # Place Controller Into 'Online' Mode
         if self.verbose:

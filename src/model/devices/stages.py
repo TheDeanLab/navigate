@@ -415,8 +415,9 @@ class PIStage(StageBase):
         self.int_theta_pos = self.theta_pos + self.int_theta_pos_offset
         self.create_internal_position_dict()
 
-        if self.verbose:
-            print("Stage Positions:", self.int_position_dict)
+        # if self.verbose:
+        # print("Physical Stage Positions:", self.int_position_dict)
+        print("Physical Stage Positions:", positions)
 
     def move_relative(self, move_dictionary, wait_until_done=False):
         """
@@ -604,3 +605,4 @@ class PIStage(StageBase):
                 blockflag = False
             else:
                 time.sleep(0.1)
+

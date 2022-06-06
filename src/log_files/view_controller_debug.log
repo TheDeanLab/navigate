@@ -1,0 +1,3 @@
+2022-06-06 10:50:13,791 - controller - DEBUG - aslm_controller: Spec - Configuration Path: C:\Users\AI2\Documents\GitHub\ASLM\src\config\configuration.yml
+2022-06-06 10:50:13,791 - controller - DEBUG - aslm_controller: Spec - Experiment Path: C:\Users\AI2\Documents\GitHub\ASLM\src\config\experiment.yml
+2022-06-06 10:50:13,792 - controller - DEBUG - aslm_controller: Spec - ETL Constants Path: C:\Users\AI2\Documents\GitHub\ASLM\src\config\etl_constants.yml

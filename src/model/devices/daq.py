@@ -48,6 +48,7 @@ import numpy as np
 
 # Local Imports
 from model.aslm_model_waveforms import tunable_lens_ramp, sawtooth, dc_value, single_pulse
+from tools.decorators import function_timer
 
 # Logger Setup
 p = __name__.split(".")[0]
@@ -210,6 +211,7 @@ class DAQBase:
                             self.etl_r_min_ao] = self.etl_r_min_ao
         self.etl_r_waveform[self.etl_r_waveform >
                             self.etl_r_max_ao] = self.etl_r_max_ao
+
 
     def create_low_res_galvo_waveform(self):
         """

@@ -59,7 +59,7 @@ def main():
     if platform.system == 'Darwin':
         # TensorFlow not supported on Apple Devices
         USE_GPU = False
-    else:
+    elif platform.system != 'Darwin':
         import tensorflow as tf
         number_GPUs = len(tf.config.list_physical_devices('GPU'))
         if number_GPUs == 0:

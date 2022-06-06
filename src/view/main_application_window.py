@@ -136,7 +136,7 @@ class Main_App(ttk.Frame):
         mainapp.camera_waveform = camera_waveform_notebook(mainapp.frame_top_right)
         mainapp.stage_control = stagecontrol_maxintensity_notebook(mainapp.frame_bottom_right)
         mainapp.acqbar = AcquireBar(mainapp.top_frame, mainapp.root)
-        logger.info("GUI started")
+        logger.info("GUI setup working")
 
 
 if __name__ == '__main__':

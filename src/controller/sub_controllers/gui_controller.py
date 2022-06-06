@@ -78,4 +78,4 @@ class GUI_Controller:
         if self.verbose:
             print('From', self.__class__.__name__, ':', *info)
         logger.debug(f"From {self.__class__.__name__} : {info}")
-        logger.info("Working")
+        

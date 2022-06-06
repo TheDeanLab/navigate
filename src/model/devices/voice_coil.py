@@ -92,7 +92,7 @@ class VoiceCoil:
             command = b'd0'
             print("Command Sent in Bytes:", command)
             time.sleep(2)
-            self.serial.write(command)
+            self.serial.send_command(command)
             time.sleep(2)
             data = self.serial.read_bytes(1)
             if len(data) > 0:

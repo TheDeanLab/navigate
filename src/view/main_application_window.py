@@ -137,6 +137,8 @@ class Main_App(ttk.Frame):
         mainapp.stage_control = stagecontrol_maxintensity_notebook(mainapp.frame_bottom_right)
         mainapp.acqbar = AcquireBar(mainapp.top_frame, mainapp.root)
         logger.info("GUI setup working")
+        logger.info("Performance - GUI Started real quick")
+        logger.info("Spec - GUI is this size")
 
 
 if __name__ == '__main__':

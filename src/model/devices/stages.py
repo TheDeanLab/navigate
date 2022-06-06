@@ -315,7 +315,7 @@ class SyntheticStage(StageBase):
                     axis +
                     '_pos')
             except BaseException:
-                logger.error(f"Zeroing of axis: {axis} failed")
+                logger.exception(f"Zeroing of axis: {axis} failed")
                 print('Zeroing of axis: ', axis, 'failed')
 
     def unzero_axes(self, list):
@@ -382,7 +382,7 @@ class PIStage(StageBase):
                 print('PI connection closed')
             logger.debug("PI connection closed")
         except BaseException:
-            logger.error("Error while disconnecting the PI stage")
+            logger.exception("Error while disconnecting the PI stage")
             print('Error while disconnecting the PI stage')
 
     def create_position_dict(self):
@@ -581,7 +581,7 @@ class PIStage(StageBase):
                     axis +
                     '_pos')
             except BaseException:
-                logger.error(f"Zeroing of axis: {axis} failed")
+                logger.exception(f"Zeroing of axis: {axis} failed")
                 print('Zeroing of axis: ', axis, 'failed')
 
     def unzero_axes(self, list):
@@ -589,7 +589,7 @@ class PIStage(StageBase):
             try:
                 exec('self.int_' + axis + '_pos_offset = 0')
             except BaseException:
-                logger.error(f"Unzeroing of axis: {axis} failed")
+                logger.exception(f"Unzeroing of axis: {axis} failed")
                 print('Unzeroing of axis: ', axis, 'failed')
 
     def load_sample(self):

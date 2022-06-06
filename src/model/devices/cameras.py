@@ -447,14 +447,10 @@ class HamamatsuOrca(CameraBase):
 
             print('sub array mode(1: OFF, 2: ON): ',
                   self.camera_controller.get_property_value('subarray_mode'))
-        logger.debug(f"subarray_hpos,
-                {self.camera_controller.get_property_value('subarray_hpos')}")
-        logger.debug(f"subarray_hsize,
-                {self.camera_controller.get_property_value('subarray_hsize')}")
-        logger.debug(f"subarray_vpos,
-                {self.camera_controller.get_property_value('subarray_vpos')}")
-        logger.debug(f"subarray_vsize,
-                {self.camera_controller.get_property_value('subarray_vsize')}")
+        logger.debug(f"subarray_hpos, {self.camera_controller.get_property_value('subarray_hpos')}")
+        logger.debug(f"subarray_hsize,{self.camera_controller.get_property_value('subarray_hsize')}")
+        logger.debug(f"subarray_vpos, {self.camera_controller.get_property_value('subarray_vpos')}")
+        logger.debug(f"subarray_vsize,{self.camera_controller.get_property_value('subarray_vsize')}")
 
     def initialize_image_series(self, data_buffer=None, number_of_frames=100):
         self.camera_controller.start_acquisition(data_buffer, number_of_frames)

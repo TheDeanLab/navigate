@@ -256,13 +256,11 @@ class HamamatsuOrca(CameraBase):
 
         # Values are pulled from the CameraParameters section of the configuration.yml file.
         # Exposure time converted here from milliseconds to seconds.
-        self.camera_controller.set_property_value(
-            "sensor_mode", 1)
+        self.camera_controller.set_property_value("sensor_mode", 1)
 
         # self.camera_controller.set_property_value(
         #     "sensor_mode", self.model.CameraParameters['sensor_mode'])
-        self.camera_controller.set_property_value(
-            "defect_correct_mode",
+        self.camera_controller.set_property_value("defect_correct_mode",
             self.model.CameraParameters['defect_correct_mode'])
         # self.camera_controller.set_property_value("exposure_control",
         #                                           1)

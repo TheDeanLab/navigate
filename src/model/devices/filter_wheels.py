@@ -48,8 +48,7 @@ import numpy as np
 # Logger Setup
 p = __name__.split(".")[0]
 logger = logging.getLogger(p)
-<<<<<<< HEAD
-=======
+
 class FilterWheelBase:
     def __init__(self, model, verbose):
         self.comport = model.FilterWheelParameters['filter_wheel_port']
@@ -307,7 +306,7 @@ class SutterFilterWheel(FilterWheelBase):
 <<<<<<< HEAD
             raise UserWarning(
                 "The serial port to the Sutter Lambda 10-B is on, but it isn't responding as expected.")
-            logger.warning("The serial port to the Sutter Lambda 10-B is on, but it isn't responding as expected.")
+            logger.error("The serial port to the Sutter Lambda 10-B is on, but it isn't responding as expected.")
 =======
             logger.error("The serial port to the Sutter Lambda 10-B is on, but it isn't responding as expected.")
             raise UserWarning(

@@ -79,6 +79,10 @@ class VoiceCoil:
         character received from the controller is the same character sent. Once the character is received the next
         character can be processed.
         """
+        
+        self.init_connection()
+        
+    def init_connection ():
         # Send command d0 and read returned information
         if self.read_on_init:
             if self.verbose:
@@ -147,10 +151,18 @@ class VoiceCoil:
 
 
 if __name__ == "__main__":
+    
+    #Open and close the connection
     vc = VoiceCoil(verbose=True)
+    vc.close_connection()
+
+    #Re-open the connection
+    vc.open()
+    vc.init_connection()
+    
     vc.send_command('k0')  # Turn off servo
     vc.send_command('k1')  # Engage servo
-    vc.close_connection()
+
 
   # def openConnection():
     #     try:

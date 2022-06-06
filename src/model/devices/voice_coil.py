@@ -46,18 +46,19 @@ import serial
 
 class VoiceCoil:
     def __init__(self, verbose):
-        self.comport = 996
+        self.comport = 'COM1'
         self.baudrate = 115200
         self.bytesize = serial.EIGHTBITS
         self.parity = serial.PARITY_NONE
         self.stopBits = serial.STOPBITS_ONE
         self.flowControl = None  # Not implemented yet.
-        self.timeout = .25
+        self.timeout = 1.25
         self.verbose = verbose
         self.init_finished = False
         self.read_on_init = True
 
         # Open Serial Port
+        # https://pyserial.readthedocs.io/en/latest/pyserial_api.html
         try:
             if self.verbose:
                 print("Opening Voice Coil on COM:", self.comport)
@@ -81,14 +82,25 @@ class VoiceCoil:
         if self.read_on_init:
             if self.verbose:
                 print("Sending Command d0 to the voice coil.")
-            self.serial.write(bytes.fromhex('d0'))
-            return_byte = self.read_bytes(1)
-            if return_byte == bytes.fromhex('d0'):
-                # Write octal literal for carriage return - 15
-                self.serial.write(15)
-                self.init_finished = True
-                if self.verbose:
-                    print("Done Initializing the voice coil")
+            
+            command = b'd0'
+            print("Command Sent in Bytes:", command)
+            self.serial.write(command)
+            self.serial.write(b'\r')
+            data = self.serial.read(999)
+
+            if len(data) > 0:
+                print("Data received: " + data)
+            else:
+                print("Nothing received from", command)
+
+            # return_byte = self.read_bytes(1)
+            # if return_byte == bytes.fromhex('d0'):
+            #     # Write octal literal for carriage return - 15
+            #     self.serial.write(15)
+            #     self.init_finished = True
+            #     if self.verbose:
+            #         print("Done Initializing the voice coil")
 
     def read_bytes(self, num_bytes):
         """
@@ -133,8 +145,9 @@ class VoiceCoil:
 
 if __name__ == "__main__":
     vc = VoiceCoil(verbose=True)
-    vc.sendCommand('k0')  # Turn off servo
-    vc.sendCommand('k1')  # Engage servo
+    vc.send_command('k0')  # Turn off servo
+    vc.send_command('k1')  # Engage servo
+    vc.close_connection()
 
   # def openConnection():
     #     try:

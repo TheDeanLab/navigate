@@ -58,6 +58,7 @@ class ZoomBase:
         if zoom_position in self.zoomdict:
             if self.verbose:
                 print('Setting zoom to {}'.format(zoom_position))
+            logger.debug(f"Setting zoom to {zoom_position}")
             if wait_until_done:
                 time.sleep(1)
 
@@ -77,6 +78,7 @@ class SyntheticZoom(ZoomBase):
         super().__init__(model, verbose)
         if self.verbose:
             print('Synthetic Zoom Initialized')
+        logger.debug("Synethetic Zoom Initialized")
 
     def set_zoom(self, zoom, wait_until_done=False):
         """
@@ -86,12 +88,15 @@ class SyntheticZoom(ZoomBase):
             self.zoomvalue = zoom
         else:
             raise ValueError('Zoom designation not in the configuration')
+            logger.error("Zoom designation not in the configuration")
         if self.verbose:
             print('Zoom set to {}'.format(zoom))
+        logger.debug(f"Zoom set to {zoom}")
 
     def move(self, position=0, wait_until_done=False):
         if self.verbose:
             print("Changing Virtual Zoom")
+        logger.debug("Changing Virtual Zoom")
 
     def read_position(self):
         """
@@ -100,7 +105,7 @@ class SyntheticZoom(ZoomBase):
         """
         if self.verbose:
             print("Reading Virtual Zoom Position")
-
+        logger.debug("Reading Virtual Zoom Position")
 
 class DynamixelZoom(ZoomBase):
     def __init__(self, model, verbose):
@@ -137,6 +142,7 @@ class DynamixelZoom(ZoomBase):
 
         if self.verbose:
             print('Dynamixel Zoom initialized')
+        logger.debug("Dynamixel Zoom initialized")
 
     def set_zoom(self, zoom, wait_until_done=False):
         """
@@ -147,9 +153,12 @@ class DynamixelZoom(ZoomBase):
             self.zoomvalue = zoom
         else:
             raise ValueError('Zoom designation not in the configuration')
+            logger.error("Zoom designation not in the configuration")
         if self.verbose:
             print('Zoom set to {}'.format(zoom))
             print("Zoom position:", self.read_position())
+        logger.debug(f"Zoom set to {zoom})")
+        logger.debug(f"Zoom position set to {self.read_position()})")
 
     def move(self, position, wait_until_done=False):
         """
@@ -193,9 +202,11 @@ class DynamixelZoom(ZoomBase):
             upper_limit = position + self.goal_position_offset
             if self.verbose:
                 print('Upper Limit: ', upper_limit)
+            logger.debug(f"Upper Limits {upper_limit}")
             lower_limit = position - self.goal_position_offset
             if self.verbose:
                 print('lower_limit: ', lower_limit)
+            logger.debug(f"lower limit, {lower_limit}")
             cur_position = self.dynamixel.read4ByteTxRx(
                 self.port_num, 1, self.id, self.addr_mx_present_position)
 
@@ -208,10 +219,11 @@ class DynamixelZoom(ZoomBase):
                     self.port_num, 1, self.id, self.addr_mx_present_position)
                 if self.verbose:
                     print(cur_position)
+                logger.debug(cur_position)
         self.dynamixel.closePort(self.port_num)
         if self.verbose:
             print('Zoom moved to {}'.format(position))
-
+        logger.debug(f"Zoom moved to {position}")
     def read_position(self):
         """
         # Returns position as an int between 0 and 4096
@@ -224,4 +236,5 @@ class DynamixelZoom(ZoomBase):
         self.dynamixel.closePort(self.port_num)
         if self.verbose:
             print('Zoom position: {}'.format(cur_position))
+        logger.debug(f"Zoom position {cur_position}")
         return cur_position

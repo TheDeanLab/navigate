@@ -133,6 +133,7 @@ class SyntheticCamera(CameraBase):
         
         if self.verbose:
             print("Synthetic Camera Class Initialized")
+        logger.debug("Synthetic Camera Class Initialized")
 
     def __del__(self):
         pass
@@ -235,6 +236,7 @@ class SyntheticCamera(CameraBase):
         self.pre_frame_idx = self.current_frame_idx
         if self.verbose:
             print('get a new frame from camera', frames)
+        logger.debug(f"get a new frame from camera, {frames}")
         return frames
 
     def set_ROI(self, roi_height=2048, roi_width=2048):
@@ -290,12 +292,13 @@ class HamamatsuOrca(CameraBase):
 
         if self.verbose:
             print("Hamamatsu Camera Class Initialized")
+        logger.debug("Hamamatsu Camera Class Initialized")
 
     def __del__(self):
         self.camera_controller.dev_close()
         if self.verbose:
             print("Hamamatsu Camera Shutdown")
-
+        logger.debug("Hamamatsu Camera Shutdown")
     def stop(self):
         self.stop_flag = True
 
@@ -314,6 +317,7 @@ class HamamatsuOrca(CameraBase):
                   "exposure_time"]
         for param in params:
             print(param, self.camera_controller.get_property_value(param))
+            logger.info(param, self.camera_controller.get_property_value(param))
 
     def close_camera(self):
         self.camera_controller.shutdown()
@@ -325,6 +329,7 @@ class HamamatsuOrca(CameraBase):
             self.camera_controller.set_property_value("sensor_mode", 12)
         else:
             print('Camera mode not supported')
+            logger.info("Camera mode not supported")
 
     def set_readout_direction(self, mode):
         if mode == 'Top-to-Bottom':
@@ -339,6 +344,7 @@ class HamamatsuOrca(CameraBase):
             self.camera_controller.set_property_value("readout_direction", 4)
         else:
             print('Camera readout direction not supported')
+            logger.info("Camera readout direction not supported")
 
     def set_lightsheet_rolling_shutter_width(self, mode):
         # TODO: Figure out how to do this.  I believe it is dictated by the exposure time and the line interval.
@@ -441,6 +447,10 @@ class HamamatsuOrca(CameraBase):
 
             print('sub array mode(1: OFF, 2: ON): ',
                   self.camera_controller.get_property_value('subarray_mode'))
+        logger.debug(f"subarray_hpos, {self.camera_controller.get_property_value('subarray_hpos')}")
+        logger.debug(f"subarray_hsize,{self.camera_controller.get_property_value('subarray_hsize')}")
+        logger.debug(f"subarray_vpos, {self.camera_controller.get_property_value('subarray_vpos')}")
+        logger.debug(f"subarray_vsize,{self.camera_controller.get_property_value('subarray_vsize')}")
 
     def initialize_image_series(self, data_buffer=None, number_of_frames=100):
         self.camera_controller.start_acquisition(data_buffer, number_of_frames)

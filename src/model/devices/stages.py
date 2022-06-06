@@ -201,6 +201,7 @@ class SyntheticStage(StageBase):
                 self.x_pos = self.x_pos + x_rel
             else:
                 print('Relative movement stopped: X limit would be reached!', 1000)
+                logger.info("Relative movement stopped: X limit would be reached!")
 
         if 'y_rel' in move_dictionary:
             y_rel = move_dictionary['y_rel']
@@ -209,6 +210,7 @@ class SyntheticStage(StageBase):
                 self.y_pos = self.y_pos + y_rel
             else:
                 print('Relative movement stopped: Y limit would be reached!', 1000)
+                logger.info("Relative movement stopped: Y limit would be reached!")
 
         if 'z_rel' in move_dictionary:
             z_rel = move_dictionary['z_rel']
@@ -217,6 +219,7 @@ class SyntheticStage(StageBase):
                 self.z_pos = self.z_pos + z_rel
             else:
                 print('Relative movement stopped: Z limit would be reached!', 1000)
+                logger.info("Relative movement stopped: Z limit would be reached!")
 
         if 'theta_rel' in move_dictionary:
             theta_rel = move_dictionary['theta_rel']
@@ -227,6 +230,7 @@ class SyntheticStage(StageBase):
                 print(
                     'Relative movement stopped: Rotation limit would be reached!',
                     1000)
+                logger.info("Relative movement stopped: Rotation limit would be reached!")
 
         if 'f_rel' in move_dictionary:
             f_rel = move_dictionary['f_rel']
@@ -237,6 +241,7 @@ class SyntheticStage(StageBase):
                 print(
                     'Relative movement stopped: Focus limit would be reached!',
                     1000)
+                logger.info("Relative movement stopped: Focus limit would be reached!")
 
         if wait_until_done is True:
             time.sleep(0.02)

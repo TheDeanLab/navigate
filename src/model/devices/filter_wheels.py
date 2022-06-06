@@ -48,6 +48,7 @@ import numpy as np
 # Logger Setup
 p = __name__.split(".")[0]
 logger = logging.getLogger(p)
+logging.basicConfig(level = logging.DEBUG)
 
 
 class FilterWheelBase:
@@ -156,14 +157,17 @@ class SutterFilterWheel(FilterWheelBase):
                 print('Opening Filter Wheel on Serial Port', self.comport)
             self.serial = serial.Serial(
                 self.comport, self.baudrate, timeout=.25)
+            logger.debug("Serial Port Opened")
         except serial.SerialException:
             raise UserWarning(
                 'Could not communicate with Sutter Lambda 10-B via COMPORT',
                 self.comport)
+            logger.warning("Could not communicate with Sutter Lambda 10-B via COMPORT")
 
         # Place Controller Into 'Online' Mode
         if self.verbose:
             print('Putting Sutter Lambda 10-B Into Online Mode')
+        logger.info("Sutter Lambda 10-B Put Into Online Mode")
         self.serial.write(bytes.fromhex('ee'))
 
         # Check to see if the initialization sequence has finished.
@@ -172,11 +176,13 @@ class SutterFilterWheel(FilterWheelBase):
             self.init_finished = True
             if self.verbose:
                 print('Done initializing the Sutter Lambda 10-B filter wheel.')
+            logger.info("Done initializing the Sutter Lambda 10-B filter wheel.")
         else:
             self.init_finished = False
 
         if self.verbose:
             print('Setting Sutter Lambda 10-B Filter to Default Filter Position')
+        logger.info("Setting Sutter Lambda 10-B Filter to Default Filter Position")
         self.set_filter('Empty-Alignment')
 
     def __enter__(self):
@@ -185,6 +191,7 @@ class SutterFilterWheel(FilterWheelBase):
     def __exit__(self, type, value, traceback):
         if self.verbose:
             print('Closing the Filter Wheel Serial Port')
+        logger.info("Closing the Filter Wheel Serial Port")
         self.close()
 
     def filter_change_delay(self, filter_name):
@@ -202,6 +209,7 @@ class SutterFilterWheel(FilterWheelBase):
         # Calculate Delay
         self.wait_until_done_delay = (
             self.delay_matrix[self.speed, delta_position])
+        logger.info("delay calculated")
 
     def set_filter(self, filter_name, wait_until_done=True):
         """
@@ -237,12 +245,14 @@ class SutterFilterWheel(FilterWheelBase):
 
                 if self.verbose:
                     print("Moving Filter Wheel:", wheel_idx)
+                logger.info("Moving Filter Wheel")
 
                 output_command = wheel_idx * 128 + self.wheel_position + 16 * self.speed
                 output_command = output_command.to_bytes(1, 'little')
 
                 if self.verbose:
                     print('Sending Filter Wheel Command:', output_command)
+                logger.info("Sending Filter Wheel Command")
                 self.serial.write(output_command)
 
             #  Wheel Position Change Delay
@@ -261,6 +271,7 @@ class SutterFilterWheel(FilterWheelBase):
         else:
             raise UserWarning(
                 "The serial port to the Sutter Lambda 10-B is on, but it isn't responding as expected.")
+            logger.warning("The serial port to the Sutter Lambda 10-B is on, but it isn't responding as expected.")
         return self.serial.read(num_bytes)
 
     def close(self):
@@ -269,5 +280,6 @@ class SutterFilterWheel(FilterWheelBase):
         """
         if self.verbose:
             print('Closing the Filter Wheel Serial Port')
+        logger.info("Closing the Filter Wheel Serial Port")
         self.set_filter('Empty-Alignment')
         self.serial.close()

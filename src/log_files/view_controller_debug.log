@@ -1,45 +1,48 @@
-2022-06-06 13:24:59,762 - controller - DEBUG - aslm_controller: Spec - Configuration Path: /Users/deanlab/Documents/GitHub/ASLM/src/config/configuration.yml
-2022-06-06 13:24:59,762 - controller - DEBUG - aslm_controller: Spec - Experiment Path: /Users/deanlab/Documents/GitHub/ASLM/src/config/experiment.yml
-2022-06-06 13:24:59,762 - controller - DEBUG - aslm_controller: Spec - ETL Constants Path: /Users/deanlab/Documents/GitHub/ASLM/src/config/etl_constants.yml
-2022-06-06 13:24:59,906 - controller - DEBUG - gui_controller: From Channels_Tab_Controller : ('channel number is', 5)
-2022-06-06 13:24:59,906 - controller - INFO - gui_controller: Working
-2022-06-06 13:24:59,906 - controller - DEBUG - gui_controller: From Channel_Setting_Controller : ('channel has been initialized',)
-2022-06-06 13:24:59,906 - controller - INFO - gui_controller: Working
-2022-06-06 13:24:59,907 - controller - DEBUG - gui_controller: From Channels_Tab_Controller : ('channels tab has been initialized',)
-2022-06-06 13:24:59,907 - controller - INFO - gui_controller: Working
-2022-06-06 13:24:59,914 - controller - DEBUG - gui_controller: From Acquire_Bar_Controller : ('image mode is set to', 'single')
-2022-06-06 13:24:59,914 - controller - INFO - gui_controller: Working
-2022-06-06 13:24:59,914 - controller - DEBUG - gui_controller: From Acquire_Bar_Controller : ('set saving settings',)
-2022-06-06 13:24:59,914 - controller - INFO - gui_controller: Working
-2022-06-06 13:24:59,915 - controller - DEBUG - gui_controller: From Stage_GUI_Controller : ('stage position is changed',)
-2022-06-06 13:24:59,915 - controller - INFO - gui_controller: Working
-2022-06-06 13:24:59,915 - controller - DEBUG - gui_controller: From Stage_GUI_Controller : ('stage position is changed',)
-2022-06-06 13:24:59,915 - controller - INFO - gui_controller: Working
-2022-06-06 13:24:59,915 - controller - DEBUG - gui_controller: From Stage_GUI_Controller : ('stage position is changed',)
-2022-06-06 13:24:59,915 - controller - INFO - gui_controller: Working
-2022-06-06 13:24:59,915 - controller - DEBUG - gui_controller: From Stage_GUI_Controller : ('stage position is changed',)
-2022-06-06 13:24:59,915 - controller - INFO - gui_controller: Working
-2022-06-06 13:24:59,915 - controller - DEBUG - gui_controller: From Stage_GUI_Controller : ('stage position is changed',)
-2022-06-06 13:24:59,915 - controller - INFO - gui_controller: Working
-2022-06-06 13:24:59,916 - controller - DEBUG - gui_controller: From Channel_Setting_Controller : ('channel has been set new value',)
-2022-06-06 13:24:59,916 - controller - INFO - gui_controller: Working
-2022-06-06 13:24:59,917 - controller - DEBUG - gui_controller: From Multi_Position_Controller : ('loaded new positions',)
-2022-06-06 13:24:59,917 - controller - INFO - gui_controller: Working
-2022-06-06 13:24:59,917 - controller - DEBUG - gui_controller: From Channels_Tab_Controller : ('timepoint settings on channels tab have been changed and recalculated',)
-2022-06-06 13:24:59,917 - controller - INFO - gui_controller: Working
-2022-06-06 13:24:59,917 - controller - DEBUG - gui_controller: From Channels_Tab_Controller : ('stack acquisition settings on channels tab have been changed and recalculated',)
-2022-06-06 13:24:59,917 - controller - INFO - gui_controller: Working
-2022-06-06 13:24:59,917 - controller - DEBUG - gui_controller: From Channels_Tab_Controller : ('channels tab has been set new values',)
-2022-06-06 13:24:59,917 - controller - INFO - gui_controller: Working
-2022-06-06 13:24:59,918 - controller - DEBUG - aslm_controller: In central controller: command passed from child, resolution, ('1x',)
-2022-06-06 13:24:59,918 - controller - DEBUG - camera_view_controller: Autoscale Enabled
-2022-06-06 13:25:00,165 - controller - DEBUG - aslm_controller: In central controller: command passed from child, stage, (35000.0, 'x')
-2022-06-06 13:25:00,166 - controller - DEBUG - aslm_controller: In central controller: command passed from child, stage, (42000.0, 'y')
-2022-06-06 13:25:00,166 - controller - DEBUG - aslm_controller: In central controller: command passed from child, stage, (15500.0, 'z')
-2022-06-06 13:25:00,166 - controller - DEBUG - aslm_controller: In central controller: command passed from child, stage, (0.0, 'theta')
-2022-06-06 13:25:00,166 - controller - DEBUG - aslm_controller: In central controller: command passed from child, stage, (70000.0, 'f')
-2022-06-06 13:25:06,660 - controller - DEBUG - gui_controller: From Channels_Tab_Controller : ('acquisition mode has been changed to', 'single')
-2022-06-06 13:25:06,660 - controller - INFO - gui_controller: Working
-2022-06-06 13:25:06,660 - controller - DEBUG - aslm_controller: In central controller: command passed from child, acquire, ()
-2022-06-06 13:25:07,320 - controller - DEBUG - gui_controller: From Channels_Tab_Controller : ('acquisition mode has been changed to', 'stop')
-2022-06-06 13:25:07,320 - controller - INFO - gui_controller: Working
+2022-06-06 13:26:48,131 - controller - DEBUG - aslm_controller: Spec - Configuration Path: /Users/deanlab/Documents/GitHub/ASLM/src/config/configuration.yml
+2022-06-06 13:26:48,131 - controller - DEBUG - aslm_controller: Spec - Experiment Path: /Users/deanlab/Documents/GitHub/ASLM/src/config/experiment.yml
+2022-06-06 13:26:48,131 - controller - DEBUG - aslm_controller: Spec - ETL Constants Path: /Users/deanlab/Documents/GitHub/ASLM/src/config/etl_constants.yml
+2022-06-06 13:26:48,274 - controller - DEBUG - gui_controller: From Channels_Tab_Controller : ('channel number is', 5)
+2022-06-06 13:26:48,274 - controller - INFO - gui_controller: Working
+2022-06-06 13:26:48,274 - controller - DEBUG - gui_controller: From Channel_Setting_Controller : ('channel has been initialized',)
+2022-06-06 13:26:48,274 - controller - INFO - gui_controller: Working
+2022-06-06 13:26:48,274 - controller - DEBUG - gui_controller: From Channels_Tab_Controller : ('channels tab has been initialized',)
+2022-06-06 13:26:48,274 - controller - INFO - gui_controller: Working
+2022-06-06 13:26:48,282 - controller - DEBUG - gui_controller: From Acquire_Bar_Controller : ('image mode is set to', 'single')
+2022-06-06 13:26:48,282 - controller - INFO - gui_controller: Working
+2022-06-06 13:26:48,282 - controller - DEBUG - gui_controller: From Acquire_Bar_Controller : ('set saving settings',)
+2022-06-06 13:26:48,282 - controller - INFO - gui_controller: Working
+2022-06-06 13:26:48,282 - controller - DEBUG - gui_controller: From Stage_GUI_Controller : ('stage position is changed',)
+2022-06-06 13:26:48,282 - controller - INFO - gui_controller: Working
+2022-06-06 13:26:48,283 - controller - DEBUG - gui_controller: From Stage_GUI_Controller : ('stage position is changed',)
+2022-06-06 13:26:48,283 - controller - INFO - gui_controller: Working
+2022-06-06 13:26:48,283 - controller - DEBUG - gui_controller: From Stage_GUI_Controller : ('stage position is changed',)
+2022-06-06 13:26:48,283 - controller - INFO - gui_controller: Working
+2022-06-06 13:26:48,283 - controller - DEBUG - gui_controller: From Stage_GUI_Controller : ('stage position is changed',)
+2022-06-06 13:26:48,283 - controller - INFO - gui_controller: Working
+2022-06-06 13:26:48,283 - controller - DEBUG - gui_controller: From Stage_GUI_Controller : ('stage position is changed',)
+2022-06-06 13:26:48,283 - controller - INFO - gui_controller: Working
+2022-06-06 13:26:48,284 - controller - DEBUG - gui_controller: From Channel_Setting_Controller : ('channel has been set new value',)
+2022-06-06 13:26:48,284 - controller - INFO - gui_controller: Working
+2022-06-06 13:26:48,285 - controller - DEBUG - gui_controller: From Multi_Position_Controller : ('loaded new positions',)
+2022-06-06 13:26:48,285 - controller - INFO - gui_controller: Working
+2022-06-06 13:26:48,285 - controller - DEBUG - gui_controller: From Channels_Tab_Controller : ('timepoint settings on channels tab have been changed and recalculated',)
+2022-06-06 13:26:48,285 - controller - INFO - gui_controller: Working
+2022-06-06 13:26:48,285 - controller - DEBUG - gui_controller: From Channels_Tab_Controller : ('stack acquisition settings on channels tab have been changed and recalculated',)
+2022-06-06 13:26:48,285 - controller - INFO - gui_controller: Working
+2022-06-06 13:26:48,285 - controller - DEBUG - gui_controller: From Channels_Tab_Controller : ('channels tab has been set new values',)
+2022-06-06 13:26:48,285 - controller - INFO - gui_controller: Working
+2022-06-06 13:26:48,286 - controller - DEBUG - aslm_controller: In central controller: command passed from child, resolution, ('1x',)
+2022-06-06 13:26:48,286 - controller - DEBUG - camera_view_controller: Autoscale Enabled
+2022-06-06 13:26:48,534 - controller - DEBUG - aslm_controller: In central controller: command passed from child, stage, (35000.0, 'x')
+2022-06-06 13:26:48,534 - controller - DEBUG - aslm_controller: In central controller: command passed from child, stage, (42000.0, 'y')
+2022-06-06 13:26:48,534 - controller - DEBUG - aslm_controller: In central controller: command passed from child, stage, (15500.0, 'z')
+2022-06-06 13:26:48,534 - controller - DEBUG - aslm_controller: In central controller: command passed from child, stage, (0.0, 'theta')
+2022-06-06 13:26:48,535 - controller - DEBUG - aslm_controller: In central controller: command passed from child, stage, (70000.0, 'f')
+2022-06-06 13:26:52,501 - controller - DEBUG - gui_controller: From Channels_Tab_Controller : ('acquisition mode has been changed to', 'single')
+2022-06-06 13:26:52,501 - controller - INFO - gui_controller: Working
+2022-06-06 13:26:52,502 - controller - DEBUG - aslm_controller: In central controller: command passed from child, acquire, ()
+2022-06-06 13:26:53,140 - controller - DEBUG - gui_controller: From Channels_Tab_Controller : ('acquisition mode has been changed to', 'stop')
+2022-06-06 13:26:53,140 - controller - INFO - gui_controller: Working
+2022-06-06 13:26:57,430 - controller - DEBUG - gui_controller: From Stage_GUI_Controller : ('stage position is changed',)
+2022-06-06 13:26:57,430 - controller - INFO - gui_controller: Working
+2022-06-06 13:26:57,680 - controller - DEBUG - aslm_controller: In central controller: command passed from child, stage, (42500.0, 'y')

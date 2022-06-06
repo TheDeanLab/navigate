@@ -51,9 +51,9 @@ import logging
 import logging.config
 import yaml
 
-
-# Third Party Imports
-import tensorflow as tf
+if platform.system() != 'Darwin':
+    # Third Party Imports
+    import tensorflow as tf
 
 # Local Imports
 from controller.aslm_controller import ASLM_controller as controller
@@ -61,13 +61,14 @@ from controller.aslm_controller import ASLM_controller as controller
 
 def main():
     # Evaluate GPU Status for Analysis Routines
-    number_GPUs = len(tf.config.list_physical_devices('GPU'))
-    if number_GPUs == 0 or platform.system() == 'Darwin':
-        USE_GPU = False
-        print('No NVIDIA GPU in system. Running on CPU only.')
-    else:
-        USE_GPU = True
-        print('NVIDIA GPU detected.')
+    USE_GPU = False
+    if platform.system() != 'Darwin':
+        number_GPUs = len(tf.config.list_physical_devices('GPU'))
+        if number_GPUs == 0:
+            print('No NVIDIA GPU in system. Running on CPU only.')
+        else:
+            USE_GPU = True
+            print('NVIDIA GPU detected.')
 
     # Specify the Default Configuration File Directories (located in src/config)
     base_directory = Path(__file__).resolve().parent

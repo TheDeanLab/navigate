@@ -56,14 +56,11 @@ from controller.aslm_controller import ASLM_controller as controller
 
 def main():
     # Evaluate GPU Status for Analysis Routines
-    if platform.system == 'Darwin':
-        # TensorFlow not supported on Apple Devices
-        USE_GPU = False
-    else:
+    USE_GPU = False
+    if platform.system() != 'Darwin':
         import tensorflow as tf
         number_GPUs = len(tf.config.list_physical_devices('GPU'))
         if number_GPUs == 0:
-            USE_GPU = False
             print('No NVIDIA GPU in system. Running on CPU only.')
         else:
             USE_GPU = True

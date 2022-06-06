@@ -82,20 +82,29 @@ class VoiceCoil:
         
         self.init_connection()
         
-    def init_connection ():
+    def init_connection (self):
         # Send command d0 and read returned information
         if self.read_on_init:
             if self.verbose:
                 print("Sending Command d0 to the voice coil.")
             
+            #Send command 'd0'
             command = b'd0'
             print("Command Sent in Bytes:", command)
             time.sleep(2)
             self.serial.write(command)
             time.sleep(2)
-            self.serial.write(b'\r')
-            data = self.serial.read(9999)
-
+            data = self.serial.read_bytes(1)
+            if len(data) > 0:
+                print("Data received: " + data)
+            else:
+                print("Nothing received from", command)
+            
+            #Send carriage return
+            command - b'\r'
+            print("Command Sent in Bytes:", command)
+            self.serial.write(command)
+            data = self.serial.read_bytes(1)
             if len(data) > 0:
                 print("Data received: " + data)
             else:
@@ -159,9 +168,12 @@ if __name__ == "__main__":
     #Re-open the connection
     vc.open()
     vc.init_connection()
-    
+
     vc.send_command('k0')  # Turn off servo
     vc.send_command('k1')  # Engage servo
+
+    #Close Connection
+    vc.close_connection()
 
 
   # def openConnection():

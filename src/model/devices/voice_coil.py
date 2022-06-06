@@ -52,6 +52,7 @@ class VoiceCoil:
         self.parity = serial.PARITY_NONE
         self.stopBits = serial.STOPBITS_ONE
         self.flowControl = None  # Not implemented yet.
+        self.xonxoff = False
         self.timeout = 1.25
         self.verbose = verbose
         self.init_finished = False
@@ -85,9 +86,11 @@ class VoiceCoil:
             
             command = b'd0'
             print("Command Sent in Bytes:", command)
+            time.sleep(2)
             self.serial.write(command)
+            time.sleep(2)
             self.serial.write(b'\r')
-            data = self.serial.read(999)
+            data = self.serial.read(9999)
 
             if len(data) > 0:
                 print("Data received: " + data)
@@ -127,7 +130,7 @@ class VoiceCoil:
                 self.close_connection()
             else:
                 # Send command to device
-                self.serial.write(msg.encode('utf-8'))
+                self.serial.write(bytes.fromhex(msg))
 
             # Read data sent from device
             data = self.serial.read(9999)

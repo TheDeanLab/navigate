@@ -1,3 +1,0 @@
-2022-06-06 11:54:24,106 - controller - DEBUG - aslm_controller: Spec - Configuration Path: /Users/deanlab/Documents/GitHub/ASLM/src/config/configuration.yml
-2022-06-06 11:54:24,107 - controller - DEBUG - aslm_controller: Spec - Experiment Path: /Users/deanlab/Documents/GitHub/ASLM/src/config/experiment.yml
-2022-06-06 11:54:24,107 - controller - DEBUG - aslm_controller: Spec - ETL Constants Path: /Users/deanlab/Documents/GitHub/ASLM/src/config/etl_constants.yml

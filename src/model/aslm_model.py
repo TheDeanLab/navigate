@@ -356,8 +356,9 @@ class Model:
     def move_stage(self, pos_dict):
         """
         Moves the stages.
+        Checks "on target state" after command and waits until done.
         """
-        self.stages.move_absolute(pos_dict)
+        self.stages.move_absolute(pos_dict, wait_until_done=True)
         self.stages.report_position()
 
     def before_acquisition(self):

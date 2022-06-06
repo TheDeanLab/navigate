@@ -56,7 +56,7 @@ from controller.aslm_controller import ASLM_controller as controller
 
 def main():
     # Evaluate GPU Status for Analysis Routines
-    if platform.system == 'Darwin':
+    if platform.system() == 'Darwin':
         # TensorFlow not supported on Apple Devices
         USE_GPU = False
     else:

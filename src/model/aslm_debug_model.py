@@ -39,11 +39,14 @@ import random
 import time
 import logging
 from pathlib import Path
+import platform
 
 from tifffile import imread
 import numpy as np
 from scipy.fftpack import dctn
-import tensorflow as tf
+# Only import if Linux or Windows
+if platform.system() != 'Darwin':
+    import tensorflow as tf
 
 from multiprocessing import Pool, Lock
 
@@ -138,6 +141,9 @@ class Debug_Module:
             self.analysis_type = analysis_type
 
     def get_timings(self, *args, **kwargs):
+        """
+        Gets camera timing information.  Units in seconds.
+        """
         cyclic_trigger = self.model.camera.camera_controller.get_property_value('cyclic_trigger_period')
         trigger_blank = self.model.camera.camera_controller.get_property_value('minimum_trigger_blank')
         trigger_interval = self.model.camera.camera_controller.get_property_value('minimum_trigger_interval')
@@ -150,14 +156,14 @@ class Debug_Module:
         print('start autofocus', *args)
         self.model.experiment.MicroscopeState = args[0]
         self.model.experiment.AutoFocusParameters = args[1]
-        frame_num = self.model.get_autofocus_frame_num() + 1 # What does adding one here again doing?
+        frame_num = self.model.get_autofocus_frame_num() + 1  # What does adding one here again doing?
         if frame_num <= 1:
             return
         self.model.before_acquisition() # Opens correct shutter and puts all signals to false
         self.model.autofocus_on = True
         self.model.is_save = False
         self.model.f_position = args[2] # Current position
-        self.model.cpu_num = args[3] # cpu cores used for analysis
+        self.model.cpu_num = args[3]  # cpu cores used for analysis
 
         self.model.signal_thread = threading.Thread(target=self.model.run_single_acquisition, kwargs={'target_channel': 1})
         self.model.signal_thread.name = "Autofocus Signal"
@@ -174,8 +180,8 @@ class Debug_Module:
             self.model.before_acquisition()
             self.model.trigger_waiting_time = 0
             self.model.pre_trigger_time = 0
-            self.model.signal_thread = threading.Thread(
-                target=self.send_signals(args[1]))
+            self.model.signal_thread = threading.Thread(target=self.send_signals, args=(args[1],))
+            # self.model.signal_thread = threading.Thread(target=self.send_signals(args[1]))
             self.model.data_thread = threading.Thread(target=self.get_frames, args=(args[1],))
             self.model.signal_thread.start()
             self.model.data_thread.start()
@@ -338,6 +344,7 @@ class Debug_Module:
 
         # Plot Data list
         plot_data = [] # Going to be a List of [focus, entropy]
+        pool = Pool(processes=self.model.cpu_num)
         start_time = time.perf_counter()
         
         pool = Pool(processes=self.model.cpu_num)
@@ -354,12 +361,13 @@ class Debug_Module:
         if end_length == 0:
             end_length = end_length2
             end_length2 = 0
+        
 
         def callback_func(pos, frame_idx):
             def func(entropy):
-                if entropy[0] > self.model.max_entropy:
-                    self.model.max_entropy = entropy[0]
-                    self.model.focus_pos = pos
+                #if entropy[0] > self.model.max_entropy:
+                #    self.model.max_entropy = entropy[0]
+                #    self.model.focus_pos = pos
                 plot_data.append([pos, entropy[0]])
                 if len(plot_data) == end_length:
                     end_lock.release()

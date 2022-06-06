@@ -56,21 +56,17 @@ def start_image_writer(configuration, experiment, verbose):
     return ImageWriter(configuration, experiment, verbose)
 
 
-def start_analysis(configuration, experiment, verbose):
+def start_analysis(configuration, experiment, USE_GPU, verbose):
     """
-    # Initializes the analysis classes on a dedicated thread
+    # Initializes the analysis class on a dedicated thread
     """
 
-    CPU = True
-    if CPU is True:
+    if USE_GPU is False:
         from model.aslm_analysis import CPUAnalysis
         return CPUAnalysis(verbose)
-    elif CPU is False:
+    else:
         from model.aslm_analysis import GPUAnalysis
         return GPUAnalysis(verbose)
-    else:
-        pass
-        # device_not_found(configuration.Devices['camera'])
 
 
 def start_camera(configuration, experiment, verbose):

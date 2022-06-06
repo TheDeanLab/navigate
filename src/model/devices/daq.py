@@ -177,9 +177,7 @@ class DAQBase:
                     "Low Resolution Mode.  Amp/Off:",
                     self.etl_l_amplitude,
                     self.etl_l_offset)
-            logger.debug(f"Low Resolution Mode.  Amp/Off:,
-                    {self.etl_l_amplitude},
-                    {self.etl_l_offset})")
+            logger.debug(f"Low Resolution Mode.  Amp/Off:, {self.etl_l_amplitude}, {self.etl_l_offset})")
 
         else:
             print("ETL setting not pulled properly.")

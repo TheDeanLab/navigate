@@ -315,7 +315,7 @@ class SyntheticStage(StageBase):
                     axis +
                     '_pos')
             except BaseException:
-                logger.exception(f"Zeroing of axis: {axis} failed")
+                logger.error(f"Zeroing of axis: {axis} failed")
                 print('Zeroing of axis: ', axis, 'failed')
 
     def unzero_axes(self, list):
@@ -324,7 +324,7 @@ class SyntheticStage(StageBase):
                 exec('self.int_' + axis + '_pos_offset = 0')
             except BaseException:
                 logger.exception(f"Unzeroing of axis: {axis} failed")
-                #print('Unzeroing of axis: ', axis, 'failed')
+                print('Unzeroing of axis: ', axis, 'failed')
 
     def load_sample(self):
         self.y_pos = self.model.StageParameters['y_load_position']
@@ -379,10 +379,10 @@ class PIStage(StageBase):
             """
             self.pidevice.unload()
             if self.verbose:
-                logger.debug("PI connection closed")
-                #print('PI connection closed')
+                print('PI connection closed')
+            logger.debug("PI connection closed")
         except BaseException:
-            logger.exception("Error while disconnecting the PI stage")
+            logger.error("Error while disconnecting the PI stage")
             print('Error while disconnecting the PI stage')
 
     def create_position_dict(self):
@@ -430,9 +430,8 @@ class PIStage(StageBase):
         self.create_internal_position_dict()
 
         if self.verbose:
-            logger.debug(f"Stage Positions: {self.int_position_dict}")
-            #print("Stage Positions:", self.int_position_dict)
-
+            print("Stage Positions:", self.int_position_dict)
+        logger.debug(f"Stage Positions: {self.int_position_dict}")
     def move_relative(self, move_dictionary, wait_until_done=False):
         """
         # PI move relative method.

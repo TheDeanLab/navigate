@@ -319,6 +319,7 @@ class HamamatsuOrca(CameraBase):
                   "exposure_time"]
         for param in params:
             print(param, self.camera_controller.get_property_value(param))
+            logger.info(param, self.camera_controller.get_property_value(param))
 
     def close_camera(self):
         self.camera_controller.shutdown()
@@ -330,6 +331,7 @@ class HamamatsuOrca(CameraBase):
             self.camera_controller.set_property_value("sensor_mode", 12)
         else:
             print('Camera mode not supported')
+            logger.info("Camera mode not supported")
 
     def set_readout_direction(self, mode):
         if mode == 'Top-to-Bottom':

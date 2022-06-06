@@ -157,7 +157,7 @@ class SutterFilterWheel(FilterWheelBase):
                 print('Opening Filter Wheel on Serial Port', self.comport)
             self.serial = serial.Serial(
                 self.comport, self.baudrate, timeout=.25)
-        logger.debug(f"Opening Filter Wheel on Serial Port, {self.comport}")
+            logger.debug(f"Opening Filter Wheel on Serial Port, {self.comport}")
         except serial.SerialException:
             raise UserWarning(
                 'Could not communicate with Sutter Lambda 10-B via COMPORT',

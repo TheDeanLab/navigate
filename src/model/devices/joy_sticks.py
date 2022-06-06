@@ -225,6 +225,7 @@ class JoystickHandler():
 
         if self.verbose:
             print('New joystick mode: ', str)
+        logger.debug("New joystick mode")
 
         if str == '012':
             self.parent.display_status_message('Joystick Mode: XY Mode')

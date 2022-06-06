@@ -254,6 +254,7 @@ class SyntheticLaserTriggers(LaserTriggerBase):
         self.switching_state = False
         if self.verbose:
             print("Low Resolution Laser Path Enabled")
+        logger.debug("Low Resolution Laser Path Enabled")
 
     def enable_high_resolution_laser(self):
         """
@@ -263,6 +264,7 @@ class SyntheticLaserTriggers(LaserTriggerBase):
         self.switching_state = True
         if self.verbose:
             print("High Resolution Laser Path Enabled")
+        logger.debug("High Resolution Laser Path Enabled")
 
     def trigger_digital_laser(self, current_laser_index):
         self.turn_off_lasers()

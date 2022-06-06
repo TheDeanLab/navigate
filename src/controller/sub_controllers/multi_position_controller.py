@@ -113,6 +113,7 @@ class Multi_Position_Controller(GUI_Controller):
         if list(filter(lambda v: type(v) != int and type(v) != float, temp)):
             #  TODO: show error: position is invalid
             print('position is invalid')
+            logger.info("position is invalid")
             return
         position = {
             'x': temp[0],
@@ -146,6 +147,7 @@ class Multi_Position_Controller(GUI_Controller):
         if not cmp_header.all():
             #  TODO: show error message
             print("The csv file isn't right, it should contain [X, Y, Z, R, F]")
+            logger.info("The csv file isn't right, it should contain [X, Y, Z, R, F]")
             return
         model = TableModel(dataframe=df)
         self.table.updateModel(model)

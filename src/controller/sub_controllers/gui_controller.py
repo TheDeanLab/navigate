@@ -77,3 +77,4 @@ class GUI_Controller:
     def show_verbose_info(self, *info):
         if self.verbose:
             print('From', self.__class__.__name__, ':', *info)
+        logger.debug(f"From {self.__class__.__name__} : {*info}")

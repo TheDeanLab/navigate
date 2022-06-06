@@ -81,6 +81,9 @@ class ASLM_controller:
             etl_constants_path,
             USE_GPU,
             args):
+        
+        logger.info("Spec - Controller controlling")
+        logger.info("Performance - Controller performing")
 
         # Verbosity and debugging menu
         self.verbose = args.verbose

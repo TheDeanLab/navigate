@@ -55,9 +55,7 @@ from model.concurrency.concurrency_tools import ResultThread, SharedNDArray, Obj
 # debug
 from model.aslm_debug_model import Debug_Module
 
-# Logger Setup
-p = __name__.split(".")[0]
-logger = logging.getLogger(p)
+
 
 class Model:
     def __init__(
@@ -67,6 +65,13 @@ class Model:
             configuration_path=None,
             experiment_path=None,
             etl_constants_path=None):
+        
+        # Logger Setup
+        from log_files.log_functions import log_setup
+        log_setup('model_logging.yml')
+        p = __name__.split(".")[0]
+        logger = logging.getLogger(p)
+        
         logger.info("Performance - Testing if it works")
         logger.debug("Spec - Testing if spec works too")
         logger.info("Made it to model")

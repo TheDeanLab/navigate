@@ -92,18 +92,21 @@ class SyntheticShutter(ShutterBase):
         self.shutter_left_state = True
         if self.verbose:
             print('Shutter left opened')
+        logger.debug("Shutter left opened")
 
     def open_right(self):
         self.shutter_right_state = True
         self.shutter_left_state = False
         if self.verbose:
             print('Shutter right opened')
+        logger.debug("Shutter right opened")
 
     def close_shutters(self):
         self.shutter_right_state = False
         self.shutter_left_state = False
         if self.verbose:
             print('Both shutters closed')
+        logger.debug("Both shutters closed")
 
     def state(self):
         return self.shutter_left_state, self.shutter_right_state
@@ -153,6 +156,7 @@ class ThorlabsShutter(ShutterBase):
 
         if self.verbose:
             print('Shutter left opened')
+        logger.debug("Shutter left opened")
 
     def open_right(self):
         """
@@ -167,7 +171,9 @@ class ThorlabsShutter(ShutterBase):
         self.shutter_left_task.write(self.shutter_left_state, auto_start=True)
 
         if self.verbose:
-            print('Shutter left opened')
+            print('Shutter right opened')
+        logger.debug("Shutter right opened")
+
 
     def close_shutters(self):
         """
@@ -182,6 +188,7 @@ class ThorlabsShutter(ShutterBase):
 
         if self.verbose:
             print('Both shutters closed')
+        logger.debug("Both shutters closed")
 
     def state(self):
         """

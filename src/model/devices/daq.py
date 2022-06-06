@@ -163,6 +163,9 @@ class DAQBase:
                     "High Resolution Mode.  Amp/Off:",
                     self.etl_r_amplitude,
                     self.etl_r_offset)
+            logger.debug(f"High Resolution Mode.  Amp/Off:,
+                    {self.etl_r_amplitude},
+                    {self.etl_r_offset})")
 
         elif resolution_mode == 'low':
             zoom = microscope_state['zoom']
@@ -175,9 +178,13 @@ class DAQBase:
                     "Low Resolution Mode.  Amp/Off:",
                     self.etl_l_amplitude,
                     self.etl_l_offset)
+            logger.debug(f"Low Resolution Mode.  Amp/Off:,
+                    {self.etl_l_amplitude},
+                    {self.etl_l_offset})")
 
         else:
             print("ETL setting not pulled properly.")
+            logger.info("ETL setting not pulled properly")
 
     def create_etl_waveform(self):
         """

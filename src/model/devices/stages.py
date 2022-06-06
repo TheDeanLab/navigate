@@ -186,9 +186,8 @@ class SyntheticStage(StageBase):
         self.int_theta_pos = self.theta_pos + self.int_theta_pos_offset
         self.create_internal_position_dict()
         if self.verbose:
-            logger.debug(f"Stage Position:, {self.int_position_dict}")
-            #print("Stage Position: ", self.int_position_dict)
-
+            print("Stage Position: ", self.int_position_dict)
+        logger.debug(f"Stage Position:, {self.int_position_dict}")
     def move_relative(self, move_dictionary, wait_until_done=False):
         """
         Move relative method
@@ -200,13 +199,8 @@ class SyntheticStage(StageBase):
                     x_rel) and (self.x_max >= self.x_pos + x_rel):
                 self.x_pos = self.x_pos + x_rel
             else:
-<<<<<<< HEAD
                 print('Relative movement stopped: X limit would be reached!', 1000)
-                logger.info("Relative movement stopped: X limit would be reached!")
-=======
                 logger.info("Relative movement stopped: X limit would be reached!, 1000")
-                #print('Relative movement stopped: X limit would be reached!', 1000)
->>>>>>> 98a26ed0dc3298a332585d014a38f351b01c9a2e
 
         if 'y_rel' in move_dictionary:
             y_rel = move_dictionary['y_rel']
@@ -214,13 +208,8 @@ class SyntheticStage(StageBase):
                     y_rel) and (self.y_max >= self.y_pos + y_rel):
                 self.y_pos = self.y_pos + y_rel
             else:
-<<<<<<< HEAD
                 print('Relative movement stopped: Y limit would be reached!', 1000)
                 logger.info("Relative movement stopped: Y limit would be reached!")
-=======
-                logger.info("Relative movement stopped: Y limit would be reached!, 1000")
-               # print('Relative movement stopped: Y limit would be reached!', 1000)
->>>>>>> 98a26ed0dc3298a332585d014a38f351b01c9a2e
 
         if 'z_rel' in move_dictionary:
             z_rel = move_dictionary['z_rel']
@@ -228,13 +217,8 @@ class SyntheticStage(StageBase):
                     z_rel) and (self.z_max >= self.z_pos + z_rel):
                 self.z_pos = self.z_pos + z_rel
             else:
-<<<<<<< HEAD
                 print('Relative movement stopped: Z limit would be reached!', 1000)
                 logger.info("Relative movement stopped: Z limit would be reached!")
-=======
-                logger.info("Relative movement stopped: Z limit would be reached!, 1000")
-                #print('Relative movement stopped: Z limit would be reached!', 1000)
->>>>>>> 98a26ed0dc3298a332585d014a38f351b01c9a2e
 
         if 'theta_rel' in move_dictionary:
             theta_rel = move_dictionary['theta_rel']
@@ -242,17 +226,10 @@ class SyntheticStage(StageBase):
                     theta_rel) and (self.theta_max >= self.theta_pos + theta_rel):
                 self.theta_pos = self.theta_pos + theta_rel
             else:
-<<<<<<< HEAD
                 print(
                     'Relative movement stopped: Rotation limit would be reached!',
                     1000)
                 logger.info("Relative movement stopped: Rotation limit would be reached!")
-=======
-                logger.info("Relative movement stopped: Rotation limit would be reached!, 1000")
-                #print(
-                  #  'Relative movement stopped: Rotation limit would be reached!',
-                   # 1000)
->>>>>>> 98a26ed0dc3298a332585d014a38f351b01c9a2e
 
         if 'f_rel' in move_dictionary:
             f_rel = move_dictionary['f_rel']
@@ -260,17 +237,10 @@ class SyntheticStage(StageBase):
                     f_rel) and (self.f_max >= self.f_pos + f_rel):
                 self.f_pos = self.f_pos + f_rel
             else:
-<<<<<<< HEAD
                 print(
                     'Relative movement stopped: Focus limit would be reached!',
                     1000)
                 logger.info("Relative movement stopped: Focus limit would be reached!")
-=======
-                logger.info("Relative movement stopped: Focus limit would be reached!, 1000")
-                #print(
-                  #  'Relative movement stopped: Focus limit would be reached!',
-                  #  1000)
->>>>>>> 98a26ed0dc3298a332585d014a38f351b01c9a2e
 
         if wait_until_done is True:
             time.sleep(0.02)
@@ -287,7 +257,7 @@ class SyntheticStage(StageBase):
                 self.x_pos = x_abs
             else:
                 logger.info("Absolute movement stopped: X limit would be reached!, 1000")
-                #print('Absolute movement stopped: X limit would be reached!', 1000)
+                print('Absolute movement stopped: X limit would be reached!', 1000)
 
         if 'y_abs' in move_dictionary:
             y_abs = move_dictionary['y_abs']
@@ -296,7 +266,7 @@ class SyntheticStage(StageBase):
                 self.y_pos = y_abs
             else:
                 logger.info("Absolute movement stopped: Y limit would be reached!, 1000")
-                #print('Absolute movement stopped: Y limit would be reached!', 1000)
+                print('Absolute movement stopped: Y limit would be reached!', 1000)
 
         if 'z_abs' in move_dictionary:
             z_abs = move_dictionary['z_abs']
@@ -305,7 +275,7 @@ class SyntheticStage(StageBase):
                 self.z_pos = z_abs
             else:
                 logger.info("Absolute movement stopped: Z limit would be reached!, 1000")
-               # print('Absolute movement stopped: Z limit would be reached!', 1000)
+                print('Absolute movement stopped: Z limit would be reached!', 1000)
 
         if 'f_abs' in move_dictionary:
             f_abs = move_dictionary['f_abs']
@@ -314,9 +284,9 @@ class SyntheticStage(StageBase):
                 self.f_pos = f_abs
             else:
                 logger.info("Absolute movement stopped: Focus limit would be reached!, 1000")
-                #print(
-                 #   'Absolute movement stopped: Focus limit would be reached!',
-                  #  1000)
+                print(
+                    'Absolute movement stopped: Focus limit would be reached!',
+                    1000)
 
         if 'theta_abs' in move_dictionary:
             theta_abs = move_dictionary['theta_abs']
@@ -325,17 +295,16 @@ class SyntheticStage(StageBase):
                 self.theta_pos = theta_abs
             else:
                 logger.info("Absolute movement stopped: Rotation limit would be reached!, 1000")
-              #  print(
-                  #  'Absolute movement stopped: Rotation limit would be reached!',
-                    #1000)
+                print(
+                    'Absolute movement stopped: Rotation limit would be reached!',
+                    1000)
 
         if wait_until_done is True:
             time.sleep(.25)
 
         if self.verbose:
-            logger.debug(f"stage moved to, {move_dictionary}")
-            #print('stage moved to ', move_dictionary)
-
+            print('stage moved to ', move_dictionary)
+        logger.debug(f"stage moved to, {move_dictionary}")
     def zero_axes(self, list):
         for axis in list:
             try:
@@ -347,7 +316,7 @@ class SyntheticStage(StageBase):
                     '_pos')
             except BaseException:
                 logger.exception(f"Zeroing of axis: {axis} failed")
-               # print('Zeroing of axis: ', axis, 'failed')
+                print('Zeroing of axis: ', axis, 'failed')
 
     def unzero_axes(self, list):
         for axis in list:
@@ -371,9 +340,9 @@ class SyntheticStage(StageBase):
         self.y_rot_position = self.y_pos
         self.z_rot_position = self.z_pos
         if self.verbose:
-            logger.debug(f"Marking new rotation position (absolute coordinates): X: {self.x_pos}, Y: {self.y_pos}, Z: {self.z_pos}")
-            #print('Marking new rotation position (absolute coordinates): X: ',
-                 # self.x_pos, ' Y: ', self.y_pos, ' Z: ', self.z_pos)
+            print('Marking new rotation position (absolute coordinates): X: ',
+                  self.x_pos, ' Y: ', self.y_pos, ' Z: ', self.z_pos)
+        logger.debug(f"Marking new rotation position (absolute coordinates): X: {self.x_pos}, Y: {self.y_pos}, Z: {self.z_pos}")
 
     def go_to_rotation_position(self, wait_until_done=False):
         pass
@@ -414,7 +383,7 @@ class PIStage(StageBase):
                 #print('PI connection closed')
         except BaseException:
             logger.exception("Error while disconnecting the PI stage")
-            #print('Error while disconnecting the PI stage')
+            print('Error while disconnecting the PI stage')
 
     def create_position_dict(self):
         """
@@ -477,9 +446,9 @@ class PIStage(StageBase):
                 self.pidevice.MVR({1: x_rel})
             else:
                 logger.info("Relative movement stopped: X Motion limit would be reached!, 1000")
-                #print(
-                 #   'Relative movement stopped: X Motion limit would be reached!',
-                #    1000)
+                print(
+                    'Relative movement stopped: X Motion limit would be reached!',
+                    1000)
 
         if 'y_rel' in move_dictionary:
             y_rel = move_dictionary['y_rel']
@@ -489,9 +458,9 @@ class PIStage(StageBase):
                 self.pidevice.MVR({2: y_rel})
             else:
                 logger.info("Relative movement stopped: Y Motion limit would be reached!, 1000")
-                #print(
-                 #   'Relative movement stopped: Y Motion limit would be reached!',
-                  #  1000)
+                print(
+                    'Relative movement stopped: Y Motion limit would be reached!',
+                    1000)
 
         if 'z_rel' in move_dictionary:
             z_rel = move_dictionary['z_rel']
@@ -501,9 +470,9 @@ class PIStage(StageBase):
                 self.pidevice.MVR({3: z_rel})
             else:
                 logger.info("Relative movement stopped: Z Motion limit would be reached!, 1000")
-                #print(
-                  #  'Relative movement stopped: Z Motion limit would be reached!',
-                  #  1000)
+                print(
+                    'Relative movement stopped: Z Motion limit would be reached!',
+                    1000)
 
         if 'theta_rel' in move_dictionary:
             theta_rel = move_dictionary['theta_rel']
@@ -512,9 +481,9 @@ class PIStage(StageBase):
                 self.pidevice.MVR({4: theta_rel})
             else:
                 logger.info("Relative movement stopped: Theta Motion limit would be reached!, 1000")
-                #print(
-                   # 'Relative movement stopped: theta Motion limit would be reached!',
-                   # 1000)
+                print(
+                    'Relative movement stopped: theta Motion limit would be reached!',
+                    1000)
 
         if 'f_rel' in move_dictionary:
             f_rel = move_dictionary['f_rel']
@@ -524,9 +493,9 @@ class PIStage(StageBase):
                 self.pidevice.MVR({5: f_rel})
             else:
                 logger.info("Relative movement stopped: F Motion limit would be reached!, 1000")
-               # print(
-                  #  'Relative movement stopped: f Motion limit would be reached!',
-                 #   1000)
+                print(
+                    'Relative movement stopped: f Motion limit would be reached!',
+                    1000)
 
         if wait_until_done is True:
             self.pitools.waitontarget(self.pidevice)
@@ -546,9 +515,9 @@ class PIStage(StageBase):
                 self.pidevice.MOV({1: x_abs})
             else:
                 logger.info("Absolute movement stopped: X Motion limit would be reached!, 1000")
-               # print(
-                  #  'Absolute movement stopped: X Motion limit would be reached!',
-                  #  1000)
+                print(
+                    'Absolute movement stopped: X Motion limit would be reached!',
+                    1000)
 
         if 'y_abs' in move_dictionary:
             y_abs = move_dictionary['y_abs']
@@ -558,9 +527,9 @@ class PIStage(StageBase):
                 self.pidevice.MOV({2: y_abs})
             else:
                 logger.info("Absolute movement stopped: Y Motion limit would be reached!, 1000")
-                #print(
-                  #  'Absolute movement stopped: Y Motion limit would be reached!',
-                   # 1000)
+                print(
+                    'Absolute movement stopped: Y Motion limit would be reached!',
+                    1000)
 
         if 'z_abs' in move_dictionary:
             z_abs = move_dictionary['z_abs']
@@ -570,9 +539,9 @@ class PIStage(StageBase):
                 self.pidevice.MOV({3: z_abs})
             else:
                 logger.info("Absolute movement stopped: Z Motion limit would be reached!, 1000")
-                #print(
-                #    'Absolute movement stopped: Z Motion limit would be reached!',
-                 #   1000)
+                print(
+                    'Absolute movement stopped: Z Motion limit would be reached!',
+                    1000)
 
         if 'f_abs' in move_dictionary:
             f_abs = move_dictionary['f_abs']
@@ -582,9 +551,9 @@ class PIStage(StageBase):
                 self.pidevice.MOV({5: f_abs})
             else:
                 logger.info("Absolute movement stopped: F Motion limit would be reached!, 1000")
-               # print(
-                 #   'Absolute movement stopped: F Motion limit would be reached!',
-                   # 1000)
+                print(
+                    'Absolute movement stopped: F Motion limit would be reached!',
+                    1000)
 
         if 'theta_abs' in move_dictionary:
             theta_abs = move_dictionary['theta_abs']
@@ -593,9 +562,9 @@ class PIStage(StageBase):
                 self.pidevice.MOV({4: theta_abs})
             else:
                 logger.info("Absolute movement stopped: Theta Motion limit would be reached!, 1000")
-               # print(
-                 #   'Absolute movement stopped: Theta Motion limit would be reached!',
-                  #  1000)
+                print(
+                    'Absolute movement stopped: Theta Motion limit would be reached!',
+                    1000)
 
         if wait_until_done is True:
             self.pitools.waitontarget(self.pidevice)
@@ -614,7 +583,7 @@ class PIStage(StageBase):
                     '_pos')
             except BaseException:
                 logger.error(f"Zeroing of axis: {axis} failed")
-                #print('Zeroing of axis: ', axis, 'failed')
+                print('Zeroing of axis: ', axis, 'failed')
 
     def unzero_axes(self, list):
         for axis in list:
@@ -622,7 +591,7 @@ class PIStage(StageBase):
                 exec('self.int_' + axis + '_pos_offset = 0')
             except BaseException:
                 logger.error(f"Unzeroing of axis: {axis} failed")
-                #print('Unzeroing of axis: ', axis, 'failed')
+                print('Unzeroing of axis: ', axis, 'failed')
 
     def load_sample(self):
         y_abs = self.model.StageParameters['y_load_position'] / 1000
@@ -640,9 +609,9 @@ class PIStage(StageBase):
         self.y_rot_position = self.y_pos
         self.z_rot_position = self.z_pos
         if self.verbose:
-            logger.debug(f"Marking new rotation position(absolute coordinates): X: , {self.x_pos},  Y: , {self.y_pos}, Z: , {self.z_pos}")
-           # print('Marking new rotation position (absolute coordinates): X: ',
-             #     self.x_pos, ' Y: ', self.y_pos, ' Z: ', self.z_pos)
+            print('Marking new rotation position (absolute coordinates): X: ',
+                 self.x_pos, ' Y: ', self.y_pos, ' Z: ', self.z_pos)
+        logger.debug(f"Marking new rotation position(absolute coordinates): X: , {self.x_pos},  Y: , {self.y_pos}, Z: , {self.z_pos}")
 
     def go_to_rotation_position(self, wait_until_done=False):
         x_abs = self.x_rot_position / 1000

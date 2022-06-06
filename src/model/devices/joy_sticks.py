@@ -87,6 +87,7 @@ class JoystickHandler():
     def button_handler(self, button_id):
         if self.verbose:
             print('Button pressed: ', button_id)
+        logger.debug(f"Button pressed, {button_id}")
 
         ''' Laser switching buttons '''
         if button_id == 1:
@@ -136,6 +137,7 @@ class JoystickHandler():
             current_state = self.parent.get_state_parameter('state')
             if self.verbose:
                 print('Current state: ', current_state)
+            logger.debug("Current state")
             if current_state == ('live'):
                 pass
                 # self.parent.StopButton.clicked.emit(True)
@@ -165,6 +167,7 @@ class JoystickHandler():
         index = combobox.findText(string)
         if self.verbose:
             print('Index: ', index)
+        logger.debug(f"Index, {index}")
         if index != -1:
             combobox.setCurrentIndex(index)
 
@@ -240,6 +243,7 @@ class JoystickHandler():
 
         if self.verbose:
             print('Axis: ', axis_id, ',Value: ', value)
+        logger.debug(f"Axis: {axis_id}, Value: {value}")
 
         value = value - 128
 

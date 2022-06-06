@@ -88,6 +88,7 @@ class LaserTriggerBase:
     def __del__(self):
         if self.verbose:
             print("Not Implemented in LaserTriggerBase")
+        logger.debug("Not Implemented in LaserTriggerBase")
 
     def enable_low_resolution_laser(self):
         """
@@ -96,6 +97,7 @@ class LaserTriggerBase:
         """
         if self.verbose:
             print("Not Implemented in LaserTriggerBase")
+        logger.debug("Not Implemented in LaserTriggerBase")
 
     def enable_high_resolution_laser(self):
         """
@@ -104,14 +106,16 @@ class LaserTriggerBase:
         """
         if self.verbose:
             print("Not Implemented in LaserTriggerBase")
-
+        logger.debug("Not Implemented in LaserTriggerBase")
     def trigger_digital_laser(self, current_laser_index):
         if self.verbose:
             print("Not Implemented in LaserTriggerBase")
+        logger.debug("Not Implemented in LaserTriggerBase")
 
     def turn_off_lasers(self):
         if self.verbose:
             print("Not Implemented in LaserTriggerBase")
+        logger.debug("Not Implemented in LaserTriggerBase")
 
     def set_laser_analog_voltage(
             self,
@@ -122,6 +126,7 @@ class LaserTriggerBase:
         """
         if self.verbose:
             print("Not Implemented in LaserTriggerBase")
+        logger.debug("Not Implemented in LaserTriggerBase")
 
 
 class LaserTriggers(LaserTriggerBase):
@@ -190,6 +195,7 @@ class LaserTriggers(LaserTriggerBase):
         self.switching_state = False
         self.switching_task.write(self.switching_state, auto_start=True)
         print("Low Resolution Laser Path Enabled")
+        logger.info("Low Resolution Laser Path Enabled")
 
     def enable_high_resolution_laser(self):
         """
@@ -200,6 +206,7 @@ class LaserTriggers(LaserTriggerBase):
         self.switching_state = True
         self.switching_task.write(self.switching_state, auto_start=True)
         print("High Resolution Laser Path Enabled")
+        logger.info("High Resolution Laser Path Enabled")
 
     def trigger_digital_laser(self, current_laser_index):
         self.turn_off_lasers()

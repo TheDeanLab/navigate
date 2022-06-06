@@ -56,10 +56,7 @@ from controller.aslm_controller import ASLM_controller as controller
 
 def main():
     # Evaluate GPU Status for Analysis Routines
-    if platform.system == 'Darwin':
-        # TensorFlow not supported on Apple Devices
-        USE_GPU = False
-    elif platform.system != 'Darwin':
+    if platform.system() != 'Darwin':
         import tensorflow as tf
         number_GPUs = len(tf.config.list_physical_devices('GPU'))
         if number_GPUs == 0:
@@ -68,6 +65,9 @@ def main():
         else:
             USE_GPU = True
             print('NVIDIA GPU detected.')
+    else:
+        # TensorFlow not supported on Apple Devices
+        USE_GPU = False
 
     # Specify the Default Configuration File Directories (located in src/config)
     base_directory = Path(__file__).resolve().parent

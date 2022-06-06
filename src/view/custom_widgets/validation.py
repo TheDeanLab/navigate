@@ -271,6 +271,7 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
             new_min = self.min_var.get()
             self.min = new_min
             print(self.max)
+            logger.info(self.max)
         except (tk.TclError, ValueError):
             pass
         if not current:

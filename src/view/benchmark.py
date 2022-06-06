@@ -30,6 +30,7 @@ def pil_gui_test(arr):
     img = ImageTk.PhotoImage(Image.fromarray(arr))
     stop = time.time()
     print(f"Pillow run took {stop-start} s")
+    logger.info(f"Pillow run took {stop-start} s")
 
     lbl = tk.Label(root, image=img)
     lbl.pack()
@@ -52,6 +53,7 @@ def matplotlib_gui_test(arr):
 
     stop = time.time()
     print(f"Matplotlib run took {stop-start} s")
+    logger.info(f"Matplotlib run took {stop-start} s")
 
     lbl = tk.Label(root)
     lbl.pack()
@@ -186,11 +188,16 @@ if __name__ == "__main__":
 
     arr_lut = cm(arr)
     print("Image Shape:", np.shape(arr_lut))
+    logger.info(f"Image Shape: {np.shape(arr_lut)}")
     arr_lut = np.uint8(arr_lut[:, :, :3]) * scaling_factor
     print("Image Shape:", np.shape(arr_lut))
+    logger.info(f"Image Shape: {np.shape(arr_lut)}")
     print("Mean: ", np.mean(arr_lut))
+    logger.info(f"Mean: {np.mean(arr_lut)}")
     print("Min: ", np.min(arr_lut))
+    logger.info(f"Min: {np.min(arr_lut)}")
     print("Max: ", np.max(arr_lut))
+    logger.info(f"Max: {np.max(arr_lut)}")
 
     pil_gui_test(arr_lut)
     # How about displaying saturated values?

@@ -151,6 +151,7 @@ class Camera_View_Controller(GUI_Controller):
 
                 if self.verbose:
                     print("Rolling Average: ", self.image_count, self.rolling_frames)
+                logger.debug(f"Rolling Average: , {self.image_count}, {self.rolling_frames}")
 
     def display_image(self, image):
         """
@@ -210,6 +211,7 @@ class Camera_View_Controller(GUI_Controller):
             self.colormap = self.view.scale_pallete.color.get()
             if self.verbose:
                 print("Updating the LUT", self.colormap)
+            logger.debug(f"Updating the LUT, {self.colormap}")
         # self.canvas.create_image(0,
         #                          0,
         #                          image=self.img,
@@ -227,12 +229,14 @@ class Camera_View_Controller(GUI_Controller):
             self.pallete['Max'].widget['state'] = 'disabled'
             if self.verbose:
                 print("Autoscale Enabled")
+            logger.debug("Autoscale Enabled")
 
         elif self.autoscale is False:  # Autoscale Disabled
             self.pallete['Min'].widget['state'] = 'normal'
             self.pallete['Max'].widget['state'] = 'normal'
             if self.verbose:
                 print("Autoscale Disabled")
+            logger.debug("Autoscale Disabled")
             self.update_min_max_counts()
 
     def update_min_max_counts(self):
@@ -244,6 +248,7 @@ class Camera_View_Controller(GUI_Controller):
         self.max_counts = self.pallete['Max'].get()
         if self.verbose:
             print("Min and Max counts scaled to ", self.min_counts, self.max_counts)
+        logger.debug(f"Min and Max counts scaled to, {self.min_counts}, {self.max_counts}")
 
     def apply_LUT(self, image, saturated_pixels):
         """
@@ -286,6 +291,7 @@ class Camera_View_Controller(GUI_Controller):
         else:
             print("Lookup Table Not Implemented in Camera_View_Controller. Displaying as Grayscale.")
             image_lut = image
+            logger.info("Lookup Table Not Implemented in Camera_View_Controller. Displaying as Grayscale.")
 
         return image_lut
 

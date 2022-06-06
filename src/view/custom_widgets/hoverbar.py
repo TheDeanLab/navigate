@@ -308,9 +308,12 @@ if __name__ == '__main__':
 
     def main():
         print('Trying out three different wraplengths:')
+        logger.info("Trying out three different wraplengths:")
         for i, wl in enumerate((200, 250, 400), 1):
+            logger.info(i)
             print(' ', i)
             main_01(wl)
         print('Done.')
+        logger.info("Done")
 
     main()

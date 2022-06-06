@@ -205,6 +205,7 @@ class LabelInput(ttk.Frame):
             print(
                 "This widget class does not support list options: " +
                 self.input_class)
+            logger.info(f"This widget class does not support list options: {self.input_class}")
 
     def pad_input(self, left, up, right, down):
         self.widget.grid(padx=(left, right), pady=(up, down))

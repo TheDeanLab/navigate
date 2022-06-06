@@ -530,6 +530,7 @@ class ASLM_controller:
 
             else:
                 print("Wrong acquisition mode.  Not recognized.")
+                logger.info("Wrong acquisition mode. Not recognized.")
                 pass
 
         elif command == 'stop_acquire':
@@ -549,6 +550,7 @@ class ASLM_controller:
                 'In central controller: command passed from child',
                 command,
                 args)
+        logger.debug(f"In central controller: command passed from child, {command}, {args}")
 
     def capture_single_image(self):
         """
@@ -572,16 +574,19 @@ class ASLM_controller:
             image_id = self.show_img_pipe_parent.recv()
             if self.verbose:
                 print('receive', image_id)
+            logger.debug(f"recieve, {image_id}")
             if image_id == 'stop':
                 break
             if not isinstance(image_id, int):
                 print('some thing wrong happened, stop the model!', image_id)
+                logger.debug(f"some thing wrong happened, stop the model!, {image_id}")
                 self.execute('stop_acquire')
             self.camera_view_controller.display_image(
                 self.data_buffer[image_id])
 
         if self.verbose:
             print("Captured", self.camera_view_controller.image_count, "Live Images")
+        logger.debug(f"Captured {self.camera_view_controller.image_count}, Live Images")
 
     def capture_autofocus_image(self):
         """
@@ -608,6 +613,7 @@ class ASLM_controller:
         plot_data = self.plot_pipe_controller.recv()
         if self.verbose:
             print("Controller received plot data: ", plot_data)
+        logger.debug(f"Controller recieved plot data: {plot_data}")
         if hasattr(self, 'af_popup_controller'):
             self.af_popup_controller.display_plot(plot_data)
         
@@ -621,3 +627,4 @@ if __name__ == '__main__':
     # Testing section.
 
     print("done")
+    logger.info("done")

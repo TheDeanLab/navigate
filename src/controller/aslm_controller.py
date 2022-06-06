@@ -530,6 +530,7 @@ class ASLM_controller:
 
             else:
                 print("Wrong acquisition mode.  Not recognized.")
+                logger.info("Wrong acquisition mode. Not recognized.")
                 pass
 
         elif command == 'stop_acquire':

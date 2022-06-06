@@ -164,9 +164,7 @@ class DAQBase:
                     "High Resolution Mode.  Amp/Off:",
                     self.etl_r_amplitude,
                     self.etl_r_offset)
-            logger.debug(f"High Resolution Mode.  Amp/Off:,
-                    {self.etl_r_amplitude},
-                    {self.etl_r_offset})")
+                logger.debug(f"High Resolution Mode.  Amp/Off:, {self.etl_r_amplitude}, {self.etl_r_offset})")
 
         elif resolution_mode == 'low':
             zoom = microscope_state['zoom']

@@ -67,9 +67,13 @@ class VoiceCoil:
                                  bytesize=self.bytesize,
                                  parity=self.parity,
                                  stopbits=self.stopBits,
-                                 timeout=self.timeout)
-        except serial.SerialException:
+                                 timeout=self.timeout,
+                                 dsrdtr=False,
+                                 rtscts=False)
+        except (serial.SerialException, ValueError) as error:
+            print(error)
             raise UserWarning("Could not Communicate with Voice Coil on COM:", self.comport)
+            
 
         """
         The SCA814 has a single character input buffer that can be overflowed if the proper steps are not taken.
@@ -83,16 +87,53 @@ class VoiceCoil:
             if self.verbose:
                 print("Sending Command d0 to the voice coil.")
             
-            command = b'd0'
-            print("Command Sent in Bytes:", command)
-            self.serial.write(command)
-            self.serial.write(b'\r')
-            data = self.serial.read(999)
+            #command = bytes.fromhex('d0')
+            # string = 'd0\r'
+            # string = string.encode('utf-8')
+            #string  = bin(208)
+            #string = bytearray(string, "ascii")
+
+
+
+
+            print("Is Port Open: ", self.serial.is_open)
+
+            # string = b"\xd0"
+            string = b'd0\r' # Can also use str.encode()
+            print("Command Sent in Bytes:", string)
+
+            #Before write
+            print("Before Write")
+            print("Bytes in Input Buffer: ", self.serial.in_waiting)
+            print("Bytes in Output Buffer: ", self.serial.out_waiting)
+
+            try:
+                hold = self.serial.write(string)
+                print("Number of Bytes Sent: ", hold)
+            except serial.SerialTimeoutException as e:
+                print(e)
+
+            # After write , Before read
+            print("After Write, Before Read")
+            print("Bytes in Input Buffer: ", self.serial.in_waiting)
+            print("Bytes in Output Buffer: ", self.serial.out_waiting)
+
+            time.sleep(2.0)
+
+            #self.serial.write(carriage_return)
+            data = self.serial.readline()
+            print(data)
+
+            # After Read
+            print("After Read")
+            print("Bytes in Input Buffer: ", self.serial.in_waiting)
+            print("Bytes in Output Buffer: ", self.serial.out_waiting)
+
 
             if len(data) > 0:
-                print("Data received: " + data)
+               print("Data received: " + data.decode())
             else:
-                print("Nothing received from", command)
+               print("Nothing received from", string)
 
             # return_byte = self.read_bytes(1)
             # if return_byte == bytes.fromhex('d0'):
@@ -132,7 +173,7 @@ class VoiceCoil:
             # Read data sent from device
             data = self.serial.read(9999)
             if len(data) > 0:
-                print("Data received: " + data)
+                print("Data received: " + data.decode())
             time.sleep(self.timeout)
 
         except serial.SerialException:
@@ -145,9 +186,11 @@ class VoiceCoil:
 
 if __name__ == "__main__":
     vc = VoiceCoil(verbose=True)
-    vc.send_command('k0')  # Turn off servo
-    vc.send_command('k1')  # Engage servo
+    vc.send_command('k0\r')  # Turn off servo
+    vc.send_command('k1\r')  # Engage servo
     vc.close_connection()
+
+    #string = "\xd0"
 
   # def openConnection():
     #     try:

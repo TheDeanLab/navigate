@@ -359,10 +359,10 @@ class Model:
             Called when user halts the acquisition
             """
             self.stop_acquisition = True
-            if self.imaging_mode != 'single':
-                if hasattr(self, 'signal_thread'):
-                    self.signal_thread.join()
-                    self.data_thread.join()
+            if self.signal_thread:
+                self.signal_thread.join()
+            if self.data_thread:
+                self.data_thread.join()
             self.end_acquisition()
 
         elif command == 'debug':

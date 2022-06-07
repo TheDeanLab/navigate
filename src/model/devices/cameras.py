@@ -45,7 +45,7 @@ from pathlib import Path
 import numpy as np
 
 # Local Imports
-
+from ..analysis import noise_model
 
 # Logger Setup
 p = __name__.split(".")[0]
@@ -130,6 +130,9 @@ class SyntheticCamera(CameraBase):
         
         self.x_pixels = experiment.CameraParameters['x_pixels']
         self.y_pixels = experiment.CameraParameters['y_pixels']
+
+        self._mean_background_count = 100.0
+        self._noise_sigma = noise_model.compute_noise_sigma(Ib=self._mean_background_count)
         
         if self.verbose:
             print("Synthetic Camera Class Initialized")
@@ -209,12 +212,16 @@ class SyntheticCamera(CameraBase):
         pass
 
     def generate_new_frame(self):
-        image = np.random.randint(
-            low=255,
-            size=(
-                self.x_pixels,
-                self.y_pixels),
-            dtype=np.uint16)
+        # image = np.random.randint(
+        #     low=255,
+        #     size=(
+        #         self.x_pixels,
+        #         self.y_pixels),
+        #     dtype=np.uint16)
+        image = np.random.normal(self._mean_background_count, 
+                                 self._noise_sigma, 
+                                 size=(self.x_pixels, self.y_pixels),
+                                ).astype(np.uint16)
         ctypes.memmove(self.data_buffer[self.current_frame_idx].ctypes.data,
                        image.ctypes.data, self.x_pixels * self.y_pixels * 2)
         self.current_frame_idx = (

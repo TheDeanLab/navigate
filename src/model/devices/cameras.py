@@ -123,6 +123,9 @@ class CameraBase:
     def close_live_mode(self):
         pass
 
+class SyntheticCameraController():
+    def __init__(self):
+        self.is_acquiring = False
 
 class SyntheticCamera(CameraBase):
     def __init__(self, camera_id, model, experiment, verbose=False):
@@ -133,6 +136,8 @@ class SyntheticCamera(CameraBase):
 
         self._mean_background_count = 100.0
         self._noise_sigma = noise_model.compute_noise_sigma(Ib=self._mean_background_count)
+
+        self.camera_controller = SyntheticCameraController()
         
         if self.verbose:
             print("Synthetic Camera Class Initialized")
@@ -170,6 +175,7 @@ class SyntheticCamera(CameraBase):
         self.num_of_frame = number_of_frames
         self.current_frame_idx = 0
         self.pre_frame_idx = 0
+        self.camera_controller.is_acquiring = True
 
     def get_images_in_series(self):
         images = []
@@ -186,6 +192,7 @@ class SyntheticCamera(CameraBase):
     def close_image_series(self):
         self.pre_frame_idx = 0
         self.current_frame_idx = 0
+        self.camera_controller.is_acquiring = False
 
     def get_image(self):
         image = np.random.normal(1000, 400, (self.y_pixels, self.x_pixels))

@@ -127,7 +127,7 @@ class CameraBase:
 class SyntheticCamera(CameraBase):
     def __init__(self, camera_id, model, experiment, verbose=False):
         super().__init__(camera_id, model, experiment, verbose)
-        
+
         self.x_pixels = experiment.CameraParameters['x_pixels']
         self.y_pixels = experiment.CameraParameters['y_pixels']
         
@@ -264,6 +264,8 @@ class HamamatsuOrca(CameraBase):
         #     "sensor_mode", self.model.CameraParameters['sensor_mode'])
         self.camera_controller.set_property_value("defect_correct_mode",
             self.model.CameraParameters['defect_correct_mode'])
+        self.camera_controller.set_property_value(
+            "exposure_time", self.model.CameraParameters['exposure_time'] / 1000)
         # self.camera_controller.set_property_value("exposure_control",
         #                                           1)
         self.camera_controller.set_property_value(
@@ -278,11 +280,9 @@ class HamamatsuOrca(CameraBase):
             "trigger_polarity", self.model.CameraParameters['trigger_polarity'])
         self.camera_controller.set_property_value(
             "trigger_source", self.model.CameraParameters['trigger_source'])
-        self.camera_controller.set_property_value(
-            "exposure_time", self.model.CameraParameters['exposure_time'] / 1000)
-        self.camera_controller.set_property_value(
-            "internal_line_interval",
-            self.model.CameraParameters['line_interval'])
+        # self.camera_controller.set_property_value(
+        #     "internal_line_interval",
+        #     self.model.CameraParameters['line_interval'])
         # 05/16 Debugging
         # self.set_ROI(experiment.CameraParameters['x_pixels'], experiment.CameraParameters['y_pixels'])
         self.camera_controller.set_property_value("image_height",
@@ -299,6 +299,7 @@ class HamamatsuOrca(CameraBase):
         if self.verbose:
             print("Hamamatsu Camera Shutdown")
         logger.debug("Hamamatsu Camera Shutdown")
+
     def stop(self):
         self.stop_flag = True
 
@@ -331,17 +332,19 @@ class HamamatsuOrca(CameraBase):
             print('Camera mode not supported')
             logger.info("Camera mode not supported")
 
+        print("Camera Sensor Mode:", self.camera_controller.get_property_value("sensor_mode"))
+
     def set_readout_direction(self, mode):
-        if mode == 'Top-to-Bottom':
+        if mode == 'Top to Bottom':
             #  'Forward' readout direction
             self.camera_controller.set_property_value("readout_direction", 1)
-        elif mode == 'Bottom-to-Top':
+        elif mode == 'Bottom to Top':
             #  'Backward' readout direction
             self.camera_controller.set_property_value("readout_direction", 2)
         elif mode == 'bytrigger':
             self.camera_controller.set_property_value("readout_direction", 3)
         elif mode == 'diverge':
-            self.camera_controller.set_property_value("readout_direction", 4)
+            self.camera_controller.set_property_value("readout_direction", 5)
         else:
             print('Camera readout direction not supported')
             logger.info("Camera readout direction not supported")

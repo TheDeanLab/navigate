@@ -53,7 +53,8 @@ class Stage_GUI_Controller(GUI_Controller):
             'f': None
         }
 
-        # state movement limits
+        # stage movement limits
+        # TODO: Should not be hard coded.
         self.position_min = {
             'x': 0,
             'y': 0,
@@ -61,6 +62,8 @@ class Stage_GUI_Controller(GUI_Controller):
             'theta': 0,
             'f': 0
         }
+
+        # TODO: Should not be hard coded.
         self.position_max = {
             'x': 10000,
             'y': 10000,
@@ -76,13 +79,9 @@ class Stage_GUI_Controller(GUI_Controller):
         buttons = self.view.get_buttons()
         for k in buttons:
             if k[:2] == 'up':
-                buttons[k].configure(
-                    command=self.up_btn_handler(k[3:-4])
-                )
+                buttons[k].configure(command=self.up_btn_handler(k[3:-4]))
             elif k[:4] == 'down':
-                buttons[k].configure(
-                    command=self.down_btn_handler(k[5:-4])
-                )
+                buttons[k].configure(command=self.down_btn_handler(k[5:-4]))
             elif k[5:-4] == 'xy':
                 buttons[k].configure(
                     command=self.xy_zero_btn_handler()
@@ -255,7 +254,7 @@ class Stage_GUI_Controller(GUI_Controller):
             y_val.set(0)
         return handler
 
-    def position_callback(self, axis):
+    def position_callback(self, axis, **kwargs):
         """
         # callback functions bind to position variables
         # axis can be 'x', 'y', 'z', 'theta', 'f'
@@ -285,9 +284,8 @@ class Stage_GUI_Controller(GUI_Controller):
 
             # Debouncing wait duration - Duration of time to integrate the number of clicks that a user provides.
             # If 1000 ms, if user hits button 10x within 1s, only moves to the final value.
-            self.event_id[axis] = self.view.after(250, lambda: self.parent_controller.execute('stage',
-                                                                                               position_var.get(),
-                                                                                               axis))
+            self.event_id[axis] = self.view.after(250, lambda: self.parent_controller.execute('stage', position_var.get(), axis))
+            # self.event_id[axis] = self.view.after(250, self.parent_controller.execute, 'stage', position_var.get(), axis)
 
             self.show_verbose_info('stage position is changed')
         

@@ -206,12 +206,14 @@ class Model:
         self.plot_pipe = handler
 
     def set_data_buffer(self, data_buffer, img_width=512, img_height=512):
-        self.camera.close_image_series()
+        if self.camera.camera_controller.is_acquiring:
+            self.camera.close_image_series()
         self.camera.set_ROI(img_width, img_height)
         self.data_buffer = data_buffer
         self.number_of_frames = self.configuration.SharedNDArray['number_of_frames']
-        self.camera.initialize_image_series(self.data_buffer, self.number_of_frames)
+        # self.camera.initialize_image_series(self.data_buffer, self.number_of_frames)
         self.frame_id = 0
+        # self.is_live = True
 
     #  Basic Image Acquisition Functions
     #  - These functions are used to acquire images from the camera
@@ -238,11 +240,13 @@ class Model:
             # First overwrites the model instance of the MicroscopeState
             """
             self.imaging_mode = 'single'
-            self.experiment.MicroscopeState = args[0]
+            self.experiment.MicroscopeState = kwargs['microscope_info']
+            self.experiment.CameraParameters = kwargs['camera_info']
             self.is_save = self.experiment.MicroscopeState['is_save']
+
             if self.is_save:
                 self.experiment.Saving = kwargs['saving_info']
-            self.before_acquisition()
+            self.prepare_acquisition()
             self.run_single_acquisition()
             self.run_data_process(1)
             self.end_acquisition()
@@ -252,9 +256,10 @@ class Model:
             Live Acquisition Mode
             """
             self.imaging_mode = 'live'
-            self.experiment.MicroscopeState = args[0]
+            self.experiment.MicroscopeState = kwargs['microscope_info']
+            self.experiment.CameraParameters = kwargs['camera_info']
             self.is_save = False
-            self.before_acquisition()
+            self.prepare_acquisition()
             self.is_live = True
             self.signal_thread = threading.Thread(target=self.run_live_acquisition)
             self.signal_thread.name = "Live Mode Signal"
@@ -332,7 +337,7 @@ class Model:
             frame_num = self.get_autofocus_frame_num() + 1
             if frame_num < 1:
                 return
-            self.before_acquisition()  # Opens correct shutter and puts all signals to false
+            self.prepare_acquisition()  # Opens correct shutter and puts all signals to false
             self.autofocus_on = True
             self.is_save = False
             self.f_position = args[2]  # Current position
@@ -374,12 +379,32 @@ class Model:
         self.stages.move_absolute(pos_dict, wait_until_done=True)
         self.stages.report_position()
 
-    def before_acquisition(self):
+    def prepare_acquisition(self):
+        if self.camera.camera_controller.is_acquiring:
+            self.camera.close_image_series()
         # turn off flags
         self.stop_acquisition = False
         self.stop_send_signal = False
         self.autofocus_on = False
-        self.is_live = False
+        if self.is_live:
+            self.is_live = False
+
+        # TODO: Calculate Waveforms for DAQ for all channels here.
+        # Currently done on a per-channel basis in the 'run_single_acquisition' function below.
+
+        # Update Camera.
+        self.camera.set_sensor_mode(self.experiment.CameraParameters['sensor_mode'])
+        print("SENSOR MODE:", self.experiment.CameraParameters['sensor_mode'])
+        if self.experiment.CameraParameters['sensor_mode'] == 'Light-Sheet':
+            print("Desired Readout Direction:", self.experiment.CameraParameters['readout_direction'])
+            print("Actual Readout Direction:", self.camera.camera_controller.get_property_value("readout_direction"))
+            self.camera.set_readout_direction(self.experiment.CameraParameters['readout_direction'])
+            # self.camera.set_lightsheet_rolling_shutter_width(self.experiment.CameraParameters['lightsheet_rolling_shutter_width'])
+
+        # Attach camera buffer and start imaging
+        # TODO: Move this to a separate function?
+        self.camera.initialize_image_series(self.data_buffer, self.number_of_frames)
+
         self.open_shutter()
 
     def end_acquisition(self):
@@ -387,11 +412,12 @@ class Model:
         #
         """
         # dettach buffer in live mode in order to clear unread frames
-        if self.is_live:
+        if self.camera.camera_controller.is_acquiring:
             self.camera.close_image_series()
-            self.camera.initialize_image_series(self.data_buffer, self.number_of_frames)
-            self.is_live = False
             self.frame_id = 0
+
+        if self.is_live:
+            self.is_live = False
 
         # close shutter
         self.shutter.close_shutters()
@@ -564,9 +590,7 @@ class Model:
                 # trigger_waiting_time is the time between two signal triggers
                 # current signal trigger should not be sent out earlier than previous trigger exposure time + camera minimum waiting time.
                 self.trigger_waiting_time = self.current_exposure_time/1000 + self.camera_minimum_waiting_time
-                print('trigger waiting time:', self.trigger_waiting_time)
                 self.current_exposure_time = channel['camera_exposure_time']
-                print(f"Channel {self.current_channel}: {self.current_exposure_time}")
 
                 # update trigger waiting time when exposure time changed
                 # self.trigger_waiting_time = self.current_exposure_time/1000 + self.camera_minimum_waiting_time

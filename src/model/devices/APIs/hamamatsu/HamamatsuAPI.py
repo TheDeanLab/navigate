@@ -655,6 +655,7 @@ class DCAM:
         # TODO: get maximum supported image width and height
         self.max_image_width = 2048
         self.max_image_height = 2048
+        self.is_acquiring = False
 
     def __result(self, errvalue):
         """
@@ -839,7 +840,8 @@ class DCAM:
 
         cDouble = c_double(fValue)
         cOption = c_int32(option)
-        ret = self.__result(dcamprop_setgetvalue(self.__hdcam, idprop, byref(cDouble), cOption))
+        cIDProp = c_int32(idprop)
+        ret = self.__result(dcamprop_setgetvalue(self.__hdcam, cIDProp, byref(cDouble), cOption))
         if ret is False:
             return False
 
@@ -963,6 +965,7 @@ class DCAM:
             self.pre_frame_count = 0
             self.pre_index = 0
             # start capture
+            self.is_acquiring = True
             return self.__result(dcamcap_start(self.__hdcam, DCAMCAP_START_SEQUENCE))
         return False
         
@@ -973,6 +976,8 @@ class DCAM:
         """
         # stop capture
         dcamcap_stop(self.__hdcam)
+
+        self.is_acquiring = False
 
         # detach buffer
         return self.__result(dcambuf_release(self.__hdcam, DCAMBUF_ATTACHKIND_FRAME))
@@ -1056,7 +1061,7 @@ if __name__ == '__main__':
     configuration = {
         'image_width': 2048.0,
         'image_height': 2048.0,
-        'sensor_mode': 12.0,  # 12 for progressive
+        'sensor_mode': 12,  # 12 for progressive
         'defect_correct_mode': 2.0,
         'binning': 1.0,
         'readout_speed': 1.0,

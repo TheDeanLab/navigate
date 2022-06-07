@@ -7,9 +7,7 @@ from pathlib import Path
 
 def log_setup(fname):
     base_directory = Path(__file__).resolve().parent
-    print(base_directory)
     logging_path = Path.joinpath(base_directory, fname)
-    print(logging_path)
     with open(logging_path, 'r') as f:
         try:
             config_data = yaml.load(f.read(), Loader=yaml.FullLoader)

@@ -363,10 +363,7 @@ class PIStage(StageBase):
         self.serialnum = str(self.model.StageParameters['serialnum'])
         self.pidevice = GCSDevice(self.controllername)
         self.pidevice.ConnectUSB(serialnum=self.serialnum)
-        self.pitools.startup(
-            self.pidevice, stages=list(
-                self.pi_stages), refmodes=list(
-                self.refmode))
+        self.pitools.startup(self.pidevice, stages=list(self.pi_stages), refmodes=list(self.refmode))
         self.block_till_controller_is_ready()
 
         # Move the Focusing Stage to the Start Position

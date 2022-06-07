@@ -43,7 +43,6 @@ from pathlib import Path
 
 # Third Party Imports
 import numpy as np
-from tifffile import imsave
 from queue import Queue
 
 # Local Imports
@@ -138,6 +137,7 @@ class Model:
         self.analysis = startup_functions.start_analysis(self.configuration, self.experiment, USE_GPU, self.verbose)
 
         # Acquisition Housekeeping
+        self.imaging_mode = None
         self.image_count = 0
         self.acquisition_count = 0
         self.total_acquisition_count = None
@@ -237,6 +237,7 @@ class Model:
             # Acquire a single image.
             # First overwrites the model instance of the MicroscopeState
             """
+            self.imaging_mode = 'single'
             self.experiment.MicroscopeState = args[0]
             self.is_save = self.experiment.MicroscopeState['is_save']
             if self.is_save:
@@ -250,6 +251,7 @@ class Model:
             """
             Live Acquisition Mode
             """
+            self.imaging_mode = 'live'
             self.experiment.MicroscopeState = args[0]
             self.is_save = False
             self.before_acquisition()
@@ -262,9 +264,11 @@ class Model:
             self.data_thread.start()
 
         elif command == 'z-stack':
+            self.imaging_mode = 'z-stack'
             pass
 
         elif command == 'projection':
+            self.imaging_mode = 'projection'
             pass
 
         elif command == 'update_setting':
@@ -350,11 +354,16 @@ class Model:
             Called when user halts the acquisition
             """
             self.stop_acquisition = True
-            if hasattr(self, 'signal_thread'):
-                self.signal_thread.join()
-                self.data_thread.join()
+            if self.imaging_mode != 'single':
+                if hasattr(self, 'signal_thread'):
+                    self.signal_thread.join()
+                    self.data_thread.join()
             self.end_acquisition()
+
         elif command == 'debug':
+            '''
+            Debug Operation Mode
+            '''
             self.debug.debug(*args, **kwargs)
 
     def move_stage(self, pos_dict):

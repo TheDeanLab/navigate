@@ -40,14 +40,24 @@ import numpy as np
 
 # Local Imports
 sys.path.append('../../')
-import src.model.aslm_model_waveforms as aslm_model_waveforms
+from src.model.aslm_analysis import Analysis as aslm_analysis
 
 class TestASLMAnalysis(unittest.TestCase):
     """
     Unit Tests for the ASLM Analysis Module
     """
-    def test_calculate_entropy(self):
+    def test_calculate_entropy_on(self):
+        """
+        Test the calculation of the Shannon Entropy
+        """
         dct_array = np.ones((128, 128))
         otf_support_x = 3
         otf_support_y = 3
-        entropy = calculate
+        entropy = aslm_analysis.calculate_entropy(self,
+                                                  dct_array=dct_array,
+                                                  otf_support_x=otf_support_x,
+                                                  otf_support_y=otf_support_y)
+        self.assertEqual(entropy, 0)
+
+if (__name__ == "__main__"):
+    unittest.main()

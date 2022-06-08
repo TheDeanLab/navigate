@@ -57,7 +57,13 @@ class Analysis:
     def __del__(self):
         pass
 
-    def calculate_entropy(self, dct_array, otf_support_x, otf_support_y):
+    def calculate_entropy(self,
+                          dct_array,
+                          otf_support_x,
+                          otf_support_y):
+        """
+        Calculate the Shannon Entropy of an array
+        """
         i = dct_array > 0
         image_entropy = np.sum(dct_array[i] * np.log(dct_array[i]))
         image_entropy = image_entropy + np.sum(-dct_array[~i] * np.log(-dct_array[~i]))

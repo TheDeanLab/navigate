@@ -159,8 +159,6 @@ class Camera_View_Controller(GUI_Controller):
         #  If Autoscale is selected, automatically calculates the min and max values for the data.
         #  If Autoscale is not selected, takes the user values as specified in the min and max counts.
         """
-        #  Update the GUI according to the instantaneous or rolling average max counts.
-        self.update_max_counts(image)
 
         #  Down-sample the data according to the configuration file.
         if self.live_subsampling != 1:
@@ -183,6 +181,9 @@ class Camera_View_Controller(GUI_Controller):
             image = scaling_factor * ((image - self.min_counts) / (self.max_counts - self.min_counts))
             image[image < 0] = 0
             image[image > scaling_factor] = scaling_factor
+
+        #  Update the GUI according to the instantaneous or rolling average max counts.
+        self.update_max_counts(image)
 
         #  Apply Lookup Table
         image = self.apply_LUT(image, saturated_pixels)

@@ -81,6 +81,9 @@ class ASLM_controller:
             etl_constants_path,
             USE_GPU,
             args):
+        
+        logger.info("Spec - Controller controlling")
+        logger.info("Performance - Controller performing")
 
         # Verbosity and debugging menu
         self.verbose = args.verbose
@@ -354,40 +357,29 @@ class ASLM_controller:
         """
         # This function will update model.experiment according values in the View(GUI)
         """
-
         # acquire_bar_controller - update image mode
-        self.experiment.MicroscopeState['image_mode'] = self.acquire_bar_controller.get_mode(
-        )
-        self.experiment.Saving['date'] = str(datetime.now().date())
-
+        self.experiment.MicroscopeState['image_mode'] = self.acquire_bar_controller.get_mode()
         # camera_view_controller
-
         # channel_setting_controller
-
         # etl_popup_controller
-
         # gui_controller
-
         # waveform_tab_controller
-
         # widget_functions
-
         # get zoom and resolution info from resolution menu
         if self.resolution_value.get() == 'high':
             self.experiment.MicroscopeState['resolution_mode'] = 'high'
             self.experiment.MicroscopeState['zoom'] = 'N/A'
         else:
             self.experiment.MicroscopeState['resolution_mode'] = 'low'
-            self.experiment.MicroscopeState['zoom'] = self.resolution_value.get(
-            )
+            self.experiment.MicroscopeState['zoom'] = self.resolution_value.get()
 
         # collect settings from sub-controllers
         # sub-controllers will validate the value, if something wrong, it will
         # return False
-        return self.channels_tab_controller.update_experiment_values(
-            self.experiment.MicroscopeState) and self.stage_gui_controller.update_experiment_values(
-            self.experiment.StageParameters) and self.camera_setting_controller.update_experiment_values(
-            self.experiment.CameraParameters)
+
+        return self.channels_tab_controller.update_experiment_values(self.experiment.MicroscopeState) and \
+               self.stage_gui_controller.update_experiment_values(self.experiment.StageParameters) and \
+               self.camera_setting_controller.update_experiment_values(self.experiment.CameraParameters)
 
     def prepare_acquire_data(self):
         """
@@ -445,8 +437,9 @@ class ASLM_controller:
             """
             # Creates a thread and uses it to call the model to move stage
             """
-            self.threads_pool.createThread(
-                'stage', self.move_stage, args=({args[1] + '_abs': args[0]},))
+            self.threads_pool.createThread('stage', self.move_stage, args=({args[1] + '_abs': args[0]},))
+            # temp = ({args[1] + '_abs': args[0]},)
+            # self.move_stage(args=temp)
 
         elif command == 'move_stage_and_update_info':
             """
@@ -497,6 +490,7 @@ class ASLM_controller:
                 return
 
             # create file directory
+            # TODO: create_save_path unresolved.
             file_directory = create_save_path(args[0], self.verbose)
 
             # save experiment file
@@ -557,10 +551,11 @@ class ASLM_controller:
         # Trigger model to capture a single image
         """
         self.camera_view_controller.image_count = 0
-        self.model.run_command(
-            'single',
-            self.experiment.MicroscopeState,
-            saving_info=self.experiment.Saving)
+        self.model.run_command('single',
+                               microscope_info=self.experiment.MicroscopeState,
+                               camera_info=self.experiment.CameraParameters,
+                               saving_info=self.experiment.Saving)
+
         image_id = self.show_img_pipe_parent.recv()
         self.camera_view_controller.display_image(self.data_buffer[image_id])
         # get 'stop' from the pipe
@@ -568,8 +563,14 @@ class ASLM_controller:
         self.set_mode_of_sub('stop')
 
     def capture_live_image(self):
+        """
+        Trigger model to capture a live image stream
+        """
         self.camera_view_controller.image_count = 0
-        self.model.run_command('live', self.experiment.MicroscopeState)
+        self.model.run_command('live',
+                               microscope_info=self.experiment.MicroscopeState,
+                               camera_info=self.experiment.CameraParameters)
+
         while True:
             image_id = self.show_img_pipe_parent.recv()
             if self.verbose:

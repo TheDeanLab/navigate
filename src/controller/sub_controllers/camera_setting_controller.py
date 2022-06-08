@@ -55,7 +55,7 @@ class Camera_Setting_Controller(GUI_Controller):
         self.resolution_value = '1x'
         self.number_of_pixels = 10
         self.mode = 'stop'
-        
+
         # Getting Widgets/Buttons
         self.mode_widgets = view.camera_mode.get_widgets()
         self.framerate_widgets = view.framerate_info.get_widgets()

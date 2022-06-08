@@ -47,7 +47,7 @@ from scipy import signal
 import numpy as np
 
 # Local Imports
-from model.aslm_model_waveforms import tunable_lens_ramp, sawtooth, dc_value, single_pulse
+from model.aslm_model_waveforms import tunable_lens_ramp, sawtooth, dc_value
 from tools.decorators import function_timer
 
 # Logger Setup
@@ -155,28 +155,18 @@ class DAQBase:
 
         if resolution_mode == 'high':
             zoom = 'one'
-            self.etl_r_amplitude = float(
-                self.etl_constants.ETLConstants[resolution_mode][zoom][laser]['amplitude'])
-            self.etl_r_offset = float(
-                self.etl_constants.ETLConstants[resolution_mode][zoom][laser]['offset'])
+            self.etl_r_amplitude = float(self.etl_constants.ETLConstants[resolution_mode][zoom][laser]['amplitude'])
+            self.etl_r_offset = float(self.etl_constants.ETLConstants[resolution_mode][zoom][laser]['offset'])
             if self.verbose:
-                print(
-                    "High Resolution Mode.  Amp/Off:",
-                    self.etl_r_amplitude,
-                    self.etl_r_offset)
+                print("High Resolution Mode.  Amp/Off:", self.etl_r_amplitude, self.etl_r_offset)
                 logger.debug(f"High Resolution Mode.  Amp/Off:, {self.etl_r_amplitude}, {self.etl_r_offset})")
 
         elif resolution_mode == 'low':
             zoom = microscope_state['zoom']
-            self.etl_l_amplitude = float(
-                self.etl_constants.ETLConstants[resolution_mode][zoom][laser]['amplitude'])
-            self.etl_l_offset = float(
-                self.etl_constants.ETLConstants[resolution_mode][zoom][laser]['offset'])
+            self.etl_l_amplitude = float(self.etl_constants.ETLConstants[resolution_mode][zoom][laser]['amplitude'])
+            self.etl_l_offset = float(self.etl_constants.ETLConstants[resolution_mode][zoom][laser]['offset'])
             if self.verbose:
-                print(
-                    "Low Resolution Mode.  Amp/Off:",
-                    self.etl_l_amplitude,
-                    self.etl_l_offset)
+                print("Low Resolution Mode.  Amp/Off:", self.etl_l_amplitude, self.etl_l_offset)
             logger.debug(f"Low Resolution Mode.  Amp/Off:, {self.etl_l_amplitude}, {self.etl_l_offset})")
 
         else:
@@ -188,65 +178,57 @@ class DAQBase:
         # Create the waveforms for the Electrotunable Lens
         # This needs to know what resolution mode, what channel, laser, etc...
         """
-        self.etl_l_waveform = tunable_lens_ramp(
-            self.sample_rate,
-            self.sweep_time,
-            self.etl_l_delay,
-            self.etl_l_ramp_rising,
-            self.etl_l_ramp_falling,
-            self.etl_l_amplitude,
-            self.etl_l_offset)
+        self.etl_l_waveform = tunable_lens_ramp(sample_rate=self.sample_rate,
+                                                sweep_time=self.sweep_time,
+                                                delay=self.etl_l_delay,
+                                                rise=self.etl_l_ramp_rising,
+                                                fall=self.etl_l_ramp_falling,
+                                                amplitude=self.etl_l_amplitude,
+                                                offset=self.etl_l_offset)
 
-        self.etl_r_waveform = tunable_lens_ramp(
-            self.sample_rate,
-            self.sweep_time,
-            self.etl_r_delay,
-            self.etl_r_ramp_rising,
-            self.etl_r_ramp_falling,
-            self.etl_r_amplitude,
-            self.etl_r_offset)
+        self.etl_r_waveform = tunable_lens_ramp(sample_rate=self.sample_rate,
+                                                sweep_time=self.sweep_time,
+                                                delay=self.etl_r_delay,
+                                                rise=self.etl_r_ramp_rising,
+                                                fall=self.etl_r_ramp_falling,
+                                                amplitude=self.etl_r_amplitude,
+                                                offset=self.etl_r_offset)
+
         # Scale the ETL waveforms to the AO range.
-        self.etl_l_waveform[self.etl_l_waveform <
-                            self.etl_l_min_ao] = self.etl_l_min_ao
-        self.etl_l_waveform[self.etl_l_waveform >
-                            self.etl_l_max_ao] = self.etl_l_max_ao
-        self.etl_r_waveform[self.etl_r_waveform <
-                            self.etl_r_min_ao] = self.etl_r_min_ao
-        self.etl_r_waveform[self.etl_r_waveform >
-                            self.etl_r_max_ao] = self.etl_r_max_ao
+        self.etl_l_waveform[self.etl_l_waveform < self.etl_l_min_ao] = self.etl_l_min_ao
+        self.etl_l_waveform[self.etl_l_waveform > self.etl_l_max_ao] = self.etl_l_max_ao
+        self.etl_r_waveform[self.etl_r_waveform < self.etl_r_min_ao] = self.etl_r_min_ao
+        self.etl_r_waveform[self.etl_r_waveform > self.etl_r_max_ao] = self.etl_r_max_ao
 
 
     def create_low_res_galvo_waveform(self):
         """
         # Calculate the sawtooth waveforms for the low-resolution digitally scanned galvo.
         """
-        self.galvo_l_waveform = sawtooth(
-            self.sample_rate,
-            self.sweep_time,
-            self.galvo_l_frequency,
-            self.galvo_l_amplitude,
-            self.galvo_l_offset,
-            self.galvo_l_duty_cycle,
-            self.galvo_l_phase)
+        self.galvo_l_waveform = sawtooth(sample_rate=self.sample_rate,
+                                         sweep_time=self.sweep_time,
+                                         frequency=self.galvo_l_frequency,
+                                         amplitude=self.galvo_l_amplitude,
+                                         offset=self.galvo_l_offset,
+                                         duty_cycle=self.galvo_l_duty_cycle,
+                                         phase=self.galvo_l_phase)
 
         # Scale the Galvo waveforms to the AO range.
-        self.galvo_l_waveform[self.galvo_l_waveform <
-                              self.galvo_l_min_ao] = self.galvo_l_min_ao
-        self.galvo_l_waveform[self.galvo_l_waveform >
-                              self.galvo_r_max_ao] = self.galvo_r_max_ao
+        self.galvo_l_waveform[self.galvo_l_waveform < self.galvo_l_min_ao] = self.galvo_l_min_ao
+        self.galvo_l_waveform[self.galvo_l_waveform > self.galvo_r_max_ao] = self.galvo_r_max_ao
 
     def create_high_res_galvo_waveform(self):
         """
         # Calculate the DC waveform for the resonant galvanometer drive signal.
         """
-        self.galvo_r_waveform = dc_value(
-            self.sample_rate, self.sweep_time, self.galvo_r_amplitude, 0)
+        self.galvo_r_waveform = dc_value(sample_rate=self.sample_rate,
+                                         sweep_time=self.sweep_time,
+                                         amplitude=self.galvo_r_amplitude,
+                                         offset=0)
 
         # Scale the Galvo waveforms to the AO range.
-        self.galvo_r_waveform[self.galvo_r_waveform <
-                              self.galvo_r_min_ao] = self.galvo_r_min_ao
-        self.galvo_r_waveform[self.galvo_r_waveform >
-                              self.galvo_r_max_ao] = self.galvo_r_max_ao
+        self.galvo_r_waveform[self.galvo_r_waveform < self.galvo_r_min_ao] = self.galvo_r_min_ao
+        self.galvo_r_waveform[self.galvo_r_waveform > self.galvo_r_max_ao] = self.galvo_r_max_ao
 
     def bundle_galvo_and_etl_waveforms(self):
         """
@@ -357,21 +339,19 @@ class NIDAQ(DAQBase):
         """
         # Configure camera triggers
         camera_trigger_out_line = self.model.DAQParameters['camera_trigger_out_line']
-        self.camera_trigger_task.co_channels.add_co_pulse_chan_time(
-            camera_trigger_out_line,
-            high_time=self.camera_high_time,
-            initial_delay=self.camera_delay)
+        self.camera_trigger_task.co_channels.add_co_pulse_chan_time(camera_trigger_out_line,
+                                                                    high_time=self.camera_high_time,
+                                                                    initial_delay=self.camera_delay)
         trigger_source = self.model.DAQParameters['trigger_source']
-        self.camera_trigger_task.triggers.start_trigger.cfg_dig_edge_start_trig(
-            trigger_source)
+        self.camera_trigger_task.triggers.start_trigger.cfg_dig_edge_start_trig(trigger_source)
 
     def create_master_trigger_task(self):
         """
         # Set up the DO master trigger task
         """
         master_trigger_out_line = self.model.DAQParameters['master_trigger_out_line']
-        self.master_trigger_task.do_channels.add_do_chan(
-            master_trigger_out_line, line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
+        self.master_trigger_task.do_channels.add_do_chan(master_trigger_out_line,
+                                                         line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
 
     def create_galvo_etl_task(self):
         """
@@ -379,16 +359,13 @@ class NIDAQ(DAQBase):
         PXI6259/ao0:3 -> 4 channels
         """
         galvo_etl_task_line = self.model.DAQParameters['galvo_etl_task_line']
-        self.galvo_etl_task.ao_channels.add_ao_voltage_chan(
-            galvo_etl_task_line)
-        self.galvo_etl_task.timing.cfg_samp_clk_timing(
-            rate=self.sample_rate,
-            sample_mode=AcquisitionType.FINITE,
-            samps_per_chan=self.samples)
+        self.galvo_etl_task.ao_channels.add_ao_voltage_chan(galvo_etl_task_line)
+        self.galvo_etl_task.timing.cfg_samp_clk_timing(rate=self.sample_rate,
+                                                       sample_mode=AcquisitionType.FINITE,
+                                                       samps_per_chan=self.samples)
 
         trigger_source = self.model.DAQParameters['trigger_source']
-        self.galvo_etl_task.triggers.start_trigger.cfg_dig_edge_start_trig(
-            trigger_source)
+        self.galvo_etl_task.triggers.start_trigger.cfg_dig_edge_start_trig(trigger_source)
 
     def start_tasks(self):
         """

@@ -45,7 +45,7 @@ from pathlib import Path
 import numpy as np
 
 # Local Imports
-
+from ..analysis import noise_model
 
 # Logger Setup
 p = __name__.split(".")[0]
@@ -123,13 +123,29 @@ class CameraBase:
     def close_live_mode(self):
         pass
 
+class SyntheticCameraController():
+    def __init__(self):
+        self.is_acquiring = False
+
+    def get_property_value(self):
+        """
+        Provides the idprop value after looking it up in the property_dict
+        """
+        """
+        return self.prop_getvalue(property_dict[name])
+
 
 class SyntheticCamera(CameraBase):
     def __init__(self, camera_id, model, experiment, verbose=False):
         super().__init__(camera_id, model, experiment, verbose)
-        
+
         self.x_pixels = experiment.CameraParameters['x_pixels']
         self.y_pixels = experiment.CameraParameters['y_pixels']
+
+        self._mean_background_count = 100.0
+        self._noise_sigma = noise_model.compute_noise_sigma(Ib=self._mean_background_count)
+
+        self.camera_controller = SyntheticCameraController()
         
         if self.verbose:
             print("Synthetic Camera Class Initialized")
@@ -167,6 +183,7 @@ class SyntheticCamera(CameraBase):
         self.num_of_frame = number_of_frames
         self.current_frame_idx = 0
         self.pre_frame_idx = 0
+        self.camera_controller.is_acquiring = True
 
     def get_images_in_series(self):
         images = []
@@ -183,6 +200,7 @@ class SyntheticCamera(CameraBase):
     def close_image_series(self):
         self.pre_frame_idx = 0
         self.current_frame_idx = 0
+        self.camera_controller.is_acquiring = False
 
     def get_image(self):
         image = np.random.normal(1000, 400, (self.y_pixels, self.x_pixels))
@@ -209,12 +227,16 @@ class SyntheticCamera(CameraBase):
         pass
 
     def generate_new_frame(self):
-        image = np.random.randint(
-            low=255,
-            size=(
-                self.x_pixels,
-                self.y_pixels),
-            dtype=np.uint16)
+        # image = np.random.randint(
+        #     low=255,
+        #     size=(
+        #         self.x_pixels,
+        #         self.y_pixels),
+        #     dtype=np.uint16)
+        image = np.random.normal(self._mean_background_count, 
+                                 self._noise_sigma, 
+                                 size=(self.x_pixels, self.y_pixels),
+                                ).astype(np.uint16)
         ctypes.memmove(self.data_buffer[self.current_frame_idx].ctypes.data,
                        image.ctypes.data, self.x_pixels * self.y_pixels * 2)
         self.current_frame_idx = (
@@ -264,6 +286,8 @@ class HamamatsuOrca(CameraBase):
         #     "sensor_mode", self.model.CameraParameters['sensor_mode'])
         self.camera_controller.set_property_value("defect_correct_mode",
             self.model.CameraParameters['defect_correct_mode'])
+        self.camera_controller.set_property_value(
+            "exposure_time", self.model.CameraParameters['exposure_time'] / 1000)
         # self.camera_controller.set_property_value("exposure_control",
         #                                           1)
         self.camera_controller.set_property_value(
@@ -278,11 +302,9 @@ class HamamatsuOrca(CameraBase):
             "trigger_polarity", self.model.CameraParameters['trigger_polarity'])
         self.camera_controller.set_property_value(
             "trigger_source", self.model.CameraParameters['trigger_source'])
-        self.camera_controller.set_property_value(
-            "exposure_time", self.model.CameraParameters['exposure_time'] / 1000)
-        self.camera_controller.set_property_value(
-            "internal_line_interval",
-            self.model.CameraParameters['line_interval'])
+        # self.camera_controller.set_property_value(
+        #     "internal_line_interval",
+        #     self.model.CameraParameters['line_interval'])
         # 05/16 Debugging
         # self.set_ROI(experiment.CameraParameters['x_pixels'], experiment.CameraParameters['y_pixels'])
         self.camera_controller.set_property_value("image_height",
@@ -299,6 +321,7 @@ class HamamatsuOrca(CameraBase):
         if self.verbose:
             print("Hamamatsu Camera Shutdown")
         logger.debug("Hamamatsu Camera Shutdown")
+
     def stop(self):
         self.stop_flag = True
 
@@ -331,17 +354,19 @@ class HamamatsuOrca(CameraBase):
             print('Camera mode not supported')
             logger.info("Camera mode not supported")
 
+        print("Camera Sensor Mode:", self.camera_controller.get_property_value("sensor_mode"))
+
     def set_readout_direction(self, mode):
-        if mode == 'Top-to-Bottom':
+        if mode == 'Top to Bottom':
             #  'Forward' readout direction
             self.camera_controller.set_property_value("readout_direction", 1)
-        elif mode == 'Bottom-to-Top':
+        elif mode == 'Bottom to Top':
             #  'Backward' readout direction
             self.camera_controller.set_property_value("readout_direction", 2)
         elif mode == 'bytrigger':
             self.camera_controller.set_property_value("readout_direction", 3)
         elif mode == 'diverge':
-            self.camera_controller.set_property_value("readout_direction", 4)
+            self.camera_controller.set_property_value("readout_direction", 5)
         else:
             print('Camera readout direction not supported')
             logger.info("Camera readout direction not supported")

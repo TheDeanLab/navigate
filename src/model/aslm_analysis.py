@@ -60,8 +60,7 @@ class Analysis:
     def calculate_entropy(self, dct_array, otf_support_x, otf_support_y):
         i = dct_array > 0
         image_entropy = np.sum(dct_array[i] * np.log(dct_array[i]))
-        image_entropy = image_entropy + \
-                        np.sum(-dct_array[~i] * np.log(-dct_array[~i]))
+        image_entropy = image_entropy + np.sum(-dct_array[~i] * np.log(-dct_array[~i]))
         image_entropy = -2 * image_entropy / (otf_support_x * otf_support_y)
         return image_entropy
 

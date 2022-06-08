@@ -49,6 +49,7 @@ class Channel_Setting_Controller(GUI_Controller):
         super().__init__(view, parent_controller, verbose)
 
         # num: numbers of channels
+        # TODO: Put in configuration file?
         self.num = 5
         # 'live': acquire mode is set to 'continuous'
         self.mode = 'stop'
@@ -73,8 +74,8 @@ class Channel_Setting_Controller(GUI_Controller):
 
     def set_mode(self, mode='stop'):
         self.mode = mode
-        state = 'normal' if mode=='stop' else 'disabled'
-        state_readonly = 'readonly' if mode=='stop' else 'disabled'
+        state = 'normal' if mode == 'stop' else 'disabled'
+        state_readonly = 'readonly' if mode == 'stop' else 'disabled'
         for i in range(5):
             self.view.channel_checks[i].config(state=state)
             self.view.exptime_pulldowns[i].config(state=state)

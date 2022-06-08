@@ -49,6 +49,7 @@ import tkinter as tk
 import platform
 import logging
 import logging.config
+from log_files.log_functions import log_setup
 import yaml
 
 # Local Imports
@@ -71,13 +72,13 @@ def main():
     # Specify the Default Configuration File Directories (located in src/config)
     base_directory = Path(__file__).resolve().parent
     configuration_directory = Path.joinpath(base_directory, 'config')
-    logging_directory = Path.joinpath(base_directory, 'log_files')
+    
 
     # Full file paths.
     configuration_path = Path.joinpath(configuration_directory, 'configuration.yml')
     experiment_path = Path.joinpath(configuration_directory, 'experiment.yml')
     etl_constants_path = Path.joinpath(configuration_directory, 'etl_constants.yml')
-    logging_path = Path.joinpath(logging_directory, 'logging.yml')
+    
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(description='Microscope Control Arguments')
@@ -153,12 +154,7 @@ def main():
         assert args.logging_config.exists(), "Logging Config Path {} not valid".format(args.logging_config)
         logging_path = args.logging_config
 
-    with open(logging_path, 'r') as f:
-        try:
-            config_data = yaml.load(f.read(), Loader=yaml.FullLoader)
-            logging.config.dictConfig(config_data)  # Configures our loggers from logging.yml
-        except yaml.YAMLError as yaml_error:
-            print(yaml_error)
+    log_setup('logging.yml')
 
     # Start the GUI
     root = tk.Tk()

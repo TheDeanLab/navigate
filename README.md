@@ -2,6 +2,8 @@
 
 [![Tests](https://github.com/AdvancedImagingUTSW/ASLM/actions/workflows/push_checks.yaml/badge.svg)](https://github.com/AdvancedImagingUTSW/ASLM/actions/workflows/push_checks.yaml)
 
+[![codecov](https://codecov.io/gh/AdvancedImagingUTSW/ASLM/branch/develop/graph/badge.svg?token=270RFSZGG5)](https://codecov.io/gh/AdvancedImagingUTSW/ASLM)
+
 ### Project Philosophy
 * Minimal number of dependencies. Prioritize standard library Python imports for maximum stability.
 * Sufficiently generic that it can drive all of our microscopes, different camera types, etc.

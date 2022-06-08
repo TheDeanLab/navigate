@@ -39,7 +39,7 @@ import sys
 import numpy as np
 
 # Local Imports
-sys.path.append('../../../')
+# sys.path.append('../../../')
 from src.model import aslm_model_waveforms as aslm_model_waveforms
 
 class TestWaveforms(unittest.TestCase):

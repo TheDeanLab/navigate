@@ -45,13 +45,20 @@ import serial
 
 
 class VoiceCoil:
+    """
+    The SCA814 has a single character input buffer that can be overflowed if the proper steps are not taken.
+    To avoid overflowing the input buffer the user should send a single character at a time and wait for that
+    same character to be echoed back by the controller. While not necessary, it is advisable to verify that the
+    character received from the controller is the same character sent. Once the character is received the next
+    character can be processed.
+    """
+
     def __init__(self, verbose):
         self.comport = 'COM1'
         self.baudrate = 115200
         self.bytesize = serial.EIGHTBITS
         self.parity = serial.PARITY_NONE
         self.stopBits = serial.STOPBITS_ONE
-        self.flowControl = None  # Not implemented yet.
         self.timeout = 1.25
         self.verbose = verbose
         self.init_finished = False
@@ -73,61 +80,37 @@ class VoiceCoil:
         except (serial.SerialException, ValueError) as error:
             print(error)
             raise UserWarning("Could not Communicate with Voice Coil on COM:", self.comport)
-            
 
-        """
-        The SCA814 has a single character input buffer that can be overflowed if the proper steps are not taken.
-        To avoid overflowing the input buffer the user should send a single character at a time and wait for that
-        same character to be echoed back by the controller. While not necessary, it is advisable to verify that the
-        character received from the controller is the same character sent. Once the character is received the next
-        character can be processed.
-        """
         # Send command d0 and read returned information
         if self.read_on_init:
+            string = b'd0\r'  # Can also use str.encode()
             if self.verbose:
-                print("Sending Command d0 to the voice coil.")
-            
-            #command = bytes.fromhex('d0')
-            # string = 'd0\r'
-            # string = string.encode('utf-8')
-            #string  = bin(208)
-            #string = bytearray(string, "ascii")
-
-
-
-
-            print("Is Port Open: ", self.serial.is_open)
-
-            # string = b"\xd0"
-            string = b'd0\r' # Can also use str.encode()
-            print("Command Sent in Bytes:", string)
-
-            #Before write
-            print("Before Write")
-            print("Bytes in Input Buffer: ", self.serial.in_waiting)
-            print("Bytes in Output Buffer: ", self.serial.out_waiting)
+                print("Before Write")
+                print("Bytes in Input Buffer: ", self.serial.in_waiting)
+                print("Bytes in Output Buffer: ", self.serial.out_waiting)
+                print("Sending Command to the voice coil:", string)
 
             try:
                 hold = self.serial.write(string)
-                print("Number of Bytes Sent: ", hold)
+                if self.verbose:
+                    print("Number of Bytes Sent: ", hold)
             except serial.SerialTimeoutException as e:
                 print(e)
 
             # After write , Before read
-            print("After Write, Before Read")
-            print("Bytes in Input Buffer: ", self.serial.in_waiting)
-            print("Bytes in Output Buffer: ", self.serial.out_waiting)
+            if self.verbose:
+                print("After Write, Before Read")
+                print("Bytes in Input Buffer: ", self.serial.in_waiting)
+                print("Bytes in Output Buffer: ", self.serial.out_waiting)
 
             time.sleep(2.0)
 
-            #self.serial.write(carriage_return)
             data = self.serial.readline()
-            print(data)
-
-            # After Read
-            print("After Read")
-            print("Bytes in Input Buffer: ", self.serial.in_waiting)
-            print("Bytes in Output Buffer: ", self.serial.out_waiting)
+            if self.verbose:
+                print(data)
+                print("After Read")
+                print("Bytes in Input Buffer: ", self.serial.in_waiting)
+                print("Bytes in Output Buffer: ", self.serial.out_waiting)
 
 
             if len(data) > 0:
@@ -135,13 +118,9 @@ class VoiceCoil:
             else:
                print("Nothing received from", string)
 
-            # return_byte = self.read_bytes(1)
-            # if return_byte == bytes.fromhex('d0'):
-            #     # Write octal literal for carriage return - 15
-            #     self.serial.write(15)
-            #     self.init_finished = True
-            #     if self.verbose:
-            #         print("Done Initializing the voice coil")
+
+    def __del__(self):
+        self.serial.close()
 
     def read_bytes(self, num_bytes):
         """
@@ -164,7 +143,7 @@ class VoiceCoil:
         try:
 
             # Close Connection with Device
-            if (msg == "close"):
+            if msg == "close":
                 self.close_connection()
             else:
                 # Send command to device
@@ -179,8 +158,10 @@ class VoiceCoil:
         except serial.SerialException:
             raise UserWarning('Error in communicating with Voice Coil via COMPORT', self.comport)
 
-    # Function to close connection with device
     def close_connection(self):
+        """
+        Function to close the connection of the Voice Coil
+        """
         self.serial.close()
 
 
@@ -188,24 +169,4 @@ if __name__ == "__main__":
     vc = VoiceCoil(verbose=True)
     vc.send_command('k0\r')  # Turn off servo
     vc.send_command('k1\r')  # Engage servo
-    vc.close_connection()
 
-    #string = "\xd0"
-
-  # def openConnection():
-    #     try:
-    #         if VoiceCoil.verbose:
-    #             print('Connecting to Voice Coil on Serial Port', VoiceCoil.comport)
-    #
-    #         # Send "d0" as initial command to device
-    #         VoiceCoil.sendmsg("d0".encode('utf-8'))
-    #
-    #         # Read data sent from device
-    #         data = VoiceCoil.ser.read(9999)
-    #         if len(data) > 0:
-    #             print("Data received: " + data)
-    #         time.sleep(.5)
-    #
-    #     except serial.SerialException:
-    #         raise UserWarning('Could not communicate with Voice Coil via COMPORT', VoiceCoil.comport)
-    #

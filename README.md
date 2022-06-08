@@ -1,5 +1,7 @@
 # Multiscale Axially Swept Light-Sheet Microscopy Project
 
+[![Tests](https://github.com/AdvancedImagingUTSW/ASLM/actions/workflows/push_checks.yaml/badge.svg)](https://github.com/AdvancedImagingUTSW/ASLM/actions/workflows/push_checks.yaml)
+
 ### Project Philosophy
 * Minimal number of dependencies. Prioritize standard library Python imports for maximum stability.
 * Sufficiently generic that it can drive all of our microscopes, different camera types, etc.

@@ -39,8 +39,8 @@ import sys
 import numpy as np
 
 # Local Imports
-sys.path.append('../../')
-from src.model.aslm_analysis import Analysis as aslm_analysis
+# sys.path.append('../../')
+from ...src.model.aslm_analysis import Analysis as aslm_analysis
 
 class TestASLMAnalysis(unittest.TestCase):
     """

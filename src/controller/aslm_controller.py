@@ -437,10 +437,9 @@ class ASLM_controller:
             """
             # Creates a thread and uses it to call the model to move stage
             """
-            # self.threads_pool.createThread('stage', self.move_stage, args=({args[1] + '_abs': args[0]},))
-            temp = ({args[1] + '_abs': args[0]},)
-            print("ARGS:", temp)
-            self.move_stage(args=temp)
+            self.threads_pool.createThread('stage', self.move_stage, args=({args[1] + '_abs': args[0]},))
+            # temp = ({args[1] + '_abs': args[0]},)
+            # self.move_stage(args=temp)
 
         elif command == 'move_stage_and_update_info':
             """

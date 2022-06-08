@@ -127,6 +127,14 @@ class SyntheticCameraController():
     def __init__(self):
         self.is_acquiring = False
 
+    def get_property_value(self):
+        """
+        Provides the idprop value after looking it up in the property_dict
+        """
+        """
+        return self.prop_getvalue(property_dict[name])
+
+
 class SyntheticCamera(CameraBase):
     def __init__(self, camera_id, model, experiment, verbose=False):
         super().__init__(camera_id, model, experiment, verbose)

@@ -223,7 +223,8 @@ class DAQBase:
         """
         self.galvo_r_waveform = dc_value(sample_rate=self.sample_rate,
                                          sweep_time=self.sweep_time,
-                                         amplitude=self.galvo_r_amplitude, 0)
+                                         amplitude=self.galvo_r_amplitude,
+                                         offset=0)
 
         # Scale the Galvo waveforms to the AO range.
         self.galvo_r_waveform[self.galvo_r_waveform < self.galvo_r_min_ao] = self.galvo_r_min_ao

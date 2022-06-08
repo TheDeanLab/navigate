@@ -1,5 +1,5 @@
 # https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
-name: ASLM code check
+name: Tests
 
 on: [push]
 

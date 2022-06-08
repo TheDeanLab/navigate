@@ -47,8 +47,8 @@ from scipy import signal
 import numpy as np
 
 # Local Imports
-from model.aslm_model_waveforms import tunable_lens_ramp, sawtooth, dc_value
-from tools.decorators import function_timer
+from ..aslm_model_waveforms import tunable_lens_ramp, sawtooth, dc_value
+# from ...tools.decorators import function_timer
 
 # Logger Setup
 p = __name__.split(".")[0]

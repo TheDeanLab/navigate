@@ -131,8 +131,8 @@ class SyntheticCameraController():
         """
         Provides the idprop value after looking it up in the property_dict
         """
-        """
-        return self.prop_getvalue(property_dict[name])
+        # return self.prop_getvalue(property_dict[name])
+        return {}
 
 
 class SyntheticCamera(CameraBase):

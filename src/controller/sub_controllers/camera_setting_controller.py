@@ -227,7 +227,7 @@ class Camera_Setting_Controller(GUI_Controller):
             self.show_verbose_info("Normal Camera Readout Mode")
 
         if sensor_value == 'Light-Sheet':
-            self.mode_widgets['Readout'].widget.set('Top to Bottom')
+            self.mode_widgets['Readout'].widget.set('Top-to-Bottom')
             self.mode_widgets['Readout'].widget['state'] = 'readonly'
             self.mode_widgets['Pixels'].set(self.number_of_pixels)  # Default to 10 pixels
             self.mode_widgets['Pixels'].widget.trigger_focusout_validation()

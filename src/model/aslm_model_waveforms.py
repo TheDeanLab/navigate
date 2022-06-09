@@ -112,7 +112,7 @@ def tunable_lens_ramp(sample_rate=100000,
     # create an array just containing the negative amplitude voltage:
     array = np.zeros(samples) - amplitude + offset
 
-    # convert rise, fall, and delay in % into number of samples
+    # convert rise, fall, and delay in % into number of samples - Should we do round not int?
     delay_samples = int(samples * delay / 100)
     rise_samples = int(samples * rise / 100)
     fall_samples = int(samples * fall / 100)
@@ -209,8 +209,14 @@ def smooth_waveform(waveform,
 
 if (__name__ == "__main__"):
     import matplotlib.pyplot as plt
+
+    etl_l_delay = self.model.RemoteFocusParameters['remote_focus_l_delay_percent']
+    etl_l_ramp_rising = self.model.RemoteFocusParameters['remote_focus_l_ramp_rising_percent']
+    etl_l_ramp_falling = self.model.RemoteFocusParameters['remote_focus_l_ramp_falling_percent']
+    etl_l_amplitude = self.model.RemoteFocusParameters['remote_focus_l_amplitude']
+
     sample_rate = 100000
     sweep_time = 0.4
-    data = square(sample_rate=sample_rate, sweep_time=sweep_time, frequency=10, amplitude=5)
+    data = sawtooth(sample_rate=sample_rate, sweep_time=sweep_time, amplitude=0.67)
     plt.plot(data)
     plt.show()

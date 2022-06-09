@@ -195,10 +195,21 @@ class DAQBase:
                                                 offset=self.etl_r_offset)
 
         # Scale the ETL waveforms to the AO range.
-        self.etl_l_waveform[self.etl_l_waveform < self.etl_l_min_ao] = self.etl_l_min_ao
-        self.etl_l_waveform[self.etl_l_waveform > self.etl_l_max_ao] = self.etl_l_max_ao
-        self.etl_r_waveform[self.etl_r_waveform < self.etl_r_min_ao] = self.etl_r_min_ao
-        self.etl_r_waveform[self.etl_r_waveform > self.etl_r_max_ao] = self.etl_r_max_ao
+        if np.any(self.etl_l_waveform < self.etl_l_min_ao):
+            print("Warning: ETL_L_Waveform Clipped - Value too low")
+            self.etl_l_waveform[self.etl_l_waveform < self.etl_l_min_ao] = self.etl_l_min_ao
+
+        if np.any(self.etl_l_waveform > self.etl_l_max_ao):
+            print("Warning: ETL_L_Waveform Clipped - Value too high")
+            self.etl_l_waveform[self.etl_l_waveform > self.etl_l_max_ao] = self.etl_l_max_ao
+
+        if np.any(self.etl_r_waveform < self.etl_r_min_ao):
+            print("Warning: ETL_R_Waveform Clipped - Value too low")
+            self.etl_r_waveform[self.etl_r_waveform < self.etl_r_min_ao] = self.etl_r_min_ao
+
+        if np.any(self.etl_r_waveform > self.etl_r_max_ao):
+            print("Warning: ETL_R_Waveform Clipped - Value too high")
+            self.etl_r_waveform[self.etl_r_waveform > self.etl_r_max_ao] = self.etl_r_max_ao
 
 
     def create_low_res_galvo_waveform(self):
@@ -338,6 +349,9 @@ class NIDAQ(DAQBase):
         """
         # Configure camera triggers
         camera_trigger_out_line = self.model.DAQParameters['camera_trigger_out_line']
+        self.camera_high_time = self.camera_pulse_percent * 0.01 * self.sweep_time
+        self.camera_delay = self.camera_delay_percent * 0.01 * self.sweep_time
+
         self.camera_trigger_task.co_channels.add_co_pulse_chan_time(camera_trigger_out_line,
                                                                     high_time=self.camera_high_time,
                                                                     initial_delay=self.camera_delay)

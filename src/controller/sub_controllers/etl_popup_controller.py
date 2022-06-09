@@ -97,9 +97,9 @@ class Etl_Popup_Controller(GUI_Controller):
         # set ranges of value for those lasers
         for laser in self.lasers:
             self.widgets[laser + ' Amp'].widget.configure(from_=0)
-            self.widgets[laser + ' Amp'].widget.configure(increment=0.1)
+            self.widgets[laser + ' Amp'].widget.configure(increment=0.01)
             self.widgets[laser + ' Off'].widget.configure(from_=0)
-            self.widgets[laser + ' Off'].widget.configure(increment=0.1)
+            self.widgets[laser + ' Off'].widget.configure(increment=0.01)
 
     def set_experiment_values(self, resolution_value):
         """

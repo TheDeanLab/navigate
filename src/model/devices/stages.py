@@ -188,6 +188,7 @@ class SyntheticStage(StageBase):
         if self.verbose:
             print("Stage Position: ", self.int_position_dict)
         logger.debug(f"Stage Position:, {self.int_position_dict}")
+
     def move_relative(self, move_dictionary, wait_until_done=False):
         """
         Move relative method

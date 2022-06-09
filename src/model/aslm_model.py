@@ -366,12 +366,13 @@ class Model:
 
         # Update Camera.
         self.camera.set_sensor_mode(self.experiment.CameraParameters['sensor_mode'])
+        # self.camera.set_exposure_time(10)
         print("SENSOR MODE:", self.experiment.CameraParameters['sensor_mode'])
         if self.experiment.CameraParameters['sensor_mode'] == 'Light-Sheet':
             print("Desired Readout Direction:", self.experiment.CameraParameters['readout_direction'])
-            print("Actual Readout Direction:", self.camera.camera_controller.get_property_value("readout_direction"))
             self.camera.set_readout_direction(self.experiment.CameraParameters['readout_direction'])
-            # self.camera.set_lightsheet_rolling_shutter_width(self.experiment.CameraParameters['lightsheet_rolling_shutter_width'])
+            print("Actual Readout Direction:", self.camera.camera_controller.get_property_value("readout_direction"))
+            self.camera.set_lightsheet_rolling_shutter_width(self.daq.sweep_time)
 
         # Attach camera buffer and start imaging
         # TODO: Move this to a separate function?

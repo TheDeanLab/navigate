@@ -144,12 +144,12 @@ class LabelInput(ttk.Frame):
         try:
             if self.variable:
                 return self.variable.get()  # Catches widgets that don't have text
-            elif isinstance(self.input, tk.Text):
+            elif isinstance(self.widget, tk.Text):
                 # This is to account for the different formatting with Text
                 # widgets
-                return self.input.get('1.0', tk.END)
+                return self.widget.get('1.0', tk.END)
             else:
-                return self.input.get()  # Cathces all others like the normal entry widget
+                return self.widget.get()  # Cathces all others like the normal entry widget
         except(TypeError, tk.TclError):
             # Catches times when a numeric entry input has a blank, since this
             # cannot be converted into a numeric value

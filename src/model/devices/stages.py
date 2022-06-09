@@ -43,7 +43,7 @@ import time
 # Third Party Imports
 from pathlib import Path
 
-from pipython import GCSDevice, pitools
+from pipython import GCSDevice, pitools, GCSError, gcserror
 
 # Local Imports
 
@@ -368,7 +368,13 @@ class PIStage(StageBase):
         self.block_till_controller_is_ready()
 
         # Move the Focusing Stage to the Start Position
-        self.pidevice.MOV(5, self.startfocus / 1000)
+        try:
+            self.pidevice.MOV(5, self.startfocus / 1000)
+        except GCSError as e:
+            logger.exception(GCSError(e)) # Need to test this on the stage or somehow simulate, otherwise the documented way will work, but if this works it will be more clear what happened
+            # raise
+            logger.error("Reset Error Axis: 5/Focus to Start Position")
+            self.pidevice.RES(5) # Resets error for axis
 
     def __del__(self):
         try:
@@ -379,9 +385,13 @@ class PIStage(StageBase):
             if self.verbose:
                 print('PI connection closed')
             logger.debug("PI connection closed")
-        except BaseException:
-            logger.exception("Error while disconnecting the PI stage")
+        except GCSError as e: #except BaseException:
+            # logger.exception("Error while disconnecting the PI stage")
             print('Error while disconnecting the PI stage')
+            logger.exception(GCSError(e))
+            raise
+            
+
 
     def create_position_dict(self):
         """
@@ -440,7 +450,13 @@ class PIStage(StageBase):
             if (self.x_min <= self.x_pos +
                     x_rel) and (self.x_max >= self.x_pos + x_rel):
                 x_rel = x_rel / 1000
-                self.pidevice.MVR({1: x_rel})
+                try:
+                    self.pidevice.MVR({1: x_rel})
+                except GCSError as e:
+                    logger.exception(GCSError(e))
+                    # raise
+                    logger.error("Reset Error Axis: 1/X Relative")
+                    self.pidevice.RES(1) # Resets error for axis
             else:
                 logger.info("Relative movement stopped: X Motion limit would be reached!, 1000")
                 print(
@@ -452,7 +468,13 @@ class PIStage(StageBase):
             if (self.y_min <= self.y_pos +
                     y_rel) and (self.y_max >= self.y_pos + y_rel):
                 y_rel = y_rel / 1000
-                self.pidevice.MVR({2: y_rel})
+                try:
+                    self.pidevice.MVR({2: y_rel})
+                except GCSError as e:
+                    logger.exception(GCSError(e))
+                    # raise
+                    logger.error("Reset Error Axis: 2/Y Relative")
+                    self.pidevice.RES(2) # Resets error for axis
             else:
                 logger.info("Relative movement stopped: Y Motion limit would be reached!, 1000")
                 print(
@@ -464,7 +486,13 @@ class PIStage(StageBase):
             if (self.z_min <= self.z_pos +
                     z_rel) and (self.z_max >= self.z_pos + z_rel):
                 z_rel = z_rel / 1000
-                self.pidevice.MVR({3: z_rel})
+                try:
+                    self.pidevice.MVR({3: z_rel})
+                except GCSError as e:
+                    logger.exception(GCSError(e))
+                    # raise
+                    logger.error("Reset Error Axis: 3/Z Relative")
+                    self.pidevice.RES(3) # Resets error for axis
             else:
                 logger.info("Relative movement stopped: Z Motion limit would be reached!, 1000")
                 print(
@@ -473,9 +501,14 @@ class PIStage(StageBase):
 
         if 'theta_rel' in move_dictionary:
             theta_rel = move_dictionary['theta_rel']
-            if (self.theta_min <= self.theta_pos +
-                    theta_rel) and (self.theta_max >= self.theta_pos + theta_rel):
-                self.pidevice.MVR({4: theta_rel})
+            if (self.theta_min <= self.theta_pos + theta_rel) and (self.theta_max >= self.theta_pos + theta_rel):
+                try:
+                    self.pidevice.MVR({4: theta_rel})
+                except GCSError as e:
+                    logger.exception(GCSError(e))
+                    # raise
+                    logger.error("Reset Error Axis: 4/Theta Relative")
+                    self.pidevice.RES(4) # Resets error for axis
             else:
                 logger.info("Relative movement stopped: Theta Motion limit would be reached!, 1000")
                 print(
@@ -484,10 +517,15 @@ class PIStage(StageBase):
 
         if 'f_rel' in move_dictionary:
             f_rel = move_dictionary['f_rel']
-            if (self.f_min <= self.f_pos +
-                    f_rel) and (self.f_max >= self.f_pos + f_rel):
+            if (self.f_min <= self.f_pos + f_rel) and (self.f_max >= self.f_pos + f_rel):
                 f_rel = f_rel / 1000
-                self.pidevice.MVR({5: f_rel})
+                try:
+                    self.pidevice.MVR({5: f_rel})
+                except GCSError as e:
+                    logger.exception(GCSError(e))
+                    # raise
+                    logger.error("Reset Error Axis: 5/Focus Relative")
+                    self.pidevice.RES(5) # Resets error for axis
             else:
                 logger.info("Relative movement stopped: F Motion limit would be reached!, 1000")
                 print(
@@ -509,7 +547,13 @@ class PIStage(StageBase):
             x_abs = x_abs - self.int_x_pos_offset
             if (self.x_min <= x_abs) and (self.x_max >= x_abs):
                 x_abs = x_abs / 1000
-                self.pidevice.MOV({1: x_abs})
+                try:
+                    self.pidevice.MOV({1: x_abs})
+                except GCSError as e:
+                    logger.exception(GCSError(e))
+                    # raise
+                    logger.error("Reset Error Axis: 1/X Absolute")
+                    self.pidevice.RES(1) # Resets error for axis
             else:
                 logger.info("Absolute movement stopped: X Motion limit would be reached!, 1000")
                 print(
@@ -521,7 +565,13 @@ class PIStage(StageBase):
             y_abs = y_abs - self.int_y_pos_offset
             if (self.y_min <= y_abs) and (self.y_max >= y_abs):
                 y_abs = y_abs / 1000
-                self.pidevice.MOV({2: y_abs})
+                try:
+                    self.pidevice.MOV({2: y_abs})
+                except GCSError as e:
+                    logger.exception(GCSError(e))
+                    # raise
+                    logger.error("Reset Error Axis: 2/Y Absolute")
+                    self.pidevice.RES(2) # Resets error for axis
             else:
                 logger.info("Absolute movement stopped: Y Motion limit would be reached!, 1000")
                 print(
@@ -533,7 +583,13 @@ class PIStage(StageBase):
             z_abs = z_abs - self.int_z_pos_offset
             if (self.z_min <= z_abs) and (self.z_max >= z_abs):
                 z_abs = z_abs / 1000
-                self.pidevice.MOV({3: z_abs})
+                try:
+                    self.pidevice.MOV({3: z_abs})
+                except GCSError as e:
+                    logger.exception(GCSError(e))
+                    # raise
+                    logger.error("Reset Error Axis: 3/Z Absolute")
+                    self.pidevice.RES(3) # Resets error for axis
             else:
                 logger.info("Absolute movement stopped: Z Motion limit would be reached!, 1000")
                 print(
@@ -545,7 +601,13 @@ class PIStage(StageBase):
             f_abs = f_abs - self.int_f_pos_offset
             if (self.f_min <= f_abs) and (self.f_max >= f_abs):
                 f_abs = f_abs / 1000
-                self.pidevice.MOV({5: f_abs})
+                try:
+                    self.pidevice.MOV({5: f_abs})
+                except GCSError as e:
+                    logger.exception(GCSError(e))
+                    # raise
+                    logger.error("Reset Error Axis: 5/Focus Absolute")
+                    self.pidevice.RES(5) # Resets error for axis
             else:
                 logger.info("Absolute movement stopped: F Motion limit would be reached!, 1000")
                 print(
@@ -556,7 +618,13 @@ class PIStage(StageBase):
             theta_abs = move_dictionary['theta_abs']
             theta_abs = theta_abs - self.int_theta_pos_offset
             if (self.theta_min <= theta_abs) and (self.theta_max >= theta_abs):
-                self.pidevice.MOV({4: theta_abs})
+                try:
+                    self.pidevice.MOV({4: theta_abs})
+                except GCSError as e:
+                    logger.exception(GCSError(e))
+                    # raise
+                    logger.error("Reset Error Axis: 4/Theta Absolute")
+                    self.pidevice.RES(4) # Resets error for axis
             else:
                 logger.info("Absolute movement stopped: Theta Motion limit would be reached!, 1000")
                 print(
@@ -592,11 +660,24 @@ class PIStage(StageBase):
 
     def load_sample(self):
         y_abs = self.model.StageParameters['y_load_position'] / 1000
-        self.pidevice.MOV({2: y_abs})
+        try:
+            self.pidevice.MOV({2: y_abs})
+        except GCSError as e:
+            logger.exception(GCSError(e))
+            # raise
+            logger.error("Reset Error Axis: 2/Y Absolute on Load Sample")
+            self.pidevice.RES(2) # Resets error for axis
+
 
     def unload_sample(self):
         y_abs = self.model.StageParameters['y_unload_position'] / 1000
-        self.pidevice.MOV({2: y_abs})
+        try:
+            self.pidevice.MOV({2: y_abs})
+        except GCSError as e:
+            logger.exception(GCSError(e))
+            # raise
+            logger.error("Reset Error Axis: 2/Y Absolute on Unload Sample")
+            self.pidevice.RES(2) # Resets error for axis
 
     def mark_rotation_position(self):
         """
@@ -614,7 +695,15 @@ class PIStage(StageBase):
         x_abs = self.x_rot_position / 1000
         y_abs = self.y_rot_position / 1000
         z_abs = self.z_rot_position / 1000
-        self.pidevice.MOV({1: x_abs, 2: y_abs, 3: z_abs})
+        try:
+            self.pidevice.MOV({1: x_abs, 2: y_abs, 3: z_abs})
+        except GCSError as e:
+            logger.exception(GCSError(e))
+            # raise
+            logger.error("Reset Error Axis: 1,2,3/X, Y, Z on Goto Rotation Position")
+            self.pidevice.RES(1) # Resets error for axis
+            self.pidevice.RES(2)
+            self.pidevice.RES(3)
         if wait_until_done is True:
             self.pitools.waitontarget(self.pidevice)
 

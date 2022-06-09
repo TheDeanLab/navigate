@@ -51,6 +51,7 @@ from .aslm_model_config import Session as session
 from controller.thread_pool import SynchronizedThreadPool
 from model.concurrency.concurrency_tools import ResultThread, SharedNDArray, ObjectInSubprocess
 from model.model_features.autofocus import Autofocus
+from model.model_features.aslm_image_writer import ImageWriter
 
 # debug
 from model.aslm_debug_model import Debug_Module
@@ -102,9 +103,6 @@ class Model:
 
         # Move device initialization steps to multiple threads
         threads_dict = {
-            'image_writer': ResultThread(target=startup_functions.start_image_writer,
-                                        args=(self.configuration, self.experiment, self.verbose,)).start(),
-
             'filter_wheel': ResultThread(target=startup_functions.start_filter_wheel,
                                          args=(self.configuration,self.verbose,)).start(),
 
@@ -143,7 +141,6 @@ class Model:
         self.acquisition_count = 0
         self.total_acquisition_count = None
         self.total_image_count = None
-        self.current_time_point = 0
         self.current_channel = 0
         self.current_filter = 'Empty'
         self.current_laser = '488nm'
@@ -236,12 +233,15 @@ class Model:
             self.experiment.MicroscopeState = kwargs['microscope_info']
             self.experiment.CameraParameters = kwargs['camera_info']
             self.is_save = self.experiment.MicroscopeState['is_save']
-
-            if self.is_save:
-                self.experiment.Saving = kwargs['saving_info']
             self.prepare_acquisition()
             self.run_single_acquisition()
-            self.run_data_process(1)
+            channel_num = len(self.experiment.MicroscopeState['channels'].keys())
+            if self.is_save:
+                self.experiment.Saving = kwargs['saving_info']
+                image_writer = ImageWriter(self)
+                self.run_data_process(channel_num, data_func=image_writer.write_tiff)
+            else:
+                self.run_data_process(channel_num)
             self.end_acquisition()
 
         elif command == 'live':
@@ -395,7 +395,7 @@ class Model:
     # functions related to send out signals
 
     # functions related to frame data
-    def run_data_process(self, num_of_frames=0, pre_func=None, in_func=None, end_func=None):
+    def run_data_process(self, num_of_frames=0, pre_func=None, data_func=None, callback=None):
         """
         # this function is the structure of data thread
         """
@@ -426,17 +426,17 @@ class Model:
             self.logger.debug(f'sent through pipe{frame_ids[0]}')
             self.show_img_pipe.send(frame_ids[0])
 
-            if in_func:
-                in_func(frame_ids)
+            if data_func:
+                data_func(frame_ids)
 
             acquired_frame_num += len(frame_ids)
             if count_frame and acquired_frame_num >= num_of_frames:
                 self.stop_acquisition = True
 
+        if callback:
+            callback()
+        
         self.show_img_pipe.send('stop')
-
-        if end_func:
-            end_func()
 
         self.logger.debug('data thread is stop')
         self.logger.debug(f'received frames in total:{acquired_frame_num}')

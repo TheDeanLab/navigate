@@ -180,7 +180,7 @@ class Etl_Popup_Controller(GUI_Controller):
                 }
 
                 # Delay feature.
-                self.event_ids[event_id_name] = self.view.popup.after(100, lambda: func(temp))
+                self.event_ids[event_id_name] = self.view.popup.after(250, lambda: func(temp))
             self.resolution_info.ETLConstants[self.resolution][self.mag][laser][etl_name] = variable.get()
 
         return func_laser

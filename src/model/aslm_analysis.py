@@ -44,8 +44,8 @@ if platform.system() != 'Darwin':
     import tensorflow as tf
 
 # Local Imports
-from analysis import image_decorrelation as image_decorrelation
-from analysis import flatfield as flatfield
+from .analysis import image_decorrelation as image_decorrelation
+from .analysis import flatfield as flatfield
 
 # Logger Setup
 p = __name__.split(".")[0]

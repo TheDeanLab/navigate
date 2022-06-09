@@ -38,6 +38,7 @@ import numpy as np
 import cv2
 from PIL import Image, ImageTk
 from skimage.color import convert_colorspace
+import matplotlib.pyplot as plt
 
 import logging
 from pathlib import Path
@@ -73,11 +74,14 @@ class Camera_View_Controller(GUI_Controller):
         self.min_counts = None
         self.mode = 'stop'
         self.colormap = 'gray'
+        self.gray_lut = plt.get_cmap('gist_gray')
+        self.gradient_lut = plt.get_cmap('plasma')
+        self.rainbow_lut = plt.get_cmap('afmhot')
+
         self.image_count = 0
         self.temp_array = None
         self.rolling_frames = 1
-        self.live_subsampling = self.parent_controller.configuration.CameraParameters[
-            'display_live_subsampling']
+        self.live_subsampling = self.parent_controller.configuration.CameraParameters['display_live_subsampling']
         self.canvas = self.view.canvas
         self.bit_depth = 8  # bit-depth for PIL presentation.
 
@@ -173,11 +177,11 @@ class Camera_View_Controller(GUI_Controller):
         if self.autoscale is True:
             self.max_counts = np.max(image)
             self.min_counts = np.min(image)
-            scaling_factor = 2 ** self.bit_depth
+            scaling_factor = 1  #2 ** self.bit_depth
             image = scaling_factor * ((image - self.min_counts) / (self.max_counts - self.min_counts))
         else:
             self.update_min_max_counts()
-            scaling_factor = 2 ** self.bit_depth
+            scaling_factor = 1  # 2 ** self.bit_depth
             image = scaling_factor * ((image - self.min_counts) / (self.max_counts - self.min_counts))
             image[image < 0] = 0
             image[image > scaling_factor] = scaling_factor
@@ -187,19 +191,44 @@ class Camera_View_Controller(GUI_Controller):
 
         #  Apply Lookup Table
         image = self.apply_LUT(image, saturated_pixels)
-
-        #  Display Image
-        self.img = ImageTk.PhotoImage(Image.fromarray(np.uint8(image)))
-        self.canvas.create_image(0,
-                                 0,
-                                 image=self.img,
-                                 anchor='nw')
+        image = image * 255
+        self.img = ImageTk.PhotoImage(Image.fromarray(image.astype(np.uint8)))
+        self.canvas.create_image(0, 0, image=self.img, anchor='nw')
 
         # Update Channel Index
         self.image_metrics['Channel'].set(self.parent_controller.model.return_channel_index())
 
         # Iterate Image Count for Rolling Average
         self.image_count = self.image_count + 1
+
+    def apply_LUT(self, image, saturated_pixels):
+        """
+        Applies a LUT to the image.
+        Red is reserved for saturated pixels.
+        self.color_values = ['gray', 'gradient', 'rainbow']
+        """
+
+        if self.colormap == 'gradient':
+            # im_color = cv2.applyColorMap(image, cv2.COLORMAP_JET)
+            image = self.rainbow_lut(image)
+        elif self.colormap == 'rainbow':
+            image = self.gradient_lut(image)
+            # im_color = cv2.applyColorMap(image, cv2.COLORMAP_RAINBOW)
+        else:
+            image = self.gray_lut(image)
+            # im_color = cv2.applyColorMap(image, cv2.COLORMAP_BONE)
+
+        image = image[:, :, :3]
+
+        # Specify the saturated values in the red channel
+        if np.any(saturated_pixels):
+            # Saturated pixels is an array of True False statements same size as the image.
+            # Pull out the red image from the RGBA, set saturated pixels to 1, put back into array.
+            red_image = image[:, :, 2]
+            red_image[saturated_pixels] = 1
+            image[:, :, 2] = red_image
+
+        return image
 
     def update_LUT(self):
         """
@@ -213,10 +242,14 @@ class Camera_View_Controller(GUI_Controller):
             if self.verbose:
                 print("Updating the LUT", self.colormap)
             logger.debug(f"Updating the LUT, {self.colormap}")
-        # self.canvas.create_image(0,
-        #                          0,
-        #                          image=self.img,
-        #                          anchor='nw')
+
+    def detect_saturation(self, image):
+        """
+        Looks for any pixels at the maximum intensity allowable for the camera.
+        """
+        saturation_value = 2**16-1
+        saturated_pixels = image[image > saturation_value]
+        return saturated_pixels
 
     def toggle_min_max_buttons(self):
         """
@@ -251,55 +284,3 @@ class Camera_View_Controller(GUI_Controller):
             print("Min and Max counts scaled to ", self.min_counts, self.max_counts)
         logger.debug(f"Min and Max counts scaled to, {self.min_counts}, {self.max_counts}")
 
-    def apply_LUT(self, image, saturated_pixels):
-        """
-        Applies a LUT to the image.
-        Red is reserved for saturated pixels.
-        """
-        # Get the LUT
-        self.update_LUT()
-
-        # Create the RGB array
-        y, x = np.shape(image)
-        image_lut = np.zeros((y, x, 3))
-
-        # Specify the saturated values in the red channel
-        if np.any(saturated_pixels):
-            saturated_pixels[saturated_pixels] = 2 ** self.bit_depth
-            image_lut[:, :, 0] = saturated_pixels
-
-        # Many of the LUTs are not actually implemented in the GUI.
-        if self.colormap == 'gray':
-            image_lut = image
-        elif self.colormap == 'green':
-            image_lut[:, :, 1] = image
-        elif self.colormap == 'blue':
-            image_lut[:, :, 2] = image
-        elif self.colormap == 'cyan':
-            image_lut[:, :, 1] = image
-            image_lut[:, :, 2] = image
-        elif self.colormap == 'magenta':
-            image_lut[:, :, 0] = image
-            image_lut[:, :, 2] = image
-        elif self.colormap == 'yellow':
-            image_lut[:, :, 0] = image
-            image_lut[:, :, 1] = image
-        elif self.colormap == 'hot':
-            image_lut = convert_colorspace()
-
-        elif self.colormap == 'viridis':
-            pass
-        else:
-            print("Lookup Table Not Implemented in Camera_View_Controller. Displaying as Grayscale.")
-            image_lut = image
-            logger.info("Lookup Table Not Implemented in Camera_View_Controller. Displaying as Grayscale.")
-
-        return image_lut
-
-    def detect_saturation(self, image):
-        """
-        Looks for any pixels at the maximum intensity allowable for the camera.
-        """
-        saturation_value = 2**16-1
-        saturated_pixels = image[image > saturation_value]
-        return saturated_pixels

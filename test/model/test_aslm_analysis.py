@@ -33,7 +33,6 @@ POSSIBILITY OF SUCH DAMAGE.
 
 # Standard Library Imports
 import unittest
-import sys
 
 # Third Party Imports
 import numpy as np

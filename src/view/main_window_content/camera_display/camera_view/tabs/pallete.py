@@ -64,7 +64,7 @@ class pallete(ttk.Labelframe):
 
         # LUT Radio buttons - Gray is default
         self.color_labels = ['Gray', 'Gradient', 'Rainbow']
-        self.color_values = ['gray', 'hot', 'viridis']
+        self.color_values = ['gray', 'gradient', 'rainbow']
         self.color = StringVar()
         for i in range(len(self.color_labels)):
             self.inputs[self.color_labels[i]] = LabelInput(parent=self,

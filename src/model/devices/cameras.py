@@ -73,10 +73,10 @@ class CameraBase:
         # Initialize Exposure and Display Information - Convert from milliseconds to seconds.
         self.camera_line_interval = self.model.CameraParameters['line_interval']
         self.camera_exposure_time = self.model.CameraParameters['exposure_time'] / 1000
-        self.camera_display_live_subsampling = self.model.CameraParameters[
-            'display_live_subsampling']
-        self.camera_display_acquisition_subsampling = self.model.CameraParameters[
-            'display_acquisition_subsampling']
+        self.camera_display_live_subsampling = self.model.CameraParameters['display_live_subsampling']
+        self.camera_display_acquisition_subsampling = self.model.CameraParameters['display_acquisition_subsampling']
+        self.lightsheet_rolling_shutter_width = self.model.CameraParameters['lightsheet_rolling_shutter_width']
+
 
     def __del__(self):
         pass
@@ -357,23 +357,42 @@ class HamamatsuOrca(CameraBase):
         print("Camera Sensor Mode:", self.camera_controller.get_property_value("sensor_mode"))
 
     def set_readout_direction(self, mode):
-        if mode == 'Top to Bottom':
+        if mode == 'Top-to-Bottom':
             #  'Forward' readout direction
-            self.camera_controller.set_property_value("readout_direction", 1)
-        elif mode == 'Bottom to Top':
+            self.camera_controller.set_property_value("readout_direction", 1.0)
+        elif mode == 'Bottom-to-Top':
             #  'Backward' readout direction
-            self.camera_controller.set_property_value("readout_direction", 2)
+            self.camera_controller.set_property_value("readout_direction", 2.0)
         elif mode == 'bytrigger':
-            self.camera_controller.set_property_value("readout_direction", 3)
+            self.camera_controller.set_property_value("readout_direction", 3.0)
         elif mode == 'diverge':
-            self.camera_controller.set_property_value("readout_direction", 5)
+            self.camera_controller.set_property_value("readout_direction", 5.0)
         else:
             print('Camera readout direction not supported')
             logger.info("Camera readout direction not supported")
 
-    def set_lightsheet_rolling_shutter_width(self, mode):
-        # TODO: Figure out how to do this.  I believe it is dictated by the exposure time and the line interval.
-        pass
+    # def set_lightsheet_rolling_shutter_width(self, mode):
+    #     # TODO: Figure out how to do this.  I believe it is dictated by the exposure time and the line interval.
+    #     pass
+
+    def set_lightsheet_rolling_shutter_width(self, sweep_time):
+        """
+        calculate the parameters for an ASLM acquisition
+        :param sweep_time: the exposure time that is desired for the whole acquisition
+        :return: set the important parameters for ASLM acquisitions
+        """
+
+        line_exposure = sweep_time / (self.y_pixels / self.lightsheet_rolling_shutter_width)
+        line_delay = (sweep_time - line_exposure) / (self.y_pixels * self.camera_line_interval)
+        acquisition_time = (line_delay + 1) * self.y_pixels * self.camera_line_interval + line_exposure + (
+                line_delay + 1) * self.camera_line_interval
+
+        print(sweep_time, self.y_pixels, self.lightsheet_rolling_shutter_width, self.camera_line_interval)
+        print(line_exposure, line_delay, acquisition_time)
+
+        # self.set_exposure_time(line_delay)
+        self.camera_controller.set_property_value("internal_line_interval", self.camera_line_interval)
+
 
     def calculate_readout_time(self):
         """
@@ -422,8 +441,7 @@ class HamamatsuOrca(CameraBase):
         #  Must convert to seconds.
         """
         exposure_time = exposure_time / 1000
-        self.camera_controller.set_property_value(
-            "exposure_time", exposure_time)
+        self.camera_controller.set_property_value("exposure_time", exposure_time)
 
     def set_line_interval(self, line_interval_time):
         self.camera_controller.set_property_value(

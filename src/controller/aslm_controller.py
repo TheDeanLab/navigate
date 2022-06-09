@@ -478,7 +478,7 @@ class ASLM_controller:
             consisting of the resolution_mode, the zoom, and the laser_info.
             e.g., self.resolution_info.ETLConstants[self.resolution][self.mag]
             """
-            self.model.run_command('update_setting', *args)
+            self.threads_pool.createThread('model', lambda: self.model.run_command('update_setting', *args))
 
         elif command == 'autofocus':
             self.threads_pool.createThread(

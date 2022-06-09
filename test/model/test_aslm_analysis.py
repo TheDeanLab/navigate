@@ -40,25 +40,27 @@ import pytest
 
 # Local Imports
 # sys.path.append('../../../')
-from src.model.aslm_analysis import Analysis as aslm_analysis
+try:
+    from src.model.aslm_analysis import Analysis as aslm_analysis
 
-@pytest.mark.skip(reason="Not sure what to do about CUDA for testing.")
-class TestASLMAnalysis(unittest.TestCase):
-    """
-    Unit Tests for the ASLM Analysis Module
-    """
-    def test_calculate_entropy_on(self):
+    class TestASLMAnalysis(unittest.TestCase):
         """
-        Test the calculation of the Shannon Entropy
+        Unit Tests for the ASLM Analysis Module
         """
-        dct_array = np.ones((128, 128))
-        otf_support_x = 3
-        otf_support_y = 3
-        entropy = aslm_analysis.calculate_entropy(self,
-                                                  dct_array=dct_array,
-                                                  otf_support_x=otf_support_x,
-                                                  otf_support_y=otf_support_y)
-        self.assertEqual(entropy, 0)
+        def test_calculate_entropy_on(self):
+            """
+            Test the calculation of the Shannon Entropy
+            """
+            dct_array = np.ones((128, 128))
+            otf_support_x = 3
+            otf_support_y = 3
+            entropy = aslm_analysis.calculate_entropy(self,
+                                                      dct_array=dct_array,
+                                                      otf_support_x=otf_support_x,
+                                                      otf_support_y=otf_support_y)
+            self.assertEqual(entropy, 0)
+ except ImportError as e:
+    print(e)
 
 if (__name__ == "__main__"):
     unittest.main()

@@ -59,7 +59,7 @@ try:
                                                       otf_support_x=otf_support_x,
                                                       otf_support_y=otf_support_y)
             self.assertEqual(entropy, 0)
- except ImportError as e:
+except ImportError as e:
     print(e)
 
 if (__name__ == "__main__"):

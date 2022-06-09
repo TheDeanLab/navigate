@@ -500,33 +500,6 @@ def get_image_decorrelation(input_image,
 
 
 def main_image_decorr():
-    '''
-    https://github.com/Ades91/ImDecorr/blob/master/main_imageDecorr.m
-    '''
-
-    # User Inputs
-    image_location = '/Users/S155475/Local/Publication materials/2020-SOLS/Data/MV3Membrane/LateralInsets/DetailVesicleTimepoint30.tif'
-    #image_location = '/Users/S155475/Downloads/test_image.tif'
-    number_high_pass_filters = 10
-    fourier_samples = 50
-    apodization_pixels = 20
-
-    # Load the Data
-    raw_image = np.array(imread(image_location))
-    raw_image = np.double(raw_image)
-
-    # Apodize Image Edges with a Cosine Function over 20 pixels
-    image = apodize_image(raw_image, apodization_pixels)
-
-    # Compute Resolution
-    kcMax, A0 = get_image_decorrelation(image, np.linspace(
-        0, 1, fourier_samples), number_high_pass_filters)
-
-    print("kcMax:", kcMax)
-    print("A0:", A0)
-    pixel_size = 110
-    print("Resolution:", 2 * pixel_size / kcMax)
-
     get_radial_average(raw_image)
 
 

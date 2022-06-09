@@ -24,30 +24,6 @@ OUTPUT_IMAGE = "OutputImage"
 FIRST_CYCLE = "First Cycle"
 LAST_CYCLE = "Last Cycle"
 
-
-def correct_flat_field(image_data: np.ndarray):
-    """
-    Calculates flat and dark_field image from the input image using the default parameters.
-    Corrects the input image using a 32-bit float data type.
-    Returns the corrected image as 16-bit float data type.
-    :param image_data: ndarray
-        image to be corrected.
-
-    :return corrected_image_data: ndarray
-        flat_field corrected image data
-    """
-    flat_field, dark_field = calculate_flat_field(image_data)
-
-    # If you want dark_field correction.
-    # corrected_stack = stack.astype(np.float32) - flat_field
-
-    corrected_image_data = image_data.astype(np.float32)
-    corrected_image_data[corrected_image_data < 0] = 0
-    corrected_image_data = corrected_image_data / flat_field
-    corrected_image_data = corrected_image_data.astype(np.float16)
-    return corrected_image_data
-
-
 def calculate_flat_field(
         images,
         if_dark_field=True,
@@ -81,11 +57,7 @@ def calculate_flat_field(
     number_of_rows = _saved_size[0] // 16
     number_of_columns = _saved_size[1] // 16
 
-    D = np.zeros(
-        (images.shape[0],
-         number_of_rows,
-         number_of_columns),
-        dtype=np.uint16)
+    D = np.zeros((images.shape[0], number_of_rows, number_of_columns), dtype=np.uint16)
 
     for i in range(images.shape[0]):
         D[i, :, :] = _resize_image(
@@ -420,7 +392,7 @@ def _inexact_alm_rspca_l1(images,
             # encourage sparse A_offset
             A_offset = np.maximum(A_offset - lambda_dark_field / (ent2 * mu), 0) + \
                 np.minimum(A_offset + lambda_dark_field / (ent2 * mu), 0)
-            A_offset = A_offset + B_offsetD
+            A_offset = A_offset + B_offset
 
         Z1 = images - a1_hat - e1_hat
         Y1 = Y1 + mu * Z1

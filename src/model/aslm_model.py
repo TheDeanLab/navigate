@@ -372,7 +372,7 @@ class Model:
             print("Desired Readout Direction:", self.experiment.CameraParameters['readout_direction'])
             self.camera.set_readout_direction(self.experiment.CameraParameters['readout_direction'])
             print("Actual Readout Direction:", self.camera.camera_controller.get_property_value("readout_direction"))
-            self.camera.set_lightsheet_rolling_shutter_width(self.daq.sweep_time)
+            self.camera.set_lightsheet_rolling_shutter_width(self.current_exposure_time, int(self.experiment.CameraParameters['number_of_pixels']))
 
         # Attach camera buffer and start imaging
         # TODO: Move this to a separate function?

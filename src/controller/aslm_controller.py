@@ -1,6 +1,4 @@
 """
-ASLM Controller.
-
 Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
@@ -73,6 +71,24 @@ p = __name__.split(".")[0]
 logger = logging.getLogger(p)
 
 class ASLM_controller:
+    """ ASLM Controller
+
+    Parameters
+    ----------
+    root : Tk top-level widget.
+        Tk.tk GUI instance.
+    configuration_path : string
+        Path to the configuration yaml file. Provides global microscope configuration parameters.
+    experiment_path : string
+        Path to the experiment yaml file. Provides experiment-specific microscope configuration.
+    etl_constants_path : string
+        Path to the etl constants yaml file. Provides magnification and wavelength-specific parameters.
+    USE_GPU : Boolean
+        Flag for utilizing CUDA functionality.
+    *args :
+        Command line input arguments for non-default file paths or using synthetic hardware modes.
+    """
+
     def __init__(
             self,
             root,
@@ -187,24 +203,37 @@ class ASLM_controller:
         self.update_buffer()
 
     def update_buffer(self):
-        """
-        # Update the buffer size according to the current camera dimensions listed in the experimental parameters
+        """ Update the buffer size according to the camera dimensions listed in the experimental parameters.
+
+        Returns
+        -------
+        self.img_width : int
+            Number of x_pixels from microscope configuration file.
+        self.image_height : int
+            Number of y_pixels from microscope configuration file.
+        self.data_buffer : SharedNDArray
+            Pre-allocated shared memory array. Size dictated by x_pixels, y_pixels, an number_of_frames in
+            configuration file.
         """
         img_width = int(self.experiment.CameraParameters['x_pixels'])
         img_height = int(self.experiment.CameraParameters['y_pixels'])
         if img_width == self.img_width and img_height == self.img_height:
             return
 
-        self.data_buffer = [SharedNDArray(
-            shape=(img_height, img_width),
-            dtype='uint16') for i in range(self.configuration.SharedNDArray['number_of_frames'])]
+        self.data_buffer = [SharedNDArray(shape=(img_height, img_width),
+                                          dtype='uint16') for i in range(self.configuration.SharedNDArray['number_of_frames'])]
         self.model.set_data_buffer(self.data_buffer, img_width, img_height)
         self.img_width = img_width
         self.img_height = img_height
 
     def initialize_cam_view(self, configuration_controller):
-        """
-        # Populate widgets with necessary data from config file via config controller. For the entire view tab.
+        """ Populate view tab.
+        Populate widgets with necessary data from config file via config controller. For the entire view tab.
+
+        Parameters
+        -------
+        configuration_controller : class
+            Camera view sub-controller.
         """
         # Populating Min and Max Counts
         minmax_values = [110, 5000]
@@ -213,16 +242,20 @@ class ASLM_controller:
         self.camera_view_controller.initialize('image', image_metrics)
 
     def initialize_menus(self):
-        """
-        # this function defines all the menus in the menubar
+        """ Initialize menus
+        This function defines all the menus in the menubar
+
+        Returns
+        -------
+        configuration_controller : class
+            Camera view sub-controller.
+
         """
         def new_experiment():
             self.populate_experiment_setting(self.default_experiment_file)
 
         def load_experiment():
-            filename = filedialog.askopenfilenames(
-                defaultextension='.yml', filetypes=[
-                    ('Yaml files', '*.yml')])
+            filename = filedialog.askopenfilenames(defaultextension='.yml', filetypes=[('Yaml files', '*.yml')])
             if not filename:
                 return
             self.populate_experiment_setting(filename[0])

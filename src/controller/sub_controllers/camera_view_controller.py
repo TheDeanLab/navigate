@@ -67,12 +67,18 @@ class Camera_View_Controller(GUI_Controller):
         self.pallete['Gradient'].widget.config(command=self.update_LUT)
         self.pallete['Rainbow'].widget.config(command=self.update_LUT)
 
-        #  Starting Mode
-        self.img = None
+        #  Stored Images
+        self.tk_image = None
+        self.image = None
+        self.saturated_pixels = None
+
+        # Widget Defaults
         self.autoscale = True
         self.max_counts = None
         self.min_counts = None
         self.mode = 'stop'
+
+        # Colormap Information
         self.colormap = 'gray'
         self.gray_lut = plt.get_cmap('gist_gray')
         self.gradient_lut = plt.get_cmap('plasma')
@@ -87,7 +93,7 @@ class Camera_View_Controller(GUI_Controller):
 
     def initialize(self, name, data):
         '''
-        #### Function that sets widgets based on data given from main controller/config
+        # Function that sets widgets based on data given from main controller/config
         '''
         # Pallete section (colors, autoscale, min/max counts)
         # keys = ['Frames to Avg', 'Image Max Counts', 'Channel']
@@ -157,43 +163,66 @@ class Camera_View_Controller(GUI_Controller):
                     print("Rolling Average: ", self.image_count, self.rolling_frames)
                 logger.debug(f"Rolling Average: , {self.image_count}, {self.rolling_frames}")
 
+    def downsample_image(self, image):
+        """
+        #  Down-sample the data for image display according to the configuration file.
+        """
+        if self.live_subsampling != 1:
+            image = cv2.resize(image,
+                               (int(np.shape(image)[0] / self.live_subsampling),
+                                int(np.shape(image)[1] / self.live_subsampling)))
+        return image
+
+    def scale_image_intensity(self, image):
+        """
+        #  Scale the data to the min/max counts, and adjust bit-depth.
+        """
+        if self.autoscale is True:
+            self.max_counts = np.max(image)
+            self.min_counts = np.min(image)
+            scaling_factor = 1
+            image = scaling_factor * ((image - self.min_counts) / (self.max_counts - self.min_counts))
+        else:
+            self.update_min_max_counts()
+            scaling_factor = 1
+            image = scaling_factor * ((image - self.min_counts) / (self.max_counts - self.min_counts))
+            image[image < 0] = 0
+            image[image > scaling_factor] = scaling_factor
+        return image
+
+    def populate_image(self, image):
+        """
+        Converts and image to an ImageTk.PhotoImage and populates the Tk Canvas
+        """
+        self.tk_image = ImageTk.PhotoImage(Image.fromarray(image.astype(np.uint8)))
+        self.canvas.create_image(0, 0, image=self.tk_image, anchor='nw')
+
     def display_image(self, image):
         """
         #  Displays a camera image using the Lookup Table specified in the View.
         #  If Autoscale is selected, automatically calculates the min and max values for the data.
         #  If Autoscale is not selected, takes the user values as specified in the min and max counts.
         """
+        # Place image in memory
+        self.image = image
 
-        #  Down-sample the data according to the configuration file.
-        if self.live_subsampling != 1:
-            image = cv2.resize(image,
-                               (int(np.shape(image)[0] / self.live_subsampling),
-                                int(np.shape(image)[1] / self.live_subsampling)))
+        # Detect saturated pixels
+        self.saturated_pixels = self.detect_saturation(self.image)
+        
+        # Downsample Image for display
+        self.image = self.downsample_image(self.image)
 
-        #  Look for Saturated Pixels
-        saturated_pixels = self.detect_saturation(image)
-
-        #  Scale the data to the min/max counts, and adjust bit-depth.
-        if self.autoscale is True:
-            self.max_counts = np.max(image)
-            self.min_counts = np.min(image)
-            scaling_factor = 1  #2 ** self.bit_depth
-            image = scaling_factor * ((image - self.min_counts) / (self.max_counts - self.min_counts))
-        else:
-            self.update_min_max_counts()
-            scaling_factor = 1  # 2 ** self.bit_depth
-            image = scaling_factor * ((image - self.min_counts) / (self.max_counts - self.min_counts))
-            image[image < 0] = 0
-            image[image > scaling_factor] = scaling_factor
+        # Scale image to [0, 1] values
+        self.image = self.scale_image_intensity(self.image)
 
         #  Update the GUI according to the instantaneous or rolling average max counts.
-        self.update_max_counts(image)
+        self.update_max_counts(self.image)
 
         #  Apply Lookup Table
-        image = self.apply_LUT(image, saturated_pixels)
-        image = image * 255
-        self.img = ImageTk.PhotoImage(Image.fromarray(image.astype(np.uint8)))
-        self.canvas.create_image(0, 0, image=self.img, anchor='nw')
+        image_lut = self.apply_LUT(self.image, self.saturated_pixels)
+
+        # Create ImageTk.PhotoImage
+        self.populate_image(image_lut)
 
         # Update Channel Index
         self.image_metrics['Channel'].set(self.parent_controller.model.return_channel_index())
@@ -207,17 +236,15 @@ class Camera_View_Controller(GUI_Controller):
         Red is reserved for saturated pixels.
         self.color_values = ['gray', 'gradient', 'rainbow']
         """
-
+        print("self.colormap", self.colormap)
         if self.colormap == 'gradient':
-            # im_color = cv2.applyColorMap(image, cv2.COLORMAP_JET)
             image = self.rainbow_lut(image)
         elif self.colormap == 'rainbow':
             image = self.gradient_lut(image)
-            # im_color = cv2.applyColorMap(image, cv2.COLORMAP_RAINBOW)
         else:
             image = self.gray_lut(image)
-            # im_color = cv2.applyColorMap(image, cv2.COLORMAP_BONE)
 
+        # Convert RGBA to RGB Image.
         image = image[:, :, :3]
 
         # Specify the saturated values in the red channel
@@ -228,6 +255,8 @@ class Camera_View_Controller(GUI_Controller):
             red_image[saturated_pixels] = 1
             image[:, :, 2] = red_image
 
+        # Scale back to an 8-bit image.
+        image = image * (2 ** self.bit_depth - 1)
         return image
 
     def update_LUT(self):
@@ -235,12 +264,12 @@ class Camera_View_Controller(GUI_Controller):
         # When the LUT is changed in the GUI, this function is called.
         # Updates the LUT.
         """
-        if self.img is None:
+        if self.image is None:
             pass
         else:
             self.colormap = self.view.scale_pallete.color.get()
-            if self.verbose:
-                print("Updating the LUT", self.colormap)
+            image_lut = self.apply_LUT(self.image, self.saturated_pixels)
+            self.populate_image(image_lut)
             logger.debug(f"Updating the LUT, {self.colormap}")
 
     def detect_saturation(self, image):

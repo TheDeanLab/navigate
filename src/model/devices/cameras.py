@@ -144,6 +144,7 @@ class SyntheticCamera(CameraBase):
 
         self._mean_background_count = 100.0
         self._noise_sigma = noise_model.compute_noise_sigma(Ib=self._mean_background_count)
+        self.blah = noise_model.compute_noise_sigma
 
         self.camera_controller = SyntheticCameraController()
         

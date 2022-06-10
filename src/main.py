@@ -57,15 +57,6 @@ def main():
     """
     Starting point for running the multiscale ASLM program.
 
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-    Raises
-    ------
-
     """
 
     # Evaluate GPU Status for Analysis Routines

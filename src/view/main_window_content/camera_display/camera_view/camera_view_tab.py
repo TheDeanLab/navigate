@@ -30,15 +30,20 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
+# Standard Library Imports
 import logging
 import tkinter as tk
-from pathlib import Path
 from tkinter import *
 from tkinter import ttk
-from view.main_window_content.camera_display.camera_view.tabs.image_metrics import image_metrics
-from view.main_window_content.camera_display.camera_view.tabs.pallete import pallete
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
+# Third Party Imports
 from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
+# Local Imports
+from view.main_window_content.camera_display.camera_view.tabs.image_metrics import image_metrics
+from view.main_window_content.camera_display.camera_view.tabs.palette import palette
+
 # Logger Setup
 p = __name__.split(".")[0]
 logger = logging.getLogger(p)
@@ -67,5 +72,5 @@ class camera_tab(ttk.Frame):
         self.image_metrics.grid(row=1, column=0, sticky=W, padx=5, pady=5)
 
         #  Frame for scale settings/pallete color
-        self.scale_pallete = pallete(self)
-        self.scale_pallete.grid(row=0, column=1, sticky=NSEW, padx=5, pady=5)
+        self.scale_palette = palette(self)
+        self.scale_palette.grid(row=0, column=1, sticky=NSEW, padx=5, pady=5)

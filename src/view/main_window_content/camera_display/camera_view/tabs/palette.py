@@ -44,7 +44,7 @@ p = __name__.split(".")[0]
 logger = logging.getLogger(p)
 
 
-class pallete(ttk.Labelframe):
+class palette(ttk.Labelframe):
     def __init__(self, cam_view, *args, **kwargs):
         # Init Frame
         text_label = 'LUT'

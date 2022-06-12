@@ -352,34 +352,6 @@ class Model:
         self.stages.move_absolute(pos_dict, wait_until_done)
         self.stages.report_position()
 
-    def prepare_acquisition(self):
-        if self.camera.camera_controller.is_acquiring:
-            self.camera.close_image_series()
-        # turn off flags
-        self.stop_acquisition = False
-        self.stop_send_signal = False
-        self.autofocus_on = False
-        self.is_live = False
-
-        # TODO: Calculate Waveforms for DAQ for all channels here.
-        # Currently done on a per-channel basis in the 'run_single_acquisition' function below.
-
-        # Update Camera.
-        self.camera.set_sensor_mode(self.experiment.CameraParameters['sensor_mode'])
-        # self.camera.set_exposure_time(10)
-        print("SENSOR MODE:", self.experiment.CameraParameters['sensor_mode'])
-        if self.experiment.CameraParameters['sensor_mode'] == 'Light-Sheet':
-            print("Desired Readout Direction:", self.experiment.CameraParameters['readout_direction'])
-            self.camera.set_readout_direction(self.experiment.CameraParameters['readout_direction'])
-            print("Actual Readout Direction:", self.camera.camera_controller.get_property_value("readout_direction"))
-            self.camera.set_lightsheet_rolling_shutter_width(self.current_exposure_time, int(self.experiment.CameraParameters['number_of_pixels']))
-
-        # Attach camera buffer and start imaging
-        # TODO: Move this to a separate function?
-        self.camera.initialize_image_series(self.data_buffer, self.number_of_frames)
-        self.frame_id = 0
-
-        self.open_shutter()
 
     def end_acquisition(self):
         """
@@ -493,13 +465,46 @@ class Model:
         # Loads the YAML file for all of the experiment parameters
         self.experiment = session(experiment_path, self.verbose)
 
-    def run_single_acquisition(self, target_channel=None, snap_func=None):
+    def prepare_acquisition(self):
+        """
+        Sets flags.
+        Calculates all of the waveforms.
+        Sets the Camera Sensor Mode
+        Initializes the data buffer and starts camera.
+        Opens Shutters
+        """
+        if self.camera.camera_controller.is_acquiring:
+            self.camera.close_image_series()
+        # turn off flags
+        self.stop_acquisition = False
+        self.stop_send_signal = False
+        self.autofocus_on = False
+        self.is_live = False
+
+        # Calculate Waveforms for all channels. Plot in the view.
+        waveform_dict = self.daq.calculate_all_waveforms(self.experiment.MicroscopeState, self.etl_constants)
+
+        # Set Camera Sensor Mode - Must be done before camera is initialized.
+        self.camera.set_sensor_mode(self.experiment.CameraParameters['sensor_mode'])
+        if self.experiment.CameraParameters['sensor_mode'] == 'Light-Sheet':
+            self.camera.set_readout_direction(self.experiment.CameraParameters['readout_direction'])
+
+        self.frame_id = 0
+
+        # Initialize Image Series - Attaches camera buffer and start imaging
+        self.camera.initialize_image_series(self.data_buffer, self.number_of_frames)
+
+        self.open_shutter()
+
+    def run_single_acquisition(self,
+                               target_channel=None,
+                               snap_func=None):
         """
         # Called by model.run_command().
-        target_channel called by the autofocus routine.
+        target_channel called only during the autofocus routine.
         """
 
-        #  Interrogate the Experiment Settings
+        #  Get the Experiment Settings
         microscope_state = self.experiment.MicroscopeState
         prefix_len = len('channel_')
         for channel_key in microscope_state['channels']:
@@ -509,31 +514,39 @@ class Model:
             if target_channel and channel_idx != target_channel:
                 continue
             channel = microscope_state['channels'][channel_key]
-            if channel['is_selected'] is True:
 
-                # Get and set the parameters for Waveform Generation,
-                # Triggering, etc.
+            # Iterate through the selected channels.
+            if channel['is_selected'] is True:
+                # Move the Filter Wheel - Rate-Limiting Step - Perform First.
+                self.filter_wheel.set_filter(channel['filter'])
+
+                # Get and set the parameters for Waveform Generation, triggering, etc.
                 self.current_channel = channel_idx
 
-                # trigger_waiting_time is the time between two signal triggers
-                # current signal trigger should not be sent out earlier than previous trigger exposure time + camera minimum waiting time.
+                # Calculate duration of time necessary between camera triggers.
                 self.trigger_waiting_time = self.current_exposure_time/1000 + self.camera_minimum_waiting_time
-                self.current_exposure_time = channel['camera_exposure_time']
 
-                # update trigger waiting time when exposure time changed
-                # self.trigger_waiting_time = self.current_exposure_time/1000 + self.camera_minimum_waiting_time
-                # self.trigger_waiting_time = self.camera_minimum_waiting_time
+                # Update Camera Exposure Time
+                self.current_exposure_time = channel['camera_exposure_time']
+                if self.experiment.CameraParameters['sensor_mode'] == 'Light-Sheet':
+                    self.current_exposure_time, camera_line_interval = self.camera.calculate_light_sheet_exposure_time(
+                        self.current_exposure_time,
+                        int(self.experiment.CameraParameters['number_of_pixels']))
+                    self.camera.camera_controller.set_property_value("inter"
+                                                                     "nal_line_interval", camera_line_interval)
+
+                # self.camera.set_exposure_time(exposure_time)
 
                 # Laser Settings
                 self.current_laser_index = channel['laser_index']
                 self.laser_triggers.trigger_digital_laser(self.current_laser_index)
                 self.laser_triggers.set_laser_analog_voltage(channel['laser_index'], channel['laser_power'])
 
-                # Filter Wheel Settings - Rate Limiting Step
-                self.filter_wheel.set_filter(channel['filter'])
+                # # Update Laser Data Acquisition Sweep Time according to exposure and delay parameters.
+                # self.daq.sweep_time = (self.current_exposure_time / 1000) * \
+                #                       ((self.configuration.CameraParameters['delay_percent'] +
+                #                         self.configuration.RemoteFocusParameters['remote_focus_l_ramp_falling_percent']) / 100 + 1)
 
-                # Update Laser Scanning Waveforms - Exposure Time in Seconds
-                self.daq.sweep_time = self.current_exposure_time / 1000
 
                 # Update ETL Settings
                 self.daq.update_etl_parameters(microscope_state, channel)
@@ -542,10 +555,10 @@ class Model:
                 if snap_func:
                     snap_func()
                 else:
-                    self.snap_image()
+                    self.snap_image(channel_key)
 
 
-    def snap_image(self):
+    def snap_image(self, channel_key):
         """
         # Snaps a single image after updating the waveforms.
         # Can be used in acquisitions where changing waveforms are required,
@@ -555,7 +568,7 @@ class Model:
         """
         #  Initialize, run, and stop the acquisition.
         #  Consider putting below to not block thread.
-        self.daq.prepare_acquisition()
+        self.daq.prepare_acquisition(channel_key)
 
         # calculate how long has been since last trigger
         time_spent = time.perf_counter() - self.pre_trigger_time

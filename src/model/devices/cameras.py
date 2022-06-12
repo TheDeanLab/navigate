@@ -355,7 +355,7 @@ class HamamatsuOrca(CameraBase):
             print('Camera mode not supported')
             logger.info("Camera mode not supported")
 
-        print("Camera Sensor Mode:", self.camera_controller.get_property_value("sensor_mode"))
+        # print("Camera Sensor Mode:", self.camera_controller.get_property_value("sensor_mode"))
 
     def set_readout_direction(self, mode):
         if mode == 'Top-to-Bottom':
@@ -376,7 +376,7 @@ class HamamatsuOrca(CameraBase):
     #     # TODO: Figure out how to do this.  I believe it is dictated by the exposure time and the line interval.
     #     pass
 
-    def set_lightsheet_rolling_shutter_width(self, full_chip_exposure_time, shutter_width):
+    def calculate_light_sheet_exposure_time(self, full_chip_exposure_time, shutter_width):
         """
         calculate the parameters for an ASLM acquisition
         :param sweep_time: the exposure time that is desired for the whole acquisition
@@ -385,10 +385,7 @@ class HamamatsuOrca(CameraBase):
 
         self.camera_line_interval = (full_chip_exposure_time / 1000)/(shutter_width + self.y_pixels + 10)
         exposure_time = self.camera_line_interval*shutter_width*1000
-
-        # print(self.camera_line_interval, exposure_time/1000)
-        self.set_exposure_time(exposure_time)
-        self.camera_controller.set_property_value("internal_line_interval", self.camera_line_interval)
+        return exposure_time, self.camera_line_interval
 
     def calculate_readout_time(self):
         """

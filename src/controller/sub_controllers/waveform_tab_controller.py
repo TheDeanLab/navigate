@@ -82,3 +82,13 @@ class Waveform_Tab_Controller(GUI_Controller):
         self.view.canvas = FigureCanvasTkAgg(self.view.fig, master=self.view)
         self.view.canvas.get_tk_widget().pack()
 
+    def plot_waveforms2(self, waveform_dict):
+        self.view.fig = Figure(figsize=(8, 2), dpi=100)
+        self.view.plot_etl = self.view.fig.add_subplot(511)
+        self.view.plot_galvo = self.view.fig.add_subplot(512)
+
+        for k in waveform_dict.keys():
+            self.view.plot_etl.plot(waveform_dict[k]['etl_waveform'], label=k)
+            self.view.plot_galvo.plot(waveform_dict[k]['galvo_waveform'], label=k)
+        self.view.canvas = FigureCanvasTkAgg(self.view.fig, master=self.view)
+        self.view.canvas.get_tk_widget().pack()

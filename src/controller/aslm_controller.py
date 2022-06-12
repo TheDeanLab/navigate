@@ -471,8 +471,6 @@ class ASLM_controller:
             # Creates a thread and uses it to call the model to move stage
             """
             self.threads_pool.createThread('stage', self.move_stage, args=({args[1] + '_abs': args[0]},))
-            # temp = ({args[1] + '_abs': args[0]},)
-            # self.move_stage(args=temp)
 
         elif command == 'move_stage_and_update_info':
             """
@@ -514,8 +512,7 @@ class ASLM_controller:
             self.threads_pool.createThread('model', lambda: self.model.run_command('update_setting', *args))
 
         elif command == 'autofocus':
-            self.threads_pool.createThread(
-                'camera', self.capture_autofocus_image)
+            self.threads_pool.createThread('camera', self.capture_autofocus_image)
             
         elif command == 'acquire_and_save':
             if not self.prepare_acquire_data():

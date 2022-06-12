@@ -32,16 +32,19 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-from controller.sub_controllers.gui_controller import GUI_Controller
+# Standard Library Imports
 import tkinter as tk
-import numpy as np
+import logging
+
+# Third Party Imports
 import cv2
 from PIL import Image, ImageTk
-from skimage.color import convert_colorspace
 import matplotlib.pyplot as plt
+import numpy as np
 
-import logging
-from pathlib import Path
+# Local Imports
+from controller.sub_controllers.gui_controller import GUI_Controller
+
 # Logger Setup
 p = __name__.split(".")[0]
 logger = logging.getLogger(p)
@@ -53,19 +56,23 @@ class Camera_View_Controller(GUI_Controller):
 
         # Getting Widgets/Buttons
         self.image_metrics = view.image_metrics.get_widgets()
-        self.pallete = view.scale_pallete.get_widgets()
+        self.image_palette = view.scale_palette.get_widgets()
+        self.canvas = self.view.canvas
 
         # Binding for adjusting the lookup table min and max counts.
         # keys = ['Autoscale', 'Min','Max']
-        self.pallete['Autoscale'].widget.config(command=self.toggle_min_max_buttons)
-        self.pallete['Min'].widget.config(command=self.update_min_max_counts)
-        self.pallete['Max'].widget.config(command=self.update_min_max_counts)
+        self.image_palette['Autoscale'].widget.config(command=self.toggle_min_max_buttons)
+        self.image_palette['Min'].widget.config(command=self.update_min_max_counts)
+        self.image_palette['Max'].widget.config(command=self.update_min_max_counts)
 
         # Bindings for changes to the LUT
         # keys = ['Gray','Gradient','Rainbow']
-        self.pallete['Gray'].widget.config(command=self.update_LUT)
-        self.pallete['Gradient'].widget.config(command=self.update_LUT)
-        self.pallete['Rainbow'].widget.config(command=self.update_LUT)
+        self.image_palette['Gray'].widget.config(command=self.update_LUT)
+        self.image_palette['Gradient'].widget.config(command=self.update_LUT)
+        self.image_palette['Rainbow'].widget.config(command=self.update_LUT)
+
+        # Bindings for key events
+        self.canvas.bind("<Button-1>", self.left_click)
 
         #  Stored Images
         self.tk_image = None
@@ -76,6 +83,7 @@ class Camera_View_Controller(GUI_Controller):
         self.autoscale = True
         self.max_counts = None
         self.min_counts = None
+        self.apply_cross_hair = True
         self.mode = 'stop'
 
         # Colormap Information
@@ -88,7 +96,6 @@ class Camera_View_Controller(GUI_Controller):
         self.temp_array = None
         self.rolling_frames = 1
         self.live_subsampling = self.parent_controller.configuration.CameraParameters['display_live_subsampling']
-        self.canvas = self.view.canvas
         self.bit_depth = 8  # bit-depth for PIL presentation.
 
     def initialize(self, name, data):
@@ -102,14 +109,14 @@ class Camera_View_Controller(GUI_Controller):
             max = data[1]
 
             # Invoking defaults
-            self.pallete['Gray'].widget.invoke()
-            self.pallete['Autoscale'].widget.invoke()
+            self.image_palette['Gray'].widget.invoke()
+            self.image_palette['Autoscale'].widget.invoke()
 
             # Populating defaults
-            self.pallete['Min'].set(min)
-            self.pallete['Max'].set(max)
-            self.pallete['Min'].widget['state'] = 'disabled'
-            self.pallete['Max'].widget['state'] = 'disabled'
+            self.image_palette['Min'].set(min)
+            self.image_palette['Max'].set(max)
+            self.image_palette['Min'].widget['state'] = 'disabled'
+            self.image_palette['Max'].widget['state'] = 'disabled'
 
         # Image Metrics section
         if name == 'image':
@@ -126,7 +133,15 @@ class Camera_View_Controller(GUI_Controller):
         # self.canvas.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH, expand=1.5)
         pass
 
-    def update_max_counts(self, image):
+    def left_click(self, event):
+        if self.image is not None:
+            # If True, make False. If False, make True.
+            self.apply_cross_hair = not self.apply_cross_hair
+            self.add_crosshair()
+            self.apply_LUT()
+            self.populate_image()
+
+    def update_max_counts(self):
         """
         #  Function gets the number of frames to average from the VIEW.
         #  If frames to average == 0 or 1, provides the maximum value from the last acquired data.
@@ -148,11 +163,11 @@ class Camera_View_Controller(GUI_Controller):
             self.image_count = self.image_count + 1
             if self.image_count == 1:
                 # First frame of the rolling average
-                self.temp_array = image
+                self.temp_array = self.image
                 self.image_metrics['Image'].set(self.max_counts)
             else:
                 # Subsequent frames of the rolling average
-                self.temp_array = np.dstack((self.temp_array, image))
+                self.temp_array = np.dstack((self.temp_array, self.image))
                 if np.shape(self.temp_array)[2] > self.rolling_frames:
                     self.temp_array = np.delete(self.temp_array, 0, 2)
 
@@ -163,38 +178,36 @@ class Camera_View_Controller(GUI_Controller):
                     print("Rolling Average: ", self.image_count, self.rolling_frames)
                 logger.debug(f"Rolling Average: , {self.image_count}, {self.rolling_frames}")
 
-    def downsample_image(self, image):
+    def downsample_image(self):
         """
         #  Down-sample the data for image display according to the configuration file.
         """
         if self.live_subsampling != 1:
-            image = cv2.resize(image,
-                               (int(np.shape(image)[0] / self.live_subsampling),
-                                int(np.shape(image)[1] / self.live_subsampling)))
-        return image
+            self.image = cv2.resize(self.image,
+                                    (int(np.shape(self.image)[0] / self.live_subsampling),
+                                     int(np.shape(self.image)[1] / self.live_subsampling)))
 
-    def scale_image_intensity(self, image):
+    def scale_image_intensity(self):
         """
         #  Scale the data to the min/max counts, and adjust bit-depth.
         """
         if self.autoscale is True:
-            self.max_counts = np.max(image)
-            self.min_counts = np.min(image)
+            self.max_counts = np.max(self.image)
+            self.min_counts = np.min(self.image)
             scaling_factor = 1
-            image = scaling_factor * ((image - self.min_counts) / (self.max_counts - self.min_counts))
+            self.image = scaling_factor * ((self.image - self.min_counts) / (self.max_counts - self.min_counts))
         else:
             self.update_min_max_counts()
             scaling_factor = 1
-            image = scaling_factor * ((image - self.min_counts) / (self.max_counts - self.min_counts))
-            image[image < 0] = 0
-            image[image > scaling_factor] = scaling_factor
-        return image
+            self.image = scaling_factor * ((self.image - self.min_counts) / (self.max_counts - self.min_counts))
+            self.image[self.image < 0] = 0
+            self.image[self.image > scaling_factor] = scaling_factor
 
-    def populate_image(self, image):
+    def populate_image(self):
         """
         Converts and image to an ImageTk.PhotoImage and populates the Tk Canvas
         """
-        self.tk_image = ImageTk.PhotoImage(Image.fromarray(image.astype(np.uint8)))
+        self.tk_image = ImageTk.PhotoImage(Image.fromarray(self.cross_hair_image.astype(np.uint8)))
         self.canvas.create_image(0, 0, image=self.tk_image, anchor='nw')
 
     def display_image(self, image):
@@ -207,57 +220,79 @@ class Camera_View_Controller(GUI_Controller):
         self.image = image
 
         # Detect saturated pixels
-        self.saturated_pixels = self.detect_saturation(self.image)
+        self.detect_saturation()
         
-        # Downsample Image for display
-        self.image = self.downsample_image(self.image)
+        # Down-sample Image for display
+        self.downsample_image()
 
         # Scale image to [0, 1] values
-        self.image = self.scale_image_intensity(self.image)
+        self.scale_image_intensity()
 
         #  Update the GUI according to the instantaneous or rolling average max counts.
-        self.update_max_counts(self.image)
+        self.update_max_counts()
+
+        # Add Cross-Hair
+        self.add_crosshair()
 
         #  Apply Lookup Table
-        image_lut = self.apply_LUT(self.image, self.saturated_pixels)
+        self.apply_LUT()
 
         # Create ImageTk.PhotoImage
-        self.populate_image(image_lut)
+        self.populate_image()
 
         # Update Channel Index
-        self.image_metrics['Channel'].set(self.parent_controller.model.return_channel_index())
+        # self.image_metrics['Channel'].set(self.parent_controller.model.return_channel_index())
 
         # Iterate Image Count for Rolling Average
         self.image_count = self.image_count + 1
 
-    def apply_LUT(self, image, saturated_pixels):
+    def add_crosshair(self):
+        """ Adds a cross-hair to the image.
+
+        Params
+        -------
+        self.image : np.array
+            Must be a 2D image.
+
+        Returns
+        -------
+        self.apply_cross_hair_image : np.arrays
+            2D image, scaled between 0 and 1 with cross-hair if self.apply_cross_hair == True
+        """
+        self.cross_hair_image = np.copy(self.image)
+        if self.apply_cross_hair:
+            (height, width) = np.shape(self.image)
+            height = int(np.floor(height / 2))
+            width = int(np.floor(width / 2))
+            self.cross_hair_image[:, width] = 1
+            self.cross_hair_image[height, :] = 1
+
+    def apply_LUT(self):
         """
         Applies a LUT to the image.
         Red is reserved for saturated pixels.
         self.color_values = ['gray', 'gradient', 'rainbow']
         """
-        print("self.colormap", self.colormap)
         if self.colormap == 'gradient':
-            image = self.rainbow_lut(image)
+            self.cross_hair_image = self.rainbow_lut(self.cross_hair_image)
         elif self.colormap == 'rainbow':
-            image = self.gradient_lut(image)
+            self.cross_hair_image = self.gradient_lut(self.cross_hair_image)
         else:
-            image = self.gray_lut(image)
+            self.cross_hair_image = self.gray_lut(self.cross_hair_image)
 
         # Convert RGBA to RGB Image.
-        image = image[:, :, :3]
+        self.cross_hair_image = self.cross_hair_image[:, :, :3]
 
         # Specify the saturated values in the red channel
-        if np.any(saturated_pixels):
+        if np.any(self.saturated_pixels):
             # Saturated pixels is an array of True False statements same size as the image.
             # Pull out the red image from the RGBA, set saturated pixels to 1, put back into array.
-            red_image = image[:, :, 2]
-            red_image[saturated_pixels] = 1
-            image[:, :, 2] = red_image
+            red_image = self.cross_hair_image[:, :, 2]
+            red_image[self.saturated_pixels] = 1
+            self.cross_hair_image[:, :, 2] = red_image
 
         # Scale back to an 8-bit image.
-        image = image * (2 ** self.bit_depth - 1)
-        return image
+        self.cross_hair_image = self.cross_hair_image * (2 ** self.bit_depth - 1)
 
     def update_LUT(self):
         """
@@ -267,18 +302,18 @@ class Camera_View_Controller(GUI_Controller):
         if self.image is None:
             pass
         else:
-            self.colormap = self.view.scale_pallete.color.get()
-            image_lut = self.apply_LUT(self.image, self.saturated_pixels)
-            self.populate_image(image_lut)
+            self.colormap = self.view.scale_palette.color.get()
+            self.add_crosshair()
+            self.apply_LUT()
+            self.populate_image()
             logger.debug(f"Updating the LUT, {self.colormap}")
 
-    def detect_saturation(self, image):
+    def detect_saturation(self):
         """
         Looks for any pixels at the maximum intensity allowable for the camera.
         """
         saturation_value = 2**16-1
-        saturated_pixels = image[image > saturation_value]
-        return saturated_pixels
+        self.saturated_pixels = self.image[self.image > saturation_value]
 
     def toggle_min_max_buttons(self):
         """
@@ -286,17 +321,17 @@ class Camera_View_Controller(GUI_Controller):
         If enabled, the min and max widgets are disabled and the image intensity is autoscaled.
         If disabled, miu and max widgets are enabled, and image intensity scaled.
         """
-        self.autoscale = self.pallete['Autoscale'].get()
+        self.autoscale = self.image_palette['Autoscale'].get()
         if self.autoscale is True:  # Autoscale Enabled
-            self.pallete['Min'].widget['state'] = 'disabled'
-            self.pallete['Max'].widget['state'] = 'disabled'
+            self.image_palette['Min'].widget['state'] = 'disabled'
+            self.image_palette['Max'].widget['state'] = 'disabled'
             if self.verbose:
                 print("Autoscale Enabled")
             logger.debug("Autoscale Enabled")
 
         elif self.autoscale is False:  # Autoscale Disabled
-            self.pallete['Min'].widget['state'] = 'normal'
-            self.pallete['Max'].widget['state'] = 'normal'
+            self.image_palette['Min'].widget['state'] = 'normal'
+            self.image_palette['Max'].widget['state'] = 'normal'
             if self.verbose:
                 print("Autoscale Disabled")
             logger.debug("Autoscale Disabled")
@@ -307,8 +342,8 @@ class Camera_View_Controller(GUI_Controller):
         When the min and max counts are toggled in the GUI, this function is called.
         Updates the min and max values.
         """
-        self.min_counts = self.pallete['Min'].get()
-        self.max_counts = self.pallete['Max'].get()
+        self.min_counts = self.image_palette['Min'].get()
+        self.max_counts = self.image_palette['Max'].get()
         if self.verbose:
             print("Min and Max counts scaled to ", self.min_counts, self.max_counts)
         logger.debug(f"Min and Max counts scaled to, {self.min_counts}, {self.max_counts}")

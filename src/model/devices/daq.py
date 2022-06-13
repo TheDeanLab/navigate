@@ -153,9 +153,10 @@ class DAQBase:
                  'camera_waveform': None}
         }
 
-    def calculate_all_waveforms(self, microscope_state, etl_constants):
+    def calculate_all_waveforms(self, microscope_state, etl_constants, galvo_parameters):
         """ Pre-calculates all waveforms necessary for the acquisition and organizes in a dictionary format.
         """
+
         # Imaging Mode = 'high' or 'low'
         imaging_mode = microscope_state['resolution_mode']
 
@@ -190,8 +191,8 @@ class DAQBase:
                 self.waveform_dict[channel_key]['galvo_waveform'] = sawtooth(sample_rate=self.sample_rate,
                                                                              sweep_time=sweep_time,
                                                                              frequency=200,
-                                                                             amplitude=0,
-                                                                             offset=0)
+                                                                             amplitude=galvo_parameters['galvo_l_offset'],
+                                                                             offset=galvo_parameters['galvo_l_amplitude'])
 
                 self.waveform_dict[channel_key]['camera_waveform'] = camera_exposure(sample_rate=self.sample_rate,
                                                                                      sweep_time=sweep_time,
@@ -227,7 +228,7 @@ class DAQBase:
         # Write the waveforms to the tasks.
         self.write_waveforms_to_tasks()
 
-    def update_etl_parameters(self, microscope_state, channel):
+    def update_etl_parameters(self, microscope_state, channel, galvo_parameters):
         """
         # Update the ETL parameters according to the zoom and excitation wavelength.
         """
@@ -260,7 +261,7 @@ class DAQBase:
                            or (self.prev_etl_r_offset != self.etl_r_offset)
 
         if update_waveforms:
-            self.calculate_all_waveforms(microscope_state, self.etl_constants)
+            self.calculate_all_waveforms(microscope_state, self.etl_constants, galvo_parameters)
             self.prev_etl_r_amplitude = self.etl_r_amplitude
             self.prev_etl_r_offset = self.etl_r_offset
             self.prev_etl_l_amplitude = self.etl_l_amplitude

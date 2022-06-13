@@ -153,8 +153,26 @@ class remote_popup():
                 parent=self.laser_frame, input_class=ValidatedSpinbox, input_var=StringVar())
 
             self.inputs[laser_labels[i] + ' Off'].grid(row=i + 1, column=2, sticky=(NSEW), pady=(20,0))
-        
-        
+
+        # Add galvo amplitude and offset to laser_frame
+        galvo = ttk.Label(
+            self.laser_frame,
+            text='Galvo',
+            padding=(
+                2,
+                5,
+                0,
+                0))
+        galvo.grid(row=5, column=0, sticky=(NSEW))
+        self.inputs['Galvo Amp'] = LabelInput(
+            parent=self.laser_frame, input_class=ValidatedSpinbox, input_var=StringVar())
+
+        self.inputs['Galvo Amp'].grid(row=5, column=1, sticky=(NSEW), pady=(20, 0), padx=(0, 5))
+
+        self.inputs['Galvo Off'] = LabelInput(
+            parent=self.laser_frame, input_class=ValidatedSpinbox, input_var=StringVar())
+
+        self.inputs['Galvo Off'].grid(row=5, column=2, sticky=(NSEW), pady=(20, 0))
 
         # High/Low Resolution
         hi_lo_labels = ['Percent Delay', 'Duty Cycle', 'Percent Smoothing']

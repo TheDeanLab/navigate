@@ -283,12 +283,13 @@ class ASLM_controller:
             if hasattr(self, 'etl_controller'):
                 self.etl_controller.showup()
                 return
-            etl_setting_popup = remote_popup(self.view)
+            etl_setting_popup = remote_popup(self.view)  # TODO: can we rename remote_popup to etl_popup?
             self.etl_controller = Etl_Popup_Controller(etl_setting_popup,
                                                        self,
                                                        self.verbose,
                                                        self.etl_setting,
-                                                       self.etl_constants_path)
+                                                       self.etl_constants_path,
+                                                       self.experiment.GalvoParameters)
             self.etl_controller.set_experiment_values(self.resolution_value.get())
             self.etl_controller.set_mode(self.acquire_bar_controller.mode)
 

@@ -662,9 +662,9 @@ class ASLM_controller:
 
     def update_waveforms(self):
         while self.model is not None:
-            if not self.waveform_queue.empty():
+            while not self.waveform_queue.empty():
                 waveform_dict = self.waveform_queue.get()
-                self.waveform_tab_controller.plot_waveforms2(waveform_dict)
+                self.waveform_tab_controller.plot_waveforms2(waveform_dict, self.configuration.DAQParameters['sample_rate'])
             time.sleep(0.001)
 
 

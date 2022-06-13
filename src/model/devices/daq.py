@@ -173,7 +173,7 @@ class DAQBase:
                 # Get the Waveform Parameters - Assumes ETL Delay < Camera Delay.  Should Assert.
                 laser = channel['laser']
                 exposure_time = channel['camera_exposure_time'] / 1000
-                sweep_time = exposure_time + exposure_time * ((self.camera_delay + self.etl_ramp_falling) / 100)
+                sweep_time = exposure_time + exposure_time * ((self.camera_delay_percent + self.etl_ramp_falling) / 100)
                 etl_amplitude = float(etl_constants.ETLConstants[imaging_mode][zoom][laser]['amplitude'])
                 etl_offset = float(etl_constants.ETLConstants[imaging_mode][zoom][laser]['offset'])
 
@@ -182,7 +182,7 @@ class DAQBase:
                                                                                        exposure_time=exposure_time,
                                                                                        sweep_time=sweep_time,
                                                                                        etl_delay=self.etl_delay,
-                                                                                       camera_delay=self.camera_delay,
+                                                                                       camera_delay=self.camera_delay_percent,
                                                                                        fall=self.etl_ramp_falling,
                                                                                        amplitude=etl_amplitude,
                                                                                        offset=etl_offset)
@@ -196,7 +196,7 @@ class DAQBase:
                 self.waveform_dict[channel_key]['camera_waveform'] = camera_exposure(sample_rate=self.sample_rate,
                                                                                      sweep_time=sweep_time,
                                                                                      exposure=exposure_time,
-                                                                                     camera_delay=self.camera_delay)
+                                                                                     camera_delay=self.camera_delay_percent)
 
         return self.waveform_dict
 
@@ -265,7 +265,6 @@ class DAQBase:
             self.prev_etl_r_offset = self.etl_r_offset
             self.prev_etl_l_amplitude = self.etl_l_amplitude
             self.prev_etl_l_offset = self.etl_l_offset
-            # self.model.plot_waveform_pipe.send(waveform_dict)
 
     def create_etl_waveform(self):
         """

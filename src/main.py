@@ -1,6 +1,4 @@
 """
-Starting point for running the program.
-
 Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
@@ -56,6 +54,11 @@ import yaml
 from controller.aslm_controller import ASLM_controller as controller
 
 def main():
+    """
+    Starting point for running the multiscale ASLM program.
+
+    """
+
     # Evaluate GPU Status for Analysis Routines
     if platform.system() != 'Darwin':
         import tensorflow as tf

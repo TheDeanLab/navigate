@@ -48,12 +48,6 @@ logger = logging.getLogger(p)
 # Local Imports
 # from model.devices.laser_scanning import LaserScanning
 
-def start_image_writer(configuration, experiment, verbose):
-    """
-    # Initializes the image i/o on a dedicated thread
-    """
-    from model.aslm_image_writer import ImageWriter
-    return ImageWriter(configuration, experiment, verbose)
 
 
 def start_analysis(configuration, experiment, use_gpu, verbose):

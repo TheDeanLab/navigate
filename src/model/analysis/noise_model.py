@@ -12,12 +12,18 @@ def compute_noise_sigma(Fn=1.0, qe=0.82, S=0.0, Ib=100.0, Nr=1.4, M=1.0):
     qe : float
         Quantum efficiency (unitless)
     S : float or np.array
-        signal (photons/pixel/frame)
+        Signal (photons/pixel/frame)
     Ib : float or np.array
-        background (photons/pixel/frame)
+        Background (photons/pixel/frame)
     Nr : float
-        readout noise (e- rms)
+        Readout noise (e- rms)
     M : float
         EM Gain
+
+    Returns
+    --------
+    noise : float or np.array
+        Estimated noise model
     """
-    return sqrt(Fn*Fn*qe*(S+Ib)+(Nr/M)**2)
+    noise = sqrt(Fn*Fn*qe*(S+Ib)+(Nr/M)**2)
+    return noise

@@ -87,6 +87,7 @@ class Camera_Setting_Controller(GUI_Controller):
         self.default_width, self.default_height = config.get_pixels()
         self.trigger_source = config.configuration.CameraParameters['trigger_source']
         self.trigger_active = config.configuration.CameraParameters['trigger_active']
+        self.readout_speed = config.configuration.CameraParameters['readout_speed']
         
         # Camera Mode
         self.mode_widgets['Sensor'].widget['values'] = ['Normal', 'Light-Sheet']
@@ -227,7 +228,7 @@ class Camera_Setting_Controller(GUI_Controller):
             self.show_verbose_info("Normal Camera Readout Mode")
 
         if sensor_value == 'Light-Sheet':
-            self.mode_widgets['Readout'].widget.set('Top to Bottom')
+            self.mode_widgets['Readout'].widget.set('Top-to-Bottom')
             self.mode_widgets['Readout'].widget['state'] = 'readonly'
             self.mode_widgets['Pixels'].set(self.number_of_pixels)  # Default to 10 pixels
             self.mode_widgets['Pixels'].widget.trigger_focusout_validation()
@@ -315,10 +316,13 @@ class Camera_Setting_Controller(GUI_Controller):
         # Calculates it here
         # TODO: @Kevin please check the math here.
         """
-        h = 9.74436 * 10 ** -6  # Readout timing constant
+
+        h = 9.74436e-6  # Readout timing constant
+        sensor_mode = self.mode_widgets['Sensor'].get()
+        if (self.readout_speed == 1) and (sensor_mode == 'Normal'):
+            h = 32.4812e-6
         # the ROI height 'subarray_vsize'
         vn = float(self.roi_widgets['Height'].get())
-        sensor_mode = self.mode_widgets['Sensor'].get()
         exposure_time = float(self.framerate_widgets['exposure_time'].get())
 
         if sensor_mode == 'Normal':

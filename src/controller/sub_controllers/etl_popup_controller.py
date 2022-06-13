@@ -97,9 +97,9 @@ class Etl_Popup_Controller(GUI_Controller):
         # set ranges of value for those lasers
         for laser in self.lasers:
             self.widgets[laser + ' Amp'].widget.configure(from_=0)
-            self.widgets[laser + ' Amp'].widget.configure(increment=0.1)
+            self.widgets[laser + ' Amp'].widget.configure(increment=0.01)
             self.widgets[laser + ' Off'].widget.configure(from_=0)
-            self.widgets[laser + ' Off'].widget.configure(increment=0.1)
+            self.widgets[laser + ' Off'].widget.configure(increment=0.01)
 
     def set_experiment_values(self, resolution_value):
         """
@@ -180,7 +180,7 @@ class Etl_Popup_Controller(GUI_Controller):
                 }
 
                 # Delay feature.
-                self.event_ids[event_id_name] = self.view.popup.after(100, lambda: func(temp))
+                self.event_ids[event_id_name] = self.view.popup.after(500, lambda: func(temp))
             self.resolution_info.ETLConstants[self.resolution][self.mag][laser][etl_name] = variable.get()
 
         return func_laser

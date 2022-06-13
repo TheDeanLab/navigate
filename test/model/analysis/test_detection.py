@@ -6,7 +6,7 @@ import sys
 import numpy as np
 
 # Local Imports
-sys.path.append('../../../')
+# sys.path.append('../../../../')
 from src.model.analysis.detection import add_median_border
 
 class TestDetection(unittest.TestCase):

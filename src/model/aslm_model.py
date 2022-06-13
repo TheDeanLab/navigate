@@ -44,12 +44,15 @@ from pathlib import Path
 # Third Party Imports
 import numpy as np
 from queue import Queue
+import multiprocessing as mp
 
 # Local Imports
 import model.aslm_device_startup_functions as startup_functions
 from .aslm_model_config import Session as session
 from controller.thread_pool import SynchronizedThreadPool
 from model.concurrency.concurrency_tools import ResultThread, SharedNDArray, ObjectInSubprocess
+from model.model_features.autofocus import Autofocus
+from model.model_features.aslm_image_writer import ImageWriter
 
 # debug
 from model.aslm_debug_model import Debug_Module
@@ -63,17 +66,18 @@ class Model:
             args,
             configuration_path=None,
             experiment_path=None,
-            etl_constants_path=None):
+            etl_constants_path=None,
+            waveform_queue=None):
         
         # Logger Setup
         from log_files.log_functions import log_setup
         log_setup('model_logging.yml')
         p = __name__.split(".")[0]
-        logger = logging.getLogger(p)
+        self.logger = logging.getLogger(p)
         
-        logger.info("Performance - Testing if it works")
-        logger.debug("Spec - Testing if spec works too")
-        logger.info("Made it to model")
+        self.logger.info("Performance - Testing if it works")
+        self.logger.debug("Spec - Testing if spec works too")
+        self.logger.info("Made it to model")
         
         # Specify verbosity
         self.verbose = args.verbose
@@ -101,9 +105,6 @@ class Model:
 
         # Move device initialization steps to multiple threads
         threads_dict = {
-            'image_writer': ResultThread(target=startup_functions.start_image_writer,
-                                        args=(self.configuration, self.experiment, self.verbose,)).start(),
-
             'filter_wheel': ResultThread(target=startup_functions.start_filter_wheel,
                                          args=(self.configuration,self.verbose,)).start(),
 
@@ -142,7 +143,6 @@ class Model:
         self.acquisition_count = 0
         self.total_acquisition_count = None
         self.total_image_count = None
-        self.current_time_point = 0
         self.current_channel = 0
         self.current_filter = 'Empty'
         self.current_laser = '488nm'
@@ -150,7 +150,6 @@ class Model:
         self.current_exposure_time = 0  # milliseconds
         self.pre_exposure_time = 0  # milliseconds
         self.start_time = None
-        self.image_acq_start_time_string = time.strftime("%Y%m%d-%H%M%S")
 
         # Autofocusing
         self.f_position = None
@@ -171,12 +170,11 @@ class Model:
         # Plot Pipe handler
         self.plot_pipe = None
 
+        # waveform queue
+        self.waveform_queue = waveform_queue
+
         # frame signal id
         self.frame_id = 0
-
-        # Queue
-        self.autofocus_frame_queue = Queue()
-        self.autofocus_pos_queue = Queue()
         
         # flags
         self.autofocus_on = False  # autofocus
@@ -205,15 +203,16 @@ class Model:
         """
         self.plot_pipe = handler
 
+    # TODO: Replace above pipe functions with
+    # def set_model_pipe(self, property, handler):
+    #     setattr(self, property, handler)
+
     def set_data_buffer(self, data_buffer, img_width=512, img_height=512):
         if self.camera.camera_controller.is_acquiring:
             self.camera.close_image_series()
         self.camera.set_ROI(img_width, img_height)
         self.data_buffer = data_buffer
         self.number_of_frames = self.configuration.SharedNDArray['number_of_frames']
-        # self.camera.initialize_image_series(self.data_buffer, self.number_of_frames)
-        self.frame_id = 0
-        # self.is_live = True
 
     #  Basic Image Acquisition Functions
     #  - These functions are used to acquire images from the camera
@@ -240,15 +239,19 @@ class Model:
             # First overwrites the model instance of the MicroscopeState
             """
             self.imaging_mode = 'single'
+            print(self.imaging_mode)
             self.experiment.MicroscopeState = kwargs['microscope_info']
             self.experiment.CameraParameters = kwargs['camera_info']
             self.is_save = self.experiment.MicroscopeState['is_save']
-
-            if self.is_save:
-                self.experiment.Saving = kwargs['saving_info']
             self.prepare_acquisition()
             self.run_single_acquisition()
-            self.run_data_process(1)
+            channel_num = len(self.experiment.MicroscopeState['channels'].keys())
+            if self.is_save:
+                self.experiment.Saving = kwargs['saving_info']
+                image_writer = ImageWriter(self)
+                self.run_data_process(channel_num, data_func=image_writer.write_tiff)
+            else:
+                self.run_data_process(channel_num)
             self.end_acquisition()
 
         elif command == 'live':
@@ -313,6 +316,8 @@ class Model:
                 #             value = self.resolution_info.ETLConstants[self.resolution][self.mag][laser][etl_name]
                 # print(args[1])
 
+            self.waveform_queue.put(self.daq.waveform_dict)
+
             # prepare devices based on updated info
             self.stop_send_signal = False
             self.signal_thread = threading.Thread(target=self.run_live_acquisition)
@@ -331,28 +336,8 @@ class Model:
             'fine_step_size': 5, 
             'fine_selected': True}
             """
-
-            self.experiment.MicroscopeState = args[0]
-            self.experiment.AutoFocusParameters = args[1]
-            frame_num = self.get_autofocus_frame_num() + 1
-            if frame_num < 1:
-                return
-            self.prepare_acquisition()  # Opens correct shutter and puts all signals to false
-            self.autofocus_on = True
-            self.is_save = False
-            self.f_position = args[2]  # Current position
-
-            self.signal_thread = threading.Thread(target=self.run_single_acquisition,
-                                                  kwargs={'target_channel': 1},
-                                                  name='Autofocus Signal')
-
-            self.data_thread = threading.Thread(target=self.run_data_process,
-                                                args=(frame_num,),
-                                                name='Autofocus Data')
-
-            # Start Threads
-            self.signal_thread.start()
-            self.data_thread.start()
+            autofocus = Autofocus(self)
+            autofocus.run(*args)
             
         elif command == 'stop':
             """
@@ -371,41 +356,14 @@ class Model:
             '''
             self.debug.debug(*args, **kwargs)
 
-    def move_stage(self, pos_dict):
+    def move_stage(self, pos_dict, wait_until_done=False):
         """
         Moves the stages.
         Checks "on target state" after command and waits until done.
         """
-        self.stages.move_absolute(pos_dict, wait_until_done=True)
+        self.stages.move_absolute(pos_dict, wait_until_done)
         self.stages.report_position()
 
-    def prepare_acquisition(self):
-        if self.camera.camera_controller.is_acquiring:
-            self.camera.close_image_series()
-        # turn off flags
-        self.stop_acquisition = False
-        self.stop_send_signal = False
-        self.autofocus_on = False
-        if self.is_live:
-            self.is_live = False
-
-        # TODO: Calculate Waveforms for DAQ for all channels here.
-        # Currently done on a per-channel basis in the 'run_single_acquisition' function below.
-
-        # Update Camera.
-        self.camera.set_sensor_mode(self.experiment.CameraParameters['sensor_mode'])
-        print("SENSOR MODE:", self.experiment.CameraParameters['sensor_mode'])
-        if self.experiment.CameraParameters['sensor_mode'] == 'Light-Sheet':
-            print("Desired Readout Direction:", self.experiment.CameraParameters['readout_direction'])
-            print("Actual Readout Direction:", self.camera.camera_controller.get_property_value("readout_direction"))
-            self.camera.set_readout_direction(self.experiment.CameraParameters['readout_direction'])
-            # self.camera.set_lightsheet_rolling_shutter_width(self.experiment.CameraParameters['lightsheet_rolling_shutter_width'])
-
-        # Attach camera buffer and start imaging
-        # TODO: Move this to a separate function?
-        self.camera.initialize_image_series(self.data_buffer, self.number_of_frames)
-
-        self.open_shutter()
 
     def end_acquisition(self):
         """
@@ -414,36 +372,30 @@ class Model:
         # dettach buffer in live mode in order to clear unread frames
         if self.camera.camera_controller.is_acquiring:
             self.camera.close_image_series()
-            self.frame_id = 0
-
-        if self.is_live:
-            self.is_live = False
 
         # close shutter
         self.shutter.close_shutters()
 
-    def run_data_process(self, num_of_frames=0):
-        """
-        This function will listen to the camera.
-        When there is a frame ready, it will call next steps to handle the frame data
-        """
-        count_frame = num_of_frames > 0
-        if self.autofocus_on:
-            f_frame_id = -1  #  to indicate if there is one frame need to calculate shannon value, but the image frame isn't ready
-            frame_num = 10  # any value but not 1
+    # functions related to send out signals
 
-        wait_num = 10  # this will let this thread wait 10 * 500 ms before it ends
+    # functions related to frame data
+    def run_data_process(self, num_of_frames=0, pre_func=None, data_func=None, callback=None):
+        """
+        # this function is the structure of data thread
+        """
+
+        wait_num = 10 # this will let this thread wait 10 * 500 ms before it ends
         acquired_frame_num = 0
-        
-        # Plot Data list
-        plot_data = []  # Going to be a List of [focus, entropy]
-        start_time = time.perf_counter()
+
+        # whether acquire specific number of frames.
+        count_frame = num_of_frames > 0
+
+        if pre_func:
+            pre_func()
 
         while not self.stop_acquisition:
             frame_ids = self.camera.get_new_frame()
-            # frame_ids = self.camera.buf_getlastframedata()
-            if self.verbose:
-                print('running data process, get frames', frame_ids)
+            self.logger.debug(f'running data process, get frames {frame_ids}')
             # if there is at least one frame available
             if not frame_ids:
                 wait_num -= 1
@@ -453,66 +405,26 @@ class Model:
                 continue
 
             wait_num = 10
-            acquired_frame_num += len(frame_ids)
 
             # show image
-            if self.verbose:
-                print('sent through pipe', frame_ids[0])
+            self.logger.debug(f'sent through pipe{frame_ids[0]}')
             self.show_img_pipe.send(frame_ids[0])
 
-            # Autofocus Analysis
-            while self.autofocus_on:
-                try:
-                    if f_frame_id < 0:
-                        f_frame_id, frame_num, f_pos = self.autofocus_frame_queue.get_nowait()
-                    if f_frame_id not in frame_ids:
-                        break
-                except:
-                    break
-                entropy = self.analysis.normalized_dct_shannon_entropy(self.data_buffer[f_frame_id], 3)
-                # How is this getting called without self.analysis existing in the model?
-                # TODO Pipe f_pos and entropy to controller to pass to popup plot
-                if self.verbose:
-                    print("Appending plot data focus, entropy: ", f_pos, entropy)
-                    plot_data.append([f_pos, entropy[0]])
-                    print("Testing plot data print: ", len(plot_data))
-                else:
-                    plot_data.append([f_pos, entropy[0]])
-                # Need to initialize entropy above for the first iteration of the autofocus routine.
-                # Need to initialize entropy_vector above for the first iteration of the autofocus routine.
-                # Then need to append each measurement to the entropy_vector.  First column will be the focus position, 
-                # second column would be the DCT entropy value.
-                # 
-                f_frame_id = -1
-                if entropy > self.max_entropy:
-                    self.max_entropy = entropy
-                    self.focus_pos = f_pos
-                if frame_num == 1:
-                    frame_num = 10  # any value but not 1
-                    print('***********max shannon entropy:', self.max_entropy, self.focus_pos)
-                    # find out the focus
-                    self.autofocus_pos_queue.put(self.focus_pos)
-                    break
+            if data_func:
+                data_func(frame_ids)
 
-            if count_frame:
-                num_of_frames -= len(frame_ids)
-                self.stop_acquisition = (num_of_frames <= 0) or self.stop_acquisition
+            acquired_frame_num += len(frame_ids)
+            if count_frame and acquired_frame_num >= num_of_frames:
+                self.stop_acquisition = True
 
-        # Turning plot_data into numpy array and sending
-        # we could send plot_data here or we could send it in function snap_image_with_autofocus
-        if self.autofocus_on:
-            if self.verbose:
-                print("Model sending plot data: ", plot_data)
-            plot_data = np.asarray(plot_data)
-            self.plot_pipe.send(plot_data) # Sending controller plot data
+        if callback:
+            callback()
         
         self.show_img_pipe.send('stop')
-        end_time = time.perf_counter()
-        print('*******total time*******', end_time - start_time)
 
-        if self.verbose:
-            print('data thread is stop')
-            print('received frames in total:', acquired_frame_num)
+        self.logger.debug('data thread is stop')
+        self.logger.debug(f'received frames in total:{acquired_frame_num}')
+
 
     def prepare_image_series(self):
         """
@@ -565,13 +477,49 @@ class Model:
         # Loads the YAML file for all of the experiment parameters
         self.experiment = session(experiment_path, self.verbose)
 
-    def run_single_acquisition(self, target_channel=None):
+    def prepare_acquisition(self):
+        """
+        Sets flags.
+        Calculates all of the waveforms.
+        Sets the Camera Sensor Mode
+        Initializes the data buffer and starts camera.
+        Opens Shutters
+        """
+        if self.camera.camera_controller.is_acquiring:
+            self.camera.close_image_series()
+        # turn off flags
+        self.stop_acquisition = False
+        self.stop_send_signal = False
+        self.autofocus_on = False
+        self.is_live = False
+
+        print("Preparing acquisiton...")
+
+        # Calculate Waveforms for all channels. Plot in the view.
+        waveform_dict = self.daq.calculate_all_waveforms(self.experiment.MicroscopeState, self.etl_constants)
+        self.waveform_queue.put(waveform_dict)
+
+        # Set Camera Sensor Mode - Must be done before camera is initialized.
+        self.camera.set_sensor_mode(self.experiment.CameraParameters['sensor_mode'])
+        if self.experiment.CameraParameters['sensor_mode'] == 'Light-Sheet':
+            self.camera.set_readout_direction(self.experiment.CameraParameters['readout_direction'])
+
+        self.frame_id = 0
+
+        # Initialize Image Series - Attaches camera buffer and start imaging
+        self.camera.initialize_image_series(self.data_buffer, self.number_of_frames)
+
+        self.open_shutter()
+
+    def run_single_acquisition(self,
+                               target_channel=None,
+                               snap_func=None):
         """
         # Called by model.run_command().
-        target_channel called by the autofocus routine.
+        target_channel called only during the autofocus routine.
         """
 
-        #  Interrogate the Experiment Settings
+        #  Get the Experiment Settings
         microscope_state = self.experiment.MicroscopeState
         prefix_len = len('channel_')
         for channel_key in microscope_state['channels']:
@@ -581,43 +529,51 @@ class Model:
             if target_channel and channel_idx != target_channel:
                 continue
             channel = microscope_state['channels'][channel_key]
-            if channel['is_selected'] is True:
 
-                # Get and set the parameters for Waveform Generation,
-                # Triggering, etc.
+            # Iterate through the selected channels.
+            if channel['is_selected'] is True:
+                # Move the Filter Wheel - Rate-Limiting Step - Perform First.
+                self.filter_wheel.set_filter(channel['filter'])
+
+                # Get and set the parameters for Waveform Generation, triggering, etc.
                 self.current_channel = channel_idx
 
-                # trigger_waiting_time is the time between two signal triggers
-                # current signal trigger should not be sent out earlier than previous trigger exposure time + camera minimum waiting time.
+                # Calculate duration of time necessary between camera triggers.
                 self.trigger_waiting_time = self.current_exposure_time/1000 + self.camera_minimum_waiting_time
-                self.current_exposure_time = channel['camera_exposure_time']
 
-                # update trigger waiting time when exposure time changed
-                # self.trigger_waiting_time = self.current_exposure_time/1000 + self.camera_minimum_waiting_time
-                # self.trigger_waiting_time = self.camera_minimum_waiting_time
+                # Update Camera Exposure Time
+                self.current_exposure_time = channel['camera_exposure_time']
+                if self.experiment.CameraParameters['sensor_mode'] == 'Light-Sheet':
+                    self.current_exposure_time, camera_line_interval = self.camera.calculate_light_sheet_exposure_time(
+                        self.current_exposure_time,
+                        int(self.experiment.CameraParameters['number_of_pixels']))
+                    self.camera.camera_controller.set_property_value("inter"
+                                                                     "nal_line_interval", camera_line_interval)
+
+                # self.camera.set_exposure_time(exposure_time)
 
                 # Laser Settings
                 self.current_laser_index = channel['laser_index']
                 self.laser_triggers.trigger_digital_laser(self.current_laser_index)
                 self.laser_triggers.set_laser_analog_voltage(channel['laser_index'], channel['laser_power'])
 
-                # Filter Wheel Settings - Rate Limiting Step
-                self.filter_wheel.set_filter(channel['filter'])
+                # # Update Laser Data Acquisition Sweep Time according to exposure and delay parameters.
+                # self.daq.sweep_time = (self.current_exposure_time / 1000) * \
+                #                       ((self.configuration.CameraParameters['delay_percent'] +
+                #                         self.configuration.RemoteFocusParameters['remote_focus_l_ramp_falling_percent']) / 100 + 1)
 
-                # Update Laser Scanning Waveforms - Exposure Time in Seconds
-                self.daq.sweep_time = self.current_exposure_time / 1000
 
                 # Update ETL Settings
                 self.daq.update_etl_parameters(microscope_state, channel)
 
                 # Acquire an Image
-                if self.autofocus_on:
-                    self.snap_image_with_autofocus()
+                if snap_func:
+                    snap_func()
                 else:
-                    self.snap_image()
+                    self.snap_image(channel_key)
 
 
-    def snap_image(self):
+    def snap_image(self, channel_key):
         """
         # Snaps a single image after updating the waveforms.
         # Can be used in acquisitions where changing waveforms are required,
@@ -627,7 +583,7 @@ class Model:
         """
         #  Initialize, run, and stop the acquisition.
         #  Consider putting below to not block thread.
-        self.daq.prepare_acquisition()
+        self.daq.prepare_acquisition(channel_key)
 
         # calculate how long has been since last trigger
         time_spent = time.perf_counter() - self.pre_trigger_time
@@ -652,59 +608,6 @@ class Model:
         self.daq.stop_acquisition()
 
         self.frame_id = (self.frame_id + 1) % self.number_of_frames
-
-    def get_autofocus_frame_num(self):
-        settings = self.experiment.AutoFocusParameters
-        frames = 0
-        if settings['coarse_selected']:
-            frames = int(settings['coarse_range']) // int(settings['coarse_step_size']) + 1
-        if settings['fine_selected']:
-            frames += int(settings['fine_range']) // int(settings['fine_step_size']) + 1
-        return frames
-
-    def snap_image_with_autofocus(self):
-        # get autofocus setting according to channel
-        settings = self.experiment.AutoFocusParameters
-        pos = self.f_position
-
-        if settings['coarse_selected']:
-            pos = self.send_autofocus_signals(self.f_position, int(settings['coarse_range']), int(settings['coarse_step_size']))
-
-        if settings['fine_selected']:
-            pos = self.send_autofocus_signals(pos, int(settings['fine_range']), int(settings['fine_step_size']))
-
-        # move stage to the focus position
-        self.move_stage({'f': pos})
-        
-        # self.autofocus_on = False
-        self.snap_image()
-        
-
-    def send_autofocus_signals(self, f_position, ranges, step_size):
-        """
-        Executes the Autofocusing Routine
-        Moves the stages, captures frames, etc.
-        TODO:we may change to 'on_target' function later when figure it out
-        TODO: Simple Example Here
-        TODO: https://github.com/PI-PhysikInstrumente/PIPython/blob/d8b025125ee95024ecebd3596eefd163a822ddd4/samples/simplemove_gcs30.py
-        """
-        steps = ranges // step_size + 1
-        pos = f_position - (steps // 2) * step_size
-        self.max_entropy = 0
-        self.focus_pos = f_position
-
-        for i in range(steps):
-            # move focus device
-            # low resolution move device
-            self.move_stage({'f': pos})
-            self.autofocus_frame_queue.put((self.frame_id, steps - i, pos))
-            time.sleep(0.1)  # add a wait time here to let the stage move to where we want
-            self.snap_image()
-            pos += step_size
-
-        # wait to get the focus position
-        pos = self.autofocus_pos_queue.get(timeout=steps*10)
-        return pos
 
     def run_live_acquisition(self):
         """

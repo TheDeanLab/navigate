@@ -83,12 +83,37 @@ class Waveform_Tab_Controller(GUI_Controller):
         self.view.canvas.get_tk_widget().pack()
 
     def plot_waveforms2(self, waveform_dict):
-        self.view.fig = Figure(figsize=(8, 2), dpi=100)
-        self.view.plot_etl = self.view.fig.add_subplot(511)
-        self.view.plot_galvo = self.view.fig.add_subplot(512)
+        from tkinter import NSEW
+        self.view.fig = Figure(figsize=(6, 6), dpi=100)
+        self.view.canvas = FigureCanvasTkAgg(self.view.fig, master=self.view)
+        self.view.canvas.draw()
 
+        self.view.plot_etl = self.view.fig.add_subplot(211)
+        self.view.plot_galvo = self.view.fig.add_subplot(212)
+
+        self.view.plot_etl.clear()
+        self.view.plot_galvo.clear()
+
+        legend = []
         for k in waveform_dict.keys():
+            if waveform_dict[k]['etl_waveform'] is None:
+                continue
             self.view.plot_etl.plot(waveform_dict[k]['etl_waveform'], label=k)
             self.view.plot_galvo.plot(waveform_dict[k]['galvo_waveform'], label=k)
-        self.view.canvas = FigureCanvasTkAgg(self.view.fig, master=self.view)
-        self.view.canvas.get_tk_widget().pack()
+            legend.append(k)
+
+        self.view.plot_etl.set_title('ETL Waveform')
+        self.view.plot_galvo.set_title('Galvo Waveform')
+
+        self.view.plot_etl.set_xlabel('Number of samples')
+        self.view.plot_galvo.set_xlabel('Number of samples')
+
+        self.view.plot_etl.set_ylabel('Amplitude')
+        self.view.plot_galvo.set_ylabel('Amplitude')
+
+        self.view.fig.legend(legend)
+
+        self.view.fig.tight_layout()
+
+        self.view.canvas.draw_idle()
+        self.view.canvas.get_tk_widget().grid(row=5, column=0, columnspan=3, sticky=(NSEW), padx=(5,5), pady=(5,5))

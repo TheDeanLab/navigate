@@ -265,6 +265,7 @@ class DAQBase:
             self.prev_etl_r_offset = self.etl_r_offset
             self.prev_etl_l_amplitude = self.etl_l_amplitude
             self.prev_etl_l_offset = self.etl_l_offset
+            # self.model.plot_waveform_pipe.send(waveform_dict)
 
     def create_etl_waveform(self):
         """

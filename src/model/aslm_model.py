@@ -44,6 +44,7 @@ from pathlib import Path
 # Third Party Imports
 import numpy as np
 from queue import Queue
+import multiprocessing as mp
 
 # Local Imports
 import model.aslm_device_startup_functions as startup_functions
@@ -65,7 +66,8 @@ class Model:
             args,
             configuration_path=None,
             experiment_path=None,
-            etl_constants_path=None):
+            etl_constants_path=None,
+            waveform_queue=None):
         
         # Logger Setup
         from log_files.log_functions import log_setup
@@ -168,6 +170,9 @@ class Model:
         # Plot Pipe handler
         self.plot_pipe = None
 
+        # waveform queue
+        self.waveform_queue = waveform_queue
+
         # frame signal id
         self.frame_id = 0
         
@@ -197,6 +202,10 @@ class Model:
         # wire up autofocus plot pipe
         """
         self.plot_pipe = handler
+
+    # TODO: Replace above pipe functions with
+    # def set_model_pipe(self, property, handler):
+    #     setattr(self, property, handler)
 
     def set_data_buffer(self, data_buffer, img_width=512, img_height=512):
         if self.camera.camera_controller.is_acquiring:
@@ -230,6 +239,7 @@ class Model:
             # First overwrites the model instance of the MicroscopeState
             """
             self.imaging_mode = 'single'
+            print(self.imaging_mode)
             self.experiment.MicroscopeState = kwargs['microscope_info']
             self.experiment.CameraParameters = kwargs['camera_info']
             self.is_save = self.experiment.MicroscopeState['is_save']
@@ -305,6 +315,8 @@ class Model:
                 # Pass to the self.model.daq to
                 #             value = self.resolution_info.ETLConstants[self.resolution][self.mag][laser][etl_name]
                 # print(args[1])
+
+            self.waveform_queue.put(self.daq.waveform_dict)
 
             # prepare devices based on updated info
             self.stop_send_signal = False
@@ -481,8 +493,11 @@ class Model:
         self.autofocus_on = False
         self.is_live = False
 
+        print("Preparing acquisiton...")
+
         # Calculate Waveforms for all channels. Plot in the view.
         waveform_dict = self.daq.calculate_all_waveforms(self.experiment.MicroscopeState, self.etl_constants)
+        self.waveform_queue.put(waveform_dict)
 
         # Set Camera Sensor Mode - Must be done before camera is initialized.
         self.camera.set_sensor_mode(self.experiment.CameraParameters['sensor_mode'])

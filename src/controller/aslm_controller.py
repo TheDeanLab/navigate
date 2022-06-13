@@ -34,6 +34,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #  Standard Library Imports
 import tkinter
 import multiprocessing as mp
+import time
+import threading
 
 # Third Party Imports
 
@@ -108,13 +110,16 @@ class ASLM_controller:
         # Create a thread pool
         self.threads_pool = SynchronizedThreadPool()
 
+        self.waveform_queue = mp.Queue()
+
         # Initialize the Model
         self.model = ObjectInSubprocess(Model,
                                         USE_GPU,
                                         args,
                                         configuration_path=configuration_path,
                                         experiment_path=experiment_path,
-                                        etl_constants_path=etl_constants_path)
+                                        etl_constants_path=etl_constants_path,
+                                        waveform_queue=self.waveform_queue)
         logger.debug(f"Spec - Configuration Path: {configuration_path}")
         logger.debug(f"Spec - Experiment Path: {experiment_path}")
         logger.debug(f"Spec - ETL Constants Path: {etl_constants_path}")
@@ -169,6 +174,8 @@ class ASLM_controller:
         self.waveform_tab_controller = Waveform_Tab_Controller(self.view.camera_waveform.waveform_tab,
                                                                self,
                                                                self.verbose)
+        t = threading.Thread(target=self.update_waveforms)
+        t.start()
 
         # initialize menu bar
         self.initialize_menus()
@@ -192,7 +199,7 @@ class ASLM_controller:
         # Wire up show image pipe
         self.show_img_pipe_parent, self.show_img_pipe_child = mp.Pipe()
         self.model.set_show_img_pipe(self.show_img_pipe_child)
-        
+
         # Setting up Pipe for Autofocus Plot
         self.plot_pipe_controller, self.plot_pipe_model = mp.Pipe(duplex=True)
         self.model.set_autofocus_plot_pipe(self.plot_pipe_model)
@@ -652,6 +659,14 @@ class ASLM_controller:
     
     def move_stage(self, args):
         self.model.move_stage(args)
+
+    def update_waveforms(self):
+        while self.model is not None:
+            if not self.waveform_queue.empty():
+                waveform_dict = self.waveform_queue.get()
+                self.waveform_tab_controller.plot_waveforms2(waveform_dict)
+            time.sleep(0.001)
+
 
 
 if __name__ == '__main__':

@@ -214,13 +214,16 @@ class Etl_Popup_Controller(GUI_Controller):
             if self.verbose:
                 print(f"Galvo parameter {galvo_parameter} changed: {value}")
             logger.debug(f"Galvo parameter {galvo_parameter} changed: {value}")
-            if value != variable.get() and value !='' and self.mode == 'live':
+            if value != variable.get() and self.mode == 'live':
                 event_id_name = galvo_parameter
                 try:
                     if self.event_ids[event_id_name]:
                         self.view.popup.after_cancel(self.event_ids[event_id_name])
                 except KeyError:
                     pass
+                if value == '':
+                    # TODO: Why is this check necessary?
+                    value = 0.0
                 temp = {galvo_parameter: float(value)}
                 self.event_ids[event_id_name] = self.view.popup.after(500, lambda: func(temp))
             self.galvo_setting[galvo_parameter] = variable.get()

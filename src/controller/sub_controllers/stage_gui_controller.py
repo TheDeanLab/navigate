@@ -90,8 +90,8 @@ class Stage_GUI_Controller(GUI_Controller):
                 buttons[k].configure(
                     command=self.zero_btn_handler(k[5:-4])
                 )
-
-        for axis in ['x', 'y', 'z', 'theta', 'f']:
+        
+        for axis in ['x', 'y', 'z', 'theta', 'f', "WASD"]:
             # add event bind to position entry variables
             self.widget_vals[axis].trace_add('write', self.position_callback(axis))
 

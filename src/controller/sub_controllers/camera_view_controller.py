@@ -58,7 +58,9 @@ class Camera_View_Controller(GUI_Controller):
         self.image_metrics = view.image_metrics.get_widgets()
         self.image_palette = view.scale_palette.get_widgets()
         self.canvas = self.view.canvas
+        self.wasd_control = self.view.get_buttons()
 
+        
         # Binding for adjusting the lookup table min and max counts.
         # keys = ['Autoscale', 'Min','Max']
         self.image_palette['Autoscale'].widget.config(command=self.toggle_min_max_buttons)

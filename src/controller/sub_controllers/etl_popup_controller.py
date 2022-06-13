@@ -221,10 +221,7 @@ class Etl_Popup_Controller(GUI_Controller):
                         self.view.popup.after_cancel(self.event_ids[event_id_name])
                 except KeyError:
                     pass
-                print("in func galvo")
-                print(galvo_parameter, value)
                 temp = {galvo_parameter: float(value)}
-                print(temp)
                 self.event_ids[event_id_name] = self.view.popup.after(500, lambda: func(temp))
             self.galvo_setting[galvo_parameter] = variable.get()
 

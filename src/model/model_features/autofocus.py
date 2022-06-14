@@ -161,4 +161,4 @@ class Autofocus():
         self.model.show_img_pipe.send(self.target_frame_id)
         # send out plot data
         plot_data = np.asarray(self.plot_data)
-        self.model.plot_pipe.send(plot_data) # Sending controller plot data
+        self.model.autofocus_plot_pipe.send(plot_data) # Sending controller plot data

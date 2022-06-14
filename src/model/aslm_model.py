@@ -160,10 +160,6 @@ class Model:
         self.signal_thread = None
         self.data_thread = None
 
-        # data buffer
-        self.data_buffer = None
-        self.number_of_frames = 0
-
         # show image function/pipe handler
         self.show_img_pipe = None
         
@@ -188,31 +184,47 @@ class Model:
         self.trigger_waiting_time = 10
         self.pre_trigger_time = 0
 
+        # data buffer for image frames
+        self.number_of_frames = self.configuration.SharedNDArray['number_of_frames']
+        self.update_data_buffer(int(self.experiment.CameraParameters['x_pixels']),
+                                int(self.experiment.CameraParameters['y_pixels']))
+
         # debug
         self.debug = Debug_Module(self, self.verbose)
 
-    def set_show_img_pipe(self, handler):
-        """
-        # wire up show image function/pipe
-        """
-        self.show_img_pipe = handler
-        
-    def set_autofocus_plot_pipe(self, handler):
-        """
-        # wire up autofocus plot pipe
-        """
-        self.plot_pipe = handler
+    def update_data_buffer(self, img_width=512, img_height=512):
+        if self.camera.is_acquiring:
+            self.camera.close_image_series()
+        self.camera.set_ROI(img_width, img_height)
+        self.data_buffer = [SharedNDArray(shape=(img_height, img_width),
+                                          dtype='uint16') for i in range(self.number_of_frames)]
+        self.img_width = img_width
+        self.img_height = img_height
+
+    def get_data_buffer(self, img_width=512, img_height=512):
+        if img_width != self.img_width or img_height != self.img_height:
+            self.update_data_buffer(img_width, img_height)
+        return self.data_buffer
+
+    def create_pipe(self, pipe_name):
+        self.release_pipe(pipe_name)
+        end1, end2 = mp.Pipe()
+        setattr(self, pipe_name, end2)
+        return end1
+
+    def release_pipe(self, pipe_name):
+        if hasattr(self, pipe_name):
+            pipe = getattr(self, pipe_name)
+            if pipe:
+                pipe.close()
+            delattr(self, pipe_name)
+
+
 
     # TODO: Replace above pipe functions with
     # def set_model_pipe(self, property, handler):
     #     setattr(self, property, handler)
 
-    def set_data_buffer(self, data_buffer, img_width=512, img_height=512):
-        if self.camera.camera_controller.is_acquiring:
-            self.camera.close_image_series()
-        self.camera.set_ROI(img_width, img_height)
-        self.data_buffer = data_buffer
-        self.number_of_frames = self.configuration.SharedNDArray['number_of_frames']
 
     #  Basic Image Acquisition Functions
     #  - These functions are used to acquire images from the camera

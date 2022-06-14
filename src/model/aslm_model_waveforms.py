@@ -41,6 +41,28 @@ from pathlib import Path
 p = __name__.split(".")[0]
 logger = logging.getLogger(p)
 
+def camera_exposure(sample_rate=100000,
+                    sweep_time=0.4,
+                    exposure=0.4,
+                    camera_delay=10):
+    """ Calculates timing and duration of camera exposure.
+    Not actually used to trigger the camera.  Only meant for visualization.
+    """
+    amplitude = 5
+
+    # get an integer number of samples
+    samples = int(np.ceil(np.multiply(sample_rate, sweep_time)))
+
+    # create an array just containing the offset voltage:
+    array = np.zeros(samples)
+
+    # convert pulse width and delay in % into number of samples
+    pulse_delay_samples = int((exposure * camera_delay / 100)*sample_rate)
+    pulse_samples = int(exposure * sample_rate)
+
+    # modify the array
+    array[pulse_delay_samples:(pulse_samples + pulse_delay_samples)] = amplitude
+    return np.array(array)
 
 def single_pulse(sample_rate=100000,
                  sweep_time=0.4,
@@ -78,6 +100,32 @@ def single_pulse(sample_rate=100000,
     # modify the array
     array[pulsedelay_samples:pulsesamples + pulsedelay_samples] = amplitude
     return np.array(array)
+
+
+def tunable_lens_ramp_v2(sample_rate=100000,
+                         exposure_time=0.2,
+                         sweep_time=0.24,
+                         etl_delay=7.5,
+                         camera_delay=10,
+                         fall=2.5,
+                         amplitude=1,
+                         offset=0):
+
+    # create an array just containing the negative amplitude voltage:
+    delay_samples = etl_delay * exposure_time * sample_rate / 100
+    delay_array = np.zeros(int(delay_samples)) + offset - amplitude
+
+    # 10-7.5 -> 1.025 * .2
+    #
+    ramp_samples = (exposure_time + exposure_time*(camera_delay-etl_delay)/100) * sample_rate
+    ramp_array = np.linspace(offset - amplitude, offset + amplitude, int(ramp_samples))
+
+    # fall_samples = .025 * .2 * 100000 = 500
+    fall_samples = fall * exposure_time * sample_rate / 100
+    fall_array = np.linspace(offset + amplitude, offset - amplitude, int(fall_samples))
+
+    waveform = np.hstack([delay_array, ramp_array, fall_array])
+    return waveform
 
 
 def tunable_lens_ramp(sample_rate=100000,
@@ -209,14 +257,43 @@ def smooth_waveform(waveform,
 
 if (__name__ == "__main__"):
     import matplotlib.pyplot as plt
-
-    etl_l_delay = self.model.RemoteFocusParameters['remote_focus_l_delay_percent']
-    etl_l_ramp_rising = self.model.RemoteFocusParameters['remote_focus_l_ramp_rising_percent']
-    etl_l_ramp_falling = self.model.RemoteFocusParameters['remote_focus_l_ramp_falling_percent']
-    etl_l_amplitude = self.model.RemoteFocusParameters['remote_focus_l_amplitude']
-
+    # General
     sample_rate = 100000
-    sweep_time = 0.4
-    data = sawtooth(sample_rate=sample_rate, sweep_time=sweep_time, amplitude=0.67)
-    plt.plot(data)
+    exposure_time = 0.25
+
+    #ETL
+    etl_delay = 7.5
+    etl_ramp_rising = 85
+    etl_ramp_falling = 2.5
+    etl_amplitude = 1
+    etl_offset = 1
+    camera_delay = 10
+
+    waveform_padding = (camera_delay + etl_ramp_falling)/100
+    #waveform_padding = 20/100
+    sweep_time = exposure_time + exposure_time * waveform_padding
+    # sweep_time = .24 seconds.
+
+    etl_waveform = tunable_lens_ramp_v2(sample_rate=sample_rate,
+                                        exposure_time=exposure_time,
+                                        sweep_time=sweep_time,
+                                        etl_delay=etl_delay,
+                                        camera_delay=camera_delay,
+                                        fall=etl_ramp_falling,
+                                        amplitude=etl_amplitude,
+                                        offset=etl_offset)
+
+    galvo_waveform = sawtooth(sample_rate=sample_rate,
+                              sweep_time=sweep_time,
+                              frequency=200,
+                              amplitude=1,
+                              offset=0)
+
+    camera_waveform = camera_exposure(sample_rate=sample_rate,
+                                      sweep_time=sweep_time,
+                                      exposure=exposure_time,
+                                      camera_delay=camera_delay)
+    plt.plot(etl_waveform)
+    plt.plot(galvo_waveform)
+    plt.plot(camera_waveform)
     plt.show()

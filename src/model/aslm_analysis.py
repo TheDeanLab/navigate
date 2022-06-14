@@ -45,7 +45,6 @@ if platform.system() != 'Darwin':
 
 # Local Imports
 from .analysis import image_decorrelation as image_decorrelation
-from .analysis import flatfield as flatfield
 
 # Logger Setup
 p = __name__.split(".")[0]
@@ -55,6 +54,9 @@ class Analysis:
     def __init__(self, use_gpu=False, verbose=False):
         self.verbose = verbose
         self.use_gpu = use_gpu
+
+        if use_gpu:
+            from .analysis import flatfield as flatfield
 
     def __del__(self):
         pass

@@ -564,7 +564,6 @@ class Model:
                 #                       ((self.configuration.CameraParameters['delay_percent'] +
                 #                         self.configuration.RemoteFocusParameters['remote_focus_l_ramp_falling_percent']) / 100 + 1)
 
-
                 # Update ETL Settings
                 self.daq.update_etl_parameters(microscope_state, channel, self.experiment.GalvoParameters)
 

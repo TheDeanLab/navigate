@@ -106,15 +106,19 @@ class Etl_Popup_Controller(GUI_Controller):
         for laser in self.lasers:
             self.widgets[laser + ' Amp'].widget.configure(from_=0)
             self.widgets[laser + ' Amp'].widget.configure(increment=0.01)
+            self.widgets[laser + ' Amp'].widget.set_precision(-2)
             self.widgets[laser + ' Off'].widget.configure(from_=0)
             self.widgets[laser + ' Off'].widget.configure(increment=0.01)
+            self.widgets[laser + ' Off'].widget.set_precision(-2)
 
         self.widgets['Galvo Amp'].widget.configure(from_=-5)
         self.widgets['Galvo Amp'].widget.configure(to=5)
         self.widgets['Galvo Amp'].widget.configure(increment=0.01)
+        self.widgets['Galvo Amp'].widget.set_precision(-2)
         self.widgets['Galvo Off'].widget.configure(from_=-5)
         self.widgets['Galvo Off'].widget.configure(to=5)
         self.widgets['Galvo Off'].widget.configure(increment=0.01)
+        self.widgets['Galvo Off'].widget.set_precision(-2)
 
     def set_experiment_values(self, resolution_value):
         """
@@ -180,13 +184,16 @@ class Etl_Popup_Controller(GUI_Controller):
         # BUG Upon startup this will always run 0.63x, and when changing magnification it will run 0.63x before whatever mag is selected
         def func_laser(*args):
             value = self.resolution_info.ETLConstants[self.resolution][self.mag][laser][etl_name]
-            if self.verbose:
-                print("ETL Amplitude/Offset Changed: ", value)
-            logger.debug(f"ETL Amplitude/Offset Changed:, {value}")
 
             # Will only run code if value in constants does not match whats in GUI for Amp or Off AND in Live mode
             # TODO: Make also work in the 'single' acquisition mode.
-            if value != variable.get() and self.mode == 'live':
+            variable_value = variable.get()
+            print("ETL Amplitude/Offset Changed: ", variable_value)
+            if value != variable_value and variable_value != '' and self.mode == 'live':
+                self.resolution_info.ETLConstants[self.resolution][self.mag][laser][etl_name] = variable_value
+                if self.verbose:
+                    print("ETL Amplitude/Offset Changed: ", variable_value)
+                logger.debug(f"ETL Amplitude/Offset Changed:, {variable_value}")
                 # tell parent controller (the device)
                 event_id_name = self.resolution + '_' + self.mag
                 if self.event_ids[event_id_name]:
@@ -199,7 +206,6 @@ class Etl_Popup_Controller(GUI_Controller):
 
                 # Delay feature.
                 self.event_ids[event_id_name] = self.view.popup.after(500, lambda: func(temp))
-            self.resolution_info.ETLConstants[self.resolution][self.mag][laser][etl_name] = variable.get()
 
         return func_laser
 
@@ -211,22 +217,24 @@ class Etl_Popup_Controller(GUI_Controller):
 
         def func_galvo(*args):
             value = self.galvo_setting[galvo_parameter]
-            if self.verbose:
-                print(f"Galvo parameter {galvo_parameter} changed: {value}")
-            logger.debug(f"Galvo parameter {galvo_parameter} changed: {value}")
-            if value != variable.get() and self.mode == 'live':
+            variable_value = variable.get()
+            print(f"Galvo parameter {galvo_parameter} changed: {variable_value}")
+            if value != variable_value and variable_value != '' and self.mode == 'live':
+                self.galvo_setting[galvo_parameter] = variable.get()
+                if self.verbose:
+                    print(f"Galvo parameter {galvo_parameter} changed: {variable_value}")
+                logger.debug(f"Galvo parameter {galvo_parameter} changed: {variable_value}")
                 event_id_name = galvo_parameter
                 try:
                     if self.event_ids[event_id_name]:
                         self.view.popup.after_cancel(self.event_ids[event_id_name])
                 except KeyError:
                     pass
-                if value == '':
-                    # TODO: Why is this check necessary?
-                    value = 0.0
-                temp = {galvo_parameter: float(value)}
+                # if value == '':
+                #     # TODO: Why is this check necessary?
+                #     value = 0.0
+                temp = {galvo_parameter: float(variable_value)}
                 self.event_ids[event_id_name] = self.view.popup.after(500, lambda: func(temp))
-            self.galvo_setting[galvo_parameter] = variable.get()
 
         return func_galvo
     

@@ -196,7 +196,7 @@ def sawtooth(sample_rate=100000,
     samples = np.multiply(float(sample_rate), sweep_time)
     duty_cycle = duty_cycle / 100
     t = np.linspace(0, sweep_time, int(samples))
-    waveform = signal.sawtooth(2 * np.pi * frequency * t + phase, width=duty_cycle)
+    waveform = signal.sawtooth(2 * np.pi * frequency * (t - phase), width=duty_cycle)
     waveform = amplitude * waveform + offset
     return waveform
 

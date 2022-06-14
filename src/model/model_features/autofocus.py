@@ -45,18 +45,21 @@ class Autofocus():
         # Queue
         self.autofocus_frame_queue = Queue()
         self.autofocus_pos_queue = Queue()
+        
+        # target channel
+        self.target_channel = 1
 
     def run(self, *args):
         self.model.experiment.MicroscopeState = args[0]
         self.model.experiment.AutoFocusParameters = args[1]
-        frame_num = self.get_autofocus_frame_num() + 1
+        frame_num = self.get_autofocus_frame_num()
         if frame_num < 1:
             return
         self.model.prepare_acquisition()  # Opens correct shutter and puts all signals to false
         self.focus_pos = args[2]  # Current position
 
         self.model.signal_thread = threading.Thread(target=self.model.run_single_acquisition,
-                                                kwargs={'target_channel': 1, 'snap_func': self.snap_image_with_autofocus},
+                                                kwargs={'target_channel': self.target_channel, 'snap_func': self.snap_image_with_autofocus},
                                                 name='Autofocus Signal')
 
         self.model.data_thread = threading.Thread(target=self.model.run_data_process,
@@ -89,11 +92,6 @@ class Autofocus():
 
         if settings['fine_selected']:
             pos = self.send_autofocus_signals(pos, int(settings['fine_range']), int(settings['fine_step_size']))
-
-        # move stage to the focus position
-        self.model.move_stage({'f': pos}, wait_until_done=True)
-        
-        self.model.snap_image()
         
 
     def send_autofocus_signals(self, f_position, ranges, step_size):
@@ -112,7 +110,7 @@ class Autofocus():
             self.model.move_stage({'f': pos}, wait_until_done=True)
             self.autofocus_frame_queue.put((self.model.frame_id, steps - i, pos))
 
-            self.model.snap_image()
+            self.model.snap_image(self.target_channel)
             pos += step_size
 
         # wait to get the focus position
@@ -123,6 +121,7 @@ class Autofocus():
         self.f_frame_id = -1  #  to indicate if there is one frame need to calculate shannon value, but the image frame isn't ready
         self.frame_num = 10  # any value but not 1
         self.f_pos = self.focus_pos
+        self.target_frame_id = 0 # frame id in the buffer with best focus
         self.plot_data = []
 
     def in_func_data(self, frame_ids=[]):
@@ -143,10 +142,13 @@ class Autofocus():
             # Then need to append each measurement to the entropy_vector.  First column will be the focus position, 
             # second column would be the DCT entropy value.
             # 
-            self.f_frame_id = -1
             if entropy > self.max_entropy:
                 self.max_entropy = entropy
                 self.focus_pos = self.f_pos
+                self.target_frame_id = self.f_frame_id
+
+            self.f_frame_id = -1
+
             if self.frame_num == 1:
                 self.frame_num = 10  # any value but not 1
                 print('***********max shannon entropy:', self.max_entropy, self.focus_pos)
@@ -155,5 +157,8 @@ class Autofocus():
                 break
 
     def end_func_data(self):
+        # send out the best focus frame id
+        self.model.show_img_pipe.send(self.target_frame_id)
+        # send out plot data
         plot_data = np.asarray(self.plot_data)
         self.model.plot_pipe.send(plot_data) # Sending controller plot data

@@ -239,7 +239,6 @@ class Model:
             # First overwrites the model instance of the MicroscopeState
             """
             self.imaging_mode = 'single'
-            print(self.imaging_mode)
             self.experiment.MicroscopeState = kwargs['microscope_info']
             self.experiment.CameraParameters = kwargs['camera_info']
             self.is_save = self.experiment.MicroscopeState['is_save']
@@ -316,6 +315,11 @@ class Model:
                 #             value = self.resolution_info.ETLConstants[self.resolution][self.mag][laser][etl_name]
                 # print(args[1])
 
+            if args[0] == 'galvo':
+                (param, value), = args[1].items()
+                self.experiment.GalvoParameters[param] = value
+
+            self.daq.calculate_all_waveforms(self.experiment.MicroscopeState, self.etl_constants, self.experiment.GalvoParameters)
             self.waveform_queue.put(self.daq.waveform_dict)
 
             # prepare devices based on updated info
@@ -493,10 +497,8 @@ class Model:
         self.autofocus_on = False
         self.is_live = False
 
-        print("Preparing acquisiton...")
-
         # Calculate Waveforms for all channels. Plot in the view.
-        waveform_dict = self.daq.calculate_all_waveforms(self.experiment.MicroscopeState, self.etl_constants)
+        waveform_dict = self.daq.calculate_all_waveforms(self.experiment.MicroscopeState, self.etl_constants, self.experiment.GalvoParameters)
         self.waveform_queue.put(waveform_dict)
 
         # Set Camera Sensor Mode - Must be done before camera is initialized.
@@ -562,9 +564,8 @@ class Model:
                 #                       ((self.configuration.CameraParameters['delay_percent'] +
                 #                         self.configuration.RemoteFocusParameters['remote_focus_l_ramp_falling_percent']) / 100 + 1)
 
-
                 # Update ETL Settings
-                self.daq.update_etl_parameters(microscope_state, channel)
+                self.daq.update_etl_parameters(microscope_state, channel, self.experiment.GalvoParameters)
 
                 # Acquire an Image
                 if snap_func:

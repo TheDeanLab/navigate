@@ -153,9 +153,10 @@ class DAQBase:
                  'camera_waveform': None}
         }
 
-    def calculate_all_waveforms(self, microscope_state, etl_constants):
+    def calculate_all_waveforms(self, microscope_state, etl_constants, galvo_parameters):
         """ Pre-calculates all waveforms necessary for the acquisition and organizes in a dictionary format.
         """
+
         # Imaging Mode = 'high' or 'low'
         imaging_mode = microscope_state['resolution_mode']
 
@@ -173,30 +174,40 @@ class DAQBase:
                 # Get the Waveform Parameters - Assumes ETL Delay < Camera Delay.  Should Assert.
                 laser = channel['laser']
                 exposure_time = channel['camera_exposure_time'] / 1000
-                sweep_time = exposure_time + exposure_time * ((self.camera_delay + self.etl_ramp_falling) / 100)
+                self.sweep_time = exposure_time + exposure_time * ((self.camera_delay_percent + self.etl_ramp_falling) / 100)
+
+                # ETL Parameters
                 etl_amplitude = float(etl_constants.ETLConstants[imaging_mode][zoom][laser]['amplitude'])
                 etl_offset = float(etl_constants.ETLConstants[imaging_mode][zoom][laser]['offset'])
+
+                # Galvo Parameters
+                galvo_amplitude = float(galvo_parameters['galvo_l_amplitude'])
+                galvo_offset = float(galvo_parameters['galvo_l_offset'])
+                galvo_frequency = 25+12.5
+
+                print("Galvo Amp:", galvo_amplitude, "Galvo Offset:", galvo_offset)
 
                 # Calculate the Waveforms
                 self.waveform_dict[channel_key]['etl_waveform'] = tunable_lens_ramp_v2(sample_rate=self.sample_rate,
                                                                                        exposure_time=exposure_time,
-                                                                                       sweep_time=sweep_time,
+                                                                                       sweep_time=self.sweep_time,
                                                                                        etl_delay=self.etl_delay,
-                                                                                       camera_delay=self.camera_delay,
+                                                                                       camera_delay=self.camera_delay_percent,
                                                                                        fall=self.etl_ramp_falling,
                                                                                        amplitude=etl_amplitude,
                                                                                        offset=etl_offset)
 
                 self.waveform_dict[channel_key]['galvo_waveform'] = sawtooth(sample_rate=self.sample_rate,
-                                                                             sweep_time=sweep_time,
-                                                                             frequency=200,
-                                                                             amplitude=0,
-                                                                             offset=0)
+                                                                             sweep_time=self.sweep_time,
+                                                                             frequency=galvo_frequency,
+                                                                             amplitude=galvo_amplitude,
+                                                                             offset=galvo_offset,
+                                                                             phase=self.camera_delay_percent*exposure_time/100)
 
                 self.waveform_dict[channel_key]['camera_waveform'] = camera_exposure(sample_rate=self.sample_rate,
-                                                                                     sweep_time=sweep_time,
+                                                                                     sweep_time=self.sweep_time,
                                                                                      exposure=exposure_time,
-                                                                                     camera_delay=self.camera_delay)
+                                                                                     camera_delay=self.camera_delay_percent)
 
         return self.waveform_dict
 
@@ -227,7 +238,7 @@ class DAQBase:
         # Write the waveforms to the tasks.
         self.write_waveforms_to_tasks()
 
-    def update_etl_parameters(self, microscope_state, channel):
+    def update_etl_parameters(self, microscope_state, channel, galvo_parameters):
         """
         # Update the ETL parameters according to the zoom and excitation wavelength.
         """
@@ -260,12 +271,11 @@ class DAQBase:
                            or (self.prev_etl_r_offset != self.etl_r_offset)
 
         if update_waveforms:
-            self.calculate_all_waveforms(microscope_state, self.etl_constants)
+            self.calculate_all_waveforms(microscope_state, self.etl_constants, galvo_parameters)
             self.prev_etl_r_amplitude = self.etl_r_amplitude
             self.prev_etl_r_offset = self.etl_r_offset
             self.prev_etl_l_amplitude = self.etl_l_amplitude
             self.prev_etl_l_offset = self.etl_l_offset
-            # self.model.plot_waveform_pipe.send(waveform_dict)
 
     def create_etl_waveform(self):
         """

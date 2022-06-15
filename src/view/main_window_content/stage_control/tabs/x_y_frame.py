@@ -129,6 +129,37 @@ class x_y_frame(ttk.Frame):
         )
 
 
+        # #WASD Movement Method
+        # def WASD_movmement(temp_bool):
+        #     # if (temp_bool):
+        #     #     def key_pressed(event):
+        #     #         label1['text'] = label1.cget("text")+event.char
+        #     #     root.bind("<Key>", key_pressed)
+        #     # else:
+        #     #     root.bind("<Key>", lambda x : None)
+        #     pass
+
+        # #Toggle Method
+        # button_is_clicked = False
+        # def Toggle():
+        #     global button_is_clicked
+        #     if (button_is_clicked):
+        #         WASD_movmement(False)
+        #         button_is_clicked = False
+        #         x_y_frame.wasd_btn.config(text='WASD Disabled')
+        #     else:
+        #         WASD_movmement(True)
+        #         button_is_clicked = True
+        #         x_y_frame.wasd_btn.config(text='WASD Enabled')
+
+        # #WASD Enable/Disable Button
+        # x_y_frame.wasd_btn = ttk.Button(
+        #     x_y_frame,
+        #     text="WASD Enabled",
+        #     command=Toggle
+        # )
+
+
 
 
 

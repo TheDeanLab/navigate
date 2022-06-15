@@ -61,6 +61,12 @@ class camera_tab(ttk.Frame):
         self.cam_image = ttk.Frame(self)
         self.cam_image.grid(row=0, column=0, sticky=NSEW)
 
+        # #Mouse Hovering Test
+        # self.cam_image.bind("<Enter>", self.on_enter)
+        # self.cam_image.bind("<Leave>", self.on_leave)
+
+
+
         # TODO decide on height, width original was 800x800. 4x binning -> 2048 -> 512
         self.canvas = tk.Canvas(self.cam_image, width=512, height=512)
         self.canvas.grid(row=0, column=0, sticky=NSEW, padx=5, pady=5)
@@ -74,3 +80,9 @@ class camera_tab(ttk.Frame):
         #  Frame for scale settings/pallete color
         self.scale_palette = palette(self)
         self.scale_palette.grid(row=0, column=1, sticky=NSEW, padx=5, pady=5)
+    
+
+    # def on_enter(self, event):
+    #     print("Mouse has entered")
+    # def on_leave(self, event):
+    #     print("Mouse has left")

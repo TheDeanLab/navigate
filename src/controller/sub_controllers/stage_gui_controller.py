@@ -34,6 +34,7 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 from controller.sub_controllers.widget_functions import validate_wrapper
 from controller.sub_controllers.gui_controller import GUI_Controller
+from controller.sub_controllers.camera_view_controller import Camera_View_Controller
 import logging
 from pathlib import Path
 # Logger Setup
@@ -44,7 +45,7 @@ logger = logging.getLogger(p)
 class Stage_GUI_Controller(GUI_Controller):
     def __init__(self, view, parent_controller, verbose=False, configuration_controller=None):
         super().__init__(view, parent_controller, verbose)
-
+        
         self.event_id = {
             'x': None,
             'y': None,

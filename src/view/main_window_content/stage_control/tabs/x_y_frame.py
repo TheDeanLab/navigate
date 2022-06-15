@@ -116,10 +116,10 @@ class x_y_frame(ttk.Frame):
         #WASD Movement Method
         def WASD_movmement(temp_bool):
             if (temp_bool):
-                # def key_pressed(event):
-                #     print(f'Key pressed: {event.char}')
-                # root.bind("<Key>", key_pressed)
-                pass
+                 def key_pressed(event):
+                     print(f'Key pressed: {event.char}')
+                     x_y_frame.bind("<Key>", key_pressed)
+            pass
 
         #WASD Enable/Disable Button
         x_y_frame.wasd_btn = ttk.Button(
@@ -170,5 +170,8 @@ class x_y_frame(ttk.Frame):
         return x_y_frame.increment_box
 
     def get_buttons(x_y_frame):
-        names = ['up_x_btn', 'down_x_btn', 'up_y_btn', 'down_y_btn', 'zero_xy_btn']
+        names = ['up_x_btn', 'down_x_btn', 'up_y_btn', 'down_y_btn', 'zero_xy_btn', 'wasd_btn']
         return {k: getattr(x_y_frame, k) for k in names}
+
+    def wasd_char(x_y_frame):
+        return 

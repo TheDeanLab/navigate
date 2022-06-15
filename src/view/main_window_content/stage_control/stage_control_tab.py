@@ -126,7 +126,7 @@ class stage_control_tab(ttk.Frame):
         for axis in ['xy', 'z', 'theta', 'f']:
             temp[axis+'_step'] = getattr(stage_control_tab, axis+'_frame').get_widget()
         return temp
-
+    
     def get_variables(stage_control_tab):
         temp = stage_control_tab.get_widgets()
         return {k: temp[k].get_variable() for k in temp}
@@ -143,3 +143,4 @@ class stage_control_tab(ttk.Frame):
             temp = getattr(stage_control_tab, axis+'_frame').get_buttons()
             result.update({k+'_'+axis+'_btn': temp[k] for k in temp})
         return result
+  

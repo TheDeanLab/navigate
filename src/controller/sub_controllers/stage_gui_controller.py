@@ -71,9 +71,14 @@ class Stage_GUI_Controller(GUI_Controller):
             'theta': 10000,
             'f': 10000
         }
+        self.canvas = self.view
 
+        #default button setting
+        self.wasd = 'disabled'
+        
         # variables
         self.widget_vals = self.view.get_variables()
+        
      
         # gui event bind
         buttons = self.view.get_buttons()
@@ -86,12 +91,16 @@ class Stage_GUI_Controller(GUI_Controller):
                 buttons[k].configure(
                     command=self.xy_zero_btn_handler()
                 )
-            else:
+            elif k[:4] == "wasd":
                 buttons[k].configure(
-                    command=self.zero_btn_handler(k[5:-4])
+                    command = self.xy_zero_btn_handler() # will change but placeholder for now
+                    #need a function that does both up and down depending on arrow key
                 )
-        
-        for axis in ['x', 'y', 'z', 'theta', 'f', "WASD"]:
+            #else:
+                #buttons[k].configure(
+                    #command=self.zero_btn_handler(k[5:-4])
+                #
+        for axis in ['x', 'y', 'z', 'theta', 'f']:
             # add event bind to position entry variables
             self.widget_vals[axis].trace_add('write', self.position_callback(axis))
 
@@ -204,6 +213,8 @@ class Stage_GUI_Controller(GUI_Controller):
                 temp = self.position_max[axis]
             position_val.set(temp)
         return handler
+    def test(self, event):
+        return event.keysym
 
     def down_btn_handler(self, axis):
         """
@@ -229,7 +240,8 @@ class Stage_GUI_Controller(GUI_Controller):
                 temp = self.position_min[axis]
             position_val.set(temp)
         return handler
-
+            
+    
     def zero_btn_handler(self, axis):
         """
         # This function generates command functions according to axis

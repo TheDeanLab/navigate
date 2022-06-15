@@ -64,7 +64,7 @@ class SelfLockThread(threading.Thread):
             try:
                 self._target(*self._args, **self._kwargs)
             except Exception as e:
-                print('thread ended because of exception!: ', e)
+                print(f'{self.name} thread ended because of exception!: {e}')
             finally:
                 # print('thread ended!!!')
                 pass
@@ -107,7 +107,7 @@ class SynchronizedThreadPool:
             callback=callback,
             cbArgs=cbArgs,
             cbKargs=cbKargs)
-        taskThread = SelfLockThread(None, task, None, args, kwargs, daemon=True)
+        taskThread = SelfLockThread(None, task, resourceName, args, kwargs, daemon=True)
         taskThread.start()
         return taskThread
 

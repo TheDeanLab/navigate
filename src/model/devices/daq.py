@@ -183,9 +183,10 @@ class DAQBase:
                 # Galvo Parameters
                 galvo_amplitude = float(galvo_parameters['galvo_l_amplitude'])
                 galvo_offset = float(galvo_parameters['galvo_l_offset'])
-                galvo_frequency = 25+12.5
 
-                print("Galvo Amp:", galvo_amplitude, "Galvo Offset:", galvo_offset)
+                # We need the camera to experience N sweeps of the galvo. As such,
+                # frequency should divide evenly into exposure_time
+                galvo_frequency = 0.5/exposure_time
 
                 # Calculate the Waveforms
                 self.waveform_dict[channel_key]['etl_waveform'] = tunable_lens_ramp_v2(sample_rate=self.sample_rate,
@@ -445,7 +446,7 @@ class NIDAQ(DAQBase):
     def __del__(self):
         pass
 
-    def create_camera_task(self):
+    def create_camera_task(self, exposure_time, line_interval):
         """
         # Set up the camera trigger
         # Calculate camera high time and initial delay.
@@ -453,8 +454,8 @@ class NIDAQ(DAQBase):
         """
         # Configure camera triggers
         camera_trigger_out_line = self.model.DAQParameters['camera_trigger_out_line']
-        self.camera_high_time = self.camera_pulse_percent * 0.01 * self.sweep_time
-        self.camera_delay = self.camera_delay_percent * 0.01 * self.sweep_time
+        self.camera_high_time = (self.camera_pulse_percent/100) * (exposure_time/1000)  # self.sweep_time
+        self.camera_delay = (self.camera_delay_percent / 100) * (exposure_time/1000)  # * 0.01 * self.sweep_time
 
         self.camera_trigger_task.co_channels.add_co_pulse_chan_time(camera_trigger_out_line,
                                                                     high_time=self.camera_high_time,
@@ -508,7 +509,7 @@ class NIDAQ(DAQBase):
         self.camera_trigger_task.close()
         self.master_trigger_task.close()
 
-    def prepare_acquisition(self, channel_key):
+    def prepare_acquisition(self, channel_key, exposure_time, line_interval):
         """
         # Initialize the nidaqmx tasks.
         """
@@ -518,7 +519,7 @@ class NIDAQ(DAQBase):
 
         # Specify ports, timing, and triggering
         self.create_master_trigger_task()
-        self.create_camera_task()
+        self.create_camera_task(exposure_time, line_interval)
         self.create_galvo_etl_task()
 
         # Calculate the waveforms and start tasks.

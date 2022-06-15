@@ -95,8 +95,6 @@ class Etl_Popup_Controller(GUI_Controller):
         """
         self.resolution_info = setting_dict
         self.galvo_setting = galvo_setting
-        print('GALVO SETTINGS')
-        print(self.galvo_setting)
         self.widgets['Mode'].widget['values'] = list(setting_dict.ETLConstants.keys())
         print(self.widgets['Mode'].widget['values'])
         self.widgets['Mode'].widget['state'] = 'readonly'

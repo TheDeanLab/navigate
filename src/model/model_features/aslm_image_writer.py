@@ -54,6 +54,7 @@ class ImageWriter:
         self.model = model
         self.save_directory = self.model.experiment.Saving['save_directory']
         self.num_of_channels = len(self.model.experiment.MicroscopeState['channels'].keys())
+        self.data_buffer = self.model.data_buffer
         self.current_time_point = 0
 
     def __del__(self):
@@ -65,6 +66,8 @@ class ImageWriter:
         If there is more than one channel there will be that many frames ie if there are 3 channels selected there should be three frames.
         Making the assumption there is only one frame per channel on a single acquisition
         '''
+
+        # Getting 
 
         # Getting allocation parameters for zarr array
         xsize = self.model.experiment.CameraParameters['x_pixels']
@@ -98,7 +101,7 @@ class ImageWriter:
         
         # Copy data to Zarr
         for frame in frame_ids:
-            
+
 
 
 

@@ -51,10 +51,19 @@ class ImageWriter:
     def __init__(self, model):
         self.model = model
         self.save_directory = self.model.experiment.Saving['save_directory']
+        self.num_of_channels = len(self.model.experiment.MicroscopeState['channels'].keys())
         self.current_time_point = 0
 
     def __del__(self):
         pass
+
+    def write_zarr(self, frame_id):
+        '''
+        Will take in camera frames and move data fom SharedND Array into a Zarr Array.
+        If there is more than one channel there will be that many frames ie if there are 3 channels selected there should be three frames
+        '''
+        
+
 
     def write_raw(self, image):
         pass

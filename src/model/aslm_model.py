@@ -104,6 +104,9 @@ class Model:
             self.configuration.Devices['lasers'] = 'SyntheticLasers'
 
         # Move device initialization steps to multiple threads
+        '''
+        Each of the below represents self.camera or the respective device
+        '''
         threads_dict = {
             'filter_wheel': ResultThread(target=startup_functions.start_filter_wheel,
                                          args=(self.configuration,self.verbose,)).start(),
@@ -248,7 +251,8 @@ class Model:
             if self.is_save:
                 self.experiment.Saving = kwargs['saving_info']
                 image_writer = ImageWriter(self)
-                self.run_data_process(channel_num, data_func=image_writer.write_tiff)
+                # self.run_data_process(channel_num, data_func=image_writer.write_tiff)
+                self.run_data_process(channel_num, data_func=image_writer.write_zarr)
             else:
                 self.run_data_process(channel_num)
             self.end_acquisition()
@@ -410,12 +414,14 @@ class Model:
 
             wait_num = 10
 
+            # May need a separate save_func as saving is done before display and other analysis may be after display
+            if data_func:
+                data_func(frame_ids)
+
             # show image
             self.logger.debug(f'sent through pipe{frame_ids[0]}')
             self.show_img_pipe.send(frame_ids[0])
 
-            if data_func:
-                data_func(frame_ids)
 
             acquired_frame_num += len(frame_ids)
             if count_frame and acquired_frame_num >= num_of_frames:

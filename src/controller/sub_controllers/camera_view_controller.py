@@ -122,7 +122,7 @@ class Camera_View_Controller(GUI_Controller):
         print(count)
     
     
-    def get_count () :
+    def get_count(self):
         global count
         return count
     

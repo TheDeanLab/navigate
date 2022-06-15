@@ -36,6 +36,7 @@ from controller.sub_controllers.gui_controller import GUI_Controller
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg)
 from matplotlib.figure import Figure
 import logging
+import numpy as np
 from pathlib import Path
 # Logger Setup
 p = __name__.split(".")[0]
@@ -82,3 +83,47 @@ class Waveform_Tab_Controller(GUI_Controller):
         self.view.canvas = FigureCanvasTkAgg(self.view.fig, master=self.view)
         self.view.canvas.get_tk_widget().pack()
 
+    def plot_waveforms2(self, waveform_dict, sample_rate):
+        from tkinter import NSEW
+        self.view.fig = Figure(figsize=(6, 6), dpi=100)
+        self.view.canvas = FigureCanvasTkAgg(self.view.fig, master=self.view)
+        self.view.canvas.draw()
+
+        self.view.plot_etl = self.view.fig.add_subplot(211)
+        self.view.plot_galvo = self.view.fig.add_subplot(212)
+
+        self.view.plot_etl.clear()
+        self.view.plot_galvo.clear()
+
+        last_etl = 0
+        last_galvo = 0
+        last_camera = 0
+        for k in waveform_dict.keys():
+            if waveform_dict[k]['etl_waveform'] is None:
+                continue
+            etl_waveform = waveform_dict[k]['etl_waveform']
+            galvo_waveform = waveform_dict[k]['galvo_waveform']
+            camera_waveform = waveform_dict[k]['camera_waveform']
+            self.view.plot_etl.plot(np.arange(len(etl_waveform))/sample_rate + last_etl, etl_waveform, label=k)
+            self.view.plot_galvo.plot(np.arange(len(galvo_waveform))/sample_rate + last_galvo, galvo_waveform, label=k)
+            self.view.plot_etl.plot(np.arange(len(camera_waveform))/sample_rate + last_camera, camera_waveform, c='k', linestyle='--')
+            self.view.plot_galvo.plot(np.arange(len(camera_waveform)) / sample_rate + last_camera, camera_waveform, c='k', linestyle='--')
+            last_etl += len(etl_waveform)/sample_rate
+            last_galvo += len(galvo_waveform)/sample_rate
+            last_camera += len(camera_waveform)/sample_rate
+
+        self.view.plot_etl.set_title('ETL Waveform')
+        self.view.plot_galvo.set_title('Galvo Waveform')
+
+        self.view.plot_etl.set_xlabel('Duration (s)')
+        self.view.plot_galvo.set_xlabel('Duration (s)')
+
+        self.view.plot_etl.set_ylabel('Amplitude')
+        self.view.plot_galvo.set_ylabel('Amplitude')
+
+        self.view.plot_etl.legend()
+
+        self.view.fig.tight_layout()
+
+        self.view.canvas.draw_idle()
+        self.view.canvas.get_tk_widget().grid(row=5, column=0, columnspan=3, sticky=(NSEW), padx=(5,5), pady=(5,5))

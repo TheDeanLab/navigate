@@ -1,6 +1,4 @@
 """
-ASLM Controller.
-
 Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
@@ -36,6 +34,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #  Standard Library Imports
 import tkinter
 import multiprocessing as mp
+import time
+import threading
 
 # Third Party Imports
 
@@ -73,6 +73,24 @@ p = __name__.split(".")[0]
 logger = logging.getLogger(p)
 
 class ASLM_controller:
+    """ ASLM Controller
+
+    Parameters
+    ----------
+    root : Tk top-level widget.
+        Tk.tk GUI instance.
+    configuration_path : string
+        Path to the configuration yaml file. Provides global microscope configuration parameters.
+    experiment_path : string
+        Path to the experiment yaml file. Provides experiment-specific microscope configuration.
+    etl_constants_path : string
+        Path to the etl constants yaml file. Provides magnification and wavelength-specific parameters.
+    USE_GPU : Boolean
+        Flag for utilizing CUDA functionality.
+    *args :
+        Command line input arguments for non-default file paths or using synthetic hardware modes.
+    """
+
     def __init__(
             self,
             root,
@@ -92,13 +110,16 @@ class ASLM_controller:
         # Create a thread pool
         self.threads_pool = SynchronizedThreadPool()
 
+        self.waveform_queue = mp.Queue()
+
         # Initialize the Model
         self.model = ObjectInSubprocess(Model,
                                         USE_GPU,
                                         args,
                                         configuration_path=configuration_path,
                                         experiment_path=experiment_path,
-                                        etl_constants_path=etl_constants_path)
+                                        etl_constants_path=etl_constants_path,
+                                        waveform_queue=self.waveform_queue)
         logger.debug(f"Spec - Configuration Path: {configuration_path}")
         logger.debug(f"Spec - Experiment Path: {experiment_path}")
         logger.debug(f"Spec - ETL Constants Path: {etl_constants_path}")
@@ -153,6 +174,8 @@ class ASLM_controller:
         self.waveform_tab_controller = Waveform_Tab_Controller(self.view.camera_waveform.waveform_tab,
                                                                self,
                                                                self.verbose)
+        t = threading.Thread(target=self.update_waveforms)
+        t.start()
 
         # initialize menu bar
         self.initialize_menus()
@@ -176,7 +199,7 @@ class ASLM_controller:
         # Wire up show image pipe
         self.show_img_pipe_parent, self.show_img_pipe_child = mp.Pipe()
         self.model.set_show_img_pipe(self.show_img_pipe_child)
-        
+
         # Setting up Pipe for Autofocus Plot
         self.plot_pipe_controller, self.plot_pipe_model = mp.Pipe(duplex=True)
         self.model.set_autofocus_plot_pipe(self.plot_pipe_model)
@@ -187,24 +210,37 @@ class ASLM_controller:
         self.update_buffer()
 
     def update_buffer(self):
-        """
-        # Update the buffer size according to the current camera dimensions listed in the experimental parameters
+        """ Update the buffer size according to the camera dimensions listed in the experimental parameters.
+
+        Returns
+        -------
+        self.img_width : int
+            Number of x_pixels from microscope configuration file.
+        self.image_height : int
+            Number of y_pixels from microscope configuration file.
+        self.data_buffer : SharedNDArray
+            Pre-allocated shared memory array. Size dictated by x_pixels, y_pixels, an number_of_frames in
+            configuration file.
         """
         img_width = int(self.experiment.CameraParameters['x_pixels'])
         img_height = int(self.experiment.CameraParameters['y_pixels'])
         if img_width == self.img_width and img_height == self.img_height:
             return
 
-        self.data_buffer = [SharedNDArray(
-            shape=(img_height, img_width),
-            dtype='uint16') for i in range(self.configuration.SharedNDArray['number_of_frames'])]
+        self.data_buffer = [SharedNDArray(shape=(img_height, img_width),
+                                          dtype='uint16') for i in range(self.configuration.SharedNDArray['number_of_frames'])]
         self.model.set_data_buffer(self.data_buffer, img_width, img_height)
         self.img_width = img_width
         self.img_height = img_height
 
     def initialize_cam_view(self, configuration_controller):
-        """
-        # Populate widgets with necessary data from config file via config controller. For the entire view tab.
+        """ Populate view tab.
+        Populate widgets with necessary data from config file via config controller. For the entire view tab.
+
+        Parameters
+        -------
+        configuration_controller : class
+            Camera view sub-controller.
         """
         # Populating Min and Max Counts
         minmax_values = [110, 5000]
@@ -213,16 +249,20 @@ class ASLM_controller:
         self.camera_view_controller.initialize('image', image_metrics)
 
     def initialize_menus(self):
-        """
-        # this function defines all the menus in the menubar
+        """ Initialize menus
+        This function defines all the menus in the menubar
+
+        Returns
+        -------
+        configuration_controller : class
+            Camera view sub-controller.
+
         """
         def new_experiment():
             self.populate_experiment_setting(self.default_experiment_file)
 
         def load_experiment():
-            filename = filedialog.askopenfilenames(
-                defaultextension='.yml', filetypes=[
-                    ('Yaml files', '*.yml')])
+            filename = filedialog.askopenfilenames(defaultextension='.yml', filetypes=[('Yaml files', '*.yml')])
             if not filename:
                 return
             self.populate_experiment_setting(filename[0])
@@ -243,12 +283,13 @@ class ASLM_controller:
             if hasattr(self, 'etl_controller'):
                 self.etl_controller.showup()
                 return
-            etl_setting_popup = remote_popup(self.view)
+            etl_setting_popup = remote_popup(self.view)  # TODO: can we rename remote_popup to etl_popup?
             self.etl_controller = Etl_Popup_Controller(etl_setting_popup,
                                                        self,
                                                        self.verbose,
                                                        self.etl_setting,
-                                                       self.etl_constants_path)
+                                                       self.etl_constants_path,
+                                                       self.experiment.GalvoParameters)
             self.etl_controller.set_experiment_values(self.resolution_value.get())
             self.etl_controller.set_mode(self.acquire_bar_controller.mode)
 
@@ -438,8 +479,6 @@ class ASLM_controller:
             # Creates a thread and uses it to call the model to move stage
             """
             self.threads_pool.createThread('stage', self.move_stage, args=({args[1] + '_abs': args[0]},))
-            # temp = ({args[1] + '_abs': args[0]},)
-            # self.move_stage(args=temp)
 
         elif command == 'move_stage_and_update_info':
             """
@@ -481,8 +520,7 @@ class ASLM_controller:
             self.threads_pool.createThread('model', lambda: self.model.run_command('update_setting', *args))
 
         elif command == 'autofocus':
-            self.threads_pool.createThread(
-                'camera', self.capture_autofocus_image)
+            self.threads_pool.createThread('camera', self.capture_autofocus_image)
             
         elif command == 'acquire_and_save':
             if not self.prepare_acquire_data():
@@ -622,6 +660,14 @@ class ASLM_controller:
     
     def move_stage(self, args):
         self.model.move_stage(args)
+
+    def update_waveforms(self):
+        while self.model is not None:
+            while not self.waveform_queue.empty():
+                waveform_dict = self.waveform_queue.get()
+                self.waveform_tab_controller.plot_waveforms2(waveform_dict, self.configuration.DAQParameters['sample_rate'])
+            time.sleep(0.001)
+
 
 
 if __name__ == '__main__':

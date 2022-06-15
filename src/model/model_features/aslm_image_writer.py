@@ -48,10 +48,10 @@ p = __name__.split(".")[0]
 logger = logging.getLogger(p)
 
 class ImageWriter:
-    def __init__(self, configuration, experiment, verbose=False):
-        self.configuration = configuration
-        self.experiment = experiment
-        self.verbose = verbose
+    def __init__(self, model):
+        self.model = model
+        self.save_directory = self.model.experiment.Saving['save_directory']
+        self.current_time_point = 0
 
     def __del__(self):
         pass
@@ -65,16 +65,17 @@ class ImageWriter:
     def write_h5(self, image):
         pass
 
-    def write_tiff(self, frame_ids, data_buffer, current_channel, current_time_point, save_directory):
+    def write_tiff(self, frame_ids):
+        current_channel = self.model.current_channel
         for idx in frame_ids:
-            image_name = self.generate_image_name(current_channel, current_time_point)
-            imsave(os.path.join(save_directory, image_name), data_buffer[idx])
+            image_name = self.generate_image_name(current_channel)
+            imsave(os.path.join(self.save_directory, image_name), self.model.data_buffer[idx])
 
-    def generate_image_name(self, current_channel, current_time_point):
+    def generate_image_name(self, current_channel):
         """
         #  Generates a string for the filename
         #  e.g., CH00_000000.tif
         """
-        image_name = "CH0" + str(current_channel) + "_" + str(current_time_point).zfill(6) + ".tif"
-        current_time_point += 1
+        image_name = "CH0" + str(current_channel) + "_" + str(self.current_time_point).zfill(6) + ".tif"
+        self.current_time_point += 1
         return image_name

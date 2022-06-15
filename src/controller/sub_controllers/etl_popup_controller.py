@@ -46,16 +46,17 @@ logger = logging.getLogger(p)
 
 class Etl_Popup_Controller(GUI_Controller):
 
-    def __init__(self, view, parent_controller, verbose=False, etl_setting=None, etl_file_name=None):
+    def __init__(self, view, parent_controller, verbose=False, etl_setting=None, etl_file_name=None, galvo_setting=None):
         super().__init__(view, parent_controller, verbose)
 
         self.resolution_info = None
+        self.experiment = None
         self.etl_file_name = etl_file_name
         # get mode and mag widgets
         self.widgets = self.view.get_widgets()
 
         self.variables = self.view.get_variables()
-        self.lasers = ['488nm', '562nm', '642nm']
+        self.lasers = ['488nm', '562nm', '642nm']  # TODO: This should pull from configuration YAML
         self.resolution = None
         self.mag = None
         self.in_initialize = True
@@ -76,6 +77,9 @@ class Etl_Popup_Controller(GUI_Controller):
             self.variables[laser + ' Amp'].trace_add('write', self.update_etl_setting(laser+' Amp', laser, 'amplitude'))
             self.variables[laser + ' Off'].trace_add('write', self.update_etl_setting(laser+' Off', laser, 'offset'))
 
+        self.variables['Galvo Amp'].trace_add('write', self.update_galvo_setting('Galvo Amp', 'galvo_l_amplitude'))
+        self.variables['Galvo Off'].trace_add('write', self.update_galvo_setting('Galvo Off', 'galvo_l_offset'))
+
         self.view.get_buttons()['Save'].configure(command=self.save_etl_info)
 
         # add saving function to the function closing the window
@@ -83,14 +87,18 @@ class Etl_Popup_Controller(GUI_Controller):
                                  combine_funcs(self.save_etl_info, self.view.popup.dismiss,
                                                lambda: delattr(self.parent_controller, 'etl_controller')))
         
-        self.initialize(etl_setting)
+        self.initialize(etl_setting, galvo_setting)
 
-    def initialize(self, setting_dict):
+    def initialize(self, setting_dict, galvo_setting):
         """
         # initialize widgets with data
         """
         self.resolution_info = setting_dict
+        self.galvo_setting = galvo_setting
+        print('GALVO SETTINGS')
+        print(self.galvo_setting)
         self.widgets['Mode'].widget['values'] = list(setting_dict.ETLConstants.keys())
+        print(self.widgets['Mode'].widget['values'])
         self.widgets['Mode'].widget['state'] = 'readonly'
         self.widgets['Mag'].widget['state'] = 'readonly'
 
@@ -98,8 +106,19 @@ class Etl_Popup_Controller(GUI_Controller):
         for laser in self.lasers:
             self.widgets[laser + ' Amp'].widget.configure(from_=0)
             self.widgets[laser + ' Amp'].widget.configure(increment=0.01)
+            self.widgets[laser + ' Amp'].widget.set_precision(-2)
             self.widgets[laser + ' Off'].widget.configure(from_=0)
             self.widgets[laser + ' Off'].widget.configure(increment=0.01)
+            self.widgets[laser + ' Off'].widget.set_precision(-2)
+
+        self.widgets['Galvo Amp'].widget.configure(from_=-5)
+        self.widgets['Galvo Amp'].widget.configure(to=5)
+        self.widgets['Galvo Amp'].widget.configure(increment=0.01)
+        self.widgets['Galvo Amp'].widget.set_precision(-2)
+        self.widgets['Galvo Off'].widget.configure(from_=-5)
+        self.widgets['Galvo Off'].widget.configure(to=5)
+        self.widgets['Galvo Off'].widget.configure(increment=0.01)
+        self.widgets['Galvo Off'].widget.set_precision(-2)
 
     def set_experiment_values(self, resolution_value):
         """
@@ -146,6 +165,9 @@ class Etl_Popup_Controller(GUI_Controller):
             self.variables[laser + ' Amp'].set(self.resolution_info.ETLConstants[self.resolution][self.mag][laser]['amplitude'])
             self.variables[laser + ' Off'].set(self.resolution_info.ETLConstants[self.resolution][self.mag][laser]['offset'])
 
+        self.variables['Galvo Amp'].set(self.galvo_setting['galvo_l_amplitude'])
+        self.variables['Galvo Off'].set(self.galvo_setting['galvo_l_offset'])
+
         if not self.in_initialize:
             # update resolution value in central controller (menu)
             self.parent_controller.resolution_value.set('high' if self.resolution == 'high' else self.mag)
@@ -162,13 +184,16 @@ class Etl_Popup_Controller(GUI_Controller):
         # BUG Upon startup this will always run 0.63x, and when changing magnification it will run 0.63x before whatever mag is selected
         def func_laser(*args):
             value = self.resolution_info.ETLConstants[self.resolution][self.mag][laser][etl_name]
-            if self.verbose:
-                print("ETL Amplitude/Offset Changed: ", value)
-            logger.debug(f"ETL Amplitude/Offset Changed:, {value}")
 
             # Will only run code if value in constants does not match whats in GUI for Amp or Off AND in Live mode
             # TODO: Make also work in the 'single' acquisition mode.
-            if value != variable.get() and self.mode == 'live':
+            variable_value = variable.get()
+            print("ETL Amplitude/Offset Changed: ", variable_value)
+            if value != variable_value and variable_value != '' and self.mode == 'live':
+                self.resolution_info.ETLConstants[self.resolution][self.mag][laser][etl_name] = variable_value
+                if self.verbose:
+                    print("ETL Amplitude/Offset Changed: ", variable_value)
+                logger.debug(f"ETL Amplitude/Offset Changed:, {variable_value}")
                 # tell parent controller (the device)
                 event_id_name = self.resolution + '_' + self.mag
                 if self.event_ids[event_id_name]:
@@ -180,10 +205,38 @@ class Etl_Popup_Controller(GUI_Controller):
                 }
 
                 # Delay feature.
-                self.event_ids[event_id_name] = self.view.popup.after(250, lambda: func(temp))
-            self.resolution_info.ETLConstants[self.resolution][self.mag][laser][etl_name] = variable.get()
+                self.event_ids[event_id_name] = self.view.popup.after(500, lambda: func(temp))
 
         return func_laser
+
+    def update_galvo_setting(self, name, galvo_parameter):
+        variable = self.variables[name]
+
+        def func(temp):
+            self.parent_controller.execute('update_setting', 'galvo', temp)
+
+        def func_galvo(*args):
+            value = self.galvo_setting[galvo_parameter]
+            variable_value = variable.get()
+            print(f"Galvo parameter {galvo_parameter} changed: {variable_value}")
+            if value != variable_value and variable_value != '' and self.mode == 'live':
+                self.galvo_setting[galvo_parameter] = variable.get()
+                if self.verbose:
+                    print(f"Galvo parameter {galvo_parameter} changed: {variable_value}")
+                logger.debug(f"Galvo parameter {galvo_parameter} changed: {variable_value}")
+                event_id_name = galvo_parameter
+                try:
+                    if self.event_ids[event_id_name]:
+                        self.view.popup.after_cancel(self.event_ids[event_id_name])
+                except KeyError:
+                    pass
+                # if value == '':
+                #     # TODO: Why is this check necessary?
+                #     value = 0.0
+                temp = {galvo_parameter: float(variable_value)}
+                self.event_ids[event_id_name] = self.view.popup.after(500, lambda: func(temp))
+
+        return func_galvo
     
     def save_etl_info(self):
         """

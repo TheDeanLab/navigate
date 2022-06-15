@@ -75,7 +75,7 @@ class CameraBase:
         self.camera_exposure_time = self.model.CameraParameters['exposure_time'] / 1000
         self.camera_display_live_subsampling = self.model.CameraParameters['display_live_subsampling']
         self.camera_display_acquisition_subsampling = self.model.CameraParameters['display_acquisition_subsampling']
-        self.lightsheet_rolling_shutter_width = self.model.CameraParameters['lightsheet_rolling_shutter_width']
+
 
 
     def __del__(self):
@@ -144,6 +144,7 @@ class SyntheticCamera(CameraBase):
 
         self._mean_background_count = 100.0
         self._noise_sigma = noise_model.compute_noise_sigma(Ib=self._mean_background_count)
+        self.blah = noise_model.compute_noise_sigma
 
         self.camera_controller = SyntheticCameraController()
         
@@ -354,7 +355,7 @@ class HamamatsuOrca(CameraBase):
             print('Camera mode not supported')
             logger.info("Camera mode not supported")
 
-        print("Camera Sensor Mode:", self.camera_controller.get_property_value("sensor_mode"))
+        # print("Camera Sensor Mode:", self.camera_controller.get_property_value("sensor_mode"))
 
     def set_readout_direction(self, mode):
         if mode == 'Top-to-Bottom':
@@ -375,24 +376,16 @@ class HamamatsuOrca(CameraBase):
     #     # TODO: Figure out how to do this.  I believe it is dictated by the exposure time and the line interval.
     #     pass
 
-    def set_lightsheet_rolling_shutter_width(self, sweep_time):
+    def calculate_light_sheet_exposure_time(self, full_chip_exposure_time, shutter_width):
         """
         calculate the parameters for an ASLM acquisition
         :param sweep_time: the exposure time that is desired for the whole acquisition
         :return: set the important parameters for ASLM acquisitions
         """
 
-        line_exposure = sweep_time / (self.y_pixels / self.lightsheet_rolling_shutter_width)
-        line_delay = (sweep_time - line_exposure) / (self.y_pixels * self.camera_line_interval)
-        acquisition_time = (line_delay + 1) * self.y_pixels * self.camera_line_interval + line_exposure + (
-                line_delay + 1) * self.camera_line_interval
-
-        print(sweep_time, self.y_pixels, self.lightsheet_rolling_shutter_width, self.camera_line_interval)
-        print(line_exposure, line_delay, acquisition_time)
-
-        # self.set_exposure_time(line_delay)
-        self.camera_controller.set_property_value("internal_line_interval", self.camera_line_interval)
-
+        self.camera_line_interval = (full_chip_exposure_time / 1000)/(shutter_width + self.y_pixels + 10)
+        exposure_time = self.camera_line_interval*shutter_width*1000
+        return exposure_time, self.camera_line_interval
 
     def calculate_readout_time(self):
         """
@@ -401,6 +394,7 @@ class HamamatsuOrca(CameraBase):
         # Currently pulling values directly from the camera.
         """
         h = 9.74436 * 10 ** -6  # Readout timing constant
+        h = self.camera_controller.get_property_value("readout_time")
         vn = self.camera_controller.get_property_value('subarray_vsize')
         sensor_mode = self.camera_controller.get_property_value('sensor_mode')
         exposure_time = self.camera_controller.get_property_value('exposure_time')

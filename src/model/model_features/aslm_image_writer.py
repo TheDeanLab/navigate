@@ -67,7 +67,11 @@ class ImageWriter:
         Making the assumption there is only one frame per channel on a single acquisition
         '''
 
-        # Getting 
+        # Getting needed info, I am doing it in the function because i think if we do not reinit the class, save directory will be a stagnant var. If we just leave self.model = model then that ref will alwasy be up to date
+        save_directory = self.model.experiment.Saving['save_directory']
+        num_of_channels = len(self.model.experiment.MicroscopeState['channels'].keys())
+        data_buffer = self.model.data_buffer
+
 
         # Getting allocation parameters for zarr array
         xsize = self.model.experiment.CameraParameters['x_pixels']
@@ -84,7 +88,7 @@ class ImageWriter:
 
         # Checking mode to set amount of slices
         if image_mode == 'single':
-            zslice = 1
+            zslice = 0 # Should this be 1?
         else:
             zslice = self.model.experiment.MicroscopeState['number_z_steps']
 
@@ -110,8 +114,25 @@ class ImageWriter:
                 selected_channels.append(channel_idx)
         
         # Copy data to Zarr
-        for frame in frame_ids:
-            pass
+        count = 0
+        time = 1
+        for idx, frame in enumerate(frame_ids):
+
+            # Getting frame from data buffer
+            img = data_buffer[frame]
+            # TODO I need help here, how do I access each pixel of the frame stored in the SharedNDArray? Is it just a 2D array? img[x][y] would be the coord?
+
+            # Pixels are saved by slice
+            if by_slice:
+                cur_channel = selected_channels[idx] # Gets current channel
+                if idx % num_of_channels == num_of_channels - 1:
+                    # If all channels have been accounted for then the timepoint can be incremented. Ex: first time point is the first three frames from frame_ids if there were three channels selected
+                    time += 1
+                # TODO Does it matter which coordinate we increment first? 
+                for x in range(xsize):
+                    for y in range(ysize):
+                        # x and y increment with image size while the others should increment with the frame count
+                        z[x, y, idx, idx, idx] =  (img[x] ,img[y],zslice, cur_channel, time) # Should update all the pixels? Might have to update each dimension individually
 
 
 

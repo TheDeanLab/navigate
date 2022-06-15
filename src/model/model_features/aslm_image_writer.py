@@ -73,6 +73,16 @@ class ImageWriter:
         xsize = self.model.experiment.CameraParameters['x_pixels']
         ysize = self.model.experiment.CameraParameters['y_pixels']
         image_mode = self.model.experiment.MicroscopeState['image_mode']
+
+        # Boolean flag to decide which order for saving, by stack or slice. Code is brute force to make it clear, can be sanitized if need be
+        by_stack = False
+        by_slice = False
+        if self.model.experiment.MicroscopeState['stack_cycling_mode'] == 'per_stack':
+            by_stack = True
+        if self.model.experiment.MicroscopeState['stack_cycling_mode'] == 'per_z':
+            by_slice = True
+
+        # Checking mode to set amount of slices
         if image_mode == 'single':
             zslice = 1
         else:
@@ -101,7 +111,7 @@ class ImageWriter:
         
         # Copy data to Zarr
         for frame in frame_ids:
-
+            pass
 
 
 

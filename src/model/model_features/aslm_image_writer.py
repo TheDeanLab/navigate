@@ -40,6 +40,7 @@ from pathlib import Path
 
 # Third Party Imports
 from tifffile import imsave
+import zarr
 
 
 # Local Imports
@@ -58,14 +59,49 @@ class ImageWriter:
     def __del__(self):
         pass
 
-    def write_zarr(self, frame_id):
+    def copy_to_zarr(self, frame_ids):
         '''
         Will take in camera frames and move data fom SharedND Array into a Zarr Array.
         If there is more than one channel there will be that many frames ie if there are 3 channels selected there should be three frames.
         Making the assumption there is only one frame per channel on a single acquisition
         '''
 
+        # Getting allocation parameters for zarr array
+        xsize = self.model.experiment.CameraParameters['x_pixels']
+        ysize = self.model.experiment.CameraParameters['y_pixels']
+        image_mode = self.model.experiment.MicroscopeState['image_mode']
+        if image_mode == 'single':
+            zslice = 1
+        else:
+            zslice = self.model.experiment.MicroscopeState['number_z_steps']
+
+
+        # Allocate zarr array with values needed
+        # X Pixel Size, Y Pixel Size, Z Slice, Channel Num, Frame ID
+        # Chunks set to False as we are not currently accessing the array like the SharedNDArray just using it to write to disk and then convert
+        # Numpy data type = dtype='uint16'
+        z = zarr.zeros((xsize, ysize, zslice, self.num_of_channels, len(frame_ids)), chunks=False , dtype='uint16')
+
+        # z[:,:,0,0,0] = 2D array at zslice=0, channel=0, frame=0
+
+        # Get the currently selected channels, the order is implicit
+        channels = self.experiment.MicroscopeState['channels']
+        selected_channels = []
+        prefix_len = len('channel_') # helps get the channel index
+        for channel_key in channels:
+            channel_idx = int(channel_key[prefix_len:])
+            channel = channels[channel_key]
+
+            # Put selected channels index into list
+            if channel['is_selected'] is True:
+                selected_channels.append(channel_idx)
         
+        # Copy data to Zarr
+        for frame in frame_ids:
+            
+
+
+
 
 
 

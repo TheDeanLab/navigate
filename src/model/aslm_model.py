@@ -104,6 +104,9 @@ class Model:
             self.configuration.Devices['lasers'] = 'SyntheticLasers'
 
         # Move device initialization steps to multiple threads
+        '''
+        Each of the below represents self.camera or the respective device
+        '''
         threads_dict = {
             'filter_wheel': ResultThread(target=startup_functions.start_filter_wheel,
                                          args=(self.configuration,self.verbose,)).start(),
@@ -149,6 +152,7 @@ class Model:
         self.current_laser_index = 1
         self.current_exposure_time = 0  # milliseconds
         self.pre_exposure_time = 0  # milliseconds
+        self.camera_line_interval = 9.7e-6  # s
         self.start_time = None
 
         # Autofocusing
@@ -260,7 +264,8 @@ class Model:
             if self.is_save:
                 self.experiment.Saving = kwargs['saving_info']
                 image_writer = ImageWriter(self)
-                self.run_data_process(channel_num, data_func=image_writer.write_tiff)
+                # self.run_data_process(channel_num, data_func=image_writer.write_tiff)
+                self.run_data_process(channel_num, data_func=image_writer.write_zarr)
             else:
                 self.run_data_process(channel_num)
             self.end_acquisition()
@@ -422,12 +427,14 @@ class Model:
 
             wait_num = 10
 
+            # May need a separate save_func as saving is done before display and other analysis may be after display
+            if data_func:
+                data_func(frame_ids)
+
             # show image
             self.logger.debug(f'sent through pipe{frame_ids[0]}')
             self.show_img_pipe.send(frame_ids[0])
 
-            if data_func:
-                data_func(frame_ids)
 
             acquired_frame_num += len(frame_ids)
             if count_frame and acquired_frame_num >= num_of_frames:
@@ -558,11 +565,10 @@ class Model:
                 # Update Camera Exposure Time
                 self.current_exposure_time = channel['camera_exposure_time']
                 if self.experiment.CameraParameters['sensor_mode'] == 'Light-Sheet':
-                    self.current_exposure_time, camera_line_interval = self.camera.calculate_light_sheet_exposure_time(
+                    self.current_exposure_time, self.camera_line_interval = self.camera.calculate_light_sheet_exposure_time(
                         self.current_exposure_time,
                         int(self.experiment.CameraParameters['number_of_pixels']))
-                    self.camera.camera_controller.set_property_value("inter"
-                                                                     "nal_line_interval", camera_line_interval)
+                    self.camera.camera_controller.set_property_value("internal_line_interval", self.camera_line_interval)
 
                 # self.camera.set_exposure_time(exposure_time)
 
@@ -575,7 +581,6 @@ class Model:
                 # self.daq.sweep_time = (self.current_exposure_time / 1000) * \
                 #                       ((self.configuration.CameraParameters['delay_percent'] +
                 #                         self.configuration.RemoteFocusParameters['remote_focus_l_ramp_falling_percent']) / 100 + 1)
-
 
                 # Update ETL Settings
                 self.daq.update_etl_parameters(microscope_state, channel, self.experiment.GalvoParameters)
@@ -597,7 +602,7 @@ class Model:
         """
         #  Initialize, run, and stop the acquisition.
         #  Consider putting below to not block thread.
-        self.daq.prepare_acquisition(channel_key)
+        self.daq.prepare_acquisition(channel_key, self.current_exposure_time, self.camera_line_interval)
 
         # calculate how long has been since last trigger
         time_spent = time.perf_counter() - self.pre_trigger_time

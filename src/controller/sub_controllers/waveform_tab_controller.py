@@ -107,6 +107,7 @@ class Waveform_Tab_Controller(GUI_Controller):
             self.view.plot_etl.plot(np.arange(len(etl_waveform))/sample_rate + last_etl, etl_waveform, label=k)
             self.view.plot_galvo.plot(np.arange(len(galvo_waveform))/sample_rate + last_galvo, galvo_waveform, label=k)
             self.view.plot_etl.plot(np.arange(len(camera_waveform))/sample_rate + last_camera, camera_waveform, c='k', linestyle='--')
+            self.view.plot_galvo.plot(np.arange(len(camera_waveform)) / sample_rate + last_camera, camera_waveform, c='k', linestyle='--')
             last_etl += len(etl_waveform)/sample_rate
             last_galvo += len(galvo_waveform)/sample_rate
             last_camera += len(camera_waveform)/sample_rate

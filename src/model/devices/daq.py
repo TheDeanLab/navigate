@@ -174,14 +174,24 @@ class DAQBase:
                 # Get the Waveform Parameters - Assumes ETL Delay < Camera Delay.  Should Assert.
                 laser = channel['laser']
                 exposure_time = channel['camera_exposure_time'] / 1000
-                sweep_time = exposure_time + exposure_time * ((self.camera_delay_percent + self.etl_ramp_falling) / 100)
+                self.sweep_time = exposure_time + exposure_time * ((self.camera_delay_percent + self.etl_ramp_falling) / 100)
+
+                # ETL Parameters
                 etl_amplitude = float(etl_constants.ETLConstants[imaging_mode][zoom][laser]['amplitude'])
                 etl_offset = float(etl_constants.ETLConstants[imaging_mode][zoom][laser]['offset'])
+
+                # Galvo Parameters
+                galvo_amplitude = float(galvo_parameters['galvo_l_amplitude'])
+                galvo_offset = float(galvo_parameters['galvo_l_offset'])
+
+                # We need the camera to experience N sweeps of the galvo. As such,
+                # frequency should divide evenly into exposure_time
+                galvo_frequency = 0.5/exposure_time
 
                 # Calculate the Waveforms
                 self.waveform_dict[channel_key]['etl_waveform'] = tunable_lens_ramp_v2(sample_rate=self.sample_rate,
                                                                                        exposure_time=exposure_time,
-                                                                                       sweep_time=sweep_time,
+                                                                                       sweep_time=self.sweep_time,
                                                                                        etl_delay=self.etl_delay,
                                                                                        camera_delay=self.camera_delay_percent,
                                                                                        fall=self.etl_ramp_falling,
@@ -189,13 +199,14 @@ class DAQBase:
                                                                                        offset=etl_offset)
 
                 self.waveform_dict[channel_key]['galvo_waveform'] = sawtooth(sample_rate=self.sample_rate,
-                                                                             sweep_time=sweep_time,
-                                                                             frequency=200,
-                                                                             amplitude=galvo_parameters['galvo_l_offset'],
-                                                                             offset=galvo_parameters['galvo_l_amplitude'])
+                                                                             sweep_time=self.sweep_time,
+                                                                             frequency=galvo_frequency,
+                                                                             amplitude=galvo_amplitude,
+                                                                             offset=galvo_offset,
+                                                                             phase=self.camera_delay_percent*exposure_time/100)
 
                 self.waveform_dict[channel_key]['camera_waveform'] = camera_exposure(sample_rate=self.sample_rate,
-                                                                                     sweep_time=sweep_time,
+                                                                                     sweep_time=self.sweep_time,
                                                                                      exposure=exposure_time,
                                                                                      camera_delay=self.camera_delay_percent)
 
@@ -435,7 +446,7 @@ class NIDAQ(DAQBase):
     def __del__(self):
         pass
 
-    def create_camera_task(self):
+    def create_camera_task(self, exposure_time, line_interval):
         """
         # Set up the camera trigger
         # Calculate camera high time and initial delay.
@@ -443,8 +454,8 @@ class NIDAQ(DAQBase):
         """
         # Configure camera triggers
         camera_trigger_out_line = self.model.DAQParameters['camera_trigger_out_line']
-        self.camera_high_time = self.camera_pulse_percent * 0.01 * self.sweep_time
-        self.camera_delay = self.camera_delay_percent * 0.01 * self.sweep_time
+        self.camera_high_time = (self.camera_pulse_percent/100) * (exposure_time/1000)  # self.sweep_time
+        self.camera_delay = (self.camera_delay_percent / 100) * (exposure_time/1000)  # * 0.01 * self.sweep_time
 
         self.camera_trigger_task.co_channels.add_co_pulse_chan_time(camera_trigger_out_line,
                                                                     high_time=self.camera_high_time,
@@ -498,7 +509,7 @@ class NIDAQ(DAQBase):
         self.camera_trigger_task.close()
         self.master_trigger_task.close()
 
-    def prepare_acquisition(self, channel_key):
+    def prepare_acquisition(self, channel_key, exposure_time, line_interval):
         """
         # Initialize the nidaqmx tasks.
         """
@@ -508,7 +519,7 @@ class NIDAQ(DAQBase):
 
         # Specify ports, timing, and triggering
         self.create_master_trigger_task()
-        self.create_camera_task()
+        self.create_camera_task(exposure_time, line_interval)
         self.create_galvo_etl_task()
 
         # Calculate the waveforms and start tasks.

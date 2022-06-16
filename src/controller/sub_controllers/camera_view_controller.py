@@ -77,9 +77,6 @@ class Camera_View_Controller(GUI_Controller):
         global count
         count = 0
         self.canvas.bind("<Button-1>", self.left_click)
-        #Mouse Hovering
-        self.canvas.bind("<Enter>", self.on_enter)
-        self.canvas.bind("<Leave>", self.on_leave)
 
 
         #  Stored Images
@@ -106,20 +103,7 @@ class Camera_View_Controller(GUI_Controller):
         self.live_subsampling = self.parent_controller.configuration.CameraParameters['display_live_subsampling']
         self.bit_depth = 8  # bit-depth for PIL presentation.
 
-    def on_enter(self, event):
-        print("Mouse has entered")
-        self.canvas.bind("<MouseWheel>", self.mouse_track)
-    def on_leave(self, event):
-        print("Mouse has left")
-
-
-    def mouse_track(self, event):
-        global count
-        if event.delta == -1:
-            count -= 1
-        if event.delta == 1:
-            count += 1
-        print(count)
+    
     
     
     def get_count(self):

@@ -207,19 +207,29 @@ class ASLM_controller:
         # Create default data buffer
         self.img_width = 0
         self.img_height = 0
+        self.count = 0
         self.update_buffer()
+
+        #binding mouse wheel event on camera view
+        self.position_o = self.stage_gui_controller.get_position()
         self.canvas = getattr(self.camera_view_controller, "canvas")
-        self.canvas.bind("<Enter>", self.enter)
+        self.canvas.bind("<Enter>", self.on_enter)
+        self.canvas.bind("<Leave>", self.on_leave)
         
-    def enter(self, event):
+    def on_enter(self, event):
         self.canvas.bind("<MouseWheel>", self.update_position)
 
+    def on_leave(self, event):
+        self.count = 0
 
     def update_position(self, event):
-        global count_val
-        count_val = self.camera_view_controller.get_count()
-        position_dict = {"x": abs(count_val), "y":0, "z": 0, "theta": 0, "f": 0}
-        self.stage_gui_controller.set_position(position_dict)
+        if event.delta == -1:
+            self.count -= 1
+        if event.delta == 1:
+            self.count += 1
+        updated_position = self.position_o
+        updated_position["z"] += self.count # need to add a scaling factor here (can make it dependent on interval defined
+        self.stage_gui_controller.set_position(updated_position)
 
     def update_buffer(self):
         """ Update the buffer size according to the camera dimensions listed in the experimental parameters.

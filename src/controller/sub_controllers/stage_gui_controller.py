@@ -97,10 +97,10 @@ class Stage_GUI_Controller(GUI_Controller):
                     command = self.xy_zero_btn_handler() # will change but placeholder for now
                     #need a function that does both up and down depending on arrow key
                 )
-            #else:
-                #buttons[k].configure(
-                    #command=self.zero_btn_handler(k[5:-4])
-                #
+            else:
+                buttons[k].configure(
+                    command=self.zero_btn_handler(k[5:-4])
+                )
         for axis in ['x', 'y', 'z', 'theta', 'f']:
             # add event bind to position entry variables
             self.widget_vals[axis].trace_add('write', self.position_callback(axis))
@@ -183,8 +183,8 @@ class Stage_GUI_Controller(GUI_Controller):
         try:
             for axis in ['x', 'y', 'z', 'theta', 'f']:
                 position[axis] = self.widget_vals[axis].get()
-                if position[axis] < self.position_min[axis] or position[axis] > self.position_max[axis]:
-                    return None
+                #if position[axis] < self.position_min[axis] or position[axis] > self.position_max[axis]:
+                    #return None
         except:
             # Tkinter will raise error when the variable is DoubleVar and the value is empty
             return None

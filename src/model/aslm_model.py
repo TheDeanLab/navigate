@@ -224,12 +224,6 @@ class Model:
             delattr(self, pipe_name)
 
 
-
-    # TODO: Replace above pipe functions with
-    # def set_model_pipe(self, property, handler):
-    #     setattr(self, property, handler)
-
-
     #  Basic Image Acquisition Functions
     #  - These functions are used to acquire images from the camera
     #  - Tasks for delivering analog and digital outputs are already initiated by the DAQ object

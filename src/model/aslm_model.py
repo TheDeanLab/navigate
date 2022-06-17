@@ -67,7 +67,7 @@ class Model:
             configuration_path=None,
             experiment_path=None,
             etl_constants_path=None,
-            waveform_queue=None):
+            event_queue=None):
         
         # Logger Setup
         from log_files.log_functions import log_setup
@@ -171,7 +171,7 @@ class Model:
         self.plot_pipe = None
 
         # waveform queue
-        self.waveform_queue = waveform_queue
+        self.event_queue = event_queue
 
         # frame signal id
         self.frame_id = 0
@@ -337,7 +337,7 @@ class Model:
                 self.experiment.GalvoParameters[param] = value
 
             self.daq.calculate_all_waveforms(self.experiment.MicroscopeState, self.etl_constants, self.experiment.GalvoParameters)
-            self.waveform_queue.put(self.daq.waveform_dict)
+            self.event_queue.put(('waveform', self.daq.waveform_dict))
 
             # prepare devices based on updated info
             self.stop_send_signal = False
@@ -518,7 +518,7 @@ class Model:
 
         # Calculate Waveforms for all channels. Plot in the view.
         waveform_dict = self.daq.calculate_all_waveforms(self.experiment.MicroscopeState, self.etl_constants, self.experiment.GalvoParameters)
-        self.waveform_queue.put(waveform_dict)
+        self.event_queue.put(('waveform', waveform_dict))
 
         # Set Camera Sensor Mode - Must be done before camera is initialized.
         self.camera.set_sensor_mode(self.experiment.CameraParameters['sensor_mode'])

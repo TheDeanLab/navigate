@@ -128,11 +128,12 @@ class ImageWriter:
                 if idx % num_of_channels == num_of_channels - 1:
                     # If all channels have been accounted for then the timepoint can be incremented. Ex: first time point is the first three frames from frame_ids if there were three channels selected
                     time += 1
-                # TODO Does it matter which coordinate we increment first? 
-                for x in range(xsize):
-                    for y in range(ysize):
-                        # x and y increment with image size while the others should increment with the frame count
-                        z[x, y, idx, idx, idx] =  (img[x] ,img[y],zslice, cur_channel, time) # Should update all the pixels? Might have to update each dimension individually
+                # # TODO Does it matter which coordinate we increment first? 
+                # for x in range(xsize):
+                #     for y in range(ysize):
+                #         # x and y increment with image size while the others should increment with the frame count
+                #          z[x, y, idx, idx, idx] =  (img[x], img[y], zslice, cur_channel, time)
+                z[:, :, idx, idx, idx] =  (img, zslice, cur_channel, time) # Should update all the pixels? Might have to update each dimension individually
 
 
 

@@ -77,7 +77,11 @@ class position_frame(ttk.Frame):
         '''
         Grid for frames
 
-                1   2   3   4   5
+            1
+            2
+            3
+            4
+            5
 
         x is 1
         y is 2

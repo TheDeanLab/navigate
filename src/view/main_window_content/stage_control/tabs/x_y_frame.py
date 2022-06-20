@@ -143,5 +143,3 @@ class x_y_frame(ttk.Frame):
         names = ['up_x_btn', 'down_x_btn', 'up_y_btn', 'down_y_btn', 'zero_xy_btn']
         return {k: getattr(x_y_frame, k) for k in names}
 
-    def wasd_char(x_y_frame):
-        return 

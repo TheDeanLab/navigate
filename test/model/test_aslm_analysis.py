@@ -41,7 +41,7 @@ import pytest
 # Local Imports
 # sys.path.append('../../../')
 try:
-    from src.model.aslm_analysis import Analysis as aslm_analysis
+    from aslm.model.aslm_analysis import Analysis as aslm_analysis
 
     class TestASLMAnalysis(unittest.TestCase):
         """

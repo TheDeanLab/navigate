@@ -40,7 +40,7 @@ import numpy as np
 
 # Local Imports
 sys.path.append('../../')
-from src.model import aslm_model_waveforms as aslm_model_waveforms
+from aslm.model import aslm_model_waveforms as aslm_model_waveforms
 
 
 class TestWaveforms(unittest.TestCase):

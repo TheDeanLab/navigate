@@ -34,7 +34,6 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 from controller.sub_controllers.widget_functions import validate_wrapper
 from controller.sub_controllers.gui_controller import GUI_Controller
-from controller.sub_controllers.camera_view_controller import Camera_View_Controller
 import logging
 from pathlib import Path
 # Logger Setup
@@ -71,12 +70,7 @@ class Stage_GUI_Controller(GUI_Controller):
             'z': 10000,
             'theta': 10000,
             'f': 10000
-        }
-        self.canvas = self.view
-
-        #default button setting
-        self.wasd = 'disabled'
-        
+        }       
         # variables
         self.widget_vals = self.view.get_variables()
         
@@ -91,11 +85,6 @@ class Stage_GUI_Controller(GUI_Controller):
             elif k[5:-4] == 'xy':
                 buttons[k].configure(
                     command=self.xy_zero_btn_handler()
-                )
-            elif k[:4] == "wasd":
-                buttons[k].configure(
-                    command = self.xy_zero_btn_handler() # will change but placeholder for now
-                    #need a function that does both up and down depending on arrow key
                 )
             else:
                 buttons[k].configure(

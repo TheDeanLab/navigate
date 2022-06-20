@@ -147,7 +147,7 @@ class VoiceCoil:
                 self.close_connection()
             else:
                 # Send command to device
-                self.serial.write(bytes.fromhex(msg))
+                self.serial.write(msg.encode("utf-8"))
 
             # Read data sent from device
             data = self.serial.read(9999)

@@ -104,66 +104,6 @@ class x_y_frame(ttk.Frame):
             input_args={'width': 23}
         )
 
-        #Toggle Method
-        def Toggle():
-            if x_y_frame.wasd_btn.config('text')[-1] == 'WASD Enabled':
-                WASD_movmement(False)
-                x_y_frame.wasd_btn.config(text='WASD Disabled')
-            else:
-                WASD_movmement(True)
-                x_y_frame.wasd_btn.config(text='WASD Enabled')
-        
-        #WASD Movement Method
-        def WASD_movmement(temp_bool):
-            if (temp_bool):
-                 def key_pressed(event):
-                     print(f'Key pressed: {event.char}')
-                     x_y_frame.bind("<Key>", key_pressed)
-            pass
-
-        #WASD Enable/Disable Button
-        x_y_frame.wasd_btn = ttk.Button(
-            x_y_frame,
-            text="WASD Enabled",
-            command=Toggle
-        )
-
-
-        # #WASD Movement Method
-        # def WASD_movmement(temp_bool):
-        #     # if (temp_bool):
-        #     #     def key_pressed(event):
-        #     #         label1['text'] = label1.cget("text")+event.char
-        #     #     root.bind("<Key>", key_pressed)
-        #     # else:
-        #     #     root.bind("<Key>", lambda x : None)
-        #     pass
-
-        # #Toggle Method
-        # button_is_clicked = False
-        # def Toggle():
-        #     global button_is_clicked
-        #     if (button_is_clicked):
-        #         WASD_movmement(False)
-        #         button_is_clicked = False
-        #         x_y_frame.wasd_btn.config(text='WASD Disabled')
-        #     else:
-        #         WASD_movmement(True)
-        #         button_is_clicked = True
-        #         x_y_frame.wasd_btn.config(text='WASD Enabled')
-
-        # #WASD Enable/Disable Button
-        # x_y_frame.wasd_btn = ttk.Button(
-        #     x_y_frame,
-        #     text="WASD Enabled",
-        #     command=Toggle
-        # )
-
-
-
-
-
-
         '''
         Grid for buttons
 
@@ -192,7 +132,6 @@ class x_y_frame(ttk.Frame):
         x_y_frame.down_x_btn.grid(row=2, column=0, rowspan=2, columnspan=2, padx=2, pady=2) #LEFT
         x_y_frame.zero_xy_btn.grid(row=2, column=2, rowspan=1, columnspan=2, padx=2, pady=(5,2), sticky=(NSEW)) #Zero xy
         x_y_frame.increment_box.grid(row=3, column=2, rowspan=1, columnspan=2, padx=2, pady=2, sticky=(NSEW)) #Increment spinbox
-        x_y_frame.wasd_btn.grid(row=0, column=1, padx=2, pady=2) #WASD Enable/Disable Button
 
 
 
@@ -201,7 +140,7 @@ class x_y_frame(ttk.Frame):
         return x_y_frame.increment_box
 
     def get_buttons(x_y_frame):
-        names = ['up_x_btn', 'down_x_btn', 'up_y_btn', 'down_y_btn', 'zero_xy_btn', 'wasd_btn']
+        names = ['up_x_btn', 'down_x_btn', 'up_y_btn', 'down_y_btn', 'zero_xy_btn']
         return {k: getattr(x_y_frame, k) for k in names}
 
     def wasd_char(x_y_frame):

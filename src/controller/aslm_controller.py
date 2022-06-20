@@ -211,7 +211,6 @@ class ASLM_controller:
         self.update_buffer()
 
         #binding mouse wheel event on camera view
-        
         self.canvas = getattr(self.camera_view_controller, "canvas")
         self.canvas.bind("<Enter>", self.on_enter)
         self.canvas.bind("<Leave>", self.on_leave)

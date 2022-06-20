@@ -74,8 +74,7 @@ class Camera_View_Controller(GUI_Controller):
         self.image_palette['Rainbow'].widget.config(command=self.update_LUT)
 
         # Bindings for key events
-        global count
-        count = 0
+        self.count = 0
         self.canvas.bind("<Button-1>", self.left_click)
 
 
@@ -103,12 +102,8 @@ class Camera_View_Controller(GUI_Controller):
         self.live_subsampling = self.parent_controller.configuration.CameraParameters['display_live_subsampling']
         self.bit_depth = 8  # bit-depth for PIL presentation.
 
-    
-    
-    
     def get_count(self):
-        global count
-        return count
+        return self.count
     
     def initialize(self, name, data):
         '''

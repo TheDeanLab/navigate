@@ -75,8 +75,3 @@ class camera_tab(ttk.Frame):
         self.scale_palette = palette(self)
         self.scale_palette.grid(row=0, column=1, sticky=NSEW, padx=5, pady=5)
     
-
-    # def on_enter(self, event):
-    #     print("Mouse has entered")
-    # def on_leave(self, event):
-    #     print("Mouse has left")

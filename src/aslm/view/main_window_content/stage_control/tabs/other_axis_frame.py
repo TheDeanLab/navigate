@@ -59,15 +59,13 @@ class other_axis_frame(ttk.Frame):
         #Up button
         other_axis_frame.up_btn = ttk.Button(
             other_axis_frame,
-            style='arrow.TButton',
-            text="\N{UPWARDS BLACK ARROW}",
+            text="+",
         )
 
         #Down button
         other_axis_frame.down_btn = ttk.Button(
             other_axis_frame,
-            style='arrow.TButton',
-            text="\N{DOWNWARDS BLACK ARROW}",
+            text="-",
         )
 
         #Zero button
@@ -104,10 +102,10 @@ class other_axis_frame(ttk.Frame):
 
 
         #Gridding out buttons
-        other_axis_frame.down_btn.grid(row=0, column=0, pady=0, sticky=(NSEW)) #DOWN
-        other_axis_frame.increment_box.grid(row=0, column=1, pady=2, sticky=(NSEW)) #Increment spinbox
-        other_axis_frame.up_btn.grid(row=0, column=2, pady=0, sticky=(NSEW)) #UP
-        other_axis_frame.zero_btn.grid(row=0, column=3, pady=0, sticky=(NSEW)) #Zero Z
+        other_axis_frame.down_btn.grid(row=0, column=0, padx=5, sticky=(N)) #DOWN
+        other_axis_frame.increment_box.grid(row=0, column=1, padx=5, sticky=(N)) #Increment spinbox
+        other_axis_frame.up_btn.grid(row=0, column=2, padx=5, sticky=(N)) #UP
+        other_axis_frame.zero_btn.grid(row=0, column=3, padx=5, sticky=(N)) #Zero Z
         
 
     def get_widget(other_axis_frame):

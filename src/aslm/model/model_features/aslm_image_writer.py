@@ -86,11 +86,8 @@ class ImageWriter:
         if self.model.experiment.MicroscopeState['stack_cycling_mode'] == 'per_z':
             by_slice = True
 
-        # Checking mode to set amount of slices
-        if image_mode == 'single':
-            zslice = 0 # Should this be 1?
-        else:
-            zslice = self.model.experiment.MicroscopeState['number_z_steps']
+        # Getting amount of slices
+        zslice = self.model.experiment.MicroscopeState['number_z_steps']
 
 
         # Allocate zarr array with values needed
@@ -114,26 +111,47 @@ class ImageWriter:
                 selected_channels.append(channel_idx)
         
         # Copy data to Zarr
-        count = 0
-        time = 1
+        chan = 0
+        time = 0
+        slice = 0
         for idx, frame in enumerate(frame_ids):
 
             # Getting frame from data buffer
             img = data_buffer[frame]
-            # TODO I need help here, how do I access each pixel of the frame stored in the SharedNDArray? Is it just a 2D array? img[x][y] would be the coord?
+            # idx can only increment thru num of channels
+            idx = idx % num_of_channels
 
-            # Pixels are saved by slice
+            # Save acq by the slice, incrementing thru slices and accounting for timepoints
             if by_slice:
-                cur_channel = selected_channels[idx] # Gets current channel
-                if idx % num_of_channels == num_of_channels - 1:
-                    # If all channels have been accounted for then the timepoint can be incremented. Ex: first time point is the first three frames from frame_ids if there were three channels selected
+                cur_channel = selected_channels[idx] # Gets first channel selected to start, then cycles thru chans
+                if slice != zslice: # This is to check for new slice group
+                    z[:, :, slice, cur_channel, time] =  img
+                    if idx == num_of_channels - 1:
+                        slice += 1 # Increment slice when num of channels has been pulled
+                else:
+                    # Once slice count equals total zslice increment time and reset slice count
                     time += 1
-                # # TODO Does it matter which coordinate we increment first? 
-                # for x in range(xsize):
-                #     for y in range(ysize):
-                #         # x and y increment with image size while the others should increment with the frame count
-                #          z[x, y, idx, idx, idx] =  (img[x], img[y], zslice, cur_channel, time)
-                z[:, :, idx, idx, idx] =  (img, zslice, cur_channel, time) # Should update all the pixels? Might have to update each dimension individually
+                    slice = 0
+
+            # Saved by stack
+            if by_stack:
+                chan = chan % num_of_channels
+                cur_channel = selected_channels[chan] # start at first channel
+                if slice != zslice: #This now checks for new channels
+                    z[:, :, slice, cur_channel, time] =  img
+                    slice += 1
+                else:
+                    # Once slice count equals total amt of zslices, increment channel and reset slices. Check time first
+                    #Check if time should be incremented
+                    if chan == num_of_channels - 1:
+                        time += 1
+                    slice = 0
+                    chan += 1
+                    
+                
+
+
+
 
 
 

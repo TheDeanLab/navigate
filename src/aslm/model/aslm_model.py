@@ -253,7 +253,7 @@ class Model:
                 self.experiment.Saving = kwargs['saving_info']
                 image_writer = ImageWriter(self)
                 # self.run_data_process(channel_num, data_func=image_writer.write_tiff)
-                self.run_data_process(channel_num, data_func=image_writer.write_zarr)
+                self.run_data_process(channel_num, data_func=image_writer.copy_to_zarr)
             else:
                 self.run_data_process(channel_num)
             self.end_acquisition()

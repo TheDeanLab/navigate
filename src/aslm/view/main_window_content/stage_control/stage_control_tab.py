@@ -62,7 +62,13 @@ class stage_control_tab(ttk.Frame):
         stage_control_tab.position_frame = position_frame(stage_control_tab)
 
         #XY Frame
-        stage_control_tab.xy_frame = x_y_frame(stage_control_tab)
+        #stage_control_tab.xy_frame = x_y_frame(stage_control_tab)
+        
+        #X Frame
+        stage_control_tab.x_frame = other_axis_frame(stage_control_tab, 'X')        
+        
+        #Y Frame
+        stage_control_tab.y_frame = other_axis_frame(stage_control_tab, 'Y')
 
         #Z Frame
         stage_control_tab.z_frame = other_axis_frame(stage_control_tab, 'Z')
@@ -95,8 +101,10 @@ class stage_control_tab(ttk.Frame):
         # Formatting
         Grid.columnconfigure(stage_control_tab.position_frame, 'all', weight=1)
         Grid.rowconfigure(stage_control_tab.position_frame, 'all', weight=1)
-        Grid.columnconfigure(stage_control_tab.xy_frame, 'all', weight=1)
-        Grid.rowconfigure(stage_control_tab.xy_frame, 'all', weight=1)
+        Grid.columnconfigure(stage_control_tab.x_frame, 'all', weight=1)
+        Grid.rowconfigure(stage_control_tab.x_frame, 'all', weight=1)
+        Grid.columnconfigure(stage_control_tab.y_frame, 'all', weight=1)
+        Grid.rowconfigure(stage_control_tab.y_frame, 'all', weight=1)
         Grid.columnconfigure(stage_control_tab.z_frame, 'all', weight=1)
         Grid.rowconfigure(stage_control_tab.z_frame, 'all', weight=1)
         Grid.columnconfigure(stage_control_tab.theta_frame, 'all', weight=1)
@@ -108,13 +116,18 @@ class stage_control_tab(ttk.Frame):
         
         #Gridding out frames
         factor = 6
-        stage_control_tab.position_frame.grid(row=0, column=0, columnspan=5, sticky=(NSEW), pady=(2,0))
-        stage_control_tab.xy_frame.grid(row=1, column=0, sticky=(NSEW), padx=10, pady=10*factor)
+        stage_control_tab.position_frame.grid(row=0, column=0, rowspan=5, sticky=(NSEW), pady=(2,0))
+        stage_control_tab.x_frame.grid(row=0, column=1, sticky=(NSEW), padx=10, pady=10)
+        stage_control_tab.y_frame.grid(row=0, column=1, sticky=(NSEW), padx=10, pady=10)
+        stage_control_tab.theta_frame.grid(row=0, column=1, sticky=(NSEW), padx=10, pady=10)
+        stage_control_tab.f_frame.grid(row=0, column=1, sticky=(NSEW), padx=10, pady=10)
+        """
+        stage_control_tab.xy_frame.grid(row=1, column=1, sticky=(NSEW), padx=10, pady=10*factor)
         stage_control_tab.z_frame.grid(row=1, column=1, sticky=(NSEW), padx=10, pady=10*factor)
         stage_control_tab.theta_frame.grid(row=1, column=2, sticky=(NSEW), padx=10, pady=10*factor)
         stage_control_tab.f_frame.grid(row=1, column=3, sticky=(NSEW), padx=10, pady=10*factor)
         stage_control_tab.goto_frame.grid(row=1, column=4, sticky=(NSEW), padx=10, pady=10*factor)
-
+        """
     def get_widgets(stage_control_tab):
         """
         # this function will return all the input widgets as a dictionary
@@ -123,7 +136,7 @@ class stage_control_tab(ttk.Frame):
         temp = {
             **stage_control_tab.position_frame.get_widgets()
         }
-        for axis in ['xy', 'z', 'theta', 'f']:
+        for axis in ['x', 'y', 'z', 'theta', 'f']:
             temp[axis+'_step'] = getattr(stage_control_tab, axis+'_frame').get_widget()
         return temp
 
@@ -136,10 +149,8 @@ class stage_control_tab(ttk.Frame):
         # this function returns all the buttons in a dictionary
         # the reference name is the same as in widget list
         """
-        result = {
-            **stage_control_tab.xy_frame.get_buttons()
-        }
-        for axis in ['z', 'theta', 'f']:
+        result = {}
+        for axis in ['x', 'y','z', 'theta', 'f']:
             temp = getattr(stage_control_tab, axis+'_frame').get_buttons()
             result.update({k+'_'+axis+'_btn': temp[k] for k in temp})
         return result

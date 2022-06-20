@@ -104,10 +104,11 @@ class other_axis_frame(ttk.Frame):
 
 
         #Gridding out buttons
-        other_axis_frame.up_btn.grid(row=0, column=0, rowspan=2, pady=2) #UP
-        other_axis_frame.down_btn.grid(row=4, column=0, rowspan=2, pady=2) #DOWN
-        other_axis_frame.zero_btn.grid(row=2, column=0, pady=(5,2), sticky=(NSEW)) #Zero Z
-        other_axis_frame.increment_box.grid(row=3, column=0, pady=2, sticky=(NSEW)) #Increment spinbox
+        other_axis_frame.down_btn.grid(row=0, column=0, pady=0, sticky=(NSEW)) #DOWN
+        other_axis_frame.increment_box.grid(row=0, column=1, pady=2, sticky=(NSEW)) #Increment spinbox
+        other_axis_frame.up_btn.grid(row=0, column=2, pady=0, sticky=(NSEW)) #UP
+        other_axis_frame.zero_btn.grid(row=0, column=3, pady=0, sticky=(NSEW)) #Zero Z
+        
 
     def get_widget(other_axis_frame):
         return other_axis_frame.increment_box

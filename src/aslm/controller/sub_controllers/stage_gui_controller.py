@@ -82,10 +82,6 @@ class Stage_GUI_Controller(GUI_Controller):
                 buttons[k].configure(command=self.up_btn_handler(k[3:-4]))
             elif k[:4] == 'down':
                 buttons[k].configure(command=self.down_btn_handler(k[5:-4]))
-            elif k[5:-4] == 'xy':
-                buttons[k].configure(
-                    command=self.xy_zero_btn_handler()
-                )
             else:
                 buttons[k].configure(
                     command=self.zero_btn_handler(k[5:-4])
@@ -112,7 +108,7 @@ class Stage_GUI_Controller(GUI_Controller):
             widgets[axis].widget.max = self.position_max[axis]
 
         # set step limits
-        for k in ['xy_step', 'z_step', 'theta_step', 'f_step']:
+        for k in ['x_step', 'y_step', 'z_step', 'theta_step', 'f_step']:
             widgets[k].widget.configure(from_=config.configuration.GUIParameters['stage'][k]['min'])
             widgets[k].widget.configure(to=config.configuration.GUIParameters['stage'][k]['max'])
             widgets[k].widget.configure(increment=config.configuration.GUIParameters['stage'][k]['step'])
@@ -144,7 +140,7 @@ class Stage_GUI_Controller(GUI_Controller):
         
         # get step value
         try:
-            for axis in ['xy', 'z', 'theta', 'f']:
+            for axis in ['x', 'y', 'z', 'theta', 'f']:
                 setting_dict[axis+'_step'] = self.widget_vals[axis+'_step'].get()
         except:
             return False
@@ -187,10 +183,7 @@ class Stage_GUI_Controller(GUI_Controller):
         # position_axis += step_axis
         """
         position_val = self.widget_vals[axis]
-        if axis == 'x' or axis == 'y':
-            step_val = self.widget_vals['xy_step']
-        else:
-            step_val = self.widget_vals[axis+'_step']
+        step_val = self.widget_vals[axis+'_step']
 
         def handler():
             # guarantee stage won't move out of limits
@@ -212,10 +205,7 @@ class Stage_GUI_Controller(GUI_Controller):
         # position_axis -= step_axis
         """
         position_val = self.widget_vals[axis]
-        if axis == 'x' or axis == 'y':
-            step_val = self.widget_vals['xy_step']
-        else:
-            step_val = self.widget_vals[axis+'_step']
+        step_val = self.widget_vals[axis+'_step']
 
         def handler():
             # guarantee stage won't move out of limits

@@ -87,15 +87,18 @@ class stage_control_tab(ttk.Frame):
 
         '''
         Grid for frames
-                1   2   3   4   5
-                6   7   8   9   10 
+                1   2   
+                3   4   
+                5   6   
+                7   8   
+                9   10 
 
-        Position frame is 1-5
-        xy is 6
-        z is 7
+        Position frame is 1, 3, 5 , 7, 9
+        x is 2
+        y is 4
+        z is 6
         theta is 8
-        focus is 9
-        goto is 10
+        focus is 10
         '''
 
         # Formatting

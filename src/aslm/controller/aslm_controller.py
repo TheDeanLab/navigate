@@ -110,7 +110,8 @@ class ASLM_controller:
         # Create a thread pool
         self.threads_pool = SynchronizedThreadPool()
 
-        self.waveform_queue = mp.Queue()
+        self.event_queue = mp.Queue()  # pass events from the model to the view via controller
+                                       # accepts tuples, ('event_name', value)
 
         # Initialize the Model
         self.model = ObjectInSubprocess(Model,
@@ -119,7 +120,7 @@ class ASLM_controller:
                                         configuration_path=configuration_path,
                                         experiment_path=experiment_path,
                                         etl_constants_path=etl_constants_path,
-                                        waveform_queue=self.waveform_queue)
+                                        event_queue=self.event_queue)
         logger.debug(f"Spec - Configuration Path: {configuration_path}")
         logger.debug(f"Spec - Experiment Path: {experiment_path}")
         logger.debug(f"Spec - ETL Constants Path: {etl_constants_path}")
@@ -174,7 +175,7 @@ class ASLM_controller:
         self.waveform_tab_controller = Waveform_Tab_Controller(self.view.camera_waveform.waveform_tab,
                                                                self,
                                                                self.verbose)
-        t = threading.Thread(target=self.update_waveforms)
+        t = threading.Thread(target=self.update_event)
         t.start()
 
         # initialize menu bar
@@ -575,6 +576,7 @@ class ASLM_controller:
                 self.etl_controller.save_etl_info()
             self.model.terminate()
             self.model = None
+            self.event_queue.put(('stop', ''))
             # self.threads_pool.clear()
 
         if self.verbose:
@@ -661,14 +663,13 @@ class ASLM_controller:
     def move_stage(self, args):
         self.model.move_stage(args)
 
-    def update_waveforms(self):
-        while self.model is not None:
-            if not self.waveform_queue.empty():
-                while not self.waveform_queue.empty():
-                    waveform_dict = self.waveform_queue.get()
-                self.waveform_tab_controller.plot_waveforms2(waveform_dict, self.configuration.DAQParameters['sample_rate'])
-            time.sleep(0.001)
-
+    def update_event(self):
+        while True:
+            event, value = self.event_queue.get()
+            if event == 'waveform':
+                self.waveform_tab_controller.plot_waveforms2(value, self.configuration.DAQParameters['sample_rate'])
+            elif event == 'stop':
+                break
 
 
 if __name__ == '__main__':

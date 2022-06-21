@@ -50,7 +50,7 @@ logger = logging.getLogger(p)
 # from model.devices.laser_scanning import LaserScanning
 
 
-def auto_redial(func, n_tries=10, exception=Exception):
+def auto_redial(func, args, n_tries=10, exception=Exception):
     """
     Retries connections to a startup device defined by func n_tries times.
 
@@ -58,17 +58,28 @@ def auto_redial(func, n_tries=10, exception=Exception):
     ----------
     func : function or class
         The function or class (__init__() function) that connects to a device.
+    args : tuple
+        Arguments to function or class
     n_tries : int
         The number of tries to redial.
     exception : inherits from BaseException
         An exception type to check on each connection attempt.
     """
-    for _ in range(n_tries):
-        try:
-            return func
-        except exception:
-            time.sleep(0.01)
+    val = None
 
+    for i in range(n_tries):
+        try:
+            val = func(*args)
+        except exception:
+            if i < (n_tries-1):
+                print(f"Failed {str(func)} attempt {i+1}/{n_tries}.")
+                time.sleep(0.1)
+            else:
+                raise exception
+        else:
+            break
+
+    return val
 
 def start_analysis(configuration, experiment, use_gpu, verbose):
     """
@@ -84,7 +95,7 @@ def start_camera(configuration, experiment, verbose):
 
     if configuration.Devices['camera'] == 'HamamatsuOrca':
         from model.devices.cameras import HamamatsuOrca
-        return auto_redial(HamamatsuOrca(0, configuration, experiment, verbose), exception=AttributeError)
+        return auto_redial(HamamatsuOrca, (0, configuration, experiment, verbose), exception=AttributeError)
     elif configuration.Devices['camera'] == 'SyntheticCamera':
         from model.devices.cameras import SyntheticCamera
         return SyntheticCamera(0, configuration, experiment, verbose)
@@ -131,7 +142,7 @@ def start_filter_wheel(configuration, verbose):
 
     if configuration.Devices['filter_wheel'] == 'SutterFilterWheel':
         from model.devices.filter_wheels import SutterFilterWheel
-        return SutterFilterWheel(configuration, verbose)
+        return auto_redial(SutterFilterWheel, (configuration, verbose), exception=UserWarning)
     elif configuration.Devices['filter_wheel'] == 'SyntheticFilterWheel':
         from model.devices.filter_wheels import SyntheticFilterWheel
         return SyntheticFilterWheel(configuration, verbose)

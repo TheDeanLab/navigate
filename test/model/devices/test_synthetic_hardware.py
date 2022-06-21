@@ -6,7 +6,7 @@ from aslm.model.aslm_model_config import Session as session
 
 # Set up the model, experiment, ETL dictionaries
 base_directory = Path(__file__).resolve().parent.parent.parent.parent
-configuration_directory = Path.joinpath(base_directory, 'src', 'config')
+configuration_directory = Path.joinpath(base_directory, 'src/aslm', 'config')
 
 model = session(Path.joinpath(configuration_directory, 'configuration.yml'))
 experiment = session(Path.joinpath(configuration_directory, 'experiment.yml'))

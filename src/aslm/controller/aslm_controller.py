@@ -220,18 +220,18 @@ class ASLM_controller:
        
     def on_enter(self, event):
        self.canvas.bind("<MouseWheel>", self.update_position)
-       print("entering")
     def on_leave(self, event):
        self.count = 0
 
     def update_position(self, event):
        position_o = self.stage_gui_controller.get_position()
+       print(position_o)
        if event.delta == -1:
            self.count -= 1
        if event.delta == 1:
            self.count += 1
        updated_position = position_o
-       updated_position["x"] += self.count # need to add a scaling factor here (can make it dependent on interv
+       updated_position["f"] += self.count # need to add a scaling factor here (can make it dependent on interv
        self.stage_gui_controller.set_position(updated_position)
    
     def key_press(self, event):
@@ -239,15 +239,16 @@ class ASLM_controller:
        position_o = self.stage_gui_controller.get_position()
        current_position = position_o
        increment = getattr(self.stage_gui_controller, "widget_vals")
-       increment = increment["xy_step"].get()
+       x_increment = increment["x_step"].get()
+       y_increment = increment["y_step"].get()
        if char.lower() == "w":
-           current_position["y"] += increment
+           current_position['y'] += y_increment
        elif char.lower() == "a":
-           current_position["x"] -= increment
+           current_position['x'] -= x_increment
        elif char.lower() == "s":
-           current_position["y"] -= increment
+           current_position['y'] -= y_increment
        elif char.lower() == "d":
-           current_position["x"] += increment
+           current_position['x'] += x_increment
        self.stage_gui_controller.set_position(current_position)
 
     def update_buffer(self):

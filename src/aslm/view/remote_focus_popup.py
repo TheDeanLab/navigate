@@ -163,7 +163,9 @@ class remote_popup():
                 5,
                 0,
                 0))
+
         galvo.grid(row=5, column=0, sticky=(NSEW))
+
         self.inputs['Galvo Amp'] = LabelInput(
             parent=self.laser_frame, input_class=ValidatedSpinbox, input_var=StringVar())
 
@@ -173,6 +175,11 @@ class remote_popup():
             parent=self.laser_frame, input_class=ValidatedSpinbox, input_var=StringVar())
 
         self.inputs['Galvo Off'].grid(row=5, column=2, sticky=(NSEW), pady=(20, 0))
+
+        self.inputs['Galvo Freq'] = LabelInput(
+            parent=self.laser_frame, input_class=ValidatedSpinbox, input_var=StringVar())
+
+        self.inputs['Galvo Freq'].grid(row=6, column=1, sticky=(NSEW), pady=(20, 0))
 
         # High/Low Resolution
         hi_lo_labels = ['Percent Delay', 'Duty Cycle', 'Percent Smoothing']

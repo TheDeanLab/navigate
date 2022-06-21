@@ -273,6 +273,7 @@ class DAQBase:
 
         if update_waveforms:
             self.calculate_all_waveforms(microscope_state, self.etl_constants, galvo_parameters)
+            self.calculate_samples()
             self.prev_etl_r_amplitude = self.etl_r_amplitude
             self.prev_etl_r_offset = self.etl_r_offset
             self.prev_etl_l_amplitude = self.etl_l_amplitude
@@ -516,6 +517,8 @@ class NIDAQ(DAQBase):
         self.camera_trigger_task = nidaqmx.Task()
         self.master_trigger_task = nidaqmx.Task()
         self.galvo_etl_task = nidaqmx.Task()
+
+        self.calculate_samples()
 
         # Specify ports, timing, and triggering
         self.create_master_trigger_task()

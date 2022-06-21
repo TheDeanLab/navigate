@@ -204,6 +204,7 @@ def sawtooth(sample_rate=100000,
     t = np.linspace(0, sweep_time, samples)
     waveform = signal.sawtooth(2 * np.pi * frequency * (t - phase), width=duty_cycle)
     waveform = amplitude * waveform + offset
+    waveform[-1] = offset - amplitude  # TODO: We do this to prevent an extra stripe on the camera. This shouldn't be necessary as the camera should be off.
     return waveform
 
 

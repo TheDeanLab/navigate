@@ -38,6 +38,7 @@ POSSIBILITY OF SUCH DAMAGE.
 import platform
 import sys
 import logging
+import time
 from pathlib import Path
 # Logger Setup
 p = __name__.split(".")[0]
@@ -48,6 +49,25 @@ logger = logging.getLogger(p)
 # Local Imports
 # from model.devices.laser_scanning import LaserScanning
 
+
+def auto_redial(func, n_tries=10, exception=Exception):
+    """
+    Retries connections to a startup device defined by func n_tries times.
+
+    Parameters
+    ----------
+    func : function or class
+        The function or class (__init__() function) that connects to a device.
+    n_tries : int
+        The number of tries to redial.
+    exception : inherits from BaseException
+        An exception type to check on each connection attempt.
+    """
+    for _ in range(n_tries):
+        try:
+            return func
+        except exception:
+            time.sleep(0.01)
 
 
 def start_analysis(configuration, experiment, use_gpu, verbose):
@@ -64,7 +84,7 @@ def start_camera(configuration, experiment, verbose):
 
     if configuration.Devices['camera'] == 'HamamatsuOrca':
         from model.devices.cameras import HamamatsuOrca
-        return HamamatsuOrca(0, configuration, experiment, verbose)
+        return auto_redial(HamamatsuOrca(0, configuration, experiment, verbose), exception=AttributeError)
     elif configuration.Devices['camera'] == 'SyntheticCamera':
         from model.devices.cameras import SyntheticCamera
         return SyntheticCamera(0, configuration, experiment, verbose)

@@ -620,6 +620,7 @@ property_dict = {
 
 # ==== api function references ====
 dcamapi_init = __dll.dcamapi_init
+dcamapi_uninit = __dll.dcamapi_uninit
 dcamdev_open = __dll.dcamdev_open
 dcamdev_close = __dll.dcamdev_close
 dcamwait_open = __dll.dcamwait_open
@@ -638,15 +639,39 @@ dcamwait_abort = __dll.dcamwait_abort
 dcamcap_firetrigger = __dll.dcamcap_firetrigger
 dcamdev_setdata = __dll.dcamdev_setdata
 
+class camReg(object):
+    """
+    Keep track of the number of cameras initialised so we can initialise and
+    finalise the library.
+
+    Cribbed from https://github.com/python-microscopy/python-microscopy/blob/master/PYME/Acquire/Hardware/HamamatsuDCAM/HamamatsuDCAM.py
+    """
+    numCameras = 0
+    maxCameras = 0
+
+    @classmethod
+    def regCamera(cls):
+        if cls.numCameras == 0:
+            # Initialize the API
+            paraminit = DCAMAPI_INIT()
+            if int(dcamapi_init(byref(paraminit))) < 0:
+                # NOTE: This is an AttributeError to match the other error thrown by this class in startup functions.
+                # This really makes no sense as an attribute error.
+                raise Exception("DCAM initialization failed.")
+            cls.maxCameras = paraminit.iDeviceCount
+
+        cls.numCameras += 1
+
+    @classmethod
+    def unregCamera(cls):
+        cls.numCameras -= 1
+        if cls.numCameras == 0:
+            dcamapi_uninit()
 
 class DCAM:
     def __init__(self, index=0):
         self.__hdcam = 0
         self.__hdcamwait = 0
-        
-        # initialize api
-        paraminit = DCAMAPI_INIT()
-        dcamapi_init(byref(paraminit))
         
         # open camera
         self.dev_open(index)
@@ -723,6 +748,8 @@ class DCAM:
             print("Camera already open")
             return self.__result(DCAMERR.ALREADYOPENED)  # instance is already opened. New Error.
 
+        camReg.regCamera()
+
         paramopen = DCAMDEV_OPEN()
         if index >= 0:
             paramopen.index = index
@@ -737,6 +764,7 @@ class DCAM:
             print("Camera Open")
 
         self.__hdcam = c_void_p(paramopen.hdcam)
+
         return True
 
     def dev_close(self):
@@ -751,6 +779,7 @@ class DCAM:
             self.__close_hdcamwait()
             dcamdev_close(self.__hdcam)
             self.__hdcam = 0
+            camReg.unregCamera()
 
         return True
 

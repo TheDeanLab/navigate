@@ -38,6 +38,7 @@ import logging
 import time
 import ctypes
 import importlib
+import sys
 
 # Third Party Imports
 from pathlib import Path
@@ -276,7 +277,10 @@ class HamamatsuOrca(CameraBase):
         super().__init__(camera_id, model, experiment, verbose)
 
         # Locally Import Hamamatsu API and Initialize Camera Controller
-        HamamatsuController = importlib.import_module('model.devices.APIs.hamamatsu.HamamatsuAPI')
+        if hasattr(sys.modules, 'model.devices.APIs.hamamatsu.HamamatsuAPI'):
+            HamamatsuController = importlib.reload('model.devices.APIs.hamamatsu.HamamatsuAPI')
+        else:
+            HamamatsuController = importlib.import_module('model.devices.APIs.hamamatsu.HamamatsuAPI')
         self.camera_controller = HamamatsuController.DCAM(camera_id)
 
         # Values are pulled from the CameraParameters section of the configuration.yml file.
@@ -318,7 +322,9 @@ class HamamatsuOrca(CameraBase):
         logger.debug("Hamamatsu Camera Class Initialized")
 
     def __del__(self):
-        self.camera_controller.dev_close()
+        if hasattr(self, 'camera_controller'):
+            self.camera_controller.dev_close()
+
         if self.verbose:
             print("Hamamatsu Camera Shutdown")
         logger.debug("Hamamatsu Camera Shutdown")

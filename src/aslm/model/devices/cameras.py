@@ -38,6 +38,7 @@ import logging
 import time
 import ctypes
 import importlib
+import sys
 
 # Third Party Imports
 from pathlib import Path
@@ -276,7 +277,10 @@ class HamamatsuOrca(CameraBase):
         super().__init__(camera_id, model, experiment, verbose)
 
         # Locally Import Hamamatsu API and Initialize Camera Controller
-        HamamatsuController = importlib.import_module('model.devices.APIs.hamamatsu.HamamatsuAPI')
+        if hasattr(sys.modules, 'model.devices.APIs.hamamatsu.HamamatsuAPI'):
+            HamamatsuController = importlib.reload('model.devices.APIs.hamamatsu.HamamatsuAPI')
+        else:
+            HamamatsuController = importlib.import_module('model.devices.APIs.hamamatsu.HamamatsuAPI')
         self.camera_controller = HamamatsuController.DCAM(camera_id)
 
         # Values are pulled from the CameraParameters section of the configuration.yml file.
@@ -318,7 +322,9 @@ class HamamatsuOrca(CameraBase):
         logger.debug("Hamamatsu Camera Class Initialized")
 
     def __del__(self):
-        self.camera_controller.dev_close()
+        if hasattr(self, 'camera_controller'):
+            self.camera_controller.dev_close()
+
         if self.verbose:
             print("Hamamatsu Camera Shutdown")
         logger.debug("Hamamatsu Camera Shutdown")
@@ -372,10 +378,6 @@ class HamamatsuOrca(CameraBase):
             print('Camera readout direction not supported')
             logger.info("Camera readout direction not supported")
 
-    # def set_lightsheet_rolling_shutter_width(self, mode):
-    #     # TODO: Figure out how to do this.  I believe it is dictated by the exposure time and the line interval.
-    #     pass
-
     def calculate_light_sheet_exposure_time(self, full_chip_exposure_time, shutter_width):
         """
         calculate the parameters for an ASLM acquisition
@@ -392,6 +394,9 @@ class HamamatsuOrca(CameraBase):
         # Calculates the readout time and maximum frame rate according to the camera configuration settings.
         # Assumes model C13440 with Camera Link communication from Hamamatsu.
         # Currently pulling values directly from the camera.
+
+        TODO: I think self.camera_controller.get_property_value("readout_time") pulls out the actual readout_time
+              calculated here (i.e. we don't need to do the calculations).
         """
         h = 9.74436 * 10 ** -6  # Readout timing constant
         h = self.camera_controller.get_property_value("readout_time")

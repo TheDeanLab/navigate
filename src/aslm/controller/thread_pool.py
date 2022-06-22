@@ -38,6 +38,7 @@ import sys
 from collections import deque
 import logging
 from pathlib import Path
+import traceback
 # Logger Setup
 p = __name__.split(".")[0]
 logger = logging.getLogger(p)
@@ -132,8 +133,12 @@ class SynchronizedThreadPool:
             # wait for it's turn
             thread.wait()
             # run itself
-            if target:
-                target(*args, **kwargs)
+            if callable(target):
+                try:
+                    target(*args, **kwargs)
+                except Exception as e:
+                    print(threading.current_thread().name, 'thread exception happened!', e, traceback.format_exc())
+
             # wake up next thread if any
             with self.resources[resourceName] as resource:
                 resource.waitlist.popleft()

@@ -51,7 +51,7 @@ def camera_exposure(sample_rate=100000,
     amplitude = 5
 
     # get an integer number of samples
-    samples = int(np.ceil(np.multiply(sample_rate, sweep_time)))
+    samples = int(np.multiply(sample_rate, sweep_time))
 
     # create an array just containing the offset voltage:
     array = np.zeros(samples)
@@ -112,19 +112,25 @@ def tunable_lens_ramp_v2(sample_rate=100000,
                          offset=0):
 
     # create an array just containing the negative amplitude voltage:
-    delay_samples = etl_delay * exposure_time * sample_rate / 100
-    delay_array = np.zeros(int(delay_samples)) + offset - amplitude
+    delay_samples = int(etl_delay * exposure_time * sample_rate / 100)
+    delay_array = np.zeros(delay_samples) + offset - amplitude
 
     # 10-7.5 -> 1.025 * .2
     #
-    ramp_samples = (exposure_time + exposure_time*(camera_delay-etl_delay)/100) * sample_rate
-    ramp_array = np.linspace(offset - amplitude, offset + amplitude, int(ramp_samples))
+    ramp_samples = int((exposure_time + exposure_time*(camera_delay-etl_delay)/100) * sample_rate)
+    ramp_array = np.linspace(offset - amplitude, offset + amplitude, ramp_samples)
 
     # fall_samples = .025 * .2 * 100000 = 500
-    fall_samples = fall * exposure_time * sample_rate / 100
-    fall_array = np.linspace(offset + amplitude, offset - amplitude, int(fall_samples))
+    fall_samples = int(fall * exposure_time * sample_rate / 100)
+    fall_array = np.linspace(offset + amplitude, offset - amplitude, fall_samples)
 
-    waveform = np.hstack([delay_array, ramp_array, fall_array])
+    extra_samples = int(int(np.multiply(sample_rate, sweep_time)) - (delay_samples + ramp_samples + fall_samples))
+    if extra_samples > 0:
+        extra_array = np.zeros(extra_samples) + offset - amplitude
+        waveform = np.hstack([delay_array, ramp_array, fall_array, extra_array])
+    else:
+        waveform = np.hstack([delay_array, ramp_array, fall_array])
+
     return waveform
 
 
@@ -193,11 +199,12 @@ def sawtooth(sample_rate=100000,
     Example:  galvosignal =  sawtooth(100000, 0.4, 199, 3.67, 0, 50, np.pi)
     '''
 
-    samples = np.multiply(float(sample_rate), sweep_time)
+    samples = int(np.multiply(sample_rate, sweep_time))
     duty_cycle = duty_cycle / 100
-    t = np.linspace(0, sweep_time, int(samples))
+    t = np.linspace(0, sweep_time, samples)
     waveform = signal.sawtooth(2 * np.pi * frequency * (t - phase), width=duty_cycle)
     waveform = amplitude * waveform + offset
+    waveform[-1] = offset - amplitude  # TODO: We do this to prevent an extra stripe on the camera. This shouldn't be necessary as the camera should be off.
     return waveform
 
 

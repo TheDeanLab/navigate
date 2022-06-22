@@ -35,9 +35,9 @@ import tkinter as tk
 from pathlib import Path
 from tkinter import ttk, NSEW, StringVar, Grid
 from tkinter.scrolledtext import ScrolledText
-from view.custom_widgets.popup import PopUp
-from view.custom_widgets.LabelInputWidgetFactory import LabelInput
-from view.custom_widgets.validation import ValidatedEntry
+from aslm.view.custom_widgets.popup import PopUp
+from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from aslm.view.custom_widgets.validation import ValidatedEntry
 
 # Logger Setup
 p = __name__.split(".")[0]

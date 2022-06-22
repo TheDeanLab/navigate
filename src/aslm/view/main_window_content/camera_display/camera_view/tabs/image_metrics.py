@@ -37,7 +37,7 @@ from tkinter import *
 from tkinter import ttk
 import tkinter as tk
 
-from view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 
 # Logger Setup
 p = __name__.split(".")[0]

@@ -44,9 +44,9 @@ from tkinter.font import Font
 import numpy as np
 
 # Import Sub-Frames
-from view.main_window_content.camera_display.camera_settings.camera_settings_tab import camera_settings_tab
-from view.main_window_content.tabs.advanced_settings_tab import advanced_settings_tab
-from view.main_window_content.tabs.channels_tab import channels_tab
+from aslm.view.main_window_content.camera_display.camera_settings.camera_settings_tab import camera_settings_tab
+from aslm.view.main_window_content.tabs.advanced_settings_tab import advanced_settings_tab
+from aslm.view.main_window_content.tabs.channels_tab import channels_tab
 
 
 class settings_notebook(ttk.Notebook):

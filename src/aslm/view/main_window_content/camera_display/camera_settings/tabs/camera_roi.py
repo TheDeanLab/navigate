@@ -37,8 +37,8 @@ import logging
 from pathlib import Path
 from tkinter.font import Font
 
-from view.custom_widgets.LabelInputWidgetFactory import LabelInput
-from view.custom_widgets.validation import ValidatedSpinbox
+from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from aslm.view.custom_widgets.validation import ValidatedSpinbox
 
 # Logger Setup
 p = __name__.split(".")[0]

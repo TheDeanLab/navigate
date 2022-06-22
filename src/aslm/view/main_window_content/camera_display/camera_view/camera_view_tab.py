@@ -41,8 +41,8 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 # Local Imports
-from view.main_window_content.camera_display.camera_view.tabs.image_metrics import image_metrics
-from view.main_window_content.camera_display.camera_view.tabs.palette import palette
+from aslm.view.main_window_content.camera_display.camera_view.tabs.image_metrics import image_metrics
+from aslm.view.main_window_content.camera_display.camera_view.tabs.palette import palette
 
 # Logger Setup
 p = __name__.split(".")[0]

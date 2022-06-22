@@ -20,21 +20,21 @@ handlers:
     class: logging.FileHandler
     level: INFO
     formatter: base
-    filename: aslm/log_files/model_info.log
+    filename: src/aslm/log_files/model_info.log
     filters: [not_performance]
     mode: w
   model_debug:
     class: logging.FileHandler
     level: DEBUG
     formatter: base
-    filename: aslm/log_files/model_debug.log
+    filename: src/aslm/log_files/model_debug.log
     filters: [not_performance]
     mode: w
   model_performance:
     class: logging.FileHandler
     level: DEBUG
     formatter: base
-    filename: aslm/log_files/model_performance.log
+    filename: src/aslm/log_files/model_performance.log
     filters: [performance_specs]
     mode: w
 loggers:

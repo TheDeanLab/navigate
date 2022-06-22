@@ -47,11 +47,11 @@ import tkinter as tk
 import platform
 import logging
 import logging.config
-from log_files.log_functions import log_setup
+from aslm.log_files.log_functions import log_setup
 import yaml
 
 # Local Imports
-from controller.aslm_controller import ASLM_controller as controller
+from aslm.controller.aslm_controller import ASLM_controller as controller
 
 def main():
     """

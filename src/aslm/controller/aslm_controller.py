@@ -41,30 +41,30 @@ import threading
 
 # Local View Imports
 from tkinter import filedialog
-from view.main_application_window import Main_App as view
-from view.remote_focus_popup import remote_popup
-from view.autofocus_setting_popup import autofocus_popup
+from aslm.view.main_application_window import Main_App as view
+from aslm.view.remote_focus_popup import remote_popup
+from aslm.view.autofocus_setting_popup import autofocus_popup
 
 # Local Sub-Controller Imports
-from controller.sub_controllers.stage_gui_controller import Stage_GUI_Controller
-from controller.sub_controllers.acquire_bar_controller import Acquire_Bar_Controller
-from controller.sub_controllers.channels_tab_controller import Channels_Tab_Controller
-from controller.sub_controllers.camera_view_controller import Camera_View_Controller
-from controller.sub_controllers.camera_setting_controller import Camera_Setting_Controller
-from controller.aslm_configuration_controller import ASLM_Configuration_Controller
-from controller.sub_controllers.waveform_tab_controller import Waveform_Tab_Controller
-from controller.sub_controllers.etl_popup_controller import Etl_Popup_Controller
-from controller.sub_controllers.autofocus_popup_controller import Autofocus_Popup_Controller
-from controller.aslm_controller_functions import *
-from controller.thread_pool import SynchronizedThreadPool
+from aslm.controller.sub_controllers.stage_gui_controller import Stage_GUI_Controller
+from aslm.controller.sub_controllers.acquire_bar_controller import Acquire_Bar_Controller
+from aslm.controller.sub_controllers.channels_tab_controller import Channels_Tab_Controller
+from aslm.controller.sub_controllers.camera_view_controller import Camera_View_Controller
+from aslm.controller.sub_controllers.camera_setting_controller import Camera_Setting_Controller
+from aslm.controller.aslm_configuration_controller import ASLM_Configuration_Controller
+from aslm.controller.sub_controllers.waveform_tab_controller import Waveform_Tab_Controller
+from aslm.controller.sub_controllers.etl_popup_controller import Etl_Popup_Controller
+from aslm.controller.sub_controllers.autofocus_popup_controller import Autofocus_Popup_Controller
+from aslm.controller.aslm_controller_functions import *
+from aslm.controller.thread_pool import SynchronizedThreadPool
 
 # Local Model Imports
-from model.aslm_model import Model
-from model.aslm_model_config import Session as session
-from model.concurrency.concurrency_tools import ObjectInSubprocess, SharedNDArray
+from aslm.model.aslm_model import Model
+from aslm.model.aslm_model_config import Session as session
+from aslm.model.concurrency.concurrency_tools import ObjectInSubprocess, SharedNDArray
 
 # debug
-from controller.aslm_debug import Debug_Module
+from aslm.controller.aslm_debug import Debug_Module
 
 import logging
 from pathlib import Path

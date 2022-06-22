@@ -43,7 +43,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Local Imports
-from controller.sub_controllers.gui_controller import GUI_Controller
+from aslm.controller.sub_controllers.gui_controller import GUI_Controller
 
 # Logger Setup
 p = __name__.split(".")[0]

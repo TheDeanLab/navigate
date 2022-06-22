@@ -60,9 +60,6 @@ class stage_control_tab(ttk.Frame):
 
         #Position Frame
         stage_control_tab.position_frame = position_frame(stage_control_tab)
-
-        #XY Frame
-        #stage_control_tab.xy_frame = x_y_frame(stage_control_tab)
         
         #X Frame
         stage_control_tab.x_frame = other_axis_frame(stage_control_tab, 'X')        
@@ -114,6 +111,8 @@ class stage_control_tab(ttk.Frame):
         Grid.rowconfigure(stage_control_tab.theta_frame, 'all', weight=1)
         Grid.columnconfigure(stage_control_tab.f_frame, 'all', weight=1)
         Grid.rowconfigure(stage_control_tab.f_frame, 'all', weight=1)
+        
+        # Did not include GOTO widget in remaking of GUI
         Grid.columnconfigure(stage_control_tab.goto_frame, 'all', weight=1)
         Grid.rowconfigure(stage_control_tab.goto_frame, 'all', weight=1)
         
@@ -126,9 +125,12 @@ class stage_control_tab(ttk.Frame):
         stage_control_tab.f_frame.grid(row=4, column=1, sticky=(NSEW), padx=5)
         
     def get_widgets(stage_control_tab):
-        """
-        # this function will return all the input widgets as a dictionary
-        # the reference name in the dictionary is the same as in the widget list file
+        """ Return all the input widgets as a dictionary
+        
+        Returns
+        -------
+        temp : dictionary
+            Dictionary of each widget with reference value same as in the widget list
         """
         temp = {
             **stage_control_tab.position_frame.get_widgets()
@@ -142,9 +144,12 @@ class stage_control_tab(ttk.Frame):
         return {k: temp[k].get_variable() for k in temp}
 
     def get_buttons(stage_control_tab):
-        """
-        # this function returns all the buttons in a dictionary
-        # the reference name is the same as in widget list
+        """ Return all the buttons as a dictionary
+        
+        Returns
+        -------
+        result : dictionary
+            Dictionary of each button with reference value same as in the button list
         """
         result = {}
         for axis in ['x', 'y','z', 'theta', 'f']:

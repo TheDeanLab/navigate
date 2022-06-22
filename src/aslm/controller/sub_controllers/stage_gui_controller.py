@@ -117,7 +117,7 @@ class Stage_GUI_Controller(GUI_Controller):
         """
         # This function set all the position and step value
         # setting_dict = { 'x': value, 'y': value, 'z': value, 'theta': value, 'f': value
-                           'xy_step': value, 'z_step': value, 'theta_step': value, 'f_step': value}
+                           'x_step': value, 'y_step': value, 'z_step': value, 'theta_step': value, 'f_step': value}
         # }
         """
         widgets = self.view.get_widgets()

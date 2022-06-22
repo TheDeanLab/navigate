@@ -65,6 +65,11 @@ def auto_redial(func, args, n_tries=10, exception=Exception):
         The number of tries to redial.
     exception : inherits from BaseException
         An exception type to check on each connection attempt.
+
+    Returns
+    -------
+    val : object
+        Result of func
     """
     val = None
 

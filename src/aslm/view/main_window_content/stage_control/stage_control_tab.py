@@ -33,7 +33,6 @@ POSSIBILITY OF SUCH DAMAGE.
 # Local Imports
 from view.main_window_content.stage_control.tabs.other_axis_frame import other_axis_frame
 from view.main_window_content.stage_control.tabs.position_frame import position_frame
-from view.main_window_content.stage_control.tabs.x_y_frame import x_y_frame
 from view.main_window_content.stage_control.tabs.goto_frame import goto_frame
 # Standard Imports
 from tkinter import *

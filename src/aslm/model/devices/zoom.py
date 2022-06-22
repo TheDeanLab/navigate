@@ -107,6 +107,7 @@ class SyntheticZoom(ZoomBase):
             print("Reading Virtual Zoom Position")
         logger.debug("Reading Virtual Zoom Position")
 
+
 class DynamixelZoom(ZoomBase):
     def __init__(self, model, verbose):
         super().__init__(model, verbose)
@@ -140,6 +141,12 @@ class DynamixelZoom(ZoomBase):
         self.port_num = self.dynamixel.portHandler(self.devicename)
         self.dynamixel.packetHandler()
 
+        # Open port and set baud rate
+        if not self.dynamixel.openPort(self.port_num):
+            raise RuntimeError(f"Unable to open port {self.port_num}.")
+
+        self.dynamixel.setBaudRate(self.port_num, self.baudrate)
+
         if self.verbose:
             print('Dynamixel Zoom initialized')
         logger.debug("Dynamixel Zoom initialized")
@@ -164,9 +171,6 @@ class DynamixelZoom(ZoomBase):
         """
         # Moves the Dynamixel Zoom Device
         """
-        # Open port and set baud rate
-        self.dynamixel.openPort(self.port_num)
-        self.dynamixel.setBaudRate(self.port_num, self.baudrate)
 
         # Enable servo
         self.dynamixel.write1ByteTxRx(
@@ -220,10 +224,10 @@ class DynamixelZoom(ZoomBase):
                 if self.verbose:
                     print(cur_position)
                 logger.debug(cur_position)
-        self.dynamixel.closePort(self.port_num)
         if self.verbose:
             print('Zoom moved to {}'.format(position))
         logger.debug(f"Zoom moved to {position}")
+
     def read_position(self):
         """
         # Returns position as an int between 0 and 4096
@@ -238,3 +242,6 @@ class DynamixelZoom(ZoomBase):
             print('Zoom position: {}'.format(cur_position))
         logger.debug(f"Zoom position {cur_position}")
         return cur_position
+
+    def __del__(self):
+        self.dynamixel.closePort(self.port_num)

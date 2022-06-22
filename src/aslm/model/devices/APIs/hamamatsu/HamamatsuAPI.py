@@ -603,6 +603,7 @@ property_dict = {
     'trigger_mode': 1049104,  # 0x00100210, R/W, mode,    "TRIGGER MODE"
     'trigger_polarity': 1049120,  # 0x00100220, R/W, mode, "TRIGGER POLARITY"
     'trigger_source': 1048848,  # 0x00100110, R/W, mode,   "TRIGGER SOURCE"
+    'trigger_delay': 1049184,  # 0x00100260,	/* R/W, sec,	"TRIGGER DELAY"			*/
     'internal_line_interval': 4208720,  # 0x00403850, R/W, sec,    "INTERNAL LINE INTERVAL"
     'image_width': 4325904,  # 0x00420210, R/O, long, "IMAGE WIDTH"
     'image_height': 4325920,  # 0x00420220, R/O, long,    "IMAGE HEIGHT"

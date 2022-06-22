@@ -153,8 +153,25 @@ class DAQBase:
                  'camera_waveform': None}
         }
 
-    def calculate_all_waveforms(self, microscope_state, etl_constants, galvo_parameters):
-        """ Pre-calculates all waveforms necessary for the acquisition and organizes in a dictionary format.
+    def calculate_all_waveforms(self, microscope_state, etl_constants, galvo_parameters, readout_time):
+        """
+        Pre-calculates all waveforms necessary for the acquisition and organizes in a dictionary format.
+
+        Parameters
+        ----------
+        microscope_state : dict
+            Dictionary of experiment MicroscopeState parameters (see config/experiment.yml)
+        etl_constants : dict
+            Dictionary of ETL parameters (see config/etl_constants.yml)
+        galvo_parameters : dict
+            Dictionary of experiment GalvoParameters parameters (see config/experiment.yml)
+        readout_time : float
+            Readout time of the camera (seconds) if we are operating the camera in Normal mode, otherwise -1.
+
+        Returns
+        -------
+        self.waveform_dict : dict
+            Dictionary of waveforms to pass to galvo and ETL, plus a camera waveform for display purposes.
         """
 
         # Imaging Mode = 'high' or 'low'
@@ -175,6 +192,12 @@ class DAQBase:
                 laser = channel['laser']
                 exposure_time = channel['camera_exposure_time'] / 1000
                 self.sweep_time = exposure_time + exposure_time * ((self.camera_delay_percent + self.etl_ramp_falling) / 100)
+                if readout_time > 0:
+                    # This addresses the dovetail nature of the camera readout in normal mode. The camera reads middle
+                    # out, and the delay in start of the last lines compared to the first lines causes the exposure
+                    # to be net longer than exposure_time. This helps the galvo keep sweeping for the full camera
+                    # exposure time.
+                    self.sweep_time += readout_time
 
                 # ETL Parameters
                 etl_amplitude = float(etl_constants.ETLConstants[imaging_mode][zoom][laser]['amplitude'])
@@ -239,7 +262,7 @@ class DAQBase:
         # Write the waveforms to the tasks.
         self.write_waveforms_to_tasks()
 
-    def update_etl_parameters(self, microscope_state, channel, galvo_parameters):
+    def update_etl_parameters(self, microscope_state, channel, galvo_parameters, readout_time):
         """
         # Update the ETL parameters according to the zoom and excitation wavelength.
         """
@@ -272,7 +295,7 @@ class DAQBase:
                            or (self.prev_etl_r_offset != self.etl_r_offset)
 
         if update_waveforms:
-            self.calculate_all_waveforms(microscope_state, self.etl_constants, galvo_parameters)
+            self.calculate_all_waveforms(microscope_state, self.etl_constants, galvo_parameters, readout_time)
             self.calculate_samples()
             self.prev_etl_r_amplitude = self.etl_r_amplitude
             self.prev_etl_r_offset = self.etl_r_offset
@@ -447,7 +470,7 @@ class NIDAQ(DAQBase):
     def __del__(self):
         pass
 
-    def create_camera_task(self, exposure_time, line_interval):
+    def create_camera_task(self, exposure_time):
         """
         # Set up the camera trigger
         # Calculate camera high time and initial delay.
@@ -455,7 +478,7 @@ class NIDAQ(DAQBase):
         """
         # Configure camera triggers
         camera_trigger_out_line = self.model.DAQParameters['camera_trigger_out_line']
-        self.camera_high_time = (self.camera_pulse_percent/100) * (exposure_time/1000)  # self.sweep_time
+        self.camera_high_time = 0.004  # (self.camera_pulse_percent / 100) * (exposure_time/1000)  # self.sweep_time
         self.camera_delay = (self.camera_delay_percent / 100) * (exposure_time/1000)  # * 0.01 * self.sweep_time
 
         self.camera_trigger_task.co_channels.add_co_pulse_chan_time(camera_trigger_out_line,
@@ -510,7 +533,7 @@ class NIDAQ(DAQBase):
         self.camera_trigger_task.close()
         self.master_trigger_task.close()
 
-    def prepare_acquisition(self, channel_key, exposure_time, line_interval):
+    def prepare_acquisition(self, channel_key, exposure_time):
         """
         # Initialize the nidaqmx tasks.
         """
@@ -522,7 +545,7 @@ class NIDAQ(DAQBase):
 
         # Specify ports, timing, and triggering
         self.create_master_trigger_task()
-        self.create_camera_task(exposure_time, line_interval)
+        self.create_camera_task(exposure_time)
         self.create_galvo_etl_task()
 
         # Calculate the waveforms and start tasks.
@@ -530,12 +553,8 @@ class NIDAQ(DAQBase):
         galvo_waveform = self.waveform_dict[channel_key]['galvo_waveform']
         self.galvo_and_etl_waveforms = np.stack((galvo_waveform, galvo_waveform, etl_waveform, etl_waveform))
 
-        self.write_waveforms_to_tasks()
-
         # Write pre-calculated waveforms to the tasks...
-        self.start_tasks()
-
-
+        self.write_waveforms_to_tasks()
 
     def run_acquisition(self):
         """
@@ -544,6 +563,7 @@ class NIDAQ(DAQBase):
         # For this to work, all analog output and counter tasks have to be started so
         # that they are waiting for the trigger signal.
         """
+        self.start_tasks()
         self.master_trigger_task.write([False, True, True, True, False], auto_start=True)
         self.galvo_etl_task.wait_until_done()
         self.camera_trigger_task.wait_until_done()

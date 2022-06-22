@@ -34,9 +34,9 @@ POSSIBILITY OF SUCH DAMAGE.
 from tkinter import *
 import tkinter as tk
 from tkinter import ttk
-from view.custom_widgets.popup import PopUp
-from view.custom_widgets.LabelInputWidgetFactory import LabelInput
-from view.custom_widgets.validation import ValidatedSpinbox
+from aslm.view.custom_widgets.popup import PopUp
+from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from aslm.view.custom_widgets.validation import ValidatedSpinbox
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, 

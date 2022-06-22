@@ -1,60 +1,103 @@
-from email.mime import base
-from pathlib import Path
+# from email.mime import base
+# from pathlib import Path
 
-from numpy import triu_indices
-from aslm.model.aslm_model_config import Session as session
+# from numpy import triu_indices
+# from aslm.model.aslm_model_config import Session as session
 
 # Set up the model, experiment, ETL dictionaries
-base_directory = Path(__file__).resolve().parent.parent.parent.parent
-configuration_directory = Path.joinpath(base_directory, 'src', 'config')
+# base_directory = Path(__file__).resolve().parent.parent.parent.parent
+# configuration_directory = Path.joinpath(base_directory, 'src/aslm', 'config')
 
-model = session(Path.joinpath(configuration_directory, 'configuration.yml'))
-experiment = session(Path.joinpath(configuration_directory, 'experiment.yml'))
-etl_constants = session(Path.joinpath(configuration_directory, 'etl_constants.yml'))
+# model = session(Path.joinpath(configuration_directory, 'configuration.yml'))
+# experiment = session(Path.joinpath(configuration_directory, 'experiment.yml'))
+# etl_constants = session(Path.joinpath(configuration_directory, 'etl_constants.yml'))
+from aslm.model.dummy_model import get_dummy_model
 
-def test_synthetic_daq():
-    from aslm.model.devices.daq import SyntheticDAQ
+class TestSyntheticHardware():
+        
+        
+    def test_synthetic_daq(self):
+        from aslm.model.devices.daq import SyntheticDAQ
+        self.dummy_model = get_dummy_model()
+        self.config = self.dummy_model.configuration
+        self.experiment = self.dummy_model.experiment
+        self.etl_const = self.dummy_model.etl_constants
+        self.verbose = self.dummy_model.verbose
 
-    sd = SyntheticDAQ(model, experiment, etl_constants)
+        
+        sd = SyntheticDAQ(self.config, self.experiment, self.etl_const, self.verbose)
 
-    return True
+        assert True
 
-def test_synthetic_camera():
-    from aslm.model.devices.cameras import SyntheticCamera
 
-    sc = SyntheticCamera(0, model, experiment)
 
-    return True
+    def test_synthetic_camera(self):
+        from aslm.model.devices.cameras import SyntheticCamera
+        self.dummy_model = get_dummy_model()
+        self.config = self.dummy_model.configuration
+        self.experiment = self.dummy_model.experiment
+        self.etl_const = self.dummy_model.etl_constants
+        self.verbose = self.dummy_model.verbose
 
-def test_synthetic_filter_wheel():
-    from aslm.model.devices.filter_wheels import SyntheticFilterWheel
 
-    sf = SyntheticFilterWheel(model, False)
+        sc = SyntheticCamera(0, self.config, self.experiment)
 
-    return True
+        return True
 
-def test_synthetic_stage():
-    from aslm.model.devices.stages import SyntheticStage
+    def test_synthetic_filter_wheel(self):
+        from aslm.model.devices.filter_wheels import SyntheticFilterWheel
+        self.dummy_model = get_dummy_model()
+        self.config = self.dummy_model.configuration
+        self.experiment = self.dummy_model.experiment
+        self.etl_const = self.dummy_model.etl_constants
+        self.verbose = self.dummy_model.verbose
 
-    ss = SyntheticStage(model, False)
+        sf = SyntheticFilterWheel(self.config, False)
 
-def test_synthetic_zoom():
-    from aslm.model.devices.zoom import SyntheticZoom
+        return True
 
-    sz = SyntheticZoom(model, False)
+    def test_synthetic_stage(self):
+        from aslm.model.devices.stages import SyntheticStage
+        self.dummy_model = get_dummy_model()
+        self.config = self.dummy_model.configuration
+        self.experiment = self.dummy_model.experiment
+        self.etl_const = self.dummy_model.etl_constants
+        self.verbose = self.dummy_model.verbose
 
-    return True
+        ss = SyntheticStage(self.config, False)
 
-def test_synthetic_shutter():
-    from aslm.model.devices.laser_shutters import SyntheticShutter
+    def test_synthetic_zoom(self):
+        from aslm.model.devices.zoom import SyntheticZoom
+        self.dummy_model = get_dummy_model()
+        self.config = self.dummy_model.configuration
+        self.experiment = self.dummy_model.experiment
+        self.etl_const = self.dummy_model.etl_constants
+        self.verbose = self.dummy_model.verbose
 
-    ss = SyntheticShutter(model, experiment)
+        sz = SyntheticZoom(self.config, False)
 
-    return True
+        return True
 
-def test_synthetic_laser():
-    from aslm.model.devices.lasers.SyntheticLaser import SyntheticLaser
+    def test_synthetic_shutter(self):
+        from aslm.model.devices.laser_shutters import SyntheticShutter
+        self.dummy_model = get_dummy_model()
+        self.config = self.dummy_model.configuration
+        self.experiment = self.dummy_model.experiment
+        self.etl_const = self.dummy_model.etl_constants
+        self.verbose = self.dummy_model.verbose
 
-    sl = SyntheticLaser(model, False)
+        ss = SyntheticShutter(self.config, self.experiment)
 
-    return True
+        return True
+
+    def test_synthetic_laser(self):
+        from aslm.model.devices.lasers.SyntheticLaser import SyntheticLaser
+        self.dummy_model = get_dummy_model()
+        self.config = self.dummy_model.configuration
+        self.experiment = self.dummy_model.experiment
+        self.etl_const = self.dummy_model.etl_constants
+        self.verbose = self.dummy_model.verbose
+
+        sl = SyntheticLaser(self.config, False)
+
+        return True

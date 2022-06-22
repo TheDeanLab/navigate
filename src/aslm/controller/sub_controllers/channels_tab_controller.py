@@ -33,10 +33,10 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 import numpy as np
-from controller.sub_controllers.widget_functions import validate_wrapper
-from controller.sub_controllers.gui_controller import GUI_Controller
-from controller.sub_controllers.channel_setting_controller import Channel_Setting_Controller
-from controller.sub_controllers.multi_position_controller import Multi_Position_Controller
+from aslm.controller.sub_controllers.widget_functions import validate_wrapper
+from aslm.controller.sub_controllers.gui_controller import GUI_Controller
+from aslm.controller.sub_controllers.channel_setting_controller import Channel_Setting_Controller
+from aslm.controller.sub_controllers.multi_position_controller import Multi_Position_Controller
 
 import logging
 from pathlib import Path

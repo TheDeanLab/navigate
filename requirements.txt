@@ -17,3 +17,4 @@ tensorflow==2.8.0
 cupy-cuda112==10.2.0
 protobuf==3.20.*
 zarr==2.11.3
+

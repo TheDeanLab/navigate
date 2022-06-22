@@ -6,9 +6,9 @@ formatters:
     format: '%(asctime)s - %(name)s - %(levelname)s - %(module)s: %(message)s'
 filters:
   performance_specs:
-    (): ext://log_files.filters.PerformanceFilter
+    (): ext://aslm.log_files.filters.PerformanceFilter
   not_performance:
-    (): ext://log_files.filters.NonPerfFilter
+    (): ext://aslm.log_files.filters.NonPerfFilter
 handlers:
   console:
     class: logging.StreamHandler
@@ -20,21 +20,21 @@ handlers:
     class: logging.FileHandler
     level: INFO
     formatter: base
-    filename: log_files/view_controller_info.log
+    filename: aslm/log_files/view_controller_info.log
     filters: [not_performance]
     mode: w
   vc_debug:
     class: logging.FileHandler
     level: DEBUG
     formatter: base
-    filename: log_files/view_controller_debug.log
+    filename: aslm/log_files/view_controller_debug.log
     filters: [not_performance]
     mode: w
   performance:
     class: logging.FileHandler
     level: DEBUG
     formatter: base
-    filename: log_files/performance.log
+    filename: aslm/log_files/performance.log
     filters: [performance_specs]
     mode: w
 loggers:

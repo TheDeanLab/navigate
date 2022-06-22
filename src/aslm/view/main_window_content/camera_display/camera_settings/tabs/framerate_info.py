@@ -37,8 +37,8 @@ from tkinter import *
 from tkinter import ttk
 from tkinter.font import Font
 
-from view.custom_widgets.LabelInputWidgetFactory import LabelInput
-from view.custom_widgets.validation import ValidatedEntry, ValidatedSpinbox
+from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from aslm.view.custom_widgets.validation import ValidatedEntry, ValidatedSpinbox
 
 # Logger Setup
 p = __name__.split(".")[0]

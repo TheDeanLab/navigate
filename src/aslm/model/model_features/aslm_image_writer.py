@@ -40,6 +40,7 @@ from pathlib import Path
 
 # Third Party Imports
 from tifffile import imsave
+import zarr
 
 
 # Local Imports
@@ -53,19 +54,107 @@ class ImageWriter:
         self.model = model
         self.save_directory = self.model.experiment.Saving['save_directory']
         self.num_of_channels = len(self.model.experiment.MicroscopeState['channels'].keys())
+        self.data_buffer = self.model.data_buffer
         self.current_time_point = 0
 
     def __del__(self):
         pass
 
-    def write_zarr(self, frame_id):
+    def copy_to_zarr(self, frame_ids):
         '''
         Will take in camera frames and move data fom SharedND Array into a Zarr Array.
         If there is more than one channel there will be that many frames ie if there are 3 channels selected there should be three frames.
         Making the assumption there is only one frame per channel on a single acquisition
         '''
 
+        # Getting needed info, I am doing it in the function because i think if we do not reinit the class, save directory will be a stagnant var. If we just leave self.model = model then that ref will alwasy be up to date
+        save_directory = self.model.experiment.Saving['save_directory']
+        num_of_channels = len(self.model.experiment.MicroscopeState['channels'].keys())
+        data_buffer = self.model.data_buffer
+
+
+        # Getting allocation parameters for zarr array
+        xsize = self.model.experiment.CameraParameters['x_pixels']
+        ysize = self.model.experiment.CameraParameters['y_pixels']
+        image_mode = self.model.experiment.MicroscopeState['image_mode']
+
+        # Boolean flag to decide which order for saving, by stack or slice. Code is brute force to make it clear, can be sanitized if need be
+        by_stack = False
+        by_slice = False
+        if self.model.experiment.MicroscopeState['stack_cycling_mode'] == 'per_stack':
+            by_stack = True
+        if self.model.experiment.MicroscopeState['stack_cycling_mode'] == 'per_z':
+            by_slice = True
+
+        # Getting amount of slices
+        zslice = self.model.experiment.MicroscopeState['number_z_steps']
+
+
+        # Allocate zarr array with values needed
+        # X Pixel Size, Y Pixel Size, Z Slice, Channel Num, Frame ID
+        # Chunks set to False as we are not currently accessing the array like the SharedNDArray just using it to write to disk and then convert
+        # Numpy data type = dtype='uint16'
+        z = zarr.zeros((xsize, ysize, zslice, self.num_of_channels, len(frame_ids)), chunks=False , dtype='uint16')
+
+        # z[:,:,0,0,0] = 2D array at zslice=0, channel=0, frame=0
+
+        # Get the currently selected channels, the order is implicit
+        channels = self.experiment.MicroscopeState['channels']
+        selected_channels = []
+        prefix_len = len('channel_') # helps get the channel index
+        for channel_key in channels:
+            channel_idx = int(channel_key[prefix_len:])
+            channel = channels[channel_key]
+
+            # Put selected channels index into list
+            if channel['is_selected'] is True:
+                selected_channels.append(channel_idx)
         
+        # Copy data to Zarr
+        chan = 0
+        time = 0
+        slice = 0
+        for idx, frame in enumerate(frame_ids):
+
+            # Getting frame from data buffer
+            img = data_buffer[frame]
+            # idx can only increment thru num of channels
+            idx = idx % num_of_channels
+
+            # Save acq by the slice, incrementing thru slices and accounting for timepoints
+            if by_slice:
+                cur_channel = selected_channels[idx] # Gets first channel selected to start, then cycles thru chans
+                if slice != zslice: # This is to check for new slice group
+                    z[:, :, slice, cur_channel, time] =  img
+                    if idx == num_of_channels - 1:
+                        slice += 1 # Increment slice when num of channels has been pulled
+                else:
+                    # Once slice count equals total zslice increment time and reset slice count
+                    time += 1
+                    slice = 0
+
+            # Saved by stack
+            if by_stack:
+                chan = chan % num_of_channels
+                cur_channel = selected_channels[chan] # start at first channel
+                if slice != zslice: #This now checks for new channels
+                    z[:, :, slice, cur_channel, time] =  img
+                    slice += 1
+                else:
+                    # Once slice count equals total amt of zslices, increment channel and reset slices. Check time first
+                    #Check if time should be incremented
+                    if chan == num_of_channels - 1:
+                        time += 1
+                    slice = 0
+                    chan += 1
+                    
+                
+
+
+
+
+
+
 
 
 

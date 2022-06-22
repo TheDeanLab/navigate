@@ -34,9 +34,9 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 from tkinter import filedialog
 
-from controller.sub_controllers.widget_functions import validate_wrapper
-from controller.sub_controllers.gui_controller import GUI_Controller
-from controller.aslm_controller_functions import save_yaml_file, combine_funcs
+from aslm.controller.sub_controllers.widget_functions import validate_wrapper
+from aslm.controller.sub_controllers.gui_controller import GUI_Controller
+from aslm.controller.aslm_controller_functions import save_yaml_file, combine_funcs
 
 import logging
 from pathlib import Path

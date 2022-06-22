@@ -50,9 +50,9 @@ if platform.system() != 'Darwin':
 
 from multiprocessing import Pool, Lock
 
-from model.aslm_device_startup_functions import start_analysis
-from model.concurrency.concurrency_tools import ObjectInSubprocess
-from model.aslm_analysis import Analysis
+from aslm.model.aslm_device_startup_functions import start_analysis
+from aslm.model.concurrency.concurrency_tools import ObjectInSubprocess
+from aslm.model.aslm_analysis import Analysis
 
 # Logger Setup
 p = __name__.split(".")[0]

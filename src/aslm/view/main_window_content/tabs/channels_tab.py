@@ -41,11 +41,11 @@ from tkinter.font import Font
 
 import numpy as np
 
-from view.main_window_content.tabs.channels.channel_settings import channel_creator
-from view.main_window_content.tabs.channels.stack_settings import stack_acq_frame
-from view.main_window_content.tabs.channels.stack_cycling_settings import stack_cycling_frame
-from view.main_window_content.tabs.channels.stack_timepoint_settings import stack_timepoint_frame
-from view.main_window_content.tabs.channels.multipoint_settings import multipoint_frame, multipoint_list
+from aslm.view.main_window_content.tabs.channels.channel_settings import channel_creator
+from aslm.view.main_window_content.tabs.channels.stack_settings import stack_acq_frame
+from aslm.view.main_window_content.tabs.channels.stack_cycling_settings import stack_cycling_frame
+from aslm.view.main_window_content.tabs.channels.stack_timepoint_settings import stack_timepoint_frame
+from aslm.view.main_window_content.tabs.channels.multipoint_settings import multipoint_frame, multipoint_list
 
 
 class channels_tab(ttk.Frame):

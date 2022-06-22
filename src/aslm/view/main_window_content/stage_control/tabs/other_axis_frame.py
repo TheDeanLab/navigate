@@ -35,8 +35,8 @@ from tkinter import *
 from tkinter import ttk
 
 # Local Imports
-from view.custom_widgets.LabelInputWidgetFactory import LabelInput
-from view.custom_widgets.validation import ValidatedSpinbox
+from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from aslm.view.custom_widgets.validation import ValidatedSpinbox
 
 import logging
 from pathlib import Path

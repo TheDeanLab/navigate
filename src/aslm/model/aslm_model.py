@@ -324,7 +324,7 @@ class Model:
                 (param, value), = args[1].items()
                 self.experiment.GalvoParameters[param] = value
 
-            self.daq.calculate_all_waveforms(self.experiment.MicroscopeState, self.etl_constants, self.experiment.GalvoParameters)
+            self.daq.calculate_all_waveforms(self.experiment.MicroscopeState, self.etl_constants, self.experiment.GalvoParameters, self.get_readout_time())
             self.event_queue.put(('waveform', self.daq.waveform_dict))
 
             # prepare devices based on updated info
@@ -488,6 +488,21 @@ class Model:
         # Loads the YAML file for all of the experiment parameters
         self.experiment = session(experiment_path, self.verbose)
 
+    def get_readout_time(self):
+        """
+        Get the camera readout time if we are in normal mode. Return a -1 to indicate when we are not in normal mode.
+        This is needed in daq.calculate_all_waveforms()
+
+        Returns
+        -------
+        readout_time : float
+            Camera readout time in seconds or -1 if not in Normal mode.
+        """
+        readout_time = -1
+        if self.experiment.CameraParameters['sensor_mode'] == 'Normal':
+            readout_time = self.camera.camera_controller.get_property_value("readout_time")
+        return readout_time
+
     def prepare_acquisition(self):
         """
         Sets flags.
@@ -505,7 +520,7 @@ class Model:
         self.is_live = False
 
         # Calculate Waveforms for all channels. Plot in the view.
-        waveform_dict = self.daq.calculate_all_waveforms(self.experiment.MicroscopeState, self.etl_constants, self.experiment.GalvoParameters)
+        waveform_dict = self.daq.calculate_all_waveforms(self.experiment.MicroscopeState, self.etl_constants, self.experiment.GalvoParameters, self.get_readout_time())
         self.event_queue.put(('waveform', waveform_dict))
 
         # Set Camera Sensor Mode - Must be done before camera is initialized.
@@ -571,7 +586,7 @@ class Model:
                 #                         self.configuration.RemoteFocusParameters['remote_focus_l_ramp_falling_percent']) / 100 + 1)
 
                 # Update ETL Settings
-                self.daq.update_etl_parameters(microscope_state, channel, self.experiment.GalvoParameters)
+                self.daq.update_etl_parameters(microscope_state, channel, self.experiment.GalvoParameters, self.get_readout_time())
 
                 # Acquire an Image
                 if snap_func:
@@ -590,7 +605,7 @@ class Model:
         """
         #  Initialize, run, and stop the acquisition.
         #  Consider putting below to not block thread.
-        self.daq.prepare_acquisition(channel_key, self.current_exposure_time, self.camera_line_interval)
+        self.daq.prepare_acquisition(channel_key, self.current_exposure_time)
 
         # calculate how long has been since last trigger
         time_spent = time.perf_counter() - self.pre_trigger_time

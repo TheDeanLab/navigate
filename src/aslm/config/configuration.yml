@@ -191,8 +191,7 @@ StageParameters:
   y_rot_position: 2000
   z_rot_position: 2000
 
-  x_step: 500
-  y_step: 500
+  xy_step: 500
   z_step: 500
   theta_step: 30
   f_step: 500
@@ -285,12 +284,7 @@ GUIParameters:
     }
   }
   stage: {
-    x_step: {
-      min: 1,
-      max: 10000,
-      step: 100
-    },
-    y_step: {
+    xy_step: {
       min: 1,
       max: 10000,
       step: 100

@@ -47,15 +47,15 @@ from queue import Queue
 import multiprocessing as mp
 
 # Local Imports
-import model.aslm_device_startup_functions as startup_functions
-from .aslm_model_config import Session as session
-from controller.thread_pool import SynchronizedThreadPool
-from model.concurrency.concurrency_tools import ResultThread, SharedNDArray, ObjectInSubprocess
-from model.model_features.autofocus import Autofocus
-from model.model_features.aslm_image_writer import ImageWriter
+import aslm.model.aslm_device_startup_functions as startup_functions
+from aslm.model.aslm_model_config import Session as session
+from aslm.controller.thread_pool import SynchronizedThreadPool
+from aslm.model.concurrency.concurrency_tools import ResultThread, SharedNDArray, ObjectInSubprocess
+from aslm.model.model_features.autofocus import Autofocus
+from aslm.model.model_features.aslm_image_writer import ImageWriter
 
 # debug
-from model.aslm_debug_model import Debug_Module
+from aslm.model.aslm_debug_model import Debug_Module
 
 
 
@@ -70,7 +70,7 @@ class Model:
             event_queue=None):
         
         # Logger Setup
-        from log_files.log_functions import log_setup
+        from aslm.log_files.log_functions import log_setup
         log_setup('model_logging.yml')
         p = __name__.split(".")[0]
         self.logger = logging.getLogger(p)

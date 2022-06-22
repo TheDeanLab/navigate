@@ -211,7 +211,8 @@ class ASLM_controller:
         self.update_buffer()
 
         #binding mouse wheel event on camera view
-        self.count =0
+        self.count = 0
+        self.mouse_scrolls = 0
         self.canvas = getattr(self.camera_view_controller, "canvas")
         self.canvas.bind("<Enter>", self.on_enter)
         self.canvas.bind("<Leave>", self.on_leave)
@@ -219,37 +220,36 @@ class ASLM_controller:
         root.bind("<Key>", self.key_press)
        
     def on_enter(self, event):
-       self.canvas.bind("<MouseWheel>", self.update_position)
+        self.canvas.bind("<MouseWheel>", self.update_position)
     def on_leave(self, event):
-       self.count = 0
+        self.count = 0
+        self.mouse_scrolls = 0
 
     def update_position(self, event):
-       position_o = self.stage_gui_controller.get_position()
-       print(position_o)
-       if event.delta == -1:
-           self.count -= 1
-       if event.delta == 1:
-           self.count += 1
-       updated_position = position_o
-       updated_position["f"] += self.count # need to add a scaling factor here (can make it dependent on interv
-       self.stage_gui_controller.set_position(updated_position)
-   
+        self.mouse_scrolls += 1
+        if self.mouse_scrolls % 2 == 0:
+            position_o = self.stage_gui_controller.get_position()
+            self.count += event.delta
+            updated_position = position_o
+            updated_position["f"] += self.count
+            self.stage_gui_controller.set_position(updated_position)
+    
     def key_press(self, event):
-       char = event.char
-       position_o = self.stage_gui_controller.get_position()
-       current_position = position_o
-       increment = getattr(self.stage_gui_controller, "widget_vals")
-       x_increment = increment["x_step"].get()
-       y_increment = increment["y_step"].get()
-       if char.lower() == "w":
-           current_position['y'] += y_increment
-       elif char.lower() == "a":
-           current_position['x'] -= x_increment
-       elif char.lower() == "s":
-           current_position['y'] -= y_increment
-       elif char.lower() == "d":
-           current_position['x'] += x_increment
-       self.stage_gui_controller.set_position(current_position)
+        char = event.char
+        position_o = self.stage_gui_controller.get_position()
+        current_position = position_o
+        increment = getattr(self.stage_gui_controller, "widget_vals")
+        x_increment = increment["x_step"].get()
+        y_increment = increment["y_step"].get()
+        if char.lower() == "w":
+            current_position['y'] += y_increment
+        elif char.lower() == "a":
+            current_position['x'] -= x_increment
+        elif char.lower() == "s":
+            current_position['y'] -= y_increment
+        elif char.lower() == "d":
+            current_position['x'] += x_increment
+        self.stage_gui_controller.set_position(current_position)
 
     def update_buffer(self):
         """ Update the buffer size according to the camera dimensions listed in the experimental parameters.

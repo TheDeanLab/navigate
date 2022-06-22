@@ -39,6 +39,7 @@ import platform
 import sys
 import logging
 import time
+
 from pathlib import Path
 # Logger Setup
 p = __name__.split(".")[0]
@@ -73,8 +74,14 @@ def auto_redial(func, args, n_tries=10, exception=Exception):
         except exception:
             if i < (n_tries-1):
                 print(f"Failed {str(func)} attempt {i+1}/{n_tries}.")
-                val = None  # TODO: Do we need to explicitly garbage collect?
-                time.sleep(0.1)
+                # If we failed, but part way through object creation, we must
+                # delete the object prior to trying again. This lets us restart
+                # the connection process with a clean slate
+                if val is not None:
+                    val.__del__()
+                    del val
+                    val = None
+                time.sleep(0.5)  # TODO: 0.5 reached by trial and error. Better value?
             else:
                 raise exception
         else:
@@ -96,7 +103,7 @@ def start_camera(configuration, experiment, verbose):
 
     if configuration.Devices['camera'] == 'HamamatsuOrca':
         from model.devices.cameras import HamamatsuOrca
-        return auto_redial(HamamatsuOrca, (0, configuration, experiment, verbose), exception=AttributeError)
+        return auto_redial(HamamatsuOrca, (0, configuration, experiment, verbose), exception=Exception)
     elif configuration.Devices['camera'] == 'SyntheticCamera':
         from model.devices.cameras import SyntheticCamera
         return SyntheticCamera(0, configuration, experiment, verbose)
@@ -113,7 +120,8 @@ def start_stages(configuration, verbose):
     if configuration.Devices['stage'] == 'PI' and platform.system(
     ) == 'Windows':
         from model.devices.stages import PIStage
-        return PIStage(configuration, verbose)
+        from pipython.pidevice.gcserror import GCSError
+        return auto_redial(PIStage, (configuration, verbose), exception=GCSError)
     elif configuration.Devices['stage'] == 'SyntheticStage':
         from model.devices.stages import SyntheticStage
         return SyntheticStage(configuration, verbose)
@@ -128,7 +136,7 @@ def start_zoom_servo(configuration, verbose):
 
     if configuration.Devices['zoom'] == 'DynamixelZoom':
         from model.devices.zoom import DynamixelZoom
-        return DynamixelZoom(configuration, verbose)
+        return auto_redial(DynamixelZoom, (configuration, verbose), exception=RuntimeError)
     elif configuration.Devices['zoom'] == 'SyntheticZoom':
         from model.devices.zoom import SyntheticZoom
         return SyntheticZoom(configuration, verbose)

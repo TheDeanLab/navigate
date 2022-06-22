@@ -655,9 +655,11 @@ class camReg(object):
         if cls.numCameras == 0:
             # Initialize the API
             paraminit = DCAMAPI_INIT()
-            if int(dcamapi_init(byref(paraminit))) < 0:
+            init_val = int(dcamapi_init(byref(paraminit)))
+            if init_val < 0:
                 # NOTE: This is an AttributeError to match the other error thrown by this class in startup functions.
                 # This really makes no sense as an attribute error.
+                dcamapi_uninit()
                 raise Exception("DCAM initialization failed.")
             cls.maxCameras = paraminit.iDeviceCount
 
@@ -780,7 +782,7 @@ class DCAM:
             self.__close_hdcamwait()
             dcamdev_close(self.__hdcam)
             self.__hdcam = 0
-            camReg.unregCamera()
+        camReg.unregCamera()
 
         return True
 

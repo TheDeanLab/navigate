@@ -48,7 +48,7 @@ Because the signals emitted can only be processed when a QEventLoop is running, 
 need something with an eventloop (e.g. a QApplication) even for testing.
 '''
 
-from src.model.devices.APIs.logitech import FarmSimulatorSidePanel
+from aslm.model.devices.APIs.logitech import FarmSimulatorSidePanel
 
 
 class JoystickBase:

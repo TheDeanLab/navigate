@@ -73,6 +73,7 @@ def auto_redial(func, args, n_tries=10, exception=Exception):
         except exception:
             if i < (n_tries-1):
                 print(f"Failed {str(func)} attempt {i+1}/{n_tries}.")
+                val = None  # TODO: Do we need to explicitly garbage collect?
                 time.sleep(0.1)
             else:
                 raise exception

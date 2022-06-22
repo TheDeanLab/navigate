@@ -109,7 +109,7 @@ class Model:
         '''
         threads_dict = {
             'filter_wheel': ResultThread(target=startup_functions.start_filter_wheel,
-                                         args=(self.configuration,self.verbose,)).start(),
+                                         args=(self.configuration, self.verbose,)).start(),
 
             'zoom': ResultThread(target=startup_functions.start_zoom_servo,
                                  args=(self.configuration, self.verbose,)).start(),

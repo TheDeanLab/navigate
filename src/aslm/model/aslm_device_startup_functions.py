@@ -38,6 +38,8 @@ POSSIBILITY OF SUCH DAMAGE.
 import platform
 import sys
 import logging
+import time
+
 from pathlib import Path
 # Logger Setup
 p = __name__.split(".")[0]
@@ -49,6 +51,48 @@ logger = logging.getLogger(p)
 # from model.devices.laser_scanning import LaserScanning
 
 
+def auto_redial(func, args, n_tries=10, exception=Exception):
+    """
+    Retries connections to a startup device defined by func n_tries times.
+
+    Parameters
+    ----------
+    func : function or class
+        The function or class (__init__() function) that connects to a device.
+    args : tuple
+        Arguments to function or class
+    n_tries : int
+        The number of tries to redial.
+    exception : inherits from BaseException
+        An exception type to check on each connection attempt.
+
+    Returns
+    -------
+    val : object
+        Result of func
+    """
+    val = None
+
+    for i in range(n_tries):
+        try:
+            val = func(*args)
+        except exception:
+            if i < (n_tries-1):
+                print(f"Failed {str(func)} attempt {i+1}/{n_tries}.")
+                # If we failed, but part way through object creation, we must
+                # delete the object prior to trying again. This lets us restart
+                # the connection process with a clean slate
+                if val is not None:
+                    val.__del__()
+                    del val
+                    val = None
+                time.sleep(0.5)  # TODO: 0.5 reached by trial and error. Better value?
+            else:
+                raise exception
+        else:
+            break
+
+    return val
 
 def start_analysis(configuration, experiment, use_gpu, verbose):
     """
@@ -64,7 +108,7 @@ def start_camera(configuration, experiment, verbose):
 
     if configuration.Devices['camera'] == 'HamamatsuOrca':
         from model.devices.cameras import HamamatsuOrca
-        return HamamatsuOrca(0, configuration, experiment, verbose)
+        return auto_redial(HamamatsuOrca, (0, configuration, experiment, verbose), exception=Exception)
     elif configuration.Devices['camera'] == 'SyntheticCamera':
         from model.devices.cameras import SyntheticCamera
         return SyntheticCamera(0, configuration, experiment, verbose)
@@ -81,7 +125,8 @@ def start_stages(configuration, verbose):
     if configuration.Devices['stage'] == 'PI' and platform.system(
     ) == 'Windows':
         from model.devices.stages import PIStage
-        return PIStage(configuration, verbose)
+        from pipython.pidevice.gcserror import GCSError
+        return auto_redial(PIStage, (configuration, verbose), exception=GCSError)
     elif configuration.Devices['stage'] == 'SyntheticStage':
         from model.devices.stages import SyntheticStage
         return SyntheticStage(configuration, verbose)
@@ -96,7 +141,7 @@ def start_zoom_servo(configuration, verbose):
 
     if configuration.Devices['zoom'] == 'DynamixelZoom':
         from model.devices.zoom import DynamixelZoom
-        return DynamixelZoom(configuration, verbose)
+        return auto_redial(DynamixelZoom, (configuration, verbose), exception=RuntimeError)
     elif configuration.Devices['zoom'] == 'SyntheticZoom':
         from model.devices.zoom import SyntheticZoom
         return SyntheticZoom(configuration, verbose)
@@ -111,7 +156,7 @@ def start_filter_wheel(configuration, verbose):
 
     if configuration.Devices['filter_wheel'] == 'SutterFilterWheel':
         from model.devices.filter_wheels import SutterFilterWheel
-        return SutterFilterWheel(configuration, verbose)
+        return auto_redial(SutterFilterWheel, (configuration, verbose), exception=UserWarning)
     elif configuration.Devices['filter_wheel'] == 'SyntheticFilterWheel':
         from model.devices.filter_wheels import SyntheticFilterWheel
         return SyntheticFilterWheel(configuration, verbose)

@@ -453,8 +453,9 @@ def _child_loop(child_pipe, initializer, initargs, initkwargs,
                 result = _dummy_function  # Cheaper than sending a real callable
             child_pipe.send((result, printed_output.getvalue()))
         except Exception as e:
-            e.child_traceback_string = traceback.format_exc()
-            child_pipe.send((e, printed_output.getvalue()))
+            # e.child_traceback_string = traceback.format_exc()
+            print('Exception inside ObjectInSubprocess:', traceback.format_exc())
+            child_pipe.send((Exception(str(e)), printed_output.getvalue()))
 
 # A minimal class that we use just to get another namespace:
 

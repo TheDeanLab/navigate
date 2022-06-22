@@ -79,6 +79,7 @@ class Etl_Popup_Controller(GUI_Controller):
 
         self.variables['Galvo Amp'].trace_add('write', self.update_galvo_setting('Galvo Amp', 'galvo_l_amplitude'))
         self.variables['Galvo Off'].trace_add('write', self.update_galvo_setting('Galvo Off', 'galvo_l_offset'))
+        self.variables['Galvo Freq'].trace_add('write', self.update_galvo_setting('Galvo Freq', 'galvo_l_frequency'))
 
         self.view.get_buttons()['Save'].configure(command=self.save_etl_info)
 
@@ -117,6 +118,10 @@ class Etl_Popup_Controller(GUI_Controller):
         self.widgets['Galvo Off'].widget.configure(to=5)
         self.widgets['Galvo Off'].widget.configure(increment=0.01)
         self.widgets['Galvo Off'].widget.set_precision(-2)
+
+        self.widgets['Galvo Freq'].widget.configure(from_=0)
+        self.widgets['Galvo Freq'].widget.configure(increment=0.5)
+        self.widgets['Galvo Freq'].widget.set_precision(-1)
 
     def set_experiment_values(self, resolution_value):
         """
@@ -165,6 +170,7 @@ class Etl_Popup_Controller(GUI_Controller):
 
         self.variables['Galvo Amp'].set(self.galvo_setting['galvo_l_amplitude'])
         self.variables['Galvo Off'].set(self.galvo_setting['galvo_l_offset'])
+        self.variables['Galvo Freq'].set(self.galvo_setting['galvo_l_frequency'])
 
         if not self.in_initialize:
             # update resolution value in central controller (menu)

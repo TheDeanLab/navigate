@@ -4,13 +4,13 @@ import numpy as np
 
 
 class TestImageWriter:
+        
 
-    def __init__(self):
+    def test_zarr_byslice(self):
+
         self.dummy_model = get_dummy_model()
         # Creating 3D simulated data in this case a 3D F shape
         self.data_buffer = None
-
-    def test_zarr_byslice(self):
         
         slicetest = ImageWriter(self.dummy_model)
 

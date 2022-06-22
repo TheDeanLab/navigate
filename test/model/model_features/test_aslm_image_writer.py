@@ -1,15 +1,21 @@
 from aslm.model.model_features.aslm_image_writer import ImageWriter
 from aslm.model.dummy_model import get_dummy_model
-# /Users/daxcollison/Documents/GitHub/ASLM/test/model/dummy_model.py
+import numpy as np
 
 
 class TestImageWriter:
 
+    def __init__(self):
+        self.dummy_model = get_dummy_model()
+        # Creating 3D simulated data in this case a 3D F shape
+        self.data_buffer = None
+
     def test_zarr_byslice(self):
         
-        # False for no GPU
-        dummy_model = get_dummy_model() 
-        slicetest = ImageWriter(dummy_model)
+        slicetest = ImageWriter(self.dummy_model)
+
+
+
 
         assert True
 

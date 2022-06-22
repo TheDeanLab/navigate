@@ -15,8 +15,28 @@ def get_dummy_model():
     etl_constants = Path.joinpath(configuration_directory, 'etl_constants.yml')
 
     class args():
+        '''
+        Leaving this class here in case we need to instantiate a full synthetic model
+        '''
         def __init__(self):
             self.verbose = False
             self.synthetic_hardware = True
+
+    # This return is used when you want a full syntethic model instead of just variable data from config files
+    # return Model(False, args(), config, experiment, etl_constants)
     
-    return Model(False, args(), config, experiment, etl_constants)
+    class dummy_model():
+        def __init__(self):
+            self.configuration = session(config, False)
+            self.experiment = session(experiment, False)
+            self.etl_constants = session(etl_constants, False)
+            self.verbose = False
+
+    # Instantiate fake model to return
+    dumb_model = dummy_model()
+
+    
+    return dumb_model
+
+    
+    

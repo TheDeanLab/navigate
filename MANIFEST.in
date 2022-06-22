@@ -1,4 +1,0 @@
-include src/aslm/*.yaml
-include src/aslm/*.log
-include src/aslm/*.ico
-include src/aslm/*.png

@@ -10,7 +10,6 @@ class TestImageWriter:
 
         self.dummy_model = get_dummy_model()
         # Creating 3D simulated data in this case a 3D F shape
-        self.data_buffer = None
         
         slicetest = ImageWriter(self.dummy_model)
 

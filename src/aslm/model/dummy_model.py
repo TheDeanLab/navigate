@@ -30,6 +30,7 @@ def get_dummy_model():
             self.configuration = session(config, False)
             self.experiment = session(experiment, False)
             self.etl_constants = session(etl_constants, False)
+            self.data_buffer = None
             self.verbose = False
 
     # Instantiate fake model to return

@@ -176,6 +176,17 @@ class remote_popup():
 
         self.inputs['Galvo Off'].grid(row=5, column=2, sticky=(NSEW), pady=(20, 0))
 
+        galvo_freq = ttk.Label(
+            self.laser_frame,
+            text='Galvo Freq',
+            padding=(
+                2,
+                5,
+                0,
+                0))
+
+        galvo_freq.grid(row=6, column=0, sticky=(NSEW))
+
         self.inputs['Galvo Freq'] = LabelInput(
             parent=self.laser_frame, input_class=ValidatedSpinbox, input_var=StringVar())
 

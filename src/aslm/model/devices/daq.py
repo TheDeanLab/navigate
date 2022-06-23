@@ -430,7 +430,7 @@ class SyntheticDAQ(DAQBase):
         """
         pass
 
-    def prepare_acquisition(self, channel_key, exposure_time, line_interval):
+    def prepare_acquisition(self, channel_key, exposure_time):
         """
         # Initialize the nidaqmx tasks.
         """

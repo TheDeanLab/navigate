@@ -41,7 +41,7 @@ from aslm.controller.aslm_controller_functions import save_yaml_file, combine_fu
 import logging
 from pathlib import Path
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 class Etl_Popup_Controller(GUI_Controller):

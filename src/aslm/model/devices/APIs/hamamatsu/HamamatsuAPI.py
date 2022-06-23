@@ -12,7 +12,7 @@ from enum import IntEnum
 import logging
 from pathlib import Path
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 # ==== load shared library ====

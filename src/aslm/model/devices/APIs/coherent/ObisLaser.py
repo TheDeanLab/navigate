@@ -12,7 +12,7 @@ from time import time, sleep
 from aslm.model.devices.lasers.LaserBase import LaserBase
 
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 class ObisLaser(LaserBase):

@@ -72,7 +72,7 @@ class Model:
         # Logger Setup
         from aslm.log_files.log_functions import log_setup
         log_setup('model_logging.yml')
-        p = __name__.split(".")[0]
+        p = __name__.split(".")[1]
         self.logger = logging.getLogger(p)
         
         self.logger.info("Performance - Testing if it works")
@@ -640,6 +640,12 @@ class Model:
         self.stop_acquisition = False
         while self.stop_acquisition is False and self.stop_send_signal is False:
             self.run_single_acquisition()
+
+    # def run_z_stack_acqusition(self):
+    #     """
+    #     Collect a z-stack.
+    #     """
+    #
 
     def change_resolution(self, args):
         resolution_value = args[0]

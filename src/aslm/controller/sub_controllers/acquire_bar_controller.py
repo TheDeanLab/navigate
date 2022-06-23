@@ -41,7 +41,7 @@ from aslm.view.main_window_content.acquire_bar_frame.acquire_popup import Acquir
 import logging
 from pathlib import Path
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 class Acquire_Bar_Controller(GUI_Controller):

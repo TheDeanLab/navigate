@@ -40,7 +40,7 @@ from tifffile import imread, imsave
 import logging
 from pathlib import Path
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 def image_to_polar(input_image):

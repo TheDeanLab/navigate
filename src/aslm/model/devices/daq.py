@@ -51,7 +51,7 @@ from ..aslm_model_waveforms import tunable_lens_ramp_v2, tunable_lens_ramp, sawt
 # from ...tools.decorators import function_timer
 
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 class DAQBase:

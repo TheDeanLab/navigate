@@ -41,7 +41,7 @@ from aslm.controller.sub_controllers.multi_position_controller import Multi_Posi
 import logging
 from pathlib import Path
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 

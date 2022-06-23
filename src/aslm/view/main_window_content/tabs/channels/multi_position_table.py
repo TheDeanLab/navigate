@@ -35,7 +35,7 @@ from tkinter import filedialog, Grid
 import logging
 from pathlib import Path
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 class Multi_Position_RowHeader(RowHeader):

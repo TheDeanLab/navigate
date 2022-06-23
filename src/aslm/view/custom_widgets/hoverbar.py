@@ -35,7 +35,7 @@ import tkinter.ttk as ttk
 import logging
 from pathlib import Path
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 '''
 see:

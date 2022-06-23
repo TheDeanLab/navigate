@@ -36,7 +36,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #  Standard Imports
 import os
 import logging
-from pathlib import Path
 
 # Third Party Imports
 from tifffile import imsave

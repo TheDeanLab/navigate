@@ -41,12 +41,10 @@ import importlib
 import sys
 
 # Third Party Imports
-from pathlib import Path
-
 import numpy as np
 
 # Local Imports
-from ..analysis import noise_model
+from aslm.model.analysis import noise_model
 
 # Logger Setup
 p = __name__.split(".")[1]

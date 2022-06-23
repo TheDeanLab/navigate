@@ -6,7 +6,6 @@ Author: Fabian Voigt
 #TODO: Why isn't this in the daq.waveform module?
 """
 import logging
-from pathlib import Path
 
 import nidaqmx
 from nidaqmx.constants import LineGrouping

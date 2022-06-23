@@ -35,13 +35,10 @@ POSSIBILITY OF SUCH DAMAGE.
 #  Standard Library Imports
 import logging
 import time
-from pathlib import Path
-
-
-import serial
 
 # Third Party Imports
 import numpy as np
+import serial
 
 # Local Imports
 

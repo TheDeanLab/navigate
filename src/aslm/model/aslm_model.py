@@ -35,28 +35,20 @@ POSSIBILITY OF SUCH DAMAGE.
 
 # Standard Library Imports
 import time
-import os
 import threading
-import platform
 import logging
-from pathlib import Path
 
 # Third Party Imports
-import numpy as np
-from queue import Queue
-import multiprocessing as mp
 
 # Local Imports
 import aslm.model.aslm_device_startup_functions as startup_functions
 from aslm.model.aslm_model_config import Session as session
-from aslm.controller.thread_pool import SynchronizedThreadPool
-from aslm.model.concurrency.concurrency_tools import ResultThread, SharedNDArray, ObjectInSubprocess
+from aslm.model.concurrency.concurrency_tools import ResultThread
 from aslm.model.model_features.autofocus import Autofocus
 from aslm.model.model_features.aslm_image_writer import ImageWriter
 
 # debug
 from aslm.model.aslm_debug_model import Debug_Module
-
 
 
 class Model:

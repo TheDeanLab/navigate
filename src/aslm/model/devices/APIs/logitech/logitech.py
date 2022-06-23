@@ -7,6 +7,8 @@ pywinusb.hid spawns another thread for joystick event handling which might cause
 problems.
 '''
 
+from PyQt4 import QtCore
+
 class FarmSimulatorSidePanel(QtCore.QObject):
     '''
     The joystick is set up using the pyqinusb package by using an HidDeviceFilter

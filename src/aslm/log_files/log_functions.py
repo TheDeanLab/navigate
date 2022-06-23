@@ -1,6 +1,5 @@
 import logging.config
 import logging.handlers
-import multiprocessing
 import yaml
 from pathlib import Path
 

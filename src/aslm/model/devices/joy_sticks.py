@@ -33,7 +33,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 import logging
-from pathlib import Path
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -48,7 +48,7 @@ Because the signals emitted can only be processed when a QEventLoop is running, 
 need something with an eventloop (e.g. a QApplication) even for testing.
 '''
 
-from aslm.model.devices.APIs.logitech import FarmSimulatorSidePanel
+from aslm.model.devices.APIs.logitech.logitech import FarmSimulatorSidePanel
 
 
 class JoystickBase:

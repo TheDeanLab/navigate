@@ -31,14 +31,14 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 
-from tkinter import *
+from tkinter import *  # TODO: terrifying
 import tkinter as tk
 from tkinter import ttk
 from aslm.view.custom_widgets.popup import PopUp
 from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from aslm.view.custom_widgets.validation import ValidatedSpinbox
 import logging
-from pathlib import Path
+
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 

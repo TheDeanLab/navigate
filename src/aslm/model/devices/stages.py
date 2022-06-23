@@ -41,7 +41,6 @@ import logging
 import time
 
 # Third Party Imports
-from pathlib import Path
 
 from pipython import GCSDevice, pitools, GCSError, gcserror
 

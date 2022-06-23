@@ -2,7 +2,6 @@
 Synthetic Laser Class
 """
 import logging
-from pathlib import Path
 
 from .LaserBase import LaserBase
 

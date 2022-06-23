@@ -38,6 +38,3 @@ def get_dummy_model():
 
     
     return dumb_model
-
-    
-    

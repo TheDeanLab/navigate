@@ -39,26 +39,6 @@ from __future__ import (absolute_import, division, print_function)
 import sys
 from pathlib import Path
 import logging
-from builtins import (
-    bytes,
-    int,
-    list,
-    object,
-    range,
-    str,
-    ascii,
-    chr,
-    hex,
-    input,
-    next,
-    oct,
-    open,
-    pow,
-    round,
-    super,
-    filter,
-    map,
-    zip)
 
 # Third Party Imports
 import yaml

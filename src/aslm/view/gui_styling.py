@@ -31,10 +31,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 
-from tkinter import *
 from tkinter import ttk
-from tkinter import font
-from tkinter.font import Font
 
 
 class stagecontrol_maxintensity_styling(ttk.Style):

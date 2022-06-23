@@ -533,6 +533,7 @@ class PIStage(StageBase):
             The corresponding number of this axis on a PI stage.
         move_dictionary : dict
             A dictionary of values required for movement. Includes 'x_abs', 'x_min', etc. for one or more axes.
+            Expects values in micrometers, except for theta, which is in degrees.
 
         Returns
         -------
@@ -541,12 +542,10 @@ class PIStage(StageBase):
 
         try:
             # Get all necessary attributes. If we can't we'll move to the error case.
-            # This could be refactored into its own function and used in the synthetic stage as well.
             axis_abs = move_dictionary[f"{axis}_abs"] - getattr(self, f"int_{axis}_pos_offset", 0)  # TODO: should we default to 0?
             axis_min, axis_max = getattr(self, f"{axis}_min"), getattr(self, f"{axis}_max")
 
             # Check that our position is within the axis bounds, fail if it's not.
-            # This could be refactored into its own function and used in the synthetic stage as well.
             if (axis_min > axis_abs) or (axis_max < axis_abs):
                 log_string = f"Absolute movement stopped: {axis} limit would be reached!" \
                              "{axis_abs} is not in the range {axis_min} to {axis_max}."
@@ -555,11 +554,7 @@ class PIStage(StageBase):
                 return
 
             # Move the stage
-            # This is the only part that needs to be different from the synthetic stage. In theory, we could
-            # refactor this entire function (move_axis_absolute()) to accept a function and input parameters
-            # and this entire function could be used in synthetic stage as well.
             try:
-                # TODO: The conversion should not be here, but instead addressed when put in move_dictionary.
                 if axis != 'theta':
                     axis_abs /= 1000  # convert to mm
                 self.pidevice.MOV({axis_num: axis_abs})
@@ -568,7 +563,6 @@ class PIStage(StageBase):
 
         except (KeyError, AttributeError):
             return
-
 
     def move_absolute(self, move_dictionary, wait_until_done=False):
         """
@@ -583,82 +577,11 @@ class PIStage(StageBase):
         for ax, n in zip(axes, axis_nums):
             self.move_axis_absolute(ax, n, move_dictionary)
 
-        # if 'x_abs' in move_dictionary:
-        #     x_abs = move_dictionary['x_abs']
-        #     x_abs = x_abs - self.int_x_pos_offset
-        #     if (self.x_min <= x_abs) and (self.x_max >= x_abs):
-        #         x_abs = x_abs / 1000
-        #         try:
-        #             self.pidevice.MOV({1: x_abs})
-        #         except GCSError as e:
-        #             logger.exception(GCSError(e))
-        #     else:
-        #         logger.info("Absolute movement stopped: X Motion limit would be reached!, 1000")
-        #         print(
-        #             'Absolute movement stopped: X Motion limit would be reached!',
-        #             1000)
-        #
-        # if 'y_abs' in move_dictionary:
-        #     y_abs = move_dictionary['y_abs']
-        #     y_abs = y_abs - self.int_y_pos_offset
-        #     if (self.y_min <= y_abs) and (self.y_max >= y_abs):
-        #         y_abs = y_abs / 1000
-        #         try:
-        #             self.pidevice.MOV({2: y_abs})
-        #         except GCSError as e:
-        #             logger.exception(GCSError(e))
-        #     else:
-        #         logger.info("Absolute movement stopped: Y Motion limit would be reached!, 1000")
-        #         print(
-        #             'Absolute movement stopped: Y Motion limit would be reached!',
-        #             1000)
-        #
-        # if 'z_abs' in move_dictionary:
-        #     z_abs = move_dictionary['z_abs']
-        #     z_abs = z_abs - self.int_z_pos_offset
-        #     if (self.z_min <= z_abs) and (self.z_max >= z_abs):
-        #         z_abs = z_abs / 1000
-        #         try:
-        #             self.pidevice.MOV({3: z_abs})
-        #         except GCSError as e:
-        #             logger.exception(GCSError(e))
-        #     else:
-        #         logger.info("Absolute movement stopped: Z Motion limit would be reached!, 1000")
-        #         print(
-        #             'Absolute movement stopped: Z Motion limit would be reached!',
-        #             1000)
-        #
-        # if 'f_abs' in move_dictionary:
-        #     f_abs = move_dictionary['f_abs']
-        #     f_abs = f_abs - self.int_f_pos_offset
-        #     if (self.f_min <= f_abs) and (self.f_max >= f_abs):
-        #         f_abs = f_abs / 1000
-        #         try:
-        #             self.pidevice.MOV({5: f_abs})
-        #         except GCSError as e:
-        #             logger.exception(GCSError(e))
-        #     else:
-        #         logger.info("Absolute movement stopped: F Motion limit would be reached!, 1000")
-        #         print(
-        #             'Absolute movement stopped: F Motion limit would be reached!',
-        #             1000)
-        #
-        # if 'theta_abs' in move_dictionary:
-        #     theta_abs = move_dictionary['theta_abs']
-        #     theta_abs = theta_abs - self.int_theta_pos_offset
-        #     if (self.theta_min <= theta_abs) and (self.theta_max >= theta_abs):
-        #         try:
-        #             self.pidevice.MOV({4: theta_abs})
-        #         except GCSError as e:
-        #             logger.exception(GCSError(e))
-        #     else:
-        #         logger.info("Absolute movement stopped: Theta Motion limit would be reached!, 1000")
-        #         print(
-        #             'Absolute movement stopped: Theta Motion limit would be reached!',
-        #             1000)
-
         if wait_until_done is True:
-            self.pitools.waitontarget(self.pidevice)
+            try:
+                self.pitools.waitontarget(self.pidevice)
+            except GCSError as e:
+                logger.exception(GCSError(e))
 
     def stop(self):
         self.pidevice.STP(noraise=True)

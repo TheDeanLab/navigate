@@ -58,10 +58,10 @@ class stack_acq_frame(ttk.Labelframe):
         stack_acq.step_size_spinval = DoubleVar()
         stack_acq.step_size_spinbox = ttk.Spinbox(
             stack_acq.step_size_frame,
-            from_=0,
-            to=500.0,
+            from_=50.0,
+            to=1000.0,
             textvariable=stack_acq.step_size_spinval,
-            increment=0.5,
+            increment=10.0,
             width=14
         )
         stack_acq.step_size_spinbox.grid(row=1, column=0, sticky=(N), padx=(4,3), pady=(3,6))
@@ -73,8 +73,8 @@ class stack_acq_frame(ttk.Labelframe):
         stack_acq.start_pos_spinval = DoubleVar()
         stack_acq.start_pos_spinbox = ttk.Spinbox(
             stack_acq.start_pos_frame,
-            from_=0,
-            to=500.0,
+            from_=2000.0,
+            to=50000.0,
             textvariable=stack_acq.start_pos_spinval,
             increment=0.5,
             width=14
@@ -89,8 +89,8 @@ class stack_acq_frame(ttk.Labelframe):
         stack_acq.end_pos_spinval = DoubleVar()
         stack_acq.end_pos_spinbox = ttk.Spinbox(
             stack_acq.end_pos_frame,
-            from_=0,
-            to=500.0,
+            from_=2000.0,
+            to=50000.0,
             textvariable=stack_acq.end_pos_spinval,
             increment=0.5,
             width=14

@@ -235,8 +235,8 @@ class Channels_Tab_Controller(GUI_Controller):
                 return
         except:
             self.stack_acq_vals['number_z_steps'].set('')
-            if self.stack_acq_event_id:
-                self.view.after_cancel(self.stack_acq_event_id)
+            # if self.stack_acq_event_id:
+            #     self.view.after_cancel(self.stack_acq_event_id)
             return
         # if step_size < 0.001:
         #     step_size = 0.001

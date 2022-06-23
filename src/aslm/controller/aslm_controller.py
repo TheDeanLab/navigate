@@ -553,10 +553,11 @@ class ASLM_controller:
                 self.threads_pool.createThread('camera', self.capture_live_image)
 
             elif self.acquire_bar_controller.mode == 'z-stack':
-                is_multi_position = self.channels_tab_controller.is_multiposition_val.get()
-                self.model.open_shutter()
-                self.model.run_z_stack_acquisition(is_multi_position, self.update_camera_view())
-                self.model.close_shutter()
+                # is_multi_position = self.channels_tab_controller.is_multiposition_val.get()
+                # self.model.open_shutter()
+                # self.model.run_z_stack_acquisition(is_multi_position, self.update_camera_view())
+                # self.model.close_shutter()
+                self.threads_pool.createThread('camera', self.capture_z_stack)
 
             elif self.acquire_bar_controller.mode == 'projection':
                 pass
@@ -628,6 +629,31 @@ class ASLM_controller:
         if self.verbose:
             print("Captured", self.camera_view_controller.image_count, "Live Images")
         logger.debug(f"Captured {self.camera_view_controller.image_count}, Live Images")
+
+    def capture_z_stack(self):
+        """
+        # Trigger model to capture a z-stack
+        """
+        self.camera_view_controller.image_count = 0
+        self.model.run_command('z-stack',
+                               microscope_info=self.experiment.MicroscopeState,
+                               camera_info=self.experiment.CameraParameters,
+                               saving_info=self.experiment.Saving)
+
+        while True:
+            image_id = self.show_img_pipe_parent.recv()
+            if self.verbose:
+                print('receive', image_id)
+            logger.debug(f"recieve, {image_id}")
+            if image_id == 'stop':
+                self.execute('stop_acquire')
+                break
+            if not isinstance(image_id, int):
+                print('some thing wrong happened, stop the model!', image_id)
+                logger.debug(f"some thing wrong happened, stop the model!, {image_id}")
+                self.execute('stop_acquire')
+            self.camera_view_controller.display_image(
+                self.data_buffer[image_id])
 
     def capture_autofocus_image(self):
         """

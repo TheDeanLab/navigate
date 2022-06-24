@@ -320,6 +320,8 @@ class Model:
                 zoom = updated_settings['zoom']
                 laser_info = updated_settings['laser_info']
 
+
+
                 if resolution_mode == 'low':
                     self.etl_constants.ETLConstants['low'][zoom] = laser_info
                 else:
@@ -667,9 +669,15 @@ class Model:
         microscope_state = self.experiment.MicroscopeState
         stack_cycling_mode = microscope_state['stack_cycling_mode']
 
-        z_pos = np.linspace(int(microscope_state['start_position']),
-                            int(microscope_state['end_position']),
+        # TODO: Make relative to stage coordinates.
+
+        z_pos = np.linspace(float(microscope_state['start_position']) + self.stages.z_pos,
+                            float(microscope_state['end_position']) + self.stages.z_pos,
                             int(microscope_state['number_z_steps']))
+
+        # z_pos = np.linspace(int(microscope_state['start_position']),
+        #                     int(microscope_state['end_position']),
+        #                     int(microscope_state['number_z_steps']))
 
         if stack_cycling_mode == 'per_stack':
             # Only change the channel we're looking at once per z-stack

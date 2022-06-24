@@ -181,8 +181,8 @@ class Model:
 
         # timing - Units in milliseconds.
         self.camera_minimum_waiting_time = self.camera.get_minimum_waiting_time()
-        self.trigger_waiting_time = 10
-        self.pre_trigger_time = 0
+        # self.trigger_waiting_time = 10
+        # self.pre_trigger_time = 0
 
         # debug
         self.debug = Debug_Module(self, self.verbose)
@@ -509,7 +509,7 @@ class Model:
         readout_time : float
             Camera readout time in seconds or -1 if not in Normal mode.
         """
-        readout_time = -1
+        readout_time = 0
         if self.experiment.CameraParameters['sensor_mode'] == 'Normal':
             readout_time = self.camera.camera_controller.get_property_value("readout_time")
         return readout_time
@@ -574,10 +574,11 @@ class Model:
                 self.current_channel = channel_idx
 
                 # Calculate duration of time necessary between camera triggers.
-                self.trigger_waiting_time = self.current_exposure_time/1000 + self.camera_minimum_waiting_time
+                # self.trigger_waiting_time = self.current_exposure_time/1000 + self.camera_minimum_waiting_time
 
                 # Update Camera Exposure Time
                 self.current_exposure_time = channel['camera_exposure_time']
+                print(self.current_exposure_time)
                 if self.experiment.CameraParameters['sensor_mode'] == 'Light-Sheet':
                     self.current_exposure_time, self.camera_line_interval = self.camera.calculate_light_sheet_exposure_time(
                         self.current_exposure_time,
@@ -605,7 +606,6 @@ class Model:
                 else:
                     self.snap_image(channel_key)
 
-
     def snap_image(self, channel_key):
         """
         # Snaps a single image after updating the waveforms.
@@ -614,27 +614,33 @@ class Model:
         # waveforms into the buffers of the NI cards.
         #
         """
-        #  Initialize, run, and stop the acquisition.
-        #  Consider putting below to not block thread.
-        self.daq.prepare_acquisition(channel_key, self.current_exposure_time)
 
         # calculate how long has been since last trigger
-        time_spent = time.perf_counter() - self.pre_trigger_time
+        # time_spent = time.perf_counter() - self.pre_trigger_time
 
-        if time_spent < self.trigger_waiting_time:
-            if self.verbose:
-                print('Need to wait!!!! Camera is not ready to be triggered!!!!')
-            #TODO: we may remove additional 0.001 waiting time
-            time.sleep(self.trigger_waiting_time - time_spent + 0.001)
+        # if time_spent < self.trigger_waiting_time:
+        #     if self.verbose:
+        #         print('Need to wait!!!! Camera is not ready to be triggered!!!!')
+        #     #TODO: we may remove additional 0.001 waiting time
+        #     time.sleep(self.trigger_waiting_time - time_spent + 0.001)
 
         # Camera Settings - Exposure Time in Milliseconds
         # only set exposure time after the previous trigger has been done.
         if self.pre_exposure_time != self.current_exposure_time:
+            # In order to change exposure time, we need to stop the camera
+            if self.camera.camera_controller.is_acquiring:
+                self.camera.close_image_series()
             self.camera.set_exposure_time(self.current_exposure_time)
             self.pre_exposure_time = self.current_exposure_time
+            # And then re-set it
+            self.camera.initialize_image_series(self.data_buffer, self.number_of_frames)
 
         # get time when send out the trigger
-        self.pre_trigger_time = time.perf_counter()
+        # self.pre_trigger_time = time.perf_counter()
+
+        #  Initialize, run, and stop the acquisition.
+        #  Consider putting below to not block thread.
+        self.daq.prepare_acquisition(channel_key, self.current_exposure_time)
 
         # Run the acquisition
         self.daq.run_acquisition()

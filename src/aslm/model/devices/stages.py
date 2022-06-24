@@ -581,6 +581,7 @@ class PIStage(StageBase):
             try:
                 self.pitools.waitontarget(self.pidevice)
             except GCSError as e:
+                print("wait on target failed")
                 logger.exception(GCSError(e))
 
     def stop(self):

@@ -578,7 +578,7 @@ class Model:
 
                 # Update Camera Exposure Time
                 self.current_exposure_time = channel['camera_exposure_time']
-                print(self.current_exposure_time)
+
                 if self.experiment.CameraParameters['sensor_mode'] == 'Light-Sheet':
                     self.current_exposure_time, self.camera_line_interval = self.camera.calculate_light_sheet_exposure_time(
                         self.current_exposure_time,

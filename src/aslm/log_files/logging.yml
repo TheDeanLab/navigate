@@ -1,0 +1,51 @@
+%YAML 1.2
+---
+version: 1
+formatters:
+  base:
+    format: '%(asctime)s - %(name)s - %(levelname)s - %(module)s: %(message)s'
+filters:
+  performance_specs:
+    (): ext://aslm.log_files.filters.PerformanceFilter
+  not_performance:
+    (): ext://aslm.log_files.filters.NonPerfFilter
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: WARNING
+    formatter: base
+    stream: ext://sys.stdout
+    filters: [not_performance]
+  vc_info:
+    class: logging.FileHandler
+    level: INFO
+    formatter: base
+    filename: log_files/view_controller_info.log
+    filters: [not_performance]
+    mode: w
+  vc_debug:
+    class: logging.FileHandler
+    level: DEBUG
+    formatter: base
+    filename: log_files/view_controller_debug.log
+    filters: [not_performance]
+    mode: w
+  performance:
+    class: logging.FileHandler
+    level: DEBUG
+    formatter: base
+    filename: log_files/performance.log
+    filters: [performance_specs]
+    mode: w
+loggers:
+  view:
+    level: DEBUG
+    handlers: [console, vc_info, vc_debug, performance]
+    propagate: no
+  controller:
+    level: DEBUG
+    handlers: [console, vc_info, vc_debug, performance]
+    propagate: no
+
+
+# https://docs.python.org/3/library/logging.html#logrecord-objects

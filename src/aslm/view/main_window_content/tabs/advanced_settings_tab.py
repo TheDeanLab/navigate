@@ -30,49 +30,22 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
+from tkinter import *
+from tkinter import ttk
+import logging
+from pathlib import Path
+# Logger Setup
+p = __name__.split(".")[1]
+logger = logging.getLogger(p)
+from tkinter.font import Font
 
-# Standard Library Imports
-import unittest
-
-# Third Party Imports
 import numpy as np
-import pytest
 
-# Local Imports
-# sys.path.append('../../../')
-
-
-'''
-Delete the below assert once the calculate entropy function is found
-'''
-def test_entropy():
-    assert True
-
-
-# try:
-#     # from aslm.model.aslm_analysis import Analysis as aslm_analysis
-#     from aslm.model.aslm_debug_model import calculate_entropy
-
-#     class TestASLMAnalysis(unittest.TestCase):
-#         """
-#         Unit Tests for the ASLM Analysis Module
-#         """
-#         def test_calculate_entropy_on(self):
-#             """
-#             Test the calculation of the Shannon Entropy
-#             """
-#             dct_array = np.ones((128, 128))
-#             otf_support_x = 3
-#             otf_support_y = 3
-#             # This trys to call from the aslm_analysis module however its only located in the aslm_debug_model
-#             # entropy = aslm_analysis.calculate_entropy()
-#             entropy = calculate_entropy(self,
-#                                                       dct_array=dct_array,
-#                                                       otf_support_x=otf_support_x,
-#                                                       otf_support_y=otf_support_y)
-#             self.assertEqual(entropy, 0)
-# except ImportError as e:
-#     print(e)
-
-# if (__name__ == "__main__"):
-#     unittest.main()
+class advanced_settings_tab(ttk.Frame):
+    def __init__(adv_settings, setntbk, *args, **kwargs):
+        #Init Frame
+        ttk.Frame.__init__(adv_settings, setntbk, *args, **kwargs)
+        
+        # Formatting
+        Grid.columnconfigure(adv_settings, 'all', weight=1)
+        Grid.rowconfigure(adv_settings, 'all', weight=1)

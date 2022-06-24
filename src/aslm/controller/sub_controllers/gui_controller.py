@@ -1,4 +1,6 @@
 """
+ASLM sub-controller for the GUI.
+
 Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
@@ -30,49 +32,50 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-
-# Standard Library Imports
-import unittest
-
-# Third Party Imports
-import numpy as np
-import pytest
-
-# Local Imports
-# sys.path.append('../../../')
+import logging
+from pathlib import Path
+# Logger Setup
+p = __name__.split(".")[1]
+logger = logging.getLogger(p)
 
 
-'''
-Delete the below assert once the calculate entropy function is found
-'''
-def test_entropy():
-    assert True
+class GUI_Controller:
+    def __init__(self, view, parent_controller=None, verbose=False, configuration_controller=None):
+        self.view = view
+        self.parent_controller = parent_controller
+        self.verbose = verbose
 
+    def initialize(self, configuration_controller):
+        """
+        # this function initializes GUI based on configuration setting
+        # parameter: configuration_controller
+        # set range value for entry or spinbox widgets; 
+        # add values to combobox
+        # get other necessary information for configuration.yml
+        """
+        pass
 
-# try:
-#     # from aslm.model.aslm_analysis import Analysis as aslm_analysis
-#     from aslm.model.aslm_debug_model import calculate_entropy
+    def set_experiment_values(self, setting_dict):
+        """
+        # this function sets values of widgets based on experiment setting
+        # setting_dict is a dictionary
+        """
+        pass
 
-#     class TestASLMAnalysis(unittest.TestCase):
-#         """
-#         Unit Tests for the ASLM Analysis Module
-#         """
-#         def test_calculate_entropy_on(self):
-#             """
-#             Test the calculation of the Shannon Entropy
-#             """
-#             dct_array = np.ones((128, 128))
-#             otf_support_x = 3
-#             otf_support_y = 3
-#             # This trys to call from the aslm_analysis module however its only located in the aslm_debug_model
-#             # entropy = aslm_analysis.calculate_entropy()
-#             entropy = calculate_entropy(self,
-#                                                       dct_array=dct_array,
-#                                                       otf_support_x=otf_support_x,
-#                                                       otf_support_y=otf_support_y)
-#             self.assertEqual(entropy, 0)
-# except ImportError as e:
-#     print(e)
+    def update_experiment_values(self, setting_dict):
+        """
+        # this function collects all the values of widgets
+        # setting_dict is a reference of experiment dictionary
+        # update the dictionary directly
+        """
+        pass
+        
+    def execute(self, command, *args):
+        self.show_verbose_info('command passed from child:', command)
+        pass
 
-# if (__name__ == "__main__"):
-#     unittest.main()
+    def show_verbose_info(self, *info):
+        if self.verbose:
+            print('From', self.__class__.__name__, ':', *info)
+        logger.debug(f"From {self.__class__.__name__} : {info}")
+        

@@ -30,49 +30,44 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
+import logging
+from pathlib import Path
+from tkinter import *
+from tkinter import ttk
+from tkinter.font import Font
 
-# Standard Library Imports
-import unittest
-
-# Third Party Imports
 import numpy as np
-import pytest
+from aslm.view.main_window_content.camera_display.camera_settings.tabs.camera_mode import camera_mode
+from aslm.view.main_window_content.camera_display.camera_settings.tabs.framerate_info import framerate_info
+from aslm.view.main_window_content.camera_display.camera_settings.tabs.camera_roi import camera_roi
 
-# Local Imports
-# sys.path.append('../../../')
+# Logger Setup
+p = __name__.split(".")[1]
+logger = logging.getLogger(p)
+
+class camera_settings_tab(ttk.Frame):
+    '''
+    # This class holds and controls the layout of the major label frames for the camera settings tab in the settings notebook. Any imported classes are children that makeup
+    # the content of the major frames. If you need to adjust anything in the frames follow the children.
+    '''
+    def __init__(self, setntbk, *args, **kwargs):
+        #Init Frame
+        ttk.Frame.__init__(self, setntbk, *args, **kwargs)
+        
+        # Formatting
+        Grid.columnconfigure(self, 'all', weight=1)
+        Grid.rowconfigure(self, 'all', weight=1)
+
+        #Camera Modes Frame
+        self.camera_mode = camera_mode(self)
+        self.camera_mode.grid(row=0, column=0, sticky=(NSEW), padx=10, pady=10)
+        
+        #Framerate Label Frame
+        self.framerate_info = framerate_info(self)
+        self.framerate_info.grid(row=0, column=1, sticky=(NSEW), padx=10, pady=10)
+
+        #Region of Interest Settings
+        self.camera_roi = camera_roi(self)
+        self.camera_roi.grid(row=1, column=0,columnspan=2, sticky=(NSEW), padx=10, pady=10)
 
 
-'''
-Delete the below assert once the calculate entropy function is found
-'''
-def test_entropy():
-    assert True
-
-
-# try:
-#     # from aslm.model.aslm_analysis import Analysis as aslm_analysis
-#     from aslm.model.aslm_debug_model import calculate_entropy
-
-#     class TestASLMAnalysis(unittest.TestCase):
-#         """
-#         Unit Tests for the ASLM Analysis Module
-#         """
-#         def test_calculate_entropy_on(self):
-#             """
-#             Test the calculation of the Shannon Entropy
-#             """
-#             dct_array = np.ones((128, 128))
-#             otf_support_x = 3
-#             otf_support_y = 3
-#             # This trys to call from the aslm_analysis module however its only located in the aslm_debug_model
-#             # entropy = aslm_analysis.calculate_entropy()
-#             entropy = calculate_entropy(self,
-#                                                       dct_array=dct_array,
-#                                                       otf_support_x=otf_support_x,
-#                                                       otf_support_y=otf_support_y)
-#             self.assertEqual(entropy, 0)
-# except ImportError as e:
-#     print(e)
-
-# if (__name__ == "__main__"):
-#     unittest.main()

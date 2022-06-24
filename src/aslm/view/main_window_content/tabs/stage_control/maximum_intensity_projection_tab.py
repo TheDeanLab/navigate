@@ -30,49 +30,67 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-
-# Standard Library Imports
-import unittest
-
-# Third Party Imports
+# Standard Imports
+from tkinter import ttk
+from tkinter import *
 import numpy as np
-import pytest
-
-# Local Imports
-# sys.path.append('../../../')
-
-
-'''
-Delete the below assert once the calculate entropy function is found
-'''
-def test_entropy():
-    assert True
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import logging
+from pathlib import Path
+# Logger Setup
+p = __name__.split(".")[1]
+logger = logging.getLogger(p)
 
 
-# try:
-#     # from aslm.model.aslm_analysis import Analysis as aslm_analysis
-#     from aslm.model.aslm_debug_model import calculate_entropy
+class maximum_intensity_projection_tab(ttk.Frame):
+    def __init__(self, note3, *args, **kwargs):
+        #Init Frame
+        ttk.Frame.__init__(self, note3, *args, **kwargs)
+        
+        # Formatting
+        Grid.columnconfigure(self, 'all', weight=1)
+        Grid.rowconfigure(self, 'all', weight=1)
 
-#     class TestASLMAnalysis(unittest.TestCase):
-#         """
-#         Unit Tests for the ASLM Analysis Module
-#         """
-#         def test_calculate_entropy_on(self):
-#             """
-#             Test the calculation of the Shannon Entropy
-#             """
-#             dct_array = np.ones((128, 128))
-#             otf_support_x = 3
-#             otf_support_y = 3
-#             # This trys to call from the aslm_analysis module however its only located in the aslm_debug_model
-#             # entropy = aslm_analysis.calculate_entropy()
-#             entropy = calculate_entropy(self,
-#                                                       dct_array=dct_array,
-#                                                       otf_support_x=otf_support_x,
-#                                                       otf_support_y=otf_support_y)
-#             self.assertEqual(entropy, 0)
-# except ImportError as e:
-#     print(e)
+        # Generate MIPs
+        def xy_mip():
+            pass
 
-# if (__name__ == "__main__"):
-#     unittest.main()
+        def xz_mip():
+            pass
+
+        def yz_mip():
+            pass
+
+        # the figure that will contain the plot
+        fig = Figure(figsize=(11, 3), tight_layout=True)
+
+        #  Data to just fill void
+        t = np.arange(0.0, 2.0, 0.01)
+        s1 = np.sin(2*np.pi*t)
+        s2 = np.sin(4*np.pi*t)
+
+        # adding the subplot
+        plot1 = fig.add_subplot(131)
+        plot1.plot(t, s1)
+        fig.gca().set_axis_off()
+
+        plot2 = fig.add_subplot(132)
+        plot2.plot(t, s2)
+        fig.gca().set_axis_off()
+
+        plot3 = fig.add_subplot(133)
+        plot3.plot(t, s2*2)
+        fig.gca().set_axis_off()
+
+        # creating the Tkinter canvas
+        # containing the Matplotlib figure
+        canvas = FigureCanvasTkAgg(fig, master=self)
+        canvas.draw()
+
+        # placing the canvas on the Tkinter window
+        # canvas.get_tk_widget().pack()
+        canvas.get_tk_widget().grid(row=0, column=0, sticky=NSEW)
+
+        self.calculate_button = ttk.Button(self, text="Calculate MIPs")
+        self.calculate_button.grid(row=1, column=0, sticky=NSEW)

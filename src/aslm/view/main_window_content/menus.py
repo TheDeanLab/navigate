@@ -30,49 +30,45 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-
-# Standard Library Imports
-import unittest
-
-# Third Party Imports
-import numpy as np
-import pytest
-
-# Local Imports
-# sys.path.append('../../../')
+from tkinter import Menu
+import logging
+from pathlib import Path
+# Logger Setup
+p = __name__.split(".")[1]
+logger = logging.getLogger(p)
 
 
-'''
-Delete the below assert once the calculate entropy function is found
-'''
-def test_entropy():
-    assert True
+#  Menubar class
+class menubar(Menu):
+    def __init__(self, window, *args, **kwargs):
+        #  Init Menu with parent
+        Menu.__init__(self, window, *args, **kwargs)
 
+        #  Creates operating system attribute
+        self.opsystem = window.tk.call('tk', 'windowingsystem')
 
-# try:
-#     # from aslm.model.aslm_analysis import Analysis as aslm_analysis
-#     from aslm.model.aslm_debug_model import calculate_entropy
+        #  Prevents menu from tearing off bar
+        window.option_add('*tearOff', False)
 
-#     class TestASLMAnalysis(unittest.TestCase):
-#         """
-#         Unit Tests for the ASLM Analysis Module
-#         """
-#         def test_calculate_entropy_on(self):
-#             """
-#             Test the calculation of the Shannon Entropy
-#             """
-#             dct_array = np.ones((128, 128))
-#             otf_support_x = 3
-#             otf_support_y = 3
-#             # This trys to call from the aslm_analysis module however its only located in the aslm_debug_model
-#             # entropy = aslm_analysis.calculate_entropy()
-#             entropy = calculate_entropy(self,
-#                                                       dct_array=dct_array,
-#                                                       otf_support_x=otf_support_x,
-#                                                       otf_support_y=otf_support_y)
-#             self.assertEqual(entropy, 0)
-# except ImportError as e:
-#     print(e)
+        #  Linking menu to option of parent to this menu class
+        window['menu'] = self
 
-# if (__name__ == "__main__"):
-#     unittest.main()
+        #  File Menu
+        self.menu_file = Menu(self)
+        self.add_cascade(menu=self.menu_file, label='File')
+
+        #  Multi-Position Menu
+        self.menu_multi_positions = Menu(self)
+        self.add_cascade(menu=self.menu_multi_positions, label='Multi-Position')
+
+        #  Resolution Menu
+        self.menu_resolution = Menu(self)
+        self.add_cascade(menu=self.menu_resolution, label='Resolution')
+
+        # Autofocus Menu
+        self.menu_autofocus = Menu(self)
+        self.add_cascade(menu=self.menu_autofocus, label='Autofocus')
+
+        # Debug Menu
+        self.menu_debug = Menu(self)
+        self.add_cascade(menu=self.menu_debug, label='Debug')

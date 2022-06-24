@@ -30,49 +30,38 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
+from tkinter import *
+from tkinter import ttk
+import logging
+from pathlib import Path
+# Logger Setup
+p = __name__.split(".")[1]
+logger = logging.getLogger(p)
 
-# Standard Library Imports
-import unittest
+# Import Sub-Frames
+from aslm.view.main_window_content.camera_display.camera_view.camera_view_tab import camera_tab
+from aslm.view.main_window_content.tabs.waveform_tab import waveform_tab
 
-# Third Party Imports
-import numpy as np
-import pytest
+class camera_waveform_notebook(ttk.Notebook):
+    def __init__(cam_wave, frame_top_right, *args, **kwargs):
+        #Init notebook
+        ttk.Notebook.__init__(cam_wave, frame_top_right, *args, **kwargs)
+        
+        # Formatting
+        Grid.columnconfigure(cam_wave, 'all', weight=1)
+        Grid.rowconfigure(cam_wave, 'all', weight=1)
 
-# Local Imports
-# sys.path.append('../../../')
+        #Putting notebook 2 into top right frame
+        cam_wave.grid(row=0, column=0)
+
+        #Creating the camera tab
+        cam_wave.camera_tab = camera_tab(cam_wave)
+
+        #Creating the waveform settings tab
+        cam_wave.waveform_tab = waveform_tab(cam_wave)
+
+        #Adding tabs to cam_wave notebook
+        cam_wave.add(cam_wave.camera_tab, text='Camera View', sticky=NSEW)
+        cam_wave.add(cam_wave.waveform_tab, text='Waveform Settings', sticky=NSEW)
 
 
-'''
-Delete the below assert once the calculate entropy function is found
-'''
-def test_entropy():
-    assert True
-
-
-# try:
-#     # from aslm.model.aslm_analysis import Analysis as aslm_analysis
-#     from aslm.model.aslm_debug_model import calculate_entropy
-
-#     class TestASLMAnalysis(unittest.TestCase):
-#         """
-#         Unit Tests for the ASLM Analysis Module
-#         """
-#         def test_calculate_entropy_on(self):
-#             """
-#             Test the calculation of the Shannon Entropy
-#             """
-#             dct_array = np.ones((128, 128))
-#             otf_support_x = 3
-#             otf_support_y = 3
-#             # This trys to call from the aslm_analysis module however its only located in the aslm_debug_model
-#             # entropy = aslm_analysis.calculate_entropy()
-#             entropy = calculate_entropy(self,
-#                                                       dct_array=dct_array,
-#                                                       otf_support_x=otf_support_x,
-#                                                       otf_support_y=otf_support_y)
-#             self.assertEqual(entropy, 0)
-# except ImportError as e:
-#     print(e)
-
-# if (__name__ == "__main__"):
-#     unittest.main()

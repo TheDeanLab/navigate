@@ -1,4 +1,6 @@
 """
+ASLM image contrast estimates.
+
 Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
@@ -31,48 +33,41 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 
-# Standard Library Imports
-import unittest
-
-# Third Party Imports
-import numpy as np
-import pytest
-
-# Local Imports
-# sys.path.append('../../../')
 
 
-'''
-Delete the below assert once the calculate entropy function is found
-'''
-def test_entropy():
-    assert True
+
+import logging
+
+# Logger Setup
+p = __name__.split(".")[1]
+logger = logging.getLogger(p)
 
 
-# try:
-#     # from aslm.model.aslm_analysis import Analysis as aslm_analysis
-#     from aslm.model.aslm_debug_model import calculate_entropy
 
-#     class TestASLMAnalysis(unittest.TestCase):
-#         """
-#         Unit Tests for the ASLM Analysis Module
-#         """
-#         def test_calculate_entropy_on(self):
-#             """
-#             Test the calculation of the Shannon Entropy
-#             """
-#             dct_array = np.ones((128, 128))
-#             otf_support_x = 3
-#             otf_support_y = 3
-#             # This trys to call from the aslm_analysis module however its only located in the aslm_debug_model
-#             # entropy = aslm_analysis.calculate_entropy()
-#             entropy = calculate_entropy(self,
-#                                                       dct_array=dct_array,
-#                                                       otf_support_x=otf_support_x,
-#                                                       otf_support_y=otf_support_y)
-#             self.assertEqual(entropy, 0)
-# except ImportError as e:
-#     print(e)
 
-# if (__name__ == "__main__"):
-#     unittest.main()
+def initiate_gpu():
+    gpus = tf.config.list_physical_devices('GPU')
+    if gpus:
+        use_cpu = False
+        # Create 2 virtual GPUs with 24GB memory each
+        try:
+            tf.config.set_logical_device_configuration(
+                gpus[0], [
+                    tf.config.LogicalDeviceConfiguration(
+                        memory_limit=23000), tf.config.LogicalDeviceConfiguration(
+                        memory_limit=23000)])
+            logical_gpus = tf.config.list_logical_devices('GPU')
+        except RuntimeError as e:
+            # Virtual devices must be set before GPUs have been initialized
+            print(e)
+    else:
+        use_cpu = True
+    return use_cpu
+
+
+if (__name__ == "__main__"):
+    # Contrast metrics testing
+    image_data = imread(os.path.join("E:", "test_data", "CH01_003b.tif"))
+    PSF_support = 3
+    verbose = True
+    entropy = normalized_dct_shannon_entropy(image_data, PSF_support, verbose)

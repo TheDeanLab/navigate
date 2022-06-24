@@ -31,48 +31,23 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 
-# Standard Library Imports
-import unittest
-
-# Third Party Imports
-import numpy as np
-import pytest
-
-# Local Imports
-# sys.path.append('../../../')
+from tkinter import ttk
 
 
-'''
-Delete the below assert once the calculate entropy function is found
-'''
-def test_entropy():
-    assert True
+class stagecontrol_maxintensity_styling(ttk.Style):
 
+    def __init__(self):
+        # Inits the style parent objects attributes
+        ttk.Style().__init__(self)
 
-# try:
-#     # from aslm.model.aslm_analysis import Analysis as aslm_analysis
-#     from aslm.model.aslm_debug_model import calculate_entropy
+        # Arrow Button Style
+        self.configure(
+            'Arrow.TButton',
+            font=('calibri', 14)
+        )
 
-#     class TestASLMAnalysis(unittest.TestCase):
-#         """
-#         Unit Tests for the ASLM Analysis Module
-#         """
-#         def test_calculate_entropy_on(self):
-#             """
-#             Test the calculation of the Shannon Entropy
-#             """
-#             dct_array = np.ones((128, 128))
-#             otf_support_x = 3
-#             otf_support_y = 3
-#             # This trys to call from the aslm_analysis module however its only located in the aslm_debug_model
-#             # entropy = aslm_analysis.calculate_entropy()
-#             entropy = calculate_entropy(self,
-#                                                       dct_array=dct_array,
-#                                                       otf_support_x=otf_support_x,
-#                                                       otf_support_y=otf_support_y)
-#             self.assertEqual(entropy, 0)
-# except ImportError as e:
-#     print(e)
-
-# if (__name__ == "__main__"):
-#     unittest.main()
+        # Increment spinbox
+        self.configure(
+            'Increment.TSpinbox',
+            arrowsize=15
+        )

@@ -30,49 +30,33 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-
-# Standard Library Imports
-import unittest
-
-# Third Party Imports
+from tkinter import *
+from tkinter import ttk
+import logging
+from pathlib import Path
+# Logger Setup
+p = __name__.split(".")[1]
+logger = logging.getLogger(p)
+from tkinter.font import Font
 import numpy as np
-import pytest
 
-# Local Imports
-# sys.path.append('../../../')
+class stack_cycling_frame(ttk.Labelframe):
+    def __init__(stack_acq, settings_tab, *args, **kwargs):
+        #Init Frame
+        text_label = 'Laser Cycling Settings'
+        ttk.Labelframe.__init__(stack_acq, settings_tab, text=text_label, *args, **kwargs)
+        
+        # Formatting
+        Grid.columnconfigure(stack_acq, 'all', weight=1)
+        Grid.rowconfigure(stack_acq, 'all', weight=1)
 
+        #Laser Cycling Frame (Vertically oriented)
+        stack_acq.cycling_frame = ttk.Frame(stack_acq)
+        stack_acq.cycling_options = StringVar()
+        stack_acq.cycling_pull_down = ttk.Combobox(stack_acq, textvariable=stack_acq.cycling_options)
+        stack_acq.cycling_pull_down.state(["readonly"]) # Makes it so the user cannot type a choice into combobox
+        stack_acq.cycling_pull_down.grid(row=0, column=1, sticky=(NSEW), padx=4, pady=(4,6))
 
-'''
-Delete the below assert once the calculate entropy function is found
-'''
-def test_entropy():
-    assert True
+        #Gridding Each Holder Frame
+        stack_acq.cycling_frame.grid(row=0, column=0, sticky=(NSEW))
 
-
-# try:
-#     # from aslm.model.aslm_analysis import Analysis as aslm_analysis
-#     from aslm.model.aslm_debug_model import calculate_entropy
-
-#     class TestASLMAnalysis(unittest.TestCase):
-#         """
-#         Unit Tests for the ASLM Analysis Module
-#         """
-#         def test_calculate_entropy_on(self):
-#             """
-#             Test the calculation of the Shannon Entropy
-#             """
-#             dct_array = np.ones((128, 128))
-#             otf_support_x = 3
-#             otf_support_y = 3
-#             # This trys to call from the aslm_analysis module however its only located in the aslm_debug_model
-#             # entropy = aslm_analysis.calculate_entropy()
-#             entropy = calculate_entropy(self,
-#                                                       dct_array=dct_array,
-#                                                       otf_support_x=otf_support_x,
-#                                                       otf_support_y=otf_support_y)
-#             self.assertEqual(entropy, 0)
-# except ImportError as e:
-#     print(e)
-
-# if (__name__ == "__main__"):
-#     unittest.main()

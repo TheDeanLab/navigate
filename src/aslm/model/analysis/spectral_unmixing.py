@@ -1,4 +1,6 @@
 """
+ASLM spectral unmixing workflows.
+
 Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
@@ -30,49 +32,15 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
+import logging
 
-# Standard Library Imports
-import unittest
+# Logger Setup
+p = __name__.split(".")[1]
+logger = logging.getLogger(p)
 
-# Third Party Imports
-import numpy as np
-import pytest
-
-# Local Imports
-# sys.path.append('../../../')
-
-
-'''
-Delete the below assert once the calculate entropy function is found
-'''
-def test_entropy():
-    assert True
-
-
-# try:
-#     # from aslm.model.aslm_analysis import Analysis as aslm_analysis
-#     from aslm.model.aslm_debug_model import calculate_entropy
-
-#     class TestASLMAnalysis(unittest.TestCase):
-#         """
-#         Unit Tests for the ASLM Analysis Module
-#         """
-#         def test_calculate_entropy_on(self):
-#             """
-#             Test the calculation of the Shannon Entropy
-#             """
-#             dct_array = np.ones((128, 128))
-#             otf_support_x = 3
-#             otf_support_y = 3
-#             # This trys to call from the aslm_analysis module however its only located in the aslm_debug_model
-#             # entropy = aslm_analysis.calculate_entropy()
-#             entropy = calculate_entropy(self,
-#                                                       dct_array=dct_array,
-#                                                       otf_support_x=otf_support_x,
-#                                                       otf_support_y=otf_support_y)
-#             self.assertEqual(entropy, 0)
-# except ImportError as e:
-#     print(e)
-
-# if (__name__ == "__main__"):
-#     unittest.main()
+def to_do():
+    '''
+    This function is used to do the spectral unmixing analysis.
+    Need to move files from the Spectral_Unmixing repo to here.
+    Requires significant organization/overhaul.
+    '''

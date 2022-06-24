@@ -30,49 +30,47 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-
 # Standard Library Imports
-import unittest
+import logging
+import tkinter as tk
+from tkinter import *
+from tkinter import ttk
 
 # Third Party Imports
-import numpy as np
-import pytest
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 # Local Imports
-# sys.path.append('../../../')
+from aslm.view.main_window_content.camera_display.camera_view.tabs.image_metrics import image_metrics
+from aslm.view.main_window_content.camera_display.camera_view.tabs.palette import palette
 
+# Logger Setup
+p = __name__.split(".")[1]
+logger = logging.getLogger(p)
 
-'''
-Delete the below assert once the calculate entropy function is found
-'''
-def test_entropy():
-    assert True
+class camera_tab(ttk.Frame):
+    def __init__(self, cam_wave, *args, **kwargs):
+        #  Init Frame
+        ttk.Frame.__init__(self, cam_wave, *args, **kwargs)
+        
+        # Formatting
+        Grid.columnconfigure(self, 'all', weight=1)
+        Grid.rowconfigure(self, 'all', weight=1)
 
+        #  Frame that will hold camera image
+        self.cam_image = ttk.Frame(self)
+        self.cam_image.grid(row=0, column=0, sticky=NSEW)
 
-# try:
-#     # from aslm.model.aslm_analysis import Analysis as aslm_analysis
-#     from aslm.model.aslm_debug_model import calculate_entropy
+        # TODO decide on height, width original was 800x800. 4x binning -> 2048 -> 512
+        self.canvas = tk.Canvas(self.cam_image, width=512, height=512)
+        self.canvas.grid(row=0, column=0, sticky=NSEW, padx=5, pady=5)
+        self.matplotlib_figure = Figure(figsize=[6, 6], tight_layout=True)
+        self.matplotlib_canvas = FigureCanvasTkAgg(self.matplotlib_figure, self.canvas)
 
-#     class TestASLMAnalysis(unittest.TestCase):
-#         """
-#         Unit Tests for the ASLM Analysis Module
-#         """
-#         def test_calculate_entropy_on(self):
-#             """
-#             Test the calculation of the Shannon Entropy
-#             """
-#             dct_array = np.ones((128, 128))
-#             otf_support_x = 3
-#             otf_support_y = 3
-#             # This trys to call from the aslm_analysis module however its only located in the aslm_debug_model
-#             # entropy = aslm_analysis.calculate_entropy()
-#             entropy = calculate_entropy(self,
-#                                                       dct_array=dct_array,
-#                                                       otf_support_x=otf_support_x,
-#                                                       otf_support_y=otf_support_y)
-#             self.assertEqual(entropy, 0)
-# except ImportError as e:
-#     print(e)
+        #  Frame for camera selection and counts
+        self.image_metrics = image_metrics(self)
+        self.image_metrics.grid(row=1, column=0, sticky=W, padx=5, pady=5)
 
-# if (__name__ == "__main__"):
-#     unittest.main()
+        #  Frame for scale settings/pallete color
+        self.scale_palette = palette(self)
+        self.scale_palette.grid(row=0, column=1, sticky=NSEW, padx=5, pady=5)

@@ -120,7 +120,7 @@ class ImageWriter:
             img = data_buffer[frame]
 
             
-
+            # TODO put a for loop in each if statement instead of current structure to make things more clear and easy
 
             # Saving Acq By Slice
             '''
@@ -136,9 +136,9 @@ class ImageWriter:
                 z[:, :, slice, chan, time] =  img
                 if chan == num_of_channels - 1:
                     slice += 1
+                slice = slice % zslice
                 if slice == zslice - 1:
                     time += 1
-                    slice = 0
 
                 
 

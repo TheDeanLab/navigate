@@ -89,14 +89,14 @@ class ImageWriter:
         # Getting amount of slices
         zslice = self.model.experiment.MicroscopeState['number_z_steps']
 
-
-        # Allocate zarr array with values needed
-        # X Pixel Size, Y Pixel Size, Z Slice, Channel Num, Frame ID
-        # Chunks set to False as we are not currently accessing the array like the SharedNDArray just using it to write to disk and then convert
-        # Numpy data type = dtype='uint16'
-        z = zarr.zeros((xsize, ysize, zslice, self.num_of_channels, len(frame_ids)), chunks=False , dtype='uint16')
-
-        # z[:,:,0,0,0] = 2D array at zslice=0, channel=0, frame=0
+        '''
+        Allocate zarr array with values needed
+        X Pixel Size, Y Pixel Size, Z Slice, Channel Num, Frame ID
+        Chunks set to size of each image with the corresponding addtl data
+        Numpy data type = dtype='uint16'
+        z[:,:,0,0,0] = 2D array at zslice=0, channel=0, frame=0
+        '''
+        z = zarr.zeros((xsize, ysize, zslice, self.num_of_channels, len(frame_ids)), chunks=(xsize,ysize,1,1,1) , dtype='uint16')
 
         # Get the currently selected channels, the order is implicit
         channels = self.model.experiment.MicroscopeState['channels']

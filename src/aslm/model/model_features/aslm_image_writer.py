@@ -76,7 +76,7 @@ class ImageWriter:
         # Getting allocation parameters for zarr array
         xsize = self.model.experiment.CameraParameters['x_pixels']
         ysize = self.model.experiment.CameraParameters['y_pixels']
-        image_mode = self.model.experiment.MicroscopeState['image_mode']
+
 
         # Boolean flag to decide which order for saving, by stack or slice. Code is brute force to make it clear, can be sanitized if need be
         by_stack = False
@@ -99,7 +99,7 @@ class ImageWriter:
         # z[:,:,0,0,0] = 2D array at zslice=0, channel=0, frame=0
 
         # Get the currently selected channels, the order is implicit
-        channels = self.experiment.MicroscopeState['channels']
+        channels = self.model.experiment.MicroscopeState['channels']
         selected_channels = []
         prefix_len = len('channel_') # helps get the channel index
         for channel_key in channels:
@@ -118,27 +118,35 @@ class ImageWriter:
 
             # Getting frame from data buffer
             img = data_buffer[frame]
+
             # idx can only increment thru num of channels
             idx = idx % num_of_channels
 
-            # Save acq by the slice, incrementing thru slices and accounting for timepoints
+
+            # Saving Acq By Slice
+            '''
+            Starts on first channel and increments with the loop. Each image is saved by slice, channel and timepoint.
+            After each channel has been taken off data buffer then the slice is incremented.
+            After the amount of slices set by zslice has been reached, time is then incremented and slice reset.
+            TODO do we need to store the actual channel number? Or just make sure that frames are in an order than channels can be interpreted?
+            '''
             if by_slice:
-                cur_channel = selected_channels[idx] # Gets first channel selected to start, then cycles thru chans
-                if slice != zslice: # This is to check for new slice group
-                    z[:, :, slice, cur_channel, time] =  img
-                    if idx == num_of_channels - 1:
-                        slice += 1 # Increment slice when num of channels has been pulled
-                else:
-                    # Once slice count equals total zslice increment time and reset slice count
+                # cur_channel = selected_channels[idx]
+                z[:, :, slice, idx, time] =  img
+                if idx == num_of_channels - 1:
+                    slice += 1
+                if slice == zslice:
                     time += 1
                     slice = 0
+                
+
 
             # Saved by stack
             if by_stack:
                 chan = chan % num_of_channels
                 cur_channel = selected_channels[chan] # start at first channel
                 if slice != zslice: #This now checks for new channels
-                    z[:, :, slice, cur_channel, time] =  img
+                    z[:, :, slice, cur_channel, time] =  img 
                     slice += 1
                 else:
                     # Once slice count equals total amt of zslices, increment channel and reset slices. Check time first
@@ -147,6 +155,8 @@ class ImageWriter:
                         time += 1
                     slice = 0
                     chan += 1
+
+        return z # Returning zarr array for now for testing, will need to write zarr array to memory
                     
                 
 

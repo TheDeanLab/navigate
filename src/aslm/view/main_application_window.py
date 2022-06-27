@@ -132,10 +132,10 @@ class Main_App(ttk.Frame):
 
         # Putting Notebooks into frames, tabs are held within the class of each
         # notebook
-        mainapp.settings = settings_notebook(mainapp.frame_left)
-        mainapp.camera_waveform = camera_waveform_notebook(mainapp.frame_top_right)
-        mainapp.stage_control = stagecontrol_maxintensity_notebook(mainapp.frame_bottom_right)
-        mainapp.acqbar = AcquireBar(mainapp.top_frame, mainapp.root)
+        mainapp.settings = settings_notebook(mainapp.frame_left, mainapp)
+        mainapp.camera_waveform = camera_waveform_notebook(mainapp.frame_top_right, mainapp)
+        mainapp.stage_control = stagecontrol_maxintensity_notebook(mainapp.frame_bottom_right, mainapp)
+        mainapp.acqbar = AcquireBar(mainapp.top_frame, mainapp.root, mainapp)
         logger.info("GUI setup working")
         logger.info("Performance - GUI Started real quick")
         logger.info("Spec - GUI is this size")

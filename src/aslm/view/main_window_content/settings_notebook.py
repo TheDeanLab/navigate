@@ -50,7 +50,7 @@ from view.main_window_content.tabs.channels_tab import channels_tab
 
 
 class settings_notebook(ttk.Notebook):
-    def __init__(setntbk, frame_left, *args, **kwargs):
+    def __init__(setntbk, frame_left, parent, *args, **kwargs):
         #Init notebook
         ttk.Notebook.__init__(setntbk, frame_left, *args, **kwargs)
         

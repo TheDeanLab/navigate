@@ -43,7 +43,7 @@ from view.main_window_content.camera_display.camera_view.camera_view_tab import 
 from view.main_window_content.tabs.waveform_tab import waveform_tab
 
 class camera_waveform_notebook(ttk.Notebook):
-    def __init__(cam_wave, frame_top_right, *args, **kwargs):
+    def __init__(cam_wave, frame_top_right, parent, *args, **kwargs):
         #Init notebook
         ttk.Notebook.__init__(cam_wave, frame_top_right, *args, **kwargs)
         

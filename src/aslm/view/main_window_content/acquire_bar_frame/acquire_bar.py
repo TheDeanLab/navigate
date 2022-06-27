@@ -46,7 +46,7 @@ class AcquireBar(ttk.Frame):
     #  Class for the acquisition bar found at the top of the main application window.
     #  Main function is to change acq setting and then call the acquisition top level window
     """
-    def __init__(self, top_frame, root, *args, **kwargs):
+    def __init__(self, top_frame, root, parent, *args, **kwargs):
         #  Init bar with frame attr
         ttk.Frame.__init__(self, top_frame, *args, **kwargs)
         

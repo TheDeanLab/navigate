@@ -300,3 +300,6 @@ class Stage_GUI_Controller(GUI_Controller):
             self.show_verbose_info('stage position is changed')
         
         return handler
+    
+    #def size_changed(view, event):
+        

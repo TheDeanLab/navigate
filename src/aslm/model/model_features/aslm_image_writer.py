@@ -119,42 +119,45 @@ class ImageWriter:
             # Getting frame from data buffer
             img = data_buffer[frame]
 
-            # idx can only increment thru num of channels
-            idx = idx % num_of_channels
+            
 
 
             # Saving Acq By Slice
             '''
             Starts on first channel and increments with the loop. Each image is saved by slice, channel and timepoint.
             After each channel has been taken off data buffer then the slice is incremented.
-            After the amount of slices set by zslice has been reached, time is then incremented and slice reset.
+            After the amount of slices set by zslice has been reached, time is then incremented.
             TODO do we need to store the actual channel number? Or just make sure that frames are in an order than channels can be interpreted?
             '''
             if by_slice:
                 # cur_channel = selected_channels[idx]
-                z[:, :, slice, idx, time] =  img
-                if idx == num_of_channels - 1:
+                # idx can only increment thru num of channels
+                chan = idx % num_of_channels
+                z[:, :, slice, chan, time] =  img
+                if chan == num_of_channels - 1:
                     slice += 1
-                if slice == zslice:
+                if slice == zslice - 1:
                     time += 1
                     slice = 0
+
                 
 
 
             # Saved by stack
+            '''
+            Starts on first channel and increments thru loop. 
+            Each increment of the loop increases the slice index.
+            Once the slice has reached max count increment to next channel.
+            After all channels and slices have been incremented, increase the time by one.
+            '''
             if by_stack:
-                chan = chan % num_of_channels
-                cur_channel = selected_channels[chan] # start at first channel
-                if slice != zslice: #This now checks for new channels
-                    z[:, :, slice, cur_channel, time] =  img 
-                    slice += 1
-                else:
-                    # Once slice count equals total amt of zslices, increment channel and reset slices. Check time first
-                    #Check if time should be incremented
-                    if chan == num_of_channels - 1:
-                        time += 1
-                    slice = 0
+                slice = idx % zslice
+                z[:, :, slice, chan, time] = img
+                if slice == zslice - 1:
                     chan += 1
+                chan = chan % num_of_channels
+                if chan == num_of_channels - 1:
+                    time += 1
 
         return z # Returning zarr array for now for testing, will need to write zarr array to memory
                     

@@ -111,64 +111,52 @@ class ImageWriter:
                 selected_channels.append(channel_idx)
         
         # Copy data to Zarr
-        chan = 0
-        time = 0
-        slice = 0
-        for idx, frame in enumerate(frame_ids):
-
-            # Getting frame from data buffer
-            img = data_buffer[frame]
-
-            
-            # TODO put a for loop in each if statement instead of current structure to make things more clear and easy
-
-            # Saving Acq By Slice
-            '''
-            Starts on first channel and increments with the loop. Each image is saved by slice, channel and timepoint.
-            After each channel has been taken off data buffer then the slice is incremented.
-            After the amount of slices set by zslice has been reached, time is then incremented.
-            TODO do we need to store the actual channel number? Or just make sure that frames are in an order than channels can be interpreted?
-            '''
-            if by_slice:
-                # cur_channel = selected_channels[idx]
-                # idx can only increment thru num of channels
+        # Saving Acq By Slice
+        '''
+        Starts on first channel and increments with the loop. Each image is saved by slice, channel and timepoint.
+        After each channel has been taken off data buffer then the slice is incremented.
+        After the amount of slices set by zslice has been reached, time is then incremented.
+        TODO do we need to store the actual channel number? Or just make sure that frames are in an order than channels can be interpreted?
+        '''
+        if by_slice:
+            time = 0
+            slice = 0
+            chan = 0
+            for idx, frame in enumerate(frame_ids):
+                img = data_buffer[frame]
                 chan = idx % num_of_channels
-                z[:, :, slice, chan, time] =  img
+                z[:, :, slice, chan, time] = img
                 if chan == num_of_channels - 1:
                     slice += 1
-                slice = slice % zslice
-                if slice == zslice - 1:
+                if slice == zslice:
                     time += 1
-
-                
-
-
-            # Saved by stack
-            '''
-            Starts on first channel and increments thru loop. 
-            Each increment of the loop increases the slice index.
-            Once the slice has reached max count increment to next channel.
-            After all channels and slices have been incremented, increase the time by one.
-            '''
-            if by_stack:
+                    slice = 0
+        
+        # Saved by stack
+        '''
+        Starts on first channel and increments thru loop. 
+        Each increment of the loop increases the slice index.
+        Once the slice has reached max count increment to next channel.
+        After all channels and slices have been incremented, increase the time by one.
+        '''
+        if by_stack:
+            time = 0
+            slice = 0
+            chan = 0
+            for idx, frame in enumerate(frame_ids):
+                image = data_buffer[frame]
                 slice = idx % zslice
-                z[:, :, slice, chan, time] = img
+                z[:, :, slice, chan, time] = image
                 if slice == zslice - 1:
                     chan += 1
-                chan = chan % num_of_channels
                 if chan == num_of_channels - 1:
                     time += 1
+                    chan = 0
+            
 
         return z # Returning zarr array for now for testing, will need to write zarr array to memory
                     
                 
-
-
-
-
-
-
-
 
 
     def write_raw(self, image):

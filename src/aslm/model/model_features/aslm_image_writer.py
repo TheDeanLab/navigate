@@ -147,11 +147,12 @@ class ImageWriter:
                 image = data_buffer[frame]
                 slice = idx % zslice
                 z[:, :, slice, chan, time] = image
-                if slice == zslice - 1:
-                    chan += 1
-                if chan == num_of_channels - 1:
+                if chan == num_of_channels - 1 and slice == zslice - 1:
                     time += 1
                     chan = 0
+                elif slice == zslice - 1:
+                    chan += 1
+                
             
 
         return z # Returning zarr array for now for testing, will need to write zarr array to memory

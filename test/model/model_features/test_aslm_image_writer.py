@@ -75,7 +75,7 @@ class TestImageWriter:
         # Test Setup
         dummy_model = get_dummy_model()
         # Creating 3D simulated data in this case a 3D F shape
-        pix_size = 2048 #dummy_model.experiment.CameraParameters['x_pixels'] #10 
+        pix_size = 10 #dummy_model.experiment.CameraParameters['x_pixels'] #10 
         dummy_model.experiment.CameraParameters['x_pixels'] = pix_size
         dummy_model.experiment.CameraParameters['y_pixels'] = pix_size
         dummy_model.experiment.MicroscopeState['stack_cycling_mode'] = 'per_stack'
@@ -107,10 +107,18 @@ class TestImageWriter:
         # Loop thru zarr array and check that all frames are still equal to what was put in
         same = True
         for time in range(duration):
+            print("Time point: ", time)
             for chans in range(num_of_chans):
+                print("Channel: ", chans)
                 for slice in range(num_of_slices):
+                    print("Slice: ", slice)
                     if np.array_equal(zarr[:, :, slice, chans, time], f_shape) == False:
                         same = False
+                        print(same)
+                        print(zarr[:, :, slice, chans, time])
+                        print("Correct:", f_shape)
+        
+        print(zarr.info)
         
         # Test will fail if an image is not the same
         assert same, "Test failed because array was not equal to what was given"

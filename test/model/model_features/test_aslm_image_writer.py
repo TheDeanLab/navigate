@@ -31,6 +31,8 @@ class TestImageWriter:
         x = np.linspace(0,1,pix_size)
         X, Y = np.meshgrid(x,x)
         f_shape = (X < 0.2) | ((Y > 0.4) & (Y < 0.6) & (X < 0.6)) | ((Y < 0.2) & (X < 0.8)) #2D numpy array
+        rot_f = np.rot90(f_shape, 1, (1,0))
+        inverted_f = np.rot90(f_shape, 2, (1,0))
         num_of_slices = dummy_model.experiment.MicroscopeState['number_z_steps'] = 4 
         # Creating dummy channels
         dummy_model.experiment.MicroscopeState['channels'] = {'channel_2': {'is_selected' : True}, 'channel_3': {'is_selected' : True}, 'channel_4':{'is_selected' : True}}

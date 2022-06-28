@@ -68,7 +68,6 @@ class ImageWriter:
         '''
 
         # Getting needed info, I am doing it in the function because i think if we do not reinit the class, save directory will be a stagnant var. If we just leave self.model = model then that ref will alwasy be up to date
-        save_directory = self.model.experiment.Saving['save_directory']
         num_of_channels = len(self.model.experiment.MicroscopeState['channels'].keys())
         data_buffer = self.model.data_buffer
 
@@ -96,7 +95,8 @@ class ImageWriter:
         Numpy data type = dtype='uint16'
         z[:,:,0,0,0] = 2D array at zslice=0, channel=0, frame=0
         '''
-        z = zarr.zeros((xsize, ysize, zslice, self.num_of_channels, len(frame_ids)), chunks=(xsize,ysize,1,1,1) , dtype='uint16')
+        z = zarr.zeros((xsize, ysize, zslice, self.num_of_channels, len(frame_ids)), 
+                        chunks=(xsize,ysize,1,1,1) , dtype='uint16')
 
         # Get the currently selected channels, the order is implicit
         channels = self.model.experiment.MicroscopeState['channels']

@@ -252,7 +252,7 @@ class Model:
             if self.is_save:
                 self.experiment.Saving = kwargs['saving_info']
                 #image_writer = ImageWriter(self)
-                # self.run_data_process(channel_num, data_func=image_writer.write_tiff)
+                #self.run_data_process(channel_num, data_func=image_writer.write_tiff)
                 #self.run_data_process(channel_num, data_func=image_writer.copy_to_zarr) still need to save to memory currently returning zarr array
             else:
                 self.run_data_process(channel_num)

@@ -64,29 +64,35 @@ class ImageWriter:
         '''
         Wrapper to give Image Writer some saving decision making, this function will be called from model.
         '''
-        if self.file_type == 'Zarr':
-            self.copy_to_zarr(frame_ids)
-        elif self.file_type == 'TIFF':
+        self.save_directory = self.model.experiment.Saving['save_directory']
+        self.file_type = self.model.experiment.Saving['file_type']
+
+
+        if self.file_type == "Zarr":
+            self.write_zarr(frame_ids)
+        elif self.file_type == "TIFF":
             self.write_tiff(frame_ids)
 
-    def copy_to_zarr(self, frame_ids):
+
+    def write_zarr(self, frame_ids):
         '''
         Will take in camera frames and move data fom SharedND Array into a Zarr Array.
         If there is more than one channel there will be that many frames ie if there are 3 channels selected there should be three frames.
         Making the assumption there is only one frame per channel on a single acquisition
         '''
 
-        # Getting needed info, I am doing it in the function because i think if we do not reinit the class, save directory will be a stagnant var. If we just leave self.model = model then that ref will alwasy be up to date
+        # Getting needed info, I am doing it in the function because i think if we do not reinit the class,
+        # save directory will be a stagnant var. If we just leave
+        # self.model = model then that ref will alwasy be up to date
         num_of_channels = len(self.model.experiment.MicroscopeState['channels'].keys())
         data_buffer = self.model.data_buffer
-
 
         # Getting allocation parameters for zarr array
         xsize = self.model.experiment.CameraParameters['x_pixels']
         ysize = self.model.experiment.CameraParameters['y_pixels']
 
-
-        # Boolean flag to decide which order for saving, by stack or slice. Code is brute force to make it clear, can be sanitized if need be
+        # Boolean flag to decide which order for saving, by stack or slice.
+        # Code is brute force to make it clear, can be sanitized if need be
         by_stack = False
         by_slice = False
         if self.model.experiment.MicroscopeState['stack_cycling_mode'] == 'per_stack':
@@ -100,12 +106,13 @@ class ImageWriter:
         '''
         Allocate zarr array with values needed
         X Pixel Size, Y Pixel Size, Z Slice, Channel Num, Frame ID
-        Chunks set to size of each image with the corresponding addtl data
+        Chunks set to size of each image with the corresponding additional data
         Numpy data type = dtype='uint16'
         z[:,:,0,0,0] = 2D array at zslice=0, channel=0, frame=0
         '''
+
         z = zarr.zeros((xsize, ysize, zslice, self.num_of_channels, len(frame_ids)), 
-                        chunks=(xsize,ysize,1,1,1) , dtype='uint16')
+                        chunks = (xsize, ysize, 1, 1, 1), dtype='uint16')
 
         # Get the currently selected channels, the order is implicit
         channels = self.model.experiment.MicroscopeState['channels']
@@ -162,12 +169,8 @@ class ImageWriter:
                 elif slice == zslice - 1:
                     chan += 1
                 
-            
-
-        return z # Returning zarr array for now for testing, will need to write zarr array to memory
-                    
-                
-
+        save_path = os.path.join(self.save_directory, "file.zarr")
+        zarr.save(save_path, z)
 
     def write_raw(self, image):
         pass
@@ -179,6 +182,13 @@ class ImageWriter:
         pass
 
     def write_tiff(self, frame_ids):
+        r"""Write data to disk as a tiff
+
+        Parameters
+        __________
+        frame_ids :
+        """
+        print("frame_ids type:", type(frame_ids))
         current_channel = self.model.current_channel
         for idx in frame_ids:
             image_name = self.generate_image_name(current_channel)

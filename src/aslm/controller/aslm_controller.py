@@ -559,12 +559,21 @@ class ASLM_controller:
             Creates the file directory for saving the data.
             Saves the experiment file to that directory.
             Acquires the data.
+            
+            Parameters
+            __________
+            args[0] : dict
+                dict = self.save_settings from the experiment.yaml file.
+                
             """
             if not self.prepare_acquire_data():
                 self.acquire_bar_controller.stop_acquire()
                 return
-            file_directory = controller_functions.create_save_path(args[0], self.verbose)
+            saving_settings = args[0]
+            file_directory = controller_functions.create_save_path(saving_settings, self.verbose)
             controller_functions.save_yaml_file(file_directory, self.experiment.serialize())
+            self.experiment.Saving['save_directory'] = saving_settings['save_directory']
+            self.experiment.Saving['file_type'] = saving_settings['file_type']
             self.execute('acquire')
 
         elif command == 'acquire':

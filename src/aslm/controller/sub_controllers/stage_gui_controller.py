@@ -52,7 +52,7 @@ class Stage_GUI_Controller(GUI_Controller):
     verbose
     configuration_controller
     """
-    def __init__(self, view, parent_controller, verbose=False, configuration_controller=None):
+    def __init__(self, view, parent_view, parent_controller, verbose=False, configuration_controller=None):
         super().__init__(view, parent_controller, verbose)
 
         self.event_id = {
@@ -107,6 +107,8 @@ class Stage_GUI_Controller(GUI_Controller):
 
         if configuration_controller:
             self.initialize(configuration_controller)
+        self.parent_view = parent_view
+        parent_view.root.bind("<Configure>", self.resize)
 
 
     def initialize(self, config):
@@ -301,5 +303,7 @@ class Stage_GUI_Controller(GUI_Controller):
         
         return handler
     
-    #def size_changed(view, event):
+    def resize(self, event):
+        if(event.widget == self.parent_view.root and (self.parent_view.winfo_width() != event.width or self.parent_view.winfo_height() != event.height)):
+            print("{}: OK".format(event.widget))
         

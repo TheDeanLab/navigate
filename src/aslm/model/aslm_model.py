@@ -35,28 +35,20 @@ POSSIBILITY OF SUCH DAMAGE.
 
 # Standard Library Imports
 import time
-import os
 import threading
-import platform
 import logging
-from pathlib import Path
 
 # Third Party Imports
-import numpy as np
-from queue import Queue
-import multiprocessing as mp
 
 # Local Imports
 import aslm.model.aslm_device_startup_functions as startup_functions
 from aslm.model.aslm_model_config import Session as session
-from aslm.controller.thread_pool import SynchronizedThreadPool
-from aslm.model.concurrency.concurrency_tools import ResultThread, SharedNDArray, ObjectInSubprocess
+from aslm.model.concurrency.concurrency_tools import ResultThread
 from aslm.model.model_features.autofocus import Autofocus
 from aslm.model.model_features.aslm_image_writer import ImageWriter
 
 # debug
 from aslm.model.aslm_debug_model import Debug_Module
-
 
 
 class Model:
@@ -72,7 +64,7 @@ class Model:
         # Logger Setup
         from aslm.log_files.log_functions import log_setup
         log_setup('model_logging.yml')
-        p = __name__.split(".")[0]
+        p = __name__.split(".")[1]
         self.logger = logging.getLogger(p)
         
         self.logger.info("Performance - Testing if it works")
@@ -189,8 +181,8 @@ class Model:
 
         # timing - Units in milliseconds.
         self.camera_minimum_waiting_time = self.camera.get_minimum_waiting_time()
-        self.trigger_waiting_time = 10
-        self.pre_trigger_time = 0
+        # self.trigger_waiting_time = 10
+        # self.pre_trigger_time = 0
 
         # debug
         self.debug = Debug_Module(self, self.verbose)
@@ -254,6 +246,7 @@ class Model:
                 #image_writer = ImageWriter(self)
                 #self.run_data_process(channel_num, data_func=image_writer.write_tiff)
                 #self.run_data_process(channel_num, data_func=image_writer.copy_to_zarr) still need to save to memory currently returning zarr array
+
             else:
                 self.run_data_process(channel_num)
             self.end_acquisition()
@@ -277,7 +270,27 @@ class Model:
 
         elif command == 'z-stack':
             self.imaging_mode = 'z-stack'
-            pass
+            self.experiment.MicroscopeState = kwargs['microscope_info']
+            self.experiment.CameraParameters = kwargs['camera_info']
+            self.is_save = self.experiment.MicroscopeState['is_save']
+            self.prepare_acquisition()
+            self.signal_thread = threading.Thread(target=self.run_z_stack_acquisition)
+            self.signal_thread.name = "Z-Stack Signal"
+            n_frames = len(self.experiment.MicroscopeState['channels'].keys()) \
+                       * int(self.experiment.MicroscopeState['number_z_steps']) \
+                       * int(self.experiment.MicroscopeState['timepoints'])
+
+            if self.is_save:
+                self.experiment.Saving = kwargs['saving_info']
+                image_writer = ImageWriter(self)
+                self.data_thread = threading.Thread(target=self.run_data_process, kwargs={'num_of_frames': n_frames,
+                                                                                          'data_func': image_writer.write_tiff})
+            else:
+                self.data_thread = threading.Thread(target=self.run_data_process, kwargs={'num_of_frames': n_frames})
+            self.data_thread.name = "Z-Stack Data"
+            self.signal_thread.start()
+            self.data_thread.start()
+            # self.end_acquisition()
 
         elif command == 'projection':
             self.imaging_mode = 'projection'
@@ -307,6 +320,8 @@ class Model:
                 resolution_mode = updated_settings['resolution_mode']
                 zoom = updated_settings['zoom']
                 laser_info = updated_settings['laser_info']
+
+
 
                 if resolution_mode == 'low':
                     self.etl_constants.ETLConstants['low'][zoom] = laser_info
@@ -393,7 +408,7 @@ class Model:
         # this function is the structure of data thread
         """
 
-        wait_num = 10 # this will let this thread wait 10 * 500 ms before it ends
+        wait_num = 10  # this will let this thread wait 10 * 500 ms before it ends
         acquired_frame_num = 0
 
         # whether acquire specific number of frames.
@@ -403,7 +418,7 @@ class Model:
             pre_func()
 
         while not self.stop_acquisition:
-            frame_ids = self.camera.get_new_frame()
+            frame_ids = self.camera.get_new_frame()  # This is the 500 ms wait for Hamamatsu
             self.logger.debug(f'running data process, get frames {frame_ids}')
             # if there is at least one frame available
             if not frame_ids:
@@ -422,7 +437,6 @@ class Model:
             # show image
             self.logger.debug(f'sent through pipe{frame_ids[0]}')
             self.show_img_pipe.send(frame_ids[0])
-
 
             acquired_frame_num += len(frame_ids)
             if count_frame and acquired_frame_num >= num_of_frames:
@@ -498,7 +512,7 @@ class Model:
         readout_time : float
             Camera readout time in seconds or -1 if not in Normal mode.
         """
-        readout_time = -1
+        readout_time = 0
         if self.experiment.CameraParameters['sensor_mode'] == 'Normal':
             readout_time = self.camera.camera_controller.get_property_value("readout_time")
         return readout_time
@@ -563,10 +577,11 @@ class Model:
                 self.current_channel = channel_idx
 
                 # Calculate duration of time necessary between camera triggers.
-                self.trigger_waiting_time = self.current_exposure_time/1000 + self.camera_minimum_waiting_time
+                # self.trigger_waiting_time = self.current_exposure_time/1000 + self.camera_minimum_waiting_time
 
                 # Update Camera Exposure Time
                 self.current_exposure_time = channel['camera_exposure_time']
+
                 if self.experiment.CameraParameters['sensor_mode'] == 'Light-Sheet':
                     self.current_exposure_time, self.camera_line_interval = self.camera.calculate_light_sheet_exposure_time(
                         self.current_exposure_time,
@@ -594,7 +609,6 @@ class Model:
                 else:
                     self.snap_image(channel_key)
 
-
     def snap_image(self, channel_key):
         """
         # Snaps a single image after updating the waveforms.
@@ -603,27 +617,34 @@ class Model:
         # waveforms into the buffers of the NI cards.
         #
         """
-        #  Initialize, run, and stop the acquisition.
-        #  Consider putting below to not block thread.
-        self.daq.prepare_acquisition(channel_key, self.current_exposure_time)
 
         # calculate how long has been since last trigger
-        time_spent = time.perf_counter() - self.pre_trigger_time
+        # time_spent = time.perf_counter() - self.pre_trigger_time
 
-        if time_spent < self.trigger_waiting_time:
-            if self.verbose:
-                print('Need to wait!!!! Camera is not ready to be triggered!!!!')
-            #TODO: we may remove additional 0.001 waiting time
-            time.sleep(self.trigger_waiting_time - time_spent + 0.001)
+        # if time_spent < self.trigger_waiting_time:
+        #     if self.verbose:
+        #         print('Need to wait!!!! Camera is not ready to be triggered!!!!')
+        #     #TODO: we may remove additional 0.001 waiting time
+        #     time.sleep(self.trigger_waiting_time - time_spent + 0.001)
 
         # Camera Settings - Exposure Time in Milliseconds
         # only set exposure time after the previous trigger has been done.
         if self.pre_exposure_time != self.current_exposure_time:
+            # In order to change exposure time, we need to stop the camera
+            # if self.camera.camera_controller.is_acquiring:
+            #     self.camera.close_image_series()
             self.camera.set_exposure_time(self.current_exposure_time)
+            cam_exposure_time = self.camera.camera_controller.get_property_value('exposure_time')
             self.pre_exposure_time = self.current_exposure_time
+            # And then re-set it
+            # self.camera.initialize_image_series(self.data_buffer, self.number_of_frames)
 
         # get time when send out the trigger
-        self.pre_trigger_time = time.perf_counter()
+        # self.pre_trigger_time = time.perf_counter()
+
+        #  Initialize, run, and stop the acquisition.
+        #  Consider putting below to not block thread.
+        self.daq.prepare_acquisition(channel_key, self.current_exposure_time)
 
         # Run the acquisition
         self.daq.run_acquisition()
@@ -640,6 +661,62 @@ class Model:
         self.stop_acquisition = False
         while self.stop_acquisition is False and self.stop_send_signal is False:
             self.run_single_acquisition()
+
+    def run_z_stack_acquisition(self):
+        """
+        Collect a z-stack.
+        """
+        import numpy as np
+
+        microscope_state = self.experiment.MicroscopeState
+        stack_cycling_mode = microscope_state['stack_cycling_mode']
+
+        # TODO: Make relative to stage coordinates.
+
+        z_pos = np.linspace(float(microscope_state['start_position']) + self.stages.z_pos,
+                            float(microscope_state['end_position']) + self.stages.z_pos,
+                            int(microscope_state['number_z_steps']))
+
+        # z_pos = np.linspace(int(microscope_state['start_position']),
+        #                     int(microscope_state['end_position']),
+        #                     int(microscope_state['number_z_steps']))
+
+        if stack_cycling_mode == 'per_stack':
+            # Only change the channel we're looking at once per z-stack
+            chans = microscope_state['channels']
+            active_channels = [k for k in chans if chans[k]['is_selected'] is True]
+        elif stack_cycling_mode == 'per_z':
+            # Regular, pass nonsense
+            active_channels = ['sdasdasd']
+        else:
+            print(f"Unknown stack cycling mode {stack_cycling_mode}. Giving up.")
+            return
+
+        # For each moment in time...
+        for t in range(int(microscope_state['timepoints'])):
+            # Make sure all the right channels are active...
+            for ch in active_channels:
+                try:
+                    # If we have readable active chans (we're in per_stack mode) we turn
+                    # on one channel at a time.
+                    for ch2 in active_channels:
+                        if ch2 != ch:
+                            self.experiment.MicroscopeState['channels'][ch2]['is_selected'] = False
+                    self.experiment.MicroscopeState['channels'][ch]['is_selected'] = True
+                except KeyError:
+                    pass
+
+                # And step through z-space...
+                for pos in z_pos:
+                    self.move_stage({'z_abs': pos}, wait_until_done=True)  # Update position
+                    self.run_single_acquisition()  # This will take pics of all active channels
+
+        # Restore active channels. TODO: Is this necessary?
+        for ch in active_channels:
+            try:
+                self.experiment.MicroscopeState['channels'][ch]['is_selected'] = True
+            except KeyError:
+                pass
 
     def change_resolution(self, args):
         resolution_value = args[0]
@@ -671,6 +748,7 @@ class Model:
 
     def return_channel_index(self):
         return self.current_channel
+
 
 if __name__ == '__main__':
     """ Testing Section """

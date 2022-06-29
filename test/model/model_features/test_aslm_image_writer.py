@@ -1,6 +1,3 @@
-from cmath import pi
-from imp import acquire_lock
-from operator import inv
 from aslm.model.model_features.aslm_image_writer import ImageWriter
 from aslm.model.dummy_model import get_dummy_model
 import numpy as np
@@ -10,6 +7,7 @@ class TestImageWriter:
         
 
     def test_zarr_byslice(self):
+
 
         '''
         This function will create a simulated 3D data set that is in the shape of a capital F. The pixel size can be set to any desired size
@@ -161,3 +159,4 @@ class TestImageWriter:
         
         # Test will fail if an image is not the same
         assert same, "Test failed because array was not equal to what was given"
+

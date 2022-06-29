@@ -8,7 +8,7 @@ from time import time
 from aslm.model.devices.lasers.LaserBase import LaserBase
 
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 

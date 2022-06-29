@@ -45,7 +45,7 @@ from aslm.view.main_window_content.camera_display.camera_view.tabs.image_metrics
 from aslm.view.main_window_content.camera_display.camera_view.tabs.palette import palette
 
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 class camera_tab(ttk.Frame):

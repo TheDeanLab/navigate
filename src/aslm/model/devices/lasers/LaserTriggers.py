@@ -6,13 +6,12 @@ Author: Fabian Voigt
 #TODO: Why isn't this in the daq.waveform module?
 """
 import logging
-from pathlib import Path
 
 import nidaqmx
 from nidaqmx.constants import LineGrouping
 
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 

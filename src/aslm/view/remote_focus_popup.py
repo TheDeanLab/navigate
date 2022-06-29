@@ -31,15 +31,15 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 
-from tkinter import *
+from tkinter import *  # TODO: terrifying
 import tkinter as tk
 from tkinter import ttk
 from aslm.view.custom_widgets.popup import PopUp
 from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from aslm.view.custom_widgets.validation import ValidatedSpinbox
 import logging
-from pathlib import Path
-p = __name__.split(".")[0]
+
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
@@ -175,6 +175,17 @@ class remote_popup():
             parent=self.laser_frame, input_class=ValidatedSpinbox, input_var=StringVar())
 
         self.inputs['Galvo Off'].grid(row=5, column=2, sticky=(NSEW), pady=(20, 0))
+
+        galvo_freq = ttk.Label(
+            self.laser_frame,
+            text='Galvo Freq',
+            padding=(
+                2,
+                5,
+                0,
+                0))
+
+        galvo_freq.grid(row=6, column=0, sticky=(NSEW))
 
         self.inputs['Galvo Freq'] = LabelInput(
             parent=self.laser_frame, input_class=ValidatedSpinbox, input_var=StringVar())

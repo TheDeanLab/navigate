@@ -47,7 +47,7 @@ if platform.system() != 'Darwin':
 from aslm.model.analysis import image_decorrelation as image_decorrelation
 
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 class Analysis:

@@ -40,7 +40,7 @@ from pyparsing import col
 from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 

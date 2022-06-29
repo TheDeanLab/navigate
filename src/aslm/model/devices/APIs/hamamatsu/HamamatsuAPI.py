@@ -12,7 +12,7 @@ from enum import IntEnum
 import logging
 from pathlib import Path
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 # ==== load shared library ====
@@ -655,8 +655,7 @@ class camReg(object):
         if cls.numCameras == 0:
             # Initialize the API
             paraminit = DCAMAPI_INIT()
-            init_val = int(dcamapi_init(byref(paraminit)))
-            if init_val < 0:
+            if int(dcamapi_init(byref(paraminit))) < 0:
                 # NOTE: This is an AttributeError to match the other error thrown by this class in startup functions.
                 # This really makes no sense as an attribute error.
                 dcamapi_uninit()

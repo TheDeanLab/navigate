@@ -38,24 +38,18 @@ from queue import Empty
 import random
 import time
 import logging
-from pathlib import Path
-import platform
 
-from tifffile import imread
 import numpy as np
 from scipy.fftpack import dctn
-# Only import if Linux or Windows
-if platform.system() != 'Darwin':
-    import tensorflow as tf
 
 from multiprocessing import Pool, Lock
 
 from aslm.model.aslm_device_startup_functions import start_analysis
 from aslm.model.concurrency.concurrency_tools import ObjectInSubprocess
-from aslm.model.aslm_analysis import Analysis
+
 
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 def calculate_entropy(dct_array, otf_support_x, otf_support_y):

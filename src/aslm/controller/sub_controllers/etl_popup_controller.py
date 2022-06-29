@@ -41,7 +41,7 @@ from aslm.controller.aslm_controller_functions import save_yaml_file, combine_fu
 import logging
 from pathlib import Path
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 class Etl_Popup_Controller(GUI_Controller):
@@ -177,8 +177,7 @@ class Etl_Popup_Controller(GUI_Controller):
             self.parent_controller.resolution_value.set('high' if self.resolution == 'high' else self.mag)
 
     def update_etl_setting(self, name, laser, etl_name):
-        """
-        # this function will update ETLConstants in memory
+        r"""This function will update ETLConstants in memory
         """
         variable = self.variables[name]
 

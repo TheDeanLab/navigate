@@ -266,7 +266,8 @@ class DAQBase:
         resolution_mode = microscope_state['resolution_mode']
 
         if resolution_mode == 'high':
-            zoom = 'one'
+            # zoom = 'one'
+            zoom = microscope_state['zoom']
             self.etl_r_amplitude = float(self.etl_constants.ETLConstants[resolution_mode][zoom][laser]['amplitude'])
             self.etl_r_offset = float(self.etl_constants.ETLConstants[resolution_mode][zoom][laser]['offset'])
             if self.verbose:

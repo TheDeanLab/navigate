@@ -277,6 +277,7 @@ class Model:
             self.prepare_acquisition()
             self.run_single_acquisition()
             channel_num = len(self.experiment.MicroscopeState['channels'].keys())
+
             if self.is_save:
                 self.experiment.Saving = kwargs['saving_info']
                 self.run_data_process(channel_num, data_func=self.image_writer.save_image)

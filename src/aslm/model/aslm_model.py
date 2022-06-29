@@ -37,13 +37,14 @@ POSSIBILITY OF SUCH DAMAGE.
 import time
 import threading
 import logging
+import multiprocessing as mp
 
 # Third Party Imports
 
 # Local Imports
 import aslm.model.aslm_device_startup_functions as startup_functions
 from aslm.model.aslm_model_config import Session as session
-from aslm.model.concurrency.concurrency_tools import ResultThread
+from aslm.model.concurrency.concurrency_tools import ResultThread, SharedNDArray
 from aslm.model.model_features.autofocus import Autofocus
 from aslm.model.model_features.aslm_image_writer import ImageWriter
 
@@ -391,6 +392,9 @@ class Model:
         self.stages.move_absolute(pos_dict, wait_until_done)
         self.stages.report_position()
 
+        # TODO: This atrribute records current focus position
+        # TODO: put it here right now
+        self.focus_pos = self.stages.int_position_dict['f_pos']
 
     def end_acquisition(self):
         """
@@ -406,7 +410,7 @@ class Model:
     # functions related to send out signals
 
     # functions related to frame data
-    def run_data_process(self, num_of_frames=0, pre_func=None, data_func=None, callback=None):
+    def run_data_process(self, num_of_frames=0):
         """
         # this function is the structure of data thread
         """
@@ -416,9 +420,6 @@ class Model:
 
         # whether acquire specific number of frames.
         count_frame = num_of_frames > 0
-
-        if pre_func:
-            pre_func()
 
         while not self.stop_acquisition:
             frame_ids = self.camera.get_new_frame()  # This is the 500 ms wait for Hamamatsu
@@ -434,8 +435,8 @@ class Model:
             wait_num = 10
 
             # May need a separate save_func as saving is done before display and other analysis may be after display
-            if data_func:
-                data_func(frame_ids)
+            if hasattr(self, 'data_container'):
+                self.data_container.run(frame_ids)
 
             # show image
             self.logger.debug(f'sent through pipe{frame_ids[0]}')
@@ -444,9 +445,6 @@ class Model:
             acquired_frame_num += len(frame_ids)
             if count_frame and acquired_frame_num >= num_of_frames:
                 self.stop_acquisition = True
-
-        if callback:
-            callback()
         
         self.show_img_pipe.send('stop')
 
@@ -553,8 +551,7 @@ class Model:
         self.open_shutter()
 
     def run_single_acquisition(self,
-                               target_channel=None,
-                               snap_func=None):
+                               target_channel=None):
         """
         # Called by model.run_command().
         target_channel called only during the autofocus routine.
@@ -603,14 +600,18 @@ class Model:
                 #                       ((self.configuration.CameraParameters['delay_percent'] +
                 #                         self.configuration.RemoteFocusParameters['remote_focus_l_ramp_falling_percent']) / 100 + 1)
 
+                if hasattr(self, 'signal_container'):
+                    self.signal_container.run()
+
                 # Update ETL Settings
                 self.daq.update_etl_parameters(microscope_state, channel, self.experiment.GalvoParameters, self.get_readout_time())
 
-                # Acquire an Image
-                if snap_func:
-                    snap_func()
-                else:
-                    self.snap_image(channel_key)
+                # Acquire an Image                
+                self.snap_image(channel_key)
+
+                if hasattr(self, 'signal_container'):
+                    self.signal_container.run(wait_response=True)
+                
 
     def snap_image(self, channel_key):
         """

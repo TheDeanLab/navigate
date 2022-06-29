@@ -55,9 +55,19 @@ class ImageWriter:
         self.num_of_channels = len(self.model.experiment.MicroscopeState['channels'].keys())
         self.data_buffer = self.model.data_buffer
         self.current_time_point = 0
+        self.file_type = self.model.experiment.Saving['file_type']
 
     def __del__(self):
         pass
+
+    def save_image(self, frame_ids):
+        '''
+        Wrapper to give Image Writer some saving decision making, this function will be called from model.
+        '''
+        if self.file_type == 'Zarr':
+            self.copy_to_zarr(frame_ids)
+        elif self.file_type == 'TIFF':
+            self.write_tiff(frame_ids)
 
     def copy_to_zarr(self, frame_ids):
         '''
@@ -85,7 +95,7 @@ class ImageWriter:
             by_slice = True
 
         # Getting amount of slices
-        zslice = self.model.experiment.MicroscopeState['number_z_steps']
+        zslice = int(self.model.experiment.MicroscopeState['number_z_steps'])
 
         '''
         Allocate zarr array with values needed

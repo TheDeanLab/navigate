@@ -7,6 +7,7 @@ Saving:
   tissue: Lung
   celltype: MV3
   label: GFP
+  file_type: Zarr
   date: 2022-06-07
 Devices:
   daq: NI

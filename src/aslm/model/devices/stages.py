@@ -60,11 +60,11 @@ class StageBase:
         self.x_pos, self.y_pos etc are the true axis positions, no matter whether
         the stages are zeroed or not.
         """
-        self.x_pos = 0
-        self.y_pos = 0
-        self.z_pos = 0
-        self.f_pos = 0
-        self.theta_pos = 0
+        self.x_pos = model.StageParameters['position']['x_pos']
+        self.y_pos = model.StageParameters['position']['y_pos']
+        self.z_pos = model.StageParameters['position']['z_pos']
+        self.f_pos = model.StageParameters['position']['f_pos']
+        self.theta_pos = model.StageParameters['position']['theta_pos']
         self.position_dict = {'x_pos': self.x_pos,
                               'y_pos': self.y_pos,
                               'z_pos': self.z_pos,
@@ -369,7 +369,8 @@ class PIStage(StageBase):
 
         # Move the Focusing Stage to the Start Position
         try:
-            self.pidevice.MOV(5, self.startfocus / 1000)
+            # self.pidevice.MOV(5, self.startfocus / 1000)
+            pass
         except GCSError as e:
             logger.exception(GCSError(e)) # Need to test this on the stage or somehow simulate, otherwise the documented way will work, but if this works it will be more clear what happened
             # raise
@@ -582,7 +583,7 @@ class PIStage(StageBase):
                 self.pitools.waitontarget(self.pidevice)
             except GCSError as e:
                 print("wait on target failed")
-                logger.exception(GCSError(e))
+                logger.exception(e)
 
     def stop(self):
         self.pidevice.STP(noraise=True)

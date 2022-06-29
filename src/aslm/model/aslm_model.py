@@ -327,6 +327,8 @@ class Model:
                 zoom = updated_settings['zoom']
                 laser_info = updated_settings['laser_info']
 
+
+
                 if resolution_mode == 'low':
                     self.etl_constants.ETLConstants['low'][zoom] = laser_info
                 else:
@@ -635,12 +637,13 @@ class Model:
         # only set exposure time after the previous trigger has been done.
         if self.pre_exposure_time != self.current_exposure_time:
             # In order to change exposure time, we need to stop the camera
-            if self.camera.camera_controller.is_acquiring:
-                self.camera.close_image_series()
+            # if self.camera.camera_controller.is_acquiring:
+            #     self.camera.close_image_series()
             self.camera.set_exposure_time(self.current_exposure_time)
+            cam_exposure_time = self.camera.camera_controller.get_property_value('exposure_time')
             self.pre_exposure_time = self.current_exposure_time
             # And then re-set it
-            self.camera.initialize_image_series(self.data_buffer, self.number_of_frames)
+            # self.camera.initialize_image_series(self.data_buffer, self.number_of_frames)
 
         # get time when send out the trigger
         # self.pre_trigger_time = time.perf_counter()
@@ -674,9 +677,15 @@ class Model:
         microscope_state = self.experiment.MicroscopeState
         stack_cycling_mode = microscope_state['stack_cycling_mode']
 
-        z_pos = np.linspace(int(microscope_state['start_position']),
-                            int(microscope_state['end_position']),
+        # TODO: Make relative to stage coordinates.
+
+        z_pos = np.linspace(float(microscope_state['start_position']) + self.stages.z_pos,
+                            float(microscope_state['end_position']) + self.stages.z_pos,
                             int(microscope_state['number_z_steps']))
+
+        # z_pos = np.linspace(int(microscope_state['start_position']),
+        #                     int(microscope_state['end_position']),
+        #                     int(microscope_state['number_z_steps']))
 
         if stack_cycling_mode == 'per_stack':
             # Only change the channel we're looking at once per z-stack

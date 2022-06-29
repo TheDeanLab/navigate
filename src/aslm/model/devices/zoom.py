@@ -109,9 +109,9 @@ class SyntheticZoom(ZoomBase):
 class DynamixelZoom(ZoomBase):
     def __init__(self, model, verbose):
         super().__init__(model, verbose)
-        # from model.devices.APIs.dynamixel import dynamixel_functions as dynamixel
-        self.dynamixel = importlib.import_module(
-            'model.devices.APIs.dynamixel.dynamixel_functions')
+        from aslm.model.devices.APIs.dynamixel import dynamixel_functions as dynamixel
+        self.dynamixel = dynamixel
+        # self.dynamixel = importlib.import_module('aslm.model.devices.APIs.dynamixel.dynamixel_functions')
         self.id = model.ZoomParameters['servo_id']
         self.comport = model.ZoomParameters['COMport']
         self.devicename = self.comport.encode('utf-8')
@@ -161,7 +161,7 @@ class DynamixelZoom(ZoomBase):
             logger.error("Zoom designation not in the configuration")
         if self.verbose:
             print('Zoom set to {}'.format(zoom))
-            print("Zoom position:", self.read_position())
+            print("Actual Zoom position:", self.read_position())
         logger.debug(f"Zoom set to {zoom})")
         logger.debug(f"Zoom position set to {self.read_position()})")
 
@@ -231,11 +231,11 @@ class DynamixelZoom(ZoomBase):
         # Returns position as an int between 0 and 4096
         # Opens & closes the port
         """
-        self.dynamixel.openPort(self.port_num)
-        self.dynamixel.setBaudRate(self.port_num, self.baudrate)
+        # self.dynamixel.openPort(self.port_num)
+        # self.dynamixel.setBaudRate(self.port_num, self.baudrate)
         cur_position = self.dynamixel.read4ByteTxRx(
             self.port_num, 1, self.id, self.addr_mx_present_position)
-        self.dynamixel.closePort(self.port_num)
+        # self.dynamixel.closePort(self.port_num)
         if self.verbose:
             print('Zoom position: {}'.format(cur_position))
         logger.debug(f"Zoom position {cur_position}")

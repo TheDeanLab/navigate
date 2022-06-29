@@ -34,8 +34,7 @@ import re
 import tkinter as tk
 from tkinter import ttk        
 from decimal import Decimal, InvalidOperation
-from .hoverbar import Tooltip
-from .LabelInputWidgetFactory import LabelInput
+from aslm.view.custom_widgets.hoverbar import Tooltip
 import logging
 from pathlib import Path
 
@@ -454,7 +453,7 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         self.trigger_focusout_validation() # Revalidate with the new maximum
 
 if __name__ == '__main__':
-
+    from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 
 
     root = tk.Tk()

@@ -46,6 +46,10 @@ from multiprocessing import Pool, Lock
 
 from aslm.model.aslm_device_startup_functions import start_analysis
 from aslm.model.concurrency.concurrency_tools import ObjectInSubprocess
+from aslm.model.model_features.alsm_feature_container import load_features
+from aslm.model.model_features.aslm_image_writer import ImageWriter
+from aslm.model.model_features.autofocus import Autofocus
+from aslm.model.model_features.dummy_detective import Dummy_Detective
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -119,6 +123,40 @@ class Debug_Module:
     def debug(self, command, *args, **kwargs):
         getattr(self, command)(*args, **kwargs)
 
+    def test_feature_container(self, *args, **kwargs):
+        # feature list
+        feature_list = []
+        # detective->yes->save->autofocus->yes->save
+        feature_list.append([[{'name': Dummy_Detective}], [{'name': ImageWriter}, {'name': Autofocus}], [{'name': ImageWriter, 'args': ('sub',)}]])
+        # detective->yes->autofocus->yes->save
+        feature_list.append([[{'name': Dummy_Detective}], [{'name': Autofocus}], [{'name': ImageWriter}]])
+        # detective->yes->save
+        feature_list.append([[{'name': Dummy_Detective}], [{'name': ImageWriter}]])
+        # detective->save
+        feature_list.append([[{'name': Dummy_Detective}, {'name': ImageWriter}]])
+        # autofocus->yes->save
+        feature_list.append([[{'name': Autofocus}], [{'name': ImageWriter}]])
+        # autofocus
+        feature_list.append([[{'name': Autofocus}]])
+
+        self.model.experiment.MicroscopeState = args[0]
+        self.model.prepare_acquisition()
+        self.model.experiment.Saving['save_directory'] = 'temp\\images'
+
+        # load features
+        self.model.signal_container, self.model.data_container = load_features(self.model, feature_list[args[2]])
+
+        self.model.signal_thread = threading.Thread(target=self.send_signals, args=(args[1],))
+        # self.model.signal_thread = threading.Thread(target=self.send_signals(args[1]))
+        # self.model.data_thread = threading.Thread(target=self.get_frames, args=(args[1],))
+        self.model.data_thread = threading.Thread(target=self.model.run_data_process, args=(args[1],))
+        self.model.signal_thread.start()
+        self.model.data_thread.start()
+
+    def clear_feature_container(self, *args, **kwargs):
+        delattr(self.model, 'signal_container')
+        delattr(self.model, 'data_container')
+
     def update_analysis_type(self, analysis_type, *args, **kwargs):
         if analysis_type == self.analysis_type:
             return
@@ -152,7 +190,7 @@ class Debug_Module:
         frame_num = self.model.get_autofocus_frame_num() + 1  # What does adding one here again doing?
         if frame_num <= 1:
             return
-        self.model.before_acquisition() # Opens correct shutter and puts all signals to false
+        self.model.prepare_acquisition() # Opens correct shutter and puts all signals to false
         self.model.autofocus_on = True
         self.model.is_save = False
         self.model.f_position = args[2] # Current position
@@ -170,11 +208,8 @@ class Debug_Module:
             print('live!!!!!!')
             self.model.experiment.MicroscopeState = args[0]
             self.model.is_save = False
-            self.model.before_acquisition()
-            self.model.trigger_waiting_time = 0
-            self.model.pre_trigger_time = 0
+            self.model.prepare_acquisition()
             self.model.signal_thread = threading.Thread(target=self.send_signals, args=(args[1],))
-            # self.model.signal_thread = threading.Thread(target=self.send_signals(args[1]))
             self.model.data_thread = threading.Thread(target=self.get_frames, args=(args[1],))
             self.model.signal_thread.start()
             self.model.data_thread.start()
@@ -183,7 +218,7 @@ class Debug_Module:
             self.model.experiment.AutoFocusParameters = args[1]
             signal_num = args[3]
             # signal_num = self.model.get_autofocus_frame_num() + 1
-            self.model.before_acquisition()
+            self.model.prepare_acquisition()
             self.model.autofocus_on = True
             self.model.is_save = False
             self.model.f_position = args[2]
@@ -208,7 +243,7 @@ class Debug_Module:
                     break
 
         self.model.experiment.MicroscopeState = args[0]
-        self.model.before_acquisition()
+        self.model.prepare_acquisition()
         self.model.autofocus_on = True
         self.model.is_save = False
         self.model.signal_thread = threading.Thread(target=func)
@@ -223,7 +258,8 @@ class Debug_Module:
         while i < signal_num and not self.model.stop_acquisition:
             self.model.run_single_acquisition()
             i += channel_num
-            print('sent out', i, 'signals!!!!!')
+            print('sent out', i, 'signals(', signal_num, ')!!!!!')
+        print('send signal ends!!!!')
 
     def send_autofocus_signals(self, f_position, signal_num):
         step_size = random.randint(5, 50)
@@ -316,7 +352,7 @@ class Debug_Module:
             self.model.plot_pipe.send(plot_data) # Sending controller plot data
         
         self.model.show_img_pipe.send('stop')
-        self.model.show_img_pipe.send(acquired_frame_num)
+        # self.model.show_img_pipe.send(acquired_frame_num)
         end_time = time.perf_counter()
         print('*******total time********', end_time - start_time)
         print('received frames in total:', acquired_frame_num)

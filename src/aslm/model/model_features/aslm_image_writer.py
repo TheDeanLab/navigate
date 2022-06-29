@@ -49,12 +49,19 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 class ImageWriter:
-    def __init__(self, model):
+    def __init__(self, model, sub_dir=''):
         self.model = model
-        self.save_directory = self.model.experiment.Saving['save_directory']
+        self.save_directory = os.path.join(self.model.experiment.Saving['save_directory'], sub_dir)
         self.num_of_channels = len(self.model.experiment.MicroscopeState['channels'].keys())
         self.data_buffer = self.model.data_buffer
         self.current_time_point = 0
+
+        self.config_table = {'signal':{},
+                            'data': {'main': self.write_tiff}}
+
+        # creat saving folder if not exits
+        if not os.path.exists(self.save_directory):
+            os.makedirs(self.save_directory)
 
     def __del__(self):
         pass
@@ -180,3 +187,6 @@ class ImageWriter:
         image_name = "CH0" + str(current_channel) + "_" + str(self.current_time_point).zfill(6) + ".tif"
         self.current_time_point += 1
         return image_name
+
+    def generate_meta_data(self):
+        print('meta data: write', self.model.frame_id)

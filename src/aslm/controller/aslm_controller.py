@@ -640,7 +640,8 @@ class ASLM_controller:
                 print('receive', image_id)
             logger.debug(f"recieve, {image_id}")
             if image_id == 'stop':
-                self.set_mode_of_sub('stop')
+                # self.set_mode_of_sub('stop')
+                self.execute('stop_acquire')
                 break
             if not isinstance(image_id, int):
                 print('some thing wrong happened, stop the model!', image_id)

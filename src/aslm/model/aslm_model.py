@@ -707,6 +707,9 @@ class Model:
 
         # TODO: Make relative to stage coordinates.
 
+        self.stages.report_position()  # Update current position
+        restore_z = self.stages.z_pos
+
         z_pos = np.linspace(float(microscope_state['start_position']) + self.stages.z_pos,
                             float(microscope_state['end_position']) + self.stages.z_pos,
                             int(microscope_state['number_z_steps']))
@@ -751,6 +754,9 @@ class Model:
                 self.experiment.MicroscopeState['channels'][ch]['is_selected'] = True
             except KeyError:
                 pass
+
+        # Restore stage position
+        self.move_stage({'z_abs': restore_z}, wait_until_done=True)  # Update position
 
     def change_resolution(self, args):
         resolution_value = args[0]

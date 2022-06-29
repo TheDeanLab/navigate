@@ -47,6 +47,7 @@ from multiprocessing import Pool, Lock
 from aslm.model.aslm_device_startup_functions import start_analysis
 from aslm.model.concurrency.concurrency_tools import ObjectInSubprocess
 
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)

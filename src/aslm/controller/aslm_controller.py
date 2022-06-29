@@ -653,6 +653,8 @@ class ASLM_controller:
             print("Captured", self.camera_view_controller.image_count, mode, "Images")
         logger.debug(f"Captured {self.camera_view_controller.image_count}, {mode} Images")
 
+        self.set_mode_of_sub('stop')
+
 
     def capture_autofocus_image(self):
         r"""Trigger model to capture a single image

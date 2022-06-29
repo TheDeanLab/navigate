@@ -220,6 +220,9 @@ class Model:
 
         return cam
 
+    # Image Writer/Save functionality
+    self.image_writer = ImageWriter(self)
+
     def set_show_img_pipe(self, handler):
         """
         # wire up show image function/pipe
@@ -276,9 +279,9 @@ class Model:
             channel_num = len(self.experiment.MicroscopeState['channels'].keys())
             if self.is_save:
                 self.experiment.Saving = kwargs['saving_info']
-                image_writer = ImageWriter(self)
-                # self.run_data_process(channel_num, data_func=image_writer.write_tiff)
-                self.run_data_process(channel_num, data_func=image_writer.copy_to_zarr)
+                self.run_data_process(channel_num, data_func=self.image_writer.save_image)
+                
+
             else:
                 self.run_data_process(channel_num)
             self.end_acquisition()
@@ -314,9 +317,8 @@ class Model:
 
             if self.is_save:
                 self.experiment.Saving = kwargs['saving_info']
-                image_writer = ImageWriter(self)
                 self.data_thread = threading.Thread(target=self.run_data_process, kwargs={'num_of_frames': n_frames,
-                                                                                          'data_func': image_writer.write_tiff})
+                                                                                          'data_func': self.image_writer.save_image})
             else:
                 self.data_thread = threading.Thread(target=self.run_data_process, kwargs={'num_of_frames': n_frames})
             self.data_thread.name = "Z-Stack Data"

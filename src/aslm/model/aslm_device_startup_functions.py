@@ -94,6 +94,7 @@ def auto_redial(func, args, n_tries=10, exception=Exception):
 
     return val
 
+
 def start_analysis(configuration, experiment, use_gpu, verbose):
     """
     # Initializes the analysis class on a dedicated thread
@@ -101,14 +102,15 @@ def start_analysis(configuration, experiment, use_gpu, verbose):
     from aslm.model.aslm_analysis import Analysis
     return Analysis(use_gpu, verbose)
 
-def start_camera(configuration, experiment, verbose):
+
+def start_camera(configuration, experiment, verbose, camera_id=0):
     """
     # Initializes the camera as a sub-process using concurrency tools.
     """
 
     if configuration.Devices['camera'] == 'HamamatsuOrca':
         from aslm.model.devices.cameras import HamamatsuOrca
-        return auto_redial(HamamatsuOrca, (0, configuration, experiment, verbose), exception=Exception)
+        return auto_redial(HamamatsuOrca, (camera_id, configuration, experiment, verbose), exception=Exception)
     elif configuration.Devices['camera'] == 'SyntheticCamera':
         from aslm.model.devices.cameras import SyntheticCamera
         return SyntheticCamera(0, configuration, experiment, verbose)

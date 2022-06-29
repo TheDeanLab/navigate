@@ -449,6 +449,9 @@ class ASLM_controller:
         self.camera_setting_controller.set_mode(mode)
         if hasattr(self, 'etl_controller') and self.etl_controller:
             self.etl_controller.set_mode(mode)
+        if mode == 'stop':
+            # GUI Failsafe
+            self.acquire_bar_controller.view.acquire_btn.configure(text='Acquire')
 
     def update_camera_view(self):
         r"""Update the real-time parameters in the camera view (channel number, max counts, image, etc.)
@@ -637,6 +640,7 @@ class ASLM_controller:
                 print('receive', image_id)
             logger.debug(f"recieve, {image_id}")
             if image_id == 'stop':
+                self.set_mode_of_sub('stop')
                 break
             if not isinstance(image_id, int):
                 print('some thing wrong happened, stop the model!', image_id)

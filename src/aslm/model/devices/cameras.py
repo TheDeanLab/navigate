@@ -276,10 +276,7 @@ class HamamatsuOrca(CameraBase):
         super().__init__(camera_id, model, experiment, verbose)
 
         # Locally Import Hamamatsu API and Initialize Camera Controller
-        if hasattr(sys.modules, 'model.devices.APIs.hamamatsu.HamamatsuAPI'):
-            HamamatsuController = importlib.reload('model.devices.APIs.hamamatsu.HamamatsuAPI')
-        else:
-            HamamatsuController = importlib.import_module('model.devices.APIs.hamamatsu.HamamatsuAPI')
+        HamamatsuController = importlib.import_module('model.devices.APIs.hamamatsu.HamamatsuAPI')
         self.camera_controller = HamamatsuController.DCAM(camera_id)
 
         # Values are pulled from the CameraParameters section of the configuration.yml file.
@@ -327,6 +324,10 @@ class HamamatsuOrca(CameraBase):
         if self.verbose:
             print("Hamamatsu Camera Shutdown")
         logger.debug("Hamamatsu Camera Shutdown")
+
+    @property
+    def serial_number(self):
+        return self.camera_controller._serial_number
 
     def stop(self):
         self.stop_flag = True

@@ -84,6 +84,9 @@ class Main_App(ttk.Frame):
         mainapp.root.geometry(f"{screen_width}x{screen_height}")
         Grid.columnconfigure(root, 'all', weight=1)
         Grid.rowconfigure(root, 'all', weight=1)
+        
+        mainapp.minimized_width = 1200
+        mainapp.minimized_height = 700
 
         # Creating and linking menu to main window/app
         mainapp.menubar = menubar(root)

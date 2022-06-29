@@ -192,6 +192,9 @@ class Model:
         # debug
         self.debug = Debug_Module(self, self.verbose)
 
+        # Image Writer/Save functionality
+        self.image_writer = ImageWriter(self)
+
     def get_camera(self):
         """
         Get the currently-used camera, in the event there are multiple cameras.
@@ -219,9 +222,6 @@ class Model:
                     break
 
         return cam
-
-    # Image Writer/Save functionality
-    self.image_writer = ImageWriter(self)
 
     def set_show_img_pipe(self, handler):
         """

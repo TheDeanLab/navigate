@@ -1,4 +1,6 @@
 from cmath import pi
+from imp import acquire_lock
+from operator import inv
 from aslm.model.model_features.aslm_image_writer import ImageWriter
 from aslm.model.dummy_model import get_dummy_model
 import numpy as np
@@ -44,7 +46,13 @@ class TestImageWriter:
         total_time = num_of_slices * num_of_chans * duration
         # Create frame id list with the f_shape with amount of frames for acquisition should be 36 based  on above
         for i in range(total_time):
-            acq.append(f_shape)
+            cycle = i % num_of_chans
+            if cycle == 0:
+                acq.append(f_shape)
+            elif cycle == 1:
+                acq.append(rot_f)
+            elif cycle == 2:
+                acq.append(inverted_f)
             frame_ids.append(i)
 
         # Set data buffer with fake frame list
@@ -62,7 +70,13 @@ class TestImageWriter:
         for time in range(duration):
             for slice in range(num_of_slices):
                 for chans in range(num_of_chans):
-                    if np.array_equal(zarr[:, :, slice, chans, time], f_shape) == False:
+                    if chans == 0:
+                        shape = f_shape
+                    elif chans == 1:
+                        shape = rot_f
+                    elif chans == 2:
+                        shape = inverted_f
+                    if np.array_equal(zarr[:, :, slice, chans, time], shape) == False:
                         same = False
 
 
@@ -81,7 +95,9 @@ class TestImageWriter:
         dummy_model.experiment.MicroscopeState['stack_cycling_mode'] = 'per_stack'
         x = np.linspace(0,1,pix_size)
         X, Y = np.meshgrid(x,x)
-        f_shape = (X < 0.2) | ((Y > 0.4) & (Y < 0.6) & (X < 0.6)) | ((Y < 0.2) & (X < 0.8)) #2D numpy array
+        f_shape = (X < 0.2) | ((Y > 0.4) & (Y < 0.6) & (X < 0.6)) | ((Y < 0.2) & (X < 0.8)).astype(int) #2D numpy array
+        rot_f = np.rot90(f_shape, 1, (1,0)).astype(int)
+        inverted_f = np.rot90(f_shape, 2, (1,0)).astype(int)
         num_of_slices = dummy_model.experiment.MicroscopeState['number_z_steps'] = 4 
         # Creating dummy channels
         dummy_model.experiment.MicroscopeState['channels'] = {'channel_2': {'is_selected' : True}, 'channel_3': {'is_selected' : True}, 'channel_4':{'is_selected' : True}}
@@ -92,9 +108,26 @@ class TestImageWriter:
         frame_ids = []
         total_time = num_of_slices * num_of_chans * duration
         # Create frame id list with the f_shape with amount of frames for acquisition should be 36 based  on above
+        c = 0
         for i in range(total_time):
-            acq.append(f_shape)
+            s = i % num_of_slices
+            if c == 0:
+                acq.append(f_shape)
+            if c == 1:
+                acq.append(rot_f)
+            if c == 2:
+                acq.append(inverted_f)
+            if c == num_of_chans - 1 and s == num_of_slices - 1:
+                c = 0
+            elif s == num_of_slices - 1:
+                c += 1
+            
             frame_ids.append(i)
+
+        for frame in range(len(acq)):
+            print("Frame ID: ", frame + 1)
+            print(acq[frame])
+            print()
 
         # Set data buffer with fake frame list
         dummy_model.data_buffer = acq 
@@ -107,16 +140,22 @@ class TestImageWriter:
         # Loop thru zarr array and check that all frames are still equal to what was put in
         same = True
         for time in range(duration):
-            print("Time point: ", time)
             for chans in range(num_of_chans):
-                print("Channel: ", chans)
                 for slice in range(num_of_slices):
-                    print("Slice: ", slice)
-                    if np.array_equal(zarr[:, :, slice, chans, time], f_shape) == False:
+                    if chans == 0:
+                        shape = f_shape
+                    elif chans == 1:
+                        shape = rot_f
+                    elif chans == 2:
+                        shape = inverted_f
+                    if np.array_equal(zarr[:, :, slice, chans, time], shape) == False:
                         same = False
-                        print(same)
-                        print(zarr[:, :, slice, chans, time])
-                        print("Correct:", f_shape)
+                        print("Same? ", same)
+                        print("Time, Channel, Slice: ", time, chans, slice)
+                        print("Shape expected: \n", shape.astype(int))
+                        print("Actual shape: \n", zarr[:, :, slice, chans, time])
+
+
         
         print(zarr.info)
         

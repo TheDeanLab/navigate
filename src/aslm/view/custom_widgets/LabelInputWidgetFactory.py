@@ -34,6 +34,7 @@ import tkinter as tk
 from tkinter import ttk
 import logging
 from pathlib import Path
+from aslm.view.custom_widgets.validation import ValidatedCombobox, ValidatedSpinbox
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -199,12 +200,12 @@ class LabelInput(ttk.Frame):
         #### Values should be a list of strings or numbers that you want to be options in the specific widget
         '''
 
-        if self.input_class in (ttk.Combobox, tk.Listbox, ttk.Spinbox):
+        if self.input_class in (ttk.Combobox, tk.Listbox, ttk.Spinbox, ValidatedCombobox, ValidatedSpinbox):
             self.widget['values'] = values
         else:
             print(
                 "This widget class does not support list options: " +
-                self.input_class)
+                str(self.input_class))
             logger.info(f"This widget class does not support list options: {self.input_class}")
 
     def pad_input(self, left, up, right, down):

@@ -203,7 +203,7 @@ class Channels_Tab_Controller(GUI_Controller):
         self.view.stack_timepoint_frame.stack_pause_spinbox['state'] = state
         self.view.stack_timepoint_frame.exp_time_spinbox['state'] = state
 
-        self.view.stack_cycling_frame.cycling_pull_down['state'] = 'readonly' if state=='normal' else state
+        self.view.stack_cycling_frame.cycling_pull_down['state'] = 'readonly' if state == 'normal' else state
 
         self.show_verbose_info('acquisition mode has been changed to', mode)
 

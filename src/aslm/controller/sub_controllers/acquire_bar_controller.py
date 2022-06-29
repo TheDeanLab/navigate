@@ -57,7 +57,8 @@ class Acquire_Bar_Controller(GUI_Controller):
             'user': '',
             'tissue': '',
             'celltype': '',
-            'label': ''
+            'label': '',
+            'file_type': ''
         }
 
         self.mode_dict = {
@@ -204,7 +205,8 @@ def initialize_popup_window(popup_window, values):
     #    'user':,
     #    'tissue':,
     #    'celltype':,
-    #    'label':
+    #    'label':,
+        'file_type':
     # }
     """
     popup_vals = popup_window.get_widgets()

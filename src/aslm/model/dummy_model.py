@@ -10,6 +10,7 @@ def get_dummy_model():
     base_directory = Path(__file__).resolve().parent.parent
     configuration_directory = Path.joinpath(base_directory, 'config')
 
+
     config = Path.joinpath(configuration_directory, 'configuration.yml')
     experiment = Path.joinpath(configuration_directory, 'experiment.yml')
     etl_constants = Path.joinpath(configuration_directory, 'etl_constants.yml')

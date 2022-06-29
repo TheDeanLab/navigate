@@ -1,8 +1,8 @@
 User:
   name: Kevin_Dean
 Saving:
-  root_directory: /home/multiscale/Desktop
-  save_directory: /home/multiscale/Desktop/test
+  root_directory: E://
+  save_directory: E://Kevin\Lung\MV3\GFP\2022-02-18\Cell000
   user: Kevin
   tissue: Lung
   celltype: MV3

@@ -35,7 +35,7 @@ from tkinter import ttk
 import logging
 from pathlib import Path
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
@@ -174,25 +174,25 @@ class LabelInput(ttk.Frame):
             # No casting needed this will set any of the other var types
             # (String, Int, etc)
             self.variable.set(value, *args, **kwargs)
-        elif type(self.input).__name__.endswith('button'):  # Catches button style widgets
+        elif type(self.widget).__name__.endswith('button'):  # Catches button style widgets
             # The below if statment is needed for button types because it needs
             # to be selected or enabled based on some value
             if value:
-                self.input.select()  # If there is a value select the button
+                self.widget.select()  # If there is a value select the button
             else:
-                self.input.deselect()  # If there is not deselect it
+                self.widget.deselect()  # If there is not deselect it
         # Catches Text type objects so the Multiline Text widget and the Entry
         # widget
-        elif isinstance(self.input, tk.Text):
-            self.input.delete('1.0', tk.END)
+        elif isinstance(self.widget, tk.Text):
+            self.widget.delete('1.0', tk.END)
             # These lines are used for the specfic formatting of the Text
             # widget, 1 is the line and 0 is the char pos of that line
-            self.input.insert('1.0', value)
+            self.widget.insert('1.0', value)
         else:
-            self.input.delete(0, tk.END)
+            self.widget.delete(0, tk.END)
             # Basic entry widget formatting, dont need the string as the first
             # arg
-            self.input.insert(0, value)
+            self.widget.insert(0, value)
 
     def set_values(self, values):
         '''

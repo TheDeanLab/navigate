@@ -43,12 +43,12 @@ the name of the class instead of self to make things easier to read. So for Main
 from pathlib import Path
 import tkinter as tk
 from tkinter import ttk
-from tkinter import *
+from tkinter import *  # TODO: terrifying
 from tkinter.constants import NSEW
 import logging
 from pathlib import Path
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 # Import Notebooks

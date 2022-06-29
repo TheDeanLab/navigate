@@ -40,7 +40,7 @@ from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from aslm.view.custom_widgets.validation import ValidatedEntry
 
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 #Class that handles the dialog box that has all the user entry stuff when you press the Acquisition button

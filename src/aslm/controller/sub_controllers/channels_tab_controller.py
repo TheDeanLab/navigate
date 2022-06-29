@@ -41,7 +41,7 @@ from aslm.controller.sub_controllers.multi_position_controller import Multi_Posi
 import logging
 from pathlib import Path
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
@@ -203,7 +203,7 @@ class Channels_Tab_Controller(GUI_Controller):
         self.view.stack_timepoint_frame.stack_pause_spinbox['state'] = state
         self.view.stack_timepoint_frame.exp_time_spinbox['state'] = state
 
-        self.view.stack_cycling_frame.cycling_pull_down['state'] = 'readonly' if state=='normal' else state
+        self.view.stack_cycling_frame.cycling_pull_down['state'] = 'readonly' if state == 'normal' else state
 
         self.show_verbose_info('acquisition mode has been changed to', mode)
 
@@ -235,8 +235,8 @@ class Channels_Tab_Controller(GUI_Controller):
                 return
         except:
             self.stack_acq_vals['number_z_steps'].set('')
-            if self.stack_acq_event_id:
-                self.view.after_cancel(self.stack_acq_event_id)
+            # if self.stack_acq_event_id:
+            #     self.view.after_cancel(self.stack_acq_event_id)
             return
         # if step_size < 0.001:
         #     step_size = 0.001

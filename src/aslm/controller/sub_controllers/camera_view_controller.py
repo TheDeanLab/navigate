@@ -46,7 +46,7 @@ import numpy as np
 from aslm.controller.sub_controllers.gui_controller import GUI_Controller
 
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
@@ -210,7 +210,7 @@ class Camera_View_Controller(GUI_Controller):
         self.tk_image = ImageTk.PhotoImage(Image.fromarray(self.cross_hair_image.astype(np.uint8)))
         self.canvas.create_image(0, 0, image=self.tk_image, anchor='nw')
 
-    def display_image(self, image):
+    def display_image(self, image, channel_id=1):
         """
         #  Displays a camera image using the Lookup Table specified in the View.
         #  If Autoscale is selected, automatically calculates the min and max values for the data.
@@ -241,7 +241,7 @@ class Camera_View_Controller(GUI_Controller):
         self.populate_image()
 
         # Update Channel Index
-        # self.image_metrics['Channel'].set(self.parent_controller.model.return_channel_index())
+        self.image_metrics['Channel'].set(channel_id)
 
         # Iterate Image Count for Rolling Average
         self.image_count = self.image_count + 1

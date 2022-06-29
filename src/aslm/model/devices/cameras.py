@@ -41,15 +41,13 @@ import importlib
 import sys
 
 # Third Party Imports
-from pathlib import Path
-
 import numpy as np
 
 # Local Imports
-from ..analysis import noise_model
+from aslm.model.analysis import noise_model
 
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
@@ -128,12 +126,13 @@ class SyntheticCameraController():
     def __init__(self):
         self.is_acquiring = False
 
-    def get_property_value(self):
+    def get_property_value(self, name):
         """
         Provides the idprop value after looking it up in the property_dict
         """
         # return self.prop_getvalue(property_dict[name])
-        return {}
+        
+        return -1  #{}
 
 
 class SyntheticCamera(CameraBase):

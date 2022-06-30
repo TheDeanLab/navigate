@@ -107,9 +107,6 @@ class Model:
             'zoom': ResultThread(target=startup_functions.start_zoom_servo,
                                  args=(self.configuration, self.verbose,)).start(),
 
-            'camera': ResultThread(target=startup_functions.start_camera,
-                                   args=(self.configuration, self.experiment, self.verbose,)).start(),
-
             'stages': ResultThread(target=startup_functions.start_stages,
                                    args=(self.configuration,self.verbose,)).start(),
 
@@ -123,8 +120,16 @@ class Model:
                                            args=(self.configuration, self.experiment, self.verbose,)).start(),
         }
 
+        # Optionally start up multiple cameras
+        for i in range(int(self.configuration.CameraParameters['number_of_cameras'])):
+            threads_dict[f'camera{i}'] = ResultThread(target=startup_functions.start_camera,
+                                                      args=(self.configuration, self.experiment, self.verbose, i)).start()
+            time.sleep(1.0)
+
         for k in threads_dict:
             setattr(self, k, threads_dict[k].get_result())
+
+        self.camera = self.get_camera()  # make sure we grab the correct camera for this resolution mode
 
         # in synthetic_hardware mode, we need to wire up camera to daq
         if args.synthetic_hardware or args.sh:
@@ -189,6 +194,37 @@ class Model:
         # debug
         self.debug = Debug_Module(self, self.verbose)
 
+        # Image Writer/Save functionality
+        self.image_writer = ImageWriter(self)
+
+    def get_camera(self):
+        """
+        Get the currently-used camera, in the event there are multiple cameras.
+        Find the camera with the matching serial number for the current resolution mode.
+
+        Returns
+        -------
+        object
+            Camera object for current resolution mode.
+        """
+
+        # Default to the zeroth camera
+        cam = self.camera0
+
+        # If we have multiple cameras, loop through them all and check their serial numbers
+        n_cams = int(self.configuration.CameraParameters['number_of_cameras'])
+        if n_cams > 1:
+            # Grab the camera with the serial number that matches for the current resolution mode, as specified in
+            # configuration.yaml
+            sn = self.configuration.CameraParameters[f"{self.experiment.MicroscopeState['resolution_mode']}_serial_number"]
+            for i in range(n_cams):
+                curr_cam = getattr(self, f'camera{i}')
+                if str(sn) == str(curr_cam.serial_number):
+                    cam = curr_cam
+                    break
+
+        return cam
+
     def update_data_buffer(self, img_width=512, img_height=512):
         if self.camera.is_acquiring:
             self.camera.close_image_series()
@@ -248,11 +284,12 @@ class Model:
             self.prepare_acquisition()
             self.run_single_acquisition()
             channel_num = len(self.experiment.MicroscopeState['channels'].keys())
+
             if self.is_save:
                 self.experiment.Saving = kwargs['saving_info']
-                image_writer = ImageWriter(self)
-                # self.run_data_process(channel_num, data_func=image_writer.write_tiff)
-                self.run_data_process(channel_num, data_func=image_writer.copy_to_zarr)
+                self.run_data_process(channel_num, data_func=self.image_writer.save_image)
+                
+
             else:
                 self.run_data_process(channel_num)
             self.end_acquisition()
@@ -288,9 +325,8 @@ class Model:
 
             if self.is_save:
                 self.experiment.Saving = kwargs['saving_info']
-                image_writer = ImageWriter(self)
                 self.data_thread = threading.Thread(target=self.run_data_process, kwargs={'num_of_frames': n_frames,
-                                                                                          'data_func': image_writer.write_tiff})
+                                                                                          'data_func': self.image_writer.save_image})
             else:
                 self.data_thread = threading.Thread(target=self.run_data_process, kwargs={'num_of_frames': n_frames})
             self.data_thread.name = "Z-Stack Data"
@@ -645,7 +681,7 @@ class Model:
             # if self.camera.camera_controller.is_acquiring:
             #     self.camera.close_image_series()
             self.camera.set_exposure_time(self.current_exposure_time)
-            cam_exposure_time = self.camera.camera_controller.get_property_value('exposure_time')
+            # cam_exposure_time = self.camera.camera_controller.get_property_value('exposure_time')
             self.pre_exposure_time = self.current_exposure_time
             # And then re-set it
             # self.camera.initialize_image_series(self.data_buffer, self.number_of_frames)
@@ -686,6 +722,9 @@ class Model:
         stack_cycling_mode = microscope_state['stack_cycling_mode']
 
         # TODO: Make relative to stage coordinates.
+
+        self.stages.report_position()  # Update current position
+        restore_z = self.stages.z_pos
 
         z_pos = np.linspace(float(microscope_state['start_position']) + self.stages.z_pos,
                             float(microscope_state['end_position']) + self.stages.z_pos,
@@ -732,8 +771,28 @@ class Model:
             except KeyError:
                 pass
 
+        # Restore stage position
+        self.move_stage({'z_abs': restore_z}, wait_until_done=True)  # Update position
+
     def change_resolution(self, args):
         resolution_value = args[0]
+
+        if (self.experiment.MicroscopeState['resolution_mode'] == "low" and resolution_value == 'high')\
+           or (self.experiment.MicroscopeState['resolution_mode'] == "high" and resolution_value != 'high'):
+            # We're switching cameras
+
+            # We need to set this first for get_camera()
+            if resolution_value == 'high':
+                self.experiment.MicroscopeState['resolution_mode'] = 'high'
+            else:
+                self.experiment.MicroscopeState['resolution_mode'] = 'low'
+
+            # We can't keep acquiring if we're switching cameras. For now, simply turn the camera off.
+            if self.camera.camera_controller.is_acquiring or self.is_live:
+                self.run_command('stop')
+
+            self.camera = self.get_camera()
+
         if resolution_value == 'high':
             print("High Resolution Mode")
             self.experiment.MicroscopeState['resolution_mode'] = 'high'

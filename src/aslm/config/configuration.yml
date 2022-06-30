@@ -49,7 +49,9 @@ DAQParameters:
 
 CameraParameters:
   # Hamamatsu Orca Flash 4.0
-  number_of_cameras: 1
+  number_of_cameras: 2
+  high_serial_number: 302158
+  low_serial_number: 302352
   x_pixels: 2048.0
   y_pixels: 2048.0
   pixel_size_in_microns: 6.5

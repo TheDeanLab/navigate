@@ -57,7 +57,8 @@ class Acquire_Bar_Controller(GUI_Controller):
             'user': '',
             'tissue': '',
             'celltype': '',
-            'label': ''
+            'label': '',
+            'file_type': ''
         }
 
         self.mode_dict = {
@@ -130,6 +131,7 @@ class Acquire_Bar_Controller(GUI_Controller):
         if self.is_save and self.mode != 'live':
             acquire_pop = acquire_popup(self.view)
             buttons = acquire_pop.get_buttons()  # This holds all the buttons in the popup
+            widgets = acquire_pop.get_widgets()
 
             # Configure the button callbacks on the popup window
             buttons['Cancel'].config(
@@ -137,6 +139,10 @@ class Acquire_Bar_Controller(GUI_Controller):
                     self.verbose))
             buttons['Done'].config(
                 command=lambda: self.launch_acquisition(acquire_pop))
+
+            # Configure drop down callbacks, will update save settings when file type is changed
+            file_type = widgets['file_type'].get_variable()
+            file_type.trace_add('write', lambda *args: self.update_file_type(file_type))
 
             initialize_popup_window(acquire_pop, self.saving_settings)
 
@@ -159,6 +165,16 @@ class Acquire_Bar_Controller(GUI_Controller):
         self.mode = self.mode_dict[self.view.pull_down.get()]
 
         self.show_verbose_info("The Microscope State is now:", self.get_mode())
+
+
+    def update_file_type(self, file_type):
+        """
+        # Updates the file type when the drop down in save dialog is changed.
+
+        """
+        self.saving_settings['file_type'] = file_type.get()
+
+
 
     def launch_acquisition(self, popup_window):
         """
@@ -204,7 +220,8 @@ def initialize_popup_window(popup_window, values):
     #    'user':,
     #    'tissue':,
     #    'celltype':,
-    #    'label':
+    #    'label':,
+    #    'file_type':
     # }
     """
     popup_vals = popup_window.get_widgets()

@@ -76,6 +76,16 @@ class palette(ttk.Labelframe):
             self.inputs[self.color_labels[i]].grid(
                 row=i, column=0, sticky=NSEW)
 
+        # Flip xy
+        self.transpose = BooleanVar()
+        self.trans = 'Flip XY'
+        self.inputs[self.trans] = LabelInput(parent=self,
+                                            label=self.trans,
+                                            input_class=ttk.Checkbutton,
+                                            input_var=self.transpose
+                                            )
+        self.inputs[self.trans].grid(row=3, column=0, sticky=NSEW)
+
         # Autoscale
         self.autoscale = BooleanVar()
         self.auto = 'Autoscale'
@@ -86,7 +96,7 @@ class palette(ttk.Labelframe):
                                             input_class=ttk.Checkbutton,
                                             input_var=self.autoscale
                                             )
-        self.inputs[self.auto].grid(row=3, column=0, sticky=NSEW)
+        self.inputs[self.auto].grid(row=4, column=0, sticky=NSEW)
 
         # Max and Min Counts
         for i in range(len(self.minmax)):
@@ -98,7 +108,7 @@ class palette(ttk.Labelframe):
                                                                        'to': 2**16-1,
                                                                        'increment': 1,
                                                                        'width': 5})
-            self.inputs[self.minmax_names[i]].grid(row=i + 4, column=0, sticky=NSEW, padx=3)
+            self.inputs[self.minmax_names[i]].grid(row=i + 5, column=0, sticky=NSEW, padx=3)
 
     def get_variables(self):
         '''

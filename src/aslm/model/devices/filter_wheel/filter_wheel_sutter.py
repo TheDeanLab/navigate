@@ -41,84 +41,11 @@ import numpy as np
 import serial
 
 # Local Imports
+from aslm.model.devices.filter_wheel.filter_wheel_base import FilterWheelBase
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
-
-class FilterWheelBase:
-    def __init__(self, model, verbose):
-        self.comport = model.FilterWheelParameters['filter_wheel_port']
-        self.baudrate = model.FilterWheelParameters['baudrate']
-        self.filter_dictionary = model.FilterWheelParameters['available_filters']
-        self.number_of_filter_wheels = model.FilterWheelParameters['number_of_filter_wheels']
-        self.wheel_position = 0
-        self.verbose = verbose
-        self.wait_until_done_delay = 0.03
-        self.wait_until_done = True
-
-    def check_if_filter_in_filter_dictionary(self, filter_name):
-        """
-        # Checks if the filter designation (string) given as argument
-        # exists in the filter dictionary
-        """
-        if filter_name in self.filter_dictionary:
-            return True
-        else:
-            raise ValueError('Filter designation not in the configuration')
-            logger.error('Filter designation not in the configuration')
-            
-
-    def filter_change_delay(self, filter_name):
-        """
-        # Calculate duration of time needed for filter wheel to change.
-        """
-        pass
-
-    def set_filter(self, filter_name, wait_until_done=True):
-        """
-        # Change the filter wheel to the filter designated by the filter position argument.
-        """
-        pass
-
-    def read(self, num_bytes):
-        """
-        # Reads the specified number of bytes from the serial port.
-        """
-        pass
-
-    def close(self):
-        """
-        # Closes the serial port.
-        """
-        pass
-
-
-class SyntheticFilterWheel(FilterWheelBase):
-    def __init__(self, model, verbose):
-        super().__init__(model, verbose)
-
-    def filter_change_delay(self, filter_name):
-        pass
-
-    def set_filter(self, filter_name, wait_until_done=True):
-        """
-        # Change the filter wheel to the filter designated by the filter position argument.
-        """
-        pass
-
-    def read(self, num_bytes):
-        """
-        # Reads the specified number of bytes from the serial port.
-        """
-        pass
-
-    def close(self):
-        """
-        # Closes the serial port.
-        """
-        pass
-
 
 class SutterFilterWheel(FilterWheelBase):
     """

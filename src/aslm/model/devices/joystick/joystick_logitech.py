@@ -32,38 +32,20 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
+
+# Standard Library Imports
 import logging
+
+# Third Party Imports
+
+# Local Imports
+from aslm.model.devices.joystick.joystick_base import JoystickBase
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-'''
-TODO: Has to be completely revamped to remove PyQT software.
-Added a large number of pass statements, and commented out PyQT
-
-Contains the joystick handlers
-
-Because the signals emitted can only be processed when a QEventLoop is running, you
-need something with an eventloop (e.g. a QApplication) even for testing.
-'''
-
-from aslm.model.devices.APIs.logitech.logitech import FarmSimulatorSidePanel
-
-
-class JoystickBase:
-    def __init__(self):
-        self.mode = 'undefined'
-
-
-class SyntheticJoystick(JoystickBase):
-    def __init__(self, parent=None):
-        super().__init__()
-        self.parent = parent
-        self.cfg = parent.cfg
-
-
-class JoystickHandler():
+class JoystickLogitech(JoystickBase):
 
     def __init__(self, parent=None):
         super().__init__()

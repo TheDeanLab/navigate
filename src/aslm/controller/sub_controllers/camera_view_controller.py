@@ -71,6 +71,9 @@ class Camera_View_Controller(GUI_Controller):
         self.image_palette['Gradient'].widget.config(command=self.update_LUT)
         self.image_palette['Rainbow'].widget.config(command=self.update_LUT)
 
+        # Transpose binding
+        self.image_palette['Flip XY'].widget.config(command=self.transpose_image)
+
         # Bindings for key events
         self.canvas.bind("<Button-1>", self.left_click)
 
@@ -85,6 +88,7 @@ class Camera_View_Controller(GUI_Controller):
         self.min_counts = None
         self.apply_cross_hair = True
         self.mode = 'stop'
+        self.transpose = False
 
         # Colormap Information
         self.colormap = 'gray'
@@ -117,6 +121,8 @@ class Camera_View_Controller(GUI_Controller):
             self.image_palette['Max'].set(max)
             self.image_palette['Min'].widget['state'] = 'disabled'
             self.image_palette['Max'].widget['state'] = 'disabled'
+
+        self.image_palette['Flip XY'].widget.invoke()
 
         # Image Metrics section
         if name == 'image':
@@ -217,7 +223,11 @@ class Camera_View_Controller(GUI_Controller):
         #  If Autoscale is not selected, takes the user values as specified in the min and max counts.
         """
         # Place image in memory
-        self.image = image
+
+        if self.transpose:
+            self.image = image.T
+        else:
+            self.image = image
 
         # Detect saturated pixels
         self.detect_saturation()
@@ -336,6 +346,9 @@ class Camera_View_Controller(GUI_Controller):
                 print("Autoscale Disabled")
             logger.debug("Autoscale Disabled")
             self.update_min_max_counts()
+
+    def transpose_image(self):
+        self.transpose = self.image_palette['Flip XY'].get()
 
     def update_min_max_counts(self):
         """

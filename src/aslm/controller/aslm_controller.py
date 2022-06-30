@@ -110,8 +110,8 @@ class ASLM_controller:
         # Create a thread pool
         self.threads_pool = SynchronizedThreadPool()
 
-        self.event_queue = mp.Queue()  # pass events from the model to the view via controller
-                                       # accepts tuples, ('event_name', value)
+        self.event_queue = mp.Queue(100)  # pass events from the model to the view via controller
+                                          # accepts tuples, ('event_name', value)
 
         # Initialize the Model
         self.model = ObjectInSubprocess(Model,
@@ -278,7 +278,7 @@ class ASLM_controller:
             if hasattr(self, 'etl_controller'):
                 self.etl_controller.showup()
                 return
-            etl_setting_popup = remote_popup(self.view)  # TODO: can we rename remote_popup to etl_popup?
+            etl_setting_popup = remote_popup(self.view)  # TODO: should we rename etl_setting popup to remote_focus_popup?
             self.etl_controller = Etl_Popup_Controller(etl_setting_popup,
                                                        self,
                                                        self.verbose,
@@ -443,6 +443,9 @@ class ASLM_controller:
         self.camera_setting_controller.set_mode(mode)
         if hasattr(self, 'etl_controller') and self.etl_controller:
             self.etl_controller.set_mode(mode)
+        if mode == 'stop':
+            # GUI Failsafe
+            self.acquire_bar_controller.view.acquire_btn.configure(text='Acquire')
 
     def update_camera_view(self):
         r"""Update the real-time parameters in the camera view (channel number, max counts, image, etc.)
@@ -553,12 +556,21 @@ class ASLM_controller:
             Creates the file directory for saving the data.
             Saves the experiment file to that directory.
             Acquires the data.
+            
+            Parameters
+            __________
+            args[0] : dict
+                dict = self.save_settings from the experiment.yaml file.
+                
             """
             if not self.prepare_acquire_data():
                 self.acquire_bar_controller.stop_acquire()
                 return
-            file_directory = controller_functions.create_save_path(args[0], self.verbose)
+            saving_settings = args[0]
+            file_directory = controller_functions.create_save_path(saving_settings, self.verbose)
             controller_functions.save_yaml_file(file_directory, self.experiment.serialize())
+            self.experiment.Saving['save_directory'] = saving_settings['save_directory']
+            self.experiment.Saving['file_type'] = saving_settings['file_type']
             self.execute('acquire')
 
         elif command == 'acquire':
@@ -631,6 +643,8 @@ class ASLM_controller:
                 print('receive', image_id)
             logger.debug(f"recieve, {image_id}")
             if image_id == 'stop':
+                # self.set_mode_of_sub('stop')
+                self.execute('stop_acquire')
                 break
             if not isinstance(image_id, int):
                 print('some thing wrong happened, stop the model!', image_id)
@@ -642,6 +656,8 @@ class ASLM_controller:
         if self.verbose:
             print("Captured", self.camera_view_controller.image_count, mode, "Images")
         logger.debug(f"Captured {self.camera_view_controller.image_count}, {mode} Images")
+
+        self.set_mode_of_sub('stop')
 
 
     def capture_autofocus_image(self):

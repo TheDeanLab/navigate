@@ -103,14 +103,47 @@ def single_pulse(sample_rate=100000,
     return np.array(array)
 
 
-def tunable_lens_ramp_v2(sample_rate=100000,
-                         exposure_time=0.2,
-                         sweep_time=0.24,
-                         etl_delay=7.5,
-                         camera_delay=10,
-                         fall=2.5,
-                         amplitude=1,
-                         offset=0):
+def tunable_lens_ramp(sample_rate=100000,
+                      exposure_time=0.2,
+                      sweep_time=0.24,
+                      etl_delay=7.5,
+                      camera_delay=10,
+                      fall=2.5,
+                      amplitude=1,
+                      offset=0):
+    r'''Returns a numpy array with a sawtooth ramp - typically used for remote focusing.
+
+    The waveform starts at offset and stays there for the delay period, then
+    rises linearly to 2x amplitude (amplitude here refers to 1/2 peak-to-peak)
+    and drops back down to the offset voltage during the fall period.
+
+    Switching from a left to right ETL ramp is possible by exchanging the
+    rise and fall periods.
+
+    Parameters
+    ----------
+    sample_rate : Integer
+        Unit - Hz
+    exposure_time : Float
+        Unit - Seconds
+    sweep_time : Float
+        Unit - Seconds
+    etl_delay : Float
+        Unit - Percent
+    camera_delay : Float
+        Unit - Percent
+    fall : Float
+        Unit - Percent
+    amplitude : Float
+        Unit - Volts
+    offset : Float
+        Unit - Volts
+
+    Returns
+    -------
+    waveform : np.array
+    '''
+
 
     # create an array just containing the negative amplitude voltage:
     delay_samples = int(etl_delay * exposure_time * sample_rate / 100)
@@ -133,58 +166,6 @@ def tunable_lens_ramp_v2(sample_rate=100000,
         waveform = np.hstack([delay_array, ramp_array, fall_array])
 
     return waveform
-
-
-def tunable_lens_ramp(sample_rate=100000,
-                      sweep_time=0.4,
-                      delay=7.5,
-                      rise=85,
-                      fall=2.5,
-                      amplitude=1,
-                      offset=0):
-    '''
-    Returns a numpy array with a ETL ramp
-    The waveform starts at offset and stays there for the delay period, then
-    rises linearly to 2x amplitude (amplitude here refers to 1/2 peak-to-peak)
-    and drops back down to the offset voltage during the fall period.
-
-    Switching from a left to right ETL ramp is possible by exchanging the
-    rise and fall periods.
-
-    Units of parameters
-    sample_rate: Integer
-    sweep_time:  Seconds
-    delay:      Percent
-    rise:       Percent
-    fall:       Percent
-    amplitude:  Volts
-    offset:     Volts
-    '''
-
-    # get an integer number of samples
-    samples = int(np.floor(np.multiply(sample_rate, sweep_time)))
-
-    # create an array just containing the negative amplitude voltage:
-    array = np.zeros(samples) - amplitude + offset
-
-    # convert rise, fall, and delay in % into number of samples - Should we do round not int?
-    delay_samples = int(samples * delay / 100)
-    rise_samples = int(samples * rise / 100)
-    fall_samples = int(samples * fall / 100)
-
-    rise_array = np.arange(0, rise_samples)
-    rise_array = amplitude * (2 * np.divide(rise_array, rise_samples) - 1) + offset
-
-    fall_array = np.arange(0, fall_samples)
-    fall_array = amplitude * (1 - 2 * np.divide(fall_array, fall_samples)) + offset
-
-    # rise phase
-    array[delay_samples:delay_samples + rise_samples] = rise_array
-
-    # fall phase
-    array[delay_samples + rise_samples:delay_samples + rise_samples + fall_samples] = fall_array
-
-    return np.array(array)
 
 
 def sawtooth(sample_rate=100000,

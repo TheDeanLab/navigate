@@ -34,84 +34,23 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
+
+# Standard Library Imports
 import logging
 
+# Third Party Imports
 import nidaqmx
 from nidaqmx.constants import LineGrouping
+
+# Local Imports
+from aslm.model.devices.shutter.laser_shutter_base import ShutterBase
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class ShutterBase:
-    """
-    Parent Shutter Class
-    """
-
-    def __init__(self, model, experiment, verbose=False):
-        self.model = model
-        self.experiment = experiment
-        self.verbose = verbose
-
-        # Right Shutter - High Resolution Mode
-        self.shutter_right = self.model.DAQParameters['shutter_right']
-        self.shutter_right_state = False
-
-        # Left Shutter - Low Resolution Mode
-        self.shutter_left = self.model.DAQParameters['shutter_left']
-        self.shutter_left_state = False
-
-    def __del__(self):
-        pass
-
-    def open_left(self):
-        pass
-
-    def open_right(self):
-        pass
-
-    def close_shutters(self):
-        pass
-
-    def state(self):
-        pass
-
-
-class SyntheticShutter(ShutterBase):
-    """
-    Virtual Shutter Device
-    """
-
-    def __init__(self, model, experiment, verbose=False):
-        super().__init__(model, experiment, verbose)
-
-    def open_left(self):
-        self.shutter_right_state = False
-        self.shutter_left_state = True
-        if self.verbose:
-            print('Shutter left opened')
-        logger.debug("Shutter left opened")
-
-    def open_right(self):
-        self.shutter_right_state = True
-        self.shutter_left_state = False
-        if self.verbose:
-            print('Shutter right opened')
-        logger.debug("Shutter right opened")
-
-    def close_shutters(self):
-        self.shutter_right_state = False
-        self.shutter_left_state = False
-        if self.verbose:
-            print('Both shutters closed')
-        logger.debug("Both shutters closed")
-
-    def state(self):
-        return self.shutter_left_state, self.shutter_right_state
-
-
-class ThorlabsShutter(ShutterBase):
+class ShutterTTL(ShutterBase):
     """
     Triggers Thorlabs-based shutter device using National Instruments DAQ
     Requires 5V signal for triggering

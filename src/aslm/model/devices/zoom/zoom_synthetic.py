@@ -1,5 +1,5 @@
 """
-ASLM image contrast estimates.
+ASLM zoom servo communication classes.
 
 Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
@@ -33,41 +33,53 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 
-
-
-
+# Standard Library Imports
 import logging
+
+# Third Party Imports
+
+# Local Imports
+from aslm.model.devices.zoom.zoom_base import ZoomBase
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
+class SyntheticZoom(ZoomBase):
+    """
+    Virtual Zoom Device
+    """
 
+    def __init__(self, model, verbose):
+        super().__init__(model, verbose)
+        if self.verbose:
+            print('Synthetic Zoom Initialized')
+        logger.debug("Synethetic Zoom Initialized")
 
-def initiate_gpu():
-    gpus = tf.config.list_physical_devices('GPU')
-    if gpus:
-        use_cpu = False
-        # Create 2 virtual GPUs with 24GB memory each
-        try:
-            tf.config.set_logical_device_configuration(
-                gpus[0], [
-                    tf.config.LogicalDeviceConfiguration(
-                        memory_limit=23000), tf.config.LogicalDeviceConfiguration(
-                        memory_limit=23000)])
-            logical_gpus = tf.config.list_logical_devices('GPU')
-        except RuntimeError as e:
-            # Virtual devices must be set before GPUs have been initialized
-            print(e)
-    else:
-        use_cpu = True
-    return use_cpu
+    def set_zoom(self, zoom, wait_until_done=False):
+        """
+        # Changes zoom after checking that the commanded value exists
+        """
+        if zoom in self.zoomdict:
+            self.zoomvalue = zoom
+        else:
+            raise ValueError('Zoom designation not in the configuration')
+            logger.error("Zoom designation not in the configuration")
+        if self.verbose:
+            print('Zoom set to {}'.format(zoom))
+        logger.debug(f"Zoom set to {zoom}")
 
+    def move(self, position=0, wait_until_done=False):
+        if self.verbose:
+            print("Changing Virtual Zoom")
+        logger.debug("Changing Virtual Zoom")
 
-if (__name__ == "__main__"):
-    # Contrast metrics testing
-    image_data = imread(os.path.join("E:", "test_data", "CH01_003b.tif"))
-    PSF_support = 3
-    verbose = True
-    entropy = normalized_dct_shannon_entropy(image_data, PSF_support, verbose)
+    def read_position(self):
+        """
+        # Returns position as an int between 0 and 4096
+        # Opens & closes the port
+        """
+        if self.verbose:
+            print("Reading Virtual Zoom Position")
+        logger.debug("Reading Virtual Zoom Position")

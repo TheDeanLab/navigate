@@ -51,6 +51,7 @@ from aslm.model.model_features.aslm_image_writer import ImageWriter
 from aslm.model.model_features.autofocus import Autofocus
 from aslm.model.model_features.dummy_detective import Dummy_Detective
 
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)

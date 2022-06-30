@@ -1,7 +1,4 @@
-"""
-ASLM Device Startup Functions
-
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -40,19 +37,17 @@ import sys
 import logging
 import time
 
+# Third Party Imports
+
+# Local Imports
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-# Third Party Imports
-
-# Local Imports
-# from model.devices.laser_scanning import LaserScanning
-
 
 def auto_redial(func, args, n_tries=10, exception=Exception):
-    """
-    Retries connections to a startup device defined by func n_tries times.
+    r"""Retries connections to a startup device defined by func n_tries times.
 
     Parameters
     ----------
@@ -95,16 +90,46 @@ def auto_redial(func, args, n_tries=10, exception=Exception):
 
 
 def start_analysis(configuration, experiment, use_gpu, verbose):
-    """
-    # Initializes the analysis class on a dedicated thread
+    r"""Initializes the analysis class on a dedicated thread
+
+    Parameters
+    ----------
+    configuration : dict
+        Session instance of global microscope configuration.
+    experiment : dict
+        Session instance of experiment configuration.
+    use_gpu : Boolean
+        Flag for enabling GPU analysis.
+    verbose : Boolean
+        Flag for enabling verbose operation.
+
+    Returns
+    -------
+    Analysis : class
+        Analysis class.
     """
     from aslm.model.aslm_analysis import Analysis
     return Analysis(use_gpu, verbose)
 
 
 def start_camera(configuration, experiment, verbose, camera_id=0):
-    """
-    # Initializes the camera as a sub-process using concurrency tools.
+    r"""Initializes the camera class on a dedicated thread.
+
+    Parameters
+    ----------
+    configuration : dict
+        Session instance of global microscope configuration.
+    experiment : dict
+        Session instance of experiment configuration.
+    verbose : Boolean
+        Flag for enabling verbose operation.
+    camera_id : int
+        Device ID (0, 1...)
+
+    Returns
+    -------
+    Camera : class
+        Camera class.
     """
 
     if configuration.Devices['camera'] == 'HamamatsuOrca':
@@ -118,8 +143,19 @@ def start_camera(configuration, experiment, verbose, camera_id=0):
 
 
 def start_stages(configuration, verbose):
-    """
-    # Initializes the Stage.
+    r"""Initializes the stage class on a dedicated thread.
+
+    Parameters
+    ----------
+    configuration : dict
+        Session instance of global microscope configuration.
+    verbose : Boolean
+        Flag for enabling verbose operation.
+
+    Returns
+    -------
+    Stage : class
+        Stage class.
     """
     if configuration.Devices['stage'] == 'PI' and platform.system() == 'Windows':
         from aslm.model.devices.stages.stage_pi import PIStage
@@ -133,8 +169,19 @@ def start_stages(configuration, verbose):
 
 
 def start_zoom_servo(configuration, verbose):
-    """
-    # Initializes the Zoom Servo Motor. DynamixelZoom of SyntheticZoom
+    r"""Initializes the zoom class on a dedicated thread.
+
+    Parameters
+    ----------
+    configuration : dict
+        Session instance of global microscope configuration.
+    verbose : Boolean
+        Flag for enabling verbose operation.
+
+    Returns
+    -------
+    Zoom : class
+        Zoom class.
     """
 
     if configuration.Devices['zoom'] == 'DynamixelZoom':
@@ -148,8 +195,19 @@ def start_zoom_servo(configuration, verbose):
 
 
 def start_filter_wheel(configuration, verbose):
-    """
-    # Initializes the Filter Wheel. Sutter or SyntheticFilterWheel
+    r"""Initializes the filter wheel class on a dedicated thread.
+
+    Parameters
+    ----------
+    configuration : dict
+        Session instance of global microscope configuration.
+    verbose : Boolean
+        Flag for enabling verbose operation.
+
+    Returns
+    -------
+    FilterWheel : class
+        FilterWheel class.
     """
 
     if configuration.Devices['filter_wheel'] == 'SutterFilterWheel':
@@ -163,9 +221,22 @@ def start_filter_wheel(configuration, verbose):
 
 
 def start_lasers(configuration, verbose):
-    '''
-    # Start the lasers: Lasers or SyntheticLasers
-    '''
+    r"""Initializes the laser classes on a dedicated thread.
+
+    Currently not implemented.  Requires API development of laser communication.  Underway.
+
+    Parameters
+    ----------
+    configuration : dict
+        Session instance of global microscope configuration.
+    verbose : Boolean
+        Flag for enabling verbose operation.
+
+    Returns
+    -------
+    Laser : class
+        Laser class.
+    """
 
     if configuration.Devices['lasers'] == 'Omicron':
         # This is the Omicron LightHUB Ultra Launch - consists of both Obis and
@@ -218,8 +289,23 @@ def start_lasers(configuration, verbose):
 
 
 def start_daq(configuration, experiment, etl_constants, verbose):
-    """
-    # Start the data acquisition device (DAQ):  NI or SyntheticDAQ
+    r"""Initializes the data acquisition (DAQ) class on a dedicated thread.
+
+    Parameters
+    ----------
+    configuration : dict
+        Session instance of global microscope configuration.
+    experiment : dict
+        Session instance of experiment configuration.
+    etl_constants : dict
+        Dictionary of wavelength and zoom-specific remote focus amplitude and offsets.
+    verbose : Boolean
+        Flag for enabling verbose operation.
+
+    Returns
+    -------
+    DAQ : class
+        DAQ class.
     """
 
     if configuration.Devices['daq'] == 'NI':
@@ -233,10 +319,25 @@ def start_daq(configuration, experiment, etl_constants, verbose):
 
 
 def start_shutters(configuration, experiment, verbose):
-    """
-    # Initializes the shutters: ThorlabsShutter or SyntheticShutter
-    # Shutters are triggered via digital outputs on the NI DAQ Card
-    # Thus, requires both to be enabled.
+    r"""Initializes the shutter class on a dedicated thread.
+
+    Initializes the shutters: ThorlabsShutter or SyntheticShutter
+    Shutters are triggered via digital outputs on the NI DAQ Card
+    Thus, requires both to be enabled.
+
+    Parameters
+    ----------
+    configuration : dict
+        Session instance of global microscope configuration.
+    experiment : dict
+        Session instance of experiment configuration.
+    verbose : Boolean
+        Flag for enabling verbose operation.
+
+    Returns
+    -------
+    Shutter : class
+        Shutter class.
     """
 
     if configuration.Devices['shutters'] == 'ThorlabsShutter' and configuration.Devices['daq'] == 'NI':
@@ -250,8 +351,23 @@ def start_shutters(configuration, experiment, verbose):
 
 
 def start_laser_triggers(configuration, experiment, verbose):
-    """
-    # Initializes the Laser Switching, Analog, and Digital DAQ Outputs:
+    r"""Initializes the laser trigger class on a dedicated thread.
+
+    Initializes the Laser Switching, Analog, and Digital DAQ Outputs.
+
+    Parameters
+    ----------
+    configuration : dict
+        Session instance of global microscope configuration.
+    experiment : dict
+        Session instance of experiment configuration.
+    verbose : Boolean
+        Flag for enabling verbose operation.
+
+    Returns
+    -------
+    Triggers : class
+        Trigger class.
     """
 
     if configuration.Devices['daq'] == 'NI':
@@ -262,21 +378,6 @@ def start_laser_triggers(configuration, experiment, verbose):
         return SyntheticLaserTriggers(configuration, experiment, verbose)
     else:
         device_not_found(configuration.Devices['daq'])
-
-
-def start_laser_scanning(configuration, experiment, etl_constants, verbose):
-    """
-    # Initializes the Laser Switching, Analog, and Digital DAQ Outputs:
-    """
-
-    if configuration.Devices['daq'] == 'NI':
-        return LaserScanning(configuration, experiment, etl_constants, verbose)
-    elif configuration.Devices['daq'] == 'SyntheticDAQ':
-        return SyntheticLaserTriggers(
-            configuration, experiment, etl_constants, verbose)
-    else:
-        device_not_found(configuration.Devices['daq'])
-
 
 def device_not_found(args):
 

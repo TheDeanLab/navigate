@@ -46,8 +46,8 @@ from aslm.model.devices.camera.camera_base import CameraBase
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-class HamamatsuOrca(CameraBase):
 
+class HamamatsuOrca(CameraBase):
     def __init__(self, camera_id, model, experiment, verbose=False):
         super().__init__(camera_id, model, experiment, verbose)
 

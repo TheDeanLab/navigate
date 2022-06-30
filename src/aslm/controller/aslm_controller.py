@@ -659,7 +659,6 @@ class ASLM_controller:
 
         self.set_mode_of_sub('stop')
 
-
     def capture_autofocus_image(self):
         r"""Trigger model to capture a single image
         """
@@ -692,7 +691,7 @@ class ASLM_controller:
         plot_data = autofocus_plot_pipe.recv()
         if self.verbose:
             print("Controller received plot data: ", plot_data)
-        logger.debug(f"Controller recieved plot data: {plot_data}")
+        logger.debug(f"Controller received plot data: {plot_data}")
         if hasattr(self, 'af_popup_controller'):
             self.af_popup_controller.display_plot(plot_data)
         
@@ -708,7 +707,7 @@ class ASLM_controller:
         Parameters
         ----------
         pos_dict : dict
-            Dictionary of axis positons
+            Dictionary of axis positions
         """
 
         # Update our local stage dictionary

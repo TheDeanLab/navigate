@@ -41,313 +41,14 @@ import logging
 import time
 
 # Third Party Imports
-
-from pipython import GCSDevice, pitools, GCSError, gcserror
+from pipython import GCSDevice, pitools, GCSError
 
 # Local Imports
+from aslm.model.devices.stage_base import StageBase
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
-
-class StageBase:
-    def __init__(self, model, verbose):
-        self.verbose = verbose
-        self.model = model
-
-        """
-        Initial setting of all positions
-        self.x_pos, self.y_pos etc are the true axis positions, no matter whether
-        the stages are zeroed or not.
-        """
-        self.x_pos = model.StageParameters['position']['x_pos']
-        self.y_pos = model.StageParameters['position']['y_pos']
-        self.z_pos = model.StageParameters['position']['z_pos']
-        self.f_pos = model.StageParameters['position']['f_pos']
-        self.theta_pos = model.StageParameters['position']['theta_pos']
-        self.position_dict = {'x_pos': self.x_pos,
-                              'y_pos': self.y_pos,
-                              'z_pos': self.z_pos,
-                              'f_pos': self.f_pos,
-                              'theta_pos': self.theta_pos,
-                              }
-        """
-        Internal (software) positions
-        """
-        self.int_x_pos = 0
-        self.int_y_pos = 0
-        self.int_z_pos = 0
-        self.int_f_pos = 0
-        self.int_theta_pos = 0
-        self.int_position_dict = {'x_pos': self.int_x_pos,
-                                  'y_pos': self.int_y_pos,
-                                  'z_pos': self.int_z_pos,
-                                  'f_pos': self.int_f_pos,
-                                  'theta_pos': self.int_theta_pos,
-                                  }
-        """
-        Create offsets. It should be: int_x_pos = x_pos + int_x_pos_offset
-        self.int_x_pos = self.x_pos + self.int_x_pos_offset
-        OR x_pos = int_x_pos - int_x_pos_offset
-        self.x_pos = self.int_x_pos - self.int_x_pos_offset
-        """
-        self.int_x_pos_offset = 0
-        self.int_y_pos_offset = 0
-        self.int_z_pos_offset = 0
-        self.int_f_pos_offset = 0
-        self.int_theta_pos_offset = 0
-
-        """
-        Setting movement limits: currently hardcoded: Units are in microns
-        """
-        self.x_max = model.StageParameters['x_max']
-        self.x_min = model.StageParameters['x_min']
-        self.y_max = model.StageParameters['y_max']
-        self.y_min = model.StageParameters['y_min']
-        self.z_max = model.StageParameters['z_max']
-        self.z_min = model.StageParameters['z_min']
-        self.f_max = model.StageParameters['f_max']
-        self.f_min = model.StageParameters['f_min']
-        self.theta_max = model.StageParameters['theta_max']
-        self.theta_min = model.StageParameters['theta_min']
-
-        # Sample Position When Rotating
-        self.x_rot_position = model.StageParameters['x_rot_position']
-        self.y_rot_position = model.StageParameters['y_rot_position']
-        self.z_rot_position = model.StageParameters['z_rot_position']
-
-        # Starting Position of Focusing Device
-        self.startfocus = model.StageParameters['startfocus']
-
-    def create_position_dict(self):
-        pass
-
-    def create_internal_position_dict(self):
-        pass
-
-    def report_position(self):
-        pass
-
-    def move_relative(self, dict, wait_until_done=False):
-        pass
-
-    def move_absolute(self, dict, wait_until_done=False):
-        pass
-
-    def stop(self):
-        pass
-
-    def zero_axes(self, list):
-        pass
-
-    def unzero_axes(self, list):
-        pass
-
-    def load_sample(self):
-        pass
-
-    def unload_sample(self):
-        pass
-
-    def mark_rotation_position(self):
-        pass
-
-    def go_to_rotation_position(self, wait_until_done=False):
-        pass
-
-
-class SyntheticStage(StageBase):
-    def __init__(self, model, verbose):
-        super().__init__(model, verbose)
-
-    def create_position_dict(self):
-        self.position_dict = {'x_pos': self.x_pos,
-                              'y_pos': self.y_pos,
-                              'z_pos': self.z_pos,
-                              'f_pos': self.f_pos,
-                              'theta_pos': self.theta_pos,
-                              }
-
-    def create_internal_position_dict(self):
-        self.int_position_dict = {'x_pos': self.int_x_pos,
-                                  'y_pos': self.int_y_pos,
-                                  'z_pos': self.int_z_pos,
-                                  'f_pos': self.int_f_pos,
-                                  'theta_pos': self.int_theta_pos,
-                                  }
-
-    def report_position(self):
-        self.create_position_dict()
-        self.int_x_pos = self.x_pos + self.int_x_pos_offset
-        self.int_y_pos = self.y_pos + self.int_y_pos_offset
-        self.int_z_pos = self.z_pos + self.int_z_pos_offset
-        self.int_f_pos = self.f_pos + self.int_f_pos_offset
-        self.int_theta_pos = self.theta_pos + self.int_theta_pos_offset
-        self.create_internal_position_dict()
-        if self.verbose:
-            print("Stage Position: ", self.int_position_dict)
-        logger.debug(f"Stage Position:, {self.int_position_dict}")
-
-    def move_relative(self, move_dictionary, wait_until_done=False):
-        """
-        Move relative method
-        """
-
-        if 'x_rel' in move_dictionary:
-            x_rel = move_dictionary['x_rel']
-            if (self.x_min <= self.x_pos +
-                    x_rel) and (self.x_max >= self.x_pos + x_rel):
-                self.x_pos = self.x_pos + x_rel
-            else:
-                print('Relative movement stopped: X limit would be reached!', 1000)
-                logger.info("Relative movement stopped: X limit would be reached!, 1000")
-
-        if 'y_rel' in move_dictionary:
-            y_rel = move_dictionary['y_rel']
-            if (self.y_min <= self.y_pos +
-                    y_rel) and (self.y_max >= self.y_pos + y_rel):
-                self.y_pos = self.y_pos + y_rel
-            else:
-                print('Relative movement stopped: Y limit would be reached!', 1000)
-                logger.info("Relative movement stopped: Y limit would be reached!")
-
-        if 'z_rel' in move_dictionary:
-            z_rel = move_dictionary['z_rel']
-            if (self.z_min <= self.z_pos +
-                    z_rel) and (self.z_max >= self.z_pos + z_rel):
-                self.z_pos = self.z_pos + z_rel
-            else:
-                print('Relative movement stopped: Z limit would be reached!', 1000)
-                logger.info("Relative movement stopped: Z limit would be reached!")
-
-        if 'theta_rel' in move_dictionary:
-            theta_rel = move_dictionary['theta_rel']
-            if (self.theta_min <= self.theta_pos +
-                    theta_rel) and (self.theta_max >= self.theta_pos + theta_rel):
-                self.theta_pos = self.theta_pos + theta_rel
-            else:
-                print(
-                    'Relative movement stopped: Rotation limit would be reached!',
-                    1000)
-                logger.info("Relative movement stopped: Rotation limit would be reached!")
-
-        if 'f_rel' in move_dictionary:
-            f_rel = move_dictionary['f_rel']
-            if (self.f_min <= self.f_pos +
-                    f_rel) and (self.f_max >= self.f_pos + f_rel):
-                self.f_pos = self.f_pos + f_rel
-            else:
-                print(
-                    'Relative movement stopped: Focus limit would be reached!',
-                    1000)
-                logger.info("Relative movement stopped: Focus limit would be reached!")
-
-        if wait_until_done is True:
-            time.sleep(0.02)
-
-    def move_absolute(self, move_dictionary, wait_until_done=False):
-        """
-        Move absolute method
-        """
-
-        if 'x_abs' in move_dictionary:
-            x_abs = move_dictionary['x_abs']
-            x_abs = x_abs - self.int_x_pos_offset
-            if (self.x_min <= x_abs) and (self.x_max >= x_abs):
-                self.x_pos = x_abs
-            else:
-                logger.info("Absolute movement stopped: X limit would be reached!, 1000")
-                print('Absolute movement stopped: X limit would be reached!', 1000)
-
-        if 'y_abs' in move_dictionary:
-            y_abs = move_dictionary['y_abs']
-            y_abs = y_abs - self.int_y_pos_offset
-            if (self.y_min <= y_abs) and (self.y_max >= y_abs):
-                self.y_pos = y_abs
-            else:
-                logger.info("Absolute movement stopped: Y limit would be reached!, 1000")
-                print('Absolute movement stopped: Y limit would be reached!', 1000)
-
-        if 'z_abs' in move_dictionary:
-            z_abs = move_dictionary['z_abs']
-            z_abs = z_abs - self.int_z_pos_offset
-            if (self.z_min <= z_abs) and (self.z_max >= z_abs):
-                self.z_pos = z_abs
-            else:
-                logger.info("Absolute movement stopped: Z limit would be reached!, 1000")
-                print('Absolute movement stopped: Z limit would be reached!', 1000)
-
-        if 'f_abs' in move_dictionary:
-            f_abs = move_dictionary['f_abs']
-            f_abs = f_abs - self.int_f_pos_offset
-            if (self.f_min <= f_abs) and (self.f_max >= f_abs):
-                self.f_pos = f_abs
-            else:
-                logger.info("Absolute movement stopped: Focus limit would be reached!, 1000")
-                print(
-                    'Absolute movement stopped: Focus limit would be reached!',
-                    1000)
-
-        if 'theta_abs' in move_dictionary:
-            theta_abs = move_dictionary['theta_abs']
-            theta_abs = theta_abs - self.int_theta_pos_offset
-            if (self.theta_min <= theta_abs) and (self.theta_max >= theta_abs):
-                self.theta_pos = theta_abs
-            else:
-                logger.info("Absolute movement stopped: Rotation limit would be reached!, 1000")
-                print(
-                    'Absolute movement stopped: Rotation limit would be reached!',
-                    1000)
-
-        if wait_until_done is True:
-            time.sleep(.25)
-
-        if self.verbose:
-            print('stage moved to ', move_dictionary)
-        logger.debug(f"stage moved to, {move_dictionary}")
-
-    def zero_axes(self, list):
-        for axis in list:
-            try:
-                exec(
-                    'self.int_' +
-                    axis +
-                    '_pos_offset = -self.' +
-                    axis +
-                    '_pos')
-            except BaseException:
-                logger.exception(f"Zeroing of axis: {axis} failed")
-                print('Zeroing of axis: ', axis, 'failed')
-
-    def unzero_axes(self, list):
-        for axis in list:
-            try:
-                exec('self.int_' + axis + '_pos_offset = 0')
-            except BaseException:
-                logger.exception(f"Unzeroing of axis: {axis} failed")
-                print('Unzeroing of axis: ', axis, 'failed')
-
-    def load_sample(self):
-        self.y_pos = self.model.StageParameters['y_load_position']
-
-    def unload_sample(self):
-        self.y_pos = self.model.StageParameters['y_unload_position']
-
-    def mark_rotation_position(self):
-        """
-        # Take the current position and mark it as rotation location
-        """
-        self.x_rot_position = self.x_pos
-        self.y_rot_position = self.y_pos
-        self.z_rot_position = self.z_pos
-        if self.verbose:
-            print('Marking new rotation position (absolute coordinates): X: ',
-                  self.x_pos, ' Y: ', self.y_pos, ' Z: ', self.z_pos)
-        logger.debug(f"Marking new rotation position (absolute coordinates): X: {self.x_pos}, Y: {self.y_pos}, Z: {self.z_pos}")
-
-    def go_to_rotation_position(self, wait_until_done=False):
-        pass
-
 
 class PIStage(StageBase):
     def __init__(self, model, verbose):
@@ -372,7 +73,8 @@ class PIStage(StageBase):
             # self.pidevice.MOV(5, self.startfocus / 1000)
             pass
         except GCSError as e:
-            logger.exception(GCSError(e)) # Need to test this on the stage or somehow simulate, otherwise the documented way will work, but if this works it will be more clear what happened
+            logger.exception(GCSError
+                (e)) # Need to test this on the stage or somehow simulate, otherwise the documented way will work, but if this works it will be more clear what happened
             # raise
 
     def __del__(self):
@@ -384,12 +86,12 @@ class PIStage(StageBase):
             if self.verbose:
                 print('PI connection closed')
             logger.debug("PI connection closed")
-        except GCSError as e: #except BaseException:
+        except GCSError as e:  # except BaseException:
             # logger.exception("Error while disconnecting the PI stage")
             print('Error while disconnecting the PI stage')
             logger.exception(GCSError(e))
             raise
-            
+
 
 
     def create_position_dict(self):
@@ -448,7 +150,7 @@ class PIStage(StageBase):
         if 'x_rel' in move_dictionary:
             x_rel = move_dictionary['x_rel']
             if (self.x_min <= self.x_pos +
-                    x_rel) and (self.x_max >= self.x_pos + x_rel):
+                x_rel) and (self.x_max >= self.x_pos + x_rel):
                 x_rel = x_rel / 1000
                 try:
                     self.pidevice.MVR({1: x_rel})
@@ -463,7 +165,7 @@ class PIStage(StageBase):
         if 'y_rel' in move_dictionary:
             y_rel = move_dictionary['y_rel']
             if (self.y_min <= self.y_pos +
-                    y_rel) and (self.y_max >= self.y_pos + y_rel):
+                y_rel) and (self.y_max >= self.y_pos + y_rel):
                 y_rel = y_rel / 1000
                 try:
                     self.pidevice.MVR({2: y_rel})
@@ -478,7 +180,7 @@ class PIStage(StageBase):
         if 'z_rel' in move_dictionary:
             z_rel = move_dictionary['z_rel']
             if (self.z_min <= self.z_pos +
-                    z_rel) and (self.z_max >= self.z_pos + z_rel):
+                z_rel) and (self.z_max >= self.z_pos + z_rel):
                 z_rel = z_rel / 1000
                 try:
                     self.pidevice.MVR({3: z_rel})
@@ -633,8 +335,9 @@ class PIStage(StageBase):
         self.z_rot_position = self.z_pos
         if self.verbose:
             print('Marking new rotation position (absolute coordinates): X: ',
-                 self.x_pos, ' Y: ', self.y_pos, ' Z: ', self.z_pos)
-        logger.debug(f"Marking new rotation position(absolute coordinates): X: , {self.x_pos},  Y: , {self.y_pos}, Z: , {self.z_pos}")
+                  self.x_pos, ' Y: ', self.y_pos, ' Z: ', self.z_pos)
+        logger.debug \
+            (f"Marking new rotation position(absolute coordinates): X: , {self.x_pos},  Y: , {self.y_pos}, Z: , {self.z_pos}")
 
     def go_to_rotation_position(self, wait_until_done=False):
         x_abs = self.x_rot_position / 1000
@@ -658,4 +361,3 @@ class PIStage(StageBase):
                 blockflag = False
             else:
                 time.sleep(0.1)
-

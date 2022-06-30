@@ -122,15 +122,12 @@ def start_stages(configuration, verbose):
     """
     # Initializes the Stage.
     """
-
-
-    if configuration.Devices['stage'] == 'PI' and platform.system(
-    ) == 'Windows':
-        from aslm.model.devices.stages import PIStage
+    if configuration.Devices['stage'] == 'PI' and platform.system() == 'Windows':
+        from aslm.model.devices.stage_pi import PIStage
         from pipython.pidevice.gcserror import GCSError
         return auto_redial(PIStage, (configuration, verbose), exception=GCSError)
     elif configuration.Devices['stage'] == 'SyntheticStage':
-        from aslm.model.devices.stages import SyntheticStage
+        from aslm.model.devices.stage_synthetic import SyntheticStage
         return SyntheticStage(configuration, verbose)
     else:
         device_not_found(configuration.Devices['stage'])

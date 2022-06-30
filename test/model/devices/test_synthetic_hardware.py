@@ -57,7 +57,7 @@ class TestSyntheticHardware():
         return True
 
     def test_synthetic_stage(self):
-        from aslm.model.devices.stages import SyntheticStage
+        from aslm.model.devices.stage_base import SyntheticStage
         self.dummy_model = get_dummy_model()
         self.config = self.dummy_model.configuration
         self.experiment = self.dummy_model.experiment

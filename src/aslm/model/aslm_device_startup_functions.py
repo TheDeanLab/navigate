@@ -227,10 +227,10 @@ def start_daq(configuration, experiment, etl_constants, verbose):
     """
 
     if configuration.Devices['daq'] == 'NI':
-        from aslm.model.devices.daq import NIDAQ
+        from aslm.model.devices.daq_ni import NIDAQ
         return NIDAQ(configuration, experiment, etl_constants, verbose)
     elif configuration.Devices['daq'] == 'SyntheticDAQ':
-        from aslm.model.devices.daq import SyntheticDAQ
+        from aslm.model.devices.daq_synthetic import SyntheticDAQ
         return SyntheticDAQ(configuration, experiment, etl_constants, verbose)
     else:
         device_not_found(configuration.Devices['daq'])

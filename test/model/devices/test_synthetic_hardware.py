@@ -17,7 +17,7 @@ class TestSyntheticHardware():
         
         
     def test_synthetic_daq(self):
-        from aslm.model.devices.daq import SyntheticDAQ
+        from aslm.model.devices.daq_base import SyntheticDAQ
         self.dummy_model = get_dummy_model()
         self.config = self.dummy_model.configuration
         self.experiment = self.dummy_model.experiment

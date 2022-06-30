@@ -110,8 +110,8 @@ class ASLM_controller:
         # Create a thread pool
         self.threads_pool = SynchronizedThreadPool()
 
-        self.event_queue = mp.Queue()  # pass events from the model to the view via controller
-                                       # accepts tuples, ('event_name', value)
+        self.event_queue = mp.Queue(100)  # pass events from the model to the view via controller
+                                          # accepts tuples, ('event_name', value)
 
         # Initialize the Model
         self.model = ObjectInSubprocess(Model,

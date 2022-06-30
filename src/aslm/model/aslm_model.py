@@ -420,9 +420,14 @@ class Model:
         Moves the stages.
         Checks "on target state" after command and waits until done.
         """
+        # Update our local experiment parameters
+        for axis, val in pos_dict.items():
+            ax = axis.split('_')[0]
+            self.experiment.StageParameters[ax] = val
+
+        # Pass to the stage
         self.stages.move_absolute(pos_dict, wait_until_done)
         self.stages.report_position()
-
 
     def end_acquisition(self):
         """

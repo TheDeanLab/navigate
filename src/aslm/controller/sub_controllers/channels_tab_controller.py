@@ -75,12 +75,22 @@ class Channels_Tab_Controller(GUI_Controller):
             'step_size': self.view.stack_acq_frame.step_size_spinval,
             'start_position': self.view.stack_acq_frame.start_pos_spinval,
             'end_position': self.view.stack_acq_frame.end_pos_spinval,
-            'number_z_steps': self.view.stack_acq_frame.slice_spinval
+            'number_z_steps': self.view.stack_acq_frame.slice_spinval,
+            'start_focus': self.view.stack_acq_frame.start_foc_spinval,
+            'end_focus': self.view.stack_acq_frame.end_foc_spinval,
+            'abs_z_start': self.view.stack_acq_frame.abs_z_start_spinval,
+            'abs_z_end': self.view.stack_acq_frame.abs_z_end_spinval
         }
         # stack acquisition event binds
         self.stack_acq_vals['step_size'].trace_add('write', self.update_z_steps)
         self.stack_acq_vals['start_position'].trace_add('write', self.update_z_steps)
         self.stack_acq_vals['end_position'].trace_add('write', self.update_z_steps)
+        self.view.stack_acq_frame.set_start_button.configure(command=self.update_start_position)
+        self.view.stack_acq_frame.set_end_button.configure(command=self.update_end_position)
+
+        # stack acquisition_variables
+        self.z_origin = 0
+        self.focus_origin = 0
 
         # laser/stack cycling variable
         self.stack_cycling_val = self.view.stack_cycling_frame.cycling_options
@@ -110,7 +120,6 @@ class Channels_Tab_Controller(GUI_Controller):
 
         if configuration_controller:
             self.initialize(configuration_controller)
-
 
     def initialize(self, config):
         """
@@ -231,10 +240,14 @@ class Channels_Tab_Controller(GUI_Controller):
             end_position = float(self.stack_acq_vals['end_position'].get())
             step_size = float(self.stack_acq_vals['step_size'].get())
             if step_size < 0.001:
-                self.stack_acq_vals['number_z_steps'].set('')
+                self.stack_acq_vals['number_z_steps'].set(0)
+                self.stack_acq_vals['abs_z_start'].set(0)
+                self.stack_acq_vals['abs_z_end'].set(0)
                 return
         except:
-            self.stack_acq_vals['number_z_steps'].set('')
+            self.stack_acq_vals['number_z_steps'].set(0)
+            self.stack_acq_vals['abs_z_start'].set(0)
+            self.stack_acq_vals['abs_z_end'].set(0)
             # if self.stack_acq_event_id:
             #     self.view.after_cancel(self.stack_acq_event_id)
             return
@@ -245,9 +258,44 @@ class Channels_Tab_Controller(GUI_Controller):
         number_z_steps = np.floor((end_position - start_position) / step_size)
         self.stack_acq_vals['number_z_steps'].set(number_z_steps)
 
+        # Shift the start/stop positions by the relative position
+        self.stack_acq_vals['abs_z_start'].set(self.z_origin + start_position)
+        self.stack_acq_vals['abs_z_end'].set(self.z_origin + end_position)
+
         self.update_timepoint_setting()
 
         self.show_verbose_info('stack acquisition settings on channels tab have been changed and recalculated')
+
+    def update_start_position(self, *args):
+        """
+        Grab new z starting position from current stage parameters.
+        """
+
+        # We have a new origin
+        self.z_origin = self.parent_controller.experiment.StageParameters['z']
+        self.focus_origin = self.parent_controller.experiment.StageParameters['f']
+        print(f"START: Current z position is {self.z_origin}, focus position is {self.focus_origin}")
+        self.stack_acq_vals['start_position'].set(0)
+        self.stack_acq_vals['start_focus'].set(0)
+
+        # Propagate parameter changes to the GUI
+        self.stack_acq_vals['abs_z_start'].set(self.z_origin)
+        self.update_z_steps()
+
+    def update_end_position(self, *args):
+        """
+        Grab new z ending position from current stage parameters
+        """
+        # Grab current values
+        z_curr = self.parent_controller.experiment.StageParameters['z']
+        focus_curr = self.parent_controller.experiment.StageParameters['f']
+        print(f"END: Current z position is {z_curr}, focus position is {focus_curr}")
+        print(f"{self.z_origin}, focus position is {self.focus_origin}")
+
+        # Propagate parameter changes to the GUI
+        self.stack_acq_vals['end_position'].set(z_curr - self.z_origin)
+        self.stack_acq_vals['end_focus'].set(focus_curr - self.focus_origin)
+        self.update_z_steps()
 
     def update_cycling_setting(self, *args):
         """

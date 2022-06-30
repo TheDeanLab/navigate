@@ -696,10 +696,22 @@ class ASLM_controller:
         
         self.set_mode_of_sub('stop')
     
-    def move_stage(self, args):
+    def move_stage(self, pos_dict):
         r""" Trigger the model to move the stage.
+
+        Parameters
+        ----------
+        pos_dict : dict
+            Dictionary of axis positons
         """
-        self.model.move_stage(args)
+
+        # Update our local stage dictionary
+        for axis, val in pos_dict.items():
+            ax = axis.split('_')[0]
+            self.experiment.StageParameters[ax] = val
+
+        # Pass to model
+        self.model.move_stage(pos_dict)
 
     def update_event(self):
         r"""Update the waveforms in the View.

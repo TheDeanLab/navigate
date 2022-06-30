@@ -75,12 +75,22 @@ class Channels_Tab_Controller(GUI_Controller):
             'step_size': self.view.stack_acq_frame.step_size_spinval,
             'start_position': self.view.stack_acq_frame.start_pos_spinval,
             'end_position': self.view.stack_acq_frame.end_pos_spinval,
-            'number_z_steps': self.view.stack_acq_frame.slice_spinval
+            'number_z_steps': self.view.stack_acq_frame.slice_spinval,
+            'start_focus': self.view.stack_acq_frame.start_foc_spinval,
+            'end_focus': self.view.stack_acq_frame.end_foc_spinval,
+            'abs_z_start': self.view.stack_acq_frame.abs_z_start_spinval,
+            'abs_z_end': self.view.stack_acq_frame.abs_z_end_spinval
         }
         # stack acquisition event binds
         self.stack_acq_vals['step_size'].trace_add('write', self.update_z_steps)
         self.stack_acq_vals['start_position'].trace_add('write', self.update_z_steps)
         self.stack_acq_vals['end_position'].trace_add('write', self.update_z_steps)
+        self.view.stack_acq_frame.set_start_button.configure(command=self.update_start_position)
+        self.view.stack_acq_frame.set_end_button.configure(command=self.update_end_position)
+
+        # stack acquisition_variables
+        self.z_origin = 0
+        self.focus_origin = 0
 
         # laser/stack cycling variable
         self.stack_cycling_val = self.view.stack_cycling_frame.cycling_options
@@ -111,7 +121,6 @@ class Channels_Tab_Controller(GUI_Controller):
         if configuration_controller:
             self.initialize(configuration_controller)
 
-
     def initialize(self, config):
         """
         # This function initializes widgets and gets other necessary configuration
@@ -125,24 +134,32 @@ class Channels_Tab_Controller(GUI_Controller):
         self.set_spinbox_range_limits(config.configuration.GUIParameters)
         self.show_verbose_info('channels tab has been initialized')
 
-    def set_experiment_values(self, setting_dict):
+    def set_experiment_values(self, microscope_state):
+        """
+        Distribute initial MicroscopeState values to this and sub-controllers and associated views.
+
+        Parameters
+        ----------
+        microscope_state : dict
+            experiment.MicroscopeState from aslm_controller
+        """
         self.in_initialization = True
-        self.set_info(self.stack_acq_vals, setting_dict)
+        self.set_info(self.stack_acq_vals, microscope_state)
         # validate
         self.view.stack_acq_frame.step_size_spinbox.validate()
         self.view.stack_acq_frame.start_pos_spinbox.validate()
         self.view.stack_acq_frame.end_pos_spinbox.validate()
 
-        self.set_info(self.timepoint_vals, setting_dict)
+        self.set_info(self.timepoint_vals, microscope_state)
         # validate
         self.view.stack_timepoint_frame.stack_pause_spinbox.validate()
         self.view.stack_timepoint_frame.exp_time_spinbox.validate()
 
-        self.stack_cycling_val.set('Per Z' if setting_dict['stack_cycling_mode']=='per_z' else 'Per Stack')
-        self.channel_setting_controller.set_experiment_values(setting_dict['channels'])
+        self.stack_cycling_val.set('Per Z' if microscope_state['stack_cycling_mode']=='per_z' else 'Per Stack')
+        self.channel_setting_controller.set_experiment_values(microscope_state['channels'])
 
         # positions
-        self.multi_position_controller.set_positions(setting_dict['stage_positions'])
+        self.multi_position_controller.set_positions(microscope_state['stage_positions'])
         
         # after initialization
         self.in_initialization = False
@@ -151,14 +168,27 @@ class Channels_Tab_Controller(GUI_Controller):
 
         self.show_verbose_info('channels tab has been set new values')
 
-    def update_experiment_values(self, setting_dict):
-        setting_dict['stage_positions'] = self.multi_position_controller.get_positions()
-        setting_dict['channels'] = self.channel_setting_controller.get_values()
-        setting_dict['stack_cycling_mode'] = 'per_stack' if self.stack_cycling_val.get() == 'Per Stack' else 'per_z'
-        
-        r1 = self.get_info(self.stack_acq_vals, setting_dict)
-        r2 = self.get_info(self.timepoint_vals, setting_dict)
-        return setting_dict['channels']!=None and r1!=None and r2!=None
+    def update_experiment_values(self, microscope_state):
+        """
+        Updates MicroscopeState in ASLM Controller with parameters from here.
+
+        Parameters
+        ----------
+        microscope_state : dict
+            experiment.MicroscopeState from aslm_controller
+        """
+
+        # Not included in stack_acq_vals or timepoint_vals
+        microscope_state['stage_positions'] = self.multi_position_controller.get_positions()
+        microscope_state['channels'] = self.channel_setting_controller.get_values()
+        microscope_state['stack_cycling_mode'] = 'per_stack' if self.stack_cycling_val.get() == 'Per Stack' else 'per_z'
+        microscope_state['stack_z_origin'] = self.z_origin
+        microscope_state['stack_focus_origin'] = self.focus_origin
+
+        # TODO: get_info acts a setter here
+        r1 = self.get_info(self.stack_acq_vals, microscope_state)  # update MicroscopeState with everything in stack_acq_vals
+        r2 = self.get_info(self.timepoint_vals, microscope_state)  # update MicroscopeState with everything in timepoint_vals
+        return microscope_state['channels'] is not None and r1 is not None and r2 is not None
 
     def set_channel_num(self, num):
         """
@@ -217,7 +247,7 @@ class Channels_Tab_Controller(GUI_Controller):
         # {
             'step_size': ,
             'start_position': ,
-            'end_possition': ,
+            'end_position': ,
             'number_z_steps':
         # }
         """
@@ -231,10 +261,14 @@ class Channels_Tab_Controller(GUI_Controller):
             end_position = float(self.stack_acq_vals['end_position'].get())
             step_size = float(self.stack_acq_vals['step_size'].get())
             if step_size < 0.001:
-                self.stack_acq_vals['number_z_steps'].set('')
+                self.stack_acq_vals['number_z_steps'].set(0)
+                self.stack_acq_vals['abs_z_start'].set(0)
+                self.stack_acq_vals['abs_z_end'].set(0)
                 return
         except:
-            self.stack_acq_vals['number_z_steps'].set('')
+            self.stack_acq_vals['number_z_steps'].set(0)
+            self.stack_acq_vals['abs_z_start'].set(0)
+            self.stack_acq_vals['abs_z_end'].set(0)
             # if self.stack_acq_event_id:
             #     self.view.after_cancel(self.stack_acq_event_id)
             return
@@ -242,12 +276,44 @@ class Channels_Tab_Controller(GUI_Controller):
         #     step_size = 0.001
         #     self.stack_acq_vals['step_size'].set(step_size)
 
-        number_z_steps = np.floor((end_position - start_position) / step_size)
+        number_z_steps = int(np.abs(np.floor((end_position - start_position) / step_size)))
         self.stack_acq_vals['number_z_steps'].set(number_z_steps)
+
+        # Shift the start/stop positions by the relative position
+        self.stack_acq_vals['abs_z_start'].set(self.z_origin + start_position)
+        self.stack_acq_vals['abs_z_end'].set(self.z_origin + end_position)
 
         self.update_timepoint_setting()
 
         self.show_verbose_info('stack acquisition settings on channels tab have been changed and recalculated')
+
+    def update_start_position(self, *args):
+        """
+        Grab new z starting position from current stage parameters.
+        """
+
+        # We have a new origin
+        self.z_origin = self.parent_controller.experiment.StageParameters['z']
+        self.focus_origin = self.parent_controller.experiment.StageParameters['f']
+
+        self.stack_acq_vals['start_position'].set(0)
+        self.stack_acq_vals['start_focus'].set(0)
+
+        # Propagate parameter changes to the GUI
+        self.update_z_steps()
+
+    def update_end_position(self, *args):
+        """
+        Grab new z ending position from current stage parameters
+        """
+        # Grab current values
+        z_curr = self.parent_controller.experiment.StageParameters['z']
+        focus_curr = self.parent_controller.experiment.StageParameters['f']
+
+        # Propagate parameter changes to the GUI
+        self.stack_acq_vals['end_position'].set(z_curr - self.z_origin)
+        self.stack_acq_vals['end_focus'].set(focus_curr - self.focus_origin)
+        self.update_z_steps()
 
     def update_cycling_setting(self, *args):
         """
@@ -256,10 +322,10 @@ class Channels_Tab_Controller(GUI_Controller):
         # In the perZ format: Slice 0/Ch0, Slice0/Ch1, Slice1/Ch0, Slice1/Ch1, etc
         # in the perStack format: Slice 0/Ch0, Slice1/Ch0... SliceN/Ch0.  Then it repeats with Ch1
         """
-        # won't do any calculation when inialization
+        # won't do any calculation when initializing
         if self.in_initialization:
             return
-        # recalculate timepoint settings
+        # recalculate time point settings
         self.update_timepoint_setting()
 
         # tell the central/parent controller that laser cycling setting is changed when mode is 'live'
@@ -269,7 +335,7 @@ class Channels_Tab_Controller(GUI_Controller):
         self.show_verbose_info('cycling setting on channels tab has been changed')
 
     def update_save_setting(self, *args):
-        # won't do any calculation when inialization
+        # won't do any calculation when initializing
         if self.in_initialization:
             return
         self.is_save = self.timepoint_vals['is_save'].get()

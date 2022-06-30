@@ -60,33 +60,35 @@ class ImageWriter:
         self.config_table = {'signal':{},
                             'data': {'main': self.write_tiff}}
 
-        # creat saving folder if not exits
-        if not os.path.exists(self.save_directory):
-            os.makedirs(self.save_directory)
-
     def __del__(self):
         pass
 
     def save_image(self, frame_ids):
-        '''
+        """
         Wrapper to give Image Writer some saving decision making, this function will be called from model.
-        '''
+        """
         self.save_directory = self.model.experiment.Saving['save_directory']
         self.file_type = self.model.experiment.Saving['file_type']
 
+        try:
+            # create saving folder if not exits
+            if not os.path.exists(self.save_directory):
+                os.makedirs(self.save_directory)
+        except FileNotFoundError as e:
+            print(f"Cannot create directory {self.save_directory}. Maybe the drive does not exist?")
+            logger.exception(e)
 
         if self.file_type == "Zarr":
             self.write_zarr(frame_ids)
         elif self.file_type == "TIFF":
             self.write_tiff(frame_ids)
 
-
     def write_zarr(self, frame_ids):
-        '''
+        """
         Will take in camera frames and move data fom SharedND Array into a Zarr Array.
         If there is more than one channel there will be that many frames ie if there are 3 channels selected there should be three frames.
         Making the assumption there is only one frame per channel on a single acquisition
-        '''
+        """
 
         # Getting needed info, I am doing it in the function because i think if we do not reinit the class,
         # save directory will be a stagnant var. If we just leave

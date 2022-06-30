@@ -70,8 +70,6 @@ class CameraBase:
         self.camera_display_live_subsampling = self.model.CameraParameters['display_live_subsampling']
         self.camera_display_acquisition_subsampling = self.model.CameraParameters['display_acquisition_subsampling']
 
-
-
     def __del__(self):
         pass
 
@@ -93,7 +91,7 @@ class CameraBase:
     def set_line_interval(self, time):
         pass
 
-    def set_binning(self, binningstring):
+    def set_binning(self, binning_string):
         pass
 
     def initialize_image_series(self):

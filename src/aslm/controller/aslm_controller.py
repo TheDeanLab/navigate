@@ -659,7 +659,6 @@ class ASLM_controller:
 
         self.set_mode_of_sub('stop')
 
-
     def capture_autofocus_image(self):
         r"""Trigger model to capture a single image
         """
@@ -692,7 +691,7 @@ class ASLM_controller:
         plot_data = autofocus_plot_pipe.recv()
         if self.verbose:
             print("Controller received plot data: ", plot_data)
-        logger.debug(f"Controller recieved plot data: {plot_data}")
+        logger.debug(f"Controller received plot data: {plot_data}")
         if hasattr(self, 'af_popup_controller'):
             self.af_popup_controller.display_plot(plot_data)
         
@@ -702,10 +701,22 @@ class ASLM_controller:
         
         self.set_mode_of_sub('stop')
     
-    def move_stage(self, args):
+    def move_stage(self, pos_dict):
         r""" Trigger the model to move the stage.
+
+        Parameters
+        ----------
+        pos_dict : dict
+            Dictionary of axis positions
         """
-        self.model.move_stage(args)
+
+        # Update our local stage dictionary
+        for axis, val in pos_dict.items():
+            ax = axis.split('_')[0]
+            self.experiment.StageParameters[ax] = val
+
+        # Pass to model
+        self.model.move_stage(pos_dict)
 
     def update_event(self):
         r"""Update the waveforms in the View.

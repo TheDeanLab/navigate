@@ -365,8 +365,6 @@ class Model:
                 zoom = updated_settings['zoom']
                 laser_info = updated_settings['laser_info']
 
-
-
                 if resolution_mode == 'low':
                     self.etl_constants.ETLConstants['low'][zoom] = laser_info
                 else:
@@ -429,8 +427,15 @@ class Model:
         Moves the stages.
         Checks "on target state" after command and waits until done.
         """
+        # Update our local experiment parameters
+        for axis, val in pos_dict.items():
+            ax = axis.split('_')[0]
+            self.experiment.StageParameters[ax] = val
+
+        # Pass to the stage
         self.stages.move_absolute(pos_dict, wait_until_done)
         self.stages.report_position()
+
 
         # TODO: This atrribute records current focus position
         # TODO: put it here right now
@@ -598,7 +603,7 @@ class Model:
     
     def run_single_channel_acquisition(self, target_channel=None):
         # stop acquisition if no channel specified
-        if target_channel == None:
+        if target_channel is None:
             self.stop_acquisition = True
             return
 
@@ -632,10 +637,15 @@ class Model:
             self.laser_triggers.set_laser_analog_voltage(channel['laser_index'], channel['laser_power'])
 
             # Update ETL Settings
-            self.daq.update_etl_parameters(microscope_state, channel, self.experiment.GalvoParameters, self.get_readout_time())
+            self.daq.update_etl_parameters(microscope_state, channel,
+                                           self.experiment.GalvoParameters, self.get_readout_time())
+
+            # Update defocus settings
+            curr_focus = self.experiment.StageParameters['f']
+            self.move_stage({'f_abs': curr_focus + float(channel['defocus'])}, wait_until_done=True)
+            self.experiment.StageParameters['f'] = curr_focus  # do something very hacky so we keep using the same focus reference
 
         self.snap_image(channel_key)
-            
 
     def run_single_acquisition(self):
         """
@@ -651,8 +661,6 @@ class Model:
                 break
             channel_idx = int(channel_key[prefix_len:])
             self.run_single_channel_acquisition(channel_idx)
-                
-                
 
     def snap_image(self, channel_key):
         """
@@ -726,13 +734,17 @@ class Model:
         self.stages.report_position()  # Update current position
         restore_z = self.stages.z_pos
 
-        z_pos = np.linspace(float(microscope_state['start_position']) + self.stages.z_pos,
-                            float(microscope_state['end_position']) + self.stages.z_pos,
+        # z-positions
+        stack_z_origin = float(microscope_state.get('stack_z_origin', 0))
+        z_pos = np.linspace(float(microscope_state['start_position']) + stack_z_origin,
+                            float(microscope_state['end_position']) + stack_z_origin,
                             int(microscope_state['number_z_steps']))
 
-        # z_pos = np.linspace(int(microscope_state['start_position']),
-        #                     int(microscope_state['end_position']),
-        #                     int(microscope_state['number_z_steps']))
+        # corresponding focus positions
+        stack_focus_origin = float(microscope_state.get('stack_focus_origin', 0))
+        f_pos = np.linspace(float(microscope_state['start_focus']) + stack_focus_origin,
+                            float(microscope_state['end_focus']) + stack_focus_origin,
+                            int(microscope_state['number_z_steps']))
 
         if stack_cycling_mode == 'per_stack':
             # Only change the channel we're looking at once per z-stack
@@ -760,8 +772,10 @@ class Model:
                     pass
 
                 # And step through z-space...
-                for pos in z_pos:
-                    self.move_stage({'z_abs': pos}, wait_until_done=True)  # Update position
+                for z, f in zip(z_pos, f_pos):
+                    print(f"z_pos: {z}, f_pos: {f}")
+                    self.move_stage({'z_abs': z}, wait_until_done=True)  # Update positions
+                    self.move_stage({'f_abs': f}, wait_until_done=True)
                     self.run_single_acquisition()  # This will take pics of all active channels
 
         # Restore active channels. TODO: Is this necessary?

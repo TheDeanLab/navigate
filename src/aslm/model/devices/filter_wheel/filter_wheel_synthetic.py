@@ -1,7 +1,5 @@
 """
-ASLM shutter communication classes.
-Triggering for shutters delivered from DAQ using digital outputs.
-Each output keeps their last digital state for as long the device is not powered down.
+ASLM filter wheel communication classes.
 
 Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
@@ -34,48 +32,40 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-
-# Standard Library Imports
+#  Standard Library Imports
 import logging
 
 # Third Party Imports
 
 # Local Imports
-from aslm.model.devices.laser_shutter_base import ShutterBase
+from aslm.model.devices.filter_wheel.filter_wheel_base import FilterWheelBase
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class SyntheticShutter(ShutterBase):
-    """
-    Virtual Shutter Device
-    """
+class SyntheticFilterWheel(FilterWheelBase):
+    def __init__(self, model, verbose):
+        super().__init__(model, verbose)
 
-    def __init__(self, model, experiment, verbose=False):
-        super().__init__(model, experiment, verbose)
+    def filter_change_delay(self, filter_name):
+        pass
 
-    def open_left(self):
-        self.shutter_right_state = False
-        self.shutter_left_state = True
-        if self.verbose:
-            print('Shutter left opened')
-        logger.debug("Shutter left opened")
+    def set_filter(self, filter_name, wait_until_done=True):
+        """
+        # Change the filter wheel to the filter designated by the filter position argument.
+        """
+        pass
 
-    def open_right(self):
-        self.shutter_right_state = True
-        self.shutter_left_state = False
-        if self.verbose:
-            print('Shutter right opened')
-        logger.debug("Shutter right opened")
+    def read(self, num_bytes):
+        """
+        # Reads the specified number of bytes from the serial port.
+        """
+        pass
 
-    def close_shutters(self):
-        self.shutter_right_state = False
-        self.shutter_left_state = False
-        if self.verbose:
-            print('Both shutters closed')
-        logger.debug("Both shutters closed")
-
-    def state(self):
-        return self.shutter_left_state, self.shutter_right_state
+    def close(self):
+        """
+        # Closes the serial port.
+        """
+        pass

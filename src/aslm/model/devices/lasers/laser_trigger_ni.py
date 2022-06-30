@@ -44,7 +44,7 @@ import nidaqmx
 from nidaqmx.constants import LineGrouping
 
 # Local Imports
-from aslm.model.devices.laser_trigger_base import LaserTriggerBase
+from aslm.model.devices.lasers.laser_trigger_base import LaserTriggerBase
 
 # Logger Setup
 p = __name__.split(".")[1]

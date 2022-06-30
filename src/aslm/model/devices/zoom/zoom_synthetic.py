@@ -1,8 +1,5 @@
 """
-ASLM laser trigger classes.
-Class for mixed digital and analog modulation of laser devices.
-Goal is to set the DC value of the laser intensity with the analog voltage, and then rapidly turn it on and off
-with the digital signal.
+ASLM zoom servo communication classes.
 
 Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
@@ -42,51 +39,47 @@ import logging
 # Third Party Imports
 
 # Local Imports
-from aslm.model.devices.laser_trigger_base import LaserTriggerBase
+from aslm.model.devices.zoom.zoom_base import ZoomBase
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-class SyntheticLaserTriggers(LaserTriggerBase):
-    def __init__(self, model, experiment, verbose=False):
-        super().__init__(model, experiment, verbose)
 
-    def __del__(self):
-        pass
+class SyntheticZoom(ZoomBase):
+    """
+    Virtual Zoom Device
+    """
 
-    def enable_low_resolution_laser(self):
-        """
-        # Evaluates the experiment configuration in the model for the resolution mode.
-        # Triggers the DAQ to select the correct laser path.
-        """
-        self.switching_state = False
+    def __init__(self, model, verbose):
+        super().__init__(model, verbose)
         if self.verbose:
-            print("Low Resolution Laser Path Enabled")
-        logger.debug("Low Resolution Laser Path Enabled")
+            print('Synthetic Zoom Initialized')
+        logger.debug("Synethetic Zoom Initialized")
 
-    def enable_high_resolution_laser(self):
+    def set_zoom(self, zoom, wait_until_done=False):
         """
-        # Evaluates the experiment configuration in the model for the resolution mode.
-        # Triggers the DAQ to select the correct laser path.
+        # Changes zoom after checking that the commanded value exists
         """
-        self.switching_state = True
+        if zoom in self.zoomdict:
+            self.zoomvalue = zoom
+        else:
+            raise ValueError('Zoom designation not in the configuration')
+            logger.error("Zoom designation not in the configuration")
         if self.verbose:
-            print("High Resolution Laser Path Enabled")
-        logger.debug("High Resolution Laser Path Enabled")
+            print('Zoom set to {}'.format(zoom))
+        logger.debug(f"Zoom set to {zoom}")
 
-    def trigger_digital_laser(self, current_laser_index):
-        self.turn_off_lasers()
-        pass
+    def move(self, position=0, wait_until_done=False):
+        if self.verbose:
+            print("Changing Virtual Zoom")
+        logger.debug("Changing Virtual Zoom")
 
-    def turn_off_lasers(self):
-        pass
-
-    def set_laser_analog_voltage(
-            self,
-            current_laser_index,
-            current_laser_intensity):
+    def read_position(self):
         """
-        # Sets the constant voltage on the DAQ according to the laser index and intensity, which is a percentage.
+        # Returns position as an int between 0 and 4096
+        # Opens & closes the port
         """
-        pass
+        if self.verbose:
+            print("Reading Virtual Zoom Position")
+        logger.debug("Reading Virtual Zoom Position")

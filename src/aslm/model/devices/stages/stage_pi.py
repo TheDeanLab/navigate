@@ -44,7 +44,7 @@ import time
 from pipython import GCSDevice, pitools, GCSError
 
 # Local Imports
-from aslm.model.devices.stage_base import StageBase
+from aslm.model.devices.stages.stage_base import StageBase
 
 # Logger Setup
 p = __name__.split(".")[1]

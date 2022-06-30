@@ -17,14 +17,12 @@ class TestSyntheticHardware():
         
         
     def test_synthetic_daq(self):
-        from aslm.model.devices.daq_base import SyntheticDAQ
+        from aslm.model.devices.daq.daq_synthetic import SyntheticDAQ
         self.dummy_model = get_dummy_model()
         self.config = self.dummy_model.configuration
         self.experiment = self.dummy_model.experiment
         self.etl_const = self.dummy_model.etl_constants
         self.verbose = self.dummy_model.verbose
-
-        
         sd = SyntheticDAQ(self.config, self.experiment, self.etl_const, self.verbose)
 
         assert True
@@ -32,20 +30,18 @@ class TestSyntheticHardware():
 
 
     def test_synthetic_camera(self):
-        from aslm.model.devices.camera_base import SyntheticCamera
+        from aslm.model.devices.camera.camera_synthetic import SyntheticCamera
         self.dummy_model = get_dummy_model()
         self.config = self.dummy_model.configuration
         self.experiment = self.dummy_model.experiment
         self.etl_const = self.dummy_model.etl_constants
         self.verbose = self.dummy_model.verbose
-
-
         sc = SyntheticCamera(0, self.config, self.experiment)
 
         return True
 
     def test_synthetic_filter_wheel(self):
-        from aslm.model.devices.filter_wheel_base import SyntheticFilterWheel
+        from aslm.model.devices.filter_wheel.filter_wheel_synthetic import SyntheticFilterWheel
         self.dummy_model = get_dummy_model()
         self.config = self.dummy_model.configuration
         self.experiment = self.dummy_model.experiment
@@ -57,7 +53,7 @@ class TestSyntheticHardware():
         return True
 
     def test_synthetic_stage(self):
-        from aslm.model.devices.stage_base import SyntheticStage
+        from aslm.model.devices.stages.stage_synthetic import SyntheticStage
         self.dummy_model = get_dummy_model()
         self.config = self.dummy_model.configuration
         self.experiment = self.dummy_model.experiment
@@ -67,7 +63,7 @@ class TestSyntheticHardware():
         ss = SyntheticStage(self.config, False)
 
     def test_synthetic_zoom(self):
-        from aslm.model.devices.zoom_base import SyntheticZoom
+        from aslm.model.devices.zoom.zoom_synthetic import SyntheticZoom
         self.dummy_model = get_dummy_model()
         self.config = self.dummy_model.configuration
         self.experiment = self.dummy_model.experiment
@@ -79,7 +75,7 @@ class TestSyntheticHardware():
         return True
 
     def test_synthetic_shutter(self):
-        from aslm.model.devices.laser_shutter_base import SyntheticShutter
+        from aslm.model.devices.shutter.laser_shutter_synthetic import SyntheticShutter
         self.dummy_model = get_dummy_model()
         self.config = self.dummy_model.configuration
         self.experiment = self.dummy_model.experiment
@@ -90,14 +86,15 @@ class TestSyntheticHardware():
 
         return True
 
-    def test_synthetic_laser(self):
-        from aslm.model.devices.lasers.SyntheticLaser import SyntheticLaser
-        self.dummy_model = get_dummy_model()
-        self.config = self.dummy_model.configuration
-        self.experiment = self.dummy_model.experiment
-        self.etl_const = self.dummy_model.etl_constants
-        self.verbose = self.dummy_model.verbose
-
-        sl = SyntheticLaser(self.config, False)
-
-        return True
+    # def test_synthetic_laser(self):
+    #     from aslm.model.devices.laser_trigger_synthetic import SyntheticLaserTriggers
+    #     from aslm.model.devices.lasers.SyntheticLaser import SyntheticLaser
+    #     self.dummy_model = get_dummy_model()
+    #     self.config = self.dummy_model.configuration
+    #     self.experiment = self.dummy_model.experiment
+    #     self.etl_const = self.dummy_model.etl_constants
+    #     self.verbose = self.dummy_model.verbose
+    #
+    #     sl = SyntheticLaser(self.config, False)
+    #
+    #     return True

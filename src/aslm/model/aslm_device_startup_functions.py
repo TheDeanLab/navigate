@@ -40,7 +40,6 @@ import sys
 import logging
 import time
 
-from pathlib import Path
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -109,10 +108,10 @@ def start_camera(configuration, experiment, verbose, camera_id=0):
     """
 
     if configuration.Devices['camera'] == 'HamamatsuOrca':
-        from aslm.model.devices.camera_hamamatsu import HamamatsuOrca
+        from aslm.model.devices.camera.camera_hamamatsu import HamamatsuOrca
         return auto_redial(HamamatsuOrca, (camera_id, configuration, experiment, verbose), exception=Exception)
     elif configuration.Devices['camera'] == 'SyntheticCamera':
-        from aslm.model.devices.camera_synthetic import SyntheticCamera
+        from aslm.model.devices.camera.camera_synthetic import SyntheticCamera
         return SyntheticCamera(0, configuration, experiment, verbose)
     else:
         device_not_found(configuration.Devices['camera'])
@@ -123,11 +122,11 @@ def start_stages(configuration, verbose):
     # Initializes the Stage.
     """
     if configuration.Devices['stage'] == 'PI' and platform.system() == 'Windows':
-        from aslm.model.devices.stage_pi import PIStage
+        from aslm.model.devices.stages.stage_pi import PIStage
         from pipython.pidevice.gcserror import GCSError
         return auto_redial(PIStage, (configuration, verbose), exception=GCSError)
     elif configuration.Devices['stage'] == 'SyntheticStage':
-        from aslm.model.devices.stage_synthetic import SyntheticStage
+        from aslm.model.devices.stages.stage_synthetic import SyntheticStage
         return SyntheticStage(configuration, verbose)
     else:
         device_not_found(configuration.Devices['stage'])
@@ -139,10 +138,10 @@ def start_zoom_servo(configuration, verbose):
     """
 
     if configuration.Devices['zoom'] == 'DynamixelZoom':
-        from aslm.model.devices.zoom_dynamixel import DynamixelZoom
+        from aslm.model.devices.zoom.zoom_dynamixel import DynamixelZoom
         return auto_redial(DynamixelZoom, (configuration, verbose), exception=RuntimeError)
     elif configuration.Devices['zoom'] == 'SyntheticZoom':
-        from aslm.model.devices.zoom_synthetic import SyntheticZoom
+        from aslm.model.devices.zoom.zoom_synthetic import SyntheticZoom
         return SyntheticZoom(configuration, verbose)
     else:
         device_not_found(configuration.Devices['zoom'])
@@ -154,10 +153,10 @@ def start_filter_wheel(configuration, verbose):
     """
 
     if configuration.Devices['filter_wheel'] == 'SutterFilterWheel':
-        from aslm.model.devices.filter_wheel_sutter import SutterFilterWheel
+        from aslm.model.devices.filter_wheel.filter_wheel_sutter import SutterFilterWheel
         return auto_redial(SutterFilterWheel, (configuration, verbose), exception=UserWarning)
     elif configuration.Devices['filter_wheel'] == 'SyntheticFilterWheel':
-        from aslm.model.devices.filter_wheel_synthetic import SyntheticFilterWheel
+        from aslm.model.devices.filter_wheel.filter_wheel_synthetic import SyntheticFilterWheel
         return SyntheticFilterWheel(configuration, verbose)
     else:
         device_not_found(configuration.Devices['filter_wheel'])
@@ -224,10 +223,10 @@ def start_daq(configuration, experiment, etl_constants, verbose):
     """
 
     if configuration.Devices['daq'] == 'NI':
-        from aslm.model.devices.daq_ni import NIDAQ
+        from aslm.model.devices.daq.daq_ni import NIDAQ
         return NIDAQ(configuration, experiment, etl_constants, verbose)
     elif configuration.Devices['daq'] == 'SyntheticDAQ':
-        from aslm.model.devices.daq_synthetic import SyntheticDAQ
+        from aslm.model.devices.daq.daq_synthetic import SyntheticDAQ
         return SyntheticDAQ(configuration, experiment, etl_constants, verbose)
     else:
         device_not_found(configuration.Devices['daq'])
@@ -241,10 +240,10 @@ def start_shutters(configuration, experiment, verbose):
     """
 
     if configuration.Devices['shutters'] == 'ThorlabsShutter' and configuration.Devices['daq'] == 'NI':
-        from aslm.model.devices.laser_shutter_ttl import ShutterTTL
+        from aslm.model.devices.shutter.laser_shutter_ttl import ShutterTTL
         return ShutterTTL(configuration, experiment, verbose)
     elif configuration.Devices['shutters'] == 'SyntheticShutter':
-        from aslm.model.devices.laser_shutter_synthetic import SyntheticShutter
+        from aslm.model.devices.shutter.laser_shutter_synthetic import SyntheticShutter
         return SyntheticShutter(configuration, experiment, verbose)
     else:
         device_not_found(configuration.Devices['shutters'])
@@ -256,10 +255,10 @@ def start_laser_triggers(configuration, experiment, verbose):
     """
 
     if configuration.Devices['daq'] == 'NI':
-        from aslm.model.devices.laser_trigger_ni import LaserTriggers
+        from aslm.model.devices.lasers.laser_trigger_ni import LaserTriggers
         return LaserTriggers(configuration, experiment, verbose)
     elif configuration.Devices['daq'] == 'SyntheticDAQ':
-        from aslm.model.devices.laser_trigger_synthetic import SyntheticLaserTriggers
+        from aslm.model.devices.lasers.laser_trigger_synthetic import SyntheticLaserTriggers
         return SyntheticLaserTriggers(configuration, experiment, verbose)
     else:
         device_not_found(configuration.Devices['daq'])

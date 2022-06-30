@@ -35,17 +35,12 @@ POSSIBILITY OF SUCH DAMAGE.
 
 # Standard Library Imports
 import logging
-import time
-import ctypes
 import importlib
-import sys
 
 # Third Party Imports
-import numpy as np
 
 # Local Imports
-from aslm.model.analysis import noise_model
-from aslm.model.devices.camera_base import CameraBase
+from aslm.model.devices.camera.camera_base import CameraBase
 
 # Logger Setup
 p = __name__.split(".")[1]

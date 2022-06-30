@@ -39,7 +39,7 @@ import logging
 # Third Party Imports
 
 # Local Imports
-from aslm.model.devices.joystick_base import JoystickBase
+from aslm.model.devices.joystick.joystick_base import JoystickBase
 
 # Logger Setup
 p = __name__.split(".")[1]

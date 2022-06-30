@@ -1,7 +1,8 @@
 """
-ASLM shutter communication classes.
-Triggering for shutters delivered from DAQ using digital outputs.
-Each output keeps their last digital state for as long the device is not powered down.
+ASLM laser trigger classes.
+Class for mixed digital and analog modulation of laser devices.
+Goal is to set the DC value of the laser intensity with the analog voltage, and then rapidly turn it on and off
+with the digital signal.
 
 Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
@@ -41,42 +42,51 @@ import logging
 # Third Party Imports
 
 # Local Imports
+from aslm.model.devices.laser_trigger_base import LaserTriggerBase
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-
-class ShutterBase:
-    """
-    Parent Shutter Class
-    """
-
+class SyntheticLaserTriggers(LaserTriggerBase):
     def __init__(self, model, experiment, verbose=False):
-        self.model = model
-        self.experiment = experiment
-        self.verbose = verbose
-
-        # Right Shutter - High Resolution Mode
-        self.shutter_right = self.model.DAQParameters['shutter_right']
-        self.shutter_right_state = False
-
-        # Left Shutter - Low Resolution Mode
-        self.shutter_left = self.model.DAQParameters['shutter_left']
-        self.shutter_left_state = False
+        super().__init__(model, experiment, verbose)
 
     def __del__(self):
         pass
 
-    def open_left(self):
+    def enable_low_resolution_laser(self):
+        """
+        # Evaluates the experiment configuration in the model for the resolution mode.
+        # Triggers the DAQ to select the correct laser path.
+        """
+        self.switching_state = False
+        if self.verbose:
+            print("Low Resolution Laser Path Enabled")
+        logger.debug("Low Resolution Laser Path Enabled")
+
+    def enable_high_resolution_laser(self):
+        """
+        # Evaluates the experiment configuration in the model for the resolution mode.
+        # Triggers the DAQ to select the correct laser path.
+        """
+        self.switching_state = True
+        if self.verbose:
+            print("High Resolution Laser Path Enabled")
+        logger.debug("High Resolution Laser Path Enabled")
+
+    def trigger_digital_laser(self, current_laser_index):
+        self.turn_off_lasers()
         pass
 
-    def open_right(self):
+    def turn_off_lasers(self):
         pass
 
-    def close_shutters(self):
+    def set_laser_analog_voltage(
+            self,
+            current_laser_index,
+            current_laser_intensity):
+        """
+        # Sets the constant voltage on the DAQ according to the laser index and intensity, which is a percentage.
+        """
         pass
-
-    def state(self):
-        pass
-

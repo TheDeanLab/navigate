@@ -259,10 +259,10 @@ def start_laser_triggers(configuration, experiment, verbose):
     """
 
     if configuration.Devices['daq'] == 'NI':
-        from aslm.model.devices.laser_triggers import LaserTriggers
+        from aslm.model.devices.laser_trigger_ni import LaserTriggers
         return LaserTriggers(configuration, experiment, verbose)
     elif configuration.Devices['daq'] == 'SyntheticDAQ':
-        from aslm.model.devices.laser_triggers import SyntheticLaserTriggers
+        from aslm.model.devices.laser_trigger_synthetic import SyntheticLaserTriggers
         return SyntheticLaserTriggers(configuration, experiment, verbose)
     else:
         device_not_found(configuration.Devices['daq'])

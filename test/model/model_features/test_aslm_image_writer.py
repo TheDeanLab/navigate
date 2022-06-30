@@ -3,9 +3,7 @@ from aslm.model.dummy_model import get_dummy_model
 import numpy as np
 
 
-class TestImageWriter:
-        
-
+class TestImageWriter(unittest.TestCase):
     def test_zarr_byslice(self):
 
 
@@ -16,7 +14,7 @@ class TestImageWriter:
         The rest of the setup comes from setting the amount of zslices, channels and the duration of the acquisition. 
         A fake frame is list is created that is tied to a fake acquisition list of 'frames' just like the camera would provide.
         The data buffer for the dummy model is set, ImageWriter is instantiated for access to saving functions.
-        Then the copy_to_zarr funciton is called with the list of frame ids.
+        Then the write_zarr function is called with the list of frame ids.
         The final check is to loop thru each frame and do a check to see if they all equal the original letter F we gave at
         the beginning. 
         A fail message will appear upon failure of test ie one of the frames did not match
@@ -60,7 +58,7 @@ class TestImageWriter:
 
         # End of Setup
 
-        zarr = slicetest.copy_to_zarr(frame_ids) # Running function to test
+        zarr = slicetest.write_zarr(frame_ids) # Running function to test
 
         # Checking results of function
         # Loop thru zarr array and check that all frames are still equal to what was put in
@@ -132,7 +130,7 @@ class TestImageWriter:
 
         stacktest = ImageWriter(dummy_model) # creating class to run func
 
-        zarr = stacktest.copy_to_zarr(frame_ids) # Function being tested
+        zarr = stacktest.write_zarr(frame_ids) # Function being tested
 
         # Checking results of function
         # Loop thru zarr array and check that all frames are still equal to what was put in
@@ -160,3 +158,5 @@ class TestImageWriter:
         # Test will fail if an image is not the same
         assert same, "Test failed because array was not equal to what was given"
 
+if (__name__ == "__main__"):
+    unittest.main()

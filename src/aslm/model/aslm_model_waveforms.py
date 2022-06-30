@@ -104,13 +104,13 @@ def single_pulse(sample_rate=100000,
 
 
 def tunable_lens_ramp(sample_rate=100000,
-                         exposure_time=0.2,
-                         sweep_time=0.24,
-                         etl_delay=7.5,
-                         camera_delay=10,
-                         fall=2.5,
-                         amplitude=1,
-                         offset=0):
+                      exposure_time=0.2,
+                      sweep_time=0.24,
+                      etl_delay=7.5,
+                      camera_delay=10,
+                      fall=2.5,
+                      amplitude=1,
+                      offset=0):
     r'''Returns a numpy array with a sawtooth ramp - typically used for remote focusing.
 
     The waveform starts at offset and stays there for the delay period, then

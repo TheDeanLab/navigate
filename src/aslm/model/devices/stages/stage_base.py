@@ -48,20 +48,20 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 class StageBase:
-    def __init__(self, model, verbose):
+    def __init__(self, configuration, verbose):
         self.verbose = verbose
-        self.model = model
+        self.configuration = configuration
 
         """
         Initial setting of all positions
         self.x_pos, self.y_pos etc are the true axis positions, no matter whether
         the stages are zeroed or not.
         """
-        self.x_pos = model.StageParameters['position']['x_pos']
-        self.y_pos = model.StageParameters['position']['y_pos']
-        self.z_pos = model.StageParameters['position']['z_pos']
-        self.f_pos = model.StageParameters['position']['f_pos']
-        self.theta_pos = model.StageParameters['position']['theta_pos']
+        self.x_pos = configuration.StageParameters['position']['x_pos']
+        self.y_pos = configuration.StageParameters['position']['y_pos']
+        self.z_pos = configuration.StageParameters['position']['z_pos']
+        self.f_pos = configuration.StageParameters['position']['f_pos']
+        self.theta_pos = configuration.StageParameters['position']['theta_pos']
         self.position_dict = {'x_pos': self.x_pos,
                               'y_pos': self.y_pos,
                               'z_pos': self.z_pos,
@@ -97,30 +97,48 @@ class StageBase:
         """
         Setting movement limits: currently hardcoded: Units are in microns
         """
-        self.x_max = model.StageParameters['x_max']
-        self.x_min = model.StageParameters['x_min']
-        self.y_max = model.StageParameters['y_max']
-        self.y_min = model.StageParameters['y_min']
-        self.z_max = model.StageParameters['z_max']
-        self.z_min = model.StageParameters['z_min']
-        self.f_max = model.StageParameters['f_max']
-        self.f_min = model.StageParameters['f_min']
-        self.theta_max = model.StageParameters['theta_max']
-        self.theta_min = model.StageParameters['theta_min']
+        self.x_max = configuration.StageParameters['x_max']
+        self.x_min = configuration.StageParameters['x_min']
+        self.y_max = configuration.StageParameters['y_max']
+        self.y_min = configuration.StageParameters['y_min']
+        self.z_max = configuration.StageParameters['z_max']
+        self.z_min = configuration.StageParameters['z_min']
+        self.f_max = configuration.StageParameters['f_max']
+        self.f_min = configuration.StageParameters['f_min']
+        self.theta_max = configuration.StageParameters['theta_max']
+        self.theta_min = configuration.StageParameters['theta_min']
 
         # Sample Position When Rotating
-        self.x_rot_position = model.StageParameters['x_rot_position']
-        self.y_rot_position = model.StageParameters['y_rot_position']
-        self.z_rot_position = model.StageParameters['z_rot_position']
+        self.x_rot_position = configuration.StageParameters['x_rot_position']
+        self.y_rot_position = configuration.StageParameters['y_rot_position']
+        self.z_rot_position = configuration.StageParameters['z_rot_position']
 
         # Starting Position of Focusing Device
-        self.startfocus = model.StageParameters['startfocus']
+        self.startfocus = configuration.StageParameters['startfocus']
 
     def create_position_dict(self):
-        pass
+        """
+        # Creates a dictionary with the hardware stage positions.
+        """
+        self.position_dict = {'x_pos': self.x_pos,
+                              'y_pos': self.y_pos,
+                              'z_pos': self.z_pos,
+                              'f_pos': self.f_pos,
+                              'theta_pos': self.theta_pos,
+                              }
 
     def create_internal_position_dict(self):
-        pass
+        """
+        # Creates a dictionary with the software stage positions.
+        # Internal position includes the offset for each stage position.
+        # e.g, int_x_pos = x_pos + int_x_pos_offset
+        """
+        self.int_position_dict = {'x_pos': self.int_x_pos,
+                                  'y_pos': self.int_y_pos,
+                                  'z_pos': self.int_z_pos,
+                                  'f_pos': self.int_f_pos,
+                                  'theta_pos': self.int_theta_pos,
+                                  }
 
     def report_position(self):
         pass
@@ -146,11 +164,6 @@ class StageBase:
     def unload_sample(self):
         pass
 
-    def mark_rotation_position(self):
-        pass
-
-    def go_to_rotation_position(self, wait_until_done=False):
-        pass
 
 
 

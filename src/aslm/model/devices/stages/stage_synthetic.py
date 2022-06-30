@@ -51,24 +51,8 @@ logger = logging.getLogger(p)
 
 
 class SyntheticStage(StageBase):
-    def __init__(self, model, verbose):
-        super().__init__(model, verbose)
-
-    def create_position_dict(self):
-        self.position_dict = {'x_pos': self.x_pos,
-                              'y_pos': self.y_pos,
-                              'z_pos': self.z_pos,
-                              'f_pos': self.f_pos,
-                              'theta_pos': self.theta_pos,
-                              }
-
-    def create_internal_position_dict(self):
-        self.int_position_dict = {'x_pos': self.int_x_pos,
-                                  'y_pos': self.int_y_pos,
-                                  'z_pos': self.int_z_pos,
-                                  'f_pos': self.int_f_pos,
-                                  'theta_pos': self.int_theta_pos,
-                                  }
+    def __init__(self, configuration, verbose):
+        super().__init__(configuration, verbose)
 
     def report_position(self):
         self.create_position_dict()
@@ -222,22 +206,8 @@ class SyntheticStage(StageBase):
                 print('Unzeroing of axis: ', axis, 'failed')
 
     def load_sample(self):
-        self.y_pos = self.model.StageParameters['y_load_position']
+        self.y_pos = self.configuration.StageParameters['y_load_position']
 
     def unload_sample(self):
-        self.y_pos = self.model.StageParameters['y_unload_position']
+        self.y_pos = self.configuration.StageParameters['y_unload_position']
 
-    def mark_rotation_position(self):
-        """
-        # Take the current position and mark it as rotation location
-        """
-        self.x_rot_position = self.x_pos
-        self.y_rot_position = self.y_pos
-        self.z_rot_position = self.z_pos
-        if self.verbose:
-            print('Marking new rotation position (absolute coordinates): X: ',
-                  self.x_pos, ' Y: ', self.y_pos, ' Z: ', self.z_pos)
-        logger.debug(f"Marking new rotation position (absolute coordinates): X: {self.x_pos}, Y: {self.y_pos}, Z: {self.z_pos}")
-
-    def go_to_rotation_position(self, wait_until_done=False):
-        pass

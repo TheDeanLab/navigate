@@ -170,4 +170,4 @@ class NIDAQ(DAQBase):
         """
         # connect camera with daq: only in syntheticDAQ
         """
-    pass
+        pass

@@ -51,37 +51,30 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 class PIStage(StageBase):
-    def __init__(self, model, verbose):
-        super().__init__(model, verbose)
-        pi_stages = self.model.StageParameters['stages']
-        pi_refmodes = self.model.StageParameters['refmode']
+    def __init__(self, configuration, verbose):
+        super().__init__(configuration, verbose)
+
+        pi_stages = self.configuration.StageParameters['stages']
+        pi_refmodes = self.configuration.StageParameters['refmode']
         pi_stages = pi_stages.split()
         pi_refmodes = pi_refmodes.split()
 
         self.pitools = pitools
-        self.controllername = self.model.StageParameters['controllername']
+        self.controllername = self.configuration.StageParameters['controllername']
         self.pi_stages = pi_stages
         self.refmode = pi_refmodes
-        self.serialnum = str(self.model.StageParameters['serialnum'])
+        self.serialnum = str(self.configuration.StageParameters['serialnum'])
         self.pidevice = GCSDevice(self.controllername)
         self.pidevice.ConnectUSB(serialnum=self.serialnum)
         self.pitools.startup(self.pidevice, stages=list(self.pi_stages), refmodes=list(self.refmode))
         self.block_till_controller_is_ready()
-
-        # Move the Focusing Stage to the Start Position
-        try:
-            # self.pidevice.MOV(5, self.startfocus / 1000)
-            pass
-        except GCSError as e:
-            logger.exception(GCSError
-                (e)) # Need to test this on the stage or somehow simulate, otherwise the documented way will work, but if this works it will be more clear what happened
-            # raise
 
     def __del__(self):
         try:
             """
             # Close the PI connection
             """
+            self.stop()
             self.pidevice.unload()
             if self.verbose:
                 print('PI connection closed')
@@ -91,32 +84,6 @@ class PIStage(StageBase):
             print('Error while disconnecting the PI stage')
             logger.exception(GCSError(e))
             raise
-
-
-
-    def create_position_dict(self):
-        """
-        # Creates a dictionary with the hardware stage positions.
-        """
-        self.position_dict = {'x_pos': self.x_pos,
-                              'y_pos': self.y_pos,
-                              'z_pos': self.z_pos,
-                              'f_pos': self.f_pos,
-                              'theta_pos': self.theta_pos,
-                              }
-
-    def create_internal_position_dict(self):
-        """
-        # Creates a dictionary with the software stage positions.
-        # Internal position includes the offset for each stage position.
-        # e.g, int_x_pos = x_pos + int_x_pos_offset
-        """
-        self.int_position_dict = {'x_pos': self.int_x_pos,
-                                  'y_pos': self.int_y_pos,
-                                  'z_pos': self.int_z_pos,
-                                  'f_pos': self.int_f_pos,
-                                  'theta_pos': self.int_theta_pos,
-                                  }
 
     def report_position(self):
         """
@@ -312,43 +279,18 @@ class PIStage(StageBase):
                 print('Unzeroing of axis: ', axis, 'failed')
 
     def load_sample(self):
-        y_abs = self.model.StageParameters['y_load_position'] / 1000
+        y_abs = self.configuration.StageParameters['y_load_position'] / 1000
         try:
             self.pidevice.MOV({2: y_abs})
         except GCSError as e:
             logger.exception(GCSError(e))
-
 
     def unload_sample(self):
-        y_abs = self.model.StageParameters['y_unload_position'] / 1000
+        y_abs = self.configuration.StageParameters['y_unload_position'] / 1000
         try:
             self.pidevice.MOV({2: y_abs})
         except GCSError as e:
             logger.exception(GCSError(e))
-
-    def mark_rotation_position(self):
-        """
-        Take the current position and mark it as rotation location
-        """
-        self.x_rot_position = self.x_pos
-        self.y_rot_position = self.y_pos
-        self.z_rot_position = self.z_pos
-        if self.verbose:
-            print('Marking new rotation position (absolute coordinates): X: ',
-                  self.x_pos, ' Y: ', self.y_pos, ' Z: ', self.z_pos)
-        logger.debug \
-            (f"Marking new rotation position(absolute coordinates): X: , {self.x_pos},  Y: , {self.y_pos}, Z: , {self.z_pos}")
-
-    def go_to_rotation_position(self, wait_until_done=False):
-        x_abs = self.x_rot_position / 1000
-        y_abs = self.y_rot_position / 1000
-        z_abs = self.z_rot_position / 1000
-        try:
-            self.pidevice.MOV({1: x_abs, 2: y_abs, 3: z_abs})
-        except GCSError as e:
-            logger.exception(GCSError(e))
-        if wait_until_done is True:
-            self.pitools.waitontarget(self.pidevice)
 
     def block_till_controller_is_ready(self):
         """

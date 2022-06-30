@@ -37,10 +37,9 @@ POSSIBILITY OF SUCH DAMAGE.
 import logging
 
 # Third Party Imports
-import numpy as np
 
 # Local Imports
-from aslm.model.aslm_model_waveforms import tunable_lens_ramp_v2, tunable_lens_ramp, sawtooth, dc_value, camera_exposure
+from aslm.model.aslm_model_waveforms import tunable_lens_ramp, sawtooth, camera_exposure
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -147,7 +146,7 @@ class DAQBase:
         }
 
     def calculate_all_waveforms(self, microscope_state, etl_constants, galvo_parameters, readout_time):
-        """
+        r"""
         Pre-calculates all waveforms necessary for the acquisition and organizes in a dictionary format.
 
         Parameters
@@ -207,7 +206,7 @@ class DAQBase:
                 galvo_frequency = float(galvo_parameters[f'galvo_{focus_prefix}_frequency'])/exposure_time  # 100.5/exposure_time
 
                 # Calculate the Waveforms
-                self.waveform_dict[channel_key]['etl_waveform'] = tunable_lens_ramp_v2(sample_rate=self.sample_rate,
+                self.waveform_dict[channel_key]['etl_waveform'] = tunable_lens_ramp(sample_rate=self.sample_rate,
                                                                                        exposure_time=exposure_time,
                                                                                        sweep_time=self.sweep_time,
                                                                                        etl_delay=self.etl_delay,
@@ -237,25 +236,6 @@ class DAQBase:
         # sweep_time units originally seconds.
         """
         self.samples = int(self.sample_rate * self.sweep_time)
-
-    def create_waveforms(self):
-        """
-        # Create the waveforms for the ETL, Galvos, and sends it to the tasks for execution.
-        """
-        self.calculate_samples()
-
-        # ETL - Currently creates both ETL L and ETL R
-        self.create_etl_waveform()
-
-        # Galvos
-        self.create_high_res_galvo_waveform()
-        self.create_low_res_galvo_waveform()
-
-        # Bundle the waveforms into a single waveform.
-        self.bundle_galvo_and_etl_waveforms()
-
-        # Write the waveforms to the tasks.
-        self.write_waveforms_to_tasks()
 
     def update_etl_parameters(self, microscope_state, channel, galvo_parameters, readout_time):
         """
@@ -297,82 +277,4 @@ class DAQBase:
             self.prev_etl_r_offset = self.etl_r_offset
             self.prev_etl_l_amplitude = self.etl_l_amplitude
             self.prev_etl_l_offset = self.etl_l_offset
-
-    def create_etl_waveform(self):
-        """
-        # Create the waveforms for the Electrotunable Lens
-        # This needs to know what resolution mode, what channel, laser, etc...
-        """
-        self.etl_l_waveform = tunable_lens_ramp(sample_rate=self.sample_rate,
-                                                sweep_time=self.sweep_time,
-                                                delay=self.etl_l_delay,
-                                                rise=self.etl_l_ramp_rising,
-                                                fall=self.etl_l_ramp_falling,
-                                                amplitude=self.etl_l_amplitude,
-                                                offset=self.etl_l_offset)
-
-        self.etl_r_waveform = tunable_lens_ramp(sample_rate=self.sample_rate,
-                                                sweep_time=self.sweep_time,
-                                                delay=self.etl_r_delay,
-                                                rise=self.etl_r_ramp_rising,
-                                                fall=self.etl_r_ramp_falling,
-                                                amplitude=self.etl_r_amplitude,
-                                                offset=self.etl_r_offset)
-
-        # Scale the ETL waveforms to the AO range.
-        if np.any(self.etl_l_waveform < self.etl_l_min_ao):
-            print("Warning: ETL_L_Waveform Clipped - Value too low")
-            self.etl_l_waveform[self.etl_l_waveform < self.etl_l_min_ao] = self.etl_l_min_ao
-
-        if np.any(self.etl_l_waveform > self.etl_l_max_ao):
-            print("Warning: ETL_L_Waveform Clipped - Value too high")
-            self.etl_l_waveform[self.etl_l_waveform > self.etl_l_max_ao] = self.etl_l_max_ao
-
-        if np.any(self.etl_r_waveform < self.etl_r_min_ao):
-            print("Warning: ETL_R_Waveform Clipped - Value too low")
-            self.etl_r_waveform[self.etl_r_waveform < self.etl_r_min_ao] = self.etl_r_min_ao
-
-        if np.any(self.etl_r_waveform > self.etl_r_max_ao):
-            print("Warning: ETL_R_Waveform Clipped - Value too high")
-            self.etl_r_waveform[self.etl_r_waveform > self.etl_r_max_ao] = self.etl_r_max_ao
-
-
-    def create_low_res_galvo_waveform(self):
-        """
-        # Calculate the sawtooth waveforms for the low-resolution digitally scanned galvo.
-        """
-        self.galvo_l_waveform = sawtooth(sample_rate=self.sample_rate,
-                                         sweep_time=self.sweep_time,
-                                         frequency=self.galvo_l_frequency,
-                                         amplitude=self.galvo_l_amplitude,
-                                         offset=self.galvo_l_offset,
-                                         duty_cycle=self.galvo_l_duty_cycle,
-                                         phase=self.galvo_l_phase)
-
-        # Scale the Galvo waveforms to the AO range.
-        self.galvo_l_waveform[self.galvo_l_waveform < self.galvo_l_min_ao] = self.galvo_l_min_ao
-        self.galvo_l_waveform[self.galvo_l_waveform > self.galvo_r_max_ao] = self.galvo_r_max_ao
-
-    def create_high_res_galvo_waveform(self):
-        """
-        # Calculate the DC waveform for the resonant galvanometer drive signal.
-        """
-        self.galvo_r_waveform = dc_value(sample_rate=self.sample_rate,
-                                         sweep_time=self.sweep_time,
-                                         amplitude=self.galvo_r_amplitude)
-
-        # Scale the Galvo waveforms to the AO range.
-        self.galvo_r_waveform[self.galvo_r_waveform < self.galvo_r_min_ao] = self.galvo_r_min_ao
-        self.galvo_r_waveform[self.galvo_r_waveform > self.galvo_r_max_ao] = self.galvo_r_max_ao
-
-    def bundle_galvo_and_etl_waveforms(self):
-        """
-        # Stacks the Galvo and ETL waveforms into a numpy array adequate for
-        # the NI cards. In here, the assignment of output channels of the Galvo / ETL card to the
-        # corresponding output channel is hardcoded: This could be improved.
-        """
-        self.galvo_and_etl_waveforms = np.stack((self.galvo_l_waveform,
-                                                 self.galvo_r_waveform,
-                                                 self.etl_l_waveform,
-                                                 self.etl_r_waveform))
 

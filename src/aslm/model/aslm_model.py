@@ -552,8 +552,49 @@ class Model:
 
         self.open_shutter()
 
-    def run_single_acquisition(self,
-                               target_channel=None):
+    
+    def run_single_channel_acquisition(self, target_channel=None):
+        # stop acquisition if no channel specified
+        if target_channel == None:
+            self.stop_acquisition = True
+            return
+
+        channel_key = 'channel_' + target_channel
+
+        if target_channel != self.current_channel:
+            microscope_state = self.experiment.MicroscopeState
+            # stop acquisition if target channel is not selected/exist
+            if channel_key not in microscope_state['channels'] or not microscope_state['channels'][channel_key]['is_selected']:
+                self.stop_acquisition = True
+                return
+
+            channel = microscope_state['channels'][channel_key]
+            self.current_channel = target_channel
+
+            # Move the Filter Wheel - Rate-Limiting Step - Perform First.
+            self.filter_wheel.set_filter(channel['filter'])
+
+            # Update Camera Exposure Time
+            self.current_exposure_time = channel['camera_exposure_time']
+
+            if self.experiment.CameraParameters['sensor_mode'] == 'Light-Sheet':
+                self.current_exposure_time, self.camera_line_interval = self.camera.calculate_light_sheet_exposure_time(
+                    self.current_exposure_time,
+                    int(self.experiment.CameraParameters['number_of_pixels']))
+                self.camera.camera_controller.set_property_value("internal_line_interval", self.camera_line_interval)
+
+            # Laser Settings
+            self.current_laser_index = channel['laser_index']
+            self.laser_triggers.trigger_digital_laser(self.current_laser_index)
+            self.laser_triggers.set_laser_analog_voltage(channel['laser_index'], channel['laser_power'])
+
+            # Update ETL Settings
+            self.daq.update_etl_parameters(microscope_state, channel, self.experiment.GalvoParameters, self.get_readout_time())
+
+        self.snap_image(channel_key)
+            
+
+    def run_single_acquisition(self):
         """
         # Called by model.run_command().
         target_channel called only during the autofocus routine.
@@ -566,53 +607,8 @@ class Model:
             if self.stop_acquisition or self.stop_send_signal:
                 break
             channel_idx = int(channel_key[prefix_len:])
-            if target_channel and channel_idx != target_channel:
-                continue
-            channel = microscope_state['channels'][channel_key]
-
-            # Iterate through the selected channels.
-            if channel['is_selected'] is True:
-                # Move the Filter Wheel - Rate-Limiting Step - Perform First.
-                self.filter_wheel.set_filter(channel['filter'])
-
-                # Get and set the parameters for Waveform Generation, triggering, etc.
-                self.current_channel = channel_idx
-
-                # Calculate duration of time necessary between camera triggers.
-                # self.trigger_waiting_time = self.current_exposure_time/1000 + self.camera_minimum_waiting_time
-
-                # Update Camera Exposure Time
-                self.current_exposure_time = channel['camera_exposure_time']
-
-                if self.experiment.CameraParameters['sensor_mode'] == 'Light-Sheet':
-                    self.current_exposure_time, self.camera_line_interval = self.camera.calculate_light_sheet_exposure_time(
-                        self.current_exposure_time,
-                        int(self.experiment.CameraParameters['number_of_pixels']))
-                    self.camera.camera_controller.set_property_value("internal_line_interval", self.camera_line_interval)
-
-                # self.camera.set_exposure_time(exposure_time)
-
-                # Laser Settings
-                self.current_laser_index = channel['laser_index']
-                self.laser_triggers.trigger_digital_laser(self.current_laser_index)
-                self.laser_triggers.set_laser_analog_voltage(channel['laser_index'], channel['laser_power'])
-
-                # # Update Laser Data Acquisition Sweep Time according to exposure and delay parameters.
-                # self.daq.sweep_time = (self.current_exposure_time / 1000) * \
-                #                       ((self.configuration.CameraParameters['delay_percent'] +
-                #                         self.configuration.RemoteFocusParameters['remote_focus_l_ramp_falling_percent']) / 100 + 1)
-
-                if hasattr(self, 'signal_container'):
-                    self.signal_container.run()
-
-                # Update ETL Settings
-                self.daq.update_etl_parameters(microscope_state, channel, self.experiment.GalvoParameters, self.get_readout_time())
-
-                # Acquire an Image                
-                self.snap_image(channel_key)
-
-                if hasattr(self, 'signal_container'):
-                    self.signal_container.run(wait_response=True)
+            self.run_single_channel_acquisition(channel_idx)
+                
                 
 
     def snap_image(self, channel_key):
@@ -623,6 +619,8 @@ class Model:
         # waveforms into the buffers of the NI cards.
         #
         """
+        if hasattr(self, 'signal_container'):
+            self.signal_container.run()
 
         # calculate how long has been since last trigger
         # time_spent = time.perf_counter() - self.pre_trigger_time
@@ -657,6 +655,9 @@ class Model:
         self.daq.stop_acquisition()
 
         self.frame_id = (self.frame_id + 1) % self.number_of_frames
+
+        if hasattr(self, 'signal_container'):
+            self.signal_container.run(wait_response=True)
 
     def run_live_acquisition(self):
         """

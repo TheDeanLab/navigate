@@ -272,19 +272,11 @@ class HamamatsuOrca(CameraBase):
 
     def initialize_image_series(self, data_buffer=None, number_of_frames=100):
         self.camera_controller.start_acquisition(data_buffer, number_of_frames)
+        self.is_acquiring = True
 
     def close_image_series(self):
         self.camera_controller.stop_acquisition()
-
-    def initialize_live_mode(self):
-        # self.camera_controller.setACQMode(mode="run_till_abort")
-        self.camera_controller.start_acquisition()
-
-    def close_live_mode(self):
-        self.camera_controller.stop_acquisition()
-
-        # self.running = False
-        # self.mode = self.MODE_SINGLE_SHOT
+        self.is_acquiring = False
 
     def get_new_frame(self):
         return self.camera_controller.get_frames()

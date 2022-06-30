@@ -149,7 +149,7 @@ class Debug_Module:
         self.model.signal_thread = threading.Thread(target=self.send_signals, args=(args[1],))
         # self.model.signal_thread = threading.Thread(target=self.send_signals(args[1]))
         # self.model.data_thread = threading.Thread(target=self.get_frames, args=(args[1],))
-        self.model.data_thread = threading.Thread(target=self.model.run_data_process, args=(args[1],))
+        self.model.data_thread = threading.Thread(target=self.model.run_data_process) #, args=(args[1],))
         self.model.signal_thread.start()
         self.model.data_thread.start()
 
@@ -256,10 +256,14 @@ class Debug_Module:
         channel_num = len(self.model.experiment.MicroscopeState['channels'].keys())
         i = 0
         while i < signal_num and not self.model.stop_acquisition:
-            self.model.run_single_acquisition()
+            self.model.signal_container.reset()
+            while not self.model.signal_container.end_flag:
+                self.model.run_single_acquisition()
             i += channel_num
             print('sent out', i, 'signals(', signal_num, ')!!!!!')
         print('send signal ends!!!!')
+        time.sleep(0.2)
+        self.model.stop_acquisition = True
 
     def send_autofocus_signals(self, f_position, signal_num):
         step_size = random.randint(5, 50)

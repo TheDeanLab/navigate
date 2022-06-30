@@ -66,7 +66,7 @@ class Debug_Module:
         self.central_controller.model.run_command('debug', 'get_timings')
 
     def test_feature_container(self):
-        signal_num = 30
+        signal_num = 2
         feature_id = simple_dialog.askinteger('Input', 'Which feature routine do you want?\n \
                             1. detective->yes->save->autofocus->yes->save\n \
                             2. detective->yes->autofocus->yes->save\n \

@@ -312,6 +312,8 @@ class Model:
             # stop live thread
             self.stop_send_signal = True
             self.signal_thread.join()
+            self.current_channel = 0
+
             if args[0] == 'channel':
                 self.experiment.MicroscopeState['channels'] = args[1]
 
@@ -402,6 +404,7 @@ class Model:
         """
         #
         """
+        self.current_channel = 0
         # dettach buffer in live mode in order to clear unread frames
         if self.camera.camera_controller.is_acquiring:
             self.camera.close_image_series()
@@ -559,7 +562,7 @@ class Model:
             self.stop_acquisition = True
             return
 
-        channel_key = 'channel_' + target_channel
+        channel_key = 'channel_' + str(target_channel)
 
         if target_channel != self.current_channel:
             microscope_state = self.experiment.MicroscopeState

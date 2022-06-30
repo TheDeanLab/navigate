@@ -102,16 +102,27 @@ class DataNode(TreeNode):
 
 class Container:
     def __init__(self, root=None):
-        self.root = root
-        self.curr_node = None
+        self.root = root # root node of the tree
+        self.curr_node = None # current running node
+        self.end_flag = False # stop running flag
 
-# TODO: SignalContainer and DataContainer looks the same now, but they will be different later
+    def reset(self):
+        self.curr_node = None
+        self.end_flag = False
+
+
 class SignalContainer(Container):
-    def __init__(self, root=None):
+    def __init__(self, root=None, number_of_execution=1):
         super().__init__(root)
+        self.number_of_execution = number_of_execution
+        self.remaining_number_of_execution = number_of_execution
+
+    def reset(self):
+        super().reset()
+        self.remaining_number_of_execution = self.number_of_execution
 
     def run(self, *args, wait_response=False):
-        if not self.root:
+        if self.end_flag or not self.root:
             return
         if not self.curr_node:
             self.curr_node = self.root
@@ -133,6 +144,9 @@ class SignalContainer(Container):
                 self.run(*args)
         else:
             self.curr_node = None
+            if self.remaining_number_of_execution > 0:
+                self.remaining_number_of_execution -= 1
+                self.end_flag = self.remaining_number_of_execution == 0
 
 
 class DataContainer(Container):
@@ -140,7 +154,7 @@ class DataContainer(Container):
         super().__init__(root)
 
     def run(self, *args):
-        if not self.root:
+        if self.end_flag or not self.root:
             return
         if not self.curr_node:
             self.curr_node = self.root
@@ -181,7 +195,6 @@ def load_features(model, feature_list):
     pre_data = data_root
     for temp in feature_list:
         for i in range(len(temp)):
-            print('feature:', temp[i])
             args = ()
             if 'args' in temp[i]:
                 args = temp[i]['args']

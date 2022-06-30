@@ -197,13 +197,8 @@ class ASLM_controller:
 
         # Advanced Tab
 
-        # Wire up show image pipe
-        self.show_img_pipe_parent, self.show_img_pipe_child = mp.Pipe()
-        self.model.set_show_img_pipe(self.show_img_pipe_child)
-
-        # Setting up Pipe for Autofocus Plot
-        self.plot_pipe_controller, self.plot_pipe_model = mp.Pipe(duplex=True)
-        self.model.set_autofocus_plot_pipe(self.plot_pipe_model)
+        # Wire up pipes
+        self.show_img_pipe = self.model.create_pipe('show_img_pipe')
 
         # Create default data buffer
         self.img_width = 0
@@ -228,9 +223,8 @@ class ASLM_controller:
         if img_width == self.img_width and img_height == self.img_height:
             return
 
-        self.data_buffer = [SharedNDArray(shape=(img_height, img_width),
-                                          dtype='uint16') for i in range(self.configuration.SharedNDArray['number_of_frames'])]
-        self.model.set_data_buffer(self.data_buffer, img_width, img_height)
+        self.data_buffer = self.model.get_data_buffer(img_width, img_height)
+
         self.img_width = img_width
         self.img_height = img_height
 
@@ -644,7 +638,7 @@ class ASLM_controller:
                                saving_info=self.experiment.Saving)
 
         while True:
-            image_id = self.show_img_pipe_parent.recv()
+            image_id = self.show_img_pipe.recv()
             if self.verbose:
                 print('receive', image_id)
             logger.debug(f"recieve, {image_id}")
@@ -673,6 +667,10 @@ class ASLM_controller:
             return
         pos = self.experiment.StageParameters['f']
         self.camera_view_controller.image_count = 0
+
+        # open pipe
+        autofocus_plot_pipe = self.model.create_pipe('autofocus_plot_pipe')
+
         self.model.run_command(
             'autofocus',
             self.experiment.MicroscopeState,
@@ -680,19 +678,27 @@ class ASLM_controller:
             pos
             )
         while True:
-            image_id = self.show_img_pipe_parent.recv()
+            image_id = self.show_img_pipe.recv()
+            if self.verbose:
+                print("controller recieved image frame id", image_id)
+
+            logger.debug(f"controller recieved image frame id {image_id}")
             if image_id == 'stop':
                 break
             self.camera_view_controller.display_image(self.data_buffer[image_id])
             # get focus position and update it in GUI
 
         # Rec plot data from model and send to sub controller to display plot
-        plot_data = self.plot_pipe_controller.recv()
+        plot_data = autofocus_plot_pipe.recv()
         if self.verbose:
             print("Controller received plot data: ", plot_data)
         logger.debug(f"Controller recieved plot data: {plot_data}")
         if hasattr(self, 'af_popup_controller'):
             self.af_popup_controller.display_plot(plot_data)
+        
+        # release pipe
+        autofocus_plot_pipe.close()
+        self.model.release_pipe('autofocus_plot_pipe')
         
         self.set_mode_of_sub('stop')
     

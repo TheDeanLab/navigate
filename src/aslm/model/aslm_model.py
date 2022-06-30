@@ -37,13 +37,14 @@ POSSIBILITY OF SUCH DAMAGE.
 import time
 import threading
 import logging
+import multiprocessing as mp
 
 # Third Party Imports
 
 # Local Imports
 import aslm.model.aslm_device_startup_functions as startup_functions
 from aslm.model.aslm_model_config import Session as session
-from aslm.model.concurrency.concurrency_tools import ResultThread
+from aslm.model.concurrency.concurrency_tools import ResultThread, SharedNDArray
 from aslm.model.model_features.autofocus import Autofocus
 from aslm.model.model_features.aslm_image_writer import ImageWriter
 
@@ -161,10 +162,6 @@ class Model:
         self.signal_thread = None
         self.data_thread = None
 
-        # data buffer
-        self.data_buffer = None
-        self.number_of_frames = 0
-
         # show image function/pipe handler
         self.show_img_pipe = None
         
@@ -188,6 +185,11 @@ class Model:
         self.camera_minimum_waiting_time = self.camera.get_minimum_waiting_time()
         # self.trigger_waiting_time = 10
         # self.pre_trigger_time = 0
+
+        # data buffer for image frames
+        self.number_of_frames = self.configuration.SharedNDArray['number_of_frames']
+        self.update_data_buffer(int(self.experiment.CameraParameters['x_pixels']),
+                                int(self.experiment.CameraParameters['y_pixels']))
 
         # debug
         self.debug = Debug_Module(self, self.verbose)
@@ -223,28 +225,33 @@ class Model:
 
         return cam
 
-    def set_show_img_pipe(self, handler):
-        """
-        # wire up show image function/pipe
-        """
-        self.show_img_pipe = handler
-        
-    def set_autofocus_plot_pipe(self, handler):
-        """
-        # wire up autofocus plot pipe
-        """
-        self.plot_pipe = handler
-
-    # TODO: Replace above pipe functions with
-    # def set_model_pipe(self, property, handler):
-    #     setattr(self, property, handler)
-
-    def set_data_buffer(self, data_buffer, img_width=512, img_height=512):
-        if self.camera.camera_controller.is_acquiring:
+    def update_data_buffer(self, img_width=512, img_height=512):
+        if self.camera.is_acquiring:
             self.camera.close_image_series()
         self.camera.set_ROI(img_width, img_height)
-        self.data_buffer = data_buffer
-        self.number_of_frames = self.configuration.SharedNDArray['number_of_frames']
+        self.data_buffer = [SharedNDArray(shape=(img_height, img_width),
+                                          dtype='uint16') for i in range(self.number_of_frames)]
+        self.img_width = img_width
+        self.img_height = img_height
+
+    def get_data_buffer(self, img_width=512, img_height=512):
+        if img_width != self.img_width or img_height != self.img_height:
+            self.update_data_buffer(img_width, img_height)
+        return self.data_buffer
+
+    def create_pipe(self, pipe_name):
+        self.release_pipe(pipe_name)
+        end1, end2 = mp.Pipe()
+        setattr(self, pipe_name, end2)
+        return end1
+
+    def release_pipe(self, pipe_name):
+        if hasattr(self, pipe_name):
+            pipe = getattr(self, pipe_name)
+            if pipe:
+                pipe.close()
+            delattr(self, pipe_name)
+
 
     #  Basic Image Acquisition Functions
     #  - These functions are used to acquire images from the camera
@@ -341,6 +348,8 @@ class Model:
             # stop live thread
             self.stop_send_signal = True
             self.signal_thread.join()
+            self.current_channel = 0
+
             if args[0] == 'channel':
                 self.experiment.MicroscopeState['channels'] = args[1]
 
@@ -423,11 +432,15 @@ class Model:
         self.stages.move_absolute(pos_dict, wait_until_done)
         self.stages.report_position()
 
+        # TODO: This atrribute records current focus position
+        # TODO: put it here right now
+        self.focus_pos = self.stages.int_position_dict['f_pos']
 
     def end_acquisition(self):
         """
         #
         """
+        self.current_channel = 0
         # dettach buffer in live mode in order to clear unread frames
         if self.camera.camera_controller.is_acquiring:
             self.camera.close_image_series()
@@ -438,7 +451,7 @@ class Model:
     # functions related to send out signals
 
     # functions related to frame data
-    def run_data_process(self, num_of_frames=0, pre_func=None, data_func=None, callback=None):
+    def run_data_process(self, num_of_frames=0, data_func=None):
         """
         # this function is the structure of data thread
         """
@@ -448,9 +461,6 @@ class Model:
 
         # whether acquire specific number of frames.
         count_frame = num_of_frames > 0
-
-        if pre_func:
-            pre_func()
 
         while not self.stop_acquisition:
             frame_ids = self.camera.get_new_frame()  # This is the 500 ms wait for Hamamatsu
@@ -465,9 +475,13 @@ class Model:
 
             wait_num = 10
 
-            # May need a separate save_func as saving is done before display and other analysis may be after display
+            # Leave it here for now to work with current ImageWriter workflow
+            # Will move it feature container later
             if data_func:
                 data_func(frame_ids)
+            
+            if hasattr(self, 'data_container'):
+                self.data_container.run(frame_ids)
 
             # show image
             self.logger.debug(f'sent through pipe{frame_ids[0]}')
@@ -476,9 +490,6 @@ class Model:
             acquired_frame_num += len(frame_ids)
             if count_frame and acquired_frame_num >= num_of_frames:
                 self.stop_acquisition = True
-
-        if callback:
-            callback()
         
         self.show_img_pipe.send('stop')
 
@@ -584,9 +595,49 @@ class Model:
 
         self.open_shutter()
 
-    def run_single_acquisition(self,
-                               target_channel=None,
-                               snap_func=None):
+    
+    def run_single_channel_acquisition(self, target_channel=None):
+        # stop acquisition if no channel specified
+        if target_channel == None:
+            self.stop_acquisition = True
+            return
+
+        channel_key = 'channel_' + str(target_channel)
+
+        if target_channel != self.current_channel:
+            microscope_state = self.experiment.MicroscopeState
+            # stop acquisition if target channel is not selected/exist
+            if channel_key not in microscope_state['channels'] or not microscope_state['channels'][channel_key]['is_selected']:
+                self.stop_acquisition = True
+                return
+
+            channel = microscope_state['channels'][channel_key]
+            self.current_channel = target_channel
+
+            # Move the Filter Wheel - Rate-Limiting Step - Perform First.
+            self.filter_wheel.set_filter(channel['filter'])
+
+            # Update Camera Exposure Time
+            self.current_exposure_time = channel['camera_exposure_time']
+
+            if self.experiment.CameraParameters['sensor_mode'] == 'Light-Sheet':
+                self.current_exposure_time, self.camera_line_interval = self.camera.calculate_light_sheet_exposure_time(
+                    self.current_exposure_time,
+                    int(self.experiment.CameraParameters['number_of_pixels']))
+                self.camera.camera_controller.set_property_value("internal_line_interval", self.camera_line_interval)
+
+            # Laser Settings
+            self.current_laser_index = channel['laser_index']
+            self.laser_triggers.trigger_digital_laser(self.current_laser_index)
+            self.laser_triggers.set_laser_analog_voltage(channel['laser_index'], channel['laser_power'])
+
+            # Update ETL Settings
+            self.daq.update_etl_parameters(microscope_state, channel, self.experiment.GalvoParameters, self.get_readout_time())
+
+        self.snap_image(channel_key)
+            
+
+    def run_single_acquisition(self):
         """
         # Called by model.run_command().
         target_channel called only during the autofocus routine.
@@ -599,50 +650,9 @@ class Model:
             if self.stop_acquisition or self.stop_send_signal:
                 break
             channel_idx = int(channel_key[prefix_len:])
-            if target_channel and channel_idx != target_channel:
-                continue
-            channel = microscope_state['channels'][channel_key]
-
-            # Iterate through the selected channels.
-            if channel['is_selected'] is True:
-                # Move the Filter Wheel - Rate-Limiting Step - Perform First.
-                self.filter_wheel.set_filter(channel['filter'])
-
-                # Get and set the parameters for Waveform Generation, triggering, etc.
-                self.current_channel = channel_idx
-
-                # Calculate duration of time necessary between camera triggers.
-                # self.trigger_waiting_time = self.current_exposure_time/1000 + self.camera_minimum_waiting_time
-
-                # Update Camera Exposure Time
-                self.current_exposure_time = channel['camera_exposure_time']
-
-                if self.experiment.CameraParameters['sensor_mode'] == 'Light-Sheet':
-                    self.current_exposure_time, self.camera_line_interval = self.camera.calculate_light_sheet_exposure_time(
-                        self.current_exposure_time,
-                        int(self.experiment.CameraParameters['number_of_pixels']))
-                    self.camera.camera_controller.set_property_value("internal_line_interval", self.camera_line_interval)
-
-                # self.camera.set_exposure_time(exposure_time)
-
-                # Laser Settings
-                self.current_laser_index = channel['laser_index']
-                self.laser_triggers.trigger_digital_laser(self.current_laser_index)
-                self.laser_triggers.set_laser_analog_voltage(channel['laser_index'], channel['laser_power'])
-
-                # # Update Laser Data Acquisition Sweep Time according to exposure and delay parameters.
-                # self.daq.sweep_time = (self.current_exposure_time / 1000) * \
-                #                       ((self.configuration.CameraParameters['delay_percent'] +
-                #                         self.configuration.RemoteFocusParameters['remote_focus_l_ramp_falling_percent']) / 100 + 1)
-
-                # Update ETL Settings
-                self.daq.update_etl_parameters(microscope_state, channel, self.experiment.GalvoParameters, self.get_readout_time())
-
-                # Acquire an Image
-                if snap_func:
-                    snap_func()
-                else:
-                    self.snap_image(channel_key)
+            self.run_single_channel_acquisition(channel_idx)
+                
+                
 
     def snap_image(self, channel_key):
         """
@@ -652,6 +662,8 @@ class Model:
         # waveforms into the buffers of the NI cards.
         #
         """
+        if hasattr(self, 'signal_container'):
+            self.signal_container.run()
 
         # calculate how long has been since last trigger
         # time_spent = time.perf_counter() - self.pre_trigger_time
@@ -686,6 +698,9 @@ class Model:
         self.daq.stop_acquisition()
 
         self.frame_id = (self.frame_id + 1) % self.number_of_frames
+
+        if hasattr(self, 'signal_container'):
+            self.signal_container.run(wait_response=True)
 
     def run_live_acquisition(self):
         """

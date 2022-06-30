@@ -45,24 +45,43 @@ class Debug_Module:
         self.central_controller = central_controller
         self.verbose = verbose
         
-        self.analysis_type = StringVar()
-        self.analysis_type.set('normal')
-        menubar.add_radiobutton(label='Normal', variable=self.analysis_type, value='normal')
-        menubar.add_radiobutton(label='ObjectInSubprocess', variable=self.analysis_type, value='subprocess')
-        menubar.add_command(label='ProcessPool', command=self.start_autofocus)
-        menubar.add_separator()
-        menubar.add_command(label='ignored signal?', command=self.debug_ignored_signal)
-        menubar.add_command(label='get timings', command=self.debug_get_timings)
+        # self.analysis_type = StringVar()
+        # self.analysis_type.set('normal')
+        # menubar.add_radiobutton(label='Normal', variable=self.analysis_type, value='normal')
+        # menubar.add_radiobutton(label='ObjectInSubprocess', variable=self.analysis_type, value='subprocess')
+        # menubar.add_command(label='ProcessPool', command=self.start_autofocus)
+        # menubar.add_separator()
+        menubar.add_command(label='test feature container', command=self.test_feature_container)
+        # menubar.add_command(label='ignored signal?', command=self.debug_ignored_signal)
+        # menubar.add_command(label='get timings', command=self.debug_get_timings)
         # menubar.add_command(label='ignored autofocus signal?', command=self.debug_autofocus)
         # menubar.add_command(label='blocked queue?', command=self.debug_blocked_queue)
         # menubar.add_command(label='update image size', command=lambda: self.central_controller.model.run_command('debug', 'update_image_size'))
         # menubar.add_command(label='get shannon value?', command=None)
         # menubar.add_command(label='stop acquire', command=lambda: self.central_controller.execute('stop_acquire'))
 
-        self.analysis_type.trace_add('write', self.update_analysis)
+        # self.analysis_type.trace_add('write', self.update_analysis)
 
     def debug_get_timings(self):
         self.central_controller.model.run_command('debug', 'get_timings')
+
+    def test_feature_container(self):
+        signal_num = 2
+        feature_id = simple_dialog.askinteger('Input', 'Which feature routine do you want?\n \
+                            1. detective->yes->save->autofocus->yes->save\n \
+                            2. detective->yes->autofocus->yes->save\n \
+                            3. detective->yes->save\n \
+                            4. detective->save\n \
+                            5. autofocus->yes->save\n \
+                            6. autofocus')
+        if not feature_id:
+            print('no input!')
+            return
+        if feature_id < 1 or feature_id > 6:
+            print('no such feature!')
+            return
+        self.start_debug(signal_num, 'debug', 'test_feature_container', self.central_controller.experiment.MicroscopeState,
+                        signal_num, feature_id-1, saving_info=self.central_controller.experiment.Saving)
 
     def debug_ignored_signal(self):
         signal_num = simple_dialog.askinteger('Input', 'How many signals you want to send out?', parent=self.central_controller.view)
@@ -92,7 +111,7 @@ class Debug_Module:
 
     def get_frames(self):
         while True:
-            image_id = self.central_controller.show_img_pipe_parent.recv()
+            image_id = self.central_controller.show_img_pipe.recv()
             if self.verbose:
                 print('receive', image_id)
             if image_id == 'stop':
@@ -103,6 +122,8 @@ class Debug_Module:
             self.central_controller.camera_view_controller.display_image(
                 self.central_controller.data_buffer[image_id])
         print('get frame ends!!!')
+        self.central_controller.model.run_command('debug', 'clear_feature_container')
+        self.central_controller.execute('stop_acquire')
 
 
     def debug_blocked_queue(self):
@@ -123,12 +144,13 @@ class Debug_Module:
         def func():
 
             self.central_controller.model.run_command(*args, **kwargs)
+            autofocus_plot_pipe = self.central_controller.model.create_pipe('autofocus_plot_pipe')
             
             self.get_frames()
 
-            image_num = self.central_controller.show_img_pipe_parent.recv()
+            # image_num = self.central_controller.show_img_pipe.recv()
 
-            print('signal num:', signal_num, 'image num:', image_num)
+            # print('signal num:', signal_num, 'image num:', image_num)
             
             self.central_controller.set_mode_of_sub('stop')
 
@@ -154,7 +176,7 @@ class Debug_Module:
                             self.central_controller.experiment.StageParameters['f'],
                             cpu_num)
             self.get_frames()
-            image_num = self.central_controller.show_img_pipe_parent.recv()
+            image_num = self.central_controller.show_img_pipe.recv()
 
             print('image num:', image_num)
             

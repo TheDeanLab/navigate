@@ -50,6 +50,14 @@ class stack_acq_frame(ttk.Labelframe):
         # Formatting
         Grid.columnconfigure(stack_acq, 'all', weight=1)
         Grid.rowconfigure(stack_acq, 'all', weight=1)
+        
+        # adding laser cycling settings
+        stack_acq.laser_frame = ttk.Frame(stack_acq)
+        stack_acq.laser_label = ttk.Label(stack_acq.laser_frame, text = "Laser Cycling Settings")
+        stack_acq.laser_label.grid(row = 1, column = 0, sticky=(S), padx=(4,3), pady=(4,1))
+        stack_acq.cycling_options = StringVar()
+        stack_acq.cycling_pull_down = ttk.Combobox(stack_acq, textvariable=stack_acq.cycling_options)
+        stack_acq.cycling_pull_down.grid(row = 2, column =0,sticky=(N), padx=(4,3), pady=(3,6))
 
         # Step Size Frame (Vertically oriented)
         stack_acq.step_size_frame = ttk.Frame(stack_acq)
@@ -114,6 +122,7 @@ class stack_acq_frame(ttk.Labelframe):
         stack_acq.slice_spinbox.grid(row=1, column=0, sticky=(N), padx=3, pady=(3,6))
 
         # Gridding Each Holder Frame
+        stack_acq.laser_frame.grid(row = 1, column = 0, sticky = (NSEW))
         stack_acq.step_size_frame.grid(row=0, column=0, sticky=(NSEW))
         stack_acq.start_pos_frame.grid(row=0, column=1, sticky=(NSEW))
         stack_acq.end_pos_frame.grid(row=0, column=2, sticky=(NSEW))

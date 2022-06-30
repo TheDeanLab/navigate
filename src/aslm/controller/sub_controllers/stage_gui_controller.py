@@ -71,10 +71,10 @@ class Stage_GUI_Controller(GUI_Controller):
             'theta': 10000,
             'f': 10000
         }
-
         # variables
         self.widget_vals = self.view.get_variables()
-     
+                #binding mouse wheel event on camera viewcanvas")
+                
         # gui event bind
         buttons = self.view.get_buttons()
         for k in buttons:

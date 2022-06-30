@@ -67,8 +67,8 @@ class channels_tab(ttk.Frame):
         self.stack_acq_frame.grid(row=1, column=0, columnspan=5, sticky=(NSEW), padx=10, pady=10)
 
         #Stack Cycling Settings
-        self.stack_cycling_frame = stack_cycling_frame(self)
-        self.stack_cycling_frame.grid(row=2, column=0, columnspan=5, sticky=(NSEW), padx=10, pady=10)
+        #self.stack_cycling_frame = stack_cycling_frame(self)
+        #self.stack_cycling_frame.grid(row=2, column=0, columnspan=5, sticky=(NSEW), padx=10, pady=10)
 
         #Time Settings
         self.stack_timepoint_frame = stack_timepoint_frame(self)

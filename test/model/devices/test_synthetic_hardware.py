@@ -45,7 +45,7 @@ class TestSyntheticHardware():
         return True
 
     def test_synthetic_filter_wheel(self):
-        from aslm.model.devices.filter_wheels import SyntheticFilterWheel
+        from aslm.model.devices.filter_wheel_base import SyntheticFilterWheel
         self.dummy_model = get_dummy_model()
         self.config = self.dummy_model.configuration
         self.experiment = self.dummy_model.experiment

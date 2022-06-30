@@ -157,10 +157,10 @@ def start_filter_wheel(configuration, verbose):
     """
 
     if configuration.Devices['filter_wheel'] == 'SutterFilterWheel':
-        from aslm.model.devices.filter_wheels import SutterFilterWheel
+        from aslm.model.devices.filter_wheel_sutter import SutterFilterWheel
         return auto_redial(SutterFilterWheel, (configuration, verbose), exception=UserWarning)
     elif configuration.Devices['filter_wheel'] == 'SyntheticFilterWheel':
-        from aslm.model.devices.filter_wheels import SyntheticFilterWheel
+        from aslm.model.devices.filter_wheel_synthetic import SyntheticFilterWheel
         return SyntheticFilterWheel(configuration, verbose)
     else:
         device_not_found(configuration.Devices['filter_wheel'])

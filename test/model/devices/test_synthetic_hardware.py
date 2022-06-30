@@ -67,7 +67,7 @@ class TestSyntheticHardware():
         ss = SyntheticStage(self.config, False)
 
     def test_synthetic_zoom(self):
-        from aslm.model.devices.zoom import SyntheticZoom
+        from aslm.model.devices.zoom_base import SyntheticZoom
         self.dummy_model = get_dummy_model()
         self.config = self.dummy_model.configuration
         self.experiment = self.dummy_model.experiment

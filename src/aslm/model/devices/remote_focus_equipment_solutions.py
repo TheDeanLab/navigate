@@ -38,13 +38,17 @@ import logging
 import time
 import serial
 
+# Third Party Imports
+
+# Local Imports
+from aslm.model.devices.remote_focus_base import RemoteFocusBase
 
 # # Logger Setup
 # p = __name__.split(".")[1]
 # logger = logging.getLogger(p)
 
 
-class VoiceCoil:
+class RemoteFocusEquipmentSolutions(RemoteFocusBase):
     """
     The SCA814 has a single character input buffer that can be overflowed if the proper steps are not taken.
     To avoid overflowing the input buffer the user should send a single character at a time and wait for that

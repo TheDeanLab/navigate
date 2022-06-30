@@ -36,82 +36,22 @@ POSSIBILITY OF SUCH DAMAGE.
 # Standard Library Imports
 import logging
 import time
-import importlib
 
 # Third Party Imports
+
+# Local Imports
+from aslm.model.devices.APIs.dynamixel import dynamixel_functions as dynamixel
+from aslm.model.devices.zoom_base import ZoomBase
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class ZoomBase:
-    def __init__(self, model, verbose):
-        self.model = model
-        self.verbose = verbose
-        self.zoomdict = model.ZoomParameters['zoom_position']
-        self.zoomvalue = None
-
-    def set_zoom(self, zoom_position, wait_until_done=False):
-        if zoom_position in self.zoomdict:
-            if self.verbose:
-                print('Setting zoom to {}'.format(zoom_position))
-            logger.debug(f"Setting zoom to {zoom_position}")
-            if wait_until_done:
-                time.sleep(1)
-
-    def move(self, position, wait_until_done=False):
-        return True
-
-    def read_position(self):
-        return True
-
-
-class SyntheticZoom(ZoomBase):
-    """
-    Virtual Zoom Device
-    """
-
-    def __init__(self, model, verbose):
-        super().__init__(model, verbose)
-        if self.verbose:
-            print('Synthetic Zoom Initialized')
-        logger.debug("Synethetic Zoom Initialized")
-
-    def set_zoom(self, zoom, wait_until_done=False):
-        """
-        # Changes zoom after checking that the commanded value exists
-        """
-        if zoom in self.zoomdict:
-            self.zoomvalue = zoom
-        else:
-            raise ValueError('Zoom designation not in the configuration')
-            logger.error("Zoom designation not in the configuration")
-        if self.verbose:
-            print('Zoom set to {}'.format(zoom))
-        logger.debug(f"Zoom set to {zoom}")
-
-    def move(self, position=0, wait_until_done=False):
-        if self.verbose:
-            print("Changing Virtual Zoom")
-        logger.debug("Changing Virtual Zoom")
-
-    def read_position(self):
-        """
-        # Returns position as an int between 0 and 4096
-        # Opens & closes the port
-        """
-        if self.verbose:
-            print("Reading Virtual Zoom Position")
-        logger.debug("Reading Virtual Zoom Position")
-
-
 class DynamixelZoom(ZoomBase):
     def __init__(self, model, verbose):
         super().__init__(model, verbose)
-        from aslm.model.devices.APIs.dynamixel import dynamixel_functions as dynamixel
         self.dynamixel = dynamixel
-        # self.dynamixel = importlib.import_module('aslm.model.devices.APIs.dynamixel.dynamixel_functions')
         self.id = model.ZoomParameters['servo_id']
         self.comport = model.ZoomParameters['COMport']
         self.devicename = self.comport.encode('utf-8')

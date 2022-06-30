@@ -109,10 +109,10 @@ def start_camera(configuration, experiment, verbose, camera_id=0):
     """
 
     if configuration.Devices['camera'] == 'HamamatsuOrca':
-        from aslm.model.devices.cameras_hamamatsu import HamamatsuOrca
+        from aslm.model.devices.camera_hamamatsu import HamamatsuOrca
         return auto_redial(HamamatsuOrca, (camera_id, configuration, experiment, verbose), exception=Exception)
     elif configuration.Devices['camera'] == 'SyntheticCamera':
-        from aslm.model.devices.cameras_synthetic import SyntheticCamera
+        from aslm.model.devices.camera_synthetic import SyntheticCamera
         return SyntheticCamera(0, configuration, experiment, verbose)
     else:
         device_not_found(configuration.Devices['camera'])
@@ -139,10 +139,10 @@ def start_zoom_servo(configuration, verbose):
     """
 
     if configuration.Devices['zoom'] == 'DynamixelZoom':
-        from aslm.model.devices.zoom import DynamixelZoom
+        from aslm.model.devices.zoom_dynamixel import DynamixelZoom
         return auto_redial(DynamixelZoom, (configuration, verbose), exception=RuntimeError)
     elif configuration.Devices['zoom'] == 'SyntheticZoom':
-        from aslm.model.devices.zoom import SyntheticZoom
+        from aslm.model.devices.zoom_synthetic import SyntheticZoom
         return SyntheticZoom(configuration, verbose)
     else:
         device_not_found(configuration.Devices['zoom'])

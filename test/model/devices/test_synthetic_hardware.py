@@ -32,7 +32,7 @@ class TestSyntheticHardware():
 
 
     def test_synthetic_camera(self):
-        from aslm.model.devices.cameras import SyntheticCamera
+        from aslm.model.devices.camera_base import SyntheticCamera
         self.dummy_model = get_dummy_model()
         self.config = self.dummy_model.configuration
         self.experiment = self.dummy_model.experiment

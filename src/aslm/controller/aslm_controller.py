@@ -166,7 +166,7 @@ class ASLM_controller:
                                                                    configuration_controller)
 
         # Stage Controller
-        self.stage_gui_controller = Stage_GUI_Controller(self.view.stage_control.stage_control_tab,
+        self.stage_gui_controller = Stage_GUI_Controller(self.view.stage_control.stage_control_tab, self.view,
                                                          self,
                                                          self.verbose,
                                                          configuration_controller)

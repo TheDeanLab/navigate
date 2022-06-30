@@ -42,7 +42,7 @@ logger = logging.getLogger(p)
 
 
 class Stage_GUI_Controller(GUI_Controller):
-    def __init__(self, view, parent_controller, verbose=False, configuration_controller=None):
+    def __init__(self, view, parent_view, parent_controller, verbose=False, configuration_controller=None):
         super().__init__(view, parent_controller, verbose)
 
         self.event_id = {

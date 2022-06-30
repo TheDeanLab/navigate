@@ -415,7 +415,7 @@ class Model:
     # functions related to send out signals
 
     # functions related to frame data
-    def run_data_process(self, num_of_frames=0):
+    def run_data_process(self, num_of_frames=0, data_func=None):
         """
         # this function is the structure of data thread
         """
@@ -439,7 +439,11 @@ class Model:
 
             wait_num = 10
 
-            # May need a separate save_func as saving is done before display and other analysis may be after display
+            # Leave it here for now to work with current ImageWriter workflow
+            # Will move it feature container later
+            if data_func:
+                data_func(frame_ids)
+            
             if hasattr(self, 'data_container'):
                 self.data_container.run(frame_ids)
 

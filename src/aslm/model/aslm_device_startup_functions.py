@@ -244,10 +244,10 @@ def start_shutters(configuration, experiment, verbose):
     """
 
     if configuration.Devices['shutters'] == 'ThorlabsShutter' and configuration.Devices['daq'] == 'NI':
-        from aslm.model.devices.laser_shutters import ThorlabsShutter
-        return ThorlabsShutter(configuration, experiment, verbose)
+        from aslm.model.devices.laser_shutter_ttl import ShutterTTL
+        return ShutterTTL(configuration, experiment, verbose)
     elif configuration.Devices['shutters'] == 'SyntheticShutter':
-        from aslm.model.devices.laser_shutters import SyntheticShutter
+        from aslm.model.devices.laser_shutter_synthetic import SyntheticShutter
         return SyntheticShutter(configuration, experiment, verbose)
     else:
         device_not_found(configuration.Devices['shutters'])

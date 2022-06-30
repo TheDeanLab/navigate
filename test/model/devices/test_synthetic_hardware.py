@@ -79,7 +79,7 @@ class TestSyntheticHardware():
         return True
 
     def test_synthetic_shutter(self):
-        from aslm.model.devices.laser_shutters import SyntheticShutter
+        from aslm.model.devices.laser_shutter_base import SyntheticShutter
         self.dummy_model = get_dummy_model()
         self.config = self.dummy_model.configuration
         self.experiment = self.dummy_model.experiment

@@ -44,6 +44,7 @@ from pathlib import Path
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+# TODO: Should we rename to remote_focus_popup_controller?
 class Etl_Popup_Controller(GUI_Controller):
 
     def __init__(self, view, parent_controller, verbose=False, etl_setting=None, etl_file_name=None, galvo_setting=None):
@@ -77,9 +78,9 @@ class Etl_Popup_Controller(GUI_Controller):
             self.variables[laser + ' Amp'].trace_add('write', self.update_etl_setting(laser+' Amp', laser, 'amplitude'))
             self.variables[laser + ' Off'].trace_add('write', self.update_etl_setting(laser+' Off', laser, 'offset'))
 
-        self.variables['Galvo Amp'].trace_add('write', self.update_galvo_setting('Galvo Amp', 'galvo_l_amplitude'))
-        self.variables['Galvo Off'].trace_add('write', self.update_galvo_setting('Galvo Off', 'galvo_l_offset'))
-        self.variables['Galvo Freq'].trace_add('write', self.update_galvo_setting('Galvo Freq', 'galvo_l_frequency'))
+        self.variables['Galvo Amp'].trace_add('write', self.update_galvo_setting('Galvo Amp', 'amplitude'))
+        self.variables['Galvo Off'].trace_add('write', self.update_galvo_setting('Galvo Off', 'offset'))
+        self.variables['Galvo Freq'].trace_add('write', self.update_galvo_setting('Galvo Freq', 'frequency'))
 
         self.view.get_buttons()['Save'].configure(command=self.save_etl_info)
 
@@ -168,9 +169,11 @@ class Etl_Popup_Controller(GUI_Controller):
             self.variables[laser + ' Amp'].set(self.resolution_info.ETLConstants[self.resolution][self.mag][laser]['amplitude'])
             self.variables[laser + ' Off'].set(self.resolution_info.ETLConstants[self.resolution][self.mag][laser]['offset'])
 
-        self.variables['Galvo Amp'].set(self.galvo_setting['galvo_l_amplitude'])
-        self.variables['Galvo Off'].set(self.galvo_setting['galvo_l_offset'])
-        self.variables['Galvo Freq'].set(self.galvo_setting['galvo_l_frequency'])
+        focus_prefix = 'r' if self.resolution == 'high' else 'l'
+
+        self.variables['Galvo Amp'].set(self.galvo_setting[f'galvo_{focus_prefix}_amplitude'])
+        self.variables['Galvo Off'].set(self.galvo_setting[f'galvo_{focus_prefix}_offset'])
+        self.variables['Galvo Freq'].set(self.galvo_setting[f'galvo_{focus_prefix}_frequency'])
 
         if not self.in_initialize:
             # update resolution value in central controller (menu)
@@ -212,8 +215,11 @@ class Etl_Popup_Controller(GUI_Controller):
 
         return func_laser
 
-    def update_galvo_setting(self, name, galvo_parameter):
+    def update_galvo_setting(self, name, parameter):
         variable = self.variables[name]
+
+        focus_prefix = 'r' if self.resolution == 'high' else 'l'
+        galvo_parameter = f'galvo_{focus_prefix}_{parameter}'
 
         def func(temp):
             self.parent_controller.execute('update_setting', 'galvo', temp)

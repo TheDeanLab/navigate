@@ -284,7 +284,7 @@ class ASLM_controller:
             if hasattr(self, 'etl_controller'):
                 self.etl_controller.showup()
                 return
-            etl_setting_popup = remote_popup(self.view)  # TODO: can we rename remote_popup to etl_popup?
+            etl_setting_popup = remote_popup(self.view)  # TODO: should we rename etl_setting popup to remote_focus_popup?
             self.etl_controller = Etl_Popup_Controller(etl_setting_popup,
                                                        self,
                                                        self.verbose,

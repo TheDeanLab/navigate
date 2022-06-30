@@ -173,6 +173,8 @@ class DAQBase:
         # Imaging Mode = 'high' or 'low'
         imaging_mode = microscope_state['resolution_mode']
 
+        focus_prefix = 'r' if imaging_mode == 'high' else 'l'
+
         # Zoom = 'one' in high resolution mode, or '0.63x', '1x', '2x'... in low-resolution mode.
         zoom = microscope_state['zoom']
 
@@ -200,12 +202,12 @@ class DAQBase:
                 etl_offset = float(etl_constants.ETLConstants[imaging_mode][zoom][laser]['offset'])
 
                 # Galvo Parameters
-                galvo_amplitude = float(galvo_parameters['galvo_l_amplitude'])
-                galvo_offset = float(galvo_parameters['galvo_l_offset'])
+                galvo_amplitude = float(galvo_parameters[f'galvo_{focus_prefix}_amplitude'])
+                galvo_offset = float(galvo_parameters[f'galvo_{focus_prefix}_offset'])
 
                 # We need the camera to experience N sweeps of the galvo. As such,
                 # frequency should divide evenly into exposure_time
-                galvo_frequency = float(galvo_parameters['galvo_l_frequency'])/exposure_time  # 100.5/exposure_time
+                galvo_frequency = float(galvo_parameters[f'galvo_{focus_prefix}_frequency'])/exposure_time  # 100.5/exposure_time
 
                 # Calculate the Waveforms
                 self.waveform_dict[channel_key]['etl_waveform'] = tunable_lens_ramp_v2(sample_rate=self.sample_rate,
@@ -497,6 +499,7 @@ class NIDAQ(DAQBase):
         # Set up the Galvo and electrotunable lens - Each start with the trigger_source.
         PXI6259/ao0:3 -> 4 channels
         """
+        # TODO: Does this task line change for the right galvo?
         galvo_etl_task_line = self.model.DAQParameters['galvo_etl_task_line']
         self.galvo_etl_task.ao_channels.add_ao_voltage_chan(galvo_etl_task_line)
         self.galvo_etl_task.timing.cfg_samp_clk_timing(rate=self.sample_rate,

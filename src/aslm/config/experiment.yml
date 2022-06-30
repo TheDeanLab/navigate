@@ -79,5 +79,14 @@ MicroscopeState:
   timepoint_interval: 0
   experiment_duration: 625.090000000039
   is_multiposition: False
-  channels: {'channel_1': {'is_selected': True, 'laser': '488nm', 'laser_index': 0, 'filter': 'GFP - FF01-515/30-32', 'filter_position': 1, 'camera_exposure_time': 200.0, 'laser_power': '75', 'interval_time': '1'}}
+  channels: {'channel_1':
+               {'is_selected': True,
+                'laser': '488nm',
+                'laser_index': 0,
+                'filter': 'GFP - FF01-515/30-32',
+                'filter_position': 1,
+                'camera_exposure_time': 200.0,
+                'laser_power': '75',
+                'interval_time': '1',
+                'defocus': '0'}}
   stage_positions: {0: {'x': 15000.0, 'y': 12000.0, 'z': 15500.0, 'theta': 0.0, 'f': 70000.0}, 1: {'x': 35000.0, 'y': 42000.0, 'z': 15500.0, 'theta': 0.0, 'f': 70000.0}}

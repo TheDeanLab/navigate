@@ -145,7 +145,8 @@ class Channel_Setting_Controller(GUI_Controller):
         #           'filter_position': ,
         #           'camera_exposure_time': ,
         #           'laser_power': ,
-        #           'interval_time': 
+        #           'interval_time': ,
+        #           'defocus': ,
         #        }
         # }
         """
@@ -164,7 +165,8 @@ class Channel_Setting_Controller(GUI_Controller):
                         'filter_position': self.get_index('filter', channel_vals['filter'].get()),
                         'camera_exposure_time': float(channel_vals['camera_exposure_time'].get()),
                         'laser_power': channel_vals['laser_power'].get(),
-                        'interval_time': channel_vals['interval_time'].get()
+                        'interval_time': channel_vals['interval_time'].get(),
+                        'defocus': channel_vals['defocus'].get()
                     }
                 except:
                     return None
@@ -234,7 +236,8 @@ class Channel_Setting_Controller(GUI_Controller):
             'filter': self.view.filterwheel_variables[index],
             'camera_exposure_time': self.view.exptime_variables[index],
             'laser_power': self.view.laserpower_variables[index],
-            'interval_time': self.view.interval_variables[index]
+            'interval_time': self.view.interval_variables[index],
+            'defocus': self.view.defocus_variables[index]
         }
         return result
 

@@ -158,7 +158,7 @@ class DynamixelZoom(ZoomBase):
                     break
                 time.sleep(0.05)
                 cur_position = self.dynamixel.read4ByteTxRx(self.port_num, 1, self.id, self.addr_mx_present_position)
-                logger.debug(f"DynamixelZoom Current Position: {cur_position})
+                logger.debug(f"DynamixelZoom Current Position: {cur_position}")
 
     def read_position(self):
         r"""Read the position of the Zoom Servo.

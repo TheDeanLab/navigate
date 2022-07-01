@@ -59,7 +59,6 @@ class Autofocus():
                                             'main': self.in_func_data,
                                             'end': self.end_func_data},
                              'node': {'node_type': 'multi-step',
-                                        'wait_next': True,
                                         'device_related': True },                                
                             }
 

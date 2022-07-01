@@ -1,7 +1,4 @@
-"""
-ASLM data acquisition card communication classes.
-
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -47,114 +44,129 @@ logger = logging.getLogger(p)
 
 
 class DAQBase:
-    def __init__(self, model, experiment, etl_constants, verbose=False):
-        self.model = model
-        self.experiment = experiment
-        self.etl_constants = etl_constants
-        self.verbose = verbose
+    r"""Parent class for Data Acquisition (DAQ) classes.
 
-        # Initialize Variables
-        self.sample_rate = self.model.DAQParameters['sample_rate']
-        self.sweep_time = self.model.DAQParameters['sweep_time']
-        self.samples = int(self.sample_rate * self.sweep_time)
+    Attributes
+    ----------
+    configuration : Session
+        Global configuration of the microscope
+    experiment : Session
+        Experiment configuration of the microscope
+    etl_constants : Dict
+        Dictionary with all of the wavelength, magnification, and imaging mode-specific amplitudes/offsets
+    verbose : Boolean
+        Verbosity
+    ...
+    """
 
-        # New DAQ Attempt
-        self.etl_delay = self.model.RemoteFocusParameters['remote_focus_l_delay_percent']
-        self.etl_ramp_rising = self.model.RemoteFocusParameters['remote_focus_l_ramp_rising_percent']
-        self.etl_ramp_falling = self.model.RemoteFocusParameters['remote_focus_l_ramp_falling_percent']
 
-        # ETL Parameters
-        self.etl_l_waveform = None
-        self.etl_l_delay = self.model.RemoteFocusParameters['remote_focus_l_delay_percent']
-        self.etl_l_ramp_rising = self.model.RemoteFocusParameters['remote_focus_l_ramp_rising_percent']
-        self.etl_l_ramp_falling = self.model.RemoteFocusParameters['remote_focus_l_ramp_falling_percent']
-        self.etl_l_amplitude = self.model.RemoteFocusParameters['remote_focus_l_amplitude']
-        self.etl_l_offset = self.model.RemoteFocusParameters['remote_focus_l_offset']
-        self.etl_l_min_ao = self.model.RemoteFocusParameters['remote_focus_l_min_ao']
-        self.etl_l_max_ao = self.model.RemoteFocusParameters['remote_focus_l_max_ao']
+def __init__(self, configuration, experiment, etl_constants, verbose=False):
+    self.configuration = configuration
+    self.experiment = experiment
+    self.etl_constants = etl_constants
+    self.verbose = verbose
 
-        # Remote Focus Parameters
-        self.etl_r_waveform = None
-        self.etl_r_delay = self.model.RemoteFocusParameters['remote_focus_r_delay_percent']
-        self.etl_r_ramp_rising = self.model.RemoteFocusParameters['remote_focus_r_ramp_rising_percent']
-        self.etl_r_ramp_falling = self.model.RemoteFocusParameters['remote_focus_r_ramp_falling_percent']
-        self.etl_r_amplitude = self.model.RemoteFocusParameters['remote_focus_r_amplitude']
-        self.etl_r_offset = self.model.RemoteFocusParameters['remote_focus_r_offset']
-        self.etl_r_min_ao = self.model.RemoteFocusParameters['remote_focus_r_min_ao']
-        self.etl_r_max_ao = self.model.RemoteFocusParameters['remote_focus_r_max_ao']
+    # Initialize Variables
+    self.sample_rate = self.configuration.DAQParameters['sample_rate']
+    self.sweep_time = self.configuration.DAQParameters['sweep_time']
+    self.samples = int(self.sample_rate * self.sweep_time)
 
-        # ETL history parameters
-        self.prev_etl_r_amplitude = self.etl_r_amplitude
-        self.prev_etl_r_offset = self.etl_r_offset
-        self.prev_etl_l_amplitude = self.etl_l_amplitude
-        self.prev_etl_l_offset = self.etl_l_offset
+    # New DAQ Attempt
+    self.etl_delay = self.configuration.RemoteFocusParameters['remote_focus_l_delay_percent']
+    self.etl_ramp_rising = self.configuration.RemoteFocusParameters['remote_focus_l_ramp_rising_percent']
+    self.etl_ramp_falling = self.configuration.RemoteFocusParameters['remote_focus_l_ramp_falling_percent']
 
-        # Bundled Waveform
-        self.galvo_and_etl_waveforms = None
+    # ETL Parameters
+    self.etl_l_waveform = None
+    self.etl_l_delay = self.configuration.RemoteFocusParameters['remote_focus_l_delay_percent']
+    self.etl_l_ramp_rising = self.configuration.RemoteFocusParameters['remote_focus_l_ramp_rising_percent']
+    self.etl_l_ramp_falling = self.configuration.RemoteFocusParameters['remote_focus_l_ramp_falling_percent']
+    self.etl_l_amplitude = self.configuration.RemoteFocusParameters['remote_focus_l_amplitude']
+    self.etl_l_offset = self.configuration.RemoteFocusParameters['remote_focus_l_offset']
+    self.etl_l_min_ao = self.configuration.RemoteFocusParameters['remote_focus_l_min_ao']
+    self.etl_l_max_ao = self.configuration.RemoteFocusParameters['remote_focus_l_max_ao']
 
-        # Left Galvo Parameters
-        self.galvo_l_waveform = None
-        self.galvo_l_frequency = self.model.GalvoParameters['galvo_l_frequency']
-        self.galvo_l_amplitude = self.model.GalvoParameters['galvo_l_amplitude']
-        self.galvo_l_offset = self.model.GalvoParameters['galvo_l_offset']
-        self.galvo_l_duty_cycle = self.model.GalvoParameters['galvo_l_duty_cycle']
-        self.galvo_l_phase = self.model.GalvoParameters['galvo_l_phase']
-        self.galvo_l_min_ao = self.model.GalvoParameters['galvo_l_min_ao']
-        self.galvo_l_max_ao = self.model.GalvoParameters['galvo_l_max_ao']
+    # Remote Focus Parameters
+    self.etl_r_waveform = None
+    self.etl_r_delay = self.configuration.RemoteFocusParameters['remote_focus_r_delay_percent']
+    self.etl_r_ramp_rising = self.configuration.RemoteFocusParameters['remote_focus_r_ramp_rising_percent']
+    self.etl_r_ramp_falling = self.configuration.RemoteFocusParameters['remote_focus_r_ramp_falling_percent']
+    self.etl_r_amplitude = self.configuration.RemoteFocusParameters['remote_focus_r_amplitude']
+    self.etl_r_offset = self.configuration.RemoteFocusParameters['remote_focus_r_offset']
+    self.etl_r_min_ao = self.configuration.RemoteFocusParameters['remote_focus_r_min_ao']
+    self.etl_r_max_ao = self.configuration.RemoteFocusParameters['remote_focus_r_max_ao']
 
-        # Right Galvo Parameters
-        self.galvo_r_waveform = None
-        self.galvo_r_frequency = None
-        self.galvo_r_amplitude = self.model.GalvoParameters['galvo_r_amplitude']
-        self.galvo_r_offset = None
-        self.galvo_r_duty_cycle = None
-        self.galvo_r_phase = None
-        self.galvo_r_max_ao = self.model.GalvoParameters['galvo_r_max_ao']
-        self.galvo_r_min_ao = self.model.GalvoParameters['galvo_r_min_ao']
+    # ETL history parameters
+    self.prev_etl_r_amplitude = self.etl_r_amplitude
+    self.prev_etl_r_offset = self.etl_r_offset
+    self.prev_etl_l_amplitude = self.etl_l_amplitude
+    self.prev_etl_l_offset = self.etl_l_offset
 
-        # Camera Parameters
-        self.camera_delay_percent = self.model.CameraParameters['delay_percent']
-        self.camera_pulse_percent = self.model.CameraParameters['pulse_percent']
-        self.camera_high_time = self.camera_pulse_percent * 0.01 * self.sweep_time
-        self.camera_delay = self.camera_delay_percent * 0.01 * self.sweep_time
+    # Bundled Waveform
+    self.galvo_and_etl_waveforms = None
 
-        # Laser Parameters
-        self.laser_ao_waveforms = None
-        self.laser_do_waveforms = None
-        self.number_of_lasers = self.model.LaserParameters['number_of_lasers']
-        self.laser_l_delay = self.model.LaserParameters['laser_l_delay_percent']
-        self.laser_l_pulse = self.model.LaserParameters['laser_l_pulse_percent']
+    # Left Galvo Parameters
+    self.galvo_l_waveform = None
+    self.galvo_l_frequency = self.configuration.GalvoParameters['galvo_l_frequency']
+    self.galvo_l_amplitude = self.configuration.GalvoParameters['galvo_l_amplitude']
+    self.galvo_l_offset = self.configuration.GalvoParameters['galvo_l_offset']
+    self.galvo_l_duty_cycle = self.configuration.GalvoParameters['galvo_l_duty_cycle']
+    self.galvo_l_phase = self.configuration.GalvoParameters['galvo_l_phase']
+    self.galvo_l_min_ao = self.configuration.GalvoParameters['galvo_l_min_ao']
+    self.galvo_l_max_ao = self.configuration.GalvoParameters['galvo_l_max_ao']
 
-        self.laser_power = 0
-        self.laser_idx = 0
-        self.imaging_mode = None
+    # Right Galvo Parameters
+    self.galvo_r_waveform = None
+    self.galvo_r_frequency = None
+    self.galvo_r_amplitude = self.configuration.GalvoParameters['galvo_r_amplitude']
+    self.galvo_r_offset = None
+    self.galvo_r_duty_cycle = None
+    self.galvo_r_phase = None
+    self.galvo_r_max_ao = self.configuration.GalvoParameters['galvo_r_max_ao']
+    self.galvo_r_min_ao = self.configuration.GalvoParameters['galvo_r_min_ao']
 
-        self.waveform_dict = {
-            'channel_1':
-                {'etl_waveform': None,
-                 'galvo_waveform': None,
-                 'camera_waveform': None},
-            'channel_2':
-                {'etl_waveform': None,
-                 'galvo_waveform': None,
-                 'camera_waveform': None},
-            'channel_3':
-                {'etl_waveform': None,
-                 'galvo_waveform': None,
-                 'camera_waveform': None},
-            'channel_4':
-                {'etl_waveform': None,
-                 'galvo_waveform': None,
-                 'camera_waveform': None},
-            'channel_5':
-                {'etl_waveform': None,
-                 'galvo_waveform': None,
-                 'camera_waveform': None}
-        }
+    # Camera Parameters
+    self.camera_delay_percent = self.configuration.CameraParameters['delay_percent']
+    self.camera_pulse_percent = self.configuration.CameraParameters['pulse_percent']
+    self.camera_high_time = self.camera_pulse_percent * 0.01 * self.sweep_time
+    self.camera_delay = self.camera_delay_percent * 0.01 * self.sweep_time
 
-    def calculate_all_waveforms(self, microscope_state, etl_constants, galvo_parameters, readout_time):
-        r"""
-        Pre-calculates all waveforms necessary for the acquisition and organizes in a dictionary format.
+    # Laser Parameters
+    self.laser_ao_waveforms = None
+    self.laser_do_waveforms = None
+    self.number_of_lasers = self.configuration.LaserParameters['number_of_lasers']
+    self.laser_l_delay = self.configuration.LaserParameters['laser_l_delay_percent']
+    self.laser_l_pulse = self.configuration.LaserParameters['laser_l_pulse_percent']
+
+    self.laser_power = 0
+    self.laser_idx = 0
+    self.imaging_mode = None
+
+    self.waveform_dict = {
+        'channel_1':
+            {'etl_waveform': None,
+             'galvo_waveform': None,
+             'camera_waveform': None},
+        'channel_2':
+            {'etl_waveform': None,
+             'galvo_waveform': None,
+             'camera_waveform': None},
+        'channel_3':
+            {'etl_waveform': None,
+             'galvo_waveform': None,
+             'camera_waveform': None},
+        'channel_4':
+            {'etl_waveform': None,
+             'galvo_waveform': None,
+             'camera_waveform': None},
+        'channel_5':
+            {'etl_waveform': None,
+             'galvo_waveform': None,
+             'camera_waveform': None}
+    }
+
+def calculate_all_waveforms(self, microscope_state, etl_constants, galvo_parameters, readout_time):
+    r"""Pre-calculates all waveforms necessary for the acquisition and organizes in a dictionary format.
 
         Parameters
         ----------
@@ -253,40 +265,39 @@ class DAQBase:
         return self.waveform_dict
 
     def calculate_samples(self):
-        """
-        # Calculate the number of samples for the waveforms.
-        # Product of the sampling frequency and the duration of the waveform/exposure time.
-        # sweep_time units originally seconds.
-        """
+        r"""Calculate the number of samples for the waveforms.
+        Product of the sampling frequency and the duration of the waveform/exposure time in seconds."""
         self.samples = int(self.sample_rate * self.sweep_time)
 
     def update_etl_parameters(self, microscope_state, channel, galvo_parameters, readout_time):
-        """
-        # Update the ETL parameters according to the zoom and excitation wavelength.
+        r"""Update the ETL parameters according to the zoom and excitation wavelength.
+
+        Parameters
+        ----------
+        microscope_state : dict
+            Dictionary of current experimental configuration.  Derivied from experiment Session object.
+        channel : int
+            Current microscope channel
+        galvo_parameters : dict
+            Dictionary of experiment GalvoParameters parameters (see config/experiment.yml).
+        readout_time : float
+            Duration of time necessary to readout a camera frame.
         """
         laser = channel['laser']
         resolution_mode = microscope_state['resolution_mode']
 
         if resolution_mode == 'high':
-            # zoom = 'one'
             zoom = microscope_state['zoom']
             self.etl_r_amplitude = float(self.etl_constants.ETLConstants[resolution_mode][zoom][laser]['amplitude'])
             self.etl_r_offset = float(self.etl_constants.ETLConstants[resolution_mode][zoom][laser]['offset'])
-            if self.verbose:
-                print("High Resolution Mode.  Amp/Off:", self.etl_r_amplitude, self.etl_r_offset)
-                logger.debug(f"High Resolution Mode.  Amp/Off:, {self.etl_r_amplitude}, {self.etl_r_offset})")
-
+            logger.debug(f"High Resolution Mode.  Amp/Off:, {self.etl_r_amplitude}, {self.etl_r_offset})")
         elif resolution_mode == 'low':
             zoom = microscope_state['zoom']
             self.etl_l_amplitude = float(self.etl_constants.ETLConstants[resolution_mode][zoom][laser]['amplitude'])
             self.etl_l_offset = float(self.etl_constants.ETLConstants[resolution_mode][zoom][laser]['offset'])
-            if self.verbose:
-                print("Low Resolution Mode.  Amp/Off:", self.etl_l_amplitude, self.etl_l_offset)
             logger.debug(f"Low Resolution Mode.  Amp/Off:, {self.etl_l_amplitude}, {self.etl_l_offset})")
-
         else:
-            print("ETL setting not pulled properly.")
-            logger.info("ETL setting not pulled properly")
+            logger.info("DAQBase - ETL setting not pulled properly")
 
         update_waveforms = (self.prev_etl_l_amplitude != self.etl_l_amplitude) \
                            or (self.prev_etl_l_offset != self.etl_l_offset) \

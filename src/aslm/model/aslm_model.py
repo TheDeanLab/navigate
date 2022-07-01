@@ -57,14 +57,8 @@ log_setup('model_logging.yml')
 p = __name__.split(".")[1]
 
 class Model:
-    def __init__(
-            self,
-            USE_GPU,
-            args,
-            configuration_path=None,
-            experiment_path=None,
-            etl_constants_path=None,
-            event_queue=None):
+    def __init__(self, USE_GPU, args, configuration_path=None, experiment_path=None,
+            etl_constants_path=None, event_queue=None):
 
 
         self.logger = logging.getLogger(p)
@@ -599,34 +593,45 @@ class Model:
 
         # Initialize Image Series - Attaches camera buffer and start imaging
         self.camera.initialize_image_series(self.data_buffer, self.number_of_frames)
-
         self.open_shutter()
 
-    
     def run_single_channel_acquisition(self, target_channel=None):
+        r"""Acquire a single channel.
+
+        Updates MicroscopeState dictionary.
+        Changes the filter wheel position.
+        Configures the camera mode and exposure time.
+        Mixed modulation control of laser intensity.
+
+        Parameters
+        ----------
+        target_channel : int
+            Index of channel to acquire.
+
+        """
         # stop acquisition if no channel specified
         if target_channel is None:
             self.stop_acquisition = True
             return
 
+        # Confirm that target channel exists
         channel_key = 'channel_' + str(target_channel)
-
         if target_channel != self.current_channel:
             microscope_state = self.experiment.MicroscopeState
-            # stop acquisition if target channel is not selected/exist
-            if channel_key not in microscope_state['channels'] or not microscope_state['channels'][channel_key]['is_selected']:
+            if channel_key not in microscope_state['channels'] \
+                    or not microscope_state['channels'][channel_key]['is_selected']:
                 self.stop_acquisition = True
                 return
 
+            # Update Microscope State Dictionary
             channel = microscope_state['channels'][channel_key]
             self.current_channel = target_channel
 
-            # Move the Filter Wheel - Rate-Limiting Step - Perform First.
+            # Filter Wheel Settings.
             self.filter_wheel.set_filter(channel['filter'])
 
-            # Update Camera Exposure Time
+            # Camera Settings
             self.current_exposure_time = channel['camera_exposure_time']
-
             if self.experiment.CameraParameters['sensor_mode'] == 'Light-Sheet':
                 self.current_exposure_time, self.camera_line_interval = self.camera.calculate_light_sheet_exposure_time(
                     self.current_exposure_time,
@@ -638,11 +643,13 @@ class Model:
             self.laser_triggers.trigger_digital_laser(self.current_laser_index)
             self.laser_triggers.set_laser_analog_voltage(channel['laser_index'], channel['laser_power'])
 
-            # Update ETL Settings
-            self.daq.update_etl_parameters(microscope_state, channel,
-                                           self.experiment.GalvoParameters, self.get_readout_time())
+            # ETL Settings
+            self.daq.update_etl_parameters(microscope_state,
+                                           channel,
+                                           self.experiment.GalvoParameters,
+                                           self.get_readout_time())
 
-            # Update defocus settings
+            # Defocus Settings
             curr_focus = self.experiment.StageParameters['f']
             self.move_stage({'f_abs': curr_focus + float(channel['defocus'])}, wait_until_done=True)
             self.experiment.StageParameters['f'] = curr_focus  # do something very hacky so we keep using the same focus reference

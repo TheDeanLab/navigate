@@ -74,7 +74,7 @@ class position_frame(ttk.Frame):
 
        
 
-        '''
+        """
         Grid for frames
 
                 1   2   3   4   5
@@ -84,7 +84,7 @@ class position_frame(ttk.Frame):
         z is 3
         theta is 4
         focus is 5
-        '''
+        """
     def get_widgets(position_frame):
         return position_frame.inputs
 

@@ -37,7 +37,7 @@ from pathlib import Path
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
-'''
+"""
 see:
 
     http://stackoverflow.com/questions/3221956/
@@ -63,13 +63,13 @@ see:
       Tested on Ubuntu 16.04/16.10, running Python 3.5.2
 
     TODO: themes styles support
-'''
+"""
 
 
 class Tooltip:
-    '''
+    """
     It creates a tooltip for a given widget as the mouse goes on it.
-    '''
+    """
 
     def __init__(self, widget,
                  *,

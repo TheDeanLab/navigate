@@ -40,9 +40,9 @@ from pathlib import Path
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-'''
+"""
 TODO Create a dictionary for widgets that holds a list of widgets for each column.Will attempt after formatting.
-'''
+"""
 
 class Channel_Setting_Controller(GUI_Controller):
     def __init__(self, view, parent_controller=None, verbose=False):

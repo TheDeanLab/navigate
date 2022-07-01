@@ -107,7 +107,7 @@ class x_y_frame(ttk.Frame):
 
 
 
-        '''
+        """
         Grid for buttons
 
                 01  02  03  04  05  06
@@ -123,7 +123,7 @@ class x_y_frame(ttk.Frame):
         Left is 13,14,19,20
         Increment is 15,16
         Zero XY is 21,22
-        '''
+        """
 
 
 

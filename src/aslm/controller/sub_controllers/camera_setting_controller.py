@@ -78,9 +78,9 @@ class Camera_Setting_Controller(GUI_Controller):
             )
 
     def initialize(self, config):
-        '''
+        """
         ## Function that sets widgets based on data given from main controller/config
-        '''
+        """
 
         # Get Default Configuration Values
         self.default_pixel_size = config.configuration.CameraParameters['pixel_size_in_microns']
@@ -206,7 +206,7 @@ class Camera_Setting_Controller(GUI_Controller):
         return True
 
     def update_sensor_mode(self, *args):
-        '''
+        """
         Updates text in readout widget based on what sensor mode is selected
         If we are in the Light Sheet mode, then we want the camera
         self.model.CameraParameters['sensor_mode']) == 12
@@ -215,7 +215,7 @@ class Camera_Setting_Controller(GUI_Controller):
         self.model.CameraParameters['sensor_mode']) == 1
 
         Should initialize from the configuration file to the default version
-        '''
+        """
         # Camera Mode
         sensor_value = self.mode_widgets['Sensor'].widget.get()
         if sensor_value == 'Normal':

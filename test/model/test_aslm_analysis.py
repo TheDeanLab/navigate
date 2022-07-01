@@ -42,9 +42,9 @@ import pytest
 # sys.path.append('../../../')
 
 
-'''
+"""
 Delete the below assert once the calculate entropy function is found
-'''
+"""
 def test_entropy():
     assert True
 

@@ -67,12 +67,12 @@ def calculate_entropy(dct_array, otf_support_x, otf_support_y):
     return image_entropy
 
 def normalized_dct_shannon_entropy(input_array, psf_support_diameter_xy, verbose=False):
-    '''
+    """
     # input_array : 2D or 3D image.  If 3D, will iterate through each 2D plane.
     # otf_support_x : Support for the OTF in the x-dimension.
     # otf_support_y : Support for the OTF in the y-dimension.
     # Returns the entropy value.
-    '''
+    """
     # Get Image Attributes
     # input_array = np.double(input_array)
     image_dimensions = input_array.ndim

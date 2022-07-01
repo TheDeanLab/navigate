@@ -33,7 +33,7 @@ POSSIBILITY OF SUCH DAMAGE.
 from tkinter import *
 import tkinter as tk
 from tkinter import ttk
-import logging
+# import logging
 from aslm.view.custom_widgets.validation import ValidatedSpinbox
 from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 
@@ -67,31 +67,27 @@ class stack_acq_frame(ttk.Labelframe):
         self.end_pos_frame.grid(row=0, column=1, sticky=NSEW)
         self.step_size_frame.grid(row=0, column=2, sticky=NSEW)
         self.slice_frame.grid(row=0, column=3, sticky=NSEW)
-        
 
         # Start Pos Frame (Vertically oriented)
         start_names = ['start_position', 'start_focus']
         start_labels = ["Pos", "Foc"]
-
 
         self.start_label = ttk.Label(self.start_pos_frame, text='Start')
         self.start_label.grid(row=0, column=1, sticky='S', padx=3, pady=(4, 1))
 
         for i in range(len(start_names)):
             self.inputs[start_names[i]] = LabelInput(parent=self.start_pos_frame,
-                                                    label=start_labels[i],
-                                                    input_class=ValidatedSpinbox,
-                                                    input_var=DoubleVar(),
-                                                    input_args={"from_": -50000.0, "increment": 0.5, "width": 14}
-                                                    )
+                                                     label=start_labels[i],
+                                                     input_class=ValidatedSpinbox,
+                                                     input_var=DoubleVar(),
+                                                     input_args={"from_": -50000.0, "increment": 0.5, "width": 14}
+                                                     )
             self.inputs[start_names[i]].grid(row=i + 1, column=1, sticky='N', padx=3, pady=(3, 6))
             self.inputs[start_names[i]].label.grid(sticky='N', padx=3, pady=(4, 1))
         
-            # Start button
+        # Start button
         self.buttons['set_start'] = ttk.Button(self.start_pos_frame, text="Set Start Pos/Foc")
         self.buttons['set_start'].grid(row=3, column=1, sticky='N', padx=3, pady=(3, 6))
-
-
 
         # End Pos Frame (Vertically Oriented)
         end_names = ['end_position', 'end_focus']
@@ -113,19 +109,15 @@ class stack_acq_frame(ttk.Labelframe):
         self.buttons['set_end'] = ttk.Button(self.end_pos_frame, text="Set End Pos/Foc")
         self.buttons['set_end'].grid(row=3, column=1, sticky='N', padx=3, pady=(3, 6))
 
-
-
         # Step Size Frame (Vertically oriented)
         self.step_size_label = ttk.Label(self.step_size_frame, text='Step Size')
         self.step_size_label.grid(row=0, column=0, sticky='S', padx=(4, 3), pady=(4, 1))
         self.inputs['step_size'] = LabelInput(parent=self.step_size_frame,
-                                                   input_class=ValidatedSpinbox,
-                                                   input_var=DoubleVar(),
-                                                   input_args={"from_": -50000.0, "increment": 0.5, "width": 14}
-                                                   )
+                                              input_class=ValidatedSpinbox,
+                                              input_var=DoubleVar(),
+                                              input_args={"from_": -50000.0, "increment": 0.5, "width": 14}
+                                              )
         self.inputs['step_size'].grid(row=1, column=0, sticky='N', padx=3, pady=(3, 6))
-
-
 
         # Slice Frame (Vertically oriented)
         self.empty_label = ttk.Label(self.slice_frame, text=' ')
@@ -144,33 +136,29 @@ class stack_acq_frame(ttk.Labelframe):
             self.inputs[slice_names[i]].state(['disabled'])
             self.inputs[slice_names[i]].grid(row=i + 1, column=1, sticky='N', padx=3, pady=(3, 6))
 
-
-
-
-
-     # Getters
+    # Getters
     def get_variables(self):
-        '''
+        """
         # This function returns a dictionary of all the variables that are tied to each widget name.
         The key is the widget name, value is the variable associated.
-        '''
+        """
         variables = {}
         for key, widget in self.inputs.items():
             variables[key] = widget.get_variable()
         return variables
 
     def get_widgets(self):
-        '''
+        """
         # This function returns the dictionary that holds the input widgets.
         The key is the widget name, value is the LabelInput class that has all the data.
-        '''
+        """
         return self.inputs
 
     def get_buttons(self):
-        '''
+        """
         # This function returns the dictionary that holds the buttons.
         The key is the button name, value is the button.
-        '''
+        """
         return self.buttons
 
 

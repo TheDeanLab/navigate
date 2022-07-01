@@ -72,6 +72,6 @@ class goto_frame(ttk.Frame):
         #Init Frame
         ttk.Frame.__init__(goto_frame, stage_control_tab, *args, **kwargs) 
 
-'''
+"""
 End of Stage Control Tab Frame Classes
-'''
+"""

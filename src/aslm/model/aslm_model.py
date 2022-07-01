@@ -48,6 +48,7 @@ from aslm.model.concurrency.concurrency_tools import ResultThread, SharedNDArray
 from aslm.model.model_features.autofocus import Autofocus
 from aslm.model.model_features.aslm_image_writer import ImageWriter
 from aslm.log_files.log_functions import log_setup
+from aslm.tools.common_dict_tools import update_settings_common, update_stage_dict
 
 # debug
 from aslm.model.aslm_debug_model import Debug_Module
@@ -55,6 +56,7 @@ from aslm.model.aslm_debug_model import Debug_Module
 # Logger Setup
 log_setup('model_logging.yml')
 p = __name__.split(".")[1]
+
 
 class Model:
     def __init__(self, USE_GPU, args, configuration_path=None, experiment_path=None,
@@ -76,7 +78,7 @@ class Model:
         self.etl_constants = session(etl_constants_path, args.verbose)
 
         # Initialize all Hardware
-        if args.synthetic_hardware or args.sh:
+        if args.synthetic_hardware:
             # If command line entry provided, overwrites the model parameters with synthetic hardware.
             self.configuration.Devices['daq'] = 'SyntheticDAQ'
             self.configuration.Devices['camera'] = 'SyntheticCamera'
@@ -88,9 +90,9 @@ class Model:
             self.configuration.Devices['lasers'] = 'SyntheticLasers'
 
         # Move device initialization steps to multiple threads
-        '''
+        """
         Each of the below represents self.camera or the respective device
-        '''
+        """
         threads_dict = {
             'filter_wheel': ResultThread(target=startup_functions.start_filter_wheel,
                                          args=(self.configuration, self.verbose,)).start(),
@@ -112,6 +114,8 @@ class Model:
         }
 
         # Optionally start up multiple cameras
+        # TODO: In the event two cameras are on, but we've only requested one, make sure it's the one with the
+        #       serial number we want.
         for i in range(int(self.configuration.CameraParameters['number_of_cameras'])):
             threads_dict[f'camera{i}'] = ResultThread(target=startup_functions.start_camera,
                                                       args=(self.configuration, self.experiment, self.verbose, i)).start()
@@ -123,7 +127,7 @@ class Model:
         self.camera = self.get_camera()  # make sure we grab the correct camera for this resolution mode
 
         # in synthetic_hardware mode, we need to wire up camera to daq
-        if args.synthetic_hardware or args.sh:
+        if args.synthetic_hardware:
             self.daq.set_camera(self.camera)
 
         # analysis class
@@ -202,6 +206,8 @@ class Model:
         # Default to the zeroth camera
         cam = self.camera0
 
+        # TODO: In the event two cameras are on, but we've only requested one, make sure it's the one with the
+        #       serial number we want.
         # If we have multiple cameras, loop through them all and check their serial numbers
         n_cams = int(self.configuration.CameraParameters['number_of_cameras'])
         if n_cams > 1:
@@ -341,38 +347,10 @@ class Model:
             self.signal_thread.join()
             self.current_channel = 0
 
-            if args[0] == 'channel':
-                self.experiment.MicroscopeState['channels'] = args[1]
+            update_settings_common(self, args)
 
-            if args[0] == 'resolution':
-                """
-                args[1] is a dictionary that includes 'resolution_mode': 'low', 'zoom': '1x', 'laser_info': ...
-                ETL popup window updating the self.etl_constants.
-                Passes new self.etl_constants to the self.model.daq
-                TODO: Make sure the daq knows which etl data to use based upon wavelength, zoom, resolution mode, etc.
-                """
-                updated_settings = args[1]
-                resolution_mode = updated_settings['resolution_mode']
-                zoom = updated_settings['zoom']
-                laser_info = updated_settings['laser_info']
-
-                if resolution_mode == 'low':
-                    self.etl_constants.ETLConstants['low'][zoom] = laser_info
-                else:
-                    self.etl_constants.ETLConstants['high'][zoom] = laser_info
-                if self.verbose:
-                    print(self.etl_constants.ETLConstants['low'][zoom])
-
-                # Modify DAQ to pull the initial values from the etl_constants.yml file, or be passed it from the model.
-                # Pass to the self.model.daq to
-                #             value = self.resolution_info.ETLConstants[self.resolution][self.mag][laser][etl_name]
-                # print(args[1])
-
-            if args[0] == 'galvo':
-                (param, value), = args[1].items()
-                self.experiment.GalvoParameters[param] = value
-
-            self.daq.calculate_all_waveforms(self.experiment.MicroscopeState, self.etl_constants, self.experiment.GalvoParameters, self.get_readout_time())
+            self.daq.calculate_all_waveforms(self.experiment.MicroscopeState, self.etl_constants,
+                                             self.experiment.GalvoParameters, self.get_readout_time())
             self.event_queue.put(('waveform', self.daq.waveform_dict))
 
             # prepare devices based on updated info
@@ -408,9 +386,9 @@ class Model:
             self.end_acquisition()
 
         elif command == 'debug':
-            '''
+            """
             Debug Operation Mode
-            '''
+            """
             self.debug.debug(*args, **kwargs)
 
     def move_stage(self, pos_dict, wait_until_done=False):
@@ -419,9 +397,7 @@ class Model:
         Checks "on target state" after command and waits until done.
         """
         # Update our local experiment parameters
-        for axis, val in pos_dict.items():
-            ax = axis.split('_')[0]
-            self.experiment.StageParameters[ax] = val
+        update_stage_dict(self, pos_dict)
 
         # Pass to the stage
         self.stages.move_absolute(pos_dict, wait_until_done)
@@ -768,8 +744,12 @@ class Model:
 
         # For each moment in time...
         for t in range(int(microscope_state['timepoints'])):
+            if self.stop_acquisition:
+                break
             # Make sure all the right channels are active...
             for ch in active_channels:
+                if self.stop_acquisition:
+                    break
                 try:
                     # If we have readable active chans (we're in per_stack mode) we turn
                     # on one channel at a time.
@@ -782,6 +762,8 @@ class Model:
 
                 # And step through z-space...
                 for z, f in zip(z_pos, f_pos):
+                    if self.stop_acquisition:
+                        break
                     print(f"z_pos: {z}, f_pos: {f}")
                     self.move_stage({'z_abs': z}, wait_until_done=True)  # Update positions
                     self.move_stage({'f_abs': f}, wait_until_done=True)
@@ -820,7 +802,7 @@ class Model:
                 self.experiment.MicroscopeState['resolution_mode'] = 'low'
 
             # We can't keep acquiring if we're switching cameras. For now, simply turn the camera off.
-            if self.camera.camera_controller.is_acquiring or self.is_live:
+            if self.camera.is_acquiring or self.is_live:
                 self.run_command('stop')
 
             self.camera = self.get_camera()

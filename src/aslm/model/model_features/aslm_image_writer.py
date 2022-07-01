@@ -112,13 +112,13 @@ class ImageWriter:
         # Getting amount of slices
         zslice = int(self.model.experiment.MicroscopeState['number_z_steps'])
 
-        '''
+        """
         Allocate zarr array with values needed
         X Pixel Size, Y Pixel Size, Z Slice, Channel Num, Frame ID
         Chunks set to size of each image with the corresponding additional data
         Numpy data type = dtype='uint16'
         z[:,:,0,0,0] = 2D array at zslice=0, channel=0, frame=0
-        '''
+        """
 
         z = zarr.zeros((xsize, ysize, zslice, self.num_of_channels, len(frame_ids)), 
                         chunks = (xsize, ysize, 1, 1, 1), dtype='uint16')
@@ -137,12 +137,12 @@ class ImageWriter:
         
         # Copy data to Zarr
         # Saving Acq By Slice
-        '''
+        """
         Starts on first channel and increments with the loop. Each image is saved by slice, channel and timepoint.
         After each channel has been taken off data buffer then the slice is incremented.
         After the amount of slices set by zslice has been reached, time is then incremented.
         TODO do we need to store the actual channel number? Or just make sure that frames are in an order than channels can be interpreted?
-        '''
+        """
         if by_slice:
             time = 0
             slice = 0
@@ -158,12 +158,12 @@ class ImageWriter:
                     slice = 0
         
         # Saved by stack
-        '''
+        """
         Starts on first channel and increments thru loop. 
         Each increment of the loop increases the slice index.
         Once the slice has reached max count increment to next channel.
         After all channels and slices have been incremented, increase the time by one.
-        '''
+        """
         if by_stack:
             time = 0
             slice = 0

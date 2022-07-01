@@ -34,9 +34,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #  Standard Library Imports
 import tkinter
 import multiprocessing as mp
-import time
 import threading
-from pathlib import Path
 
 # Third Party Imports
 
@@ -62,7 +60,8 @@ from aslm.controller.thread_pool import SynchronizedThreadPool
 # Local Model Imports
 from aslm.model.aslm_model import Model
 from aslm.model.aslm_model_config import Session as session
-from aslm.model.concurrency.concurrency_tools import ObjectInSubprocess, SharedNDArray
+from aslm.model.concurrency.concurrency_tools import ObjectInSubprocess
+from aslm.tools.common_dict_tools import update_settings_common, update_stage_dict
 
 # debug
 from aslm.controller.aslm_debug import Debug_Module
@@ -71,10 +70,10 @@ import logging
 from pathlib import Path
 
 # Logger Setup
-
 import logging
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
+
 
 class ASLM_controller:
     """ ASLM Controller
@@ -140,7 +139,7 @@ class ASLM_controller:
 
         # etl setting file
         self.etl_constants_path = etl_constants_path
-        self.etl_setting = session(self.etl_constants_path, self.verbose)
+        self.etl_constants = session(self.etl_constants_path, self.verbose)
 
         # Initialize the View
         self.view = view(root)
@@ -285,10 +284,12 @@ class ASLM_controller:
             etl_setting_popup = remote_popup(self.view)  # TODO: should we rename etl_setting popup to remote_focus_popup?
             self.etl_controller = Etl_Popup_Controller(etl_setting_popup,
                                                        self,
-                                                       self.verbose,
-                                                       self.etl_setting,
+                                                       self.etl_constants,
                                                        self.etl_constants_path,
-                                                       self.experiment.GalvoParameters)
+                                                       self.configuration,
+                                                       self.experiment.GalvoParameters,
+                                                       self.verbose)
+
             self.etl_controller.set_experiment_values(self.resolution_value.get())
             self.etl_controller.set_mode(self.acquire_bar_controller.mode)
 
@@ -335,7 +336,7 @@ class ASLM_controller:
         meso_res_sub_menu = tkinter.Menu(self.view.menubar.menu_resolution)
         self.view.menubar.menu_resolution.add_cascade(menu=meso_res_sub_menu,label='Mesoscale')
 
-        for res in self.etl_setting.ETLConstants['low'].keys():
+        for res in self.etl_constants.ETLConstants['low'].keys():
             meso_res_sub_menu.add_radiobutton(label=res,
                                               variable=self.resolution_value,
                                               value=res)
@@ -449,7 +450,7 @@ class ASLM_controller:
             self.etl_controller.set_mode(mode)
         if mode == 'stop':
             # GUI Failsafe
-            self.acquire_bar_controller.view.acquire_btn.configure(text='Acquire')
+            self.acquire_bar_controller.stop_acquire()
 
     def update_camera_view(self):
         r"""Update the real-time parameters in the camera view (channel number, max counts, image, etc.)
@@ -546,6 +547,7 @@ class ASLM_controller:
                 'laser_info': self.resolution_info.ETLConstants[self.resolution][self.mag]
                 }
             """
+            update_settings_common(self, args)
             self.threads_pool.createThread('model', lambda: self.model.run_command('update_setting', *args))
 
         elif command == 'autofocus':
@@ -715,9 +717,7 @@ class ASLM_controller:
         """
 
         # Update our local stage dictionary
-        for axis, val in pos_dict.items():
-            ax = axis.split('_')[0]
-            self.experiment.StageParameters[ax] = val
+        update_stage_dict(self, pos_dict)
 
         # Pass to model
         self.model.move_stage(pos_dict)

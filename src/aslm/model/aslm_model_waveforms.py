@@ -65,13 +65,14 @@ def camera_exposure(sample_rate=100000,
     array[pulse_delay_samples:(pulse_samples + pulse_delay_samples)] = amplitude
     return np.array(array)
 
+
 def single_pulse(sample_rate=100000,
                  sweep_time=0.4,
                  delay=10,
                  pulse_width=1,
                  amplitude=1,
                  offset=0):
-    '''
+    """
     Returns a numpy array with a single pulse
     Used for creating TTL pulses out of analog outputs and laser intensity
     pulses.
@@ -87,7 +88,7 @@ def single_pulse(sample_rate=100000,
     Examples:
     typical_TTL_pulse = single_pulse(sample_rate, sweep_time, 10, 1, 5, 0)
     typical_laser_pulse = single_pulse(sample_rate, sweep_time, 10, 80, 1.25, 0)
-    '''
+    """
     # get an integer number of samples
     samples = int(np.floor(np.multiply(sample_rate, sweep_time)))
 
@@ -111,7 +112,7 @@ def tunable_lens_ramp(sample_rate=100000,
                       fall=2.5,
                       amplitude=1,
                       offset=0):
-    r'''Returns a numpy array with a sawtooth ramp - typically used for remote focusing.
+    r"""Returns a numpy array with a sawtooth ramp - typically used for remote focusing.
 
     The waveform starts at offset and stays there for the delay period, then
     rises linearly to 2x amplitude (amplitude here refers to 1/2 peak-to-peak)
@@ -142,8 +143,7 @@ def tunable_lens_ramp(sample_rate=100000,
     Returns
     -------
     waveform : np.array
-    '''
-
+    """
 
     # create an array just containing the negative amplitude voltage:
     delay_samples = int(etl_delay * exposure_time * sample_rate / 100)
@@ -175,32 +175,33 @@ def sawtooth(sample_rate=100000,
              offset=0,
              duty_cycle=50,
              phase=np.pi / 2):
-    '''
+    """
     Returns a numpy array with a sawtooth function.
     Used for creating the galvo signal.
     Example:  galvosignal =  sawtooth(100000, 0.4, 199, 3.67, 0, 50, np.pi)
-    '''
+    """
 
     samples = int(np.multiply(sample_rate, sweep_time))
     duty_cycle = duty_cycle / 100
     t = np.linspace(0, sweep_time, samples)
     waveform = signal.sawtooth(2 * np.pi * frequency * (t - phase), width=duty_cycle)
     waveform = amplitude * waveform + offset
-    # waveform[-1] = offset - amplitude  # TODO: We do this to prevent an extra stripe on the camera. This shouldn't be necessary as the camera should be off.
+
     return waveform
 
 
 def dc_value(sample_rate=100000,
              sweep_time=0.4,
              amplitude=1):
-    '''
+    """
     Returns a numpy array with a DC value
     Used for creating the resonant galvo drive voltage.
-    '''
+    """
     samples = np.multiply(float(sample_rate), sweep_time)
     waveform = np.zeros(int(samples))
     waveform[:] = amplitude
     return waveform
+
 
 def square(sample_rate=100000,
            sweep_time=0.4,
@@ -209,16 +210,17 @@ def square(sample_rate=100000,
            offset=0,
            duty_cycle=50,
            phase=np.pi):
-    '''
+    """
     Returns a numpy array with a square waveform
     Used for creating analog laser drive voltage.
-    '''
+    """
     samples = int(sample_rate * sweep_time)
     duty_cycle = duty_cycle / 100
     t = np.linspace(0, sweep_time, samples)
     waveform = signal.square(2 * np.pi * frequency * t + phase, duty=duty_cycle)
     waveform = amplitude * waveform + offset
     return waveform
+
 
 def sine_wave(sample_rate=100000,
               sweep_time=0.4,
@@ -234,6 +236,7 @@ def sine_wave(sample_rate=100000,
     waveform = amplitude * np.sin((2 * np.pi * frequency * t) - phase) + offset
     return waveform
 
+
 def smooth_waveform(waveform,
                     percent_smoothing=10):
     """
@@ -244,7 +247,8 @@ def smooth_waveform(waveform,
     smoothed_waveform = np.convolve(waveform, np.ones(window_len), 'valid') / window_len
     return smoothed_waveform
 
-if (__name__ == "__main__"):
+
+if __name__ == "__main__":
     import matplotlib.pyplot as plt
     # General
     sample_rate = 100000

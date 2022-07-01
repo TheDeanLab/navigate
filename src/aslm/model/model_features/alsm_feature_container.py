@@ -49,10 +49,11 @@ class TreeNode:
                 setattr(self, key, kwargs[key])
 
 class SignalNode(TreeNode):
-    def __init__(self, feature_name, func_dict, *, node_type='one-step', wait_next=False):
+    def __init__(self, feature_name, func_dict, *, node_type='one-step', wait_next=False, device_related=False):
         super().__init__(feature_name, func_dict, node_type=node_type, wait_next=wait_next)
         self.has_response_func = func_dict.get('main-response', None)
         self.wait_response = False
+        self.device_related = device_related
 
     def run(self, *args, wait_response=False):
         # initialize the node when first time entering it
@@ -71,8 +72,12 @@ class SignalNode(TreeNode):
             # print(self.node_name, 'running response function:', self.node_funcs['main-response'])
             result = self.node_funcs['main-response'](*args)
             self.wait_response = False
-        else:
+        elif self.device_related:
             return None, False
+        else:
+            result = self.node_funcs['main'](*args)
+            if self.has_response_func:
+                result = self.node_funcs['main-response'](*args)
 
         if self.node_type == 'multi-step' and not self.node_funcs['end']():
             return result, False
@@ -123,6 +128,7 @@ class SignalContainer(Container):
 
     def run(self, *args, wait_response=False):
         if self.end_flag or not self.root:
+            self.end_flag = True
             return
         if not self.curr_node:
             self.curr_node = self.root
@@ -146,7 +152,7 @@ class SignalContainer(Container):
             self.curr_node = None
             if self.remaining_number_of_execution > 0:
                 self.remaining_number_of_execution -= 1
-                self.end_flag = self.remaining_number_of_execution == 0
+                self.end_flag = (self.remaining_number_of_execution == 0)
 
 
 class DataContainer(Container):

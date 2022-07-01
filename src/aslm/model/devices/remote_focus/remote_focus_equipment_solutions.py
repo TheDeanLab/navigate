@@ -55,6 +55,7 @@ class RemoteFocusEquipmentSolutions(RemoteFocusBase):
     character can be processed. Uses pyserial: https://pyserial.readthedocs.io/en/latest/pyserial_api.html
 
     Attributes
+    ----------
     comport : str
         COM port for communicating with the voice coil
     baud_rate : int

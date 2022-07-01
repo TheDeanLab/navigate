@@ -141,7 +141,7 @@ class ASLM_controller:
 
         # etl setting file
         self.etl_constants_path = etl_constants_path
-        self.etl_setting = session(self.etl_constants_path, self.verbose)
+        self.etl_constants = session(self.etl_constants_path, self.verbose)
 
         # Initialize the View
         self.view = view(root)
@@ -286,7 +286,7 @@ class ASLM_controller:
             etl_setting_popup = remote_popup(self.view)  # TODO: should we rename etl_setting popup to remote_focus_popup?
             self.etl_controller = Etl_Popup_Controller(etl_setting_popup,
                                                        self,
-                                                       self.etl_setting,
+                                                       self.etl_constants,
                                                        self.etl_constants_path,
                                                        self.configuration,
                                                        self.experiment.GalvoParameters,
@@ -338,7 +338,7 @@ class ASLM_controller:
         meso_res_sub_menu = tkinter.Menu(self.view.menubar.menu_resolution)
         self.view.menubar.menu_resolution.add_cascade(menu=meso_res_sub_menu,label='Mesoscale')
 
-        for res in self.etl_setting.ETLConstants['low'].keys():
+        for res in self.etl_constants.ETLConstants['low'].keys():
             meso_res_sub_menu.add_radiobutton(label=res,
                                               variable=self.resolution_value,
                                               value=res)

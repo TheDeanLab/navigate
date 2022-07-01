@@ -55,7 +55,7 @@ def log_setup(fname):
     """
 
     # the path to fname is set relative to the location of the folder containing this file (log_functions.py)
-    base_directory = Path.joinpath(Path(__name__).resolve().parent, 'src/aslm/log_files')
+    base_directory = Path(__file__).resolve().parent
     logging_path = Path.joinpath(base_directory, fname)
 
     # Function to map filename to base_directory/filename in the dictionary

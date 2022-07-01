@@ -52,6 +52,9 @@ from aslm.log_files.log_functions import log_setup
 # debug
 from aslm.model.aslm_debug_model import Debug_Module
 
+# Logger Setup
+log_setup('model_logging.yml')
+p = __name__.split(".")[1]
 
 class Model:
     def __init__(
@@ -63,9 +66,7 @@ class Model:
             etl_constants_path=None,
             event_queue=None):
 
-        # Logger Setup
-        log_setup('model_logging.yml')
-        p = __name__.split(".")[1]
+
         self.logger = logging.getLogger(p)
 
         # Specify verbosity

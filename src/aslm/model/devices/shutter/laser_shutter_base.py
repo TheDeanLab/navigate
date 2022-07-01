@@ -1,9 +1,4 @@
-"""
-ASLM shutter communication classes.
-Triggering for shutters delivered from DAQ using digital outputs.
-Each output keeps their last digital state for as long the device is not powered down.
-
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -48,35 +43,43 @@ logger = logging.getLogger(p)
 
 
 class ShutterBase:
-    """
-    Parent Shutter Class
+    r"""ShutterBase Class
+    Parent class for the laser shutters.
+
+    Attributes
+    ----------
+    configuration : Session
+        Global configuration of the microscope
+    experiment : Session
+        Experiment configuration of the microscope
+    verbose : Boolean
+        Verbosity
+    shutter_right_state : Boolean
+        Right shutter state
+    shutter_left_state : Boolean
+        Left shutter state
+
+    Methods
+    -------
+    open_left()
+        Open the left shutter, close the right shutter.
+    open_right()
+        Open the right shutter, close the left shutter.
+    close_shutters()
+        Close both shutters
+    state()
+        Return the current state of the shutters
     """
 
-    def __init__(self, model, experiment, verbose=False):
-        self.model = model
+    def __init__(self, configuration, experiment, verbose=False):
+        self.configuration = configuration
         self.experiment = experiment
         self.verbose = verbose
 
         # Right Shutter - High Resolution Mode
-        self.shutter_right = self.model.DAQParameters['shutter_right']
+        self.shutter_right = self.configuration.DAQParameters['shutter_right']
         self.shutter_right_state = False
 
         # Left Shutter - Low Resolution Mode
-        self.shutter_left = self.model.DAQParameters['shutter_left']
+        self.shutter_left = self.configuration.DAQParameters['shutter_left']
         self.shutter_left_state = False
-
-    def __del__(self):
-        pass
-
-    def open_left(self):
-        pass
-
-    def open_right(self):
-        pass
-
-    def close_shutters(self):
-        pass
-
-    def state(self):
-        pass
-

@@ -1,9 +1,4 @@
-"""
-ASLM shutter communication classes.
-Triggering for shutters delivered from DAQ using digital outputs.
-Each output keeps their last digital state for as long the device is not powered down.
-
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -51,85 +46,87 @@ logger = logging.getLogger(p)
 
 
 class ShutterTTL(ShutterBase):
-    """
-    Triggers Thorlabs-based shutter device using National Instruments DAQ
-    Requires 5V signal for triggering
-    https://www.thorlabs.com/thorproduct.cfm?partnumber=SHB1#ad-image-0
+    """ShutterTTL Class
+
+    Triggering for shutters delivered from DAQ using digital outputs.
+    Each output keeps their last digital state for as long the device is not powered down.
+
+    Attributes
+    ----------
+    configuration : Session
+        Global configuration of the microscope
+    experiment : Session
+        Experiment configuration of the microscope
+    verbose : Boolean
+        Verbosity
+
+    Methods
+    -------
+    open_left()
+        Open the left shutter, close the right shutter.
+    open_right()
+        Open the right shutter, close the left shutter.
+    close_shutters()
+        Close both shutters
+    state()
+        Return the current state of the shutters
     """
 
-    def __init__(self, model, experiment, verbose=False):
-        super().__init__(model, experiment, verbose)
+    def __init__(self, configuration, experiment, verbose=False):
+        super().__init__(configuration, experiment, verbose)
 
         # Right Shutter - High Resolution Mode
         self.shutter_right_task = nidaqmx.Task()
-        self.shutter_right_task.do_channels.add_do_chan(
-            self.shutter_right, line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
-        self.shutter_right_task.write(
-            self.shutter_right_state, auto_start=True)
+        self.shutter_right_task.do_channels.add_do_chan(self.shutter_right, line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
+        self.shutter_right_task.write(self.shutter_right_state, auto_start=True)
 
         # Left Shutter - Low Resolution Mode
         self.shutter_left_task = nidaqmx.Task()
-        self.shutter_left_task.do_channels.add_do_chan(
-            self.shutter_left, line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
+        self.shutter_left_task.do_channels.add_do_chan(self.shutter_left, line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
         self.shutter_left_task.write(self.shutter_left_state, auto_start=True)
 
     def __del__(self):
-        """
-        Closes the NI DAQ tasks.
+        """Close the ShutterTTL at exit.
         """
         self.shutter_right_task.close()
         self.shutter_left_task.close()
 
     def open_left(self):
-        """
-        Opens the Left Shutter
-        Closes the Right Shutter
+        r"""Open the left shutter, close the right shutter.
         """
         self.shutter_right_state = False
-        self.shutter_right_task.write(
-            self.shutter_right_state, auto_start=True)
-
+        self.shutter_right_task.write(self.shutter_right_state, auto_start=True)
         self.shutter_left_state = True
         self.shutter_left_task.write(self.shutter_left_state, auto_start=True)
-
-        if self.verbose:
-            print('Shutter left opened')
-        logger.debug("Shutter left opened")
+        logger.debug("ShutterTTL - Shutter left opened")
 
     def open_right(self):
-        """
-        Opens the Right Shutter
-        Closes the Left Shutter
+        r"""Open the right shutter, close the left shutter.
         """
         self.shutter_right_state = True
-        self.shutter_right_task.write(
-            self.shutter_right_state, auto_start=True)
-
+        self.shutter_right_task.write(self.shutter_right_state, auto_start=True)
         self.shutter_left_state = False
         self.shutter_left_task.write(self.shutter_left_state, auto_start=True)
-
-        if self.verbose:
-            print('Shutter right opened')
-        logger.debug("Shutter right opened")
+        logger.debug("ShutterTTL - Shutter right opened")
 
 
     def close_shutters(self):
-        """
-        Closes both Shutters
+        r"""CLose both shutters
         """
         self.shutter_right_state = False
-        self.shutter_right_task.write(
-            self.shutter_right_state, auto_start=True)
-
+        self.shutter_right_task.write(self.shutter_right_state, auto_start=True)
         self.shutter_left_state = False
         self.shutter_left_task.write(self.shutter_left_state, auto_start=True)
-
-        if self.verbose:
-            print('Both shutters closed')
-        logger.debug("Both shutters closed")
+        logger.debug("ShutterTTL - Both shutters closed")
 
     def state(self):
-        """
-        Returns the state of the shutters
+        r"""Return the state of both shutters
+
+        Returns
+        -------
+        shutter_left_state : Boolean
+            State of the left shutter.
+        shutter_right_state : Boolean
+            State of the right shutter
         """
         return self.shutter_left_state, self.shutter_right_state

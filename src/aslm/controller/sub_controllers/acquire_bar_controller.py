@@ -46,7 +46,7 @@ p = __name__.split(".")[0]
 logger = logging.getLogger(p)
 
 class Acquire_Bar_Controller(GUI_Controller):
-    def __init__(self, view, parent_controller, verbose=False):
+    def __init__(self, view, parent_view, parent_controller, verbose=False):
         super().__init__(view, parent_controller, verbose)
 
         # acquisition image mode variable
@@ -71,14 +71,10 @@ class Acquire_Bar_Controller(GUI_Controller):
         # gui event bind
         self.view.acquire_btn.config(command=self.launch_popup_window)
 
-        self.view.pull_down.bind(  # bind the pull down menu to the update_microscope_mode function, observer event
+        self.view.pull_down.bind(  
             '<<ComboboxSelected>>',
             self.update_microscope_mode)
 
-        #self.view.pull_down.bind( 
-        #    '<<ComboboxSelected>>',
-        #    self.grey_out)
-#
         self.view.exit_btn.config(command=self.exit_program)
 
     def set_mode(self, mode):
@@ -161,12 +157,6 @@ class Acquire_Bar_Controller(GUI_Controller):
         # Gets the state of the pull-down menu and tell the central controller
         """
         self.mode = self.mode_dict[self.view.pull_down.get()]
-        settings = stack_timepoint_frame(self.view)
-        if self.mode == 'live' or self.mode == "Alignment":# alignment functionality not yet added as a mode
-            settings.save_check.state(["readonly"])
-            settings.exp_time_spinbox.state(["readonly"])
-            settings.stack_acq_spinbox.state(["readonly"])
-            settings.timepoint_interval_spinbox.state(["readonly"])
         self.show_verbose_info("The Microscope State is now:", self.get_mode())
 
     def launch_acquisition(self, popup_window):

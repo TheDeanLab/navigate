@@ -80,6 +80,7 @@ class stack_timepoint_frame(ttk.Labelframe):
         stack_timepoint_label_frame.save_data.set(False)
         stack_timepoint_label_frame.save_check = ttk.Checkbutton(stack_timepoint_label_frame, text='', variable=stack_timepoint_label_frame.save_data)
         stack_timepoint_label_frame.save_check.grid(row=0, column=input_position, sticky=(NSEW), pady=(4,0))
+        
 
 
         # Timepoints Label, spinbox defaults to 1.

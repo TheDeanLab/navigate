@@ -34,11 +34,11 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 
 class TreeNode:
-    def __init__(self, feature_name, func_dict, *, node_type='one-step', wait_next=False):
+    def __init__(self, feature_name, func_dict, *, node_type='one-step', device_related=False):
         self.node_name = str(feature_name)
         self.node_funcs = func_dict
         self.node_type = node_type # 'one-step', 'multi-step'
-        self.wait_next = wait_next
+        self.device_related = device_related
         self.is_initialized = False
         self.child = None
         self.sibling = None
@@ -49,11 +49,15 @@ class TreeNode:
                 setattr(self, key, kwargs[key])
 
 class SignalNode(TreeNode):
-    def __init__(self, feature_name, func_dict, *, node_type='one-step', wait_next=False, device_related=False):
-        super().__init__(feature_name, func_dict, node_type=node_type, wait_next=wait_next)
-        self.has_response_func = func_dict.get('main-response', None)
+    def __init__(self, feature_name, func_dict, *, node_type='one-step', device_related=False):
+        super().__init__(feature_name, func_dict, node_type=node_type, device_related=device_related)
+        self.has_response_func = func_dict.get('main-response') != None
         self.wait_response = False
-        self.device_related = device_related
+
+        # if node type is multi-step, the node should have one response function
+        if self.node_type == 'multi-step' and self.has_response_func == False and self.device_related == False:
+            self.node_funcs['main-response'] = dummy_func
+            self.has_response_func = True
 
     def run(self, *args, wait_response=False):
         # initialize the node when first time entering it
@@ -79,15 +83,15 @@ class SignalNode(TreeNode):
             if self.has_response_func:
                 result = self.node_funcs['main-response'](*args)
 
-        if self.node_type == 'multi-step' and not self.node_funcs['end']():
+        if self.wait_response or self.node_type == 'multi-step' and not self.node_funcs['end']():
             return result, False
         
         self.is_initialized = False
         return result, True
 
 class DataNode(TreeNode):
-    def __init__(self, feature_name, func_dict, *, node_type='one-step', wait_next=False):
-        super().__init__(feature_name, func_dict, node_type=node_type, wait_next=wait_next)
+    def __init__(self, feature_name, func_dict, *, node_type='one-step', device_related=False):
+        super().__init__(feature_name, func_dict, node_type=node_type, device_related=device_related)
 
     def run(self, *args):
         # initialize the node when first time entering it
@@ -140,13 +144,13 @@ class SignalContainer(Container):
             if not self.curr_node.sibling:
                 break
             self.curr_node = self.curr_node.sibling
-            if self.curr_node.wait_next:
+            if self.curr_node.device_related:
                 return
 
         if result and self.curr_node.child:
             print('Signal running child of', self.curr_node.node_name)
             self.curr_node = self.curr_node.child
-            if not self.curr_node.wait_next:
+            if not self.curr_node.device_related:
                 self.run(*args)
         else:
             self.curr_node = None
@@ -172,13 +176,13 @@ class DataContainer(Container):
             if not self.curr_node.sibling:
                 break
             self.curr_node = self.curr_node.sibling
-            if self.curr_node.wait_next:
+            if self.curr_node.device_related:
                 return
 
         if result and self.curr_node.child:
             print('Data running child of', self.curr_node.node_name)
             self.curr_node = self.curr_node.child
-            if not self.curr_node.wait_next:
+            if not self.curr_node.device_related:
                 self.run(*args)
         else:
             self.curr_node = None

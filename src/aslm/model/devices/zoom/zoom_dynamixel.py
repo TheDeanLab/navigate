@@ -81,105 +81,97 @@ class DynamixelZoom(ZoomBase):
 
         # Open port and set baud rate
         if not self.dynamixel.openPort(self.port_num):
+            logger.debug("Unable to open DynamixelZoom")
             raise RuntimeError(f"Unable to open port {self.port_num}.")
 
         self.dynamixel.setBaudRate(self.port_num, self.baudrate)
+        logger.debug("DynamixelZoom Initialized")
 
-        if self.verbose:
-            print('Dynamixel Zoom initialized')
-        logger.debug("Dynamixel Zoom initialized")
+    def __del__(self):
+        logger.debug("DynamixelZoom Instance Deleted")
+        self.dynamixel.closePort(self.port_num)
 
     def set_zoom(self, zoom, wait_until_done=False):
-        """
+        r""" Change the DynamixelZoom Servo.
+
+        Confirms tha the zoom position is available in the zoomdict
+
+        Parameters
+        ----------
+        zoom : dict
+            Zoom dictionary
+        wait_until_done : Boolean
+            Delay parameter.
+
         # Changes zoom after checking that the commanded value exists
         """
         if zoom in self.zoomdict:
             self.move(self.zoomdict[zoom], wait_until_done)
             self.zoomvalue = zoom
         else:
+            logger.error(f"Zoom designation, {zoom}, not in the configuration")
             raise ValueError('Zoom designation not in the configuration')
-            logger.error("Zoom designation not in the configuration")
-        if self.verbose:
-            print('Zoom set to {}'.format(zoom))
-            print("Actual Zoom position:", self.read_position())
-        logger.debug(f"Zoom set to {zoom})")
-        logger.debug(f"Zoom position set to {self.read_position()})")
+        logger.debug(f"Changed DynamixelZoom to {zoom}")
+        logger.debug(f"DynamixelZoom position: {self.read_position()}")
 
     def move(self, position, wait_until_done=False):
-        """
-        # Moves the Dynamixel Zoom Device
+        r""" Move the DynamixelZoom Servo
+
+        Parameters
+        ----------
+        position : int
+            Location to move to.
+        wait_until_done : Boolean
+            Delay parameter
         """
 
         # Enable servo
-        self.dynamixel.write1ByteTxRx(
-            self.port_num,
-            1,
-            self.id,
-            self.addr_mx_torque_enable,
-            self.torque_enable)
+        self.dynamixel.write1ByteTxRx( self.port_num, 1, self.id, self.addr_mx_torque_enable, self.torque_enable)
 
         # Write Moving Speed
-        self.dynamixel.write2ByteTxRx(
-            self.port_num, 1, self.id, self.addr_mx_moving_speed, 100)
+        self.dynamixel.write2ByteTxRx(self.port_num, 1, self.id, self.addr_mx_moving_speed, 100)
 
         # Write Torque Limit
-        self.dynamixel.write2ByteTxRx(
-            self.port_num, 1, self.id, self.addr_mx_torque_limit, 200)
+        self.dynamixel.write2ByteTxRx(self.port_num, 1, self.id, self.addr_mx_torque_limit, 200)
 
         # Write P Gain
-        self.dynamixel.write1ByteTxRx(
-            self.port_num, 1, self.id, self.addr_mx_p_gain, 44)
+        self.dynamixel.write1ByteTxRx(self.port_num, 1, self.id, self.addr_mx_p_gain, 44)
 
         # Write Goal Position
-        self.dynamixel.write2ByteTxRx(
-            self.port_num,
-            1,
-            self.id,
-            self.addr_mx_goal_position,
-            position)
+        self.dynamixel.write2ByteTxRx(self.port_num, 1, self.id, self.addr_mx_goal_position, position)
 
         # Check position
         if wait_until_done:
             start_time = time.time()
             upper_limit = position + self.goal_position_offset
-            if self.verbose:
-                print('Upper Limit: ', upper_limit)
-            logger.debug(f"Upper Limits {upper_limit}")
+            logger.debug(f"DynamixelZoom Upper Limit: {upper_limit}")
+
             lower_limit = position - self.goal_position_offset
-            if self.verbose:
-                print('lower_limit: ', lower_limit)
-            logger.debug(f"lower limit, {lower_limit}")
-            cur_position = self.dynamixel.read4ByteTxRx(
-                self.port_num, 1, self.id, self.addr_mx_present_position)
+            logger.debug(f"DynamixelZoom Lower Limit: {lower_limit}")
+
+            cur_position = self.dynamixel.read4ByteTxRx(self.port_num, 1, self.id, self.addr_mx_present_position)
 
             while (cur_position < lower_limit) or (cur_position > upper_limit):
                 # Timeout function
                 if time.time() - start_time > self.timeout:
+                    logger.debug(f"DynamixelZoom Timeout Event")
                     break
                 time.sleep(0.05)
-                cur_position = self.dynamixel.read4ByteTxRx(
-                    self.port_num, 1, self.id, self.addr_mx_present_position)
-                if self.verbose:
-                    print(cur_position)
-                logger.debug(cur_position)
-        if self.verbose:
-            print('Zoom moved to {}'.format(position))
-        logger.debug(f"Zoom moved to {position}")
+                cur_position = self.dynamixel.read4ByteTxRx(self.port_num, 1, self.id, self.addr_mx_present_position)
+                logger.debug(f"DynamixelZoom Current Position: {cur_position}")
 
     def read_position(self):
+        r"""Read the position of the Zoom Servo.
+
+        Returned position is an int between 0 and 4096.
+        Opens and closes the port.
+
+        Returns
+        -------
+        cur_position : int
+            Servo position.
         """
-        # Returns position as an int between 0 and 4096
-        # Opens & closes the port
-        """
-        # self.dynamixel.openPort(self.port_num)
-        # self.dynamixel.setBaudRate(self.port_num, self.baudrate)
         cur_position = self.dynamixel.read4ByteTxRx(
             self.port_num, 1, self.id, self.addr_mx_present_position)
-        # self.dynamixel.closePort(self.port_num)
-        if self.verbose:
-            print('Zoom position: {}'.format(cur_position))
         logger.debug(f"Zoom position {cur_position}")
         return cur_position
-
-    def __del__(self):
-        self.dynamixel.closePort(self.port_num)

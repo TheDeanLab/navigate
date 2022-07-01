@@ -89,7 +89,6 @@ class HamamatsuOrca(CameraBase):
         self.camera_controller.set_property_value("image_width",
                                                    self.model.CameraParameters['x_pixels'])
 
-        self.is_acquiring = False
 
         if self.verbose:
             print("Hamamatsu Camera Class Initialized")

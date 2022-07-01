@@ -53,6 +53,7 @@ class CameraBase:
         self.camera_id = camera_id
         self.verbose = verbose
         self.stop_flag = False
+        self.is_acquiring = False
 
         # Initialize Pixel Information
         self.pixel_size_in_microns = self.model.CameraParameters['pixel_size_in_microns']

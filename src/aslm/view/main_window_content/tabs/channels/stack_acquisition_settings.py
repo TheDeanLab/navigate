@@ -33,7 +33,7 @@ POSSIBILITY OF SUCH DAMAGE.
 from tkinter import *
 import tkinter as tk
 from tkinter import ttk
-import logging
+# import logging
 from aslm.view.custom_widgets.validation import ValidatedSpinbox
 from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 

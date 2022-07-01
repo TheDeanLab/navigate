@@ -242,10 +242,6 @@ class Channels_Tab_Controller(GUI_Controller):
         self.stack_acq_widgets['start_position'].state([state])
         self.stack_acq_widgets['end_position'].state([state])
 
-        # self.view.stack_acq_frame.step_size_spinbox['state'] = state
-        # self.view.stack_acq_frame.start_pos_spinbox['state'] = state
-        # self.view.stack_acq_frame.end_pos_spinbox['state'] = state
-
         state = 'normal' if mode == 'stop' else 'disabled'
         self.view.stack_timepoint_frame.save_check['state'] = state
         self.view.stack_timepoint_frame.stack_pause_spinbox['state'] = state

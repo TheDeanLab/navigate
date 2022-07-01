@@ -34,9 +34,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #  Standard Library Imports
 import tkinter
 import multiprocessing as mp
-import time
 import threading
-from pathlib import Path
 
 # Third Party Imports
 
@@ -72,10 +70,10 @@ import logging
 from pathlib import Path
 
 # Logger Setup
-
 import logging
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
+
 
 class ASLM_controller:
     """ ASLM Controller

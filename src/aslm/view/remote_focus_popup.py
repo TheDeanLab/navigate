@@ -43,7 +43,6 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-
 # TODO: Should we rename to remote_focus_popup?
 class remote_popup():
     '''
@@ -90,8 +89,7 @@ class remote_popup():
         self.laser_frame.grid(row=1, column=0, columnspan=2, sticky=(NSEW))
         self.high_low_frame.grid(row=2, column=0, columnspan=2, sticky=(NSEW))
 
-        '''Filling Frames with widgets'''
-
+        #Filling Frames with widgets
         # Mode/Mag Frame
         self.inputs["Mode"] = LabelInput(parent=self.mode_mag_frame,
                                          label="Mode",
@@ -215,27 +213,27 @@ class remote_popup():
 
     # Getters
     def get_variables(self):
-        '''
-        # This function returns a dictionary of all the variables that are tied to each widget name.
+        """
+        This function returns a dictionary of all the variables that are tied to each widget name.
         The key is the widget name, value is the variable associated.
-        '''
+        """
         variables = {}
         for key, widget in self.inputs.items():
             variables[key] = widget.get_variable()
         return variables
 
     def get_widgets(self):
-        '''
-        # This function returns the dictionary that holds the input widgets.
+        """
+        This function returns the dictionary that holds the input widgets.
         The key is the widget name, value is the LabelInput class that has all the data.
-        '''
+        """
         return self.inputs
 
     def get_buttons(self):
-        '''
-        # This function returns the dictionary that holds the buttons.
+        """
+        This function returns the dictionary that holds the buttons.
         The key is the button name, value is the button.
-        '''
+        """
         return self.buttons
 
 

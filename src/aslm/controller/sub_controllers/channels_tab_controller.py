@@ -63,30 +63,37 @@ class Channels_Tab_Controller(GUI_Controller):
         # the only thing is that when the user's input is smaller than the limits, 
         # it will show inputs in red, but still let the function know the inputs changed
         # I can not block it since the Tkinter's working strategy
-        validate_wrapper(self.view.stack_acq_frame.step_size_spinbox)
-        validate_wrapper(self.view.stack_acq_frame.start_pos_spinbox)
-        validate_wrapper(self.view.stack_acq_frame.end_pos_spinbox)
+        # validate_wrapper(self.view.stack_acq_frame.step_size_spinbox)
+        # validate_wrapper(self.view.stack_acq_frame.start_pos_spinbox)
+        # validate_wrapper(self.view.stack_acq_frame.end_pos_spinbox)
 
         validate_wrapper(self.view.stack_timepoint_frame.stack_pause_spinbox)
         validate_wrapper(self.view.stack_timepoint_frame.exp_time_spinbox, is_integer=True)
 
+        # Get Widgets and Buttons from stack_acquisition_settings in view
+        self.stack_acq_widgets = self.view.stack_acq_frame.get_widgets()
+        self.stack_acq_vals = self.view.stack_acq_frame.get_variables()
+        self.stack_acq_buttons = self.view.stack_acq_frame.get_buttons()
+
         # stack acquisition variables
-        self.stack_acq_vals = {
-            'step_size': self.view.stack_acq_frame.step_size_spinval,
-            'start_position': self.view.stack_acq_frame.start_pos_spinval,
-            'end_position': self.view.stack_acq_frame.end_pos_spinval,
-            'number_z_steps': self.view.stack_acq_frame.slice_spinval,
-            'start_focus': self.view.stack_acq_frame.start_foc_spinval,
-            'end_focus': self.view.stack_acq_frame.end_foc_spinval,
-            'abs_z_start': self.view.stack_acq_frame.abs_z_start_spinval,
-            'abs_z_end': self.view.stack_acq_frame.abs_z_end_spinval
-        }
+        # self.stack_acq_vals = {
+        #     'step_size': self.view.stack_acq_frame.step_size_spinval,
+        #     'start_position': self.view.stack_acq_frame.start_pos_spinval,
+        #     'end_position': self.view.stack_acq_frame.end_pos_spinval,
+        #     'number_z_steps': self.view.stack_acq_frame.slice_spinval,
+        #     'start_focus': self.view.stack_acq_frame.start_foc_spinval,
+        #     'end_focus': self.view.stack_acq_frame.end_foc_spinval,
+        #     'abs_z_start': self.view.stack_acq_frame.abs_z_start_spinval,
+        #     'abs_z_end': self.view.stack_acq_frame.abs_z_end_spinval
+        # }
         # stack acquisition event binds
         self.stack_acq_vals['step_size'].trace_add('write', self.update_z_steps)
         self.stack_acq_vals['start_position'].trace_add('write', self.update_z_steps)
         self.stack_acq_vals['end_position'].trace_add('write', self.update_z_steps)
-        self.view.stack_acq_frame.set_start_button.configure(command=self.update_start_position)
-        self.view.stack_acq_frame.set_end_button.configure(command=self.update_end_position)
+        # self.view.stack_acq_frame.set_start_button.configure(command=self.update_start_position)
+        # self.view.stack_acq_frame.set_end_button.configure(command=self.update_end_position)
+        self.stack_acq_buttons['set_start'].configure(command=self.update_start_position)
+        self.stack_acq_buttons['set_end'].configure(command=self.update_end_position)
 
         # stack acquisition_variables
         self.z_origin = 0
@@ -146,9 +153,9 @@ class Channels_Tab_Controller(GUI_Controller):
         self.in_initialization = True
         self.set_info(self.stack_acq_vals, microscope_state)
         # validate
-        self.view.stack_acq_frame.step_size_spinbox.validate()
-        self.view.stack_acq_frame.start_pos_spinbox.validate()
-        self.view.stack_acq_frame.end_pos_spinbox.validate()
+        # self.view.stack_acq_frame.step_size_spinbox.validate()
+        # self.view.stack_acq_frame.start_pos_spinbox.validate()
+        # self.view.stack_acq_frame.end_pos_spinbox.validate()
 
         self.set_info(self.timepoint_vals, microscope_state)
         # validate
@@ -203,16 +210,22 @@ class Channels_Tab_Controller(GUI_Controller):
         # this function will set the spinbox widget's values of from_, to, step
         """
         temp_dict = {
-            self.view.stack_acq_frame.step_size_spinbox: settings['stack_acquisition']['step_size'],
-            self.view.stack_acq_frame.start_pos_spinbox: settings['stack_acquisition']['start_pos'],
-            self.view.stack_acq_frame.end_pos_spinbox: settings['stack_acquisition']['end_pos'],
+            self.stack_acq_widgets['step_size']: settings['stack_acquisition']['step_size'],
+            self.stack_acq_widgets['start_position']: settings['stack_acquisition']['start_pos'],
+            self.stack_acq_widgets['end_position']: settings['stack_acquisition']['end_pos'],
             self.view.stack_timepoint_frame.stack_pause_spinbox: settings['timepoint']['stack_pause'],
             self.view.stack_timepoint_frame.exp_time_spinbox: settings['timepoint']['timepoints']
         }
-        for widget in temp_dict:
-            widget.configure(from_=temp_dict[widget]['min'])
-            widget.configure(to=temp_dict[widget]['max'])
-            widget.configure(increment=temp_dict[widget]['step'])
+        for idx, widget in enumerate(temp_dict):
+            # Hacky Solution until stack time points are converted to LabelInput
+            if idx < 3:
+                widget.widget.configure(from_=temp_dict[widget]['min'])
+                widget.widget.configure(to=temp_dict[widget]['max'])
+                widget.widget.configure(increment=temp_dict[widget]['step'])
+            else:
+                widget.configure(from_=temp_dict[widget]['min'])
+                widget.configure(to=temp_dict[widget]['max'])
+                widget.configure(increment=temp_dict[widget]['step'])
 
         # channels setting
         self.channel_setting_controller.set_spinbox_range_limits(settings['channel'])

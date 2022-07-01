@@ -36,6 +36,7 @@ import tkinter
 import multiprocessing as mp
 import time
 import threading
+from pathlib import Path
 
 # Third Party Imports
 
@@ -68,7 +69,10 @@ from aslm.controller.aslm_debug import Debug_Module
 
 import logging
 from pathlib import Path
+
 # Logger Setup
+
+import logging
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 

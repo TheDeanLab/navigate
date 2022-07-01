@@ -47,10 +47,14 @@ from aslm.model.aslm_model_config import Session as session
 from aslm.model.concurrency.concurrency_tools import ResultThread, SharedNDArray
 from aslm.model.model_features.autofocus import Autofocus
 from aslm.model.model_features.aslm_image_writer import ImageWriter
+from aslm.log_files.log_functions import log_setup
 
 # debug
 from aslm.model.aslm_debug_model import Debug_Module
 
+# Logger Setup
+log_setup('model_logging.yml')
+p = __name__.split(".")[1]
 
 class Model:
     def __init__(
@@ -61,17 +65,10 @@ class Model:
             experiment_path=None,
             etl_constants_path=None,
             event_queue=None):
-        
-        # Logger Setup
-        from aslm.log_files.log_functions import log_setup
-        log_setup('model_logging.yml')
-        p = __name__.split(".")[1]
+
+        # Logging
         self.logger = logging.getLogger(p)
-        
-        self.logger.info("Performance - Testing if it works")
-        self.logger.debug("Spec - Testing if spec works too")
-        self.logger.info("Made it to model")
-        
+
         # Specify verbosity
         self.verbose = args.verbose
 

@@ -699,7 +699,7 @@ class ASLM_controller:
         autofocus_plot_pipe.close()
         self.model.release_pipe('autofocus_plot_pipe')
         
-        self.set_mode_of_sub('stop')
+        self.execute('stop_acquire')
     
     def move_stage(self, pos_dict):
         r""" Trigger the model to move the stage.

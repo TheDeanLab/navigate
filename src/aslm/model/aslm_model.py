@@ -446,8 +446,13 @@ class Model:
         #
         """
         self.current_channel = 0
+        # clear feature containers
+        if hasattr(self, 'signal_container'):
+            delattr(self, 'signal_container')
+        if hasattr(self, 'data_container'):
+            delattr(self, 'data_container')
         # dettach buffer in live mode in order to clear unread frames
-        if self.camera.camera_controller.is_acquiring:
+        if self.camera.is_acquiring:
             self.camera.close_image_series()
 
         # close shutter
@@ -788,6 +793,15 @@ class Model:
         # Restore stage position
         self.move_stage({'z_abs': restore_z}, wait_until_done=True)  # Update position
 
+    def run_single_channel_acquisition_with_features(self, target_channel=1):
+        # if not hasattr(self, 'signal_container'):
+        #     self.run_single_channel_acquisition(target_channel)
+        #     return
+        
+        self.signal_container.reset()
+        while not self.signal_container.end_flag:
+            self.run_single_channel_acquisition(target_channel)
+    
     def change_resolution(self, args):
         resolution_value = args[0]
 

@@ -38,6 +38,9 @@ from queue import Queue
 import numpy as np
 import threading
 
+# Local imports
+from aslm.model.model_features.alsm_feature_container import load_features
+
 class Autofocus():
     def __init__(self, model):
         self.model = model
@@ -56,30 +59,32 @@ class Autofocus():
                                             'main': self.in_func_data,
                                             'end': self.end_func_data},
                              'node': {'node_type': 'multi-step',
-                                        'wait_next': True },                                
+                                        'wait_next': True,
+                                        'device_related': True },                                
                             }
 
     def run(self, *args):
-        # self.model.experiment.MicroscopeState = args[0]
-        # self.model.experiment.AutoFocusParameters = args[1]
-        # frame_num = self.get_autofocus_frame_num()
-        # if frame_num < 1:
-        #     return
-        # self.model.prepare_acquisition()  # Opens correct shutter and puts all signals to false
-        # self.focus_pos = args[2]  # Current position
+        self.model.experiment.MicroscopeState = args[0]
+        self.model.experiment.AutoFocusParameters = args[1]
+        frame_num = self.get_autofocus_frame_num()
+        if frame_num < 1:
+            return
+        self.model.prepare_acquisition()  # Opens correct shutter and puts all signals to false
+        
+        # load Autofocus
+        self.model.signal_container, self.model.data_container = load_features(self.model, [[{'name': Autofocus}]])
 
-        # self.model.signal_thread = threading.Thread(target=self.model.run_single_acquisition,
-        #                                         kwargs={'target_channel': self.target_channel, 'snap_func': self.snap_image_with_autofocus},
-        #                                         name='Autofocus Signal')
+        self.model.signal_thread = threading.Thread(target=self.model.run_single_channel_acquisition_with_features,
+                                                kwargs={'target_channel': self.target_channel},
+                                                name='Autofocus Signal')
 
-        # self.model.data_thread = threading.Thread(target=self.model.run_data_process,
-        #                                     args=(frame_num, self.pre_func_data, self.in_func_data, self.end_func_data,),
-        #                                     name='Autofocus Data')
+        self.model.data_thread = threading.Thread(target=self.model.run_data_process,
+                                            args=(frame_num+1,),
+                                            name='Autofocus Data')
 
-        # # Start Threads
-        # self.model.signal_thread.start()
-        # self.model.data_thread.start()
-        pass
+        # Start Threads
+        self.model.signal_thread.start()
+        self.model.data_thread.start()
 
     def get_autofocus_frame_num(self):
         """
@@ -190,10 +195,8 @@ class Autofocus():
 
     def end_func_data(self):
         print('data:', len(self.plot_data), self.total_frame_num)
-        if len(self.plot_data) < self.total_frame_num:
+        if self.get_frames_num <= self.total_frame_num:
             return False
-        # send out the best focus frame id
-        self.model.show_img_pipe.send(self.target_frame_id)
         # send out plot data
         plot_data = np.asarray(self.plot_data)
         self.model.autofocus_plot_pipe.send(plot_data) # Sending controller plot data

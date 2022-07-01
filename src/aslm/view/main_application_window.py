@@ -145,4 +145,3 @@ if __name__ == '__main__':
     root = tk.Tk()
     Main_App(root)
     root.mainloop()
-    

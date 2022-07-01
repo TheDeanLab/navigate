@@ -46,8 +46,8 @@ from aslm.model.devices.camera.camera_base import CameraBase
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-class HamamatsuOrca(CameraBase):
 
+class HamamatsuOrca(CameraBase):
     def __init__(self, camera_id, model, experiment, verbose=False):
         super().__init__(camera_id, model, experiment, verbose)
 
@@ -88,6 +88,8 @@ class HamamatsuOrca(CameraBase):
                                                    self.model.CameraParameters['y_pixels'])
         self.camera_controller.set_property_value("image_width",
                                                    self.model.CameraParameters['x_pixels'])
+
+        self.is_acquiring = False
 
         if self.verbose:
             print("Hamamatsu Camera Class Initialized")
@@ -207,7 +209,6 @@ class HamamatsuOrca(CameraBase):
             readout_time = exposure_time - 1 / (exposure_time + (vn+10)*h)
 
         return readout_time, max_frame_rate
-
 
     def set_exposure_time(self, exposure_time):
         """

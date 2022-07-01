@@ -38,6 +38,7 @@ from queue import Empty
 import random
 import time
 import logging
+import os
 
 import numpy as np
 from scipy.fftpack import dctn
@@ -140,9 +141,14 @@ class Debug_Module:
         # autofocus
         feature_list.append([[{'name': Autofocus}]])
 
+        # feature_list.append([[{'name': Dummy_Detective}, {'name': ImageWriter, 'args':('sub\\sub2',)}, {'name': Dummy_Detective}],[{'name':ImageWriter, 'args':('sub',)}, {'name':ImageWriter}]])
+
         self.model.experiment.MicroscopeState = args[0]
         self.model.prepare_acquisition()
         self.model.experiment.Saving['save_directory'] = 'temp\\images'
+
+        if not os.path.exists('temp\\images\\sub\\sub2'):
+            os.makedirs('temp\\images\\sub\\sub2')
 
         # load features
         self.model.signal_container, self.model.data_container = load_features(self.model, feature_list[args[2]])
@@ -254,12 +260,13 @@ class Debug_Module:
         
 
     def send_signals(self, signal_num):
-        channel_num = len(self.model.experiment.MicroscopeState['channels'].keys())
+        channel_num = 1 #len(self.model.experiment.MicroscopeState['channels'].keys())
         i = 0
         while i < signal_num and not self.model.stop_acquisition:
-            self.model.signal_container.reset()
-            while not self.model.signal_container.end_flag:
-                self.model.run_single_acquisition()
+            # self.model.signal_container.reset()
+            # while not self.model.signal_container.end_flag:
+            #     self.model.run_single_channel_acquisition(1)
+            self.model.run_single_channel_acquisition_with_features(1)
             i += channel_num
             print('sent out', i, 'signals(', signal_num, ')!!!!!')
         print('send signal ends!!!!')

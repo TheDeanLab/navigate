@@ -1,7 +1,4 @@
-"""
-ASLM data acquisition card communication classes.
-
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -51,81 +48,100 @@ logger = logging.getLogger(p)
 
 
 class NIDAQ(DAQBase):
-    def __init__(self, model, experiment, etl_constants, verbose=False):
-        super().__init__(model, experiment, etl_constants, verbose)
+    r"""NIDAQ class for Data Acquisition (DAQ).
+
+    Attributes
+    ----------
+    configuration : Session
+        Global configuration of the microscope
+    experiment : Session
+        Experiment configuration of the microscope
+    etl_constants : Dict
+        Dictionary with all of the wavelength, magnification, and imaging mode-specific amplitudes/offsets
+    verbose : Boolean
+        Verbosity
+    ...
+    """
+    def __init__(self, configuration, experiment, etl_constants, verbose=False):
+        super().__init__(configuration, experiment, etl_constants, verbose)
 
     def __del__(self):
         pass
 
     def create_camera_task(self, exposure_time):
+        r"""Set up the camera trigger task.
+
+        Parameters
+        ----------
+        exposure_time : float
+            Duration of camera exposure.
         """
-        # Set up the camera trigger
-        # Calculate camera high time and initial delay.
-        # Disadvantage: high time and delay can only be set after a task has been created
-        """
-        # Configure camera triggers
-        camera_trigger_out_line = self.model.DAQParameters['camera_trigger_out_line']
+        camera_trigger_out_line = self.configuration.DAQParameters['camera_trigger_out_line']
         self.camera_high_time = 0.004  # (self.camera_pulse_percent / 100) * (exposure_time/1000)  # self.sweep_time
         self.camera_delay = (self.camera_delay_percent / 100) * (exposure_time/1000)  # * 0.01 * self.sweep_time
 
         self.camera_trigger_task.co_channels.add_co_pulse_chan_time(camera_trigger_out_line,
                                                                     high_time=self.camera_high_time,
                                                                     initial_delay=self.camera_delay)
-        trigger_source = self.model.DAQParameters['trigger_source']
+        trigger_source = self.configuration.DAQParameters['trigger_source']
         self.camera_trigger_task.triggers.start_trigger.cfg_dig_edge_start_trig(trigger_source)
 
     def create_master_trigger_task(self):
-        """
-        # Set up the DO master trigger task
-        """
-        master_trigger_out_line = self.model.DAQParameters['master_trigger_out_line']
+        r"""Set up the DO master trigger task."""
+        master_trigger_out_line = self.configuration.DAQParameters['master_trigger_out_line']
         self.master_trigger_task.do_channels.add_do_chan(master_trigger_out_line,
                                                          line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
 
     def create_galvo_etl_task(self):
-        """
-        # Set up the Galvo and electrotunable lens - Each start with the trigger_source.
-        PXI6259/ao0:3 -> 4 channels
-        """
+        r"""Create galvo and ETL tasks.
+
+        All waveforms initiated by the trigger_source. PXI6259/ao0:3 -> 4 channels"""
         # TODO: Does this task line change for the right galvo?
-        galvo_etl_task_line = self.model.DAQParameters['galvo_etl_task_line']
+        galvo_etl_task_line = self.configuration.DAQParameters['galvo_etl_task_line']
         self.galvo_etl_task.ao_channels.add_ao_voltage_chan(galvo_etl_task_line)
         self.galvo_etl_task.timing.cfg_samp_clk_timing(rate=self.sample_rate,
                                                        sample_mode=AcquisitionType.FINITE,
                                                        samps_per_chan=self.samples)
 
-        trigger_source = self.model.DAQParameters['trigger_source']
+        trigger_source = self.configuration.DAQParameters['trigger_source']
         self.galvo_etl_task.triggers.start_trigger.cfg_dig_edge_start_trig(trigger_source)
 
-
     def start_tasks(self):
-        """
-        # Start the tasks for camera triggering and analog outputs
-        # If the tasks are configured to be triggered, they won't output any signals until run_tasks() is called.
-        """
+        r"""Start the tasks for camera triggering and analog outputs
+
+        If the tasks are configured to be triggered, they won't start until run_tasks() is called."""
+
         self.camera_trigger_task.start()
         self.galvo_etl_task.start()
 
     def stop_tasks(self):
-        """
-        # Stop the tasks for triggering, analog and counter outputs.
-        """
+        r"""Stop the tasks for triggering, analog and counter outputs."""
+
         self.galvo_etl_task.stop()
         self.camera_trigger_task.stop()
         self.master_trigger_task.stop()
 
     def close_tasks(self):
-        """
-        # Close the tasks for triggering, analog, and counter outputs.
-        """
+        r"""Close the tasks for triggering, analog, and counter outputs."""
+
         self.galvo_etl_task.close()
         self.camera_trigger_task.close()
         self.master_trigger_task.close()
 
     def prepare_acquisition(self, channel_key, exposure_time):
+        r"""Prepare the acquisition.
+
+        Creates and configures the DAQ tasks.
+        Writes the waveforms to each task.
+
+        Parameters
+        ----------
+        channel_key : int
+            Index of channel to be imaged.
+        exposure_time : float
+            Camera exposure duration.
         """
-        # Initialize the nidaqmx tasks.
-        """
+
         self.camera_trigger_task = nidaqmx.Task()
         self.master_trigger_task = nidaqmx.Task()
         self.galvo_etl_task = nidaqmx.Task()
@@ -155,29 +171,25 @@ class NIDAQ(DAQBase):
         self.write_waveforms_to_tasks()
 
     def run_acquisition(self):
-        """
-        # Run the tasks for triggering, analog and counter outputs.
-        # the master trigger initiates all other tasks via a shared trigger
-        # For this to work, all analog output and counter tasks have to be started so
-        # that they are waiting for the trigger signal.
-        """
+        r"""Run DAQ Acquisition.
+        Run the tasks for triggering, analog and counter outputs.
+        The master trigger initiates all other tasks via a shared trigger
+        For this to work, all analog output and counter tasks have to be started so that
+        they are waiting for the trigger signal."""
         self.start_tasks()
         self.master_trigger_task.write([False, True, True, True, False], auto_start=True)
         self.galvo_etl_task.wait_until_done()
         self.camera_trigger_task.wait_until_done()
 
     def stop_acquisition(self):
+        r"""Stop Acquisition."""
         self.stop_tasks()
         self.close_tasks()
 
     def write_waveforms_to_tasks(self):
-        """
-        # Write the galvo, etl, and laser waveforms to the NI DAQ tasks
-        """
+        r"""Write the galvo, etl, and laser waveforms to each task."""
         self.galvo_etl_task.write(self.galvo_and_etl_waveforms)
 
     def set_camera(self, camera):
-        """
-        # connect camera with daq: only in syntheticDAQ
-        """
+        r"""Connect camera with daq: only in syntheticDAQ."""
         pass

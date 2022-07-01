@@ -57,6 +57,7 @@ class stack_acq_frame(ttk.Labelframe):
         stack_acq.step_size_spinbox = ttk.Spinbox(
             stack_acq.step_size_frame,
             textvariable=stack_acq.step_size_spinval,
+            from_=-50000.0,
             increment=0.5,
             width=14
         )
@@ -72,6 +73,7 @@ class stack_acq_frame(ttk.Labelframe):
         stack_acq.start_pos_spinbox = ttk.Spinbox(
             stack_acq.start_pos_frame,
             textvariable=stack_acq.start_pos_spinval,
+            from_=-50000.0,
             increment=0.5,
             width=14
         )
@@ -83,6 +85,7 @@ class stack_acq_frame(ttk.Labelframe):
         stack_acq.start_foc_spinbox = ttk.Spinbox(
             stack_acq.start_pos_frame,
             textvariable=stack_acq.start_foc_spinval,
+            from_=-50000.0,
             increment=0.5,
             width=14
         )
@@ -104,6 +107,7 @@ class stack_acq_frame(ttk.Labelframe):
         stack_acq.end_pos_spinbox = ttk.Spinbox(
             stack_acq.end_pos_frame,
             textvariable=stack_acq.end_pos_spinval,
+            from_=-50000.0,
             increment=0.5,
             width=14
         )
@@ -115,6 +119,7 @@ class stack_acq_frame(ttk.Labelframe):
         stack_acq.end_foc_spinbox = ttk.Spinbox(
             stack_acq.end_pos_frame,
             textvariable=stack_acq.end_foc_spinval,
+            from_=-50000.0,
             increment=0.5,
             width=14
         )

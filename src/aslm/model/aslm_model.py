@@ -735,13 +735,13 @@ class Model:
         restore_z = self.stages.z_pos
 
         # z-positions
-        stack_z_origin = float(microscope_state.get('stack_z_origin', 0))
+        stack_z_origin = float(microscope_state.get('stack_z_origin', self.experiment.StageParameters['z']))
         z_pos = np.linspace(float(microscope_state['start_position']) + stack_z_origin,
                             float(microscope_state['end_position']) + stack_z_origin,
                             int(microscope_state['number_z_steps']))
 
         # corresponding focus positions
-        stack_focus_origin = float(microscope_state.get('stack_focus_origin', 0))
+        stack_focus_origin = float(microscope_state.get('stack_focus_origin', self.experiment.StageParameters['f']))
         f_pos = np.linspace(float(microscope_state['start_focus']) + stack_focus_origin,
                             float(microscope_state['end_focus']) + stack_focus_origin,
                             int(microscope_state['number_z_steps']))

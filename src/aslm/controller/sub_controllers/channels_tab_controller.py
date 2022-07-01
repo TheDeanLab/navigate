@@ -39,7 +39,7 @@ from aslm.controller.sub_controllers.channel_setting_controller import Channel_S
 from aslm.controller.sub_controllers.multi_position_controller import Multi_Position_Controller
 
 import logging
-from pathlib import Path
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -155,7 +155,7 @@ class Channels_Tab_Controller(GUI_Controller):
         self.view.stack_timepoint_frame.stack_pause_spinbox.validate()
         self.view.stack_timepoint_frame.exp_time_spinbox.validate()
 
-        self.stack_cycling_val.set('Per Z' if microscope_state['stack_cycling_mode']=='per_z' else 'Per Stack')
+        self.stack_cycling_val.set('Per Z' if microscope_state['stack_cycling_mode'] == 'per_z' else 'Per Stack')
         self.channel_setting_controller.set_experiment_values(microscope_state['channels'])
 
         # positions
@@ -485,7 +485,16 @@ class Channels_Tab_Controller(GUI_Controller):
 
     def get_info(self, vals, value_dict={}):
         """
-        # get values from a list of variables
+        Gets and assigns parameters in vals to corresponding parameter in value_dict.
+
+        TODO: perhaps rename to map_values or the like?
+
+        Parameters
+        ----------
+        vals : dict
+            Dictionary of parameters (source)
+        value_dict : dict
+            Dictionary of parameters (target)
         """
         for name in vals:
             value_dict[name] = vals[name].get()

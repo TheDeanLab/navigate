@@ -35,7 +35,6 @@ POSSIBILITY OF SUCH DAMAGE.
 
 # Standard Library Imports
 import logging
-import time
 
 # Third Party Imports
 
@@ -52,19 +51,3 @@ class ZoomBase:
         self.verbose = verbose
         self.zoomdict = model.ZoomParameters['zoom_position']
         self.zoomvalue = None
-
-    def set_zoom(self, zoom_position, wait_until_done=False):
-        if zoom_position in self.zoomdict:
-            if self.verbose:
-                print('Setting zoom to {}'.format(zoom_position))
-            logger.debug(f"Setting zoom to {zoom_position}")
-            if wait_until_done:
-                time.sleep(1)
-
-    def move(self, position, wait_until_done=False):
-        return True
-
-    def read_position(self):
-        return True
-
-

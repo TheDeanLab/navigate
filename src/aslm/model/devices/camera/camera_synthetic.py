@@ -54,7 +54,7 @@ class SyntheticCameraController:
         self.is_acquiring = False
 
     def get_property_value(self, name):
-        """
+        """W
         Provides the idprop value after looking it up in the property_dict
         """
         # return self.prop_getvalue(property_dict[name])
@@ -68,11 +68,10 @@ class SyntheticCamera(CameraBase):
 
         self.x_pixels = experiment.CameraParameters['x_pixels']
         self.y_pixels = experiment.CameraParameters['y_pixels']
-
+        self.is_acquiring = False
         self._mean_background_count = 100.0
         self._noise_sigma = noise_model.compute_noise_sigma(Ib=self._mean_background_count)
         self.blah = noise_model.compute_noise_sigma
-
         self.camera_controller = SyntheticCameraController()
 
         if self.verbose:

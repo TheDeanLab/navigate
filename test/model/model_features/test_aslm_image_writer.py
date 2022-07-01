@@ -7,7 +7,7 @@ import pytest
 def test_zarr_byslice(self):
 
 
-    '''
+    """
     This function will create a simulated 3D data set that is in the shape of a capital F. The pixel size can be set to any desired size
     for testing.
     Numpy linspace and meshgrid are used to create the F shape. A boolean constraint is set to create the shape directly.
@@ -18,7 +18,7 @@ def test_zarr_byslice(self):
     The final check is to loop thru each frame and do a check to see if they all equal the original letter F we gave at
     the beginning. 
     A fail message will appear upon failure of test ie one of the frames did not match
-    '''
+    """
     
     # Test Setup
     dummy_model = get_dummy_model()

@@ -45,9 +45,9 @@ logger = logging.getLogger(p)
 
 # TODO: Should we rename to remote_focus_popup?
 class remote_popup():
-    '''
+    """
     #### Class creates the popup that has the ETL or voice coil parameters.
-    '''
+    """
 
     def __init__(self, root, *args, **kwargs):
         # Creating popup window with this name and size/placement, PopUp is a
@@ -72,7 +72,7 @@ class remote_popup():
         Grid.columnconfigure(content_frame, 'all', weight=1)
         Grid.rowconfigure(content_frame, 'all', weight=1)
 
-        '''Creating the widgets for the popup'''
+        """Creating the widgets for the popup"""
         # Dictionary for all the variables
         self.inputs = {}
         self.buttons = {}

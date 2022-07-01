@@ -372,8 +372,8 @@ class _WaitingList:
 
 
 class _ProxyObjectPipeLock:
-    '''Raises an educational exception (rather than blocking) when you try
-       to acquire a locked lock.'''
+    """Raises an educational exception (rather than blocking) when you try
+       to acquire a locked lock."""
 
     def __init__(self):
         self.lock = threading.Lock()
@@ -744,12 +744,12 @@ if mp.get_start_method(allow_none=True) != 'spawn':
 
 
 class _Tests():
-    '''
+    """
     Method names that start with `test_` will be run.
 
     Use: _test_... method names for tests that are called as part
     of a larger group.
-    '''
+    """
     class TestClass:
         def __init__(self, *args, **kwargs):
             for k, v in kwargs.items():

@@ -46,9 +46,9 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 class autofocus_popup():
-    '''
+    """
     #### Class creates the popup to configure autofocus parameters.
-    '''
+    """
 
     def __init__(self, root, *args, **kwargs):
         # Creating popup window with this name and size/placement, PopUp is a
@@ -64,7 +64,7 @@ class autofocus_popup():
         content_frame = self.popup.get_frame()   
         
 
-        '''Creating the widgets for the popup'''
+        """Creating the widgets for the popup"""
         # Dictionary for all the variables
         self.inputs = {}
         self.stage_vars = [BooleanVar(False), BooleanVar(False)]

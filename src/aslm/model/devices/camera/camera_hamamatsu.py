@@ -282,12 +282,12 @@ class HamamatsuOrca(CameraBase):
         return self.camera_controller.get_frames()
 
     def get_minimum_waiting_time(self):
-        '''
+        """
         # this function will get timings from the camera device
         # cyclic_trigger_period, minimum_trigger_blank, minimum_trigger_interval
         # 'cyclic_trigger_period' of current device is 0
         # according to the document, trigger_blank should be bigger than trigger_interval.
-        '''
+        """
         # cyclic_trigger = self.camera_controller.get_property_value('cyclic_trigger_period')
         trigger_blank = self.camera_controller.get_property_value('minimum_trigger_blank')
         # trigger_interval = self.camera_controller.get_property_value('minimum_trigger_interval')

@@ -79,7 +79,7 @@ class stage_control_tab(ttk.Frame):
         stage_control_tab.goto_frame_label.pack() #For visual mockup purposes
 
 
-        '''
+        """
         Grid for frames
                 1   2   3   4   5
                 6   7   8   9   10 
@@ -90,7 +90,7 @@ class stage_control_tab(ttk.Frame):
         theta is 8
         focus is 9
         goto is 10
-        '''
+        """
 
         # Formatting
         Grid.columnconfigure(stage_control_tab.position_frame, 'all', weight=1)

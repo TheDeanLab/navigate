@@ -138,27 +138,27 @@ class stack_acq_frame(ttk.Labelframe):
 
     # Getters
     def get_variables(self):
-        '''
+        """
         # This function returns a dictionary of all the variables that are tied to each widget name.
         The key is the widget name, value is the variable associated.
-        '''
+        """
         variables = {}
         for key, widget in self.inputs.items():
             variables[key] = widget.get_variable()
         return variables
 
     def get_widgets(self):
-        '''
+        """
         # This function returns the dictionary that holds the input widgets.
         The key is the widget name, value is the LabelInput class that has all the data.
-        '''
+        """
         return self.inputs
 
     def get_buttons(self):
-        '''
+        """
         # This function returns the dictionary that holds the buttons.
         The key is the button name, value is the button.
-        '''
+        """
         return self.buttons
 
 

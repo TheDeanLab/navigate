@@ -90,9 +90,9 @@ class Model:
             self.configuration.Devices['lasers'] = 'SyntheticLasers'
 
         # Move device initialization steps to multiple threads
-        '''
+        """
         Each of the below represents self.camera or the respective device
-        '''
+        """
         threads_dict = {
             'filter_wheel': ResultThread(target=startup_functions.start_filter_wheel,
                                          args=(self.configuration, self.verbose,)).start(),
@@ -386,9 +386,9 @@ class Model:
             self.end_acquisition()
 
         elif command == 'debug':
-            '''
+            """
             Debug Operation Mode
-            '''
+            """
             self.debug.debug(*args, **kwargs)
 
     def move_stage(self, pos_dict, wait_until_done=False):

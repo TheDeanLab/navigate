@@ -104,9 +104,9 @@ class Camera_View_Controller(GUI_Controller):
         self.bit_depth = 8  # bit-depth for PIL presentation.
 
     def initialize(self, name, data):
-        '''
+        """
         # Function that sets widgets based on data given from main controller/config
-        '''
+        """
         # Pallete section (colors, autoscale, min/max counts)
         # keys = ['Frames to Avg', 'Image Max Counts', 'Channel']
         if name == 'minmax':

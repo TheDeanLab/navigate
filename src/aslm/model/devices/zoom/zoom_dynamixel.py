@@ -112,7 +112,7 @@ class DynamixelZoom(ZoomBase):
             logger.error(f"Zoom designation, {zoom}, not in the configuration")
             raise ValueError('Zoom designation not in the configuration')
         logger.debug(f"Changed DynamixelZoom to {zoom}")
-        logger.debug(f"DynamixelZoom position: {self.read_position()})")
+        logger.debug(f"DynamixelZoom position: {self.read_position()}")
 
     def move(self, position, wait_until_done=False):
         r""" Move the DynamixelZoom Servo

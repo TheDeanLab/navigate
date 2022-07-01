@@ -53,33 +53,55 @@ class SyntheticZoom(ZoomBase):
 
     def __init__(self, model, verbose):
         super().__init__(model, verbose)
-        if self.verbose:
-            print('Synthetic Zoom Initialized')
-        logger.debug("Synethetic Zoom Initialized")
+        logger.debug("SyntheticZoom Servo Initialized")
+
+    def __del__(self):
+        logger.debug("SyntheticZoom Servo instance Deleted")
+        pass
 
     def set_zoom(self, zoom, wait_until_done=False):
-        """
+        r""" Change the SyntheticZoom Servo.
+
+        Confirms tha the zoom position is available in the zoomdict
+
+        Parameters
+        ----------
+        zoom : dict
+            Zoom dictionary
+        wait_until_done : Boolean
+            Delay parameter.
+
         # Changes zoom after checking that the commanded value exists
         """
         if zoom in self.zoomdict:
             self.zoomvalue = zoom
         else:
+            logger.error(f"Zoom designation, {zoom}, not in the configuration")
             raise ValueError('Zoom designation not in the configuration')
-            logger.error("Zoom designation not in the configuration")
-        if self.verbose:
-            print('Zoom set to {}'.format(zoom))
-        logger.debug(f"Zoom set to {zoom}")
+        logger.debug(f"Changed SyntheticZoom to {zoom}")
+        logger.debug(f"SyntheticZoom position: {self.read_position()}")
 
     def move(self, position=0, wait_until_done=False):
-        if self.verbose:
-            print("Changing Virtual Zoom")
-        logger.debug("Changing Virtual Zoom")
+        r""" Move the SyntheticZoom Servo
+
+        Parameters
+        ----------
+        position : int
+            Location to move to.
+        wait_until_done : Boolean
+            Delay parameter
+        """
+        logger.debug(f"Changing SyntheticZoom to {zoom}")
+        pass
 
     def read_position(self):
+        r"""Read the position of the Zoom Servo
+
+        Returns
+        -------
+        cur_position : int
+            Current position of SyntheticZoom
         """
-        # Returns position as an int between 0 and 4096
-        # Opens & closes the port
-        """
-        if self.verbose:
-            print("Reading Virtual Zoom Position")
-        logger.debug("Reading Virtual Zoom Position")
+        cur_position = None
+        logger.debug(f"SyntheticZoom position: {cur_position}")
+        return cur_position

@@ -34,24 +34,49 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 from tkinter import filedialog
 
-from aslm.controller.sub_controllers.widget_functions import validate_wrapper
 from aslm.controller.sub_controllers.gui_controller import GUI_Controller
 from aslm.controller.aslm_controller_functions import save_yaml_file, combine_funcs
 
 import logging
-from pathlib import Path
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+
 # TODO: Should we rename to remote_focus_popup_controller?
 class Etl_Popup_Controller(GUI_Controller):
+    def __init__(self, view, parent_controller, remote_focus_dict, etl_file_name, configuration_dict, galvo_dict,
+                 verbose=False):
+        """
+        Controller for remote focus parameters.
 
-    def __init__(self, view, parent_controller, verbose=False, etl_setting=None, etl_file_name=None, galvo_setting=None):
+        Parameters
+        ----------
+        view : object
+            GUI element containing widgets and variables to control. Likely tk.Toplevel-derived.
+        parent_controller : ASLM_controller
+            The main controller.
+        remote_focus_dict : dict
+            Dictionary of remote focus device parameters for each zoom/wavelength.
+        etl_file_name : str
+            Location of file where remote_focus_dict is read from/saved to.
+        configuration_dict : dict
+            Dictionary containing microscope hardware configuration, such as voltage limits for remote focus hardware.
+        galvo_dict : dict
+            Dictionary containing galvo frequency, amplitude, offset. From the experiment dictionary.
+        verbose : bool, default False
+            Display additional feedback in standard output.
+
+        Returns
+        -------
+        None
+        """
         super().__init__(view, parent_controller, verbose)
 
-        self.resolution_info = None
-        self.experiment = None
+        self.resolution_info = remote_focus_dict
+        self.configuration = configuration_dict
+        self.galvo_setting = galvo_dict
         self.etl_file_name = etl_file_name
         # get mode and mag widgets
         self.widgets = self.view.get_widgets()
@@ -63,11 +88,10 @@ class Etl_Popup_Controller(GUI_Controller):
         self.in_initialize = True
         self.mode = 'stop'
 
-        
         # event id list
         self.event_ids = {}
-        for mode in etl_setting.ETLConstants:
-            for mag in etl_setting.ETLConstants[mode]:
+        for mode in self.resolution_info.ETLConstants:
+            for mag in self.resolution_info.ETLConstants[mode]:
                 self.event_ids[mode+'_'+mag] = None
 
         # event combination
@@ -88,41 +112,65 @@ class Etl_Popup_Controller(GUI_Controller):
         self.view.popup.protocol("WM_DELETE_WINDOW",
                                  combine_funcs(self.save_etl_info, self.view.popup.dismiss,
                                                lambda: delattr(self.parent_controller, 'etl_controller')))
-        
-        self.initialize(etl_setting, galvo_setting)
 
-    def initialize(self, setting_dict, galvo_setting):
-        """
-        # initialize widgets with data
-        """
-        self.resolution_info = setting_dict
-        self.galvo_setting = galvo_setting
-        self.widgets['Mode'].widget['values'] = list(setting_dict.ETLConstants.keys())
+        # Populate widgets
+        self.widgets['Mode'].widget['values'] = list(self.resolution_info.ETLConstants.keys())
         print(self.widgets['Mode'].widget['values'])
         self.widgets['Mode'].widget['state'] = 'readonly'
         self.widgets['Mag'].widget['state'] = 'readonly'
 
-        # set ranges of value for those lasers
-        for laser in self.lasers:
-            self.widgets[laser + ' Amp'].widget.configure(from_=0)
-            self.widgets[laser + ' Amp'].widget.configure(increment=0.01)
-            self.widgets[laser + ' Amp'].widget.set_precision(-2)
-            self.widgets[laser + ' Off'].widget.configure(from_=0)
-            self.widgets[laser + ' Off'].widget.configure(increment=0.01)
-            self.widgets[laser + ' Off'].widget.set_precision(-2)
+        self.configure_widget_range()
 
-        self.widgets['Galvo Amp'].widget.configure(from_=-5)
-        self.widgets['Galvo Amp'].widget.configure(to=5)
-        self.widgets['Galvo Amp'].widget.configure(increment=0.01)
-        self.widgets['Galvo Amp'].widget.set_precision(-2)
-        self.widgets['Galvo Off'].widget.configure(from_=-5)
-        self.widgets['Galvo Off'].widget.configure(to=5)
-        self.widgets['Galvo Off'].widget.configure(increment=0.01)
-        self.widgets['Galvo Off'].widget.set_precision(-2)
+    def configure_widget_range(self):
+        """
+        Update the widget ranges and precisions based on the current resolution mode.
+        """
+
+        if self.resolution == 'high':
+            precision = -3
+            increment = 0.001
+            focus_prefix = 'r'
+        else:
+            # resolution is low
+            precision = -2
+            increment = 0.01
+            focus_prefix = 'l'
+
+        laser_min = self.configuration.RemoteFocusParameters[f'remote_focus_{focus_prefix}_min_ao']
+        laser_max = self.configuration.RemoteFocusParameters[f'remote_focus_{focus_prefix}_max_ao']
+        galvo_min = self.configuration.GalvoParameters[f'galvo_{focus_prefix}_min_ao']
+        galvo_max = self.configuration.GalvoParameters[f'galvo_{focus_prefix}_max_ao']
+
+        # set ranges of value for those lasers
+
+        for laser in self.lasers:
+            self.widgets[laser + ' Amp'].widget.configure(from_=laser_min)
+            self.widgets[laser + ' Amp'].widget.configure(to=laser_max)
+            self.widgets[laser + ' Amp'].widget.configure(increment=increment)
+            self.widgets[laser + ' Amp'].widget.set_precision(precision)
+            # TODO: The offset bounds should adjust based on the amplitude bounds,
+            #       so that amp + offset does not exceed the bounds. Can be done
+            #       in update_etl_setting()
+            self.widgets[laser + ' Off'].widget.configure(from_=laser_min)
+            self.widgets[laser + ' Off'].widget.configure(to=laser_max)
+            self.widgets[laser + ' Off'].widget.configure(increment=increment)
+            self.widgets[laser + ' Off'].widget.set_precision(precision)
+
+        self.widgets['Galvo Amp'].widget.configure(from_=galvo_min)
+        self.widgets['Galvo Amp'].widget.configure(to=galvo_max)
+        self.widgets['Galvo Amp'].widget.configure(increment=increment)
+        self.widgets['Galvo Amp'].widget.set_precision(precision)
+        # TODO: The offset bounds should adjust based on the amplitude bounds,
+        #       so that amp + offset does not exceed the bounds. Can be done
+        #       in update_etl_setting()
+        self.widgets['Galvo Off'].widget.configure(from_=galvo_min)
+        self.widgets['Galvo Off'].widget.configure(to=galvo_max)
+        self.widgets['Galvo Off'].widget.configure(increment=increment)
+        self.widgets['Galvo Off'].widget.set_precision(precision)
 
         self.widgets['Galvo Freq'].widget.configure(from_=0)
-        self.widgets['Galvo Freq'].widget.configure(increment=0.5)
-        self.widgets['Galvo Freq'].widget.set_precision(-1)
+        self.widgets['Galvo Freq'].widget.configure(increment=increment)
+        self.widgets['Galvo Freq'].widget.set_precision(precision)
 
     def set_experiment_values(self, resolution_value):
         """
@@ -166,8 +214,10 @@ class Etl_Popup_Controller(GUI_Controller):
         # get magnification setting
         self.mag = self.widgets['Mag'].widget.get()
         for laser in self.lasers:
-            self.variables[laser + ' Amp'].set(self.resolution_info.ETLConstants[self.resolution][self.mag][laser]['amplitude'])
-            self.variables[laser + ' Off'].set(self.resolution_info.ETLConstants[self.resolution][self.mag][laser]['offset'])
+            self.variables[laser + ' Amp'].set(self.resolution_info.ETLConstants
+                                               [self.resolution][self.mag][laser]['amplitude'])
+            self.variables[laser + ' Off'].set(self.resolution_info.ETLConstants
+                                               [self.resolution][self.mag][laser]['offset'])
 
         focus_prefix = 'r' if self.resolution == 'high' else 'l'
 
@@ -178,6 +228,8 @@ class Etl_Popup_Controller(GUI_Controller):
         if not self.in_initialize:
             # update resolution value in central controller (menu)
             self.parent_controller.resolution_value.set('high' if self.resolution == 'high' else self.mag)
+            # reconfigure widgets
+            self.configure_widget_range()
 
     def update_etl_setting(self, name, laser, etl_name):
         r"""This function will update ETLConstants in memory
@@ -187,7 +239,9 @@ class Etl_Popup_Controller(GUI_Controller):
         def func(temp):
             self.parent_controller.execute('update_setting', 'resolution', temp)
 
-        # BUG Upon startup this will always run 0.63x, and when changing magnification it will run 0.63x before whatever mag is selected
+        # TODO: Is this still a bug?
+        # BUG Upon startup this will always run 0.63x, and when changing magnification it will run 0.63x
+        # before whatever mag is selected
         def func_laser(*args):
             value = self.resolution_info.ETLConstants[self.resolution][self.mag][laser][etl_name]
 
@@ -238,9 +292,7 @@ class Etl_Popup_Controller(GUI_Controller):
                         self.view.popup.after_cancel(self.event_ids[event_id_name])
                 except KeyError:
                     pass
-                # if value == '':
-                #     # TODO: Why is this check necessary?
-                #     value = 0.0
+
                 temp = {galvo_parameter: float(variable_value)}
                 self.event_ids[event_id_name] = self.view.popup.after(500, lambda: func(temp))
 
@@ -248,24 +300,30 @@ class Etl_Popup_Controller(GUI_Controller):
     
     def save_etl_info(self):
         """
-        # this function will save etl to new yaml file.
+        This function will save updated remote focus parameters to their yaml file.
+
+        TODO: This currently does not save the galvo parameters, even though they are controlled here.
+              Right now, these must be saved in the experiment file separately.
         """
         errors = self.get_errors()
         if errors:
-            return # Dont save if any errors TODO needs testing
+            return  # Dont save if any errors TODO needs testing
 
         save_yaml_file('', self.resolution_info.serialize(), self.etl_file_name)
 
-    '''
-        Example for preventing submission of a field/controller. So if there is an error in any field that is supposed to have validation then the config cannot be saved
-    '''
+    """
+    Example for preventing submission of a field/controller. So if there is an error in any field that 
+    is supposed to have validation then the config cannot be saved.
+    """
     # TODO needs testing may also need to be moved to the remote_focus_popup class. Opinions welcome
     def get_errors(self):
-        '''Get a list of field errors in popup'''
+        """
+        Get a list of field errors in popup
+        """
 
         errors = {}
         for key, labelInput in self.widgets.items():
-            if hasattr(labelInput.widget,'trigger_focusout_validation'):
+            if hasattr(labelInput.widget, 'trigger_focusout_validation'):
                 labelInput.widget.trigger_focusout_validation()
             if labelInput.error.get():
                 errors[key] = labelInput.error.get()

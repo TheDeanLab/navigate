@@ -44,6 +44,7 @@ from pathlib import Path
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+
 class Acquire_Bar_Controller(GUI_Controller):
     def __init__(self, view, parent_controller, verbose=False):
         super().__init__(view, parent_controller, verbose)
@@ -153,9 +154,7 @@ class Acquire_Bar_Controller(GUI_Controller):
             # tell the controller to stop acquire(continuous mode)
             self.parent_controller.execute('stop_acquire')
         else:
-            # if the mode is 'live'
-            if self.mode == 'live':
-                self.view.acquire_btn.configure(text='Stop')
+            self.view.acquire_btn.configure(text='Stop')
             self.parent_controller.execute('acquire')
 
     def update_microscope_mode(self, *args):
@@ -173,8 +172,6 @@ class Acquire_Bar_Controller(GUI_Controller):
 
         """
         self.saving_settings['file_type'] = file_type.get()
-
-
 
     def launch_acquisition(self, popup_window):
         """
@@ -197,6 +194,9 @@ class Acquire_Bar_Controller(GUI_Controller):
 
             # Close the window
             popup_window.popup.dismiss(self.verbose)
+
+            # We are now acquiring
+            self.view.acquire_btn.configure(text='Stop')
 
     def exit_program(self):
         self.show_verbose_info("Exiting Program")

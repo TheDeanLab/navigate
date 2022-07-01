@@ -35,10 +35,13 @@ from pathlib import Path
 from tkinter import *
 from tkinter import ttk
 
+
 # Logger Setup
 p = __name__.split(".")[0]
 logger = logging.getLogger(p)
 
+#Local import
+from view.main_window_content.tabs.channels.stack_timepoint_settings import stack_timepoint_frame
 
 
 class AcquireBar(ttk.Frame):
@@ -66,7 +69,7 @@ class AcquireBar(ttk.Frame):
         self.pull_down['values'] = ('Continuous Scan', 'Z-Stack', 'Single Acquisition', 'Alignment', 'Projection')
         self.pull_down.current(0)
         self.pull_down.state(["readonly"])
-
+        print(self.pull_down.current(0))
         #  Progress Bar: Current Acquisitions and Overall
         self.progBar_frame = ttk.Frame(self)
 

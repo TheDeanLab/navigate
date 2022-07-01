@@ -37,6 +37,7 @@ POSSIBILITY OF SUCH DAMAGE.
 import sys
 from controller.sub_controllers.gui_controller import GUI_Controller
 from view.main_window_content.acquire_bar_frame.acquire_popup import Acquire_PopUp as acquire_popup
+from view.main_window_content.tabs.channels.stack_timepoint_settings import stack_timepoint_frame
 
 import logging
 from pathlib import Path
@@ -70,10 +71,14 @@ class Acquire_Bar_Controller(GUI_Controller):
         # gui event bind
         self.view.acquire_btn.config(command=self.launch_popup_window)
 
-        self.view.pull_down.bind(
+        self.view.pull_down.bind(  # bind the pull down menu to the update_microscope_mode function, observer event
             '<<ComboboxSelected>>',
             self.update_microscope_mode)
 
+        #self.view.pull_down.bind( 
+        #    '<<ComboboxSelected>>',
+        #    self.grey_out)
+#
         self.view.exit_btn.config(command=self.exit_program)
 
     def set_mode(self, mode):
@@ -86,7 +91,6 @@ class Acquire_Bar_Controller(GUI_Controller):
         reverse_dict = dict(
             map(lambda v: (v[1], v[0]), self.mode_dict.items()))
         self.view.pull_down.set(reverse_dict[mode])
-
         self.show_verbose_info('image mode is set to', mode)
 
     def get_mode(self):
@@ -157,7 +161,12 @@ class Acquire_Bar_Controller(GUI_Controller):
         # Gets the state of the pull-down menu and tell the central controller
         """
         self.mode = self.mode_dict[self.view.pull_down.get()]
-
+        settings = stack_timepoint_frame(self.view)
+        if self.mode == 'live' or self.mode == "Alignment":# alignment functionality not yet added as a mode
+            settings.save_check.state(["readonly"])
+            settings.exp_time_spinbox.state(["readonly"])
+            settings.stack_acq_spinbox.state(["readonly"])
+            settings.timepoint_interval_spinbox.state(["readonly"])
         self.show_verbose_info("The Microscope State is now:", self.get_mode())
 
     def launch_acquisition(self, popup_window):

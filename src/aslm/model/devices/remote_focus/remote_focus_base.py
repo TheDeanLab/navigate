@@ -1,7 +1,4 @@
-"""
-ASLM Voice Coil Model.
-
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,17 +31,23 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 
 #  Standard Library Imports
+import logging
 
 # Third Party Imports
 
 # Local Imports
 
 # # Logger Setup
-# p = __name__.split(".")[1]
-# logger = logging.getLogger(p)
+p = __name__.split(".")[1]
+logger = logging.getLogger(p)
 
 
 class RemoteFocusBase:
+    r"""RemoteFocusBase Class
+
+     Parent class for voice coil models.
+     """
+
     def __init__(self):
         pass
 

@@ -1,7 +1,4 @@
-"""
-ASLM Voice Coil Model.
-
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -36,6 +33,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #  Standard Library Imports
 import time
 import serial
+import logging
 
 # Third Party Imports
 
@@ -43,91 +41,129 @@ import serial
 from aslm.model.devices.remote_focus.remote_focus_base import RemoteFocusBase
 
 # # Logger Setup
-# p = __name__.split(".")[1]
-# logger = logging.getLogger(p)
+p = __name__.split(".")[1]
+logger = logging.getLogger(p)
 
 
 class RemoteFocusEquipmentSolutions(RemoteFocusBase):
-    """
+    r"""RemoteFocusEquipmentSolutions Class
+
     The SCA814 has a single character input buffer that can be overflowed if the proper steps are not taken.
     To avoid overflowing the input buffer the user should send a single character at a time and wait for that
     same character to be echoed back by the controller. While not necessary, it is advisable to verify that the
     character received from the controller is the same character sent. Once the character is received the next
-    character can be processed.
+    character can be processed. Uses pyserial: https://pyserial.readthedocs.io/en/latest/pyserial_api.html
+
+    Attributes
+    comport : str
+        COM port for communicating with the voice coil
+    baud_rate : int
+        Baud rate for communicating with the voice coil
+    byte_size : Other
+        Number of data bits
+    parity : Other
+        Enable parity checking
+    stop_bits : Other
+        Number of stop bits.
+    timeout : float
+        Timeout duration.
+    verbose : Boolean
+        Verbosity
+    read_on_init : Boolean
+        Establish connection upon initialization.
+    debug : Boolean
+        Debugging mode.  Prints statements for debugging.
+
+    Methods
+    -------
+    read_bytes()
+        Read bytes from the RemoteFocusEquipmentSolutions device.
+    send_command()
+        Send command to the RemoteFocusEquipmentSolutions device.
+    close_connection()
+        Close connection with the RemoteFocusEquipmentSolutions device.
     """
 
     def __init__(self, verbose):
         self.comport = 'COM1'
-        self.baudrate = 115200
-        self.bytesize = serial.EIGHTBITS
+        self.baud_rate = 115200
+        self.byte_size = serial.EIGHTBITS
         self.parity = serial.PARITY_NONE
-        self.stopBits = serial.STOPBITS_ONE
+        self.stop_bits = serial.STOPBITS_ONE
         self.timeout = 1.25
         self.verbose = verbose
-        self.init_finished = False
         self.read_on_init = True
+        self.debug = False
 
         # Open Serial Port
-        # https://pyserial.readthedocs.io/en/latest/pyserial_api.html
+        #
         try:
-            if self.verbose:
-                print("Opening Voice Coil on COM:", self.comport)
-            self.serial = serial.Serial(port=self.comport,
-                                 baudrate=self.baudrate,
-                                 bytesize=self.bytesize,
-                                 parity=self.parity,
-                                 stopbits=self.stopBits,
-                                 timeout=self.timeout,
-                                 dsrdtr=False,
-                                 rtscts=False)
+            logger.debug(f"RemoteFocusEquipmentSolutions - Opening Voice Coil on COM: {self.comport}")
+            self.serial = serial.Serial(
+                port=self.comport,
+                baudrate=self.baud_rate,
+                bytesize=self.byte_size,
+                parity=self.parity,
+                stopbits=self.stop_bits,
+                timeout=self.timeout,
+                dsrdtr=False,
+                rtscts=False)
+
         except (serial.SerialException, ValueError) as error:
-            print(error)
-            raise UserWarning("Could not Communicate with Voice Coil on COM:", self.comport)
+            logger.debug(f"RemoteFocusEquipmentSolutions - Error: {error}")
+            raise UserWarning("Could not Communicate with RemoteFocusEquipmentSolutions on COM:", self.comport)
 
         # Send command d0 and read returned information
         if self.read_on_init:
             string = b'd0\r'  # Can also use str.encode()
-            if self.verbose:
-                print("Before Write")
-                print("Bytes in Input Buffer: ", self.serial.in_waiting)
-                print("Bytes in Output Buffer: ", self.serial.out_waiting)
-                print("Sending Command to the voice coil:", string)
-
+            if self.debug:
+                print("RemoteFocusEquipmentSolutions - Before Write")
+                print("RemoteFocusEquipmentSolutions - Bytes in Input Buffer: ", self.serial.in_waiting)
+                print("RemoteFocusEquipmentSolutions - Bytes in Output Buffer: ", self.serial.out_waiting)
+                print("RemoteFocusEquipmentSolutions - Sending Command to the voice coil:", string)
+            logger.debug(f"RemoteFocusEquipmentSolutions - Sending command: {string}")
             try:
                 hold = self.serial.write(string)
-                if self.verbose:
-                    print("Number of Bytes Sent: ", hold)
             except serial.SerialTimeoutException as e:
-                print(e)
+                logger.debug(f"RemoteFocusEquipmentSolutions - Error: {e}")
+                raise UserWarning("RemoteFocusEquipmentSolutions Timeout Exception")
 
             # After write , Before read
-            if self.verbose:
-                print("After Write, Before Read")
-                print("Bytes in Input Buffer: ", self.serial.in_waiting)
-                print("Bytes in Output Buffer: ", self.serial.out_waiting)
+            if self.debug:
+                print("RemoteFocusEquipmentSolutions - After Write, Before Read")
+                print("RemoteFocusEquipmentSolutions - Bytes in Input Buffer: ", self.serial.in_waiting)
+                print("RemoteFocusEquipmentSolutions - Bytes in Output Buffer: ", self.serial.out_waiting)
 
-            time.sleep(2.0)
-
+            time.sleep(self.timeout)
             data = self.serial.readline()
-            if self.verbose:
-                print(data)
-                print("After Read")
-                print("Bytes in Input Buffer: ", self.serial.in_waiting)
-                print("Bytes in Output Buffer: ", self.serial.out_waiting)
-
-
-            if len(data) > 0:
-               print("Data received: " + data.decode())
-            else:
-               print("Nothing received from", string)
-
+            if self.debug:
+                print("RemoteFocusEquipmentSolutions - After Read")
+                print("RemoteFocusEquipmentSolutions - Raw Data Received:", data)
+                print("RemoteFocusEquipmentSolutions - Bytes in Input Buffer: ", self.serial.in_waiting)
+                print("RemoteFocusEquipmentSolutions - Bytes in Output Buffer: ", self.serial.out_waiting)
+                if len(data) > 0:
+                    print("RemoteFocusEquipmentSolutions - Encoded Data received: " + data.decode())
+                else:
+                    print("RemoteFocusEquipmentSolutions - Nothing received from", string)
 
     def __del__(self):
+        r"""Close the RemoteFocusEquipmentSolutions Class
+        """
+        logger.debug("Closing RemoteFocusEquipmentSolutions Serial Port")
         self.serial.close()
 
     def read_bytes(self, num_bytes):
-        """
-        Reads the specified number of bytes from the serial port.
+        """Read the specified number of bytes from RemoteFocusEquipmentSolutions.
+
+        Parameters
+        ----------
+        num_bytes : int
+            Number of bytes to receive
+
+        Returns
+        -------
+        received_bytes : bytearray
+            Number of bytes received from the RemoteFocusEquipmentSolutions device.
         """
         for i in range(100):
             num_waiting = self.serial.inWaiting()
@@ -135,41 +171,47 @@ class RemoteFocusEquipmentSolutions(RemoteFocusBase):
                 break
             time.sleep(0.02)
         else:
-            raise UserWarning(
-                "The serial port to the Voice Coil is on, but it isn't responding as expected.")
-        return self.serial.read(num_bytes)
+            logger.debug("The serial port to the RemoteFocusEquipmentSolutions is connected, "
+                         "but it isn't responding as expected.")
+            raise UserWarning("The serial port to the Voice Coil is connected, but it isn't responding as expected.")
+        received_bytes = self.serial.read(num_bytes)
+        return received_bytes
 
-    def send_command(self, msg):
-        """
-        Function to Write Commands to the Device
+    def send_command(self, message):
+        r"""Send write command to the RemoteFocusEquipmentSolutions device.
+
+        Parameters
+        ----------
+        message : str
+            Message to send to the RemoteFocusEquipmentSolutions device. If str == 'close', shutdown device.
+
         """
         try:
-
-            # Close Connection with Device
-            if msg == "close":
+            if message == "close":
                 self.close_connection()
             else:
                 # Send command to device
-                self.serial.write(msg.encode('utf-8'))
-
+                self.serial.write(message.encode('utf-8'))
             # Read data sent from device
             data = self.serial.read(9999)
             if len(data) > 0:
-                print("Data received: " + data.decode())
+                if self.debug:
+                    print("Data received: " + data.decode())
+                else:
+                    pass
             time.sleep(self.timeout)
 
         except serial.SerialException:
             raise UserWarning('Error in communicating with Voice Coil via COMPORT', self.comport)
 
     def close_connection(self):
-        """
-        Function to close the connection of the Voice Coil
+        r"""Close RemoteFocusEquipmentSolutions class
         """
         self.serial.close()
 
 
 if __name__ == "__main__":
-    vc = VoiceCoil(verbose=True)
+    vc = RemoteFocusEquipmentSolutions(verbose=True)
     vc.send_command('k0\r')  # Turn off servo
     vc.send_command('k1\r')  # Engage servo
 

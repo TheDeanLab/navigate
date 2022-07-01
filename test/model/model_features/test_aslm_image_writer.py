@@ -1,6 +1,7 @@
 from aslm.model.model_features.aslm_image_writer import ImageWriter
 from aslm.model.dummy_model import get_dummy_model
 import numpy as np
+import unitttest
 
 
 class TestImageWriter(unittest.TestCase):

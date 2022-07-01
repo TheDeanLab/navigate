@@ -37,7 +37,6 @@ mkdir ~/Git/
 cd ~/Git/
 git clone https://github.com/AdvancedImagingUTSW/ASLM.git
 cd ASLM
-python -m pip install -r requirements.txt
 pip install -e .
 ~~~
 

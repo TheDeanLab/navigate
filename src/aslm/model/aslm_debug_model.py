@@ -47,7 +47,7 @@ from multiprocessing import Pool, Lock
 
 from aslm.model.aslm_device_startup_functions import start_analysis
 from aslm.model.concurrency.concurrency_tools import ObjectInSubprocess
-from aslm.model.model_features.alsm_feature_container import load_features
+from aslm.model.model_features.aslm_feature_container import load_features
 from aslm.model.model_features.aslm_image_writer import ImageWriter
 from aslm.model.model_features.autofocus import Autofocus
 from aslm.model.model_features.dummy_detective import Dummy_Detective

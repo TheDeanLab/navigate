@@ -97,6 +97,7 @@ class NIDAQ(DAQBase):
         trigger_source = self.model.DAQParameters['trigger_source']
         self.galvo_etl_task.triggers.start_trigger.cfg_dig_edge_start_trig(trigger_source)
 
+
     def start_tasks(self):
         """
         # Start the tasks for camera triggering and analog outputs
@@ -139,7 +140,16 @@ class NIDAQ(DAQBase):
         # Calculate the waveforms and start tasks.
         etl_waveform = self.waveform_dict[channel_key]['etl_waveform']
         galvo_waveform = self.waveform_dict[channel_key]['galvo_waveform']
-        self.galvo_and_etl_waveforms = np.stack((galvo_waveform, galvo_waveform, etl_waveform, etl_waveform))
+        etl_zeros, galvo_zeros = np.zeros_like(etl_waveform), np.zeros_like(galvo_waveform)
+
+        # Write waveforms to channels ao0 (galvo, left), ao1 (galvo, right), ao2 (etl, left), ao3 (blink, right)
+        if self.imaging_mode == 'high':
+            self.galvo_and_etl_waveforms = np.stack((galvo_zeros, galvo_waveform, etl_zeros, etl_waveform), axis=0)
+        elif self.imaging_mode == 'low':
+            self.galvo_and_etl_waveforms = np.stack((galvo_waveform, galvo_zeros, etl_waveform, etl_zeros), axis=0)
+        else:
+            logger.warning(f"NIDAQ - Unknown imaging mode {self.imaging_mode}. Zero waveform written.")
+            self.galvo_and_etl_waveforms = np.stack((galvo_zeros, galvo_zeros, etl_zeros, etl_zeros), axis=0)
 
         # Write pre-calculated waveforms to the tasks...
         self.write_waveforms_to_tasks()

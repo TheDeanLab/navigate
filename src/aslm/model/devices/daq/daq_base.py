@@ -64,7 +64,7 @@ class DAQBase:
         self.etl_ramp_falling = self.model.RemoteFocusParameters['remote_focus_l_ramp_falling_percent']
 
         # ETL Parameters
-        # self.etl_l_waveform = None
+        self.etl_l_waveform = None
         self.etl_l_delay = self.model.RemoteFocusParameters['remote_focus_l_delay_percent']
         self.etl_l_ramp_rising = self.model.RemoteFocusParameters['remote_focus_l_ramp_rising_percent']
         self.etl_l_ramp_falling = self.model.RemoteFocusParameters['remote_focus_l_ramp_falling_percent']
@@ -89,22 +89,28 @@ class DAQBase:
         self.prev_etl_l_amplitude = self.etl_l_amplitude
         self.prev_etl_l_offset = self.etl_l_offset
 
+        # Bundled Waveform
+        self.galvo_and_etl_waveforms = None
+
         # Left Galvo Parameters
         self.galvo_l_waveform = None
-        self.galvo_and_etl_waveforms = None
         self.galvo_l_frequency = self.model.GalvoParameters['galvo_l_frequency']
         self.galvo_l_amplitude = self.model.GalvoParameters['galvo_l_amplitude']
         self.galvo_l_offset = self.model.GalvoParameters['galvo_l_offset']
         self.galvo_l_duty_cycle = self.model.GalvoParameters['galvo_l_duty_cycle']
         self.galvo_l_phase = self.model.GalvoParameters['galvo_l_phase']
         self.galvo_l_min_ao = self.model.GalvoParameters['galvo_l_min_ao']
+        self.galvo_l_max_ao = self.model.GalvoParameters['galvo_l_max_ao']
 
         # Right Galvo Parameters
-        self.galvo_r_max_ao = self.model.GalvoParameters['galvo_l_max_ao']
-        self.galvo_r_amplitude = self.model.GalvoParameters['galvo_r_amplitude']
-        self.galvo_r_min_ao = self.model.GalvoParameters['galvo_r_min_ao']
-        self.galvo_r_max_ao = self.model.GalvoParameters['galvo_r_max_ao']
         self.galvo_r_waveform = None
+        self.galvo_r_frequency = None
+        self.galvo_r_amplitude = self.model.GalvoParameters['galvo_r_amplitude']
+        self.galvo_r_offset = None
+        self.galvo_r_duty_cycle = None
+        self.galvo_r_phase = None
+        self.galvo_r_max_ao = self.model.GalvoParameters['galvo_r_max_ao']
+        self.galvo_r_min_ao = self.model.GalvoParameters['galvo_r_min_ao']
 
         # Camera Parameters
         self.camera_delay_percent = self.model.CameraParameters['delay_percent']
@@ -121,6 +127,7 @@ class DAQBase:
 
         self.laser_power = 0
         self.laser_idx = 0
+        self.imaging_mode = None
 
         self.waveform_dict = {
             'channel_1':
@@ -167,11 +174,11 @@ class DAQBase:
         """
 
         # Imaging Mode = 'high' or 'low'
-        imaging_mode = microscope_state['resolution_mode']
+        self.imaging_mode = microscope_state['resolution_mode']
 
-        focus_prefix = 'r' if imaging_mode == 'high' else 'l'
+        focus_prefix = 'r' if self.imaging_mode == 'high' else 'l'
 
-        # Zoom = 'one' in high resolution mode, or '0.63x', '1x', '2x'... in low-resolution mode.
+        # Zoom = 'N/A' in high resolution mode, or '0.63x', '1x', '2x'... in low-resolution mode.
         zoom = microscope_state['zoom']
 
         # Iterate through the dictionary.
@@ -194,8 +201,8 @@ class DAQBase:
                     self.sweep_time += readout_time
 
                 # ETL Parameters
-                etl_amplitude = float(etl_constants.ETLConstants[imaging_mode][zoom][laser]['amplitude'])
-                etl_offset = float(etl_constants.ETLConstants[imaging_mode][zoom][laser]['offset'])
+                etl_amplitude = float(etl_constants.ETLConstants[self.imaging_mode][zoom][laser]['amplitude'])
+                etl_offset = float(etl_constants.ETLConstants[self.imaging_mode][zoom][laser]['offset'])
 
                 # Galvo Parameters
                 galvo_amplitude = float(galvo_parameters[f'galvo_{focus_prefix}_amplitude'])
@@ -226,6 +233,22 @@ class DAQBase:
                                                                                      sweep_time=self.sweep_time,
                                                                                      exposure=exposure_time,
                                                                                      camera_delay=self.camera_delay_percent)
+
+                # Confirm that the values are between the minimum and maximum voltages.
+                max_etl_voltage = getattr(self, f"etl_{focus_prefix}_max_ao")
+                min_etl_voltage = getattr(self, f"etl_{focus_prefix}_min_ao")
+                max_galvo_voltage = getattr(self, f"galvo_{focus_prefix}_max_ao")
+                min_galvo_voltage = getattr(self, f"galvo_{focus_prefix}_min_ao")
+
+                # Clip waveforms with min and max.
+                self.waveform_dict[channel_key]['etl_waveform'][self.waveform_dict[channel_key]['etl_waveform'] >
+                                                                max_etl_voltage] = max_etl_voltage
+                self.waveform_dict[channel_key]['etl_waveform'][self.waveform_dict[channel_key]['etl_waveform'] <
+                                                                min_etl_voltage] = min_etl_voltage
+                self.waveform_dict[channel_key]['galvo_waveform'][self.waveform_dict[channel_key]['galvo_waveform'] >
+                                                                max_galvo_voltage] = max_galvo_voltage
+                self.waveform_dict[channel_key]['galvo_waveform'][self.waveform_dict[channel_key]['galvo_waveform'] <
+                                                                min_galvo_voltage] = min_galvo_voltage
 
         return self.waveform_dict
 

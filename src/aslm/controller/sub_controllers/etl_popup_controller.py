@@ -131,7 +131,7 @@ class Etl_Popup_Controller(GUI_Controller):
         self.in_initialize = True
         self.widgets['Mode'].set('high' if resolution_value == 'high' else 'low')
         self.show_magnification()
-        self.widgets['Mag'].set('one' if resolution_value == 'high' else resolution_value)
+        self.widgets['Mag'].set('N/A' if resolution_value == 'high' else resolution_value)
         self.show_laser_info()
         
         # end initialization
@@ -218,13 +218,12 @@ class Etl_Popup_Controller(GUI_Controller):
     def update_galvo_setting(self, name, parameter):
         variable = self.variables[name]
 
-        focus_prefix = 'r' if self.resolution == 'high' else 'l'
-        galvo_parameter = f'galvo_{focus_prefix}_{parameter}'
-
         def func(temp):
             self.parent_controller.execute('update_setting', 'galvo', temp)
 
         def func_galvo(*args):
+            focus_prefix = 'r' if self.resolution == 'high' else 'l'
+            galvo_parameter = f'galvo_{focus_prefix}_{parameter}'
             value = self.galvo_setting[galvo_parameter]
             variable_value = variable.get()
             print(f"Galvo parameter {galvo_parameter} changed: {variable_value}")

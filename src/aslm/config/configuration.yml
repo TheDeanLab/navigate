@@ -49,7 +49,7 @@ DAQParameters:
 
 CameraParameters:
   # Hamamatsu Orca Flash 4.0
-  number_of_cameras: 1
+  number_of_cameras: 2
   high_serial_number: 302158
   low_serial_number: 302352
   x_pixels: 2048.0
@@ -97,8 +97,8 @@ RemoteFocusParameters:
   remote_focus_r_ramp_falling_percent: 2.5
   remote_focus_r_amplitude: 0.7
   remote_focus_r_offset: 2.3
-  remote_focus_r_min_ao: -10
-  remote_focus_r_max_ao: 10
+  remote_focus_r_min_ao: -0.7
+  remote_focus_r_max_ao: 0.7
 
 FilterWheelParameters:
   filter_wheel_port: COM19

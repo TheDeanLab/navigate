@@ -65,6 +65,7 @@ def camera_exposure(sample_rate=100000,
     array[pulse_delay_samples:(pulse_samples + pulse_delay_samples)] = amplitude
     return np.array(array)
 
+
 def single_pulse(sample_rate=100000,
                  sweep_time=0.4,
                  delay=10,
@@ -144,7 +145,6 @@ def tunable_lens_ramp(sample_rate=100000,
     waveform : np.array
     """
 
-
     # create an array just containing the negative amplitude voltage:
     delay_samples = int(etl_delay * exposure_time * sample_rate / 100)
     delay_array = np.zeros(delay_samples) + offset - amplitude
@@ -202,6 +202,7 @@ def dc_value(sample_rate=100000,
     waveform[:] = amplitude
     return waveform
 
+
 def square(sample_rate=100000,
            sweep_time=0.4,
            frequency=10,
@@ -220,6 +221,7 @@ def square(sample_rate=100000,
     waveform = amplitude * waveform + offset
     return waveform
 
+
 def sine_wave(sample_rate=100000,
               sweep_time=0.4,
               frequency=10,
@@ -234,6 +236,7 @@ def sine_wave(sample_rate=100000,
     waveform = amplitude * np.sin((2 * np.pi * frequency * t) - phase) + offset
     return waveform
 
+
 def smooth_waveform(waveform,
                     percent_smoothing=10):
     """
@@ -244,7 +247,8 @@ def smooth_waveform(waveform,
     smoothed_waveform = np.convolve(waveform, np.ones(window_len), 'valid') / window_len
     return smoothed_waveform
 
-if (__name__ == "__main__"):
+
+if __name__ == "__main__":
     import matplotlib.pyplot as plt
     # General
     sample_rate = 100000

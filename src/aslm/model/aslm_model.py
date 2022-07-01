@@ -802,7 +802,7 @@ class Model:
                 self.experiment.MicroscopeState['resolution_mode'] = 'low'
 
             # We can't keep acquiring if we're switching cameras. For now, simply turn the camera off.
-            if self.camera.camera_controller.is_acquiring or self.is_live:
+            if self.camera.is_acquiring or self.is_live:
                 self.run_command('stop')
 
             self.camera = self.get_camera()

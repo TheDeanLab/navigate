@@ -158,7 +158,7 @@ class ResultThread(threading.Thread):
     Example:
     ```
         def f(a):
-            """ A function that does something... """
+            ''' A function that does something... '''
             return a.sum()
 
         ##

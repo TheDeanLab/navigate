@@ -64,6 +64,7 @@ class stack_acq_frame(ttk.Labelframe):
             increment=0.5,
             width=14
         )
+        stack_acq.step_size_spinbox.state(["disabled"])
         stack_acq.step_size_spinbox.grid(row=1, column=0, sticky=(N), padx=(4,3), pady=(3,6))
 
     # Start Pos Frame (Vertically oriented)
@@ -79,6 +80,7 @@ class stack_acq_frame(ttk.Labelframe):
             increment=0.5,
             width=14
         )
+        stack_acq.start_pos_spinbox.state(["disabled"])
         stack_acq.start_pos_spinbox.grid(row=1, column=0, sticky=(N), padx=3, pady=(3,6))
 
 
@@ -95,6 +97,7 @@ class stack_acq_frame(ttk.Labelframe):
             increment=0.5,
             width=14
         )
+        stack_acq.end_pos_spinbox.state(['disabled'])
         stack_acq.end_pos_spinbox.grid(row=1, column=0, sticky=(N), padx=3, pady=(3,6))
 
     # Slice Frame (Vertically oriented)

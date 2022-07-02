@@ -45,7 +45,7 @@ p = __name__.split(".")[0]
 logger = logging.getLogger(p)
 
 class Acquire_Bar_Controller(GUI_Controller):
-    def __init__(self, view, parent_controller, verbose=False):
+    def __init__(self, view, parent_view, parent_controller, verbose=False):
         super().__init__(view, parent_controller, verbose)
 
         # acquisition image mode variable
@@ -75,6 +75,8 @@ class Acquire_Bar_Controller(GUI_Controller):
             self.update_microscope_mode)
 
         self.view.exit_btn.config(command=self.exit_program)
+        
+        self.parent_view = parent_view
 
     def set_mode(self, mode):
         """
@@ -157,7 +159,16 @@ class Acquire_Bar_Controller(GUI_Controller):
         # Gets the state of the pull-down menu and tell the central controller
         """
         self.mode = self.mode_dict[self.view.pull_down.get()]
-
+        if self.mode not in ["z-stack", "projection"]: 
+            self.parent_view.stack_acq_frame.step_size_spinbox['state'] = "disabled"
+            self.parent_view.stack_acq_frame.start_pos_spinbox['state'] = "disabled"
+            self.parent_view.stack_acq_frame.end_pos_spinbox['state'] = "disabled"
+            self.parent_view.stack_acq_frame.slice_spinbox['state'] = "disabled"
+        else:
+            self.parent_view.stack_acq_frame.step_size_spinbox['state'] = "normal"
+            self.parent_view.stack_acq_frame.start_pos_spinbox['state'] = "normal"
+            self.parent_view.stack_acq_frame.end_pos_spinbox['state'] = "normal"
+            self.parent_view.stack_acq_frame.slice_spinbox['state'] = "normal"
         self.show_verbose_info("The Microscope State is now:", self.get_mode())
 
     def launch_acquisition(self, popup_window):

@@ -1,6 +1,4 @@
-"""
-ASLM stage communication classes.
-Class for mixed digital and analog modulation of laser devices.
+"""Class for mixed digital and analog modulation of laser devices.
 Goal is to set the DC value of the laser intensity with the analog voltage, and then rapidly turn it on and off
 with the digital signal.
 
@@ -48,12 +46,89 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 class StageBase:
+    r"""StageBase Parent Class
+
+    Attributes
+    ----------
+    configuration : Session
+        Global configuration of the microscope
+    verbose : Boolean
+        Verbosity
+    x_pos : float
+        True x position
+    y_pos : float
+        True y position
+    z_pos : float
+        True z position
+    f_pos : float
+        True focus position
+    theta_pos : float
+        True rotation position
+    position_dict : dict
+        Dictionary of true stage positions
+    int_x_pos : float
+        Software x position
+    int_y_pos : float
+        Software y position
+    int_z_pos : float
+        Software z position
+    int_f_pos : float
+        Software focus position
+    int_theta_pos : float
+        Software theta position
+    int_position_dict : dict
+        Dictionary of software stage positions
+    int_x_pos_offset : float
+        x position offset
+    int_y_pos_offset : float
+        y position offset
+    int_z_pos_offset : float
+        z position offset
+    int_f_pos_offset : float
+        focus position offset
+    int_theta_pos_offset : float
+        theta position offset
+    x_max : float
+        Max x position
+    y_max : float
+        Max y position
+    z_max : float
+        Max y position
+    f_max : float
+        Max focus positoin
+    theta_max : float
+        Max rotation position
+    x_min : float
+        Min x position
+    y_min : float
+        Min y position
+    z_min : float
+        Min y position
+    f_min : float
+        Min focus positoin
+    theta_min : float
+        Min rotation position
+    x_rot_position : float
+        Location to move the specimen in x while rotating.
+    y_rot_position : float
+        Location to move the specimen in y while rotating.
+    z_rot_position : float
+        Location to move the specimen in z while rotating.
+    startfocus : float
+        Location to initialize the focusing stage to.
+
+    Methods
+    -------
+    create_position_dict()
+        Creates a dictionary with the hardware stage positions.
+    create_internal_position_dict()
+        Creates a dictionary with the software stage positions.
+    """
     def __init__(self, configuration, verbose):
         self.verbose = verbose
         self.configuration = configuration
 
-        """
-        Initial setting of all positions
+        r"""Initial setting for all positions
         self.x_pos, self.y_pos etc are the true axis positions, no matter whether
         the stages are zeroed or not.
         """
@@ -68,9 +143,8 @@ class StageBase:
                               'f_pos': self.f_pos,
                               'theta_pos': self.theta_pos,
                               }
-        """
-        Internal (software) positions
-        """
+
+        r"""Internal (software) positions"""
         self.int_x_pos = 0
         self.int_y_pos = 0
         self.int_z_pos = 0
@@ -82,8 +156,7 @@ class StageBase:
                                   'f_pos': self.int_f_pos,
                                   'theta_pos': self.int_theta_pos,
                                   }
-        """
-        Create offsets. It should be: int_x_pos = x_pos + int_x_pos_offset
+        r"""Create offsets. It should be: int_x_pos = x_pos + int_x_pos_offset
         self.int_x_pos = self.x_pos + self.int_x_pos_offset
         OR x_pos = int_x_pos - int_x_pos_offset
         self.x_pos = self.int_x_pos - self.int_x_pos_offset
@@ -94,9 +167,7 @@ class StageBase:
         self.int_f_pos_offset = 0
         self.int_theta_pos_offset = 0
 
-        """
-        Setting movement limits: currently hardcoded: Units are in microns
-        """
+        r"""Stage movement limits: currently hardcoded: Units are in microns"""
         self.x_max = configuration.StageParameters['x_max']
         self.x_min = configuration.StageParameters['x_min']
         self.y_max = configuration.StageParameters['y_max']
@@ -117,8 +188,7 @@ class StageBase:
         self.startfocus = configuration.StageParameters['startfocus']
 
     def create_position_dict(self):
-        """
-        # Creates a dictionary with the hardware stage positions.
+        r"""Creates a dictionary with the hardware stage positions.
         """
         self.position_dict = {'x_pos': self.x_pos,
                               'y_pos': self.y_pos,
@@ -128,10 +198,9 @@ class StageBase:
                               }
 
     def create_internal_position_dict(self):
-        """
-        # Creates a dictionary with the software stage positions.
-        # Internal position includes the offset for each stage position.
-        # e.g, int_x_pos = x_pos + int_x_pos_offset
+        r"""Creates a dictionary with the software stage positions.
+        Internal position includes the offset for each stage position.
+        e.g, int_x_pos = x_pos + int_x_pos_offset
         """
         self.int_position_dict = {'x_pos': self.int_x_pos,
                                   'y_pos': self.int_y_pos,
@@ -139,31 +208,4 @@ class StageBase:
                                   'f_pos': self.int_f_pos,
                                   'theta_pos': self.int_theta_pos,
                                   }
-
-    def report_position(self):
-        pass
-
-    def move_relative(self, dict, wait_until_done=False):
-        pass
-
-    def move_absolute(self, dict, wait_until_done=False):
-        pass
-
-    def stop(self):
-        pass
-
-    def zero_axes(self, list):
-        pass
-
-    def unzero_axes(self, list):
-        pass
-
-    def load_sample(self):
-        pass
-
-    def unload_sample(self):
-        pass
-
-
-
 

@@ -45,7 +45,10 @@ class TestZoomBase(unittest.TestCase):
     r"""Unit Test for Zoom Base Class"""
 
     def test_zoom_base_attributes(self):
-        configuration_path = Path('/Users/S155475/Desktop/GitHub/ASLM/src/aslm/config/configuration.yml')
+        base_directory = Path(__file__).resolve().parent.parent.parent.parent.parent
+        configuration_directory = Path.joinpath(base_directory, 'src', 'aslm', 'config')
+        configuration_path = Path.joinpath(configuration_directory, 'configuration.yml')
+
         configuration = session(configuration_path, False)
         zoom_class = ZoomBase(configuration, False)
 

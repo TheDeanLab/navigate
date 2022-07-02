@@ -129,7 +129,14 @@ class Acquire_Bar_Controller(GUI_Controller):
         # The popup window provides the user with the opportunity to fill in fields that describe the experiment and
         # also dictate the save path of the data in a standardized format.
         """
-        if self.is_save and self.mode != 'live':
+        if self.view.acquire_btn['text'] == 'Stop':
+            # change the button to 'Acquire'
+            self.view.acquire_btn.configure(text='Acquire')
+
+            # tell the controller to stop acquire(continuous mode)
+            self.parent_controller.execute('stop_acquire')
+
+        elif self.is_save and self.mode != 'live':
             acquire_pop = acquire_popup(self.view)
             buttons = acquire_pop.get_buttons()  # This holds all the buttons in the popup
             widgets = acquire_pop.get_widgets()
@@ -147,12 +154,6 @@ class Acquire_Bar_Controller(GUI_Controller):
 
             initialize_popup_window(acquire_pop, self.saving_settings)
 
-        elif self.view.acquire_btn['text'] == 'Stop':
-            # change the button to 'Acquire'
-            self.view.acquire_btn.configure(text='Acquire')
-
-            # tell the controller to stop acquire(continuous mode)
-            self.parent_controller.execute('stop_acquire')
         else:
             self.view.acquire_btn.configure(text='Stop')
             self.parent_controller.execute('acquire')

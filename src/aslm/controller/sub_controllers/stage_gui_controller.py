@@ -93,6 +93,46 @@ class Stage_GUI_Controller(GUI_Controller):
 
         if configuration_controller:
             self.initialize(configuration_controller)
+        #binding mouse wheel event on camera view
+        self.count = 0
+        self.mouse_scrolls = 0
+        self.canvas = canvas
+        self.canvas.bind("<Enter>", self.on_enter)
+        self.canvas.bind("<Leave>", self.on_leave)
+        #WASD key movement
+        self.parent_view.root.bind("<Key>", self.key_press)
+   
+def on_enter(self, event):
+    self.canvas.bind("<MouseWheel>", self.update_position)
+
+def on_leave(self, event):
+    self.count = 0
+    self.mouse_scrolls = 0
+
+def update_position(self, event):
+    self.mouse_scrolls += 1
+    if self.mouse_scrolls % 2 == 0:
+        position_o = self.get_position()
+        self.count += event.delta
+        updated_position = position_o
+        updated_position["f"] += self.count
+        self.set_position(updated_position)
+    
+def key_press(self, event):
+    char = event.char
+    position_o = self.get_position()
+    current_position = position_o
+    x_increment = self.widget_vals["x_step"].get()
+    y_increment = self.widget_vals["y_step"].get()
+    if char.lower() == "w":
+        current_position['y'] += y_increment
+    elif char.lower() == "a":
+        current_position['x'] -= x_increment
+    elif char.lower() == "s":
+        current_position['y'] -= y_increment
+    elif char.lower() == "d":
+        current_position['x'] += x_increment
+    self.stage_gui_controller.set_position(current_position)
 
     def initialize(self, config):
         """

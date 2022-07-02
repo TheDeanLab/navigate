@@ -13,6 +13,7 @@ pandastable==0.12.2.post1
 opencv-python==4.5.5.62
 numpy==1.22.0
 scikit-image==0.19.1
-tensorflow==2.8.0
-cupy-cuda112==10.2.0
-protobuf==3.20.*
+tensorflow==2.9.1
+cupy-cuda112==10.2.0; sys_platform != "darwin"
+zarr==2.11.3
+fsspec

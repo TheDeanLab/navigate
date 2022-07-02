@@ -44,10 +44,10 @@ if platform.system() != 'Darwin':
     import tensorflow as tf
 
 # Local Imports
-from .analysis import image_decorrelation as image_decorrelation
+from aslm.model.analysis import image_decorrelation as image_decorrelation
 
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 class Analysis:
@@ -56,7 +56,7 @@ class Analysis:
         self.use_gpu = use_gpu
 
         if use_gpu:
-            from .analysis import flatfield as flatfield
+            from aslm.model.analysis import flatfield as flatfield
 
     def __del__(self):
         pass
@@ -64,12 +64,12 @@ class Analysis:
     def normalized_dct_shannon_entropy(self,
                                        input_array,
                                        psf_support_diameter_xy):
-        '''
+        """
         # input_array : 2D or 3D image.  If 3D, will iterate through each 2D plane.
         # otf_support_x : Support for the OTF in the x-dimension.
         # otf_support_y : Support for the OTF in the y-dimension.
         # Returns the entropy value.
-        '''
+        """
         # Get Image Attributes
         input_array = np.double(input_array)
         image_dimensions = input_array.ndim
@@ -127,10 +127,10 @@ class Analysis:
                                   number_high_pass_filters=10,
                                   fourier_samples=50,
                                   apodization_pixels=20):
-        '''
+        """
         Estimates the resolution of an image using decorrelation analysis
         https://github.com/Ades91/ImDecorr/blob/master/main_imageDecorr.m
-        '''
+        """
         input_array = np.double(input_array)
 
         # Apodize Image Edges with a Cosine Function over 20 pixels

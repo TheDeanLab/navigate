@@ -35,14 +35,15 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 import sys
-from controller.sub_controllers.gui_controller import GUI_Controller
-from view.main_window_content.acquire_bar_frame.acquire_popup import Acquire_PopUp as acquire_popup
+from aslm.controller.sub_controllers.gui_controller import GUI_Controller
+from aslm.view.main_window_content.acquire_bar_frame.acquire_popup import Acquire_PopUp as acquire_popup
 
 import logging
 from pathlib import Path
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
+
 
 class Acquire_Bar_Controller(GUI_Controller):
     def __init__(self, view, parent_controller, verbose=False):
@@ -57,7 +58,8 @@ class Acquire_Bar_Controller(GUI_Controller):
             'user': '',
             'tissue': '',
             'celltype': '',
-            'label': ''
+            'label': '',
+            'file_type': ''
         }
 
         self.mode_dict = {
@@ -96,14 +98,14 @@ class Acquire_Bar_Controller(GUI_Controller):
         return self.mode
 
     def stop_acquire(self):
+        r"""Stop the acquisition.
+        """
         self.view.acquire_btn.configure(text='Acquire')
 
     def set_save_option(self, is_save):
-        """
-        # set whether the image will be saved
+        r"""Set whether the image will be saved
         """
         self.is_save = is_save
-
         self.show_verbose_info('set save data option:', is_save)
 
     def set_saving_settings(self, saving_settings):
@@ -130,6 +132,7 @@ class Acquire_Bar_Controller(GUI_Controller):
         if self.is_save and self.mode != 'live':
             acquire_pop = acquire_popup(self.view)
             buttons = acquire_pop.get_buttons()  # This holds all the buttons in the popup
+            widgets = acquire_pop.get_widgets()
 
             # Configure the button callbacks on the popup window
             buttons['Cancel'].config(
@@ -137,6 +140,10 @@ class Acquire_Bar_Controller(GUI_Controller):
                     self.verbose))
             buttons['Done'].config(
                 command=lambda: self.launch_acquisition(acquire_pop))
+
+            # Configure drop down callbacks, will update save settings when file type is changed
+            file_type = widgets['file_type'].get_variable()
+            file_type.trace_add('write', lambda *args: self.update_file_type(file_type))
 
             initialize_popup_window(acquire_pop, self.saving_settings)
 
@@ -147,9 +154,7 @@ class Acquire_Bar_Controller(GUI_Controller):
             # tell the controller to stop acquire(continuous mode)
             self.parent_controller.execute('stop_acquire')
         else:
-            # if the mode is 'live'
-            if self.mode == 'live':
-                self.view.acquire_btn.configure(text='Stop')
+            self.view.acquire_btn.configure(text='Stop')
             self.parent_controller.execute('acquire')
 
     def update_microscope_mode(self, *args):
@@ -159,6 +164,14 @@ class Acquire_Bar_Controller(GUI_Controller):
         self.mode = self.mode_dict[self.view.pull_down.get()]
 
         self.show_verbose_info("The Microscope State is now:", self.get_mode())
+
+
+    def update_file_type(self, file_type):
+        """
+        # Updates the file type when the drop down in save dialog is changed.
+
+        """
+        self.saving_settings['file_type'] = file_type.get()
 
     def launch_acquisition(self, popup_window):
         """
@@ -182,6 +195,9 @@ class Acquire_Bar_Controller(GUI_Controller):
             # Close the window
             popup_window.popup.dismiss(self.verbose)
 
+            # We are now acquiring
+            self.view.acquire_btn.configure(text='Stop')
+
     def exit_program(self):
         self.show_verbose_info("Exiting Program")
         # call the central controller to stop all the threads
@@ -204,7 +220,8 @@ def initialize_popup_window(popup_window, values):
     #    'user':,
     #    'tissue':,
     #    'celltype':,
-    #    'label':
+    #    'label':,
+    #    'file_type':
     # }
     """
     popup_vals = popup_window.get_widgets()

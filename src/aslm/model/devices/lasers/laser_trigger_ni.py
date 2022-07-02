@@ -35,98 +35,20 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-import logging
-from pathlib import Path
 
+# Standard Library Imports
+import logging
+
+# Third Party Imports
 import nidaqmx
 from nidaqmx.constants import LineGrouping
 
+# Local Imports
+from aslm.model.devices.lasers.laser_trigger_base import LaserTriggerBase
+
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
-
-
-class LaserTriggerBase:
-    def __init__(self, model, experiment, verbose=False):
-        self.model = model
-        self.experiment = experiment
-        self.verbose = verbose
-
-        # Number of Lasers
-        # TODO: Make it so that we can iterate through each laser and create a
-        # task.
-        self.number_of_lasers = self.model.LaserParameters['number_of_lasers']
-
-        # Minimum and Maximum Laser Voltages
-        self.laser_min_do = self.model.LaserParameters['laser_min_do']
-        self.laser_max_do = self.model.LaserParameters['laser_max_do']
-        self.laser_min_ao = self.model.LaserParameters['laser_min_ao']
-        self.laser_max_ao = self.model.LaserParameters['laser_max_ao']
-
-        # Digital Ports
-        self.switching_port = self.model.DAQParameters['laser_port_switcher']
-        self.laser_0_do_port = self.model.DAQParameters['laser_0_do']
-        self.laser_1_do_port = self.model.DAQParameters['laser_1_do']
-        self.laser_2_do_port = self.model.DAQParameters['laser_2_do']
-
-        # Analog Ports
-        self.laser_0_ao_port = self.model.DAQParameters['laser_0_ao']
-        self.laser_1_ao_port = self.model.DAQParameters['laser_1_ao']
-        self.laser_2_ao_port = self.model.DAQParameters['laser_2_ao']
-
-        # Digital Output Default State
-        self.switching_state = False
-        self.laser_0_do_state = False
-        self.laser_1_do_state = False
-        self.laser_2_do_state = False
-
-        # Analog Output Default Voltage
-        self.laser_0_ao_voltage = 0
-        self.laser_1_ao_voltage = 0
-        self.laser_2_ao_voltage = 0
-
-    def __del__(self):
-        if self.verbose:
-            print("Not Implemented in LaserTriggerBase")
-        logger.debug("Not Implemented in LaserTriggerBase")
-
-    def enable_low_resolution_laser(self):
-        """
-        # Evaluates the experiment configuration in the model for the resolution mode.
-        # Triggers the DAQ to select the correct laser path.
-        """
-        if self.verbose:
-            print("Not Implemented in LaserTriggerBase")
-        logger.debug("Not Implemented in LaserTriggerBase")
-
-    def enable_high_resolution_laser(self):
-        """
-        # Evaluates the experiment configuration in the model for the resolution mode.
-        # Triggers the DAQ to select the correct laser path.
-        """
-        if self.verbose:
-            print("Not Implemented in LaserTriggerBase")
-        logger.debug("Not Implemented in LaserTriggerBase")
-    def trigger_digital_laser(self, current_laser_index):
-        if self.verbose:
-            print("Not Implemented in LaserTriggerBase")
-        logger.debug("Not Implemented in LaserTriggerBase")
-
-    def turn_off_lasers(self):
-        if self.verbose:
-            print("Not Implemented in LaserTriggerBase")
-        logger.debug("Not Implemented in LaserTriggerBase")
-
-    def set_laser_analog_voltage(
-            self,
-            current_laser_index,
-            current_laser_intensity):
-        """
-        # Sets the constant voltage on the DAQ according to the laser index and intensity, which is a percentage.
-        """
-        if self.verbose:
-            print("Not Implemented in LaserTriggerBase")
-        logger.debug("Not Implemented in LaserTriggerBase")
 
 
 class LaserTriggers(LaserTriggerBase):
@@ -237,47 +159,3 @@ class LaserTriggers(LaserTriggerBase):
             self.laser_1_ao_task.write(scaled_laser_voltage, auto_start=True)
         elif current_laser_index == 2:
             self.laser_2_ao_task.write(scaled_laser_voltage, auto_start=True)
-
-
-class SyntheticLaserTriggers(LaserTriggerBase):
-    def __init__(self, model, experiment, verbose=False):
-        super().__init__(model, experiment, verbose)
-
-    def __del__(self):
-        pass
-
-    def enable_low_resolution_laser(self):
-        """
-        # Evaluates the experiment configuration in the model for the resolution mode.
-        # Triggers the DAQ to select the correct laser path.
-        """
-        self.switching_state = False
-        if self.verbose:
-            print("Low Resolution Laser Path Enabled")
-        logger.debug("Low Resolution Laser Path Enabled")
-
-    def enable_high_resolution_laser(self):
-        """
-        # Evaluates the experiment configuration in the model for the resolution mode.
-        # Triggers the DAQ to select the correct laser path.
-        """
-        self.switching_state = True
-        if self.verbose:
-            print("High Resolution Laser Path Enabled")
-        logger.debug("High Resolution Laser Path Enabled")
-
-    def trigger_digital_laser(self, current_laser_index):
-        self.turn_off_lasers()
-        pass
-
-    def turn_off_lasers(self):
-        pass
-
-    def set_laser_analog_voltage(
-            self,
-            current_laser_index,
-            current_laser_intensity):
-        """
-        # Sets the constant voltage on the DAQ according to the laser index and intensity, which is a percentage.
-        """
-        pass

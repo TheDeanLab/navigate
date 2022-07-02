@@ -36,8 +36,9 @@ from tkinter import ttk
 from tkinter.font import Font
 import logging
 from pathlib import Path
+from aslm.view.custom_widgets.validation import ValidatedSpinbox
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
@@ -79,10 +80,14 @@ class channel_creator(ttk.Labelframe):
         self.interval_variables = []
         self.interval_spins = []
 
+        # Defocus Spinboxes
+        self.defocus_variables = []
+        self.defocus_spins = []
+
         #  Channel Creation
 
         #  Grids labels them across the top row of each column
-        self.label_text = ["Channel", "Laser", "Laser Power", "Filter", "Exp. Time (ms)", "Interval"]
+        self.label_text = ["Channel", "Laser", "Power", "Filter", "Exp. Time (ms)", "Interval", "Defocus"]
         self.labels = []
         self.frame_columns = []
 
@@ -91,11 +96,11 @@ class channel_creator(ttk.Labelframe):
             self.frame_columns.append(ttk.Frame(self))
             self.frame_columns[idx].columnconfigure(0, weight=1, uniform=1)
             self.frame_columns[idx].rowconfigure('all', weight=1, uniform=1)
-            self.frame_columns[idx].grid(row=0, column=idx, sticky=NSEW, padx=1, pady=(4,6))
+            self.frame_columns[idx].grid(row=0, column=idx, sticky=NSEW, padx=1, pady=(4, 6))
             self.labels.append(ttk.Label(self.frame_columns[idx], text=self.label_text[idx]))
             self.labels[idx].grid(row=0, column=0, sticky=N, pady=1, padx=1)
-        self.frame_columns[5].grid(padx=(1,4))
-        self.frame_columns[0].grid(padx=(4,1))
+        self.frame_columns[5].grid(padx=(1, 4))
+        self.frame_columns[0].grid(padx=(4, 1))
             
         
         #  Adds and grids widgets to respective column
@@ -121,13 +126,13 @@ class channel_creator(ttk.Labelframe):
             self.laserpower_variables.append(StringVar())
             self.laserpower_pulldowns.append(ttk.Spinbox(self.frame_columns[2], from_=0, to=100.0,
                                                          textvariable=self.laserpower_variables[num],
-                                                         increment=25, width=12, font=Font(size=11)))
+                                                         increment=5, width=3, font=Font(size=11)))
             self.laserpower_pulldowns[num].grid(row=num+1, column=0, sticky=NS, padx=1, pady=1)
 
             #  FilterWheel Dropdowns
             self.filterwheel_variables.append(StringVar())
             self.filterwheel_pulldowns.append(ttk.Combobox(self.frame_columns[3],
-                                                           textvariable=self.filterwheel_variables[num], width=15))
+                                                           textvariable=self.filterwheel_variables[num], width=22))
             self.filterwheel_pulldowns[num].state(["readonly"])
             self.filterwheel_pulldowns[num].grid(row=num+1, column=0, sticky=NSEW, padx=1, pady=1)
 
@@ -140,8 +145,15 @@ class channel_creator(ttk.Labelframe):
             #  Time Interval Spinboxes
             self.interval_variables.append(StringVar())
             self.interval_spins.append(ttk.Spinbox(self.frame_columns[5], from_=0, to=5000.0,
-                                                   textvariable=self.interval_variables[num], increment=5, width=12, font=Font(size=11)))
+                                                   textvariable=self.interval_variables[num], increment=1, width=6, font=Font(size=11)))
             self.interval_spins[num].grid(row=num+1, column=0, sticky=NSEW, padx=1, pady=1)
+
+            # Defocus Spinbox
+            self.defocus_variables.append(DoubleVar())
+            self.defocus_spins.append(ValidatedSpinbox(self.frame_columns[6], from_=0.0, to=200.0,
+                                                  textvariable=self.defocus_variables[num], increment=0.1, width=6, font=Font(size=11)))
+            self.defocus_spins[num].grid(row=num+1, column=0, sticky=NSEW, padx=1, pady=1)
+
 
         self.filterwheel_pulldowns[1].grid(pady=2)
         self.filterwheel_pulldowns[2].grid(pady=2)

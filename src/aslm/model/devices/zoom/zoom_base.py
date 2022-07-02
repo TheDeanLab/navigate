@@ -1,5 +1,5 @@
 """
-ASLM image contrast estimates.
+ASLM zoom servo communication classes.
 
 Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
@@ -33,41 +33,21 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 
-
-
-
+# Standard Library Imports
 import logging
-from pathlib import Path
+
+# Third Party Imports
+
+# Local Imports
+
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-
-
-def initiate_gpu():
-    gpus = tf.config.list_physical_devices('GPU')
-    if gpus:
-        use_cpu = False
-        # Create 2 virtual GPUs with 24GB memory each
-        try:
-            tf.config.set_logical_device_configuration(
-                gpus[0], [
-                    tf.config.LogicalDeviceConfiguration(
-                        memory_limit=23000), tf.config.LogicalDeviceConfiguration(
-                        memory_limit=23000)])
-            logical_gpus = tf.config.list_logical_devices('GPU')
-        except RuntimeError as e:
-            # Virtual devices must be set before GPUs have been initialized
-            print(e)
-    else:
-        use_cpu = True
-    return use_cpu
-
-
-if (__name__ == "__main__"):
-    # Contrast metrics testing
-    image_data = imread(os.path.join("E:", "test_data", "CH01_003b.tif"))
-    PSF_support = 3
-    verbose = True
-    entropy = normalized_dct_shannon_entropy(image_data, PSF_support, verbose)
+class ZoomBase:
+    def __init__(self, model, verbose):
+        self.model = model
+        self.verbose = verbose
+        self.zoomdict = model.ZoomParameters['zoom_position']
+        self.zoomvalue = None

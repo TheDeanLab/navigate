@@ -35,7 +35,7 @@ POSSIBILITY OF SUCH DAMAGE.
 import logging
 from pathlib import Path
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
@@ -75,9 +75,9 @@ class ASLM_Configuration_Controller:
                 self.configuration.CameraParameters['y_pixels']]
 
     def get_framerate(self, verbose=False):
-        '''
+        """
         # Gets default framerate info from camera
-        '''
+        """
         pass  # TODO Kevin this is where you pull in and then calculate the info from the config file to initializing the framerate widgets
 
     def get_stage_position(self):

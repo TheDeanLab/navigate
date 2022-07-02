@@ -32,12 +32,12 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-from controller.sub_controllers.widget_functions import validate_wrapper
-from controller.sub_controllers.gui_controller import GUI_Controller
+from aslm.controller.sub_controllers.widget_functions import validate_wrapper
+from aslm.controller.sub_controllers.gui_controller import GUI_Controller
 import logging
 from pathlib import Path
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
@@ -313,8 +313,12 @@ class Stage_GUI_Controller(GUI_Controller):
 
             # Debouncing wait duration - Duration of time to integrate the number of clicks that a user provides.
             # If 1000 ms, if user hits button 10x within 1s, only moves to the final value.
-            self.event_id[axis] = self.view.after(250, lambda: self.parent_controller.execute('stage', position_var.get(), axis))
-            # self.event_id[axis] = self.view.after(250, self.parent_controller.execute, 'stage', position_var.get(), axis)
+            self.event_id[axis] = self.view.after(250, lambda: self.parent_controller.execute('stage',
+                                                                                              position_var.get(),
+                                                                                              axis))
+
+            # Acquire an image.
+            self.parent_controller.execute('')
 
             self.show_verbose_info('stage position is changed')
         

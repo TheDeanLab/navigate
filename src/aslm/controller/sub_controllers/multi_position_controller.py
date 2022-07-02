@@ -37,12 +37,12 @@ import math
 import pandas as pd
 from pandastable import TableModel
 
-from controller.sub_controllers.gui_controller import GUI_Controller
+from aslm.controller.sub_controllers.gui_controller import GUI_Controller
 
 import logging
 from pathlib import Path
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 

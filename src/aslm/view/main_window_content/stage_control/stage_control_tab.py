@@ -31,10 +31,10 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 # Local Imports
-from view.main_window_content.stage_control.tabs.other_axis_frame import other_axis_frame
-from view.main_window_content.stage_control.tabs.position_frame import position_frame
-from view.main_window_content.stage_control.tabs.x_y_frame import x_y_frame
-from view.main_window_content.stage_control.tabs.goto_frame import goto_frame
+from aslm.view.main_window_content.stage_control.tabs.other_axis_frame import other_axis_frame
+from aslm.view.main_window_content.stage_control.tabs.position_frame import position_frame
+from aslm.view.main_window_content.stage_control.tabs.x_y_frame import x_y_frame
+from aslm.view.main_window_content.stage_control.tabs.goto_frame import goto_frame
 # Standard Imports
 from tkinter import *
 from tkinter import ttk
@@ -42,7 +42,7 @@ from tkinter.font import Font
 import logging
 from pathlib import Path
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
@@ -85,7 +85,7 @@ class stage_control_tab(ttk.Frame):
         stage_control_tab.goto_frame_label.pack() #For visual mockup purposes
 
 
-        '''
+        """
         Grid for frames
                 1   2   3   4   5
                 6   7   8   9   10 
@@ -96,7 +96,7 @@ class stage_control_tab(ttk.Frame):
         theta is 8
         focus is 9
         goto is 10
-        '''
+        """
 
         # Formatting
         Grid.columnconfigure(stage_control_tab.position_frame, 'all', weight=1)

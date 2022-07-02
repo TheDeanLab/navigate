@@ -43,10 +43,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Local Imports
-from controller.sub_controllers.gui_controller import GUI_Controller
+from aslm.controller.sub_controllers.gui_controller import GUI_Controller
 
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
@@ -71,12 +71,16 @@ class Camera_View_Controller(GUI_Controller):
         self.image_palette['Gradient'].widget.config(command=self.update_LUT)
         self.image_palette['Rainbow'].widget.config(command=self.update_LUT)
 
+        # Transpose binding
+        self.image_palette['Flip XY'].widget.config(command=self.transpose_image)
+
         # Bindings for key events
         self.canvas.bind("<Button-1>", self.left_click)
 
         #  Stored Images
         self.tk_image = None
         self.image = None
+        self.cross_hair_image = None
         self.saturated_pixels = None
 
         # Widget Defaults
@@ -85,6 +89,7 @@ class Camera_View_Controller(GUI_Controller):
         self.min_counts = None
         self.apply_cross_hair = True
         self.mode = 'stop'
+        self.transpose = False
 
         # Colormap Information
         self.colormap = 'gray'
@@ -99,9 +104,9 @@ class Camera_View_Controller(GUI_Controller):
         self.bit_depth = 8  # bit-depth for PIL presentation.
 
     def initialize(self, name, data):
-        '''
+        """
         # Function that sets widgets based on data given from main controller/config
-        '''
+        """
         # Pallete section (colors, autoscale, min/max counts)
         # keys = ['Frames to Avg', 'Image Max Counts', 'Channel']
         if name == 'minmax':
@@ -117,6 +122,8 @@ class Camera_View_Controller(GUI_Controller):
             self.image_palette['Max'].set(max)
             self.image_palette['Min'].widget['state'] = 'disabled'
             self.image_palette['Max'].widget['state'] = 'disabled'
+
+        self.image_palette['Flip XY'].widget.invoke()
 
         # Image Metrics section
         if name == 'image':
@@ -174,10 +181,6 @@ class Camera_View_Controller(GUI_Controller):
                 # Update GUI
                 self.image_metrics['Image'].set(np.max(self.temp_array))
 
-                if self.verbose:
-                    print("Rolling Average: ", self.image_count, self.rolling_frames)
-                logger.debug(f"Rolling Average: , {self.image_count}, {self.rolling_frames}")
-
     def downsample_image(self):
         """
         #  Down-sample the data for image display according to the configuration file.
@@ -210,14 +213,18 @@ class Camera_View_Controller(GUI_Controller):
         self.tk_image = ImageTk.PhotoImage(Image.fromarray(self.cross_hair_image.astype(np.uint8)))
         self.canvas.create_image(0, 0, image=self.tk_image, anchor='nw')
 
-    def display_image(self, image):
+    def display_image(self, image, channel_id=1):
         """
         #  Displays a camera image using the Lookup Table specified in the View.
         #  If Autoscale is selected, automatically calculates the min and max values for the data.
         #  If Autoscale is not selected, takes the user values as specified in the min and max counts.
         """
         # Place image in memory
-        self.image = image
+
+        if self.transpose:
+            self.image = image.T
+        else:
+            self.image = image
 
         # Detect saturated pixels
         self.detect_saturation()
@@ -241,7 +248,7 @@ class Camera_View_Controller(GUI_Controller):
         self.populate_image()
 
         # Update Channel Index
-        # self.image_metrics['Channel'].set(self.parent_controller.model.return_channel_index())
+        self.image_metrics['Channel'].set(channel_id)
 
         # Iterate Image Count for Rolling Average
         self.image_count = self.image_count + 1
@@ -268,8 +275,7 @@ class Camera_View_Controller(GUI_Controller):
             self.cross_hair_image[height, :] = 1
 
     def apply_LUT(self):
-        """
-        Applies a LUT to the image.
+        r"""Applies a LUT to the image.
         Red is reserved for saturated pixels.
         self.color_values = ['gray', 'gradient', 'rainbow']
         """
@@ -325,17 +331,16 @@ class Camera_View_Controller(GUI_Controller):
         if self.autoscale is True:  # Autoscale Enabled
             self.image_palette['Min'].widget['state'] = 'disabled'
             self.image_palette['Max'].widget['state'] = 'disabled'
-            if self.verbose:
-                print("Autoscale Enabled")
             logger.debug("Autoscale Enabled")
 
         elif self.autoscale is False:  # Autoscale Disabled
             self.image_palette['Min'].widget['state'] = 'normal'
             self.image_palette['Max'].widget['state'] = 'normal'
-            if self.verbose:
-                print("Autoscale Disabled")
             logger.debug("Autoscale Disabled")
             self.update_min_max_counts()
+
+    def transpose_image(self):
+        self.transpose = self.image_palette['Flip XY'].get()
 
     def update_min_max_counts(self):
         """
@@ -344,7 +349,5 @@ class Camera_View_Controller(GUI_Controller):
         """
         self.min_counts = self.image_palette['Min'].get()
         self.max_counts = self.image_palette['Max'].get()
-        if self.verbose:
-            print("Min and Max counts scaled to ", self.min_counts, self.max_counts)
         logger.debug(f"Min and Max counts scaled to, {self.min_counts}, {self.max_counts}")
 

@@ -35,13 +35,13 @@ import tkinter as tk
 from tkinter import ttk, NSEW, Grid
 from tkinter.font import Font
 # Local Imports
-from view.custom_widgets.LabelInputWidgetFactory import LabelInput
-from view.custom_widgets.validation import ValidatedSpinbox
+from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from aslm.view.custom_widgets.validation import ValidatedSpinbox
 
 import logging
 from pathlib import Path
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
@@ -107,7 +107,7 @@ class x_y_frame(ttk.Frame):
 
 
 
-        '''
+        """
         Grid for buttons
 
                 01  02  03  04  05  06
@@ -123,7 +123,7 @@ class x_y_frame(ttk.Frame):
         Left is 13,14,19,20
         Increment is 15,16
         Zero XY is 21,22
-        '''
+        """
 
 
 

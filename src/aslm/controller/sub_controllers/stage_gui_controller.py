@@ -42,7 +42,7 @@ logger = logging.getLogger(p)
 
 
 class Stage_GUI_Controller(GUI_Controller):
-    def __init__(self, view, parent_controller, verbose=False, configuration_controller=None):
+    def __init__(self, view, parent_view, canvas, parent_controller, verbose=False, configuration_controller=None):
         super().__init__(view, parent_controller, verbose)
 
         self.event_id = {
@@ -71,10 +71,10 @@ class Stage_GUI_Controller(GUI_Controller):
             'theta': 10000,
             'f': 10000
         }
-
         # variables
         self.widget_vals = self.view.get_variables()
-     
+                #binding mouse wheel event on camera viewcanvas")
+                
         # gui event bind
         buttons = self.view.get_buttons()
         for k in buttons:
@@ -93,7 +93,6 @@ class Stage_GUI_Controller(GUI_Controller):
 
         if configuration_controller:
             self.initialize(configuration_controller)
-
 
     def initialize(self, config):
         """
@@ -280,3 +279,7 @@ class Stage_GUI_Controller(GUI_Controller):
             self.show_verbose_info('stage position is changed')
         
         return handler
+
+
+
+ 

@@ -166,11 +166,13 @@ class ASLM_controller:
                                                                    configuration_controller)
 
         # Stage Controller
-        self.stage_gui_controller = Stage_GUI_Controller(self.view.stage_control.stage_control_tab,
+        self.stage_gui_controller = Stage_GUI_Controller(self.view.stage_control.stage_control_tab,  
+                                                         self.view,
+                                                         self.camera_view_controller.canvas,
                                                          self,
                                                          self.verbose,
                                                          configuration_controller)
-
+                        
         # Waveform Controller
         self.waveform_tab_controller = Waveform_Tab_Controller(self.view.camera_waveform.waveform_tab,
                                                                self,

@@ -110,6 +110,7 @@ class Channels_Tab_Controller(GUI_Controller):
 
         if configuration_controller:
             self.initialize(configuration_controller)
+         
 
 
     def initialize(self, config):
@@ -179,6 +180,7 @@ class Channels_Tab_Controller(GUI_Controller):
             self.view.stack_timepoint_frame.stack_pause_spinbox: settings['timepoint']['stack_pause'],
             self.view.stack_timepoint_frame.exp_time_spinbox: settings['timepoint']['timepoints']
         }
+
         for widget in temp_dict:
             widget.configure(from_=temp_dict[widget]['min'])
             widget.configure(to=temp_dict[widget]['max'])
@@ -186,19 +188,17 @@ class Channels_Tab_Controller(GUI_Controller):
 
         # channels setting
         self.channel_setting_controller.set_spinbox_range_limits(settings['channel'])
-    
+
     def set_mode(self, mode):
         """
         # change acquisition mode
         """
         self.mode = mode
         self.channel_setting_controller.set_mode(mode)
-
         state = 'normal' if mode == 'stop' else 'disabled'
         self.view.stack_acq_frame.step_size_spinbox['state'] = state
         self.view.stack_acq_frame.start_pos_spinbox['state'] = state
         self.view.stack_acq_frame.end_pos_spinbox['state'] = state
-
         self.view.stack_timepoint_frame.save_check['state'] = state
         self.view.stack_timepoint_frame.stack_pause_spinbox['state'] = state
         self.view.stack_timepoint_frame.exp_time_spinbox['state'] = state

@@ -144,6 +144,7 @@ class ASLM_controller:
         # Sub Gui Controllers
         # Acquire bar
         self.acquire_bar_controller = Acquire_Bar_Controller(self.view.acqbar,
+                                                             self.view.settings.channels_tab,
                                                              self,
                                                              self.verbose)
 

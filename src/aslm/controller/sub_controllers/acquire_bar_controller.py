@@ -45,7 +45,7 @@ p = __name__.split(".")[0]
 logger = logging.getLogger(p)
 
 class Acquire_Bar_Controller(GUI_Controller):
-    def __init__(self, view, parent_controller, verbose=False):
+    def __init__(self, view, parent_view, parent_controller, verbose=False):
         super().__init__(view, parent_controller, verbose)
 
         # acquisition image mode variable
@@ -60,12 +60,12 @@ class Acquire_Bar_Controller(GUI_Controller):
             'label': ''
         }
 
-        self.mode_dict = {
+        self.mode_dict = { 
             'Continuous Scan': 'live',
             'Z-Stack': 'z-stack',
             'Single Acquisition': 'single',
             'Projection': 'projection'
-        }
+        }  #need to add alignment here
 
         # gui event bind
         self.view.acquire_btn.config(command=self.launch_popup_window)
@@ -75,6 +75,7 @@ class Acquire_Bar_Controller(GUI_Controller):
             self.update_microscope_mode)
 
         self.view.exit_btn.config(command=self.exit_program)
+        self.parent_view = parent_view
 
     def set_mode(self, mode):
         """
@@ -86,7 +87,6 @@ class Acquire_Bar_Controller(GUI_Controller):
         reverse_dict = dict(
             map(lambda v: (v[1], v[0]), self.mode_dict.items()))
         self.view.pull_down.set(reverse_dict[mode])
-
         self.show_verbose_info('image mode is set to', mode)
 
     def get_mode(self):
@@ -157,7 +157,13 @@ class Acquire_Bar_Controller(GUI_Controller):
         # Gets the state of the pull-down menu and tell the central controller
         """
         self.mode = self.mode_dict[self.view.pull_down.get()]
-
+        if self.mode in ["live", "Alignment"]: # need to get alignment
+            self.parent_view.stack_timepoint_frame.save_check['state'] = "disabled"
+            self.parent_view.stack_timepoint_frame.exp_time_spinbox['state'] = "disabled"
+            self.parent_view.stack_timepoint_frame.stack_acq_spinbox['state'] = "disabled"
+            self.parent_view.stack_timepoint_frame.stack_pause_spinbox['state'] = "disabled"
+            self.parent_view.stack_timepoint_frame.timepoint_interval_spinbox['state'] = "disabled"
+            self.parent_view.stack_timepoint_frame.total_time_spinval['state'] = "disabled"
         self.show_verbose_info("The Microscope State is now:", self.get_mode())
 
     def launch_acquisition(self, popup_window):

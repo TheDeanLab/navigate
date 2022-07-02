@@ -105,9 +105,11 @@ class Stage_GUI_Controller(GUI_Controller):
     
     def on_enter(self, event):
         self.canvas.bind("<MouseWheel>", self.update_position)
+        
     def on_leave(self, event):
         self.count = 0
         self.mouse_scrolls = 0
+
     def update_position(self, event):
         self.mouse_scrolls += 1
         if self.mouse_scrolls % 2 == 0:
@@ -115,13 +117,12 @@ class Stage_GUI_Controller(GUI_Controller):
             self.count += event.delta
             updated_position = position_o
             updated_position["f"] += self.count
-            print(updated_position)
             self.set_position(updated_position)
+
     def key_press(self, event):
       char = event.char
       position_o = self.get_position()
       current_position = position_o
-      #increment = getattr(self.stage_gui_controller, "widget_vals")
       x_increment = self.widget_vals["x_step"].get()
       y_increment = self.widget_vals["y_step"].get()
       if char.lower() == "w":

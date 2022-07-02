@@ -1,7 +1,4 @@
-"""
-ASLM zoom servo communication classes.
-
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,34 +31,28 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 
 # Standard Library Imports
-import logging
+import unittest
+from pathlib import Path
 
 # Third Party Imports
 
 # Local Imports
-
-# Logger Setup
-p = __name__.split(".")[1]
-logger = logging.getLogger(p)
+from aslm.model.devices.zoom.zoom_base import ZoomBase
+from aslm.model.aslm_model_config import Session as session
 
 
-class ZoomBase:
-    r"""ZoomBase parent class.
+class TestZoomBase(unittest.TestCase):
+    r"""Unit Test for Zoom Base Class"""
 
-    Attributes
-    ----------
-    configuration : Session
-        Global configuration of the microscope
-    zoomdict : dict
-        Dictionary of possible zoom values and their corresponding servo position.
-    zoomvalue : int
-        Current Zoom value
-    verbose : Boolean
-        Verbosity
-    """
+    def test_zoom_base_attributes(self):
+        configuration_path = Path('/Users/S155475/Desktop/GitHub/ASLM/src/aslm/config/configuration.yml')
+        configuration = session(configuration_path, False)
+        zoom_class = ZoomBase(configuration, False)
 
-    def __init__(self, configuration, verbose):
-        self.configuration = configuration
-        self.verbose = verbose
-        self.zoomdict = configuration.ZoomParameters['zoom_position']
-        self.zoomvalue = None
+        assert hasattr(zoom_class, 'configuration')
+        assert hasattr(zoom_class, 'zoomdict')
+        assert hasattr(zoom_class, 'zoomvalue')
+        assert hasattr(zoom_class, 'verbose')
+
+if __name__ == '__main__':
+    unittest.main()

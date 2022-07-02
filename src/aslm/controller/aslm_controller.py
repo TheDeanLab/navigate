@@ -232,8 +232,9 @@ class ASLM_controller:
         self.img_height = img_height
 
     def initialize_cam_view(self, configuration_controller):
-        """ Populate view tab.
+        r""" Populate view tab.
         Populate widgets with necessary data from config file via config controller. For the entire view tab.
+        Sets the minimum and maximum counts for when the data is not being autoscaled.
 
         Parameters
         -------
@@ -241,7 +242,7 @@ class ASLM_controller:
             Camera view sub-controller.
         """
         # Populating Min and Max Counts
-        minmax_values = [110, 5000]
+        minmax_values = [0, 2**16-1]
         self.camera_view_controller.initialize('minmax', minmax_values)
         image_metrics = [1, 0, 0]
         self.camera_view_controller.initialize('image', image_metrics)

@@ -261,7 +261,7 @@ class DAQBase:
                 self.waveform_dict[channel_key]['galvo_waveform'][self.waveform_dict[channel_key]['galvo_waveform'] <
                                                                 min_galvo_voltage] = min_galvo_voltage
 
-            return self.waveform_dict
+        return self.waveform_dict
 
     def calculate_samples(self):
         r"""Calculate the number of samples for the waveforms.

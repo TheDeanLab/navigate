@@ -249,7 +249,6 @@ class Model:
                 pipe.close()
             delattr(self, pipe_name)
 
-
     #  Basic Image Acquisition Functions
     #  - These functions are used to acquire images from the camera
     #  - Tasks for delivering analog and digital outputs are already initiated by the DAQ object
@@ -285,7 +284,6 @@ class Model:
             if self.is_save:
                 self.experiment.Saving = kwargs['saving_info']
                 self.run_data_process(channel_num, data_func=self.image_writer.save_image)
-                
 
             else:
                 self.run_data_process(channel_num)
@@ -557,7 +555,8 @@ class Model:
         self.is_live = False
 
         # Calculate Waveforms for all channels. Plot in the view.
-        waveform_dict = self.daq.calculate_all_waveforms(self.experiment.MicroscopeState, self.etl_constants, self.experiment.GalvoParameters, self.get_readout_time())
+        waveform_dict = self.daq.calculate_all_waveforms(self.experiment.MicroscopeState, self.etl_constants,
+                                                         self.experiment.GalvoParameters, self.get_readout_time())
         self.event_queue.put(('waveform', waveform_dict))
 
         # Set Camera Sensor Mode - Must be done before camera is initialized.
@@ -596,7 +595,8 @@ class Model:
             microscope_state = self.experiment.MicroscopeState
             if channel_key not in microscope_state['channels'] \
                     or not microscope_state['channels'][channel_key]['is_selected']:
-                self.stop_acquisition = True
+                if self.imaging_mode != 'z-stack':
+                    self.stop_acquisition = True
                 return
 
             # Update Microscope State Dictionary
@@ -715,7 +715,6 @@ class Model:
         stack_cycling_mode = microscope_state['stack_cycling_mode']
 
         # TODO: Make relative to stage coordinates.
-
         self.stages.report_position()  # Update current position
         restore_z = self.stages.z_pos
 

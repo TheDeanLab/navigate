@@ -34,15 +34,14 @@ from tkinter import *
 from tkinter import ttk
 import logging
 from pathlib import Path
-
 # Logger Setup
 p = __name__.split(".")[0]
 logger = logging.getLogger(p)
 from tkinter.font import Font
 import numpy as np
 
-#Local imports
-#from view.main_window_content.acquire_bar_frame.acquire_bar import AcquireBar
+# Local imports
+#from view.notebooks.acquire_bar_frame.acquire_bar import AcquireBar
 
 """
   settings.channels_label_frame = channels_label_frame(settings.channel_main)
@@ -80,7 +79,6 @@ class stack_timepoint_frame(ttk.Labelframe):
         stack_timepoint_label_frame.save_data.set(False)
         stack_timepoint_label_frame.save_check = ttk.Checkbutton(stack_timepoint_label_frame, text='', variable=stack_timepoint_label_frame.save_data)
         stack_timepoint_label_frame.save_check.grid(row=0, column=input_position, sticky=(NSEW), pady=(4,0))
-        
 
 
         # Timepoints Label, spinbox defaults to 1.

@@ -37,7 +37,6 @@ POSSIBILITY OF SUCH DAMAGE.
 import sys
 from controller.sub_controllers.gui_controller import GUI_Controller
 from view.main_window_content.acquire_bar_frame.acquire_popup import Acquire_PopUp as acquire_popup
-from view.main_window_content.tabs.channels.stack_timepoint_settings import stack_timepoint_frame
 
 import logging
 from pathlib import Path
@@ -46,7 +45,7 @@ p = __name__.split(".")[0]
 logger = logging.getLogger(p)
 
 class Acquire_Bar_Controller(GUI_Controller):
-    def __init__(self, view, parent_view, parent_controller, verbose=False):
+    def __init__(self, view, parent_controller, verbose=False):
         super().__init__(view, parent_controller, verbose)
 
         # acquisition image mode variable
@@ -71,7 +70,7 @@ class Acquire_Bar_Controller(GUI_Controller):
         # gui event bind
         self.view.acquire_btn.config(command=self.launch_popup_window)
 
-        self.view.pull_down.bind(  
+        self.view.pull_down.bind(
             '<<ComboboxSelected>>',
             self.update_microscope_mode)
 
@@ -87,6 +86,7 @@ class Acquire_Bar_Controller(GUI_Controller):
         reverse_dict = dict(
             map(lambda v: (v[1], v[0]), self.mode_dict.items()))
         self.view.pull_down.set(reverse_dict[mode])
+
         self.show_verbose_info('image mode is set to', mode)
 
     def get_mode(self):
@@ -157,6 +157,7 @@ class Acquire_Bar_Controller(GUI_Controller):
         # Gets the state of the pull-down menu and tell the central controller
         """
         self.mode = self.mode_dict[self.view.pull_down.get()]
+
         self.show_verbose_info("The Microscope State is now:", self.get_mode())
 
     def launch_acquisition(self, popup_window):

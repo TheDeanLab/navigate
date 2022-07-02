@@ -377,7 +377,6 @@ class ASLM_controller:
 
         # set mode according to model.experiment
         mode = self.experiment.MicroscopeState['image_mode']
-        print(mode)
         self.acquire_bar_controller.set_mode(mode)
         self.acquire_bar_controller.set_saving_settings(self.experiment.Saving)
 

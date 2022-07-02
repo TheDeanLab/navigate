@@ -38,40 +38,23 @@ from pathlib import Path
 
 # Local Imports
 from aslm.model.devices.zoom.zoom_dynamixel import DynamixelZoom
-from aslm.model.aslm_model_config import Session as session
 
 
 class TestZoomDynamixel(unittest.TestCase):
-    r"""Unit Test for DynamixelZoom Class"""
+    r"""Unit Test for DynamixelZoom Class
+
+    Does not instantiate object owing to DLL"""
 
     def test_zoom_dynamixel_attributes(self):
-        configuration_path = Path('/Users/S155475/Desktop/GitHub/ASLM/src/aslm/config/configuration.yml')
-        configuration = session(configuration_path, False)
-        zoom_class = DynamixelZoom(configuration, False)
 
-        assert hasattr(zoom_class, 'configuration')
-        assert hasattr(zoom_class, 'zoomdict')
-        assert hasattr(zoom_class, 'zoomvalue')
-        assert hasattr(zoom_class, 'verbose')
-        assert hasattr(zoom_class, 'id')
-        assert hasattr(zoom_class, 'comport')
-        assert hasattr(zoom_class, 'devicename')
-        assert hasattr(zoom_class, 'baudrate')
-        assert hasattr(zoom_class, 'addr_mx_torque_enable')
-        assert hasattr(zoom_class, 'addr_mx_goal_position')
-        assert hasattr(zoom_class, 'addr_mx_present_position')
-        assert hasattr(zoom_class, 'addr_mx_p_gain')
-        assert hasattr(zoom_class, 'addr_mx_torque_limit')
-        assert hasattr(zoom_class, 'addr_mx_moving_speed')
-        assert hasattr(zoom_class, 'goal_position_offset')
-        assert hasattr(zoom_class, 'sleeptime')
-        assert hasattr(zoom_class, 'timeout')
-        assert hasattr(zoom_class, 'torque_enable')
-        assert hasattr(zoom_class, 'torque_disable')
-        assert hasattr(zoom_class, 'set_zoom') and callable(getattr(zoom_class, 'set_zoom'))
-        assert hasattr(zoom_class, 'read_position') and callable(getattr(zoom_class, 'read_position'))
-        assert hasattr(zoom_class, 'move') and callable(getattr(zoom_class, 'move'))
+        attributes = dir(DynamixelZoom)
+        desired_attributes = ['move',
+                              'read_position',
+                              'set_zoom']
 
+        for da in desired_attributes:
+            assert da in attributes
 
 if __name__ == '__main__':
     unittest.main()
+

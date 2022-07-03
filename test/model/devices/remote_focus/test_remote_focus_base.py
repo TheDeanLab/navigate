@@ -31,55 +31,22 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 
 # Standard Library Imports
-import logging
+import unittest
+from pathlib import Path
 
 # Third Party Imports
 
 # Local Imports
-
-# Logger Setup
-p = __name__.split(".")[1]
-logger = logging.getLogger(p)
+from aslm.model.devices.remote_focus.remote_focus_base import RemoteFocusBase
 
 
-class ShutterBase:
-    r"""ShutterBase Class
-    Parent class for the laser shutters.
+class TestLaserBase(unittest.TestCase):
+    r"""Unit Test for RemoteFocusBase Class"""
 
-    Attributes
-    ----------
-    configuration : Session
-        Global configuration of the microscope
-    experiment : Session
-        Experiment configuration of the microscope
-    verbose : Boolean
-        Verbosity
-    shutter_right_state : Boolean
-        Right shutter state
-    shutter_left_state : Boolean
-        Left shutter state
+    def test_shutter_base_attributes(self):
+        remote_focus = RemoteFocusBase(configuration=configuration, experiment=experiment, verbose=False)
+        pass
 
-    Methods
-    -------
-    open_left()
-        Open the left shutter, close the right shutter.
-    open_right()
-        Open the right shutter, close the left shutter.
-    close_shutters()
-        Close both shutters
-    state()
-        Return the current state of the shutters
-    """
 
-    def __init__(self, configuration, experiment, verbose=False):
-        self.configuration = configuration
-        self.configuration = experiment
-        self.verbose = verbose
-
-        # Right Shutter - High Resolution Mode
-        self.shutter_right = self.configuration.DAQParameters['shutter_right']
-        self.shutter_right_state = False
-
-        # Left Shutter - Low Resolution Mode
-        self.shutter_left = self.configuration.DAQParameters['shutter_left']
-        self.shutter_left_state = False
+if __name__ == '__main__':
+    unittest.main()

@@ -31,55 +31,41 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 
 # Standard Library Imports
-import logging
+import unittest
+from pathlib import Path
 
 # Third Party Imports
 
 # Local Imports
-
-# Logger Setup
-p = __name__.split(".")[1]
-logger = logging.getLogger(p)
+from aslm.model.devices.camera.camera_hamamatsu import HamamatsuOrca
+from aslm.model.aslm_model_config import Session as session
 
 
-class ShutterBase:
-    r"""ShutterBase Class
-    Parent class for the laser shutters.
+class TestHamamatsuOrca(unittest.TestCase):
+    r"""Unit Test for HamamamatsuOrca Class"""
 
-    Attributes
-    ----------
-    configuration : Session
-        Global configuration of the microscope
-    experiment : Session
-        Experiment configuration of the microscope
-    verbose : Boolean
-        Verbosity
-    shutter_right_state : Boolean
-        Right shutter state
-    shutter_left_state : Boolean
-        Left shutter state
+    def test_hamamatsu_camera_attributes(self):
+        attributes = dir(HamamatsuOrca)
+        desired_attributes = ['serial_number',
+                              'stop',
+                              'report_settings',
+                              'close_camera',
+                              'set_sensor_mode',
+                              'set_readout_direction',
+                              'calculate_light_sheet_exposure_time',
+                              'calculate_readout_time',
+                              'set_exposure_time',
+                              'set_line_interval',
+                              'set_binning',
+                              'set_ROI',
+                              'initialize_image_series',
+                              'close_image_series',
+                              'get_new_frame',
+                              'get_minimum_waiting_time']
 
-    Methods
-    -------
-    open_left()
-        Open the left shutter, close the right shutter.
-    open_right()
-        Open the right shutter, close the left shutter.
-    close_shutters()
-        Close both shutters
-    state()
-        Return the current state of the shutters
-    """
+        for da in desired_attributes:
+            assert da in attributes
 
-    def __init__(self, configuration, experiment, verbose=False):
-        self.configuration = configuration
-        self.configuration = experiment
-        self.verbose = verbose
 
-        # Right Shutter - High Resolution Mode
-        self.shutter_right = self.configuration.DAQParameters['shutter_right']
-        self.shutter_right_state = False
-
-        # Left Shutter - Low Resolution Mode
-        self.shutter_left = self.configuration.DAQParameters['shutter_left']
-        self.shutter_left_state = False
+if __name__ == '__main__':
+    unittest.main()

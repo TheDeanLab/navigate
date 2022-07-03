@@ -1,5 +1,4 @@
-"""
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,6 +34,7 @@ POSSIBILITY OF SUCH DAMAGE.
 import tkinter
 import multiprocessing as mp
 import threading
+from pathlib import Path
 
 # Third Party Imports
 
@@ -66,9 +66,6 @@ from aslm.tools.common_dict_tools import update_settings_common, update_stage_di
 # debug
 from aslm.controller.aslm_debug import Debug_Module
 
-import logging
-from pathlib import Path
-
 # Logger Setup
 import logging
 p = __name__.split(".")[1]
@@ -94,14 +91,7 @@ class ASLM_controller:
         Command line input arguments for non-default file paths or using synthetic hardware modes.
     """
 
-    def __init__(
-            self,
-            root,
-            configuration_path,
-            experiment_path,
-            etl_constants_path,
-            USE_GPU,
-            args):
+    def __init__(self, root, configuration_path, experiment_path, etl_constants_path, USE_GPU, args):
         
         logger.info("Spec - Controller controlling")
         logger.info("Performance - Controller performing")

@@ -31,55 +31,38 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 
 # Standard Library Imports
-import logging
+import unittest
+from pathlib import Path
 
 # Third Party Imports
 
 # Local Imports
-
-# Logger Setup
-p = __name__.split(".")[1]
-logger = logging.getLogger(p)
+from aslm.model.devices.shutter.laser_shutter_base import ShutterBase
+from aslm.model.aslm_model_config import Session as session
 
 
-class ShutterBase:
-    r"""ShutterBase Class
-    Parent class for the laser shutters.
+class TestLaserBase(unittest.TestCase):
+    r"""Unit Test for ShutterBase Class"""
 
-    Attributes
-    ----------
-    configuration : Session
-        Global configuration of the microscope
-    experiment : Session
-        Experiment configuration of the microscope
-    verbose : Boolean
-        Verbosity
-    shutter_right_state : Boolean
-        Right shutter state
-    shutter_left_state : Boolean
-        Left shutter state
+    def test_shutter_base_attributes(self):
+        base_directory = Path(__file__).resolve().parent.parent.parent.parent.parent
+        configuration_directory = Path.joinpath(base_directory, 'src', 'aslm', 'config')
+        configuration_path = Path.joinpath(configuration_directory, 'configuration.yml')
+        experiment_path = Path.joinpath(configuration_path, 'experiment.yml')
 
-    Methods
-    -------
-    open_left()
-        Open the left shutter, close the right shutter.
-    open_right()
-        Open the right shutter, close the left shutter.
-    close_shutters()
-        Close both shutters
-    state()
-        Return the current state of the shutters
-    """
+        configuration = session(configuration_path, False)
+        experiment = session(experiment_path, False)
 
-    def __init__(self, configuration, experiment, verbose=False):
-        self.configuration = configuration
-        self.configuration = experiment
-        self.verbose = verbose
+        shutter = ShutterBase(configuration=configuration, experiment=experiment, verbose=False)
 
-        # Right Shutter - High Resolution Mode
-        self.shutter_right = self.configuration.DAQParameters['shutter_right']
-        self.shutter_right_state = False
+        assert hasattr(shutter, 'configuration')
+        assert hasattr(shutter, 'experiment')
+        assert hasattr(shutter, 'verbose')
+        assert hasattr(shutter, 'shutter_right')
+        assert hasattr(shutter, 'shutter_right_state')
+        assert hasattr(shutter, 'shutter_left')
+        assert hasattr(shutter, 'shutter_left_state')
 
-        # Left Shutter - Low Resolution Mode
-        self.shutter_left = self.configuration.DAQParameters['shutter_left']
-        self.shutter_left_state = False
+
+if __name__ == '__main__':
+    unittest.main()

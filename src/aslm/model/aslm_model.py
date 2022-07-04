@@ -1,7 +1,4 @@
-"""
-ASLM Model.
-
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -260,17 +257,15 @@ class Model:
         """
         Receives commands from the controller.
         """
-        if self.verbose:
-            print('in the model(get the command from controller):', command, args)
+        logging.info('ASLM Model - Received command from controller:', command, args)
         if not self.data_buffer:
-            if self.verbose:
-                print("Error: The Shared Memory Buffer Has Not Been Set Up.")
+            logging.debug('ASLM Model - Shared Memory Buffer Not Set Up.')
             return
 
         if command == 'single':
-            """
-            # Acquire a single image.
-            # First overwrites the model instance of the MicroscopeState
+            r"""Acquire a single image.
+            
+            First overwrites the model instance of the MicroscopeState
             """
             self.imaging_mode = 'single'
             self.experiment.MicroscopeState = kwargs['microscope_info']
@@ -283,7 +278,6 @@ class Model:
             if self.is_save:
                 self.experiment.Saving = kwargs['saving_info']
                 self.run_data_process(channel_num, data_func=self.image_writer.save_image)
-
             else:
                 self.run_data_process(channel_num)
             self.end_acquisition()
@@ -742,7 +736,7 @@ class Model:
             # Regular, pass nonsense
             active_channels = ['sdasdasd']
         else:
-            print(f"Unknown stack cycling mode {stack_cycling_mode}. Giving up.")
+            logging.debug(f"ASLM Model - Unknown stack cycling mode {stack_cycling_mode}. Giving up.")
             return
 
         # For each moment in time...
@@ -811,19 +805,19 @@ class Model:
             self.camera = self.get_camera()
 
         if resolution_value == 'high':
-            print("High Resolution Mode")
+            logging.info("ASLM Model - Switching to High Resolution Mode")
             self.experiment.MicroscopeState['resolution_mode'] = 'high'
             self.laser_triggers.enable_high_resolution_laser()
         else:
             # Can be 0.63, 1, 2, 3, 4, 5, and 6x.
-            print("Low Resolution Mode, Zoom:", resolution_value)
+            logging.info(f"ASLM Model - Switching to Low Resolution Mode, Zoom: {resolution_value}")
             self.experiment.MicroscopeState['resolution_mode'] = 'low'
             self.experiment.MicroscopeState['zoom'] = resolution_value
             self.zoom.set_zoom(resolution_value)
             self.laser_triggers.enable_low_resolution_laser()
 
     def open_shutter(self):
-        """
+        r"""Open the Laser Shutter
         # Evaluates the experiment parameters and opens the proper shutter.
         # 'low' is the low-resolution mode of the microscope, or the left shutter.
         # 'high' is the high-resolution mode of the microscope, or the right shutter.
@@ -834,12 +828,8 @@ class Model:
         elif resolution_mode == 'high':
             self.shutter.open_right()
         else:
-            print("Shutter Command Invalid")
+            logging.debug("ASLM Model - Shutter Command Invalid")
 
     def return_channel_index(self):
         return self.current_channel
 
-
-if __name__ == '__main__':
-    """ Testing Section """
-    pass

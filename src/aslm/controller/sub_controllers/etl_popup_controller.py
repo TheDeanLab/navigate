@@ -294,7 +294,11 @@ class Etl_Popup_Controller(GUI_Controller):
         def func_galvo(*args):
             focus_prefix = 'r' if self.resolution == 'high' else 'l'
             galvo_parameter = f'galvo_{focus_prefix}_{parameter}'
-            value = self.galvo_setting[galvo_parameter]
+            try:
+                value = self.galvo_setting[galvo_parameter]
+            except KeyError:
+                # Special case for galvo amplitude not being defined
+                value = 0
             variable_value = variable.get()
             print(f"Galvo parameter {galvo_parameter} changed: {variable_value}")
             if value != variable_value and variable_value != '':  # and self.mode == 'live':

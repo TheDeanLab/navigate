@@ -224,7 +224,7 @@ class DAQBase:
 
                 # We need the camera to experience N sweeps of the galvo. As such,
                 # frequency should divide evenly into exposure_time
-                galvo_frequency = float(galvo_parameters[f'galvo_{focus_prefix}_frequency'])/exposure_time  # 100.5/exposure_time
+                galvo_frequency = float(galvo_parameters.get(f'galvo_{focus_prefix}_frequency',0))/exposure_time  # 100.5/exposure_time
 
                 # Calculate the Waveforms
                 self.waveform_dict[channel_key]['etl_waveform'] = tunable_lens_ramp(sample_rate=self.sample_rate,

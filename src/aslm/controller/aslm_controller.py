@@ -34,6 +34,7 @@ POSSIBILITY OF SUCH DAMAGE.
 import tkinter
 import multiprocessing as mp
 import threading
+from pathlib import Path
 
 # Third Party Imports
 
@@ -128,7 +129,7 @@ class ASLM_controller:
 
         # etl setting file
         self.etl_constants_path = etl_constants_path
-        self.etl_setting = session(self.etl_constants_path,
+        self.etl_constants = session(self.etl_constants_path,
                                    self.verbose)
 
 
@@ -187,9 +188,6 @@ class ASLM_controller:
         self.img_height = 0
         self.data_buffer = None
         self.update_buffer()
-
-        # Misc. instances
-        self.resolution_value = None
 
     def update_buffer(self):
         r""" Update the buffer size according to the camera dimensions listed in the experimental parameters.

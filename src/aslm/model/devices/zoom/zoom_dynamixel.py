@@ -114,7 +114,7 @@ class DynamixelZoom(ZoomBase):
         ----------
         zoom : dict
             Zoom dictionary
-        wait_until_done : Boolean
+        wait_until_done : bool
             Delay parameter.
 
         # Changes zoom after checking that the commanded value exists
@@ -135,7 +135,7 @@ class DynamixelZoom(ZoomBase):
         ----------
         position : int
             Location to move to.
-        wait_until_done : Boolean
+        wait_until_done : bool
             Delay parameter
         """
 

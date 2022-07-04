@@ -37,6 +37,7 @@ import logging
 import multiprocessing as mp
 
 # Third Party Imports
+import numpy as np
 
 # Local Imports
 import aslm.model.aslm_device_startup_functions as startup_functions
@@ -56,8 +57,54 @@ p = __name__.split(".")[1]
 
 
 class Model:
-    def __init__(self, USE_GPU, args, configuration_path=None, experiment_path=None,
-            etl_constants_path=None, event_queue=None):
+    """ASLM Model Class
+
+    Model for Model-View-Controller Software Architecture.
+
+    Attributes
+    ----------
+    USE_GPU : bool
+        Flag for whether or not to leverage CUDA analysis engine.
+    args : str
+        ...
+    configuration_path : str
+        File path for the global configuration of the microscope
+    experiment_path : str
+        File path for the experiment configuration of the microscope
+    event_queue : ...
+        ...
+
+    Methods
+    -------
+    get_camera()
+    update_data_buffer()
+    get_data_buffer()
+    create_pipe()
+    release_pipe()
+    run_command()
+    move_stage()
+    end_acquisition()
+    run_data_process()
+    calculate_number_of_channels()
+    load_experiment_file()
+    get_readout_time()
+    prepare_acquisition()
+    run_single_channel_acquisition()
+    run_single_acquisition()
+    snap_image()
+    run_live_acquisition()
+    run_z_stack_acquisition()
+    run_single_channel_acquisition_with_features()
+    open_shutter()
+    return_channel_index()
+    """
+    def __init__(self,
+                 USE_GPU,
+                 args,
+                 configuration_path=None,
+                 experiment_path=None,
+                 etl_constants_path=None,
+                 event_queue=None):
 
         self.logger = logging.getLogger(p)
 
@@ -114,7 +161,10 @@ class Model:
         #       serial number we want.
         for i in range(int(self.configuration.CameraParameters['number_of_cameras'])):
             threads_dict[f'camera{i}'] = ResultThread(target=startup_functions.start_camera,
-                                                      args=(self.configuration, self.experiment, self.verbose, i)).start()
+                                                      args=(self.configuration,
+                                                            self.experiment,
+                                                            self.verbose,
+                                                            i)).start()
             time.sleep(1.0)
 
         for k in threads_dict:
@@ -127,7 +177,10 @@ class Model:
             self.daq.set_camera(self.camera)
 
         # analysis class
-        self.analysis = startup_functions.start_analysis(self.configuration, self.experiment, USE_GPU, self.verbose)
+        self.analysis = startup_functions.start_analysis(self.configuration,
+                                                         self.experiment,
+                                                         USE_GPU,
+                                                         self.verbose)
 
         # Acquisition Housekeeping
         self.imaging_mode = None
@@ -143,6 +196,9 @@ class Model:
         self.pre_exposure_time = 0  # milliseconds
         self.camera_line_interval = 9.7e-6  # s
         self.start_time = None
+        self.data_buffer = None
+        self.img_width = int(self.configuration.CameraParameters['x-pixels'])
+        self.img_height = int(self.configuration.CameraParameters['y-pixels'])
 
         # Autofocusing
         self.f_position = None
@@ -179,8 +235,7 @@ class Model:
 
         # data buffer for image frames
         self.number_of_frames = self.configuration.SharedNDArray['number_of_frames']
-        self.update_data_buffer(int(self.experiment.CameraParameters['x_pixels']),
-                                int(self.experiment.CameraParameters['y_pixels']))
+        self.update_data_buffer(self.img_width, self.img_height)
 
         # debug
         self.debug = Debug_Module(self, self.verbose)
@@ -189,7 +244,8 @@ class Model:
         self.image_writer = ImageWriter(self)
 
     def get_camera(self):
-        """
+        r"""Select active camera.
+
         Get the currently-used camera, in the event there are multiple cameras.
         Find the camera with the matching serial number for the current resolution mode.
 
@@ -200,7 +256,7 @@ class Model:
         """
 
         # Default to the zeroth camera
-        cam = self.camera0
+        cam = self.camera
 
         # TODO: In the event two cameras are on, but we've only requested one, make sure it's the one with the
         #       serial number we want.
@@ -219,6 +275,15 @@ class Model:
         return cam
 
     def update_data_buffer(self, img_width=512, img_height=512):
+        r"""Update the Data Buffer
+
+        Parameters
+        ----------
+        img_width : int
+            Number of active pixels in the x-dimension.
+        img_height : int
+            Number of active pixels in the y-dimension.
+        """
         if self.camera.is_acquiring:
             self.camera.close_image_series()
         self.camera.set_ROI(img_width, img_height)
@@ -228,34 +293,72 @@ class Model:
         self.img_height = img_height
 
     def get_data_buffer(self, img_width=512, img_height=512):
+        r"""Get the data buffer.
+
+        If the number of active pixels in x and y changes, updates the data buffer and returns in.
+
+        Parameters
+        ----------
+        img_height : int
+            Number of active pixels in the x-dimension.
+        img_width : int
+            Number of active pixels in the y-dimension.
+
+        Returns
+        -------
+        data_buffer : SharedNDArray
+            Shared memory object.
+        """
         if img_width != self.img_width or img_height != self.img_height:
             self.update_data_buffer(img_width, img_height)
         return self.data_buffer
 
     def create_pipe(self, pipe_name):
+        r"""Create a data pipe.
+
+        Creates a pair of connection objects connected by a pipe which by default is duplex (two-way)
+
+        Parameters
+        ----------
+        pipe_name : str
+            Name of pipe to create.
+
+        Returns
+        -------
+        end1 : object
+            Connection object.
+        """
         self.release_pipe(pipe_name)
         end1, end2 = mp.Pipe()
         setattr(self, pipe_name, end2)
         return end1
 
     def release_pipe(self, pipe_name):
+        r"""Close a data pipe.
+
+        Parameters
+        ----------
+        pipe_name : str
+            Name of pipe to close.
+        """
         if hasattr(self, pipe_name):
             pipe = getattr(self, pipe_name)
             if pipe:
                 pipe.close()
             delattr(self, pipe_name)
 
-    #  Basic Image Acquisition Functions
-    #  - These functions are used to acquire images from the camera
-    #  - Tasks for delivering analog and digital outputs are already initiated by the DAQ object
-    #  - daq.create_waveforms() calculates the waveforms and writes them to tasks.
-    #  - daq.start_tasks() starts the tasks, which then wait for an external trigger.
-    #  - daq.run_tasks() delivers the external trigger which synchronously starts the tasks and waits for completion.
-    #  - daq.stop_tasks() stops the tasks and cleans up.
-
     def run_command(self, command, *args, **kwargs):
-        """
-        Receives commands from the controller.
+        r"""Receives commands from the controller.
+
+        Parameters
+        ----------
+        command : str
+            Type of command to run.  Can be 'single', 'live', 'z-stack', 'projection', 'update_setting'
+            'autofocus', 'stop', and 'debug'.
+        *args : str
+            ...
+        **kwargs : str
+            ...
         """
         logging.info('ASLM Model - Received command from controller:', command, args)
         if not self.data_buffer:
@@ -283,9 +386,7 @@ class Model:
             self.end_acquisition()
 
         elif command == 'live':
-            """
-            Live Acquisition Mode
-            """
+            r"""Live Acquisition Mode"""
             self.imaging_mode = 'live'
             self.experiment.MicroscopeState = kwargs['microscope_info']
             self.experiment.CameraParameters = kwargs['camera_info']
@@ -388,46 +489,56 @@ class Model:
             self.debug.debug(*args, **kwargs)
 
     def move_stage(self, pos_dict, wait_until_done=False):
-        """
-        Moves the stages.
-        Checks "on target state" after command and waits until done.
+        r"""Moves the stages.
+
+        Updates the stage dictionary, moves to the desired position, and reports the position.
+
+        Parameters
+        ----------
+        pos_dict : dict
+            Dictionary of stage positions.
+        wait_until_done : bool
+            Checks "on target state" after command and waits until done.
         """
         # Update our local experiment parameters
         update_stage_dict(self, pos_dict)
-
-        # Pass to the stage
         self.stages.move_absolute(pos_dict, wait_until_done)
-
-        # TODO: This atrribute records current focus position
+        self.stages.report_position()
+        # TODO: This attribute records current focus position
         # TODO: put it here right now
         self.focus_pos = self.stages.int_position_dict['f_pos']
 
     def stop_stage(self):
+        r"""Stop the stages."""
         self.stages.stop()
 
     def end_acquisition(self):
-        """
+        r"""End the acquisition.
+
+        Sets the current channel to 0, clears the signal and data containers, disconnects buffer in live mode
+        and closes the shutters.
         #
         """
         self.current_channel = 0
-        # clear feature containers
         if hasattr(self, 'signal_container'):
             delattr(self, 'signal_container')
         if hasattr(self, 'data_container'):
             delattr(self, 'data_container')
-        # dettach buffer in live mode in order to clear unread frames
         if self.camera.is_acquiring:
             self.camera.close_image_series()
-
-        # close shutter
         self.shutter.close_shutters()
 
-    # functions related to send out signals
-
-    # functions related to frame data
     def run_data_process(self, num_of_frames=0, data_func=None):
-        """
-        # this function is the structure of data thread
+        r"""Run the data process.
+
+        This function is the structure of data thread.
+
+        Parameters
+        ----------
+        num_of_frames : int
+            ...
+        data_func : object
+            Function to run on the acquired data.
         """
 
         wait_num = 10  # this will let this thread wait 10 * 500 ms before it ends
@@ -438,7 +549,7 @@ class Model:
 
         while not self.stop_acquisition:
             frame_ids = self.camera.get_new_frame()  # This is the 500 ms wait for Hamamatsu
-            self.logger.debug(f'running data process, get frames {frame_ids}')
+            self.logger.info(f'ASLM Model - Running data process, get frames {frame_ids}')
             # if there is at least one frame available
             if not frame_ids:
                 wait_num -= 1
@@ -458,7 +569,7 @@ class Model:
                 self.data_container.run(frame_ids)
 
             # show image
-            self.logger.debug(f'sent through pipe{frame_ids[0]}')
+            self.logger.info(f'ASLM Model - Sent through pipe{frame_ids[0]}')
             self.show_img_pipe.send(frame_ids[0])
 
             acquired_frame_num += len(frame_ids)
@@ -466,64 +577,30 @@ class Model:
                 self.stop_acquisition = True
         
         self.show_img_pipe.send('stop')
-
-        self.logger.debug('data thread is stop')
-        self.logger.debug(f'received frames in total:{acquired_frame_num}')
-
-    def prepare_image_series(self):
-        """
-        #  Prepares an image series without waveform update
-        """
-        pass
-        # self.daq.create_tasks()
-        # self.daq.write_waveforms_to_tasks()
-
-    def snap_image_in_series(self):
-        """
-        # Snaps and image from a series without waveform update
-        """
-        pass
-        # self.daq.start_tasks()
-        # self.daq.run_tasks()
-        # self.data = self.camera.get_image()
-        # self.daq.stop_tasks()
-
-    def close_image_series(self):
-        """
-        #  Cleans up after series without waveform update
-        """
-        pass  # self.daq.close_tasks()
+        self.logger.info('ASLM Model - Data thread stopped.')
+        self.logger.info(f'ASLM Model - Received frames in total: {acquired_frame_num}')
 
     def calculate_number_of_channels(self):
-        """
-        #  Calculates the total number of channels that are selected.
-        """
+        r"""Calculates the total number of channels selected."""
         return len(self.experiment.MicroscopeState['channels'])
 
-    def prepare_acquisition_list(self):
-        """
-        #  Calculates the total number of acquisitions, images, etc.  Initializes the counters.
-        """
-        number_of_channels = self.calculate_number_of_channels()
-        number_of_positions = len(
-            self.experiment.MicroscopeState['stage_positions'])
-        number_of_slices = self.experiment.MicroscopeState['number_z_steps']
-        number_of_time_points = self.experiment.MicroscopeState['timepoints']
-
-        self.image_count = 0
-        self.acquisition_count = 0
-        self.total_acquisition_count = number_of_channels * \
-            number_of_positions * number_of_time_points
-        self.total_image_count = self.total_acquisition_count * number_of_slices
-        self.start_time = time.time()
-
     def load_experiment_file(self, experiment_path):
-        # Loads the YAML file for all of the experiment parameters
+        r"""Load the experiment YAML file.
+
+        Loads the YAML file for all of the experiment parameters
+
+        Parameters
+        ----------
+        experiment_path : str
+            File path to non-default experiment file.
+        """
         self.experiment = session(experiment_path, self.verbose)
 
     def get_readout_time(self):
-        """
-        Get the camera readout time if we are in normal mode. Return a -1 to indicate when we are not in normal mode.
+        r"""Get readout time from camera.
+
+        Get the camera readout time if we are in normal mode.
+        Return a -1 to indicate when we are not in normal mode.
         This is needed in daq.calculate_all_waveforms()
 
         Returns
@@ -537,24 +614,26 @@ class Model:
         return readout_time
 
     def prepare_acquisition(self):
-        """
-        Sets flags.
-        Calculates all of the waveforms.
-        Sets the Camera Sensor Mode
-        Initializes the data buffer and starts camera.
-        Opens Shutters
+        r"""Prepare the acquisition.
+
+        Sets flags, calculates all of the waveforms.
+        Sets the Camera Sensor Mode, initializes the data buffer, starts camera, and opens shutters
         """
         if self.camera.is_acquiring:
             self.camera.close_image_series()
+
         # turn off flags
         self.stop_acquisition = False
         self.stop_send_signal = False
         self.autofocus_on = False
         self.is_live = False
+        self.frame_id = 0
 
         # Calculate Waveforms for all channels. Plot in the view.
-        waveform_dict = self.daq.calculate_all_waveforms(self.experiment.MicroscopeState, self.etl_constants,
-                                                         self.experiment.GalvoParameters, self.get_readout_time())
+        waveform_dict = self.daq.calculate_all_waveforms(self.experiment.MicroscopeState,
+                                                         self.etl_constants,
+                                                         self.experiment.GalvoParameters,
+                                                         self.get_readout_time())
         self.event_queue.put(('waveform', waveform_dict))
 
         # Set Camera Sensor Mode - Must be done before camera is initialized.
@@ -562,10 +641,9 @@ class Model:
         if self.experiment.CameraParameters['sensor_mode'] == 'Light-Sheet':
             self.camera.set_readout_direction(self.experiment.CameraParameters['readout_direction'])
 
-        self.frame_id = 0
-
         # Initialize Image Series - Attaches camera buffer and start imaging
-        self.camera.initialize_image_series(self.data_buffer, self.number_of_frames)
+        self.camera.initialize_image_series(self.data_buffer,
+                                            self.number_of_frames)
         self.open_shutter()
 
     def run_single_channel_acquisition(self, target_channel=None):
@@ -631,8 +709,9 @@ class Model:
         self.snap_image(channel_key)
 
     def run_single_acquisition(self):
-        """
-        # Called by model.run_command().
+        r"""Run a single acquisition.
+
+        Called by model.run_command().
         target_channel called only during the autofocus routine.
         """
 
@@ -646,12 +725,19 @@ class Model:
             self.run_single_channel_acquisition(channel_idx)
 
     def snap_image(self, channel_key):
-        """
-        # Snaps a single image after updating the waveforms.
-        # Can be used in acquisitions where changing waveforms are required,
-        # but there is additional overhead due to the need to write the
-        # waveforms into the buffers of the NI cards.
-        #
+        r"""Acquire an image after updating the waveforms.
+
+        Can be used in acquisitions where changing waveforms are required,
+        but there is additional overhead due to the need to write the
+        waveforms into the buffers of the DAQ cards.
+
+        TODO: Cleanup.
+
+        Parameters
+        ----------
+        channel_key : int
+            Channel index to acquire.
+
         """
         if hasattr(self, 'signal_container'):
             self.signal_container.run()
@@ -682,7 +768,8 @@ class Model:
 
         #  Initialize, run, and stop the acquisition.
         #  Consider putting below to not block thread.
-        self.daq.prepare_acquisition(channel_key, self.current_exposure_time)
+        self.daq.prepare_acquisition(channel_key,
+                                     self.current_exposure_time)
 
         # Run the acquisition
         self.daq.run_acquisition()
@@ -694,20 +781,17 @@ class Model:
             self.signal_container.run(wait_response=True)
 
     def run_live_acquisition(self):
-        """
-        #  Stream live image to the GUI.
-        #  Recalculates the waveforms for each image, thereby allowing people to adjust
-        #  acquisition parameters in real-time.
+        r"""Stream live image to the GUI.
+
+         Recalculates the waveforms for each image, thereby allowing people to adjust
+         acquisition parameters in real-time.
         """
         self.stop_acquisition = False
         while self.stop_acquisition is False and self.stop_send_signal is False:
             self.run_single_acquisition()
 
     def run_z_stack_acquisition(self):
-        """
-        Collect a z-stack.
-        """
-        import numpy as np
+        r"""Acquire a z-stack."""
 
         microscope_state = self.experiment.MicroscopeState
         stack_cycling_mode = microscope_state['stack_cycling_mode']
@@ -736,7 +820,7 @@ class Model:
             # Regular, pass nonsense
             active_channels = ['sdasdasd']
         else:
-            logging.debug(f"ASLM Model - Unknown stack cycling mode {stack_cycling_mode}. Giving up.")
+            logging.debug(f"ASLM Model - Unknown stack cycling mode: {stack_cycling_mode}.")
             return
 
         # For each moment in time...
@@ -761,7 +845,6 @@ class Model:
                 for z, f in zip(z_pos, f_pos):
                     if self.stop_acquisition:
                         break
-                    print(f"z_pos: {z}, f_pos: {f}")
                     self.move_stage({'z_abs': z}, wait_until_done=True)  # Update positions
                     self.move_stage({'f_abs': f}, wait_until_done=True)
                     self.run_single_acquisition()  # This will take pics of all active channels
@@ -777,6 +860,14 @@ class Model:
         self.move_stage({'z_abs': restore_z}, wait_until_done=True)  # Update position
 
     def run_single_channel_acquisition_with_features(self, target_channel=1):
+        r"""Acquire data with ...
+
+        Parameters
+        ----------
+        target_channel : int
+            Desired channel to acquire.
+
+        """
         # if not hasattr(self, 'signal_container'):
         #     self.run_single_channel_acquisition(target_channel)
         #     return
@@ -785,8 +876,14 @@ class Model:
         while not self.signal_container.end_flag:
             self.run_single_channel_acquisition(target_channel)
     
-    def change_resolution(self, args):
-        resolution_value = args[0]
+    def change_resolution(self, resolution_value):
+        r"""Switch resolution mode of the microscope.
+
+        Parameters
+        ----------
+        resolution_value : str
+            'high' for high-resolution mode, and 'low' for low-resolution mode.
+        """
 
         if (self.experiment.MicroscopeState['resolution_mode'] == "low" and resolution_value == 'high')\
            or (self.experiment.MicroscopeState['resolution_mode'] == "high" and resolution_value != 'high'):
@@ -805,7 +902,7 @@ class Model:
             self.camera = self.get_camera()
 
         if resolution_value == 'high':
-            logging.info("ASLM Model - Switching to High Resolution Mode")
+            logging.info("ASLM Model - Switching into High-Resolution Mode")
             self.experiment.MicroscopeState['resolution_mode'] = 'high'
             self.laser_triggers.enable_high_resolution_laser()
         else:
@@ -817,10 +914,11 @@ class Model:
             self.laser_triggers.enable_low_resolution_laser()
 
     def open_shutter(self):
-        r"""Open the Laser Shutter
-        # Evaluates the experiment parameters and opens the proper shutter.
-        # 'low' is the low-resolution mode of the microscope, or the left shutter.
-        # 'high' is the high-resolution mode of the microscope, or the right shutter.
+        r"""Open the shutter according to the resolution mode.
+
+        Evaluates the experiment parameters and opens the proper shutter.
+        'low' is the low-resolution mode of the microscope, or the left shutter.
+        'high' is the high-resolution mode of the microscope, or the right shutter.
         """
         resolution_mode = self.experiment.MicroscopeState['resolution_mode']
         if resolution_mode == 'low':
@@ -828,8 +926,15 @@ class Model:
         elif resolution_mode == 'high':
             self.shutter.open_right()
         else:
-            logging.debug("ASLM Model - Shutter Command Invalid")
+            logging.debug(f"ASLM Model - Invalid Shutter Command: {resolution_mode}")
 
     def return_channel_index(self):
+        r"""Provide the current channel index.
+
+        Returns
+        -------
+        current_channel : int
+            Index for active channel.
+        """
         return self.current_channel
 

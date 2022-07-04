@@ -45,6 +45,19 @@ logger = logging.getLogger(p)
 
 
 class SyntheticDAQ(DAQBase):
+    r"""SyntheticDAQ class for Data Acquisition (DAQ).
+
+    Attributes
+    ----------
+    configuration : Session
+        Global configuration of the microscope
+    experiment : Session
+        Experiment configuration of the microscope
+    etl_constants : dict
+        Dictionary with all of the wavelength, magnification, and imaging mode-specific amplitudes/offsets
+    verbose : bool
+        Verbosity
+    """
     def __init__(self, configuration, experiment, etl_constants, verbose=False):
         super().__init__(configuration, experiment, etl_constants, verbose)
         self.camera = None

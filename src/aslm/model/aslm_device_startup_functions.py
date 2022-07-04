@@ -94,9 +94,9 @@ def start_analysis(configuration, experiment, use_gpu, verbose):
 
     Parameters
     ----------
-    configuration : dict
+    configuration : Session
         Session instance of global microscope configuration.
-    experiment : dict
+    experiment : Session
         Session instance of experiment configuration.
     use_gpu : Boolean
         Flag for enabling GPU analysis.

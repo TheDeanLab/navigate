@@ -68,11 +68,11 @@ class RemoteFocusEquipmentSolutions(RemoteFocusBase):
         Number of stop bits.
     timeout : float
         Timeout duration.
-    verbose : Boolean
+    verbose : bool
         Verbosity
-    read_on_init : Boolean
+    read_on_init : bool
         Establish connection upon initialization.
-    debug : Boolean
+    debug : bool
         Debugging mode.  Prints statements for debugging.
 
     Methods

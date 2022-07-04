@@ -52,11 +52,10 @@ class DAQBase:
         Global configuration of the microscope
     experiment : Session
         Experiment configuration of the microscope
-    etl_constants : Dict
+    etl_constants : dict
         Dictionary with all of the wavelength, magnification, and imaging mode-specific amplitudes/offsets
-    verbose : Boolean
+    verbose : bool
         Verbosity
-    ...
     """
 
     def __init__(self, configuration, experiment, etl_constants, verbose=False):

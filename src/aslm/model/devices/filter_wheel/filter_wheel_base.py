@@ -59,11 +59,11 @@ class FilterWheelBase:
         Number of installed filter wheels.
     wheel_position : int
         Default filter wheel position
-    verbose : Boolean
+    verbose : bool
         Verbosity
     wait_until_done_delay = float
         Duration of time to wait for a filter wheel change.
-    wait_until_done = Boolean
+    wait_until_done = bool
         Flag for enabling the wait period for a filter wheel change.
 
     Methods
@@ -92,7 +92,7 @@ class FilterWheelBase:
 
         Returns
         -------
-        filter_exists : Boolean
+        filter_exists : bool
             Flag if filter exists in the filter dictionary.
 
         """

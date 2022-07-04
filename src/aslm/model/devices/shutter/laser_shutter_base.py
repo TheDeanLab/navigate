@@ -52,11 +52,11 @@ class ShutterBase:
         Global configuration of the microscope
     experiment : Session
         Experiment configuration of the microscope
-    verbose : Boolean
+    verbose : bool
         Verbosity
-    shutter_right_state : Boolean
+    shutter_right_state : bool
         Right shutter state
-    shutter_left_state : Boolean
+    shutter_left_state : bool
         Left shutter state
 
     Methods

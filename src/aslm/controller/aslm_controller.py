@@ -510,7 +510,7 @@ class ASLM_controller:
                 'laser_info': self.resolution_info.ETLConstants[self.resolution][self.mag]
                 }
             """
-            self.model.change_resolution(args)
+            self.model.change_resolution(resolution_value=args)
             self.camera_setting_controller.calculate_physical_dimensions(args[0])
             if hasattr(self, 'etl_controller') and self.etl_controller:
                 self.etl_controller.set_experiment_values(args[0])

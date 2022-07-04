@@ -52,7 +52,7 @@ class StageBase:
     ----------
     configuration : Session
         Global configuration of the microscope
-    verbose : Boolean
+    verbose : bool
         Verbosity
     x_pos : float
         True x position

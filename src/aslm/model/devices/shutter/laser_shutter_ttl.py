@@ -57,7 +57,7 @@ class ShutterTTL(ShutterBase):
         Global configuration of the microscope
     experiment : Session
         Experiment configuration of the microscope
-    verbose : Boolean
+    verbose : bool
         Verbosity
 
     Methods
@@ -124,9 +124,9 @@ class ShutterTTL(ShutterBase):
 
         Returns
         -------
-        shutter_left_state : Boolean
+        shutter_left_state : bool
             State of the left shutter.
-        shutter_right_state : Boolean
+        shutter_right_state : bool
             State of the right shutter
         """
         return self.shutter_left_state, self.shutter_right_state

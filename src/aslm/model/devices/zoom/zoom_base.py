@@ -56,7 +56,7 @@ class ZoomBase:
         Dictionary of possible zoom values and their corresponding servo position.
     zoomvalue : int
         Current Zoom value
-    verbose : Boolean
+    verbose : bool
         Verbosity
     """
 

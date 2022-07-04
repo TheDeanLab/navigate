@@ -64,11 +64,11 @@ class SutterFilterWheel(FilterWheelBase):
         Number of installed filter wheels.
     wheel_position : int
         Default filter wheel position
-    verbose : Boolean
+    verbose : bool
         Verbosity
     wait_until_done_delay = float
         Duration of time to wait for a filter wheel change.
-    wait_until_done = Boolean
+    wait_until_done = bool
         Flag for enabling the wait period for a filter wheel change.
     delay_matrix = np.ndarray
         Matrix of duration in seconds needed to switch filter wheel positions
@@ -151,7 +151,7 @@ class SutterFilterWheel(FilterWheelBase):
         ----------
         filter_name : str
             Name of filter to move to.
-        wait_until_done : Boolean
+        wait_until_done : bool
             Waits duration of time necessary for filter wheel to change positions.
         """
         if self.check_if_filter_in_filter_dictionary(filter_name) is True:

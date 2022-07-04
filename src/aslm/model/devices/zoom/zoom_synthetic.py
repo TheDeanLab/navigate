@@ -75,7 +75,7 @@ class SyntheticZoom(ZoomBase):
         ----------
         zoom : dict
             Zoom dictionary
-        wait_until_done : Boolean
+        wait_until_done : bool
             Delay parameter.
 
         # Changes zoom after checking that the commanded value exists
@@ -95,7 +95,7 @@ class SyntheticZoom(ZoomBase):
         ----------
         position : int
             Location to move to.
-        wait_until_done : Boolean
+        wait_until_done : bool
             Delay parameter
         """
         logger.debug(f"Changing SyntheticZoom to {zoom}")

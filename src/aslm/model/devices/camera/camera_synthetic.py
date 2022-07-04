@@ -79,7 +79,7 @@ class SyntheticCamera(CameraBase):
         Global configuration of the microscope
     experiment : Session
         Experiment configuration of the microscope
-    verbose : Boolean
+    verbose : bool
         Verbosity
 
     """

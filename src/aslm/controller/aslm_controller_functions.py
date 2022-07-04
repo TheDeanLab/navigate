@@ -45,7 +45,7 @@ logger = logging.getLogger(p)
 
 
 def create_save_path(saving_settings, verbose=False):
-    """
+    r"""Create path to save the data to.
     # haven't finished
     # This function retrieves the user inputs from the popup save window.
     # It then creates a new directory in the user specified path.

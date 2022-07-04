@@ -87,7 +87,7 @@ class Channel_Setting_Controller(GUI_Controller):
                 self.view.filterwheel_pulldowns[i]['state'] = state
 
     def initialize(self, config):
-        setting_dict = config.get_channels_info(self.verbose)
+        setting_dict = config.get_channels_info()
         for i in range(self.num):
             self.view.laser_pulldowns[i]['values'] = setting_dict['laser']
             self.view.filterwheel_pulldowns[i]['values'] = setting_dict['filter']

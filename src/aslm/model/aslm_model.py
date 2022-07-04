@@ -360,9 +360,9 @@ class Model:
         **kwargs : str
             ...
         """
-        logging.info(f"ASLM Model - Received command from controller: {command}, {args}")
+        logging.info('ASLM Model - Received command from controller:', command, args)
         if not self.data_buffer:
-            logging.debug("ASLM Model Error: The Shared Memory Buffer Has Not Been Set Up.")
+            logging.debug('ASLM Model - Shared Memory Buffer Not Set Up.')
             return
 
         if command == 'single':
@@ -381,7 +381,6 @@ class Model:
             if self.is_save:
                 self.experiment.Saving = kwargs['saving_info']
                 self.run_data_process(channel_num, data_func=self.image_writer.save_image)
-
             else:
                 self.run_data_process(channel_num)
             self.end_acquisition()
@@ -505,10 +504,13 @@ class Model:
         update_stage_dict(self, pos_dict)
         self.stages.move_absolute(pos_dict, wait_until_done)
         self.stages.report_position()
-
-        # TODO: This atrribute records current focus position
+        # TODO: This attribute records current focus position
         # TODO: put it here right now
         self.focus_pos = self.stages.int_position_dict['f_pos']
+
+    def stop_stage(self):
+        r"""Stop the stages."""
+        self.stages.stop()
 
     def end_acquisition(self):
         r"""End the acquisition.
@@ -595,7 +597,7 @@ class Model:
         self.experiment = session(experiment_path, self.verbose)
 
     def get_readout_time(self):
-        r"""Get readout time from caamera.
+        r"""Get readout time from camera.
 
         Get the camera readout time if we are in normal mode.
         Return a -1 to indicate when we are not in normal mode.
@@ -905,7 +907,7 @@ class Model:
             self.laser_triggers.enable_high_resolution_laser()
         else:
             # Can be 0.63, 1, 2, 3, 4, 5, and 6x.
-            logging.info(f"ASLM Model - Switching into Low-Resolution Mode. Magnification = {resolution_value}.")
+            logging.info(f"ASLM Model - Switching to Low Resolution Mode, Zoom: {resolution_value}")
             self.experiment.MicroscopeState['resolution_mode'] = 'low'
             self.experiment.MicroscopeState['zoom'] = resolution_value
             self.zoom.set_zoom(resolution_value)

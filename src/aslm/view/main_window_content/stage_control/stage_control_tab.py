@@ -35,48 +35,51 @@ from aslm.view.main_window_content.stage_control.tabs.other_axis_frame import ot
 from aslm.view.main_window_content.stage_control.tabs.position_frame import position_frame
 from aslm.view.main_window_content.stage_control.tabs.x_y_frame import x_y_frame
 from aslm.view.main_window_content.stage_control.tabs.goto_frame import goto_frame
+from aslm.view.main_window_content.stage_control.tabs.stop_frame import  stop_frame
 # Standard Imports
 from tkinter import *
 from tkinter import ttk
-from tkinter.font import Font
 import logging
-from pathlib import Path
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
 class stage_control_tab(ttk.Frame):
-    def __init__(stage_control_tab, note3, *args, **kwargs):
-        #Init Frame
-        ttk.Frame.__init__(stage_control_tab, note3, *args, **kwargs)
+    def __init__(self, note3, *args, **kwargs):
+        # Init Frame
+        ttk.Frame.__init__(self, note3, *args, **kwargs)
         
         # Formatting
-        Grid.columnconfigure(stage_control_tab, 'all', weight=1)
-        Grid.rowconfigure(stage_control_tab, 'all', weight=1)
+        Grid.columnconfigure(self, 'all', weight=1)
+        Grid.rowconfigure(self, 'all', weight=1)
         
 
-        #Building out stage control elements, frame by frame
+        # Building out stage control elements, frame by frame
 
-        #Position Frame
-        stage_control_tab.position_frame = position_frame(stage_control_tab)
+        # Position Frame
+        self.position_frame = position_frame(self)
 
-        #XY Frame
-        stage_control_tab.xy_frame = x_y_frame(stage_control_tab)
+        # XY Frame
+        self.xy_frame = x_y_frame(self)
 
-        #Z Frame
-        stage_control_tab.z_frame = other_axis_frame(stage_control_tab, 'Z')
+         #Z Frame
+        self.z_frame = other_axis_frame(self, 'Z')
 
-        #Theta Frame
-        stage_control_tab.theta_frame = other_axis_frame(stage_control_tab, 'Theta')
+        # Theta Frame
+        self.theta_frame = other_axis_frame(self, 'Theta')
 
-        #Focus Frame
-        stage_control_tab.f_frame = other_axis_frame(stage_control_tab, 'Focus')
+        # Focus Frame
+        self.f_frame = other_axis_frame(self, 'Focus')
 
-        #GoTo Frame
-        stage_control_tab.goto_frame = goto_frame(stage_control_tab)
-        stage_control_tab.goto_frame_label = ttk.Label(stage_control_tab.goto_frame, text="Goto Frame")
-        stage_control_tab.goto_frame_label.pack() #For visual mockup purposes
+        # GoTo Frame
+        self.goto_frame = goto_frame(self)
+        self.goto_frame_label = ttk.Label(self.goto_frame, text="Goto Frame")
+        self.goto_frame_label.pack()  # For visual mockup purposes
+
+        # stop frame
+        self.stop_frame = stop_frame(self, 'Stop')
 
 
         """
@@ -93,53 +96,57 @@ class stage_control_tab(ttk.Frame):
         """
 
         # Formatting
-        Grid.columnconfigure(stage_control_tab.position_frame, 'all', weight=1)
-        Grid.rowconfigure(stage_control_tab.position_frame, 'all', weight=1)
-        Grid.columnconfigure(stage_control_tab.xy_frame, 'all', weight=1)
-        Grid.rowconfigure(stage_control_tab.xy_frame, 'all', weight=1)
-        Grid.columnconfigure(stage_control_tab.z_frame, 'all', weight=1)
-        Grid.rowconfigure(stage_control_tab.z_frame, 'all', weight=1)
-        Grid.columnconfigure(stage_control_tab.theta_frame, 'all', weight=1)
-        Grid.rowconfigure(stage_control_tab.theta_frame, 'all', weight=1)
-        Grid.columnconfigure(stage_control_tab.f_frame, 'all', weight=1)
-        Grid.rowconfigure(stage_control_tab.f_frame, 'all', weight=1)
-        Grid.columnconfigure(stage_control_tab.goto_frame, 'all', weight=1)
-        Grid.rowconfigure(stage_control_tab.goto_frame, 'all', weight=1)
+        Grid.columnconfigure(self.position_frame, 'all', weight=1)
+        Grid.rowconfigure(self.position_frame, 'all', weight=1)
+        Grid.columnconfigure(self.xy_frame, 'all', weight=1)
+        Grid.rowconfigure(self.xy_frame, 'all', weight=1)
+        Grid.columnconfigure(self.z_frame, 'all', weight=1)
+        Grid.rowconfigure(self.z_frame, 'all', weight=1)
+        Grid.columnconfigure(self.theta_frame, 'all', weight=1)
+        Grid.rowconfigure(self.theta_frame, 'all', weight=1)
+        Grid.columnconfigure(self.f_frame, 'all', weight=1)
+        Grid.rowconfigure(self.f_frame, 'all', weight=1)
+        Grid.columnconfigure(self.goto_frame, 'all', weight=1)
+        Grid.rowconfigure(self.goto_frame, 'all', weight=1)
+        Grid.columnconfigure(self.stop_frame, 'all', weight=1)
+        Grid.rowconfigure(self.stop_frame, 'all', weight=1)
         
-        #Gridding out frames
+        # Gridding out frames
         factor = 6
-        stage_control_tab.position_frame.grid(row=0, column=0, columnspan=5, sticky=(NSEW), pady=(2,0))
-        stage_control_tab.xy_frame.grid(row=1, column=0, sticky=(NSEW), padx=10, pady=10*factor)
-        stage_control_tab.z_frame.grid(row=1, column=1, sticky=(NSEW), padx=10, pady=10*factor)
-        stage_control_tab.theta_frame.grid(row=1, column=2, sticky=(NSEW), padx=10, pady=10*factor)
-        stage_control_tab.f_frame.grid(row=1, column=3, sticky=(NSEW), padx=10, pady=10*factor)
-        stage_control_tab.goto_frame.grid(row=1, column=4, sticky=(NSEW), padx=10, pady=10*factor)
+        self.position_frame.grid(row=0, column=0, columnspan=5, sticky=(NSEW), pady=(2,0))
+        self.xy_frame.grid(row=1, column=0, sticky=(NSEW), padx=10, pady=10*factor)
+        self.z_frame.grid(row=1, column=1, sticky=(NSEW), padx=10, pady=10*factor)
+        self.theta_frame.grid(row=1, column=2, sticky=(NSEW), padx=10, pady=10*factor)
+        self.f_frame.grid(row=1, column=3, sticky=(NSEW), padx=10, pady=10*factor)
+        # self.goto_frame.grid(row=0, column=4, sticky=(NSEW), padx=10, pady=10*factor)
+        self.stop_frame.grid(row=1, column=4, sticky=(NSEW), padx=10, pady=10 * factor)
 
-    def get_widgets(stage_control_tab):
+    def get_widgets(self):
         """
         # this function will return all the input widgets as a dictionary
         # the reference name in the dictionary is the same as in the widget list file
         """
         temp = {
-            **stage_control_tab.position_frame.get_widgets()
+            **self.position_frame.get_widgets()
         }
         for axis in ['xy', 'z', 'theta', 'f']:
-            temp[axis+'_step'] = getattr(stage_control_tab, axis+'_frame').get_widget()
+            temp[axis+'_step'] = getattr(self, axis+'_frame').get_widget()
         return temp
 
-    def get_variables(stage_control_tab):
-        temp = stage_control_tab.get_widgets()
+    def get_variables(self):
+        temp = self.get_widgets()
         return {k: temp[k].get_variable() for k in temp}
 
-    def get_buttons(stage_control_tab):
+    def get_buttons(self):
         """
         # this function returns all the buttons in a dictionary
         # the reference name is the same as in widget list
         """
         result = {
-            **stage_control_tab.xy_frame.get_buttons()
+            **self.xy_frame.get_buttons()
         }
         for axis in ['z', 'theta', 'f']:
-            temp = getattr(stage_control_tab, axis+'_frame').get_buttons()
+            temp = getattr(self, axis+'_frame').get_buttons()
             result.update({k+'_'+axis+'_btn': temp[k] for k in temp})
+        result.update(self.stop_frame.get_buttons())
         return result

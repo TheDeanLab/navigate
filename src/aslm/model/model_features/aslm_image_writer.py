@@ -1,7 +1,4 @@
-"""
-ASLM camera communication classes.
-
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -41,14 +38,17 @@ import logging
 from tifffile import imsave
 import zarr
 
-
 # Local Imports
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+
 class ImageWriter:
+    r"""Class for saving acquired data to disk.
+
+    """
     def __init__(self, model, sub_dir=''):
         self.model = model
         self.save_directory = os.path.join(self.model.experiment.Saving['save_directory'], sub_dir)
@@ -56,16 +56,23 @@ class ImageWriter:
         self.data_buffer = self.model.data_buffer
         self.current_time_point = 0
         self.file_type = self.model.experiment.Saving['file_type']
-
-        self.config_table = {'signal':{},
-                            'data': {'main': self.write_tiff}}
+        self.config_table = {'signal': {},
+                             'data': {'main': self.write_tiff}}
 
     def __del__(self):
         pass
 
     def save_image(self, frame_ids):
-        """
-        Wrapper to give Image Writer some saving decision making, this function will be called from model.
+        r"""Save the data to disk.
+
+        Wrapper to give Image Writer some saving decision making, this function is called from model.
+
+        Evaluates the file_type desired, and calls the necessary function.
+
+        Parameters
+        ----------
+        frame_ids : int
+            Frame ID.
         """
         self.save_directory = self.model.experiment.Saving['save_directory']
         self.file_type = self.model.experiment.Saving['file_type']
@@ -75,18 +82,30 @@ class ImageWriter:
             if not os.path.exists(self.save_directory):
                 os.makedirs(self.save_directory)
         except FileNotFoundError as e:
-            print(f"Cannot create directory {self.save_directory}. Maybe the drive does not exist?")
+            logger.debug(f"ASLM IMage Writer - Cannot create directory {self.save_directory}. Maybe the drive does not exist?")
             logger.exception(e)
 
         if self.file_type == "Zarr":
             self.write_zarr(frame_ids)
         elif self.file_type == "TIFF":
             self.write_tiff(frame_ids)
+        elif self.file_type == "RAW":
+            pass
+        elif self.file_type == "N5":
+            pass
+        elif self.file_type == "H5":
+            pass
+        elif self.file_type == "Multipage-TIFF":
+            pass
+        else:
+            logging.debug(f"ASLM Image Writer - Unknown file type: {self.file_type}")
 
     def write_zarr(self, frame_ids):
-        """
+        r"""Write data to Zarr.
+
         Will take in camera frames and move data fom SharedND Array into a Zarr Array.
-        If there is more than one channel there will be that many frames ie if there are 3 channels selected there should be three frames.
+        If there is more than one channel there will be that many frames.
+        For example, if there are 3 channels selected there should be three frames.
         Making the assumption there is only one frame per channel on a single acquisition
         """
 
@@ -191,13 +210,12 @@ class ImageWriter:
         pass
 
     def write_tiff(self, frame_ids):
-        r"""Write data to disk as a tiff
+        r"""Write data to disk as a single slice tiff
 
         Parameters
         __________
-        frame_ids :
+        frame_ids : int
         """
-        print("frame_ids type:", type(frame_ids))
         current_channel = self.model.current_channel
         for idx in frame_ids:
             image_name = self.generate_image_name(current_channel)

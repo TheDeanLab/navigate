@@ -174,7 +174,7 @@ class Model:
 
         # in synthetic_hardware mode, we need to wire up camera to daq
         if args.synthetic_hardware:
-            self.daq.set_camera(self.camera)
+            self.daq.set_camera(self.camera0)
 
         # analysis class
         self.analysis = startup_functions.start_analysis(self.configuration,
@@ -261,6 +261,7 @@ class Model:
         # TODO: In the event two cameras are on, but we've only requested one, make sure it's the one with the
         #       serial number we want.
         # If we have multiple cameras, loop through them all and check their serial numbers
+
         n_cams = int(self.configuration.CameraParameters['number_of_cameras'])
         if n_cams > 1:
             # Grab the camera with the serial number that matches for the current resolution mode, as specified in
@@ -768,8 +769,7 @@ class Model:
 
         #  Initialize, run, and stop the acquisition.
         #  Consider putting below to not block thread.
-        self.daq.prepare_acquisition(channel_key,
-                                     self.current_exposure_time)
+        self.daq.prepare_acquisition(channel_key, self.current_exposure_time)
 
         # Run the acquisition
         self.daq.run_acquisition()

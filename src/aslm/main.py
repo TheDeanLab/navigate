@@ -181,7 +181,12 @@ def main():
 
     # Start the GUI
     root = tk.Tk()
-    controller(root, configuration_path, experiment_path, etl_constants_path, USE_GPU, args)
+    controller(root,
+               configuration_path,
+               experiment_path,
+               etl_constants_path,
+               USE_GPU,
+               args)
     root.mainloop()
 
 

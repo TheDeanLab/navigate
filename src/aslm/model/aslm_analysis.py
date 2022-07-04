@@ -1,7 +1,4 @@
-"""
-ASLM camera communication classes.
-
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -51,7 +48,19 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 class Analysis:
-    def __init__(self, use_gpu=False, verbose=False):
+    r""" Class with Analysis Sub-Routines.
+
+    Parameters
+    ----------
+    use_gpu : bool
+        Flag for leveraging CUDA analysis routines.
+    verbose : bool
+        Verbosity.
+
+    """
+    def __init__(self,
+                 use_gpu=False,
+                 verbose=False):
         self.verbose = verbose
         self.use_gpu = use_gpu
 

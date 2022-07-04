@@ -1,7 +1,4 @@
-"""
-ASLM camera communication classes.
-
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -44,6 +41,14 @@ from aslm.model.model_features.aslm_feature_container import load_features
 class Autofocus():
     def __init__(self, model):
         self.model = model
+        self.max_entropy = None
+        self.f_frame_id = None
+        self.frame_num = None
+        self.f_pos = None
+        self.target_frame_id = None
+        self.get_frames_num = None
+        self.plot_data = None
+        self.total_frame_num = None
 
         # Queue
         self.autofocus_frame_queue = Queue()
@@ -52,17 +57,27 @@ class Autofocus():
         # target channel
         self.target_channel = 1
 
-        self.config_table = {'signal': {'init': self.pre_func_signal, 
-                                            'main': self.in_func_signal,
-                                            'end': self.end_func_signal},
+        self.config_table = {'signal': {'init': self.pre_func_signal,
+                                        'main': self.in_func_signal,
+                                        'end': self.end_func_signal},
                              'data': {'init': self.pre_func_data,
-                                            'main': self.in_func_data,
-                                            'end': self.end_func_data},
+                                      'main': self.in_func_data,
+                                      'end': self.end_func_data},
                              'node': {'node_type': 'multi-step',
-                                        'device_related': True },                                
+                                      'device_related': True },
                             }
 
     def run(self, *args):
+        r"""Run the Autofocusing Routine
+
+        Parameters
+        ----------
+        args[0] : dict
+            Current microscope state.
+        args[1] : dict
+            Autofocus parameters
+
+        """
         self.model.experiment.MicroscopeState = args[0]
         self.model.experiment.AutoFocusParameters = args[1]
         frame_num = self.get_autofocus_frame_num()
@@ -78,17 +93,15 @@ class Autofocus():
                                                 name='Autofocus Signal')
 
         self.model.data_thread = threading.Thread(target=self.model.run_data_process,
-                                            args=(frame_num+1,),
-                                            name='Autofocus Data')
+                                                  args=(frame_num+1,),
+                                                  name='Autofocus Data')
 
         # Start Threads
         self.model.signal_thread.start()
         self.model.data_thread.start()
 
     def get_autofocus_frame_num(self):
-        """
-        # this function calculate how many frames are needed to get the best focus position.
-        """
+        r"""Calculate how many frames are needed to get the best focus position."""
         settings = self.model.experiment.AutoFocusParameters
         frames = 0
         if settings['coarse_selected']:

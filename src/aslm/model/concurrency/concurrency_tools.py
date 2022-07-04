@@ -10,6 +10,7 @@ from contextlib import redirect_stdout
 import sys
 import traceback
 import inspect
+import platform
 
 # Making sure objects are cleaned up nicely is tricky:
 import weakref
@@ -20,6 +21,7 @@ import signal
 
 import logging
 from pathlib import Path
+import numpy as np
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -28,10 +30,9 @@ logger = logging.getLogger(p)
 # Sharing memory between child processes is tricky:
 try:
     from multiprocessing import shared_memory
-    import numpy as np
 except ImportError:
-    shared_memory = None
-    np = None
+    shared_memory = np.ndarray([0])
+    # np = None
 
 
 

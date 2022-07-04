@@ -49,13 +49,27 @@ logger = logging.getLogger(p)
 
 
 class DynamixelZoom(ZoomBase):
-    def __init__(self, model, verbose):
-        super().__init__(model, verbose)
+    r"""DynamixelZoom Class
+
+    Controls the Dynamixel Servo.
+
+    Methods
+    -------
+    set_zoom(zoom, wait_until_done)
+        Change the DynamixelZoom position to zoom value of the microscope.
+    move(position, wait_until_done)
+        Move the DynamixelZoom position.
+    read_position()
+        Read the position of the DynamixelZoom servo.
+
+    """
+    def __init__(self, configuration, verbose):
+        super().__init__(configuration, verbose)
         self.dynamixel = dynamixel
-        self.id = model.ZoomParameters['servo_id']
-        self.comport = model.ZoomParameters['COMport']
+        self.id = configuration.ZoomParameters['servo_id']
+        self.comport = configuration.ZoomParameters['COMport']
         self.devicename = self.comport.encode('utf-8')
-        self.baudrate = model.ZoomParameters['baudrate']
+        self.baudrate = configuration.ZoomParameters['baudrate']
         self.addr_mx_torque_enable = 24
         self.addr_mx_goal_position = 30
         self.addr_mx_present_position = 36

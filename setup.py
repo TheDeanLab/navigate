@@ -1,4 +1,8 @@
-from setuptools import setup, find_packages, find_namespace_packages
+from gettext import install
+from setuptools import setup
+
+with open('requirements.txt', 'r') as fp:
+    install_requires = list(fp.read().splitlines())
 
 setup(
      name='aslm',
@@ -10,5 +14,6 @@ setup(
          ]
      },
      include_package_data=True,
+     install_requires=install_requires
  ) 
 

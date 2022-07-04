@@ -83,19 +83,19 @@ class image_metrics(ttk.Labelframe):
                 self.inputs[self.names[i]].grid(row=0, column=i, sticky=(NSEW), padx=5, pady=3)
 
     def get_variables(self):
-        '''
+        """
         # This function returns a dictionary of all the variables that are tied to each widget name.
         The key is the widget name, value is the variable associated.
-        '''
+        """
         variables = {}
         for key, widget in self.inputs.items():
             variables[key] = widget.get()
         return variables
     
     def get_widgets(self):
-        '''
+        """
         # This function returns the dictionary that holds the widgets.
         The key is the widget name, value is the LabelInput class that has all the data.
-        '''
+        """
         return self.inputs
 

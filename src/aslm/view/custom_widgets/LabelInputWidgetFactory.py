@@ -40,7 +40,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-'''
+"""
 Base design courtesy of: Python GUI Programming - A Complete Reference Guide by Alan D. Moore and B. M. Harwani
 If you need a reference for the types of arguments that different widgets accept you can use the below:
 https://tkdocs.com/shipman/
@@ -72,11 +72,11 @@ Please note that these values are arbitrary and just to show usage.
 Typically this class will be called as a child of a LabelFrame for a related grouping of data or fields.
 Each widget you need to create will be a new instance of the LabelInput class.
 The widget within a LabelInput class can be directly referenced with self.widget, this allows base tkinter calls to be made on the internal widget (ex grid or when setting readonly)
-'''
+"""
 
 
 class LabelInput(ttk.Frame):
-    '''Widget class that contains label and input together.'''
+    """Widget class that contains label and input together."""
     # The below takes a parent frame, the postition of the label(left or top defaults to left), type of widget (defaults to entry), the input variable used, input arguments, label arguments and
     # finally the keyword arguments that will be passed to the super
     # constructor for the frame
@@ -103,8 +103,8 @@ class LabelInput(ttk.Frame):
         self.variable = input_var
         self.input_class = input_class
 
-        '''This if statement will check for the type of widget being created and will create it based on that, since certain
-        widgets need different formatting, like how button types don't need a textvariable like a StringVar()'''
+        """This if statement will check for the type of widget being created and will create it based on that, since certain
+        widgets need different formatting, like how button types don't need a textvariable like a StringVar()"""
         if input_class in (ttk.Checkbutton, ttk.Button, ttk.Radiobutton):
             input_args["text"] = label
             input_args["variable"] = input_var
@@ -113,8 +113,8 @@ class LabelInput(ttk.Frame):
             self.label.grid(row=0, column=0, sticky=(tk.W + tk.E))
             input_args["textvariable"] = input_var
 
-        '''This will call the passed in widget types constructor, the **input_args is the dict passed in with the arguments needed for
-        that type if desired, its totally optional'''
+        """This will call the passed in widget types constructor, the **input_args is the dict passed in with the arguments needed for
+        that type if desired, its totally optional"""
         self.widget = input_class(self, **input_args)
         # This if will change the pos of the label based on what is passed in
         # top will put label on top of widge, while left will put it on the
@@ -133,15 +133,15 @@ class LabelInput(ttk.Frame):
         self.error_label.grid(row=2, column=0, sticky=(tk.W + tk.E))
 
     def grid(self, sticky=(tk.E + tk.W), **kwargs):
-        '''
+        """
         #### Creating a custom grid function that will default LabelInput.grid() to sticky=tk.W + tk.E
-        '''
+        """
         super().grid(sticky=sticky, **kwargs)
 
     def get(self):
-        '''
+        """
         #### Creating a generic get function to catch all types of widgets, this uses the try except block for instances when tkintervariables fails
-        '''
+        """
         try:
             if self.variable:
                 return self.variable.get()  # Catches widgets that don't have text
@@ -157,15 +157,15 @@ class LabelInput(ttk.Frame):
             return ''
 
     def get_variable(self):
-        '''
+        """
         # return varaible tied with the widget if any
-        '''
+        """
         return self.variable
 
     def set(self, value, *args, **kwargs):
-        '''
+        """
         #### Creating a generic set funciton to complement the above get
-        '''
+        """
         if isinstance(self.variable, tk.BooleanVar):
             # This will cast the value to bool if the variable is a Tk
             # BooleanVar, bc Boolean.Var().set() can only accept bool type
@@ -196,9 +196,9 @@ class LabelInput(ttk.Frame):
             self.widget.insert(0, value)
 
     def set_values(self, values):
-        '''
+        """
         #### Values should be a list of strings or numbers that you want to be options in the specific widget
-        '''
+        """
 
         if self.input_class in (ttk.Combobox, tk.Listbox, ttk.Spinbox, ValidatedCombobox, ValidatedSpinbox):
             self.widget['values'] = values

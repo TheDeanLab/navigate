@@ -1,5 +1,4 @@
-"""
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -60,19 +59,17 @@ from aslm.controller.thread_pool import SynchronizedThreadPool
 # Local Model Imports
 from aslm.model.aslm_model import Model
 from aslm.model.aslm_model_config import Session as session
-from aslm.model.concurrency.concurrency_tools import ObjectInSubprocess, SharedNDArray
+from aslm.model.concurrency.concurrency_tools import ObjectInSubprocess
+from aslm.tools.common_dict_tools import update_settings_common, update_stage_dict
 
 # debug
 from aslm.controller.aslm_debug import Debug_Module
 
-import logging
-from pathlib import Path
-
 # Logger Setup
-
 import logging
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
+
 
 class ASLM_controller:
     """ ASLM Controller
@@ -93,14 +90,7 @@ class ASLM_controller:
         Command line input arguments for non-default file paths or using synthetic hardware modes.
     """
 
-    def __init__(
-            self,
-            root,
-            configuration_path,
-            experiment_path,
-            etl_constants_path,
-            USE_GPU,
-            args):
+    def __init__(self, root, configuration_path, experiment_path, etl_constants_path, USE_GPU, args):
         
         logger.info("Spec - Controller controlling")
         logger.info("Performance - Controller performing")
@@ -140,6 +130,7 @@ class ASLM_controller:
         self.etl_constants_path = etl_constants_path
         self.etl_setting = session(self.etl_constants_path,
                                    self.verbose)
+
 
         # Initialize the View
         self.view = view(root)
@@ -225,6 +216,7 @@ class ASLM_controller:
     def initialize_cam_view(self, configuration_controller):
         r""" Populate view tab.
         Populate widgets with necessary data from config file via config controller. For the entire view tab.
+        Sets the minimum and maximum counts for when the data is not being autoscaled.
 
         Parameters
         -------
@@ -232,7 +224,7 @@ class ASLM_controller:
             Camera view sub-controller.
         """
         # Populating Min and Max Counts
-        minmax_values = [110, 5000]
+        minmax_values = [0, 2**16-1]
         self.camera_view_controller.initialize('minmax', minmax_values)
         image_metrics = [1, 0, 0]
         self.camera_view_controller.initialize('image', image_metrics)
@@ -278,10 +270,12 @@ class ASLM_controller:
             etl_setting_popup = remote_popup(self.view)  # TODO: should we rename etl_setting popup to remote_focus_popup?
             self.etl_controller = Etl_Popup_Controller(etl_setting_popup,
                                                        self,
-                                                       self.verbose,
-                                                       self.etl_setting,
+                                                       self.etl_constants,
                                                        self.etl_constants_path,
-                                                       self.experiment.GalvoParameters)
+                                                       self.configuration,
+                                                       self.experiment.GalvoParameters,
+                                                       self.verbose)
+
             self.etl_controller.set_experiment_values(self.resolution_value.get())
             self.etl_controller.set_mode(self.acquire_bar_controller.mode)
 
@@ -329,7 +323,7 @@ class ASLM_controller:
         self.view.menubar.menu_resolution.add_cascade(menu=meso_res_sub_menu,
                                                       label='Mesoscale')
 
-        for res in self.etl_setting.ETLConstants['low'].keys():
+        for res in self.etl_constants.ETLConstants['low'].keys():
             meso_res_sub_menu.add_radiobutton(label=res,
                                               variable=self.resolution_value,
                                               value=res)
@@ -382,6 +376,7 @@ class ASLM_controller:
         resolution_mode = self.experiment.MicroscopeState['resolution_mode']
         if resolution_mode == 'high':
             self.resolution_value.set('high')
+            self.experiment.MicroscopeState['zoom'] = 'N/A'
         else:
             self.resolution_value.set(self.experiment.MicroscopeState['zoom'])
 
@@ -437,7 +432,7 @@ class ASLM_controller:
             self.etl_controller.set_mode(mode)
         if mode == 'stop':
             # GUI Failsafe
-            self.acquire_bar_controller.view.acquire_btn.configure(text='Acquire')
+            self.acquire_bar_controller.stop_acquire()
 
     def update_camera_view(self):
         r"""Update the real-time parameters in the camera view (channel number, max counts, image, etc.)
@@ -534,6 +529,7 @@ class ASLM_controller:
                 'laser_info': self.resolution_info.ETLConstants[self.resolution][self.mag]
                 }
             """
+            update_settings_common(self, args)
             self.threads_pool.createThread('model', lambda: self.model.run_command('update_setting', *args))
 
         elif command == 'autofocus':
@@ -630,8 +626,8 @@ class ASLM_controller:
             image_id = self.show_img_pipe.recv()
             logger.info(f"ASLM Controller - Received Image: {image_id}")
             if image_id == 'stop':
-                # self.set_mode_of_sub('stop')
-                self.execute('stop_acquire')
+                self.set_mode_of_sub('stop')
+                # self.execute('stop_acquire')
                 break
             if not isinstance(image_id, int):
                 logger.debug(f"ASLM Controller - Something wrong happened, stop the model!, {image_id}")
@@ -689,9 +685,7 @@ class ASLM_controller:
         """
 
         # Update our local stage dictionary
-        for axis, val in pos_dict.items():
-            ax = axis.split('_')[0]
-            self.experiment.StageParameters[ax] = val
+        update_stage_dict(self, pos_dict)
 
         # Pass to model
         self.model.move_stage(pos_dict)

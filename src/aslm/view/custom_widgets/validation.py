@@ -51,7 +51,7 @@ REGEX_DICT = {
 
 # Base design courtesy of below book.
 # Learning Path: Python GUI Programming - A Complete Reference Guide by Alan D. Moore and B. M. Harwani 
-'''
+"""
 The below classes take advantage of multiple inheritance to achieve validation.
 
 Validation Events: none, focusin, focusout, focus, key, all
@@ -87,13 +87,13 @@ widget.config(
             invalidcommand=invalid_function with args
 )
 
-'''
+"""
 
 # Base Class
 class ValidatedMixin:
-    '''
+    """
     #### Adds validation functionality to an input widget
-    '''
+    """
     # error_var can be passed a var for error message, if not class creates its own
     def __init__(self, *args, error_var=None, **kwargs):
         self.error = error_var or tk.StringVar()
@@ -349,10 +349,10 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         self.bind('<FocusOut>', self._set_focus_update_var)
 
     def set_precision(self, prec):
-        '''
+        """
         Given a precision it will update the spinboxes ability to handle more or less precision for validation.
         This is separate from the increment value.
-        '''
+        """
         self.precision = prec
 
     def _key_validate(self, char, index, current, proposed, action, **kwargs):

@@ -1,22 +1,22 @@
-'''
+"""
 TODO: Gutted terribly owing to the removal of PyQT.
 Will require significant work to integrate into the GUI, if we choose to.
 
 Logitech Joystick Classes
 pywinusb.hid spawns another thread for joystick event handling which might cause
 problems.
-'''
+"""
 
 from PyQt4 import QtCore
 
 class FarmSimulatorSidePanel(QtCore.QObject):
-    '''
+    """
     The joystick is set up using the pyqinusb package by using an HidDeviceFilter
     for the side panel values.
 
     Axis numbers are 0-indexed as per Python convention, i.e. the 6 axes are
     designated "0" to "5".
-    '''
+    """
 
 
     def __init__(self):
@@ -38,13 +38,13 @@ class FarmSimulatorSidePanel(QtCore.QObject):
         # self.sig_start_timer.connect(self.start_axis_timer)
         # self.sig_stop_timer.connect(self.stop_axis_timer)
 
-        '''
+        """
         One problem with the joystick is that it stops sending packages when the
         maximum tip/tilt is reached. To circumvent the motion to be stopped,
         a QTimer is used to periodically trigger movement in the same direction.
 
         joystick_timer_start/stop are helper methods.
-        '''
+        """
         self.timeout_interval = 10
         # self.axis0_timer = QtCore.QTimer(self)
         # self.axis1_timer = QtCore.QTimer(self)
@@ -85,7 +85,7 @@ class FarmSimulatorSidePanel(QtCore.QObject):
         print(data[1])
 
     def get_bin(self, x, n=0):
-        '''
+        """
         Get the binary representation of x.
 
         Args:
@@ -96,13 +96,13 @@ class FarmSimulatorSidePanel(QtCore.QObject):
         Returns
         -------
         str
-        '''
+        """
         return format(x, 'b').zfill(n)
 
     def farm_panel_handler(self, data):
-        ''' Each group is checked to see if events are different from off-events
+        """ Each group is checked to see if events are different from off-events
         '00000000' is the off-event.
-        Buttons 1 to 8'''
+        Buttons 1 to 8"""
         self.group_1to8 = data[1]
 
         self.group_1to8_string = self.get_bin(self.group_1to8,8)
@@ -127,10 +127,10 @@ class FarmSimulatorSidePanel(QtCore.QObject):
         if self.group_25to29_string != '00000000':
             index = self.group_25to29_string.find('1')
             if index == 0:
-                '''
+                """
                 29 is the mode changing button, so the corresponding
                 signal should be emitted as well:
-                '''
+                """
                 print('self mode: ', self.mode)
                 if self.mode == '012':
                     self.mode = '345'
@@ -146,12 +146,12 @@ class FarmSimulatorSidePanel(QtCore.QObject):
                 button = 32-index
                 self.sig_button_pressed.emit(button)
 
-        '''Joystick handling:
+        """Joystick handling:
 
         Stop the joystick timer - a QTimer can be stopped even though it was never
         started. This allows every new arriving HID package to stop the
         persistent sending of messages.
-        '''
+        """
         self.handle_axis_value_changes(0,'012',5,data)
         self.handle_axis_value_changes(1,'012',6,data)
         self.handle_axis_value_changes(2,'012',7,data)
@@ -167,11 +167,11 @@ class FarmSimulatorSidePanel(QtCore.QObject):
                 #self.sig_mode_changed.emit(axis_group)
 
             if value-128 == -128 or value-128 == 127:
-                ''' Assign a certain axis the min or max value '''
+                """ Assign a certain axis the min or max value """
 
                 exec('self.axis'+str(axis_id)+'_value = value')
-                ''' Start timers. Because this is executed from
-                another thread, a signal has to be used here.'''
+                """ Start timers. Because this is executed from
+                another thread, a signal has to be used here."""
                 #self.sig_start_timer.emit(axis_id)
                 #self.sig_axis_moved.emit(axis_id, value)
             else:

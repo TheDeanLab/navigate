@@ -1,7 +1,4 @@
-"""
-ASLM camera communication classes.
-
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -50,12 +47,21 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 class SyntheticCameraController:
+    r"""SyntheticCameraController. Synthetic Camera API."""
     def __init__(self):
         self.is_acquiring = False
 
     def get_property_value(self, name):
-        """W
-        Provides the idprop value after looking it up in the property_dict
+        r"""Provides the idprop value after looking it up in the property_dict
+
+        Parameters
+        name : str
+            Not currently used.
+
+        Returns
+        -------
+        property_value : int
+            Currently hard-coded to -1.
         """
         # return self.prop_getvalue(property_dict[name])
 
@@ -63,8 +69,22 @@ class SyntheticCameraController:
 
 
 class SyntheticCamera(CameraBase):
-    def __init__(self, camera_id, model, experiment, verbose=False):
-        super().__init__(camera_id, model, experiment, verbose)
+    r"""SyntheticCamera camera class.
+
+    Parameters
+    ----------
+    camera_id : int
+        Selects which camera to connect to (0, 1, ...).
+    configuration : Session
+        Global configuration of the microscope
+    experiment : Session
+        Experiment configuration of the microscope
+    verbose : Boolean
+        Verbosity
+
+    """
+    def __init__(self, camera_id, configuration, experiment, verbose=False):
+        super().__init__(camera_id, configuration, experiment, verbose)
 
         self.x_pixels = experiment.CameraParameters['x_pixels']
         self.y_pixels = experiment.CameraParameters['y_pixels']
@@ -73,107 +93,127 @@ class SyntheticCamera(CameraBase):
         self._noise_sigma = noise_model.compute_noise_sigma(Ib=self._mean_background_count)
         self.blah = noise_model.compute_noise_sigma
         self.camera_controller = SyntheticCameraController()
+        self.current_frame_idx = None
+        self.data_buffer = None
+        self.num_of_frame = None
+        self.current_frame_idx = None
+        self.pre_frame_idx = None
 
-        if self.verbose:
-            print("Synthetic Camera Class Initialized")
-        logger.debug("Synthetic Camera Class Initialized")
+        logger.info("SyntheticCamera Class Initialized")
 
     def __del__(self):
+        logger.info("SyntheticCamera Shutdown")
         pass
 
     @property
     def serial_number(self):
+        r"""Get Camera Serial Number
+
+        Returns
+        -------
+        serial_number : int
+            Serial number for the camera. Default None for SyntheticCamera.
+        """
         return None
 
     def stop(self):
+        r""" Set stop_flag as True"""
         self.stop_flag = True
 
     def report_settings(self):
+        r"""Print Camera Settings."""
         pass
 
     def close_camera(self):
+        r"""Close SyntheticCamera Camera"""
         pass
 
     def set_sensor_mode(self, mode):
+        r"""Set SyntheticCamera sensor mode.
+
+        Parameters
+        ----------
+        mode : str
+            'Normal' or 'Light-Sheet'
+        """
         pass
 
     def set_exposure_time(self, exposure_time):
-        self.camera_exposure_time = exposure_time
+        r"""Set SyntheticCamera exposure time.
+
+        All of our units are in milliseconds. Function convert to seconds.
+
+        Parameters
+        ----------
+        exposure_time : float
+            Exposure time in milliseconds.
+
+        """
+        self.camera_exposure_time = exposure_time / 1000
 
     def set_line_interval(self, line_interval_time):
+        r"""Set SyntheticCamera line interval.
+
+        Parameters
+        ----------
+        line_interval_time : float
+            Line interval duration.
+        """
         pass
 
     def set_binning(self, binning_string):
+        r"""Set SyntheticCamera binning mode.
+
+        Parameters
+        ----------
+        binning_string : str
+            Desired binning properties (e.g., '2x2', '4x4', '8x8'
+        """
         self.x_binning = int(binning_string[0])
         self.y_binning = int(binning_string[2])
         self.x_pixels = int(self.x_pixels / self.x_binning)
         self.y_pixels = int(self.y_pixels / self.y_binning)
 
     def initialize_image_series(self, data_buffer=None, number_of_frames=100):
+        r"""Initialize SyntheticCamera image series.
+
+        Parameters
+        ----------
+        data_buffer : int
+            Size of the data to buffer.  Default is None.
+        number_of_frames : int
+            Number of frames.  Default is 100.
+        """
         self.data_buffer = data_buffer
         self.num_of_frame = number_of_frames
         self.current_frame_idx = 0
         self.pre_frame_idx = 0
         self.camera_controller.is_acquiring = True
 
-    def get_images_in_series(self):
-        images = []
-        for i in range(10):
-            images.append(
-                np.random.randint(
-                    low=255,
-                    size=(
-                        self.x_pixels,
-                        self.y_pixels),
-                    dtype=np.uint16))
-        return images
-
     def close_image_series(self):
+        r"""Close image series.
+
+        Stops the acquisition and sets is_acquiring flag to False.
+        """
         self.pre_frame_idx = 0
         self.current_frame_idx = 0
         self.camera_controller.is_acquiring = False
 
-    def get_image(self):
-        image = np.random.normal(1000, 400, (self.y_pixels, self.x_pixels))
-        image = np.around(image)
-        time.sleep(self.camera_exposure_time / 1000)
-        return image
-
-    def initialize_live_mode(self):
-        pass
-
-    def get_live_image(self):
-        images = []
-        for i in range(10):
-            images.append(
-                np.random.randint(
-                    low=255,
-                    size=(
-                        self.x_pixels,
-                        self.y_pixels),
-                    dtype=np.uint16))
-        return images
-
-    def close_live_mode(self):
-        pass
-
     def generate_new_frame(self):
-        # image = np.random.randint(
-        #     low=255,
-        #     size=(
-        #         self.x_pixels,
-        #         self.y_pixels),
-        #     dtype=np.uint16)
+        r"""Generate a synthetic image."""
         image = np.random.normal(self._mean_background_count,
                                  self._noise_sigma,
                                  size=(self.x_pixels, self.y_pixels),
                                  ).astype(np.uint16)
+
         ctypes.memmove(self.data_buffer[self.current_frame_idx].ctypes.data,
                        image.ctypes.data, self.x_pixels * self.y_pixels * 2)
-        self.current_frame_idx = (
-                                         self.current_frame_idx + 1) % self.num_of_frame
+
+        self.current_frame_idx = (self.current_frame_idx + 1) % self.num_of_frame
 
     def get_new_frame(self):
+        r"""Get frame from SyntheticCamera camera."""
+
         time.sleep(self.camera_exposure_time / 1000)
         timeout = 500
         while self.pre_frame_idx == self.current_frame_idx and timeout:
@@ -193,10 +233,26 @@ class SyntheticCamera(CameraBase):
         return frames
 
     def set_ROI(self, roi_height=2048, roi_width=2048):
+        r"""Change the size of the active region on the camera.
+
+        Parameters
+        ----------
+        roi_height : int
+            Height of active camera region.
+        roi_width : int
+            Width of active camera region.
+        """
         self.x_pixels = roi_width
         self.y_pixels = roi_height
 
     def get_minimum_waiting_time(self):
+        r"""Get minimum waiting time for SyntheticCamera.
+
+        This function get timing information from the camera device
+        cyclic_trigger_period, minimum_trigger_blank, minimum_trigger_interval
+        'cyclic_trigger_period' of current device is 0
+        according to the document, trigger_blank should be bigger than trigger_interval.
+        """
         return 0.01
 
 

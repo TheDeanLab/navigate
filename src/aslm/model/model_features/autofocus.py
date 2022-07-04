@@ -39,7 +39,7 @@ import numpy as np
 import threading
 
 # Local imports
-from aslm.model.model_features.alsm_feature_container import load_features
+from aslm.model.model_features.aslm_feature_container import load_features
 
 class Autofocus():
     def __init__(self, model):
@@ -59,7 +59,6 @@ class Autofocus():
                                             'main': self.in_func_data,
                                             'end': self.end_func_data},
                              'node': {'node_type': 'multi-step',
-                                        'wait_next': True,
                                         'device_related': True },                                
                             }
 

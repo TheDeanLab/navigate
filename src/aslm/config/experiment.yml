@@ -48,7 +48,6 @@ GalvoParameters:
   galvo_l_frequency: 99.9
   galvo_l_amplitude: 2.5
   galvo_l_offset: 0
-  galvo_r_amplitude: 0.5
   galvo_r_offset: 0
   galvo_r_frequency: 0
 StageParameters:

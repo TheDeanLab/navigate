@@ -1,7 +1,4 @@
-"""
-ASLM data acquisition card communication classes.
-
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -48,82 +45,64 @@ logger = logging.getLogger(p)
 
 
 class SyntheticDAQ(DAQBase):
-    def __init__(self, model, experiment, etl_constants, verbose=False):
-        super().__init__(model, experiment, etl_constants, verbose)
+    def __init__(self, configuration, experiment, etl_constants, verbose=False):
+        super().__init__(configuration, experiment, etl_constants, verbose)
+        self.camera = None
 
     def create_camera_task(self):
-        """
-        # Set up the camera trigger
-        # Calculate camera high time and initial delay.
-        # Disadvantage: high time and delay can only be set after a task has been created
-        """
-        # Configure camera triggers
-        camera_trigger_out_line = self.model.DAQParameters['camera_trigger_out_line']
+        r"""Set up the camera trigger task."""
         pass
 
     def create_master_trigger_task(self):
-        """
-        # Set up the DO master trigger task
-        """
-        master_trigger_out_line = self.model.DAQParameters['master_trigger_out_line']
+        r"""Set up the DO master trigger task."""
         pass
 
     def create_galvo_etl_task(self):
-        """
-        # Set up the Galvo and electrotunable lens - Each start with the trigger_source.
-        PXI6259/ao0:3 -> 4 channels
-        """
-        galvo_etl_task_line = self.model.DAQParameters['galvo_etl_task_line']
-        trigger_source = self.model.DAQParameters['trigger_source']
+        r"""Create galvo and ETL tasks"""
         pass
 
     def start_tasks(self):
-        """
-        # Start the tasks for camera triggering and analog outputs
-        # If the tasks are configured to be triggered, they won't output any signals until run_tasks() is called.
-        """
+        r"""Start the tasks for camera triggering and analog outputs
+        # If the tasks are configured to be triggered, they won't start until run_tasks() is called."""
         pass
 
     def stop_tasks(self):
-        """
-        # Stop the tasks for triggering, analog and counter outputs.
-        """
+        r"""Stop the tasks for triggering, analog and counter outputs."""
         pass
 
     def close_tasks(self):
-        """
-        # Close the tasks for triggering, analog, and counter outputs.
-        """
+        r"""Close the tasks for triggering, analog, and counter outputs."""
         pass
 
     def prepare_acquisition(self, channel_key, exposure_time):
-        """
-        # Initialize the nidaqmx tasks.
+        r"""Prepare the acquisition.
+
+        Parameters
+        ----------
+        channel_key : int
+            Index of channel to be imaged.
+        exposure_time : float
+            Camera exposure duration.
         """
         pass
 
     def run_acquisition(self):
-        """
-        # Run the tasks for triggering, analog and counter outputs.
-        # the master trigger initiates all other tasks via a shared trigger
-        # For this to work, all analog output and counter tasks have to be started so
-        # that they are waiting for the trigger signal.
-        """
+        r"""Run DAQ Acquisition.
+        Run the tasks for triggering, analog and counter outputs.
+        The master trigger initiates all other tasks via a shared trigger
+        For this to work, all analog output and counter tasks have to be started so that
+        they are waiting for the trigger signal."""
         time.sleep(0.01)
         self.camera.generate_new_frame()
 
     def stop_acquisition(self):
+        r"""Stop Acquisition."""
         pass
 
     def write_waveforms_to_tasks(self):
-        """
-        # Write the galvo, etl, and laser waveforms to the NI DAQ tasks
-        """
+        r"""Write the galvo, etl, and laser waveforms to each task."""
         pass
 
     def set_camera(self, camera):
-        """
-        # connect camera with daq: only in syntheticDAQ
-        """
+        r"""Connect camera with daq: only in syntheticDAQ."""
         self.camera = camera
-        pass

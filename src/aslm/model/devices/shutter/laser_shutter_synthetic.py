@@ -1,9 +1,4 @@
-"""
-ASLM shutter communication classes.
-Triggering for shutters delivered from DAQ using digital outputs.
-Each output keeps their last digital state for as long the device is not powered down.
-
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -49,33 +44,72 @@ logger = logging.getLogger(p)
 
 
 class SyntheticShutter(ShutterBase):
-    """
-    Virtual Shutter Device
+    """SyntheticShutter Class
+
+    Triggering for shutters delivered from synthetically.
+
+    Attributes
+    ----------
+    configuration : Session
+        Global configuration of the microscope
+    experiment : Session
+        Experiment configuration of the microscope
+    verbose : Boolean
+        Verbosity
+    shutter_right_state : Boolean
+        Right shutter state
+    shutter_left_state : Boolean
+        Left shutter state
+
+    Methods
+    -------
+    open_left()
+        Open the left shutter, close the right shutter.
+    open_right()
+        Open the right shutter, close the left shutter.
+    close_shutters()
+        Close both shutters
+    state()
+        Return the current state of the shutters
     """
 
-    def __init__(self, model, experiment, verbose=False):
-        super().__init__(model, experiment, verbose)
+    def __init__(self, configuration, experiment, verbose=False):
+        super().__init__(configuration, experiment, verbose)
+
+    def __del__(self):
+        r"""Close the SyntheticShutter at exit.
+        """
+        pass
 
     def open_left(self):
+        r"""Open the left shutter, close the right shutter.
+        """
         self.shutter_right_state = False
         self.shutter_left_state = True
-        if self.verbose:
-            print('Shutter left opened')
-        logger.debug("Shutter left opened")
+        logger.debug("SyntheticShutter - Shutter left opened")
 
     def open_right(self):
+        r"""Open the right shutter, close the left shutter.
+        """
         self.shutter_right_state = True
         self.shutter_left_state = False
-        if self.verbose:
-            print('Shutter right opened')
-        logger.debug("Shutter right opened")
+        logger.debug("SyntheticShutter - Shutter right opened")
 
     def close_shutters(self):
+        r"""CLose both shutters
+        """
         self.shutter_right_state = False
         self.shutter_left_state = False
-        if self.verbose:
-            print('Both shutters closed')
-        logger.debug("Both shutters closed")
+        logger.debug("SyntheticShutter - Both shutters closed")
 
     def state(self):
+        r"""Return the state of both shutters
+
+        Returns
+        -------
+        shutter_left_state : Boolean
+            State of the left shutter.
+        shutter_right_state : Boolean
+            State of the right shutter
+        """
         return self.shutter_left_state, self.shutter_right_state

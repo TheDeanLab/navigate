@@ -80,6 +80,7 @@ class Camera_View_Controller(GUI_Controller):
         #  Stored Images
         self.tk_image = None
         self.image = None
+        self.cross_hair_image = None
         self.saturated_pixels = None
 
         # Widget Defaults
@@ -103,9 +104,9 @@ class Camera_View_Controller(GUI_Controller):
         self.bit_depth = 8  # bit-depth for PIL presentation.
 
     def initialize(self, name, data):
-        '''
+        """
         # Function that sets widgets based on data given from main controller/config
-        '''
+        """
         # Pallete section (colors, autoscale, min/max counts)
         # keys = ['Frames to Avg', 'Image Max Counts', 'Channel']
         if name == 'minmax':
@@ -179,10 +180,6 @@ class Camera_View_Controller(GUI_Controller):
 
                 # Update GUI
                 self.image_metrics['Image'].set(np.max(self.temp_array))
-
-                if self.verbose:
-                    print("Rolling Average: ", self.image_count, self.rolling_frames)
-                logger.debug(f"Rolling Average: , {self.image_count}, {self.rolling_frames}")
 
     def downsample_image(self):
         """
@@ -278,8 +275,7 @@ class Camera_View_Controller(GUI_Controller):
             self.cross_hair_image[height, :] = 1
 
     def apply_LUT(self):
-        """
-        Applies a LUT to the image.
+        r"""Applies a LUT to the image.
         Red is reserved for saturated pixels.
         self.color_values = ['gray', 'gradient', 'rainbow']
         """
@@ -335,15 +331,11 @@ class Camera_View_Controller(GUI_Controller):
         if self.autoscale is True:  # Autoscale Enabled
             self.image_palette['Min'].widget['state'] = 'disabled'
             self.image_palette['Max'].widget['state'] = 'disabled'
-            if self.verbose:
-                print("Autoscale Enabled")
             logger.debug("Autoscale Enabled")
 
         elif self.autoscale is False:  # Autoscale Disabled
             self.image_palette['Min'].widget['state'] = 'normal'
             self.image_palette['Max'].widget['state'] = 'normal'
-            if self.verbose:
-                print("Autoscale Disabled")
             logger.debug("Autoscale Disabled")
             self.update_min_max_counts()
 
@@ -357,7 +349,5 @@ class Camera_View_Controller(GUI_Controller):
         """
         self.min_counts = self.image_palette['Min'].get()
         self.max_counts = self.image_palette['Max'].get()
-        if self.verbose:
-            print("Min and Max counts scaled to ", self.min_counts, self.max_counts)
         logger.debug(f"Min and Max counts scaled to, {self.min_counts}, {self.max_counts}")
 

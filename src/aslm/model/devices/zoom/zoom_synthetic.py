@@ -1,7 +1,4 @@
-"""
-ASLM zoom servo communication classes.
-
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -47,12 +44,22 @@ logger = logging.getLogger(p)
 
 
 class SyntheticZoom(ZoomBase):
-    """
-    Virtual Zoom Device
+    """SyntheticZoom Class
+
+    Controls the SyntheticZoom Servo.
+
+    Methods
+    -------
+    set_zoom(zoom, wait_until_done)
+        Change the DynamixelZoom position to zoom value of the microscope.
+    move(position, wait_until_done)
+        Move the DynamixelZoom position.
+    read_position()
+        Read the position of the DynamixelZoom servo.
     """
 
-    def __init__(self, model, verbose):
-        super().__init__(model, verbose)
+    def __init__(self, configuration, verbose):
+        super().__init__(configuration, verbose)
         logger.debug("SyntheticZoom Servo Initialized")
 
     def __del__(self):
@@ -60,7 +67,7 @@ class SyntheticZoom(ZoomBase):
         pass
 
     def set_zoom(self, zoom, wait_until_done=False):
-        r""" Change the SyntheticZoom Servo.
+        r"""Change the SyntheticZoom Servo.
 
         Confirms tha the zoom position is available in the zoomdict
 

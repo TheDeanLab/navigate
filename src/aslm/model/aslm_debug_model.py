@@ -47,7 +47,7 @@ from multiprocessing import Pool, Lock
 
 from aslm.model.aslm_device_startup_functions import start_analysis
 from aslm.model.concurrency.concurrency_tools import ObjectInSubprocess
-from aslm.model.model_features.alsm_feature_container import load_features
+from aslm.model.model_features.aslm_feature_container import load_features
 from aslm.model.model_features.aslm_image_writer import ImageWriter
 from aslm.model.model_features.autofocus import Autofocus
 from aslm.model.model_features.dummy_detective import Dummy_Detective
@@ -67,12 +67,12 @@ def calculate_entropy(dct_array, otf_support_x, otf_support_y):
     return image_entropy
 
 def normalized_dct_shannon_entropy(input_array, psf_support_diameter_xy, verbose=False):
-    '''
+    """
     # input_array : 2D or 3D image.  If 3D, will iterate through each 2D plane.
     # otf_support_x : Support for the OTF in the x-dimension.
     # otf_support_y : Support for the OTF in the y-dimension.
     # Returns the entropy value.
-    '''
+    """
     # Get Image Attributes
     # input_array = np.double(input_array)
     image_dimensions = input_array.ndim

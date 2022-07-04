@@ -86,18 +86,18 @@ class Stage_GUI_Controller(GUI_Controller):
                 buttons[k].configure(
                     command=self.xy_zero_btn_handler()
                 )
-            else:
+            elif k.startswith('zero'):
                 buttons[k].configure(
                     command=self.zero_btn_handler(k[5:-4])
                 )
 
+        buttons['stop'].configure(command=self.stop_button_handler)
         for axis in ['x', 'y', 'z', 'theta', 'f']:
             # add event bind to position entry variables
             self.widget_vals[axis].trace_add('write', self.position_callback(axis))
 
         if configuration_controller:
             self.initialize(configuration_controller)
-
 
     def initialize(self, config):
         """
@@ -253,6 +253,9 @@ class Stage_GUI_Controller(GUI_Controller):
             x_val.set(0)
             y_val.set(0)
         return handler
+
+    def stop_button_handler(self):
+        self.view.after(250, lambda: self.parent_controller.execute('stop_stage'))
 
     def position_callback(self, axis, **kwargs):
         """

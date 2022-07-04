@@ -209,3 +209,7 @@ class StageBase:
                                   'theta_pos': self.int_theta_pos,
                                   }
 
+    def stop(self):
+        r"""Stop all stage movement abruptly.
+        """
+        pass

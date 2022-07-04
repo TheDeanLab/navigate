@@ -403,12 +403,13 @@ class Model:
 
         # Pass to the stage
         self.stages.move_absolute(pos_dict, wait_until_done)
-        self.stages.report_position()
-
 
         # TODO: This atrribute records current focus position
         # TODO: put it here right now
         self.focus_pos = self.stages.int_position_dict['f_pos']
+
+    def stop_stage(self):
+        self.stages.stop()
 
     def end_acquisition(self):
         """

@@ -33,18 +33,43 @@ POSSIBILITY OF SUCH DAMAGE.
 # Standard Imports
 from tkinter import *
 from tkinter import ttk
+
+# Local Imports
+from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from aslm.view.custom_widgets.validation import ValidatedSpinbox
+
 import logging
+from pathlib import Path
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class goto_frame(ttk.Frame):
-    def __init__(goto_frame, stage_control_tab, *args, **kwargs):
+class stop_frame(ttk.Frame):
+    def __init__(self, stage_control_tab, name, *args, **kwargs):
         # Init Frame
-        ttk.Frame.__init__(goto_frame, stage_control_tab, *args, **kwargs)
-        
+        ttk.Frame.__init__(self, stage_control_tab, *args, **kwargs)
+        self.name = name
+
         # Formatting
-        Grid.columnconfigure(goto_frame, 'all', weight=1)
-        Grid.rowconfigure(goto_frame, 'all', weight=1)
+        Grid.columnconfigure(self, 'all', weight=1)
+        Grid.rowconfigure(self, 'all', weight=1)
+
+        # Stop button
+        self.stop_btn = Button(
+            self,
+            bg='red',
+            fg='white',
+            text="STOP",
+            width=20,
+            height=10
+        )
+
+        # Gridding out buttons
+        self.stop_btn.grid(row=0, column=0, rowspan=2, pady=2)
+
+    def get_buttons(self):
+        return {
+            'stop': self.stop_btn
+        }

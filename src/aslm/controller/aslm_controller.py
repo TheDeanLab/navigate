@@ -478,6 +478,9 @@ class ASLM_controller:
             """
             self.threads_pool.createThread('stage', self.move_stage, args=({args[1] + '_abs': args[0]},))
 
+        elif command == 'stop_stage':
+            self.threads_pool.createThread('stop_stage', self.stop_stage)
+
         elif command == 'move_stage_and_update_info':
             r"""update stage view to show the position
             
@@ -713,6 +716,9 @@ class ASLM_controller:
 
         # Pass to model
         self.model.move_stage(pos_dict)
+
+    def stop_stage(self):
+        self.model.stop_stage()
 
     def update_event(self):
         r"""Update the waveforms in the View.

@@ -257,7 +257,10 @@ class PIStage(StageBase):
                 logger.exception(e)
 
     def stop(self):
-        self.pidevice.STP(noraise=True)
+        try:
+            self.pidevice.STP(noraise=True)
+        except GCSError as e:
+            logger.exception(e)
 
     def zero_axes(self, list):
         for axis in list:

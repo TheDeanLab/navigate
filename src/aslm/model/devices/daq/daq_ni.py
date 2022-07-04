@@ -64,9 +64,13 @@ class NIDAQ(DAQBase):
     """
     def __init__(self, configuration, experiment, etl_constants, verbose=False):
         super().__init__(configuration, experiment, etl_constants, verbose)
+        self.camera_trigger_task = None
+        self.master_trigger_task = None
+        self.galvo_etl_task = None
 
     def __del__(self):
-        pass
+        if self.camera_trigger_task is not None:
+            self.stop_acquisition()
 
     def create_camera_task(self, exposure_time):
         r"""Set up the camera trigger task.
@@ -189,7 +193,3 @@ class NIDAQ(DAQBase):
     def write_waveforms_to_tasks(self):
         r"""Write the galvo, etl, and laser waveforms to each task."""
         self.galvo_etl_task.write(self.galvo_and_etl_waveforms)
-
-    def set_camera(self, camera):
-        r"""Connect camera with daq: only in syntheticDAQ."""
-        pass

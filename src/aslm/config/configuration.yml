@@ -131,7 +131,7 @@ GalvoParameters:
 
   # Shadow Reduction Galvo for NanoSPIM Module
   # Cambridge Technology CRS 4 kHz system.
-  galvo_r_amplitude: 0.5
+  galvo_r_offset: 0.5
   galvo_r_min_ao: -5
   galvo_r_max_ao: 5
 

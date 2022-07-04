@@ -82,7 +82,8 @@ class Etl_Popup_Controller(GUI_Controller):
         self.widgets = self.view.get_widgets()
 
         self.variables = self.view.get_variables()
-        self.lasers = ['488nm', '562nm', '642nm']  # TODO: This should pull from configuration YAML
+
+        self.lasers = [v for k, v in self.configuration.LaserParameters.items() if k.endswith('wavelength')]
         self.resolution = None
         self.mag = None
         self.in_initialize = True
@@ -142,7 +143,6 @@ class Etl_Popup_Controller(GUI_Controller):
         galvo_max = self.configuration.GalvoParameters[f'galvo_{focus_prefix}_max_ao']
 
         # set ranges of value for those lasers
-
         for laser in self.lasers:
             self.widgets[laser + ' Amp'].widget.configure(from_=laser_min)
             self.widgets[laser + ' Amp'].widget.configure(to=laser_max)
@@ -171,6 +171,22 @@ class Etl_Popup_Controller(GUI_Controller):
         self.widgets['Galvo Freq'].widget.configure(from_=0)
         self.widgets['Galvo Freq'].widget.configure(increment=increment)
         self.widgets['Galvo Freq'].widget.set_precision(precision)
+
+        # The galvo by default uses a sawtooth waveform. However, sometimes we have a resonant galvo.
+        # In the case of the resonant galvo, the amplitude must be zero and only the offset can be
+        # controlled. We only define the offset in the configuration.yml file. If only the offset is
+        # defined for galvo_{focus_prefix}, we disable the amplitude.
+        #
+        # TODO: Are there other parameters we wish to enable/disable based on configuration?
+        # TODO: Should we instead change galvo amp/offset behavior based on a waveform type passed in the
+        #       configuration? That is, should we pass galvo_l_waveform: sawtooth and galvo_r_waveform: dc_value?
+        #       And then adjust the ETL_Popup_Controller accordingly? We could do the same for ETL vs. voice coil.
+        if self.configuration.GalvoParameters.get(f'galvo_{focus_prefix}_amplitude', None) is None:
+            self.widgets['Galvo Amp'].widget['state'] = "disabled"
+            self.widgets['Galvo Freq'].widget['state'] = "disabled"
+        else:
+            self.widgets['Galvo Amp'].widget['state'] = "normal"
+            self.widgets['Galvo Freq'].widget['state'] = "normal"
 
     def set_experiment_values(self, resolution_value):
         """
@@ -221,9 +237,9 @@ class Etl_Popup_Controller(GUI_Controller):
 
         focus_prefix = 'r' if self.resolution == 'high' else 'l'
 
-        self.variables['Galvo Amp'].set(self.galvo_setting[f'galvo_{focus_prefix}_amplitude'])
-        self.variables['Galvo Off'].set(self.galvo_setting[f'galvo_{focus_prefix}_offset'])
-        self.variables['Galvo Freq'].set(self.galvo_setting[f'galvo_{focus_prefix}_frequency'])
+        self.variables['Galvo Amp'].set(self.galvo_setting.get(f'galvo_{focus_prefix}_amplitude', 0))
+        self.variables['Galvo Off'].set(self.galvo_setting.get(f'galvo_{focus_prefix}_offset', 0))
+        self.variables['Galvo Freq'].set(self.galvo_setting.get(f'galvo_{focus_prefix}_frequency', 0))
 
         if not self.in_initialize:
             # update resolution value in central controller (menu)
@@ -249,7 +265,7 @@ class Etl_Popup_Controller(GUI_Controller):
             # TODO: Make also work in the 'single' acquisition mode.
             variable_value = variable.get()
             print("ETL Amplitude/Offset Changed: ", variable_value)
-            if value != variable_value and variable_value != '' and self.mode == 'live':
+            if value != variable_value and variable_value != '':  # and self.mode == 'live':
                 self.resolution_info.ETLConstants[self.resolution][self.mag][laser][etl_name] = variable_value
                 if self.verbose:
                     print("ETL Amplitude/Offset Changed: ", variable_value)
@@ -281,7 +297,7 @@ class Etl_Popup_Controller(GUI_Controller):
             value = self.galvo_setting[galvo_parameter]
             variable_value = variable.get()
             print(f"Galvo parameter {galvo_parameter} changed: {variable_value}")
-            if value != variable_value and variable_value != '' and self.mode == 'live':
+            if value != variable_value and variable_value != '':  # and self.mode == 'live':
                 self.galvo_setting[galvo_parameter] = variable.get()
                 if self.verbose:
                     print(f"Galvo parameter {galvo_parameter} changed: {variable_value}")

@@ -62,7 +62,6 @@ class Model:
     def __init__(self, USE_GPU, args, configuration_path=None, experiment_path=None,
             etl_constants_path=None, event_queue=None):
 
-
         self.logger = logging.getLogger(p)
 
         # Specify verbosity
@@ -101,7 +100,7 @@ class Model:
                                  args=(self.configuration, self.verbose,)).start(),
 
             'stages': ResultThread(target=startup_functions.start_stages,
-                                   args=(self.configuration,self.verbose,)).start(),
+                                   args=(self.configuration, self.verbose,)).start(),
 
             'shutter': ResultThread(target=startup_functions.start_shutters,
                                     args=(self.configuration, self.experiment, self.verbose,)).start(),
@@ -340,10 +339,14 @@ class Model:
             consisting of the resolution_mode, the zoom, and the laser_info.
             e.g., self.resolution_info.ETLConstants[self.resolution][self.mag]
             """
-            # stop live thread
-            self.stop_send_signal = True
-            self.signal_thread.join()
-            self.current_channel = 0
+            reboot = False
+            if self.camera.is_acquiring:
+                # We called this while in the middle of an acquisition
+                # stop live thread
+                self.stop_send_signal = True
+                self.signal_thread.join()
+                self.current_channel = 0
+                reboot = True
 
             update_settings_common(self, args)
 
@@ -351,11 +354,12 @@ class Model:
                                              self.experiment.GalvoParameters, self.get_readout_time())
             self.event_queue.put(('waveform', self.daq.waveform_dict))
 
-            # prepare devices based on updated info
-            self.stop_send_signal = False
-            self.signal_thread = threading.Thread(target=self.run_live_acquisition)
-            self.signal_thread.name = "ETL Popup Signal"
-            self.signal_thread.start()
+            if reboot:
+                # prepare devices based on updated info
+                self.stop_send_signal = False
+                self.signal_thread = threading.Thread(target=self.run_live_acquisition)
+                self.signal_thread.name = "ETL Popup Signal"
+                self.signal_thread.start()
 
         elif command == 'autofocus':
             """
@@ -471,7 +475,6 @@ class Model:
         self.logger.debug('data thread is stop')
         self.logger.debug(f'received frames in total:{acquired_frame_num}')
 
-
     def prepare_image_series(self):
         """
         #  Prepares an image series without waveform update
@@ -546,7 +549,7 @@ class Model:
         Initializes the data buffer and starts camera.
         Opens Shutters
         """
-        if self.camera.camera_controller.is_acquiring:
+        if self.camera.is_acquiring:
             self.camera.close_image_series()
         # turn off flags
         self.stop_acquisition = False
@@ -801,7 +804,7 @@ class Model:
                 self.experiment.MicroscopeState['resolution_mode'] = 'low'
 
             # We can't keep acquiring if we're switching cameras. For now, simply turn the camera off.
-            if self.camera.is_acquiring or self.is_live:
+            if self.camera.is_acquiring:
                 self.run_command('stop')
 
             self.camera = self.get_camera()

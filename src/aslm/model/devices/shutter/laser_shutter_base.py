@@ -73,7 +73,7 @@ class ShutterBase:
 
     def __init__(self, configuration, experiment, verbose=False):
         self.configuration = configuration
-        self.configuration = experiment
+        self.experiment = experiment
         self.verbose = verbose
 
         # Right Shutter - High Resolution Mode

@@ -117,8 +117,8 @@ class DAQBase:
         # Right Galvo Parameters
         self.galvo_r_waveform = None
         self.galvo_r_frequency = None
-        self.galvo_r_amplitude = self.configuration.GalvoParameters['galvo_r_amplitude']
-        self.galvo_r_offset = None
+        self.galvo_r_amplitude = self.configuration.GalvoParameters.get('galvo_r_amplitude', 0)
+        self.galvo_r_offset = self.configuration.GalvoParameters.get('galvo_r_offset', 0)
         self.galvo_r_duty_cycle = None
         self.galvo_r_phase = None
         self.galvo_r_max_ao = self.configuration.GalvoParameters['galvo_r_max_ao']
@@ -187,10 +187,13 @@ class DAQBase:
         # Imaging Mode = 'high' or 'low'
         self.imaging_mode = microscope_state['resolution_mode']
 
-        focus_prefix = 'r' if self.imaging_mode == 'high' else 'l'
-
         # Zoom = 'N/A' in high resolution mode, or '0.63x', '1x', '2x'... in low-resolution mode.
-        zoom = microscope_state['zoom']
+        if self.imaging_mode == 'high':
+            focus_prefix = 'r'
+            zoom = 'N/A'  # TODO: Why do I need this safety check here? It seems that zoom update lags imaging mode update.
+        else:
+            focus_prefix = 'l'
+            zoom = microscope_state['zoom']
 
         # Iterate through the dictionary.
         for channel_key in microscope_state['channels']:
@@ -216,8 +219,8 @@ class DAQBase:
                 etl_offset = float(etl_constants.ETLConstants[self.imaging_mode][zoom][laser]['offset'])
 
                 # Galvo Parameters
-                galvo_amplitude = float(galvo_parameters[f'galvo_{focus_prefix}_amplitude'])
-                galvo_offset = float(galvo_parameters[f'galvo_{focus_prefix}_offset'])
+                galvo_amplitude = float(galvo_parameters.get(f'galvo_{focus_prefix}_amplitude', 0))
+                galvo_offset = float(galvo_parameters.get(f'galvo_{focus_prefix}_offset', 0))
 
                 # We need the camera to experience N sweeps of the galvo. As such,
                 # frequency should divide evenly into exposure_time
@@ -282,18 +285,18 @@ class DAQBase:
         readout_time : float
             Duration of time necessary to readout a camera frame.
         """
-        laser = channel['laser']
-        resolution_mode = microscope_state['resolution_mode']
+        laser, resolution_mode, zoom = channel['laser'], microscope_state['resolution_mode'],  microscope_state['zoom']
+        remote_focus_dict = self.etl_constants.ETLConstants[resolution_mode][zoom][laser]
+
+        # Use defaults of 0 in the case they are not provided
+        amp = float(remote_focus_dict.get('amplitude', 0))
+        off = float(remote_focus_dict.get('offset', 0))
 
         if resolution_mode == 'high':
-            zoom = microscope_state['zoom']
-            self.etl_r_amplitude = float(self.etl_constants.ETLConstants[resolution_mode][zoom][laser]['amplitude'])
-            self.etl_r_offset = float(self.etl_constants.ETLConstants[resolution_mode][zoom][laser]['offset'])
+            self.etl_r_amplitude, self.etl_r_offset = amp, off
             logger.debug(f"High Resolution Mode.  Amp/Off:, {self.etl_r_amplitude}, {self.etl_r_offset})")
         elif resolution_mode == 'low':
-            zoom = microscope_state['zoom']
-            self.etl_l_amplitude = float(self.etl_constants.ETLConstants[resolution_mode][zoom][laser]['amplitude'])
-            self.etl_l_offset = float(self.etl_constants.ETLConstants[resolution_mode][zoom][laser]['offset'])
+            self.etl_l_amplitude, self.etl_l_offset = amp, off
             logger.debug(f"Low Resolution Mode.  Amp/Off:, {self.etl_l_amplitude}, {self.etl_l_offset})")
         else:
             logger.info("DAQBase - ETL setting not pulled properly")
@@ -304,10 +307,16 @@ class DAQBase:
                            or (self.prev_etl_r_offset != self.etl_r_offset)
 
         if update_waveforms:
+            # Compute the waveforms
             self.calculate_all_waveforms(microscope_state, self.etl_constants, galvo_parameters, readout_time)
+            # Make sure we write out a sufficient number of samples to capture the full waveform
             self.calculate_samples()
+            # Set up previous values for next update_waveforms check
             self.prev_etl_r_amplitude = self.etl_r_amplitude
             self.prev_etl_r_offset = self.etl_r_offset
             self.prev_etl_l_amplitude = self.etl_l_amplitude
             self.prev_etl_l_offset = self.etl_l_offset
 
+    def set_camera(self, camera):
+        r"""Connect camera with daq: only in syntheticDAQ."""
+        pass

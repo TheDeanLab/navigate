@@ -43,6 +43,7 @@ import pretty_errors
 # Local Imports
 from aslm.controller.aslm_controller import ASLM_controller as controller
 
+
 def main():
     r"""Multiscale ASLM Microscope Software.
     Microscope control software built in a Model-View-Controller architecture.

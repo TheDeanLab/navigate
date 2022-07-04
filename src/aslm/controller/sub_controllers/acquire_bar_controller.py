@@ -133,7 +133,7 @@ class Acquire_Bar_Controller(GUI_Controller):
             # change the button to 'Acquire'
             self.view.acquire_btn.configure(text='Acquire')
 
-            # tell the controller to stop acquire(continuous mode)
+            # tell the controller to stop acquire (continuous mode)
             self.parent_controller.execute('stop_acquire')
 
         elif self.is_save and self.mode != 'live':

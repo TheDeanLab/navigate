@@ -380,6 +380,7 @@ class ASLM_controller:
         resolution_mode = self.experiment.MicroscopeState['resolution_mode']
         if resolution_mode == 'high':
             self.resolution_value.set('high')
+            self.experiment.MicroscopeState['zoom'] = 'N/A'
         else:
             self.resolution_value.set(self.experiment.MicroscopeState['zoom'])
 
@@ -640,8 +641,8 @@ class ASLM_controller:
                 print('receive', image_id)
             logger.debug(f"recieve, {image_id}")
             if image_id == 'stop':
-                # self.set_mode_of_sub('stop')
-                self.execute('stop_acquire')
+                self.set_mode_of_sub('stop')
+                # self.execute('stop_acquire')
                 break
             if not isinstance(image_id, int):
                 print('some thing wrong happened, stop the model!', image_id)

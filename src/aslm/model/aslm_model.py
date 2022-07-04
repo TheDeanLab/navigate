@@ -197,8 +197,8 @@ class Model:
         self.camera_line_interval = 9.7e-6  # s
         self.start_time = None
         self.data_buffer = None
-        self.img_width = int(self.configuration.CameraParameters['x-pixels'])
-        self.img_height = int(self.configuration.CameraParameters['y-pixels'])
+        self.img_width = int(self.configuration.CameraParameters['x_pixels'])
+        self.img_height = int(self.configuration.CameraParameters['y_pixels'])
 
         # Autofocusing
         self.f_position = None
@@ -256,7 +256,7 @@ class Model:
         """
 
         # Default to the zeroth camera
-        cam = self.camera
+        cam = self.camera0
 
         # TODO: In the event two cameras are on, but we've only requested one, make sure it's the one with the
         #       serial number we want.

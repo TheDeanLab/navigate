@@ -236,8 +236,8 @@ class PIStage(StageBase):
                 self.pidevice.MOV({axis_num: axis_abs})
                 return True
             except GCSError as e:
-                return False
                 logger.exception(GCSError(e))
+                return False
 
         except (KeyError, AttributeError):
             return False

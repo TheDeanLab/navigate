@@ -500,18 +500,47 @@ class Model:
             Dictionary of stage positions.
         wait_until_done : bool
             Checks "on target state" after command and waits until done.
+
+        Returns
+        -------
+        success : bool
+            Was the move successful?
         """
         # Update our local experiment parameters
         update_stage_dict(self, pos_dict)
-        self.stages.move_absolute(pos_dict, wait_until_done)
-        self.stages.report_position()
+        success = self.stages.move_absolute(pos_dict, wait_until_done)
+        ret_pos_dict = self.get_stage_position()
+        if not success:
+            # Record where we are now
+            update_stage_dict(self, ret_pos_dict)
         # TODO: This attribute records current focus position
         # TODO: put it here right now
         self.focus_pos = self.stages.int_position_dict['f_pos']
 
+        return success
+
+    def get_stage_position(self):
+        r"""Get the position of the stage.
+
+        Returns
+        -------
+        ret_pos_dict : dict
+            Dictionary of stage positions.
+        """
+        ret_pos_dict = self.stages.report_position()
+        return ret_pos_dict
+
     def stop_stage(self):
-        r"""Stop the stages."""
+        r"""Stop the stages. Grab the current position.
+
+        Returns
+        -------
+        ret_pos_dict: dict
+            Dictionary of stage positions.
+        """
         self.stages.stop()
+        ret_pos_dict = self.get_stage_position()
+        return ret_pos_dict
 
     def end_acquisition(self):
         r"""End the acquisition.

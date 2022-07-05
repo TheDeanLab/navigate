@@ -66,6 +66,8 @@ class SyntheticStage(StageBase):
             print("Stage Position: ", self.int_position_dict)
         logger.debug(f"Stage Position:, {self.int_position_dict}")
 
+        return self.int_position_dict
+
     def move_relative(self, move_dictionary, wait_until_done=False):
         """
         Move relative method
@@ -183,6 +185,8 @@ class SyntheticStage(StageBase):
         if self.verbose:
             print('stage moved to ', move_dictionary)
         logger.debug(f"stage moved to, {move_dictionary}")
+
+        return True
 
     def zero_axes(self, list):
         for axis in list:

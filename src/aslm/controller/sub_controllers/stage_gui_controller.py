@@ -29,10 +29,9 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-from aslm.controller.sub_controllers.widget_functions import validate_wrapper
 from aslm.controller.sub_controllers.gui_controller import GUI_Controller
 import logging
-from pathlib import Path
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -93,9 +92,9 @@ class Stage_GUI_Controller(GUI_Controller):
                 )
 
         buttons['stop'].configure(command=self.stop_button_handler)
-        for axis in ['x', 'y', 'z', 'theta', 'f']:
-            # add event bind to position entry variables
-            self.widget_vals[axis].trace_add('write', self.position_callback(axis))
+        self.position_callback_traces = {}
+        self.position_callbacks_bound = False
+        self.bind_position_callbacks()
 
         if configuration_controller:
             self.initialize(configuration_controller)
@@ -121,6 +120,24 @@ class Stage_GUI_Controller(GUI_Controller):
             widgets[k].widget.configure(from_=config.configuration.GUIParameters['stage'][k]['min'])
             widgets[k].widget.configure(to=config.configuration.GUIParameters['stage'][k]['max'])
             widgets[k].widget.configure(increment=config.configuration.GUIParameters['stage'][k]['step'])
+
+    def bind_position_callbacks(self):
+        r"""Binds position_callback() to each axis, records the trace name so we can unbind later.
+        """
+        if not self.position_callbacks_bound:
+            for axis in ['x', 'y', 'z', 'theta', 'f']:
+                # add event bind to position entry variables
+                cbname = self.widget_vals[axis].trace_add('write', self.position_callback(axis))
+                self.position_callback_traces[axis] = cbname
+            self.position_callbacks_bound = True
+
+    def unbind_position_callbacks(self):
+        r"""Unbinds position callbacks.
+        """
+        if self.position_callbacks_bound:
+            for axis, cbname in self.position_callback_traces.items():
+                self.widget_vals[axis].trace_remove('write', cbname)
+            self.position_callbacks_bound = False
 
     def set_experiment_values(self, setting_dict):
         r"""This function set all the position and step values
@@ -178,6 +195,24 @@ class Stage_GUI_Controller(GUI_Controller):
             # validate position value if set through variable
             widgets[axis].widget.trigger_focusout_validation()
         self.show_verbose_info('Set stage position')
+
+    def set_position_silent(self, position):
+        r"""This function is to populate(set) position in the View without a trace.
+
+        Parameters
+        ----------
+        position : dict
+            {'x': value, 'y': value, 'z': value, 'theta': value, 'f': value}
+        """
+        self.unbind_position_callbacks()
+
+        widgets = self.view.get_widgets()
+        for axis in ['x', 'y', 'z', 'theta', 'f']:
+            self.widget_vals[axis].set(position.get(axis, 0))
+            # validate position value if set through variable
+            widgets[axis].widget.trigger_focusout_validation()
+
+        self.bind_position_callbacks()
 
     def get_position(self):
         r"""This function returns current position from the view.

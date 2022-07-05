@@ -35,6 +35,7 @@ import tkinter
 import multiprocessing as mp
 import threading
 from pathlib import Path
+import time
 
 # Third Party Imports
 
@@ -692,10 +693,26 @@ class ASLM_controller:
         update_stage_dict(self, pos_dict)
 
         # Pass to model
-        self.model.move_stage(pos_dict)
+        success = self.model.move_stage(pos_dict)
+        if not success:
+            # Let's update our internal positions
+            time.sleep(0.250)  # TODO: Banks on this getting called in a thread. Truly unsafe.
+                               #       Currently set to debounce for the stage buttons.
+            ret_pos_dict = self.model.get_stage_position()
+            update_stage_dict(self, ret_pos_dict)
+            self.update_stage_gui_controller_silent(ret_pos_dict)
 
     def stop_stage(self):
-        self.model.stop_stage()
+        ret_pos_dict = self.model.stop_stage()
+        self.update_stage_gui_controller_silent(ret_pos_dict)
+
+    def update_stage_gui_controller_silent(self, ret_pos_dict):
+        r"""Send updates to the stage GUI"""
+        stage_gui_dict = {}
+        for axis, val in ret_pos_dict.items():
+            ax = axis.split('_')[0]
+            stage_gui_dict[ax] = val
+        self.stage_gui_controller.set_position_silent(stage_gui_dict)
 
     def update_event(self):
         r"""Update the waveforms in the View.

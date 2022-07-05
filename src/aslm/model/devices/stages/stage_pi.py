@@ -91,8 +91,9 @@ class PIStage(StageBase):
         # position dictionary.
         """
         try:
-            positions = self.pidevice.qPOS(self.pidevice.axes)
+            positions = self.pidevice.qPOS(self.pidevice.axes)  # positions from the device are in mm
 
+            # convert to um
             self.x_pos = round(positions['1'] * 1000, 2)
             self.y_pos = round(positions['2'] * 1000, 2)
             self.z_pos = round(positions['3'] * 1000, 2)
@@ -110,6 +111,8 @@ class PIStage(StageBase):
             print('Failed to report position')
             logger.exception(e)
         logger.debug(f"Stage Positions: {self.int_position_dict}")
+
+        return self.int_position_dict
 
     def move_relative(self, move_dictionary, wait_until_done=False):
         """
@@ -209,7 +212,8 @@ class PIStage(StageBase):
 
         Returns
         -------
-        None
+        bool
+            Was the move successful?
         """
 
         try:
@@ -230,31 +234,49 @@ class PIStage(StageBase):
                 if axis != 'theta':
                     axis_abs /= 1000  # convert to mm
                 self.pidevice.MOV({axis_num: axis_abs})
+                return True
             except GCSError as e:
+                return False
                 logger.exception(GCSError(e))
 
         except (KeyError, AttributeError):
-            return
+            return False
 
     def move_absolute(self, move_dictionary, wait_until_done=False):
         """
         # PI move absolute method.
         # XYZF Values are converted to millimeters for PI API.
         # Theta Values are not converted.
+
+        Parameters
+        ----------
+        move_dictionary : dict
+            A dictionary of values required for movement. Includes 'x_abs', etc. for one or more axes.
+            Expects values in micrometers, except for theta, which is in degrees.
+        wait_until_done : bool
+            Block until stage has moved to its new spot.
+
+        Returns
+        -------
+        success : bool
+            Was the move successful?
         """
 
         axes = ['x', 'y', 'z', 'f', 'theta']
         axis_nums = [1, 2, 3, 5, 4]
 
         for ax, n in zip(axes, axis_nums):
-            self.move_axis_absolute(ax, n, move_dictionary)
+            success = self.move_axis_absolute(ax, n, move_dictionary)
 
         if wait_until_done is True:
             try:
                 self.pitools.waitontarget(self.pidevice)
             except GCSError as e:
                 print("wait on target failed")
+                success = False
                 logger.exception(e)
+
+        return success
 
     def stop(self):
         try:

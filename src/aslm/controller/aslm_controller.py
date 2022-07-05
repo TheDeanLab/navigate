@@ -602,11 +602,13 @@ class ASLM_controller:
                 pass
 
         elif command == 'stop_acquire':
-            self.model.run_command('stop')
+            # self.model.run_command('stop')
+            self.sloppy_stop()
             self.set_mode_of_sub('stop')
 
         elif command == 'exit':
-            self.model.run_command('stop')
+            # self.model.run_command('stop')
+            self.sloppy_stop()
             if hasattr(self, 'etl_controller'):
                 self.etl_controller.save_etl_info()
             self.model.terminate()
@@ -615,6 +617,26 @@ class ASLM_controller:
             # self.threads_pool.clear()
 
         logger.info(f"ASLM Controller - command passed from child, {command}, {args}")
+
+    def sloppy_stop(self):
+        r"""Keep trying to stop the model until successful.
+
+        TODO: Delete this function!!!
+
+        This is set up to get around the conflict between self.threads_pool.createThread('model', target)
+        commands and the need to stop as abruptly as possible when the user hits stop. Here we leverage
+        ObjectInSubprocess's refusal to let us access the model from two threads to our advantage, and just
+        try repeatedly until we get a command in front of the next command in the model threads_pool resource.
+        We should instead pause the model thread pool and interject our stop command, or clear the queue
+        in threads_pool.
+        """
+        e = RuntimeError
+        while e == RuntimeError:
+            try:
+                self.model.run_command('stop')
+                e = None
+            except RuntimeError:
+                e = RuntimeError
 
     def capture_image(self, mode):
         r"""Trigger the model to capture images

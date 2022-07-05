@@ -32,12 +32,12 @@ POSSIBILITY OF SUCH DAMAGE.
 
 # Standard Library Imports
 import logging
+import importlib
 
 # Third Party Imports
 
 # Local Imports
 from aslm.model.devices.camera.camera_base import CameraBase
-import aslm.model.devices.APIs.hamamatsu.HamamatsuAPI as HamamatsuController
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -62,6 +62,8 @@ class HamamatsuOrca(CameraBase):
     def __init__(self, camera_id, configuration, experiment, verbose=False):
         super().__init__(camera_id, configuration, experiment, verbose)
 
+        # Locally Import Hamamatsu API and Initialize Camera Controller
+        HamamatsuController = importlib.import_module('model.devices.APIs.hamamatsu.HamamatsuAPI')
         self.camera_controller = HamamatsuController.DCAM(camera_id)
 
         # Values are pulled from the CameraParameters section of the configuration.yml file.

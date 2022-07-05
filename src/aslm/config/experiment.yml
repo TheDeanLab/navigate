@@ -7,6 +7,7 @@ Saving:
   tissue: Lung
   celltype: MV3
   label: GFP
+  file_type: Zarr
   date: 2022-06-07
 Devices:
   daq: NI
@@ -47,7 +48,8 @@ GalvoParameters:
   galvo_l_frequency: 99.9
   galvo_l_amplitude: 2.5
   galvo_l_offset: 0
-  galvo_r_amplitude: 0.5
+  galvo_r_offset: 0
+  galvo_r_frequency: 0
 StageParameters:
   x_step: 500.0
   y_step: 500.0
@@ -66,7 +68,7 @@ MicroscopeState:
   stack_cycling_mode: per_stack
   start_position: 0.0
   end_position: 200.0
-  step_size: 0.16
+  step_size: 0.2
   number_z_steps: 1250.0
   timepoints: 1
   stack_pause: 0.0
@@ -77,5 +79,14 @@ MicroscopeState:
   timepoint_interval: 0
   experiment_duration: 625.090000000039
   is_multiposition: False
-  channels: {'channel_1': {'is_selected': True, 'laser': '488nm', 'laser_index': 0, 'filter': 'GFP - FF01-515/30-32', 'filter_position': 1, 'camera_exposure_time': 200.0, 'laser_power': '75', 'interval_time': '1'}}
+  channels: {'channel_1':
+               {'is_selected': True,
+                'laser': '488nm',
+                'laser_index': 0,
+                'filter': 'GFP - FF01-515/30-32',
+                'filter_position': 1,
+                'camera_exposure_time': 200.0,
+                'laser_power': '75',
+                'interval_time': '1',
+                'defocus': '0'}}
   stage_positions: {0: {'x': 15000.0, 'y': 12000.0, 'z': 15500.0, 'theta': 0.0, 'f': 70000.0}, 1: {'x': 35000.0, 'y': 42000.0, 'z': 15500.0, 'theta': 0.0, 'f': 70000.0}}

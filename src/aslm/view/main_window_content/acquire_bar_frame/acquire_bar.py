@@ -36,7 +36,7 @@ from tkinter import *
 from tkinter import ttk
 
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
@@ -83,9 +83,9 @@ class AcquireBar(ttk.Frame):
         self.exit_btn = ttk.Button(self, text="Exit")
 
         #  Gridding out Bar
-        '''
+        """
             0   1   2   3
-        '''
+        """
         self.acquire_btn.grid(row=0, column=0, sticky=NSEW, pady=(2,2), padx=(2,2))
         self.pull_down.grid(row=0, column=1, sticky=NSEW, pady=(2,2), padx=(2,2))
         self.progBar_frame.grid(row=0, column=2, sticky=NSEW, pady=(2,2), padx=(2,2))

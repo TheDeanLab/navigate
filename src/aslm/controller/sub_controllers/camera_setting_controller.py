@@ -32,12 +32,12 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-from controller.sub_controllers.gui_controller import GUI_Controller
+from aslm.controller.sub_controllers.gui_controller import GUI_Controller
 
 import logging
 from pathlib import Path
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
@@ -78,9 +78,9 @@ class Camera_Setting_Controller(GUI_Controller):
             )
 
     def initialize(self, config):
-        '''
+        """
         ## Function that sets widgets based on data given from main controller/config
-        '''
+        """
 
         # Get Default Configuration Values
         self.default_pixel_size = config.configuration.CameraParameters['pixel_size_in_microns']
@@ -180,7 +180,6 @@ class Camera_Setting_Controller(GUI_Controller):
         # after initialization
         self.in_initialization = False
 
-
     def update_experiment_values(self, setting_dict):
         """
         Update the dictionary so that it can be combined with all of the other
@@ -206,7 +205,7 @@ class Camera_Setting_Controller(GUI_Controller):
         return True
 
     def update_sensor_mode(self, *args):
-        '''
+        """
         Updates text in readout widget based on what sensor mode is selected
         If we are in the Light Sheet mode, then we want the camera
         self.model.CameraParameters['sensor_mode']) == 12
@@ -215,7 +214,7 @@ class Camera_Setting_Controller(GUI_Controller):
         self.model.CameraParameters['sensor_mode']) == 1
 
         Should initialize from the configuration file to the default version
-        '''
+        """
         # Camera Mode
         sensor_value = self.mode_widgets['Sensor'].widget.get()
         if sensor_value == 'Normal':
@@ -360,7 +359,7 @@ class Camera_Setting_Controller(GUI_Controller):
         pixels = self.mode_widgets['Pixels'].get()
         if pixels != '':
             self.number_of_pixels = int(pixels)
-        if self.mode != 'live':
+        if not ((self.mode == 'live') or (self.mode == 'stop')):
             return
         
         # tell central controller to update model

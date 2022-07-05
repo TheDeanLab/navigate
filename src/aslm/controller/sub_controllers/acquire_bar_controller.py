@@ -35,17 +35,21 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 import sys
-from controller.sub_controllers.gui_controller import GUI_Controller
-from view.main_window_content.acquire_bar_frame.acquire_popup import Acquire_PopUp as acquire_popup
+from aslm.controller.sub_controllers.gui_controller import GUI_Controller
+from aslm.view.main_window_content.acquire_bar_frame.acquire_popup import Acquire_PopUp as acquire_popup
 
 import logging
 from pathlib import Path
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+
 class Acquire_Bar_Controller(GUI_Controller):
-    def __init__(self, view, parent_controller, verbose=False):
+    def __init__(self,
+                 view,
+                 parent_controller,
+                 verbose=False):
         super().__init__(view, parent_controller, verbose)
 
         # acquisition image mode variable
@@ -57,7 +61,8 @@ class Acquire_Bar_Controller(GUI_Controller):
             'user': '',
             'tissue': '',
             'celltype': '',
-            'label': ''
+            'label': '',
+            'file_type': ''
         }
 
         self.mode_dict = {
@@ -69,103 +74,136 @@ class Acquire_Bar_Controller(GUI_Controller):
 
         # gui event bind
         self.view.acquire_btn.config(command=self.launch_popup_window)
-
-        self.view.pull_down.bind(
-            '<<ComboboxSelected>>',
-            self.update_microscope_mode)
-
+        self.view.pull_down.bind('<<ComboboxSelected>>',self.update_microscope_mode)
         self.view.exit_btn.config(command=self.exit_program)
 
-    def set_mode(self, mode):
-        """
-        # set image mode
-        # mode could be: 'live', 'z-stack', 'single', 'projection'
+    def set_mode(self,
+                 mode):
+        r"""Set imaging mode.
+
+        Parameters
+        ----------
+        mode: str
+            Mode could be: 'live', 'z-stack', 'single', 'projection'
         """
         self.mode = mode
         # update pull down combobox
-        reverse_dict = dict(
-            map(lambda v: (v[1], v[0]), self.mode_dict.items()))
+        reverse_dict = dict(map(lambda v: (v[1], v[0]), self.mode_dict.items()))
         self.view.pull_down.set(reverse_dict[mode])
-
-        self.show_verbose_info('image mode is set to', mode)
+        self.show_verbose_info('Image mode is set to', mode)
 
     def get_mode(self):
-        """
-        # return right now image mode setting
+        r"""Get the current imaging mode.
+
+        Returns
+        -------
+        mode : str
+            Current imaging mode.
         """
         return self.mode
 
     def stop_acquire(self):
+        r"""Stop the acquisition."""
         self.view.acquire_btn.configure(text='Acquire')
 
-    def set_save_option(self, is_save):
-        """
-        # set whether the image will be saved
+    def set_save_option(self,
+                        is_save):
+        r"""Set whether the image will be saved.
+
+        Parameters
+        ----------
+        is_save : bool
+            True if we will save the data.  False if we will not.
         """
         self.is_save = is_save
-
         self.show_verbose_info('set save data option:', is_save)
 
-    def set_saving_settings(self, saving_settings):
-        """
-        # set saving settings
-        # right now it is a reference to the model.exprement.Saving
+    def set_saving_settings(self,
+                            saving_settings):
+        r"""Set saving settings
+
+        Parameters
+        ----------
+        saving_settings : dict
+            Dictionary with root_directory, save_directory, user, etc. Reference to configuration.experiment.Saving.
         """
         # if value is None, set to ''
         for name in saving_settings:
             if saving_settings[name] is None:
                 saving_settings[name] = ''
-
         self.saving_settings = saving_settings
-
-        self.show_verbose_info('set saving settings')
+        self.show_verbose_info('Set saving settings')
 
     def launch_popup_window(self):
+        r"""Launches the Save Dialog Popup Window
+
+        The popup window should only be launched if the microscope is set to save the data,
+        with the exception of the continuous acquisition mode.
+        The popup window provides the user with the opportunity to fill in fields that describe the experiment and
+        also dictate the save path of the data in a standardized format.
         """
-        # The popup window should only be launched if the microscope is set to save the data,
-        # with the exception of the continuous acquisition mode.
-        # The popup window provides the user with the opportunity to fill in fields that describe the experiment and
-        # also dictate the save path of the data in a standardized format.
-        """
-        if self.is_save and self.mode != 'live':
-            acquire_pop = acquire_popup(self.view)
-            buttons = acquire_pop.get_buttons()  # This holds all the buttons in the popup
-
-            # Configure the button callbacks on the popup window
-            buttons['Cancel'].config(
-                command=lambda: acquire_pop.popup.dismiss(
-                    self.verbose))
-            buttons['Done'].config(
-                command=lambda: self.launch_acquisition(acquire_pop))
-
-            initialize_popup_window(acquire_pop, self.saving_settings)
-
-        elif self.view.acquire_btn['text'] == 'Stop':
+        if self.view.acquire_btn['text'] == 'Stop':
             # change the button to 'Acquire'
             self.view.acquire_btn.configure(text='Acquire')
 
-            # tell the controller to stop acquire(continuous mode)
+            # tell the controller to stop acquire (continuous mode)
             self.parent_controller.execute('stop_acquire')
+
+        elif self.is_save and self.mode != 'live':
+            acquire_pop = acquire_popup(self.view)
+            buttons = acquire_pop.get_buttons()  # This holds all the buttons in the popup
+            widgets = acquire_pop.get_widgets()
+
+            # Configure the button callbacks on the popup window
+            buttons['Cancel'].config(command=lambda: acquire_pop.popup.dismiss(self.verbose))
+            buttons['Done'].config(command=lambda: self.launch_acquisition(acquire_pop))
+
+            # Configure drop down callbacks, will update save settings when file type is changed
+            file_type = widgets['file_type'].get_variable()
+            file_type.trace_add('write', lambda *args: self.update_file_type(file_type))
+
+            initialize_popup_window(acquire_pop, self.saving_settings)
+
         else:
-            # if the mode is 'live'
-            if self.mode == 'live':
-                self.view.acquire_btn.configure(text='Stop')
+            self.view.acquire_btn.configure(text='Stop')
             self.parent_controller.execute('acquire')
 
-    def update_microscope_mode(self, *args):
-        """
-        # Gets the state of the pull-down menu and tell the central controller
+    def update_microscope_mode(self,
+                               *args):
+        r"""Gets the state of the pull-down menu and tells the central controller
+
+        Parameters
+        ----------
+        args : str
+            Imaging Mode.
         """
         self.mode = self.mode_dict[self.view.pull_down.get()]
-
         self.show_verbose_info("The Microscope State is now:", self.get_mode())
 
-    def launch_acquisition(self, popup_window):
+    def update_file_type(self,
+                         file_type):
+        r"""Updates the file type when the drop down in save dialog is changed.
+
+        Parameters
+        ----------
+        file_type : str
+            File type.
         """
-        # Once the popup window has been filled out, we first create the save path using the create_save_path function.
-        # This automatically removes spaces and replaces them with underscores.
-        # Then it makes the directory.
-        # Thereafter, the experiment is ready to go.
+        self.saving_settings['file_type'] = file_type.get()
+
+    def launch_acquisition(self,
+                           popup_window):
+        r"""Launch the Acquisition.
+
+        Once the popup window has been filled out, we first create the save path using the create_save_path function.
+        This automatically removes spaces and replaces them with underscores.
+        Then it makes the directory.
+        Thereafter, the experiment is ready to go.
+
+        Parameters
+        ----------
+        popup_window : object
+            Instance of the popup save dialog.
         """
         # update saving settings according to user's input
         self.update_saving_settings(popup_window)
@@ -182,33 +220,39 @@ class Acquire_Bar_Controller(GUI_Controller):
             # Close the window
             popup_window.popup.dismiss(self.verbose)
 
+            # We are now acquiring
+            self.view.acquire_btn.configure(text='Stop')
+
     def exit_program(self):
+        r"""Exit Button
+
+        Quits the software.
+        """
         self.show_verbose_info("Exiting Program")
         # call the central controller to stop all the threads
         self.parent_controller.execute('exit')
         sys.exit()
 
     def update_saving_settings(self, popup_window):
+        r"""Gets the entries from the popup save dialog and overwrites the saving_settings dictionary."""
         popup_vals = popup_window.get_variables()
         for name in popup_vals:
             # remove leading and tailing whitespaces
             self.saving_settings[name] = popup_vals[name].strip()
 
 
-def initialize_popup_window(popup_window, values):
-    """
-    # this function will initialize popup window
-    # values should be a dict {
-    #    'root_directory':,
-    #    'save_directory':,
-    #    'user':,
-    #    'tissue':,
-    #    'celltype':,
-    #    'label':
-    # }
+def initialize_popup_window(popup_window,
+                            values):
+    """This function initializes the popup window
+
+    Parameters
+    ----------
+    popup_window : object
+        Instance of the popup save dialog.
+    values : dict
+        {'root_directory':, 'save_directory':, 'user':, 'tissue':,'celltype':,'label':, 'file_type':}
     """
     popup_vals = popup_window.get_widgets()
-
     for name in values:
         if popup_vals.get(name, None):
             popup_vals[name].set(values[name])

@@ -34,13 +34,12 @@ import re
 import tkinter as tk
 from tkinter import ttk        
 from decimal import Decimal, InvalidOperation
-from .hoverbar import Tooltip
-from .LabelInputWidgetFactory import LabelInput
+from aslm.view.custom_widgets.hoverbar import Tooltip
 import logging
 from pathlib import Path
 
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 REGEX_DICT = {
@@ -52,7 +51,7 @@ REGEX_DICT = {
 
 # Base design courtesy of below book.
 # Learning Path: Python GUI Programming - A Complete Reference Guide by Alan D. Moore and B. M. Harwani 
-'''
+"""
 The below classes take advantage of multiple inheritance to achieve validation.
 
 Validation Events: none, focusin, focusout, focus, key, all
@@ -88,13 +87,13 @@ widget.config(
             invalidcommand=invalid_function with args
 )
 
-'''
+"""
 
 # Base Class
 class ValidatedMixin:
-    '''
+    """
     #### Adds validation functionality to an input widget
-    '''
+    """
     # error_var can be passed a var for error message, if not class creates its own
     def __init__(self, *args, error_var=None, **kwargs):
         self.error = error_var or tk.StringVar()
@@ -350,10 +349,10 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         self.bind('<FocusOut>', self._set_focus_update_var)
 
     def set_precision(self, prec):
-        '''
+        """
         Given a precision it will update the spinboxes ability to handle more or less precision for validation.
         This is separate from the increment value.
-        '''
+        """
         self.precision = prec
 
     def _key_validate(self, char, index, current, proposed, action, **kwargs):
@@ -454,7 +453,7 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         self.trigger_focusout_validation() # Revalidate with the new maximum
 
 if __name__ == '__main__':
-
+    from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 
 
     root = tk.Tk()

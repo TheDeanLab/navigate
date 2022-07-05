@@ -1,11 +1,11 @@
-'''
+"""
 Python and cupy implementation of BaSiC flat-field correction (doi: 10.1038/ncomms14836)
 Adapted by Doug Shepherd: https://github.com/QI2lab/OPM/blob/master/flat_field.py
 Original code found at: https://github.com/peng-lab/PyBasicCellprofilerPlugin
 
 TO DO: Tons of optimization opportunities with cupy, numba, and cucim.
 Maybe need to write our own DCT operator for use on GPU?Last updated: Shepherd 06/21
-'''
+"""
 
 import numpy as np
 from skimage.transform import resize as skresize
@@ -14,7 +14,7 @@ import cupy as cp
 import logging
 from pathlib import Path
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 RESIZE_ORDER = 1
@@ -510,12 +510,12 @@ def _idct2d(mtrx: np.array):
 
 
 if (__name__ == '__main__'):
-    '''
+    """
     Testing section for the flat_field correction
     In a windows command prompt, typing nvidia-smi will all you to confirm the
     CUDA Version.  Here, on the acquisition computer, we have 11.4
     GPU Type: Quadro K420
-    '''
+    """
     from tifffile import imread, imsave
     import time
     import os

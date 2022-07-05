@@ -75,13 +75,15 @@ class Channel_Setting_Controller(GUI_Controller):
 
     def set_mode(self, mode='stop'):
         self.mode = mode
+        print(self.mode)
         state = 'normal' if mode == 'stop' else 'disabled'
         state_readonly = 'readonly' if mode == 'stop' else 'disabled'
         for i in range(5):
             self.view.channel_checks[i].config(state=state)
-            self.view.exptime_pulldowns[i].config(state=state)
             self.view.interval_spins[i].config(state=state)
             self.view.laser_pulldowns[i]['state'] = state_readonly
+            if self.mode != 'live' or (self.mode == 'live' and not self.view.channel_variables[i].get()):
+                self.view.exptime_pulldowns[i].config(state=state)
             if not self.view.channel_variables[i].get():
                 self.view.laserpower_pulldowns[i].config(state=state)
                 self.view.filterwheel_pulldowns[i]['state'] = state_readonly

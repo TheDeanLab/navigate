@@ -39,6 +39,9 @@ def update_settings_common(target, args):
         (param, value), = args[1].items()
         target.experiment.GalvoParameters[param] = value
 
+    if args[0] == 'number_of_pixels':
+        target.experiment.CameraParameters['number_of_pixels'] = args[1]
+
 
 def update_stage_dict(target, pos_dict):
     # Update our local experiment parameters

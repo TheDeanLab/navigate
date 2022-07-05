@@ -265,7 +265,7 @@ class Etl_Popup_Controller(GUI_Controller):
             # TODO: Make also work in the 'single' acquisition mode.
             variable_value = variable.get()
             print("ETL Amplitude/Offset Changed: ", variable_value)
-            if value != variable_value and variable_value != '':  # and self.mode == 'live':
+            if value != variable_value and variable_value != '' and (self.mode == 'live' or self.mode == 'stop'):
                 self.resolution_info.ETLConstants[self.resolution][self.mag][laser][etl_name] = variable_value
                 if self.verbose:
                     print("ETL Amplitude/Offset Changed: ", variable_value)
@@ -301,7 +301,7 @@ class Etl_Popup_Controller(GUI_Controller):
                 value = 0
             variable_value = variable.get()
             print(f"Galvo parameter {galvo_parameter} changed: {variable_value}")
-            if value != variable_value and variable_value != '':  # and self.mode == 'live':
+            if value != variable_value and variable_value != '' and (self.mode == 'live' or self.mode == 'stop'):
                 self.galvo_setting[galvo_parameter] = variable.get()
                 if self.verbose:
                     print(f"Galvo parameter {galvo_parameter} changed: {variable_value}")

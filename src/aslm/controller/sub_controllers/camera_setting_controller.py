@@ -180,7 +180,6 @@ class Camera_Setting_Controller(GUI_Controller):
         # after initialization
         self.in_initialization = False
 
-
     def update_experiment_values(self, setting_dict):
         """
         Update the dictionary so that it can be combined with all of the other
@@ -360,7 +359,7 @@ class Camera_Setting_Controller(GUI_Controller):
         pixels = self.mode_widgets['Pixels'].get()
         if pixels != '':
             self.number_of_pixels = int(pixels)
-        if self.mode != 'live':
+        if not ((self.mode == 'live') or (self.mode == 'stop')):
             return
         
         # tell central controller to update model

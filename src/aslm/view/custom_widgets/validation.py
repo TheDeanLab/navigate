@@ -377,9 +377,9 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         ]):
             return False
 
-        # Proposed is either a Decimal, '-', '.', or '-.' need one final check for '-' and '.' 
-        if proposed in '-.':
-            return True
+        # # Proposed is either a Decimal, '-', '.', or '-.' need one final check for '-' and '.' 
+        # if proposed in '-.':
+        #     return True
 
         # Proposed value is a Decimal, so convert and check further
         proposed = Decimal(proposed)

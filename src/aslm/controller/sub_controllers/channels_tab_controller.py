@@ -1,7 +1,4 @@
-"""
-ASLM sub-controller for the channels tab.
-
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -32,13 +29,19 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
+
+# Standard Library Imports
+import logging
+
+# Third Party Imports
 import numpy as np
+
+# Local Imports
 from aslm.controller.sub_controllers.widget_functions import validate_wrapper
 from aslm.controller.sub_controllers.gui_controller import GUI_Controller
 from aslm.controller.sub_controllers.channel_setting_controller import Channel_Setting_Controller
 from aslm.controller.sub_controllers.multi_position_controller import Multi_Position_Controller
 
-import logging
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -46,16 +49,24 @@ logger = logging.getLogger(p)
 
 
 class Channels_Tab_Controller(GUI_Controller):
-    def __init__(self, view, parent_controller=None, verbose=False, configuration_controller=None):
+    def __init__(self,
+                 view,
+                 parent_controller=None,
+                 verbose=False,
+                 configuration_controller=None):
         super().__init__(view, parent_controller, verbose)
 
         self.is_save = False
         self.mode = 'stop'
         self.in_initialization = True
+
         # sub-controllers
-        self.channel_setting_controller = Channel_Setting_Controller(self.view.channel_widgets_frame, self,
+        self.channel_setting_controller = Channel_Setting_Controller(self.view.channel_widgets_frame,
+                                                                     self,
                                                                      self.verbose)
-        self.multi_position_controller = Multi_Position_Controller(self.view.multipoint_list, self, self.verbose)
+        self.multi_position_controller = Multi_Position_Controller(self.view.multipoint_list,
+                                                                   self,
+                                                                   self.verbose)
 
         # add validation functions to spinbox
         # this function validate user's input (not from experiment file)
@@ -104,7 +115,7 @@ class Channels_Tab_Controller(GUI_Controller):
         # laser/stack cycling event binds
         self.stack_cycling_val.trace_add('write', self.update_cycling_setting)
 
-        # timepoint setting variables
+        # time point setting variables
         self.timepoint_vals = {
             'is_save': self.view.stack_timepoint_frame.save_data,
             'timepoints': self.view.stack_timepoint_frame.exp_time_spinval,
@@ -115,6 +126,7 @@ class Channels_Tab_Controller(GUI_Controller):
         }
         # timepoint event id
         self.timepoint_event_id = None
+
         # timepoint event binds
         self.timepoint_vals['is_save'].trace_add('write', self.update_save_setting)
         self.timepoint_vals['timepoints'].trace_add('write', lambda *args: self.update_timepoint_setting(True))
@@ -128,7 +140,8 @@ class Channels_Tab_Controller(GUI_Controller):
         if configuration_controller:
             self.initialize(configuration_controller)
 
-    def initialize(self, config):
+    def initialize(self,
+                   config):
         r"""Function initializes widgets and gets other necessary configuration
 
         Parameters
@@ -141,13 +154,12 @@ class Channels_Tab_Controller(GUI_Controller):
         self.stage_velocity = config.configuration.StageParameters['velocity']
         self.filter_wheel_delay = config.configuration.FilterWheelParameters['filter_wheel_delay']
         self.channel_setting_controller.initialize(config)
-        
         self.set_spinbox_range_limits(config.configuration.GUIParameters)
         self.show_verbose_info('channels tab has been initialized')
 
-    def set_experiment_values(self, microscope_state):
-        """
-        Distribute initial MicroscopeState values to this and sub-controllers and associated views.
+    def set_experiment_values(self,
+                              microscope_state):
+        """Distribute initial MicroscopeState values to this and sub-controllers and associated views.
 
         Parameters
         ----------
@@ -177,14 +189,19 @@ class Channels_Tab_Controller(GUI_Controller):
         self.channel_setting_controller.in_initialization = False
         self.update_z_steps()
 
-        self.show_verbose_info('channels tab has been set new values')
+        self.show_verbose_info('Channels tab has been set new values')
 
-    def update_experiment_values(self, microscope_state):
-        """
-        Updates MicroscopeState in ASLM Controller with parameters from here.
+    def update_experiment_values(self,
+                                 microscope_state):
+        """Updates MicroscopeState in ASLM Controller.
 
         Parameters
         ----------
+        microscope_state : dict
+            experiment.MicroscopeState from aslm_controller
+
+        Returns
+        -------
         microscope_state : dict
             experiment.MicroscopeState from aslm_controller
         """
@@ -201,17 +218,25 @@ class Channels_Tab_Controller(GUI_Controller):
         r2 = self.get_info(self.timepoint_vals, microscope_state)  # update MicroscopeState with everything in timepoint_vals
         return microscope_state['channels'] is not None and r1 is not None and r2 is not None
 
-    def set_channel_num(self, num):
-        """
-        # change the number of channels
+    def set_channel_num(self,
+                        num):
+        r"""Change the number of channels.
+
+        Parameters
+        ----------
+        num : int
+            Number of channels. e.g. 5.
         """
         self.channel_setting_controller.set_num(num)
+        self.show_verbose_info('Channel number is', num)
 
-        self.show_verbose_info('channel number is', num)
+    def set_spinbox_range_limits(self,
+                                 settings):
+        r"""This function will set the spinbox widget's values of from_, to, step
 
-    def set_spinbox_range_limits(self, settings):
-        """
-        # this function will set the spinbox widget's values of from_, to, step
+        Parameters
+        ----------
+        settings :
         """
         temp_dict = {
             self.stack_acq_widgets['step_size']: settings['stack_acquisition']['step_size'],
@@ -234,9 +259,14 @@ class Channels_Tab_Controller(GUI_Controller):
         # channels setting
         self.channel_setting_controller.set_spinbox_range_limits(settings['channel'])
     
-    def set_mode(self, mode):
-        """
-        # change acquisition mode
+    def set_mode(self,
+                 mode):
+        r"""Change acquisition mode.
+
+        Parameters
+        ----------
+        mode : str
+            'stop'
         """
         self.mode = mode
         self.channel_setting_controller.set_mode(mode)
@@ -251,28 +281,27 @@ class Channels_Tab_Controller(GUI_Controller):
         self.view.stack_timepoint_frame.save_check['state'] = state
         self.view.stack_timepoint_frame.stack_pause_spinbox['state'] = state
         self.view.stack_timepoint_frame.exp_time_spinbox['state'] = state
-
         self.view.stack_cycling_frame.cycling_pull_down['state'] = 'readonly' if state == 'normal' else state
-
         self.show_verbose_info('acquisition mode has been changed to', mode)
 
-    def update_z_steps(self, *args):
+    def update_z_steps(self,
+                       *args):
+        r"""Recalculates the number of slices that will be acquired in a z-stack.
+
+        Requires GUI to have start position, end position, or step size changed.
+        Sets the number of slices in the model and the GUI.
+        Sends the current values to central/parent controller
+
+        Parameters
+        ----------
+        args : dict
+            Values is a dict as follows {'step_size':  'start_position': , 'end_position': ,'number_z_steps'}
         """
-        # Recalculates the number of slices that will be acquired in a z-stack whenever the GUI
-        # has the start position, end position, or step size changed.
-        # Sets the number of slices in the model and the GUI.
-        # send the current values to central/parent controller
-        # the values is a dict as follows
-        # {
-            'step_size': ,
-            'start_position': ,
-            'end_position': ,
-            'number_z_steps':
-        # }
-        """
-        # won't do any calculation when inialization
+
+        # won't do any calculation when initialization
         if self.in_initialization:
             return
+
         # Calculate the number of slices and set GUI
         try:
             # validate the spinbox's value
@@ -291,6 +320,7 @@ class Channels_Tab_Controller(GUI_Controller):
             # if self.stack_acq_event_id:
             #     self.view.after_cancel(self.stack_acq_event_id)
             return
+
         # if step_size < 0.001:
         #     step_size = 0.001
         #     self.stack_acq_vals['step_size'].set(step_size)
@@ -303,18 +333,20 @@ class Channels_Tab_Controller(GUI_Controller):
         self.stack_acq_vals['abs_z_end'].set(self.z_origin + end_position)
 
         self.update_timepoint_setting()
-
         self.show_verbose_info('stack acquisition settings on channels tab have been changed and recalculated')
 
     def update_start_position(self, *args):
-        """
-        Grab new z starting position from current stage parameters.
+        r"""Get new z starting position from current stage parameters.
+
+        Parameters
+        ----------
+        args : None
+            ?
         """
 
         # We have a new origin
         self.z_origin = self.parent_controller.experiment.StageParameters['z']
         self.focus_origin = self.parent_controller.experiment.StageParameters['f']
-
         self.stack_acq_vals['start_position'].set(0)
         self.stack_acq_vals['start_focus'].set(0)
 
@@ -322,8 +354,12 @@ class Channels_Tab_Controller(GUI_Controller):
         self.update_z_steps()
 
     def update_end_position(self, *args):
-        """
-        Grab new z ending position from current stage parameters
+        r"""Get new z ending position from current stage parameters
+
+        Parameters
+        ----------
+        args : ?
+            ?
         """
         # Grab current values
         z_curr = self.parent_controller.experiment.StageParameters['z']
@@ -334,12 +370,18 @@ class Channels_Tab_Controller(GUI_Controller):
         self.stack_acq_vals['end_focus'].set(focus_curr - self.focus_origin)
         self.update_z_steps()
 
-    def update_cycling_setting(self, *args):
-        """
-        # Updates the cycling settings in the model and the GUI.
-        # You can collect different channels in different formats.
-        # In the perZ format: Slice 0/Ch0, Slice0/Ch1, Slice1/Ch0, Slice1/Ch1, etc
-        # in the perStack format: Slice 0/Ch0, Slice1/Ch0... SliceN/Ch0.  Then it repeats with Ch1
+    def update_cycling_setting(self,
+                               *args):
+        """Update the cycling settings in the model and the GUI.
+
+        You can collect different channels in different formats.
+        In the perZ format: Slice 0/Ch0, Slice0/Ch1, Slice1/Ch0, Slice1/Ch1, etc
+        in the perStack format: Slice 0/Ch0, Slice1/Ch0... SliceN/Ch0.  Then it repeats with Ch1
+
+        Parameters
+        ----------
+        args : ?
+            ?
         """
         # won't do any calculation when initializing
         if self.in_initialization:
@@ -350,31 +392,43 @@ class Channels_Tab_Controller(GUI_Controller):
         # tell the central/parent controller that laser cycling setting is changed when mode is 'live'
         if self.mode == 'live':
             self.parent_controller.execute('update_setting', 'laser_cycling', self.stack_cycling_val.get())
+        self.show_verbose_info('Cycling setting on channels tab has been changed')
 
-        self.show_verbose_info('cycling setting on channels tab has been changed')
+    def update_save_setting(self,
+                            *args):
+        r"""Tell the centrol/parent controller 'save_data' is selected.
 
-    def update_save_setting(self, *args):
-        # won't do any calculation when initializing
+        Does not do any calculation when initializing the software.
+
+        Parameters
+        ----------
+        args : ?
+            ?
+        """
         if self.in_initialization:
             return
         self.is_save = self.timepoint_vals['is_save'].get()
-        # tell the centrol/parent controller 'save_data' is selected
         self.parent_controller.execute('set_save', self.is_save)
+        self.show_verbose_info('Save data option has been changed to', self.is_save)
 
-        self.show_verbose_info('save data option has been changed to', self.is_save)
+    def update_timepoint_setting(self,
+                                 call_parent=False):
+        r"""Automatically calculates the stack acquisition time based on the number of time points,
+        channels, and exposure time.
 
-    def update_timepoint_setting(self, call_parent=False):
+        TODO: Add necessary computation for 'Stack Acq.Time', 'Timepoint Interval', 'Experiment Duration'?
+
+        Does not do any calculation when initializing the software.
+        Order of priority for perStack: timepoints > positions > channels > z-steps > delay
+        ORder of priority for perZ: timepoints > positions > z-steps > delays > channels
+
+        Parameters
+        ----------
+        call_parent : bool
+            Tell parent controller that time point setting has changed.
         """
-        # Automatically calculate the stack acquisition time based on the number of timepoints,
-        #  channels, and exposure time.  Add necessary computation for 'Stack Acq.Time',
-        #  'Timepoint Interval', 'Experiment Duration'?
-        """
-        # won't do any calculation when inialization
         if self.in_initialization:
             return
-        # Order of priority for perStack: timepoints > positions > channels > z-steps > delay
-        # ORder of priority for perZ: timepoints > positions > z-steps > delays > channels
-
         channel_settings = self.channel_setting_controller.get_values()
         number_of_positions = self.multi_position_controller.get_position_num() if self.is_multiposition else 1
         channel_exposure_time = []
@@ -459,10 +513,8 @@ class Channels_Tab_Controller(GUI_Controller):
         self.show_verbose_info('timepoint settings on channels tab have been changed and recalculated')
 
     def timepoint_callback(self):
+        r"""Tell central controller that time point setting has been changed when mode is 'live'.
         """
-        # this function call central controller that timepoint setting has been changed
-        """
-        # tell the central controller that timepoint's setting has changed when mode is 'live'
         if self.mode == 'live':
             if self.timepoint_event_id:
                 self.view.after_cancel(self.timepoint_event_id)
@@ -472,39 +524,48 @@ class Channels_Tab_Controller(GUI_Controller):
             self.timepoint_event_id = self.view.after(1000, lambda: self.parent_controller.execute('update_setting', 'timepoint', temp))
 
     def toggle_multiposition(self):
+        r"""Toggle Multi-position Acquisition.
+
+        Recalculates the experiment duration.
+        """
         self.is_multiposition = self.is_multiposition_val.get()
-        # recalculate experiment time
         self.update_timepoint_setting()
-        self.show_verbose_info('multi-position:', self.is_multiposition)
+        self.show_verbose_info('Multi-position:', self.is_multiposition)
 
     def load_positions(self):
+        r"""Load Positions for Multi-Position Acquisition. """
         self.multi_position_controller.load_csv_func()
 
     def export_positions(self):
+        r"""Export Positions for Multi-Position Acquisition. """
         self.multi_position_controller.export_csv_func()
 
     def move_to_position(self):
+        r"""Move to a position within the Multi-Position Acquisition Interface."""
         event = type('MyEvent', (object,), {})
         event.x, event.y = 0, 0
         self.multi_position_controller.handle_double_click(event)
 
     def append_current_position(self):
+        r"""Add current position to the Multi-Position Acquisition Interface."""
         self.multi_position_controller.add_stage_position_func()
 
     def generate_positions(self):
+        r"""Generate a Multi-Position Acquisition."""
         self.multi_position_controller.generate_positions_func()
 
-    def set_info(self, vals, values):
-        """
-        # set values to a list of variables
-        """
+    def set_info(self,
+                 vals,
+                 values):
+        r"""Set values to a list of variables."""
         for name in values:
             if name in vals:
                 vals[name].set(values[name])
 
-    def get_info(self, vals, value_dict={}):
-        """
-        Gets and assigns parameters in vals to corresponding parameter in value_dict.
+    def get_info(self,
+                 vals,
+                 value_dict={}):
+        r"""Gets and assigns parameters in vals to corresponding parameter in value_dict.
 
         TODO: perhaps rename to map_values or the like?
 
@@ -514,6 +575,11 @@ class Channels_Tab_Controller(GUI_Controller):
             Dictionary of parameters (source)
         value_dict : dict
             Dictionary of parameters (target)
+
+        Returns
+        -------
+        value_dict : dict
+            Dictionary of values.
         """
         for name in vals:
             value_dict[name] = vals[name].get()
@@ -521,7 +587,21 @@ class Channels_Tab_Controller(GUI_Controller):
                 return None
         return value_dict
 
-    def execute(self, command, *args):
+    def execute(self,
+                command,
+                *args):
+        r"""Execute Command in the parent controller.
+
+        Parameters
+        ----------
+        command : str
+            recalculate_timepoint, channel, move_stage_and_update_info, get_stage_position
+
+        Returns
+        -------
+        command : object
+            Returns parent_controller.execute(command) if command = 'get_stage_position',
+        """
         if command == 'recalculate_timepoint':
             self.update_timepoint_setting()
         elif command == 'channel':
@@ -530,5 +610,4 @@ class Channels_Tab_Controller(GUI_Controller):
             self.parent_controller.execute(command, *args)
         elif command == 'get_stage_position':
             return self.parent_controller.execute(command)
-
-        self.show_verbose_info('get command from child', command, args)
+        self.show_verbose_info('Received command from child', command, args)

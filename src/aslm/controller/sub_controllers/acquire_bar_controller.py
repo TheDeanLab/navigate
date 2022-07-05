@@ -74,11 +74,7 @@ class Acquire_Bar_Controller(GUI_Controller):
 
         # gui event bind
         self.view.acquire_btn.config(command=self.launch_popup_window)
-
-        self.view.pull_down.bind(
-            '<<ComboboxSelected>>',
-            self.update_microscope_mode)
-
+        self.view.pull_down.bind('<<ComboboxSelected>>',self.update_microscope_mode)
         self.view.exit_btn.config(command=self.exit_program)
 
     def set_mode(self,

@@ -103,9 +103,17 @@ class Camera_View_Controller(GUI_Controller):
         self.live_subsampling = self.parent_controller.configuration.CameraParameters['display_live_subsampling']
         self.bit_depth = 8  # bit-depth for PIL presentation.
 
-    def initialize(self, name, data):
-        """
-        # Function that sets widgets based on data given from main controller/config
+    def initialize(self,
+                   name,
+                   data):
+        r"""Sets widgets based on data given from main controller/config.
+
+        Parameters
+        ----------
+        name : str
+            'minmax', 'image'.
+        data : list
+            Min and max intensity values.
         """
         # Pallete section (colors, autoscale, min/max counts)
         # keys = ['Frames to Avg', 'Image Max Counts', 'Channel']
@@ -133,14 +141,28 @@ class Camera_View_Controller(GUI_Controller):
 
     #  Set mode for the execute statement in main controller
 
-    def set_mode(self, mode=''):
+    def set_mode(self,
+                 mode=''):
+        r"""Sets mode of camera_view_controller.
+
+        Parameters
+        ----------
+        mode : str
+            camera_view_controller modde.
+        """
         self.mode = mode
 
     def populate_view(self):
+        r"""Adjust the camera view dimensions.
+
+        TODO: Evaluate if we should remove this.
+        """
         # self.canvas.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH, expand=1.5)
         pass
 
-    def left_click(self, event):
+    def left_click(self,
+                   event):
+        r"""Toggles cross-hair on image upon left click event."""
         if self.image is not None:
             # If True, make False. If False, make True.
             self.apply_cross_hair = not self.apply_cross_hair
@@ -149,12 +171,12 @@ class Camera_View_Controller(GUI_Controller):
             self.populate_image()
 
     def update_max_counts(self):
-        """
-        #  Function gets the number of frames to average from the VIEW.
-        #  If frames to average == 0 or 1, provides the maximum value from the last acquired data.
-        #  If frames to average >1, initializes a temporary array, and appends each subsequent image to it.
-        #  Once the number of frames to average has been reached, deletes the first image in.
-        #  Reports the rolling average.
+        """Update the max counts in the camera view.
+        Function gets the number of frames to average from the VIEW.
+         If frames to average == 0 or 1, provides the maximum value from the last acquired data.
+         If frames to average >1, initializes a temporary array, and appends each subsequent image to it.
+         Once the number of frames to average has been reached, deletes the first image in.
+         Reports the rolling average.
         """
         self.rolling_frames = int(self.image_metrics['Frames'].get())
         if self.rolling_frames == 0:
@@ -182,18 +204,14 @@ class Camera_View_Controller(GUI_Controller):
                 self.image_metrics['Image'].set(np.max(self.temp_array))
 
     def downsample_image(self):
-        """
-        #  Down-sample the data for image display according to the configuration file.
-        """
+        r"""Down-sample the data for image display according to the configuration file."""
         if self.live_subsampling != 1:
             self.image = cv2.resize(self.image,
                                     (int(np.shape(self.image)[0] / self.live_subsampling),
                                      int(np.shape(self.image)[1] / self.live_subsampling)))
 
     def scale_image_intensity(self):
-        """
-        #  Scale the data to the min/max counts, and adjust bit-depth.
-        """
+        r"""Scale the data to the min/max counts, and adjust bit-depth."""
         if self.autoscale is True:
             self.max_counts = np.max(self.image)
             self.min_counts = np.min(self.image)
@@ -207,17 +225,24 @@ class Camera_View_Controller(GUI_Controller):
             self.image[self.image > scaling_factor] = scaling_factor
 
     def populate_image(self):
-        """
-        Converts and image to an ImageTk.PhotoImage and populates the Tk Canvas
-        """
+        """Converts image to an ImageTk.PhotoImage and populates the Tk Canvas"""
         self.tk_image = ImageTk.PhotoImage(Image.fromarray(self.cross_hair_image.astype(np.uint8)))
         self.canvas.create_image(0, 0, image=self.tk_image, anchor='nw')
 
-    def display_image(self, image, channel_id=1):
-        """
-        #  Displays a camera image using the Lookup Table specified in the View.
-        #  If Autoscale is selected, automatically calculates the min and max values for the data.
-        #  If Autoscale is not selected, takes the user values as specified in the min and max counts.
+    def display_image(self,
+                      image,
+                      channel_id=1):
+        r"""Displays a camera image using the Lookup Table specified in the View.
+
+        If Autoscale is selected, automatically calculates the min and max values for the data.
+        If Autoscale is not selected, takes the user values as specified in the min and max counts.
+
+        Parameters
+        ----------
+        image: ndarray
+            Acquired image.
+        channel_id : int
+            Channel ID.
         """
         # Place image in memory
 
@@ -254,7 +279,7 @@ class Camera_View_Controller(GUI_Controller):
         self.image_count = self.image_count + 1
 
     def add_crosshair(self):
-        """ Adds a cross-hair to the image.
+        r"""Adds a cross-hair to the image.
 
         Params
         -------
@@ -276,6 +301,7 @@ class Camera_View_Controller(GUI_Controller):
 
     def apply_LUT(self):
         r"""Applies a LUT to the image.
+
         Red is reserved for saturated pixels.
         self.color_values = ['gray', 'gradient', 'rainbow']
         """
@@ -301,9 +327,10 @@ class Camera_View_Controller(GUI_Controller):
         self.cross_hair_image = self.cross_hair_image * (2 ** self.bit_depth - 1)
 
     def update_LUT(self):
-        """
-        # When the LUT is changed in the GUI, this function is called.
-        # Updates the LUT.
+        r"""Update the LUT in the Camera View.
+
+        When the LUT is changed in the GUI, this function is called.
+        Updates the LUT.
         """
         if self.image is None:
             pass
@@ -315,15 +342,13 @@ class Camera_View_Controller(GUI_Controller):
             logger.debug(f"Updating the LUT, {self.colormap}")
 
     def detect_saturation(self):
-        """
-        Looks for any pixels at the maximum intensity allowable for the camera.
-        """
+        r"""Look for any pixels at the maximum intensity allowable for the camera. """
         saturation_value = 2**16-1
         self.saturated_pixels = self.image[self.image > saturation_value]
 
     def toggle_min_max_buttons(self):
-        """
-        Checks the value of the autoscale widget.
+        r"""Checks the value of the autoscale widget.
+
         If enabled, the min and max widgets are disabled and the image intensity is autoscaled.
         If disabled, miu and max widgets are enabled, and image intensity scaled.
         """
@@ -340,10 +365,12 @@ class Camera_View_Controller(GUI_Controller):
             self.update_min_max_counts()
 
     def transpose_image(self):
+        r"""Get Flip XY widget value from the View."""
         self.transpose = self.image_palette['Flip XY'].get()
 
     def update_min_max_counts(self):
-        """
+        """Get min and max count values from the View.
+
         When the min and max counts are toggled in the GUI, this function is called.
         Updates the min and max values.
         """

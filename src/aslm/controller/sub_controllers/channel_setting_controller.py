@@ -35,7 +35,7 @@ POSSIBILITY OF SUCH DAMAGE.
 from aslm.controller.sub_controllers.widget_functions import validate_wrapper
 from aslm.controller.sub_controllers.gui_controller import GUI_Controller
 import logging
-from pathlib import Path
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -43,6 +43,7 @@ logger = logging.getLogger(p)
 """
 TODO Create a dictionary for widgets that holds a list of widgets for each column.Will attempt after formatting.
 """
+
 
 class Channel_Setting_Controller(GUI_Controller):
     def __init__(self, view, parent_controller=None, verbose=False):
@@ -85,6 +86,7 @@ class Channel_Setting_Controller(GUI_Controller):
                 self.view.laserpower_pulldowns[i].config(state=state)
                 self.view.filterwheel_pulldowns[i]['state'] = state_readonly
                 self.view.filterwheel_pulldowns[i]['state'] = state
+                self.view.defocus_spins[i].config(state=state)
 
     def initialize(self, config):
         r"""Populates the laser and filter wheel options in the View.

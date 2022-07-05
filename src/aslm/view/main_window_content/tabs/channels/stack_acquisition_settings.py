@@ -133,7 +133,7 @@ class stack_acq_frame(ttk.Labelframe):
                                                      input_args={"from_": -50000.0, "increment": 0.5, "width": 14}
                                                      )
             self.inputs[slice_names[i]].label.grid(sticky='N', padx=3, pady=(4, 1))
-            self.inputs[slice_names[i]].state(['disabled'])
+            self.inputs[slice_names[i]].widget.configure(state='disabled')
             self.inputs[slice_names[i]].grid(row=i + 1, column=1, sticky='N', padx=3, pady=(3, 6))
 
     # Getters

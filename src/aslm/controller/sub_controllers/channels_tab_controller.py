@@ -241,10 +241,11 @@ class Channels_Tab_Controller(GUI_Controller):
         self.mode = mode
         self.channel_setting_controller.set_mode(mode)
 
-        state = 'active' if mode == 'stop' else 'disabled'
-        self.stack_acq_widgets['step_size'].state([state])
-        self.stack_acq_widgets['start_position'].state([state])
-        self.stack_acq_widgets['end_position'].state([state])
+        stack_state = 'disabled' if mode == 'z-stack' else 'active'
+        for key, widget in self.stack_acq_widgets.items():
+            if key == 'abs_z_start' or key == 'abs_z_end' or key == 'number_z_steps':
+                continue
+            widget.widget.configure(state=stack_state)
 
         state = 'normal' if mode == 'stop' else 'disabled'
         self.view.stack_timepoint_frame.save_check['state'] = state

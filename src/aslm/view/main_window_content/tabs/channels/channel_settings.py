@@ -30,13 +30,15 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
+import logging
+
 import tkinter as tk
 from tkinter import *
 from tkinter import ttk
 from tkinter.font import Font
-import logging
-from pathlib import Path
+
 from aslm.view.custom_widgets.validation import ValidatedSpinbox
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)

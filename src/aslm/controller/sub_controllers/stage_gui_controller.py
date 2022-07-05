@@ -32,8 +32,8 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-from controller.sub_controllers.widget_functions import validate_wrapper
-from controller.sub_controllers.gui_controller import GUI_Controller
+from aslm.controller.sub_controllers.widget_functions import validate_wrapper
+from aslm.controller.sub_controllers.gui_controller import GUI_Controller
 import logging
 from pathlib import Path
 # Logger Setup
@@ -107,7 +107,7 @@ class Stage_GUI_Controller(GUI_Controller):
             widgets[axis].widget.max = self.position_max[axis]
 
         # set step limits
-        for k in ['x_step', 'y_step', 'z_step', 'theta_step', 'f_step']:
+        for k in ['xy_step', 'z_step', 'theta_step', 'f_step']:
             widgets[k].widget.configure(from_=config.configuration.GUIParameters['stage'][k]['min'])
             widgets[k].widget.configure(to=config.configuration.GUIParameters['stage'][k]['max'])
             widgets[k].widget.configure(increment=config.configuration.GUIParameters['stage'][k]['step'])
@@ -139,7 +139,7 @@ class Stage_GUI_Controller(GUI_Controller):
         
         # get step value
         try:
-            for axis in ['x', 'y', 'z', 'theta', 'f']:
+            for axis in ['xy', 'z', 'theta', 'f']:
                 setting_dict[axis+'_step'] = self.widget_vals[axis+'_step'].get()
         except:
             return False

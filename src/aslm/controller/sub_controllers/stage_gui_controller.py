@@ -1,7 +1,4 @@
-"""
-ASLM sub-controller for stage control from the GUI.
-
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -42,7 +39,11 @@ logger = logging.getLogger(p)
 
 
 class Stage_GUI_Controller(GUI_Controller):
-    def __init__(self, view, parent_controller, verbose=False, configuration_controller=None):
+    def __init__(self,
+                 view,
+                 parent_controller,
+                 verbose=False,
+                 configuration_controller=None):
         super().__init__(view, parent_controller, verbose)
 
         self.event_id = {
@@ -100,8 +101,12 @@ class Stage_GUI_Controller(GUI_Controller):
             self.initialize(configuration_controller)
 
     def initialize(self, config):
-        """
-        # initialize the limits of steps and postions
+        r"""Initialize the Stage limits of steps and positions
+
+        Parameters
+        ----------
+        config : object
+            ASLM_Configuration_Controller - config.configuration is Session instance of configuration.
         """
         self.position_min = config.get_stage_position_limits('_min')
         self.position_max = config.get_stage_position_limits('_max')
@@ -118,11 +123,13 @@ class Stage_GUI_Controller(GUI_Controller):
             widgets[k].widget.configure(increment=config.configuration.GUIParameters['stage'][k]['step'])
 
     def set_experiment_values(self, setting_dict):
-        """
-        # This function set all the position and step value
-        # setting_dict = { 'x': value, 'y': value, 'z': value, 'theta': value, 'f': value
+        r"""This function set all the position and step values
+
+        Parameters
+        ----------
+        setting_dict : dict
+             setting_dict = { 'x': value, 'y': value, 'z': value, 'theta': value, 'f': value
                            'xy_step': value, 'z_step': value, 'theta_step': value, 'f_step': value}
-        # }
         """
         widgets = self.view.get_widgets()
         for k in widgets:
@@ -130,11 +137,17 @@ class Stage_GUI_Controller(GUI_Controller):
             widgets[k].widget.trigger_focusout_validation()
 
     def update_experiment_values(self, setting_dict):
-        """
-        # This function collects position and step value
-        # it will update setting_dict directly
-        # return value: bool - True: all the values are valid
-        #                      False: any value is invalid
+        r"""This function collects position and step values
+
+        Parameters
+        ----------
+        setting_dict : dict
+            Dictionary of old stage locations.  Updated directly with new stage locations.
+
+        Returns
+        -------
+            positions_valid : bool
+                Returns True if all values are valid. Returns False if any value is invalid.
         """
         position = self.get_position()
         if position is None:
@@ -152,22 +165,27 @@ class Stage_GUI_Controller(GUI_Controller):
         return True
     
     def set_position(self, position):
-        """
-        # This function is to populate(set) position
-        # position should be a dict
-        # {'x': value, 'y': value, 'z': value, 'theta': value, 'f': value}
+        r"""This function is to populate(set) position in the View
+
+        Parameters
+        ----------
+        position : dict
+            {'x': value, 'y': value, 'z': value, 'theta': value, 'f': value}
         """
         widgets = self.view.get_widgets()
         for axis in ['x', 'y', 'z', 'theta', 'f']:
             self.widget_vals[axis].set(position.get(axis, 0))
             # validate position value if set through variable
             widgets[axis].widget.trigger_focusout_validation()
-        
-        self.show_verbose_info('set stage position')
+        self.show_verbose_info('Set stage position')
 
     def get_position(self):
-        """
-        # This function returns current position
+        r"""This function returns current position from the view.
+
+        Returns
+        -------
+        position : dict
+            Dictionary of x, y, z, theta, and f values.
         """
         position = {}
         try:
@@ -181,10 +199,18 @@ class Stage_GUI_Controller(GUI_Controller):
         return position
 
     def up_btn_handler(self, axis):
-        """
-        # This function generates command functions according to axis
-        # axis should be one of 'x', 'y', 'z', 'theta', 'f'
-        # position_axis += step_axis
+        r"""This function generates command functions according to the desired axis to move.
+
+        Parameters
+        ----------
+        axis = str
+            Should be one of 'x', 'y', 'z', 'theta', 'f'
+            position_axis += step_axis
+
+        Returns
+        -------
+        handler : object
+            Function for setting desired stage positions in the View.
         """
         position_val = self.widget_vals[axis]
         if axis == 'x' or axis == 'y':
@@ -206,10 +232,19 @@ class Stage_GUI_Controller(GUI_Controller):
         return handler
 
     def down_btn_handler(self, axis):
-        """
-        # This function generates command functions according to axis
-        # axis should be one of 'x', 'y', 'z', 'theta', 'f'
-        # position_axis -= step_axis
+        r"""This function generates command functions according to the desired axis to move.
+
+
+        Parameters
+        ----------
+        axis = str
+            Should be one of 'x', 'y', 'z', 'theta', 'f'
+            position_axis += step_axis
+
+        Returns
+        -------
+        handler : object
+            Function for setting desired stage positions in the View.
         """
         position_val = self.widget_vals[axis]
         if axis == 'x' or axis == 'y':
@@ -231,10 +266,19 @@ class Stage_GUI_Controller(GUI_Controller):
         return handler
 
     def zero_btn_handler(self, axis):
-        """
-        # This function generates command functions according to axis
-        # axis should be one of 'z', 'theta', 'f'
-        # position_axis = 0
+        r"""This function generates command functions according to the desired axis to move.
+
+
+        Parameters
+        ----------
+        axis = str
+            Should be one of 'z', 'theta', 'f'
+            position_axis = 0
+
+        Returns
+        -------
+        handler : object
+            Function for setting desired stage positions in the View.
         """
         position_val = self.widget_vals[axis]
 
@@ -243,8 +287,12 @@ class Stage_GUI_Controller(GUI_Controller):
         return handler
 
     def xy_zero_btn_handler(self):
-        """
-        # This function generates command functions to set xy position to zero
+        r"""This function generates command functions to set xy position to zero
+
+        Returns
+        -------
+        handler : object
+            Function for setting desired stage positions in the View.
         """
         x_val = self.widget_vals['x']
         y_val = self.widget_vals['y']
@@ -255,14 +303,26 @@ class Stage_GUI_Controller(GUI_Controller):
         return handler
 
     def stop_button_handler(self):
+        r"""This function stops the stage after a 250 ms debouncing period of time."""
         self.view.after(250, lambda: self.parent_controller.execute('stop_stage'))
 
     def position_callback(self, axis, **kwargs):
-        """
-        # callback functions bind to position variables
-        # axis can be 'x', 'y', 'z', 'theta', 'f'
-        # this function considers debouncing user inputs(or click buttons)
-        # to reduce time costs of moving stage device
+        r"""Callback functions bind to position variables.
+
+        Implements debounce functionality for user inputs (or click buttons) to reduce time costs of moving stage.
+
+        Parameters
+        ----------
+        axis : str
+            axis can be 'x', 'y', 'z', 'theta', 'f'
+        kwargs : ...
+            ...
+
+        Returns
+        -------
+        handler : object
+            Function for moving stage to the desired position with debounce functionality.
+
         """
         position_var = self.widget_vals[axis]
         temp = self.view.get_widgets()
@@ -293,7 +353,6 @@ class Stage_GUI_Controller(GUI_Controller):
 
             # Acquire an image.
             self.parent_controller.execute('')
-
-            self.show_verbose_info('stage position is changed')
+            self.show_verbose_info('Stage position changed')
         
         return handler

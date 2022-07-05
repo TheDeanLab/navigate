@@ -89,12 +89,6 @@ class ASLM_Configuration_Controller:
         return [self.configuration.CameraParameters['x_pixels'],
                 self.configuration.CameraParameters['y_pixels']]
 
-    def get_framerate(self, verbose=False):
-        """
-        # Gets default framerate info from camera
-        """
-        pass  # TODO Kevin this is where you pull in and then calculate the info from the config file to initializing the framerate widgets
-
     def get_stage_position(self):
         r"""Get current position of the stage
 

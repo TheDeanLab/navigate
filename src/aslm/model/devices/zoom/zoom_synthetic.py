@@ -80,7 +80,7 @@ class SyntheticZoom(ZoomBase):
 
         # Changes zoom after checking that the commanded value exists
         """
-        if zoom[0] in self.zoomdict:
+        if zoom in self.zoomdict:
             self.zoomvalue = zoom
         else:
             logger.error(f"Zoom designation, {zoom}, not in the configuration")

@@ -85,17 +85,20 @@ class ASLM_controller:
         Path to the experiment yaml file. Provides experiment-specific microscope configuration.
     etl_constants_path : string
         Path to the etl constants yaml file. Provides magnification and wavelength-specific parameters.
-    USE_GPU : Boolean
+    use_gpu : Boolean
         Flag for utilizing CUDA functionality.
     *args :
         Command line input arguments for non-default file paths or using synthetic hardware modes.
     """
 
-    def __init__(self, root, configuration_path, experiment_path, etl_constants_path, USE_GPU, args):
+    def __init__(self,
+                 root,
+                 configuration_path,
+                 experiment_path,
+                 etl_constants_path,
+                 use_gpu,
+                 args):
         
-        logger.info("Spec - Controller controlling")
-        logger.info("Performance - Controller performing")
-
         # Verbosity and debugging menu
         self.verbose = args.verbose
         self.debug = args.debug
@@ -107,7 +110,7 @@ class ASLM_controller:
 
         # Initialize the Model
         self.model = ObjectInSubprocess(Model,
-                                        USE_GPU,
+                                        use_gpu,
                                         args,
                                         configuration_path=configuration_path,
                                         experiment_path=experiment_path,
@@ -556,7 +559,7 @@ class ASLM_controller:
                 self.acquire_bar_controller.stop_acquire()
                 return
             saving_settings = args[0]
-            file_directory = controller_functions.create_save_path(saving_settings, self.verbose)
+            file_directory = controller_functions.create_save_path(saving_settings)
             controller_functions.save_yaml_file(file_directory, self.experiment.serialize())
             self.experiment.Saving['save_directory'] = saving_settings['save_directory']
             self.experiment.Saving['file_type'] = saving_settings['file_type']

@@ -165,19 +165,16 @@ def main():
     log_setup('logging.yml')
 
     # Evaluate GPU Status for Analysis Routines
-    USE_GPU = False
+    use_gpu = False
     if args.CPU:
-        # If user overrides GPU search, keep USE_GPU flag as False.
+        # If user overrides GPU search, keep use_gpu flag as False.
         pass
     else:
         if platform.system() != 'Darwin':
             import tensorflow as tf
             number_GPUs = len(tf.config.list_physical_devices('GPU'))
-            if number_GPUs == 0:
-                print('No NVIDIA GPU in system. Running on CPU only.')
-            else:
-                USE_GPU = True
-                print('NVIDIA GPU detected.')
+            if number_GPUs > 0:
+                use_gpu = True
 
     # Start the GUI
     root = tk.Tk()
@@ -185,7 +182,7 @@ def main():
                configuration_path,
                experiment_path,
                etl_constants_path,
-               USE_GPU,
+               use_gpu,
                args)
     root.mainloop()
 

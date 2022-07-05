@@ -1,7 +1,4 @@
-"""
-ASLM controller functions.
-
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -44,38 +41,47 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-def create_save_path(saving_settings, verbose=False):
+def create_save_path(saving_settings):
     r"""Create path to save the data to.
-    # haven't finished
-    # This function retrieves the user inputs from the popup save window.
-    # It then creates a new directory in the user specified path.
+
+    This function retrieves the user inputs from the popup save window.
+    It then creates a new directory in the user specified path.
+
+    Parameters
+    ----------
+    saving_settings : dict
+        Dictionary containing information necessary to build path to save data to.
+
+    Returns
+    -------
+    save_directory : str
+        Path to save data to.
     """
     root_directory = saving_settings['root_directory']
     user_string = saving_settings['user']
     tissue_string = saving_settings['tissue']
-    celltype_string = saving_settings['celltype']
+    cell_type_string = saving_settings['celltype']
     label_string = saving_settings['label']
     date_string = str(datetime.now().date())
 
     # Make sure that there are no spaces in the variables
     user_string = user_string.replace(" ", "-")
     tissue_string = tissue_string.replace(" ", "-")
-    celltype_string = celltype_string.replace(" ", "-")
+    cell_type_string = cell_type_string.replace(" ", "-")
     label_string = label_string.replace(" ", "-")
 
     # Create the save directory on disk.
-    save_directory = os.path.join(saving_settings['root_directory'],
+    save_directory = os.path.join(root_directory,
                                   user_string,
                                   tissue_string,
-                                  celltype_string,
+                                  cell_type_string,
                                   label_string,
                                   date_string)
     if not os.path.exists(save_directory):
         os.makedirs(save_directory)
 
     # Determine Number of Cells in Directory
-    cell_directories = list(
-        filter(lambda v: v[:5] == 'Cell_', os.listdir(save_directory)))
+    cell_directories = list(filter(lambda v: v[:5] == 'Cell_', os.listdir(save_directory)))
     if len(cell_directories) != 0:
         cell_directories.sort()
         cell_index = int(cell_directories[-1][5:]) + 1
@@ -86,8 +92,7 @@ def create_save_path(saving_settings, verbose=False):
     save_directory = os.path.join(save_directory, cell_string)
     if not os.path.exists(save_directory):
         os.makedirs(save_directory)
-    if verbose:
-        print("Data Will be Saved To:", save_directory)
+    logging.info(f"Data Saved to: {save_directory}")
 
     # Update the Model
     saving_settings['save_directory'] = save_directory
@@ -96,7 +101,22 @@ def create_save_path(saving_settings, verbose=False):
     return save_directory
 
 
-def save_yaml_file(file_directory, experiment, filename='experiment.yml'):
+def save_yaml_file(file_directory,
+                   experiment,
+                   filename='experiment.yml'):
+    r"""Same YAML file to Disk
+
+    Parameters
+    ----------
+    file_directory : str
+        String of directory to save data to.
+    experiment : object
+        I think?
+    filename : str
+        String of name to save data to.  Default is experiment.yml.
+
+    """
+
     try:
         file_name = os.path.join(file_directory, filename)
         with open(file_name, 'w') as f:

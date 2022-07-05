@@ -129,8 +129,12 @@ class Channels_Tab_Controller(GUI_Controller):
             self.initialize(configuration_controller)
 
     def initialize(self, config):
-        """
-        # This function initializes widgets and gets other necessary configuration
+        r"""Function initializes widgets and gets other necessary configuration
+
+        Parameters
+        ----------
+        config : object
+            ASLM_Configuration_Controller.  config.configuration = Session object.
         """
         self.set_channel_num(config.configuration.GUIParameters['number_of_channels'])
         self.view.stack_cycling_frame.cycling_pull_down['values'] = ['Per Z', 'Per Stack']

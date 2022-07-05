@@ -87,11 +87,17 @@ class Channel_Setting_Controller(GUI_Controller):
                 self.view.filterwheel_pulldowns[i]['state'] = state
 
     def initialize(self, config):
+        r"""Populates the laser and filter wheel options in the View.
+
+        Parameters
+        ----------
+        config : object
+            ASLM_Configuration_Controller - config.configuration is session instance of configuration.
+        """
         setting_dict = config.get_channels_info()
         for i in range(self.num):
             self.view.laser_pulldowns[i]['values'] = setting_dict['laser']
             self.view.filterwheel_pulldowns[i]['values'] = setting_dict['filter']
-
         self.show_verbose_info('channel has been initialized')
 
     def set_experiment_values(self, setting_dict):

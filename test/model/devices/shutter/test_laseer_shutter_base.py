@@ -48,7 +48,7 @@ class TestLaserBase(unittest.TestCase):
         base_directory = Path(__file__).resolve().parent.parent.parent.parent.parent
         configuration_directory = Path.joinpath(base_directory, 'src', 'aslm', 'config')
         configuration_path = Path.joinpath(configuration_directory, 'configuration.yml')
-        experiment_path = Path.joinpath(configuration_path, 'experiment.yml')
+        experiment_path = Path.joinpath(configuration_directory, 'experiment.yml')
 
         configuration = session(configuration_path, False)
         experiment = session(experiment_path, False)

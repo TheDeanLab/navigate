@@ -34,7 +34,7 @@ class LazyTiff:
 
     @property
     def shape(self):
-        return (self.n_files, self._width, self._height)
+        return (self._n_files, self._width, self._height)
     
     def __getitem__(self, keys):
         """Numpy slicing access."""

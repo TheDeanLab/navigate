@@ -42,6 +42,7 @@ from tkinter.font import Font
 
 # Local Imports
 from view.main_window_content.stage_control.stage_control_tab import stage_control_tab
+from view.main_window_content.stage_control.minimized_control import minimized_control
 from view.main_window_content.tabs.stage_control.maximum_intensity_projection_tab import maximum_intensity_projection_tab
 
 class stagecontrol_maxintensity_notebook(ttk.Notebook):
@@ -60,15 +61,26 @@ class stagecontrol_maxintensity_notebook(ttk.Notebook):
 
         #Creating Stage Control Tab
         self.stage_control_tab = stage_control_tab(self)
+        
+        #Creating Minimized Stage Control Tab
+        self.minimized_control = minimized_control(self)
 
         #Creating Max intensity projection Tab
         self.maximum_intensity_projection_tab = maximum_intensity_projection_tab(self)
         
         #Adding tabs to self notebook
         self.add(self.stage_control_tab, text='Stage Control', sticky=NSEW)
+        self.add(self.minimized_control, text='Stage Control', sticky=NSEW)
+        #self.hide(minimized_control)
         self.add(self.maximum_intensity_projection_tab, text='MIPs', sticky=NSEW)
         
-    #def minimize_stage_control():  #included in notebook out of need to refresh widgets without reinstantiating the whole notebook
+        #Create State Tracker for minimization
+        self.minimized = False
+        
+    def swap_view(self):
+        if self.minimized==True:
+            #self.hide()
+            print()
         
 
 

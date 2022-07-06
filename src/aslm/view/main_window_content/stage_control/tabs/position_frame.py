@@ -44,12 +44,57 @@ from pathlib import Path
 p = __name__.split(".")[0]
 logger = logging.getLogger(p)
 
-
 class position_frame(ttk.Frame):
     def __init__(position_frame, stage_control_tab, *args, **kwargs):
 
         #Init Frame
         ttk.Frame.__init__(position_frame, stage_control_tab, *args, **kwargs)
+        
+        # Formatting
+        Grid.columnconfigure(position_frame, 'all', weight=1)
+        Grid.rowconfigure(position_frame, 'all', weight=1)
+
+        #Creating each entry frame for a label and entry
+        position_frame.inputs = {}
+        entry_names = ['x', 'y', 'z', 'theta', 'f']
+        entry_labels = ['X', 'Y', 'Z', "\N{Greek Capital Theta Symbol}", 'F']       
+
+        # entries
+        for i in range(len(entry_names)):
+            position_frame.inputs[entry_names[i]] = LabelInput(parent=position_frame,
+                                                            label=entry_labels[i],
+                                                            input_class=ValidatedEntry,
+                                                            input_var=DoubleVar(),
+                                                            input_args={'required': True, 'precision': 0.1}
+                                                            )
+            position_frame.inputs[entry_names[i]].grid(row=0, column=i, pady=1, padx=15)
+
+
+
+       
+
+        """
+        Grid for frames
+                1   2   3   4   5
+        x is 1
+        y is 2
+        z is 3
+        theta is 4
+        focus is 5
+        """
+    def get_widgets(position_frame):
+        return position_frame.inputs
+
+    def get_variables(position_frame):
+        variables = {}
+        for name in position_frame.inputs:
+            variables[name] = position_frame.inputs[name].get_variable()
+        return variables
+class min_position_frame(ttk.Frame):
+    def __init__(position_frame, minimized_control, *args, **kwargs):
+
+        #Init Frame
+        ttk.Frame.__init__(position_frame, minimized_control, *args, **kwargs)
         
         # Formatting
         Grid.columnconfigure(position_frame, 'all', weight=1)

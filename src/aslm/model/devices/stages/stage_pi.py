@@ -59,6 +59,9 @@ class PIStage(StageBase):
         pi_stages = pi_stages.split()
         pi_refmodes = pi_refmodes.split()
 
+        # Mapping from self.axes to corresponding PI axis labelling
+        self.pi_axes = [1, 2, 3, 5, 4]  # x, y, z, f, theta
+
         self.pitools = pitools
         self.controllername = self.configuration.StageParameters['controllername']
         self.pi_stages = pi_stages
@@ -94,11 +97,11 @@ class PIStage(StageBase):
             positions = self.pidevice.qPOS(self.pidevice.axes)  # positions from the device are in mm
 
             # convert to um
-            self.x_pos = round(positions['1'] * 1000, 2)
-            self.y_pos = round(positions['2'] * 1000, 2)
-            self.z_pos = round(positions['3'] * 1000, 2)
-            self.f_pos = round(positions['5'] * 1000, 2)
-            self.theta_pos = positions['4']
+            for ax, n in zip(self.axes, self.pi_axes):
+                pos = positions[str(n)]
+                if ax != 'theta':
+                    pos = round(pos * 1000, 2)
+                setattr(self, f"{ax}_pos", pos)
         except GCSError as e:
             print('Failed to report position')
             logger.exception(e)
@@ -180,10 +183,7 @@ class PIStage(StageBase):
             Was the move successful?
         """
 
-        axes = ['x', 'y', 'z', 'f', 'theta']
-        axis_nums = [1, 2, 3, 5, 4]
-
-        for ax, n in zip(axes, axis_nums):
+        for ax, n in zip(self.axes, self.pi_axes):
             success = self.move_axis_absolute(ax, n, move_dictionary)
 
         if wait_until_done is True:

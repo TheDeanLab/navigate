@@ -209,6 +209,18 @@ class StageBase:
                                   'theta_pos': self.int_theta_pos,
                                   }
 
+    def update_position_dictionaries(self):
+        self.create_position_dict()
+        self.int_x_pos = self.x_pos + self.int_x_pos_offset
+        self.int_y_pos = self.y_pos + self.int_y_pos_offset
+        self.int_z_pos = self.z_pos + self.int_z_pos_offset
+        self.int_f_pos = self.f_pos + self.int_f_pos_offset
+        self.int_theta_pos = self.theta_pos + self.int_theta_pos_offset
+        self.create_internal_position_dict()
+        if self.verbose:
+            print("Stage Position: ", self.int_position_dict)
+        logger.debug(f"Stage Position:, {self.int_position_dict}")
+
     def stop(self):
         r"""Stop all stage movement abruptly.
         """

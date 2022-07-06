@@ -207,6 +207,18 @@ StageParameters:
   }
   velocity: 1000
 
+  x_l_offset: 0
+  y_l_offset: 0
+  z_l_offset: 0
+  f_l_offset: 0
+  theta_l_offset: 0
+
+  x_r_offset: 0
+  y_r_offset: 0
+  z_r_offset: 0
+  f_r_offset: 0
+  theta_r_offset: 0
+
 ZoomParameters:
   # Robotis Dynamixel MX-28R Robot Servo
   servo_id: 1

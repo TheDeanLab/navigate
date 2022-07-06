@@ -911,7 +911,7 @@ class Model:
 
         if (self.experiment.MicroscopeState['resolution_mode'] == "low" and resolution_value == 'high')\
            or (self.experiment.MicroscopeState['resolution_mode'] == "high" and resolution_value != 'high'):
-            # We're switching cameras
+            # We're switching between one of the low and the high resolution modes
 
             # We need to set this first for get_camera()
             if resolution_value == 'high':
@@ -925,6 +925,8 @@ class Model:
 
             self.camera = self.get_camera()
 
+            self.apply_resolution_stage_offset(resolution_value)
+
         if resolution_value == 'high':
             logging.info("ASLM Model - Switching into High-Resolution Mode")
             self.experiment.MicroscopeState['resolution_mode'] = 'high'
@@ -936,6 +938,28 @@ class Model:
             self.experiment.MicroscopeState['zoom'] = resolution_value
             self.zoom.set_zoom(resolution_value)
             self.laser_triggers.enable_low_resolution_laser()
+
+    def apply_resolution_stage_offset(self, mode):
+        """
+        There is a slight offset between the high and low resolution modes, defined in configuration.yml.
+        Apply this offset when we switch modes from low to high or vice versa. Do not apply this when
+        we are just switching in between low modes.
+
+        mode : str
+            One of "high" or "low"
+        """
+        pos_dict = self.get_stage_position()
+        for axis, val in pos_dict.items():
+            ax = axis.split('_')[0]
+            l_offset = self.configuration.StageParameters.get(f"{ax}_l_offset", 0)
+            r_offset = self.configuration.StageParameters.get(f"{ax}_r_offset", 0)
+            if mode == 'high':
+                new_pos = val + r_offset - l_offset
+            else:
+                # we assume low res mode
+                new_pos = val - r_offset + l_offset
+
+            self.move_stage({f"{ax}_abs": new_pos})
 
     def open_shutter(self):
         r"""Open the shutter according to the resolution mode.

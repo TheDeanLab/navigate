@@ -104,100 +104,15 @@ class PIStage(StageBase):
             logger.exception(e)
 
         # Update internal dictionaries
-        self.create_position_dict()
-        self.int_x_pos = self.x_pos + self.int_x_pos_offset
-        self.int_y_pos = self.y_pos + self.int_y_pos_offset
-        self.int_z_pos = self.z_pos + self.int_z_pos_offset
-        self.int_f_pos = self.f_pos + self.int_f_pos_offset
-        self.int_theta_pos = self.theta_pos + self.int_theta_pos_offset
-        self.create_internal_position_dict()
+        self.update_position_dictionaries()
 
-        logger.debug(f"Stage Positions: {self.int_position_dict}")
-        return self.int_position_dict
-
-    def move_relative(self, move_dictionary, wait_until_done=False):
-        """
-        # PI move relative method.
-        # Checks to make sure that the move does not exceed the stage limits prior to movement.
-        """
-        if 'x_rel' in move_dictionary:
-            x_rel = move_dictionary['x_rel']
-            if (self.x_min <= self.x_pos +
-                x_rel) and (self.x_max >= self.x_pos + x_rel):
-                x_rel = x_rel / 1000
-                try:
-                    self.pidevice.MVR({1: x_rel})
-                except GCSError as e:
-                    logger.exception(GCSError(e))
-            else:
-                logger.info("Relative movement stopped: X Motion limit would be reached!, 1000")
-                print(
-                    'Relative movement stopped: X Motion limit would be reached!',
-                    1000)
-
-        if 'y_rel' in move_dictionary:
-            y_rel = move_dictionary['y_rel']
-            if (self.y_min <= self.y_pos +
-                y_rel) and (self.y_max >= self.y_pos + y_rel):
-                y_rel = y_rel / 1000
-                try:
-                    self.pidevice.MVR({2: y_rel})
-                except GCSError as e:
-                    logger.exception(GCSError(e))
-            else:
-                logger.info("Relative movement stopped: Y Motion limit would be reached!, 1000")
-                print(
-                    'Relative movement stopped: Y Motion limit would be reached!',
-                    1000)
-
-        if 'z_rel' in move_dictionary:
-            z_rel = move_dictionary['z_rel']
-            if (self.z_min <= self.z_pos +
-                z_rel) and (self.z_max >= self.z_pos + z_rel):
-                z_rel = z_rel / 1000
-                try:
-                    self.pidevice.MVR({3: z_rel})
-                except GCSError as e:
-                    logger.exception(GCSError(e))
-            else:
-                logger.info("Relative movement stopped: Z Motion limit would be reached!, 1000")
-                print(
-                    'Relative movement stopped: Z Motion limit would be reached!',
-                    1000)
-
-        if 'theta_rel' in move_dictionary:
-            theta_rel = move_dictionary['theta_rel']
-            if (self.theta_min <= self.theta_pos + theta_rel) and (self.theta_max >= self.theta_pos + theta_rel):
-                try:
-                    self.pidevice.MVR({4: theta_rel})
-                except GCSError as e:
-                    logger.exception(GCSError(e))
-            else:
-                logger.info("Relative movement stopped: Theta Motion limit would be reached!, 1000")
-                print(
-                    'Relative movement stopped: theta Motion limit would be reached!',
-                    1000)
-
-        if 'f_rel' in move_dictionary:
-            f_rel = move_dictionary['f_rel']
-            if (self.f_min <= self.f_pos + f_rel) and (self.f_max >= self.f_pos + f_rel):
-                f_rel = f_rel / 1000
-                try:
-                    self.pidevice.MVR({5: f_rel})
-                except GCSError as e:
-                    logger.exception(GCSError(e))
-            else:
-                logger.info("Relative movement stopped: F Motion limit would be reached!, 1000")
-                print(
-                    'Relative movement stopped: f Motion limit would be reached!',
-                    1000)
-
-        if wait_until_done is True:
-            self.pitools.waitontarget(self.pidevice)
+        return self.position_dict
 
     def move_axis_absolute(self, axis, axis_num, move_dictionary):
         """
         Implement movement logic along a single axis.
+
+        To move relative, self.pidevice.MVR({1: x_rel}).
 
         Example calls:
 

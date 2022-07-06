@@ -41,6 +41,10 @@ from aslm.controller.sub_controllers.widget_functions import validate_wrapper
 from aslm.controller.sub_controllers.gui_controller import GUI_Controller
 from aslm.controller.sub_controllers.channel_setting_controller import Channel_Setting_Controller
 from aslm.controller.sub_controllers.multi_position_controller import Multi_Position_Controller
+from aslm.controller.sub_controllers.tiling_wizard_controller import Tiling_Wizard_Controller
+
+# View Imports that are not called on startup
+from aslm.view.main_window_content.tabs.channels.tiling_wizard_popup import tiling_wizard_popup as tiling_wizard
 
 
 # Logger Setup
@@ -136,6 +140,7 @@ class Channels_Tab_Controller(GUI_Controller):
         self.is_multiposition = False
         self.is_multiposition_val = self.view.multipoint_frame.on_off
         self.view.multipoint_frame.save_check.configure(command=self.toggle_multiposition)
+        self.view.multipoint_frame.buttons["tiling"].configure(command=self.launch_tiling_wizard)
 
         if configuration_controller:
             self.initialize(configuration_controller)
@@ -531,6 +536,23 @@ class Channels_Tab_Controller(GUI_Controller):
         self.is_multiposition = self.is_multiposition_val.get()
         self.update_timepoint_setting()
         self.show_verbose_info('Multi-position:', self.is_multiposition)
+
+
+    def launch_tiling_wizard(self):
+        '''
+        Launches tiling wizard popup. 
+
+        Will only launch when button in GUI is pressed, and will not duplicate. Pressing button again brings popup to top
+        '''
+
+        if hasattr(self, 'tiling_wizard_controller'):
+            self.tiling_wizard_controller.showup()
+            return
+        tiling_wizard_popup = tiling_wizard(self.view)
+        self.tiling_wizard_controller = Tiling_Wizard_Controller(tiling_wizard_popup, self, self.verbose)
+
+        # Add controller calls here
+
 
     def load_positions(self):
         r"""Load Positions for Multi-Position Acquisition. """

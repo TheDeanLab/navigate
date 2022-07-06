@@ -509,10 +509,11 @@ class Model:
         # Update our local experiment parameters
         update_stage_dict(self, pos_dict)
         success = self.stages.move_absolute(pos_dict, wait_until_done)
-        ret_pos_dict = self.get_stage_position()
-        if not success:
-            # Record where we are now
-            update_stage_dict(self, ret_pos_dict)
+        ret_pos_dict = self.get_stage_position()  # This will always be behind because it gets the position
+                                                  # before movement is finished
+        # if not success:
+        #     # Record where we are now
+        #     update_stage_dict(self, ret_pos_dict)
         # TODO: This attribute records current focus position
         # TODO: put it here right now
         self.focus_pos = self.stages.int_position_dict['f_pos']
@@ -533,14 +534,8 @@ class Model:
     def stop_stage(self):
         r"""Stop the stages. Grab the current position.
 
-        Returns
-        -------
-        ret_pos_dict: dict
-            Dictionary of stage positions.
         """
         self.stages.stop()
-        ret_pos_dict = self.get_stage_position()
-        return ret_pos_dict
 
     def end_acquisition(self):
         r"""End the acquisition.

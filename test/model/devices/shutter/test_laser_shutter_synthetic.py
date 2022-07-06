@@ -69,10 +69,10 @@ class TestSyntheticShutter(unittest.TestCase):
         assert hasattr(shutter, 'shutter_left_state')
 
         # Methods
-        assert callable(hasattr(shutter, 'open_left'))
-        assert callable(hasattr(shutter, 'open_right'))
-        assert callable(hasattr(shutter, 'close_shutters'))
-        assert callable(hasattr(shutter, 'state'))
+        assert hasattr(shutter, 'open_left') and callable(getattr(shutter, 'open_left'))
+        assert hasattr(shutter, 'open_right') and callable(getattr(shutter, 'open_right'))
+        assert hasattr(shutter, 'close_shutters') and callable(getattr(shutter, 'close_shutters'))
+        assert hasattr(shutter, 'state') and callable(getattr(shutter, 'state'))
 
 if __name__ == '__main__':
     unittest.main()

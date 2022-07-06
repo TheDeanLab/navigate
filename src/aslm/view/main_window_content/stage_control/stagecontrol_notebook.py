@@ -42,29 +42,29 @@ from tkinter.font import Font
 
 # Local Imports
 from aslm.view.main_window_content.stage_control.stage_control_tab import stage_control_tab
-from aslm.view.main_window_content.tabs.stage_control.maximum_intensity_projection_tab import maximum_intensity_projection_tab
+from aslm.view.main_window_content.stage_control.tabs.maximum_intensity_projection_tab import maximum_intensity_projection_tab
 
 class stagecontrol_maxintensity_notebook(ttk.Notebook):
-    def __init__(stagecontrol_maxintensity, frame_bot_right, *args, **kwargs):
+    def __init__(self, frame_bot_right, *args, **kwargs):
         #Init notebook
-        ttk.Notebook.__init__(stagecontrol_maxintensity, frame_bot_right, *args, **kwargs)
+        ttk.Notebook.__init__(self, frame_bot_right, *args, **kwargs)
         
         # Formatting
-        Grid.columnconfigure(stagecontrol_maxintensity, 'all', weight=1)
-        Grid.rowconfigure(stagecontrol_maxintensity, 'all', weight=1)
+        Grid.columnconfigure(self, 'all', weight=1)
+        Grid.rowconfigure(self, 'all', weight=1)
 
         #Putting notebook 3 into bottom right frame
-        stagecontrol_maxintensity.grid(row=0, column=0)
+        self.grid(row=0, column=0)
 
         #Creating Stage Control Tab
-        stagecontrol_maxintensity.stage_control_tab = stage_control_tab(stagecontrol_maxintensity)
+        self.stage_control_tab = stage_control_tab(self)
 
         #Creating Max intensity projection Tab
-        stagecontrol_maxintensity.maximum_intensity_projection_tab = maximum_intensity_projection_tab(stagecontrol_maxintensity)
+        self.maximum_intensity_projection_tab = maximum_intensity_projection_tab(self)
 
-        #Adding tabs to stagecontrol_maxintensity notebook
-        stagecontrol_maxintensity.add(stagecontrol_maxintensity.stage_control_tab, text='Stage Control', sticky=NSEW)
-        stagecontrol_maxintensity.add(stagecontrol_maxintensity.maximum_intensity_projection_tab, text='MIPs', sticky=NSEW)
+        #Adding tabs to notebook
+        self.add(self.stage_control_tab, text='Stage Control', sticky=NSEW)
+        self.add(self.maximum_intensity_projection_tab, text='MIPs', sticky=NSEW)
 
 
 class goto_frame(ttk.Frame):

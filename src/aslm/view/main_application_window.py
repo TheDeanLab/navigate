@@ -53,10 +53,10 @@ logger = logging.getLogger(p)
 
 # Import Notebooks
 from .main_window_content.settings_notebook import settings_notebook
-from .main_window_content.camera_notebook import camera_waveform_notebook
-from .main_window_content.stagecontrol_notebook import stagecontrol_maxintensity_notebook
+from .main_window_content.camera_display.camera_view.camera_notebook import camera_waveform_notebook
+from .main_window_content.stage_control.stagecontrol_notebook import stagecontrol_maxintensity_notebook
 from .main_window_content.acquire_bar_frame.acquire_bar import AcquireBar
-from .main_window_content.menus import menubar
+from .menus import menubar
 
 
 # Creates the frame that will hold the GUI content, its parent is the main

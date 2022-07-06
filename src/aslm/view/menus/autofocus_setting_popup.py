@@ -115,14 +115,16 @@ class autofocus_popup():
         self.autofocus_btn.grid(row=4, column=2, pady=(0, 10))
 
         # Plot
-        nums = [[1,2], [3,4], [5,6]]
-        nums = np.asarray(nums)
         self.fig = Figure(figsize = (5, 5), dpi = 100)
         self.coarse = self.fig.add_subplot(211)
+        self.coarse.set_title("Coarse Autofocus")
+        self.coarse.set_ylabel("Entropy")
+        self.coarse.set_xlabel("Focus Position")
         self.fine = self.fig.add_subplot(212)
-        # self.coarse.plot(nums[:, 0], nums[:, 1], 'bo')
-        # self.coarse.clear()
-        # self.fine.plot(nums[:, 1], nums[:, 0], 'g*')
+        self.fine.set_title("Fine Autofocus")
+        self.fine.set_ylabel("Entropy")
+        self.fine.set_xlabel("Focus Position")
+        self.fig.tight_layout()
         canvas = FigureCanvasTkAgg(self.fig, master=content_frame)
         canvas.draw()
         canvas.get_tk_widget().grid(row=5, column=0, columnspan=3, sticky=(NSEW), padx=(5,5), pady=(5,5))

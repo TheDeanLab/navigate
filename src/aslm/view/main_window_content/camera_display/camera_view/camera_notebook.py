@@ -40,28 +40,28 @@ logger = logging.getLogger(p)
 
 # Import Sub-Frames
 from aslm.view.main_window_content.camera_display.camera_view.camera_view_tab import camera_tab
-from aslm.view.main_window_content.tabs.waveform_tab import waveform_tab
+from aslm.view.main_window_content.camera_display.camera_view.waveform_tab import waveform_tab
 
 class camera_waveform_notebook(ttk.Notebook):
-    def __init__(cam_wave, frame_top_right, *args, **kwargs):
+    def __init__(self, frame_top_right, *args, **kwargs):
         #Init notebook
-        ttk.Notebook.__init__(cam_wave, frame_top_right, *args, **kwargs)
+        ttk.Notebook.__init__(self, frame_top_right, *args, **kwargs)
         
         # Formatting
-        Grid.columnconfigure(cam_wave, 'all', weight=1)
-        Grid.rowconfigure(cam_wave, 'all', weight=1)
+        Grid.columnconfigure(self, 'all', weight=1)
+        Grid.rowconfigure(self, 'all', weight=1)
 
         #Putting notebook 2 into top right frame
-        cam_wave.grid(row=0, column=0)
+        self.grid(row=0, column=0)
 
         #Creating the camera tab
-        cam_wave.camera_tab = camera_tab(cam_wave)
+        self.camera_tab = camera_tab(self)
 
         #Creating the waveform settings tab
-        cam_wave.waveform_tab = waveform_tab(cam_wave)
+        self.waveform_tab = waveform_tab(self)
 
-        #Adding tabs to cam_wave notebook
-        cam_wave.add(cam_wave.camera_tab, text='Camera View', sticky=NSEW)
-        cam_wave.add(cam_wave.waveform_tab, text='Waveform Settings', sticky=NSEW)
+        #Adding tabs to self notebook
+        self.add(self.camera_tab, text='Camera View', sticky=NSEW)
+        self.add(self.waveform_tab, text='Waveform Settings', sticky=NSEW)
 
 

@@ -58,10 +58,9 @@ class LazyTiff:
                 with PIL.Image.open(file) as im:
                     self._image[i,...] = im
                     
-        self._image = self._image.squeeze()
         if len(keys) == 1:
-            return self._image
+            return self._image.squeeze()
         if len(keys) == 2:
-            return self._image[keys[1]]
+            return self._image[:,keys[1]].squeeze()
         
-        return self._image[keys[1],keys[2]]
+        return self._image[:,keys[1],keys[2]].squeeze()

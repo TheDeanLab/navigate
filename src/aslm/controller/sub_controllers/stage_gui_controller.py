@@ -303,12 +303,3 @@ class Stage_GUI_Controller(GUI_Controller):
         
         return handler
     
-    """
-    def resize(self, event):
-        if event.widget == self.parent_view.root:
-            #print(f"{self.parent_view.root.winfo_width()}")
-            if event.width < self.parent_view.minimized_width or event.height < self.parent_view.minimized_height:
-                print(f"{self.parent_view.stage_control.select()}")
-                #self.parent_view.stage_control.swap_view()
-    """            
-        

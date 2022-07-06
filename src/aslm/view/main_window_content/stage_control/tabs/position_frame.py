@@ -110,7 +110,7 @@ class min_position_frame(ttk.Frame):
             position_frame.inputs[entry_names[i]] = LabelInput(parent=position_frame,
                                                             label=entry_labels[i],
                                                             input_class=ValidatedEntry,
-                                                            input_var=DoubleVar(),
+                                                            input_var=minimized_control.note3.stage_control_tab.position_frame.inputs[entry_names[i]].get_variable(),
                                                             input_args={'required': True, 'precision': 0.1}
                                                             )
             position_frame.inputs[entry_names[i]].grid(row=i, column=0, pady=1, padx=15)

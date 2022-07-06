@@ -189,7 +189,7 @@ class min_x_y_frame(ttk.Frame):
         x_y_frame.increment_box = LabelInput(
             parent=x_y_frame,
             input_class=ValidatedSpinbox,
-            input_var=tk.DoubleVar(),
+            input_var=minimized_control.note3.stage_control_tab.xy_frame.increment_box.get_variable(), #gets variable from original stage control view's xy increment box minimized_control.note3.stage_control_tab.xy_frame.increment_box.get_variable()
             input_args={'width': 25}
         )
 

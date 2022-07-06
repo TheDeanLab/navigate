@@ -50,6 +50,7 @@ class minimized_control(ttk.Frame):
     def __init__(minimized_control, note3, *args, **kwargs):
         #Init Frame
         ttk.Frame.__init__(minimized_control, note3, *args, **kwargs)
+        minimized_control.note3=note3
         
         # Formatting
         Grid.columnconfigure(minimized_control, 'all', weight=1)
@@ -66,12 +67,17 @@ class minimized_control(ttk.Frame):
 
         #Z Frame
         minimized_control.z_frame = other_axis_frame(minimized_control, 'Z')
+        minimized_control.z_frame.increment_box.set(minimized_control.note3.stage_control_tab.z_frame.increment_box.get_variable())
 
         #Theta Frame
         minimized_control.theta_frame = other_axis_frame(minimized_control, 'Theta')
+        minimized_control.theta_frame.increment_box.set(minimized_control.note3.stage_control_tab.theta_frame.increment_box.get_variable().get())
 
         #Focus Frame
         minimized_control.f_frame = other_axis_frame(minimized_control, 'Focus')
+        minimized_control.f_frame.increment_box.set(minimized_control.note3.stage_control_tab.f_frame.increment_box.get())
+
+        #try changing w/ if loop inside of other_axis_frame.py
 
         #GoTo Frame
         minimized_control.goto_frame = goto_frame(minimized_control)

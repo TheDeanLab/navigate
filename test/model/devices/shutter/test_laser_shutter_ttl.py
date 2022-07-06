@@ -45,32 +45,15 @@ class TestShutterTTL(unittest.TestCase):
     r"""Unit Test for ShutterTTL Class"""
 
     def test_shutter_TTL_attributes(self):
-        base_directory = Path(__file__).resolve().parent.parent.parent.parent.parent
-        configuration_directory = Path.joinpath(base_directory, 'src', 'aslm', 'config')
-        configuration_path = Path.joinpath(configuration_directory, 'configuration.yml')
-        experiment_path = Path.joinpath(configuration_directory, 'experiment.yml')
+        attributes = dir(ShutterTTL)
+        desired_attributes = ['open_left',
+                              'open_right',
+                              'close_shutters',
+                              'state']
 
-        configuration = session(configuration_path, False)
-        experiment = session(experiment_path, False)
+        for da in desired_attributes:
+            assert da in attributes
 
-        shutter = ShutterTTL(configuration,
-                             experiment,
-                             False)
-
-        # Attributes
-        assert hasattr(shutter, 'configuration')
-        assert hasattr(shutter, 'experiment')
-        assert hasattr(shutter, 'verbose')
-        assert hasattr(shutter, 'shutter_right')
-        assert hasattr(shutter, 'shutter_right_state')
-        assert hasattr(shutter, 'shutter_left')
-        assert hasattr(shutter, 'shutter_left_state')
-
-        # Methods
-        assert callable(hasattr(shutter, 'open_left'))
-        assert callable(hasattr(shutter, 'open_right'))
-        assert callable(hasattr(shutter, 'close_shutters'))
-        assert callable(hasattr(shutter, 'state'))
 
 if __name__ == '__main__':
     unittest.main()

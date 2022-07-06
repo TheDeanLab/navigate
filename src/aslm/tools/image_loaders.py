@@ -1,6 +1,7 @@
 import numpy as np
 import PIL 
 import glob 
+
 class LazyTiff:
     def __init__(self, fp):
         """

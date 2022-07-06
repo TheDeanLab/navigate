@@ -47,12 +47,17 @@ class TestSyntheticShutter(unittest.TestCase):
     def test_synthetic_shutter_attributes(self):
         base_directory = Path(__file__).resolve().parent.parent.parent.parent.parent
         configuration_directory = Path.joinpath(base_directory, 'src', 'aslm', 'config')
+
         configuration_path = Path.joinpath(configuration_directory, 'configuration.yml')
         experiment_path = Path.joinpath(configuration_directory, 'experiment.yml')
-        configuration = session(configuration_path, False)
-        experiment = session(experiment_path, False)
 
-        shutter = SyntheticShutter(configuration=configuration, experiment=experiment, verbose=False)
+        configuration = session(file_path=configuration_path,
+                                verbose=False)
+        experiment = session(file_path=experiment_path,
+                             verbose=False)
+        shutter = SyntheticShutter(configuration,
+                              experiment,
+                              False)
 
         # Attributes
         assert hasattr(shutter, 'configuration')

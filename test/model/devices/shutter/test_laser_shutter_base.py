@@ -50,10 +50,14 @@ class TestLaserBase(unittest.TestCase):
         configuration_path = Path.joinpath(configuration_directory, 'configuration.yml')
         experiment_path = Path.joinpath(configuration_directory, 'experiment.yml')
 
-        configuration = session(configuration_path, False)
-        experiment = session(experiment_path, False)
+        configuration = session(file_path=configuration_path,
+                                verbose=False)
+        experiment = session(file_path=experiment_path,
+                             verbose=False)
 
-        shutter = ShutterBase(configuration=configuration, experiment=experiment, verbose=False)
+        shutter = ShutterBase(configuration,
+                              experiment,
+                              False)
 
         assert hasattr(shutter, 'configuration')
         assert hasattr(shutter, 'experiment')

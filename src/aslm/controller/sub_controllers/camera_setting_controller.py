@@ -1,7 +1,4 @@
-"""
-ASLM sub-controller for the camera settings.
-
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -73,13 +70,15 @@ class Camera_Setting_Controller(GUI_Controller):
         self.roi_widgets['Height'].get_variable().trace_add('write', self.update_fov)
         
         for btn_name in self.roi_btns:
-            self.roi_btns[btn_name].config(
-                command=self.update_roi(btn_name)
-            )
+            self.roi_btns[btn_name].config(command=self.update_roi(btn_name))
 
     def initialize(self, config):
-        """
-        ## Function that sets widgets based on data given from main controller/config
+        r"""Sets widgets based on data given from main controller/config.
+
+        Parameters
+        ----------
+        config : dict
+            Dictionary with various camera parameters.
         """
 
         # Get Default Configuration Values
@@ -139,12 +138,20 @@ class Camera_Setting_Controller(GUI_Controller):
         self.roi_widgets['FOV_X'].widget['state'] = 'disabled'
         self.roi_widgets['FOV_Y'].widget['state'] = 'disabled'
 
-    def set_experiment_values(self, experiment):
-        """
+    def set_experiment_values(self,
+                              experiment):
+        r"""Sets values in View according to the experiment yaml file.
+
         Experiment yaml filed passed by controller.
+
+        Parameters
+        ----------
+        experiment : Session
+            Configuration of the experimental settings.
         """
         self.in_initialization = True
 
+        # Retrieve settings.
         setting_dict = experiment.CameraParameters
         microscope_state = experiment.MicroscopeState
         self.resolution_value = 'high' if microscope_state['resolution_mode'] == 'high' else microscope_state['zoom']

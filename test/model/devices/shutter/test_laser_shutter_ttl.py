@@ -53,7 +53,9 @@ class TestShutterTTL(unittest.TestCase):
         configuration = session(configuration_path, False)
         experiment = session(experiment_path, False)
 
-        shutter = ShutterTTL(configuration=configuration, experiment=experiment, verbose=False)
+        shutter = ShutterTTL(configuration,
+                             experiment,
+                             False)
 
         # Attributes
         assert hasattr(shutter, 'configuration')

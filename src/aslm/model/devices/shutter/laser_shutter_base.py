@@ -71,7 +71,10 @@ class ShutterBase:
         Return the current state of the shutters
     """
 
-    def __init__(self, configuration, experiment, verbose=False):
+    def __init__(self,
+                 configuration,
+                 experiment,
+                 verbose=False):
         self.configuration = configuration
         self.experiment = experiment
         self.verbose = verbose

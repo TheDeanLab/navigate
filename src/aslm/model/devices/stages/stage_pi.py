@@ -99,19 +99,20 @@ class PIStage(StageBase):
             self.z_pos = round(positions['3'] * 1000, 2)
             self.f_pos = round(positions['5'] * 1000, 2)
             self.theta_pos = positions['4']
-            self.create_position_dict()
-
-            self.int_x_pos = self.x_pos + self.int_x_pos_offset
-            self.int_y_pos = self.y_pos + self.int_y_pos_offset
-            self.int_z_pos = self.z_pos + self.int_z_pos_offset
-            self.int_f_pos = self.f_pos + self.int_f_pos_offset
-            self.int_theta_pos = self.theta_pos + self.int_theta_pos_offset
-            self.create_internal_position_dict()
         except GCSError as e:
             print('Failed to report position')
             logger.exception(e)
-        logger.debug(f"Stage Positions: {self.int_position_dict}")
 
+        # Update internal dictionaries
+        self.create_position_dict()
+        self.int_x_pos = self.x_pos + self.int_x_pos_offset
+        self.int_y_pos = self.y_pos + self.int_y_pos_offset
+        self.int_z_pos = self.z_pos + self.int_z_pos_offset
+        self.int_f_pos = self.f_pos + self.int_f_pos_offset
+        self.int_theta_pos = self.theta_pos + self.int_theta_pos_offset
+        self.create_internal_position_dict()
+
+        logger.debug(f"Stage Positions: {self.int_position_dict}")
         return self.int_position_dict
 
     def move_relative(self, move_dictionary, wait_until_done=False):
@@ -231,9 +232,11 @@ class PIStage(StageBase):
 
             # Move the stage
             try:
+                pos = axis_abs
                 if axis != 'theta':
-                    axis_abs /= 1000  # convert to mm
-                self.pidevice.MOV({axis_num: axis_abs})
+                    pos /= 1000  # convert to mm
+                self.pidevice.MOV({axis_num: pos})
+
                 return True
             except GCSError as e:
                 logger.exception(GCSError(e))

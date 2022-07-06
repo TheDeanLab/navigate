@@ -382,6 +382,8 @@ class ASLM_controller:
         else:
             self.resolution_value.set(self.experiment.MicroscopeState['zoom'])
 
+        self.model.apply_resolution_stage_offset(resolution_mode, initial=True)
+
     def update_experiment_setting(self):
         r"""Update model.experiment according to values in the GUI
 

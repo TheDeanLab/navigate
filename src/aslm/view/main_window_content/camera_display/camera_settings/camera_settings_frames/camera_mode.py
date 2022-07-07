@@ -32,8 +32,6 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 import logging
 import tkinter as tk
-from pathlib import Path
-from tkinter import *
 from tkinter import ttk
 
 from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
@@ -57,16 +55,16 @@ class camera_mode(ttk.Labelframe):
         ttk.Labelframe.__init__(self, settings_tab, text=text_label, *args, **kwargs)
         
         # Formatting
-        Grid.columnconfigure(self, 'all', weight=1)
-        Grid.rowconfigure(self, 'all', weight=1)
+        tk.Grid.columnconfigure(self, 'all', weight=1)
+        tk.Grid.rowconfigure(self, 'all', weight=1)
 
         #Holds dropdowns, this is done in case more widgets are to be added in a different frame, these can be grouped together
         content_frame = ttk.Frame(self)
-        content_frame.grid(row=0, column=0, sticky=(NSEW), pady=5)
+        content_frame.grid(row=0, column=0, sticky=(tk.NSEW), pady=5)
         
         # Formatting
-        Grid.columnconfigure(content_frame, 'all', weight=1)
-        Grid.rowconfigure(content_frame, 'all', weight=1)
+        tk.Grid.columnconfigure(content_frame, 'all', weight=1)
+        tk.Grid.rowconfigure(content_frame, 'all', weight=1)
         
 
         #Dictionary for all the variables, this will be used by the controller
@@ -119,5 +117,5 @@ class camera_mode(ttk.Labelframe):
 
 if __name__ == '__main__':
     root = tk.Tk()
-    camera_mode(root).grid(row=0, column=0, sticky=(NSEW))
+    camera_mode(root).grid(row=0, column=0, sticky=(tk.NSEW))
     root.mainloop()

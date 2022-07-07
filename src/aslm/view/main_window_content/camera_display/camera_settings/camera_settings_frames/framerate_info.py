@@ -32,10 +32,8 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 import logging
 import tkinter as tk
-from pathlib import Path
-from tkinter import *
 from tkinter import ttk
-from tkinter.font import Font
+
 
 from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from aslm.view.custom_widgets.validation import ValidatedEntry, ValidatedSpinbox
@@ -58,13 +56,13 @@ class framerate_info(ttk.LabelFrame):
 
         #  Holds widgests, this is done in case more widgets are to be added in a different frame, these can be grouped together
         content_frame = ttk.Frame(self)
-        content_frame.grid(row=0, column=0, sticky=(NSEW), pady=5, padx=5)
+        content_frame.grid(row=0, column=0, sticky=(tk.NSEW), pady=5, padx=5)
         
         # Formatting
-        Grid.columnconfigure(self, 'all', weight=1)
-        Grid.rowconfigure(self, 'all', weight=1)
-        Grid.columnconfigure(content_frame, 'all', weight=1)
-        Grid.rowconfigure(content_frame, 'all', weight=1)
+        tk.Grid.columnconfigure(self, 'all', weight=1)
+        tk.Grid.rowconfigure(self, 'all', weight=1)
+        tk.Grid.columnconfigure(content_frame, 'all', weight=1)
+        tk.Grid.rowconfigure(content_frame, 'all', weight=1)
 
         #  Dictionary for all the variables, this will be used by the controller
         self.inputs = {}

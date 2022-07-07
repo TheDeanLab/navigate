@@ -31,7 +31,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 # Standard Imports
-from tkinter import *
+import tkinter as tk
 from tkinter import ttk
 import logging
 
@@ -46,5 +46,5 @@ class goto_frame(ttk.Frame):
         ttk.Frame.__init__(goto_frame, stage_control_tab, *args, **kwargs)
         
         # Formatting
-        Grid.columnconfigure(goto_frame, 'all', weight=1)
-        Grid.rowconfigure(goto_frame, 'all', weight=1)
+        tk.Grid.columnconfigure(goto_frame, 'all', weight=1)
+        tk.Grid.rowconfigure(goto_frame, 'all', weight=1)

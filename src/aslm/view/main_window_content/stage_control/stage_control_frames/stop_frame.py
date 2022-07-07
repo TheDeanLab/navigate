@@ -31,15 +31,12 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 # Standard Imports
-from tkinter import *
+import tkinter as tk
 from tkinter import ttk
 
-# Local Imports
-from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
-from aslm.view.custom_widgets.validation import ValidatedSpinbox
 
 import logging
-from pathlib import Path
+
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -53,11 +50,11 @@ class stop_frame(ttk.Frame):
         self.name = name
 
         # Formatting
-        Grid.columnconfigure(self, 'all', weight=1)
-        Grid.rowconfigure(self, 'all', weight=1)
+        tk.Grid.columnconfigure(self, 'all', weight=1)
+        tk.Grid.rowconfigure(self, 'all', weight=1)
 
         # Stop button
-        self.stop_btn = Button(
+        self.stop_btn = ttk.Button(
             self,
             bg='red',
             fg='white',

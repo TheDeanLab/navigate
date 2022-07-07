@@ -31,18 +31,18 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 # Standard Imports
-from tkinter import *
+import tkinter as tk
 from tkinter import ttk
 import logging
-from pathlib import Path
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
-from tkinter.font import Font
+
 
 # Local Imports
 from aslm.view.main_window_content.stage_control.stage_control_tab import stage_control_tab
-from aslm.view.main_window_content.stage_control.tabs.maximum_intensity_projection_tab import maximum_intensity_projection_tab
+from aslm.view.main_window_content.stage_control import maximum_intensity_projection_tab
 
 class stagecontrol_maxintensity_notebook(ttk.Notebook):
     def __init__(self, frame_bot_right, *args, **kwargs):
@@ -50,8 +50,8 @@ class stagecontrol_maxintensity_notebook(ttk.Notebook):
         ttk.Notebook.__init__(self, frame_bot_right, *args, **kwargs)
         
         # Formatting
-        Grid.columnconfigure(self, 'all', weight=1)
-        Grid.rowconfigure(self, 'all', weight=1)
+        tk.Grid.columnconfigure(self, 'all', weight=1)
+        tk.Grid.rowconfigure(self, 'all', weight=1)
 
         #Putting notebook 3 into bottom right frame
         self.grid(row=0, column=0)
@@ -63,8 +63,8 @@ class stagecontrol_maxintensity_notebook(ttk.Notebook):
         self.maximum_intensity_projection_tab = maximum_intensity_projection_tab(self)
 
         #Adding tabs to notebook
-        self.add(self.stage_control_tab, text='Stage Control', sticky=NSEW)
-        self.add(self.maximum_intensity_projection_tab, text='MIPs', sticky=NSEW)
+        self.add(self.stage_control_tab, text='Stage Control', sticky=tk.NSEW)
+        self.add(self.maximum_intensity_projection_tab, text='MIPs', sticky=tk.NSEW)
 
 
 class goto_frame(ttk.Frame):

@@ -32,12 +32,12 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 # Standard Imports
 from tkinter import ttk
-from tkinter import *
+import tkinter as tk
 import numpy as np
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import logging
-from pathlib import Path
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -49,8 +49,8 @@ class maximum_intensity_projection_tab(ttk.Frame):
         ttk.Frame.__init__(self, note3, *args, **kwargs)
         
         # Formatting
-        Grid.columnconfigure(self, 'all', weight=1)
-        Grid.rowconfigure(self, 'all', weight=1)
+        tk.Grid.columnconfigure(self, 'all', weight=1)
+        tk.Grid.rowconfigure(self, 'all', weight=1)
 
         # Generate MIPs
         def xy_mip():
@@ -90,7 +90,7 @@ class maximum_intensity_projection_tab(ttk.Frame):
 
         # placing the canvas on the Tkinter window
         # canvas.get_tk_widget().pack()
-        canvas.get_tk_widget().grid(row=0, column=0, sticky=NSEW)
+        canvas.get_tk_widget().grid(row=0, column=0, sticky=tk.NSEW)
 
         self.calculate_button = ttk.Button(self, text="Calculate MIPs")
-        self.calculate_button.grid(row=1, column=0, sticky=NSEW)
+        self.calculate_button.grid(row=1, column=0, sticky=tk.NSEW)

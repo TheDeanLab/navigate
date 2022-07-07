@@ -32,8 +32,6 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 #Adds the contents of the camera selection/counts frame
 import logging
-from pathlib import Path
-from tkinter import *
 from tkinter import ttk
 import tkinter as tk
 
@@ -51,8 +49,8 @@ class image_metrics(ttk.Labelframe):
         ttk.Labelframe.__init__(self, cam_view, text=text_label, *args, **kwargs)
         
         # Formatting
-        Grid.columnconfigure(self, 'all', weight=1)
-        Grid.rowconfigure(self, 'all', weight=1)
+        tk.Grid.columnconfigure(self, 'all', weight=1)
+        tk.Grid.rowconfigure(self, 'all', weight=1)
         
         # Dictionary for widgets
         self.inputs = {}
@@ -67,20 +65,20 @@ class image_metrics(ttk.Labelframe):
                 self.inputs[self.names[i]] = LabelInput(parent=self,
                                                         label=self.labels[i],
                                                         input_class=ttk.Spinbox,
-                                                        input_var=IntVar(),
+                                                        input_var=tk.IntVar(),
                                                         input_args={'from_':1, 'to':20, 'increment':1, 'width':9},
                                                         label_pos="top"
                                                         )
-                self.inputs[self.names[i]].grid(row=0, column=i, sticky=(NSEW), padx=5, pady=3)
+                self.inputs[self.names[i]].grid(row=0, column=i, sticky=(tk.NSEW), padx=5, pady=3)
             if i > 0:
                 self.inputs[self.names[i]] = LabelInput(parent=self,
                                                         label=self.labels[i],
                                                         input_class=ttk.Entry,
-                                                        input_var=IntVar(),
+                                                        input_var=tk.IntVar(),
                                                         input_args={'width':15},
                                                         label_pos="top"
                                                         )
-                self.inputs[self.names[i]].grid(row=0, column=i, sticky=(NSEW), padx=5, pady=3)
+                self.inputs[self.names[i]].grid(row=0, column=i, sticky=(tk.NSEW), padx=5, pady=3)
 
     def get_variables(self):
         """

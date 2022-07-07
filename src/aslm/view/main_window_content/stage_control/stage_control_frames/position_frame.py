@@ -31,7 +31,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 # Standard Imports
-from tkinter import *
+import tkinter as tk
 from tkinter import ttk
 
 # Local Imports
@@ -39,7 +39,7 @@ from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from aslm.view.custom_widgets.validation import ValidatedEntry
 
 import logging
-from pathlib import Path
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -52,8 +52,8 @@ class position_frame(ttk.Frame):
         ttk.Frame.__init__(position_frame, stage_control_tab, *args, **kwargs)
         
         # Formatting
-        Grid.columnconfigure(position_frame, 'all', weight=1)
-        Grid.rowconfigure(position_frame, 'all', weight=1)
+        tk.Grid.columnconfigure(position_frame, 'all', weight=1)
+        tk.Grid.rowconfigure(position_frame, 'all', weight=1)
 
         #Creating each entry frame for a label and entry
         position_frame.inputs = {}
@@ -65,7 +65,7 @@ class position_frame(ttk.Frame):
             position_frame.inputs[entry_names[i]] = LabelInput(parent=position_frame,
                                                             label=entry_labels[i],
                                                             input_class=ValidatedEntry,
-                                                            input_var=DoubleVar(),
+                                                            input_var=tk.DoubleVar(),
                                                             input_args={'required': True, 'precision': 0.1}
                                                             )
             position_frame.inputs[entry_names[i]].grid(row=0, column=i, pady=1, padx=15)

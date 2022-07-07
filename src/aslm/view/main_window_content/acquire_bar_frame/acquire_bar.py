@@ -31,8 +31,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 import logging
-from pathlib import Path
-from tkinter import *
+import tkinter as tk
 from tkinter import ttk
 
 # Logger Setup
@@ -51,8 +50,8 @@ class AcquireBar(ttk.Frame):
         ttk.Frame.__init__(self, top_frame, *args, **kwargs)
         
         # Formatting
-        Grid.columnconfigure(self, 'all', weight=1)
-        Grid.rowconfigure(self, 'all', weight=1)
+        tk.Grid.columnconfigure(self, 'all', weight=1)
+        tk.Grid.rowconfigure(self, 'all', weight=1)
 
         #  Putting bar into frame
         self.grid(row=0, column=0)
@@ -61,7 +60,7 @@ class AcquireBar(ttk.Frame):
         self.acquire_btn = ttk.Button(self, text="Acquire")
 
         #  Read Only Pull down menu: continuous, z-stack, single acquisition, projection.
-        self.options = StringVar()
+        self.options = tk.StringVar()
         self.pull_down = ttk.Combobox(self, textvariable=self.options)
         self.pull_down['values'] = ('Continuous Scan', 'Z-Stack', 'Single Acquisition', 'Alignment', 'Projection')
         self.pull_down.current(0)
@@ -72,10 +71,10 @@ class AcquireBar(ttk.Frame):
 
         #  This is used to hold and grid the two progress bars.Now when this is
         #  loaded into Acbar the progress bars will follow
-        self.CurAcq = ttk.Progressbar(self.progBar_frame, orient=HORIZONTAL, length=200, mode='indeterminate')
+        self.CurAcq = ttk.Progressbar(self.progBar_frame, orient=tk.HORIZONTAL, length=200, mode='indeterminate')
 
         #  Change mode to determinate and set steps for more intuitive usage
-        self.OvrAcq = ttk.Progressbar(self.progBar_frame, orient=HORIZONTAL, length=200, mode='indeterminate')
+        self.OvrAcq = ttk.Progressbar(self.progBar_frame, orient=tk.HORIZONTAL, length=200, mode='indeterminate')
         self.CurAcq.grid(row=0, column=0)
         self.OvrAcq.grid(row=1, column=0)
 
@@ -86,7 +85,7 @@ class AcquireBar(ttk.Frame):
         """
             0   1   2   3
         """
-        self.acquire_btn.grid(row=0, column=0, sticky=NSEW, pady=(2,2), padx=(2,2))
-        self.pull_down.grid(row=0, column=1, sticky=NSEW, pady=(2,2), padx=(2,2))
-        self.progBar_frame.grid(row=0, column=2, sticky=NSEW, pady=(2,2), padx=(2,2))
-        self.exit_btn.grid(row=0, column=3, sticky=NSEW, pady=(2,2), padx=(2,2))
+        self.acquire_btn.grid(row=0, column=0, sticky=tk.NSEW, pady=(2,2), padx=(2,2))
+        self.pull_down.grid(row=0, column=1, sticky=tk.NSEW, pady=(2,2), padx=(2,2))
+        self.progBar_frame.grid(row=0, column=2, sticky=tk.NSEW, pady=(2,2), padx=(2,2))
+        self.exit_btn.grid(row=0, column=3, sticky=tk.NSEW, pady=(2,2), padx=(2,2))

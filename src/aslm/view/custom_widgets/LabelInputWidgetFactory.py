@@ -33,7 +33,7 @@ POSSIBILITY OF SUCH DAMAGE.
 import tkinter as tk
 from tkinter import ttk
 import logging
-from pathlib import Path
+
 from aslm.view.custom_widgets.validation import ValidatedCombobox, ValidatedSpinbox
 # Logger Setup
 p = __name__.split(".")[1]

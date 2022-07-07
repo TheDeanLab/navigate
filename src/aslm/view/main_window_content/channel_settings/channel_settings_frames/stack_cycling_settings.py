@@ -30,15 +30,14 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-from tkinter import *
+import tkinter as tk
 from tkinter import ttk
 import logging
-from pathlib import Path
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
-from tkinter.font import Font
-import numpy as np
+
 
 class stack_cycling_frame(ttk.Labelframe):
     def __init__(stack_acq, settings_tab, *args, **kwargs):
@@ -47,16 +46,16 @@ class stack_cycling_frame(ttk.Labelframe):
         ttk.Labelframe.__init__(stack_acq, settings_tab, text=text_label, *args, **kwargs)
         
         # Formatting
-        Grid.columnconfigure(stack_acq, 'all', weight=1)
-        Grid.rowconfigure(stack_acq, 'all', weight=1)
+        tk.Grid.columnconfigure(stack_acq, 'all', weight=1)
+        tk.Grid.rowconfigure(stack_acq, 'all', weight=1)
 
         #Laser Cycling Frame (Vertically oriented)
         stack_acq.cycling_frame = ttk.Frame(stack_acq)
-        stack_acq.cycling_options = StringVar()
+        stack_acq.cycling_options = tk.StringVar()
         stack_acq.cycling_pull_down = ttk.Combobox(stack_acq, textvariable=stack_acq.cycling_options)
         stack_acq.cycling_pull_down.state(["readonly"]) # Makes it so the user cannot type a choice into combobox
-        stack_acq.cycling_pull_down.grid(row=0, column=1, sticky=(NSEW), padx=4, pady=(4,6))
+        stack_acq.cycling_pull_down.grid(row=0, column=1, sticky=(tk.NSEW), padx=4, pady=(4,6))
 
         #Gridding Each Holder Frame
-        stack_acq.cycling_frame.grid(row=0, column=0, sticky=(NSEW))
+        stack_acq.cycling_frame.grid(row=0, column=0, sticky=(tk.NSEW))
 

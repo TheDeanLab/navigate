@@ -30,10 +30,9 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-from tkinter import *
+import tkinter as tk
 from tkinter import ttk
 import logging
-from pathlib import Path
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -48,8 +47,8 @@ class camera_waveform_notebook(ttk.Notebook):
         ttk.Notebook.__init__(self, frame_top_right, *args, **kwargs)
         
         # Formatting
-        Grid.columnconfigure(self, 'all', weight=1)
-        Grid.rowconfigure(self, 'all', weight=1)
+        tk.Grid.columnconfigure(self, 'all', weight=1)
+        tk.Grid.rowconfigure(self, 'all', weight=1)
 
         #Putting notebook 2 into top right frame
         self.grid(row=0, column=0)
@@ -61,7 +60,7 @@ class camera_waveform_notebook(ttk.Notebook):
         self.waveform_tab = waveform_tab(self)
 
         #Adding tabs to self notebook
-        self.add(self.camera_tab, text='Camera View', sticky=NSEW)
-        self.add(self.waveform_tab, text='Waveform Settings', sticky=NSEW)
+        self.add(self.camera_tab, text='Camera View', sticky=tk.NSEW)
+        self.add(self.waveform_tab, text='Waveform Settings', sticky=tk.NSEW)
 
 

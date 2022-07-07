@@ -30,9 +30,9 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-from tkinter import ttk, Grid
+import tkinter as tk
+from tkinter import ttk
 import logging
-from pathlib import Path
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -43,5 +43,5 @@ class waveform_tab(ttk.Frame):
         ttk.Frame.__init__(self, cam_wave, *args, **kwargs)
         
         # Formatting
-        Grid.columnconfigure(self, 'all', weight=1)
-        Grid.rowconfigure(self, 'all', weight=1)
+        tk.Grid.columnconfigure(self, 'all', weight=1)
+        tk.Grid.rowconfigure(self, 'all', weight=1)

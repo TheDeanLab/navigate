@@ -33,7 +33,6 @@ POSSIBILITY OF SUCH DAMAGE.
 # Standard Library Imports
 import logging
 import tkinter as tk
-from tkinter import *
 from tkinter import ttk
 
 # Third Party Imports
@@ -41,8 +40,8 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 # Local Imports
-from aslm.view.main_window_content.camera_display.camera_view.tabs.image_metrics import image_metrics
-from aslm.view.main_window_content.camera_display.camera_view.tabs.palette import palette
+from aslm.view.main_window_content.camera_display.camera_view.camera_view_frames.image_metrics import image_metrics
+from aslm.view.main_window_content.camera_display.camera_view.camera_view_frames.palette import palette
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -54,16 +53,16 @@ class camera_tab(ttk.Frame):
         ttk.Frame.__init__(self, cam_wave, *args, **kwargs)
         
         # Formatting
-        Grid.columnconfigure(self, 'all', weight=1)
-        Grid.rowconfigure(self, 'all', weight=1)
+        tk.Grid.columnconfigure(self, 'all', weight=1)
+        tk.Grid.rowconfigure(self, 'all', weight=1)
 
         #  Frame that will hold camera image
         self.cam_image = ttk.Frame(self)
-        self.cam_image.grid(row=0, column=0, sticky=NSEW)
+        self.cam_image.grid(row=0, column=0, sticky=tk.NSEW)
 
         # TODO decide on height, width original was 800x800. 4x binning -> 2048 -> 512
         self.canvas = tk.Canvas(self.cam_image, width=512, height=512)
-        self.canvas.grid(row=0, column=0, sticky=NSEW, padx=5, pady=5)
+        self.canvas.grid(row=0, column=0, sticky=tk.NSEW, padx=5, pady=5)
         self.matplotlib_figure = Figure(figsize=[6, 6], tight_layout=True)
         self.matplotlib_canvas = FigureCanvasTkAgg(self.matplotlib_figure, self.canvas)
 
@@ -73,4 +72,4 @@ class camera_tab(ttk.Frame):
 
         #  Frame for scale settings/pallete color
         self.scale_palette = palette(self)
-        self.scale_palette.grid(row=0, column=1, sticky=NSEW, padx=5, pady=5)
+        self.scale_palette.grid(row=0, column=1, sticky=tk.NSEW, padx=5, pady=5)

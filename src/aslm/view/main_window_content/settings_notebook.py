@@ -31,21 +31,18 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 # Standard Imports
-from tkinter import *
+import tkinter as tk
 from tkinter import ttk
 import logging
-from pathlib import Path
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
-from tkinter.font import Font
 
-# Third Party Imports
-import numpy as np
 
 # Import Sub-Frames
 from aslm.view.main_window_content.camera_display.camera_settings.camera_settings_tab import camera_settings_tab
-from aslm.view.main_window_content.tabs.channels_tab import channels_tab
+from aslm.view.main_window_content.channel_settings import channels_tab
 
 
 class settings_notebook(ttk.Notebook):
@@ -54,8 +51,8 @@ class settings_notebook(ttk.Notebook):
         ttk.Notebook.__init__(self, frame_left, *args, **kwargs)
         
         # Formatting
-        Grid.columnconfigure(self, 'all', weight=1)
-        Grid.rowconfigure(self, 'all', weight=1)
+        tk.Grid.columnconfigure(self, 'all', weight=1)
+        tk.Grid.rowconfigure(self, 'all', weight=1)
 
         #Putting notebook 1 into left frame
         self.grid(row=0,column=0)
@@ -67,8 +64,8 @@ class settings_notebook(ttk.Notebook):
         self.camera_settings_tab = camera_settings_tab(self)
 
         #Adding tabs to settings notebook
-        self.add(self.channels_tab, text='Channels', sticky=NSEW)
-        self.add(self.camera_settings_tab, text='Camera Settings', sticky=NSEW)
+        self.add(self.channels_tab, text='Channels', sticky=tk.NSEW)
+        self.add(self.camera_settings_tab, text='Camera Settings', sticky=tk.NSEW)
 
 
 

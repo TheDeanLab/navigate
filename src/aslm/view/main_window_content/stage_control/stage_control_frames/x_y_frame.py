@@ -32,14 +32,14 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 # Standard Imports
 import tkinter as tk
-from tkinter import ttk, NSEW, Grid
-from tkinter.font import Font
+from tkinter import ttk
+
 # Local Imports
 from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from aslm.view.custom_widgets.validation import ValidatedSpinbox
 
 import logging
-from pathlib import Path
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -51,8 +51,8 @@ class x_y_frame(ttk.Frame):
         ttk.Frame.__init__(x_y_frame, stage_control_tab, *args, **kwargs)
         
         # Formatting
-        Grid.columnconfigure(x_y_frame, 'all', weight=1)
-        Grid.rowconfigure(x_y_frame, 'all', weight=1)
+        tk.Grid.columnconfigure(x_y_frame, 'all', weight=1)
+        tk.Grid.rowconfigure(x_y_frame, 'all', weight=1)
 
         #Setting up buttons for up, down, left, right, zero and increment spinbox
         s = ttk.Style()
@@ -133,8 +133,8 @@ class x_y_frame(ttk.Frame):
         x_y_frame.up_x_btn.grid(row=2, column=4, rowspan=2, columnspan=2, padx=2, pady=2) #RIGHT
         x_y_frame.down_y_btn.grid(row=4, column=2, rowspan=2, columnspan=2, padx=2, pady=2) #DOWN
         x_y_frame.down_x_btn.grid(row=2, column=0, rowspan=2, columnspan=2, padx=2, pady=2) #LEFT
-        x_y_frame.zero_xy_btn.grid(row=2, column=2, rowspan=1, columnspan=2, padx=2, pady=(5,2), sticky=(NSEW)) #Zero xy
-        x_y_frame.increment_box.grid(row=3, column=2, rowspan=1, columnspan=2, padx=2, pady=2, sticky=(NSEW)) #Increment spinbox
+        x_y_frame.zero_xy_btn.grid(row=2, column=2, rowspan=1, columnspan=2, padx=2, pady=(5,2), sticky=(tk.NSEW)) #Zero xy
+        x_y_frame.increment_box.grid(row=3, column=2, rowspan=1, columnspan=2, padx=2, pady=2, sticky=(tk.NSEW)) #Increment spinbox
 
 
 

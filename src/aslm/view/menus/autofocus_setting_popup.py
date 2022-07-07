@@ -31,7 +31,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 
-from tkinter import *  # TODO: Terrifying
+import tkinter as tk
 from tkinter import ttk
 from aslm.view.custom_widgets.popup import PopUp
 from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
@@ -39,7 +39,7 @@ from aslm.view.custom_widgets.validation import ValidatedSpinbox
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,
 NavigationToolbar2Tk)
-import numpy as np
+
 import logging
 # Logger Setup
 p = __name__.split(".")[1]
@@ -67,7 +67,7 @@ class autofocus_popup():
         """Creating the widgets for the popup"""
         # Dictionary for all the variables
         self.inputs = {}
-        self.stage_vars = [BooleanVar(False), BooleanVar(False)]
+        self.stage_vars = [tk.BooleanVar(False), tk.BooleanVar(False)]
 
         # Label Lists
         title_labels = ['Select', 'Ranges', 'Step Size']
@@ -85,7 +85,7 @@ class autofocus_popup():
                     5,
                     0,
                     0))
-            title.grid(row=0, column=i, sticky=(NSEW))
+            title.grid(row=0, column=i, sticky=(tk.NSEW))
         
 
         # Widgets
@@ -96,19 +96,19 @@ class autofocus_popup():
                 text=setting_labels[i],
                 variable=self.stage_vars[i]
                 )
-            stage.grid(row=i + 1, column=0, sticky=(NSEW), padx=5)
+            stage.grid(row=i + 1, column=0, sticky=(tk.NSEW), padx=5)
             # Entry Widgets
             self.inputs[setting_names[i] + '_range'] = LabelInput(parent=content_frame,
                                                                   input_class=ValidatedSpinbox,
-                                                                  input_var=StringVar()
+                                                                  input_var=tk.StringVar()
                                                                   )
-            self.inputs[setting_names[i] + '_range'].grid(row=i + 1, column=1, sticky=(NSEW), padx=(0, 5), pady=(15, 0))
+            self.inputs[setting_names[i] + '_range'].grid(row=i + 1, column=1, sticky=(tk.NSEW), padx=(0, 5), pady=(15, 0))
 
             self.inputs[setting_names[i] + '_step_size'] = LabelInput(parent=content_frame,
                                                                       input_class=ValidatedSpinbox,
-                                                                      input_var=StringVar()
+                                                                      input_var=tk.StringVar()
                                                                       )
-            self.inputs[setting_names[i] + '_step_size'].grid(row=i + 1, column=2, sticky=(NSEW), padx=(0, 5), pady=(15, 0))
+            self.inputs[setting_names[i] + '_step_size'].grid(row=i + 1, column=2, sticky=(tk.NSEW), padx=(0, 5), pady=(15, 0))
 
         # Buttons
         self.autofocus_btn = ttk.Button(content_frame, text='Autofocus')
@@ -127,7 +127,7 @@ class autofocus_popup():
         self.fig.tight_layout()
         canvas = FigureCanvasTkAgg(self.fig, master=content_frame)
         canvas.draw()
-        canvas.get_tk_widget().grid(row=5, column=0, columnspan=3, sticky=(NSEW), padx=(5,5), pady=(5,5))
+        canvas.get_tk_widget().grid(row=5, column=0, columnspan=3, sticky=(tk.NSEW), padx=(5,5), pady=(5,5))
         # Adding toolbar
         toolbar = NavigationToolbar2Tk(canvas, content_frame, pack_toolbar=False)
         toolbar.update()

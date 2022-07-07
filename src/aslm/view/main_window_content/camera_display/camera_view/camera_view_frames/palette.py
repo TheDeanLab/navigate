@@ -31,11 +31,8 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 import logging
-from pathlib import Path
-from tkinter import *
+import tkinter as tk
 from tkinter import ttk
-
-from pyparsing import col
 
 from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 
@@ -56,8 +53,8 @@ class palette(ttk.Labelframe):
             **kwargs)
         
         # Formatting
-        Grid.columnconfigure(self, 'all', weight=1)
-        Grid.rowconfigure(self, 'all', weight=1)
+        tk.Grid.columnconfigure(self, 'all', weight=1)
+        tk.Grid.rowconfigure(self, 'all', weight=1)
 
         # Dictionary for widgets
         self.inputs = {}
@@ -65,7 +62,7 @@ class palette(ttk.Labelframe):
         # LUT Radio buttons - Gray is default
         self.color_labels = ['Gray', 'Gradient', 'Rainbow']
         self.color_values = ['gray', 'gradient', 'rainbow']
-        self.color = StringVar()
+        self.color = tk.StringVar()
         for i in range(len(self.color_labels)):
             self.inputs[self.color_labels[i]] = LabelInput(parent=self,
                                                            label=self.color_labels[i],
@@ -74,20 +71,20 @@ class palette(ttk.Labelframe):
                                                            input_args={'value': self.color_values[i]}
                                                            )
             self.inputs[self.color_labels[i]].grid(
-                row=i, column=0, sticky=NSEW)
+                row=i, column=0, sticky=tk.NSEW)
 
         # Flip xy
-        self.transpose = BooleanVar()
+        self.transpose = tk.BooleanVar()
         self.trans = 'Flip XY'
         self.inputs[self.trans] = LabelInput(parent=self,
                                             label=self.trans,
                                             input_class=ttk.Checkbutton,
                                             input_var=self.transpose
                                             )
-        self.inputs[self.trans].grid(row=3, column=0, sticky=NSEW)
+        self.inputs[self.trans].grid(row=3, column=0, sticky=tk.NSEW)
 
         # Autoscale
-        self.autoscale = BooleanVar()
+        self.autoscale = tk.BooleanVar()
         self.auto = 'Autoscale'
         self.minmax = ['Min Counts', 'Max Counts']
         self.minmax_names = ['Min', 'Max']
@@ -96,19 +93,19 @@ class palette(ttk.Labelframe):
                                             input_class=ttk.Checkbutton,
                                             input_var=self.autoscale
                                             )
-        self.inputs[self.auto].grid(row=4, column=0, sticky=NSEW)
+        self.inputs[self.auto].grid(row=4, column=0, sticky=tk.NSEW)
 
         # Max and Min Counts
         for i in range(len(self.minmax)):
             self.inputs[self.minmax_names[i]] = LabelInput(parent=self,
                                                            label=self.minmax[i],
                                                            input_class=ttk.Spinbox,
-                                                           input_var=IntVar(),
+                                                           input_var=tk.IntVar(),
                                                            input_args={'from_': 1,
                                                                        'to': 2**16-1,
                                                                        'increment': 1,
                                                                        'width': 5})
-            self.inputs[self.minmax_names[i]].grid(row=i + 5, column=0, sticky=NSEW, padx=3)
+            self.inputs[self.minmax_names[i]].grid(row=i + 5, column=0, sticky=tk.NSEW, padx=3)
 
     def get_variables(self):
         """

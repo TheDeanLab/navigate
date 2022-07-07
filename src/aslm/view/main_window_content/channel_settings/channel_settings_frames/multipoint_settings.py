@@ -31,13 +31,11 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 import pandas as pd
-from pandastable import Table
-from .multi_position_table import Multi_Position_Table as MPTable
+from aslm.view.main_window_content.channel_settings.channel_settings_frames.multi_position_table import Multi_Position_Table as MPTable
 import tkinter as tk
-from tkinter import ttk, Grid
-from tkinter.constants import NSEW
+from tkinter import ttk
 import logging
-from pathlib import Path
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -50,19 +48,19 @@ class multipoint_frame(ttk.Labelframe):
         ttk.Labelframe.__init__(self, settings_tab, text=text_label, *args, **kwargs)
         
         # Formatting
-        Grid.columnconfigure(self, 'all', weight=1)
-        Grid.rowconfigure(self, 'all', weight=1)
+        tk.Grid.columnconfigure(self, 'all', weight=1)
+        tk.Grid.rowconfigure(self, 'all', weight=1)
 
         # Save Data Label
         label_position = 0
         input_position = 4
         self.laser_label = ttk.Label(self, text='Enable')
-        self.laser_label.grid(row=0, column=label_position, sticky=(NSEW), padx=(4,1), pady=(4,6))
+        self.laser_label.grid(row=0, column=label_position, sticky=(tk.NSEW), padx=(4,1), pady=(4,6))
 
         # Save Data Checkbox
         self.on_off = tk.BooleanVar()
         self.save_check = ttk.Checkbutton(self, text='', variable=self.on_off)
-        self.save_check.grid(row=0, column=input_position, sticky=(NSEW), pady=(4,6))
+        self.save_check.grid(row=0, column=input_position, sticky=(tk.NSEW), pady=(4,6))
 
 class multipoint_list(ttk.Frame):
     """

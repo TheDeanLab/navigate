@@ -42,11 +42,15 @@ logger = logging.getLogger(p)
 
 
 class AcquireBar(ttk.Frame):
+    r"""
+     Class for the acquisition bar found at the top of the main application window.
+     Main function is to change acq setting and then call the acquisition top level window
     """
-    #  Class for the acquisition bar found at the top of the main application window.
-    #  Main function is to change acq setting and then call the acquisition top level window
-    """
-    def __init__(self, top_frame, root, *args, **kwargs):
+    def __init__(self,
+                 top_frame,
+                 root,
+                 *args,
+                 **kwargs):
         #  Init bar with frame attr
         ttk.Frame.__init__(self, top_frame, *args, **kwargs)
         
@@ -72,10 +76,16 @@ class AcquireBar(ttk.Frame):
 
         #  This is used to hold and grid the two progress bars.Now when this is
         #  loaded into Acbar the progress bars will follow
-        self.CurAcq = ttk.Progressbar(self.progBar_frame, orient=HORIZONTAL, length=200, mode='indeterminate')
+        self.CurAcq = ttk.Progressbar(self.progBar_frame,
+                                      orient=HORIZONTAL,
+                                      length=200,
+                                      mode='indeterminate')
 
         #  Change mode to determinate and set steps for more intuitive usage
-        self.OvrAcq = ttk.Progressbar(self.progBar_frame, orient=HORIZONTAL, length=200, mode='indeterminate')
+        self.OvrAcq = ttk.Progressbar(self.progBar_frame,
+                                      orient=HORIZONTAL,
+                                      length=200,
+                                      mode='determinate')
         self.CurAcq.grid(row=0, column=0)
         self.OvrAcq.grid(row=1, column=0)
 

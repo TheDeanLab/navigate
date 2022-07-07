@@ -77,6 +77,44 @@ class Acquire_Bar_Controller(GUI_Controller):
         self.view.pull_down.bind('<<ComboboxSelected>>',self.update_microscope_mode)
         self.view.exit_btn.config(command=self.exit_program)
 
+    def update_determinate_progress_bar(self,
+                                        microscope_state,
+                                        images_received=100,
+                                        stop=False):
+        r"""Update progess bars.
+
+        Parameters
+        ----------
+        microscope_state : dict
+            State of the microscope.  Positions, channels, z-steps, etc.
+        images_received : int
+            Number of images received in the controller.
+        stop : bool
+            Stop flag to set back to 0.
+        """
+        num_channels = len([channel[-1] for channel in microscope_state['channels'].keys()])
+        # if microscope_state['is_multiposition'] == True:
+        #     number_of_positions = 1
+        # else:
+        #     number_of_positions = len(microscope_state['stage_positions'])
+        # print("Number of positions:", number_of_positions)
+        # TODO: Consider multiposition acquisition.
+        total_anticipated_images = num_channels * microscope_state['number_z_steps']
+        percent_complete = 100 * (images_received / total_anticipated_images)
+        self.view.OvrAcq['value'] = percent_complete
+        if stop is True:
+            self.view.OvrAcq.stop()
+
+
+    def start_progress_bar(self):
+        r"""Start moving the continuous progress bar.
+        Progress bar advances every interval of time milliseconds; Default is 50 ms."""
+        self.view.CurAcq.start()
+
+    def stop_progress_bar(self):
+        r"""Stop moving the continuous progress bar."""
+        self.view.CurAcq.stop()
+
     def set_mode(self,
                  mode):
         r"""Set imaging mode.

@@ -37,7 +37,7 @@ class LazyTiff:
         
         image_index = self._image_index
         if len(keys) == 0:
-            return self._image
+            return self._image.squeeze()
         elif len(keys) < 2:
             # Need to grab all of the files
             new_files = self._files
@@ -56,7 +56,6 @@ class LazyTiff:
                     self._image[...,i] = im
                     
         if len(keys) == 1:
-            return self._image[keys[0],...]
+            return self._image[keys[0],...].squeeze()
         
         return self._image[keys[0],keys[1],:].squeeze()
-        

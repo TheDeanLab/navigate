@@ -105,7 +105,6 @@ class Acquire_Bar_Controller(GUI_Controller):
         if stop is True:
             self.view.OvrAcq.stop()
 
-
     def start_progress_bar(self):
         r"""Start moving the continuous progress bar.
         Progress bar advances every interval of time milliseconds; Default is 50 ms."""

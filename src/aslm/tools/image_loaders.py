@@ -7,6 +7,18 @@ class LazyTiff:
         """
         Lazy-loads a folder containing a sequence of TIFF files using PIL.
         Assumes all TIFF files are single slices, with the same x and y dims.
+
+        Usage is, e.g.
+
+        low_res_fp = '/endosome/archive/MIL/marin/Zach/Lung/Alignment/AntiRFP/2022-07-02/Cell_001'
+
+        low_res = LazyTiff(fp)
+        imshow(low_res[:,:,500])
+
+        Parameters
+        ----------
+        fp : str
+            Path to folder containting sequence of TIFF (.tif) files.
         """
             
         # How many images in this sequence?

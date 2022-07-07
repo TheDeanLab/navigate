@@ -1,7 +1,4 @@
-"""
-ASLM sub-controller ETL popup window.
-
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -33,11 +30,14 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 
+# Standard Library Imports
+import logging
+
+# Third Party Imports
+
+# Local Imports
 from aslm.controller.sub_controllers.gui_controller import GUI_Controller
 from aslm.controller.aslm_controller_functions import combine_funcs
-
-
-import logging
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -45,24 +45,27 @@ logger = logging.getLogger(p)
 
 
 class Tiling_Wizard_Controller(GUI_Controller):
-    def __init__(self, view, parent_controller, verbose=False):
-        """
-        Controller for tiling wizard parameters.
+    """
+    Controller for tiling wizard parameters.
 
-        Parameters
-        ----------
-        view : object
-            GUI element containing widgets and variables to control. Likely tk.Toplevel-derived.
-        parent_controller : ASLM_controller
-            The main controller.
-        verbose : bool, default False
-            Display additional feedback in standard output.
+    Parameters
+    ----------
+    view : object
+        GUI element containing widgets and variables to control. Likely tk.Toplevel-derived.
+    parent_controller : ASLM_controller
+        The main controller.
+    verbose : bool, default False
+        Display additional feedback in standard output.
 
-        Returns
-        -------
-        None
-        """
+    Returns
+    -------
+    None
+    """
 
+    def __init__(self,
+                 view,
+                 parent_controller,
+                 verbose=False):
         super().__init__(view, parent_controller, verbose)
 
         # Getting widgets and buttons and vars of widgets

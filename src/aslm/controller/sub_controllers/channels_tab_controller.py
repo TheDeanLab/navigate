@@ -539,17 +539,18 @@ class Channels_Tab_Controller(GUI_Controller):
 
 
     def launch_tiling_wizard(self):
-        '''
-        Launches tiling wizard popup. 
+        r"""Launches tiling wizard popup.
 
         Will only launch when button in GUI is pressed, and will not duplicate. Pressing button again brings popup to top
-        '''
+        """
 
         if hasattr(self, 'tiling_wizard_controller'):
             self.tiling_wizard_controller.showup()
             return
         tiling_wizard_popup = tiling_wizard(self.view)
-        self.tiling_wizard_controller = Tiling_Wizard_Controller(tiling_wizard_popup, self, self.verbose)
+        self.tiling_wizard_controller = Tiling_Wizard_Controller(tiling_wizard_popup,
+                                                                 self,
+                                                                 self.verbose)
 
         # Add controller calls here
 

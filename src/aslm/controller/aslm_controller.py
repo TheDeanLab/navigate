@@ -578,10 +578,6 @@ class ASLM_controller:
             args[0] : string
                 string = 'continuous', 'z-stack', 'single', or 'projection'
             """
-
-            # Start continuous acquisition bar.
-            self.acquire_bar_controller.start_progress_bar()
-
             # Prepare data
             if not self.prepare_acquire_data():
                 self.acquire_bar_controller.stop_acquire()
@@ -651,7 +647,8 @@ class ASLM_controller:
             except RuntimeError:
                 e = RuntimeError
 
-    def capture_image(self, mode):
+    def capture_image(self,
+                      mode):
         r"""Trigger the model to capture images.
 
         Parameters
@@ -662,16 +659,17 @@ class ASLM_controller:
         self.camera_view_controller.image_count = 0
         active_channels = [channel[-1] for channel in self.experiment.MicroscopeState['channels'].keys()]
         num_channels = len(active_channels)
+
+        # Start up Progress Bars
         images_received = 0
+        self.acquire_bar_controller.progress_bar(self.experiment.MicroscopeState,
+                                                 mode=mode,
+                                                 images_received=0,
+                                                 stop=False)
         self.model.run_command(mode,
                                microscope_info=self.experiment.MicroscopeState,
                                camera_info=self.experiment.CameraParameters,
                                saving_info=self.experiment.Saving)
-
-        # Determinate Progress Bar
-        self.acquire_bar_controller.update_determinate_progress_bar(self.experiment.MicroscopeState,
-                                                                    images_received=0,
-                                                                    stop=False)
 
         while True:
             image_id = self.show_img_pipe.recv()
@@ -686,21 +684,20 @@ class ASLM_controller:
             self.camera_view_controller.display_image(
                 self.data_buffer[image_id],
                 active_channels[image_id % num_channels])
-
-            # Update determinate progress bar.
-            if mode == 'z-stack':
-                images_received += 1
-                self.acquire_bar_controller.update_determinate_progress_bar(self.experiment.MicroscopeState,
-                                                                            images_received=images_received,
-                                                                            stop=False)
+            images_received += 1
+            self.acquire_bar_controller.progress_bar(self.experiment.MicroscopeState,
+                                                     mode=mode,
+                                                     images_received=images_received,
+                                                     stop=False)
 
         logger.info(f"ASLM Controller - Captured {self.camera_view_controller.image_count}, {mode} Images")
         self.set_mode_of_sub('stop')
 
         # Stop Progress Bars
-        self.acquire_bar_controller.stop_progress_bar()
-        self.acquire_bar_controller.update_determinate_progress_bar(self.experiment.MicroscopeState,
-                                                                    stop=True)
+        self.acquire_bar_controller.progress_bar(self.experiment.MicroscopeState,
+                                                 mode,
+                                                 images_received=images_received,
+                                                 stop=True)
 
 
     def capture_autofocus_image(self):
@@ -739,10 +736,6 @@ class ASLM_controller:
         self.model.release_pipe('autofocus_plot_pipe')
         
         self.execute('stop_acquire')
-
-        # Stop Progress Bar
-        self.acquire_bar_controller.stop_progress_bar()
-
 
     def move_stage(self, pos_dict):
         r""" Trigger the model to move the stage.

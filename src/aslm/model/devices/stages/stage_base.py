@@ -177,8 +177,6 @@ class StageBase:
             int_pos = getattr(self, f"{ax}_pos") + getattr(self, f"int_{ax}_pos_offset")
             setattr(self, f"int_{ax}_pos", int_pos)
         self.create_internal_position_dict()
-        if self.verbose:
-            print("Stage Position: ", self.int_position_dict)
         logger.debug(f"Stage Position:, {self.int_position_dict}")
 
     def stop(self):

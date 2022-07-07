@@ -32,10 +32,10 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 import pandas as pd
 from pandastable import Table
+from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from .multi_position_table import Multi_Position_Table as MPTable
 import tkinter as tk
 from tkinter import ttk, Grid
-from tkinter.constants import NSEW
 import logging
 from pathlib import Path
 # Logger Setup
@@ -53,16 +53,42 @@ class multipoint_frame(ttk.Labelframe):
         Grid.columnconfigure(self, 'all', weight=1)
         Grid.rowconfigure(self, 'all', weight=1)
 
+        # Dict
+
+        self.buttons = {}
+
+
         # Save Data Label
-        label_position = 0
-        input_position = 4
         self.laser_label = ttk.Label(self, text='Enable')
-        self.laser_label.grid(row=0, column=label_position, sticky=(NSEW), padx=(4,1), pady=(4,6))
+        self.laser_label.grid(row=0, column=0, sticky=(tk.NSEW), padx=(4,1), pady=(4,6))
 
         # Save Data Checkbox
         self.on_off = tk.BooleanVar()
         self.save_check = ttk.Checkbutton(self, text='', variable=self.on_off)
-        self.save_check.grid(row=0, column=input_position, sticky=(NSEW), pady=(4,6))
+        self.save_check.grid(row=0, column=1, sticky=(tk.NSEW), pady=(4,6))
+
+        # Tiling Wizard Button
+        self.buttons["tiling"] = ttk.Button(self, text="Launch Tiling Wizard")
+        self.buttons["tiling"].grid(row=0, column=2, sticky=(tk.NSEW), padx=(10,0), pady=(4,6))
+
+        # Getters
+    def get_variables(self):
+        """
+        This function returns a dictionary of all the variables that are tied to each widget name.
+        The key is the widget name, value is the variable associated.
+        """
+        variables = {}
+        for key, widget in self.inputs.items():
+            variables[key] = widget.get_variable()
+        return variables
+
+    def get_widgets(self):
+        """
+        This function returns the dictionary that holds the input widgets.
+        The key is the widget name, value is the LabelInput class that has all the data.
+        """
+        return self.inputs
+
 
 class multipoint_list(ttk.Frame):
     """

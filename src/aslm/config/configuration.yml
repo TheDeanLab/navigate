@@ -183,7 +183,7 @@ StageParameters:
   y_max: 100000
   y_min: 2000
   z_max: 48500
-  z_min: 31500
+  z_min: 26000
   f_max: 100000
   f_min: 2000
   theta_max: 360

@@ -168,10 +168,10 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
     # Dynamic range checker
         if min_var:
             self.min_var = min_var
-            self.min_var.trace('w', self._set_minimum)
+            self.min_var.trace_add('w', self._set_minimum)
         if max_var:
             self.max_var = max_var
-            self.max_var.trace('w', self._set_maximum)
+            self.max_var.trace_add('w', self._set_maximum)
         self.focus_update_var = focus_update_var
         self.bind('<FocusOut>', self._set_focus_update_var)
 
@@ -341,10 +341,10 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         # Dynamic range checker
         if min_var:
             self.min_var = min_var
-            self.min_var.trace('w', self._set_minimum)
+            self.min_var.trace_add('w', self._set_minimum)
         if max_var:
             self.max_var = max_var
-            self.max_var.trace('w', self._set_maximum)
+            self.max_var.trace_add('w', self._set_maximum)
         self.focus_update_var = focus_update_var
         self.bind('<FocusOut>', self._set_focus_update_var)
 

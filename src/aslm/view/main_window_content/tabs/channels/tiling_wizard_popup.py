@@ -65,11 +65,11 @@ class tiling_wizard_popup():
                  *args,
                  **kwargs):
         # Creating popup window with this name and size/placement, PopUp is a
-        # Toplevel window
+        # Toplevel window #300x200 pixels, first +320 means 320 pixels from left edge, +180 means 180 pixels from top edge
         self.popup = PopUp(
             root,
             "Multiposition Tiling Wizard",
-            '550x550+330+180',
+            '1250x550+330+330',
             top=False,
             transient=False)
 
@@ -100,16 +100,6 @@ class tiling_wizard_popup():
         self.inputs = {}
         self.buttons = {}
 
-        # Lists for names and labels
-        btn_labels = ["Save to Disk",
-                      "Populate Multiposition Table",
-                      "Set X Start",
-                      "Set X End",
-                      "Set Y Start",
-                      "Set Y End",
-                      "Set Z Start",
-                      "Set Z End"]
-
         names = ["save",
                  "set_table",
                  "x_start",
@@ -126,6 +116,15 @@ class tiling_wizard_popup():
                        "z_dist",
                        "z_tiles"]
 
+        dist_labels = ["X Distance",
+                       "Num. Tiles",
+                       "Y Distance",
+                       "Num. Tiles",
+                       "Z Distance",
+                       "Num. Tiles",
+                       "Tot. Tiles"]
+
+
         data_labels = ["Step Size",
                        "Percent Overlay",
                        "Total Tiles"]
@@ -135,38 +134,85 @@ class tiling_wizard_popup():
                       "total_tiles"]
 
         # Action buttons
+        btn_labels = ["Save to Disk",
+                      "Populate Multiposition Table",
+                      "Set X Start",
+                      "Set X End",
+                      "Set Y Start",
+                      "Set Y End",
+                      "Set Z Start",
+                      "Set Z End"]
+
         for i in range(2):
-          self.buttons[names[i]] = ttk.Button(action_buttons, text=btn_labels[i])
-          self.buttons[names[i]].grid(row=0, column=i, sticky=tk.NSEW, padx=(5,0), pady=(5,0))
+          self.buttons[names[i]] = ttk.Button(action_buttons,
+                                              text=btn_labels[i])
+          self.buttons[names[i]].grid(row=0,
+                                      column=i,
+                                      sticky=tk.NSEW,
+                                      padx=(5,0),
+                                      pady=(5,0))
 
         # Position buttons
         for i in range(len(names)):
             if i > 1:
-              self.buttons[names[i]] = ttk.Button(pos_grid, text=btn_labels[i])
-              self.buttons[names[i]].grid(row=i - 2, column=0, sticky=tk.NSEW, padx=(5,0), pady=(5,0))
+              self.buttons[names[i]] = ttk.Button(pos_grid,
+                                                  text=btn_labels[i])
+              self.buttons[names[i]].grid(row=i - 2,
+                                          column=0,
+                                          sticky=tk.NSEW,
+                                          padx=(5,0),
+                                          pady=(5,0))
 
 
         # Position Spinboxes
         for i in range(len(names)):
             if i > 1:
-                self.inputs[names[i]] = LabelInput(parent=pos_grid, input_class=ValidatedSpinbox, input_var=tk.StringVar())
-                self.inputs[names[i]].grid(row=i - 2, column=1, sticky=(tk.NSEW), pady=(20,0), padx=5)
+                self.inputs[names[i]] = LabelInput(parent=pos_grid,
+                                                   input_class=ValidatedSpinbox,
+                                                   input_var=tk.StringVar())
+                self.inputs[names[i]].grid(row=i - 2,
+                                           column=1,
+                                           sticky=(tk.NSEW),
+                                           pady=(20,0),
+                                           padx=5)
                 self.inputs[names[i]].state(['disabled'])
 
         # Dist and Tile entries
         for i in range(len(entry_names)):
-            self.inputs[entry_names[i]] = LabelInput(parent=pos_grid, input_class=ValidatedEntry, input_var=tk.StringVar())
-            self.inputs[entry_names[i]].grid(row=i, column=2, sticky=tk.NSEW, padx=(5,0), pady=(17,0))
+            self.inputs[entry_names[i]] = LabelInput(parent=pos_grid,
+                                                     label=dist_labels[i],
+                                                     input_class=ValidatedEntry,
+                                                     input_var=tk.StringVar())
+            self.inputs[entry_names[i]].grid(row=i,
+                                             column=2,
+                                             sticky=tk.NSEW,
+                                             padx=(5,0),
+                                             pady=(17,0))
             self.inputs[entry_names[i]].state(['disabled'])
 
         # Data widgets
         for i in range(len(data_names)):
             if i < 2:
-                self.inputs[data_names[i]] = LabelInput(parent=data, label=data_labels[i], input_class=ValidatedEntry, input_var=tk.StringVar(), input_args={"width":5})
-                self.inputs[data_names[i]].grid(row=i, column=0, sticky=tk.NSEW, padx=(5,0), pady=(5,0))
+                self.inputs[data_names[i]] = LabelInput(parent=data,
+                                                        label=data_labels[i],
+                                                        input_class=ValidatedEntry,
+                                                        input_var=tk.StringVar(),
+                                                        input_args={"width":5})
+                self.inputs[data_names[i]].grid(row=i,
+                                                column=0,
+                                                sticky=tk.NSEW,
+                                                padx=(5,0),
+                                                pady=(5,0))
             else:
-                self.inputs[data_names[i]] = LabelInput(parent=data, label=data_labels[i], input_class=ValidatedEntry, input_var=tk.StringVar())
-                self.inputs[data_names[i]].grid(row=0, column=1, sticky=tk.NSEW, padx=(5,0), pady=(5,0))
+                self.inputs[data_names[i]] = LabelInput(parent=data,
+                                                        label=data_labels[i],
+                                                        input_class=ValidatedEntry,
+                                                        input_var=tk.StringVar())
+                self.inputs[data_names[i]].grid(row=0,
+                                                column=1,
+                                                sticky=tk.NSEW,
+                                                padx=(5,0),
+                                                pady=(5,0))
 
         # Formatting
         self.inputs["step_size"].widget.grid(padx=(25,0))

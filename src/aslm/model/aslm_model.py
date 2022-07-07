@@ -552,6 +552,7 @@ class Model:
         if self.camera.is_acquiring:
             self.camera.close_image_series()
         self.shutter.close_shutters()
+        self.laser_triggers.turn_off_lasers()
 
     def run_data_process(self, num_of_frames=0, data_func=None):
         r"""Run the data process.

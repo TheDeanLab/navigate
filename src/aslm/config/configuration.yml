@@ -49,7 +49,7 @@ DAQParameters:
 
 CameraParameters:
   # Hamamatsu Orca Flash 4.0
-  number_of_cameras: 1
+  number_of_cameras: 2
   high_serial_number: 302158
   low_serial_number: 302352
   x_pixels: 2048.0
@@ -178,12 +178,12 @@ StageParameters:
   y_load_position: 90000
 
   startfocus: 75000
-  x_max: 50000
-  x_min: 2000
+  x_max: 33500
+  x_min: 17000
   y_max: 100000
   y_min: 2000
-  z_max: 50000
-  z_min: 2000
+  z_max: 48500
+  z_min: 31500
   f_max: 100000
   f_min: 2000
   theta_max: 360
@@ -199,10 +199,10 @@ StageParameters:
   f_step: 500
 
   position: {
-    x_pos: 44500,
-    y_pos: 95000,
-    z_pos: 15500,
-    f_pos: 75000,
+    x_pos: 25250,
+    y_pos: 40000,
+    z_pos: 40000,
+    f_pos: 70000,
     theta_pos: 0
   }
   velocity: 1000

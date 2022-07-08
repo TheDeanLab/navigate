@@ -159,9 +159,9 @@ class Tiling_Wizard_Controller(GUI_Controller):
         -------
         None
         '''
-        x = self.variables['x_tiles'].get()
-        y = self.variables['y_tiles'].get()
-        z = self.variables['z_tiles'].get()
+        x = float(self.variables['x_tiles'].get())
+        y = float(self.variables['y_tiles'].get())
+        z = float(self.variables['z_tiles'].get())
         total_tiles = x + y + z
         self.variables['total_tiles'].set(total_tiles)
 
@@ -208,7 +208,7 @@ class Tiling_Wizard_Controller(GUI_Controller):
                 dist = float(self.variables[a + '_dist'].get())
                 fov = float(self.fov[a])
                 if fov != 0: 
-                    num_tiles = abs(( dist - (overlay * fov) ) /  ( fov * (1 - overlay) ))
+                    num_tiles = round(abs(( dist - (overlay * fov) ) /  ( fov * (1 - overlay) )))
                 else:
                     num_tiles = 0.0
                 self.variables[a + '_tiles'].set(num_tiles)
@@ -216,7 +216,7 @@ class Tiling_Wizard_Controller(GUI_Controller):
             dist = float(self.variables[axis + '_dist'].get())
             fov = float(self.fov[axis])
             if fov != 0: 
-                num_tiles = abs(( dist - (overlay * fov) ) /  ( fov * (1 - overlay) ))
+                num_tiles = round(abs(( dist - (overlay * fov) ) /  ( fov * (1 - overlay) )))
             else:
                 num_tiles = 0.0
             self.variables[axis + '_tiles'].set(num_tiles)

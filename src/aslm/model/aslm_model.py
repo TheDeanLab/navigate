@@ -515,7 +515,7 @@ class Model:
         update_stage_dict(self, pos_dict)
 
         # In the event we are in high res mode...
-        if self.experiment.MicroscopeState['resolution_mode'] == 'high':
+        if self.experiment.MicroscopeState['resolution_mode'] == 'high' and hasattr(self, 'stages_r'):
             # ...we will use stages_r as the focusing stage
             pop_ax = None
             for axis, val in pos_dict.items():
@@ -548,7 +548,7 @@ class Model:
             Dictionary of stage positions.
         """
         ret_pos_dict = self.stages.report_position()
-        if self.experiment.MicroscopeState['resolution_mode'] == 'high':
+        if self.experiment.MicroscopeState['resolution_mode'] == 'high' and hasattr(self, 'stages_r'):
             # replace with high res focus
             f_pos_dict = self.stages_r.report_position()
             ret_pos_dict['f_pos'] = f_pos_dict['f_pos']
@@ -560,7 +560,7 @@ class Model:
 
         """
         self.stages.stop()
-        if self.experiment.MicroscopeState['resolution_mode'] == 'high':
+        if self.experiment.MicroscopeState['resolution_mode'] == 'high' and hasattr(self, 'stages_r'):
             self.stages_r.stop()
 
     def end_acquisition(self):

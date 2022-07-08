@@ -154,10 +154,11 @@ class Model:
 
             'laser_triggers': ResultThread(target=startup_functions.start_laser_triggers,
                                            args=(self.configuration, self.experiment, self.verbose,)).start(),
-
-            'stages_r': ResultThread(target=startup_functions.start_stages_r,
-                                     args=(self.configuration, self.verbose,)).start(),
         }
+
+        if not args.synthetic_hardware:
+            threads_dict['stages_r'] = ResultThread(target=startup_functions.start_stages_r,
+                                                    args=(self.configuration, self.verbose,)).start()
 
         # Optionally start up multiple cameras
         # TODO: In the event two cameras are on, but we've only requested one, make sure it's the one with the

@@ -186,7 +186,7 @@ StageParameters:
   z_max: 50000
   z_min: 25000
   f_max: 100000
-  f_min: 2000
+  f_min: -100000
   theta_max: 360
   theta_min: 0
 
@@ -217,7 +217,7 @@ StageParameters:
   x_r_offset: 1660
   y_r_offset: 1950
   z_r_offset: -14560
-  f_r_offset: -660000
+  f_r_offset: -66000
   theta_r_offset: 0
 
 ZoomParameters:

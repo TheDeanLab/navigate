@@ -547,6 +547,11 @@ class Model:
             Dictionary of stage positions.
         """
         ret_pos_dict = self.stages.report_position()
+        if self.experiment.MicroscopeState['resolution_mode'] == 'high':
+            # replace with high res focus
+            f_pos_dict = self.stages_r.report_position()
+            ret_pos_dict['f_pos'] = f_pos_dict['f_pos']
+
         return ret_pos_dict
 
     def stop_stage(self):
@@ -842,7 +847,7 @@ class Model:
         stack_cycling_mode = microscope_state['stack_cycling_mode']
 
         # TODO: Make relative to stage coordinates.
-        self.stages.report_position()  # Update current position
+        self.get_stage_position()
         restore_z = self.stages.z_pos
 
         # z-positions
@@ -978,6 +983,9 @@ class Model:
                 new_pos = val + r_offset
                 if not initial:
                     new_pos -= l_offset
+                print(f'setting axis {ax} with val {val} to {new_pos} based on offsets {l_offset}, {r_offset}')
+                if ax == 'f':
+                    new_pos = 0
             else:
                 # we assume low res mode
                 new_pos = val + l_offset

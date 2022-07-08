@@ -179,11 +179,11 @@ StageParameters:
 
   startfocus: 75000
   x_max: 33500
-  x_min: 17000
+  x_min: 16000
   y_max: 100000
   y_min: 2000
-  z_max: 48500
-  z_min: 26000
+  z_max: 50000
+  z_min: 25000
   f_max: 100000
   f_min: 2000
   theta_max: 360
@@ -213,9 +213,9 @@ StageParameters:
   f_l_offset: 0
   theta_l_offset: 0
 
-  x_r_offset: 0
-  y_r_offset: 0
-  z_r_offset: 0
+  x_r_offset: 1660
+  y_r_offset: 1950
+  z_r_offset: -14560
   f_r_offset: 0
   theta_r_offset: 0
 

@@ -512,6 +512,8 @@ class ASLM_controller:
             self.camera_setting_controller.calculate_physical_dimensions(args[0])
             if hasattr(self, 'etl_controller') and self.etl_controller:
                 self.etl_controller.set_experiment_values(args[0])
+            ret_pos_dict = self.model.get_stage_position()
+            self.update_stage_gui_controller_silent(ret_pos_dict)
 
         elif command == 'set_save':
             r"""Set whether the image will be saved.

@@ -964,7 +964,7 @@ class Model:
                 if not initial:
                     new_pos -= r_offset
 
-            self.move_stage({f"{ax}_abs": new_pos})
+            self.move_stage({f"{ax}_abs": new_pos}, wait_until_done=True)
 
     def open_shutter(self):
         r"""Open the shutter according to the resolution mode.

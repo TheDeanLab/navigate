@@ -13,6 +13,7 @@ from enum import IntEnum
 
 __dll = ctypes.WinDLL("Thorlabs.MotionControl.KCube.InertialMotor.dll")
 
+
 class TLFTDICommunicationError(Exception):
     r"""Exception for Thorlabs FTDI communications module or supporting code."""
 
@@ -40,26 +41,28 @@ class FT_Status(IntEnum):
     FT_NoFunctionsAvailable = 17  # No functions available for this device
     FT_FunctionNotAvailable = 18  # The function is not available for this device.
     FT_BadFunctionPointer = 19  # Bad function pointer detected
-    FT_GenericFunctionFail = 20  # The function failed to complete succesfully
-    FT_SpecificFunctionFail = 21  # The function failed to complete succesfully
+    FT_GenericFunctionFail = 20  # The function failed to complete successfully.
+    FT_SpecificFunctionFail = 21  # The function failed to complete successfully.
 
 
 FT_Status_Description = {
     FT_Status.FT_OK: "No error",
     FT_Status.FT_InvalidHandle: "The FTDI functions have not been initialized.",
-    FT_Status.FT_DeviceNotFound: "The Device could not be found. This can be generated if the function TLI_BuildDeviceList() has not been called.",
+    FT_Status.FT_DeviceNotFound: "The Device could not be found. This can be generated if the function TLI_"
+                                 "BuildDeviceList() has not been called.",
     FT_Status.FT_DeviceNotOpened: "The Device must be opened before it can be accessed.",
     FT_Status.FT_IOError: "An I/O Error has occured in the FTDI chip.",
     FT_Status.FT_InsufficientResources: "There are Insufficient resources to run this application.",
     FT_Status.FT_InvalidParameter: "An invalid parameter has been supplied to the device.",
-    FT_Status.FT_DeviceNotPresent: "The Device is no longer present. The device may have been disconnected since the last TLI_BuildDeviceList() call.",
+    FT_Status.FT_DeviceNotPresent: "The Device is no longer present. The device may have been disconnected since the "
+                                   "last TLI_BuildDeviceList() call.",
     FT_Status.FT_IncorrectDevice: "The device detected does not match that expected.",
     FT_Status.FT_NoDLLLoaded: "The library for this device could not be found.",
     FT_Status.FT_FunctionNotAvailable: "The function is not available for this device.",
     FT_Status.FT_NoFunctionsAvailable: "No functions available for this device.",
     FT_Status.FT_BadFunctionPointer: "Bad function pointer detected.",
-    FT_Status.FT_GenericFunctionFail: "The function failed to complete succesfully.",
-    FT_Status.FT_SpecificFunctionFail: "The function failed to complete succesfully."
+    FT_Status.FT_GenericFunctionFail: "The function failed to complete successfully.",
+    FT_Status.FT_SpecificFunctionFail: "The function failed to complete successfully."
 }
 
 
@@ -103,8 +106,10 @@ class Motor_DLL_Error(IntEnum):
 Motor_DLL_Error_Description = {
     Motor_DLL_Error.TL_UNHOMED: "The device cannot perform this function until it has been Homed.",
     Motor_DLL_Error.TL_INVALID_POSITION: "The function cannot be performed as it would result in an illegal position.",
-    Motor_DLL_Error.TL_INVALID_VELOCITY_PARAMETER: "An invalid velocity parameter was supplied. The velocity must be greater than zero.",
-    Motor_DLL_Error.TL_CANNOT_HOME_DEVICE: "This device does not support Homing. Check the Limit switch parameters are correct.",
+    Motor_DLL_Error.TL_INVALID_VELOCITY_PARAMETER: "An invalid velocity parameter was supplied. The velocity must be "
+                                                   "greater than zero.",
+    Motor_DLL_Error.TL_CANNOT_HOME_DEVICE: "This device does not support Homing. Check the Limit switch parameters "
+                                           "are correct.",
     Motor_DLL_Error.TL_JOG_CONTINOUS_MODE: "An invalid jog mode was supplied for the jog function.",
     Motor_DLL_Error.TL_NO_MOTOR_INFO: "There is no Motor Parameters available to convert Real World Units.",
     Motor_DLL_Error.TL_CMD_TEMP_UNAVAILABLE: "Command temporarily unavailable, Device may be busy."

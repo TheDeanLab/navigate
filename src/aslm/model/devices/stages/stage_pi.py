@@ -135,32 +135,20 @@ class PIStage(StageBase):
             Was the move successful?
         """
 
+        axis_abs = self.get_abs_position(axis, move_dictionary)
+        if axis_abs == -1e50:
+            return False
+
+        # Move the stage
         try:
-            # Get all necessary attributes. If we can't we'll move to the error case.
-            axis_abs = move_dictionary[f"{axis}_abs"] - getattr(self, f"int_{axis}_pos_offset", 0)  # TODO: should we default to 0?
-            axis_min, axis_max = getattr(self, f"{axis}_min"), getattr(self, f"{axis}_max")
+            pos = axis_abs
+            if axis != 'theta':
+                pos /= 1000  # convert to mm
+            self.pidevice.MOV({axis_num: pos})
 
-            # Check that our position is within the axis bounds, fail if it's not.
-            if (axis_min > axis_abs) or (axis_max < axis_abs):
-                log_string = f"Absolute movement stopped: {axis} limit would be reached!" \
-                             "{axis_abs} is not in the range {axis_min} to {axis_max}."
-                logger.info(log_string)
-                print(log_string)
-                return
-
-            # Move the stage
-            try:
-                pos = axis_abs
-                if axis != 'theta':
-                    pos /= 1000  # convert to mm
-                self.pidevice.MOV({axis_num: pos})
-
-                return True
-            except GCSError as e:
-                logger.exception(GCSError(e))
-                return False
-
-        except (KeyError, AttributeError):
+            return True
+        except GCSError as e:
+            logger.exception(GCSError(e))
             return False
 
     def move_absolute(self, move_dictionary, wait_until_done=False):

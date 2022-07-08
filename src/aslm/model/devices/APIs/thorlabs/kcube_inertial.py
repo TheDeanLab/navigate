@@ -8,10 +8,10 @@ Tested on Thorlabs KIM001.
 
 import ctypes
 import ctypes.wintypes
-
 from enum import IntEnum
+from pathlib import Path
 
-__dll = ctypes.WinDLL("Thorlabs.MotionControl.KCube.InertialMotor.dll")
+__dll = ctypes.WinDLL("C:\Program Files\Thorlabs\Kinesis\Thorlabs.MotionControl.KCube.InertialMotor.dll")
 
 
 class TLFTDICommunicationError(Exception):

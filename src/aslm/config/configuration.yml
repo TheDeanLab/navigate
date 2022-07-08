@@ -6,6 +6,7 @@ Devices:
   etl: ETL  #ETL or SyntheticETL
   filter_wheel: SutterFilterWheel #SutterFilterWheel or SyntheticFilterWheel
   stage: PI  # PI or SyntheticStage
+  stage_r: Thorlabs  # Currently just a focusing unit for the right side
   zoom: DynamixelZoom  #DynamixelZoom or SyntheticZoom
   lasers: SyntheticLasers #Omicron or SyntheticLasers
   shutters: ThorlabsShutter #ThorlabsShutter or SyntheticShutter
@@ -216,7 +217,7 @@ StageParameters:
   x_r_offset: 1660
   y_r_offset: 1950
   z_r_offset: -14560
-  f_r_offset: 0
+  f_r_offset: -660000
   theta_r_offset: 0
 
 ZoomParameters:

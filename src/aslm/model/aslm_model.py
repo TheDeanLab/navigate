@@ -154,6 +154,9 @@ class Model:
 
             'laser_triggers': ResultThread(target=startup_functions.start_laser_triggers,
                                            args=(self.configuration, self.experiment, self.verbose,)).start(),
+
+            'stages_r': ResultThread(target=startup_functions.start_stages_r,
+                                     args=(self.configuration, self.verbose,)).start(),
         }
 
         # Optionally start up multiple cameras
@@ -506,11 +509,26 @@ class Model:
         success : bool
             Was the move successful?
         """
+
         # Update our local experiment parameters
         update_stage_dict(self, pos_dict)
+
+        # In the event we are in high res mode...
+        if self.experiment.MicroscopeState['resolution_mode'] == 'high':
+            # ...we will use stages_r as the focusing stage
+            pop_ax = None
+            for axis, val in pos_dict.items():
+                ax = axis.split('_')[0]
+                if ax == 'f':
+                    pop_ax = axis
+            if pop_ax is not None:
+                # remove f from the pos_dict and use a different stage to make it move
+                f_dict = {pop_ax: pos_dict.pop(pop_ax)}
+                success = self.stages_r.move_absolute(f_dict, wait_until_done)
+
         success = self.stages.move_absolute(pos_dict, wait_until_done)
-        ret_pos_dict = self.get_stage_position()  # This will always be behind because it gets the position
-                                                  # before movement is finished
+        # ret_pos_dict = self.get_stage_position()  # This will always be behind because it gets the position
+        #                                           # before movement is finished
         # if not success:
         #     # Record where we are now
         #     update_stage_dict(self, ret_pos_dict)
@@ -536,6 +554,8 @@ class Model:
 
         """
         self.stages.stop()
+        if self.experiment.MicroscopeState['resolution_mode'] == 'high':
+            self.stages_r.stop()
 
     def end_acquisition(self):
         r"""End the acquisition.

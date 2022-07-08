@@ -168,6 +168,29 @@ def start_stages(configuration, verbose):
         device_not_found(configuration.Devices['stage'])
 
 
+def start_stages_r(configuration, verbose):
+    r"""Initializes a focusing stage class in a dedicated thread.
+
+    Parameters
+    ----------
+    configuration : dict
+        Session instance of global microscope configuration.
+    verbose : Boolean
+        Flag for enabling verbose operation.
+
+    Returns
+    -------
+    Stage : class
+        Stage class.
+    """
+    if configuration.Devices['stage_r'] == 'Thorlabs' and platform.system() == 'Windows':
+        from aslm.model.devices.stages.stage_tl_kcube_inertial import TLKIMStage
+        from aslm.model.devices.APIs.thorlabs.kcube_inertial import TLFTDICommunicationError
+        return auto_redial(TLKIMStage, (configuration, verbose), exception=TLFTDICommunicationError)
+    else:
+        device_not_found(configuration.Devices['stage_r'])
+
+
 def start_zoom_servo(configuration, verbose):
     r"""Initializes the zoom class on a dedicated thread.
 

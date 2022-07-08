@@ -23,7 +23,8 @@ class TLKIMStage(StageBase):
 
         # Cheat for now by opening just the first stage of this type.
         # TODO: Pass this from the configuration file
-        self.serialnum = self.kim_controllerTLI_GetDeviceListExt().split(',')[0]
+        self.serialnum = self.kim_controller.TLI_GetDeviceListExt().split(',')[0]
+        print(f"KIM S/N: {self.serialnum}")
         self.kim_controller.KIM_Open(self.serialnum)
 
     def __del__(self):
@@ -70,7 +71,7 @@ class TLKIMStage(StageBase):
         if axis_abs == -1e50:
             return False
 
-        self.kim_controller.KIM_MoveAbsolute(self.serialnum, axis_num, axis_abs)
+        self.kim_controller.KIM_MoveAbsolute(self.serialnum, axis_num, int(axis_abs))
         return True
 
     def move_absolute(self, move_dictionary, wait_until_done=False):
@@ -97,7 +98,7 @@ class TLKIMStage(StageBase):
                 target_pos = move_dictionary[f"{ax}_abs"] - getattr(self, f"int_{ax}_pos_offset",
                                                                     0)  # TODO: should we default to 0?
                 while (stage_pos != target_pos) and (i < n_tries):
-                    stage_pos = self.kim_controller.KIM_GetCurrentPosition(self.serialnum, ax)
+                    stage_pos = self.kim_controller.KIM_GetCurrentPosition(self.serialnum, n)
                     i += 1
                     time.sleep(0.01)
                 if stage_pos != target_pos:
@@ -108,3 +109,27 @@ class TLKIMStage(StageBase):
     def stop(self):
         for i in self.kim_axes:
             self.kim_controller.KIM_MoveStop(self.serialnum, i)
+
+    def get_abs_position(self, axis, move_dictionary):
+        r"""
+        Hack in a lack of bounds checking. TODO: Don't do this.
+        """
+        try:
+            # Get all necessary attributes. If we can't we'll move to the error case.
+            axis_abs = move_dictionary[f"{axis}_abs"] - getattr(self, f"int_{axis}_pos_offset",
+                                                                0)  # TODO: should we default to 0?
+            # axis_min, axis_max = getattr(self, f"{axis}_min"), getattr(self, f"{axis}_max")
+            axis_min, axis_max = -1e6, 1e6
+
+            # Check that our position is within the axis bounds, fail if it's not.
+            if (axis_min > axis_abs) or (axis_max < axis_abs):
+                log_string = f"Absolute movement stopped: {axis} limit would be reached!" \
+                             "{axis_abs} is not in the range {axis_min} to {axis_max}."
+                logger.info(log_string)
+                print(log_string)
+                # Return a ridiculous value to make it clear we've failed.
+                # This is to avoid returning a duck type.
+                return -1e50
+            return axis_abs
+        except (KeyError, AttributeError):
+            return -1e50

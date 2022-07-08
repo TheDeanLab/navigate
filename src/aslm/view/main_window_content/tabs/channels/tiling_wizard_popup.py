@@ -197,6 +197,7 @@ class tiling_wizard_popup():
                                                 input_class=ValidatedSpinbox,
                                                 input_var=tk.StringVar(),
                                                 input_args={"width":5, "increment": 5, "from_": 0})
+        self.inputs['step_size'].widget.state(['disabled'])
         self.inputs['step_size'].grid(row=0,
                                         column=0,
                                         sticky=tk.NSEW,
@@ -217,6 +218,7 @@ class tiling_wizard_popup():
                                                 label="Total Tiles",
                                                 input_class=ValidatedEntry,
                                                 input_var=tk.StringVar())
+        self.inputs['total_tiles'].widget.state(['disabled'])
         self.inputs['total_tiles'].grid(row=0,
                                         column=1,
                                         sticky=tk.NSEW,

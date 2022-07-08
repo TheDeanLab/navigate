@@ -974,7 +974,12 @@ class Model:
         mode : str
             One of "high" or "low"
         """
-        pos_dict = self.get_stage_position()
+        if mode == 'high':
+            # grab only the 'low' position dictionary
+            pos_dict = self.stages.report_position()
+        else:
+            # We're switching back to low, grab the high info
+            pos_dict = self.get_stage_position()
         for axis, val in pos_dict.items():
             ax = axis.split('_')[0]
             l_offset = self.configuration.StageParameters.get(f"{ax}_l_offset", 0)
@@ -983,9 +988,6 @@ class Model:
                 new_pos = val + r_offset
                 if not initial:
                     new_pos -= l_offset
-                print(f'setting axis {ax} with val {val} to {new_pos} based on offsets {l_offset}, {r_offset}')
-                if ax == 'f':
-                    new_pos = 0
             else:
                 # we assume low res mode
                 new_pos = val + l_offset

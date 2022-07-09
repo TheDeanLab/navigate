@@ -154,8 +154,6 @@ class ASLM_controller:
                                                              self,
                                                              self.verbose)
 
-        self.camera_view_controller.populate_view()
-
         self.camera_setting_controller = Camera_Setting_Controller(self.view.settings.camera_settings_tab,
                                                                    self,
                                                                    self.verbose,

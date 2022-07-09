@@ -37,8 +37,14 @@ class TLKIMStage(StageBase):
         # position dictionary.
         """
         for i, ax in zip(self.kim_axes, self.axes):
-            pos = self.kim_controller.KIM_GetCurrentPosition(self.serialnum, i)
-            setattr(self, f"{ax}_pos", pos)
+            try:
+                # need to request before we get the current position
+                err = self.kim_controller.KIM_RequestCurrentPosition(self.serialnum, i)
+                pos = self.kim_controller.KIM_GetCurrentPosition(self.serialnum, i)
+                setattr(self, f"{ax}_pos", pos)
+            except (self.kim_controller.TLFTDICommunicationError, self.kim_controller.TLDLLError,
+                    self.kim_controller.TLMotorDLLError):
+                pass
 
         # Update internal dictionaries
         self.update_position_dictionaries()
@@ -118,6 +124,7 @@ class TLKIMStage(StageBase):
             # Get all necessary attributes. If we can't we'll move to the error case.
             axis_abs = move_dictionary[f"{axis}_abs"] - getattr(self, f"int_{axis}_pos_offset",
                                                                 0)  # TODO: should we default to 0?
+
             # axis_min, axis_max = getattr(self, f"{axis}_min"), getattr(self, f"{axis}_max")
             axis_min, axis_max = -1e6, 1e6
 

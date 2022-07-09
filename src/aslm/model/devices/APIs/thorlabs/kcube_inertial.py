@@ -276,6 +276,30 @@ class KIM_Channels(IntEnum):  # unsigned short
     Channel4 = 4
 
 
+__dll.KIM_RequestCurrentPosition.argtypes = [ctypes.c_char_p, ctypes.c_ushort]
+__dll.KIM_RequestCurrentPosition.restype = ctypes.c_int
+__dll.KIM_RequestCurrentPosition.errcheck = errcheck
+
+
+def KIM_RequestCurrentPosition(serial_no, channel):
+    r"""Gets current position.
+
+    Parmeters
+    ---------
+    serial_number : str
+        Serial number of Thorlabs Kinesis Inertial Motor (KIM) device.
+    channel : int
+        The device channel. One of KIM_Channels.
+
+    Returns
+    -------
+    int
+        The error code or 0 if successful.
+    """
+
+    return __dll.KIM_RequestCurrentPosition(serial_no.encode('ascii'), channel)
+
+
 __dll.KIM_GetCurrentPosition.argtypes = [ctypes.c_char_p, ctypes.c_ushort]
 __dll.KIM_GetCurrentPosition.restype = ctypes.c_int
 

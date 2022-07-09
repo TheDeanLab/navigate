@@ -761,6 +761,7 @@ class ASLM_controller:
     def stop_stage(self):
         self.model.stop_stage()
         ret_pos_dict = self.model.get_stage_position()
+        update_stage_dict(self, ret_pos_dict)
         self.update_stage_gui_controller_silent(ret_pos_dict)
 
     def update_stage_gui_controller_silent(self, ret_pos_dict):

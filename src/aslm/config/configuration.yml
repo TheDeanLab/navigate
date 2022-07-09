@@ -214,9 +214,9 @@ StageParameters:
   f_l_offset: 0
   theta_l_offset: 0
 
-  x_r_offset: 1660
-  y_r_offset: 1950
-  z_r_offset: -14560
+  x_r_offset: 1500
+  y_r_offset: 1720
+  z_r_offset: -14311
   f_r_offset: 0
   theta_r_offset: 0
 

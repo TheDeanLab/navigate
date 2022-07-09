@@ -556,12 +556,15 @@ class Model:
         return ret_pos_dict
 
     def stop_stage(self):
-        r"""Stop the stages. Grab the current position.
+        r"""Stop the stages.
 
         """
         self.stages.stop()
         if self.experiment.MicroscopeState['resolution_mode'] == 'high' and hasattr(self, 'stages_r'):
             self.stages_r.stop()
+
+        ret_pos_dict = self.get_stage_position()
+        update_stage_dict(self, ret_pos_dict)
 
     def end_acquisition(self):
         r"""End the acquisition.

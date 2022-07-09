@@ -975,12 +975,7 @@ class Model:
         mode : str
             One of "high" or "low"
         """
-        if mode == 'high':
-            # grab only the 'low' position dictionary
-            pos_dict = self.stages.report_position()
-        else:
-            # We're switching back to low, grab the high info
-            pos_dict = self.get_stage_position()
+        pos_dict = self.get_stage_position()
         for axis, val in pos_dict.items():
             ax = axis.split('_')[0]
             l_offset = self.configuration.StageParameters.get(f"{ax}_l_offset", 0)
@@ -990,12 +985,20 @@ class Model:
                 if not initial:
                     new_pos -= l_offset
             else:
-                # we assume low res mode
+                # we are moving to low res mode
                 new_pos = val + l_offset
                 if not initial:
                     new_pos -= r_offset
 
+            if hasattr(self, 'stages_r') and ax == 'f':
+                # Do not move the focus if we're using an entirely different stage
+                continue
+
             self.move_stage({f"{ax}_abs": new_pos}, wait_until_done=True)
+
+        # Update based on new focus
+        ret_pos_dict = self.get_stage_position()
+        update_stage_dict(self, ret_pos_dict)
 
     def open_shutter(self):
         r"""Open the shutter according to the resolution mode.

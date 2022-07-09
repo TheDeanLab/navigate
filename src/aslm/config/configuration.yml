@@ -217,7 +217,7 @@ StageParameters:
   x_r_offset: 1660
   y_r_offset: 1950
   z_r_offset: -14560
-  f_r_offset: -55400
+  f_r_offset: 0
   theta_r_offset: 0
 
 ZoomParameters:

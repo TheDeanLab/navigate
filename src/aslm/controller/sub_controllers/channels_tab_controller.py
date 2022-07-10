@@ -553,7 +553,7 @@ class Channels_Tab_Controller(GUI_Controller):
                                                                  self,
                                                                  self.verbose)
 
-        # Add controller calls here
+
 
 
     def load_positions(self):

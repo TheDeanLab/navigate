@@ -125,14 +125,6 @@ class tiling_wizard_popup():
                        "Tot. Tiles"]
 
 
-        data_labels = ["Step Size",
-                       "Percent Overlay",
-                       "Total Tiles"]
-
-        data_names = ["step_size",
-                      "percent_overlay",
-                      "total_tiles"]
-
         # Action buttons
         btn_labels = ["Save to Disk",
                       "Populate Multiposition Table",
@@ -175,7 +167,7 @@ class tiling_wizard_popup():
                                            sticky=(tk.NSEW),
                                            pady=(20,0),
                                            padx=5)
-                self.inputs[names[i]].state(['disabled'])
+                self.inputs[names[i]].widget.state(['disabled'])
 
         # Dist and Tile entries
         for i in range(len(entry_names)):
@@ -188,31 +180,50 @@ class tiling_wizard_popup():
                                              sticky=tk.NSEW,
                                              padx=(5,0),
                                              pady=(17,0))
-            self.inputs[entry_names[i]].state(['disabled'])
+            self.inputs[entry_names[i]].widget.state(['disabled'])
+
 
         # Data widgets
-        for i in range(len(data_names)):
-            if i < 2:
-                self.inputs[data_names[i]] = LabelInput(parent=data,
-                                                        label=data_labels[i],
-                                                        input_class=ValidatedEntry,
-                                                        input_var=tk.StringVar(),
-                                                        input_args={"width":5})
-                self.inputs[data_names[i]].grid(row=i,
-                                                column=0,
-                                                sticky=tk.NSEW,
-                                                padx=(5,0),
-                                                pady=(5,0))
-            else:
-                self.inputs[data_names[i]] = LabelInput(parent=data,
-                                                        label=data_labels[i],
-                                                        input_class=ValidatedEntry,
-                                                        input_var=tk.StringVar())
-                self.inputs[data_names[i]].grid(row=0,
-                                                column=1,
-                                                sticky=tk.NSEW,
-                                                padx=(5,0),
-                                                pady=(5,0))
+        data_labels = ["Step Size",
+                       "Percent Overlay",
+                       "Total Tiles"]
+
+        data_names = ["step_size",
+                      "percent_overlay",
+                      "total_tiles"]
+                      
+        self.inputs['step_size'] = LabelInput(parent=data,
+                                                label="Step Size",
+                                                input_class=ValidatedSpinbox,
+                                                input_var=tk.StringVar(),
+                                                input_args={"width":5, "increment": 5, "from_": 0})
+        self.inputs['step_size'].widget.state(['disabled'])
+        self.inputs['step_size'].grid(row=0,
+                                        column=0,
+                                        sticky=tk.NSEW,
+                                        padx=(5,0),
+                                        pady=(5,0))
+        self.inputs['percent_overlay'] = LabelInput(parent=data,
+                                                label="Percent Overlay",
+                                                input_class=ValidatedSpinbox,
+                                                input_var=tk.StringVar(),
+                                                input_args={"width":5, "increment": 5, "from_": 0, "to": 100})
+        self.inputs['percent_overlay'].grid(row=1,
+                                        column=0,
+                                        sticky=tk.NSEW,
+                                        padx=(5,0),
+                                        pady=(5,0))
+    
+        self.inputs['total_tiles'] = LabelInput(parent=data,
+                                                label="Total Tiles",
+                                                input_class=ValidatedEntry,
+                                                input_var=tk.StringVar())
+        self.inputs['total_tiles'].widget.state(['disabled'])
+        self.inputs['total_tiles'].grid(row=0,
+                                        column=1,
+                                        sticky=tk.NSEW,
+                                        padx=(5,0),
+                                        pady=(5,0))
 
         # Formatting
         self.inputs["step_size"].widget.grid(padx=(25,0))

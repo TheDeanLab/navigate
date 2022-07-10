@@ -154,8 +154,6 @@ class ASLM_controller:
                                                              self,
                                                              self.verbose)
 
-        self.camera_view_controller.populate_view()
-
         self.camera_setting_controller = Camera_Setting_Controller(self.view.settings.camera_settings_tab,
                                                                    self,
                                                                    self.verbose,
@@ -512,6 +510,9 @@ class ASLM_controller:
             self.camera_setting_controller.calculate_physical_dimensions(args[0])
             if hasattr(self, 'etl_controller') and self.etl_controller:
                 self.etl_controller.set_experiment_values(args[0])
+            ret_pos_dict = self.model.get_stage_position()
+            update_stage_dict(self, ret_pos_dict)
+            self.update_stage_gui_controller_silent(ret_pos_dict)
 
         elif command == 'set_save':
             r"""Set whether the image will be saved.
@@ -764,6 +765,7 @@ class ASLM_controller:
     def stop_stage(self):
         self.model.stop_stage()
         ret_pos_dict = self.model.get_stage_position()
+        update_stage_dict(self, ret_pos_dict)
         self.update_stage_gui_controller_silent(ret_pos_dict)
 
     def update_stage_gui_controller_silent(self, ret_pos_dict):

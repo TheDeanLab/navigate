@@ -674,19 +674,26 @@ class ASLM_controller:
                                saving_info=self.experiment.Saving)
 
         while True:
+            # Receive the Image and log it.
             image_id = self.show_img_pipe.recv()
             logger.info(f"ASLM Controller - Received Image: {image_id}")
+
             if image_id == 'stop':
                 self.set_mode_of_sub('stop')
-                # self.execute('stop_acquire')
                 break
             if not isinstance(image_id, int):
                 logger.debug(f"ASLM Controller - Something wrong happened, stop the model!, {image_id}")
                 self.execute('stop_acquire')
+
+            # Display the Image in the View
             self.camera_view_controller.display_image(
-                self.data_buffer[image_id],
-                active_channels[image_id % num_channels])
+                image=self.data_buffer[image_id],
+                microscope_state=self.experiment.MicroscopeState,
+                channel_id=active_channels[image_id % num_channels],
+                images_received=images_received)
             images_received += 1
+
+            # Update progress bar.
             self.acquire_bar_controller.progress_bar(images_received=images_received,
                                                      microscope_state=self.experiment.MicroscopeState,
                                                      mode=mode,

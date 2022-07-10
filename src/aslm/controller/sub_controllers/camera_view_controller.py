@@ -82,8 +82,9 @@ class Camera_View_Controller(GUI_Controller):
         self.image_palette['Gradient'].widget.config(command=self.update_LUT)
         self.image_palette['Rainbow'].widget.config(command=self.update_LUT)
 
-        # Transpose binding
+        # Transpose and live bindings
         self.image_palette['Flip XY'].widget.config(command=self.transpose_image)
+        self.view.live_frame.live.bind("<<ComboboxSelected>>", self.update_display_state)
 
         # Left Click Binding
         self.canvas.bind("<Button-1>", self.left_click)
@@ -118,6 +119,7 @@ class Camera_View_Controller(GUI_Controller):
         self.apply_cross_hair = True
         self.mode = 'stop'
         self.transpose = False
+        self.display_state = "Live"
 
         # Colormap Information
         self.colormap = 'gray'
@@ -135,6 +137,24 @@ class Camera_View_Controller(GUI_Controller):
         self.zoom_y_pos = 0
         self.original_image_height = None
         self.original_image_width = None
+        self.number_of_slices = 0
+        self.image_volume = None
+        self.total_images_per_volume = None
+        self.number_of_channels = None
+
+    def update_display_state(self, event):
+        r"""Image Display Combobox Called.
+
+        Sets self.display_state to desired display format.
+
+        Parameters
+        ----------
+        event : tk.event
+            Tk event object.
+
+        """
+        self.display_state = self.view.live_frame.live.get()
+
 
     def get_absolute_position(self):
         x = self.parent_controller.view.winfo_pointerx()
@@ -382,7 +402,9 @@ class Camera_View_Controller(GUI_Controller):
 
     def display_image(self,
                       image,
-                      channel_id=1):
+                      microscope_state,
+                      channel_id=1,
+                      images_received=0):
         r"""Displays a camera image using the Lookup Table specified in the View.
 
         If Autoscale is selected, automatically calculates the min and max values for the data.
@@ -395,44 +417,75 @@ class Camera_View_Controller(GUI_Controller):
         channel_id : int
             Channel ID.
         """
+
         # Place image in memory
         if self.transpose:
             self.image = image.T
         else:
             self.image = image
 
-        # Place original image dimensions in memory
+        # Save image dimensions to memory.
         (self.original_image_height, self.original_image_width) = np.shape(self.image)
 
-        # Digital zoom.
-        self.digital_zoom()
+        # For first image received, pre-allocate memory/arrays.
+        if images_received == 0:
+            self.number_of_channels = len([channel[-1] for channel in microscope_state['channels'].keys()])
+            self.number_of_slices = microscope_state['number_z_steps']
+            self.total_images_per_volume = number_of_channels * self.number_of_slices
 
-        # Detect saturated pixels
-        self.detect_saturation()
+            for channel in number_of_channels:
+                self.image_volume[channel] = np.zeros(self.original_image_height,
+                                                      self.original_image_width,
+                                                      self.number_of_slices)
 
-        # Down-sample Image for display
-        self.down_sample_image()
+        # Store each image to the pre-allocated memory. Requires knowledge of how images are received.
+        if microscope_state['stack_cycling_mode'] == 'per_stack':
+            pass
 
-        # Scale image to [0, 1] values
-        self.scale_image_intensity()
+        if microscope_state['stack_cycling_mode'] == 'per_z':
+            # Every image that comes in will be the next channel.
+            pass
 
-        #  Update the GUI according to the instantaneous or rolling average max counts.
-        self.update_max_counts()
+        # MIP Display Mode
+        if self.display_state != 'Live:':
+            if self.display_state == 'XY MIP':
+                pass
+            if self.display_state == 'YZ MIP':
+                pass
+            if self.display_state == 'ZY MIP':
+                pass
 
-        # Add Cross-Hair
-        self.add_crosshair()
+        # Live Display Mode
+        else:
+            # Digital zoom.
+            self.digital_zoom()
 
-        #  Apply Lookup Table
-        self.apply_LUT()
+            # Detect saturated pixels
+            self.detect_saturation()
 
-        # Create ImageTk.PhotoImage
-        self.populate_image()
+            # Down-sample Image for display
+            self.down_sample_image()
 
-        # Update Channel Index
-        self.image_metrics['Channel'].set(channel_id)
+            # Scale image to [0, 1] values
+            self.scale_image_intensity()
 
-        # Iterate Image Count for Rolling Average
-        self.image_count = self.image_count + 1
+            #  Update the GUI according to the instantaneous or rolling average max counts.
+            self.update_max_counts()
+
+            # Add Cross-Hair
+            self.add_crosshair()
+
+            #  Apply Lookup Table
+            self.apply_LUT()
+
+            # Create ImageTk.PhotoImage
+            self.populate_image()
+
+            # Update Channel Index
+            self.image_metrics['Channel'].set(channel_id)
+
+            # Iterate Image Count for Rolling Average
+            self.image_count = self.image_count + 1
 
     def add_crosshair(self):
         r"""Adds a cross-hair to the image.

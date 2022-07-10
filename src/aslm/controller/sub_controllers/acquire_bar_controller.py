@@ -77,12 +77,12 @@ class Acquire_Bar_Controller(GUI_Controller):
         self.view.pull_down.bind('<<ComboboxSelected>>',self.update_microscope_mode)
         self.view.exit_btn.config(command=self.exit_program)
 
-    def start_progress_bar(self,
-                           images_received,
-                           microscope_state,
-                           mode,
-                           stop=False):
-        r"""Update progess bars.
+    def progress_bar(self,
+                     images_received,
+                     microscope_state,
+                     mode,
+                     stop=False):
+        r"""Update progress bars.
 
         Parameters
         ----------

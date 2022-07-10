@@ -662,9 +662,11 @@ class ASLM_controller:
 
         # Start up Progress Bars
         images_received = 0
-        self.acquire_bar_controller.update_determinate_progress_bar(self.experiment.MicroscopeState,
-                                                                    images_received=0,
-                                                                    stop=False)
+        self.acquire_bar_controller.start_progress_bar(images_received=images_received,
+                                                       microscope_state=self.experiment.MicroscopeState,
+                                                       mode=mode,
+                                                       stop=False)
+
         self.model.run_command(mode,
                                microscope_info=self.experiment.MicroscopeState,
                                camera_info=self.experiment.CameraParameters,
@@ -684,17 +686,19 @@ class ASLM_controller:
                 self.data_buffer[image_id],
                 active_channels[image_id % num_channels])
             images_received += 1
-            self.acquire_bar_controller.update_determinate_progress_bar(self.experiment.MicroscopeState,
-                                                                        images_received=images_received,
-                                                                        stop=False)
+            self.acquire_bar_controller.start_progress_bar(images_received,
+                                                           self.experiment.MicroscopeState,
+                                                           mode,
+                                                           stop=False)
 
         logger.info(f"ASLM Controller - Captured {self.camera_view_controller.image_count}, {mode} Images")
         self.set_mode_of_sub('stop')
 
         # Stop Progress Bars
-        self.acquire_bar_controller.update_determinate_progress_bar(self.experiment.MicroscopeState,
-                                                                    images_received=images_received,
-                                                                    stop=True)
+        self.acquire_bar_controller.start_progress_bar(images_received,
+                                                       self.experiment.MicroscopeState,
+                                                       mode,
+                                                       stop=True)
 
     def capture_autofocus_image(self):
         r"""Trigger model to capture a single image

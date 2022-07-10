@@ -55,10 +55,10 @@ class Multi_Position_Controller(GUI_Controller):
                  view,
                  parent_controller=None,
                  verbose=None):
-        super().__init__(view, parent_controller, verbose)
-
+        super().__init__(view,
+                         parent_controller,
+                         verbose)
         self.table = self.view.pt
-
         self.table.rowheader.bind("<Double-Button-1>", self.handle_double_click)
         self.table.loadCSV = self.load_csv_func
         self.table.exportCSV = self.export_csv_func

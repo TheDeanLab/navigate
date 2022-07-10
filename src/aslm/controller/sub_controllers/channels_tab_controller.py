@@ -217,6 +217,7 @@ class Channels_Tab_Controller(GUI_Controller):
         microscope_state['stack_cycling_mode'] = 'per_stack' if self.stack_cycling_val.get() == 'Per Stack' else 'per_z'
         microscope_state['stack_z_origin'] = self.z_origin
         microscope_state['stack_focus_origin'] = self.focus_origin
+        microscope_state['is_multiposition'] = self.is_multiposition_val.get()
 
         # TODO: get_info acts a setter here
         r1 = self.get_info(self.stack_acq_vals, microscope_state)  # update MicroscopeState with everything in stack_acq_vals

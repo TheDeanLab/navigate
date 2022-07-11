@@ -23,7 +23,7 @@ class TLKIMStage(StageBase):
 
         # Cheat for now by opening just the first stage of this type.
         # TODO: Pass this from the configuration file
-        self.serialnum = self.kim_controller.TLI_GetDeviceListExt().split(',')[0]
+        self.serialnum = self.kim_controller.TLI_GetDeviceListExt()[0]
         print(f"KIM S/N: {self.serialnum}")
         self.kim_controller.KIM_Open(self.serialnum)
 

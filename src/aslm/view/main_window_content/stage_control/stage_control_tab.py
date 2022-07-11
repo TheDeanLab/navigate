@@ -62,13 +62,13 @@ class stage_control_tab(ttk.Frame):
         self.position_frame = position_frame(self)
 
         #XY Frame
-        #stage_control_tab.xy_frame = x_y_frame(stage_control_tab)
+        self.xy_frame = x_y_frame(self)
         
         #X Frame
-        stage_control_tab.x_frame = other_axis_frame(stage_control_tab, 'X')        
+        # stage_control_tab.x_frame = other_axis_frame(stage_control_tab, 'X')        
         
-        #Y Frame
-        stage_control_tab.y_frame = other_axis_frame(stage_control_tab, 'Y')
+        # #Y Frame
+        # stage_control_tab.y_frame = other_axis_frame(stage_control_tab, 'Y')
 
          #Z Frame
         self.z_frame = other_axis_frame(self, 'Z')

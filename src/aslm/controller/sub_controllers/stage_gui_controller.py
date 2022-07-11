@@ -38,11 +38,7 @@ logger = logging.getLogger(p)
 
 
 class Stage_GUI_Controller(GUI_Controller):
-    def __init__(self,
-                 view,
-                 parent_controller,
-                 verbose=False,
-                 configuration_controller=None):
+    def __init__(self, view, parent_view, canvas, parent_controller, verbose=False, configuration_controller=None):
         super().__init__(view, parent_controller, verbose)
 
         self.event_id = {
@@ -71,10 +67,10 @@ class Stage_GUI_Controller(GUI_Controller):
             'theta': 10000,
             'f': 10000
         }
-
         # variables
         self.widget_vals = self.view.get_variables()
-     
+                #binding mouse wheel event on camera viewcanvas")
+                
         # gui event bind
         buttons = self.view.get_buttons()
         for k in buttons:
@@ -98,6 +94,46 @@ class Stage_GUI_Controller(GUI_Controller):
 
         if configuration_controller:
             self.initialize(configuration_controller)
+        #binding mouse wheel event on camera view
+        self.count = 0
+        self.mouse_scrolls = 0
+        self.canvas = canvas
+        self.canvas.bind("<Enter>", self.on_enter)
+        self.canvas.bind("<Leave>", self.on_leave)
+        #WASD key movement
+        self.parent_view.root.bind("<Key>", self.key_press)
+   
+def on_enter(self, event):
+    self.canvas.bind("<MouseWheel>", self.update_position)
+
+def on_leave(self, event):
+    self.count = 0
+    self.mouse_scrolls = 0
+
+def update_position(self, event):
+    self.mouse_scrolls += 1
+    if self.mouse_scrolls % 2 == 0:
+        position_o = self.get_position()
+        self.count += event.delta
+        updated_position = position_o
+        updated_position["f"] += self.count
+        self.set_position(updated_position)
+    
+def key_press(self, event):
+    char = event.char
+    position_o = self.get_position()
+    current_position = position_o
+    x_increment = self.widget_vals["x_step"].get()
+    y_increment = self.widget_vals["y_step"].get()
+    if char.lower() == "w":
+        current_position['y'] += y_increment
+    elif char.lower() == "a":
+        current_position['x'] -= x_increment
+    elif char.lower() == "s":
+        current_position['y'] -= y_increment
+    elif char.lower() == "d":
+        current_position['x'] += x_increment
+    self.stage_gui_controller.set_position(current_position)
 
     def initialize(self, config):
         r"""Initialize the Stage limits of steps and positions
@@ -116,7 +152,7 @@ class Stage_GUI_Controller(GUI_Controller):
             widgets[axis].widget.max = self.position_max[axis]
 
         # set step limits
-        for k in ['xy_step', 'z_step', 'theta_step', 'f_step']:
+        for k in ['x_step', 'y_step', 'z_step', 'theta_step', 'f_step']:
             widgets[k].widget.configure(from_=config.configuration.GUIParameters['stage'][k]['min'])
             widgets[k].widget.configure(to=config.configuration.GUIParameters['stage'][k]['max'])
             widgets[k].widget.configure(increment=config.configuration.GUIParameters['stage'][k]['step'])
@@ -174,7 +210,7 @@ class Stage_GUI_Controller(GUI_Controller):
         
         # get step value
         try:
-            for axis in ['xy', 'z', 'theta', 'f']:
+            for axis in ['x', 'y', 'z', 'theta', 'f']:
                 setting_dict[axis+'_step'] = self.widget_vals[axis+'_step'].get()
         except:
             return False
@@ -248,10 +284,7 @@ class Stage_GUI_Controller(GUI_Controller):
             Function for setting desired stage positions in the View.
         """
         position_val = self.widget_vals[axis]
-        if axis == 'x' or axis == 'y':
-            step_val = self.widget_vals['xy_step']
-        else:
-            step_val = self.widget_vals[axis+'_step']
+        step_val = self.widget_vals[axis+'_step']
 
         def handler():
             # guarantee stage won't move out of limits
@@ -282,10 +315,7 @@ class Stage_GUI_Controller(GUI_Controller):
             Function for setting desired stage positions in the View.
         """
         position_val = self.widget_vals[axis]
-        if axis == 'x' or axis == 'y':
-            step_val = self.widget_vals['xy_step']
-        else:
-            step_val = self.widget_vals[axis+'_step']
+        step_val = self.widget_vals[axis+'_step']
 
         def handler():
             # guarantee stage won't move out of limits
@@ -391,3 +421,7 @@ class Stage_GUI_Controller(GUI_Controller):
             self.show_verbose_info('Stage position changed')
         
         return handler
+
+
+
+ 

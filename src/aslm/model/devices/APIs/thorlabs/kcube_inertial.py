@@ -172,6 +172,21 @@ def TLI_BuildDeviceList():
     return __dll.TLI_BuildDeviceList()
 
 
+__dll.TLI_GetDeviceListSize.restype = ctypes.c_short
+
+
+def TLI_GetDeviceListSize():
+    r"""
+    Gets the device list size.
+
+    Returns
+    -------
+    int
+        Number of devices in device list.
+    """
+    return __dll.TLI_GetDeviceListSize()
+
+
 __dll.TLI_GetDeviceListExt.argtypes = [ctypes.c_char_p, ctypes.wintypes.DWORD]
 __dll.TLI_GetDeviceListExt.restype = ctypes.c_short
 __dll.TLI_GetDeviceListExt.errcheck = errcheck
@@ -182,15 +197,41 @@ def TLI_GetDeviceListExt():
 
     Returns
     -------
-    str
-        List of device serial numbers.
+    List
+        List of device serial numbers as strings.
     """
 
-    c_buf_len = 256  # TODO: What size should this be?
+    c_buf_len = 256
     c_buf = ctypes.create_string_buffer(c_buf_len)
     __dll.TLI_GetDeviceListExt(c_buf, c_buf_len)
 
-    return str(c_buf.value.decode(CODING))
+    return str(c_buf.value.decode(CODING)).split(',')[:-1]
+
+
+__dll.TLI_GetDeviceListByTypeExt.argtypes = [ctypes.c_char_p, ctypes.wintypes.DWORD, ctypes.c_int]
+__dll.TLI_GetDeviceListByTypeExt.restype = ctypes.c_short
+__dll.TLI_GetDeviceListByTypeExt.errcheck = errcheck
+
+
+def TLI_GetDeviceListByTypeExt(type_id):
+    r"""Get the contents of the device list which match the supplied type_id.
+
+    Parameters
+    ----------
+    type_id : int
+        Device type.
+
+    Returns
+    -------
+    List
+        List of device serial numbers as strings.
+    """
+
+    c_buf_len = 256
+    c_buf = ctypes.create_string_buffer(c_buf_len)
+    __dll.TLI_GetDeviceListByTypeExt(c_buf, c_buf_len, type_id)
+
+    return str(c_buf.value.decode(CODING)).split(',')[:-1]
 
 
 class MOT_MotorTypes(IntEnum):
@@ -211,7 +252,7 @@ class TLI_DeviceInfo(ctypes.Structure):
         ("serialNo", ctypes.c_char * 16),         # The device serial number.
         ("PID", ctypes.wintypes.DWORD),           # The USB PID number.
         ("isKnownType", ctypes.wintypes.BOOL),    # True if this object is a type known to the Motion Control software.
-        ("motorType", ctypes.c_int),              # The motor type (if a motor). One of MOT_MotorTypes
+        ("motorType", ctypes.c_int),              # The motor type (if a motor)
         ("isPiezoDevice", ctypes.wintypes.BOOL),  # True if the device is a piezo device.
         ("isLaser", ctypes.wintypes.BOOL),        # True if the device is a laser.
         ("isCustomType", ctypes.wintypes.BOOL),   # True if the device is a custom type.
@@ -222,7 +263,6 @@ class TLI_DeviceInfo(ctypes.Structure):
 
 __dll.TLI_GetDeviceInfo.argtypes = [ctypes.c_char_p, ctypes.POINTER(TLI_DeviceInfo)]
 __dll.TLI_GetDeviceInfo.restype = ctypes.c_short
-__dll.TLI_GetDeviceInfo.errcheck = errcheck
 
 
 def TLI_GetDeviceInfo(serial_no):
@@ -243,7 +283,7 @@ def TLI_GetDeviceInfo(serial_no):
 
     info = TLI_DeviceInfo()
 
-    __dll.TLI_GetDeviceInfo(serial_no.encode(CODING), ctypes.byref(info))
+    __dll.TLI_GetDeviceInfo(serial_no.encode(CODING), ctypes.byref(info))  # 1 if successful, 0 if not
 
     return info
 
@@ -409,16 +449,43 @@ def KIM_MoveAbsolute(serial_no, channel, position):
     return __dll.KIM_MoveAbsolute(serial_no.encode(CODING), channel, position)
 
 
+__dll.KIM_SetPosition.argtypes = [ctypes.c_char_p, ctypes.c_ushort, ctypes.c_long]
+__dll.KIM_SetPosition.restype = ctypes.c_short
+__dll.KIM_SetPosition.errcheck = errcheck
+
+
+def KIM_SetPosition(serial_no, channel, position):
+    r"""Set the current position to position.
+
+    Parmeters
+    ---------
+    serial_number : str
+        Serial number of Thorlabs Kinesis Inertial Motor (KIM) device.
+    channel : int
+        The device channel. One of KIM_Channels.
+    position : int
+        The value the current position is mapped to.
+
+    Returns
+    -------
+    int
+        The error code or 0 if successful.
+    """
+
+    return __dll.KIM_SetPosition(serial_no.encode(CODING), channel, position)
+
+
 class KIM_TravelDirection(IntEnum):  # byte
     Forward = 1  # An enum constant representing the forward option.
     Reverse = 2  # An enum constant representing the reverse option.
+
 
 __dll.KIM_MoveJog.argtypes = [ctypes.c_char_p, ctypes.c_ushort, ctypes.c_byte]
 __dll.KIM_MoveJog.restype = ctypes.c_short
 __dll.KIM_MoveJog.errcheck = errcheck
 
 
-def KIM_MoveAbsolute(serial_no, channel, jog_direction):
+def KIM_MoveJog(serial_no, channel, jog_direction):
     r"""Move jog.
 
     Parmeters

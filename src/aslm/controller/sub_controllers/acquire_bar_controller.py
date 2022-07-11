@@ -264,8 +264,6 @@ class Acquire_Bar_Controller(GUI_Controller):
             Imaging Mode.
         """
         self.mode = self.mode_dict[self.view.pull_down.get()]
-<<<<<<< HEAD
-<<<<<<< HEAD
         if self.mode not in ["z-stack", "projection"]: 
             self.parent_view.stack_acq_frame.step_size_spinbox['state'] = "disabled"
             self.parent_view.stack_acq_frame.start_pos_spinbox['state'] = "disabled"
@@ -276,9 +274,7 @@ class Acquire_Bar_Controller(GUI_Controller):
             self.parent_view.stack_acq_frame.start_pos_spinbox['state'] = "normal"
             self.parent_view.stack_acq_frame.end_pos_spinbox['state'] = "normal"
             self.parent_view.stack_acq_frame.slice_spinbox['state'] = "normal"
-=======
->>>>>>> parent of ef3d79c (Greyed out timepoints settings (#135))
-=======
+
         if self.mode in ["live", "Alignment"]: # need to get alignment
             self.parent_view.stack_timepoint_frame.save_check['state'] = "disabled"
             self.parent_view.stack_timepoint_frame.exp_time_spinbox['state'] = "disabled"
@@ -286,7 +282,7 @@ class Acquire_Bar_Controller(GUI_Controller):
             self.parent_view.stack_timepoint_frame.stack_pause_spinbox['state'] = "disabled"
             self.parent_view.stack_timepoint_frame.timepoint_interval_spinbox['state'] = "disabled"
             self.parent_view.stack_timepoint_frame.total_time_spinval['state'] = "disabled"
->>>>>>> parent of 31d6422 (Greyed out stack acq settings (#136))
+
         self.show_verbose_info("The Microscope State is now:", self.get_mode())
 
     def update_file_type(self,

@@ -33,8 +33,9 @@ POSSIBILITY OF SUCH DAMAGE.
 from tkinter import *
 import tkinter as tk
 from tkinter import ttk
+from tokenize import String
 # import logging
-from aslm.view.custom_widgets.validation import ValidatedSpinbox
+from aslm.view.custom_widgets.validation import ValidatedCombobox, ValidatedSpinbox
 from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 
 # Logger Setup
@@ -61,12 +62,14 @@ class stack_acq_frame(ttk.Labelframe):
         self.start_pos_frame = ttk.Frame(self)
         self.end_pos_frame = ttk.Frame(self)
         self.slice_frame = ttk.Frame(self)
+        self.cycling_frame = ttk.Frame(self)
 
         # Gridding Each Holder Frame
         self.start_pos_frame.grid(row=0, column=0, sticky=NSEW)
         self.end_pos_frame.grid(row=0, column=1, sticky=NSEW)
         self.step_size_frame.grid(row=0, column=2, sticky=NSEW)
         self.slice_frame.grid(row=0, column=3, sticky=NSEW)
+        self.cycling_frame.grid(row = 1, column = 0, sticky= NSEW)
 
         # Start Pos Frame (Vertically oriented)
         start_names = ['start_position', 'start_focus']
@@ -135,7 +138,15 @@ class stack_acq_frame(ttk.Labelframe):
             self.inputs[slice_names[i]].label.grid(sticky='N', padx=3, pady=(4, 1))
             self.inputs[slice_names[i]].widget.configure(state='disabled')
             self.inputs[slice_names[i]].grid(row=i + 1, column=1, sticky='N', padx=3, pady=(3, 6))
-
+        
+        self.cycling_options = StringVar()
+        self.inputs["cycling"] = LabelInput(parent=self.cycling_frame,
+                                            label= "Laser Cycling Settings",
+                                            input_class=ValidatedCombobox,
+                                            input_var=StringVar()
+                                            )
+        self.inputs["cycling"].state(["readonly"]) # Makes it so the user cannot type a choice into combobox
+        self.inputs["cycling"].grid(row=4, column=0, sticky=(NSEW), padx=4, pady=(4,6))
     # Getters
     def get_variables(self):
         """

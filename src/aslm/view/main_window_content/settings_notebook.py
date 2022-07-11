@@ -1,5 +1,4 @@
-"""
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -36,7 +35,7 @@ from tkinter import ttk
 import logging
 from pathlib import Path
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 from tkinter.font import Font
 
@@ -44,9 +43,9 @@ from tkinter.font import Font
 import numpy as np
 
 # Import Sub-Frames
-from view.main_window_content.camera_display.camera_settings.camera_settings_tab import camera_settings_tab
-from view.main_window_content.tabs.advanced_settings_tab import advanced_settings_tab
-from view.main_window_content.tabs.channels_tab import channels_tab
+from aslm.view.main_window_content.camera_display.camera_settings.camera_settings_tab import camera_settings_tab
+from aslm.view.main_window_content.tabs.advanced_settings_tab import advanced_settings_tab
+from aslm.view.main_window_content.tabs.channels_tab import channels_tab
 
 
 class settings_notebook(ttk.Notebook):

@@ -10,6 +10,7 @@ from contextlib import redirect_stdout
 import sys
 import traceback
 import inspect
+import platform
 
 # Making sure objects are cleaned up nicely is tricky:
 import weakref
@@ -20,17 +21,20 @@ import signal
 
 import logging
 from pathlib import Path
+import numpy as np
+
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 # Sharing memory between child processes is tricky:
 try:
     from multiprocessing import shared_memory
-    import numpy as np
 except ImportError:
-    shared_memory = None
-    np = None
+    print("Warning - multiprocessing.shared_memory module could not be imported.")
+    print("Shared memory arrays not implemented.")
+    shared_memory = np.ndarray([0])
+    # np = None
 
 
 
@@ -401,7 +405,9 @@ def _get_response(object_in_subprocess, release=False):
 
 
 def _close(dummy_namespace):
-    """Effectively a method of ObjectInSubprocess, but defined externally to
+    r"""Externally defined close function.
+
+    Effectively a method of ObjectInSubprocess, but defined externally to
     minimize shadowing of the object's namespace
     """
     if not dummy_namespace.child_process.is_alive():
@@ -412,9 +418,35 @@ def _close(dummy_namespace):
         dummy_namespace.parent_pipe.close()
 
 
-def _child_loop(child_pipe, initializer, initargs, initkwargs,
-                close_method_name, closeargs, closekwargs):
-    """The event loop of a ObjectInSubprocess's child process"""
+def _child_loop(child_pipe,
+                initializer,
+                initargs,
+                initkwargs,
+                close_method_name,
+                closeargs,
+                closekwargs):
+    r"""The event loop of a ObjectInSubprocess's child process
+
+    Parameters
+    ----------
+    child_pipe : object
+        multiprocessing.connection.Connection object.
+    initializer :
+        ...
+    initargs : tuple
+        e.g., (False, Namespace(verbose=False, synthetic_hardware=True, debug=False, CPU=True, config_file=None, experiment_file=None, etl_const_file=None, logging_config=None))
+    initkwargs : dict
+        e.g., {'configuration_path': PosixPath('.../config/configuration.yml'), 'experiment_path':
+        PosixPath('.../config/experiment.yml'), 'etl_constants_path': PosixPath('.../config/etl_constants.yml'),
+        'event_queue': <multiprocessing.queues.Queue object at 0x7fdd509c7c40>}
+    close_method_name : NoneType
+        None
+    closeargs : NoneType
+        None
+    closekwargs : NoneType
+        None
+
+    """
     # Initialization.
     printed_output = io.StringIO()
     try:  # Create an instance of our object...
@@ -453,8 +485,9 @@ def _child_loop(child_pipe, initializer, initargs, initkwargs,
                 result = _dummy_function  # Cheaper than sending a real callable
             child_pipe.send((result, printed_output.getvalue()))
         except Exception as e:
-            e.child_traceback_string = traceback.format_exc()
-            child_pipe.send((e, printed_output.getvalue()))
+            # e.child_traceback_string = traceback.format_exc()
+            print('Exception inside ObjectInSubprocess:', traceback.format_exc())
+            child_pipe.send((Exception(str(e)), printed_output.getvalue()))
 
 # A minimal class that we use just to get another namespace:
 

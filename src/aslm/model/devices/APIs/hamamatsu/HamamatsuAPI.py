@@ -7,12 +7,17 @@
     Function definitions can be found at 'dcamsdk4/doc/api_reference/dcamapi4_en.html'
 """
 
+# Standard Library Imports
 from ctypes import *
 from enum import IntEnum
 import logging
-from pathlib import Path
+
+# Third Party Imports
+
+# Local Imports
+
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 # ==== load shared library ====
@@ -591,6 +596,14 @@ class DCAMDATA_REGION(Structure):
         ('reserved', c_int32)
     ]
 
+class DCAMDEV_STRING(Structure):
+    _fields_ = [
+        ('size', c_int32),
+        ('iString', c_int32),
+        ('text', c_char_p),
+        ('textbytes', c_int32)
+    ]
+
 property_dict = {
     'exposure_time': 2031888,  # 0x001F0110, R/W, sec, "EXPOSURE TIME"
     'sensor_mode': 4194832,  # 0x00400210, R/W, mode,  "SENSOR MODE"
@@ -603,6 +616,7 @@ property_dict = {
     'trigger_mode': 1049104,  # 0x00100210, R/W, mode,    "TRIGGER MODE"
     'trigger_polarity': 1049120,  # 0x00100220, R/W, mode, "TRIGGER POLARITY"
     'trigger_source': 1048848,  # 0x00100110, R/W, mode,   "TRIGGER SOURCE"
+    'trigger_delay': 1049184,  # 0x00100260,	/* R/W, sec,	"TRIGGER DELAY"			*/
     'internal_line_interval': 4208720,  # 0x00403850, R/W, sec,    "INTERNAL LINE INTERVAL"
     'image_width': 4325904,  # 0x00420210, R/O, long, "IMAGE WIDTH"
     'image_height': 4325920,  # 0x00420220, R/O, long,    "IMAGE HEIGHT"
@@ -620,6 +634,7 @@ property_dict = {
 
 # ==== api function references ====
 dcamapi_init = __dll.dcamapi_init
+dcamapi_uninit = __dll.dcamapi_uninit
 dcamdev_open = __dll.dcamdev_open
 dcamdev_close = __dll.dcamdev_close
 dcamwait_open = __dll.dcamwait_open
@@ -637,16 +652,47 @@ dcamwait_start = __dll.dcamwait_start
 dcamwait_abort = __dll.dcamwait_abort
 dcamcap_firetrigger = __dll.dcamcap_firetrigger
 dcamdev_setdata = __dll.dcamdev_setdata
+dcamdev_getstring = __dll.dcamdev_getstring
+
+class camReg(object):
+    """
+    Keep track of the number of cameras initialised so we can initialise and
+    finalise the library.
+
+    Cribbed from https://github.com/python-microscopy/python-microscopy/blob/master/PYME/Acquire/Hardware/HamamatsuDCAM/HamamatsuDCAM.py
+    """
+    numCameras = -1
+    maxCameras = 0
+
+    @classmethod
+    def regCamera(cls):
+        if cls.numCameras == -1:
+            # Initialize the API
+            paraminit = DCAMAPI_INIT()
+            if int(dcamapi_init(byref(paraminit))) < 0:
+                # NOTE: This is an AttributeError to match the other error thrown by this class in startup functions.
+                # This really makes no sense as an attribute error.
+                dcamapi_uninit()
+                raise Exception("DCAM initialization failed.")
+            cls.maxCameras = paraminit.iDeviceCount
+
+        cls.numCameras += 1
+        print(f"Number of cameras is {cls.numCameras}")
+
+    @classmethod
+    def unregCamera(cls):
+        cls.numCameras -= 1
+        if cls.numCameras == 0:
+            dcamapi_uninit()
+
+
+camReg.regCamera()  # Make sure DCAMAPI is initialized
 
 
 class DCAM:
     def __init__(self, index=0):
         self.__hdcam = 0
         self.__hdcamwait = 0
-        
-        # initialize api
-        paraminit = DCAMAPI_INIT()
-        dcamapi_init(byref(paraminit))
         
         # open camera
         self.dev_open(index)
@@ -656,6 +702,8 @@ class DCAM:
         self.max_image_width = 2048
         self.max_image_height = 2048
         self.is_acquiring = False
+
+        self._serial_number = self.get_string_value(c_int32(int("0x04000102", 0))).strip('S/N: ')
 
     def __result(self, errvalue):
         """
@@ -737,6 +785,9 @@ class DCAM:
             print("Camera Open")
 
         self.__hdcam = c_void_p(paramopen.hdcam)
+
+        camReg.regCamera()
+
         return True
 
     def dev_close(self):
@@ -751,6 +802,8 @@ class DCAM:
             self.__close_hdcamwait()
             dcamdev_close(self.__hdcam)
             self.__hdcam = 0
+
+        camReg.unregCamera()
 
         return True
 
@@ -891,6 +944,30 @@ class DCAM:
         Provides the idprop value after looking it up in the property_dict
         """
         return self.prop_getvalue(property_dict[name])
+
+    def get_string_value(self, id_str):
+        """
+        Get attribute value from the camera by IDSTR (or ERR) as a string.
+
+        Parameters
+        ----------
+        id_str : c_int32
+
+        Returns
+        -------
+        Value of IDSTR or ERR as a string.
+        """
+
+        c_buf_len = 256
+        c_buf = create_string_buffer(c_buf_len)
+        param = DCAMDEV_STRING()
+        param.size = sizeof(param)
+        param.text = addressof(c_buf)
+        param.textbytes = c_int32(c_buf_len)
+        param.iString = id_str
+        dcamdev_getstring(self.__hdcam, byref(param))
+
+        return c_buf.value.decode()
 
     def set_ROI(self, left, top, right, bottom):
         """

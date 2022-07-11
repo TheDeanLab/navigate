@@ -36,7 +36,7 @@ from tkinter import ttk
 import logging
 from pathlib import Path
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 #https://stackoverflow.com/questions/28560209/transient-input-window
@@ -48,8 +48,15 @@ logger = logging.getLogger(p)
 #Class that handles the dialog box that has all the user entry stuff when you press the Acquisition button
 class PopUp(tk.Toplevel):
 
-    def __init__(self, root, name, size, top=True, transient=True, *args, **kwargs):
-        '''
+    def __init__(self,
+                 root,
+                 name,
+                 size,
+                 top=True,
+                 transient=True,
+                 *args,
+                 **kwargs):
+        """
         #### Creates the popup window based on the root window being passed, title that you want the window to have and the size of the window.
         Some important things to consider:
 
@@ -70,7 +77,7 @@ class PopUp(tk.Toplevel):
         - Transient is a boolean that if true means the main app will not be usable until popup is closed
 
         - The parent frame for any widgets you add to the popup will be retrieved with the get_frame() function
-        '''
+        """
         tk.Toplevel.__init__(self)
         #This starts the popup window config, and makes sure that any child widgets can be resized with the window
         self.title(name)
@@ -99,9 +106,9 @@ class PopUp(tk.Toplevel):
         #Dismiss function for destroying window when done
 
     def dismiss(self, verbose=False):
-        '''
+        """
         #### Releases control back to main window from popup
-        '''
+        """
         self.grab_release() #Ensures input can be anywhere now
         self.destroy()
     

@@ -1,5 +1,4 @@
-"""
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,12 +34,12 @@ from tkinter import ttk
 import logging
 from pathlib import Path
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 # Import Sub-Frames
-from view.main_window_content.camera_display.camera_view.camera_view_tab import camera_tab
-from view.main_window_content.tabs.waveform_tab import waveform_tab
+from aslm.view.main_window_content.camera_display.camera_view.camera_view_tab import camera_tab
+from aslm.view.main_window_content.tabs.waveform_tab import waveform_tab
 
 class camera_waveform_notebook(ttk.Notebook):
     def __init__(cam_wave, frame_top_right, parent, *args, **kwargs):

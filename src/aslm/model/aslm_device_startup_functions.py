@@ -1,7 +1,4 @@
-"""
-ASLM Device Startup Functions
-
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -38,97 +35,237 @@ POSSIBILITY OF SUCH DAMAGE.
 import platform
 import sys
 import logging
-from pathlib import Path
-# Logger Setup
-p = __name__.split(".")[0]
-logger = logging.getLogger(p)
+import time
 
 # Third Party Imports
 
 # Local Imports
-# from model.devices.laser_scanning import LaserScanning
 
+# Logger Setup
+p = __name__.split(".")[1]
+logger = logging.getLogger(p)
+
+
+def auto_redial(func, args, n_tries=10, exception=Exception):
+    r"""Retries connections to a startup device defined by func n_tries times.
+
+    Parameters
+    ----------
+    func : function or class
+        The function or class (__init__() function) that connects to a device.
+    args : tuple
+        Arguments to function or class
+    n_tries : int
+        The number of tries to redial.
+    exception : inherits from BaseException
+        An exception type to check on each connection attempt.
+
+    Returns
+    -------
+    val : object
+        Result of func
+    """
+    val = None
+
+    for i in range(n_tries):
+        try:
+            val = func(*args)
+        except exception:
+            if i < (n_tries-1):
+                print(f"Failed {str(func)} attempt {i+1}/{n_tries}.")
+                # If we failed, but part way through object creation, we must
+                # delete the object prior to trying again. This lets us restart
+                # the connection process with a clean slate
+                if val is not None:
+                    val.__del__()
+                    del val
+                    val = None
+                time.sleep(0.5)  # TODO: 0.5 reached by trial and error. Better value?
+            else:
+                raise exception
+        else:
+            break
+
+    return val
 
 
 def start_analysis(configuration, experiment, use_gpu, verbose):
+    r"""Initializes the analysis class on a dedicated thread
+
+    Parameters
+    ----------
+    configuration : Session
+        Session instance of global microscope configuration.
+    experiment : Session
+        Session instance of experiment configuration.
+    use_gpu : Boolean
+        Flag for enabling GPU analysis.
+    verbose : Boolean
+        Flag for enabling verbose operation.
+
+    Returns
+    -------
+    Analysis : class
+        Analysis class.
     """
-    # Initializes the analysis class on a dedicated thread
-    """
-    from model.aslm_analysis import Analysis
+    from aslm.model.aslm_analysis import Analysis
     return Analysis(use_gpu, verbose)
 
-def start_camera(configuration, experiment, verbose):
-    """
-    # Initializes the camera as a sub-process using concurrency tools.
+
+def start_camera(configuration, experiment, verbose, camera_id=0):
+    r"""Initializes the camera class on a dedicated thread.
+
+    Parameters
+    ----------
+    configuration : dict
+        Session instance of global microscope configuration.
+    experiment : dict
+        Session instance of experiment configuration.
+    verbose : Boolean
+        Flag for enabling verbose operation.
+    camera_id : int
+        Device ID (0, 1...)
+
+    Returns
+    -------
+    Camera : class
+        Camera class.
     """
 
     if configuration.Devices['camera'] == 'HamamatsuOrca':
-        from model.devices.cameras import HamamatsuOrca
-        return HamamatsuOrca(0, configuration, experiment, verbose)
+        from aslm.model.devices.camera.camera_hamamatsu import HamamatsuOrca
+        return auto_redial(HamamatsuOrca, (camera_id, configuration, experiment, verbose), exception=Exception)
     elif configuration.Devices['camera'] == 'SyntheticCamera':
-        from model.devices.cameras import SyntheticCamera
+        from aslm.model.devices.camera.camera_synthetic import SyntheticCamera
         return SyntheticCamera(0, configuration, experiment, verbose)
     else:
         device_not_found(configuration.Devices['camera'])
 
 
 def start_stages(configuration, verbose):
-    """
-    # Initializes the Stage.
-    """
+    r"""Initializes the stage class on a dedicated thread.
 
+    Parameters
+    ----------
+    configuration : dict
+        Session instance of global microscope configuration.
+    verbose : Boolean
+        Flag for enabling verbose operation.
 
-    if configuration.Devices['stage'] == 'PI' and platform.system(
-    ) == 'Windows':
-        from model.devices.stages import PIStage
-        return PIStage(configuration, verbose)
+    Returns
+    -------
+    Stage : class
+        Stage class.
+    """
+    if configuration.Devices['stage'] == 'PI' and platform.system() == 'Windows':
+        from aslm.model.devices.stages.stage_pi import PIStage
+        from pipython.pidevice.gcserror import GCSError
+        return auto_redial(PIStage, (configuration, verbose), exception=GCSError)
     elif configuration.Devices['stage'] == 'SyntheticStage':
-        from model.devices.stages import SyntheticStage
+        from aslm.model.devices.stages.stage_synthetic import SyntheticStage
         return SyntheticStage(configuration, verbose)
     else:
         device_not_found(configuration.Devices['stage'])
 
 
-def start_zoom_servo(configuration, verbose):
+def start_stages_r(configuration, verbose):
+    r"""Initializes a focusing stage class in a dedicated thread.
+
+    Parameters
+    ----------
+    configuration : dict
+        Session instance of global microscope configuration.
+    verbose : Boolean
+        Flag for enabling verbose operation.
+
+    Returns
+    -------
+    Stage : class
+        Stage class.
     """
-    # Initializes the Zoom Servo Motor. DynamixelZoom of SyntheticZoom
+    if configuration.Devices['stage_r'] == 'Thorlabs' and platform.system() == 'Windows':
+        from aslm.model.devices.stages.stage_tl_kcube_inertial import TLKIMStage
+        from aslm.model.devices.APIs.thorlabs.kcube_inertial import TLFTDICommunicationError
+        return auto_redial(TLKIMStage, (configuration, verbose), exception=TLFTDICommunicationError)
+    else:
+        device_not_found(configuration.Devices['stage_r'])
+
+
+def start_zoom_servo(configuration, verbose):
+    r"""Initializes the zoom class on a dedicated thread.
+
+    Parameters
+    ----------
+    configuration : dict
+        Session instance of global microscope configuration.
+    verbose : Boolean
+        Flag for enabling verbose operation.
+
+    Returns
+    -------
+    Zoom : class
+        Zoom class.
     """
 
     if configuration.Devices['zoom'] == 'DynamixelZoom':
-        from model.devices.zoom import DynamixelZoom
-        return DynamixelZoom(configuration, verbose)
+        from aslm.model.devices.zoom.zoom_dynamixel import DynamixelZoom
+        return auto_redial(DynamixelZoom, (configuration, verbose), exception=RuntimeError)
     elif configuration.Devices['zoom'] == 'SyntheticZoom':
-        from model.devices.zoom import SyntheticZoom
+        from aslm.model.devices.zoom.zoom_synthetic import SyntheticZoom
         return SyntheticZoom(configuration, verbose)
     else:
         device_not_found(configuration.Devices['zoom'])
 
 
 def start_filter_wheel(configuration, verbose):
-    """
-    # Initializes the Filter Wheel. Sutter or SyntheticFilterWheel
+    r"""Initializes the filter wheel class on a dedicated thread.
+
+    Parameters
+    ----------
+    configuration : dict
+        Session instance of global microscope configuration.
+    verbose : Boolean
+        Flag for enabling verbose operation.
+
+    Returns
+    -------
+    FilterWheel : class
+        FilterWheel class.
     """
 
     if configuration.Devices['filter_wheel'] == 'SutterFilterWheel':
-        from model.devices.filter_wheels import SutterFilterWheel
-        return SutterFilterWheel(configuration, verbose)
+        from aslm.model.devices.filter_wheel.filter_wheel_sutter import SutterFilterWheel
+        return auto_redial(SutterFilterWheel, (configuration, verbose), exception=UserWarning)
     elif configuration.Devices['filter_wheel'] == 'SyntheticFilterWheel':
-        from model.devices.filter_wheels import SyntheticFilterWheel
+        from aslm.model.devices.filter_wheel.filter_wheel_synthetic import SyntheticFilterWheel
         return SyntheticFilterWheel(configuration, verbose)
     else:
         device_not_found(configuration.Devices['filter_wheel'])
 
 
 def start_lasers(configuration, verbose):
-    '''
-    # Start the lasers: Lasers or SyntheticLasers
-    '''
+    r"""Initializes the laser classes on a dedicated thread.
+
+    Currently not implemented.  Requires API development of laser communication.  Underway.
+
+    Parameters
+    ----------
+    configuration : dict
+        Session instance of global microscope configuration.
+    verbose : Boolean
+        Flag for enabling verbose operation.
+
+    Returns
+    -------
+    Laser : class
+        Laser class.
+    """
 
     if configuration.Devices['lasers'] == 'Omicron':
         # This is the Omicron LightHUB Ultra Launch - consists of both Obis and
         # Luxx lasers.
-        from model.devices.lasers.coherent.ObisLaser import ObisLaser as obis
-        from model.devices.lasers.omicron.LuxxLaser import LuxxLaser as luxx
+        from aslm.model.devices.APIs.coherent.ObisLaser import ObisLaser as obis
+        from aslm.model.devices.APIs.omicron.LuxxLaser import LuxxLaser as luxx
 
         # Iteratively go through the configuration file and turn on each of the lasers,
         # and make sure that they are in appropriate external control mode.
@@ -161,7 +298,7 @@ def start_lasers(configuration, verbose):
                 sys.exit()
 
     elif configuration.Devices['lasers'] == 'SyntheticLasers':
-        from model.devices.lasers.SyntheticLaser import SyntheticLaser
+        from aslm.model.devices.lasers.SyntheticLaser import SyntheticLaser
         laser = SyntheticLaser(configuration, verbose)
 
     else:
@@ -175,65 +312,95 @@ def start_lasers(configuration, verbose):
 
 
 def start_daq(configuration, experiment, etl_constants, verbose):
-    """
-    # Start the data acquisition device (DAQ):  NI or SyntheticDAQ
+    r"""Initializes the data acquisition (DAQ) class on a dedicated thread.
+
+    Parameters
+    ----------
+    configuration : dict
+        Session instance of global microscope configuration.
+    experiment : dict
+        Session instance of experiment configuration.
+    etl_constants : dict
+        Dictionary of wavelength and zoom-specific remote focus amplitude and offsets.
+    verbose : Boolean
+        Flag for enabling verbose operation.
+
+    Returns
+    -------
+    DAQ : class
+        DAQ class.
     """
 
     if configuration.Devices['daq'] == 'NI':
-        from model.devices.daq import NIDAQ
+        from aslm.model.devices.daq.daq_ni import NIDAQ
         return NIDAQ(configuration, experiment, etl_constants, verbose)
     elif configuration.Devices['daq'] == 'SyntheticDAQ':
-        from model.devices.daq import SyntheticDAQ
+        from aslm.model.devices.daq.daq_synthetic import SyntheticDAQ
         return SyntheticDAQ(configuration, experiment, etl_constants, verbose)
     else:
         device_not_found(configuration.Devices['daq'])
 
 
 def start_shutters(configuration, experiment, verbose):
-    """
-    # Initializes the shutters: ThorlabsShutter or SyntheticShutter
-    # Shutters are triggered via digital outputs on the NI DAQ Card
-    # Thus, requires both to be enabled.
+    r"""Initializes the shutter class on a dedicated thread.
+
+    Initializes the shutters: ThorlabsShutter or SyntheticShutter
+    Shutters are triggered via digital outputs on the NI DAQ Card
+    Thus, requires both to be enabled.
+
+    Parameters
+    ----------
+    configuration : dict
+        Session instance of global microscope configuration.
+    experiment : dict
+        Session instance of experiment configuration.
+    verbose : Boolean
+        Flag for enabling verbose operation.
+
+    Returns
+    -------
+    Shutter : class
+        Shutter class.
     """
 
     if configuration.Devices['shutters'] == 'ThorlabsShutter' and configuration.Devices['daq'] == 'NI':
-        from model.devices.laser_shutters import ThorlabsShutter
-        return ThorlabsShutter(configuration, experiment, verbose)
+        from aslm.model.devices.shutter.laser_shutter_ttl import ShutterTTL
+        return ShutterTTL(configuration, experiment, verbose)
     elif configuration.Devices['shutters'] == 'SyntheticShutter':
-        from model.devices.laser_shutters import SyntheticShutter
+        from aslm.model.devices.shutter.laser_shutter_synthetic import SyntheticShutter
         return SyntheticShutter(configuration, experiment, verbose)
     else:
         device_not_found(configuration.Devices['shutters'])
 
 
 def start_laser_triggers(configuration, experiment, verbose):
-    """
-    # Initializes the Laser Switching, Analog, and Digital DAQ Outputs:
+    r"""Initializes the laser trigger class on a dedicated thread.
+
+    Initializes the Laser Switching, Analog, and Digital DAQ Outputs.
+
+    Parameters
+    ----------
+    configuration : dict
+        Session instance of global microscope configuration.
+    experiment : dict
+        Session instance of experiment configuration.
+    verbose : Boolean
+        Flag for enabling verbose operation.
+
+    Returns
+    -------
+    Triggers : class
+        Trigger class.
     """
 
     if configuration.Devices['daq'] == 'NI':
-        from model.devices.laser_triggers import LaserTriggers
+        from aslm.model.devices.lasers.laser_trigger_ni import LaserTriggers
         return LaserTriggers(configuration, experiment, verbose)
     elif configuration.Devices['daq'] == 'SyntheticDAQ':
-        from model.devices.laser_triggers import SyntheticLaserTriggers
+        from aslm.model.devices.lasers.laser_trigger_synthetic import SyntheticLaserTriggers
         return SyntheticLaserTriggers(configuration, experiment, verbose)
     else:
         device_not_found(configuration.Devices['daq'])
-
-
-def start_laser_scanning(configuration, experiment, etl_constants, verbose):
-    """
-    # Initializes the Laser Switching, Analog, and Digital DAQ Outputs:
-    """
-
-    if configuration.Devices['daq'] == 'NI':
-        return LaserScanning(configuration, experiment, etl_constants, verbose)
-    elif configuration.Devices['daq'] == 'SyntheticDAQ':
-        return SyntheticLaserTriggers(
-            configuration, experiment, etl_constants, verbose)
-    else:
-        device_not_found(configuration.Devices['daq'])
-
 
 def device_not_found(args):
 

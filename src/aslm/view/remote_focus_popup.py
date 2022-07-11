@@ -31,23 +31,23 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 
-from tkinter import *
+from tkinter import *  # TODO: terrifying
 import tkinter as tk
 from tkinter import ttk
-from view.custom_widgets.popup import PopUp
-from view.custom_widgets.LabelInputWidgetFactory import LabelInput
-from view.custom_widgets.validation import ValidatedSpinbox
+from aslm.view.custom_widgets.popup import PopUp
+from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from aslm.view.custom_widgets.validation import ValidatedSpinbox
 import logging
-from pathlib import Path
-p = __name__.split(".")[0]
+
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-
+# TODO: Should we rename to remote_focus_popup?
 class remote_popup():
-    '''
-    #### Class creates the popup that has the ETL parameters.
-    '''
+    """
+    #### Class creates the popup that has the ETL or voice coil parameters.
+    """
 
     def __init__(self, root, *args, **kwargs):
         # Creating popup window with this name and size/placement, PopUp is a
@@ -72,7 +72,7 @@ class remote_popup():
         Grid.columnconfigure(content_frame, 'all', weight=1)
         Grid.rowconfigure(content_frame, 'all', weight=1)
 
-        '''Creating the widgets for the popup'''
+        """Creating the widgets for the popup"""
         # Dictionary for all the variables
         self.inputs = {}
         self.buttons = {}
@@ -89,8 +89,7 @@ class remote_popup():
         self.laser_frame.grid(row=1, column=0, columnspan=2, sticky=(NSEW))
         self.high_low_frame.grid(row=2, column=0, columnspan=2, sticky=(NSEW))
 
-        '''Filling Frames with widgets'''
-
+        #Filling Frames with widgets
         # Mode/Mag Frame
         self.inputs["Mode"] = LabelInput(parent=self.mode_mag_frame,
                                          label="Mode",
@@ -163,7 +162,9 @@ class remote_popup():
                 5,
                 0,
                 0))
+
         galvo.grid(row=5, column=0, sticky=(NSEW))
+
         self.inputs['Galvo Amp'] = LabelInput(
             parent=self.laser_frame, input_class=ValidatedSpinbox, input_var=StringVar())
 
@@ -173,6 +174,22 @@ class remote_popup():
             parent=self.laser_frame, input_class=ValidatedSpinbox, input_var=StringVar())
 
         self.inputs['Galvo Off'].grid(row=5, column=2, sticky=(NSEW), pady=(20, 0))
+
+        galvo_freq = ttk.Label(
+            self.laser_frame,
+            text='Galvo Freq',
+            padding=(
+                2,
+                5,
+                0,
+                0))
+
+        galvo_freq.grid(row=6, column=0, sticky=(NSEW))
+
+        self.inputs['Galvo Freq'] = LabelInput(
+            parent=self.laser_frame, input_class=ValidatedSpinbox, input_var=StringVar())
+
+        self.inputs['Galvo Freq'].grid(row=6, column=1, sticky=(NSEW), pady=(20, 0))
 
         # High/Low Resolution
         hi_lo_labels = ['Percent Delay', 'Duty Cycle', 'Percent Smoothing']
@@ -196,27 +213,27 @@ class remote_popup():
 
     # Getters
     def get_variables(self):
-        '''
-        # This function returns a dictionary of all the variables that are tied to each widget name.
+        """
+        This function returns a dictionary of all the variables that are tied to each widget name.
         The key is the widget name, value is the variable associated.
-        '''
+        """
         variables = {}
         for key, widget in self.inputs.items():
             variables[key] = widget.get_variable()
         return variables
 
     def get_widgets(self):
-        '''
-        # This function returns the dictionary that holds the input widgets.
+        """
+        This function returns the dictionary that holds the input widgets.
         The key is the widget name, value is the LabelInput class that has all the data.
-        '''
+        """
         return self.inputs
 
     def get_buttons(self):
-        '''
-        # This function returns the dictionary that holds the buttons.
+        """
+        This function returns the dictionary that holds the buttons.
         The key is the button name, value is the button.
-        '''
+        """
         return self.buttons
 
 

@@ -26,11 +26,11 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 # Local Imports
-from view.main_window_content.stage_control.tabs.other_axis_frame import other_axis_frame
-from view.main_window_content.stage_control.tabs.position_frame import position_frame
-from view.main_window_content.stage_control.tabs.x_y_frame import x_y_frame
-from view.main_window_content.stage_control.tabs.goto_frame import goto_frame
-#from view.main_window_content.stage_control.tabs.stop_frame import  stop_frame
+from aslm.view.main_window_content.stage_control.tabs.other_axis_frame import other_axis_frame
+from aslm.view.main_window_content.stage_control.tabs.position_frame import position_frame
+from aslm.view.main_window_content.stage_control.tabs.x_y_frame import x_y_frame
+from aslm.view.main_window_content.stage_control.tabs.goto_frame import goto_frame
+from aslm.view.main_window_content.stage_control.tabs.stop_frame import  stop_frame
 # Standard Imports
 from tkinter import *
 from tkinter import ttk
@@ -74,7 +74,7 @@ class stage_control_tab(ttk.Frame):
         self.goto_frame_label.pack()  # For visual mockup purposes
 
         # stop frame
-        #self.stop_frame = stop_frame(self, 'Stop')
+        self.stop_frame = stop_frame(self, 'Stop')
 
 
         """
@@ -102,8 +102,8 @@ class stage_control_tab(ttk.Frame):
         Grid.rowconfigure(self.f_frame, 'all', weight=1)
         Grid.columnconfigure(self.goto_frame, 'all', weight=1)
         Grid.rowconfigure(self.goto_frame, 'all', weight=1)
-        #Grid.columnconfigure(self.stop_frame, 'all', weight=1)
-        #Grid.rowconfigure(self.stop_frame, 'all', weight=1)
+        Grid.columnconfigure(self.stop_frame, 'all', weight=1)
+        Grid.rowconfigure(self.stop_frame, 'all', weight=1)
         
         # Gridding out frames
         factor = 6
@@ -113,7 +113,7 @@ class stage_control_tab(ttk.Frame):
         self.theta_frame.grid(row=1, column=2, sticky=(NSEW), padx=10, pady=10*factor)
         self.f_frame.grid(row=1, column=3, sticky=(NSEW), padx=10, pady=10*factor)
         # self.goto_frame.grid(row=0, column=4, sticky=(NSEW), padx=10, pady=10*factor)
-        #self.stop_frame.grid(row=1, column=4, sticky=(NSEW), padx=10, pady=10 * factor)
+        self.stop_frame.grid(row=1, column=4, sticky=(NSEW), padx=10, pady=10 * factor)
 
     def get_widgets(self):
         """
@@ -142,5 +142,5 @@ class stage_control_tab(ttk.Frame):
         for axis in ['z', 'theta', 'f']:
             temp = getattr(self, axis+'_frame').get_buttons()
             result.update({k+'_'+axis+'_btn': temp[k] for k in temp})
-        #result.update(self.stop_frame.get_buttons())
+        result.update(self.stop_frame.get_buttons())
         return result

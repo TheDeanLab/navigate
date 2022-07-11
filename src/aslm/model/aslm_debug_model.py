@@ -38,24 +38,23 @@ from queue import Empty
 import random
 import time
 import logging
-from pathlib import Path
-import platform
+import os
 
-from tifffile import imread
 import numpy as np
 from scipy.fftpack import dctn
-# Only import if Linux or Windows
-if platform.system() != 'Darwin':
-    import tensorflow as tf
 
 from multiprocessing import Pool, Lock
 
-from model.aslm_device_startup_functions import start_analysis
-from model.concurrency.concurrency_tools import ObjectInSubprocess
-from model.aslm_analysis import Analysis
+from aslm.model.aslm_device_startup_functions import start_analysis
+from aslm.model.concurrency.concurrency_tools import ObjectInSubprocess
+from aslm.model.model_features.aslm_feature_container import load_features
+from aslm.model.model_features.aslm_image_writer import ImageWriter
+from aslm.model.model_features.autofocus import Autofocus
+from aslm.model.model_features.dummy_detective import Dummy_Detective
+
 
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 def calculate_entropy(dct_array, otf_support_x, otf_support_y):
@@ -68,12 +67,12 @@ def calculate_entropy(dct_array, otf_support_x, otf_support_y):
     return image_entropy
 
 def normalized_dct_shannon_entropy(input_array, psf_support_diameter_xy, verbose=False):
-    '''
+    """
     # input_array : 2D or 3D image.  If 3D, will iterate through each 2D plane.
     # otf_support_x : Support for the OTF in the x-dimension.
     # otf_support_y : Support for the OTF in the y-dimension.
     # Returns the entropy value.
-    '''
+    """
     # Get Image Attributes
     # input_array = np.double(input_array)
     image_dimensions = input_array.ndim
@@ -126,6 +125,45 @@ class Debug_Module:
     def debug(self, command, *args, **kwargs):
         getattr(self, command)(*args, **kwargs)
 
+    def test_feature_container(self, *args, **kwargs):
+        # feature list
+        feature_list = []
+        # detective->yes->save->autofocus->yes->save
+        feature_list.append([[{'name': Dummy_Detective}], [{'name': ImageWriter}, {'name': Autofocus}], [{'name': ImageWriter, 'args': ('sub',)}]])
+        # detective->yes->autofocus->yes->save
+        feature_list.append([[{'name': Dummy_Detective}], [{'name': Autofocus}], [{'name': ImageWriter}]])
+        # detective->yes->save
+        feature_list.append([[{'name': Dummy_Detective}], [{'name': ImageWriter}]])
+        # detective->save
+        feature_list.append([[{'name': Dummy_Detective}, {'name': ImageWriter}]])
+        # autofocus->yes->save
+        feature_list.append([[{'name': Autofocus}], [{'name': ImageWriter}]])
+        # autofocus
+        feature_list.append([[{'name': Autofocus}]])
+
+        # feature_list.append([[{'name': Dummy_Detective}, {'name': ImageWriter, 'args':('sub\\sub2',)}, {'name': Dummy_Detective}],[{'name':ImageWriter, 'args':('sub',)}, {'name':ImageWriter}]])
+
+        self.model.experiment.MicroscopeState = args[0]
+        self.model.prepare_acquisition()
+        self.model.experiment.Saving['save_directory'] = 'temp\\images'
+
+        if not os.path.exists('temp\\images\\sub\\sub2'):
+            os.makedirs('temp\\images\\sub\\sub2')
+
+        # load features
+        self.model.signal_container, self.model.data_container = load_features(self.model, feature_list[args[2]])
+
+        self.model.signal_thread = threading.Thread(target=self.send_signals, args=(args[1],))
+        # self.model.signal_thread = threading.Thread(target=self.send_signals(args[1]))
+        # self.model.data_thread = threading.Thread(target=self.get_frames, args=(args[1],))
+        self.model.data_thread = threading.Thread(target=self.model.run_data_process) #, args=(args[1],))
+        self.model.signal_thread.start()
+        self.model.data_thread.start()
+
+    def clear_feature_container(self, *args, **kwargs):
+        delattr(self.model, 'signal_container')
+        delattr(self.model, 'data_container')
+
     def update_analysis_type(self, analysis_type, *args, **kwargs):
         if analysis_type == self.analysis_type:
             return
@@ -159,7 +197,7 @@ class Debug_Module:
         frame_num = self.model.get_autofocus_frame_num() + 1  # What does adding one here again doing?
         if frame_num <= 1:
             return
-        self.model.before_acquisition() # Opens correct shutter and puts all signals to false
+        self.model.prepare_acquisition() # Opens correct shutter and puts all signals to false
         self.model.autofocus_on = True
         self.model.is_save = False
         self.model.f_position = args[2] # Current position
@@ -177,11 +215,8 @@ class Debug_Module:
             print('live!!!!!!')
             self.model.experiment.MicroscopeState = args[0]
             self.model.is_save = False
-            self.model.before_acquisition()
-            self.model.trigger_waiting_time = 0
-            self.model.pre_trigger_time = 0
+            self.model.prepare_acquisition()
             self.model.signal_thread = threading.Thread(target=self.send_signals, args=(args[1],))
-            # self.model.signal_thread = threading.Thread(target=self.send_signals(args[1]))
             self.model.data_thread = threading.Thread(target=self.get_frames, args=(args[1],))
             self.model.signal_thread.start()
             self.model.data_thread.start()
@@ -190,7 +225,7 @@ class Debug_Module:
             self.model.experiment.AutoFocusParameters = args[1]
             signal_num = args[3]
             # signal_num = self.model.get_autofocus_frame_num() + 1
-            self.model.before_acquisition()
+            self.model.prepare_acquisition()
             self.model.autofocus_on = True
             self.model.is_save = False
             self.model.f_position = args[2]
@@ -215,7 +250,7 @@ class Debug_Module:
                     break
 
         self.model.experiment.MicroscopeState = args[0]
-        self.model.before_acquisition()
+        self.model.prepare_acquisition()
         self.model.autofocus_on = True
         self.model.is_save = False
         self.model.signal_thread = threading.Thread(target=func)
@@ -225,12 +260,18 @@ class Debug_Module:
         
 
     def send_signals(self, signal_num):
-        channel_num = len(self.model.experiment.MicroscopeState['channels'].keys())
+        channel_num = 1 #len(self.model.experiment.MicroscopeState['channels'].keys())
         i = 0
         while i < signal_num and not self.model.stop_acquisition:
-            self.model.run_single_acquisition()
+            # self.model.signal_container.reset()
+            # while not self.model.signal_container.end_flag:
+            #     self.model.run_single_channel_acquisition(1)
+            self.model.run_single_channel_acquisition_with_features(1)
             i += channel_num
-            print('sent out', i, 'signals!!!!!')
+            print('sent out', i, 'signals(', signal_num, ')!!!!!')
+        print('send signal ends!!!!')
+        time.sleep(0.2)
+        self.model.stop_acquisition = True
 
     def send_autofocus_signals(self, f_position, signal_num):
         step_size = random.randint(5, 50)
@@ -323,7 +364,7 @@ class Debug_Module:
             self.model.plot_pipe.send(plot_data) # Sending controller plot data
         
         self.model.show_img_pipe.send('stop')
-        self.model.show_img_pipe.send(acquired_frame_num)
+        # self.model.show_img_pipe.send(acquired_frame_num)
         end_time = time.perf_counter()
         print('*******total time********', end_time - start_time)
         print('received frames in total:', acquired_frame_num)

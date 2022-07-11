@@ -35,13 +35,13 @@ from tkinter import *
 from tkinter import ttk
 
 # Local Imports
-from view.custom_widgets.LabelInputWidgetFactory import LabelInput
-from view.custom_widgets.validation import ValidatedSpinbox
+from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from aslm.view.custom_widgets.validation import ValidatedSpinbox
 
 import logging
 from pathlib import Path
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 class other_axis_frame(ttk.Frame):
@@ -169,7 +169,7 @@ class min_other_axis_frame(ttk.Frame):
                 input_args={'width': 25}
             )
 
-        '''
+        """
         Grid for buttons
 
                 1
@@ -183,7 +183,7 @@ class min_other_axis_frame(ttk.Frame):
         Down is 5,6
         Increment is 3
         Zero is 4
-        '''
+        """
 
 
         #Gridding out buttons

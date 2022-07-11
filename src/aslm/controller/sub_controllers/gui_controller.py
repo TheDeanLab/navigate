@@ -35,7 +35,7 @@ POSSIBILITY OF SUCH DAMAGE.
 import logging
 from pathlib import Path
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
@@ -75,7 +75,5 @@ class GUI_Controller:
         pass
 
     def show_verbose_info(self, *info):
-        if self.verbose:
-            print('From', self.__class__.__name__, ':', *info)
-        logger.debug(f"From {self.__class__.__name__} : {info}")
+        logger.info(f"{self.__class__.__name__} : {info}")
         

@@ -36,7 +36,7 @@ from tkinter import ttk
 import logging
 from pathlib import Path
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 from tkinter.font import Font
 
@@ -88,6 +88,6 @@ class goto_frame(ttk.Frame):
         #Init Frame
         ttk.Frame.__init__(goto_frame, stage_control_tab, *args, **kwargs) 
 
-'''
+"""
 End of Stage Control Tab Frame Classes
-'''
+"""

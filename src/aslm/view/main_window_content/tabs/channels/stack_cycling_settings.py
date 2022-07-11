@@ -51,12 +51,12 @@ class stack_cycling_frame(ttk.Labelframe):
         Grid.rowconfigure(stack_acq, 'all', weight=1)
 
         #Laser Cycling Frame (Vertically oriented)
-        stack_acq.cycling_frame = ttk.Frame(stack_acq)
-        stack_acq.cycling_options = StringVar()
-        stack_acq.cycling_pull_down = ttk.Combobox(stack_acq, textvariable=stack_acq.cycling_options)
-        stack_acq.cycling_pull_down.state(["readonly"]) # Makes it so the user cannot type a choice into combobox
-        stack_acq.cycling_pull_down.grid(row=0, column=1, sticky=(NSEW), padx=4, pady=(4,6))
+       # stack_acq.cycling_frame = ttk.Frame(stack_acq)
+       # stack_acq.cycling_options = StringVar()
+       # stack_acq.cycling_pull_down = ttk.Combobox(stack_acq, textvariable=stack_acq.cycling_options)
+       # stack_acq.cycling_pull_down.state(["readonly"]) # Makes it so the user cannot type a choice into combobox
+       # stack_acq.cycling_pull_down.grid(row=0, column=1, sticky=(NSEW), padx=4, pady=(4,6))
 
         #Gridding Each Holder Frame
-        stack_acq.cycling_frame.grid(row=0, column=0, sticky=(NSEW))
+        #stack_acq.cycling_frame.grid(row=0, column=0, sticky=(NSEW))
 

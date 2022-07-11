@@ -53,7 +53,7 @@ class JoystickLogitech(JoystickBase):
         self.cfg = parent.cfg
         self.verbose = True
 
-        ''' parent is the window '''
+        """ parent is the window """
         # Select if Demo mode is enabled, or the Logitech Farm Simulator
         if self.cfg.sidepanel == 'FarmSimulator':
             self.joystick = FarmSimulatorSidePanel()
@@ -63,7 +63,7 @@ class JoystickLogitech(JoystickBase):
         elif self.cfg.sidepanel == 'Demo':
             self.joystick = Demo_SidePanel()
 
-        ''' '''
+        """ """
         self.SliderChangeCount = 0
 
     def button_handler(self, button_id):
@@ -71,7 +71,7 @@ class JoystickLogitech(JoystickBase):
             print('Button pressed: ', button_id)
         logger.debug(f"Button pressed, {button_id}")
 
-        ''' Laser switching buttons '''
+        """ Laser switching buttons """
         if button_id == 1:
             self.set_combobox_to_index(self.parent.LaserComboBox, 0)
         if button_id == 2:
@@ -85,13 +85,13 @@ class JoystickLogitech(JoystickBase):
         if button_id == 8:
             self.set_combobox_to_index(self.parent.LaserComboBox, 5)
 
-        ''' Load & unload samples '''
+        """ Load & unload samples """
         if button_id == 5:
             self.parent.sig_unload_sample.emit()
         if button_id == 10:
             self.parent.sig_load_sample.emit()
 
-        ''' Filter & Zoom Increments & decrements '''
+        """ Filter & Zoom Increments & decrements """
         if button_id == 11:
             self.increment_combobox(self.parent.FilterComboBox)
         if button_id == 12:
@@ -101,7 +101,7 @@ class JoystickLogitech(JoystickBase):
         if button_id == 14:
             self.decrement_combobox(self.parent.ZoomComboBox)
 
-        ''' Shutter buttons '''
+        """ Shutter buttons """
         if button_id == 17:
             self.set_combobox_to_string(self.parent.ShutterComboBox, 'Both')
 
@@ -114,7 +114,7 @@ class JoystickLogitech(JoystickBase):
         if button_id == 20:
             self.set_combobox_to_string(self.parent.ShutterComboBox, 'Right')
 
-        ''' Live button '''
+        """ Live button """
         if button_id == 21:
             current_state = self.parent.get_state_parameter('state')
             if self.verbose:
@@ -127,14 +127,14 @@ class JoystickLogitech(JoystickBase):
                 pass
                 # self.parent.LiveButton.clicked.emit(True)
 
-        ''' Increase & decrease laser intensity '''
+        """ Increase & decrease laser intensity """
         if button_id == 26:
             self.increase_slider(self.parent.LaserIntensitySlider, 2)
 
         if button_id == 27:
             self.decrease_slider(self.parent.LaserIntensitySlider, 2)
 
-        ''' Stop movement button '''
+        """ Stop movement button """
         if button_id == 28:
             # self.parent.sig_stop_movement.emit()
 
@@ -167,10 +167,10 @@ class JoystickLogitech(JoystickBase):
 
     def increase_slider(self, slider, event_devider=2):
         self.SliderChangeCount += 1
-        ''' To avoid events coming too quickly,
+        """ To avoid events coming too quickly,
         only every n-th event is causing a change if
         n = event_devider
-        '''
+        """
         if self.SliderChangeCount % event_devider == 0:
             value = slider.value()
             value = value + 1
@@ -181,10 +181,10 @@ class JoystickLogitech(JoystickBase):
                 slider.setValue(100)
 
     def decrease_slider(self, slider, event_devider=2):
-        ''' To avoid events coming too quickly,
+        """ To avoid events coming too quickly,
         only every n-th event is causing a change if
         n = event_devider
-        '''
+        """
         self.SliderChangeCount += 1
 
         if self.SliderChangeCount % event_devider == 0:
@@ -197,13 +197,13 @@ class JoystickLogitech(JoystickBase):
                 slider.setValue(0)
 
     def mode_handler(self, str):
-        '''
+        """
         Helper method to handle mode changes of the joystick.
         The FarmSimulatorSidePanel has 6 movement axes, 0 to 2 in "blue"
         LED mode (grey button on the joystick) and 3 to 5 in "red" mode.
         When starting up, the mode is unknown and has to be found out by
         registering which axes produce joystick events.
-        '''
+        """
 
         if self.verbose:
             print('New joystick mode: ', str)
@@ -217,12 +217,12 @@ class JoystickLogitech(JoystickBase):
             self.parent.display_status_message('Joystick Mode: Undefined')
 
     def axis_handler(self, axis_id, value):
-        ''' The axis handler deals with joystick movements.
+        """ The axis handler deals with joystick movements.
         The FarmSimulatorSidePanel has 6 movement axes, 0 to 2 in "blue"
         LED mode (grey button on the joystick) and 3 to 5 in "red" mode.
         When starting up, the mode is unknown and has to be found out by
         registering which axes produce joystick events.
-        '''
+        """
 
         if self.verbose:
             print('Axis: ', axis_id, ',Value: ', value)
@@ -237,10 +237,10 @@ class JoystickLogitech(JoystickBase):
             pass
             # self.parent.sig_move_relative.emit({'y_rel':value/5})
         elif axis_id == 3:
-            ''' Some FarmSimulatorSidePanel have a bug which lets them
+            """ Some FarmSimulatorSidePanel have a bug which lets them
             send axis 2 and axis 3 (both rotation motions) at the same time.
             The following is intended to prevent this to affect the microscope:
-            '''
+            """
             if self.joystick.mode == '123':
                 pass
             else:

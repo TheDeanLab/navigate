@@ -48,10 +48,10 @@ logger = logging.getLogger(p)
 
 
 def deskew_image(image_data, shear_angle, z_pixel_size, xy_pixel_size):
-    '''
+    """
     #  This function is designed to deskew an image.
     # return uint16 data to save as tiff
-    '''
+    """
 
     use_cpu = True  # initiate_gpu()
     time_it = True
@@ -148,9 +148,9 @@ def initiate_gpu():
 
 
 if (__name__ == "__main__"):
-    '''
+    """
     Testing section
-    '''
+    """
 
     from tifffile import imread, imsave
     image_data = imread(os.path.join("E:", "test_data", "CH01_003b.tif"))

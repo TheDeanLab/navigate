@@ -48,7 +48,6 @@ GalvoParameters:
   galvo_l_frequency: 99.9
   galvo_l_amplitude: 2.5
   galvo_l_offset: 0
-  galvo_r_amplitude: 0.5
   galvo_r_offset: 0
   galvo_r_frequency: 0
 StageParameters:
@@ -56,9 +55,9 @@ StageParameters:
   z_step: 500.0
   theta_step: 30.0
   f_step: 500.0
-  x: 35000.0
-  y: 42000.0
-  z: 15500.0
+  x: 25250.0
+  y: 40000.0
+  z: 40000.0
   theta: 0.0
   f: 70000.0
 MicroscopeState:
@@ -68,7 +67,7 @@ MicroscopeState:
   stack_cycling_mode: per_stack
   start_position: 0.0
   end_position: 200.0
-  step_size: 0.16
+  step_size: 0.2
   number_z_steps: 1250.0
   timepoints: 1
   stack_pause: 0.0

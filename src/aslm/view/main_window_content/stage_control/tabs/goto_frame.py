@@ -33,9 +33,8 @@ POSSIBILITY OF SUCH DAMAGE.
 # Standard Imports
 from tkinter import *
 from tkinter import ttk
-from tkinter.font import Font
 import logging
-from pathlib import Path
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -43,7 +42,7 @@ logger = logging.getLogger(p)
 
 class goto_frame(ttk.Frame):
     def __init__(goto_frame, stage_control_tab, *args, **kwargs):
-        #Init Frame
+        # Init Frame
         ttk.Frame.__init__(goto_frame, stage_control_tab, *args, **kwargs)
         
         # Formatting

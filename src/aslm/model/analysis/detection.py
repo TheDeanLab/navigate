@@ -50,10 +50,10 @@ logger = logging.getLogger(p)
 
 
 def add_median_border(image_data):
-    '''
+    """
     # Add Border to Image that is the Median of the Image
     # Requires 3D image.
-    '''
+    """
     (z_len, y_len, x_len) = image_data.shape
     median_intensity = np.median(image_data)
     padded_image_data = np.full(
@@ -63,9 +63,9 @@ def add_median_border(image_data):
 
 
 def make_sphere_3D(radius):
-    '''
+    """
     # Make a 3D structured element in the shape of a sphere
-    '''
+    """
     radius = int(radius)
     sphere = np.zeros((radius, radius, radius))
     (z_len, y_len, x_len) = sphere.shape
@@ -83,10 +83,10 @@ def make_inside_image(
         insideBlur,
         insideDilateRadius,
         insideErodeRadius):
-    '''
+    """
     # Function tries to fill the interior of a cell.
     # Gaussian blur followed by Otsu thresholding, dilation, hole filling, and erosion.
-    '''
+    """
     image_blurred = padded_image_data**insideGamma
     image_blurred = gaussian_filter(image_blurred, sigma=insideBlur)
     image_binary = image_blurred > threshold_otsu(image_blurred)
@@ -101,18 +101,18 @@ def make_inside_image(
 
 
 def make_normalized_image(image_data):
-    '''
+    """
     # Normalizes the image.  Subtracts Otsu threshold from the image, and normalizes it by the standard deviation.
-    '''
+    """
     normalized_cell = padded_image_data - threshold_otsu(image_data)
     normalized_cell = normalized_cell / np.std(normalized_cell)
     return normalized_cell
 
 
 def surface_filter_gauss_3D(image_data, sigma):
-    '''
+    """
     # Function identifies surfaces in Z, Y, and Z directions. Returns each image.
-    '''
+    """
     # Same Sigma Value for All 3 Dimensions
     w = np.ceil(5 * sigma)
     x = np.arange(-w, w, 1)
@@ -154,9 +154,9 @@ def surface_filter_gauss_3D(image_data, sigma):
 
 
 def multiscale_surface_filter_3D(input, scales: list):
-    '''
+    """
     # Function identifies surfaces at multiple scales.
-    '''
+    """
     n_scales = np.size(scales)
     max_response = np.zeros(np.shape(input))
     max_response_scale = np.zeros(np.shape(input))
@@ -184,9 +184,9 @@ def multiscale_surface_filter_3D(input, scales: list):
 
 
 def combine_images(inside_image, normalized_cell, surface_cell):
-    '''
+    """
     # Function combines the inside image, normalized cell, and surface cell images.
-    '''
+    """
     level = 0.999
     combined_image = np.maximum(
         np.maximum(

@@ -45,9 +45,9 @@ logger = logging.getLogger(p)
 
 #Class that handles the dialog box that has all the user entry stuff when you press the Acquisition button
 class Acquire_PopUp():
-    '''
+    """
     #### Class creates the popup that is generated when the Acquire button is pressed and Save File checkbox is selected.
-    '''
+    """
     def __init__(self, root, *args, **kwargs):
         # Creating popup window with this name and size/placement, PopUp is a Toplevel window
         self.popup = PopUp(root, "File Saving Dialog", '430x505+320+180', transient=True)
@@ -59,7 +59,7 @@ class Acquire_PopUp():
         Grid.columnconfigure(content_frame, 'all', weight=1)
         Grid.rowconfigure(content_frame, 'all', weight=1)
 
-        '''Creating the widgets for the popup'''
+        """Creating the widgets for the popup"""
         #Dictionary for all the variables
         self.inputs = {}
         self.buttons = {}
@@ -114,27 +114,27 @@ class Acquire_PopUp():
         
 
     def get_variables(self):
-        '''
+        """
         # This function returns a dictionary of all the variables that are tied to each widget name.
         The key is the widget name, value is the variable associated.
-        '''
+        """
         variables = {}
         for key, widget in self.inputs.items():
             variables[key] = widget.get()
         return variables
 
     def get_widgets(self):
-        '''
+        """
         # This function returns the dictionary that holds the input widgets.
         The key is the widget name, value is the LabelInput class that has all the data.
-        '''
+        """
         return self.inputs
 
     def get_buttons(self):
-        '''
+        """
         # This function returns the dictionary that holds the buttons.
         The key is the button name, value is the button.
-        '''
+        """
         return self.buttons
 
 

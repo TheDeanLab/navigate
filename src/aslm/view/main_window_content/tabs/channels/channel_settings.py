@@ -30,12 +30,15 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
+import logging
+
 import tkinter as tk
 from tkinter import *
 from tkinter import ttk
 from tkinter.font import Font
-import logging
-from pathlib import Path
+
+from aslm.view.custom_widgets.validation import ValidatedSpinbox
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -148,8 +151,8 @@ class channel_creator(ttk.Labelframe):
             self.interval_spins[num].grid(row=num+1, column=0, sticky=NSEW, padx=1, pady=1)
 
             # Defocus Spinbox
-            self.defocus_variables.append(StringVar())
-            self.defocus_spins.append(ttk.Spinbox(self.frame_columns[6], from_=0, to=200.0,
+            self.defocus_variables.append(DoubleVar())
+            self.defocus_spins.append(ValidatedSpinbox(self.frame_columns[6], from_=0.0, to=200.0,
                                                   textvariable=self.defocus_variables[num], increment=0.1, width=6, font=Font(size=11)))
             self.defocus_spins[num].grid(row=num+1, column=0, sticky=NSEW, padx=1, pady=1)
 

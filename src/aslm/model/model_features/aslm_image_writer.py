@@ -1,7 +1,4 @@
-"""
-ASLM camera communication classes.
-
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -41,14 +38,17 @@ import logging
 from tifffile import imsave
 import zarr
 
-
 # Local Imports
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+
 class ImageWriter:
+    r"""Class for saving acquired data to disk.
+
+    """
     def __init__(self, model, sub_dir=''):
         self.model = model
         self.save_directory = os.path.join(self.model.experiment.Saving['save_directory'], sub_dir)
@@ -56,37 +56,58 @@ class ImageWriter:
         self.data_buffer = self.model.data_buffer
         self.current_time_point = 0
         self.file_type = self.model.experiment.Saving['file_type']
-
-        self.config_table = {'signal':{},
-                            'data': {'main': self.write_tiff}}
-
-        # creat saving folder if not exits
-        if not os.path.exists(self.save_directory):
-            os.makedirs(self.save_directory)
+        self.config_table = {'signal': {},
+                             'data': {'main': self.write_tiff}}
 
     def __del__(self):
         pass
 
     def save_image(self, frame_ids):
-        '''
-        Wrapper to give Image Writer some saving decision making, this function will be called from model.
-        '''
+        r"""Save the data to disk.
+
+        Wrapper to give Image Writer some saving decision making, this function is called from model.
+
+        Evaluates the file_type desired, and calls the necessary function.
+
+        Parameters
+        ----------
+        frame_ids : int
+            Frame ID.
+        """
         self.save_directory = self.model.experiment.Saving['save_directory']
         self.file_type = self.model.experiment.Saving['file_type']
 
+        try:
+            # create saving folder if not exits
+            if not os.path.exists(self.save_directory):
+                os.makedirs(self.save_directory)
+        except FileNotFoundError as e:
+            logger.debug(f"ASLM IMage Writer - Cannot create directory {self.save_directory}. Maybe the drive does not exist?")
+            logger.exception(e)
 
         if self.file_type == "Zarr":
             self.write_zarr(frame_ids)
         elif self.file_type == "TIFF":
             self.write_tiff(frame_ids)
-
+        elif self.file_type == "RAW":
+            pass
+        elif self.file_type == "N5":
+            pass
+        elif self.file_type == "H5":
+            pass
+        elif self.file_type == "Multipage-TIFF":
+            pass
+        else:
+            logging.debug(f"ASLM Image Writer - Unknown file type: {self.file_type}")
 
     def write_zarr(self, frame_ids):
-        '''
+        r"""Write data to Zarr.
+
         Will take in camera frames and move data fom SharedND Array into a Zarr Array.
-        If there is more than one channel there will be that many frames ie if there are 3 channels selected there should be three frames.
+        If there is more than one channel there will be that many frames.
+        For example, if there are 3 channels selected there should be three frames.
         Making the assumption there is only one frame per channel on a single acquisition
-        '''
+        """
 
         # Getting needed info, I am doing it in the function because i think if we do not reinit the class,
         # save directory will be a stagnant var. If we just leave
@@ -110,13 +131,13 @@ class ImageWriter:
         # Getting amount of slices
         zslice = int(self.model.experiment.MicroscopeState['number_z_steps'])
 
-        '''
+        """
         Allocate zarr array with values needed
         X Pixel Size, Y Pixel Size, Z Slice, Channel Num, Frame ID
         Chunks set to size of each image with the corresponding additional data
         Numpy data type = dtype='uint16'
         z[:,:,0,0,0] = 2D array at zslice=0, channel=0, frame=0
-        '''
+        """
 
         z = zarr.zeros((xsize, ysize, zslice, self.num_of_channels, len(frame_ids)), 
                         chunks = (xsize, ysize, 1, 1, 1), dtype='uint16')
@@ -135,12 +156,12 @@ class ImageWriter:
         
         # Copy data to Zarr
         # Saving Acq By Slice
-        '''
+        """
         Starts on first channel and increments with the loop. Each image is saved by slice, channel and timepoint.
         After each channel has been taken off data buffer then the slice is incremented.
         After the amount of slices set by zslice has been reached, time is then incremented.
         TODO do we need to store the actual channel number? Or just make sure that frames are in an order than channels can be interpreted?
-        '''
+        """
         if by_slice:
             time = 0
             slice = 0
@@ -156,12 +177,12 @@ class ImageWriter:
                     slice = 0
         
         # Saved by stack
-        '''
+        """
         Starts on first channel and increments thru loop. 
         Each increment of the loop increases the slice index.
         Once the slice has reached max count increment to next channel.
         After all channels and slices have been incremented, increase the time by one.
-        '''
+        """
         if by_stack:
             time = 0
             slice = 0
@@ -189,13 +210,12 @@ class ImageWriter:
         pass
 
     def write_tiff(self, frame_ids):
-        r"""Write data to disk as a tiff
+        r"""Write data to disk as a single slice tiff
 
         Parameters
         __________
-        frame_ids :
+        frame_ids : int
         """
-        print("frame_ids type:", type(frame_ids))
         current_channel = self.model.current_channel
         for idx in frame_ids:
             image_name = self.generate_image_name(current_channel)

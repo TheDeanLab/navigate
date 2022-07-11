@@ -94,9 +94,9 @@ def start_analysis(configuration, experiment, use_gpu, verbose):
 
     Parameters
     ----------
-    configuration : dict
+    configuration : Session
         Session instance of global microscope configuration.
-    experiment : dict
+    experiment : Session
         Session instance of experiment configuration.
     use_gpu : Boolean
         Flag for enabling GPU analysis.
@@ -166,6 +166,29 @@ def start_stages(configuration, verbose):
         return SyntheticStage(configuration, verbose)
     else:
         device_not_found(configuration.Devices['stage'])
+
+
+def start_stages_r(configuration, verbose):
+    r"""Initializes a focusing stage class in a dedicated thread.
+
+    Parameters
+    ----------
+    configuration : dict
+        Session instance of global microscope configuration.
+    verbose : Boolean
+        Flag for enabling verbose operation.
+
+    Returns
+    -------
+    Stage : class
+        Stage class.
+    """
+    if configuration.Devices['stage_r'] == 'Thorlabs' and platform.system() == 'Windows':
+        from aslm.model.devices.stages.stage_tl_kcube_inertial import TLKIMStage
+        from aslm.model.devices.APIs.thorlabs.kcube_inertial import TLFTDICommunicationError
+        return auto_redial(TLKIMStage, (configuration, verbose), exception=TLFTDICommunicationError)
+    else:
+        device_not_found(configuration.Devices['stage_r'])
 
 
 def start_zoom_servo(configuration, verbose):

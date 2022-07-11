@@ -35,7 +35,6 @@ POSSIBILITY OF SUCH DAMAGE.
 
 # Standard Library Imports
 import logging
-import time
 
 # Third Party Imports
 
@@ -47,24 +46,22 @@ logger = logging.getLogger(p)
 
 
 class ZoomBase:
-    def __init__(self, model, verbose):
-        self.model = model
+    r"""ZoomBase parent class.
+
+    Attributes
+    ----------
+    configuration : Session
+        Global configuration of the microscope
+    zoomdict : dict
+        Dictionary of possible zoom values and their corresponding servo position.
+    zoomvalue : int
+        Current Zoom value
+    verbose : bool
+        Verbosity
+    """
+
+    def __init__(self, configuration, verbose):
+        self.configuration = configuration
         self.verbose = verbose
-        self.zoomdict = model.ZoomParameters['zoom_position']
+        self.zoomdict = configuration.ZoomParameters['zoom_position']
         self.zoomvalue = None
-
-    def set_zoom(self, zoom_position, wait_until_done=False):
-        if zoom_position in self.zoomdict:
-            if self.verbose:
-                print('Setting zoom to {}'.format(zoom_position))
-            logger.debug(f"Setting zoom to {zoom_position}")
-            if wait_until_done:
-                time.sleep(1)
-
-    def move(self, position, wait_until_done=False):
-        return True
-
-    def read_position(self):
-        return True
-
-

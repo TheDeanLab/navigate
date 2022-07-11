@@ -1,7 +1,4 @@
-"""
-ASLM camera communication classes.
-
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -38,9 +35,20 @@ from queue import Queue
 import numpy as np
 import threading
 
+# Local imports
+from aslm.model.model_features.aslm_feature_container import load_features
+
 class Autofocus():
     def __init__(self, model):
         self.model = model
+        self.max_entropy = None
+        self.f_frame_id = None
+        self.frame_num = None
+        self.f_pos = None
+        self.target_frame_id = None
+        self.get_frames_num = None
+        self.plot_data = None
+        self.total_frame_num = None
 
         # Queue
         self.autofocus_frame_queue = Queue()
@@ -49,42 +57,51 @@ class Autofocus():
         # target channel
         self.target_channel = 1
 
-        self.config_table = {'signal': {'init': self.pre_func_signal, 
-                                            'main': self.in_func_signal,
-                                            'end': self.end_func_signal},
+        self.config_table = {'signal': {'init': self.pre_func_signal,
+                                        'main': self.in_func_signal,
+                                        'end': self.end_func_signal},
                              'data': {'init': self.pre_func_data,
-                                            'main': self.in_func_data,
-                                            'end': self.end_func_data},
+                                      'main': self.in_func_data,
+                                      'end': self.end_func_data},
                              'node': {'node_type': 'multi-step',
-                                        'wait_next': True },                                
+                                      'device_related': True },
                             }
 
     def run(self, *args):
-        # self.model.experiment.MicroscopeState = args[0]
-        # self.model.experiment.AutoFocusParameters = args[1]
-        # frame_num = self.get_autofocus_frame_num()
-        # if frame_num < 1:
-        #     return
-        # self.model.prepare_acquisition()  # Opens correct shutter and puts all signals to false
-        # self.focus_pos = args[2]  # Current position
+        r"""Run the Autofocusing Routine
 
-        # self.model.signal_thread = threading.Thread(target=self.model.run_single_acquisition,
-        #                                         kwargs={'target_channel': self.target_channel, 'snap_func': self.snap_image_with_autofocus},
-        #                                         name='Autofocus Signal')
+        Parameters
+        ----------
+        args[0] : dict
+            Current microscope state.
+        args[1] : dict
+            Autofocus parameters
 
-        # self.model.data_thread = threading.Thread(target=self.model.run_data_process,
-        #                                     args=(frame_num, self.pre_func_data, self.in_func_data, self.end_func_data,),
-        #                                     name='Autofocus Data')
+        """
+        self.model.experiment.MicroscopeState = args[0]
+        self.model.experiment.AutoFocusParameters = args[1]
+        frame_num = self.get_autofocus_frame_num()
+        if frame_num < 1:
+            return
+        self.model.prepare_acquisition()  # Opens correct shutter and puts all signals to false
+        
+        # load Autofocus
+        self.model.signal_container, self.model.data_container = load_features(self.model, [[{'name': Autofocus}]])
 
-        # # Start Threads
-        # self.model.signal_thread.start()
-        # self.model.data_thread.start()
-        pass
+        self.model.signal_thread = threading.Thread(target=self.model.run_single_channel_acquisition_with_features,
+                                                kwargs={'target_channel': self.target_channel},
+                                                name='Autofocus Signal')
+
+        self.model.data_thread = threading.Thread(target=self.model.run_data_process,
+                                                  args=(frame_num+1,),
+                                                  name='Autofocus Data')
+
+        # Start Threads
+        self.model.signal_thread.start()
+        self.model.data_thread.start()
 
     def get_autofocus_frame_num(self):
-        """
-        # this function calculate how many frames are needed to get the best focus position.
-        """
+        r"""Calculate how many frames are needed to get the best focus position."""
         settings = self.model.experiment.AutoFocusParameters
         frames = 0
         if settings['coarse_selected']:
@@ -190,10 +207,8 @@ class Autofocus():
 
     def end_func_data(self):
         print('data:', len(self.plot_data), self.total_frame_num)
-        if len(self.plot_data) < self.total_frame_num:
+        if self.get_frames_num <= self.total_frame_num:
             return False
-        # send out the best focus frame id
-        self.model.show_img_pipe.send(self.target_frame_id)
         # send out plot data
         plot_data = np.asarray(self.plot_data)
         self.model.autofocus_plot_pipe.send(plot_data) # Sending controller plot data

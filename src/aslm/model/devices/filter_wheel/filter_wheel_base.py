@@ -1,7 +1,4 @@
-"""
-ASLM filter wheel communication classes.
-
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -32,6 +29,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
+
 #  Standard Library Imports
 import logging
 
@@ -45,6 +43,35 @@ logger = logging.getLogger(p)
 
 
 class FilterWheelBase:
+    r"""FilterWheelBase Class
+
+    Parent class for controlling filter wheels.
+
+    Attributes
+    ----------
+    comport : str
+        Comport for communicating with the filter wheel, e.g., COM1.
+    baudrate : int
+        Baud rate for communicating with the filter wheel, e.g., 9600.
+    filter_dictionary : dict
+        Dictionary with installed filter names, e.g., filter_dictionary = {'GFP', 0}.
+    number_of_filter_wheels : int
+        Number of installed filter wheels.
+    wheel_position : int
+        Default filter wheel position
+    verbose : bool
+        Verbosity
+    wait_until_done_delay = float
+        Duration of time to wait for a filter wheel change.
+    wait_until_done = bool
+        Flag for enabling the wait period for a filter wheel change.
+
+    Methods
+    -------
+    check_if_filter_in_filter_dictionary()
+        Checks to see if filter name exists in the filter dictionary.
+    """
+
     def __init__(self, model, verbose):
         self.comport = model.FilterWheelParameters['filter_wheel_port']
         self.baudrate = model.FilterWheelParameters['baudrate']
@@ -56,38 +83,25 @@ class FilterWheelBase:
         self.wait_until_done = True
 
     def check_if_filter_in_filter_dictionary(self, filter_name):
-        """
-        # Checks if the filter designation (string) given as argument
-        # exists in the filter dictionary
+        r"""Checks if the filter designation (string) given exists in the filter dictionary
+
+        Parameters
+        ----------
+        filter_name : str
+            Name of filter.
+
+        Returns
+        -------
+        filter_exists : bool
+            Flag if filter exists in the filter dictionary.
+
         """
         if filter_name in self.filter_dictionary:
-            return True
+            filter_exists = True
         else:
-            raise ValueError('Filter designation not in the configuration')
-            logger.error('Filter designation not in the configuration')
+            filter_exists = False
+            logger.debug('Filter Name not in the Filter Dictionary')
+            raise ValueError('Filter Name not in the Filter Dictionary.')
+        return filter_exists
 
-
-    def filter_change_delay(self, filter_name):
-        """
-        # Calculate duration of time needed for filter wheel to change.
-        """
-        pass
-
-    def set_filter(self, filter_name, wait_until_done=True):
-        """
-        # Change the filter wheel to the filter designated by the filter position argument.
-        """
-        pass
-
-    def read(self, num_bytes):
-        """
-        # Reads the specified number of bytes from the serial port.
-        """
-        pass
-
-    def close(self):
-        """
-        # Closes the serial port.
-        """
-        pass
 

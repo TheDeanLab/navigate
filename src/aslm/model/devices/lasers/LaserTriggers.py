@@ -16,7 +16,7 @@ logger = logging.getLogger(p)
 
 
 class LaserTriggers():
-    ''' Class for interacting with the laser enable DO lines via NI-DAQmx
+    """ Class for interacting with the laser enable DO lines via NI-DAQmx
     Works only with NI-PXI 6733s with all lasers on 6 output lines.
 
     This uses the property of NI-DAQmx-outputs to keep their last digital state or
@@ -27,7 +27,7 @@ class LaserTriggers():
     Needs a dictionary which combines laser wavelengths and device outputs
     in the form:
     {'488 nm': 'PXI6259/line0/port0', '515 nm': 'PXI6259/line0/port1'}
-    '''
+    """
 
     def __init__(self, laser_dict):
         self.laser_enable_state = 'None'
@@ -49,26 +49,26 @@ class LaserTriggers():
             print('LaserTriggers initialized')
 
     def check_if_laser_in_laser_dict(self, laser):
-        '''
+        """
         Checks if the laser designation (string) given as argument exists in the laser_dict
-        '''
+        """
         if laser in self.laser_dict:
             return True
         else:
             raise ValueError('Laser not in the configuration')
 
     def build_cmd_int(self, laser):
-        '''
+        """
         Turns the line number into a command integer via 2^n
-        '''
+        """
         self.line = self.laser_dict[laser][-1]
         return pow(2, int(self.line))
 
     def enable(self, laser):
-        '''
+        """
         Enables a single laser line.
         If another laser was on beforehand, this one is switched off.
-        '''
+        """
         if self.check_if_laser_in_laser_dict(laser):
             if self.verbose:
                 print(self.laser_dict[laser])
@@ -87,9 +87,9 @@ class LaserTriggers():
             pass
 
     def enable_all(self):
-        '''
+        """
         Enables all laser lines.
-        '''
+        """
         with nidaqmx.Task() as task:
             task.do_channels.add_do_chan(
                 self.laser_enable_device,
@@ -101,9 +101,9 @@ class LaserTriggers():
             print('Enabled all lasers')
 
     def disable_all(self):
-        '''
+        """
         Disables all laser lines.
-        '''
+        """
         with nidaqmx.Task() as task:
             task.do_channels.add_do_chan(
                 self.laser_enable_device,

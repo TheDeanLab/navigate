@@ -49,7 +49,7 @@ class JoystickBase:
     def __init__(self):
         self.mode = 'undefined'
 
-    '''
+    """
     TODO: Has to be completely revamped to remove PyQT software.
     Added a large number of pass statements, and commented out PyQT
     
@@ -57,4 +57,4 @@ class JoystickBase:
     
     Because the signals emitted can only be processed when a QEventLoop is running, you
     need something with an event loop (e.g. a QApplication) even for testing.
-    '''
+    """

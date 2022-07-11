@@ -1,5 +1,4 @@
-"""
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -108,7 +107,7 @@ class Main_App(ttk.Frame):
         # mainapp.bottom_right_frame_label = ttk.Label(mainapp.frame_bottom_right, text="Notebook #3")
         # mainapp.bottom_right_frame_label.grid(row=0,column=0)
 
-        '''
+        """
                 Placing the notebooks using grid. While the grid is called on each frame it is actually calling
                 the main window since those are the parent to the frames. The labels have already been packed into each respective
                 frame so can be ignored in the grid setup. This layout uses a 2x2 grid to start.
@@ -119,7 +118,7 @@ class Main_App(ttk.Frame):
 
                 The above is the grid "spots" the left frame will take spots 3 & 5 while top right takes
                 spot 4 and bottom right frame takes spot 6. Top frame will be spots 1 & 2
-                '''
+                """
 
         # Gridding out foundational frames
         mainapp.grid(column=0, row=0, sticky=(NSEW))
@@ -145,4 +144,3 @@ if __name__ == '__main__':
     root = tk.Tk()
     Main_App(root)
     root.mainloop()
-    

@@ -86,7 +86,7 @@ class other_axis_frame(ttk.Frame):
         )
 
 
-        '''
+        """
         Grid for buttons
 
                 1
@@ -100,7 +100,7 @@ class other_axis_frame(ttk.Frame):
         Down is 5,6
         Increment is 3
         Zero is 4
-        '''
+        """
 
 
         #Gridding out buttons

@@ -37,8 +37,12 @@ import tkinter as tk
 import platform
 from aslm.log_files.log_functions import log_setup
 
+# Third Party Imports
+import pretty_errors
+
 # Local Imports
 from aslm.controller.aslm_controller import ASLM_controller as controller
+
 
 def main():
     r"""Multiscale ASLM Microscope Software.
@@ -76,27 +80,20 @@ def main():
     # Parse command line arguments
     parser = argparse.ArgumentParser(description='Multiscale Microscope Command Line Arguments')
     input_args = parser.add_argument_group('Input Arguments')
-    input_args.add_argument('--verbose',
+    input_args.add_argument('-v', '--verbose',
                             required=False,
                             default=False,
                             action='store_true',
                             help='Enables the software to operate in a verbose mode.  Warning: Excessively verbose.')
 
-    input_args.add_argument('--synthetic_hardware',
+    input_args.add_argument('-sh', '--synthetic_hardware',
                             required=False,
                             default=False,
                             action='store_true',
                             help='Synthetic Hardware - '
                                  'Allows launching of the software without the physical devices attached.')
 
-    input_args.add_argument('--sh',
-                            required=False,
-                            default=False,
-                            action='store_true',
-                            help='Synthetic Hardware - '
-                                 'Allows launching of the software without the physical devices attached.')
-
-    input_args.add_argument('--debug',
+    input_args.add_argument('-d', '--debug',
                             required=False,
                             default=False,
                             action='store_true',
@@ -168,23 +165,25 @@ def main():
     log_setup('logging.yml')
 
     # Evaluate GPU Status for Analysis Routines
-    USE_GPU = False
+    use_gpu = False
     if args.CPU:
-        # If user overrides GPU search, keep USE_GPU flag as False.
+        # If user overrides GPU search, keep use_gpu flag as False.
         pass
     else:
         if platform.system() != 'Darwin':
             import tensorflow as tf
             number_GPUs = len(tf.config.list_physical_devices('GPU'))
-            if number_GPUs == 0:
-                print('No NVIDIA GPU in system. Running on CPU only.')
-            else:
-                USE_GPU = True
-                print('NVIDIA GPU detected.')
+            if number_GPUs > 0:
+                use_gpu = True
 
     # Start the GUI
     root = tk.Tk()
-    controller(root, configuration_path, experiment_path, etl_constants_path, USE_GPU, args)
+    controller(root,
+               configuration_path,
+               experiment_path,
+               etl_constants_path,
+               use_gpu,
+               args)
     root.mainloop()
 
 

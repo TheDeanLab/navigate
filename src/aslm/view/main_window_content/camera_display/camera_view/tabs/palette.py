@@ -30,13 +30,16 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
+
+# Standard Library Imports
 import logging
-from pathlib import Path
 from tkinter import *
 from tkinter import ttk
+from pathlib import Path
 
-from pyparsing import col
+# Third Party Library Imports
 
+# Local Imports
 from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 
 # Logger Setup
@@ -80,10 +83,10 @@ class palette(ttk.Labelframe):
         self.transpose = BooleanVar()
         self.trans = 'Flip XY'
         self.inputs[self.trans] = LabelInput(parent=self,
-                                            label=self.trans,
-                                            input_class=ttk.Checkbutton,
-                                            input_var=self.transpose
-                                            )
+                                             label=self.trans,
+                                             input_class=ttk.Checkbutton,
+                                             input_var=self.transpose
+                                             )
         self.inputs[self.trans].grid(row=3, column=0, sticky=NSEW)
 
         # Autoscale
@@ -96,7 +99,7 @@ class palette(ttk.Labelframe):
                                             input_class=ttk.Checkbutton,
                                             input_var=self.autoscale
                                             )
-        self.inputs[self.auto].grid(row=4, column=0, sticky=NSEW)
+        self.inputs[self.auto].grid(row=5, column=0, sticky=NSEW)
 
         # Max and Min Counts
         for i in range(len(self.minmax)):
@@ -108,21 +111,22 @@ class palette(ttk.Labelframe):
                                                                        'to': 2**16-1,
                                                                        'increment': 1,
                                                                        'width': 5})
-            self.inputs[self.minmax_names[i]].grid(row=i + 5, column=0, sticky=NSEW, padx=3)
+            self.inputs[self.minmax_names[i]].grid(row=i + 6, column=0, sticky=NSEW, padx=3)
+
 
     def get_variables(self):
-        '''
+        """
         # This function returns a dictionary of all the variables that are tied to each widget name.
         The key is the widget name, value is the variable associated.
-        '''
+        """
         variables = {}
         for key, widget in self.inputs.items():
             variables[key] = widget.get()
         return variables
 
     def get_widgets(self):
-        '''
+        """
         # This function returns the dictionary that holds the widgets.
         The key is the widget name, value is the LabelInput class that has all the data.
-        '''
+        """
         return self.inputs

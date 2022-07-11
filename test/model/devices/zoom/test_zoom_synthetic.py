@@ -1,5 +1,4 @@
-"""
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -30,33 +29,37 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-from tkinter import *
-from tkinter import ttk
-import logging
+
+# Standard Library Imports
+import unittest
 from pathlib import Path
-# Logger Setup
-p = __name__.split(".")[1]
-logger = logging.getLogger(p)
-from tkinter.font import Font
-import numpy as np
 
-class stack_cycling_frame(ttk.Labelframe):
-    def __init__(stack_acq, settings_tab, *args, **kwargs):
-        #Init Frame
-        text_label = 'Laser Cycling Settings'
-        ttk.Labelframe.__init__(stack_acq, settings_tab, text=text_label, *args, **kwargs)
-        
-        # Formatting
-        Grid.columnconfigure(stack_acq, 'all', weight=1)
-        Grid.rowconfigure(stack_acq, 'all', weight=1)
+# Third Party Imports
 
-        #Laser Cycling Frame (Vertically oriented)
-        stack_acq.cycling_frame = ttk.Frame(stack_acq)
-        stack_acq.cycling_options = StringVar()
-        stack_acq.cycling_pull_down = ttk.Combobox(stack_acq, textvariable=stack_acq.cycling_options)
-        stack_acq.cycling_pull_down.state(["readonly"]) # Makes it so the user cannot type a choice into combobox
-        stack_acq.cycling_pull_down.grid(row=0, column=1, sticky=(NSEW), padx=4, pady=(4,6))
+# Local Imports
+from aslm.model.devices.zoom.zoom_synthetic import SyntheticZoom
+from aslm.model.aslm_model_config import Session as session
 
-        #Gridding Each Holder Frame
-        stack_acq.cycling_frame.grid(row=0, column=0, sticky=(NSEW))
 
+class TestZoomSynthetic(unittest.TestCase):
+    r"""Unit Test for SyntheticZoom Class"""
+
+    def test_zoom_synthetic_attributes(self):
+        base_directory = Path(__file__).resolve().parent.parent.parent.parent.parent
+        configuration_directory = Path.joinpath(base_directory, 'src', 'aslm', 'config')
+        configuration_path = Path.joinpath(configuration_directory, 'configuration.yml')
+
+        configuration = session(configuration_path, False)
+        zoom_class = SyntheticZoom(configuration, False)
+
+        assert hasattr(zoom_class, 'configuration')
+        assert hasattr(zoom_class, 'zoomdict')
+        assert hasattr(zoom_class, 'zoomvalue')
+        assert hasattr(zoom_class, 'verbose')
+        assert hasattr(zoom_class, 'set_zoom') and callable(getattr(zoom_class, 'set_zoom'))
+        assert hasattr(zoom_class, 'read_position') and callable(getattr(zoom_class, 'read_position'))
+        assert hasattr(zoom_class, 'move') and callable(getattr(zoom_class, 'move'))
+
+
+if __name__ == '__main__':
+    unittest.main()

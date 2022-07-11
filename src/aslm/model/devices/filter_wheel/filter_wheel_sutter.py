@@ -1,7 +1,4 @@
-"""
-ASLM filter wheel communication classes.
-
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -32,6 +29,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
+
 #  Standard Library Imports
 import logging
 import time
@@ -47,21 +45,50 @@ from aslm.model.devices.filter_wheel.filter_wheel_base import FilterWheelBase
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-class SutterFilterWheel(FilterWheelBase):
-    """
-    Module for controlling Sutter Lambda Filter Wheels
 
-    Command byte = (wheel * 128) + (self.speed * 16) + position
+class SutterFilterWheel(FilterWheelBase):
+    r"""SutterFilterWheel Class
+
+    Class for controlling Sutter Lambda Filter Wheels
     https://www.sutter.com/manuals/LB10-3_OpMan.pdf
 
-    TODO: Currently moves multiple filter wheels to the same position.  In the future, it may be nice to have
-          a way to move multiple filter wheels to different positions independently.
+    Attributes
+    ----------
+    comport : str
+        Comport for communicating with the filter wheel, e.g., COM1.
+    baudrate : int
+        Baud rate for communicating with the filter wheel, e.g., 9600.
+    filter_dictionary : dict
+        Dictionary with installed filter names, e.g., filter_dictionary = {'GFP', 0}.
+    number_of_filter_wheels : int
+        Number of installed filter wheels.
+    wheel_position : int
+        Default filter wheel position
+    verbose : bool
+        Verbosity
+    wait_until_done_delay = float
+        Duration of time to wait for a filter wheel change.
+    wait_until_done = bool
+        Flag for enabling the wait period for a filter wheel change.
+    delay_matrix = np.ndarray
+        Matrix of duration in seconds needed to switch filter wheel positions
+    speed = int
+        Filter wheel movement speed.  0 = fastest, 8 = slowest.
+
+    Methods
+    -------
+    check_if_filter_in_filter_dictionary()
+        Checks to see if filter name exists in the filter dictionary.
+    filter_change_delay(filter_name)
+        Change the filter wheel to the position occupied by filter_name
+    read(num_bytes)
+        Read num_bytes of bytes from the serial port.
+    close()
+        Set the filter wheel to the empty position and close the communication port.
     """
 
     def __init__(self, model, verbose):
         super().__init__(model, verbose)
-
-        # Sutter Lambda 10-B Specific Initializations
         self.read_on_init = True
         self.speed = 2
 
@@ -75,109 +102,84 @@ class SutterFilterWheel(FilterWheelBase):
                                        [0, 0.124, 0.235, 0.350, 0.460, 0.580],
                                        [0, 0.230, 0.440, 0.650, 0.860, 1.100]])
 
-        # Open Serial Port
+        logging.debug(f"SutterFilterWheel - Opening Serial Port {self.comport}")
         try:
-            if self.verbose:
-                print('Opening Filter Wheel on Serial Port', self.comport)
-            self.serial = serial.Serial(
-                self.comport, self.baudrate, timeout=.25)
-            logger.debug(f"Opening Filter Wheel on Serial Port, {self.comport}")
+            self.serial = serial.Serial(self.comport, self.baudrate, timeout=.25)
         except serial.SerialException:
-            raise UserWarning(
-                'Could not communicate with Sutter Lambda 10-B via COMPORT',
-                self.comport)
-            logger.warning("Could not communicate with Sutter Lambda 10-B via COMPORT")
+            logger.warning("SutterFilterWheel - Could not establish Serial Port Connection")
+            raise UserWarning('Could not communicate with Sutter Lambda 10-B via COMPORT', self.comport)
 
-        # Place Controller Into 'Online' Mode
-        if self.verbose:
-            print('Putting Sutter Lambda 10-B Into Online Mode')
-        logger.debug("Sutter Lambda 10-B Put Into Online Mode")
+        logger.debug("SutterFilterWheel - Placing device In Online Mode")
         self.serial.write(bytes.fromhex('ee'))
-
-        # Check to see if the initialization sequence has finished.
         if self.read_on_init:
             self.read(2)  # class 'bytes'
             self.init_finished = True
-            if self.verbose:
-                print('Done initializing the Sutter Lambda 10-B filter wheel.')
-            logger.debug("Done initializing the Sutter Lambda 10-B filter wheel.")
+            logger.debug("SutterFilterWheel - Initialized.")
         else:
             self.init_finished = False
-
-        if self.verbose:
-            print('Setting Sutter Lambda 10-B Filter to Default Filter Position')
-        logger.debug("Setting Sutter Lambda 10-B Filter to Default Filter Position")
         self.set_filter('Empty-Alignment')
+        logger.debug("SutterFilterWheel -  Placed in Default Filter Position.")
 
     def __enter__(self):
         return self
 
     def __exit__(self, type, value, traceback):
-        if self.verbose:
-            print('Closing the Filter Wheel Serial Port')
-        logger.debug("Closing the Filter Wheel Serial Port")
+        logger.debug("SutterFilterWheel - Closing Device.")
         self.close()
 
     def filter_change_delay(self, filter_name):
-        """
-        # The Sutter Filter wheels require ~40 ms to change between adjacent filter positions
-        # See page 38: https://www.sutter.com/manuals/LB10-3_OpMan.pdf
-        """
-        # Old Position
-        old_position = self.wheel_position
+        r"""Calculate duration of time necessary to change filter wheel positions.
+        Identifies the number of positions that must be switched, and then retrieves
+        the duration of time necessary to perform the switch from self.delay_matrix.
+        Detailed information on timing located on page 38: https://www.sutter.com/manuals/LB10-3_OpMan.pdf
 
-        # New Position
+        Parameters
+        ----------
+        filter_name : str
+            Name of filter that we want to move to.
+        """
+        # Find the old and new positions, the distance between them, and the delay necessary.
+        old_position = self.wheel_position
         self.wheel_position = self.filter_dictionary[filter_name]
         delta_position = int(abs(old_position - self.wheel_position))
-
-        # Calculate Delay
-        self.wait_until_done_delay = (
-            self.delay_matrix[self.speed, delta_position])
-        logger.info("delay calculated")
+        self.wait_until_done_delay = (self.delay_matrix[self.speed, delta_position])
 
     def set_filter(self, filter_name, wait_until_done=True):
-        """
-        # Change the filter wheel to the filter designated by the filter position argument.
+        r"""Change the filter wheel to the filter designated by the filter position argument.
+
+        Parameters
+        ----------
+        filter_name : str
+            Name of filter to move to.
+        wait_until_done : bool
+            Waits duration of time necessary for filter wheel to change positions.
         """
         if self.check_if_filter_in_filter_dictionary(filter_name) is True:
+
             # Calculate the Delay Needed to Change the Positions
             self.filter_change_delay(filter_name)
 
-            # Make sure you are moving it to a reasonable filter position
+            # Make sure you are moving it to a reasonable filter position at a reasonable speed.
             assert self.wheel_position in range(10)
-
-            # Make sure you are moving it at a reasonable self.speed
             assert self.speed in range(8)
-            logger.info("reasonable self.speed and filter position")
 
-            # If previously we did not confirm that the initialization was
-            # complete, check now.
+            # If previously we did not confirm that the initialization was complete, check now.
             if not self.init_finished:
                 self.read(2)
                 self.init_finished = True
-                if self.verbose:
-                    print('Done initializing filter wheel.')
-                logger.debug("Done initializing filter wheel.")
+                logger.debug("SutterFilterWheel - Initialized.")
+
             for wheel_idx in range(self.number_of_filter_wheels):
+                """Loop through each filter, and send the binary sequence via serial to
+                move to the desired filter wheel position
+                When number_of_filter_wheels = 1, loop executes once, and only wheel A changes.
+                When number_of_filter_wheels = 2, loop executes twice, with both wheel A and
+                B moving to the same position sequentially
+                Filter Wheel Command Byte Encoding = wheel + (self.speed*16) + position = command byte
                 """
-                # Loop through each filter, and send the binary sequence via serial to
-                # move to the desired filter wheel position
-                # When number_of_filter_wheels = 1, loop executes once, and only wheel A changes.
-                # When number_of_filter_wheels = 2, loop executes twice, with both wheel A and
-                # B moving to the same position sequentially
-                # Filter Wheel Command Byte Encoding = wheel + (self.speed*16) + position = command byte
-                """
-
-                if self.verbose:
-                    print("Moving Filter Wheel:", wheel_idx)
-                logger.debug(f"Moving Filter Wheel, {wheel_idx}")
-
+                logger.debug(f"SutterFilterWheel - Moving to Position {wheel_idx}")
                 output_command = wheel_idx * 128 + self.wheel_position + 16 * self.speed
                 output_command = output_command.to_bytes(1, 'little')
-
-                if self.verbose:
-                    print('Sending Filter Wheel Command:', output_command)
-                logger.debug(f"Sending Filter Wheel Command, {output_command}")
                 self.serial.write(output_command)
 
             #  Wheel Position Change Delay
@@ -185,8 +187,12 @@ class SutterFilterWheel(FilterWheelBase):
                 time.sleep(self.wait_until_done_delay)
 
     def read(self, num_bytes):
-        """
-        # Reads the specified number of bytes from the serial port.
+        r"""Reads the specified number of bytes from the serial port.
+
+        Parameters
+        ----------
+        num_bytes : int
+            Number of bytes to read from the serial port.
         """
         for i in range(100):
             num_waiting = self.serial.inWaiting()
@@ -194,17 +200,15 @@ class SutterFilterWheel(FilterWheelBase):
                 break
             time.sleep(0.02)
         else:
-            raise UserWarning(
-                "The serial port to the Sutter Lambda 10-B is on, but it isn't responding as expected.")
             logger.error("The serial port to the Sutter Lambda 10-B is on, but it isn't responding as expected.")
+            raise UserWarning("The serial port to the Sutter Lambda 10-B is on, but it isn't responding as expected.")
         return self.serial.read(num_bytes)
 
     def close(self):
+        r"""Close the SutterFilterWheel serial port.
+
+        Sets the filter wheel to the Empty-Alignment position and then closes the port.
         """
-        # Closes the serial port.
-        """
-        if self.verbose:
-            print('Closing the Filter Wheel Serial Port')
-        logger.debug("Closing the Filter Wheel Serial Port")
+        logger.debug("SutterFilterWheel - Closing the Filter Wheel Serial Port")
         self.set_filter('Empty-Alignment')
         self.serial.close()

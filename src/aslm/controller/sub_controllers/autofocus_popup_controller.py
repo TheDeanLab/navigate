@@ -90,9 +90,9 @@ class Autofocus_Popup_Controller(GUI_Controller):
         self.parent_controller.execute('autofocus')
         
     def display_plot(self, data):
-        '''
+        """
         ### Displays a plot of [focus, entropy] with data from autofocus routine
-        '''
+        """
     
         coarse_range = self.setting_dict['coarse_range']
         coarse_step = self.setting_dict['coarse_step_size']

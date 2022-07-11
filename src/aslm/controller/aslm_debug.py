@@ -66,7 +66,7 @@ class Debug_Module:
         self.central_controller.model.run_command('debug', 'get_timings')
 
     def test_feature_container(self):
-        signal_num = 2
+        signal_num = 10
         feature_id = simple_dialog.askinteger('Input', 'Which feature routine do you want?\n \
                             1. detective->yes->save->autofocus->yes->save\n \
                             2. detective->yes->autofocus->yes->save\n \
@@ -80,6 +80,12 @@ class Debug_Module:
         if feature_id < 1 or feature_id > 6:
             print('no such feature!')
             return
+        if feature_id == 3 or feature_id == 4:
+            signal_num = 30
+        elif feature_id == 1 or feature_id == 2:
+            signal_num = 3
+        else:
+            signal_num = 1
         self.start_debug(signal_num, 'debug', 'test_feature_container', self.central_controller.experiment.MicroscopeState,
                         signal_num, feature_id-1, saving_info=self.central_controller.experiment.Saving)
 

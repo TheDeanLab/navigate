@@ -1,7 +1,4 @@
-"""
-ASLM resolution estimates.
-
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -33,25 +30,31 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 
+# Standard Library Imports
+import logging
+from pathlib import Path
 
+# Third Party Imports
 import numpy as np
 import numpy.matlib
 from tifffile import imread, imsave
-import logging
-from pathlib import Path
+
+# Local Imports
+
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+
 def image_to_polar(input_image):
-    '''
+    """
     # imP = im2pol(imC)
     # Transform an image from carthesian to polar coordinate
     # Inputs:
     #  input_image        	Input image in carthesian coordinate
     # Outputs:
     #  imP        	Output image in polar coordinate
-    '''
+    """
     from scipy import ndimage
     from scipy import interpolate
 
@@ -94,13 +97,13 @@ def image_to_polar(input_image):
 
 
 def get_radial_average(input_image):
-    '''
+    """
     # Return the radial average of input square image im
     # Inputs:
     #  im        	Square image
     # Outputs:
     #  r        	Radial average
-    '''
+    """
     image_size = np.shape(input_image)
     if len(image_size) != 2:
         raise ValueError('Input image must 2D')
@@ -118,14 +121,14 @@ def get_radial_average(input_image):
 
 
 def get_decorrelation_local_maxima(decorrelation_function):
-    '''
+    """
     # Return the local maxima of the decorrelation function decorrelation_function
     # Inputs:
     #  decorrelation_function        	        Decorrelation function
     # Outputs:
     #  max_index        	Position of the local maxima
     #  max_amplitude		Amplitude of the local maxima
-    '''
+    """
 
     decorrelation_function = np.array(decorrelation_function)
 
@@ -169,7 +172,7 @@ def linear_map(input_value,
                mapped_minimum_value=None,
                mapped_maximum_value=None
                ):
-    '''
+    """
     # Performs a linear mapping of input_value from the range [minimum_value,maximum_value] to the range [mapped_minimum_value,mapped_maximum_value]
     # Inputs:
     #  input_value        	Input value
@@ -179,7 +182,7 @@ def linear_map(input_value,
     #  mapped_maximum_value		Maximum value of the new range of input_value
     # Outputs:
     #  rescaled_value        	Rescaled value
-    '''
+    """
 
     if mapped_minimum_value or mapped_maximum_value is None:
         mapped_minimum_value = minimum_value  # Correct
@@ -206,14 +209,14 @@ def linear_map(input_value,
 
 def apodize_image(input_image,
                   number_pixels):
-    '''
+    """
     # Apodize the edges of a 2D image
     # Inputs:
     #  input_image        	    Input image
     #  number_pixels            Number of pixels of the apodization
     # Outputs:
     #  output_image        	Apodized image
-    '''
+    """
 
     # CALCULATE SIZE OF IMAGE AND MEAN VALUE
     y_pixels, x_pixels = np.shape(input_image)
@@ -259,7 +262,7 @@ def get_correlation_coefficient(image_1,
                                 image_2,
                                 c1=None,
                                 c2=None):
-    '''
+    """
     # Return the normalized correlation coefficient expressed in Fourier space
     #
     # Inputs:
@@ -268,7 +271,7 @@ def get_correlation_coefficient(image_1,
     #
     # Outputs:
     #  correlation_coefficient        	Normalized cross-correlation coefficient
-    '''
+    """
 
     # Suppress numpy warnings for invalid values
     numpy.seterr(invalid='ignore')
@@ -295,7 +298,7 @@ def get_correlation_coefficient(image_1,
 def get_image_decorrelation(input_image,
                             fourier_sampling=None,
                             number_highpass_filters=None):
-    '''
+    """
     # Estimate the image cut-off frequency based on decorrelation analysis
     # Inputs:
     #  input_image        	2D image to be analyzed
@@ -304,7 +307,7 @@ def get_image_decorrelation(input_image,
     # Outputs:
     #  kcMax        Estimated cut-off frequency of the image in normalized frequency
     #  A0			Amplitude of the local maxima of d0
-    '''
+    """
 
     if number_highpass_filters is None:
         number_highpass_filters = 10
@@ -351,12 +354,7 @@ def get_image_decorrelation(input_image,
     # Masked Fourier Image
     fourier_image = np.fft.fftshift(np.fft.fft2(np.fft.fftshift(input_image)))
     fourier_image = np.multiply(fourier_image, mask0)
-    c = np.real(
-        np.sqrt(
-            np.sum(
-                np.multiply(
-                    fourier_image,
-                    np.conjugate(fourier_image)))))
+    c = np.real(np.sqrt(np.sum(np.multiply(fourier_image, np.conjugate(fourier_image)))))
 
     sampling_interval = np.linspace(
         fourier_sampling[0], fourier_sampling[-1], number_fourier_samples)

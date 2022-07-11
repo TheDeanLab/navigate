@@ -6,6 +6,7 @@ Devices:
   etl: ETL  #ETL or SyntheticETL
   filter_wheel: SutterFilterWheel #SutterFilterWheel or SyntheticFilterWheel
   stage: PI  # PI or SyntheticStage
+  stage_r: Thorlabs  # Currently just a focusing unit for the right side
   zoom: DynamixelZoom  #DynamixelZoom or SyntheticZoom
   lasers: SyntheticLasers #Omicron or SyntheticLasers
   shutters: ThorlabsShutter #ThorlabsShutter or SyntheticShutter
@@ -49,7 +50,9 @@ DAQParameters:
 
 CameraParameters:
   # Hamamatsu Orca Flash 4.0
-  number_of_cameras: 1
+  number_of_cameras: 2
+  high_serial_number: 302158
+  low_serial_number: 302352
   x_pixels: 2048.0
   y_pixels: 2048.0
   pixel_size_in_microns: 6.5
@@ -95,8 +98,8 @@ RemoteFocusParameters:
   remote_focus_r_ramp_falling_percent: 2.5
   remote_focus_r_amplitude: 0.7
   remote_focus_r_offset: 2.3
-  remote_focus_r_min_ao: -10
-  remote_focus_r_max_ao: 10
+  remote_focus_r_min_ao: -0.7
+  remote_focus_r_max_ao: 0.7
 
 FilterWheelParameters:
   filter_wheel_port: COM19
@@ -129,7 +132,7 @@ GalvoParameters:
 
   # Shadow Reduction Galvo for NanoSPIM Module
   # Cambridge Technology CRS 4 kHz system.
-  galvo_r_amplitude: 0.5
+  galvo_r_offset: 0.5
   galvo_r_min_ao: -5
   galvo_r_max_ao: 5
 
@@ -175,15 +178,15 @@ StageParameters:
   y_unload_position: 10000
   y_load_position: 90000
 
-  startfocus: 70700
-  x_max: 50000
-  x_min: 2000
+  startfocus: 75000
+  x_max: 33500
+  x_min: 16000
   y_max: 100000
   y_min: 2000
   z_max: 50000
-  z_min: 2000
+  z_min: 25000
   f_max: 100000
-  f_min: 2000
+  f_min: -100000
   theta_max: 360
   theta_min: 0
 
@@ -198,13 +201,25 @@ StageParameters:
   f_step: 500
 
   position: {
-    x_pos: 35000,
-    y_pos: 42000,
-    z_pos: 15500,
+    x_pos: 25250,
+    y_pos: 40000,
+    z_pos: 40000,
     f_pos: 70000,
     theta_pos: 0
   }
   velocity: 1000
+
+  x_l_offset: 0
+  y_l_offset: 0
+  z_l_offset: 0
+  f_l_offset: 0
+  theta_l_offset: 0
+
+  x_r_offset: 1500
+  y_r_offset: 1720
+  z_r_offset: -14311
+  f_r_offset: 0
+  theta_r_offset: 0
 
 ZoomParameters:
   # Robotis Dynamixel MX-28R Robot Servo

@@ -39,44 +39,31 @@ from __future__ import (absolute_import, division, print_function)
 import sys
 from pathlib import Path
 import logging
-from builtins import (
-    bytes,
-    int,
-    list,
-    object,
-    range,
-    str,
-    ascii,
-    chr,
-    hex,
-    input,
-    next,
-    oct,
-    open,
-    pow,
-    round,
-    super,
-    filter,
-    map,
-    zip)
 
 # Third Party Imports
 import yaml
 
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
 class Session:
-    """
+    """Session Class
+
     Stores variables and other classes that are common to several UI or instances of the code.
     Custom dunder setattr and getattr methods are used to add functionality.  Previously emitted signals for pyQt.
+
+    Parameters
+    ----------
+    file_path : Path
+        Path instance of file path to the configuration or experiment yaml file.
     """
 
-    def __init__(self, file_path=None, verbose=False):
-        """
-        The class is prepared to load values from a Yaml file
+    def __init__(self,
+                 file_path=None,
+                 verbose=False):
+        """The class is prepared to load values from a Yaml file
         :param file: Path to the file where the config file is or a dictionary with the data to load.
         :arg args: Arguments passed to the program from the command line.
         """
@@ -91,6 +78,7 @@ class Session:
 
         if file_path is None:
             print("No file provided to load_yaml_config()")
+            logging.debug("No file path provided to load the configuration or experiment yaml file.")
             sys.exit(1)
         else:
             if isinstance(file_path, Path):
@@ -99,23 +87,32 @@ class Session:
                     try:
                         config_data = yaml.load(f, Loader=yaml.FullLoader)
                     except yaml.YAMLError as yaml_error:
-                        print(yaml_error)
+                        logging.debug(f"Session - Yaml Error: {yaml_error}")
 
         # Set the attributes with the custom __setattr__
         for data_iterator in config_data:
-            self.__setattr__(data_iterator, config_data[data_iterator], verbose)
+            self.__setattr__(data_iterator,
+                             config_data[data_iterator],
+                             verbose)
 
-    def __setattr__(self, key, value, verbose=False):
+    def __setattr__(self,
+                    key,
+                    value,
+                    verbose=False):
+        """Custom setter for Configuration and Experiment attributes.
+
+        Parameters
+        ----------
+        key : str
+            name of the attribute, e.g. 'Devices'
+        value : dict
+            Dictioanry of attribute values, e.g., {'daq': 'NI', 'camera': 'HamamatsuOrca', 'etl': 'ETL', ...
+        verbose : bool
+            Verbosity
         """
-        Custom setter for the attributes.
-        :param key: Name of the attribute.
-        :param value: Value of the attribute.
-        """
-        #
         # # Confirm that the value is a dictionary
         if not isinstance(value, dict):
-            raise Exception(
-                'Everything passed to a the configuration must be a dictionary')
+            raise Exception('Everything passed to a the configuration must be a dictionary')
 
         # If the key does not exist in self.params, add it
         if key not in self.params:
@@ -126,7 +123,6 @@ class Session:
             for k in value:
                 if k in self.params[key]:
                     val = value[k]
-                    # Update value
                     self.params[key][k] = value[k]
                 else:
                     self.params[key][k] = value[k]
@@ -140,9 +136,12 @@ class Session:
             return self.params[item]
 
     def __str__(self):
-        """
-        Overrides the print(class).
-        :return: a Yaml-ready string.
+        r"""Overrides the print(class).
+
+        Returns
+        -------
+        s : str
+            A Yaml-ready string.
         """
 
         s = ''
@@ -153,64 +152,21 @@ class Session:
         return s
 
     def serialize(self):
-        """
-        Function kept for compatibility. Now it only outputs the same information than print(class).
-        :return: string Yaml-ready.
+        r"""Overrides the print(class).
+
+        Function kept for compatibility.
+
+        Returns
+        -------
+        string : str
+            Yaml-ready string.
         """
         return self.__str__()
 
-    def get_parameters(self):
-        """
-        Special class for setting up the ParamTree from PyQtGraph. It saves the iterating over all the variables directly
-        on the GUI.
-        :return: a list with the parameters and their types.
-        """
-        p = []
-        for k in self.params:
-            c = []
-            for m in self.params[k]:
-                if isinstance(self.params[k][m], type([])):
-                    s = {
-                        'name': m.replace(
-                            '_', ' '), 'type': type(
-                            self.params[k][m]).__name__, 'values': self.params[k][m]}
-                elif type(self.params[k][m]).__name__ == 'NoneType':
-                    s = {
-                        'name': m.replace(
-                            '_',
-                            ' '),
-                        'type': "str",
-                        'values': self.params[k][m]}
-                elif type(self.params[k][m]).__name__ == 'long':
-                    s = {
-                        'name': m.replace(
-                            '_',
-                            ' '),
-                        'type': "float",
-                        'values': self.params[k][m]}
-                else:
-                    s = {
-                        'name': m.replace(
-                            '_',
-                            ' '),
-                        'type': type(
-                            self.params[k][m]).__name__,
-                        'value': self.params[k][m],
-                        'decimals': 6}
-                c.append(s)
+    # def copy(self):
+    #     """
+    #     Copies this class. Important not to overwrite the memory of a previously created .
+    #     :return: a  exactly the same as this one.
+    #     """
+    #     return Session(self.params)
 
-            a = {'name': k.replace('_', ' '), 'type': 'group', 'children': c}
-            p.append(a)
-        return p
-
-    def copy(self):
-        """
-        Copies this class. Important not to overwrite the memory of a previously created .
-        :return: a  exactly the same as this one.
-        """
-        return Session(self.params)
-
-
-if __name__ == '__main__':
-    """ Testing Section """
-    pass

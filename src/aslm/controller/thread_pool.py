@@ -1,7 +1,4 @@
-"""
-ASLM thread pool.
-
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -32,15 +29,21 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
+
+# Standard Library Imports
 import threading
 import ctypes
 import sys
 from collections import deque
 import logging
-from pathlib import Path
 import traceback
+
+# Third Party Imports
+
+# Local Imports
+
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
@@ -54,7 +57,12 @@ class SelfLockThread(threading.Thread):
             kwargs={},
             *,
             daemon=None):
-        super().__init__(group, target, name, args, kwargs, daemon=daemon)
+        super().__init__(group,
+                         target,
+                         name,
+                         args,
+                         kwargs,
+                         daemon=daemon)
         self.selfLock = threading.Lock()
         # lock itself
         self.selfLock.acquire()
@@ -66,8 +74,8 @@ class SelfLockThread(threading.Thread):
                 self._target(*self._args, **self._kwargs)
             except Exception as e:
                 print(f'{self.name} thread ended because of exception!: {e}')
+                logger.debug(f'{self.name} thread ended because of exception!: {e}')
             finally:
-                # print('thread ended!!!')
                 pass
 
 
@@ -138,6 +146,7 @@ class SynchronizedThreadPool:
                     target(*args, **kwargs)
                 except Exception as e:
                     print(threading.current_thread().name, 'thread exception happened!', e, traceback.format_exc())
+                    logger.debug(threading.current_thread().name, 'thread exception happened!', e, traceback.format_exc())
 
             # wake up next thread if any
             with self.resources[resourceName] as resource:
@@ -214,6 +223,7 @@ class SynchronizedThreadPool:
     def localtrace(self, frame, event, arg):
         if event == 'exception':
             print('****in local trace: exception stops the thread')
+            logger.debug('****in local trace: exception stops the thread')
             raise SystemExit()
         return self.localtrace
 

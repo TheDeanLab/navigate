@@ -35,22 +35,22 @@ import tkinter as tk
 from pathlib import Path
 from tkinter import ttk, NSEW, StringVar, Grid
 from tkinter.scrolledtext import ScrolledText
-from view.custom_widgets.popup import PopUp
-from view.custom_widgets.LabelInputWidgetFactory import LabelInput
-from view.custom_widgets.validation import ValidatedEntry
+from aslm.view.custom_widgets.popup import PopUp
+from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from aslm.view.custom_widgets.validation import ValidatedCombobox, ValidatedEntry
 
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 #Class that handles the dialog box that has all the user entry stuff when you press the Acquisition button
 class Acquire_PopUp():
-    '''
+    """
     #### Class creates the popup that is generated when the Acquire button is pressed and Save File checkbox is selected.
-    '''
+    """
     def __init__(self, root, *args, **kwargs):
         # Creating popup window with this name and size/placement, PopUp is a Toplevel window
-        self.popup = PopUp(root, "File Saving Dialog", '450x450+320+180', transient=True)
+        self.popup = PopUp(root, "File Saving Dialog", '430x505+320+180', transient=True)
 
         # Storing the content frame of the popup, this will be the parent of the widgets
         content_frame = self.popup.get_frame()
@@ -59,7 +59,7 @@ class Acquire_PopUp():
         Grid.columnconfigure(content_frame, 'all', weight=1)
         Grid.rowconfigure(content_frame, 'all', weight=1)
 
-        '''Creating the widgets for the popup'''
+        """Creating the widgets for the popup"""
         #Dictionary for all the variables
         self.inputs = {}
         self.buttons = {}
@@ -69,8 +69,8 @@ class Acquire_PopUp():
         self.entries_label.grid(row=0, column=0, columnspan=2, sticky=(NSEW), pady=5)
 
         # Creating Entry Widgets
-        entry_names = ['root_directory', 'user', 'tissue', 'celltype', 'label', 'misc']
-        entry_labels = ['Root Directory', 'User', 'Tissue Type', 'Cell Type', 'Label', 'Misc. Info']
+        entry_names = ['root_directory', 'user', 'tissue', 'celltype', 'label', 'file_type', 'misc']
+        entry_labels = ['Root Directory', 'User', 'Tissue Type', 'Cell Type', 'Label', 'File Type', 'Misc. Info']
 
         # Loop for each entry and label
         for i in range(len(entry_names)):
@@ -80,6 +80,15 @@ class Acquire_PopUp():
                                             input_class=ScrolledText,
                                             input_args={"wrap": tk.WORD, "width": 40, "height": 10}
                                             )
+            elif entry_names[i] == 'file_type':
+                self.inputs[entry_names[i]] = LabelInput(parent=content_frame,
+                                            label=entry_labels[i],
+                                            input_class=ValidatedCombobox,
+                                            input_var=StringVar()
+                                            )
+                self.inputs[entry_names[i]].set_values(('Zarr', 'TIFF'))
+                self.inputs[entry_names[i]].set('Zarr')
+
             else:
                 self.inputs[entry_names[i]] = LabelInput(parent=content_frame,
                                             label=entry_labels[i],
@@ -99,33 +108,33 @@ class Acquire_PopUp():
 
         #Done and Cancel Buttons
         self.buttons['Cancel'] = ttk.Button(content_frame, text="Cancel Acquisition")
-        self.buttons['Cancel'].grid(row=7, column=0, padx=5, sticky=(NSEW))
+        self.buttons['Cancel'].grid(row=8, column=0, padx=5, sticky=(NSEW))
         self.buttons['Done'] = ttk.Button(content_frame, text="Acquire Data")
-        self.buttons['Done'].grid(row=7, column=1, padx=5, sticky=(NSEW))
+        self.buttons['Done'].grid(row=8, column=1, padx=5, sticky=(NSEW))
         
 
     def get_variables(self):
-        '''
+        """
         # This function returns a dictionary of all the variables that are tied to each widget name.
         The key is the widget name, value is the variable associated.
-        '''
+        """
         variables = {}
         for key, widget in self.inputs.items():
             variables[key] = widget.get()
         return variables
 
     def get_widgets(self):
-        '''
+        """
         # This function returns the dictionary that holds the input widgets.
         The key is the widget name, value is the LabelInput class that has all the data.
-        '''
+        """
         return self.inputs
 
     def get_buttons(self):
-        '''
+        """
         # This function returns the dictionary that holds the buttons.
         The key is the button name, value is the button.
-        '''
+        """
         return self.buttons
 
 

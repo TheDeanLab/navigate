@@ -32,14 +32,14 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-from controller.sub_controllers.gui_controller import GUI_Controller
-from controller.aslm_controller_functions import combine_funcs
+from aslm.controller.sub_controllers.gui_controller import GUI_Controller
+from aslm.controller.aslm_controller_functions import combine_funcs
 import time
 
 import logging
 from pathlib import Path
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
@@ -90,9 +90,9 @@ class Autofocus_Popup_Controller(GUI_Controller):
         self.parent_controller.execute('autofocus')
         
     def display_plot(self, data):
-        '''
+        """
         ### Displays a plot of [focus, entropy] with data from autofocus routine
-        '''
+        """
     
         coarse_range = self.setting_dict['coarse_range']
         coarse_step = self.setting_dict['coarse_step_size']

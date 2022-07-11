@@ -32,10 +32,15 @@ Excellent directions can be found for CuPy. https://docs.cupy.dev/en/stable/inst
 ~~~
 conda create -n ASLM python=3.9.7
 conda activate ASLM
-python -m pip install -r requirements.txt
-cd C:\Users\UserProfile\Documents\GitHub\ASLM\src\
-python main.py
+python -m pip install --upgrade pip
+mkdir ~/Git/
+cd ~/Git/
+git clone https://github.com/AdvancedImagingUTSW/ASLM.git
+cd ASLM
+pip install -e .
 ~~~
+
+To run, enter `aslm` in the `ASLM` Anaconda environment.
 
 ### Trouble Shooting
 If running the software on campus at UTSW you may need to update some of your proxy settings to allow pip/conda to install the proper packages.
@@ -74,9 +79,12 @@ python main.py --verbose --synthetic_hardware
 
 ### Authors
 * Kevin Dean
+* Zach Marin
 * Xiaoding 'Annie' Wang
 * Dax Collison
 * Sampath Rapuri
+* Samir Mamtani
+* Renil Gupta
 * Andrew Jamieson
 
 

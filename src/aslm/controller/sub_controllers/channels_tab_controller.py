@@ -144,6 +144,7 @@ class Channels_Tab_Controller(GUI_Controller):
 
         if configuration_controller:
             self.initialize(configuration_controller)
+         
 
     def initialize(self,
                    config):

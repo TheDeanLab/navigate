@@ -295,7 +295,7 @@ class Camera_View_Controller(GUI_Controller):
             new_image_width = new_image_width - 1
 
         # zoom_x_pos and y_pos are between 0 and 512.
-        #TODO: Grab the widget size so that this isn't hardcoded.
+        # TODO: Grab the widget size so that this isn't hardcoded.
         scaling_factor_x = int(self.original_image_width / 512)
         scaling_factor_y = int(self.original_image_height / 512)
         x_start_index = (self.zoom_x_pos * scaling_factor_x) - (new_image_width / 2)
@@ -425,18 +425,20 @@ class Camera_View_Controller(GUI_Controller):
             self.image = image
 
         # Save image dimensions to memory.
-        (self.original_image_height, self.original_image_width) = np.shape(self.image)
+        self.original_image_height, self.original_image_width = self.image.shape
 
         # For first image received, pre-allocate memory/arrays.
         if images_received == 0:
             self.number_of_channels = len([channel[-1] for channel in microscope_state['channels'].keys()])
-            self.number_of_slices = microscope_state['number_z_steps']
-            self.total_images_per_volume = number_of_channels * self.number_of_slices
+            self.number_of_slices = int(microscope_state['number_z_steps'])
+            # print(self.original_image_height, self.original_image_width, self.number_of_slices)
+            self.total_images_per_volume = self.number_of_channels * self.number_of_slices
 
-            for channel in number_of_channels:
-                self.image_volume[channel] = np.zeros(self.original_image_height,
-                                                      self.original_image_width,
-                                                      self.number_of_slices)
+            # TODO: Switch CXYZ to XYZC?
+            self.image_volume = np.zeros((self.number_of_channels,
+                                          self.original_image_height,
+                                          self.original_image_width,
+                                          self.number_of_slices))
 
         # Store each image to the pre-allocated memory. Requires knowledge of how images are received.
         if microscope_state['stack_cycling_mode'] == 'per_stack':
@@ -447,7 +449,7 @@ class Camera_View_Controller(GUI_Controller):
             pass
 
         # MIP Display Mode
-        if self.display_state != 'Live:':
+        if self.display_state != 'Live':
             if self.display_state == 'XY MIP':
                 pass
             if self.display_state == 'YZ MIP':

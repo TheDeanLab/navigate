@@ -115,7 +115,7 @@ class Channels_Tab_Controller(GUI_Controller):
         self.focus_origin = 0
 
         # laser/stack cycling variable
-        self.stack_cycling_val = self.view.stack_cycling_frame.cycling_options
+        self.stack_cycling_val = self.view.stack_acq_frame.cycling_options
         # laser/stack cycling event binds
         self.stack_cycling_val.trace_add('write', self.update_cycling_setting)
 
@@ -156,7 +156,8 @@ class Channels_Tab_Controller(GUI_Controller):
             ASLM_Configuration_Controller.  config.configuration = Session object.
         """
         self.set_channel_num(config.configuration.GUIParameters['number_of_channels'])
-        self.view.stack_cycling_frame.cycling_pull_down['values'] = ['Per Z', 'Per Stack']
+        self.view.stack_acq_frame.inputs['cycling'].set_values(('Per Z', 'Per Stack'))
+        self.view.stack_acq_frame.inputs['cycling'].set('Per Z')
         self.stage_velocity = config.configuration.StageParameters['velocity']
         self.filter_wheel_delay = config.configuration.FilterWheelParameters['filter_wheel_delay']
         self.channel_setting_controller.initialize(config)
@@ -288,7 +289,7 @@ class Channels_Tab_Controller(GUI_Controller):
         self.view.stack_timepoint_frame.save_check['state'] = state
         self.view.stack_timepoint_frame.stack_pause_spinbox['state'] = state
         self.view.stack_timepoint_frame.exp_time_spinbox['state'] = state
-        self.view.stack_cycling_frame.cycling_pull_down['state'] = 'readonly' if state == 'normal' else state
+        self.view.stack_acq_frame.inputs["cycling"]['state'] = 'readonly' if state == 'normal' else state
         self.show_verbose_info('acquisition mode has been changed to', mode)
 
     def update_z_steps(self,

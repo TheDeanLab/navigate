@@ -73,3 +73,30 @@ class stop_frame(ttk.Frame):
         return {
             'stop': self.stop_btn
         }
+
+class min_stop_frame(ttk.Frame):
+    def __init__(self, stage_control_tab, name, *args, **kwargs):
+        # Init Frame
+        ttk.Frame.__init__(self, stage_control_tab, *args, **kwargs)
+        self.name = name
+
+        # Formatting
+        Grid.columnconfigure(self, 'all', weight=1)
+        Grid.rowconfigure(self, 'all', weight=1)
+
+        # Stop button
+        self.stop_btn = Button(
+            self,
+            bg='red',
+            fg='white',
+            text="STOP",
+            width=10
+        )
+
+        # Gridding out buttons
+        self.stop_btn.grid(row=0, column=0, rowspan=2, pady=2)
+
+    def get_buttons(self):
+        return {
+            'stop': self.stop_btn
+        }

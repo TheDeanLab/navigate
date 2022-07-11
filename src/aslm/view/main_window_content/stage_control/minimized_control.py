@@ -35,6 +35,7 @@ from view.main_window_content.stage_control.tabs.other_axis_frame import min_oth
 from view.main_window_content.stage_control.tabs.position_frame import min_position_frame as position_frame
 from view.main_window_content.stage_control.tabs.x_y_frame import min_x_y_frame as x_y_frame
 from view.main_window_content.stage_control.tabs.goto_frame import goto_frame
+from aslm.view.main_window_content.stage_control.tabs.stop_frame import  min_stop_frame as stop_frame
 # Standard Imports
 from tkinter import *
 from tkinter import ttk
@@ -86,6 +87,9 @@ class minimized_control(ttk.Frame):
         minimized_control.goto_frame = goto_frame(minimized_control)
         minimized_control.goto_frame_label = ttk.Label(minimized_control.goto_frame, text="Goto Frame")
         minimized_control.goto_frame_label.pack() #For visual mockup purposes
+        
+        # stop frame
+        minimized_control.stop_frame = stop_frame(minimized_control, 'Stop')
 
 
         '''
@@ -115,6 +119,8 @@ class minimized_control(ttk.Frame):
         Grid.rowconfigure(minimized_control.theta_frame, 'all', weight=1)
         Grid.columnconfigure(minimized_control.f_frame, 'all', weight=1)
         Grid.rowconfigure(minimized_control.f_frame, 'all', weight=1)
+        Grid.columnconfigure(minimized_control.stop_frame, 'all', weight=1)
+        Grid.rowconfigure(minimized_control.stop_frame, 'all', weight=1)
         
         # Did not include GOTO widget in remaking of GUI
         Grid.columnconfigure(minimized_control.goto_frame, 'all', weight=1)
@@ -126,6 +132,7 @@ class minimized_control(ttk.Frame):
         minimized_control.z_frame.grid(row=2, column=1, sticky=(NSEW), padx=5)
         minimized_control.theta_frame.grid(row=3, column=1, sticky=(NSEW), padx=5)
         minimized_control.f_frame.grid(row=4, column=1, sticky=(NSEW), padx=5)
+        minimized_control.stop_frame.grid(row=0, column=2, sticky=(NSEW), padx=5, pady=5)
         
     def get_widgets(minimized_control):
         """ Return all the input widgets as a dictionary

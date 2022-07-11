@@ -71,7 +71,6 @@ class stagecontrol_maxintensity_notebook(ttk.Notebook):
         #Adding tabs to self notebook
         self.add(self.stage_control_tab, text='Stage Control', sticky=NSEW)
         self.add(self.minimized_control, text='Stage Control', sticky=NSEW)
-        #self.hide(minimized_control)
         self.add(self.maximum_intensity_projection_tab, text='MIPs', sticky=NSEW)
         
         #Create State Tracker for minimization

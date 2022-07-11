@@ -84,6 +84,7 @@ class Stage_GUI_Controller(GUI_Controller):
 
         # variables
         self.widget_vals = self.view.get_variables()
+        self.parent_view = parent_view
      
         # gui event bind
         buttons = self.view.get_buttons()
@@ -100,6 +101,21 @@ class Stage_GUI_Controller(GUI_Controller):
                 buttons[k].configure(
                     command=self.zero_btn_handler(k[5:-4])
                 )
+                
+        min_buttons = self.parent_view.stage_control.minimized_control.get_buttons()
+        for k in min_buttons:
+            if k[:2] == 'up':
+                min_buttons[k].configure(command=self.up_btn_handler(k[3:-4]))
+            elif k[:4] == 'down':
+                min_buttons[k].configure(command=self.down_btn_handler(k[5:-4]))
+            elif k[5:-4] == 'xy':
+                min_buttons[k].configure(
+                    command=self.xy_zero_btn_handler()
+                )
+            else:
+                min_buttons[k].configure(
+                    command=self.zero_btn_handler(k[5:-4])
+                )
 
         for axis in ['x', 'y', 'z', 'theta', 'f']:
             # add event bind to position entry variables
@@ -107,8 +123,6 @@ class Stage_GUI_Controller(GUI_Controller):
 
         if configuration_controller:
             self.initialize(configuration_controller)
-        self.parent_view = parent_view
-        #parent_view.root.bind("<Configure>", self.resize)
 
 
     def initialize(self, config):

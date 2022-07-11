@@ -147,14 +147,27 @@ class min_other_axis_frame(ttk.Frame):
         )
 
         #Increment spinbox
-
-        other_axis_frame.increment_box = LabelInput(
-            parent=other_axis_frame,
-            input_class=ValidatedSpinbox,
-            input_var=DoubleVar(),
-            input_args={'width': 25}
-        )
-
+        if name=='Z':
+            other_axis_frame.increment_box = LabelInput(
+                parent=other_axis_frame,
+                input_class=ValidatedSpinbox,
+                input_var=minimized_control.note3.stage_control_tab.z_frame.increment_box.get_variable(),
+                input_args={'width': 25}
+            )
+        elif name=='Theta':
+            other_axis_frame.increment_box = LabelInput(
+                parent=other_axis_frame,
+                input_class=ValidatedSpinbox,
+                input_var=minimized_control.note3.stage_control_tab.theta_frame.increment_box.get_variable(),
+                input_args={'width': 25}
+            )
+        elif name=='Focus':
+            other_axis_frame.increment_box = LabelInput(
+                parent=other_axis_frame,
+                input_class=ValidatedSpinbox,
+                input_var=minimized_control.note3.stage_control_tab.f_frame.increment_box.get_variable(),
+                input_args={'width': 25}
+            )
 
         '''
         Grid for buttons

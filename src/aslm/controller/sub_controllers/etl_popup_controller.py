@@ -128,14 +128,14 @@ class Etl_Popup_Controller(GUI_Controller):
         """
         # set experiment values
         """
-        self.in_initialize = True
+        resolution = 'high' if resolution_value == 'high' else 'low'
+        mag = 'N/A' if resolution_value == 'high' else resolution_value
+        if self.widgets['Mode'].get() == resolution and self.widgets['Mag'].get() == mag:
+            return
         self.widgets['Mode'].set('high' if resolution_value == 'high' else 'low')
-        self.show_magnification()
-        self.widgets['Mag'].set('one' if resolution_value == 'high' else resolution_value)
-        self.show_laser_info()
-        
-        # end initialization
-        self.in_initialize = False
+        self.show_magnification('N/A' if resolution_value == 'high' else resolution_value)
+        # self.widgets['Mag'].set('N/A' if resolution_value == 'high' else resolution_value)
+        # self.show_laser_info()
 
     def set_mode(self, mode='stop'):
         self.mode = mode
@@ -155,7 +155,11 @@ class Etl_Popup_Controller(GUI_Controller):
         self.resolution = self.widgets['Mode'].widget.get()
         temp = list(self.resolution_info.ETLConstants[self.resolution].keys())
         self.widgets['Mag'].widget['values'] = temp
-        self.widgets['Mag'].widget.set(temp[0])
+        print('**** args:', args)
+        if args[0] in temp:
+            self.widgets['Mag'].widget.set(args[0])
+        else:
+            self.widgets['Mag'].widget.set(temp[0])
         # update laser info
         self.show_laser_info()
 
@@ -175,9 +179,12 @@ class Etl_Popup_Controller(GUI_Controller):
         self.variables['Galvo Off'].set(self.galvo_setting[f'galvo_{focus_prefix}_offset'])
         self.variables['Galvo Freq'].set(self.galvo_setting[f'galvo_{focus_prefix}_frequency'])
 
-        if not self.in_initialize:
-            # update resolution value in central controller (menu)
+        # update resolution value in central controller (menu)
+        value = 'high' if self.resolution == 'high' else self.mag
+        if self.parent_controller.resolution_value.get() != value:
             self.parent_controller.resolution_value.set('high' if self.resolution == 'high' else self.mag)
+        # reconfigure widgets
+        self.configure_widget_range()
 
     def update_etl_setting(self, name, laser, etl_name):
         r"""This function will update ETLConstants in memory

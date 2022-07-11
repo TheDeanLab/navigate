@@ -144,6 +144,7 @@ class ASLM_controller:
         # Sub Gui Controllers
         # Acquire bar
         self.acquire_bar_controller = Acquire_Bar_Controller(self.view.acqbar,
+                                                             self.view.settings.channels_tab,
                                                              self,
                                                              self.verbose)
 
@@ -348,6 +349,15 @@ class ASLM_controller:
         self.view.menubar.menu_autofocus.add_command(label='Autofocus', command=lambda: self.execute('autofocus'))
         self.view.menubar.menu_autofocus.add_command(label='setting', command=popup_autofocus_setting)
 
+        # add-on features
+        feature_list = ['None', 'Change Resolution']
+        self.feature_id_val = tkinter.IntVar(0)
+        for i in range(len(feature_list)):
+            self.view.menubar.menu_features.add_radiobutton(label=feature_list[i],
+                                                            variable=self.feature_id_val,
+                                                            value=i)
+        self.feature_id_val.trace_add('write', lambda *args: self.execute('load_feature', self.feature_id_val.get()))
+
         # debug menu
         if self.debug:
             Debug_Module(self, self.view.menubar.menu_debug, self.verbose)
@@ -513,7 +523,17 @@ class ASLM_controller:
                 'laser_info': self.resolution_info.ETLConstants[self.resolution][self.mag]
                 }
             """
-            self.model.change_resolution(args)
+            print('*** change resolution!!!!')
+            resolution = 'low' if args[0] != 'high' else 'high'
+            mag = 'N/A' if args[0] == 'high' else args[0]
+            temp = {
+                    'resolution_mode': resolution,
+                    'zoom': mag,
+                    'laser_info': self.etl_constants.ETLConstants[resolution][mag]
+                }
+            work_thread = self.threads_pool.createThread('model', lambda: self.model.run_command('update_setting', 'resolution', temp))
+            work_thread.join()
+            # self.model.change_resolution(resolution_value=args[0])
             self.camera_setting_controller.calculate_physical_dimensions(args[0])
             if hasattr(self, 'etl_controller') and self.etl_controller:
                 self.etl_controller.set_experiment_values(args[0])
@@ -548,6 +568,10 @@ class ASLM_controller:
             r"""Execute autofocus routine.
             """
             self.threads_pool.createThread('camera', self.capture_autofocus_image)
+
+        elif command == 'load_feature':
+            r"""Tell model to load/unload features."""
+            self.threads_pool.createThread('model', lambda: self.model.run_command('load_feature', *args))
             
         elif command == 'acquire_and_save':
             r"""Acquire data and save it.
@@ -611,10 +635,14 @@ class ASLM_controller:
 
         elif command == 'stop_acquire':
             self.model.run_command('stop')
+            # self.sloppy_stop()
             self.set_mode_of_sub('stop')
+            self.acquire_bar_controller.stop_progress_bar()
+            self.feature_id_val.set(0)
 
         elif command == 'exit':
             self.model.run_command('stop')
+            # self.sloppy_stop()
             if hasattr(self, 'etl_controller'):
                 self.etl_controller.save_etl_info()
             self.model.terminate()

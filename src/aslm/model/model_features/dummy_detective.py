@@ -59,5 +59,6 @@ class Dummy_Detective:
         self.detection_queue.put((frame_ids, r))
         return r
 
-    def generate_meta_data(self):
+    def generate_meta_data(self, *args):
         print('This frame is detective', self.model.frame_id)
+        return True

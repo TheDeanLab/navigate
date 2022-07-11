@@ -47,6 +47,11 @@ from aslm.model.aslm_model_config import Session as session
 from aslm.model.concurrency.concurrency_tools import ResultThread, SharedNDArray
 from aslm.model.model_features.autofocus import Autofocus
 from aslm.model.model_features.aslm_image_writer import ImageWriter
+from aslm.model.model_features.dummy_detective import Dummy_Detective
+from aslm.model.model_features.aslm_common_features import *
+from aslm.model.model_features.aslm_feature_container import load_features
+from aslm.log_files.log_functions import log_setup
+from aslm.tools.common_dict_tools import update_settings_common, update_stage_dict
 
 # debug
 from aslm.model.aslm_debug_model import Debug_Module
@@ -197,6 +202,10 @@ class Model:
         # Image Writer/Save functionality
         self.image_writer = ImageWriter(self)
 
+        # feature list
+        # TODO: put it here now
+        self.feature_list = [[[{'name': ChangeResolution, 'args': ('1x',)}], [{'name': Dummy_Detective, 'node':{'device_related': True}}], [{'name': ChangeResolution, 'args': ('high',)}], [{'name': Snap, 'node':{'device_related': True}}]]]
+
     def get_camera(self):
         """
         Get the currently-used camera, in the event there are multiple cameras.
@@ -345,45 +354,26 @@ class Model:
             consisting of the resolution_mode, the zoom, and the laser_info.
             e.g., self.resolution_info.ETLConstants[self.resolution][self.mag]
             """
-            # stop live thread
-            self.stop_send_signal = True
-            self.signal_thread.join()
-            self.current_channel = 0
+            print('****** in the model: ', args)
+            if args[0] != 'resolution':
+                return
+            reboot = False
+            if self.camera.is_acquiring:
+                # We called this while in the middle of an acquisition
+                # stop live thread
+                self.stop_send_signal = True
+                self.signal_thread.join()
+                self.current_channel = 0
+                reboot = True
 
-            if args[0] == 'channel':
-                self.experiment.MicroscopeState['channels'] = args[1]
+            if args[1]['resolution_mode'] != self.experiment.MicroscopeState['resolution_mode'] or \
+                args[1]['zoom'] != self.experiment.MicroscopeState['zoom']:
+                self.change_resolution('high' if args[1]['resolution_mode'] == 'high' else args[1]['zoom'])
 
-            if args[0] == 'resolution':
-                """
-                args[1] is a dictionary that includes 'resolution_mode': 'low', 'zoom': '1x', 'laser_info': ...
-                ETL popup window updating the self.etl_constants.
-                Passes new self.etl_constants to the self.model.daq
-                TODO: Make sure the daq knows which etl data to use based upon wavelength, zoom, resolution mode, etc.
-                """
-                updated_settings = args[1]
-                resolution_mode = updated_settings['resolution_mode']
-                zoom = updated_settings['zoom']
-                laser_info = updated_settings['laser_info']
+            update_settings_common(self, args)
 
-
-
-                if resolution_mode == 'low':
-                    self.etl_constants.ETLConstants['low'][zoom] = laser_info
-                else:
-                    self.etl_constants.ETLConstants['high'][zoom] = laser_info
-                if self.verbose:
-                    print(self.etl_constants.ETLConstants['low'][zoom])
-
-                # Modify DAQ to pull the initial values from the etl_constants.yml file, or be passed it from the model.
-                # Pass to the self.model.daq to
-                #             value = self.resolution_info.ETLConstants[self.resolution][self.mag][laser][etl_name]
-                # print(args[1])
-
-            if args[0] == 'galvo':
-                (param, value), = args[1].items()
-                self.experiment.GalvoParameters[param] = value
-
-            self.daq.calculate_all_waveforms(self.experiment.MicroscopeState, self.etl_constants, self.experiment.GalvoParameters, self.get_readout_time())
+            self.daq.calculate_all_waveforms(self.experiment.MicroscopeState, self.etl_constants,
+                                             self.experiment.GalvoParameters, self.get_readout_time())
             self.event_queue.put(('waveform', self.daq.waveform_dict))
 
             # prepare devices based on updated info
@@ -406,6 +396,17 @@ class Model:
             """
             autofocus = Autofocus(self)
             autofocus.run(*args)
+
+        elif command == 'load_feature':
+            """
+            args[0]: int, args[0]-1 is the id of features
+                   : 0 no features
+            """
+            if args[0] == 0 and hasattr(self, 'signal_container'):
+                delattr(self, 'signal_container')
+                delattr(self, 'data_container')
+                return
+            self.signal_container, self.data_container = load_features(self, self.feature_list[args[0]-1])
             
         elif command == 'stop':
             """
@@ -563,8 +564,11 @@ class Model:
             readout_time = self.camera.camera_controller.get_property_value("readout_time")
         return readout_time
 
-    def prepare_acquisition(self):
-        """
+    def prepare_acquisition(self, turn_off_flags=True):
+        r"""Prepare the acquisition.
+
+        Sets flags, calculates all of the waveforms.
+        Sets the Camera Sensor Mode, initializes the data buffer, starts camera, and opens shutters
         Sets flags.
         Calculates all of the waveforms.
         Sets the Camera Sensor Mode
@@ -574,10 +578,11 @@ class Model:
         if self.camera.camera_controller.is_acquiring:
             self.camera.close_image_series()
         # turn off flags
-        self.stop_acquisition = False
-        self.stop_send_signal = False
-        self.autofocus_on = False
-        self.is_live = False
+        if turn_off_flags:
+            self.stop_acquisition = False
+            self.stop_send_signal = False
+            self.autofocus_on = False
+            self.is_live = False
 
         # Calculate Waveforms for all channels. Plot in the view.
         waveform_dict = self.daq.calculate_all_waveforms(self.experiment.MicroscopeState, self.etl_constants, self.experiment.GalvoParameters, self.get_readout_time())
@@ -591,7 +596,9 @@ class Model:
         self.frame_id = 0
 
         # Initialize Image Series - Attaches camera buffer and start imaging
-        self.camera.initialize_image_series(self.data_buffer, self.number_of_frames)
+        self.camera.initialize_image_series(self.data_buffer,
+                                            self.number_of_frames)
+        self.frame_id = 0
 
         self.open_shutter()
 
@@ -650,9 +657,7 @@ class Model:
             if self.stop_acquisition or self.stop_send_signal:
                 break
             channel_idx = int(channel_key[prefix_len:])
-            self.run_single_channel_acquisition(channel_idx)
-                
-                
+            self.run_single_channel_acquisition_with_features(channel_idx)
 
     def snap_image(self, channel_key):
         """
@@ -774,8 +779,33 @@ class Model:
         # Restore stage position
         self.move_stage({'z_abs': restore_z}, wait_until_done=True)  # Update position
 
-    def change_resolution(self, args):
-        resolution_value = args[0]
+    def run_single_channel_acquisition_with_features(self, target_channel=1):
+        r"""Acquire data with ...
+
+        Parameters
+        ----------
+        target_channel : int
+            Desired channel to acquire.
+
+        """
+        if not hasattr(self, 'signal_container'):
+            self.run_single_channel_acquisition(target_channel)
+            return
+        
+        self.signal_container.reset()
+        while not self.signal_container.end_flag and not self.stop_send_signal and not self.stop_acquisition:
+            self.run_single_channel_acquisition(target_channel)
+            if not hasattr(self, 'signal_container'):
+                return
+    
+    def change_resolution(self, resolution_value):
+        r"""Switch resolution mode of the microscope.
+
+        Parameters
+        ----------
+        resolution_value : str
+            'high' for high-resolution mode, and 'low' for low-resolution mode.
+        """
 
         if (self.experiment.MicroscopeState['resolution_mode'] == "low" and resolution_value == 'high')\
            or (self.experiment.MicroscopeState['resolution_mode'] == "high" and resolution_value != 'high'):
@@ -788,18 +818,18 @@ class Model:
                 self.experiment.MicroscopeState['resolution_mode'] = 'low'
 
             # We can't keep acquiring if we're switching cameras. For now, simply turn the camera off.
-            if self.camera.camera_controller.is_acquiring or self.is_live:
-                self.run_command('stop')
+            # if self.camera.is_acquiring:
+            #     self.run_command('stop')
 
             self.camera = self.get_camera()
 
         if resolution_value == 'high':
-            print("High Resolution Mode")
+            self.logger.info("ASLM Model - Switching into High-Resolution Mode")
             self.experiment.MicroscopeState['resolution_mode'] = 'high'
             self.laser_triggers.enable_high_resolution_laser()
         else:
             # Can be 0.63, 1, 2, 3, 4, 5, and 6x.
-            print("Low Resolution Mode, Zoom:", resolution_value)
+            self.logger.info(f"ASLM Model - Switching to Low Resolution Mode, Zoom: {resolution_value}")
             self.experiment.MicroscopeState['resolution_mode'] = 'low'
             self.experiment.MicroscopeState['zoom'] = resolution_value
             self.zoom.set_zoom(resolution_value)

@@ -69,6 +69,10 @@ class menubar(Menu):
         self.menu_autofocus = Menu(self)
         self.add_cascade(menu=self.menu_autofocus, label='Autofocus')
 
+        # Add-on Features menu
+        self.menu_features = Menu(self)
+        self.add_cascade(menu=self.menu_features, label='Add-on Features')
+
         # Debug Menu
         self.menu_debug = Menu(self)
         self.add_cascade(menu=self.menu_debug, label='Debug')

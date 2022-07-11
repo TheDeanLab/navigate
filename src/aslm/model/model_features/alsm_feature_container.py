@@ -160,7 +160,7 @@ class DataContainer(Container):
             self.curr_node = self.root
         while self.curr_node:
             result, is_end = self.curr_node.run(*args)
-            print('Data running node:', self.curr_node.node_name, 'get result:', result)
+            # print('Data running node:', self.curr_node.node_name, 'get result:', result)
             if not is_end:
                 return
             if not self.curr_node.sibling:
@@ -170,7 +170,7 @@ class DataContainer(Container):
                 return
 
         if result and self.curr_node.child:
-            print('Data running child of', self.curr_node.node_name)
+            # print('Data running child of', self.curr_node.node_name)
             self.curr_node = self.curr_node.child
             if not self.curr_node.wait_next:
                 self.run(*args)
@@ -204,6 +204,9 @@ def load_features(model, feature_list):
             if 'node' in feature.config_table:
                 signal_node.set_property(**feature.config_table['node'])
                 data_node.set_property(**feature.config_table['node'])
+            if 'node' in temp[i]:
+                signal_node.set_property(**temp[i]['node'])
+                data_node.set_property(**temp[i]['node'])
             if i == 0:
                 pre_signal.child = signal_node
                 pre_data.child = data_node
@@ -216,7 +219,7 @@ def load_features(model, feature_list):
     return SignalContainer(signal_root.child), DataContainer(data_root.child)
 
 
-def dummy_True():
+def dummy_True(*args):
     return True
 
 def dummy_func(*args):

@@ -238,8 +238,11 @@ class Camera_View_Controller(GUI_Controller):
         # Scale image to [0, 1] values
         self.scale_image_intensity()
 
-        #  Update the GUI according to the instantaneous or rolling average max counts.
-        self.update_max_counts()
+            # TODO: Switch CXYZ to XYZC?
+            # self.image_volume = np.zeros((self.number_of_channels,
+            #                               self.original_image_height,
+            #                               self.original_image_width,
+            #                               self.number_of_slices))
 
         # Add Cross-Hair
         self.add_crosshair()

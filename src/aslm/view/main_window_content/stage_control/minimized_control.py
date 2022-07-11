@@ -47,6 +47,9 @@ logger = logging.getLogger(p)
 
 
 class minimized_control(ttk.Frame):
+    """
+    Stage GUI Control Tab resized and reformatted to fit onto a smaller windowsize. All widgets and variables linked to main stage GUI control
+    """
     def __init__(minimized_control, note3, *args, **kwargs):
         #Init Frame
         ttk.Frame.__init__(minimized_control, note3, *args, **kwargs)

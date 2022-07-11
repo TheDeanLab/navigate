@@ -32,17 +32,18 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-from controller.sub_controllers.widget_functions import validate_wrapper
-from controller.sub_controllers.gui_controller import GUI_Controller
+from aslm.controller.sub_controllers.widget_functions import validate_wrapper
+from aslm.controller.sub_controllers.gui_controller import GUI_Controller
 import logging
-from pathlib import Path
+
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-'''
+"""
 TODO Create a dictionary for widgets that holds a list of widgets for each column.Will attempt after formatting.
-'''
+"""
+
 
 class Channel_Setting_Controller(GUI_Controller):
     def __init__(self, view, parent_controller=None, verbose=False):
@@ -78,20 +79,28 @@ class Channel_Setting_Controller(GUI_Controller):
         state_readonly = 'readonly' if mode == 'stop' else 'disabled'
         for i in range(5):
             self.view.channel_checks[i].config(state=state)
-            self.view.exptime_pulldowns[i].config(state=state)
             self.view.interval_spins[i].config(state=state)
             self.view.laser_pulldowns[i]['state'] = state_readonly
+            if self.mode != 'live' or (self.mode == 'live' and not self.view.channel_variables[i].get()):
+                self.view.exptime_pulldowns[i].config(state=state)
             if not self.view.channel_variables[i].get():
                 self.view.laserpower_pulldowns[i].config(state=state)
                 self.view.filterwheel_pulldowns[i]['state'] = state_readonly
                 self.view.filterwheel_pulldowns[i]['state'] = state
+                self.view.defocus_spins[i].config(state=state)
 
     def initialize(self, config):
-        setting_dict = config.get_channels_info(self.verbose)
+        r"""Populates the laser and filter wheel options in the View.
+
+        Parameters
+        ----------
+        config : object
+            ASLM_Configuration_Controller - config.configuration is session instance of configuration.
+        """
+        setting_dict = config.get_channels_info()
         for i in range(self.num):
             self.view.laser_pulldowns[i]['values'] = setting_dict['laser']
             self.view.filterwheel_pulldowns[i]['values'] = setting_dict['filter']
-
         self.show_verbose_info('channel has been initialized')
 
     def set_experiment_values(self, setting_dict):
@@ -145,7 +154,8 @@ class Channel_Setting_Controller(GUI_Controller):
         #           'filter_position': ,
         #           'camera_exposure_time': ,
         #           'laser_power': ,
-        #           'interval_time': 
+        #           'interval_time': ,
+        #           'defocus': ,
         #        }
         # }
         """
@@ -164,7 +174,8 @@ class Channel_Setting_Controller(GUI_Controller):
                         'filter_position': self.get_index('filter', channel_vals['filter'].get()),
                         'camera_exposure_time': float(channel_vals['camera_exposure_time'].get()),
                         'laser_power': channel_vals['laser_power'].get(),
-                        'interval_time': channel_vals['interval_time'].get()
+                        'interval_time': channel_vals['interval_time'].get(),
+                        'defocus': channel_vals['defocus'].get()
                     }
                 except:
                     return None
@@ -234,7 +245,8 @@ class Channel_Setting_Controller(GUI_Controller):
             'filter': self.view.filterwheel_variables[index],
             'camera_exposure_time': self.view.exptime_variables[index],
             'laser_power': self.view.laserpower_variables[index],
-            'interval_time': self.view.interval_variables[index]
+            'interval_time': self.view.interval_variables[index],
+            'defocus': self.view.defocus_variables[index]
         }
         return result
 

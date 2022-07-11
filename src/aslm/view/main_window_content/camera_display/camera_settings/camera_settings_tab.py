@@ -37,19 +37,19 @@ from tkinter import ttk
 from tkinter.font import Font
 
 import numpy as np
-from view.main_window_content.camera_display.camera_settings.tabs.camera_mode import camera_mode
-from view.main_window_content.camera_display.camera_settings.tabs.framerate_info import framerate_info
-from view.main_window_content.camera_display.camera_settings.tabs.camera_roi import camera_roi
+from aslm.view.main_window_content.camera_display.camera_settings.tabs.camera_mode import camera_mode
+from aslm.view.main_window_content.camera_display.camera_settings.tabs.framerate_info import framerate_info
+from aslm.view.main_window_content.camera_display.camera_settings.tabs.camera_roi import camera_roi
 
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 class camera_settings_tab(ttk.Frame):
-    '''
+    """
     # This class holds and controls the layout of the major label frames for the camera settings tab in the settings notebook. Any imported classes are children that makeup
     # the content of the major frames. If you need to adjust anything in the frames follow the children.
-    '''
+    """
     def __init__(self, setntbk, *args, **kwargs):
         #Init Frame
         ttk.Frame.__init__(self, setntbk, *args, **kwargs)

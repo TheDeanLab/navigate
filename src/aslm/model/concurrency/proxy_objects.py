@@ -15,7 +15,7 @@ import signal
 import ctypes as C
 from pathlib import Path
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 try:
@@ -372,8 +372,8 @@ class _WaitingList:
 
 
 class _ProxyObjectPipeLock:
-    '''Raises an educational exception (rather than blocking) when you try
-       to acquire a locked lock.'''
+    """Raises an educational exception (rather than blocking) when you try
+       to acquire a locked lock."""
 
     def __init__(self):
         self.lock = threading.Lock()
@@ -744,12 +744,12 @@ if mp.get_start_method(allow_none=True) != 'spawn':
 
 
 class _Tests():
-    '''
+    """
     Method names that start with `test_` will be run.
 
     Use: _test_... method names for tests that are called as part
     of a larger group.
-    '''
+    """
     class TestClass:
         def __init__(self, *args, **kwargs):
             for k, v in kwargs.items():

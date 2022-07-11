@@ -27,7 +27,7 @@ import sys
 import platform
 
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 is_64bits = sys.maxsize > 2**32

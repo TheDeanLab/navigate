@@ -1,5 +1,4 @@
-"""
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -37,14 +36,8 @@ from tkinter import *
 from tkinter import ttk
 
 # Third Party Imports
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 # Local Imports
-from aslm.view.main_window_content.camera_display.camera_view.tabs.image_metrics import image_metrics
-from aslm.view.main_window_content.camera_display.camera_view.tabs.palette import palette
-from aslm.view.main_window_content.camera_display.camera_view.tabs.live_frame import live_frame
-from aslm.view.main_window_content.camera_display.camera_view.tabs.slider import slider
 from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 
 # Logger Setup
@@ -52,39 +45,54 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class camera_tab(ttk.Frame):
-    def __init__(self, cam_wave, *args, **kwargs):
-        #  Init Frame
-        ttk.Frame.__init__(self, cam_wave, *args, **kwargs)
-        
+class live_frame(ttk.Labelframe):
+    def __init__(self,
+                 cam_view,
+                 *args,
+                 **kwargs):
+
+        # Init Frame
+        text_label = 'Image Display'
+        ttk.Labelframe.__init__(
+            self,
+            cam_view,
+            text=text_label,
+            *args,
+            **kwargs)
+
         # Formatting
         Grid.columnconfigure(self, 'all', weight=1)
         Grid.rowconfigure(self, 'all', weight=1)
 
-        #  Frame that will hold camera image
-        self.cam_image = ttk.Frame(self)
-        self.cam_image.grid(row=0, column=0, sticky=NSEW)
-
-        # Frame for the Waveforms
-        self.canvas = tk.Canvas(self.cam_image, width=512, height=512)
-        self.canvas.grid(row=0, column=0, sticky=NSEW, padx=5, pady=5)
-        self.matplotlib_figure = Figure(figsize=[6, 6], tight_layout=True)
-        self.matplotlib_canvas = FigureCanvasTkAgg(self.matplotlib_figure, self.canvas)
-
-        #  Frame for scale settings/palette color
-        self.scale_palette = palette(self)
-        self.scale_palette.grid(row=0, column=1, sticky=NSEW, padx=5, pady=5)
-
-        # Frame for the slider bar.
-        self.slider = slider(self)
-        self.slider.grid(row=1, column=0, sticky=SW, padx=5, pady=5)
-
-        #  Frame for camera selection and counts
-        self.image_metrics = image_metrics(self)
-        self.image_metrics.grid(row=2, column=0, sticky=W, padx=5, pady=5)
-
-        # Frame for controlling the live display functionality.
-        self.live_frame = live_frame(self)
-        self.live_frame.grid(row=1, column=1, sticky=NSEW, padx=5, pady=5)
+        self.live_var = StringVar()
+        self.live = ttk.Combobox(self,
+                                 textvariable=self.live_var,
+                                 state="readonly")
+        self.live['values'] = ('Live',
+                               'XY Slice',
+                               'YZ Slice',
+                               'ZY Slice',
+                               'XY MIP',
+                               'YZ MIP',
+                               'ZY MIP')
+        self.live.set('Live')
+        self.live.grid(row=1, column=0)
 
 
+
+    def get_variables(self):
+        """
+        # This function returns a dictionary of all the variables that are tied to each widget name.
+        The key is the widget name, value is the variable associated.
+        """
+        variables = {}
+        for key, widget in self.inputs.items():
+            variables[key] = widget.get()
+        return variables
+
+    def get_widgets(self):
+        """
+        # This function returns the dictionary that holds the widgets.
+        The key is the widget name, value is the LabelInput class that has all the data.
+        """
+        return self.inputs

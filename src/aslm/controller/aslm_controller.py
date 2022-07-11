@@ -658,8 +658,6 @@ class ASLM_controller:
             'z-stack', ...
         """
         self.camera_view_controller.image_count = 0
-        active_channels = [channel[-1] for channel in self.experiment.MicroscopeState['channels'].keys()]
-        num_channels = len(active_channels)
 
         # Start up Progress Bars
         images_received = 0
@@ -689,7 +687,6 @@ class ASLM_controller:
             self.camera_view_controller.display_image(
                 image=self.data_buffer[image_id],
                 microscope_state=self.experiment.MicroscopeState,
-                channel_id=active_channels[image_id % num_channels],
                 images_received=images_received)
             images_received += 1
 

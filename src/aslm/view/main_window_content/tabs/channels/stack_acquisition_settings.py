@@ -33,6 +33,7 @@ POSSIBILITY OF SUCH DAMAGE.
 from tkinter import *
 import tkinter as tk
 from tkinter import ttk
+from tokenize import String
 # import logging
 from aslm.view.custom_widgets.validation import ValidatedCombobox, ValidatedSpinbox
 from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
@@ -59,19 +60,12 @@ class stack_acq_frame(ttk.Labelframe):
 
         # Frames for widgets
         self.pos_slice = ttk.Frame(self)
-        self.step_size_frame = ttk.Frame(self)
-        self.start_pos_frame = ttk.Frame(self)
-        self.end_pos_frame = ttk.Frame(self)
-        self.slice_frame = ttk.Frame(self)
         self.cycling = ttk.Frame(self)
 
         # Gridding Each Holder Frame
         self.pos_slice.grid(row=0, column=0, sticky=(NSEW))
-        # self.start_pos_frame.grid(row=0, column=0, sticky=NSEW)
-        # self.end_pos_frame.grid(row=0, column=1, sticky=NSEW)
-        # self.step_size_frame.grid(row=0, column=2, sticky=NSEW)
-        # self.slice_frame.grid(row=0, column=3, sticky=NSEW)
         self.cycling.grid(row=1, column=0, sticky=(NSEW))
+
 
         # Start Pos Frame (Vertically oriented)
         start_names = ['start_position', 'start_focus']

@@ -114,6 +114,7 @@ class Channels_Tab_Controller(GUI_Controller):
         self.z_origin = 0
         self.focus_origin = 0
 
+
         # laser/stack cycling event binds
         self.stack_acq_vals['cycling'].trace_add('write', self.update_cycling_setting)
 

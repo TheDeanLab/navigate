@@ -136,7 +136,6 @@ class ASLM_controller:
         self.etl_constants = session(self.etl_constants_path,
                                    self.verbose)
 
-
         # Initialize the View
         self.view = view(root)
 
@@ -154,8 +153,6 @@ class ASLM_controller:
         self.camera_view_controller = Camera_View_Controller(self.view.camera_waveform.camera_tab,
                                                              self,
                                                              self.verbose)
-
-        self.camera_view_controller.populate_view()
 
         self.camera_setting_controller = Camera_Setting_Controller(self.view.settings.camera_settings_tab,
                                                                    self,
@@ -386,6 +383,8 @@ class ASLM_controller:
         else:
             self.resolution_value.set(self.experiment.MicroscopeState['zoom'])
 
+        self.model.apply_resolution_stage_offset(resolution_mode, initial=True)
+
     def update_experiment_setting(self):
         r"""Update model.experiment according to values in the GUI
 
@@ -453,7 +452,9 @@ class ASLM_controller:
             self.camera_view_controller.display_image(self.model.data)
             self.camera_view_controller.update_channel_idx(self.model.current_channel)
 
-    def execute(self, command, *args):
+    def execute(self,
+                command,
+                *args):
         r"""Functions listens to the Sub_Gui_Controllers.
 
         The controller.experiment is passed as an argument to the model, which then overwrites
@@ -513,6 +514,9 @@ class ASLM_controller:
             self.camera_setting_controller.calculate_physical_dimensions(args[0])
             if hasattr(self, 'etl_controller') and self.etl_controller:
                 self.etl_controller.set_experiment_values(args[0])
+            ret_pos_dict = self.model.get_stage_position()
+            update_stage_dict(self, ret_pos_dict)
+            self.update_stage_gui_controller_silent(ret_pos_dict)
 
         elif command == 'set_save':
             r"""Set whether the image will be saved.
@@ -542,8 +546,7 @@ class ASLM_controller:
             self.threads_pool.createThread('model', lambda: self.model.run_command('update_setting', *args))
 
         elif command == 'autofocus':
-            r"""Execute autofocus routine.
-            """
+            r"""Execute autofocus routine."""
             self.threads_pool.createThread('camera', self.capture_autofocus_image)
             
         elif command == 'acquire_and_save':
@@ -580,37 +583,46 @@ class ASLM_controller:
             args[0] : string
                 string = 'continuous', 'z-stack', 'single', or 'projection'
             """
-
+            # Prepare data
             if not self.prepare_acquire_data():
                 self.acquire_bar_controller.stop_acquire()
                 return
 
             if self.acquire_bar_controller.mode == 'single':
-                self.threads_pool.createThread('camera', self.capture_image, args=('single',))
+                self.threads_pool.createThread('camera',
+                                               self.capture_image,
+                                               args=('single',))
 
             elif self.acquire_bar_controller.mode == 'live':
-                self.threads_pool.createThread('camera', self.capture_image, args=('live',))
+                    self.threads_pool.createThread('camera',
+                                                   self.capture_image,
+                                                   args=('live',))
 
             elif self.acquire_bar_controller.mode == 'z-stack':
                 # is_multi_position = self.channels_tab_controller.is_multiposition_val.get()
                 # self.model.open_shutter()
                 # self.model.run_z_stack_acquisition(is_multi_position, self.update_camera_view())
                 # self.model.close_shutter()
-                self.threads_pool.createThread('camera', self.capture_image, args=('z-stack',))
+
+                self.threads_pool.createThread('camera',
+                                               self.capture_image,
+                                               args=('z-stack',))
 
             elif self.acquire_bar_controller.mode == 'projection':
                 pass
 
             else:
-                logger.info("ASLM Controller - Wrong acquisition mode. Not recognized.")
-                pass
+                logger.debug("ASLM Controller - Wrong acquisition mode. Not recognized.")
 
         elif command == 'stop_acquire':
-            self.model.run_command('stop')
+            # self.model.run_command('stop')
+            self.sloppy_stop()
             self.set_mode_of_sub('stop')
+            self.acquire_bar_controller.stop_progress_bar()
 
         elif command == 'exit':
-            self.model.run_command('stop')
+            # self.model.run_command('stop')
+            self.sloppy_stop()
             if hasattr(self, 'etl_controller'):
                 self.etl_controller.save_etl_info()
             self.model.terminate()
@@ -620,32 +632,85 @@ class ASLM_controller:
 
         logger.info(f"ASLM Controller - command passed from child, {command}, {args}")
 
-    def capture_image(self, mode):
-        r"""Trigger the model to capture images
+    def sloppy_stop(self):
+        r"""Keep trying to stop the model until successful.
+
+        TODO: Delete this function!!!
+
+        This is set up to get around the conflict between self.threads_pool.createThread('model', target)
+        commands and the need to stop as abruptly as possible when the user hits stop. Here we leverage
+        ObjectInSubprocess's refusal to let us access the model from two threads to our advantage, and just
+        try repeatedly until we get a command in front of the next command in the model threads_pool resource.
+        We should instead pause the model thread pool and interject our stop command, or clear the queue
+        in threads_pool.
+        """
+        e = RuntimeError
+        while e == RuntimeError:
+            try:
+                self.model.run_command('stop')
+                e = None
+            except RuntimeError:
+                e = RuntimeError
+
+    def capture_image(self,
+                      mode):
+        r"""Trigger the model to capture images.
+
+        Parameters
+        ----------
+        mode : str
+            'z-stack', ...
         """
         self.camera_view_controller.image_count = 0
         active_channels = [channel[-1] for channel in self.experiment.MicroscopeState['channels'].keys()]
         num_channels = len(active_channels)
+
+        # Start up Progress Bars
+        images_received = 0
+        self.acquire_bar_controller.progress_bar(images_received=images_received,
+                                                 microscope_state=self.experiment.MicroscopeState,
+                                                 mode=mode,
+                                                 stop=False)
+
         self.model.run_command(mode,
                                microscope_info=self.experiment.MicroscopeState,
                                camera_info=self.experiment.CameraParameters,
                                saving_info=self.experiment.Saving)
 
         while True:
+            # Receive the Image and log it.
             image_id = self.show_img_pipe.recv()
             logger.info(f"ASLM Controller - Received Image: {image_id}")
+
             if image_id == 'stop':
                 self.set_mode_of_sub('stop')
-                # self.execute('stop_acquire')
                 break
             if not isinstance(image_id, int):
                 logger.debug(f"ASLM Controller - Something wrong happened, stop the model!, {image_id}")
                 self.execute('stop_acquire')
+
+            # Display the Image in the View
             self.camera_view_controller.display_image(
-                self.data_buffer[image_id], active_channels[image_id % num_channels])
+                image=self.data_buffer[image_id],
+                microscope_state=self.experiment.MicroscopeState,
+                channel_id=active_channels[image_id % num_channels],
+                images_received=images_received)
+            images_received += 1
+
+            # Update progress bar.
+            self.acquire_bar_controller.progress_bar(images_received=images_received,
+                                                     microscope_state=self.experiment.MicroscopeState,
+                                                     mode=mode,
+                                                     stop=False)
 
         logger.info(f"ASLM Controller - Captured {self.camera_view_controller.image_count}, {mode} Images")
         self.set_mode_of_sub('stop')
+
+        # Stop Progress Bars
+        self.acquire_bar_controller.progress_bar(images_received=images_received,
+                                                 microscope_state=self.experiment.MicroscopeState,
+                                                 mode=mode,
+                                                 stop=True)
 
     def capture_autofocus_image(self):
         r"""Trigger model to capture a single image
@@ -683,7 +748,7 @@ class ASLM_controller:
         self.model.release_pipe('autofocus_plot_pipe')
         
         self.execute('stop_acquire')
-    
+
     def move_stage(self, pos_dict):
         r""" Trigger the model to move the stage.
 
@@ -698,16 +763,20 @@ class ASLM_controller:
 
         # Pass to model
         success = self.model.move_stage(pos_dict)
-        if not success:
-            # Let's update our internal positions
-            time.sleep(0.250)  # TODO: Banks on this getting called in a thread. Truly unsafe.
-                               #       Currently set to debounce for the stage buttons.
-            ret_pos_dict = self.model.get_stage_position()
-            update_stage_dict(self, ret_pos_dict)
-            self.update_stage_gui_controller_silent(ret_pos_dict)
+        # if not success:
+        #     print("Unsuccessful")
+        #     # Let's update our internal positions
+        #     time.sleep(0.250)  # TODO: Banks on this getting called in a thread. Truly unsafe.
+        #                        #       Currently set to debounce for the stage buttons.
+        #     ret_pos_dict = self.model.get_stage_position()
+        #     print(ret_pos_dict)
+        #     update_stage_dict(self, ret_pos_dict)
+        #     self.update_stage_gui_controller_silent(ret_pos_dict)
 
     def stop_stage(self):
-        ret_pos_dict = self.model.stop_stage()
+        self.model.stop_stage()
+        ret_pos_dict = self.model.get_stage_position()
+        update_stage_dict(self, ret_pos_dict)
         self.update_stage_gui_controller_silent(ret_pos_dict)
 
     def update_stage_gui_controller_silent(self, ret_pos_dict):
@@ -719,8 +788,7 @@ class ASLM_controller:
         self.stage_gui_controller.set_position_silent(stage_gui_dict)
 
     def update_event(self):
-        r"""Update the waveforms in the View.
-        """
+        r"""Update the waveforms in the View."""
         while True:
             event, value = self.event_queue.get()
             if event == 'waveform':

@@ -1,7 +1,4 @@
-"""
-ASLM sub-controller for the multi-position control.
-
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -32,15 +29,21 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
+
+# Standard Library Imports
 from tkinter import filedialog
 import math
+import logging
+from pathlib import Path
+
+# Third Party Imports
 import pandas as pd
 from pandastable import TableModel
 
+# Local Imports
 from aslm.controller.sub_controllers.gui_controller import GUI_Controller
 
-import logging
-from pathlib import Path
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -48,11 +51,14 @@ logger = logging.getLogger(p)
 
 class Multi_Position_Controller(GUI_Controller):
     
-    def __init__(self, view, parent_controller=None, verbose=None):
-        super().__init__(view, parent_controller, verbose)
-
+    def __init__(self,
+                 view,
+                 parent_controller=None,
+                 verbose=None):
+        super().__init__(view,
+                         parent_controller,
+                         verbose)
         self.table = self.view.pt
-
         self.table.rowheader.bind("<Double-Button-1>", self.handle_double_click)
         self.table.loadCSV = self.load_csv_func
         self.table.exportCSV = self.export_csv_func

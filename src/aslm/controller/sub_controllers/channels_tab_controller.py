@@ -41,6 +41,10 @@ from aslm.controller.sub_controllers.widget_functions import validate_wrapper
 from aslm.controller.sub_controllers.gui_controller import GUI_Controller
 from aslm.controller.sub_controllers.channel_setting_controller import Channel_Setting_Controller
 from aslm.controller.sub_controllers.multi_position_controller import Multi_Position_Controller
+from aslm.controller.sub_controllers.tiling_wizard_controller import Tiling_Wizard_Controller
+
+# View Imports that are not called on startup
+from aslm.view.main_window_content.tabs.channels.tiling_wizard_popup import tiling_wizard_popup as tiling_wizard
 
 
 # Logger Setup
@@ -136,6 +140,7 @@ class Channels_Tab_Controller(GUI_Controller):
         self.is_multiposition = False
         self.is_multiposition_val = self.view.multipoint_frame.on_off
         self.view.multipoint_frame.save_check.configure(command=self.toggle_multiposition)
+        self.view.multipoint_frame.buttons["tiling"].configure(command=self.launch_tiling_wizard)
 
         if configuration_controller:
             self.initialize(configuration_controller)
@@ -212,6 +217,7 @@ class Channels_Tab_Controller(GUI_Controller):
         microscope_state['stack_cycling_mode'] = 'per_stack' if self.stack_cycling_val.get() == 'Per Stack' else 'per_z'
         microscope_state['stack_z_origin'] = self.z_origin
         microscope_state['stack_focus_origin'] = self.focus_origin
+        microscope_state['is_multiposition'] = self.is_multiposition_val.get()
 
         # TODO: get_info acts a setter here
         r1 = self.get_info(self.stack_acq_vals, microscope_state)  # update MicroscopeState with everything in stack_acq_vals
@@ -532,6 +538,24 @@ class Channels_Tab_Controller(GUI_Controller):
         self.update_timepoint_setting()
         self.show_verbose_info('Multi-position:', self.is_multiposition)
 
+
+    def launch_tiling_wizard(self):
+        r"""Launches tiling wizard popup.
+
+        Will only launch when button in GUI is pressed, and will not duplicate. Pressing button again brings popup to top
+        """
+
+        if hasattr(self, 'tiling_wizard_controller'):
+            self.tiling_wizard_controller.showup()
+            return
+        tiling_wizard_popup = tiling_wizard(self.view)
+        self.tiling_wizard_controller = Tiling_Wizard_Controller(tiling_wizard_popup,
+                                                                 self,
+                                                                 self.verbose)
+
+
+
+
     def load_positions(self):
         r"""Load Positions for Multi-Position Acquisition. """
         self.multi_position_controller.load_csv_func()
@@ -607,5 +631,5 @@ class Channels_Tab_Controller(GUI_Controller):
         elif (command == 'channel') or (command == 'move_stage_and_update_info') or (command == 'update_setting'):
             self.view.after(1000, lambda: self.parent_controller.execute(command, *args))
         elif command == 'get_stage_position':
-            return self.parent_controller.execute(command)
+            return self.view.after(1000, lambda: self.parent_controller.execute(command))
         self.show_verbose_info('Received command from child', command, args)

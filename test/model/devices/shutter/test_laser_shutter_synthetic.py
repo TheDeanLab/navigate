@@ -47,13 +47,17 @@ class TestSyntheticShutter(unittest.TestCase):
     def test_synthetic_shutter_attributes(self):
         base_directory = Path(__file__).resolve().parent.parent.parent.parent.parent
         configuration_directory = Path.joinpath(base_directory, 'src', 'aslm', 'config')
+
         configuration_path = Path.joinpath(configuration_directory, 'configuration.yml')
-        experiment_path = Path.joinpath(configuration_path, 'experiment.yml')
+        experiment_path = Path.joinpath(configuration_directory, 'experiment.yml')
 
-        configuration = session(configuration_path, False)
-        experiment = session(experiment_path, False)
-
-        shutter = SyntheticShutter(configuration=configuration, experiment=experiment, verbose=False)
+        configuration = session(file_path=configuration_path,
+                                verbose=False)
+        experiment = session(file_path=experiment_path,
+                             verbose=False)
+        shutter = SyntheticShutter(configuration,
+                              experiment,
+                              False)
 
         # Attributes
         assert hasattr(shutter, 'configuration')
@@ -65,10 +69,10 @@ class TestSyntheticShutter(unittest.TestCase):
         assert hasattr(shutter, 'shutter_left_state')
 
         # Methods
-        assert callable(hasattr(shutter, 'open_left'))
-        assert callable(hasattr(shutter, 'open_right'))
-        assert callable(hasattr(shutter, 'close_shutters'))
-        assert callable(hasattr(shutter, 'state'))
+        assert hasattr(shutter, 'open_left') and callable(getattr(shutter, 'open_left'))
+        assert hasattr(shutter, 'open_right') and callable(getattr(shutter, 'open_right'))
+        assert hasattr(shutter, 'close_shutters') and callable(getattr(shutter, 'close_shutters'))
+        assert hasattr(shutter, 'state') and callable(getattr(shutter, 'state'))
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,7 +1,4 @@
-"""
-ASLM sub-controller for the camera settings.
-
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -73,13 +70,15 @@ class Camera_Setting_Controller(GUI_Controller):
         self.roi_widgets['Height'].get_variable().trace_add('write', self.update_fov)
         
         for btn_name in self.roi_btns:
-            self.roi_btns[btn_name].config(
-                command=self.update_roi(btn_name)
-            )
+            self.roi_btns[btn_name].config(command=self.update_roi(btn_name))
 
     def initialize(self, config):
-        """
-        ## Function that sets widgets based on data given from main controller/config
+        r"""Sets widgets based on data given from main controller/config.
+
+        Parameters
+        ----------
+        config : dict
+            Dictionary with various camera parameters.
         """
 
         # Get Default Configuration Values
@@ -139,12 +138,20 @@ class Camera_Setting_Controller(GUI_Controller):
         self.roi_widgets['FOV_X'].widget['state'] = 'disabled'
         self.roi_widgets['FOV_Y'].widget['state'] = 'disabled'
 
-    def set_experiment_values(self, experiment):
-        """
+    def set_experiment_values(self,
+                              experiment):
+        r"""Sets values in View according to the experiment yaml file.
+
         Experiment yaml filed passed by controller.
+
+        Parameters
+        ----------
+        experiment : Session
+            Configuration of the experimental settings.
         """
         self.in_initialization = True
 
+        # Retrieve settings.
         setting_dict = experiment.CameraParameters
         microscope_state = experiment.MicroscopeState
         self.resolution_value = 'high' if microscope_state['resolution_mode'] == 'high' else microscope_state['zoom']
@@ -265,24 +272,29 @@ class Camera_Setting_Controller(GUI_Controller):
         self.calculate_physical_dimensions(self.resolution_value)
 
     def set_mode(self, mode):
-        """
+        r"""
         # this function will change state of widgets according to different mode
         # 'stop' mode will let the editable widget be 'normal'
         # in 'live' and 'stack' mode, some widgets are disabled
+
+        Parameters
+        ----------
+        mode : str
+            One of 'live', 'z-stack', 'stop', 'single'
         """
         self.mode = mode
-        state = 'disabled' if mode == 'live' else 'normal'
-        state_readonly = 'disabled' if mode == 'live' else 'readonly'
+        state = 'disabled' if mode != 'stop' else 'normal'
+        state_readonly = 'disabled' if mode != 'stop' else 'readonly'
         self.mode_widgets['Sensor'].widget['state'] = state_readonly
         if self.mode_widgets['Sensor'].get() == 'Light-Sheet':
             self.mode_widgets['Readout'].widget['state'] = state_readonly
+            self.mode_widgets['Pixels'].widget['state'] = 'normal' if mode == 'live' else state
         self.framerate_widgets['frames_to_average'].widget['state'] = state
         self.roi_widgets['Width'].widget['state'] = state
         self.roi_widgets['Height'].widget['state'] = state
         self.roi_widgets['Binning'].widget['state'] = state_readonly
         for btn_name in self.roi_btns:
             self.roi_btns[btn_name]['state'] = state
-            
         
     def calculate_physical_dimensions(self, resolution_value):
         """
@@ -365,8 +377,4 @@ class Camera_Setting_Controller(GUI_Controller):
         # tell central controller to update model
         if self.pixel_event_id:
             self.view.after_cancel(self.pixel_event_id)
-        self.view.pixel_event_id = self.view.after(1000, \
-                lambda: self.parent_controller.execute('update_setting', 
-                                                       'number_of_pixels',
-                                                       self.number_of_pixels)
-                )
+        self.view.after(10, lambda: self.parent_controller.execute('update_setting', 'number_of_pixels', self.number_of_pixels))

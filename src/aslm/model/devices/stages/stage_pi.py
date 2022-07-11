@@ -59,6 +59,9 @@ class PIStage(StageBase):
         pi_stages = pi_stages.split()
         pi_refmodes = pi_refmodes.split()
 
+        # Mapping from self.axes to corresponding PI axis labelling
+        self.pi_axes = [1, 2, 3, 5, 4]  # x, y, z, f, theta
+
         self.pitools = pitools
         self.controllername = self.configuration.StageParameters['controllername']
         self.pi_stages = pi_stages
@@ -94,109 +97,25 @@ class PIStage(StageBase):
             positions = self.pidevice.qPOS(self.pidevice.axes)  # positions from the device are in mm
 
             # convert to um
-            self.x_pos = round(positions['1'] * 1000, 2)
-            self.y_pos = round(positions['2'] * 1000, 2)
-            self.z_pos = round(positions['3'] * 1000, 2)
-            self.f_pos = round(positions['5'] * 1000, 2)
-            self.theta_pos = positions['4']
-            self.create_position_dict()
-
-            self.int_x_pos = self.x_pos + self.int_x_pos_offset
-            self.int_y_pos = self.y_pos + self.int_y_pos_offset
-            self.int_z_pos = self.z_pos + self.int_z_pos_offset
-            self.int_f_pos = self.f_pos + self.int_f_pos_offset
-            self.int_theta_pos = self.theta_pos + self.int_theta_pos_offset
-            self.create_internal_position_dict()
+            for ax, n in zip(self.axes, self.pi_axes):
+                pos = positions[str(n)]
+                if ax != 'theta':
+                    pos = round(pos * 1000, 2)
+                setattr(self, f"{ax}_pos", pos)
         except GCSError as e:
             print('Failed to report position')
             logger.exception(e)
-        logger.debug(f"Stage Positions: {self.int_position_dict}")
 
-        return self.int_position_dict
+        # Update internal dictionaries
+        self.update_position_dictionaries()
 
-    def move_relative(self, move_dictionary, wait_until_done=False):
-        """
-        # PI move relative method.
-        # Checks to make sure that the move does not exceed the stage limits prior to movement.
-        """
-        if 'x_rel' in move_dictionary:
-            x_rel = move_dictionary['x_rel']
-            if (self.x_min <= self.x_pos +
-                x_rel) and (self.x_max >= self.x_pos + x_rel):
-                x_rel = x_rel / 1000
-                try:
-                    self.pidevice.MVR({1: x_rel})
-                except GCSError as e:
-                    logger.exception(GCSError(e))
-            else:
-                logger.info("Relative movement stopped: X Motion limit would be reached!, 1000")
-                print(
-                    'Relative movement stopped: X Motion limit would be reached!',
-                    1000)
-
-        if 'y_rel' in move_dictionary:
-            y_rel = move_dictionary['y_rel']
-            if (self.y_min <= self.y_pos +
-                y_rel) and (self.y_max >= self.y_pos + y_rel):
-                y_rel = y_rel / 1000
-                try:
-                    self.pidevice.MVR({2: y_rel})
-                except GCSError as e:
-                    logger.exception(GCSError(e))
-            else:
-                logger.info("Relative movement stopped: Y Motion limit would be reached!, 1000")
-                print(
-                    'Relative movement stopped: Y Motion limit would be reached!',
-                    1000)
-
-        if 'z_rel' in move_dictionary:
-            z_rel = move_dictionary['z_rel']
-            if (self.z_min <= self.z_pos +
-                z_rel) and (self.z_max >= self.z_pos + z_rel):
-                z_rel = z_rel / 1000
-                try:
-                    self.pidevice.MVR({3: z_rel})
-                except GCSError as e:
-                    logger.exception(GCSError(e))
-            else:
-                logger.info("Relative movement stopped: Z Motion limit would be reached!, 1000")
-                print(
-                    'Relative movement stopped: Z Motion limit would be reached!',
-                    1000)
-
-        if 'theta_rel' in move_dictionary:
-            theta_rel = move_dictionary['theta_rel']
-            if (self.theta_min <= self.theta_pos + theta_rel) and (self.theta_max >= self.theta_pos + theta_rel):
-                try:
-                    self.pidevice.MVR({4: theta_rel})
-                except GCSError as e:
-                    logger.exception(GCSError(e))
-            else:
-                logger.info("Relative movement stopped: Theta Motion limit would be reached!, 1000")
-                print(
-                    'Relative movement stopped: theta Motion limit would be reached!',
-                    1000)
-
-        if 'f_rel' in move_dictionary:
-            f_rel = move_dictionary['f_rel']
-            if (self.f_min <= self.f_pos + f_rel) and (self.f_max >= self.f_pos + f_rel):
-                f_rel = f_rel / 1000
-                try:
-                    self.pidevice.MVR({5: f_rel})
-                except GCSError as e:
-                    logger.exception(GCSError(e))
-            else:
-                logger.info("Relative movement stopped: F Motion limit would be reached!, 1000")
-                print(
-                    'Relative movement stopped: f Motion limit would be reached!',
-                    1000)
-
-        if wait_until_done is True:
-            self.pitools.waitontarget(self.pidevice)
+        return self.position_dict
 
     def move_axis_absolute(self, axis, axis_num, move_dictionary):
         """
         Implement movement logic along a single axis.
+
+        To move relative, self.pidevice.MVR({1: x_rel}).
 
         Example calls:
 
@@ -216,30 +135,20 @@ class PIStage(StageBase):
             Was the move successful?
         """
 
+        axis_abs = self.get_abs_position(axis, move_dictionary)
+        if axis_abs == -1e50:
+            return False
+
+        # Move the stage
         try:
-            # Get all necessary attributes. If we can't we'll move to the error case.
-            axis_abs = move_dictionary[f"{axis}_abs"] - getattr(self, f"int_{axis}_pos_offset", 0)  # TODO: should we default to 0?
-            axis_min, axis_max = getattr(self, f"{axis}_min"), getattr(self, f"{axis}_max")
+            pos = axis_abs
+            if axis != 'theta':
+                pos /= 1000  # convert to mm
+            self.pidevice.MOV({axis_num: pos})
 
-            # Check that our position is within the axis bounds, fail if it's not.
-            if (axis_min > axis_abs) or (axis_max < axis_abs):
-                log_string = f"Absolute movement stopped: {axis} limit would be reached!" \
-                             "{axis_abs} is not in the range {axis_min} to {axis_max}."
-                logger.info(log_string)
-                print(log_string)
-                return
-
-            # Move the stage
-            try:
-                if axis != 'theta':
-                    axis_abs /= 1000  # convert to mm
-                self.pidevice.MOV({axis_num: axis_abs})
-                return True
-            except GCSError as e:
-                return False
-                logger.exception(GCSError(e))
-
-        except (KeyError, AttributeError):
+            return True
+        except GCSError as e:
+            logger.exception(GCSError(e))
             return False
 
     def move_absolute(self, move_dictionary, wait_until_done=False):
@@ -262,10 +171,7 @@ class PIStage(StageBase):
             Was the move successful?
         """
 
-        axes = ['x', 'y', 'z', 'f', 'theta']
-        axis_nums = [1, 2, 3, 5, 4]
-
-        for ax, n in zip(axes, axis_nums):
+        for ax, n in zip(self.axes, self.pi_axes):
             success = self.move_axis_absolute(ax, n, move_dictionary)
 
         if wait_until_done is True:

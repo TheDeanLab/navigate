@@ -40,11 +40,11 @@ from pathlib import Path
 from aslm.model.devices.remote_focus.remote_focus_base import RemoteFocusBase
 
 
-class TestLaserBase(unittest.TestCase):
+class TestRemoteFocusBase(unittest.TestCase):
     r"""Unit Test for RemoteFocusBase Class"""
 
     def test_shutter_base_attributes(self):
-        remote_focus = RemoteFocusBase(configuration=configuration, experiment=experiment, verbose=False)
+        remote_focus = RemoteFocusBase()
         pass
 
 

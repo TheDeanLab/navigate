@@ -35,13 +35,13 @@ from tkinter import ttk
 import logging
 from pathlib import Path
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 from tkinter.font import Font
 import numpy as np
 
 # Local imports
-#from view.notebooks.acquire_bar_frame.acquire_bar import AcquireBar
+#from aslm.view.notebooks.acquire_bar_frame.acquire_bar import AcquireBar
 
 """
   settings.channels_label_frame = channels_label_frame(settings.channel_main)

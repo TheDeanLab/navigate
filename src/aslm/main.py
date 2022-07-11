@@ -1,5 +1,4 @@
-"""
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -30,108 +29,116 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-ASLM software modified code and/or took inspiration from a number of sources with different licenses.
-Listed here for bookkeeping purposes.
-
-https://github.com/uetke/UUTrack    - GNU GPL v3.0      - Architecture, camera.
-https://github.com/mesoSPIM/mesoSPIM-control    - GNU GPL v3.0
-https://github.com/MicroscopeAutoPilot/autopilot    - NPOSL-3.0
-https://github.com/bicarlsen/obis_laser_controller  - GNU GPL v3.0  - Laser Controller
-https://github.com/AndrewGYork/tools - GNU GPL v2.0 - Sutter Filter Wheel
-
 """
 # Standard Library Imports
 import argparse
 from pathlib import Path
 import tkinter as tk
 import platform
-import logging
-import logging.config
-from log_files.log_functions import log_setup
-import yaml
+from aslm.log_files.log_functions import log_setup
+
+# Third Party Imports
+import pretty_errors
 
 # Local Imports
-from controller.aslm_controller import ASLM_controller as controller
+from aslm.controller.aslm_controller import ASLM_controller as controller
+
 
 def main():
-    """
-    Starting point for running the multiscale ASLM program.
+    r"""Multiscale ASLM Microscope Software.
+    Microscope control software built in a Model-View-Controller architecture.
+    Provides control of cameras, data acquisition cards, filter wheels, lasers
+    stages, voice coils, and zoom servos.
 
-    """
+    Parameters
+    ----------
+    *args : iterable
+        --verbose
+        --synthetic_hardware
+        --sh
+        --debug
+        --CPU
+        --config_file
+        --experiment_file
+        --etl_const_file
+        --logging_config
 
-    # Evaluate GPU Status for Analysis Routines
-    USE_GPU = False
-    if platform.system() != 'Darwin':
-        import tensorflow as tf
-        number_GPUs = len(tf.config.list_physical_devices('GPU'))
-        if number_GPUs == 0:
-            print('No NVIDIA GPU in system. Running on CPU only.')
-        else:
-            USE_GPU = True
-            print('NVIDIA GPU detected.')
+    Examples
+    --------
+    python main.py --synthetic_hardware
+    """
 
     # Specify the Default Configuration File Directories (located in src/config)
     base_directory = Path(__file__).resolve().parent
     configuration_directory = Path.joinpath(base_directory, 'config')
-    
 
     # Full file paths.
     configuration_path = Path.joinpath(configuration_directory, 'configuration.yml')
     experiment_path = Path.joinpath(configuration_directory, 'experiment.yml')
     etl_constants_path = Path.joinpath(configuration_directory, 'etl_constants.yml')
-    
 
     # Parse command line arguments
-    parser = argparse.ArgumentParser(description='Microscope Control Arguments')
+    parser = argparse.ArgumentParser(description='Multiscale Microscope Command Line Arguments')
     input_args = parser.add_argument_group('Input Arguments')
-    input_args.add_argument('--verbose',
+    input_args.add_argument('-v', '--verbose',
                             required=False,
                             default=False,
                             action='store_true',
-                            help='Verbose output')
+                            help='Enables the software to operate in a verbose mode.  Warning: Excessively verbose.')
 
-    input_args.add_argument('--synthetic_hardware',
+    input_args.add_argument('-sh', '--synthetic_hardware',
                             required=False,
                             default=False,
                             action='store_true',
-                            help='Synthetic hardware modules')
+                            help='Synthetic Hardware - '
+                                 'Allows launching of the software without the physical devices attached.')
 
-    input_args.add_argument('--sh',
+    input_args.add_argument('-d', '--debug',
                             required=False,
                             default=False,
                             action='store_true',
-                            help='Synthetic hardware modules')
+                            help='Enables debugging tool menu to be accessible.')
 
-    input_args.add_argument('--debug',
+    input_args.add_argument('--CPU',
                             required=False,
                             default=False,
                             action='store_true',
-                            help='Debugging tools')
+                            help='Forces software to use CPU for analytical operations.  '
+                                 'Overrides the automatic selection of a CUDA GPU if it is present by TensorFlow.')
 
     # Non-Default Configuration and Experiment Input Arguments
     input_args.add_argument('--config_file',
                             type=Path,
                             required=False,
                             default=None,
-                            help='path to configuration.yml file')
+                            help='Non-default path to the configuration.yml file.  \n'
+                                 'This file sets the default global physical'
+                                 'state of the microscope.  For example, number of lasers, number of cameras, '
+                                 'digital I/O, analog I/O, etc.')
 
     input_args.add_argument('--experiment_file',
                             type=Path,
                             required=False,
                             default=None,
-                            help='path to experiment.yml file')
+                            help='Non-default path to the experiment.yml file. \n'
+                                 'This file sets the default user-specified '
+                                 'physical state of the microscope. For example, how many channels, '
+                                 'and what are their exposure time, filter position, laser, etc. ')
 
     input_args.add_argument('--etl_const_file',
                             type=Path,
                             required=False,
                             default=None,
-                            help='path to etl_constants.yml file')
+                            help='Non-default path to the etl_constants.yml file.  \n'
+                                 'This file specifies the wavelength- and zoom-specific amplitude and offset '
+                                 'of the ETL waveform generation.')
 
     input_args.add_argument('--logging_config',
                             type=Path,
                             required=False,
                             default=None,
-                            help='path to logging.yml config file')
+                            help='Non-default path to the logging.yml config file \n'
+                                 'This file specifies how the logging will be performed.')
 
     #  Parse Arguments
     args = parser.parse_args()
@@ -157,9 +164,26 @@ def main():
 
     log_setup('logging.yml')
 
+    # Evaluate GPU Status for Analysis Routines
+    use_gpu = False
+    if args.CPU:
+        # If user overrides GPU search, keep use_gpu flag as False.
+        pass
+    else:
+        if platform.system() != 'Darwin':
+            import tensorflow as tf
+            number_GPUs = len(tf.config.list_physical_devices('GPU'))
+            if number_GPUs > 0:
+                use_gpu = True
+
     # Start the GUI
     root = tk.Tk()
-    controller(root, configuration_path, experiment_path, etl_constants_path, USE_GPU, args)
+    controller(root,
+               configuration_path,
+               experiment_path,
+               etl_constants_path,
+               use_gpu,
+               args)
     root.mainloop()
 
 

@@ -1,7 +1,4 @@
-"""
-ASLM sub-controller for the camera settings.
-
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -32,12 +29,12 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-from controller.sub_controllers.gui_controller import GUI_Controller
+from aslm.controller.sub_controllers.gui_controller import GUI_Controller
 
 import logging
 from pathlib import Path
 # Logger Setup
-p = __name__.split(".")[0]
+p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
@@ -73,14 +70,16 @@ class Camera_Setting_Controller(GUI_Controller):
         self.roi_widgets['Height'].get_variable().trace_add('write', self.update_fov)
         
         for btn_name in self.roi_btns:
-            self.roi_btns[btn_name].config(
-                command=self.update_roi(btn_name)
-            )
+            self.roi_btns[btn_name].config(command=self.update_roi(btn_name))
 
     def initialize(self, config):
-        '''
-        ## Function that sets widgets based on data given from main controller/config
-        '''
+        r"""Sets widgets based on data given from main controller/config.
+
+        Parameters
+        ----------
+        config : dict
+            Dictionary with various camera parameters.
+        """
 
         # Get Default Configuration Values
         self.default_pixel_size = config.configuration.CameraParameters['pixel_size_in_microns']
@@ -139,12 +138,20 @@ class Camera_Setting_Controller(GUI_Controller):
         self.roi_widgets['FOV_X'].widget['state'] = 'disabled'
         self.roi_widgets['FOV_Y'].widget['state'] = 'disabled'
 
-    def set_experiment_values(self, experiment):
-        """
+    def set_experiment_values(self,
+                              experiment):
+        r"""Sets values in View according to the experiment yaml file.
+
         Experiment yaml filed passed by controller.
+
+        Parameters
+        ----------
+        experiment : Session
+            Configuration of the experimental settings.
         """
         self.in_initialization = True
 
+        # Retrieve settings.
         setting_dict = experiment.CameraParameters
         microscope_state = experiment.MicroscopeState
         self.resolution_value = 'high' if microscope_state['resolution_mode'] == 'high' else microscope_state['zoom']
@@ -180,7 +187,6 @@ class Camera_Setting_Controller(GUI_Controller):
         # after initialization
         self.in_initialization = False
 
-
     def update_experiment_values(self, setting_dict):
         """
         Update the dictionary so that it can be combined with all of the other
@@ -206,7 +212,7 @@ class Camera_Setting_Controller(GUI_Controller):
         return True
 
     def update_sensor_mode(self, *args):
-        '''
+        """
         Updates text in readout widget based on what sensor mode is selected
         If we are in the Light Sheet mode, then we want the camera
         self.model.CameraParameters['sensor_mode']) == 12
@@ -215,7 +221,7 @@ class Camera_Setting_Controller(GUI_Controller):
         self.model.CameraParameters['sensor_mode']) == 1
 
         Should initialize from the configuration file to the default version
-        '''
+        """
         # Camera Mode
         sensor_value = self.mode_widgets['Sensor'].widget.get()
         if sensor_value == 'Normal':
@@ -266,24 +272,29 @@ class Camera_Setting_Controller(GUI_Controller):
         self.calculate_physical_dimensions(self.resolution_value)
 
     def set_mode(self, mode):
-        """
+        r"""
         # this function will change state of widgets according to different mode
         # 'stop' mode will let the editable widget be 'normal'
         # in 'live' and 'stack' mode, some widgets are disabled
+
+        Parameters
+        ----------
+        mode : str
+            One of 'live', 'z-stack', 'stop', 'single'
         """
         self.mode = mode
-        state = 'disabled' if mode == 'live' else 'normal'
-        state_readonly = 'disabled' if mode == 'live' else 'readonly'
+        state = 'disabled' if mode != 'stop' else 'normal'
+        state_readonly = 'disabled' if mode != 'stop' else 'readonly'
         self.mode_widgets['Sensor'].widget['state'] = state_readonly
         if self.mode_widgets['Sensor'].get() == 'Light-Sheet':
             self.mode_widgets['Readout'].widget['state'] = state_readonly
+            self.mode_widgets['Pixels'].widget['state'] = 'normal' if mode == 'live' else state
         self.framerate_widgets['frames_to_average'].widget['state'] = state
         self.roi_widgets['Width'].widget['state'] = state
         self.roi_widgets['Height'].widget['state'] = state
         self.roi_widgets['Binning'].widget['state'] = state_readonly
         for btn_name in self.roi_btns:
             self.roi_btns[btn_name]['state'] = state
-            
         
     def calculate_physical_dimensions(self, resolution_value):
         """
@@ -360,14 +371,10 @@ class Camera_Setting_Controller(GUI_Controller):
         pixels = self.mode_widgets['Pixels'].get()
         if pixels != '':
             self.number_of_pixels = int(pixels)
-        if self.mode != 'live':
+        if not ((self.mode == 'live') or (self.mode == 'stop')):
             return
         
         # tell central controller to update model
         if self.pixel_event_id:
             self.view.after_cancel(self.pixel_event_id)
-        self.view.pixel_event_id = self.view.after(1000, \
-                lambda: self.parent_controller.execute('update_setting', 
-                                                       'number_of_pixels',
-                                                       self.number_of_pixels)
-                )
+        self.view.after(10, lambda: self.parent_controller.execute('update_setting', 'number_of_pixels', self.number_of_pixels))

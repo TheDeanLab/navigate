@@ -61,14 +61,8 @@ class stage_control_tab(ttk.Frame):
         # Position Frame
         self.position_frame = position_frame(self)
 
-        #XY Frame
+        # XY Frame
         self.xy_frame = x_y_frame(self)
-        
-        #X Frame
-        # stage_control_tab.x_frame = other_axis_frame(stage_control_tab, 'X')        
-        
-        # #Y Frame
-        # stage_control_tab.y_frame = other_axis_frame(stage_control_tab, 'Y')
 
          #Z Frame
         self.z_frame = other_axis_frame(self, 'Z')
@@ -135,8 +129,8 @@ class stage_control_tab(ttk.Frame):
         temp = {
             **self.position_frame.get_widgets()
         }
-        for axis in ['x', 'y', 'z', 'theta', 'f']:
-            temp[axis+'_step'] = getattr(stage_control_tab, axis+'_frame').get_widget()
+        for axis in ['xy', 'z', 'theta', 'f']:
+            temp[axis+'_step'] = getattr(self, axis+'_frame').get_widget()
         return temp
 
     def get_variables(self):

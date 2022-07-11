@@ -142,7 +142,6 @@ class ASLM_controller:
         # Sub Gui Controllers
         # Acquire bar, channels controller, camera view, camera settings, stage, waveforms, menus.
         self.acquire_bar_controller = Acquire_Bar_Controller(self.view.acqbar,
-                                                             self.view.settings.channels_tab,
                                                              self,
                                                              self.verbose)
 

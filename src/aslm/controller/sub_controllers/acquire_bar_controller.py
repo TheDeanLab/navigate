@@ -264,25 +264,6 @@ class Acquire_Bar_Controller(GUI_Controller):
             Imaging Mode.
         """
         self.mode = self.mode_dict[self.view.pull_down.get()]
-        if self.mode not in ["z-stack", "projection"]: 
-            self.parent_view.stack_acq_frame.step_size_spinbox['state'] = "disabled"
-            self.parent_view.stack_acq_frame.start_pos_spinbox['state'] = "disabled"
-            self.parent_view.stack_acq_frame.end_pos_spinbox['state'] = "disabled"
-            self.parent_view.stack_acq_frame.slice_spinbox['state'] = "disabled"
-        else:
-            self.parent_view.stack_acq_frame.step_size_spinbox['state'] = "normal"
-            self.parent_view.stack_acq_frame.start_pos_spinbox['state'] = "normal"
-            self.parent_view.stack_acq_frame.end_pos_spinbox['state'] = "normal"
-            self.parent_view.stack_acq_frame.slice_spinbox['state'] = "normal"
-
-        if self.mode in ["live", "Alignment"]: # need to get alignment
-            self.parent_view.stack_timepoint_frame.save_check['state'] = "disabled"
-            self.parent_view.stack_timepoint_frame.exp_time_spinbox['state'] = "disabled"
-            self.parent_view.stack_timepoint_frame.stack_acq_spinbox['state'] = "disabled"
-            self.parent_view.stack_timepoint_frame.stack_pause_spinbox['state'] = "disabled"
-            self.parent_view.stack_timepoint_frame.timepoint_interval_spinbox['state'] = "disabled"
-            self.parent_view.stack_timepoint_frame.total_time_spinval['state'] = "disabled"
-
         self.show_verbose_info("The Microscope State is now:", self.get_mode())
 
     def update_file_type(self,

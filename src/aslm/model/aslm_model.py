@@ -455,8 +455,8 @@ class Model:
                 self.current_channel = 0
                 reboot = True
 
-            if args[0] == 'resolution' and args[1]['resolution_mode'] != self.experiment.MicroscopeState['resolution_mode'] or \
-                args[1]['zoom'] != self.experiment.MicroscopeState['zoom']:
+            if args[0] == 'resolution' and (args[1]['resolution_mode'] != self.experiment.MicroscopeState['resolution_mode'] or \
+                args[1]['zoom'] != self.experiment.MicroscopeState['zoom']):
                 self.change_resolution('high' if args[1]['resolution_mode'] == 'high' else args[1]['zoom'])
 
             update_settings_common(self, args)
@@ -492,11 +492,12 @@ class Model:
             args[0]: int, args[0]-1 is the id of features
                    : 0 no features
             """
-            if args[0] == 0 and hasattr(self, 'signal_container'):
+            if hasattr(self, 'signal_container'):
                 delattr(self, 'signal_container')
                 delattr(self, 'data_container')
-                return
-            self.signal_container, self.data_container = load_features(self, self.feature_list[args[0]-1])
+            
+            if args[0] != 0:
+                self.signal_container, self.data_container = load_features(self, self.feature_list[args[0]-1])
             
         elif command == 'stop':
             """

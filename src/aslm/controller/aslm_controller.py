@@ -520,7 +520,6 @@ class ASLM_controller:
                 'laser_info': self.resolution_info.ETLConstants[self.resolution][self.mag]
                 }
             """
-            print('*** change resolution!!!!')
             resolution = 'low' if args[0] != 'high' else 'high'
             mag = 'N/A' if args[0] == 'high' else args[0]
             temp = {

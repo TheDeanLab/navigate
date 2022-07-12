@@ -111,32 +111,29 @@ class Stage_GUI_Controller(GUI_Controller):
         self.canvas.bind("<MouseWheel>", self.update_focus)
 
     def on_leave(self, event):
-        self.count = 0
-        self.mouse_scrolls = 0
+        self.canvas.unbind("<MouseWheel>", self.update_focus)
 
     def update_focus(self, event):
-        self.mouse_scrolls += 1
-        # TODO: Why only on mod 2?
-        if self.mouse_scrolls % 2 == 0:
-            position_o = self.get_position()
-            self.count += event.delta
-            updated_position = position_o
-            updated_position["f"] += self.count
-            self.set_position(updated_position)
+        current_position = self.get_position()
+        f_increment = self.widget_vals["f_step"].get()
+        if event.delta > 0:
+            current_position["f"] += f_increment
+        else:
+            current_position["f"] -= f_increment
+        self.set_position(current_position)
         
     def key_press(self, event):
-        char = event.char
-        if char.lower in ["w", "a", "s", "d"]:
-            position_o = self.get_position()
-            current_position = position_o
+        char = event.char.lower()
+        if char in ['w', 'a', 's', 'd']:
+            current_position = self.get_position()
             xy_increment = self.widget_vals["xy_step"].get()
-            if char.lower() == "w":
+            if char == "w":
                 current_position['y'] += xy_increment
-            elif char.lower() == "a":
+            elif char == "a":
                 current_position['x'] -= xy_increment
-            elif char.lower() == "s":
+            elif char == "s":
                 current_position['y'] -= xy_increment
-            elif char.lower() == "d":
+            elif char == "d":
                 current_position['x'] += xy_increment
             self.set_position(current_position)
 

@@ -32,12 +32,15 @@ POSSIBILITY OF SUCH DAMAGE.
 
 # Standard Library Imports
 import logging
+from math import ceil
 
 # Third Party Imports
+import pandas as pd
 
 # Local Imports
 from aslm.controller.sub_controllers.gui_controller import GUI_Controller
 from aslm.controller.aslm_controller_functions import combine_funcs
+from aslm.tools.multipos_table_tools import compute_grid, update_table
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -82,19 +85,19 @@ class Tiling_Wizard_Controller(GUI_Controller):
         self.fov = {'x': 0.0, 'y': 0.0, 'z': 0.0} # Backend
         self.variables['step_size'].set(0.0)
         self.variables['percent_overlay'].set(0.0)
-        self.variables['total_tiles'].set(0.0)
+        self.variables['total_tiles'].set(1)
         for axis in ['x', 'y', 'z']:
             self.variables[axis + '_start'].set(0.0)
             self.variables[axis + '_end'].set(0.0)
             self.variables[axis + '_dist'].set(0.0)
-            self.variables[axis + '_tiles'].set(0.0)
+            self.variables[axis + '_tiles'].set(1)
 
         # Ref to widgets in other views (Camera Settings, Stage Control Positions, Stack Acq Settings)
         main_view = self.parent_controller.parent_controller.view # channels_tab_controller -> aslm_controller -> view
         self.cam_settings_widgets = main_view.settings.camera_settings_tab.camera_roi.get_widgets()
         self.stack_acq_widgets = main_view.settings.channels_tab.stack_acq_frame.get_widgets()
         self.stage_position_vars = main_view.stage_control.stage_control_tab.position_frame.get_variables()
-        
+        self.multipoint_table = main_view.settings.channels_tab.multipoint_list.get_table()
 
         # Setting/Tracing Percent Overlay
         self.variables['percent_overlay'].trace_add('write', lambda *args: self.update_overlay())
@@ -137,12 +140,54 @@ class Tiling_Wizard_Controller(GUI_Controller):
         self.variables['y_tiles'].trace_add('write', lambda *args: self.update_total_tiles())
         self.variables['z_tiles'].trace_add('write', lambda *args: self.update_total_tiles())
 
+        # Populate Table trace
+        self.buttons['set_table'].configure(command=self.set_table)
+
         # Update widgets to current values in other views
         self.update_stepsize()
         self.update_fov()
 
         # Properly Closing Popup with parent controller
         self.view.popup.protocol("WM_DELETE_WINDOW", combine_funcs(self.view.popup.dismiss, lambda: delattr(self.parent_controller, 'tiling_wizard_controller')))
+
+    
+    def set_table(self):
+        '''
+        Sets multiposition table with values from tiling wizard after Populate Multiposition Table button is pressed
+        Compute grid will return a list of all position combinations. This list is then converted to a 
+        pandas dataframe which is then set as the new table data. The table is then redrawn.
+
+        Parameters
+        ----------
+        self : object
+            Tiling Wizard Controller instance
+        
+
+        Returns
+        -------
+        None
+        '''
+
+        x_start = float(self.variables['x_start'].get())
+        x_stop = float(self.variables['x_end'].get())
+        x_tiles = int(self.variables['x_tiles'].get())
+
+        y_start = float(self.variables['y_start'].get())
+        y_stop = float(self.variables['y_end'].get())
+        y_tiles = int(self.variables['y_tiles'].get())
+
+        z_start = float(self.variables['z_start'].get())
+        z_stop = float(self.variables['z_end'].get())
+        z_tiles = int(self.variables['z_tiles'].get())
+
+        table_values = compute_grid(x_start, x_stop, x_tiles, y_start, y_stop, y_tiles, z_start, z_stop, z_tiles)
+
+        # update_table(self.multipoint_table, table_values)
+        self.multipoint_table.model.df = pd.DataFrame(table_values, columns=list('XYZRF'))
+        self.multipoint_table.currentrow = self.multipoint_table.model.df.shape[0]-1
+        self.multipoint_table.update_rowcolors()
+        self.multipoint_table.redraw()
+        self.multipoint_table.tableChanged()
 
     
     def update_total_tiles(self):
@@ -162,7 +207,7 @@ class Tiling_Wizard_Controller(GUI_Controller):
         x = float(self.variables['x_tiles'].get())
         y = float(self.variables['y_tiles'].get())
         z = float(self.variables['z_tiles'].get())
-        total_tiles = x + y + z
+        total_tiles = x * y * z
         self.variables['total_tiles'].set(total_tiles)
 
 
@@ -201,24 +246,24 @@ class Tiling_Wizard_Controller(GUI_Controller):
         None
         '''
 
-        overlay = float(self.percent_overlay)
+        overlay = float(self.percent_overlay) / 100
 
         if axis == "all":
             for a in ['x', 'y', 'z']:
                 dist = float(self.variables[a + '_dist'].get())
                 fov = float(self.fov[a])
                 if fov != 0: 
-                    num_tiles = round(abs(( dist - (overlay * fov) ) /  ( fov * (1 - overlay) )))
+                    num_tiles = ceil(abs(( dist - (overlay * fov) ) /  ( fov * (1 - overlay) )))
                 else:
-                    num_tiles = 0.0
+                    num_tiles = 1
                 self.variables[a + '_tiles'].set(num_tiles)
         else:
             dist = float(self.variables[axis + '_dist'].get())
             fov = float(self.fov[axis])
             if fov != 0: 
-                num_tiles = round(abs(( dist - (overlay * fov) ) /  ( fov * (1 - overlay) )))
+                num_tiles = ceil(abs(( dist - (overlay * fov) ) /  ( fov * (1 - overlay) )))
             else:
-                num_tiles = 0.0
+                num_tiles = 1
             self.variables[axis + '_tiles'].set(num_tiles)
 
             

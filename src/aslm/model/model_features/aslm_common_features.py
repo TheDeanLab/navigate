@@ -42,8 +42,21 @@ class ChangeResolution:
 
         
     def signal_func(self):
+        self.model.logger.debug('prepare to change resolution')
+        self.model.ready_to_change_resolution.acquire()
+        self.model.ask_to_change_resolution = True
+        self.model.logger.debug('wait to change resolution')
+        self.model.ready_to_change_resolution.acquire()
         self.model.change_resolution(self.resolution_mode)
+        self.model.logger.debug('changed resolution')
+        self.model.ask_to_change_resolution = False
         self.model.prepare_acquisition(False)
+        self.model.logger.debug('wake up data thread ')
+        self.model.ready_to_change_resolution.release()
+        return True
+
+    def data_func(self):
+        print('the camera is:', self.model.camera.serial_number)
         return True
 
     def generate_meta_data(self, *args):

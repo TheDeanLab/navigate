@@ -235,6 +235,10 @@ class Model:
         self.stop_acquisition = False # stop signal and data threads
         self.stop_send_signal = False # stop signal thread
 
+        self.pause_data_event = threading.Event()
+        self.ready_to_change_resolution = threading.Lock()
+        self.ask_to_change_resolution = False
+
         # timing - Units in milliseconds.
         self.camera_minimum_waiting_time = self.camera.get_minimum_waiting_time()
         # self.trigger_waiting_time = 10
@@ -252,7 +256,7 @@ class Model:
 
         # feature list
         # TODO: put it here now
-        self.feature_list = [[[{'name': ChangeResolution, 'args': ('1x',)}], [{'name': Dummy_Detective, 'node':{'device_related': True}}], [{'name': ChangeResolution, 'args': ('high',)}], [{'name': Snap, 'node':{'device_related': True}}]]]
+        self.feature_list = [[[{'name': Snap}, {'name': ChangeResolution, 'args': ('1x',)}], [{'name': Snap, 'node':{'device_related': True}}], [{'name': ChangeResolution, 'args': ('high',)}], [{'name': Snap, 'node':{'device_related': True}}]]]
 
     def get_camera(self):
         r"""Select active camera.
@@ -390,10 +394,15 @@ class Model:
             self.run_single_acquisition()
             channel_num = len(self.experiment.MicroscopeState['channels'].keys())
 
+            # only for test, delete later
+            if hasattr(self, 'signal_container'):
+                channel_num += 4
+
             if self.is_save:
                 self.experiment.Saving = kwargs['saving_info']
                 self.run_data_process(channel_num, data_func=self.image_writer.save_image)
             else:
+                pass
                 self.run_data_process(channel_num)
             self.end_acquisition()
 
@@ -626,6 +635,13 @@ class Model:
         count_frame = num_of_frames > 0
 
         while not self.stop_acquisition:
+            self.logger.debug(f'*******current camera {self.camera.serial_number}')
+            if self.ask_to_change_resolution:
+                self.logger.debug('data thread prepare to change resolution')
+                self.ready_to_change_resolution.release()
+                self.logger.debug('ready to change resolution')
+                self.pause_data_event.clear()
+                self.pause_data_event.wait()
             frame_ids = self.camera.get_new_frame()  # This is the 500 ms wait for Hamamatsu
             self.logger.info(f'ASLM Model - Running data process, get frames {frame_ids}')
             # if there is at least one frame available
@@ -728,6 +744,8 @@ class Model:
         self.camera.initialize_image_series(self.data_buffer,
                                             self.number_of_frames)
         self.frame_id = 0
+
+        self.pause_data_event.set()
 
         self.open_shutter()
 
@@ -859,6 +877,8 @@ class Model:
         self.daq.run_acquisition()
         self.daq.stop_acquisition()
 
+        print('!!!!send out signal', self.frame_id) #, self.camera.get_new_frame())
+
         self.frame_id = (self.frame_id + 1) % self.number_of_frames
 
         if hasattr(self, 'signal_container'):
@@ -957,10 +977,14 @@ class Model:
             return
         
         self.signal_container.reset()
+        if not self.signal_container.container_end_lock.locked():
+            self.signal_container.container_end_lock.acquire()
         while not self.signal_container.end_flag and not self.stop_send_signal and not self.stop_acquisition:
             self.run_single_channel_acquisition(target_channel)
             if not hasattr(self, 'signal_container'):
                 return
+        # self.stop_acquisition = True
+        # self.show_img_pipe.send('stop')
     
     def change_resolution(self, resolution_value):
         r"""Switch resolution mode of the microscope.

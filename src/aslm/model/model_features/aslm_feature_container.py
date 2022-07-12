@@ -29,6 +29,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
+import threading
 
 class TreeNode:
     def __init__(self, feature_name, func_dict, *, node_type='one-step', device_related=False):
@@ -111,10 +112,11 @@ class DataNode(TreeNode):
 
 
 class Container:
-    def __init__(self, root=None):
+    def __init__(self, root=None, container_end_lock=None):
         self.root = root # root node of the tree
         self.curr_node = None # current running node
         self.end_flag = False # stop running flag
+        self.container_end_lock = container_end_lock
 
     def reset(self):
         self.curr_node = None
@@ -122,8 +124,8 @@ class Container:
 
 
 class SignalContainer(Container):
-    def __init__(self, root=None, number_of_execution=1):
-        super().__init__(root)
+    def __init__(self, root=None, container_end_lock=None, number_of_execution=1):
+        super().__init__(root, container_end_lock)
         self.number_of_execution = number_of_execution
         self.remaining_number_of_execution = number_of_execution
 
@@ -158,11 +160,13 @@ class SignalContainer(Container):
             if self.remaining_number_of_execution > 0:
                 self.remaining_number_of_execution -= 1
                 self.end_flag = (self.remaining_number_of_execution == 0)
+                print('****get the lock!')
+                # self.container_end_lock.acquire()
 
 
 class DataContainer(Container):
-    def __init__(self, root=None):
-        super().__init__(root)
+    def __init__(self, root=None, container_end_lock=None):
+        super().__init__(root, container_end_lock)
 
     def run(self, *args):
         if self.end_flag or not self.root:
@@ -171,7 +175,7 @@ class DataContainer(Container):
             self.curr_node = self.root
         while self.curr_node:
             result, is_end = self.curr_node.run(*args)
-            # print('Data running node:', self.curr_node.node_name, 'get result:', result)
+            print('Data running node:', self.curr_node.node_name, 'get result:', result)
             if not is_end:
                 return
             if not self.curr_node.sibling:
@@ -187,6 +191,8 @@ class DataContainer(Container):
                 self.run(*args)
         else:
             self.curr_node = None
+            print('!!!!!!release the lock!')
+            self.container_end_lock.release()
 
 
 def get_registered_funcs(feature_module, func_type='signal'):
@@ -228,8 +234,9 @@ def load_features(model, feature_list):
                 pre_data.sibling = data_node
             pre_signal = signal_node
             pre_data = data_node
-            
-    return SignalContainer(signal_root.child), DataContainer(data_root.child)
+
+    container_end_lock = threading.Lock()
+    return SignalContainer(signal_root.child, container_end_lock), DataContainer(data_root.child, container_end_lock)
 
 
 def dummy_True(*args):

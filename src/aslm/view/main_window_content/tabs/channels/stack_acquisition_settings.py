@@ -137,13 +137,13 @@ class stack_acq_frame(ttk.Labelframe):
 
         # Laser Cycling Settings
         self.inputs['cycling'] = LabelInput(parent=self.cycling,
-                                                     label='Laser Cycling Settings',
-                                                     input_class=ValidatedCombobox,
-                                                     input_var=StringVar(),
-                                                     input_args={'width': 7}
-                                                     )
-        self.inputs["cycling"].state(["readonly"]) # Makes it so the user cannot type a choice into combobox
-        self.inputs["cycling"].grid(row=0, column=0, sticky=(NSEW), padx=6, pady=5)
+                                            label='Laser Cycling Settings ',
+                                            input_class=ValidatedCombobox,
+                                            input_var=StringVar(),
+                                            input_args={'width': 9}
+                                            )
+        self.inputs["cycling"].state(["readonly"])  # Makes it so the user cannot type a choice into combobox
+        self.inputs["cycling"].grid(row=0, column=0, sticky='NSEW', padx=6, pady=5)
 
     # Getters
     def get_variables(self):

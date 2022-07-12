@@ -877,8 +877,6 @@ class Model:
         self.daq.run_acquisition()
         self.daq.stop_acquisition()
 
-        print('!!!!send out signal', self.frame_id) #, self.camera.get_new_frame())
-
         self.frame_id = (self.frame_id + 1) % self.number_of_frames
 
         if hasattr(self, 'signal_container'):

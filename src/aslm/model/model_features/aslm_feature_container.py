@@ -160,7 +160,7 @@ class SignalContainer(Container):
             if self.remaining_number_of_execution > 0:
                 self.remaining_number_of_execution -= 1
                 self.end_flag = (self.remaining_number_of_execution == 0)
-                print('****get the lock!')
+                # TODO: verify this line.
                 # self.container_end_lock.acquire()
 
 
@@ -175,7 +175,7 @@ class DataContainer(Container):
             self.curr_node = self.root
         while self.curr_node:
             result, is_end = self.curr_node.run(*args)
-            print('Data running node:', self.curr_node.node_name, 'get result:', result)
+            # print('Data running node:', self.curr_node.node_name, 'get result:', result)
             if not is_end:
                 return
             if not self.curr_node.sibling:
@@ -191,7 +191,6 @@ class DataContainer(Container):
                 self.run(*args)
         else:
             self.curr_node = None
-            print('!!!!!!release the lock!')
             self.container_end_lock.release()
 
 

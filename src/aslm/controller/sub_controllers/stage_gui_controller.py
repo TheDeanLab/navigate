@@ -99,28 +99,26 @@ class Stage_GUI_Controller(GUI_Controller):
             self.initialize(configuration_controller)
 
         # binding mouse wheel event on camera view
-        self.count = 0
-        self.mouse_scrolls = 0
-        self.canvas.bind("<Enter>", self.on_enter)
-        self.canvas.bind("<Leave>", self.on_leave)
+        # self.canvas.bind("<Enter>", self.on_enter)
+        # self.canvas.bind("<Leave>", self.on_leave)
 
         # WASD key movement
         self.main_view.root.bind("<Key>", self.key_press)
    
-    def on_enter(self, event):
-        self.canvas.bind("<MouseWheel>", self.update_focus)
-
-    def on_leave(self, event):
-        self.canvas.unbind("<MouseWheel>", self.update_focus)
-
-    def update_focus(self, event):
-        current_position = self.get_position()
-        f_increment = self.widget_vals["f_step"].get()
-        if event.delta > 0:
-            current_position["f"] += f_increment
-        else:
-            current_position["f"] -= f_increment
-        self.set_position(current_position)
+    # def on_enter(self, event):
+    #     self.canvas.bind("<MouseWheel>", self.update_focus)
+    #
+    # def on_leave(self, event):
+    #     self.canvas.unbind("<MouseWheel>")
+    #
+    # def update_focus(self, event):
+    #     current_position = self.get_position()
+    #     f_increment = self.widget_vals["f_step"].get()
+    #     if event.delta > 0:
+    #         current_position["f"] += f_increment
+    #     else:
+    #         current_position["f"] -= f_increment
+    #     self.set_position(current_position)
         
     def key_press(self, event):
         char = event.char.lower()

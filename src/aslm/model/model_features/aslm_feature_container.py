@@ -53,7 +53,7 @@ class SignalNode(TreeNode):
 
         # if node type is multi-step, the node should have one response function
         if self.node_type == 'multi-step' and self.has_response_func == False and self.device_related == False:
-            self.node_funcs['main-response'] = dummy_func
+            self.node_funcs['main-response'] = dummy_True
             self.has_response_func = True
 
     def run(self, *args, wait_response=False):
@@ -95,6 +95,10 @@ class DataNode(TreeNode):
         if not self.is_initialized:
             self.node_funcs['init']()
             self.is_initialized = True
+
+        # to decide whether it is the target frame
+        if not self.node_funcs['pre-main'](*args):
+            return False, False
 
         result = self.node_funcs['main'](*args)
 
@@ -193,6 +197,8 @@ def get_registered_funcs(feature_module, func_type='signal'):
         func_dict['main'] = feature_module.generate_meta_data
     if 'end' not in func_dict:
         func_dict['end'] = dummy_True
+    if func_type == 'data' and 'pre-main' not in func_dict:
+        func_dict['pre-main'] = dummy_True
     return func_dict
 
 def load_features(model, feature_list):

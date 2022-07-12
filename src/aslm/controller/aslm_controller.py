@@ -640,6 +640,7 @@ class ASLM_controller:
         elif command == 'stop_acquire':
             # self.model.run_command('stop')
             self.sloppy_stop()
+            self.feature_id_val.set(0)
             self.set_mode_of_sub('stop')
             self.acquire_bar_controller.stop_progress_bar()
 

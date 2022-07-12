@@ -391,18 +391,21 @@ class Model:
             self.experiment.CameraParameters = kwargs['camera_info']
             self.is_save = self.experiment.MicroscopeState['is_save']
             self.prepare_acquisition()
+
+            # can't run single acquisition with features right now.
+            if hasattr(self, 'signal_container'):
+                self.show_img_pipe.send('stop')
+                self.end_acquisition()
+                self.logger.info('cannot run single acquisition with features!')
+                return
+
             self.run_single_acquisition()
             channel_num = len(self.experiment.MicroscopeState['channels'].keys())
-
-            # only for test, delete later
-            if hasattr(self, 'signal_container'):
-                channel_num += 4
 
             if self.is_save:
                 self.experiment.Saving = kwargs['saving_info']
                 self.run_data_process(channel_num, data_func=self.image_writer.save_image)
             else:
-                pass
                 self.run_data_process(channel_num)
             self.end_acquisition()
 
@@ -981,8 +984,6 @@ class Model:
             self.run_single_channel_acquisition(target_channel)
             if not hasattr(self, 'signal_container'):
                 return
-        # self.stop_acquisition = True
-        # self.show_img_pipe.send('stop')
     
     def change_resolution(self, resolution_value):
         r"""Switch resolution mode of the microscope.

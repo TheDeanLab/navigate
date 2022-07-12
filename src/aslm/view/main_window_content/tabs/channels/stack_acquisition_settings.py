@@ -33,13 +33,15 @@ POSSIBILITY OF SUCH DAMAGE.
 from tkinter import *
 import tkinter as tk
 from tkinter import ttk
+from tokenize import String
 # import logging
-from aslm.view.custom_widgets.validation import ValidatedSpinbox
+from aslm.view.custom_widgets.validation import ValidatedCombobox, ValidatedSpinbox
 from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+import logging
 
 # Logger Setup
-# p = __name__.split(".")[1]
-# logger = logging.getLogger(p)
+p = __name__.split(".")[1]
+logger = logging.getLogger(p)
 
 
 class stack_acq_frame(ttk.Labelframe):
@@ -57,84 +59,91 @@ class stack_acq_frame(ttk.Labelframe):
         self.buttons = {}
 
         # Frames for widgets
-        self.step_size_frame = ttk.Frame(self)
-        self.start_pos_frame = ttk.Frame(self)
-        self.end_pos_frame = ttk.Frame(self)
-        self.slice_frame = ttk.Frame(self)
+        self.pos_slice = ttk.Frame(self)
+        self.cycling = ttk.Frame(self)
 
         # Gridding Each Holder Frame
-        self.start_pos_frame.grid(row=0, column=0, sticky=NSEW)
-        self.end_pos_frame.grid(row=0, column=1, sticky=NSEW)
-        self.step_size_frame.grid(row=0, column=2, sticky=NSEW)
-        self.slice_frame.grid(row=0, column=3, sticky=NSEW)
+        self.pos_slice.grid(row=0, column=0, sticky=(NSEW))
+        self.cycling.grid(row=1, column=0, sticky=(NSEW))
+
 
         # Start Pos Frame (Vertically oriented)
         start_names = ['start_position', 'start_focus']
         start_labels = ["Pos", "Foc"]
 
-        self.start_label = ttk.Label(self.start_pos_frame, text='Start')
-        self.start_label.grid(row=0, column=1, sticky='S', padx=3, pady=(4, 1))
+        self.start_label = ttk.Label(self.pos_slice, text='Start')
+        self.start_label.grid(row=0, column=0, sticky='S')
 
         for i in range(len(start_names)):
-            self.inputs[start_names[i]] = LabelInput(parent=self.start_pos_frame,
+            self.inputs[start_names[i]] = LabelInput(parent=self.pos_slice,
                                                      label=start_labels[i],
                                                      input_class=ValidatedSpinbox,
                                                      input_var=DoubleVar(),
                                                      input_args={"from_": -50000.0, "increment": 0.5, "width": 14}
                                                      )
-            self.inputs[start_names[i]].grid(row=i + 1, column=1, sticky='N', padx=3, pady=(3, 6))
-            self.inputs[start_names[i]].label.grid(sticky='N', padx=3, pady=(4, 1))
+            self.inputs[start_names[i]].grid(row=i + 1, column=0, sticky='N')
+            self.inputs[start_names[i]].label.grid(sticky='N')
         
         # Start button
-        self.buttons['set_start'] = ttk.Button(self.start_pos_frame, text="Set Start Pos/Foc")
-        self.buttons['set_start'].grid(row=3, column=1, sticky='N', padx=3, pady=(3, 6))
+        self.buttons['set_start'] = ttk.Button(self.pos_slice, text="Set Start Pos/Foc")
+        self.buttons['set_start'].grid(row=3, column=0, sticky='N')
 
         # End Pos Frame (Vertically Oriented)
         end_names = ['end_position', 'end_focus']
         end_labels = ['Pos', 'Foc']
 
-        self.end_label = ttk.Label(self.end_pos_frame, text='End')
-        self.end_label.grid(row=0, column=1, sticky='S', padx=3, pady=(4, 1))
+        self.end_label = ttk.Label(self.pos_slice, text='End')
+        self.end_label.grid(row=0, column=1, sticky='S')
         for i in range(len(end_names)):
-            self.inputs[end_names[i]] = LabelInput(parent=self.end_pos_frame,
+            self.inputs[end_names[i]] = LabelInput(parent=self.pos_slice,
                                                    label=end_labels[i],
                                                    input_class=ValidatedSpinbox,
                                                    input_var=DoubleVar(),
                                                    input_args={"from_": -50000.0, "increment": 0.5, "width": 14}
                                                    )
-            self.inputs[end_names[i]].grid(row=i + 1, column=1, sticky='N', padx=3, pady=(3, 6))
-            self.inputs[end_names[i]].label.grid(sticky='N', padx=3, pady=(4, 1))
+            self.inputs[end_names[i]].grid(row=i + 1, column=1, sticky='N')
+            self.inputs[end_names[i]].label.grid(sticky='N')
         
             # End Button
-        self.buttons['set_end'] = ttk.Button(self.end_pos_frame, text="Set End Pos/Foc")
-        self.buttons['set_end'].grid(row=3, column=1, sticky='N', padx=3, pady=(3, 6))
+        self.buttons['set_end'] = ttk.Button(self.pos_slice, text="Set End Pos/Foc")
+        self.buttons['set_end'].grid(row=3, column=1, sticky='N')
 
         # Step Size Frame (Vertically oriented)
-        self.step_size_label = ttk.Label(self.step_size_frame, text='Step Size')
-        self.step_size_label.grid(row=0, column=0, sticky='S', padx=(4, 3), pady=(4, 1))
-        self.inputs['step_size'] = LabelInput(parent=self.step_size_frame,
+        self.step_size_label = ttk.Label(self.pos_slice, text='Step Size')
+        self.step_size_label.grid(row=0, column=2, sticky='S')
+        self.inputs['step_size'] = LabelInput(parent=self.pos_slice,
                                               input_class=ValidatedSpinbox,
                                               input_var=DoubleVar(),
                                               input_args={"from_": -50000.0, "increment": 0.5, "width": 14}
                                               )
-        self.inputs['step_size'].grid(row=1, column=0, sticky='N', padx=3, pady=(3, 6))
+        self.inputs['step_size'].grid(row=1, column=2, sticky='N')
 
         # Slice Frame (Vertically oriented)
-        self.empty_label = ttk.Label(self.slice_frame, text=' ')
-        self.empty_label.grid(row=0, column=0, sticky='N', padx=3, pady=(4, 1))
+        self.empty_label = ttk.Label(self.pos_slice, text=' ')
+        self.empty_label.grid(row=0, column=3, sticky='N')
         slice_names = ['number_z_steps', 'abs_z_start', 'abs_z_end']
         slice_labels = ['# slices', 'Abs Z Start', 'Abs Z Stop']
 
         for i in range(len(slice_names)):
-            self.inputs[slice_names[i]] = LabelInput(parent=self.slice_frame,
+            self.inputs[slice_names[i]] = LabelInput(parent=self.pos_slice,
                                                      label=slice_labels[i],
                                                      input_class=ValidatedSpinbox,
                                                      input_var=DoubleVar(),
                                                      input_args={"from_": -50000.0, "increment": 0.5, "width": 14}
                                                      )
-            self.inputs[slice_names[i]].label.grid(sticky='N', padx=3, pady=(4, 1))
+            self.inputs[slice_names[i]].label.grid(sticky='N')
             self.inputs[slice_names[i]].widget.configure(state='disabled')
-            self.inputs[slice_names[i]].grid(row=i + 1, column=1, sticky='N', padx=3, pady=(3, 6))
+            self.inputs[slice_names[i]].grid(row=i + 1, column=3, sticky='N')
+
+        # Laser Cycling Settings
+        self.inputs['cycling'] = LabelInput(parent=self.cycling,
+                                            label='Laser Cycling Settings ',
+                                            input_class=ValidatedCombobox,
+                                            input_var=StringVar(),
+                                            input_args={'width': 9}
+                                            )
+        self.inputs["cycling"].state(["readonly"])  # Makes it so the user cannot type a choice into combobox
+        self.inputs["cycling"].grid(row=0, column=0, sticky='NSEW', padx=6, pady=5)
 
     # Getters
     def get_variables(self):

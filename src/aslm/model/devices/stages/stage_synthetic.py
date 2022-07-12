@@ -55,138 +55,63 @@ class SyntheticStage(StageBase):
         super().__init__(configuration, verbose)
 
     def report_position(self):
-        self.create_position_dict()
-        self.int_x_pos = self.x_pos + self.int_x_pos_offset
-        self.int_y_pos = self.y_pos + self.int_y_pos_offset
-        self.int_z_pos = self.z_pos + self.int_z_pos_offset
-        self.int_f_pos = self.f_pos + self.int_f_pos_offset
-        self.int_theta_pos = self.theta_pos + self.int_theta_pos_offset
-        self.create_internal_position_dict()
-        if self.verbose:
-            print("Stage Position: ", self.int_position_dict)
-        logger.debug(f"Stage Position:, {self.int_position_dict}")
+        self.update_position_dictionaries()
 
-        return self.int_position_dict
+        return self.position_dict
 
-    def move_relative(self, move_dictionary, wait_until_done=False):
+    def move_axis_absolute(self, axis, move_dictionary):
         """
-        Move relative method
+        Implement movement logic along a single axis.
+
+        Example calls:
+
+        Parameters
+        ----------
+        axis : str
+            An axis prefix in move_dictionary. For example, axis='x' corresponds to 'x_abs', 'x_min', etc.
+        axis_num : int
+            The corresponding number of this axis on a PI stage.
+        move_dictionary : dict
+            A dictionary of values required for movement. Includes 'x_abs', 'x_min', etc. for one or more axes.
+            Expects values in micrometers, except for theta, which is in degrees.
+
+        Returns
+        -------
+        bool
+            Was the move successful?
         """
+        axis_abs = self.get_abs_position(axis, move_dictionary)
+        if axis_abs == -1e50:
+            return False
 
-        if 'x_rel' in move_dictionary:
-            x_rel = move_dictionary['x_rel']
-            if (self.x_min <= self.x_pos +
-                    x_rel) and (self.x_max >= self.x_pos + x_rel):
-                self.x_pos = self.x_pos + x_rel
-            else:
-                print('Relative movement stopped: X limit would be reached!', 1000)
-                logger.info("Relative movement stopped: X limit would be reached!, 1000")
-
-        if 'y_rel' in move_dictionary:
-            y_rel = move_dictionary['y_rel']
-            if (self.y_min <= self.y_pos +
-                    y_rel) and (self.y_max >= self.y_pos + y_rel):
-                self.y_pos = self.y_pos + y_rel
-            else:
-                print('Relative movement stopped: Y limit would be reached!', 1000)
-                logger.info("Relative movement stopped: Y limit would be reached!")
-
-        if 'z_rel' in move_dictionary:
-            z_rel = move_dictionary['z_rel']
-            if (self.z_min <= self.z_pos +
-                    z_rel) and (self.z_max >= self.z_pos + z_rel):
-                self.z_pos = self.z_pos + z_rel
-            else:
-                print('Relative movement stopped: Z limit would be reached!', 1000)
-                logger.info("Relative movement stopped: Z limit would be reached!")
-
-        if 'theta_rel' in move_dictionary:
-            theta_rel = move_dictionary['theta_rel']
-            if (self.theta_min <= self.theta_pos +
-                    theta_rel) and (self.theta_max >= self.theta_pos + theta_rel):
-                self.theta_pos = self.theta_pos + theta_rel
-            else:
-                print(
-                    'Relative movement stopped: Rotation limit would be reached!',
-                    1000)
-                logger.info("Relative movement stopped: Rotation limit would be reached!")
-
-        if 'f_rel' in move_dictionary:
-            f_rel = move_dictionary['f_rel']
-            if (self.f_min <= self.f_pos +
-                    f_rel) and (self.f_max >= self.f_pos + f_rel):
-                self.f_pos = self.f_pos + f_rel
-            else:
-                print(
-                    'Relative movement stopped: Focus limit would be reached!',
-                    1000)
-                logger.info("Relative movement stopped: Focus limit would be reached!")
-
-        if wait_until_done is True:
-            time.sleep(0.02)
+        # Move the stage
+        setattr(self, f"{axis}_pos", axis_abs)
+        return True
 
     def move_absolute(self, move_dictionary, wait_until_done=False):
         """
-        Move absolute method
+
+        Parameters
+        ----------
+        move_dictionary : dict
+            A dictionary of values required for movement. Includes 'x_abs', etc. for one or more axes.
+            Expects values in micrometers, except for theta, which is in degrees.
+        wait_until_done : bool
+            Block until stage has moved to its new spot.
+
+        Returns
+        -------
+        success : bool
+            Was the move successful?
         """
 
-        if 'x_abs' in move_dictionary:
-            x_abs = move_dictionary['x_abs']
-            x_abs = x_abs - self.int_x_pos_offset
-            if (self.x_min <= x_abs) and (self.x_max >= x_abs):
-                self.x_pos = x_abs
-            else:
-                logger.info("Absolute movement stopped: X limit would be reached!, 1000")
-                print('Absolute movement stopped: X limit would be reached!', 1000)
-
-        if 'y_abs' in move_dictionary:
-            y_abs = move_dictionary['y_abs']
-            y_abs = y_abs - self.int_y_pos_offset
-            if (self.y_min <= y_abs) and (self.y_max >= y_abs):
-                self.y_pos = y_abs
-            else:
-                logger.info("Absolute movement stopped: Y limit would be reached!, 1000")
-                print('Absolute movement stopped: Y limit would be reached!', 1000)
-
-        if 'z_abs' in move_dictionary:
-            z_abs = move_dictionary['z_abs']
-            z_abs = z_abs - self.int_z_pos_offset
-            if (self.z_min <= z_abs) and (self.z_max >= z_abs):
-                self.z_pos = z_abs
-            else:
-                logger.info("Absolute movement stopped: Z limit would be reached!, 1000")
-                print('Absolute movement stopped: Z limit would be reached!', 1000)
-
-        if 'f_abs' in move_dictionary:
-            f_abs = move_dictionary['f_abs']
-            f_abs = f_abs - self.int_f_pos_offset
-            if (self.f_min <= f_abs) and (self.f_max >= f_abs):
-                self.f_pos = f_abs
-            else:
-                logger.info("Absolute movement stopped: Focus limit would be reached!, 1000")
-                print(
-                    'Absolute movement stopped: Focus limit would be reached!',
-                    1000)
-
-        if 'theta_abs' in move_dictionary:
-            theta_abs = move_dictionary['theta_abs']
-            theta_abs = theta_abs - self.int_theta_pos_offset
-            if (self.theta_min <= theta_abs) and (self.theta_max >= theta_abs):
-                self.theta_pos = theta_abs
-            else:
-                logger.info("Absolute movement stopped: Rotation limit would be reached!, 1000")
-                print(
-                    'Absolute movement stopped: Rotation limit would be reached!',
-                    1000)
+        for ax in self.axes:
+            success = self.move_axis_absolute(ax, move_dictionary)
 
         if wait_until_done is True:
             time.sleep(.25)
 
-        if self.verbose:
-            print('stage moved to ', move_dictionary)
-        logger.debug(f"stage moved to, {move_dictionary}")
-
-        return True
+        return success
 
     def zero_axes(self, list):
         for axis in list:
@@ -214,4 +139,3 @@ class SyntheticStage(StageBase):
 
     def unload_sample(self):
         self.y_pos = self.configuration.StageParameters['y_unload_position']
-

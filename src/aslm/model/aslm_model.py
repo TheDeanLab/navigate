@@ -156,6 +156,10 @@ class Model:
                                            args=(self.configuration, self.experiment, self.verbose,)).start(),
         }
 
+        if not args.synthetic_hardware:
+            threads_dict['stages_r'] = ResultThread(target=startup_functions.start_stages_r,
+                                                    args=(self.configuration, self.verbose,)).start()
+
         # Optionally start up multiple cameras
         # TODO: In the event two cameras are on, but we've only requested one, make sure it's the one with the
         #       serial number we want.
@@ -506,11 +510,26 @@ class Model:
         success : bool
             Was the move successful?
         """
+
         # Update our local experiment parameters
         update_stage_dict(self, pos_dict)
+
+        # In the event we are in high res mode...
+        if self.experiment.MicroscopeState['resolution_mode'] == 'high' and hasattr(self, 'stages_r'):
+            # ...we will use stages_r as the focusing stage
+            pop_ax = None
+            for axis, val in pos_dict.items():
+                ax = axis.split('_')[0]
+                if ax == 'f':
+                    pop_ax = axis
+            if pop_ax is not None:
+                # remove f from the pos_dict and use a different stage to make it move
+                f_dict = {pop_ax: pos_dict.pop(pop_ax)}
+                success = self.stages_r.move_absolute(f_dict, wait_until_done)
+
         success = self.stages.move_absolute(pos_dict, wait_until_done)
-        ret_pos_dict = self.get_stage_position()  # This will always be behind because it gets the position
-                                                  # before movement is finished
+        # ret_pos_dict = self.get_stage_position()  # This will always be behind because it gets the position
+        #                                           # before movement is finished
         # if not success:
         #     # Record where we are now
         #     update_stage_dict(self, ret_pos_dict)
@@ -529,13 +548,23 @@ class Model:
             Dictionary of stage positions.
         """
         ret_pos_dict = self.stages.report_position()
+        if self.experiment.MicroscopeState['resolution_mode'] == 'high' and hasattr(self, 'stages_r'):
+            # replace with high res focus
+            f_pos_dict = self.stages_r.report_position()
+            ret_pos_dict['f_pos'] = f_pos_dict['f_pos']
+
         return ret_pos_dict
 
     def stop_stage(self):
-        r"""Stop the stages. Grab the current position.
+        r"""Stop the stages.
 
         """
         self.stages.stop()
+        if self.experiment.MicroscopeState['resolution_mode'] == 'high' and hasattr(self, 'stages_r'):
+            self.stages_r.stop()
+
+        ret_pos_dict = self.get_stage_position()
+        update_stage_dict(self, ret_pos_dict)
 
     def end_acquisition(self):
         r"""End the acquisition.
@@ -552,6 +581,7 @@ class Model:
         if self.camera.is_acquiring:
             self.camera.close_image_series()
         self.shutter.close_shutters()
+        self.laser_triggers.turn_off_lasers()
 
     def run_data_process(self, num_of_frames=0, data_func=None):
         r"""Run the data process.
@@ -821,7 +851,7 @@ class Model:
         stack_cycling_mode = microscope_state['stack_cycling_mode']
 
         # TODO: Make relative to stage coordinates.
-        self.stages.report_position()  # Update current position
+        self.get_stage_position()
         restore_z = self.stages.z_pos
 
         # z-positions
@@ -911,7 +941,7 @@ class Model:
 
         if (self.experiment.MicroscopeState['resolution_mode'] == "low" and resolution_value == 'high')\
            or (self.experiment.MicroscopeState['resolution_mode'] == "high" and resolution_value != 'high'):
-            # We're switching cameras
+            # We're switching between one of the low and the high resolution modes
 
             # We need to set this first for get_camera()
             if resolution_value == 'high':
@@ -925,6 +955,8 @@ class Model:
 
             self.camera = self.get_camera()
 
+            self.apply_resolution_stage_offset(resolution_value)
+
         if resolution_value == 'high':
             logging.info("ASLM Model - Switching into High-Resolution Mode")
             self.experiment.MicroscopeState['resolution_mode'] = 'high'
@@ -936,6 +968,40 @@ class Model:
             self.experiment.MicroscopeState['zoom'] = resolution_value
             self.zoom.set_zoom(resolution_value)
             self.laser_triggers.enable_low_resolution_laser()
+
+    def apply_resolution_stage_offset(self, mode, initial=False):
+        """
+        There is a slight offset between the high and low resolution modes, defined in configuration.yml.
+        Apply this offset when we switch modes from low to high or vice versa. Do not apply this when
+        we are just switching in between low modes.
+
+        mode : str
+            One of "high" or "low"
+        """
+        pos_dict = self.get_stage_position()
+        for axis, val in pos_dict.items():
+            ax = axis.split('_')[0]
+            l_offset = self.configuration.StageParameters.get(f"{ax}_l_offset", 0)
+            r_offset = self.configuration.StageParameters.get(f"{ax}_r_offset", 0)
+            if mode == 'high':
+                new_pos = val + r_offset
+                if not initial:
+                    new_pos -= l_offset
+            else:
+                # we are moving to low res mode
+                new_pos = val + l_offset
+                if not initial:
+                    new_pos -= r_offset
+
+            if hasattr(self, 'stages_r') and ax == 'f':
+                # Do not move the focus if we're using an entirely different stage
+                continue
+
+            self.move_stage({f"{ax}_abs": new_pos}, wait_until_done=True)
+
+        # Update based on new focus
+        ret_pos_dict = self.get_stage_position()
+        update_stage_dict(self, ret_pos_dict)
 
     def open_shutter(self):
         r"""Open the shutter according to the resolution mode.

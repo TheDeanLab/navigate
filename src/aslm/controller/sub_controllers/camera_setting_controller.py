@@ -325,7 +325,7 @@ class Camera_Setting_Controller(GUI_Controller):
     def calculate_readout_time(self):
         """
         # Calculates it here
-        # TODO: @Kevin please check the math here.
+        # TODO: Highly specific to Hamamatsu. Should find a way to pass this from the camera to here.
         """
 
         h = 9.74436e-6  # Readout timing constant

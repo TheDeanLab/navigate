@@ -536,7 +536,7 @@ class Camera_View_Controller(GUI_Controller):
         if images_received == 0:
             self.initialize_non_live_display(microscope_state=microscope_state)
 
-        # Identify the identity (e.g., slice #, channel #) of the image received.
+        # Identify image identity (e.g., slice #, channel #).
         self.identify_channel_index_and_slice(microscope_state=microscope_state)
 
         # Place image in XYZC numpy array.

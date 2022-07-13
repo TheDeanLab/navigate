@@ -121,8 +121,7 @@ class tiling_wizard_popup():
                        "Y Distance",
                        "Num. Tiles",
                        "Z Distance",
-                       "Num. Tiles",
-                       "Tot. Tiles"]
+                       "Num. Tiles"]
 
 
         # Action buttons
@@ -184,25 +183,12 @@ class tiling_wizard_popup():
 
 
         # Data widgets
-        data_labels = ["Step Size",
-                       "Percent Overlay",
+        data_labels = ["Percent Overlay",
                        "Total Tiles"]
 
-        data_names = ["step_size",
-                      "percent_overlay",
+        data_names = ["percent_overlay",
                       "total_tiles"]
-                      
-        self.inputs['step_size'] = LabelInput(parent=data,
-                                                label="Step Size",
-                                                input_class=ValidatedSpinbox,
-                                                input_var=tk.StringVar(),
-                                                input_args={"width":5, "increment": 5, "from_": 0})
-        self.inputs['step_size'].widget.state(['disabled'])
-        self.inputs['step_size'].grid(row=0,
-                                        column=0,
-                                        sticky=tk.NSEW,
-                                        padx=(5,0),
-                                        pady=(5,0))
+
         self.inputs['percent_overlay'] = LabelInput(parent=data,
                                                 label="Percent Overlay",
                                                 input_class=ValidatedSpinbox,
@@ -226,8 +212,6 @@ class tiling_wizard_popup():
                                         pady=(5,0))
 
         # Formatting
-        self.inputs["step_size"].widget.grid(padx=(25,0))
-        self.inputs["step_size"].label.grid(padx=(15,0))
         self.inputs["total_tiles"].grid(padx=(110,0))
 
     # Getters

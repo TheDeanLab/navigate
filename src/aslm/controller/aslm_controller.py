@@ -142,6 +142,7 @@ class ASLM_controller:
         # Sub Gui Controllers
         # Acquire bar, channels controller, camera view, camera settings, stage, waveforms, menus.
         self.acquire_bar_controller = Acquire_Bar_Controller(self.view.acqbar,
+                                                             self.view.settings.channels_tab,
                                                              self,
                                                              self.verbose)
 
@@ -159,11 +160,15 @@ class ASLM_controller:
                                                                    self.verbose,
                                                                    configuration_controller)
 
-        self.stage_gui_controller = Stage_GUI_Controller(self.view.stage_control.stage_control_tab,
+        # Stage Controller
+        self.stage_gui_controller = Stage_GUI_Controller(self.view.stage_control.stage_control_tab,  
+                                                         self.view,
+                                                         self.camera_view_controller.canvas,
                                                          self,
                                                          self.verbose,
                                                          configuration_controller)
-
+                        
+        # Waveform Controller
         self.waveform_tab_controller = Waveform_Tab_Controller(self.view.camera_waveform.waveform_tab,
                                                                self,
                                                                self.verbose)
@@ -338,6 +343,15 @@ class ASLM_controller:
         self.view.menubar.menu_autofocus.add_command(label='Autofocus', command=lambda: self.execute('autofocus'))
         self.view.menubar.menu_autofocus.add_command(label='setting', command=popup_autofocus_setting)
 
+        # add-on features
+        feature_list = ['None', 'Change Resolution']
+        self.feature_id_val = tkinter.IntVar(0)
+        for i in range(len(feature_list)):
+            self.view.menubar.menu_features.add_radiobutton(label=feature_list[i],
+                                                            variable=self.feature_id_val,
+                                                            value=i)
+        self.feature_id_val.trace_add('write', lambda *args: self.execute('load_feature', self.feature_id_val.get()))
+
         # debug menu
         if self.debug:
             Debug_Module(self, self.view.menubar.menu_debug, self.verbose)
@@ -505,7 +519,16 @@ class ASLM_controller:
                 'laser_info': self.resolution_info.ETLConstants[self.resolution][self.mag]
                 }
             """
-            self.model.change_resolution(resolution_value=args[0])
+            resolution = 'low' if args[0] != 'high' else 'high'
+            mag = 'N/A' if args[0] == 'high' else args[0]
+            temp = {
+                    'resolution_mode': resolution,
+                    'zoom': mag,
+                    'laser_info': self.etl_constants.ETLConstants[resolution][mag]
+                }
+            work_thread = self.threads_pool.createThread('model', lambda: self.model.run_command('update_setting', 'resolution', temp))
+            work_thread.join()
+            # self.model.change_resolution(resolution_value=args[0])
             self.camera_setting_controller.calculate_physical_dimensions(args[0])
             if hasattr(self, 'etl_controller') and self.etl_controller:
                 self.etl_controller.set_experiment_values(args[0])
@@ -543,6 +566,10 @@ class ASLM_controller:
         elif command == 'autofocus':
             r"""Execute autofocus routine."""
             self.threads_pool.createThread('camera', self.capture_autofocus_image)
+
+        elif command == 'load_feature':
+            r"""Tell model to load/unload features."""
+            self.threads_pool.createThread('model', lambda: self.model.run_command('load_feature', *args))
             
         elif command == 'acquire_and_save':
             r"""Acquire data and save it.
@@ -594,14 +621,16 @@ class ASLM_controller:
                                                    args=('live',))
 
             elif self.acquire_bar_controller.mode == 'z-stack':
-                # is_multi_position = self.channels_tab_controller.is_multiposition_val.get()
-                # self.model.open_shutter()
-                # self.model.run_z_stack_acquisition(is_multi_position, self.update_camera_view())
-                # self.model.close_shutter()
+                if self.experiment.MicroscopeState['is_multiposition'] is True:
+                    # Populate MicroscopeState with the positions
+                    self.experiment.MicroscopeState['stage_positions'] = self.channels_tab_controller.multi_position_controller.get_positions()
+                    print("Positions:", self.experiment.MicroscopeState['stage_positions'])
+
 
                 self.threads_pool.createThread('camera',
                                                self.capture_image,
                                                args=('z-stack',))
+
 
             elif self.acquire_bar_controller.mode == 'projection':
                 pass
@@ -609,11 +638,15 @@ class ASLM_controller:
             else:
                 logger.debug("ASLM Controller - Wrong acquisition mode. Not recognized.")
 
+
         elif command == 'stop_acquire':
             # self.model.run_command('stop')
             self.sloppy_stop()
+            self.feature_id_val.set(0)
             self.set_mode_of_sub('stop')
+
             self.acquire_bar_controller.stop_progress_bar()
+
 
         elif command == 'exit':
             # self.model.run_command('stop')

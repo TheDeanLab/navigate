@@ -47,7 +47,14 @@ logger = logging.getLogger(p)
 #Class that handles the dialog box that has all the user entry stuff when you press the Acquisition button
 class PopUp(tk.Toplevel):
 
-    def __init__(self, root, name, size, top=True, transient=True, *args, **kwargs):
+    def __init__(self,
+                 root,
+                 name,
+                 size,
+                 top=True,
+                 transient=True,
+                 *args,
+                 **kwargs):
         """
         #### Creates the popup window based on the root window being passed, title that you want the window to have and the size of the window.
         Some important things to consider:

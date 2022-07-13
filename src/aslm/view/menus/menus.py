@@ -1,5 +1,4 @@
-"""
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -69,6 +68,10 @@ class menubar(Menu):
         # Autofocus Menu
         self.menu_autofocus = Menu(self)
         self.add_cascade(menu=self.menu_autofocus, label='Autofocus')
+
+        # Add-on Features menu
+        self.menu_features = Menu(self)
+        self.add_cascade(menu=self.menu_features, label='Add-on Features')
 
         # Debug Menu
         self.menu_debug = Menu(self)

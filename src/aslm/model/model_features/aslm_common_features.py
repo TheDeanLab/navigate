@@ -29,40 +29,48 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
+from aslm.model.model_features.aslm_feature_container import dummy_True
 
-# Standard Library Imports
-import unittest
-from pathlib import Path
+class ChangeResolution:
+    def __init__(self, model, resolution_mode='high'):
+        self.model = model
 
-# Third Party Imports
+        self.config_table={'signal': {'main': self.signal_func}, 
+                            'data': {'main': dummy_True}}
 
-# Local Imports
-from aslm.model.devices.shutter.laser_shutter_base import ShutterBase
-from aslm.model.aslm_model_config import Session as session
+        self.resolution_mode = resolution_mode
 
+        
+    def signal_func(self):
+        self.model.logger.debug('prepare to change resolution')
+        self.model.pause_data_ready_lock.acquire()
+        self.model.ask_to_pause_data_thread = True
+        self.model.logger.debug('wait to change resolution')
+        self.model.pause_data_ready_lock.acquire()
+        self.model.change_resolution(self.resolution_mode)
+        self.model.logger.debug('changed resolution')
+        self.model.ask_to_pause_data_thread = False
+        self.model.prepare_acquisition(False)
+        self.model.pause_data_event.set()
+        self.model.logger.debug('wake up data thread ')
+        self.model.pause_data_ready_lock.release()
+        return True
 
-class TestLaserBase(unittest.TestCase):
-    r"""Unit Test for ShutterBase Class"""
+    def data_func(self):
+        print('the camera is:', self.model.camera.serial_number)
+        return True
 
-    def test_shutter_base_attributes(self):
-        base_directory = Path(__file__).resolve().parent.parent.parent.parent.parent
-        configuration_directory = Path.joinpath(base_directory, 'src', 'aslm', 'config')
-        configuration_path = Path.joinpath(configuration_directory, 'configuration.yml')
-        experiment_path = Path.joinpath(configuration_path, 'experiment.yml')
+    def generate_meta_data(self, *args):
+        print('This frame: change resolution', self.resolution_mode, self.model.frame_id)
+        return True
 
-        configuration = session(configuration_path, False)
-        experiment = session(experiment_path, False)
+class Snap:
+    def __init__(self, model):
+        self.model = model
 
-        shutter = ShutterBase(configuration=configuration, experiment=experiment, verbose=False)
+        self.config_table={'signal':{},
+                            'data': {'main': dummy_True}}
 
-        assert hasattr(shutter, 'configuration')
-        assert hasattr(shutter, 'experiment')
-        assert hasattr(shutter, 'verbose')
-        assert hasattr(shutter, 'shutter_right')
-        assert hasattr(shutter, 'shutter_right_state')
-        assert hasattr(shutter, 'shutter_left')
-        assert hasattr(shutter, 'shutter_left_state')
-
-
-if __name__ == '__main__':
-    unittest.main()
+    def generate_meta_data(self, *args):
+        print('This frame: snap one frame', self.model.frame_id)
+        return True

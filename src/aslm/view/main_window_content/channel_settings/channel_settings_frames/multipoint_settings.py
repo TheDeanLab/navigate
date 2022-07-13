@@ -51,16 +51,42 @@ class multipoint_frame(ttk.Labelframe):
         tk.Grid.columnconfigure(self, 'all', weight=1)
         tk.Grid.rowconfigure(self, 'all', weight=1)
 
+        # Dict
+
+        self.buttons = {}
+
+
         # Save Data Label
-        label_position = 0
-        input_position = 4
         self.laser_label = ttk.Label(self, text='Enable')
-        self.laser_label.grid(row=0, column=label_position, sticky=(tk.NSEW), padx=(4,1), pady=(4,6))
+        self.laser_label.grid(row=0, column=0, sticky=(tk.NSEW), padx=(4,1), pady=(4,6))
 
         # Save Data Checkbox
         self.on_off = tk.BooleanVar()
         self.save_check = ttk.Checkbutton(self, text='', variable=self.on_off)
-        self.save_check.grid(row=0, column=input_position, sticky=(tk.NSEW), pady=(4,6))
+        self.save_check.grid(row=0, column=1, sticky=(tk.NSEW), pady=(4,6))
+
+        # Tiling Wizard Button
+        self.buttons["tiling"] = ttk.Button(self, text="Launch Tiling Wizard")
+        self.buttons["tiling"].grid(row=0, column=2, sticky=(tk.NSEW), padx=(10,0), pady=(4,6))
+
+        # Getters
+    def get_variables(self):
+        """
+        This function returns a dictionary of all the variables that are tied to each widget name.
+        The key is the widget name, value is the variable associated.
+        """
+        variables = {}
+        for key, widget in self.inputs.items():
+            variables[key] = widget.get_variable()
+        return variables
+
+    def get_widgets(self):
+        """
+        This function returns the dictionary that holds the input widgets.
+        The key is the widget name, value is the LabelInput class that has all the data.
+        """
+        return self.inputs
+
 
 class multipoint_list(ttk.Frame):
     """
@@ -82,4 +108,22 @@ class multipoint_list(ttk.Frame):
         self.pt = MPTable(self, showtoolbar=False)
         self.pt.show()
         self.pt.model.df = df
+    
+    def get_table(self):
+        '''
+        Returns a reference to multipoint table dataframe.
+
+        Parameters
+        ----------
+        self : object
+            Multipoint List instance
+        
+
+        Returns
+        -------
+        self.pt.model.df: Pandas DataFrame
+            Reference to table data as dataframe
+        '''
+
+        return self.pt
 

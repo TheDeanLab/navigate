@@ -1,5 +1,4 @@
-"""
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -30,6 +29,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
+<<<<<<<< HEAD:src/aslm/view/main_window_content/channel_settings/channel_settings_frames/stack_cycling_settings.py
 import tkinter as tk
 from tkinter import ttk
 import logging
@@ -58,4 +58,46 @@ class stack_cycling_frame(ttk.Labelframe):
 
         #Gridding Each Holder Frame
         stack_acq.cycling_frame.grid(row=0, column=0, sticky=(tk.NSEW))
+========
 
+# Standard Library Imports
+import unittest
+from pathlib import Path
+
+# Third Party Imports
+
+# Local Imports
+from aslm.model.devices.shutter.laser_shutter_base import ShutterBase
+from aslm.model.aslm_model_config import Session as session
+
+>>>>>>>> develop:test/model/devices/shutter/test_laser_shutter_base.py
+
+class TestLaserBase(unittest.TestCase):
+    r"""Unit Test for ShutterBase Class"""
+
+    def test_shutter_base_attributes(self):
+        base_directory = Path(__file__).resolve().parent.parent.parent.parent.parent
+        configuration_directory = Path.joinpath(base_directory, 'src', 'aslm', 'config')
+        configuration_path = Path.joinpath(configuration_directory, 'configuration.yml')
+        experiment_path = Path.joinpath(configuration_directory, 'experiment.yml')
+
+        configuration = session(file_path=configuration_path,
+                                verbose=False)
+        experiment = session(file_path=experiment_path,
+                             verbose=False)
+
+        shutter = ShutterBase(configuration,
+                              experiment,
+                              False)
+
+        assert hasattr(shutter, 'configuration')
+        assert hasattr(shutter, 'experiment')
+        assert hasattr(shutter, 'verbose')
+        assert hasattr(shutter, 'shutter_right')
+        assert hasattr(shutter, 'shutter_right_state')
+        assert hasattr(shutter, 'shutter_left')
+        assert hasattr(shutter, 'shutter_left_state')
+
+
+if __name__ == '__main__':
+    unittest.main()

@@ -58,20 +58,12 @@ class ShutterBase:
         Right shutter state
     shutter_left_state : bool
         Left shutter state
-
-    Methods
-    -------
-    open_left()
-        Open the left shutter, close the right shutter.
-    open_right()
-        Open the right shutter, close the left shutter.
-    close_shutters()
-        Close both shutters
-    state()
-        Return the current state of the shutters
     """
 
-    def __init__(self, configuration, experiment, verbose=False):
+    def __init__(self,
+                 configuration,
+                 experiment,
+                 verbose=False):
         self.configuration = configuration
         self.experiment = experiment
         self.verbose = verbose

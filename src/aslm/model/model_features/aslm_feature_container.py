@@ -29,6 +29,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
+import threading
 
 class TreeNode:
     def __init__(self, feature_name, func_dict, *, node_type='one-step', device_related=False):
@@ -53,7 +54,7 @@ class SignalNode(TreeNode):
 
         # if node type is multi-step, the node should have one response function
         if self.node_type == 'multi-step' and self.has_response_func == False and self.device_related == False:
-            self.node_funcs['main-response'] = dummy_func
+            self.node_funcs['main-response'] = dummy_True
             self.has_response_func = True
 
     def run(self, *args, wait_response=False):
@@ -96,6 +97,10 @@ class DataNode(TreeNode):
             self.node_funcs['init']()
             self.is_initialized = True
 
+        # to decide whether it is the target frame
+        if not self.node_funcs['pre-main'](*args):
+            return False, False
+
         result = self.node_funcs['main'](*args)
 
         if self.node_type == 'multi-step' and not self.node_funcs['end']():
@@ -107,10 +112,11 @@ class DataNode(TreeNode):
 
 
 class Container:
-    def __init__(self, root=None):
+    def __init__(self, root=None, container_end_lock=None):
         self.root = root # root node of the tree
         self.curr_node = None # current running node
         self.end_flag = False # stop running flag
+        self.container_end_lock = container_end_lock
 
     def reset(self):
         self.curr_node = None
@@ -118,8 +124,8 @@ class Container:
 
 
 class SignalContainer(Container):
-    def __init__(self, root=None, number_of_execution=1):
-        super().__init__(root)
+    def __init__(self, root=None, container_end_lock=None, number_of_execution=1):
+        super().__init__(root, container_end_lock)
         self.number_of_execution = number_of_execution
         self.remaining_number_of_execution = number_of_execution
 
@@ -154,11 +160,13 @@ class SignalContainer(Container):
             if self.remaining_number_of_execution > 0:
                 self.remaining_number_of_execution -= 1
                 self.end_flag = (self.remaining_number_of_execution == 0)
+                # TODO: verify this line.
+                # self.container_end_lock.acquire()
 
 
 class DataContainer(Container):
-    def __init__(self, root=None):
-        super().__init__(root)
+    def __init__(self, root=None, container_end_lock=None):
+        super().__init__(root, container_end_lock)
 
     def run(self, *args):
         if self.end_flag or not self.root:
@@ -167,7 +175,7 @@ class DataContainer(Container):
             self.curr_node = self.root
         while self.curr_node:
             result, is_end = self.curr_node.run(*args)
-            print('Data running node:', self.curr_node.node_name, 'get result:', result)
+            # print('Data running node:', self.curr_node.node_name, 'get result:', result)
             if not is_end:
                 return
             if not self.curr_node.sibling:
@@ -177,12 +185,13 @@ class DataContainer(Container):
                 return
 
         if result and self.curr_node.child:
-            print('Data running child of', self.curr_node.node_name)
+            # print('Data running child of', self.curr_node.node_name)
             self.curr_node = self.curr_node.child
             if not self.curr_node.device_related:
                 self.run(*args)
         else:
             self.curr_node = None
+            self.container_end_lock.release()
 
 
 def get_registered_funcs(feature_module, func_type='signal'):
@@ -193,6 +202,8 @@ def get_registered_funcs(feature_module, func_type='signal'):
         func_dict['main'] = feature_module.generate_meta_data
     if 'end' not in func_dict:
         func_dict['end'] = dummy_True
+    if func_type == 'data' and 'pre-main' not in func_dict:
+        func_dict['pre-main'] = dummy_True
     return func_dict
 
 def load_features(model, feature_list):
@@ -211,6 +222,9 @@ def load_features(model, feature_list):
             if 'node' in feature.config_table:
                 signal_node.set_property(**feature.config_table['node'])
                 data_node.set_property(**feature.config_table['node'])
+            if 'node' in temp[i]:
+                signal_node.set_property(**temp[i]['node'])
+                data_node.set_property(**temp[i]['node'])
             if i == 0:
                 pre_signal.child = signal_node
                 pre_data.child = data_node
@@ -219,11 +233,12 @@ def load_features(model, feature_list):
                 pre_data.sibling = data_node
             pre_signal = signal_node
             pre_data = data_node
-            
-    return SignalContainer(signal_root.child), DataContainer(data_root.child)
+
+    container_end_lock = threading.Lock()
+    return SignalContainer(signal_root.child, container_end_lock), DataContainer(data_root.child, container_end_lock)
 
 
-def dummy_True():
+def dummy_True(*args):
     return True
 
 def dummy_func(*args):

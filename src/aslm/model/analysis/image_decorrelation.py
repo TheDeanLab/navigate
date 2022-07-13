@@ -1,7 +1,4 @@
-"""
-ASLM resolution estimates.
-
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -33,15 +30,21 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 
+# Standard Library Imports
+import logging
+from pathlib import Path
 
+# Third Party Imports
 import numpy as np
 import numpy.matlib
 from tifffile import imread, imsave
-import logging
-from pathlib import Path
+
+# Local Imports
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
+
 
 def image_to_polar(input_image):
     """
@@ -351,12 +354,7 @@ def get_image_decorrelation(input_image,
     # Masked Fourier Image
     fourier_image = np.fft.fftshift(np.fft.fft2(np.fft.fftshift(input_image)))
     fourier_image = np.multiply(fourier_image, mask0)
-    c = np.real(
-        np.sqrt(
-            np.sum(
-                np.multiply(
-                    fourier_image,
-                    np.conjugate(fourier_image)))))
+    c = np.real(np.sqrt(np.sum(np.multiply(fourier_image, np.conjugate(fourier_image)))))
 
     sampling_interval = np.linspace(
         fourier_sampling[0], fourier_sampling[-1], number_fourier_samples)

@@ -77,7 +77,8 @@ The widget within a LabelInput class can be directly referenced with self.widget
 
 class LabelInput(ttk.Frame):
     """Widget class that contains label and input together."""
-    # The below takes a parent frame, the postition of the label(left or top defaults to left), type of widget (defaults to entry), the input variable used, input arguments, label arguments and
+    # The below takes a parent frame, the postition of the label(left or top defaults to left),
+    # type of widget (defaults to entry), the input variable used, input arguments, label arguments and
     # finally the keyword arguments that will be passed to the super
     # constructor for the frame
 

@@ -110,4 +110,22 @@ class multipoint_list(ttk.Frame):
         self.pt = MPTable(self, showtoolbar=False)
         self.pt.show()
         self.pt.model.df = df
+    
+    def get_table(self):
+        '''
+        Returns a reference to multipoint table dataframe.
+
+        Parameters
+        ----------
+        self : object
+            Multipoint List instance
+        
+
+        Returns
+        -------
+        self.pt.model.df: Pandas DataFrame
+            Reference to table data as dataframe
+        '''
+
+        return self.pt
 

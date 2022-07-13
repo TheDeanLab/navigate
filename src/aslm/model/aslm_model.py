@@ -928,6 +928,18 @@ class Model:
             logging.debug(f"ASLM Model - Unknown stack cycling mode: {stack_cycling_mode}.")
             return
 
+        #TODO: Cycle through multiposition here, if enabled. @ ZACH!
+        if self.experiment.MicroscopeState['is_multiposition'] is True:
+            # Pseudo code.
+            # If true, iterate through each row in the multiposition dialog.
+            # These values have been passed over in the MicroscopeState object.
+            # position = {  0 : {'X': x_pos, 'Y': y_pos, 'Z': z_pos, ...}
+            #               1 : {'X': x_pos, 'Y': y_pos, 'Z': z_pos, ...}   }
+            positions = self.experiment.MicroscopeState['stage_positions']
+
+            #  for row in positions:
+            pass 
+
         # For each moment in time...
         for t in range(int(microscope_state['timepoints'])):
             if self.stop_acquisition:

@@ -32,12 +32,11 @@ POSSIBILITY OF SUCH DAMAGE.
 
 # Standard Library Imports
 import logging
-from math import ceil
 
 # Third Party Imports
 
 # Local Imports
-from aslm.tools.multipos_table_tools import compute_tiles_from_bounding_box, update_table
+from aslm.tools.multipos_table_tools import compute_tiles_from_bounding_box, update_table, calc_num_tiles, sign
 from aslm.controller.sub_controllers.gui_controller import GUI_Controller
 from aslm.controller.aslm_controller_functions import combine_funcs
 
@@ -119,6 +118,13 @@ class Tiling_Wizard_Controller(GUI_Controller):
         self.variables['z_start'].trace_add('write', lambda *args: self.calculate_distance('z'))
         self.variables['z_end'].trace_add('write', lambda *args: self.calculate_distance('z'))
 
+        self.variables['x_start'].trace_add('write', lambda *args: self.update_fov())
+        self.variables['x_end'].trace_add('write', lambda *args: self.update_fov())
+        self.variables['y_start'].trace_add('write', lambda *args: self.update_fov())
+        self.variables['y_end'].trace_add('write', lambda *args: self.update_fov())
+        self.variables['z_start'].trace_add('write', lambda *args: self.update_fov())
+        self.variables['z_end'].trace_add('write', lambda *args: self.update_fov())
+
         # Calculating Number of Tiles traces
         # TODO: For reasons that make no sense to me at all, these can't go in a for ax in self._axes loop?
         self.variables['x_dist'].trace_add('write', lambda *args: self.calculate_tiles('x'))
@@ -167,27 +173,25 @@ class Tiling_Wizard_Controller(GUI_Controller):
         """
 
         x_start = float(self.variables['x_start'].get())
-        x_stop = float(self.variables['x_end'].get())
         x_tiles = int(self.variables['x_tiles'].get())
 
         y_start = float(self.variables['y_start'].get())
-        y_stop = float(self.variables['y_end'].get())
         y_tiles = int(self.variables['y_tiles'].get())
 
-        z_start = float(self.variables['z_start'].get())
-        z_stop = float(self.variables['z_end'].get())
+        # shift z by coordinate origin of local z-stack
+        z_start = float(self.variables['z_start'].get()) + float(self.stack_acq_widgets['start_position'].get())
         z_tiles = int(self.variables['z_tiles'].get())
 
         # Default to fixed theta
         r_start = self.stage_position_vars['theta'].get()
-        r_stop = self.stage_position_vars['theta'].get()
         r_tiles = 1
 
-        table_values = compute_tiles_from_bounding_box(x_start, x_stop, x_tiles,
-                                                       y_start, y_stop, y_tiles,
-                                                       z_start, z_stop, z_tiles,
-                                                       r_start, r_stop, r_tiles,
-                                                       self._f_start, self._f_end, z_tiles)  # Make focus track with z
+        ov = float(self._percent_overlay) / 100
+        table_values = compute_tiles_from_bounding_box(x_start, x_tiles, self._fov['x'], ov,
+                                                       y_start, y_tiles, self._fov['y'], ov,
+                                                       z_start, z_tiles, self._fov['z'], ov,
+                                                       r_start, r_tiles, 0, ov,
+                                                       self._f_start, z_tiles, (self._f_end-self._f_start), ov)
 
         update_table(self.multipoint_table, table_values)
 
@@ -245,11 +249,9 @@ class Tiling_Wizard_Controller(GUI_Controller):
 
         for ax in axis:
             dist = abs(float(self.variables[f"{ax}_dist"].get()))  # um
-            fov = float(self._fov[ax])                             # um
-            if fov == 0 or overlay == 1 or dist < fov:
-                num_tiles = 1
-            else:
-                num_tiles = ceil( ( dist - (overlay * fov) ) / ( fov * (1 - overlay) ) )
+            fov = abs(float(self._fov[ax]))                        # um
+
+            num_tiles = calc_num_tiles(dist, overlay, fov)
 
             self.variables[f"{ax}_tiles"].set(num_tiles)
 
@@ -336,13 +338,17 @@ class Tiling_Wizard_Controller(GUI_Controller):
         -------
         None
         """
-        x = self.cam_settings_widgets['FOV_X'].get()
-        y = self.cam_settings_widgets['FOV_Y'].get()
-        z = abs(self.stack_acq_widgets['abs_z_end'].get() - self.stack_acq_widgets['abs_z_start'].get())
+
+        # Calculate signed fov
+        x = float(self.cam_settings_widgets['FOV_X'].get()) \
+            * sign(float(self.variables['x_end'].get()) - float(self.variables['x_start'].get()))
+        y = float(self.cam_settings_widgets['FOV_Y'].get()) \
+            * sign(float(self.variables['y_end'].get()) - float(self.variables['y_start'].get()))
+        z = float(self.stack_acq_widgets['end_position'].get()) - float(self.stack_acq_widgets['start_position'].get())
         self._fov['x'], self._fov['y'], self._fov['z'] = x, y, z
 
         self.calculate_tiles()
-    
+
     def showup(self):
         """
         # this function will let the popup window show in front

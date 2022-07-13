@@ -791,18 +791,12 @@ class ASLM_controller:
         update_stage_dict(self, pos_dict)
 
         # Pass to model
-        success = self.model.move_stage(pos_dict)
-        # if not success:
-        #     print("Unsuccessful")
-        #     # Let's update our internal positions
-        #     time.sleep(0.250)  # TODO: Banks on this getting called in a thread. Truly unsafe.
-        #                        #       Currently set to debounce for the stage buttons.
-        #     ret_pos_dict = self.model.get_stage_position()
-        #     print(ret_pos_dict)
-        #     update_stage_dict(self, ret_pos_dict)
-        #     self.update_stage_gui_controller_silent(ret_pos_dict)
+        self.model.move_stage(pos_dict)
 
     def stop_stage(self):
+        r"""
+        Stop the stage. Grab the stopped position from the stage and update the GUI control values accordingly.
+        """
         self.model.stop_stage()
         ret_pos_dict = self.model.get_stage_position()
         update_stage_dict(self, ret_pos_dict)

@@ -128,7 +128,7 @@ class channel_creator(ttk.Labelframe):
             self.laserpower_pulldowns.append(ttk.Spinbox(self.frame_columns[2], from_=0, to=100.0,
                                                          textvariable=self.laserpower_variables[num],
                                                          increment=5, width=3, font=Font(size=11)))
-            self.laserpower_pulldowns[num].grid(row=num+1, column=0, sticky=NS, padx=1, pady=1)
+            self.laserpower_pulldowns[num].grid(row=num+1, column=0, sticky=tk.NS, padx=1, pady=1)
 
             #  FilterWheel Dropdowns
             self.filterwheel_variables.append(tk.StringVar())

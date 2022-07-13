@@ -41,7 +41,7 @@ logger = logging.getLogger(p)
 from aslm.view.main_window_content.camera_display.camera_view.camera_view_tab import camera_tab
 from aslm.view.main_window_content.camera_display.camera_view.waveform_tab import waveform_tab
 
-class camera_waveform_notebook(ttk.Notebook):
+class camera_notebook(ttk.Notebook):
     def __init__(self, frame_top_right, *args, **kwargs):
         #Init notebook
         ttk.Notebook.__init__(self, frame_top_right, *args, **kwargs)

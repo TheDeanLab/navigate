@@ -84,7 +84,7 @@ class Waveform_Tab_Controller(GUI_Controller):
         self.view.canvas.get_tk_widget().pack()
 
     def plot_waveforms2(self, waveform_dict, sample_rate):
-        from tkinter import tk.NSEW
+        from tkinter import NSEW
         self.view.fig = Figure(figsize=(6, 6), dpi=100)
         self.view.canvas = FigureCanvasTkAgg(self.view.fig, master=self.view)
         self.view.canvas.draw()
@@ -126,4 +126,4 @@ class Waveform_Tab_Controller(GUI_Controller):
         self.view.fig.tight_layout()
 
         self.view.canvas.draw_idle()
-        self.view.canvas.get_tk_widget().grid(row=5, column=0, columnspan=3, sticky=(tk.NSEW), padx=(5,5), pady=(5,5))
+        self.view.canvas.get_tk_widget().grid(row=5, column=0, columnspan=3, sticky=(NSEW), padx=(5,5), pady=(5,5))

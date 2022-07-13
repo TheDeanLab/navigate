@@ -54,7 +54,7 @@ class stop_frame(ttk.Frame):
         tk.Grid.rowconfigure(self, 'all', weight=1)
 
         # Stop button
-        self.stop_btn = ttk.Button(
+        self.stop_btn = tk.Button(
             self,
             bg='red',
             fg='white',

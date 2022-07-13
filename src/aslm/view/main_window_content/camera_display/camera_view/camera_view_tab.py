@@ -68,7 +68,7 @@ class camera_tab(ttk.Frame):
 
         #  Frame for camera selection and counts
         self.image_metrics = image_metrics(self)
-        self.image_metrics.grid(row=1, column=0, sticky=W, padx=5, pady=5)
+        self.image_metrics.grid(row=1, column=0, sticky=tk.W, padx=5, pady=5)
 
         #  Frame for scale settings/pallete color
         self.scale_palette = palette(self)

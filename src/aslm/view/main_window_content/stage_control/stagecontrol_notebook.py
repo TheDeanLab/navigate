@@ -42,9 +42,9 @@ logger = logging.getLogger(p)
 
 # Local Imports
 from aslm.view.main_window_content.stage_control.stage_control_tab import stage_control_tab
-from aslm.view.main_window_content.stage_control import maximum_intensity_projection_tab
+from aslm.view.main_window_content.stage_control.maximum_intensity_projection_tab import maximum_intensity_projection_tab
 
-class stagecontrol_maxintensity_notebook(ttk.Notebook):
+class stagecontrol_notebook(ttk.Notebook):
     def __init__(self, frame_bot_right, *args, **kwargs):
         #Init notebook
         ttk.Notebook.__init__(self, frame_bot_right, *args, **kwargs)

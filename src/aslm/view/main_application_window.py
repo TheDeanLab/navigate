@@ -49,9 +49,9 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 # Import Notebooks
-from aslm.view.main_window_content import settings_notebook
-from aslm.view.main_window_content.camera_display.camera_view import camera_notebook
-from aslm.view.main_window_content.stage_control import stagecontrol_notebook
+from aslm.view.main_window_content.settings_notebook import settings_notebook
+from aslm.view.main_window_content.camera_display.camera_view.camera_notebook import camera_notebook
+from aslm.view.main_window_content.stage_control.stagecontrol_notebook import stagecontrol_notebook
 from aslm.view.main_window_content.acquire_bar_frame.acquire_bar import AcquireBar
 from aslm.view.menus.menus import menubar
 

@@ -676,6 +676,10 @@ class Model:
         self.show_img_pipe.send('stop')
         self.logger.info('ASLM Model - Data thread stopped.')
         self.logger.info(f'ASLM Model - Received frames in total: {acquired_frame_num}')
+        
+        # release the lock when data thread ends
+        if self.pause_data_ready_lock.locked():
+            self.pause_data_ready_lock.release()
 
     def calculate_number_of_channels(self):
         r"""Calculates the total number of channels selected."""

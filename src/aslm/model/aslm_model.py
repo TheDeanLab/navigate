@@ -934,7 +934,7 @@ class Model:
             logging.debug(f"ASLM Model - Unknown stack cycling mode: {stack_cycling_mode}.")
             return
 
-        #TODO: Cycle through multiposition here, if enabled. @ ZACH!
+        # TODO: Cycle through multiposition here, if enabled. @ ZACH!
         if self.experiment.MicroscopeState['is_multiposition'] is True:
             # Pseudo code.
             # If true, iterate through each row in the multiposition dialog.

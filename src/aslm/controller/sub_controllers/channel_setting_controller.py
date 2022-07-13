@@ -75,6 +75,7 @@ class Channel_Setting_Controller(GUI_Controller):
 
     def set_mode(self, mode='stop'):
         self.mode = mode
+        print(self.mode)
         state = 'normal' if mode == 'stop' else 'disabled'
         state_readonly = 'readonly' if mode == 'stop' else 'disabled'
         for i in range(5):

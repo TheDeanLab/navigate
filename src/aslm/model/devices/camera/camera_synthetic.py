@@ -227,6 +227,8 @@ class SyntheticCamera(CameraBase):
             frames = list(range(self.pre_frame_idx, self.num_of_frame))
             frames += list(range(0, self.current_frame_idx))
         self.pre_frame_idx = self.current_frame_idx
+        if self.verbose:
+            print('get a new frame from camera', frames)
         logger.debug(f"get a new frame from camera, {frames}")
         return frames
 

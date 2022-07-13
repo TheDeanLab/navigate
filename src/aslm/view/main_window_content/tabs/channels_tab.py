@@ -40,6 +40,7 @@ logger = logging.getLogger(p)
 
 from aslm.view.main_window_content.tabs.channels.channel_settings import channel_creator
 from aslm.view.main_window_content.tabs.channels.stack_acquisition_settings import stack_acq_frame
+from aslm.view.main_window_content.tabs.channels.stack_cycling_settings import stack_cycling_frame
 from aslm.view.main_window_content.tabs.channels.stack_timepoint_settings import stack_timepoint_frame
 from aslm.view.main_window_content.tabs.channels.multipoint_settings import multipoint_frame, multipoint_list
 
@@ -60,6 +61,10 @@ class channels_tab(ttk.Frame):
         # Stack Acquisition Settings
         self.stack_acq_frame = stack_acq_frame(self)
         self.stack_acq_frame.grid(row=1, column=0, columnspan=5, sticky=(NSEW), padx=10, pady=10)
+
+        # Stack Cycling Settings
+        self.stack_cycling_frame = stack_cycling_frame(self)
+        self.stack_cycling_frame.grid(row=2, column=0, columnspan=5, sticky=(NSEW), padx=10, pady=10)
 
         # Time Settings
         self.stack_timepoint_frame = stack_timepoint_frame(self)

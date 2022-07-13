@@ -63,7 +63,7 @@ class HamamatsuOrca(CameraBase):
         super().__init__(camera_id, configuration, experiment, verbose)
 
         # Locally Import Hamamatsu API and Initialize Camera Controller
-        HamamatsuController = importlib.import_module('aslm.model.devices.APIs.hamamatsu.HamamatsuAPI')
+        HamamatsuController = importlib.import_module('model.devices.APIs.hamamatsu.HamamatsuAPI')
         self.camera_controller = HamamatsuController.DCAM(camera_id)
 
         # Values are pulled from the CameraParameters section of the configuration.yml file.

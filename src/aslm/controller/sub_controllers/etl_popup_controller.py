@@ -86,6 +86,7 @@ class Etl_Popup_Controller(GUI_Controller):
         self.lasers = [v for k, v in self.configuration.LaserParameters.items() if k.endswith('wavelength')]
         self.resolution = None
         self.mag = None
+        self.in_initialize = True
         self.mode = 'stop'
 
         # event id list
@@ -191,10 +192,14 @@ class Etl_Popup_Controller(GUI_Controller):
         """
         # set experiment values
         """
+        self.in_initialize = True
         self.widgets['Mode'].set('high' if resolution_value == 'high' else 'low')
         self.show_magnification()
         self.widgets['Mag'].set('N/A' if resolution_value == 'high' else resolution_value)
         self.show_laser_info()
+        
+        # end initialization
+        self.in_initialize = False
 
     def set_mode(self, mode='stop'):
         self.mode = mode
@@ -236,10 +241,11 @@ class Etl_Popup_Controller(GUI_Controller):
         self.variables['Galvo Off'].set(self.galvo_setting.get(f'galvo_{focus_prefix}_offset', 0))
         self.variables['Galvo Freq'].set(self.galvo_setting.get(f'galvo_{focus_prefix}_frequency', 0))
 
-        # update resolution value in central controller (menu)
-        self.parent_controller.resolution_value.set('high' if self.resolution == 'high' else self.mag)
-        # reconfigure widgets
-        self.configure_widget_range()
+        if not self.in_initialize:
+            # update resolution value in central controller (menu)
+            self.parent_controller.resolution_value.set('high' if self.resolution == 'high' else self.mag)
+            # reconfigure widgets
+            self.configure_widget_range()
 
     def update_etl_setting(self, name, laser, etl_name):
         r"""This function will update ETLConstants in memory

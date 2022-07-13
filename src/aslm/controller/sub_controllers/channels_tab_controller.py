@@ -114,9 +114,10 @@ class Channels_Tab_Controller(GUI_Controller):
         self.z_origin = 0
         self.focus_origin = 0
 
-
+        # laser/stack cycling variable
+        self.stack_cycling_val = self.view.stack_cycling_frame.cycling_options
         # laser/stack cycling event binds
-        self.stack_acq_vals['cycling'].trace_add('write', self.update_cycling_setting)
+        self.stack_cycling_val.trace_add('write', self.update_cycling_setting)
 
         # time point setting variables
         self.timepoint_vals = {
@@ -154,7 +155,7 @@ class Channels_Tab_Controller(GUI_Controller):
             ASLM_Configuration_Controller.  config.configuration = Session object.
         """
         self.set_channel_num(config.configuration.GUIParameters['number_of_channels'])
-        self.stack_acq_widgets['cycling'].widget['values'] = ['Per Z', 'Per Stack']
+        self.view.stack_cycling_frame.cycling_pull_down['values'] = ['Per Z', 'Per Stack']
         self.stage_velocity = config.configuration.StageParameters['velocity']
         self.filter_wheel_delay = config.configuration.FilterWheelParameters['filter_wheel_delay']
         self.channel_setting_controller.initialize(config)
@@ -182,7 +183,7 @@ class Channels_Tab_Controller(GUI_Controller):
         self.view.stack_timepoint_frame.stack_pause_spinbox.validate()
         self.view.stack_timepoint_frame.exp_time_spinbox.validate()
 
-        self.stack_acq_vals['cycling'].set('Per Z' if microscope_state['stack_cycling_mode'] == 'per_z' else 'Per Stack')
+        self.stack_cycling_val.set('Per Z' if microscope_state['stack_cycling_mode'] == 'per_z' else 'Per Stack')
         self.channel_setting_controller.set_experiment_values(microscope_state['channels'])
 
         # positions
@@ -213,10 +214,9 @@ class Channels_Tab_Controller(GUI_Controller):
         # Not included in stack_acq_vals or timepoint_vals
         microscope_state['stage_positions'] = self.multi_position_controller.get_positions()
         microscope_state['channels'] = self.channel_setting_controller.get_values()
-        microscope_state['stack_cycling_mode'] = 'per_stack' if self.stack_acq_vals['cycling'].get() == 'Per Stack' else 'per_z'
+        microscope_state['stack_cycling_mode'] = 'per_stack' if self.stack_cycling_val.get() == 'Per Stack' else 'per_z'
         microscope_state['stack_z_origin'] = self.z_origin
         microscope_state['stack_focus_origin'] = self.focus_origin
-        microscope_state['is_multiposition'] = self.is_multiposition_val.get()
 
         # TODO: get_info acts a setter here
         r1 = self.get_info(self.stack_acq_vals, microscope_state)  # update MicroscopeState with everything in stack_acq_vals
@@ -286,7 +286,7 @@ class Channels_Tab_Controller(GUI_Controller):
         self.view.stack_timepoint_frame.save_check['state'] = state
         self.view.stack_timepoint_frame.stack_pause_spinbox['state'] = state
         self.view.stack_timepoint_frame.exp_time_spinbox['state'] = state
-        self.stack_acq_widgets['cycling'].widget['state'] = 'readonly' if state == 'normal' else state
+        self.view.stack_cycling_frame.cycling_pull_down['state'] = 'readonly' if state == 'normal' else state
         self.show_verbose_info('acquisition mode has been changed to', mode)
 
     def update_z_steps(self,
@@ -396,7 +396,7 @@ class Channels_Tab_Controller(GUI_Controller):
 
         # tell the central/parent controller that laser cycling setting is changed when mode is 'live'
         if self.mode == 'live':
-            self.parent_controller.execute('update_setting', 'laser_cycling', self.stack_acq_vals['cycling'].get())
+            self.parent_controller.execute('update_setting', 'laser_cycling', self.stack_cycling_val.get())
         self.show_verbose_info('Cycling setting on channels tab has been changed')
 
     def update_save_setting(self,
@@ -453,7 +453,7 @@ class Channels_Tab_Controller(GUI_Controller):
                 self.view.after_cancel(self.timepoint_event_id)
             return
 
-        perStack = self.stack_acq_vals['cycling'].get() == 'Per Stack'
+        perStack = self.stack_cycling_val.get() == 'Per Stack'
 
         # Initialize variable to keep track of how long the entire experiment will take.
         # Includes time, positions, channels...
@@ -539,20 +539,19 @@ class Channels_Tab_Controller(GUI_Controller):
 
 
     def launch_tiling_wizard(self):
-        r"""Launches tiling wizard popup.
+        '''
+        Launches tiling wizard popup. 
 
         Will only launch when button in GUI is pressed, and will not duplicate. Pressing button again brings popup to top
-        """
+        '''
 
         if hasattr(self, 'tiling_wizard_controller'):
             self.tiling_wizard_controller.showup()
             return
         tiling_wizard_popup = tiling_wizard(self.view)
-        self.tiling_wizard_controller = Tiling_Wizard_Controller(tiling_wizard_popup,
-                                                                 self,
-                                                                 self.verbose)
+        self.tiling_wizard_controller = Tiling_Wizard_Controller(tiling_wizard_popup, self, self.verbose)
 
-
+        # Add controller calls here
 
 
     def load_positions(self):

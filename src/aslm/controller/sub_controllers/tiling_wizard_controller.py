@@ -1,4 +1,7 @@
-"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""
+ASLM sub-controller ETL popup window.
+
+Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -42,37 +45,33 @@ from aslm.controller.sub_controllers.gui_controller import GUI_Controller
 from aslm.controller.aslm_controller_functions import combine_funcs
 from aslm.tools.multipos_table_tools import compute_grid, update_table
 
+
+import logging
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
 class Tiling_Wizard_Controller(GUI_Controller):
-    """
-    Controller for tiling wizard parameters.
-    Gathers the FOV from the camera settings tab and will update when user changes this value.
-    Set start/end position buttons will grab the stage values for the respective axis when pressed and display in popup
-    Number of images we need to acquire with our desired percent overlap is calculated and then displayed in third column
+    def __init__(self, view, parent_controller, verbose=False):
+        """
+        Controller for tiling wizard parameters.
 
+        Parameters
+        ----------
+        view : object
+            GUI element containing widgets and variables to control. Likely tk.Toplevel-derived.
+        parent_controller : ASLM_controller
+            The main controller.
+        verbose : bool, default False
+            Display additional feedback in standard output.
 
-    Parameters
-    ----------
-    view : object
-        GUI element containing widgets and variables to control. Likely tk.Toplevel-derived. In this case tiling_wizard_popup.py
-    parent_controller : channels_tab_controller
-        The controller that creates the popup/this controller.
-    verbose : bool, default False
-        Display additional feedback in standard output.
+        Returns
+        -------
+        None
+        """
 
-    Returns
-    -------
-    None
-    """
-
-    def __init__(self,
-                 view,
-                 parent_controller,
-                 verbose=False):
         super().__init__(view, parent_controller, verbose)
 
         # Getting widgets and buttons and vars of widgets

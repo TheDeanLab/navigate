@@ -29,49 +29,47 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-from tkinter import Menu
-import logging
-from pathlib import Path
-# Logger Setup
-p = __name__.split(".")[1]
-logger = logging.getLogger(p)
+from aslm.model.model_features.aslm_feature_container import dummy_True
 
+class ChangeResolution:
+    def __init__(self, model, resolution_mode='high'):
+        self.model = model
 
-#  Menubar class
-class menubar(Menu):
-    def __init__(self, window, *args, **kwargs):
-        #  Init Menu with parent
-        Menu.__init__(self, window, *args, **kwargs)
+        self.config_table={'signal': {'main': self.signal_func}, 
+                            'data': {'main': dummy_True}}
 
-        #  Creates operating system attribute
-        self.opsystem = window.tk.call('tk', 'windowingsystem')
+        self.resolution_mode = resolution_mode
 
-        #  Prevents menu from tearing off bar
-        window.option_add('*tearOff', False)
+        
+    def signal_func(self):
+        self.model.logger.debug('prepare to change resolution')
+        self.model.ready_to_change_resolution.acquire()
+        self.model.ask_to_change_resolution = True
+        self.model.logger.debug('wait to change resolution')
+        self.model.ready_to_change_resolution.acquire()
+        self.model.change_resolution(self.resolution_mode)
+        self.model.logger.debug('changed resolution')
+        self.model.ask_to_change_resolution = False
+        self.model.prepare_acquisition(False)
+        self.model.logger.debug('wake up data thread ')
+        self.model.ready_to_change_resolution.release()
+        return True
 
-        #  Linking menu to option of parent to this menu class
-        window['menu'] = self
+    def data_func(self):
+        print('the camera is:', self.model.camera.serial_number)
+        return True
 
-        #  File Menu
-        self.menu_file = Menu(self)
-        self.add_cascade(menu=self.menu_file, label='File')
+    def generate_meta_data(self, *args):
+        print('This frame: change resolution', self.resolution_mode, self.model.frame_id)
+        return True
 
-        #  Multi-Position Menu
-        self.menu_multi_positions = Menu(self)
-        self.add_cascade(menu=self.menu_multi_positions, label='Multi-Position')
+class Snap:
+    def __init__(self, model):
+        self.model = model
 
-        #  Resolution Menu
-        self.menu_resolution = Menu(self)
-        self.add_cascade(menu=self.menu_resolution, label='Resolution')
+        self.config_table={'signal':{},
+                            'data': {'main': dummy_True}}
 
-        # Autofocus Menu
-        self.menu_autofocus = Menu(self)
-        self.add_cascade(menu=self.menu_autofocus, label='Autofocus')
-
-        # Add-on Features menu
-        self.menu_features = Menu(self)
-        self.add_cascade(menu=self.menu_features, label='Add-on Features')
-
-        # Debug Menu
-        self.menu_debug = Menu(self)
-        self.add_cascade(menu=self.menu_debug, label='Debug')
+    def generate_meta_data(self, *args):
+        print('This frame: snap one frame', self.model.frame_id)
+        return True

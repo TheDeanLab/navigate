@@ -435,10 +435,10 @@ class Camera_View_Controller(GUI_Controller):
             self.total_images_per_volume = self.number_of_channels * self.number_of_slices
 
             # TODO: Switch CXYZ to XYZC?
-            self.image_volume = np.zeros((self.number_of_channels,
-                                          self.original_image_height,
-                                          self.original_image_width,
-                                          self.number_of_slices))
+            # self.image_volume = np.zeros((self.number_of_channels,
+            #                               self.original_image_height,
+            #                               self.original_image_width,
+            #                               self.number_of_slices))
 
         # Store each image to the pre-allocated memory. Requires knowledge of how images are received.
         if microscope_state['stack_cycling_mode'] == 'per_stack':

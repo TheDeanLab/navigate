@@ -45,6 +45,9 @@ from aslm.model.aslm_model_config import Session as session
 from aslm.model.concurrency.concurrency_tools import ResultThread, SharedNDArray
 from aslm.model.model_features.autofocus import Autofocus
 from aslm.model.model_features.aslm_image_writer import ImageWriter
+from aslm.model.model_features.dummy_detective import Dummy_Detective
+from aslm.model.model_features.aslm_common_features import *
+from aslm.model.model_features.aslm_feature_container import load_features
 from aslm.log_files.log_functions import log_setup
 from aslm.tools.common_dict_tools import update_settings_common, update_stage_dict
 
@@ -232,6 +235,10 @@ class Model:
         self.stop_acquisition = False # stop signal and data threads
         self.stop_send_signal = False # stop signal thread
 
+        self.pause_data_event = threading.Event()
+        self.ready_to_change_resolution = threading.Lock()
+        self.ask_to_change_resolution = False
+
         # timing - Units in milliseconds.
         self.camera_minimum_waiting_time = self.camera.get_minimum_waiting_time()
         # self.trigger_waiting_time = 10
@@ -246,6 +253,10 @@ class Model:
 
         # Image Writer/Save functionality
         self.image_writer = ImageWriter(self)
+
+        # feature list
+        # TODO: put it here now
+        self.feature_list = [[[{'name': Snap}, {'name': ChangeResolution, 'args': ('1x',)}], [{'name': Snap, 'node':{'device_related': True}}], [{'name': ChangeResolution, 'args': ('high',)}], [{'name': Snap, 'node':{'device_related': True}}]]]
 
     def get_camera(self):
         r"""Select active camera.
@@ -380,6 +391,14 @@ class Model:
             self.experiment.CameraParameters = kwargs['camera_info']
             self.is_save = self.experiment.MicroscopeState['is_save']
             self.prepare_acquisition()
+
+            # can't run single acquisition with features right now.
+            if hasattr(self, 'signal_container'):
+                self.show_img_pipe.send('stop')
+                self.end_acquisition()
+                self.logger.info('cannot run single acquisition with features!')
+                return
+
             self.run_single_acquisition()
             channel_num = len(self.experiment.MicroscopeState['channels'].keys())
 
@@ -448,6 +467,10 @@ class Model:
                 self.current_channel = 0
                 reboot = True
 
+            if args[0] == 'resolution' and (args[1]['resolution_mode'] != self.experiment.MicroscopeState['resolution_mode'] or \
+                args[1]['zoom'] != self.experiment.MicroscopeState['zoom']):
+                self.change_resolution('high' if args[1]['resolution_mode'] == 'high' else args[1]['zoom'])
+
             update_settings_common(self, args)
 
             self.daq.calculate_all_waveforms(self.experiment.MicroscopeState, self.etl_constants,
@@ -475,6 +498,18 @@ class Model:
             """
             autofocus = Autofocus(self)
             autofocus.run(*args)
+
+        elif command == 'load_feature':
+            """
+            args[0]: int, args[0]-1 is the id of features
+                   : 0 no features
+            """
+            if hasattr(self, 'signal_container'):
+                delattr(self, 'signal_container')
+                delattr(self, 'data_container')
+            
+            if args[0] != 0:
+                self.signal_container, self.data_container = load_features(self, self.feature_list[args[0]-1])
             
         elif command == 'stop':
             """
@@ -603,6 +638,13 @@ class Model:
         count_frame = num_of_frames > 0
 
         while not self.stop_acquisition:
+            self.logger.debug(f'*******current camera {self.camera.serial_number}')
+            if self.ask_to_change_resolution:
+                self.logger.debug('data thread prepare to change resolution')
+                self.ready_to_change_resolution.release()
+                self.logger.debug('ready to change resolution')
+                self.pause_data_event.clear()
+                self.pause_data_event.wait()
             frame_ids = self.camera.get_new_frame()  # This is the 500 ms wait for Hamamatsu
             self.logger.info(f'ASLM Model - Running data process, get frames {frame_ids}')
             # if there is at least one frame available
@@ -668,21 +710,26 @@ class Model:
             readout_time = self.camera.camera_controller.get_property_value("readout_time")
         return readout_time
 
-    def prepare_acquisition(self):
+    def prepare_acquisition(self, turn_off_flags=True):
         r"""Prepare the acquisition.
 
         Sets flags, calculates all of the waveforms.
         Sets the Camera Sensor Mode, initializes the data buffer, starts camera, and opens shutters
+        Sets flags.
+        Calculates all of the waveforms.
+        Sets the Camera Sensor Mode
+        Initializes the data buffer and starts camera.
+        Opens Shutters
         """
-        if self.camera.is_acquiring:
+        if self.camera.camera_controller.is_acquiring:
             self.camera.close_image_series()
 
         # turn off flags
-        self.stop_acquisition = False
-        self.stop_send_signal = False
-        self.autofocus_on = False
-        self.is_live = False
-        self.frame_id = 0
+        if turn_off_flags:
+            self.stop_acquisition = False
+            self.stop_send_signal = False
+            self.autofocus_on = False
+            self.is_live = False
 
         # Calculate Waveforms for all channels. Plot in the view.
         waveform_dict = self.daq.calculate_all_waveforms(self.experiment.MicroscopeState,
@@ -699,6 +746,10 @@ class Model:
         # Initialize Image Series - Attaches camera buffer and start imaging
         self.camera.initialize_image_series(self.data_buffer,
                                             self.number_of_frames)
+        self.frame_id = 0
+
+        self.pause_data_event.set()
+
         self.open_shutter()
 
     def run_single_channel_acquisition(self, target_channel=None):
@@ -777,7 +828,7 @@ class Model:
             if self.stop_acquisition or self.stop_send_signal:
                 break
             channel_idx = int(channel_key[prefix_len:])
-            self.run_single_channel_acquisition(channel_idx)
+            self.run_single_channel_acquisition_with_features(channel_idx)
 
     def snap_image(self, channel_key):
         r"""Acquire an image after updating the waveforms.
@@ -922,13 +973,17 @@ class Model:
             Desired channel to acquire.
 
         """
-        # if not hasattr(self, 'signal_container'):
-        #     self.run_single_channel_acquisition(target_channel)
-        #     return
+        if not hasattr(self, 'signal_container'):
+            self.run_single_channel_acquisition(target_channel)
+            return
         
         self.signal_container.reset()
-        while not self.signal_container.end_flag:
+        if not self.signal_container.container_end_lock.locked():
+            self.signal_container.container_end_lock.acquire()
+        while not self.signal_container.end_flag and not self.stop_send_signal and not self.stop_acquisition:
             self.run_single_channel_acquisition(target_channel)
+            if not hasattr(self, 'signal_container'):
+                return
     
     def change_resolution(self, resolution_value):
         r"""Switch resolution mode of the microscope.
@@ -950,20 +1005,20 @@ class Model:
                 self.experiment.MicroscopeState['resolution_mode'] = 'low'
 
             # We can't keep acquiring if we're switching cameras. For now, simply turn the camera off.
-            if self.camera.is_acquiring:
-                self.run_command('stop')
+            # if self.camera.is_acquiring:
+            #     self.run_command('stop')
 
             self.camera = self.get_camera()
 
             self.apply_resolution_stage_offset(resolution_value)
 
         if resolution_value == 'high':
-            logging.info("ASLM Model - Switching into High-Resolution Mode")
+            self.logger.info("ASLM Model - Switching into High-Resolution Mode")
             self.experiment.MicroscopeState['resolution_mode'] = 'high'
             self.laser_triggers.enable_high_resolution_laser()
         else:
             # Can be 0.63, 1, 2, 3, 4, 5, and 6x.
-            logging.info(f"ASLM Model - Switching to Low Resolution Mode, Zoom: {resolution_value}")
+            self.logger.info(f"ASLM Model - Switching to Low Resolution Mode, Zoom: {resolution_value}")
             self.experiment.MicroscopeState['resolution_mode'] = 'low'
             self.experiment.MicroscopeState['zoom'] = resolution_value
             self.zoom.set_zoom(resolution_value)

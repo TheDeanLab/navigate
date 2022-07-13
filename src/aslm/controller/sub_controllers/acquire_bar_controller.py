@@ -48,9 +48,12 @@ logger = logging.getLogger(p)
 class Acquire_Bar_Controller(GUI_Controller):
     def __init__(self,
                  view,
+                 parent_view,
                  parent_controller,
                  verbose=False):
         super().__init__(view, parent_controller, verbose)
+
+        self.parent_view = parent_view
 
         # acquisition image mode variable
         self.mode = 'live'

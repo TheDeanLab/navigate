@@ -177,11 +177,13 @@ class Model:
         for k in threads_dict:
             setattr(self, k, threads_dict[k].get_result())
 
+        # in synthetic_hardware mode, we need to wire up camera to daq
+        self.in_synthetic_mode = False
+        if args.synthetic_hardware:
+            self.in_synthetic_mode = True
+
         self.camera = self.get_camera()  # make sure we grab the correct camera for this resolution mode
 
-        # in synthetic_hardware mode, we need to wire up camera to daq
-        if args.synthetic_hardware:
-            self.daq.set_camera(self.camera0)
 
         # analysis class
         self.analysis = startup_functions.start_analysis(self.configuration,
@@ -287,7 +289,9 @@ class Model:
                 if str(sn) == str(curr_cam.serial_number):
                     cam = curr_cam
                     break
-
+        # in synthetic mode, need to wire daq with camera when switching cameras.
+        if self.in_synthetic_mode:
+            self.daq.set_camera(cam)
         return cam
 
     def update_data_buffer(self, img_width=512, img_height=512):

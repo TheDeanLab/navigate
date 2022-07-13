@@ -68,9 +68,10 @@ class slider(ttk.Labelframe):
                                    tickinterval=20,
                                    orient=HORIZONTAL,
                                    showvalue=0,
-                                   label="Slice Index")
-        #self.slider_widget.configure(state='disabled')  # 'normal'
+                                   label="Slice Index",
+                                   fg="black")
         self.slider_widget.grid(row=1, column=0, sticky=NSEW, padx=5, pady=5)
+        self.slider_widget.configure(state='disabled')
 
 
     def get_variables(self):

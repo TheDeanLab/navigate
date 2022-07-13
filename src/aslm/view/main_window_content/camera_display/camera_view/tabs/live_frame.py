@@ -77,7 +77,7 @@ class live_frame(ttk.Labelframe):
                                'ZY MIP')
         self.live.set('Live')
         self.live.grid(row=1, column=0)
-
+        self.live.state = "readonly"
 
 
     def get_variables(self):

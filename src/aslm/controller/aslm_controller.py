@@ -174,8 +174,7 @@ class ASLM_controller:
         self.initialize_menus()
 
         # Set view based on model.experiment
-        self.experiment = session(experiment_path,
-                                  args.verbose)
+        self.experiment = session(experiment_path, args.verbose)
         self.populate_experiment_setting()
 
         # Camera View Tab

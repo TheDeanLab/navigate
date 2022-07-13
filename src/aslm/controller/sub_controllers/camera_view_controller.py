@@ -86,6 +86,9 @@ class Camera_View_Controller(GUI_Controller):
         # Left Click Binding
         self.canvas.bind("<Button-1>", self.left_click)
 
+        # Slider Binding
+        self.view.slider.slider_widget.bind("<Button-1>", self.slider_update)
+
         # Mouse Wheel Binding
         if platform.system() == 'Windows':
             self.canvas.bind("<MouseWheel>", self.mouse_wheel)
@@ -127,7 +130,6 @@ class Camera_View_Controller(GUI_Controller):
         self.image_count = 0
         self.temp_array = None
         self.rolling_frames = 1
-        self.live_subsampling = self.parent_controller.configuration.CameraParameters['display_live_subsampling']
         self.bit_depth = 8  # bit-depth for PIL presentation.
         self.zoom_value = 1
         self.zoom_x_pos = 0
@@ -140,12 +142,20 @@ class Camera_View_Controller(GUI_Controller):
         self.number_of_channels = 0
         self.image_counter = 0
         self.slice_index = 0
+        self.channel_index = 0
 
+    def slider_update(self, event):
+        slider_index = self.view.slider.slider_widget.get()
+        channel_display_index = 0
+        self.retrieve_image_slice_from_volume(slider_index=slider_index,
+                                              channel_display_index=channel_display_index)
+        self.reset_display()
 
     def update_display_state(self, event):
         r"""Image Display Combobox Called.
 
-        Sets self.display_state to desired display format.
+        Sets self.display_state to desired display format.  Toggles state of slider widget. Sets number of
+        positions.
 
         Parameters
         ----------
@@ -154,7 +164,30 @@ class Camera_View_Controller(GUI_Controller):
 
         """
         self.display_state = self.view.live_frame.live.get()
+        # Slice in the XY Dimension.
+        if self.display_state == 'XY Slice':
+            print("XY Slice")
+            try:
+                slider_length = np.shape(self.image_volume)[2] - 1
+            except IndexError:
+                slider_length = self.parent_controller.experiment.MicroscopeState['number_z_steps'] - 1
+        if self.display_state == 'YZ Slice':
+            try:
+                slider_length = np.shape(self.image_volume)[0] - 1
+            except IndexError:
+                slider_length = self.parent_controller.experiment.CameraParameters['y_pixels'] - 1
+        if self.display_state == 'YZ Slice':
+            try:
+                slider_length = np.shape(self.image_volume)[1] - 1
+            except IndexError:
+                slider_length = self.parent_controller.experiment.CameraParameters['x_pixels'] - 1
 
+        if self.display_state.find('Slice') != -1:
+            self.view.slider.slider_widget.configure(to=slider_length,
+                                                     tickinterval=(slider_length / 5),
+                                                     state='normal')
+        else:
+            self.view.slider.slider_widget.configure(state='disabled')
 
     def get_absolute_position(self):
         x = self.parent_controller.view.winfo_pointerx()
@@ -224,7 +257,7 @@ class Camera_View_Controller(GUI_Controller):
         Parameters
         ----------
         mode : str
-            camera_view_controller modde.
+            camera_view_controller mode.
         """
         self.mode = mode
 
@@ -370,13 +403,7 @@ class Camera_View_Controller(GUI_Controller):
                 self.image_metrics['Image'].set(np.max(self.temp_array))
 
     def down_sample_image(self):
-        r"""Down-sample the data for image display according to the configuration file."""
-        # if self.live_subsampling != 1:
-        #     self.image = cv2.resize(self.image,
-        #                             (int(np.shape(self.image)[0] / self.live_subsampling),
-        #                              int(np.shape(self.image)[1] / self.live_subsampling)))
-
-        """Down-sample the data for image display according to widget size.."""
+        r"""Down-sample the data for image display according to widget size.."""
         self.down_sampled_image = cv2.resize(self.zoom_image, (512, 512))
 
     def scale_image_intensity(self):
@@ -396,9 +423,86 @@ class Camera_View_Controller(GUI_Controller):
             self.down_sampled_image[self.down_sampled_image > scaling_factor] = scaling_factor
 
     def populate_image(self):
-        """Converts image to an ImageTk.PhotoImage and populates the Tk Canvas"""
+        r"""Converts image to an ImageTk.PhotoImage and populates the Tk Canvas"""
         self.tk_image = ImageTk.PhotoImage(Image.fromarray(self.cross_hair_image.astype(np.uint8)))
         self.canvas.create_image(0, 0, image=self.tk_image, anchor='nw')
+
+    def initialize_non_live_display(self,
+                                    microscope_state):
+        r"""Starts image and slice counter, number of channels, number of slices, images per volume, and image volume.
+
+        Parameters
+        ----------
+        microscope_state : dict
+            State of the microscope
+        """
+        self.image_counter = 0
+        self.slice_index = 0
+        self.number_of_channels = len([channel[-1] for channel in microscope_state['channels'].keys()])
+        self.number_of_slices = int(microscope_state['number_z_steps'])
+        self.total_images_per_volume = self.number_of_channels * self.number_of_slices
+        self.image_volume = np.zeros((self.original_image_width,
+                                      self.original_image_height,
+                                      self.number_of_slices,
+                                      self.number_of_channels))
+
+    def identify_channel_index_and_slice(self,
+                                         microscope_state):
+        R"""As images arrive, identify channel index and slice.
+
+        Parameters
+        ----------
+        microscope_state : dict
+            State of the microscope
+        """
+        # Reset the image counter after the full acquisition of an image volume.
+        if self.image_counter == self.total_images_per_volume:
+            self.image_counter = 0
+
+        # Store each image to the pre-allocated memory.
+        if microscope_state['stack_cycling_mode'] == 'per_stack':
+            if 0 * self.number_of_slices <= self.image_counter < 1 * self.number_of_slices:
+                self.channel_index = 0
+            elif 1 * self.number_of_slices <= self.image_counter < 2 * self.number_of_slices:
+                self.channel_index = 1
+            elif 2 * self.number_of_slices <= self.image_counter < 3 * self.number_of_slices:
+                self.channel_index = 2
+            elif 3 * self.number_of_slices <= self.image_counter < 4 * self.number_of_slices:
+                self.channel_index = 3
+            elif 4 * self.number_of_slices <= self.image_counter < 5 * self.number_of_slices:
+                self.channel_index = 4
+            else:
+                self.channel_index = 0
+                print("Camera View Controller - Cannot identify proper channel for per_stack imaging mode.")
+
+            self.slice_index = self.image_counter - (self.channel_index * self.number_of_slices)
+            self.image_volume[:, :, self.slice_index, self.channel_index] = self.image
+            self.image_counter += 1
+
+        if microscope_state['stack_cycling_mode'] == 'per_z':
+            # Every image that comes in will be the next channel.
+            self.channel_index = images_received % self.number_of_channels
+            self.image_volume[:, :, self.slice_index, self.channel_index] = self.image
+            if self.channel_index == (self.number_of_channels - 1):
+                self.slice_index += 1
+            if self.slice_index == self.total_images_per_volume:
+                self.slice_index = 0
+
+    def retrieve_image_slice_from_volume(self,
+                                         slider_index,
+                                         channel_display_index):
+        if self.display_state == 'XY MIP':
+            self.image = np.max(self.image_volume[:, :, :, channel_display_index], axis=2)
+        if self.display_state == 'YZ MIP':
+            self.image = np.max(self.image_volume[:, :, :, channel_display_index], axis=0)
+        if self.display_state == 'ZY MIP':
+            self.image = np.max(self.image_volume[:, :, :, channel_display_index], axis=1)
+        if self.display_state == 'XY Slice':
+            self.image = self.image_volume[:, :, slider_index, channel_display_index]
+        if self.display_state == 'YZ Slice':
+            self.image = self.image_volume[slider_index, :, :, channel_display_index]
+        if self.display_state == 'ZY Slice':
+            self.image = self.image_volume[:, slider_index, :, channel_display_index]
 
     def display_image(self,
                       image,
@@ -428,100 +532,33 @@ class Camera_View_Controller(GUI_Controller):
         # Save image dimensions to memory.
         self.original_image_height, self.original_image_width = self.image.shape
 
-        # For first image received, pre-allocate memory/arrays, initialize counter.
+        # For first image received, pre-allocate memory/arrays, initialize counters.
         if images_received == 0:
-            self.image_counter = 0
-            self.slice_index = 0
-            self.number_of_channels = len([channel[-1] for channel in microscope_state['channels'].keys()])
-            self.number_of_slices = int(microscope_state['number_z_steps'])
-            self.total_images_per_volume = self.number_of_channels * self.number_of_slices
-            self.image_volume = np.zeros((self.original_image_width,
-                                          self.original_image_height,
-                                          self.number_of_slices,
-                                          self.number_of_channels))
+            self.initialize_non_live_display(microscope_state=microscope_state)
 
-        # Reset the image counter after the full acquisition of an image volume.
-        if self.image_counter == self.total_images_per_volume:
-            self.image_counter = 0
+        # Identify the identity (e.g., slice #, channel #) of the image received.
+        self.identify_channel_index_and_slice(microscope_state=microscope_state)
 
-        # Store each image to the pre-allocated memory.
-        if microscope_state['stack_cycling_mode'] == 'per_stack':
-            if 0 * self.number_of_slices <= self.image_counter < 1 * self.number_of_slices:
-                channel_index = 0
-            elif 1 * self.number_of_slices <= self.image_counter < 2 * self.number_of_slices:
-                channel_index = 1
-            elif 2 * self.number_of_slices <= self.image_counter < 3 * self.number_of_slices:
-                channel_index = 2
-            elif 3 * self.number_of_slices <= self.image_counter < 4 * self.number_of_slices:
-                channel_index = 3
-            elif 4 * self.number_of_slices <= self.image_counter < 5 * self.number_of_slices:
-                channel_index = 4
-            else:
-                channel_index = 0
-                print("Camera View Controller - Cannot identify proper channel for per_stack imaging mode.")
+        # Place image in XYZC numpy array.
+        self.image_volume[:, :, self.slice_index, self.channel_index] = self.image
 
-            self.slice_index = self.image_counter - (channel_index * self.number_of_slices)
-            self.image_volume[:, :, self.slice_index, channel_index] = self.image
-            self.image_counter += 1
-
-        if microscope_state['stack_cycling_mode'] == 'per_z':
-            # Every image that comes in will be the next channel.
-            channel_index = images_received % self.number_of_channels
-            self.image_volume[:, :, self.slice_index, channel_index] = self.image
-            if channel_index == (self.number_of_channels - 1):
-                self.slice_index += 1
-            if self.slice_index == self.total_images_per_volume:
-                self.slice_index = 0
-
-        # MIP Display Mode
+        # MIP and Slice Mode TODO: Consider channels
         if self.display_state != 'Live':
             slider_index = self.view.slider.slider_widget.get()
             channel_display_index = 0
-            # TODO: Consider channels?
-            print("Slider Index:", slider_index)
-            if self.display_state == 'XY MIP':
-                self.image = np.max(self.image_volume[:, :, :, channel_display_index], axis=2)
-            if self.display_state == 'YZ MIP':
-                self.image = np.max(self.image_volume[:, :, :, channel_display_index], axis=0)
-            if self.display_state == 'ZY MIP':
-                self.image = np.max(self.image_volume[:, :, :, channel_display_index], axis=1)
-            if self.display_state == 'XY Slice':
-                self.image = self.image_volume[:, :, slider_index, channel_display_index]
-            if self.display_state == 'YZ Slice':
-                self.image = self.image_volume[slider_index, :, :, channel_display_index]
-            if self.display_state == 'ZY Slice':
-                self.image = self.image_volume[:, slider_index, :, channel_display_index]
+            self.retrieve_image_slice_from_volume(slider_index=slider_index,
+                                                  channel_display_index=channel_display_index)
 
-        # Live Display
-        if self.display_state == 'Live':
-            # Digital zoom.
+        else:
             self.digital_zoom()
-
-            # Detect saturated pixels
             self.detect_saturation()
-
-            # Down-sample Image for display
             self.down_sample_image()
-
-            # Scale image to [0, 1] values
             self.scale_image_intensity()
-
-            #  Update the GUI according to the instantaneous or rolling average max counts.
             self.update_max_counts()
-
-            # Add Cross-Hair
             self.add_crosshair()
-
-            #  Apply Lookup Table
             self.apply_LUT()
-
-            # Create ImageTk.PhotoImage
             self.populate_image()
-
-            # Update Channel Index
-            # self.image_metrics['Channel'].set(channel_id)
-
-            # Iterate Image Count for Rolling Average
+            self.image_metrics['Channel'].set(self.channel_index)
             self.image_count = self.image_count + 1
 
     def add_crosshair(self):

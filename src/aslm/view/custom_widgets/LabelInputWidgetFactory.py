@@ -211,6 +211,4 @@ class LabelInput(ttk.Frame):
 
     def pad_input(self, left, up, right, down):
         self.widget.grid(padx=(left, right), pady=(up, down))
-        
-    def set_variable(self, value):
-        self.variable = value
+

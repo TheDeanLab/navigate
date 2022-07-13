@@ -31,17 +31,16 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 # Local Imports
-from view.main_window_content.stage_control.tabs.other_axis_frame import min_other_axis_frame as other_axis_frame
-from view.main_window_content.stage_control.tabs.position_frame import min_position_frame as position_frame
-from view.main_window_content.stage_control.tabs.x_y_frame import min_x_y_frame as x_y_frame
-from view.main_window_content.stage_control.tabs.goto_frame import goto_frame
+from aslm.view.main_window_content.stage_control.tabs.other_axis_frame import min_other_axis_frame as other_axis_frame
+from aslm.view.main_window_content.stage_control.tabs.position_frame import min_position_frame as position_frame
+from aslm.view.main_window_content.stage_control.tabs.x_y_frame import min_x_y_frame as x_y_frame
+from aslm.view.main_window_content.stage_control.tabs.goto_frame import goto_frame
 from aslm.view.main_window_content.stage_control.tabs.stop_frame import  min_stop_frame as stop_frame
 # Standard Imports
-from tkinter import *
+import tkinter as tk
 from tkinter import ttk
-from tkinter.font import Font
 import logging
-from pathlib import Path
+
 # Logger Setup
 p = __name__.split(".")[0]
 logger = logging.getLogger(p)
@@ -57,8 +56,8 @@ class minimized_control(ttk.Frame):
         minimized_control.note3=note3
         
         # Formatting
-        Grid.columnconfigure(minimized_control, 'all', weight=1)
-        Grid.rowconfigure(minimized_control, 'all', weight=1)
+        tk.Grid.columnconfigure(minimized_control, 'all', weight=1)
+        tk.Grid.rowconfigure(minimized_control, 'all', weight=1)
         
 
         #Building out stage control elements, frame by frame
@@ -71,7 +70,7 @@ class minimized_control(ttk.Frame):
 
         #Z Frame
         minimized_control.z_frame = other_axis_frame(minimized_control, 'Z')
-        minimized_control.z_frame.increment_box.set(minimized_control.note3.stage_control_tab.z_frame.increment_box.get_variable())
+        minimized_control.z_frame.increment_box.set(minimized_control.note3.stage_control_tab.z_frame.increment_box.get_variable().get())
 
         #Theta Frame
         minimized_control.theta_frame = other_axis_frame(minimized_control, 'Theta')
@@ -109,30 +108,30 @@ class minimized_control(ttk.Frame):
         '''
 
         # Formatting
-        Grid.columnconfigure(minimized_control.position_frame, 'all', weight=1)
-        Grid.rowconfigure(minimized_control.position_frame, 'all', weight=1)
-        Grid.columnconfigure(minimized_control.xy_frame, 'all', weight=1)
-        Grid.rowconfigure(minimized_control.xy_frame, 'all', weight=1)
-        Grid.columnconfigure(minimized_control.z_frame, 'all', weight=1)
-        Grid.rowconfigure(minimized_control.z_frame, 'all', weight=1)
-        Grid.columnconfigure(minimized_control.theta_frame, 'all', weight=1)
-        Grid.rowconfigure(minimized_control.theta_frame, 'all', weight=1)
-        Grid.columnconfigure(minimized_control.f_frame, 'all', weight=1)
-        Grid.rowconfigure(minimized_control.f_frame, 'all', weight=1)
-        Grid.columnconfigure(minimized_control.stop_frame, 'all', weight=1)
-        Grid.rowconfigure(minimized_control.stop_frame, 'all', weight=1)
+        tk.Grid.columnconfigure(minimized_control.position_frame, 'all', weight=1)
+        tk.Grid.rowconfigure(minimized_control.position_frame, 'all', weight=1)
+        tk.Grid.columnconfigure(minimized_control.xy_frame, 'all', weight=1)
+        tk.Grid.rowconfigure(minimized_control.xy_frame, 'all', weight=1)
+        tk.Grid.columnconfigure(minimized_control.z_frame, 'all', weight=1)
+        tk.Grid.rowconfigure(minimized_control.z_frame, 'all', weight=1)
+        tk.Grid.columnconfigure(minimized_control.theta_frame, 'all', weight=1)
+        tk.Grid.rowconfigure(minimized_control.theta_frame, 'all', weight=1)
+        tk.Grid.columnconfigure(minimized_control.f_frame, 'all', weight=1)
+        tk.Grid.rowconfigure(minimized_control.f_frame, 'all', weight=1)
+        tk.Grid.columnconfigure(minimized_control.stop_frame, 'all', weight=1)
+        tk.Grid.rowconfigure(minimized_control.stop_frame, 'all', weight=1)
         
         # Did not include GOTO widget in remaking of GUI
-        Grid.columnconfigure(minimized_control.goto_frame, 'all', weight=1)
-        Grid.rowconfigure(minimized_control.goto_frame, 'all', weight=1)
+        tk.Grid.columnconfigure(minimized_control.goto_frame, 'all', weight=1)
+        tk.Grid.rowconfigure(minimized_control.goto_frame, 'all', weight=1)
         
         #Gridding out frames
-        minimized_control.position_frame.grid(row=0, column=0, rowspan=5, sticky=(NSEW), pady=2)
-        minimized_control.xy_frame.grid(row=0, column=1, sticky=(NSEW), padx=5)
-        minimized_control.z_frame.grid(row=2, column=1, sticky=(NSEW), padx=5)
-        minimized_control.theta_frame.grid(row=3, column=1, sticky=(NSEW), padx=5)
-        minimized_control.f_frame.grid(row=4, column=1, sticky=(NSEW), padx=5)
-        minimized_control.stop_frame.grid(row=0, column=2, sticky=(NSEW), padx=5, pady=5)
+        minimized_control.position_frame.grid(row=0, column=0, rowspan=5, sticky=(tk.NSEW), pady=2)
+        minimized_control.xy_frame.grid(row=0, column=1, sticky=(tk.NSEW), padx=5)
+        minimized_control.z_frame.grid(row=2, column=1, sticky=(tk.NSEW), padx=5)
+        minimized_control.theta_frame.grid(row=3, column=1, sticky=(tk.NSEW), padx=5)
+        minimized_control.f_frame.grid(row=4, column=1, sticky=(tk.NSEW), padx=5)
+        minimized_control.stop_frame.grid(row=0, column=2, sticky=(tk.NSEW), padx=5, pady=5)
         
     def get_widgets(minimized_control):
         """ Return all the input widgets as a dictionary

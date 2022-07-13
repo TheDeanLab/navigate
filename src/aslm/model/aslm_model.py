@@ -236,8 +236,8 @@ class Model:
         self.stop_send_signal = False # stop signal thread
 
         self.pause_data_event = threading.Event()
-        self.ready_to_change_resolution = threading.Lock()
-        self.ask_to_change_resolution = False
+        self.pause_data_ready_lock = threading.Lock()
+        self.ask_to_pause_data_thread = False
 
         # timing - Units in milliseconds.
         self.camera_minimum_waiting_time = self.camera.get_minimum_waiting_time()
@@ -639,9 +639,9 @@ class Model:
 
         while not self.stop_acquisition:
             self.logger.debug(f'*******current camera {self.camera.serial_number}')
-            if self.ask_to_change_resolution:
+            if self.ask_to_pause_data_thread:
                 self.logger.debug('data thread prepare to change resolution')
-                self.ready_to_change_resolution.release()
+                self.pause_data_ready_lock.release()
                 self.logger.debug('ready to change resolution')
                 self.pause_data_event.clear()
                 self.pause_data_event.wait()
@@ -747,8 +747,6 @@ class Model:
         self.camera.initialize_image_series(self.data_buffer,
                                             self.number_of_frames)
         self.frame_id = 0
-
-        self.pause_data_event.set()
 
         self.open_shutter()
 

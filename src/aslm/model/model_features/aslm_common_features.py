@@ -43,16 +43,17 @@ class ChangeResolution:
         
     def signal_func(self):
         self.model.logger.debug('prepare to change resolution')
-        self.model.ready_to_change_resolution.acquire()
-        self.model.ask_to_change_resolution = True
+        self.model.pause_data_ready_lock.acquire()
+        self.model.ask_to_pause_data_thread = True
         self.model.logger.debug('wait to change resolution')
-        self.model.ready_to_change_resolution.acquire()
+        self.model.pause_data_ready_lock.acquire()
         self.model.change_resolution(self.resolution_mode)
         self.model.logger.debug('changed resolution')
-        self.model.ask_to_change_resolution = False
+        self.model.ask_to_pause_data_thread = False
         self.model.prepare_acquisition(False)
+        self.model.pause_data_event.set()
         self.model.logger.debug('wake up data thread ')
-        self.model.ready_to_change_resolution.release()
+        self.model.pause_data_ready_lock.release()
         return True
 
     def data_func(self):

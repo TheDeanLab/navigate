@@ -622,14 +622,16 @@ class ASLM_controller:
                                                    args=('live',))
 
             elif self.acquire_bar_controller.mode == 'z-stack':
-                # is_multi_position = self.channels_tab_controller.is_multiposition_val.get()
-                # self.model.open_shutter()
-                # self.model.run_z_stack_acquisition(is_multi_position, self.update_camera_view())
-                # self.model.close_shutter()
+                if self.experiment.MicroscopeState['is_multiposition'] is True:
+                    # Populate MicroscopeState with the positions
+                    self.experiment.MicroscopeState['stage_positions'] = self.channels_tab_controller.multi_position_controller.get_positions()
+                    print("Positions:", self.experiment.MicroscopeState['stage_positions'])
+
 
                 self.threads_pool.createThread('camera',
                                                self.capture_image,
                                                args=('z-stack',))
+
 
             elif self.acquire_bar_controller.mode == 'projection':
                 pass
@@ -637,12 +639,15 @@ class ASLM_controller:
             else:
                 logger.debug("ASLM Controller - Wrong acquisition mode. Not recognized.")
 
+
         elif command == 'stop_acquire':
             # self.model.run_command('stop')
             self.sloppy_stop()
             self.feature_id_val.set(0)
             self.set_mode_of_sub('stop')
+
             self.acquire_bar_controller.stop_progress_bar()
+
 
         elif command == 'exit':
             # self.model.run_command('stop')

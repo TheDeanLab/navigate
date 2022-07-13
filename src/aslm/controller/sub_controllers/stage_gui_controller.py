@@ -41,6 +41,9 @@ class Stage_GUI_Controller(GUI_Controller):
     def __init__(self, view, main_view, canvas, parent_controller, verbose=False, configuration_controller=None):
         super().__init__(view, parent_controller, verbose)
 
+        self.main_view = main_view
+        self.canvas = canvas
+
         self.event_id = {
             'x': None,
             'y': None,
@@ -67,10 +70,10 @@ class Stage_GUI_Controller(GUI_Controller):
             'theta': 10000,
             'f': 10000
         }
+
         # variables
         self.widget_vals = self.view.get_variables()
-                #binding mouse wheel event on camera viewcanvas")
-                
+
         # gui event bind
         buttons = self.view.get_buttons()
         for k in buttons:
@@ -94,45 +97,43 @@ class Stage_GUI_Controller(GUI_Controller):
 
         if configuration_controller:
             self.initialize(configuration_controller)
-    #     #binding mouse wheel event on camera view
-    #     self.count = 0
-    #     self.mouse_scrolls = 0
-    #     self.canvas = canvas
-    #     self.canvas.bind("<Enter>", self.on_enter)
-    #     self.canvas.bind("<Leave>", self.on_leave)
-    #     #WASD key movement
-    #     self.main_view.root.bind("<Key>", self.key_press)
+
+        # binding mouse wheel event on camera view
+        # self.canvas.bind("<Enter>", self.on_enter)
+        # self.canvas.bind("<Leave>", self.on_leave)
+
+        # WASD key movement
+        self.main_view.root.bind("<Key>", self.key_press)
    
     # def on_enter(self, event):
-    #     self.canvas.bind("<MouseWheel>", self.update_position)
-
+    #     self.canvas.bind("<MouseWheel>", self.update_focus)
+    #
     # def on_leave(self, event):
-    #     self.count = 0
-    #     self.mouse_scrolls = 0
-
-    # def update_position(self, event):
-    #     self.mouse_scrolls += 1
-    #     if self.mouse_scrolls % 2 == 0:
-    #         position_o = self.get_position()
-    #         self.count += event.delta
-    #         updated_position = position_o
-    #         updated_position["f"] += self.count
-    #         self.set_position(updated_position)
+    #     self.canvas.unbind("<MouseWheel>")
+    #
+    # def update_focus(self, event):
+    #     current_position = self.get_position()
+    #     f_increment = self.widget_vals["f_step"].get()
+    #     if event.delta > 0:
+    #         current_position["f"] += f_increment
+    #     else:
+    #         current_position["f"] -= f_increment
+    #     self.set_position(current_position)
         
-    # def key_press(self, event):
-    #     char = event.char
-    #     position_o = self.get_position()
-    #     current_position = position_o
-    #     xy_increment = self.widget_vals["xy_step"].get()
-    #     if char.lower() == "w":
-    #         current_position['y'] += xy_increment
-    #     elif char.lower() == "a":
-    #         current_position['x'] -= xy_increment
-    #     elif char.lower() == "s":
-    #         current_position['y'] -= xy_increment
-    #     elif char.lower() == "d":
-    #         current_position['x'] += xy_increment
-    #     self.stage_gui_controller.set_position(current_position)
+    def key_press(self, event):
+        char = event.char.lower()
+        if char in ['w', 'a', 's', 'd']:
+            current_position = self.get_position()
+            xy_increment = self.widget_vals["xy_step"].get()
+            if char == "w":
+                current_position['y'] += xy_increment
+            elif char == "a":
+                current_position['x'] -= xy_increment
+            elif char == "s":
+                current_position['y'] -= xy_increment
+            elif char == "d":
+                current_position['x'] += xy_increment
+            self.set_position(current_position)
 
     def initialize(self, config):
         r"""Initialize the Stage limits of steps and positions

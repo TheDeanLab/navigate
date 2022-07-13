@@ -74,11 +74,11 @@ def compute_tiles_from_bounding_box(x_start, x_tiles, x_length, x_overlap,
     """
 
     # Error checking to prevent empty list when tiles are zero (or 1, due to np.arange)
-    x_tiles = 2 if x_tiles <= 1 else x_tiles
-    y_tiles = 2 if y_tiles <= 1 else y_tiles
-    z_tiles = 2 if z_tiles <= 1 else z_tiles
-    theta_tiles = 2 if theta_tiles <= 1 else theta_tiles
-    f_tiles = 2 if f_tiles <= 1 else f_tiles
+    x_tiles = 1 if x_tiles <= 0 else x_tiles
+    y_tiles = 1 if y_tiles <= 0 else y_tiles
+    z_tiles = 1 if z_tiles <= 0 else z_tiles
+    theta_tiles = 1 if theta_tiles <= 0 else theta_tiles
+    f_tiles = 1 if f_tiles <= 0 else f_tiles
 
     x_step = x_length*(1 - sign(x_length)*x_overlap)
     y_step = y_length*(1 - sign(y_length)*y_overlap)
@@ -95,6 +95,8 @@ def compute_tiles_from_bounding_box(x_start, x_tiles, x_length, x_overlap,
     zs = dim_vector(z_start, z_tiles, z_step)
     thetas = dim_vector(theta_start, theta_tiles, theta_step)
     fs = dim_vector(f_start, f_tiles, f_step)
+
+    print(xs.shape, ys.shape, zs.shape, thetas.shape, fs.shape)
 
     # grid out the 4D space...
     x, y, z, t = np.meshgrid(xs, ys, zs, thetas)

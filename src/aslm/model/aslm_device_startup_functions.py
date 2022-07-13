@@ -137,7 +137,7 @@ def start_camera(configuration, experiment, verbose, camera_id=0):
         return auto_redial(HamamatsuOrca, (camera_id, configuration, experiment, verbose), exception=Exception)
     elif configuration.Devices['camera'] == 'SyntheticCamera':
         from aslm.model.devices.camera.camera_synthetic import SyntheticCamera
-        return SyntheticCamera(0, configuration, experiment, verbose)
+        return SyntheticCamera(camera_id, configuration, experiment, verbose)
     else:
         device_not_found(configuration.Devices['camera'])
 
@@ -166,6 +166,29 @@ def start_stages(configuration, verbose):
         return SyntheticStage(configuration, verbose)
     else:
         device_not_found(configuration.Devices['stage'])
+
+
+def start_stages_r(configuration, verbose):
+    r"""Initializes a focusing stage class in a dedicated thread.
+
+    Parameters
+    ----------
+    configuration : dict
+        Session instance of global microscope configuration.
+    verbose : Boolean
+        Flag for enabling verbose operation.
+
+    Returns
+    -------
+    Stage : class
+        Stage class.
+    """
+    if configuration.Devices['stage_r'] == 'Thorlabs' and platform.system() == 'Windows':
+        from aslm.model.devices.stages.stage_tl_kcube_inertial import TLKIMStage
+        from aslm.model.devices.APIs.thorlabs.kcube_inertial import TLFTDICommunicationError
+        return auto_redial(TLKIMStage, (configuration, verbose), exception=TLFTDICommunicationError)
+    else:
+        device_not_found(configuration.Devices['stage_r'])
 
 
 def start_zoom_servo(configuration, verbose):

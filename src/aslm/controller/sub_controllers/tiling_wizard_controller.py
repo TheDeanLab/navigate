@@ -1,7 +1,4 @@
-"""
-ASLM sub-controller ETL popup window.
-
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -45,8 +42,11 @@ from aslm.controller.sub_controllers.gui_controller import GUI_Controller
 from aslm.controller.aslm_controller_functions import combine_funcs
 from aslm.tools.multipos_table_tools import compute_grid, update_table
 
+# Third Party Imports
 
-import logging
+# Local Imports
+from aslm.controller.sub_controllers.gui_controller import GUI_Controller
+from aslm.controller.aslm_controller_functions import combine_funcs
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -54,24 +54,31 @@ logger = logging.getLogger(p)
 
 
 class Tiling_Wizard_Controller(GUI_Controller):
-    def __init__(self, view, parent_controller, verbose=False):
-        """
-        Controller for tiling wizard parameters.
+    """
+    Controller for tiling wizard parameters.
+    Gathers the FOV from the camera settings tab and will update when user changes this value.
+    Set start/end position buttons will grab the stage values for the respective axis when pressed and display in popup
+    Number of images we need to acquire with our desired percent overlap is calculated and then displayed in third column
 
-        Parameters
-        ----------
-        view : object
-            GUI element containing widgets and variables to control. Likely tk.Toplevel-derived.
-        parent_controller : ASLM_controller
-            The main controller.
-        verbose : bool, default False
-            Display additional feedback in standard output.
 
-        Returns
-        -------
-        None
-        """
+    Parameters
+    ----------
+    view : object
+        GUI element containing widgets and variables to control. Likely tk.Toplevel-derived. In this case tiling_wizard_popup.py
+    parent_controller : channels_tab_controller
+        The controller that creates the popup/this controller.
+    verbose : bool, default False
+        Display additional feedback in standard output.
 
+    Returns
+    -------
+    None
+    """
+
+    def __init__(self,
+                 view,
+                 parent_controller,
+                 verbose=False):
         super().__init__(view, parent_controller, verbose)
 
         # Getting widgets and buttons and vars of widgets
@@ -85,11 +92,13 @@ class Tiling_Wizard_Controller(GUI_Controller):
         self.variables['step_size'].set(0.0)
         self.variables['percent_overlay'].set(0.0)
         self.variables['total_tiles'].set(1)
+
         for axis in ['x', 'y', 'z']:
             self.variables[axis + '_start'].set(0.0)
             self.variables[axis + '_end'].set(0.0)
             self.variables[axis + '_dist'].set(0.0)
             self.variables[axis + '_tiles'].set(1)
+
 
         # Ref to widgets in other views (Camera Settings, Stage Control Positions, Stack Acq Settings)
         main_view = self.parent_controller.parent_controller.view # channels_tab_controller -> aslm_controller -> view
@@ -97,6 +106,7 @@ class Tiling_Wizard_Controller(GUI_Controller):
         self.stack_acq_widgets = main_view.settings.channels_tab.stack_acq_frame.get_widgets()
         self.stage_position_vars = main_view.stage_control.stage_control_tab.position_frame.get_variables()
         self.multipoint_table = main_view.settings.channels_tab.multipoint_list.get_table()
+
 
         # Setting/Tracing Percent Overlay
         self.variables['percent_overlay'].trace_add('write', lambda *args: self.update_overlay())
@@ -142,6 +152,7 @@ class Tiling_Wizard_Controller(GUI_Controller):
         # Populate Table trace
         self.buttons['set_table'].configure(command=self.set_table)
 
+
         # Update widgets to current values in other views
         self.update_stepsize()
         self.update_fov()
@@ -150,6 +161,7 @@ class Tiling_Wizard_Controller(GUI_Controller):
         self.view.popup.protocol("WM_DELETE_WINDOW", combine_funcs(self.view.popup.dismiss, lambda: delattr(self.parent_controller, 'tiling_wizard_controller')))
 
     
+
     def set_table(self):
         '''
         Sets multiposition table with values from tiling wizard after Populate Multiposition Table button is pressed
@@ -206,7 +218,9 @@ class Tiling_Wizard_Controller(GUI_Controller):
         x = float(self.variables['x_tiles'].get())
         y = float(self.variables['y_tiles'].get())
         z = float(self.variables['z_tiles'].get())
+
         total_tiles = x * y * z
+
         self.variables['total_tiles'].set(total_tiles)
 
 
@@ -245,7 +259,9 @@ class Tiling_Wizard_Controller(GUI_Controller):
         None
         '''
 
+
         overlay = float(self.percent_overlay) / 100
+
 
         if axis == "all":
             for a in ['x', 'y', 'z']:
@@ -255,6 +271,7 @@ class Tiling_Wizard_Controller(GUI_Controller):
                     num_tiles = ceil(abs(( dist - (overlay * fov) ) /  ( fov * (1 - overlay) )))
                 else:
                     num_tiles = 1
+
                 self.variables[a + '_tiles'].set(num_tiles)
         else:
             dist = float(self.variables[axis + '_dist'].get())
@@ -263,6 +280,7 @@ class Tiling_Wizard_Controller(GUI_Controller):
                 num_tiles = ceil(abs(( dist - (overlay * fov) ) /  ( fov * (1 - overlay) )))
             else:
                 num_tiles = 1
+
             self.variables[axis + '_tiles'].set(num_tiles)
 
             
@@ -379,3 +397,4 @@ class Tiling_Wizard_Controller(GUI_Controller):
         """
         self.view.popup.deiconify()
         self.view.popup.attributes("-topmost", 1)
+

@@ -1,5 +1,4 @@
-"""
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -30,33 +29,47 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-from tkinter import *
-from tkinter import ttk
-import logging
-from pathlib import Path
-# Logger Setup
-p = __name__.split(".")[1]
-logger = logging.getLogger(p)
-from tkinter.font import Font
-import numpy as np
+from aslm.model.model_features.aslm_feature_container import dummy_True
 
-class stack_cycling_frame(ttk.Labelframe):
-    def __init__(stack_acq, settings_tab, *args, **kwargs):
-        #Init Frame
-        text_label = 'Laser Cycling Settings'
-        ttk.Labelframe.__init__(stack_acq, settings_tab, text=text_label, *args, **kwargs)
+class ChangeResolution:
+    def __init__(self, model, resolution_mode='high'):
+        self.model = model
+
+        self.config_table={'signal': {'main': self.signal_func}, 
+                            'data': {'main': dummy_True}}
+
+        self.resolution_mode = resolution_mode
+
         
-        # Formatting
-        Grid.columnconfigure(stack_acq, 'all', weight=1)
-        Grid.rowconfigure(stack_acq, 'all', weight=1)
+    def signal_func(self):
+        self.model.logger.debug('prepare to change resolution')
+        self.model.ready_to_change_resolution.acquire()
+        self.model.ask_to_change_resolution = True
+        self.model.logger.debug('wait to change resolution')
+        self.model.ready_to_change_resolution.acquire()
+        self.model.change_resolution(self.resolution_mode)
+        self.model.logger.debug('changed resolution')
+        self.model.ask_to_change_resolution = False
+        self.model.prepare_acquisition(False)
+        self.model.logger.debug('wake up data thread ')
+        self.model.ready_to_change_resolution.release()
+        return True
 
-        #Laser Cycling Frame (Vertically oriented)
-        stack_acq.cycling_frame = ttk.Frame(stack_acq)
-        stack_acq.cycling_options = StringVar()
-        stack_acq.cycling_pull_down = ttk.Combobox(stack_acq, textvariable=stack_acq.cycling_options)
-        stack_acq.cycling_pull_down.state(["readonly"]) # Makes it so the user cannot type a choice into combobox
-        stack_acq.cycling_pull_down.grid(row=0, column=1, sticky=(NSEW), padx=4, pady=(4,6))
+    def data_func(self):
+        print('the camera is:', self.model.camera.serial_number)
+        return True
 
-        #Gridding Each Holder Frame
-        stack_acq.cycling_frame.grid(row=0, column=0, sticky=(NSEW))
+    def generate_meta_data(self, *args):
+        print('This frame: change resolution', self.resolution_mode, self.model.frame_id)
+        return True
 
+class Snap:
+    def __init__(self, model):
+        self.model = model
+
+        self.config_table={'signal':{},
+                            'data': {'main': dummy_True}}
+
+    def generate_meta_data(self, *args):
+        print('This frame: snap one frame', self.model.frame_id)
+        return True

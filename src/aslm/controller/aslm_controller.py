@@ -136,13 +136,13 @@ class ASLM_controller:
         self.etl_constants = session(self.etl_constants_path,
                                    self.verbose)
 
-
         # Initialize the View
         self.view = view(root)
 
         # Sub Gui Controllers
         # Acquire bar, channels controller, camera view, camera settings, stage, waveforms, menus.
         self.acquire_bar_controller = Acquire_Bar_Controller(self.view.acqbar,
+                                                             self.view.settings.channels_tab,
                                                              self,
                                                              self.verbose)
 
@@ -155,18 +155,20 @@ class ASLM_controller:
                                                              self,
                                                              self.verbose)
 
-        self.camera_view_controller.populate_view()
-
         self.camera_setting_controller = Camera_Setting_Controller(self.view.settings.camera_settings_tab,
                                                                    self,
                                                                    self.verbose,
                                                                    configuration_controller)
 
-        self.stage_gui_controller = Stage_GUI_Controller(self.view.stage_control.stage_control_tab,
+        # Stage Controller
+        self.stage_gui_controller = Stage_GUI_Controller(self.view.stage_control.stage_control_tab,  
+                                                         self.view,
+                                                         self.camera_view_controller.canvas,
                                                          self,
                                                          self.verbose,
                                                          configuration_controller)
-
+                        
+        # Waveform Controller
         self.waveform_tab_controller = Waveform_Tab_Controller(self.view.camera_waveform.waveform_tab,
                                                                self,
                                                                self.verbose)
@@ -342,6 +344,15 @@ class ASLM_controller:
         self.view.menubar.menu_autofocus.add_command(label='Autofocus', command=lambda: self.execute('autofocus'))
         self.view.menubar.menu_autofocus.add_command(label='setting', command=popup_autofocus_setting)
 
+        # add-on features
+        feature_list = ['None', 'Change Resolution']
+        self.feature_id_val = tkinter.IntVar(0)
+        for i in range(len(feature_list)):
+            self.view.menubar.menu_features.add_radiobutton(label=feature_list[i],
+                                                            variable=self.feature_id_val,
+                                                            value=i)
+        self.feature_id_val.trace_add('write', lambda *args: self.execute('load_feature', self.feature_id_val.get()))
+
         # debug menu
         if self.debug:
             Debug_Module(self, self.view.menubar.menu_debug, self.verbose)
@@ -381,6 +392,8 @@ class ASLM_controller:
             self.experiment.MicroscopeState['zoom'] = 'N/A'
         else:
             self.resolution_value.set(self.experiment.MicroscopeState['zoom'])
+
+        self.model.apply_resolution_stage_offset(resolution_mode, initial=True)
 
     def update_experiment_setting(self):
         r"""Update model.experiment according to values in the GUI
@@ -449,7 +462,9 @@ class ASLM_controller:
             self.camera_view_controller.display_image(self.model.data)
             self.camera_view_controller.update_channel_idx(self.model.current_channel)
 
-    def execute(self, command, *args):
+    def execute(self,
+                command,
+                *args):
         r"""Functions listens to the Sub_Gui_Controllers.
 
         The controller.experiment is passed as an argument to the model, which then overwrites
@@ -505,10 +520,22 @@ class ASLM_controller:
                 'laser_info': self.resolution_info.ETLConstants[self.resolution][self.mag]
                 }
             """
-            self.model.change_resolution(resolution_value=args[0])
+            resolution = 'low' if args[0] != 'high' else 'high'
+            mag = 'N/A' if args[0] == 'high' else args[0]
+            temp = {
+                    'resolution_mode': resolution,
+                    'zoom': mag,
+                    'laser_info': self.etl_constants.ETLConstants[resolution][mag]
+                }
+            work_thread = self.threads_pool.createThread('model', lambda: self.model.run_command('update_setting', 'resolution', temp))
+            work_thread.join()
+            # self.model.change_resolution(resolution_value=args[0])
             self.camera_setting_controller.calculate_physical_dimensions(args[0])
             if hasattr(self, 'etl_controller') and self.etl_controller:
                 self.etl_controller.set_experiment_values(args[0])
+            ret_pos_dict = self.model.get_stage_position()
+            update_stage_dict(self, ret_pos_dict)
+            self.update_stage_gui_controller_silent(ret_pos_dict)
 
         elif command == 'set_save':
             r"""Set whether the image will be saved.
@@ -538,9 +565,12 @@ class ASLM_controller:
             self.threads_pool.createThread('model', lambda: self.model.run_command('update_setting', *args))
 
         elif command == 'autofocus':
-            r"""Execute autofocus routine.
-            """
+            r"""Execute autofocus routine."""
             self.threads_pool.createThread('camera', self.capture_autofocus_image)
+
+        elif command == 'load_feature':
+            r"""Tell model to load/unload features."""
+            self.threads_pool.createThread('model', lambda: self.model.run_command('load_feature', *args))
             
         elif command == 'acquire_and_save':
             r"""Acquire data and save it.
@@ -576,16 +606,20 @@ class ASLM_controller:
             args[0] : string
                 string = 'continuous', 'z-stack', 'single', or 'projection'
             """
-
+            # Prepare data
             if not self.prepare_acquire_data():
                 self.acquire_bar_controller.stop_acquire()
                 return
 
             if self.acquire_bar_controller.mode == 'single':
-                self.threads_pool.createThread('camera', self.capture_image, args=('single',))
+                self.threads_pool.createThread('camera',
+                                               self.capture_image,
+                                               args=('single',))
 
             elif self.acquire_bar_controller.mode == 'live':
-                self.threads_pool.createThread('camera', self.capture_image, args=('live',))
+                    self.threads_pool.createThread('camera',
+                                                   self.capture_image,
+                                                   args=('live',))
 
             elif self.acquire_bar_controller.mode == 'z-stack':
                 if self.experiment.MicroscopeState['is_multiposition'] is True:
@@ -593,15 +627,28 @@ class ASLM_controller:
                     self.experiment.MicroscopeState['stage_positions'] = self.channels_tab_controller.multi_position_controller.get_positions()
                     print("Positions:", self.experiment.MicroscopeState['stage_positions'])
 
+
                 self.threads_pool.createThread('camera',
                                                self.capture_image,
                                                args=('z-stack',))
-                logger.info("ASLM Controller - Wrong acquisition mode. Not recognized.")
+
+
+            elif self.acquire_bar_controller.mode == 'projection':
+                pass
+
+            else:
+                logger.debug("ASLM Controller - Wrong acquisition mode. Not recognized.")
+
 
         elif command == 'stop_acquire':
             # self.model.run_command('stop')
             self.sloppy_stop()
+            self.feature_id_val.set(0)
             self.set_mode_of_sub('stop')
+
+            self.acquire_bar_controller.stop_progress_bar()
+
+
         elif command == 'exit':
             # self.model.run_command('stop')
             self.sloppy_stop()
@@ -634,32 +681,65 @@ class ASLM_controller:
             except RuntimeError:
                 e = RuntimeError
 
-    def capture_image(self, mode):
-        r"""Trigger the model to capture images
+    def capture_image(self,
+                      mode):
+        r"""Trigger the model to capture images.
+
+        Parameters
+        ----------
+        mode : str
+            'z-stack', ...
         """
         self.camera_view_controller.image_count = 0
         active_channels = [channel[-1] for channel in self.experiment.MicroscopeState['channels'].keys()]
         num_channels = len(active_channels)
+
+        # Start up Progress Bars
+        images_received = 0
+        self.acquire_bar_controller.progress_bar(images_received=images_received,
+                                                 microscope_state=self.experiment.MicroscopeState,
+                                                 mode=mode,
+                                                 stop=False)
+
         self.model.run_command(mode,
                                microscope_info=self.experiment.MicroscopeState,
                                camera_info=self.experiment.CameraParameters,
                                saving_info=self.experiment.Saving)
 
         while True:
+            # Receive the Image and log it.
             image_id = self.show_img_pipe.recv()
             logger.info(f"ASLM Controller - Received Image: {image_id}")
+
             if image_id == 'stop':
                 self.set_mode_of_sub('stop')
-                # self.execute('stop_acquire')
                 break
             if not isinstance(image_id, int):
                 logger.debug(f"ASLM Controller - Something wrong happened, stop the model!, {image_id}")
                 self.execute('stop_acquire')
+
+            # Display the Image in the View
             self.camera_view_controller.display_image(
-                self.data_buffer[image_id], active_channels[image_id % num_channels])
+                image=self.data_buffer[image_id],
+                microscope_state=self.experiment.MicroscopeState,
+                channel_id=active_channels[image_id % num_channels],
+                images_received=images_received)
+            images_received += 1
+
+            # Update progress bar.
+            self.acquire_bar_controller.progress_bar(images_received=images_received,
+                                                     microscope_state=self.experiment.MicroscopeState,
+                                                     mode=mode,
+                                                     stop=False)
 
         logger.info(f"ASLM Controller - Captured {self.camera_view_controller.image_count}, {mode} Images")
         self.set_mode_of_sub('stop')
+
+        # Stop Progress Bars
+        self.acquire_bar_controller.progress_bar(images_received=images_received,
+                                                 microscope_state=self.experiment.MicroscopeState,
+                                                 mode=mode,
+                                                 stop=True)
 
     def capture_autofocus_image(self):
         r"""Trigger model to capture a single image
@@ -697,7 +777,7 @@ class ASLM_controller:
         self.model.release_pipe('autofocus_plot_pipe')
         
         self.execute('stop_acquire')
-    
+
     def move_stage(self, pos_dict):
         r""" Trigger the model to move the stage.
 
@@ -725,6 +805,7 @@ class ASLM_controller:
     def stop_stage(self):
         self.model.stop_stage()
         ret_pos_dict = self.model.get_stage_position()
+        update_stage_dict(self, ret_pos_dict)
         self.update_stage_gui_controller_silent(ret_pos_dict)
 
     def update_stage_gui_controller_silent(self, ret_pos_dict):
@@ -736,8 +817,7 @@ class ASLM_controller:
         self.stage_gui_controller.set_position_silent(stage_gui_dict)
 
     def update_event(self):
-        r"""Update the waveforms in the View.
-        """
+        r"""Update the waveforms in the View."""
         while True:
             event, value = self.event_queue.get()
             if event == 'waveform':

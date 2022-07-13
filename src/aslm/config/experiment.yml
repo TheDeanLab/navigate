@@ -55,9 +55,9 @@ StageParameters:
   z_step: 500.0
   theta_step: 30.0
   f_step: 500.0
-  x: 35000.0
-  y: 42000.0
-  z: 15500.0
+  x: 25250.0
+  y: 40000.0
+  z: 40000.0
   theta: 0.0
   f: 70000.0
 MicroscopeState:

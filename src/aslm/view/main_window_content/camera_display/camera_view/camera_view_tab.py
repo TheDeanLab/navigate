@@ -45,6 +45,7 @@ from aslm.view.main_window_content.camera_display.camera_view.tabs.image_metrics
 from aslm.view.main_window_content.camera_display.camera_view.tabs.palette import palette
 from aslm.view.main_window_content.camera_display.camera_view.tabs.live_frame import live_frame
 from aslm.view.main_window_content.camera_display.camera_view.tabs.slider import slider
+from aslm.view.main_window_content.camera_display.camera_view.tabs.rgb_selection import rgb_selection
 from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 
 # Logger Setup
@@ -87,4 +88,6 @@ class camera_tab(ttk.Frame):
         self.live_frame = live_frame(self)
         self.live_frame.grid(row=1, column=1, sticky=NSEW, padx=5, pady=5)
 
-
+        #  Frame for camera selection and counts
+        self.rgb_selection = rgb_selection(self)
+        self.rgb_selection.grid(row=2, column=1, sticky=W, padx=5, pady=5)

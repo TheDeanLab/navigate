@@ -40,7 +40,6 @@ logger = logging.getLogger(p)
 
 from aslm.view.main_window_content.channel_settings.channel_settings_frames.channel_settings import channel_creator
 from aslm.view.main_window_content.channel_settings.channel_settings_frames.stack_acquisition_settings import stack_acq_frame
-from aslm.view.main_window_content.channel_settings.channel_settings_frames.stack_cycling_settings import stack_cycling_frame
 from aslm.view.main_window_content.channel_settings.channel_settings_frames.stack_timepoint_settings import stack_timepoint_frame
 from aslm.view.main_window_content.channel_settings.channel_settings_frames.multipoint_settings import multipoint_frame, multipoint_list
 

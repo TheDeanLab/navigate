@@ -344,7 +344,7 @@ class ASLM_controller:
         self.view.menubar.menu_autofocus.add_command(label='setting', command=popup_autofocus_setting)
 
         # add-on features
-        feature_list = ['None', 'Change Resolution']
+        feature_list = ['None', 'Change Resolution', 'Fast Switching Resolution(?)']
         self.feature_id_val = tkinter.IntVar(0)
         for i in range(len(feature_list)):
             self.view.menubar.menu_features.add_radiobutton(label=feature_list[i],

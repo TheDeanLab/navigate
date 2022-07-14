@@ -258,7 +258,11 @@ class Model:
 
         # feature list
         # TODO: put it here now
-        self.feature_list = [[[{'name': Snap}, {'name': ChangeResolution, 'args': ('1x',)}], [{'name': Snap, 'node':{'device_related': True}}], [{'name': ChangeResolution, 'args': ('high',)}], [{'name': Snap, 'node':{'device_related': True}}]]]
+        self.feature_list = []
+        # automatically switch resolution
+        self.feature_list.append([[{'name': Snap}, {'name': ChangeResolution, 'args': ('1x',)}], [{'name': Snap, 'node':{'device_related': True}}], [{'name': ChangeResolution, 'args': ('high',)}], [{'name': Snap, 'node':{'device_related': True}}]])
+        # TODO: an updated one, need to test
+        self.feature_list.append([[{'name': ChangeResolution, 'args': ('1x',)}, {'name': Snap}], [{'name': ChangeResolution, 'args': ('high',), 'node': {'device_related': True}}, {'name': Snap}]])
 
     def get_camera(self):
         r"""Select active camera.

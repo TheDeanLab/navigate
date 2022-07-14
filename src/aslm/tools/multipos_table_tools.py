@@ -188,7 +188,7 @@ def calc_num_tiles(dist, overlap, roi_length):
         Number of tiles needed to cover this distance.
 
     """
-    if roi_length <= 0 or overlap >= 1:
+    if dist == 0 or roi_length <= 0 or overlap >= 1:
         num_tiles = 1
     else:
         ov = overlap * roi_length  # True overlap in distance units

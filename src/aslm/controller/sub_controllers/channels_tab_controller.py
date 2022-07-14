@@ -370,6 +370,15 @@ class Channels_Tab_Controller(GUI_Controller):
         z_curr = self.parent_controller.experiment.StageParameters['z']
         focus_curr = self.parent_controller.experiment.StageParameters['f']
 
+        if z_curr < self.z_origin:
+            # Sort so we are always going low to high
+            tmp = self.z_origin
+            tmp_f = self.focus_origin
+            self.z_origin = z_curr
+            self.focus_origin = focus_curr
+            z_curr = tmp
+            focus_curr = tmp_f
+
         # Propagate parameter changes to the GUI
         self.stack_acq_vals['end_position'].set(z_curr - self.z_origin)
         self.stack_acq_vals['end_focus'].set(focus_curr - self.focus_origin)

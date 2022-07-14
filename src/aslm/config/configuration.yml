@@ -71,7 +71,6 @@ CameraParameters:
   delay_percent: 10
   pulse_percent: 1
   line_interval: 0.000075
-  display_live_subsampling: 4
   display_acquisition_subsampling: 4
   average_frame_rate: 4.969
   frames_to_average: 1

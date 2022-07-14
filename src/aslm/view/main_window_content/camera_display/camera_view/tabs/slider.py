@@ -29,54 +29,64 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-
 # Standard Library Imports
 import logging
+import tkinter as tk
+from tkinter import *
+from tkinter import ttk
 
 # Third Party Imports
 
 # Local Imports
+from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class CameraBase:
-    r"""CameraBase Parent camera class.
+class slider(ttk.Labelframe):
+    def __init__(self, cam_view, *args, **kwargs):
+        # Init Frame
+        text_label = 'Slice Index'
+        ttk.Labelframe.__init__(
+            self,
+            cam_view,
+            text=text_label,
+            *args,
+            **kwargs)
 
-    Parameters
-    ----------
-    camera_id : int
-        Selects which camera to connect to (0, 1, ...).
-    configuration : Session
-        Global configuration of the microscope
-    experiment : Session
-        Experiment configuration of the microscope
-    verbose : bool
-        Verbosity
+        # Formatting
+        Grid.columnconfigure(self, 'all', weight=1)
+        Grid.rowconfigure(self, 'all', weight=1)
 
-    """
-    def __init__(self, camera_id, configuration, experiment, verbose=False):
-        self.configuration = configuration
-        self.experiment = experiment
-        self.camera_id = camera_id
-        self.verbose = verbose
-        self.stop_flag = False
-        self.is_acquiring = False
+        # Slider
+        self.inputs = {}
+        self.slider_widget = Scale(cam_view,
+                                   from_=0,
+                                   to=200,
+                                   tickinterval=20,
+                                   orient=HORIZONTAL,
+                                   showvalue=0,
+                                   label="Slice Index",
+                                   fg="black")
+        self.slider_widget.grid(row=1, column=0, sticky=NSEW, padx=5, pady=5)
+        self.slider_widget.configure(state='disabled')
 
-        # Initialize Pixel Information
-        self.pixel_size_in_microns = self.configuration.CameraParameters['pixel_size_in_microns']
-        self.binning_string = self.configuration.CameraParameters['binning']
-        self.x_binning = int(self.binning_string[0])
-        self.y_binning = int(self.binning_string[2])
-        self.x_pixels = self.configuration.CameraParameters['x_pixels']
-        self.y_pixels = self.configuration.CameraParameters['y_pixels']
-        self.x_pixels = int(self.x_pixels / self.x_binning)
-        self.y_pixels = int(self.y_pixels / self.y_binning)
 
-        # Initialize Exposure and Display Information - Convert from milliseconds to seconds.
-        self.camera_line_interval = self.configuration.CameraParameters['line_interval']
-        self.camera_exposure_time = self.configuration.CameraParameters['exposure_time'] / 1000
-        self.camera_display_acquisition_subsampling = self.configuration.CameraParameters['display_acquisition_subsampling']
+    def get_variables(self):
+        """
+        # This function returns a dictionary of all the variables that are tied to each widget name.
+        The key is the widget name, value is the variable associated.
+        """
+        variables = {}
+        for key, widget in self.inputs.items():
+            variables[key] = widget.get()
+        return variables
 
+    def get_widgets(self):
+        """
+        # This function returns the dictionary that holds the widgets.
+        The key is the widget name, value is the LabelInput class that has all the data.
+        """
+        return self.inputs

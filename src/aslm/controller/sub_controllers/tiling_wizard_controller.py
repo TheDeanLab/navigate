@@ -173,25 +173,35 @@ class Tiling_Wizard_Controller(GUI_Controller):
         """
 
         x_start = float(self.variables['x_start'].get())
+        x_stop = float(self.variables['x_end'].get())
         x_tiles = int(self.variables['x_tiles'].get())
 
         y_start = float(self.variables['y_start'].get())
+        y_stop = float(self.variables['y_end'].get())
         y_tiles = int(self.variables['y_tiles'].get())
 
         # shift z by coordinate origin of local z-stack
         z_start = float(self.variables['z_start'].get()) + float(self.stack_acq_widgets['start_position'].get())
+        z_stop = float(self.variables['z_end'].get())
         z_tiles = int(self.variables['z_tiles'].get())
 
         # Default to fixed theta
         r_start = self.stage_position_vars['theta'].get()
+        r_stop = self.stage_position_vars['theta'].get()
         r_tiles = 1
 
-        ov = float(self._percent_overlay) / 100
-        table_values = compute_tiles_from_bounding_box(x_start, x_tiles, self._fov['x'], ov,
-                                                       y_start, y_tiles, self._fov['y'], ov,
-                                                       z_start, z_tiles, self._fov['z'], ov,
-                                                       r_start, r_tiles, 0, ov,
-                                                       self._f_start, z_tiles, (self._f_end-self._f_start), ov)
+        # ov = float(self._percent_overlay) / 100
+        # table_values = compute_tiles_from_bounding_box(x_start, x_tiles, self._fov['x'], ov,
+        #                                                y_start, y_tiles, self._fov['y'], ov,
+        #                                                z_start, z_tiles, self._fov['z'], ov,
+        #                                                r_start, r_tiles, 0, ov,
+        #                                                self._f_start, z_tiles, (self._f_end-self._f_start), ov)
+
+        table_values = compute_tiles_from_bounding_box(x_start, x_stop, x_tiles,
+                                                       y_start, y_stop, y_tiles,
+                                                       z_start, z_stop, z_tiles,
+                                                       r_start, r_stop, r_tiles,
+                                                       self._f_start, self._f_end, z_tiles)  # Make focus track with z
 
         update_table(self.multipoint_table, table_values)
 

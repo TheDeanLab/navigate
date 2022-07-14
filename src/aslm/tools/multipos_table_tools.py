@@ -74,96 +74,96 @@ def compute_tiles_from_bounding_box(x_start, x_stop, x_tiles, y_start, y_stop, y
     return table_of_values
 
 
-# def compute_tiles_from_bounding_box(x_start, x_tiles, x_length, x_overlap,
-#                                     y_start, y_tiles, y_length, y_overlap,
-#                                     z_start, z_tiles, z_length, z_overlap,
-#                                     theta_start, theta_tiles, theta_length, theta_overlap,
-#                                     f_start, f_tiles, f_length, f_overlap):
-#     r"""Create a grid of ROIs to image based on start position, number of tiles, and signed FOV length in each dimension.
-#
-#     Assumes (x_start, y_start, z_start) correspond to origin of grid space.
-#
-#     Focus currently tracks with z, since focus is z-dependent. TODO: Change this behavior? Make it a flag?
-#
-#     Parameters
-#     ----------
-#     x_start : float
-#         Starting position along x-dimension.
-#     x_tiles : int
-#         Number of tiles to take along x-dimension.
-#     x_length : float
-#         Signed length of the FOV along x-dimension.
-#     x_overlap : float
-#         Fractional overlap of ROIs along x-dimension.
-#     y_start : float
-#         Starting position along y-dimension.
-#     y_tiles : int
-#         Number of tiles to take along y-dimension.
-#     y_length : float
-#         Signed length of the FOV along y-dimension.
-#     y_overlap : float
-#         Fractional overlap of ROIs along y-dimension.
-#     z_start : float
-#         Starting position along z-dimension.
-#     z_tiles : int
-#         Number of tiles to take along z-dimension.
-#     z_length : float
-#         Signed length of the FOV along z-dimension.
-#     z_overlap : float
-#         Fractional overlap of ROIs along z-dimension.
-#     theta_start : float
-#         Starting position along rotation dimension.
-#     theta_tiles : int
-#         Number of tiles to take along rotation dimension.
-#     theta_length : float
-#         Signed length of the FOV along rotation dimension.
-#     theta_overlap : float
-#         Fractional overlap of ROIs along rotation dimension.
-#     f_start : float
-#         Starting position along focus dimension.
-#     f_tiles : int
-#         Number of tiles to take along focus dimension.
-#     f_length : float
-#         Signed length of the FOV along focus dimension.
-#     f_overlap : float
-#         Fractional overlap of ROIs along focus dimension.
-#
-#     Returns
-#     -------
-#     np.array
-#         (n_positions x (x, y, z, theta, f)) array of positions, gridding out the space
-#     """
-#
-#     # Error checking to prevent empty list when tiles are zero
-#     x_tiles = 1 if x_tiles <= 0 else x_tiles
-#     y_tiles = 1 if y_tiles <= 0 else y_tiles
-#     z_tiles = 1 if z_tiles <= 0 else z_tiles
-#     theta_tiles = 1 if theta_tiles <= 0 else theta_tiles
-#     f_tiles = 1 if f_tiles <= 0 else f_tiles
-#
-#     # Calculate the step between the edge of each frame
-#     x_step = x_length*(1 - sign(x_length)*x_overlap)
-#     y_step = y_length*(1 - sign(y_length)*y_overlap)
-#     z_step = z_length*(1 - sign(z_length)*z_overlap)
-#     theta_step = theta_length*(1 - sign(theta_length)*theta_overlap)
-#     f_step = f_length * (1 - sign(f_length) * f_overlap)
-#
-#     # grid out each dimension starting from (x_start, y_start, z_start) in steps
-#     def dim_vector(start, n_tiles, step):
-#         return start + np.arange(0, n_tiles, 1) * step
-#     xs = dim_vector(x_start, x_tiles, x_step)
-#     ys = dim_vector(y_start, y_tiles, y_step)
-#     zs = dim_vector(z_start, z_tiles, z_step)
-#     thetas = dim_vector(theta_start, theta_tiles, theta_step)
-#     fs = dim_vector(f_start, f_tiles, f_step)
-#
-#     # grid out the 4D space...
-#     x, y, z, t = np.meshgrid(xs, ys, zs, thetas)
-#
-#     # we need to make f vary the same as z, for now, since focus changes with z
-#     f = np.repeat(fs, int(len(t.ravel())/len(fs)))  # This only works if len(fs) = len(zs)
-#
-#     return np.vstack([x.ravel(), y.ravel(), z.ravel(), t.ravel(), f]).T
+def compute_tiles_from_bounding_box(x_start, x_tiles, x_length, x_overlap,
+                                    y_start, y_tiles, y_length, y_overlap,
+                                    z_start, z_tiles, z_length, z_overlap,
+                                    theta_start, theta_tiles, theta_length, theta_overlap,
+                                    f_start, f_tiles, f_length, f_overlap):
+    r"""Create a grid of ROIs to image based on start position, number of tiles, and signed FOV length in each dimension.
+
+    Assumes (x_start, y_start, z_start) correspond to origin of grid space.
+
+    Focus currently tracks with z, since focus is z-dependent. TODO: Change this behavior? Make it a flag?
+
+    Parameters
+    ----------
+    x_start : float
+        Starting position along x-dimension.
+    x_tiles : int
+        Number of tiles to take along x-dimension.
+    x_length : float
+        Signed length of the FOV along x-dimension.
+    x_overlap : float
+        Fractional overlap of ROIs along x-dimension.
+    y_start : float
+        Starting position along y-dimension.
+    y_tiles : int
+        Number of tiles to take along y-dimension.
+    y_length : float
+        Signed length of the FOV along y-dimension.
+    y_overlap : float
+        Fractional overlap of ROIs along y-dimension.
+    z_start : float
+        Starting position along z-dimension.
+    z_tiles : int
+        Number of tiles to take along z-dimension.
+    z_length : float
+        Signed length of the FOV along z-dimension.
+    z_overlap : float
+        Fractional overlap of ROIs along z-dimension.
+    theta_start : float
+        Starting position along rotation dimension.
+    theta_tiles : int
+        Number of tiles to take along rotation dimension.
+    theta_length : float
+        Signed length of the FOV along rotation dimension.
+    theta_overlap : float
+        Fractional overlap of ROIs along rotation dimension.
+    f_start : float
+        Starting position along focus dimension.
+    f_tiles : int
+        Number of tiles to take along focus dimension.
+    f_length : float
+        Signed length of the FOV along focus dimension.
+    f_overlap : float
+        Fractional overlap of ROIs along focus dimension.
+
+    Returns
+    -------
+    np.array
+        (n_positions x (x, y, z, theta, f)) array of positions, gridding out the space
+    """
+
+    # Error checking to prevent empty list when tiles are zero
+    x_tiles = 1 if x_tiles <= 0 else x_tiles
+    y_tiles = 1 if y_tiles <= 0 else y_tiles
+    z_tiles = 1 if z_tiles <= 0 else z_tiles
+    theta_tiles = 1 if theta_tiles <= 0 else theta_tiles
+    f_tiles = 1 if f_tiles <= 0 else f_tiles
+
+    # Calculate the step between the edge of each frame
+    x_step = x_length*(1 - x_overlap)
+    y_step = y_length*(1 - y_overlap)
+    z_step = z_length*(1 - z_overlap)
+    theta_step = theta_length*(1 - theta_overlap)
+    f_step = f_length * (1 - f_overlap)
+
+    # grid out each dimension starting from (x_start, y_start, z_start) in steps
+    def dim_vector(start, n_tiles, step):
+        return start + np.arange(0, n_tiles, 1) * step
+    xs = dim_vector(x_start, x_tiles, x_step)
+    ys = dim_vector(y_start, y_tiles, y_step)
+    zs = dim_vector(z_start, z_tiles, z_step)
+    thetas = dim_vector(theta_start, theta_tiles, theta_step)
+    fs = dim_vector(f_start, f_tiles, f_step)
+
+    # grid out the 4D space...
+    x, y, z, t = np.meshgrid(xs, ys, zs, thetas)
+
+    # we need to make f vary the same as z, for now, since focus changes with z
+    f = np.repeat(fs, int(len(t.ravel())/len(fs)))  # This only works if len(fs) = len(zs)
+
+    return np.vstack([x.ravel(), y.ravel(), z.ravel(), t.ravel(), f]).T
 
 
 def calc_num_tiles(dist, overlap, roi_length):

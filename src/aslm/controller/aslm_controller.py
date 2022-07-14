@@ -616,16 +616,15 @@ class ASLM_controller:
                                                args=('single',))
 
             elif self.acquire_bar_controller.mode == 'live':
-                    self.threads_pool.createThread('camera',
-                                                   self.capture_image,
-                                                   args=('live',))
+                self.threads_pool.createThread('camera',
+                                               self.capture_image,
+                                               args=('live',))
 
             elif self.acquire_bar_controller.mode == 'z-stack':
                 if self.experiment.MicroscopeState['is_multiposition'] is True:
                     # Populate MicroscopeState with the positions
                     self.experiment.MicroscopeState['stage_positions'] = self.channels_tab_controller.multi_position_controller.get_positions()
                     print("Positions:", self.experiment.MicroscopeState['stage_positions'])
-
 
                 self.threads_pool.createThread('camera',
                                                self.capture_image,
@@ -702,6 +701,10 @@ class ASLM_controller:
                                microscope_info=self.experiment.MicroscopeState,
                                camera_info=self.experiment.CameraParameters,
                                saving_info=self.experiment.Saving)
+
+        self.camera_view_controller.initialize_non_live_display(self.data_buffer,
+                                                                self.experiment.MicroscopeState,
+                                                                self.experiment.CameraParameters)
 
         while True:
             # Receive the Image and log it.

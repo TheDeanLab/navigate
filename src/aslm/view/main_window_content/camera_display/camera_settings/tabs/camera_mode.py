@@ -67,7 +67,6 @@ class camera_mode(ttk.Labelframe):
         # Formatting
         Grid.columnconfigure(content_frame, 'all', weight=1)
         Grid.rowconfigure(content_frame, 'all', weight=1)
-        
 
         #Dictionary for all the variables, this will be used by the controller
         self.inputs = {}

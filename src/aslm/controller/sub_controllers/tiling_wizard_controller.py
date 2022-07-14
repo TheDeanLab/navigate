@@ -32,19 +32,11 @@ POSSIBILITY OF SUCH DAMAGE.
 
 # Standard Library Imports
 import logging
-from math import ceil
-
-# Third Party Imports
-import pandas as pd
-
-# Local Imports
-from aslm.controller.sub_controllers.gui_controller import GUI_Controller
-from aslm.controller.aslm_controller_functions import combine_funcs
-from aslm.tools.multipos_table_tools import compute_grid, update_table
 
 # Third Party Imports
 
 # Local Imports
+from aslm.tools.multipos_table_tools import *
 from aslm.controller.sub_controllers.gui_controller import GUI_Controller
 from aslm.controller.aslm_controller_functions import combine_funcs
 
@@ -87,37 +79,38 @@ class Tiling_Wizard_Controller(GUI_Controller):
         self.variables = self.view.get_variables()
 
         # Init widgets to zero
-        self.percent_overlay = 0.0 # Backend
-        self.fov = {'x': 0.0, 'y': 0.0, 'z': 0.0} # Backend
-        self.variables['step_size'].set(0.0)
+        self._axes = ['x', 'y', 'z']
+        self._percent_overlay = 0.0
+        self._fov = dict([(ax, 0.0) for ax in self._axes])
         self.variables['percent_overlay'].set(0.0)
         self.variables['total_tiles'].set(1)
 
-        for axis in ['x', 'y', 'z']:
-            self.variables[axis + '_start'].set(0.0)
-            self.variables[axis + '_end'].set(0.0)
-            self.variables[axis + '_dist'].set(0.0)
-            self.variables[axis + '_tiles'].set(1)
-
+        for ax in self._axes:
+            self.variables[f'{ax}_start'].set(0.0)
+            self.variables[f'{ax}_end'].set(0.0)
+            self.variables[f'{ax}_dist'].set(0.0)
+            self.variables[f'{ax}_tiles'].set(1)
 
         # Ref to widgets in other views (Camera Settings, Stage Control Positions, Stack Acq Settings)
-        main_view = self.parent_controller.parent_controller.view # channels_tab_controller -> aslm_controller -> view
+        main_view = self.parent_controller.parent_controller.view  # channels_tab_controller -> aslm_controller -> view
         self.cam_settings_widgets = main_view.settings.camera_settings_tab.camera_roi.get_widgets()
         self.stack_acq_widgets = main_view.settings.channels_tab.stack_acq_frame.get_widgets()
         self.stage_position_vars = main_view.stage_control.stage_control_tab.position_frame.get_variables()
         self.multipoint_table = main_view.settings.channels_tab.multipoint_list.get_table()
 
-
         # Setting/Tracing Percent Overlay
+        # Overlay change is also handled in update_overlay
         self.variables['percent_overlay'].trace_add('write', lambda *args: self.update_overlay())
 
         # Trace cam_settings FOV to catch user changes
+        # FOV change handled in update_fov
         self.cam_settings_widgets['FOV_X'].get_variable().trace_add('write', lambda *args: self.update_fov())
         self.cam_settings_widgets['FOV_Y'].get_variable().trace_add('write', lambda *args: self.update_fov())
         self.stack_acq_widgets['abs_z_start'].get_variable().trace_add('write', lambda *args: self.update_fov())
         self.stack_acq_widgets['abs_z_end'].get_variable().trace_add('write', lambda *args: self.update_fov())
 
-        # Calculating distance traces
+        # Calculate distances
+        # TODO: For reasons that make no sense to me at all, these can't go in a for ax in self._axes loop?
         self.variables['x_start'].trace_add('write', lambda *args: self.calculate_distance('x'))
         self.variables['x_end'].trace_add('write', lambda *args: self.calculate_distance('x'))
         self.variables['y_start'].trace_add('write', lambda *args: self.calculate_distance('y'))
@@ -125,45 +118,45 @@ class Tiling_Wizard_Controller(GUI_Controller):
         self.variables['z_start'].trace_add('write', lambda *args: self.calculate_distance('z'))
         self.variables['z_end'].trace_add('write', lambda *args: self.calculate_distance('z'))
 
+        self.variables['x_start'].trace_add('write', lambda *args: self.update_fov())
+        self.variables['x_end'].trace_add('write', lambda *args: self.update_fov())
+        self.variables['y_start'].trace_add('write', lambda *args: self.update_fov())
+        self.variables['y_end'].trace_add('write', lambda *args: self.update_fov())
+        self.variables['z_start'].trace_add('write', lambda *args: self.update_fov())
+        self.variables['z_end'].trace_add('write', lambda *args: self.update_fov())
 
         # Calculating Number of Tiles traces
-            # Distance change
+        # TODO: For reasons that make no sense to me at all, these can't go in a for ax in self._axes loop?
         self.variables['x_dist'].trace_add('write', lambda *args: self.calculate_tiles('x'))
         self.variables['y_dist'].trace_add('write', lambda *args: self.calculate_tiles('y'))
         self.variables['z_dist'].trace_add('write', lambda *args: self.calculate_tiles('z'))
-            # FOV change handled in update_fov
-            # Overlay change is also handled in update_overlay
-
-        # Tracing step size in stack acq settings
-        self.stack_acq_widgets['step_size'].get_variable().trace_add('write', lambda *args: self.update_stepsize())
-        
-        # Button Configuration
-        for axis in ['x', 'y', 'z']:
-
-            # Start/End buttons
-            self.buttons[axis + '_start'].configure(command=self.position_handler(axis, 'start'))
-            self.buttons[axis + '_end'].configure(command=self.position_handler(axis, 'end'))
-
-        # Calculating total tile traces
-        self.variables['x_tiles'].trace_add('write', lambda *args: self.update_total_tiles())
-        self.variables['y_tiles'].trace_add('write', lambda *args: self.update_total_tiles())
-        self.variables['z_tiles'].trace_add('write', lambda *args: self.update_total_tiles())
 
         # Populate Table trace
         self.buttons['set_table'].configure(command=self.set_table)
 
+        for ax in self._axes:
+            # Start/End buttons
+            self.buttons[f'{ax}_start'].configure(command=self.position_handler(ax, 'start'))
+            self.buttons[f'{ax}_end'].configure(command=self.position_handler(ax, 'end'))
+
+            # Calculating total tile traces
+            self.variables[f'{ax}_tiles'].trace_add('write', lambda *args: self.update_total_tiles())
+
+        # Hidden focus variables for z-stacking
+        # TODO: Don't special case? Idk.
+        self._f_start = self.stage_position_vars['f'].get()
+        self._f_end = self.stage_position_vars['f'].get()
 
         # Update widgets to current values in other views
-        self.update_stepsize()
         self.update_fov()
 
         # Properly Closing Popup with parent controller
-        self.view.popup.protocol("WM_DELETE_WINDOW", combine_funcs(self.view.popup.dismiss, lambda: delattr(self.parent_controller, 'tiling_wizard_controller')))
-
-    
+        self.view.popup.protocol("WM_DELETE_WINDOW", combine_funcs(self.view.popup.dismiss,
+                                                                   lambda: delattr(self.parent_controller,
+                                                                                   'tiling_wizard_controller')))
 
     def set_table(self):
-        '''
+        """
         Sets multiposition table with values from tiling wizard after Populate Multiposition Table button is pressed
         Compute grid will return a list of all position combinations. This list is then converted to a 
         pandas dataframe which is then set as the new table data. The table is then redrawn.
@@ -177,7 +170,7 @@ class Tiling_Wizard_Controller(GUI_Controller):
         Returns
         -------
         None
-        '''
+        """
 
         x_start = float(self.variables['x_start'].get())
         x_stop = float(self.variables['x_end'].get())
@@ -187,22 +180,33 @@ class Tiling_Wizard_Controller(GUI_Controller):
         y_stop = float(self.variables['y_end'].get())
         y_tiles = int(self.variables['y_tiles'].get())
 
-        z_start = float(self.variables['z_start'].get())
+        # shift z by coordinate origin of local z-stack
+        z_start = float(self.variables['z_start'].get()) + float(self.stack_acq_widgets['start_position'].get())
         z_stop = float(self.variables['z_end'].get())
         z_tiles = int(self.variables['z_tiles'].get())
 
-        table_values = compute_grid(x_start, x_stop, x_tiles, y_start, y_stop, y_tiles, z_start, z_stop, z_tiles)
+        # Default to fixed theta
+        r_start = self.stage_position_vars['theta'].get()
+        r_stop = self.stage_position_vars['theta'].get()
+        r_tiles = 1
 
-        # update_table(self.multipoint_table, table_values)
-        self.multipoint_table.model.df = pd.DataFrame(table_values, columns=list('XYZRF'))
-        self.multipoint_table.currentrow = self.multipoint_table.model.df.shape[0]-1
-        self.multipoint_table.update_rowcolors()
-        self.multipoint_table.redraw()
-        self.multipoint_table.tableChanged()
+        # ov = float(self._percent_overlay) / 100
+        # table_values = compute_tiles_from_bounding_box2(x_start, x_tiles, self._fov['x'], ov,
+        #                                                 y_start, y_tiles, self._fov['y'], ov,
+        #                                                 z_start, z_tiles, self._fov['z'], ov,
+        #                                                 r_start, r_tiles, 0, ov,
+        #                                                 self._f_start, z_tiles, (self._f_end-self._f_start), ov)
 
-    
+        table_values = compute_tiles_from_bounding_box(x_start, x_stop, x_tiles,
+                                                       y_start, y_stop, y_tiles,
+                                                       z_start, z_stop, z_tiles,
+                                                       r_start, r_stop, r_tiles,
+                                                       self._f_start, self._f_end, z_tiles)  # Make focus track with z
+
+        update_table(self.multipoint_table, table_values)
+
     def update_total_tiles(self):
-        '''
+        """
         Sums the tiles for each axis in the tiling wizard. Will update when any axis has a tile amount change.
         
         Parameters
@@ -214,7 +218,8 @@ class Tiling_Wizard_Controller(GUI_Controller):
         Returns
         -------
         None
-        '''
+        """
+
         x = float(self.variables['x_tiles'].get())
         y = float(self.variables['y_tiles'].get())
         z = float(self.variables['z_tiles'].get())
@@ -223,26 +228,8 @@ class Tiling_Wizard_Controller(GUI_Controller):
 
         self.variables['total_tiles'].set(total_tiles)
 
-
-    def update_stepsize(self):
-        '''
-        Update step size when stack acq settings changed. This essentially mimics the step size widget in stack acq.
-        
-        Parameters
-        ----------
-        self : object
-            Tiling Wizard Controller instance
-        
-
-        Returns
-        -------
-        None
-        '''
-        step_size = self.stack_acq_widgets['step_size'].get()
-        self.variables['step_size'].set(step_size)
-
-    def calculate_tiles(self, axis):
-        '''
+    def calculate_tiles(self, axis=None):
+        """
         Calculates the number of tiles of the acquisition for each axis or an individual axis
         Num of Tiles = dist - (overlay * FOV)  /  FOV * (1 - overlay) 
         (D-OF)/(F-OF) = N
@@ -251,69 +238,56 @@ class Tiling_Wizard_Controller(GUI_Controller):
         ----------
         self : object
             Tiling Wizard Controller instance
-        axis : char
-            x, y, z axis of stage to calculate. If "all" is passed then all stages are calculated
+        axis : str
+            x, y, z axis of stage to calculate.
 
         Returns
         -------
         None
-        '''
+        """
 
+        if axis not in self._axes + [None]:
+            logger.warning(f"Unknown axis {axis}, skipping calculate_tiles().")
+            return
 
-        overlay = float(self.percent_overlay) / 100
-
-
-        if axis == "all":
-            for a in ['x', 'y', 'z']:
-                dist = float(self.variables[a + '_dist'].get())
-                fov = float(self.fov[a])
-                if fov != 0: 
-                    num_tiles = ceil(abs(( dist - (overlay * fov) ) /  ( fov * (1 - overlay) )))
-                else:
-                    num_tiles = 1
-
-                self.variables[a + '_tiles'].set(num_tiles)
+        if axis is not None:
+            axis = [axis]
         else:
-            dist = float(self.variables[axis + '_dist'].get())
-            fov = float(self.fov[axis])
-            if fov != 0: 
-                num_tiles = ceil(abs(( dist - (overlay * fov) ) /  ( fov * (1 - overlay) )))
-            else:
-                num_tiles = 1
+            axis = self._axes
 
-            self.variables[axis + '_tiles'].set(num_tiles)
+        overlay = float(self._percent_overlay) / 100
 
-            
-            
+        for ax in axis:
+            dist = abs(float(self.variables[f"{ax}_dist"].get()))  # um
+            fov = abs(float(self._fov[ax]))                        # um
 
-        
-    
+            num_tiles = calc_num_tiles(dist, overlay, fov)
+
+            self.variables[f"{ax}_tiles"].set(num_tiles)
+
     def calculate_distance(self, axis):
-        '''
+        """
         This function will calculate the distance for a given axis of the stage when the start or end position is changed via the Set buttons
         
         Parameters
         ----------
         self : object
             Tiling Wizard Controller instance
-        axis : char
+        axis : str
             x, y, z axis of stage to calculate
 
         Returns
         -------
         None
 
-        '''
-
+        """
         start = float(self.variables[axis + '_start'].get())
         end = float(self.variables[axis + '_end'].get())
         dist = abs(end - start)
         self.variables[axis + '_dist'].set(dist)
-
-
     
     def update_overlay(self):
-        '''
+        """
         Updates percent overlay when a user changes the widget in the popup. This value is used for backend calculations.
         The number of tiles will then be recalculated
 
@@ -325,23 +299,24 @@ class Tiling_Wizard_Controller(GUI_Controller):
         Returns
         -------
         None
-        '''
+        """
 
-        self.percent_overlay = self.variables['percent_overlay'].get()
-        
-        self.calculate_tiles("all")
-
-
+        try:
+            self._percent_overlay = float(self.variables['percent_overlay'].get())
+            self.calculate_tiles()
+        except ValueError:
+            # most likely an empty string was passed
+            pass
     
     def position_handler(self, axis, start_end):
-        '''
+        """
         When the Set [axis] Start/End button is pressed then the stage position is polled from the stage controller
 
         Parameters
         ----------
         self : object
             Tiling Wizard Controller instance
-        axis : char
+        axis : str
             x, y, z axis that corresponds to stage axis
         start_end : str
             start or end will signify which spinbox gets updated upon button press
@@ -351,15 +326,17 @@ class Tiling_Wizard_Controller(GUI_Controller):
         handler : func
             Function for setting positional spinbox based on parameters passed in
 
-        '''
+        """
         def handler():
             pos = self.stage_position_vars[axis].get()
             self.widgets[axis + '_' + start_end].widget.set(pos)
+            if axis == 'z':
+                setattr(self, f"_f_{start_end}", self.stage_position_vars['f'].get())
+
         return handler
 
-
     def update_fov(self):
-        '''
+        """
         Grabs the updated FOV if changed by user, will recalculate num of tiles for each axis after
 
         Parameters
@@ -370,18 +347,18 @@ class Tiling_Wizard_Controller(GUI_Controller):
         Returns
         -------
         None
-        '''
-        x = self.cam_settings_widgets['FOV_X'].get()
-        y = self.cam_settings_widgets['FOV_Y'].get()
-        z = abs(self.stack_acq_widgets['abs_z_end'].get() - self.stack_acq_widgets['abs_z_start'].get())
-        self.fov['x'] = x
-        self.fov['y'] = y
-        self.fov['z'] = z
+        """
 
-        self.calculate_tiles("all")
+        # Calculate signed fov
+        x = float(self.cam_settings_widgets['FOV_X'].get()) \
+            * sign(float(self.variables['x_end'].get()) - float(self.variables['x_start'].get()))
+        y = float(self.cam_settings_widgets['FOV_Y'].get()) \
+            * sign(float(self.variables['y_end'].get()) - float(self.variables['y_start'].get()))
+        z = float(self.stack_acq_widgets['end_position'].get()) - float(self.stack_acq_widgets['start_position'].get())
+        self._fov['x'], self._fov['y'], self._fov['z'] = x, y, z
 
+        self.calculate_tiles()
 
-    
     def showup(self):
         """
         # this function will let the popup window show in front

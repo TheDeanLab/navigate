@@ -43,11 +43,15 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 # Local Imports
 from aslm.view.main_window_content.camera_display.camera_view.tabs.image_metrics import image_metrics
 from aslm.view.main_window_content.camera_display.camera_view.tabs.palette import palette
+from aslm.view.main_window_content.camera_display.camera_view.tabs.live_frame import live_frame
+from aslm.view.main_window_content.camera_display.camera_view.tabs.slider import slider
+from aslm.view.main_window_content.camera_display.camera_view.tabs.rgb_selection import rgb_selection
 from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
+
 
 class camera_tab(ttk.Frame):
     def __init__(self, cam_wave, *args, **kwargs):
@@ -84,89 +88,6 @@ class camera_tab(ttk.Frame):
         self.live_frame = live_frame(self)
         self.live_frame.grid(row=1, column=1, sticky=NSEW, padx=5, pady=5)
 
-class live_frame(ttk.Labelframe):
-    def __init__(self, cam_view, *args, **kwargs):
-        # Init Frame
-        text_label = 'Image Display'
-        ttk.Labelframe.__init__(
-            self,
-            cam_view,
-            text=text_label,
-            *args,
-            **kwargs)
-
-        # Formatting
-        Grid.columnconfigure(self, 'all', weight=1)
-        Grid.rowconfigure(self, 'all', weight=1)
-
-        self.live_var = StringVar()
-        self.live = ttk.Combobox(self, textvariable=self.live_var)
-        self.live['values'] = ('Live', 'Image Plane', 'XY MIP', 'YZ MIP', 'ZY MIP')
-        self.live.set('Live')
-        self.live.grid(row=1, column=0)
-
-
-
-    def get_variables(self):
-        """
-        # This function returns a dictionary of all the variables that are tied to each widget name.
-        The key is the widget name, value is the variable associated.
-        """
-        variables = {}
-        for key, widget in self.inputs.items():
-            variables[key] = widget.get()
-        return variables
-
-    def get_widgets(self):
-        """
-        # This function returns the dictionary that holds the widgets.
-        The key is the widget name, value is the LabelInput class that has all the data.
-        """
-        return self.inputs
-
-
-class slider(ttk.Labelframe):
-    def __init__(self, cam_view, *args, **kwargs):
-        # Init Frame
-        text_label = 'Slice Index'
-        ttk.Labelframe.__init__(
-            self,
-            cam_view,
-            text=text_label,
-            *args,
-            **kwargs)
-
-        # Formatting
-        Grid.columnconfigure(self, 'all', weight=1)
-        Grid.rowconfigure(self, 'all', weight=1)
-
-        # Slider
-        self.inputs = {}
-        self.slider_widget = Scale(cam_view,
-                                   from_=0,
-                                   to=200,
-                                   tickinterval=20,
-                                   orient=HORIZONTAL,
-                                   showvalue=0,
-                                   label="Slice Index")
-        self.slider_widget.configure(state='disabled')  # 'normal'
-        self.slider_widget.grid(row=1, column=0, sticky=NSEW, padx=5, pady=5)
-
-
-    def get_variables(self):
-        """
-        # This function returns a dictionary of all the variables that are tied to each widget name.
-        The key is the widget name, value is the variable associated.
-        """
-        variables = {}
-        for key, widget in self.inputs.items():
-            variables[key] = widget.get()
-        return variables
-
-    def get_widgets(self):
-        """
-        # This function returns the dictionary that holds the widgets.
-        The key is the widget name, value is the LabelInput class that has all the data.
-        """
-        return self.inputs
-
+        #  Frame for camera selection and counts
+        self.rgb_selection = rgb_selection(self)
+        self.rgb_selection.grid(row=2, column=1, sticky=W, padx=5, pady=5)

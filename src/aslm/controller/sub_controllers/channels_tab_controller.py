@@ -330,7 +330,7 @@ class Channels_Tab_Controller(GUI_Controller):
         #     step_size = 0.001
         #     self.stack_acq_vals['step_size'].set(step_size)
 
-        number_z_steps = int(np.abs(np.floor((end_position - start_position) / step_size)))
+        number_z_steps = int(np.ceil(np.abs((end_position - start_position) / step_size)))
         self.stack_acq_vals['number_z_steps'].set(number_z_steps)
 
         # Shift the start/stop positions by the relative position

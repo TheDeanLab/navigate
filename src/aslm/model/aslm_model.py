@@ -177,11 +177,13 @@ class Model:
         for k in threads_dict:
             setattr(self, k, threads_dict[k].get_result())
 
+        # in synthetic_hardware mode, we need to wire up camera to daq
+        self.in_synthetic_mode = False
+        if args.synthetic_hardware:
+            self.in_synthetic_mode = True
+
         self.camera = self.get_camera()  # make sure we grab the correct camera for this resolution mode
 
-        # in synthetic_hardware mode, we need to wire up camera to daq
-        if args.synthetic_hardware:
-            self.daq.set_camera(self.camera0)
 
         # analysis class
         self.analysis = startup_functions.start_analysis(self.configuration,
@@ -236,8 +238,8 @@ class Model:
         self.stop_send_signal = False # stop signal thread
 
         self.pause_data_event = threading.Event()
-        self.ready_to_change_resolution = threading.Lock()
-        self.ask_to_change_resolution = False
+        self.pause_data_ready_lock = threading.Lock()
+        self.ask_to_pause_data_thread = False
 
         # timing - Units in milliseconds.
         self.camera_minimum_waiting_time = self.camera.get_minimum_waiting_time()
@@ -287,7 +289,9 @@ class Model:
                 if str(sn) == str(curr_cam.serial_number):
                     cam = curr_cam
                     break
-
+        # in synthetic mode, need to wire daq with camera when switching cameras.
+        if self.in_synthetic_mode:
+            self.daq.set_camera(cam)
         return cam
 
     def update_data_buffer(self, img_width=512, img_height=512):
@@ -435,6 +439,8 @@ class Model:
             n_frames = len(self.experiment.MicroscopeState['channels'].keys()) \
                        * int(self.experiment.MicroscopeState['number_z_steps']) \
                        * int(self.experiment.MicroscopeState['timepoints'])
+            if bool(self.experiment.MicroscopeState['is_multiposition']):
+                n_frames = n_frames * len(self.experiment.MicroscopeState['stage_positions'])
 
             if self.is_save:
                 self.experiment.Saving = kwargs['saving_info']
@@ -639,9 +645,9 @@ class Model:
 
         while not self.stop_acquisition:
             self.logger.debug(f'*******current camera {self.camera.serial_number}')
-            if self.ask_to_change_resolution:
+            if self.ask_to_pause_data_thread:
                 self.logger.debug('data thread prepare to change resolution')
-                self.ready_to_change_resolution.release()
+                self.pause_data_ready_lock.release()
                 self.logger.debug('ready to change resolution')
                 self.pause_data_event.clear()
                 self.pause_data_event.wait()
@@ -676,6 +682,12 @@ class Model:
         self.show_img_pipe.send('stop')
         self.logger.info('ASLM Model - Data thread stopped.')
         self.logger.info(f'ASLM Model - Received frames in total: {acquired_frame_num}')
+        
+        # release the lock when data thread ends
+        if self.pause_data_ready_lock.locked():
+            self.pause_data_ready_lock.release()
+
+        self.end_acquisition()  # Need this to turn off the lasers/close the shutters
 
     def calculate_number_of_channels(self):
         r"""Calculates the total number of channels selected."""
@@ -747,8 +759,6 @@ class Model:
         self.camera.initialize_image_series(self.data_buffer,
                                             self.number_of_frames)
         self.frame_id = 0
-
-        self.pause_data_event.set()
 
         self.open_shutter()
 
@@ -900,22 +910,12 @@ class Model:
 
         microscope_state = self.experiment.MicroscopeState
         stack_cycling_mode = microscope_state['stack_cycling_mode']
+        is_multiposition = bool(self.experiment.MicroscopeState['is_multiposition'])
 
-        # TODO: Make relative to stage coordinates.
-        self.get_stage_position()
-        restore_z = self.stages.z_pos
-
-        # z-positions
-        stack_z_origin = float(microscope_state.get('stack_z_origin', self.experiment.StageParameters['z']))
-        z_pos = np.linspace(float(microscope_state['start_position']) + stack_z_origin,
-                            float(microscope_state['end_position']) + stack_z_origin,
-                            int(microscope_state['number_z_steps']))
-
-        # corresponding focus positions
-        stack_focus_origin = float(microscope_state.get('stack_focus_origin', self.experiment.StageParameters['f']))
-        f_pos = np.linspace(float(microscope_state['start_focus']) + stack_focus_origin,
-                            float(microscope_state['end_focus']) + stack_focus_origin,
-                            int(microscope_state['number_z_steps']))
+        if not is_multiposition:
+            # TODO: Make relative to stage coordinates.
+            self.get_stage_position()
+            restore_z = self.stages.z_pos
 
         if stack_cycling_mode == 'per_stack':
             # Only change the channel we're looking at once per z-stack
@@ -928,43 +928,73 @@ class Model:
             logging.debug(f"ASLM Model - Unknown stack cycling mode: {stack_cycling_mode}.")
             return
 
-        #TODO: Cycle through multiposition here, if enabled. @ ZACH!
-        if self.experiment.MicroscopeState['is_multiposition'] is True:
-            # Pseudo code.
-            # If true, iterate through each row in the multiposition dialog.
-            # These values have been passed over in the MicroscopeState object.
-            # position = {  0 : {'X': x_pos, 'Y': y_pos, 'Z': z_pos, ...}
-            #               1 : {'X': x_pos, 'Y': y_pos, 'Z': z_pos, ...}   }
-            positions = self.experiment.MicroscopeState['stage_positions']
-
-            #  for row in positions:
-            pass 
-
         # For each moment in time...
         for t in range(int(microscope_state['timepoints'])):
             if self.stop_acquisition:
                 break
-            # Make sure all the right channels are active...
-            for ch in active_channels:
+
+            if is_multiposition:
+                # Pseudo code.
+                # If true, iterate through each row in the multiposition dialog.
+                # These values have been passed over in the MicroscopeState object.
+                # position = {  0 : {'X': x_pos, 'Y': y_pos, 'Z': z_pos, ...}
+                #               1 : {'X': x_pos, 'Y': y_pos, 'Z': z_pos, ...}   }
+                positions = self.experiment.MicroscopeState['stage_positions']
+            else:
+                # Normal mode, use default positions
+                positions = dict({
+                    0 : {
+                        'x': float(self.experiment.StageParameters['x']),
+                        'y': float(self.experiment.StageParameters['y']),
+                        'z': float(microscope_state.get('stack_z_origin', self.experiment.StageParameters['z'])),
+                        'theta': float(self.experiment.StageParameters['theta']),
+                        'f': float(microscope_state.get('stack_focus_origin', self.experiment.StageParameters['f']))
+                    }
+                })
+
+            for k, position in positions.items():
+                print(k, position)
                 if self.stop_acquisition:
                     break
-                try:
-                    # If we have readable active chans (we're in per_stack mode) we turn
-                    # on one channel at a time.
-                    for ch2 in active_channels:
-                        if ch2 != ch:
-                            self.experiment.MicroscopeState['channels'][ch2]['is_selected'] = False
-                    self.experiment.MicroscopeState['channels'][ch]['is_selected'] = True
-                except KeyError:
-                    pass
 
-                # And step through z-space...
-                for z, f in zip(z_pos, f_pos):
+                # move to position
+                for ax, val in position.items():
+                    self.move_stage({f"{ax}_abs": val}, wait_until_done=True)
+
+                # construct z-stack
+                stack_z_origin, stack_focus_origin = position['z'], position['f']
+                # z-positions
+                z_pos = np.linspace(float(microscope_state['start_position']) + stack_z_origin,
+                                    float(microscope_state['end_position']) + stack_z_origin,
+                                    int(microscope_state['number_z_steps']))
+
+                # corresponding focus positions
+                f_pos = np.linspace(float(microscope_state['start_focus']) + stack_focus_origin,
+                                    float(microscope_state['end_focus']) + stack_focus_origin,
+                                    int(microscope_state['number_z_steps']))
+
+                # Make sure all the right channels are active...
+                for ch in active_channels:
                     if self.stop_acquisition:
                         break
-                    self.move_stage({'z_abs': z}, wait_until_done=True)  # Update positions
-                    self.move_stage({'f_abs': f}, wait_until_done=True)
-                    self.run_single_acquisition()  # This will take pics of all active channels
+                    try:
+                        # If we have readable active chans (we're in per_stack mode) we turn
+                        # on one channel at a time.
+                        for ch2 in active_channels:
+                            if ch2 != ch:
+                                self.experiment.MicroscopeState['channels'][ch2]['is_selected'] = False
+                        self.experiment.MicroscopeState['channels'][ch]['is_selected'] = True
+                    except KeyError:
+                        pass
+
+                    # And step through z-space...
+                    for z, f in zip(z_pos, f_pos):
+                        print(f"Moving to z: {z}, f: {f}")
+                        if self.stop_acquisition:
+                            break
+                        self.move_stage({'z_abs': z}, wait_until_done=True)  # Update positions
+                        self.move_stage({'f_abs': f}, wait_until_done=True)
+                        self.run_single_acquisition()  # This will take pics of all active channels
 
         # Restore active channels. TODO: Is this necessary?
         for ch in active_channels:
@@ -973,8 +1003,9 @@ class Model:
             except KeyError:
                 pass
 
-        # Restore stage position
-        self.move_stage({'z_abs': restore_z}, wait_until_done=True)  # Update position
+        if not is_multiposition:
+            # Restore stage position
+            self.move_stage({'z_abs': restore_z}, wait_until_done=True)  # Update position
 
     def run_single_channel_acquisition_with_features(self, target_channel=1):
         r"""Acquire data with ...
@@ -990,8 +1021,7 @@ class Model:
             return
         
         self.signal_container.reset()
-        if not self.signal_container.container_end_lock.locked():
-            self.signal_container.container_end_lock.acquire()
+
         while not self.signal_container.end_flag and not self.stop_send_signal and not self.stop_acquisition:
             self.run_single_channel_acquisition(target_channel)
             if not hasattr(self, 'signal_container'):

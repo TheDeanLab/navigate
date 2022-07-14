@@ -179,8 +179,7 @@ class ASLM_controller:
         self.initialize_menus()
 
         # Set view based on model.experiment
-        self.experiment = session(experiment_path,
-                                  args.verbose)
+        self.experiment = session(experiment_path, args.verbose)
         self.populate_experiment_setting()
 
         # Camera View Tab
@@ -617,16 +616,15 @@ class ASLM_controller:
                                                args=('single',))
 
             elif self.acquire_bar_controller.mode == 'live':
-                    self.threads_pool.createThread('camera',
-                                                   self.capture_image,
-                                                   args=('live',))
+                self.threads_pool.createThread('camera',
+                                               self.capture_image,
+                                               args=('live',))
 
             elif self.acquire_bar_controller.mode == 'z-stack':
                 if self.experiment.MicroscopeState['is_multiposition'] is True:
                     # Populate MicroscopeState with the positions
                     self.experiment.MicroscopeState['stage_positions'] = self.channels_tab_controller.multi_position_controller.get_positions()
                     print("Positions:", self.experiment.MicroscopeState['stage_positions'])
-
 
                 self.threads_pool.createThread('camera',
                                                self.capture_image,
@@ -691,8 +689,6 @@ class ASLM_controller:
             'z-stack', ...
         """
         self.camera_view_controller.image_count = 0
-        active_channels = [channel[-1] for channel in self.experiment.MicroscopeState['channels'].keys()]
-        num_channels = len(active_channels)
 
         # Start up Progress Bars
         images_received = 0
@@ -705,6 +701,10 @@ class ASLM_controller:
                                microscope_info=self.experiment.MicroscopeState,
                                camera_info=self.experiment.CameraParameters,
                                saving_info=self.experiment.Saving)
+
+        self.camera_view_controller.initialize_non_live_display(self.data_buffer,
+                                                                self.experiment.MicroscopeState,
+                                                                self.experiment.CameraParameters)
 
         while True:
             # Receive the Image and log it.
@@ -722,7 +722,6 @@ class ASLM_controller:
             self.camera_view_controller.display_image(
                 image=self.data_buffer[image_id],
                 microscope_state=self.experiment.MicroscopeState,
-                channel_id=active_channels[image_id % num_channels],
                 images_received=images_received)
             images_received += 1
 
@@ -791,18 +790,12 @@ class ASLM_controller:
         update_stage_dict(self, pos_dict)
 
         # Pass to model
-        success = self.model.move_stage(pos_dict)
-        # if not success:
-        #     print("Unsuccessful")
-        #     # Let's update our internal positions
-        #     time.sleep(0.250)  # TODO: Banks on this getting called in a thread. Truly unsafe.
-        #                        #       Currently set to debounce for the stage buttons.
-        #     ret_pos_dict = self.model.get_stage_position()
-        #     print(ret_pos_dict)
-        #     update_stage_dict(self, ret_pos_dict)
-        #     self.update_stage_gui_controller_silent(ret_pos_dict)
+        self.model.move_stage(pos_dict)
 
     def stop_stage(self):
+        r"""
+        Stop the stage. Grab the stopped position from the stage and update the GUI control values accordingly.
+        """
         self.model.stop_stage()
         ret_pos_dict = self.model.get_stage_position()
         update_stage_dict(self, ret_pos_dict)

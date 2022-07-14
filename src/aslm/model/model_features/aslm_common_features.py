@@ -43,24 +43,21 @@ class ChangeResolution:
         
     def signal_func(self):
         self.model.logger.debug('prepare to change resolution')
-        self.model.ready_to_change_resolution.acquire()
-        self.model.ask_to_change_resolution = True
+        self.model.pause_data_ready_lock.acquire()
+        self.model.ask_to_pause_data_thread = True
         self.model.logger.debug('wait to change resolution')
-        self.model.ready_to_change_resolution.acquire()
+        self.model.pause_data_ready_lock.acquire()
         self.model.change_resolution(self.resolution_mode)
         self.model.logger.debug('changed resolution')
-        self.model.ask_to_change_resolution = False
+        self.model.ask_to_pause_data_thread = False
         self.model.prepare_acquisition(False)
+        self.model.pause_data_event.set()
         self.model.logger.debug('wake up data thread ')
-        self.model.ready_to_change_resolution.release()
-        return True
-
-    def data_func(self):
-        print('the camera is:', self.model.camera.serial_number)
+        self.model.pause_data_ready_lock.release()
         return True
 
     def generate_meta_data(self, *args):
-        print('This frame: change resolution', self.resolution_mode, self.model.frame_id)
+        # print('This frame: change resolution', self.resolution_mode, self.model.frame_id)
         return True
 
 class Snap:
@@ -68,8 +65,12 @@ class Snap:
         self.model = model
 
         self.config_table={'signal':{},
-                            'data': {'main': dummy_True}}
+                            'data': {'main': self.data_func}}
+
+    def data_func(self, *args):
+        print('the camera is:', self.model.camera.serial_number, self.model.frame_id)
+        return True
 
     def generate_meta_data(self, *args):
-        print('This frame: snap one frame', self.model.frame_id)
+        # print('This frame: snap one frame', self.model.frame_id)
         return True

@@ -996,8 +996,7 @@ class Model:
             return
         
         self.signal_container.reset()
-        if not self.signal_container.container_end_lock.locked():
-            self.signal_container.container_end_lock.acquire()
+
         while not self.signal_container.end_flag and not self.stop_send_signal and not self.stop_acquisition:
             self.run_single_channel_acquisition(target_channel)
             if not hasattr(self, 'signal_container'):

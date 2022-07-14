@@ -56,12 +56,8 @@ class ChangeResolution:
         self.model.pause_data_ready_lock.release()
         return True
 
-    def data_func(self):
-        print('the camera is:', self.model.camera.serial_number)
-        return True
-
     def generate_meta_data(self, *args):
-        print('This frame: change resolution', self.resolution_mode, self.model.frame_id)
+        # print('This frame: change resolution', self.resolution_mode, self.model.frame_id)
         return True
 
 class Snap:
@@ -69,8 +65,12 @@ class Snap:
         self.model = model
 
         self.config_table={'signal':{},
-                            'data': {'main': dummy_True}}
+                            'data': {'main': self.data_func}}
+
+    def data_func(self, *args):
+        print('the camera is:', self.model.camera.serial_number, self.model.frame_id)
+        return True
 
     def generate_meta_data(self, *args):
-        print('This frame: snap one frame', self.model.frame_id)
+        # print('This frame: snap one frame', self.model.frame_id)
         return True

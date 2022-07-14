@@ -74,7 +74,7 @@ def compute_tiles_from_bounding_box(x_start, x_stop, x_tiles, y_start, y_stop, y
     return table_of_values
 
 
-def compute_tiles_from_bounding_box(x_start, x_tiles, x_length, x_overlap,
+def compute_tiles_from_bounding_box2(x_start, x_tiles, x_length, x_overlap,
                                     y_start, y_tiles, y_length, y_overlap,
                                     z_start, z_tiles, z_length, z_overlap,
                                     theta_start, theta_tiles, theta_length, theta_overlap,

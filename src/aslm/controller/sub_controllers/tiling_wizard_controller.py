@@ -36,7 +36,7 @@ import logging
 # Third Party Imports
 
 # Local Imports
-from aslm.tools.multipos_table_tools import compute_tiles_from_bounding_box, update_table, calc_num_tiles, sign
+from aslm.tools.multipos_table_tools import *
 from aslm.controller.sub_controllers.gui_controller import GUI_Controller
 from aslm.controller.aslm_controller_functions import combine_funcs
 
@@ -191,11 +191,11 @@ class Tiling_Wizard_Controller(GUI_Controller):
         r_tiles = 1
 
         # ov = float(self._percent_overlay) / 100
-        # table_values = compute_tiles_from_bounding_box(x_start, x_tiles, self._fov['x'], ov,
-        #                                                y_start, y_tiles, self._fov['y'], ov,
-        #                                                z_start, z_tiles, self._fov['z'], ov,
-        #                                                r_start, r_tiles, 0, ov,
-        #                                                self._f_start, z_tiles, (self._f_end-self._f_start), ov)
+        # table_values = compute_tiles_from_bounding_box2(x_start, x_tiles, self._fov['x'], ov,
+        #                                                 y_start, y_tiles, self._fov['y'], ov,
+        #                                                 z_start, z_tiles, self._fov['z'], ov,
+        #                                                 r_start, r_tiles, 0, ov,
+        #                                                 self._f_start, z_tiles, (self._f_end-self._f_start), ov)
 
         table_values = compute_tiles_from_bounding_box(x_start, x_stop, x_tiles,
                                                        y_start, y_stop, y_tiles,

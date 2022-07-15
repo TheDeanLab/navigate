@@ -135,7 +135,7 @@ class x_y_frame(ttk.Frame):
         x_y_frame.down_x_btn.grid(row=2, column=0, rowspan=2, columnspan=2, padx=2, pady=2) #LEFT
         x_y_frame.zero_xy_btn.grid(row=2, column=2, rowspan=1, columnspan=2, padx=2, pady=(5,2), sticky=(NSEW)) #Zero xy
         x_y_frame.increment_box.grid(row=3, column=2, rowspan=1, columnspan=2, padx=2, pady=2, sticky=(NSEW)) #Increment spinbox
-
+        x_y_frame.increment_box.widget.set_precision(-1)
 
 
 

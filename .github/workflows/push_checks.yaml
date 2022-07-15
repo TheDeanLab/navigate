@@ -12,6 +12,7 @@ jobs:
         operating-system: [windows-latest]  # [ubuntu-latest, windows-latest]
 
     steps:
+      - name: Checkout
       - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v3
@@ -23,7 +24,9 @@ jobs:
           pip install pytest
           pip install pytest-cov
           pip install -e .
+        #pip install pytest-xvfb
       - name: Test with pytest
+        #uses: GabrielBB/xvfb-action@v1
         run: |
           python3 -m pytest --cov=./ --cov-report=xml
       - name: Codecov

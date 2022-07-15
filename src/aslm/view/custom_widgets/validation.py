@@ -175,6 +175,11 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         self.focus_update_var = focus_update_var
         self.bind('<FocusOut>', self._set_focus_update_var)
 
+    def _get_precision(self):
+        nums_after = self.resolution.find('.')
+        
+        return (-1) * len(self.resolution[nums_after + 1:])
+
     def _key_validate(self, char, index, current, proposed, action, **kwargs):
 
         valid = True
@@ -332,10 +337,10 @@ class ValidatedCombobox(ValidatedMixin, ttk.Combobox):
 # On focusout, make sure number is a valid number string and greater than from value
 # If given a min_var, max_var, or focus_update_var then the spinbox range will update dynamically when those valuse are changed (can be used to link to other widgets)
 class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
-    def __init__(self, *args, precision=None, min_var=None, max_var=None, focus_update_var=None, from_='-Infinity', to='Infinity', **kwargs):
+    def __init__(self, *args, min_var=None, max_var=None, focus_update_var=None, from_='-Infinity', to='Infinity', **kwargs):
         super().__init__(*args, from_=from_, to=to, **kwargs)
-        self.resolution = Decimal(str(kwargs.get('increment', '1.0'))) # Number put into spinbox
-        self.precision = (self.resolution.normalize().as_tuple().exponent) # Precision of number as exponent
+        self.resolution = str(kwargs.get('increment', '1.0')) # Number put into spinbox
+        self.precision = self._get_precision()
         self.variable = kwargs.get('textvariable') or tk.DoubleVar
 
         # Dynamic range checker
@@ -354,6 +359,11 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         This is separate from the increment value.
         """
         self.precision = prec
+
+    def _get_precision(self):
+        nums_after = self.resolution.find('.')
+        
+        return (-1) * len(self.resolution[nums_after + 1:])
 
     def _key_validate(self, char, index, current, proposed, action, **kwargs):
 

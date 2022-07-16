@@ -260,9 +260,9 @@ class Model:
         # TODO: put it here now
         self.feature_list = []
         # automatically switch resolution
-        self.feature_list.append([[{'name': Snap}, {'name': ChangeResolution, 'args': ('1x',)}], [{'name': Snap, 'node':{'device_related': True}}], [{'name': ChangeResolution, 'args': ('high',)}], [{'name': Snap, 'node':{'device_related': True}}]])
-        # TODO: an updated one, need to test
         self.feature_list.append([[{'name': ChangeResolution, 'args': ('1x',)}, {'name': Snap}], [{'name': ChangeResolution, 'args': ('high',), 'node': {'device_related': True}}, {'name': Snap}]])
+        # z stack acquisition
+        self.feature_list.append([[{'name': ZStackAcquisition}]])
 
     def get_camera(self):
         r"""Select active camera.

@@ -74,3 +74,121 @@ class Snap:
     def generate_meta_data(self, *args):
         # print('This frame: snap one frame', self.model.frame_id)
         return True
+
+class ZStackAcquisition:
+    def __init__(self, model):
+        self.model = model
+
+        self.number_z_steps = 0
+        self.start_z_position = 0
+        self.end_z_position = 0
+        self.start_focus = 0
+        self.end_focus = 0
+        self.z_step_size = 0
+        self.focus_step_size = 0
+        self.timepoints = 0
+
+        self.positions = {}
+        self.current_position_idx = 0
+        self.current_z_position = 0
+        self.current_focus_position = 0
+        self.need_to_move_new_position = True
+
+        self.config_table = {'signal': {'init': self.pre_signal_func,
+                                        'main': self.signal_func,
+                                        'end': self.signal_end},
+                             'data': {'main': dummy_True},
+                             'node': {'node_type': 'multi-step',
+                                      'device_related': True}}
+
+    def pre_signal_func(self):
+        microscope_state = self.model.experiment.MicroscopeState
+
+        self.number_z_steps = int(microscope_state['number_z_steps'])
+
+        self.start_z_position = float(microscope_state['start_position'])
+        self.end_z_position = float(microscope_state['end_position'])
+        self.z_step_size = (self.end_z_position - self.start_z_position) / self.number_z_steps
+        
+        self.start_focus = float(microscope_state['start_focus'])
+        self.end_focus = float(microscope_state['end_focus'])
+        self.focus_step_size = (self.end_focus - self.start_focus) / self.number_z_steps
+        
+        self.timepoints = int(microscope_state['timepoints'])
+
+        if bool(microscope_state['is_multiposition']):
+            self.positions = microscope_state['stage_positions']
+        else:
+            self.positions = dict({
+                    0 : {
+                        'x': float(self.model.experiment.StageParameters['x']),
+                        'y': float(self.model.experiment.StageParameters['y']),
+                        'z': float(microscope_state.get('stack_z_origin', self.model.experiment.StageParameters['z'])),
+                        'theta': float(self.model.experiment.StageParameters['theta']),
+                        'f': float(microscope_state.get('stack_focus_origin', self.model.experiment.StageParameters['f']))
+                    }
+                })
+        self.current_position_idx = 0
+        self.current_z_position = 0
+        self.current_focus_position = 0
+        self.z_position_moved_time = 0
+        self.need_to_move_new_position = True
+
+        self.restore_z = -1
+
+        if not bool(microscope_state['is_multiposition']):
+            # TODO: Make relative to stage coordinates.
+            self.model.get_stage_position()
+            self.restore_z = self.model.stages.z_pos
+    
+    def signal_func(self):
+        if self.model.stop_acquisition:
+            return False
+        # move stage X, Y, Theta
+        if self.need_to_move_new_position:
+            self.need_to_move_new_position = False
+            pos_dict = dict(map(lambda ax: (f'{ax}_abs', self.positions[self.current_position_idx][ax]), ['x', 'y', 'theta']))
+            self.model.move_stage(pos_dict, wait_until_done=True)
+            
+            self.z_position_moved_time = 0
+            # calculate first z, f position
+            self.current_z_position = self.start_z_position + self.positions[self.current_position_idx]['z']
+            self.current_focus_position = self.start_focus + self.positions[self.current_position_idx]['f']
+            # move to next position
+            self.current_position_idx += 1
+
+        # move z, f
+        self.model.move_stage({'z_abs': self.current_z_position, 'f_abs': self.current_focus_position}, wait_until_done=True)
+
+        # next z, f position
+        self.current_z_position += self.z_step_size
+        self.current_focus_position += self.focus_step_size
+
+        # update z position moved time
+        self.z_position_moved_time += 1
+
+        return True
+
+    def signal_end(self):
+        # end this node
+        if self.model.stop_acquisition:
+            return True
+        
+        # decide whether to move X,Y,Theta
+        if self.z_position_moved_time > self.number_z_steps:
+            self.need_to_move_new_position = True
+            if self.current_position_idx == len(self.positions):
+                self.timepoints -= 1
+                self.current_position_idx = 0
+
+        if self.timepoints == 0:
+            # restore z if need
+            if self.restore_z >= 0:
+                self.model.move_stage({'z_abs': self.restore_z}, wait_until_done=True)  # Update position
+            return True
+        return False
+
+    def generate_meta_data(self, *args):
+        # print('This frame: z stack', self.model.frame_id)
+        return True
+        

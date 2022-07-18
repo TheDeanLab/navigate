@@ -947,7 +947,7 @@ class Model:
             else:
                 # Normal mode, use default positions
                 positions = dict({
-                    0 : {
+                    0: {
                         'x': float(self.experiment.StageParameters['x']),
                         'y': float(self.experiment.StageParameters['y']),
                         'z': float(microscope_state.get('stack_z_origin', self.experiment.StageParameters['z'])),

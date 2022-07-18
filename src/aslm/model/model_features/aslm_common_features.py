@@ -191,4 +191,60 @@ class ZStackAcquisition:
     def generate_meta_data(self, *args):
         # print('This frame: z stack', self.model.frame_id)
         return True
-        
+
+
+class FindTissueSimple2D:
+    def __init__(self, model, overlap=0.2):
+        """
+        Detect tissue and grid out the space to image.
+        """
+        self.model = model
+
+        self.config_table = {'signal': {},
+                             'data': self.data_func}
+
+        self.overlap = overlap
+
+    def data_func(self, frame_ids):
+        import scipy.ndimage
+        import numpy as np
+        from aslm.tools.multipos_table_tools import compute_tiles_from_bounding_box2, calc_num_tiles, update_table
+
+        for idx in frame_ids:
+            img = self.model.data_buffer[idx]
+
+            # Threshold the image
+            mag_img = scipy.ndimage.gaussian_gradient_magnitude(img, 20)
+            l, h = np.min(mag_img), np.max(mag_img)
+            mag_img = (mag_img - l) / (h - l)
+            thresh_img = scipy.ndimage.binary_fill_holes(mag_img > np.mean(mag_img))
+
+            # Find the bounding box
+            if self.model.experiment.MicroscopeState['resolution_mode'] == 'high':
+                pixel_size = self.model.configuration.ZoomParameters['high_res_zoom_pixel_size']
+                mag = 300/8.4
+            else:
+                zoom = self.model.experiment.MicroscopeState['zoom']
+                pixel_size = self.model.configuration.ZoomParameters['low_res_zoom_pixel_size'][zoom]
+                mag = float(zoom[:-1])
+            x, y = np.where(thresh_img)
+            x_start, x_end = pixel_size*np.min(x), pixel_size*np.max(x)
+            y_start, y_end = pixel_size*np.min(y), pixel_size*np.max(y)
+
+            # grid out the 2D space
+            z_start = self.model.experiment.StageParameters['z']
+            r_start = self.model.experiment.StageParameters['theta']
+            f_start = self.model.experiment.StageParameters['f']
+            xd, yd = x_end-x_start, y_end-y_start
+            fov_x = float(self.model.experiment.CameraParameters['x_pixels']) * pixel_size / mag
+            fov_y = float(self.model.experiment.CameraParameters['y_pixels']) * pixel_size / mag
+            x_tiles = calc_num_tiles(xd, self.overlap, fov_x)
+            y_tiles = calc_num_tiles(yd, self.overlap, fov_y)
+
+            table_values = compute_tiles_from_bounding_box2(x_start, x_tiles, fov_x, self.overlap,
+                                                            y_start, y_tiles, fov_y, self.overlap,
+                                                            z_start, 1, 0, self.overlap,
+                                                            r_start, 1, 0, self.overlap,
+                                                            f_start, 1, 0, self.overlap)
+
+            # somehow pass table_values to the controller.... update_table()

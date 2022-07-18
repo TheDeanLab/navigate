@@ -610,33 +610,7 @@ class ASLM_controller:
                 self.acquire_bar_controller.stop_acquire()
                 return
 
-            if self.acquire_bar_controller.mode == 'single':
-                self.threads_pool.createThread('camera',
-                                               self.capture_image,
-                                               args=('single',))
-
-            elif self.acquire_bar_controller.mode == 'live':
-                self.threads_pool.createThread('camera',
-                                               self.capture_image,
-                                               args=('live',))
-
-            elif self.acquire_bar_controller.mode == 'z-stack':
-                if self.experiment.MicroscopeState['is_multiposition'] is True:
-                    # Populate MicroscopeState with the positions
-                    self.experiment.MicroscopeState['stage_positions'] = self.channels_tab_controller.multi_position_controller.get_positions()
-                    print("Positions:", self.experiment.MicroscopeState['stage_positions'])
-
-                self.threads_pool.createThread('camera',
-                                               self.capture_image,
-                                               args=('z-stack',))
-
-
-            elif self.acquire_bar_controller.mode == 'projection':
-                pass
-
-            else:
-                logger.debug("ASLM Controller - Wrong acquisition mode. Not recognized.")
-
+            self.threads_pool.createThread('camera', self.capture_image, args=(self.acquire_bar_controller.mode,))
 
         elif command == 'stop_acquire':
             # self.model.run_command('stop')
@@ -697,7 +671,7 @@ class ASLM_controller:
                                                  mode=mode,
                                                  stop=False)
 
-        self.model.run_command(mode,
+        self.model.run_command('acquire', imaging_mode=mode,
                                microscope_info=self.experiment.MicroscopeState,
                                camera_info=self.experiment.CameraParameters,
                                saving_info=self.experiment.Saving)

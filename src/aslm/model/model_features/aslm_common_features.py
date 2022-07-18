@@ -35,8 +35,7 @@ class ChangeResolution:
     def __init__(self, model, resolution_mode='high'):
         self.model = model
 
-        self.config_table={'signal': {'main': self.signal_func}, 
-                            'data': {'main': dummy_True}}
+        self.config_table={'signal': {'main': self.signal_func}}
 
         self.resolution_mode = resolution_mode
 
@@ -64,8 +63,7 @@ class Snap:
     def __init__(self, model):
         self.model = model
 
-        self.config_table={'signal':{},
-                            'data': {'main': self.data_func}}
+        self.config_table={'data': {'main': self.data_func}}
 
     def data_func(self, *args):
         print('the camera is:', self.model.camera.serial_number, self.model.frame_id)
@@ -97,7 +95,6 @@ class ZStackAcquisition:
         self.config_table = {'signal': {'init': self.pre_signal_func,
                                         'main': self.signal_func,
                                         'end': self.signal_end},
-                             'data': {'main': dummy_True},
                              'node': {'node_type': 'multi-step',
                                       'device_related': True}}
 

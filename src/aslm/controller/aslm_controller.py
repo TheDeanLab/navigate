@@ -815,5 +815,8 @@ class ASLM_controller:
             event, value = self.event_queue.get()
             if event == 'waveform':
                 self.waveform_tab_controller.plot_waveforms2(value, self.configuration.DAQParameters['sample_rate'])
+            elif event == 'multiposition':
+                from aslm.tools.multipos_table_tools import update_table
+                update_table(self.view.settings.channels_tab.multipoint_list.get_table(), value, append=True)
             elif event == 'stop':
                 break

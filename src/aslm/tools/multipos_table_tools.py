@@ -197,7 +197,7 @@ def calc_num_tiles(dist, overlap, roi_length):
     return int(num_tiles)
 
 
-def update_table(table, pos):
+def update_table(table, pos, append=False):
     """
     Updates and redraws table based on given list. List is converted to a pandas dataframe before setting data in table.
     
@@ -207,13 +207,19 @@ def update_table(table, pos):
         Instance of multiposition table in GUI
     pos: list or np.array
         List or np.array of positions to be added to table. Each row contains an X, Y, Z, R, F position
+    append: bool
+        Append the new positions to the table
         
     Returns
     -------
     None : 
         Table is updated
     """
-    table.model.df = pd.DataFrame(pos, columns=list('XYZRF'))
+    frame = pd.DataFrame(pos, columns=list('XYZRF'))
+    if append:
+        table.model.df.append(frame)
+    else:
+        table.model.df = frame
     table.currentrow = table.model.df.shape[0]-1
     table.update_rowcolors()
     table.redraw()

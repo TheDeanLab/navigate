@@ -244,4 +244,4 @@ class FindTissueSimple2D:
                                                             r_start, 1, 0, self.overlap,
                                                             f_start, 1, 0, self.overlap)
 
-            # somehow pass table_values to the controller.... update_table()
+            self.model.event_queue.put(('multiposition', table_values))

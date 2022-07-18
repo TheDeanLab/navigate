@@ -198,14 +198,14 @@ class FindTissueSimple2D:
         self.model = model
 
         self.config_table = {'signal': {},
-                             'data': self.data_func}
+                             'data': {'main': self.data_func}}
 
         self.overlap = overlap
 
     def data_func(self, frame_ids):
         import scipy.ndimage
         import numpy as np
-        from aslm.tools.multipos_table_tools import compute_tiles_from_bounding_box2, calc_num_tiles, update_table
+        from aslm.tools.multipos_table_tools import compute_tiles_from_bounding_box2, calc_num_tiles
 
         for idx in frame_ids:
             img = self.model.data_buffer[idx]

@@ -191,7 +191,7 @@ class ZStackAcquisition:
 
 
 class FindTissueSimple2D:
-    def __init__(self, model, overlap=0.2):
+    def __init__(self, model, overlap=0.1, target_resolution='high'):
         """
         Detect tissue and grid out the space to image.
         """
@@ -201,32 +201,45 @@ class FindTissueSimple2D:
                              'data': {'main': self.data_func}}
 
         self.overlap = overlap
+        self.target_resolution = target_resolution
 
     def data_func(self, frame_ids):
-        import scipy.ndimage
+        from skimage import filters
+        from skimage.transform import downscale_local_mean
         import numpy as np
         from aslm.tools.multipos_table_tools import compute_tiles_from_bounding_box2, calc_num_tiles
 
         for idx in frame_ids:
             img = self.model.data_buffer[idx]
 
-            # Threshold the image
-            mag_img = scipy.ndimage.gaussian_gradient_magnitude(img, 20)
-            l, h = np.min(mag_img), np.max(mag_img)
-            mag_img = (mag_img - l) / (h - l)
-            thresh_img = scipy.ndimage.binary_fill_holes(mag_img > np.mean(mag_img))
-
-            # Find the bounding box
+            # Get current mag
             if self.model.experiment.MicroscopeState['resolution_mode'] == 'high':
+                curr_pixel_size = self.model.configuration.ZoomParameters['high_res_zoom_pixel_size']
+                curr_mag = 300/8.4
+            else:
+                zoom = self.model.experiment.MicroscopeState['zoom']
+                curr_pixel_size = self.model.configuration.ZoomParameters['low_res_zoom_pixel_size'][zoom]
+                curr_mag = float(zoom[:-1])
+
+            # get target mag
+            if self.target_resolution == 'high':
                 pixel_size = self.model.configuration.ZoomParameters['high_res_zoom_pixel_size']
                 mag = 300/8.4
             else:
-                zoom = self.model.experiment.MicroscopeState['zoom']
-                pixel_size = self.model.configuration.ZoomParameters['low_res_zoom_pixel_size'][zoom]
-                mag = float(zoom[:-1])
+                pixel_size = self.model.configuration.ZoomParameters['low_res_zoom_pixel_size'][self.target_resolution]
+                mag = float(self.target_resolution)
+
+            ds = int(mag/curr_mag)
+
+            # Downsample
+            ds_img = downscale_local_mean(img, (ds, ds))
+
+            thresh_img = ds_img > filters.threshold_otsu(img)
+
+            # Find the bounding box
             x, y = np.where(thresh_img)
-            x_start, x_end = pixel_size*np.min(x), pixel_size*np.max(x)
-            y_start, y_end = pixel_size*np.min(y), pixel_size*np.max(y)
+            x_start, x_end = curr_pixel_size*ds*np.min(x)/curr_mag, curr_pixel_size*ds*np.max(x)/curr_mag
+            y_start, y_end = curr_pixel_size*ds*np.min(y)/curr_mag, curr_pixel_size*ds*np.max(y)/curr_mag
 
             # grid out the 2D space
             z_start = self.model.experiment.StageParameters['z']

@@ -263,6 +263,8 @@ class Model:
         self.feature_list.append([[{'name': ChangeResolution, 'args': ('1x',)}, {'name': Snap}], [{'name': ChangeResolution, 'args': ('high',), 'node': {'device_related': True}}, {'name': Snap}]])
         # z stack acquisition
         self.feature_list.append([[{'name': ZStackAcquisition}]])
+        # threshold and tile
+        self.feature_list.append([[{'name': FindTissueSimple2D}]])
 
     def get_camera(self):
         r"""Select active camera.
@@ -399,7 +401,6 @@ class Model:
             # TODO: put it here now.
             if self.imaging_mode == 'z-stack':
                 self.signal_container, self.data_container = load_features(self, [[{'name': ZStackAcquisition}]])
-            
             if self.imaging_mode == 'live':
                 self.signal_thread = threading.Thread(target=self.run_live_acquisition)
             else:
@@ -746,8 +747,8 @@ class Model:
             microscope_state = self.experiment.MicroscopeState
             if channel_key not in microscope_state['channels'] \
                     or not microscope_state['channels'][channel_key]['is_selected']:
-                if self.imaging_mode != 'z-stack':
-                    self.stop_acquisition = True
+                # if self.imaging_mode != 'z-stack':
+                #     self.stop_acquisition = True
                 return
 
             # Update Microscope State Dictionary
@@ -870,7 +871,7 @@ class Model:
         self.run_single_acquisition()
         # wait a very short time to the data thread to get the last frame
         # TODO: maybe need to adjust
-        time.sleep(0.005)
+        # time.sleep(0.005)
         self.stop_acquisition = True
 
     def run_single_channel_acquisition_with_features(self, target_channel=1):

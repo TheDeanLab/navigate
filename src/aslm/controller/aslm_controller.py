@@ -344,7 +344,7 @@ class ASLM_controller:
         self.view.menubar.menu_autofocus.add_command(label='setting', command=popup_autofocus_setting)
 
         # add-on features
-        feature_list = ['None', 'Switch Resolution', 'Z Stack Acquisition']
+        feature_list = ['None', 'Switch Resolution', 'Z Stack Acquisition', 'Threshold']
         self.feature_id_val = tkinter.IntVar(0)
         for i in range(len(feature_list)):
             self.view.menubar.menu_features.add_radiobutton(label=feature_list[i],
@@ -791,6 +791,6 @@ class ASLM_controller:
                 self.waveform_tab_controller.plot_waveforms2(value, self.configuration.DAQParameters['sample_rate'])
             elif event == 'multiposition':
                 from aslm.tools.multipos_table_tools import update_table
-                update_table(self.view.settings.channels_tab.multipoint_list.get_table(), value, append=True)
+                update_table(self.view.settings.channels_tab.multipoint_list.get_table(), value)
             elif event == 'stop':
                 break

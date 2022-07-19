@@ -146,8 +146,17 @@ class ZStackAcquisition:
         # move stage X, Y, Theta
         if self.need_to_move_new_position:
             self.need_to_move_new_position = False
+
+            self.model.pause_data_ready_lock.acquire()
+            self.model.ask_to_pause_data_thread = True
+            self.model.pause_data_ready_lock.acquire()
+
             pos_dict = dict(map(lambda ax: (f'{ax}_abs', self.positions[self.current_position_idx][ax]), ['x', 'y', 'theta']))
             self.model.move_stage(pos_dict, wait_until_done=True)
+
+            self.model.ask_to_pause_data_thread = False
+            self.model.pause_data_event.set()
+            self.model.pause_data_ready_lock.release()
             
             self.z_position_moved_time = 0
             # calculate first z, f position
@@ -157,7 +166,15 @@ class ZStackAcquisition:
             self.current_position_idx += 1
 
         # move z, f
+        self.model.pause_data_ready_lock.acquire()
+        self.model.ask_to_pause_data_thread = True
+        self.model.pause_data_ready_lock.acquire()
+
         self.model.move_stage({'z_abs': self.current_z_position, 'f_abs': self.current_focus_position}, wait_until_done=True)
+
+        self.model.ask_to_pause_data_thread = False
+        self.model.pause_data_event.set()
+        self.model.pause_data_ready_lock.release()
 
         # next z, f position
         self.current_z_position += self.z_step_size
@@ -260,6 +277,25 @@ class FindTissueSimple2D:
             curr_fov_y = float(self.model.experiment.CameraParameters['y_pixels']) * curr_pixel_size
             x_start += self.model.experiment.StageParameters['x'] - curr_fov_x/2
             y_start += self.model.experiment.StageParameters['y'] - curr_fov_y/2
+
+            if self.target_resolution == 'high':
+                x_start += float(self.model.configuration.StageParameters['x_r_offset']) \
+                           - float(self.model.configuration.StageParameters['x_l_offset'])
+                y_start += float(self.model.configuration.StageParameters['y_r_offset']) \
+                           - float(self.model.configuration.StageParameters['y_l_offset'])
+                z_start += float(self.model.configuration.StageParameters['z_r_offset']) \
+                           - float(self.model.configuration.StageParameters['z_l_offset'])
+                r_start += float(self.model.configuration.StageParameters['theta_r_offset']) \
+                           - float(self.model.configuration.StageParameters['theta_l_offset'])
+            else:
+                x_start += -float(self.model.configuration.StageParameters['x_r_offset']) \
+                           + float(self.model.configuration.StageParameters['x_l_offset'])
+                y_start += -float(self.model.configuration.StageParameters['y_r_offset']) \
+                           + float(self.model.configuration.StageParameters['y_l_offset'])
+                z_start += -float(self.model.configuration.StageParameters['z_r_offset']) \
+                           + float(self.model.configuration.StageParameters['z_l_offset'])
+                r_start += -float(self.model.configuration.StageParameters['theta_r_offset']) \
+                           + float(self.model.configuration.StageParameters['theta_l_offset'])
 
             # grid out the 2D space
             fov_x = float(self.model.experiment.CameraParameters['x_pixels']) * pixel_size

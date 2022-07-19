@@ -13,75 +13,12 @@ def sign(x):
     return -1 if x < 0 else 1  # (1 if x > 0 else 0)
 
 
-def compute_tiles_from_bounding_box(x_start, x_stop, x_tiles, y_start, y_stop, y_tiles, z_start, z_stop, z_tiles,
-                                    r_start=0, r_stop=0, r_tiles=1, f_start=0, f_stop=0, f_tiles=1):
-    """
-    Creates a multiposition grid based on the start position, stop position, and number of tiles
-    of each dimension.
-    Focus currently tracks with z, since focus is z-dependent. TODO: Change this behavior? Make it a flag?
-    Parameters
-    ----------
-    x_start, x_stop: float
-        Start and end of X position
-    x_tiles: int
-        Num of tiles for X dimension (cannot be 0)
-    y_start, y_stop: float
-        Start and end of Y position
-    y_tiles: int
-        Num of tiles for Y dimension (cannot be 0)
-    z_start, z_stop: float
-        Start and end of Z position
-    z_tiles: int
-        Num of tiles for Z dimension (cannot be 0)
-    r_start, r_stop: float, default 0
-        Start and end of R (theta) position
-    r_tiles: int, default 0
-        Num of tiles for R (theta) dimension
-    f_start, f_stop: float, default 0
-        Start and end of F position
-    f_tiles: int, default 0
-        Num of tiles for F dimension
-    Returns
-    -------
-    table_of_values: list
-        Each element in the list is a row in the multiposition table (x, y, z)
-    """
-
-    # Error checking to prevent empty list when tiles are zero
-    x_tiles = 1 if x_tiles <= 0 else x_tiles
-    y_tiles = 1 if y_tiles <= 0 else y_tiles
-    z_tiles = 1 if z_tiles <= 0 else z_tiles
-    r_tiles = 1 if r_tiles <= 0 else r_tiles
-    f_tiles = 1 if f_tiles <= 0 else f_tiles
-
-    xs = np.linspace(x_start, x_stop, x_tiles)
-    ys = np.linspace(y_start, y_stop, y_tiles)
-    zs = np.linspace(z_start, z_stop, z_tiles)
-    rs = np.linspace(r_start, r_stop, r_tiles)
-    fs = np.linspace(f_start, f_stop, z_tiles)  # currently tracks with zs
-    table_of_values = list(itertools.product(xs, ys, zip(zs, fs), rs))  # zip to force zs and fs to match
-
-    # Unravel the zip
-    # TODO: This is slow as heck and effectively undoes all of the speed benefits of np and itertools. Find
-    #       a better way to do this.
-    for i in range(len(table_of_values)):
-        table_of_values[i] = (table_of_values[i][0],
-                              table_of_values[i][1],
-                              table_of_values[i][2][0],
-                              table_of_values[i][3],
-                              table_of_values[i][2][1])
-
-    return table_of_values
-
-
-def compute_tiles_from_bounding_box2(x_start, x_tiles, x_length, x_overlap,
+def compute_tiles_from_bounding_box(x_start, x_tiles, x_length, x_overlap,
                                     y_start, y_tiles, y_length, y_overlap,
                                     z_start, z_tiles, z_length, z_overlap,
                                     theta_start, theta_tiles, theta_length, theta_overlap,
                                     f_start, f_tiles, f_length, f_overlap):
     r"""Create a grid of ROIs to image based on start position, number of tiles, and signed FOV length in each dimension.
-
-    Assumes (x_start, y_start, z_start) correspond to origin of grid space.
 
     Focus currently tracks with z, since focus is z-dependent. TODO: Change this behavior? Make it a flag?
 
@@ -145,17 +82,20 @@ def compute_tiles_from_bounding_box2(x_start, x_tiles, x_length, x_overlap,
     x_step = x_length*(1 - x_overlap)
     y_step = y_length*(1 - y_overlap)
     z_step = z_length*(1 - z_overlap)
-    theta_step = theta_length*(1 - theta_overlap)
-    f_step = f_length * (1 - f_overlap)
+    theta_step = theta_length * (1 - theta_overlap)
+    f_step = f_length * (1 - f_overlap)              # Although we assume focus FOVs have no thickness, we include
+                                                     # overlap to adjust for z-ramping. We have no excuse for the
+                                                     # theta overlap.
 
     # grid out each dimension starting from (x_start, y_start, z_start) in steps
     def dim_vector(start, n_tiles, step):
         return start + np.arange(0, n_tiles, 1) * step
-    xs = dim_vector(x_start, x_tiles, x_step)
-    ys = dim_vector(y_start, y_tiles, y_step)
-    zs = dim_vector(z_start, z_tiles, z_step)
-    thetas = dim_vector(theta_start, theta_tiles, theta_step)
-    fs = dim_vector(f_start, f_tiles, f_step)
+
+    xs = dim_vector(x_start, x_tiles, x_step)                  # x-coordinate is centered on FOV
+    ys = dim_vector(y_start, y_tiles, y_step)                  # y-coordinate is centered on FOV
+    zs = dim_vector(z_start, z_tiles, z_step)                  # z-coordinate is centered on local z-stack origin
+    thetas = dim_vector(theta_start, theta_tiles, theta_step)  # we assume theta FOVs have no thickness
+    fs = dim_vector(f_start, f_tiles, f_step)                  # we assume focus FOVs have no thickness
 
     # grid out the 4D space...
     x, y, z, t = np.meshgrid(xs, ys, zs, thetas)

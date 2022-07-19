@@ -207,7 +207,7 @@ class FindTissueSimple2D:
         from skimage import filters
         from skimage.transform import downscale_local_mean
         import numpy as np
-        from aslm.tools.multipos_table_tools import compute_tiles_from_bounding_box2, calc_num_tiles
+        from aslm.tools.multipos_table_tools import compute_tiles_from_bounding_box, calc_num_tiles
 
         for idx in frame_ids:
             img = self.model.data_buffer[idx]
@@ -215,7 +215,7 @@ class FindTissueSimple2D:
             # Get current mag
             if self.model.experiment.MicroscopeState['resolution_mode'] == 'high':
                 curr_pixel_size = self.model.configuration.ZoomParameters['high_res_zoom_pixel_size']
-                curr_mag = 300/8.4
+                curr_mag = 300/(12.19/1.56)  # TODO: Don't hardcode
             else:
                 zoom = self.model.experiment.MicroscopeState['zoom']
                 curr_pixel_size = self.model.configuration.ZoomParameters['low_res_zoom_pixel_size'][zoom]
@@ -224,7 +224,7 @@ class FindTissueSimple2D:
             # get target mag
             if self.target_resolution == 'high':
                 pixel_size = self.model.configuration.ZoomParameters['high_res_zoom_pixel_size']
-                mag = 300/8.4
+                mag = 300/(12.19/1.56)  # TODO: Don't hardcode
             else:
                 pixel_size = self.model.configuration.ZoomParameters['low_res_zoom_pixel_size'][self.target_resolution]
                 mag = float(self.target_resolution)
@@ -238,23 +238,30 @@ class FindTissueSimple2D:
 
             # Find the bounding box
             x, y = np.where(thresh_img)
-            x_start, x_end = curr_pixel_size*ds*np.min(x)/curr_mag, curr_pixel_size*ds*np.max(x)/curr_mag
-            y_start, y_end = curr_pixel_size*ds*np.min(y)/curr_mag, curr_pixel_size*ds*np.max(y)/curr_mag
+            # + 0.5 accounts for center of FOV
+            x_start, x_end = curr_pixel_size*ds*(np.min(x)+0.5), curr_pixel_size*ds*(np.max(x)+0.5)
+            y_start, y_end = curr_pixel_size*ds*(np.min(y)+0.5), curr_pixel_size*ds*(np.max(y)+0.5)
 
             # grid out the 2D space
             z_start = self.model.experiment.StageParameters['z']
             r_start = self.model.experiment.StageParameters['theta']
             f_start = self.model.experiment.StageParameters['f']
             xd, yd = x_end-x_start, y_end-y_start
-            fov_x = float(self.model.experiment.CameraParameters['x_pixels']) * pixel_size / mag
-            fov_y = float(self.model.experiment.CameraParameters['y_pixels']) * pixel_size / mag
+            x_start += self.model.experiment.StageParameters['x']
+            y_start += self.model.experiment.StageParameters['y']
+            fov_x = float(self.model.experiment.CameraParameters['x_pixels']) * pixel_size
+            fov_y = float(self.model.experiment.CameraParameters['y_pixels']) * pixel_size
             x_tiles = calc_num_tiles(xd, self.overlap, fov_x)
             y_tiles = calc_num_tiles(yd, self.overlap, fov_y)
 
-            table_values = compute_tiles_from_bounding_box2(x_start, x_tiles, fov_x, self.overlap,
-                                                            y_start, y_tiles, fov_y, self.overlap,
-                                                            z_start, 1, 0, self.overlap,
-                                                            r_start, 1, 0, self.overlap,
-                                                            f_start, 1, 0, self.overlap)
+            print(fov_x, fov_y)
+
+            table_values = compute_tiles_from_bounding_box(x_start, x_tiles, fov_x, self.overlap,
+                                                           y_start, y_tiles, fov_y, self.overlap,
+                                                           z_start, 1, 0, self.overlap,
+                                                           r_start, 1, 0, self.overlap,
+                                                           f_start, 1, 0, self.overlap)
+
+            print(table_values.shape)
 
             self.model.event_queue.put(('multiposition', table_values))

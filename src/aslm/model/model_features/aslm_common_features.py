@@ -29,7 +29,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-from aslm.model.model_features.aslm_feature_container import dummy_True
+
 
 class ChangeResolution:
     def __init__(self, model, resolution_mode='high'):
@@ -59,6 +59,7 @@ class ChangeResolution:
         # print('This frame: change resolution', self.resolution_mode, self.model.frame_id)
         return True
 
+
 class Snap:
     def __init__(self, model):
         self.model = model
@@ -72,6 +73,7 @@ class Snap:
     def generate_meta_data(self, *args):
         # print('This frame: snap one frame', self.model.frame_id)
         return True
+
 
 class ZStackAcquisition:
     def __init__(self, model):
@@ -229,11 +231,11 @@ class FindTissueSimple2D:
                 pixel_size = self.model.configuration.ZoomParameters['low_res_zoom_pixel_size'][self.target_resolution]
                 mag = float(self.target_resolution)
 
+            # Downsample according to the desired magnification change. Note, we could downsample by whatever we want.
             ds = int(mag/curr_mag)
-
-            # Downsample
             ds_img = downscale_local_mean(img, (ds, ds))
 
+            # Threshold
             thresh_img = ds_img > filters.threshold_otsu(img)
 
             # Find the bounding box
@@ -241,14 +243,25 @@ class FindTissueSimple2D:
             # + 0.5 accounts for center of FOV
             x_start, x_end = curr_pixel_size*ds*(np.min(x)+0.5), curr_pixel_size*ds*(np.max(x)+0.5)
             y_start, y_end = curr_pixel_size*ds*(np.min(y)+0.5), curr_pixel_size*ds*(np.max(y)+0.5)
+            xd, yd = x_end - x_start, y_end - y_start
 
-            # grid out the 2D space
+            # grab z, theta, f starting positions
             z_start = self.model.experiment.StageParameters['z']
             r_start = self.model.experiment.StageParameters['theta']
-            f_start = self.model.experiment.StageParameters['f']
-            xd, yd = x_end-x_start, y_end-y_start
-            x_start += self.model.experiment.StageParameters['x']
-            y_start += self.model.experiment.StageParameters['y']
+            if self.target_resolution == 'high':
+                f_start = 0  # very different range of focus values in high-res
+            else:
+                f_start = self.model.experiment.StageParameters['f']
+
+            # Update x and y start to initialize from the upper-left corner of the current image, since this is
+            # how np.where indexed them. The + 0.5 in x_start/y_start calculation shifts their starts back to the
+            # center of the field of view.
+            curr_fov_x = float(self.model.experiment.CameraParameters['x_pixels']) * curr_pixel_size
+            curr_fov_y = float(self.model.experiment.CameraParameters['y_pixels']) * curr_pixel_size
+            x_start += self.model.experiment.StageParameters['x'] - curr_fov_x/2
+            y_start += self.model.experiment.StageParameters['y'] - curr_fov_y/2
+
+            # grid out the 2D space
             fov_x = float(self.model.experiment.CameraParameters['x_pixels']) * pixel_size
             fov_y = float(self.model.experiment.CameraParameters['y_pixels']) * pixel_size
             x_tiles = calc_num_tiles(xd, self.overlap, fov_x)

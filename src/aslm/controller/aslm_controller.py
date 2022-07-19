@@ -792,5 +792,6 @@ class ASLM_controller:
             elif event == 'multiposition':
                 from aslm.tools.multipos_table_tools import update_table
                 update_table(self.view.settings.channels_tab.multipoint_list.get_table(), value)
+                self.view.settings.channels_tab.multipoint_frame.on_off.set(True)  # assume we want to use multipos
             elif event == 'stop':
                 break

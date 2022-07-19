@@ -433,8 +433,9 @@ class Model:
                 self.current_channel = 0
                 reboot = True
 
-            if args[0] == 'resolution' and (args[1]['resolution_mode'] != self.experiment.MicroscopeState['resolution_mode'] or \
-                args[1]['zoom'] != self.experiment.MicroscopeState['zoom']):
+            # if args[0] == 'resolution' and (args[1]['resolution_mode'] != self.experiment.MicroscopeState['resolution_mode'] or \
+            #     args[1]['zoom'] != self.experiment.MicroscopeState['zoom']):
+            if args[0] == 'resolution':
                 self.change_resolution('high' if args[1]['resolution_mode'] == 'high' else args[1]['zoom'])
 
             update_settings_common(self, args)

@@ -1,8 +1,36 @@
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+provided that the following conditions are met:
+
+     * Redistributions of source code must retain the above copyright notice,
+     this list of conditions and the following disclaimer.
+
+     * Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in the
+     documentation and/or other materials provided with the distribution.
+
+     * Neither the name of the copyright holders nor the names of its
+     contributors may be used to endorse or promote products derived from this
+     software without specific prior written permission.
+
+NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
+THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
 """
-Obis Laser Class
-OBIS561, 150 mW, is COM4
-Useful information can be found on Page C-22 of the OBIS_LX_LS Operators Manual
-"""
+
+# Standard Library Imports
 import logging
 from pathlib import Path
 
@@ -15,10 +43,39 @@ from aslm.model.devices.lasers.LaserBase import LaserBase
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+errors = {
+    '-400': "Query Unavailable",
+    "-350": "Queue overflow",
+    "-321": "Out of memory",
+    "-310": "System error",
+    "-257": "File to open not named",
+    "-256": "File does not exist",
+    "-241": "Device unavailable",
+    "-221": "Settings conflict",
+    "-220": "Invalid parameter",
+    "-203": "Command protected",
+    "-200": "Execution error (command is out of order)",
+    "-109": "Parameter missing",
+    "-102": "Syntax error",
+    "-100": "Unrecognized command or query",
+    "0": "No error",
+    "500": "CCB fault",
+    "510": "I2C bus fault",
+    "520": "Controller time out",
+    "900": "CCB message timed out"
+}
+
 class ObisLaser(LaserBase):
-    def __init__(self, verbose, port='COM4'):
+    """
+    Obis Laser Class
+    OBIS561, 150 mW, is COM4
+    Useful information can be found on Page C-22 of the OBIS_LX_LS Operators Manual
+    """
+
+    def __init__(self, verbose, port='COM28'):
         self.timeout = 0.05
-        self.end_of_line = '\r'
+        self.end_of_line = '\r\n'
+        self.verbose = verbose
 
         try:
             # Open serial port
@@ -62,15 +119,13 @@ class ObisLaser(LaserBase):
             print('could not close the port')
 
     def ask(self, command):
-        self.laser.write(str(command + self.end_of_line).encode())
-        response = ''
-        read_iteration = self.laser.read()
-        while read_iteration != b'\r':
-            response += read_iteration.decode()
-            sleep(self.timeout)
-            read_iteration = self.laser.read()
-        if self.verbose:
-            print("Command:", command, "Response:", response)
+        self.laser.reset_input_buffer()  # flush once
+        self.laser.write((str(command) + self.end_of_line).encode('ascii'))
+        response = self.laser.read_until(self.end_of_line.encode('ascii')).decode('ascii').strip('\r\n')
+        if response.startswith('ERR'):
+            code = response.strip('ERR')
+            print(f"Error {code}: {errors[code]}.")
+        self.laser.reset_input_buffer()  # flush twice
         return response
 
     
@@ -229,9 +284,10 @@ class ObisLaser(LaserBase):
             print("Invalid mode")
             return
 
-        self.laser.write(command.encode())
+        # self.laser.write(command.encode())
+        self.ask(command)
         if self.verbose:
-            print("Set Laser Operating Mode to:", self.laser_operating_mode)
+            print("Set Laser Operating Mode to:", self.get_laser_operating_mode())
 
     def get_laser_operating_mode(self):
         """
@@ -285,8 +341,10 @@ class ObisLaser(LaserBase):
         """
 
         # not sure if this will work like this but worth a test
-        command = "SOURce:POWer:LEVel:IMMediate:AMPLitude " + level
-        laser_power_level = self.ask(command)
+        command = f"SOURce:POWer:LEVel:IMMediate:AMPLitude {level}"
+        print(command)
+        self.ask(command)
+        laser_power_level = self.ask("SOURce:POWer:LEVel:IMMediate:AMPLitude?")
         if self.verbose:
             print("Laser State:", laser_power_level)
         self.laser_power_level = laser_power_level

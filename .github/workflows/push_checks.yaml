@@ -23,10 +23,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install pytest
           pip install pytest-cov
+          pip install pytest-xvfb
           pip install -e .
-        #pip install pytest-xvfb
       - name: Test with pytest
-        #uses: GabrielBB/xvfb-action@v1
+        uses: GabrielBB/xvfb-action@v1
         run: |
           python3 -m pytest --cov=./ --cov-report=xml
       - name: Codecov

@@ -34,12 +34,14 @@ POSSIBILITY OF SUCH DAMAGE.
 import pytest
 import unittest
 from pathlib import Path
+import platform
 
 # Third Party Imports
 
 # Local Imports
 from aslm.model.devices.zoom.zoom_dynamixel import DynamixelZoom
 
+@pytest.mark.skipif(platform.system() != 'Windows')
 class TestZoomDynamixel(unittest.TestCase):
     r"""Unit Test for DynamixelZoom Class
 

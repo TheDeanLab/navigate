@@ -266,6 +266,15 @@ class ObisLaser(LaserBase):
         # MIXSO (External mixed modulation with power feedback) Note: This
         # operating mode is not supported in some device models.
         """
+        
+        # check if laser is on
+        # if it is turned off then save the state so we can turn it back on
+        self.get_laser_state(self)
+        if self.laser_state == 'ON':
+            # save current state
+            state = self.laser_state
+            self.set_laser_to_off(self)
+
         if mode == 'cwp':
             command = "SOURce:AM:INTernal CWP"
         elif mode == 'cwc':
@@ -288,6 +297,10 @@ class ObisLaser(LaserBase):
         self.ask(command)
         if self.verbose:
             print("Set Laser Operating Mode to:", self.get_laser_operating_mode())
+
+        if state == 'ON':
+            # turn laser back on
+            self.set_laser_to_on(self)
 
     def get_laser_operating_mode(self):
         """
@@ -340,6 +353,14 @@ class ObisLaser(LaserBase):
         level represants the power level to set in watts
         """
 
+        # check if laser is on
+        # if it is turned off then save the state so we can turn it back on
+        self.get_laser_state(self)
+        if self.laser_state == 'ON':
+            # save current state
+            state = self.laser_state
+            self.set_laser_to_off(self)
+
         # not sure if this will work like this but worth a test
         command = f"SOURce:POWer:LEVel:IMMediate:AMPLitude {level}"
         print(command)
@@ -348,6 +369,11 @@ class ObisLaser(LaserBase):
         if self.verbose:
             print("Laser State:", laser_power_level)
         self.laser_power_level = laser_power_level
+
+        if state == 'ON':
+            # turn laser back on
+            self.set_laser_to_on(self)
+        
         return laser_power_level
 
     # we could add an API function here to rise or lower power level by x amuont

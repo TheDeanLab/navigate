@@ -30,33 +30,33 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 
-# # Standard Library Imports
-# import pytest
-# import unittest
-# from pathlib import Path
-# import platform
+# Standard Library Imports
+import pytest
+import unittest
+from pathlib import Path
+import platform
 
-# # Third Party Imports
+# Third Party Imports
 
-# # Local Imports
-# from aslm.model.devices.zoom.zoom_dynamixel import DynamixelZoom
+# Local Imports
+from aslm.model.devices.zoom.zoom_dynamixel import DynamixelZoom
 
-# @pytest.mark.skipif(platform.system() != 'Windows')
-# class TestZoomDynamixel(unittest.TestCase):
-#     r"""Unit Test for DynamixelZoom Class
+@pytest.mark.skip(reason='DLL not found')
+class TestZoomDynamixel(unittest.TestCase):
+    r"""Unit Test for DynamixelZoom Class
 
-#     Does not instantiate object owing to DLL"""
+    Does not instantiate object owing to DLL"""
 
-#     def test_zoom_dynamixel_attributes(self):
+    def test_zoom_dynamixel_attributes(self):
 
-#         attributes = dir(DynamixelZoom)
-#         desired_attributes = ['move',
-#                               'read_position',
-#                               'set_zoom']
+        attributes = dir(DynamixelZoom)
+        desired_attributes = ['move',
+                              'read_position',
+                              'set_zoom']
 
-#         for da in desired_attributes:
-#             assert da in attributes
+        for da in desired_attributes:
+            assert da in attributes
 
-# if __name__ == '__main__':
-#     unittest.main()
+if __name__ == '__main__':
+    unittest.main()
 

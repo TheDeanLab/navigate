@@ -227,6 +227,7 @@ class FindTissueSimple2D:
         from skimage.transform import downscale_local_mean
         import numpy as np
         from aslm.tools.multipos_table_tools import compute_tiles_from_bounding_box, calc_num_tiles
+        import tifffile
 
         for idx in frame_ids:
             img = self.model.data_buffer[idx]
@@ -255,12 +256,17 @@ class FindTissueSimple2D:
             # Threshold
             thresh_img = ds_img > filters.threshold_otsu(img)
 
+            tifffile.imwrite("C:\\Users\\MicroscopyInnovation\\Desktop\\Data\\Zach\\thresh.tiff", thresh_img)
+
             # Find the bounding box
+            # In the real-deal, non-transposed image, x increase corresponds to a decrease in row number
+            # y increase responds to an increase in row number
+            # This means the smallest x coordinate is actually the largest
             x, y = np.where(thresh_img)
             # + 0.5 accounts for center of FOV
-            x_start, x_end = curr_pixel_size*ds*(np.min(x)+0.5), curr_pixel_size*ds*(np.max(x)+0.5)
+            x_start, x_end = -curr_pixel_size*ds*(np.max(x)+0.5), -curr_pixel_size*ds*(np.min(x)+0.5)
             y_start, y_end = curr_pixel_size*ds*(np.min(y)+0.5), curr_pixel_size*ds*(np.max(y)+0.5)
-            xd, yd = x_end - x_start, y_end - y_start
+            xd, yd = abs(x_start - x_end), y_end - y_start
 
             # grab z, theta, f starting positions
             z_start = self.model.experiment.StageParameters['z']
@@ -275,7 +281,7 @@ class FindTissueSimple2D:
             # center of the field of view.
             curr_fov_x = float(self.model.experiment.CameraParameters['x_pixels']) * curr_pixel_size
             curr_fov_y = float(self.model.experiment.CameraParameters['y_pixels']) * curr_pixel_size
-            x_start += self.model.experiment.StageParameters['x'] - curr_fov_x/2
+            x_start += self.model.experiment.StageParameters['x'] + curr_fov_x/2
             y_start += self.model.experiment.StageParameters['y'] - curr_fov_y/2
 
             if self.target_resolution == 'high':

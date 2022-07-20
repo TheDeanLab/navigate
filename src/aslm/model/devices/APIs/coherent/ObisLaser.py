@@ -61,16 +61,66 @@ class ObisLaser(LaserBase):
         except serial.SerialException:
             print('could not close the port')
 
+    def ask(self, command):
+        self.laser.write(str(command + self.end_of_line).encode())
+        response = ''
+        read_iteration = self.laser.read()
+        while read_iteration != b'\r':
+            response += read_iteration.decode()
+            sleep(self.timeout)
+            read_iteration = self.laser.read()
+        if self.verbose:
+            print("Command:", command, "Response:", response)
+        return response
+
+    
+    """
+    # System Information Queries
+    """
+
     def get_laser_model(self):
         """
         # Get the laser model.
         """
-        command = "?SYSTem:INFormation:MODel?"
+        command = "SYSTem:INFormation:MODel?"
         laser_model = self.ask(command)
         if self.verbose:
             print("Laser Model:", laser_model)
         self.laser_model = laser_model
         return laser_model
+
+    def get_laser_calibration_date(self):
+        """
+        # Get the laser calibration date
+        """
+        command = "SYSTem:INFormation:CDATe?"
+        laser_calibration_date = self.ask(command)
+        if self.verbose:
+            print("Laser Calibration Date:", laser_calibration_date)
+        self.laser_calibration_date = laser_calibration_date
+        return laser_calibration_date
+
+    def get_laser_firmware(self):
+        """
+        # Get the lasers current firmware version
+        """
+        command = "SYSTem:INFormation:FVERsion?"
+        laser_firmware = self.ask(command)
+        if self.verbose:
+            print("Laser Firmware:", laser_firmware)
+        self.laser_firmware = laser_firmware
+        return laser_firmware
+
+    def get_laser_protocol(self):
+        """
+        # Get the lasers protocol version
+        """
+        command = "SYSTem:INFormation:PVERsion?"
+        laser_protocol = self.ask(command)
+        if self.verbose:
+            print("Laser Protocol Version:", laser_protocol)
+        self.laser_protocol = laser_protocol
+        return laser_protocol
 
     def get_laser_wavelength(self):
         """
@@ -105,6 +155,22 @@ class ObisLaser(LaserBase):
         self.maximum_laser_power = maximum_laser_power
         return maximum_laser_power
 
+    def get_laser_system_info(self):
+        """
+        # Get all of the lasers system info.
+        """
+        self.get_maximum_laser_power(self)
+        self.get_minimum_laser_power(self)
+        self.get_laser_wavelength(self)
+        self.get_laser_model(self)
+        self.get_laser_calibration_date(self)
+        self.get_laser_firmware(self)
+        self.get_laser_protocol(self)
+
+    """
+    # System State Commands and Queries
+    """
+
     def get_laser_power(self):
         """
         # Get the current laser power in mW.
@@ -116,27 +182,21 @@ class ObisLaser(LaserBase):
         self.laser_power = laser_power
         return laser_power
 
-    def get_ext_control(self):
+    def get_laser_output_current(self):
         """
-        # Get the external control status.
+        # Get the current laser output current in amps.
         """
-        command = "SYSTem:EXTernal:CONTRol?"
-        ext_control = self.ask(command)
+        command = "SOURce:POWer:CURRent?"
+        laser_output_current = self.ask(command)
         if self.verbose:
-            print("External Control:", ext_control)
-        self.ext_control = ext_control
-        return ext_control
+            print("Laser Output Current:", laser_output_current)
+        self.laser_output_current = laser_output_current
+        return laser_output_current
 
-    def get_laser_status(self):
-        """
-        # Get the current laser status.
-        """
-        command = "SOURce:STATus?"
-        laser_status = self.ask(command)
-        if self.verbose:
-            print("Laser Status:", laser_status)
-        self.laser_status = laser_status
-        return laser_status
+    
+    """
+    # Operational Commands and Querie
+    """
 
     def set_laser_operating_mode(self, mode):
         """
@@ -177,10 +237,14 @@ class ObisLaser(LaserBase):
         """
         # Get the laser operating mode.
         """
-        #  TODO: Fix
+        #  ToDo: Fix (looks right but might have to look at the actal reply back to see what mode is written in the repose - more info is on page C-22)
 
         command = "SOURce:AM:SOURce?"
         laser_operating_mode = self.ask(command)
+
+        # use this print for debugging if the function doesnt work
+        print(laser_operating_mode)
+
         if ("CWP" in laser_operating_mode):
             self.laser_operating_mode = "cwp"
         elif ("CWC" in laser_operating_mode):
@@ -202,24 +266,106 @@ class ObisLaser(LaserBase):
             print("Laser Operating Mode:", laser_operating_mode)
         return laser_operating_mode
 
-    def ask(self, command):
-        self.laser.write(str(command + self.end_of_line).encode())
-        response = ''
-        read_iteration = self.laser.read()
-        while read_iteration != b'\r':
-            response += read_iteration.decode()
-            sleep(self.timeout)
-            read_iteration = self.laser.read()
+    def get_laser_power_level(self):
+        """
+        # Get the current laser Laser Power Level.
+        The reply string represents the present laser power level setting as an NRf value in watts.
+        """
+        command = "SOURce:POWer:LEVel:IMMediate:AMPLitude?"
+        laser_power_level = self.ask(command)
         if self.verbose:
-            print("Command:", command, "Response:", response)
-        return response
+            print("Laser State:", laser_power_level)
+        self.laser_power_level = laser_power_level
+        return laser_power_level
 
+    def set_laser_power_level(self, level):
+        """
+        # Set the current laser Laser Power Level.
+        level represants the power level to set in watts
+        """
+
+        # not sure if this will work like this but worth a test
+        command = "SOURce:POWer:LEVel:IMMediate:AMPLitude " + level
+        laser_power_level = self.ask(command)
+        if self.verbose:
+            print("Laser State:", laser_power_level)
+        self.laser_power_level = laser_power_level
+        return laser_power_level
+
+    # we could add an API function here to rise or lower power level by x amuont
+
+    def get_laser_state(self):
+        """
+        # Get the current laser state On/Off.
+        """
+        command = "SOURce:AM:STATe?"
+        laser_state = self.ask(command)
+        if self.verbose:
+            print("Laser State:", laser_state)
+        self.laser_state = laser_state
+        return laser_state
+
+    def set_laser_to_on(self):
+        """
+        # Set the laser state On state.
+        """
+        command = "SOURce:AM:STATe ON"
+        laser_state = self.ask(command)
+        if self.verbose:
+            print("Laser State:", laser_state)
+        self.laser_state = laser_state
+        return laser_state
+
+    def set_laser_to_off(self):
+        """
+        # Set the laser state Off state.
+        """
+        command = "SOURce:AM:STATe OFF"
+        laser_state = self.ask(command)
+        if self.verbose:
+            print("Laser State:", laser_state)
+        self.laser_state = laser_state
+        return laser_state
+
+
+    
+    # we can add to this when we know what we want our laser setting to be when we turn it on
     def initialize_laser(self):
         """
         # Initialize the laser.
         """
+        self.set_laser_to_on(self)
         self.set_laser_operating_mode('mixed')
         self.set_laser_power(self.get_maximum_laser_power())
+
+
+
+
+    # I am not sure where these command come from as I cant find it in the documentation
+    def get_ext_control(self):
+        """
+        # Get the external control status.
+        """
+        command = "SYSTem:EXTernal:CONTRol?"
+        ext_control = self.ask(command)
+        if self.verbose:
+            print("External Control:", ext_control)
+        self.ext_control = ext_control
+        return ext_control
+
+
+    def get_laser_status(self):
+        """
+        # Get the current laser status.
+        """
+        command = "SOURce:STATus?"
+        laser_status = self.ask(command)
+        if self.verbose:
+            print("Laser Status:", laser_status)
+        self.laser_status = laser_status
+        return laser_status
+
+    
 
 
 

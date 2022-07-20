@@ -425,4 +425,3 @@ class Stage_GUI_Controller(GUI_Controller):
             self.show_verbose_info('Stage position changed')
         
         return handler
-        

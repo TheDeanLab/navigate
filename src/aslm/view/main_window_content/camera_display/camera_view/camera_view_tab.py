@@ -42,10 +42,15 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 # Local Imports
 from aslm.view.main_window_content.camera_display.camera_view.camera_view_frames.image_metrics import image_metrics
 from aslm.view.main_window_content.camera_display.camera_view.camera_view_frames.palette import palette
+from aslm.view.main_window_content.camera_display.camera_view.camera_view_frames.live_frame import live_frame
+from aslm.view.main_window_content.camera_display.camera_view.camera_view_frames.slider import slider
+from aslm.view.main_window_content.camera_display.camera_view.camera_view_frames.rgb_selection import rgb_selection
+from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
+
 
 class camera_tab(ttk.Frame):
     def __init__(self, cam_wave, *args, **kwargs):

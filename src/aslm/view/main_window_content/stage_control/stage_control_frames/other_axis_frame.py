@@ -31,7 +31,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 # Standard Imports
-import tkinter as tk
+from tkinter import *
 from tkinter import ttk
 
 # Local Imports
@@ -39,7 +39,7 @@ from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from aslm.view.custom_widgets.validation import ValidatedSpinbox
 
 import logging
-
+from pathlib import Path
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -51,8 +51,8 @@ class other_axis_frame(ttk.Frame):
         other_axis_frame.name = name
         
         # Formatting
-        tk.Grid.columnconfigure(other_axis_frame, 'all', weight=1)
-        tk.Grid.rowconfigure(other_axis_frame, 'all', weight=1)
+        Grid.columnconfigure(other_axis_frame, 'all', weight=1)
+        Grid.rowconfigure(other_axis_frame, 'all', weight=1)
 
         #Setting up buttons for up, down, zero and increment spinbox
 
@@ -81,7 +81,7 @@ class other_axis_frame(ttk.Frame):
         other_axis_frame.increment_box = LabelInput(
             parent=other_axis_frame,
             input_class=ValidatedSpinbox,
-            input_var=tk.DoubleVar(),
+            input_var=DoubleVar(),
             input_args={'width': 25}
         )
 
@@ -106,8 +106,9 @@ class other_axis_frame(ttk.Frame):
         #Gridding out buttons
         other_axis_frame.up_btn.grid(row=0, column=0, rowspan=2, pady=2) #UP
         other_axis_frame.down_btn.grid(row=4, column=0, rowspan=2, pady=2) #DOWN
-        other_axis_frame.zero_btn.grid(row=2, column=0, pady=(5,2), sticky=(tk.NSEW)) #Zero Z
-        other_axis_frame.increment_box.grid(row=3, column=0, pady=2, sticky=(tk.NSEW)) #Increment spinbox
+        other_axis_frame.zero_btn.grid(row=2, column=0, pady=(5,2), sticky=(NSEW)) #Zero Z
+        other_axis_frame.increment_box.grid(row=3, column=0, pady=2, sticky=(NSEW)) #Increment spinbox
+        other_axis_frame.increment_box.widget.set_precision(-1)
 
     def get_widget(other_axis_frame):
         return other_axis_frame.increment_box

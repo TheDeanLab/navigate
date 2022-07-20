@@ -35,7 +35,7 @@ from tkinter import ttk
 import logging
 from aslm.view.custom_widgets.validation import ValidatedSpinbox, ValidatedCombobox
 from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
-import logging
+
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -173,6 +173,3 @@ if __name__ == '__main__':
     root = tk.Tk()
     stack_acq_frame(root)
     root.mainloop()
-
-
-

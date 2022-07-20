@@ -330,7 +330,7 @@ class Channels_Tab_Controller(GUI_Controller):
         #     step_size = 0.001
         #     self.stack_acq_vals['step_size'].set(step_size)
 
-        number_z_steps = int(np.abs(np.floor((end_position - start_position) / step_size)))
+        number_z_steps = int(np.ceil(np.abs((end_position - start_position) / step_size)))
         self.stack_acq_vals['number_z_steps'].set(number_z_steps)
 
         # Shift the start/stop positions by the relative position
@@ -367,12 +367,30 @@ class Channels_Tab_Controller(GUI_Controller):
             ?
         """
         # Grab current values
-        z_curr = self.parent_controller.experiment.StageParameters['z']
-        focus_curr = self.parent_controller.experiment.StageParameters['f']
+        z_end = self.parent_controller.experiment.StageParameters['z']
+        focus_end = self.parent_controller.experiment.StageParameters['f']
+
+        z_start = self.z_origin
+        focus_start = self.focus_origin
+
+        if z_end < z_start:
+            # Sort so we are always going low to high
+            tmp = z_start
+            tmp_f = focus_start
+            z_start = z_end
+            focus_start = focus_end
+            z_end = tmp
+            focus_end = tmp_f
+
+        # set origin to be in the middle of start and end
+        self.z_origin = (z_start + z_end)/2
+        self.focus_origin = (focus_start + focus_end)/2
 
         # Propagate parameter changes to the GUI
-        self.stack_acq_vals['end_position'].set(z_curr - self.z_origin)
-        self.stack_acq_vals['end_focus'].set(focus_curr - self.focus_origin)
+        self.stack_acq_vals['start_position'].set(z_start - self.z_origin)
+        self.stack_acq_vals['start_focus'].set(focus_start - self.focus_origin)
+        self.stack_acq_vals['end_position'].set(z_end - self.z_origin)
+        self.stack_acq_vals['end_focus'].set(focus_end - self.focus_origin)
         self.update_z_steps()
 
     def update_cycling_setting(self,

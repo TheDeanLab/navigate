@@ -44,7 +44,7 @@ logger = logging.getLogger(p)
 
 
 # TODO: Should we rename to remote_focus_popup?
-class remote_popup():
+class Remote_Popup():
     """
     #### Class creates the popup that has the ETL or voice coil parameters.
     """

@@ -32,7 +32,7 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 
 import tkinter as tk
-from aslm.view.remote_focus_popup import Remote_Popup
+from aslm.view.menus.remote_focus_popup import remote_popup
 import time
 
 def test_remotefocuspopup():
@@ -50,10 +50,10 @@ def test_remotefocuspopup():
         True or False as to whether the test passed
     """
     root = tk.Tk()
-    remote_pop = Remote_Popup(root)
+    r_pop = remote_popup(root)
     root.update()
     time.sleep(3)
-    bool = isinstance(remote_pop, Remote_Popup)
+    bool = isinstance(r_pop, remote_popup)
     root.destroy()
     
     assert bool

@@ -45,7 +45,7 @@ import logging
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-class Autofocus_Popup():
+class autofocus_popup():
     """
     #### Class creates the popup to configure autofocus parameters.
     """

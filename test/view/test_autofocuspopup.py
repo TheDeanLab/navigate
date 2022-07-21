@@ -1,4 +1,5 @@
-"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""
+Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -30,30 +31,29 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 
-# Standard Library Imports
-import unittest
-from pathlib import Path
+import tkinter as tk
+from aslm.view.menus.autofocus_setting_popup import autofocus_popup
+import time
 
-# Third Party Imports
+def test_autofocuspopup():
+    """
+    Tests that the autofocus popup and all its widgets gets created and does not
+    throw any exceptions. Test will fail if any exceptions.
 
-# Local Imports
-from aslm.model.devices.zoom.zoom_dynamixel import DynamixelZoom
+    Parameters
+    ----------
+    None
 
-class TestZoomDynamixel(unittest.TestCase):
-    r"""Unit Test for DynamixelZoom Class
-
-    Does not instantiate object owing to DLL"""
-
-    def test_zoom_dynamixel_attributes(self):
-
-        attributes = dir(DynamixelZoom)
-        desired_attributes = ['move',
-                              'read_position',
-                              'set_zoom']
-
-        for da in desired_attributes:
-            assert da in attributes
-
-if __name__ == '__main__':
-    unittest.main()
-
+    Returns
+    -------
+    bool : bool
+        True or False as to whether the test passed
+    """
+    root = tk.Tk()
+    auto_pop = autofocus_popup(root)
+    root.update()
+    time.sleep(3)
+    bool = isinstance(auto_pop, autofocus_popup)
+    root.destroy()
+    
+    assert bool

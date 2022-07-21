@@ -44,7 +44,7 @@ from aslm.controller.sub_controllers.multi_position_controller import Multi_Posi
 from aslm.controller.sub_controllers.tiling_wizard_controller import Tiling_Wizard_Controller
 
 # View Imports that are not called on startup
-from aslm.view.main_window_content.tabs.channels.tiling_wizard_popup import tiling_wizard_popup as tiling_wizard
+from aslm.view.main_window_content.channel_settings.channel_settings_frames.tiling_wizard_popup import tiling_wizard_popup as tiling_wizard
 
 
 # Logger Setup

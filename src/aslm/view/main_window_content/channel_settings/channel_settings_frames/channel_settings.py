@@ -33,7 +33,6 @@ POSSIBILITY OF SUCH DAMAGE.
 import logging
 
 import tkinter as tk
-from tkinter import *
 from tkinter import ttk
 from tkinter.font import Font
 
@@ -51,8 +50,8 @@ class channel_creator(ttk.Labelframe):
         ttk.Labelframe.__init__(self, channels_tab, text=self.title, *args, **kwargs)
         
         # Formatting
-        Grid.columnconfigure(self, 'all', weight=1)
-        Grid.rowconfigure(self, 'all', weight=1)
+        tk.Grid.columnconfigure(self, 'all', weight=1)
+        tk.Grid.rowconfigure(self, 'all', weight=1)
 
         #  Arrays with Widget Variables and widgets themselves
         #  TODO refactor using dicts for variables and one for widgets,
@@ -98,9 +97,9 @@ class channel_creator(ttk.Labelframe):
             self.frame_columns.append(ttk.Frame(self))
             self.frame_columns[idx].columnconfigure(0, weight=1, uniform=1)
             self.frame_columns[idx].rowconfigure('all', weight=1, uniform=1)
-            self.frame_columns[idx].grid(row=0, column=idx, sticky=NSEW, padx=1, pady=(4, 6))
+            self.frame_columns[idx].grid(row=0, column=idx, sticky=tk.NSEW, padx=1, pady=(4, 6))
             self.labels.append(ttk.Label(self.frame_columns[idx], text=self.label_text[idx]))
-            self.labels[idx].grid(row=0, column=0, sticky=N, pady=1, padx=1)
+            self.labels[idx].grid(row=0, column=0, sticky=tk.N, pady=1, padx=1)
         self.frame_columns[5].grid(padx=(1, 4))
         self.frame_columns[0].grid(padx=(4, 1))
             
@@ -112,49 +111,49 @@ class channel_creator(ttk.Labelframe):
         for num in range(0, 5):
             #  This will add a widget to each column frame for the respecitive types
             #  Channel Checkboxes
-            self.channel_variables.append(BooleanVar())
+            self.channel_variables.append(tk.BooleanVar())
             self.channel_checks.append(ttk.Checkbutton(self.frame_columns[0], text='CH' + str(num+1),
                                                        variable=self.channel_variables[num]))
-            self.channel_checks[num].grid(row=num+1, column=0, sticky=NSEW, padx=1, pady=1)
+            self.channel_checks[num].grid(row=num+1, column=0, sticky=tk.NSEW, padx=1, pady=1)
 
             #  Laser Dropdowns
-            self.laser_variables.append(StringVar())
+            self.laser_variables.append(tk.StringVar())
             self.laser_pulldowns.append(ttk.Combobox(self.frame_columns[1],
                                                      textvariable=self.laser_variables[num], width=8))
             self.laser_pulldowns[num].state(["readonly"])
-            self.laser_pulldowns[num].grid(row=num+1, column=0, sticky=NSEW, padx=1, pady=1)
+            self.laser_pulldowns[num].grid(row=num+1, column=0, sticky=tk.NSEW, padx=1, pady=1)
 
             #  Laser Power Spinbox
-            self.laserpower_variables.append(StringVar())
+            self.laserpower_variables.append(tk.StringVar())
             self.laserpower_pulldowns.append(ttk.Spinbox(self.frame_columns[2], from_=0, to=100.0,
                                                          textvariable=self.laserpower_variables[num],
                                                          increment=5, width=3, font=Font(size=11)))
-            self.laserpower_pulldowns[num].grid(row=num+1, column=0, sticky=NS, padx=1, pady=1)
+            self.laserpower_pulldowns[num].grid(row=num+1, column=0, sticky=tk.NS, padx=1, pady=1)
 
             #  FilterWheel Dropdowns
-            self.filterwheel_variables.append(StringVar())
+            self.filterwheel_variables.append(tk.StringVar())
             self.filterwheel_pulldowns.append(ttk.Combobox(self.frame_columns[3],
                                                            textvariable=self.filterwheel_variables[num], width=22))
             self.filterwheel_pulldowns[num].state(["readonly"])
-            self.filterwheel_pulldowns[num].grid(row=num+1, column=0, sticky=NSEW, padx=1, pady=1)
+            self.filterwheel_pulldowns[num].grid(row=num+1, column=0, sticky=tk.NSEW, padx=1, pady=1)
 
             #  Exposure Time Spinboxes
-            self.exptime_variables.append(StringVar())
+            self.exptime_variables.append(tk.StringVar())
             self.exptime_pulldowns.append(ttk.Spinbox(self.frame_columns[4], from_=0, to=5000.0,
                                                       textvariable=self.exptime_variables[num], increment=25, width=12, font=Font(size=11)))
-            self.exptime_pulldowns[num].grid(row=num+1, column=0, sticky=NSEW, padx=1, pady=1)
+            self.exptime_pulldowns[num].grid(row=num+1, column=0, sticky=tk.NSEW, padx=1, pady=1)
 
             #  Time Interval Spinboxes
-            self.interval_variables.append(StringVar())
+            self.interval_variables.append(tk.StringVar())
             self.interval_spins.append(ttk.Spinbox(self.frame_columns[5], from_=0, to=5000.0,
                                                    textvariable=self.interval_variables[num], increment=1, width=6, font=Font(size=11)))
-            self.interval_spins[num].grid(row=num+1, column=0, sticky=NSEW, padx=1, pady=1)
+            self.interval_spins[num].grid(row=num+1, column=0, sticky=tk.NSEW, padx=1, pady=1)
 
             # Defocus Spinbox
-            self.defocus_variables.append(DoubleVar())
+            self.defocus_variables.append(tk.DoubleVar())
             self.defocus_spins.append(ValidatedSpinbox(self.frame_columns[6], from_=0.0, to=200.0,
                                                   textvariable=self.defocus_variables[num], increment=0.1, width=6, font=Font(size=11)))
-            self.defocus_spins[num].grid(row=num+1, column=0, sticky=NSEW, padx=1, pady=1)
+            self.defocus_spins[num].grid(row=num+1, column=0, sticky=tk.NSEW, padx=1, pady=1)
 
 
         self.filterwheel_pulldowns[1].grid(pady=2)
@@ -166,5 +165,5 @@ class channel_creator(ttk.Labelframe):
 
 if __name__ == '__main__':
     root = tk.Tk()
-    channel_creator(root).grid(row=0, column=0, sticky=NSEW)
+    channel_creator(root).grid(row=0, column=0, sticky=tk.NSEW)
     root.mainloop()

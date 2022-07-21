@@ -29,16 +29,10 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-
-# Standard Library Imports
 import unittest
 from pathlib import Path
-
-# Third Party Imports
-
-# Local Imports
-from aslm.model.devices.shutter.laser_shutter_base import ShutterBase
 from aslm.model.aslm_model_config import Session as session
+from aslm.model.devices.shutter.laser_shutter_base import ShutterBase
 
 
 class TestLaserBase(unittest.TestCase):

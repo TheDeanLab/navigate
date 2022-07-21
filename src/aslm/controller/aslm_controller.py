@@ -42,8 +42,8 @@ import time
 # Local View Imports
 from tkinter import filedialog
 from aslm.view.main_application_window import Main_App as view
-from aslm.view.remote_focus_popup import remote_popup
-from aslm.view.autofocus_setting_popup import autofocus_popup
+from aslm.view.menus.remote_focus_popup import remote_popup
+from aslm.view.menus.autofocus_setting_popup import autofocus_popup
 
 # Local Sub-Controller Imports
 from aslm.controller.sub_controllers.stage_gui_controller import Stage_GUI_Controller

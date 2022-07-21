@@ -31,7 +31,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 A main window is created and passed to the mainapp class. This class will init as a frame then config the main window. It then
 creates a menubar using the menubar class. Adds the options for each file menu. It then sets up the frames, then grids the frames.
-Finally it uses the notebook classes to put them into the respective frames on the grid. Each of the notebook classes includes tab
+Finally it uses the notebook classes to put them into the respective frames on the tk.Grid. Each of the notebook classes includes tab
 classes and inits those etc. The second parameter in each classes __init__ function is the parent. I used the name of the parent
 so that it would be easier to keep track of inheritances. Once you have the parent name you can look to the parents class in the
 class definition. For example for class Main_App(ttk.Frame) the parent to Main_App is a frame and its name is root. I also used
@@ -39,11 +39,8 @@ the name of the class instead of self to make things easier to read. So for Main
 """
 
 # Import Standard Libraries
-from pathlib import Path
 import tkinter as tk
 from tkinter import ttk
-from tkinter import *  # TODO: terrifying
-from tkinter.constants import NSEW
 import logging
 from pathlib import Path
 # Logger Setup
@@ -51,11 +48,11 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 # Import Notebooks
-from .main_window_content.settings_notebook import settings_notebook
-from .main_window_content.camera_notebook import camera_waveform_notebook
-from .main_window_content.stagecontrol_notebook import stagecontrol_maxintensity_notebook
-from .main_window_content.acquire_bar_frame.acquire_bar import AcquireBar
-from .main_window_content.menus import menubar
+from aslm.view.main_window_content.settings_notebook import settings_notebook
+from aslm.view.main_window_content.camera_display.camera_view.camera_notebook import camera_notebook
+from aslm.view.main_window_content.stage_control.stagecontrol_notebook import stagecontrol_notebook
+from aslm.view.main_window_content.acquire_bar_frame.acquire_bar import AcquireBar
+from aslm.view.menus.menus import menubar
 
 
 # Creates the frame that will hold the GUI content, its parent is the main
@@ -75,14 +72,14 @@ class Main_App(ttk.Frame):
         # keep icons relative to view directory structure
         view_directory = Path(__file__).resolve().parent
         photo_image = view_directory.joinpath("icon", "mic.png")
-        mainapp.root.iconphoto(True, PhotoImage(file=photo_image))
+        mainapp.root.iconphoto(True, tk.PhotoImage(file=photo_image))
         mainapp.root.resizable(True, True)
         factor = (3/4) # This changes how much of the screen to use. 1 is essentially fullscreen on startup
         screen_width = int(root.winfo_screenwidth() * factor)
         screen_height = int(root.winfo_screenheight() * factor)
         mainapp.root.geometry(f"{screen_width}x{screen_height}")
-        Grid.columnconfigure(root, 'all', weight=1)
-        Grid.rowconfigure(root, 'all', weight=1)
+        tk.Grid.columnconfigure(root, 'all', weight=1)
+        tk.Grid.rowconfigure(root, 'all', weight=1)
 
         # Creating and linking menu to main window/app
         mainapp.menubar = menubar(root)
@@ -108,7 +105,7 @@ class Main_App(ttk.Frame):
         # mainapp.bottom_right_frame_label.grid(row=0,column=0)
 
         """
-                Placing the notebooks using grid. While the grid is called on each frame it is actually calling
+                Placing the notebooks using tk.Grid. While the grid is called on each frame it is actually calling
                 the main window since those are the parent to the frames. The labels have already been packed into each respective
                 frame so can be ignored in the grid setup. This layout uses a 2x2 grid to start.
 
@@ -121,19 +118,19 @@ class Main_App(ttk.Frame):
                 """
 
         # Gridding out foundational frames
-        mainapp.grid(column=0, row=0, sticky=(NSEW))
+        mainapp.grid(column=0, row=0, sticky=(tk.NSEW))
         # Sticky tells which walls of gridded cell the widget should stick to,
         # in this case its sticking to the main window on all sides
-        mainapp.top_frame.grid(row=0, column=0, columnspan=2, sticky=(NSEW), padx=3, pady=3)
-        mainapp.frame_left.grid(row=1, column=0, rowspan=2, sticky=(NSEW), padx=3, pady=3)
-        mainapp.frame_top_right.grid(row=1, column=1, sticky=(NSEW), padx=3, pady=3)
-        mainapp.frame_bottom_right.grid(row=2, column=1, sticky=(NSEW), padx=3, pady=3)
+        mainapp.top_frame.grid(row=0, column=0, columnspan=2, sticky=(tk.NSEW), padx=3, pady=3)
+        mainapp.frame_left.grid(row=1, column=0, rowspan=2, sticky=(tk.NSEW), padx=3, pady=3)
+        mainapp.frame_top_right.grid(row=1, column=1, sticky=(tk.NSEW), padx=3, pady=3)
+        mainapp.frame_bottom_right.grid(row=2, column=1, sticky=(tk.NSEW), padx=3, pady=3)
 
         # Putting Notebooks into frames, tabs are held within the class of each
         # notebook
         mainapp.settings = settings_notebook(mainapp.frame_left)
-        mainapp.camera_waveform = camera_waveform_notebook(mainapp.frame_top_right)
-        mainapp.stage_control = stagecontrol_maxintensity_notebook(mainapp.frame_bottom_right)
+        mainapp.camera_waveform = camera_notebook(mainapp.frame_top_right)
+        mainapp.stage_control = stagecontrol_notebook(mainapp.frame_bottom_right)
         mainapp.acqbar = AcquireBar(mainapp.top_frame, mainapp.root)
         logger.info("GUI setup working")
         logger.info("Performance - GUI Started real quick")

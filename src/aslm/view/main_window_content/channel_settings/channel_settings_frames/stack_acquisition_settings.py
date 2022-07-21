@@ -30,12 +30,10 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-from tkinter import *
 import tkinter as tk
 from tkinter import ttk
 import logging
-
-from aslm.view.custom_widgets.validation import ValidatedCombobox, ValidatedSpinbox
+from aslm.view.custom_widgets.validation import ValidatedSpinbox, ValidatedCombobox
 from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 
 
@@ -51,8 +49,8 @@ class stack_acq_frame(ttk.Labelframe):
         ttk.Labelframe.__init__(self, settings_tab, text=text_label, *args, **kwargs)
         
         # Formatting
-        Grid.columnconfigure(self, 'all', weight=1)
-        Grid.rowconfigure(self, 'all', weight=1)
+        tk.Grid.columnconfigure(self, 'all', weight=1)
+        tk.Grid.rowconfigure(self, 'all', weight=1)
 
         # Dictionary for widgets and buttons
         self.inputs = {}
@@ -63,8 +61,8 @@ class stack_acq_frame(ttk.Labelframe):
         self.cycling = ttk.Frame(self)
 
         # Gridding Each Holder Frame
-        self.pos_slice.grid(row=0, column=0, sticky=(NSEW))
-        self.cycling.grid(row=1, column=0, sticky=(NSEW))
+        self.pos_slice.grid(row=0, column=0, sticky=(tk.NSEW))
+        self.cycling.grid(row=1, column=0, sticky=(tk.NSEW))
 
 
         # Start Pos Frame (Vertically oriented)
@@ -78,7 +76,7 @@ class stack_acq_frame(ttk.Labelframe):
             self.inputs[start_names[i]] = LabelInput(parent=self.pos_slice,
                                                      label=start_labels[i],
                                                      input_class=ValidatedSpinbox,
-                                                     input_var=DoubleVar(),
+                                                     input_var=tk.DoubleVar(),
                                                      input_args={"from_": -50000.0, "increment": 0.5, "width": 14}
                                                      )
             self.inputs[start_names[i]].grid(row=i + 1, column=0, sticky='N')
@@ -98,7 +96,7 @@ class stack_acq_frame(ttk.Labelframe):
             self.inputs[end_names[i]] = LabelInput(parent=self.pos_slice,
                                                    label=end_labels[i],
                                                    input_class=ValidatedSpinbox,
-                                                   input_var=DoubleVar(),
+                                                   input_var=tk.DoubleVar(),
                                                    input_args={"from_": -50000.0, "increment": 0.5, "width": 14}
                                                    )
             self.inputs[end_names[i]].grid(row=i + 1, column=1, sticky='N')
@@ -113,7 +111,7 @@ class stack_acq_frame(ttk.Labelframe):
         self.step_size_label.grid(row=0, column=2, sticky='S')
         self.inputs['step_size'] = LabelInput(parent=self.pos_slice,
                                               input_class=ValidatedSpinbox,
-                                              input_var=DoubleVar(),
+                                              input_var=tk.DoubleVar(),
                                               input_args={"from_": -50000.0, "increment": 0.5, "width": 14}
                                               )
         self.inputs['step_size'].grid(row=1, column=2, sticky='N')
@@ -128,7 +126,7 @@ class stack_acq_frame(ttk.Labelframe):
             self.inputs[slice_names[i]] = LabelInput(parent=self.pos_slice,
                                                      label=slice_labels[i],
                                                      input_class=ValidatedSpinbox,
-                                                     input_var=DoubleVar(),
+                                                     input_var=tk.DoubleVar(),
                                                      input_args={"from_": -50000.0, "increment": 0.5, "width": 14}
                                                      )
             self.inputs[slice_names[i]].label.grid(sticky='N')
@@ -139,7 +137,7 @@ class stack_acq_frame(ttk.Labelframe):
         self.inputs['cycling'] = LabelInput(parent=self.cycling,
                                             label='Laser Cycling Settings ',
                                             input_class=ValidatedCombobox,
-                                            input_var=StringVar(),
+                                            input_var=tk.StringVar(),
                                             input_args={'width': 9}
                                             )
         self.inputs["cycling"].state(["readonly"])  # Makes it so the user cannot type a choice into combobox
@@ -175,4 +173,3 @@ if __name__ == '__main__':
     root = tk.Tk()
     stack_acq_frame(root)
     root.mainloop()
-

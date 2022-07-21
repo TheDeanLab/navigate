@@ -30,13 +30,12 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-import re
 import tkinter as tk
 from tkinter import ttk        
 from decimal import Decimal, InvalidOperation
 from aslm.view.custom_widgets.hoverbar import Tooltip
 import logging
-from pathlib import Path
+
 
 # Logger Setup
 p = __name__.split(".")[1]

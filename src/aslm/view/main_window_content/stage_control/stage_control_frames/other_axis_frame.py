@@ -110,6 +110,7 @@ class other_axis_frame(ttk.Frame):
         other_axis_frame.increment_box.grid(row=3, column=0, pady=2, sticky=(NSEW)) #Increment spinbox
         other_axis_frame.increment_box.widget.set_precision(-1)
 
+
     def get_widget(other_axis_frame):
         return other_axis_frame.increment_box
 

@@ -53,7 +53,7 @@ class SignalNode(TreeNode):
 
         # if node type is multi-step, the node should have one response function
         if self.node_type == 'multi-step' and self.has_response_func == False and self.device_related == False:
-            self.node_funcs['main-response'] = dummy_func
+            self.node_funcs['main-response'] = dummy_True
             self.has_response_func = True
 
     def run(self, *args, wait_response=False):
@@ -95,6 +95,10 @@ class DataNode(TreeNode):
         if not self.is_initialized:
             self.node_funcs['init']()
             self.is_initialized = True
+
+        # to decide whether it is the target frame
+        if not self.node_funcs['pre-main'](*args):
+            return False, False
 
         result = self.node_funcs['main'](*args)
 
@@ -145,7 +149,7 @@ class SignalContainer(Container):
                 return
 
         if result and self.curr_node.child:
-            print('Signal running child of', self.curr_node.node_name)
+            # print('Signal running child of', self.curr_node.node_name)
             self.curr_node = self.curr_node.child
             if not self.curr_node.device_related:
                 self.run(*args)
@@ -167,7 +171,7 @@ class DataContainer(Container):
             self.curr_node = self.root
         while self.curr_node:
             result, is_end = self.curr_node.run(*args)
-            print('Data running node:', self.curr_node.node_name, 'get result:', result)
+            # print('Data running node:', self.curr_node.node_name, 'get result:', result)
             if not is_end:
                 return
             if not self.curr_node.sibling:
@@ -177,7 +181,7 @@ class DataContainer(Container):
                 return
 
         if result and self.curr_node.child:
-            print('Data running child of', self.curr_node.node_name)
+            # print('Data running child of', self.curr_node.node_name)
             self.curr_node = self.curr_node.child
             if not self.curr_node.device_related:
                 self.run(*args)
@@ -186,13 +190,20 @@ class DataContainer(Container):
 
 
 def get_registered_funcs(feature_module, func_type='signal'):
-    func_dict = feature_module.config_table[func_type]
+    func_dict = feature_module.config_table.get(func_type, {})
+    
     if 'init' not in func_dict:
         func_dict['init'] = dummy_func
     if 'main' not in func_dict:
-        func_dict['main'] = feature_module.generate_meta_data
+        # TODO: keep this now, later might change it after figuring out the meta data thing
+        if hasattr(feature_module, 'generate_meta_data') and func_type == 'signal':
+            func_dict['main'] = feature_module.generate_meta_data
+        else:
+            func_dict['main'] = dummy_True
     if 'end' not in func_dict:
         func_dict['end'] = dummy_True
+    if func_type == 'data' and 'pre-main' not in func_dict:
+        func_dict['pre-main'] = dummy_True
     return func_dict
 
 def load_features(model, feature_list):
@@ -211,6 +222,9 @@ def load_features(model, feature_list):
             if 'node' in feature.config_table:
                 signal_node.set_property(**feature.config_table['node'])
                 data_node.set_property(**feature.config_table['node'])
+            if 'node' in temp[i]:
+                signal_node.set_property(**temp[i]['node'])
+                data_node.set_property(**temp[i]['node'])
             if i == 0:
                 pre_signal.child = signal_node
                 pre_data.child = data_node
@@ -219,11 +233,11 @@ def load_features(model, feature_list):
                 pre_data.sibling = data_node
             pre_signal = signal_node
             pre_data = data_node
-            
+
     return SignalContainer(signal_root.child), DataContainer(data_root.child)
 
 
-def dummy_True():
+def dummy_True(*args):
     return True
 
 def dummy_func(*args):

@@ -35,17 +35,19 @@ import unittest
 from pathlib import Path
 
 # Third Party Imports
+import pytest
+import platform
 
 # Local Imports
-from aslm.model.devices.zoom.zoom_dynamixel import DynamixelZoom
 
 
 class TestZoomDynamixel(unittest.TestCase):
     r"""Unit Test for DynamixelZoom Class
 
     Does not instantiate object owing to DLL"""
-
+    @pytest.mark.skipif(platform.system() == 'Darwin', reason='No DLL for mac')
     def test_zoom_dynamixel_attributes(self):
+        from aslm.model.devices.zoom.zoom_dynamixel import DynamixelZoom
 
         attributes = dir(DynamixelZoom)
         desired_attributes = ['move',

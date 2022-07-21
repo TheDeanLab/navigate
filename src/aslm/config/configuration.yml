@@ -8,7 +8,7 @@ Devices:
   stage: PI  # PI or SyntheticStage
   stage_r: Thorlabs  # Currently just a focusing unit for the right side
   zoom: DynamixelZoom  #DynamixelZoom or SyntheticZoom
-  lasers: SyntheticLasers #Omicron or SyntheticLasers
+  lasers: Omicron #Omicron or SyntheticLasers
   shutters: ThorlabsShutter #ThorlabsShutter or SyntheticShutter
 
 DAQParameters:
@@ -275,14 +275,14 @@ GUIParameters:
       step: 0.1
     },
     start_pos: {
-      min: 0,
+      min: -5000,
       max: 5000,
       step: 1
     },
     end_pos: {
-      min: 0,
+      min: -5000,
       max: 10000,
-      step: 10
+      step: 1
     }
   }
   timepoint: {

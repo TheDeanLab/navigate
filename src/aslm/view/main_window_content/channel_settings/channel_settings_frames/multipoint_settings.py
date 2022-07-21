@@ -31,13 +31,11 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 import pandas as pd
-from pandastable import Table
-from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
-from .multi_position_table import Multi_Position_Table as MPTable
+from aslm.view.main_window_content.channel_settings.channel_settings_frames.multi_position_table import Multi_Position_Table as MPTable
 import tkinter as tk
-from tkinter import ttk, Grid
+from tkinter import ttk
 import logging
-from pathlib import Path
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -50,8 +48,8 @@ class multipoint_frame(ttk.Labelframe):
         ttk.Labelframe.__init__(self, settings_tab, text=text_label, *args, **kwargs)
         
         # Formatting
-        Grid.columnconfigure(self, 'all', weight=1)
-        Grid.rowconfigure(self, 'all', weight=1)
+        tk.Grid.columnconfigure(self, 'all', weight=1)
+        tk.Grid.rowconfigure(self, 'all', weight=1)
 
         # Dict
 

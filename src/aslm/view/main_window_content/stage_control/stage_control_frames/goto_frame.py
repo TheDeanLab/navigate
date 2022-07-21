@@ -1,4 +1,5 @@
-"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""
+Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -29,49 +30,21 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-from tkinter import Menu
+# Standard Imports
+import tkinter as tk
+from tkinter import ttk
 import logging
-from pathlib import Path
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-#  Menubar class
-class menubar(Menu):
-    def __init__(self, window, *args, **kwargs):
-        #  Init Menu with parent
-        Menu.__init__(self, window, *args, **kwargs)
-
-        #  Creates operating system attribute
-        self.opsystem = window.tk.call('tk', 'windowingsystem')
-
-        #  Prevents menu from tearing off bar
-        window.option_add('*tearOff', False)
-
-        #  Linking menu to option of parent to this menu class
-        window['menu'] = self
-
-        #  File Menu
-        self.menu_file = Menu(self)
-        self.add_cascade(menu=self.menu_file, label='File')
-
-        #  Multi-Position Menu
-        self.menu_multi_positions = Menu(self)
-        self.add_cascade(menu=self.menu_multi_positions, label='Multi-Position')
-
-        #  Resolution Menu
-        self.menu_resolution = Menu(self)
-        self.add_cascade(menu=self.menu_resolution, label='Resolution')
-
-        # Autofocus Menu
-        self.menu_autofocus = Menu(self)
-        self.add_cascade(menu=self.menu_autofocus, label='Autofocus')
-
-        # Add-on Features menu
-        self.menu_features = Menu(self)
-        self.add_cascade(menu=self.menu_features, label='Add-on Features')
-
-        # Debug Menu
-        self.menu_debug = Menu(self)
-        self.add_cascade(menu=self.menu_debug, label='Debug')
+class goto_frame(ttk.Frame):
+    def __init__(goto_frame, stage_control_tab, *args, **kwargs):
+        # Init Frame
+        ttk.Frame.__init__(goto_frame, stage_control_tab, *args, **kwargs)
+        
+        # Formatting
+        tk.Grid.columnconfigure(goto_frame, 'all', weight=1)
+        tk.Grid.rowconfigure(goto_frame, 'all', weight=1)

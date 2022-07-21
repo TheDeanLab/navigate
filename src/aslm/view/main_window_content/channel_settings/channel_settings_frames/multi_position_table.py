@@ -31,9 +31,9 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 from pandastable import Table, Menu, RowHeader, ColumnHeader
-from tkinter import filedialog, Grid
+import tkinter as tk
 import logging
-from pathlib import Path
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -119,8 +119,8 @@ class Multi_Position_Table(Table):
         super().show(callback)
         
         # Formatting
-        Grid.columnconfigure(self, 'all', weight=1)
-        Grid.rowconfigure(self, 'all', weight=1)
+        tk.Grid.columnconfigure(self, 'all', weight=1)
+        tk.Grid.rowconfigure(self, 'all', weight=1)
 
         self.rowheader = Multi_Position_RowHeader(self.parentframe, self)
         self.rowheader.grid(row=1,column=0,rowspan=1,sticky='news')

@@ -30,14 +30,12 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-from tkinter import *
 import tkinter as tk
 from tkinter import ttk
-from tokenize import String
-# import logging
-from aslm.view.custom_widgets.validation import ValidatedCombobox, ValidatedSpinbox
-from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 import logging
+from aslm.view.custom_widgets.validation import ValidatedSpinbox, ValidatedCombobox
+from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -51,8 +49,8 @@ class stack_acq_frame(ttk.Labelframe):
         ttk.Labelframe.__init__(self, settings_tab, text=text_label, *args, **kwargs)
         
         # Formatting
-        Grid.columnconfigure(self, 'all', weight=1)
-        Grid.rowconfigure(self, 'all', weight=1)
+        tk.Grid.columnconfigure(self, 'all', weight=1)
+        tk.Grid.rowconfigure(self, 'all', weight=1)
 
         # Dictionary for widgets and buttons
         self.inputs = {}
@@ -63,8 +61,8 @@ class stack_acq_frame(ttk.Labelframe):
         self.cycling = ttk.Frame(self)
 
         # Gridding Each Holder Frame
-        self.pos_slice.grid(row=0, column=0, sticky=(NSEW))
-        self.cycling.grid(row=1, column=0, sticky=(NSEW))
+        self.pos_slice.grid(row=0, column=0, sticky=(tk.NSEW))
+        self.cycling.grid(row=1, column=0, sticky=(tk.NSEW))
 
 
         # Start Pos Frame (Vertically oriented)
@@ -78,7 +76,7 @@ class stack_acq_frame(ttk.Labelframe):
             self.inputs[start_names[i]] = LabelInput(parent=self.pos_slice,
                                                      label=start_labels[i],
                                                      input_class=ValidatedSpinbox,
-                                                     input_var=DoubleVar(),
+                                                     input_var=tk.DoubleVar(),
                                                      input_args={"from_": -50000.0, "increment": 0.5, "width": 14}
                                                      )
             self.inputs[start_names[i]].grid(row=i + 1, column=0, sticky='N')
@@ -98,7 +96,7 @@ class stack_acq_frame(ttk.Labelframe):
             self.inputs[end_names[i]] = LabelInput(parent=self.pos_slice,
                                                    label=end_labels[i],
                                                    input_class=ValidatedSpinbox,
-                                                   input_var=DoubleVar(),
+                                                   input_var=tk.DoubleVar(),
                                                    input_args={"from_": -50000.0, "increment": 0.5, "width": 14}
                                                    )
             self.inputs[end_names[i]].grid(row=i + 1, column=1, sticky='N')
@@ -113,7 +111,7 @@ class stack_acq_frame(ttk.Labelframe):
         self.step_size_label.grid(row=0, column=2, sticky='S')
         self.inputs['step_size'] = LabelInput(parent=self.pos_slice,
                                               input_class=ValidatedSpinbox,
-                                              input_var=DoubleVar(),
+                                              input_var=tk.DoubleVar(),
                                               input_args={"from_": -50000.0, "increment": 0.5, "width": 14}
                                               )
         self.inputs['step_size'].grid(row=1, column=2, sticky='N')
@@ -128,7 +126,7 @@ class stack_acq_frame(ttk.Labelframe):
             self.inputs[slice_names[i]] = LabelInput(parent=self.pos_slice,
                                                      label=slice_labels[i],
                                                      input_class=ValidatedSpinbox,
-                                                     input_var=DoubleVar(),
+                                                     input_var=tk.DoubleVar(),
                                                      input_args={"from_": -50000.0, "increment": 0.5, "width": 14}
                                                      )
             self.inputs[slice_names[i]].label.grid(sticky='N')
@@ -139,7 +137,7 @@ class stack_acq_frame(ttk.Labelframe):
         self.inputs['cycling'] = LabelInput(parent=self.cycling,
                                             label='Laser Cycling Settings ',
                                             input_class=ValidatedCombobox,
-                                            input_var=StringVar(),
+                                            input_var=tk.StringVar(),
                                             input_args={'width': 9}
                                             )
         self.inputs["cycling"].state(["readonly"])  # Makes it so the user cannot type a choice into combobox
@@ -175,119 +173,3 @@ if __name__ == '__main__':
     root = tk.Tk()
     stack_acq_frame(root)
     root.mainloop()
-
-
-
-
-
- # self.start_pos_label = ttk.Label(self.start_pos_frame, text='Pos')
-        # self.start_pos_label.grid(row=1, column=0, sticky='N', padx=3, pady=(4, 1))
-        # self.start_pos_spinval = DoubleVar()
-        # self.start_pos_spinbox = ttk.Spinbox(
-        #     self.start_pos_frame,
-        #     textvariable=self.start_pos_spinval,
-        #     from_=-50000.0,
-        #     increment=0.5,
-        #     width=14
-        # )
-        # self.start_pos_spinbox.grid(row=1, column=1, sticky='N', padx=3, pady=(3, 6))
-
-        # self.start_foc_label = ttk.Label(self.start_pos_frame, text='Foc')
-        # self.start_foc_label.grid(row=2, column=0, sticky='N', padx=3, pady=(4, 1))
-        # self.start_foc_spinval = DoubleVar()
-        # self.start_foc_spinbox = ttk.Spinbox(
-        #     self.start_pos_frame,
-        #     textvariable=self.start_foc_spinval,
-        #     from_=-50000.0,
-        #     increment=0.5,
-        #     width=14
-        # )
-        # self.start_foc_spinbox.grid(row=2, column=1, sticky='N', padx=3, pady=(3, 6))
-
-        # self.set_start_button = ttk.Button(
-        #     self.start_pos_frame,
-        #     text="Set Start Pos/Foc"
-        # )
-        # self.set_start_button.grid(row=3, column=1, sticky='N', padx=3, pady=(3, 6))
-
-        # End Pos Frame (Vertically oriented)
-        
-       
-        # self.end_pos_label = ttk.Label(self.end_pos_frame, text='Pos')
-        # self.end_pos_label.grid(row=1, column=0, sticky='N', padx=3, pady=(4, 1))
-        # self.end_pos_spinval = DoubleVar()
-        # self.end_pos_spinbox = ttk.Spinbox(
-        #     self.end_pos_frame,
-        #     textvariable=self.end_pos_spinval,
-        #     from_=-50000.0,
-        #     increment=0.5,
-        #     width=14
-        # )
-        # self.end_pos_spinbox.grid(row=1, column=1, sticky='N', padx=3, pady=(3, 6))
-
-        # self.end_foc_label = ttk.Label(self.end_pos_frame, text='Foc')
-        # self.end_foc_label.grid(row=2, column=0, sticky='N', padx=3, pady=(4, 1))
-        # self.end_foc_spinval = DoubleVar()
-        # self.end_foc_spinbox = ttk.Spinbox(
-        #     self.end_pos_frame,
-        #     textvariable=self.end_foc_spinval,
-        #     from_=-50000.0,
-        #     increment=0.5,
-        #     width=14
-        # )
-        # self.end_foc_spinbox.grid(row=2, column=1, sticky='N', padx=3, pady=(3, 6))
-
-        # self.set_end_button = ttk.Button(
-        #     self.end_pos_frame,
-        #     text="Set End Pos/Foc"
-        # )
-        # self.set_end_button.grid(row=3, column=1, sticky='N', padx=3, pady=(3, 6))
-
-                # self.step_size_spinval = DoubleVar()
-        # self.step_size_spinbox = ttk.Spinbox(
-        #     self.step_size_frame,
-        #     textvariable=self.step_size_spinval,
-        #     from_=-50000.0,
-        #     increment=0.5,
-        #     width=14
-        # )
-        # self.step_size_spinbox.grid(row=1, column=0, sticky='N', padx=(4, 3), pady=(3, 6))
-
-
-        # self.slice_label = ttk.Label(self.slice_frame, text='# slices')
-        # self.slice_label.grid(row=1, column=0, sticky='N', padx=3, pady=(4, 1))
-        # self.slice_spinval = DoubleVar()
-        # self.slice_spinbox = ttk.Spinbox(
-        #     self.slice_frame,
-        #     textvariable=self.slice_spinval,
-        #     increment=0.5,
-        #     width=14
-        # )
-        # self.slice_spinbox.state(['disabled'])
-        # self.slice_spinbox.grid(row=1, column=1, sticky='N', padx=3, pady=(3, 6))
-
-        # self.abs_z_start_label = ttk.Label(self.slice_frame, text='Abs Z Start')
-        # self.abs_z_start_label.grid(row=2, column=0, sticky='N', padx=3, pady=(4, 1))
-        # self.abs_z_start_spinval = DoubleVar()
-        # self.abs_z_start_spinbox = ttk.Spinbox(
-        #     self.slice_frame,
-        #     textvariable=self.abs_z_start_spinval,
-        #     increment=0.5,
-        #     width=14
-        # )
-        # self.abs_z_start_spinbox.state(['disabled'])
-        # self.abs_z_start_spinbox.grid(row=2, column=1, sticky='N', padx=3, pady=(3, 6))
-
-        # self.abs_z_end_label = ttk.Label(self.slice_frame, text='Abs Z Stop')
-        # self.abs_z_end_label.grid(row=3, column=0, sticky='N', padx=3, pady=(4, 1))
-        # self.abs_z_end_spinval = DoubleVar()
-        # self.abs_z_end_spinbox = ttk.Spinbox(
-        #     self.slice_frame,
-        #     textvariable=self.abs_z_end_spinval,
-        #     increment=0.5,
-        #     width=14
-        # )
-        # self.abs_z_end_spinbox.state(['disabled'])
-        # self.abs_z_end_spinbox.grid(row=3, column=1, sticky='N', padx=3, pady=(3, 6))
-
-

@@ -31,17 +31,14 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 
 # Standard Library Imports
-import pytest
 import unittest
 from pathlib import Path
-import platform
 
 # Third Party Imports
 
 # Local Imports
 from aslm.model.devices.zoom.zoom_dynamixel import DynamixelZoom
 
-@pytest.mark.skip(reason='DLL not found')
 class TestZoomDynamixel(unittest.TestCase):
     r"""Unit Test for DynamixelZoom Class
 

@@ -1,5 +1,4 @@
-"""
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -30,43 +29,50 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
+from tkinter import Menu
+
 import logging
-import tkinter as tk
-from tkinter import ttk
-
-
-import numpy as np
-from aslm.view.main_window_content.camera_display.camera_settings.camera_settings_frames.camera_mode import camera_mode
-from aslm.view.main_window_content.camera_display.camera_settings.camera_settings_frames.framerate_info import framerate_info
-from aslm.view.main_window_content.camera_display.camera_settings.camera_settings_frames.camera_roi import camera_roi
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-class camera_settings_tab(ttk.Frame):
-    """
-    # This class holds and controls the layout of the major label frames for the camera settings tab in the settings notebook. Any imported classes are children that makeup
-    # the content of the major frames. If you need to adjust anything in the frames follow the children.
-    """
-    def __init__(self, setntbk, *args, **kwargs):
-        #Init Frame
-        ttk.Frame.__init__(self, setntbk, *args, **kwargs)
-        
-        # Formatting
-        tk.Grid.columnconfigure(self, 'all', weight=1)
-        tk.Grid.rowconfigure(self, 'all', weight=1)
 
-        #Camera Modes Frame
-        self.camera_mode = camera_mode(self)
-        self.camera_mode.grid(row=0, column=0, sticky=(tk.NSEW), padx=10, pady=10)
-        
-        #Framerate Label Frame
-        self.framerate_info = framerate_info(self)
-        self.framerate_info.grid(row=0, column=1, sticky=(tk.NSEW), padx=10, pady=10)
+#  Menubar class
+class menubar(Menu):
+    def __init__(self, window, *args, **kwargs):
+        #  Init Menu with parent
+        Menu.__init__(self, window, *args, **kwargs)
 
-        #Region of Interest Settings
-        self.camera_roi = camera_roi(self)
-        self.camera_roi.grid(row=1, column=0,columnspan=2, sticky=(tk.NSEW), padx=10, pady=10)
+        #  Creates operating system attribute
+        self.opsystem = window.tk.call('tk', 'windowingsystem')
 
+        #  Prevents menu from tearing off bar
+        window.option_add('*tearOff', False)
 
+        #  Linking menu to option of parent to this menu class
+        window['menu'] = self
+
+        #  File Menu
+        self.menu_file = Menu(self)
+        self.add_cascade(menu=self.menu_file, label='File')
+
+        #  Multi-Position Menu
+        self.menu_multi_positions = Menu(self)
+        self.add_cascade(menu=self.menu_multi_positions, label='Multi-Position')
+
+        #  Resolution Menu
+        self.menu_resolution = Menu(self)
+        self.add_cascade(menu=self.menu_resolution, label='Resolution')
+
+        # Autofocus Menu
+        self.menu_autofocus = Menu(self)
+        self.add_cascade(menu=self.menu_autofocus, label='Autofocus')
+
+        # Add-on Features menu
+        self.menu_features = Menu(self)
+        self.add_cascade(menu=self.menu_features, label='Add-on Features')
+
+        # Debug Menu
+        self.menu_debug = Menu(self)
+        self.add_cascade(menu=self.menu_debug, label='Debug')

@@ -30,43 +30,66 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-import logging
+# Standard Imports
 import tkinter as tk
 from tkinter import ttk
 
+# Local Imports
+from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from aslm.view.custom_widgets.validation import ValidatedEntry
 
-import numpy as np
-from aslm.view.main_window_content.camera_display.camera_settings.camera_settings_frames.camera_mode import camera_mode
-from aslm.view.main_window_content.camera_display.camera_settings.camera_settings_frames.framerate_info import framerate_info
-from aslm.view.main_window_content.camera_display.camera_settings.camera_settings_frames.camera_roi import camera_roi
+import logging
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-class camera_settings_tab(ttk.Frame):
-    """
-    # This class holds and controls the layout of the major label frames for the camera settings tab in the settings notebook. Any imported classes are children that makeup
-    # the content of the major frames. If you need to adjust anything in the frames follow the children.
-    """
-    def __init__(self, setntbk, *args, **kwargs):
+
+class position_frame(ttk.Frame):
+    def __init__(position_frame, stage_control_tab, *args, **kwargs):
+
         #Init Frame
-        ttk.Frame.__init__(self, setntbk, *args, **kwargs)
+        ttk.Frame.__init__(position_frame, stage_control_tab, *args, **kwargs)
         
         # Formatting
-        tk.Grid.columnconfigure(self, 'all', weight=1)
-        tk.Grid.rowconfigure(self, 'all', weight=1)
+        tk.Grid.columnconfigure(position_frame, 'all', weight=1)
+        tk.Grid.rowconfigure(position_frame, 'all', weight=1)
 
-        #Camera Modes Frame
-        self.camera_mode = camera_mode(self)
-        self.camera_mode.grid(row=0, column=0, sticky=(tk.NSEW), padx=10, pady=10)
-        
-        #Framerate Label Frame
-        self.framerate_info = framerate_info(self)
-        self.framerate_info.grid(row=0, column=1, sticky=(tk.NSEW), padx=10, pady=10)
+        #Creating each entry frame for a label and entry
+        position_frame.inputs = {}
+        entry_names = ['x', 'y', 'z', 'theta', 'f']
+        entry_labels = ['X', 'Y', 'Z', "\N{Greek Capital Theta Symbol}", 'F']       
 
-        #Region of Interest Settings
-        self.camera_roi = camera_roi(self)
-        self.camera_roi.grid(row=1, column=0,columnspan=2, sticky=(tk.NSEW), padx=10, pady=10)
+        # entries
+        for i in range(len(entry_names)):
+            position_frame.inputs[entry_names[i]] = LabelInput(parent=position_frame,
+                                                            label=entry_labels[i],
+                                                            input_class=ValidatedEntry,
+                                                            input_var=tk.DoubleVar(),
+                                                            input_args={'required': True, 'precision': 0.1}
+                                                            )
+            position_frame.inputs[entry_names[i]].grid(row=0, column=i, pady=1, padx=15)
 
 
+
+       
+
+        """
+        Grid for frames
+
+                1   2   3   4   5
+
+        x is 1
+        y is 2
+        z is 3
+        theta is 4
+        focus is 5
+        """
+    def get_widgets(position_frame):
+        return position_frame.inputs
+
+    def get_variables(position_frame):
+        variables = {}
+        for name in position_frame.inputs:
+            variables[name] = position_frame.inputs[name].get_variable()
+        return variables

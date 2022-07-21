@@ -30,43 +30,67 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-import logging
-import tkinter as tk
+# Standard Imports
 from tkinter import ttk
-
-
+import tkinter as tk
 import numpy as np
-from aslm.view.main_window_content.camera_display.camera_settings.camera_settings_frames.camera_mode import camera_mode
-from aslm.view.main_window_content.camera_display.camera_settings.camera_settings_frames.framerate_info import framerate_info
-from aslm.view.main_window_content.camera_display.camera_settings.camera_settings_frames.camera_roi import camera_roi
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import logging
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-class camera_settings_tab(ttk.Frame):
-    """
-    # This class holds and controls the layout of the major label frames for the camera settings tab in the settings notebook. Any imported classes are children that makeup
-    # the content of the major frames. If you need to adjust anything in the frames follow the children.
-    """
-    def __init__(self, setntbk, *args, **kwargs):
+
+class maximum_intensity_projection_tab(ttk.Frame):
+    def __init__(self, note3, *args, **kwargs):
         #Init Frame
-        ttk.Frame.__init__(self, setntbk, *args, **kwargs)
+        ttk.Frame.__init__(self, note3, *args, **kwargs)
         
         # Formatting
         tk.Grid.columnconfigure(self, 'all', weight=1)
         tk.Grid.rowconfigure(self, 'all', weight=1)
 
-        #Camera Modes Frame
-        self.camera_mode = camera_mode(self)
-        self.camera_mode.grid(row=0, column=0, sticky=(tk.NSEW), padx=10, pady=10)
-        
-        #Framerate Label Frame
-        self.framerate_info = framerate_info(self)
-        self.framerate_info.grid(row=0, column=1, sticky=(tk.NSEW), padx=10, pady=10)
+        # Generate MIPs
+        def xy_mip():
+            pass
 
-        #Region of Interest Settings
-        self.camera_roi = camera_roi(self)
-        self.camera_roi.grid(row=1, column=0,columnspan=2, sticky=(tk.NSEW), padx=10, pady=10)
+        def xz_mip():
+            pass
 
+        def yz_mip():
+            pass
 
+        # the figure that will contain the plot
+        fig = Figure(figsize=(11, 3), tight_layout=True)
+
+        #  Data to just fill void
+        t = np.arange(0.0, 2.0, 0.01)
+        s1 = np.sin(2*np.pi*t)
+        s2 = np.sin(4*np.pi*t)
+
+        # adding the subplot
+        plot1 = fig.add_subplot(131)
+        plot1.plot(t, s1)
+        fig.gca().set_axis_off()
+
+        plot2 = fig.add_subplot(132)
+        plot2.plot(t, s2)
+        fig.gca().set_axis_off()
+
+        plot3 = fig.add_subplot(133)
+        plot3.plot(t, s2*2)
+        fig.gca().set_axis_off()
+
+        # creating the Tkinter canvas
+        # containing the Matplotlib figure
+        canvas = FigureCanvasTkAgg(fig, master=self)
+        canvas.draw()
+
+        # placing the canvas on the Tkinter window
+        # canvas.get_tk_widget().pack()
+        canvas.get_tk_widget().grid(row=0, column=0, sticky=tk.NSEW)
+
+        self.calculate_button = ttk.Button(self, text="Calculate MIPs")
+        self.calculate_button.grid(row=1, column=0, sticky=tk.NSEW)

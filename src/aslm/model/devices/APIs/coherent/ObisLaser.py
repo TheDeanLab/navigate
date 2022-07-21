@@ -154,6 +154,30 @@ class ObisLaser(LaserBase):
             print("Laser Calibration Date:", laser_calibration_date)
         self.laser_calibration_date = laser_calibration_date
         return laser_calibration_date
+    
+    def get_laser_serial_number(self):
+        """
+        # System Serial Number Query
+        Retrieves the serial number of the laser.
+        """
+        command = "SYSTem:INFormation:SNUMber?"
+        laser_serial_number = self.ask(command)
+        if self.verbose:
+            print("Laser Serial Number:", laser_serial_number)
+        self.laser_serial_number = laser_serial_number
+        return laser_serial_number
+
+    def get_laser_part_number(self):
+        """
+        # System Part Number Query
+        Retrieves the manufacturer part number of the laser. 
+        """
+        command = "SYSTem:INFormation:PNUMber?"
+        laser_part_number = self.ask(command)
+        if self.verbose:
+            print("Laser Part Number:", laser_part_number)
+        self.laser_part_number = laser_part_number
+        return laser_part_number
 
     def get_laser_firmware(self):
         """
@@ -187,6 +211,18 @@ class ObisLaser(LaserBase):
             print("Laser Wavelength:", laser_wavelength)
         self.laser_wavelength = laser_wavelength
         return laser_wavelength
+
+    def get_power_rating(self):
+        """
+        # System Power Rating Query
+        Retrieves the power rating (in watts) of the laser. 
+        """
+        command = "SYSTem:INFormation:POWer?"
+        laser_power_rating = self.ask(command)
+        if self.verbose:
+            print("Laser Power Rating:", laser_power_rating)
+        self.laser_power_rating = laser_power_rating
+        return laser_power_rating
 
     def get_minimum_laser_power(self):
         """
@@ -247,6 +283,32 @@ class ObisLaser(LaserBase):
             print("Laser Output Current:", laser_output_current)
         self.laser_output_current = laser_output_current
         return laser_output_current
+
+    def get_base_plate_temp(self, unit):
+        """
+        # Base Plate Temperature Query
+        Returns the present laser base plate temperature. An optional unit indicator 
+        may be specified. If the 'C' unit indicator is specified, or if the unit indicator 
+        is left off, the returned value represents the laser base plate temperature in 
+        degrees C. If the 'F' unit indicator is specified, the returned value represents 
+        the laser base temperature in degrees F.
+        """
+        if unit == "C":
+            #passed
+            valid = True
+        elif unit == "F":
+            #passed
+            valid = True
+        else:
+            valid = False
+            unit = "C"
+
+        command = "SOURce:TEMPerature:BASeplate? {unit}"
+        laser_base_plate_temp = self.ask(command)
+        if self.verbose:
+            print("Laser Base Plate Temp:", laser_base_plate_temp)
+        self.laser_base_plate_temp = laser_base_plate_temp
+        return laser_base_plate_temp
 
     
     """
@@ -412,6 +474,108 @@ class ObisLaser(LaserBase):
         return laser_state
 
 
+    """
+    # OBIS Mandatory Commands and Queries
+        The OBIS Mandatory Command set is implemented by all OBIS compatible devices
+    """
+
+    def get_analog_mod_type(self):
+        """
+        # Get Analog Modulation Type
+        Gets the analog modulation type that provides unique electrical impedance 
+        on the analog interface of the OBIS Remote. The factory default is 50Ω. 
+        """
+        command = "SYSTem:INFormation:AMODulation:TYPe?"
+        analog_mod_type = self.ask(command)
+        if self.verbose:
+            print("Laser Analog Modulation Type:", analog_mod_type)
+        self.analog_mod_type = analog_mod_type
+        return analog_mod_type
+
+    def set_analog_mod_type(self, type):
+        """
+        # Set Analog Modulation Type
+        Sets the analog modulation type that provides unique electrical impedance 
+        on the analog interface of the OBIS Remote. The factory default is 50Ω. 
+        """
+        command = "SYSTem:INFormation:AMODulation:TYPe {type}"
+        self.ask(command)
+        analog_mod_type = self.ask("SYSTem:INFormation:AMODulation:TYPe?")
+        if self.verbose:
+            print("Laser Analog Modulation Type:", analog_mod_type)
+        self.analog_mod_type = analog_mod_type
+        return analog_mod_type
+
+    def get_system_status(self):
+        """
+        # System Status Query
+        Gets the system status code. The status code is returned in a string 
+        expressed in uppercase hexadecimal integer form. The 32-bit word 
+        represents a bit-mapped status indicator. 
+        """
+        command = "SYSTem:STATus?"
+        system_ststus = self.ask(command)
+        if self.verbose:
+            print("Laser System Status:", system_ststus)
+        self.system_ststus = system_ststus
+        return system_ststus
+
+    def get_system_fault(self):
+        """
+        # System Fault Query
+        Gets the system fault code. The fault code is returned in a string expressed 
+        in uppercase hexadecimal integer form. The 32-bit word represents a 
+        bit-mapped fault indicator. 
+        """
+        command = "SYSTem:FAULt?"
+        system_fault = self.ask(command)
+        if self.verbose:
+            print("Laser System Fault:", system_fault)
+        self.system_fault = system_fault
+        return system_fault
+
+
+    """
+    # OBIS Optional Commands
+        This section describes the optional commands for OBIS lasers.
+    """
+    
+    def get_laser_blanking_status(self):
+        """
+        # Get Blanking Status
+        """
+        command = "SOURce:AModulation:BLANKing?"
+        laser_blanking_status = self.ask(command)
+        if self.verbose:
+            print("Laser Blanking Status:", laser_blanking_status)
+        self.laser_blanking_status = laser_blanking_status
+        return laser_blanking_status
+
+    def set_laser_blanking_on(self):
+        """
+        # Set Blanking Status to ON
+        """
+        command = "SOURce:AModulation:BLANKing ON"
+        self.ask(command)
+        laser_blanking_status = self.ask("SOURce:AModulation:BLANKing?")
+        if self.verbose:
+            print("Laser Blanking Status:", laser_blanking_status)
+        self.laser_blanking_status = laser_blanking_status
+        return laser_blanking_status
+
+    def set_laser_blanking_off(self):
+        """
+        # Set Blanking Status to OFF
+        """
+        command = "SOURce:AModulation:BLANKing OFF"
+        self.ask(command)
+        laser_blanking_status = self.ask("SOURce:AModulation:BLANKing?")
+        if self.verbose:
+            print("Laser Blanking Status:", laser_blanking_status)
+        self.laser_blanking_status = laser_blanking_status
+        return laser_blanking_status
+
+    
     
     # we can add to this when we know what we want our laser setting to be when we turn it on
     def initialize_laser(self):

@@ -31,11 +31,9 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 import tkinter as tk
-from tkinter import *
 from tkinter import ttk
 import logging
-from pathlib import Path
-from tkinter.font import Font
+
 
 from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from aslm.view.custom_widgets.validation import ValidatedSpinbox
@@ -60,35 +58,35 @@ class camera_roi(ttk.Labelframe):
         ttk.Labelframe.__init__(self, settings_tab, text=text_label, *args, **kwargs)
         
         # Formatting
-        Grid.columnconfigure(self, 'all', weight=1)
-        Grid.rowconfigure(self, 'all', weight=1)
+        tk.Grid.columnconfigure(self, 'all', weight=1)
+        tk.Grid.rowconfigure(self, 'all', weight=1)
 
         # Parent Label Frames for widgets
         # ROI
         self.roi_frame = ttk.LabelFrame(self, text='Number of Pixels')
-        self.roi_frame.grid(row=0, column=0, sticky=NSEW, padx=10, pady=10)
+        self.roi_frame.grid(row=0, column=0, sticky=tk.NSEW, padx=10, pady=10)
 
         # Button Frame
         self.btn_frame = ttk.LabelFrame(self, text="Default FOVs")
-        self.btn_frame.grid(row=0, column=1, sticky=NSEW, padx=(40,10), pady=10)
+        self.btn_frame.grid(row=0, column=1, sticky=tk.NSEW, padx=(40,10), pady=10)
 
         # FOV
         self.fov_frame = ttk.LabelFrame(self, text='FOV Dimensions (microns)')
-        self.fov_frame.grid(row=1, column=0, sticky=NSEW, padx=10, pady=10)
+        self.fov_frame.grid(row=1, column=0, sticky=tk.NSEW, padx=10, pady=10)
 
         # ROI Center
         self.center_roi_frame = ttk.LabelFrame(self, text='ROI Center')
-        self.center_roi_frame.grid(row=1, column=1, sticky=NSEW, padx=(40,10), pady=10)
+        self.center_roi_frame.grid(row=1, column=1, sticky=tk.NSEW, padx=(40,10), pady=10)
         
         # Formatting
-        Grid.columnconfigure(self.roi_frame, 'all', weight=1)
-        Grid.rowconfigure(self.roi_frame, 'all', weight=1)
-        Grid.columnconfigure(self.btn_frame, 'all', weight=1)
-        Grid.rowconfigure(self.btn_frame, 'all', weight=1)
-        Grid.columnconfigure(self.fov_frame, 'all', weight=1)
-        Grid.rowconfigure(self.fov_frame, 'all', weight=1)
-        Grid.columnconfigure(self.center_roi_frame, 'all', weight=1)
-        Grid.rowconfigure(self.center_roi_frame, 'all', weight=1)
+        tk.Grid.columnconfigure(self.roi_frame, 'all', weight=1)
+        tk.Grid.rowconfigure(self.roi_frame, 'all', weight=1)
+        tk.Grid.columnconfigure(self.btn_frame, 'all', weight=1)
+        tk.Grid.rowconfigure(self.btn_frame, 'all', weight=1)
+        tk.Grid.columnconfigure(self.fov_frame, 'all', weight=1)
+        tk.Grid.rowconfigure(self.fov_frame, 'all', weight=1)
+        tk.Grid.columnconfigure(self.center_roi_frame, 'all', weight=1)
+        tk.Grid.rowconfigure(self.center_roi_frame, 'all', weight=1)
 
 
         # Dictionary for all the variables, this will be used by the controller

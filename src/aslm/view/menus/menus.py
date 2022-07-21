@@ -1,5 +1,4 @@
-"""
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -30,67 +29,50 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-# Standard Imports
-from tkinter import ttk
-from tkinter import *
-import numpy as np
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from tkinter import Menu
+
 import logging
-from pathlib import Path
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class maximum_intensity_projection_tab(ttk.Frame):
-    def __init__(self, note3, *args, **kwargs):
-        #Init Frame
-        ttk.Frame.__init__(self, note3, *args, **kwargs)
-        
-        # Formatting
-        Grid.columnconfigure(self, 'all', weight=1)
-        Grid.rowconfigure(self, 'all', weight=1)
+#  Menubar class
+class menubar(Menu):
+    def __init__(self, window, *args, **kwargs):
+        #  Init Menu with parent
+        Menu.__init__(self, window, *args, **kwargs)
 
-        # Generate MIPs
-        def xy_mip():
-            pass
+        #  Creates operating system attribute
+        self.opsystem = window.tk.call('tk', 'windowingsystem')
 
-        def xz_mip():
-            pass
+        #  Prevents menu from tearing off bar
+        window.option_add('*tearOff', False)
 
-        def yz_mip():
-            pass
+        #  Linking menu to option of parent to this menu class
+        window['menu'] = self
 
-        # the figure that will contain the plot
-        fig = Figure(figsize=(11, 3), tight_layout=True)
+        #  File Menu
+        self.menu_file = Menu(self)
+        self.add_cascade(menu=self.menu_file, label='File')
 
-        #  Data to just fill void
-        t = np.arange(0.0, 2.0, 0.01)
-        s1 = np.sin(2*np.pi*t)
-        s2 = np.sin(4*np.pi*t)
+        #  Multi-Position Menu
+        self.menu_multi_positions = Menu(self)
+        self.add_cascade(menu=self.menu_multi_positions, label='Multi-Position')
 
-        # adding the subplot
-        plot1 = fig.add_subplot(131)
-        plot1.plot(t, s1)
-        fig.gca().set_axis_off()
+        #  Resolution Menu
+        self.menu_resolution = Menu(self)
+        self.add_cascade(menu=self.menu_resolution, label='Resolution')
 
-        plot2 = fig.add_subplot(132)
-        plot2.plot(t, s2)
-        fig.gca().set_axis_off()
+        # Autofocus Menu
+        self.menu_autofocus = Menu(self)
+        self.add_cascade(menu=self.menu_autofocus, label='Autofocus')
 
-        plot3 = fig.add_subplot(133)
-        plot3.plot(t, s2*2)
-        fig.gca().set_axis_off()
+        # Add-on Features menu
+        self.menu_features = Menu(self)
+        self.add_cascade(menu=self.menu_features, label='Add-on Features')
 
-        # creating the Tkinter canvas
-        # containing the Matplotlib figure
-        canvas = FigureCanvasTkAgg(fig, master=self)
-        canvas.draw()
-
-        # placing the canvas on the Tkinter window
-        # canvas.get_tk_widget().pack()
-        canvas.get_tk_widget().grid(row=0, column=0, sticky=NSEW)
-
-        self.calculate_button = ttk.Button(self, text="Calculate MIPs")
-        self.calculate_button.grid(row=1, column=0, sticky=NSEW)
+        # Debug Menu
+        self.menu_debug = Menu(self)
+        self.add_cascade(menu=self.menu_debug, label='Debug')

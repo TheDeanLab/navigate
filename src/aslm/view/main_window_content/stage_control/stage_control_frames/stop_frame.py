@@ -30,22 +30,43 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-from tkinter import *
+# Standard Imports
+import tkinter as tk
 from tkinter import ttk
+
+
 import logging
-from pathlib import Path
+
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
-from tkinter.font import Font
 
-import numpy as np
 
-class advanced_settings_tab(ttk.Frame):
-    def __init__(adv_settings, setntbk, *args, **kwargs):
-        #Init Frame
-        ttk.Frame.__init__(adv_settings, setntbk, *args, **kwargs)
-        
+class stop_frame(ttk.Frame):
+    def __init__(self, stage_control_tab, name, *args, **kwargs):
+        # Init Frame
+        ttk.Frame.__init__(self, stage_control_tab, *args, **kwargs)
+        self.name = name
+
         # Formatting
-        Grid.columnconfigure(adv_settings, 'all', weight=1)
-        Grid.rowconfigure(adv_settings, 'all', weight=1)
+        tk.Grid.columnconfigure(self, 'all', weight=1)
+        tk.Grid.rowconfigure(self, 'all', weight=1)
+
+        # Stop button
+        self.stop_btn = tk.Button(
+            self,
+            bg='red',
+            fg='white',
+            text="STOP",
+            width=20,
+            height=10
+        )
+
+        # Gridding out buttons
+        self.stop_btn.grid(row=0, column=0, rowspan=2, pady=2)
+
+    def get_buttons(self):
+        return {
+            'stop': self.stop_btn
+        }

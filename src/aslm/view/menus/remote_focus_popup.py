@@ -31,7 +31,6 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 
-from tkinter import *  # TODO: terrifying
 import tkinter as tk
 from tkinter import ttk
 from aslm.view.custom_widgets.popup import PopUp
@@ -69,8 +68,8 @@ class Remote_Popup():
         content_frame.rowconfigure(2, pad=5)
         
         # Formatting
-        Grid.columnconfigure(content_frame, 'all', weight=1)
-        Grid.rowconfigure(content_frame, 'all', weight=1)
+        tk.Grid.columnconfigure(content_frame, 'all', weight=1)
+        tk.Grid.rowconfigure(content_frame, 'all', weight=1)
 
         """Creating the widgets for the popup"""
         # Dictionary for all the variables
@@ -84,17 +83,17 @@ class Remote_Popup():
         self.high_low_frame = ttk.Frame(content_frame, padding=(0, 5, 0, 0))
 
         # Gridding Frames
-        self.mode_mag_frame.grid(row=0, column=0, sticky=(NSEW))
-        self.save_frame.grid(row=0, column=1, sticky=(NSEW))
-        self.laser_frame.grid(row=1, column=0, columnspan=2, sticky=(NSEW))
-        self.high_low_frame.grid(row=2, column=0, columnspan=2, sticky=(NSEW))
+        self.mode_mag_frame.grid(row=0, column=0, sticky=(tk.NSEW))
+        self.save_frame.grid(row=0, column=1, sticky=(tk.NSEW))
+        self.laser_frame.grid(row=1, column=0, columnspan=2, sticky=(tk.NSEW))
+        self.high_low_frame.grid(row=2, column=0, columnspan=2, sticky=(tk.NSEW))
 
         #Filling Frames with widgets
         # Mode/Mag Frame
         self.inputs["Mode"] = LabelInput(parent=self.mode_mag_frame,
                                          label="Mode",
                                          input_class=ttk.Combobox,
-                                         input_var=StringVar(),
+                                         input_var=tk.StringVar(),
                                          label_args={'padding': (2, 5, 48, 0)}
                                          )
         self.inputs["Mode"].grid(row=0, column=0)
@@ -103,7 +102,7 @@ class Remote_Popup():
         self.inputs["Mag"] = LabelInput(parent=self.mode_mag_frame,
                                         label="Magnification",
                                         input_class=ttk.Combobox,
-                                        input_var=StringVar(),
+                                        input_var=tk.StringVar(),
                                         label_args={'padding': (2, 5, 5, 0)}
                                         )
         self.inputs["Mag"].grid(row=1, column=0)
@@ -113,7 +112,7 @@ class Remote_Popup():
         self.buttons['Save'] = ttk.Button(
             self.save_frame, text="Save Configuration")
         self.buttons['Save'].grid(
-            row=0, column=0, sticky=(NSEW), padx=(
+            row=0, column=0, sticky=(tk.NSEW), padx=(
                 5, 0), pady=(
                 5, 0))
 
@@ -131,7 +130,7 @@ class Remote_Popup():
                     5,
                     0,
                     0))
-            title.grid(row=0, column=i, sticky=(NSEW), padx=(0,5))
+            title.grid(row=0, column=i, sticky=(tk.NSEW), padx=(0,5))
             # Laser labels
             laser = ttk.Label(
                 self.laser_frame,
@@ -141,17 +140,17 @@ class Remote_Popup():
                     5,
                     0,
                     0))
-            laser.grid(row=i + 1, column=0, sticky=(NSEW))
+            laser.grid(row=i + 1, column=0, sticky=(tk.NSEW))
             # Entry Widgets
             self.inputs[laser_labels[i] + ' Amp'] = LabelInput(
-                parent=self.laser_frame, input_class=ValidatedSpinbox, input_var=StringVar())
+                parent=self.laser_frame, input_class=ValidatedSpinbox, input_var=tk.StringVar())
 
-            self.inputs[laser_labels[i] + ' Amp'].grid(row=i + 1, column=1, sticky=(NSEW), pady=(20,0), padx=(0,5))
+            self.inputs[laser_labels[i] + ' Amp'].grid(row=i + 1, column=1, sticky=(tk.NSEW), pady=(20,0), padx=(0,5))
             
             self.inputs[laser_labels[i] + ' Off'] = LabelInput(
-                parent=self.laser_frame, input_class=ValidatedSpinbox, input_var=StringVar())
+                parent=self.laser_frame, input_class=ValidatedSpinbox, input_var=tk.StringVar())
 
-            self.inputs[laser_labels[i] + ' Off'].grid(row=i + 1, column=2, sticky=(NSEW), pady=(20,0))
+            self.inputs[laser_labels[i] + ' Off'].grid(row=i + 1, column=2, sticky=(tk.NSEW), pady=(20,0))
 
         # Add galvo amplitude and offset to laser_frame
         galvo = ttk.Label(
@@ -163,17 +162,17 @@ class Remote_Popup():
                 0,
                 0))
 
-        galvo.grid(row=5, column=0, sticky=(NSEW))
+        galvo.grid(row=5, column=0, sticky=(tk.NSEW))
 
         self.inputs['Galvo Amp'] = LabelInput(
-            parent=self.laser_frame, input_class=ValidatedSpinbox, input_var=StringVar())
+            parent=self.laser_frame, input_class=ValidatedSpinbox, input_var=tk.StringVar())
 
-        self.inputs['Galvo Amp'].grid(row=5, column=1, sticky=(NSEW), pady=(20, 0), padx=(0, 5))
+        self.inputs['Galvo Amp'].grid(row=5, column=1, sticky=(tk.NSEW), pady=(20, 0), padx=(0, 5))
 
         self.inputs['Galvo Off'] = LabelInput(
-            parent=self.laser_frame, input_class=ValidatedSpinbox, input_var=StringVar())
+            parent=self.laser_frame, input_class=ValidatedSpinbox, input_var=tk.StringVar())
 
-        self.inputs['Galvo Off'].grid(row=5, column=2, sticky=(NSEW), pady=(20, 0))
+        self.inputs['Galvo Off'].grid(row=5, column=2, sticky=(tk.NSEW), pady=(20, 0))
 
         galvo_freq = ttk.Label(
             self.laser_frame,
@@ -184,12 +183,12 @@ class Remote_Popup():
                 0,
                 0))
 
-        galvo_freq.grid(row=6, column=0, sticky=(NSEW))
+        galvo_freq.grid(row=6, column=0, sticky=(tk.NSEW))
 
         self.inputs['Galvo Freq'] = LabelInput(
-            parent=self.laser_frame, input_class=ValidatedSpinbox, input_var=StringVar())
+            parent=self.laser_frame, input_class=ValidatedSpinbox, input_var=tk.StringVar())
 
-        self.inputs['Galvo Freq'].grid(row=6, column=1, sticky=(NSEW), pady=(20, 0))
+        self.inputs['Galvo Freq'].grid(row=6, column=1, sticky=(tk.NSEW), pady=(20, 0))
 
         # High/Low Resolution
         hi_lo_labels = ['Percent Delay', 'Duty Cycle', 'Percent Smoothing']
@@ -200,11 +199,11 @@ class Remote_Popup():
             self.inputs[dict_labels[i]] = LabelInput(parent=self.high_low_frame,
                                                      input_class=ttk.Entry,
                                                      label=hi_lo_labels[i],
-                                                     input_var=StringVar(),
+                                                     input_var=tk.StringVar(),
                                                      label_args={'padding': (2, 5, 5, 0)}
                                                      )
             self.inputs[dict_labels[i]].grid(
-                row=i, column=0, sticky=(NSEW), padx=(2, 5))
+                row=i, column=0, sticky=(tk.NSEW), padx=(2, 5))
 
         # Padding Entry Widgets
         self.inputs['Delay'].pad_input(30, 0, 0, 0)

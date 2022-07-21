@@ -213,17 +213,11 @@ class Tiling_Wizard_Controller(GUI_Controller):
             self._f_end = tmp
 
         ov = float(self._percent_overlay) / 100
-        table_values = compute_tiles_from_bounding_box2(x_start, x_tiles, abs(self._fov['x']), ov,
+        table_values = compute_tiles_from_bounding_box(x_start, x_tiles, abs(self._fov['x']), ov,
                                                         y_start, y_tiles, abs(self._fov['y']), ov,
                                                         z_start, z_tiles, abs(self._fov['z']), ov,
                                                         r_start, r_tiles, 0, ov,
                                                         self._f_start, z_tiles, (self._f_end-self._f_start), ov)
-
-        # table_values = compute_tiles_from_bounding_box(x_start, x_stop, x_tiles,
-        #                                                y_start, y_stop, y_tiles,
-        #                                                z_start, z_stop, z_tiles,
-        #                                                r_start, r_stop, r_tiles,
-        #                                                self._f_start, self._f_end, z_tiles)  # Make focus track with z
 
         update_table(self.multipoint_table, table_values)
 

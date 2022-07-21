@@ -30,24 +30,48 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-
+# Standard Imports
+import tkinter as tk
 from tkinter import ttk
+import logging
+
+# Logger Setup
+p = __name__.split(".")[1]
+logger = logging.getLogger(p)
 
 
-class stagecontrol_maxintensity_styling(ttk.Style):
+# Local Imports
+from aslm.view.main_window_content.stage_control.stage_control_tab import stage_control_tab
+from aslm.view.main_window_content.stage_control.maximum_intensity_projection_tab import maximum_intensity_projection_tab
 
-    def __init__(self):
-        # Inits the style parent objects attributes
-        ttk.Style().__init__(self)
+class stagecontrol_notebook(ttk.Notebook):
+    def __init__(self, frame_bot_right, *args, **kwargs):
+        #Init notebook
+        ttk.Notebook.__init__(self, frame_bot_right, *args, **kwargs)
+        
+        # Formatting
+        tk.Grid.columnconfigure(self, 'all', weight=1)
+        tk.Grid.rowconfigure(self, 'all', weight=1)
 
-        # Arrow Button Style
-        self.configure(
-            'Arrow.TButton',
-            font=('calibri', 14)
-        )
+        #Putting notebook 3 into bottom right frame
+        self.grid(row=0, column=0)
 
-        # Increment spinbox
-        self.configure(
-            'Increment.TSpinbox',
-            arrowsize=15
-        )
+        #Creating Stage Control Tab
+        self.stage_control_tab = stage_control_tab(self)
+
+        #Creating Max intensity projection Tab
+        self.maximum_intensity_projection_tab = maximum_intensity_projection_tab(self)
+
+        #Adding tabs to notebook
+        self.add(self.stage_control_tab, text='Stage Control', sticky=tk.NSEW)
+        self.add(self.maximum_intensity_projection_tab, text='MIPs', sticky=tk.NSEW)
+
+
+class goto_frame(ttk.Frame):
+    def __init__(goto_frame, stage_control_tab, *args, **kwargs):
+        #Init Frame
+        ttk.Frame.__init__(goto_frame, stage_control_tab, *args, **kwargs) 
+
+"""
+End of Stage Control Tab Frame Classes
+"""

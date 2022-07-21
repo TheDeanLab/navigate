@@ -44,7 +44,7 @@ from aslm.controller.sub_controllers.multi_position_controller import Multi_Posi
 from aslm.controller.sub_controllers.tiling_wizard_controller import Tiling_Wizard_Controller
 
 # View Imports that are not called on startup
-from aslm.view.main_window_content.tabs.channels.tiling_wizard_popup import tiling_wizard_popup as tiling_wizard
+from aslm.view.main_window_content.channel_settings.channel_settings_frames.tiling_wizard_popup import tiling_wizard_popup as tiling_wizard
 
 
 # Logger Setup
@@ -367,21 +367,30 @@ class Channels_Tab_Controller(GUI_Controller):
             ?
         """
         # Grab current values
-        z_curr = self.parent_controller.experiment.StageParameters['z']
-        focus_curr = self.parent_controller.experiment.StageParameters['f']
+        z_end = self.parent_controller.experiment.StageParameters['z']
+        focus_end = self.parent_controller.experiment.StageParameters['f']
 
-        if z_curr < self.z_origin:
+        z_start = self.z_origin
+        focus_start = self.focus_origin
+
+        if z_end < z_start:
             # Sort so we are always going low to high
-            tmp = self.z_origin
-            tmp_f = self.focus_origin
-            self.z_origin = z_curr
-            self.focus_origin = focus_curr
-            z_curr = tmp
-            focus_curr = tmp_f
+            tmp = z_start
+            tmp_f = focus_start
+            z_start = z_end
+            focus_start = focus_end
+            z_end = tmp
+            focus_end = tmp_f
+
+        # set origin to be in the middle of start and end
+        self.z_origin = (z_start + z_end)/2
+        self.focus_origin = (focus_start + focus_end)/2
 
         # Propagate parameter changes to the GUI
-        self.stack_acq_vals['end_position'].set(z_curr - self.z_origin)
-        self.stack_acq_vals['end_focus'].set(focus_curr - self.focus_origin)
+        self.stack_acq_vals['start_position'].set(z_start - self.z_origin)
+        self.stack_acq_vals['start_focus'].set(focus_start - self.focus_origin)
+        self.stack_acq_vals['end_position'].set(z_end - self.z_origin)
+        self.stack_acq_vals['end_focus'].set(focus_end - self.focus_origin)
         self.update_z_steps()
 
     def update_cycling_setting(self,

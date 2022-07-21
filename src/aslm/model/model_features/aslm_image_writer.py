@@ -100,7 +100,7 @@ class ImageWriter:
         else:
             logging.debug(f"ASLM Image Writer - Unknown file type: {self.file_type}")
 
-    def write_zarr(self, frame_ids):
+    def copy_to_zarr(self, frame_ids):
         r"""Write data to Zarr.
 
         Will take in camera frames and move data fom SharedND Array into a Zarr Array.
@@ -196,6 +196,10 @@ class ImageWriter:
                     chan = 0
                 elif slice == zslice - 1:
                     chan += 1
+        return z
+
+    def write_zarr(self, frame_ids):
+        z = self.copy_to_zarr(frame_ids)
                 
         save_path = os.path.join(self.save_directory, "file.zarr")
         zarr.save(save_path, z)

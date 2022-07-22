@@ -67,8 +67,8 @@ class Snap:
 
         self.config_table={'data': {'main': self.data_func}}
 
-    def data_func(self, *args):
-        print('the camera is:', self.model.camera.serial_number, self.model.frame_id)
+    def data_func(self, frame_ids):
+        print('the camera is:', self.model.camera.serial_number, frame_ids, self.model.frame_id)
         return True
 
     def generate_meta_data(self, *args):

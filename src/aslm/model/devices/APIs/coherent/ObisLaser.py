@@ -284,7 +284,7 @@ class ObisLaser(LaserBase):
         self.laser_output_current = laser_output_current
         return laser_output_current
 
-    def get_base_plate_temp(self, unit):
+    def get_base_plate_temp(self, unit="C"):
         """
         # Base Plate Temperature Query
         Returns the present laser base plate temperature. An optional unit indicator 

@@ -721,6 +721,7 @@ class ASLM_controller:
             return
         pos = self.experiment.StageParameters['f']
         self.camera_view_controller.image_count = 0
+        images_received = 0
 
         # open pipe
         autofocus_plot_pipe = self.model.create_pipe('autofocus_plot_pipe')
@@ -736,7 +737,12 @@ class ASLM_controller:
             logger.info(f"ASLM Controller - Received image frame id {image_id}")
             if image_id == 'stop':
                 break
-            self.camera_view_controller.display_image(self.data_buffer[image_id])
+            # Display the Image in the View
+            self.camera_view_controller.display_image(
+                image=self.data_buffer[image_id],
+                microscope_state=self.experiment.MicroscopeState,
+                images_received=images_received)
+            images_received += 1
             # get focus position and update it in GUI
 
         # Rec plot data from model and send to sub controller to display plot

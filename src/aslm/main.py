@@ -37,9 +37,6 @@ import tkinter as tk
 import platform
 from aslm.log_files.log_functions import log_setup
 
-# Third Party Imports
-import pretty_errors
-
 # Local Imports
 from aslm.controller.aslm_controller import ASLM_controller as controller
 

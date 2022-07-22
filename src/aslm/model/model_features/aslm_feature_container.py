@@ -29,7 +29,6 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-import threading
 
 class TreeNode:
     def __init__(self, feature_name, func_dict, *, node_type='one-step', device_related=False):
@@ -191,11 +190,16 @@ class DataContainer(Container):
 
 
 def get_registered_funcs(feature_module, func_type='signal'):
-    func_dict = feature_module.config_table[func_type]
+    func_dict = feature_module.config_table.get(func_type, {})
+    
     if 'init' not in func_dict:
         func_dict['init'] = dummy_func
     if 'main' not in func_dict:
-        func_dict['main'] = feature_module.generate_meta_data
+        # TODO: keep this now, later might change it after figuring out the meta data thing
+        if hasattr(feature_module, 'generate_meta_data') and func_type == 'signal':
+            func_dict['main'] = feature_module.generate_meta_data
+        else:
+            func_dict['main'] = dummy_True
     if 'end' not in func_dict:
         func_dict['end'] = dummy_True
     if func_type == 'data' and 'pre-main' not in func_dict:

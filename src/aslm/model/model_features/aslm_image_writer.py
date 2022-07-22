@@ -51,13 +51,14 @@ class ImageWriter:
     """
     def __init__(self, model, sub_dir=''):
         self.model = model
-        self.save_directory = os.path.join(self.model.experiment.Saving['save_directory'], sub_dir)
+        self.save_directory = ''
+        self.sub_dir = sub_dir
         self.num_of_channels = len(self.model.experiment.MicroscopeState['channels'].keys())
         self.data_buffer = self.model.data_buffer
         self.current_time_point = 0
         self.file_type = self.model.experiment.Saving['file_type']
         self.config_table = {'signal': {},
-                             'data': {'main': self.write_tiff}}
+                             'data': {'main': self.save_image}}
 
     def __del__(self):
         pass
@@ -74,7 +75,7 @@ class ImageWriter:
         frame_ids : int
             Frame ID.
         """
-        self.save_directory = self.model.experiment.Saving['save_directory']
+        self.save_directory = os.path.join(self.model.experiment.Saving['save_directory'], self.sub_dir)
         self.file_type = self.model.experiment.Saving['file_type']
 
         try:
@@ -100,7 +101,7 @@ class ImageWriter:
         else:
             logging.debug(f"ASLM Image Writer - Unknown file type: {self.file_type}")
 
-    def write_zarr(self, frame_ids):
+    def copy_to_zarr(self, frame_ids):
         r"""Write data to Zarr.
 
         Will take in camera frames and move data fom SharedND Array into a Zarr Array.
@@ -196,6 +197,10 @@ class ImageWriter:
                     chan = 0
                 elif slice == zslice - 1:
                     chan += 1
+        return z
+
+    def write_zarr(self, frame_ids):
+        z = self.copy_to_zarr(frame_ids)
                 
         save_path = os.path.join(self.save_directory, "file.zarr")
         zarr.save(save_path, z)

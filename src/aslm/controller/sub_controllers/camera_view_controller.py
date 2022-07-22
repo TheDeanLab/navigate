@@ -538,7 +538,7 @@ class Camera_View_Controller(GUI_Controller):
 
         # Place image in memory
         # TODO: This is the slow part
-        # self.image_volume[:, :, self.slice_index, self.channel_index] = image[:, :]       # copy
+        # self.image_volume[:, :, self.slice_index, self.channel_index] = image[:, ]       # copy
 
         if self.transpose:
             self.image = image.T

@@ -42,8 +42,8 @@ import time
 # Local View Imports
 from tkinter import filedialog
 from aslm.view.main_application_window import Main_App as view
-from aslm.view.remote_focus_popup import remote_popup
-from aslm.view.autofocus_setting_popup import autofocus_popup
+from aslm.view.menus.remote_focus_popup import remote_popup
+from aslm.view.menus.autofocus_setting_popup import autofocus_popup
 
 # Local Sub-Controller Imports
 from aslm.controller.sub_controllers.stage_gui_controller import Stage_GUI_Controller
@@ -344,7 +344,7 @@ class ASLM_controller:
         self.view.menubar.menu_autofocus.add_command(label='setting', command=popup_autofocus_setting)
 
         # add-on features
-        feature_list = ['None', 'Change Resolution']
+        feature_list = ['None', 'Switch Resolution', 'Z Stack Acquisition', 'Threshold']
         self.feature_id_val = tkinter.IntVar(0)
         for i in range(len(feature_list)):
             self.view.menubar.menu_features.add_radiobutton(label=feature_list[i],
@@ -610,33 +610,7 @@ class ASLM_controller:
                 self.acquire_bar_controller.stop_acquire()
                 return
 
-            if self.acquire_bar_controller.mode == 'single':
-                self.threads_pool.createThread('camera',
-                                               self.capture_image,
-                                               args=('single',))
-
-            elif self.acquire_bar_controller.mode == 'live':
-                self.threads_pool.createThread('camera',
-                                               self.capture_image,
-                                               args=('live',))
-
-            elif self.acquire_bar_controller.mode == 'z-stack':
-                if self.experiment.MicroscopeState['is_multiposition'] is True:
-                    # Populate MicroscopeState with the positions
-                    self.experiment.MicroscopeState['stage_positions'] = self.channels_tab_controller.multi_position_controller.get_positions()
-                    print("Positions:", self.experiment.MicroscopeState['stage_positions'])
-
-                self.threads_pool.createThread('camera',
-                                               self.capture_image,
-                                               args=('z-stack',))
-
-
-            elif self.acquire_bar_controller.mode == 'projection':
-                pass
-
-            else:
-                logger.debug("ASLM Controller - Wrong acquisition mode. Not recognized.")
-
+            self.threads_pool.createThread('camera', self.capture_image, args=(self.acquire_bar_controller.mode,))
 
         elif command == 'stop_acquire':
             # self.model.run_command('stop')
@@ -697,7 +671,7 @@ class ASLM_controller:
                                                  mode=mode,
                                                  stop=False)
 
-        self.model.run_command(mode,
+        self.model.run_command('acquire', imaging_mode=mode,
                                microscope_info=self.experiment.MicroscopeState,
                                camera_info=self.experiment.CameraParameters,
                                saving_info=self.experiment.Saving)
@@ -747,6 +721,7 @@ class ASLM_controller:
             return
         pos = self.experiment.StageParameters['f']
         self.camera_view_controller.image_count = 0
+        images_received = 0
 
         # open pipe
         autofocus_plot_pipe = self.model.create_pipe('autofocus_plot_pipe')
@@ -762,7 +737,12 @@ class ASLM_controller:
             logger.info(f"ASLM Controller - Received image frame id {image_id}")
             if image_id == 'stop':
                 break
-            self.camera_view_controller.display_image(self.data_buffer[image_id])
+            # Display the Image in the View
+            self.camera_view_controller.display_image(
+                image=self.data_buffer[image_id],
+                microscope_state=self.experiment.MicroscopeState,
+                images_received=images_received)
+            images_received += 1
             # get focus position and update it in GUI
 
         # Rec plot data from model and send to sub controller to display plot
@@ -815,5 +795,9 @@ class ASLM_controller:
             event, value = self.event_queue.get()
             if event == 'waveform':
                 self.waveform_tab_controller.plot_waveforms2(value, self.configuration.DAQParameters['sample_rate'])
+            elif event == 'multiposition':
+                from aslm.tools.multipos_table_tools import update_table
+                update_table(self.view.settings.channels_tab.multipoint_list.get_table(), value)
+                self.view.settings.channels_tab.multipoint_frame.on_off.set(True)  # assume we want to use multipos
             elif event == 'stop':
                 break

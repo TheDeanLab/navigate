@@ -30,43 +30,48 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-import logging
+# Standard Imports
 import tkinter as tk
 from tkinter import ttk
-
-
-import numpy as np
-from aslm.view.main_window_content.camera_display.camera_settings.camera_settings_frames.camera_mode import camera_mode
-from aslm.view.main_window_content.camera_display.camera_settings.camera_settings_frames.framerate_info import framerate_info
-from aslm.view.main_window_content.camera_display.camera_settings.camera_settings_frames.camera_roi import camera_roi
+import logging
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-class camera_settings_tab(ttk.Frame):
-    """
-    # This class holds and controls the layout of the major label frames for the camera settings tab in the settings notebook. Any imported classes are children that makeup
-    # the content of the major frames. If you need to adjust anything in the frames follow the children.
-    """
-    def __init__(self, setntbk, *args, **kwargs):
-        #Init Frame
-        ttk.Frame.__init__(self, setntbk, *args, **kwargs)
+
+# Local Imports
+from aslm.view.main_window_content.stage_control.stage_control_tab import stage_control_tab
+from aslm.view.main_window_content.stage_control.maximum_intensity_projection_tab import maximum_intensity_projection_tab
+
+class stagecontrol_notebook(ttk.Notebook):
+    def __init__(self, frame_bot_right, *args, **kwargs):
+        #Init notebook
+        ttk.Notebook.__init__(self, frame_bot_right, *args, **kwargs)
         
         # Formatting
         tk.Grid.columnconfigure(self, 'all', weight=1)
         tk.Grid.rowconfigure(self, 'all', weight=1)
 
-        #Camera Modes Frame
-        self.camera_mode = camera_mode(self)
-        self.camera_mode.grid(row=0, column=0, sticky=(tk.NSEW), padx=10, pady=10)
-        
-        #Framerate Label Frame
-        self.framerate_info = framerate_info(self)
-        self.framerate_info.grid(row=0, column=1, sticky=(tk.NSEW), padx=10, pady=10)
+        #Putting notebook 3 into bottom right frame
+        self.grid(row=0, column=0)
 
-        #Region of Interest Settings
-        self.camera_roi = camera_roi(self)
-        self.camera_roi.grid(row=1, column=0,columnspan=2, sticky=(tk.NSEW), padx=10, pady=10)
+        #Creating Stage Control Tab
+        self.stage_control_tab = stage_control_tab(self)
+
+        #Creating Max intensity projection Tab
+        self.maximum_intensity_projection_tab = maximum_intensity_projection_tab(self)
+
+        #Adding tabs to notebook
+        self.add(self.stage_control_tab, text='Stage Control', sticky=tk.NSEW)
+        self.add(self.maximum_intensity_projection_tab, text='MIPs', sticky=tk.NSEW)
 
 
+class goto_frame(ttk.Frame):
+    def __init__(goto_frame, stage_control_tab, *args, **kwargs):
+        #Init Frame
+        ttk.Frame.__init__(goto_frame, stage_control_tab, *args, **kwargs) 
+
+"""
+End of Stage Control Tab Frame Classes
+"""

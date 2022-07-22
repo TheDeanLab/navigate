@@ -54,7 +54,7 @@ errors = {
     "-221": "Settings conflict",
     "-220": "Invalid parameter",
     "-203": "Command protected",
-    "-200": "Execution error (command is out of order)",
+    "-200": "Execution error (command is out of order). Are you setting a parameter while the laser is in an ON state?",
     "-109": "Parameter missing",
     "-102": "Syntax error",
     "-100": "Unrecognized command or query",
@@ -331,11 +331,12 @@ class ObisLaser(LaserBase):
         
         # check if laser is on
         # if it is turned off then save the state so we can turn it back on
-        self.get_laser_state(self)
+        self.get_laser_state()
+        state = 'OFF'
         if self.laser_state == 'ON':
             # save current state
             state = self.laser_state
-            self.set_laser_to_off(self)
+            self.set_laser_to_off()
 
         if mode == 'cwp':
             command = "SOURce:AM:INTernal CWP"
@@ -362,7 +363,7 @@ class ObisLaser(LaserBase):
 
         if state == 'ON':
             # turn laser back on
-            self.set_laser_to_on(self)
+            self.set_laser_to_on()
 
     def get_laser_operating_mode(self):
         """
@@ -417,11 +418,12 @@ class ObisLaser(LaserBase):
 
         # check if laser is on
         # if it is turned off then save the state so we can turn it back on
-        self.get_laser_state(self)
+        self.get_laser_state()
+        state = 'OFF'
         if self.laser_state == 'ON':
             # save current state
             state = self.laser_state
-            self.set_laser_to_off(self)
+            self.set_laser_to_off()
 
         # not sure if this will work like this but worth a test
         command = f"SOURce:POWer:LEVel:IMMediate:AMPLitude {level}"
@@ -434,7 +436,7 @@ class ObisLaser(LaserBase):
 
         if state == 'ON':
             # turn laser back on
-            self.set_laser_to_on(self)
+            self.set_laser_to_on()
         
         return laser_power_level
 
@@ -499,11 +501,12 @@ class ObisLaser(LaserBase):
         on the analog interface of the OBIS Remote. The factory default is 50Ω. 
         """
 
-        self.get_laser_state(self)
+        self.get_laser_state()
+        state = 'OFF'
         if self.laser_state == 'ON':
             # save current state
             state = self.laser_state
-            self.set_laser_to_off(self)
+            self.set_laser_to_off()
 
         command = "SYSTem:INFormation:AMODulation:TYPe {type}"
         self.ask(command)
@@ -514,7 +517,7 @@ class ObisLaser(LaserBase):
 
         if state == 'ON':
             # turn laser back on
-            self.set_laser_to_on(self)
+            self.set_laser_to_on()
 
         return analog_mod_type
 
@@ -568,11 +571,12 @@ class ObisLaser(LaserBase):
         # Set Blanking Status to ON
         """
 
-        self.get_laser_state(self)
+        self.get_laser_state()
+        state = 'OFF'
         if self.laser_state == 'ON':
             # save current state
             state = self.laser_state
-            self.set_laser_to_off(self)
+            self.set_laser_to_off()
 
         command = "SOURce:AModulation:BLANKing ON"
         self.ask(command)
@@ -583,7 +587,7 @@ class ObisLaser(LaserBase):
 
         if state == 'ON':
             # turn laser back on
-            self.set_laser_to_on(self)
+            self.set_laser_to_on()
 
         return laser_blanking_status
 
@@ -592,11 +596,12 @@ class ObisLaser(LaserBase):
         # Set Blanking Status to OFF
         """
         
-        self.get_laser_state(self)
+        self.get_laser_state()
+        state = 'OFF'
         if self.laser_state == 'ON':
             # save current state
             state = self.laser_state
-            self.set_laser_to_off(self)
+            self.set_laser_to_off()
 
         command = "SOURce:AModulation:BLANKing OFF"
         self.ask(command)
@@ -607,7 +612,7 @@ class ObisLaser(LaserBase):
 
         if state == 'ON':
             # turn laser back on
-            self.set_laser_to_on(self)
+            self.set_laser_to_on()
 
         return laser_blanking_status
 
@@ -618,7 +623,7 @@ class ObisLaser(LaserBase):
         """
         # Initialize the laser.
         """
-        self.set_laser_to_on(self)
+        self.set_laser_to_on()
         self.set_laser_operating_mode('mixed')
         self.set_laser_power(self.get_maximum_laser_power())
 

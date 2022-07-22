@@ -40,11 +40,9 @@ def ome_pixels_dict(configuration, experiment):
     if experiment.MicroscopeState['resolution_mode'] == 'low':
         pixel_size = float(configuration.ZoomParameters['low_res_zoom_pixel_size'][experiment.MicroscopeState['zoom']])
         ome_dict['Pixels']['PhysicalSizeX'], ome_dict['Pixels']['PhysicalSizeY'] = pixel_size, pixel_size
-        ome_dict['Pixels']['PhysicalSizeXUnit'], ome_dict['Pixels']['PhysicalSizeYUnit'] = 'um', 'um'   # micrometer
     elif experiment.MicroscopeState['resolution_mode'] == 'high':
         pixel_size = float(configuration.ZoomParameters['high_res_zoom_pixel_size'])
         ome_dict['Pixels']['PhysicalSizeX'], ome_dict['Pixels']['PhysicalSizeY'] = pixel_size, pixel_size
-        ome_dict['Pixels']['PhysicalSizeXUnit'], ome_dict['Pixels']['PhysicalSizeYUnit'] = 'um', 'um'   # micrometer
         
     ome_dict['Pixels']['TimeIncrement'] = float(experiment.MicroscopeState['timepoint_interval'])
 

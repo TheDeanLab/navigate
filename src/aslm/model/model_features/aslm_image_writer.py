@@ -222,8 +222,8 @@ class ImageWriter:
         for idx in frame_ids:
             image_name = self.generate_image_name(current_channel, ext='.ome.tif')
             tifffile.imwrite(os.path.join(self.save_directory, image_name), self.model.data_buffer[idx],
-                             contiguous=True, metadata=ome_metadata_tools.ome_pixels_dict(self.model.configuration, 
-                                                                                          self.model.experiment))
+                             metadata=ome_metadata_tools.ome_pixels_dict(self.model.configuration, 
+                                                                         self.model.experiment))
 
     def generate_image_name(self, current_channel, ext=".tif"):
         """

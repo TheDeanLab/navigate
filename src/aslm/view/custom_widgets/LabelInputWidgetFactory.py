@@ -190,6 +190,8 @@ class LabelInput(ttk.Frame):
             # These lines are used for the specfic formatting of the Text
             # widget, 1 is the line and 0 is the char pos of that line
             self.widget.insert('1.0', value)
+        elif isinstance(self.widget, ValidatedCombobox):
+            self.widget.current(self.widget['values'].index(value))
         else:
             self.widget.delete(0, tk.END)
             # Basic entry widget formatting, dont need the string as the first

@@ -498,12 +498,24 @@ class ObisLaser(LaserBase):
         Sets the analog modulation type that provides unique electrical impedance 
         on the analog interface of the OBIS Remote. The factory default is 50Ω. 
         """
+
+        self.get_laser_state(self)
+        if self.laser_state == 'ON':
+            # save current state
+            state = self.laser_state
+            self.set_laser_to_off(self)
+
         command = "SYSTem:INFormation:AMODulation:TYPe {type}"
         self.ask(command)
         analog_mod_type = self.ask("SYSTem:INFormation:AMODulation:TYPe?")
         if self.verbose:
             print("Laser Analog Modulation Type:", analog_mod_type)
         self.analog_mod_type = analog_mod_type
+
+        if state == 'ON':
+            # turn laser back on
+            self.set_laser_to_on(self)
+
         return analog_mod_type
 
     def get_system_status(self):
@@ -555,24 +567,48 @@ class ObisLaser(LaserBase):
         """
         # Set Blanking Status to ON
         """
+
+        self.get_laser_state(self)
+        if self.laser_state == 'ON':
+            # save current state
+            state = self.laser_state
+            self.set_laser_to_off(self)
+
         command = "SOURce:AModulation:BLANKing ON"
         self.ask(command)
         laser_blanking_status = self.ask("SOURce:AModulation:BLANKing?")
         if self.verbose:
             print("Laser Blanking Status:", laser_blanking_status)
         self.laser_blanking_status = laser_blanking_status
+
+        if state == 'ON':
+            # turn laser back on
+            self.set_laser_to_on(self)
+
         return laser_blanking_status
 
     def set_laser_blanking_off(self):
         """
         # Set Blanking Status to OFF
         """
+        
+        self.get_laser_state(self)
+        if self.laser_state == 'ON':
+            # save current state
+            state = self.laser_state
+            self.set_laser_to_off(self)
+
         command = "SOURce:AModulation:BLANKing OFF"
         self.ask(command)
         laser_blanking_status = self.ask("SOURce:AModulation:BLANKing?")
         if self.verbose:
             print("Laser Blanking Status:", laser_blanking_status)
         self.laser_blanking_status = laser_blanking_status
+
+        if state == 'ON':
+            # turn laser back on
+            self.set_laser_to_on(self)
+
         return laser_blanking_status
 
     

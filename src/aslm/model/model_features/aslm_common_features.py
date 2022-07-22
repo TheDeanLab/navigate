@@ -35,7 +35,8 @@ class ChangeResolution:
     def __init__(self, model, resolution_mode='high'):
         self.model = model
 
-        self.config_table={'signal': {'main': self.signal_func}}
+        self.config_table={'signal': {'main': self.signal_func},
+                           'node': {'device_related': True}}
 
         self.resolution_mode = resolution_mode
 

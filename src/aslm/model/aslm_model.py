@@ -260,7 +260,7 @@ class Model:
         # TODO: put it here now
         self.feature_list = []
         # automatically switch resolution
-        self.feature_list.append([[{'name': ChangeResolution, 'args': ('1x',)}, {'name': Snap}], [{'name': ChangeResolution, 'args': ('high',), 'node': {'device_related': True}}, {'name': Snap}]])
+        self.feature_list.append([[{'name': ChangeResolution, 'args': ('1x',)}, {'name': Snap}], [{'name': ChangeResolution, 'args': ('high',)}, {'name': Snap}]])
         # z stack acquisition
         self.feature_list.append([[{'name': ZStackAcquisition}]])
         # threshold and tile
@@ -851,10 +851,10 @@ class Model:
         self.daq.run_acquisition()
         self.daq.stop_acquisition()
 
-        self.frame_id = (self.frame_id + 1) % self.number_of_frames
-
         if hasattr(self, 'signal_container'):
             self.signal_container.run(wait_response=True)
+
+        self.frame_id = (self.frame_id + 1) % self.number_of_frames
 
     def run_live_acquisition(self):
         r"""Stream live image to the GUI.

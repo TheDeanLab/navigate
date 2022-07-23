@@ -100,6 +100,8 @@ class ImageWriter:
             pass
         else:
             logging.debug(f"ASLM Image Writer - Unknown file type: {self.file_type}")
+        
+        return True
 
     def copy_to_zarr(self, frame_ids):
         r"""Write data to Zarr.
@@ -237,3 +239,4 @@ class ImageWriter:
 
     def generate_meta_data(self):
         print('meta data: write', self.model.frame_id)
+        return True

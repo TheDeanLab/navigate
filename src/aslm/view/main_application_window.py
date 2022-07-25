@@ -74,12 +74,27 @@ class Main_App(ttk.Frame):
         photo_image = view_directory.joinpath("icon", "mic.png")
         mainapp.root.iconphoto(True, tk.PhotoImage(file=photo_image))
         mainapp.root.resizable(True, True)
-        factor = (3/4) # This changes how much of the screen to use. 1 is essentially fullscreen on startup
+        factor = (1) # This changes how much of the screen to use. 1 is essentially fullscreen on startup
         screen_width = int(root.winfo_screenwidth() * factor)
         screen_height = int(root.winfo_screenheight() * factor)
+
+        dpi = mainapp.root.winfo_fpixels('1i')
+        real_width = int(screen_width * dpi / 96)
+        real_height = int(screen_height * dpi / 96)
+        print('dpi', dpi)
+        print('actual vs real width should be', screen_width, real_width)
+        print('actual vs real height should be', screen_height, real_height)
+
+        factor = dpi / 72
+        mainapp.root.tk.call('tk', 'scaling', factor)
+
         mainapp.root.geometry(f"{screen_width}x{screen_height}")
         tk.Grid.columnconfigure(root, 'all', weight=1)
         tk.Grid.rowconfigure(root, 'all', weight=1)
+
+
+
+
 
         # Creating and linking menu to main window/app
         mainapp.menubar = menubar(root)

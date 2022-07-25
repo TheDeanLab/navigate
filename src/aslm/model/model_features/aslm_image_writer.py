@@ -33,12 +33,14 @@ POSSIBILITY OF SUCH DAMAGE.
 #  Standard Imports
 import os
 import logging
+from importlib_metadata import metadata
 
 # Third Party Imports
-from tifffile import imsave
+import tifffile
 import zarr
 
 # Local Imports
+from aslm.tools import ome_metadata_tools
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -86,19 +88,9 @@ class ImageWriter:
             logger.debug(f"ASLM IMage Writer - Cannot create directory {self.save_directory}. Maybe the drive does not exist?")
             logger.exception(e)
 
-        if self.file_type == "Zarr":
-            self.write_zarr(frame_ids)
-        elif self.file_type == "TIFF":
-            self.write_tiff(frame_ids)
-        elif self.file_type == "RAW":
-            pass
-        elif self.file_type == "N5":
-            pass
-        elif self.file_type == "H5":
-            pass
-        elif self.file_type == "Multipage-TIFF":
-            pass
-        else:
+        try:
+            getattr(self, f"write_{self.file_type.lower().replace(' ','_').replace('-','_')}")(frame_ids)
+        except AttributeError:
             logging.debug(f"ASLM Image Writer - Unknown file type: {self.file_type}")
         
         return True
@@ -226,14 +218,22 @@ class ImageWriter:
         current_channel = self.model.current_channel
         for idx in frame_ids:
             image_name = self.generate_image_name(current_channel)
-            imsave(os.path.join(self.save_directory, image_name), self.model.data_buffer[idx])
+            tifffile.imsave(os.path.join(self.save_directory, image_name), self.model.data_buffer[idx])
 
-    def generate_image_name(self, current_channel):
+    def write_ome_tiff(self, frame_ids):
+        current_channel = self.model.current_channel
+        for idx in frame_ids:
+            image_name = self.generate_image_name(current_channel, ext='.ome.tif')
+            tifffile.imwrite(os.path.join(self.save_directory, image_name), self.model.data_buffer[idx],
+                             metadata=ome_metadata_tools.ome_pixels_dict(self.model.configuration, 
+                                                                         self.model.experiment))
+
+    def generate_image_name(self, current_channel, ext=".tif"):
         """
         #  Generates a string for the filename
         #  e.g., CH00_000000.tif
         """
-        image_name = "CH0" + str(current_channel) + "_" + str(self.current_time_point).zfill(6) + ".tif"
+        image_name = "CH0" + str(current_channel) + "_" + str(self.current_time_point).zfill(6) + ext
         self.current_time_point += 1
         return image_name
 

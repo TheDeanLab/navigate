@@ -137,7 +137,7 @@ def start_camera(configuration, experiment, verbose, camera_id=0):
         return auto_redial(HamamatsuOrca, (camera_id, configuration, experiment, verbose), exception=Exception)
     elif configuration.Devices['camera'] == 'SyntheticCamera':
         from aslm.model.devices.camera.camera_synthetic import SyntheticCamera
-        return SyntheticCamera(camera_id, configuration, experiment, verbose)
+        return SyntheticCamera(0, configuration, experiment, verbose)
     else:
         device_not_found(configuration.Devices['camera'])
 

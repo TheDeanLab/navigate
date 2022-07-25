@@ -11,10 +11,6 @@ import tkinter as tk
 import numpy as np
 
 from PIL import Image, ImageTk
-import logging
-
-p = __name__.split(".")[1]
-logger = logging.getLogger(p)
 
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure

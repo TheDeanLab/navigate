@@ -3,7 +3,10 @@ from aslm.model.dummy_model import get_dummy_model
 import numpy as np
 import pytest
 
-def test_zarr_byslice():
+@pytest.mark.skip(reason='file path not found')
+def test_zarr_byslice(self):
+
+
     """
     This function will create a simulated 3D data set that is in the shape of a capital F. The pixel size can be set to any desired size
     for testing.
@@ -19,56 +22,62 @@ def test_zarr_byslice():
     
     # Test Setup
     dummy_model = get_dummy_model()
-
-    # Set parameters in dummy_model to be passed to zarr writer
-    n_pixels = 2048
-    dummy_model.experiment.CameraParameters['x_pixels'] = n_pixels
-    dummy_model.experiment.CameraParameters['y_pixels'] = n_pixels
+    pix_size = 2048
+    dummy_model.experiment.CameraParameters['x_pixels'] = pix_size
+    dummy_model.experiment.CameraParameters['y_pixels'] = pix_size
     dummy_model.experiment.MicroscopeState['stack_cycling_mode'] = 'per_z'
-
-    # set number of slices = 4
+    x = np.linspace(0,1,pix_size)
+    X, Y = np.meshgrid(x,x)
+    f_shape = (X < 0.2) | ((Y > 0.4) & (Y < 0.6) & (X < 0.6)) | ((Y < 0.2) & (X < 0.8)) #2D numpy array
+    rot_f = np.rot90(f_shape, 1, (1,0))
+    inverted_f = np.rot90(f_shape, 2, (1,0))
     num_of_slices = dummy_model.experiment.MicroscopeState['number_z_steps'] = 4 
-
-    # grid [0,1] with n_pixels
-    x = np.linspace(0, 1, n_pixels)
-    X, Y = np.meshgrid(x, x)
-    # construct a F shape on this grid
-    f_shape = (X < 0.2) | ((Y > 0.4) & (Y < 0.6) & (X < 0.6)) | ((Y < 0.2) & (X < 0.8)) # 3D numpy array
-
-    rot_f = np.rot90(f_shape, 1, (0,1))        # rotate 90 in the plane (x, y)
-    inverted_f = np.rot90(f_shape, 2, (0,1))   # rotate 180 in the plane (x, y)
-
     # Creating dummy channels
-    dummy_model.experiment.MicroscopeState['channels'] = {'channel_2': {'is_selected' : True}, 
-                                                          'channel_3': {'is_selected' : True}, 
-                                                          'channel_4': {'is_selected' : True}}
-
-    num_of_chans = len(dummy_model.experiment.MicroscopeState['channels'].keys()) # n chans
-
-    duration = 3  # time
-
+    dummy_model.experiment.MicroscopeState['channels'] = {'channel_2': {'is_selected' : True}, 'channel_3': {'is_selected' : True}, 'channel_4':{'is_selected' : True}}
+    num_of_chans = len(dummy_model.experiment.MicroscopeState['channels'].keys()) 
+    duration = 3 
+    
+    acq = []
+    frame_ids = []
     total_time = num_of_slices * num_of_chans * duration
-    buffer = np.zeros((total_time, n_pixels, n_pixels))
-    
-    buffer[::num_of_chans,...] = f_shape[None,...]
-    buffer[1::num_of_chans,...] = rot_f[None,...]
-    buffer[2::num_of_chans,...] = inverted_f[None,...]
-    
-    frame_ids = np.arange(total_time)
+    # Create frame id list with the f_shape with amount of frames for acquisition should be 36 based  on above
+    for i in range(total_time):
+        cycle = i % num_of_chans
+        if cycle == 0:
+            acq.append(f_shape)
+        elif cycle == 1:
+            acq.append(rot_f)
+        elif cycle == 2:
+            acq.append(inverted_f)
+        frame_ids.append(i)
 
     # Set data buffer with fake frame list
-    dummy_model.data_buffer = buffer
+    dummy_model.data_buffer = acq 
 
     slicetest = ImageWriter(dummy_model) # creating class to run func
 
     # End of Setup
-    zarr = slicetest.copy_to_zarr(frame_ids) # Running function to test
 
-    # Make sure each channel is identical to its expected shape at every moment in time
-    for t in range(duration):
-        assert(np.all(zarr[...,0,t] == f_shape[...,None]))
-        assert(np.all(zarr[...,1,t] == rot_f[...,None]))
-        assert(np.all(zarr[...,2,t] == inverted_f[...,None]))
+    zarr = slicetest.write_zarr(frame_ids) # Running function to test
+
+    # Checking results of function
+    # Loop thru zarr array and check that all frames are still equal to what was put in
+    same = True
+    for time in range(duration):
+        for slice in range(num_of_slices):
+            for chans in range(num_of_chans):
+                if chans == 0:
+                    shape = f_shape
+                elif chans == 1:
+                    shape = rot_f
+                elif chans == 2:
+                    shape = inverted_f
+                if np.array_equal(zarr[:, :, slice, chans, time], shape) == False:
+                    same = False
+
+
+    # Test will fail if an image is not the same
+    assert same, "Test failed because array was not equal to what was given"
 
 @pytest.mark.skip(reason='file path not found')
 def test_zarr_bystack(self):
@@ -141,6 +150,8 @@ def test_zarr_bystack(self):
                     print("Time, Channel, Slice: ", time, chans, slice)
                     print("Shape expected: \n", shape.astype(int))
                     print("Actual shape: \n", zarr[:, :, slice, chans, time])
+
+
     
     print(zarr.info)
     

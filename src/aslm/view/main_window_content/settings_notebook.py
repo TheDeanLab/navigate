@@ -30,42 +30,49 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 # Standard Imports
-import tkinter as tk
+from tkinter import *
 from tkinter import ttk
 import logging
-
+from pathlib import Path
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
+from tkinter.font import Font
 
+# Third Party Imports
+import numpy as np
 
 # Import Sub-Frames
 from aslm.view.main_window_content.camera_display.camera_settings.camera_settings_tab import camera_settings_tab
-from aslm.view.main_window_content.channel_settings.channels_tab import channels_tab
+from aslm.view.main_window_content.tabs.advanced_settings_tab import advanced_settings_tab
+from aslm.view.main_window_content.tabs.channels_tab import channels_tab
 
 
 class settings_notebook(ttk.Notebook):
-    def __init__(self, frame_left, *args, **kwargs):
+    def __init__(setntbk, frame_left, *args, **kwargs):
         #Init notebook
-        ttk.Notebook.__init__(self, frame_left, *args, **kwargs)
+        ttk.Notebook.__init__(setntbk, frame_left, *args, **kwargs)
         
         # Formatting
-        tk.Grid.columnconfigure(self, 'all', weight=1)
-        tk.Grid.rowconfigure(self, 'all', weight=1)
+        Grid.columnconfigure(setntbk, 'all', weight=1)
+        Grid.rowconfigure(setntbk, 'all', weight=1)
 
         #Putting notebook 1 into left frame
-        self.grid(row=0,column=0)
+        setntbk.grid(row=0,column=0)
 
         #Creating the Channels tab
-        self.channels_tab = channels_tab(self)
+        setntbk.channels_tab = channels_tab(setntbk)
 
         #Creating the Camera tab
-        self.camera_settings_tab = camera_settings_tab(self)
+        setntbk.camera_settings_tab = camera_settings_tab(setntbk)
+
+        #Creating the advanced settings tab
+        # setntbk.advanced_settings_tab = advanced_settings_tab(setntbk)
 
         #Adding tabs to settings notebook
-        self.add(self.channels_tab, text='Channels', sticky=tk.NSEW)
-        self.add(self.camera_settings_tab, text='Camera Settings', sticky=tk.NSEW)
-
+        setntbk.add(setntbk.channels_tab, text='Channels', sticky=NSEW)
+        setntbk.add(setntbk.camera_settings_tab, text='Camera Settings', sticky=NSEW)
+        # setntbk.add(setntbk.advanced_settings_tab, text='Advanced Configuration', sticky=NSEW)
 
 
 

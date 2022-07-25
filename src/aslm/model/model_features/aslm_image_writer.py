@@ -33,14 +33,12 @@ POSSIBILITY OF SUCH DAMAGE.
 #  Standard Imports
 import os
 import logging
-from importlib_metadata import metadata
 
 # Third Party Imports
-import tifffile
+from tifffile import imsave
 import zarr
 
 # Local Imports
-from aslm.tools import ome_metadata_tools
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -53,14 +51,13 @@ class ImageWriter:
     """
     def __init__(self, model, sub_dir=''):
         self.model = model
-        self.save_directory = ''
-        self.sub_dir = sub_dir
+        self.save_directory = os.path.join(self.model.experiment.Saving['save_directory'], sub_dir)
         self.num_of_channels = len(self.model.experiment.MicroscopeState['channels'].keys())
         self.data_buffer = self.model.data_buffer
         self.current_time_point = 0
         self.file_type = self.model.experiment.Saving['file_type']
         self.config_table = {'signal': {},
-                             'data': {'main': self.save_image}}
+                             'data': {'main': self.write_tiff}}
 
     def __del__(self):
         pass
@@ -77,7 +74,7 @@ class ImageWriter:
         frame_ids : int
             Frame ID.
         """
-        self.save_directory = os.path.join(self.model.experiment.Saving['save_directory'], self.sub_dir)
+        self.save_directory = self.model.experiment.Saving['save_directory']
         self.file_type = self.model.experiment.Saving['file_type']
 
         try:
@@ -88,14 +85,22 @@ class ImageWriter:
             logger.debug(f"ASLM IMage Writer - Cannot create directory {self.save_directory}. Maybe the drive does not exist?")
             logger.exception(e)
 
-        try:
-            getattr(self, f"write_{self.file_type.lower().replace(' ','_').replace('-','_')}")(frame_ids)
-        except AttributeError:
+        if self.file_type == "Zarr":
+            self.write_zarr(frame_ids)
+        elif self.file_type == "TIFF":
+            self.write_tiff(frame_ids)
+        elif self.file_type == "RAW":
+            pass
+        elif self.file_type == "N5":
+            pass
+        elif self.file_type == "H5":
+            pass
+        elif self.file_type == "Multipage-TIFF":
+            pass
+        else:
             logging.debug(f"ASLM Image Writer - Unknown file type: {self.file_type}")
-        
-        return True
 
-    def copy_to_zarr(self, frame_ids):
+    def write_zarr(self, frame_ids):
         r"""Write data to Zarr.
 
         Will take in camera frames and move data fom SharedND Array into a Zarr Array.
@@ -191,10 +196,6 @@ class ImageWriter:
                     chan = 0
                 elif slice == zslice - 1:
                     chan += 1
-        return z
-
-    def write_zarr(self, frame_ids):
-        z = self.copy_to_zarr(frame_ids)
                 
         save_path = os.path.join(self.save_directory, "file.zarr")
         zarr.save(save_path, z)
@@ -218,25 +219,16 @@ class ImageWriter:
         current_channel = self.model.current_channel
         for idx in frame_ids:
             image_name = self.generate_image_name(current_channel)
-            tifffile.imsave(os.path.join(self.save_directory, image_name), self.model.data_buffer[idx])
+            imsave(os.path.join(self.save_directory, image_name), self.model.data_buffer[idx])
 
-    def write_ome_tiff(self, frame_ids):
-        current_channel = self.model.current_channel
-        for idx in frame_ids:
-            image_name = self.generate_image_name(current_channel, ext='.ome.tif')
-            tifffile.imwrite(os.path.join(self.save_directory, image_name), self.model.data_buffer[idx],
-                             metadata=ome_metadata_tools.ome_pixels_dict(self.model.configuration, 
-                                                                         self.model.experiment))
-
-    def generate_image_name(self, current_channel, ext=".tif"):
+    def generate_image_name(self, current_channel):
         """
         #  Generates a string for the filename
         #  e.g., CH00_000000.tif
         """
-        image_name = "CH0" + str(current_channel) + "_" + str(self.current_time_point).zfill(6) + ext
+        image_name = "CH0" + str(current_channel) + "_" + str(self.current_time_point).zfill(6) + ".tif"
         self.current_time_point += 1
         return image_name
 
     def generate_meta_data(self):
         print('meta data: write', self.model.frame_id)
-        return True

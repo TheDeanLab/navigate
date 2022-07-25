@@ -33,6 +33,7 @@ POSSIBILITY OF SUCH DAMAGE.
 # Standard Library Imports
 import logging
 import tkinter as tk
+from tkinter import *
 from tkinter import ttk
 
 # Third Party Imports
@@ -40,17 +41,13 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 # Local Imports
-from aslm.view.main_window_content.camera_display.camera_view.camera_view_frames.image_metrics import image_metrics
-from aslm.view.main_window_content.camera_display.camera_view.camera_view_frames.palette import palette
-from aslm.view.main_window_content.camera_display.camera_view.camera_view_frames.live_frame import live_frame
-from aslm.view.main_window_content.camera_display.camera_view.camera_view_frames.slider import slider
-from aslm.view.main_window_content.camera_display.camera_view.camera_view_frames.rgb_selection import rgb_selection
+from aslm.view.main_window_content.camera_display.camera_view.tabs.image_metrics import image_metrics
+from aslm.view.main_window_content.camera_display.camera_view.tabs.palette import palette
 from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
-
 
 class camera_tab(ttk.Frame):
     def __init__(self, cam_wave, *args, **kwargs):
@@ -58,34 +55,34 @@ class camera_tab(ttk.Frame):
         ttk.Frame.__init__(self, cam_wave, *args, **kwargs)
         
         # Formatting
-        tk.Grid.columnconfigure(self, 'all', weight=1)
-        tk.Grid.rowconfigure(self, 'all', weight=1)
+        Grid.columnconfigure(self, 'all', weight=1)
+        Grid.rowconfigure(self, 'all', weight=1)
 
         #  Frame that will hold camera image
         self.cam_image = ttk.Frame(self)
-        self.cam_image.grid(row=0, column=0, sticky=tk.NSEW)
+        self.cam_image.grid(row=0, column=0, sticky=NSEW)
 
         # Frame for the Waveforms
         self.canvas = tk.Canvas(self.cam_image, width=512, height=512)
-        self.canvas.grid(row=0, column=0, sticky=tk.NSEW, padx=5, pady=5)
+        self.canvas.grid(row=0, column=0, sticky=NSEW, padx=5, pady=5)
         self.matplotlib_figure = Figure(figsize=[6, 6], tight_layout=True)
         self.matplotlib_canvas = FigureCanvasTkAgg(self.matplotlib_figure, self.canvas)
 
         #  Frame for scale settings/palette color
         self.scale_palette = palette(self)
-        self.scale_palette.grid(row=0, column=1, sticky=tk.NSEW, padx=5, pady=5)
+        self.scale_palette.grid(row=0, column=1, sticky=NSEW, padx=5, pady=5)
 
         # Frame for the slider bar.
         self.slider = slider(self)
-        self.slider.grid(row=1, column=0, sticky=tk.SW, padx=5, pady=5)
+        self.slider.grid(row=1, column=0, sticky=SW, padx=5, pady=5)
 
         #  Frame for camera selection and counts
         self.image_metrics = image_metrics(self)
-        self.image_metrics.grid(row=2, column=0, sticky=tk.W, padx=5, pady=5)
+        self.image_metrics.grid(row=2, column=0, sticky=W, padx=5, pady=5)
 
         # Frame for controlling the live display functionality.
         self.live_frame = live_frame(self)
-        self.live_frame.grid(row=1, column=1, sticky=tk.NSEW, padx=5, pady=5)
+        self.live_frame.grid(row=1, column=1, sticky=NSEW, padx=5, pady=5)
 
 class live_frame(ttk.Labelframe):
     def __init__(self, cam_view, *args, **kwargs):
@@ -99,10 +96,10 @@ class live_frame(ttk.Labelframe):
             **kwargs)
 
         # Formatting
-        tk.Grid.columnconfigure(self, 'all', weight=1)
-        tk.Grid.rowconfigure(self, 'all', weight=1)
+        Grid.columnconfigure(self, 'all', weight=1)
+        Grid.rowconfigure(self, 'all', weight=1)
 
-        self.live_var = tk.StringVar()
+        self.live_var = StringVar()
         self.live = ttk.Combobox(self, textvariable=self.live_var)
         self.live['values'] = ('Live', 'Image Plane', 'XY MIP', 'YZ MIP', 'ZY MIP')
         self.live.set('Live')
@@ -140,20 +137,20 @@ class slider(ttk.Labelframe):
             **kwargs)
 
         # Formatting
-        tk.Grid.columnconfigure(self, 'all', weight=1)
-        tk.Grid.rowconfigure(self, 'all', weight=1)
+        Grid.columnconfigure(self, 'all', weight=1)
+        Grid.rowconfigure(self, 'all', weight=1)
 
         # Slider
         self.inputs = {}
-        self.slider_widget = tk.Scale(cam_view,
+        self.slider_widget = Scale(cam_view,
                                    from_=0,
                                    to=200,
                                    tickinterval=20,
-                                   orient=tk.HORIZONTAL,
+                                   orient=HORIZONTAL,
                                    showvalue=0,
                                    label="Slice Index")
         self.slider_widget.configure(state='disabled')  # 'normal'
-        self.slider_widget.grid(row=1, column=0, sticky=tk.NSEW, padx=5, pady=5)
+        self.slider_widget.grid(row=1, column=0, sticky=NSEW, padx=5, pady=5)
 
 
     def get_variables(self):

@@ -31,8 +31,9 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 import logging
-from tkinter import ttk
 import tkinter as tk
+from pathlib import Path
+from tkinter import ttk, NSEW, StringVar, Grid
 from tkinter.scrolledtext import ScrolledText
 from aslm.view.custom_widgets.popup import PopUp
 from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
@@ -55,8 +56,8 @@ class Acquire_PopUp():
         content_frame = self.popup.get_frame()
         
         # Formatting
-        tk.Grid.columnconfigure(content_frame, 'all', weight=1)
-        tk.Grid.rowconfigure(content_frame, 'all', weight=1)
+        Grid.columnconfigure(content_frame, 'all', weight=1)
+        Grid.rowconfigure(content_frame, 'all', weight=1)
 
         """Creating the widgets for the popup"""
         #Dictionary for all the variables
@@ -65,7 +66,7 @@ class Acquire_PopUp():
 
         #Label for entries
         self.entries_label = ttk.Label(content_frame, text="Please fill out the fields below")
-        self.entries_label.grid(row=0, column=0, columnspan=2, sticky=(tk.NSEW), pady=5)
+        self.entries_label.grid(row=0, column=0, columnspan=2, sticky=(NSEW), pady=5)
 
         # Creating Entry Widgets
         entry_names = ['root_directory', 'user', 'tissue', 'celltype', 'label', 'file_type', 'misc']
@@ -83,19 +84,19 @@ class Acquire_PopUp():
                 self.inputs[entry_names[i]] = LabelInput(parent=content_frame,
                                             label=entry_labels[i],
                                             input_class=ValidatedCombobox,
-                                            input_var=tk.StringVar()
+                                            input_var=StringVar()
                                             )
                 self.inputs[entry_names[i]].set_values(('Zarr', 'TIFF'))
-                self.inputs[entry_names[i]].set('TIFF')
+                self.inputs[entry_names[i]].set('Zarr')
 
             else:
                 self.inputs[entry_names[i]] = LabelInput(parent=content_frame,
                                             label=entry_labels[i],
                                             input_class=ValidatedEntry,
-                                            input_var=tk.StringVar(),
+                                            input_var=StringVar(),
                                             input_args={"required": True}
                                             )
-            self.inputs[entry_names[i]].grid(row=i+1, column=0, columnspan=2, sticky=(tk.NSEW), padx=5)
+            self.inputs[entry_names[i]].grid(row=i+1, column=0, columnspan=2, sticky=(NSEW), padx=5)
             self.inputs[entry_names[i]].label.grid(padx=(0, 20))
 
         # Formatting
@@ -107,9 +108,9 @@ class Acquire_PopUp():
 
         #Done and Cancel Buttons
         self.buttons['Cancel'] = ttk.Button(content_frame, text="Cancel Acquisition")
-        self.buttons['Cancel'].grid(row=8, column=0, padx=5, sticky=(tk.NSEW))
+        self.buttons['Cancel'].grid(row=8, column=0, padx=5, sticky=(NSEW))
         self.buttons['Done'] = ttk.Button(content_frame, text="Acquire Data")
-        self.buttons['Done'].grid(row=8, column=1, padx=5, sticky=(tk.NSEW))
+        self.buttons['Done'].grid(row=8, column=1, padx=5, sticky=(NSEW))
         
 
     def get_variables(self):

@@ -131,7 +131,7 @@ class TLKIMStage(StageBase):
             # Check that our position is within the axis bounds, fail if it's not.
             if (axis_min > axis_abs) or (axis_max < axis_abs):
                 log_string = f"Absolute movement stopped: {axis} limit would be reached!" \
-                             f"{axis_abs} is not in the range {axis_min} to {axis_max}."
+                             "{axis_abs} is not in the range {axis_min} to {axis_max}."
                 logger.info(log_string)
                 print(log_string)
                 # Return a ridiculous value to make it clear we've failed.

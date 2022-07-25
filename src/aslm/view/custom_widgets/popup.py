@@ -30,10 +30,11 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
+from tkinter import *
 import tkinter as tk
 from tkinter import ttk
 import logging
-
+from pathlib import Path
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -83,7 +84,7 @@ class PopUp(tk.Toplevel):
         self.geometry(size) #300x200 pixels, first +320 means 320 pixels from left edge, +180 means 180 pixels from top edge
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
-        self.resizable(tk.FALSE, tk.FALSE) #Makes it so user cannot resize
+        self.resizable(FALSE, FALSE) #Makes it so user cannot resize
         if top == True:
             self.attributes("-topmost", 1) #Makes it be on top of mainapp when called
         
@@ -98,7 +99,7 @@ class PopUp(tk.Toplevel):
       
         #Putting popup frame into toplevel window
         self.content_frame = ttk.Frame(self)
-        self.content_frame.grid(row=0, column=0, sticky=(tk.NSEW))
+        self.content_frame.grid(row=0, column=0, sticky=(NSEW))
 
         
     #Catching close buttons/destroying window procedures

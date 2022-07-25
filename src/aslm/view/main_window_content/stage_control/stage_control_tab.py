@@ -31,13 +31,13 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 # Local Imports
-from aslm.view.main_window_content.stage_control.stage_control_frames.other_axis_frame import other_axis_frame
-from aslm.view.main_window_content.stage_control.stage_control_frames.position_frame import position_frame
-from aslm.view.main_window_content.stage_control.stage_control_frames.x_y_frame import x_y_frame
-from aslm.view.main_window_content.stage_control.stage_control_frames.goto_frame import goto_frame
-from aslm.view.main_window_content.stage_control.stage_control_frames.stop_frame import  stop_frame
+from aslm.view.main_window_content.stage_control.tabs.other_axis_frame import other_axis_frame
+from aslm.view.main_window_content.stage_control.tabs.position_frame import position_frame
+from aslm.view.main_window_content.stage_control.tabs.x_y_frame import x_y_frame
+from aslm.view.main_window_content.stage_control.tabs.goto_frame import goto_frame
+from aslm.view.main_window_content.stage_control.tabs.stop_frame import  stop_frame
 # Standard Imports
-import tkinter as tk
+from tkinter import *
 from tkinter import ttk
 import logging
 
@@ -52,8 +52,8 @@ class stage_control_tab(ttk.Frame):
         ttk.Frame.__init__(self, note3, *args, **kwargs)
         
         # Formatting
-        tk.Grid.columnconfigure(self, 'all', weight=1)
-        tk.Grid.rowconfigure(self, 'all', weight=1)
+        Grid.columnconfigure(self, 'all', weight=1)
+        Grid.rowconfigure(self, 'all', weight=1)
         
 
         # Building out stage control elements, frame by frame
@@ -96,30 +96,30 @@ class stage_control_tab(ttk.Frame):
         """
 
         # Formatting
-        tk.Grid.columnconfigure(self.position_frame, 'all', weight=1)
-        tk.Grid.rowconfigure(self.position_frame, 'all', weight=1)
-        tk.Grid.columnconfigure(self.xy_frame, 'all', weight=1)
-        tk.Grid.rowconfigure(self.xy_frame, 'all', weight=1)
-        tk.Grid.columnconfigure(self.z_frame, 'all', weight=1)
-        tk.Grid.rowconfigure(self.z_frame, 'all', weight=1)
-        tk.Grid.columnconfigure(self.theta_frame, 'all', weight=1)
-        tk.Grid.rowconfigure(self.theta_frame, 'all', weight=1)
-        tk.Grid.columnconfigure(self.f_frame, 'all', weight=1)
-        tk.Grid.rowconfigure(self.f_frame, 'all', weight=1)
-        tk.Grid.columnconfigure(self.goto_frame, 'all', weight=1)
-        tk.Grid.rowconfigure(self.goto_frame, 'all', weight=1)
-        tk.Grid.columnconfigure(self.stop_frame, 'all', weight=1)
-        tk.Grid.rowconfigure(self.stop_frame, 'all', weight=1)
+        Grid.columnconfigure(self.position_frame, 'all', weight=1)
+        Grid.rowconfigure(self.position_frame, 'all', weight=1)
+        Grid.columnconfigure(self.xy_frame, 'all', weight=1)
+        Grid.rowconfigure(self.xy_frame, 'all', weight=1)
+        Grid.columnconfigure(self.z_frame, 'all', weight=1)
+        Grid.rowconfigure(self.z_frame, 'all', weight=1)
+        Grid.columnconfigure(self.theta_frame, 'all', weight=1)
+        Grid.rowconfigure(self.theta_frame, 'all', weight=1)
+        Grid.columnconfigure(self.f_frame, 'all', weight=1)
+        Grid.rowconfigure(self.f_frame, 'all', weight=1)
+        Grid.columnconfigure(self.goto_frame, 'all', weight=1)
+        Grid.rowconfigure(self.goto_frame, 'all', weight=1)
+        Grid.columnconfigure(self.stop_frame, 'all', weight=1)
+        Grid.rowconfigure(self.stop_frame, 'all', weight=1)
         
         # Gridding out frames
         factor = 6
-        self.position_frame.grid(row=0, column=0, columnspan=5, sticky=(tk.NSEW), pady=(2,0))
-        self.xy_frame.grid(row=1, column=0, sticky=(tk.NSEW), padx=10, pady=10*factor)
-        self.z_frame.grid(row=1, column=1, sticky=(tk.NSEW), padx=10, pady=10*factor)
-        self.theta_frame.grid(row=1, column=2, sticky=(tk.NSEW), padx=10, pady=10*factor)
-        self.f_frame.grid(row=1, column=3, sticky=(tk.NSEW), padx=10, pady=10*factor)
-        # self.goto_frame.grid(row=0, column=4, sticky=(tk.NSEW), padx=10, pady=10*factor)
-        self.stop_frame.grid(row=1, column=4, sticky=(tk.NSEW), padx=10, pady=10 * factor)
+        self.position_frame.grid(row=0, column=0, columnspan=5, sticky=(NSEW), pady=(2,0))
+        self.xy_frame.grid(row=1, column=0, sticky=(NSEW), padx=10, pady=10*factor)
+        self.z_frame.grid(row=1, column=1, sticky=(NSEW), padx=10, pady=10*factor)
+        self.theta_frame.grid(row=1, column=2, sticky=(NSEW), padx=10, pady=10*factor)
+        self.f_frame.grid(row=1, column=3, sticky=(NSEW), padx=10, pady=10*factor)
+        # self.goto_frame.grid(row=0, column=4, sticky=(NSEW), padx=10, pady=10*factor)
+        self.stop_frame.grid(row=1, column=4, sticky=(NSEW), padx=10, pady=10 * factor)
 
     def get_widgets(self):
         """

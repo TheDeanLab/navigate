@@ -44,39 +44,20 @@ class Dummy_Detective:
         self.model = model
         # Queue
         self.detection_queue = Queue()
-        self.frame_queue = Queue()
-        # target frame id
-        self.target_frame_id = -1
 
-        self.config_table={'signal': {'main': self.signal_func, 
-                                      'main-response': self.signal_response_func}, 
-                           'data': {'pre-main': self.is_target_frame,
-                                    'main': self.data_func},
-                           'node': {'need_response': True}}
+        self.config_table={'signal': {'main-response': self.signal_func}, 
+                                        'data': {'main': self.data_func}}
 
     def signal_func(self):
-        self.frame_queue.put(self.model.frame_id)
-
-    def signal_response_func(self):
         frame_ids, r = self.detection_queue.get()
         print('******Signal detective get:', frame_ids, self.model.frame_id)
         return r
 
-    def is_target_frame(self, frame_ids):
-        try:
-            if self.target_frame_id < 0:
-                self.target_frame_id = self.frame_queue.get()
-        except:
-            return False
-        return self.target_frame_id in frame_ids
-
     def data_func(self, frame_ids):
-        # should detect #target_frame_id
         r = bool(random.getrandbits(1))
-        print('detecting image: ', self.target_frame_id, 'is', r)
-        self.detection_queue.put((self.target_frame_id, r))
+        print('detecting image: ', frame_ids, 'is', r)
+        self.detection_queue.put((frame_ids, r))
         return r
 
-    def generate_meta_data(self, *args):
+    def generate_meta_data(self):
         print('This frame is detective', self.model.frame_id)
-        return True

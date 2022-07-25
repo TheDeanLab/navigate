@@ -12,9 +12,9 @@ pandas==1.3.5
 pandastable==0.12.2.post1
 opencv-python==4.5.5.62
 numpy==1.22.0; sys_platform != "darwin"
-numpy==1.21.6; sys_platform == "darwin" 
+numpy==1.21.6; sys_platform == "Darwin" 
 scikit-image==0.19.1
-tensorflow==2.9.1; sys_platform != "darwin"
+tensorflow==2.9.1
 cupy-cuda112==10.2.0; sys_platform != "darwin"
 zarr==2.11.3
 fsspec

@@ -48,12 +48,9 @@ logger = logging.getLogger(p)
 class Acquire_Bar_Controller(GUI_Controller):
     def __init__(self,
                  view,
-                 parent_view,
                  parent_controller,
                  verbose=False):
         super().__init__(view, parent_controller, verbose)
-
-        self.parent_view = parent_view
 
         # acquisition image mode variable
         self.mode = 'live'
@@ -132,10 +129,10 @@ class Acquire_Bar_Controller(GUI_Controller):
             number_of_slices = microscope_state['number_z_steps']
 
         top_anticipated_images = number_of_slices
-        bottom_anticipated_images = number_of_channels \
-                                    * number_of_slices \
-                                    * number_of_timepoints \
-                                    * number_of_positions
+        bottom_anticipated_images = number_of_channels * \
+                                    number_of_slices * \
+                                    number_of_timepoints * \
+                                    number_of_positions
 
         if images_received > 0:
             # Update progress bars according to imaging mode.

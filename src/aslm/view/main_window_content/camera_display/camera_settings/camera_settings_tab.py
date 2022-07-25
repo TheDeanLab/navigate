@@ -31,14 +31,15 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 import logging
-import tkinter as tk
+from pathlib import Path
+from tkinter import *
 from tkinter import ttk
-
+from tkinter.font import Font
 
 import numpy as np
-from aslm.view.main_window_content.camera_display.camera_settings.camera_settings_frames.camera_mode import camera_mode
-from aslm.view.main_window_content.camera_display.camera_settings.camera_settings_frames.framerate_info import framerate_info
-from aslm.view.main_window_content.camera_display.camera_settings.camera_settings_frames.camera_roi import camera_roi
+from aslm.view.main_window_content.camera_display.camera_settings.tabs.camera_mode import camera_mode
+from aslm.view.main_window_content.camera_display.camera_settings.tabs.framerate_info import framerate_info
+from aslm.view.main_window_content.camera_display.camera_settings.tabs.camera_roi import camera_roi
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -54,19 +55,19 @@ class camera_settings_tab(ttk.Frame):
         ttk.Frame.__init__(self, setntbk, *args, **kwargs)
         
         # Formatting
-        tk.Grid.columnconfigure(self, 'all', weight=1)
-        tk.Grid.rowconfigure(self, 'all', weight=1)
+        Grid.columnconfigure(self, 'all', weight=1)
+        Grid.rowconfigure(self, 'all', weight=1)
 
         #Camera Modes Frame
         self.camera_mode = camera_mode(self)
-        self.camera_mode.grid(row=0, column=0, sticky=(tk.NSEW), padx=10, pady=10)
+        self.camera_mode.grid(row=0, column=0, sticky=(NSEW), padx=10, pady=10)
         
         #Framerate Label Frame
         self.framerate_info = framerate_info(self)
-        self.framerate_info.grid(row=0, column=1, sticky=(tk.NSEW), padx=10, pady=10)
+        self.framerate_info.grid(row=0, column=1, sticky=(NSEW), padx=10, pady=10)
 
         #Region of Interest Settings
         self.camera_roi = camera_roi(self)
-        self.camera_roi.grid(row=1, column=0,columnspan=2, sticky=(tk.NSEW), padx=10, pady=10)
+        self.camera_roi.grid(row=1, column=0,columnspan=2, sticky=(NSEW), padx=10, pady=10)
 
 

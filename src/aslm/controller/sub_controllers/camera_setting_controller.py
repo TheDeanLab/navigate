@@ -302,11 +302,15 @@ class Camera_Setting_Controller(GUI_Controller):
         the physical size of the pixel, and the number of pixels.
         update FOV_X and FOV_Y
 
-        TODO: @Kevin, please check the code here
+        TODO: Stop hardcoding things.  This could be pulled in a microscope specific configuration.
+        54-12-8: EFLobj = 12.19 mm / RI
+
         """
         if resolution_value == 'high':
             tube_lens_focal_length = 300
-            multi_immersion_focal_length = 8.4
+            extended_focal_length = 12.19
+            refractive_index = 1.56
+            multi_immersion_focal_length = extended_focal_length/refractive_index
             magnification = tube_lens_focal_length / multi_immersion_focal_length
         else:
             magnification = resolution_value
@@ -325,7 +329,7 @@ class Camera_Setting_Controller(GUI_Controller):
     def calculate_readout_time(self):
         """
         # Calculates it here
-        # TODO: @Kevin please check the math here.
+        # TODO: Highly specific to Hamamatsu. Should find a way to pass this from the camera to here.
         """
 
         h = 9.74436e-6  # Readout timing constant

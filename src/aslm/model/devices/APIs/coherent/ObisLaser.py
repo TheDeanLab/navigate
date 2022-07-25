@@ -29,6 +29,8 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
+# Help
+# https://www.micron.ox.ac.uk/software/microscope/_modules/microscope/lights/obis.html
 
 # Standard Library Imports
 import logging
@@ -119,13 +121,15 @@ class ObisLaser(LaserBase):
             print('could not close the port')
 
     def ask(self, command):
-        self.laser.reset_input_buffer()  # flush once
         self.laser.write((str(command) + self.end_of_line).encode('ascii'))
+        print("command to write: ", str(command) + self.end_of_line)
+        print("readline: ",self.laser.readline())
         response = self.laser.read_until(self.end_of_line.encode('ascii')).decode('ascii').strip('\r\n')
+        print("Response: ", response)
+        # print(self.laser.readline())
         if response.startswith('ERR'):
             code = response.strip('ERR')
             print(f"Error {code}: {errors[code]}.")
-        self.laser.reset_input_buffer()  # flush twice
         return response
 
     
@@ -141,7 +145,7 @@ class ObisLaser(LaserBase):
         laser_model = self.ask(command)
         if self.verbose:
             print("Laser Model:", laser_model)
-        self.laser_model = laser_model
+        # self.laser_model = laser_model
         return laser_model
 
     def get_laser_calibration_date(self):
@@ -152,7 +156,7 @@ class ObisLaser(LaserBase):
         laser_calibration_date = self.ask(command)
         if self.verbose:
             print("Laser Calibration Date:", laser_calibration_date)
-        self.laser_calibration_date = laser_calibration_date
+        # self.laser_calibration_date = laser_calibration_date
         return laser_calibration_date
     
     def get_laser_serial_number(self):
@@ -164,7 +168,7 @@ class ObisLaser(LaserBase):
         laser_serial_number = self.ask(command)
         if self.verbose:
             print("Laser Serial Number:", laser_serial_number)
-        self.laser_serial_number = laser_serial_number
+        # self.laser_serial_number = laser_serial_number
         return laser_serial_number
 
     def get_laser_part_number(self):
@@ -176,7 +180,7 @@ class ObisLaser(LaserBase):
         laser_part_number = self.ask(command)
         if self.verbose:
             print("Laser Part Number:", laser_part_number)
-        self.laser_part_number = laser_part_number
+        # self.laser_part_number = laser_part_number
         return laser_part_number
 
     def get_laser_firmware(self):
@@ -187,7 +191,7 @@ class ObisLaser(LaserBase):
         laser_firmware = self.ask(command)
         if self.verbose:
             print("Laser Firmware:", laser_firmware)
-        self.laser_firmware = laser_firmware
+        # self.laser_firmware = laser_firmware
         return laser_firmware
 
     def get_laser_protocol(self):
@@ -198,7 +202,7 @@ class ObisLaser(LaserBase):
         laser_protocol = self.ask(command)
         if self.verbose:
             print("Laser Protocol Version:", laser_protocol)
-        self.laser_protocol = laser_protocol
+        # self.laser_protocol = laser_protocol
         return laser_protocol
 
     def get_laser_wavelength(self):
@@ -209,7 +213,7 @@ class ObisLaser(LaserBase):
         laser_wavelength = self.ask(command)
         if self.verbose:
             print("Laser Wavelength:", laser_wavelength)
-        self.laser_wavelength = laser_wavelength
+        # self.laser_wavelength = laser_wavelength
         return laser_wavelength
 
     def get_power_rating(self):
@@ -221,7 +225,7 @@ class ObisLaser(LaserBase):
         laser_power_rating = self.ask(command)
         if self.verbose:
             print("Laser Power Rating:", laser_power_rating)
-        self.laser_power_rating = laser_power_rating
+        # self.laser_power_rating = laser_power_rating
         return laser_power_rating
 
     def get_minimum_laser_power(self):
@@ -232,7 +236,7 @@ class ObisLaser(LaserBase):
         minimum_laser_power = self.ask(command)
         if self.verbose:
             print("Minimum Laser Power:", minimum_laser_power)
-        self.minimum_laser_power = minimum_laser_power
+        # self.minimum_laser_power = minimum_laser_power
         return minimum_laser_power
 
     def get_maximum_laser_power(self):
@@ -243,7 +247,7 @@ class ObisLaser(LaserBase):
         maximum_laser_power = self.ask(command)
         if self.verbose:
             print("Maximum Laser Power:", maximum_laser_power)
-        self.maximum_laser_power = maximum_laser_power
+        # self.maximum_laser_power = maximum_laser_power
         return maximum_laser_power
 
     def get_laser_system_info(self):
@@ -270,7 +274,7 @@ class ObisLaser(LaserBase):
         laser_power = self.ask(command)
         if self.verbose:
             print("Laser Power:", laser_power)
-        self.laser_power = laser_power
+        # self.laser_power = laser_power
         return laser_power
 
     def get_laser_output_current(self):
@@ -281,7 +285,7 @@ class ObisLaser(LaserBase):
         laser_output_current = self.ask(command)
         if self.verbose:
             print("Laser Output Current:", laser_output_current)
-        self.laser_output_current = laser_output_current
+        # self.laser_output_current = laser_output_current
         return laser_output_current
 
     def get_base_plate_temp(self, unit="C"):
@@ -307,7 +311,7 @@ class ObisLaser(LaserBase):
         laser_base_plate_temp = self.ask(command)
         if self.verbose:
             print("Laser Base Plate Temp:", laser_base_plate_temp)
-        self.laser_base_plate_temp = laser_base_plate_temp
+        # self.laser_base_plate_temp = laser_base_plate_temp
         return laser_base_plate_temp
 
     
@@ -331,12 +335,12 @@ class ObisLaser(LaserBase):
         
         # check if laser is on
         # if it is turned off then save the state so we can turn it back on
-        self.get_laser_state()
-        state = 'OFF'
-        if self.laser_state == 'ON':
-            # save current state
-            state = self.laser_state
-            self.set_laser_to_off()
+        # self.get_laser_state()
+        # state = 'OFF'
+        # if self.laser_state == 'ON':
+        #     # save current state
+        #     state = self.laser_state
+        #     self.set_laser_to_off()
 
         if mode == 'cwp':
             command = "SOURce:AM:INTernal CWP"
@@ -361,9 +365,9 @@ class ObisLaser(LaserBase):
         if self.verbose:
             print("Set Laser Operating Mode to:", self.get_laser_operating_mode())
 
-        if state == 'ON':
-            # turn laser back on
-            self.set_laser_to_on()
+        # if state == 'ON':
+        #     # turn laser back on
+        #     self.set_laser_to_on()
 
     def get_laser_operating_mode(self):
         """
@@ -375,7 +379,7 @@ class ObisLaser(LaserBase):
         laser_operating_mode = self.ask(command)
 
         # use this print for debugging if the function doesnt work
-        print(laser_operating_mode)
+        print(f"test: {laser_operating_mode}")
 
         if ("CWP" in laser_operating_mode):
             self.laser_operating_mode = "cwp"
@@ -407,8 +411,8 @@ class ObisLaser(LaserBase):
         laser_power_level = self.ask(command)
         if self.verbose:
             print("Laser State:", laser_power_level)
-        self.laser_power_level = laser_power_level
-        return laser_power_level
+        # self.laser_power_level = laser_power_level
+        # return laser_power_level
 
     def set_laser_power_level(self, level):
         """
@@ -418,11 +422,11 @@ class ObisLaser(LaserBase):
 
         # check if laser is on
         # if it is turned off then save the state so we can turn it back on
-        self.get_laser_state()
+        laser_state = self.get_laser_state()
         state = 'OFF'
-        if self.laser_state == 'ON':
+        if laser_state == 'ON':
             # save current state
-            state = self.laser_state
+            state = laser_state
             self.set_laser_to_off()
 
         # not sure if this will work like this but worth a test
@@ -450,7 +454,7 @@ class ObisLaser(LaserBase):
         laser_state = self.ask(command)
         if self.verbose:
             print("Laser State:", laser_state)
-        self.laser_state = laser_state
+        # self.laser_state = laser_state
         return laser_state
 
     def set_laser_to_on(self):
@@ -461,7 +465,7 @@ class ObisLaser(LaserBase):
         laser_state = self.ask(command)
         if self.verbose:
             print("Laser State:", laser_state)
-        self.laser_state = laser_state
+        # self.laser_state = laser_state
         return laser_state
 
     def set_laser_to_off(self):
@@ -472,7 +476,7 @@ class ObisLaser(LaserBase):
         laser_state = self.ask(command)
         if self.verbose:
             print("Laser State:", laser_state)
-        self.laser_state = laser_state
+        # self.laser_state = laser_state
         return laser_state
 
 
@@ -491,7 +495,7 @@ class ObisLaser(LaserBase):
         analog_mod_type = self.ask(command)
         if self.verbose:
             print("Laser Analog Modulation Type:", analog_mod_type)
-        self.analog_mod_type = analog_mod_type
+        # self.analog_mod_type = analog_mod_type
         return analog_mod_type
 
     def set_analog_mod_type(self, type):
@@ -513,7 +517,7 @@ class ObisLaser(LaserBase):
         analog_mod_type = self.ask("SYSTem:INFormation:AMODulation:TYPe?")
         if self.verbose:
             print("Laser Analog Modulation Type:", analog_mod_type)
-        self.analog_mod_type = analog_mod_type
+        # self.analog_mod_type = analog_mod_type
 
         if state == 'ON':
             # turn laser back on
@@ -532,7 +536,7 @@ class ObisLaser(LaserBase):
         system_ststus = self.ask(command)
         if self.verbose:
             print("Laser System Status:", system_ststus)
-        self.system_ststus = system_ststus
+        # self.system_ststus = system_ststus
         return system_ststus
 
     def get_system_fault(self):
@@ -546,7 +550,7 @@ class ObisLaser(LaserBase):
         system_fault = self.ask(command)
         if self.verbose:
             print("Laser System Fault:", system_fault)
-        self.system_fault = system_fault
+        # self.system_fault = system_fault
         return system_fault
 
 
@@ -563,7 +567,7 @@ class ObisLaser(LaserBase):
         laser_blanking_status = self.ask(command)
         if self.verbose:
             print("Laser Blanking Status:", laser_blanking_status)
-        self.laser_blanking_status = laser_blanking_status
+        # self.laser_blanking_status = laser_blanking_status
         return laser_blanking_status
 
     def set_laser_blanking_on(self):
@@ -583,7 +587,7 @@ class ObisLaser(LaserBase):
         laser_blanking_status = self.ask("SOURce:AModulation:BLANKing?")
         if self.verbose:
             print("Laser Blanking Status:", laser_blanking_status)
-        self.laser_blanking_status = laser_blanking_status
+        # self.laser_blanking_status = laser_blanking_status
 
         if state == 'ON':
             # turn laser back on
@@ -608,7 +612,7 @@ class ObisLaser(LaserBase):
         laser_blanking_status = self.ask("SOURce:AModulation:BLANKing?")
         if self.verbose:
             print("Laser Blanking Status:", laser_blanking_status)
-        self.laser_blanking_status = laser_blanking_status
+        # self.laser_blanking_status = laser_blanking_status
 
         if state == 'ON':
             # turn laser back on
@@ -639,7 +643,7 @@ class ObisLaser(LaserBase):
         ext_control = self.ask(command)
         if self.verbose:
             print("External Control:", ext_control)
-        self.ext_control = ext_control
+        # self.ext_control = ext_control
         return ext_control
 
 
@@ -651,7 +655,7 @@ class ObisLaser(LaserBase):
         laser_status = self.ask(command)
         if self.verbose:
             print("Laser Status:", laser_status)
-        self.laser_status = laser_status
+        # self.laser_status = laser_status
         return laser_status
 
     

@@ -72,15 +72,14 @@ class Channels_Tab_Controller(GUI_Controller):
                                                                    self,
                                                                    self.verbose)
 
+        
+
         # add validation functions to spinbox
         # this function validate user's input (not from experiment file)
         # and will stop propagating errors to any 'parent' functions
         # the only thing is that when the user's input is smaller than the limits, 
         # it will show inputs in red, but still let the function know the inputs changed
         # I can not block it since the Tkinter's working strategy
-        # validate_wrapper(self.view.stack_acq_frame.step_size_spinbox)
-        # validate_wrapper(self.view.stack_acq_frame.start_pos_spinbox)
-        # validate_wrapper(self.view.stack_acq_frame.end_pos_spinbox)
 
         validate_wrapper(self.view.stack_timepoint_frame.stack_pause_spinbox)
         validate_wrapper(self.view.stack_timepoint_frame.exp_time_spinbox, is_integer=True)
@@ -90,25 +89,15 @@ class Channels_Tab_Controller(GUI_Controller):
         self.stack_acq_vals = self.view.stack_acq_frame.get_variables()
         self.stack_acq_buttons = self.view.stack_acq_frame.get_buttons()
 
-        # stack acquisition variables
-        # self.stack_acq_vals = {
-        #     'step_size': self.view.stack_acq_frame.step_size_spinval,
-        #     'start_position': self.view.stack_acq_frame.start_pos_spinval,
-        #     'end_position': self.view.stack_acq_frame.end_pos_spinval,
-        #     'number_z_steps': self.view.stack_acq_frame.slice_spinval,
-        #     'start_focus': self.view.stack_acq_frame.start_foc_spinval,
-        #     'end_focus': self.view.stack_acq_frame.end_foc_spinval,
-        #     'abs_z_start': self.view.stack_acq_frame.abs_z_start_spinval,
-        #     'abs_z_end': self.view.stack_acq_frame.abs_z_end_spinval
-        # }
         # stack acquisition event binds
         self.stack_acq_vals['step_size'].trace_add('write', self.update_z_steps)
         self.stack_acq_vals['start_position'].trace_add('write', self.update_z_steps)
         self.stack_acq_vals['end_position'].trace_add('write', self.update_z_steps)
-        # self.view.stack_acq_frame.set_start_button.configure(command=self.update_start_position)
-        # self.view.stack_acq_frame.set_end_button.configure(command=self.update_end_position)
         self.stack_acq_buttons['set_start'].configure(command=self.update_start_position)
         self.stack_acq_buttons['set_end'].configure(command=self.update_end_position)
+
+
+
 
         # stack acquisition_variables
         self.z_origin = 0
@@ -172,12 +161,8 @@ class Channels_Tab_Controller(GUI_Controller):
         """
         self.in_initialization = True
         self.set_info(self.stack_acq_vals, microscope_state)
-        # validate
-        # self.view.stack_acq_frame.step_size_spinbox.validate()
-        # self.view.stack_acq_frame.start_pos_spinbox.validate()
-        # self.view.stack_acq_frame.end_pos_spinbox.validate()
-
         self.set_info(self.timepoint_vals, microscope_state)
+
         # validate
         self.view.stack_timepoint_frame.stack_pause_spinbox.validate()
         self.view.stack_timepoint_frame.exp_time_spinbox.validate()
@@ -276,18 +261,15 @@ class Channels_Tab_Controller(GUI_Controller):
         self.mode = mode
         self.channel_setting_controller.set_mode(mode)
 
-        stack_state = 'disabled' if mode == 'z-stack' else 'active'
-        for key, widget in self.stack_acq_widgets.items():
-            if key == 'abs_z_start' or key == 'abs_z_end' or key == 'number_z_steps':
-                continue
-            widget.widget.configure(state=stack_state)
-
         state = 'normal' if mode == 'stop' else 'disabled'
+        for key, widget in self.stack_acq_widgets.items():
+            widget.widget['state'] = state
         self.view.stack_timepoint_frame.save_check['state'] = state
         self.view.stack_timepoint_frame.stack_pause_spinbox['state'] = state
         self.view.stack_timepoint_frame.exp_time_spinbox['state'] = state
-        self.stack_acq_widgets['cycling'].widget['state'] = 'readonly' if state == 'normal' else state
         self.show_verbose_info('acquisition mode has been changed to', mode)
+
+
 
     def update_z_steps(self,
                        *args):

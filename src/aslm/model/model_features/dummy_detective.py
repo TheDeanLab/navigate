@@ -51,7 +51,8 @@ class Dummy_Detective:
         self.config_table={'signal': {'main': self.signal_func, 
                                       'main-response': self.signal_response_func}, 
                            'data': {'pre-main': self.is_target_frame,
-                                    'main': self.data_func}}
+                                    'main': self.data_func},
+                           'node': {'need_response': True}}
 
     def signal_func(self):
         self.frame_queue.put(self.model.frame_id)

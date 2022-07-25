@@ -7,7 +7,7 @@ Saving:
   tissue: Lung
   celltype: MV3
   label: GFP
-  file_type: Zarr
+  file_type: TIFF
   date: 2022-06-07
 Devices:
   daq: NI
@@ -51,8 +51,7 @@ GalvoParameters:
   galvo_r_offset: 0
   galvo_r_frequency: 0
 StageParameters:
-  x_step: 500.0
-  y_step: 500.0
+  xy_step: 500.0
   z_step: 500.0
   theta_step: 30.0
   f_step: 500.0

@@ -44,7 +44,7 @@ from aslm.controller.sub_controllers.multi_position_controller import Multi_Posi
 from aslm.controller.sub_controllers.tiling_wizard_controller import Tiling_Wizard_Controller
 
 # View Imports that are not called on startup
-from aslm.view.main_window_content.tabs.channels.tiling_wizard_popup import tiling_wizard_popup as tiling_wizard
+from aslm.view.main_window_content.channel_settings.channel_settings_frames.tiling_wizard_popup import tiling_wizard_popup as tiling_wizard
 
 
 # Logger Setup
@@ -114,10 +114,9 @@ class Channels_Tab_Controller(GUI_Controller):
         self.z_origin = 0
         self.focus_origin = 0
 
-        # laser/stack cycling variable
-        self.stack_cycling_val = self.view.stack_cycling_frame.cycling_options
+
         # laser/stack cycling event binds
-        self.stack_cycling_val.trace_add('write', self.update_cycling_setting)
+        self.stack_acq_vals['cycling'].trace_add('write', self.update_cycling_setting)
 
         # time point setting variables
         self.timepoint_vals = {
@@ -155,7 +154,7 @@ class Channels_Tab_Controller(GUI_Controller):
             ASLM_Configuration_Controller.  config.configuration = Session object.
         """
         self.set_channel_num(config.configuration.GUIParameters['number_of_channels'])
-        self.view.stack_cycling_frame.cycling_pull_down['values'] = ['Per Z', 'Per Stack']
+        self.stack_acq_widgets['cycling'].widget['values'] = ['Per Z', 'Per Stack']
         self.stage_velocity = config.configuration.StageParameters['velocity']
         self.filter_wheel_delay = config.configuration.FilterWheelParameters['filter_wheel_delay']
         self.channel_setting_controller.initialize(config)
@@ -183,7 +182,7 @@ class Channels_Tab_Controller(GUI_Controller):
         self.view.stack_timepoint_frame.stack_pause_spinbox.validate()
         self.view.stack_timepoint_frame.exp_time_spinbox.validate()
 
-        self.stack_cycling_val.set('Per Z' if microscope_state['stack_cycling_mode'] == 'per_z' else 'Per Stack')
+        self.stack_acq_vals['cycling'].set('Per Z' if microscope_state['stack_cycling_mode'] == 'per_z' else 'Per Stack')
         self.channel_setting_controller.set_experiment_values(microscope_state['channels'])
 
         # positions
@@ -214,7 +213,7 @@ class Channels_Tab_Controller(GUI_Controller):
         # Not included in stack_acq_vals or timepoint_vals
         microscope_state['stage_positions'] = self.multi_position_controller.get_positions()
         microscope_state['channels'] = self.channel_setting_controller.get_values()
-        microscope_state['stack_cycling_mode'] = 'per_stack' if self.stack_cycling_val.get() == 'Per Stack' else 'per_z'
+        microscope_state['stack_cycling_mode'] = 'per_stack' if self.stack_acq_vals['cycling'].get() == 'Per Stack' else 'per_z'
         microscope_state['stack_z_origin'] = self.z_origin
         microscope_state['stack_focus_origin'] = self.focus_origin
         microscope_state['is_multiposition'] = self.is_multiposition_val.get()
@@ -287,7 +286,7 @@ class Channels_Tab_Controller(GUI_Controller):
         self.view.stack_timepoint_frame.save_check['state'] = state
         self.view.stack_timepoint_frame.stack_pause_spinbox['state'] = state
         self.view.stack_timepoint_frame.exp_time_spinbox['state'] = state
-        self.view.stack_cycling_frame.cycling_pull_down['state'] = 'readonly' if state == 'normal' else state
+        self.stack_acq_widgets['cycling'].widget['state'] = 'readonly' if state == 'normal' else state
         self.show_verbose_info('acquisition mode has been changed to', mode)
 
     def update_z_steps(self,
@@ -331,7 +330,7 @@ class Channels_Tab_Controller(GUI_Controller):
         #     step_size = 0.001
         #     self.stack_acq_vals['step_size'].set(step_size)
 
-        number_z_steps = int(np.abs(np.floor((end_position - start_position) / step_size)))
+        number_z_steps = int(np.ceil(np.abs((end_position - start_position) / step_size)))
         self.stack_acq_vals['number_z_steps'].set(number_z_steps)
 
         # Shift the start/stop positions by the relative position
@@ -368,12 +367,30 @@ class Channels_Tab_Controller(GUI_Controller):
             ?
         """
         # Grab current values
-        z_curr = self.parent_controller.experiment.StageParameters['z']
-        focus_curr = self.parent_controller.experiment.StageParameters['f']
+        z_end = self.parent_controller.experiment.StageParameters['z']
+        focus_end = self.parent_controller.experiment.StageParameters['f']
+
+        z_start = self.z_origin
+        focus_start = self.focus_origin
+
+        if z_end < z_start:
+            # Sort so we are always going low to high
+            tmp = z_start
+            tmp_f = focus_start
+            z_start = z_end
+            focus_start = focus_end
+            z_end = tmp
+            focus_end = tmp_f
+
+        # set origin to be in the middle of start and end
+        self.z_origin = (z_start + z_end)/2
+        self.focus_origin = (focus_start + focus_end)/2
 
         # Propagate parameter changes to the GUI
-        self.stack_acq_vals['end_position'].set(z_curr - self.z_origin)
-        self.stack_acq_vals['end_focus'].set(focus_curr - self.focus_origin)
+        self.stack_acq_vals['start_position'].set(z_start - self.z_origin)
+        self.stack_acq_vals['start_focus'].set(focus_start - self.focus_origin)
+        self.stack_acq_vals['end_position'].set(z_end - self.z_origin)
+        self.stack_acq_vals['end_focus'].set(focus_end - self.focus_origin)
         self.update_z_steps()
 
     def update_cycling_setting(self,
@@ -397,7 +414,7 @@ class Channels_Tab_Controller(GUI_Controller):
 
         # tell the central/parent controller that laser cycling setting is changed when mode is 'live'
         if self.mode == 'live':
-            self.parent_controller.execute('update_setting', 'laser_cycling', self.stack_cycling_val.get())
+            self.parent_controller.execute('update_setting', 'laser_cycling', self.stack_acq_vals['cycling'].get())
         self.show_verbose_info('Cycling setting on channels tab has been changed')
 
     def update_save_setting(self,
@@ -454,7 +471,7 @@ class Channels_Tab_Controller(GUI_Controller):
                 self.view.after_cancel(self.timepoint_event_id)
             return
 
-        perStack = self.stack_cycling_val.get() == 'Per Stack'
+        perStack = self.stack_acq_vals['cycling'].get() == 'Per Stack'
 
         # Initialize variable to keep track of how long the entire experiment will take.
         # Includes time, positions, channels...

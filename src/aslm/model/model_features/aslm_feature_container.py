@@ -31,11 +31,12 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 
 class TreeNode:
-    def __init__(self, feature_name, func_dict, *, node_type='one-step', device_related=False):
+    def __init__(self, feature_name, func_dict, *, node_type='one-step', device_related=False, need_response=False):
         self.node_name = str(feature_name)
         self.node_funcs = func_dict
         self.node_type = node_type # 'one-step', 'multi-step'
         self.device_related = device_related
+        self.need_response = need_response # True, False
         self.is_initialized = False
         self.child = None
         self.sibling = None
@@ -46,14 +47,14 @@ class TreeNode:
                 setattr(self, key, kwargs[key])
 
 class SignalNode(TreeNode):
-    def __init__(self, feature_name, func_dict, *, node_type='one-step', device_related=False):
-        super().__init__(feature_name, func_dict, node_type=node_type, device_related=device_related)
+    def __init__(self, feature_name, func_dict, *, node_type='one-step', device_related=False, need_response=False):
+        super().__init__(feature_name, func_dict, node_type=node_type, device_related=device_related, need_response=need_response)
         self.has_response_func = func_dict.get('main-response') != None
         self.wait_response = False
 
         # if node type is multi-step, the node should have one response function
         if self.node_type == 'multi-step' and self.has_response_func == False and self.device_related == False:
-            self.node_funcs['main-response'] = dummy_func
+            self.node_funcs['main-response'] = dummy_True
             self.has_response_func = True
 
     def run(self, *args, wait_response=False):
@@ -73,12 +74,11 @@ class SignalNode(TreeNode):
             # print(self.node_name, 'running response function:', self.node_funcs['main-response'])
             result = self.node_funcs['main-response'](*args)
             self.wait_response = False
-        elif self.device_related:
+        elif self.device_related or self.has_response_func:
             return None, False
         else:
+            # run(wait_response=True)
             result = self.node_funcs['main'](*args)
-            if self.has_response_func:
-                result = self.node_funcs['main-response'](*args)
 
         if self.wait_response or self.node_type == 'multi-step' and not self.node_funcs['end']():
             return result, False
@@ -87,14 +87,18 @@ class SignalNode(TreeNode):
         return result, True
 
 class DataNode(TreeNode):
-    def __init__(self, feature_name, func_dict, *, node_type='one-step', device_related=False):
-        super().__init__(feature_name, func_dict, node_type=node_type, device_related=device_related)
+    def __init__(self, feature_name, func_dict, *, node_type='one-step', device_related=False, need_response=False):
+        super().__init__(feature_name, func_dict, node_type=node_type, device_related=device_related, need_response=need_response)
 
     def run(self, *args):
         # initialize the node when first time entering it
         if not self.is_initialized:
             self.node_funcs['init']()
             self.is_initialized = True
+
+        # to decide whether it is the target frame
+        if not self.node_funcs['pre-main'](*args):
+            return False, False
 
         result = self.node_funcs['main'](*args)
 
@@ -138,61 +142,70 @@ class SignalContainer(Container):
             result, is_end = self.curr_node.run(*args, wait_response=wait_response)
             if not is_end:
                 return
-            if not self.curr_node.sibling:
-                break
-            self.curr_node = self.curr_node.sibling
+            if self.curr_node.sibling:
+                self.curr_node = self.curr_node.sibling
+            elif result and self.curr_node.child:
+                print('Signal running child of', self.curr_node.node_name)
+                self.curr_node = self.curr_node.child
+            else:
+                self.curr_node = None
+                if self.remaining_number_of_execution > 0:
+                    self.remaining_number_of_execution -= 1
+                    self.end_flag = (self.remaining_number_of_execution == 0)
+                return
+            
             if self.curr_node.device_related:
                 return
 
-        if result and self.curr_node.child:
-            print('Signal running child of', self.curr_node.node_name)
-            self.curr_node = self.curr_node.child
-            if not self.curr_node.device_related:
-                self.run(*args)
-        else:
-            self.curr_node = None
-            if self.remaining_number_of_execution > 0:
-                self.remaining_number_of_execution -= 1
-                self.end_flag = (self.remaining_number_of_execution == 0)
+        
 
 
 class DataContainer(Container):
     def __init__(self, root=None):
         super().__init__(root)
+        self.returned_a_response = False
 
     def run(self, *args):
         if self.end_flag or not self.root:
             return
         if not self.curr_node:
             self.curr_node = self.root
+        self.returned_a_response = False
         while self.curr_node:
             result, is_end = self.curr_node.run(*args)
-            print('Data running node:', self.curr_node.node_name, 'get result:', result)
+            # print('Data running node:', self.curr_node.node_name, 'get result:', result)
             if not is_end:
                 return
-            if not self.curr_node.sibling:
-                break
-            self.curr_node = self.curr_node.sibling
-            if self.curr_node.device_related:
+            if self.curr_node.need_response:
+                self.returned_a_response = True
+            if self.curr_node.sibling:
+                self.curr_node = self.curr_node.sibling
+            elif result and self.curr_node.child:
+                # print('Data running child of', self.curr_node.node_name)
+                self.curr_node = self.curr_node.child
+            else:
+                self.curr_node = None
                 return
 
-        if result and self.curr_node.child:
-            print('Data running child of', self.curr_node.node_name)
-            self.curr_node = self.curr_node.child
-            if not self.curr_node.device_related:
-                self.run(*args)
-        else:
-            self.curr_node = None
+            if self.curr_node.device_related or (self.curr_node.need_response and self.returned_a_response):
+                return
 
 
 def get_registered_funcs(feature_module, func_type='signal'):
-    func_dict = feature_module.config_table[func_type]
+    func_dict = feature_module.config_table.get(func_type, {})
+    
     if 'init' not in func_dict:
         func_dict['init'] = dummy_func
     if 'main' not in func_dict:
-        func_dict['main'] = feature_module.generate_meta_data
+        # TODO: keep this now, later might change it after figuring out the meta data thing
+        if hasattr(feature_module, 'generate_meta_data') and func_type == 'signal':
+            func_dict['main'] = feature_module.generate_meta_data
+        else:
+            func_dict['main'] = dummy_True
     if 'end' not in func_dict:
         func_dict['end'] = dummy_True
+    if func_type == 'data' and 'pre-main' not in func_dict:
+        func_dict['pre-main'] = dummy_True
     return func_dict
 
 def load_features(model, feature_list):
@@ -208,9 +221,16 @@ def load_features(model, feature_list):
             feature = temp[i]['name'](model, *args)
             signal_node = SignalNode(temp[i]['name'].__name__, get_registered_funcs(feature, 'signal'))
             data_node = DataNode(temp[i]['name'].__name__, get_registered_funcs(feature, 'data'))
+            # if signal function has a waiting func, then the nodes are 'need_response' nodes
+            if 'main-response' in feature.config_table.get('signal', {}):
+                signal_node.need_response = True
+                data_node.need_response = True
             if 'node' in feature.config_table:
                 signal_node.set_property(**feature.config_table['node'])
                 data_node.set_property(**feature.config_table['node'])
+            if 'node' in temp[i]:
+                signal_node.set_property(**temp[i]['node'])
+                data_node.set_property(**temp[i]['node'])
             if i == 0:
                 pre_signal.child = signal_node
                 pre_data.child = data_node
@@ -219,11 +239,11 @@ def load_features(model, feature_list):
                 pre_data.sibling = data_node
             pre_signal = signal_node
             pre_data = data_node
-            
+
     return SignalContainer(signal_root.child), DataContainer(data_root.child)
 
 
-def dummy_True():
+def dummy_True(*args):
     return True
 
 def dummy_func(*args):

@@ -55,7 +55,6 @@ from aslm.tools.common_dict_tools import update_settings_common, update_stage_di
 from aslm.model.aslm_debug_model import Debug_Module
 
 # Logger Setup
-log_setup('model_logging.yml')
 p = __name__.split(".")[1]
 
 
@@ -109,6 +108,7 @@ class Model:
                  etl_constants_path=None,
                  event_queue=None):
 
+        log_setup('model_logging.yml')
         self.logger = logging.getLogger(p)
 
         # Specify verbosity

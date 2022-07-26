@@ -54,7 +54,6 @@ class TestZoomBase(unittest.TestCase):
         stage_base = StageBase(configuration, False)
 
         assert hasattr(stage_base, 'configuration')
-        assert hasattr(stage_base, 'verbose')
         assert hasattr(stage_base, 'x_pos')
         assert hasattr(stage_base, 'y_pos')
         assert hasattr(stage_base, 'z_pos')

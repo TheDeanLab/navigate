@@ -46,8 +46,7 @@ class TestSyntheticHardware():
         self.config = self.dummy_model.configuration
         self.experiment = self.dummy_model.experiment
         self.etl_const = self.dummy_model.etl_constants
-        self.verbose = self.dummy_model.verbose
-        sd = SyntheticDAQ(self.config, self.experiment, self.etl_const, self.verbose)
+        sd = SyntheticDAQ(self.config, self.experiment, self.etl_const)
 
         assert True
 
@@ -59,7 +58,6 @@ class TestSyntheticHardware():
         self.config = self.dummy_model.configuration
         self.experiment = self.dummy_model.experiment
         self.etl_const = self.dummy_model.etl_constants
-        self.verbose = self.dummy_model.verbose
         sc = SyntheticCamera(0, self.config, self.experiment)
 
         return True
@@ -70,7 +68,6 @@ class TestSyntheticHardware():
         self.config = self.dummy_model.configuration
         self.experiment = self.dummy_model.experiment
         self.etl_const = self.dummy_model.etl_constants
-        self.verbose = self.dummy_model.verbose
 
         sf = SyntheticFilterWheel(self.config, False)
 
@@ -82,7 +79,7 @@ class TestSyntheticHardware():
         self.config = self.dummy_model.configuration
         self.experiment = self.dummy_model.experiment
         self.etl_const = self.dummy_model.etl_constants
-        self.verbose = self.dummy_model.verbose
+
 
         ss = SyntheticStage(self.config, False)
 
@@ -92,7 +89,7 @@ class TestSyntheticHardware():
         self.config = self.dummy_model.configuration
         self.experiment = self.dummy_model.experiment
         self.etl_const = self.dummy_model.etl_constants
-        self.verbose = self.dummy_model.verbose
+
 
         sz = SyntheticZoom(self.config, False)
 
@@ -104,7 +101,7 @@ class TestSyntheticHardware():
         self.config = self.dummy_model.configuration
         self.experiment = self.dummy_model.experiment
         self.etl_const = self.dummy_model.etl_constants
-        self.verbose = self.dummy_model.verbose
+
 
         ss = SyntheticShutter(self.config, self.experiment)
 
@@ -117,7 +114,6 @@ class TestSyntheticHardware():
     #     self.config = self.dummy_model.configuration
     #     self.experiment = self.dummy_model.experiment
     #     self.etl_const = self.dummy_model.etl_constants
-    #     self.verbose = self.dummy_model.verbose
     #
     #     sl = SyntheticLaser(self.config, False)
     #

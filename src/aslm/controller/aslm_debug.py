@@ -117,6 +117,7 @@ class Debug_Module:
     def get_frames(self):
         while True:
             image_id = self.central_controller.show_img_pipe.recv()
+            logger.debug(f"Received: {image_id}")
             if image_id == 'stop':
                 break
             if not isinstance(image_id, int):
@@ -185,6 +186,7 @@ class Debug_Module:
             
             # Rec plot data from model and send to sub controller to display plot
             plot_data = self.central_controller.plot_pipe_controller.recv()
+            logger.debug(f"Controller received plot data: {plot_data}")
             if hasattr(self.central_controller, 'af_popup_controller'):
                 self.central_controller.af_popup_controller.display_plot(plot_data)
             

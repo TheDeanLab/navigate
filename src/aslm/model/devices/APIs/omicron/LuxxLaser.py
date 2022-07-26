@@ -31,6 +31,8 @@ class LuxxLaser(LaserBase):
             # Open serial port
             self.laser = serial.Serial(self.comport, self.baudrate, timeout=self.timeout)
 
+            logger.debug(f"The laser is connected via {self.comport}")
+
 
             # Confirm the Laser Wavelength
             # Must remove non-standard ASCII codes that cause errors in the utf-8 codec
@@ -39,24 +41,27 @@ class LuxxLaser(LaserBase):
             wavelength = wavelength.replace(b"\xa7140", str(" ").encode())
             wavelength = float(wavelength.decode())
             self.wavelength = wavelength
+            logger.debug(f"The Wavelength is: {wavelength}")
 
             # Confirm the Laser Serial Number
             serial_number = self.ask("GSN")
             serial_number = serial_number.decode()
             self.serial = serial_number
-
+            logger.debug(f"The laser Serial Number: {serial_number}")
 
             # Confirm the Laser Working Hours
             laser_working_hours = self.ask("GWH")
             laser_working_hours = laser_working_hours.decode()
             self.hours = laser_working_hours
+            logger.debug(f"Laser working hours: {laser_working_hours}")
 
             # Confirm the Laser Maximum Power
             power_max = float(self.ask("GMP"))
             self.pmax = power_max
+            logger.debug(f"Laser max power: {power_max}")
 
         except serial.SerialException:
-            raise OSError('Port "%s" is unavailable.\n' % port +
+            raise OSError('Port "%s" is unavailable.\n' % self.comport +
                           'Maybe the laser is not connected, the wrong' +
                           ' port is specified or the port is already opened')
 
@@ -70,6 +75,7 @@ class LuxxLaser(LaserBase):
 
             # Close the port
             self.laser.close()
+            logger.debug(f"Port closed")
 
         except serial.SerialException:
             print('Could not close the port')
@@ -114,6 +120,8 @@ class LuxxLaser(LaserBase):
         else:
             search_string = "!%s(.+)\n" % command[:3]
             search_string = search_string.encode()
+            print(f"The search string is: {search_string}")
+            print(f"The response string is: {response}")
 
             if len(response) > 0:
                 response = re.findall(search_string, response)[-1]
@@ -281,6 +289,7 @@ class LuxxLaser(LaserBase):
         self.set_power(self.pmax)
         self.set_mode("CW-APC")
         self.start()
+        logger.debug(f"{self.wavelength}nm Laser Initialized - Max Power: {self.pmax}mW")
 
 
 def stopwatch(func, *func_args, **func_kwargs):

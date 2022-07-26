@@ -659,7 +659,7 @@ class Model:
         experiment_path : str
             File path to non-default experiment file.
         """
-        self.experiment = session(experiment_path, self.verbose)
+        self.experiment = session(experiment_path)
 
     def get_readout_time(self):
         r"""Get readout time from camera.

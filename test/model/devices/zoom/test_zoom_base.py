@@ -55,7 +55,6 @@ class TestZoomBase(unittest.TestCase):
         assert hasattr(zoom_class, 'configuration')
         assert hasattr(zoom_class, 'zoomdict')
         assert hasattr(zoom_class, 'zoomvalue')
-        assert hasattr(zoom_class, 'verbose')
 
 if __name__ == '__main__':
     unittest.main()

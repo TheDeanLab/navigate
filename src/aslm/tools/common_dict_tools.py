@@ -30,6 +30,7 @@ def update_settings_common(target, args):
         if target.verbose:
             print(target.etl_constants.ETLConstants['low'][zoom])
 
+
         # Modify DAQ to pull the initial values from the etl_constants.yml file, or be passed it from the model.
         # Pass to the self.model.daq to
         #             value = self.resolution_info.ETLConstants[self.resolution][self.mag][laser][etl_name]

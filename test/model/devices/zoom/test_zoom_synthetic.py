@@ -55,7 +55,6 @@ class TestZoomSynthetic(unittest.TestCase):
         assert hasattr(zoom_class, 'configuration')
         assert hasattr(zoom_class, 'zoomdict')
         assert hasattr(zoom_class, 'zoomvalue')
-        assert hasattr(zoom_class, 'verbose')
         assert hasattr(zoom_class, 'set_zoom') and callable(getattr(zoom_class, 'set_zoom'))
         assert hasattr(zoom_class, 'read_position') and callable(getattr(zoom_class, 'read_position'))
         assert hasattr(zoom_class, 'move') and callable(getattr(zoom_class, 'move'))

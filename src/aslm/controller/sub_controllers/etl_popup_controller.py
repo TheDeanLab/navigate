@@ -272,7 +272,7 @@ class Etl_Popup_Controller(GUI_Controller):
             # Will only run code if value in constants does not match whats in GUI for Amp or Off AND in Live mode
             # TODO: Make also work in the 'single' acquisition mode.
             variable_value = variable.get()
-            print("ETL Amplitude/Offset Changed: ", variable_value)
+            logger.debug(f"ETL Amplitude/Offset Changed pre if statement: {variable_value}")
             if value != variable_value and variable_value != '' and (self.mode == 'live' or self.mode == 'stop'):
                 self.resolution_info.ETLConstants[self.resolution][self.mag][laser][etl_name] = variable_value
                 logger.debug(f"ETL Amplitude/Offset Changed:, {variable_value}")
@@ -306,7 +306,7 @@ class Etl_Popup_Controller(GUI_Controller):
                 # Special case for galvo amplitude not being defined
                 value = 0
             variable_value = variable.get()
-            print(f"Galvo parameter {galvo_parameter} changed: {variable_value}")
+            logger.debug(f"Galvo parameter {galvo_parameter} changed: {variable_value} pre if statement")
             if value != variable_value and variable_value != '' and (self.mode == 'live' or self.mode == 'stop'):
                 self.galvo_setting[galvo_parameter] = variable.get()
                 logger.debug(f"Galvo parameter {galvo_parameter} changed: {variable_value}")

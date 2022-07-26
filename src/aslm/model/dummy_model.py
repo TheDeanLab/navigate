@@ -20,7 +20,6 @@ def get_dummy_model():
         Leaving this class here in case we need to instantiate a full synthetic model
         """
         def __init__(self):
-            self.verbose = False
             self.synthetic_hardware = True
 
     # This return is used when you want a full syntethic model instead of just variable data from config files
@@ -32,7 +31,6 @@ def get_dummy_model():
             self.experiment = session(experiment, False)
             self.etl_constants = session(etl_constants, False)
             self.data_buffer = None
-            self.verbose = False
 
     # Instantiate fake model to return
     dumb_model = dummy_model()

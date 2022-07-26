@@ -70,11 +70,10 @@ starts the tkinter GUi, instantiates the controller, and then begins the main lo
 ![alt text](https://github.com/AdvancedImagingUTSW/ASLM/blob/develop/aslm_architecture.jpg?raw=true)
 
 ### Command Line Input Arguments (optional)
-* --verbose: Verbose mode.
-* --synthetic_hardware: Use simulated hardware.
+* --synthetic_hardware or -sh: Use simulated hardware.
 
 ~~~
-python main.py --verbose --synthetic_hardware
+python main.py --synthetic_hardware -sh
 ~~~
 
 ### Authors

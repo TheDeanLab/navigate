@@ -55,37 +55,35 @@ StageParameters:
   z_step: 500.0
   theta_step: 30.0
   f_step: 500.0
-  x: 25250.0
-  y: 40000.0
-  z: 40000.0
-  theta: 0.0
-  f: 70000.0
+  x: 16000.0
+  y: 53941.67
+  z: 47100.0
+  theta: 55.00006
+  f: 66122.8
 MicroscopeState:
   resolution_mode: low
-  image_mode: single
+  image_mode: live
   zoom: 1x
   stack_cycling_mode: per_stack
   start_position: 0.0
   end_position: 200.0
   step_size: 0.2
-  number_z_steps: 1250.0
+  number_z_steps: 1000.0
   timepoints: 1
   stack_pause: 0.0
   etl_amplitude: 0
   etl_offset: 0
   is_save: False
-  stack_acq_time: 249.99999999999434
+  stack_acq_time: 199.9999999999972
   timepoint_interval: 0
-  experiment_duration: 625.090000000039
+  experiment_duration: 600.0899999999995
   is_multiposition: False
-  channels: {'channel_1':
-               {'is_selected': True,
-                'laser': '488nm',
-                'laser_index': 0,
-                'filter': 'GFP - FF01-515/30-32',
-                'filter_position': 1,
-                'camera_exposure_time': 200.0,
-                'laser_power': '75',
-                'interval_time': '1',
-                'defocus': '0'}}
+  channels: {'channel_1': {'is_selected': True, 'laser': '488nm', 'laser_index': 0, 'filter': 'GFP - FF01-515/30-32', 'filter_position': 1, 'camera_exposure_time': 200.0, 'laser_power': '20', 'interval_time': '1', 'defocus': 0.0}, 'channel_2': {'is_selected': True, 'laser': '562nm', 'laser_index': 1, 'filter': 'RFP - FF01-595/31-32', 'filter_position': 2, 'camera_exposure_time': 200.0, 'laser_power': '20', 'interval_time': '1', 'defocus': 0.0}, 'channel_3': {'is_selected': True, 'laser': '642nm', 'laser_index': 2, 'filter': 'Far-Red - BLP01-647R/31-32', 'filter_position': 3, 'camera_exposure_time': 200.0, 'laser_power': '20', 'interval_time': '1', 'defocus': 0.0}}
   stage_positions: {0: {'x': 15000.0, 'y': 12000.0, 'z': 15500.0, 'theta': 0.0, 'f': 70000.0}, 1: {'x': 35000.0, 'y': 42000.0, 'z': 15500.0, 'theta': 0.0, 'f': 70000.0}}
+  stack_z_origin: 0
+  stack_focus_origin: 0
+  start_focus: 0.0
+  end_focus: 0.0
+  abs_z_start: 0.0
+  abs_z_end: 200.0
+  cycling: Per Stack

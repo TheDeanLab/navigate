@@ -132,6 +132,48 @@ class ObisLaser(LaserBase):
             print(f"Error {code}: {errors[code]}.")
         return response
 
+    # New version of ask() and moving it int two functions.
+    # send() and read()
+
+    def send(self, command):
+        response = self.laser.write(command + b"\r\n")
+        print(response)
+        return response
+
+    def read(self):
+        response = self.laser.readline().strip()
+        if self.laser.readline().strip() != b"OK":
+            # This is be the error message if it isnt okay
+            print(self.laser.readline().strip()) 
+        return response
+
+
+
+    def testing_handshake(self):
+        self.laser.write("SOURce:AM:STATe?" + b"\r\n")
+        print(self.laser.readline())
+        print(self.laser.readline())
+        print(self.laser.readline())
+        print(self.laser.readline())
+
+        self.laser.write("SOURce:AM:STATe OFF" + b"\r\n")
+        print(self.laser.readline())
+        print(self.laser.readline())
+        print(self.laser.readline())
+        print(self.laser.readline())
+
+        self.laser.write("SOURce:AM:STATe?" + b"\r\n")
+        self.laser.readline()
+        print(self.laser.readline())
+        self.laser.readline()
+        print(self.laser.readline())
+
+        self.laser.write("SOURce:AM:STATe?" + b"\r\n")
+        print(self.laser.readline())
+        self.laser.readline()
+        print(self.laser.readline())
+        self.laser.readline()
+
     
     """
     # System Information Queries
@@ -143,6 +185,17 @@ class ObisLaser(LaserBase):
         """
         command = "SYSTem:INFormation:MODel?"
         laser_model = self.ask(command)
+        if self.verbose:
+            print("Laser Model:", laser_model)
+        # self.laser_model = laser_model
+        return laser_model
+
+    def get_laser_model_v2(self):
+        """
+        # Get the laser model.
+        """
+        self.send("SYSTem:INFormation:MODel?")
+        response = self.read()
         if self.verbose:
             print("Laser Model:", laser_model)
         # self.laser_model = laser_model

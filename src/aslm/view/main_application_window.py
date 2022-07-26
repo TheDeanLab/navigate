@@ -43,9 +43,6 @@ import tkinter as tk
 from tkinter import ttk
 import logging
 from pathlib import Path
-# Logger Setup
-p = __name__.split(".")[1]
-logger = logging.getLogger(p)
 
 # Third Party Imports
 
@@ -135,10 +132,10 @@ class MainApp(ttk.Frame):
         self.logger.info("Spec - GUI is this size")
 
         # Adjust Canvas Width for Screen Resolution
-        dpi = self.root.winfo_fpixels('1i')
+        dpi = int(self.root.winfo_fpixels('1i'))
         canvas_width, canvas_height = int(root.winfo_screenwidth()), int(root.winfo_screenheight())
-        screen_width, screen_height = int(canvas_width * (dpi / 96) - 1), int(canvas_height * dpi / 96)
-        print(f"Max Screen Width, Height: {screen_width}, {screen_height}")
+        screen_width, screen_height = int(canvas_width * (dpi / 96)), int(canvas_height * (dpi / 96))
+        print(f"Screen Width, Height, dpi: {screen_width}, {screen_height}, {dpi}")
         print(f"Canvas Width, Height: {canvas_width}, {canvas_height}")
 
         if canvas_width > screen_width or canvas_height > screen_height:

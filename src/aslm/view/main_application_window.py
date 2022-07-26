@@ -58,8 +58,18 @@ from aslm.view.menus.menus import menubar
 # Creates the frame that will hold the GUI content, its parent is the main
 # window or root Tk object
 class Main_App(ttk.Frame):
-    # Takes a Tk object should be something like root = Tk() then
-    # root_window(root)
+    r"""
+    Placing the notebooks using tk.Grid. While the grid is called on each frame it is actually calling
+    the main window since those are the parent to the frames. The labels have already been packed into each respective
+    frame so can be ignored in the grid setup. This layout uses a 2x2 grid to start.
+
+    1   2
+    3   4
+    5   6
+
+    The above is the grid "spots" the left frame will take spots 3 & 5 while top right takes
+    spot 4 and bottom right frame takes spot 6. Top frame will be spots 1 & 2
+    """
 
     def __init__(mainapp, root, *args, **kwargs):
         # Inits this class as a frame subclass with the root as its parent
@@ -69,77 +79,50 @@ class Main_App(ttk.Frame):
         # widgets can be resized with the window
         mainapp.root = root
         mainapp.root.title("Axially Swept Light-Sheet Microscope")
+
         # keep icons relative to view directory structure
         view_directory = Path(__file__).resolve().parent
         photo_image = view_directory.joinpath("icon", "mic.png")
         mainapp.root.iconphoto(True, tk.PhotoImage(file=photo_image))
         mainapp.root.resizable(True, True)
-        factor = (1) # This changes how much of the screen to use. 1 is essentially fullscreen on startup
-        screen_width = int(root.winfo_screenwidth() * factor)
-        screen_height = int(root.winfo_screenheight() * factor)
 
+        # Adjust Canvas Width for Resolution
+        screen_width = int(root.winfo_screenwidth())
+        screen_height = int(root.winfo_screenheight())
         dpi = mainapp.root.winfo_fpixels('1i')
         real_width = int(screen_width * dpi / 96)
         real_height = int(screen_height * dpi / 96)
-        print('dpi', dpi)
-        print('actual vs real width should be', screen_width, real_width)
-        print('actual vs real height should be', screen_height, real_height)
-
         factor = dpi / 72
         mainapp.root.tk.call('tk', 'scaling', factor)
+        logger.info(f"Desired Screen Width, Height: {screen_width}, {screen_height}")
+        logger.info(f"Actual Screen Width, Height, and dpi: {real_width}, {real_height}, {dpi}")
+        logger.info(f"Scaling screen display by factor of {factor}")
 
         mainapp.root.geometry(f"{screen_width}x{screen_height}")
         tk.Grid.columnconfigure(root, 'all', weight=1)
         tk.Grid.rowconfigure(root, 'all', weight=1)
-
-
-
-
 
         # Creating and linking menu to main window/app
         mainapp.menubar = menubar(root)
 
         # Top Frame Acquire Bar
         mainapp.top_frame = ttk.Frame(mainapp)
-        # mainapp.top_frame_label = ttk.Label(mainapp.top_frame, text="Acquire Bar")
-        # mainapp.top_frame_label.grid(row=0,column=0)
 
         # Left Frame Notebook 1 setup
         mainapp.frame_left = ttk.Frame(mainapp)
-        # mainapp.left_frame_label = ttk.Label(mainapp.frame_left, text="Notebook #1")
-        # mainapp.left_frame_label.grid(row=0,column=0)
 
         # Top right Frame Notebook 2 setup
         mainapp.frame_top_right = ttk.Frame(mainapp)
-        # mainapp.top_right_frame_label = ttk.Label(mainapp.frame_top_right, text="Notebook #2")
-        # mainapp.top_right_frame_label.grid(row=0,column=0)
 
         # Bottom right Frame Notebook 3 setup
         mainapp.frame_bottom_right = ttk.Frame(mainapp)
-        # mainapp.bottom_right_frame_label = ttk.Label(mainapp.frame_bottom_right, text="Notebook #3")
-        # mainapp.bottom_right_frame_label.grid(row=0,column=0)
-
-        """
-                Placing the notebooks using tk.Grid. While the grid is called on each frame it is actually calling
-                the main window since those are the parent to the frames. The labels have already been packed into each respective
-                frame so can be ignored in the grid setup. This layout uses a 2x2 grid to start.
-
-                        1   2
-                        3   4
-                        5   6
-
-                The above is the grid "spots" the left frame will take spots 3 & 5 while top right takes
-                spot 4 and bottom right frame takes spot 6. Top frame will be spots 1 & 2
-                """
 
         # Gridding out foundational frames
-        mainapp.grid(column=0, row=0, sticky=(tk.NSEW))
-        # Sticky tells which walls of gridded cell the widget should stick to,
-        # in this case its sticking to the main window on all sides
-        mainapp.top_frame.grid(row=0, column=0, columnspan=2, sticky=(tk.NSEW), padx=3, pady=3)
-        mainapp.frame_left.grid(row=1, column=0, rowspan=2, sticky=(tk.NSEW), padx=3, pady=3)
-        mainapp.frame_top_right.grid(row=1, column=1, sticky=(tk.NSEW), padx=3, pady=3)
-        mainapp.frame_bottom_right.grid(row=2, column=1, sticky=(tk.NSEW), padx=3, pady=3)
+        mainapp.grid(column=0, row=0, sticky=tk.NSEW)
+        mainapp.top_frame.grid(row=0, column=0, columnspan=2, sticky=tk.NSEW, padx=3, pady=3)
+        mainapp.frame_left.grid(row=1, column=0, rowspan=2, sticky=tk.NSEW, padx=3, pady=3)
+        mainapp.frame_top_right.grid(row=1, column=1, sticky=tk.NSEW, padx=3, pady=3)
+        mainapp.frame_bottom_right.grid(row=2, column=1, sticky=tk.NSEW, padx=3, pady=3)
 
         # Putting Notebooks into frames, tabs are held within the class of each
         # notebook

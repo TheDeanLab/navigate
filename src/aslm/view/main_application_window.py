@@ -47,7 +47,9 @@ from pathlib import Path
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-# Import Notebooks
+# Third Party Imports
+
+# Local Imports
 from aslm.view.main_window_content.settings_notebook import settings_notebook
 from aslm.view.main_window_content.camera_display.camera_view.camera_notebook import camera_notebook
 from aslm.view.main_window_content.stage_control.stagecontrol_notebook import stagecontrol_notebook
@@ -55,10 +57,12 @@ from aslm.view.main_window_content.acquire_bar_frame.acquire_bar import AcquireB
 from aslm.view.menus.menus import menubar
 
 
-# Creates the frame that will hold the GUI content, its parent is the main
-# window or root Tk object
-class Main_App(ttk.Frame):
-    r"""
+# Logger Setup
+p = __name__.split(".")[1]
+
+class MainApp(ttk.Frame):
+    r"""Creates the frame that will hold the GUI content, its parent is the main window or root Tk object
+``
     Placing the notebooks using tk.Grid. While the grid is called on each frame it is actually calling
     the main window since those are the parent to the frames. The labels have already been packed into each respective
     frame so can be ignored in the grid setup. This layout uses a 2x2 grid to start.
@@ -71,68 +75,78 @@ class Main_App(ttk.Frame):
     spot 4 and bottom right frame takes spot 6. Top frame will be spots 1 & 2
     """
 
-    def __init__(mainapp, root, *args, **kwargs):
+    def __init__(self,
+                 root,
+                 *args,
+                 **kwargs):
+
         # Inits this class as a frame subclass with the root as its parent
-        ttk.Frame.__init__(mainapp, root, *args, **kwargs)
+        ttk.Frame.__init__(self,
+                           root,
+                           *args,
+                           **kwargs)
+
+        # Initialize Logger
+        self.logger = logging.getLogger(p)
 
         # This starts the main window config, and makes sure that any child
         # widgets can be resized with the window
-        mainapp.root = root
-        mainapp.root.title("Axially Swept Light-Sheet Microscope")
+        self.root = root
+        self.root.title("Axially Swept Light-Sheet Microscope")
 
         # keep icons relative to view directory structure
         view_directory = Path(__file__).resolve().parent
         photo_image = view_directory.joinpath("icon", "mic.png")
-        mainapp.root.iconphoto(True, tk.PhotoImage(file=photo_image))
-        mainapp.root.resizable(True, True)
-
-        # Adjust Canvas Width for Resolution
-        screen_width = int(root.winfo_screenwidth())
-        screen_height = int(root.winfo_screenheight())
-        dpi = mainapp.root.winfo_fpixels('1i')
-        real_width = int(screen_width * dpi / 96)
-        real_height = int(screen_height * dpi / 96)
-        factor = dpi / 72
-        mainapp.root.tk.call('tk', 'scaling', factor)
-        logger.info(f"Desired Screen Width, Height: {screen_width}, {screen_height}")
-        logger.info(f"Actual Screen Width, Height, and dpi: {real_width}, {real_height}, {dpi}")
-        logger.info(f"Scaling screen display by factor of {factor}")
-
-        mainapp.root.geometry(f"{screen_width}x{screen_height}")
+        self.root.iconphoto(True, tk.PhotoImage(file=photo_image))
+        self.root.resizable(True, True)
         tk.Grid.columnconfigure(root, 'all', weight=1)
         tk.Grid.rowconfigure(root, 'all', weight=1)
 
         # Creating and linking menu to main window/app
-        mainapp.menubar = menubar(root)
+        self.menubar = menubar(root)
 
         # Top Frame Acquire Bar
-        mainapp.top_frame = ttk.Frame(mainapp)
+        self.top_frame = ttk.Frame(self)
 
         # Left Frame Notebook 1 setup
-        mainapp.frame_left = ttk.Frame(mainapp)
+        self.frame_left = ttk.Frame(self)
 
         # Top right Frame Notebook 2 setup
-        mainapp.frame_top_right = ttk.Frame(mainapp)
+        self.frame_top_right = ttk.Frame(self)
 
         # Bottom right Frame Notebook 3 setup
-        mainapp.frame_bottom_right = ttk.Frame(mainapp)
+        self.frame_bottom_right = ttk.Frame(self)
 
         # Gridding out foundational frames
-        mainapp.grid(column=0, row=0, sticky=tk.NSEW)
-        mainapp.top_frame.grid(row=0, column=0, columnspan=2, sticky=tk.NSEW, padx=3, pady=3)
-        mainapp.frame_left.grid(row=1, column=0, rowspan=2, sticky=tk.NSEW, padx=3, pady=3)
-        mainapp.frame_top_right.grid(row=1, column=1, sticky=tk.NSEW, padx=3, pady=3)
-        mainapp.frame_bottom_right.grid(row=2, column=1, sticky=tk.NSEW, padx=3, pady=3)
+        self.grid(column=0, row=0, sticky=tk.NSEW)
+        self.top_frame.grid(row=0, column=0, columnspan=2, sticky=tk.NSEW, padx=3, pady=3)
+        self.frame_left.grid(row=1, column=0, rowspan=2, sticky=tk.NSEW, padx=3, pady=3)
+        self.frame_top_right.grid(row=1, column=1, sticky=tk.NSEW, padx=3, pady=3)
+        self.frame_bottom_right.grid(row=2, column=1, sticky=tk.NSEW, padx=3, pady=3)
 
         # Putting Notebooks into frames, tabs are held within the class of each
         # notebook
-        mainapp.settings = settings_notebook(mainapp.frame_left)
-        mainapp.camera_waveform = camera_notebook(mainapp.frame_top_right)
-        mainapp.stage_control = stagecontrol_notebook(mainapp.frame_bottom_right)
-        mainapp.acqbar = AcquireBar(mainapp.top_frame, mainapp.root)
-        logger.info("GUI setup working")
-        logger.info("Performance - GUI Started real quick")
-        logger.info("Spec - GUI is this size")
+        self.settings = settings_notebook(self.frame_left)
+        self.camera_waveform = camera_notebook(self.frame_top_right)
+        self.stage_control = stagecontrol_notebook(self.frame_bottom_right)
+        self.acqbar = AcquireBar(self.top_frame, self.root)
+        self.logger.info("GUI setup working")
+        self.logger.info("Performance - GUI Started real quick")
+        self.logger.info("Spec - GUI is this size")
+
+        # Adjust Canvas Width for Screen Resolution
+        dpi = self.root.winfo_fpixels('1i')
+        canvas_width, canvas_height = int(root.winfo_screenwidth()), int(root.winfo_screenheight())
+        screen_width, screen_height = int(canvas_width * (dpi / 96) - 1), int(canvas_height * dpi / 96)
+        print(f"Max Screen Width, Height: {screen_width}, {screen_height}")
+        print(f"Canvas Width, Height: {canvas_width}, {canvas_height}")
+
+        if canvas_width > screen_width or canvas_height > screen_height:
+            screen_scaling_factor = dpi / 72
+            print("Scaling GUI by :", screen_scaling_factor)
+
+        # self.root.geometry(f"{screen_width}x{screen_height}")
+        # self.root.tk.call('tk', 'scaling', screen_scaling_factor)
 
 
 if __name__ == '__main__':

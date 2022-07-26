@@ -27,9 +27,9 @@ def get_dummy_model():
     
     class dummy_model():
         def __init__(self):
-            self.configuration = session(config, False)
-            self.experiment = session(experiment, False)
-            self.etl_constants = session(etl_constants, False)
+            self.configuration = session(config)
+            self.experiment = session(experiment)
+            self.etl_constants = session(etl_constants)
             self.data_buffer = None
 
     # Instantiate fake model to return

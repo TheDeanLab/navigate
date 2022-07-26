@@ -16,7 +16,8 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 class ObisLaser(LaserBase):
-    def __init__(self, verbose, port='COM4'):
+    def __init__(self,
+                 port='COM4'):
         self.timeout = 0.05
         self.end_of_line = '\r'
 
@@ -30,8 +31,7 @@ class ObisLaser(LaserBase):
             self.laser.bytesize = 8
             self.laser.timeout = self.timeout
             self.laser.open()
-            if self.verbose:
-                print("Port opened")
+
 
         except serial.SerialException:
             raise OSError('Port "%s" is unavailable.\n' % port + \
@@ -45,8 +45,7 @@ class ObisLaser(LaserBase):
         try:
             # self.set_power(0)
             self.laser.close()
-            if self.verbose:
-                print("Port closed")
+
         except serial.SerialException:
             print('Could not close the port')
 
@@ -56,8 +55,7 @@ class ObisLaser(LaserBase):
         """
         try:
             self.laser.close()
-            if self.verbose:
-                print("Port Closed")
+
         except serial.SerialException:
             print('could not close the port')
 
@@ -67,8 +65,6 @@ class ObisLaser(LaserBase):
         """
         command = "?SYSTem:INFormation:MODel?"
         laser_model = self.ask(command)
-        if self.verbose:
-            print("Laser Model:", laser_model)
         self.laser_model = laser_model
         return laser_model
 
@@ -78,8 +74,6 @@ class ObisLaser(LaserBase):
         """
         command = "SYSTem:INFormation:WAVelength?"
         laser_wavelength = self.ask(command)
-        if self.verbose:
-            print("Laser Wavelength:", laser_wavelength)
         self.laser_wavelength = laser_wavelength
         return laser_wavelength
 
@@ -89,8 +83,6 @@ class ObisLaser(LaserBase):
         """
         command = "SOURce:POWer:LIMit:LOW?"
         minimum_laser_power = self.ask(command)
-        if self.verbose:
-            print("Minimum Laser Power:", minimum_laser_power)
         self.minimum_laser_power = minimum_laser_power
         return minimum_laser_power
 
@@ -100,8 +92,6 @@ class ObisLaser(LaserBase):
         """
         command = "SOURce:POWer:LIMit:HIGH?"
         maximum_laser_power = self.ask(command)
-        if self.verbose:
-            print("Maximum Laser Power:", maximum_laser_power)
         self.maximum_laser_power = maximum_laser_power
         return maximum_laser_power
 
@@ -111,8 +101,6 @@ class ObisLaser(LaserBase):
         """
         command = "SOURce:POWer:LEVel?"
         laser_power = self.ask(command)
-        if self.verbose:
-            print("Laser Power:", laser_power)
         self.laser_power = laser_power
         return laser_power
 
@@ -122,8 +110,6 @@ class ObisLaser(LaserBase):
         """
         command = "SYSTem:EXTernal:CONTRol?"
         ext_control = self.ask(command)
-        if self.verbose:
-            print("External Control:", ext_control)
         self.ext_control = ext_control
         return ext_control
 
@@ -133,8 +119,6 @@ class ObisLaser(LaserBase):
         """
         command = "SOURce:STATus?"
         laser_status = self.ask(command)
-        if self.verbose:
-            print("Laser Status:", laser_status)
         self.laser_status = laser_status
         return laser_status
 
@@ -170,8 +154,6 @@ class ObisLaser(LaserBase):
             return
 
         self.laser.write(command.encode())
-        if self.verbose:
-            print("Set Laser Operating Mode to:", self.laser_operating_mode)
 
     def get_laser_operating_mode(self):
         """
@@ -198,8 +180,6 @@ class ObisLaser(LaserBase):
         else:
             print("Invalid Laser Operating Mode")
             return
-        if self.verbose:
-            print("Laser Operating Mode:", laser_operating_mode)
         return laser_operating_mode
 
     def ask(self, command):
@@ -210,8 +190,6 @@ class ObisLaser(LaserBase):
             response += read_iteration.decode()
             sleep(self.timeout)
             read_iteration = self.laser.read()
-        if self.verbose:
-            print("Command:", command, "Response:", response)
         return response
 
     def initialize_laser(self):

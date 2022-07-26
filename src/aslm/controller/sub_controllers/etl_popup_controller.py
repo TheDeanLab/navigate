@@ -46,8 +46,13 @@ logger = logging.getLogger(p)
 
 # TODO: Should we rename to remote_focus_popup_controller?
 class Etl_Popup_Controller(GUI_Controller):
-    def __init__(self, view, parent_controller, remote_focus_dict, etl_file_name, configuration_dict, galvo_dict,
-                 verbose=False):
+    def __init__(self,
+                 view,
+                 parent_controller,
+                 remote_focus_dict,
+                 etl_file_name,
+                 configuration_dict,
+                 galvo_dict):
         """
         Controller for remote focus parameters.
 
@@ -65,14 +70,13 @@ class Etl_Popup_Controller(GUI_Controller):
             Dictionary containing microscope hardware configuration, such as voltage limits for remote focus hardware.
         galvo_dict : dict
             Dictionary containing galvo frequency, amplitude, offset. From the experiment dictionary.
-        verbose : bool, default False
-            Display additional feedback in standard output.
+
 
         Returns
         -------
         None
         """
-        super().__init__(view, parent_controller, verbose)
+        super().__init__(view, parent_controller)
 
         self.resolution_info = remote_focus_dict
         self.configuration = configuration_dict
@@ -271,8 +275,6 @@ class Etl_Popup_Controller(GUI_Controller):
             print("ETL Amplitude/Offset Changed: ", variable_value)
             if value != variable_value and variable_value != '' and (self.mode == 'live' or self.mode == 'stop'):
                 self.resolution_info.ETLConstants[self.resolution][self.mag][laser][etl_name] = variable_value
-                if self.verbose:
-                    print("ETL Amplitude/Offset Changed: ", variable_value)
                 logger.debug(f"ETL Amplitude/Offset Changed:, {variable_value}")
                 # tell parent controller (the device)
                 event_id_name = self.resolution + '_' + self.mag
@@ -307,8 +309,6 @@ class Etl_Popup_Controller(GUI_Controller):
             print(f"Galvo parameter {galvo_parameter} changed: {variable_value}")
             if value != variable_value and variable_value != '' and (self.mode == 'live' or self.mode == 'stop'):
                 self.galvo_setting[galvo_parameter] = variable.get()
-                if self.verbose:
-                    print(f"Galvo parameter {galvo_parameter} changed: {variable_value}")
                 logger.debug(f"Galvo parameter {galvo_parameter} changed: {variable_value}")
                 event_id_name = galvo_parameter
                 try:

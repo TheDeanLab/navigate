@@ -63,8 +63,8 @@ class DynamixelZoom(ZoomBase):
         Read the position of the DynamixelZoom servo.
 
     """
-    def __init__(self, configuration, verbose):
-        super().__init__(configuration, verbose)
+    def __init__(self, configuration):
+        super().__init__(configuration)
         self.dynamixel = dynamixel
         self.id = configuration.ZoomParameters['servo_id']
         self.comport = configuration.ZoomParameters['COMport']

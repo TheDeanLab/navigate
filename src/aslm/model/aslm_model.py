@@ -111,17 +111,14 @@ class Model:
         log_setup('model_logging.yml')
         self.logger = logging.getLogger(p)
 
-        # Specify verbosity
-        self.verbose = args.verbose
-
         # Loads the YAML file for all of the microscope parameters
-        self.configuration = session(configuration_path, args.verbose)
+        self.configuration = session(configuration_path)
 
         # Loads the YAML file for all of the experiment parameters
-        self.experiment = session(experiment_path, args.verbose)
+        self.experiment = session(experiment_path)
 
         # Loads the YAML file for all of the ETL constants
-        self.etl_constants = session(etl_constants_path, args.verbose)
+        self.etl_constants = session(etl_constants_path)
 
         # Initialize all Hardware
         if args.synthetic_hardware:
@@ -141,27 +138,27 @@ class Model:
         """
         threads_dict = {
             'filter_wheel': ResultThread(target=startup_functions.start_filter_wheel,
-                                         args=(self.configuration, self.verbose,)).start(),
+                                         args=(self.configuration,)).start(),
 
             'zoom': ResultThread(target=startup_functions.start_zoom_servo,
-                                 args=(self.configuration, self.verbose,)).start(),
+                                 args=(self.configuration,)).start(),
 
             'stages': ResultThread(target=startup_functions.start_stages,
-                                   args=(self.configuration, self.verbose,)).start(),
+                                   args=(self.configuration,)).start(),
 
             'shutter': ResultThread(target=startup_functions.start_shutters,
-                                    args=(self.configuration, self.experiment, self.verbose,)).start(),
+                                    args=(self.configuration, self.experiment,)).start(),
 
             'daq': ResultThread(target=startup_functions.start_daq,
-                                args=(self.configuration, self.experiment, self.etl_constants, self.verbose,)).start(),
+                                args=(self.configuration, self.experiment, self.etl_constants,)).start(),
 
             'laser_triggers': ResultThread(target=startup_functions.start_laser_triggers,
-                                           args=(self.configuration, self.experiment, self.verbose,)).start(),
+                                           args=(self.configuration, self.experiment,)).start(),
         }
 
         if not args.synthetic_hardware:
             threads_dict['stages_r'] = ResultThread(target=startup_functions.start_stages_r,
-                                                    args=(self.configuration, self.verbose,)).start()
+                                                    args=(self.configuration,)).start()
 
         # Optionally start up multiple cameras
         # TODO: In the event two cameras are on, but we've only requested one, make sure it's the one with the
@@ -170,7 +167,6 @@ class Model:
             threads_dict[f'camera{i}'] = ResultThread(target=startup_functions.start_camera,
                                                       args=(self.configuration,
                                                             self.experiment,
-                                                            self.verbose,
                                                             i)).start()
             time.sleep(1.0)
 
@@ -188,8 +184,7 @@ class Model:
         # analysis class
         self.analysis = startup_functions.start_analysis(self.configuration,
                                                          self.experiment,
-                                                         USE_GPU,
-                                                         self.verbose)
+                                                         USE_GPU)
 
         # Acquisition Housekeeping
         self.imaging_mode = None
@@ -251,7 +246,7 @@ class Model:
         self.update_data_buffer(self.img_width, self.img_height)
 
         # debug
-        self.debug = Debug_Module(self, self.verbose)
+        self.debug = Debug_Module(self)
 
         # Image Writer/Save functionality
         self.image_writer = ImageWriter(self)

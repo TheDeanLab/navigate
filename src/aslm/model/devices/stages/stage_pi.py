@@ -51,8 +51,8 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 class PIStage(StageBase):
-    def __init__(self, configuration, verbose):
-        super().__init__(configuration, verbose)
+    def __init__(self, configuration):
+        super().__init__(configuration)
 
         pi_stages = self.configuration.StageParameters['stages']
         pi_refmodes = self.configuration.StageParameters['refmode']
@@ -79,8 +79,6 @@ class PIStage(StageBase):
             """
             self.stop()
             self.pidevice.unload()
-            if self.verbose:
-                print('PI connection closed')
             logger.debug("PI connection closed")
         except GCSError as e:  # except BaseException:
             # logger.exception("Error while disconnecting the PI stage")

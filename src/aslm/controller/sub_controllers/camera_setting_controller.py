@@ -43,9 +43,8 @@ class Camera_Setting_Controller(GUI_Controller):
             self,
             view,
             parent_controller=None,
-            verbose=False,
             configuration_controller=None):
-        super().__init__(view, parent_controller, verbose)
+        super().__init__(view, parent_controller)
 
         # default values
         self.in_initialization = True

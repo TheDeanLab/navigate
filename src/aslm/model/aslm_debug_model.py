@@ -116,10 +116,9 @@ def normalized_dct_shannon_entropy(input_array, psf_support_diameter_xy, verbose
     return entropy
 
 class Debug_Module:
-    def __init__(self, model, verbose=False):
+    def __init__(self, model):
 
         self.model = model
-        self.verbose = verbose
         self.analysis_type = 'normal'
 
     def debug(self, command, *args, **kwargs):
@@ -170,9 +169,9 @@ class Debug_Module:
         if self.analysis_type == 'subprocess':
             self.model.analysis.terminate()
         if analysis_type == 'normal':
-            self.model.analysis = start_analysis(self.model.configuration, self.model.experiment, self.verbose)
+            self.model.analysis = start_analysis(self.model.configuration, self.model.experiment)
         elif analysis_type == 'subprocess':
-            self.model.analysis = ObjectInSubprocess(CPUAnalysis, verbose=self.verbose)
+            self.model.analysis = ObjectInSubprocess(CPUAnalysis)
         else:
             self.start_autofocus(*args, **kwargs)
         if analysis_type != 'pool':

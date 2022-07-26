@@ -58,8 +58,8 @@ class SyntheticZoom(ZoomBase):
         Read the position of the DynamixelZoom servo.
     """
 
-    def __init__(self, configuration, verbose):
-        super().__init__(configuration, verbose)
+    def __init__(self, configuration):
+        super().__init__(configuration)
         logger.debug("SyntheticZoom Servo Initialized")
 
     def __del__(self):

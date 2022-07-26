@@ -56,21 +56,16 @@ class Channels_Tab_Controller(GUI_Controller):
     def __init__(self,
                  view,
                  parent_controller=None,
-                 verbose=False,
                  configuration_controller=None):
-        super().__init__(view, parent_controller, verbose)
+        super().__init__(view, parent_controller)
 
         self.is_save = False
         self.mode = 'stop'
         self.in_initialization = True
 
         # sub-controllers
-        self.channel_setting_controller = Channel_Setting_Controller(self.view.channel_widgets_frame,
-                                                                     self,
-                                                                     self.verbose)
-        self.multi_position_controller = Multi_Position_Controller(self.view.multipoint_list,
-                                                                   self,
-                                                                   self.verbose)
+        self.channel_setting_controller = Channel_Setting_Controller(self.view.channel_widgets_frame, self)
+        self.multi_position_controller = Multi_Position_Controller(self.view.multipoint_list, self)
 
         # add validation functions to spinbox
         # this function validate user's input (not from experiment file)
@@ -566,11 +561,7 @@ class Channels_Tab_Controller(GUI_Controller):
             self.tiling_wizard_controller.showup()
             return
         tiling_wizard_popup = tiling_wizard(self.view)
-        self.tiling_wizard_controller = Tiling_Wizard_Controller(tiling_wizard_popup,
-                                                                 self,
-                                                                 self.verbose)
-
-
+        self.tiling_wizard_controller = Tiling_Wizard_Controller(tiling_wizard_popup, self)
 
 
     def load_positions(self):

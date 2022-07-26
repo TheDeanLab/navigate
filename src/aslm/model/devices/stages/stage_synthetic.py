@@ -51,8 +51,8 @@ logger = logging.getLogger(p)
 
 
 class SyntheticStage(StageBase):
-    def __init__(self, configuration, verbose):
-        super().__init__(configuration, verbose)
+    def __init__(self, configuration):
+        super().__init__(configuration)
 
     def report_position(self):
         self.update_position_dictionaries()

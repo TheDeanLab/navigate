@@ -13,7 +13,7 @@ logger = logging.getLogger(p)
 
 
 class LuxxLaser(LaserBase):
-    def __init__(self, comport, verbose):
+    def __init__(self, comport):
         """
         # Luxx Laser Class
         # LUXX488, 200 mW, is COM19
@@ -30,8 +30,7 @@ class LuxxLaser(LaserBase):
         try:
             # Open serial port
             self.laser = serial.Serial(self.comport, self.baudrate, timeout=self.timeout)
-            if self.verbose:
-                print("The laser is connected via %s" % self.comport)
+
 
             # Confirm the Laser Wavelength
             # Must remove non-standard ASCII codes that cause errors in the utf-8 codec
@@ -40,28 +39,21 @@ class LuxxLaser(LaserBase):
             wavelength = wavelength.replace(b"\xa7140", str(" ").encode())
             wavelength = float(wavelength.decode())
             self.wavelength = wavelength
-            if self.verbose:
-                print("The Wavelength is:", wavelength)
 
             # Confirm the Laser Serial Number
             serial_number = self.ask("GSN")
             serial_number = serial_number.decode()
             self.serial = serial_number
-            if self.verbose:
-                print("The laser Serial Number is: ", serial_number)
+
 
             # Confirm the Laser Working Hours
             laser_working_hours = self.ask("GWH")
             laser_working_hours = laser_working_hours.decode()
             self.hours = laser_working_hours
-            if self.verbose:
-                print("Laser working hours: ", laser_working_hours)
 
             # Confirm the Laser Maximum Power
             power_max = float(self.ask("GMP"))
             self.pmax = power_max
-            if self.verbose:
-                print("Laser maximum power: ", power_max)
 
         except serial.SerialException:
             raise OSError('Port "%s" is unavailable.\n' % port +
@@ -79,8 +71,6 @@ class LuxxLaser(LaserBase):
             # Close the port
             self.laser.close()
 
-            if self.verbose:
-                print("Port closed")
         except serial.SerialException:
             print('Could not close the port')
 
@@ -90,8 +80,7 @@ class LuxxLaser(LaserBase):
         """
         try:
             self.laser.close()
-            if self.verbose:
-                print("Port Closed")
+
         except serial.SerialException:
             print('could not close the port')
 
@@ -125,9 +114,6 @@ class LuxxLaser(LaserBase):
         else:
             search_string = "!%s(.+)\n" % command[:3]
             search_string = search_string.encode()
-            if self.verbose:
-                print("The search string is:", search_string)
-                print("The response string is:", response)
 
             if len(response) > 0:
                 response = re.findall(search_string, response)[-1]
@@ -295,8 +281,6 @@ class LuxxLaser(LaserBase):
         self.set_power(self.pmax)
         self.set_mode("CW-APC")
         self.start()
-        if self.verbose:
-            print((self.wavelength, "nm Laser Initialized - Max Power: ", self.pmax, "mW"))
 
 
 def stopwatch(func, *func_args, **func_kwargs):

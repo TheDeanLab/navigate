@@ -54,15 +54,12 @@ class DAQBase:
         Experiment configuration of the microscope
     etl_constants : dict
         Dictionary with all of the wavelength, magnification, and imaging mode-specific amplitudes/offsets
-    verbose : bool
-        Verbosity
     """
 
-    def __init__(self, configuration, experiment, etl_constants, verbose=False):
+    def __init__(self, configuration, experiment, etl_constants):
         self.configuration = configuration
         self.experiment = experiment
         self.etl_constants = etl_constants
-        self.verbose = verbose
 
         # Initialize Variables
         self.sample_rate = self.configuration.DAQParameters['sample_rate']

@@ -61,8 +61,7 @@ class Session:
     """
 
     def __init__(self,
-                 file_path=None,
-                 verbose=False):
+                 file_path=None):
         """The class is prepared to load values from a Yaml file
         :param file: Path to the file where the config file is or a dictionary with the data to load.
         :arg args: Arguments passed to the program from the command line.
@@ -92,13 +91,11 @@ class Session:
         # Set the attributes with the custom __setattr__
         for data_iterator in config_data:
             self.__setattr__(data_iterator,
-                             config_data[data_iterator],
-                             verbose)
+                             config_data[data_iterator])
 
     def __setattr__(self,
                     key,
-                    value,
-                    verbose=False):
+                    value):
         """Custom setter for Configuration and Experiment attributes.
 
         Parameters
@@ -107,8 +104,6 @@ class Session:
             name of the attribute, e.g. 'Devices'
         value : dict
             Dictioanry of attribute values, e.g., {'daq': 'NI', 'camera': 'HamamatsuOrca', 'etl': 'ETL', ...
-        verbose : bool
-            Verbosity
         """
         # # Confirm that the value is a dictionary
         if not isinstance(value, dict):

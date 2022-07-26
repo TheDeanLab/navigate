@@ -54,14 +54,10 @@ class Analysis:
     ----------
     use_gpu : bool
         Flag for leveraging CUDA analysis routines.
-    verbose : bool
-        Verbosity.
 
     """
     def __init__(self,
-                 use_gpu=False,
-                 verbose=False):
-        self.verbose = verbose
+                 use_gpu=False):
         self.use_gpu = use_gpu
 
         if use_gpu:
@@ -182,7 +178,7 @@ if (__name__ == '__main__'):
     from tifffile import imread
     import matplotlib.pyplot as plt
 
-    analysis = Analysis(use_gpu=False, verbose=False)
+    analysis = Analysis(use_gpu=False)
     image_path = r'F:\Dean\flatfield_test.tif'
     raw_image = np.array(imread(image_path))
     # resolution = analysis.estimate_image_resolution(raw_image,

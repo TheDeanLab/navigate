@@ -49,9 +49,8 @@ class Acquire_Bar_Controller(GUI_Controller):
     def __init__(self,
                  view,
                  parent_view,
-                 parent_controller,
-                 verbose=False):
-        super().__init__(view, parent_controller, verbose)
+                 parent_controller):
+        super().__init__(view, parent_controller)
 
         self.parent_view = parent_view
 
@@ -244,7 +243,7 @@ class Acquire_Bar_Controller(GUI_Controller):
             widgets = acquire_pop.get_widgets()
 
             # Configure the button callbacks on the popup window
-            buttons['Cancel'].config(command=lambda: acquire_pop.popup.dismiss(self.verbose))
+            buttons['Cancel'].config(command=lambda: acquire_pop.popup.dismiss())
             buttons['Done'].config(command=lambda: self.launch_acquisition(acquire_pop))
 
             # Configure drop down callbacks, will update save settings when file type is changed
@@ -307,7 +306,7 @@ class Acquire_Bar_Controller(GUI_Controller):
                 'acquire_and_save', self.saving_settings)
 
             # Close the window
-            popup_window.popup.dismiss(self.verbose)
+            popup_window.popup.dismiss()
 
             # We are now acquiring
             self.view.acquire_btn.configure(text='Stop')

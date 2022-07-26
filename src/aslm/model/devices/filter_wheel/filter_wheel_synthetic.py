@@ -61,15 +61,13 @@ class SyntheticFilterWheel(FilterWheelBase):
         Number of installed filter wheels.
     wheel_position : int
         Default filter wheel position
-    verbose : bool
-        Verbosity
     wait_until_done_delay = float
         Duration of time to wait for a filter wheel change.
     wait_until_done = bool
         Flag for enabling the wait period for a filter wheel change.
     """
-    def __init__(self, model, verbose):
-        super().__init__(model, verbose)
+    def __init__(self, model):
+        super().__init__(model)
 
     def filter_change_delay(self, filter_name):
         r"""Calculate duration of time necessary to change filter wheel positions

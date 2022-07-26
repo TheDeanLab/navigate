@@ -53,8 +53,6 @@ class StageBase:
     ----------
     configuration : Session
         Global configuration of the microscope
-    verbose : bool
-        Verbosity
     x_pos : float
         True x position
     y_pos : float
@@ -125,8 +123,7 @@ class StageBase:
     create_internal_position_dict()
         Creates a dictionary with the software stage positions.
     """
-    def __init__(self, configuration, verbose, axes=['x', 'y', 'z', 'f', 'theta']):
-        self.verbose = verbose
+    def __init__(self, configuration, axes=['x', 'y', 'z', 'f', 'theta']):
         self.configuration = configuration
         self.position_dict = None
         self.int_position_dict = None

@@ -168,11 +168,24 @@ class ObisLaser(LaserBase):
         self.laser.readline()
         print(self.laser.readline())
 
+        self.laser.write("SOURce:AM:STATe OFF" + b"\r\n")
+        self.laser.readline()
+        print(self.laser.readline())
+        self.laser.readline()
+        print(self.laser.readline())
+
         self.laser.write("SOURce:AM:STATe?" + b"\r\n")
         print(self.laser.readline())
         self.laser.readline()
         print(self.laser.readline())
         self.laser.readline()
+
+        self.laser.write("SOURce:AM:STATe OFF" + b"\r\n")
+        print(self.laser.readline())
+        self.laser.readline()
+        print(self.laser.readline())
+        self.laser.readline()
+
 
     
     """

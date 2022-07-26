@@ -158,7 +158,7 @@ def start_stages(configuration):
     if configuration.Devices['stage'] == 'PI' and platform.system() == 'Windows':
         from aslm.model.devices.stages.stage_pi import PIStage
         from pipython.pidevice.gcserror import GCSError
-        return auto_redial(PIStage, (configuration), exception=GCSError)
+        return auto_redial(PIStage, (configuration,), exception=GCSError)
     elif configuration.Devices['stage'] == 'SyntheticStage':
         from aslm.model.devices.stages.stage_synthetic import SyntheticStage
         return SyntheticStage(configuration)
@@ -182,7 +182,7 @@ def start_stages_r(configuration):
     if configuration.Devices['stage_r'] == 'Thorlabs' and platform.system() == 'Windows':
         from aslm.model.devices.stages.stage_tl_kcube_inertial import TLKIMStage
         from aslm.model.devices.APIs.thorlabs.kcube_inertial import TLFTDICommunicationError
-        return auto_redial(TLKIMStage, (configuration), exception=TLFTDICommunicationError)
+        return auto_redial(TLKIMStage, (configuration,), exception=TLFTDICommunicationError)
     else:
         device_not_found(configuration.Devices['stage_r'])
 
@@ -203,7 +203,7 @@ def start_zoom_servo(configuration):
 
     if configuration.Devices['zoom'] == 'DynamixelZoom':
         from aslm.model.devices.zoom.zoom_dynamixel import DynamixelZoom
-        return auto_redial(DynamixelZoom, (configuration), exception=RuntimeError)
+        return auto_redial(DynamixelZoom, (configuration,), exception=RuntimeError)
     elif configuration.Devices['zoom'] == 'SyntheticZoom':
         from aslm.model.devices.zoom.zoom_synthetic import SyntheticZoom
         return SyntheticZoom(configuration)
@@ -227,7 +227,7 @@ def start_filter_wheel(configuration):
 
     if configuration.Devices['filter_wheel'] == 'SutterFilterWheel':
         from aslm.model.devices.filter_wheel.filter_wheel_sutter import SutterFilterWheel
-        return auto_redial(SutterFilterWheel, (configuration), exception=UserWarning)
+        return auto_redial(SutterFilterWheel, (configuration,), exception=UserWarning)
     elif configuration.Devices['filter_wheel'] == 'SyntheticFilterWheel':
         from aslm.model.devices.filter_wheel.filter_wheel_synthetic import SyntheticFilterWheel
         return SyntheticFilterWheel(configuration)

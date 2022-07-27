@@ -45,10 +45,12 @@ import logging
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-
 class stage_control_tab(ttk.Frame):
+    """
+    Stage GUI Control Tab resized and reformatted to fit onto a smaller windowsize. All widgets and variables linked to main stage GUI control
+    """
     def __init__(self, note3, *args, **kwargs):
-        # Init Frame
+        #Init Frame
         ttk.Frame.__init__(self, note3, *args, **kwargs)
         
         # Formatting
@@ -56,44 +58,46 @@ class stage_control_tab(ttk.Frame):
         tk.Grid.rowconfigure(self, 'all', weight=1)
         
 
-        # Building out stage control elements, frame by frame
+        #Building out stage control elements, frame by frame
 
-        # Position Frame
+        #Position Frame
         self.position_frame = position_frame(self)
-
-        # XY Frame
+        
+        #XY Frame
         self.xy_frame = x_y_frame(self)
 
-         #Z Frame
+        #Z Frame
         self.z_frame = other_axis_frame(self, 'Z')
 
-        # Theta Frame
+        #Theta Frame
         self.theta_frame = other_axis_frame(self, 'Theta')
 
-        # Focus Frame
+        #Focus Frame
         self.f_frame = other_axis_frame(self, 'Focus')
 
-        # GoTo Frame
+        #GoTo Frame
         self.goto_frame = goto_frame(self)
         self.goto_frame_label = ttk.Label(self.goto_frame, text="Goto Frame")
-        self.goto_frame_label.pack()  # For visual mockup purposes
-
+        self.goto_frame_label.pack() #For visual mockup purposes
+        
         # stop frame
         self.stop_frame = stop_frame(self, 'Stop')
 
 
-        """
+        '''
         Grid for frames
-                1   2   3   4   5
-                6   7   8   9   10 
-
-        Position frame is 1-5
-        xy is 6
-        z is 7
+                1   2   
+                3   4   
+                5   6   
+                7   8   
+                9   10 
+        Position frame is 1, 3, 5 , 7, 9
+        x is 2
+        y is 4
+        z is 6
         theta is 8
-        focus is 9
-        goto is 10
-        """
+        focus is 10
+        '''
 
         # Formatting
         tk.Grid.columnconfigure(self.position_frame, 'all', weight=1)
@@ -106,25 +110,26 @@ class stage_control_tab(ttk.Frame):
         tk.Grid.rowconfigure(self.theta_frame, 'all', weight=1)
         tk.Grid.columnconfigure(self.f_frame, 'all', weight=1)
         tk.Grid.rowconfigure(self.f_frame, 'all', weight=1)
-        tk.Grid.columnconfigure(self.goto_frame, 'all', weight=1)
-        tk.Grid.rowconfigure(self.goto_frame, 'all', weight=1)
         tk.Grid.columnconfigure(self.stop_frame, 'all', weight=1)
         tk.Grid.rowconfigure(self.stop_frame, 'all', weight=1)
+        tk.Grid.columnconfigure(self.goto_frame, 'all', weight=1)
+        tk.Grid.rowconfigure(self.goto_frame, 'all', weight=1)
         
-        # Gridding out frames
-        factor = 6
-        self.position_frame.grid(row=0, column=0, columnspan=5, sticky=(tk.NSEW), pady=(2,0))
-        self.xy_frame.grid(row=1, column=0, sticky=(tk.NSEW), padx=10, pady=10*factor)
-        self.z_frame.grid(row=1, column=1, sticky=(tk.NSEW), padx=10, pady=10*factor)
-        self.theta_frame.grid(row=1, column=2, sticky=(tk.NSEW), padx=10, pady=10*factor)
-        self.f_frame.grid(row=1, column=3, sticky=(tk.NSEW), padx=10, pady=10*factor)
-        # self.goto_frame.grid(row=0, column=4, sticky=(tk.NSEW), padx=10, pady=10*factor)
-        self.stop_frame.grid(row=1, column=4, sticky=(tk.NSEW), padx=10, pady=10 * factor)
-
+        #Gridding out frames
+        self.position_frame.grid(row=0, column=0, rowspan=5, sticky=(tk.NSEW), pady=2)
+        self.xy_frame.grid(row=0, column=1, sticky=(tk.NSEW), padx=5)
+        self.z_frame.grid(row=2, column=1, sticky=(tk.NSEW), padx=5)
+        self.theta_frame.grid(row=3, column=1, sticky=(tk.NSEW), padx=5)
+        self.f_frame.grid(row=4, column=1, sticky=(tk.NSEW), padx=5)
+        self.stop_frame.grid(row=0, column=2, sticky=(tk.NSEW), padx=5, pady=5)
+        
     def get_widgets(self):
-        """
-        # this function will return all the input widgets as a dictionary
-        # the reference name in the dictionary is the same as in the widget list file
+        """ Return all the input widgets as a dictionary
+        
+        Returns
+        -------
+        temp : dictionary
+            Dictionary of each widget with reference value same as in the widget list
         """
         temp = {
             **self.position_frame.get_widgets()
@@ -138,9 +143,12 @@ class stage_control_tab(ttk.Frame):
         return {k: temp[k].get_variable() for k in temp}
 
     def get_buttons(self):
-        """
-        # this function returns all the buttons in a dictionary
-        # the reference name is the same as in widget list
+        """ Return all the buttons as a dictionary
+        
+        Returns
+        -------
+        result : dictionary
+            Dictionary of each button with reference value same as in the button list
         """
         result = {
             **self.xy_frame.get_buttons()

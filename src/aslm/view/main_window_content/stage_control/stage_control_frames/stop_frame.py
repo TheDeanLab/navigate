@@ -42,7 +42,6 @@ import logging
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-
 class stop_frame(ttk.Frame):
     def __init__(self, stage_control_tab, name, *args, **kwargs):
         # Init Frame
@@ -59,8 +58,7 @@ class stop_frame(ttk.Frame):
             bg='red',
             fg='white',
             text="STOP",
-            width=20,
-            height=10
+            width=10
         )
 
         # Gridding out buttons

@@ -45,9 +45,9 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 class other_axis_frame(ttk.Frame):
-    def __init__(other_axis_frame, stage_control_tab, name, *args, **kwargs):
+    def __init__(other_axis_frame, minimized_control, name, *args, **kwargs):
         #Init Frame
-        ttk.Frame.__init__(other_axis_frame, stage_control_tab, *args, **kwargs)
+        ttk.Frame.__init__(other_axis_frame, minimized_control, *args, **kwargs)
         other_axis_frame.name = name
         
         # Formatting
@@ -59,15 +59,13 @@ class other_axis_frame(ttk.Frame):
         #Up button
         other_axis_frame.up_btn = ttk.Button(
             other_axis_frame,
-            style='arrow.TButton',
-            text="\N{UPWARDS BLACK ARROW}",
+            text="+",
         )
 
         #Down button
         other_axis_frame.down_btn = ttk.Button(
             other_axis_frame,
-            style='arrow.TButton',
-            text="\N{DOWNWARDS BLACK ARROW}",
+            text="-",
         )
 
         #Zero button
@@ -77,7 +75,6 @@ class other_axis_frame(ttk.Frame):
         )
 
         #Increment spinbox
-
         other_axis_frame.increment_box = LabelInput(
             parent=other_axis_frame,
             input_class=ValidatedSpinbox,
@@ -85,17 +82,14 @@ class other_axis_frame(ttk.Frame):
             input_args={'width': 25}
         )
 
-
         """
         Grid for buttons
-
                 1
                 2
                 3
                 4
                 5
                 6
-
         Up is 1,2
         Down is 5,6
         Increment is 3
@@ -104,12 +98,12 @@ class other_axis_frame(ttk.Frame):
 
 
         #Gridding out buttons
-        other_axis_frame.up_btn.grid(row=0, column=0, rowspan=2, pady=2) #UP
-        other_axis_frame.down_btn.grid(row=4, column=0, rowspan=2, pady=2) #DOWN
-        other_axis_frame.zero_btn.grid(row=2, column=0, pady=(5,2), sticky=(NSEW)) #Zero Z
-        other_axis_frame.increment_box.grid(row=3, column=0, pady=2, sticky=(NSEW)) #Increment spinbox
+        other_axis_frame.down_btn.grid(row=0, column=0, padx=5, sticky=(N)) #DOWN
+        other_axis_frame.increment_box.grid(row=0, column=1, padx=5, sticky=(N)) #Increment spinbox
+        other_axis_frame.up_btn.grid(row=0, column=2, padx=5, sticky=(N)) #UP
+        other_axis_frame.zero_btn.grid(row=0, column=3, padx=5, sticky=(N)) #Zero Z
         other_axis_frame.increment_box.widget.set_precision(-1)
-
+        
 
     def get_widget(other_axis_frame):
         return other_axis_frame.increment_box

@@ -44,12 +44,11 @@ import logging
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-
 class position_frame(ttk.Frame):
-    def __init__(position_frame, stage_control_tab, *args, **kwargs):
+    def __init__(position_frame, minimized_control, *args, **kwargs):
 
         #Init Frame
-        ttk.Frame.__init__(position_frame, stage_control_tab, *args, **kwargs)
+        ttk.Frame.__init__(position_frame, minimized_control, *args, **kwargs)
         
         # Formatting
         tk.Grid.columnconfigure(position_frame, 'all', weight=1)
@@ -68,7 +67,7 @@ class position_frame(ttk.Frame):
                                                             input_var=tk.DoubleVar(),
                                                             input_args={'required': True, 'precision': 0.1}
                                                             )
-            position_frame.inputs[entry_names[i]].grid(row=0, column=i, pady=1, padx=15)
+            position_frame.inputs[entry_names[i]].grid(row=i, column=0, pady=1, padx=15)
 
 
 
@@ -76,9 +75,11 @@ class position_frame(ttk.Frame):
 
         """
         Grid for frames
-
-                1   2   3   4   5
-
+            1
+            2
+            3
+            4
+            5
         x is 1
         y is 2
         z is 3

@@ -85,7 +85,7 @@ class Acquire_PopUp():
                                             input_class=ValidatedCombobox,
                                             input_var=tk.StringVar()
                                             )
-                self.inputs[entry_names[i]].set_values(('Zarr', 'TIFF', 'OME-TIFF'))
+                self.inputs[entry_names[i]].set_values(('Zarr', 'TIFF'))
                 self.inputs[entry_names[i]].set('TIFF')
 
             else:

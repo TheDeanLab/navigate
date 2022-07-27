@@ -69,7 +69,7 @@ class TestSyntheticHardware():
         self.experiment = self.dummy_model.experiment
         self.etl_const = self.dummy_model.etl_constants
 
-        sf = SyntheticFilterWheel(self.config, False)
+        sf = SyntheticFilterWheel(self.config)
 
         return True
 
@@ -81,7 +81,7 @@ class TestSyntheticHardware():
         self.etl_const = self.dummy_model.etl_constants
 
 
-        ss = SyntheticStage(self.config, False)
+        ss = SyntheticStage(self.config)
 
     def test_synthetic_zoom(self):
         from aslm.model.devices.zoom.zoom_synthetic import SyntheticZoom
@@ -91,7 +91,7 @@ class TestSyntheticHardware():
         self.etl_const = self.dummy_model.etl_constants
 
 
-        sz = SyntheticZoom(self.config, False)
+        sz = SyntheticZoom(self.config)
 
         return True
 

@@ -54,8 +54,7 @@ class TestSyntheticShutter(unittest.TestCase):
         configuration = session(file_path=configuration_path)
         experiment = session(file_path=experiment_path)
         shutter = SyntheticShutter(configuration,
-                              experiment,
-                              False)
+                              experiment)
 
         # Attributes
         assert hasattr(shutter, 'configuration')

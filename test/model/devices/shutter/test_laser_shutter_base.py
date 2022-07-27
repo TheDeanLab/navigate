@@ -48,8 +48,7 @@ class TestLaserBase(unittest.TestCase):
         experiment = session(file_path=experiment_path)
 
         shutter = ShutterBase(configuration,
-                              experiment,
-                              False)
+                              experiment)
 
         assert hasattr(shutter, 'configuration')
         assert hasattr(shutter, 'experiment')

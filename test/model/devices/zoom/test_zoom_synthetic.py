@@ -49,8 +49,8 @@ class TestZoomSynthetic(unittest.TestCase):
         configuration_directory = Path.joinpath(base_directory, 'src', 'aslm', 'config')
         configuration_path = Path.joinpath(configuration_directory, 'configuration.yml')
 
-        configuration = session(configuration_path, False)
-        zoom_class = SyntheticZoom(configuration, False)
+        configuration = session(configuration_path)
+        zoom_class = SyntheticZoom(configuration)
 
         assert hasattr(zoom_class, 'configuration')
         assert hasattr(zoom_class, 'zoomdict')

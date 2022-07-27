@@ -50,8 +50,8 @@ class TestZoomBase(unittest.TestCase):
         configuration_path = Path.joinpath(configuration_directory, 'configuration.yml')
 
         # Instantiate the stage_base class
-        configuration = session(configuration_path, False)
-        stage_base = StageBase(configuration, False)
+        configuration = session(configuration_path)
+        stage_base = StageBase(configuration)
 
         assert hasattr(stage_base, 'configuration')
         assert hasattr(stage_base, 'x_pos')

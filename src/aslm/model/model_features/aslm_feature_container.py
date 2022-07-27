@@ -47,15 +47,10 @@ class TreeNode:
                 setattr(self, key, kwargs[key])
 
 class SignalNode(TreeNode):
-    def __init__(self, feature_name, func_dict, *, node_type='one-step', device_related=False, need_response=False):
+    def __init__(self, feature_name, func_dict, *, node_type='one-step', device_related=False, need_response=False, **kwargs):
         super().__init__(feature_name, func_dict, node_type=node_type, device_related=device_related, need_response=need_response)
         self.has_response_func = func_dict.get('main-response') != None
         self.wait_response = False
-
-        # if node type is multi-step, the node should have one response function
-        if self.node_type == 'multi-step' and self.has_response_func == False and self.device_related == False:
-            self.node_funcs['main-response'] = dummy_True
-            self.has_response_func = True
 
     def run(self, *args, wait_response=False):
         # initialize the node when first time entering it
@@ -87,7 +82,7 @@ class SignalNode(TreeNode):
         return result, True
 
 class DataNode(TreeNode):
-    def __init__(self, feature_name, func_dict, *, node_type='one-step', device_related=False, need_response=False):
+    def __init__(self, feature_name, func_dict, *, node_type='one-step', device_related=False, need_response=False, **kwargs):
         super().__init__(feature_name, func_dict, node_type=node_type, device_related=device_related, need_response=need_response)
 
     def run(self, *args):
@@ -219,18 +214,21 @@ def load_features(model, feature_list):
             if 'args' in temp[i]:
                 args = temp[i]['args']
             feature = temp[i]['name'](model, *args)
-            signal_node = SignalNode(temp[i]['name'].__name__, get_registered_funcs(feature, 'signal'))
-            data_node = DataNode(temp[i]['name'].__name__, get_registered_funcs(feature, 'data'))
+
+            node_config = feature.config_table.get('node', {})
             # if signal function has a waiting func, then the nodes are 'need_response' nodes
             if 'main-response' in feature.config_table.get('signal', {}):
-                signal_node.need_response = True
-                data_node.need_response = True
-            if 'node' in feature.config_table:
-                signal_node.set_property(**feature.config_table['node'])
-                data_node.set_property(**feature.config_table['node'])
+                node_config['need_response'] = True
             if 'node' in temp[i]:
-                signal_node.set_property(**temp[i]['node'])
-                data_node.set_property(**temp[i]['node'])
+                for k, v in temp[i]['node'].items():
+                    node_config[k] = v
+            # 'multi-step' must also be 'device_related'
+            if node_config.get('node_type', '') == 'multi-step':
+                node_config['device_related'] = True
+
+            signal_node = SignalNode(temp[i]['name'].__name__, get_registered_funcs(feature, 'signal'), **node_config)
+            data_node = DataNode(temp[i]['name'].__name__, get_registered_funcs(feature, 'data'), **node_config)
+            
             if i == 0:
                 pre_signal.child = signal_node
                 pre_data.child = data_node

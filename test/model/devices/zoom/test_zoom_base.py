@@ -50,7 +50,7 @@ class TestZoomBase(unittest.TestCase):
         configuration_path = Path.joinpath(configuration_directory, 'configuration.yml')
 
         configuration = session(configuration_path)
-        zoom_class = ZoomBase(configurationf)
+        zoom_class = ZoomBase(configuration)
 
         assert hasattr(zoom_class, 'configuration')
         assert hasattr(zoom_class, 'zoomdict')

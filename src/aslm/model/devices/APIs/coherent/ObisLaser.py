@@ -147,46 +147,44 @@ class ObisLaser(LaserBase):
             print(self.laser.readline().strip()) 
         return response
 
-
-
     def testing_handshake(self):
-        self.laser.write("SOURce:AM:STATe?" + b"\r\n")
+        self.laser.write(("SOURce:AM:STATe?" + self.end_of_line).encode('ascii'))
         print(self.laser.readline())
         print(self.laser.readline())
         print(self.laser.readline())
         print(self.laser.readline())
 
-        self.laser.write("SOURce:AM:STATe OFF" + b"\r\n")
+        self.laser.write(("SOURce:AM:STATe OFF" + self.end_of_line).encode())
         print(self.laser.readline())
         print(self.laser.readline())
         print(self.laser.readline())
         print(self.laser.readline())
 
-        self.laser.write("SOURce:AM:STATe?" + b"\r\n")
+        self.laser.write(("SOURce:AM:STATe?" + self.end_of_line).encode())
         self.laser.readline()
         print(self.laser.readline())
         self.laser.readline()
         print(self.laser.readline())
 
-        self.laser.write("SOURce:AM:STATe OFF" + b"\r\n")
+        self.laser.write(("SOURce:AM:STATe OFF" + self.end_of_line).encode())
         self.laser.readline()
         print(self.laser.readline())
         self.laser.readline()
         print(self.laser.readline())
 
-        self.laser.write("SOURce:AM:STATe?" + b"\r\n")
+        self.laser.write(("SOURce:AM:STATe?" + self.end_of_line).encode())
         print(self.laser.readline())
         self.laser.readline()
         print(self.laser.readline())
         self.laser.readline()
 
-        self.laser.write("SOURce:AM:STATe OFF" + b"\r\n")
+        self.laser.write(("SOURce:AM:STATe OFF" + self.end_of_line).encode())
         print(self.laser.readline())
         self.laser.readline()
         print(self.laser.readline())
         self.laser.readline()
 
-        self.laser.write("SOURce:AM:STATe OFFON" + b"\r\n")
+        self.laser.write(("SOURce:AM:STATe OFFON" + self.end_of_line).encode())
         print(self.laser.readline())
         print(self.laser.readline())
         print(self.laser.readline())

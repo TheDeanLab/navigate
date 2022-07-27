@@ -9,8 +9,9 @@ logger = logging.getLogger(p)
 
 
 class LaserBase:
-    def __init__(self, port, verbose):
-        self.verbose = verbose
+    def __init__(self, port):
+        pass
+
 
     def close(self):
         """

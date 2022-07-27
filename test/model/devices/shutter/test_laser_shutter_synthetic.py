@@ -51,18 +51,14 @@ class TestSyntheticShutter(unittest.TestCase):
         configuration_path = Path.joinpath(configuration_directory, 'configuration.yml')
         experiment_path = Path.joinpath(configuration_directory, 'experiment.yml')
 
-        configuration = session(file_path=configuration_path,
-                                verbose=False)
-        experiment = session(file_path=experiment_path,
-                             verbose=False)
+        configuration = session(file_path=configuration_path)
+        experiment = session(file_path=experiment_path)
         shutter = SyntheticShutter(configuration,
-                              experiment,
-                              False)
+                              experiment)
 
         # Attributes
         assert hasattr(shutter, 'configuration')
         assert hasattr(shutter, 'experiment')
-        assert hasattr(shutter, 'verbose')
         assert hasattr(shutter, 'shutter_right')
         assert hasattr(shutter, 'shutter_right_state')
         assert hasattr(shutter, 'shutter_left')

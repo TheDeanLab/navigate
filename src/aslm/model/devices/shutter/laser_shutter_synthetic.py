@@ -54,8 +54,6 @@ class SyntheticShutter(ShutterBase):
         Global configuration of the microscope
     experiment : Session
         Experiment configuration of the microscope
-    verbose : bool
-        Verbosity
     shutter_right_state : bool
         Right shutter state
     shutter_left_state : bool
@@ -73,8 +71,8 @@ class SyntheticShutter(ShutterBase):
         Return the current state of the shutters
     """
 
-    def __init__(self, configuration, experiment, verbose=False):
-        super().__init__(configuration, experiment, verbose)
+    def __init__(self, configuration, experiment):
+        super().__init__(configuration, experiment)
 
     def __del__(self):
         r"""Close the SyntheticShutter at exit.

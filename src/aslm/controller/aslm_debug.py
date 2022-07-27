@@ -41,10 +41,9 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 class Debug_Module:
-    def __init__(self, central_controller, menubar, verbose=False):
+    def __init__(self, central_controller, menubar):
         self.central_controller = central_controller
-        self.verbose = verbose
-        
+
         # self.analysis_type = StringVar()
         # self.analysis_type.set('normal')
         # menubar.add_radiobutton(label='Normal', variable=self.analysis_type, value='normal')
@@ -118,8 +117,7 @@ class Debug_Module:
     def get_frames(self):
         while True:
             image_id = self.central_controller.show_img_pipe.recv()
-            if self.verbose:
-                print('receive', image_id)
+            logger.debug(f"Received: {image_id}")
             if image_id == 'stop':
                 break
             if not isinstance(image_id, int):
@@ -188,8 +186,7 @@ class Debug_Module:
             
             # Rec plot data from model and send to sub controller to display plot
             plot_data = self.central_controller.plot_pipe_controller.recv()
-            if self.verbose:
-                print("Controller received plot data: ", plot_data)
+            logger.debug(f"Controller received plot data: {plot_data}")
             if hasattr(self.central_controller, 'af_popup_controller'):
                 self.central_controller.af_popup_controller.display_plot(plot_data)
             

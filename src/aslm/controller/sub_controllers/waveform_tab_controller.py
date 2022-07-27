@@ -44,8 +44,8 @@ logger = logging.getLogger(p)
 
 
 class Waveform_Tab_Controller(GUI_Controller):
-    def __init__(self, view, parent_controller=None, verbose=False):
-        super().__init__(view, parent_controller, verbose)
+    def __init__(self, view, parent_controller=None):
+        super().__init__(view, parent_controller)
         self.remote_focus_waveform = 0
         self.etl_r_waveform = 0
         self.galvo_l_waveform = 0

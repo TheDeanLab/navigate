@@ -1,7 +1,4 @@
-"""
-ASLM zoom servo communication classes.
-
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -56,12 +53,9 @@ class ZoomBase:
         Dictionary of possible zoom values and their corresponding servo position.
     zoomvalue : int
         Current Zoom value
-    verbose : bool
-        Verbosity
     """
 
-    def __init__(self, configuration, verbose):
+    def __init__(self, configuration):
         self.configuration = configuration
-        self.verbose = verbose
         self.zoomdict = configuration.ZoomParameters['zoom_position']
         self.zoomvalue = None

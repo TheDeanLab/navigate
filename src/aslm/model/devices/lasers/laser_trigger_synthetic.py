@@ -49,8 +49,8 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 class SyntheticLaserTriggers(LaserTriggerBase):
-    def __init__(self, model, experiment, verbose=False):
-        super().__init__(model, experiment, verbose)
+    def __init__(self, model, experiment):
+        super().__init__(model, experiment)
 
     def __del__(self):
         pass
@@ -61,8 +61,6 @@ class SyntheticLaserTriggers(LaserTriggerBase):
         # Triggers the DAQ to select the correct laser path.
         """
         self.switching_state = False
-        if self.verbose:
-            print("Low Resolution Laser Path Enabled")
         logger.debug("Low Resolution Laser Path Enabled")
 
     def enable_high_resolution_laser(self):
@@ -71,8 +69,6 @@ class SyntheticLaserTriggers(LaserTriggerBase):
         # Triggers the DAQ to select the correct laser path.
         """
         self.switching_state = True
-        if self.verbose:
-            print("High Resolution Laser Path Enabled")
         logger.debug("High Resolution Laser Path Enabled")
 
     def trigger_digital_laser(self, current_laser_index):

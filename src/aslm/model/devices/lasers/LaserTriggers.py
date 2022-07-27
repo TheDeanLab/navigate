@@ -32,7 +32,6 @@ class LaserTriggers():
     def __init__(self, laser_dict):
         self.laser_enable_state = 'None'
         self.laser_dict = laser_dict
-        self.verbose = True
 
         # get a value in the laser_dict to get the general device string
         self.laser_enable_device = next(iter(self.laser_dict.values()))
@@ -45,8 +44,7 @@ class LaserTriggers():
 
         # Make sure that all the Lasers are off upon initialization:
         self.disable_all()
-        if self.verbose:
-            print('LaserTriggers initialized')
+        logger.info(f"LaserTriggers initialized")
 
     def check_if_laser_in_laser_dict(self, laser):
         """
@@ -70,8 +68,7 @@ class LaserTriggers():
         If another laser was on beforehand, this one is switched off.
         """
         if self.check_if_laser_in_laser_dict(laser):
-            if self.verbose:
-                print(self.laser_dict[laser])
+            logger.info(f"Laser Line Enabled: {self.laser_dict[laser]}")
             self.cmd = self.build_cmd_int(laser)
 
             with nidaqmx.Task() as task:
@@ -81,8 +78,7 @@ class LaserTriggers():
                 task.write(self.cmd, auto_start=True)
 
             self.laser_enable_state = laser
-            if self.verbose:
-                print('Enabled ' + laser)
+            logger.info(f"Enabled: {laser}")
         else:
             pass
 
@@ -97,8 +93,7 @@ class LaserTriggers():
             task.write(255, auto_start=True)
 
         self.laser_enable_state = 'all on'
-        if self.verbose:
-            print('Enabled all lasers')
+        logger.debug("Enable all lasers")
 
     def disable_all(self):
         """
@@ -111,8 +106,7 @@ class LaserTriggers():
             task.write(0, auto_start=True)
 
         self.laser_enable_state = 'off'
-        if self.verbose:
-            print('Disabled all')
+        logger.debug("Diabled all")
 
     def state(self):
         """

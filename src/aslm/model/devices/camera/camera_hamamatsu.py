@@ -55,12 +55,10 @@ class HamamatsuOrca(CameraBase):
         Global configuration of the microscope
     experiment : Session
         Experiment configuration of the microscope
-    verbose : bool
-        Verbosity
 
     """
-    def __init__(self, camera_id, configuration, experiment, verbose=False):
-        super().__init__(camera_id, configuration, experiment, verbose)
+    def __init__(self, camera_id, configuration, experiment):
+        super().__init__(camera_id, configuration, experiment)
 
         # Locally Import Hamamatsu API and Initialize Camera Controller
         HamamatsuController = importlib.import_module('aslm.model.devices.APIs.hamamatsu.HamamatsuAPI')

@@ -59,8 +59,6 @@ class Tiling_Wizard_Controller(GUI_Controller):
         GUI element containing widgets and variables to control. Likely tk.Toplevel-derived. In this case tiling_wizard_popup.py
     parent_controller : channels_tab_controller
         The controller that creates the popup/this controller.
-    verbose : bool, default False
-        Display additional feedback in standard output.
 
     Returns
     -------
@@ -69,9 +67,8 @@ class Tiling_Wizard_Controller(GUI_Controller):
 
     def __init__(self,
                  view,
-                 parent_controller,
-                 verbose=False):
-        super().__init__(view, parent_controller, verbose)
+                 parent_controller):
+        super().__init__(view, parent_controller)
 
         # Getting widgets and buttons and vars of widgets
         self.widgets = self.view.get_widgets()

@@ -52,12 +52,10 @@ logger = logging.getLogger(p)
 class Camera_View_Controller(GUI_Controller):
     def __init__(self,
                  view,
-                 parent_controller=None,
-                 verbose=False):
+                 parent_controller=None):
 
         super().__init__(view,
-                         parent_controller,
-                         verbose)
+                         parent_controller)
 
         # Logging
         self.logger = logging.getLogger(p)

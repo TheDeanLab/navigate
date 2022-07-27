@@ -79,12 +79,10 @@ class SyntheticCamera(CameraBase):
         Global configuration of the microscope
     experiment : Session
         Experiment configuration of the microscope
-    verbose : bool
-        Verbosity
 
     """
-    def __init__(self, camera_id, configuration, experiment, verbose=False):
-        super().__init__(camera_id, configuration, experiment, verbose)
+    def __init__(self, camera_id, configuration, experiment):
+        super().__init__(camera_id, configuration, experiment)
 
         self.x_pixels = experiment.CameraParameters['x_pixels']
         self.y_pixels = experiment.CameraParameters['y_pixels']

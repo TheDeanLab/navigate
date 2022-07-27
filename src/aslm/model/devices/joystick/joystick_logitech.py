@@ -51,7 +51,6 @@ class JoystickLogitech(JoystickBase):
         super().__init__()
         self.parent = parent
         self.cfg = parent.cfg
-        self.verbose = True
 
         """ parent is the window """
         # Select if Demo mode is enabled, or the Logitech Farm Simulator
@@ -67,8 +66,6 @@ class JoystickLogitech(JoystickBase):
         self.SliderChangeCount = 0
 
     def button_handler(self, button_id):
-        if self.verbose:
-            print('Button pressed: ', button_id)
         logger.debug(f"Button pressed, {button_id}")
 
         """ Laser switching buttons """
@@ -117,8 +114,6 @@ class JoystickLogitech(JoystickBase):
         """ Live button """
         if button_id == 21:
             current_state = self.parent.get_state_parameter('state')
-            if self.verbose:
-                print('Current state: ', current_state)
             logger.debug("Current state")
             if current_state == ('live'):
                 pass
@@ -137,6 +132,7 @@ class JoystickLogitech(JoystickBase):
         """ Stop movement button """
         if button_id == 28:
             # self.parent.sig_stop_movement.emit()
+            pass
 
         if button_id == 29:
             pass
@@ -147,8 +143,6 @@ class JoystickLogitech(JoystickBase):
 
     def set_combobox_to_string(self, combobox, string):
         index = combobox.findText(string)
-        if self.verbose:
-            print('Index: ', index)
         logger.debug(f"Index, {index}")
         if index != -1:
             combobox.setCurrentIndex(index)
@@ -205,8 +199,6 @@ class JoystickLogitech(JoystickBase):
         registering which axes produce joystick events.
         """
 
-        if self.verbose:
-            print('New joystick mode: ', str)
         logger.debug("New joystick mode")
 
         if str == '012':
@@ -224,8 +216,6 @@ class JoystickLogitech(JoystickBase):
         registering which axes produce joystick events.
         """
 
-        if self.verbose:
-            print('Axis: ', axis_id, ',Value: ', value)
         logger.debug(f"Axis: {axis_id}, Value: {value}")
 
         value = value - 128

@@ -53,15 +53,12 @@ class CameraBase:
         Global configuration of the microscope
     experiment : Session
         Experiment configuration of the microscope
-    verbose : bool
-        Verbosity
 
     """
-    def __init__(self, camera_id, configuration, experiment, verbose=False):
+    def __init__(self, camera_id, configuration, experiment):
         self.configuration = configuration
         self.experiment = experiment
         self.camera_id = camera_id
-        self.verbose = verbose
         self.stop_flag = False
         self.is_acquiring = False
 

@@ -46,8 +46,8 @@ TODO Create a dictionary for widgets that holds a list of widgets for each colum
 
 
 class Channel_Setting_Controller(GUI_Controller):
-    def __init__(self, view, parent_controller=None, verbose=False):
-        super().__init__(view, parent_controller, verbose)
+    def __init__(self, view, parent_controller=None):
+        super().__init__(view, parent_controller)
 
         # num: numbers of channels
         # TODO: Put in configuration file?

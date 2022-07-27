@@ -49,13 +49,12 @@ class TestZoomBase(unittest.TestCase):
         configuration_directory = Path.joinpath(base_directory, 'src', 'aslm', 'config')
         configuration_path = Path.joinpath(configuration_directory, 'configuration.yml')
 
-        configuration = session(configuration_path, False)
-        zoom_class = ZoomBase(configuration, False)
+        configuration = session(configuration_path)
+        zoom_class = ZoomBase(configuration)
 
         assert hasattr(zoom_class, 'configuration')
         assert hasattr(zoom_class, 'zoomdict')
         assert hasattr(zoom_class, 'zoomvalue')
-        assert hasattr(zoom_class, 'verbose')
 
 if __name__ == '__main__':
     unittest.main()

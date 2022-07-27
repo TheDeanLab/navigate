@@ -100,8 +100,7 @@ class ASLM_controller:
                  use_gpu,
                  args):
         
-        # Verbosity and debugging menu
-        self.verbose = args.verbose
+        # Debug menu
         self.debug = args.debug
 
         # Create a thread pool
@@ -125,16 +124,14 @@ class ASLM_controller:
         self.default_experiment_file = experiment_path
 
         # Load the Configuration to Populate the GUI
-        self.configuration = session(configuration_path,
-                                     self.verbose)
+        self.configuration = session(configuration_path)
 
         # Initialize view based on model.configuration
         configuration_controller = ASLM_Configuration_Controller(self.configuration)
 
         # etl setting file
         self.etl_constants_path = etl_constants_path
-        self.etl_constants = session(self.etl_constants_path,
-                                   self.verbose)
+        self.etl_constants = session(self.etl_constants_path)
 
         # Initialize the View
         self.view = view(root)
@@ -143,21 +140,17 @@ class ASLM_controller:
         # Acquire bar, channels controller, camera view, camera settings, stage, waveforms, menus.
         self.acquire_bar_controller = Acquire_Bar_Controller(self.view.acqbar,
                                                              self.view.settings.channels_tab,
-                                                             self,
-                                                             self.verbose)
+                                                             self)
 
         self.channels_tab_controller = Channels_Tab_Controller(self.view.settings.channels_tab,
                                                                self,
-                                                               self.verbose,
                                                                configuration_controller)
 
         self.camera_view_controller = Camera_View_Controller(self.view.camera_waveform.camera_tab,
-                                                             self,
-                                                             self.verbose)
+                                                             self)
 
         self.camera_setting_controller = Camera_Setting_Controller(self.view.settings.camera_settings_tab,
                                                                    self,
-                                                                   self.verbose,
                                                                    configuration_controller)
 
         # Stage Controller
@@ -165,13 +158,10 @@ class ASLM_controller:
                                                          self.view,
                                                          self.camera_view_controller.canvas,
                                                          self,
-                                                         self.verbose,
                                                          configuration_controller)
                         
         # Waveform Controller
-        self.waveform_tab_controller = Waveform_Tab_Controller(self.view.camera_waveform.waveform_tab,
-                                                               self,
-                                                               self.verbose)
+        self.waveform_tab_controller = Waveform_Tab_Controller(self.view.camera_waveform.waveform_tab, self)
 
         t = threading.Thread(target=self.update_event)
         t.start()
@@ -179,7 +169,7 @@ class ASLM_controller:
         self.initialize_menus()
 
         # Set view based on model.experiment
-        self.experiment = session(experiment_path, args.verbose)
+        self.experiment = session(experiment_path)
         self.populate_experiment_setting()
 
         # Camera View Tab
@@ -276,8 +266,7 @@ class ASLM_controller:
                                                        self.etl_constants,
                                                        self.etl_constants_path,
                                                        self.configuration,
-                                                       self.experiment.GalvoParameters,
-                                                       self.verbose)
+                                                       self.experiment.GalvoParameters)
 
             self.etl_controller.set_experiment_values(self.resolution_value.get())
             self.etl_controller.set_mode(self.acquire_bar_controller.mode)
@@ -289,7 +278,6 @@ class ASLM_controller:
             af_popup = autofocus_popup(self.view)
             self.af_popup_controller = Autofocus_Popup_Controller(af_popup,
                                                                   self,
-                                                                  self.verbose,
                                                                   self.experiment.AutoFocusParameters)
 
         menus_dict = {
@@ -354,7 +342,7 @@ class ASLM_controller:
 
         # debug menu
         if self.debug:
-            Debug_Module(self, self.view.menubar.menu_debug, self.verbose)
+            Debug_Module(self, self.view.menubar.menu_debug)
 
     def populate_experiment_setting(self, file_name=None):
         r"""Load experiment file and populate model.experiment and configure view.
@@ -376,7 +364,7 @@ class ASLM_controller:
                 self.model.load_experiment_file(file_path)
 
                 # Create experiment instance.
-                self.experiment = session(file_path, self.verbose)
+                self.experiment = session(file_path)
 
         # Configure GUI
         mode = self.experiment.MicroscopeState['image_mode']

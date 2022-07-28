@@ -80,12 +80,11 @@ class KeystrokeController(GUI_Controller):
         self.main_view.bind("2", self.switch_tab2)
 
 
-
     def switch_tab1(self, event):
-        if event.state == 4:
-            self.main_tabs.select(0) 
+        if event.state == 4 or event.state == 8:
+            self.main_tabs.select(0)
 
 
     def switch_tab2(self, event):
-        if event.state == 4:
-            self.main_tabs.select(1) 
+        if event.state == 4 or event.state == 8:
+            self.main_tabs.select(1)

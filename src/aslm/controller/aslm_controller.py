@@ -41,6 +41,7 @@ import time
 
 # Local View Imports
 from tkinter import filedialog
+from aslm.controller.sub_controllers.keystroke_controller import KeystrokeController
 from aslm.view.main_application_window import Main_App as view
 from aslm.view.menus.remote_focus_popup import remote_popup
 from aslm.view.menus.autofocus_setting_popup import autofocus_popup
@@ -137,7 +138,8 @@ class ASLM_controller:
         self.view = view(root)
 
         # Sub Gui Controllers
-        # Acquire bar, channels controller, camera view, camera settings, stage, waveforms, menus.
+        # Acquire bar, channels controller, camera view, camera settings, stage, waveforms, menus, keystroke
+
         self.acquire_bar_controller = Acquire_Bar_Controller(self.view.acqbar,
                                                              self.view.settings.channels_tab,
                                                              self)
@@ -162,6 +164,9 @@ class ASLM_controller:
                         
         # Waveform Controller
         self.waveform_tab_controller = Waveform_Tab_Controller(self.view.camera_waveform.waveform_tab, self)
+
+        # Keystroke Controller
+        self.keystroke_controller = KeystrokeController(self.view, self)
 
         t = threading.Thread(target=self.update_event)
         t.start()

@@ -82,23 +82,23 @@ class Camera_View_Controller(GUI_Controller):
         self.view.live_frame.live.bind("<<ComboboxSelected>>", self.update_display_state)
 
         # Left Click Binding
-        self.canvas.bind("<Button-1>", self.left_click)
+        # self.canvas.bind("<Button-1>", self.left_click)
 
         # Slider Binding
-        self.view.slider.slider_widget.bind("<Button-1>", self.slider_update)
+        # self.view.slider.slider_widget.bind("<Button-1>", self.slider_update)
 
         # Mouse Wheel Binding
-        if platform.system() == 'Windows':
-            self.canvas.bind("<MouseWheel>", self.mouse_wheel)
-        elif platform.system() == 'Linux':
-            self.canvas.bind("<Button-4>", self.mouse_wheel)
-            self.canvas.bind("<Button-5>", self.mouse_wheel)
+        # if platform.system() == 'Windows':
+        #     self.canvas.bind("<MouseWheel>", self.mouse_wheel)
+        # elif platform.system() == 'Linux':
+        #     self.canvas.bind("<Button-4>", self.mouse_wheel)
+        #     self.canvas.bind("<Button-5>", self.mouse_wheel)
 
         # Right-Click Binding
         self.menu = tk.Menu(self.canvas, tearoff=0)
         self.menu.add_command(label="Move Here", command=self.move_stage)
         self.menu.add_command(label="Reset Display", command=self.reset_display)
-        self.canvas.bind("<Button-3>", self.popup_menu)
+        # self.canvas.bind("<Button-3>", self.popup_menu)
         self.move_to_x = None
         self.move_to_y = None
 

@@ -98,6 +98,7 @@ class MainApp(ttk.Frame):
         photo_image = view_directory.joinpath("icon", "mic.png")
         self.root.iconphoto(True, tk.PhotoImage(file=photo_image))
         self.root.resizable(True, True)
+        self.root.geometry("")
         tk.Grid.columnconfigure(root, 'all', weight=1)
         tk.Grid.rowconfigure(root, 'all', weight=1)
 
@@ -138,12 +139,12 @@ class MainApp(ttk.Frame):
         # Appears that Windows has 96 DPI, and Apple has 72.  
         # iMac Built in Retina Display is 4480 x 2520
         # In the settings, can adjust display scaling -> 2560 x 1440
-        dpi = int(self.root.winfo_fpixels('1i')) 
-        tk_screen_width, tk_screen_height = int(root.winfo_screenwidth()), int(root.winfo_screenheight()) # 1920 x 1080
+        # dpi = int(self.root.winfo_fpixels('1i'))
+        # tk_screen_width, tk_screen_height = int(root.winfo_screenwidth()), int(root.winfo_screenheight()) # 1920 x 1080
         # TK screen width is the correct width according to the OS.
         
         # Tk doesn't take into account the DPI?
-        actual_screen_width, actual_screen_height = int(tk_screen_width * (dpi / 96)), int(tk_screen_height * (dpi / 96))
+        # actual_screen_width, actual_screen_height = int(tk_screen_width * (dpi / 96)), int(tk_screen_height * (dpi / 96))
         # Take into account the fact that we actually do not have 96 DPI, but actually 72. 2560 x 1440.
 
         # print(f"TK Screen Width, Height, dpi: {tk_screen_width}, {tk_screen_height}, {dpi}")  # 1920 x 1080
@@ -156,11 +157,11 @@ class MainApp(ttk.Frame):
         #     
         #     self.root.tk.call('tk', 'scaling', screen_scaling_factor)
 
-        self.root.geometry(f"{actual_screen_width}x{actual_screen_height}")
+        # self.root.geometry(f"{actual_screen_width}x{actual_screen_height}")
          
 
 
 if __name__ == '__main__':
     root = tk.Tk()
-    Main_App(root)
+    MainApp(root)
     root.mainloop()

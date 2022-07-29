@@ -11,8 +11,8 @@ logger = logging.getLogger(p)
 
 
 class SyntheticLaser(LaserBase):
-    def __init__(self, model, verbose):
-        super().__init__(model, verbose)
+    def __init__(self, model):
+        super().__init__(model)
 
     def close(self):
         """

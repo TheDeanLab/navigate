@@ -68,8 +68,6 @@ class RemoteFocusEquipmentSolutions(RemoteFocusBase):
         Number of stop bits.
     timeout : float
         Timeout duration.
-    verbose : bool
-        Verbosity
     read_on_init : bool
         Establish connection upon initialization.
     debug : bool
@@ -85,14 +83,13 @@ class RemoteFocusEquipmentSolutions(RemoteFocusBase):
         Close connection with the RemoteFocusEquipmentSolutions device.
     """
 
-    def __init__(self, verbose):
+    def __init__(self):
         self.comport = 'COM1'
         self.baud_rate = 115200
         self.byte_size = serial.EIGHTBITS
         self.parity = serial.PARITY_NONE
         self.stop_bits = serial.STOPBITS_ONE
         self.timeout = 1.25
-        self.verbose = verbose
         self.read_on_init = True
         self.debug = False
 
@@ -212,7 +209,7 @@ class RemoteFocusEquipmentSolutions(RemoteFocusBase):
 
 
 if __name__ == "__main__":
-    vc = RemoteFocusEquipmentSolutions(verbose=True)
+    vc = RemoteFocusEquipmentSolutions()
     vc.send_command('k0\r')  # Turn off servo
     vc.send_command('k1\r')  # Engage servo
 

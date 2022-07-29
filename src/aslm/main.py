@@ -50,7 +50,6 @@ def main():
     Parameters
     ----------
     *args : iterable
-        --verbose
         --synthetic_hardware
         --sh
         --debug
@@ -77,11 +76,6 @@ def main():
     # Parse command line arguments
     parser = argparse.ArgumentParser(description='Multiscale Microscope Command Line Arguments')
     input_args = parser.add_argument_group('Input Arguments')
-    input_args.add_argument('-v', '--verbose',
-                            required=False,
-                            default=False,
-                            action='store_true',
-                            help='Enables the software to operate in a verbose mode.  Warning: Excessively verbose.')
 
     input_args.add_argument('-sh', '--synthetic_hardware',
                             required=False,

@@ -1,9 +1,4 @@
-"""
-ASLM sub-controller for the acquire popup window.
-When the mode is changed, we need to communicate this to the central controller.
-Central controller then communicates these changes to the channel_setting_controller.
-
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,25 +29,28 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-from sre_parse import State
-import sys
-from aslm.controller.sub_controllers.gui_controller import GUI_Controller
-from aslm.view.main_window_content.acquire_bar_frame.acquire_popup import Acquire_PopUp as acquire_popup
 
+# Standard Library Imports
+import sys
 import logging
-from pathlib import Path
+
+# Third Party Imports
+
+# Local Imports
+from aslm.controller.sub_controllers.gui_controller import GUI_Controller
+from aslm.view.main_window_content.acquire_bar_frame.acquire_popup import AcquirePopUp
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class Acquire_Bar_Controller(GUI_Controller):
+class AcquireBarController(GUI_Controller):
     def __init__(self,
                  view,
                  parent_view,
-                 parent_controller,
-                 verbose=False):
-        super().__init__(view, parent_controller, verbose)
+                 parent_controller):
+        super().__init__(view, parent_controller)
 
         self.parent_view = parent_view
         
@@ -62,13 +60,14 @@ class Acquire_Bar_Controller(GUI_Controller):
         self.update_stack_acq(self.mode)
         self.is_save = False
         self.saving_settings = {
-            'root_directory': 'E:\\',
+            'root_directory': self.parent_controller.experiment.Saving['root_directory'],
             'save_directory': '',
             'user': '',
             'tissue': '',
             'celltype': '',
             'label': '',
-            'file_type': ''
+            'file_type': '',
+            'solvent': '',
         }
 
         self.mode_dict = {
@@ -243,12 +242,12 @@ class Acquire_Bar_Controller(GUI_Controller):
             self.parent_controller.execute('stop_acquire')
 
         elif self.is_save and self.mode != 'live':
-            acquire_pop = acquire_popup(self.view)
+            acquire_pop = AcquirePopUp(self.view)
             buttons = acquire_pop.get_buttons()  # This holds all the buttons in the popup
             widgets = acquire_pop.get_widgets()
 
             # Configure the button callbacks on the popup window
-            buttons['Cancel'].config(command=lambda: acquire_pop.popup.dismiss(self.verbose))
+            buttons['Cancel'].config(command=lambda: acquire_pop.popup.dismiss())
             buttons['Done'].config(command=lambda: self.launch_acquisition(acquire_pop))
 
             # Configure drop down callbacks, will update save settings when file type is changed
@@ -348,16 +347,17 @@ class Acquire_Bar_Controller(GUI_Controller):
         self.update_saving_settings(popup_window)
 
         # Verify user's input is non-zero.
-        is_valid = self.saving_settings['user'] and self.saving_settings['tissue'] \
-            and self.saving_settings['celltype'] and self.saving_settings['label']
+        is_valid = self.saving_settings['user'] \
+                   and self.saving_settings['tissue'] \
+                   and self.saving_settings['celltype'] \
+                   and self.saving_settings['label']
 
         if is_valid:
             # tell central controller, save the image/data
-            self.parent_controller.execute(
-                'acquire_and_save', self.saving_settings)
+            self.parent_controller.execute('acquire_and_save', self.saving_settings)
 
             # Close the window
-            popup_window.popup.dismiss(self.verbose)
+            popup_window.popup.dismiss()
 
             # We are now acquiring
             self.view.acquire_btn.configure(text='Stop')

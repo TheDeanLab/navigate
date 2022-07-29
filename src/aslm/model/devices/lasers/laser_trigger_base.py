@@ -49,10 +49,9 @@ logger = logging.getLogger(p)
 
 
 class LaserTriggerBase:
-    def __init__(self, model, experiment, verbose=False):
+    def __init__(self, model, experiment):
         self.model = model
         self.experiment = experiment
-        self.verbose = verbose
 
         # Number of Lasers
         # TODO: Make it so that we can iterate through each laser and create a
@@ -88,8 +87,6 @@ class LaserTriggerBase:
         self.laser_2_ao_voltage = 0
 
     def __del__(self):
-        if self.verbose:
-            print("Not Implemented in LaserTriggerBase")
         logger.debug("Not Implemented in LaserTriggerBase")
 
     def enable_low_resolution_laser(self):
@@ -97,8 +94,6 @@ class LaserTriggerBase:
         # Evaluates the experiment configuration in the model for the resolution mode.
         # Triggers the DAQ to select the correct laser path.
         """
-        if self.verbose:
-            print("Not Implemented in LaserTriggerBase")
         logger.debug("Not Implemented in LaserTriggerBase")
 
     def enable_high_resolution_laser(self):
@@ -106,17 +101,11 @@ class LaserTriggerBase:
         # Evaluates the experiment configuration in the model for the resolution mode.
         # Triggers the DAQ to select the correct laser path.
         """
-        if self.verbose:
-            print("Not Implemented in LaserTriggerBase")
         logger.debug("Not Implemented in LaserTriggerBase")
     def trigger_digital_laser(self, current_laser_index):
-        if self.verbose:
-            print("Not Implemented in LaserTriggerBase")
         logger.debug("Not Implemented in LaserTriggerBase")
 
     def turn_off_lasers(self):
-        if self.verbose:
-            print("Not Implemented in LaserTriggerBase")
         logger.debug("Not Implemented in LaserTriggerBase")
 
     def set_laser_analog_voltage(
@@ -126,7 +115,5 @@ class LaserTriggerBase:
         """
         # Sets the constant voltage on the DAQ according to the laser index and intensity, which is a percentage.
         """
-        if self.verbose:
-            print("Not Implemented in LaserTriggerBase")
         logger.debug("Not Implemented in LaserTriggerBase")
 

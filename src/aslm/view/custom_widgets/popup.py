@@ -104,7 +104,7 @@ class PopUp(tk.Toplevel):
     #Catching close buttons/destroying window procedures
         #Dismiss function for destroying window when done
 
-    def dismiss(self, verbose=False):
+    def dismiss(self):
         """
         #### Releases control back to main window from popup
         """

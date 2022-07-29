@@ -38,8 +38,8 @@ logger = logging.getLogger(p)
 
 
 class Stage_GUI_Controller(GUI_Controller):
-    def __init__(self, view, main_view, canvas, parent_controller, verbose=False, configuration_controller=None):
-        super().__init__(view, parent_controller, verbose)
+    def __init__(self, view, main_view, canvas, parent_controller, configuration_controller=None):
+        super().__init__(view, parent_controller)
 
         self.main_view = main_view
         self.canvas = canvas

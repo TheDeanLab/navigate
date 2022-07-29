@@ -46,8 +46,7 @@ class TestSyntheticHardware():
         self.config = self.dummy_model.configuration
         self.experiment = self.dummy_model.experiment
         self.etl_const = self.dummy_model.etl_constants
-        self.verbose = self.dummy_model.verbose
-        sd = SyntheticDAQ(self.config, self.experiment, self.etl_const, self.verbose)
+        sd = SyntheticDAQ(self.config, self.experiment, self.etl_const)
 
         assert True
 
@@ -59,7 +58,6 @@ class TestSyntheticHardware():
         self.config = self.dummy_model.configuration
         self.experiment = self.dummy_model.experiment
         self.etl_const = self.dummy_model.etl_constants
-        self.verbose = self.dummy_model.verbose
         sc = SyntheticCamera(0, self.config, self.experiment)
 
         return True
@@ -70,9 +68,8 @@ class TestSyntheticHardware():
         self.config = self.dummy_model.configuration
         self.experiment = self.dummy_model.experiment
         self.etl_const = self.dummy_model.etl_constants
-        self.verbose = self.dummy_model.verbose
 
-        sf = SyntheticFilterWheel(self.config, False)
+        sf = SyntheticFilterWheel(self.config)
 
         return True
 
@@ -82,9 +79,9 @@ class TestSyntheticHardware():
         self.config = self.dummy_model.configuration
         self.experiment = self.dummy_model.experiment
         self.etl_const = self.dummy_model.etl_constants
-        self.verbose = self.dummy_model.verbose
 
-        ss = SyntheticStage(self.config, False)
+
+        ss = SyntheticStage(self.config)
 
     def test_synthetic_zoom(self):
         from aslm.model.devices.zoom.zoom_synthetic import SyntheticZoom
@@ -92,9 +89,9 @@ class TestSyntheticHardware():
         self.config = self.dummy_model.configuration
         self.experiment = self.dummy_model.experiment
         self.etl_const = self.dummy_model.etl_constants
-        self.verbose = self.dummy_model.verbose
 
-        sz = SyntheticZoom(self.config, False)
+
+        sz = SyntheticZoom(self.config)
 
         return True
 
@@ -104,7 +101,7 @@ class TestSyntheticHardware():
         self.config = self.dummy_model.configuration
         self.experiment = self.dummy_model.experiment
         self.etl_const = self.dummy_model.etl_constants
-        self.verbose = self.dummy_model.verbose
+
 
         ss = SyntheticShutter(self.config, self.experiment)
 
@@ -117,7 +114,6 @@ class TestSyntheticHardware():
     #     self.config = self.dummy_model.configuration
     #     self.experiment = self.dummy_model.experiment
     #     self.etl_const = self.dummy_model.etl_constants
-    #     self.verbose = self.dummy_model.verbose
     #
     #     sl = SyntheticLaser(self.config, False)
     #

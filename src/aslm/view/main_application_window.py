@@ -52,6 +52,7 @@ from aslm.view.main_window_content.camera_display.camera_view.camera_notebook im
 from aslm.view.main_window_content.stage_control.stagecontrol_notebook import stagecontrol_notebook
 from aslm.view.main_window_content.acquire_bar_frame.acquire_bar import AcquireBar
 from aslm.view.menus.menus import menubar
+from aslm.view.custom_widgets.scrollbars import ScrolledFrame
 
 
 # Logger Setup
@@ -78,10 +79,11 @@ class MainApp(ttk.Frame):
                  **kwargs):
 
         # Inits this class as a frame subclass with the root as its parent
-        ttk.Frame.__init__(self,
-                           root,
-                           *args,
-                           **kwargs)
+        self.scroll_frame = ScrolledFrame(root)
+        self.scroll_frame.grid(row=0, column=0, sticky=tk.NSEW)
+        
+
+        ttk.Frame.__init__(self, self.scroll_frame.interior, *args, **kwargs)
 
         # Initialize Logger
         self.logger = logging.getLogger(p)

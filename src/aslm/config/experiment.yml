@@ -1,7 +1,7 @@
 User:
   name: Kevin_Dean
 Saving:
-  root_directory: E://
+  root_directory: C:\Users\MicroscopyInnovation\Desktop\Data
   save_directory: E://Kevin\Lung\MV3\GFP\2022-02-18\Cell000
   user: Kevin
   tissue: Lung
@@ -9,6 +9,7 @@ Saving:
   label: GFP
   file_type: TIFF
   date: 2022-06-07
+  solvent: BABB
 Devices:
   daq: NI
   camera: HamamatsuOrca

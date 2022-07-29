@@ -47,7 +47,7 @@ from aslm.view.menus.autofocus_setting_popup import autofocus_popup
 
 # Local Sub-Controller Imports
 from aslm.controller.sub_controllers.stage_gui_controller import Stage_GUI_Controller
-from aslm.controller.sub_controllers.acquire_bar_controller import Acquire_Bar_Controller
+from aslm.controller.sub_controllers.acquire_bar_controller import AcquireBarController
 from aslm.controller.sub_controllers.channels_tab_controller import Channels_Tab_Controller
 from aslm.controller.sub_controllers.camera_view_controller import Camera_View_Controller
 from aslm.controller.sub_controllers.camera_setting_controller import Camera_Setting_Controller
@@ -123,8 +123,9 @@ class ASLM_controller:
         # save default experiment file
         self.default_experiment_file = experiment_path
 
-        # Load the Configuration to Populate the GUI
+        # Load the Configuration and Experiment Files and Populate the GUI
         self.configuration = session(configuration_path)
+        self.experiment = session(experiment_path)
 
         # Initialize view based on model.configuration
         configuration_controller = ASLM_Configuration_Controller(self.configuration)
@@ -138,9 +139,9 @@ class ASLM_controller:
 
         # Sub Gui Controllers
         # Acquire bar, channels controller, camera view, camera settings, stage, waveforms, menus.
-        self.acquire_bar_controller = Acquire_Bar_Controller(self.view.acqbar,
-                                                             self.view.settings.channels_tab,
-                                                             self)
+        self.acquire_bar_controller = AcquireBarController(self.view.acqbar,
+                                                           self.view.settings.channels_tab,
+                                                           self)
 
         self.channels_tab_controller = Channels_Tab_Controller(self.view.settings.channels_tab,
                                                                self,
@@ -169,7 +170,7 @@ class ASLM_controller:
         self.initialize_menus()
 
         # Set view based on model.experiment
-        self.experiment = session(experiment_path)
+        # self.experiment = session(experiment_path)
         self.populate_experiment_setting()
 
         # Camera View Tab
@@ -581,6 +582,10 @@ class ASLM_controller:
             controller_functions.save_yaml_file(file_directory, self.experiment.serialize())
             self.experiment.Saving['save_directory'] = saving_settings['save_directory']
             self.experiment.Saving['file_type'] = saving_settings['file_type']
+            self.experiment.Saving['solvent'] = saving_settings['solvent']
+            self.camera_setting_controller.solvent = self.experiment.Saving['solvent']
+            self.camera_setting_controller.calculate_physical_dimensions(
+                self.experiment.MicroscopeState['resolution_mode'])
             self.execute('acquire')
 
         elif command == 'acquire':

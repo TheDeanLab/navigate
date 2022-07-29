@@ -53,9 +53,11 @@ class AcquireBarController(GUI_Controller):
         super().__init__(view, parent_controller)
 
         self.parent_view = parent_view
+        
 
         # acquisition image mode variable
         self.mode = 'live'
+        self.update_stack_acq(self.mode)
         self.is_save = False
         self.saving_settings = {
             'root_directory': self.parent_controller.experiment.Saving['root_directory'],
@@ -72,6 +74,7 @@ class AcquireBarController(GUI_Controller):
             'Continuous Scan': 'live',
             'Z-Stack': 'z-stack',
             'Single Acquisition': 'single',
+            'Alignment': 'alignment',
             'Projection': 'projection'
         }
 
@@ -260,6 +263,7 @@ class AcquireBarController(GUI_Controller):
     def update_microscope_mode(self,
                                *args):
         r"""Gets the state of the pull-down menu and tells the central controller
+            Will additionally call functions to disable and enable widgets based on mode
 
         Parameters
         ----------
@@ -268,6 +272,51 @@ class AcquireBarController(GUI_Controller):
         """
         self.mode = self.mode_dict[self.view.pull_down.get()]
         self.show_verbose_info("The Microscope State is now:", self.get_mode())
+
+        # Update state status of other widgets in the GUI based on what mode is set
+        self.update_stack_acq(self.mode)
+        self.update_stack_time(self.mode)
+
+    def update_stack_acq(self, mode):
+        """Changes state behavior of widgets in the stack acquisition frame based on mode of microscope
+
+        Parameters
+        ----------
+        mode : str
+            Imaging Mode.
+        """
+
+        # Get ref to widgets
+        stack_widgets = self.parent_view.stack_acq_frame.get_widgets()
+
+        # Grey out stack acq widgets when not Zstack or projection
+        if mode == 'z-stack' or mode == 'projection':
+            state = 'normal'
+        else:
+            state = 'disabled'
+        for key, widget in stack_widgets.items():
+            widget.widget['state'] = state
+
+    def update_stack_time(self, mode):
+        """Changes state behavior of widgets in the stack timepoint frame based on mode of microscope
+
+        Parameters
+        ----------
+        mode : str
+            Imaging Mode.
+        """
+        
+        # Get ref to widgets
+        time_widgets = self.parent_view.stack_timepoint_frame.get_widgets()
+
+        # Grey out time widgets when in Continuous Scan or Alignment modes
+        if mode == 'live' or mode == 'alignment':
+            state = 'disabled'
+        else:
+            state = 'normal'
+        for key, widget in time_widgets.items():
+            widget['state'] = state
+
 
     def update_file_type(self,
                          file_type):

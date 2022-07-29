@@ -65,6 +65,10 @@ class Camera_View_Controller(GUI_Controller):
         self.image_palette = view.scale_palette.get_widgets()
         self.canvas = self.view.canvas
 
+        # Get canvas width and height. Accounts for padding.
+        self.canvas_height = self.view.canvas.winfo_height()-4
+        self.canvas_width = self.view.canvas.winfo_width()-4
+
         # Binding for adjusting the lookup table min and max counts.
         # keys = ['Autoscale', 'Min','Max']
         self.image_palette['Autoscale'].widget.config(command=self.toggle_min_max_buttons)
@@ -262,8 +266,9 @@ class Camera_View_Controller(GUI_Controller):
     def move_stage(self):
         r"""Move the stage according to the position the user clicked."""
         # TODO: Account for the digital zoom value when calculating these values.
-        # Currently hardcoded to account for 512 x 512 image display size below (factor of 4)
-        print("Move stage to pixel:", 4 * self.move_to_y, 4 * self.move_to_x)
+        height_scaling_factor = self.original_image_height / self.canvas_height
+        width_scaling_factor = self.original_image_width / self.canvas_width
+        print("Move stage to pixel:", height_scaling_factor * self.move_to_y, width_scaling_factor * self.move_to_x)
 
     def reset_display(self):
         r"""Set the display back to the original digital zoom."""
@@ -309,8 +314,7 @@ class Camera_View_Controller(GUI_Controller):
     def digital_zoom(self):
         r"""Apply digital zoom.
 
-        Currently,the x, y position of the mouse is between 0 and 512 in both x, and y,
-        which is the size of the widget.
+        The x and y positions are between 0 and the canvas width and height respectively.
 
         """
         # New image size. Should be an integer value that is divisible by 2.
@@ -323,9 +327,8 @@ class Camera_View_Controller(GUI_Controller):
             new_image_width = new_image_width - 1
 
         # zoom_x_pos and y_pos are between 0 and 512.
-        # TODO: Grab the widget size so that this isn't hardcoded.
-        scaling_factor_x = int(self.original_image_width / 512)
-        scaling_factor_y = int(self.original_image_height / 512)
+        scaling_factor_x = int(self.original_image_width / self.canvas_width)
+        scaling_factor_y = int(self.original_image_height / self.canvas_height)
         x_start_index = (self.zoom_x_pos * scaling_factor_x) - (new_image_width / 2)
         x_end_index = (self.zoom_x_pos * scaling_factor_x) + (new_image_width / 2)
         y_start_index = (self.zoom_y_pos * scaling_factor_y) - (new_image_height / 2)

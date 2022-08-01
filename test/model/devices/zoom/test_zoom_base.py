@@ -38,7 +38,7 @@ from pathlib import Path
 
 # Local Imports
 from aslm.model.devices.zoom.zoom_base import ZoomBase
-from aslm.model.aslm_model_config import Session as session
+from aslm.model.aslm_model_config import Configurator
 
 
 class TestZoomBase(unittest.TestCase):
@@ -49,7 +49,7 @@ class TestZoomBase(unittest.TestCase):
         configuration_directory = Path.joinpath(base_directory, 'src', 'aslm', 'config')
         configuration_path = Path.joinpath(configuration_directory, 'configuration.yml')
 
-        configuration = session(configuration_path)
+        configuration = Configurator(configuration_path)
         zoom_class = ZoomBase(configuration)
 
         assert hasattr(zoom_class, 'configuration')

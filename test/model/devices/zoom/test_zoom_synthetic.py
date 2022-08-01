@@ -38,7 +38,7 @@ from pathlib import Path
 
 # Local Imports
 from aslm.model.devices.zoom.zoom_synthetic import SyntheticZoom
-from aslm.model.aslm_model_config import Session as session
+from aslm.model.aslm_model_config import Configurator
 
 
 class TestZoomSynthetic(unittest.TestCase):
@@ -49,7 +49,7 @@ class TestZoomSynthetic(unittest.TestCase):
         configuration_directory = Path.joinpath(base_directory, 'src', 'aslm', 'config')
         configuration_path = Path.joinpath(configuration_directory, 'configuration.yml')
 
-        configuration = session(configuration_path)
+        configuration = Configurator(configuration_path)
         zoom_class = SyntheticZoom(configuration)
 
         assert hasattr(zoom_class, 'configuration')

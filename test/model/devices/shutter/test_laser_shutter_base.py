@@ -31,7 +31,7 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 import unittest
 from pathlib import Path
-from aslm.model.aslm_model_config import Session as session
+from aslm.model.aslm_model_config import Configurator
 from aslm.model.devices.shutter.laser_shutter_base import ShutterBase
 
 
@@ -44,8 +44,8 @@ class TestLaserBase(unittest.TestCase):
         configuration_path = Path.joinpath(configuration_directory, 'configuration.yml')
         experiment_path = Path.joinpath(configuration_directory, 'experiment.yml')
 
-        configuration = session(file_path=configuration_path)
-        experiment = session(file_path=experiment_path)
+        configuration = Configurator(file_path=configuration_path)
+        experiment = Configurator(file_path=experiment_path)
 
         shutter = ShutterBase(configuration,
                               experiment)

@@ -75,9 +75,9 @@ class SyntheticCamera(CameraBase):
     ----------
     camera_id : int
         Selects which camera to connect to (0, 1, ...).
-    configuration : Session
+    configuration : Configurator
         Global configuration of the microscope
-    experiment : Session
+    experiment : Configurator
         Experiment configuration of the microscope
 
     """

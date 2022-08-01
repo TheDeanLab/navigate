@@ -95,7 +95,7 @@ class Channel_Setting_Controller(GUI_Controller):
         Parameters
         ----------
         config : object
-            ASLM_Configuration_Controller - config.configuration is session instance of configuration.
+            ASLM_Configuration_Controller - config.configuration is Configurator instance of configuration.
         """
         setting_dict = config.get_channels_info()
         for i in range(self.num):

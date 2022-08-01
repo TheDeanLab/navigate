@@ -96,10 +96,10 @@ def start_analysis(configuration,
 
     Parameters
     ----------
-    configuration : Session
-        Session instance of global microscope configuration.
-    experiment : Session
-        Session instance of experiment configuration.
+    configuration : Configurator
+        Configurator instance of global microscope configuration.
+    experiment : Configurator
+        Configurator instance of experiment configuration.
     use_gpu : Boolean
         Flag for enabling GPU analysis.
 
@@ -120,9 +120,9 @@ def start_camera(configuration,
     Parameters
     ----------
     configuration : dict
-        Session instance of global microscope configuration.
+        Configurator instance of global microscope configuration.
     experiment : dict
-        Session instance of experiment configuration.
+        Configurator instance of experiment configuration.
     camera_id : int
         Device ID (0, 1...)
 
@@ -148,7 +148,7 @@ def start_stages(configuration):
     Parameters
     ----------
     configuration : dict
-        Session instance of global microscope configuration.
+        Configurator instance of global microscope configuration.
 
     Returns
     -------
@@ -172,7 +172,7 @@ def start_stages_r(configuration):
     Parameters
     ----------
     configuration : dict
-        Session instance of global microscope configuration.
+        Configurator instance of global microscope configuration.
 
     Returns
     -------
@@ -193,7 +193,7 @@ def start_zoom_servo(configuration):
     Parameters
     ----------
     configuration : dict
-        Session instance of global microscope configuration.
+        Configurator instance of global microscope configuration.
 
     Returns
     -------
@@ -217,7 +217,7 @@ def start_filter_wheel(configuration):
     Parameters
     ----------
     configuration : dict
-        Session instance of global microscope configuration.
+        Configurator instance of global microscope configuration.
 
     Returns
     -------
@@ -243,7 +243,7 @@ def start_lasers(configuration):
     Parameters
     ----------
     configuration : dict
-        Session instance of global microscope configuration.
+        Configurator instance of global microscope configuration.
 
     Returns
     -------
@@ -304,9 +304,9 @@ def start_daq(configuration, experiment, etl_constants):
     Parameters
     ----------
     configuration : dict
-        Session instance of global microscope configuration.
+        Configurator instance of global microscope configuration.
     experiment : dict
-        Session instance of experiment configuration.
+        Configurator instance of experiment configuration.
     etl_constants : dict
         Dictionary of wavelength and zoom-specific remote focus amplitude and offsets.
 
@@ -336,9 +336,9 @@ def start_shutters(configuration, experiment):
     Parameters
     ----------
     configuration : dict
-        Session instance of global microscope configuration.
+        Configurator instance of global microscope configuration.
     experiment : dict
-        Session instance of experiment configuration.
+        Configurator instance of experiment configuration.
 
     Returns
     -------
@@ -364,9 +364,9 @@ def start_laser_triggers(configuration, experiment):
     Parameters
     ----------
     configuration : dict
-        Session instance of global microscope configuration.
+        Configurator instance of global microscope configuration.
     experiment : dict
-        Session instance of experiment configuration.
+        Configurator instance of experiment configuration.
 
     Returns
     -------

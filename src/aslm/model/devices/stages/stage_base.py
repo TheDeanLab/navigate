@@ -51,7 +51,7 @@ class StageBase:
 
     Attributes
     ----------
-    configuration : Session
+    configuration : Configurator
         Global configuration of the microscope
     x_pos : float
         True x position

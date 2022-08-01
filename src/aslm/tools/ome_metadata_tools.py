@@ -4,9 +4,9 @@ def ome_pixels_dict(configuration, experiment):
 
     Parameters 
     ----------
-    configuration : aslm.model.aslm_model_config.Session
+    configuration : aslm.model.aslm_model_config.Configurator
         Dictionary of microscope configuration data
-    model: aslm.model.aslm_model_config.Session
+    model: aslm.model.aslm_model_config.Configurator
         Dictionary of microscope experiment data
     
     Returns

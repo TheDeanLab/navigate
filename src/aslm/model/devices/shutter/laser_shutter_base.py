@@ -48,9 +48,9 @@ class ShutterBase:
 
     Attributes
     ----------
-    configuration : Session
+    configuration : Configurator
         Global configuration of the microscope
-    experiment : Session
+    experiment : Configurator
         Experiment configuration of the microscope
     shutter_right_state : bool
         Right shutter state

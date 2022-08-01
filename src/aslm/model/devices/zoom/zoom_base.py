@@ -47,7 +47,7 @@ class ZoomBase:
 
     Attributes
     ----------
-    configuration : Session
+    configuration : Configurator
         Global configuration of the microscope
     zoomdict : dict
         Dictionary of possible zoom values and their corresponding servo position.

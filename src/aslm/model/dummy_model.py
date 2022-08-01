@@ -1,5 +1,5 @@
 from pathlib import Path
-from aslm.model.aslm_model_config import Session as session
+from aslm.model.aslm_model_config import Configurator
 from aslm.model.aslm_model import Model
 
 def get_dummy_model():
@@ -27,9 +27,9 @@ def get_dummy_model():
     
     class dummy_model():
         def __init__(self):
-            self.configuration = session(config)
-            self.experiment = session(experiment)
-            self.etl_constants = session(etl_constants)
+            self.configuration = Configurator(config)
+            self.experiment = Configurator(experiment)
+            self.etl_constants = Configurator(etl_constants)
             self.data_buffer = None
 
     # Instantiate fake model to return

@@ -152,7 +152,7 @@ class Camera_Setting_Controller(GUI_Controller):
 
         Parameters
         ----------
-        experiment : Session
+        experiment : Configurator
             Configuration of the experimental settings.
         """
         self.in_initialization = True

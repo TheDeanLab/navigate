@@ -53,9 +53,9 @@ class ShutterTTL(ShutterBase):
 
     Attributes
     ----------
-    configuration : Session
+    configuration : Configurator
         Global configuration of the microscope
-    experiment : Session
+    experiment : Configurator
         Experiment configuration of the microscope
 
     Methods

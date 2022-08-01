@@ -145,7 +145,7 @@ class Stage_GUI_Controller(GUI_Controller):
         Parameters
         ----------
         config : object
-            ASLM_Configuration_Controller - config.configuration is Session instance of configuration.
+            ASLM_Configuration_Controller - config.configuration is Configurator instance of configuration.
         """
         self.position_min = config.get_stage_position_limits('_min')
         self.position_max = config.get_stage_position_limits('_max')

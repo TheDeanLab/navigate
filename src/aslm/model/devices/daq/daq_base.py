@@ -48,9 +48,9 @@ class DAQBase:
 
     Attributes
     ----------
-    configuration : Session
+    configuration : Configurator
         Global configuration of the microscope
-    experiment : Session
+    experiment : Configurator
         Experiment configuration of the microscope
     etl_constants : dict
         Dictionary with all of the wavelength, magnification, and imaging mode-specific amplitudes/offsets
@@ -273,7 +273,7 @@ class DAQBase:
         Parameters
         ----------
         microscope_state : dict
-            Dictionary of current experimental configuration.  Derivied from experiment Session object.
+            Dictionary of current experimental configuration.  Derivied from experiment Configurator object.
         channel : int
             Current microscope channel
         galvo_parameters : dict

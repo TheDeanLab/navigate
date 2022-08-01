@@ -135,7 +135,7 @@ class Channels_Tab_Controller(GUI_Controller):
         Parameters
         ----------
         config : object
-            ASLM_Configuration_Controller.  config.configuration = Session object.
+            ASLM_Configuration_Controller.  config.configuration = Configurator object.
         """
         self.set_channel_num(config.configuration.GUIParameters['number_of_channels'])
         self.stack_acq_widgets['cycling'].widget['values'] = ['Per Z', 'Per Stack']

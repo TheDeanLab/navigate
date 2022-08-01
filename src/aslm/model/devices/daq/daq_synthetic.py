@@ -49,9 +49,9 @@ class SyntheticDAQ(DAQBase):
 
     Attributes
     ----------
-    configuration : Session
+    configuration : Configurator
         Global configuration of the microscope
-    experiment : Session
+    experiment : Configurator
         Experiment configuration of the microscope
     etl_constants : dict
         Dictionary with all of the wavelength, magnification, and imaging mode-specific amplitudes/offsets

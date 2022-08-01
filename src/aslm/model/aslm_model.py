@@ -41,7 +41,7 @@ import numpy as np
 
 # Local Imports
 import aslm.model.aslm_device_startup_functions as startup_functions
-from aslm.model.aslm_model_config import Session as session
+from aslm.model.aslm_model_config import Configurator
 from aslm.model.concurrency.concurrency_tools import ResultThread, SharedNDArray
 from aslm.model.model_features.autofocus import Autofocus
 from aslm.model.model_features.aslm_image_writer import ImageWriter
@@ -112,13 +112,13 @@ class Model:
         self.logger = logging.getLogger(p)
 
         # Loads the YAML file for all of the microscope parameters
-        self.configuration = session(configuration_path)
+        self.configuration = Configurator(configuration_path)
 
         # Loads the YAML file for all of the experiment parameters
-        self.experiment = session(experiment_path)
+        self.experiment = Configurator(experiment_path)
 
         # Loads the YAML file for all of the ETL constants
-        self.etl_constants = session(etl_constants_path)
+        self.etl_constants = Configurator(etl_constants_path)
 
         # Initialize all Hardware
         if args.synthetic_hardware:
@@ -659,7 +659,7 @@ class Model:
         experiment_path : str
             File path to non-default experiment file.
         """
-        self.experiment = session(experiment_path)
+        self.experiment = Configurator(experiment_path)
 
     def get_readout_time(self):
         r"""Get readout time from camera.

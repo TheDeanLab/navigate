@@ -1,8 +1,4 @@
-"""
-ASLM Model Configuration
-Store variables that can be shared between different classes
-
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,7 +31,6 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 
 # Standard Imports
-from __future__ import (absolute_import, division, print_function)
 import sys
 from pathlib import Path
 import logging
@@ -43,13 +38,15 @@ import logging
 # Third Party Imports
 import yaml
 
+# Local Imports
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class Session:
-    """Session Class
+class Configurator:
+    """Configurator Class
 
     Stores variables and other classes that are common to several UI or instances of the code.
     Custom dunder setattr and getattr methods are used to add functionality.  Previously emitted signals for pyQt.
@@ -67,7 +64,7 @@ class Session:
         :arg args: Arguments passed to the program from the command line.
         """
 
-        super(Session, self).__init__()
+        super(Configurator, self).__init__()
         super().__setattr__('params', dict())
 
         """
@@ -86,7 +83,7 @@ class Session:
                     try:
                         config_data = yaml.load(f, Loader=yaml.FullLoader)
                     except yaml.YAMLError as yaml_error:
-                        logging.debug(f"Session - Yaml Error: {yaml_error}")
+                        logging.debug(f"Configurator - Yaml Error: {yaml_error}")
 
         # Set the attributes with the custom __setattr__
         for data_iterator in config_data:
@@ -122,13 +119,14 @@ class Session:
                 else:
                     self.params[key][k] = value[k]
 
-            super(Session, self).__setattr__(k, value[k])
+            super(Configurator, self).__setattr__(k, value[k])
 
     def __getattr__(self, item):
         if item not in self.params:
             return None
         else:
             return self.params[item]
+            super(Configurator, self).__setattr__(k, value[k])
 
     def __str__(self):
         r"""Overrides the print(class).
@@ -149,8 +147,6 @@ class Session:
     def serialize(self):
         r"""Overrides the print(class).
 
-        Function kept for compatibility.
-
         Returns
         -------
         string : str
@@ -158,10 +154,4 @@ class Session:
         """
         return self.__str__()
 
-    # def copy(self):
-    #     """
-    #     Copies this class. Important not to overwrite the memory of a previously created .
-    #     :return: a  exactly the same as this one.
-    #     """
-    #     return Session(self.params)
 

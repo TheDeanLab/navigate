@@ -57,10 +57,11 @@ from aslm.controller.sub_controllers.etl_popup_controller import Etl_Popup_Contr
 from aslm.controller.sub_controllers.autofocus_popup_controller import Autofocus_Popup_Controller
 import aslm.controller.aslm_controller_functions as controller_functions
 from aslm.controller.thread_pool import SynchronizedThreadPool
+from aslm.controller.sub_controllers.keystroke_controller import KeystrokeController
 
 # Local Model Imports
 from aslm.model.aslm_model import Model
-from aslm.model.aslm_model_config import Session as session
+from aslm.model.aslm_model_config import Configurator
 from aslm.model.concurrency.concurrency_tools import ObjectInSubprocess
 from aslm.tools.common_dict_tools import update_settings_common, update_stage_dict
 
@@ -124,15 +125,15 @@ class ASLM_controller:
         self.default_experiment_file = experiment_path
 
         # Load the Configuration and Experiment Files and Populate the GUI
-        self.configuration = session(configuration_path)
-        self.experiment = session(experiment_path)
+        self.configuration = Configurator(configuration_path)
+        self.experiment = Configurator(experiment_path)
 
         # Initialize view based on model.configuration
         configuration_controller = ASLM_Configuration_Controller(self.configuration)
 
         # etl setting file
         self.etl_constants_path = etl_constants_path
-        self.etl_constants = session(self.etl_constants_path)
+        self.etl_constants = Configurator(self.etl_constants_path)
 
         # Initialize the View
         self.view = view(root)
@@ -173,7 +174,6 @@ class ASLM_controller:
         self.initialize_menus()
 
         # Set view based on model.experiment
-        # self.experiment = session(experiment_path)
         self.populate_experiment_setting()
 
         # Camera View Tab
@@ -368,7 +368,7 @@ class ASLM_controller:
                 self.model.load_experiment_file(file_path)
 
                 # Create experiment instance.
-                self.experiment = session(file_path)
+                self.experiment = Configurator(file_path)
 
         # Configure GUI
         mode = self.experiment.MicroscopeState['image_mode']

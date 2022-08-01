@@ -38,7 +38,7 @@ import platform
 from aslm.log_files.log_functions import log_setup
 
 # Local Imports
-from aslm.controller.aslm_controller import ASLM_controller as controller
+from aslm.controller.aslm_controller import ASLM_controller as Controller
 
 
 def main():
@@ -169,7 +169,7 @@ def main():
 
     # Start the GUI
     root = tk.Tk()
-    controller(root,
+    Controller(root,
                configuration_path,
                experiment_path,
                etl_constants_path,

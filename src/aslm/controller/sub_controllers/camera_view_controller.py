@@ -637,12 +637,12 @@ class Camera_View_Controller(GUI_Controller):
         if self.autoscale is True:  # Autoscale Enabled
             self.image_palette['Min'].widget['state'] = 'disabled'
             self.image_palette['Max'].widget['state'] = 'disabled'
-            logger.debug("Autoscale Enabled")
+            logger.info("Autoscale Enabled")
 
         elif self.autoscale is False:  # Autoscale Disabled
             self.image_palette['Min'].widget['state'] = 'normal'
             self.image_palette['Max'].widget['state'] = 'normal'
-            logger.debug("Autoscale Disabled")
+            logger.info("Autoscale Disabled")
             self.update_min_max_counts()
 
     def transpose_image(self):

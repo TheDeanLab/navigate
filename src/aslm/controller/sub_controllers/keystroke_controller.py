@@ -61,11 +61,9 @@ class KeystrokeController(GUI_Controller):
         self.camera_view.slider.slider_widget.bind("<Button-1>", self.camera_controller.slider_update)
 
         # MouseWheel Binding
-        if platform.system() != 'Linux':
-            self.camera_view.canvas.bind("<MouseWheel>", self.camera_controller.mouse_wheel)
-        else:
-            self.camera_view.canvas.bind("<Button-4>", self.camera_controller.mouse_wheel)
-            self.camera_view.canvas.bind("<Button-5>", self.camera_controller.mouse_wheel)
+        self.view.root.bind("<MouseWheel>", self.view.scroll_frame.mouse_wheel)
+        self.camera_view.canvas.bind("<Enter>", self.camera_controller_mouse_wheel_enter)
+        self.camera_view.canvas.bind("<Leave>", self.camera_controller_mouse_wheel_leave)
 
         # Right Click Binding
         if platform.system() == 'Darwin':
@@ -82,11 +80,25 @@ class KeystrokeController(GUI_Controller):
         self.main_view.bind("1", self.switch_tab1)
         self.main_view.bind("2", self.switch_tab2)
 
+    def camera_controller_mouse_wheel_enter(self, event):
+        self.view.root.unbind("<MouseWheel>")  # get rid of scrollbar mousewheel
+        if platform.system() != 'Linux':
+            self.camera_view.canvas.bind("<MouseWheel>", self.camera_controller.mouse_wheel)
+        else:
+            self.camera_view.canvas.bind("<Button-4>", self.camera_controller.mouse_wheel)
+            self.camera_view.canvas.bind("<Button-5>", self.camera_controller.mouse_wheel)
+
+    def camera_controller_mouse_wheel_leave(self, event):
+        if platform.system() != "Linux":
+            self.camera_view.canvas.unbind("<MouseWheel>")
+        else:
+            self.camera_view.canvas.unbind("<Button-4>")
+            self.camera_view.canvas.unbind("<Button-5>")
+        self.view.root.bind("<MouseWheel>", self.view.scroll_frame.mouse_wheel)  # reinstate scrollbar mousewheel
 
     def switch_tab1(self, event):
         if event.state == 4 or event.state == 8:
             self.main_tabs.select(0)
-
 
     def switch_tab2(self, event):
         if event.state == 4 or event.state == 8:

@@ -300,11 +300,13 @@ class Camera_View_Controller(GUI_Controller):
         """
         self.zoom_x_pos = int(event.x)
         self.zoom_y_pos = int(event.y)
-        if event.num == 4 or event.delta == 120:
+        # if event.num == 4 or event.delta == 120:
+        if event.delta > 0:
             # Zoom out event.
             if self.zoom_value < 1:
                 self.zoom_value = self.zoom_value + .05
-        if event.num == 5 or event.delta == -120:
+        # if event.num == 5 or event.delta == -120:
+        if event.delta < 0:
             # Zoom in event.
             if self.zoom_value > 0.05:
                 self.zoom_value = self.zoom_value - .05

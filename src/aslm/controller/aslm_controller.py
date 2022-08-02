@@ -474,7 +474,7 @@ class ASLM_controller:
             args[0] : dict
                 dict = {'x': value, 'y': value, 'z': value, 'theta': value, 'f': value}
             """
-            self.threads_pool.createThread('stage', self.move_stage, args=({args[1] + '_abs': args[0]},))
+            self.threads_pool.createThread('model', self.move_stage, args=({args[1] + '_abs': args[0]},))
 
         elif command == 'stop_stage':
             self.threads_pool.createThread('stop_stage', self.stop_stage)
@@ -588,7 +588,7 @@ class ASLM_controller:
             self.experiment.Saving['solvent'] = saving_settings['solvent']
             self.camera_setting_controller.solvent = self.experiment.Saving['solvent']
             self.camera_setting_controller.calculate_physical_dimensions(
-                self.experiment.MicroscopeState['resolution_mode'])
+                self.experiment.MicroscopeState['zoom'])
             self.execute('acquire')
 
         elif command == 'acquire':
@@ -790,7 +790,7 @@ class ASLM_controller:
         while True:
             event, value = self.event_queue.get()
             if event == 'waveform':
-                self.waveform_tab_controller.plot_waveforms2(value, self.configuration.DAQParameters['sample_rate'])
+                self.waveform_tab_controller.update_waveforms(value, self.configuration.DAQParameters['sample_rate'])
             elif event == 'multiposition':
                 from aslm.tools.multipos_table_tools import update_table
                 update_table(self.view.settings.channels_tab.multipoint_list.get_table(), value)

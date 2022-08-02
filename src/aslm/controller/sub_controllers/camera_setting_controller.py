@@ -302,7 +302,7 @@ class Camera_Setting_Controller(GUI_Controller):
         for btn_name in self.roi_btns:
             self.roi_btns[btn_name]['state'] = state
         
-    def calculate_physical_dimensions(self, resolution_value):
+    def calculate_physical_dimensions(self, magnification):
         """
         Calculates the size of the field of view according to the magnification of the system,
         the physical size of the pixel, and the number of pixels.
@@ -311,7 +311,7 @@ class Camera_Setting_Controller(GUI_Controller):
         TODO: Should make sure that this is updated before we run the tiling wizard.  Also can probably be done more
         elegantly in a configuration file and dictionary structure.
         """
-        if resolution_value == 'high':
+        if magnification == 'N/A':  # magnification == 'N/A' is a proxy for resolution == 'high'
             # 54-12-8 - EFLobj = 12.19 mm / RI
             tube_lens_focal_length = 300
             extended_focal_length = 12.19
@@ -334,7 +334,6 @@ class Camera_Setting_Controller(GUI_Controller):
             multi_immersion_focal_length = extended_focal_length/refractive_index
             magnification = tube_lens_focal_length / multi_immersion_focal_length
         else:
-            magnification = resolution_value
             magnification = float(magnification[:-1])
 
         pixel_size = self.default_pixel_size

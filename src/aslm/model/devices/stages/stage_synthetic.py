@@ -109,7 +109,7 @@ class SyntheticStage(StageBase):
             success = self.move_axis_absolute(ax, move_dictionary)
 
         if wait_until_done is True:
-            time.sleep(.25)
+            time.sleep(0.25)
 
         return success
 

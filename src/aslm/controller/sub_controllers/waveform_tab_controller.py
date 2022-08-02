@@ -37,7 +37,8 @@ from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg)
 from matplotlib.figure import Figure
 import logging
 import numpy as np
-from pathlib import Path
+from tkinter import NSEW
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -51,40 +52,17 @@ class Waveform_Tab_Controller(GUI_Controller):
         self.galvo_l_waveform = 0
         self.galvo_r_waveform = 0
         self.laser_ao_waveforms = 0
+        
+        self.initialize_plots()
 
-        #TODO: Update waveforms according to the current model?
-        #TODO: How do you detect changes to the model to rerun the code?
-        #TODO: Concatenate each channel into a consecutive waveform as the microscope actually will.
+        self.view.bind('<Enter>', self.plot_waveforms)  # TODO: This means we have to move our mouse off and then back
+                                                        #       on to the plot to see an update. Better event to bind?
 
-    def update_waveforms(self):
-        self.etl_l_waveform = self.parent_controller.model.daq.etl_l_waveform
-        self.etl_r_waveform = self.parent_controller.model.daq.etl_r_waveform
-        self.galvo_l_waveform = self.parent_controller.model.daq.galvo_l_waveform
-        self.galvo_r_waveform = self.parent_controller.model.daq.galvo_r_waveform
-        self.laser_ao_waveforms = self.parent_controller.model.daq.laser_ao_waveforms
+    def update_waveforms(self, waveform_dict, sample_rate):
+        self.waveform_dict = waveform_dict
+        self.sample_rate = sample_rate
 
-    def plot_waveforms(self):
-        self.parent_controller.model.daq.create_waveforms()
-        self.update_waveforms()
-        self.view.fig = Figure(figsize=(8, 4), dpi=100)
-
-        self.view.plot1 = self.view.fig.add_subplot(511)
-        self.view.plot1.plot(self.etl_l_waveform, label='ETL L')
-
-        self.view.plot2 = self.view.fig.add_subplot(512)
-        self.view.plot2.plot(self.galvo_l_waveform, label='GALVO L')
-
-        self.view.plot3 = self.view.fig.add_subplot(513)
-        self.view.plot3.plot(self.laser_ao_waveforms, label='LASER')
-
-        self.view.plot4 = self.view.fig.add_subplot(514)
-        self.view.plot4.plot(self.galvo_r_waveform, label='GALVO R')
-
-        self.view.canvas = FigureCanvasTkAgg(self.view.fig, master=self.view)
-        self.view.canvas.get_tk_widget().pack()
-
-    def plot_waveforms2(self, waveform_dict, sample_rate):
-        from tkinter import NSEW
+    def initialize_plots(self):
         self.view.fig = Figure(figsize=(6, 6), dpi=100)
         self.view.canvas = FigureCanvasTkAgg(self.view.fig, master=self.view)
         self.view.canvas.draw()
@@ -92,25 +70,29 @@ class Waveform_Tab_Controller(GUI_Controller):
         self.view.plot_etl = self.view.fig.add_subplot(211)
         self.view.plot_galvo = self.view.fig.add_subplot(212)
 
+        self.view.canvas.get_tk_widget().grid(row=5, column=0, columnspan=3, sticky=(NSEW), padx=(5,5), pady=(5,5))
+
+    def plot_waveforms(self, event):
+
         self.view.plot_etl.clear()
         self.view.plot_galvo.clear()
 
         last_etl = 0
         last_galvo = 0
         last_camera = 0
-        for k in waveform_dict.keys():
-            if waveform_dict[k]['etl_waveform'] is None:
+        for k in self.waveform_dict.keys():
+            if self.waveform_dict[k]['etl_waveform'] is None:
                 continue
-            etl_waveform = waveform_dict[k]['etl_waveform']
-            galvo_waveform = waveform_dict[k]['galvo_waveform']
-            camera_waveform = waveform_dict[k]['camera_waveform']
-            self.view.plot_etl.plot(np.arange(len(etl_waveform))/sample_rate + last_etl, etl_waveform, label=k)
-            self.view.plot_galvo.plot(np.arange(len(galvo_waveform))/sample_rate + last_galvo, galvo_waveform, label=k)
-            self.view.plot_etl.plot(np.arange(len(camera_waveform))/sample_rate + last_camera, camera_waveform, c='k', linestyle='--')
-            self.view.plot_galvo.plot(np.arange(len(camera_waveform)) / sample_rate + last_camera, camera_waveform, c='k', linestyle='--')
-            last_etl += len(etl_waveform)/sample_rate
-            last_galvo += len(galvo_waveform)/sample_rate
-            last_camera += len(camera_waveform)/sample_rate
+            etl_waveform = self.waveform_dict[k]['etl_waveform']
+            galvo_waveform = self.waveform_dict[k]['galvo_waveform']
+            camera_waveform = self.waveform_dict[k]['camera_waveform']
+            self.view.plot_etl.plot(np.arange(len(etl_waveform))/self.sample_rate + last_etl, etl_waveform, label=k)
+            self.view.plot_galvo.plot(np.arange(len(galvo_waveform))/self.sample_rate + last_galvo, galvo_waveform, label=k)
+            self.view.plot_etl.plot(np.arange(len(camera_waveform))/self.sample_rate + last_camera, camera_waveform, c='k', linestyle='--')
+            self.view.plot_galvo.plot(np.arange(len(camera_waveform)) / self.sample_rate + last_camera, camera_waveform, c='k', linestyle='--')
+            last_etl += len(etl_waveform)/self.sample_rate
+            last_galvo += len(galvo_waveform)/self.sample_rate
+            last_camera += len(camera_waveform)/self.sample_rate
 
         self.view.plot_etl.set_title('ETL Waveform')
         self.view.plot_galvo.set_title('Galvo Waveform')
@@ -126,4 +108,3 @@ class Waveform_Tab_Controller(GUI_Controller):
         self.view.fig.tight_layout()
 
         self.view.canvas.draw_idle()
-        self.view.canvas.get_tk_widget().grid(row=5, column=0, columnspan=3, sticky=(NSEW), padx=(5,5), pady=(5,5))

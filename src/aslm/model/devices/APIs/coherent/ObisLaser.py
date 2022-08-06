@@ -37,6 +37,7 @@ import logging
 from pathlib import Path
 
 import serial
+from serial import SerialTimeoutException
 from time import time, sleep
 
 from aslm.model.devices.lasers.LaserBase import LaserBase
@@ -66,6 +67,8 @@ errors = {
     "520": "Controller time out",
     "900": "CCB message timed out"
 }
+
+# add dictonary here for commands
 
 class ObisLaser(LaserBase):
     """
@@ -136,59 +139,120 @@ class ObisLaser(LaserBase):
     # send() and read()
 
     def send(self, command):
-        response = self.laser.write(command + b"\r\n")
-        print(response)
-        return response
+        try:
+            response = self.laser.write((command + self.end_of_line).encode())
+        except SerialTimeoutException as e:
+            print(e)
+        # print(response)
+        # return response
 
     def read(self):
-        response = self.laser.readline().strip()
-        if self.laser.readline().strip() != b"OK":
-            # This is be the error message if it isnt okay
-            print(self.laser.readline().strip()) 
-        return response
+        # this while loop fixed most of the blanking response issue
+        response = ''
+        while result := self.laser.readline():
+            # print("Output: ",result)
+            if result == b'OK\r\n':
+                # print('line is OK')
+                break
+            # if result == b'OFF\r\n':
+            #     print('line is OFF')
+            #     continue
+            # if result == b'ON\r\n':
+            #     print('line is OFF')
+            #     continue
+            if result.startswith(b'ERR'):
+                # print('line is Error')
+                # Future error handling call TODO
+                break
+            response = result
+            
+        # Sleeps allowing serial commaction to finish???
+        # look into instead of using sleep make sure we get an OK or response we are expecting before we send anpother
+        # Fixing this would help speed up the code
+        sleep(.5)
+        print(f"Result: {result}, Resp: {response}")
+        return result, response
 
     def testing_handshake(self):
-        self.laser.write(("SOURce:AM:STATe?" + self.end_of_line).encode('ascii'))
-        print(self.laser.readline())
-        print(self.laser.readline())
-        print(self.laser.readline())
-        print(self.laser.readline())
+        print("We got here")
 
-        self.laser.write(("SOURce:AM:STATe OFF" + self.end_of_line).encode())
-        print(self.laser.readline())
-        print(self.laser.readline())
-        print(self.laser.readline())
-        print(self.laser.readline())
+        # self.send("SOURce:AM:STATe?")
+        # # Sleeps allowing serial commaction to finish???
+        # sleep(.5)
+        # response = self.read()
+        # print("first done")
 
-        self.laser.write(("SOURce:AM:STATe?" + self.end_of_line).encode())
-        self.laser.readline()
-        print(self.laser.readline())
-        self.laser.readline()
-        print(self.laser.readline())
+        # self.send("SOURce:AM:STATe ONOFF")
+        # # Sleeps allowing serial commaction to finish???
+        # sleep(.5)
+        # response = self.read()
+        # print("second done")
 
-        self.laser.write(("SOURce:AM:STATe OFF" + self.end_of_line).encode())
-        self.laser.readline()
-        print(self.laser.readline())
-        self.laser.readline()
-        print(self.laser.readline())
 
-        self.laser.write(("SOURce:AM:STATe?" + self.end_of_line).encode())
-        print(self.laser.readline())
-        self.laser.readline()
-        print(self.laser.readline())
-        self.laser.readline()
+        # self.send("SOURce:AM:STATe OFF")
+        # # Sleeps allowing serial commaction to finish???
+        # sleep(.5)
+        # response = self.read()
+        # print("third done")
 
-        self.laser.write(("SOURce:AM:STATe OFF" + self.end_of_line).encode())
-        print(self.laser.readline())
-        self.laser.readline()
-        print(self.laser.readline())
-        self.laser.readline()
 
-        self.laser.write(("SOURce:AM:STATe OFFON" + self.end_of_line).encode())
-        print(self.laser.readline())
-        print(self.laser.readline())
-        print(self.laser.readline())
-        print(self.laser.readline())
+        # self.send("SOURce:AM:STATe?")
+        # # Sleeps allowing serial commaction to finish???
+        # sleep(.5)
+        # response = self.read()
+        # print("forth done")
+
+        self.send("SOURce:POWer:LEVel:IMMediate:AMPLitude?")
+        # Sleeps allowing serial commaction to finish???
+        sleep(.5)
+        response = self.read()
+        print("fith done")
+
+        level = 0.2
+        self.send("SOURce:POWer:LEVel:IMMediate:AMPLitude 0.20000")
+        # Sleeps allowing serial commaction to finish???
+        sleep(.5)
+        response = self.read()
+        print("sixth done")
+
+        self.send("SOURce:POWer:LEVel:IMMediate:AMPLitude?")
+        # Sleeps allowing serial commaction to finish???
+        sleep(.5)
+        response = self.read()
+        print("seventh done")
+    
+
+
+        # print()
+        # print()
+
+        # self.laser.write(("SOURce:AM:STATe OFF" + self.end_of_line).encode())
+        # print(self.laser.readline())
+        # print(self.laser.readline())
+        # print(self.laser.readline())
+        # print(self.laser.readline())
+
+        # self.laser.write(("SOURce:AM:STATe?" + self.end_of_line).encode())
+        # print(self.laser.readline().strip())
+        # print(self.laser.readline().strip())
+
+
+        # self.laser.write(("SOURce:AM:STATe OFF" + self.end_of_line).encode())
+        # print(self.laser.readline())
+        # print(self.laser.readline())
+
+        # self.laser.write(("SOURce:AM:STATe?" + self.end_of_line).encode())
+        # print(self.laser.readline())
+        # print(self.laser.readline())
+
+        # self.laser.write(("SOURce:AM:STATe OFF" + self.end_of_line).encode())
+        # print(self.laser.readline())
+        # print(self.laser.readline())
+
+        # self.laser.write(("SOURce:AM:STATe OFFON" + self.end_of_line).encode())
+        # print(self.laser.readline())
+        # print(self.laser.readline())
+
 
 
     

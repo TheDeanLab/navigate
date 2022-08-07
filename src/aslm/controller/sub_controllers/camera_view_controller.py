@@ -300,11 +300,13 @@ class Camera_View_Controller(GUI_Controller):
         """
         self.zoom_x_pos = int(event.x)
         self.zoom_y_pos = int(event.y)
-        if event.num == 4 or event.delta == 120:
+        delta = 120 if platform.system() != 'Darwin' else 1
+        threshold = event.delta/delta
+        if (event.num == 4) or (threshold > 0):
             # Zoom out event.
             if self.zoom_value < 1:
                 self.zoom_value = self.zoom_value + .05
-        if event.num == 5 or event.delta == -120:
+        if (event.num == 5) or (threshold < 0):
             # Zoom in event.
             if self.zoom_value > 0.05:
                 self.zoom_value = self.zoom_value - .05
@@ -443,11 +445,11 @@ class Camera_View_Controller(GUI_Controller):
         """
         self.image_counter = 0
         self.slice_index = 0
-        self.number_of_channels = len([channel[-1] for channel in microscope_state['channels'].keys()])
+        self.number_of_channels = len(microscope_state['channels'])
         self.number_of_slices = int(microscope_state['number_z_steps'])
         self.total_images_per_volume = self.number_of_channels * self.number_of_slices
-        self.original_image_width = camera_parameters['x_pixels']
-        self.original_image_height = camera_parameters['y_pixels']
+        self.original_image_width = int(camera_parameters['x_pixels'])
+        self.original_image_height = int(camera_parameters['y_pixels'])
         self.image_volume = np.zeros((self.original_image_width,
                                       self.original_image_height,
                                       self.number_of_slices,

@@ -53,7 +53,7 @@ class KeystrokeController(GUI_Controller):
         self.multi_controller = parent_controller.channels_tab_controller.multi_position_controller
         self.stage_controller = parent_controller.stage_gui_controller
 
-        '''Keystrokes for Camera View'''
+        """Keystrokes for Camera View"""
         # Left Click binding
         self.camera_view.canvas.bind("<Button-1>", self.camera_controller.left_click)
 
@@ -61,29 +61,44 @@ class KeystrokeController(GUI_Controller):
         self.camera_view.slider.slider_widget.bind("<Button-1>", self.camera_controller.slider_update)
 
         # MouseWheel Binding
-        if platform.system() == 'Windows':
-            self.camera_view.canvas.bind("<MouseWheel>", self.camera_controller.mouse_wheel)
-        elif platform.system() == 'Linux':
-            self.camera_view.canvas.bind("<Button-4>", self.camera_controller.mouse_wheel)
-            self.camera_view.canvas.bind("<Button-5>", self.camera_controller.mouse_wheel)
+        self.view.root.bind("<MouseWheel>", self.view.scroll_frame.mouse_wheel)
+        self.camera_view.canvas.bind("<Enter>", self.camera_controller_mouse_wheel_enter)
+        self.camera_view.canvas.bind("<Leave>", self.camera_controller_mouse_wheel_leave)
 
         # Right Click Binding
-        self.camera_view.canvas.bind("<Button-3>", self.camera_controller.popup_menu)
+        if platform.system() == 'Darwin':
+            self.camera_view.canvas.bind("<Button-2>", self.camera_controller.popup_menu)
+        else:
+            self.camera_view.canvas.bind("<Button-3>", self.camera_controller.popup_menu)
 
-        '''Keystrokes for MultiTable'''
+        """Keystrokes for MultiTable"""
         self.mp_table = self.multi_table.pt
         self.mp_table.rowheader.bind("<Double-Button-1>", self.multi_controller.handle_double_click)
 
-        '''Keystrokes for Main Window'''
+        """Keystrokes for Main Window"""
         self.main_view.bind("<Key>", self.stage_controller.key_press)
         self.main_view.bind("1", self.switch_tab1)
         self.main_view.bind("2", self.switch_tab2)
 
+    def camera_controller_mouse_wheel_enter(self, event):
+        self.view.root.unbind("<MouseWheel>")  # get rid of scrollbar mousewheel
+        if platform.system() != 'Linux':
+            self.camera_view.canvas.bind("<MouseWheel>", self.camera_controller.mouse_wheel)
+        else:
+            self.camera_view.canvas.bind("<Button-4>", self.camera_controller.mouse_wheel)
+            self.camera_view.canvas.bind("<Button-5>", self.camera_controller.mouse_wheel)
+
+    def camera_controller_mouse_wheel_leave(self, event):
+        if platform.system() != "Linux":
+            self.camera_view.canvas.unbind("<MouseWheel>")
+        else:
+            self.camera_view.canvas.unbind("<Button-4>")
+            self.camera_view.canvas.unbind("<Button-5>")
+        self.view.root.bind("<MouseWheel>", self.view.scroll_frame.mouse_wheel)  # reinstate scrollbar mousewheel
 
     def switch_tab1(self, event):
         if event.state == 4 or event.state == 8:
             self.main_tabs.select(0)
-
 
     def switch_tab2(self, event):
         if event.state == 4 or event.state == 8:

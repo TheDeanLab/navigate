@@ -392,10 +392,12 @@ class Model:
             self.experiment.CameraParameters = kwargs['camera_info']
             self.is_save = self.experiment.MicroscopeState['is_save']
             self.prepare_acquisition()
+
             # load features
             # TODO: put it here now.
             if self.imaging_mode == 'z-stack':
                 self.signal_container, self.data_container = load_features(self, [[{'name': ZStackAcquisition}]])
+
             if self.imaging_mode == 'live':
                 self.signal_thread = threading.Thread(target=self.run_live_acquisition)
             else:

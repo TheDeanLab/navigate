@@ -68,7 +68,45 @@ errors = {
     "900": "CCB message timed out"
 }
 
-# add dictonary here for commands
+# Started to add dictionary but I have not tested it out
+commands = {
+    # commands to get info from laser
+    "l_model": "SYSTem:INFormation:MODel?",
+    "l_cabibration_date": "SYSTem:INFormation:CDATe?",
+    "l_cabibration_date": "SYSTem:INFormation:CDATe?",
+    "l_serial_num": "SYSTem:INFormation:SNUMber?",
+    "l_part_num": "SYSTem:INFormation:PNUMber?",
+    "l_firmware_version": "SYSTem:INFormation:FVERsion?",
+    "l_wavelength": "SYSTem:INFormation:WAVelength?",
+    "l_power_rating": "SYSTem:INFormation:POWer?",
+    "l_min_power": "SOURce:POWer:LIMit:LOW?",
+    "l_max_power": "SOURce:POWer:LIMit:HIGH?",
+    "l_output_power_level": "SOURce:POWer:LEVel?",
+    "l_output_current": "SOURce:POWer:CURRent?",
+    "l_opperating_mode": "SOURce:AM:SOURce?", 
+    "l_current_power_level": "SOURce:POWer:LEVel:IMMediate:AMPLitude??",
+    "l_analog_type": "SYSTem:INFormation:AMODulation:TYPe?",
+    "l_status": "SYSTem:STATus?",
+    "l_system_fault": "SYSTem:FAULt?",
+    "l_blanking_status": "SOURce:AModulation:BLANKing?",
+
+    # set commands and values will need to be passed in function
+    # valid value are ON or OFF
+    "set_blanking": "SOURce:AModulation:BLANKing ", 
+    # Set operatingmind Internal - valid values = CWP|CWC
+    "set_operating_mode_Int": "SOURce:AM:INTernal ", 
+    # Set operatingmind External - valid values = DIGital|ANALog|MIXed|DIGSO|MIXSO
+    "set_operating_mode_Ext": "SOURce:AM:EXTernal ",
+    # Set power level
+    # Note we were not able to get this command to work on 08/06/2022
+    "set_power_level": "SOURce:POWer:LEVel:IMMediate:AMPLitude ",
+    # Set lasser state - valid values = ON or OFF
+    "set_state": "SOURce:AM:STATe ",
+    # set analog mod type - valid values = 1 or 2
+    "set_analog_type": "SYSTem:INFormation:AMODulation:TYPe ",
+    # set blanking status - vaild values = On or OFF
+    "set_blanking_status": "SOURce:AModulation:BLANKing ",
+}
 
 class ObisLaser(LaserBase):
     """
@@ -153,6 +191,7 @@ class ObisLaser(LaserBase):
             # print("Output: ",result)
             if result == b'OK\r\n':
                 # print('line is OK')
+                # result = "OK"
                 break
             # if result == b'OFF\r\n':
             #     print('line is OFF')
@@ -162,7 +201,10 @@ class ObisLaser(LaserBase):
             #     continue
             if result.startswith(b'ERR'):
                 # print('line is Error')
+                # result = "ERROR"
                 # Future error handling call TODO
+                # code = result.strip('ERR')
+                # print(f"Error {code}: {errors[code]}.")
                 break
             response = result
             
@@ -173,7 +215,7 @@ class ObisLaser(LaserBase):
         print(f"Result: {result}, Resp: {response}")
         return result, response
 
-    def testing_handshake(self):
+    def testing(self):
         print("We got here")
 
         # self.send("SOURce:AM:STATe?")
@@ -220,42 +262,30 @@ class ObisLaser(LaserBase):
         sleep(.5)
         response = self.read()
         print("seventh done")
-    
 
 
-        # print()
-        # print()
-
-        # self.laser.write(("SOURce:AM:STATe OFF" + self.end_of_line).encode())
-        # print(self.laser.readline())
-        # print(self.laser.readline())
-        # print(self.laser.readline())
-        # print(self.laser.readline())
-
-        # self.laser.write(("SOURce:AM:STATe?" + self.end_of_line).encode())
-        # print(self.laser.readline().strip())
-        # print(self.laser.readline().strip())
 
 
-        # self.laser.write(("SOURce:AM:STATe OFF" + self.end_of_line).encode())
-        # print(self.laser.readline())
-        # print(self.laser.readline())
+    def askMachine(self, command):
+        self.send(command)
+        # Sleeps allowing serial commaction to finish???
+        sleep(.5)
+        response = self.read()
 
-        # self.laser.write(("SOURce:AM:STATe?" + self.end_of_line).encode())
-        # print(self.laser.readline())
-        # print(self.laser.readline())
-
-        # self.laser.write(("SOURce:AM:STATe OFF" + self.end_of_line).encode())
-        # print(self.laser.readline())
-        # print(self.laser.readline())
-
-        # self.laser.write(("SOURce:AM:STATe OFFON" + self.end_of_line).encode())
-        # print(self.laser.readline())
-        # print(self.laser.readline())
-
+    def updateMachine(self, command, value):
+        command = command + value
+        self.send(command)
+        # Sleeps allowing serial commaction to finish???
+        sleep(.5)
+        response = self.read()
 
 
     
+
+
+    # old code below this line
+    # dont worry about any code below this point as Tanner will clean it up when it is all working
+
     """
     # System Information Queries
     """
@@ -266,17 +296,6 @@ class ObisLaser(LaserBase):
         """
         command = "SYSTem:INFormation:MODel?"
         laser_model = self.ask(command)
-        if self.verbose:
-            print("Laser Model:", laser_model)
-        # self.laser_model = laser_model
-        return laser_model
-
-    def get_laser_model_v2(self):
-        """
-        # Get the laser model.
-        """
-        self.send("SYSTem:INFormation:MODel?")
-        response = self.read()
         if self.verbose:
             print("Laser Model:", laser_model)
         # self.laser_model = laser_model
@@ -754,43 +773,6 @@ class ObisLaser(LaserBase):
 
         return laser_blanking_status
 
-    
-    
-    # we can add to this when we know what we want our laser setting to be when we turn it on
-    def initialize_laser(self):
-        """
-        # Initialize the laser.
-        """
-        self.set_laser_to_on()
-        self.set_laser_operating_mode('mixed')
-        self.set_laser_power(self.get_maximum_laser_power())
-
-
-
-
-    # I am not sure where these command come from as I cant find it in the documentation
-    def get_ext_control(self):
-        """
-        # Get the external control status.
-        """
-        command = "SYSTem:EXTernal:CONTRol?"
-        ext_control = self.ask(command)
-        if self.verbose:
-            print("External Control:", ext_control)
-        # self.ext_control = ext_control
-        return ext_control
-
-
-    def get_laser_status(self):
-        """
-        # Get the current laser status.
-        """
-        command = "SOURce:STATus?"
-        laser_status = self.ask(command)
-        if self.verbose:
-            print("Laser Status:", laser_status)
-        # self.laser_status = laser_status
-        return laser_status
 
     
 

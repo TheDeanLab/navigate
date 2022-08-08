@@ -44,10 +44,11 @@ from pathlib import Path
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-class other_axis_frame(ttk.Frame):
+class other_axis_frame(ttk.Labelframe):
     def __init__(other_axis_frame, stage_control_tab, name, *args, **kwargs):
         #Init Frame
-        ttk.Frame.__init__(other_axis_frame, stage_control_tab, *args, **kwargs)
+        label = name
+        ttk.Labelframe.__init__(other_axis_frame, stage_control_tab, text= label + " Movement", *args, **kwargs)
         other_axis_frame.name = name
         
         # Formatting

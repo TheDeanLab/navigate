@@ -45,10 +45,10 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class x_y_frame(ttk.Frame):
+class x_y_frame(ttk.Labelframe):
     def __init__(x_y_frame, stage_control_tab, *args, **kwargs):
         #Init Frame
-        ttk.Frame.__init__(x_y_frame, stage_control_tab, *args, **kwargs)
+        ttk.Labelframe.__init__(x_y_frame, stage_control_tab, text="X Y Movement", *args, **kwargs)
         
         # Formatting
         Grid.columnconfigure(x_y_frame, 'all', weight=1)

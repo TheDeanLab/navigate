@@ -68,7 +68,7 @@ class position_frame(ttk.Frame):
                                                             input_var=tk.DoubleVar(),
                                                             input_args={'required': True, 'precision': 0.1}
                                                             )
-            position_frame.inputs[entry_names[i]].grid(row=0, column=i, pady=1, padx=15)
+            position_frame.inputs[entry_names[i]].grid(row=i, column=0)
 
 
 
@@ -77,7 +77,11 @@ class position_frame(ttk.Frame):
         """
         Grid for frames
 
-                1   2   3   4   5
+                1
+                2
+                3
+                4
+                5
 
         x is 1
         y is 2

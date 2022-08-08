@@ -80,6 +80,8 @@ class KeystrokeController(GUI_Controller):
         self.main_view.bind("1", self.switch_tab1)
         self.main_view.bind("2", self.switch_tab2)
         self.main_view.bind("3", self.switch_tab3)
+        self.main_view.bind("4", self.switch_tab4)
+
 
     def camera_controller_mouse_wheel_enter(self, event):
         self.view.root.unbind("<MouseWheel>")  # get rid of scrollbar mousewheel
@@ -97,6 +99,8 @@ class KeystrokeController(GUI_Controller):
             self.camera_view.canvas.unbind("<Button-5>")
         self.view.root.bind("<MouseWheel>", self.view.scroll_frame.mouse_wheel)  # reinstate scrollbar mousewheel
 
+    # Refactorable when we have time
+
     def switch_tab1(self, event):
         if event.state == 4 or event.state == 8:
             self.main_tabs.select(0)
@@ -108,3 +112,7 @@ class KeystrokeController(GUI_Controller):
     def switch_tab3(self, event):
         if event.state == 4 or event.state == 8:
             self.main_tabs.select(2)
+
+    def switch_tab4(self, event):
+        if event.state == 4 or event.state == 8:
+            self.main_tabs.select(3)

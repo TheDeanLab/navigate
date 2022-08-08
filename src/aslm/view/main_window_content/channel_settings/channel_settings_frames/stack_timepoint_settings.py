@@ -54,33 +54,31 @@ class stack_timepoint_frame(ttk.Labelframe):
 
 
         #Save Data Label
-        label_position = 0
-        input_position = 4
         self.laser_label = ttk.Label(self, text='Save Data')
-        self.laser_label.grid(row=0, column=label_position, sticky=(tk.NSEW), padx=(4,5), pady=(4,0))
+        self.laser_label.grid(row=0, column=0, sticky=(tk.NSEW), padx=(4,5), pady=(4,0))
 
         #Save Data Checkbox
         self.save_data = tk.BooleanVar()
         self.save_data.set(False)
         self.save_check = ttk.Checkbutton(self, text='', variable=self.save_data)
-        self.save_check.grid(row=0, column=input_position, sticky=(tk.NSEW), pady=(4,0))
+        self.save_check.grid(row=0, column=1, sticky=(tk.NSEW), pady=(4,0))
         self.inputs['save_check'] = self.save_check
 
 
         # Timepoints Label, spinbox defaults to 1.
         self.filterwheel_label = ttk.Label(self, text='Timepoints')
-        self.filterwheel_label.grid(row=1, column=label_position, sticky=(tk.NSEW), padx=(4,5), pady=2)
+        self.filterwheel_label.grid(row=1, column=0, sticky=(tk.NSEW), padx=(4,5), pady=2)
         self.exp_time_spinval = tk.StringVar()
         self.exp_time_spinbox = ttk.Spinbox(
             self, from_=0, to=5000, textvariable=self.exp_time_spinval,
             increment=1,
             width=12)
-        self.exp_time_spinbox.grid(row=1, column=input_position, sticky=(tk.NSEW), pady=2)
+        self.exp_time_spinbox.grid(row=1, column=1, sticky=(tk.NSEW), pady=2)
         self.inputs['time_spin'] = self.exp_time_spinbox
 
         #Stack Acq. Time Label
         self.exp_time_label = ttk.Label(self, text='Stack Acq. Time')
-        self.exp_time_label.grid(row=2, column=label_position, sticky=(tk.NSEW), padx=(4,5), pady=2)
+        self.exp_time_label.grid(row=2, column=0, sticky=(tk.NSEW), padx=(4,5), pady=2)
 
         # Stack Acq. Time Spinbox
         self.stack_acq_spinval = tk.StringVar()
@@ -92,24 +90,24 @@ class stack_timepoint_frame(ttk.Labelframe):
             increment=25,
             width=12
         )
-        self.stack_acq_spinbox.grid(row=2, column=input_position, sticky=(tk.NSEW), pady=2)
+        self.stack_acq_spinbox.grid(row=2, column=1, sticky=(tk.NSEW), pady=2)
         self.stack_acq_spinbox.state(['disabled']) #Starts it disabled
 
         #Stack Pause Label
         self.exp_time_label = ttk.Label(self, text='Stack Pause (s)')
-        self.exp_time_label.grid(row=3, column=label_position, sticky=(tk.NSEW), padx=(4,5), pady=2)
+        self.exp_time_label.grid(row=0, column=2, sticky=(tk.NSEW), padx=(4,5), pady=2)
 
         # Stack Pause Spinbox
         self.stack_pause_spinval = tk.StringVar()
         self.stack_pause_spinbox = ttk.Spinbox(
             self, from_=0,to=5000.0,
             textvariable=self.stack_pause_spinval, increment=25, width=12)
-        self.stack_pause_spinbox.grid(row=3, column=input_position, sticky=(tk.NSEW), pady=2)
+        self.stack_pause_spinbox.grid(row=0, column=3, sticky=(tk.NSEW), pady=2)
         self.inputs['stack_pause'] = self.stack_pause_spinbox
 
         #Timepoint Interval Label
         self.exp_time_label = ttk.Label(self, text='Timepoint Interval (hh:mm:ss)')
-        self.exp_time_label.grid(row=4, column=label_position, sticky=(tk.NSEW), padx=(4,5), pady=2)
+        self.exp_time_label.grid(row=1, column=2, sticky=(tk.NSEW), padx=(4,5), pady=2)
 
         # Timepoint Interval Spinbox
         self.timepoint_interval_spinval = tk.StringVar()
@@ -118,13 +116,13 @@ class stack_timepoint_frame(ttk.Labelframe):
         self.timepoint_interval_spinbox = ttk.Spinbox(
             self, from_=0, to=5000.0,
             textvariable=self.timepoint_interval_spinval, increment=25, width=12)
-        self.timepoint_interval_spinbox.grid(row=4, column=input_position, sticky=(tk.NSEW), pady=2)
+        self.timepoint_interval_spinbox.grid(row=1, column=3, sticky=(tk.NSEW), pady=2)
         self.timepoint_interval_spinbox.state(['disabled']) #Starts it disabled
 
 
         #Total Time Label
         self.exp_time_label = ttk.Label(self, text='Experiment Duration (hh:mm:ss)')
-        self.exp_time_label.grid(row=5, column=label_position, sticky=(tk.NSEW), padx=(4,5), pady=(2,6))
+        self.exp_time_label.grid(row=2, column=2, sticky=(tk.NSEW), padx=(4,5), pady=(2,6))
 
         # Total Time Spinbox
         self.total_time_spinval = tk.StringVar()
@@ -134,7 +132,7 @@ class stack_timepoint_frame(ttk.Labelframe):
             self,
             from_=0, to=5000.0, textvariable=self.total_time_spinval,
             increment=25, width=12)
-        self.total_time_spinval.grid(row=5, column=input_position, sticky=(tk.NSEW), pady=(2,6))
+        self.total_time_spinval.grid(row=2, column=3, sticky=(tk.NSEW), pady=(2,6))
         self.total_time_spinval.state(['disabled'])
 
 

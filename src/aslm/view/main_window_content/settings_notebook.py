@@ -42,7 +42,7 @@ logger = logging.getLogger(p)
 # Import Sub-Frames
 from aslm.view.main_window_content.camera_display.camera_settings.camera_settings_tab import camera_settings_tab
 from aslm.view.main_window_content.channel_settings.channels_tab import channels_tab
-from aslm.view.main_window_content.channel_settings.multiposition_tab import multiposition_tab
+from aslm.view.main_window_content.multiposition.multiposition_tab import multiposition_tab
 
 
 class settings_notebook(ttk.Notebook):

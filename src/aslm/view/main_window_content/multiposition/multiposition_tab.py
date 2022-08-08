@@ -34,7 +34,7 @@ import tkinter as tk
 from tkinter import ttk
 import logging
 
-from aslm.view.main_window_content.channel_settings.channel_settings_frames.multipoint_settings import multipoint_list
+from aslm.view.main_window_content.multiposition.multipoint_settings import multipoint_list
 
 # Logger Setup
 p = __name__.split(".")[1]

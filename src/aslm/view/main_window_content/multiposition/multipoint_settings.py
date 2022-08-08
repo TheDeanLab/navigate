@@ -31,7 +31,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 import pandas as pd
-from aslm.view.main_window_content.channel_settings.channel_settings_frames.multi_position_table import Multi_Position_Table as MPTable
+from aslm.view.main_window_content.multiposition.multi_position_table import Multi_Position_Table as MPTable
 import tkinter as tk
 from tkinter import ttk
 import logging

@@ -190,7 +190,7 @@ class Channels_Tab_Controller(GUI_Controller):
         """
 
         # Not included in stack_acq_vals or timepoint_vals
-        microscope_state['stage_positions'] = self.multi_position_controller.get_positions()
+        microscope_state['stage_positions'] = self.parent_controller.multiposition_tab_controller.get_positions()
         microscope_state['channels'] = self.channel_setting_controller.get_values()
         microscope_state['stack_cycling_mode'] = 'per_stack' if self.stack_acq_vals['cycling'].get() == 'Per Stack' else 'per_z'
         microscope_state['stack_z_origin'] = self.z_origin
@@ -429,7 +429,7 @@ class Channels_Tab_Controller(GUI_Controller):
         if self.in_initialization:
             return
         channel_settings = self.channel_setting_controller.get_values()
-        number_of_positions = self.multi_position_controller.get_position_num() if self.is_multiposition else 1
+        number_of_positions = self.parent_controller.multiposition_tab_controller.get_position_num() if self.is_multiposition else 1
         channel_exposure_time = []
         # validate the spinbox's value
         try:
@@ -547,25 +547,25 @@ class Channels_Tab_Controller(GUI_Controller):
 
     def load_positions(self):
         r"""Load Positions for Multi-Position Acquisition. """
-        self.multi_position_controller.load_csv_func()
+        self.parent_controller.multiposition_tab_controller.load_csv_func()
 
     def export_positions(self):
         r"""Export Positions for Multi-Position Acquisition. """
-        self.multi_position_controller.export_csv_func()
+        self.parent_controller.multiposition_tab_controller.export_csv_func()
 
     def move_to_position(self):
         r"""Move to a position within the Multi-Position Acquisition Interface."""
         event = type('MyEvent', (object,), {})
         event.x, event.y = 0, 0
-        self.multi_position_controller.handle_double_click(event)
+        self.parent_controller.multiposition_tab_controller.handle_double_click(event)
 
     def append_current_position(self):
         r"""Add current position to the Multi-Position Acquisition Interface."""
-        self.multi_position_controller.add_stage_position_func()
+        self.parent_controller.multiposition_tab_controller.add_stage_position_func()
 
     def generate_positions(self):
         r"""Generate a Multi-Position Acquisition."""
-        self.multi_position_controller.generate_positions_func()
+        self.parent_controller.multiposition_tab_controller.generate_positions_func()
 
     def set_info(self,
                  vals,

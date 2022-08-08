@@ -133,11 +133,11 @@ class LabelInput(ttk.Frame):
             self, textvariable=self.error, foreground='red')
         self.error_label.grid(row=2, column=0, sticky=(tk.W + tk.E))
 
-    def grid(self, sticky=(tk.E + tk.W), **kwargs):
-        """
-        #### Creating a custom grid function that will default LabelInput.grid() to sticky=tk.W + tk.E
-        """
-        super().grid(sticky=sticky, **kwargs)
+    # def grid(self, sticky=(tk.E + tk.W), **kwargs):
+    #     """
+    #     #### Creating a custom grid function that will default LabelInput.grid() to sticky=tk.W + tk.E
+    #     """
+    #     super().grid(sticky=sticky, **kwargs)
 
     def get(self):
         """

@@ -60,7 +60,7 @@ class stagecontrol_notebook(ttk.Notebook):
         self.stage_control_tab = stage_control_tab(self)
 
         #Creating Max intensity projection Tab
-        self.maximum_intensity_projection_tab = maximum_intensity_projection_tab(self)
+        # self.maximum_intensity_projection_tab = maximum_intensity_projection_tab(self)
 
         #Adding tabs to notebook
         self.add(self.stage_control_tab, text='Stage Control', sticky=tk.NSEW)

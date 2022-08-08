@@ -42,6 +42,7 @@ logger = logging.getLogger(p)
 # Import Sub-Frames
 from aslm.view.main_window_content.camera_display.camera_settings.camera_settings_tab import camera_settings_tab
 from aslm.view.main_window_content.channel_settings.channels_tab import channels_tab
+from aslm.view.main_window_content.stage_control.stage_control_tab import stage_control_tab
 from aslm.view.main_window_content.multiposition.multiposition_tab import multiposition_tab
 
 
@@ -63,12 +64,16 @@ class settings_notebook(ttk.Notebook):
         #Creating the Camera tab
         self.camera_settings_tab = camera_settings_tab(self)
 
+        #Creating Stage Control Tab
+        self.stage_control_tab = stage_control_tab(self)
+
         # Creating Table tab
         self.multiposition_tab = multiposition_tab(self)
 
         #Adding tabs to settings notebook
         self.add(self.channels_tab, text='Channels', sticky=tk.NSEW)
         self.add(self.camera_settings_tab, text='Camera Settings', sticky=tk.NSEW)
+        self.add(self.stage_control_tab, text='Stage Control', sticky=tk.NSEW)
         self.add(self.multiposition_tab, text='Multiposition', sticky=tk.NSEW)
 
 

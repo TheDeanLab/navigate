@@ -128,7 +128,7 @@ class MainApp(ttk.Frame):
         # notebook
         self.settings = settings_notebook(self.frame_left)
         self.camera_waveform = camera_notebook(self.frame_top_right)
-        self.stage_control = stagecontrol_notebook(self.frame_bottom_right)
+        # self.stage_control = stagecontrol_notebook(self.frame_bottom_right)
         self.acqbar = AcquireBar(self.top_frame, self.root)
         self.logger.info("GUI setup working")
         self.logger.info("Performance - GUI Started real quick")

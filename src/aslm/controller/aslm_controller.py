@@ -58,6 +58,7 @@ from aslm.controller.sub_controllers.autofocus_popup_controller import Autofocus
 import aslm.controller.aslm_controller_functions as controller_functions
 from aslm.controller.thread_pool import SynchronizedThreadPool
 from aslm.controller.sub_controllers.keystroke_controller import KeystrokeController
+from aslm.controller.sub_controllers.multi_position_controller import Multi_Position_Controller
 
 # Local Model Imports
 from aslm.model.aslm_model import Model
@@ -147,6 +148,8 @@ class ASLM_controller:
         self.channels_tab_controller = Channels_Tab_Controller(self.view.settings.channels_tab,
                                                                self,
                                                                configuration_controller)
+
+        self.multiposition_tab_controller = Multi_Position_Controller(self.view.settings.multiposition_tab.multipoint_list, self)
 
         self.camera_view_controller = Camera_View_Controller(self.view.camera_waveform.camera_tab,
                                                              self)
@@ -793,7 +796,7 @@ class ASLM_controller:
                 self.waveform_tab_controller.update_waveforms(value, self.configuration.DAQParameters['sample_rate'])
             elif event == 'multiposition':
                 from aslm.tools.multipos_table_tools import update_table
-                update_table(self.view.settings.channels_tab.multipoint_list.get_table(), value)
+                update_table(self.view.settings.multiposition_tab.multipoint_list.get_table(), value)
                 self.view.settings.channels_tab.multipoint_frame.on_off.set(True)  # assume we want to use multipos
             elif event == 'stop':
                 break

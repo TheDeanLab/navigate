@@ -93,7 +93,7 @@ class Tiling_Wizard_Controller(GUI_Controller):
         self.cam_settings_widgets = main_view.settings.camera_settings_tab.camera_roi.get_widgets()
         self.stack_acq_widgets = main_view.settings.channels_tab.stack_acq_frame.get_widgets()
         self.stage_position_vars = main_view.stage_control.stage_control_tab.position_frame.get_variables()
-        self.multipoint_table = main_view.settings.channels_tab.multipoint_list.get_table()
+        self.multipoint_table = main_view.settings.multiposition_tab.multipoint_list.get_table()
 
         # Setting/Tracing Percent Overlay
         # Overlay change is also handled in update_overlay

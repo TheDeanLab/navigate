@@ -40,7 +40,6 @@ import numpy as np
 from aslm.controller.sub_controllers.widget_functions import validate_wrapper
 from aslm.controller.sub_controllers.gui_controller import GUI_Controller
 from aslm.controller.sub_controllers.channel_setting_controller import Channel_Setting_Controller
-from aslm.controller.sub_controllers.multi_position_controller import Multi_Position_Controller
 from aslm.controller.sub_controllers.tiling_wizard_controller import Tiling_Wizard_Controller
 
 # View Imports that are not called on startup
@@ -65,7 +64,7 @@ class Channels_Tab_Controller(GUI_Controller):
 
         # sub-controllers
         self.channel_setting_controller = Channel_Setting_Controller(self.view.channel_widgets_frame, self)
-        self.multi_position_controller = Multi_Position_Controller(self.view.multipoint_list, self)
+        
 
         
 
@@ -123,7 +122,7 @@ class Channels_Tab_Controller(GUI_Controller):
         self.is_multiposition = False
         self.is_multiposition_val = self.view.multipoint_frame.on_off
         self.view.multipoint_frame.save_check.configure(command=self.toggle_multiposition)
-        self.view.multipoint_frame.buttons["tiling"].configure(command=self.launch_tiling_wizard)
+        self.view.quick_launch.buttons["tiling"].configure(command=self.launch_tiling_wizard)
 
         if configuration_controller:
             self.initialize(configuration_controller)
@@ -166,7 +165,7 @@ class Channels_Tab_Controller(GUI_Controller):
         self.channel_setting_controller.set_experiment_values(microscope_state['channels'])
 
         # positions
-        self.multi_position_controller.set_positions(microscope_state['stage_positions'])
+        self.parent_controller.multiposition_tab_controller.set_positions(microscope_state['stage_positions'])
         
         # after initialization
         self.in_initialization = False

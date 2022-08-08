@@ -1,4 +1,7 @@
-"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+
+
+"""
+Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -29,7 +32,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-# Standard Imports
+
 import tkinter as tk
 from tkinter import ttk
 import logging
@@ -38,42 +41,19 @@ import logging
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+class quick_launch(ttk.Labelframe):
+    def __init__(self, settings_tab, *args, **kwargs):
+        text_label = 'Quick Launch Buttons'
+        ttk.Labelframe.__init__(self, settings_tab, text=text_label, *args, **kwargs)
 
-# Import Sub-Frames
-from aslm.view.main_window_content.camera_display.camera_settings.camera_settings_tab import camera_settings_tab
-from aslm.view.main_window_content.channel_settings.channels_tab import channels_tab
-from aslm.view.main_window_content.channel_settings.multiposition_tab import multiposition_tab
-
-
-class settings_notebook(ttk.Notebook):
-    def __init__(self, frame_left, *args, **kwargs):
-        #Init notebook
-        ttk.Notebook.__init__(self, frame_left, *args, **kwargs)
-        
         # Formatting
         tk.Grid.columnconfigure(self, 'all', weight=1)
         tk.Grid.rowconfigure(self, 'all', weight=1)
 
-        #Putting notebook 1 into left frame
-        self.grid(row=0,column=0)
+        # Dicts
+        self.buttons = {}
 
-        #Creating the Channels tab
-        self.channels_tab = channels_tab(self)
-
-        #Creating the Camera tab
-        self.camera_settings_tab = camera_settings_tab(self)
-
-        # Creating Table tab
-        self.multiposition_tab = multiposition_tab(self)
-
-        #Adding tabs to settings notebook
-        self.add(self.channels_tab, text='Channels', sticky=tk.NSEW)
-        self.add(self.camera_settings_tab, text='Camera Settings', sticky=tk.NSEW)
-        self.add(self.multiposition_tab, text='Multiposition', sticky=tk.NSEW)
-
-
-
-
-
-
-
+        # Buttons
+        # Tiling Wizard Button
+        self.buttons["tiling"] = ttk.Button(self, text="Launch Tiling Wizard")
+        self.buttons["tiling"].grid(row=0, column=2, sticky=(tk.NSEW), padx=(10,0), pady=(4,6))

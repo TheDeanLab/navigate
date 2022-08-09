@@ -77,10 +77,17 @@ class KeystrokeController(GUI_Controller):
 
         """Keystrokes for Main Window"""
         self.main_view.bind("<Key>", self.stage_controller.key_press)
+        # self.main_view.bind("<Key>", self.test)
         self.main_view.bind("1", self.switch_tab1)
         self.main_view.bind("2", self.switch_tab2)
         self.main_view.bind("3", self.switch_tab3)
         self.main_view.bind("4", self.switch_tab4)
+
+    # def test(self, event):
+    #     print(event.state)
+    #     print(event.keysym)
+    #     print(event.keycode)
+    #     print(event)
 
 
     def camera_controller_mouse_wheel_enter(self, event):
@@ -102,15 +109,15 @@ class KeystrokeController(GUI_Controller):
     # Refactorable when we have time
 
     def switch_tab1(self, event):
-        if event.state == 4 or event.state == 8:
+        if event.state == 4:
             self.main_tabs.select(0)
 
     def switch_tab2(self, event):
-        if event.state == 4 or event.state == 8:
+        if event.state == 4:
             self.main_tabs.select(1)
     
     def switch_tab3(self, event):
-        if event.state == 4 or event.state == 8:
+        if event.state == 4:
             self.main_tabs.select(2)
 
     def switch_tab4(self, event):

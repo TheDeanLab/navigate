@@ -72,7 +72,7 @@ class stack_timepoint_frame(ttk.Labelframe):
         self.exp_time_spinbox = ttk.Spinbox(
             self, from_=0, to=5000, textvariable=self.exp_time_spinval,
             increment=1,
-            width=12)
+            width=3)
         self.exp_time_spinbox.grid(row=1, column=1, sticky=(tk.NSEW), pady=2)
         self.inputs['time_spin'] = self.exp_time_spinbox
 
@@ -88,7 +88,7 @@ class stack_timepoint_frame(ttk.Labelframe):
             to=5000.0,
             textvariable=self.stack_acq_spinval, #this holds the data in the entry
             increment=25,
-            width=12
+            width=6
         )
         self.stack_acq_spinbox.grid(row=2, column=1, sticky=(tk.NSEW), pady=2)
         self.stack_acq_spinbox.state(['disabled']) #Starts it disabled
@@ -101,7 +101,7 @@ class stack_timepoint_frame(ttk.Labelframe):
         self.stack_pause_spinval = tk.StringVar()
         self.stack_pause_spinbox = ttk.Spinbox(
             self, from_=0,to=5000.0,
-            textvariable=self.stack_pause_spinval, increment=25, width=12)
+            textvariable=self.stack_pause_spinval, increment=25, width=6)
         self.stack_pause_spinbox.grid(row=0, column=3, sticky=(tk.NSEW), pady=2)
         self.inputs['stack_pause'] = self.stack_pause_spinbox
 
@@ -115,7 +115,7 @@ class stack_timepoint_frame(ttk.Labelframe):
             self.timepoint_interval_spinval.set('0')
         self.timepoint_interval_spinbox = ttk.Spinbox(
             self, from_=0, to=5000.0,
-            textvariable=self.timepoint_interval_spinval, increment=25, width=12)
+            textvariable=self.timepoint_interval_spinval, increment=25, width=6)
         self.timepoint_interval_spinbox.grid(row=1, column=3, sticky=(tk.NSEW), pady=2)
         self.timepoint_interval_spinbox.state(['disabled']) #Starts it disabled
 
@@ -131,7 +131,7 @@ class stack_timepoint_frame(ttk.Labelframe):
         self.total_time_spinval = ttk.Spinbox(
             self,
             from_=0, to=5000.0, textvariable=self.total_time_spinval,
-            increment=25, width=12)
+            increment=25, width=6)
         self.total_time_spinval.grid(row=2, column=3, sticky=(tk.NSEW), pady=(2,6))
         self.total_time_spinval.state(['disabled'])
 

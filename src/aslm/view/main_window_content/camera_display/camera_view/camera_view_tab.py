@@ -103,7 +103,7 @@ class live_frame(ttk.Labelframe):
         tk.Grid.rowconfigure(self, 'all', weight=1)
 
         self.live_var = tk.StringVar()
-        self.live = ttk.Combobox(self, textvariable=self.live_var)
+        self.live = ttk.Combobox(self, textvariable=self.live_var, width=15)
         self.live['values'] = ('Live', 'Image Plane', 'XY MIP', 'YZ MIP', 'ZY MIP')
         self.live.set('Live')
         self.live.grid(row=1, column=0)

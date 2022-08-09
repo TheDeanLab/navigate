@@ -67,7 +67,9 @@ class live_frame(ttk.Labelframe):
         self.live_var = StringVar()
         self.live = ttk.Combobox(self,
                                  textvariable=self.live_var,
-                                 state="readonly")
+                                 state="readonly",
+                                 width=6
+                                 )
         self.live['values'] = ('Live',
                                'XY Slice',
                                'YZ Slice',
@@ -76,7 +78,7 @@ class live_frame(ttk.Labelframe):
                                'YZ MIP',
                                'ZY MIP')
         self.live.set('Live')
-        self.live.grid(row=1, column=0)
+        self.live.grid(row=0, column=0)
         self.live.state = "readonly"
 
 

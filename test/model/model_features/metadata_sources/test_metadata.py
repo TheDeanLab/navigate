@@ -38,6 +38,6 @@ def test_metadata_shape():
     tts = model.experiment.MicroscopeState['timepoints']
     tcs = sum([v['is_selected'] == True for k, v in model.experiment.MicroscopeState['channels'].items()])
 
-    xs, ys, zs, ts, cs = md.shape
+    xs, ys, cs, zs, ts = md.shape
 
     assert((xs==txs) and (ys==tys) and (zs==tzs) and (ts==tts) and (cs==tcs))

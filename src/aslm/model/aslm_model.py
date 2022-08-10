@@ -400,6 +400,9 @@ class Model:
             # TODO: put it here now.
             if self.imaging_mode == 'z-stack':
                 self.signal_container, self.data_container = load_features(self, [[{'name': ZStackAcquisition}]])
+            
+            if self.imaging_mode == 'single':
+                self.experiment.MicroscopeState['stack_cycling_mode'] = 'per_z'
 
             if self.imaging_mode == 'live':
                 self.signal_thread = threading.Thread(target=self.run_live_acquisition)

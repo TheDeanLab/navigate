@@ -74,7 +74,7 @@ class Metadata:
         self.shape_c = sum([v['is_selected'] == True for k, v in self.experiment.MicroscopeState['channels'].items()])
 
     def set_stack_order_from_configuration_experiment(self) -> None:
-        self._per_stack = self.experiment.MicroscopeState['image_mode'] == 'per_stack'
+        self._per_stack = self.experiment.MicroscopeState['stack_cycling_mode'] == 'per_stack'
 
     @property
     def voxel_size(self) -> tuple:

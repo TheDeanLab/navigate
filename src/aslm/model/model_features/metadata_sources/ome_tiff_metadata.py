@@ -22,7 +22,7 @@ class OMETIFFMetadata(XMLMetadata):
         ome_dict['Pixels']['SizeX'] = int(self.experiment.CameraParameters['x_pixels'])
         ome_dict['Pixels']['SizeY'] = int(self.experiment.CameraParameters['y_pixels'])
         ome_dict['Pixels']['SizeT'] = int(self.experiment.MicroscopeState['timepoints'])
-        ome_dict['Pixels']['SizeC'] = len(self.experiment.MicroscopeState['channels'])
+        ome_dict['Pixels']['SizeC'] = 1 # len(self.experiment.MicroscopeState['channels'])
 
         if self.experiment.MicroscopeState['image_mode'] == 'z-stack':
             ome_dict['Pixels']['SizeZ'] = int(self.experiment.MicroscopeState['number_z_steps'])
@@ -48,4 +48,4 @@ class OMETIFFMetadata(XMLMetadata):
         return ome_dict
 
     def to_xml(self) -> str:
-        return super().to_xml('OME-TIFF')
+        return super().to_xml('OME-TIFF', 'OME')

@@ -77,12 +77,17 @@ class TiffDataSource(DataSource):
             self._setup_write_image()
 
         dx, dy, dz = self.metadata.voxel_size
+
+        md = {'spacing': dz, 'unit': 'um', 'axes': 'ZYX'}
+        md['Plane'] = {}
+        for k, v in zip(['PositionX', 'PositionY', 'PositionZ'], ['x', 'y', 'z']):
+            md['Plane'][k] = kw[v]
+
+        print(md)
         
         self.image[c].write(data.reshape(1, self.shape_y, self.shape_x), 
                             resolution=(1./dx, 1./dy), 
-                            metadata={'spacing': dz,
-                                      'unit': 'um',
-                                      'axes': 'ZYX'},
+                            metadata=md,
                             contiguous=True)
 
         self._current_frame += 1

@@ -82,13 +82,10 @@ class TiffDataSource(DataSource):
         md['Plane'] = {}
         for k, v in zip(['PositionX', 'PositionY', 'PositionZ'], ['x', 'y', 'z']):
             md['Plane'][k] = kw[v]
-
-        print(md)
         
         self.image[c].write(data.reshape(1, self.shape_y, self.shape_x), 
                             resolution=(1./dx, 1./dy), 
-                            metadata=md,
-                            contiguous=True)
+                            metadata=md)
 
         self._current_frame += 1
 
@@ -123,7 +120,6 @@ class TiffDataSource(DataSource):
                                         self.generate_image_name(ch, self._current_time))
             self.image.append(tifffile.TiffWriter(file_name, bigtiff=self.is_bigtiff,
                                                   ome=self.is_ome))
-            print(f"Bigtiff? {self.is_bigtiff} OME? {self.is_ome}")
             self.file_name.append(file_name)
 
     def _mode_checks(self) -> None:
@@ -139,9 +135,9 @@ class TiffDataSource(DataSource):
         try:
             if self._write_mode:
                 for ch in range(self.shape_c):
-                    if self.is_ome:
-                        # Attach OME metadata at the end of the write 
-                        tifffile.tiffcomment(self.file_name[ch], self.metadata.to_xml())
+                    # if self.is_ome:
+                    #     # Attach OME metadata at the end of the write 
+                    #     tifffile.tiffcomment(self.file_name[ch], self.metadata.to_xml())
                     self.image[ch].close()
             else:
                 self.image.close()

@@ -21,6 +21,7 @@ class DataSource:
         self.logger = logging.getLogger(__name__.split(".")[1])
         self.file_name = file_name
         self.metadata = None  # Expect a metadata object
+        self._mode = None
         self.mode = mode
 
         self.dx, self.dy, self.dz = 1, 1, 1  # pixel sizes (um)

@@ -46,3 +46,6 @@ class OMETIFFMetadata(XMLMetadata):
         ome_dict['Pixels']['TimeIncrement'] = float(self.experiment.MicroscopeState['timepoint_interval'])
 
         return ome_dict
+
+    def to_xml(self) -> str:
+        return super().to_xml('OME-TIFF')

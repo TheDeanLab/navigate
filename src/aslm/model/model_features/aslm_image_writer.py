@@ -93,11 +93,11 @@ class ImageWriter:
         """
         for idx in frame_ids:
             self.data_source.write(self.model.data_buffer[idx],
-                                   x=self.model.data_buffer_positions[self.frame_id][0],
-                                   y=self.model.data_buffer_positions[self.frame_id][1],
-                                   z=self.model.data_buffer_positions[self.frame_id][2],
-                                   theta=self.model.data_buffer_positions[self.frame_id][3],
-                                   f=self.model.data_buffer_positions[self.frame_id][4])
+                                   x=self.model.data_buffer_positions[idx][0],
+                                   y=self.model.data_buffer_positions[idx][1],
+                                   z=self.model.data_buffer_positions[idx][2],
+                                   theta=self.model.data_buffer_positions[idx][3],
+                                   f=self.model.data_buffer_positions[idx][4])
 
     def generate_image_name(self, current_channel, ext=".tif"):
         """

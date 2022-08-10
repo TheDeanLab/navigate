@@ -25,6 +25,7 @@ class Metadata:
         self.dt = 1                          # time displacement (s)
         self.dc = 1                          # step size between channels, should always be 1
         self._order = 'XYCZT'
+        self._per_stack = True
 
         # shape
         self.shape_x, self.shape_y, self.shape_z, self.shape_t, self.shape_c = 1, 1, 1, 1, 1
@@ -47,35 +48,33 @@ class Metadata:
         self._experiment = experiment
         self.set_from_configuration_experiment()
 
+    @property
+    def per_stack(self) -> bool:
+        return self._per_stack
+
     def set_from_configuration_experiment(self) -> None:
-        self.set_shape_from_configuration_experiment()
-        self.set_stack_order_from_configuration_experiment()
+        if self.experiment is not None and self.configuration is not None:
+            self.set_shape_from_configuration_experiment()
+            self.set_stack_order_from_configuration_experiment()
 
     def set_shape_from_configuration_experiment(self) -> None:
-        if self.experiment is not None and self.configuration is not None:
-            try:
-                zoom = self.experiment.MicroscopeState['zoom']
-                if self.experiment.MicroscopeState['resolution_mode'] == 'low':
-                    pixel_size = float(self.configuration.ZoomParameters['low_res_zoom_pixel_size'][zoom])
-                else:
-                    pixel_size = float(self.configuration.ZoomParameters['high_res_zoom_pixel_size'])
-                self.dx, self.dy = pixel_size, pixel_size
-                self.dz = float(self.experiment.MicroscopeState['step_size'])
-                self.dt = float(self.experiment.MicroscopeState['timepoint_interval'])
+        zoom = self.experiment.MicroscopeState['zoom']
+        if self.experiment.MicroscopeState['resolution_mode'] == 'low':
+            pixel_size = float(self.configuration.ZoomParameters['low_res_zoom_pixel_size'][zoom])
+        else:
+            pixel_size = float(self.configuration.ZoomParameters['high_res_zoom_pixel_size'])
+        self.dx, self.dy = pixel_size, pixel_size
+        self.dz = float(self.experiment.MicroscopeState['step_size'])
+        self.dt = float(self.experiment.MicroscopeState['timepoint_interval'])
 
-                self.shape_x = self.experiment.CameraParameters['x_pixels']
-                self.shape_y = self.experiment.CameraParameters['y_pixels']
-                self.shape_z = self.experiment.MicroscopeState['number_z_steps']
-                self.shape_t = self.experiment.MicroscopeState['timepoints']
-                self.shape_c = sum([v['is_selected'] == True for k, v in self.experiment.MicroscopeState['channels'].items()])
-            except (TypeError, KeyError) as e:
-                logger.warning(f"Could not compute metadata from empty experiment or configuration: {e}")
+        self.shape_x = self.experiment.CameraParameters['x_pixels']
+        self.shape_y = self.experiment.CameraParameters['y_pixels']
+        self.shape_z = self.experiment.MicroscopeState['number_z_steps']
+        self.shape_t = self.experiment.MicroscopeState['timepoints']
+        self.shape_c = sum([v['is_selected'] == True for k, v in self.experiment.MicroscopeState['channels'].items()])
 
     def set_stack_order_from_configuration_experiment(self) -> None:
-        if self.experiment.MicroscopeState['image_mode'] == 'z-stack':
-            self._order = 'XYZCT'
-        elif self.experiment.MicroscopeState['stack_cycling_mode'] == 'per_z':
-            self._order = 'XYCZT'
+        self._per_stack = self.experiment.MicroscopeState['image_mode'] == 'per_stack'
 
     @property
     def voxel_size(self) -> tuple:

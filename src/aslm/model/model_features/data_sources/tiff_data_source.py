@@ -14,6 +14,7 @@ from ..metadata_sources.ome_tiff_metadata import OMETIFFMetadata
 class TiffDataSource(DataSource):
     def __init__(self, file_name: str = None, mode: str = 'w', is_bigtiff: bool = True) -> None:
         self.image = None
+        self._write_mode = None
         super().__init__(file_name, mode)
 
         self.save_directory = Path(self.file_name).parent
@@ -34,6 +35,7 @@ class TiffDataSource(DataSource):
         
         # Keep track of z, time, channel indices
         self._current_frame = 0
+        self._current_time = 0
 
     @property
     def data(self) -> npt.ArrayLike:
@@ -43,14 +45,14 @@ class TiffDataSource(DataSource):
     
     @property
     def is_bigtiff(self) -> bool:
-        if self.write_mode:
+        if self._write_mode:
             return self._is_bigtiff
         else:
             return self.image.is_bigtiff
 
     @property
     def is_ome(self) -> bool:
-        if self.write_mode:
+        if self._write_mode:
             return self._is_ome
         else:
             return self.image.is_ome
@@ -68,26 +70,27 @@ class TiffDataSource(DataSource):
         """
         self.mode = 'w'
 
-        dx, dy, dz = self.metadata.voxel_size
-        c, z, t = self._czt_indices(self._current_frame)
-        if t == 0:
-            self.close()
+        c, z, self._current_time = self._czt_indices(self._current_frame, self.metadata.per_stack)  # find current channel
+        print(f"C: {c} Z: {z} T: {self._current_time}")
+        if (z==0) and (c==0):
+            # Make sure we're set up for writing
             self._setup_write_image()
+
+        dx, dy, dz = self.metadata.voxel_size
         
-        if self.is_ome:
-            self.image[c].write(data, metadata=self.metadata.ome_xml_dict,
-                                bigtiff=self.is_bigtiff)
-        else:
-            metadata={'spacing': dz,
-                      'unit': 'um',
-                      'axes': 'ZYX'}
-            self.image[c].write(data.reshape(1,self.shape[1],self.shape[0]), 
-                                resolution=(1./dx, 1./dy), 
-                                metadata=metadata,
-                                bigtiff=self.is_bigtiff,
-                                contiguous=True)
+        self.image[c].write(data.reshape(1, self.shape_y, self.shape_x), 
+                            resolution=(1./dx, 1./dy), 
+                            metadata={'spacing': dz,
+                                      'unit': 'um',
+                                      'axes': 'ZYX'},
+                            contiguous=True)
 
         self._current_frame += 1
+
+        # Check if this was the last frame to write
+        c, z, _ = self._czt_indices(self._current_frame, self.metadata.per_stack)
+        if (z==0) and (c==0):
+            self.close()
 
     def generate_image_name(self, current_channel, current_time_point):
         """
@@ -109,14 +112,18 @@ class TiffDataSource(DataSource):
 
         # Initialize one TIFF per channel per time point
         self.image = []
+        self.file_name = []
         for ch in range(self.shape_c):
             file_name = os.path.join(self.save_directory, 
-                                        self.generate_image_name(ch, self._t_idx))
-            self.image.append(tifffile.TiffWriter(file_name))
+                                        self.generate_image_name(ch, self._current_time))
+            self.image.append(tifffile.TiffWriter(file_name, bigtiff=self.is_bigtiff,
+                                                  ome=self.is_ome))
+            print(f"Bigtiff? {self.is_bigtiff} OME? {self.is_ome}")
+            self.file_name.append(file_name)
 
     def _mode_checks(self) -> None:
-        self.close()  # if anything was already open, close it
         self._write_mode = self._mode == 'w'
+        self.close()  # if anything was already open, close it
         if self._write_mode:
             self._current_frame = 0
             # self._setup_write_image()
@@ -126,7 +133,10 @@ class TiffDataSource(DataSource):
     def close(self) -> None:
         try:
             if self._write_mode:
-                for ch in range(self.shape[4]):
+                for ch in range(self.shape_c):
+                    if self.is_ome:
+                        # Attach OME metadata at the end of the write 
+                        tifffile.tiffcomment(self.file_name[ch], self.metadata.to_xml())
                     self.image[ch].close()
             else:
                 self.image.close()

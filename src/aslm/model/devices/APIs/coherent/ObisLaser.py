@@ -161,6 +161,8 @@ class ObisLaser(LaserBase):
         except serial.SerialException:
             print('could not close the port')
 
+    
+    # started to depreciate this function into to functions send() and read()
     def ask(self, command):
         self.laser.write((str(command) + self.end_of_line).encode('ascii'))
         print("command to write: ", str(command) + self.end_of_line)
@@ -250,8 +252,10 @@ class ObisLaser(LaserBase):
         response = self.read()
         print("fith done")
 
-        level = 0.2
-        self.send("SOURce:POWer:LEVel:IMMediate:AMPLitude 0.20000")
+        level = 0.002
+        # Need to test this now
+        self.send("SOURce:POWer:LEVel:IMMediate:AMPLitude %.5f" % level)
+        # self.send("SOURce:POWer:LEVel:IMMediate:AMPLitude 0.20000 ")
         # Sleeps allowing serial commaction to finish???
         sleep(.5)
         response = self.read()

@@ -314,8 +314,6 @@ class Model:
         self.img_width = img_width
         self.img_height = img_height
         self.data_buffer_positions = SharedNDArray(shape=(self.number_of_frames, 6), dtype=float)  # z-index, x, y, z, theta, f
-        self.data_buffer_channels = SharedNDArray(shape=(self.number_of_frames,), dtype=int)
-        self.data_buffer_timepoints = SharedNDArray(shape=(self.number_of_frames,), dtype=int)
 
     def get_data_buffer(self, img_width=512, img_height=512):
         r"""Get the data buffer.

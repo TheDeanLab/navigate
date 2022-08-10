@@ -18,8 +18,6 @@ def test_metadata_voxel_size():
 
     dx, dy, dz = md.voxel_size
 
-    print(dx, dy, dz)
-
     assert((dx == pixel_size) and (dy == pixel_size) and (dz == float(model.experiment.MicroscopeState['step_size'])))
 
 def test_metadata_shape():

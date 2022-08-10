@@ -1,8 +1,6 @@
 from .metadata import XMLMetadata
 
 class OMETIFFMetadata(XMLMetadata):
-    def __init__(self) -> None:
-        super().__init__()
 
     @property
     def ome_tiff_xml_dict(self) -> dict:

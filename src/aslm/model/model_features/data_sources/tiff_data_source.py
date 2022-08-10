@@ -1,0 +1,135 @@
+#  Standard Imports
+import os
+from pathlib import Path
+
+# Third Party Imports
+import tifffile
+import numpy.typing as npt
+
+# Local imports
+from .data_source import DataSource
+from ..metadata_sources.metadata import Metadata
+from ..metadata_sources.ome_tiff_metadata import OMETIFFMetadata
+
+class TiffDataSource(DataSource):
+    def __init__(self, file_name: str = None, mode: str = 'w', is_bigtiff: bool = True) -> None:
+        self.image = None
+        super().__init__(file_name, mode)
+
+        self.save_directory = Path(self.file_name).parent
+
+        # Is this an OME-TIFF?
+        # TODO: check the header, rather than use the file extension
+        if self.file_name.endswith('.ome.tiff') or self.file_name.endswith('.ome.tif'):
+            self._is_ome = True
+            self.metadata = OMETIFFMetadata()
+        else:
+            self._is_ome = False
+            self.metadata = Metadata()
+        
+        self._is_bigtiff = is_bigtiff
+
+        # For file writing, do we assume all files end with tiff or tif?
+        self.__double_f = self.file_name.endswith('tiff') 
+        
+        # Keep track of z, time, channel indices
+        self._current_frame = 0
+
+    @property
+    def data(self) -> npt.ArrayLike:
+        self.mode = 'r'
+        
+        return self.image.asarray()
+    
+    @property
+    def is_bigtiff(self) -> bool:
+        if self.write_mode:
+            return self._is_bigtiff
+        else:
+            return self.image.is_bigtiff
+
+    @property
+    def is_ome(self) -> bool:
+        if self.write_mode:
+            return self._is_ome
+        else:
+            return self.image.is_ome
+
+    def read(self) -> None:
+        self.image = tifffile.TiffFile(self.file_name)
+
+        # TODO: Parse metadata
+        self.shape_x, self.shape_y, self.shape_z, self.shape_c, self.shape_t = self.image.shape
+
+    def write(self, data: npt.ArrayLike, **kw) -> None:
+        """One channel, all z-position, one timepoint = one stack.
+        N channels are opened simultaneously for writing.
+        At each time point, a new file is opened for each channel.
+        """
+        self.mode = 'w'
+
+        dx, dy, dz = self.metadata.voxel_size
+        c, z, t = self._czt_indices(self._current_frame)
+        if t == 0:
+            self.close()
+            self._setup_write_image()
+        
+        if self.is_ome:
+            self.image[c].write(data, metadata=self.metadata.ome_xml_dict,
+                                bigtiff=self.is_bigtiff)
+        else:
+            metadata={'spacing': dz,
+                      'unit': 'um',
+                      'axes': 'ZYX'}
+            self.image[c].write(data.reshape(1,self.shape[1],self.shape[0]), 
+                                resolution=(1./dx, 1./dy), 
+                                metadata=metadata,
+                                bigtiff=self.is_bigtiff,
+                                contiguous=True)
+
+        self._current_frame += 1
+
+    def generate_image_name(self, current_channel, current_time_point):
+        """
+        #  Generates a string for the filename
+        #  e.g., CH00_000000.tif
+        """
+        ext = ".ome" if self.is_ome else ""
+        ext += ".tiff" if self.__double_f else ".tif"
+        image_name = "CH0" + str(current_channel) + "_" + str(current_time_point).zfill(6) + ext
+        return image_name
+
+    def _setup_write_image(self) -> None:
+        """Setup N channel images for writing."""
+
+        # Grab expected data shape from metadata
+        self.shape_x, self.shape_y, self.shape_c, self.shape_z, self.shape_t = self.metadata.shape
+        self.dx, self.dy, self.dz = self.metadata.voxel_size
+        self.dc, self.dt = self.metadata.dc, self.metadata.dt
+
+        # Initialize one TIFF per channel per time point
+        self.image = []
+        for ch in range(self.shape_c):
+            file_name = os.path.join(self.save_directory, 
+                                        self.generate_image_name(ch, self._t_idx))
+            self.image.append(tifffile.TiffWriter(file_name))
+
+    def _mode_checks(self) -> None:
+        self.close()  # if anything was already open, close it
+        self._write_mode = self._mode == 'w'
+        if self._write_mode:
+            self._current_frame = 0
+            # self._setup_write_image()
+        else:
+            self.read()
+    
+    def close(self) -> None:
+        try:
+            if self._write_mode:
+                for ch in range(self.shape[4]):
+                    self.image[ch].close()
+            else:
+                self.image.close()
+        except AttributeError:
+            # image wasn't instantiated, no need to close anything
+            pass

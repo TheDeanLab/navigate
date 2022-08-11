@@ -1,4 +1,7 @@
-"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+
+
+"""
+Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -29,64 +32,28 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-# Standard Library Imports
-import logging
+
 import tkinter as tk
-from tkinter import *
 from tkinter import ttk
-
-# Third Party Imports
-
-# Local Imports
-from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+import logging
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-
-class slider(ttk.Labelframe):
-    def __init__(self, cam_view, *args, **kwargs):
-        # Init Frame
-        text_label = 'Slice Index'
-        ttk.Labelframe.__init__(
-            self,
-            cam_view,
-            text=text_label,
-            *args,
-            **kwargs)
+class quick_launch(ttk.Labelframe):
+    def __init__(self, settings_tab, *args, **kwargs):
+        text_label = 'Quick Launch Buttons'
+        ttk.Labelframe.__init__(self, settings_tab, text=text_label, *args, **kwargs)
 
         # Formatting
-        Grid.columnconfigure(self, 'all', weight=1)
-        Grid.rowconfigure(self, 'all', weight=1)
+        tk.Grid.columnconfigure(self, 'all', weight=1)
+        tk.Grid.rowconfigure(self, 'all', weight=1)
 
-        # Slider
-        self.inputs = {}
-        self.slider_widget = Scale(cam_view,
-                                   from_=0,
-                                   to=200,
-                                   tickinterval=20,
-                                   orient=HORIZONTAL,
-                                   showvalue=0,
-                                   label="Slice Index",
-                                   fg="black")
-        self.slider_widget.grid(row=1, column=0, sticky=NSEW, padx=5, pady=5)
-        self.slider_widget.configure(state='disabled')
+        # Dicts
+        self.buttons = {}
 
-
-    def get_variables(self):
-        """
-        # This function returns a dictionary of all the variables that are tied to each widget name.
-        The key is the widget name, value is the variable associated.
-        """
-        variables = {}
-        for key, widget in self.inputs.items():
-            variables[key] = widget.get()
-        return variables
-
-    def get_widgets(self):
-        """
-        # This function returns the dictionary that holds the widgets.
-        The key is the widget name, value is the LabelInput class that has all the data.
-        """
-        return self.inputs
+        # Buttons
+        # Tiling Wizard Button
+        self.buttons["tiling"] = ttk.Button(self, text="Launch Tiling Wizard")
+        self.buttons["tiling"].grid(row=0, column=2, sticky=(tk.NSEW), padx=(10,0), pady=(4,6))

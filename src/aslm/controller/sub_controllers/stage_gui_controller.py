@@ -128,6 +128,8 @@ class Stage_GUI_Controller(GUI_Controller):
         char = event.char.lower()
         if char in ['w', 'a', 's', 'd']:
             current_position = self.get_position()
+            if current_position is None:
+                return
             xy_increment = self.widget_vals["xy_step"].get()
             if char == "w":
                 current_position['y'] += xy_increment

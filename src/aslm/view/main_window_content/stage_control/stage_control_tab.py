@@ -112,14 +112,13 @@ class stage_control_tab(ttk.Frame):
         tk.Grid.rowconfigure(self.stop_frame, 'all', weight=1)
         
         # Gridding out frames
-        factor = 6
-        self.position_frame.grid(row=0, column=0, columnspan=5, sticky=(tk.NSEW), pady=(2,0))
-        self.xy_frame.grid(row=1, column=0, sticky=(tk.NSEW), padx=10, pady=10*factor)
-        self.z_frame.grid(row=1, column=1, sticky=(tk.NSEW), padx=10, pady=10*factor)
-        self.theta_frame.grid(row=1, column=2, sticky=(tk.NSEW), padx=10, pady=10*factor)
-        self.f_frame.grid(row=1, column=3, sticky=(tk.NSEW), padx=10, pady=10*factor)
-        # self.goto_frame.grid(row=0, column=4, sticky=(tk.NSEW), padx=10, pady=10*factor)
-        self.stop_frame.grid(row=1, column=4, sticky=(tk.NSEW), padx=10, pady=10 * factor)
+        self.position_frame.grid(row=0, column=0, sticky=(tk.NSEW), padx=3, pady=3)
+        self.xy_frame.grid(row=0, column=1, sticky=(tk.NSEW), padx=3, pady=3)
+        self.z_frame.grid(row=0, column=2, sticky=(tk.NSEW), padx=3, pady=3)
+        self.f_frame.grid(row=1, column=0, sticky=(tk.NSEW), padx=3, pady=3)
+        self.theta_frame.grid(row=1, column=2, sticky=(tk.NSEW), padx=3, pady=3)
+        # self.goto_frame.grid(row=0, column=4, sticky=(tk.NSEW))
+        self.stop_frame.grid(row=1, column=1, sticky=(tk.NSEW), padx=3, pady=3)
 
     def get_widgets(self):
         """

@@ -44,13 +44,13 @@ class KeystrokeController(GUI_Controller):
 
         # References to all sub frames
         self.camera_view = main_view.camera_waveform.camera_tab # Camera View
-        self.multi_table = main_view.settings.channels_tab.multipoint_list # Multiposition Table
+        self.multi_table = main_view.settings.multiposition_tab.multipoint_list # Multiposition Table
         self.main_view = main_view.root # Main view
         self.main_tabs = main_view.settings
 
         # Controllers for all sub frames
         self.camera_controller = parent_controller.camera_view_controller
-        self.multi_controller = parent_controller.channels_tab_controller.multi_position_controller
+        self.multi_controller = parent_controller.multiposition_tab_controller
         self.stage_controller = parent_controller.stage_gui_controller
 
         """Keystrokes for Camera View"""
@@ -58,7 +58,7 @@ class KeystrokeController(GUI_Controller):
         self.camera_view.canvas.bind("<Button-1>", self.camera_controller.left_click)
 
         # Slider Binding
-        self.camera_view.slider.slider_widget.bind("<Button-1>", self.camera_controller.slider_update)
+        self.camera_view.slider.bind("<Button-1>", self.camera_controller.slider_update)
 
         # MouseWheel Binding
         self.view.root.bind("<MouseWheel>", self.view.scroll_frame.mouse_wheel)
@@ -77,8 +77,18 @@ class KeystrokeController(GUI_Controller):
 
         """Keystrokes for Main Window"""
         self.main_view.bind("<Key>", self.stage_controller.key_press)
+        # self.main_view.bind("<Key>", self.test)
         self.main_view.bind("1", self.switch_tab1)
         self.main_view.bind("2", self.switch_tab2)
+        self.main_view.bind("3", self.switch_tab3)
+        self.main_view.bind("4", self.switch_tab4)
+
+    # def test(self, event):
+    #     print(event.state)
+    #     print(event.keysym)
+    #     print(event.keycode)
+    #     print(event)
+
 
     def camera_controller_mouse_wheel_enter(self, event):
         self.view.root.unbind("<MouseWheel>")  # get rid of scrollbar mousewheel
@@ -96,10 +106,20 @@ class KeystrokeController(GUI_Controller):
             self.camera_view.canvas.unbind("<Button-5>")
         self.view.root.bind("<MouseWheel>", self.view.scroll_frame.mouse_wheel)  # reinstate scrollbar mousewheel
 
+    # Refactorable when we have time
+
     def switch_tab1(self, event):
-        if event.state == 4 or event.state == 8:
+        if event.state == 4:
             self.main_tabs.select(0)
 
     def switch_tab2(self, event):
-        if event.state == 4 or event.state == 8:
+        if event.state == 4:
             self.main_tabs.select(1)
+    
+    def switch_tab3(self, event):
+        if event.state == 4:
+            self.main_tabs.select(2)
+
+    def switch_tab4(self, event):
+        if event.state == 4 or event.state == 8:
+            self.main_tabs.select(3)

@@ -31,7 +31,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 import pandas as pd
-from aslm.view.main_window_content.channel_settings.channel_settings_frames.multi_position_table import Multi_Position_Table as MPTable
+from aslm.view.main_window_content.multiposition.multi_position_table import Multi_Position_Table as MPTable
 import tkinter as tk
 from tkinter import ttk
 import logging
@@ -53,9 +53,6 @@ class multipoint_frame(ttk.Labelframe):
 
         # Dict
 
-        self.buttons = {}
-
-
         # Save Data Label
         self.laser_label = ttk.Label(self, text='Enable')
         self.laser_label.grid(row=0, column=0, sticky=(tk.NSEW), padx=(4,1), pady=(4,6))
@@ -65,9 +62,6 @@ class multipoint_frame(ttk.Labelframe):
         self.save_check = ttk.Checkbutton(self, text='', variable=self.on_off)
         self.save_check.grid(row=0, column=1, sticky=(tk.NSEW), pady=(4,6))
 
-        # Tiling Wizard Button
-        self.buttons["tiling"] = ttk.Button(self, text="Launch Tiling Wizard")
-        self.buttons["tiling"].grid(row=0, column=2, sticky=(tk.NSEW), padx=(10,0), pady=(4,6))
 
         # Getters
     def get_variables(self):

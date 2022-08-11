@@ -127,7 +127,7 @@ class MainApp(ttk.Frame):
         # Putting Notebooks into frames, tabs are held within the class of each
         # notebook
         self.settings = settings_notebook(self.frame_left, self.root)
-        self.camera_waveform = camera_notebook(self.frame_top_right)
+        self.camera_waveform = camera_notebook(self.frame_top_right, self.root)
         self.stage_control = stagecontrol_notebook(self.frame_bottom_right)
         self.acqbar = AcquireBar(self.top_frame, self.root)
         self.logger.info("GUI setup working")

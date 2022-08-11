@@ -37,10 +37,10 @@ import logging
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-class waveform_tab(ttk.Frame):
+class waveform_tab(tk.Frame):
     def __init__(self, cam_wave, *args, **kwargs):
         #Init Frame
-        ttk.Frame.__init__(self, cam_wave, *args, **kwargs)
+        tk.Frame.__init__(self, cam_wave, *args, **kwargs)
         
         # Formatting
         tk.Grid.columnconfigure(self, 'all', weight=1)

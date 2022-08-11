@@ -39,54 +39,62 @@ import logging
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+
 class DockableNotebook(ttk.Notebook):
-    def __init__(self, parent, *args, **kwargs):
+    def __init__(self, parent, root, *args, **kwargs):
         ttk.Notebook.__init__(self, parent, *args, **kwargs)
+
+        self.root = root
+        self.tab_list = []
+        self.cur_tab = None
 
         # Formatting
         tk.Grid.columnconfigure(self, 'all', weight=1)
         tk.Grid.rowconfigure(self, 'all', weight=1)
 
-        # Binding
-        self.bind("<ButtonPress-1> <<NotebookTabChanged>>", self.press)
-        self.bind("<B1_Motion> <<NotebookTabChanged>>", self.move)
-        self.bind("<ButtonRelease-1> <<NotebookTabChanged>>", self.release)
+         # Popup setup
+        self.menu = tk.Menu(self, tearoff=0)
+        self.menu.add_command(label="Popout Tab", command=self.popout)
 
+        # Bindings
+        self.bind("<ButtonPress-2>", self.find)
+        self.bind("<ButtonPress-3>", self.find)
 
+    def set_tablist(self, tab_list):
+        self.tab_list = tab_list
 
-    def press(self, event):
-        print("Pressed Tab: ", event.widget.select())
+    def get_absolute_position(self):
+        x = self.root.winfo_pointerx()
+        y = self.root.winfo_pointery()
+        return x, y
 
-    def move(self, event):
-        print("Moving Tab: ", event.widget.select())
+    def find(self, event):
+        element = event.widget.identify(event.x, event.y)
+        if "label" in element:
+            try:
+                x, y = self.get_absolute_position()
+                self.menu.tk_popup(x, y)
+            finally:
+                self.menu.grab_release()
 
-    def release(self, event):
-        print("Releasing Tab: ", event.widget.select())
+    def popout(self):
+        # Get ref to correct tab to popout
+        tab = self.select()
+        tab_text = self.tab(tab)['text']
+        for tab_name in self.tab_list:
+            if tab_text == self.tab(tab_name)['text']:
+                tab = tab_name
+                self.tab_list.remove(tab_name)
+        self.hide(tab)
+        self.root.wm_manage(tab)
 
+        # self.root.wm_title(tab, tab_text)
+        tk.Wm.title(tab, tab_text)
+        tk.Wm.protocol(tab, "WM_DELETE_WINDOW", lambda: self.dismiss(tab, tab_text))
 
-class FloatingWindow(tk.Toplevel):
-    def __init__(self, label, *args, **kwargs):
-        tk.Toplevel.__init__(self, *args, **kwargs)
-        self.overrideredirect(True)
-
-        self.label = tk.Label(self, text=label)
-        self.label.grid(row=0, column=0, sticky=tk.NSEW)
-
-        self.label.bind("<ButtonPress-1>", self.start_move)
-        self.label.bind("<ButtonRelease-1>", self.stop_move)
-        self.label.bind("<B1-Motion>", self.do_move)
-
-    def start_move(self, event):
-        self.x = event.x
-        self.y = event.y
-
-    def stop_move(self, event):
-        self.x = None
-        self.y = None
-
-    def do_move(self, event):
-        deltax = event.x - self.x
-        deltay = event.y - self.y
-        x = self.winfo_x() + deltax
-        y = self.winfo_y() + deltay
-        self.geometry(f"+{x}+{y}")
+    def dismiss(self, tab, tab_text):
+        self.root.wm_forget(tab)
+        tab.grid(row=0, column=0)
+        self.add(tab)
+        self.tab(tab, text=tab_text)
+        self.tab_list.append(tab)

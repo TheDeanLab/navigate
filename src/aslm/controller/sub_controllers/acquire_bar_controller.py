@@ -31,8 +31,10 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 
 # Standard Library Imports
+from email import message
 import sys
 import logging
+from tkinter import messagebox
 
 # Third Party Imports
 
@@ -367,10 +369,12 @@ class AcquireBarController(GUI_Controller):
 
         Quits the software.
         """
-        self.show_verbose_info("Exiting Program")
-        # call the central controller to stop all the threads
-        self.parent_controller.execute('exit')
-        sys.exit()
+        if messagebox.askyesno("Exit", "Are you sure?"):
+            self.show_verbose_info("Exiting Program")
+            # call the central controller to stop all the threads
+            self.parent_controller.execute('exit')
+            sys.exit()
+        
 
     def update_saving_settings(self, popup_window):
         r"""Gets the entries from the popup save dialog and overwrites the saving_settings dictionary."""

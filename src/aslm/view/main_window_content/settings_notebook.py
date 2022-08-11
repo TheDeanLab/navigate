@@ -79,6 +79,7 @@ class settings_notebook(ttk.Notebook):
 
         # Binding for Popup menu
         self.bind("<ButtonPress-2>", self.find)
+        self.bind("<ButtonPress-3>", self.find)
 
     def get_absolute_position(self):
         x = self.root.winfo_pointerx()

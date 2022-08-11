@@ -5,5 +5,8 @@ def get_data_source(file_type):
     elif file_type == 'Zarr':
         from .zarr_data_source import ZarrDataSource
         return ZarrDataSource
+    elif file_type == 'BDV':
+        from .bdv_data_source import BigDataViewerDataSource
+        return BigDataViewerDataSource
     else:
         raise NotImplementedError(f"Unknown file type {file_type}. Cannot open.")

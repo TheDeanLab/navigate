@@ -22,9 +22,8 @@ def test_write_read():
         ds.write(data[i,...].squeeze())
     ds.close()
 
-    files = ds.file_name
     # For each file...
-    for i, fn in enumerate(files):
+    for i, fn in enumerate(ds.file_name):
         ds2 = TiffDataSource(fn, 'r')
         # Make sure XYZ size is correct (and C and T are each of size 1)
         assert((ds2.shape_x == ds.shape_x) and (ds2.shape_y == ds.shape_y) \
@@ -32,12 +31,12 @@ def test_write_read():
                 and (ds2.shape_t == 1))
         # Make sure the data copied properly
         np.testing.assert_equal(ds2.data, data[i*ds.shape_z:(i+1)*ds.shape_z,...].squeeze())
-
-    del ds
+        ds2.close()
 
     try:
         # Clean up
-        for fn in files:
+        for fn in ds.file_name:
             os.remove(fn)
     except PermissionError:
+        # Windows seems to think these files are still open
         pass

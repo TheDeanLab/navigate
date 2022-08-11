@@ -36,18 +36,16 @@ import logging
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+from aslm.view.custom_widgets.DockableNotebook import DockableNotebook
+
 # Import Sub-Frames
 from aslm.view.main_window_content.camera_display.camera_view.camera_view_tab import camera_tab
 from aslm.view.main_window_content.camera_display.camera_view.waveform_tab import waveform_tab
 
-class camera_notebook(ttk.Notebook):
+class camera_notebook(DockableNotebook):
     def __init__(self, frame_top_right, *args, **kwargs):
         #Init notebook
-        ttk.Notebook.__init__(self, frame_top_right, *args, **kwargs)
-        
-        # Formatting
-        tk.Grid.columnconfigure(self, 'all', weight=1)
-        tk.Grid.rowconfigure(self, 'all', weight=1)
+        DockableNotebook.__init__(self, frame_top_right, *args, **kwargs)
 
         #Putting notebook 2 into top right frame
         self.grid(row=0, column=0)
@@ -57,6 +55,10 @@ class camera_notebook(ttk.Notebook):
 
         #Creating the waveform settings tab
         self.waveform_tab = waveform_tab(self)
+
+        # Tab list
+        tab_list = [self.camera_tab, self.waveform_tab]
+        self.set_tablist(tab_list)
 
         #Adding tabs to self notebook
         self.add(self.camera_tab, text='Camera View', sticky=tk.NSEW)

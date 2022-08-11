@@ -34,24 +34,67 @@ import tkinter as tk
 from tkinter import ttk
 import logging
 
-from aslm.view.main_window_content.multiposition.multipoint_settings import multipoint_list
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
+class DockableNotebook(ttk.Notebook):
+    def __init__(self, parent, root, *args, **kwargs):
+        ttk.Notebook.__init__(self, parent, *args, **kwargs)
 
-class multiposition_tab(tk.Frame):
-    def __init__(self, setntbk, *args, **kwargs):
-        # Init Frame
-        tk.Frame.__init__(self, setntbk, *args, **kwargs)
-        
+        self.root = root
+        self.tab_list = []
+        self.cur_tab = None
+
         # Formatting
         tk.Grid.columnconfigure(self, 'all', weight=1)
         tk.Grid.rowconfigure(self, 'all', weight=1)
 
+         # Popup setup
+        self.menu = tk.Menu(self, tearoff=0)
+        self.menu.add_command(label="Popout Tab", command=self.popout)
 
-        # Multipoint List
-        self.multipoint_list = multipoint_list(self)
-        self.multipoint_list.grid(row=5, column=0, columnspan=3, sticky=(tk.NSEW), padx=10, pady=10)
+        # Bindings
+        self.bind("<ButtonPress-2>", self.find)
+        self.bind("<ButtonPress-3>", self.find)
+
+    def set_tablist(self, tab_list):
+        self.tab_list = tab_list
+
+    def get_absolute_position(self):
+        x = self.root.winfo_pointerx()
+        y = self.root.winfo_pointery()
+        return x, y
+
+    def find(self, event):
+        element = event.widget.identify(event.x, event.y)
+        if "label" in element:
+            try:
+                x, y = self.get_absolute_position()
+                self.menu.tk_popup(x, y)
+            finally:
+                self.menu.grab_release()
+
+    def popout(self):
+        # Get ref to correct tab to popout
+        tab = self.select()
+        tab_text = self.tab(tab)['text']
+        for tab_name in self.tab_list:
+            if tab_text == self.tab(tab_name)['text']:
+                tab = tab_name
+                self.tab_list.remove(tab_name)
+        self.hide(tab)
+        self.root.wm_manage(tab)
+
+        # self.root.wm_title(tab, tab_text)
+        tk.Wm.title(tab, tab_text)
+        tk.Wm.protocol(tab, "WM_DELETE_WINDOW", lambda: self.dismiss(tab, tab_text))
+
+    def dismiss(self, tab, tab_text):
+        self.root.wm_forget(tab)
+        tab.grid(row=0, column=0)
+        self.add(tab)
+        self.tab(tab, text=tab_text)
+        self.tab_list.append(tab)

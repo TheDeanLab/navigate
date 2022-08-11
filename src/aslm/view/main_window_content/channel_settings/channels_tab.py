@@ -44,10 +44,10 @@ from aslm.view.main_window_content.channel_settings.channel_settings_frames.stac
 from aslm.view.main_window_content.multiposition.multipoint_settings import multipoint_frame
 from aslm.view.main_window_content.channel_settings.channel_settings_frames.quick_launch import quick_launch
 
-class channels_tab(ttk.Frame):
+class channels_tab(tk.Frame):
     def __init__(self, setntbk, *args, **kwargs):
         # Init Frame
-        ttk.Frame.__init__(self, setntbk, *args, **kwargs)
+        tk.Frame.__init__(self, setntbk, *args, **kwargs)
         
         # Formatting
         tk.Grid.columnconfigure(self, 'all', weight=1)

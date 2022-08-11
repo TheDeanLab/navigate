@@ -44,14 +44,14 @@ from aslm.view.main_window_content.camera_display.camera_settings.camera_setting
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-class camera_settings_tab(ttk.Frame):
+class camera_settings_tab(tk.Frame):
     """
     # This class holds and controls the layout of the major label frames for the camera settings tab in the settings notebook. Any imported classes are children that makeup
     # the content of the major frames. If you need to adjust anything in the frames follow the children.
     """
     def __init__(self, setntbk, *args, **kwargs):
         #Init Frame
-        ttk.Frame.__init__(self, setntbk, *args, **kwargs)
+        tk.Frame.__init__(self, setntbk, *args, **kwargs)
         
         # Formatting
         tk.Grid.columnconfigure(self, 'all', weight=1)

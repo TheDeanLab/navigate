@@ -55,7 +55,6 @@ class AcquireBarController(GUI_Controller):
         super().__init__(view, parent_controller)
 
         self.parent_view = parent_view
-        
 
         # acquisition image mode variable
         self.mode = 'live'
@@ -84,6 +83,7 @@ class AcquireBarController(GUI_Controller):
         self.view.acquire_btn.config(command=self.launch_popup_window)
         self.view.pull_down.bind('<<ComboboxSelected>>',self.update_microscope_mode)
         self.view.exit_btn.config(command=self.exit_program)
+
 
     def progress_bar(self,
                      images_received,

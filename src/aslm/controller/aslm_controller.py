@@ -172,6 +172,9 @@ class ASLM_controller:
         # Keystroke Controller
         self.keystroke_controller = KeystrokeController(self.view, self)
 
+        # Bonus config
+        self.update_acquire_control()
+
         t = threading.Thread(target=self.update_event)
         t.start()
 
@@ -213,6 +216,9 @@ class ASLM_controller:
         self.data_buffer = self.model.get_data_buffer(img_width, img_height)
         self.img_width = img_width
         self.img_height = img_height
+
+    def update_acquire_control(self):
+            self.view.acqbar.stop_stage.config(command=self.stage_gui_controller.stop_button_handler)
 
     def initialize_cam_view(self, configuration_controller):
         r""" Populate view tab.

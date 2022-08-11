@@ -49,6 +49,7 @@ class BigDataViewerDataSource(DataSource):
     def close(self) -> None:
         try:
             self.image.close()
+            self.metadata.write_xml(self.file_name, views=self._views)
         except AttributeError:
             # image wasn't instantiated, no need to close anything
             pass

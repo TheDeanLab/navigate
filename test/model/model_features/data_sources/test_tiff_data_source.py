@@ -35,6 +35,9 @@ def test_write_read():
 
     del ds
 
-    # Clean up
-    for fn in files:
-        os.remove(fn)
+    try:
+        # Clean up
+        for fn in files:
+            os.remove(fn)
+    except PermissionError:
+        pass

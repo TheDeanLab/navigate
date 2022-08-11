@@ -106,3 +106,6 @@ class BigDataViewerMetadata(XMLMetadata):
         timepoints = range(t_start, t_stop+1)
         
         return file_path, setups, timepoints
+
+    def write_xml(self, file_name: str, views: list) -> None:
+        return super().write_xml(file_name, file_type='bdv', root='SpimData', views=views)

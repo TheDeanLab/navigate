@@ -79,6 +79,7 @@ class image_metrics(ttk.Labelframe):
                                                         label_pos="top"
                                                         )
                 self.inputs[self.names[i]].grid(row=0, column=i, sticky=(tk.NSEW), padx=5, pady=3)
+                self.inputs[self.names[i]].configure(width=5)
 
     def get_variables(self):
         """

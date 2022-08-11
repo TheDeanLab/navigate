@@ -58,6 +58,8 @@ class other_axis_frame(ttk.Labelframe):
         image_directory = Path(__file__).resolve().parent
         other_axis_frame.up_image = tk.PhotoImage(file=image_directory.joinpath("images", "greyup.png"))
         other_axis_frame.down_image = tk.PhotoImage(file=image_directory.joinpath("images", "greydown.png"))
+        other_axis_frame.up_image = other_axis_frame.up_image.subsample(2,2)
+        other_axis_frame.down_image = other_axis_frame.down_image.subsample(2,2)
 
         #Setting up buttons for up, down, zero and increment spinbox
 

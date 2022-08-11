@@ -65,6 +65,10 @@ class x_y_frame(ttk.Labelframe):
         x_y_frame.down_image = tk.PhotoImage(file=image_directory.joinpath("images", "greydown.png"))
         x_y_frame.left_image = tk.PhotoImage(file=image_directory.joinpath("images", "greyleft.png"))
         x_y_frame.right_image = tk.PhotoImage(file=image_directory.joinpath("images", "greyright.png"))
+        x_y_frame.up_image = x_y_frame.up_image.subsample(2,2)
+        x_y_frame.down_image = x_y_frame.down_image.subsample(2,2)
+        x_y_frame.left_image = x_y_frame.left_image.subsample(2,2)
+        x_y_frame.right_image = x_y_frame.right_image.subsample(2,2)
 
         #Up button
         x_y_frame.up_y_btn = tk.Button(

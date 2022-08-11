@@ -107,7 +107,7 @@ class Multi_Position_ColumnHeader(ColumnHeader):
 class Multi_Position_Table(Table):
 
     def __init__(self, parent=None, **kwargs):
-        super().__init__(parent, **kwargs)
+        super().__init__(parent, width=400, height=500, columns=4, **kwargs)
 
         self.loadCSV = None
         self.exportCSV = None

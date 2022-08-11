@@ -62,6 +62,12 @@ class settings_notebook(DockableNotebook):
         #Creating the Camera tab
         self.camera_settings_tab = camera_settings_tab(self)
 
+        #Creating Stage Control Tab
+        self.stage_control_tab = stage_control_tab(self)
+
+        #Creating Multiposition Table Tab
+        self.multiposition_tab = multiposition_tab(self)
+
         # Tab list
         tab_list = [self.channels_tab, self.camera_settings_tab, self.stage_control_tab, self.multiposition_tab]
         self.set_tablist(tab_list)

@@ -2,7 +2,7 @@ import os
 
 import numpy as np
 
-def test_write_shape():
+def test_write_read():
     from aslm.model.dummy_model import get_dummy_model
     from aslm.model.model_features.data_sources.tiff_data_source import TiffDataSource
 
@@ -16,20 +16,24 @@ def test_write_shape():
     ds.set_metadata_from_configuration_experiment(model.configuration, model.experiment)
 
     # Populate one image per channel per timepoint
-    for _ in range(ds.shape_c*ds.shape_z*ds.shape_t):
-        data = np.random.rand(ds.shape_x, ds.shape_y)
-        ds.write(data)
+    n_images = ds.shape_c*ds.shape_z*ds.shape_t
+    data = np.random.rand(n_images, ds.shape_x, ds.shape_y)
+    for i in range(n_images):
+        ds.write(data[i,...].squeeze())
     ds.close()
 
-    # grab the file names (one file per channel per timepoint)
     files = ds.file_name
-
-    # For each file, make sure XYZ size is correct (and C and T are each of size 1)
-    for fn in files:
+    # For each file...
+    for i, fn in enumerate(files):
         ds2 = TiffDataSource(fn, 'r')
+        # Make sure XYZ size is correct (and C and T are each of size 1)
         assert((ds2.shape_x == ds.shape_x) and (ds2.shape_y == ds.shape_y) \
                 and (ds2.shape_c == 1) and (ds2.shape_z == ds.shape_z) \
                 and (ds2.shape_t == 1))
+        # Make sure the data copied properly
+        np.testing.assert_equal(ds2.data, data[i*ds.shape_z:(i+1)*ds.shape_z,...].squeeze())
+
+    del ds
 
     # Clean up
     for fn in files:

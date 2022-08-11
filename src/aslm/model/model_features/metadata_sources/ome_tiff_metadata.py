@@ -2,7 +2,6 @@ from .metadata import XMLMetadata
 
 class OMETIFFMetadata(XMLMetadata):
 
-    @property
     def ome_tiff_xml_dict(self) -> dict:
         """
         Generates dictionary with same heirarchical structure as OME-XML. Useful for
@@ -19,16 +18,19 @@ class OMETIFFMetadata(XMLMetadata):
 
         ome_dict['Pixels']['SizeX'] = int(self.experiment.CameraParameters['x_pixels'])
         ome_dict['Pixels']['SizeY'] = int(self.experiment.CameraParameters['y_pixels'])
-        ome_dict['Pixels']['SizeT'] = int(self.experiment.MicroscopeState['timepoints'])
-        ome_dict['Pixels']['SizeC'] = 1 # len(self.experiment.MicroscopeState['channels'])
+        
+        # The following two are commented since we split our TIFFs into one TIFF stack per
+        # channel per time point
+        ome_dict['Pixels']['SizeT'] = 1  # int(self.experiment.MicroscopeState['timepoints'])
+        ome_dict['Pixels']['SizeC'] = 1  # len(self.experiment.MicroscopeState['channels'])
 
         if self.experiment.MicroscopeState['image_mode'] == 'z-stack':
             ome_dict['Pixels']['SizeZ'] = int(self.experiment.MicroscopeState['number_z_steps'])
             ome_dict['Pixels']['PhysicalSizeZ'] = int(self.experiment.MicroscopeState['step_size'])
-            if self.experiment.MicroscopeState['stack_cycling_mode'] == 'per_stack':
-                ome_dict['Pixels']['DimensionOrder'] = 'XYZCT'
-            elif self.experiment.MicroscopeState['stack_cycling_mode'] == 'per_z':
-                ome_dict['Pixels']['DimensionOrder'] = 'XYCZT'
+            # if self.experiment.MicroscopeState['stack_cycling_mode'] == 'per_stack':
+            #     ome_dict['Pixels']['DimensionOrder'] = 'XYZCT'
+            # elif self.experiment.MicroscopeState['stack_cycling_mode'] == 'per_z':
+            #     ome_dict['Pixels']['DimensionOrder'] = 'XYCZT'
         else:
             ome_dict['Pixels']['SizeZ'] = 1
 

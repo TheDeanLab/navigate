@@ -15,6 +15,7 @@ class BigDataViewerDataSource(DataSource):
         self._current_frame = 0
         self.metadata = BigDataViewerMetadata()
         self.image = None
+        self._views = None
 
     def write(self, data: npt.ArrayLike, **kw) -> None:
         c, z, t = self._czt_indices(self._current_frame, self.metadata.per_stack)
@@ -22,7 +23,7 @@ class BigDataViewerDataSource(DataSource):
         setup_group_name = f"{(c*self.shape_z+z):02}"
         self.image.create_dataset('/'.join([time_group_name, setup_group_name, "0", "cells"]),
                                   shape=(self.shape_x, self.shape_y), data=data)
-
+        self._views.append(**kw)
         self._current_frame += 1
 
     def read(self) -> None:

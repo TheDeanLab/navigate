@@ -98,27 +98,25 @@ class settings_notebook(ttk.Notebook):
     def popout(self):
         # Get ref to correct tab to popout
         tab = self.select()
-        tab_text = ""
-        text = self.tab('current')['text']
-        split = text.split("_")
-        for word in split:
-            if word != "!" or word != "tab":
-                tab_text += word.capitalize()
-                tab_text += " "
+        tab_text = self.tab(tab)['text']
+        if tab_text == 'Channels':
+            tab = self.channels_tab
+        elif tab_text == 'Camera Settings':
+            tab = self.camera_settings_tab
+        self.hide(tab)
         self.root.wm_manage(tab)
-        # tab.wm_title(tab_text)
-        print("tried chanigng text and protocol")
-        tk.Wm.wm_title(tab, tab_text)
+
+        # self.root.wm_title(tab, tab_text)
+        tk.Wm.title(tab, tab_text)
+        # self.root.wm_protocol("WM_DELETE_WINDOW", lambda: self.dismiss(tab, tab_text))
         tk.Wm.protocol(tab, "WM_DELETE_WINDOW", lambda: self.dismiss(tab, tab_text))
         # popup.protocol("WM_DELETE_WINDOW", lambda: self.dismiss(tab, tab_text))
     
     def dismiss(self, tab, tab_text):
         self.root.wm_forget(tab)
-        print("Dismissing")
-        self.add(tab, tab_text, sticky=tk.NSEW)
-        print("tried adding back tab")
-        self.grab_release()
-        self.destroy()
+        tab.grid(row=0, column=0)
+        self.add(tab)
+        self.tab(tab, text=tab_text)
 
         
     

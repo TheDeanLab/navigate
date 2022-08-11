@@ -80,8 +80,8 @@ class ImageWriter:
         self.data_source = data_sources.get_data_source(self.file_type)(file_name)
 
         # Pass experiment and configuration to metadata
-        self.data_source.metadata.configuration = self.model.configuration
-        self.data_source.metadata.experiment = self.model.experiment
+        self.data_source.set_metadata_from_configuration_experiment(self.model.configuration, 
+                                                                    self.model.experiment)
 
     def save_image(self, frame_ids):
         r"""Save the data to disk.

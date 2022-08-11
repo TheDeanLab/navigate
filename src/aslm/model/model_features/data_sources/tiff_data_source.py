@@ -12,7 +12,7 @@ from ..metadata_sources.metadata import Metadata
 from ..metadata_sources.ome_tiff_metadata import OMETIFFMetadata
 
 class TiffDataSource(DataSource):
-    def __init__(self, file_name: str = None, mode: str = 'w', is_bigtiff: bool = True) -> None:
+    def __init__(self, file_name: str = '', mode: str = 'w', is_bigtiff: bool = True) -> None:
         self.image = None
         self._write_mode = None
         super().__init__(file_name, mode)
@@ -61,7 +61,8 @@ class TiffDataSource(DataSource):
         self.image = tifffile.TiffFile(self.file_name)
 
         # TODO: Parse metadata
-        self.shape_x, self.shape_y, self.shape_z, self.shape_c, self.shape_t = self.image.shape
+        for i, ax in enumerate(list(self.image.series[0].axes)):
+            setattr(self, f"shape_{ax.lower()}", self.data.shape[i])
 
     def write(self, data: npt.ArrayLike, **kw) -> None:
         """One channel, all z-position, one timepoint = one stack.
@@ -71,7 +72,6 @@ class TiffDataSource(DataSource):
         self.mode = 'w'
 
         c, z, self._current_time = self._czt_indices(self._current_frame, self.metadata.per_stack)  # find current channel
-        print(f"C: {c} Z: {z} T: {self._current_time}")
         if (z==0) and (c==0):
             # Make sure we're set up for writing
             self._setup_write_image()
@@ -79,13 +79,18 @@ class TiffDataSource(DataSource):
         dx, dy, dz = self.metadata.voxel_size
 
         md = {'spacing': dz, 'unit': 'um', 'axes': 'ZYX'}
-        md['Plane'] = {}
-        for k, v in zip(['PositionX', 'PositionY', 'PositionZ'], ['x', 'y', 'z']):
-            md['Plane'][k] = kw[v]
+        if len(kw) > 0:
+            md['Plane'] = {}
+            for k, v in zip(['PositionX', 'PositionY', 'PositionZ'], ['x', 'y', 'z']):
+                try:
+                    md['Plane'][k] = kw[v]
+                except KeyError:
+                    pass
         
-        self.image[c].write(data.reshape(1, self.shape_y, self.shape_x), 
+        self.image[c].write(data,
                             resolution=(1./dx, 1./dy), 
-                            metadata=md)
+                            metadata=md,
+                            contiguous=True)
 
         self._current_frame += 1
 
@@ -141,6 +146,6 @@ class TiffDataSource(DataSource):
                     self.image[ch].close()
             else:
                 self.image.close()
-        except AttributeError:
+        except (TypeError, AttributeError):
             # image wasn't instantiated, no need to close anything
             pass

@@ -12,6 +12,7 @@ class BigDataViewerDataSource(DataSource):
     def __init__(self, file_name: str = None, mode: str = 'w') -> None:
         super().__init__(file_name, mode)
 
+        self._current_frame = 0
         self.metadata = BigDataViewerMetadata()
         self.image = None
 
@@ -21,6 +22,8 @@ class BigDataViewerDataSource(DataSource):
         setup_group_name = f"{(c*self.shape_z+z):02}"
         self.image.create_dataset('/'.join([time_group_name, setup_group_name, "0", "cells"]),
                                   shape=(self.shape_x, self.shape_y), data=data)
+
+        self._current_frame += 1
 
     def read(self) -> None:
         self.image = h5py.File(self.file_name, 'r')
@@ -36,6 +39,7 @@ class BigDataViewerDataSource(DataSource):
         self._write_mode = self._mode == 'w'
         self.close()  # if anything was already open, close it
         if self._write_mode:
+            self._current_frame = 0
             self.image = h5py.File(self.file_name, 'a')
             self._setup_h5()
         else:

@@ -2,9 +2,9 @@ import logging
 
 import numpy.typing as npt
 
-
+from aslm.model.aslm_model_config import Configurator
 class DataSource:
-    def __init__(self, file_name: str = None, mode: str = 'w') -> None:
+    def __init__(self, file_name: str = '', mode: str = 'w') -> None:
         """
         Base class for data sources, which can be of arbitrary file type.
         This implements read and write methods for accessing each data source.
@@ -22,13 +22,14 @@ class DataSource:
         self.file_name = file_name
         self.metadata = None  # Expect a metadata object
         self._mode = None
-        self.mode = mode
 
         self.dx, self.dy, self.dz = 1, 1, 1  # pixel sizes (um)
         self.dt = 1                          # time displacement (s)
         self.dc = 1                          # step size between channels, should always be 1
         # shape
         self.shape_x, self.shape_y, self.shape_z, self.shape_t, self.shape_c = 1, 1, 1, 1, 1
+
+        self.mode = mode
 
     @property
     def mode(self) -> str:
@@ -59,6 +60,15 @@ class DataSource:
     def shape(self) -> tuple:
         """Return shape as XYCZT."""
         return (self.shape_x, self.shape_y, self.shape_c, self.shape_z, self.shape_t)
+
+    def set_metadata_from_configuration_experiment(self, configuration: Configurator, 
+                                                   experiment: Configurator) -> None:
+        self.metadata.configuration = configuration
+        self.metadata.experiment = experiment
+
+        # pull new values from the metadata
+        self.dx, self.dy, self.dz = self.metadata.voxel_size
+        self.shape_x, self.shape_y, self.shape_c, self.shape_z, self.shape_t = self.metadata.shape
 
     def _czt_indices(self, frame_id: int, per_stack: bool = True) -> tuple:
         """Figure out where we are in the stack from the frame number.

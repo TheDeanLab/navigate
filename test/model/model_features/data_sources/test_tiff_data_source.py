@@ -2,13 +2,13 @@ import os
 
 import numpy as np
 
-def test_write_read():
+def test_tiff_write_read():
     from aslm.model.dummy_model import get_dummy_model
     from aslm.model.model_features.data_sources.tiff_data_source import TiffDataSource
 
     # Set up model with a random number of z-steps to modulate the shape
     model = get_dummy_model()
-    z_steps = np.random.randint(0,10)
+    z_steps = np.random.randint(1,10)
     model.experiment.MicroscopeState['number_z_steps'] = z_steps
 
     # Establish a TIFF data source

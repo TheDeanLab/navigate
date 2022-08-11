@@ -42,10 +42,10 @@ logger = logging.getLogger(p)
 
 
 
-class multiposition_tab(ttk.Frame):
+class multiposition_tab(tk.Frame):
     def __init__(self, setntbk, *args, **kwargs):
         # Init Frame
-        ttk.Frame.__init__(self, setntbk, *args, **kwargs)
+        tk.Frame.__init__(self, setntbk, *args, **kwargs)
         
         # Formatting
         tk.Grid.columnconfigure(self, 'all', weight=1)

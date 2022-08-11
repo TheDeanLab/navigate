@@ -46,10 +46,10 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class stage_control_tab(ttk.Frame):
+class stage_control_tab(tk.Frame):
     def __init__(self, note3, *args, **kwargs):
         # Init Frame
-        ttk.Frame.__init__(self, note3, *args, **kwargs)
+        tk.Frame.__init__(self, note3, *args, **kwargs)
         
         # Formatting
         tk.Grid.columnconfigure(self, 'all', weight=1)

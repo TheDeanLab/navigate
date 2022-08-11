@@ -43,12 +43,16 @@ def parse_xml(root):
     if text != '':
         d['text'] = text
     prev_tag = ''
-    count = 0
     for child in root:
-        tag = child.tag + str(count)
+        tag = child.tag
         if tag == prev_tag:
-            count += 1
-            tag = child.tag + str(count)
+            if type(d[tag]) != list:
+                # create the list
+                tmp = d[tag]
+                d[tag] = []
+                d[tag].append(tmp)
+            d[tag].append(parse_xml(child))
+        else:
+            d[tag] = parse_xml(child)
         prev_tag = tag
-        d[tag] = parse_xml(child)
     return d

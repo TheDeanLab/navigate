@@ -1,33 +1,43 @@
-def dict_to_xml(d, root=None):
+import xml.etree.ElementTree as ET
+
+def dict_to_xml(d, tag=None):
     """Parse a Python dictionary to XML.
     
     Parameters
     ----------
     d: dict
         Dictionary to parse to XML.
-    root : str
+    tag : str
         Root key of dictionary
     """
 
-    if root is None:
-        root = list(d.keys())[0]
+    if tag is None:
+        tag = list(d.keys())[0]
 
-    xml = f"<{root}"
+    xml = f"\n<{tag}"
     if isinstance(d, dict):
         next_xml = ""
+        text = ""
         for k, v in d.items():
             if isinstance(v, dict):
                 # Not a leaf node
-                next_xml = dict_to_xml(v, k)
+                next_xml += dict_to_xml(v, k)
+            elif isinstance(v, list):
+                for el in v:
+                    next_xml += dict_to_xml(el, k)
             else:
-                xml += f" {k}=\"{v}\""
+                if k == "text":
+                    text = "\n" + str(v)
+                else:
+                    xml += f" {k}=\"{v}\""
         xml += ">"
+        xml += text
         xml += next_xml
-    xml += f"</{root}>"
-
+    xml += f"\n</{tag}>"
+    
     return xml
 
-def parse_xml(root):
+def parse_xml(root: ET.Element) -> dict:
     """
     Parse an XML ElementTree.
 
@@ -35,6 +45,11 @@ def parse_xml(root):
     ----------
     root : xml.etree.ElementTree.Element
         root Element of XML ElementTree
+
+    Returns
+    -------
+    d : dict
+        Dictionary representation of the XML file.
     """
     d = {}
     for k, v in root.attrib.items():

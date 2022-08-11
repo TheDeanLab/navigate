@@ -9,6 +9,11 @@ def dict_to_xml(d, tag=None):
         Dictionary to parse to XML.
     tag : str
         Root key of dictionary
+
+    Returns
+    -------
+    xml : str
+        String of XML tags produced from dictionary.
     """
 
     if tag is None:

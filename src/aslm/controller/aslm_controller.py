@@ -35,12 +35,12 @@ import tkinter
 import multiprocessing as mp
 import threading
 from pathlib import Path
-import time
+import sys
 
 # Third Party Imports
 
 # Local View Imports
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 from aslm.view.main_application_window import MainApp as view
 from aslm.view.menus.remote_focus_popup import remote_popup
 from aslm.view.menus.autofocus_setting_popup import autofocus_popup
@@ -138,6 +138,7 @@ class ASLM_controller:
 
         # Initialize the View
         self.view = view(root)
+        self.view.root.protocol("WM_DELETE_WINDOW", self.exit_program)
 
         # Sub Gui Controllers
         # Acquire bar, channels controller, camera view, camera settings, stage, waveforms, menus.
@@ -800,3 +801,9 @@ class ASLM_controller:
                 self.view.settings.channels_tab.multipoint_frame.on_off.set(True)  # assume we want to use multipos
             elif event == 'stop':
                 break
+    
+    def exit_program(self):
+        if messagebox.askyesno("Exit", "Are you sure?"):
+            logger.info("Exiting Program")
+            self.execute('exit')
+            sys.exit()

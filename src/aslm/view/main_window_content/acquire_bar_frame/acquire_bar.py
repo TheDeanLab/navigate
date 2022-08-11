@@ -98,4 +98,4 @@ class AcquireBar(ttk.Frame):
         self.acquire_btn.grid(row=0, column=0, sticky=tk.NSEW, pady=(2,2), padx=(2,2))
         self.pull_down.grid(row=0, column=1, sticky=tk.NSEW, pady=(2,2), padx=(2,2))
         self.progBar_frame.grid(row=0, column=2, sticky=tk.NSEW, pady=(2,2), padx=(2,2))
-        self.exit_btn.grid(row=0, column=3, sticky=tk.NSEW, pady=(2,2), padx=(2,2))
+        self.exit_btn.grid(row=0, column=3, sticky=tk.E, pady=(2,2), padx=(2,2))

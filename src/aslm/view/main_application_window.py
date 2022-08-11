@@ -40,9 +40,10 @@ the name of the class instead of self to make things easier to read. So for Main
 
 # Import Standard Libraries
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 import logging
 from pathlib import Path
+import sys
 
 # Third Party Imports
 
@@ -159,6 +160,8 @@ class MainApp(ttk.Frame):
         #     self.root.tk.call('tk', 'scaling', screen_scaling_factor)
 
         # self.root.geometry(f"{actual_screen_width}x{actual_screen_height}")
+    
+
          
 
 

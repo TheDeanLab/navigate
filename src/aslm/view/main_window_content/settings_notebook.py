@@ -45,9 +45,13 @@ from aslm.view.main_window_content.channel_settings.channels_tab import channels
 
 
 class settings_notebook(ttk.Notebook):
-    def __init__(self, frame_left, *args, **kwargs):
+    def __init__(self, frame_left, root, *args, **kwargs):
         #Init notebook
         ttk.Notebook.__init__(self, frame_left, *args, **kwargs)
+
+        # Current tab (tab is a reserved word for notebook hence cur_tab)
+        self.cur_tab = None
+        self.root = root
         
         # Formatting
         tk.Grid.columnconfigure(self, 'all', weight=1)
@@ -59,15 +63,65 @@ class settings_notebook(ttk.Notebook):
         #Creating the Channels tab
         self.channels_tab = channels_tab(self)
 
+
         #Creating the Camera tab
         self.camera_settings_tab = camera_settings_tab(self)
+
 
         #Adding tabs to settings notebook
         self.add(self.channels_tab, text='Channels', sticky=tk.NSEW)
         self.add(self.camera_settings_tab, text='Camera Settings', sticky=tk.NSEW)
 
 
+        # Popup setup
+        self.menu = tk.Menu(self, tearoff=0)
+        self.menu.add_command(label="Popout Tab", command=self.popout)
 
+        # Binding for Popup menu
+        self.bind("<ButtonPress-2>", self.find)
+
+    def get_absolute_position(self):
+        x = self.root.winfo_pointerx()
+        y = self.root.winfo_pointery()
+        return x, y
+
+    def find(self, event):
+        element = event.widget.identify(event.x, event.y)
+        self.cur_tab = event.widget.index(event.widget.select())
+        if "label" in element:
+            try:
+                x, y = self.get_absolute_position()
+                self.menu.tk_popup(x, y)
+            finally:
+                self.menu.grab_release()
+    
+    def popout(self):
+        # Get ref to correct tab to popout
+        tab = self.select()
+        tab_text = ""
+        text = self.tab('current')['text']
+        split = text.split("_")
+        for word in split:
+            if word != "!" or word != "tab":
+                tab_text += word.capitalize()
+                tab_text += " "
+        self.root.wm_manage(tab)
+        # tab.wm_title(tab_text)
+        print("tried chanigng text and protocol")
+        tk.Wm.wm_title(tab, tab_text)
+        tk.Wm.protocol(tab, "WM_DELETE_WINDOW", lambda: self.dismiss(tab, tab_text))
+        # popup.protocol("WM_DELETE_WINDOW", lambda: self.dismiss(tab, tab_text))
+    
+    def dismiss(self, tab, tab_text):
+        self.root.wm_forget(tab)
+        print("Dismissing")
+        self.add(tab, tab_text, sticky=tk.NSEW)
+        print("tried adding back tab")
+        self.grab_release()
+        self.destroy()
+
+        
+    
 
 
 

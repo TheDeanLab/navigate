@@ -34,41 +34,59 @@ import tkinter as tk
 from tkinter import ttk
 import logging
 
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-from aslm.view.main_window_content.channel_settings.channel_settings_frames.channel_settings import channel_creator
-from aslm.view.main_window_content.channel_settings.channel_settings_frames.stack_acquisition_settings import stack_acq_frame
-from aslm.view.main_window_content.channel_settings.channel_settings_frames.stack_timepoint_settings import stack_timepoint_frame
-from aslm.view.main_window_content.channel_settings.channel_settings_frames.multipoint_settings import multipoint_frame, multipoint_list
+class DockableNotebook(ttk.Notebook):
+    def __init__(self, parent, *args, **kwargs):
+        ttk.Notebook.__init__(self, parent, *args, **kwargs)
 
-
-class channels_tab(tk.Frame):
-    def __init__(self, setntbk, *args, **kwargs):
-        # Init Frame
-        tk.Frame.__init__(self, setntbk, *args, **kwargs)
-        
         # Formatting
         tk.Grid.columnconfigure(self, 'all', weight=1)
         tk.Grid.rowconfigure(self, 'all', weight=1)
 
-        # Channel Settings
-        self.channel_widgets_frame = channel_creator(self)
-        self.channel_widgets_frame.grid(row=0, column=0, columnspan=5, sticky=(tk.NSEW), padx=10, pady=10)
+        # Binding
+        self.bind("<ButtonPress-1> <<NotebookTabChanged>>", self.press)
+        self.bind("<B1_Motion> <<NotebookTabChanged>>", self.move)
+        self.bind("<ButtonRelease-1> <<NotebookTabChanged>>", self.release)
 
-        # Stack Acquisition Settings
-        self.stack_acq_frame = stack_acq_frame(self)
-        self.stack_acq_frame.grid(row=1, column=0, columnspan=5, sticky=(tk.NSEW), padx=10, pady=10)
 
-        # Time Settings
-        self.stack_timepoint_frame = stack_timepoint_frame(self)
-        self.stack_timepoint_frame.grid(row=3, column=0, columnspan=5, sticky=(tk.NSEW), padx=10, pady=10)
 
-        # Multipoint Enable
-        self.multipoint_frame = multipoint_frame(self)
-        self.multipoint_frame.grid(row=4, column=0, columnspan=5, sticky=(tk.NSEW), padx=10, pady=10)
+    def press(self, event):
+        print("Pressed Tab: ", event.widget.select())
 
-        # Multipoint List
-        self.multipoint_list = multipoint_list(self)
-        self.multipoint_list.grid(row=5, column=0, columnspan=5, sticky=(tk.NSEW), padx=10, pady=10)
+    def move(self, event):
+        print("Moving Tab: ", event.widget.select())
+
+    def release(self, event):
+        print("Releasing Tab: ", event.widget.select())
+
+
+class FloatingWindow(tk.Toplevel):
+    def __init__(self, label, *args, **kwargs):
+        tk.Toplevel.__init__(self, *args, **kwargs)
+        self.overrideredirect(True)
+
+        self.label = tk.Label(self, text=label)
+        self.label.grid(row=0, column=0, sticky=tk.NSEW)
+
+        self.label.bind("<ButtonPress-1>", self.start_move)
+        self.label.bind("<ButtonRelease-1>", self.stop_move)
+        self.label.bind("<B1-Motion>", self.do_move)
+
+    def start_move(self, event):
+        self.x = event.x
+        self.y = event.y
+
+    def stop_move(self, event):
+        self.x = None
+        self.y = None
+
+    def do_move(self, event):
+        deltax = event.x - self.x
+        deltay = event.y - self.y
+        x = self.winfo_x() + deltax
+        y = self.winfo_y() + deltay
+        self.geometry(f"+{x}+{y}")

@@ -60,7 +60,7 @@ class BigDataViewerDataSource(DataSource):
                     setup_group_name = f"{(c*self.shape_z+z):02}"
                     for i in range(self.subdivisons.shape[0]):
                         dx, dy, dz = self.subdivisons[i,...]
-                        self.image.create_dataset('/'.join([time_group_name, setup_group_name, "0", "cells"]),
+                        self.image.create_dataset('/'.join([time_group_name, setup_group_name, f"{i}", "cells"]),
                                     chunks=tuple(self.resolutions[i,...]),
                                     shape=(self.shape_x//dx , self.shape_y//dy, self.shape_z//dz))
 

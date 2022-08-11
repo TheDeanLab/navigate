@@ -11,7 +11,44 @@ import numpy.typing as npt
 from .metadata import XMLMetadata
 
 class BigDataViewerMetadata(XMLMetadata):
-    
+    def __init__(self) -> None:
+        super().__init__()
+        self._views = []
+
+    @property
+    def bdv_xml_dict(self, file_name: str) -> dict:
+        bdv_dict = {}
+        bdv_dict['SpimData'] = {'version': 2.0}
+        
+        bdv_dict['SpimData']['BasePath'] = {'type': 'relative', 'text': '.'}
+
+        bdv_dict['SpimData']['SequenceDescription'] = {}
+        bdv_dict['SpimData']['SequenceDescription']['ImageLoader'] = {'format': 'bdv.hdf5'}
+        bdv_dict['SpimData']['SequenceDescription']['ImageLoader']['hdf5'] = {'type': 'relative', 'text': file_name}
+
+        bdv_dict['SpimData']['SequenceDescription']['ViewSetups'] = []
+        view_id = 0
+        for ch in self.shape_c:
+            for z in self.shape_z:
+                d = {'ViewSetup': {'id': {'text': view_id}, 'name': {'text': view_id}}}
+                d['ViewSetup']['size'] = {'text': f"{self.shape_x} {self.shape_y} {self.shape_z}"}
+                d['ViewSetup']['voxelSize'] = {'unit': {'text': 'um'}}
+                d['ViewSetup']['voxelSize']['size'] = {'text': f"{self.dx} {self.dy} {self.dz}"}
+                d['ViewSetup']['attributes'] = {'channel': {'text': ch}, 'tile': {'text': z}}
+                bdv_dict['SpimData']['SequenceDescription']['ViewSetups'].append(d)
+                view_id += 1
+
+        bdv_dict['SpimData']['SequenceDescription']['Timepoints'] = {'type': 'range'}
+        bdv_dict['SpimData']['SequenceDescription']['Timepoints']['first'] = {'text': 0}
+        bdv_dict['SpimData']['SequenceDescription']['Timepoints']['last'] = {'text': self.shape_t}
+
+        bdv_dict['SpimData']['SequenceDescription']['ViewRegistrations'] = []
+
+        for view in self._views:
+            affine_matrix = self.stage_positions_to_affine_matrix(**view[1:])
+            d = {'ViewRegistration': {'timepoint': view[0], 'setup': 0}}
+            bdv_dict['SpimData']['SequenceDescription']['ViewRegistrations'].append()
+
     def stage_positions_to_affine_matrix(self, x: float, y: float, z: float, 
                                          theta: float, f: Optional[float] = None) -> npt.ArrayLike:
         """Convert stage positions to an affine matrix. Ignore focus for now."""

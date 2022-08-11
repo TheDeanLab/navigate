@@ -94,12 +94,12 @@ class XMLMetadata(Metadata):
         with open(file_name, 'r') as fp:
             fp.write(xml)
 
-    def to_xml(self, file_type: str, root: Optional[str] = None) -> str:
+    def to_xml(self, file_type: str, root: Optional[str] = None, **kw) -> str:
         """
         Convert stored metadata to XML
         """
         try:
-            d = getattr(self, f"{file_type.lower().replace(' ','_').replace('-','_')}_xml_dict")
+            d = getattr(self, f"{file_type.lower().replace(' ','_').replace('-','_')}_xml_dict")(**kw)
             xml = xml_tools.dict_to_xml(d, root)
         except AttributeError:
             logging.debug(f"Metadata Writer - I do not know how to export {self.file_type} metadata to XML.")

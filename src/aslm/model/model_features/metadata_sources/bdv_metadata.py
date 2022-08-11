@@ -13,7 +13,8 @@ from .metadata import XMLMetadata
 class BigDataViewerMetadata(XMLMetadata):
     def __init__(self) -> None:
         super().__init__()
-        self._views = []
+        # self._views = []
+        self.setups = range(self.shape_c*self.shape_z)
 
     @property
     def bdv_xml_dict(self, file_name: str) -> dict:
@@ -44,10 +45,10 @@ class BigDataViewerMetadata(XMLMetadata):
 
         bdv_dict['SpimData']['SequenceDescription']['ViewRegistrations'] = []
 
-        for view in self._views:
-            affine_matrix = self.stage_positions_to_affine_matrix(**view[1:])
-            d = {'ViewRegistration': {'timepoint': view[0], 'setup': 0}}
-            bdv_dict['SpimData']['SequenceDescription']['ViewRegistrations'].append()
+        # for view in self._views:
+        #     affine_matrix = self.stage_positions_to_affine_matrix(**view[1:])
+        #     d = {'ViewRegistration': {'timepoint': view[0], 'setup': 0}}
+        #     bdv_dict['SpimData']['SequenceDescription']['ViewRegistrations'].append()
 
     def stage_positions_to_affine_matrix(self, x: float, y: float, z: float, 
                                          theta: float, f: Optional[float] = None) -> npt.ArrayLike:

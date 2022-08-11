@@ -79,12 +79,12 @@ class stack_acq_frame(ttk.Labelframe):
                                                      input_var=tk.DoubleVar(),
                                                      input_args={"from_": -50000.0, "increment": 0.5, "width": 6}
                                                      )
-            self.inputs[start_names[i]].grid(row=i + 1, column=0, sticky='N')
+            self.inputs[start_names[i]].grid(row=i + 1, column=0, sticky='N', pady=2, padx=(6,0))
             self.inputs[start_names[i]].label.grid(sticky='N')
         
         # Start button
         self.buttons['set_start'] = ttk.Button(self.pos_slice, text="Set Start Pos/Foc")
-        self.buttons['set_start'].grid(row=3, column=0, sticky='N')
+        self.buttons['set_start'].grid(row=3, column=0, sticky='N', pady=2, padx=(6,0))
 
         # End Pos Frame (Vertically Oriented)
         end_names = ['end_position', 'end_focus']
@@ -99,12 +99,12 @@ class stack_acq_frame(ttk.Labelframe):
                                                    input_var=tk.DoubleVar(),
                                                    input_args={"from_": -50000.0, "increment": 0.5, "width": 6}
                                                    )
-            self.inputs[end_names[i]].grid(row=i + 1, column=1, sticky='N')
+            self.inputs[end_names[i]].grid(row=i + 1, column=1, sticky='N', pady=2, padx=(6,0))
             self.inputs[end_names[i]].label.grid(sticky='N')
         
             # End Button
         self.buttons['set_end'] = ttk.Button(self.pos_slice, text="Set End Pos/Foc")
-        self.buttons['set_end'].grid(row=3, column=1, sticky='N')
+        self.buttons['set_end'].grid(row=3, column=1, sticky='N', pady=2, padx=(6,0))
 
         # Step Size Frame (Vertically oriented)
         self.step_size_label = ttk.Label(self.pos_slice, text='Step Size')
@@ -114,13 +114,13 @@ class stack_acq_frame(ttk.Labelframe):
                                               input_var=tk.DoubleVar(),
                                               input_args={"from_": -50000.0, "increment": 0.5, "width": 6}
                                               )
-        self.inputs['step_size'].grid(row=1, column=2, sticky='N')
+        self.inputs['step_size'].grid(row=1, column=2, sticky='N', padx=6)
 
         # Slice Frame (Vertically oriented)
         self.empty_label = ttk.Label(self.pos_slice, text=' ')
         self.empty_label.grid(row=0, column=3, sticky='N')
         slice_names = ['number_z_steps', 'abs_z_start', 'abs_z_end']
-        slice_labels = ['# slices', 'Abs Z Start', 'Abs Z Stop']
+        slice_labels = ['# slices      ', 'Abs Z Start', 'Abs Z Stop']
 
         for i in range(len(slice_names)):
             self.inputs[slice_names[i]] = LabelInput(parent=self.pos_slice,
@@ -129,16 +129,18 @@ class stack_acq_frame(ttk.Labelframe):
                                                      input_var=tk.DoubleVar(),
                                                      input_args={"from_": -50000.0, "increment": 0.5, "width": 6}
                                                      )
-            self.inputs[slice_names[i]].label.grid(sticky='N')
+            # self.inputs[slice_names[i]].label.grid(sticky='E')
+            # self.inputs[slice_names[i]].widget.grid(sticky='E')
             self.inputs[slice_names[i]].widget.configure(state='disabled')
-            self.inputs[slice_names[i]].grid(row=i + 1, column=3, sticky='N')
+            self.inputs[slice_names[i]].grid(row=i + 1, column=3, sticky='NSEW', pady=2, padx=(6,0))
+
 
         # Laser Cycling Settings
         self.inputs['cycling'] = LabelInput(parent=self.cycling,
                                             label='Laser Cycling Settings ',
                                             input_class=ValidatedCombobox,
                                             input_var=tk.StringVar(),
-                                            input_args={'width': 7}
+                                            input_args={'width': 8}
                                             )
         self.inputs["cycling"].state(["readonly"])  # Makes it so the user cannot type a choice into combobox
         self.inputs["cycling"].grid(row=0, column=0, sticky='NSEW', padx=6, pady=5)

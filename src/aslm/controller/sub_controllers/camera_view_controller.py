@@ -147,7 +147,7 @@ class Camera_View_Controller(GUI_Controller):
         self.channel_index = 0
 
     def slider_update(self, event):
-        slider_index = self.view.slider.slider_widget.get()
+        slider_index = self.view.slider.get()
         channel_display_index = 0
         self.retrieve_image_slice_from_volume(slider_index=slider_index,
                                               channel_display_index=channel_display_index)

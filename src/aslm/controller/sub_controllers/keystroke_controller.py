@@ -58,7 +58,7 @@ class KeystrokeController(GUI_Controller):
         self.camera_view.canvas.bind("<Button-1>", self.camera_controller.left_click)
 
         # Slider Binding
-        self.camera_view.slider.slider_widget.bind("<Button-1>", self.camera_controller.slider_update)
+        self.camera_view.slider.bind("<Button-1>", self.camera_controller.slider_update)
 
         # MouseWheel Binding
         self.view.root.bind("<MouseWheel>", self.view.scroll_frame.mouse_wheel)

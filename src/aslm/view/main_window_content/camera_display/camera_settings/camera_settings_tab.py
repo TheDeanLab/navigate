@@ -52,6 +52,8 @@ class camera_settings_tab(tk.Frame):
     def __init__(self, setntbk, *args, **kwargs):
         #Init Frame
         tk.Frame.__init__(self, setntbk, *args, **kwargs)
+
+        self.index = 1
         
         # Formatting
         tk.Grid.columnconfigure(self, 'all', weight=1)

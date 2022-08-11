@@ -110,16 +110,20 @@ class KeystrokeController(GUI_Controller):
 
     def switch_tab1(self, event):
         if event.state == 4:
-            self.main_tabs.select(0)
+            if self.main_tabs.index("end") > 0:
+                self.main_tabs.select(0)
 
     def switch_tab2(self, event):
         if event.state == 4:
-            self.main_tabs.select(1)
+            if self.main_tabs.index("end") > 1:
+                self.main_tabs.select(1)
     
     def switch_tab3(self, event):
         if event.state == 4:
-            self.main_tabs.select(2)
+            if self.main_tabs.index("end") > 2:
+                self.main_tabs.select(2)
 
     def switch_tab4(self, event):
-        if event.state == 4 or event.state == 8:
-            self.main_tabs.select(3)
+        if event.state == 4:
+            if self.main_tabs.index("end") > 3:
+                self.main_tabs.select(3)

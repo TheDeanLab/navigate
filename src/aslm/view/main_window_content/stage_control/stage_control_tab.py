@@ -50,6 +50,8 @@ class stage_control_tab(tk.Frame):
     def __init__(self, note3, *args, **kwargs):
         # Init Frame
         tk.Frame.__init__(self, note3, *args, **kwargs)
+
+        self.index = 2
         
         # Formatting
         tk.Grid.columnconfigure(self, 'all', weight=1)

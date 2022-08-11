@@ -41,6 +41,8 @@ class waveform_tab(tk.Frame):
     def __init__(self, cam_wave, *args, **kwargs):
         #Init Frame
         tk.Frame.__init__(self, cam_wave, *args, **kwargs)
+
+        self.index = 1
         
         # Formatting
         tk.Grid.columnconfigure(self, 'all', weight=1)

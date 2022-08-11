@@ -48,6 +48,8 @@ class channels_tab(tk.Frame):
     def __init__(self, setntbk, *args, **kwargs):
         # Init Frame
         tk.Frame.__init__(self, setntbk, *args, **kwargs)
+
+        self.index = 0
         
         # Formatting
         tk.Grid.columnconfigure(self, 'all', weight=1)

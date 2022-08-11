@@ -46,6 +46,8 @@ class multiposition_tab(tk.Frame):
     def __init__(self, setntbk, *args, **kwargs):
         # Init Frame
         tk.Frame.__init__(self, setntbk, *args, **kwargs)
+
+        self.index = 3
         
         # Formatting
         tk.Grid.columnconfigure(self, 'all', weight=1)

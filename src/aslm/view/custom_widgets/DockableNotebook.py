@@ -95,6 +95,9 @@ class DockableNotebook(ttk.Notebook):
     def dismiss(self, tab, tab_text):
         self.root.wm_forget(tab)
         tab.grid(row=0, column=0)
-        self.add(tab)
+        if self.index("end") - 1 > tab.index:
+            self.insert(tab.index, tab)
+        else:
+            self.insert("end", tab)
         self.tab(tab, text=tab_text)
         self.tab_list.append(tab)

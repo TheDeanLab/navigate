@@ -40,7 +40,6 @@ import numpy as np
 from aslm.controller.sub_controllers.widget_functions import validate_wrapper
 from aslm.controller.sub_controllers.gui_controller import GUI_Controller
 from aslm.controller.sub_controllers.channel_setting_controller import Channel_Setting_Controller
-from aslm.controller.sub_controllers.multi_position_controller import Multi_Position_Controller
 from aslm.controller.sub_controllers.tiling_wizard_controller import Tiling_Wizard_Controller
 
 # View Imports that are not called on startup
@@ -65,7 +64,7 @@ class Channels_Tab_Controller(GUI_Controller):
 
         # sub-controllers
         self.channel_setting_controller = Channel_Setting_Controller(self.view.channel_widgets_frame, self)
-        self.multi_position_controller = Multi_Position_Controller(self.view.multipoint_list, self)
+        
 
         
 
@@ -123,7 +122,7 @@ class Channels_Tab_Controller(GUI_Controller):
         self.is_multiposition = False
         self.is_multiposition_val = self.view.multipoint_frame.on_off
         self.view.multipoint_frame.save_check.configure(command=self.toggle_multiposition)
-        self.view.multipoint_frame.buttons["tiling"].configure(command=self.launch_tiling_wizard)
+        self.view.quick_launch.buttons["tiling"].configure(command=self.launch_tiling_wizard)
 
         if configuration_controller:
             self.initialize(configuration_controller)
@@ -166,7 +165,7 @@ class Channels_Tab_Controller(GUI_Controller):
         self.channel_setting_controller.set_experiment_values(microscope_state['channels'])
 
         # positions
-        self.multi_position_controller.set_positions(microscope_state['stage_positions'])
+        self.parent_controller.multiposition_tab_controller.set_positions(microscope_state['stage_positions'])
         
         # after initialization
         self.in_initialization = False
@@ -191,7 +190,7 @@ class Channels_Tab_Controller(GUI_Controller):
         """
 
         # Not included in stack_acq_vals or timepoint_vals
-        microscope_state['stage_positions'] = self.multi_position_controller.get_positions()
+        microscope_state['stage_positions'] = self.parent_controller.multiposition_tab_controller.get_positions()
         microscope_state['channels'] = self.channel_setting_controller.get_values()
         microscope_state['stack_cycling_mode'] = 'per_stack' if self.stack_acq_vals['cycling'].get() == 'Per Stack' else 'per_z'
         microscope_state['stack_z_origin'] = self.z_origin
@@ -430,7 +429,7 @@ class Channels_Tab_Controller(GUI_Controller):
         if self.in_initialization:
             return
         channel_settings = self.channel_setting_controller.get_values()
-        number_of_positions = self.multi_position_controller.get_position_num() if self.is_multiposition else 1
+        number_of_positions = self.parent_controller.multiposition_tab_controller.get_position_num() if self.is_multiposition else 1
         channel_exposure_time = []
         # validate the spinbox's value
         try:
@@ -548,25 +547,25 @@ class Channels_Tab_Controller(GUI_Controller):
 
     def load_positions(self):
         r"""Load Positions for Multi-Position Acquisition. """
-        self.multi_position_controller.load_csv_func()
+        self.parent_controller.multiposition_tab_controller.load_csv_func()
 
     def export_positions(self):
         r"""Export Positions for Multi-Position Acquisition. """
-        self.multi_position_controller.export_csv_func()
+        self.parent_controller.multiposition_tab_controller.export_csv_func()
 
     def move_to_position(self):
         r"""Move to a position within the Multi-Position Acquisition Interface."""
         event = type('MyEvent', (object,), {})
         event.x, event.y = 0, 0
-        self.multi_position_controller.handle_double_click(event)
+        self.parent_controller.multiposition_tab_controller.handle_double_click(event)
 
     def append_current_position(self):
         r"""Add current position to the Multi-Position Acquisition Interface."""
-        self.multi_position_controller.add_stage_position_func()
+        self.parent_controller.multiposition_tab_controller.add_stage_position_func()
 
     def generate_positions(self):
         r"""Generate a Multi-Position Acquisition."""
-        self.multi_position_controller.generate_positions_func()
+        self.parent_controller.multiposition_tab_controller.generate_positions_func()
 
     def set_info(self,
                  vals,

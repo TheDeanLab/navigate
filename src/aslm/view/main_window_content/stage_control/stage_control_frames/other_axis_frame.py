@@ -31,7 +31,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 # Standard Imports
-from tkinter import *
+import tkinter as tk
 from tkinter import ttk
 
 # Local Imports
@@ -44,30 +44,41 @@ from pathlib import Path
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-class other_axis_frame(ttk.Frame):
+class other_axis_frame(ttk.Labelframe):
     def __init__(other_axis_frame, stage_control_tab, name, *args, **kwargs):
         #Init Frame
-        ttk.Frame.__init__(other_axis_frame, stage_control_tab, *args, **kwargs)
+        label = name
+        ttk.Labelframe.__init__(other_axis_frame, stage_control_tab, text= label + " Movement", *args, **kwargs)
         other_axis_frame.name = name
         
         # Formatting
-        Grid.columnconfigure(other_axis_frame, 'all', weight=1)
-        Grid.rowconfigure(other_axis_frame, 'all', weight=1)
+        tk.Grid.columnconfigure(other_axis_frame, 'all', weight=1)
+        tk.Grid.rowconfigure(other_axis_frame, 'all', weight=1)
+
+        image_directory = Path(__file__).resolve().parent
+        other_axis_frame.up_image = tk.PhotoImage(file=image_directory.joinpath("images", "greyup.png"))
+        other_axis_frame.down_image = tk.PhotoImage(file=image_directory.joinpath("images", "greydown.png"))
+        other_axis_frame.up_image = other_axis_frame.up_image.subsample(2,2)
+        other_axis_frame.down_image = other_axis_frame.down_image.subsample(2,2)
 
         #Setting up buttons for up, down, zero and increment spinbox
 
         #Up button
-        other_axis_frame.up_btn = ttk.Button(
+        other_axis_frame.up_btn = tk.Button(
             other_axis_frame,
-            style='arrow.TButton',
-            text="\N{UPWARDS BLACK ARROW}",
+            image=other_axis_frame.up_image,
+            borderwidth=0
+            # style='arrow.TButton',
+            # text="\N{UPWARDS BLACK ARROW}",
         )
 
         #Down button
-        other_axis_frame.down_btn = ttk.Button(
+        other_axis_frame.down_btn = tk.Button(
             other_axis_frame,
-            style='arrow.TButton',
-            text="\N{DOWNWARDS BLACK ARROW}",
+            image=other_axis_frame.down_image,
+            borderwidth=0
+            # style='arrow.TButton',
+            # text="\N{DOWNWARDS BLACK ARROW}",
         )
 
         #Zero button
@@ -81,8 +92,8 @@ class other_axis_frame(ttk.Frame):
         other_axis_frame.increment_box = LabelInput(
             parent=other_axis_frame,
             input_class=ValidatedSpinbox,
-            input_var=DoubleVar(),
-            input_args={'width': 25}
+            input_var=tk.DoubleVar(),
+            input_args={'width': 5}
         )
 
 
@@ -104,10 +115,10 @@ class other_axis_frame(ttk.Frame):
 
 
         #Gridding out buttons
-        other_axis_frame.up_btn.grid(row=0, column=0, rowspan=2, pady=2) #UP
-        other_axis_frame.down_btn.grid(row=4, column=0, rowspan=2, pady=2) #DOWN
-        other_axis_frame.zero_btn.grid(row=2, column=0, pady=(5,2), sticky=(NSEW)) #Zero Z
-        other_axis_frame.increment_box.grid(row=3, column=0, pady=2, sticky=(NSEW)) #Increment spinbox
+        other_axis_frame.up_btn.grid(row=0, column=0, pady=2) #UP
+        other_axis_frame.down_btn.grid(row=3, column=0, pady=2) #DOWN
+        other_axis_frame.zero_btn.grid(row=1, column=0, pady=(5,2)) #Zero Z
+        other_axis_frame.increment_box.grid(row=2, column=0, pady=2) #Increment spinbox
         other_axis_frame.increment_box.widget.set_precision(-1)
 
 

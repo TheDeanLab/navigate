@@ -30,43 +30,28 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-# Standard Imports
 import tkinter as tk
 from tkinter import ttk
-
-
 import logging
 
+from aslm.view.main_window_content.multiposition.multipoint_settings import multipoint_list
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class stop_frame(ttk.Frame):
-    def __init__(self, stage_control_tab, name, *args, **kwargs):
-        # Init Frame
-        ttk.Frame.__init__(self, stage_control_tab, *args, **kwargs)
-        self.name = name
 
+class multiposition_tab(ttk.Frame):
+    def __init__(self, setntbk, *args, **kwargs):
+        # Init Frame
+        ttk.Frame.__init__(self, setntbk, *args, **kwargs)
+        
         # Formatting
         tk.Grid.columnconfigure(self, 'all', weight=1)
         tk.Grid.rowconfigure(self, 'all', weight=1)
 
-        # Stop button
-        self.stop_btn = tk.Button(
-            self,
-            bg='red',
-            fg='white',
-            text="STOP",
-            width=10,
-            height=5
-        )
 
-        # Gridding out buttons
-        self.stop_btn.grid(row=0, column=0, rowspan=2, pady=2)
-
-    def get_buttons(self):
-        return {
-            'stop': self.stop_btn
-        }
+        # Multipoint List
+        self.multipoint_list = multipoint_list(self)
+        self.multipoint_list.grid(row=5, column=0, columnspan=3, sticky=(tk.NSEW), padx=10, pady=10)

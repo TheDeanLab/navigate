@@ -78,7 +78,8 @@ class camera_mode(ttk.Labelframe):
                 self.inputs[self.names[i]] = LabelInput(parent=content_frame,
                                                         label=self.labels[i],
                                                         input_class=ttk.Combobox,
-                                                        input_var=tk.StringVar()                                          
+                                                        input_var=tk.StringVar(),
+                                                        input_args={'width': 12}                                          
                                                         )
                 self.inputs[self.names[i]].grid(row=i, column=0, pady=3, padx=5)
             else:
@@ -86,7 +87,7 @@ class camera_mode(ttk.Labelframe):
                                                         label=self.labels[i],
                                                         input_class=ValidatedSpinbox,
                                                         input_var=tk.StringVar(),
-                                                        input_args={"from_": 0, "to": 10000, "increment": 1}                                       
+                                                        input_args={"from_": 0, "to": 10000, "increment": 1, 'width': 5}                                       
                                                         )
                 self.inputs[self.names[i]].grid(row=i, column=0, pady=3, padx=5)
         

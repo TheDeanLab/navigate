@@ -329,9 +329,9 @@ class Etl_Popup_Controller(GUI_Controller):
         TODO: This currently does not save the galvo parameters, even though they are controlled here.
               Right now, these must be saved in the experiment file separately.
         """
-        errors = self.get_errors()
-        if errors:
-            return  # Dont save if any errors TODO needs testing
+        # errors = self.get_errors()
+        # if errors:
+        #     return  # Dont save if any errors TODO needs testing
 
         save_yaml_file('', self.resolution_info.serialize(), self.etl_file_name)
 
@@ -340,15 +340,15 @@ class Etl_Popup_Controller(GUI_Controller):
     is supposed to have validation then the config cannot be saved.
     """
     # TODO needs testing may also need to be moved to the remote_focus_popup class. Opinions welcome
-    def get_errors(self):
-        """
-        Get a list of field errors in popup
-        """
+    # def get_errors(self):
+    #     """
+    #     Get a list of field errors in popup
+    #     """
 
-        errors = {}
-        for key, labelInput in self.widgets.items():
-            if hasattr(labelInput.widget, 'trigger_focusout_validation'):
-                labelInput.widget.trigger_focusout_validation()
-            if labelInput.error.get():
-                errors[key] = labelInput.error.get()
-        return errors
+    #     errors = {}
+    #     for key, labelInput in self.widgets.items():
+    #         if hasattr(labelInput.widget, 'trigger_focusout_validation'):
+    #             labelInput.widget.trigger_focusout_validation()
+    #         if labelInput.error.get():
+    #             errors[key] = labelInput.error.get()
+    #     return errors

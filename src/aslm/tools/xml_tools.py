@@ -35,10 +35,13 @@ def dict_to_xml(d, tag=None):
                     text = "\n" + str(v)
                 else:
                     xml += f" {k}=\"{v}\""
-        xml += ">"
-        xml += text
-        xml += next_xml
-    xml += f"\n</{tag}>"
+        if text != "" or next_xml != "":
+            xml += ">"
+            xml += text
+            xml += next_xml
+            xml += f"\n</{tag}>"
+        else:
+            xml += "/>"
     
     return xml
 
@@ -46,11 +49,13 @@ def parse_xml(root: ET.Element) -> dict:
     """
     Parse an XML ElementTree.
 
+    TODO: Does not account for namespacing. See OME-XML.
+
     Parameters
     ----------
     root : xml.etree.ElementTree.Element
         root Element of XML ElementTree
-
+    
     Returns
     -------
     d : dict
@@ -59,9 +64,13 @@ def parse_xml(root: ET.Element) -> dict:
     d = {}
     for k, v in root.attrib.items():
         d[k] = v
-    text = root.text.strip()
-    if text != '':
-        d['text'] = text
+    try:
+        text = root.text.strip()
+        if text != '':
+            d['text'] = text
+    except AttributeError:
+        # root.text is None
+        pass
     prev_tag = ''
     for child in root:
         tag = child.tag

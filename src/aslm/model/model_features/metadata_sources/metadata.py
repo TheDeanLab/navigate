@@ -89,9 +89,10 @@ class Metadata:
 class XMLMetadata(Metadata):
 
     def write_xml(self, file_name: str, file_type: str, root: Optional[str] = None, **kw) -> None:
-        xml = self.to_xml(file_type, root=root, file_name=file_name, **kw)
+        xml = '<?xml version="1.0" encoding="UTF-8"?>'
+        xml += self.to_xml(file_type, root=root, file_name=file_name, **kw)
         file_name = '.'.join(file_name.split('.')[:-1])+'.xml'
-        with open(file_name, 'r') as fp:
+        with open(file_name, 'w') as fp:
             fp.write(xml)
 
     def to_xml(self, file_type: str, root: Optional[str] = None, **kw) -> str:

@@ -57,10 +57,11 @@ class BigDataViewerDataSource(DataSource):
             dx, dy, dz = self.resolutions[i,...]
             if z % dz == 0:
                 dataset_name = '/'.join([time_group_name, setup_group_name, f"{i}", "cells"])
-                print(z, dz, dataset_name, self.image[dataset_name].shape, data[::dx, ::dy].shape)
-                self.image[dataset_name][...,z//dz] = data[::dx, ::dy]
+                # print(z, dz, dataset_name, self.image[dataset_name].shape, data[::dx, ::dy].shape)
+                zs = z//dz-1 if z > 0 else 0
+                self.image[dataset_name][...,zs] = data[::dx, ::dy]
                 if len(kw) > 0:
-                    self._views.append(**kw)
+                    self._views.append(kw)
         self._current_frame += 1
 
         # Check if this was the last frame to write

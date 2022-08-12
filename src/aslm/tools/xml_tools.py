@@ -19,7 +19,7 @@ def dict_to_xml(d, tag=None):
     if tag is None:
         tag = list(d.keys())[0]
 
-    xml = f"\n<{tag}"
+    xml = f"<{tag}"
     if isinstance(d, dict):
         next_xml = ""
         text = ""
@@ -32,14 +32,14 @@ def dict_to_xml(d, tag=None):
                     next_xml += dict_to_xml(el, k)
             else:
                 if k == "text":
-                    text = "\n" + str(v)
+                    text = str(v)
                 else:
                     xml += f" {k}=\"{v}\""
         if text != "" or next_xml != "":
             xml += ">"
             xml += text
             xml += next_xml
-            xml += f"\n</{tag}>"
+            xml += f"</{tag}>"
         else:
             xml += "/>"
     

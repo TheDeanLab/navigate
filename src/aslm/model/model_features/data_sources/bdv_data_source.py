@@ -79,8 +79,8 @@ class BigDataViewerDataSource(DataSource):
             setup_group_name = f"s{i:02}"
             if setup_group_name in self.image:
                 del self.image[setup_group_name]
-                self.image.create_dataset(f"{setup_group_name}/resolutions", data=self.resolutions)
-                self.image.create_dataset(f"{setup_group_name}/subdivisions", data=self.subdivisons)
+            self.image.create_dataset(f"{setup_group_name}/resolutions", data=self.resolutions)
+            self.image.create_dataset(f"{setup_group_name}/subdivisions", data=self.subdivisons)
 
         # Create the datasets to populate
         for t in range(self.shape_t):

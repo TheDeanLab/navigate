@@ -39,7 +39,7 @@ class BigDataViewerMetadata(XMLMetadata):
         # Time
         bdv_dict['SequenceDescription']['Timepoints'] = {'type': 'range'}
         bdv_dict['SequenceDescription']['Timepoints']['first'] = {'text': 0}
-        bdv_dict['SequenceDescription']['Timepoints']['last'] = {'text': self.shape_t}
+        bdv_dict['SequenceDescription']['Timepoints']['last'] = {'text': self.shape_t-1}
 
         # View registrations
         bdv_dict['ViewRegistrations'] = {'ViewRegistration': []}

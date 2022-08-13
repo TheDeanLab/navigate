@@ -192,7 +192,7 @@ class ZStackAcquisition:
             return True
         
         # decide whether to move X,Y,Theta
-        if self.z_position_moved_time > self.number_z_steps:
+        if self.z_position_moved_time >= self.number_z_steps:
             self.need_to_move_new_position = True
             if self.current_position_idx == len(self.positions):
                 self.timepoints -= 1

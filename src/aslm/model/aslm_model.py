@@ -203,6 +203,7 @@ class Model:
         self.data_buffer = None
         self.img_width = int(self.configuration.CameraParameters['x_pixels'])
         self.img_height = int(self.configuration.CameraParameters['y_pixels'])
+        self.data_buffer_positions = None
 
         # Autofocusing
         self.f_position = None
@@ -249,7 +250,7 @@ class Model:
         self.debug = Debug_Module(self)
 
         # Image Writer/Save functionality
-        self.image_writer = ImageWriter(self)
+        self.image_writer = None
 
         # feature list
         # TODO: put it here now
@@ -312,6 +313,7 @@ class Model:
                                           dtype='uint16') for i in range(self.number_of_frames)]
         self.img_width = img_width
         self.img_height = img_height
+        self.data_buffer_positions = SharedNDArray(shape=(self.number_of_frames, 6), dtype=float)  # z-index, x, y, z, theta, f
 
     def get_data_buffer(self, img_width=512, img_height=512):
         r"""Get the data buffer.
@@ -392,11 +394,13 @@ class Model:
             self.experiment.CameraParameters = kwargs['camera_info']
             self.is_save = self.experiment.MicroscopeState['is_save']
             self.prepare_acquisition()
-
             # load features
             # TODO: put it here now.
             if self.imaging_mode == 'z-stack':
                 self.signal_container, self.data_container = load_features(self, [[{'name': ZStackAcquisition}]])
+            
+            if self.imaging_mode == 'single':
+                self.experiment.MicroscopeState['stack_cycling_mode'] = 'per_z'
 
             if self.imaging_mode == 'live':
                 self.signal_thread = threading.Thread(target=self.run_live_acquisition)
@@ -406,6 +410,7 @@ class Model:
             self.signal_thread.name = self.imaging_mode + " signal"
             if self.is_save and self.imaging_mode != 'live':
                 self.experiment.Saving = kwargs['saving_info']
+                self.image_writer = ImageWriter(self)
                 self.data_thread = threading.Thread(target=self.run_data_process, kwargs={'data_func': self.image_writer.save_image})
             else:
                 self.is_save = False
@@ -581,6 +586,8 @@ class Model:
             self.camera.close_image_series()
         self.shutter.close_shutters()
         self.laser_triggers.turn_off_lasers()
+        if self.image_writer is not None:
+            self.image_writer.close()
 
     def run_data_process(self, num_of_frames=0, data_func=None):
         r"""Run the data process.
@@ -741,16 +748,17 @@ class Model:
 
         # Confirm that target channel exists
         channel_key = 'channel_' + str(target_channel)
+        microscope_state = self.experiment.MicroscopeState
+        channels = microscope_state['channels']
         if target_channel != self.current_channel:
-            microscope_state = self.experiment.MicroscopeState
-            if channel_key not in microscope_state['channels'] \
-                    or not microscope_state['channels'][channel_key]['is_selected']:
+            if channel_key not in channels \
+                    or not channels[channel_key]['is_selected']:
                 # if self.imaging_mode != 'z-stack':
                 #     self.stop_acquisition = True
                 return
 
             # Update Microscope State Dictionary
-            channel = microscope_state['channels'][channel_key]
+            channel = channels[channel_key]
             self.current_channel = target_channel
 
             # Filter Wheel Settings.
@@ -780,6 +788,7 @@ class Model:
             self.move_stage({'f_abs': curr_focus + float(channel['defocus'])}, wait_until_done=True)
             self.experiment.StageParameters['f'] = curr_focus  # do something very hacky so we keep using the same focus reference
 
+        # Take the image
         self.snap_image(channel_key)
 
     def run_single_acquisition(self):
@@ -847,6 +856,14 @@ class Model:
         # Run the acquisition
         self.daq.run_acquisition()
         self.daq.stop_acquisition()
+
+        # Stash current position, channel, timepoint
+        # Do this here, because signal container functions can inject changes to the stage
+        self.data_buffer_positions[self.frame_id][0] = self.experiment.StageParameters['x']
+        self.data_buffer_positions[self.frame_id][1] = self.experiment.StageParameters['y']
+        self.data_buffer_positions[self.frame_id][2] = self.experiment.StageParameters['z']
+        self.data_buffer_positions[self.frame_id][3] = self.experiment.StageParameters['theta']
+        self.data_buffer_positions[self.frame_id][4] = self.experiment.StageParameters['f']
 
         if hasattr(self, 'signal_container'):
             self.signal_container.run(wait_response=True)

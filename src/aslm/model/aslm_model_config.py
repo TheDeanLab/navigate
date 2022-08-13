@@ -126,7 +126,7 @@ class Configurator:
             return None
         else:
             return self.params[item]
-            super(Configurator, self).__setattr__(k, value[k])
+            # super(Configurator, self).__setattr__(k, value[k])
 
     def __str__(self):
         r"""Overrides the print(class).

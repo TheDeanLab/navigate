@@ -96,7 +96,7 @@ class BigDataViewerDataSource(DataSource):
                         # print(f"Creating {dataset_name} with shape {shape}")
                         self.image.create_dataset(dataset_name,
                                     chunks=tuple(self.subdivisions[i,...]),
-                                    shape=shape)
+                                    shape=shape, dtype='uint16')
 
     def _mode_checks(self) -> None:
         self._write_mode = self._mode == 'w'

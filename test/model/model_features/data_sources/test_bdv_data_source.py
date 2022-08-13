@@ -17,7 +17,8 @@ def test_bdv_write_read():
 
     # Populate one image per channel per timepoint
     n_images = ds.shape_c*ds.shape_z*ds.shape_t
-    data = np.random.rand(n_images, ds.shape_x, ds.shape_y)
+    # TODO: Why does 2**16 make ImageJ crash??? But 2**8 works???
+    data = (np.random.rand(n_images, ds.shape_x, ds.shape_y)*2**8).astype('uint16')
     for i in range(n_images):
         ds.write(data[i,...].squeeze(), x=1, y=1, z=1, theta=1, f=1)
     ds.close()

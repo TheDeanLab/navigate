@@ -106,7 +106,7 @@ class AcquirePopUp:
                 self.inputs[entry_names[i]].set_values(('TIFF',
                                                         # 'OME-TIFF',
                                                         # 'Zarr', 
-                                                        #'BDV',
+                                                        'BDV',
                                                         ))
                 self.inputs[entry_names[i]].set('TIFF')
 

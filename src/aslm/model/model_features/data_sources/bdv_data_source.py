@@ -57,7 +57,7 @@ class BigDataViewerDataSource(DataSource):
             if z % dz == 0:
                 dataset_name = '/'.join([time_group_name, setup_group_name, f"{i}", "cells"])
                 # print(z, dz, dataset_name, self.image[dataset_name].shape, data[::dx, ::dy].shape)
-                zs = z//dz-1 if z > 0 else 0
+                zs = np.minimum(z//dz, self.subdivisions[i,2]-1)  # TODO: Is this necessary?
                 self.image[dataset_name][...,zs] = data[::dx, ::dy]
                 if len(kw) > 0:
                     self._views.append(kw)
@@ -88,15 +88,14 @@ class BigDataViewerDataSource(DataSource):
                 for z in range(self.shape_z):
                     setup_group_name = f"s{(c*self.shape_z+z):02}"
                     for i in range(self.subdivisions.shape[0]):
-                        dx, dy, dz = self.subdivisions[i,...]
                         dataset_name = '/'.join([time_group_name, setup_group_name, f"{i}", "cells"])
                         if dataset_name in self.image:
                             del self.image[dataset_name]
-                        shape = (dx,dy,dz)
+                        shape = tuple(self.subdivisions[i,...])
                         # print(f"Creating {dataset_name} with shape {shape}")
+                        # TODO chunk on a different size scale than shape
                         self.image.create_dataset(dataset_name,
-                                    chunks=tuple(self.subdivisions[i,...]),
-                                    shape=shape, dtype='uint16')
+                                    chunks=shape, shape=shape, dtype='uint16')
 
     def _mode_checks(self) -> None:
         self._write_mode = self._mode == 'w'

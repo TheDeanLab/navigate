@@ -1,7 +1,6 @@
 #  Standard Imports
 
 # Third Party Imports
-from decimal import DivisionByZero
 import h5py
 import numpy as np
 import numpy.typing as npt
@@ -27,7 +26,7 @@ class BigDataViewerDataSource(DataSource):
         return self._resolutions
 
     @property
-    def subdivisons(self) -> npt.ArrayLike:
+    def subdivisions(self) -> npt.ArrayLike:
         if self._subdivisions is None:
             self._subdivisions = np.tile([self.shape_x, self.shape_y, self.shape_z], 
                                         (self._resolutions.shape[0],1))
@@ -53,7 +52,7 @@ class BigDataViewerDataSource(DataSource):
 
         time_group_name = f"t{t:05}"
         setup_group_name = f"s{(c*self.shape_z+z):02}"
-        for i in range(self.subdivisons.shape[0]):
+        for i in range(self.subdivisions.shape[0]):
             dx, dy, dz = self.resolutions[i,...]
             if z % dz == 0:
                 dataset_name = '/'.join([time_group_name, setup_group_name, f"{i}", "cells"])
@@ -80,7 +79,7 @@ class BigDataViewerDataSource(DataSource):
             if setup_group_name in self.image:
                 del self.image[setup_group_name]
             self.image.create_dataset(f"{setup_group_name}/resolutions", data=self.resolutions)
-            self.image.create_dataset(f"{setup_group_name}/subdivisions", data=self.subdivisons)
+            self.image.create_dataset(f"{setup_group_name}/subdivisions", data=self.subdivisions)
 
         # Create the datasets to populate
         for t in range(self.shape_t):
@@ -88,15 +87,15 @@ class BigDataViewerDataSource(DataSource):
             for c in range(self.shape_c):
                 for z in range(self.shape_z):
                     setup_group_name = f"s{(c*self.shape_z+z):02}"
-                    for i in range(self.subdivisons.shape[0]):
-                        dx, dy, dz = self.subdivisons[i,...]
+                    for i in range(self.subdivisions.shape[0]):
+                        dx, dy, dz = self.subdivisions[i,...]
                         dataset_name = '/'.join([time_group_name, setup_group_name, f"{i}", "cells"])
                         if dataset_name in self.image:
                             del self.image[dataset_name]
                         shape = (dx,dy,dz)
                         # print(f"Creating {dataset_name} with shape {shape}")
                         self.image.create_dataset(dataset_name,
-                                    #chunks=tuple(self.resolutions[i,...]),
+                                    chunks=tuple(self.subdivisions[i,...]),
                                     shape=shape)
 
     def _mode_checks(self) -> None:

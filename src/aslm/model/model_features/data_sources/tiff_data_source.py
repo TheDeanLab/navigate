@@ -71,7 +71,7 @@ class TiffDataSource(DataSource):
         """
         self.mode = 'w'
 
-        c, z, self._current_time = self._czt_indices(self._current_frame, self.metadata.per_stack)  # find current channel
+        c, z, self._current_tim, _ = self._cztp_indices(self._current_frame, self.metadata.per_stack)  # find current channel
         if (z==0) and (c==0):
             # Make sure we're set up for writing
             self._setup_write_image()
@@ -95,7 +95,7 @@ class TiffDataSource(DataSource):
         self._current_frame += 1
 
         # Check if this was the last frame to write
-        c, z, _ = self._czt_indices(self._current_frame, self.metadata.per_stack)
+        c, z, _, _ = self._cztp_indices(self._current_frame, self.metadata.per_stack)
         if (z==0) and (c==0):
             self.close()
 

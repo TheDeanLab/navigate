@@ -10,6 +10,7 @@ from .data_source import DataSource
 from ..metadata_sources.bdv_metadata import BigDataViewerMetadata
 from aslm.model.aslm_model_config import Configurator
 
+
 class BigDataViewerDataSource(DataSource):
     def __init__(self, file_name: str = None, mode: str = 'w') -> None:
         self._resolutions = np.array([[1,1,1],[2,2,2],[4,4,4],[8,8,8]],dtype=int)
@@ -20,6 +21,8 @@ class BigDataViewerDataSource(DataSource):
 
         self._current_frame = 0
         self.metadata = BigDataViewerMetadata()
+
+        self._position = -1
 
     @property
     def resolutions(self) -> npt.ArrayLike:
@@ -49,13 +52,12 @@ class BigDataViewerDataSource(DataSource):
     def write(self, data: npt.ArrayLike, **kw) -> None:
         self.mode = 'w'
 
-        c, z, t = self._czt_indices(self._current_frame, self.metadata.per_stack)  # find current channel
-        if (z==0) and (c==0):
-            # Make sure we're set up for writing
+        c, z, t, p = self._cztp_indices(self._current_frame, self.metadata.per_stack)  # find current channel
+        if (z==0) and (c==0) and (t==0) and (p==0):
             self._setup_h5()
 
         time_group_name = f"t{t:05}"
-        setup_group_name = f"s{(c*self.shape_z+z):02}"
+        setup_group_name = f"s{(c*self.positions+p):02}"
         for i in range(self.subdivisions.shape[0]):
             dx, dy, dz = self.resolutions[i,...]
             if z % dz == 0:
@@ -68,8 +70,8 @@ class BigDataViewerDataSource(DataSource):
         self._current_frame += 1
 
         # Check if this was the last frame to write
-        c, z, _ = self._czt_indices(self._current_frame, self.metadata.per_stack)
-        if (z==0) and (c==0):
+        c, z, t, p = self._cztp_indices(self._current_frame, self.metadata.per_stack)
+        if (z==0) and (c==0) and (t==self.shape_t) and (p==self.positions):
             self.close()
 
     def read(self) -> None:
@@ -78,7 +80,7 @@ class BigDataViewerDataSource(DataSource):
 
     def _setup_h5(self):
         # Create setups
-        for i in range(self.shape_c*self.shape_t):
+        for i in range(self.shape_c*self.positions):
             setup_group_name = f"s{i:02}"
             if setup_group_name in self.image:
                 del self.image[setup_group_name]
@@ -88,18 +90,17 @@ class BigDataViewerDataSource(DataSource):
         # Create the datasets to populate
         for t in range(self.shape_t):
             time_group_name = f"t{t:05}"
-            for c in range(self.shape_c):
-                for z in range(self.shape_z):
-                    setup_group_name = f"s{(c*self.shape_z+z):02}"
-                    for i in range(self.subdivisions.shape[0]):
-                        dataset_name = '/'.join([time_group_name, setup_group_name, f"{i}", "cells"])
-                        if dataset_name in self.image:
-                            del self.image[dataset_name]
-                        # print(f"Creating {dataset_name} with shape {shape}")
-                        # TODO chunk on a different size scale than shape
-                        self.image.create_dataset(dataset_name,
-                                    chunks=tuple(self.subdivisions[i,...]), 
-                                    shape=self.shapes[i,...], dtype='uint16')
+            for i in range(self.shape_c*self.positions):
+                setup_group_name = f"s{i:02}"
+                for j in range(self.subdivisions.shape[0]):
+                    dataset_name = '/'.join([time_group_name, setup_group_name, f"{j}", "cells"])
+                    if dataset_name in self.image:
+                        del self.image[dataset_name]
+                    # print(f"Creating {dataset_name} with shape {shape}")
+                    # TODO chunk on a different size scale than shape
+                    self.image.create_dataset(dataset_name,
+                                chunks=tuple(self.subdivisions[j,...]),
+                                shape=self.shapes[j,...], dtype='uint16')
 
     def _mode_checks(self) -> None:
         self._write_mode = self._mode == 'w'

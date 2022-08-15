@@ -30,6 +30,7 @@ class Metadata:
 
         # shape
         self.shape_x, self.shape_y, self.shape_z, self.shape_t, self.shape_c = 1, 1, 1, 1, 1
+        self.positions = 1
 
     @property
     def configuration(self) -> Optional[Configurator]:
@@ -73,6 +74,11 @@ class Metadata:
         self.shape_z = int(self.experiment.MicroscopeState['number_z_steps'])
         self.shape_t = int(self.experiment.MicroscopeState['timepoints'])
         self.shape_c = sum([v['is_selected'] == True for k, v in self.experiment.MicroscopeState['channels'].items()])
+
+        if bool(self.experiment.MicroscopeState['is_multiposition']):
+            self.positions = len(self.experiment.MicroscopeState['stage_positions'])
+        else:
+            self.positions = 1
 
     def set_stack_order_from_configuration_experiment(self) -> None:
         self._per_stack = self.experiment.MicroscopeState['stack_cycling_mode'] == 'per_stack'

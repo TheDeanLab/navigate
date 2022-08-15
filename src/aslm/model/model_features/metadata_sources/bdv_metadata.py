@@ -28,7 +28,7 @@ class BigDataViewerMetadata(XMLMetadata):
         bdv_dict['SequenceDescription']['ViewSetups'] = []
         view_id = 0
         for _ in range(self.shape_c):
-            for _ in range(self.shape_z):
+            for _ in range(self.positions):
                 d = {'ViewSetup': {'id': {'text': view_id}, 'name': {'text': view_id}}}
                 d['ViewSetup']['size'] = {'text': f"{self.shape_x} {self.shape_y} {self.shape_z}"}
                 d['ViewSetup']['voxelSize'] = {'unit': {'text': 'um'}}
@@ -44,14 +44,17 @@ class BigDataViewerMetadata(XMLMetadata):
         # View registrations
         bdv_dict['ViewRegistrations'] = {'ViewRegistration': []}
         for t in range(self.shape_t):
-            for c in range(self.shape_c):
-                for z in range(self.shape_z):
-                    view_id = c*self.shape_z+z
-                    matrix_id = view_id + t*self.shape_c*self.shape_z
+            for p in range(self.positions):
+                for c in range(self.shape_c):
+                    view_id = c * self.positions + p
+                    mat = np.zeros((3,4), dtype=float)
+                    for z in range(self.shape_z):
+                        matrix_id = z + self.shape_z*c + t*self.shape_c*self.shape_z*self.positions
+                        mat += self.stage_positions_to_affine_matrix(**views[matrix_id])/self.shape_z
                     d = {'timepoint': t, 'setup': view_id}
                     d['ViewTransform'] = {'type': 'affine'}
-                    d['ViewTransform']['affine'] = {'text': 
-                        ' '.join([f"{x:.6f}" for x in self.stage_positions_to_affine_matrix(**views[matrix_id]).ravel()])}
+                    d['ViewTransform']['affine'] = {'text':
+                        ' '.join([f"{x:.6f}" for x in mat.ravel()])}
                     bdv_dict['ViewRegistrations']['ViewRegistration'].append(d)
         
         return bdv_dict

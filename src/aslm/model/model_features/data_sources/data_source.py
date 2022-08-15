@@ -3,6 +3,8 @@ import logging
 import numpy.typing as npt
 
 from aslm.model.aslm_model_config import Configurator
+
+
 class DataSource:
     def __init__(self, file_name: str = '', mode: str = 'w') -> None:
         """
@@ -28,6 +30,7 @@ class DataSource:
         self.dc = 1                          # step size between channels, should always be 1
         # shape
         self.shape_x, self.shape_y, self.shape_z, self.shape_t, self.shape_c = 1, 1, 1, 1, 1
+        self.positions = 1
 
         self.mode = mode
 
@@ -69,9 +72,13 @@ class DataSource:
         # pull new values from the metadata
         self.dx, self.dy, self.dz = self.metadata.voxel_size
         self.shape_x, self.shape_y, self.shape_c, self.shape_z, self.shape_t = self.metadata.shape
+        self.positions = self.metadata.positions
 
-    def _czt_indices(self, frame_id: int, per_stack: bool = True) -> tuple:
+    def _cztp_indices(self, frame_id: int, per_stack: bool = True) -> tuple:
         """Figure out where we are in the stack from the frame number.
+
+        per_stack indicates if we move through z (per_stack=True) or c fastest.
+        we move through positions slower than z or c. we move through time slower than z, c or p.
         
         Parameters
         ----------
@@ -88,17 +95,20 @@ class DataSource:
             Index of z position
         t : int
             Index of time position
+        p : int
+            Index of multiposition position.
         """
         if per_stack:
-            c = int(frame_id / self.shape_z) % self.shape_c
+            c = (frame_id // self.shape_z) % self.shape_c
             z = frame_id % self.shape_z
         else:
             c = frame_id % self.shape_c
-            z = int(frame_id / self.shape_c) % self.shape_z
-        
-        t = int(frame_id / (self.shape_c*self.shape_z))
+            z = (frame_id // self.shape_c) % self.shape_z
 
-        return c, z, t
+        p = frame_id // (self.shape_c*self.shape_z)
+        t = frame_id // (self.shape_c*self.shape_z*self.positions)
+
+        return c, z, t, p
 
     def _mode_checks(self) -> None:
         """Run additional checks after setting the mode."""

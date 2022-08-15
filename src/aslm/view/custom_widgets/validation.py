@@ -33,7 +33,7 @@ POSSIBILITY OF SUCH DAMAGE.
 import tkinter as tk
 from tkinter import ttk        
 from decimal import Decimal, InvalidOperation
-from aslm.view.custom_widgets.hoverbar import Tooltip
+from aslm.view.custom_widgets.hover import hover
 import logging
 
 
@@ -108,6 +108,8 @@ class ValidatedMixin:
             validatecommand=(validcmd, '%P', '%s', '%S', '%V', '%i', '%d'), # pass in all sub codes/data
             invalidcommand=(invalidcmd, '%P', '%s', '%S', '%V', '%i', '%d')
         )
+        
+        self.hover = hover(self, text=None, type="free")
 
     # Error handler - where you can customize color or what happens to widget
     def _toggle_error(self, on=False):
@@ -296,6 +298,13 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         else:
             self.variable.set(current)
         self.trigger_focusout_validation() # Revalidate with the new maximum
+        
+    def _toggle_error(self, on=False):
+        super()._toggle_error(on)
+        if on:
+            self.hover.seterror(self.error.get())
+        else:
+            self.hover.hidetip()
 
 # Clears box on backspace, allows fully typed words that match values to be accepted, and an option to require a value
 class ValidatedCombobox(ValidatedMixin, ttk.Combobox):
@@ -460,6 +469,13 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         else:
             self.variable.set(current)
         self.trigger_focusout_validation() # Revalidate with the new maximum
+        
+    def _toggle_error(self, on=False):
+        super()._toggle_error(on)
+        if on:
+            self.hover.seterror(self.error.get())
+        else:
+            self.hover.hidetip()
 
 if __name__ == '__main__':
     from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput

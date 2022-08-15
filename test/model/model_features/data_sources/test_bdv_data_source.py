@@ -30,3 +30,5 @@ def test_bdv_write_read():
     except PermissionError:
         # Windows seems to think these files are still open
         pass
+    
+    assert(True)

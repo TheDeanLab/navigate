@@ -30,13 +30,17 @@ class BigDataViewerDataSource(DataSource):
         if self._subdivisions is None:
             self._subdivisions = np.tile([self.shape_x, self.shape_y, self.shape_z], 
                                         (self._resolutions.shape[0],1))
-            self._subdivisions[:,0] //= self._resolutions[:,0]
-            self._subdivisions[:,1] //= self._resolutions[:,1]
-            self._subdivisions[:,2] //= self._resolutions[:,2]
+            self._subdivisions[:,0] = np.gcd(32, self.shapes[:,0])
+            self._subdivisions[:,1] = np.gcd(32, self.shapes[:,1])
+            self._subdivisions[:,2] = np.gcd(32, self.shapes[:,2])
 
             # Safety
             self._subdivisions = np.maximum(self._subdivisions, 1)
         return self._subdivisions
+
+    @property
+    def shapes(self) -> npt.ArrayLike:
+        return np.maximum(np.array([self.shape_x, self.shape_y, self.shape_z])[None,:]//self.resolutions, 1)
 
     def set_metadata_from_configuration_experiment(self, configuration: Configurator, experiment: Configurator) -> None:
         self._subdivisions = None
@@ -91,11 +95,11 @@ class BigDataViewerDataSource(DataSource):
                         dataset_name = '/'.join([time_group_name, setup_group_name, f"{i}", "cells"])
                         if dataset_name in self.image:
                             del self.image[dataset_name]
-                        shape = tuple(self.subdivisions[i,...])
                         # print(f"Creating {dataset_name} with shape {shape}")
                         # TODO chunk on a different size scale than shape
                         self.image.create_dataset(dataset_name,
-                                    chunks=shape, shape=shape, dtype='uint16')
+                                    chunks=tuple(self.subdivisions[i,...]), 
+                                    shape=self.shapes[i,...], dtype='uint16')
 
     def _mode_checks(self) -> None:
         self._write_mode = self._mode == 'w'

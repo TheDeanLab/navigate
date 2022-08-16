@@ -25,15 +25,16 @@ class BigDataViewerMetadata(XMLMetadata):
         bdv_dict['SequenceDescription']['ImageLoader']['hdf5'] = {'type': 'relative', 'text': file_name}
 
         # Populate the views
-        bdv_dict['SequenceDescription']['ViewSetups'] = []
+        bdv_dict['SequenceDescription']['ViewSetups'] = {}
+        bdv_dict['SequenceDescription']['ViewSetups']['ViewSetup'] = []
         view_id = 0
         for _ in range(self.shape_c):
             for _ in range(self.positions):
-                d = {'ViewSetup': {'id': {'text': view_id}, 'name': {'text': view_id}}}
-                d['ViewSetup']['size'] = {'text': f"{self.shape_x} {self.shape_y} {self.shape_z}"}
-                d['ViewSetup']['voxelSize'] = {'unit': {'text': 'um'}}
-                d['ViewSetup']['voxelSize']['size'] = {'text': f"{self.dx} {self.dy} {self.dz}"}
-                bdv_dict['SequenceDescription']['ViewSetups'].append(d)
+                d = {'id': {'text': view_id}, 'name': {'text': view_id}}
+                d['size'] = {'text': f"{self.shape_x} {self.shape_y} {self.shape_z}"}
+                d['voxelSize'] = {'unit': {'text': 'um'}}
+                d['voxelSize']['size'] = {'text': f"{self.dx} {self.dy} {self.dz}"}
+                bdv_dict['SequenceDescription']['ViewSetups']['ViewSetup'].append(d)
                 view_id += 1
 
         # Time

@@ -62,6 +62,9 @@ class TiffDataSource(DataSource):
 
         # TODO: Parse metadata
         for i, ax in enumerate(list(self.image.series[0].axes)):
+            if ax == 'Q':
+                # TODO: This is a hack for tifffile. Find a way to remove this.
+                ax = 'Z'
             setattr(self, f"shape_{ax.lower()}", self.data.shape[i])
 
     def write(self, data: npt.ArrayLike, **kw) -> None:

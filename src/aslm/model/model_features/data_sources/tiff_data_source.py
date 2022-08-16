@@ -96,8 +96,8 @@ class TiffDataSource(DataSource):
         
         if self.is_ome:
             self.image[c].write(data,
-                            description=ome_xml,
-                            contiguous=True)
+                                description=ome_xml,
+                                contiguous=True)
         else:
             dx, dy, dz = self.metadata.voxel_size
             md = {'spacing': dz, 'unit': 'um', 'axes': 'ZYX'}
@@ -142,7 +142,7 @@ class TiffDataSource(DataSource):
             file_name = os.path.join(position_directory,
                                      self.generate_image_name(ch, self._current_time))
             self.image.append(tifffile.TiffWriter(file_name, bigtiff=self.is_bigtiff,
-                                                  ome=False))
+                                                  ome=False, byteorder='<'))
             self.file_name.append(file_name)
             self.uid.append(str(uuid.uuid4()))
 
@@ -160,13 +160,13 @@ class TiffDataSource(DataSource):
         try:
             if self._write_mode:
                 for ch in range(self.shape_c):
-                    # if self.is_ome and len(self._views) > 0:
-                    #     # Attach OME metadata at the end of the write
-                    #     tifffile.tiffcomment(self.file_name[ch], self.metadata.to_xml(c=ch, t=self._current_time,
-                    #                                                                   file_name=self.file_name,
-                    #                                                                   uid=self.uid,
-                    #                                                                   views=self._views).encode())
                     self.image[ch].close()
+                    if self.is_ome and len(self._views) > 0:
+                        # Attach OME metadata at the end of the write
+                        tifffile.tiffcomment(self.file_name[ch], self.metadata.to_xml(c=ch, t=self._current_time,
+                                                                                      file_name=self.file_name,
+                                                                                      uid=self.uid,
+                                                                                      views=self._views).encode())
             else:
                 self.image.close()
         except (TypeError, AttributeError, ValueError):

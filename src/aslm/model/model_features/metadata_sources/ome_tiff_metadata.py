@@ -35,6 +35,8 @@ class OMETIFFMetadata(XMLMetadata):
                 file_name = [file_name]
             ome_dict['Image']['Name'] = os.path.basename(file_name[c])
         ome_dict['Image']['Pixels'] = {'ID': f'Pixels:{idx}'}
+        ome_dict['Image']['Pixels']['BigEndian'] = 'false'
+        ome_dict['Image']['Pixels']['Interleaved'] = 'false'
         ome_dict['Image']['Pixels']['Type'] = 'uint16'  # Hardcoded from SharedNDArray call
 
         ome_dict['Image']['Pixels']['SizeX'] = int(self.experiment.CameraParameters['x_pixels'])
@@ -45,7 +47,7 @@ class OMETIFFMetadata(XMLMetadata):
         ome_dict['Image']['Pixels']['SizeT'] = int(self.experiment.MicroscopeState['timepoints'])
         ome_dict['Image']['Pixels']['SizeC'] = len(self.experiment.MicroscopeState['channels'])
 
-        ome_dict['Image']['Pixels']['DimensionOrder'] = 'XYCZT'
+        ome_dict['Image']['Pixels']['DimensionOrder'] = 'XYZCT'
         z_steps = 1
         if self.experiment.MicroscopeState['image_mode'] == 'z-stack':
             z_steps = int(self.experiment.MicroscopeState['number_z_steps'])
@@ -62,10 +64,10 @@ class OMETIFFMetadata(XMLMetadata):
             pixel_size = float(self.configuration.ZoomParameters['high_res_zoom_pixel_size'])
             ome_dict['Image']['Pixels']['PhysicalSizeX'], ome_dict['Image']['Pixels']['PhysicalSizeY'] = pixel_size, pixel_size
 
-        # Units
-        # ome_dict['Image']['Pixels']['PhysicalSizeXUnit'] = "µm"
-        # ome_dict['Image']['Pixels']['PhysicalSizeYUnit'] = "µm"
-        # ome_dict['Image']['Pixels']['PhysicalSizeZUnit'] = "µm"
+        ome_dict['Image']['Pixels']['Channel'] = []
+        for i in range(self.shape_c):
+            d = {'ID': f'Channel:{idx}:{i}', 'SamplesPerPixel': '1', 'LightPath': {}}
+            ome_dict['Image']['Pixels']['Channel'].append(d)
 
         if file_name is not None and uid is not None:
             ome_dict['Image']['Pixels']['TiffData'] = []
@@ -76,7 +78,7 @@ class OMETIFFMetadata(XMLMetadata):
             if len(file_name) == len(uid):
                 # Assume file name is a list passed in the order of the channels
                 for i, fn in enumerate(file_name):
-                    d = {"FirstC": str(i), "FirstT": str(t), "FirstZ": "0", "PlaneCount": str(z_steps)}
+                    d = {"FirstC": str(i), "FirstT": str(t), "FirstZ": "0", "IFD": "0", "PlaneCount": str(z_steps)}
                     d['UUID'] = {'FileName': os.path.basename(fn), 'text': 'urn:uuid:'+uid[i]}
                     ome_dict['Image']['Pixels']['TiffData'].append(d)
             else:
@@ -84,16 +86,17 @@ class OMETIFFMetadata(XMLMetadata):
         else:
             ome_dict['Image']['Pixels']['MetadataOnly'] = {}  # Required filler
 
-        ome_dict['Image']['Pixels']['TimeIncrement'] = float(self.experiment.MicroscopeState['timepoint_interval'])
+        dt = float(self.experiment.MicroscopeState['timepoint_interval'])
+        ome_dict['Image']['Pixels']['TimeIncrement'] = dt
 
         # TODO: Populate plane positions in OME-XML
         if views is not None:
             ome_dict['Image']['Pixels']['Plane'] = []
-            for i in range(self.shape_z):
-                view_idx = i+c*self.shape_z
-                d = {'TheT': str(t), 'TheC': str(c), 'TheZ': str(i),
-                     'PositionX': views[view_idx]['x'], 'PositionY': views[view_idx]['y'], 'PositionZ': views[view_idx]['z']}
-                     # 'PositionXUnit': "µm", 'PositionYUnit': "µm", 'PositionZUnit': "µm"}
+            for i in range(self.shape_c):
+                view_idx = i*self.shape_z
+                d = {'DeltaT': dt, 'TheT': '0',
+                     'TheC': str(i), 'TheZ': '0', 'PositionX': views[view_idx]['x'],
+                     'PositionY': views[view_idx]['y'], 'PositionZ': views[view_idx]['z']}
                 ome_dict['Image']['Pixels']['Plane'].append(d)
 
         return ome_dict

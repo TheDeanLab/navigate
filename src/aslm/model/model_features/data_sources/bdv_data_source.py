@@ -17,6 +17,8 @@ class BigDataViewerDataSource(DataSource):
         self._subdivisions = None
         self.image = None
         self._views = []
+
+        file_name = '.'.join(file_name.split('.')[:-1])+'.hdf'
         super().__init__(file_name, mode)
 
         self._current_frame = 0

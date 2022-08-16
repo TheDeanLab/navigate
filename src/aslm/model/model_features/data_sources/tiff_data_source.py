@@ -1,5 +1,6 @@
 #  Standard Imports
 import os
+import uuid
 from pathlib import Path
 
 # Third Party Imports
@@ -85,7 +86,8 @@ class TiffDataSource(DataSource):
                 # Make sure we're set up for writing
                 self._setup_write_image()
             if self.is_ome:
-                ome_xml = self.metadata.to_xml(c=c, t=self._current_time).encode()
+                ome_xml = self.metadata.to_xml(c=c, t=self._current_time,
+                                               file_name=self.file_name, uid=self.uid).encode()
         else:
             ome_xml = None
 
@@ -132,6 +134,7 @@ class TiffDataSource(DataSource):
         # Initialize one TIFF per channel per time point
         self.image = []
         self.file_name = []
+        self.uid = []
         position_directory = os.path.join(self.save_directory, f"Position{self._current_position}")
         if not os.path.exists(position_directory):
             os.mkdir(position_directory)
@@ -141,6 +144,7 @@ class TiffDataSource(DataSource):
             self.image.append(tifffile.TiffWriter(file_name, bigtiff=self.is_bigtiff,
                                                   ome=False))
             self.file_name.append(file_name)
+            self.uid.append(str(uuid.uuid4()))
 
     def _mode_checks(self) -> None:
         self._write_mode = self._mode == 'w'
@@ -159,6 +163,8 @@ class TiffDataSource(DataSource):
                     # if self.is_ome and len(self._views) > 0:
                     #     # Attach OME metadata at the end of the write
                     #     tifffile.tiffcomment(self.file_name[ch], self.metadata.to_xml(c=ch, t=self._current_time,
+                    #                                                                   file_name=self.file_name,
+                    #                                                                   uid=self.uid,
                     #                                                                   views=self._views).encode())
                     self.image[ch].close()
             else:

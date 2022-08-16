@@ -70,8 +70,10 @@ class BigDataViewerMetadata(XMLMetadata):
                     view_id = c * self.positions + p
                     mat = np.zeros((3,4), dtype=float)
                     for z in range(self.shape_z):
-                        matrix_id = z + self.shape_z*c + t*self.shape_c*self.shape_z*self.positions
+                        matrix_id = z + self.shape_z*c + p*self.shape_c*self.shape_z \
+                                    + t*self.shape_c*self.shape_z*self.positions
                         # Construct centroid of volume matrix
+                        print(matrix_id, views[matrix_id])
                         mat += self.stage_positions_to_affine_matrix(**views[matrix_id])/self.shape_z
                     d = {'timepoint': t, 'setup': view_id}
                     d['ViewTransform'] = {'type': 'affine'}
@@ -90,9 +92,9 @@ class BigDataViewerMetadata(XMLMetadata):
         arr[:,3] = [x,y,z]
 
         # Rotation (theta pivots in the xz plane, about the y axis)
-        sin_theta, cos_theta = np.sin(theta), np.cos(theta)
-        arr[0,0], arr[2,2] = cos_theta, cos_theta
-        arr[0,2], arr[2,0] = sin_theta, -sin_theta
+        # sin_theta, cos_theta = np.sin(theta), np.cos(theta)
+        # arr[0,0], arr[2,2] = cos_theta, cos_theta
+        # arr[0,2], arr[2,0] = sin_theta, -sin_theta
 
         return arr
     

@@ -35,7 +35,7 @@ POSSIBILITY OF SUCH DAMAGE.
 from datetime import datetime
 import os
 import logging
-from pathlib import Path
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -81,6 +81,7 @@ def create_save_path(saving_settings):
         os.makedirs(save_directory)
 
     # Determine Number of Cells in Directory
+    # Cell1/Position1/1_CH00_000000.tif
     cell_directories = list(filter(lambda v: v[:5] == 'Cell_', os.listdir(save_directory)))
     if len(cell_directories) != 0:
         cell_directories.sort()
@@ -125,6 +126,7 @@ def save_yaml_file(file_directory,
         return False
     return True
 
+
 def combine_funcs(*funclist):
     """
     # this function will combine a list of functions to a new function
@@ -136,64 +138,64 @@ def combine_funcs(*funclist):
     return new_func
 
 
-def update_from_channels_tab_controller(self):
-    # get settings from channels tab
-    settings = self.channels_tab_controller.get_values()
+# def update_from_channels_tab_controller(self):
+#     # get settings from channels tab
+#     settings = self.channels_tab_controller.get_values()
+#
+#     # if there is something wrong, it will popup a window and return false
+#     for k in settings:
+#         if not settings[k]:
+#             tkinter.messagebox.showerror(
+#                 title='Warning',
+#                 message='There are some missing/wrong settings!')
+#             return False
+#
+#     # validate channels
+#     try:
+#         for k in settings['channel']:
+#             float(settings['channel'][k]['laser_power'])
+#             float(settings['channel'][k]['interval_time'])
+#             if settings['channel'][k]['laser_index'] < 0 or settings['channel'][k]['filter_position'] < 0:
+#                 raise
+#     except BaseException:
+#         tkinter.messagebox.showerror(
+#             title='Warning',
+#             message='There are some missing/wrong settings!')
+#         return False
+#
+#     self.experiment.MicroscopeState['stack_cycling_mode'] = settings['stack_cycling_mode']
+#     for k in settings['stack_acquisition']:
+#         self.experiment.MicroscopeState[k] = settings['stack_acquisition'][k]
+#     for k in settings['timepoint']:
+#         self.experiment.MicroscopeState[k] = settings['timepoint'][k]
+#
+#     # channels
+#     self.experiment.MicroscopeState['channels'] = settings['channel']
+#
+#     # get all positions
+#     self.experiment.MicroscopeState['stage_positions'] = self.channels_tab_controller.get_positions(
+#     )
+#
+#     # get position information from stage tab
+#     position = self.stage_gui_controller.get_position()
+#
+#     # validate positions
+#     if not position:
+#         tkinter.messagebox.showerror(
+#             title='Warning',
+#             message='There are some missing/wrong settings!')
+#         return False
+#
+#     for axis in position:
+#         self.experiment.StageParameters[axis] = position[axis]
+#     step_size = self.stage_gui_controller.get_step_size()
+#     for axis in step_size:
+#         self.experiment.StageParameters[axis + '_step'] = step_size[axis]
 
-    # if there is something wrong, it will popup a window and return false
-    for k in settings:
-        if not settings[k]:
-            tkinter.messagebox.showerror(
-                title='Warning',
-                message='There are some missing/wrong settings!')
-            return False
 
-    # validate channels
-    try:
-        for k in settings['channel']:
-            float(settings['channel'][k]['laser_power'])
-            float(settings['channel'][k]['interval_time'])
-            if settings['channel'][k]['laser_index'] < 0 or settings['channel'][k]['filter_position'] < 0:
-                raise
-    except BaseException:
-        tkinter.messagebox.showerror(
-            title='Warning',
-            message='There are some missing/wrong settings!')
-        return False
-
-    self.experiment.MicroscopeState['stack_cycling_mode'] = settings['stack_cycling_mode']
-    for k in settings['stack_acquisition']:
-        self.experiment.MicroscopeState[k] = settings['stack_acquisition'][k]
-    for k in settings['timepoint']:
-        self.experiment.MicroscopeState[k] = settings['timepoint'][k]
-
-    # channels
-    self.experiment.MicroscopeState['channels'] = settings['channel']
-
-    # get all positions
-    self.experiment.MicroscopeState['stage_positions'] = self.channels_tab_controller.get_positions(
-    )
-
-    # get position information from stage tab
-    position = self.stage_gui_controller.get_position()
-
-    # validate positions
-    if not position:
-        tkinter.messagebox.showerror(
-            title='Warning',
-            message='There are some missing/wrong settings!')
-        return False
-
-    for axis in position:
-        self.experiment.StageParameters[axis] = position[axis]
-    step_size = self.stage_gui_controller.get_step_size()
-    for axis in step_size:
-        self.experiment.StageParameters[axis + '_step'] = step_size[axis]
-
-
-def update_from_camera_setting_controller(self):
-    self.experiment.CameraParameters['sensor_mode'] = self.camera_setting_controller.sensor_mode
-    self.experiment.CameraParameters['binning'] = 1
-    # self.experiment.CameraParameters['x_pixels'] = self.camera_setting_controller.roi_widgets['Pixels_X'].get()
-    # self.experiment.CameraParameters['y_pixels'] = self.camera_setting_controller.roi_widgets['Pixels_Y'].get()
-    self.experiment.CameraParameters['number_of_cameras'] = 1
+# def update_from_camera_setting_controller(self):
+#     self.experiment.CameraParameters['sensor_mode'] = self.camera_setting_controller.sensor_mode
+#     self.experiment.CameraParameters['binning'] = 1
+#     # self.experiment.CameraParameters['x_pixels'] = self.camera_setting_controller.roi_widgets['Pixels_X'].get()
+#     # self.experiment.CameraParameters['y_pixels'] = self.camera_setting_controller.roi_widgets['Pixels_Y'].get()
+#     self.experiment.CameraParameters['number_of_cameras'] = 1

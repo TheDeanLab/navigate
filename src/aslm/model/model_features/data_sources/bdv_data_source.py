@@ -15,6 +15,7 @@ class BigDataViewerDataSource(DataSource):
     def __init__(self, file_name: str = None, mode: str = 'w') -> None:
         self._resolutions = np.array([[1,1,1],[2,2,2],[4,4,4],[8,8,8]],dtype=int)
         self._subdivisions = None
+        self._shapes = None
         self.image = None
         self._views = []
 
@@ -24,31 +25,37 @@ class BigDataViewerDataSource(DataSource):
         self._current_frame = 0
         self.metadata = BigDataViewerMetadata()
 
-        self._position = -1
-
     @property
     def resolutions(self) -> npt.ArrayLike:
+        """Store as XYZ per BDV spec."""
         return self._resolutions
 
     @property
     def subdivisions(self) -> npt.ArrayLike:
+        """Store as XYZ per BDV spec."""
         if self._subdivisions is None:
-            self._subdivisions = np.tile([self.shape_x, self.shape_y, self.shape_z], 
-                                        (self._resolutions.shape[0],1))
+            self._subdivisions = np.zeros((4,3), dtype=int)
             self._subdivisions[:,0] = np.gcd(32, self.shapes[:,0])
             self._subdivisions[:,1] = np.gcd(32, self.shapes[:,1])
             self._subdivisions[:,2] = np.gcd(32, self.shapes[:,2])
 
             # Safety
             self._subdivisions = np.maximum(self._subdivisions, 1)
+
+            # Reverse to XYZ
+            self._subdivisions = self._subdivisions[:,::-1]
         return self._subdivisions
 
     @property
     def shapes(self) -> npt.ArrayLike:
-        return np.maximum(np.array([self.shape_x, self.shape_y, self.shape_z])[None,:]//self.resolutions, 1)
+        """Store as ZYX rather than XYZ, per BDV spec."""
+        if self._shapes is None:
+            self._shapes = np.maximum(np.array([self.shape_z, self.shape_y, self.shape_x])[None,:]//self.resolutions[:,::-1], 1)
+        return self._shapes
 
     def set_metadata_from_configuration_experiment(self, configuration: Configurator, experiment: Configurator) -> None:
         self._subdivisions = None
+        self._shapes = None
         return super().set_metadata_from_configuration_experiment(configuration, experiment)
 
     def write(self, data: npt.ArrayLike, **kw) -> None:
@@ -65,9 +72,9 @@ class BigDataViewerDataSource(DataSource):
             if z % dz == 0:
                 dataset_name = '/'.join([time_group_name, setup_group_name, f"{i}", "cells"])
                 # print(z, dz, dataset_name, self.image[dataset_name].shape, data[::dx, ::dy].shape)
-                zs = np.minimum(z//dz, self.subdivisions[i,2]-1)  # TODO: Is this necessary?
-                self.image[dataset_name][...,zs] = data[::dx, ::dy]
-                if len(kw) > 0:
+                zs = np.minimum(z//dz, self.shapes[i,0]-1)  # TODO: Is this necessary?
+                self.image[dataset_name][zs,...] = data[::dx, ::dy].T
+                if (i==0) and len(kw) > 0:
                     self._views.append(kw)
         self._current_frame += 1
 
@@ -98,10 +105,9 @@ class BigDataViewerDataSource(DataSource):
                     dataset_name = '/'.join([time_group_name, setup_group_name, f"{j}", "cells"])
                     if dataset_name in self.image:
                         del self.image[dataset_name]
-                    # print(f"Creating {dataset_name} with shape {shape}")
-                    # TODO chunk on a different size scale than shape
+                    # print(f"Creating {dataset_name} with shape {self.shapes[j,...]}")
                     self.image.create_dataset(dataset_name,
-                                chunks=tuple(self.subdivisions[j,...]),
+                                chunks=tuple(self.subdivisions[j,...][::-1]),
                                 shape=self.shapes[j,...], dtype='uint16')
 
     def _mode_checks(self) -> None:
@@ -109,6 +115,7 @@ class BigDataViewerDataSource(DataSource):
         self.close()  # if anything was already open, close it
         if self._write_mode:
             self._current_frame = 0
+            self._views = []
             self.image = h5py.File(self.file_name, 'a')
             self._setup_h5()
         else:

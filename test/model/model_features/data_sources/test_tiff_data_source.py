@@ -47,8 +47,10 @@ def tiff_write_read(is_ome=False):
         # Windows seems to think these files are still open
         pass
 
+
 def test_tiff_write_read():
     tiff_write_read(False)
+
 
 def test_tiff_write_read_ome():
     tiff_write_read(True)

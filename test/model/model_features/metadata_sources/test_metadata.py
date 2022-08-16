@@ -19,6 +19,7 @@ def test_metadata_voxel_size():
 
     assert((dx == pixel_size) and (dy == pixel_size) and (dz == float(model.experiment.MicroscopeState['step_size'])))
 
+
 def test_metadata_shape():
     from aslm.model.dummy_model import get_dummy_model
     from aslm.model.model_features.metadata_sources.metadata import Metadata

@@ -1,7 +1,6 @@
 import pytest
 
 
-#@pytest.mark.skip(reason="Error parsing schema on Windows, despite schema being present and accurate.")
 def test_ome_metadata_valid():
     import urllib.request
     import os

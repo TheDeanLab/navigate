@@ -51,6 +51,7 @@ class BigDataViewerMetadata(XMLMetadata):
                     mat = np.zeros((3,4), dtype=float)
                     for z in range(self.shape_z):
                         matrix_id = z + self.shape_z*c + t*self.shape_c*self.shape_z*self.positions
+                        # Construct centroid of volume matrix
                         mat += self.stage_positions_to_affine_matrix(**views[matrix_id])/self.shape_z
                     d = {'timepoint': t, 'setup': view_id}
                     d['ViewTransform'] = {'type': 'affine'}

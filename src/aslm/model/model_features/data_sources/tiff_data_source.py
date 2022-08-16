@@ -71,10 +71,15 @@ class TiffDataSource(DataSource):
         """
         self.mode = 'w'
 
-        c, z, self._current_tim, _ = self._cztp_indices(self._current_frame, self.metadata.per_stack)  # find current channel
-        if (z==0) and (c==0):
-            # Make sure we're set up for writing
-            self._setup_write_image()
+        c, z, self._current_time, _ = self._cztp_indices(self._current_frame, self.metadata.per_stack)  # find current channel
+        if (z==0):
+            if (c==0):
+                # Make sure we're set up for writing
+                self._setup_write_image()
+            if self.is_ome:
+                ome_xml = self.metadata.to_xml(c=c, t=self._current_time)
+        else:
+            ome_xml = None
 
         dx, dy, dz = self.metadata.voxel_size
 
@@ -87,10 +92,15 @@ class TiffDataSource(DataSource):
                 except KeyError:
                     pass
         
-        self.image[c].write(data,
-                            resolution=(1./dx, 1./dy), 
-                            metadata=md,
+        if self.is_ome:
+            self.image[c].write(data,
+                            description=ome_xml,
                             contiguous=True)
+        else:
+            self.image[c].write(data,
+                                resolution=(1./dx, 1./dy), 
+                                metadata=md,
+                                contiguous=True)
 
         self._current_frame += 1
 
@@ -124,7 +134,7 @@ class TiffDataSource(DataSource):
             file_name = os.path.join(self.save_directory, 
                                         self.generate_image_name(ch, self._current_time))
             self.image.append(tifffile.TiffWriter(file_name, bigtiff=self.is_bigtiff,
-                                                  ome=self.is_ome))
+                                                  ome=False))
             self.file_name.append(file_name)
 
     def _mode_checks(self) -> None:
@@ -146,6 +156,6 @@ class TiffDataSource(DataSource):
                     self.image[ch].close()
             else:
                 self.image.close()
-        except (TypeError, AttributeError):
+        except (TypeError, AttributeError, ValueError):
             # image wasn't instantiated, no need to close anything
             pass

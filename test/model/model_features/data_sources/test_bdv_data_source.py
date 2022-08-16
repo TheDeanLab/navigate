@@ -2,7 +2,7 @@ import os
 
 import numpy as np
 
-def test_bdv_write_read():
+def test_bdv_write():
     from aslm.model.dummy_model import get_dummy_model
     from aslm.model.model_features.data_sources.bdv_data_source import BigDataViewerDataSource
 

@@ -2,17 +2,22 @@ import os
 
 import numpy as np
 
-def test_tiff_write_read():
+def tiff_write_read(is_ome=False):
     from aslm.model.dummy_model import get_dummy_model
     from aslm.model.model_features.data_sources.tiff_data_source import TiffDataSource
 
     # Set up model with a random number of z-steps to modulate the shape
     model = get_dummy_model()
     z_steps = np.random.randint(1,10)
+    model.experiment.MicroscopeState['image_mode'] = 'z-stack'
     model.experiment.MicroscopeState['number_z_steps'] = z_steps
 
     # Establish a TIFF data source
-    ds = TiffDataSource()
+    if is_ome:
+        fn = 'test.ome.tif'
+    else:
+        fn = ''
+    ds = TiffDataSource(fn)
     ds.set_metadata_from_configuration_experiment(model.configuration, model.experiment)
 
     # Populate one image per channel per timepoint
@@ -24,6 +29,7 @@ def test_tiff_write_read():
 
     # For each file...
     for i, fn in enumerate(ds.file_name):
+        print(fn)
         ds2 = TiffDataSource(fn, 'r')
         # Make sure XYZ size is correct (and C and T are each of size 1)
         assert((ds2.shape_x == ds.shape_x) and (ds2.shape_y == ds.shape_y) \
@@ -40,3 +46,9 @@ def test_tiff_write_read():
     except PermissionError:
         # Windows seems to think these files are still open
         pass
+
+def test_tiff_write_read():
+    tiff_write_read(False)
+
+def test_tiff_write_read_ome():
+    tiff_write_read(True)

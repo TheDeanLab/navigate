@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
 
+
 def dict_to_xml(d, tag=None):
     """Parse a Python dictionary to XML.
     
@@ -44,6 +45,7 @@ def dict_to_xml(d, tag=None):
             xml += "/>"
     
     return xml
+
 
 def parse_xml(root: ET.Element) -> dict:
     """

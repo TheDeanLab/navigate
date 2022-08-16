@@ -71,6 +71,8 @@ class TiffDataSource(DataSource):
         """One channel, all z-position, one timepoint = one stack.
         N channels are opened simultaneously for writing.
         At each time point, a new file is opened for each channel.
+
+        TODO: Update this to work for multi-position.
         """
         self.mode = 'w'
 

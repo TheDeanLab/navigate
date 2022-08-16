@@ -93,10 +93,21 @@ class Metadata:
         """Return shape as XYCZT."""
         return (self.shape_x, self.shape_y, self.shape_c, self.shape_z, self.shape_t)
 
+
 class XMLMetadata(Metadata):
+    """
+    This is a base class for dealing with metadata that is stored as an XML, e.g. in OME-TIFF or BigDataViewer.
+    There are multiple methods for storing XML. In OME-TIFF, the XML is stored in the header of the first OME-TIFF
+    file in a directory. In BigDataViewer, it is stored in a separate XML. Both have proprietary XML formats. To
+    address this, we store their metadata in a nested dictionary, defined by file_type_xml_dict()
+    (e.g. ome_tiff_xml_dict()) (see to_xml()). We then parse this nested dictionary into an XML file. Similarly,
+    we can parse from an XML file to a nested dictionary and map these values back to our internal representation
+    of metadata values (TODO: Not implemented. Will use xml_tools.parse_xml() for the first bit.)
+    """
 
     def write_xml(self, file_name: str, file_type: str, root: Optional[str] = None, **kw) -> None:
-        xml = '<?xml version="1.0" encoding="UTF-8"?>'
+        """Write to XML file. Assumes we do not include the XML header in our nested metadata dictionary."""
+        xml = '<?xml version="1.0" encoding="UTF-8"?>'  # XML file header
         # TODO: should os.path.basename be the default? Added this for BigDataViewer's relative path.
         xml += self.to_xml(file_type, root=root, file_name=os.path.basename(file_name), **kw)
         file_name = '.'.join(file_name.split('.')[:-1])+'.xml'

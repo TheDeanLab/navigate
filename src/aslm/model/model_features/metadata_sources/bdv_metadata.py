@@ -24,18 +24,38 @@ class BigDataViewerMetadata(XMLMetadata):
         bdv_dict['SequenceDescription']['ImageLoader'] = {'format': 'bdv.hdf5'}
         bdv_dict['SequenceDescription']['ImageLoader']['hdf5'] = {'type': 'relative', 'text': file_name}
 
-        # Populate the views
+        # Populate ViewSetups
         bdv_dict['SequenceDescription']['ViewSetups'] = {}
         bdv_dict['SequenceDescription']['ViewSetups']['ViewSetup'] = []
+        # Attributes are necessary for BigStitcher
+        bdv_dict['SequenceDescription']['ViewSetups']['Attributes'] = [
+            {'name': 'illumination', 'Illumination': {'id': {'text': 0}, 'name': {'text': 0}}},
+            {'name': 'channel', 'Channel': []},
+            {'name': 'tile', 'Tile': []},
+            {'name': 'angle', 'Angle': {'id': {'text': 0}, 'name': {'text': 0}}}
+        ]
+        # The actual loop that populates ViewSetup
         view_id = 0
-        for _ in range(self.shape_c):
-            for _ in range(self.positions):
+        for c in range(self.shape_c):
+            # We also take care of the Channel attributes here
+            ch = {'id': {'text': str(c)}, 'name': {'text': str(c)}}
+            bdv_dict['SequenceDescription']['ViewSetups']['Attributes'][1]['Channel'].append(ch)
+            for p in range(self.positions):
                 d = {'id': {'text': view_id}, 'name': {'text': view_id}}
                 d['size'] = {'text': f"{self.shape_x} {self.shape_y} {self.shape_z}"}
                 d['voxelSize'] = {'unit': {'text': 'um'}}
                 d['voxelSize']['size'] = {'text': f"{self.dx} {self.dy} {self.dz}"}
+                # These attributes are necessary for BigStitcher
+                d['attributes'] = {'illumination': {'text': '0'},
+                                   'channel': {'text': str(c)},
+                                   'tile': {'text': str(p)},
+                                   'angle': {'text': '0'}}
                 bdv_dict['SequenceDescription']['ViewSetups']['ViewSetup'].append(d)
                 view_id += 1
+        # Finish up the Tile Attributes outside of the channels loop so we have one per tile
+        for p in range(self.positions):
+            tile = {'id': {'text': str(p)}, 'name': {'text': str(p)}}
+            bdv_dict['SequenceDescription']['ViewSetups']['Attributes'][2]['Tile'].append(tile)
 
         # Time
         bdv_dict['SequenceDescription']['Timepoints'] = {'type': 'range'}

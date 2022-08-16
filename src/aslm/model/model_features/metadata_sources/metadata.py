@@ -107,9 +107,10 @@ class XMLMetadata(Metadata):
         """
         Convert stored metadata to XML
         """
+        xml = ""
         try:
             d = getattr(self, f"{file_type.lower().replace(' ','_').replace('-','_')}_xml_dict")(**kw)
             xml = xml_tools.dict_to_xml(d, root)
         except AttributeError:
-            logging.debug(f"Metadata Writer - I do not know how to export {self.file_type} metadata to XML.")
+            logging.debug(f"Metadata Writer - I do not know how to export {file_type} metadata to XML.")
         return xml

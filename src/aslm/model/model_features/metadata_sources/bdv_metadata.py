@@ -16,7 +16,7 @@ class BigDataViewerMetadata(XMLMetadata):
 
     def bdv_xml_dict(self, file_name: str, views: list) -> dict:
         # Header
-        bdv_dict = {'version': 2.0}
+        bdv_dict = {'version': 0.2}
         
         # File path
         bdv_dict['BasePath'] = {'type': 'relative', 'text': '.'}
@@ -25,15 +25,16 @@ class BigDataViewerMetadata(XMLMetadata):
         bdv_dict['SequenceDescription']['ImageLoader']['hdf5'] = {'type': 'relative', 'text': file_name}
 
         # Populate the views
-        bdv_dict['SequenceDescription']['ViewSetups'] = []
+        bdv_dict['SequenceDescription']['ViewSetups'] = {}
+        bdv_dict['SequenceDescription']['ViewSetups']['ViewSetup'] = []
         view_id = 0
         for _ in range(self.shape_c):
             for _ in range(self.positions):
-                d = {'ViewSetup': {'id': {'text': view_id}, 'name': {'text': view_id}}}
-                d['ViewSetup']['size'] = {'text': f"{self.shape_x} {self.shape_y} {self.shape_z}"}
-                d['ViewSetup']['voxelSize'] = {'unit': {'text': 'um'}}
-                d['ViewSetup']['voxelSize']['size'] = {'text': f"{self.dx} {self.dy} {self.dz}"}
-                bdv_dict['SequenceDescription']['ViewSetups'].append(d)
+                d = {'id': {'text': view_id}, 'name': {'text': view_id}}
+                d['size'] = {'text': f"{self.shape_x} {self.shape_y} {self.shape_z}"}
+                d['voxelSize'] = {'unit': {'text': 'um'}}
+                d['voxelSize']['size'] = {'text': f"{self.dx} {self.dy} {self.dz}"}
+                bdv_dict['SequenceDescription']['ViewSetups']['ViewSetup'].append(d)
                 view_id += 1
 
         # Time
@@ -50,6 +51,7 @@ class BigDataViewerMetadata(XMLMetadata):
                     mat = np.zeros((3,4), dtype=float)
                     for z in range(self.shape_z):
                         matrix_id = z + self.shape_z*c + t*self.shape_c*self.shape_z*self.positions
+                        # Construct centroid of volume matrix
                         mat += self.stage_positions_to_affine_matrix(**views[matrix_id])/self.shape_z
                     d = {'timepoint': t, 'setup': view_id}
                     d['ViewTransform'] = {'type': 'affine'}

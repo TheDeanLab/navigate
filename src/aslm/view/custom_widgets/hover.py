@@ -41,7 +41,10 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 class hover(object):
-
+    '''
+    Takes in a widget to which the hover is bound and text (optional)
+    Description setting is not done on initialization, must use hover.setdescription()
+    '''
     def __init__(self, widget=None, text=None, type="free"):
         self.widget = widget
         self.tipwindow = None
@@ -56,9 +59,12 @@ class hover(object):
         widget.bind('<Leave>', self.hide)
         widget.bind('<ButtonPress>', self.hide)
 
+    # Sets a description for the widget to appear when hovered over
+    # If text=None, no description hover will be shown at all
     def setdescription(self, text):
         self.description=text
-        
+    
+    # Event handlers
     def show(self, event):
         if self.type=="free" and (not self.description==None):
             self.type="description"

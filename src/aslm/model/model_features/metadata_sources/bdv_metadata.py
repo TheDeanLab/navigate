@@ -14,7 +14,7 @@ class BigDataViewerMetadata(XMLMetadata):
     def __init__(self) -> None:
         super().__init__()
 
-    def bdv_xml_dict(self, file_name: str, views: list) -> dict:
+    def bdv_xml_dict(self, file_name: str, views: list, **kw) -> dict:
         # Header
         bdv_dict = {'version': 0.2}
         

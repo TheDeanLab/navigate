@@ -109,7 +109,7 @@ class XMLMetadata(Metadata):
         """Write to XML file. Assumes we do not include the XML header in our nested metadata dictionary."""
         xml = '<?xml version="1.0" encoding="UTF-8"?>'  # XML file header
         # TODO: should os.path.basename be the default? Added this for BigDataViewer's relative path.
-        xml += self.to_xml(file_type, root=root, file_name=os.path.basename(file_name), **kw)
+        xml += self.to_xml(file_type, root, file_name=os.path.basename(file_name), **kw)
         file_name = '.'.join(file_name.split('.')[:-1])+'.xml'
         with open(file_name, 'w') as fp:
             fp.write(xml)

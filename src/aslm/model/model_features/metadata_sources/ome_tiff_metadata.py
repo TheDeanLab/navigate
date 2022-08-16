@@ -1,8 +1,11 @@
+from typing import Optional
+
 from .metadata import XMLMetadata
+
 
 class OMETIFFMetadata(XMLMetadata):
 
-    def ome_tiff_xml_dict(self, c=0, t=0):
+    def ome_tiff_xml_dict(self, c=0, t=0, **kw):
         """
         Generates dictionary with same heirarchical structure as OME-XML. Useful for
         OME-TIFF and OME-XML.
@@ -12,9 +15,9 @@ class OMETIFFMetadata(XMLMetadata):
         ome_dict
             OME TIFF metadata dictionary
         """
-        ome_dict = {'xmlns': "http://www.openmicroscopy.org/Schemas/OME/2015-01",
+        ome_dict = {'xmlns': "http://www.openmicroscopy.org/Schemas/OME/2016-06",
                     'xmlns:xsi' : "http://www.w3.org/2001/XMLSchema-instance",
-                    'xsi:schemaLocation': "http://www.openmicroscopy.org/Schemas/OME/2015-01 http://www.openmicroscopy.org/Schemas/OME/2015-01/ome.xsd"}
+                    'xsi:schemaLocation': "http://www.openmicroscopy.org/Schemas/OME/2016-06 http://www.openmicroscopy.org/Schemas/OME/2016-06/ome.xsd"}
         ome_dict['Image'] = {'ID': f'Image:{c}'}
         ome_dict['Image']['Pixels'] = {'ID': f'Pixels:{c}'}
         ome_dict['Image']['Pixels']['Type'] = 'uint16'  # Hardcoded from SharedNDArray call
@@ -55,5 +58,8 @@ class OMETIFFMetadata(XMLMetadata):
 
         return ome_dict
 
-    def to_xml(self, **kw) -> str:
-        return super().to_xml('OME-TIFF', root='OME', **kw)
+    def write_xml(self, file_name: str, file_type: str = 'OME-TIFF', root: Optional[str] = 'OME', **kw) -> None:
+        return super().write_xml(file_name, file_type=file_type, root=root, **kw)
+
+    def to_xml(self, file_type: str = 'OME-TIFF', root: Optional[str] = 'OME', **kw) -> str:
+        return super().to_xml(file_type, root=root, **kw)

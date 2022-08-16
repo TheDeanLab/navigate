@@ -1,17 +1,22 @@
 """
 Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
+
 Redistribution and use in source and binary forms, with or without
 modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
 provided that the following conditions are met:
+
      * Redistributions of source code must retain the above copyright notice,
      this list of conditions and the following disclaimer.
+
      * Redistributions in binary form must reproduce the above copyright
      notice, this list of conditions and the following disclaimer in the
      documentation and/or other materials provided with the distribution.
+
      * Neither the name of the copyright holders nor the names of its
      contributors may be used to endorse or promote products derived from this
      software without specific prior written permission.
+
 NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
 THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
 CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -102,43 +107,6 @@ class hover(object):
         
     def hidetip(self):
         self.type="free"
-        tw = self.tipwindow
-        self.tipwindow = None
-        if tw:
-            tw.destroy()
-
-class DescriptionHover(hover):
-    def __init__(self, widget, text):
-        super().__init__(widget, text)
-        
-        #bind show and hide to bounds of the widget
-        widget.bind('<Enter>', self.show)
-        widget.bind('<Leave>', self.hide)
-        widget.bind('<ButtonPress>', self.hide)
-        
-class ErrorHover(hover):
-
-    def __init__(self, widget=None, text=None):
-        super().__init__(widget, text)
-
-    def showtip(self, text):
-        "Display text in tooltip window"
-        self.text = text
-        if self.tipwindow or not self.text:
-            return
-        x, y, cx, cy = self.widget.bbox("insert")
-        x = x + self.widget.winfo_rootx() # + self.widget.winfo_width()
-        y = y + self.widget.winfo_height() + self.widget.winfo_rooty()
-        
-        self.tipwindow = tw = tk.Toplevel(self.widget)
-        tw.wm_overrideredirect(1)
-        tw.wm_geometry("+%d+%d" % (x, y))
-        label = tk.Label(tw, text=self.text, justify=tk.LEFT,
-                      background="#ff5d66", relief=tk.RIDGE,
-                      font=("comic sans", "8", "normal"))
-        label.pack(ipadx=1)
-
-    def hidetip(self):
         tw = self.tipwindow
         self.tipwindow = None
         if tw:

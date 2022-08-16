@@ -41,4 +41,8 @@ class HoverMixin:
           
 class HoverButton(HoverMixin, ttk.Button):
      def __init__(self, *args, **kwargs):
-          super().__init__(*args, **kwargs)
+          super().__init__(*args, **kwargs) 
+          
+class HoverTkButton(HoverMixin, tk.Button):
+     def __init__(self, *args, **kwargs):
+          super().__init__(*args, **kwargs) 

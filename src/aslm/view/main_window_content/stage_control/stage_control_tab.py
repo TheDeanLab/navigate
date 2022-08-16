@@ -122,6 +122,9 @@ class stage_control_tab(tk.Frame):
         # self.goto_frame.grid(row=0, column=4, sticky=(tk.NSEW))
         self.stop_frame.grid(row=1, column=1, sticky=(tk.NSEW), padx=3, pady=3)
 
+        #example hover description
+        self.xy_frame.up_y_btn.hover.setdescription("Increases the Y value of the stage's position")
+        
     def get_widgets(self):
         """
         # this function will return all the input widgets as a dictionary

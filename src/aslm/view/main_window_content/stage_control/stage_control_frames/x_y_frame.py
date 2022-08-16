@@ -38,6 +38,7 @@ from PIL import ImageTk
 # Local Imports
 from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from aslm.view.custom_widgets.validation import ValidatedSpinbox
+from aslm.view.custom_widgets.hovermixin import HoverButton, HoverTkButton
 
 import logging
 from pathlib import Path
@@ -71,7 +72,7 @@ class x_y_frame(ttk.Labelframe):
         x_y_frame.right_image = x_y_frame.right_image.subsample(2,2)
 
         #Up button
-        x_y_frame.up_y_btn = tk.Button(
+        x_y_frame.up_y_btn = HoverTkButton(
             x_y_frame,
             image= x_y_frame.up_image,
             borderwidth=0
@@ -110,7 +111,7 @@ class x_y_frame(ttk.Labelframe):
         )
 
         #Zero button
-        x_y_frame.zero_xy_btn = ttk.Button(
+        x_y_frame.zero_xy_btn = HoverButton(
             x_y_frame,
             text="ZERO XY"
         )

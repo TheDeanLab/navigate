@@ -16,7 +16,7 @@ class BigDataViewerMetadata(XMLMetadata):
 
     def bdv_xml_dict(self, file_name: str, views: list) -> dict:
         # Header
-        bdv_dict = {'version': 2.0}
+        bdv_dict = {'version': 0.2}
         
         # File path
         bdv_dict['BasePath'] = {'type': 'relative', 'text': '.'}

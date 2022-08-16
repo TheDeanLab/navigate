@@ -35,12 +35,25 @@ def test_ome_metadata_valid():
 
     print(output)
 
-    assert('No validation errors found.' in output)
-
     # Delete bftools
-    os.rmdir('./bftools')
+    delete_folder('./bftools')
     os.remove('bftools.zip')
 
     # Delete XML
     os.remove('test.xml')
 
+    assert ('No validation errors found.' in output)
+
+
+def delete_folder(top):
+    # https://docs.python.org/3/library/os.html#os.walk
+    # Delete everything reachable from the directory named in "top",
+    # assuming there are no symbolic links.
+    # CAUTION:  This is dangerous!  For example, if top == '/', it
+    # could delete all your disk files.
+    import os
+    for root, dirs, files in os.walk(top, topdown=False):
+        for name in files:
+            os.remove(os.path.join(root, name))
+        for name in dirs:
+            os.rmdir(os.path.join(root, name))

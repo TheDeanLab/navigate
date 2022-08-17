@@ -87,6 +87,7 @@ commands = {
     "l_current_power_level": "SOURce:POWer:LEVel:IMMediate:AMPLitude??",
     "l_analog_type": "SYSTem:INFormation:AMODulation:TYPe?",
     "l_status": "SYSTem:STATus?",
+    "l_state": "SOURce:AM:STATe?",
     "l_system_fault": "SYSTem:FAULt?",
     "l_blanking_status": "SOURce:AModulation:BLANKing?",
 
@@ -186,6 +187,15 @@ class ObisLaser(LaserBase):
         # print(response)
         # return response
 
+    def sendv2(self, command, value=''):
+        try:
+            response = self.laser.write((command + value + self.end_of_line).encode())
+        except SerialTimeoutException as e:
+            print(e)
+        sleep(0.5)
+        # print(response)
+        # return response
+
     def read(self):
         # this while loop fixed most of the blanking response issue
         response = ''
@@ -267,6 +277,13 @@ class ObisLaser(LaserBase):
         response = self.read()
         print("seventh done")
 
+    # Testing the dictonary
+    def testingv2(self):
+        self.sendv2(commands['set_state'], 'ON')
+        response = self.read()
+
+        self.sendv2(commands['l_state'])
+        response = self.read()
 
 
 

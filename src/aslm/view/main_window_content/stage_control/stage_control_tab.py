@@ -124,6 +124,7 @@ class stage_control_tab(tk.Frame):
 
         #example hover description
         self.xy_frame.up_y_btn.hover.setdescription("Increases the Y value of the stage's position")
+        self.position_frame.inputs['x'].widget.hover.setdescription("X position of the stage")
         
     def get_widgets(self):
         """

@@ -85,6 +85,7 @@ class hover(object):
         if self.tipwindow or not self.text:
             return
         
+        #set specifics of error message by type
         x, y, cx, cy = self.widget.bbox("insert")
         if self.type.lower() == "description":
             background="#ffffe0"

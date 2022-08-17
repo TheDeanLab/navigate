@@ -40,6 +40,22 @@ from pathlib import Path
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+"""
+User guide for the class
+Each instance of hover is intended to be an attribute of a tk or ttk widget (see validated fields or hovermixins), and by default is set only to show error messages
+
+In this case, the parent widget is the Stage Control GUI y position label. 
+To instantiate the description, 
+    widget.hover.setdescription("Y position of the stage")
+    
+Please note: when dealing with LabelInput widgets, be sure to use 
+    LabelInput.widget.hover.setdescription(),
+    which will target the specific widget and not the LabelInput frame
+
+Examples of proper usage are within stage_control_tab.py for both LabelInput and regular usage
+"""
+
+
 class hover(object):
     """ 
     Hover that allows for information to be displayed additionally without interrupting the GUI
@@ -175,7 +191,6 @@ class hover(object):
             return
         
         #set format of hover by type
-        x, y, cx, cy = self.widget.bbox("insert")
         if self.type.lower() == "description":
             background="#ffffe0"
             relief = tk.SOLID

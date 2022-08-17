@@ -29,8 +29,6 @@ POSSIBILITY OF SUCH DAMAGE.
 import tkinter as tk
 from tkinter import ttk        
 from aslm.view.custom_widgets.hover import hover
-import logging
-from pathlib import Path
 
 class HoverMixin:
      def __init__(self, *args, **kwargs):

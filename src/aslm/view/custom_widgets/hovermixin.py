@@ -46,3 +46,11 @@ class HoverButton(HoverMixin, ttk.Button):
 class HoverTkButton(HoverMixin, tk.Button):
      def __init__(self, *args, **kwargs):
           super().__init__(*args, **kwargs) 
+          
+class HoverRadioButton(HoverMixin, ttk.Radiobutton):
+     def __init__(self, *args, **kwargs):
+          super().__init__(*args, **kwargs)
+
+class HoverCheckButton(HoverMixin, ttk.Checkbutton):
+     def __init__(self, *args, **kwargs):
+          super().__init__(*args, **kwargs) 

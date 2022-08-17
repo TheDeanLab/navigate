@@ -93,6 +93,7 @@ class hover(object):
             font=("tahoma", "8", "normal")
             x = self.widget.winfo_rootx() + self.widget.winfo_width()
             y = self.widget.winfo_rooty() + self.widget.winfo_height()
+            
         elif self.type.lower() == "error":
             background="#ff5d66"
             relief=tk.RIDGE,

@@ -41,11 +41,28 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 class hover(object):
-    '''
-    Takes in a widget to which the hover is bound and text (optional)
-    Description setting is not done on initialization, must use hover.setdescription()
-    '''
+    """ 
+    Hover that allows for information to be displayed additionally without interrupting the GUI
+
+    Parameters
+    ----------
+    widget  : bound widget.
+        The widget to which the hover instance is bound, usually the one on which information is being provided
+    text    : str variable
+        Text to be displayed when the hover is shown (default set to None so the hover will not show at all)
+    type    : str variable
+        Represents the current state of the hover and whether it is in use at any given moment 
+
+    Returns
+    -------
+    None
+    """
     def __init__(self, widget=None, text=None, type="free"):
+        '''
+        Constructor for the Hover
+        
+        Initializes attributes and binds events
+        '''
         self.widget = widget
         self.tipwindow = None
         self.id = None
@@ -62,30 +79,102 @@ class hover(object):
     # Sets a description for the widget to appear when hovered over
     # If text=None, no description hover will be shown at all
     def setdescription(self, text):
+        """
+        Setter for description text
+
+        Parameters
+        ----------
+        text    : str
+            Text to be displayed when hover is shown as a description
+        
+        Returns
+        -------
+        None
+        """
         self.description=text
     
     # Event handlers
     def show(self, event):
+        """
+        Event handler to show the hover
+
+        Parameters
+        ----------
+        event   : event
+            The event instance
+        
+        Returns
+        -------
+        None
+        """
         if self.type=="free" and (not self.description==None):
             self.type="description"
             self.showtip(self.description)
+            
     def hide(self, event):
+        """
+        Event handler to hide the hover
+
+        Parameters
+        ----------
+        event   : event
+            The event instance
+        
+        Returns
+        -------
+        None
+        """
         if self.type=="description":
             self.hidetip()
 
     def update_type(self, newtype):
-        self.type=newtype
+        """
+        Setter for the type
+
+        Parameters
+        ----------
+        newtype : str
+            The new state of the hover
+        
+        Returns
+        -------
+        None
+        """
+        self.type=newtype.lower()
     
     def get_type(self):
+        """
+        Getter for the type
+
+        Parameters
+        ----------
+        None
+        
+        Returns
+        -------
+        type    : str
+            The current state of the hover
+        """
         return self.type
     
     def showtip(self, text):
-        "Display text in tooltip window"
+        """
+        Displays the hover
+
+        Parameters
+        ----------
+        text    :str
+            The text to be displayed on the hover
+        
+        Returns
+        -------
+        None
+        """
         self.text = text
         if self.tipwindow or not self.text:
             return
         
-        #set specifics of error message by type
+        #set format of hover by type
         x, y, cx, cy = self.widget.bbox("insert")
         if self.type.lower() == "description":
             background="#ffffe0"
@@ -110,10 +199,33 @@ class hover(object):
         label.pack(ipadx=1)
 
     def seterror(self, text):
+        """
+        Setter for the error message
+
+        Parameters
+        ----------
+        error    : str
+            Error message to be displayed
+        
+        Returns
+        -------
+        None
+        """
         self.type="error"
         self.showtip(text)
         
     def hidetip(self):
+        """
+        Hides the hover and resets type
+
+        Parameters
+        ----------
+        None
+        
+        Returns
+        -------
+        None
+        """
         self.type="free"
         tw = self.tipwindow
         self.tipwindow = None

@@ -35,6 +35,7 @@ from tkinter import ttk
 import logging
 
 from aslm.view.custom_widgets.validation import ValidatedCombobox, ValidatedSpinbox
+from aslm.view.custom_widgets.hovermixin import HoverButton, HoverCheckButton, HoverRadioButton, HoverTkButton
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -106,7 +107,7 @@ class LabelInput(ttk.Frame):
 
         """This if statement will check for the type of widget being created and will create it based on that, since certain
         widgets need different formatting, like how button types don't need a textvariable like a StringVar()"""
-        if input_class in (ttk.Checkbutton, ttk.Button, ttk.Radiobutton):
+        if input_class in (ttk.Checkbutton, ttk.Button, ttk.Radiobutton, HoverButton, HoverTkButton, HoverCheckButton, HoverRadioButton):
             input_args["text"] = label
             input_args["variable"] = input_var
         else:

@@ -33,8 +33,10 @@ POSSIBILITY OF SUCH DAMAGE.
 import tkinter as tk
 from tkinter import ttk
 import logging
+from aslm.view.custom_widgets.hovermixin import HoverButton
 from aslm.view.custom_widgets.validation import ValidatedSpinbox, ValidatedCombobox
 from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from aslm.view.custom_widgets.hover import hover
 
 
 # Logger Setup
@@ -83,7 +85,7 @@ class stack_acq_frame(ttk.Labelframe):
             self.inputs[start_names[i]].label.grid(sticky='N')
         
         # Start button
-        self.buttons['set_start'] = ttk.Button(self.pos_slice, text="Set Start Pos/Foc")
+        self.buttons['set_start'] = HoverButton(self.pos_slice, text="Set Start Pos/Foc")
         self.buttons['set_start'].grid(row=3, column=0, sticky='N', pady=2, padx=(6,0))
 
         # End Pos Frame (Vertically Oriented)
@@ -103,7 +105,7 @@ class stack_acq_frame(ttk.Labelframe):
             self.inputs[end_names[i]].label.grid(sticky='N')
         
             # End Button
-        self.buttons['set_end'] = ttk.Button(self.pos_slice, text="Set End Pos/Foc")
+        self.buttons['set_end'] = HoverButton(self.pos_slice, text="Set End Pos/Foc")
         self.buttons['set_end'].grid(row=3, column=1, sticky='N', pady=2, padx=(6,0))
 
         # Step Size Frame (Vertically oriented)
@@ -144,6 +146,10 @@ class stack_acq_frame(ttk.Labelframe):
                                             )
         self.inputs["cycling"].state(["readonly"])  # Makes it so the user cannot type a choice into combobox
         self.inputs["cycling"].grid(row=0, column=0, sticky='NSEW', padx=6, pady=5)
+        
+        # Initialize DescriptionHovers
+        self.inputs['step_size'].widget.hover.setdescription("Step Size")
+        self.buttons['set_end'].hover.setdescription("Sets End")
 
     # Getters
     def get_variables(self):

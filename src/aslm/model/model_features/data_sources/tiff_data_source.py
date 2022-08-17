@@ -102,7 +102,7 @@ class TiffDataSource(DataSource):
             dx, dy, dz = self.metadata.voxel_size
             md = {'spacing': dz, 'unit': 'um', 'axes': 'ZYX'}
             self.image[c].write(data,
-                                resolution=(1./dx, 1./dy), 
+                                resolution=(1e4/dx, 1e4/dy, 'CENTIMETER'),
                                 metadata=md,
                                 contiguous=True)
 

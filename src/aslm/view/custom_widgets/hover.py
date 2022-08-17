@@ -91,14 +91,14 @@ class hover(object):
             background="#ffffe0"
             relief = tk.SOLID
             font=("tahoma", "8", "normal")
-            x = x+self.widget.winfo_rootx() + self.widget.winfo_width()
-            y = y+self.widget.winfo_rooty() + self.widget.winfo_height()
+            x = self.widget.winfo_rootx() + self.widget.winfo_width()
+            y = self.widget.winfo_rooty() + self.widget.winfo_height()
         elif self.type.lower() == "error":
             background="#ff5d66"
             relief=tk.RIDGE,
             font=("comic sans", "8", "normal")
-            x = x+self.widget.winfo_rootx()
-            y = y+self.widget.winfo_rooty() + self.widget.winfo_height()
+            x = self.widget.winfo_rootx()
+            y = self.widget.winfo_rooty() + self.widget.winfo_height()
         
         self.tipwindow = tw = tk.Toplevel(self.widget)
         tw.wm_overrideredirect(1)

@@ -311,7 +311,8 @@ class Camera_Setting_Controller(GUI_Controller):
         TODO: Should make sure that this is updated before we run the tiling wizard.  Also can probably be done more
         elegantly in a configuration file and dictionary structure.
         """
-        if magnification == 'N/A':  # magnification == 'N/A' is a proxy for resolution == 'high'
+        # magnification == 'N/A' is a proxy for resolution == 'high'
+        if (magnification == 'N/A') or (magnification == 'high'):
             # 54-12-8 - EFLobj = 12.19 mm / RI
             tube_lens_focal_length = 300
             extended_focal_length = 12.19

@@ -313,7 +313,7 @@ class Model:
                                           dtype='uint16') for i in range(self.number_of_frames)]
         self.img_width = img_width
         self.img_height = img_height
-        self.data_buffer_positions = SharedNDArray(shape=(self.number_of_frames, 6), dtype=float)  # z-index, x, y, z, theta, f
+        self.data_buffer_positions = SharedNDArray(shape=(self.number_of_frames, 5), dtype=float)  # z-index, x, y, z, theta, f
 
     def get_data_buffer(self, img_width=512, img_height=512):
         r"""Get the data buffer.
@@ -853,10 +853,6 @@ class Model:
         #  Consider putting below to not block thread.
         self.daq.prepare_acquisition(channel_key, self.current_exposure_time)
 
-        # Run the acquisition
-        self.daq.run_acquisition()
-        self.daq.stop_acquisition()
-
         # Stash current position, channel, timepoint
         # Do this here, because signal container functions can inject changes to the stage
         self.data_buffer_positions[self.frame_id][0] = self.experiment.StageParameters['x']
@@ -864,6 +860,10 @@ class Model:
         self.data_buffer_positions[self.frame_id][2] = self.experiment.StageParameters['z']
         self.data_buffer_positions[self.frame_id][3] = self.experiment.StageParameters['theta']
         self.data_buffer_positions[self.frame_id][4] = self.experiment.StageParameters['f']
+
+        # Run the acquisition
+        self.daq.run_acquisition()
+        self.daq.stop_acquisition()
 
         if hasattr(self, 'signal_container'):
             self.signal_container.run(wait_response=True)

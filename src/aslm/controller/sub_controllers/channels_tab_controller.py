@@ -263,8 +263,6 @@ class Channels_Tab_Controller(GUI_Controller):
         self.view.stack_timepoint_frame.exp_time_spinbox['state'] = state
         self.show_verbose_info('acquisition mode has been changed to', mode)
 
-
-
     def update_z_steps(self,
                        *args):
         r"""Recalculates the number of slices that will be acquired in a z-stack.

@@ -14,9 +14,9 @@ class BigDataViewerMetadata(XMLMetadata):
     def __init__(self) -> None:
         super().__init__()
 
-    def bdv_xml_dict(self, file_name: str, views: list) -> dict:
+    def bdv_xml_dict(self, file_name: str, views: list, **kw) -> dict:
         # Header
-        bdv_dict = {'version': 2.0}
+        bdv_dict = {'version': 0.2}
         
         # File path
         bdv_dict['BasePath'] = {'type': 'relative', 'text': '.'}
@@ -24,17 +24,38 @@ class BigDataViewerMetadata(XMLMetadata):
         bdv_dict['SequenceDescription']['ImageLoader'] = {'format': 'bdv.hdf5'}
         bdv_dict['SequenceDescription']['ImageLoader']['hdf5'] = {'type': 'relative', 'text': file_name}
 
-        # Populate the views
-        bdv_dict['SequenceDescription']['ViewSetups'] = []
+        # Populate ViewSetups
+        bdv_dict['SequenceDescription']['ViewSetups'] = {}
+        bdv_dict['SequenceDescription']['ViewSetups']['ViewSetup'] = []
+        # Attributes are necessary for BigStitcher
+        bdv_dict['SequenceDescription']['ViewSetups']['Attributes'] = [
+            {'name': 'illumination', 'Illumination': {'id': {'text': 0}, 'name': {'text': 0}}},
+            {'name': 'channel', 'Channel': []},
+            {'name': 'tile', 'Tile': []},
+            {'name': 'angle', 'Angle': {'id': {'text': 0}, 'name': {'text': 0}}}
+        ]
+        # The actual loop that populates ViewSetup
         view_id = 0
-        for _ in range(self.shape_c):
-            for _ in range(self.shape_z):
-                d = {'ViewSetup': {'id': {'text': view_id}, 'name': {'text': view_id}}}
-                d['ViewSetup']['size'] = {'text': f"{self.shape_x} {self.shape_y} {self.shape_z}"}
-                d['ViewSetup']['voxelSize'] = {'unit': {'text': 'um'}}
-                d['ViewSetup']['voxelSize']['size'] = {'text': f"{self.dx} {self.dy} {self.dz}"}
-                bdv_dict['SequenceDescription']['ViewSetups'].append(d)
+        for c in range(self.shape_c):
+            # We also take care of the Channel attributes here
+            ch = {'id': {'text': str(c)}, 'name': {'text': str(c)}}
+            bdv_dict['SequenceDescription']['ViewSetups']['Attributes'][1]['Channel'].append(ch)
+            for p in range(self.positions):
+                d = {'id': {'text': view_id}, 'name': {'text': view_id}}
+                d['size'] = {'text': f"{self.shape_x} {self.shape_y} {self.shape_z}"}
+                d['voxelSize'] = {'unit': {'text': 'um'}}
+                d['voxelSize']['size'] = {'text': f"{self.dx} {self.dy} {self.dz}"}
+                # These attributes are necessary for BigStitcher
+                d['attributes'] = {'illumination': {'text': '0'},
+                                   'channel': {'text': str(c)},
+                                   'tile': {'text': str(p)},
+                                   'angle': {'text': '0'}}
+                bdv_dict['SequenceDescription']['ViewSetups']['ViewSetup'].append(d)
                 view_id += 1
+        # Finish up the Tile Attributes outside of the channels loop so we have one per tile
+        for p in range(self.positions):
+            tile = {'id': {'text': str(p)}, 'name': {'text': str(p)}}
+            bdv_dict['SequenceDescription']['ViewSetups']['Attributes'][2]['Tile'].append(tile)
 
         # Time
         bdv_dict['SequenceDescription']['Timepoints'] = {'type': 'range'}
@@ -44,14 +65,20 @@ class BigDataViewerMetadata(XMLMetadata):
         # View registrations
         bdv_dict['ViewRegistrations'] = {'ViewRegistration': []}
         for t in range(self.shape_t):
-            for c in range(self.shape_c):
-                for z in range(self.shape_z):
-                    view_id = c*self.shape_z+z
-                    matrix_id = view_id + t*self.shape_c*self.shape_z
+            for p in range(self.positions):
+                for c in range(self.shape_c):
+                    view_id = c * self.positions + p
+                    mat = np.zeros((3,4), dtype=float)
+                    for z in range(self.shape_z):
+                        matrix_id = z + self.shape_z*c + p*self.shape_c*self.shape_z \
+                                    + t*self.shape_c*self.shape_z*self.positions
+                        # Construct centroid of volume matrix
+                        print(matrix_id, views[matrix_id])
+                        mat += self.stage_positions_to_affine_matrix(**views[matrix_id])/self.shape_z
                     d = {'timepoint': t, 'setup': view_id}
                     d['ViewTransform'] = {'type': 'affine'}
-                    d['ViewTransform']['affine'] = {'text': 
-                        ' '.join([f"{x:.6f}" for x in self.stage_positions_to_affine_matrix(**views[matrix_id]).ravel()])}
+                    d['ViewTransform']['affine'] = {'text':
+                        ' '.join([f"{x:.6f}" for x in mat.ravel()])}
                     bdv_dict['ViewRegistrations']['ViewRegistration'].append(d)
         
         return bdv_dict
@@ -65,9 +92,9 @@ class BigDataViewerMetadata(XMLMetadata):
         arr[:,3] = [x,y,z]
 
         # Rotation (theta pivots in the xz plane, about the y axis)
-        sin_theta, cos_theta = np.sin(theta), np.cos(theta)
-        arr[0,0], arr[2,2] = cos_theta, cos_theta
-        arr[0,2], arr[2,0] = sin_theta, -sin_theta
+        # sin_theta, cos_theta = np.sin(theta), np.cos(theta)
+        # arr[0,0], arr[2,2] = cos_theta, cos_theta
+        # arr[0,2], arr[2,0] = sin_theta, -sin_theta
 
         return arr
     

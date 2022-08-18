@@ -1,6 +1,6 @@
 #  Standard Imports
 import os
-from typing import Optional
+from typing import Optional, Union
 import xml.etree.ElementTree as ET
 
 # Third Party Imports
@@ -14,15 +14,50 @@ class BigDataViewerMetadata(XMLMetadata):
     def __init__(self) -> None:
         super().__init__()
 
-    def bdv_xml_dict(self, file_name: str, views: list, **kw) -> dict:
+    def bdv_xml_dict(self, file_name: Union[str, list, None], views: list, **kw) -> dict:
         # Header
         bdv_dict = {'version': 0.2}
         
         # File path
         bdv_dict['BasePath'] = {'type': 'relative', 'text': '.'}
         bdv_dict['SequenceDescription'] = {}
-        bdv_dict['SequenceDescription']['ImageLoader'] = {'format': 'bdv.hdf5'}
-        bdv_dict['SequenceDescription']['ImageLoader']['hdf5'] = {'type': 'relative', 'text': file_name}
+
+        ext = os.path.basename(file_name).split('.')[-1]
+        if ext == "hdf5":
+            """
+            <ImageLoader format="bdv.hdf5">
+                <hdf5 type="relative">dataset.h5</hdf5>
+            </ImageLoader>
+            """
+            bdv_dict['SequenceDescription']['ImageLoader'] = {'format': 'bdv.hdf5'}
+            bdv_dict['SequenceDescription']['ImageLoader']['hdf5'] = {'type': 'relative', 'text': file_name}
+
+        elif ext == "tiff" or ext == "tif":
+            """
+            Need to iterate through the time points, etc.
+            <ImageLoader format="spimreconstruction.filelist">
+                <imglib2container>ArrayImgFactory</imglib2container>
+                <ZGrouped>false</ZGrouped>
+                <files>
+                    <FileMapping view_setup="0" timepoint="0" series="0" channel="0">
+                        <file type="relative">1_CH00_000000.tif</file>
+                    </FileMapping>
+                    <FileMapping view_setup="1" timepoint="0" series="0" channel="0">
+                        <file type="relative">1_CH01_000000.tif</file>
+                    </FileMapping>
+                </files>
+            </ImageLoader>
+            """
+            pass
+
+        elif ext == "n5":
+            """
+            <ImageLoader format="bdv.n5" version="1.0">
+                <n5 type="relative">dataset.n5</n5>
+            </ImageLoader>
+            """
+            bdv_dict['SequenceDescription']['ImageLoader'] = {'format': 'bdv.n5'}
+            bdv_dict['SequenceDescription']['ImageLoader']['n5'] = {'type': 'relative', 'text': file_name}
 
         # Populate ViewSetups
         bdv_dict['SequenceDescription']['ViewSetups'] = {}

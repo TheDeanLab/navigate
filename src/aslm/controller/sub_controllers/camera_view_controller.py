@@ -450,10 +450,10 @@ class Camera_View_Controller(GUI_Controller):
         self.total_images_per_volume = self.number_of_channels * self.number_of_slices
         self.original_image_width = int(camera_parameters['x_pixels'])
         self.original_image_height = int(camera_parameters['y_pixels'])
-        self.image_volume = np.zeros((self.original_image_width,
-                                      self.original_image_height,
-                                      self.number_of_slices,
-                                      self.number_of_channels))
+        # self.image_volume = np.zeros((self.original_image_width,
+        #                               self.original_image_height,
+        #                               self.number_of_slices,
+        #                               self.number_of_channels))
 
 
     def identify_channel_index_and_slice(self,

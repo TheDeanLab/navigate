@@ -3,7 +3,7 @@ import numpy.typing as npt
 
 
 def gaussian_beam(r0: int, z0: int, rl: int, zl: int, w0: float, NA: float = 0.15,  n: float = 1.33,
-                  wvl: float = 488.0, pixel_size: float = 1, I0: float = 1) -> npt.ArrayLike:
+                  wvl: float = 488.0, pixel_size: float = 1, I0: float = 1, bg: float = 0) -> npt.ArrayLike:
     """ Generate a Gaussian beam
 
     Parameters
@@ -24,6 +24,8 @@ def gaussian_beam(r0: int, z0: int, rl: int, zl: int, w0: float, NA: float = 0.1
         Effective pixel size [nm]
     I0 : float
         Peak intensity of the beam
+    bg : float
+        Background intensity (what is "zero" in this image?)
 
     Returns
     -------
@@ -35,7 +37,7 @@ def gaussian_beam(r0: int, z0: int, rl: int, zl: int, w0: float, NA: float = 0.1
     R, Z = np.meshgrid(r, z)
     z_r = n * w0 / NA
     w_z = w0 * np.sqrt(1 + (Z / z_r) ** 2)
-    return I0 * (w0 / w_z) ** 2 * np.exp(-2 * R * R / (w_z * w_z))
+    return I0 * (w0 / w_z) ** 2 * np.exp(-2 * R * R / (w_z * w_z)) + bg
 
 
 ######## Fitting functions #########
@@ -50,19 +52,21 @@ def gaussian_beam(r0: int, z0: int, rl: int, zl: int, w0: float, NA: float = 0.1
 # w0 = wvl
 # rb, zb = image.shape[0]//2, image.shape[1]//2
 #
-# x0 = (np.argmax(np.max(image, axis=0))-1024, np.argmax(np.max(image, axis=1))-1024, w0, np.max(image))
+# x0 = (np.argmax(np.max(image, axis=0))-1024, np.argmax(np.max(image, axis=1))-1024, w0, np.max(image), 100)
+# # The bounds are optional
 # res = least_squares(fit_gaussian_beam_error, x0, args=(image, NA, n, wvl, pixel_size),
-#                     bounds=([-rb,-zb, 0, np.max(image)-100], [rb, zb, 5*wvl, np.max(image)]))
+#                     bounds=([-rb,-zb, 0, np.max(image)-100, 0], [rb, zb, 5*wvl, np.max(image), np.inf]))
 # # res = minimize(fit_gaussian_beam_mse, x0, args=(image, NA, n, wvl, pixel_size))
 #
 # fig, axs = plt.subplots(1,2,figsize=(12,6))
 # axs[0].imshow(image)
-# axs[1].imshow(gaussian_beam(res.x[0], res.x[1], image.shape[0], image.shape[1], res.x[2], NA, n, wvl, pixel_size, res.x[3]))
+# axs[1].imshow(gaussian_beam(res.x[0], res.x[1], image.shape[0], image.shape[1], res.x[2],
+#                             NA, n, wvl, pixel_size, res.x[3], res.x[4]))
 #
 
 def fit_gaussian_beam_error(x, image, NA, n, wvl, pixel_size, ravel=True):
-    """x = (r0, z0, w0, I0)"""
-    diff = (gaussian_beam(x[0], x[1], image.shape[0], image.shape[1], x[2], NA, n, wvl, pixel_size, x[3]) - image)
+    """x = (r0, z0, w0, I0, bg0)"""
+    diff = (gaussian_beam(x[0], x[1], image.shape[0], image.shape[1], x[2], NA, n, wvl, pixel_size, x[3], x[4]) - image)
     # diff += x[2]  # regularize by beam waist size
     if ravel:
         return diff.ravel()

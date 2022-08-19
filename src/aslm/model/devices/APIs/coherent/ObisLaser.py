@@ -68,11 +68,15 @@ errors = {
     "900": "CCB message timed out"
 }
 
+# add fault status here
+fault = {
+    '00000000': 'A value of 0 indicates no fault conditions',
+}
+
 # Started to add dictionary but I have not tested it out
 commands = {
     # commands to get info from laser
     "l_model": "SYSTem:INFormation:MODel?",
-    "l_cabibration_date": "SYSTem:INFormation:CDATe?",
     "l_cabibration_date": "SYSTem:INFormation:CDATe?",
     "l_serial_num": "SYSTem:INFormation:SNUMber?",
     "l_part_num": "SYSTem:INFormation:PNUMber?",
@@ -83,29 +87,37 @@ commands = {
     "l_max_power": "SOURce:POWer:LIMit:HIGH?",
     "l_output_power_level": "SOURce:POWer:LEVel?",
     "l_output_current": "SOURce:POWer:CURRent?",
-    "l_opperating_mode": "SOURce:AM:SOURce?", 
-    "l_current_power_level": "SOURce:POWer:LEVel:IMMediate:AMPLitude??",
-    "l_analog_type": "SYSTem:INFormation:AMODulation:TYPe?",
+    "l_opperating_mode": "SOURce:AM:SOURce?",
+    "l_current_power_level": "SOURce:POWer:LEVel:IMMediate:AMPLitude?",
     "l_status": "SYSTem:STATus?",
     "l_state": "SOURce:AM:STATe?",
     "l_system_fault": "SYSTem:FAULt?",
-    "l_blanking_status": "SOURce:AModulation:BLANKing?",
 
     # set commands and values will need to be passed in function
     # valid value are ON or OFF
-    "set_blanking": "SOURce:AModulation:BLANKing ", 
-    # Set operatingmind Internal - valid values = CWP|CWC
-    "set_operating_mode_Int": "SOURce:AM:INTernal ", 
-    # Set operatingmind External - valid values = DIGital|ANALog|MIXed|DIGSO|MIXSO
+    "set_blanking": "SOURce:AModulation:BLANKing ",
+
+    # Set operating mode Internal - valid values = CWP|CWC
+    # Note CWC didnt work when base testing
+    "set_operating_mode_Int": "SOURce:AM:INTernal ",
+
+    # Set operating mode External - valid values = DIGital|ANALog|MIXed|DIGSO|MIXSO
+    # Note DIGSO|MIXSO didnt work when base testing
     "set_operating_mode_Ext": "SOURce:AM:EXTernal ",
-    # Set power level
-    # Note we were not able to get this command to work on 08/06/2022
+
+    # Set power level - needs to be exactly 5 decimal places or it will not work!
     "set_power_level": "SOURce:POWer:LEVel:IMMediate:AMPLitude ",
-    # Set lasser state - valid values = ON or OFF
+
+    # Set laser state - valid values = ON or OFF
     "set_state": "SOURce:AM:STATe ",
+
+
+    # unrecognized commands Below
+    "l_blanking_status": "SOURce:AModulation:BLANKing?",
+    "l_analog_type": "SYSTem:INFormation:AMODulation:TYPe?",
     # set analog mod type - valid values = 1 or 2
     "set_analog_type": "SYSTem:INFormation:AMODulation:TYPe ",
-    # set blanking status - vaild values = On or OFF
+    # set blanking status - valid values = On or OFF
     "set_blanking_status": "SOURce:AModulation:BLANKing ",
 }
 
@@ -176,24 +188,23 @@ class ObisLaser(LaserBase):
             print(f"Error {code}: {errors[code]}.")
         return response
 
+
+    def send_and_read(self, command, value=''):
+        self.send(command, value)
+        self.read()
+
+
     # New version of ask() and moving it int two functions.
     # send() and read()
 
-    def send(self, command):
-        try:
-            response = self.laser.write((command + self.end_of_line).encode())
-        except SerialTimeoutException as e:
-            print(e)
-        # print(response)
-        # return response
-
-    def sendv2(self, command, value=''):
+    def send(self, command, value=''):
         try:
             response = self.laser.write((command + value + self.end_of_line).encode())
+            # print (command + value + self.end_of_line)
         except SerialTimeoutException as e:
             print(e)
         sleep(0.5)
-        # print(response)
+        print(command + value)
         # return response
 
     def read(self):
@@ -201,9 +212,11 @@ class ObisLaser(LaserBase):
         response = ''
         while result := self.laser.readline():
             # print("Output: ",result)
+            # print(result.decode('ascii').strip('\r\n'))
             if result == b'OK\r\n':
                 # print('line is OK')
                 # result = "OK"
+                result = result.decode('ascii').strip('\r\n')
                 break
             # if result == b'OFF\r\n':
             #     print('line is OFF')
@@ -215,76 +228,65 @@ class ObisLaser(LaserBase):
                 # print('line is Error')
                 # result = "ERROR"
                 # Future error handling call TODO
-                # code = result.strip('ERR')
+                # result = result.strip('ERR')
                 # print(f"Error {code}: {errors[code]}.")
+                code = result.decode('ascii').strip('\r\n')
+                message = code.strip('ERR')
+                result = f"Error: {code}, Message: {errors[message]}"
                 break
-            response = result
+            # response = result
+            response = result.decode('ascii').strip('\r\n')
             
-        # Sleeps allowing serial commaction to finish???
-        # look into instead of using sleep make sure we get an OK or response we are expecting before we send anpother
+        # Sleeps allowing serial communicate to finish???
+        # look into instead of using sleep make sure we get an OK or response we are expecting before we send another
         # Fixing this would help speed up the code
         sleep(.5)
+        # print(type(result))
         print(f"Result: {result}, Resp: {response}")
         return result, response
 
     def testing(self):
-        print("We got here")
 
-        # self.send("SOURce:AM:STATe?")
+        # self.send_and_read(commands['l_state'])
+        # self.send_and_read(commands['l_current_power_level'])
+        # self.send_and_read(commands['set_power_level'], '.00200')
+        # self.send_and_read(commands['l_model'])
+        # self.send_and_read(commands['l_cabibration_date'])
+        # self.send_and_read(commands['l_serial_num'])
+        # self.send_and_read(commands['l_part_num'])
+        # self.send_and_read(commands['l_firmware_version'])
+        # self.send_and_read(commands['l_wavelength'])
+        # self.send_and_read(commands['l_power_rating'])
+        # self.send_and_read(commands['l_min_power'])
+        # self.send_and_read(commands['l_max_power'])
+        # self.send_and_read(commands['l_output_power_level'])
+        # self.send_and_read(commands['l_output_current'])
+        # self.send_and_read(commands['l_opperating_mode'])
+        # self.send_and_read(commands['l_current_power_level'])
+        # self.send_and_read(commands['l_status'])
+        # self.send_and_read(commands['l_state'])
+        # self.send_and_read(commands['l_system_fault'])
+
+        # self.send_and_read(commands['set_operating_mode_Int'], 'CWP')
+        # self.send_and_read(commands['l_opperating_mode'])
+        # self.send_and_read(commands['set_operating_mode_Ext'], 'DIGital')
+        # self.send_and_read(commands['l_opperating_mode'])
+        # self.send_and_read(commands['set_operating_mode_Ext'], 'ANALog')
+        # self.send_and_read(commands['l_opperating_mode'])
+        # self.send_and_read(commands['set_operating_mode_Ext'], 'MIXed')
+        # self.send_and_read(commands['l_opperating_mode'])
+
+        self.send_and_read(commands['set_analog_type'], '1')
+        self.send_and_read(commands['l_analog_type'])
+
+
+        # level = 0.02
+        # # Need to test this now
+        # self.send("SOURce:POWer:LEVel:IMMediate:AMPLitude %.5f" % level)
+        # # self.send("SOURce:POWer:LEVel:IMMediate:AMPLitude 0.20000 ")
         # # Sleeps allowing serial commaction to finish???
         # sleep(.5)
         # response = self.read()
-        # print("first done")
-
-        # self.send("SOURce:AM:STATe ONOFF")
-        # # Sleeps allowing serial commaction to finish???
-        # sleep(.5)
-        # response = self.read()
-        # print("second done")
-
-
-        # self.send("SOURce:AM:STATe OFF")
-        # # Sleeps allowing serial commaction to finish???
-        # sleep(.5)
-        # response = self.read()
-        # print("third done")
-
-
-        # self.send("SOURce:AM:STATe?")
-        # # Sleeps allowing serial commaction to finish???
-        # sleep(.5)
-        # response = self.read()
-        # print("forth done")
-
-        self.send("SOURce:POWer:LEVel:IMMediate:AMPLitude?")
-        # Sleeps allowing serial commaction to finish???
-        sleep(.5)
-        response = self.read()
-        print("fith done")
-
-        level = 0.002
-        # Need to test this now
-        self.send("SOURce:POWer:LEVel:IMMediate:AMPLitude %.5f" % level)
-        # self.send("SOURce:POWer:LEVel:IMMediate:AMPLitude 0.20000 ")
-        # Sleeps allowing serial commaction to finish???
-        sleep(.5)
-        response = self.read()
-        print("sixth done")
-
-        self.send("SOURce:POWer:LEVel:IMMediate:AMPLitude?")
-        # Sleeps allowing serial commaction to finish???
-        sleep(.5)
-        response = self.read()
-        print("seventh done")
-
-    # Testing the dictonary
-    def testingv2(self):
-        self.sendv2(commands['set_state'], 'ON')
-        response = self.read()
-
-        self.sendv2(commands['l_state'])
-        response = self.read()
-
 
 
     def askMachine(self, command):

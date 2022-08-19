@@ -57,6 +57,7 @@ def main():
         --config_file
         --experiment_file
         --etl_const_file
+        --restful_config_file
         --logging_config
 
     Examples
@@ -72,6 +73,7 @@ def main():
     configuration_path = Path.joinpath(configuration_directory, 'configuration.yml')
     experiment_path = Path.joinpath(configuration_directory, 'experiment.yml')
     etl_constants_path = Path.joinpath(configuration_directory, 'etl_constants.yml')
+    rest_api_path = Path.joinpath(configuration_directory, 'rest_api_config.yml')
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(description='Multiscale Microscope Command Line Arguments')
@@ -124,6 +126,13 @@ def main():
                                  'This file specifies the wavelength- and zoom-specific amplitude and offset '
                                  'of the ETL waveform generation.')
 
+    input_args.add_argument('--rest_api_file',
+                            type=Path,
+                            required=False,
+                            default=None,
+                            help='Non-default path to the rest_api_config.yml config file \n'
+                                 'This file specifies urls of restful api services.')
+
     input_args.add_argument('--logging_config',
                             type=Path,
                             required=False,
@@ -147,6 +156,10 @@ def main():
     if args.etl_const_file:
         assert args.etl_const_file.exists(), "etl_const_file Path {} not valid".format(args.etl_const_file)
         etl_constants_path = args.etl_const_file
+
+    if args.rest_api_file:
+        assert args.rest_api_file.exists(), "rest_api_file Path {} not valid".format(args.rest_api_file)
+        rest_api_path = args.rest_api_file
 
     # Creating Loggers etc., they exist globally so no need to pass
     if args.logging_config:
@@ -173,6 +186,7 @@ def main():
                configuration_path,
                experiment_path,
                etl_constants_path,
+               rest_api_path,
                use_gpu,
                args)
     root.mainloop()

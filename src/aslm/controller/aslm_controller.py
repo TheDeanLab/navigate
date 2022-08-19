@@ -99,6 +99,7 @@ class ASLM_controller:
                  configuration_path,
                  experiment_path,
                  etl_constants_path,
+                 rest_api_path,
                  use_gpu,
                  args):
         
@@ -117,6 +118,7 @@ class ASLM_controller:
                                         configuration_path=configuration_path,
                                         experiment_path=experiment_path,
                                         etl_constants_path=etl_constants_path,
+                                        rest_api_path=rest_api_path,
                                         event_queue=self.event_queue)
         logger.info(f"Spec - Configuration Path: {configuration_path}")
         logger.info(f"Spec - Experiment Path: {experiment_path}")

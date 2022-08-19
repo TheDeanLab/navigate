@@ -106,6 +106,7 @@ class Model:
                  configuration_path=None,
                  experiment_path=None,
                  etl_constants_path=None,
+                 rest_api_path=None,
                  event_queue=None):
 
         log_setup('model_logging.yml')
@@ -119,6 +120,9 @@ class Model:
 
         # Loads the YAML file for all of the ETL constants
         self.etl_constants = Configurator(etl_constants_path)
+
+        # Loads the YAML file for rest api urls
+        self.rest_api_config = Configurator(rest_api_path)
 
         # Initialize all Hardware
         if args.synthetic_hardware:

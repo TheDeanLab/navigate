@@ -109,6 +109,7 @@ class TiffDataSource(DataSource):
         self._current_frame += 1
 
         # Check if this was the last frame to write
+        # print("Switch")
         c, z, _, _ = self._cztp_indices(self._current_frame, self.metadata.per_stack)
         if (z==0) and (c==0):
             self.close()
@@ -135,6 +136,7 @@ class TiffDataSource(DataSource):
         self.image = []
         self.file_name = []
         self.uid = []
+        self._views = []
         position_directory = os.path.join(self.save_directory, f"Position{self._current_position}")
         if not os.path.exists(position_directory):
             os.mkdir(position_directory)

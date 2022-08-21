@@ -51,12 +51,10 @@ def tiff_write_read(is_ome=False, multiposition=False):
             os.remove(fn)
             dirs.append(os.path.dirname(fn))
         for dn in list(set(dirs)):
-            print(dn)
             os.rmdir(dn)
     except PermissionError:
         # Windows seems to think these files are still open
         pass
-
 
 def test_tiff_write_read():
     tiff_write_read(False)

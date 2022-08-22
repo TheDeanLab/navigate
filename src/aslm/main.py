@@ -36,6 +36,7 @@ from pathlib import Path
 import tkinter as tk
 import platform
 from aslm.log_files.log_functions import log_setup
+from aslm.config import get_configuration_paths
 
 # Local Imports
 from aslm.controller.aslm_controller import ASLM_controller as Controller
@@ -64,14 +65,8 @@ def main():
     python main.py --synthetic_hardware
     """
 
-    # Specify the Default Configuration File Directories (located in src/config)
-    base_directory = Path(__file__).resolve().parent
-    configuration_directory = Path.joinpath(base_directory, 'config')
-
-    # Full file paths.
-    configuration_path = Path.joinpath(configuration_directory, 'configuration.yml')
-    experiment_path = Path.joinpath(configuration_directory, 'experiment.yml')
-    etl_constants_path = Path.joinpath(configuration_directory, 'etl_constants.yml')
+    # Specify the Default Configuration paths
+    configuration_path, experiment_path, etl_constants_path = get_configuration_paths()
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(description='Multiscale Microscope Command Line Arguments')

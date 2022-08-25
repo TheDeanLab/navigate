@@ -93,6 +93,7 @@ class ZStackAcquisition:
         self.current_focus_position = 0
         self.need_to_move_new_position = True
         self.need_to_move_z_position = True
+        self.z_position_moved_time = 0
 
         self.stack_cycling_mode = 'per_stack'
         self.channels = [1]
@@ -207,7 +208,7 @@ class ZStackAcquisition:
             return True
         
         # decide whether to move X,Y,Theta
-        if self.z_position_moved_time > self.number_z_steps:
+        if self.z_position_moved_time >= self.number_z_steps:
             self.z_position_moved_time = 0
             # calculate first z, f position
             self.current_z_position = self.start_z_position + self.positions[self.current_position_idx]['z']

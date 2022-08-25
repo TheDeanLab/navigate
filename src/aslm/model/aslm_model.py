@@ -807,6 +807,9 @@ class Model:
             channel_idx = int(channel_key[prefix_len:])
             self.run_single_channel_acquisition_with_features(channel_idx)
 
+            if self.imaging_mode == 'z-stack':
+                break
+
     def snap_image(self, channel_key):
         r"""Acquire an image after updating the waveforms.
 
@@ -903,9 +906,10 @@ class Model:
             return
         
         self.signal_container.reset()
+        self.target_channel = target_channel
 
         while not self.signal_container.end_flag and not self.stop_send_signal and not self.stop_acquisition:
-            self.run_single_channel_acquisition(target_channel)
+            self.run_single_channel_acquisition(self.target_channel)
             if not hasattr(self, 'signal_container'):
                 return
     

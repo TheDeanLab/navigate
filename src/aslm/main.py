@@ -58,7 +58,7 @@ def main():
         --config_file
         --experiment_file
         --etl_const_file
-        --restful_config_file
+        --rest_api_file
         --logging_config
 
     Examples
@@ -67,7 +67,7 @@ def main():
     """
 
     # Specify the Default Configuration paths
-    configuration_path, experiment_path, etl_constants_path = get_configuration_paths()
+    configuration_path, experiment_path, etl_constants_path, rest_api_path = get_configuration_paths()
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(description='Multiscale Microscope Command Line Arguments')

@@ -402,7 +402,7 @@ class Camera_View_Controller(GUI_Controller):
                 # Update GUI
                 self.image_metrics['Image'].set(np.max(self.temp_array))
 
-    def down_sample_image(self, factor=4, fast=True):
+    def down_sample_image(self, factor=4, fast=False):
         r"""Down-sample the data for image display according to widget size.."""
         if fast:
             # Approx. 3800x faster than cv2.resize(), but no interpolation

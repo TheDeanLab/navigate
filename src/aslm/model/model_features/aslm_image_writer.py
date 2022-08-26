@@ -35,9 +35,11 @@ import os
 import logging
 
 # Third Party Imports
+# import numpy as np
 
 # Local imports
 from aslm.model.model_features import data_sources
+# from aslm.tools.image import text_array
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -92,7 +94,10 @@ class ImageWriter:
             Frame ID.
         """
         for idx in frame_ids:
-            self.data_source.write(self.model.data_buffer[idx],
+            # data = self.model.data_buffer[idx]
+            # text_im = text_array(f"Image {idx}")
+            # data[:text_im.shape[0], :text_im.shape[1]] += text_im.astype('uint16')*np.maximum(np.max(data)//2, 1)
+            self.data_source.write(self.model.data_buffer[idx],  # data,
                                    x=self.model.data_buffer_positions[idx][0],
                                    y=self.model.data_buffer_positions[idx][1],
                                    z=self.model.data_buffer_positions[idx][2],

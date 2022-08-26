@@ -23,7 +23,7 @@ class BigDataViewerMetadata(XMLMetadata):
         bdv_dict['SequenceDescription'] = {}
 
         ext = os.path.basename(file_name).split('.')[-1]
-        if ext == "hdf5":
+        if ext == "hdf":
             """
             <ImageLoader format="bdv.hdf5">
                 <hdf5 type="relative">dataset.h5</hdf5>
@@ -108,7 +108,7 @@ class BigDataViewerMetadata(XMLMetadata):
                         matrix_id = z + self.shape_z*c + p*self.shape_c*self.shape_z \
                                     + t*self.shape_c*self.shape_z*self.positions
                         # Construct centroid of volume matrix
-                        print(matrix_id, views[matrix_id])
+                        # print(matrix_id, views[matrix_id])
                         mat += self.stage_positions_to_affine_matrix(**views[matrix_id])/self.shape_z
                     d = {'timepoint': t, 'setup': view_id}
                     d['ViewTransform'] = {'type': 'affine'}

@@ -153,13 +153,18 @@ class Analysis:
                                        input_array,
                                        psf_support_diameter_xy):
 
-        dct_array = dctn(input_array, type=2, axes=(0,1))
-        abs_array = np.abs(dct_array / np.linalg.norm(dct_array))
-        image_entropy = -2 * (abs_array * np.log(abs_array)).sum() \
-                        / (input_array.shape[0] * input_array.shape[1] /
-                           (psf_support_diameter_xy * psf_support_diameter_xy))
+        axes = (0, 1)
+        sl = slice(None)
+        if input_array.ndim > 2:
+            axes = (1, 2)
+            sl = (slice(None), np.newaxis, np.newaxis)
 
-        return np.atleast_2d(image_entropy)
+        dct_array = dctn(input_array, type=2, axes=axes)
+        abs_array = np.abs(dct_array / np.atleast_1d(np.linalg.norm(dct_array, axis=axes))[sl])
+        image_entropy = -2 * np.nansum(abs_array * np.log(abs_array), axis=axes) \
+                        / np.prod([input_array.shape[x] / psf_support_diameter_xy for x in axes])
+
+        return np.atleast_1d(image_entropy)
 
     def estimate_image_resolution(self,
                                   input_array,

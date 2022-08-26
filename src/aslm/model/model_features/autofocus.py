@@ -118,7 +118,8 @@ class Autofocus():
     def pre_func_signal(self):
         settings = self.model.experiment.AutoFocusParameters
         # self.focus_pos = args[2]  # Current position
-        self.focus_pos = self.model.focus_pos # TODO: get focus position from model right now.
+        # self.focus_pos = self.model.focus_pos # TODO: get focus position from model right now.
+        self.focus_pos = self.model.get_stage_position()['f_pos']
         self.total_frame_num = self.get_autofocus_frame_num() #total frame num
         self.coarse_steps, self.init_pos = 0, 0
         if settings['fine_selected']:
@@ -177,7 +178,9 @@ class Autofocus():
                     break
             except:
                 break
-            entropy = self.model.analysis.normalized_dct_shannon_entropy(self.model.data_buffer[self.f_frame_id], 3)
+            # entropy = self.model.analysis.normalized_dct_shannon_entropy(self.model.data_buffer[self.f_frame_id], 3)
+            entropy = self.model.analysis.fast_normalized_dct_shannon_entropy(self.model.data_buffer[self.f_frame_id], 3)
+            # entropy = self.model.analysis.image_intensity(self.model.data_buffer[self.f_frame_id], 3)
 
             # print('entropy:', self.f_frame_id, self.frame_num, self.f_pos, entropy)
 

@@ -66,6 +66,29 @@ class Analysis:
     def __del__(self):
         pass
 
+    def image_intensity(self, input_array, psf_support_diameter_xy):
+        # Get Image Attributes
+        input_array = np.double(input_array)
+        image_dimensions = input_array.ndim
+
+        if image_dimensions == 2:
+            (image_height, image_width) = input_array.shape
+            number_of_images = 1
+        elif image_dimensions == 3:
+            (number_of_images, image_height, image_width) = input_array.shape
+        else:
+            raise ValueError("Only 2D and 3D Images Supported.")
+
+        #  Preallocate Array
+        entropy = np.zeros(number_of_images)
+
+        for image_idx in range(int(number_of_images)):
+            # Add entropy value to the entropy array
+            entropy[image_idx] = np.sum(input_array[image_idx,...])
+
+        return entropy
+
+
     def normalized_dct_shannon_entropy(self,
                                        input_array,
                                        psf_support_diameter_xy):
@@ -125,6 +148,18 @@ class Analysis:
             # Add entropy value to the entropy array
             entropy[image_idx] = image_entropy
         return entropy
+
+    def fast_normalized_dct_shannon_entropy(self,
+                                       input_array,
+                                       psf_support_diameter_xy):
+
+        dct_array = dctn(input_array, type=2, axes=(0,1))
+        abs_array = np.abs(dct_array / np.linalg.norm(dct_array))
+        image_entropy = -2 * (abs_array * np.log(abs_array)).sum() \
+                        / (input_array.shape[0] * input_array.shape[1] /
+                           (psf_support_diameter_xy * psf_support_diameter_xy))
+
+        return np.atleast_2d(image_entropy)
 
     def estimate_image_resolution(self,
                                   input_array,

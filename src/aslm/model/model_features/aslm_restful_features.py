@@ -37,6 +37,13 @@ from os.path import exists
 
 from aslm.model.aslm_model_config import Configurator
 
+def prepare_service(service_url, *kwargs):
+    service_url = service_url.rstrip('/')
+    if service_url.endswith('ilastik'):
+        r = requests.get(f"{service_url}/load?project={kwargs['project_file']}")
+        return r.status_code == 200
+    return False
+
 class IlastikSegmentation:
     def __init__(self, model):
         self.model = model
@@ -46,22 +53,13 @@ class IlastikSegmentation:
 
         self.config_table={'data': {'main': self.data_func}}
 
-    def prepare_segmentation(self):
-        if self.model.ilastik_project_file != self.project_file:
-            self.project_file = self.model.ilastik_project_file
-            if exists(self.project_file):
-                requests.get(f"{self.service_url}/load?project={self.project_file}")
-            else:
-                self.project_file = None
-        return self.project_file is not None
-
     def data_func(self, frame_ids):
-        # TODO: use process workers if more than one frames
-        img_data = base64.b64encode(self.model.data_buffer[idx] for idx in frame_ids)
+        # Ilastik process multiple images in sequence.
+        img_data = [base64.b64encode(self.model.data_buffer[idx]) for idx in frame_ids]
         json_data = {
             'dtype': 'uint16', 
             'shape': (self.model.img_height, self.model.img_width),
-            'image': img_data.decode('utf-8')
+            'image': [img.decode('utf-8') for img in img_data]
             }
 
         response = requests.post(f"{self.service_url}/segmentation", json=json_data, stream=True)

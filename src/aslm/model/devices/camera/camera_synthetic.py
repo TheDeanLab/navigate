@@ -94,7 +94,6 @@ class SyntheticCamera(CameraBase):
         self.current_frame_idx = None
         self.data_buffer = None
         self.num_of_frame = None
-        self.current_frame_idx = None
         self.pre_frame_idx = None
 
         if camera_id == 0:
@@ -219,7 +218,7 @@ class SyntheticCamera(CameraBase):
             frames = list(range(self.pre_frame_idx, self.num_of_frame))
             frames += list(range(0, self.current_frame_idx))
         self.pre_frame_idx = self.current_frame_idx
-        logger.debug(f"get a new frame from camera, {frames}")
+        logger.debug(f"Get a new frame from camera, {frames}")
         return frames
 
     def set_ROI(self, roi_height=2048, roi_width=2048):

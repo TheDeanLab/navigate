@@ -179,8 +179,6 @@ class ObisLaser(LaserBase):
         self.send(command, value)
         self.read()
 
-
-    # New version of ask() and moving it int two functions.
     # send() and read()
 
     def send(self, command, value=''):
@@ -193,6 +191,8 @@ class ObisLaser(LaserBase):
         print(command + value)
         # return response
 
+
+    #ToDo - Update with what might be needs to use the errors in the software or to log them
     def read(self):
         # this while loop fixed most of the blanking response issue
         response = ''
@@ -231,6 +231,8 @@ class ObisLaser(LaserBase):
         print(f"Result: {result}, Resp: {response}")
         return result, response
 
+
+    # funstion is as it descibles an is what was used to test all of the commands
     def testing(self):
 
         # self.send_and_read(commands['l_state'])
@@ -274,76 +276,6 @@ class ObisLaser(LaserBase):
         # sleep(.5)
         # response = self.read()
 
-
-    def askMachine(self, command):
-        self.send(command)
-        # Sleeps allowing serial commaction to finish???
-        sleep(.5)
-        response = self.read()
-
-    def updateMachine(self, command, value):
-        command = command + value
-        self.send(command)
-        # Sleeps allowing serial commaction to finish???
-        sleep(.5)
-        response = self.read()
-
-
-    
-
-
-    # old code below this line
-    # dont worry about any code below this point as Tanner will clean it up when it is all working
-
-    """
-    # System Information Queries
-    """
-
-    def get_laser_model(self):
-        """
-        # Get the laser model.
-        """
-        command = "SYSTem:INFormation:MODel?"
-        laser_model = self.ask(command)
-        if self.verbose:
-            print("Laser Model:", laser_model)
-        # self.laser_model = laser_model
-        return laser_model
-
-    def get_laser_calibration_date(self):
-        """
-        # Get the laser calibration date
-        """
-        command = "SYSTem:INFormation:CDATe?"
-        laser_calibration_date = self.ask(command)
-        if self.verbose:
-            print("Laser Calibration Date:", laser_calibration_date)
-        # self.laser_calibration_date = laser_calibration_date
-        return laser_calibration_date
-    
-    def get_laser_serial_number(self):
-        """
-        # System Serial Number Query
-        Retrieves the serial number of the laser.
-        """
-        command = "SYSTem:INFormation:SNUMber?"
-        laser_serial_number = self.ask(command)
-        if self.verbose:
-            print("Laser Serial Number:", laser_serial_number)
-        # self.laser_serial_number = laser_serial_number
-        return laser_serial_number
-
-    def get_laser_part_number(self):
-        """
-        # System Part Number Query
-        Retrieves the manufacturer part number of the laser. 
-        """
-        command = "SYSTem:INFormation:PNUMber?"
-        laser_part_number = self.ask(command)
-        if self.verbose:
-            print("Laser Part Number:", laser_part_number)
-        # self.laser_part_number = laser_part_number
-        return laser_part_number
 
 
 

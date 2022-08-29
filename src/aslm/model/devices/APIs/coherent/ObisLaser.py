@@ -128,7 +128,7 @@ class ObisLaser(LaserBase):
     Useful information can be found on Page C-22 of the OBIS_LX_LS Operators Manual
     """
 
-    # took at verbose but you might have to change the com port as you use it
+    # took out verbose but you might have to change the com port as you use it
     def __init__(self, port='COM28'):
     # def __init__(self, port='COM4'):
         self.timeout = 0.05

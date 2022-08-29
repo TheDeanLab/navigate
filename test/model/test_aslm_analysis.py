@@ -41,6 +41,45 @@ import pytest
 # Local Imports
 # sys.path.append('../../../')
 
+def box(size):
+    x = np.linspace(0,1,100)
+    X, Y = np.meshgrid(x,x)
+    l = (1-size)/2
+    u = l +  size
+    image = (X > l) & (X < u) & (Y > l) & (Y < u)
+    return image.astype(float)
+
+def power_tent(r, off, scale, sigma, alpha):
+    return off + scale*(1-np.abs(sigma*r)**alpha)
+
+def power_tent_res(x, r, val):
+    return power_tent(r, *x)-val
+
+def power_tent_rsq(x, r, val):
+    ss_err = (power_tent_res(x,r,val)**2).sum()
+    ss_tot = ((val-val.mean())**2).sum()
+    rsq = 1 - (ss_err/ss_tot)
+    return rsq
+
+def test_fast_normalized_dct_shannon_entropy_tent():
+    from scipy.ndimage import gaussian_filter
+    from scipy.optimize import least_squares
+
+    from aslm.model.aslm_analysis import Analysis
+
+    anal = Analysis()
+
+    im = box(0.5)
+
+    r = range(0,60)
+    points = np.zeros((len(r),))
+    for i in r:
+        points[i] = anal.fast_normalized_dct_shannon_entropy(gaussian_filter(im,i),1)[0]
+        
+    res = least_squares(power_tent_res, [np.min(points),np.max(points),1,0.5], args=(r,points))
+
+    assert(power_tent_rsq(res.x, r, points) > 0.9)
+
 def test_fast_normalized_dct_shannon_entropy():
     from aslm.model.aslm_analysis import Analysis
 

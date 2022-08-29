@@ -161,7 +161,7 @@ class Analysis:
 
         dct_array = dctn(input_array, type=2, axes=axes)
         abs_array = np.abs(dct_array / np.atleast_1d(np.linalg.norm(dct_array, axis=axes))[sl])
-        image_entropy = -2 * np.nansum(abs_array * np.log(abs_array), axis=axes) \
+        image_entropy = -2 * np.nansum(abs_array * np.log2(abs_array), axis=axes) \
                         / np.prod([input_array.shape[x] / psf_support_diameter_xy for x in axes])
 
         return np.atleast_1d(image_entropy)

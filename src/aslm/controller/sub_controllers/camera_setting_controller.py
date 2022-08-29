@@ -43,15 +43,15 @@ class Camera_Setting_Controller(GUI_Controller):
             self,
             view,
             parent_controller=None,
-            verbose=False,
             configuration_controller=None):
-        super().__init__(view, parent_controller, verbose)
+        super().__init__(view, parent_controller)
 
         # default values
         self.in_initialization = True
         self.resolution_value = '1x'
         self.number_of_pixels = 10
         self.mode = 'stop'
+        self.solvent = 'BABB'
 
         # Getting Widgets/Buttons
         self.mode_widgets = view.camera_mode.get_widgets()
@@ -60,6 +60,11 @@ class Camera_Setting_Controller(GUI_Controller):
         self.roi_btns = view.camera_roi.get_buttons()
 
         # initialize
+        self.default_pixel_size = None
+        self.default_width, self.default_height = None, None
+        self.trigger_source = None
+        self.trigger_active = None
+        self.readout_speed = None
         self.initialize(configuration_controller)
 
         # Event binding
@@ -134,6 +139,7 @@ class Camera_Setting_Controller(GUI_Controller):
         # Center position
         self.roi_widgets['Center_X'].widget['state'] = 'disabled'
         self.roi_widgets['Center_Y'].widget['state'] = 'disabled'
+
         # FOV
         self.roi_widgets['FOV_X'].widget['state'] = 'disabled'
         self.roi_widgets['FOV_Y'].widget['state'] = 'disabled'
@@ -146,7 +152,7 @@ class Camera_Setting_Controller(GUI_Controller):
 
         Parameters
         ----------
-        experiment : Session
+        experiment : Configurator
             Configuration of the experimental settings.
         """
         self.in_initialization = True
@@ -296,24 +302,39 @@ class Camera_Setting_Controller(GUI_Controller):
         for btn_name in self.roi_btns:
             self.roi_btns[btn_name]['state'] = state
         
-    def calculate_physical_dimensions(self, resolution_value):
+    def calculate_physical_dimensions(self, magnification):
         """
         Calculates the size of the field of view according to the magnification of the system,
         the physical size of the pixel, and the number of pixels.
         update FOV_X and FOV_Y
 
-        TODO: Stop hardcoding things.  This could be pulled in a microscope specific configuration.
-        54-12-8: EFLobj = 12.19 mm / RI
-
+        TODO: Should make sure that this is updated before we run the tiling wizard.  Also can probably be done more
+        elegantly in a configuration file and dictionary structure.
         """
-        if resolution_value == 'high':
+        # magnification == 'N/A' is a proxy for resolution == 'high'
+        if (magnification == 'N/A') or (magnification == 'high'):
+            # 54-12-8 - EFLobj = 12.19 mm / RI
             tube_lens_focal_length = 300
             extended_focal_length = 12.19
-            refractive_index = 1.56
+            if self.solvent == 'BABB':
+                refractive_index = 1.56
+            elif self.solvent == 'Water':
+                refractive_index = 1.333
+            elif self.solvent == 'CUBIC':
+                refractive_index = 1.48
+            elif self.solvent == 'CLARITY':
+                refractive_index = 1.45
+            elif self.solvent == 'uDISCO':
+                refractive_index = 1.56
+            elif self.solvent == 'eFLASH':
+                refractive_index = 1.458
+            else:
+                # Default unknown value - Specified as mid-range.
+                refractive_index = 1.45
+
             multi_immersion_focal_length = extended_focal_length/refractive_index
             magnification = tube_lens_focal_length / multi_immersion_focal_length
         else:
-            magnification = resolution_value
             magnification = float(magnification[:-1])
 
         pixel_size = self.default_pixel_size

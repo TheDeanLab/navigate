@@ -75,16 +75,14 @@ class SyntheticCamera(CameraBase):
     ----------
     camera_id : int
         Selects which camera to connect to (0, 1, ...).
-    configuration : Session
+    configuration : Configurator
         Global configuration of the microscope
-    experiment : Session
+    experiment : Configurator
         Experiment configuration of the microscope
-    verbose : bool
-        Verbosity
 
     """
-    def __init__(self, camera_id, configuration, experiment, verbose=False):
-        super().__init__(camera_id, configuration, experiment, verbose)
+    def __init__(self, camera_id, configuration, experiment):
+        super().__init__(camera_id, configuration, experiment)
 
         self.x_pixels = experiment.CameraParameters['x_pixels']
         self.y_pixels = experiment.CameraParameters['y_pixels']
@@ -96,7 +94,6 @@ class SyntheticCamera(CameraBase):
         self.current_frame_idx = None
         self.data_buffer = None
         self.num_of_frame = None
-        self.current_frame_idx = None
         self.pre_frame_idx = None
 
         if camera_id == 0:
@@ -221,7 +218,7 @@ class SyntheticCamera(CameraBase):
             frames = list(range(self.pre_frame_idx, self.num_of_frame))
             frames += list(range(0, self.current_frame_idx))
         self.pre_frame_idx = self.current_frame_idx
-        logger.debug(f"get a new frame from camera, {frames}")
+        logger.debug(f"Get a new frame from camera, {frames}")
         return frames
 
     def set_ROI(self, roi_height=2048, roi_width=2048):

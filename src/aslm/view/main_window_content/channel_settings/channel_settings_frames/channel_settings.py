@@ -119,7 +119,7 @@ class channel_creator(ttk.Labelframe):
             #  Laser Dropdowns
             self.laser_variables.append(tk.StringVar())
             self.laser_pulldowns.append(ttk.Combobox(self.frame_columns[1],
-                                                     textvariable=self.laser_variables[num], width=8))
+                                                     textvariable=self.laser_variables[num], width=6))
             self.laser_pulldowns[num].state(["readonly"])
             self.laser_pulldowns[num].grid(row=num+1, column=0, sticky=tk.NSEW, padx=1, pady=1)
 
@@ -133,26 +133,26 @@ class channel_creator(ttk.Labelframe):
             #  FilterWheel Dropdowns
             self.filterwheel_variables.append(tk.StringVar())
             self.filterwheel_pulldowns.append(ttk.Combobox(self.frame_columns[3],
-                                                           textvariable=self.filterwheel_variables[num], width=22))
+                                                           textvariable=self.filterwheel_variables[num], width=10))
             self.filterwheel_pulldowns[num].state(["readonly"])
             self.filterwheel_pulldowns[num].grid(row=num+1, column=0, sticky=tk.NSEW, padx=1, pady=1)
 
             #  Exposure Time Spinboxes
             self.exptime_variables.append(tk.StringVar())
             self.exptime_pulldowns.append(ttk.Spinbox(self.frame_columns[4], from_=0, to=5000.0,
-                                                      textvariable=self.exptime_variables[num], increment=25, width=12, font=Font(size=11)))
+                                                      textvariable=self.exptime_variables[num], increment=25, width=5, font=Font(size=11)))
             self.exptime_pulldowns[num].grid(row=num+1, column=0, sticky=tk.NSEW, padx=1, pady=1)
 
             #  Time Interval Spinboxes
             self.interval_variables.append(tk.StringVar())
             self.interval_spins.append(ttk.Spinbox(self.frame_columns[5], from_=0, to=5000.0,
-                                                   textvariable=self.interval_variables[num], increment=1, width=6, font=Font(size=11)))
+                                                   textvariable=self.interval_variables[num], increment=1, width=3, font=Font(size=11)))
             self.interval_spins[num].grid(row=num+1, column=0, sticky=tk.NSEW, padx=1, pady=1)
 
             # Defocus Spinbox
             self.defocus_variables.append(tk.DoubleVar())
             self.defocus_spins.append(ValidatedSpinbox(self.frame_columns[6], from_=0.0, to=200.0,
-                                                  textvariable=self.defocus_variables[num], increment=0.1, width=6, font=Font(size=11)))
+                                                  textvariable=self.defocus_variables[num], increment=0.1, width=4, font=Font(size=11)))
             self.defocus_spins[num].grid(row=num+1, column=0, sticky=tk.NSEW, padx=1, pady=1)
 
 

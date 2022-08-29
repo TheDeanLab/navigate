@@ -59,8 +59,6 @@ class Tiling_Wizard_Controller(GUI_Controller):
         GUI element containing widgets and variables to control. Likely tk.Toplevel-derived. In this case tiling_wizard_popup.py
     parent_controller : channels_tab_controller
         The controller that creates the popup/this controller.
-    verbose : bool, default False
-        Display additional feedback in standard output.
 
     Returns
     -------
@@ -69,9 +67,8 @@ class Tiling_Wizard_Controller(GUI_Controller):
 
     def __init__(self,
                  view,
-                 parent_controller,
-                 verbose=False):
-        super().__init__(view, parent_controller, verbose)
+                 parent_controller):
+        super().__init__(view, parent_controller)
 
         # Getting widgets and buttons and vars of widgets
         self.widgets = self.view.get_widgets()
@@ -95,8 +92,8 @@ class Tiling_Wizard_Controller(GUI_Controller):
         main_view = self.parent_controller.parent_controller.view  # channels_tab_controller -> aslm_controller -> view
         self.cam_settings_widgets = main_view.settings.camera_settings_tab.camera_roi.get_widgets()
         self.stack_acq_widgets = main_view.settings.channels_tab.stack_acq_frame.get_widgets()
-        self.stage_position_vars = main_view.stage_control.stage_control_tab.position_frame.get_variables()
-        self.multipoint_table = main_view.settings.channels_tab.multipoint_list.get_table()
+        self.stage_position_vars = main_view.settings.stage_control_tab.position_frame.get_variables()
+        self.multipoint_table = main_view.settings.multiposition_tab.multipoint_list.get_table()
 
         # Setting/Tracing Percent Overlay
         # Overlay change is also handled in update_overlay

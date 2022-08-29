@@ -41,6 +41,17 @@ import pytest
 # Local Imports
 # sys.path.append('../../../')
 
+def test_fast_normalized_dct_shannon_entropy():
+    from aslm.model.aslm_analysis import Analysis
+
+    anal = Analysis()
+
+    image_array = np.ones((np.random.randint(1,4),128,128)).squeeze()
+    psf_support_diameter_xy = np.random.randint(3, 10)
+
+    entropy = anal.fast_normalized_dct_shannon_entropy(image_array, psf_support_diameter_xy)
+
+    assert(np.all(entropy == 0))
 
 """
 Delete the below assert once the calculate entropy function is found

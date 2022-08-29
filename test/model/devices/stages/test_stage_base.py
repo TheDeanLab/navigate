@@ -38,7 +38,7 @@ from pathlib import Path
 
 # Local Imports
 from aslm.model.devices.stages.stage_base import StageBase
-from aslm.model.aslm_model_config import Session as session
+from aslm.model.aslm_model_config import Configurator
 
 
 class TestZoomBase(unittest.TestCase):
@@ -50,11 +50,10 @@ class TestZoomBase(unittest.TestCase):
         configuration_path = Path.joinpath(configuration_directory, 'configuration.yml')
 
         # Instantiate the stage_base class
-        configuration = session(configuration_path, False)
-        stage_base = StageBase(configuration, False)
+        configuration = Configurator(configuration_path)
+        stage_base = StageBase(configuration)
 
         assert hasattr(stage_base, 'configuration')
-        assert hasattr(stage_base, 'verbose')
         assert hasattr(stage_base, 'x_pos')
         assert hasattr(stage_base, 'y_pos')
         assert hasattr(stage_base, 'z_pos')

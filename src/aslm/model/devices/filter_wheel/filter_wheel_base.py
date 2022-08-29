@@ -59,8 +59,6 @@ class FilterWheelBase:
         Number of installed filter wheels.
     wheel_position : int
         Default filter wheel position
-    verbose : bool
-        Verbosity
     wait_until_done_delay = float
         Duration of time to wait for a filter wheel change.
     wait_until_done = bool
@@ -72,13 +70,12 @@ class FilterWheelBase:
         Checks to see if filter name exists in the filter dictionary.
     """
 
-    def __init__(self, model, verbose):
+    def __init__(self, model):
         self.comport = model.FilterWheelParameters['filter_wheel_port']
         self.baudrate = model.FilterWheelParameters['baudrate']
         self.filter_dictionary = model.FilterWheelParameters['available_filters']
         self.number_of_filter_wheels = model.FilterWheelParameters['number_of_filter_wheels']
         self.wheel_position = 0
-        self.verbose = verbose
         self.wait_until_done_delay = 0.03
         self.wait_until_done = True
 

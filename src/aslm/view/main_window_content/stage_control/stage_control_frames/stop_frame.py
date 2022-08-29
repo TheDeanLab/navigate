@@ -59,8 +59,8 @@ class stop_frame(ttk.Frame):
             bg='red',
             fg='white',
             text="STOP",
-            width=20,
-            height=10
+            width=10,
+            height=5
         )
 
         # Gridding out buttons

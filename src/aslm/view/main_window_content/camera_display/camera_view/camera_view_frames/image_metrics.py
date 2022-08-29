@@ -66,19 +66,20 @@ class image_metrics(ttk.Labelframe):
                                                         label=self.labels[i],
                                                         input_class=ttk.Spinbox,
                                                         input_var=tk.IntVar(),
-                                                        input_args={'from_':1, 'to':20, 'increment':1, 'width':9},
+                                                        input_args={'from_':1, 'to':20, 'increment':1, 'width':5},
                                                         label_pos="top"
                                                         )
-                self.inputs[self.names[i]].grid(row=0, column=i, sticky=(tk.NSEW), padx=5, pady=3)
+                self.inputs[self.names[i]].grid(row=i, column=0, sticky=(tk.NSEW), padx=5, pady=3)
             if i > 0:
                 self.inputs[self.names[i]] = LabelInput(parent=self,
                                                         label=self.labels[i],
                                                         input_class=ttk.Entry,
                                                         input_var=tk.IntVar(),
-                                                        input_args={'width':15},
+                                                        input_args={'width':5},
                                                         label_pos="top"
                                                         )
-                self.inputs[self.names[i]].grid(row=0, column=i, sticky=(tk.NSEW), padx=5, pady=3)
+                self.inputs[self.names[i]].grid(row=i, column=0, sticky=(tk.NSEW), padx=5, pady=3)
+                self.inputs[self.names[i]].configure(width=5)
 
     def get_variables(self):
         """

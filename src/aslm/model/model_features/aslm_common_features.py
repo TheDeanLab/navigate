@@ -35,7 +35,8 @@ class ChangeResolution:
     def __init__(self, model, resolution_mode='high'):
         self.model = model
 
-        self.config_table={'signal': {'main': self.signal_func}}
+        self.config_table={'signal': {'main': self.signal_func},
+                           'node': {'device_related': True}}
 
         self.resolution_mode = resolution_mode
 
@@ -66,8 +67,8 @@ class Snap:
 
         self.config_table={'data': {'main': self.data_func}}
 
-    def data_func(self, *args):
-        print('the camera is:', self.model.camera.serial_number, self.model.frame_id)
+    def data_func(self, frame_ids):
+        print('the camera is:', self.model.camera.serial_number, frame_ids, self.model.frame_id)
         return True
 
     def generate_meta_data(self, *args):
@@ -81,9 +82,7 @@ class ZStackAcquisition:
 
         self.number_z_steps = 0
         self.start_z_position = 0
-        self.end_z_position = 0
         self.start_focus = 0
-        self.end_focus = 0
         self.z_step_size = 0
         self.focus_step_size = 0
         self.timepoints = 0
@@ -93,6 +92,11 @@ class ZStackAcquisition:
         self.current_z_position = 0
         self.current_focus_position = 0
         self.need_to_move_new_position = True
+        self.need_to_move_z_position = True
+        self.z_position_moved_time = 0
+
+        self.stack_cycling_mode = 'per_stack'
+        self.channels = [1]
 
         self.config_table = {'signal': {'init': self.pre_signal_func,
                                         'main': self.signal_func,
@@ -103,15 +107,21 @@ class ZStackAcquisition:
     def pre_signal_func(self):
         microscope_state = self.model.experiment.MicroscopeState
 
+        self.stack_cycling_mode = microscope_state['stack_cycling_mode']
+        # get available channels
+        prefix_len = len('channel_')
+        self.channels = [int(channel_key[prefix_len:]) for channel_key in microscope_state['channels']]
+        self.current_channel_in_list = 0
+
         self.number_z_steps = int(microscope_state['number_z_steps'])
 
         self.start_z_position = float(microscope_state['start_position'])
-        self.end_z_position = float(microscope_state['end_position'])
-        self.z_step_size = (self.end_z_position - self.start_z_position) / self.number_z_steps
+        end_z_position = float(microscope_state['end_position'])
+        self.z_step_size = float(microscope_state['step_size'])
         
         self.start_focus = float(microscope_state['start_focus'])
-        self.end_focus = float(microscope_state['end_focus'])
-        self.focus_step_size = (self.end_focus - self.start_focus) / self.number_z_steps
+        end_focus = float(microscope_state['end_focus'])
+        self.focus_step_size = (end_focus - self.start_focus) / self.number_z_steps
         
         self.timepoints = int(microscope_state['timepoints'])
 
@@ -128,10 +138,11 @@ class ZStackAcquisition:
                     }
                 })
         self.current_position_idx = 0
-        self.current_z_position = 0
-        self.current_focus_position = 0
         self.z_position_moved_time = 0
         self.need_to_move_new_position = True
+        self.need_to_move_z_position = True
+        self.current_z_position = self.start_z_position + self.positions[self.current_position_idx]['z']
+        self.current_focus_position = self.start_focus + self.positions[self.current_position_idx]['f']
 
         self.restore_z = -1
 
@@ -158,30 +169,36 @@ class ZStackAcquisition:
             self.model.pause_data_event.set()
             self.model.pause_data_ready_lock.release()
             
-            self.z_position_moved_time = 0
-            # calculate first z, f position
-            self.current_z_position = self.start_z_position + self.positions[self.current_position_idx]['z']
-            self.current_focus_position = self.start_focus + self.positions[self.current_position_idx]['f']
-            # move to next position
-            self.current_position_idx += 1
+            # self.z_position_moved_time = 0
+            # # calculate first z, f position
+            # self.current_z_position = self.start_z_position + self.positions[self.current_position_idx]['z']
+            # self.current_focus_position = self.start_focus + self.positions[self.current_position_idx]['f']
 
-        # move z, f
-        self.model.pause_data_ready_lock.acquire()
-        self.model.ask_to_pause_data_thread = True
-        self.model.pause_data_ready_lock.acquire()
+        if self.need_to_move_z_position:
+            # move z, f
+            self.model.pause_data_ready_lock.acquire()
+            self.model.ask_to_pause_data_thread = True
+            self.model.pause_data_ready_lock.acquire()
 
-        self.model.move_stage({'z_abs': self.current_z_position, 'f_abs': self.current_focus_position}, wait_until_done=True)
+            self.model.move_stage({'z_abs': self.current_z_position, 'f_abs': self.current_focus_position}, wait_until_done=True)
 
-        self.model.ask_to_pause_data_thread = False
-        self.model.pause_data_event.set()
-        self.model.pause_data_ready_lock.release()
+            self.model.ask_to_pause_data_thread = False
+            self.model.pause_data_event.set()
+            self.model.pause_data_ready_lock.release()
 
-        # next z, f position
-        self.current_z_position += self.z_step_size
-        self.current_focus_position += self.focus_step_size
+        if self.stack_cycling_mode != 'per_stack':
+            # update channel for each z position in 'per_slice'
+            self.update_channel()
+            self.need_to_move_z_position = (self.current_channel_in_list == 0)
 
-        # update z position moved time
-        self.z_position_moved_time += 1
+        # in 'per_slice', move to next z position if all the channels have been acquired
+        if self.need_to_move_z_position:
+            # next z, f position
+            self.current_z_position += self.z_step_size
+            self.current_focus_position += self.focus_step_size
+
+            # update z position moved time
+            self.z_position_moved_time += 1
 
         return True
 
@@ -191,9 +208,26 @@ class ZStackAcquisition:
             return True
         
         # decide whether to move X,Y,Theta
-        if self.z_position_moved_time > self.number_z_steps:
-            self.need_to_move_new_position = True
-            if self.current_position_idx == len(self.positions):
+        if self.z_position_moved_time >= self.number_z_steps:
+            self.z_position_moved_time = 0
+            # calculate first z, f position
+            self.current_z_position = self.start_z_position + self.positions[self.current_position_idx]['z']
+            self.current_focus_position = self.start_focus + self.positions[self.current_position_idx]['f']
+
+            # after running through a z-stack, update channel
+            if self.stack_cycling_mode == 'per_stack':
+                self.update_channel()
+                # if run through all the channels, move to next position
+                if self.current_channel_in_list == 0:
+                    self.need_to_move_new_position = True
+            else:
+                self.need_to_move_new_position = True
+
+            if self.need_to_move_new_position:
+                # move to next position
+                self.current_position_idx += 1
+            
+            if self.need_to_move_new_position and self.current_position_idx == len(self.positions):
                 self.timepoints -= 1
                 self.current_position_idx = 0
 
@@ -207,6 +241,10 @@ class ZStackAcquisition:
     def generate_meta_data(self, *args):
         # print('This frame: z stack', self.model.frame_id)
         return True
+
+    def update_channel(self):
+        self.current_channel_in_list = (self.current_channel_in_list+1) % len(self.channels)
+        self.model.target_channel = self.channels[self.current_channel_in_list]
 
 
 class FindTissueSimple2D:

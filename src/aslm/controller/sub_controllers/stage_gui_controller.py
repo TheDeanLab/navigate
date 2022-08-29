@@ -38,8 +38,14 @@ logger = logging.getLogger(p)
 
 
 class Stage_GUI_Controller(GUI_Controller):
-    def __init__(self, view, main_view, canvas, parent_controller, verbose=False, configuration_controller=None):
-        super().__init__(view, parent_controller, verbose)
+    def __init__(self,
+                 view,
+                 main_view,
+                 canvas,
+                 parent_controller,
+                 configuration_controller=None):
+        super().__init__(view,
+                         parent_controller)
 
         self.main_view = main_view
         self.canvas = canvas
@@ -53,22 +59,20 @@ class Stage_GUI_Controller(GUI_Controller):
         }
 
         # stage movement limits
-        # TODO: Should not be hard coded.
         self.position_min = {
-            'x': 0,
-            'y': 0,
-            'z': 0,
-            'theta': 0,
-            'f': 0
+            'x': self.parent_controller.configuration.StageParameters['x_min'],
+            'y': self.parent_controller.configuration.StageParameters['y_min'],
+            'z': self.parent_controller.configuration.StageParameters['z_min'],
+            'theta': self.parent_controller.configuration.StageParameters['theta_min'],
+            'f': self.parent_controller.configuration.StageParameters['f_min']
         }
 
-        # TODO: Should not be hard coded.
         self.position_max = {
-            'x': 10000,
-            'y': 10000,
-            'z': 10000,
-            'theta': 10000,
-            'f': 10000
+            'x': self.parent_controller.configuration.StageParameters['x_max'],
+            'y': self.parent_controller.configuration.StageParameters['y_max'],
+            'z': self.parent_controller.configuration.StageParameters['z_max'],
+            'theta': self.parent_controller.configuration.StageParameters['theta_max'],
+            'f': self.parent_controller.configuration.StageParameters['f_max']
         }
 
         # variables
@@ -124,6 +128,8 @@ class Stage_GUI_Controller(GUI_Controller):
         char = event.char.lower()
         if char in ['w', 'a', 's', 'd']:
             current_position = self.get_position()
+            if current_position is None:
+                return
             xy_increment = self.widget_vals["xy_step"].get()
             if char == "w":
                 current_position['y'] += xy_increment
@@ -141,7 +147,7 @@ class Stage_GUI_Controller(GUI_Controller):
         Parameters
         ----------
         config : object
-            ASLM_Configuration_Controller - config.configuration is Session instance of configuration.
+            ASLM_Configuration_Controller - config.configuration is Configurator instance of configuration.
         """
         self.position_min = config.get_stage_position_limits('_min')
         self.position_max = config.get_stage_position_limits('_max')

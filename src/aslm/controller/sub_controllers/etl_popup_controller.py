@@ -46,8 +46,13 @@ logger = logging.getLogger(p)
 
 # TODO: Should we rename to remote_focus_popup_controller?
 class Etl_Popup_Controller(GUI_Controller):
-    def __init__(self, view, parent_controller, remote_focus_dict, etl_file_name, configuration_dict, galvo_dict,
-                 verbose=False):
+    def __init__(self,
+                 view,
+                 parent_controller,
+                 remote_focus_dict,
+                 etl_file_name,
+                 configuration_dict,
+                 galvo_dict):
         """
         Controller for remote focus parameters.
 
@@ -65,14 +70,13 @@ class Etl_Popup_Controller(GUI_Controller):
             Dictionary containing microscope hardware configuration, such as voltage limits for remote focus hardware.
         galvo_dict : dict
             Dictionary containing galvo frequency, amplitude, offset. From the experiment dictionary.
-        verbose : bool, default False
-            Display additional feedback in standard output.
+
 
         Returns
         -------
         None
         """
-        super().__init__(view, parent_controller, verbose)
+        super().__init__(view, parent_controller)
 
         self.resolution_info = remote_focus_dict
         self.configuration = configuration_dict
@@ -268,11 +272,9 @@ class Etl_Popup_Controller(GUI_Controller):
             # Will only run code if value in constants does not match whats in GUI for Amp or Off AND in Live mode
             # TODO: Make also work in the 'single' acquisition mode.
             variable_value = variable.get()
-            print("ETL Amplitude/Offset Changed: ", variable_value)
+            logger.debug(f"ETL Amplitude/Offset Changed pre if statement: {variable_value}")
             if value != variable_value and variable_value != '' and (self.mode == 'live' or self.mode == 'stop'):
                 self.resolution_info.ETLConstants[self.resolution][self.mag][laser][etl_name] = variable_value
-                if self.verbose:
-                    print("ETL Amplitude/Offset Changed: ", variable_value)
                 logger.debug(f"ETL Amplitude/Offset Changed:, {variable_value}")
                 # tell parent controller (the device)
                 event_id_name = self.resolution + '_' + self.mag
@@ -304,11 +306,9 @@ class Etl_Popup_Controller(GUI_Controller):
                 # Special case for galvo amplitude not being defined
                 value = 0
             variable_value = variable.get()
-            print(f"Galvo parameter {galvo_parameter} changed: {variable_value}")
+            logger.debug(f"Galvo parameter {galvo_parameter} changed: {variable_value} pre if statement")
             if value != variable_value and variable_value != '' and (self.mode == 'live' or self.mode == 'stop'):
                 self.galvo_setting[galvo_parameter] = variable.get()
-                if self.verbose:
-                    print(f"Galvo parameter {galvo_parameter} changed: {variable_value}")
                 logger.debug(f"Galvo parameter {galvo_parameter} changed: {variable_value}")
                 event_id_name = galvo_parameter
                 try:
@@ -329,9 +329,9 @@ class Etl_Popup_Controller(GUI_Controller):
         TODO: This currently does not save the galvo parameters, even though they are controlled here.
               Right now, these must be saved in the experiment file separately.
         """
-        errors = self.get_errors()
-        if errors:
-            return  # Dont save if any errors TODO needs testing
+        # errors = self.get_errors()
+        # if errors:
+        #     return  # Dont save if any errors TODO needs testing
 
         save_yaml_file('', self.resolution_info.serialize(), self.etl_file_name)
 
@@ -340,15 +340,15 @@ class Etl_Popup_Controller(GUI_Controller):
     is supposed to have validation then the config cannot be saved.
     """
     # TODO needs testing may also need to be moved to the remote_focus_popup class. Opinions welcome
-    def get_errors(self):
-        """
-        Get a list of field errors in popup
-        """
+    # def get_errors(self):
+    #     """
+    #     Get a list of field errors in popup
+    #     """
 
-        errors = {}
-        for key, labelInput in self.widgets.items():
-            if hasattr(labelInput.widget, 'trigger_focusout_validation'):
-                labelInput.widget.trigger_focusout_validation()
-            if labelInput.error.get():
-                errors[key] = labelInput.error.get()
-        return errors
+    #     errors = {}
+    #     for key, labelInput in self.widgets.items():
+    #         if hasattr(labelInput.widget, 'trigger_focusout_validation'):
+    #             labelInput.widget.trigger_focusout_validation()
+    #         if labelInput.error.get():
+    #             errors[key] = labelInput.error.get()
+    #     return errors

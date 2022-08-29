@@ -46,10 +46,12 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class stage_control_tab(ttk.Frame):
+class stage_control_tab(tk.Frame):
     def __init__(self, note3, *args, **kwargs):
         # Init Frame
-        ttk.Frame.__init__(self, note3, *args, **kwargs)
+        tk.Frame.__init__(self, note3, *args, **kwargs)
+
+        self.index = 2
         
         # Formatting
         tk.Grid.columnconfigure(self, 'all', weight=1)
@@ -112,15 +114,18 @@ class stage_control_tab(ttk.Frame):
         tk.Grid.rowconfigure(self.stop_frame, 'all', weight=1)
         
         # Gridding out frames
-        factor = 6
-        self.position_frame.grid(row=0, column=0, columnspan=5, sticky=(tk.NSEW), pady=(2,0))
-        self.xy_frame.grid(row=1, column=0, sticky=(tk.NSEW), padx=10, pady=10*factor)
-        self.z_frame.grid(row=1, column=1, sticky=(tk.NSEW), padx=10, pady=10*factor)
-        self.theta_frame.grid(row=1, column=2, sticky=(tk.NSEW), padx=10, pady=10*factor)
-        self.f_frame.grid(row=1, column=3, sticky=(tk.NSEW), padx=10, pady=10*factor)
-        # self.goto_frame.grid(row=0, column=4, sticky=(tk.NSEW), padx=10, pady=10*factor)
-        self.stop_frame.grid(row=1, column=4, sticky=(tk.NSEW), padx=10, pady=10 * factor)
+        self.position_frame.grid(row=0, column=0, sticky=(tk.NSEW), padx=3, pady=3)
+        self.xy_frame.grid(row=0, column=1, sticky=(tk.NSEW), padx=3, pady=3)
+        self.z_frame.grid(row=0, column=2, sticky=(tk.NSEW), padx=3, pady=3)
+        self.f_frame.grid(row=1, column=0, sticky=(tk.NSEW), padx=3, pady=3)
+        self.theta_frame.grid(row=1, column=2, sticky=(tk.NSEW), padx=3, pady=3)
+        # self.goto_frame.grid(row=0, column=4, sticky=(tk.NSEW))
+        self.stop_frame.grid(row=1, column=1, sticky=(tk.NSEW), padx=3, pady=3)
 
+        #example hover description
+        self.xy_frame.up_y_btn.hover.setdescription("Increases the Y value of the stage's position")
+        self.position_frame.inputs['y'].widget.hover.setdescription("Y position of the stage")
+        
     def get_widgets(self):
         """
         # this function will return all the input widgets as a dictionary

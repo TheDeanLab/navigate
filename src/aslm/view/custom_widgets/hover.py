@@ -33,121 +33,216 @@ POSSIBILITY OF SUCH DAMAGE.
 from tkinter import ttk
 import tkinter as tk
 import logging
+from pathlib import Path
 
+#from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-class ToolTip(object):
+"""
+User guide for the class
+Each instance of hover is intended to be an attribute of a tk or ttk widget (see validated fields or hovermixins), and by default is set only to show error messages
 
-    def __init__(self, widget):
+In this case, the parent widget is the Stage Control GUI y position label. 
+To instantiate the description, 
+    widget.hover.setdescription("Y position of the stage")
+    
+Please note: when dealing with LabelInput widgets, be sure to use 
+    LabelInput.widget.hover.setdescription(),
+    which will target the specific widget and not the LabelInput frame
+
+Examples of proper usage are within stage_control_tab.py for both LabelInput and regular usage
+"""
+
+
+class hover(object):
+    """ 
+    Hover that allows for information to be displayed additionally without interrupting the GUI
+
+    Parameters
+    ----------
+    widget  : bound widget.
+        The widget to which the hover instance is bound, usually the one on which information is being provided
+    text    : str variable
+        Text to be displayed when the hover is shown (default set to None so the hover will not show at all)
+    type    : str variable
+        Represents the current state of the hover and whether it is in use at any given moment 
+
+    Returns
+    -------
+    None
+    """
+    def __init__(self, widget=None, text=None, type="free"):
+        '''
+        Constructor for the Hover
+        
+        Initializes attributes and binds events
+        '''
         self.widget = widget
         self.tipwindow = None
         self.id = None
         self.x = self.y = 0
+        self.text = text
+        self.description=None
+        self.type = type
+        
+        #define event handling for showing and hiding the hover
+        widget.bind('<Enter>', self.show)
+        widget.bind('<Leave>', self.hide)
+        widget.bind('<ButtonPress>', self.hide)
 
+    # Sets a description for the widget to appear when hovered over
+    # If text=None, no description hover will be shown at all
+    def setdescription(self, text):
+        """
+        Setter for description text
+
+        Parameters
+        ----------
+        text    : str
+            Text to be displayed when hover is shown as a description
+        
+        Returns
+        -------
+        None
+        """
+        self.description=text
+    
+    # Event handlers
+    def show(self, event):
+        """
+        Event handler to show the hover
+
+        Parameters
+        ----------
+        event   : event
+            The event instance
+        
+        Returns
+        -------
+        None
+        """
+        if self.type=="free" and (not self.description==None):
+            self.type="description"
+            self.showtip(self.description)
+            
+    def hide(self, event):
+        """
+        Event handler to hide the hover
+
+        Parameters
+        ----------
+        event   : event
+            The event instance
+        
+        Returns
+        -------
+        None
+        """
+        if self.type=="description":
+            self.hidetip()
+
+    def update_type(self, newtype):
+        """
+        Setter for the type
+
+        Parameters
+        ----------
+        newtype : str
+            The new state of the hover
+        
+        Returns
+        -------
+        None
+        """
+        self.type=newtype.lower()
+    
+    def get_type(self):
+        """
+        Getter for the type
+
+        Parameters
+        ----------
+        None
+        
+        Returns
+        -------
+        type    : str
+            The current state of the hover
+        """
+        return self.type
+    
     def showtip(self, text):
-        "Display text in tooltip window"
+        """
+        Displays the hover
+
+        Parameters
+        ----------
+        text    :str
+            The text to be displayed on the hover
+        
+        Returns
+        -------
+        None
+        """
         self.text = text
         if self.tipwindow or not self.text:
             return
-        x, y, cx, cy = self.widget.bbox("insert")
-        x = x + self.widget.winfo_rootx() + 57
-        y = y + cy + self.widget.winfo_rooty() +27
+        
+        #set format of hover by type
+        if self.type.lower() == "description":
+            background="#ffffe0"
+            relief = tk.SOLID
+            font=("tahoma", "8", "normal")
+            x = self.widget.winfo_rootx() + self.widget.winfo_width()
+            y = self.widget.winfo_rooty() + self.widget.winfo_height()
+            
+        elif self.type.lower() == "error":
+            background="#ff5d66"
+            relief=tk.RIDGE,
+            font=("comic sans", "8", "normal")
+            x = self.widget.winfo_rootx()
+            y = self.widget.winfo_rooty() + self.widget.winfo_height()
+        
         self.tipwindow = tw = tk.Toplevel(self.widget)
         tw.wm_overrideredirect(1)
         tw.wm_geometry("+%d+%d" % (x, y))
         label = tk.Label(tw, text=self.text, justify=tk.LEFT,
-                      background="#ffffe0", relief=tk.SOLID, borderwidth=1,
-                      font=("tahoma", "8", "normal"))
+                      background=background, relief=relief, borderwidth=1,
+                      font=font)
         label.pack(ipadx=1)
 
+    def seterror(self, text):
+        """
+        Setter for the error message
+
+        Parameters
+        ----------
+        error    : str
+            Error message to be displayed
+        
+        Returns
+        -------
+        None
+        """
+        self.type="error"
+        self.showtip(text)
+        
     def hidetip(self):
+        """
+        Hides the hover and resets type
+
+        Parameters
+        ----------
+        None
+        
+        Returns
+        -------
+        None
+        """
+        self.type="free"
         tw = self.tipwindow
         self.tipwindow = None
         if tw:
             tw.destroy()
-
-def CreateToolTip(widget, text):
-    toolTip = ToolTip(widget)
-    def enter(event):
-        toolTip.showtip(text)
-    def leave(event):
-        toolTip.hidetip()
-    widget.bind('<Enter>', enter)
-    widget.bind('<Leave>', leave)
-    widget.bind('<ButtonPress>', leave)
-
-if __name__ == '__main__':
-    root = tk.Tk()
-    frame = ttk.Frame(root)
-
-    btn_ne = ttk.Button(frame, text='North East')
-    btn_se = ttk.Button(frame, text='South East')
-    btn_sw = ttk.Button(frame, text='South West')
-    btn_nw = ttk.Button(frame, text='North West')
-    btn_center = ttk.Button(frame, text='Center')
-    btn_n = ttk.Button(frame, text='North')
-    btn_e = ttk.Button(frame, text='East')
-    btn_s = ttk.Button(frame, text='South')
-    btn_w = ttk.Button(frame, text='West')
-
-    CreateToolTip(btn_ne, "Testing if this works/nHello")
-    CreateToolTip(btn_sw, 'Lorem ipsum dolor sit amet, velit eu nam cursus '
-                     'quisque gravida sollicitudin, felis arcu interdum '
-                     'error quam quis massa, et velit libero ligula est '
-                     'donec. Suspendisse fringilla urna ridiculus dui '
-                     'volutpat justo, quisque nisl eget sed blandit '
-                     'egestas, libero nullam magna sem dui nam, auctor '
-                     'vehicula nunc arcu vel sed dictum, tincidunt vitae '
-                     'id tristique aptent platea. Lacus eros nec proin '
-                     'morbi sollicitudin integer, montes suspendisse '
-                     'augue lorem iaculis sed, viverra sed interdum eget '
-                     'ut at pulvinar, turpis vivamus ac pharetra nulla '
-                     'maecenas ut. Consequat dui condimentum lectus nulla '
-                     'vitae, nam consequat fusce ac facilisis eget orci, '
-                     'cras enim donec aenean sed dolor aliquam, elit '
-                     'lorem in a nec fringilla, malesuada curabitur diam '
-                     'nonummy nisl nibh ipsum. In odio nunc nec porttitor '
-                     'ipsum, nunc ridiculus platea wisi turpis praesent '
-                     'vestibulum, suspendisse hendrerit amet quis vivamus '
-                     'adipiscing elit, ut dolor nec nonummy mauris nec '
-                     'libero, ad rutrum id tristique facilisis sed '
-                     'ultrices. Convallis velit posuere mauris lectus sit '
-                     'turpis, lobortis volutpat et placerat leo '
-                     'malesuada, vulputate id maecenas at a volutpat '
-                     'vulputate, est augue nec proin ipsum pellentesque '
-                     'fringilla. Mattis feugiat metus ultricies repellat '
-                     'dictum, suspendisse erat rhoncus ultricies in ipsum, '
-                     'nulla ante pellentesque blandit ligula sagittis '
-                     'ultricies, sed tortor sodales pede et duis platea')
-
-
-    r = 0
-    c = 0
-    pad = 10
-    btn_nw.grid(row=r, column=c, padx=pad, pady=pad, sticky=tk.NW)
-    btn_n.grid(row=r, column=c + 1, padx=pad, pady=pad, sticky=tk.N)
-    btn_ne.grid(row=r, column=c + 2, padx=pad, pady=pad, sticky=tk.NE)
-
-    r += 1
-    btn_w.grid(row=r, column=c + 0, padx=pad, pady=pad, sticky=tk.W)
-    btn_center.grid(row=r, column=c + 1, padx=pad, pady=pad,
-                sticky=tk.NSEW)
-    btn_e.grid(row=r, column=c + 2, padx=pad, pady=pad, sticky=tk.E)
-
-    r += 1
-    btn_sw.grid(row=r, column=c, padx=pad, pady=pad, sticky=tk.SW)
-    btn_s.grid(row=r, column=c + 1, padx=pad, pady=pad, sticky=tk.S)
-    btn_se.grid(row=r, column=c + 2, padx=pad, pady=pad, sticky=tk.SE)
-
-    frame.grid(sticky=tk.NSEW)
-    for i in (0, 2):
-        frame.rowconfigure(i, weight=1)
-        frame.columnconfigure(i, weight=1)
-
-    root.rowconfigure(0, weight=1)
-    root.columnconfigure(0, weight=1)
-
-    root.title('Tooltip')
-    root.mainloop()

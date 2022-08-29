@@ -45,8 +45,8 @@ logger = logging.getLogger(p)
 
 class Autofocus_Popup_Controller(GUI_Controller):
 
-    def __init__(self, view, parent_controller, verbose=False, setting_dict=None):
-        super().__init__(view, parent_controller, verbose)
+    def __init__(self, view, parent_controller, setting_dict=None):
+        super().__init__(view, parent_controller)
 
         self.widgets = self.view.get_widgets()
         self.setting_dict = setting_dict

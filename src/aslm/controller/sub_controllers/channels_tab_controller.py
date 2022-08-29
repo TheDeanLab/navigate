@@ -40,7 +40,6 @@ import numpy as np
 from aslm.controller.sub_controllers.widget_functions import validate_wrapper
 from aslm.controller.sub_controllers.gui_controller import GUI_Controller
 from aslm.controller.sub_controllers.channel_setting_controller import Channel_Setting_Controller
-from aslm.controller.sub_controllers.multi_position_controller import Multi_Position_Controller
 from aslm.controller.sub_controllers.tiling_wizard_controller import Tiling_Wizard_Controller
 
 # View Imports that are not called on startup
@@ -56,21 +55,18 @@ class Channels_Tab_Controller(GUI_Controller):
     def __init__(self,
                  view,
                  parent_controller=None,
-                 verbose=False,
                  configuration_controller=None):
-        super().__init__(view, parent_controller, verbose)
+        super().__init__(view, parent_controller)
 
         self.is_save = False
         self.mode = 'stop'
         self.in_initialization = True
 
         # sub-controllers
-        self.channel_setting_controller = Channel_Setting_Controller(self.view.channel_widgets_frame,
-                                                                     self,
-                                                                     self.verbose)
-        self.multi_position_controller = Multi_Position_Controller(self.view.multipoint_list,
-                                                                   self,
-                                                                   self.verbose)
+        self.channel_setting_controller = Channel_Setting_Controller(self.view.channel_widgets_frame, self)
+        
+
+        
 
         # add validation functions to spinbox
         # this function validate user's input (not from experiment file)
@@ -78,9 +74,6 @@ class Channels_Tab_Controller(GUI_Controller):
         # the only thing is that when the user's input is smaller than the limits, 
         # it will show inputs in red, but still let the function know the inputs changed
         # I can not block it since the Tkinter's working strategy
-        # validate_wrapper(self.view.stack_acq_frame.step_size_spinbox)
-        # validate_wrapper(self.view.stack_acq_frame.start_pos_spinbox)
-        # validate_wrapper(self.view.stack_acq_frame.end_pos_spinbox)
 
         validate_wrapper(self.view.stack_timepoint_frame.stack_pause_spinbox)
         validate_wrapper(self.view.stack_timepoint_frame.exp_time_spinbox, is_integer=True)
@@ -90,25 +83,15 @@ class Channels_Tab_Controller(GUI_Controller):
         self.stack_acq_vals = self.view.stack_acq_frame.get_variables()
         self.stack_acq_buttons = self.view.stack_acq_frame.get_buttons()
 
-        # stack acquisition variables
-        # self.stack_acq_vals = {
-        #     'step_size': self.view.stack_acq_frame.step_size_spinval,
-        #     'start_position': self.view.stack_acq_frame.start_pos_spinval,
-        #     'end_position': self.view.stack_acq_frame.end_pos_spinval,
-        #     'number_z_steps': self.view.stack_acq_frame.slice_spinval,
-        #     'start_focus': self.view.stack_acq_frame.start_foc_spinval,
-        #     'end_focus': self.view.stack_acq_frame.end_foc_spinval,
-        #     'abs_z_start': self.view.stack_acq_frame.abs_z_start_spinval,
-        #     'abs_z_end': self.view.stack_acq_frame.abs_z_end_spinval
-        # }
         # stack acquisition event binds
         self.stack_acq_vals['step_size'].trace_add('write', self.update_z_steps)
         self.stack_acq_vals['start_position'].trace_add('write', self.update_z_steps)
         self.stack_acq_vals['end_position'].trace_add('write', self.update_z_steps)
-        # self.view.stack_acq_frame.set_start_button.configure(command=self.update_start_position)
-        # self.view.stack_acq_frame.set_end_button.configure(command=self.update_end_position)
         self.stack_acq_buttons['set_start'].configure(command=self.update_start_position)
         self.stack_acq_buttons['set_end'].configure(command=self.update_end_position)
+
+
+
 
         # stack acquisition_variables
         self.z_origin = 0
@@ -139,7 +122,7 @@ class Channels_Tab_Controller(GUI_Controller):
         self.is_multiposition = False
         self.is_multiposition_val = self.view.multipoint_frame.on_off
         self.view.multipoint_frame.save_check.configure(command=self.toggle_multiposition)
-        self.view.multipoint_frame.buttons["tiling"].configure(command=self.launch_tiling_wizard)
+        self.view.quick_launch.buttons["tiling"].configure(command=self.launch_tiling_wizard)
 
         if configuration_controller:
             self.initialize(configuration_controller)
@@ -151,7 +134,7 @@ class Channels_Tab_Controller(GUI_Controller):
         Parameters
         ----------
         config : object
-            ASLM_Configuration_Controller.  config.configuration = Session object.
+            ASLM_Configuration_Controller.  config.configuration = Configurator object.
         """
         self.set_channel_num(config.configuration.GUIParameters['number_of_channels'])
         self.stack_acq_widgets['cycling'].widget['values'] = ['Per Z', 'Per Stack']
@@ -172,12 +155,8 @@ class Channels_Tab_Controller(GUI_Controller):
         """
         self.in_initialization = True
         self.set_info(self.stack_acq_vals, microscope_state)
-        # validate
-        # self.view.stack_acq_frame.step_size_spinbox.validate()
-        # self.view.stack_acq_frame.start_pos_spinbox.validate()
-        # self.view.stack_acq_frame.end_pos_spinbox.validate()
-
         self.set_info(self.timepoint_vals, microscope_state)
+
         # validate
         self.view.stack_timepoint_frame.stack_pause_spinbox.validate()
         self.view.stack_timepoint_frame.exp_time_spinbox.validate()
@@ -186,7 +165,7 @@ class Channels_Tab_Controller(GUI_Controller):
         self.channel_setting_controller.set_experiment_values(microscope_state['channels'])
 
         # positions
-        self.multi_position_controller.set_positions(microscope_state['stage_positions'])
+        self.parent_controller.multiposition_tab_controller.set_positions(microscope_state['stage_positions'])
         
         # after initialization
         self.in_initialization = False
@@ -211,7 +190,7 @@ class Channels_Tab_Controller(GUI_Controller):
         """
 
         # Not included in stack_acq_vals or timepoint_vals
-        microscope_state['stage_positions'] = self.multi_position_controller.get_positions()
+        microscope_state['stage_positions'] = self.parent_controller.multiposition_tab_controller.get_positions()
         microscope_state['channels'] = self.channel_setting_controller.get_values()
         microscope_state['stack_cycling_mode'] = 'per_stack' if self.stack_acq_vals['cycling'].get() == 'Per Stack' else 'per_z'
         microscope_state['stack_z_origin'] = self.z_origin
@@ -276,17 +255,12 @@ class Channels_Tab_Controller(GUI_Controller):
         self.mode = mode
         self.channel_setting_controller.set_mode(mode)
 
-        stack_state = 'disabled' if mode == 'z-stack' else 'active'
-        for key, widget in self.stack_acq_widgets.items():
-            if key == 'abs_z_start' or key == 'abs_z_end' or key == 'number_z_steps':
-                continue
-            widget.widget.configure(state=stack_state)
-
         state = 'normal' if mode == 'stop' else 'disabled'
+        for key, widget in self.stack_acq_widgets.items():
+            widget.widget['state'] = state
         self.view.stack_timepoint_frame.save_check['state'] = state
         self.view.stack_timepoint_frame.stack_pause_spinbox['state'] = state
         self.view.stack_timepoint_frame.exp_time_spinbox['state'] = state
-        self.stack_acq_widgets['cycling'].widget['state'] = 'readonly' if state == 'normal' else state
         self.show_verbose_info('acquisition mode has been changed to', mode)
 
     def update_z_steps(self,
@@ -453,7 +427,7 @@ class Channels_Tab_Controller(GUI_Controller):
         if self.in_initialization:
             return
         channel_settings = self.channel_setting_controller.get_values()
-        number_of_positions = self.multi_position_controller.get_position_num() if self.is_multiposition else 1
+        number_of_positions = self.parent_controller.multiposition_tab_controller.get_position_num() if self.is_multiposition else 1
         channel_exposure_time = []
         # validate the spinbox's value
         try:
@@ -566,34 +540,30 @@ class Channels_Tab_Controller(GUI_Controller):
             self.tiling_wizard_controller.showup()
             return
         tiling_wizard_popup = tiling_wizard(self.view)
-        self.tiling_wizard_controller = Tiling_Wizard_Controller(tiling_wizard_popup,
-                                                                 self,
-                                                                 self.verbose)
-
-
+        self.tiling_wizard_controller = Tiling_Wizard_Controller(tiling_wizard_popup, self)
 
 
     def load_positions(self):
         r"""Load Positions for Multi-Position Acquisition. """
-        self.multi_position_controller.load_csv_func()
+        self.parent_controller.multiposition_tab_controller.load_csv_func()
 
     def export_positions(self):
         r"""Export Positions for Multi-Position Acquisition. """
-        self.multi_position_controller.export_csv_func()
+        self.parent_controller.multiposition_tab_controller.export_csv_func()
 
     def move_to_position(self):
         r"""Move to a position within the Multi-Position Acquisition Interface."""
         event = type('MyEvent', (object,), {})
         event.x, event.y = 0, 0
-        self.multi_position_controller.handle_double_click(event)
+        self.parent_controller.multiposition_tab_controller.handle_double_click(event)
 
     def append_current_position(self):
         r"""Add current position to the Multi-Position Acquisition Interface."""
-        self.multi_position_controller.add_stage_position_func()
+        self.parent_controller.multiposition_tab_controller.add_stage_position_func()
 
     def generate_positions(self):
         r"""Generate a Multi-Position Acquisition."""
-        self.multi_position_controller.generate_positions_func()
+        self.parent_controller.multiposition_tab_controller.generate_positions_func()
 
     def set_info(self,
                  vals,

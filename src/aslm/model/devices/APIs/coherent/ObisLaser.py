@@ -128,7 +128,9 @@ class ObisLaser(LaserBase):
     Useful information can be found on Page C-22 of the OBIS_LX_LS Operators Manual
     """
 
-    def __init__(self, verbose, port='COM28'):
+    # took at verbose but you might have to change the com port as you use it
+    def __init__(self, port='COM28'):
+    # def __init__(self, port='COM4'):
         self.timeout = 0.05
         self.end_of_line = '\r\n'
         self.verbose = verbose
@@ -143,8 +145,7 @@ class ObisLaser(LaserBase):
             self.laser.bytesize = 8
             self.laser.timeout = self.timeout
             self.laser.open()
-            if self.verbose:
-                print("Port opened")
+
 
         except serial.SerialException:
             raise OSError('Port "%s" is unavailable.\n' % port + \
@@ -158,8 +159,7 @@ class ObisLaser(LaserBase):
         try:
             # self.set_power(0)
             self.laser.close()
-            if self.verbose:
-                print("Port closed")
+
         except serial.SerialException:
             print('Could not close the port')
 
@@ -169,11 +169,9 @@ class ObisLaser(LaserBase):
         """
         try:
             self.laser.close()
-            if self.verbose:
-                print("Port Closed")
+
         except serial.SerialException:
             print('could not close the port')
-
 
     def send_and_read(self, command, value=''):
         self.send(command, value)
@@ -275,11 +273,6 @@ class ObisLaser(LaserBase):
         # # Sleeps allowing serial commaction to finish???
         # sleep(.5)
         # response = self.read()
-
-
-
-
-    
 
 
 

@@ -52,8 +52,8 @@ logger = logging.getLogger(p)
 
 
 class LaserTriggers(LaserTriggerBase):
-    def __init__(self, model, experiment, verbose=False):
-        super().__init__(model, experiment, verbose)
+    def __init__(self, model, experiment):
+        super().__init__(model, experiment)
 
         # Initialize Digital Tasks
         self.switching_task = nidaqmx.Task()

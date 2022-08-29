@@ -53,12 +53,10 @@ class ShutterTTL(ShutterBase):
 
     Attributes
     ----------
-    configuration : Session
+    configuration : Configurator
         Global configuration of the microscope
-    experiment : Session
+    experiment : Configurator
         Experiment configuration of the microscope
-    verbose : bool
-        Verbosity
 
     Methods
     -------
@@ -72,8 +70,8 @@ class ShutterTTL(ShutterBase):
         Return the current state of the shutters
     """
 
-    def __init__(self, configuration, experiment, verbose=False):
-        super().__init__(configuration, experiment, verbose)
+    def __init__(self, configuration, experiment):
+        super().__init__(configuration, experiment)
 
         # Right Shutter - High Resolution Mode
         self.shutter_right_task = nidaqmx.Task()

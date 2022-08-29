@@ -107,7 +107,7 @@ class camera_roi(ttk.Labelframe):
         # Loop for each frame
         # Button Frame
         for i in range(len(btn_names)):
-            self.buttons[btn_names[i]] = ttk.Button(self.btn_frame, text=btn_labels[i])
+            self.buttons[btn_names[i]] = ttk.Button(self.btn_frame, text=btn_labels[i], width=9)
             self.buttons[btn_names[i]].grid(row=i, column=0, pady=5, padx=35)
         
         for i in range(2):
@@ -116,7 +116,7 @@ class camera_roi(ttk.Labelframe):
                                                             label=self.roi_labels[i],
                                                             input_class=ValidatedSpinbox,
                                                             input_var=tk.IntVar(),
-                                                            input_args={"from_": 0, "to": 2048, "increment": 1.0}
+                                                            input_args={"from_": 0, "to": 2048, "increment": 1.0, 'width': 5}
                                                             )
             self.inputs[self.roi_labels[i]].grid(row=i, column=0, pady=5, padx=5)
 
@@ -124,7 +124,8 @@ class camera_roi(ttk.Labelframe):
             self.inputs[self.fov_names[i]] = LabelInput(parent=self.fov_frame,
                                                         label=self.xy_labels[i],
                                                         input_class=ttk.Entry,
-                                                        input_var=tk.IntVar()
+                                                        input_var=tk.IntVar(),
+                                                        input_args={'width': 7}
                                                         )
             self.inputs[self.fov_names[i]].grid(row=i, column=0, pady=1, padx=5)
 
@@ -133,7 +134,7 @@ class camera_roi(ttk.Labelframe):
                                                             label=self.xy_labels[i],
                                                             input_class=ttk.Spinbox,
                                                             input_var=tk.IntVar(),
-                                                            input_args={"from_": 0, "to": 2048, "increment": 1.0}
+                                                            input_args={"from_": 0, "to": 2048, "increment": 1.0, 'width': 6}
                                                             )
             self.inputs[self.center_names[i]].grid(row=i, column=0, pady=1, padx=5)
 
@@ -141,7 +142,8 @@ class camera_roi(ttk.Labelframe):
         self.inputs[self.binning] = LabelInput(parent=self.roi_frame,
                                                 label=self.binning,
                                                 input_class=ttk.Combobox,
-                                                input_var=tk.StringVar()
+                                                input_var=tk.StringVar(),
+                                                input_args={'width': 5}
                                                 )
         self.inputs[self.binning].grid(row=3, column=0, pady=5, padx=5)
         

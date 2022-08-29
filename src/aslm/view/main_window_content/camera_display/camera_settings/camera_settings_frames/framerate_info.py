@@ -76,7 +76,8 @@ class framerate_info(ttk.LabelFrame):
                 self.inputs[self.names[i]] = LabelInput(parent=content_frame,
                                                         label=self.labels[i],
                                                         input_class=ValidatedEntry,
-                                                        input_var=tk.DoubleVar()                                          
+                                                        input_var=tk.DoubleVar(),
+                                                        input_args={'width': 6}                                          
                                                         )
                 self.inputs[self.names[i]].widget['state'] = 'readonly'
                 self.inputs[self.names[i]].grid(row=i, column=0, pady=1)
@@ -85,7 +86,7 @@ class framerate_info(ttk.LabelFrame):
                                                         label=self.labels[i],
                                                         input_class=ValidatedSpinbox,
                                                         input_var=tk.DoubleVar(),
-                                                        input_args={"from_": 1, "to": 1000, "increment": 1.0}                                          
+                                                        input_args={"from_": 1, "to": 1000, "increment": 1.0, 'width': 6}                                          
                                                         )
                 self.inputs[self.names[i]].grid(row=i, column=0, pady=1)
             

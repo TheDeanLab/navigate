@@ -64,8 +64,6 @@ class SutterFilterWheel(FilterWheelBase):
         Number of installed filter wheels.
     wheel_position : int
         Default filter wheel position
-    verbose : bool
-        Verbosity
     wait_until_done_delay = float
         Duration of time to wait for a filter wheel change.
     wait_until_done = bool
@@ -87,8 +85,8 @@ class SutterFilterWheel(FilterWheelBase):
         Set the filter wheel to the empty position and close the communication port.
     """
 
-    def __init__(self, model, verbose):
-        super().__init__(model, verbose)
+    def __init__(self, model):
+        super().__init__(model)
         self.read_on_init = True
         self.speed = 2
 

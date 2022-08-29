@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--BigDataViewer XML Example from https://fly.mpi-cbg.de/~pietzsch/bdv-example/drosophila.xml-->
+<SpimData version="0.2">
+  <BasePath type="relative">.</BasePath>
+  <SequenceDescription>
+    <ImageLoader format="bdv.hdf5">
+      <hdf5 type="relative">drosophila.h5</hdf5>
+    </ImageLoader>
+    <ViewSetups>
+      <ViewSetup>
+        <id>0</id>
+      </ViewSetup>
+      <ViewSetup>
+        <id>1</id>
+      </ViewSetup>
+    </ViewSetups>
+    <Timepoints type="range">
+      <first>0</first>
+      <last>2</last>
+    </Timepoints>
+  </SequenceDescription>
+  <ViewRegistrations>
+    <ReferenceTimepoint>350</ReferenceTimepoint>
+    <ViewRegistration timepoint="0" setup="0">
+      <ViewTransform type="affine">
+        <affine>0.996591329574585 0.0014791092835366726 0.01073253620415926 -5.384683609008789 -0.001930794445797801 0.9954455494880676 -0.003766203299164772 -81.54486083984375 -4.968568682670593E-4 -6.0385558754205704E-5 3.490110397338867 9.85491943359375</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="0" setup="1">
+      <ViewTransform type="affine">
+        <affine>0.9967471361160278 -0.0018281697994098067 -0.0159448329359293 -3.9299731254577637 -0.005900930613279343 0.49216321110725403 -3.0123801231384277 262.5342712402344 0.004747752100229263 0.8682872653007507 1.7716364860534668 -426.66754150390625</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="1" setup="0">
+      <ViewTransform type="affine">
+        <affine>0.9966375827789307 0.0014226322527974844 0.009849724359810352 -5.8060078620910645 -0.0018444646848365664 0.9956076145172119 -0.005629136227071285 -69.27687072753906 -3.634979948401451E-4 6.720321252942085E-4 3.4895498752593994 10.738128662109375</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="1" setup="1">
+      <ViewTransform type="affine">
+        <affine>0.996777355670929 -0.001879655523225665 -0.015927843749523163 -4.662176132202148 -0.005749744363129139 0.4920715391635895 -3.0124056339263916 275.1748046875 0.004699353594332933 0.8685303926467896 1.7690489292144775 -422.2758483886719</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="2" setup="0">
+      <ViewTransform type="affine">
+        <affine>0.9967382550239563 0.0013750510988757014 0.00983844231814146 -5.692346572875977 -0.0018074746476486325 0.9957119822502136 -0.0039688413962721825 -70.14445495605469 -3.824750892817974E-4 3.17456666380167E-4 3.4910457134246826 13.597747802734375</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="2" setup="1">
+      <ViewTransform type="affine">
+        <affine>0.9968152642250061 -0.001965513452887535 -0.015846025198698044 -5.178727149963379 -0.005820842459797859 0.4911666214466095 -3.0130810737609863 278.82867431640625 0.004750141873955727 0.8690722584724426 1.7654311656951904 -415.7231140136719</affine>
+      </ViewTransform>
+    </ViewRegistration>
+  </ViewRegistrations>
+</SpimData>

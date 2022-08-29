@@ -32,7 +32,7 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 
 import tkinter as tk
-from aslm.view.main_window_content.acquire_bar_frame.acquire_popup import Acquire_PopUp
+from aslm.view.main_window_content.acquire_bar_frame.acquire_popup import AcquirePopUp
 import time
 
 def test_acquirepopup():
@@ -50,10 +50,10 @@ def test_acquirepopup():
         True or False as to whether the test passed
     """
     root = tk.Tk()
-    acq_pop = Acquire_PopUp(root)
+    acq_pop = AcquirePopUp(root)
     root.update()
     time.sleep(3)
-    bool = isinstance(acq_pop, Acquire_PopUp)
+    bool = isinstance(acq_pop, AcquirePopUp)
     root.destroy()
     
     assert bool

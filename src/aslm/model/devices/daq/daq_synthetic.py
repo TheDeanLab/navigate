@@ -49,17 +49,15 @@ class SyntheticDAQ(DAQBase):
 
     Attributes
     ----------
-    configuration : Session
+    configuration : Configurator
         Global configuration of the microscope
-    experiment : Session
+    experiment : Configurator
         Experiment configuration of the microscope
     etl_constants : dict
         Dictionary with all of the wavelength, magnification, and imaging mode-specific amplitudes/offsets
-    verbose : bool
-        Verbosity
     """
-    def __init__(self, configuration, experiment, etl_constants, verbose=False):
-        super().__init__(configuration, experiment, etl_constants, verbose)
+    def __init__(self, configuration, experiment, etl_constants):
+        super().__init__(configuration, experiment, etl_constants)
         self.camera = None
 
     def create_camera_task(self):

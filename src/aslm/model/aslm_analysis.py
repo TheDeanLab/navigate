@@ -54,14 +54,10 @@ class Analysis:
     ----------
     use_gpu : bool
         Flag for leveraging CUDA analysis routines.
-    verbose : bool
-        Verbosity.
 
     """
     def __init__(self,
-                 use_gpu=False,
-                 verbose=False):
-        self.verbose = verbose
+                 use_gpu=False):
         self.use_gpu = use_gpu
 
         if use_gpu:
@@ -69,6 +65,29 @@ class Analysis:
 
     def __del__(self):
         pass
+
+    def image_intensity(self, input_array, psf_support_diameter_xy):
+        # Get Image Attributes
+        input_array = np.double(input_array)
+        image_dimensions = input_array.ndim
+
+        if image_dimensions == 2:
+            (image_height, image_width) = input_array.shape
+            number_of_images = 1
+        elif image_dimensions == 3:
+            (number_of_images, image_height, image_width) = input_array.shape
+        else:
+            raise ValueError("Only 2D and 3D Images Supported.")
+
+        #  Preallocate Array
+        entropy = np.zeros(number_of_images)
+
+        for image_idx in range(int(number_of_images)):
+            # Add entropy value to the entropy array
+            entropy[image_idx] = np.sum(input_array[image_idx,...])
+
+        return entropy
+
 
     def normalized_dct_shannon_entropy(self,
                                        input_array,
@@ -130,6 +149,23 @@ class Analysis:
             entropy[image_idx] = image_entropy
         return entropy
 
+    def fast_normalized_dct_shannon_entropy(self,
+                                       input_array,
+                                       psf_support_diameter_xy):
+
+        axes = (0, 1)
+        sl = slice(None)
+        if input_array.ndim > 2:
+            axes = (1, 2)
+            sl = (slice(None), np.newaxis, np.newaxis)
+
+        dct_array = dctn(input_array, type=2, axes=axes)
+        abs_array = np.abs(dct_array / np.atleast_1d(np.linalg.norm(dct_array, axis=axes))[sl])
+        image_entropy = -2 * np.nansum(abs_array * np.log(abs_array), axis=axes) \
+                        / np.prod([input_array.shape[x] / psf_support_diameter_xy for x in axes])
+
+        return np.atleast_1d(image_entropy)
+
     def estimate_image_resolution(self,
                                   input_array,
                                   pixel_size,
@@ -182,7 +218,7 @@ if (__name__ == '__main__'):
     from tifffile import imread
     import matplotlib.pyplot as plt
 
-    analysis = Analysis(use_gpu=False, verbose=False)
+    analysis = Analysis(use_gpu=False)
     image_path = r'F:\Dean\flatfield_test.tif'
     raw_image = np.array(imread(image_path))
     # resolution = analysis.estimate_image_resolution(raw_image,

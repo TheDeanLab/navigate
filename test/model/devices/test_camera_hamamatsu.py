@@ -38,7 +38,7 @@ from pathlib import Path
 
 # Local Imports
 from aslm.model.devices.camera.camera_hamamatsu import HamamatsuOrca
-from aslm.model.aslm_model_config import Session as session
+from aslm.model.aslm_model_config import Configurator
 
 
 class TestHamamatsuOrca(unittest.TestCase):

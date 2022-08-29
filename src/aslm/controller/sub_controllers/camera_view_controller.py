@@ -52,12 +52,10 @@ logger = logging.getLogger(p)
 class Camera_View_Controller(GUI_Controller):
     def __init__(self,
                  view,
-                 parent_controller=None,
-                 verbose=False):
+                 parent_controller=None):
 
         super().__init__(view,
-                         parent_controller,
-                         verbose)
+                         parent_controller)
 
         # Logging
         self.logger = logging.getLogger(p)
@@ -66,6 +64,10 @@ class Camera_View_Controller(GUI_Controller):
         self.image_metrics = view.image_metrics.get_widgets()
         self.image_palette = view.scale_palette.get_widgets()
         self.canvas = self.view.canvas
+
+        # Get canvas width and height. Accounts for padding.
+        self.canvas_height = self.view.canvas.winfo_height()-4
+        self.canvas_width = self.view.canvas.winfo_width()-4
 
         # Binding for adjusting the lookup table min and max counts.
         # keys = ['Autoscale', 'Min','Max']
@@ -84,23 +86,23 @@ class Camera_View_Controller(GUI_Controller):
         self.view.live_frame.live.bind("<<ComboboxSelected>>", self.update_display_state)
 
         # Left Click Binding
-        self.canvas.bind("<Button-1>", self.left_click)
+        # self.canvas.bind("<Button-1>", self.left_click)
 
         # Slider Binding
-        self.view.slider.slider_widget.bind("<Button-1>", self.slider_update)
+        # self.view.slider.slider_widget.bind("<Button-1>", self.slider_update)
 
         # Mouse Wheel Binding
-        if platform.system() == 'Windows':
-            self.canvas.bind("<MouseWheel>", self.mouse_wheel)
-        elif platform.system() == 'Linux':
-            self.canvas.bind("<Button-4>", self.mouse_wheel)
-            self.canvas.bind("<Button-5>", self.mouse_wheel)
+        # if platform.system() == 'Windows':
+        #     self.canvas.bind("<MouseWheel>", self.mouse_wheel)
+        # elif platform.system() == 'Linux':
+        #     self.canvas.bind("<Button-4>", self.mouse_wheel)
+        #     self.canvas.bind("<Button-5>", self.mouse_wheel)
 
         # Right-Click Binding
         self.menu = tk.Menu(self.canvas, tearoff=0)
         self.menu.add_command(label="Move Here", command=self.move_stage)
         self.menu.add_command(label="Reset Display", command=self.reset_display)
-        self.canvas.bind("<Button-3>", self.popup_menu)
+        # self.canvas.bind("<Button-3>", self.popup_menu)
         self.move_to_x = None
         self.move_to_y = None
 
@@ -145,7 +147,7 @@ class Camera_View_Controller(GUI_Controller):
         self.channel_index = 0
 
     def slider_update(self, event):
-        slider_index = self.view.slider.slider_widget.get()
+        slider_index = self.view.slider.get()
         channel_display_index = 0
         self.retrieve_image_slice_from_volume(slider_index=slider_index,
                                               channel_display_index=channel_display_index)
@@ -264,8 +266,9 @@ class Camera_View_Controller(GUI_Controller):
     def move_stage(self):
         r"""Move the stage according to the position the user clicked."""
         # TODO: Account for the digital zoom value when calculating these values.
-        # Currently hardcoded to account for 512 x 512 image display size below (factor of 4)
-        print("Move stage to pixel:", 4 * self.move_to_y, 4 * self.move_to_x)
+        height_scaling_factor = self.original_image_height / self.canvas_height
+        width_scaling_factor = self.original_image_width / self.canvas_width
+        print("Move stage to pixel:", height_scaling_factor * self.move_to_y, width_scaling_factor * self.move_to_x)
 
     def reset_display(self):
         r"""Set the display back to the original digital zoom."""
@@ -297,11 +300,13 @@ class Camera_View_Controller(GUI_Controller):
         """
         self.zoom_x_pos = int(event.x)
         self.zoom_y_pos = int(event.y)
-        if event.num == 4 or event.delta == 120:
+        delta = 120 if platform.system() != 'Darwin' else 1
+        threshold = event.delta/delta
+        if (event.num == 4) or (threshold > 0):
             # Zoom out event.
             if self.zoom_value < 1:
                 self.zoom_value = self.zoom_value + .05
-        if event.num == 5 or event.delta == -120:
+        if (event.num == 5) or (threshold < 0):
             # Zoom in event.
             if self.zoom_value > 0.05:
                 self.zoom_value = self.zoom_value - .05
@@ -311,8 +316,7 @@ class Camera_View_Controller(GUI_Controller):
     def digital_zoom(self):
         r"""Apply digital zoom.
 
-        Currently,the x, y position of the mouse is between 0 and 512 in both x, and y,
-        which is the size of the widget.
+        The x and y positions are between 0 and the canvas width and height respectively.
 
         """
         # New image size. Should be an integer value that is divisible by 2.
@@ -325,9 +329,8 @@ class Camera_View_Controller(GUI_Controller):
             new_image_width = new_image_width - 1
 
         # zoom_x_pos and y_pos are between 0 and 512.
-        # TODO: Grab the widget size so that this isn't hardcoded.
-        scaling_factor_x = int(self.original_image_width / 512)
-        scaling_factor_y = int(self.original_image_height / 512)
+        scaling_factor_x = int(self.original_image_width / self.canvas_width)
+        scaling_factor_y = int(self.original_image_height / self.canvas_height)
         x_start_index = (self.zoom_x_pos * scaling_factor_x) - (new_image_width / 2)
         x_end_index = (self.zoom_x_pos * scaling_factor_x) + (new_image_width / 2)
         y_start_index = (self.zoom_y_pos * scaling_factor_y) - (new_image_height / 2)
@@ -399,7 +402,7 @@ class Camera_View_Controller(GUI_Controller):
                 # Update GUI
                 self.image_metrics['Image'].set(np.max(self.temp_array))
 
-    def down_sample_image(self, factor=4, fast=True):
+    def down_sample_image(self, factor=4, fast=False):
         r"""Down-sample the data for image display according to widget size.."""
         if fast:
             # Approx. 3800x faster than cv2.resize(), but no interpolation
@@ -442,15 +445,15 @@ class Camera_View_Controller(GUI_Controller):
         """
         self.image_counter = 0
         self.slice_index = 0
-        self.number_of_channels = len([channel[-1] for channel in microscope_state['channels'].keys()])
+        self.number_of_channels = len(microscope_state['channels'])
         self.number_of_slices = int(microscope_state['number_z_steps'])
         self.total_images_per_volume = self.number_of_channels * self.number_of_slices
-        self.original_image_width = camera_parameters['x_pixels']
-        self.original_image_height = camera_parameters['y_pixels']
-        self.image_volume = np.zeros((self.original_image_width,
-                                      self.original_image_height,
-                                      self.number_of_slices,
-                                      self.number_of_channels))
+        self.original_image_width = int(camera_parameters['x_pixels'])
+        self.original_image_height = int(camera_parameters['y_pixels'])
+        # self.image_volume = np.zeros((self.original_image_width,
+        #                               self.original_image_height,
+        #                               self.number_of_slices,
+        #                               self.number_of_channels))
 
 
     def identify_channel_index_and_slice(self,
@@ -636,12 +639,12 @@ class Camera_View_Controller(GUI_Controller):
         if self.autoscale is True:  # Autoscale Enabled
             self.image_palette['Min'].widget['state'] = 'disabled'
             self.image_palette['Max'].widget['state'] = 'disabled'
-            logger.debug("Autoscale Enabled")
+            logger.info("Autoscale Enabled")
 
         elif self.autoscale is False:  # Autoscale Disabled
             self.image_palette['Min'].widget['state'] = 'normal'
             self.image_palette['Max'].widget['state'] = 'normal'
-            logger.debug("Autoscale Disabled")
+            logger.info("Autoscale Disabled")
             self.update_min_max_counts()
 
     def transpose_image(self):

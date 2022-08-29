@@ -35,19 +35,19 @@ import tkinter
 import multiprocessing as mp
 import threading
 from pathlib import Path
-import time
+import sys
 
 # Third Party Imports
 
 # Local View Imports
-from tkinter import filedialog
-from aslm.view.main_application_window import Main_App as view
+from tkinter import filedialog, messagebox
+from aslm.view.main_application_window import MainApp as view
 from aslm.view.menus.remote_focus_popup import remote_popup
 from aslm.view.menus.autofocus_setting_popup import autofocus_popup
 
 # Local Sub-Controller Imports
 from aslm.controller.sub_controllers.stage_gui_controller import Stage_GUI_Controller
-from aslm.controller.sub_controllers.acquire_bar_controller import Acquire_Bar_Controller
+from aslm.controller.sub_controllers.acquire_bar_controller import AcquireBarController
 from aslm.controller.sub_controllers.channels_tab_controller import Channels_Tab_Controller
 from aslm.controller.sub_controllers.camera_view_controller import Camera_View_Controller
 from aslm.controller.sub_controllers.camera_setting_controller import Camera_Setting_Controller
@@ -57,10 +57,12 @@ from aslm.controller.sub_controllers.etl_popup_controller import Etl_Popup_Contr
 from aslm.controller.sub_controllers.autofocus_popup_controller import Autofocus_Popup_Controller
 import aslm.controller.aslm_controller_functions as controller_functions
 from aslm.controller.thread_pool import SynchronizedThreadPool
+from aslm.controller.sub_controllers.keystroke_controller import KeystrokeController
+from aslm.controller.sub_controllers.multi_position_controller import Multi_Position_Controller
 
 # Local Model Imports
 from aslm.model.aslm_model import Model
-from aslm.model.aslm_model_config import Session as session
+from aslm.model.aslm_model_config import Configurator
 from aslm.model.concurrency.concurrency_tools import ObjectInSubprocess
 from aslm.tools.common_dict_tools import update_settings_common, update_stage_dict
 
@@ -100,8 +102,7 @@ class ASLM_controller:
                  use_gpu,
                  args):
         
-        # Verbosity and debugging menu
-        self.verbose = args.verbose
+        # Debug menu
         self.debug = args.debug
 
         # Create a thread pool
@@ -124,54 +125,55 @@ class ASLM_controller:
         # save default experiment file
         self.default_experiment_file = experiment_path
 
-        # Load the Configuration to Populate the GUI
-        self.configuration = session(configuration_path,
-                                     self.verbose)
+        # Load the Configuration and Experiment Files and Populate the GUI
+        self.configuration = Configurator(configuration_path)
+        self.experiment = Configurator(experiment_path)
 
         # Initialize view based on model.configuration
         configuration_controller = ASLM_Configuration_Controller(self.configuration)
 
         # etl setting file
         self.etl_constants_path = etl_constants_path
-        self.etl_constants = session(self.etl_constants_path,
-                                   self.verbose)
+        self.etl_constants = Configurator(self.etl_constants_path)
 
         # Initialize the View
         self.view = view(root)
+        self.view.root.protocol("WM_DELETE_WINDOW", self.exit_program)
 
         # Sub Gui Controllers
         # Acquire bar, channels controller, camera view, camera settings, stage, waveforms, menus.
-        self.acquire_bar_controller = Acquire_Bar_Controller(self.view.acqbar,
-                                                             self.view.settings.channels_tab,
-                                                             self,
-                                                             self.verbose)
+        self.acquire_bar_controller = AcquireBarController(self.view.acqbar,
+                                                           self.view.settings.channels_tab,
+                                                           self)
 
         self.channels_tab_controller = Channels_Tab_Controller(self.view.settings.channels_tab,
                                                                self,
-                                                               self.verbose,
                                                                configuration_controller)
 
+        self.multiposition_tab_controller = Multi_Position_Controller(self.view.settings.multiposition_tab.multipoint_list, self)
+
         self.camera_view_controller = Camera_View_Controller(self.view.camera_waveform.camera_tab,
-                                                             self,
-                                                             self.verbose)
+                                                             self)
 
         self.camera_setting_controller = Camera_Setting_Controller(self.view.settings.camera_settings_tab,
                                                                    self,
-                                                                   self.verbose,
                                                                    configuration_controller)
 
         # Stage Controller
-        self.stage_gui_controller = Stage_GUI_Controller(self.view.stage_control.stage_control_tab,  
+        self.stage_gui_controller = Stage_GUI_Controller(self.view.settings.stage_control_tab,  
                                                          self.view,
                                                          self.camera_view_controller.canvas,
                                                          self,
-                                                         self.verbose,
                                                          configuration_controller)
                         
         # Waveform Controller
-        self.waveform_tab_controller = Waveform_Tab_Controller(self.view.camera_waveform.waveform_tab,
-                                                               self,
-                                                               self.verbose)
+        self.waveform_tab_controller = Waveform_Tab_Controller(self.view.camera_waveform.waveform_tab, self)
+
+        # Keystroke Controller
+        self.keystroke_controller = KeystrokeController(self.view, self)
+
+        # Bonus config
+        self.update_acquire_control()
 
         t = threading.Thread(target=self.update_event)
         t.start()
@@ -179,7 +181,6 @@ class ASLM_controller:
         self.initialize_menus()
 
         # Set view based on model.experiment
-        self.experiment = session(experiment_path, args.verbose)
         self.populate_experiment_setting()
 
         # Camera View Tab
@@ -215,6 +216,9 @@ class ASLM_controller:
         self.data_buffer = self.model.get_data_buffer(img_width, img_height)
         self.img_width = img_width
         self.img_height = img_height
+
+    def update_acquire_control(self):
+            self.view.acqbar.stop_stage.config(command=self.stage_gui_controller.stop_button_handler)
 
     def initialize_cam_view(self, configuration_controller):
         r""" Populate view tab.
@@ -276,8 +280,7 @@ class ASLM_controller:
                                                        self.etl_constants,
                                                        self.etl_constants_path,
                                                        self.configuration,
-                                                       self.experiment.GalvoParameters,
-                                                       self.verbose)
+                                                       self.experiment.GalvoParameters)
 
             self.etl_controller.set_experiment_values(self.resolution_value.get())
             self.etl_controller.set_mode(self.acquire_bar_controller.mode)
@@ -289,7 +292,6 @@ class ASLM_controller:
             af_popup = autofocus_popup(self.view)
             self.af_popup_controller = Autofocus_Popup_Controller(af_popup,
                                                                   self,
-                                                                  self.verbose,
                                                                   self.experiment.AutoFocusParameters)
 
         menus_dict = {
@@ -354,7 +356,7 @@ class ASLM_controller:
 
         # debug menu
         if self.debug:
-            Debug_Module(self, self.view.menubar.menu_debug, self.verbose)
+            Debug_Module(self, self.view.menubar.menu_debug)
 
     def populate_experiment_setting(self, file_name=None):
         r"""Load experiment file and populate model.experiment and configure view.
@@ -376,7 +378,7 @@ class ASLM_controller:
                 self.model.load_experiment_file(file_path)
 
                 # Create experiment instance.
-                self.experiment = session(file_path, self.verbose)
+                self.experiment = Configurator(file_path)
 
         # Configure GUI
         mode = self.experiment.MicroscopeState['image_mode']
@@ -482,7 +484,7 @@ class ASLM_controller:
             args[0] : dict
                 dict = {'x': value, 'y': value, 'z': value, 'theta': value, 'f': value}
             """
-            self.threads_pool.createThread('stage', self.move_stage, args=({args[1] + '_abs': args[0]},))
+            self.threads_pool.createThread('model', self.move_stage, args=({args[1] + '_abs': args[0]},))
 
         elif command == 'stop_stage':
             self.threads_pool.createThread('stop_stage', self.stop_stage)
@@ -593,6 +595,10 @@ class ASLM_controller:
             controller_functions.save_yaml_file(file_directory, self.experiment.serialize())
             self.experiment.Saving['save_directory'] = saving_settings['save_directory']
             self.experiment.Saving['file_type'] = saving_settings['file_type']
+            self.experiment.Saving['solvent'] = saving_settings['solvent']
+            self.camera_setting_controller.solvent = self.experiment.Saving['solvent']
+            self.camera_setting_controller.calculate_physical_dimensions(
+                self.experiment.MicroscopeState['zoom'])
             self.execute('acquire')
 
         elif command == 'acquire':
@@ -794,10 +800,16 @@ class ASLM_controller:
         while True:
             event, value = self.event_queue.get()
             if event == 'waveform':
-                self.waveform_tab_controller.plot_waveforms2(value, self.configuration.DAQParameters['sample_rate'])
+                self.waveform_tab_controller.update_waveforms(value, self.configuration.DAQParameters['sample_rate'])
             elif event == 'multiposition':
                 from aslm.tools.multipos_table_tools import update_table
-                update_table(self.view.settings.channels_tab.multipoint_list.get_table(), value)
+                update_table(self.view.settings.multiposition_tab.multipoint_list.get_table(), value)
                 self.view.settings.channels_tab.multipoint_frame.on_off.set(True)  # assume we want to use multipos
             elif event == 'stop':
                 break
+    
+    def exit_program(self):
+        if messagebox.askyesno("Exit", "Are you sure?"):
+            logger.info("Exiting Program")
+            self.execute('exit')
+            sys.exit()

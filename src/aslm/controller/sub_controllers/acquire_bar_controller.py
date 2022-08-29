@@ -1,9 +1,4 @@
-"""
-ASLM sub-controller for the acquire popup window.
-When the mode is changed, we need to communicate this to the central controller.
-Central controller then communicates these changes to the channel_setting_controller.
-
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,44 +29,53 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-import sys
-from aslm.controller.sub_controllers.gui_controller import GUI_Controller
-from aslm.view.main_window_content.acquire_bar_frame.acquire_popup import Acquire_PopUp as acquire_popup
 
+# Standard Library Imports
+from email import message
+import sys
 import logging
-from pathlib import Path
+from tkinter import messagebox
+
+# Third Party Imports
+
+# Local Imports
+from aslm.controller.sub_controllers.gui_controller import GUI_Controller
+from aslm.view.main_window_content.acquire_bar_frame.acquire_popup import AcquirePopUp
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class Acquire_Bar_Controller(GUI_Controller):
+class AcquireBarController(GUI_Controller):
     def __init__(self,
                  view,
                  parent_view,
-                 parent_controller,
-                 verbose=False):
-        super().__init__(view, parent_controller, verbose)
+                 parent_controller):
+        super().__init__(view, parent_controller)
 
         self.parent_view = parent_view
 
         # acquisition image mode variable
         self.mode = 'live'
+        self.update_stack_acq(self.mode)
         self.is_save = False
         self.saving_settings = {
-            'root_directory': 'E:\\',
+            'root_directory': self.parent_controller.experiment.Saving['root_directory'],
             'save_directory': '',
             'user': '',
             'tissue': '',
             'celltype': '',
             'label': '',
-            'file_type': ''
+            'file_type': '',
+            'solvent': '',
         }
 
         self.mode_dict = {
             'Continuous Scan': 'live',
             'Z-Stack': 'z-stack',
             'Single Acquisition': 'single',
+            'Alignment': 'alignment',
             'Projection': 'projection'
         }
 
@@ -79,6 +83,7 @@ class Acquire_Bar_Controller(GUI_Controller):
         self.view.acquire_btn.config(command=self.launch_popup_window)
         self.view.pull_down.bind('<<ComboboxSelected>>',self.update_microscope_mode)
         self.view.exit_btn.config(command=self.exit_program)
+
 
     def progress_bar(self,
                      images_received,
@@ -239,12 +244,12 @@ class Acquire_Bar_Controller(GUI_Controller):
             self.parent_controller.execute('stop_acquire')
 
         elif self.is_save and self.mode != 'live':
-            acquire_pop = acquire_popup(self.view)
+            acquire_pop = AcquirePopUp(self.view)
             buttons = acquire_pop.get_buttons()  # This holds all the buttons in the popup
             widgets = acquire_pop.get_widgets()
 
             # Configure the button callbacks on the popup window
-            buttons['Cancel'].config(command=lambda: acquire_pop.popup.dismiss(self.verbose))
+            buttons['Cancel'].config(command=lambda: acquire_pop.popup.dismiss())
             buttons['Done'].config(command=lambda: self.launch_acquisition(acquire_pop))
 
             # Configure drop down callbacks, will update save settings when file type is changed
@@ -260,6 +265,7 @@ class Acquire_Bar_Controller(GUI_Controller):
     def update_microscope_mode(self,
                                *args):
         r"""Gets the state of the pull-down menu and tells the central controller
+            Will additionally call functions to disable and enable widgets based on mode
 
         Parameters
         ----------
@@ -268,6 +274,51 @@ class Acquire_Bar_Controller(GUI_Controller):
         """
         self.mode = self.mode_dict[self.view.pull_down.get()]
         self.show_verbose_info("The Microscope State is now:", self.get_mode())
+
+        # Update state status of other widgets in the GUI based on what mode is set
+        self.update_stack_acq(self.mode)
+        self.update_stack_time(self.mode)
+
+    def update_stack_acq(self, mode):
+        """Changes state behavior of widgets in the stack acquisition frame based on mode of microscope
+
+        Parameters
+        ----------
+        mode : str
+            Imaging Mode.
+        """
+
+        # Get ref to widgets
+        stack_widgets = self.parent_view.stack_acq_frame.get_widgets()
+
+        # Grey out stack acq widgets when not Zstack or projection
+        if mode == 'z-stack' or mode == 'projection':
+            state = 'normal'
+        else:
+            state = 'disabled'
+        for key, widget in stack_widgets.items():
+            widget.widget['state'] = state
+
+    def update_stack_time(self, mode):
+        """Changes state behavior of widgets in the stack timepoint frame based on mode of microscope
+
+        Parameters
+        ----------
+        mode : str
+            Imaging Mode.
+        """
+        
+        # Get ref to widgets
+        time_widgets = self.parent_view.stack_timepoint_frame.get_widgets()
+
+        # Grey out time widgets when in Continuous Scan or Alignment modes
+        if mode == 'live' or mode == 'alignment':
+            state = 'disabled'
+        else:
+            state = 'normal'
+        for key, widget in time_widgets.items():
+            widget['state'] = state
+
 
     def update_file_type(self,
                          file_type):
@@ -298,16 +349,17 @@ class Acquire_Bar_Controller(GUI_Controller):
         self.update_saving_settings(popup_window)
 
         # Verify user's input is non-zero.
-        is_valid = self.saving_settings['user'] and self.saving_settings['tissue'] \
-            and self.saving_settings['celltype'] and self.saving_settings['label']
+        is_valid = self.saving_settings['user'] \
+                   and self.saving_settings['tissue'] \
+                   and self.saving_settings['celltype'] \
+                   and self.saving_settings['label']
 
         if is_valid:
             # tell central controller, save the image/data
-            self.parent_controller.execute(
-                'acquire_and_save', self.saving_settings)
+            self.parent_controller.execute('acquire_and_save', self.saving_settings)
 
             # Close the window
-            popup_window.popup.dismiss(self.verbose)
+            popup_window.popup.dismiss()
 
             # We are now acquiring
             self.view.acquire_btn.configure(text='Stop')
@@ -317,10 +369,12 @@ class Acquire_Bar_Controller(GUI_Controller):
 
         Quits the software.
         """
-        self.show_verbose_info("Exiting Program")
-        # call the central controller to stop all the threads
-        self.parent_controller.execute('exit')
-        sys.exit()
+        if messagebox.askyesno("Exit", "Are you sure?"):
+            self.show_verbose_info("Exiting Program")
+            # call the central controller to stop all the threads
+            self.parent_controller.execute('exit')
+            sys.exit()
+        
 
     def update_saving_settings(self, popup_window):
         r"""Gets the entries from the popup save dialog and overwrites the saving_settings dictionary."""

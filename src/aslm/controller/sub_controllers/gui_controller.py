@@ -40,10 +40,9 @@ logger = logging.getLogger(p)
 
 
 class GUI_Controller:
-    def __init__(self, view, parent_controller=None, verbose=False, configuration_controller=None):
+    def __init__(self, view, parent_controller=None, configuration_controller=None):
         self.view = view
         self.parent_controller = parent_controller
-        self.verbose = verbose
 
     def initialize(self, configuration_controller):
         """

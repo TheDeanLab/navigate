@@ -48,12 +48,10 @@ class ShutterBase:
 
     Attributes
     ----------
-    configuration : Session
+    configuration : Configurator
         Global configuration of the microscope
-    experiment : Session
+    experiment : Configurator
         Experiment configuration of the microscope
-    verbose : bool
-        Verbosity
     shutter_right_state : bool
         Right shutter state
     shutter_left_state : bool
@@ -62,11 +60,9 @@ class ShutterBase:
 
     def __init__(self,
                  configuration,
-                 experiment,
-                 verbose=False):
+                 experiment):
         self.configuration = configuration
         self.experiment = experiment
-        self.verbose = verbose
 
         # Right Shutter - High Resolution Mode
         self.shutter_right = self.configuration.DAQParameters['shutter_right']

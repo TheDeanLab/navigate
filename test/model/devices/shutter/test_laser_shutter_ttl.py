@@ -38,7 +38,7 @@ from pathlib import Path
 
 # Local Imports
 from aslm.model.devices.shutter.laser_shutter_ttl import ShutterTTL
-from aslm.model.aslm_model_config import Session as session
+from aslm.model.aslm_model_config import Configurator
 
 
 class TestShutterTTL(unittest.TestCase):

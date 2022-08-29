@@ -51,8 +51,8 @@ logger = logging.getLogger(p)
 
 
 class SyntheticStage(StageBase):
-    def __init__(self, configuration, verbose):
-        super().__init__(configuration, verbose)
+    def __init__(self, configuration):
+        super().__init__(configuration)
 
     def report_position(self):
         self.update_position_dictionaries()
@@ -109,7 +109,7 @@ class SyntheticStage(StageBase):
             success = self.move_axis_absolute(ax, move_dictionary)
 
         if wait_until_done is True:
-            time.sleep(.25)
+            time.sleep(0.25)
 
         return success
 

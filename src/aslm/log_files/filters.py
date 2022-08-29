@@ -23,9 +23,3 @@ class NonPerfFilter(logging.Filter):
             return False
         
         return True
-        
-        
-            
-        
-            
-            

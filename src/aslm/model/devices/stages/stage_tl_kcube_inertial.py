@@ -10,8 +10,8 @@ logger = logging.getLogger(p)
 
 
 class TLKIMStage(StageBase):
-    def __init__(self, configuration, verbose):
-        super().__init__(configuration, verbose, axes=['f'])  # only initialize the focus axis
+    def __init__(self, configuration):
+        super().__init__(configuration, axes=['f'])  # only initialize the focus axis
 
         # Mapping from self.axes to corresponding KIM channels
         self.kim_axes = [1]

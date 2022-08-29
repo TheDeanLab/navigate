@@ -41,7 +41,7 @@ import numpy as np
 
 # Local Imports
 import aslm.model.aslm_device_startup_functions as startup_functions
-from aslm.model.aslm_model_config import Session as session
+from aslm.model.aslm_model_config import Configurator
 from aslm.model.concurrency.concurrency_tools import ResultThread, SharedNDArray
 from aslm.model.model_features.autofocus import Autofocus
 from aslm.model.model_features.aslm_image_writer import ImageWriter
@@ -55,7 +55,6 @@ from aslm.tools.common_dict_tools import update_settings_common, update_stage_di
 from aslm.model.aslm_debug_model import Debug_Module
 
 # Logger Setup
-log_setup('model_logging.yml')
 p = __name__.split(".")[1]
 
 
@@ -109,19 +108,17 @@ class Model:
                  etl_constants_path=None,
                  event_queue=None):
 
+        log_setup('model_logging.yml')
         self.logger = logging.getLogger(p)
 
-        # Specify verbosity
-        self.verbose = args.verbose
-
         # Loads the YAML file for all of the microscope parameters
-        self.configuration = session(configuration_path, args.verbose)
+        self.configuration = Configurator(configuration_path)
 
         # Loads the YAML file for all of the experiment parameters
-        self.experiment = session(experiment_path, args.verbose)
+        self.experiment = Configurator(experiment_path)
 
         # Loads the YAML file for all of the ETL constants
-        self.etl_constants = session(etl_constants_path, args.verbose)
+        self.etl_constants = Configurator(etl_constants_path)
 
         # Initialize all Hardware
         if args.synthetic_hardware:
@@ -141,27 +138,27 @@ class Model:
         """
         threads_dict = {
             'filter_wheel': ResultThread(target=startup_functions.start_filter_wheel,
-                                         args=(self.configuration, self.verbose,)).start(),
+                                         args=(self.configuration,)).start(),
 
             'zoom': ResultThread(target=startup_functions.start_zoom_servo,
-                                 args=(self.configuration, self.verbose,)).start(),
+                                 args=(self.configuration,)).start(),
 
             'stages': ResultThread(target=startup_functions.start_stages,
-                                   args=(self.configuration, self.verbose,)).start(),
+                                   args=(self.configuration,)).start(),
 
             'shutter': ResultThread(target=startup_functions.start_shutters,
-                                    args=(self.configuration, self.experiment, self.verbose,)).start(),
+                                    args=(self.configuration, self.experiment,)).start(),
 
             'daq': ResultThread(target=startup_functions.start_daq,
-                                args=(self.configuration, self.experiment, self.etl_constants, self.verbose,)).start(),
+                                args=(self.configuration, self.experiment, self.etl_constants,)).start(),
 
             'laser_triggers': ResultThread(target=startup_functions.start_laser_triggers,
-                                           args=(self.configuration, self.experiment, self.verbose,)).start(),
+                                           args=(self.configuration, self.experiment,)).start(),
         }
 
         if not args.synthetic_hardware:
             threads_dict['stages_r'] = ResultThread(target=startup_functions.start_stages_r,
-                                                    args=(self.configuration, self.verbose,)).start()
+                                                    args=(self.configuration,)).start()
 
         # Optionally start up multiple cameras
         # TODO: In the event two cameras are on, but we've only requested one, make sure it's the one with the
@@ -170,7 +167,6 @@ class Model:
             threads_dict[f'camera{i}'] = ResultThread(target=startup_functions.start_camera,
                                                       args=(self.configuration,
                                                             self.experiment,
-                                                            self.verbose,
                                                             i)).start()
             time.sleep(1.0)
 
@@ -188,8 +184,7 @@ class Model:
         # analysis class
         self.analysis = startup_functions.start_analysis(self.configuration,
                                                          self.experiment,
-                                                         USE_GPU,
-                                                         self.verbose)
+                                                         USE_GPU)
 
         # Acquisition Housekeeping
         self.imaging_mode = None
@@ -208,6 +203,7 @@ class Model:
         self.data_buffer = None
         self.img_width = int(self.configuration.CameraParameters['x_pixels'])
         self.img_height = int(self.configuration.CameraParameters['y_pixels'])
+        self.data_buffer_positions = None
 
         # Autofocusing
         self.f_position = None
@@ -251,10 +247,10 @@ class Model:
         self.update_data_buffer(self.img_width, self.img_height)
 
         # debug
-        self.debug = Debug_Module(self, self.verbose)
+        self.debug = Debug_Module(self)
 
         # Image Writer/Save functionality
-        self.image_writer = ImageWriter(self)
+        self.image_writer = None
 
         # feature list
         # TODO: put it here now
@@ -317,6 +313,7 @@ class Model:
                                           dtype='uint16') for i in range(self.number_of_frames)]
         self.img_width = img_width
         self.img_height = img_height
+        self.data_buffer_positions = SharedNDArray(shape=(self.number_of_frames, 5), dtype=float)  # z-index, x, y, z, theta, f
 
     def get_data_buffer(self, img_width=512, img_height=512):
         r"""Get the data buffer.
@@ -401,6 +398,10 @@ class Model:
             # TODO: put it here now.
             if self.imaging_mode == 'z-stack':
                 self.signal_container, self.data_container = load_features(self, [[{'name': ZStackAcquisition}]])
+            
+            if self.imaging_mode == 'single':
+                self.experiment.MicroscopeState['stack_cycling_mode'] = 'per_z'
+
             if self.imaging_mode == 'live':
                 self.signal_thread = threading.Thread(target=self.run_live_acquisition)
             else:
@@ -409,6 +410,7 @@ class Model:
             self.signal_thread.name = self.imaging_mode + " signal"
             if self.is_save and self.imaging_mode != 'live':
                 self.experiment.Saving = kwargs['saving_info']
+                self.image_writer = ImageWriter(self)
                 self.data_thread = threading.Thread(target=self.run_data_process, kwargs={'data_func': self.image_writer.save_image})
             else:
                 self.is_save = False
@@ -584,6 +586,8 @@ class Model:
             self.camera.close_image_series()
         self.shutter.close_shutters()
         self.laser_triggers.turn_off_lasers()
+        if self.image_writer is not None:
+            self.image_writer.close()
 
     def run_data_process(self, num_of_frames=0, data_func=None):
         r"""Run the data process.
@@ -664,7 +668,7 @@ class Model:
         experiment_path : str
             File path to non-default experiment file.
         """
-        self.experiment = session(experiment_path, self.verbose)
+        self.experiment = Configurator(experiment_path)
 
     def get_readout_time(self):
         r"""Get readout time from camera.
@@ -744,16 +748,17 @@ class Model:
 
         # Confirm that target channel exists
         channel_key = 'channel_' + str(target_channel)
+        microscope_state = self.experiment.MicroscopeState
+        channels = microscope_state['channels']
         if target_channel != self.current_channel:
-            microscope_state = self.experiment.MicroscopeState
-            if channel_key not in microscope_state['channels'] \
-                    or not microscope_state['channels'][channel_key]['is_selected']:
+            if channel_key not in channels \
+                    or not channels[channel_key]['is_selected']:
                 # if self.imaging_mode != 'z-stack':
                 #     self.stop_acquisition = True
                 return
 
             # Update Microscope State Dictionary
-            channel = microscope_state['channels'][channel_key]
+            channel = channels[channel_key]
             self.current_channel = target_channel
 
             # Filter Wheel Settings.
@@ -783,6 +788,7 @@ class Model:
             self.move_stage({'f_abs': curr_focus + float(channel['defocus'])}, wait_until_done=True)
             self.experiment.StageParameters['f'] = curr_focus  # do something very hacky so we keep using the same focus reference
 
+        # Take the image
         self.snap_image(channel_key)
 
     def run_single_acquisition(self):
@@ -800,6 +806,9 @@ class Model:
                 break
             channel_idx = int(channel_key[prefix_len:])
             self.run_single_channel_acquisition_with_features(channel_idx)
+
+            if self.imaging_mode == 'z-stack':
+                break
 
     def snap_image(self, channel_key):
         r"""Acquire an image after updating the waveforms.
@@ -847,6 +856,14 @@ class Model:
         #  Consider putting below to not block thread.
         self.daq.prepare_acquisition(channel_key, self.current_exposure_time)
 
+        # Stash current position, channel, timepoint
+        # Do this here, because signal container functions can inject changes to the stage
+        self.data_buffer_positions[self.frame_id][0] = self.experiment.StageParameters['x']
+        self.data_buffer_positions[self.frame_id][1] = self.experiment.StageParameters['y']
+        self.data_buffer_positions[self.frame_id][2] = self.experiment.StageParameters['z']
+        self.data_buffer_positions[self.frame_id][3] = self.experiment.StageParameters['theta']
+        self.data_buffer_positions[self.frame_id][4] = self.experiment.StageParameters['f']
+
         # Run the acquisition
         self.daq.run_acquisition()
         self.daq.stop_acquisition()
@@ -889,9 +906,10 @@ class Model:
             return
         
         self.signal_container.reset()
+        self.target_channel = target_channel
 
         while not self.signal_container.end_flag and not self.stop_send_signal and not self.stop_acquisition:
-            self.run_single_channel_acquisition(target_channel)
+            self.run_single_channel_acquisition(self.target_channel)
             if not hasattr(self, 'signal_container'):
                 return
     

@@ -66,7 +66,7 @@ def calculate_entropy(dct_array, otf_support_x, otf_support_y):
     image_entropy = -2 * image_entropy / (otf_support_x * otf_support_y)
     return image_entropy
 
-def normalized_dct_shannon_entropy(input_array, psf_support_diameter_xy, verbose=False):
+def normalized_dct_shannon_entropy(input_array, psf_support_diameter_xy):
     """
     # input_array : 2D or 3D image.  If 3D, will iterate through each 2D plane.
     # otf_support_x : Support for the OTF in the x-dimension.
@@ -92,8 +92,8 @@ def normalized_dct_shannon_entropy(input_array, psf_support_diameter_xy, verbose
     entropy = np.zeros(number_of_images)
     execution_time = np.zeros(number_of_images)
     for image_idx in range(int(number_of_images)):
-        if verbose:
-            start_time = time.time()
+        start_time = time.time()
+        logger.info(f"Start Time of {image_idx}: {start_time}")
         if image_dimensions == 2:
             numpy_array = input_array
         else:
@@ -106,20 +106,18 @@ def normalized_dct_shannon_entropy(input_array, psf_support_diameter_xy, verbose
         dct_array = np.divide(dct_array, np.linalg.norm(dct_array, ord=2))
         image_entropy = calculate_entropy(dct_array, otf_support_x, otf_support_y)
 
-        if verbose:
-            print("DCTS Entropy:", image_entropy)
-            execution_time[image_idx] = time.time() - start_time
-            print("Execution Time:", execution_time[image_idx])
+        logger.info(f"DCTS Entropy = {image_entropy}")
+        execution_time[image_idx] = time.time() - start_time
+        logger.info(f"Execution Time: {execution_time[image_idx]}")
 
         entropy[image_idx] = image_entropy
         input_array[0][0] = 0
     return entropy
 
 class Debug_Module:
-    def __init__(self, model, verbose=False):
+    def __init__(self, model):
 
         self.model = model
-        self.verbose = verbose
         self.analysis_type = 'normal'
 
     def debug(self, command, *args, **kwargs):
@@ -170,9 +168,9 @@ class Debug_Module:
         if self.analysis_type == 'subprocess':
             self.model.analysis.terminate()
         if analysis_type == 'normal':
-            self.model.analysis = start_analysis(self.model.configuration, self.model.experiment, self.verbose)
+            self.model.analysis = start_analysis(self.model.configuration, self.model.experiment)
         elif analysis_type == 'subprocess':
-            self.model.analysis = ObjectInSubprocess(CPUAnalysis, verbose=self.verbose)
+            self.model.analysis = ObjectInSubprocess(CPUAnalysis)
         else:
             self.start_autofocus(*args, **kwargs)
         if analysis_type != 'pool':
@@ -305,8 +303,7 @@ class Debug_Module:
         while not self.model.stop_acquisition:
             frame_ids = self.model.camera.get_new_frame()
             # frame_ids = self.camera.buf_getlastframedata()
-            if self.verbose:
-                print('running data process, get frames', frame_ids)
+            logger.debug(f"Running data process, get frames {frame_ids}")
             # if there is at least one frame available
             if not frame_ids:
                 wait_num -= 1
@@ -318,8 +315,7 @@ class Debug_Module:
             acquired_frame_num += len(frame_ids)
 
             # show image
-            if self.verbose:
-                print('sent through pipe', frame_ids[0])
+            logger.debug(f"Sent through pipe {frame_ids[0]}")
             self.model.show_img_pipe.send(frame_ids[0])
 
             # autofocuse analyse
@@ -332,13 +328,12 @@ class Debug_Module:
                 except:
                     break
                 entropy = self.model.analysis.normalized_dct_shannon_entropy(self.model.data_buffer[f_frame_id], 3)
-                print('*******calculate entropy ', frame_num)
-                if self.verbose:
-                    print("Appending plot data focus, entropy: ", f_pos, entropy)
-                    plot_data.append([f_pos, entropy[0]])
-                    print("Testing plot data print: ", len(plot_data))
-                else:
-                    plot_data.append([f_pos, entropy[0]])
+                logger.debug(f"Calculate entropy: {frame_num}")
+
+                logger.debug(f"Appending plot data focus, entropy: {f_pos}, {entropy}")
+                plot_data.append([f_pos, entropy[0]])
+                logger.debug(f"Testing plot data print: {len(plot_data)}")
+
 
                 f_frame_id = -1
                 if entropy > self.model.max_entropy:
@@ -358,18 +353,17 @@ class Debug_Module:
         # Turning plot_data into numpy array and sending
         # we could send plot_data here or we could send it in function snap_image_with_autofocus
         if self.model.autofocus_on:
-            if self.verbose:
-                print("Model sending plot data: ", plot_data)
+            logger.debug(f"Model sending plot data: {plot_data}")
             plot_data = np.asarray(plot_data)
             self.model.plot_pipe.send(plot_data) # Sending controller plot data
         
         self.model.show_img_pipe.send('stop')
         # self.model.show_img_pipe.send(acquired_frame_num)
         end_time = time.perf_counter()
-        print('*******total time********', end_time - start_time)
-        print('received frames in total:', acquired_frame_num)
-        if self.verbose:
-            print('data thread is stopped, send stop to parent pipe')
+        logger.debug(f"Total Time: {end_time - start_time}")
+        logger.debug(f"Received Frames in Total: {acquired_frame_num}")
+        logger.debug(f"Data thread has stopped, send stop signal to parent pipe")
+
 
     def get_frames_analysis(self, num_of_frames=0):
         """
@@ -417,8 +411,7 @@ class Debug_Module:
         while not self.model.stop_acquisition:
             frame_ids = self.model.camera.get_new_frame()
             # frame_ids = self.camera.buf_getlastframedata()
-            if self.verbose:
-                print('running data process, get frames', frame_ids)
+            logger.debug(f"Running data process, get frames {frame_ids}")
             # if there is at least one frame available
             if not frame_ids:
                 wait_num -= 1
@@ -430,8 +423,7 @@ class Debug_Module:
             acquired_frame_num += len(frame_ids)
 
             # show image
-            if self.verbose:
-                print('sent through pipe', frame_ids[0])
+            logger.debug(f"Sent through pipe {frame_ids[0]}")
             self.model.show_img_pipe.send(frame_ids[0])
 
             # autofocuse analyse
@@ -445,7 +437,7 @@ class Debug_Module:
                     break
                 pool.apply_async(normalized_dct_shannon_entropy, (self.model.data_buffer[f_frame_id], 3,), callback = callback_func(f_pos, f_frame_id))
                 # entropy = normalized_dct_shannon_entropy(self.model.data_buffer[f_frame_id], 3)
-                print('*******calculate entropy ', frame_num)
+                logger.debug(f"Calculate Entropy: {frame_num}")
                 # if self.verbose:
                 #     print("Appending plot data focus, entropy: ", f_pos, entropy)
                 #     plot_data.append([f_pos, entropy[0]])
@@ -460,7 +452,7 @@ class Debug_Module:
                 if frame_num == 1:
                     end_lock.acquire()
                     frame_num = 10 # any value but not 1
-                    print('***********max shannon entropy:', self.model.max_entropy, self.model.focus_pos)
+                    logger.debug(f"Max Shannon Entropy: {self.model.max_entropy} {self.model.focus_pos}")
                     # find out the focus
                     self.model.autofocus_pos_queue.put(self.model.focus_pos)
                     end_length += end_length2
@@ -470,7 +462,7 @@ class Debug_Module:
                 num_of_frames -= len(frame_ids)
                 self.model.stop_acquisition = (num_of_frames <= 0) or self.model.stop_acquisition
         
-        print('entropy values:', plot_data)
+        logger.debug(f"Entropy Values: {plot_data}")
         pool.close()
         self.model.show_img_pipe.send('stop')
         self.model.show_img_pipe.send(acquired_frame_num)
@@ -478,12 +470,10 @@ class Debug_Module:
         # Turning plot_data into numpy array and sending
         # we could send plot_data here or we could send it in function snap_image_with_autofocus
         if self.model.autofocus_on:
-            if self.verbose:
-                print("Model sending plot data: ", plot_data)
+            logger.debug(f"Model sending plot data: {plot_data}")
             plot_data = np.asarray(plot_data)
             self.model.plot_pipe.send(plot_data) # Sending controller plot data
         end_time = time.perf_counter()
-        print('*******total time********', end_time - start_time)
-        print('received frames in total:', acquired_frame_num)
-        if self.verbose:
-            print('data thread is stopped, send stop to parent pipe')
+        logger.debug(f"Total Time: {end_time - start_time}")
+        logger.debug(f"Received frames in total: {acquired_frame_num}")
+        logger.debug(f"Data thread has stopped, send stop signal to parent pipe")

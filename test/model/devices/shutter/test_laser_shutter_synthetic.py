@@ -38,7 +38,7 @@ from pathlib import Path
 
 # Local Imports
 from aslm.model.devices.shutter.laser_shutter_synthetic import SyntheticShutter
-from aslm.model.aslm_model_config import Session as session
+from aslm.model.aslm_model_config import Configurator
 
 
 class TestSyntheticShutter(unittest.TestCase):
@@ -51,18 +51,14 @@ class TestSyntheticShutter(unittest.TestCase):
         configuration_path = Path.joinpath(configuration_directory, 'configuration.yml')
         experiment_path = Path.joinpath(configuration_directory, 'experiment.yml')
 
-        configuration = session(file_path=configuration_path,
-                                verbose=False)
-        experiment = session(file_path=experiment_path,
-                             verbose=False)
+        configuration = Configurator(file_path=configuration_path)
+        experiment = Configurator(file_path=experiment_path)
         shutter = SyntheticShutter(configuration,
-                              experiment,
-                              False)
+                              experiment)
 
         # Attributes
         assert hasattr(shutter, 'configuration')
         assert hasattr(shutter, 'experiment')
-        assert hasattr(shutter, 'verbose')
         assert hasattr(shutter, 'shutter_right')
         assert hasattr(shutter, 'shutter_right_state')
         assert hasattr(shutter, 'shutter_left')

@@ -177,7 +177,6 @@ class ObisLaser(LaserBase):
         self.send(command, value)
         self.read()
 
-    # send() and read()
 
     def send(self, command, value=''):
         try:
@@ -192,26 +191,16 @@ class ObisLaser(LaserBase):
 
     #ToDo - Update with what might be needs to use the errors in the software or to log them
     def read(self):
-        # this while loop fixed most of the blanking response issue
+
         response = ''
         while result := self.laser.readline():
             # print("Output: ",result)
             # print(result.decode('ascii').strip('\r\n'))
             if result == b'OK\r\n':
-                # print('line is OK')
                 # result = "OK"
                 result = result.decode('ascii').strip('\r\n')
                 break
-            # if result == b'OFF\r\n':
-            #     print('line is OFF')
-            #     continue
-            # if result == b'ON\r\n':
-            #     print('line is OFF')
-            #     continue
             if result.startswith(b'ERR'):
-                # print('line is Error')
-                # result = "ERROR"
-                # Future error handling call TODO
                 # result = result.strip('ERR')
                 # print(f"Error {code}: {errors[code]}.")
                 code = result.decode('ascii').strip('\r\n')
@@ -220,12 +209,10 @@ class ObisLaser(LaserBase):
                 break
             # response = result
             response = result.decode('ascii').strip('\r\n')
-            
-        # Sleeps allowing serial communicate to finish???
+
         # look into instead of using sleep make sure we get an OK or response we are expecting before we send another
         # Fixing this would help speed up the code
         sleep(.5)
-        # print(type(result))
         print(f"Result: {result}, Resp: {response}")
         return result, response
 
@@ -233,46 +220,10 @@ class ObisLaser(LaserBase):
     # funstion is as it descibles an is what was used to test all of the commands
     def testing(self):
 
-        # self.send_and_read(commands['l_state'])
-        # self.send_and_read(commands['l_current_power_level'])
-        # self.send_and_read(commands['set_power_level'], '.00200')
-        # self.send_and_read(commands['l_model'])
-        # self.send_and_read(commands['l_cabibration_date'])
-        # self.send_and_read(commands['l_serial_num'])
-        # self.send_and_read(commands['l_part_num'])
-        # self.send_and_read(commands['l_firmware_version'])
-        # self.send_and_read(commands['l_wavelength'])
-        # self.send_and_read(commands['l_power_rating'])
-        # self.send_and_read(commands['l_min_power'])
-        # self.send_and_read(commands['l_max_power'])
-        # self.send_and_read(commands['l_output_power_level'])
-        # self.send_and_read(commands['l_output_current'])
-        # self.send_and_read(commands['l_opperating_mode'])
-        # self.send_and_read(commands['l_current_power_level'])
-        # self.send_and_read(commands['l_status'])
-        # self.send_and_read(commands['l_state'])
-        # self.send_and_read(commands['l_system_fault'])
+        self.send_and_read(commands['l_state'])
+        self.send_and_read(commands['l_current_power_level'])
+        self.send_and_read(commands['set_power_level'], '.00200')
 
-        # self.send_and_read(commands['set_operating_mode_Int'], 'CWP')
-        # self.send_and_read(commands['l_opperating_mode'])
-        # self.send_and_read(commands['set_operating_mode_Ext'], 'DIGital')
-        # self.send_and_read(commands['l_opperating_mode'])
-        # self.send_and_read(commands['set_operating_mode_Ext'], 'ANALog')
-        # self.send_and_read(commands['l_opperating_mode'])
-        # self.send_and_read(commands['set_operating_mode_Ext'], 'MIXed')
-        # self.send_and_read(commands['l_opperating_mode'])
-
-        self.send_and_read(commands['set_analog_type'], '1')
-        self.send_and_read(commands['l_analog_type'])
-
-
-        # level = 0.02
-        # # Need to test this now
-        # self.send("SOURce:POWer:LEVel:IMMediate:AMPLitude %.5f" % level)
-        # # self.send("SOURce:POWer:LEVel:IMMediate:AMPLitude 0.20000 ")
-        # # Sleeps allowing serial commaction to finish???
-        # sleep(.5)
-        # response = self.read()
 
 
 

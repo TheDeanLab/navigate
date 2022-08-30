@@ -118,8 +118,8 @@ class Autofocus():
     def pre_func_signal(self):
         settings = self.model.experiment.AutoFocusParameters
         # self.focus_pos = args[2]  # Current position
-        # self.focus_pos = self.model.focus_pos # TODO: get focus position from model right now.
-        self.focus_pos = self.model.get_stage_position()['f_pos']
+        self.focus_pos = self.model.focus_pos # TODO: get focus position from model right now.
+        # self.focus_pos = self.model.get_stage_position()['f_pos']
         self.total_frame_num = self.get_autofocus_frame_num() #total frame num
         self.coarse_steps, self.init_pos = 0, 0
         if settings['fine_selected']:
@@ -184,7 +184,7 @@ class Autofocus():
 
             # print('entropy:', self.f_frame_id, self.frame_num, self.f_pos, entropy)
 
-            self.model.logger.debug(f'Appending plot data focus, entropy: {self.f_pos}, {entropy}')
+            self.model.logger.debug(f'Appending plot data for frame {self.f_frame_id} focus: {self.f_pos}, entropy: {entropy[0]}')
             self.plot_data.append([self.f_pos, entropy[0]])
             # Need to initialize entropy above for the first iteration of the autofocus routine.
             # Need to initialize entropy_vector above for the first iteration of the autofocus routine.

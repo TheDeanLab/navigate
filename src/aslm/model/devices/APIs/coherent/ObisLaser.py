@@ -77,7 +77,7 @@ fault = {
 commands = {
     # commands to get info from laser
     "l_model": "SYSTem:INFormation:MODel?",
-    "l_cabibration_date": "SYSTem:INFormation:CDATe?",
+    "l_calibration_date": "SYSTem:INFormation:CDATe?",
     "l_serial_num": "SYSTem:INFormation:SNUMber?",
     "l_part_num": "SYSTem:INFormation:PNUMber?",
     "l_firmware_version": "SYSTem:INFormation:FVERsion?",

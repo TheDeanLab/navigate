@@ -173,20 +173,18 @@ class ObisLaser(LaserBase):
         except serial.SerialException:
             print('could not close the port')
 
-    def send_and_read(self, command, value=''):
-        self.send(command, value)
-        self.read()
-
 
     def send(self, command, value=''):
         try:
             # response = self.laser.write((command + value + self.end_of_line).encode())
-            response = self.laser.write((" ".join(command, value, self.end_of_line)).encode())
+            response = self.laser.write((" ".join(commands[command], value, self.end_of_line)).encode())
             # print (command + value + self.end_of_line)
         except SerialTimeoutException as e:
             print(e)
         sleep(0.5)
         print(command + value)
+
+        self.read()
         # return response
 
 
@@ -221,9 +219,9 @@ class ObisLaser(LaserBase):
     # funstion is as it descibles an is what was used to test all of the commands
     def testing(self):
 
-        self.send_and_read(commands['l_state'])
-        self.send_and_read(commands['l_current_power_level'])
-        self.send_and_read(commands['set_power_level'], '.00200')
+        self.send(commands['l_state'])
+        self.send(commands['l_current_power_level'])
+        self.send(commands['set_power_level'], '.00200')
 
 
 

@@ -579,8 +579,10 @@ class Model:
         """
         self.current_channel = 0
         if hasattr(self, 'signal_container'):
+            self.signal_container.cleanup()
             delattr(self, 'signal_container')
         if hasattr(self, 'data_container'):
+            self.data_container.cleanup()
             delattr(self, 'data_container')
         if self.camera.is_acquiring:
             self.camera.close_image_series()
@@ -635,6 +637,7 @@ class Model:
             
             if hasattr(self, 'data_container'):
                 if self.data_container.is_closed:
+                    self.stop_acquisition = True
                     break
                 self.data_container.run(frame_ids)
 

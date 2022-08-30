@@ -187,7 +187,11 @@ class DataContainer(Container):
                 result, is_end = self.curr_node.run(*args)
             except:
                 if self.curr_node.need_response == False and self.curr_node.node_type == 'one-step':
-                    self.curr_node.node_funcs.get('cleanup', dummy_func)()
+                    try:
+                        self.curr_node.node_funcs.get('cleanup', dummy_func)()
+                    except:
+                        print(f'The node({self.curr_node.node_name}) is not closed correctly! Please check the cleanup function')
+                        pass
                     self.curr_node.is_marked = True
                     result, is_end = False, True
                 else:

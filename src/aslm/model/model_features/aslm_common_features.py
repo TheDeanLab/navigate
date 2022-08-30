@@ -65,7 +65,7 @@ class Snap:
     def __init__(self, model):
         self.model = model
 
-        self.config_table={'data': {'main': self.data_func}}
+        self.config_table = {'data': {'main': self.data_func}}
 
     def data_func(self, frame_ids):
         print('the camera is:', self.model.camera.serial_number, frame_ids, self.model.frame_id)
@@ -74,6 +74,25 @@ class Snap:
     def generate_meta_data(self, *args):
         # print('This frame: snap one frame', self.model.frame_id)
         return True
+
+class WaitToContinue:
+    def __init__(self, model):
+        self.model = model
+        self.can_continue = False
+        self.target_frame_id = -1
+
+        self.config_table = {'signal': {'main': self.signal_func},
+                             'data':   {'pre-main': self.data_func}}
+
+    def signal_func(self):
+        self.can_continue = True
+        self.target_frame_id = self.model.frame_id
+        print('--wait to continue:', self.target_frame_id)
+        return True
+
+    def data_func(self, frame_ids):
+        print('??continue??', self.target_frame_id, frame_ids)
+        return self.can_continue and (self.target_frame_id in frame_ids)
 
 
 class ZStackAcquisition:

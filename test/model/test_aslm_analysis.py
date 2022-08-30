@@ -85,7 +85,8 @@ def test_fast_normalized_dct_shannon_entropy():
 
     anal = Analysis()
 
-    image_array = np.ones((np.random.randint(1,4),128,128)).squeeze()
+    # image_array = np.ones((np.random.randint(1,4),128,128)).squeeze()
+    image_array = np.ones((128, 128)).squeeze()
     psf_support_diameter_xy = np.random.randint(3, 10)
 
     entropy = anal.fast_normalized_dct_shannon_entropy(image_array, psf_support_diameter_xy)

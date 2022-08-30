@@ -282,6 +282,10 @@ class DAQBase:
             Duration of time necessary to readout a camera frame.
         """
         laser, resolution_mode, zoom = channel['laser'], microscope_state['resolution_mode'],  microscope_state['zoom']
+        if resolution_mode == 'high':
+            # TODO: Temporary hard code because I don't want to chase down why the dictionaries are getting
+            #       passed out of order again.
+            zoom = 'N/A'
         remote_focus_dict = self.etl_constants.ETLConstants[resolution_mode][zoom][laser]
 
         # Use defaults of 0 in the case they are not provided

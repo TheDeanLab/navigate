@@ -157,21 +157,16 @@ class Analysis:
         return entropy
 
     def fast_normalized_dct_shannon_entropy(self,
-                                       input_array,
-                                       psf_support_diameter_xy):
+                                            input_array,
+                                            psf_support_diameter_xy):
 
-        axes = (0, 1)
-        sl = slice(None)
-        if input_array.ndim > 2:
-            axes = (1, 2)
-            sl = (slice(None), np.newaxis, np.newaxis)
+        dct_array = dctn(input_array, type=2)
+        abs_array = np.abs(dct_array / np.linalg.norm(dct_array))
+        yh = int(input_array.shape[1]//psf_support_diameter_xy)
+        xh = int(input_array.shape[0]//psf_support_diameter_xy)
+        entropy = -2*np.nansum(abs_array[:xh,:yh]*np.log2(abs_array[:xh,:yh]))/(yh*xh)
 
-        dct_array = dctn(input_array, type=2, axes=axes)
-        abs_array = np.abs(dct_array / np.atleast_1d(np.linalg.norm(dct_array, axis=axes))[sl])
-        image_entropy = -2 * np.nansum(abs_array * np.log2(abs_array), axis=axes) \
-                        / np.prod([input_array.shape[x] / psf_support_diameter_xy for x in axes])
-
-        return np.atleast_1d(image_entropy)
+        return np.atleast_1d(entropy)
 
     def estimate_image_resolution(self,
                                   input_array,

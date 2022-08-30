@@ -35,8 +35,9 @@ import threading
 import time
 import random
 
-from aslm.model.model_features.aslm_feature_container import SignalNode, load_features
+from aslm.model.model_features.aslm_feature_container import SignalNode, DataNode, DataContainer, load_features
 from aslm.model.model_features.aslm_common_features import WaitToContinue
+from aslm.model.model_features.aslm_feature_container import dummy_True
 
 class DummyFeature:
     def __init__(self, *args):
@@ -52,7 +53,9 @@ class DummyFeature:
         self.init_times = 0
         self.running_times_main_func = 0
         self.running_times_response_func = 0
+        self.running_times_cleanup_func = 0
         self.is_end = False
+        self.is_closed = False
 
         self.model = None if len(args) == 0 else args[0]
         self.feature_name = args[1] if len(args) > 1 else 'none'
@@ -104,11 +107,17 @@ class DummyFeature:
     def end_func(self):
         return self.is_end
 
+    def close(self):
+        self.is_closed = True
+        self.running_times_cleanup_func += 1
+
     def clear(self):
         self.init_times = 0
         self.running_times_main_func = 0
         self.running_times_response_func = 0
+        self.running_times_cleanup_func = 0
         self.is_end = False
+        self.is_closed = False
 
     def signal_init_func(self, *args):
         self.target_frame_id = -1
@@ -445,7 +454,7 @@ class TestFeatureContainer(unittest.TestCase):
 
         print('without waiting for a response:')
         node = SignalNode('test_1', func_dict)
-        assert node.has_response_func == False
+        assert node.need_response == False
         assert node.node_funcs['end']() == False
 
         feature.is_end = True
@@ -479,7 +488,7 @@ class TestFeatureContainer(unittest.TestCase):
         feature.clear()
         node = SignalNode('test_1', func_dict, device_related=True)
         print(node.node_type)
-        assert node.has_response_func == False
+        assert node.need_response == False
         result, is_end = node.run()
         assert is_end == True
         assert node.wait_response == False
@@ -497,7 +506,7 @@ class TestFeatureContainer(unittest.TestCase):
         feature.clear()
         node.node_type = 'multi-step'
         assert func_dict.get('main-response', None) == None
-        assert node.has_response_func == False
+        assert node.need_response == False
         steps = 5
         for i in range(steps+1):
             feature.is_end = (i == steps)
@@ -518,7 +527,7 @@ class TestFeatureContainer(unittest.TestCase):
         feature.clear()
         node = SignalNode('test_1', func_dict, node_type='multi-step', device_related=True)
         assert func_dict.get('main-response') == None
-        assert node.has_response_func == False
+        assert node.need_response == False
         assert node.device_related == True
         steps = 5
         for i in range(steps+1):
@@ -540,8 +549,8 @@ class TestFeatureContainer(unittest.TestCase):
         print('wait for a response:')
         feature.clear()
         func_dict['main-response'] = feature.response_func
-        node = SignalNode('test_2', func_dict)
-        assert node.has_response_func == True
+        node = SignalNode('test_2', func_dict, need_response=True)
+        assert node.need_response == True
         assert node.wait_response == False
 
         print('--running without waiting option')
@@ -601,7 +610,7 @@ class TestFeatureContainer(unittest.TestCase):
 
         print('--multi-step function')
         feature.clear()
-        node = SignalNode('test', func_dict, node_type='multi-step')
+        node = SignalNode('test', func_dict, node_type='multi-step', need_response=True)
         steps = 5
         for i in range(steps+1):
             feature.is_end = (i == steps)
@@ -616,6 +625,105 @@ class TestFeatureContainer(unittest.TestCase):
                 assert is_end == True
             assert feature.running_times_response_func == i+1
             assert node.wait_response == False
+
+    def test_node_cleanup(self):
+        def wrap_error_func(func):
+            def temp_func(raise_error=False):
+                if raise_error:
+                    raise Exception
+                func()
+            return temp_func
+
+        feature = DummyFeature()
+        func_dict = {
+            'init': feature.init_func,
+            'pre-main': dummy_True,
+            'main': wrap_error_func(feature.main_func),
+            'end': feature.end_func,
+        }
+        # one-step node without response
+        print('- one-step node without response')
+        node = DataNode('cleanup_node', func_dict)
+        data_container = DataContainer(node)
+        assert data_container.root == node
+        data_container.run()
+        assert feature.running_times_main_func == 1, feature.running_times_main_func
+        data_container.run(True)
+        assert node.is_marked == True
+        assert feature.running_times_main_func == 1, feature.running_times_main_func
+
+        feature.clear()
+        func_dict['cleanup'] = feature.close
+        node = DataNode('cleanup_node', func_dict)
+        data_container = DataContainer(node)
+        data_container.run()
+        data_container.run(True)
+        assert feature.is_closed == True
+        assert node.is_marked == True
+        assert feature.running_times_main_func == 1
+        data_container.run()
+        assert feature.running_times_main_func == 1
+
+        # node with response
+        print('- node with response')
+        feature.clear()
+        node = DataNode('cleanup_node', func_dict, need_response=True)
+        data_container = DataContainer(node, [node])
+        assert data_container.root == node
+        data_container.run()
+        assert feature.running_times_main_func == 1, feature.running_times_main_func
+        data_container.run(True)
+        assert feature.running_times_cleanup_func == 1
+        assert feature.is_closed == True
+        assert node.is_marked == False
+        assert feature.running_times_main_func == 1
+        assert data_container.end_flag == True
+        data_container.run()
+        assert feature.running_times_main_func == 1
+
+        # multiple nodes
+        print('- multiple nodes')
+        feature.clear()
+        node1 = DataNode('cleanup_node1', func_dict)
+        node2 = DataNode('cleanup_node2', func_dict, device_related=True)
+        node3 = DataNode('cleanup_node3', func_dict, need_response=True, device_related=True)
+        node1.sibling = node2
+        node2.sibling = node3
+        cleanup_list = [node1, node2, node3]
+        data_container = DataContainer(node1, cleanup_list)
+        assert data_container.root == node1
+        assert feature.running_times_main_func == 0
+
+        for i in range(1, 4):
+            data_container.run()
+            assert feature.running_times_main_func == i, feature.running_times_main_func
+        # mark a single node
+        data_container.run(True)
+        assert feature.is_closed == True
+        assert feature.running_times_cleanup_func == 1
+        feature.is_closed = False
+        assert node1.is_marked == True
+        assert feature.running_times_main_func == 3
+        assert data_container.end_flag == False
+        data_container.run()
+        assert feature.running_times_main_func == 4
+        assert node2.is_marked == False
+        data_container.run()
+        assert feature.running_times_main_func == 5
+        assert node3.is_marked == False
+        # run node1 which is marked
+        data_container.run()
+        assert feature.running_times_main_func == 5
+        # run node2
+        data_container.run()
+        assert feature.running_times_main_func == 6
+        assert node2.is_marked == False
+        # run node3 and clean up all nodes
+        data_container.run(True)
+        assert feature.running_times_cleanup_func == 4
+        assert feature.running_times_main_func == 6
+        assert data_container.end_flag == True
+
 
 if __name__ == '__main__':
     unittest.main()

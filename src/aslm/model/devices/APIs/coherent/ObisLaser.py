@@ -99,11 +99,11 @@ commands = {
 
     # Set operating mode Internal - valid values = CWP|CWC
     # Note CWC didnt work when base testing
-    "set_operating_mode_Int": "SOURce:AM:INTernal ",
+    "set_operating_mode_int": "SOURce:AM:INTernal ",
 
     # Set operating mode External - valid values = DIGital|ANALog|MIXed|DIGSO|MIXSO
     # Note DIGSO|MIXSO didnt work when base testing
-    "set_operating_mode_Ext": "SOURce:AM:EXTernal ",
+    "set_operating_mode_ext": "SOURce:AM:EXTernal ",
 
     # Set power level - needs to be exactly 5 decimal places or it will not work!
     "set_power_level": "SOURce:POWer:LEVel:IMMediate:AMPLitude ",

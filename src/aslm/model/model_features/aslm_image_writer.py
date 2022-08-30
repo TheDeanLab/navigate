@@ -59,7 +59,8 @@ class ImageWriter:
         self.data_buffer = self.model.data_buffer
         self.current_time_point = 0
         self.config_table = {'signal': {},
-                             'data': {'main': self.save_image}}
+                             'data': {'main': self.save_image,
+                                      'cleanup': self.close}}
 
         # create the save directory if it doesn't already exist
         self.save_directory = os.path.join(self.model.experiment.Saving['save_directory'], self.sub_dir)

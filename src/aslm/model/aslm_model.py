@@ -634,6 +634,8 @@ class Model:
                 data_func(frame_ids)
             
             if hasattr(self, 'data_container'):
+                if self.data_container.is_closed:
+                    break
                 self.data_container.run(frame_ids)
 
             # show image
@@ -911,6 +913,8 @@ class Model:
         while not self.signal_container.end_flag and not self.stop_send_signal and not self.stop_acquisition:
             self.run_single_channel_acquisition(self.target_channel)
             if not hasattr(self, 'signal_container'):
+                return
+            if self.signal_container.is_closed:
                 return
     
     def change_resolution(self, resolution_value):

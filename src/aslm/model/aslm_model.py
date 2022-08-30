@@ -915,6 +915,7 @@ class Model:
             if not hasattr(self, 'signal_container'):
                 return
             if self.signal_container.is_closed:
+                self.stop_acquisition = True
                 return
     
     def change_resolution(self, resolution_value):

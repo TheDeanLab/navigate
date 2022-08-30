@@ -95,30 +95,30 @@ commands = {
 
     # set commands and values will need to be passed in function
     # valid value are ON or OFF
-    "set_blanking": "SOURce:AModulation:BLANKing ",
+    "set_blanking": "SOURce:AModulation:BLANKing",
 
     # Set operating mode Internal - valid values = CWP|CWC
     # Note CWC didnt work when base testing
-    "set_operating_mode_int": "SOURce:AM:INTernal ",
+    "set_operating_mode_int": "SOURce:AM:INTernal",
 
     # Set operating mode External - valid values = DIGital|ANALog|MIXed|DIGSO|MIXSO
     # Note DIGSO|MIXSO didnt work when base testing
-    "set_operating_mode_ext": "SOURce:AM:EXTernal ",
+    "set_operating_mode_ext": "SOURce:AM:EXTernal",
 
     # Set power level - needs to be exactly 5 decimal places or it will not work!
-    "set_power_level": "SOURce:POWer:LEVel:IMMediate:AMPLitude ",
+    "set_power_level": "SOURce:POWer:LEVel:IMMediate:AMPLitude",
 
     # Set laser state - valid values = ON or OFF
-    "set_state": "SOURce:AM:STATe ",
+    "set_state": "SOURce:AM:STATe",
 
 
     # unrecognized commands Below
     "l_blanking_status": "SOURce:AModulation:BLANKing?",
     "l_analog_type": "SYSTem:INFormation:AMODulation:TYPe?",
     # set analog mod type - valid values = 1 or 2
-    "set_analog_type": "SYSTem:INFormation:AMODulation:TYPe ",
+    "set_analog_type": "SYSTem:INFormation:AMODulation:TYPe",
     # set blanking status - valid values = On or OFF
-    "set_blanking_status": "SOURce:AModulation:BLANKing ",
+    "set_blanking_status": "SOURce:AModulation:BLANKing",
 }
 
 class ObisLaser(LaserBase):
@@ -133,7 +133,7 @@ class ObisLaser(LaserBase):
     # def __init__(self, port='COM4'):
         self.timeout = 0.05
         self.end_of_line = '\r\n'
-        self.verbose = verbose
+        # self.verbose = verbose
 
         try:
             # Open serial port
@@ -180,7 +180,8 @@ class ObisLaser(LaserBase):
 
     def send(self, command, value=''):
         try:
-            response = self.laser.write((command + value + self.end_of_line).encode())
+            # response = self.laser.write((command + value + self.end_of_line).encode())
+            response = self.laser.write((" ".join(command, value, self.end_of_line)).encode())
             # print (command + value + self.end_of_line)
         except SerialTimeoutException as e:
             print(e)

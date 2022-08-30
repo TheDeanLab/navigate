@@ -72,9 +72,11 @@ class Analysis:
         image_dimensions = input_array.ndim
 
         if image_dimensions == 2:
+            axes = (0, 1)
             (image_height, image_width) = input_array.shape
             number_of_images = 1
         elif image_dimensions == 3:
+            axes = (1, 2)
             (number_of_images, image_height, image_width) = input_array.shape
         else:
             raise ValueError("Only 2D and 3D Images Supported.")
@@ -82,9 +84,14 @@ class Analysis:
         #  Preallocate Array
         entropy = np.zeros(number_of_images)
 
-        for image_idx in range(int(number_of_images)):
-            # Add entropy value to the entropy array
-            entropy[image_idx] = np.sum(input_array[image_idx,...])
+        s = np.prod([input_array.shape[x]**2 / psf_support_diameter_xy for x in axes])
+
+        if number_of_images == 1:
+            entropy[0] = np.sum(input_array)/s
+        else:
+            for image_idx in range(int(number_of_images)):
+                # Add entropy value to the entropy array
+                entropy[image_idx] = np.sum(input_array[image_idx,...])/s
 
         return entropy
 

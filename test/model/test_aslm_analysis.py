@@ -55,8 +55,8 @@ def power_tent(r, off, scale, sigma, alpha):
 def power_tent_res(x, r, val):
     return power_tent(r, *x)-val
 
-def power_tent_rsq(x, r, val):
-    ss_err = (power_tent_res(x,r,val)**2).sum()
+def rsq(res_func, x, r, val):
+    ss_err = (res_func(x,r,val)**2).sum()
     ss_tot = ((val-val.mean())**2).sum()
     rsq = 1 - (ss_err/ss_tot)
     return rsq
@@ -78,7 +78,7 @@ def test_fast_normalized_dct_shannon_entropy_tent():
         
     res = least_squares(power_tent_res, [np.min(points),np.max(points),1,0.5], args=(r,points))
 
-    assert(power_tent_rsq(res.x, r, points) > 0.9)
+    assert(rsq(power_tent_res, res.x, r, points) > 0.9)
 
 def test_fast_normalized_dct_shannon_entropy():
     from aslm.model.aslm_analysis import Analysis

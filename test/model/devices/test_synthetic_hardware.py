@@ -62,17 +62,6 @@ class TestSyntheticHardware():
 
         return True
 
-    def test_synthetic_filter_wheel(self):
-        from aslm.model.devices.filter_wheel.filter_wheel_synthetic import SyntheticFilterWheel
-        self.dummy_model = get_dummy_model()
-        self.config = self.dummy_model.configuration
-        self.experiment = self.dummy_model.experiment
-        self.etl_const = self.dummy_model.etl_constants
-
-        sf = SyntheticFilterWheel(self.config)
-
-        return True
-
     def test_synthetic_stage(self):
         from aslm.model.devices.stages.stage_synthetic import SyntheticStage
         self.dummy_model = get_dummy_model()

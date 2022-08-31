@@ -66,6 +66,36 @@ class Analysis:
     def __del__(self):
         pass
 
+    def image_intensity(self, input_array, psf_support_diameter_xy):
+        # Get Image Attributes
+        input_array = np.double(input_array)
+        image_dimensions = input_array.ndim
+
+        if image_dimensions == 2:
+            axes = (0, 1)
+            (image_height, image_width) = input_array.shape
+            number_of_images = 1
+        elif image_dimensions == 3:
+            axes = (1, 2)
+            (number_of_images, image_height, image_width) = input_array.shape
+        else:
+            raise ValueError("Only 2D and 3D Images Supported.")
+
+        #  Preallocate Array
+        entropy = np.zeros(number_of_images)
+
+        s = np.prod([input_array.shape[x]**2 / psf_support_diameter_xy for x in axes])
+
+        if number_of_images == 1:
+            entropy[0] = np.sum(input_array)/s
+        else:
+            for image_idx in range(int(number_of_images)):
+                # Add entropy value to the entropy array
+                entropy[image_idx] = np.sum(input_array[image_idx,...])/s
+
+        return entropy
+
+
     def normalized_dct_shannon_entropy(self,
                                        input_array,
                                        psf_support_diameter_xy):
@@ -125,6 +155,18 @@ class Analysis:
             # Add entropy value to the entropy array
             entropy[image_idx] = image_entropy
         return entropy
+
+    def fast_normalized_dct_shannon_entropy(self,
+                                            input_array,
+                                            psf_support_diameter_xy):
+
+        dct_array = dctn(input_array, type=2)
+        abs_array = np.abs(dct_array / np.linalg.norm(dct_array))
+        yh = int(input_array.shape[1]//psf_support_diameter_xy)
+        xh = int(input_array.shape[0]//psf_support_diameter_xy)
+        entropy = -2*np.nansum(abs_array[:xh,:yh]*np.log2(abs_array[:xh,:yh]))/(yh*xh)
+
+        return np.atleast_1d(entropy)
 
     def estimate_image_resolution(self,
                                   input_array,

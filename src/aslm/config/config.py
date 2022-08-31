@@ -4,9 +4,9 @@ import platform
 from pathlib import Path
 
 def get_configuration_paths():
-    # Establish a base directory in AppData/.ASLM for Windows or ~/.ASLM for Mac and Linux
+    # Establish a base directory in AppData/Local/.ASLM for Windows or ~/.ASLM for Mac and Linux
     if platform.system() == 'Windows':
-        base_directory = os.getenv('APPDATA')
+        base_directory = os.getenv('LOCALAPPDATA')
     else:
         base_directory = os.getenv('HOME')
     aslm_directory = os.path.join(base_directory, '.ASLM')

@@ -377,6 +377,7 @@ class FindTissueSimple2D:
 
             self.model.event_queue.put(('multiposition', table_values))
 
+
 class AutoCenterBeam:
     def __init__(self, model) -> None:
         self.model = model
@@ -391,87 +392,111 @@ class AutoCenterBeam:
                                       'device_related': True },
                             }
 
-        self.total_frame_num = 10
-        self.off_step = 0.1
-        self.amp_step = 0.1
+        self.total_frame_num = 20
+        self.etl_step = 0.05
+        self.galvo_step = 0.05
         self.switch_at = int(self.total_frame_num//2)
         self.signal_id = 0
         self.psf_support_size = 6
         self.row = None
         self.col = None
-        self.amp = None
-        self.off = None
+        self.etl_offsets = None
+        self.galvo_offsets = None
+        self.get_frames_num = 0
+        self.target_channel = 1
     
     def pre_func_signal(self):
-        self.amp = np.zeros((self.switch_at,))
-        self.off = np.zeros((self.switch_at,))
         self.image_width = self.model.experiment.CameraParameters['x_pixels']
         self.image_height = self.model.experiment.CameraParameters['y_pixels']
         self.resolution = self.model.experiment.MicroscopeState['resolution_mode']
         self.zoom = self.model.experiment.MicroscopeState['zoom']
+
+        self.wvl_string = self.model.experiment.MicroscopeState['channels'][f"channel_{self.target_channel}"]['laser']
+        wvl = int((self.wvl_string).split('nm')[0])/1000  # um
+
         self.etl_dict = self.model.etl_constants.ETLConstants[self.resolution][self.zoom].copy()
+        self.etl_dict[self.wvl_string]['offset'] = str(float(self.etl_dict[self.wvl_string]['offset'])-0.25)
+        self.etl_dict[self.wvl_string]['amplitude'] = 0
         self.galvo_dict = self.model.experiment.GalvoParameters.copy()
+
         self.side = "r" if self.resolution == "high" else "l"
-        self.offsets = self.galvo_dict[f'galvo_{self.side}_offset'] + np.arange(self.switch_at)*self.off_step
-        self.amplitudes = self.etl_dict['amplitude'] + np.arange(self.switch_at)*self.amp_step
+        if self.side == "l":
+            self.model.experiment.GalvoParameters[f'galvo_{self.side}_amplitude'] = 0
+        self.galvo_dict[f'galvo_{self.side}_offset'] = str(float(self.galvo_dict[f'galvo_{self.side}_offset'])-0.25)
+        print(f"Galvo offset initially at {self.galvo_dict[f'galvo_{self.side}_offset']}")
+        print(f"ETL offset initially at {self.etl_dict[self.wvl_string]['offset']}")
+        self.galvo_offsets = float(self.galvo_dict[f'galvo_{self.side}_offset']) + np.arange(self.switch_at) * self.galvo_step
+        self.etl_offsets = float(self.etl_dict[self.wvl_string]['offset']) + np.arange(self.switch_at) * self.etl_step
         self.signal_id = 0
-        wvl = int(self.model.experiment.Channels[self.target_channel]['laser'].split('nm')[0])/1000  # um
+
         if self.resolution == 'low':
             pixel_size = self.model.configuration.ZoomParameters['low_res_zoom_pixel_size'][self.zoom]
         else:
-            pixel_size  = self.model.configuration.ZoomParameters['high_res_zoom_pixel_size']
+            pixel_size = self.model.configuration.ZoomParameters['high_res_zoom_pixel_size']
         # TODO: Don't hardcode numerical aperture
         self.psf_support_size = support_psf_width(wvl, 0.15, pixel_size)
 
     def in_func_signal(self):
         ## Move beam
-        # etl_amplitude = float(etl_constants.ETLConstants[self.imaging_mode][zoom][laser]['amplitude'])
-        # etl_offset = float(etl_constants.ETLConstants[self.imaging_mode][zoom][laser]['offset'])
         if self.signal_id < self.switch_at:
-            self.etl_dict['amplitude'] += self.amp_step
-            self.model.experiment.GalvoParameters[f'galvo_{self.side}_offset'] = self.offsets[0]
+            etl_off = str(float(self.etl_dict[self.wvl_string]['offset']) + self.etl_step)
+            galvo_off = str(self.galvo_offsets[self.switch_at//2])
         else:
-            self.etl_dict['ampltude'] = self.amplitudes[0]
-            self.model.experiment.GalvoParameters[f'galvo_{self.side}_offset'] += self.off_step
-        temp = {
-                'resolution_mode': self.resolution,
-                'zoom': self.zoom,
-                'laser_info': self.etl_dict
-            }
-        self.model.run_command('update_setting', 'resolution', temp)
+            etl_off = str(self.etl_offsets[self.switch_at//2])
+            galvo_off = str(float(self.model.experiment.GalvoParameters[f'galvo_{self.side}_offset']) + self.galvo_step)
+
+        print(f"ETL offset: {etl_off} Galvo offset: {galvo_off}")
+        self.etl_dict[self.wvl_string]['offset'] = etl_off
+        self.model.etl_constants.ETLConstants[self.resolution][self.zoom] = self.etl_dict
+        self.model.experiment.GalvoParameters[f'galvo_{self.side}_offset'] = galvo_off
         self.signal_id += 1
 
+        return self.signal_id < self.total_frame_num
+
     def end_func_signal(self):
-        return self.signal_id > self.total_frame_num
+        return self.signal_id >= self.total_frame_num
 
     def pre_func_data(self):
-        self.row = []
-        self.col = []
+        self.row = np.zeros((self.switch_at,))
+        self.col = np.zeros((self.switch_at,))
+        self.get_frames_num = 0
 
     def in_func_data(self, frame_ids=[]):
-        for id in frame_ids:
-            row, col = centroid_image_intensity_by_max(self.model.data_buffer[id], self.psf_support_size)
-            self.row[self.get_frames_num] = row
-            self.col[self.get_frames_num] = col
+        for i in frame_ids:
+            print(f"Considering frame id {i}")
+            row, col = centroid_image_intensity_by_max(self.model.data_buffer[i], self.psf_support_size)
+            if self.get_frames_num < self.switch_at:
+                print(row, col, self.get_frames_num)
+                self.row[self.get_frames_num] = row
+            else:
+                print(row, col, self.get_frames_num - self.switch_at)
+                self.col[self.get_frames_num-self.switch_at] = col
             self.get_frames_num += 1
 
+        if self.get_frames_num >= self.total_frame_num:
+            return frame_ids
+
     def end_func_data(self):
-        if self.get_frames_num > self.total_frame_num:
-            res_row = linregress(self.row, self.amplitudes)
-            res_col = linregress(self.col, self.offsets)
+        print(self.get_frames_num, self.total_frame_num)
+        if self.get_frames_num < self.total_frame_num:
+            return False
 
-            etl_amp = res_row.intercept + res_row.slope*self.image_width
-            galvo_off = res_col.intercept + res_col.slope*self.image_height
+        # Updates
+        print(self.row)
+        print(self.etl_offsets)
+        print(self.col)
+        print(self.galvo_offsets)
 
-            self.etl_dict['amplitude'] = etl_amp
-            temp = {
-                    'resolution_mode': self.resolution,
-                    'zoom': self.zoom,
-                    'laser_info': self.etl_dict
-                }
-            self.model.run_command('update_setting', 'resolution', temp)
-            self.signal_id += 1
-            self.model.experiment.GalvoParameters[f'galvo_{self.side}_offset'] = galvo_off
+        res_row = linregress(self.row, self.etl_offsets)
+        res_col = linregress(self.col, self.galvo_offsets)
 
-            return True
-        return False
+        etl_off = res_row.intercept + res_row.slope*(self.image_width//2)
+        galvo_off = res_col.intercept + res_col.slope*(self.image_height//2)
+
+        print(f"******* Setting ETL to {etl_off}, Galvo to {galvo_off}")
+
+        self.etl_dict[self.wvl_string]['offset'] = str(etl_off)
+        self.model.etl_constants.ETLConstants[self.resolution][self.zoom] = self.etl_dict
+        self.model.experiment.GalvoParameters[f'galvo_{self.side}_offset'] = str(galvo_off)
+
+        return True

@@ -50,6 +50,7 @@ class Autofocus():
         self.get_frames_num = None
         self.plot_data = None
         self.total_frame_num = None
+        self.psf_support_size = None
 
         # Queue
         self.autofocus_frame_queue = Queue()
@@ -169,6 +170,15 @@ class Autofocus():
         self.plot_data = []
         self.total_frame_num = self.get_autofocus_frame_num()
 
+        wvl = int(self.model.experiment.Channels[self.target_channel]['laser'].split('nm')[0]) / 1000  # um
+        if self.model.experiment.MicroscopeState['resolution_mode'] == 'low':
+            zoom = self.model.experiment.MicroscopeState['zoom']
+            pixel_size = self.model.configuration.ZoomParameters['low_res_zoom_pixel_size'][zoom]
+        else:
+            pixel_size = self.model.configuration.ZoomParameters['high_res_zoom_pixel_size']
+        # TODO: Don't hardcode numerical aperture
+        self.psf_support_size = support_psf_width(wvl, 0.15, pixel_size)
+
     def in_func_data(self, frame_ids=[]):
         self.get_frames_num += len(frame_ids)
         while True:
@@ -180,16 +190,8 @@ class Autofocus():
             except:
                 break
             # entropy = self.model.analysis.normalized_dct_shannon_entropy(self.model.data_buffer[self.f_frame_id], 3)
-            wvl = int(self.model.experiment.Channels[self.target_channel]['laser'].split('nm')[0])/1000  # um
-            if self.model.experiment.MicroscopeState['resolution_mode'] == 'low':
-                zoom = self.model.experiment.MicroscopeState['zoom']
-                pixel_size = self.model.configuration.ZoomParameters['low_res_zoom_pixel_size'][zoom]
-            else:
-                pixel_size  = self.model.configuration.ZoomParameters['high_res_zoom_pixel_size']
-            # TODO: Don't hardcode numerical aperture
-            psf_support_size = support_psf_width(wvl, 0.15, pixel_size)
             entropy = self.model.analysis.fast_normalized_dct_shannon_entropy(self.model.data_buffer[self.f_frame_id], 
-                                                                              psf_support_size)
+                                                                              self.psf_support_size)
             # entropy = self.model.analysis.image_intensity(self.model.data_buffer[self.f_frame_id], 3)
 
             # print('entropy:', self.f_frame_id, self.frame_num, self.f_pos, entropy)

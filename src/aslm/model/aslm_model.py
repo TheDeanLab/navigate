@@ -261,6 +261,7 @@ class Model:
         self.feature_list.append([[{'name': ZStackAcquisition}]])
         # threshold and tile
         self.feature_list.append([[{'name': FindTissueSimple2D}]])
+        self.feature_list.append([[{'name': AutoCenterBeam}]])
 
     def get_camera(self):
         r"""Select active camera.

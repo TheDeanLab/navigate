@@ -1,6 +1,47 @@
 import numpy as np
 import numpy.typing as npt
 
+def support_psf_width(wvl: float, NA: float, pixel_size: float) -> int:
+    """Return the number of pixels covered by a single PSF.
+    
+    Parameters
+    ----------
+    wvl : float
+        Wavelength in microns.
+    NA : float 
+        Numerical aperture of the system
+    pixel_size : float
+        Effective pixel size at the camera in microns.
+
+    Returns
+    -------
+    int
+        Pixels per PSF. If a PSF is completely contained within
+        a single pixel, return 1.
+    """
+
+    res = 0.61*wvl/NA
+
+    return max(int(res//pixel_size),1)
+
+def centroid_image_intensity_by_max(image: npt.ArrayLike, psf_support: int = 6):
+    """Compute the centroid of an image's intensity by averaging the psf_support
+       max values from each dimension. TODO: Generalize to nD. 
+
+    Parameters
+    ----------
+    image : np.ArrayLike
+        Numpy array representing an image.
+    psf_support : int
+        The number of pixels a single PSF covers.
+    """
+
+    maxvals_col = np.max(image, axis=0)
+    col = np.argsort(maxvals_col)[-psf_support:].mean()
+    maxvals_row = np.max(image, axis=1)
+    row = np.argsort(maxvals_row)[-psf_support:].mean()
+    
+    return row, col
 
 def gaussian_beam(r0: int, z0: int, rl: int, zl: int, w0: float, NA: float = 0.15,  n: float = 1.33,
                   wvl: float = 488.0, pixel_size: float = 1, I0: float = 1, bg: float = 0) -> npt.ArrayLike:

@@ -29,7 +29,10 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
+import numpy as np
+from scipy.stats import linregress
 
+from aslm.tools.beams import centroid_image_intensity_by_max, support_psf_width
 
 class ChangeResolution:
     def __init__(self, model, resolution_mode='high'):
@@ -373,3 +376,102 @@ class FindTissueSimple2D:
                                                            f_start, 1, 0, self.overlap)
 
             self.model.event_queue.put(('multiposition', table_values))
+
+class AutoCenterBeam:
+    def __init__(self, model) -> None:
+        self.model = model
+
+        self.config_table = {'signal': {'init': self.pre_func_signal,
+                                        'main': self.in_func_signal,
+                                        'end': self.end_func_signal},
+                             'data': {'init': self.pre_func_data,
+                                      'main': self.in_func_data,
+                                      'end': self.end_func_data},
+                             'node': {'node_type': 'multi-step',
+                                      'device_related': True },
+                            }
+
+        self.total_frame_num = 10
+        self.off_step = 0.1
+        self.amp_step = 0.1
+        self.switch_at = int(self.total_frame_num//2)
+        self.signal_id = 0
+        self.psf_support_size = 6
+        self.row = None
+        self.col = None
+        self.amp = None
+        self.off = None
+    
+    def pre_func_signal(self):
+        self.amp = np.zeros((self.switch_at,))
+        self.off = np.zeros((self.switch_at,))
+        self.image_width = self.model.experiment.CameraParameters['x_pixels']
+        self.image_height = self.model.experiment.CameraParameters['y_pixels']
+        self.resolution = self.model.experiment.MicroscopeState['resolution_mode']
+        self.zoom = self.model.experiment.MicroscopeState['zoom']
+        self.etl_dict = self.model.etl_constants.ETLConstants[self.resolution][self.zoom].copy()
+        self.galvo_dict = self.model.experiment.GalvoParameters.copy()
+        self.side = "r" if self.resolution == "high" else "l"
+        self.offsets = self.galvo_dict[f'galvo_{self.side}_offset'] + np.arange(self.switch_at)*self.off_step
+        self.amplitudes = self.etl_dict['amplitude'] + np.arange(self.switch_at)*self.amp_step
+        self.signal_id = 0
+        wvl = int(self.model.experiment.Channels[self.target_channel]['laser'].split('nm')[0])/1000  # um
+        if self.resolution == 'low':
+            pixel_size = self.model.configuration.ZoomParameters['low_res_zoom_pixel_size'][self.zoom]
+        else:
+            pixel_size  = self.model.configuration.ZoomParameters['high_res_zoom_pixel_size']
+        # TODO: Don't hardcode numerical aperture
+        self.psf_support_size = support_psf_width(wvl, 0.15, pixel_size)
+
+    def in_func_signal(self):
+        ## Move beam
+        # etl_amplitude = float(etl_constants.ETLConstants[self.imaging_mode][zoom][laser]['amplitude'])
+        # etl_offset = float(etl_constants.ETLConstants[self.imaging_mode][zoom][laser]['offset'])
+        if self.signal_id < self.switch_at:
+            self.etl_dict['amplitude'] += self.amp_step
+            self.model.experiment.GalvoParameters[f'galvo_{self.side}_offset'] = self.offsets[0]
+        else:
+            self.etl_dict['ampltude'] = self.amplitudes[0]
+            self.model.experiment.GalvoParameters[f'galvo_{self.side}_offset'] += self.off_step
+        temp = {
+                'resolution_mode': self.resolution,
+                'zoom': self.zoom,
+                'laser_info': self.etl_dict
+            }
+        self.model.run_command('update_setting', 'resolution', temp)
+        self.signal_id += 1
+
+    def end_func_signal(self):
+        return self.signal_id > self.total_frame_num
+
+    def pre_func_data(self):
+        self.row = []
+        self.col = []
+
+    def in_func_data(self, frame_ids=[]):
+        for id in frame_ids:
+            row, col = centroid_image_intensity_by_max(self.model.data_buffer[id], self.psf_support_size)
+            self.row[self.get_frames_num] = row
+            self.col[self.get_frames_num] = col
+            self.get_frames_num += 1
+
+    def end_func_data(self):
+        if self.get_frames_num > self.total_frame_num:
+            res_row = linregress(self.row, self.amplitudes)
+            res_col = linregress(self.col, self.offsets)
+
+            etl_amp = res_row.intercept + res_row.slope*self.image_width
+            galvo_off = res_col.intercept + res_col.slope*self.image_height
+
+            self.etl_dict['amplitude'] = etl_amp
+            temp = {
+                    'resolution_mode': self.resolution,
+                    'zoom': self.zoom,
+                    'laser_info': self.etl_dict
+                }
+            self.model.run_command('update_setting', 'resolution', temp)
+            self.signal_id += 1
+            self.model.experiment.GalvoParameters[f'galvo_{self.side}_offset'] = galvo_off
+
+            return True
+        return False

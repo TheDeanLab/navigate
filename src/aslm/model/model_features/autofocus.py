@@ -37,6 +37,7 @@ import threading
 
 # Local imports
 from aslm.model.model_features.aslm_feature_container import load_features
+from aslm.tools.beams import support_psf_width
 
 class Autofocus():
     def __init__(self, model):
@@ -179,7 +180,16 @@ class Autofocus():
             except:
                 break
             # entropy = self.model.analysis.normalized_dct_shannon_entropy(self.model.data_buffer[self.f_frame_id], 3)
-            entropy = self.model.analysis.fast_normalized_dct_shannon_entropy(self.model.data_buffer[self.f_frame_id], 3)
+            wvl = int(self.model.experiment.Channels[self.target_channel]['laser'].split('nm')[0])/1000  # um
+            if self.model.experiment.MicroscopeState['resolution_mode'] == 'low':
+                zoom = self.model.experiment.MicroscopeState['zoom']
+                pixel_size = self.model.configuration.ZoomParameters['low_res_zoom_pixel_size'][zoom]
+            else:
+                pixel_size  = self.model.configuration.ZoomParameters['high_res_zoom_pixel_size']
+            # TODO: Don't hardcode numerical aperture
+            psf_support_size = support_psf_width(wvl, 0.15, pixel_size)
+            entropy = self.model.analysis.fast_normalized_dct_shannon_entropy(self.model.data_buffer[self.f_frame_id], 
+                                                                              psf_support_size)
             # entropy = self.model.analysis.image_intensity(self.model.data_buffer[self.f_frame_id], 3)
 
             # print('entropy:', self.f_frame_id, self.frame_num, self.f_pos, entropy)

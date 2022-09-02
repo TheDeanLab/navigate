@@ -32,17 +32,22 @@ POSSIBILITY OF SUCH DAMAGE.
 import base64
 import requests
 import numpy
+import json
 from io import BytesIO
-from os.path import exists
 
-from aslm.model.aslm_model_config import Configurator
+import logging
+# Logger Setup
+p = __name__.split(".")[1]
+logger = logging.getLogger(p)
 
-def prepare_service(service_url, *kwargs):
+def prepare_service(service_url, **kwargs):
     service_url = service_url.rstrip('/')
     if service_url.endswith('ilastik'):
         r = requests.get(f"{service_url}/load?project={kwargs['project_file']}")
-        return r.status_code == 200
-    return False
+        logger.info(f'get response:{r.status_code}, {r.content}')
+        if r.status_code == 200:
+            return json.loads(r.content)
+    return None
 
 class IlastikSegmentation:
     def __init__(self, model):
@@ -63,7 +68,11 @@ class IlastikSegmentation:
             }
 
         response = requests.post(f"{self.service_url}/segmentation", json=json_data, stream=True)
+        if response.status_code == 200:
 
-        # segmentation_mask is a dictionary like object with keys 'arr_0', 'arr_1'...
-        segmentation_mask = numpy.load(BytesIO(response.raw.read()))
-        #TODO: what should we do with the segmentation mask?
+            # segmentation_mask is a dictionary like object with keys 'arr_0', 'arr_1'...
+            segmentation_mask = numpy.load(BytesIO(response.raw.read()))
+            print('get segmentation mask array', segmentation_mask.shape)
+            #TODO: what should we do with the segmentation mask?
+        else:
+            print('There is something wrong!')

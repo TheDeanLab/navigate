@@ -29,6 +29,8 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
+import time
+
 import numpy as np
 from scipy.stats import linregress
 
@@ -417,15 +419,14 @@ class AutoCenterBeam:
         self.etl_dict = self.model.etl_constants.ETLConstants[self.resolution][self.zoom].copy()
         self.etl_dict[self.wvl_string]['offset'] = str(float(self.etl_dict[self.wvl_string]['offset'])-0.25)
         self.etl_dict[self.wvl_string]['amplitude'] = 0
-        self.galvo_dict = self.model.experiment.GalvoParameters.copy()
 
         self.side = "r" if self.resolution == "high" else "l"
         if self.side == "l":
             self.model.experiment.GalvoParameters[f'galvo_{self.side}_amplitude'] = 0
-        self.galvo_dict[f'galvo_{self.side}_offset'] = str(float(self.galvo_dict[f'galvo_{self.side}_offset'])-0.25)
-        print(f"Galvo offset initially at {self.galvo_dict[f'galvo_{self.side}_offset']}")
+        self.model.experiment.GalvoParameters[f'galvo_{self.side}_offset'] = str(float(self.model.experiment.GalvoParameters[f'galvo_{self.side}_offset'])-0.25)
+        print(f"Galvo offset initially at {self.model.experiment.GalvoParameters[f'galvo_{self.side}_offset']}")
         print(f"ETL offset initially at {self.etl_dict[self.wvl_string]['offset']}")
-        self.galvo_offsets = float(self.galvo_dict[f'galvo_{self.side}_offset']) + np.arange(self.switch_at) * self.galvo_step
+        self.galvo_offsets = float(self.model.experiment.GalvoParameters[f'galvo_{self.side}_offset']) + np.arange(self.switch_at) * self.galvo_step
         self.etl_offsets = float(self.etl_dict[self.wvl_string]['offset']) + np.arange(self.switch_at) * self.etl_step
         self.signal_id = 0
 
@@ -435,6 +436,9 @@ class AutoCenterBeam:
             pixel_size = self.model.configuration.ZoomParameters['high_res_zoom_pixel_size']
         # TODO: Don't hardcode numerical aperture
         self.psf_support_size = support_psf_width(wvl, 0.15, pixel_size)
+
+        print(self.model.experiment.GalvoParameters)
+        time.sleep(0.25)
 
     def in_func_signal(self):
         ## Move beam
@@ -450,7 +454,8 @@ class AutoCenterBeam:
         self.model.etl_constants.ETLConstants[self.resolution][self.zoom] = self.etl_dict
         self.model.experiment.GalvoParameters[f'galvo_{self.side}_offset'] = galvo_off
         self.signal_id += 1
-
+        time.sleep(0.25)
+        print(self.model.experiment.GalvoParameters)
         return self.signal_id < self.total_frame_num
 
     def end_func_signal(self):
@@ -492,6 +497,14 @@ class AutoCenterBeam:
 
         etl_off = res_row.intercept + res_row.slope*(self.image_width//2)
         galvo_off = res_col.intercept + res_col.slope*(self.image_height//2)
+
+        etl_off = np.clip(etl_off,
+                          float(self.model.configuration.RemoteFocusParameters[f'remote_focus_{self.side}_min_ao']),
+                          float(self.model.configuration.RemoteFocusParameters[f'remote_focus_{self.side}_max_ao']))
+
+        galvo_off = np.clip(galvo_off,
+                            float(self.model.configuration.GalvoParameters[f'galvo_{self.side}_min_ao']),
+                            float(self.model.configuration.GalvoParameters[f'galvo_{self.side}_max_ao']))
 
         print(f"******* Setting ETL to {etl_off}, Galvo to {galvo_off}")
 

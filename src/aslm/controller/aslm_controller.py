@@ -44,6 +44,7 @@ from tkinter import filedialog, messagebox
 from aslm.view.main_application_window import MainApp as view
 from aslm.view.menus.remote_focus_popup import remote_popup
 from aslm.view.menus.autofocus_setting_popup import autofocus_popup
+from aslm.view.menus.ilastik_setting_popup import ilastik_setting_popup
 
 # Local Sub-Controller Imports
 from aslm.controller.sub_controllers.stage_gui_controller import Stage_GUI_Controller
@@ -55,6 +56,7 @@ from aslm.controller.aslm_configuration_controller import ASLM_Configuration_Con
 from aslm.controller.sub_controllers.waveform_tab_controller import Waveform_Tab_Controller
 from aslm.controller.sub_controllers.etl_popup_controller import Etl_Popup_Controller
 from aslm.controller.sub_controllers.autofocus_popup_controller import Autofocus_Popup_Controller
+from aslm.controller.sub_controllers.ilastik_popup_controller import Ilastik_Popup_Controller
 import aslm.controller.aslm_controller_functions as controller_functions
 from aslm.controller.thread_pool import SynchronizedThreadPool
 from aslm.controller.sub_controllers.keystroke_controller import KeystrokeController
@@ -252,11 +254,11 @@ class ASLM_controller:
             self.populate_experiment_setting(self.default_experiment_file)
 
         def load_experiment():
-            filename = filedialog.askopenfilenames(defaultextension='.yml',
+            filename = filedialog.askopenfilename(defaultextension='.yml',
                                                    filetypes=[('Yaml files', '*.yml')])
             if not filename:
                 return
-            self.populate_experiment_setting(filename[0])
+            self.populate_experiment_setting(filename)
 
         def save_experiment():
             # update model.experiment and save it to file
@@ -295,6 +297,14 @@ class ASLM_controller:
             self.af_popup_controller = Autofocus_Popup_Controller(af_popup,
                                                                   self,
                                                                   self.experiment.AutoFocusParameters)
+
+        def popup_ilastik_setting():
+            if hasattr(self, 'ilastik_controller'):
+                self.ilastik_controller.showup()
+                return
+            ilastik_popup_window = ilastik_setting_popup(self.view)
+            ilastik_url = 'http://127.0.0.1:5000/ilastik'
+            self.ilastik_controller = Ilastik_Popup_Controller(ilastik_popup_window, self, ilastik_url)
 
         menus_dict = {
             self.view.menubar.menu_file: {
@@ -348,14 +358,16 @@ class ASLM_controller:
         self.view.menubar.menu_autofocus.add_command(label='setting', command=popup_autofocus_setting)
 
         # add-on features
-        feature_list = ['None', 'Switch Resolution', 'Z Stack Acquisition', 'Threshold']
+        feature_list = ['None', 'Switch Resolution', 'Z Stack Acquisition', 'Threshold', 'Ilastik Segmentation']
         self.feature_id_val = tkinter.IntVar(0)
         for i in range(len(feature_list)):
             self.view.menubar.menu_features.add_radiobutton(label=feature_list[i],
                                                             variable=self.feature_id_val,
                                                             value=i)
         self.feature_id_val.trace_add('write', lambda *args: self.execute('load_feature', self.feature_id_val.get()))
-
+        self.view.menubar.menu_features.add_separator()
+        self.view.menubar.menu_features.add_command(label='ilastik setting', command=popup_ilastik_setting)
+        
         # debug menu
         if self.debug:
             Debug_Module(self, self.view.menubar.menu_debug)

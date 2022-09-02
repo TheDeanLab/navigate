@@ -48,6 +48,7 @@ from aslm.model.model_features.aslm_image_writer import ImageWriter
 from aslm.model.model_features.dummy_detective import Dummy_Detective
 from aslm.model.model_features.aslm_common_features import *
 from aslm.model.model_features.aslm_feature_container import load_features
+from aslm.model.model_features.aslm_restful_features import IlastikSegmentation
 from aslm.log_files.log_functions import log_setup
 from aslm.tools.common_dict_tools import update_settings_common, update_stage_dict
 
@@ -265,6 +266,8 @@ class Model:
         self.feature_list.append([[{'name': ZStackAcquisition}]])
         # threshold and tile
         self.feature_list.append([[{'name': FindTissueSimple2D}]])
+        # Ilastik segmentation
+        self.feature_list.append([[{'name': IlastikSegmentation}]])
 
     def get_camera(self):
         r"""Select active camera.

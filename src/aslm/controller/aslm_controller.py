@@ -47,20 +47,10 @@ from aslm.view.menus.autofocus_setting_popup import autofocus_popup
 from aslm.view.menus.ilastik_setting_popup import ilastik_setting_popup
 
 # Local Sub-Controller Imports
-from aslm.controller.sub_controllers.stage_gui_controller import Stage_GUI_Controller
-from aslm.controller.sub_controllers.acquire_bar_controller import AcquireBarController
-from aslm.controller.sub_controllers.channels_tab_controller import Channels_Tab_Controller
-from aslm.controller.sub_controllers.camera_view_controller import Camera_View_Controller
-from aslm.controller.sub_controllers.camera_setting_controller import Camera_Setting_Controller
+from aslm.controller.sub_controllers import *
 from aslm.controller.aslm_configuration_controller import ASLM_Configuration_Controller
-from aslm.controller.sub_controllers.waveform_tab_controller import Waveform_Tab_Controller
-from aslm.controller.sub_controllers.etl_popup_controller import Etl_Popup_Controller
-from aslm.controller.sub_controllers.autofocus_popup_controller import Autofocus_Popup_Controller
-from aslm.controller.sub_controllers.ilastik_popup_controller import Ilastik_Popup_Controller
 import aslm.controller.aslm_controller_functions as controller_functions
 from aslm.controller.thread_pool import SynchronizedThreadPool
-from aslm.controller.sub_controllers.keystroke_controller import KeystrokeController
-from aslm.controller.sub_controllers.multi_position_controller import Multi_Position_Controller
 
 # Local Model Imports
 from aslm.model.aslm_model import Model

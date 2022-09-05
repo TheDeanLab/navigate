@@ -258,7 +258,7 @@ class HamamatsuOrca(CameraBase):
 
         """
         exposure_time = exposure_time / 1000
-        self.camera_controller.set_property_value("exposure_time", exposure_time)
+        return self.camera_controller.set_property_value("exposure_time", exposure_time)
 
     def set_line_interval(self, line_interval_time):
         r"""Set HamamatsuOrca line interval.
@@ -268,7 +268,7 @@ class HamamatsuOrca(CameraBase):
         line_interval_time : float
             Line interval duration.
         """
-        self.camera_controller.set_property_value("internal_line_interval", line_interval_time)
+        return self.camera_controller.set_property_value("internal_line_interval", line_interval_time)
 
     def set_binning(self, binning_string):
         r"""Set HamamatsuOrca binning mode.

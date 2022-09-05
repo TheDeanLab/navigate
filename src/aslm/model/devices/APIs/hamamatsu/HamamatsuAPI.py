@@ -1106,6 +1106,16 @@ class DCAM:
     def get_camera_handler(self):
         return self.__hdcam
 
+    def fire_software_trigger(self):
+        trigger_source = self.get_property_value('trigger_source')
+        if trigger_source == 3.0:
+            # fire trigger to camera
+            err = dcamcap_firetrigger(self.__hdcam, 0)
+            if err < 0:
+                print('an error happened when sending trigger to the camera', err)
+        else:
+            print(f"Camera is in mode {trigger_source}, not software mode (3).")
+
 
 if __name__ == '__main__':
     print('start testing Hamamatsu API!')

@@ -131,7 +131,7 @@ class HamamatsuOrca(CameraBase):
 
     def close_camera(self):
         r"""Close HamamatsuOrca Camera"""
-        self.camera_controller.shutdown()
+        self.camera_controller.dev_close()
 
     def set_sensor_mode(self, mode):
         r"""Set HamamatsuOrca sensor mode.

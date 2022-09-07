@@ -172,7 +172,7 @@ class ASLM_controller:
         t = threading.Thread(target=self.update_event)
         t.start()
 
-        self.initialize_menus()
+        self.initialize_menus(args.synthetic_hardware)
 
         # Set view based on model.experiment
         self.populate_experiment_setting()
@@ -230,7 +230,7 @@ class ASLM_controller:
         image_metrics = [1, 0, 0]
         self.camera_view_controller.initialize('image', image_metrics)
 
-    def initialize_menus(self):
+    def initialize_menus(self, is_synthetic_hardware=False):
         r""" Initialize menus
         This function defines all the menus in the menubar
 
@@ -263,6 +263,13 @@ class ASLM_controller:
             controller_functions.save_yaml_file('',
                                                 self.experiment.serialize(),
                                                 filename)
+
+        def load_images():
+            filenames = filedialog.askopenfilenames(defaultextension='.tif',
+                                                    filetypes=[('tiff files', '*.tif')])
+            if not filenames:
+                return
+            self.model.load_images(filenames)
 
         def popup_etl_setting():
             if hasattr(self, 'etl_controller'):
@@ -315,6 +322,12 @@ class ASLM_controller:
             menu_items = menus_dict[menu]
             for label in menu_items:
                 menu.add_command(label=label, command=menu_items[label])
+
+        # load images from disk in synthetic hardware
+        if is_synthetic_hardware:
+            self.view.menubar.menu_file.add_separator()
+            self.view.menubar.menu_file.add_command(label='Load Images', command=load_images)
+            self.view.menubar.menu_file.add_command(label='Unload Images', command=lambda: self.model.load_images(None))
 
         # add resolution menu
         self.resolution_value = tkinter.StringVar()

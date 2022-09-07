@@ -1026,3 +1026,10 @@ class Model:
         """
         return self.current_channel
 
+    def load_images(self, filenames=None):
+        r"""Load/Unload images to the Synthetic Camera
+        """
+        self.camera.initialize_image_series(self.data_buffer,
+                                            self.number_of_frames)
+        self.camera.load_images(filenames)
+        self.camera.close_image_series()

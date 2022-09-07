@@ -37,6 +37,7 @@ import ctypes
 
 # Third Party Imports
 import numpy as np
+from tifffile import TiffFile
 
 # Local Imports
 from aslm.model.analysis import noise_model
@@ -95,6 +96,7 @@ class SyntheticCamera(CameraBase):
         self.data_buffer = None
         self.num_of_frame = None
         self.pre_frame_idx = None
+        self.random_image = True
 
         if camera_id == 0:
             self.serial_number = configuration.CameraParameters['low_serial_number']
@@ -190,17 +192,46 @@ class SyntheticCamera(CameraBase):
         self.current_frame_idx = 0
         self.camera_controller.is_acquiring = False
 
+    def load_images(self, filenames=None):
+        if filenames is None:
+            self.random_image = True
+        else:
+            self.random_image = False
+            self.img_id = 0
+            self.img_max_id = self.num_of_frame
+            idx = 0
+            for image_file in filenames:
+                try:
+                    tif_images = TiffFile(image_file)
+                    for img_id in range(len(tif_images.pages)):
+                        image = tif_images.pages[img_id].asarray()
+                        ctypes.memmove(self.data_buffer[idx].ctypes.data,
+                                        image.ctypes.data, self.x_pixels * self.y_pixels * 2)
+                        idx += 1
+                        if idx >= self.num_of_frame:
+                            return
+                except:
+                    pass
+            self.img_max_id = idx
+            if self.img_max_id == 0:
+                self.random_image = False
+
+
     def generate_new_frame(self):
         r"""Generate a synthetic image."""
-        image = np.random.normal(self._mean_background_count,
-                                 self._noise_sigma,
-                                 size=(self.x_pixels, self.y_pixels),
-                                 ).astype(np.uint16)
+        if self.random_image:
+            image = np.random.normal(self._mean_background_count,
+                                    self._noise_sigma,
+                                    size=(self.x_pixels, self.y_pixels),
+                                    ).astype(np.uint16)
+            
+            ctypes.memmove(self.data_buffer[self.current_frame_idx].ctypes.data,
+                        image.ctypes.data, self.x_pixels * self.y_pixels * 2)
 
-        ctypes.memmove(self.data_buffer[self.current_frame_idx].ctypes.data,
-                       image.ctypes.data, self.x_pixels * self.y_pixels * 2)
-
-        self.current_frame_idx = (self.current_frame_idx + 1) % self.num_of_frame
+            self.current_frame_idx = (self.current_frame_idx + 1) % self.num_of_frame
+        else:
+            self.img_id = (self.img_id + 1) % self.img_max_id
+            self.current_frame_idx = self.img_id
 
     def get_new_frame(self):
         r"""Get frame from SyntheticCamera camera."""

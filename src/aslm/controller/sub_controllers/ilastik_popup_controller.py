@@ -53,17 +53,9 @@ class Ilastik_Popup_Controller(GUI_Controller):
 
         self.service_url = service_url
         self.project_filename = None
-
-        # add saving function to the function closing the window
-        self.exit_func = combine_funcs(self.view.popup.dismiss,
-                                  lambda: delattr(self.parent_controller, 'ilastik_controller'))
-        self.view.popup.protocol("WM_DELETE_WINDOW", self.exit_func)
-        buttons = self.view.get_buttons()
-        buttons['load'].configure(command=self.load_project)
-        buttons['confirm'].configure(command=self.confirm_setting)
-
-        self.project_filename_var = self.view.get_variables()['project_name']
-        self.label_frame = self.view.get_widgets()['label_frame']
+        self.segmentation_usage = 'show'
+        self.label_dict = None
+        self.showup()        
 
     def load_project(self):
         filename = filedialog.askopenfilename(defaultextension='.ilp',
@@ -82,10 +74,14 @@ class Ilastik_Popup_Controller(GUI_Controller):
             child.destroy()
 
         if not r:
+            self.project_filename = None
             self.project_filename_var.set("Please select an ilastik pixelclassification project file!")
             messagebox.showerror(title='Ilastik Error', 
                                  message=message)
         else:
+            self.project_filename = filename
+            r['status'] = [False] * len(r['names'])
+            self.label_dict = r
             self.update_project(filename, r)
 
     def update_project(self, filename, label_dict):
@@ -94,10 +90,20 @@ class Ilastik_Popup_Controller(GUI_Controller):
 
         # redraw new labels
         for i, label_name in enumerate(label_dict['names']):
-            label_widget = Checkbutton(self.label_frame, text=label_name)
+            label_widget = Checkbutton(self.label_frame, text=label_name, command=self.toggle_label(i))
             label_widget.grid(row=1+i, column=0, pady=(0, 10), padx=(20, 5), sticky="W")
+            if label_dict['status'][i]:
+                label_widget.select()
             color_block = Label(self.label_frame, background=label_dict['label_colors'][i], width=3, height=1)
             color_block.grid(row=1+i, column=1, pady=(0, 10), padx=(0, 10))
+
+    def toggle_label(self, label_id):
+        def func():
+            self.label_dict['status'][label_id] = not self.label_dict['status'][label_id]
+        return func
+
+    def set_segmentation_usage(self, *args):
+        self.segmentation_usage = self.segmentation_usage_var.get()
 
     def confirm_setting(self):
         """confirm setting
@@ -105,13 +111,32 @@ class Ilastik_Popup_Controller(GUI_Controller):
         tell the model which labels will be used
         activate features containing ilastik
         """
-        # add saving function to the function closing the window
-        self.exit_func()
+        self.view.popup.dismiss()
 
-    def showup(self):
+    def showup(self, popup_window=None):
         """show the popup window
 
         this function will let the popup window show in front
         """
-        self.view.popup.deiconify()
-        self.view.popup.attributes("-topmost", 1)
+        if popup_window is not None:
+            self.view = popup_window
+        self.view.popup.protocol("WM_DELETE_WINDOW", self.view.popup.dismiss)
+        buttons = self.view.get_buttons()
+        buttons['load'].configure(command=self.load_project)
+        buttons['confirm'].configure(command=self.confirm_setting)
+
+        vars = self.view.get_variables()
+        self.project_filename_var = vars['project_name']
+        self.segmentation_usage_var = vars['usage']
+        self.label_frame = self.view.get_widgets()['label_frame']
+
+        # segmentation
+        if self.segmentation_usage != self.segmentation_usage_var.get():
+            self.segmentation_usage_var.set(self.segmentation_usage)
+        self.segmentation_usage_var.trace_add('write', self.set_segmentation_usage)
+
+        if self.project_filename is not None:
+            # destroy current labels
+            for child in self.label_frame.winfo_children():
+                child.destroy()
+            self.update_project(self.project_filename, self.label_dict)

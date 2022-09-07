@@ -71,14 +71,22 @@ class ilastik_setting_popup():
             color_block =tkinter.Label(self.label_frame, background=default_colors[i], width=3, height=1)
             color_block.grid(row=1+i, column=1, pady=(0, 10), padx=(0, 10))
 
+        # segmentation usage
+        self.usage_var = tkinter.StringVar(value='show')
+        tkinter.Label(content_frame, text="Choose the way to use segmentation:").grid(row=4, sticky=NW)
+        show_on_gui = ttk.Radiobutton(content_frame, text='Show Segmentation', value='show', variable=self.usage_var)
+        show_on_gui.grid(row=5, column=0, padx=(20, 0), pady=(10, 20), sticky="W")
+        mark_position = ttk.Radiobutton(content_frame, text='Mark Position', value='mark', variable=self.usage_var, state=tkinter.DISABLED)
+        mark_position.grid(row=5, column=1, padx=(0, 0), pady=(10, 20), sticky="W")
+        
         self.confirm_btn = ttk.Button(content_frame, text='Confirm Setting', width=30)
-        self.confirm_btn.grid(row=4, column=1, sticky="SE", padx=(0, 10), pady=(0, 10))
+        self.confirm_btn.grid(row=7, column=1, sticky="SE", padx=(0, 10), pady=(0, 10))
 
     def get_buttons(self):
         return {'load': self.load_project_btn, 'confirm': self.confirm_btn}
 
     def get_variables(self):
-        return {'project_name': self.project_name_var}
+        return {'project_name': self.project_name_var, 'usage': self.usage_var}
 
     def get_widgets(self):
         return {'label_frame': self.label_frame}

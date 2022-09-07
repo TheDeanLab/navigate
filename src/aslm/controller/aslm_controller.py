@@ -296,12 +296,12 @@ class ASLM_controller:
                                                                   self.experiment.AutoFocusParameters)
 
         def popup_ilastik_setting():
-            if hasattr(self, 'ilastik_controller'):
-                self.ilastik_controller.showup()
-                return
             ilastik_popup_window = ilastik_setting_popup(self.view)
             ilastik_url = 'http://127.0.0.1:5000/ilastik'
-            self.ilastik_controller = Ilastik_Popup_Controller(ilastik_popup_window, self, ilastik_url)
+            if hasattr(self, 'ilastik_controller'):
+                self.ilastik_controller.showup(ilastik_popup_window)
+            else:
+                self.ilastik_controller = Ilastik_Popup_Controller(ilastik_popup_window, self, ilastik_url)
 
         menus_dict = {
             self.view.menubar.menu_file: {

@@ -111,6 +111,13 @@ class Ilastik_Popup_Controller(GUI_Controller):
         tell the model which labels will be used
         activate features containing ilastik
         """
+        # update ilastik menu status
+        ilastik_menu_state = 'normal' if self.project_filename else 'disabled'
+        self.parent_controller.view.menubar.menu_features.entryconfig('Ilastik Segmentation', state=ilastik_menu_state)
+        # update segmentation mask color map
+        self.parent_controller.camera_view_controller.set_mask_color_table(self.label_dict['label_colors'])
+        # TODO: tell model the target label
+        # close the window
         self.view.popup.dismiss()
 
     def showup(self, popup_window=None):

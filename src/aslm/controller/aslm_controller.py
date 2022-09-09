@@ -115,6 +115,7 @@ class ASLM_controller:
         logger.info(f"Spec - Configuration Path: {configuration_path}")
         logger.info(f"Spec - Experiment Path: {experiment_path}")
         logger.info(f"Spec - ETL Constants Path: {etl_constants_path}")
+        logger.info(f"Spec - Rest API Path: {rest_api_path}")
 
         # save default experiment file
         self.default_experiment_file = experiment_path
@@ -129,6 +130,9 @@ class ASLM_controller:
         # etl setting file
         self.etl_constants_path = etl_constants_path
         self.etl_constants = Configurator(self.etl_constants_path)
+
+        # Rest service
+        self.rest_urls = Configurator(rest_api_path)
 
         # Initialize the View
         self.view = view(root)
@@ -297,7 +301,7 @@ class ASLM_controller:
 
         def popup_ilastik_setting():
             ilastik_popup_window = ilastik_setting_popup(self.view)
-            ilastik_url = 'http://127.0.0.1:5000/ilastik'
+            ilastik_url = self.rest_urls.Ilastik['url']
             if hasattr(self, 'ilastik_controller'):
                 self.ilastik_controller.showup(ilastik_popup_window)
             else:
@@ -370,6 +374,8 @@ class ASLM_controller:
         self.feature_id_val.trace_add('write', lambda *args: self.execute('load_feature', self.feature_id_val.get()))
         self.view.menubar.menu_features.add_separator()
         self.view.menubar.menu_features.add_command(label='ilastik setting', command=popup_ilastik_setting)
+        # disable ilastik menu
+        self.view.menubar.menu_features.entryconfig('Ilastik Segmentation', state='disabled')
         
         # debug menu
         if self.debug:
@@ -466,6 +472,7 @@ class ASLM_controller:
         if mode == 'stop':
             # GUI Failsafe
             self.acquire_bar_controller.stop_acquire()
+            self.feature_id_val.set(0)
 
     def update_camera_view(self):
         r"""Update the real-time parameters in the camera view (channel number, max counts, image, etc.)
@@ -588,7 +595,8 @@ class ASLM_controller:
 
         elif command == 'load_feature':
             r"""Tell model to load/unload features."""
-            self.threads_pool.createThread('model', lambda: self.model.run_command('load_feature', *args))
+            if args[0] != 0:
+                self.threads_pool.createThread('model', lambda: self.model.run_command('load_feature', *args))
             
         elif command == 'acquire_and_save':
             r"""Acquire data and save it.
@@ -633,12 +641,14 @@ class ASLM_controller:
                 self.acquire_bar_controller.stop_acquire()
                 return
 
+            # if select 'ilastik segmentation', 'show segmentation', and in 'single acquisition'
+            self.camera_view_controller.display_mask_flag = self.acquire_bar_controller.mode == 'single' and self.feature_id_val.get() == 4 and self.ilastik_controller.segmentation_usage == 'show'
+
             self.threads_pool.createThread('camera', self.capture_image, args=(self.acquire_bar_controller.mode,))
 
         elif command == 'stop_acquire':
             # self.model.run_command('stop')
             self.sloppy_stop()
-            self.feature_id_val.set(0)
             self.set_mode_of_sub('stop')
 
             self.acquire_bar_controller.stop_progress_bar()
@@ -822,6 +832,8 @@ class ASLM_controller:
                 from aslm.tools.multipos_table_tools import update_table
                 update_table(self.view.settings.multiposition_tab.multipoint_list.get_table(), value)
                 self.view.settings.channels_tab.multipoint_frame.on_off.set(True)  # assume we want to use multipos
+            elif event == 'ilastik_mask':
+                self.camera_view_controller.display_mask(value)
             elif event == 'stop':
                 break
     

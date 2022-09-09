@@ -68,11 +68,12 @@ class IlastikSegmentation:
             }
 
         response = requests.post(f"{self.service_url}/segmentation", json=json_data, stream=True)
+        print('get response:', response.status_code)
         if response.status_code == 200:
-
             # segmentation_mask is a dictionary like object with keys 'arr_0', 'arr_1'...
             segmentation_mask = numpy.load(BytesIO(response.raw.read()))
-            print('get segmentation mask array', segmentation_mask.shape)
-            #TODO: what should we do with the segmentation mask?
+            # display segmentation
+            for idx in range(len(segmentation_mask)):
+                self.model.event_queue.put(('ilastik_mask', segmentation_mask['arr_{}'.format(idx)]))
         else:
             print('There is something wrong!')

@@ -53,7 +53,8 @@ class Ilastik_Popup_Controller(GUI_Controller):
 
         self.service_url = service_url
         self.project_filename = None
-        self.segmentation_usage = 'show'
+        self.show_segmentation_flag = False
+        self.mark_position_flag = False
         self.label_dict = None
         self.showup()        
 
@@ -102,8 +103,11 @@ class Ilastik_Popup_Controller(GUI_Controller):
             self.label_dict['status'][label_id] = not self.label_dict['status'][label_id]
         return func
 
-    def set_segmentation_usage(self, *args):
-        self.segmentation_usage = self.segmentation_usage_var.get()
+    def toggle_display(self):
+        self.show_segmentation_flag = not self.show_segmentation_flag
+
+    def toggle_mark_position(self):
+        self.mark_position_flag = not self.mark_position_flag
 
     def confirm_setting(self):
         """confirm setting
@@ -116,7 +120,7 @@ class Ilastik_Popup_Controller(GUI_Controller):
         self.parent_controller.view.menubar.menu_features.entryconfig('Ilastik Segmentation', state=ilastik_menu_state)
         # update segmentation mask color map
         self.parent_controller.camera_view_controller.set_mask_color_table(self.label_dict['label_colors'])
-        # TODO: tell model the target label
+        # tell model the target label
         # close the window
         self.view.popup.dismiss()
 
@@ -132,15 +136,20 @@ class Ilastik_Popup_Controller(GUI_Controller):
         buttons['load'].configure(command=self.load_project)
         buttons['confirm'].configure(command=self.confirm_setting)
 
-        vars = self.view.get_variables()
-        self.project_filename_var = vars['project_name']
-        self.segmentation_usage_var = vars['usage']
-        self.label_frame = self.view.get_widgets()['label_frame']
+        self.project_filename_var = self.view.get_variables()['project_name']
+        widgets = self.view.get_widgets()
+        self.label_frame = widgets['label_frame']
+        show_seg_widget = widgets['show_segmentation']
+        mark_pos_widget = widgets['mark_position']
 
         # segmentation
-        if self.segmentation_usage != self.segmentation_usage_var.get():
-            self.segmentation_usage_var.set(self.segmentation_usage)
-        self.segmentation_usage_var.trace_add('write', self.set_segmentation_usage)
+        if self.show_segmentation_flag:
+            show_seg_widget.select()
+        if self.mark_position_flag:
+            mark_pos_widget.select()
+
+        show_seg_widget.configure(command=self.toggle_display)
+        mark_pos_widget.configure(command=self.toggle_mark_position)
 
         if self.project_filename is not None:
             # destroy current labels

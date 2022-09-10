@@ -595,8 +595,7 @@ class ASLM_controller:
 
         elif command == 'load_feature':
             r"""Tell model to load/unload features."""
-            if args[0] != 0:
-                self.threads_pool.createThread('model', lambda: self.model.run_command('load_feature', *args))
+            self.threads_pool.createThread('model', lambda: self.model.run_command('load_feature', *args))
             
         elif command == 'acquire_and_save':
             r"""Acquire data and save it.
@@ -642,7 +641,7 @@ class ASLM_controller:
                 return
 
             # if select 'ilastik segmentation', 'show segmentation', and in 'single acquisition'
-            self.camera_view_controller.display_mask_flag = self.acquire_bar_controller.mode == 'single' and self.feature_id_val.get() == 4 and self.ilastik_controller.segmentation_usage == 'show'
+            self.camera_view_controller.display_mask_flag = self.acquire_bar_controller.mode == 'single' and self.feature_id_val.get() == 4 and self.ilastik_controller.show_segmentation_flag
 
             self.threads_pool.createThread('camera', self.capture_image, args=(self.acquire_bar_controller.mode,))
 

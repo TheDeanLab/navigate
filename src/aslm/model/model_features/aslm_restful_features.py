@@ -34,6 +34,7 @@ import requests
 import numpy
 import json
 from io import BytesIO
+from math import ceil
 
 import logging
 # Logger Setup
@@ -56,7 +57,18 @@ class IlastikSegmentation:
         self.service_url = self.model.rest_api_config.Ilastik['url']
         self.project_file = None
 
-        self.config_table={'data': {'main': self.data_func}}
+        self.resolution = None
+        self.zoom = None
+        self.pieces_num = 1
+        self.pieces_size = 1
+
+        self.config_table={'data': {'init': self.init_func,
+                                    'main': self.data_func}}
+
+    def init_func(self, *args):
+        if self.resolution != self.model.experiment.MicroscopeState['resolution_mode'] \
+            or self.zoom != self.model.experiment.MicroscopeState['zoom']:
+            self.update_setting()
 
     def data_func(self, frame_ids):
         # Ilastik process multiple images in sequence.
@@ -74,6 +86,60 @@ class IlastikSegmentation:
             segmentation_mask = numpy.load(BytesIO(response.raw.read()))
             # display segmentation
             for idx in range(len(segmentation_mask)):
-                self.model.event_queue.put(('ilastik_mask', segmentation_mask['arr_{}'.format(idx)]))
+                segmentation_id = 'arr_{}'.format(idx)
+                if self.model.display_ilastik_segmentation: 
+                    self.model.event_queue.put(('ilastik_mask', segmentation_mask[segmentation_id]))
+                # mark position
+                if self.model.mark_ilastik_position:
+                    self.mark_position(segmentation_mask[segmentation_id])
         else:
             print('There is something wrong!')
+
+    def update_setting(self):
+        self.resolution = self.model.experiment.MicroscopeState['resolution_mode']
+        self.zoom = self.model.experiment.MicroscopeState['zoom']
+        
+        # Get current mag
+        if self.resolution == 'high':
+            curr_pixel_size = self.model.configuration.ZoomParameters['high_res_zoom_pixel_size']
+        else:
+            curr_pixel_size = self.model.configuration.ZoomParameters['low_res_zoom_pixel_size'][self.zoom]
+        # target resolution is 'high'
+        pixel_size = self.model.configuration.ZoomParameters['high_res_zoom_pixel_size']
+        # calculate pieces
+        self.pieces_num = int(curr_pixel_size / pixel_size)
+        self.pieces_size = ceil(self.model.experiment.CameraParameters['x_pixels'] / self.pieces_num)
+        self.posistion_step_size = self.pieces_size * pixel_size
+        # calculate corner (x,y)
+        curr_fov_x = float(self.model.experiment.CameraParameters['x_pixels']) * curr_pixel_size
+        curr_fov_y = float(self.model.experiment.CameraParameters['y_pixels']) * curr_pixel_size
+        self.x_start = self.model.experiment.StageParameters['x'] - curr_fov_x/2
+        self.y_start = self.model.experiment.StageParameters['y'] - curr_fov_y/2
+
+    def mark_position(self, mask):
+        # target_label = self.model.ilastik_target
+        target_label = self.model.ilastik_target_labels
+        lx, rx = 0, self.pieces_size
+        # get current z, theta, focus
+        # TODO: are they same as high resolution?
+        z = self.model.experiment.StageParameters['z']
+        theta = self.model.experiment.StageParameters['theta']
+        f = self.model.experiment.StageParameters['f']
+        pos_x, pos_y = self.x_start, self.y_start
+        table_values = []
+        for i in range(self.pieces_num):
+            ly, ry = 0, self.pieces_size
+            for j in range(self.pieces_num):
+                for k in target_label:
+                    if numpy.any(mask[lx:rx, ly:ry, 0] == k):
+                        table_values.append([pos_x, pos_y, z, theta, f])
+                        break
+                pos_y += self.posistion_step_size
+                ly += self.pieces_size
+                ry += self.pieces_size
+            lx += self.pieces_size
+            rx += self.pieces_size
+            pos_x += self.posistion_step_size
+            pos_y = self.y_start
+        self.model.event_queue.put(('multiposition', table_values))
+

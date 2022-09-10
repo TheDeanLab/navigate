@@ -1033,3 +1033,8 @@ class Model:
                                             self.number_of_frames)
         self.camera.load_images(filenames)
         self.camera.close_image_series()
+
+    def update_ilastik_setting(self, display_segmentation=False, mark_position=True, target_labels=[1]):
+        self.display_ilastik_segmentation = display_segmentation
+        self.mark_ilastik_position = mark_position
+        self.ilastik_target_labels = target_labels

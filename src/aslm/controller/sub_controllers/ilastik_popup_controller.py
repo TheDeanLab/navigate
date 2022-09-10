@@ -121,8 +121,18 @@ class Ilastik_Popup_Controller(GUI_Controller):
         # update segmentation mask color map
         self.parent_controller.camera_view_controller.set_mask_color_table(self.label_dict['label_colors'])
         # tell model the target label
-        # close the window
-        self.view.popup.dismiss()
+        if self.show_segmentation_flag == False and self.mark_position_flag == False or \
+            (self.mark_position_flag and True not in self.label_dict['status']):
+            messagebox.showwarning('Warning', message="You haven't select any usage or target label!")
+            self.parent_controller.view.menubar.menu_features.entryconfig('Ilastik Segmentation', state='disabled')
+        else:
+            self.parent_controller.model.update_ilastik_setting(**{
+                'display_segmentation': self.show_segmentation_flag,
+                'mark_position': self.mark_position_flag,
+                'target_labels': [i+1 for i, x in enumerate(self.label_dict['status']) if x]
+            })
+            # close the window
+            self.view.popup.dismiss()
 
     def showup(self, popup_window=None):
         """show the popup window

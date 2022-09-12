@@ -30,18 +30,6 @@ hardware:
     servo_id: 1
     port: COM18
     baudrate: 1000000
-  lasers:
-    type: Omicron
-    wavelengths:
-      -
-        wavelength: 488
-        port: COM19
-      -
-        wavelength: 561
-        port: COM4
-      -
-        wavelength: 642
-        port: COM17
 
 # Only one microscope can be active in the GUI at a time, but all microscopes will be accessible
 microscopes:
@@ -61,20 +49,8 @@ microscopes:
       camera_trigger_out_line: /PXI6259/ctr0
       trigger_source: /PXI6259/PFI0
 
-      # Galvos
-      galvo_etl_task_line: PXI6259/ao0:3
-      galvo_ao: PXI6259/ao0
-
       # Digital Laser Outputs
       laser_port_switcher: PXI6733/port0/line0
-      laser_0_do: PXI6733/port0/line2
-      laser_1_do: PXI6733/port0/line3
-      laser_2_do: PXI6733/port0/line4
-
-      # Analog Laser Outputs
-      laser_0_ao: PXI6733/ao0
-      laser_1_ao: PXI6733/ao1
-      laser_2_ao: PXI6733/ao2
 
     camera:
       hardware:
@@ -109,14 +85,25 @@ microscopes:
       hardware:
         type: NI
         channel: PXI6259/ao2
+        min: 0
+        max: 5
       # Optotune EL-16-40-TC-VIS-5D-1-C
-      remote_focus_delay_percent: 7.5
-      remote_focus_ramp_rising_percent: 85
-      remote_focus_ramp_falling_percent: 2.5
-      remote_focus_amplitude: 0.7
-      remote_focus_offset: 2.3
-      remote_focus_min_ao: 0
-      remote_focus_max_ao: 5
+      delay_percent: 7.5
+      ramp_rising_percent: 85
+      ramp_falling_percent: 2.5
+      amplitude: 0.7
+      offset: 2.3
+    galvo:
+      hardware:
+        type: NI
+        channel: PXI6259/ao0
+        min: -5
+        max: 5
+      frequency: 99.9
+      amplitude: 2.5
+      offset: 0
+      duty_cycle: 50
+      phase: 1.57079 # pi/2
     filter_wheel:
       hardware:
         type: SutterFilterWheel
@@ -199,31 +186,64 @@ microscopes:
       hardware:
         type: NI
         channel: PXI6259/port0/line0
-      shutter_min_do: 0
-      shutter_max_do: 5
-    lasers:
+        min: 0
+        max: 5
+        lasers:
       # Omicron LightHub Ultra
       # 488 and 640 are LuxX+ Lasers
       # 561 is a Coherent OBIS Laser
-      hardware:
-        type: Omicron
-      wavelengths:
-        - wavelength: 488
-          type: LuxX
-          index: 0
-        - wavelength: 561
-          type: Obis
-          index: 1
-        - wavelength: 642
-          type: LuxX
-          index: 2
-
-      min_ao: 0
-      max_ao: 5
-      min_do: 0
-      max_do: 5
-      delay_percent: 10
-      pulse_percent: 87
+      # Digital Laser Outputs
+      - wavelength: 488
+        onoff:
+          hardware:
+            type: NI
+            channel: PXI6733/port0/line2
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PXI6733/ao0
+            min: 0
+            max: 5
+        type: LuxX
+        index: 0
+        delay_percent: 10
+        pulse_percent: 87
+      - wavelength: 561
+        onoff:
+          hardware:
+            type: NI
+            channel: PXI6733/port0/line3
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PXI6733/ao1
+            min: 0
+            max: 5
+        type: Obis
+        index: 1
+        delay_percent: 10
+        pulse_percent: 87
+      - wavelength: 642
+        onoff:
+          hardware:
+            type: NI
+            channel: PXI6733/port0/line4
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PXI6733/ao2
+            min: 0
+            max: 5
+        type: LuxX
+        index: 2
+        delay_percent: 10
+        pulse_percent: 87
   -
     name: high
     daq:
@@ -240,20 +260,9 @@ microscopes:
       camera_trigger_out_line: /PXI6259/ctr0
       trigger_source: /PXI6259/PFI0
 
-      # Galvos
-      galvo_etl_task_line: PXI6259/ao0:3
-      galvo_ao: PXI6259/ao1
-
       # Digital Laser Outputs
       laser_port_switcher: PXI6733/port0/line0
-      laser_0_do: PXI6733/port0/line2
-      laser_1_do: PXI6733/port0/line3
-      laser_2_do: PXI6733/port0/line4
-
-      # Analog Laser Outputs
-      laser_0_ao: PXI6733/ao0
-      laser_1_ao: PXI6733/ao1
-      laser_2_ao: PXI6733/ao2
+      
     camera:
       hardware:
         type: HamamatsuOrca
@@ -287,14 +296,21 @@ microscopes:
       hardware:
         type: NI
         channel: PXI6259/ao3
+        min: -0.7
+        max: 0.7
       # Optotune EL-16-40-TC-VIS-5D-1-C
-      remote_focus_delay_percent: 7.5
-      remote_focus_ramp_rising_percent: 85
-      remote_focus_ramp_falling_percent: 2.5
-      remote_focus_amplitude: 0.7
-      remote_focus_offset: 2.3
-      remote_focus_min_ao: -0.7
-      remote_focus_max_ao: 0.7
+      delay_percent: 7.5
+      ramp_rising_percent: 85
+      ramp_falling_percent: 2.5
+      amplitude: 0.7
+      offset: 2.3
+    galvo:
+      hardware:
+        type: NI
+        channel: PXI6259/ao1
+        min: -5
+        max: 5
+      offset: 0.5
     filter_wheel:
       hardware:
         type: SutterFilterWheel
@@ -373,22 +389,55 @@ microscopes:
       # Omicron LightHub Ultra
       # 488 and 640 are LuxX+ Lasers
       # 561 is a Coherent OBIS Laser
-      hardware:
-        type: Omicron
-      wavelengths:
-        - wavelength: 488
-          type: LuxX
-          index: 0
-        - wavelength: 561
-          type: Obis
-          index: 1
-        - wavelength: 642
-          type: LuxX
-          index: 2
-
-      min_ao: 0
-      max_ao: 5
-      min_do: 0
-      max_do: 5
-      delay_percent: 10
-      pulse_percent: 87
+      # Digital Laser Outputs
+      - wavelength: 488
+        onoff:
+          hardware:
+            type: NI
+            channel: PXI6733/port0/line2
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PXI6733/ao0
+            min: 0
+            max: 5
+        type: LuxX
+        index: 0
+        delay_percent: 10
+        pulse_percent: 87
+      - wavelength: 561
+        onoff:
+          hardware:
+            type: NI
+            channel: PXI6733/port0/line3
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PXI6733/ao1
+            min: 0
+            max: 5
+        type: Obis
+        index: 1
+        delay_percent: 10
+        pulse_percent: 87
+      - wavelength: 642
+        onoff:
+          hardware:
+            type: NI
+            channel: PXI6733/port0/line4
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PXI6733/ao2
+            min: 0
+            max: 5
+        type: LuxX
+        index: 2
+        delay_percent: 10
+        pulse_percent: 87

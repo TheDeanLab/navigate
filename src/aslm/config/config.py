@@ -61,10 +61,10 @@ def load_configs(manager, **kwargs):
                 sys.exit(1)
     
     # return combined dictionary
-    # return config_dict
+    return config_dict
 
     # return independent dictionaries
-    return config_dict.values()
+    # return config_dict.values()
 
 def build_nested_dict(manager, parent_dict, key_name, dict_data):
     if type(dict_data) != dict and type(dict_data) != list:

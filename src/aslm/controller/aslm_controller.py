@@ -113,10 +113,14 @@ class ASLM_controller:
                                           # accepts tuples, ('event_name', value)
 
         self.manager = Manager()
-        self.configuration, self.experiment, self.etl_constants = load_configs(self.manager,
-                                                                               configuration=configuration_path,
-                                                                               experiment=experiment_path,
-                                                                               etl_constants=etl_constants_path)
+        self.configuration = load_configs(self.manager,
+                                        configuration=configuration_path,
+                                        experiment=experiment_path,
+                                        etl_constants=etl_constants_path)
+        #self.configuration['configuration'] -- self.configuration
+        #self.configuration['experiment'] -- self.experiment
+        #self.configuration['etl_constants'] -- self.etl_constants
+        
         # Initialize the Model
         self.model = ObjectInSubprocess(Model,
                                         use_gpu,

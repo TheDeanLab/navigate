@@ -12,6 +12,14 @@ class LaserBase:
     def __init__(self, port):
         pass
 
+    def set_power(self, power_level):
+        pass
+
+    def turn_on(self):
+        pass
+
+    def turn_off(self):
+        pass
 
     def close(self):
         """

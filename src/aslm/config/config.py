@@ -28,7 +28,7 @@ def get_configuration_paths():
     # If they are not already, copy the default ones that ship with the software too this folder
     if not os.path.exists(configuration_path):
         copy_base_directory = Path(__file__).resolve().parent
-        copy_configuration_path = Path.joinpath(copy_base_directory, 'configuration.yml')
+        copy_configuration_path = Path.joinpath(copy_base_directory, 'configuration_old.yml')
         shutil.copyfile(copy_configuration_path, configuration_path)
 
     if not os.path.exists(experiment_path):

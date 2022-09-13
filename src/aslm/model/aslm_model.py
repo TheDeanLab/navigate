@@ -104,8 +104,6 @@ class Model:
                  USE_GPU,
                  args,
                  configuration_path=None,
-                 experiment_path=None,
-                 etl_constants_path=None,
                  event_queue=None):
 
         log_setup('model_logging.yml')
@@ -115,25 +113,18 @@ class Model:
         # self.configuration = Configurator(configuration_path)
         self.configuration = configuration_path
 
-        # Loads the YAML file for all of the experiment parameters
-        # self.experiment = Configurator(experiment_path)
-        self.experiment = experiment_path
-
-        # Loads the YAML file for all of the ETL constants
-        # self.etl_constants = Configurator(etl_constants_path)
-        self.etl_constants = etl_constants_path
 
         # Initialize all Hardware
         if args.synthetic_hardware:
             # If command line entry provided, overwrites the model parameters with synthetic hardware.
-            self.configuration['Devices']['daq'] = 'SyntheticDAQ'
-            self.configuration['Devices']['camera'] = 'SyntheticCamera'
-            self.configuration['Devices']['etl'] = 'SyntheticETL'
-            self.configuration['Devices']['filter_wheel'] = 'SyntheticFilterWheel'
-            self.configuration['Devices']['stage'] = 'SyntheticStage'
-            self.configuration['Devices']['zoom'] = 'SyntheticZoom'
-            self.configuration['Devices']['shutters'] = 'SyntheticShutter'
-            self.configuration['Devices']['lasers'] = 'SyntheticLasers'
+            self.configuration['configuration']['Devices']['daq'] = 'SyntheticDAQ'
+            self.configuration['configuration']['Devices']['camera'] = 'SyntheticCamera'
+            self.configuration['configuration']['Devices']['etl'] = 'SyntheticETL'
+            self.configuration['configuration']['Devices']['filter_wheel'] = 'SyntheticFilterWheel'
+            self.configuration['configuration']['Devices']['stage'] = 'SyntheticStage'
+            self.configuration['configuration']['Devices']['zoom'] = 'SyntheticZoom'
+            self.configuration['configuration']['Devices']['shutters'] = 'SyntheticShutter'
+            self.configuration['configuration']['Devices']['lasers'] = 'SyntheticLasers'
 
         # Move device initialization steps to multiple threads
         """
@@ -166,10 +157,9 @@ class Model:
         # Optionally start up multiple cameras
         # TODO: In the event two cameras are on, but we've only requested one, make sure it's the one with the
         #       serial number we want.
-        for i in range(int(self.configuration['CameraParameters']['number_of_cameras'])):
+        for i in range(int(self.configuration['configuration']['CameraParameters']['number_of_cameras'])):
             threads_dict[f'camera{i}'] = ResultThread(target=startup_functions.start_camera,
                                                       args=(self.configuration,
-                                                            self.experiment,
                                                             i)).start()
             time.sleep(1.0)
 
@@ -186,7 +176,6 @@ class Model:
 
         # analysis class
         self.analysis = startup_functions.start_analysis(self.configuration,
-                                                         self.experiment,
                                                          USE_GPU)
 
         # Acquisition Housekeeping
@@ -204,8 +193,8 @@ class Model:
         self.camera_line_interval = 9.7e-6  # s
         self.start_time = None
         self.data_buffer = None
-        self.img_width = int(self.configuration['CameraParameters']['x_pixels'])
-        self.img_height = int(self.configuration['CameraParameters']['y_pixels'])
+        self.img_width = int(self.configuration['configuration']['CameraParameters']['x_pixels'])
+        self.img_height = int(self.configuration['configuration']['CameraParameters']['y_pixels'])
         self.data_buffer_positions = None
 
         # Autofocusing
@@ -246,7 +235,7 @@ class Model:
         # self.pre_trigger_time = 0
 
         # data buffer for image frames
-        self.number_of_frames = self.configuration['SharedNDArray']['number_of_frames']
+        self.number_of_frames = self.configuration['configuration']['SharedNDArray']['number_of_frames']
         self.update_data_buffer(self.img_width, self.img_height)
 
         # debug
@@ -284,11 +273,11 @@ class Model:
         #       serial number we want.
         # If we have multiple cameras, loop through them all and check their serial numbers
 
-        n_cams = int(self.configuration['CameraParameters']['number_of_cameras'])
+        n_cams = int(self.configuration['configuration']['CameraParameters']['number_of_cameras'])
         if n_cams > 1:
             # Grab the camera with the serial number that matches for the current resolution mode, as specified in
             # configuration.yaml
-            sn = self.configuration['CameraParameters'][f"{self.experiment['MicroscopeState']['resolution_mode']}_serial_number"]
+            sn = self.configuration['configuration']['CameraParameters'][f"{self.experiment['MicroscopeState']['resolution_mode']}_serial_number"]
             for i in range(n_cams):
                 curr_cam = getattr(self, f'camera{i}')
                 if str(sn) == str(curr_cam.serial_number):
@@ -975,8 +964,8 @@ class Model:
         pos_dict = self.get_stage_position()
         for axis, val in pos_dict.items():
             ax = axis.split('_')[0]
-            l_offset = self.configuration['StageParameters'].get(f"{ax}_l_offset", 0)
-            r_offset = self.configuration['StageParameters'].get(f"{ax}_r_offset", 0)
+            l_offset = self.configuration['configuration']['StageParameters'].get(f"{ax}_l_offset", 0)
+            r_offset = self.configuration['configuration']['StageParameters'].get(f"{ax}_r_offset", 0)
             if mode == 'high':
                 new_pos = val + r_offset
                 if not initial:

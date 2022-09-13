@@ -126,8 +126,6 @@ class ASLM_controller:
                                         use_gpu,
                                         args,
                                         self.configuration,
-                                        self.experiment,
-                                        self.etl_constants,
                                         # configuration_path=configuration_path,
                                         # experiment_path=experiment_path,
                                         # etl_constants_path=etl_constants_path,
@@ -814,7 +812,7 @@ class ASLM_controller:
         while True:
             event, value = self.event_queue.get()
             if event == 'waveform':
-                self.waveform_tab_controller.update_waveforms(value, self.configuration['DAQParameters']['sample_rate'])
+                self.waveform_tab_controller.update_waveforms(value, self.configuration['configuration']['DAQParameters']['sample_rate'])
             elif event == 'multiposition':
                 from aslm.tools.multipos_table_tools import update_table
                 update_table(self.view.settings.multiposition_tab.multipoint_list.get_table(), value)

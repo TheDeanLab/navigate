@@ -96,6 +96,7 @@ class SyntheticCamera(CameraBase):
         self.num_of_frame = None
         self.pre_frame_idx = None
 
+        # Configuration is passed in as self.configuration['configuration']
         if camera_id == 0:
             self.serial_number = configuration['CameraParameters']['low_serial_number']
         else:

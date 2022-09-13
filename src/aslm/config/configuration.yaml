@@ -414,6 +414,8 @@ microscopes:
       - wavelength: 488
         onoff:
           hardware:
+            name: CoherentObis
+          hardware:
             name: daq
             type: NI
             channel: PXI6733/port0/line2

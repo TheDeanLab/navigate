@@ -55,16 +55,16 @@ class Metadata:
         return self._per_stack
 
     def set_from_configuration_experiment(self) -> None:
-        if self.experiment is not None and self.configuration is not None:
+        if self.experiment is not None and self.configuration['configuration'] is not None:
             self.set_shape_from_configuration_experiment()
             self.set_stack_order_from_configuration_experiment()
 
     def set_shape_from_configuration_experiment(self) -> None:
         zoom = self.experiment['MicroscopeState']['zoom']
         if self.experiment['MicroscopeState']['resolution_mode'] == 'low':
-            pixel_size = float(self.configuration['ZoomParameters']['low_res_zoom_pixel_size'][zoom])
+            pixel_size = float(self.configuration['configuration']['ZoomParameters']['low_res_zoom_pixel_size'][zoom])
         else:
-            pixel_size = float(self.configuration['ZoomParameters']['high_res_zoom_pixel_size'])
+            pixel_size = float(self.configuration['configuration']['ZoomParameters']['high_res_zoom_pixel_size'])
         self.dx, self.dy = pixel_size, pixel_size
         self.dz = float(self.experiment['MicroscopeState']['step_size'])
         self.dt = float(self.experiment['MicroscopeState']['timepoint_interval'])

@@ -135,7 +135,7 @@ class SyntheticStage(StageBase):
                 print('Unzeroing of axis: ', axis, 'failed')
 
     def load_sample(self):
-        self.y_pos = self.configuration['StageParameters']['y_load_position']
+        self.y_pos = self.configuration['configuration']['StageParameters']['y_load_position']
 
     def unload_sample(self):
-        self.y_pos = self.configuration['StageParameters']['y_unload_position']
+        self.y_pos = self.configuration['configuration']['StageParameters']['y_unload_position']

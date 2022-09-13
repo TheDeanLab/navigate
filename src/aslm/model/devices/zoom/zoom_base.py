@@ -57,5 +57,5 @@ class ZoomBase:
 
     def __init__(self, configuration):
         self.configuration = configuration
-        self.zoomdict = configuration['ZoomParameters']['zoom_position']
+        self.zoomdict = self.configuration['configuration']['ZoomParameters']['zoom_position']
         self.zoomvalue = None

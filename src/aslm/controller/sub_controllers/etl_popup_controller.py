@@ -87,7 +87,7 @@ class Etl_Popup_Controller(GUI_Controller):
 
         self.variables = self.view.get_variables()
 
-        self.lasers = [v for k, v in self.configuration['LaserParameters'].items() if k.endswith('wavelength')]
+        self.lasers = [v for k, v in self.configuration['configuration']['LaserParameters'].items() if k.endswith('wavelength')]
         self.resolution = None
         self.mag = None
         self.mode = 'stop'
@@ -140,10 +140,10 @@ class Etl_Popup_Controller(GUI_Controller):
             increment = 0.01
             focus_prefix = 'l'
 
-        laser_min = self.configuration['RemoteFocusParameters'][f'remote_focus_{focus_prefix}_min_ao']
-        laser_max = self.configuration['RemoteFocusParameters'][f'remote_focus_{focus_prefix}_max_ao']
-        galvo_min = self.configuration['GalvoParameters'][f'galvo_{focus_prefix}_min_ao']
-        galvo_max = self.configuration['GalvoParameters'][f'galvo_{focus_prefix}_max_ao']
+        laser_min = self.configuration['configuration']['RemoteFocusParameters'][f'remote_focus_{focus_prefix}_min_ao']
+        laser_max = self.configuration['configuration']['RemoteFocusParameters'][f'remote_focus_{focus_prefix}_max_ao']
+        galvo_min = self.configuration['configuration']['GalvoParameters'][f'galvo_{focus_prefix}_min_ao']
+        galvo_max = self.configuration['configuration']['GalvoParameters'][f'galvo_{focus_prefix}_max_ao']
 
         # set ranges of value for those lasers
         for laser in self.lasers:
@@ -184,7 +184,7 @@ class Etl_Popup_Controller(GUI_Controller):
         # TODO: Should we instead change galvo amp/offset behavior based on a waveform type passed in the
         #       configuration? That is, should we pass galvo_l_waveform: sawtooth and galvo_r_waveform: dc_value?
         #       And then adjust the ETL_Popup_Controller accordingly? We could do the same for ETL vs. voice coil.
-        if self.configuration['GalvoParameters'].get(f'galvo_{focus_prefix}_amplitude', None) is None:
+        if self.configuration['configuration']['GalvoParameters'].get(f'galvo_{focus_prefix}_amplitude', None) is None:
             self.widgets['Galvo Amp'].widget['state'] = "disabled"
             self.widgets['Galvo Freq'].widget['state'] = "disabled"
         else:

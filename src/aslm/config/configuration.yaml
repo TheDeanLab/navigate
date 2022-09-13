@@ -98,7 +98,8 @@ microscopes:
       offset: 2.3
     galvo:
       hardware:
-        type: daq
+        name: daq
+        type: NI
         channel: PXI6259/ao0
         min: -5
         max: 5
@@ -109,6 +110,7 @@ microscopes:
       phase: 1.57079 # pi/2
     filter_wheel:
       hardware:
+        name: filter_wheel
         type: SutterFilterWheel
         wheel_number: 1
       filter_wheel_delay: .030 # in seconds
@@ -189,6 +191,7 @@ microscopes:
         6x: 1.044
     shutter:
       hardware:
+        name: daq
         type: NI
         channel: PXI6259/port0/line0
         min: 0
@@ -227,6 +230,7 @@ microscopes:
             max: 5
         power:
           hardware:
+            name: daq
             type: NI
             channel: PXI6733/ao1
             min: 0
@@ -238,12 +242,14 @@ microscopes:
       - wavelength: 642
         onoff:
           hardware:
+            name: daq
             type: NI
             channel: PXI6733/port0/line4
             min: 0
             max: 5
         power:
           hardware:
+            name: daq
             type: NI
             channel: PXI6733/ao2
             min: 0
@@ -256,6 +262,7 @@ microscopes:
     name: high
     daq:
       hardware:
+        name: daq
         type: NI
 
       # NI PCIe-1073 Chassis with PXI-6259 and PXI-6733 DAQ Boards.
@@ -302,6 +309,7 @@ microscopes:
         step: 1
     remote_focus_device:
       hardware:
+        name: daq
         type: NI
         channel: PXI6259/ao3
         min: -0.7
@@ -314,6 +322,7 @@ microscopes:
       offset: 2.3
     galvo:
       hardware:
+        name: daq
         type: NI
         channel: PXI6259/ao1
         min: -5
@@ -321,6 +330,7 @@ microscopes:
       offset: 0.5
     filter_wheel:
       hardware:
+        name: filter_wheel
         type: SutterFilterWheel
         wheel_number: 2
       filter_wheel_delay: .030 # in seconds
@@ -338,10 +348,12 @@ microscopes:
     stage:
       hardware:
         -
+          name: stage
           type: PI
           serial_number: 119060508
           axes: [x, y, z, theta]
         -
+          name: stage
           type: Thorlabs
           serial_number: 7400375
           axes: [f]
@@ -389,6 +401,7 @@ microscopes:
         N/A: 0.167
     shutter:
       hardware:
+        name: daq
         type: NI
         channel: PXI6259/port0/line0
       shutter_min_do: 0
@@ -401,12 +414,14 @@ microscopes:
       - wavelength: 488
         onoff:
           hardware:
+            name: daq
             type: NI
             channel: PXI6733/port0/line2
             min: 0
             max: 5
         power:
           hardware:
+            name: daq
             type: NI
             channel: PXI6733/ao0
             min: 0
@@ -418,12 +433,14 @@ microscopes:
       - wavelength: 561
         onoff:
           hardware:
+            name: daq
             type: NI
             channel: PXI6733/port0/line3
             min: 0
             max: 5
         power:
           hardware:
+            name: daq
             type: NI
             channel: PXI6733/ao1
             min: 0
@@ -435,12 +452,14 @@ microscopes:
       - wavelength: 642
         onoff:
           hardware:
+            name: daq
             type: NI
             channel: PXI6733/port0/line4
             min: 0
             max: 5
         power:
           hardware:
+            name: daq
             type: NI
             channel: PXI6733/ao2
             min: 0

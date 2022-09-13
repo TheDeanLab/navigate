@@ -37,6 +37,7 @@ microscopes:
     name: low
     daq:
       hardware:
+        name: daq
         type: NI
 
       # NI PCIe-1073 Chassis with PXI-6259 and PXI-6733 DAQ Boards.
@@ -54,6 +55,7 @@ microscopes:
 
     camera:
       hardware:
+        name: camera
         type: HamamatsuOrca
         serial_number: 302352
       x_pixels: 2048.0
@@ -83,6 +85,7 @@ microscopes:
         step: 1
     remote_focus_device:
       hardware:
+        name: daq
         type: NI
         channel: PXI6259/ao2
         min: 0
@@ -95,7 +98,7 @@ microscopes:
       offset: 2.3
     galvo:
       hardware:
-        type: NI
+        type: daq
         channel: PXI6259/ao0
         min: -5
         max: 5
@@ -122,6 +125,7 @@ microscopes:
         Blocked6: 9
     stage:
       hardware:
+        name: stage
         type: PI
         serial_number: 119060508
         axes: [x, y, z, theta, f]
@@ -164,6 +168,7 @@ microscopes:
       theta_offset: 0
     zoom:
       hardware:
+        name: zoom
         type: DynamixelZoom
         servo_id: 1
       position:
@@ -188,7 +193,7 @@ microscopes:
         channel: PXI6259/port0/line0
         min: 0
         max: 5
-        lasers:
+    lasers:
       # Omicron LightHub Ultra
       # 488 and 640 are LuxX+ Lasers
       # 561 is a Coherent OBIS Laser
@@ -196,12 +201,14 @@ microscopes:
       - wavelength: 488
         onoff:
           hardware:
+            name: daq
             type: NI
             channel: PXI6733/port0/line2
             min: 0
             max: 5
         power:
           hardware:
+            name: daq
             type: NI
             channel: PXI6733/ao0
             min: 0
@@ -213,6 +220,7 @@ microscopes:
       - wavelength: 561
         onoff:
           hardware:
+            name: daq
             type: NI
             channel: PXI6733/port0/line3
             min: 0

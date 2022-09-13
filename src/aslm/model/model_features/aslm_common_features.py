@@ -149,11 +149,11 @@ class ZStackAcquisition:
         else:
             self.positions = dict({
                     0 : {
-                        'x': float(self.model.experiment.StageParameters['x']),
-                        'y': float(self.model.experiment.StageParameters['y']),
-                        'z': float(microscope_state.get('stack_z_origin', self.model.experiment.StageParameters['z'])),
-                        'theta': float(self.model.experiment.StageParameters['theta']),
-                        'f': float(microscope_state.get('stack_focus_origin', self.model.experiment.StageParameters['f']))
+                        'x': float(self.model.experiment['StageParameters']['x']),
+                        'y': float(self.model.experiment['StageParameters']['y']),
+                        'z': float(microscope_state.get('stack_z_origin', self.model.experiment['StageParameters']['z'])),
+                        'theta': float(self.model.experiment['StageParameters']['theta']),
+                        'f': float(microscope_state.get('stack_focus_origin', self.model.experiment['StageParameters']['f']))
                     }
                 })
         self.current_position_idx = 0
@@ -290,20 +290,20 @@ class FindTissueSimple2D:
             img = self.model.data_buffer[idx]
 
             # Get current mag
-            if self.model.experiment.MicroscopeState['resolution_mode'] == 'high':
-                curr_pixel_size = self.model.configuration.ZoomParameters['high_res_zoom_pixel_size']
+            if self.model.experiment['MicroscopeState']['resolution_mode'] == 'high':
+                curr_pixel_size = self.model.configuration['ZoomParameters']['high_res_zoom_pixel_size']
                 curr_mag = 300/(12.19/1.56)  # TODO: Don't hardcode
             else:
-                zoom = self.model.experiment.MicroscopeState['zoom']
-                curr_pixel_size = self.model.configuration.ZoomParameters['low_res_zoom_pixel_size'][zoom]
+                zoom = self.model.experiment['MicroscopeState']['zoom']
+                curr_pixel_size = self.model.configuration['ZoomParameters']['low_res_zoom_pixel_size'][zoom]
                 curr_mag = float(zoom[:-1])
 
             # get target mag
             if self.target_resolution == 'high':
-                pixel_size = self.model.configuration.ZoomParameters['high_res_zoom_pixel_size']
+                pixel_size = self.model.configuration['ZoomParameters']['high_res_zoom_pixel_size']
                 mag = 300/(12.19/1.56)  # TODO: Don't hardcode
             else:
-                pixel_size = self.model.configuration.ZoomParameters['low_res_zoom_pixel_size'][self.target_resolution]
+                pixel_size = self.model.configuration['ZoomParameters']['low_res_zoom_pixel_size'][self.target_resolution]
                 mag = float(self.target_resolution)
 
             # Downsample according to the desired magnification change. Note, we could downsample by whatever we want.
@@ -326,43 +326,43 @@ class FindTissueSimple2D:
             xd, yd = abs(x_start - x_end), y_end - y_start
 
             # grab z, theta, f starting positions
-            z_start = self.model.experiment.StageParameters['z']
-            r_start = self.model.experiment.StageParameters['theta']
+            z_start = self.model.experiment['StageParameters']['z']
+            r_start = self.model.experiment['StageParameters']['theta']
             if self.target_resolution == 'high':
                 f_start = 0  # very different range of focus values in high-res
             else:
-                f_start = self.model.experiment.StageParameters['f']
+                f_start = self.model.experiment['StageParameters']['f']
 
             # Update x and y start to initialize from the upper-left corner of the current image, since this is
             # how np.where indexed them. The + 0.5 in x_start/y_start calculation shifts their starts back to the
             # center of the field of view.
-            curr_fov_x = float(self.model.experiment.CameraParameters['x_pixels']) * curr_pixel_size
-            curr_fov_y = float(self.model.experiment.CameraParameters['y_pixels']) * curr_pixel_size
-            x_start += self.model.experiment.StageParameters['x'] + curr_fov_x/2
-            y_start += self.model.experiment.StageParameters['y'] - curr_fov_y/2
+            curr_fov_x = float(self.model.experiment['CameraParameters']['x_pixels']) * curr_pixel_size
+            curr_fov_y = float(self.model.experiment['CameraParameters']['y_pixels']) * curr_pixel_size
+            x_start += self.model.experiment['StageParameters']['x'] + curr_fov_x/2
+            y_start += self.model.experiment['StageParameters']['y'] - curr_fov_y/2
 
             if self.target_resolution == 'high':
-                x_start += float(self.model.configuration.StageParameters['x_r_offset']) \
-                           - float(self.model.configuration.StageParameters['x_l_offset'])
-                y_start += float(self.model.configuration.StageParameters['y_r_offset']) \
-                           - float(self.model.configuration.StageParameters['y_l_offset'])
-                z_start += float(self.model.configuration.StageParameters['z_r_offset']) \
-                           - float(self.model.configuration.StageParameters['z_l_offset'])
-                r_start += float(self.model.configuration.StageParameters['theta_r_offset']) \
-                           - float(self.model.configuration.StageParameters['theta_l_offset'])
+                x_start += float(self.model.configuration['StageParameters']['x_r_offset']) \
+                           - float(self.model.configuration['StageParameters']['x_l_offset'])
+                y_start += float(self.model.configuration['StageParameters']['y_r_offset']) \
+                           - float(self.model.configuration['StageParameters']['y_l_offset'])
+                z_start += float(self.model.configuration['StageParameters']['z_r_offset']) \
+                           - float(self.model.configuration['StageParameters']['z_l_offset'])
+                r_start += float(self.model.configuration['StageParameters']['theta_r_offset']) \
+                           - float(self.model.configuration['StageParameters']['theta_l_offset'])
             else:
-                x_start += -float(self.model.configuration.StageParameters['x_r_offset']) \
-                           + float(self.model.configuration.StageParameters['x_l_offset'])
-                y_start += -float(self.model.configuration.StageParameters['y_r_offset']) \
-                           + float(self.model.configuration.StageParameters['y_l_offset'])
-                z_start += -float(self.model.configuration.StageParameters['z_r_offset']) \
-                           + float(self.model.configuration.StageParameters['z_l_offset'])
-                r_start += -float(self.model.configuration.StageParameters['theta_r_offset']) \
-                           + float(self.model.configuration.StageParameters['theta_l_offset'])
+                x_start += -float(self.model.configuration['StageParameters']['x_r_offset']) \
+                           + float(self.model.configuration['StageParameters']['x_l_offset'])
+                y_start += -float(self.model.configuration['StageParameters']['y_r_offset']) \
+                           + float(self.model.configuration['StageParameters']['y_l_offset'])
+                z_start += -float(self.model.configuration['StageParameters']['z_r_offset']) \
+                           + float(self.model.configuration['StageParameters']['z_l_offset'])
+                r_start += -float(self.model.configuration['StageParameters']['theta_r_offset']) \
+                           + float(self.model.configuration['StageParameters']['theta_l_offset'])
 
             # grid out the 2D space
-            fov_x = float(self.model.experiment.CameraParameters['x_pixels']) * pixel_size
-            fov_y = float(self.model.experiment.CameraParameters['y_pixels']) * pixel_size
+            fov_x = float(self.model.experiment['CameraParameters']['x_pixels']) * pixel_size
+            fov_y = float(self.model.experiment['CameraParameters']['y_pixels']) * pixel_size
             x_tiles = calc_num_tiles(xd, self.overlap, fov_x)
             y_tiles = calc_num_tiles(yd, self.overlap, fov_y)
 

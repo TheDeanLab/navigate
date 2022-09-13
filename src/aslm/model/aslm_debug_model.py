@@ -143,7 +143,7 @@ class Debug_Module:
 
         self.model.experiment.MicroscopeState = args[0]
         self.model.prepare_acquisition()
-        self.model.experiment.Saving['save_directory'] = 'temp\\images'
+        self.model.experiment['Saving']['save_directory'] = 'temp\\images'
 
         if not os.path.exists('temp\\images\\sub\\sub2'):
             os.makedirs('temp\\images\\sub\\sub2')
@@ -258,7 +258,7 @@ class Debug_Module:
         
 
     def send_signals(self, signal_num):
-        channel_num = 1 #len(self.model.experiment.MicroscopeState['channels'].keys())
+        channel_num = 1 #len(self.model.experiment['MicroscopeState']['channels'].keys())
         i = 0
         while i < signal_num and not self.model.stop_acquisition:
             # self.model.signal_container.reset()

@@ -87,16 +87,16 @@ class Camera_Setting_Controller(GUI_Controller):
         """
 
         # Get Default Configuration Values
-        self.default_pixel_size = config.configuration.CameraParameters['pixel_size_in_microns']
+        self.default_pixel_size = config.configuration['CameraParameters']['pixel_size_in_microns']
         self.default_width, self.default_height = config.get_pixels()
-        self.trigger_source = config.configuration.CameraParameters['trigger_source']
-        self.trigger_active = config.configuration.CameraParameters['trigger_active']
-        self.readout_speed = config.configuration.CameraParameters['readout_speed']
+        self.trigger_source = config.configuration['CameraParameters']['trigger_source']
+        self.trigger_active = config.configuration['CameraParameters']['trigger_active']
+        self.readout_speed = config.configuration['CameraParameters']['readout_speed']
         
         # Camera Mode
         self.mode_widgets['Sensor'].widget['values'] = ['Normal', 'Light-Sheet']
         self.mode_widgets['Sensor'].widget['state'] = 'readonly'
-        self.mode_widgets['Sensor'].widget.set(config.configuration.CameraParameters['sensor_mode'])
+        self.mode_widgets['Sensor'].widget.set(config.configuration['CameraParameters']['sensor_mode'])
         self.mode_widgets['Sensor'].widget.selection_clear()
 
         # Readout Mode
@@ -108,13 +108,13 @@ class Camera_Setting_Controller(GUI_Controller):
         self.mode_widgets['Pixels'].widget['state'] = 'disabled'
         self.mode_widgets['Pixels'].set('')
         self.mode_widgets['Pixels'].widget.config(from_=1) # min value
-        self.mode_widgets['Pixels'].widget.config(to=config.configuration.CameraParameters['y_pixels'] / 2) # max value
+        self.mode_widgets['Pixels'].widget.config(to=config.configuration['CameraParameters']['y_pixels'] / 2) # max value
         self.mode_widgets['Pixels'].widget.config(increment=1) # step value
 
         # framerate_widgets
-        self.framerate_widgets['exposure_time'].widget.min = config.configuration.CameraParameters['exposure_time_range']['min']
-        self.framerate_widgets['exposure_time'].widget.max = config.configuration.CameraParameters['exposure_time_range']['max']
-        self.framerate_widgets['exposure_time'].set(config.configuration.CameraParameters['exposure_time'])
+        self.framerate_widgets['exposure_time'].widget.min = config.configuration['CameraParameters']['exposure_time_range']['min']
+        self.framerate_widgets['exposure_time'].widget.max = config.configuration['CameraParameters']['exposure_time_range']['max']
+        self.framerate_widgets['exposure_time'].set(config.configuration['CameraParameters']['exposure_time'])
         self.framerate_widgets['exposure_time'].widget['state'] = 'disabled'
         self.framerate_widgets['readout_time'].widget['state'] = 'disabled'
         self.framerate_widgets['max_framerate'].widget['state'] = 'disabled'
@@ -158,8 +158,8 @@ class Camera_Setting_Controller(GUI_Controller):
         self.in_initialization = True
 
         # Retrieve settings.
-        setting_dict = experiment.CameraParameters
-        microscope_state = experiment.MicroscopeState
+        setting_dict = experiment['CameraParameters']
+        microscope_state = experiment['MicroscopeState']
         self.resolution_value = 'high' if microscope_state['resolution_mode'] == 'high' else microscope_state['zoom']
 
         # Readout Settings
@@ -221,10 +221,10 @@ class Camera_Setting_Controller(GUI_Controller):
         """
         Updates text in readout widget based on what sensor mode is selected
         If we are in the Light Sheet mode, then we want the camera
-        self.model.CameraParameters['sensor_mode']) == 12
+        self.model['CameraParameters']['sensor_mode']) == 12
 
         If we are in the normal mode, then we want the camera
-        self.model.CameraParameters['sensor_mode']) == 1
+        self.model['CameraParameters']['sensor_mode']) == 1
 
         Should initialize from the configuration file to the default version
         """

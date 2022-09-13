@@ -78,19 +78,19 @@ class NIDAQ(DAQBase):
         exposure_time : float
             Duration of camera exposure.
         """
-        camera_trigger_out_line = self.configuration.DAQParameters['camera_trigger_out_line']
+        camera_trigger_out_line = self.configuration['DAQParameters']['camera_trigger_out_line']
         self.camera_high_time = 0.004  # (self.camera_pulse_percent / 100) * (exposure_time/1000)  # self.sweep_time
         self.camera_delay = (self.camera_delay_percent / 100) * (exposure_time/1000)  # * 0.01 * self.sweep_time
 
         self.camera_trigger_task.co_channels.add_co_pulse_chan_time(camera_trigger_out_line,
                                                                     high_time=self.camera_high_time,
                                                                     initial_delay=self.camera_delay)
-        trigger_source = self.configuration.DAQParameters['trigger_source']
+        trigger_source = self.configuration['DAQParameters']['trigger_source']
         self.camera_trigger_task.triggers.start_trigger.cfg_dig_edge_start_trig(trigger_source)
 
     def create_master_trigger_task(self):
         r"""Set up the DO master trigger task."""
-        master_trigger_out_line = self.configuration.DAQParameters['master_trigger_out_line']
+        master_trigger_out_line = self.configuration['DAQParameters']['master_trigger_out_line']
         self.master_trigger_task.do_channels.add_do_chan(master_trigger_out_line,
                                                          line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
 
@@ -99,13 +99,13 @@ class NIDAQ(DAQBase):
 
         All waveforms initiated by the trigger_source. PXI6259/ao0:3 -> 4 channels"""
         # TODO: Does this task line change for the right galvo?
-        galvo_etl_task_line = self.configuration.DAQParameters['galvo_etl_task_line']
+        galvo_etl_task_line = self.configuration['DAQParameters']['galvo_etl_task_line']
         self.galvo_etl_task.ao_channels.add_ao_voltage_chan(galvo_etl_task_line)
         self.galvo_etl_task.timing.cfg_samp_clk_timing(rate=self.sample_rate,
                                                        sample_mode=AcquisitionType.FINITE,
                                                        samps_per_chan=self.samples)
 
-        trigger_source = self.configuration.DAQParameters['trigger_source']
+        trigger_source = self.configuration['DAQParameters']['trigger_source']
         self.galvo_etl_task.triggers.start_trigger.cfg_dig_edge_start_trig(trigger_source)
 
     def start_tasks(self):

@@ -62,34 +62,34 @@ class DAQBase:
         self.etl_constants = etl_constants
 
         # Initialize Variables
-        self.sample_rate = self.configuration.DAQParameters['sample_rate']
-        self.sweep_time = self.configuration.DAQParameters['sweep_time']
+        self.sample_rate = self.configuration['DAQParameters']['sample_rate']
+        self.sweep_time = self.configuration['DAQParameters']['sweep_time']
         self.samples = int(self.sample_rate * self.sweep_time)
 
         # New DAQ Attempt
-        self.etl_delay = self.configuration.RemoteFocusParameters['remote_focus_l_delay_percent']
-        self.etl_ramp_rising = self.configuration.RemoteFocusParameters['remote_focus_l_ramp_rising_percent']
-        self.etl_ramp_falling = self.configuration.RemoteFocusParameters['remote_focus_l_ramp_falling_percent']
+        self.etl_delay = self.configuration['RemoteFocusParameters']['remote_focus_l_delay_percent']
+        self.etl_ramp_rising = self.configuration['RemoteFocusParameters']['remote_focus_l_ramp_rising_percent']
+        self.etl_ramp_falling = self.configuration['RemoteFocusParameters']['remote_focus_l_ramp_falling_percent']
 
         # ETL Parameters
         self.etl_l_waveform = None
-        self.etl_l_delay = self.configuration.RemoteFocusParameters['remote_focus_l_delay_percent']
-        self.etl_l_ramp_rising = self.configuration.RemoteFocusParameters['remote_focus_l_ramp_rising_percent']
-        self.etl_l_ramp_falling = self.configuration.RemoteFocusParameters['remote_focus_l_ramp_falling_percent']
-        self.etl_l_amplitude = self.configuration.RemoteFocusParameters['remote_focus_l_amplitude']
-        self.etl_l_offset = self.configuration.RemoteFocusParameters['remote_focus_l_offset']
-        self.etl_l_min_ao = self.configuration.RemoteFocusParameters['remote_focus_l_min_ao']
-        self.etl_l_max_ao = self.configuration.RemoteFocusParameters['remote_focus_l_max_ao']
+        self.etl_l_delay = self.configuration['RemoteFocusParameters']['remote_focus_l_delay_percent']
+        self.etl_l_ramp_rising = self.configuration['RemoteFocusParameters']['remote_focus_l_ramp_rising_percent']
+        self.etl_l_ramp_falling = self.configuration['RemoteFocusParameters']['remote_focus_l_ramp_falling_percent']
+        self.etl_l_amplitude = self.configuration['RemoteFocusParameters']['remote_focus_l_amplitude']
+        self.etl_l_offset = self.configuration['RemoteFocusParameters']['remote_focus_l_offset']
+        self.etl_l_min_ao = self.configuration['RemoteFocusParameters']['remote_focus_l_min_ao']
+        self.etl_l_max_ao = self.configuration['RemoteFocusParameters']['remote_focus_l_max_ao']
 
         # Remote Focus Parameters
         self.etl_r_waveform = None
-        self.etl_r_delay = self.configuration.RemoteFocusParameters['remote_focus_r_delay_percent']
-        self.etl_r_ramp_rising = self.configuration.RemoteFocusParameters['remote_focus_r_ramp_rising_percent']
-        self.etl_r_ramp_falling = self.configuration.RemoteFocusParameters['remote_focus_r_ramp_falling_percent']
-        self.etl_r_amplitude = self.configuration.RemoteFocusParameters['remote_focus_r_amplitude']
-        self.etl_r_offset = self.configuration.RemoteFocusParameters['remote_focus_r_offset']
-        self.etl_r_min_ao = self.configuration.RemoteFocusParameters['remote_focus_r_min_ao']
-        self.etl_r_max_ao = self.configuration.RemoteFocusParameters['remote_focus_r_max_ao']
+        self.etl_r_delay = self.configuration['RemoteFocusParameters']['remote_focus_r_delay_percent']
+        self.etl_r_ramp_rising = self.configuration['RemoteFocusParameters']['remote_focus_r_ramp_rising_percent']
+        self.etl_r_ramp_falling = self.configuration['RemoteFocusParameters']['remote_focus_r_ramp_falling_percent']
+        self.etl_r_amplitude = self.configuration['RemoteFocusParameters']['remote_focus_r_amplitude']
+        self.etl_r_offset = self.configuration['RemoteFocusParameters']['remote_focus_r_offset']
+        self.etl_r_min_ao = self.configuration['RemoteFocusParameters']['remote_focus_r_min_ao']
+        self.etl_r_max_ao = self.configuration['RemoteFocusParameters']['remote_focus_r_max_ao']
 
         # ETL history parameters
         self.prev_etl_r_amplitude = self.etl_r_amplitude
@@ -102,36 +102,36 @@ class DAQBase:
 
         # Left Galvo Parameters
         self.galvo_l_waveform = None
-        self.galvo_l_frequency = self.configuration.GalvoParameters['galvo_l_frequency']
-        self.galvo_l_amplitude = self.configuration.GalvoParameters['galvo_l_amplitude']
-        self.galvo_l_offset = self.configuration.GalvoParameters['galvo_l_offset']
-        self.galvo_l_duty_cycle = self.configuration.GalvoParameters['galvo_l_duty_cycle']
-        self.galvo_l_phase = self.configuration.GalvoParameters['galvo_l_phase']
-        self.galvo_l_min_ao = self.configuration.GalvoParameters['galvo_l_min_ao']
-        self.galvo_l_max_ao = self.configuration.GalvoParameters['galvo_l_max_ao']
+        self.galvo_l_frequency = self.configuration['GalvoParameters']['galvo_l_frequency']
+        self.galvo_l_amplitude = self.configuration['GalvoParameters']['galvo_l_amplitude']
+        self.galvo_l_offset = self.configuration['GalvoParameters']['galvo_l_offset']
+        self.galvo_l_duty_cycle = self.configuration['GalvoParameters']['galvo_l_duty_cycle']
+        self.galvo_l_phase = self.configuration['GalvoParameters']['galvo_l_phase']
+        self.galvo_l_min_ao = self.configuration['GalvoParameters']['galvo_l_min_ao']
+        self.galvo_l_max_ao = self.configuration['GalvoParameters']['galvo_l_max_ao']
 
         # Right Galvo Parameters
         self.galvo_r_waveform = None
         self.galvo_r_frequency = None
-        self.galvo_r_amplitude = self.configuration.GalvoParameters.get('galvo_r_amplitude', 0)
-        self.galvo_r_offset = self.configuration.GalvoParameters.get('galvo_r_offset', 0)
+        self.galvo_r_amplitude = self.configuration['GalvoParameters'].get('galvo_r_amplitude', 0)
+        self.galvo_r_offset = self.configuration['GalvoParameters'].get('galvo_r_offset', 0)
         self.galvo_r_duty_cycle = None
         self.galvo_r_phase = None
-        self.galvo_r_max_ao = self.configuration.GalvoParameters['galvo_r_max_ao']
-        self.galvo_r_min_ao = self.configuration.GalvoParameters['galvo_r_min_ao']
+        self.galvo_r_max_ao = self.configuration['GalvoParameters']['galvo_r_max_ao']
+        self.galvo_r_min_ao = self.configuration['GalvoParameters']['galvo_r_min_ao']
 
         # Camera Parameters
-        self.camera_delay_percent = self.configuration.CameraParameters['delay_percent']
-        self.camera_pulse_percent = self.configuration.CameraParameters['pulse_percent']
+        self.camera_delay_percent = self.configuration['CameraParameters']['delay_percent']
+        self.camera_pulse_percent = self.configuration['CameraParameters']['pulse_percent']
         self.camera_high_time = self.camera_pulse_percent * 0.01 * self.sweep_time
         self.camera_delay = self.camera_delay_percent * 0.01 * self.sweep_time
 
         # Laser Parameters
         self.laser_ao_waveforms = None
         self.laser_do_waveforms = None
-        self.number_of_lasers = self.configuration.LaserParameters['number_of_lasers']
-        self.laser_l_delay = self.configuration.LaserParameters['laser_l_delay_percent']
-        self.laser_l_pulse = self.configuration.LaserParameters['laser_l_pulse_percent']
+        self.number_of_lasers = self.configuration['LaserParameters']['number_of_lasers']
+        self.laser_l_delay = self.configuration['LaserParameters']['laser_l_delay_percent']
+        self.laser_l_pulse = self.configuration['LaserParameters']['laser_l_pulse_percent']
 
         self.laser_power = 0
         self.laser_idx = 0
@@ -211,8 +211,8 @@ class DAQBase:
                     self.sweep_time += readout_time
 
                 # ETL Parameters
-                etl_amplitude = float(etl_constants.ETLConstants[self.imaging_mode][zoom][laser]['amplitude'])
-                etl_offset = float(etl_constants.ETLConstants[self.imaging_mode][zoom][laser]['offset'])
+                etl_amplitude = float(etl_constants['ETLConstants'][self.imaging_mode][zoom][laser]['amplitude'])
+                etl_offset = float(etl_constants['ETLConstants'][self.imaging_mode][zoom][laser]['offset'])
 
                 # Galvo Parameters
                 galvo_amplitude = float(galvo_parameters.get(f'galvo_{focus_prefix}_amplitude', 0))
@@ -286,7 +286,7 @@ class DAQBase:
             # TODO: Temporary hard code because I don't want to chase down why the dictionaries are getting
             #       passed out of order again.
             zoom = 'N/A'
-        remote_focus_dict = self.etl_constants.ETLConstants[resolution_mode][zoom][laser]
+        remote_focus_dict = self.etl_constants['ETLConstants'][resolution_mode][zoom][laser]
 
         # Use defaults of 0 in the case they are not provided
         amp = float(remote_focus_dict.get('amplitude', 0))

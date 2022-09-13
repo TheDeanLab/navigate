@@ -54,8 +54,8 @@ class ImageWriter:
         self.model = model
         self.save_directory = ''
         self.sub_dir = sub_dir
-        # self.num_of_channels = len(self.model.experiment.MicroscopeState['channels'].keys())
-        self.num_of_channels = len([k for k, v in self.model.experiment.MicroscopeState['channels'].items() if v['is_selected']])
+        # self.num_of_channels = len(self.model.experiment['MicroscopeState']['channels'].keys())
+        self.num_of_channels = len([k for k, v in self.model.experiment['MicroscopeState']['channels'].items() if v['is_selected']])
         self.data_buffer = self.model.data_buffer
         self.current_time_point = 0
         self.config_table = {'signal': {},
@@ -63,7 +63,7 @@ class ImageWriter:
                                       'cleanup': self.close}}
 
         # create the save directory if it doesn't already exist
-        self.save_directory = os.path.join(self.model.experiment.Saving['save_directory'], self.sub_dir)
+        self.save_directory = os.path.join(self.model.experiment['Saving']['save_directory'], self.sub_dir)
         try:
             # create saving folder if not exits
             if not os.path.exists(self.save_directory):
@@ -73,7 +73,7 @@ class ImageWriter:
             logger.exception(e)
         
         # Set up the file name and path in the save directory
-        self.file_type = self.model.experiment.Saving['file_type']
+        self.file_type = self.model.experiment['Saving']['file_type']
         current_channel = self.model.current_channel
         ext = '.' + self.file_type.lower().replace(' ','.').replace('-','.')
         image_name = self.generate_image_name(current_channel, ext=ext)

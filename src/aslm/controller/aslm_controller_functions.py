@@ -163,17 +163,17 @@ def combine_funcs(*funclist):
 #             message='There are some missing/wrong settings!')
 #         return False
 #
-#     self.experiment.MicroscopeState['stack_cycling_mode'] = settings['stack_cycling_mode']
+#     self.experiment['MicroscopeState']['stack_cycling_mode'] = settings['stack_cycling_mode']
 #     for k in settings['stack_acquisition']:
-#         self.experiment.MicroscopeState[k] = settings['stack_acquisition'][k]
+#         self.experiment['MicroscopeState'][k] = settings['stack_acquisition'][k]
 #     for k in settings['timepoint']:
-#         self.experiment.MicroscopeState[k] = settings['timepoint'][k]
+#         self.experiment['MicroscopeState'][k] = settings['timepoint'][k]
 #
 #     # channels
-#     self.experiment.MicroscopeState['channels'] = settings['channel']
+#     self.experiment['MicroscopeState']['channels'] = settings['channel']
 #
 #     # get all positions
-#     self.experiment.MicroscopeState['stage_positions'] = self.channels_tab_controller.get_positions(
+#     self.experiment['MicroscopeState']['stage_positions'] = self.channels_tab_controller.get_positions(
 #     )
 #
 #     # get position information from stage tab
@@ -187,15 +187,15 @@ def combine_funcs(*funclist):
 #         return False
 #
 #     for axis in position:
-#         self.experiment.StageParameters[axis] = position[axis]
+#         self.experiment['StageParameters'][axis] = position[axis]
 #     step_size = self.stage_gui_controller.get_step_size()
 #     for axis in step_size:
-#         self.experiment.StageParameters[axis + '_step'] = step_size[axis]
+#         self.experiment['StageParameters'][axis + '_step'] = step_size[axis]
 
 
 # def update_from_camera_setting_controller(self):
-#     self.experiment.CameraParameters['sensor_mode'] = self.camera_setting_controller.sensor_mode
-#     self.experiment.CameraParameters['binning'] = 1
-#     # self.experiment.CameraParameters['x_pixels'] = self.camera_setting_controller.roi_widgets['Pixels_X'].get()
-#     # self.experiment.CameraParameters['y_pixels'] = self.camera_setting_controller.roi_widgets['Pixels_Y'].get()
-#     self.experiment.CameraParameters['number_of_cameras'] = 1
+#     self.experiment['CameraParameters']['sensor_mode'] = self.camera_setting_controller.sensor_mode
+#     self.experiment['CameraParameters']['binning'] = 1
+#     # self.experiment['CameraParameters']['x_pixels'] = self.camera_setting_controller.roi_widgets['Pixels_X'].get()
+#     # self.experiment['CameraParameters']['y_pixels'] = self.camera_setting_controller.roi_widgets['Pixels_Y'].get()
+#     self.experiment['CameraParameters']['number_of_cameras'] = 1

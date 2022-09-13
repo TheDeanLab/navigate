@@ -69,25 +69,25 @@ class HamamatsuOrca(CameraBase):
         self.camera_controller.set_property_value("sensor_mode",
                                                   1)
         self.camera_controller.set_property_value("defect_correct_mode",
-                                                  self.configuration.CameraParameters['defect_correct_mode'])
+                                                  self.configuration['CameraParameters']['defect_correct_mode'])
         self.camera_controller.set_property_value("exposure_time",
-                                                  self.configuration.CameraParameters['exposure_time'] / 1000)
+                                                  self.configuration['CameraParameters']['exposure_time'] / 1000)
         self.camera_controller.set_property_value("binning",
-                                                  int(self.configuration.CameraParameters['binning'][0]))
+                                                  int(self.configuration['CameraParameters']['binning'][0]))
         self.camera_controller.set_property_value("readout_speed",
-                                                  self.configuration.CameraParameters['readout_speed'])
+                                                  self.configuration['CameraParameters']['readout_speed'])
         self.camera_controller.set_property_value("trigger_active",
-                                                  self.configuration.CameraParameters['trigger_active'])
+                                                  self.configuration['CameraParameters']['trigger_active'])
         self.camera_controller.set_property_value("trigger_mode",
-                                                  self.configuration.CameraParameters['trigger_mode'])
+                                                  self.configuration['CameraParameters']['trigger_mode'])
         self.camera_controller.set_property_value("trigger_polarity",
-                                                  self.configuration.CameraParameters['trigger_polarity'])
+                                                  self.configuration['CameraParameters']['trigger_polarity'])
         self.camera_controller.set_property_value("trigger_source",
-                                                  self.configuration.CameraParameters['trigger_source'])
+                                                  self.configuration['CameraParameters']['trigger_source'])
         self.camera_controller.set_property_value("image_height",
-                                                   self.configuration.CameraParameters['y_pixels'])
+                                                   self.configuration['CameraParameters']['y_pixels'])
         self.camera_controller.set_property_value("image_width",
-                                                   self.configuration.CameraParameters['x_pixels'])
+                                                   self.configuration['CameraParameters']['x_pixels'])
 
         logger.info("HamamatsuOrca Initialized")
 
@@ -283,7 +283,7 @@ class HamamatsuOrca(CameraBase):
         self.y_binning = int(binning_string[2])
         self.x_pixels = int(self.x_pixels / self.x_binning)
         self.y_pixels = int(self.y_pixels / self.y_binning)
-        self.experiment.CameraParameters['camera_binning'] = str(self.x_binning) + 'x' + str(self.y_binning)
+        self.experiment['CameraParameters']['camera_binning'] = str(self.x_binning) + 'x' + str(self.y_binning)
 
     def set_ROI(self, roi_height=2048, roi_width=2048):
         r"""Change the size of the active region on the camera.
@@ -296,8 +296,8 @@ class HamamatsuOrca(CameraBase):
             Width of active camera region.
         """
         # Get the Maximum Number of Pixels from the Configuration File
-        camera_height = self.configuration.CameraParameters['y_pixels']
-        camera_width = self.configuration.CameraParameters['x_pixels']
+        camera_height = self.configuration['CameraParameters']['y_pixels']
+        camera_width = self.configuration['CameraParameters']['x_pixels']
 
         # Calculate Location of Image Edges
         roi_top = (camera_height - roi_height) / 2

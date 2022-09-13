@@ -63,17 +63,17 @@ class CameraBase:
         self.is_acquiring = False
 
         # Initialize Pixel Information
-        self.pixel_size_in_microns = self.configuration.CameraParameters['pixel_size_in_microns']
-        self.binning_string = self.configuration.CameraParameters['binning']
+        self.pixel_size_in_microns = self.configuration['CameraParameters']['pixel_size_in_microns']
+        self.binning_string = self.configuration['CameraParameters']['binning']
         self.x_binning = int(self.binning_string[0])
         self.y_binning = int(self.binning_string[2])
-        self.x_pixels = self.configuration.CameraParameters['x_pixels']
-        self.y_pixels = self.configuration.CameraParameters['y_pixels']
+        self.x_pixels = self.configuration['CameraParameters']['x_pixels']
+        self.y_pixels = self.configuration['CameraParameters']['y_pixels']
         self.x_pixels = int(self.x_pixels / self.x_binning)
         self.y_pixels = int(self.y_pixels / self.y_binning)
 
         # Initialize Exposure and Display Information - Convert from milliseconds to seconds.
-        self.camera_line_interval = self.configuration.CameraParameters['line_interval']
-        self.camera_exposure_time = self.configuration.CameraParameters['exposure_time'] / 1000
-        self.camera_display_acquisition_subsampling = self.configuration.CameraParameters['display_acquisition_subsampling']
+        self.camera_line_interval = self.configuration['CameraParameters']['line_interval']
+        self.camera_exposure_time = self.configuration['CameraParameters']['exposure_time'] / 1000
+        self.camera_display_acquisition_subsampling = self.configuration['CameraParameters']['display_acquisition_subsampling']
 

@@ -94,7 +94,7 @@ class Debug_Module:
             print('no input!')
             return
 
-        channel_num = len(self.central_controller.experiment.MicroscopeState['channels'].keys())
+        channel_num = len(self.central_controller.experiment['MicroscopeState']['channels'].keys())
         signal_num = (signal_num // channel_num) * channel_num + channel_num
 
         self.start_debug(signal_num, 'debug', 'ignored_signals', 'live', self.central_controller.experiment.MicroscopeState,
@@ -110,7 +110,7 @@ class Debug_Module:
         self.start_debug(signal_num, 'debug', 'ignored_signals', 'autofocus',
                             self.central_controller.experiment.MicroscopeState,
                             self.central_controller.experiment.AutoFocusParameters,
-                            self.central_controller.experiment.StageParameters['f'],
+                            self.central_controller.experiment['StageParameters']['f'],
                             signal_num)
         
 
@@ -140,7 +140,7 @@ class Debug_Module:
 
         self.start_debug(signal_num, 'debug', 'blocked_queue', 
                             self.central_controller.experiment.MicroscopeState,
-                            self.central_controller.experiment.StageParameters['f'],
+                            self.central_controller.experiment['StageParameters']['f'],
                             signal_num)
 
     def start_debug(self, signal_num, *args, **kwargs):
@@ -177,7 +177,7 @@ class Debug_Module:
             self.central_controller.model.run_command('debug', 'update_analysis_type', 'pool',
                             self.central_controller.experiment.MicroscopeState,
                             self.central_controller.experiment.AutoFocusParameters,
-                            self.central_controller.experiment.StageParameters['f'],
+                            self.central_controller.experiment['StageParameters']['f'],
                             cpu_num)
             self.get_frames()
             image_num = self.central_controller.show_img_pipe.recv()

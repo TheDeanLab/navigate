@@ -60,28 +60,28 @@ class Metadata:
             self.set_stack_order_from_configuration_experiment()
 
     def set_shape_from_configuration_experiment(self) -> None:
-        zoom = self.experiment.MicroscopeState['zoom']
-        if self.experiment.MicroscopeState['resolution_mode'] == 'low':
-            pixel_size = float(self.configuration.ZoomParameters['low_res_zoom_pixel_size'][zoom])
+        zoom = self.experiment['MicroscopeState']['zoom']
+        if self.experiment['MicroscopeState']['resolution_mode'] == 'low':
+            pixel_size = float(self.configuration['ZoomParameters']['low_res_zoom_pixel_size'][zoom])
         else:
-            pixel_size = float(self.configuration.ZoomParameters['high_res_zoom_pixel_size'])
+            pixel_size = float(self.configuration['ZoomParameters']['high_res_zoom_pixel_size'])
         self.dx, self.dy = pixel_size, pixel_size
-        self.dz = float(self.experiment.MicroscopeState['step_size'])
-        self.dt = float(self.experiment.MicroscopeState['timepoint_interval'])
+        self.dz = float(self.experiment['MicroscopeState']['step_size'])
+        self.dt = float(self.experiment['MicroscopeState']['timepoint_interval'])
 
-        self.shape_x = int(self.experiment.CameraParameters['x_pixels'])
-        self.shape_y = int(self.experiment.CameraParameters['y_pixels'])
-        self.shape_z = int(self.experiment.MicroscopeState['number_z_steps'])
-        self.shape_t = int(self.experiment.MicroscopeState['timepoints'])
-        self.shape_c = sum([v['is_selected'] == True for k, v in self.experiment.MicroscopeState['channels'].items()])
+        self.shape_x = int(self.experiment['CameraParameters']['x_pixels'])
+        self.shape_y = int(self.experiment['CameraParameters']['y_pixels'])
+        self.shape_z = int(self.experiment['MicroscopeState']['number_z_steps'])
+        self.shape_t = int(self.experiment['MicroscopeState']['timepoints'])
+        self.shape_c = sum([v['is_selected'] == True for k, v in self.experiment['MicroscopeState']['channels'].items()])
 
-        if bool(self.experiment.MicroscopeState['is_multiposition']):
-            self.positions = len(self.experiment.MicroscopeState['stage_positions'])
+        if bool(self.experiment['MicroscopeState']['is_multiposition']):
+            self.positions = len(self.experiment['MicroscopeState']['stage_positions'])
         else:
             self.positions = 1
 
     def set_stack_order_from_configuration_experiment(self) -> None:
-        self._per_stack = self.experiment.MicroscopeState['stack_cycling_mode'] == 'per_stack'
+        self._per_stack = self.experiment['MicroscopeState']['stack_cycling_mode'] == 'per_stack'
 
     @property
     def voxel_size(self) -> tuple:

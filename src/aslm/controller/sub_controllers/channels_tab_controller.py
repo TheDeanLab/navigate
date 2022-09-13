@@ -136,12 +136,12 @@ class Channels_Tab_Controller(GUI_Controller):
         config : object
             ASLM_Configuration_Controller.  config.configuration = Configurator object.
         """
-        self.set_channel_num(config.configuration.GUIParameters['number_of_channels'])
+        self.set_channel_num(config.configuration['GUIParameters']['number_of_channels'])
         self.stack_acq_widgets['cycling'].widget['values'] = ['Per Z', 'Per Stack']
-        self.stage_velocity = config.configuration.StageParameters['velocity']
-        self.filter_wheel_delay = config.configuration.FilterWheelParameters['filter_wheel_delay']
+        self.stage_velocity = config.configuration['StageParameters']['velocity']
+        self.filter_wheel_delay = config.configuration['FilterWheelParameters']['filter_wheel_delay']
         self.channel_setting_controller.initialize(config)
-        self.set_spinbox_range_limits(config.configuration.GUIParameters)
+        self.set_spinbox_range_limits(config.configuration['GUIParameters'])
         self.show_verbose_info('channels tab has been initialized')
 
     def set_experiment_values(self,
@@ -324,8 +324,8 @@ class Channels_Tab_Controller(GUI_Controller):
         """
 
         # We have a new origin
-        self.z_origin = self.parent_controller.experiment.StageParameters['z']
-        self.focus_origin = self.parent_controller.experiment.StageParameters['f']
+        self.z_origin = self.parent_controller.experiment['StageParameters']['z']
+        self.focus_origin = self.parent_controller.experiment['StageParameters']['f']
         self.stack_acq_vals['start_position'].set(0)
         self.stack_acq_vals['start_focus'].set(0)
 
@@ -341,8 +341,8 @@ class Channels_Tab_Controller(GUI_Controller):
             ?
         """
         # Grab current values
-        z_end = self.parent_controller.experiment.StageParameters['z']
-        focus_end = self.parent_controller.experiment.StageParameters['f']
+        z_end = self.parent_controller.experiment['StageParameters']['z']
+        focus_end = self.parent_controller.experiment['StageParameters']['f']
 
         z_start = self.z_origin
         focus_start = self.focus_origin

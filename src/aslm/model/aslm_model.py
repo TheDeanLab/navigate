@@ -112,25 +112,28 @@ class Model:
         self.logger = logging.getLogger(p)
 
         # Loads the YAML file for all of the microscope parameters
-        self.configuration = Configurator(configuration_path)
+        # self.configuration = Configurator(configuration_path)
+        self.configuration = configuration_path
 
         # Loads the YAML file for all of the experiment parameters
-        self.experiment = Configurator(experiment_path)
+        # self.experiment = Configurator(experiment_path)
+        self.experiment = experiment_path
 
         # Loads the YAML file for all of the ETL constants
-        self.etl_constants = Configurator(etl_constants_path)
+        # self.etl_constants = Configurator(etl_constants_path)
+        self.etl_constants = etl_constants_path
 
         # Initialize all Hardware
         if args.synthetic_hardware:
             # If command line entry provided, overwrites the model parameters with synthetic hardware.
-            self.configuration.Devices['daq'] = 'SyntheticDAQ'
-            self.configuration.Devices['camera'] = 'SyntheticCamera'
-            self.configuration.Devices['etl'] = 'SyntheticETL'
-            self.configuration.Devices['filter_wheel'] = 'SyntheticFilterWheel'
-            self.configuration.Devices['stage'] = 'SyntheticStage'
-            self.configuration.Devices['zoom'] = 'SyntheticZoom'
-            self.configuration.Devices['shutters'] = 'SyntheticShutter'
-            self.configuration.Devices['lasers'] = 'SyntheticLasers'
+            self.configuration['Devices']['daq'] = 'SyntheticDAQ'
+            self.configuration['Devices']['camera'] = 'SyntheticCamera'
+            self.configuration['Devices']['etl'] = 'SyntheticETL'
+            self.configuration['Devices']['filter_wheel'] = 'SyntheticFilterWheel'
+            self.configuration['Devices']['stage'] = 'SyntheticStage'
+            self.configuration['Devices']['zoom'] = 'SyntheticZoom'
+            self.configuration['Devices']['shutters'] = 'SyntheticShutter'
+            self.configuration['Devices']['lasers'] = 'SyntheticLasers'
 
         # Move device initialization steps to multiple threads
         """
@@ -163,7 +166,7 @@ class Model:
         # Optionally start up multiple cameras
         # TODO: In the event two cameras are on, but we've only requested one, make sure it's the one with the
         #       serial number we want.
-        for i in range(int(self.configuration.CameraParameters['number_of_cameras'])):
+        for i in range(int(self.configuration['CameraParameters']['number_of_cameras'])):
             threads_dict[f'camera{i}'] = ResultThread(target=startup_functions.start_camera,
                                                       args=(self.configuration,
                                                             self.experiment,
@@ -201,8 +204,8 @@ class Model:
         self.camera_line_interval = 9.7e-6  # s
         self.start_time = None
         self.data_buffer = None
-        self.img_width = int(self.configuration.CameraParameters['x_pixels'])
-        self.img_height = int(self.configuration.CameraParameters['y_pixels'])
+        self.img_width = int(self.configuration['CameraParameters']['x_pixels'])
+        self.img_height = int(self.configuration['CameraParameters']['y_pixels'])
         self.data_buffer_positions = None
 
         # Autofocusing
@@ -243,7 +246,7 @@ class Model:
         # self.pre_trigger_time = 0
 
         # data buffer for image frames
-        self.number_of_frames = self.configuration.SharedNDArray['number_of_frames']
+        self.number_of_frames = self.configuration['SharedNDArray']['number_of_frames']
         self.update_data_buffer(self.img_width, self.img_height)
 
         # debug
@@ -281,11 +284,11 @@ class Model:
         #       serial number we want.
         # If we have multiple cameras, loop through them all and check their serial numbers
 
-        n_cams = int(self.configuration.CameraParameters['number_of_cameras'])
+        n_cams = int(self.configuration['CameraParameters']['number_of_cameras'])
         if n_cams > 1:
             # Grab the camera with the serial number that matches for the current resolution mode, as specified in
             # configuration.yaml
-            sn = self.configuration.CameraParameters[f"{self.experiment.MicroscopeState['resolution_mode']}_serial_number"]
+            sn = self.configuration['CameraParameters'][f"{self.experiment['MicroscopeState']['resolution_mode']}_serial_number"]
             for i in range(n_cams):
                 curr_cam = getattr(self, f'camera{i}')
                 if str(sn) == str(curr_cam.serial_number):
@@ -390,9 +393,9 @@ class Model:
 
         if command == 'acquire':
             self.imaging_mode = kwargs['imaging_mode']
-            self.experiment.MicroscopeState = kwargs['microscope_info']
-            self.experiment.CameraParameters = kwargs['camera_info']
-            self.is_save = self.experiment.MicroscopeState['is_save']
+            self.experiment['MicroscopeState'] = kwargs['microscope_info']
+            self.experiment['CameraParameters'] = kwargs['camera_info']
+            self.is_save = self.experiment['MicroscopeState']['is_save']
             self.prepare_acquisition()
             # load features
             # TODO: put it here now.
@@ -400,7 +403,7 @@ class Model:
                 self.signal_container, self.data_container = load_features(self, [[{'name': ZStackAcquisition}]])
             
             if self.imaging_mode == 'single':
-                self.experiment.MicroscopeState['stack_cycling_mode'] = 'per_z'
+                self.experiment['MicroscopeState']['stack_cycling_mode'] = 'per_z'
 
             if self.imaging_mode == 'live':
                 self.signal_thread = threading.Thread(target=self.run_live_acquisition)
@@ -409,7 +412,7 @@ class Model:
             
             self.signal_thread.name = self.imaging_mode + " signal"
             if self.is_save and self.imaging_mode != 'live':
-                self.experiment.Saving = kwargs['saving_info']
+                self.experiment['Saving'] = kwargs['saving_info']
                 self.image_writer = ImageWriter(self)
                 self.data_thread = threading.Thread(target=self.run_data_process, kwargs={'data_func': self.image_writer.save_image})
             else:
@@ -424,7 +427,7 @@ class Model:
             Called by the controller
             Passes the string 'resolution' and a dictionary
             consisting of the resolution_mode, the zoom, and the laser_info.
-            e.g., self.resolution_info.ETLConstants[self.resolution][self.mag]
+            e.g., self.resolution_info['ETLConstants'][self.resolution][self.mag]
             """
             reboot = False
             if self.camera.is_acquiring:
@@ -435,15 +438,15 @@ class Model:
                 self.current_channel = 0
                 reboot = True
 
-            # if args[0] == 'resolution' and (args[1]['resolution_mode'] != self.experiment.MicroscopeState['resolution_mode'] or \
-            #     args[1]['zoom'] != self.experiment.MicroscopeState['zoom']):
+            # if args[0] == 'resolution' and (args[1]['resolution_mode'] != self.experiment['MicroscopeState']['resolution_mode'] or \
+            #     args[1]['zoom'] != self.experiment['MicroscopeState']['zoom']):
             if args[0] == 'resolution':
                 self.change_resolution('high' if args[1]['resolution_mode'] == 'high' else args[1]['zoom'])
 
             update_settings_common(self, args)
 
-            self.daq.calculate_all_waveforms(self.experiment.MicroscopeState, self.etl_constants,
-                                             self.experiment.GalvoParameters, self.get_readout_time())
+            self.daq.calculate_all_waveforms(self.experiment['MicroscopeState'], self.etl_constants,
+                                             self.experiment['GalvoParameters'], self.get_readout_time())
             self.event_queue.put(('waveform', self.daq.waveform_dict))
 
             if reboot:
@@ -519,7 +522,7 @@ class Model:
         update_stage_dict(self, pos_dict)
 
         # In the event we are in high res mode...
-        if self.experiment.MicroscopeState['resolution_mode'] == 'high' and hasattr(self, 'stages_r'):
+        if self.experiment['MicroscopeState']['resolution_mode'] == 'high' and hasattr(self, 'stages_r'):
             # ...we will use stages_r as the focusing stage
             pop_ax = None
             for axis, val in pos_dict.items():
@@ -552,7 +555,7 @@ class Model:
             Dictionary of stage positions.
         """
         ret_pos_dict = self.stages.report_position()
-        if self.experiment.MicroscopeState['resolution_mode'] == 'high' and hasattr(self, 'stages_r'):
+        if self.experiment['MicroscopeState']['resolution_mode'] == 'high' and hasattr(self, 'stages_r'):
             # replace with high res focus
             f_pos_dict = self.stages_r.report_position()
             ret_pos_dict['f_pos'] = f_pos_dict['f_pos']
@@ -564,7 +567,7 @@ class Model:
 
         """
         self.stages.stop()
-        if self.experiment.MicroscopeState['resolution_mode'] == 'high' and hasattr(self, 'stages_r'):
+        if self.experiment['MicroscopeState']['resolution_mode'] == 'high' and hasattr(self, 'stages_r'):
             self.stages_r.stop()
 
         ret_pos_dict = self.get_stage_position()
@@ -661,7 +664,7 @@ class Model:
 
     def calculate_number_of_channels(self):
         r"""Calculates the total number of channels selected."""
-        return len(self.experiment.MicroscopeState['channels'])
+        return len(self.experiment['MicroscopeState']['channels'])
 
     def load_experiment_file(self, experiment_path):
         r"""Load the experiment YAML file.
@@ -688,7 +691,7 @@ class Model:
             Camera readout time in seconds or -1 if not in Normal mode.
         """
         readout_time = 0
-        if self.experiment.CameraParameters['sensor_mode'] == 'Normal':
+        if self.experiment['CameraParameters']['sensor_mode'] == 'Normal':
             readout_time = self.camera.camera_controller.get_property_value("readout_time")
         return readout_time
 
@@ -714,16 +717,16 @@ class Model:
             self.is_live = False
 
         # Calculate Waveforms for all channels. Plot in the view.
-        waveform_dict = self.daq.calculate_all_waveforms(self.experiment.MicroscopeState,
+        waveform_dict = self.daq.calculate_all_waveforms(self.experiment['MicroscopeState'],
                                                          self.etl_constants,
-                                                         self.experiment.GalvoParameters,
+                                                         self.experiment['GalvoParameters'],
                                                          self.get_readout_time())
         self.event_queue.put(('waveform', waveform_dict))
 
         # Set Camera Sensor Mode - Must be done before camera is initialized.
-        self.camera.set_sensor_mode(self.experiment.CameraParameters['sensor_mode'])
-        if self.experiment.CameraParameters['sensor_mode'] == 'Light-Sheet':
-            self.camera.set_readout_direction(self.experiment.CameraParameters['readout_direction'])
+        self.camera.set_sensor_mode(self.experiment['CameraParameters']['sensor_mode'])
+        if self.experiment['CameraParameters']['sensor_mode'] == 'Light-Sheet':
+            self.camera.set_readout_direction(self.experiment['CameraParameters']['readout_direction'])
 
         # Initialize Image Series - Attaches camera buffer and start imaging
         self.camera.initialize_image_series(self.data_buffer,
@@ -753,7 +756,7 @@ class Model:
 
         # Confirm that target channel exists
         channel_key = 'channel_' + str(target_channel)
-        microscope_state = self.experiment.MicroscopeState
+        microscope_state = self.experiment['MicroscopeState']
         channels = microscope_state['channels']
         if target_channel != self.current_channel:
             if channel_key not in channels \
@@ -771,10 +774,10 @@ class Model:
 
             # Camera Settings
             self.current_exposure_time = channel['camera_exposure_time']
-            if self.experiment.CameraParameters['sensor_mode'] == 'Light-Sheet':
+            if self.experiment['CameraParameters']['sensor_mode'] == 'Light-Sheet':
                 self.current_exposure_time, self.camera_line_interval = self.camera.calculate_light_sheet_exposure_time(
                     self.current_exposure_time,
-                    int(self.experiment.CameraParameters['number_of_pixels']))
+                    int(self.experiment['CameraParameters']['number_of_pixels']))
                 self.camera.camera_controller.set_property_value("internal_line_interval", self.camera_line_interval)
 
             # Laser Settings
@@ -785,13 +788,13 @@ class Model:
             # ETL Settings
             self.daq.update_etl_parameters(microscope_state,
                                            channel,
-                                           self.experiment.GalvoParameters,
+                                           self.experiment['GalvoParameters'],
                                            self.get_readout_time())
 
             # Defocus Settings
-            curr_focus = self.experiment.StageParameters['f']
+            curr_focus = self.experiment['StageParameters']['f']
             self.move_stage({'f_abs': curr_focus + float(channel['defocus'])}, wait_until_done=True)
-            self.experiment.StageParameters['f'] = curr_focus  # do something very hacky so we keep using the same focus reference
+            self.experiment['StageParameters']['f'] = curr_focus  # do something very hacky so we keep using the same focus reference
 
         # Take the image
         self.snap_image(channel_key)
@@ -804,7 +807,7 @@ class Model:
         """
 
         #  Get the Experiment Settings
-        microscope_state = self.experiment.MicroscopeState
+        microscope_state = self.experiment['MicroscopeState']
         prefix_len = len('channel_')
         for channel_key in microscope_state['channels']:
             if self.stop_acquisition or self.stop_send_signal:
@@ -863,11 +866,11 @@ class Model:
 
         # Stash current position, channel, timepoint
         # Do this here, because signal container functions can inject changes to the stage
-        self.data_buffer_positions[self.frame_id][0] = self.experiment.StageParameters['x']
-        self.data_buffer_positions[self.frame_id][1] = self.experiment.StageParameters['y']
-        self.data_buffer_positions[self.frame_id][2] = self.experiment.StageParameters['z']
-        self.data_buffer_positions[self.frame_id][3] = self.experiment.StageParameters['theta']
-        self.data_buffer_positions[self.frame_id][4] = self.experiment.StageParameters['f']
+        self.data_buffer_positions[self.frame_id][0] = self.experiment['StageParameters']['x']
+        self.data_buffer_positions[self.frame_id][1] = self.experiment['StageParameters']['y']
+        self.data_buffer_positions[self.frame_id][2] = self.experiment['StageParameters']['z']
+        self.data_buffer_positions[self.frame_id][3] = self.experiment['StageParameters']['theta']
+        self.data_buffer_positions[self.frame_id][4] = self.experiment['StageParameters']['f']
 
         # Run the acquisition
         self.daq.run_acquisition()
@@ -930,15 +933,15 @@ class Model:
             'high' for high-resolution mode, and 'low' for low-resolution mode.
         """
 
-        if (self.experiment.MicroscopeState['resolution_mode'] == "low" and resolution_value == 'high')\
-           or (self.experiment.MicroscopeState['resolution_mode'] == "high" and resolution_value != 'high'):
+        if (self.experiment['MicroscopeState']['resolution_mode'] == "low" and resolution_value == 'high')\
+           or (self.experiment['MicroscopeState']['resolution_mode'] == "high" and resolution_value != 'high'):
             # We're switching between one of the low and the high resolution modes
 
             # We need to set this first for get_camera()
             if resolution_value == 'high':
-                self.experiment.MicroscopeState['resolution_mode'] = 'high'
+                self.experiment['MicroscopeState']['resolution_mode'] = 'high'
             else:
-                self.experiment.MicroscopeState['resolution_mode'] = 'low'
+                self.experiment['MicroscopeState']['resolution_mode'] = 'low'
 
             # We can't keep acquiring if we're switching cameras. For now, simply turn the camera off.
             # if self.camera.is_acquiring:
@@ -950,13 +953,13 @@ class Model:
 
         if resolution_value == 'high':
             self.logger.info("ASLM Model - Switching into High-Resolution Mode")
-            self.experiment.MicroscopeState['resolution_mode'] = 'high'
+            self.experiment['MicroscopeState']['resolution_mode'] = 'high'
             self.laser_triggers.enable_high_resolution_laser()
         else:
             # Can be 0.63, 1, 2, 3, 4, 5, and 6x.
             self.logger.info(f"ASLM Model - Switching to Low Resolution Mode, Zoom: {resolution_value}")
-            self.experiment.MicroscopeState['resolution_mode'] = 'low'
-            self.experiment.MicroscopeState['zoom'] = resolution_value
+            self.experiment['MicroscopeState']['resolution_mode'] = 'low'
+            self.experiment['MicroscopeState']['zoom'] = resolution_value
             self.zoom.set_zoom(resolution_value)
             self.laser_triggers.enable_low_resolution_laser()
 
@@ -972,8 +975,8 @@ class Model:
         pos_dict = self.get_stage_position()
         for axis, val in pos_dict.items():
             ax = axis.split('_')[0]
-            l_offset = self.configuration.StageParameters.get(f"{ax}_l_offset", 0)
-            r_offset = self.configuration.StageParameters.get(f"{ax}_r_offset", 0)
+            l_offset = self.configuration['StageParameters'].get(f"{ax}_l_offset", 0)
+            r_offset = self.configuration['StageParameters'].get(f"{ax}_r_offset", 0)
             if mode == 'high':
                 new_pos = val + r_offset
                 if not initial:
@@ -1001,7 +1004,7 @@ class Model:
         'low' is the low-resolution mode of the microscope, or the left shutter.
         'high' is the high-resolution mode of the microscope, or the right shutter.
         """
-        resolution_mode = self.experiment.MicroscopeState['resolution_mode']
+        resolution_mode = self.experiment['MicroscopeState']['resolution_mode']
         if resolution_mode == 'low':
             self.shutter.open_left()
         elif resolution_mode == 'high':

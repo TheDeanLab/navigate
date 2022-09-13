@@ -84,8 +84,8 @@ class SyntheticCamera(CameraBase):
     def __init__(self, camera_id, configuration, experiment):
         super().__init__(camera_id, configuration, experiment)
 
-        self.x_pixels = experiment.CameraParameters['x_pixels']
-        self.y_pixels = experiment.CameraParameters['y_pixels']
+        self.x_pixels = experiment['CameraParameters']['x_pixels']
+        self.y_pixels = experiment['CameraParameters']['y_pixels']
         self.is_acquiring = False
         self._mean_background_count = 100.0
         self._noise_sigma = noise_model.compute_noise_sigma(Ib=self._mean_background_count)
@@ -97,9 +97,9 @@ class SyntheticCamera(CameraBase):
         self.pre_frame_idx = None
 
         if camera_id == 0:
-            self.serial_number = configuration.CameraParameters['low_serial_number']
+            self.serial_number = configuration['CameraParameters']['low_serial_number']
         else:
-            self.serial_number = configuration.CameraParameters['high_serial_number']
+            self.serial_number = configuration['CameraParameters']['high_serial_number']
 
         logger.info("SyntheticCamera Class Initialized")
 

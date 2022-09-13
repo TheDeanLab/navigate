@@ -65,9 +65,9 @@ class ShutterBase:
         self.experiment = experiment
 
         # Right Shutter - High Resolution Mode
-        self.shutter_right = self.configuration.DAQParameters['shutter_right']
+        self.shutter_right = self.configuration['DAQParameters']['shutter_right']
         self.shutter_right_state = False
 
         # Left Shutter - Low Resolution Mode
-        self.shutter_left = self.configuration.DAQParameters['shutter_left']
+        self.shutter_left = self.configuration['DAQParameters']['shutter_left']
         self.shutter_left_state = False

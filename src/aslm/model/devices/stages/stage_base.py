@@ -134,22 +134,22 @@ class StageBase:
         the stages are zeroed or not.
         """
         for ax in self.axes:
-            setattr(self, f"{ax}_pos", self.configuration.StageParameters['position'][f'{ax}_pos'])  # True stage position
+            setattr(self, f"{ax}_pos", self.configuration['StageParameters']['position'][f'{ax}_pos'])  # True stage position
             setattr(self, f"int_{ax}_pos", 0)                                       # Internal stage position
             setattr(self, f"int_{ax}_pos_offset", 0)                                # Offset between true and internal
-            setattr(self, f"{ax}_min", self.configuration.StageParameters[f'{ax}_min'])  # Units are in microns
-            setattr(self, f"{ax}_max", configuration.StageParameters[f'{ax}_max'])  # Units are in microns
+            setattr(self, f"{ax}_min", self.configuration['StageParameters'][f'{ax}_min'])  # Units are in microns
+            setattr(self, f"{ax}_max", configuration['StageParameters'][f'{ax}_max'])  # Units are in microns
 
         self.create_position_dict()
         self.create_internal_position_dict()
 
         # Sample Position When Rotating
-        self.x_rot_position = self.configuration.StageParameters['x_rot_position']
-        self.y_rot_position = self.configuration.StageParameters['y_rot_position']
-        self.z_rot_position = self.configuration.StageParameters['z_rot_position']
+        self.x_rot_position = self.configuration['StageParameters']['x_rot_position']
+        self.y_rot_position = self.configuration['StageParameters']['y_rot_position']
+        self.z_rot_position = self.configuration['StageParameters']['z_rot_position']
 
         # Starting Position of Focusing Device
-        self.startfocus = self.configuration.StageParameters['startfocus']
+        self.startfocus = self.configuration['StageParameters']['startfocus']
 
     def create_position_dict(self):
         r"""Creates a dictionary with the hardware stage positions.

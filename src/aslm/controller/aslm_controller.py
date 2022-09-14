@@ -187,6 +187,8 @@ class ASLM_controller:
         t = threading.Thread(target=self.update_event)
         t.start()
 
+        # self.microscope = self.configuration['configuration']['microscopes'].keys()[0]  # Default to the first microscope
+
         self.initialize_menus()
 
         # Set view based on model.experiment

@@ -98,9 +98,9 @@ class SyntheticCamera(CameraBase):
 
         # Configuration is passed in as self.configuration['configuration']
         if camera_id == 0:
-            self.serial_number = configuration['CameraParameters']['low_serial_number']
+            self.serial_number = self.configuration['configuration']['CameraParameters']['low_serial_number']
         else:
-            self.serial_number = configuration['CameraParameters']['high_serial_number']
+            self.serial_number = self.configuration['configuration']['CameraParameters']['high_serial_number']
 
         logger.info("SyntheticCamera Class Initialized")
 

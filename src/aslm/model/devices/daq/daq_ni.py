@@ -56,12 +56,10 @@ class NIDAQ(DAQBase):
         Global configuration of the microscope
     experiment : Configurator
         Experiment configuration of the microscope
-    etl_constants : dict
-        Dictionary with all of the wavelength, magnification, and imaging mode-specific amplitudes/offsets
 
     """
-    def __init__(self, configuration, experiment, etl_constants):
-        super().__init__(configuration, experiment, etl_constants)
+    def __init__(self, configuration):
+        super().__init__(configuration)
         self.camera_trigger_task = None
         self.master_trigger_task = None
         self.galvo_etl_task = None

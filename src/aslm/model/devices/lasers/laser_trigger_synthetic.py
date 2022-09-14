@@ -49,8 +49,8 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 class SyntheticLaserTriggers(LaserTriggerBase):
-    def __init__(self, model, experiment):
-        super().__init__(model, experiment)
+    def __init__(self, model):
+        super().__init__(model)
 
     def __del__(self):
         pass

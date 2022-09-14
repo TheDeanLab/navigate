@@ -53,12 +53,10 @@ class HamamatsuOrca(CameraBase):
         Selects which camera to connect to (0, 1, ...).
     configuration : Configurator
         Global configuration of the microscope
-    experiment : Configurator
-        Experiment configuration of the microscope
 
     """
-    def __init__(self, camera_id, configuration, experiment):
-        super().__init__(camera_id, configuration, experiment)
+    def __init__(self, camera_id, configuration):
+        super().__init__(camera_id, configuration)
 
         # Locally Import Hamamatsu API and Initialize Camera Controller
         HamamatsuController = importlib.import_module('aslm.model.devices.APIs.hamamatsu.HamamatsuAPI')
@@ -283,7 +281,7 @@ class HamamatsuOrca(CameraBase):
         self.y_binning = int(binning_string[2])
         self.x_pixels = int(self.x_pixels / self.x_binning)
         self.y_pixels = int(self.y_pixels / self.y_binning)
-        self.experiment['CameraParameters']['camera_binning'] = str(self.x_binning) + 'x' + str(self.y_binning)
+        self.configuration['experiment']['CameraParameters']['camera_binning'] = str(self.x_binning) + 'x' + str(self.y_binning)
 
     def set_ROI(self, roi_height=2048, roi_width=2048):
         r"""Change the size of the active region on the camera.

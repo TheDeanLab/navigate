@@ -78,8 +78,8 @@ class Autofocus():
             Autofocus parameters
 
         """
-        self.model.experiment.MicroscopeState = args[0]
-        self.model.experiment.AutoFocusParameters = args[1]
+        self.model.configuration['experiment']['MicroscopeState'] = args[0]
+        self.model.configuration['experiment']['AutoFocusParameters'] = args[1]
         frame_num = self.get_autofocus_frame_num()
         if frame_num < 1:
             return
@@ -102,7 +102,7 @@ class Autofocus():
 
     def get_autofocus_frame_num(self):
         r"""Calculate how many frames are needed to get the best focus position."""
-        settings = self.model.experiment.AutoFocusParameters
+        settings = self.model.configuration['experiment']['AutoFocusParameters']
         frames = 0
         if settings['coarse_selected']:
             frames = int(settings['coarse_range']) // int(settings['coarse_step_size']) + 1
@@ -116,7 +116,7 @@ class Autofocus():
         return steps, pos_offset
 
     def pre_func_signal(self):
-        settings = self.model.experiment.AutoFocusParameters
+        settings = self.model.configuration['experiment']['AutoFocusParameters']
         # self.focus_pos = args[2]  # Current position
         self.focus_pos = self.model.focus_pos # TODO: get focus position from model right now.
         # self.focus_pos = self.model.get_stage_position()['f_pos']

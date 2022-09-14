@@ -68,8 +68,6 @@ from aslm.model.aslm_model_config import Configurator
 from aslm.model.concurrency.concurrency_tools import ObjectInSubprocess
 from aslm.tools.common_dict_tools import update_settings_common, update_stage_dict
 
-# debug
-from aslm.controller.aslm_debug import Debug_Module
 
 # Logger Setup
 import logging
@@ -104,8 +102,7 @@ class ASLM_controller:
                  use_gpu,
                  args):
         
-        # Debug menu
-        self.debug = args.debug
+
 
         # Create a thread pool
         self.threads_pool = SynchronizedThreadPool()
@@ -118,7 +115,7 @@ class ASLM_controller:
                                         experiment=experiment_path,
                                         etl_constants=etl_constants_path)
         #self.configuration['configuration'] -- self.configuration
-        #self.configuration['experiment'] -- self.experiment
+        #self.configuration['experiment'] -- self.configuration['experiment']
         #self.configuration['etl_constants'] -- self.etl_constants
         
         # Initialize the Model
@@ -139,7 +136,7 @@ class ASLM_controller:
 
         # Load the Configuration and Experiment Files and Populate the GUI
         # self.configuration = Configurator(configuration_path)
-        # self.experiment = Configurator(experiment_path)
+        # self.configuration['experiment'] = Configurator(experiment_path)
 
         # Initialize view based on model.configuration
         configuration_controller = ASLM_Configuration_Controller(self.configuration)
@@ -220,8 +217,8 @@ class ASLM_controller:
             Pre-allocated shared memory array. Size dictated by x_pixels, y_pixels, an number_of_frames in
             configuration file.
         """
-        img_width = int(self.experiment['CameraParameters']['x_pixels'])
-        img_height = int(self.experiment['CameraParameters']['y_pixels'])
+        img_width = int(self.configuration['experiment']['CameraParameters']['x_pixels'])
+        img_height = int(self.configuration['experiment']['CameraParameters']['y_pixels'])
         if img_width == self.img_width and img_height == self.img_height:
             return
 
@@ -279,7 +276,7 @@ class ASLM_controller:
             if not filename:
                 return
             controller_functions.save_yaml_file('',
-                                                self.experiment.serialize(),
+                                                self.configuration['experiment'],
                                                 filename)
 
         def popup_etl_setting():
@@ -289,10 +286,10 @@ class ASLM_controller:
             etl_setting_popup = remote_popup(self.view)  # TODO: should we rename etl_setting popup to remote_focus_popup?
             self.etl_controller = Etl_Popup_Controller(etl_setting_popup,
                                                        self,
-                                                       self.etl_constants,
+                                                       self.configuration['etl_constants'],
                                                        self.etl_constants_path,
                                                        self.configuration,
-                                                       self.experiment['GalvoParameters'])
+                                                       self.configuration['experiment']['GalvoParameters'])
 
             self.etl_controller.set_experiment_values(self.resolution_value.get())
             self.etl_controller.set_mode(self.acquire_bar_controller.mode)
@@ -304,7 +301,7 @@ class ASLM_controller:
             af_popup = autofocus_popup(self.view)
             self.af_popup_controller = Autofocus_Popup_Controller(af_popup,
                                                                   self,
-                                                                  self.experiment['AutoFocusParameters'])
+                                                                  self.configuration['experiment']['AutoFocusParameters'])
 
         menus_dict = {
             self.view.menubar.menu_file: {
@@ -340,7 +337,7 @@ class ASLM_controller:
         self.view.menubar.menu_resolution.add_cascade(menu=meso_res_sub_menu,
                                                       label='Mesoscale')
 
-        for res in self.etl_constants['ETLConstants']['low'].keys():
+        for res in self.configuration['etl_constants']['ETLConstants']['low'].keys():
             meso_res_sub_menu.add_radiobutton(label=res,
                                               variable=self.resolution_value,
                                               value=res)
@@ -366,9 +363,6 @@ class ASLM_controller:
                                                             value=i)
         self.feature_id_val.trace_add('write', lambda *args: self.execute('load_feature', self.feature_id_val.get()))
 
-        # debug menu
-        if self.debug:
-            Debug_Module(self, self.view.menubar.menu_debug)
 
     def populate_experiment_setting(self, file_name=None):
         r"""Load experiment file and populate model.experiment and configure view.
@@ -390,21 +384,21 @@ class ASLM_controller:
                 self.model.load_experiment_file(file_path)
 
                 # Create experiment instance.
-                self.experiment = Configurator(file_path)
+                self.configuration['experiment'] = Configurator(file_path)
 
         # Configure GUI
-        mode = self.experiment['MicroscopeState']['image_mode']
+        mode = self.configuration['experiment']['MicroscopeState']['image_mode']
         self.acquire_bar_controller.set_mode(mode)
-        self.acquire_bar_controller.set_saving_settings(self.experiment['Saving'])
-        self.stage_gui_controller.set_experiment_values(self.experiment['StageParameters'])
-        self.channels_tab_controller.set_experiment_values(self.experiment['MicroscopeState'])
-        self.camera_setting_controller.set_experiment_values(self.experiment)
-        resolution_mode = self.experiment['MicroscopeState']['resolution_mode']
+        self.acquire_bar_controller.set_saving_settings(self.configuration['experiment']['Saving'])
+        self.stage_gui_controller.set_experiment_values(self.configuration['experiment']['StageParameters'])
+        self.channels_tab_controller.set_experiment_values(self.configuration['experiment']['MicroscopeState'])
+        self.camera_setting_controller.set_experiment_values(self.configuration['experiment'])
+        resolution_mode = self.configuration['experiment']['MicroscopeState']['resolution_mode']
         if resolution_mode == 'high':
             self.resolution_value.set('high')
-            self.experiment['MicroscopeState']['zoom'] = 'N/A'
+            self.configuration['experiment']['MicroscopeState']['zoom'] = 'N/A'
         else:
-            self.resolution_value.set(self.experiment['MicroscopeState']['zoom'])
+            self.resolution_value.set(self.configuration['experiment']['MicroscopeState']['zoom'])
 
         self.model.apply_resolution_stage_offset(resolution_mode, initial=True)
 
@@ -417,17 +411,17 @@ class ASLM_controller:
 
         """
         # acquire_bar_controller - update image mode
-        self.experiment['MicroscopeState']['image_mode'] = self.acquire_bar_controller.get_mode()
+        self.configuration['experiment']['MicroscopeState']['image_mode'] = self.acquire_bar_controller.get_mode()
         if self.resolution_value.get() == 'high':
-            self.experiment['MicroscopeState']['resolution_mode'] = 'high'
-            self.experiment['MicroscopeState']['zoom'] = 'N/A'
+            self.configuration['experiment']['MicroscopeState']['resolution_mode'] = 'high'
+            self.configuration['experiment']['MicroscopeState']['zoom'] = 'N/A'
         else:
-            self.experiment['MicroscopeState']['resolution_mode'] = 'low'
-            self.experiment['MicroscopeState']['zoom'] = self.resolution_value.get()
+            self.configuration['experiment']['MicroscopeState']['resolution_mode'] = 'low'
+            self.configuration['experiment']['MicroscopeState']['zoom'] = self.resolution_value.get()
 
-        return self.channels_tab_controller.update_experiment_values(self.experiment['MicroscopeState']) and \
-               self.stage_gui_controller.update_experiment_values(self.experiment['StageParameters']) and \
-               self.camera_setting_controller.update_experiment_values(self.experiment['CameraParameters'])
+        return self.channels_tab_controller.update_experiment_values(self.configuration['experiment']['MicroscopeState']) and \
+               self.stage_gui_controller.update_experiment_values(self.configuration['experiment']['StageParameters']) and \
+               self.camera_setting_controller.update_experiment_values(self.configuration['experiment']['CameraParameters'])
 
     def prepare_acquire_data(self):
         r"""Prepare the acquisition data.
@@ -538,7 +532,7 @@ class ASLM_controller:
             temp = {
                     'resolution_mode': resolution,
                     'zoom': mag,
-                    'laser_info': self.etl_constants['ETLConstants'][resolution][mag]
+                    'laser_info': self.configuration['etl_constants']['ETLConstants'][resolution][mag]
                 }
             work_thread = self.threads_pool.createThread('model', lambda: self.model.run_command('update_setting', 'resolution', temp))
             work_thread.join()
@@ -604,13 +598,13 @@ class ASLM_controller:
                 return
             saving_settings = args[0]
             file_directory = controller_functions.create_save_path(saving_settings)
-            controller_functions.save_yaml_file(file_directory, self.experiment.serialize())
-            self.experiment['Saving']['save_directory'] = saving_settings['save_directory']
-            self.experiment['Saving']['file_type'] = saving_settings['file_type']
-            self.experiment['Saving']['solvent'] = saving_settings['solvent']
-            self.camera_setting_controller.solvent = self.experiment['Saving']['solvent']
+            controller_functions.save_yaml_file(file_directory, self.configuration['experiment'])
+            self.configuration['experiment']['Saving']['save_directory'] = saving_settings['save_directory']
+            self.configuration['experiment']['Saving']['file_type'] = saving_settings['file_type']
+            self.configuration['experiment']['Saving']['solvent'] = saving_settings['solvent']
+            self.camera_setting_controller.solvent = self.configuration['experiment']['Saving']['solvent']
             self.camera_setting_controller.calculate_physical_dimensions(
-                self.experiment['MicroscopeState']['zoom'])
+                self.configuration['experiment']['MicroscopeState']['zoom'])
             self.execute('acquire')
 
         elif command == 'acquire':
@@ -685,18 +679,18 @@ class ASLM_controller:
         # Start up Progress Bars
         images_received = 0
         self.acquire_bar_controller.progress_bar(images_received=images_received,
-                                                 microscope_state=self.experiment['MicroscopeState'],
+                                                 microscope_state=self.configuration['experiment']['MicroscopeState'],
                                                  mode=mode,
                                                  stop=False)
 
         self.model.run_command('acquire', imaging_mode=mode,
-                               microscope_info=self.experiment['MicroscopeState'],
-                               camera_info=self.experiment['CameraParameters'],
-                               saving_info=self.experiment['Saving'])
+                               microscope_info=self.configuration['experiment']['MicroscopeState'],
+                               camera_info=self.configuration['experiment']['CameraParameters'],
+                               saving_info=self.configuration['experiment']['Saving'])
 
         self.camera_view_controller.initialize_non_live_display(self.data_buffer,
-                                                                self.experiment['MicroscopeState'],
-                                                                self.experiment['CameraParameters'])
+                                                                self.configuration['experiment']['MicroscopeState'],
+                                                                self.configuration['experiment']['CameraParameters'])
 
         while True:
             # Receive the Image and log it.
@@ -713,13 +707,13 @@ class ASLM_controller:
             # Display the Image in the View
             self.camera_view_controller.display_image(
                 image=self.data_buffer[image_id],
-                microscope_state=self.experiment['MicroscopeState'],
+                microscope_state=self.configuration['experiment']['MicroscopeState'],
                 images_received=images_received)
             images_received += 1
 
             # Update progress bar.
             self.acquire_bar_controller.progress_bar(images_received=images_received,
-                                                     microscope_state=self.experiment['MicroscopeState'],
+                                                     microscope_state=self.configuration['experiment']['MicroscopeState'],
                                                      mode=mode,
                                                      stop=False)
 
@@ -728,7 +722,7 @@ class ASLM_controller:
 
         # Stop Progress Bars
         self.acquire_bar_controller.progress_bar(images_received=images_received,
-                                                 microscope_state=self.experiment['MicroscopeState'],
+                                                 microscope_state=self.configuration['experiment']['MicroscopeState'],
                                                  mode=mode,
                                                  stop=True)
 
@@ -737,7 +731,7 @@ class ASLM_controller:
         """
         if not self.prepare_acquire_data():
             return
-        pos = self.experiment['StageParameters']['f']
+        pos = self.configuration['experiment']['StageParameters']['f']
         self.camera_view_controller.image_count = 0
         images_received = 0
 
@@ -746,8 +740,8 @@ class ASLM_controller:
 
         self.model.run_command(
             'autofocus',
-            self.experiment['MicroscopeState'],
-            self.experiment['AutoFocusParameters'],
+            self.configuration['experiment']['MicroscopeState'],
+            self.configuration['experiment']['AutoFocusParameters'],
             pos
             )
         while True:
@@ -758,7 +752,7 @@ class ASLM_controller:
             # Display the Image in the View
             self.camera_view_controller.display_image(
                 image=self.data_buffer[image_id],
-                microscope_state=self.experiment['MicroscopeState'],
+                microscope_state=self.configuration['experiment']['MicroscopeState'],
                 images_received=images_received)
             images_received += 1
             # get focus position and update it in GUI

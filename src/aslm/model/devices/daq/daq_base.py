@@ -56,7 +56,7 @@ class DAQBase:
         Dictionary with all of the wavelength, magnification, and imaging mode-specific amplitudes/offsets
     """
 
-    def __init__(self, configuration, experiment, etl_constants):
+    def __init__(self, configuration):
         self.configuration = configuration
         self.experiment = self.configuration['experiment']
         self.etl_constants = self.configuration['etl_constants']
@@ -286,7 +286,7 @@ class DAQBase:
             # TODO: Temporary hard code because I don't want to chase down why the dictionaries are getting
             #       passed out of order again.
             zoom = 'N/A'
-        remote_focus_dict = self.etl_constants['ETLConstants'][resolution_mode][zoom][laser]
+        remote_focus_dict = self.configuration['etl_constants']['ETLConstants'][resolution_mode][zoom][laser]
 
         # Use defaults of 0 in the case they are not provided
         amp = float(remote_focus_dict.get('amplitude', 0))
@@ -308,7 +308,7 @@ class DAQBase:
 
         if update_waveforms:
             # Compute the waveforms
-            self.calculate_all_waveforms(microscope_state, self.etl_constants, galvo_parameters, readout_time)
+            self.calculate_all_waveforms(microscope_state, self.configuration['etl_constants'], galvo_parameters, readout_time)
             # Make sure we write out a sufficient number of samples to capture the full waveform
             self.calculate_samples()
             # Set up previous values for next update_waveforms check

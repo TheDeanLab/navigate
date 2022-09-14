@@ -333,7 +333,7 @@ class Etl_Popup_Controller(GUI_Controller):
         # if errors:
         #     return  # Dont save if any errors TODO needs testing
 
-        save_yaml_file('', self.resolution_info.serialize(), self.etl_file_name)
+        save_yaml_file('', self.resolution_info, self.etl_file_name)
 
     """
     Example for preventing submission of a field/controller. So if there is an error in any field that 

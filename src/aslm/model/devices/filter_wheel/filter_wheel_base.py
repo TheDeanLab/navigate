@@ -71,10 +71,10 @@ class FilterWheelBase:
     """
 
     def __init__(self, model):
-        self.comport = model['FilterWheelParameters']['filter_wheel_port']
-        self.baudrate = model['FilterWheelParameters']['baudrate']
-        self.filter_dictionary = model['FilterWheelParameters']['available_filters']
-        self.number_of_filter_wheels = model['FilterWheelParameters']['number_of_filter_wheels']
+        self.comport = model['configuration']['FilterWheelParameters']['filter_wheel_port']
+        self.baudrate = model['configuration']['FilterWheelParameters']['baudrate']
+        self.filter_dictionary = model['configuration']['FilterWheelParameters']['available_filters']
+        self.number_of_filter_wheels = model['configuration']['FilterWheelParameters']['number_of_filter_wheels']
         self.wheel_position = 0
         self.wait_until_done_delay = 0.03
         self.wait_until_done = True

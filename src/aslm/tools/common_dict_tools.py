@@ -9,7 +9,7 @@ def update_settings_common(target, args):
     copies of the dictionaries in each major object.
     """
     if args[0] == 'channel':
-        target.experiment['MicroscopeState']['channels'] = args[1]
+        target.configuration['experiment']['MicroscopeState']['channels'] = args[1]
 
     if args[0] == 'resolution':
         """
@@ -24,9 +24,9 @@ def update_settings_common(target, args):
         laser_info = updated_settings['laser_info']
 
         if resolution_mode == 'low':
-            target.etl_constants['ETLConstants']['low'][zoom] = laser_info
+            target.configuration['etl_constants']['ETLConstants']['low'][zoom] = laser_info
         else:
-            target.etl_constants['ETLConstants']['high'][zoom] = laser_info
+            target.configuration['etl_constants']['ETLConstants']['high'][zoom] = laser_info
         # if target.verbose:
         #     print(target.etl_constants['ETLConstants']['low'][zoom])
 
@@ -38,14 +38,14 @@ def update_settings_common(target, args):
 
     if args[0] == 'galvo':
         (param, value), = args[1].items()
-        target.experiment['GalvoParameters'][param] = value
+        target.configuration['experiment']['GalvoParameters'][param] = value
 
     if args[0] == 'number_of_pixels':
-        target.experiment['CameraParameters']['number_of_pixels'] = args[1]
+        target.configuration['experiment']['CameraParameters']['number_of_pixels'] = args[1]
 
 
 def update_stage_dict(target, pos_dict):
     # Update our local experiment parameters
     for axis, val in pos_dict.items():
         ax = axis.split('_')[0]
-        target.experiment['StageParameters'][ax] = val
+        target.configuration['experiment']['StageParameters'][ax] = val

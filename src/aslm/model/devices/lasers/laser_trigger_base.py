@@ -49,31 +49,31 @@ logger = logging.getLogger(p)
 
 
 class LaserTriggerBase:
-    def __init__(self, model, experiment):
-        self.model = model
-        self.experiment = experiment
+    def __init__(self, configuration):
+        self.configuration = configuration
+        self.experiment = self.configuration['experiment']
 
         # Number of Lasers
         # TODO: Make it so that we can iterate through each laser and create a
         # task.
-        self.number_of_lasers = self.model['LaserParameters']['number_of_lasers']
+        self.number_of_lasers = self.configuration['configuration']['LaserParameters']['number_of_lasers']
 
         # Minimum and Maximum Laser Voltages
-        self.laser_min_do = self.model['LaserParameters']['laser_min_do']
-        self.laser_max_do = self.model['LaserParameters']['laser_max_do']
-        self.laser_min_ao = self.model['LaserParameters']['laser_min_ao']
-        self.laser_max_ao = self.model['LaserParameters']['laser_max_ao']
+        self.laser_min_do = self.configuration['configuration']['LaserParameters']['laser_min_do']
+        self.laser_max_do = self.configuration['configuration']['LaserParameters']['laser_max_do']
+        self.laser_min_ao = self.configuration['configuration']['LaserParameters']['laser_min_ao']
+        self.laser_max_ao = self.configuration['configuration']['LaserParameters']['laser_max_ao']
 
         # Digital Ports
-        self.switching_port = self.model['DAQParameters']['laser_port_switcher']
-        self.laser_0_do_port = self.model['DAQParameters']['laser_0_do']
-        self.laser_1_do_port = self.model['DAQParameters']['laser_1_do']
-        self.laser_2_do_port = self.model['DAQParameters']['laser_2_do']
+        self.switching_port = self.configuration['configuration']['DAQParameters']['laser_port_switcher']
+        self.laser_0_do_port = self.configuration['configuration']['DAQParameters']['laser_0_do']
+        self.laser_1_do_port = self.configuration['configuration']['DAQParameters']['laser_1_do']
+        self.laser_2_do_port = self.configuration['configuration']['DAQParameters']['laser_2_do']
 
         # Analog Ports
-        self.laser_0_ao_port = self.model['DAQParameters']['laser_0_ao']
-        self.laser_1_ao_port = self.model['DAQParameters']['laser_1_ao']
-        self.laser_2_ao_port = self.model['DAQParameters']['laser_2_ao']
+        self.laser_0_ao_port = self.configuration['configuration']['DAQParameters']['laser_0_ao']
+        self.laser_1_ao_port = self.configuration['configuration']['DAQParameters']['laser_1_ao']
+        self.laser_2_ao_port = self.configuration['configuration']['DAQParameters']['laser_2_ao']
 
         # Digital Output Default State
         self.switching_state = False

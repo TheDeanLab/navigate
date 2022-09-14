@@ -136,12 +136,12 @@ class Channels_Tab_Controller(GUI_Controller):
         config : object
             ASLM_Configuration_Controller.  config.configuration = Configurator object.
         """
-        self.set_channel_num(config.configuration['GUIParameters']['number_of_channels'])
+        self.set_channel_num(config.configuration['configuration']['GUIParameters']['number_of_channels'])
         self.stack_acq_widgets['cycling'].widget['values'] = ['Per Z', 'Per Stack']
-        self.stage_velocity = config.configuration['StageParameters']['velocity']
-        self.filter_wheel_delay = config.configuration['FilterWheelParameters']['filter_wheel_delay']
+        self.stage_velocity = config.configuration['configuration']['StageParameters']['velocity']
+        self.filter_wheel_delay = config.configuration['configuration']['FilterWheelParameters']['filter_wheel_delay']
         self.channel_setting_controller.initialize(config)
-        self.set_spinbox_range_limits(config.configuration['GUIParameters'])
+        self.set_spinbox_range_limits(config.configuration['configuration']['GUIParameters'])
         self.show_verbose_info('channels tab has been initialized')
 
     def set_experiment_values(self,

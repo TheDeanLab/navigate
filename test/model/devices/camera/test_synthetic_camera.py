@@ -46,18 +46,18 @@ class TestSyntheticCamera(unittest.TestCase):
     def test_synthetic_camera_initialization(self):
         self.dummy_model = get_dummy_model()
         self.configuration = self.dummy_model.configuration
-        self.experiment = self.dummy_model.experiment
+        self.configuration['experiment'] = self.dummy_model.experiment
         synthetic_camera = SyntheticCamera(configuration=self.configuration,
-                                           experiment=self.experiment,
+                                           experiment=self.configuration['experiment'],
                                            camera_id=0)
         return True
 
     def test_synthetic_camera_attributes(self):
         self.dummy_model = get_dummy_model()
         self.configuration = self.dummy_model.configuration
-        self.experiment = self.dummy_model.experiment
+        self.configuration['experiment'] = self.dummy_model.experiment
         synthetic_camera = SyntheticCamera(configuration=self.configuration,
-                                           experiment=self.experiment,
+                                           experiment=self.configuration['experiment'],
                                            camera_id=0)
         desired_attributes = ['x_pixels',
                               'y_pixels',
@@ -78,9 +78,9 @@ class TestSyntheticCamera(unittest.TestCase):
     def test_synthetic_camera_wheel_attributes_type(self):
         self.dummy_model = get_dummy_model()
         self.configuration = self.dummy_model.configuration
-        self.experiment = self.dummy_model.experiment
+        self.configuration['experiment'] = self.dummy_model.experiment
         synthetic_camera = SyntheticCamera(configuration=self.configuration,
-                                           experiment=self.experiment,
+                                           experiment=self.configuration['experiment'],
                                            camera_id=0)
         desired_attributes = {'x_pixels': int,
                               'y_pixels': int,
@@ -102,9 +102,9 @@ class TestSyntheticCamera(unittest.TestCase):
     def test_synthetic_camera_methods(self):
         self.dummy_model = get_dummy_model()
         self.configuration = self.dummy_model.configuration
-        self.experiment = self.dummy_model.experiment
+        self.configuration['experiment'] = self.dummy_model.experiment
         synthetic_camera = SyntheticCamera(configuration=self.configuration,
-                                           experiment=self.experiment,
+                                           experiment=self.configuration['experiment'],
                                            camera_id=0)
 
         methods = ['stop',
@@ -127,9 +127,9 @@ class TestSyntheticCamera(unittest.TestCase):
     def test_synthetic_camera_wheel_method_calls(self):
         self.dummy_model = get_dummy_model()
         self.configuration = self.dummy_model.configuration
-        self.experiment = self.dummy_model.experiment
+        self.configuration['experiment'] = self.dummy_model.experiment
         synthetic_camera = SyntheticCamera(configuration=self.configuration,
-                                           experiment=self.experiment,
+                                           experiment=self.configuration['experiment'],
                                            camera_id=0)
         synthetic_camera.stop()
         synthetic_camera.report_settings()
@@ -148,9 +148,9 @@ class TestSyntheticCamera(unittest.TestCase):
     def test_synthetic_camera_stop(self):
         self.dummy_model = get_dummy_model()
         self.configuration = self.dummy_model.configuration
-        self.experiment = self.dummy_model.experiment
+        self.configuration['experiment'] = self.dummy_model.experiment
         synthetic_camera = SyntheticCamera(configuration=self.configuration,
-                                           experiment=self.experiment,
+                                           experiment=self.configuration['experiment'],
                                            camera_id=0)
         synthetic_camera.stop_flag = False
         synthetic_camera.stop()
@@ -159,9 +159,9 @@ class TestSyntheticCamera(unittest.TestCase):
     def test_synthetic_camera_exposure(self):
         self.dummy_model = get_dummy_model()
         self.configuration = self.dummy_model.configuration
-        self.experiment = self.dummy_model.experiment
+        self.configuration['experiment'] = self.dummy_model.experiment
         synthetic_camera = SyntheticCamera(configuration=self.configuration,
-                                           experiment=self.experiment,
+                                           experiment=self.configuration['experiment'],
                                            camera_id=0)
         exposure_time = 200
         synthetic_camera.set_exposure_time(exposure_time=exposure_time)
@@ -170,9 +170,9 @@ class TestSyntheticCamera(unittest.TestCase):
     def test_synthetic_camera_binning(self):
         self.dummy_model = get_dummy_model()
         self.configuration = self.dummy_model.configuration
-        self.experiment = self.dummy_model.experiment
+        self.configuration['experiment'] = self.dummy_model.experiment
         synthetic_camera = SyntheticCamera(configuration=self.configuration,
-                                           experiment=self.experiment,
+                                           experiment=self.configuration['experiment'],
                                            camera_id=0)
         x_pixels = synthetic_camera.x_pixels
         synthetic_camera.set_binning(binning_string='2x2')
@@ -185,9 +185,9 @@ class TestSyntheticCamera(unittest.TestCase):
     def test_synthetic_camera_initialize_image_series(self):
         self.dummy_model = get_dummy_model()
         self.configuration = self.dummy_model.configuration
-        self.experiment = self.dummy_model.experiment
+        self.configuration['experiment'] = self.dummy_model.experiment
         synthetic_camera = SyntheticCamera(configuration=self.configuration,
-                                           experiment=self.experiment,
+                                           experiment=self.configuration['experiment'],
                                            camera_id=0)
         synthetic_camera.initialize_image_series()
         assert synthetic_camera.num_of_frame == 100
@@ -199,9 +199,9 @@ class TestSyntheticCamera(unittest.TestCase):
     def test_synthetic_camera_close_image_series(self):
         self.dummy_model = get_dummy_model()
         self.configuration = self.dummy_model.configuration
-        self.experiment = self.dummy_model.experiment
+        self.configuration['experiment'] = self.dummy_model.experiment
         synthetic_camera = SyntheticCamera(configuration=self.configuration,
-                                           experiment=self.experiment,
+                                           experiment=self.configuration['experiment'],
                                            camera_id=0)
         synthetic_camera.close_image_series()
         assert synthetic_camera.pre_frame_idx == 0
@@ -211,9 +211,9 @@ class TestSyntheticCamera(unittest.TestCase):
     def test_synthetic_camera_generate_new_frame(self):
         self.dummy_model = get_dummy_model()
         self.configuration = self.dummy_model.configuration
-        self.experiment = self.dummy_model.experiment
+        self.configuration['experiment'] = self.dummy_model.experiment
         synthetic_camera = SyntheticCamera(configuration=self.configuration,
-                                           experiment=self.experiment,
+                                           experiment=self.configuration['experiment'],
                                            camera_id=0)
         synthetic_camera.initialize_image_series(data_buffer=100, number_of_frames=100)
         # TODO - get the data buffer to not be type None
@@ -221,9 +221,9 @@ class TestSyntheticCamera(unittest.TestCase):
     def test_synthetic_camera_get_new_frame(self):
         self.dummy_model = get_dummy_model()
         self.configuration = self.dummy_model.configuration
-        self.experiment = self.dummy_model.experiment
+        self.configuration['experiment'] = self.dummy_model.experiment
         synthetic_camera = SyntheticCamera(configuration=self.configuration,
-                                           experiment=self.experiment,
+                                           experiment=self.configuration['experiment'],
                                            camera_id=0)
         synthetic_camera.initialize_image_series(data_buffer=100, number_of_frames=100)
         # synthetic_camera.generate_new_frame()
@@ -233,9 +233,9 @@ class TestSyntheticCamera(unittest.TestCase):
     def test_synthetic_get_camera_minimum_wating_time(self):
         self.dummy_model = get_dummy_model()
         self.configuration = self.dummy_model.configuration
-        self.experiment = self.dummy_model.experiment
+        self.configuration['experiment'] = self.dummy_model.experiment
         synthetic_camera = SyntheticCamera(configuration=self.configuration,
-                                           experiment=self.experiment,
+                                           experiment=self.configuration['experiment'],
                                            camera_id=0)
 
         wait_time = synthetic_camera.get_minimum_waiting_time()
@@ -244,9 +244,9 @@ class TestSyntheticCamera(unittest.TestCase):
     def test_synthetic_camera_set_roi(self):
         self.dummy_model = get_dummy_model()
         self.configuration = self.dummy_model.configuration
-        self.experiment = self.dummy_model.experiment
+        self.configuration['experiment'] = self.dummy_model.experiment
         synthetic_camera = SyntheticCamera(configuration=self.configuration,
-                                           experiment=self.experiment,
+                                           experiment=self.configuration['experiment'],
                                            camera_id=0)
         synthetic_camera.set_ROI()
         assert synthetic_camera.x_pixels == 2048

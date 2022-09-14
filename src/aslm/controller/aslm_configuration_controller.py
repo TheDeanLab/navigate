@@ -44,7 +44,7 @@ logger = logging.getLogger(p)
 
 class ASLM_Configuration_Controller:
     def __init__(self, configuration):
-        self.configuration['configuration'] = configuration
+        self.configuration = configuration
 
     def get_channels_info(self):
         r"""Populate the channel combobox with the channels that are available in the model.configuration

@@ -28,24 +28,24 @@ class ZarrDataSource(DataSource):
         # Getting needed info, I am doing it in the function because i think if we do not reinit the class,
         # save directory will be a stagnant var. If we just leave
         # self.model = model then that ref will alwasy be up to date
-        num_of_channels = len(self.model.experiment['MicroscopeState']['channels'].keys())
+        num_of_channels = len(self.model.configuration['experiment']['MicroscopeState']['channels'].keys())
         data_buffer = self.model.data_buffer
 
         # Getting allocation parameters for zarr array
-        xsize = self.model.experiment['CameraParameters']['x_pixels']
-        ysize = self.model.experiment['CameraParameters']['y_pixels']
+        xsize = self.model.configuration['experiment']['CameraParameters']['x_pixels']
+        ysize = self.model.configuration['experiment']['CameraParameters']['y_pixels']
 
         # Boolean flag to decide which order for saving, by stack or slice.
         # Code is brute force to make it clear, can be sanitized if need be
         by_stack = False
         by_slice = False
-        if self.model.experiment['MicroscopeState']['stack_cycling_mode'] == 'per_stack':
+        if self.model.configuration['experiment']['MicroscopeState']['stack_cycling_mode'] == 'per_stack':
             by_stack = True
-        if self.model.experiment['MicroscopeState']['stack_cycling_mode'] == 'per_z':
+        if self.model.configuration['experiment']['MicroscopeState']['stack_cycling_mode'] == 'per_z':
             by_slice = True
 
         # Getting amount of slices
-        zslice = int(self.model.experiment['MicroscopeState']['number_z_steps'])
+        zslice = int(self.model.configuration['experiment']['MicroscopeState']['number_z_steps'])
 
         """
         Allocate zarr array with values needed
@@ -59,7 +59,7 @@ class ZarrDataSource(DataSource):
                         chunks = (xsize, ysize, 1, 1, 1), dtype='uint16')
 
         # Get the currently selected channels, the order is implicit
-        channels = self.model.experiment['MicroscopeState']['channels']
+        channels = self.model.configuration['experiment']['MicroscopeState']['channels']
         selected_channels = []
         prefix_len = len('channel_') # helps get the channel index
         for channel_key in channels:

@@ -61,7 +61,7 @@ class AcquireBarController(GUI_Controller):
         self.update_stack_acq(self.mode)
         self.is_save = False
         self.saving_settings = {
-            'root_directory': self.parent_controller.experiment['Saving']['root_directory'],
+            'root_directory': self.parent_controller.configuration['experiment']['Saving']['root_directory'],
             'save_directory': '',
             'user': '',
             'tissue': '',

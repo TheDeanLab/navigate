@@ -39,28 +39,28 @@ class OMETIFFMetadata(XMLMetadata):
         ome_dict['Image']['Pixels']['Interleaved'] = 'false'
         ome_dict['Image']['Pixels']['Type'] = 'uint16'  # Hardcoded from SharedNDArray call
 
-        ome_dict['Image']['Pixels']['SizeX'] = int(self.experiment['CameraParameters']['x_pixels'])
-        ome_dict['Image']['Pixels']['SizeY'] = int(self.experiment['CameraParameters']['y_pixels'])
+        ome_dict['Image']['Pixels']['SizeX'] = int(self.configuration['experiment']['CameraParameters']['x_pixels'])
+        ome_dict['Image']['Pixels']['SizeY'] = int(self.configuration['experiment']['CameraParameters']['y_pixels'])
         
         # The following two are commented since we split our TIFFs into one TIFF stack per
         # channel per time point
-        ome_dict['Image']['Pixels']['SizeT'] = int(self.experiment['MicroscopeState']['timepoints'])
-        ome_dict['Image']['Pixels']['SizeC'] = len(self.experiment['MicroscopeState']['channels'])
+        ome_dict['Image']['Pixels']['SizeT'] = int(self.configuration['experiment']['MicroscopeState']['timepoints'])
+        ome_dict['Image']['Pixels']['SizeC'] = len(self.configuration['experiment']['MicroscopeState']['channels'])
 
         ome_dict['Image']['Pixels']['DimensionOrder'] = 'XYZCT'
         z_steps = 1
-        if self.experiment['MicroscopeState']['image_mode'] == 'z-stack':
-            z_steps = int(self.experiment['MicroscopeState']['number_z_steps'])
-            ome_dict['Image']['Pixels']['PhysicalSizeZ'] = float(self.experiment['MicroscopeState']['step_size'])
+        if self.configuration['experiment']['MicroscopeState']['image_mode'] == 'z-stack':
+            z_steps = int(self.configuration['experiment']['MicroscopeState']['number_z_steps'])
+            ome_dict['Image']['Pixels']['PhysicalSizeZ'] = float(self.configuration['experiment']['MicroscopeState']['step_size'])
 
         ome_dict['Image']['Pixels']['SizeZ'] = z_steps
 
         # This section contains duplicated code b/c in the instance resolution mode != high or low, we
         # do not want to include this information
-        if self.experiment['MicroscopeState']['resolution_mode'] == 'low':
-            pixel_size = float(self.configuration['configuration']['ZoomParameters']['low_res_zoom_pixel_size'][self.experiment['MicroscopeState']['zoom']])
+        if self.configuration['experiment']['MicroscopeState']['resolution_mode'] == 'low':
+            pixel_size = float(self.configuration['configuration']['ZoomParameters']['low_res_zoom_pixel_size'][self.configuration['experiment']['MicroscopeState']['zoom']])
             ome_dict['Image']['Pixels']['PhysicalSizeX'], ome_dict['Image']['Pixels']['PhysicalSizeY'] = pixel_size, pixel_size
-        elif self.experiment['MicroscopeState']['resolution_mode'] == 'high':
+        elif self.configuration['experiment']['MicroscopeState']['resolution_mode'] == 'high':
             pixel_size = float(self.configuration['configuration']['ZoomParameters']['high_res_zoom_pixel_size'])
             ome_dict['Image']['Pixels']['PhysicalSizeX'], ome_dict['Image']['Pixels']['PhysicalSizeY'] = pixel_size, pixel_size
 
@@ -86,7 +86,7 @@ class OMETIFFMetadata(XMLMetadata):
         else:
             ome_dict['Image']['Pixels']['MetadataOnly'] = {}  # Required filler
 
-        dt = float(self.experiment['MicroscopeState']['timepoint_interval'])
+        dt = float(self.configuration['experiment']['MicroscopeState']['timepoint_interval'])
         ome_dict['Image']['Pixels']['TimeIncrement'] = dt
 
         # TODO: Populate plane positions in OME-XML

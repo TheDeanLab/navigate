@@ -103,7 +103,7 @@ def create_save_path(saving_settings):
 
 
 def save_yaml_file(file_directory,
-                   experiment,
+                   content_dict,
                    filename='experiment.yml'):
     r"""Same YAML file to Disk
 
@@ -111,17 +111,17 @@ def save_yaml_file(file_directory,
     ----------
     file_directory : str
         String of directory to save data to.
-    experiment : object
-        I think?
+    content_dict : dict
+        Dictionary that holds information about specified content.
     filename : str
         String of name to save data to.  Default is experiment.yml.
 
     """
-
+    import json
     try:
         file_name = os.path.join(file_directory, filename)
         with open(file_name, 'w') as f:
-            f.write(experiment)
+            f.write(json.dumps(content_dict))
     except BaseException:
         return False
     return True
@@ -162,18 +162,18 @@ def combine_funcs(*funclist):
 #             title='Warning',
 #             message='There are some missing/wrong settings!')
 #         return False
-#
-#     self.experiment['MicroscopeState']['stack_cycling_mode'] = settings['stack_cycling_mode']
+#     
+#     self.configuration['experiment']['MicroscopeState']['stack_cycling_mode'] = settings['stack_cycling_mode']
 #     for k in settings['stack_acquisition']:
-#         self.experiment['MicroscopeState'][k] = settings['stack_acquisition'][k]
+#         self.configuration['experiment']['MicroscopeState'][k] = settings['stack_acquisition'][k]
 #     for k in settings['timepoint']:
-#         self.experiment['MicroscopeState'][k] = settings['timepoint'][k]
+#         self.configuration['experiment']['MicroscopeState'][k] = settings['timepoint'][k]
 #
 #     # channels
-#     self.experiment['MicroscopeState']['channels'] = settings['channel']
+#     self.configuration['experiment']['MicroscopeState']['channels'] = settings['channel']
 #
 #     # get all positions
-#     self.experiment['MicroscopeState']['stage_positions'] = self.channels_tab_controller.get_positions(
+#     self.configuration['experiment']['MicroscopeState']['stage_positions'] = self.channels_tab_controller.get_positions(
 #     )
 #
 #     # get position information from stage tab
@@ -187,15 +187,15 @@ def combine_funcs(*funclist):
 #         return False
 #
 #     for axis in position:
-#         self.experiment['StageParameters'][axis] = position[axis]
+#         self.configuration['experiment']['StageParameters'][axis] = position[axis]
 #     step_size = self.stage_gui_controller.get_step_size()
 #     for axis in step_size:
-#         self.experiment['StageParameters'][axis + '_step'] = step_size[axis]
+#         self.configuration['experiment']['StageParameters'][axis + '_step'] = step_size[axis]
 
 
 # def update_from_camera_setting_controller(self):
-#     self.experiment['CameraParameters']['sensor_mode'] = self.camera_setting_controller.sensor_mode
-#     self.experiment['CameraParameters']['binning'] = 1
-#     # self.experiment['CameraParameters']['x_pixels'] = self.camera_setting_controller.roi_widgets['Pixels_X'].get()
-#     # self.experiment['CameraParameters']['y_pixels'] = self.camera_setting_controller.roi_widgets['Pixels_Y'].get()
-#     self.experiment['CameraParameters']['number_of_cameras'] = 1
+#     self.configuration['experiment']['CameraParameters']['sensor_mode'] = self.camera_setting_controller.sensor_mode
+#     self.configuration['experiment']['CameraParameters']['binning'] = 1
+#     # self.configuration['experiment']['CameraParameters']['x_pixels'] = self.camera_setting_controller.roi_widgets['Pixels_X'].get()
+#     # self.configuration['experiment']['CameraParameters']['y_pixels'] = self.camera_setting_controller.roi_widgets['Pixels_Y'].get()
+#     self.configuration['experiment']['CameraParameters']['number_of_cameras'] = 1

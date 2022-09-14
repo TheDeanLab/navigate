@@ -55,8 +55,7 @@ class ShutterTTL(ShutterBase):
     ----------
     configuration : Configurator
         Global configuration of the microscope
-    experiment : Configurator
-        Experiment configuration of the microscope
+
 
     Methods
     -------
@@ -70,8 +69,8 @@ class ShutterTTL(ShutterBase):
         Return the current state of the shutters
     """
 
-    def __init__(self, configuration, experiment):
-        super().__init__(configuration, experiment)
+    def __init__(self, configuration):
+        super().__init__(configuration)
 
         # Right Shutter - High Resolution Mode
         self.shutter_right_task = nidaqmx.Task()

@@ -81,11 +81,11 @@ class SyntheticCamera(CameraBase):
         Experiment configuration of the microscope
 
     """
-    def __init__(self, camera_id, configuration, experiment):
-        super().__init__(camera_id, configuration, experiment)
+    def __init__(self, camera_id, configuration):
+        super().__init__(camera_id, configuration)
 
-        self.x_pixels = experiment['CameraParameters']['x_pixels']
-        self.y_pixels = experiment['CameraParameters']['y_pixels']
+        self.x_pixels = self.experiment['CameraParameters']['x_pixels']
+        self.y_pixels = self.experiment['CameraParameters']['y_pixels']
         self.is_acquiring = False
         self._mean_background_count = 100.0
         self._noise_sigma = noise_model.compute_noise_sigma(Ib=self._mean_background_count)

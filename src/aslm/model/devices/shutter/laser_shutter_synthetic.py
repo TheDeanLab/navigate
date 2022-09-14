@@ -71,8 +71,8 @@ class SyntheticShutter(ShutterBase):
         Return the current state of the shutters
     """
 
-    def __init__(self, configuration, experiment):
-        super().__init__(configuration, experiment)
+    def __init__(self, configuration):
+        super().__init__(configuration)
 
     def __del__(self):
         r"""Close the SyntheticShutter at exit.

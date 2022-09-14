@@ -90,7 +90,6 @@ def auto_redial(func, args, n_tries=10, exception=Exception):
 
 
 def start_analysis(configuration,
-                   experiment,
                    use_gpu):
     r"""Initializes the analysis class on a dedicated thread
 
@@ -98,8 +97,6 @@ def start_analysis(configuration,
     ----------
     configuration : Configurator
         Configurator instance of global microscope configuration.
-    experiment : Configurator
-        Configurator instance of experiment configuration.
     use_gpu : Boolean
         Flag for enabling GPU analysis.
 
@@ -113,7 +110,6 @@ def start_analysis(configuration,
 
 
 def start_camera(configuration,
-                 experiment,
                  camera_id=0):
     r"""Initializes the camera class on a dedicated thread.
 
@@ -134,10 +130,10 @@ def start_camera(configuration,
 
     if configuration['configuration']['Devices']['camera'] == 'HamamatsuOrca':
         from aslm.model.devices.camera.camera_hamamatsu import HamamatsuOrca
-        return auto_redial(HamamatsuOrca, (camera_id, configuration, experiment), exception=Exception)
+        return auto_redial(HamamatsuOrca, (camera_id, configuration), exception=Exception)
     elif configuration['configuration']['Devices']['camera'] == 'SyntheticCamera':
         from aslm.model.devices.camera.camera_synthetic import SyntheticCamera
-        return SyntheticCamera(camera_id, configuration, experiment)
+        return SyntheticCamera(camera_id, configuration)
     else:
         device_not_found(configuration['configuration']['Devices']['camera'])
 
@@ -298,17 +294,13 @@ def start_lasers(configuration):
     return laser
 
 
-def start_daq(configuration, experiment, etl_constants):
+def start_daq(configuration):
     r"""Initializes the data acquisition (DAQ) class on a dedicated thread.
 
     Parameters
     ----------
     configuration : dict
         Configurator instance of global microscope configuration.
-    experiment : dict
-        Configurator instance of experiment configuration.
-    etl_constants : dict
-        Dictionary of wavelength and zoom-specific remote focus amplitude and offsets.
 
     Returns
     -------
@@ -318,15 +310,15 @@ def start_daq(configuration, experiment, etl_constants):
 
     if configuration['configuration']['Devices']['daq'] == 'NI':
         from aslm.model.devices.daq.daq_ni import NIDAQ
-        return NIDAQ(configuration, experiment, etl_constants)
+        return NIDAQ(configuration)
     elif configuration['configuration']['Devices']['daq'] == 'SyntheticDAQ':
         from aslm.model.devices.daq.daq_synthetic import SyntheticDAQ
-        return SyntheticDAQ(configuration, experiment, etl_constants)
+        return SyntheticDAQ(configuration)
     else:
         device_not_found(configuration['configuration']['Devices']['daq'])
 
 
-def start_shutters(configuration, experiment):
+def start_shutters(configuration):
     r"""Initializes the shutter class on a dedicated thread.
 
     Initializes the shutters: ThorlabsShutter or SyntheticShutter
@@ -337,8 +329,6 @@ def start_shutters(configuration, experiment):
     ----------
     configuration : dict
         Configurator instance of global microscope configuration.
-    experiment : dict
-        Configurator instance of experiment configuration.
 
     Returns
     -------
@@ -348,15 +338,15 @@ def start_shutters(configuration, experiment):
 
     if configuration['configuration']['Devices']['shutters'] == 'ThorlabsShutter' and configuration['configuration']['Devices']['daq'] == 'NI':
         from aslm.model.devices.shutter.laser_shutter_ttl import ShutterTTL
-        return ShutterTTL(configuration, experiment)
+        return ShutterTTL(configuration)
     elif configuration['configuration']['Devices']['shutters'] == 'SyntheticShutter':
         from aslm.model.devices.shutter.laser_shutter_synthetic import SyntheticShutter
-        return SyntheticShutter(configuration, experiment)
+        return SyntheticShutter(configuration)
     else:
         device_not_found(configuration['configuration']['Devices']['shutters'])
 
 
-def start_laser_triggers(configuration, experiment):
+def start_laser_triggers(configuration):
     r"""Initializes the laser trigger class on a dedicated thread.
 
     Initializes the Laser Switching, Analog, and Digital DAQ Outputs.
@@ -376,10 +366,10 @@ def start_laser_triggers(configuration, experiment):
 
     if configuration['configuration']['Devices']['daq'] == 'NI':
         from aslm.model.devices.lasers.laser_trigger_ni import LaserTriggers
-        return LaserTriggers(configuration, experiment)
+        return LaserTriggers(configuration)
     elif configuration['configuration']['Devices']['daq'] == 'SyntheticDAQ':
         from aslm.model.devices.lasers.laser_trigger_synthetic import SyntheticLaserTriggers
-        return SyntheticLaserTriggers(configuration, experiment)
+        return SyntheticLaserTriggers(configuration)
     else:
         device_not_found(configuration['configuration']['Devices']['daq'])
 

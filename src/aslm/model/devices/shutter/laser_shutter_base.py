@@ -59,10 +59,9 @@ class ShutterBase:
     """
 
     def __init__(self,
-                 configuration,
-                 experiment):
+                 configuration):
         self.configuration = configuration
-        self.experiment = experiment
+        self.experiment = self.configuration['experiment']
 
         # Right Shutter - High Resolution Mode
         self.shutter_right = self.configuration['configuration']['DAQParameters']['shutter_right']

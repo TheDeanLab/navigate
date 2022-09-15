@@ -87,16 +87,19 @@ class Camera_Setting_Controller(GUI_Controller):
         """
 
         # Get Default Configuration Values
-        self.default_pixel_size = config.configuration['configuration']['CameraParameters']['pixel_size_in_microns']
-        self.default_width, self.default_height = config.get_pixels()
-        self.trigger_source = config.configuration['configuration']['CameraParameters']['trigger_source']
-        self.trigger_active = config.configuration['configuration']['CameraParameters']['trigger_active']
-        self.readout_speed = config.configuration['configuration']['CameraParameters']['readout_speed']
+        camera_setting_dict = config.camera_setting_dict
+        if camera_setting_dict is None:
+            return
+        self.default_pixel_size = camera_setting_dict['pixel_size_in_microns']
+        self.default_width, self.default_height = config.camera_pixels
+        self.trigger_source = camera_setting_dict['trigger_source']
+        self.trigger_active = camera_setting_dict['trigger_active']
+        self.readout_speed = camera_setting_dict['readout_speed']
         
         # Camera Mode
         self.mode_widgets['Sensor'].widget['values'] = ['Normal', 'Light-Sheet']
         self.mode_widgets['Sensor'].widget['state'] = 'readonly'
-        self.mode_widgets['Sensor'].widget.set(config.configuration['configuration']['CameraParameters']['sensor_mode'])
+        self.mode_widgets['Sensor'].widget.set(camera_setting_dict['sensor_mode'])
         self.mode_widgets['Sensor'].widget.selection_clear()
 
         # Readout Mode
@@ -108,13 +111,13 @@ class Camera_Setting_Controller(GUI_Controller):
         self.mode_widgets['Pixels'].widget['state'] = 'disabled'
         self.mode_widgets['Pixels'].set('')
         self.mode_widgets['Pixels'].widget.config(from_=1) # min value
-        self.mode_widgets['Pixels'].widget.config(to=config.configuration['configuration']['CameraParameters']['y_pixels'] / 2) # max value
+        self.mode_widgets['Pixels'].widget.config(to=self.default_height / 2) # max value
         self.mode_widgets['Pixels'].widget.config(increment=1) # step value
 
         # framerate_widgets
-        self.framerate_widgets['exposure_time'].widget.min = config.configuration['configuration']['CameraParameters']['exposure_time_range']['min']
-        self.framerate_widgets['exposure_time'].widget.max = config.configuration['configuration']['CameraParameters']['exposure_time_range']['max']
-        self.framerate_widgets['exposure_time'].set(config.configuration['configuration']['CameraParameters']['exposure_time'])
+        self.framerate_widgets['exposure_time'].widget.min = camera_setting_dict['exposure_time_range']['min']
+        self.framerate_widgets['exposure_time'].widget.max = camera_setting_dict['exposure_time_range']['max']
+        self.framerate_widgets['exposure_time'].set(camera_setting_dict['exposure_time'])
         self.framerate_widgets['exposure_time'].widget['state'] = 'disabled'
         self.framerate_widgets['readout_time'].widget['state'] = 'disabled'
         self.framerate_widgets['max_framerate'].widget['state'] = 'disabled'

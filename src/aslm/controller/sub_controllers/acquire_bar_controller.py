@@ -60,16 +60,7 @@ class AcquireBarController(GUI_Controller):
         self.mode = 'live'
         self.update_stack_acq(self.mode)
         self.is_save = False
-        self.saving_settings = {
-            'root_directory': self.parent_controller.configuration['experiment']['Saving']['root_directory'],
-            'save_directory': '',
-            'user': '',
-            'tissue': '',
-            'celltype': '',
-            'label': '',
-            'file_type': '',
-            'solvent': '',
-        }
+        self.saving_settings = self.parent_controller.configuration['experiment']['Saving']
 
         self.mode_dict = {
             'Continuous Scan': 'live',
@@ -211,22 +202,6 @@ class AcquireBarController(GUI_Controller):
         """
         self.is_save = is_save
         self.show_verbose_info('set save data option:', is_save)
-
-    def set_saving_settings(self,
-                            saving_settings):
-        r"""Set saving settings
-
-        Parameters
-        ----------
-        saving_settings : dict
-            Dictionary with root_directory, save_directory, user, etc. Reference to configuration.experiment.Saving.
-        """
-        # if value is None, set to ''
-        for name in saving_settings:
-            if saving_settings[name] is None:
-                saving_settings[name] = ''
-        self.saving_settings = saving_settings
-        self.show_verbose_info('Set saving settings')
 
     def launch_popup_window(self):
         r"""Launches the Save Dialog Popup Window

@@ -46,7 +46,7 @@ from aslm.view.main_application_window import MainApp as view
 from aslm.view.menus.remote_focus_popup import remote_popup
 from aslm.view.menus.autofocus_setting_popup import autofocus_popup
 
-from aslm.config.config import load_configs
+from aslm.config.config import load_configs, update_config_dict
 # Local Sub-Controller Imports
 from aslm.controller.sub_controllers.stage_gui_controller import Stage_GUI_Controller
 from aslm.controller.sub_controllers.acquire_bar_controller import AcquireBarController
@@ -114,18 +114,12 @@ class ASLM_controller:
                                         configuration=configuration_path,
                                         experiment=experiment_path,
                                         etl_constants=etl_constants_path)
-        #self.configuration['configuration'] -- self.configuration
-        #self.configuration['experiment'] -- self.configuration['experiment']
-        #self.configuration['etl_constants'] -- self.etl_constants
         
         # Initialize the Model
         self.model = ObjectInSubprocess(Model,
                                         use_gpu,
                                         args,
                                         self.configuration,
-                                        # configuration_path=configuration_path,
-                                        # experiment_path=experiment_path,
-                                        # etl_constants_path=etl_constants_path,
                                         event_queue=self.event_queue)
         logger.info(f"Spec - Configuration Path: {configuration_path}")
         logger.info(f"Spec - Experiment Path: {experiment_path}")
@@ -133,17 +127,12 @@ class ASLM_controller:
 
         # save default experiment file
         self.default_experiment_file = experiment_path
-
-        # Load the Configuration and Experiment Files and Populate the GUI
-        # self.configuration = Configurator(configuration_path)
-        # self.configuration['experiment'] = Configurator(experiment_path)
-
-        # Initialize view based on model.configuration
-        configuration_controller = ASLM_Configuration_Controller(self.configuration)
-
         # etl setting file
         self.etl_constants_path = etl_constants_path
-        # self.etl_constants = Configurator(self.etl_constants_path)
+
+        # Configuration Reader
+        microscope_name = 'high' if self.configuration['experiment']['MicroscopeState']['resolution_mode'] == 'high' else 'low'
+        self.configuration_controller = ASLM_Configuration_Controller(self.configuration, microscope_name)
 
         # Initialize the View
         self.view = view(root)
@@ -157,7 +146,7 @@ class ASLM_controller:
 
         self.channels_tab_controller = Channels_Tab_Controller(self.view.settings.channels_tab,
                                                                self,
-                                                               configuration_controller)
+                                                               self.configuration_controller)
 
         self.multiposition_tab_controller = Multi_Position_Controller(self.view.settings.multiposition_tab.multipoint_list, self)
 
@@ -166,14 +155,14 @@ class ASLM_controller:
 
         self.camera_setting_controller = Camera_Setting_Controller(self.view.settings.camera_settings_tab,
                                                                    self,
-                                                                   configuration_controller)
+                                                                   self.configuration_controller)
 
         # Stage Controller
         self.stage_gui_controller = Stage_GUI_Controller(self.view.settings.stage_control_tab,  
                                                          self.view,
                                                          self.camera_view_controller.canvas,
                                                          self,
-                                                         configuration_controller)
+                                                         self.configuration_controller)
                         
         # Waveform Controller
         self.waveform_tab_controller = Waveform_Tab_Controller(self.view.camera_waveform.waveform_tab, self)
@@ -195,7 +184,7 @@ class ASLM_controller:
         self.populate_experiment_setting()
 
         # Camera View Tab
-        self.initialize_cam_view(configuration_controller)
+        self.initialize_cam_view()
 
         # Wire up pipes
         self.show_img_pipe = self.model.create_pipe('show_img_pipe')
@@ -231,15 +220,10 @@ class ASLM_controller:
     def update_acquire_control(self):
             self.view.acqbar.stop_stage.config(command=self.stage_gui_controller.stop_button_handler)
 
-    def initialize_cam_view(self, configuration_controller):
-        r""" Populate view tab.
+    def initialize_cam_view(self):
+        """ Populate view tab.
         Populate widgets with necessary data from config file via config controller. For the entire view tab.
         Sets the minimum and maximum counts for when the data is not being autoscaled.
-
-        Parameters
-        -------
-        configuration_controller : class
-            Camera view sub-controller.
         """
         # Populating Min and Max Counts
         minmax_values = [0, 2**16-1]
@@ -382,27 +366,31 @@ class ASLM_controller:
         if file_name:
             file_path = Path(file_name)
             if file_path.exists():
-                # Loads experiment file within the model, then the controller.
-                self.model.load_experiment_file(file_path)
+                # TODO: tell model the experiment dict is changed.
 
-                # Create experiment instance.
-                self.configuration['experiment'] = Configurator(file_path)
+                # TODO: read the new file and update info of the configuration dict
+                update_config_dict(self.manager, self.configuration, 'experiment', file_name)
 
         # Configure GUI
-        mode = self.configuration['experiment']['MicroscopeState']['image_mode']
-        self.acquire_bar_controller.set_mode(mode)
-        self.acquire_bar_controller.set_saving_settings(self.configuration['experiment']['Saving'])
-        self.stage_gui_controller.set_experiment_values(self.configuration['experiment']['StageParameters'])
-        self.channels_tab_controller.set_experiment_values(self.configuration['experiment']['MicroscopeState'])
-        self.camera_setting_controller.set_experiment_values(self.configuration['experiment'])
         resolution_mode = self.configuration['experiment']['MicroscopeState']['resolution_mode']
         if resolution_mode == 'high':
+            if self.configuration_controller.change_microscope('high'):
+                #TODO: update widgets
+                pass
             self.resolution_value.set('high')
             self.configuration['experiment']['MicroscopeState']['zoom'] = 'N/A'
         else:
+            if self.configuration_controller.change_microscope('low'):
+                #TODO: update widgets
+                pass
             self.resolution_value.set(self.configuration['experiment']['MicroscopeState']['zoom'])
 
         self.model.apply_resolution_stage_offset(resolution_mode, initial=True)
+        mode = self.configuration['experiment']['MicroscopeState']['image_mode']
+        self.acquire_bar_controller.set_mode(mode)
+        self.stage_gui_controller.set_experiment_values(self.configuration['experiment']['StageParameters'])
+        self.channels_tab_controller.set_experiment_values(self.configuration['experiment']['MicroscopeState'])
+        self.camera_setting_controller.set_experiment_values(self.configuration['experiment'])
 
     def update_experiment_setting(self):
         r"""Update model.experiment according to values in the GUI
@@ -808,7 +796,7 @@ class ASLM_controller:
         while True:
             event, value = self.event_queue.get()
             if event == 'waveform':
-                self.waveform_tab_controller.update_waveforms(value, self.configuration['configuration']['DAQParameters']['sample_rate'])
+                self.waveform_tab_controller.update_waveforms(value, self.configuration_controller.daq_sample_rate)
             elif event == 'multiposition':
                 from aslm.tools.multipos_table_tools import update_table
                 update_table(self.view.settings.multiposition_tab.multipoint_list.get_table(), value)

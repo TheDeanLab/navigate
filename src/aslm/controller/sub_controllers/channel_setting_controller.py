@@ -97,7 +97,7 @@ class Channel_Setting_Controller(GUI_Controller):
         config : object
             ASLM_Configuration_Controller - config.configuration is Configurator instance of configuration.
         """
-        setting_dict = config.get_channels_info()
+        setting_dict = config.channels_info
         for i in range(self.num):
             self.view.laser_pulldowns[i]['values'] = setting_dict['laser']
             self.view.filterwheel_pulldowns[i]['values'] = setting_dict['filter']
@@ -188,7 +188,7 @@ class Channel_Setting_Controller(GUI_Controller):
         """
         temp_dict = {
             'laser_power': self.view.laserpower_pulldowns,
-            'camera_exposure_time': self.view.exptime_pulldowns,
+            'exposure_time': self.view.exptime_pulldowns,
             'interval_time': self.view.interval_spins
         }
         for k in temp_dict:

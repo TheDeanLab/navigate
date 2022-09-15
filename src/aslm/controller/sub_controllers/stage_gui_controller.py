@@ -59,21 +59,8 @@ class Stage_GUI_Controller(GUI_Controller):
         }
 
         # stage movement limits
-        self.position_min = {
-            'x': self.parent_controller.configuration['configuration']['StageParameters']['x_min'],
-            'y': self.parent_controller.configuration['configuration']['StageParameters']['y_min'],
-            'z': self.parent_controller.configuration['configuration']['StageParameters']['z_min'],
-            'theta': self.parent_controller.configuration['configuration']['StageParameters']['theta_min'],
-            'f': self.parent_controller.configuration['configuration']['StageParameters']['f_min']
-        }
-
-        self.position_max = {
-            'x': self.parent_controller.configuration['configuration']['StageParameters']['x_max'],
-            'y': self.parent_controller.configuration['configuration']['StageParameters']['y_max'],
-            'z': self.parent_controller.configuration['configuration']['StageParameters']['z_max'],
-            'theta': self.parent_controller.configuration['configuration']['StageParameters']['theta_max'],
-            'f': self.parent_controller.configuration['configuration']['StageParameters']['f_max']
-        }
+        self.position_min = {}
+        self.position_max = {}
 
         # variables
         self.widget_vals = self.view.get_variables()
@@ -153,15 +140,17 @@ class Stage_GUI_Controller(GUI_Controller):
         self.position_max = config.get_stage_position_limits('_max')
 
         widgets = self.view.get_widgets()
+        step_dict = config.stage_step
         for axis in ['x', 'y', 'z', 'theta', 'f']:
             widgets[axis].widget.min = self.position_min[axis]
             widgets[axis].widget.max = self.position_max[axis]
-
-        # set step limits
-        for k in ['xy_step', 'z_step', 'theta_step', 'f_step']:
-            widgets[k].widget.configure(from_=config.configuration['configuration']['GUIParameters']['stage'][k]['min'])
-            widgets[k].widget.configure(to=config.configuration['configuration']['GUIParameters']['stage'][k]['max'])
-            widgets[k].widget.configure(increment=config.configuration['configuration']['GUIParameters']['stage'][k]['step'])
+            if axis == 'x' or 'y':
+                step_axis = 'xy'
+            else:
+                step_axis = axis
+            widgets[step_axis+'_step'].widget.configure(from_=1)
+            widgets[step_axis+'_step'].widget.configure(to=self.position_max[axis])
+            widgets[step_axis+'_step'].widget.configure(increment=step_dict[axis])          
 
     def bind_position_callbacks(self):
         r"""Binds position_callback() to each axis, records the trace name so we can unbind later.

@@ -3,6 +3,7 @@ import sys
 import shutil
 import platform
 from pathlib import Path
+from os.path import isfile
 from multiprocessing import Manager
 
 import yaml
@@ -21,14 +22,14 @@ def get_configuration_paths():
         os.mkdir(configuration_directory)
 
     # Configuration files should be stored in this directory
-    configuration_path = Path.joinpath(configuration_directory, 'configuration.yml')
+    configuration_path = Path.joinpath(configuration_directory, 'configuration.yaml')
     experiment_path = Path.joinpath(configuration_directory, 'experiment.yml')
     etl_constants_path = Path.joinpath(configuration_directory, 'etl_constants.yml')
 
     # If they are not already, copy the default ones that ship with the software too this folder
     if not os.path.exists(configuration_path):
         copy_base_directory = Path(__file__).resolve().parent
-        copy_configuration_path = Path.joinpath(copy_base_directory, 'configuration_old.yml')
+        copy_configuration_path = Path.joinpath(copy_base_directory, 'configuration.yaml')
         shutil.copyfile(copy_configuration_path, configuration_path)
 
     if not os.path.exists(experiment_path):
@@ -63,9 +64,6 @@ def load_configs(manager, **kwargs):
     # return combined dictionary
     return config_dict
 
-    # return independent dictionaries
-    # return config_dict.values()
-
 def build_nested_dict(manager, parent_dict, key_name, dict_data):
     if type(dict_data) != dict and type(dict_data) != list:
         parent_dict[key_name] = dict_data
@@ -80,4 +78,14 @@ def build_nested_dict(manager, parent_dict, key_name, dict_data):
             d.append(None)
             build_nested_dict(manager, d, i, v)
     parent_dict[key_name] = d
+
+def update_config_dict(manager, parent_dict, config_name, new_config) -> bool:
+    if type(new_config) != dict:
+        file_path = str(new_config)
+        if isfile(file_path) and (file_path.ends('.yml') or file_path.ends('.yaml')):
+            with open(file_path) as f:
+                new_config = yaml.load(f, Loader=yaml.FullLoader)
+        else:
+            return False
     
+    build_nested_dict(manager, parent_dict, config_name, new_config)

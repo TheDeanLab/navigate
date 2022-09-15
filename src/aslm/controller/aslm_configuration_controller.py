@@ -43,11 +43,42 @@ logger = logging.getLogger(p)
 
 
 class ASLM_Configuration_Controller:
-    def __init__(self, configuration):
+    def __init__(self, configuration, microscope_name='low'):
         self.configuration = configuration
+        self.microscope_name = None
+        self.microscope_config = None
 
-    def get_channels_info(self):
-        r"""Populate the channel combobox with the channels that are available in the model.configuration
+        self.change_microscope(microscope_name)
+
+    def change_microscope(self, microscope_name='low')->bool:
+        r"""Get the new microscope configuration dict according to the name
+        
+        Returns
+        -------
+        result: bool
+        """
+        if self.microscope_name == microscope_name:
+            return False
+
+        for i in range(len(self.configuration['configuration']['microscopes'])):
+            if self.configuration['configuration']['microscopes'][i]['name'] == microscope_name:
+                self.microscope_config = self.configuration['configuration']['microscopes'][i]
+                self.microscope_name = microscope_name
+                return True
+        return False
+
+    def get_microscope_configuration_dict(self):
+        r"""Return microscope configuration dict
+        
+        Returns
+        -------
+        microscope_configuration_dict: dict
+        """
+        return self.microscope_config
+
+    @property
+    def channels_info(self):
+        r"""Populate the channel combobox with the channels that are available in the configuration
 
         Returns
         -------
@@ -56,27 +87,44 @@ class ASLM_Configuration_Controller:
                 'laser': ['488nm', '562nm', '642nm'],
                 'filter': ['Empty-Alignment', 'GFP - FF01-515/30-32', '...}
         """
+        if self.microscope_config is None:
+            return {}
 
-        setting = {'laser': self.get_lasers_info(), 'filter': list(
-            self.configuration['configuration']['FilterWheelParameters']['available_filters'].keys()), }
+        setting = {'laser': self.lasers_info, 
+                   'filter': list(self.microscope_config['filter_wheel']['available_filters'].keys())}
         return setting
 
-    def get_lasers_info(self):
-        r"""Populate the laser combobox with the lasers that are available in the model.configuration
+    @property
+    def lasers_info(self):
+        r"""Populate the laser combobox with the lasers that are available in the configuration
 
         Returns
         -------
         laser_list : list
             List of lasers, e.g. ['488nm', '562nm', '642nm']
         """
-        number_of_lasers = int(self.configuration['configuration']['LaserParameters']['number_of_lasers'])
-        laser_list = []
-        for i in range(number_of_lasers):
-            laser_wavelength = self.configuration['configuration']['LaserParameters']['laser_' + str(i) + '_wavelength']
-            laser_list.append(laser_wavelength)
-        return laser_list
+        if self.microscope_config is None:
+            return []
+        
+        return [str(laser['wavelength'])+'nm' for laser in self.microscope_config['lasers']]
 
-    def get_pixels(self):
+    @property
+    def camera_setting_dict(self):
+        r"""Get camera setting dict
+
+        Returns
+        -------
+        camera_setting: dict
+            Camera Setting, e.g. {
+
+            }
+        """
+        if self.microscope_config is not None:
+            return self.microscope_config['camera']
+        return None
+
+    @property
+    def camera_pixels(self):
         r"""Get default pixel values from camera
 
         Returns
@@ -86,10 +134,14 @@ class ASLM_Configuration_Controller:
         y_pixels : int
             Number of y pixels
         """
-        return [self.configuration['configuration']['CameraParameters']['x_pixels'],
-                self.configuration['configuration']['CameraParameters']['y_pixels']]
+        if self.microscope_config is None:
+            return [2048, 2048]
+        
+        return [self.microscope_config['camera']['x_pixels'],
+                self.microscope_config['camera']['y_pixels']]
 
-    def get_stage_position(self):
+    @property
+    def stage_default_position(self):
         r"""Get current position of the stage
 
         Returns
@@ -97,17 +149,27 @@ class ASLM_Configuration_Controller:
         position : dict
             Dictionary with x, y, z, theta, and f positions.
         """
-        stage_position = self.configuration['configuration']['StageParameters']['position']
-        position = {
-            'x': stage_position['x_pos'],
-            'y': stage_position['y_pos'],
-            'z': stage_position['z_pos'],
-            'theta': stage_position['theta_pos'],
-            'f': stage_position['f_pos']
-        }
+        if self.microscope_config is not None:
+            stage_position = self.microscope_config['stage']['position']
+            position = {
+                'x': stage_position['x_pos'],
+                'y': stage_position['y_pos'],
+                'z': stage_position['z_pos'],
+                'theta': stage_position['theta_pos'],
+                'f': stage_position['f_pos']
+            }
+        else:
+            position = {
+                'x': 0,
+                'y': 0,
+                'z': 0,
+                'theta': 0,
+                'f': 0
+            }
         return position
 
-    def get_stage_step(self):
+    @property
+    def stage_step(self):
         r"""Get the step size of the stage
 
         Returns
@@ -115,12 +177,17 @@ class ASLM_Configuration_Controller:
         steps : dict
             Step size in x (same step size for y), z, theta, and f.
         """
-        steps = {
-            'x': self.configuration['configuration']['StageParameters']['xy_step'],
-            'z': self.configuration['configuration']['StageParameters']['z_step'],
-            'theta': self.configuration['configuration']['StageParameters']['theta_step'],
-            'f': self.configuration['configuration']['StageParameters']['f_step']
-        }
+        if self.microscope_config is not None:
+            stage_dict = self.microscope_config['stage']
+            steps = {
+                'x': stage_dict['x_step'],
+                'y': stage_dict['y_step'],
+                'z': stage_dict['z_step'],
+                'theta': stage_dict['theta_step'],
+                'f': stage_dict['f_step']
+            }
+        else:
+            steps = {'x': 10, 'y': 10, 'z': 10, 'theta': 10, 'f': 10}
         return steps
 
     def get_stage_position_limits(self, suffix):
@@ -138,9 +205,14 @@ class ASLM_Configuration_Controller:
 
         """
         axis = ['x', 'y', 'z', 'theta', 'f']
-        position_limits = {}
-        for a in axis:
-            position_limits[a] = self.configuration['configuration']['StageParameters'][a + suffix]
+        if self.microscope_config is not None:
+            stage_dict = self.microscope_config['stage']
+            position_limits = {}
+            for a in axis:
+                position_limits[a] = stage_dict[a + suffix]
+        else:
+            for a in axis:
+                position_limits[a] = 0 if suffix == '_min' else 100
         return position_limits
 
     def get_etl_info(self):
@@ -157,3 +229,28 @@ class ASLM_Configuration_Controller:
             'remote_focus_r_delay_percent': self.configuration['configuration']['LaserParameters']['laser_r_delay_percent'],
             'remote_focus_r_pulse_percent': self.configuration['configuration']['LaserParameters']['laser_r_pulse_percent']}
         return remote_focus_parameters
+
+    @property
+    def daq_sample_rate(self):
+        if self.microscope_config is not None:
+            return self.microscope_config['daq']['sample_rate']
+        return 100000
+
+    @property
+    def filter_wheel_setting_dict(self):
+        if self.microscope_config is not None:
+            return self.microscope_config['filter_wheel']
+        return None
+
+    @property
+    def stage_setting_dict(self):
+        if self.microscope_config is not None:
+            return self.microscope_config['stage']
+        return None
+
+    @property
+    def number_of_channels(self):
+        if self.microscope_config is not None:
+            return self.configuration['configuration']['gui']['channels']['count']
+        return 5
+    

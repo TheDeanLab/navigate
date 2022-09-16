@@ -35,12 +35,15 @@ import argparse
 from pathlib import Path
 import tkinter as tk
 import platform
+import os
 from aslm.log_files.log_functions import log_setup
 from aslm.config import get_configuration_paths
 
 # Local Imports
 from aslm.controller.aslm_controller import ASLM_controller as Controller
 
+os.environ['http_proxy'] = ''
+os.environ['https_proxy'] = ''
 
 def main():
     r"""Multiscale ASLM Microscope Software.

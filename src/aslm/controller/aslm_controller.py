@@ -44,21 +44,13 @@ from tkinter import filedialog, messagebox
 from aslm.view.main_application_window import MainApp as view
 from aslm.view.menus.remote_focus_popup import remote_popup
 from aslm.view.menus.autofocus_setting_popup import autofocus_popup
+from aslm.view.menus.ilastik_setting_popup import ilastik_setting_popup
 
 # Local Sub-Controller Imports
-from aslm.controller.sub_controllers.stage_gui_controller import Stage_GUI_Controller
-from aslm.controller.sub_controllers.acquire_bar_controller import AcquireBarController
-from aslm.controller.sub_controllers.channels_tab_controller import Channels_Tab_Controller
-from aslm.controller.sub_controllers.camera_view_controller import Camera_View_Controller
-from aslm.controller.sub_controllers.camera_setting_controller import Camera_Setting_Controller
+from aslm.controller.sub_controllers import *
 from aslm.controller.aslm_configuration_controller import ASLM_Configuration_Controller
-from aslm.controller.sub_controllers.waveform_tab_controller import Waveform_Tab_Controller
-from aslm.controller.sub_controllers.etl_popup_controller import Etl_Popup_Controller
-from aslm.controller.sub_controllers.autofocus_popup_controller import Autofocus_Popup_Controller
 import aslm.controller.aslm_controller_functions as controller_functions
 from aslm.controller.thread_pool import SynchronizedThreadPool
-from aslm.controller.sub_controllers.keystroke_controller import KeystrokeController
-from aslm.controller.sub_controllers.multi_position_controller import Multi_Position_Controller
 
 # Local Model Imports
 from aslm.model.aslm_model import Model
@@ -99,6 +91,7 @@ class ASLM_controller:
                  configuration_path,
                  experiment_path,
                  etl_constants_path,
+                 rest_api_path,
                  use_gpu,
                  args):
         
@@ -117,10 +110,12 @@ class ASLM_controller:
                                         configuration_path=configuration_path,
                                         experiment_path=experiment_path,
                                         etl_constants_path=etl_constants_path,
+                                        rest_api_path=rest_api_path,
                                         event_queue=self.event_queue)
         logger.info(f"Spec - Configuration Path: {configuration_path}")
         logger.info(f"Spec - Experiment Path: {experiment_path}")
         logger.info(f"Spec - ETL Constants Path: {etl_constants_path}")
+        logger.info(f"Spec - Rest API Path: {rest_api_path}")
 
         # save default experiment file
         self.default_experiment_file = experiment_path
@@ -135,6 +130,9 @@ class ASLM_controller:
         # etl setting file
         self.etl_constants_path = etl_constants_path
         self.etl_constants = Configurator(self.etl_constants_path)
+
+        # Rest service
+        self.rest_urls = Configurator(rest_api_path)
 
         # Initialize the View
         self.view = view(root)
@@ -178,7 +176,7 @@ class ASLM_controller:
         t = threading.Thread(target=self.update_event)
         t.start()
 
-        self.initialize_menus()
+        self.initialize_menus(args.synthetic_hardware)
 
         # Set view based on model.experiment
         self.populate_experiment_setting()
@@ -236,7 +234,7 @@ class ASLM_controller:
         image_metrics = [1, 0, 0]
         self.camera_view_controller.initialize('image', image_metrics)
 
-    def initialize_menus(self):
+    def initialize_menus(self, is_synthetic_hardware=False):
         r""" Initialize menus
         This function defines all the menus in the menubar
 
@@ -250,11 +248,11 @@ class ASLM_controller:
             self.populate_experiment_setting(self.default_experiment_file)
 
         def load_experiment():
-            filename = filedialog.askopenfilenames(defaultextension='.yml',
+            filename = filedialog.askopenfilename(defaultextension='.yml',
                                                    filetypes=[('Yaml files', '*.yml')])
             if not filename:
                 return
-            self.populate_experiment_setting(filename[0])
+            self.populate_experiment_setting(filename)
 
         def save_experiment():
             # update model.experiment and save it to file
@@ -269,6 +267,13 @@ class ASLM_controller:
             controller_functions.save_yaml_file('',
                                                 self.experiment.serialize(),
                                                 filename)
+
+        def load_images():
+            filenames = filedialog.askopenfilenames(defaultextension='.tif',
+                                                    filetypes=[('tiff files', '*.tif')])
+            if not filenames:
+                return
+            self.model.load_images(filenames)
 
         def popup_etl_setting():
             if hasattr(self, 'etl_controller'):
@@ -294,6 +299,14 @@ class ASLM_controller:
                                                                   self,
                                                                   self.experiment.AutoFocusParameters)
 
+        def popup_ilastik_setting():
+            ilastik_popup_window = ilastik_setting_popup(self.view)
+            ilastik_url = self.rest_urls.Ilastik['url']
+            if hasattr(self, 'ilastik_controller'):
+                self.ilastik_controller.showup(ilastik_popup_window)
+            else:
+                self.ilastik_controller = Ilastik_Popup_Controller(ilastik_popup_window, self, ilastik_url)
+
         menus_dict = {
             self.view.menubar.menu_file: {
                 'New Experiment': new_experiment,
@@ -313,6 +326,12 @@ class ASLM_controller:
             menu_items = menus_dict[menu]
             for label in menu_items:
                 menu.add_command(label=label, command=menu_items[label])
+
+        # load images from disk in synthetic hardware
+        if is_synthetic_hardware:
+            self.view.menubar.menu_file.add_separator()
+            self.view.menubar.menu_file.add_command(label='Load Images', command=load_images)
+            self.view.menubar.menu_file.add_command(label='Unload Images', command=lambda: self.model.load_images(None))
 
         # add resolution menu
         self.resolution_value = tkinter.StringVar()
@@ -346,14 +365,18 @@ class ASLM_controller:
         self.view.menubar.menu_autofocus.add_command(label='setting', command=popup_autofocus_setting)
 
         # add-on features
-        feature_list = ['None', 'Switch Resolution', 'Z Stack Acquisition', 'Threshold']
+        feature_list = ['None', 'Switch Resolution', 'Z Stack Acquisition', 'Threshold', 'Ilastik Segmentation']
         self.feature_id_val = tkinter.IntVar(0)
         for i in range(len(feature_list)):
             self.view.menubar.menu_features.add_radiobutton(label=feature_list[i],
                                                             variable=self.feature_id_val,
                                                             value=i)
         self.feature_id_val.trace_add('write', lambda *args: self.execute('load_feature', self.feature_id_val.get()))
-
+        self.view.menubar.menu_features.add_separator()
+        self.view.menubar.menu_features.add_command(label='ilastik setting', command=popup_ilastik_setting)
+        # disable ilastik menu
+        self.view.menubar.menu_features.entryconfig('Ilastik Segmentation', state='disabled')
+        
         # debug menu
         if self.debug:
             Debug_Module(self, self.view.menubar.menu_debug)
@@ -449,6 +472,7 @@ class ASLM_controller:
         if mode == 'stop':
             # GUI Failsafe
             self.acquire_bar_controller.stop_acquire()
+            self.feature_id_val.set(0)
 
     def update_camera_view(self):
         r"""Update the real-time parameters in the camera view (channel number, max counts, image, etc.)
@@ -616,12 +640,14 @@ class ASLM_controller:
                 self.acquire_bar_controller.stop_acquire()
                 return
 
+            # if select 'ilastik segmentation', 'show segmentation', and in 'single acquisition'
+            self.camera_view_controller.display_mask_flag = self.acquire_bar_controller.mode == 'single' and self.feature_id_val.get() == 4 and self.ilastik_controller.show_segmentation_flag
+
             self.threads_pool.createThread('camera', self.capture_image, args=(self.acquire_bar_controller.mode,))
 
         elif command == 'stop_acquire':
             # self.model.run_command('stop')
             self.sloppy_stop()
-            self.feature_id_val.set(0)
             self.set_mode_of_sub('stop')
 
             self.acquire_bar_controller.stop_progress_bar()
@@ -805,6 +831,8 @@ class ASLM_controller:
                 from aslm.tools.multipos_table_tools import update_table
                 update_table(self.view.settings.multiposition_tab.multipoint_list.get_table(), value)
                 self.view.settings.channels_tab.multipoint_frame.on_off.set(True)  # assume we want to use multipos
+            elif event == 'ilastik_mask':
+                self.camera_view_controller.display_mask(value)
             elif event == 'stop':
                 break
     

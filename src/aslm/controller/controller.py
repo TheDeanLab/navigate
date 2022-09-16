@@ -56,7 +56,7 @@ from aslm.controller.sub_controllers.camera_setting_controller import Camera_Set
 from aslm.controller.configuration_controller import ConfigurationController
 from aslm.controller.sub_controllers.waveform_tab_controller import Waveform_Tab_Controller
 from aslm.controller.sub_controllers.etl_popup_controller import Etl_Popup_Controller
-from aslm.controller.sub_controllers.autofocus_popup_controller import Autofocus_Popup_Controller
+from aslm.controller.sub_controllers.autofocus_popup_controller import AutofocusPopupController
 import aslm.controller.aslm_controller_functions as controller_functions
 from aslm.controller.thread_pool import SynchronizedThreadPool
 from aslm.controller.sub_controllers.keystroke_controller import KeystrokeController
@@ -285,9 +285,7 @@ class Controller:
                 self.af_popup_controller.showup()
                 return
             af_popup = autofocus_popup(self.view)
-            self.af_popup_controller = Autofocus_Popup_Controller(af_popup,
-                                                                  self,
-                                                                  self.configuration['experiment']['AutoFocusParameters'])
+            self.af_popup_controller = AutofocusPopupController(af_popup, self)
 
         menus_dict = {
             self.view.menubar.menu_file: {

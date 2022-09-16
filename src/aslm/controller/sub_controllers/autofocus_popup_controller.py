@@ -43,23 +43,18 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class Autofocus_Popup_Controller(GUI_Controller):
+class AutofocusPopupController(GUI_Controller):
 
-    def __init__(self, view, parent_controller, setting_dict=None):
+    def __init__(self, view, parent_controller):
         super().__init__(view, parent_controller)
 
         self.widgets = self.view.get_widgets()
-        self.setting_dict = setting_dict
+        
         self.autofocus_fig = self.view.fig
         self.autofocus_coarse = self.view.coarse
         self.autofocus_fine = self.view.fine
 
-
-        # show the value
-        for k in self.widgets:
-            self.widgets[k].set(setting_dict[k])
-        self.view.stage_vars[0].set(setting_dict['coarse_selected'])
-        self.view.stage_vars[1].set(setting_dict['fine_selected'])
+        self.populate_experiment_values()    
 
         # add saving function to the function closing the window
         exit_func = combine_funcs(self.update_experiment_values, self.view.popup.dismiss,
@@ -68,13 +63,19 @@ class Autofocus_Popup_Controller(GUI_Controller):
 
         self.view.autofocus_btn.configure(command=self.start_autofocus)
 
-    def update_experiment_values(self, setting_dict=None):
-        if not setting_dict:
-            setting_dict = self.setting_dict
+    def populate_experiment_values(self):
+        self.setting_dict = self.parent_controller.configuration['experiment']['AutoFocusParameters']
+        # show the value
         for k in self.widgets:
-            setting_dict[k] = self.widgets[k].get()
-        setting_dict['coarse_selected'] = self.view.stage_vars[0].get()
-        setting_dict['fine_selected'] = self.view.stage_vars[1].get()
+            self.widgets[k].set(self.setting_dict[k])
+        self.view.stage_vars[0].set(self.setting_dict['coarse_selected'])
+        self.view.stage_vars[1].set(self.setting_dict['fine_selected'])
+
+    def update_experiment_values(self):
+        for k in self.widgets:
+            self.setting_dict[k] = self.widgets[k].get()
+        self.setting_dict['coarse_selected'] = self.view.stage_vars[0].get()
+        self.setting_dict['fine_selected'] = self.view.stage_vars[1].get()
 
     def showup(self):
         """

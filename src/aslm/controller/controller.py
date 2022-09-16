@@ -384,8 +384,7 @@ class Controller:
             self.resolution_value.set(self.configuration['experiment']['MicroscopeState']['zoom'])
 
         self.model.apply_resolution_stage_offset(resolution_mode, initial=True)
-        mode = self.configuration['experiment']['MicroscopeState']['image_mode']
-        self.acquire_bar_controller.set_mode(mode)
+        self.acquire_bar_controller.populate_experiment_values()
         self.stage_gui_controller.set_experiment_values(self.configuration['experiment']['StageParameters'])
         self.channels_tab_controller.set_experiment_values(self.configuration['experiment']['MicroscopeState'])
         self.camera_setting_controller.set_experiment_values(self.configuration['experiment'])

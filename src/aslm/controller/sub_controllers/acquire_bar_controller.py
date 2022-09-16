@@ -60,7 +60,6 @@ class AcquireBarController(GUI_Controller):
         self.mode = 'live'
         self.update_stack_acq(self.mode)
         self.is_save = False
-        self.saving_settings = self.parent_controller.configuration['experiment']['Saving']
 
         self.mode_dict = {
             'Continuous Scan': 'live',
@@ -321,7 +320,7 @@ class AcquireBarController(GUI_Controller):
             Instance of the popup save dialog.
         """
         # update saving settings according to user's input
-        self.update_saving_settings(popup_window)
+        self.update_experiment_values(popup_window)
 
         # Verify user's input is non-zero.
         is_valid = self.saving_settings['user'] \
@@ -349,9 +348,13 @@ class AcquireBarController(GUI_Controller):
             # call the central controller to stop all the threads
             self.parent_controller.execute('exit')
             sys.exit()
-        
 
-    def update_saving_settings(self, popup_window):
+    def populate_experiment_values(self):
+        self.saving_settings = self.parent_controller.configuration['experiment']['Saving']
+        mode = self.parent_controller.configuration['experiment']['MicroscopeState']['image_mode']
+        self.set_mode(mode)
+
+    def update_experiment_values(self, popup_window):
         r"""Gets the entries from the popup save dialog and overwrites the saving_settings dictionary."""
         popup_vals = popup_window.get_variables()
         for name in popup_vals:

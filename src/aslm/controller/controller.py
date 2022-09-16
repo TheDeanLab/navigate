@@ -53,7 +53,7 @@ from aslm.controller.sub_controllers.acquire_bar_controller import AcquireBarCon
 from aslm.controller.sub_controllers.channels_tab_controller import Channels_Tab_Controller
 from aslm.controller.sub_controllers.camera_view_controller import Camera_View_Controller
 from aslm.controller.sub_controllers.camera_setting_controller import Camera_Setting_Controller
-from aslm.controller.aslm_configuration_controller import ASLM_Configuration_Controller
+from aslm.controller.configuration_controller import ConfigurationController
 from aslm.controller.sub_controllers.waveform_tab_controller import Waveform_Tab_Controller
 from aslm.controller.sub_controllers.etl_popup_controller import Etl_Popup_Controller
 from aslm.controller.sub_controllers.autofocus_popup_controller import Autofocus_Popup_Controller
@@ -75,7 +75,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class ASLM_controller:
+class Controller:
     """ ASLM Controller
 
     Parameters
@@ -132,7 +132,7 @@ class ASLM_controller:
 
         # Configuration Reader
         microscope_name = 'high' if self.configuration['experiment']['MicroscopeState']['resolution_mode'] == 'high' else 'low'
-        self.configuration_controller = ASLM_Configuration_Controller(self.configuration, microscope_name)
+        self.configuration_controller = ConfigurationController(self.configuration, microscope_name)
 
         # Initialize the View
         self.view = view(root)

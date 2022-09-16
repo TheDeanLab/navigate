@@ -42,7 +42,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class ASLM_Configuration_Controller:
+class ConfigurationController:
     def __init__(self, configuration, microscope_name='low'):
         self.configuration = configuration
         self.microscope_name = None

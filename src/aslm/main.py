@@ -39,7 +39,7 @@ from aslm.log_files.log_functions import log_setup
 from aslm.config import get_configuration_paths
 
 # Local Imports
-from aslm.controller.aslm_controller import ASLM_controller as Controller
+from aslm.controller.controller import Controller
 
 
 def main():

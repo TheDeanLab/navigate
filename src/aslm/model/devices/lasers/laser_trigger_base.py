@@ -52,28 +52,30 @@ class LaserTriggerBase:
     def __init__(self, configuration):
         self.configuration = configuration
         self.experiment = self.configuration['experiment']
+        self.microscope = self.experiment['MicroscopeState']['resolution_mode'] 
 
         # Number of Lasers
         # TODO: Make it so that we can iterate through each laser and create a
         # task.
-        self.number_of_lasers = self.configuration['configuration']['LaserParameters']['number_of_lasers']
+        self.lasers = self.configuration['configuration']['microscopes'][self.microscope]['lasers']
+        self.number_of_lasers = len(self.lasers)
 
         # Minimum and Maximum Laser Voltages
-        self.laser_min_do = self.configuration['configuration']['LaserParameters']['laser_min_do']
-        self.laser_max_do = self.configuration['configuration']['LaserParameters']['laser_max_do']
-        self.laser_min_ao = self.configuration['configuration']['LaserParameters']['laser_min_ao']
-        self.laser_max_ao = self.configuration['configuration']['LaserParameters']['laser_max_ao']
+        self.laser_min_do = self.lasers[0]['onoff']['hardware']['min']
+        self.laser_max_do = self.lasers[0]['onoff']['hardware']['max']
+        self.laser_min_ao = self.lasers[0]['power']['hardware']['min']
+        self.laser_max_ao = self.lasers[0]['power']['hardware']['max']
 
         # Digital Ports
         self.switching_port = self.configuration['configuration']['DAQParameters']['laser_port_switcher']
-        self.laser_0_do_port = self.configuration['configuration']['DAQParameters']['laser_0_do']
-        self.laser_1_do_port = self.configuration['configuration']['DAQParameters']['laser_1_do']
-        self.laser_2_do_port = self.configuration['configuration']['DAQParameters']['laser_2_do']
+        self.laser_0_do_port = self.lasers[0]['onoff']['hardware']['channel']
+        self.laser_1_do_port = self.lasers[1]['onoff']['hardware']['channel']
+        self.laser_2_do_port = self.lasers[2]['onoff']['hardware']['channel']
 
         # Analog Ports
-        self.laser_0_ao_port = self.configuration['configuration']['DAQParameters']['laser_0_ao']
-        self.laser_1_ao_port = self.configuration['configuration']['DAQParameters']['laser_1_ao']
-        self.laser_2_ao_port = self.configuration['configuration']['DAQParameters']['laser_2_ao']
+        self.laser_0_ao_port = self.lasers[0]['power']['hardware']['channel']
+        self.laser_1_ao_port = self.lasers[1]['power']['hardware']['channel']
+        self.laser_2_ao_port = self.lasers[2]['power']['hardware']['channel']
 
         # Digital Output Default State
         self.switching_state = False

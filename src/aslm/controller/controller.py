@@ -63,7 +63,7 @@ from aslm.controller.sub_controllers.keystroke_controller import KeystrokeContro
 from aslm.controller.sub_controllers.multi_position_controller import Multi_Position_Controller
 
 # Local Model Imports
-from aslm.model.aslm_model import Model
+from aslm.model.model import Model
 from aslm.model.aslm_model_config import Configurator
 from aslm.model.concurrency.concurrency_tools import ObjectInSubprocess
 from aslm.tools.common_dict_tools import update_settings_common, update_stage_dict

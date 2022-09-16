@@ -1,6 +1,6 @@
 from pathlib import Path
 from aslm.model.aslm_model_config import Configurator
-from aslm.model.aslm_model import Model
+from aslm.model.model import Model
 
 def get_dummy_model():
     """

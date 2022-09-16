@@ -128,14 +128,14 @@ def start_camera(configuration,
         Camera class.
     """
 
-    if configuration['configuration']['Devices']['camera'] == 'HamamatsuOrca':
+    if configuration['configuration']['hardware']['camera'] == 'HamamatsuOrca':
         from aslm.model.devices.camera.camera_hamamatsu import HamamatsuOrca
         return auto_redial(HamamatsuOrca, (camera_id, configuration), exception=Exception)
-    elif configuration['configuration']['Devices']['camera'] == 'SyntheticCamera':
+    elif configuration['configuration']['hardware']['camera'] == 'SyntheticCamera':
         from aslm.model.devices.camera.camera_synthetic import SyntheticCamera
         return SyntheticCamera(camera_id, configuration)
     else:
-        device_not_found(configuration['configuration']['Devices']['camera'])
+        device_not_found(configuration['configuration']['hardware']['camera'])
 
 
 def start_stages(configuration):
@@ -151,15 +151,15 @@ def start_stages(configuration):
     Stage : class
         Stage class.
     """
-    if configuration['configuration']['Devices']['stage'] == 'PI' and platform.system() == 'Windows':
+    if configuration['configuration']['hardware']['stage'] == 'PI' and platform.system() == 'Windows':
         from aslm.model.devices.stages.stage_pi import PIStage
         from pipython.pidevice.gcserror import GCSError
         return auto_redial(PIStage, (configuration,), exception=GCSError)
-    elif configuration['configuration']['Devices']['stage'] == 'SyntheticStage':
+    elif configuration['configuration']['hardware']['stage'] == 'SyntheticStage':
         from aslm.model.devices.stages.stage_synthetic import SyntheticStage
         return SyntheticStage(configuration)
     else:
-        device_not_found(configuration['configuration']['Devices']['stage'])
+        device_not_found(configuration['configuration']['hardware']['stage'])
 
 
 def start_stages_r(configuration):
@@ -175,12 +175,12 @@ def start_stages_r(configuration):
     Stage : class
         Stage class.
     """
-    if configuration['configuration']['Devices']['stage_r'] == 'Thorlabs' and platform.system() == 'Windows':
+    if configuration['configuration']['hardware']['stage_r'] == 'Thorlabs' and platform.system() == 'Windows':
         from aslm.model.devices.stages.stage_tl_kcube_inertial import TLKIMStage
         from aslm.model.devices.APIs.thorlabs.kcube_inertial import TLFTDICommunicationError
         return auto_redial(TLKIMStage, (configuration,), exception=TLFTDICommunicationError)
     else:
-        device_not_found(configuration['configuration']['Devices']['stage_r'])
+        device_not_found(configuration['configuration']['hardware']['stage_r'])
 
 
 def start_zoom_servo(configuration):
@@ -197,14 +197,14 @@ def start_zoom_servo(configuration):
         Zoom class.
     """
 
-    if configuration['configuration']['Devices']['zoom'] == 'DynamixelZoom':
+    if configuration['configuration']['hardware']['zoom'] == 'DynamixelZoom':
         from aslm.model.devices.zoom.zoom_dynamixel import DynamixelZoom
         return auto_redial(DynamixelZoom, (configuration,), exception=RuntimeError)
-    elif configuration['configuration']['Devices']['zoom'] == 'SyntheticZoom':
+    elif configuration['configuration']['hardware']['zoom'] == 'SyntheticZoom':
         from aslm.model.devices.zoom.zoom_synthetic import SyntheticZoom
         return SyntheticZoom(configuration)
     else:
-        device_not_found(configuration['configuration']['Devices']['zoom'])
+        device_not_found(configuration['configuration']['hardware']['zoom'])
 
 
 def start_filter_wheel(configuration):
@@ -221,14 +221,14 @@ def start_filter_wheel(configuration):
         FilterWheel class.
     """
 
-    if configuration['configuration']['Devices']['filter_wheel'] == 'SutterFilterWheel':
+    if configuration['configuration']['hardware']['filter_wheel'] == 'SutterFilterWheel':
         from aslm.model.devices.filter_wheel.filter_wheel_sutter import SutterFilterWheel
         return auto_redial(SutterFilterWheel, (configuration,), exception=UserWarning)
-    elif configuration['configuration']['Devices']['filter_wheel'] == 'SyntheticFilterWheel':
+    elif configuration['configuration']['hardware']['filter_wheel'] == 'SyntheticFilterWheel':
         from aslm.model.devices.filter_wheel.filter_wheel_synthetic import SyntheticFilterWheel
         return SyntheticFilterWheel(configuration)
     else:
-        device_not_found(configuration['configuration']['Devices']['filter_wheel'])
+        device_not_found(configuration['configuration']['hardware']['filter_wheel'])
 
 
 def start_lasers(configuration):
@@ -247,7 +247,7 @@ def start_lasers(configuration):
         Laser class.
     """
 
-    if configuration['configuration']['Devices']['lasers'] == 'Omicron':
+    if configuration['configuration']['hardware']['lasers'] == 'Omicron':
         # This is the Omicron LightHUB Ultra Launch - consists of both Obis and
         # Luxx lasers.
         from aslm.model.devices.APIs.coherent.ObisLaser import ObisLaser as obis
@@ -283,7 +283,7 @@ def start_lasers(configuration):
                 print("Laser index not recognized")
                 sys.exit()
 
-    elif configuration['configuration']['Devices']['lasers'] == 'SyntheticLasers':
+    elif configuration['configuration']['hardware']['lasers'] == 'SyntheticLasers':
         from aslm.model.devices.lasers.SyntheticLaser import SyntheticLaser
         laser = SyntheticLaser(configuration)
 
@@ -308,14 +308,14 @@ def start_daq(configuration):
         DAQ class.
     """
 
-    if configuration['configuration']['Devices']['daq'] == 'NI':
+    if configuration['configuration']['hardware']['daq'] == 'NI':
         from aslm.model.devices.daq.daq_ni import NIDAQ
         return NIDAQ(configuration)
-    elif configuration['configuration']['Devices']['daq'] == 'SyntheticDAQ':
+    elif configuration['configuration']['hardware']['daq'] == 'SyntheticDAQ':
         from aslm.model.devices.daq.daq_synthetic import SyntheticDAQ
         return SyntheticDAQ(configuration)
     else:
-        device_not_found(configuration['configuration']['Devices']['daq'])
+        device_not_found(configuration['configuration']['hardware']['daq'])
 
 
 def start_shutters(configuration):
@@ -336,14 +336,14 @@ def start_shutters(configuration):
         Shutter class.
     """
 
-    if configuration['configuration']['Devices']['shutters'] == 'ThorlabsShutter' and configuration['configuration']['Devices']['daq'] == 'NI':
+    if configuration['configuration']['hardware']['shutters'] == 'ThorlabsShutter' and configuration['configuration']['hardware']['daq'] == 'NI':
         from aslm.model.devices.shutter.laser_shutter_ttl import ShutterTTL
         return ShutterTTL(configuration)
-    elif configuration['configuration']['Devices']['shutters'] == 'SyntheticShutter':
+    elif configuration['configuration']['hardware']['shutters'] == 'SyntheticShutter':
         from aslm.model.devices.shutter.laser_shutter_synthetic import SyntheticShutter
         return SyntheticShutter(configuration)
     else:
-        device_not_found(configuration['configuration']['Devices']['shutters'])
+        device_not_found(configuration['configuration']['hardware']['shutters'])
 
 
 def start_laser_triggers(configuration):
@@ -364,14 +364,14 @@ def start_laser_triggers(configuration):
         Trigger class.
     """
 
-    if configuration['configuration']['Devices']['daq'] == 'NI':
+    if configuration['configuration']['hardware']['daq'] == 'NI':
         from aslm.model.devices.lasers.laser_trigger_ni import LaserTriggers
         return LaserTriggers(configuration)
-    elif configuration['configuration']['Devices']['daq'] == 'SyntheticDAQ':
+    elif configuration['configuration']['hardware']['daq'] == 'SyntheticDAQ':
         from aslm.model.devices.lasers.laser_trigger_synthetic import SyntheticLaserTriggers
         return SyntheticLaserTriggers(configuration)
     else:
-        device_not_found(configuration['configuration']['Devices']['daq'])
+        device_not_found(configuration['configuration']['hardware']['daq'])
 
 def device_not_found(args):
 

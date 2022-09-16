@@ -40,7 +40,7 @@ import multiprocessing as mp
 import numpy as np
 
 # Local Imports
-import aslm.model.aslm_device_startup_functions as startup_functions
+import aslm.model.device_startup_functions as startup_functions
 from aslm.model.aslm_model_config import Configurator
 from aslm.model.concurrency.concurrency_tools import ResultThread, SharedNDArray
 from aslm.model.model_features.autofocus import Autofocus
@@ -111,19 +111,19 @@ class Model:
         # self.configuration = Configurator(configuration_path)
         self.configuration = configuration_path
 
-
+        self.microscope = self.configuration['experiment']['MicroscopeState']['resolution_mode'] 
 
         # Initialize all Hardware
         if args.synthetic_hardware:
             # If command line entry provided, overwrites the model parameters with synthetic hardware.
             self.configuration['configuration']['hardware']['daq'] = 'SyntheticDAQ'
             self.configuration['configuration']['hardware']['camera'] = 'SyntheticCamera'
-            #self.configuration['configuration']['hardware']['etl'] = 'SyntheticETL' # TODO This does not have a hardware reference as its part of DAQ
+            self.configuration['configuration']['hardware']['etl'] = 'SyntheticETL'
             self.configuration['configuration']['hardware']['filter_wheel'] = 'SyntheticFilterWheel'
             self.configuration['configuration']['hardware']['stage'] = 'SyntheticStage'
             self.configuration['configuration']['hardware']['zoom'] = 'SyntheticZoom'
-            #self.configuration['configuration']['hardware']['shutters'] = 'SyntheticShutter' # part of DAQ how should we handle?
-            #self.configuration['configuration']['hardware']['lasers'] = 'SyntheticLasers' # Also not sure since this one can be put into multiple hardware categories
+            self.configuration['configuration']['hardware']['shutters'] = 'SyntheticShutter'
+            self.configuration['configuration']['hardware']['lasers'] = 'SyntheticLasers'
 
         # Move device initialization steps to multiple threads
         """
@@ -156,14 +156,12 @@ class Model:
         # Optionally start up multiple cameras
         # TODO: In the event two cameras are on, but we've only requested one, make sure it's the one with the
         #       serial number we want.
-
-        # Also the below value of number of cameras is no longer in config TODO 
-        for i in range(int(len(self.configuration['configuration']['hardware']['camera']))):
+        n_cameras = len(self.configuration['configuration']['hardware']['camera'])
+        for i in range(n_cameras):
             threads_dict[f'camera{i}'] = ResultThread(target=startup_functions.start_camera,
-                                                      args=(self.configuration,
-                                                            i)).start()
+                                                      args=(self.configuration, i)).start()
             time.sleep(1.0)
-
+        
         for k in threads_dict:
             setattr(self, k, threads_dict[k].get_result())
 
@@ -194,8 +192,8 @@ class Model:
         self.camera_line_interval = 9.7e-6  # s
         self.start_time = None
         self.data_buffer = None
-        self.img_width = int(self.configuration['configuration']['microscopes']['camera']['x_pixels'])
-        self.img_height = int(self.configuration['configuration']['microscopes']['camera']['y_pixels'])
+        self.img_width = int(self.configuration['configuration']['microscopes'][self.microscope]['camera']['x_pixels'])
+        self.img_height = int(self.configuration['configuration']['microscopes'][self.microscope]['camera']['y_pixels'])
         self.data_buffer_positions = None
 
         # Autofocusing
@@ -236,7 +234,7 @@ class Model:
         # self.pre_trigger_time = 0
 
         # data buffer for image frames
-        self.number_of_frames = self.configuration['configuration']['SharedNDArray']['number_of_frames'] # TODO this value is no longer in config
+        self.number_of_frames = 100
         self.update_data_buffer(self.img_width, self.img_height)
 
 
@@ -272,11 +270,11 @@ class Model:
         #       serial number we want.
         # If we have multiple cameras, loop through them all and check their serial numbers
 
-        n_cams = int(self.configuration['configuration']['CameraParameters']['number_of_cameras']) # TODO same as above
+        n_cams = len(self.configuration['configuration']['hardware']['camera'])
         if n_cams > 1:
             # Grab the camera with the serial number that matches for the current resolution mode, as specified in
             # configuration.yaml
-            sn = self.configuration['configuration']['microscope']['camera']['hardware']['serial_number']
+            sn = self.configuration['configuration']['microscope'][self.microscope]['camera']['hardware']['serial_number']
             for i in range(n_cams):
                 curr_cam = getattr(self, f'camera{i}')
                 if str(sn) == str(curr_cam.serial_number):
@@ -963,19 +961,10 @@ class Model:
         pos_dict = self.get_stage_position()
         for axis, val in pos_dict.items():
             ax = axis.split('_')[0]
-            l_offset = self.configuration['configuration']['stage'][f"{ax}_offset"]
-            r_offset = self.configuration['configuration']['stage'][f"{ax}_offset"]
-            # l_offset = self.configuration['configuration']['StageParameters'].get(f"{ax}_l_offset", 0)
-            # r_offset = self.configuration['configuration']['StageParameters'].get(f"{ax}_r_offset", 0)
-            if mode == 'high':
-                new_pos = val + r_offset
-                if not initial:
-                    new_pos -= l_offset
-            else:
-                # we are moving to low res mode
-                new_pos = val + l_offset
-                if not initial:
-                    new_pos -= r_offset
+            offset = self.configuration['configuration']['microscopes'][self.microscope]['stage'][f"{ax}_offset"]
+            new_pos = val + offset
+            if not initial:
+                new_pos -= offset
 
             if hasattr(self, 'stages_r') and ax == 'f':
                 # Do not move the focus if we're using an entirely different stage

@@ -54,8 +54,10 @@ class PIStage(StageBase):
     def __init__(self, configuration):
         super().__init__(configuration)
 
-        pi_stages = self.configuration['configuration']['StageParameters']['stages']
-        pi_refmodes = self.configuration['configuration']['StageParameters']['refmode']
+        self.stage_hardware = self.configuration['configuration']['hardware']['stage'][self.configuration['configuration']['hardware']['stage']['type'] == 'PI']
+
+        pi_stages = self.stage_hardware['stages']
+        pi_refmodes = self.stage_hardware['refmode']
         pi_stages = pi_stages.split()
         pi_refmodes = pi_refmodes.split()
 
@@ -63,10 +65,10 @@ class PIStage(StageBase):
         self.pi_axes = [1, 2, 3, 5, 4]  # x, y, z, f, theta
 
         self.pitools = pitools
-        self.controllername = self.configuration['configuration']['StageParameters']['controllername']
+        self.controllername = self.stage_hardware['controllername']
         self.pi_stages = pi_stages
         self.refmode = pi_refmodes
-        self.serialnum = str(self.configuration['configuration']['StageParameters']['serialnum'])
+        self.serialnum = str(self.stage_hardware['serial_number'])
         self.pidevice = GCSDevice(self.controllername)
         self.pidevice.ConnectUSB(serialnum=self.serialnum)
         self.pitools.startup(self.pidevice, stages=list(self.pi_stages), refmodes=list(self.refmode))
@@ -210,14 +212,14 @@ class PIStage(StageBase):
                 print('Unzeroing of axis: ', axis, 'failed')
 
     def load_sample(self):
-        y_abs = self.configuration['configuration']['StageParameters']['y_load_position'] / 1000
+        y_abs = self.stage['y_load_position'] / 1000
         try:
             self.pidevice.MOV({2: y_abs})
         except GCSError as e:
             logger.exception(GCSError(e))
 
     def unload_sample(self):
-        y_abs = self.configuration['configuration']['StageParameters']['y_unload_position'] / 1000
+        y_abs = self.stage['y_unload_position'] / 1000
         try:
             self.pidevice.MOV({2: y_abs})
         except GCSError as e:

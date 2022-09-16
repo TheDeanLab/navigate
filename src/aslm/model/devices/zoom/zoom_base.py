@@ -57,5 +57,6 @@ class ZoomBase:
 
     def __init__(self, configuration):
         self.configuration = configuration
-        self.zoomdict = self.configuration['configuration']['ZoomParameters']['zoom_position']
+        self.microscope = configuration['experiment']['MicroscopeState']['resolution_mode']
+        self.zoomdict = self.configuration['configuration']['microscopes'][self.microscope]['zoom']['position']
         self.zoomvalue = None

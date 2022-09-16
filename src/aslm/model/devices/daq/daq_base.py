@@ -60,36 +60,38 @@ class DAQBase:
         self.configuration = configuration
         self.experiment = self.configuration['experiment']
         self.etl_constants = self.configuration['etl_constants']
+        self.microscope = self.experiment['MicroscopeState']['resolution_mode']
+        self.daq_parameters = self.configuration['microscopes'][self.microscope]['daq']
 
         # Initialize Variables
-        self.sample_rate = self.configuration['configuration']['DAQParameters']['sample_rate']
-        self.sweep_time = self.configuration['configuration']['DAQParameters']['sweep_time']
+        self.sample_rate = self.daq_parameters['sample_rate']
+        self.sweep_time = self.daq_parameters['sweep_time']
         self.samples = int(self.sample_rate * self.sweep_time)
 
         # New DAQ Attempt
-        self.etl_delay = self.configuration['configuration']['RemoteFocusParameters']['remote_focus_l_delay_percent']
-        self.etl_ramp_rising = self.configuration['configuration']['RemoteFocusParameters']['remote_focus_l_ramp_rising_percent']
-        self.etl_ramp_falling = self.configuration['configuration']['RemoteFocusParameters']['remote_focus_l_ramp_falling_percent']
+        self.etl_delay = self.configuration['microscopes']['low']['remote_focus_device']['delay_percent']
+        self.etl_ramp_rising = self.configuration['microscopes']['low']['remote_focus_device']['ramp_rising_percent']
+        self.etl_ramp_falling = self.configuration['microscopes']['low']['remote_focus_device']['ramp_falling_percent']
 
         # ETL Parameters
         self.etl_l_waveform = None
-        self.etl_l_delay = self.configuration['configuration']['RemoteFocusParameters']['remote_focus_l_delay_percent']
-        self.etl_l_ramp_rising = self.configuration['configuration']['RemoteFocusParameters']['remote_focus_l_ramp_rising_percent']
-        self.etl_l_ramp_falling = self.configuration['configuration']['RemoteFocusParameters']['remote_focus_l_ramp_falling_percent']
-        self.etl_l_amplitude = self.configuration['configuration']['RemoteFocusParameters']['remote_focus_l_amplitude']
-        self.etl_l_offset = self.configuration['configuration']['RemoteFocusParameters']['remote_focus_l_offset']
-        self.etl_l_min_ao = self.configuration['configuration']['RemoteFocusParameters']['remote_focus_l_min_ao']
-        self.etl_l_max_ao = self.configuration['configuration']['RemoteFocusParameters']['remote_focus_l_max_ao']
+        self.etl_l_delay = self.configuration['microscopes']['low']['remote_focus_device']['delay_percent']
+        self.etl_l_ramp_rising = self.configuration['microscopes']['low']['remote_focus_device']['ramp_rising_percent']
+        self.etl_l_ramp_falling = self.configuration['microscopes']['low']['remote_focus_device']['ramp_falling_percent']
+        self.etl_l_amplitude = self.configuration['microscopes']['low']['remote_focus_device']['lamplitude']
+        self.etl_l_offset = self.configuration['microscopes']['low']['remote_focus_device']['offset']
+        self.etl_l_min_ao = self.configuration['microscopes']['low']['remote_focus_device']['hardware']['min']
+        self.etl_l_max_ao = self.configuration['microscopes']['low']['remote_focus_device']['hardware']['max']
 
         # Remote Focus Parameters
         self.etl_r_waveform = None
-        self.etl_r_delay = self.configuration['configuration']['RemoteFocusParameters']['remote_focus_r_delay_percent']
-        self.etl_r_ramp_rising = self.configuration['configuration']['RemoteFocusParameters']['remote_focus_r_ramp_rising_percent']
-        self.etl_r_ramp_falling = self.configuration['configuration']['RemoteFocusParameters']['remote_focus_r_ramp_falling_percent']
-        self.etl_r_amplitude = self.configuration['configuration']['RemoteFocusParameters']['remote_focus_r_amplitude']
-        self.etl_r_offset = self.configuration['configuration']['RemoteFocusParameters']['remote_focus_r_offset']
-        self.etl_r_min_ao = self.configuration['configuration']['RemoteFocusParameters']['remote_focus_r_min_ao']
-        self.etl_r_max_ao = self.configuration['configuration']['RemoteFocusParameters']['remote_focus_r_max_ao']
+        self.etl_r_delay = self.configuration['microscopes']['high']['remote_focus_device']['delay_percent']
+        self.etl_r_ramp_rising = self.configuration['microscopes']['high']['remote_focus_device']['ramp_rising_percent']
+        self.etl_r_ramp_falling = self.configuration['microscopes']['high']['remote_focus_device']['ramp_falling_percent']
+        self.etl_r_amplitude = self.configuration['microscopes']['high']['remote_focus_device']['amplitude']
+        self.etl_r_offset = self.configuration['microscopes']['high']['remote_focus_device']['offset']
+        self.etl_r_min_ao = self.configuration['microscopes']['high']['remote_focus_device']['min_ao']
+        self.etl_r_max_ao = self.configuration['microscopes']['high']['remote_focus_device']['max_ao']
 
         # ETL history parameters
         self.prev_etl_r_amplitude = self.etl_r_amplitude
@@ -102,23 +104,23 @@ class DAQBase:
 
         # Left Galvo Parameters
         self.galvo_l_waveform = None
-        self.galvo_l_frequency = self.configuration['configuration']['GalvoParameters']['galvo_l_frequency']
-        self.galvo_l_amplitude = self.configuration['configuration']['GalvoParameters']['galvo_l_amplitude']
-        self.galvo_l_offset = self.configuration['configuration']['GalvoParameters']['galvo_l_offset']
-        self.galvo_l_duty_cycle = self.configuration['configuration']['GalvoParameters']['galvo_l_duty_cycle']
-        self.galvo_l_phase = self.configuration['configuration']['GalvoParameters']['galvo_l_phase']
-        self.galvo_l_min_ao = self.configuration['configuration']['GalvoParameters']['galvo_l_min_ao']
-        self.galvo_l_max_ao = self.configuration['configuration']['GalvoParameters']['galvo_l_max_ao']
+        self.galvo_l_frequency = self.configuration['microscopes']['low']['galvo']['frequency']
+        self.galvo_l_amplitude = self.configuration['microscopes']['low']['galvo']['amplitude']
+        self.galvo_l_offset = self.configuration['microscopes']['low']['galvo']['offset']
+        self.galvo_l_duty_cycle = self.configuration['microscopes']['low']['galvo']['duty_cycle']
+        self.galvo_l_phase = self.configuration['microscopes']['low']['galvo']['phase']
+        self.galvo_l_min_ao = self.configuration['microscopes']['low']['galvo']['hardware']['min']
+        self.galvo_l_max_ao = self.configuration['microscopes']['low']['galvo']['hardware']['max']
 
         # Right Galvo Parameters
         self.galvo_r_waveform = None
         self.galvo_r_frequency = None
-        self.galvo_r_amplitude = self.configuration['configuration']['GalvoParameters'].get('galvo_r_amplitude', 0)
-        self.galvo_r_offset = self.configuration['configuration']['GalvoParameters'].get('galvo_r_offset', 0)
+        self.galvo_r_amplitude = self.configuration['microscopes']['high']['galvo'].get('amplitude', 0)
+        self.galvo_r_offset = self.configuration['microscopes']['high']['galvo'].get('offset', 0)
         self.galvo_r_duty_cycle = None
         self.galvo_r_phase = None
-        self.galvo_r_max_ao = self.configuration['configuration']['GalvoParameters']['galvo_r_max_ao']
-        self.galvo_r_min_ao = self.configuration['configuration']['GalvoParameters']['galvo_r_min_ao']
+        self.galvo_r_max_ao = self.configuration['microscopes']['low']['galvo']['hardware']['max_ao']
+        self.galvo_r_min_ao = self.configuration['microscopes']['low']['galvo']['hardware']['min_ao']
 
         # Camera Parameters
         self.camera_delay_percent = self.configuration['configuration']['CameraParameters']['delay_percent']

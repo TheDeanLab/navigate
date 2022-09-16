@@ -70,11 +70,13 @@ class FilterWheelBase:
         Checks to see if filter name exists in the filter dictionary.
     """
 
-    def __init__(self, model):
-        self.comport = model['configuration']['FilterWheelParameters']['filter_wheel_port']
-        self.baudrate = model['configuration']['FilterWheelParameters']['baudrate']
-        self.filter_dictionary = model['configuration']['FilterWheelParameters']['available_filters']
-        self.number_of_filter_wheels = model['configuration']['FilterWheelParameters']['number_of_filter_wheels']
+    def __init__(self, configuration):
+        
+        self.microscope = configuration['experiment']['MicroscopeState']['resolution_mode'] 
+        self.comport = configuration['configuration']['hardware']['filter_wheel']['port']
+        self.baudrate = configuration['configuration']['hardware']['filter_wheel']['baudrate']
+        self.filter_dictionary = configuration['configuration']['microscopes'][self.microscope]['filter_wheel']['available_filters']
+        self.number_of_filter_wheels = configuration['configuration']['hardware']['filter_wheel']['number_of_wheels']
         self.wheel_position = 0
         self.wait_until_done_delay = 0.03
         self.wait_until_done = True

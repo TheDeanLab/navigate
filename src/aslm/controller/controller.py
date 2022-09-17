@@ -31,7 +31,7 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 
 #  Standard Library Imports
-from multiprocessing.dummy import Manager
+from multiprocessing import Manager
 import tkinter
 import multiprocessing as mp
 import threading
@@ -53,7 +53,7 @@ from aslm.controller.sub_controllers.stage_gui_controller import Stage_GUI_Contr
 from aslm.controller.sub_controllers.acquire_bar_controller import AcquireBarController
 from aslm.controller.sub_controllers.channels_tab_controller import Channels_Tab_Controller
 from aslm.controller.sub_controllers.camera_view_controller import Camera_View_Controller
-from aslm.controller.sub_controllers.camera_setting_controller import Camera_Setting_Controller
+from aslm.controller.sub_controllers.camera_setting_controller import CameraSettingController
 from aslm.controller.configuration_controller import ConfigurationController
 from aslm.controller.sub_controllers.waveform_tab_controller import Waveform_Tab_Controller
 from aslm.controller.sub_controllers.etl_popup_controller import Etl_Popup_Controller
@@ -161,9 +161,7 @@ class Controller:
         self.camera_view_controller = Camera_View_Controller(self.view.camera_waveform.camera_tab,
                                                              self)
 
-        self.camera_setting_controller = Camera_Setting_Controller(self.view.settings.camera_settings_tab,
-                                                                   self,
-                                                                   self.configuration_controller)
+        self.camera_setting_controller = CameraSettingController(self.view.settings.camera_settings_tab, self)
 
         # Stage Controller
         self.stage_gui_controller = Stage_GUI_Controller(self.view.settings.stage_control_tab,  
@@ -423,7 +421,7 @@ class Controller:
         self.acquire_bar_controller.populate_experiment_values()
         self.stage_gui_controller.set_experiment_values(self.configuration['experiment']['StageParameters'])
         self.channels_tab_controller.set_experiment_values(self.configuration['experiment']['MicroscopeState'])
-        self.camera_setting_controller.set_experiment_values(self.configuration['experiment'])
+        self.camera_setting_controller.populate_experiment_values()
 
     def update_experiment_setting(self):
         r"""Update model.experiment according to values in the GUI

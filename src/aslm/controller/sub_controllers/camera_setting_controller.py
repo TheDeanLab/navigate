@@ -38,12 +38,11 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class Camera_Setting_Controller(GUI_Controller):
+class CameraSettingController(GUI_Controller):
     def __init__(
             self,
             view,
-            parent_controller=None,
-            configuration_controller=None):
+            parent_controller=None):
         super().__init__(view, parent_controller)
 
         # default values
@@ -65,7 +64,7 @@ class Camera_Setting_Controller(GUI_Controller):
         self.trigger_source = None
         self.trigger_active = None
         self.readout_speed = None
-        self.initialize(configuration_controller)
+        self.initialize()
 
         # Event binding
         self.pixel_event_id = None
@@ -77,7 +76,7 @@ class Camera_Setting_Controller(GUI_Controller):
         for btn_name in self.roi_btns:
             self.roi_btns[btn_name].config(command=self.update_roi(btn_name))
 
-    def initialize(self, config):
+    def initialize(self):
         r"""Sets widgets based on data given from main controller/config.
 
         Parameters
@@ -87,19 +86,20 @@ class Camera_Setting_Controller(GUI_Controller):
         """
 
         # Get Default Configuration Values
-        camera_setting_dict = config.camera_setting_dict
-        if camera_setting_dict is None:
+        camera_config_dict = self.parent_controller.configuration_controller.camera_config_dict
+        if camera_config_dict is None:
             return
-        self.default_pixel_size = camera_setting_dict['pixel_size_in_microns']
-        self.default_width, self.default_height = config.camera_pixels
-        self.trigger_source = camera_setting_dict['trigger_source']
-        self.trigger_active = camera_setting_dict['trigger_active']
-        self.readout_speed = camera_setting_dict['readout_speed']
+        
+        self.default_pixel_size = camera_config_dict['pixel_size_in_microns']
+        self.default_width, self.default_height = self.parent_controller.configuration_controller.camera_pixels
+        self.trigger_source = camera_config_dict['trigger_source']
+        self.trigger_active = camera_config_dict['trigger_active']
+        self.readout_speed = camera_config_dict['readout_speed']
         
         # Camera Mode
         self.mode_widgets['Sensor'].widget['values'] = ['Normal', 'Light-Sheet']
         self.mode_widgets['Sensor'].widget['state'] = 'readonly'
-        self.mode_widgets['Sensor'].widget.set(camera_setting_dict['sensor_mode'])
+        self.mode_widgets['Sensor'].widget.set(camera_config_dict['sensor_mode'])
         self.mode_widgets['Sensor'].widget.selection_clear()
 
         # Readout Mode
@@ -115,9 +115,9 @@ class Camera_Setting_Controller(GUI_Controller):
         self.mode_widgets['Pixels'].widget.config(increment=1) # step value
 
         # framerate_widgets
-        self.framerate_widgets['exposure_time'].widget.min = camera_setting_dict['exposure_time_range']['min']
-        self.framerate_widgets['exposure_time'].widget.max = camera_setting_dict['exposure_time_range']['max']
-        self.framerate_widgets['exposure_time'].set(camera_setting_dict['exposure_time'])
+        self.framerate_widgets['exposure_time'].widget.min = camera_config_dict['exposure_time_range']['min']
+        self.framerate_widgets['exposure_time'].widget.max = camera_config_dict['exposure_time_range']['max']
+        self.framerate_widgets['exposure_time'].set(camera_config_dict['exposure_time'])
         self.framerate_widgets['exposure_time'].widget['state'] = 'disabled'
         self.framerate_widgets['readout_time'].widget['state'] = 'disabled'
         self.framerate_widgets['max_framerate'].widget['state'] = 'disabled'
@@ -147,8 +147,7 @@ class Camera_Setting_Controller(GUI_Controller):
         self.roi_widgets['FOV_X'].widget['state'] = 'disabled'
         self.roi_widgets['FOV_Y'].widget['state'] = 'disabled'
 
-    def set_experiment_values(self,
-                              experiment):
+    def populate_experiment_values(self):
         r"""Sets values in View according to the experiment yaml file.
 
         Experiment yaml filed passed by controller.
@@ -161,32 +160,32 @@ class Camera_Setting_Controller(GUI_Controller):
         self.in_initialization = True
 
         # Retrieve settings.
-        setting_dict = experiment['CameraParameters']
-        microscope_state = experiment['MicroscopeState']
-        self.resolution_value = 'high' if microscope_state['resolution_mode'] == 'high' else microscope_state['zoom']
+        self.camera_setting_dict = self.parent_controller.configuration['experiment']['CameraParameters']
+        self.microscope_state_dict = self.parent_controller.configuration['experiment']['MicroscopeState']
+        self.resolution_value = 'high' if self.microscope_state_dict['resolution_mode'] == 'high' else self.microscope_state_dict['zoom']
 
         # Readout Settings
-        self.mode_widgets['Sensor'].set(setting_dict['sensor_mode'])
-        if setting_dict['sensor_mode'] == 'Normal':
+        self.mode_widgets['Sensor'].set(self.camera_setting_dict['sensor_mode'])
+        if self.camera_setting_dict['sensor_mode'] == 'Normal':
             self.mode_widgets['Readout'].set('')
             self.mode_widgets['Pixels'].set('')
         else:
-            self.mode_widgets['Readout'].set(setting_dict['readout_direction'])
-            self.mode_widgets['Pixels'].set(setting_dict['number_of_pixels'])
+            self.mode_widgets['Readout'].set(self.camera_setting_dict['readout_direction'])
+            self.mode_widgets['Pixels'].set(self.camera_setting_dict['number_of_pixels'])
 
         # ROI Settings
-        self.roi_widgets['Width'].set(setting_dict['x_pixels'])
-        self.roi_widgets['Height'].set(setting_dict['y_pixels'])
+        self.roi_widgets['Width'].set(self.camera_setting_dict['x_pixels'])
+        self.roi_widgets['Height'].set(self.camera_setting_dict['y_pixels'])
 
         # Binning settins
-        self.roi_widgets['Binning'].set(setting_dict['binning'])
+        self.roi_widgets['Binning'].set(self.camera_setting_dict['binning'])
 
         # Camera Framerate Info - 'exposure_time', 'readout_time', 'framerate', 'frames_to_average'
         # Exposure time is currently for just the first active channel
-        channels = microscope_state['channels']
+        channels = self.microscope_state_dict['channels']
         exposure_time = channels[list(channels.keys())[0]]['camera_exposure_time']
         self.framerate_widgets['exposure_time'].set(exposure_time)
-        self.framerate_widgets['frames_to_average'].set(setting_dict['frames_to_average'])
+        self.framerate_widgets['frames_to_average'].set(self.camera_setting_dict['frames_to_average'])
 
         # Physical Dimensions
         self.calculate_physical_dimensions(self.resolution_value)
@@ -196,27 +195,27 @@ class Camera_Setting_Controller(GUI_Controller):
         # after initialization
         self.in_initialization = False
 
-    def update_experiment_values(self, setting_dict):
+    def update_experiment_values(self):
         """
         Update the dictionary so that it can be combined with all of the other
         sub-controllers, and then sent to the model.
         """
         # Camera Operation Mode
-        setting_dict['sensor_mode'] = self.mode_widgets['Sensor'].get()
-        if setting_dict['sensor_mode'] == 'Light-Sheet':
-            setting_dict['readout_direction'] = self.mode_widgets['Readout'].get()
-            setting_dict['number_of_pixels'] = self.mode_widgets['Pixels'].get()
+        self.camera_setting_dict['sensor_mode'] = self.mode_widgets['Sensor'].get()
+        if self.camera_setting_dict['sensor_mode'] == 'Light-Sheet':
+            self.camera_setting_dict['readout_direction'] = self.mode_widgets['Readout'].get()
+            self.camera_setting_dict['number_of_pixels'] = self.mode_widgets['Pixels'].get()
 
         # Camera Binning
-        setting_dict['binning'] = self.roi_widgets['Binning'].get()
+        self.camera_setting_dict['binning'] = self.roi_widgets['Binning'].get()
 
         # Camera FOV Size.
-        setting_dict['x_pixels'] = self.roi_widgets['Width'].get()
-        setting_dict['y_pixels'] = self.roi_widgets['Height'].get()
+        self.camera_setting_dict['x_pixels'] = self.roi_widgets['Width'].get()
+        self.camera_setting_dict['y_pixels'] = self.roi_widgets['Height'].get()
 
-        setting_dict['number_of_cameras'] = 1
-        setting_dict['pixel_size'] = self.default_pixel_size
-        setting_dict['frames_to_average'] = self.framerate_widgets['frames_to_average'].get()
+        self.camera_setting_dict['number_of_cameras'] = 1
+        self.camera_setting_dict['pixel_size'] = self.default_pixel_size
+        self.camera_setting_dict['frames_to_average'] = self.framerate_widgets['frames_to_average'].get()
 
         return True
 

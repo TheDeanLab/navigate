@@ -57,15 +57,12 @@ class ConfigurationController:
         -------
         result: bool
         """
-        if self.microscope_name == microscope_name:
+        if self.microscope_name == microscope_name or microscope_name not in self.configuration['configuration']['microscopes']:
             return False
 
-        for i in range(len(self.configuration['configuration']['microscopes'])):
-            if self.configuration['configuration']['microscopes'][i]['name'] == microscope_name:
-                self.microscope_config = self.configuration['configuration']['microscopes'][i]
-                self.microscope_name = microscope_name
-                return True
-        return False
+        self.microscope_config = self.configuration['configuration']['microscopes'][microscope_name]
+        self.microscope_name = microscope_name
+        return True
 
     def get_microscope_configuration_dict(self):
         r"""Return microscope configuration dict
@@ -109,8 +106,8 @@ class ConfigurationController:
         return [str(laser['wavelength'])+'nm' for laser in self.microscope_config['lasers']]
 
     @property
-    def camera_setting_dict(self):
-        r"""Get camera setting dict
+    def camera_config_dict(self):
+        r"""Get camera configuration dict
 
         Returns
         -------

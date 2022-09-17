@@ -49,15 +49,8 @@ from aslm.view.menus.ilastik_setting_popup import ilastik_setting_popup
 
 from aslm.config.config import load_configs, update_config_dict
 # Local Sub-Controller Imports
-from aslm.controller.sub_controllers.stage_gui_controller import Stage_GUI_Controller
-from aslm.controller.sub_controllers.acquire_bar_controller import AcquireBarController
-from aslm.controller.sub_controllers.channels_tab_controller import Channels_Tab_Controller
-from aslm.controller.sub_controllers.camera_view_controller import Camera_View_Controller
-from aslm.controller.sub_controllers.camera_setting_controller import CameraSettingController
 from aslm.controller.configuration_controller import ConfigurationController
-from aslm.controller.sub_controllers.waveform_tab_controller import Waveform_Tab_Controller
-from aslm.controller.sub_controllers.etl_popup_controller import Etl_Popup_Controller
-from aslm.controller.sub_controllers.autofocus_popup_controller import AutofocusPopupController
+from aslm.controller.sub_controllers import *
 import aslm.controller.aslm_controller_functions as controller_functions
 from aslm.controller.thread_pool import SynchronizedThreadPool
 
@@ -120,7 +113,6 @@ class Controller:
                                         use_gpu,
                                         args,
                                         self.configuration,
-                                        configuration_path=configuration_path,
                                         experiment_path=experiment_path,
                                         etl_constants_path=etl_constants_path,
                                         rest_api_path=rest_api_path,

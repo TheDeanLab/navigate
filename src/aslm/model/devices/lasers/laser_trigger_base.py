@@ -67,7 +67,7 @@ class LaserTriggerBase:
         self.laser_max_ao = self.lasers[0]['power']['hardware']['max']
 
         # Digital Ports
-        self.switching_port = self.configuration['configuration']['DAQParameters']['laser_port_switcher']
+        self.switching_port = self.configuration['configuration']['microscopes']['low']['daq']['laser_port_switcher']
         self.laser_0_do_port = self.lasers[0]['onoff']['hardware']['channel']
         self.laser_1_do_port = self.lasers[1]['onoff']['hardware']['channel']
         self.laser_2_do_port = self.lasers[2]['onoff']['hardware']['channel']

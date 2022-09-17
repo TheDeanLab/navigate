@@ -128,10 +128,15 @@ def start_camera(configuration,
         Camera class.
     """
 
-    if configuration['configuration']['hardware']['camera'] == 'HamamatsuOrca':
+    try:
+        cam_type = configuration['configuration']['hardware']['camera'][camera_id]['type']
+    except:
+        cam_type = configuration['configuration']['hardware']['camera']['type']
+
+    if cam_type == 'HamamatsuOrca':
         from aslm.model.devices.camera.camera_hamamatsu import HamamatsuOrca
         return auto_redial(HamamatsuOrca, (camera_id, configuration), exception=Exception)
-    elif configuration['configuration']['hardware']['camera'] == 'SyntheticCamera':
+    elif cam_type == 'SyntheticCamera':
         from aslm.model.devices.camera.camera_synthetic import SyntheticCamera
         return SyntheticCamera(camera_id, configuration)
     else:
@@ -151,16 +156,33 @@ def start_stages(configuration):
     Stage : class
         Stage class.
     """
-    if configuration['configuration']['hardware']['stage'] == 'PI' and platform.system() == 'Windows':
-        from aslm.model.devices.stages.stage_pi import PIStage
-        from pipython.pidevice.gcserror import GCSError
-        return auto_redial(PIStage, (configuration,), exception=GCSError)
-    elif configuration['configuration']['hardware']['stage'] == 'SyntheticStage':
-        from aslm.model.devices.stages.stage_synthetic import SyntheticStage
-        return SyntheticStage(configuration)
-    else:
-        device_not_found(configuration['configuration']['hardware']['stage'])
 
+    stages = configuration['configuration']['hardware']['stage']
+
+    if type(stages) == list:
+        for i in range(len(stages)):
+            stage_type = configuration['configuration']['hardware']['stage'][i]['type']
+
+            if stage_type == 'PI' and platform.system() == 'Windows':
+                from aslm.model.devices.stages.stage_pi import PIStage
+                from pipython.pidevice.gcserror import GCSError
+                return auto_redial(PIStage, (configuration,), exception=GCSError)
+            elif stage_type == 'SyntheticStage':
+                from aslm.model.devices.stages.stage_synthetic import SyntheticStage
+                return SyntheticStage(configuration)
+            else:
+                device_not_found(stage_type)
+    else:
+        stage_type = configuration['configuration']['hardware']['stage']['type']
+        if stage_type == 'PI' and platform.system() == 'Windows':
+            from aslm.model.devices.stages.stage_pi import PIStage
+            from pipython.pidevice.gcserror import GCSError
+            return auto_redial(PIStage, (configuration,), exception=GCSError)
+        elif stage_type == 'SyntheticStage':
+            from aslm.model.devices.stages.stage_synthetic import SyntheticStage
+            return SyntheticStage(configuration)
+        else:
+            device_not_found(stage_type)
 
 def start_stages_r(configuration):
     r"""Initializes a focusing stage class in a dedicated thread.
@@ -175,12 +197,12 @@ def start_stages_r(configuration):
     Stage : class
         Stage class.
     """
-    if configuration['configuration']['hardware']['stage_r'] == 'Thorlabs' and platform.system() == 'Windows':
+    if configuration['configuration']['hardware']['stage'][1]['type'] == 'Thorlabs' and platform.system() == 'Windows':
         from aslm.model.devices.stages.stage_tl_kcube_inertial import TLKIMStage
         from aslm.model.devices.APIs.thorlabs.kcube_inertial import TLFTDICommunicationError
         return auto_redial(TLKIMStage, (configuration,), exception=TLFTDICommunicationError)
     else:
-        device_not_found(configuration['configuration']['hardware']['stage_r'])
+        device_not_found(configuration['configuration']['hardware']['stage'][1]['type'])
 
 
 def start_zoom_servo(configuration):
@@ -197,14 +219,14 @@ def start_zoom_servo(configuration):
         Zoom class.
     """
 
-    if configuration['configuration']['hardware']['zoom'] == 'DynamixelZoom':
+    if configuration['configuration']['hardware']['zoom']['type'] == 'DynamixelZoom':
         from aslm.model.devices.zoom.zoom_dynamixel import DynamixelZoom
         return auto_redial(DynamixelZoom, (configuration,), exception=RuntimeError)
-    elif configuration['configuration']['hardware']['zoom'] == 'SyntheticZoom':
+    elif configuration['configuration']['hardware']['zoom']['type'] == 'SyntheticZoom':
         from aslm.model.devices.zoom.zoom_synthetic import SyntheticZoom
         return SyntheticZoom(configuration)
     else:
-        device_not_found(configuration['configuration']['hardware']['zoom'])
+        device_not_found(configuration['configuration']['hardware']['zoom']['type'])
 
 
 def start_filter_wheel(configuration):
@@ -221,14 +243,14 @@ def start_filter_wheel(configuration):
         FilterWheel class.
     """
 
-    if configuration['configuration']['hardware']['filter_wheel'] == 'SutterFilterWheel':
+    if configuration['configuration']['hardware']['filter_wheel']['type'] == 'SutterFilterWheel':
         from aslm.model.devices.filter_wheel.filter_wheel_sutter import SutterFilterWheel
         return auto_redial(SutterFilterWheel, (configuration,), exception=UserWarning)
-    elif configuration['configuration']['hardware']['filter_wheel'] == 'SyntheticFilterWheel':
+    elif configuration['configuration']['hardware']['filter_wheel']['type'] == 'SyntheticFilterWheel':
         from aslm.model.devices.filter_wheel.filter_wheel_synthetic import SyntheticFilterWheel
         return SyntheticFilterWheel(configuration)
     else:
-        device_not_found(configuration['configuration']['hardware']['filter_wheel'])
+        device_not_found(configuration['configuration']['hardware']['filter_wheel']['type'])
 
 
 def start_lasers(configuration):
@@ -247,43 +269,44 @@ def start_lasers(configuration):
         Laser class.
     """
 
-    if configuration['configuration']['hardware']['lasers'] == 'Omicron':
-        # This is the Omicron LightHUB Ultra Launch - consists of both Obis and
-        # Luxx lasers.
-        from aslm.model.devices.APIs.coherent.ObisLaser import ObisLaser as obis
-        from aslm.model.devices.APIs.omicron.LuxxLaser import LuxxLaser as luxx
+    lasers = configuration['configuration']['hardware']['lasers']
+    if type(lasers) == list and lasers[0]['type'] == 'Omicron':
+            # This is the Omicron LightHUB Ultra Launch - consists of both Obis and
+            # Luxx lasers.
+            from aslm.model.devices.APIs.coherent.ObisLaser import ObisLaser as obis
+            from aslm.model.devices.APIs.omicron.LuxxLaser import LuxxLaser as luxx
 
-        # Iteratively go through the configuration file and turn on each of the lasers,
-        # and make sure that they are in appropriate external control mode.
-        laser = {}
-        for laser_idx in range(
-                configuration['configuration']['LaserParameters']['number_of_lasers']):
-            if laser_idx == 0:
-                # 488 nm LuxX laser
-                print("Initializing 488 nm LuxX Laser")
-                comport = 'COM19'
-                laser[laser_idx] = luxx(comport)
-                laser[laser_idx].initialize_laser()
+            # Iteratively go through the configuration file and turn on each of the lasers,
+            # and make sure that they are in appropriate external control mode.
+            laser = {}
+            for laser_idx in range(
+                    configuration['configuration']['LaserParameters']['number_of_lasers']):
+                if laser_idx == 0:
+                    # 488 nm LuxX laser
+                    print("Initializing 488 nm LuxX Laser")
+                    comport = 'COM19'
+                    laser[laser_idx] = luxx(comport)
+                    laser[laser_idx].initialize_laser()
 
-            elif laser_idx == 1:
-                # 561 nm Obis laser
-                print("Initializing 561 nm Obis Laser")
-                comport = 'COM4'
-                laser[laser_idx] = obis(comport)
-                laser[laser_idx].set_laser_operating_mode('mixed')
+                elif laser_idx == 1:
+                    # 561 nm Obis laser
+                    print("Initializing 561 nm Obis Laser")
+                    comport = 'COM4'
+                    laser[laser_idx] = obis(comport)
+                    laser[laser_idx].set_laser_operating_mode('mixed')
 
-            elif laser_idx == 2:
-                # 642 nm LuxX laser
-                print("Initializing 642 nm LuxX Laser")
-                comport = 'COM17'
-                laser[laser_idx] = luxx(comport)
-                laser[laser_idx].initialize_laser()
+                elif laser_idx == 2:
+                    # 642 nm LuxX laser
+                    print("Initializing 642 nm LuxX Laser")
+                    comport = 'COM17'
+                    laser[laser_idx] = luxx(comport)
+                    laser[laser_idx].initialize_laser()
 
-            else:
-                print("Laser index not recognized")
-                sys.exit()
+                else:
+                    print("Laser index not recognized")
+                    sys.exit()
 
-    elif configuration['configuration']['hardware']['lasers'] == 'SyntheticLasers':
+    elif lasers['type'] == 'SyntheticLasers':
         from aslm.model.devices.lasers.SyntheticLaser import SyntheticLaser
         laser = SyntheticLaser(configuration)
 
@@ -308,14 +331,14 @@ def start_daq(configuration):
         DAQ class.
     """
 
-    if configuration['configuration']['hardware']['daq'] == 'NI':
+    if configuration['configuration']['hardware']['daq']['type'] == 'NI':
         from aslm.model.devices.daq.daq_ni import NIDAQ
         return NIDAQ(configuration)
-    elif configuration['configuration']['hardware']['daq'] == 'SyntheticDAQ':
+    elif configuration['configuration']['hardware']['daq']['type'] == 'SyntheticDAQ':
         from aslm.model.devices.daq.daq_synthetic import SyntheticDAQ
         return SyntheticDAQ(configuration)
     else:
-        device_not_found(configuration['configuration']['hardware']['daq'])
+        device_not_found(configuration['configuration']['hardware']['daq']['type'])
 
 
 def start_shutters(configuration):
@@ -336,14 +359,15 @@ def start_shutters(configuration):
         Shutter class.
     """
 
-    if configuration['configuration']['hardware']['shutters'] == 'ThorlabsShutter' and configuration['configuration']['hardware']['daq'] == 'NI':
+    if configuration['configuration']['hardware']['shutters']['type'] == 'ThorlabsShutter'\
+       and configuration['configuration']['hardware']['daq']['type'] == 'NI':
         from aslm.model.devices.shutter.laser_shutter_ttl import ShutterTTL
         return ShutterTTL(configuration)
-    elif configuration['configuration']['hardware']['shutters'] == 'SyntheticShutter':
+    elif configuration['configuration']['hardware']['shutters']['type'] == 'SyntheticShutter':
         from aslm.model.devices.shutter.laser_shutter_synthetic import SyntheticShutter
         return SyntheticShutter(configuration)
     else:
-        device_not_found(configuration['configuration']['hardware']['shutters'])
+        device_not_found(configuration['configuration']['hardware']['shutters']['type'])
 
 
 def start_laser_triggers(configuration):
@@ -364,14 +388,14 @@ def start_laser_triggers(configuration):
         Trigger class.
     """
 
-    if configuration['configuration']['hardware']['daq'] == 'NI':
+    if configuration['configuration']['hardware']['daq']['type'] == 'NI':
         from aslm.model.devices.lasers.laser_trigger_ni import LaserTriggers
         return LaserTriggers(configuration)
-    elif configuration['configuration']['hardware']['daq'] == 'SyntheticDAQ':
+    elif configuration['configuration']['hardware']['daq']['type'] == 'SyntheticDAQ':
         from aslm.model.devices.lasers.laser_trigger_synthetic import SyntheticLaserTriggers
         return SyntheticLaserTriggers(configuration)
     else:
-        device_not_found(configuration['configuration']['hardware']['daq'])
+        device_not_found(configuration['configuration']['hardware']['daq']['type'])
 
 def device_not_found(args):
 

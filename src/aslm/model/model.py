@@ -123,14 +123,15 @@ class Model:
         # Initialize all Hardware
         if args.synthetic_hardware:
             # If command line entry provided, overwrites the model parameters with synthetic hardware.
-            self.configuration['configuration']['hardware']['daq'] = 'SyntheticDAQ'
-            self.configuration['configuration']['hardware']['camera'] = 'SyntheticCamera'
-            self.configuration['configuration']['hardware']['etl'] = 'SyntheticETL'
-            self.configuration['configuration']['hardware']['filter_wheel'] = 'SyntheticFilterWheel'
-            self.configuration['configuration']['hardware']['stage'] = 'SyntheticStage'
-            self.configuration['configuration']['hardware']['zoom'] = 'SyntheticZoom'
-            self.configuration['configuration']['hardware']['shutters'] = 'SyntheticShutter'
-            self.configuration['configuration']['hardware']['lasers'] = 'SyntheticLasers'
+            self.configuration['configuration']['hardware']['daq']['type'] = 'SyntheticDAQ'
+            for i in range(len(self.configuration['configuration']['hardware']['camera'])):
+                self.configuration['configuration']['hardware']['camera'][i]['type'] = 'SyntheticCamera'
+            self.configuration['configuration']['hardware']['etl'] = {'type': 'SyntheticETL'}
+            self.configuration['configuration']['hardware']['filter_wheel']['type'] = 'SyntheticFilterWheel'
+            self.configuration['configuration']['hardware']['stage'] = {'type': 'SyntheticStage'}
+            self.configuration['configuration']['hardware']['zoom']['type'] = 'SyntheticZoom'
+            self.configuration['configuration']['hardware']['shutters'] = {'type': 'SyntheticShutter'}
+            self.configuration['configuration']['hardware']['lasers'] = {'type': 'SyntheticLasers'}
 
         # Move device initialization steps to multiple threads
         """
@@ -283,7 +284,7 @@ class Model:
         if n_cams > 1:
             # Grab the camera with the serial number that matches for the current resolution mode, as specified in
             # configuration.yaml
-            sn = self.configuration['configuration']['microscope'][self.microscope]['camera']['hardware']['serial_number']
+            sn = self.configuration['configuration']['microscopes'][self.microscope]['camera']['hardware']['serial_number']
             for i in range(n_cams):
                 curr_cam = getattr(self, f'camera{i}')
                 if str(sn) == str(curr_cam.serial_number):

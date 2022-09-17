@@ -64,7 +64,7 @@ class CameraBase:
         self.is_acquiring = False
 
         # Initialize Pixel Information
-        self.camera_parameters = self.configuration['configuration'][self.microscope]['camera']
+        self.camera_parameters = self.configuration['configuration']['microscopes'][self.microscope]['camera']
         self.pixel_size_in_microns = self.camera_parameters['pixel_size_in_microns']
         self.binning_string = self.camera_parameters['binning']
         self.x_binning = int(self.binning_string[0])

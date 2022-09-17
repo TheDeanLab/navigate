@@ -25,6 +25,7 @@ def get_configuration_paths():
     configuration_path = Path.joinpath(configuration_directory, 'configuration.yaml')
     experiment_path = Path.joinpath(configuration_directory, 'experiment.yml')
     etl_constants_path = Path.joinpath(configuration_directory, 'etl_constants.yml')
+    rest_api_path = Path.joinpath(configuration_directory, 'rest_api_config.yml')
 
     # If they are not already, copy the default ones that ship with the software too this folder
     if not os.path.exists(configuration_path):
@@ -41,8 +42,13 @@ def get_configuration_paths():
         copy_base_directory = Path(__file__).resolve().parent
         copy_etl_constants_path = Path.joinpath(copy_base_directory, 'etl_constants.yml')
         shutil.copyfile(copy_etl_constants_path, etl_constants_path)
+
+    if not os.path.exists(rest_api_path):
+        copy_base_directory = Path(__file__).resolve().parent
+        copy_rest_api_path = Path.joinpath(copy_base_directory, 'rest_api_config.yml')
+        shutil.copyfile(copy_rest_api_path, rest_api_path)
     
-    return configuration_path, experiment_path, etl_constants_path
+    return configuration_path, experiment_path, etl_constants_path, rest_api_path
 
 def load_configs(manager, **kwargs):
     if kwargs == {}:

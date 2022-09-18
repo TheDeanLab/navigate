@@ -34,6 +34,7 @@ import platform
 import sys
 import tkinter as tk
 import logging
+import threading
 
 # Third Party Imports
 import cv2
@@ -145,6 +146,11 @@ class Camera_View_Controller(GUI_Controller):
         self.image_counter = 0
         self.slice_index = 0
         self.channel_index = 0
+
+        # ilastik mask
+        self.display_mask_flag = False
+        self.ilastik_mask_ready_lock = threading.Lock()
+        self.ilastik_seg_mask = None
 
     def slider_update(self, event):
         slider_index = self.view.slider.get()
@@ -429,7 +435,16 @@ class Camera_View_Controller(GUI_Controller):
 
     def populate_image(self):
         r"""Converts image to an ImageTk.PhotoImage and populates the Tk Canvas"""
-        self.tk_image = ImageTk.PhotoImage(Image.fromarray(self.cross_hair_image.astype(np.uint8)))
+        if self.display_mask_flag:
+            self.ilastik_mask_ready_lock.acquire()
+            temp_img1 = self.cross_hair_image.astype(np.uint8)
+            img1 = Image.fromarray(temp_img1)
+            temp_img2 = cv2.resize(self.ilastik_seg_mask, temp_img1.shape[:2])
+            img2 = Image.fromarray(temp_img2)
+            img3 = Image.blend(img1, img2, 0.2)
+            self.tk_image = ImageTk.PhotoImage(img3)
+        else:
+            self.tk_image = ImageTk.PhotoImage(Image.fromarray(self.cross_hair_image.astype(np.uint8)))
         self.canvas.create_image(0, 0, image=self.tk_image, anchor='nw')
 
     def initialize_non_live_display(self,
@@ -660,3 +675,21 @@ class Camera_View_Controller(GUI_Controller):
         self.min_counts = self.image_palette['Min'].get()
         self.max_counts = self.image_palette['Max'].get()
         logger.debug(f"Min and Max counts scaled to, {self.min_counts}, {self.max_counts}")
+
+    def set_mask_color_table(self, colors):
+        """Set up segmentation mask color table
+
+        """
+        self.mask_color_table = np.zeros((256, 1, 3), dtype=np.uint8)
+        self.mask_color_table[0] = [0, 0, 0]
+        for i in range(len(colors)):
+            color_hex = colors[i]
+            self.mask_color_table[i+1] = [int(color_hex[1:3], 16), int(color_hex[3:5], 16), int(color_hex[5:], 16)]
+        if not self.ilastik_mask_ready_lock.locked():
+            self.ilastik_mask_ready_lock.acquire()
+
+    def display_mask(self, mask):
+        """Update segmentation mask array
+        """
+        self.ilastik_seg_mask = cv2.applyColorMap(mask, self.mask_color_table)
+        self.ilastik_mask_ready_lock.release()

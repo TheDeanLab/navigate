@@ -48,6 +48,7 @@ from aslm.model.model_features.aslm_image_writer import ImageWriter
 from aslm.model.model_features.dummy_detective import Dummy_Detective
 from aslm.model.model_features.aslm_common_features import *
 from aslm.model.model_features.aslm_feature_container import load_features
+from aslm.model.model_features.aslm_restful_features import IlastikSegmentation
 from aslm.log_files.log_functions import log_setup
 from aslm.tools.common_dict_tools import update_settings_common, update_stage_dict
 
@@ -106,6 +107,7 @@ class Model:
                  configuration_path=None,
                  experiment_path=None,
                  etl_constants_path=None,
+                 rest_api_path=None,
                  event_queue=None):
 
         log_setup('model_logging.yml')
@@ -119,6 +121,9 @@ class Model:
 
         # Loads the YAML file for all of the ETL constants
         self.etl_constants = Configurator(etl_constants_path)
+
+        # Loads the YAML file for rest api urls
+        self.rest_api_config = Configurator(rest_api_path)
 
         # Initialize all Hardware
         if args.synthetic_hardware:
@@ -261,6 +266,8 @@ class Model:
         self.feature_list.append([[{'name': ZStackAcquisition}]])
         # threshold and tile
         self.feature_list.append([[{'name': FindTissueSimple2D}]])
+        # Ilastik segmentation
+        self.feature_list.append([[{'name': IlastikSegmentation}]])
 
     def get_camera(self):
         r"""Select active camera.
@@ -1019,3 +1026,15 @@ class Model:
         """
         return self.current_channel
 
+    def load_images(self, filenames=None):
+        r"""Load/Unload images to the Synthetic Camera
+        """
+        self.camera.initialize_image_series(self.data_buffer,
+                                            self.number_of_frames)
+        self.camera.load_images(filenames)
+        self.camera.close_image_series()
+
+    def update_ilastik_setting(self, display_segmentation=False, mark_position=True, target_labels=[1]):
+        self.display_ilastik_segmentation = display_segmentation
+        self.mark_ilastik_position = mark_position
+        self.ilastik_target_labels = target_labels

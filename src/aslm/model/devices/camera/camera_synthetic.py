@@ -37,6 +37,7 @@ import ctypes
 
 # Third Party Imports
 import numpy as np
+from tifffile import TiffFile
 
 # Local Imports
 from aslm.model.analysis import noise_model
@@ -95,6 +96,7 @@ class SyntheticCamera(CameraBase):
         self.data_buffer = None
         self.num_of_frame = None
         self.pre_frame_idx = None
+        self.random_image = True
 
         if camera_id == 0:
             self.serial_number = configuration.CameraParameters['low_serial_number']
@@ -190,15 +192,44 @@ class SyntheticCamera(CameraBase):
         self.current_frame_idx = 0
         self.camera_controller.is_acquiring = False
 
+    def load_images(self, filenames=None):
+        if filenames is None:
+            self.random_image = True
+        else:
+            self.random_image = False
+            self.img_id = 0
+            self.current_tif_id = 0
+            self.tif_images = []
+            idx = 0
+            for image_file in filenames:
+                try:
+                    tif = TiffFile(image_file)
+                    self.tif_images.append(tif)
+                    idx += len(tif.pages)
+                    if idx >= self.num_of_frame:
+                        return
+                except:
+                    pass
+            if idx == 0:
+                self.random_image = False
+
+
     def generate_new_frame(self):
         r"""Generate a synthetic image."""
-        image = np.random.normal(self._mean_background_count,
-                                 self._noise_sigma,
-                                 size=(self.x_pixels, self.y_pixels),
-                                 ).astype(np.uint16)
-
+        if self.random_image:
+            image = np.random.normal(self._mean_background_count,
+                                    self._noise_sigma,
+                                    size=(self.x_pixels, self.y_pixels),
+                                    ).astype(np.uint16)
+        else:
+            image = self.tif_images[self.current_tif_id].pages[self.img_id].asarray()
+            self.img_id += 1
+            if self.img_id >= len(self.tif_images[self.current_tif_id].pages):
+                self.img_id = 0
+                self.current_tif_id = (self.current_tif_id + 1) % len(self.tif_images)
+            
         ctypes.memmove(self.data_buffer[self.current_frame_idx].ctypes.data,
-                       image.ctypes.data, self.x_pixels * self.y_pixels * 2)
+                    image.ctypes.data, self.x_pixels * self.y_pixels * 2)
 
         self.current_frame_idx = (self.current_frame_idx + 1) % self.num_of_frame
 

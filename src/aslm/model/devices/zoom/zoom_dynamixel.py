@@ -66,10 +66,10 @@ class DynamixelZoom(ZoomBase):
     def __init__(self, configuration):
         super().__init__(configuration)
         self.dynamixel = dynamixel
-        self.id = configuration['configuration']['ZoomParameters']['servo_id']
-        self.comport = configuration['configuration']['ZoomParameters']['COMport']
+        self.id = configuration['configuration']['hardware']['zoom']['servo_id']
+        self.comport = configuration['configuration']['hardware']['zoom']['port']
         self.devicename = self.comport.encode('utf-8')
-        self.baudrate = configuration['configuration']['ZoomParameters']['baudrate']
+        self.baudrate = configuration['configuration']['hardware']['zoom']['baudrate']
         self.addr_mx_torque_enable = 24
         self.addr_mx_goal_position = 30
         self.addr_mx_present_position = 36

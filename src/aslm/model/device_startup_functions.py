@@ -279,8 +279,8 @@ def start_lasers(configuration):
             # Iteratively go through the configuration file and turn on each of the lasers,
             # and make sure that they are in appropriate external control mode.
             laser = {}
-            for laser_idx in range(
-                    configuration['configuration']['LaserParameters']['number_of_lasers']):
+            num_lasers = len(configuration['configuration']['microscopes']['lasers'])
+            for laser_idx in range(num_lasers):
                 if laser_idx == 0:
                     # 488 nm LuxX laser
                     print("Initializing 488 nm LuxX Laser")

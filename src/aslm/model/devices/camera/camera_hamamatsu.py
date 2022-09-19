@@ -71,7 +71,7 @@ class HamamatsuOrca(CameraBase):
         self.camera_controller.set_property_value("exposure_time",
                                                   self.camera_parameters['exposure_time'] / 1000)
         self.camera_controller.set_property_value("binning",
-                                                  int(self.configuration['configuration']['CameraParameters']['binning'][0])) # How should this be handled
+                                                  int(self.camera_parameters['binning'][0]))
         self.camera_controller.set_property_value("readout_speed",
                                                   self.camera_parameters['readout_speed'])
         self.camera_controller.set_property_value("trigger_active",

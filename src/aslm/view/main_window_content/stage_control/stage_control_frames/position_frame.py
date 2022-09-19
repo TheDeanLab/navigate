@@ -66,7 +66,7 @@ class position_frame(ttk.Labelframe):
                                                             label=entry_labels[i],
                                                             input_class=ValidatedEntry,
                                                             input_var=tk.DoubleVar(),
-                                                            input_args={'required': True, 'precision': 0.1, 'width': 6}
+                                                            input_args={'required': True, 'precision': 0.1, 'width': 6, 'takefocus': False}
                                                             )
             position_frame.inputs[entry_names[i]].grid(row=i, column=0)
 

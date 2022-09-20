@@ -165,16 +165,34 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         self.min = min
         self.max = max
         self.required = required
+        self.undo_history = []
+        self.redo_history = []
+
+
+        # Update history
+        self.bind("<FocusOut>", self._add_history)
         
     # Dynamic range checker
-        if min_var:
-            self.min_var = min_var
-            self.min_var.trace_add('w', self._set_minimum)
-        if max_var:
-            self.max_var = max_var
-            self.max_var.trace_add('w', self._set_maximum)
-        self.focus_update_var = focus_update_var
-        self.bind('<FocusOut>', self._set_focus_update_var)
+        # if min_var:
+        #     self.min_var = min_var
+        #     self.min_var.trace_add('w', self._set_minimum)
+        # if max_var:
+        #     self.max_var = max_var
+        #     self.max_var.trace_add('w', self._set_maximum)
+        # self.focus_update_var = focus_update_var
+        # self.bind('<FocusOut>', self._set_focus_update_var)
+
+
+    def _add_history(self, event):
+        print("Add history process started")
+        if event.type == '10': # FocusOut event
+            print("Focusout event caught")
+            if self.get() != '':
+                print("Not a blank focusout")
+                if not self.undo_history or self.get() != self.undo_history[-1]:
+                    print("No repeat entry or undo history is empty")
+                    self.undo_history.append(self.get())
+                    print(f"Undo history list: {self.undo_history}")
 
     def _get_precision(self):
         nums_after = self.resolution.find('.')

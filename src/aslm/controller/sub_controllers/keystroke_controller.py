@@ -30,6 +30,8 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 from aslm.controller.sub_controllers.gui_controller import GUI_Controller
+from aslm.view.custom_widgets.validation import ValidatedEntry
+import tkinter as tk
 import logging
 import platform
 
@@ -82,6 +84,9 @@ class KeystrokeController(GUI_Controller):
         self.main_view.bind("2", self.switch_tab2)
         self.main_view.bind("3", self.switch_tab3)
         self.main_view.bind("4", self.switch_tab4)
+        self.main_view.bind_all('z', self.undo)
+        self.main_view.bind_all('y', self.redo) # May need to bind individually bind all may not be a good way to do it
+        
 
     # def test(self, event):
     #     print(event.state)
@@ -127,3 +132,40 @@ class KeystrokeController(GUI_Controller):
         if event.state == 4:
             if self.main_tabs.index("end") > 3:
                 self.main_tabs.select(3)
+
+
+    # Need to make sure that the entry is undo/redo and that the underlying variable for the entry is being updated to what is shown
+
+    def undo(self, event):
+        print("Undo process started")
+        if isinstance(event.widget, ValidatedEntry): #Add all widgets that you want to be able to undo here
+            widget = event.widget
+            print("Entry being tested: ", widget)
+            print("State of widget: ", widget.state)
+            print("Undo history of widget: ", widget.undo_history)
+            if event.state == 4:
+                if len(widget.undo_history) > 1:
+                    print("Undo really starting now")
+                    widget.delete(0, tk.END)
+                    print("Widget delete")
+                    widget.insert(tk.END, widget.undo_history[-2]) # Should this be widget.variable.set()
+                    print("Widget insert: ", widget.undo_history[-2])
+                    widget.redo_history.append(widget.undo_history.pop())
+                    print("Adding to redo history: ", widget.redo_history)
+                if len(widget.undo_history) == 1:
+                    widget.delete(0, tk.END)
+                    print("Widget delete bc less than 1")
+                    widget.redo_history.append(widget.undo_history.pop())
+
+
+    def redo(self, event):
+        print("Redo process started")
+        if isinstance(event.widget, ValidatedEntry):
+            widget = event.widget
+            if event.state == 4:
+                if widget.redo_history:
+                    widget.delete(0, tk.END)
+                    widget.insert(tk.END, widget.redo_history[-1])
+                    widget.undo_history.append(widget.redo_history.pop())
+
+        

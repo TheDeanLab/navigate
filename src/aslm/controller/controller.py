@@ -142,9 +142,8 @@ class Controller:
                                                            self.view.settings.channels_tab,
                                                            self)
 
-        self.channels_tab_controller = Channels_Tab_Controller(self.view.settings.channels_tab,
-                                                               self,
-                                                               self.configuration_controller)
+        self.channels_tab_controller = ChannelsTabController(self.view.settings.channels_tab,
+                                                               self)
 
         self.multiposition_tab_controller = MultiPositionController(self.view.settings.multiposition_tab.multipoint_list, self)
 
@@ -411,7 +410,7 @@ class Controller:
         self.acquire_bar_controller.populate_experiment_values()
         self.stage_gui_controller.set_experiment_values(self.configuration['experiment']['StageParameters'])
         self.multiposition_tab_controller.set_positions(self.configuration['experiment']['MultiPositions']['stage_positions'])
-        self.channels_tab_controller.set_experiment_values(self.configuration['experiment']['MicroscopeState'])
+        self.channels_tab_controller.populate_experiment_values()
         self.camera_setting_controller.populate_experiment_values()
 
     def update_experiment_setting(self):
@@ -431,9 +430,8 @@ class Controller:
             self.configuration['experiment']['MicroscopeState']['resolution_mode'] = 'low'
             self.configuration['experiment']['MicroscopeState']['zoom'] = self.resolution_value.get()
 
-        return self.channels_tab_controller.update_experiment_values(self.configuration['experiment']['MicroscopeState']) and \
-               self.stage_gui_controller.update_experiment_values(self.configuration['experiment']['StageParameters']) and \
-               self.camera_setting_controller.update_experiment_values(self.configuration['experiment']['CameraParameters'])
+        # TODO: validate experiment dict
+        return True
 
     def prepare_acquire_data(self):
         r"""Prepare the acquisition data.
@@ -581,7 +579,7 @@ class Controller:
                 'laser_info': self.resolution_info['ETLConstants'][self.resolution][self.mag]
                 }
             """
-            update_settings_common(self, args)
+            # update_settings_common(self, args)
             self.threads_pool.createThread('model', lambda: self.model.run_command('update_setting', *args))
 
         elif command == 'autofocus':

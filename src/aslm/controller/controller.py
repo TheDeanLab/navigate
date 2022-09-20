@@ -106,16 +106,14 @@ class Controller:
         self.configuration = load_configs(self.manager,
                                         configuration=configuration_path,
                                         experiment=experiment_path,
-                                        etl_constants=etl_constants_path)
+                                        etl_constants=etl_constants_path,
+                                        rest_api_path=rest_api_path)
         
         # Initialize the Model
         self.model = ObjectInSubprocess(Model,
                                         use_gpu,
                                         args,
                                         self.configuration,
-                                        experiment_path=experiment_path,
-                                        etl_constants_path=etl_constants_path,
-                                        rest_api_path=rest_api_path,
                                         event_queue=self.event_queue)
         logger.info(f"Spec - Configuration Path: {configuration_path}")
         logger.info(f"Spec - Experiment Path: {experiment_path}")
@@ -148,7 +146,7 @@ class Controller:
                                                                self,
                                                                self.configuration_controller)
 
-        self.multiposition_tab_controller = Multi_Position_Controller(self.view.settings.multiposition_tab.multipoint_list, self)
+        self.multiposition_tab_controller = MultiPositionController(self.view.settings.multiposition_tab.multipoint_list, self)
 
         self.camera_view_controller = Camera_View_Controller(self.view.camera_waveform.camera_tab,
                                                              self)
@@ -307,11 +305,11 @@ class Controller:
                 'Save Experiment': save_experiment
             },
             self.view.menubar.menu_multi_positions: {
-                'Load Positions': self.channels_tab_controller.load_positions,
-                'Export Positions': self.channels_tab_controller.export_positions,
-                'Append Current Position': self.channels_tab_controller.append_current_position,
-                'Generate Positions': self.channels_tab_controller.generate_positions,
-                'Move to Selected Position': self.channels_tab_controller.move_to_position,
+                'Load Positions': self.multiposition_tab_controller.load_positions,
+                'Export Positions': self.multiposition_tab_controller.export_positions,
+                'Append Current Position': self.multiposition_tab_controller.add_stage_position,
+                'Generate Positions': self.multiposition_tab_controller.generate_positions,
+                'Move to Selected Position': self.multiposition_tab_controller.move_to_position,
                 # 'Sort Positions': ,
             }
         }
@@ -412,6 +410,7 @@ class Controller:
         self.model.apply_resolution_stage_offset(resolution_mode, initial=True)
         self.acquire_bar_controller.populate_experiment_values()
         self.stage_gui_controller.set_experiment_values(self.configuration['experiment']['StageParameters'])
+        self.multiposition_tab_controller.set_positions(self.configuration['experiment']['MultiPositions']['stage_positions'])
         self.channels_tab_controller.set_experiment_values(self.configuration['experiment']['MicroscopeState'])
         self.camera_setting_controller.populate_experiment_values()
 

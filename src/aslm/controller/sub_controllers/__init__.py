@@ -7,5 +7,5 @@ from .waveform_tab_controller import Waveform_Tab_Controller
 from .etl_popup_controller import Etl_Popup_Controller
 from .autofocus_popup_controller import AutofocusPopupController
 from .keystroke_controller import KeystrokeController
-from .multi_position_controller import Multi_Position_Controller
+from .multi_position_controller import MultiPositionController
 from .ilastik_popup_controller import Ilastik_Popup_Controller

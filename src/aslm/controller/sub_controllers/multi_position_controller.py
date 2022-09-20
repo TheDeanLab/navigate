@@ -49,7 +49,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class Multi_Position_Controller(GUI_Controller):
+class MultiPositionController(GUI_Controller):
     
     def __init__(self,
                  view,
@@ -58,11 +58,11 @@ class Multi_Position_Controller(GUI_Controller):
                          parent_controller)
         self.table = self.view.pt
         # self.table.rowheader.bind("<Double-Button-1>", self.handle_double_click)
-        self.table.loadCSV = self.load_csv_func
-        self.table.exportCSV = self.export_csv_func
+        self.table.loadCSV = self.load_positions
+        self.table.exportCSV = self.export_positions
         self.table.insertRow = self.insert_row_func
-        self.table.generatePositions = self.generate_positions_func
-        self.table.addStagePosition = self.add_stage_position_func
+        self.table.generatePositions = self.generate_positions
+        self.table.addStagePosition = self.add_stage_position
 
     def set_positions(self, positions):
         """
@@ -76,8 +76,9 @@ class Multi_Position_Controller(GUI_Controller):
             'f': 'F'
         }
         data = {}
+
         for name in axis_dict:
-            data[axis_dict[name]] = list(map(lambda pos: positions[pos][name], positions))
+            data[axis_dict[name]] = list(pos[name] for pos in positions)
         self.table.model.df = pd.DataFrame(data)
         self.table.redraw()
 
@@ -135,7 +136,7 @@ class Multi_Position_Controller(GUI_Controller):
         """
         return self.table.model.df.shape[0]
 
-    def load_csv_func(self):
+    def load_positions(self):
         """
         # this function load a csv file,
         # the valid csv file should contain the line of headers ['X', 'Y', 'Z', 'R', 'F']
@@ -158,7 +159,7 @@ class Multi_Position_Controller(GUI_Controller):
         self.table.redraw()
         self.show_verbose_info('loaded csv file', filename)
 
-    def export_csv_func(self):
+    def export_positions(self):
         """
         # this function opens a dialog that let the user input a filename
         # then, it will export positions to that csv file
@@ -170,6 +171,12 @@ class Multi_Position_Controller(GUI_Controller):
         self.table.model.df.to_csv(filename, index=False)   
         self.show_verbose_info('exporting csv file', filename)
 
+    def move_to_position(self):
+        r"""Move to a position within the Multi-Position Acquisition Interface."""
+        event = type('MyEvent', (object,), {})
+        event.x, event.y = 0, 0
+        self.handle_double_click(event)
+
     def insert_row_func(self):
         """
         # this function insert a row before selected row
@@ -180,14 +187,14 @@ class Multi_Position_Controller(GUI_Controller):
         self.table.tableChanged()
         self.show_verbose_info('insert a row before current row')
 
-    def generate_positions_func(self):
+    def generate_positions(self):
         """
         # this function opens a dialog to let the user input start and end position
         # then it will generate positions for the user
         """
         pass
 
-    def add_stage_position_func(self):
+    def add_stage_position(self):
         """
         # this function will get the stage's current position,
         # then add it to position list

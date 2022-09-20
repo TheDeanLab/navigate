@@ -220,7 +220,7 @@ microscopes:
         index: 0
         delay_percent: 10
         pulse_percent: 87
-      - wavelength: 561
+      - wavelength: 562
         onoff:
           hardware:
             name: daq
@@ -430,7 +430,7 @@ microscopes:
         index: 0
         delay_percent: 10
         pulse_percent: 87
-      - wavelength: 561
+      - wavelength: 562
         onoff:
           hardware:
             name: daq

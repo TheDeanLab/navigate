@@ -212,7 +212,8 @@ class ConfigurationController:
                 position_limits[a] = 0 if suffix == '_min' else 100
         return position_limits
 
-    def get_etl_info(self):
+    @property
+    def remote_focus_dict(self):
         r"""Return delay_percent, pulse_percent.
 
         Returns
@@ -220,12 +221,16 @@ class ConfigurationController:
         remote_focus_parameters : dict
             Dictionary with the remote focus percent delay and pulse percent.
         """
-        remote_focus_parameters = {
-            'remote_focus_l_delay_percent': self.configuration['configuration']['LaserParameters']['laser_l_delay_percent'],
-            'remote_focus_l_pulse_percent': self.configuration['configuration']['LaserParameters']['laser_l_pulse_percent'],
-            'remote_focus_r_delay_percent': self.configuration['configuration']['LaserParameters']['laser_r_delay_percent'],
-            'remote_focus_r_pulse_percent': self.configuration['configuration']['LaserParameters']['laser_r_pulse_percent']}
-        return remote_focus_parameters
+        if self.microscope_config is not None:
+            return self.microscope_config['remote_focus_device']
+        
+        return None
+
+    @property
+    def galvo_parameter_dict(self):
+        if self.microscope_config is not None:
+            return self.microscope_config['galvo']
+        return None
 
     @property
     def daq_sample_rate(self):

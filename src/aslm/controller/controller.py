@@ -272,15 +272,11 @@ class Controller:
                 self.etl_controller.showup()
                 return
             etl_setting_popup = remote_popup(self.view)  # TODO: should we rename etl_setting popup to remote_focus_popup?
-            self.etl_controller = Etl_Popup_Controller(etl_setting_popup,
+            self.etl_controller = EtlPopupController(etl_setting_popup,
                                                        self,
-                                                       self.configuration['etl_constants'],
-                                                       self.etl_constants_path,
-                                                       self.configuration,
-                                                       self.configuration['experiment']['GalvoParameters'])
+                                                       self.etl_constants_path)
 
-            self.etl_controller.set_experiment_values(self.resolution_value.get())
-            self.etl_controller.set_mode(self.acquire_bar_controller.mode)
+            self.etl_controller.populate_experiment_values()
 
         def popup_autofocus_setting():
             if hasattr(self, 'af_popup_controller'):
@@ -394,16 +390,13 @@ class Controller:
 
         # Configure GUI
         resolution_mode = self.configuration['experiment']['MicroscopeState']['resolution_mode']
+        if self.configuration_controller.change_microscope(resolution_mode):
+            #TODO: update widgets
+            pass
         if resolution_mode == 'high':
-            if self.configuration_controller.change_microscope('high'):
-                #TODO: update widgets
-                pass
-            self.resolution_value.set('high')
             self.configuration['experiment']['MicroscopeState']['zoom'] = 'N/A'
+            self.resolution_value.set('high')
         else:
-            if self.configuration_controller.change_microscope('low'):
-                #TODO: update widgets
-                pass
             self.resolution_value.set(self.configuration['experiment']['MicroscopeState']['zoom'])
 
         self.model.apply_resolution_stage_offset(resolution_mode, initial=True)
@@ -460,8 +453,6 @@ class Controller:
         self.channels_tab_controller.set_mode(mode)
         self.camera_view_controller.set_mode(mode)
         self.camera_setting_controller.set_mode(mode)
-        if hasattr(self, 'etl_controller') and self.etl_controller:
-            self.etl_controller.set_mode(mode)
         if mode == 'stop':
             # GUI Failsafe
             self.acquire_bar_controller.stop_acquire()
@@ -538,19 +529,16 @@ class Controller:
                 'laser_info': self.resolution_info['ETLConstants'][self.resolution][self.mag]
                 }
             """
-            resolution = 'low' if args[0] != 'high' else 'high'
-            mag = 'N/A' if args[0] == 'high' else args[0]
-            temp = {
-                    'resolution_mode': resolution,
-                    'zoom': mag,
-                    'laser_info': self.configuration['etl_constants']['ETLConstants'][resolution][mag]
-                }
-            work_thread = self.threads_pool.createThread('model', lambda: self.model.run_command('update_setting', 'resolution', temp))
+            resolution = 'high' if self.resolution_value.get() == 'high' else 'low'
+            mag = 'N/A' if resolution == 'high' else self.resolution_value.get()
+            self.configuration['experiment']['MicroscopeState']['resolution_mode'] = resolution
+            self.configuration['experiment']['MicroscopeState']['zoom'] = mag
+            work_thread = self.threads_pool.createThread('model', lambda: self.model.run_command('update_setting', 'resolution'))
             work_thread.join()
             # self.model.change_resolution(resolution_value=args[0])
-            self.camera_setting_controller.calculate_physical_dimensions(args[0])
+            self.camera_setting_controller.calculate_physical_dimensions(mag)
             if hasattr(self, 'etl_controller') and self.etl_controller:
-                self.etl_controller.set_experiment_values(args[0])
+                self.etl_controller.populate_experiment_values()
             ret_pos_dict = self.model.get_stage_position()
             update_stage_dict(self, ret_pos_dict)
             self.update_stage_gui_controller_silent(ret_pos_dict)

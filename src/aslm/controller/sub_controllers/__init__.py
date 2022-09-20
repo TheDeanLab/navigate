@@ -4,7 +4,7 @@ from .channels_tab_controller import ChannelsTabController
 from .camera_view_controller import Camera_View_Controller
 from .camera_setting_controller import CameraSettingController
 from .waveform_tab_controller import Waveform_Tab_Controller
-from .etl_popup_controller import Etl_Popup_Controller
+from .etl_popup_controller import EtlPopupController
 from .autofocus_popup_controller import AutofocusPopupController
 from .keystroke_controller import KeystrokeController
 from .multi_position_controller import MultiPositionController

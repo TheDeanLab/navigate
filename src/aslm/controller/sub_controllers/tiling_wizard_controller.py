@@ -45,7 +45,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class Tiling_Wizard_Controller(GUI_Controller):
+class TilingWizardController(GUI_Controller):
     """
     Controller for tiling wizard parameters.
     Gathers the FOV from the camera settings tab and will update when user changes this value.

@@ -40,7 +40,7 @@ import numpy as np
 from aslm.controller.sub_controllers.widget_functions import validate_wrapper
 from aslm.controller.sub_controllers.gui_controller import GUI_Controller
 from aslm.controller.sub_controllers.channel_setting_controller import ChannelSettingController
-from aslm.controller.sub_controllers.tiling_wizard_controller import Tiling_Wizard_Controller
+from aslm.controller.sub_controllers.tiling_wizard_controller import TilingWizardController
 
 # View Imports that are not called on startup
 from aslm.view.main_window_content.channel_settings.channel_settings_frames.tiling_wizard_popup import tiling_wizard_popup as tiling_wizard
@@ -490,7 +490,7 @@ class ChannelsTabController(GUI_Controller):
             self.tiling_wizard_controller.showup()
             return
         tiling_wizard_popup = tiling_wizard(self.view)
-        self.tiling_wizard_controller = Tiling_Wizard_Controller(tiling_wizard_popup, self)
+        self.tiling_wizard_controller = TilingWizardController(tiling_wizard_popup, self)
 
     def set_info(self,
                  vals,

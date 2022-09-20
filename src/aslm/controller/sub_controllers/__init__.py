@@ -3,7 +3,7 @@ from .acquire_bar_controller import AcquireBarController
 from .channels_tab_controller import ChannelsTabController
 from .camera_view_controller import CameraViewController
 from .camera_setting_controller import CameraSettingController
-from .waveform_tab_controller import Waveform_Tab_Controller
+from .waveform_tab_controller import WaveformTabController
 from .etl_popup_controller import EtlPopupController
 from .autofocus_popup_controller import AutofocusPopupController
 from .keystroke_controller import KeystrokeController

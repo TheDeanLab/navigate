@@ -157,7 +157,7 @@ class Controller:
                                                          self.configuration_controller)
                         
         # Waveform Controller
-        self.waveform_tab_controller = Waveform_Tab_Controller(self.view.camera_waveform.waveform_tab, self)
+        self.waveform_tab_controller = WaveformTabController(self.view.camera_waveform.waveform_tab, self)
 
         # Keystroke Controller
         self.keystroke_controller = KeystrokeController(self.view, self)

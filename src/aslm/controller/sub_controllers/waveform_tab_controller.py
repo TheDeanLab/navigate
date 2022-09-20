@@ -44,7 +44,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class Waveform_Tab_Controller(GUI_Controller):
+class WaveformTabController(GUI_Controller):
     def __init__(self, view, parent_controller=None):
         super().__init__(view, parent_controller)
         self.remote_focus_waveform = 0

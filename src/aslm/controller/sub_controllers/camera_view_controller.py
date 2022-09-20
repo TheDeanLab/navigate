@@ -50,7 +50,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class Camera_View_Controller(GUI_Controller):
+class CameraViewController(GUI_Controller):
     def __init__(self,
                  view,
                  parent_controller=None):

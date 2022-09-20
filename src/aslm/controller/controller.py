@@ -147,7 +147,7 @@ class Controller:
 
         self.multiposition_tab_controller = MultiPositionController(self.view.settings.multiposition_tab.multipoint_list, self)
 
-        self.camera_view_controller = Camera_View_Controller(self.view.camera_waveform.camera_tab,
+        self.camera_view_controller = CameraViewController(self.view.camera_waveform.camera_tab,
                                                              self)
 
         self.camera_setting_controller = CameraSettingController(self.view.settings.camera_settings_tab, self)

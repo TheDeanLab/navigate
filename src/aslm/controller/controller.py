@@ -129,9 +129,6 @@ class Controller:
         microscope_name = 'high' if self.configuration['experiment']['MicroscopeState']['resolution_mode'] == 'high' else 'low'
         self.configuration_controller = ConfigurationController(self.configuration, microscope_name)
 
-        # Rest service
-        self.rest_urls = Configurator(rest_api_path)
-
         # Initialize the View
         self.view = view(root)
         self.view.root.protocol("WM_DELETE_WINDOW", self.exit_program)
@@ -287,11 +284,11 @@ class Controller:
 
         def popup_ilastik_setting():
             ilastik_popup_window = ilastik_setting_popup(self.view)
-            ilastik_url = self.rest_urls.Ilastik['url']
+            ilastik_url = self.configuration['rest_api_path']['Ilastik']['url']
             if hasattr(self, 'ilastik_controller'):
                 self.ilastik_controller.showup(ilastik_popup_window)
             else:
-                self.ilastik_controller = Ilastik_Popup_Controller(ilastik_popup_window, self, ilastik_url)
+                self.ilastik_controller = IlastikPopupController(ilastik_popup_window, self, ilastik_url)
 
         menus_dict = {
             self.view.menubar.menu_file: {

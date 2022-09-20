@@ -46,7 +46,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class Ilastik_Popup_Controller(GUI_Controller):
+class IlastikPopupController(GUI_Controller):
 
     def __init__(self, view, parent_controller, service_url):
         super().__init__(view, parent_controller)

@@ -37,18 +37,19 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class Stage_GUI_Controller(GUI_Controller):
+class StageController(GUI_Controller):
     def __init__(self,
                  view,
                  main_view,
                  canvas,
-                 parent_controller,
-                 configuration_controller=None):
+                 parent_controller):
         super().__init__(view,
                          parent_controller)
 
         self.main_view = main_view
         self.canvas = canvas
+
+        self.stage_setting_dict = self.parent_controller.configuration['experiment']['StageParameters']
 
         self.event_id = {
             'x': None,
@@ -86,8 +87,7 @@ class Stage_GUI_Controller(GUI_Controller):
         self.position_callbacks_bound = False
         self.bind_position_callbacks()
 
-        if configuration_controller:
-            self.initialize(configuration_controller)
+        self.initialize()
 
         # binding mouse wheel event on camera view
         # self.canvas.bind("<Enter>", self.on_enter)
@@ -128,7 +128,7 @@ class Stage_GUI_Controller(GUI_Controller):
                 current_position['x'] += xy_increment
             self.set_position(current_position)
 
-    def initialize(self, config):
+    def initialize(self):
         r"""Initialize the Stage limits of steps and positions
 
         Parameters
@@ -136,6 +136,7 @@ class Stage_GUI_Controller(GUI_Controller):
         config : object
             ASLM_Configuration_Controller - config.configuration is Configurator instance of configuration.
         """
+        config = self.parent_controller.configuration_controller
         self.position_min = config.get_stage_position_limits('_min')
         self.position_max = config.get_stage_position_limits('_max')
 
@@ -170,7 +171,7 @@ class Stage_GUI_Controller(GUI_Controller):
                 self.widget_vals[axis].trace_remove('write', cbname)
             self.position_callbacks_bound = False
 
-    def set_experiment_values(self, setting_dict):
+    def populate_experiment_values(self):
         r"""This function set all the position and step values
 
         Parameters
@@ -179,38 +180,11 @@ class Stage_GUI_Controller(GUI_Controller):
              setting_dict = { 'x': value, 'y': value, 'z': value, 'theta': value, 'f': value
                            'xy_step': value, 'z_step': value, 'theta_step': value, 'f_step': value}
         """
+        self.stage_setting_dict = self.parent_controller.configuration['experiment']['StageParameters']
         widgets = self.view.get_widgets()
         for k in widgets:
-            self.widget_vals[k].set(setting_dict.get(k, 0))
+            self.widget_vals[k].set(self.stage_setting_dict.get(k, 0))
             widgets[k].widget.trigger_focusout_validation()
-
-    def update_experiment_values(self, setting_dict):
-        r"""This function collects position and step values
-
-        Parameters
-        ----------
-        setting_dict : dict
-            Dictionary of old stage locations.  Updated directly with new stage locations.
-
-        Returns
-        -------
-            positions_valid : bool
-                Returns True if all values are valid. Returns False if any value is invalid.
-        """
-        position = self.get_position()
-        if position is None:
-            return False
-        for axis in ['x', 'y', 'z', 'theta', 'f']:
-            setting_dict[axis] = position[axis]
-        
-        # get step value
-        try:
-            for axis in ['xy', 'z', 'theta', 'f']:
-                setting_dict[axis+'_step'] = self.widget_vals[axis+'_step'].get()
-        except:
-            return False
-        
-        return True
     
     def set_position(self, position):
         r"""This function is to populate(set) position in the View
@@ -225,6 +199,7 @@ class Stage_GUI_Controller(GUI_Controller):
             self.widget_vals[axis].set(position.get(axis, 0))
             # validate position value if set through variable
             widgets[axis].widget.trigger_focusout_validation()
+            self.stage_setting_dict[axis] = position.get(axis, 0)
         self.show_verbose_info('Set stage position')
 
     def set_position_silent(self, position):
@@ -237,11 +212,7 @@ class Stage_GUI_Controller(GUI_Controller):
         """
         self.unbind_position_callbacks()
 
-        widgets = self.view.get_widgets()
-        for axis in ['x' , 'y', 'z', 'theta', 'f']:
-            self.widget_vals[axis].set(position.get(axis, 0))
-            # validate position value if set through variable
-            widgets[axis].widget.trigger_focusout_validation()
+        self.set_position(position)
 
         self.bind_position_callbacks()
 
@@ -410,7 +381,8 @@ class Stage_GUI_Controller(GUI_Controller):
                 if self.event_id[axis]:
                     self.view.after_cancel(self.event_id[axis])
                 return
-
+            # update stage position
+            self.stage_setting_dict[axis] = position
             # Debouncing wait duration - Duration of time to integrate the number of clicks that a user provides.
             # If 1000 ms, if user hits button 10x within 1s, only moves to the final value.
             self.event_id[axis] = self.view.after(250, lambda: self.parent_controller.execute('stage',

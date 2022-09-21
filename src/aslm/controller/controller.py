@@ -150,11 +150,10 @@ class Controller:
         self.camera_setting_controller = CameraSettingController(self.view.settings.camera_settings_tab, self)
 
         # Stage Controller
-        self.stage_gui_controller = Stage_GUI_Controller(self.view.settings.stage_control_tab,  
+        self.stage_controller = StageController(self.view.settings.stage_control_tab,  
                                                          self.view,
                                                          self.camera_view_controller.canvas,
-                                                         self,
-                                                         self.configuration_controller)
+                                                         self)
                         
         # Waveform Controller
         self.waveform_tab_controller = WaveformTabController(self.view.camera_waveform.waveform_tab, self)
@@ -210,7 +209,7 @@ class Controller:
         self.img_height = img_height
 
     def update_acquire_control(self):
-            self.view.acqbar.stop_stage.config(command=self.stage_gui_controller.stop_button_handler)
+            self.view.acqbar.stop_stage.config(command=self.stage_controller.stop_button_handler)
 
     def initialize_cam_view(self):
         """ Populate view tab.
@@ -398,7 +397,7 @@ class Controller:
 
         self.model.apply_resolution_stage_offset(resolution_mode, initial=True)
         self.acquire_bar_controller.populate_experiment_values()
-        self.stage_gui_controller.set_experiment_values(self.configuration['experiment']['StageParameters'])
+        self.stage_controller.populate_experiment_values()
         self.multiposition_tab_controller.set_positions(self.configuration['experiment']['MultiPositions']['stage_positions'])
         self.channels_tab_controller.populate_experiment_values()
         self.camera_setting_controller.populate_experiment_values()
@@ -502,7 +501,7 @@ class Controller:
             args[0] : dict
                 dict = {'x': value, 'y': value, 'z': value, 'theta': value, 'f': value}
             """
-            self.stage_gui_controller.set_position(args[0])
+            self.stage_controller.set_position(args[0])
 
         elif command == 'get_stage_position':
             r"""Returns the current stage position
@@ -511,7 +510,7 @@ class Controller:
             -------
                 dict = {'x': value, 'y': value, 'z': value, 'theta': value, 'f': value}
             """
-            return self.stage_gui_controller.get_position()
+            return self.stage_controller.get_position()
 
         elif command == 'resolution':
             r"""Changes the resolution mode and zoom position.
@@ -538,7 +537,7 @@ class Controller:
                 self.etl_controller.populate_experiment_values()
             ret_pos_dict = self.model.get_stage_position()
             update_stage_dict(self, ret_pos_dict)
-            self.update_stage_gui_controller_silent(ret_pos_dict)
+            self.update_stage_controller_silent(ret_pos_dict)
 
         elif command == 'set_save':
             r"""Set whether the image will be saved.
@@ -789,15 +788,15 @@ class Controller:
         self.model.stop_stage()
         ret_pos_dict = self.model.get_stage_position()
         update_stage_dict(self, ret_pos_dict)
-        self.update_stage_gui_controller_silent(ret_pos_dict)
+        self.update_stage_controller_silent(ret_pos_dict)
 
-    def update_stage_gui_controller_silent(self, ret_pos_dict):
+    def update_stage_controller_silent(self, ret_pos_dict):
         r"""Send updates to the stage GUI"""
         stage_gui_dict = {}
         for axis, val in ret_pos_dict.items():
             ax = axis.split('_')[0]
             stage_gui_dict[ax] = val
-        self.stage_gui_controller.set_position_silent(stage_gui_dict)
+        self.stage_controller.set_position_silent(stage_gui_dict)
 
     def update_event(self):
         r"""Update the waveforms in the View."""

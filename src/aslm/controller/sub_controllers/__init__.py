@@ -1,4 +1,4 @@
-from .stage_gui_controller import Stage_GUI_Controller
+from .stage_controller import StageController
 from .acquire_bar_controller import AcquireBarController
 from .channels_tab_controller import ChannelsTabController
 from .camera_view_controller import CameraViewController

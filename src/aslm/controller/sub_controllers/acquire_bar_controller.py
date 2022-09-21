@@ -351,6 +351,7 @@ class AcquireBarController(GUI_Controller):
 
     def populate_experiment_values(self):
         self.saving_settings = self.parent_controller.configuration['experiment']['Saving']
+        self.saving_settings['date'] = str(self.saving_settings['date'])
         mode = self.parent_controller.configuration['experiment']['MicroscopeState']['image_mode']
         self.set_mode(mode)
 

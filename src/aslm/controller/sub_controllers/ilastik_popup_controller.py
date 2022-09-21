@@ -36,7 +36,6 @@ from tkinter import filedialog, messagebox, Checkbutton, Label
 import traceback
 
 from aslm.controller.sub_controllers.gui_controller import GUI_Controller
-from aslm.controller.aslm_controller_functions import combine_funcs
 from aslm.model.model_features.aslm_restful_features import prepare_service
 
 import logging

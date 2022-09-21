@@ -33,8 +33,8 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 from aslm.controller.sub_controllers.gui_controller import GUI_Controller
-from aslm.controller.aslm_controller_functions import combine_funcs
-import time
+from aslm.tools.common_functions import combine_funcs
+
 
 import logging
 from pathlib import Path

@@ -51,7 +51,7 @@ from aslm.config.config import load_configs, update_config_dict
 # Local Sub-Controller Imports
 from aslm.controller.configuration_controller import ConfigurationController
 from aslm.controller.sub_controllers import *
-import aslm.controller.aslm_controller_functions as controller_functions
+from aslm.tools.file_functions import create_save_path, save_yaml_file
 from aslm.controller.thread_pool import SynchronizedThreadPool
 
 # Local Model Imports
@@ -252,9 +252,9 @@ class Controller:
                                                     filetypes=[('Yaml file', '*.yml')])
             if not filename:
                 return
-            controller_functions.save_yaml_file('',
-                                                self.configuration['experiment'],
-                                                filename)
+            save_yaml_file('',
+                           self.configuration['experiment'],
+                           filename)
 
         def load_images():
             filenames = filedialog.askopenfilenames(defaultextension='.tif',
@@ -592,8 +592,8 @@ class Controller:
                 self.acquire_bar_controller.stop_acquire()
                 return
             saving_settings = args[0]
-            file_directory = controller_functions.create_save_path(saving_settings)
-            controller_functions.save_yaml_file(file_directory, self.configuration['experiment'])
+            file_directory = create_save_path(saving_settings)
+            save_yaml_file(file_directory, self.configuration['experiment'])
             self.configuration['experiment']['Saving']['save_directory'] = saving_settings['save_directory']
             self.configuration['experiment']['Saving']['file_type'] = saving_settings['file_type']
             self.configuration['experiment']['Saving']['solvent'] = saving_settings['solvent']

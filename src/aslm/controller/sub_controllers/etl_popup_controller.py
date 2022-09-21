@@ -34,7 +34,8 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 
 from aslm.controller.sub_controllers.gui_controller import GUI_Controller
-from aslm.controller.aslm_controller_functions import save_yaml_file, combine_funcs
+from aslm.tools.file_functions import save_yaml_file
+from aslm.tools.common_functions import combine_funcs
 
 import logging
 

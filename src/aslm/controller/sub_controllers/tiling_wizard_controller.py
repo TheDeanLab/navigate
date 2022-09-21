@@ -38,7 +38,7 @@ import logging
 # Local Imports
 from aslm.tools.multipos_table_tools import *
 from aslm.controller.sub_controllers.gui_controller import GUI_Controller
-from aslm.controller.aslm_controller_functions import combine_funcs
+from aslm.tools.common_functions import combine_funcs
 
 # Logger Setup
 p = __name__.split(".")[1]

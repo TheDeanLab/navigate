@@ -34,12 +34,8 @@ POSSIBILITY OF SUCH DAMAGE.
 # Standard library imports
 from datetime import datetime
 import os
-import logging
 
-# Logger Setup
-p = __name__.split(".")[1]
-logger = logging.getLogger(p)
-
+from .common_functions import copy_proxy_object
 
 def create_save_path(saving_settings):
     r"""Create path to save the data to.
@@ -93,9 +89,8 @@ def create_save_path(saving_settings):
     save_directory = os.path.join(save_directory, cell_string)
     if not os.path.exists(save_directory):
         os.makedirs(save_directory)
-    logging.info(f"Data Saved to: {save_directory}")
 
-    # Update the Model
+    # Update the experiment dict
     saving_settings['save_directory'] = save_directory
     saving_settings['date'] = date_string
 
@@ -121,81 +116,7 @@ def save_yaml_file(file_directory,
     try:
         file_name = os.path.join(file_directory, filename)
         with open(file_name, 'w') as f:
-            f.write(json.dumps(content_dict))
+            f.write(json.dumps(copy_proxy_object(content_dict)))
     except BaseException:
         return False
     return True
-
-
-def combine_funcs(*funclist):
-    """
-    # this function will combine a list of functions to a new function
-    """
-    def new_func():
-        for func in funclist:
-            if callable(func):
-                func()
-    return new_func
-
-
-# def update_from_channels_tab_controller(self):
-#     # get settings from channels tab
-#     settings = self.channels_tab_controller.get_values()
-#
-#     # if there is something wrong, it will popup a window and return false
-#     for k in settings:
-#         if not settings[k]:
-#             tkinter.messagebox.showerror(
-#                 title='Warning',
-#                 message='There are some missing/wrong settings!')
-#             return False
-#
-#     # validate channels
-#     try:
-#         for k in settings['channel']:
-#             float(settings['channel'][k]['laser_power'])
-#             float(settings['channel'][k]['interval_time'])
-#             if settings['channel'][k]['laser_index'] < 0 or settings['channel'][k]['filter_position'] < 0:
-#                 raise
-#     except BaseException:
-#         tkinter.messagebox.showerror(
-#             title='Warning',
-#             message='There are some missing/wrong settings!')
-#         return False
-#     
-#     self.configuration['experiment']['MicroscopeState']['stack_cycling_mode'] = settings['stack_cycling_mode']
-#     for k in settings['stack_acquisition']:
-#         self.configuration['experiment']['MicroscopeState'][k] = settings['stack_acquisition'][k]
-#     for k in settings['timepoint']:
-#         self.configuration['experiment']['MicroscopeState'][k] = settings['timepoint'][k]
-#
-#     # channels
-#     self.configuration['experiment']['MicroscopeState']['channels'] = settings['channel']
-#
-#     # get all positions
-#     self.configuration['experiment']['MicroscopeState']['stage_positions'] = self.channels_tab_controller.get_positions(
-#     )
-#
-#     # get position information from stage tab
-#     position = self.stage_gui_controller.get_position()
-#
-#     # validate positions
-#     if not position:
-#         tkinter.messagebox.showerror(
-#             title='Warning',
-#             message='There are some missing/wrong settings!')
-#         return False
-#
-#     for axis in position:
-#         self.configuration['experiment']['StageParameters'][axis] = position[axis]
-#     step_size = self.stage_gui_controller.get_step_size()
-#     for axis in step_size:
-#         self.configuration['experiment']['StageParameters'][axis + '_step'] = step_size[axis]
-
-
-# def update_from_camera_setting_controller(self):
-#     self.configuration['experiment']['CameraParameters']['sensor_mode'] = self.camera_setting_controller.sensor_mode
-#     self.configuration['experiment']['CameraParameters']['binning'] = 1
-#     # self.configuration['experiment']['CameraParameters']['x_pixels'] = self.camera_setting_controller.roi_widgets['Pixels_X'].get()
-#     # self.configuration['experiment']['CameraParameters']['y_pixels'] = self.camera_setting_controller.roi_widgets['Pixels_Y'].get()
-#     self.configuration['experiment']['CameraParameters']['number_of_cameras'] = 1

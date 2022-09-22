@@ -187,7 +187,7 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         print("Add history process started")
         if event.type == '10': # FocusOut event
             print("Focusout event caught")
-            if self.get() != '':
+            if self.get() != "":
                 print("Not a blank focusout")
                 if not self.undo_history or self.get() != self.undo_history[-1]:
                     print("No repeat entry or undo history is empty")

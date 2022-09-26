@@ -33,22 +33,18 @@ import unittest
 from pathlib import Path
 from aslm.model.aslm_model_config import Configurator
 from aslm.model.devices.shutter.laser_shutter_base import ShutterBase
+from aslm.model.dummy_model import DummyModel
 
 
 class TestLaserBase(unittest.TestCase):
     r"""Unit Test for ShutterBase Class"""
 
     def test_shutter_base_attributes(self):
-        base_directory = Path(__file__).resolve().parent.parent.parent.parent.parent
-        configuration_directory = Path.joinpath(base_directory, 'src', 'aslm', 'config')
-        configuration_path = Path.joinpath(configuration_directory, 'configuration.yml')
-        experiment_path = Path.joinpath(configuration_directory, 'experiment.yml')
+        self.dummy_model = DummyModel()
+        self.configuration = self.dummy_model.configuration
+        self.experiment = self.dummy_model.configuration['experiment']
 
-        configuration = Configurator(file_path=configuration_path)
-        experiment = Configurator(file_path=experiment_path)
-
-        shutter = ShutterBase(configuration,
-                              experiment)
+        shutter = ShutterBase(configuration=self.configuration)
 
         assert hasattr(shutter, 'configuration')
         assert hasattr(shutter, 'experiment')

@@ -1,5 +1,5 @@
 from aslm.model.model_features.aslm_image_writer import ImageWriter
-from aslm.model.dummy_model import get_dummy_model
+from aslm.model.dummy_model import DummyModel
 import numpy as np
 import pytest
 
@@ -19,7 +19,7 @@ def test_zarr_byslice():
     """
     
     # Test Setup
-    dummy_model = get_dummy_model()
+    dummy_model = DummyModel()
 
     # Set parameters in dummy_model to be passed to zarr writer
     n_pixels = 2048
@@ -75,7 +75,7 @@ def test_zarr_byslice():
 def test_zarr_bystack(self):
 
     # Test Setup
-    dummy_model = get_dummy_model()
+    dummy_model = DummyModel()
     # Creating 3D simulated data in this case a 3D F shape
     pix_size = 10 #dummy_model.experiment.CameraParameters['x_pixels'] #10 
     dummy_model.experiment.CameraParameters['x_pixels'] = pix_size

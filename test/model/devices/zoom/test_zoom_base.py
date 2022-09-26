@@ -39,18 +39,16 @@ from pathlib import Path
 # Local Imports
 from aslm.model.devices.zoom.zoom_base import ZoomBase
 from aslm.model.aslm_model_config import Configurator
+from aslm.model.dummy_model import DummyModel
 
 
 class TestZoomBase(unittest.TestCase):
     r"""Unit Test for Zoom Base Class"""
 
     def test_zoom_base_attributes(self):
-        base_directory = Path(__file__).resolve().parent.parent.parent.parent.parent
-        configuration_directory = Path.joinpath(base_directory, 'src', 'aslm', 'config')
-        configuration_path = Path.joinpath(configuration_directory, 'configuration.yml')
-
-        configuration = Configurator(configuration_path)
-        zoom_class = ZoomBase(configuration)
+        self.dummy_model = DummyModel()
+        self.config = self.dummy_model.configuration
+        zoom_class = ZoomBase(configuration=self.config)
 
         assert hasattr(zoom_class, 'configuration')
         assert hasattr(zoom_class, 'zoomdict')

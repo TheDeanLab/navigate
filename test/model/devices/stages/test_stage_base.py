@@ -39,19 +39,17 @@ from pathlib import Path
 # Local Imports
 from aslm.model.devices.stages.stage_base import StageBase
 from aslm.model.aslm_model_config import Configurator
+from aslm.model.dummy_model import DummyModel
 
 
 class TestZoomBase(unittest.TestCase):
     r"""Unit Test for StageBase Class"""
 
     def test_stage_base_attributes(self):
-        base_directory = Path(__file__).resolve().parent.parent.parent.parent.parent
-        configuration_directory = Path.joinpath(base_directory, 'src', 'aslm', 'config')
-        configuration_path = Path.joinpath(configuration_directory, 'configuration.yml')
-
-        # Instantiate the stage_base class
-        configuration = Configurator(configuration_path)
-        stage_base = StageBase(configuration)
+        self.dummy_model = DummyModel()
+        self.configuration = self.dummy_model.configuration
+        self.experiment = self.dummy_model.configuration['experiment']
+        stage_base = StageBase(configuration=self.configuration)
 
         assert hasattr(stage_base, 'configuration')
         assert hasattr(stage_base, 'x_pos')

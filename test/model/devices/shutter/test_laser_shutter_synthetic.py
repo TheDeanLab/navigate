@@ -39,22 +39,17 @@ from pathlib import Path
 # Local Imports
 from aslm.model.devices.shutter.laser_shutter_synthetic import SyntheticShutter
 from aslm.model.aslm_model_config import Configurator
+from aslm.model.dummy_model import DummyModel
 
 
 class TestSyntheticShutter(unittest.TestCase):
     r"""Unit Test for SyntheticShutter Class"""
 
     def test_synthetic_shutter_attributes(self):
-        base_directory = Path(__file__).resolve().parent.parent.parent.parent.parent
-        configuration_directory = Path.joinpath(base_directory, 'src', 'aslm', 'config')
-
-        configuration_path = Path.joinpath(configuration_directory, 'configuration.yml')
-        experiment_path = Path.joinpath(configuration_directory, 'experiment.yml')
-
-        configuration = Configurator(file_path=configuration_path)
-        experiment = Configurator(file_path=experiment_path)
-        shutter = SyntheticShutter(configuration,
-                              experiment)
+        self.dummy_model = DummyModel()
+        self.configuration = self.dummy_model.configuration
+        self.experiment = self.dummy_model.configuration['experiment']
+        shutter = SyntheticShutter(configuration=self.configuration)
 
         # Attributes
         assert hasattr(shutter, 'configuration')

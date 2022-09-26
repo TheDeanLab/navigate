@@ -37,19 +37,19 @@ import unittest
 import pytest
 
 from aslm.model.devices.filter_wheel.filter_wheel_synthetic import SyntheticFilterWheel
-from aslm.model.dummy_model import get_dummy_model
+from aslm.model.dummy_model import DummyModel
 
 class TestSyntheticFilterWheel(unittest.TestCase):
     r"""Unit Test for FilterWheel Class"""
 
     def test_synthetic_filter_wheel_initialization(self):
-        self.dummy_model = get_dummy_model()
+        self.dummy_model = DummyModel()
         self.config = self.dummy_model.configuration
         synthetic_filter = SyntheticFilterWheel(self.config)
         return True
 
     def test_synthetic_filter_wheel_attributes(self):
-        self.dummy_model = get_dummy_model()
+        self.dummy_model = DummyModel()
         self.config = self.dummy_model.configuration
         synthetic_filter = SyntheticFilterWheel(self.config)
         assert hasattr(synthetic_filter, 'comport')
@@ -61,7 +61,7 @@ class TestSyntheticFilterWheel(unittest.TestCase):
 
 
     def test_synthetic_filter_wheel_attributes_type(self):
-        self.dummy_model = get_dummy_model()
+        self.dummy_model = DummyModel()
         self.config = self.dummy_model.configuration
         synthetic_filter = SyntheticFilterWheel(self.config)
         assert type(synthetic_filter.comport == str)
@@ -74,7 +74,7 @@ class TestSyntheticFilterWheel(unittest.TestCase):
 
 
     def test_synthetic_filter_wheel_methods(self):
-            self.dummy_model = get_dummy_model()
+            self.dummy_model = DummyModel()
             self.config = self.dummy_model.configuration
             synthetic_filter = SyntheticFilterWheel(self.config)
             assert hasattr(synthetic_filter, 'filter_change_delay') and callable(getattr(synthetic_filter, 'filter_change_delay'))
@@ -84,7 +84,7 @@ class TestSyntheticFilterWheel(unittest.TestCase):
 
 
     def test_synthetic_filter_wheel_method_calls(self):
-        self.dummy_model = get_dummy_model()
+        self.dummy_model = DummyModel()
         self.config = self.dummy_model.configuration
         synthetic_filter = SyntheticFilterWheel(self.config)
         synthetic_filter.filter_change_delay(filter_name='Empty-Alignment')

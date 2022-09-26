@@ -1,8 +1,8 @@
 def test_metadata_voxel_size():
-    from aslm.model.dummy_model import get_dummy_model
+    from aslm.model.dummy_model import DummyModel
     from aslm.model.model_features.metadata_sources.metadata import Metadata
 
-    model = get_dummy_model()
+    model = DummyModel()
 
     md = Metadata()
 
@@ -21,10 +21,10 @@ def test_metadata_voxel_size():
 
 
 def test_metadata_shape():
-    from aslm.model.dummy_model import get_dummy_model
+    from aslm.model.dummy_model import DummyModel
     from aslm.model.model_features.metadata_sources.metadata import Metadata
 
-    model = get_dummy_model()
+    model = DummyModel()
 
     md = Metadata()
 

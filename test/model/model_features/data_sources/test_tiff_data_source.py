@@ -3,11 +3,11 @@ import os
 import numpy as np
 
 def tiff_write_read(is_ome=False, multiposition=False):
-    from aslm.model.dummy_model import get_dummy_model
+    from aslm.model.dummy_model import DummyModel
     from aslm.model.model_features.data_sources.tiff_data_source import TiffDataSource
 
     # Set up model with a random number of z-steps to modulate the shape
-    model = get_dummy_model()
+    model = DummyModel()
     z_steps = np.random.randint(1,10)
     model.experiment.MicroscopeState['image_mode'] = 'z-stack'
     model.experiment.MicroscopeState['number_z_steps'] = z_steps

@@ -35,7 +35,7 @@ POSSIBILITY OF SUCH DAMAGE.
 # Third Party Imports
 
 # Local Imports
-from aslm.model.dummy_model import DummyModel
+from aslm.model.dummy import DummyModel
 
 
 class TestSyntheticHardware():

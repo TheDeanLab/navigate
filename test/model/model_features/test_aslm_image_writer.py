@@ -1,5 +1,5 @@
 from aslm.model.model_features.aslm_image_writer import ImageWriter
-from aslm.model.dummy_model import DummyModel
+from aslm.model.dummy import DummyModel
 import numpy as np
 import pytest
 

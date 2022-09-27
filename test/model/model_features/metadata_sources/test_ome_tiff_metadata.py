@@ -5,7 +5,7 @@ def test_ome_metadata_valid():
     import urllib.request
     import os
     import platform
-    from aslm.model.dummy_model import DummyModel
+    from aslm.model.dummy import DummyModel
     from aslm.model.model_features.metadata_sources.ome_tiff_metadata import OMETIFFMetadata
 
     # First, download OME-XML validation tools

@@ -39,7 +39,7 @@ from pathlib import Path
 # Local Imports
 from aslm.model.devices.zoom.zoom_base import ZoomBase
 from aslm.model.aslm_model_config import Configurator
-from aslm.model.dummy_model import DummyModel
+from aslm.model.dummy import DummyModel
 
 
 class TestZoomBase(unittest.TestCase):

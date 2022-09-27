@@ -35,7 +35,7 @@ import random
 from aslm.model.model_features.aslm_feature_container import SignalNode, DataNode, DataContainer, load_features
 from aslm.model.model_features.aslm_common_features import WaitToContinue
 from aslm.model.model_features.aslm_feature_container import dummy_True
-from aslm.model.dummy_model import DummyFeature, DummyModel
+from aslm.model.dummy import DummyFeature, DummyModel
 
 def generate_random_feature_list(has_response_func=False, multi_step=False, with_data_func=True):
     feature_list = []

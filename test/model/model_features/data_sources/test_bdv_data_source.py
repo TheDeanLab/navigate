@@ -4,7 +4,7 @@ import numpy as np
 
 
 def test_bdv_write():
-    from aslm.model.dummy_model import DummyModel
+    from aslm.model.dummy import DummyModel
     from aslm.model.model_features.data_sources.bdv_data_source import BigDataViewerDataSource
 
     # Set up model with a random number of z-steps to modulate the shape

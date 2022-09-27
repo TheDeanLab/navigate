@@ -38,7 +38,7 @@ import pytest
 import numpy as np
 
 from aslm.model.devices.camera.camera_synthetic import SyntheticCamera
-from aslm.model.dummy_model import DummyModel
+from aslm.model.dummy import DummyModel
 
 class TestSyntheticCamera(unittest.TestCase):
     r"""Unit Test for FilterWheel Class"""

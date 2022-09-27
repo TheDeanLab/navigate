@@ -37,7 +37,7 @@ import unittest
 import pytest
 
 from aslm.model.devices.filter_wheel.filter_wheel_synthetic import SyntheticFilterWheel
-from aslm.model.dummy_model import DummyModel
+from aslm.model.dummy import DummyModel
 
 class TestSyntheticFilterWheel(unittest.TestCase):
     r"""Unit Test for FilterWheel Class"""

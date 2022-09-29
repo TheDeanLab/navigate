@@ -96,7 +96,8 @@ class DAQBase:
             self.waveform_dict : dict
                 Dictionary of waveforms to pass to galvo and ETL, plus a camera waveform for display purposes.
             """
-        self.microscope_name = microscope_name
+        self.enable_microscope(microscope_name)
+
         microscope_state = self.configuration['experiment']['MicroscopeState']
         self.camera_delay_percent = self.configuration['configuration']['microscopes'][microscope_name]['camera']['delay_percent']
         self.sample_rate = self.configuration['configuration']['microscopes'][microscope_name]['daq']['sample_rate']
@@ -124,3 +125,6 @@ class DAQBase:
 
         return self.waveform_dict
 
+    def enable_microscope(self, microscope_name):
+        if microscope_name != self.microscope_name:
+            self.microscope_name = microscope_name

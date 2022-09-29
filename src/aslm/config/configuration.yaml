@@ -51,6 +51,7 @@ microscopes:
 
       # Digital Laser Outputs
       laser_port_switcher: PXI6733/port0/line0
+      laser_switch_state: False
 
     camera:
       hardware:
@@ -277,6 +278,7 @@ microscopes:
 
       # Digital Laser Outputs
       laser_port_switcher: PXI6733/port0/line0
+      laser_switch_state: True
       
     camera:
       hardware:
@@ -405,7 +407,7 @@ microscopes:
       hardware:
         name: daq
         type: NI
-        channel: PXI6259/port0/line0
+        channel: PXI6259/port2/line0
       shutter_min_do: 0
       shutter_max_do: 5
     lasers:

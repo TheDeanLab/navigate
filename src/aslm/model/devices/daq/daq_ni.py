@@ -62,6 +62,7 @@ class NIDAQ(DAQBase):
         super().__init__(configuration)
         self.camera_trigger_task = None
         self.master_trigger_task = None
+        self.laser_switching_task = nidaqmx.Task()
 
     def __del__(self):
         if self.camera_trigger_task is not None:
@@ -129,3 +130,16 @@ class NIDAQ(DAQBase):
         self.master_trigger_task.stop()
         self.camera_trigger_task.close()
         self.master_trigger_task.close()
+
+    def enable_microscope(self, microscope_name):
+        if microscope_name != self.microscope_name:
+            self.microscope_name = microscope_name
+
+        switching_port = self.configuration['configuration']['microscopes'][self.microscope_name]['daq']['laser_port_switcher']
+        switching_on_state = self.configuration['configuration']['microscopes'][self.microscope_name]['daq']['laser_switch_state']
+        
+        self.laser_switching_task.close()
+        self.laser_switching_task = nidaqmx.Task()
+        self.laser_switching_task.do_channels.add_do_chan(
+            switching_port, line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
+        self.laser_switching_task.write(switching_on_state, auto_start=True)

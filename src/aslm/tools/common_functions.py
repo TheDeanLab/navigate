@@ -39,6 +39,10 @@ def combine_funcs(*funclist):
                 func()
     return new_func
 
+def build_ref_name(separator, *args):
+    alist = list(map(lambda a: str(a), args))
+    return separator.join(alist)
+
 def copy_proxy_object(content):
     r"""This function will serialize proxy dict and list
 

@@ -58,57 +58,12 @@ class SyntheticZoom(ZoomBase):
         Read the position of the DynamixelZoom servo.
     """
 
-    def __init__(self, configuration):
-        super().__init__(configuration)
+    def __init__(self, microscope_name, device_connection, configuration):
+        super().__init__(microscope_name, device_connection, configuration)
         logger.debug("SyntheticZoom Servo Initialized")
 
     def __del__(self):
         logger.debug("SyntheticZoom Servo instance Deleted")
         pass
 
-    def set_zoom(self, zoom, wait_until_done=False):
-        r"""Change the SyntheticZoom Servo.
 
-        Confirms tha the zoom position is available in the zoomdict
-
-        Parameters
-        ----------
-        zoom : dict
-            Zoom dictionary
-        wait_until_done : bool
-            Delay parameter.
-
-        # Changes zoom after checking that the commanded value exists
-        """
-        if zoom in self.zoomdict:
-            self.zoomvalue = zoom
-        else:
-            logger.error(f"Zoom designation, {zoom}, not in the configuration")
-            raise ValueError('Zoom designation not in the configuration')
-        logger.debug(f"Changed SyntheticZoom to {zoom}")
-        logger.debug(f"SyntheticZoom position: {self.read_position()}")
-
-    def move(self, position=0, wait_until_done=False):
-        r""" Move the SyntheticZoom Servo
-
-        Parameters
-        ----------
-        position : int
-            Location to move to.
-        wait_until_done : bool
-            Delay parameter
-        """
-        logger.debug(f"Changing SyntheticZoom to {zoom}")
-        pass
-
-    def read_position(self):
-        r"""Read the position of the Zoom Servo
-
-        Returns
-        -------
-        cur_position : int
-            Current position of SyntheticZoom
-        """
-        cur_position = None
-        logger.debug(f"SyntheticZoom position: {cur_position}")
-        return cur_position

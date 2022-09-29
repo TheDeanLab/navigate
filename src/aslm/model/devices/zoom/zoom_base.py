@@ -55,8 +55,53 @@ class ZoomBase:
         Current Zoom value
     """
 
-    def __init__(self, configuration):
-        self.configuration = configuration
-        self.microscope = configuration['experiment']['MicroscopeState']['resolution_mode']
-        self.zoomdict = self.configuration['configuration']['microscopes'][self.microscope]['zoom']['position']
+    def __init__(self, microscope_name, device_controller, configuration):
+        self.zoomdict = configuration['configuration']['microscopes'][microscope_name]['zoom']['position']
         self.zoomvalue = None
+
+    def set_zoom(self, zoom, wait_until_done=False):
+        r"""Change the Zoom Servo.
+
+        Confirms tha the zoom position is available in the zoomdict
+
+        Parameters
+        ----------
+        zoom : dict
+            Zoom dictionary
+        wait_until_done : bool
+            Delay parameter.
+
+        # Changes zoom after checking that the commanded value exists
+        """
+        if zoom in self.zoomdict:
+            self.zoomvalue = zoom
+        else:
+            logger.error(f"Zoom designation, {zoom}, not in the configuration")
+            raise ValueError('Zoom designation not in the configuration')
+        logger.debug(f"Changed Zoom to {zoom}")
+        logger.debug(f"Zoom position: {self.read_position()}")
+
+    def move(self, position=0, wait_until_done=False):
+        r""" Move the Zoom Servo
+
+        Parameters
+        ----------
+        position : int
+            Location to move to.
+        wait_until_done : bool
+            Delay parameter
+        """
+        logger.debug(f"Changing Zoom to {position}")
+        pass
+
+    def read_position(self):
+        r"""Read the position of the Zoom Servo
+
+        Returns
+        -------
+        cur_position : int
+            Current position of Zoom
+        """
+        cur_position = None
+        logger.debug(f"Zoom position: {cur_position}")
+        return cur_position

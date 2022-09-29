@@ -96,17 +96,18 @@ microscopes:
       amplitude: 0.7
       offset: 2.3
     galvo:
-      hardware:
-        name: daq
-        type: NI
-        channel: PXI6259/ao0
-        min: -5
-        max: 5
-      frequency: 99.9
-      amplitude: 2.5
-      offset: 0
-      duty_cycle: 50
-      phase: 1.57079 # pi/2
+      -
+        hardware:
+          name: daq
+          type: NI
+          channel: PXI6259/ao0
+          min: -5
+          max: 5
+        frequency: 99.9
+        amplitude: 2.5
+        offset: 0
+        duty_cycle: 50
+        phase: 1.57079 # pi/2
     filter_wheel:
       hardware:
         name: filter_wheel
@@ -320,13 +321,14 @@ microscopes:
       amplitude: 0.7
       offset: 2.3
     galvo:
-      hardware:
-        name: daq
-        type: NI
-        channel: PXI6259/ao1
-        min: -5
-        max: 5
-      offset: 0.5
+      -
+        hardware:
+          name: daq
+          type: NI
+          channel: PXI6259/ao1
+          min: -5
+          max: 5
+        offset: 0.5
     filter_wheel:
       hardware:
         name: filter_wheel

@@ -58,7 +58,7 @@ class SyntheticDAQ(DAQBase):
     """
     def __init__(self, configuration):
         super().__init__(configuration)
-        self.camera = None
+        self.camera = {}
 
     def create_camera_task(self):
         r"""Set up the camera trigger task."""
@@ -104,7 +104,7 @@ class SyntheticDAQ(DAQBase):
         For this to work, all analog output and counter tasks have to be started so that
         they are waiting for the trigger signal."""
         time.sleep(0.01)
-        self.camera.generate_new_frame()
+        self.camera[self.microscope_name].generate_new_frame()
 
     def stop_acquisition(self):
         r"""Stop Acquisition."""
@@ -114,6 +114,6 @@ class SyntheticDAQ(DAQBase):
         r"""Write the galvo, etl, and laser waveforms to each task."""
         pass
 
-    def set_camera(self, camera):
+    def add_camera(self, microscope_name, camera):
         r"""Connect camera with daq: only in syntheticDAQ."""
-        self.camera = camera
+        self.camera[microscope_name] = camera

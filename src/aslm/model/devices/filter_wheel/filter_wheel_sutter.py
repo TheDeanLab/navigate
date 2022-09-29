@@ -45,6 +45,23 @@ from aslm.model.devices.filter_wheel.filter_wheel_base import FilterWheelBase
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+class SutterFilterWheelController():
+    r""" SutterFilterWheel Serial Class
+    Attributes
+    ----------
+    comport : str
+        Comport for communicating with the filter wheel, e.g., COM1.
+    baudrate : int
+        Baud rate for communicating with the filter wheel, e.g., 9600.
+    """
+    def __init__(self, comport, baudrate, timeout=.25):
+        logging.debug(f"SutterFilterWheel - Opening Serial Port {self.comport}")
+        try:
+            self.serial = serial.Serial(comport, baudrate, timeout=.25)
+        except serial.SerialException:
+            logger.warning("SutterFilterWheel - Could not establish Serial Port Connection")
+            raise UserWarning('Could not communicate with Sutter Lambda 10-B via COMPORT', self.comport)
+
 
 class SutterFilterWheel(FilterWheelBase):
     r"""SutterFilterWheel Class
@@ -85,8 +102,14 @@ class SutterFilterWheel(FilterWheelBase):
         Set the filter wheel to the empty position and close the communication port.
     """
 
-    def __init__(self, model):
-        super().__init__(model)
+    def __init__(self, microscope_name, device_connection, configuration):
+        super().__init__(microscope_name, device_connection, configuration)
+        self.serial = device_connection
+
+        self.number_of_filter_wheels = configuration['configuration']['microscopes'][microscope_name]['filter_wheel']['hardware']['wheel_number']
+        self.wait_until_done_delay = configuration['configuration']['microscopes'][microscope_name]['filter_wheel']['filter_wheel_delay']
+        self.wait_until_done = True        
+
         self.read_on_init = True
         self.speed = 2
 
@@ -100,12 +123,6 @@ class SutterFilterWheel(FilterWheelBase):
                                        [0, 0.124, 0.235, 0.350, 0.460, 0.580],
                                        [0, 0.230, 0.440, 0.650, 0.860, 1.100]])
 
-        logging.debug(f"SutterFilterWheel - Opening Serial Port {self.comport}")
-        try:
-            self.serial = serial.Serial(self.comport, self.baudrate, timeout=.25)
-        except serial.SerialException:
-            logger.warning("SutterFilterWheel - Could not establish Serial Port Connection")
-            raise UserWarning('Could not communicate with Sutter Lambda 10-B via COMPORT', self.comport)
 
         logger.debug("SutterFilterWheel - Placing device In Online Mode")
         self.serial.write(bytes.fromhex('ee'))

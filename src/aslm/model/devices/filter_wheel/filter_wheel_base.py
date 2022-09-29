@@ -49,20 +49,10 @@ class FilterWheelBase:
 
     Attributes
     ----------
-    comport : str
-        Comport for communicating with the filter wheel, e.g., COM1.
-    baudrate : int
-        Baud rate for communicating with the filter wheel, e.g., 9600.
     filter_dictionary : dict
         Dictionary with installed filter names, e.g., filter_dictionary = {'GFP', 0}.
-    number_of_filter_wheels : int
-        Number of installed filter wheels.
     wheel_position : int
         Default filter wheel position
-    wait_until_done_delay = float
-        Duration of time to wait for a filter wheel change.
-    wait_until_done = bool
-        Flag for enabling the wait period for a filter wheel change.
 
     Methods
     -------
@@ -70,16 +60,10 @@ class FilterWheelBase:
         Checks to see if filter name exists in the filter dictionary.
     """
 
-    def __init__(self, configuration):
+    def __init__(self, microscope_name, device_connection, configuration):
         
-        self.microscope = configuration['experiment']['MicroscopeState']['resolution_mode'] 
-        self.comport = configuration['configuration']['hardware']['filter_wheel']['port']
-        self.baudrate = configuration['configuration']['hardware']['filter_wheel']['baudrate']
-        self.filter_dictionary = configuration['configuration']['microscopes'][self.microscope]['filter_wheel']['available_filters']
-        self.number_of_filter_wheels = configuration['configuration']['hardware']['filter_wheel']['number_of_wheels']
+        self.filter_dictionary = configuration['configuration']['microscopes'][microscope_name]['filter_wheel']['available_filters']
         self.wheel_position = 0
-        self.wait_until_done_delay = 0.03
-        self.wait_until_done = True
 
     def check_if_filter_in_filter_dictionary(self, filter_name):
         r"""Checks if the filter designation (string) given exists in the filter dictionary

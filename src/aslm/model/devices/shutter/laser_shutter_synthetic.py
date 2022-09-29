@@ -71,43 +71,5 @@ class SyntheticShutter(ShutterBase):
         Return the current state of the shutters
     """
 
-    def __init__(self, configuration):
-        super().__init__(configuration)
-
-    def __del__(self):
-        r"""Close the SyntheticShutter at exit.
-        """
-        pass
-
-    def open_left(self):
-        r"""Open the left shutter, close the right shutter.
-        """
-        self.shutter_right_state = False
-        self.shutter_left_state = True
-        logger.debug("SyntheticShutter - Shutter left opened")
-
-    def open_right(self):
-        r"""Open the right shutter, close the left shutter.
-        """
-        self.shutter_right_state = True
-        self.shutter_left_state = False
-        logger.debug("SyntheticShutter - Shutter right opened")
-
-    def close_shutters(self):
-        r"""CLose both shutters
-        """
-        self.shutter_right_state = False
-        self.shutter_left_state = False
-        logger.debug("SyntheticShutter - Both shutters closed")
-
-    def state(self):
-        r"""Return the state of both shutters
-
-        Returns
-        -------
-        shutter_left_state : bool
-            State of the left shutter.
-        shutter_right_state : bool
-            State of the right shutter
-        """
-        return self.shutter_left_state, self.shutter_right_state
+    def __init__(self, microscope_name, device_connection, configuration):
+        super().__init__(microscope_name, device_connection, configuration)

@@ -58,15 +58,21 @@ class ShutterBase:
         Left shutter state
     """
 
-    def __init__(self,
-                 configuration):
-        self.configuration = configuration
-        self.experiment = self.configuration['experiment']
+    def __init__(self, microscope_name, device_connection, configuration):
 
-        # Right Shutter - High Resolution Mode
-        self.shutter_right = self.configuration['configuration']['microscopes']['high']['shutter']['hardware']['channel']
-        self.shutter_right_state = False
+        self.shutter_state = False
 
-        # Left Shutter - Low Resolution Mode
-        self.shutter_left = self.configuration['configuration']['microscopes']['low']['shutter']['hardware']['channel']
-        self.shutter_left_state = False
+    def __del__(self):
+        r"""Close the Shutter at exit.
+        """
+        pass
+
+    def open_shutter(self):
+        pass
+
+    def close_shutter(self):
+        pass
+
+    @property
+    def state(self):
+        return self.shutter_state

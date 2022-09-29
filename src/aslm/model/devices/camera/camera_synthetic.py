@@ -82,27 +82,20 @@ class SyntheticCamera(CameraBase):
         Experiment configuration of the microscope
 
     """
-    def __init__(self, camera_id, configuration):
-        super().__init__(camera_id, configuration)
+    def __init__(self, microscope_name, device_connection, configuration):
+        super().__init__(microscope_name, device_connection, configuration)
 
-        self.x_pixels = self.experiment['CameraParameters']['x_pixels']
-        self.y_pixels = self.experiment['CameraParameters']['y_pixels']
+        self.x_pixels = self.configuration['experiment']['CameraParameters']['x_pixels']
+        self.y_pixels = self.configuration['experiment']['CameraParameters']['y_pixels']
         self.is_acquiring = False
         self._mean_background_count = 100.0
         self._noise_sigma = noise_model.compute_noise_sigma(Ib=self._mean_background_count)
         self.blah = noise_model.compute_noise_sigma
-        self.camera_controller = SyntheticCameraController()
         self.current_frame_idx = None
         self.data_buffer = None
         self.num_of_frame = None
         self.pre_frame_idx = None
         self.random_image = True
-
-        # Configuration is passed in as self.configuration['configuration']
-        if camera_id == 0:
-            self.serial_number = self.configuration['configuration']['hardware']['camera'][0]['serial_number']
-        else:
-            self.serial_number = self.configuration['configuration']['hardware']['camera'][1]['serial_number']
 
         logger.info("SyntheticCamera Class Initialized")
 

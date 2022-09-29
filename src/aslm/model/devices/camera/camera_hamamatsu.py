@@ -32,7 +32,6 @@ POSSIBILITY OF SUCH DAMAGE.
 
 # Standard Library Imports
 import logging
-import importlib
 
 # Third Party Imports
 
@@ -55,12 +54,8 @@ class HamamatsuOrca(CameraBase):
         Global configuration of the microscope
 
     """
-    def __init__(self, camera_id, configuration):
-        super().__init__(camera_id, configuration)
-
-        # Locally Import Hamamatsu API and Initialize Camera Controller
-        HamamatsuController = importlib.import_module('aslm.model.devices.APIs.hamamatsu.HamamatsuAPI')
-        self.camera_controller = HamamatsuController.DCAM(camera_id)
+    def __init__(self, microscope_name, device_connection, configuration):
+        super().__init__(microscope_name, device_connection, configuration)
 
         # Values are pulled from the CameraParameters section of the configuration.yml file.
         # Exposure time converted here from milliseconds to seconds.

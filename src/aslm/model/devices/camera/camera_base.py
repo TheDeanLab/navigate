@@ -47,24 +47,22 @@ class CameraBase:
 
     Parameters
     ----------
-    camera_id : int
-        Selects which camera to connect to (0, 1, ...).
+    microscope_name : str
+        Selects which camera to connect to the microscope.
+    device_connection: Object
+        Camera API object
     configuration : Configurator
         Global configuration of the microscope
-    experiment : Configurator
-        Experiment configuration of the microscope
 
     """
-    def __init__(self, camera_id, configuration):
+    def __init__(self, microscope_name, device_connection, configuration):
         self.configuration = configuration
-        self.experiment = self.configuration['experiment']
-        self.microscope = self.experiment['MicroscopeState']['resolution_mode']
-        self.camera_id = camera_id
+        self.camera_controller = device_connection
+        self.camera_parameters = self.configuration['configuration']['microscopes'][microscope_name]['camera']
         self.stop_flag = False
         self.is_acquiring = False
 
         # Initialize Pixel Information
-        self.camera_parameters = self.configuration['configuration']['microscopes'][self.microscope]['camera']
         self.pixel_size_in_microns = self.camera_parameters['pixel_size_in_microns']
         self.binning_string = self.camera_parameters['binning']
         self.x_binning = int(self.binning_string[0])

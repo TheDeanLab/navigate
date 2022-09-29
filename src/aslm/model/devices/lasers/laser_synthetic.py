@@ -3,7 +3,7 @@ Synthetic Laser Class
 """
 import logging
 
-from .LaserBase import LaserBase
+from aslm.model.devices.lasers.laser_base import LaserBase
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -11,8 +11,8 @@ logger = logging.getLogger(p)
 
 
 class SyntheticLaser(LaserBase):
-    def __init__(self, model):
-        super().__init__(model)
+    def __init__(self, microscope_name, device_connection, configuration, laser_id):
+        super().__init__(microscope_name, device_connection, configuration, laser_id)
 
     def close(self):
         """

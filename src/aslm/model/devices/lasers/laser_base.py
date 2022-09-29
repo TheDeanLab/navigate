@@ -9,10 +9,13 @@ logger = logging.getLogger(p)
 
 
 class LaserBase:
-    def __init__(self, port):
-        pass
+    def __init__(self, microscope_name, device_connection, configuration, laser_id):
+        self.configuration = configuration
+        self.microscope_name = microscope_name
 
-    def set_power(self, power_level):
+        self.device_config = configuration['configuration']['microscopes'][microscope_name]['lasers'][laser_id]
+
+    def set_power(self, laser_intensity):
         pass
 
     def turn_on(self):

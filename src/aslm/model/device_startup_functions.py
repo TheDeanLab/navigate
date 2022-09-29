@@ -93,25 +93,6 @@ def auto_redial(func, args, n_tries=10, exception=Exception, **kwargs):
 
     return val
 
-def start_analysis(configuration,
-                   use_gpu):
-    r"""Initializes the analysis class on a dedicated thread
-
-    Parameters
-    ----------
-    configuration : Configurator
-        Configurator instance of global microscope configuration.
-    use_gpu : Boolean
-        Flag for enabling GPU analysis.
-
-    Returns
-    -------
-    Analysis : class
-        Analysis class.
-    """
-    from aslm.model.aslm_analysis import Analysis
-    return Analysis(use_gpu)
-
 
 def load_camera_connection(configuration,
                            camera_id=0,
@@ -339,70 +320,6 @@ def start_filter_wheel(microscope_name, device_connection, configuration, is_syn
         device_not_found(microscope_name, 'filter_wheel', device_type)
 
 
-def start_lasers(configuration):
-    r"""Initializes the laser classes on a dedicated thread.
-
-    Currently not implemented.  Requires API development of laser communication.  Underway.
-
-    Parameters
-    ----------
-    configuration : dict
-        Configurator instance of global microscope configuration.
-
-    Returns
-    -------
-    Laser : class
-        Laser class.
-    """
-
-    lasers = configuration['configuration']['hardware']['lasers']
-    if type(lasers) == list and lasers[0]['type'] == 'Omicron':
-            # This is the Omicron LightHUB Ultra Launch - consists of both Obis and
-            # Luxx lasers.
-            from aslm.model.devices.APIs.coherent.ObisLaser import ObisLaser as obis
-            from aslm.model.devices.APIs.omicron.LuxxLaser import LuxxLaser as luxx
-
-            # Iteratively go through the configuration file and turn on each of the lasers,
-            # and make sure that they are in appropriate external control mode.
-            laser = {}
-            num_lasers = len(configuration['configuration']['microscopes']['lasers'])
-            for laser_idx in range(num_lasers):
-                if laser_idx == 0:
-                    # 488 nm LuxX laser
-                    print("Initializing 488 nm LuxX Laser")
-                    comport = 'COM19'
-                    laser[laser_idx] = luxx(comport)
-                    laser[laser_idx].initialize_laser()
-
-                elif laser_idx == 1:
-                    # 561 nm Obis laser
-                    print("Initializing 561 nm Obis Laser")
-                    comport = 'COM4'
-                    laser[laser_idx] = obis(comport)
-                    laser[laser_idx].set_laser_operating_mode('mixed')
-
-                elif laser_idx == 2:
-                    # 642 nm LuxX laser
-                    print("Initializing 642 nm LuxX Laser")
-                    comport = 'COM17'
-                    laser[laser_idx] = luxx(comport)
-                    laser[laser_idx].initialize_laser()
-
-                else:
-                    print("Laser index not recognized")
-                    sys.exit()
-
-    elif lasers['type'] == 'SyntheticLasers':
-        from aslm.model.devices.lasers.SyntheticLaser import SyntheticLaser
-        laser = SyntheticLaser(configuration)
-
-    else:
-        print("Laser Type in Configuration.yml Not Recognized - Initialization Failed")
-        sys.exit()
-
-    return laser
-
-
 def start_daq(configuration, is_synthetic=False):
     r"""Initializes the data acquisition (DAQ) class on a dedicated thread.
 
@@ -455,16 +372,20 @@ def start_shutter(microscope_name, device_connection, configuration, is_syntheti
         device_type = configuration['configuration']['microscopes'][microscope_name]['shutter']['hardware']['type']
 
     if device_type == 'NI':
+        if device_connection is not None:
+            return device_connection
         from aslm.model.devices.shutter.laser_shutter_ttl import ShutterTTL
         return ShutterTTL(microscope_name, None, configuration)
     elif device_type == 'SyntheticShutter':
+        if device_connection is not None:
+            return device_connection
         from aslm.model.devices.shutter.laser_shutter_synthetic import SyntheticShutter
         return SyntheticShutter(microscope_name, None, configuration)
     else:
         device_not_found(microscope_name, 'shutter', device_type)
 
 
-def start_laser_triggers(configuration):
+def start_lasers(microscope_name, device_connection, configuration, id=0, is_synthetic=False):
     r"""Initializes the laser trigger class on a dedicated thread.
 
     Initializes the Laser Switching, Analog, and Digital DAQ Outputs.
@@ -482,14 +403,23 @@ def start_laser_triggers(configuration):
         Trigger class.
     """
 
-    if configuration['configuration']['hardware']['daq']['type'] == 'NI':
-        from aslm.model.devices.lasers.laser_trigger_ni import LaserTriggers
-        return LaserTriggers(configuration)
-    elif configuration['configuration']['hardware']['daq']['type'] == 'SyntheticDAQ':
-        from aslm.model.devices.lasers.laser_trigger_synthetic import SyntheticLaserTriggers
-        return SyntheticLaserTriggers(configuration)
+    if is_synthetic:
+        device_type = 'SyntheticLaser'
     else:
-        device_not_found(configuration['configuration']['hardware']['daq']['type'])
+        device_type = configuration['configuration']['microscopes'][microscope_name]['lasers'][id]['onoff']['hardware']['type']
+
+    if device_type == 'NI':
+        if device_connection is not None:
+            return device_connection
+        from aslm.model.devices.lasers.laser_ni import LaserNI
+        return LaserNI(microscope_name, device_connection, configuration, id)
+    elif device_type == 'SyntheticLaser':
+        if device_connection is not None:
+            return device_connection
+        from aslm.model.devices.lasers.laser_synthetic import SyntheticLaser
+        return SyntheticLaser(microscope_name, device_connection, configuration, id)
+    else:
+        device_not_found(microscope_name, 'laser', device_type, id)
 
 def start_remote_focus_device(microscope_name, device_connection, configuration, is_synthetic=False):
     if is_synthetic:
@@ -521,7 +451,7 @@ def start_galvo(microscope_name, device_connection, configuration, id=0, is_synt
     else:
         device_not_found(microscope_name, 'galvo', id, device_type)
 
-def device_not_found(args):
+def device_not_found(*args):
 
     print("Device Not Found in Configuration.YML:", args)
     sys.exit()

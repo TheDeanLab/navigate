@@ -80,12 +80,13 @@ class WaveformTabController(GUI_Controller):
         last_etl = 0
         last_galvo = 0
         last_camera = 0
-        for k in self.waveform_dict.keys():
-            if self.waveform_dict[k]['etl_waveform'] is None:
+        for k in self.waveform_dict['camera_waveform'].keys():
+            if self.waveform_dict['etl_waveform'][k] is None:
                 continue
-            etl_waveform = self.waveform_dict[k]['etl_waveform']
-            galvo_waveform = self.waveform_dict[k]['galvo_waveform']
-            camera_waveform = self.waveform_dict[k]['camera_waveform']
+            etl_waveform = self.waveform_dict['etl_waveform'][k]
+            # TODO: multiple galvos
+            galvo_waveform = self.waveform_dict['galvo_waveform'][0][k]
+            camera_waveform = self.waveform_dict['camera_waveform'][k]
             self.view.plot_etl.plot(np.arange(len(etl_waveform))/self.sample_rate + last_etl, etl_waveform, label=k)
             self.view.plot_galvo.plot(np.arange(len(galvo_waveform))/self.sample_rate + last_galvo, galvo_waveform, label=k)
             self.view.plot_etl.plot(np.arange(len(camera_waveform))/self.sample_rate + last_camera, camera_waveform, c='k', linestyle='--')

@@ -528,7 +528,7 @@ class Model:
         # prepare active microscope
         waveform_dict = self.active_microscope.prepare_acquisition()
 
-        # self.event_queue.put(('waveform', waveform_dict))
+        self.event_queue.put(('waveform', waveform_dict))
 
         
         self.frame_id = 0

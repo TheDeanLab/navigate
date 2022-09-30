@@ -717,38 +717,9 @@ class Model:
             'high' for high-resolution mode, and 'low' for low-resolution mode.
         """
         if resolution_value != self.active_microscope_name:
+            former_microscope = self.active_microscope_name
             self.get_active_microscope()
-            self.active_microscope.activate()
-
-    def apply_resolution_stage_offset(self, mode, initial=False):
-        """
-        There is a slight offset between the high and low resolution modes, defined in configuration.yml.
-        Apply this offset when we switch modes from low to high or vice versa. Do not apply this when
-        we are just switching in between low modes.
-
-        mode : str
-            One of "high" or "low"
-        """
-        # TODO: add it to microscope!
-        print('** stage offset')
-        return
-        pos_dict = self.get_stage_position()
-        for axis, val in pos_dict.items():
-            ax = axis.split('_')[0]
-            offset = self.configuration['configuration']['microscopes'][self.microscope]['stage'][f"{ax}_offset"]
-            new_pos = val + offset
-            if not initial:
-                new_pos -= offset
-
-            if hasattr(self, 'stages_r') and ax == 'f':
-                # Do not move the focus if we're using an entirely different stage
-                continue
-
-            self.move_stage({f"{ax}_abs": new_pos}, wait_until_done=True)
-
-        # Update based on new focus
-        ret_pos_dict = self.get_stage_position()
-        update_stage_dict(self, ret_pos_dict)
+            self.active_microscope.move_stage_offset(former_microscope)
 
     def load_images(self, filenames=None):
         r"""Load/Unload images to the Synthetic Camera

@@ -29,7 +29,6 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-from asyncore import read
 import logging
 from multiprocessing.managers import ListProxy
 
@@ -135,9 +134,16 @@ class Microscope:
         self.data_buffer = data_buffer
         self.number_of_frames = number_of_frames
 
-    def activate(self):
-        #TODO: move stage offset
-        pass
+    def move_stage_offset(self, former_microscope=None):
+        if former_microscope:
+            former_offset_dict = self.configuration['configuration']['microscopes'][former_microscope]['stage']
+        else:
+            former_offset_dict = dict((f'{a}_offset', 0) for a in self.stages)
+        self_offset_dict = self.configuration['configuration']['microscopes'][self.microscope_name]['stage']
+        pos_dict = self.get_stage_position()
+        for axes in self.stages:
+            pos = pos_dict[axes+'_pos'] + self_offset_dict[axes+'_offset'] - former_offset_dict[axes+'_offset']
+            self.stages[axes].move_absolute({axes+'_pos': pos}, wait_until_done=True)
 
     def prepare_acquisition(self):
         if self.camera.camera_controller.is_acquiring:

@@ -395,7 +395,6 @@ class Controller:
         else:
             self.resolution_value.set(self.configuration['experiment']['MicroscopeState']['zoom'])
 
-        self.model.apply_resolution_stage_offset(resolution_mode, initial=True)
         self.acquire_bar_controller.populate_experiment_values()
         self.stage_controller.populate_experiment_values()
         self.multiposition_tab_controller.set_positions(self.configuration['experiment']['MultiPositions']['stage_positions'])

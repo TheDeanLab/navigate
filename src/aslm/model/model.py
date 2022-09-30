@@ -112,9 +112,9 @@ class Model:
         self.microscopes = {}
         for microscope_name in configuration['configuration']['microscopes'].keys():
             self.microscopes[microscope_name] = Microscope(microscope_name, configuration, devices_dict, args.synthetic_hardware)
-        
+        self.active_microscope = None
+        self.active_microscope_name = None
         self.get_active_microscope()
-
 
         # Acquisition Housekeeping
         self.imaging_mode = None
@@ -171,7 +171,6 @@ class Model:
         # data buffer for image frames
         self.number_of_frames = self.configuration['experiment']['CameraParameters']['databuffer_size']
         self.update_data_buffer(self.img_width, self.img_height)
-
 
         # Image Writer/Save functionality
         self.image_writer = None
@@ -284,8 +283,6 @@ class Model:
             logging.debug('ASLM Model - Shared Memory Buffer Not Set Up.')
             return
 
-        self.get_active_microscope()
-
         if command == 'acquire':
             self.is_acquiring = True
             self.imaging_mode = self.configuration['experiment']['MicroscopeState']['image_mode']
@@ -329,15 +326,24 @@ class Model:
                 # stop live thread
                 self.stop_send_signal = True
                 self.signal_thread.join()
+                if args[0] == 'resolution' and args[1] != self.active_microscope_name:
+                    self.pause_data_thread()
+                    self.active_microscope.end_acquisition()
+                    reboot = True
                 self.current_channel = 0
-                reboot = True
 
             if args[0] == 'resolution':
                 self.change_resolution(args[1])
+                if reboot:
+                    # prepare active microscope
+                    waveform_dict = self.active_microscope.prepare_acquisition()
+                    self.resume_data_thread()
 
-            self.event_queue.put(('waveform', self.active_microscope.calculate_all_waveform))
+            if not reboot:
+                waveform_dict = self.active_microscope.calculate_all_waveform()
+            self.event_queue.put(('waveform', waveform_dict))
 
-            if reboot:
+            if self.is_acquiring:
                 # prepare devices based on updated info
                 self.stop_send_signal = False
                 self.signal_thread = threading.Thread(target=self.run_live_acquisition)
@@ -461,9 +467,7 @@ class Model:
 
         while not self.stop_acquisition:
             if self.ask_to_pause_data_thread:
-                self.logger.debug('data thread prepare to change resolution')
                 self.pause_data_ready_lock.release()
-                self.logger.debug('ready to change resolution')
                 self.pause_data_event.clear()
                 self.pause_data_event.wait()
             frame_ids = self.active_microscope.camera.get_new_frame()  # This is the 500 ms wait for Hamamatsu
@@ -506,6 +510,16 @@ class Model:
             self.pause_data_ready_lock.release()
 
         self.end_acquisition()  # Need this to turn off the lasers/close the shutters
+
+    def pause_data_thread(self):
+        self.pause_data_ready_lock.acquire()
+        self.ask_to_pause_data_thread = True
+        self.pause_data_ready_lock.acquire()
+
+    def resume_data_thread(self):
+        self.ask_to_pause_data_thread = False
+        self.pause_data_event.set()
+        self.pause_data_ready_lock.release()
 
     def prepare_acquisition(self, turn_off_flags=True):
         r"""Prepare the acquisition.

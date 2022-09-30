@@ -1,4 +1,5 @@
-"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""
+Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -32,26 +33,28 @@ POSSIBILITY OF SUCH DAMAGE.
 
 # Standard Library Imports
 import unittest
-import sys
 
 # Third Party Imports
-import numpy as np
 
 # Local Imports
-# sys.path.append('../../../../')
-from aslm.model.analysis.detection import add_median_border
 
-class TestDetection(unittest.TestCase):
 
-    def test_matrix_expansion(self):
-        data = np.random.rand(50, 50, 50)
-        test_output = add_median_border(data)
-        self.assertEqual(np.shape(test_output), (52, 52, 52))
+class TestTemplate(unittest.TestCase):
+    """
+    Template for Unit Tests
+    """
 
-    def test_median_border(self):
-        data = np.random.rand(50, 50, 50)
-        test_output = add_median_border(data)
-        self.assertEqual(test_output[0, 0, 0], np.median(data))
+    def test_1(self):
+        """
+        Proper Numpydoc for test
+        """
+        pass
+
+    def test_2(self):
+        """
+        Proper numpydoc for test
+        """
+        pass
 
 if (__name__ == "__main__"):
     unittest.main()

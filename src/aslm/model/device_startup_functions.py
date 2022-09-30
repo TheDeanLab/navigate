@@ -196,11 +196,11 @@ def load_stages(configuration, is_synthetic=False):
         if stage_type == 'PI' and platform.system() == 'Windows':
             from aslm.model.devices.stages.stage_pi import build_PIStage_connection
             from pipython.pidevice.gcserror import GCSError
-            stage_devices.append(auto_redial(build_PIStage_connection, (stage_config['controllername'], stage_config['serialnum'], stage_config['stages'], stage_config['refmode'],), exception=GCSError))
+            stage_devices.append(auto_redial(build_PIStage_connection, (stage_config['controllername'], stage_config['serial_number'], stage_config['stages'], stage_config['refmode'],), exception=GCSError))
         elif stage_type == 'Thorlabs' and platform.system() == 'Windows':
             from aslm.model.devices.stages.stage_tl_kcube_inertial import build_TLKIMStage_connection
             from aslm.model.devices.APIs.thorlabs.kcube_inertial import TLFTDICommunicationError
-            stage_devices.append(auto_redial(build_TLKIMStage_connection, (stage_config['serialnum'],), exception=TLFTDICommunicationError))
+            stage_devices.append(auto_redial(build_TLKIMStage_connection, (stage_config['serial_number'],), exception=TLFTDICommunicationError))
         elif stage_type == 'SyntheticStage':
             stage_devices.append(DummyDeviceConnection())
         else:
@@ -285,7 +285,7 @@ def load_filter_wheel_connection(configuration, is_synthetic=False):
     
     if device_type == 'SutterFilterWheel':
         from aslm.model.devices.filter_wheel.filter_wheel_sutter import build_filter_wheel_connection
-        return auto_redial(build_filter_wheel_connection, (device_info['comport'], device_info['baudrate'], 0.25), exception=Exception)
+        return auto_redial(build_filter_wheel_connection, (device_info['port'], device_info['baudrate'], 0.25), exception=Exception)
     elif device_type == 'SyntheticFilterWheel':
         return DummyDeviceConnection()
     else:

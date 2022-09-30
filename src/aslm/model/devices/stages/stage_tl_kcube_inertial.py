@@ -17,8 +17,8 @@ def build_TLKIMStage_connection(serialnum):
     # Cheat for now by opening just the first stage of this type.
     # TODO: Pass this from the configuration file
     available_serialnum = kim_controller.TLI_GetDeviceListExt()[0]
-    assert(available_serialnum == serialnum)
-    kim_controller.KIM_Open(serialnum)
+    assert(str(available_serialnum) == str(serialnum))
+    kim_controller.KIM_Open(str(serialnum))
     return kim_controller
 
 class TLKIMStage(StageBase):

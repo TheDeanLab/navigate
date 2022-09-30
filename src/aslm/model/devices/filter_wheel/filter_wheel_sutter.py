@@ -45,8 +45,9 @@ from aslm.model.devices.filter_wheel.filter_wheel_base import FilterWheelBase
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-class SutterFilterWheelController():
-    r""" SutterFilterWheel Serial Class
+
+def build_filter_wheel_connection(comport, baudrate, timeout=.25):
+    r""" Build SutterFilterWheel Serial Port connection
     Attributes
     ----------
     comport : str
@@ -54,13 +55,12 @@ class SutterFilterWheelController():
     baudrate : int
         Baud rate for communicating with the filter wheel, e.g., 9600.
     """
-    def __init__(self, comport, baudrate, timeout=.25):
-        logging.debug(f"SutterFilterWheel - Opening Serial Port {self.comport}")
-        try:
-            self.serial = serial.Serial(comport, baudrate, timeout=.25)
-        except serial.SerialException:
-            logger.warning("SutterFilterWheel - Could not establish Serial Port Connection")
-            raise UserWarning('Could not communicate with Sutter Lambda 10-B via COMPORT', self.comport)
+    logging.debug(f"SutterFilterWheel - Opening Serial Port {comport}")
+    try:
+        return serial.Serial(comport, baudrate, timeout=.25)
+    except serial.SerialException:
+        logger.warning("SutterFilterWheel - Could not establish Serial Port Connection")
+        raise UserWarning('Could not communicate with Sutter Lambda 10-B via COMPORT', self.comport)
 
 
 class SutterFilterWheel(FilterWheelBase):

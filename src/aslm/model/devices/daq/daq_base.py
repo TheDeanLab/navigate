@@ -103,7 +103,7 @@ class DAQBase:
         self.sample_rate = self.configuration['configuration']['microscopes'][microscope_name]['daq']['sample_rate']
         
         # Iterate through the dictionary.
-        for channel_key in microscope_state['channels']:
+        for channel_key in microscope_state['channels'].keys():
             # channel includes 'is_selected', 'laser', 'filter', 'camera_exposure'...
             channel = microscope_state['channels'][channel_key]
 
@@ -118,7 +118,7 @@ class DAQBase:
                     # exposure time.
                     self.sweep_time += readout_time
 
-                self.waveform_dict[channel_key]['camera_waveform'] = camera_exposure(sample_rate=self.sample_rate,
+                self.waveform_dict[channel_key] = camera_exposure(sample_rate=self.sample_rate,
                                                                                      sweep_time=self.sweep_time,
                                                                                      exposure=exposure_time,
                                                                                      camera_delay=self.camera_delay_percent)

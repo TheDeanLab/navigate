@@ -56,8 +56,8 @@ class RemoteFocusBase:
         self.sample_rate = configuration['configuration']['microscopes'][microscope_name]['daq']['sample_rate']
         self.sweep_time = configuration['configuration']['microscopes'][microscope_name]['daq']['sweep_time']
         self.camera_delay_percent = configuration['configuration']['microscopes'][microscope_name]['camera']['delay_percent']
-        self.delay_percent = self.device_config['delay_percent']
-        self.ramp_falling_percent = self.device_config['ramp_falling_percent']
+        self.etl_delay = self.device_config['delay_percent']
+        self.etl_ramp_falling = self.device_config['ramp_falling_percent']
         self.etl_max_voltage = self.device_config['hardware']['max']
         self.etl_min_voltage = self.device_config['hardware']['min']
 
@@ -77,7 +77,7 @@ class RemoteFocusBase:
         imaging_mode = microscope_state['resolution_mode']
         zoom = microscope_state['zoom']
 
-        for channel_key in microscope_state['channels']:
+        for channel_key in microscope_state['channels'].keys():
             # channel includes 'is_selected', 'laser', 'filter', 'camera_exposure'...
             channel = microscope_state['channels'][channel_key]
 

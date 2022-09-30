@@ -526,13 +526,13 @@ class Controller:
                 }
             """
             resolution = 'high' if self.resolution_value.get() == 'high' else 'low'
-            mag = 'N/A' if resolution == 'high' else self.resolution_value.get()
+            zoom = 'N/A' if resolution == 'high' else self.resolution_value.get()
             self.configuration['experiment']['MicroscopeState']['resolution_mode'] = resolution
-            self.configuration['experiment']['MicroscopeState']['zoom'] = mag
-            work_thread = self.threads_pool.createThread('model', lambda: self.model.run_command('update_setting', 'resolution'))
+            self.configuration['experiment']['MicroscopeState']['zoom'] = zoom
+            work_thread = self.threads_pool.createThread('model', lambda: self.model.run_command('update_setting', 'resolution', resolution))
             work_thread.join()
             # self.model.change_resolution(resolution_value=args[0])
-            self.camera_setting_controller.calculate_physical_dimensions(mag)
+            self.camera_setting_controller.calculate_physical_dimensions(zoom)
             if hasattr(self, 'etl_controller') and self.etl_controller:
                 self.etl_controller.populate_experiment_values()
             ret_pos_dict = self.model.get_stage_position()
@@ -680,10 +680,7 @@ class Controller:
                                                  mode=mode,
                                                  stop=False)
 
-        self.model.run_command('acquire', imaging_mode=mode,
-                               microscope_info=self.configuration['experiment']['MicroscopeState'],
-                               camera_info=self.configuration['experiment']['CameraParameters'],
-                               saving_info=self.configuration['experiment']['Saving'])
+        self.model.run_command('acquire')
 
         self.camera_view_controller.initialize_non_live_display(self.data_buffer,
                                                                 self.configuration['experiment']['MicroscopeState'],

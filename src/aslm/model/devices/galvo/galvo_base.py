@@ -58,6 +58,7 @@ class GalvoBase:
         self.camera_delay_percent = configuration['configuration']['microscopes'][microscope_name]['camera']['delay_percent']
         self.galvo_max_voltage = self.device_config['hardware']['max']
         self.galvo_min_voltage = self.device_config['hardware']['min']
+        self.etl_ramp_falling = configuration['configuration']['microscopes'][microscope_name]['remote_focus_device']['ramp_falling_percent']
 
         self.samples = int(self.sample_rate * self.sweep_time)
 
@@ -73,7 +74,7 @@ class GalvoBase:
         microscope_state = self.configuration['experiment']['MicroscopeState']
         galvo_parameters = self.configuration['experiment']['GalvoParameters'][self.microscope_name]
 
-        for channel_key in microscope_state['channels']:
+        for channel_key in microscope_state['channels'].keys():
             # channel includes 'is_selected', 'laser', 'filter', 'camera_exposure'...
             channel = microscope_state['channels'][channel_key]
 
@@ -91,9 +92,9 @@ class GalvoBase:
                     self.sweep_time += readout_time
 
                 # galvo Parameters
-                galvo_amplitude = float(galvo_parameters[self.microscope_name].get('amplitude', 0))
-                galvo_offset = float(galvo_parameters[self.microscope_name].get('offset', 0))
-                galvo_frequency = float(galvo_parameters[self.microscope_name].get('frequency', 0)) / exposure_time
+                galvo_amplitude = float(galvo_parameters.get('amplitude', 0))
+                galvo_offset = float(galvo_parameters.get('offset', 0))
+                galvo_frequency = float(galvo_parameters.get('frequency', 0)) / exposure_time
 
                 # Calculate the Waveforms
                 self.waveform_dict[channel_key] = sawtooth(sample_rate=self.sample_rate,

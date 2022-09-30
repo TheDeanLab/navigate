@@ -27,6 +27,7 @@ CameraParameters:
   binning: 1x1
   pixel_size: 6.5
   frames_to_average: 1.0
+  databuffer_size: 100
 RemoteFocusParameters:
   remote_focus_l_delay_percent: 7.5
   remote_focus_l_ramp_rising_percent: 85

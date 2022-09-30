@@ -37,9 +37,9 @@ import sys
 import logging
 import time
 import importlib
+from multiprocessing.managers import ListProxy
 
 # Third Party Imports
-import serial
 
 # Local Imports
 from aslm.tools.common_functions import build_ref_name
@@ -166,7 +166,7 @@ def start_camera(microscope_name, device_connection, configuration, is_synthetic
         device_not_found(microscope_name, 'camera', cam_type)
 
 
-def start_stages(configuration):
+def load_stages(configuration, is_synthetic=False):
     r"""Initializes the stage class on a dedicated thread.
 
     Parameters
@@ -179,54 +179,55 @@ def start_stages(configuration):
     Stage : class
         Stage class.
     """
+    stage_devices = []
 
     stages = configuration['configuration']['hardware']['stage']
 
-    if type(stages) == list:
-        for i in range(len(stages)):
-            stage_type = configuration['configuration']['hardware']['stage'][i]['type']
+    if type(stages) != ListProxy:
+        stages = [stages]
 
-            if stage_type == 'PI' and platform.system() == 'Windows':
-                from aslm.model.devices.stages.stage_pi import PIStage
-                from pipython.pidevice.gcserror import GCSError
-                return auto_redial(PIStage, (configuration,), exception=GCSError)
-            elif stage_type == 'SyntheticStage':
-                from aslm.model.devices.stages.stage_synthetic import SyntheticStage
-                return SyntheticStage(configuration)
-            else:
-                device_not_found(stage_type)
-    else:
-        stage_type = configuration['configuration']['hardware']['stage']['type']
+    for i in range(len(stages)):
+        stage_config = configuration['configuration']['hardware']['stage'][i]
+        if is_synthetic:
+            stage_type = 'SyntheticStage'
+        else:
+            stage_type = stage_config['type']
+
         if stage_type == 'PI' and platform.system() == 'Windows':
-            from aslm.model.devices.stages.stage_pi import PIStage
+            from aslm.model.devices.stages.stage_pi import build_PIStage_connection
             from pipython.pidevice.gcserror import GCSError
-            return auto_redial(PIStage, (configuration,), exception=GCSError)
+            stage_devices.append(auto_redial(build_PIStage_connection, (stage_config['controllername'], stage_config['serialnum'], stage_config['stages'], stage_config['refmode'],), exception=GCSError))
+        elif stage_type == 'Thorlabs' and platform.system() == 'Windows':
+            from aslm.model.devices.stages.stage_tl_kcube_inertial import build_TLKIMStage_connection
+            from aslm.model.devices.APIs.thorlabs.kcube_inertial import TLFTDICommunicationError
+            stage_devices.append(auto_redial(build_TLKIMStage_connection, (stage_config['serialnum'],), exception=TLFTDICommunicationError))
         elif stage_type == 'SyntheticStage':
-            from aslm.model.devices.stages.stage_synthetic import SyntheticStage
-            return SyntheticStage(configuration)
+            stage_devices.append(DummyDeviceConnection())
         else:
             device_not_found(stage_type)
 
-def start_stages_r(configuration):
-    r"""Initializes a focusing stage class in a dedicated thread.
+    return stage_devices
 
-    Parameters
-    ----------
-    configuration : dict
-        Configurator instance of global microscope configuration.
-
-    Returns
-    -------
-    Stage : class
-        Stage class.
-    """
-    if configuration['configuration']['hardware']['stage'][1]['type'] == 'Thorlabs' and platform.system() == 'Windows':
-        from aslm.model.devices.stages.stage_tl_kcube_inertial import TLKIMStage
-        from aslm.model.devices.APIs.thorlabs.kcube_inertial import TLFTDICommunicationError
-        return auto_redial(TLKIMStage, (configuration,), exception=TLFTDICommunicationError)
+def start_stage(microscope_name, device_connection, configuration, id=0, is_synthetic=False):
+    device_config = configuration['configuration']['microscopes'][microscope_name]['stage']['hardware']
+    if is_synthetic:
+        device_type = 'SyntheticStage'
+    elif type(device_config) == ListProxy:
+        device_type = device_config[id]['type']
     else:
-        device_not_found(configuration['configuration']['hardware']['stage'][1]['type'])
+        device_type = device_config['type']
 
+    if device_type == 'PI':
+        from aslm.model.devices.stages.stage_pi import PIStage
+        return PIStage(microscope_name, device_connection, configuration, id)
+    elif device_type == 'Thorlabs':
+        from aslm.model.devices.stages.stage_tl_kcube_inertial import TLKIMStage
+        return TLKIMStage(microscope_name, device_connection, configuration, id)
+    elif device_type == 'SyntheticStage':
+        from aslm.model.devices.stages.stage_synthetic import SyntheticStage
+        return SyntheticStage(microscope_name, device_connection, configuration, id)
+    else:
+        device_not_found(microscope_name, 'stage', device_type, id)
 
 def load_zoom_connection(configuration, is_synthetic=False):
     device_info = configuration['configuration']['hardware']['zoom']
@@ -283,7 +284,8 @@ def load_filter_wheel_connection(configuration, is_synthetic=False):
         device_type = device_info['type']
     
     if device_type == 'SutterFilterWheel':
-        return auto_redial(serial.Serial, (device_info['comport'], device_info['baudrate'],), timeout=.25, exception=Exception)
+        from aslm.model.devices.filter_wheel.filter_wheel_sutter import build_filter_wheel_connection
+        return auto_redial(build_filter_wheel_connection, (device_info['comport'], device_info['baudrate'], 0.25), exception=Exception)
     elif device_type == 'SyntheticFilterWheel':
         return DummyDeviceConnection()
     else:
@@ -481,5 +483,14 @@ def load_devices(configuration, is_synthetic=False)->dict:
     # load daq
     if 'daq' in configuration['configuration']['hardware'].keys():
         devices['daq'] = start_daq(configuration, is_synthetic)
+
+    # load stage
+    if 'stage' in configuration['configuration']['hardware'].keys():
+        device_config = configuration['configuration']['hardware']['stage']
+        devices['stages'] = {}
+        stages = load_stages(configuration, is_synthetic)
+        for i, stage in enumerate(stages):
+            device_ref_name = build_ref_name('_', device_config[i]['type'], device_config[i]['serial_number'])
+            devices['stages'][device_ref_name] = stage
 
     return devices

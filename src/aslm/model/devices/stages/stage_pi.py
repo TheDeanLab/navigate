@@ -50,29 +50,43 @@ from aslm.model.devices.stages.stage_base import StageBase
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+def build_PIStage_connection(controllername, serialnum, stages, refmodes):
+    pi_stages = stages.split()
+    pi_refmodes = refmodes.split()
+    pi_tools = pitools
+    pi_device = GCSDevice(controllername)
+    pi_device.ConnectUSB(serialnum=serialnum)
+    pi_tools.startup(pi_device, stages=list(pi_stages), refmodes=list(pi_refmodes))
+    # wait until pi_device is ready
+    blockflag = True
+    while blockflag:
+        if pi_device.IsControllerReady():
+            blockflag = False
+        else:
+            time.sleep(0.1)
+    
+    stage_connection = {
+        'pitools': pi_tools,
+        'pidevice': pi_device
+    }
+    return stage_connection
+
 class PIStage(StageBase):
-    def __init__(self, configuration):
-        super().__init__(configuration)
-
-        self.stage_hardware = self.configuration['configuration']['hardware']['stage'][self.configuration['configuration']['hardware']['stage']['type'] == 'PI']
-
-        pi_stages = self.stage_hardware['stages']
-        pi_refmodes = self.stage_hardware['refmode']
-        pi_stages = pi_stages.split()
-        pi_refmodes = pi_refmodes.split()
+    def __init__(self, microscope_name, device_connection, configuration, device_id=0):
+        super().__init__(microscope_name, device_connection, configuration, device_id)
 
         # Mapping from self.axes to corresponding PI axis labelling
-        self.pi_axes = [1, 2, 3, 5, 4]  # x, y, z, f, theta
+        axes_mapping = {
+            'x': 1,
+            'y': 2,
+            'z': 3,
+            'f': 5,
+            'theta': 4
+        }
+        self.pi_axes = list(map(lambda a: axes_mapping[a], self.axes))
 
-        self.pitools = pitools
-        self.controllername = self.stage_hardware['controllername']
-        self.pi_stages = pi_stages
-        self.refmode = pi_refmodes
-        self.serialnum = str(self.stage_hardware['serial_number'])
-        self.pidevice = GCSDevice(self.controllername)
-        self.pidevice.ConnectUSB(serialnum=self.serialnum)
-        self.pitools.startup(self.pidevice, stages=list(self.pi_stages), refmodes=list(self.refmode))
-        self.block_till_controller_is_ready()
+        self.pitools = device_connection['pitools']
+        self.pidevice = device_connection['pidevice']
 
     def __del__(self):
         try:
@@ -212,27 +226,16 @@ class PIStage(StageBase):
                 print('Unzeroing of axis: ', axis, 'failed')
 
     def load_sample(self):
-        y_abs = self.stage['y_load_position'] / 1000
+        y_abs = self.y_load_position / 1000
         try:
             self.pidevice.MOV({2: y_abs})
         except GCSError as e:
             logger.exception(GCSError(e))
 
     def unload_sample(self):
-        y_abs = self.stage['y_unload_position'] / 1000
+        y_abs = self.y_unload_position / 1000
         try:
             self.pidevice.MOV({2: y_abs})
         except GCSError as e:
             logger.exception(GCSError(e))
 
-    def block_till_controller_is_ready(self):
-        """
-        Blocks further execution (especially during referencing moves)
-        till the PI controller returns ready
-        """
-        blockflag = True
-        while blockflag:
-            if self.pidevice.IsControllerReady():
-                blockflag = False
-            else:
-                time.sleep(0.1)

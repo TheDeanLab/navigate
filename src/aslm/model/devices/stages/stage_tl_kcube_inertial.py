@@ -28,6 +28,8 @@ class TLKIMStage(StageBase):
         # Mapping from self.axes to corresponding KIM channels
         self.kim_axes = [1]
         self.kim_controller = device_connection
+
+        self.serialnum = str(configuration['configuration']['microscopes'][microscope_name]['stage']['hardware'][device_id]['serial_number'])
         
 
     def __del__(self):

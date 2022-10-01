@@ -55,14 +55,9 @@ class OMETIFFMetadata(XMLMetadata):
 
         ome_dict['Image']['Pixels']['SizeZ'] = z_steps
 
-        # This section contains duplicated code b/c in the instance resolution mode != high or low, we
-        # do not want to include this information
-        if self.configuration['experiment']['MicroscopeState']['resolution_mode'] == 'low':
-            pixel_size = float(self.configuration['configuration']['ZoomParameters']['low_res_zoom_pixel_size'][self.configuration['experiment']['MicroscopeState']['zoom']])
-            ome_dict['Image']['Pixels']['PhysicalSizeX'], ome_dict['Image']['Pixels']['PhysicalSizeY'] = pixel_size, pixel_size
-        elif self.configuration['experiment']['MicroscopeState']['resolution_mode'] == 'high':
-            pixel_size = float(self.configuration['configuration']['ZoomParameters']['high_res_zoom_pixel_size'])
-            ome_dict['Image']['Pixels']['PhysicalSizeX'], ome_dict['Image']['Pixels']['PhysicalSizeY'] = pixel_size, pixel_size
+        zoom = self.configuration['experiment']['MicroscopeState']['zoom']
+        pixel_size = float(self.configuration['configuration']['microscopes'][self.active_microscope]['zoom']['pixel_size'][zoom])
+        ome_dict['Image']['Pixels']['PhysicalSizeX'], ome_dict['Image']['Pixels']['PhysicalSizeY'] = pixel_size, pixel_size
 
         ome_dict['Image']['Pixels']['Channel'] = []
         for i in range(self.shape_c):

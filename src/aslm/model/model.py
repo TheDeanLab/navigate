@@ -303,7 +303,7 @@ class Model:
             
             self.signal_thread.name = self.imaging_mode + " signal"
             if self.is_save and self.imaging_mode != 'live':
-                self.configuration['experiment']['Saving'] = kwargs['saving_info']
+                # self.configuration['experiment']['Saving'] = kwargs['saving_info']
                 self.image_writer = ImageWriter(self)
                 self.data_thread = threading.Thread(target=self.run_data_process, kwargs={'data_func': self.image_writer.save_image})
             else:

@@ -2,8 +2,7 @@ import logging
 
 import numpy.typing as npt
 
-from aslm.model.aslm_model_config import Configurator
-
+from multiprocessing.managers import DictProxy
 
 class DataSource:
     def __init__(self, file_name: str = '', mode: str = 'w') -> None:
@@ -64,10 +63,8 @@ class DataSource:
         """Return shape as XYCZT."""
         return (self.shape_x, self.shape_y, self.shape_c, self.shape_z, self.shape_t)
 
-    def set_metadata_from_configuration_experiment(self, configuration: Configurator, 
-                                                   experiment: Configurator) -> None:
+    def set_metadata_from_configuration_experiment(self, configuration: DictProxy) -> None:
         self.metadata.configuration = configuration
-        self.metadata.experiment = experiment
 
         # pull new values from the metadata
         self.dx, self.dy, self.dz = self.metadata.voxel_size

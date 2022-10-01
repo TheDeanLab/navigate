@@ -14,7 +14,7 @@ def test_bdv_write():
 
     # Establish a BDV data source
     ds = BigDataViewerDataSource('test.h5')
-    ds.set_metadata_from_configuration_experiment(model.configuration, model.experiment)
+    ds.set_metadata_from_configuration_experiment(model.configuration)
 
     # Populate one image per channel per timepoint
     n_images = ds.shape_c*ds.shape_z*ds.shape_t

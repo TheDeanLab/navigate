@@ -20,7 +20,7 @@ def tiff_write_read(is_ome=False, multiposition=False):
     else:
         fn = ''
     ds = TiffDataSource(fn)
-    ds.set_metadata_from_configuration_experiment(model.configuration, model.experiment)
+    ds.set_metadata_from_configuration_experiment(model.configuration)
 
     # Populate one image per channel per timepoint per positioj
     n_images = ds.shape_c*ds.shape_z*ds.shape_t*ds.positions

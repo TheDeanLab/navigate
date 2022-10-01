@@ -21,7 +21,6 @@ class Metadata:
         (https://github.com/python-microscopy/python-microscopy/).
         """
         self._configuration = None
-        self._experiment = None
         self.dx, self.dy, self.dz = 1, 1, 1  # pixel sizes (um)
         self.dt = 1                          # time displacement (s)
         self.dc = 1                          # step size between channels, should always be 1
@@ -31,6 +30,8 @@ class Metadata:
         # shape
         self.shape_x, self.shape_y, self.shape_z, self.shape_t, self.shape_c = 1, 1, 1, 1, 1
         self.positions = 1
+
+        self.active_microscope = None
 
     @property
     def configuration(self) -> Optional[Configurator]:
@@ -42,29 +43,18 @@ class Metadata:
         self.set_from_configuration_experiment()
 
     @property
-    def experiment(self) -> Optional[Configurator]:
-        return self._experiment
-
-    @experiment.setter
-    def experiment(self, experiment: Configurator) -> None:
-        self._experiment = experiment
-        self.set_from_configuration_experiment()
-
-    @property
     def per_stack(self) -> bool:
         return self._per_stack
 
     def set_from_configuration_experiment(self) -> None:
-        if self.configuration['experiment'] is not None and self.configuration['configuration'] is not None:
+        if self.configuration.get('experiment') is not None and self.configuration.get('configuration') is not None:
+            self.active_microscope = self.configuration['experiment']['MicroscopeState']['resolution_mode']
             self.set_shape_from_configuration_experiment()
             self.set_stack_order_from_configuration_experiment()
 
     def set_shape_from_configuration_experiment(self) -> None:
         zoom = self.configuration['experiment']['MicroscopeState']['zoom']
-        if self.configuration['experiment']['MicroscopeState']['resolution_mode'] == 'low':
-            pixel_size = float(self.configuration['configuration']['ZoomParameters']['low_res_zoom_pixel_size'][zoom])
-        else:
-            pixel_size = float(self.configuration['configuration']['ZoomParameters']['high_res_zoom_pixel_size'])
+        pixel_size = float(self.configuration['configuration']['microscopes'][self.active_microscope]['zoom']['pixel_size'][zoom])
         self.dx, self.dy = pixel_size, pixel_size
         self.dz = float(self.configuration['experiment']['MicroscopeState']['step_size'])
         self.dt = float(self.configuration['experiment']['MicroscopeState']['timepoint_interval'])

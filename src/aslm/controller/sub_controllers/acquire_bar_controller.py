@@ -364,17 +364,17 @@ class AcquireBarController(GUI_Controller):
 
 
 def initialize_popup_window(popup_window,
-                            values):
+                            saving_settings):
     """This function initializes the popup window
 
     Parameters
     ----------
     popup_window : object
         Instance of the popup save dialog.
-    values : dict
+    save_settings : dict
         {'root_directory':, 'save_directory':, 'user':, 'tissue':,'celltype':,'label':, 'file_type':}
     """
     popup_vals = popup_window.get_widgets()
-    for name in values:
-        if popup_vals.get(name, None):
-            popup_vals[name].set(values[name])
+    for k, v in saving_settings.items():
+        if popup_vals.get(k, None):
+            popup_vals[k].set(v)

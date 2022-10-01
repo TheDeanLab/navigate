@@ -8,7 +8,7 @@ import numpy.typing as npt
 # Local imports
 from .data_source import DataSource
 from ..metadata_sources.bdv_metadata import BigDataViewerMetadata
-from aslm.model.aslm_model_config import Configurator
+from multiprocessing.managers import DictProxy
 
 
 class BigDataViewerDataSource(DataSource):
@@ -53,10 +53,10 @@ class BigDataViewerDataSource(DataSource):
             self._shapes = np.maximum(np.array([self.shape_z, self.shape_y, self.shape_x])[None,:]//self.resolutions[:,::-1], 1)
         return self._shapes
 
-    def set_metadata_from_configuration_experiment(self, configuration: Configurator, experiment: Configurator) -> None:
+    def set_metadata_from_configuration_experiment(self, configuration: DictProxy) -> None:
         self._subdivisions = None
         self._shapes = None
-        return super().set_metadata_from_configuration_experiment(configuration, experiment)
+        return super().set_metadata_from_configuration_experiment(configuration)
 
     def write(self, data: npt.ArrayLike, **kw) -> None:
         self.mode = 'w'

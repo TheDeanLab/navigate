@@ -33,6 +33,7 @@ POSSIBILITY OF SUCH DAMAGE.
 # Standard Library Imports
 import unittest
 from pathlib import Path
+from aslm.model.devices.zoom import zoom_synthetic
 
 # Third Party Imports
 
@@ -45,17 +46,18 @@ from aslm.model.dummy import DummyModel
 class TestZoomSynthetic(unittest.TestCase):
     r"""Unit Test for SyntheticZoom Class"""
 
-    def test_zoom_synthetic_attributes(self):
-        self.dummy_model = DummyModel()
-        self.config = self.dummy_model.configuration
-        zoom_class = SyntheticZoom(configuration=self.config)
+    dummy_model = DummyModel()
+    microscope_name = 'low'
+    zoom_class = SyntheticZoom(microscope_name, None, dummy_model.configuration)
 
-        assert hasattr(zoom_class, 'configuration')
-        assert hasattr(zoom_class, 'zoomdict')
-        assert hasattr(zoom_class, 'zoomvalue')
-        assert hasattr(zoom_class, 'set_zoom') and callable(getattr(zoom_class, 'set_zoom'))
-        assert hasattr(zoom_class, 'read_position') and callable(getattr(zoom_class, 'read_position'))
-        assert hasattr(zoom_class, 'move') and callable(getattr(zoom_class, 'move'))
+    def test_zoom_synthetic_attributes(self):
+
+        assert hasattr(self.zoom_class, 'zoomdict')
+        assert hasattr(self.zoom_class, 'zoomvalue')
+
+        assert hasattr(self.zoom_class, 'set_zoom') and callable(getattr(self.zoom_class, 'set_zoom'))
+        assert hasattr(self.zoom_class, 'move') and callable(getattr(self.zoom_class, 'move'))
+        assert hasattr(self.zoom_class, 'read_position') and callable(getattr(self.zoom_class, 'read_position'))
 
 
 if __name__ == '__main__':

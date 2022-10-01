@@ -2,7 +2,6 @@ import os
 
 import numpy as np
 
-
 def test_bdv_write():
     from aslm.model.dummy import DummyModel
     from aslm.model.model_features.data_sources.bdv_data_source import BigDataViewerDataSource
@@ -10,7 +9,7 @@ def test_bdv_write():
     # Set up model with a random number of z-steps to modulate the shape
     model = DummyModel()
     z_steps = np.random.randint(1,10)
-    model.experiment.MicroscopeState['number_z_steps'] = z_steps
+    model.configuration['experiment']['MicroscopeState']['number_z_steps'] = z_steps
 
     # Establish a BDV data source
     ds = BigDataViewerDataSource('test.h5')

@@ -38,21 +38,16 @@ from aslm.model.dummy import DummyModel
 
 class TestLaserBase(unittest.TestCase):
     r"""Unit Test for ShutterBase Class"""
+    dummy_model = DummyModel()
+    microscope_name = 'low'
 
     def test_shutter_base_attributes(self):
-        self.dummy_model = DummyModel()
-        self.configuration = self.dummy_model.configuration
-        self.experiment = self.dummy_model.configuration['experiment']
+        shutter = ShutterBase(self.microscope_name, None, self.dummy_model.configuration)
 
-        shutter = ShutterBase(configuration=self.configuration)
-
-        assert hasattr(shutter, 'configuration')
-        assert hasattr(shutter, 'experiment')
-        assert hasattr(shutter, 'shutter_right')
-        assert hasattr(shutter, 'shutter_right_state')
-        assert hasattr(shutter, 'shutter_left')
-        assert hasattr(shutter, 'shutter_left_state')
-
+        # Methods
+        assert hasattr(shutter, 'open_shutter') and callable(getattr(shutter, 'open_shutter'))
+        assert hasattr(shutter, 'close_shutter') and callable(getattr(shutter, 'close_shutter'))
+        assert hasattr(shutter, 'state')
 
 if __name__ == '__main__':
     unittest.main()

@@ -21,7 +21,6 @@ def test_ome_metadata_valid():
     md = OMETIFFMetadata()
 
     md.configuration = model.configuration
-    md.experiment = model.experiment
 
     # Write metadata to file
     md.write_xml('test.xml')

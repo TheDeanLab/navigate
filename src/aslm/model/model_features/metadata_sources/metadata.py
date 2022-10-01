@@ -66,7 +66,7 @@ class Metadata:
         self.shape_c = sum([v['is_selected'] == True for k, v in self.configuration['experiment']['MicroscopeState']['channels'].items()])
 
         if bool(self.configuration['experiment']['MicroscopeState']['is_multiposition']):
-            self.positions = len(self.configuration['experiment']['MicroscopeState']['stage_positions'])
+            self.positions = len(self.configuration['experiment']['MultiPositions']['stage_positions'])
         else:
             self.positions = 1
 

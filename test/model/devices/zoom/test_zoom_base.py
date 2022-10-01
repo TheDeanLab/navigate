@@ -40,19 +40,23 @@ from pathlib import Path
 from aslm.model.devices.zoom.zoom_base import ZoomBase
 from aslm.model.aslm_model_config import Configurator
 from aslm.model.dummy import DummyModel
+from attr import has
 
 
 class TestZoomBase(unittest.TestCase):
     r"""Unit Test for Zoom Base Class"""
+    dummy_model = DummyModel()
+    microscope_name = 'low'
+    zoom_class = ZoomBase(microscope_name, None, dummy_model.configuration)
 
     def test_zoom_base_attributes(self):
-        self.dummy_model = DummyModel()
-        self.config = self.dummy_model.configuration
-        zoom_class = ZoomBase(configuration=self.config)
 
-        assert hasattr(zoom_class, 'configuration')
-        assert hasattr(zoom_class, 'zoomdict')
-        assert hasattr(zoom_class, 'zoomvalue')
+        assert hasattr(self.zoom_class, 'zoomdict')
+        assert hasattr(self.zoom_class, 'zoomvalue')
+
+        assert hasattr(self.zoom_class, 'set_zoom') and callable(getattr(self.zoom_class, 'set_zoom'))
+        assert hasattr(self.zoom_class, 'move') and callable(getattr(self.zoom_class, 'move'))
+        assert hasattr(self.zoom_class, 'read_position') and callable(getattr(self.zoom_class, 'read_position'))
 
 if __name__ == '__main__':
     unittest.main()

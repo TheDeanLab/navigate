@@ -31,6 +31,7 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 
 # Standard Library Imports
+import unittest
 
 # Third Party Imports
 
@@ -38,64 +39,37 @@ POSSIBILITY OF SUCH DAMAGE.
 from aslm.model.dummy import DummyModel
 
 
-class TestSyntheticHardware():
+class TestSyntheticHardware(unittest.TestCase):
+    dummy_model = DummyModel()
+    microscope_name = 'low'
 
     def test_synthetic_daq(self):
         from aslm.model.devices.daq.daq_synthetic import SyntheticDAQ
-        self.dummy_model = DummyModel()
-        self.config = self.dummy_model.configuration
-        sd = SyntheticDAQ(configuration=self.config)
-
-        assert True
-
-
+        
+        SyntheticDAQ(self.dummy_model.configuration)
 
     def test_synthetic_camera(self):
-        from aslm.model.devices.camera.camera_synthetic import SyntheticCamera
-        self.dummy_model = DummyModel()
-        self.config = self.dummy_model.configuration
-        sc = SyntheticCamera(configuration=self.config, camera_id=0)
+        from aslm.model.devices.camera.camera_synthetic import SyntheticCamera, SyntheticCameraController
 
-        return True
+        scc = SyntheticCameraController()
+        SyntheticCamera(self.microscope_name, scc, self.dummy_model.configuration)
 
     def test_synthetic_stage(self):
         from aslm.model.devices.stages.stage_synthetic import SyntheticStage
-        self.dummy_model = DummyModel()
-        self.config = self.dummy_model.configuration
 
-
-
-        ss = SyntheticStage(configuration=self.config)
+        SyntheticStage(self.microscope_name, None, self.dummy_model.configuration)
 
     def test_synthetic_zoom(self):
         from aslm.model.devices.zoom.zoom_synthetic import SyntheticZoom
-        self.dummy_model = DummyModel()
-        self.config = self.dummy_model.configuration
 
-
-        sz = SyntheticZoom(configuration=self.config)
-
-        return True
+        SyntheticZoom(self.microscope_name, None, self.dummy_model.configuration)
 
     def test_synthetic_shutter(self):
         from aslm.model.devices.shutter.laser_shutter_synthetic import SyntheticShutter
-        self.dummy_model = DummyModel()
-        self.config = self.dummy_model.configuration
 
+        SyntheticShutter(self.microscope_name, None, self.dummy_model.configuration)
 
+    def test_synthetic_laser(self):
+        from aslm.model.devices.lasers.laser_synthetic import SyntheticLaser
 
-        ss = SyntheticShutter(configuration=self.config)
-
-        return True
-
-    # def test_synthetic_laser(self):
-    #     from aslm.model.devices.laser_trigger_synthetic import SyntheticLaserTriggers
-    #     from aslm.model.devices.lasers.SyntheticLaser import SyntheticLaser
-    #     self.dummy_model = DummyModel()
-    #     self.config = self.dummy_model.configuration
-    #     self.experiment = self.dummy_model.experiment
-    #     self.etl_const = self.dummy_model.etl_constants
-    #
-    #     sl = SyntheticLaser(self.config, False)
-    #
-    #     return True
+        SyntheticLaser(self.microscope_name, None, self.dummy_model.configuration, 0)

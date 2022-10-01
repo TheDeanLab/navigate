@@ -44,26 +44,24 @@ from aslm.model.dummy import DummyModel
 
 class TestSyntheticShutter(unittest.TestCase):
     r"""Unit Test for SyntheticShutter Class"""
+    dummy_model = DummyModel()
+    microscope_name = 'low'
 
     def test_synthetic_shutter_attributes(self):
-        self.dummy_model = DummyModel()
-        self.configuration = self.dummy_model.configuration
-        self.experiment = self.dummy_model.configuration['experiment']
-        shutter = SyntheticShutter(configuration=self.configuration)
+        shutter = SyntheticShutter(self.microscope_name, None, self.dummy_model.configuration)
 
         # Attributes
-        assert hasattr(shutter, 'configuration')
-        assert hasattr(shutter, 'experiment')
-        assert hasattr(shutter, 'shutter_right')
-        assert hasattr(shutter, 'shutter_right_state')
-        assert hasattr(shutter, 'shutter_left')
-        assert hasattr(shutter, 'shutter_left_state')
+        # assert hasattr(shutter, 'configuration')
+        # assert hasattr(shutter, 'experiment')
+        # assert hasattr(shutter, 'shutter_right')
+        # assert hasattr(shutter, 'shutter_right_state')
+        # assert hasattr(shutter, 'shutter_left')
+        # assert hasattr(shutter, 'shutter_left_state')
 
         # Methods
-        assert hasattr(shutter, 'open_left') and callable(getattr(shutter, 'open_left'))
-        assert hasattr(shutter, 'open_right') and callable(getattr(shutter, 'open_right'))
-        assert hasattr(shutter, 'close_shutters') and callable(getattr(shutter, 'close_shutters'))
-        assert hasattr(shutter, 'state') and callable(getattr(shutter, 'state'))
+        assert hasattr(shutter, 'open_shutter') and callable(getattr(shutter, 'open_shutter'))
+        assert hasattr(shutter, 'close_shutter') and callable(getattr(shutter, 'close_shutter'))
+        assert hasattr(shutter, 'state')
 
 if __name__ == '__main__':
     unittest.main()

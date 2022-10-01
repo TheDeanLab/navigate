@@ -7,17 +7,14 @@ def test_metadata_voxel_size():
     md = Metadata()
 
     md.configuration = model.configuration
-    md.experiment = model.experiment
 
-    zoom = model.experiment.MicroscopeState['zoom']
-    if model.experiment.MicroscopeState['resolution_mode'] == 'low':
-        pixel_size = float(model.configuration.ZoomParameters['low_res_zoom_pixel_size'][zoom])
-    else:
-        pixel_size = float(model.configuration.ZoomParameters['high_res_zoom_pixel_size'])
+    zoom = model.configuration['experiment']['MicroscopeState']['zoom']
+    active_microscope = model.configuration['experiment']['MicroscopeState']['resolution_mode']
+    pixel_size = float(model.configuration['configuration']['microscopes'][active_microscope]['zoom']['pixel_size'][zoom])
 
     dx, dy, dz = md.voxel_size
 
-    assert((dx == pixel_size) and (dy == pixel_size) and (dz == float(model.experiment.MicroscopeState['step_size'])))
+    assert((dx == pixel_size) and (dy == pixel_size) and (dz == float(model.configuration['experiment']['MicroscopeState']['step_size'])))
 
 
 def test_metadata_shape():
@@ -29,13 +26,12 @@ def test_metadata_shape():
     md = Metadata()
 
     md.configuration = model.configuration
-    md.experiment = model.experiment
 
-    txs = model.experiment.CameraParameters['x_pixels']
-    tys = model.experiment.CameraParameters['y_pixels']
-    tzs = model.experiment.MicroscopeState['number_z_steps']
-    tts = model.experiment.MicroscopeState['timepoints']
-    tcs = sum([v['is_selected'] == True for k, v in model.experiment.MicroscopeState['channels'].items()])
+    txs = model.configuration['experiment']['CameraParameters']['x_pixels']
+    tys = model.configuration['experiment']['CameraParameters']['y_pixels']
+    tzs = model.configuration['experiment']['MicroscopeState']['number_z_steps']
+    tts = model.configuration['experiment']['MicroscopeState']['timepoints']
+    tcs = sum([v['is_selected'] == True for k, v in model.configuration['experiment']['MicroscopeState']['channels'].items()])
 
     xs, ys, cs, zs, ts = md.shape
 

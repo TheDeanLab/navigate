@@ -38,20 +38,16 @@ from pathlib import Path
 
 # Local Imports
 from aslm.model.devices.stages.stage_base import StageBase
-from aslm.model.aslm_model_config import Configurator
 from aslm.model.dummy import DummyModel
 
-
-class TestZoomBase(unittest.TestCase):
+class TestStageBase(unittest.TestCase):
     r"""Unit Test for StageBase Class"""
 
     def test_stage_base_attributes(self):
-        self.dummy_model = DummyModel()
-        self.configuration = self.dummy_model.configuration
-        self.experiment = self.dummy_model.configuration['experiment']
-        stage_base = StageBase(configuration=self.configuration)
+        dummy_model = DummyModel()
+        microscope_name = 'low'
+        stage_base = StageBase(microscope_name, None, dummy_model.configuration)
 
-        assert hasattr(stage_base, 'configuration')
         assert hasattr(stage_base, 'x_pos')
         assert hasattr(stage_base, 'y_pos')
         assert hasattr(stage_base, 'z_pos')

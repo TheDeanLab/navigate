@@ -22,7 +22,7 @@
 .DS_Store
 .AppleDouble
 .LSOverride
-
+*.icloud
 # Thumbnails
 ._*
 

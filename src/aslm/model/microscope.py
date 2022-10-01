@@ -195,6 +195,9 @@ class Microscope:
         # Laser Settings
         current_laser_index = channel['laser_index']
         self.lasers[str(self.laser_wavelength[current_laser_index])].set_power(channel['laser_power'])
+        for k in self.lasers:
+            self.lasers[k].turn_off()
+        self.lasers[str(self.laser_wavelength[current_laser_index])].turn_on()
 
     def get_readout_time(self):
         r"""Get readout time from camera.

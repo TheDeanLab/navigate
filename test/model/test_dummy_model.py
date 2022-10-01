@@ -37,7 +37,7 @@ import unittest
 import pytest
 import numpy as np
 
-from aslm.model.dummy_model import get_dummy_model
+from aslm.model.dummy import DummyModel
 
 class TestDummyModel(unittest.TestCase):
     r"""Unit Test for Dummy Model"""

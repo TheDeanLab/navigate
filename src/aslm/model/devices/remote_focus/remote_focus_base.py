@@ -94,6 +94,7 @@ class RemoteFocusBase:
                     # to be net longer than exposure_time. This helps the galvo keep sweeping for the full camera
                     # exposure time.
                     self.sweep_time += readout_time
+                self.samples = int(self.sample_rate * self.sweep_time)
 
                 # ETL Parameters
                 etl_amplitude = float(etl_constants['ETLConstants'][imaging_mode][zoom][laser]['amplitude'])
@@ -101,13 +102,13 @@ class RemoteFocusBase:
 
                 # Calculate the Waveforms
                 self.waveform_dict[channel_key] = tunable_lens_ramp(sample_rate=self.sample_rate,
-                                                                                       exposure_time=exposure_time,
-                                                                                       sweep_time=self.sweep_time,
-                                                                                       etl_delay=self.etl_delay,
-                                                                                       camera_delay=self.camera_delay_percent,
-                                                                                       fall=self.etl_ramp_falling,
-                                                                                       amplitude=etl_amplitude,
-                                                                                       offset=etl_offset)
+                                                                    exposure_time=exposure_time,
+                                                                    sweep_time=self.sweep_time,
+                                                                    etl_delay=self.etl_delay,
+                                                                    camera_delay=self.camera_delay_percent,
+                                                                    fall=self.etl_ramp_falling,
+                                                                    amplitude=etl_amplitude,
+                                                                    offset=etl_offset)
                 self.waveform_dict[channel_key][self.waveform_dict[channel_key] > self.etl_max_voltage] = self.etl_max_voltage
                 self.waveform_dict[channel_key][self.waveform_dict[channel_key] < self.etl_min_voltage] = self.etl_min_voltage
 

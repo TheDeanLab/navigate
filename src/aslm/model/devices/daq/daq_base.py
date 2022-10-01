@@ -69,7 +69,7 @@ class DAQBase:
         # ETL Parameters
         self.etl_ramp_falling = {}
         for m in self.configuration['configuration']['microscopes'].keys():
-            self.etl_ramp_falling[m] = self.configuration['configuration']['microscopes'][m]['remote_focus_device']['ramp_rising_percent']
+            self.etl_ramp_falling[m] = self.configuration['configuration']['microscopes'][m]['remote_focus_device']['ramp_falling_percent']
 
         # Camera Parameters
         self.camera_delay_percent = self.configuration['configuration']['microscopes'][self.microscope_name]['camera']['delay_percent']
@@ -119,9 +119,9 @@ class DAQBase:
                     self.sweep_time += readout_time
 
                 self.waveform_dict[channel_key] = camera_exposure(sample_rate=self.sample_rate,
-                                                                                     sweep_time=self.sweep_time,
-                                                                                     exposure=exposure_time,
-                                                                                     camera_delay=self.camera_delay_percent)
+                                                                  sweep_time=self.sweep_time,
+                                                                  exposure=exposure_time,
+                                                                  camera_delay=self.camera_delay_percent)
 
         return self.waveform_dict
 

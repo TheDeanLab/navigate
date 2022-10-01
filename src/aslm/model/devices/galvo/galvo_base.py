@@ -90,6 +90,7 @@ class GalvoBase:
                     # to be net longer than exposure_time. This helps the galvo keep sweeping for the full camera
                     # exposure time.
                     self.sweep_time += readout_time
+                self.samples = int(self.sample_rate * self.sweep_time)
 
                 # galvo Parameters
                 galvo_amplitude = float(galvo_parameters.get('amplitude', 0))

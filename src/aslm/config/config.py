@@ -64,7 +64,7 @@ def load_configs(manager, **kwargs):
                 config_data = yaml.load(f, Loader=yaml.FullLoader)
                 build_nested_dict(manager, config_dict, config_name, config_data)
             except yaml.YAMLError as yaml_error:
-                print(f"Configurator - Yaml Error: {yaml_error}")
+                print(f"Configuration - Yaml Error: {yaml_error}")
                 sys.exit(1)
     
     # return combined dictionary

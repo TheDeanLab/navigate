@@ -151,11 +151,6 @@ class CameraSettingController(GUI_Controller):
         r"""Sets values in View according to the experiment yaml file.
 
         Experiment yaml filed passed by controller.
-
-        Parameters
-        ----------
-        experiment : Configurator
-            Configuration of the experimental settings.
         """
         self.in_initialization = True
 

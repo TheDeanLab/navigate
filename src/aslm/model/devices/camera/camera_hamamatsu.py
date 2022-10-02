@@ -48,9 +48,11 @@ class HamamatsuOrca(CameraBase):
 
     Parameters
     ----------
-    camera_id : int
-        Selects which camera to connect to (0, 1, ...).
-    configuration : Configurator
+    microscope_name : str
+        Name of microscope in configuration
+    device_connection : object
+        Hardware device to connect to
+    configuration : multiprocesing.managers.DictProxy
         Global configuration of the microscope
 
     """

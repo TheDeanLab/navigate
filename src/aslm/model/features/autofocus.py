@@ -36,7 +36,7 @@ import numpy as np
 import threading
 
 # Local imports
-from aslm.model.model_features.aslm_feature_container import load_features
+from aslm.model.features.feature_container import load_features
 
 class Autofocus():
     def __init__(self, model):

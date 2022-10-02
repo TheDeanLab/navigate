@@ -4,7 +4,7 @@ import numpy as np
 
 def tiff_write_read(is_ome=False, multiposition=False):
     from aslm.model.dummy import DummyModel
-    from aslm.model.model_features.data_sources.tiff_data_source import TiffDataSource
+    from aslm.model.data_sources.tiff_data_source import TiffDataSource
 
     # Set up model with a random number of z-steps to modulate the shape
     model = DummyModel()

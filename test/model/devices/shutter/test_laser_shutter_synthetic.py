@@ -32,13 +32,11 @@ POSSIBILITY OF SUCH DAMAGE.
 
 # Standard Library Imports
 import unittest
-from pathlib import Path
 
 # Third Party Imports
 
 # Local Imports
 from aslm.model.devices.shutter.laser_shutter_synthetic import SyntheticShutter
-from aslm.model.aslm_model_config import Configurator
 from aslm.model.dummy import DummyModel
 
 

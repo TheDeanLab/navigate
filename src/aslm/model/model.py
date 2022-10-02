@@ -40,14 +40,13 @@ import multiprocessing as mp
 import numpy as np
 
 # Local Imports
-from aslm.model.aslm_model_config import Configurator
 from aslm.model.concurrency.concurrency_tools import ResultThread, SharedNDArray
-from aslm.model.model_features.autofocus import Autofocus
-from aslm.model.model_features.aslm_image_writer import ImageWriter
-from aslm.model.model_features.dummy_detective import Dummy_Detective
-from aslm.model.model_features.aslm_common_features import *
-from aslm.model.model_features.aslm_feature_container import load_features
-from aslm.model.model_features.aslm_restful_features import IlastikSegmentation
+from aslm.model.features.autofocus import Autofocus
+from aslm.model.features.image_writer import ImageWriter
+from aslm.model.features.dummy_detective import Dummy_Detective
+from aslm.model.features.common_features import *
+from aslm.model.features.feature_container import load_features
+from aslm.model.features.restful_features import IlastikSegmentation
 from aslm.log_files.log_functions import log_setup
 from aslm.tools.common_dict_tools import update_settings_common, update_stage_dict
 from aslm.model.device_startup_functions import load_devices
@@ -105,7 +104,6 @@ class Model:
         self.logger = logging.getLogger(p)
 
         # Loads the YAML file for all of the microscope parameters
-        # self.configuration = Configurator(configuration_path)
         self.configuration = configuration
 
         devices_dict = load_devices(configuration, args.synthetic_hardware)

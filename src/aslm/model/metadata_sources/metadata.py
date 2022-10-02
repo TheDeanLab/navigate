@@ -5,7 +5,8 @@ from typing import Optional
 
 # Local Imports
 from aslm.tools import xml_tools
-from aslm.model.aslm_model_config import Configurator
+
+from multiprocessing.managers import DictProxy
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -34,11 +35,11 @@ class Metadata:
         self.active_microscope = None
 
     @property
-    def configuration(self) -> Optional[Configurator]:
+    def configuration(self) -> Optional[DictProxy]:
         return self._configuration
 
     @configuration.setter
-    def configuration(self, configuration: Configurator) -> None:
+    def configuration(self, configuration: DictProxy) -> None:
         self._configuration = configuration
         self.set_from_configuration_experiment()
 

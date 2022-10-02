@@ -30,8 +30,6 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 from pathlib import Path
-from aslm.model.aslm_model_config import Configurator
-
 
 # Annies imports for dummy feature containter
 import multiprocessing as mp
@@ -39,9 +37,9 @@ from multiprocessing import Manager
 import threading
 import time
 import random
-from aslm.model.model_features.aslm_feature_container import SignalNode, DataNode, DataContainer, load_features
-from aslm.model.model_features.aslm_common_features import WaitToContinue
-from aslm.model.model_features.aslm_feature_container import dummy_True
+from aslm.model.features.feature_container import SignalNode, DataNode, DataContainer, load_features
+from aslm.model.features.common_features import WaitToContinue
+from aslm.model.features.feature_container import dummy_True
 from aslm.config.config import load_configs
 
 

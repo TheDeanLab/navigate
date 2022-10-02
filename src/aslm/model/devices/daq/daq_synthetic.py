@@ -49,12 +49,8 @@ class SyntheticDAQ(DAQBase):
 
     Attributes
     ----------
-    configuration : Configurator
+    configuration : multiprocesing.managers.DictProxy
         Global configuration of the microscope
-    experiment : Configurator
-        Experiment configuration of the microscope
-    etl_constants : dict
-        Dictionary with all of the wavelength, magnification, and imaging mode-specific amplitudes/offsets
     """
     def __init__(self, configuration):
         super().__init__(configuration)

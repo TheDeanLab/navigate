@@ -45,14 +45,14 @@ logger = logging.getLogger(p)
 class ZoomBase:
     r"""ZoomBase parent class.
 
-    Attributes
+    Parameters
     ----------
-    configuration : Configurator
+    microscope_name : str
+        Name of microscope in configuration
+    device_connection : object
+        Hardware device to connect to
+    configuration : multiprocesing.managers.DictProxy
         Global configuration of the microscope
-    zoomdict : dict
-        Dictionary of possible zoom values and their corresponding servo position.
-    zoomvalue : int
-        Current Zoom value
     """
 
     def __init__(self, microscope_name, device_controller, configuration):

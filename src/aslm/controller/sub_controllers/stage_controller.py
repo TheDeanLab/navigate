@@ -133,8 +133,8 @@ class StageController(GUI_Controller):
 
         Parameters
         ----------
-        config : object
-            ASLM_Configuration_Controller - config.configuration is Configurator instance of configuration.
+        config : multiprocesing.managers.DictProxy
+            Global configuration of the microscope
         """
         config = self.parent_controller.configuration_controller
         self.position_min = config.get_stage_position_limits('_min')

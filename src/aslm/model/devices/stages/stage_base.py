@@ -50,10 +50,17 @@ logger = logging.getLogger(p)
 class StageBase:
     r"""StageBase Parent Class
 
-    Attributes
+    Parameters
     ----------
-    configuration : Configurator
+    microscope_name : str
+        Name of microscope in configuration
+    device_connection : object
+        Hardware device to connect to
+    configuration : multiprocesing.managers.DictProxy
         Global configuration of the microscope
+
+    Attribiutes
+    -----------
     x_pos : float
         True x position
     y_pos : float

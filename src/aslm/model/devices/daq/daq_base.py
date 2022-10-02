@@ -36,7 +36,7 @@ import logging
 # Third Party Imports
 
 # Local Imports
-from aslm.model.aslm_model_waveforms import tunable_lens_ramp, sawtooth, camera_exposure
+from aslm.model.aslm_model_waveforms import camera_exposure
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -48,12 +48,8 @@ class DAQBase:
 
     Attributes
     ----------
-    configuration : Configurator
+    configuration : multiprocesing.managers.DictProxy
         Global configuration of the microscope
-    experiment : Configurator
-        Experiment configuration of the microscope
-    etl_constants : dict
-        Dictionary with all of the wavelength, magnification, and imaging mode-specific amplitudes/offsets
     """
 
     def __init__(self, configuration):

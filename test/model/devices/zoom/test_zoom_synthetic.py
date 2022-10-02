@@ -32,14 +32,11 @@ POSSIBILITY OF SUCH DAMAGE.
 
 # Standard Library Imports
 import unittest
-from pathlib import Path
-from aslm.model.devices.zoom import zoom_synthetic
 
 # Third Party Imports
 
 # Local Imports
 from aslm.model.devices.zoom.zoom_synthetic import SyntheticZoom
-from aslm.model.aslm_model_config import Configurator
 from aslm.model.dummy import DummyModel
 
 

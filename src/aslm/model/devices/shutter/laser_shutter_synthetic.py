@@ -50,14 +50,12 @@ class SyntheticShutter(ShutterBase):
 
     Attributes
     ----------
-    configuration : Configurator
+    microscope_name : str
+        Name of microscope in configuration
+    device_connection : object
+        Hardware device to connect to
+    configuration : multiprocesing.managers.DictProxy
         Global configuration of the microscope
-    experiment : Configurator
-        Experiment configuration of the microscope
-    shutter_right_state : bool
-        Right shutter state
-    shutter_left_state : bool
-        Left shutter state
 
     Methods
     -------

@@ -1,5 +1,5 @@
 def test_data_source_mode():
-    from aslm.model.model_features.data_sources.data_source import DataSource
+    from aslm.model.data_sources.data_source import DataSource
 
     ds = DataSource()
 

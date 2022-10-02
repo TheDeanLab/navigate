@@ -35,9 +35,7 @@ import logging
 
 # Third Party Imports
 import nidaqmx
-from nidaqmx.constants import AcquisitionType
 from nidaqmx.constants import LineGrouping
-import numpy as np
 
 # Local Imports
 from aslm.model.devices.daq.daq_base import DAQBase
@@ -52,10 +50,8 @@ class NIDAQ(DAQBase):
 
     Attributes
     ----------
-    configuration : Configurator
+    configuration : multiprocesing.managers.DictProxy
         Global configuration of the microscope
-    experiment : Configurator
-        Experiment configuration of the microscope
 
     """
     def __init__(self, configuration):

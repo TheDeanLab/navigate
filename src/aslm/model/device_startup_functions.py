@@ -101,8 +101,8 @@ def load_camera_connection(configuration,
 
     Parameters
     ----------
-    configuration : dict
-        Configurator instance of global microscope configuration.
+    configuration : multiprocesing.managers.DictProxy
+        Global configuration of the microscope
     camera_id : int
         Device ID (0, 1...)
     is_synthetic: bool
@@ -134,14 +134,16 @@ def start_camera(microscope_name, device_connection, configuration, is_synthetic
 
     Parameters
     ----------
-    microscope name: str
-        Microscope name in the configuration yaml file
-    camera controller: camera api object
-        Camera api object that can communicate with the camera device directly.
-    configuration : dict
-        Configurator instance of global microscope configuration.
-    is_synthetic: bool
-        Whether it is a synthetic hardware
+    Parameters
+    ----------
+    microscope_name : str
+        Name of microscope in configuration
+    device_connection : object
+        Hardware device to connect to
+    configuration : multiprocesing.managers.DictProxy
+        Global configuration of the microscope
+    is_synthetic : bool
+        Run synthetic version of hardware?
 
     Returns
     -------
@@ -171,8 +173,10 @@ def load_stages(configuration, is_synthetic=False):
 
     Parameters
     ----------
-    configuration : dict
-        Configurator instance of global microscope configuration.
+    configuration : multiprocesing.managers.DictProxy
+        Global configuration of the microscope
+    is_synthetic : bool
+        Run synthetic version of hardware?
 
     Returns
     -------
@@ -249,8 +253,14 @@ def start_zoom(microscope_name, device_connection, configuration, is_synthetic=F
 
     Parameters
     ----------
-    configuration : dict
-        Configurator instance of global microscope configuration.
+    microscope_name : str
+        Name of microscope in configuration
+    device_connection : object
+        Hardware device to connect to
+    configuration : multiprocesing.managers.DictProxy
+        Global configuration of the microscope
+    is_synthetic : bool
+        Run synthetic version of hardware?
 
     Returns
     -------
@@ -296,8 +306,14 @@ def start_filter_wheel(microscope_name, device_connection, configuration, is_syn
 
     Parameters
     ----------
-    configuration : dict
-        Configurator instance of global microscope configuration.
+    microscope_name : str
+        Name of microscope in configuration
+    device_connection : object
+        Hardware device to connect to
+    configuration : multiprocesing.managers.DictProxy
+        Global configuration of the microscope
+    is_synthetic : bool
+        Run synthetic version of hardware?
 
     Returns
     -------
@@ -327,8 +343,10 @@ def start_daq(configuration, is_synthetic=False):
 
     Parameters
     ----------
-    configuration : dict
-        Configurator instance of global microscope configuration.
+    configuration : multiprocesing.managers.DictProxy
+        Global configuration of the microscope
+    is_synthetic : bool
+        Run synthetic version of hardware?
 
     Returns
     -------
@@ -359,8 +377,14 @@ def start_shutter(microscope_name, device_connection, configuration, is_syntheti
 
     Parameters
     ----------
-    configuration : dict
-        Configurator instance of global microscope configuration.
+    microscope_name : str
+        Name of microscope in configuration
+    device_connection : object
+        Hardware device to connect to
+    configuration : multiprocesing.managers.DictProxy
+        Global configuration of the microscope
+    is_synthetic : bool
+        Run synthetic version of hardware?
 
     Returns
     -------
@@ -394,10 +418,16 @@ def start_lasers(microscope_name, device_connection, configuration, id=0, is_syn
 
     Parameters
     ----------
-    configuration : dict
-        Configurator instance of global microscope configuration.
-    experiment : dict
-        Configurator instance of experiment configuration.
+    microscope_name : str
+        Name of microscope in configuration
+    device_connection : object
+        Hardware device to connect to
+    configuration : multiprocesing.managers.DictProxy
+        Global configuration of the microscope
+    id : int
+        Index of laser in laser list in configuration dictionary
+    is_synthetic : bool
+        Run synthetic version of hardware?
 
     Returns
     -------

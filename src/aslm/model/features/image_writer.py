@@ -38,7 +38,7 @@ import logging
 # import numpy as np
 
 # Local imports
-from aslm.model.model_features import data_sources
+from aslm.model import data_sources
 # from aslm.tools.image import text_array
 
 # Logger Setup

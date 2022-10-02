@@ -51,22 +51,14 @@ class ShutterTTL(ShutterBase):
     Triggering for shutters delivered from DAQ using digital outputs.
     Each output keeps their last digital state for as long the device is not powered down.
 
-    Attributes
+    Parameters
     ----------
-    configuration : Configurator
+    microscope_name : str
+        Name of microscope in configuration
+    device_connection : object
+        Hardware device to connect to
+    configuration : multiprocesing.managers.DictProxy
         Global configuration of the microscope
-
-
-    Methods
-    -------
-    open_left()
-        Open the left shutter, close the right shutter.
-    open_right()
-        Open the right shutter, close the left shutter.
-    close_shutters()
-        Close both shutters
-    state()
-        Return the current state of the shutters
     """
 
     def __init__(self, microscope_name, device_connection, configuration):

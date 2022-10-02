@@ -6,7 +6,7 @@ def test_ome_metadata_valid():
     import os
     import platform
     from aslm.model.dummy import DummyModel
-    from aslm.model.model_features.metadata_sources.ome_tiff_metadata import OMETIFFMetadata
+    from aslm.model.metadata_sources.ome_tiff_metadata import OMETIFFMetadata
 
     # First, download OME-XML validation tools
     urllib.request.urlretrieve("https://downloads.openmicroscopy.org/bio-formats/6.0.1/artifacts/bftools.zip",

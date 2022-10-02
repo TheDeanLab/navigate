@@ -124,12 +124,12 @@ class ZStackAcquisition:
                                       'device_related': True}}
 
     def pre_signal_func(self):
-        microscope_state = self.model.configuration['experiment'].MicroscopeState
+        microscope_state = self.model.configuration['experiment']['MicroscopeState']
 
         self.stack_cycling_mode = microscope_state['stack_cycling_mode']
         # get available channels
         prefix_len = len('channel_')
-        self.channels = [int(channel_key[prefix_len:]) for channel_key in microscope_state['channels']]
+        self.channels = [int(channel_key[prefix_len:]) for channel_key in microscope_state['channels'].keys()]
         self.current_channel_in_list = 0
 
         self.number_z_steps = int(microscope_state['number_z_steps'])
@@ -168,7 +168,7 @@ class ZStackAcquisition:
         if not bool(microscope_state['is_multiposition']):
             # TODO: Make relative to stage coordinates.
             self.model.get_stage_position()
-            self.restore_z = self.model.stages.z_pos
+            self.restore_z = self.model.active_microscope.get_stage_position()['z_pos']
     
     def signal_func(self):
         if self.model.stop_acquisition:
@@ -224,6 +224,7 @@ class ZStackAcquisition:
     def signal_end(self):
         # end this node
         if self.model.stop_acquisition:
+            self.model.logger.debug("ENDING IT")
             return True
         
         # decide whether to move X,Y,Theta
@@ -254,7 +255,9 @@ class ZStackAcquisition:
             # restore z if need
             if self.restore_z >= 0:
                 self.model.move_stage({'z_abs': self.restore_z}, wait_until_done=True)  # Update position
+            self.model.logger.debug("TIMEPOINTS ENDED")
             return True
+        self.model.logger.debug("NO ENDING")
         return False
 
     def generate_meta_data(self, *args):

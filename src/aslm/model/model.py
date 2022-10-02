@@ -381,6 +381,7 @@ class Model:
             """
             Called when user halts the acquisition
             """
+            self.logger.info('ASLM Model - Stopping with stop command.')
             self.stop_acquisition = True
             if self.signal_thread:
                 self.signal_thread.join()
@@ -474,6 +475,7 @@ class Model:
             self.logger.info(f'ASLM Model - Running data process, get frames {frame_ids}')
             # if there is at least one frame available
             if not frame_ids:
+                self.logger.info(f'ASLM Model - Waiting {wait_num}')
                 wait_num -= 1
                 if wait_num <= 0:
                     # it has waited for wait_num * 500 ms, it's sure there won't be any frame coming
@@ -489,6 +491,7 @@ class Model:
             
             if hasattr(self, 'data_container'):
                 if self.data_container.is_closed:
+                    self.logger.info('ASLM Model - Data container is closed.')
                     self.stop_acquisition = True
                     break
                 self.data_container.run(frame_ids)
@@ -499,6 +502,7 @@ class Model:
 
             acquired_frame_num += len(frame_ids)
             if count_frame and acquired_frame_num >= num_of_frames:
+                self.logger.info('ASLM Model - Loop stop condition met.')
                 self.stop_acquisition = True
         
         self.show_img_pipe.send('stop')
@@ -564,6 +568,7 @@ class Model:
         """
         # stop acquisition if no channel specified
         if target_channel is None:
+            self.logger.info('ASLM Model - Target channel is none.')
             self.stop_acquisition = True
             return
 
@@ -682,6 +687,7 @@ class Model:
         # wait a very short time to the data thread to get the last frame
         # TODO: maybe need to adjust
         # time.sleep(0.005)
+        self.logger.info('ASLM Model - Stopping in run acquisition.')
         self.stop_acquisition = True
 
     def run_single_channel_acquisition_with_features(self, target_channel=1):
@@ -705,6 +711,7 @@ class Model:
             if not hasattr(self, 'signal_container'):
                 return
             if self.signal_container.is_closed:
+                self.logger.info('ASLM Model - Signal container is closed.')
                 self.stop_acquisition = True
                 return
     

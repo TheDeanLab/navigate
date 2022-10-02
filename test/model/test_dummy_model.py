@@ -34,9 +34,8 @@ POSSIBILITY OF SUCH DAMAGE.
 import unittest
 
 # Third Party Imports
-import pytest
-import numpy as np
 
+# Local imports
 from aslm.model.dummy import DummyModel
 
 class TestDummyModel(unittest.TestCase):

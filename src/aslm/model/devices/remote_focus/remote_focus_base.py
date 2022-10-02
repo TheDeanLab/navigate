@@ -36,7 +36,7 @@ import logging
 # Third Party Imports
 
 # Local Imports
-from aslm.model.aslm_model_waveforms import tunable_lens_ramp
+from aslm.model.waveforms import tunable_lens_ramp
 
 # # Logger Setup
 p = __name__.split(".")[1]

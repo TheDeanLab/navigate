@@ -36,7 +36,7 @@ import logging
 # Third Party Imports
 
 # Local Imports
-from aslm.model.aslm_model_waveforms import sawtooth
+from aslm.model.waveforms import sawtooth
 
 # # Logger Setup
 p = __name__.split(".")[1]

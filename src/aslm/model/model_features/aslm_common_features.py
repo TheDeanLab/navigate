@@ -224,7 +224,6 @@ class ZStackAcquisition:
     def signal_end(self):
         # end this node
         if self.model.stop_acquisition:
-            self.model.logger.debug("ENDING IT")
             return True
         
         # decide whether to move X,Y,Theta
@@ -255,9 +254,7 @@ class ZStackAcquisition:
             # restore z if need
             if self.restore_z >= 0:
                 self.model.move_stage({'z_abs': self.restore_z}, wait_until_done=True)  # Update position
-            self.model.logger.debug("TIMEPOINTS ENDED")
             return True
-        self.model.logger.debug("NO ENDING")
         return False
 
     def generate_meta_data(self, *args):

@@ -53,6 +53,13 @@ class RemoteFocusNI(RemoteFocusBase):
     def __init__(self, microscope_name, device_connection, configuration):
         super().__init__(microscope_name, device_connection, configuration)
 
+        self.task = None
+
+        self.trigger_source = configuration['configuration']['microscopes'][microscope_name]['daq']['trigger_source']
+
+        self.initialize_task()
+
+    def initialize_task(self):
         # TODO: makesure the task is reusable, Or need to create and close each time.
         self.task = nidaqmx.Task()
         channel = self.device_config['hardware']['channel']
@@ -60,13 +67,21 @@ class RemoteFocusNI(RemoteFocusBase):
         self.task.timing.cfg_samp_clk_timing(rate=self.sample_rate,
                                              sample_mode=AcquisitionType.FINITE,
                                              samps_per_chan=self.samples)
-        trigger_source = configuration['configuration']['microscopes'][microscope_name]['daq']['trigger_source']
-        self.task.triggers.start_trigger.cfg_dig_edge_start_trig(trigger_source)
-
+        self.task.triggers.start_trigger.cfg_dig_edge_start_trig(self.trigger_source)
 
     def __del__(self):
         self.stop_task()
         self.close_task()
+
+    def adjust(self, readout_time):
+        self.stop_task()
+        self.close_task()
+
+        waveform_dict = super().adjust(readout_time)
+
+        self.initialize_task()
+
+        return waveform_dict
 
     def prepare_task(self, channel_key):
         # write waveform
@@ -74,9 +89,10 @@ class RemoteFocusNI(RemoteFocusBase):
 
     def start_task(self):
         self.task.start()
-        self.task.wait_until_done()
 
-    def stop_task(self):
+    def stop_task(self, force=False):
+        if not force:
+            self.task.wait_until_done()
         self.task.stop()
     
     def close_task(self):

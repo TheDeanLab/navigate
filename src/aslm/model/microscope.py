@@ -199,6 +199,17 @@ class Microscope:
             self.lasers[k].turn_off()
         self.lasers[str(self.laser_wavelength[current_laser_index])].turn_on()
 
+        # Galvo settings
+        for k in self.galvo:
+            self.galvo[k].stop_task()
+            self.galvo[k].prepare_task(channel_key)
+            self.galvo[k].start_task()
+
+        # Remote focus settings
+        self.remote_focus_device.stop_task()
+        self.remote_focus_device.prepare_task(channel_key)
+        self.remote_focus_device.start_task()
+
     def get_readout_time(self):
         r"""Get readout time from camera.
 

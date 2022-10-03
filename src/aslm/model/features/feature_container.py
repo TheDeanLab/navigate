@@ -30,6 +30,12 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 
+import logging
+
+p = __name__.split(".")[1]
+
+logger = logging.getLogger(p)
+
 class TreeNode:
     def __init__(self, feature_name, func_dict, *, node_type='one-step', device_related=False, need_response=False):
         self.node_name = str(feature_name)
@@ -146,10 +152,11 @@ class SignalContainer(Container):
         if not self.curr_node:
             self.curr_node = self.root
         while self.curr_node:
-            print('running signal node:', self.curr_node.node_name)
+            logger.debug(f'running signal node: {self.curr_node.node_name}')
             try:
                 result, is_end = self.curr_node.run(*args, wait_response=wait_response)
-            except:
+            except Exception as e:
+                logger.debug(f'SignalContainer - {e}')
                 self.end_flag = True
                 self.cleanup()
                 return
@@ -158,7 +165,7 @@ class SignalContainer(Container):
             if self.curr_node.sibling:
                 self.curr_node = self.curr_node.sibling
             elif result and self.curr_node.child:
-                print('Signal running child of', self.curr_node.node_name)
+                logger.debug(f'Signal running child of {self.curr_node.node_name}')
                 self.curr_node = self.curr_node.child
             else:
                 self.curr_node = None
@@ -185,12 +192,13 @@ class DataContainer(Container):
         while self.curr_node:
             try:
                 result, is_end = self.curr_node.run(*args)
-            except:
+            except Exception as e:
+                logger.debug(f'DataContainer - {e}')
                 if self.curr_node.need_response == False and self.curr_node.node_type == 'one-step':
                     try:
                         self.curr_node.node_funcs.get('cleanup', dummy_func)()
                     except:
-                        print(f'The node({self.curr_node.node_name}) is not closed correctly! Please check the cleanup function')
+                        logger.debug(f'The node({self.curr_node.node_name}) is not closed correctly! Please check the cleanup function')
                         pass
                     self.curr_node.is_marked = True
                     result, is_end = False, True

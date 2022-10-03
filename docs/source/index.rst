@@ -19,3 +19,4 @@ Welcome to ASLM's documentation!
    :caption: Contents:
 
    userguide
+   modules

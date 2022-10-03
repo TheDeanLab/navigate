@@ -19,12 +19,3 @@ Welcome to ASLM's documentation!
    :caption: Contents:
 
    userguide
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

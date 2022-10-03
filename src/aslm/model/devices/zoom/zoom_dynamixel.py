@@ -47,6 +47,25 @@ from aslm.model.devices.zoom.zoom_base import ZoomBase
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+def build_dynamixel_zoom_connection(configuration):
+    id = configuration['configuration']['hardware']['zoom']['servo_id']
+    comport = configuration['configuration']['hardware']['zoom']['port']
+    devicename = comport.encode('utf-8')
+    baudrate = configuration['configuration']['hardware']['zoom']['baudrate']
+
+    port_num = dynamixel.portHandler(devicename)
+    dynamixel.packetHandler()
+
+    # Open port and set baud rate
+    if not dynamixel.openPort(port_num):
+        logger.debug("Unable to open DynamixelZoom")
+        raise RuntimeError(f"Unable to open port {port_num}.")
+
+    dynamixel.setBaudRate(port_num, baudrate)
+    logger.debug("DynamixelZoom Initialized")
+
+    return port_num
+
 
 class DynamixelZoom(ZoomBase):
     r"""DynamixelZoom Class
@@ -63,13 +82,10 @@ class DynamixelZoom(ZoomBase):
         Read the position of the DynamixelZoom servo.
 
     """
-    def __init__(self, configuration):
-        super().__init__(configuration)
+    def __init__(self, microscope_name, device_connection, configuration):
+        super().__init__(microscope_name, device_connection, configuration)
         self.dynamixel = dynamixel
-        self.id = configuration.ZoomParameters['servo_id']
-        self.comport = configuration.ZoomParameters['COMport']
-        self.devicename = self.comport.encode('utf-8')
-        self.baudrate = configuration.ZoomParameters['baudrate']
+        self.id = configuration['configuration']['microscopes'][microscope_name]['zoom']['hardware']['servo_id']
         self.addr_mx_torque_enable = 24
         self.addr_mx_goal_position = 30
         self.addr_mx_present_position = 36
@@ -90,16 +106,7 @@ class DynamixelZoom(ZoomBase):
         self.torque_enable = 1
         self.torque_disable = 0
 
-        self.port_num = self.dynamixel.portHandler(self.devicename)
-        self.dynamixel.packetHandler()
-
-        # Open port and set baud rate
-        if not self.dynamixel.openPort(self.port_num):
-            logger.debug("Unable to open DynamixelZoom")
-            raise RuntimeError(f"Unable to open port {self.port_num}.")
-
-        self.dynamixel.setBaudRate(self.port_num, self.baudrate)
-        logger.debug("DynamixelZoom Initialized")
+        self.port_num = device_connection
 
     def __del__(self):
         logger.debug("DynamixelZoom Instance Deleted")

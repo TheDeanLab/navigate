@@ -39,7 +39,7 @@ import numpy as np
 import pytest
 
 # Local Imports
-from aslm.model import aslm_model_waveforms as aslm_model_waveforms
+from aslm.model import waveforms
 
 
 class TestWaveforms(unittest.TestCase):
@@ -58,7 +58,7 @@ class TestWaveforms(unittest.TestCase):
     def test_single_pulse_max_default_amplitude(self):
         sample_rate = 100000
         sweep_time = 0.4
-        data = aslm_model_waveforms.single_pulse(sample_rate=sample_rate,
+        data = waveforms.single_pulse(sample_rate=sample_rate,
                                                  sweep_time=sweep_time)
         self.assertEqual(np.max(data), 1)
 
@@ -66,7 +66,7 @@ class TestWaveforms(unittest.TestCase):
         sample_rate = 100000
         sweep_time = 0.4
         amplitude = 2
-        data = aslm_model_waveforms.single_pulse(sample_rate=sample_rate,
+        data = waveforms.single_pulse(sample_rate=sample_rate,
                                                  sweep_time=sweep_time,
                                                  amplitude=amplitude)
         self.assertEqual(np.max(data), amplitude)
@@ -74,7 +74,7 @@ class TestWaveforms(unittest.TestCase):
     def test_single_pulse_min_default_amplitude(self):
         sample_rate = 100000
         sweep_time = 0.4
-        data = aslm_model_waveforms.single_pulse(sample_rate=sample_rate,
+        data = waveforms.single_pulse(sample_rate=sample_rate,
                                                  sweep_time=sweep_time)
         self.assertEqual(np.min(data), 0)
 
@@ -82,7 +82,7 @@ class TestWaveforms(unittest.TestCase):
         sample_rate = 100000
         sweep_time = 0.4
         default_delay = 10
-        data = aslm_model_waveforms.single_pulse(sample_rate=sample_rate,
+        data = waveforms.single_pulse(sample_rate=sample_rate,
                                                  sweep_time=sweep_time)
         first_index = self.find_first_index_above_threshold(data=data, threshold=0)
         self.assertEqual(int(sample_rate * sweep_time * default_delay / 100), first_index)
@@ -91,7 +91,7 @@ class TestWaveforms(unittest.TestCase):
         sample_rate = 100000
         sweep_time = 0.4
         delay = 20
-        data = aslm_model_waveforms.single_pulse(sample_rate=sample_rate,
+        data = waveforms.single_pulse(sample_rate=sample_rate,
                                                  sweep_time=sweep_time,
                                                  delay=delay)
         first_index = self.find_first_index_above_threshold(data, 0.5)
@@ -103,7 +103,7 @@ class TestWaveforms(unittest.TestCase):
         sample_rate = 100000
         sweep_time = 0.4
         default_offset = 0
-        data = aslm_model_waveforms.single_pulse(sample_rate=sample_rate,
+        data = waveforms.single_pulse(sample_rate=sample_rate,
                                                  sweep_time=sweep_time)
         self.assertEqual(np.min(data), default_offset)
 
@@ -111,7 +111,7 @@ class TestWaveforms(unittest.TestCase):
         sample_rate = 100000
         sweep_time = 0.4
         offset = 0.2
-        data = aslm_model_waveforms.single_pulse(sample_rate=sample_rate,
+        data = waveforms.single_pulse(sample_rate=sample_rate,
                                                  sweep_time=sweep_time,
                                                  offset=offset)
         self.assertEqual(np.min(data), offset)
@@ -121,7 +121,7 @@ class TestWaveforms(unittest.TestCase):
         sample_rate = 100000
         sweep_time = 0.4
         delay = 10.5
-        data = aslm_model_waveforms.tunable_lens_ramp(sample_rate=sample_rate,
+        data = waveforms.tunable_lens_ramp(sample_rate=sample_rate,
                                                       sweep_time=sweep_time,
                                                       etl_delay=delay)
         first_index = self.find_first_index_above_threshold(data=data, threshold=-1)
@@ -129,31 +129,31 @@ class TestWaveforms(unittest.TestCase):
 
     def test_tunable_lens_ramp_amplitude_max(self):
         amplitude = 1.5
-        data = aslm_model_waveforms.tunable_lens_ramp(amplitude=amplitude)
+        data = waveforms.tunable_lens_ramp(amplitude=amplitude)
         self.assertEqual(np.max(data), amplitude)
 
     def test_tunable_lens_ramp_amplitude_min(self):
         amplitude = 1.5
-        data = aslm_model_waveforms.tunable_lens_ramp(amplitude=amplitude)
+        data = waveforms.tunable_lens_ramp(amplitude=amplitude)
         self.assertEqual(np.min(data), -1 * amplitude)
 
     def test_tunable_lens_offset_min(self):
         default_amplitude = 1
         offset = 0.5
-        data = aslm_model_waveforms.tunable_lens_ramp(offset=offset)
+        data = waveforms.tunable_lens_ramp(offset=offset)
         self.assertEqual(np.min(data), -1 * default_amplitude + offset)
 
     def test_tunable_lens_offset_max(self):
         default_amplitude = 1
         offset = 0.5
-        data = aslm_model_waveforms.tunable_lens_ramp(offset=offset)
+        data = waveforms.tunable_lens_ramp(offset=offset)
         self.assertEqual(np.max(data), default_amplitude + offset)
 
     def test_dc_value(self):
         sample_rate = 100000
         sweep_time = 0.4
         for amplitude in np.linspace(-5, 5, 3):
-            data = aslm_model_waveforms.dc_value(sample_rate=sample_rate,
+            data = waveforms.dc_value(sample_rate=sample_rate,
                                                  sweep_time=sweep_time,
                                                  amplitude=amplitude)
             self.assertEqual(np.max(data), amplitude)
@@ -163,7 +163,7 @@ class TestWaveforms(unittest.TestCase):
         sample_rate = 100000
         sweep_time = 0.4
         for amplitude in np.linspace(-5, 5, 3):
-            data = aslm_model_waveforms.sawtooth(sample_rate=sample_rate,
+            data = waveforms.sawtooth(sample_rate=sample_rate,
                                                  sweep_time=sweep_time,
                                                  amplitude=amplitude)
             self.assertAlmostEqual(np.max(data), np.abs(amplitude), delta=np.abs(amplitude) / 100)
@@ -172,7 +172,7 @@ class TestWaveforms(unittest.TestCase):
         sample_rate = 100000
         sweep_time = 0.4
         for amplitude in np.linspace(-5, 5, 3):
-            data = aslm_model_waveforms.square(sample_rate=sample_rate,
+            data = waveforms.square(sample_rate=sample_rate,
                                                sweep_time=sweep_time,
                                                amplitude=amplitude)
             self.assertEqual(np.max(data), np.abs(amplitude))
@@ -183,7 +183,7 @@ class TestWaveforms(unittest.TestCase):
         sweep_time = 0.4
         for amplitude in np.linspace(0, 5, 5):
             for offset in np.linspace(0, 3, 3):
-                data = aslm_model_waveforms.square(sample_rate=sample_rate,
+                data = waveforms.square(sample_rate=sample_rate,
                                                    offset=offset,
                                                    amplitude=amplitude,
                                                    sweep_time=sweep_time)

@@ -31,6 +31,7 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 
 # Standard Library Imports
+from multiprocessing import dummy
 import unittest
 from pathlib import Path
 
@@ -38,15 +39,13 @@ from pathlib import Path
 
 # Local Imports
 from aslm.model.devices.remote_focus.remote_focus_base import RemoteFocusBase
-
-
+from aslm.model.dummy import DummyModel
 class TestRemoteFocusBase(unittest.TestCase):
     r"""Unit Test for RemoteFocusBase Class"""
 
     def test_shutter_base_attributes(self):
-        remote_focus = RemoteFocusBase()
-        pass
-
+        dummy_model = DummyModel()
+        RemoteFocusBase('low', None, dummy_model.configuration)
 
 if __name__ == '__main__':
     unittest.main()

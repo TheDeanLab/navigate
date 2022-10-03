@@ -36,6 +36,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 # Standard Imports
 import logging
+from multiprocessing.managers import ListProxy
 
 # Third Party Imports
 
@@ -49,10 +50,17 @@ logger = logging.getLogger(p)
 class StageBase:
     r"""StageBase Parent Class
 
-    Attributes
+    Parameters
     ----------
-    configuration : Configurator
+    microscope_name : str
+        Name of microscope in configuration
+    device_connection : object
+        Hardware device to connect to
+    configuration : multiprocesing.managers.DictProxy
         Global configuration of the microscope
+
+    Attribiutes
+    -----------
     x_pos : float
         True x position
     y_pos : float
@@ -123,33 +131,39 @@ class StageBase:
     create_internal_position_dict()
         Creates a dictionary with the software stage positions.
     """
-    def __init__(self, configuration, axes=['x', 'y', 'z', 'f', 'theta']):
-        self.configuration = configuration
+    def __init__(self, microscope_name, device_connection, configuration, device_id=0):
         self.position_dict = None
         self.int_position_dict = None
-        self.axes = axes
+        stage = configuration['configuration']['microscopes'][microscope_name]['stage']
+        if type(stage['hardware']) == ListProxy:
+            self.axes = stage['hardware'][device_id]['axes']
+        else:
+            self.axes = stage['hardware']['axes']
 
-        r"""Initial setting for all positions
+        """Initial setting for all positions
         self.x_pos, self.y_pos etc are the true axis positions, no matter whether
         the stages are zeroed or not.
         """
         for ax in self.axes:
-            setattr(self, f"{ax}_pos", self.configuration.StageParameters['position'][f'{ax}_pos'])  # True stage position
+            setattr(self, f"{ax}_pos", stage['position'][f'{ax}_pos'])  # True stage position
             setattr(self, f"int_{ax}_pos", 0)                                       # Internal stage position
             setattr(self, f"int_{ax}_pos_offset", 0)                                # Offset between true and internal
-            setattr(self, f"{ax}_min", self.configuration.StageParameters[f'{ax}_min'])  # Units are in microns
-            setattr(self, f"{ax}_max", configuration.StageParameters[f'{ax}_max'])  # Units are in microns
+            setattr(self, f"{ax}_min", stage[f'{ax}_min'])  # Units are in microns
+            setattr(self, f"{ax}_max", stage[f'{ax}_max'])  # Units are in microns
 
         self.create_position_dict()
         self.create_internal_position_dict()
 
         # Sample Position When Rotating
-        self.x_rot_position = self.configuration.StageParameters['x_rot_position']
-        self.y_rot_position = self.configuration.StageParameters['y_rot_position']
-        self.z_rot_position = self.configuration.StageParameters['z_rot_position']
+        self.x_rot_position = stage['x_rot_position']
+        self.y_rot_position = stage['y_rot_position']
+        self.z_rot_position = stage['z_rot_position']
+
+        self.y_load_position = stage['y_load_position']
+        self.y_unload_position = stage['y_unload_position']
 
         # Starting Position of Focusing Device
-        self.startfocus = self.configuration.StageParameters['startfocus']
+        self.startfocus = stage['startfocus']
 
     def create_position_dict(self):
         r"""Creates a dictionary with the hardware stage positions.

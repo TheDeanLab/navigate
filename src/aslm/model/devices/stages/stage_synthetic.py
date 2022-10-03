@@ -51,8 +51,8 @@ logger = logging.getLogger(p)
 
 
 class SyntheticStage(StageBase):
-    def __init__(self, configuration):
-        super().__init__(configuration)
+    def __init__(self, microscope_name, device_connection, configuration, device_id=0):
+        super().__init__(microscope_name, device_connection, configuration, device_id)
 
     def report_position(self):
         self.update_position_dictionaries()
@@ -135,7 +135,7 @@ class SyntheticStage(StageBase):
                 print('Unzeroing of axis: ', axis, 'failed')
 
     def load_sample(self):
-        self.y_pos = self.configuration.StageParameters['y_load_position']
+        self.y_pos = self.y_load_position
 
     def unload_sample(self):
-        self.y_pos = self.configuration.StageParameters['y_unload_position']
+        self.y_pos = self.y_unload_position

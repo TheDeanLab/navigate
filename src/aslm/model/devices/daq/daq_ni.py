@@ -35,7 +35,7 @@ import logging
 
 # Third Party Imports
 import nidaqmx
-from nidaqmx.constants import LineGrouping
+import numpy as np
 
 # Local Imports
 from aslm.model.devices.daq.daq_base import DAQBase
@@ -59,6 +59,9 @@ class NIDAQ(DAQBase):
         self.camera_trigger_task = None
         self.master_trigger_task = None
         self.laser_switching_task = nidaqmx.Task()
+
+        self.analog_outputs = {}  # keep track of analog outputs and their waveforms
+        self.analog_output_tasks = []
 
     def __del__(self):
         if self.camera_trigger_task is not None:
@@ -86,8 +89,47 @@ class NIDAQ(DAQBase):
         r"""Set up the DO master trigger task."""
         master_trigger_out_line = self.configuration['configuration']['microscopes'][self.microscope_name]['daq']['master_trigger_out_line']
         self.master_trigger_task.do_channels.add_do_chan(master_trigger_out_line,
-                                                         line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
-      
+                                                         line_grouping=nidaqmx.constants.LineGrouping.CHAN_FOR_ALL_LINES)
+
+    def create_analog_output_tasks(self, channel_key):
+        """
+        Create a single analog output task for all channels per board. Most NI DAQ cards have only one clock for analog
+        output sample timing, and as such all channels must be grouped here.
+        """
+
+        self.analog_output_tasks = []
+
+        # Create one analog output task per board, grouping the channels
+        boards = list(set([x.split('/')[0] for x in self.analog_outputs.keys()]))
+        for board in boards:
+            # chans = list(set([int(x.split('/')[1].strip('ao')) for x in self.analog_outputs.keys() if x.split('/')[0] == board]))
+            # low, high = min(chans), max(chans)
+            # channel = f"{board}/ao{low}"
+            # if low != high:
+            #     channel += f":{high}"
+            channel = ', '.join(list(set([x for x in self.analog_outputs.keys() if x.split('/')[0] == board])))
+            self.analog_output_tasks.append(nidaqmx.Task())
+            self.analog_output_tasks[-1].ao_channels.add_ao_voltage_chan(channel)
+
+            sample_rates = list(set([v['sample_rate'] for v in self.analog_outputs.values()]))
+            if len(sample_rates) > 1:
+                logger.debug("NI DAQ - Different sample rates provided for each analog channel. Defaulting to the first sample rate provided.")
+            n_samples = list(set([v['samples'] for v in self.analog_outputs.values()]))
+            if len(n_samples) > 1:
+                logger.debug("NI DAQ - Different number of samples provided for each analog channel. Defaulting to the minimum number of samples provided. Waveforms will be clipped to this length.")
+            n_sample = min(n_samples)
+            self.analog_output_tasks[-1].timing.cfg_samp_clk_timing(rate=sample_rates[0],
+                                                 sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
+                                                 samps_per_chan=n_sample)
+
+            triggers = list(set([v['trigger_source'] for v in self.analog_outputs.values()]))
+            if len(triggers) > 1:
+                logger.debug("NI DAQ - Different triggers provided for each analog channel. Defaulting to the first trigger provided.")
+            self.analog_output_tasks[-1].triggers.start_trigger.cfg_dig_edge_start_trig(triggers[0])
+
+            # Write values to board
+            waveforms = np.vstack([v['waveform'][channel_key][:n_sample] for v in self.analog_outputs.values()])
+            self.analog_output_tasks[-1].write(waveforms)
 
     def prepare_acquisition(self, channel_key, exposure_time):
         r"""Prepare the acquisition.
@@ -109,6 +151,7 @@ class NIDAQ(DAQBase):
         # Specify ports, timing, and triggering
         self.create_master_trigger_task()
         self.create_camera_task(exposure_time)
+        self.create_analog_output_tasks(channel_key)
 
     def run_acquisition(self):
         r"""Run DAQ Acquisition.
@@ -117,8 +160,12 @@ class NIDAQ(DAQBase):
         For this to work, all analog output and counter tasks have to be started so that
         they are waiting for the trigger signal."""
         self.camera_trigger_task.start()
+        for task in self.analog_output_tasks:
+            task.start()
         self.master_trigger_task.write([False, True, True, True, False], auto_start=True)
         self.camera_trigger_task.wait_until_done()
+        for task in self.analog_output_tasks:
+            task.wait_until_done()
 
     def stop_acquisition(self):
         r"""Stop Acquisition."""
@@ -126,6 +173,9 @@ class NIDAQ(DAQBase):
         self.master_trigger_task.stop()
         self.camera_trigger_task.close()
         self.master_trigger_task.close()
+        for task in self.analog_output_tasks:
+            task.stop()
+            task.close()
 
     def enable_microscope(self, microscope_name):
         if microscope_name != self.microscope_name:
@@ -137,5 +187,5 @@ class NIDAQ(DAQBase):
         self.laser_switching_task.close()
         self.laser_switching_task = nidaqmx.Task()
         self.laser_switching_task.do_channels.add_do_chan(
-            switching_port, line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
+            switching_port, line_grouping=nidaqmx.constants.LineGrouping.CHAN_FOR_ALL_LINES)
         self.laser_switching_task.write(switching_on_state, auto_start=True)

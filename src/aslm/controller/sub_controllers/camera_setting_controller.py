@@ -247,6 +247,7 @@ class CameraSettingController(GUI_Controller):
         
         # calculate readout time
         self.calculate_readout_time()
+        self.update_experiment_values()
 
     def update_exposure_time(self, exposure_time):
         """

@@ -1,4 +1,7 @@
-"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""
+ASLM sub-controller ETL popup window.
+
+Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -29,54 +32,33 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-from tkinter import Menu
+from aslm.controller.sub_controllers.gui_controller import GUI_Controller
+
+
 
 import logging
-
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-#  Menubar class
-class menubar(Menu):
-    def __init__(self, window, *args, **kwargs):
-        #  Init Menu with parent
-        Menu.__init__(self, window, *args, **kwargs)
+class HelpPopupController(GUI_Controller):
 
-        #  Creates operating system attribute
-        self.opsystem = window.tk.call('tk', 'windowingsystem')
+    def __init__(self, view, parent_controller):
+        super().__init__(view, parent_controller)
 
-        #  Prevents menu from tearing off bar
-        window.option_add('*tearOff', False)
+        self.widgets = self.view.get_widgets()
 
-        #  Linking menu to option of parent to this menu class
-        window['menu'] = self
+        self.view.popup.protocol("WM_DELETE_WINDOW", self.view.popup.dismiss)
 
-        #  File Menu
-        self.menu_file = Menu(self)
-        self.add_cascade(menu=self.menu_file, label='File')
 
-        #  Multi-Position Menu
-        self.menu_multi_positions = Menu(self)
-        self.add_cascade(menu=self.menu_multi_positions, label='Multi-Position')
+    def showup(self):
+        """
+        # this function will let the popup window show in front
+        """
+        self.view.popup.deiconify()
+        self.view.popup.attributes("-topmost", 1)
 
-        #  Resolution Menu
-        self.menu_resolution = Menu(self)
-        self.add_cascade(menu=self.menu_resolution, label='Resolution')
-
-        # Autofocus Menu
-        self.menu_autofocus = Menu(self)
-        self.add_cascade(menu=self.menu_autofocus, label='Autofocus')
-
-        # Add-on Features menu
-        self.menu_features = Menu(self)
-        self.add_cascade(menu=self.menu_features, label='Add-on Features')
-
-        # Help Menu
-        self.menu_help = Menu(self)
-        self.add_cascade(menu=self.menu_help, label='Help')
-
-        # Debug Menu
-        self.menu_debug = Menu(self)
-        self.add_cascade(menu=self.menu_debug, label='Debug')
+        
+        
+        

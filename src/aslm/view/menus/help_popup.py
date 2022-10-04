@@ -1,4 +1,5 @@
-"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""
+Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -29,54 +30,52 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-from tkinter import Menu
+
+import tkinter as tk
+from tkinter import ttk
+from aslm.view.custom_widgets.popup import PopUp
+
 
 import logging
-
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+class help_popup():
+    """
+    #### Class creates the popup that provides list of hot keys.
+    """
 
-#  Menubar class
-class menubar(Menu):
-    def __init__(self, window, *args, **kwargs):
-        #  Init Menu with parent
-        Menu.__init__(self, window, *args, **kwargs)
+    def __init__(self, root, *args, **kwargs):
+        # Creating popup window with this name and size/placement, PopUp is a
+        # Toplevel window
+        self.popup = PopUp(
+            root,
+            "Autofocus Settings",
+            '+320+180',
+            top=False,
+            transient=False)
 
-        #  Creates operating system attribute
-        self.opsystem = window.tk.call('tk', 'windowingsystem')
+        # Creating content frame
+        content_frame = self.popup.get_frame()   
+        
 
-        #  Prevents menu from tearing off bar
-        window.option_add('*tearOff', False)
+        """Creating the widgets for the popup"""
+        # Dictionary for all the variables
+        self.inputs = {}
 
-        #  Linking menu to option of parent to this menu class
-        window['menu'] = self
 
-        #  File Menu
-        self.menu_file = Menu(self)
-        self.add_cascade(menu=self.menu_file, label='File')
+        # Label Lists
+        labels = []
 
-        #  Multi-Position Menu
-        self.menu_multi_positions = Menu(self)
-        self.add_cascade(menu=self.menu_multi_positions, label='Multi-Position')
+        
 
-        #  Resolution Menu
-        self.menu_resolution = Menu(self)
-        self.add_cascade(menu=self.menu_resolution, label='Resolution')
+        # Widgets
 
-        # Autofocus Menu
-        self.menu_autofocus = Menu(self)
-        self.add_cascade(menu=self.menu_autofocus, label='Autofocus')
 
-        # Add-on Features menu
-        self.menu_features = Menu(self)
-        self.add_cascade(menu=self.menu_features, label='Add-on Features')
+        # Buttons
 
-        # Help Menu
-        self.menu_help = Menu(self)
-        self.add_cascade(menu=self.menu_help, label='Help')
 
-        # Debug Menu
-        self.menu_debug = Menu(self)
-        self.add_cascade(menu=self.menu_debug, label='Debug')
+
+    def get_widgets(self):
+        return self.inputs

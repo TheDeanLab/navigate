@@ -42,10 +42,13 @@ import sys
 
 # Local View Imports
 from tkinter import filedialog, messagebox
+from aslm.controller.sub_controllers.help_popup_controller import HelpPopupController
 from aslm.view.main_application_window import MainApp as view
 from aslm.view.menus.remote_focus_popup import remote_popup
 from aslm.view.menus.autofocus_setting_popup import autofocus_popup
 from aslm.view.menus.ilastik_setting_popup import ilastik_setting_popup
+from aslm.view.menus.help_popup import help_popup
+
 
 from aslm.config.config import load_configs, update_config_dict
 # Local Sub-Controller Imports
@@ -288,6 +291,16 @@ class Controller:
             else:
                 self.ilastik_controller = IlastikPopupController(ilastik_popup_window, self, ilastik_url)
 
+        # Help popup
+        def popup_help():
+            if hasattr(self, 'help_controller'):
+                self.help_controller.showup()
+                return
+            help_pop = help_popup(self.view)
+            self.help_controller = HelpPopupController(help_pop, self)  
+
+
+
         menus_dict = {
             self.view.menubar.menu_file: {
                 'New Experiment': new_experiment,
@@ -344,6 +357,9 @@ class Controller:
         # autofocus menu
         self.view.menubar.menu_autofocus.add_command(label='Autofocus', command=lambda: self.execute('autofocus'))
         self.view.menubar.menu_autofocus.add_command(label='setting', command=popup_autofocus_setting)
+
+        # Help menu
+        self.view.menubar.menu_help.add_command(label='Help', command=popup_help)
 
         # add-on features
         feature_list = ['None', 'Switch Resolution', 'Z Stack Acquisition', 'Threshold', 'Ilastik Segmentation']

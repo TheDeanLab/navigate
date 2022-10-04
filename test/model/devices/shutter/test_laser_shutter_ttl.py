@@ -38,21 +38,16 @@ from pathlib import Path
 
 # Local Imports
 from aslm.model.devices.shutter.laser_shutter_ttl import ShutterTTL
-from aslm.model.aslm_model_config import Configurator
+from aslm.model.dummy import DummyModel
 
 
 class TestShutterTTL(unittest.TestCase):
     r"""Unit Test for ShutterTTL Class"""
 
-    def test_shutter_TTL_attributes(self):
-        attributes = dir(ShutterTTL)
-        desired_attributes = ['open_left',
-                              'open_right',
-                              'close_shutters',
-                              'state']
-
-        for da in desired_attributes:
-            assert da in attributes
+    def test_shutter_ttl_attributes(self):
+        assert hasattr(ShutterTTL, 'open_shutter') and callable(getattr(ShutterTTL, 'open_shutter'))
+        assert hasattr(ShutterTTL, 'close_shutter') and callable(getattr(ShutterTTL, 'close_shutter'))
+        assert hasattr(ShutterTTL, 'state')
 
 
 if __name__ == '__main__':

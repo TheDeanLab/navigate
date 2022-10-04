@@ -38,14 +38,14 @@ import logging
 # Local Imports
 from aslm.tools.multipos_table_tools import *
 from aslm.controller.sub_controllers.gui_controller import GUI_Controller
-from aslm.controller.aslm_controller_functions import combine_funcs
+from aslm.tools.common_functions import combine_funcs
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class Tiling_Wizard_Controller(GUI_Controller):
+class TilingWizardController(GUI_Controller):
     """
     Controller for tiling wizard parameters.
     Gathers the FOV from the camera settings tab and will update when user changes this value.

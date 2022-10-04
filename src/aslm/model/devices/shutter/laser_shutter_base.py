@@ -48,26 +48,29 @@ class ShutterBase:
 
     Attributes
     ----------
-    configuration : Configurator
+    microscope_name : str
+        Name of microscope in configuration
+    device_connection : object
+        Hardware device to connect to
+    configuration : multiprocesing.managers.DictProxy
         Global configuration of the microscope
-    experiment : Configurator
-        Experiment configuration of the microscope
-    shutter_right_state : bool
-        Right shutter state
-    shutter_left_state : bool
-        Left shutter state
     """
 
-    def __init__(self,
-                 configuration,
-                 experiment):
-        self.configuration = configuration
-        self.experiment = experiment
+    def __init__(self, microscope_name, device_connection, configuration):
 
-        # Right Shutter - High Resolution Mode
-        self.shutter_right = self.configuration.DAQParameters['shutter_right']
-        self.shutter_right_state = False
+        self.shutter_state = False
 
-        # Left Shutter - Low Resolution Mode
-        self.shutter_left = self.configuration.DAQParameters['shutter_left']
-        self.shutter_left_state = False
+    def __del__(self):
+        r"""Close the Shutter at exit.
+        """
+        pass
+
+    def open_shutter(self):
+        pass
+
+    def close_shutter(self):
+        pass
+
+    @property
+    def state(self):
+        return self.shutter_state

@@ -8,24 +8,29 @@ import time
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+def build_TLKIMStage_connection(serialnum):
+    kim_controller = importlib.import_module('aslm.model.devices.APIs.thorlabs.kcube_inertial')
+
+    # Initialize
+    kim_controller.TLI_BuildDeviceList()
+
+    # Cheat for now by opening just the first stage of this type.
+    # TODO: Pass this from the configuration file
+    available_serialnum = kim_controller.TLI_GetDeviceListExt()[0]
+    assert(str(available_serialnum) == str(serialnum))
+    kim_controller.KIM_Open(str(serialnum))
+    return kim_controller
 
 class TLKIMStage(StageBase):
-    def __init__(self, configuration):
-        super().__init__(configuration, axes=['f'])  # only initialize the focus axis
+    def __init__(self, microscope_name, device_connection, configuration, device_id=0):
+        super().__init__(microscope_name, device_connection, configuration, device_id)  # only initialize the focus axis
 
         # Mapping from self.axes to corresponding KIM channels
         self.kim_axes = [1]
+        self.kim_controller = device_connection
 
-        self.kim_controller = importlib.import_module('aslm.model.devices.APIs.thorlabs.kcube_inertial')
-
-        # Initialize
-        self.kim_controller.TLI_BuildDeviceList()
-
-        # Cheat for now by opening just the first stage of this type.
-        # TODO: Pass this from the configuration file
-        self.serialnum = self.kim_controller.TLI_GetDeviceListExt()[0]
-        print(f"KIM S/N: {self.serialnum}")
-        self.kim_controller.KIM_Open(self.serialnum)
+        self.serialnum = str(configuration['configuration']['microscopes'][microscope_name]['stage']['hardware'][device_id]['serial_number'])
+        
 
     def __del__(self):
         self.stop()

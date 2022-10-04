@@ -32,43 +32,34 @@ POSSIBILITY OF SUCH DAMAGE.
 
 # Standard Library Imports
 import unittest
-from pathlib import Path
 
 # Third Party Imports
 
 # Local Imports
 from aslm.model.devices.shutter.laser_shutter_synthetic import SyntheticShutter
-from aslm.model.aslm_model_config import Configurator
+from aslm.model.dummy import DummyModel
 
 
 class TestSyntheticShutter(unittest.TestCase):
     r"""Unit Test for SyntheticShutter Class"""
+    dummy_model = DummyModel()
+    microscope_name = 'low'
 
     def test_synthetic_shutter_attributes(self):
-        base_directory = Path(__file__).resolve().parent.parent.parent.parent.parent
-        configuration_directory = Path.joinpath(base_directory, 'src', 'aslm', 'config')
-
-        configuration_path = Path.joinpath(configuration_directory, 'configuration.yml')
-        experiment_path = Path.joinpath(configuration_directory, 'experiment.yml')
-
-        configuration = Configurator(file_path=configuration_path)
-        experiment = Configurator(file_path=experiment_path)
-        shutter = SyntheticShutter(configuration,
-                              experiment)
+        shutter = SyntheticShutter(self.microscope_name, None, self.dummy_model.configuration)
 
         # Attributes
-        assert hasattr(shutter, 'configuration')
-        assert hasattr(shutter, 'experiment')
-        assert hasattr(shutter, 'shutter_right')
-        assert hasattr(shutter, 'shutter_right_state')
-        assert hasattr(shutter, 'shutter_left')
-        assert hasattr(shutter, 'shutter_left_state')
+        # assert hasattr(shutter, 'configuration')
+        # assert hasattr(shutter, 'experiment')
+        # assert hasattr(shutter, 'shutter_right')
+        # assert hasattr(shutter, 'shutter_right_state')
+        # assert hasattr(shutter, 'shutter_left')
+        # assert hasattr(shutter, 'shutter_left_state')
 
         # Methods
-        assert hasattr(shutter, 'open_left') and callable(getattr(shutter, 'open_left'))
-        assert hasattr(shutter, 'open_right') and callable(getattr(shutter, 'open_right'))
-        assert hasattr(shutter, 'close_shutters') and callable(getattr(shutter, 'close_shutters'))
-        assert hasattr(shutter, 'state') and callable(getattr(shutter, 'state'))
+        assert hasattr(shutter, 'open_shutter') and callable(getattr(shutter, 'open_shutter'))
+        assert hasattr(shutter, 'close_shutter') and callable(getattr(shutter, 'close_shutter'))
+        assert hasattr(shutter, 'state')
 
 if __name__ == '__main__':
     unittest.main()

@@ -51,80 +51,52 @@ class ShutterTTL(ShutterBase):
     Triggering for shutters delivered from DAQ using digital outputs.
     Each output keeps their last digital state for as long the device is not powered down.
 
-    Attributes
+    Parameters
     ----------
-    configuration : Configurator
+    microscope_name : str
+        Name of microscope in configuration
+    device_connection : object
+        Hardware device to connect to
+    configuration : multiprocesing.managers.DictProxy
         Global configuration of the microscope
-    experiment : Configurator
-        Experiment configuration of the microscope
-
-    Methods
-    -------
-    open_left()
-        Open the left shutter, close the right shutter.
-    open_right()
-        Open the right shutter, close the left shutter.
-    close_shutters()
-        Close both shutters
-    state()
-        Return the current state of the shutters
     """
 
-    def __init__(self, configuration, experiment):
-        super().__init__(configuration, experiment)
+    def __init__(self, microscope_name, device_connection, configuration):
+        super().__init__(microscope_name, device_connection, configuration)
 
-        # Right Shutter - High Resolution Mode
-        self.shutter_right_task = nidaqmx.Task()
-        self.shutter_right_task.do_channels.add_do_chan(self.shutter_right, line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
-        self.shutter_right_task.write(self.shutter_right_state, auto_start=True)
+        shutter_channel = configuration['configuration']['microscopes'][microscope_name]['shutter']['hardware']['channel']
 
-        # Left Shutter - Low Resolution Mode
-        self.shutter_left_task = nidaqmx.Task()
-        self.shutter_left_task.do_channels.add_do_chan(self.shutter_left, line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
-        self.shutter_left_task.write(self.shutter_left_state, auto_start=True)
+        self.shutter_task = nidaqmx.Task()
+        self.shutter_task.do_channels.add_do_chan(shutter_channel, line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
+        self.shutter_task.write(self.shutter_state, auto_start=True)
 
     def __del__(self):
         """Close the ShutterTTL at exit.
         """
-        self.shutter_right_task.close()
-        self.shutter_left_task.close()
+        self.shutter_task.close()
 
-    def open_left(self):
-        r"""Open the left shutter, close the right shutter.
+    def open_shutter(self):
+        r"""Open the shutter
         """
-        self.shutter_right_state = False
-        self.shutter_right_task.write(self.shutter_right_state, auto_start=True)
-        self.shutter_left_state = True
-        self.shutter_left_task.write(self.shutter_left_state, auto_start=True)
-        logger.debug("ShutterTTL - Shutter left opened")
+        self.shutter_state = True
+        self.shutter_task.write(self.shutter_state, auto_start=True)
+        logger.debug("ShutterTTL - Shutter opened")
 
-    def open_right(self):
-        r"""Open the right shutter, close the left shutter.
+
+    def close_shutter(self):
+        r"""CLose the shutter
         """
-        self.shutter_right_state = True
-        self.shutter_right_task.write(self.shutter_right_state, auto_start=True)
-        self.shutter_left_state = False
-        self.shutter_left_task.write(self.shutter_left_state, auto_start=True)
-        logger.debug("ShutterTTL - Shutter right opened")
+        self.shutter_state = False
+        self.shutter_task.write(self.shutter_state, auto_start=True)
+        logger.debug("ShutterTTL - The shutter is closed")
 
-
-    def close_shutters(self):
-        r"""CLose both shutters
-        """
-        self.shutter_right_state = False
-        self.shutter_right_task.write(self.shutter_right_state, auto_start=True)
-        self.shutter_left_state = False
-        self.shutter_left_task.write(self.shutter_left_state, auto_start=True)
-        logger.debug("ShutterTTL - Both shutters closed")
-
+    @property
     def state(self):
         r"""Return the state of both shutters
 
         Returns
         -------
-        shutter_left_state : bool
-            State of the left shutter.
-        shutter_right_state : bool
-            State of the right shutter
+        shutter_state : bool
+            State of the shutter.
         """
-        return self.shutter_left_state, self.shutter_right_state
+        return self.shutter_state

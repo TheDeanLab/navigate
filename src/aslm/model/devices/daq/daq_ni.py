@@ -35,8 +35,6 @@ import logging
 
 # Third Party Imports
 import nidaqmx
-from nidaqmx.constants import AcquisitionType
-from nidaqmx.constants import LineGrouping
 import numpy as np
 
 # Local Imports
@@ -52,19 +50,18 @@ class NIDAQ(DAQBase):
 
     Attributes
     ----------
-    configuration : Configurator
+    configuration : multiprocesing.managers.DictProxy
         Global configuration of the microscope
-    experiment : Configurator
-        Experiment configuration of the microscope
-    etl_constants : dict
-        Dictionary with all of the wavelength, magnification, and imaging mode-specific amplitudes/offsets
 
     """
-    def __init__(self, configuration, experiment, etl_constants):
-        super().__init__(configuration, experiment, etl_constants)
+    def __init__(self, configuration):
+        super().__init__(configuration)
         self.camera_trigger_task = None
         self.master_trigger_task = None
-        self.galvo_etl_task = None
+        self.laser_switching_task = nidaqmx.Task()
+
+        self.analog_outputs = {}  # keep track of analog outputs and their waveforms
+        self.analog_output_tasks = []
 
     def __del__(self):
         if self.camera_trigger_task is not None:
@@ -78,57 +75,56 @@ class NIDAQ(DAQBase):
         exposure_time : float
             Duration of camera exposure.
         """
-        camera_trigger_out_line = self.configuration.DAQParameters['camera_trigger_out_line']
+        camera_trigger_out_line = self.configuration['configuration']['microscopes'][self.microscope_name]['daq']['camera_trigger_out_line']
         self.camera_high_time = 0.004  # (self.camera_pulse_percent / 100) * (exposure_time/1000)  # self.sweep_time
         self.camera_delay = (self.camera_delay_percent / 100) * (exposure_time/1000)  # * 0.01 * self.sweep_time
 
         self.camera_trigger_task.co_channels.add_co_pulse_chan_time(camera_trigger_out_line,
                                                                     high_time=self.camera_high_time,
                                                                     initial_delay=self.camera_delay)
-        trigger_source = self.configuration.DAQParameters['trigger_source']
+        trigger_source = self.configuration['configuration']['microscopes'][self.microscope_name]['daq']['trigger_source']
         self.camera_trigger_task.triggers.start_trigger.cfg_dig_edge_start_trig(trigger_source)
 
     def create_master_trigger_task(self):
         r"""Set up the DO master trigger task."""
-        master_trigger_out_line = self.configuration.DAQParameters['master_trigger_out_line']
+        master_trigger_out_line = self.configuration['configuration']['microscopes'][self.microscope_name]['daq']['master_trigger_out_line']
         self.master_trigger_task.do_channels.add_do_chan(master_trigger_out_line,
-                                                         line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
+                                                         line_grouping=nidaqmx.constants.LineGrouping.CHAN_FOR_ALL_LINES)
 
-    def create_galvo_etl_task(self):
-        r"""Create galvo and ETL tasks.
+    def create_analog_output_tasks(self, channel_key):
+        """
+        Create a single analog output task for all channels per board. Most NI DAQ cards have only one clock for analog
+        output sample timing, and as such all channels must be grouped here.
+        """
 
-        All waveforms initiated by the trigger_source. PXI6259/ao0:3 -> 4 channels"""
-        # TODO: Does this task line change for the right galvo?
-        galvo_etl_task_line = self.configuration.DAQParameters['galvo_etl_task_line']
-        self.galvo_etl_task.ao_channels.add_ao_voltage_chan(galvo_etl_task_line)
-        self.galvo_etl_task.timing.cfg_samp_clk_timing(rate=self.sample_rate,
-                                                       sample_mode=AcquisitionType.FINITE,
-                                                       samps_per_chan=self.samples)
+        self.analog_output_tasks = []
 
-        trigger_source = self.configuration.DAQParameters['trigger_source']
-        self.galvo_etl_task.triggers.start_trigger.cfg_dig_edge_start_trig(trigger_source)
+        # Create one analog output task per board, grouping the channels
+        boards = list(set([x.split('/')[0] for x in self.analog_outputs.keys()]))
+        for board in boards:
+            channel = ', '.join(list(set([x for x in self.analog_outputs.keys() if x.split('/')[0] == board])))
+            self.analog_output_tasks.append(nidaqmx.Task())
+            self.analog_output_tasks[-1].ao_channels.add_ao_voltage_chan(channel)
 
-    def start_tasks(self):
-        r"""Start the tasks for camera triggering and analog outputs
+            sample_rates = list(set([v['sample_rate'] for v in self.analog_outputs.values()]))
+            if len(sample_rates) > 1:
+                logger.debug("NI DAQ - Different sample rates provided for each analog channel. Defaulting to the first sample rate provided.")
+            n_samples = list(set([v['samples'] for v in self.analog_outputs.values()]))
+            if len(n_samples) > 1:
+                logger.debug("NI DAQ - Different number of samples provided for each analog channel. Defaulting to the minimum number of samples provided. Waveforms will be clipped to this length.")
+            n_sample = min(n_samples)
+            self.analog_output_tasks[-1].timing.cfg_samp_clk_timing(rate=sample_rates[0],
+                                                 sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
+                                                 samps_per_chan=n_sample)
 
-        If the tasks are configured to be triggered, they won't start until run_tasks() is called."""
+            triggers = list(set([v['trigger_source'] for v in self.analog_outputs.values()]))
+            if len(triggers) > 1:
+                logger.debug("NI DAQ - Different triggers provided for each analog channel. Defaulting to the first trigger provided.")
+            self.analog_output_tasks[-1].triggers.start_trigger.cfg_dig_edge_start_trig(triggers[0])
 
-        self.camera_trigger_task.start()
-        self.galvo_etl_task.start()
-
-    def stop_tasks(self):
-        r"""Stop the tasks for triggering, analog and counter outputs."""
-
-        self.galvo_etl_task.stop()
-        self.camera_trigger_task.stop()
-        self.master_trigger_task.stop()
-
-    def close_tasks(self):
-        r"""Close the tasks for triggering, analog, and counter outputs."""
-
-        self.galvo_etl_task.close()
-        self.camera_trigger_task.close()
-        self.master_trigger_task.close()
+            # Write values to board
+            waveforms = np.vstack([v['waveform'][channel_key][:n_sample] for k, v in self.analog_outputs.items() if k.split('/')[0] == board])
+            self.analog_output_tasks[-1].write(waveforms)
 
     def prepare_acquisition(self, channel_key, exposure_time):
         r"""Prepare the acquisition.
@@ -146,31 +142,11 @@ class NIDAQ(DAQBase):
 
         self.camera_trigger_task = nidaqmx.Task()
         self.master_trigger_task = nidaqmx.Task()
-        self.galvo_etl_task = nidaqmx.Task()
-
-        self.calculate_samples()
 
         # Specify ports, timing, and triggering
         self.create_master_trigger_task()
         self.create_camera_task(exposure_time)
-        self.create_galvo_etl_task()
-
-        # Calculate the waveforms and start tasks.
-        etl_waveform = self.waveform_dict[channel_key]['etl_waveform']
-        galvo_waveform = self.waveform_dict[channel_key]['galvo_waveform']
-        etl_zeros, galvo_zeros = np.zeros_like(etl_waveform), np.zeros_like(galvo_waveform)
-
-        # Write waveforms to channels ao0 (galvo, left), ao1 (galvo, right), ao2 (etl, left), ao3 (blink, right)
-        if self.imaging_mode == 'high':
-            self.galvo_and_etl_waveforms = np.stack((galvo_zeros, galvo_waveform, etl_zeros, etl_waveform), axis=0)
-        elif self.imaging_mode == 'low':
-            self.galvo_and_etl_waveforms = np.stack((galvo_waveform, galvo_zeros, etl_waveform, etl_zeros), axis=0)
-        else:
-            logger.warning(f"NIDAQ - Unknown imaging mode {self.imaging_mode}. Zero waveform written.")
-            self.galvo_and_etl_waveforms = np.stack((galvo_zeros, galvo_zeros, etl_zeros, etl_zeros), axis=0)
-
-        # Write pre-calculated waveforms to the tasks...
-        self.write_waveforms_to_tasks()
+        self.create_analog_output_tasks(channel_key)
 
     def run_acquisition(self):
         r"""Run DAQ Acquisition.
@@ -178,16 +154,34 @@ class NIDAQ(DAQBase):
         The master trigger initiates all other tasks via a shared trigger
         For this to work, all analog output and counter tasks have to be started so that
         they are waiting for the trigger signal."""
-        self.start_tasks()
+        self.camera_trigger_task.start()
+        for task in self.analog_output_tasks:
+            task.start()
         self.master_trigger_task.write([False, True, True, True, False], auto_start=True)
-        self.galvo_etl_task.wait_until_done()
         self.camera_trigger_task.wait_until_done()
+        for task in self.analog_output_tasks:
+            task.wait_until_done()
 
     def stop_acquisition(self):
         r"""Stop Acquisition."""
-        self.stop_tasks()
-        self.close_tasks()
+        self.camera_trigger_task.stop()
+        self.master_trigger_task.stop()
+        self.camera_trigger_task.close()
+        self.master_trigger_task.close()
+        for task in self.analog_output_tasks:
+            task.stop()
+            task.close()
 
-    def write_waveforms_to_tasks(self):
-        r"""Write the galvo, etl, and laser waveforms to each task."""
-        self.galvo_etl_task.write(self.galvo_and_etl_waveforms)
+    def enable_microscope(self, microscope_name):
+        if microscope_name != self.microscope_name:
+            self.microscope_name = microscope_name
+            self.analog_outputs = {}
+
+        switching_port = self.configuration['configuration']['microscopes'][self.microscope_name]['daq']['laser_port_switcher']
+        switching_on_state = self.configuration['configuration']['microscopes'][self.microscope_name]['daq']['laser_switch_state']
+        
+        self.laser_switching_task.close()
+        self.laser_switching_task = nidaqmx.Task()
+        self.laser_switching_task.do_channels.add_do_chan(
+            switching_port, line_grouping=nidaqmx.constants.LineGrouping.CHAN_FOR_ALL_LINES)
+        self.laser_switching_task.write(switching_on_state, auto_start=True)

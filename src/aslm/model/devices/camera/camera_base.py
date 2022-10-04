@@ -47,33 +47,33 @@ class CameraBase:
 
     Parameters
     ----------
-    camera_id : int
-        Selects which camera to connect to (0, 1, ...).
-    configuration : Configurator
+   microscope_name : str
+        Name of microscope in configuration
+    device_connection : object
+        Hardware device to connect to
+    configuration : multiprocesing.managers.DictProxy
         Global configuration of the microscope
-    experiment : Configurator
-        Experiment configuration of the microscope
 
     """
-    def __init__(self, camera_id, configuration, experiment):
+    def __init__(self, microscope_name, device_connection, configuration):
         self.configuration = configuration
-        self.experiment = experiment
-        self.camera_id = camera_id
+        self.camera_controller = device_connection
+        self.camera_parameters = self.configuration['configuration']['microscopes'][microscope_name]['camera']
         self.stop_flag = False
         self.is_acquiring = False
 
         # Initialize Pixel Information
-        self.pixel_size_in_microns = self.configuration.CameraParameters['pixel_size_in_microns']
-        self.binning_string = self.configuration.CameraParameters['binning']
+        self.pixel_size_in_microns = self.camera_parameters['pixel_size_in_microns']
+        self.binning_string = self.camera_parameters['binning']
         self.x_binning = int(self.binning_string[0])
         self.y_binning = int(self.binning_string[2])
-        self.x_pixels = self.configuration.CameraParameters['x_pixels']
-        self.y_pixels = self.configuration.CameraParameters['y_pixels']
+        self.x_pixels = self.camera_parameters['x_pixels']
+        self.y_pixels = self.camera_parameters['y_pixels']
         self.x_pixels = int(self.x_pixels / self.x_binning)
         self.y_pixels = int(self.y_pixels / self.y_binning)
 
         # Initialize Exposure and Display Information - Convert from milliseconds to seconds.
-        self.camera_line_interval = self.configuration.CameraParameters['line_interval']
-        self.camera_exposure_time = self.configuration.CameraParameters['exposure_time'] / 1000
-        self.camera_display_acquisition_subsampling = self.configuration.CameraParameters['display_acquisition_subsampling']
+        self.camera_line_interval = self.camera_parameters['line_interval']
+        self.camera_exposure_time = self.camera_parameters['exposure_time'] / 1000
+        self.camera_display_acquisition_subsampling = self.camera_parameters['display_acquisition_subsampling']
 

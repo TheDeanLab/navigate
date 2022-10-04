@@ -60,16 +60,6 @@ class AcquireBarController(GUI_Controller):
         self.mode = 'live'
         self.update_stack_acq(self.mode)
         self.is_save = False
-        self.saving_settings = {
-            'root_directory': self.parent_controller.experiment.Saving['root_directory'],
-            'save_directory': '',
-            'user': '',
-            'tissue': '',
-            'celltype': '',
-            'label': '',
-            'file_type': '',
-            'solvent': '',
-        }
 
         self.mode_dict = {
             'Continuous Scan': 'live',
@@ -212,22 +202,6 @@ class AcquireBarController(GUI_Controller):
         self.is_save = is_save
         self.show_verbose_info('set save data option:', is_save)
 
-    def set_saving_settings(self,
-                            saving_settings):
-        r"""Set saving settings
-
-        Parameters
-        ----------
-        saving_settings : dict
-            Dictionary with root_directory, save_directory, user, etc. Reference to configuration.experiment.Saving.
-        """
-        # if value is None, set to ''
-        for name in saving_settings:
-            if saving_settings[name] is None:
-                saving_settings[name] = ''
-        self.saving_settings = saving_settings
-        self.show_verbose_info('Set saving settings')
-
     def launch_popup_window(self):
         r"""Launches the Save Dialog Popup Window
 
@@ -256,7 +230,9 @@ class AcquireBarController(GUI_Controller):
             file_type = widgets['file_type'].get_variable()
             file_type.trace_add('write', lambda *args: self.update_file_type(file_type))
 
-            initialize_popup_window(acquire_pop, self.saving_settings)
+            for k, v in self.saving_settings.items():                
+                if widgets.get(k, None):
+                    widgets[k].set(v)
 
         else:
             self.view.acquire_btn.configure(text='Stop')
@@ -346,7 +322,7 @@ class AcquireBarController(GUI_Controller):
             Instance of the popup save dialog.
         """
         # update saving settings according to user's input
-        self.update_saving_settings(popup_window)
+        self.update_experiment_values(popup_window)
 
         # Verify user's input is non-zero.
         is_valid = self.saving_settings['user'] \
@@ -356,7 +332,7 @@ class AcquireBarController(GUI_Controller):
 
         if is_valid:
             # tell central controller, save the image/data
-            self.parent_controller.execute('acquire_and_save', self.saving_settings)
+            self.parent_controller.execute('acquire_and_save')
 
             # Close the window
             popup_window.popup.dismiss()
@@ -374,28 +350,16 @@ class AcquireBarController(GUI_Controller):
             # call the central controller to stop all the threads
             self.parent_controller.execute('exit')
             sys.exit()
-        
 
-    def update_saving_settings(self, popup_window):
+    def populate_experiment_values(self):
+        self.saving_settings = self.parent_controller.configuration['experiment']['Saving']
+        self.saving_settings['date'] = str(self.saving_settings['date'])
+        mode = self.parent_controller.configuration['experiment']['MicroscopeState']['image_mode']
+        self.set_mode(mode)
+
+    def update_experiment_values(self, popup_window):
         r"""Gets the entries from the popup save dialog and overwrites the saving_settings dictionary."""
         popup_vals = popup_window.get_variables()
         for name in popup_vals:
             # remove leading and tailing whitespaces
             self.saving_settings[name] = popup_vals[name].strip()
-
-
-def initialize_popup_window(popup_window,
-                            values):
-    """This function initializes the popup window
-
-    Parameters
-    ----------
-    popup_window : object
-        Instance of the popup save dialog.
-    values : dict
-        {'root_directory':, 'save_directory':, 'user':, 'tissue':,'celltype':,'label':, 'file_type':}
-    """
-    popup_vals = popup_window.get_widgets()
-    for name in values:
-        if popup_vals.get(name, None):
-            popup_vals[name].set(values[name])

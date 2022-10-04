@@ -50,7 +50,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class Camera_View_Controller(GUI_Controller):
+class CameraViewController(GUI_Controller):
     def __init__(self,
                  view,
                  parent_controller=None):
@@ -178,17 +178,17 @@ class Camera_View_Controller(GUI_Controller):
             try:
                 slider_length = np.shape(self.image_volume)[2] - 1
             except IndexError:
-                slider_length = self.parent_controller.experiment.MicroscopeState['number_z_steps'] - 1
+                slider_length = self.parent_controller.configuration['experiment']['MicroscopeState']['number_z_steps'] - 1
         if self.display_state == 'YZ Slice':
             try:
                 slider_length = np.shape(self.image_volume)[0] - 1
             except IndexError:
-                slider_length = self.parent_controller.experiment.CameraParameters['y_pixels'] - 1
+                slider_length = self.parent_controller.configuration['experiment']['CameraParameters']['y_pixels'] - 1
         if self.display_state == 'YZ Slice':
             try:
                 slider_length = np.shape(self.image_volume)[1] - 1
             except IndexError:
-                slider_length = self.parent_controller.experiment.CameraParameters['x_pixels'] - 1
+                slider_length = self.parent_controller.configuration['experiment']['CameraParameters']['x_pixels'] - 1
 
         if self.display_state.find('Slice') != -1:
             self.view.slider.slider_widget.configure(to=slider_length,

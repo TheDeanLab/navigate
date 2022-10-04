@@ -32,7 +32,6 @@ POSSIBILITY OF SUCH DAMAGE.
 
 # Standard Library Imports
 import logging
-import importlib
 
 # Third Party Imports
 
@@ -49,45 +48,41 @@ class HamamatsuOrca(CameraBase):
 
     Parameters
     ----------
-    camera_id : int
-        Selects which camera to connect to (0, 1, ...).
-    configuration : Configurator
+    microscope_name : str
+        Name of microscope in configuration
+    device_connection : object
+        Hardware device to connect to
+    configuration : multiprocesing.managers.DictProxy
         Global configuration of the microscope
-    experiment : Configurator
-        Experiment configuration of the microscope
 
     """
-    def __init__(self, camera_id, configuration, experiment):
-        super().__init__(camera_id, configuration, experiment)
-
-        # Locally Import Hamamatsu API and Initialize Camera Controller
-        HamamatsuController = importlib.import_module('aslm.model.devices.APIs.hamamatsu.HamamatsuAPI')
-        self.camera_controller = HamamatsuController.DCAM(camera_id)
+    def __init__(self, microscope_name, device_connection, configuration):
+        super().__init__(microscope_name, device_connection, configuration)
 
         # Values are pulled from the CameraParameters section of the configuration.yml file.
         # Exposure time converted here from milliseconds to seconds.
         self.camera_controller.set_property_value("sensor_mode",
                                                   1)
         self.camera_controller.set_property_value("defect_correct_mode",
-                                                  self.configuration.CameraParameters['defect_correct_mode'])
+                                                  self.camera_parameters['defect_correct_mode'])
         self.camera_controller.set_property_value("exposure_time",
-                                                  self.configuration.CameraParameters['exposure_time'] / 1000)
+                                                  self.camera_parameters['exposure_time'] / 1000)
         self.camera_controller.set_property_value("binning",
-                                                  int(self.configuration.CameraParameters['binning'][0]))
+                                                  int(self.camera_parameters['binning'][0]))
         self.camera_controller.set_property_value("readout_speed",
-                                                  self.configuration.CameraParameters['readout_speed'])
+                                                  self.camera_parameters['readout_speed'])
         self.camera_controller.set_property_value("trigger_active",
-                                                  self.configuration.CameraParameters['trigger_active'])
+                                                  self.camera_parameters['trigger_active'])
         self.camera_controller.set_property_value("trigger_mode",
-                                                  self.configuration.CameraParameters['trigger_mode'])
+                                                  self.camera_parameters['trigger_mode'])
         self.camera_controller.set_property_value("trigger_polarity",
-                                                  self.configuration.CameraParameters['trigger_polarity'])
+                                                  self.camera_parameters['trigger_polarity'])
         self.camera_controller.set_property_value("trigger_source",
-                                                  self.configuration.CameraParameters['trigger_source'])
+                                                  self.camera_parameters['trigger_source'])
         self.camera_controller.set_property_value("image_height",
-                                                   self.configuration.CameraParameters['y_pixels'])
+                                                   self.camera_parameters['y_pixels'])
         self.camera_controller.set_property_value("image_width",
-                                                   self.configuration.CameraParameters['x_pixels'])
+                                                   self.camera_parameters['x_pixels'])
 
         logger.info("HamamatsuOrca Initialized")
 
@@ -283,7 +278,7 @@ class HamamatsuOrca(CameraBase):
         self.y_binning = int(binning_string[2])
         self.x_pixels = int(self.x_pixels / self.x_binning)
         self.y_pixels = int(self.y_pixels / self.y_binning)
-        self.experiment.CameraParameters['camera_binning'] = str(self.x_binning) + 'x' + str(self.y_binning)
+        self.configuration['experiment']['CameraParameters']['camera_binning'] = str(self.x_binning) + 'x' + str(self.y_binning)
 
     def set_ROI(self, roi_height=2048, roi_width=2048):
         r"""Change the size of the active region on the camera.
@@ -296,8 +291,8 @@ class HamamatsuOrca(CameraBase):
             Width of active camera region.
         """
         # Get the Maximum Number of Pixels from the Configuration File
-        camera_height = self.configuration.CameraParameters['y_pixels']
-        camera_width = self.configuration.CameraParameters['x_pixels']
+        camera_height = self.camera_parameters['y_pixels']
+        camera_width = self.camera_parameters['x_pixels']
 
         # Calculate Location of Image Edges
         roi_top = (camera_height - roi_height) / 2

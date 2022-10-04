@@ -50,14 +50,12 @@ class SyntheticShutter(ShutterBase):
 
     Attributes
     ----------
-    configuration : Configurator
+    microscope_name : str
+        Name of microscope in configuration
+    device_connection : object
+        Hardware device to connect to
+    configuration : multiprocesing.managers.DictProxy
         Global configuration of the microscope
-    experiment : Configurator
-        Experiment configuration of the microscope
-    shutter_right_state : bool
-        Right shutter state
-    shutter_left_state : bool
-        Left shutter state
 
     Methods
     -------
@@ -71,43 +69,5 @@ class SyntheticShutter(ShutterBase):
         Return the current state of the shutters
     """
 
-    def __init__(self, configuration, experiment):
-        super().__init__(configuration, experiment)
-
-    def __del__(self):
-        r"""Close the SyntheticShutter at exit.
-        """
-        pass
-
-    def open_left(self):
-        r"""Open the left shutter, close the right shutter.
-        """
-        self.shutter_right_state = False
-        self.shutter_left_state = True
-        logger.debug("SyntheticShutter - Shutter left opened")
-
-    def open_right(self):
-        r"""Open the right shutter, close the left shutter.
-        """
-        self.shutter_right_state = True
-        self.shutter_left_state = False
-        logger.debug("SyntheticShutter - Shutter right opened")
-
-    def close_shutters(self):
-        r"""CLose both shutters
-        """
-        self.shutter_right_state = False
-        self.shutter_left_state = False
-        logger.debug("SyntheticShutter - Both shutters closed")
-
-    def state(self):
-        r"""Return the state of both shutters
-
-        Returns
-        -------
-        shutter_left_state : bool
-            State of the left shutter.
-        shutter_right_state : bool
-            State of the right shutter
-        """
-        return self.shutter_left_state, self.shutter_right_state
+    def __init__(self, microscope_name, device_connection, configuration):
+        super().__init__(microscope_name, device_connection, configuration)

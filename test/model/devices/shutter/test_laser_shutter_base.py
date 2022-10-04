@@ -31,32 +31,22 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 import unittest
 from pathlib import Path
-from aslm.model.aslm_model_config import Configurator
 from aslm.model.devices.shutter.laser_shutter_base import ShutterBase
+from aslm.model.dummy import DummyModel
 
 
 class TestLaserBase(unittest.TestCase):
     r"""Unit Test for ShutterBase Class"""
+    dummy_model = DummyModel()
+    microscope_name = 'low'
 
     def test_shutter_base_attributes(self):
-        base_directory = Path(__file__).resolve().parent.parent.parent.parent.parent
-        configuration_directory = Path.joinpath(base_directory, 'src', 'aslm', 'config')
-        configuration_path = Path.joinpath(configuration_directory, 'configuration.yml')
-        experiment_path = Path.joinpath(configuration_directory, 'experiment.yml')
+        shutter = ShutterBase(self.microscope_name, None, self.dummy_model.configuration)
 
-        configuration = Configurator(file_path=configuration_path)
-        experiment = Configurator(file_path=experiment_path)
-
-        shutter = ShutterBase(configuration,
-                              experiment)
-
-        assert hasattr(shutter, 'configuration')
-        assert hasattr(shutter, 'experiment')
-        assert hasattr(shutter, 'shutter_right')
-        assert hasattr(shutter, 'shutter_right_state')
-        assert hasattr(shutter, 'shutter_left')
-        assert hasattr(shutter, 'shutter_left_state')
-
+        # Methods
+        assert hasattr(shutter, 'open_shutter') and callable(getattr(shutter, 'open_shutter'))
+        assert hasattr(shutter, 'close_shutter') and callable(getattr(shutter, 'close_shutter'))
+        assert hasattr(shutter, 'state')
 
 if __name__ == '__main__':
     unittest.main()

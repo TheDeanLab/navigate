@@ -41,7 +41,7 @@ logger = logging.getLogger(p)
 
 
 class KeystrokeController(GUI_Controller):
-    def __init__(self, main_view, parent_controller, configuration_controller=None):
+    def __init__(self, main_view, parent_controller):
         super().__init__(main_view, parent_controller)
 
         # References to all sub frames
@@ -53,7 +53,7 @@ class KeystrokeController(GUI_Controller):
         # Controllers for all sub frames
         self.camera_controller = parent_controller.camera_view_controller
         self.multi_controller = parent_controller.multiposition_tab_controller
-        self.stage_controller = parent_controller.stage_gui_controller
+        self.stage_controller = parent_controller.stage_controller
 
         """Keystrokes for Camera View"""
         # Left Click binding

@@ -102,11 +102,6 @@ class NIDAQ(DAQBase):
         # Create one analog output task per board, grouping the channels
         boards = list(set([x.split('/')[0] for x in self.analog_outputs.keys()]))
         for board in boards:
-            # chans = list(set([int(x.split('/')[1].strip('ao')) for x in self.analog_outputs.keys() if x.split('/')[0] == board]))
-            # low, high = min(chans), max(chans)
-            # channel = f"{board}/ao{low}"
-            # if low != high:
-            #     channel += f":{high}"
             channel = ', '.join(list(set([x for x in self.analog_outputs.keys() if x.split('/')[0] == board])))
             self.analog_output_tasks.append(nidaqmx.Task())
             self.analog_output_tasks[-1].ao_channels.add_ao_voltage_chan(channel)
@@ -128,7 +123,7 @@ class NIDAQ(DAQBase):
             self.analog_output_tasks[-1].triggers.start_trigger.cfg_dig_edge_start_trig(triggers[0])
 
             # Write values to board
-            waveforms = np.vstack([v['waveform'][channel_key][:n_sample] for v in self.analog_outputs.values()])
+            waveforms = np.vstack([v['waveform'][channel_key][:n_sample] for k, v in self.analog_outputs.items() if k.split('/')[0] == board])
             self.analog_output_tasks[-1].write(waveforms)
 
     def prepare_acquisition(self, channel_key, exposure_time):

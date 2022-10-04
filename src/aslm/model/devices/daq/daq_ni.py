@@ -175,6 +175,7 @@ class NIDAQ(DAQBase):
     def enable_microscope(self, microscope_name):
         if microscope_name != self.microscope_name:
             self.microscope_name = microscope_name
+            self.analog_outputs = {}
 
         switching_port = self.configuration['configuration']['microscopes'][self.microscope_name]['daq']['laser_port_switcher']
         switching_on_state = self.configuration['configuration']['microscopes'][self.microscope_name]['daq']['laser_switch_state']

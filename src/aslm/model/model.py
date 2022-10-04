@@ -726,10 +726,6 @@ class Model:
             former_microscope = self.active_microscope_name
             self.get_active_microscope()
             self.active_microscope.move_stage_offset(former_microscope)
-            try:
-                self.active_microscope.daq.analog_outputs = {}
-            except:
-                pass
         else:
             # update zoom if possible
             try:

@@ -168,7 +168,7 @@ class Controller:
 
         # self.microscope = self.configuration['configuration']['microscopes'].keys()[0]  # Default to the first microscope
 
-        self.initialize_menus()
+        self.initialize_menus(args.synthetic_hardware)
 
         # Set view based on model.experiment
         self.populate_experiment_setting()
@@ -589,12 +589,9 @@ class Controller:
             if not self.prepare_acquire_data():
                 self.acquire_bar_controller.stop_acquire()
                 return
-            saving_settings = args[0]
+            saving_settings = self.configuration['experiment']['Saving']
             file_directory = create_save_path(saving_settings)
-            save_yaml_file(file_directory, self.configuration['experiment'])
-            self.configuration['experiment']['Saving']['save_directory'] = saving_settings['save_directory']
-            self.configuration['experiment']['Saving']['file_type'] = saving_settings['file_type']
-            self.configuration['experiment']['Saving']['solvent'] = saving_settings['solvent']
+            save_yaml_file(file_directory, self.configuration['experiment'], filename='experiment.yml')
             self.camera_setting_controller.solvent = self.configuration['experiment']['Saving']['solvent']
             self.camera_setting_controller.calculate_physical_dimensions(
                 self.configuration['experiment']['MicroscopeState']['zoom'])

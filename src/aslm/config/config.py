@@ -88,7 +88,7 @@ def build_nested_dict(manager, parent_dict, key_name, dict_data):
 def update_config_dict(manager, parent_dict, config_name, new_config) -> bool:
     if type(new_config) != dict:
         file_path = str(new_config)
-        if isfile(file_path) and (file_path.ends('.yml') or file_path.ends('.yaml')):
+        if isfile(file_path) and (file_path.endswith('.yml') or file_path.endswith('.yaml')):
             with open(file_path) as f:
                 new_config = yaml.load(f, Loader=yaml.FullLoader)
         else:

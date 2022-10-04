@@ -230,7 +230,9 @@ class AcquireBarController(GUI_Controller):
             file_type = widgets['file_type'].get_variable()
             file_type.trace_add('write', lambda *args: self.update_file_type(file_type))
 
-            initialize_popup_window(acquire_pop, self.saving_settings)
+            for k, v in self.saving_settings.items():                
+                if widgets.get(k, None):
+                    widgets[k].set(v)
 
         else:
             self.view.acquire_btn.configure(text='Stop')
@@ -330,7 +332,7 @@ class AcquireBarController(GUI_Controller):
 
         if is_valid:
             # tell central controller, save the image/data
-            self.parent_controller.execute('acquire_and_save', self.saving_settings)
+            self.parent_controller.execute('acquire_and_save')
 
             # Close the window
             popup_window.popup.dismiss()
@@ -361,20 +363,3 @@ class AcquireBarController(GUI_Controller):
         for name in popup_vals:
             # remove leading and tailing whitespaces
             self.saving_settings[name] = popup_vals[name].strip()
-
-
-def initialize_popup_window(popup_window,
-                            saving_settings):
-    """This function initializes the popup window
-
-    Parameters
-    ----------
-    popup_window : object
-        Instance of the popup save dialog.
-    save_settings : dict
-        {'root_directory':, 'save_directory':, 'user':, 'tissue':,'celltype':,'label':, 'file_type':}
-    """
-    popup_vals = popup_window.get_widgets()
-    for k, v in saving_settings.items():
-        if popup_vals.get(k, None):
-            popup_vals[k].set(v)

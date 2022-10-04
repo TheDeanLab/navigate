@@ -319,19 +319,20 @@ class Model:
             e.g., self.resolution_info['ETLConstants'][self.resolution][self.mag]
             """
             reboot = False
+            resolution_value = self.configuration['experiment']['MicroscopeState']['resolution_mode']
             if self.is_acquiring:
                 # We called this while in the middle of an acquisition
                 # stop live thread
                 self.stop_send_signal = True
                 self.signal_thread.join()
-                if args[0] == 'resolution' and args[1] != self.active_microscope_name:
+                if args[0] == 'resolution' and resolution_value != self.active_microscope_name:
                     self.pause_data_thread()
                     self.active_microscope.end_acquisition()
                     reboot = True
                 self.current_channel = 0
 
             if args[0] == 'resolution':
-                self.change_resolution(args[1])
+                self.change_resolution(resolution_value)
                 if reboot:
                     # prepare active microscope
                     waveform_dict = self.active_microscope.prepare_acquisition()
@@ -725,6 +726,18 @@ class Model:
             former_microscope = self.active_microscope_name
             self.get_active_microscope()
             self.active_microscope.move_stage_offset(former_microscope)
+            try:
+                self.active_microscope.daq.analog_outputs = {}
+            except:
+                pass
+        else:
+            # update zoom if possible
+            try:
+                zoom_value = self.configuration['experiment']['MicroscopeState']['zoom']
+                self.active_microscope.zoom.set_zoom(zoom_value)
+                self.logger.debug(f'Change zoom of {self.active_microscope_name} to {zoom_value}')
+            except:
+                self.logger.debug(f'There is no zoom in microscope: {self.active_microscope_name}')
 
     def load_images(self, filenames=None):
         r"""Load/Unload images to the Synthetic Camera

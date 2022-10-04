@@ -53,20 +53,38 @@ class GalvoNI(GalvoBase):
     def __init__(self, microscope_name, device_connection, configuration, galvo_id=0):
         super().__init__(microscope_name, device_connection, configuration, galvo_id)
 
-        # TODO: makesure the task is reusable, Or need to create and close each time.
+        self.task = None
+
+        self.trigger_source = configuration['configuration']['microscopes'][microscope_name]['daq']['trigger_source']
+
+        # self.initialize_task()
+
+        self.daq = device_connection
+
+    def initialize_task(self):
+        # TODO: make sure the task is reusable, Or need to create and close each time.
         self.task = nidaqmx.Task()
         channel = self.device_config['hardware']['channel']
         self.task.ao_channels.add_ao_voltage_chan(channel)
+        print(f"Initializing galvo with sample rate {self.sample_rate} and {self.samples} samples")
         self.task.timing.cfg_samp_clk_timing(rate=self.sample_rate,
                                              sample_mode=AcquisitionType.FINITE,
                                              samps_per_chan=self.samples)
-        trigger_source = configuration['configuration']['microscopes'][microscope_name]['daq']['trigger_source']
-        self.task.triggers.start_trigger.cfg_dig_edge_start_trig(trigger_source)
-
+        self.task.triggers.start_trigger.cfg_dig_edge_start_trig(self.trigger_source)
 
     def __del__(self):
         self.stop_task()
         self.close_task()
+
+    def adjust(self, readout_time):
+        waveform_dict = super().adjust(readout_time)
+
+        self.daq.analog_outputs[self.device_config['hardware']['channel']] = {'sample_rate': self.sample_rate,
+                                                                              'samples': self.samples,
+                                                                              'trigger_source': self.trigger_source,
+                                                                              'waveform': waveform_dict}
+
+        return waveform_dict
 
     def prepare_task(self, channel_key):
         # write waveform
@@ -74,9 +92,10 @@ class GalvoNI(GalvoBase):
 
     def start_task(self):
         self.task.start()
-        self.task.wait_until_done()
 
-    def stop_task(self):
+    def stop_task(self, force=False):
+        if not force:
+            self.task.wait_until_done()
         self.task.stop()
     
     def close_task(self):

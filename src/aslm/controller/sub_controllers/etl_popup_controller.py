@@ -115,7 +115,6 @@ class EtlPopupController(GUI_Controller):
 
         # Populate widgets
         self.widgets['Mode'].widget['values'] = list(self.resolution_info['ETLConstants'].keys())
-        print(self.widgets['Mode'].widget['values'])
         self.widgets['Mode'].widget['state'] = 'readonly'
         self.widgets['Mag'].widget['state'] = 'readonly'
 
@@ -138,8 +137,9 @@ class EtlPopupController(GUI_Controller):
 
         laser_min = self.configuration_controller.remote_focus_dict['hardware']['min']
         laser_max = self.configuration_controller.remote_focus_dict['hardware']['max']
-        galvo_min = self.configuration_controller.galvo_parameter_dict['hardware']['min']
-        galvo_max = self.configuration_controller.galvo_parameter_dict['hardware']['max']
+        # TODO: support multiple galvos
+        galvo_min = self.configuration_controller.galvo_parameter_dict[0]['hardware']['min']
+        galvo_max = self.configuration_controller.galvo_parameter_dict[0]['hardware']['max']
 
         # set ranges of value for those lasers
         for laser in self.lasers:
@@ -180,7 +180,7 @@ class EtlPopupController(GUI_Controller):
         # TODO: Should we instead change galvo amp/offset behavior based on a waveform type passed in the
         #       configuration? That is, should we pass galvo_l_waveform: sawtooth and galvo_r_waveform: dc_value?
         #       And then adjust the ETL_Popup_Controller accordingly? We could do the same for ETL vs. voice coil.
-        if self.configuration_controller.galvo_parameter_dict['amplitude'] is None:
+        if self.configuration_controller.galvo_parameter_dict[0]['amplitude'] is None:
             self.widgets['Galvo Amp'].widget['state'] = "disabled"
             self.widgets['Galvo Freq'].widget['state'] = "disabled"
         else:
@@ -238,11 +238,12 @@ class EtlPopupController(GUI_Controller):
             self.variables[laser + ' Off'].set(self.resolution_info['ETLConstants']
                                                [self.resolution][self.mag][laser]['offset'])
 
-        focus_prefix = 'r' if self.resolution == 'high' else 'l'
-
-        self.variables['Galvo Amp'].set(self.galvo_setting.get(f'galvo_{focus_prefix}_amplitude', 0))
-        self.variables['Galvo Off'].set(self.galvo_setting.get(f'galvo_{focus_prefix}_offset', 0))
-        self.variables['Galvo Freq'].set(self.galvo_setting.get(f'galvo_{focus_prefix}_frequency', 0))
+        # do not tell the model to update galvo
+        self.update_galvo_device_flag = False
+        self.variables['Galvo Amp'].set(self.galvo_setting[self.resolution].get(f'amplitude', 0))
+        self.variables['Galvo Off'].set(self.galvo_setting[self.resolution].get(f'offset', 0))
+        self.variables['Galvo Freq'].set(self.galvo_setting[self.resolution].get(f'frequency', 0))
+        self.update_galvo_device_flag = True
 
         # update resolution value in central controller (menu)
         value = 'high' if self.resolution == 'high' else self.mag
@@ -283,19 +284,20 @@ class EtlPopupController(GUI_Controller):
         variable = self.variables[name]
 
         def func_galvo(*args):
-            focus_prefix = 'r' if self.resolution == 'high' else 'l'
-            galvo_parameter = f'galvo_{focus_prefix}_{parameter}'
+            if not self.update_galvo_device_flag:
+                return
             try:
-                value = self.galvo_setting[galvo_parameter]
+                value = self.galvo_setting[self.resolution][parameter]
             except KeyError:
                 # Special case for galvo amplitude not being defined
                 value = 0
             variable_value = variable.get()
-            logger.debug(f"Galvo parameter {galvo_parameter} changed: {variable_value} pre if statement")
+            logger.debug(f"Galvo parameter {parameter} changed: {variable_value} pre if statement")
             if value != variable_value and variable_value != '':
-                self.galvo_setting[galvo_parameter] = variable_value
-                logger.debug(f"Galvo parameter {galvo_parameter} changed: {variable_value}")
-                event_id_name = galvo_parameter
+                self.galvo_setting[self.resolution][parameter] = variable_value
+                logger.debug(f"Galvo parameter {parameter} changed: {variable_value}")
+                # change any galvo parameters as one event
+                event_id_name = 'galvo'
                 try:
                     if self.event_ids[event_id_name]:
                         self.view.popup.after_cancel(self.event_ids[event_id_name])

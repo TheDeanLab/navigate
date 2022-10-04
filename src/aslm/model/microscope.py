@@ -97,8 +97,12 @@ class Microscope:
                         ref_list = []
                 
                 device_ref_name = build_ref_name('_', *ref_list)
+
                 if device_name in devices_dict and device_ref_name in devices_dict[device_name]:
                     device_connection = devices_dict[device_name][device_ref_name]
+                elif device_ref_name.startswith('NI') and (device_name == 'galvo' or device_name == 'remote_focus_device'):
+                    # TODO: Remove this. We should not have this hardcoded.
+                    device_connection = self.daq
 
                 if is_list:
                     exec(f"self.{device_name}['{device_name_list[i]}'] = start_{device_name}(name, device_connection, configuration, i, is_synthetic)")

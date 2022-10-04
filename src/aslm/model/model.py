@@ -319,19 +319,20 @@ class Model:
             e.g., self.resolution_info['ETLConstants'][self.resolution][self.mag]
             """
             reboot = False
+            resolution_value = self.configuration['experiment']['MicroscopeState']['resolution_mode']
             if self.is_acquiring:
                 # We called this while in the middle of an acquisition
                 # stop live thread
                 self.stop_send_signal = True
                 self.signal_thread.join()
-                if args[0] == 'resolution' and args[1] != self.active_microscope_name:
+                if args[0] == 'resolution' and resolution_value != self.active_microscope_name:
                     self.pause_data_thread()
                     self.active_microscope.end_acquisition()
                     reboot = True
                 self.current_channel = 0
 
             if args[0] == 'resolution':
-                self.change_resolution(args[1])
+                self.change_resolution(resolution_value)
                 if reboot:
                     # prepare active microscope
                     waveform_dict = self.active_microscope.prepare_acquisition()

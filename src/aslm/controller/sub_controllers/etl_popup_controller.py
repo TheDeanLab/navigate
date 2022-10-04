@@ -115,7 +115,6 @@ class EtlPopupController(GUI_Controller):
 
         # Populate widgets
         self.widgets['Mode'].widget['values'] = list(self.resolution_info['ETLConstants'].keys())
-        print(self.widgets['Mode'].widget['values'])
         self.widgets['Mode'].widget['state'] = 'readonly'
         self.widgets['Mag'].widget['state'] = 'readonly'
 

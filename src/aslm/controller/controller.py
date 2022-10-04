@@ -527,7 +527,7 @@ class Controller:
             zoom = 'N/A' if resolution == 'high' else self.resolution_value.get()
             self.configuration['experiment']['MicroscopeState']['resolution_mode'] = resolution
             self.configuration['experiment']['MicroscopeState']['zoom'] = zoom
-            work_thread = self.threads_pool.createThread('model', lambda: self.model.run_command('update_setting', 'resolution', resolution))
+            work_thread = self.threads_pool.createThread('model', lambda: self.model.run_command('update_setting', 'resolution'))
             work_thread.join()
             # self.model.change_resolution(resolution_value=args[0])
             self.camera_setting_controller.calculate_physical_dimensions(zoom)

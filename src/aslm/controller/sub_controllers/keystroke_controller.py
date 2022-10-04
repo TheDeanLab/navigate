@@ -85,7 +85,7 @@ class KeystrokeController(GUI_Controller):
         self.main_view.bind("3", self.switch_tab3)
         self.main_view.bind("4", self.switch_tab4)
         self.main_view.bind_all('z', self.undo)
-        self.main_view.bind_all('y', self.redo) # May need to bind individually bind all may not be a good way to do it
+        self.main_view.bind_all('y', self.redo)
         
 
     # def test(self, event):
@@ -137,35 +137,27 @@ class KeystrokeController(GUI_Controller):
     # Need to make sure that the entry is undo/redo and that the underlying variable for the entry is being updated to what is shown
 
     def undo(self, event):
-        print("Undo process started")
         if isinstance(event.widget, ValidatedEntry): #Add all widgets that you want to be able to undo here
             widget = event.widget
-            print("Entry being tested: ", widget)
-            print("State of widget: ", widget.state)
-            print("Undo history of widget: ", widget.undo_history)
             if event.state == 4:
                 if len(widget.undo_history) > 1:
-                    print("Undo really starting now")
-                    widget.delete(0, tk.END)
-                    print("Widget delete")
-                    widget.insert(tk.END, widget.undo_history[-2]) # Should this be widget.variable.set()
-                    print("Widget insert: ", widget.undo_history[-2])
+                    widget.variable.set(widget.undo_history[-2]) # Should this be widget.variable.set()
                     widget.redo_history.append(widget.undo_history.pop())
-                    print("Adding to redo history: ", widget.redo_history)
                 if len(widget.undo_history) == 1:
-                    widget.delete(0, tk.END)
-                    print("Widget delete bc less than 1")
                     widget.redo_history.append(widget.undo_history.pop())
 
 
     def redo(self, event):
-        print("Redo process started")
+        print("Redo triggered")
         if isinstance(event.widget, ValidatedEntry):
             widget = event.widget
             if event.state == 4:
                 if widget.redo_history:
-                    widget.delete(0, tk.END)
-                    widget.insert(tk.END, widget.redo_history[-1])
+                    if not widget.undo_history:
+                        widget.undo_history.append(widget.redo_history.pop())
+                        if not widget.redo_history:
+                            return
+                    widget.variable.set(widget.redo_history[-1])
                     widget.undo_history.append(widget.redo_history.pop())
 
         

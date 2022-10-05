@@ -333,6 +333,9 @@ class Model:
 
             if args[0] == 'resolution':
                 self.change_resolution(self.configuration['experiment']['MicroscopeState']['resolution_mode'])
+
+            if args[0] == 'number_of_pixels':
+                self.configuration['experiment']['CameraParameters']['number_of_pixels'] = args[1]
             
             if reboot:
                 # prepare active microscope

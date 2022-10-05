@@ -69,6 +69,7 @@ class CameraSettingController(GUI_Controller):
         # Event binding
         self.pixel_event_id = None
         self.mode_widgets['Sensor'].widget.bind('<<ComboboxSelected>>', self.update_sensor_mode)
+        self.mode_widgets['Readout'].widget.bind('<<ComboboxSelected>>', self.update_experiment_values)
         self.mode_widgets['Pixels'].get_variable().trace_add('write', self.update_number_of_pixels)
         self.roi_widgets['Width'].get_variable().trace_add('write', self.update_fov)
         self.roi_widgets['Height'].get_variable().trace_add('write', self.update_fov)
@@ -190,7 +191,7 @@ class CameraSettingController(GUI_Controller):
         # after initialization
         self.in_initialization = False
 
-    def update_experiment_values(self):
+    def update_experiment_values(self, *args):
         """
         Update the dictionary so that it can be combined with all of the other
         sub-controllers, and then sent to the model.

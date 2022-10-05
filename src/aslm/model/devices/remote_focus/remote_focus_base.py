@@ -98,6 +98,12 @@ class RemoteFocusBase:
 
                 # ETL Parameters
                 etl_amplitude = float(etl_constants['ETLConstants'][imaging_mode][zoom][laser]['amplitude'])
+
+                # Validation for when user puts a '-' in spinbox
+                temp = etl_constants['ETLConstants'][imaging_mode][zoom][laser]['offset']
+                if temp == '-' or temp == '.':
+                    etl_constants['ETLConstants'][imaging_mode][zoom][laser]['offset'] = '0'
+
                 etl_offset = float(etl_constants['ETLConstants'][imaging_mode][zoom][laser]['offset'])
 
                 # Calculate the Waveforms

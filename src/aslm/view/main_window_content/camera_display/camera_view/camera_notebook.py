@@ -40,7 +40,7 @@ from aslm.view.custom_widgets.DockableNotebook import DockableNotebook
 
 # Import Sub-Frames
 from aslm.view.main_window_content.camera_display.camera_view.camera_view_tab import camera_tab
-from aslm.view.main_window_content.camera_display.camera_view.waveform_tab import waveform_tab
+from aslm.view.main_window_content.camera_display.camera_view.waveform_tab import WaveformTab
 
 class camera_notebook(DockableNotebook):
     def __init__(self, frame_top_right, *args, **kwargs):
@@ -54,7 +54,7 @@ class camera_notebook(DockableNotebook):
         self.camera_tab = camera_tab(self)
 
         #Creating the waveform settings tab
-        self.waveform_tab = waveform_tab(self)
+        self.waveform_tab = WaveformTab(self)
 
         # Tab list
         tab_list = [self.camera_tab, self.waveform_tab]

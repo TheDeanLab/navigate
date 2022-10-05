@@ -97,7 +97,7 @@ class DAQBase:
         microscope_state = self.configuration['experiment']['MicroscopeState']
         self.camera_delay_percent = self.configuration['configuration']['microscopes'][microscope_name]['camera']['delay_percent']
         self.sample_rate = self.configuration['configuration']['microscopes'][microscope_name]['daq']['sample_rate']
-        
+
         # Iterate through the dictionary.
         for channel_key in microscope_state['channels'].keys():
             # channel includes 'is_selected', 'laser', 'filter', 'camera_exposure'...

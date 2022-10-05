@@ -76,6 +76,7 @@ class RemoteFocusBase:
         etl_constants = self.configuration['etl_constants']
         imaging_mode = microscope_state['resolution_mode']
         zoom = microscope_state['zoom']
+        self.sample_rate = self.configuration['configuration']['microscopes'][self.microscope_name]['daq']['sample_rate']
 
         for channel_key in microscope_state['channels'].keys():
             # channel includes 'is_selected', 'laser', 'filter', 'camera_exposure'...

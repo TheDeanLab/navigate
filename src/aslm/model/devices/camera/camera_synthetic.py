@@ -68,6 +68,9 @@ class SyntheticCameraController:
 
         return -1  # {}
 
+    def set_property_value(self, name, value):
+        logger.debug(f'set camera property {name}: {value}')
+
 
 class SyntheticCamera(CameraBase):
     r"""SyntheticCamera camera class.

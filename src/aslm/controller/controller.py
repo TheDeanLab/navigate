@@ -409,6 +409,7 @@ class Controller:
         """
         # acquire_bar_controller - update image mode
         self.configuration['experiment']['MicroscopeState']['image_mode'] = self.acquire_bar_controller.get_mode()
+        self.camera_setting_controller.update_experiment_values()
 
         # TODO: validate experiment dict
         return True

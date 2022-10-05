@@ -69,7 +69,6 @@ class CameraSettingController(GUIController):
         # Event binding
         self.pixel_event_id = None
         self.mode_widgets['Sensor'].widget.bind('<<ComboboxSelected>>', self.update_sensor_mode)
-        self.mode_widgets['Readout'].widget.bind('<<ComboboxSelected>>', self.update_experiment_values)
         self.mode_widgets['Pixels'].get_variable().trace_add('write', self.update_number_of_pixels)
         self.roi_widgets['Width'].get_variable().trace_add('write', self.update_fov)
         self.roi_widgets['Height'].get_variable().trace_add('write', self.update_fov)
@@ -248,7 +247,6 @@ class CameraSettingController(GUIController):
         
         # calculate readout time
         self.calculate_readout_time()
-        self.update_experiment_values()
 
     def update_exposure_time(self, exposure_time):
         """
@@ -395,10 +393,13 @@ class CameraSettingController(GUIController):
         pixels = self.mode_widgets['Pixels'].get()
         if pixels != '':
             self.number_of_pixels = int(pixels)
-        if not ((self.mode == 'live') or (self.mode == 'stop')):
+
+        if self.mode != 'live' and self.mode != 'stop':
             return
+        
+        self.camera_setting_dict['number_of_pixels'] = self.number_of_pixels
         
         # tell central controller to update model
         if self.pixel_event_id:
             self.view.after_cancel(self.pixel_event_id)
-        self.view.after(10, lambda: self.parent_controller.execute('update_setting', 'number_of_pixels', self.number_of_pixels))
+        self.view.after(10, lambda: self.parent_controller.execute('update_setting', 'number_of_pixels'))

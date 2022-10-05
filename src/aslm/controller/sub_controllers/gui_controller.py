@@ -39,12 +39,12 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class GUI_Controller:
-    def __init__(self, view, parent_controller=None, configuration_controller=None):
+class GUIController:
+    def __init__(self, view, parent_controller=None):
         self.view = view
         self.parent_controller = parent_controller
 
-    def initialize(self, configuration_controller):
+    def initialize(self):
         """
         # this function initializes GUI based on configuration setting
         # parameter: configuration_controller
@@ -54,14 +54,14 @@ class GUI_Controller:
         """
         pass
 
-    def set_experiment_values(self, setting_dict):
+    def set_experiment_values(self):
         """
         # this function sets values of widgets based on experiment setting
         # setting_dict is a dictionary
         """
         pass
 
-    def update_experiment_values(self, setting_dict):
+    def update_experiment_values(self):
         """
         # this function collects all the values of widgets
         # setting_dict is a reference of experiment dictionary

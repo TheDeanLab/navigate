@@ -41,7 +41,7 @@ import pandas as pd
 from pandastable import TableModel
 
 # Local Imports
-from aslm.controller.sub_controllers.gui_controller import GUI_Controller
+from aslm.controller.sub_controllers.gui_controller import GUIController
 
 
 # Logger Setup
@@ -49,7 +49,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class MultiPositionController(GUI_Controller):
+class MultiPositionController(GUIController):
     
     def __init__(self,
                  view,

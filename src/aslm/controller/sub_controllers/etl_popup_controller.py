@@ -33,7 +33,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 
-from aslm.controller.sub_controllers.gui_controller import GUI_Controller
+from aslm.controller.sub_controllers.gui_controller import GUIController
 from aslm.tools.file_functions import save_yaml_file
 from aslm.tools.common_functions import combine_funcs
 
@@ -45,7 +45,7 @@ logger = logging.getLogger(p)
 
 
 # TODO: Should we rename to remote_focus_popup_controller?
-class EtlPopupController(GUI_Controller):
+class EtlPopupController(GUIController):
     def __init__(self,
                  view,
                  parent_controller,

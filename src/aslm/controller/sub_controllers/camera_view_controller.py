@@ -43,14 +43,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Local Imports
-from aslm.controller.sub_controllers.gui_controller import GUI_Controller
+from aslm.controller.sub_controllers.gui_controller import GUIController
 from aslm.tools.decorators import function_timer
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class CameraViewController(GUI_Controller):
+class CameraViewController(GUIController):
     def __init__(self,
                  view,
                  parent_controller=None):

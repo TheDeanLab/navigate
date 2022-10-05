@@ -42,14 +42,14 @@ import numpy as np
 from tkinter import NSEW
 
 # Local Imports
-from aslm.controller.sub_controllers.gui_controller import GUI_Controller
+from aslm.controller.sub_controllers.gui_controller import GUIController
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class WaveformTabController(GUI_Controller):
+class WaveformTabController(GUIController):
     def __init__(self, view, parent_controller=None):
         super().__init__(view, parent_controller)
         self.remote_focus_waveform = 0

@@ -33,7 +33,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 from aslm.controller.sub_controllers.widget_functions import validate_wrapper
-from aslm.controller.sub_controllers.gui_controller import GUI_Controller
+from aslm.controller.sub_controllers.gui_controller import GUIController
 import logging
 
 # Logger Setup
@@ -45,7 +45,7 @@ TODO Create a dictionary for widgets that holds a list of widgets for each colum
 """
 
 
-class ChannelSettingController(GUI_Controller):
+class ChannelSettingController(GUIController):
     def __init__(self, view, parent_controller=None, configuration_controller=None):
         super().__init__(view, parent_controller)
 

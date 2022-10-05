@@ -38,7 +38,7 @@ import numpy as np
 
 # Local Imports
 from aslm.controller.sub_controllers.widget_functions import validate_wrapper
-from aslm.controller.sub_controllers.gui_controller import GUI_Controller
+from aslm.controller.sub_controllers.gui_controller import GUIController
 from aslm.controller.sub_controllers.channel_setting_controller import ChannelSettingController
 from aslm.controller.sub_controllers.tiling_wizard_controller import TilingWizardController
 
@@ -51,7 +51,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class ChannelsTabController(GUI_Controller):
+class ChannelsTabController(GUIController):
     def __init__(self,
                  view,
                  parent_controller=None):

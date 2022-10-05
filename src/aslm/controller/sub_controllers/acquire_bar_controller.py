@@ -39,7 +39,7 @@ from tkinter import messagebox
 # Third Party Imports
 
 # Local Imports
-from aslm.controller.sub_controllers.gui_controller import GUI_Controller
+from aslm.controller.sub_controllers.gui_controller import GUIController
 from aslm.view.main_window_content.acquire_bar_frame.acquire_popup import AcquirePopUp
 
 # Logger Setup
@@ -47,7 +47,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class AcquireBarController(GUI_Controller):
+class AcquireBarController(GUIController):
     def __init__(self,
                  view,
                  parent_view,

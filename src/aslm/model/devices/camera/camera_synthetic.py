@@ -88,8 +88,6 @@ class SyntheticCamera(CameraBase):
     def __init__(self, microscope_name, device_connection, configuration):
         super().__init__(microscope_name, device_connection, configuration)
 
-        self.x_pixels = self.configuration['experiment']['CameraParameters']['x_pixels']
-        self.y_pixels = self.configuration['experiment']['CameraParameters']['y_pixels']
         self.is_acquiring = False
         self._mean_background_count = 100.0
         self._noise_sigma = noise_model.compute_noise_sigma(Ib=self._mean_background_count)

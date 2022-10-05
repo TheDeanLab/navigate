@@ -169,6 +169,11 @@ class Controller:
 
         self.initialize_menus(args.synthetic_hardware)
 
+        # Create default data buffer
+        self.img_width = 0
+        self.img_height = 0
+        self.data_buffer = None
+
         # Set view based on model.experiment
         self.populate_experiment_setting()
 
@@ -177,12 +182,6 @@ class Controller:
 
         # Wire up pipes
         self.show_img_pipe = self.model.create_pipe('show_img_pipe')
-
-        # Create default data buffer
-        self.img_width = 0
-        self.img_height = 0
-        self.data_buffer = None
-        self.update_buffer()
 
     def update_buffer(self):
         r""" Update the buffer size according to the camera dimensions listed in the experimental parameters.
@@ -208,6 +207,13 @@ class Controller:
 
     def update_acquire_control(self):
             self.view.acqbar.stop_stage.config(command=self.stage_controller.stop_button_handler)
+
+    def change_microscope(self, microscope_name):
+        self.configuration['experiment']['MicroscopeState']['microscope_name'] = microscope_name
+        if self.configuration_controller.change_microscope():
+            # update widgets
+            self.stage_controller.initialize()
+            self.channels_tab_controller.initialize()
 
     def initialize_cam_view(self):
         """ Populate view tab.
@@ -374,19 +380,14 @@ class Controller:
             file_name = path to the non-default experiment yaml file.
 
         """
-        if file_name:
-            file_path = Path(file_name)
-            if file_path.exists():
-                # TODO: tell model the experiment dict is changed.
+        # read the new file and update info of the configuration dict
+        update_config_dict(self.manager, self.configuration, 'experiment', file_name)
 
-                # TODO: read the new file and update info of the configuration dict
-                update_config_dict(self.manager, self.configuration, 'experiment', file_name)
+        # update buffer
+        self.update_buffer()
 
         # Configure GUI
         resolution_mode = self.configuration['experiment']['MicroscopeState']['resolution_mode']
-        if self.configuration_controller.change_microscope():
-            #TODO: update widgets
-            pass
         if resolution_mode == 'high':
             self.configuration['experiment']['MicroscopeState']['zoom'] = 'N/A'
             self.resolution_value.set('high')
@@ -398,6 +399,9 @@ class Controller:
         self.multiposition_tab_controller.set_positions(self.configuration['experiment']['MultiPositions']['stage_positions'])
         self.channels_tab_controller.populate_experiment_values()
         self.camera_setting_controller.populate_experiment_values()
+
+        # set widget modes
+        self.set_mode_of_sub('stop')
 
     def update_experiment_setting(self):
         r"""Update model.experiment according to values in the GUI
@@ -520,8 +524,7 @@ class Controller:
             resolution = 'high' if self.resolution_value.get() == 'high' else 'low'
             zoom = 'N/A' if resolution == 'high' else self.resolution_value.get()
             if resolution != self.configuration['experiment']['MicroscopeState']['microscope_name']:
-                self.configuration['experiment']['MicroscopeState']['microscope_name'] = resolution
-                self.configuration_controller.change_microscope()
+                self.change_microscope(resolution)
             self.configuration['experiment']['MicroscopeState']['resolution_mode'] = resolution
             self.configuration['experiment']['MicroscopeState']['zoom'] = zoom
             work_thread = self.threads_pool.createThread('model', lambda: self.model.run_command('update_setting', 'resolution'))

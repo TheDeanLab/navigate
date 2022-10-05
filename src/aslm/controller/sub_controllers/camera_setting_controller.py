@@ -292,6 +292,9 @@ class CameraSettingController(GUIController):
         if self.mode_widgets['Sensor'].get() == 'Light-Sheet':
             self.mode_widgets['Readout'].widget['state'] = state_readonly
             self.mode_widgets['Pixels'].widget['state'] = 'normal' if mode == 'live' else state
+        else:
+            self.mode_widgets['Readout'].widget['state'] = 'disabled'
+            self.mode_widgets['Pixels'].widget['state'] = 'disabled'
         self.framerate_widgets['frames_to_average'].widget['state'] = state
         self.roi_widgets['Width'].widget['state'] = state
         self.roi_widgets['Height'].widget['state'] = state

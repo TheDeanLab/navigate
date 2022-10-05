@@ -43,21 +43,24 @@ logger = logging.getLogger(p)
 
 
 class ConfigurationController:
-    def __init__(self, configuration, microscope_name='low'):
+    def __init__(self, configuration):
         self.configuration = configuration
         self.microscope_name = None
         self.microscope_config = None
 
-        self.change_microscope(microscope_name)
+        self.change_microscope()
 
-    def change_microscope(self, microscope_name='low')->bool:
+    def change_microscope(self)->bool:
         r"""Get the new microscope configuration dict according to the name
         
         Returns
         -------
         result: bool
         """
-        if self.microscope_name == microscope_name or microscope_name not in self.configuration['configuration']['microscopes']:
+        microscope_name = self.configuration['experiment']['MicroscopeState']['microscope_name']
+        assert(microscope_name in self.configuration['configuration']['microscopes'].keys())
+        
+        if self.microscope_name == microscope_name:
             return False
 
         self.microscope_config = self.configuration['configuration']['microscopes'][microscope_name]

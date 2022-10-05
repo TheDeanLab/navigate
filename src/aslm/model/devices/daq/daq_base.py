@@ -55,7 +55,7 @@ class DAQBase:
     def __init__(self, configuration):
         self.configuration = configuration
         self.etl_constants = self.configuration['etl_constants']
-        self.microscope_name = self.configuration['experiment']['MicroscopeState']['resolution_mode']
+        self.microscope_name = self.configuration['experiment']['MicroscopeState']['microscope_name']
         self.daq_parameters = self.configuration['configuration']['microscopes'][self.microscope_name]['daq']
 
         # Initialize Variables

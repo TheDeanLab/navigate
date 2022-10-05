@@ -49,7 +49,7 @@ class Metadata:
 
     def set_from_configuration_experiment(self) -> None:
         if self.configuration.get('experiment') is not None and self.configuration.get('configuration') is not None:
-            self.active_microscope = self.configuration['experiment']['MicroscopeState']['resolution_mode']
+            self.active_microscope = self.configuration['experiment']['MicroscopeState']['microscope_name']
             self.set_shape_from_configuration_experiment()
             self.set_stack_order_from_configuration_experiment()
 

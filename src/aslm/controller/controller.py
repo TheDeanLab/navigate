@@ -125,8 +125,7 @@ class Controller:
         self.etl_constants_path = etl_constants_path
 
         # Configuration Reader
-        microscope_name = 'high' if self.configuration['experiment']['MicroscopeState']['resolution_mode'] == 'high' else 'low'
-        self.configuration_controller = ConfigurationController(self.configuration, microscope_name)
+        self.configuration_controller = ConfigurationController(self.configuration)
 
         # Initialize the View
         self.view = view(root)
@@ -385,7 +384,7 @@ class Controller:
 
         # Configure GUI
         resolution_mode = self.configuration['experiment']['MicroscopeState']['resolution_mode']
-        if self.configuration_controller.change_microscope(resolution_mode):
+        if self.configuration_controller.change_microscope():
             #TODO: update widgets
             pass
         if resolution_mode == 'high':
@@ -410,12 +409,6 @@ class Controller:
         """
         # acquire_bar_controller - update image mode
         self.configuration['experiment']['MicroscopeState']['image_mode'] = self.acquire_bar_controller.get_mode()
-        if self.resolution_value.get() == 'high':
-            self.configuration['experiment']['MicroscopeState']['resolution_mode'] = 'high'
-            self.configuration['experiment']['MicroscopeState']['zoom'] = 'N/A'
-        else:
-            self.configuration['experiment']['MicroscopeState']['resolution_mode'] = 'low'
-            self.configuration['experiment']['MicroscopeState']['zoom'] = self.resolution_value.get()
 
         # TODO: validate experiment dict
         return True
@@ -525,6 +518,9 @@ class Controller:
             """
             resolution = 'high' if self.resolution_value.get() == 'high' else 'low'
             zoom = 'N/A' if resolution == 'high' else self.resolution_value.get()
+            if resolution != self.configuration['experiment']['MicroscopeState']['microscope_name']:
+                self.configuration['experiment']['MicroscopeState']['microscope_name'] = resolution
+                self.configuration_controller.change_microscope()
             self.configuration['experiment']['MicroscopeState']['resolution_mode'] = resolution
             self.configuration['experiment']['MicroscopeState']['zoom'] = zoom
             work_thread = self.threads_pool.createThread('model', lambda: self.model.run_command('update_setting', 'resolution'))

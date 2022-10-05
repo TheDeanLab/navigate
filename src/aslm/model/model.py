@@ -259,7 +259,7 @@ class Model:
             delattr(self, pipe_name)
 
     def get_active_microscope(self):
-        self.active_microscope_name = self.configuration['experiment']['MicroscopeState']['resolution_mode']
+        self.active_microscope_name = self.configuration['experiment']['MicroscopeState']['microscope_name']
         self.active_microscope = self.microscopes[self.active_microscope_name]
         return self.active_microscope
 
@@ -319,27 +319,28 @@ class Model:
             e.g., self.resolution_info['ETLConstants'][self.resolution][self.mag]
             """
             reboot = False
-            resolution_value = self.configuration['experiment']['MicroscopeState']['resolution_mode']
+            microscope_name = self.configuration['experiment']['MicroscopeState']['microscope_name']
             if self.is_acquiring:
                 # We called this while in the middle of an acquisition
                 # stop live thread
                 self.stop_send_signal = True
                 self.signal_thread.join()
-                if args[0] == 'resolution' and resolution_value != self.active_microscope_name:
+                if microscope_name != self.active_microscope_name:
                     self.pause_data_thread()
                     self.active_microscope.end_acquisition()
                     reboot = True
                 self.current_channel = 0
 
             if args[0] == 'resolution':
-                self.change_resolution(resolution_value)
-                if reboot:
-                    # prepare active microscope
-                    waveform_dict = self.active_microscope.prepare_acquisition()
-                    self.resume_data_thread()
-
-            if not reboot:
+                self.change_resolution(self.configuration['experiment']['MicroscopeState']['resolution_mode'])
+            
+            if reboot:
+                # prepare active microscope
+                waveform_dict = self.active_microscope.prepare_acquisition()
+                self.resume_data_thread()
+            else:
                 waveform_dict = self.active_microscope.calculate_all_waveform()
+            
             self.event_queue.put(('waveform', waveform_dict))
 
             if self.is_acquiring:

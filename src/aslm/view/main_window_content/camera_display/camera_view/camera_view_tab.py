@@ -51,7 +51,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class camera_tab(tk.Frame):
+class CameraTab(tk.Frame):
     def __init__(self, cam_wave, *args, **kwargs):
         #  Init Frame
         tk.Frame.__init__(self, cam_wave, *args, **kwargs)

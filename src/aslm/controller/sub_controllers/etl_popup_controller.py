@@ -180,7 +180,7 @@ class EtlPopupController(GUI_Controller):
         # TODO: Should we instead change galvo amp/offset behavior based on a waveform type passed in the
         #       configuration? That is, should we pass galvo_l_waveform: sawtooth and galvo_r_waveform: dc_value?
         #       And then adjust the ETL_Popup_Controller accordingly? We could do the same for ETL vs. voice coil.
-        if self.configuration_controller.galvo_parameter_dict[0]['amplitude'] is None:
+        if 'amplitude' not in self.configuration_controller.galvo_parameter_dict[0].keys():
             self.widgets['Galvo Amp'].widget['state'] = "disabled"
             self.widgets['Galvo Freq'].widget['state'] = "disabled"
         else:

@@ -235,7 +235,7 @@ class Controller:
 
         def load_experiment():
             filename = filedialog.askopenfilename(defaultextension='.yml',
-                                                   filetypes=[('Yaml files', '*.yml')])
+                                                   filetypes=[('Yaml files', '*.yml *.yaml')])
             if not filename:
                 return
             self.populate_experiment_setting(filename)
@@ -247,7 +247,7 @@ class Controller:
                                              message='Incorrect/missing settings. Cannot save current experiment file.')
                 return
             filename = filedialog.asksaveasfilename(defaultextension='.yml',
-                                                    filetypes=[('Yaml file', '*.yml')])
+                                                    filetypes=[('Yaml file', '*.yml *.yaml')])
             if not filename:
                 return
             save_yaml_file('',
@@ -256,7 +256,7 @@ class Controller:
 
         def load_images():
             filenames = filedialog.askopenfilenames(defaultextension='.tif',
-                                                    filetypes=[('tiff files', '*.tif')])
+                                                    filetypes=[('tiff files', '*.tif *.tiff')])
             if not filenames:
                 return
             self.model.load_images(filenames)

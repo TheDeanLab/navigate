@@ -610,6 +610,10 @@ class Model:
         for channel_key in microscope_state['channels'].keys():
             if self.stop_acquisition or self.stop_send_signal:
                 break
+
+            if not microscope_state['channels'][channel_key]['is_selected']:
+                continue
+            
             channel_idx = int(channel_key[prefix_len:])
             self.run_single_channel_acquisition_with_features(channel_idx)
 

@@ -44,7 +44,7 @@ import numpy as np
 
 # Local Imports
 from aslm.controller.sub_controllers.gui_controller import GUIController
-from aslm.tools.decorators import function_timer
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -65,10 +65,6 @@ class CameraViewController(GUIController):
         self.image_metrics = view.image_metrics.get_widgets()
         self.image_palette = view.scale_palette.get_widgets()
         self.canvas = self.view.canvas
-
-        # Get canvas width and height. Accounts for padding.
-        self.canvas_height = self.view.canvas.winfo_height()-4
-        self.canvas_width = self.view.canvas.winfo_width()-4
 
         # Binding for adjusting the lookup table min and max counts.
         # keys = ['Autoscale', 'Min','Max']
@@ -272,8 +268,8 @@ class CameraViewController(GUIController):
     def move_stage(self):
         r"""Move the stage according to the position the user clicked."""
         # TODO: Account for the digital zoom value when calculating these values.
-        height_scaling_factor = self.original_image_height / self.canvas_height
-        width_scaling_factor = self.original_image_width / self.canvas_width
+        height_scaling_factor = self.original_image_height / self.view.canvas_height
+        width_scaling_factor = self.original_image_width / self.view.canvas_width
         print("Move stage to pixel:", height_scaling_factor * self.move_to_y, width_scaling_factor * self.move_to_x)
 
     def reset_display(self):
@@ -335,8 +331,8 @@ class CameraViewController(GUIController):
             new_image_width = new_image_width - 1
 
         # zoom_x_pos and y_pos are between 0 and 512.
-        scaling_factor_x = int(self.original_image_width / self.canvas_width)
-        scaling_factor_y = int(self.original_image_height / self.canvas_height)
+        scaling_factor_x = self.original_image_width / self.view.canvas_width
+        scaling_factor_y = self.original_image_height / self.view.canvas_height
         x_start_index = (self.zoom_x_pos * scaling_factor_x) - (new_image_width / 2)
         x_end_index = (self.zoom_x_pos * scaling_factor_x) + (new_image_width / 2)
         y_start_index = (self.zoom_y_pos * scaling_factor_y) - (new_image_height / 2)
@@ -408,14 +404,10 @@ class CameraViewController(GUIController):
                 # Update GUI
                 self.image_metrics['Image'].set(np.max(self.temp_array))
 
-    def down_sample_image(self, factor=4, fast=False):
+    def down_sample_image(self, factor=4):
         r"""Down-sample the data for image display according to widget size.."""
-        if fast:
-            # Approx. 3800x faster than cv2.resize(), but no interpolation
-            self.down_sampled_image = self.zoom_image[::factor, ::factor]
-        else:
-            sx, sy = self.original_image_width//factor, self.original_image_height//factor
-            self.down_sampled_image = cv2.resize(self.zoom_image, (sx, sy))
+        sx, sy = self.original_image_width//factor, self.original_image_height//factor
+        self.down_sampled_image = cv2.resize(self.zoom_image, (sx, sy))
 
     def scale_image_intensity(self):
         r"""Scale the data to the min/max counts, and adjust bit-depth."""
@@ -424,10 +416,10 @@ class CameraViewController(GUIController):
             self.min_counts = np.min(self.down_sampled_image)
         else:
             self.update_min_max_counts()
+        
         scaling_factor = 1
         self.down_sampled_image = scaling_factor * ((self.down_sampled_image - self.min_counts) /
-                                                    (self.max_counts - self.min_counts))
-
+                                        (self.max_counts - self.min_counts))
         self.down_sampled_image[self.down_sampled_image < 0] = 0
         self.down_sampled_image[self.down_sampled_image > scaling_factor] = scaling_factor
 

@@ -75,9 +75,9 @@ def auto_redial(func, args, n_tries=10, exception=Exception, **kwargs):
     for i in range(n_tries):
         try:
             val = func(*args, **kwargs)
-        except exception:
+        except exception as e:
             if i < (n_tries-1):
-                print(f"Failed {str(func)} attempt {i+1}/{n_tries}.")
+                logger.debug(f"auto_redial - Failed {str(func)} attempt {i+1}/{n_tries} with exception {e}.")
                 # If we failed, but part way through object creation, we must
                 # delete the object prior to trying again. This lets us restart
                 # the connection process with a clean slate
@@ -205,6 +205,10 @@ def load_stages(configuration, is_synthetic=False):
             from aslm.model.devices.stages.stage_tl_kcube_inertial import build_TLKIMStage_connection
             from aslm.model.devices.APIs.thorlabs.kcube_inertial import TLFTDICommunicationError
             stage_devices.append(auto_redial(build_TLKIMStage_connection, (stage_config['serial_number'],), exception=TLFTDICommunicationError))
+        elif stage_type == 'MCL' and platform.system() == 'Windows':
+            from aslm.model.devices.stages.stage_mcl import build_MCLStage_connection
+            from aslm.model.devices.APIs.mcl.madlib import MadlibError
+            stage_devices.append(auto_redial(build_MCLStage_connection, (stage_config['serial_number'],), exception=MadlibError))
         elif stage_type == 'SyntheticStage':
             stage_devices.append(DummyDeviceConnection())
         else:
@@ -227,6 +231,9 @@ def start_stage(microscope_name, device_connection, configuration, id=0, is_synt
     elif device_type == 'Thorlabs':
         from aslm.model.devices.stages.stage_tl_kcube_inertial import TLKIMStage
         return TLKIMStage(microscope_name, device_connection, configuration, id)
+    elif device_type == 'MCL':
+        from aslm.model.devices.stages.stage_mcl import MCLStage
+        return MCLStage(microscope_name, device_connection, configuration, id)
     elif device_type == 'SyntheticStage':
         from aslm.model.devices.stages.stage_synthetic import SyntheticStage
         return SyntheticStage(microscope_name, device_connection, configuration, id)

@@ -405,7 +405,7 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         max_val = self.cget('to')
         
 
-        if min_val == '-Infinity' or max_val == 'Infinity':
+        if min_val == '-Infinity' or min_val == float('-inf') or max_val == 'Infinity' or max_val == float('inf'):
             return True
 
         no_negative = int(min_val) >= 0

@@ -106,7 +106,7 @@ class Controller:
                                         configuration=configuration_path,
                                         experiment=experiment_path,
                                         etl_constants=etl_constants_path,
-                                        rest_api_path=rest_api_path)
+                                        rest_api_config=rest_api_path)
         
         # Initialize the Model
         self.model = ObjectInSubprocess(Model,
@@ -287,7 +287,7 @@ class Controller:
 
         def popup_ilastik_setting():
             ilastik_popup_window = ilastik_setting_popup(self.view)
-            ilastik_url = self.configuration['rest_api_path']['Ilastik']['url']
+            ilastik_url = self.configuration['rest_api_config']['Ilastik']['url']
             if hasattr(self, 'ilastik_controller'):
                 self.ilastik_controller.showup(ilastik_popup_window)
             else:

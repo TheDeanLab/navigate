@@ -418,7 +418,7 @@ class CameraViewController(GUIController):
             self.update_min_max_counts()
         
         scaling_factor = 1
-        self.image = scaling_factor * ((self.down_sampled_image - self.min_counts) /
+        self.down_sampled_image = scaling_factor * ((self.down_sampled_image - self.min_counts) /
                                         (self.max_counts - self.min_counts))
         self.down_sampled_image[self.down_sampled_image < 0] = 0
         self.down_sampled_image[self.down_sampled_image > scaling_factor] = scaling_factor

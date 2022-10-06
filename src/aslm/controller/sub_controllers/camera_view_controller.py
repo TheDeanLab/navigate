@@ -414,16 +414,14 @@ class CameraViewController(GUIController):
         if self.autoscale is True:
             self.max_counts = np.max(self.down_sampled_image)
             self.min_counts = np.min(self.down_sampled_image)
-            scaling_factor = 1
-            self.down_sampled_image = scaling_factor * ((self.down_sampled_image - self.min_counts) /
-                                                        (self.max_counts - self.min_counts))
         else:
             self.update_min_max_counts()
-            scaling_factor = 1
-            self.image = scaling_factor * ((self.down_sampled_image - self.min_counts) /
-                                           (self.max_counts - self.min_counts))
-            self.down_sampled_image[self.down_sampled_image < 0] = 0
-            self.down_sampled_image[self.down_sampled_image > scaling_factor] = scaling_factor
+        
+        scaling_factor = 1
+        self.image = scaling_factor * ((self.down_sampled_image - self.min_counts) /
+                                        (self.max_counts - self.min_counts))
+        self.down_sampled_image[self.down_sampled_image < 0] = 0
+        self.down_sampled_image[self.down_sampled_image > scaling_factor] = scaling_factor
 
     def populate_image(self):
         r"""Converts image to an ImageTk.PhotoImage and populates the Tk Canvas"""
@@ -664,8 +662,8 @@ class CameraViewController(GUIController):
         When the min and max counts are toggled in the GUI, this function is called.
         Updates the min and max values.
         """
-        self.min_counts = self.image_palette['Min'].get()
-        self.max_counts = self.image_palette['Max'].get()
+        self.min_counts = float(self.image_palette['Min'].get())
+        self.max_counts = float(self.image_palette['Max'].get())
         logger.debug(f"Min and Max counts scaled to, {self.min_counts}, {self.max_counts}")
 
     def set_mask_color_table(self, colors):

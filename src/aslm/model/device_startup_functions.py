@@ -493,7 +493,7 @@ def start_galvo(microscope_name, device_connection, configuration, id=0, is_synt
 def device_not_found(*args):
 
     print("Device Not Found in Configuration.YML:", args)
-    raise Exception('Device not found!')
+    raise RuntimeError(f"Device not found in configuration: {args}")
 
 def load_devices(configuration, is_synthetic=False)->dict:
     devices = {}

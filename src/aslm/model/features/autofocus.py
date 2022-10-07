@@ -32,11 +32,11 @@ POSSIBILITY OF SUCH DAMAGE.
 
 # Standard Library Imports
 from queue import Queue
-import numpy as np
 import threading
 
 # Local imports
 from aslm.model.features.feature_container import load_features
+from aslm.model.analysis.image_contrast import fast_normalized_dct_shannon_entropy
 
 class Autofocus():
     def __init__(self, model):
@@ -78,8 +78,6 @@ class Autofocus():
             Autofocus parameters
 
         """
-        self.model.configuration['experiment']['MicroscopeState'] = args[0]
-        self.model.configuration['experiment']['AutoFocusParameters'] = args[1]
         frame_num = self.get_autofocus_frame_num()
         if frame_num < 1:
             return
@@ -118,7 +116,7 @@ class Autofocus():
     def pre_func_signal(self):
         settings = self.model.configuration['experiment']['AutoFocusParameters']
         # self.focus_pos = args[2]  # Current position
-        self.focus_pos = self.model.focus_pos # TODO: get focus position from model right now.
+        self.focus_pos = self.model.configuration['experiment']['StageParameters']['f']
         # self.focus_pos = self.model.get_stage_position()['f_pos']
         self.total_frame_num = self.get_autofocus_frame_num() #total frame num
         self.coarse_steps, self.init_pos = 0, 0
@@ -179,7 +177,7 @@ class Autofocus():
             except:
                 break
             # entropy = self.model.analysis.normalized_dct_shannon_entropy(self.model.data_buffer[self.f_frame_id], 3)
-            entropy = self.model.analysis.fast_normalized_dct_shannon_entropy(self.model.data_buffer[self.f_frame_id], 3)
+            entropy = fast_normalized_dct_shannon_entropy(self.model.data_buffer[self.f_frame_id], 3)
             # entropy = self.model.analysis.image_intensity(self.model.data_buffer[self.f_frame_id], 3)
 
             # print('entropy:', self.f_frame_id, self.frame_num, self.f_pos, entropy)
@@ -200,7 +198,7 @@ class Autofocus():
 
             if self.frame_num == 1:
                 self.frame_num = 10  # any value but not 1
-                print('***********max shannon entropy:', self.max_entropy, self.focus_pos)
+                self.model.logger.info(f'***********max shannon entropy: {self.max_entropy}, {self.focus_pos}')
                 # find out the focus
                 self.autofocus_pos_queue.put(self.focus_pos)
                 # return [self.target_frame_id]
@@ -209,14 +207,10 @@ class Autofocus():
             return frame_ids
 
     def end_func_data(self):
-        print('data:', len(self.plot_data), self.total_frame_num)
         if self.get_frames_num <= self.total_frame_num:
             return False
         # send out plot data
-        plot_data = np.asarray(self.plot_data)
-        self.model.autofocus_plot_pipe.send(plot_data) # Sending controller plot data
-        print('data end: true')
+        self.model.event_queue.put(('autofocus', self.plot_data))
+
         return self.get_frames_num > self.total_frame_num
 
-    def generate_meta_data(self):
-        print('autofocus signal:', self.model.frame_id)

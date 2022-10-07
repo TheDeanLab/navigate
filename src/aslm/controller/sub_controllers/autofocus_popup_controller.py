@@ -32,12 +32,14 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
+import numpy as np
+
 from aslm.controller.sub_controllers.gui_controller import GUIController
 from aslm.tools.common_functions import combine_funcs
 
 
 import logging
-from pathlib import Path
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -94,7 +96,8 @@ class AutofocusPopupController(GUIController):
         """
         ### Displays a plot of [focus, entropy] with data from autofocus routine
         """
-    
+        data = np.asarray(data)
+
         coarse_range = self.setting_dict['coarse_range']
         coarse_step = self.setting_dict['coarse_step_size']
 

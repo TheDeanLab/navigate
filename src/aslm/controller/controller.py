@@ -566,7 +566,7 @@ class Controller:
 
         elif command == 'autofocus':
             r"""Execute autofocus routine."""
-            self.threads_pool.createThread('camera', self.capture_autofocus_image)
+            self.threads_pool.createThread('camera', self.capture_image, args=('autofocus', 'live',))
 
         elif command == 'load_feature':
             r"""Tell model to load/unload features."""
@@ -615,7 +615,7 @@ class Controller:
             # if select 'ilastik segmentation', 'show segmentation', and in 'single acquisition'
             self.camera_view_controller.display_mask_flag = self.acquire_bar_controller.mode == 'single' and self.feature_id_val.get() == 4 and self.ilastik_controller.show_segmentation_flag
 
-            self.threads_pool.createThread('camera', self.capture_image, args=(self.acquire_bar_controller.mode,))
+            self.threads_pool.createThread('camera', self.capture_image, args=('acquire', self.acquire_bar_controller.mode,))
 
         elif command == 'stop_acquire':
             # self.model.run_command('stop')
@@ -658,6 +658,7 @@ class Controller:
                 e = RuntimeError
 
     def capture_image(self,
+                      command,
                       mode):
         r"""Trigger the model to capture images.
 
@@ -675,7 +676,7 @@ class Controller:
                                                  mode=mode,
                                                  stop=False)
 
-        self.model.run_command('acquire')
+        self.model.run_command(command)
 
         self.camera_view_controller.initialize_non_live_display(self.data_buffer,
                                                                 self.configuration['experiment']['MicroscopeState'],
@@ -714,49 +715,6 @@ class Controller:
                                                  microscope_state=self.configuration['experiment']['MicroscopeState'],
                                                  mode=mode,
                                                  stop=True)
-
-    def capture_autofocus_image(self):
-        r"""Trigger model to capture a single image
-        """
-        if not self.prepare_acquire_data():
-            return
-        pos = self.configuration['experiment']['StageParameters']['f']
-        self.camera_view_controller.image_count = 0
-        images_received = 0
-
-        # open pipe
-        autofocus_plot_pipe = self.model.create_pipe('autofocus_plot_pipe')
-
-        self.model.run_command(
-            'autofocus',
-            self.configuration['experiment']['MicroscopeState'],
-            self.configuration['experiment']['AutoFocusParameters'],
-            pos
-            )
-        while True:
-            image_id = self.show_img_pipe.recv()
-            logger.info(f"ASLM Controller - Received image frame id {image_id}")
-            if image_id == 'stop':
-                break
-            # Display the Image in the View
-            self.camera_view_controller.display_image(
-                image=self.data_buffer[image_id],
-                microscope_state=self.configuration['experiment']['MicroscopeState'],
-                images_received=images_received)
-            images_received += 1
-            # get focus position and update it in GUI
-
-        # Rec plot data from model and send to sub controller to display plot
-        plot_data = autofocus_plot_pipe.recv()
-        logger.info(f"ASLM Controller - Received plot data: {plot_data}")
-        if hasattr(self, 'af_popup_controller'):
-            self.af_popup_controller.display_plot(plot_data)
-        
-        # release pipe
-        autofocus_plot_pipe.close()
-        self.model.release_pipe('autofocus_plot_pipe')
-        
-        self.execute('stop_acquire')
 
     def move_stage(self, pos_dict):
         r""" Trigger the model to move the stage.
@@ -802,6 +760,9 @@ class Controller:
                 self.view.settings.channels_tab.multipoint_frame.on_off.set(True)  # assume we want to use multipos
             elif event == 'ilastik_mask':
                 self.camera_view_controller.display_mask(value)
+            elif event == 'autofocus':
+                if hasattr(self, 'af_popup_controller'):
+                    self.af_popup_controller.display_plot(value)
             elif event == 'stop':
                 break
     

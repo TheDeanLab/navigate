@@ -102,7 +102,7 @@ class NIDAQ(DAQBase):
         # Create one analog output task per board, grouping the channels
         boards = list(set([x.split('/')[0] for x in self.analog_outputs.keys()]))
         for board in boards:
-            channel = ', '.join(list(set([x for x in self.analog_outputs.keys() if x.split('/')[0] == board])))
+            channel = ', '.join(list([x for x in self.analog_outputs.keys() if x.split('/')[0] == board]))
             self.analog_output_tasks.append(nidaqmx.Task())
             self.analog_output_tasks[-1].ao_channels.add_ao_voltage_chan(channel)
 

@@ -38,8 +38,6 @@ import importlib
 # Third Party Imports
 import numpy as np
 from scipy.fftpack import dctn
-if platform.system() != 'Darwin':
-    import tensorflow as tf
 
 # Local Imports
 from aslm.model.analysis import image_decorrelation
@@ -88,6 +86,9 @@ def normalized_dct_shannon_entropy(input_array,
     # otf_support_y : Support for the OTF in the y-dimension.
     # Returns the entropy value.
     """
+    if platform.system() != 'Darwin' and use_gpu:
+        import tensorflow as tf
+        
     # Get Image Attributes
     input_array = np.double(input_array)
     image_dimensions = input_array.ndim

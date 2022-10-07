@@ -88,15 +88,19 @@ class GalvoNI(GalvoBase):
 
     def prepare_task(self, channel_key):
         # write waveform
-        self.task.write(self.waveform_dict[channel_key])
+        # self.task.write(self.waveform_dict[channel_key])
+        pass
 
     def start_task(self):
-        self.task.start()
+        # self.task.start()
+        pass
 
     def stop_task(self, force=False):
-        if not force:
-            self.task.wait_until_done()
-        self.task.stop()
+        # if not force:
+        #     self.task.wait_until_done()
+        # self.task.stop()
+        pass
     
     def close_task(self):
-        self.task.close()
+        # self.task.close()
+        pass

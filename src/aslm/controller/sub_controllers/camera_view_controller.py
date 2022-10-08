@@ -662,8 +662,10 @@ class CameraViewController(GUIController):
         When the min and max counts are toggled in the GUI, this function is called.
         Updates the min and max values.
         """
-        self.min_counts = float(self.image_palette['Min'].get())
-        self.max_counts = float(self.image_palette['Max'].get())
+        if self.image_palette['Min'].get() != '':
+            self.min_counts = float(self.image_palette['Min'].get())
+        if self.image_palette['Max'].get() != '':
+            self.max_counts = float(self.image_palette['Max'].get())
         logger.debug(f"Min and Max counts scaled to, {self.min_counts}, {self.max_counts}")
 
     def set_mask_color_table(self, colors):

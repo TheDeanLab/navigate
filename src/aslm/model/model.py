@@ -523,7 +523,8 @@ class Model:
     def resume_data_thread(self):
         self.ask_to_pause_data_thread = False
         self.pause_data_event.set()
-        self.pause_data_ready_lock.release()
+        if self.pause_data_ready_lock.locked():
+            self.pause_data_ready_lock.release()
 
     def prepare_acquisition(self, turn_off_flags=True):
         r"""Prepare the acquisition.

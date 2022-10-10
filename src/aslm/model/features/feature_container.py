@@ -196,6 +196,7 @@ class DataContainer(Container):
                 logger.debug(f'DataContainer - {e}')
                 if self.curr_node.need_response == False and self.curr_node.node_type == 'one-step':
                     try:
+                        logger.debug(f'Datacontainer cleanup node {self.curr_node.node_name}')
                         self.curr_node.node_funcs.get('cleanup', dummy_func)()
                     except:
                         logger.debug(f'The node({self.curr_node.node_name}) is not closed correctly! Please check the cleanup function')

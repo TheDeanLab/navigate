@@ -288,3 +288,4 @@ temp-BICF-JG-LE4350.txt
 *.log
 src/log_files/*.log
 *.icloud
+docs/source/_build

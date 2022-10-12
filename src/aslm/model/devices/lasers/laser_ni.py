@@ -63,7 +63,9 @@ class LaserNI(LaserBase):
                 laser_do_port, line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
         except KeyError:
             self.laser_do_task = None
-        
+
+        self._current_intensity = 0
+
         # Analog out
         laser_ao_port = self.device_config['power']['hardware']['channel']
         self.laser_min_ao = self.device_config['power']['hardware']['min']
@@ -77,14 +79,18 @@ class LaserNI(LaserBase):
         scaled_laser_voltage = (
             int(laser_intensity) / 100) * self.laser_max_ao
         self.laser_ao_task.write(scaled_laser_voltage, auto_start=True)
+        self._current_intensity = laser_intensity
 
     def turn_on(self):
         if self.laser_do_task is not None:
             self.laser_do_task.write(True, auto_start=True)
+        self.set_power(self._current_intensity)
 
     def turn_off(self):
         if self.laser_do_task is None:
+            tmp = self._current_intensity
             self.set_power(0)
+            self._current_intensity = tmp
         else:
             self.laser_do_task.write(False, auto_start=True)
 

@@ -41,7 +41,7 @@ from aslm.model.dummy import DummyModel
 
 class TestSyntheticHardware(unittest.TestCase):
     dummy_model = DummyModel()
-    microscope_name = 'low'
+    microscope_name = 'microscope_low_res'
 
     def test_synthetic_daq(self):
         from aslm.model.devices.daq.daq_synthetic import SyntheticDAQ

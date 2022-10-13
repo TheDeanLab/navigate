@@ -42,7 +42,7 @@ from aslm.model.dummy import DummyModel
 class TestSyntheticFilterWheel(unittest.TestCase):
     r"""Unit Test for FilterWheel Class"""
     dummy_model = DummyModel()
-    microscope_name = 'low'
+    microscope_name = 'microscope_low_res'
     synthetic_filter = SyntheticFilterWheel(microscope_name, None, dummy_model.configuration)
 
     # def test_synthetic_filter_wheel_attributes(self):

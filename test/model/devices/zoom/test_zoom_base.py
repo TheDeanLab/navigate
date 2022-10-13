@@ -44,7 +44,7 @@ from attr import has
 class TestZoomBase(unittest.TestCase):
     r"""Unit Test for Zoom Base Class"""
     dummy_model = DummyModel()
-    microscope_name = 'low'
+    microscope_name = 'microscope_low_res'
     zoom_class = ZoomBase(microscope_name, None, dummy_model.configuration)
 
     def test_zoom_base_attributes(self):

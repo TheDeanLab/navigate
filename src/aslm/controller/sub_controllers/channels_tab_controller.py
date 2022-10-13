@@ -267,6 +267,8 @@ class ChannelsTabController(GUIController):
         self.microscope_state_dict['abs_z_end'] = self.stack_acq_vals['abs_z_end'].get()
         self.microscope_state_dict['start_focus'] = self.stack_acq_vals['start_focus'].get()
         self.microscope_state_dict['end_focus'] = self.stack_acq_vals['end_focus'].get()
+        self.microscope_state_dict['stack_z_origin'] = self.z_origin
+        self.microscope_state_dict['stack_focus_origin'] = self.focus_origin
 
         self.update_timepoint_setting()
         self.show_verbose_info('stack acquisition settings on channels tab have been changed and recalculated')

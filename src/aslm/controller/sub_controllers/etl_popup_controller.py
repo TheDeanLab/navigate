@@ -84,9 +84,16 @@ class EtlPopupController(GUIController):
         self.variables = self.view.get_variables()
 
         self.lasers = self.configuration_controller.lasers_info
+        galvo_dict = self.configuration_controller.galvo_parameter_dict
+        self.galvos = []
+        for i, galvo in enumerate(galvo_dict):
+            self.galvos.append(f"Galvo {i}")
         self.resolution = None
         self.mag = None
         self.mode = 'stop'
+
+        #Checks if number of lasers in etl_contstants matches config file
+        self.update_etl_lasers()
 
         # event id list
         self.event_ids = {}
@@ -102,9 +109,15 @@ class EtlPopupController(GUIController):
             self.variables[laser + ' Amp'].trace_add('write', self.update_etl_setting(laser+' Amp', laser, 'amplitude'))
             self.variables[laser + ' Off'].trace_add('write', self.update_etl_setting(laser+' Off', laser, 'offset'))
 
-        self.variables['Galvo Amp'].trace_add('write', self.update_galvo_setting('Galvo Amp', 'amplitude'))
-        self.variables['Galvo Off'].trace_add('write', self.update_galvo_setting('Galvo Off', 'offset'))
-        self.variables['Galvo Freq'].trace_add('write', self.update_galvo_setting('Galvo Freq', 'frequency'))
+        for galvo in self.galvos:
+            self.variables[galvo + ' Amp'].trace_add('write', self.update_galvo_setting(galvo + ' Amp', 'amplitude'))
+            self.variables[galvo + ' Off'].trace_add('write', self.update_galvo_setting(galvo + ' Off', 'offset'))
+            self.variables[galvo + ' Freq'].trace_add('write', self.update_galvo_setting(galvo + ' Freq', 'frequency'))
+
+
+        # self.variables['Galvo Amp'].trace_add('write', self.update_galvo_setting('Galvo Amp', 'amplitude'))
+        # self.variables['Galvo Off'].trace_add('write', self.update_galvo_setting('Galvo Off', 'offset'))
+        # self.variables['Galvo Freq'].trace_add('write', self.update_galvo_setting('Galvo Freq', 'frequency'))
 
         self.view.get_buttons()['Save'].configure(command=self.save_etl_info)
 
@@ -155,21 +168,22 @@ class EtlPopupController(GUIController):
             self.widgets[laser + ' Off'].widget.configure(increment=increment)
             self.widgets[laser + ' Off'].widget.set_precision(precision)
 
-        self.widgets['Galvo Amp'].widget.configure(from_=galvo_min)
-        self.widgets['Galvo Amp'].widget.configure(to=galvo_max)
-        self.widgets['Galvo Amp'].widget.configure(increment=increment)
-        self.widgets['Galvo Amp'].widget.set_precision(precision)
-        # TODO: The offset bounds should adjust based on the amplitude bounds,
-        #       so that amp + offset does not exceed the bounds. Can be done
-        #       in update_etl_setting()
-        self.widgets['Galvo Off'].widget.configure(from_=galvo_min)
-        self.widgets['Galvo Off'].widget.configure(to=galvo_max)
-        self.widgets['Galvo Off'].widget.configure(increment=increment)
-        self.widgets['Galvo Off'].widget.set_precision(precision)
+        for galvo in self.galvos:
+            self.widgets[galvo + ' Amp'].widget.configure(from_=galvo_min)
+            self.widgets[galvo + ' Amp'].widget.configure(to=galvo_max)
+            self.widgets[galvo + ' Amp'].widget.configure(increment=increment)
+            self.widgets[galvo + ' Amp'].widget.set_precision(precision)
+            # TODO: The offset bounds should adjust based on the amplitude bounds,
+            #       so that amp + offset does not exceed the bounds. Can be done
+            #       in update_etl_setting()
+            self.widgets[galvo + ' Off'].widget.configure(from_=galvo_min)
+            self.widgets[galvo + ' Off'].widget.configure(to=galvo_max)
+            self.widgets[galvo + ' Off'].widget.configure(increment=increment)
+            self.widgets[galvo + ' Off'].widget.set_precision(precision)
 
-        self.widgets['Galvo Freq'].widget.configure(from_=0)
-        self.widgets['Galvo Freq'].widget.configure(increment=increment)
-        self.widgets['Galvo Freq'].widget.set_precision(precision)
+            self.widgets[galvo + ' Freq'].widget.configure(from_=0)
+            self.widgets[galvo + ' Freq'].widget.configure(increment=increment)
+            self.widgets[galvo + ' Freq'].widget.set_precision(precision)
 
         # The galvo by default uses a sawtooth waveform. However, sometimes we have a resonant galvo.
         # In the case of the resonant galvo, the amplitude must be zero and only the offset can be
@@ -180,12 +194,14 @@ class EtlPopupController(GUIController):
         # TODO: Should we instead change galvo amp/offset behavior based on a waveform type passed in the
         #       configuration? That is, should we pass galvo_l_waveform: sawtooth and galvo_r_waveform: dc_value?
         #       And then adjust the ETL_Popup_Controller accordingly? We could do the same for ETL vs. voice coil.
+        # TODO this might have buggy behavior adding the dynamic galvo stuff
         if 'amplitude' not in self.configuration_controller.galvo_parameter_dict[0].keys():
             self.widgets['Galvo Amp'].widget['state'] = "disabled"
             self.widgets['Galvo Freq'].widget['state'] = "disabled"
-        else:
-            self.widgets['Galvo Amp'].widget['state'] = "normal"
-            self.widgets['Galvo Freq'].widget['state'] = "normal"
+        # TODO this might not be needed at all since it defaults to normal on creation. Will also need to check all galvos not just one
+        # else:
+        #     self.widgets['Galvo Amp'].widget['state'] = "normal"
+        #     self.widgets['Galvo Freq'].widget['state'] = "normal"
 
     def populate_experiment_values(self):
         """
@@ -240,9 +256,10 @@ class EtlPopupController(GUIController):
 
         # do not tell the model to update galvo
         self.update_galvo_device_flag = False
-        self.variables['Galvo Amp'].set(self.galvo_setting[self.resolution].get(f'amplitude', 0))
-        self.variables['Galvo Off'].set(self.galvo_setting[self.resolution].get(f'offset', 0))
-        self.variables['Galvo Freq'].set(self.galvo_setting[self.resolution].get(f'frequency', 0))
+        for galvo in self.galvos:
+            self.variables[galvo + ' Amp'].set(self.galvo_setting[self.resolution].get(f'amplitude', 0))
+            self.variables[galvo + ' Off'].set(self.galvo_setting[self.resolution].get(f'offset', 0))
+            self.variables[galvo + ' Freq'].set(self.galvo_setting[self.resolution].get(f'frequency', 0))
         self.update_galvo_device_flag = True
 
         # update resolution value in central controller (menu)
@@ -320,6 +337,11 @@ class EtlPopupController(GUIController):
         #     return  # Dont save if any errors TODO needs testing
 
         save_yaml_file('', self.resolution_info, self.etl_file_name)
+
+
+    def update_etl_lasers(self):
+        num_lasers = len(self.lasers)
+        num_etl_lasers = self.resolution_info
 
     """
     Example for preventing submission of a field/controller. So if there is an error in any field that 

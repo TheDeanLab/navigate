@@ -271,7 +271,7 @@ class Controller:
             if hasattr(self, 'etl_controller'):
                 self.etl_controller.showup()
                 return
-            etl_setting_popup = remote_popup(self.view)  # TODO: should we rename etl_setting popup to remote_focus_popup?
+            etl_setting_popup = remote_popup(self.view, self.configuration_controller)  # TODO: should we rename etl_setting popup to remote_focus_popup?
             self.etl_controller = EtlPopupController(etl_setting_popup,
                                                        self,
                                                        self.etl_constants_path)

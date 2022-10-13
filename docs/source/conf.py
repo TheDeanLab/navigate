@@ -38,8 +38,44 @@ extensions = [ 'sphinx.ext.duration',
                'sphinx.ext.napoleon',
 ]
 
+# Boolean indicating whether to scan all found documents for
+# autosummary directives, and to generate stub pages for each
+# (http://sphinx-doc.org/latest/ext/autosummary.html)
+autosummary_generate = True
+
+# Both the class’ and the __init__ method’s docstring are concatenated
+# and inserted.
+autoclass_content = "both"
+
+# inheritance_graph_attrs = {'rankdir': "TB",
+#                           'clusterrank': 'local'}
+# inheritance_node_attrs  = {'style': 'filled'}
+
+# This value selects how automatically documented members are sorted
+# (http://sphinx-doc.org/latest/ext/autodoc.html)
+autodoc_member_order = "groupwise"
+
+# This value is a list of autodoc directive flags that should be
+# automatically applied to all autodoc
+# directives. (http://sphinx-doc.org/latest/ext/autodoc.html)
+autodoc_default_flags = [
+    "members",
+    "inherited-members",
+    "show-inheritance",
+]  
+
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ['../_templates']
+
+# The suffix of source filenames.
+source_suffix = ".rst"
+
+# If true, the current module name will be prepended to all
+# description unit titles (such as .. function::).
+add_module_names = True
+
+# The default language to highlight source code
+highlight_language = "python"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.

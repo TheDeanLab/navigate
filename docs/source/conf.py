@@ -36,6 +36,7 @@ extensions = [ 'sphinx.ext.duration',
                'sphinx.ext.autosummary',
                'sphinx.ext.githubpages',
                'sphinx.ext.napoleon',
+               'sphinx.ext.coverage',
 ]
 
 # Boolean indicating whether to scan all found documents for

@@ -21,3 +21,11 @@ Welcome to ASLM's documentation!
    userguide
    modules
 
+
+**Index and search**
+====================
+
+----
+
+* :ref:`genindex`
+* :ref:`Search <search>`

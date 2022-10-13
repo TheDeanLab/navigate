@@ -128,7 +128,7 @@ class NIDAQ(DAQBase):
             self.analog_output_tasks[-1].triggers.start_trigger.cfg_dig_edge_start_trig(triggers[0])
 
             # Write values to board
-            waveforms = np.vstack([v['waveform'][channel_key][:n_sample] for k, v in self.analog_outputs.items() if k.split('/')[0] == board])
+            waveforms = np.vstack([v['waveform'][channel_key][:n_sample] for k, v in self.analog_outputs.items() if k.split('/')[0] == board]).squeeze()
             self.analog_output_tasks[-1].write(waveforms)
 
     def prepare_acquisition(self, channel_key, exposure_time):

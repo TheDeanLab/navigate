@@ -728,7 +728,7 @@ class Model:
         resolution_value : str
             'high' for high-resolution mode, and 'low' for low-resolution mode.
         """
-        if resolution_value != self.active_microscope_name:
+        if self.configuration['configuration']['gui']['resolution_modes'][resolution_value] != self.active_microscope_name:
             former_microscope = self.active_microscope_name
             self.get_active_microscope()
             self.active_microscope.move_stage_offset(former_microscope)

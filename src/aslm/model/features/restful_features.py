@@ -98,9 +98,11 @@ class IlastikSegmentation:
         self.resolution = self.model.configuration['experiment']['MicroscopeState']['resolution_mode']
         self.zoom = self.model.configuration['experiment']['MicroscopeState']['zoom']
         # Get current mag
-        curr_pixel_size = float(self.model.configuration['configuration']['microscopes'][self.resolution]['zoom']['pixel_size'][self.zoom])
+        current_microscope_name = self.model.configuration['experiment']['MicroscopeState']['microscope_name']
+        curr_pixel_size = float(self.model.configuration['configuration']['microscopes'][current_microscope_name]['zoom']['pixel_size'][self.zoom])
         # target resolution is 'high'
-        pixel_size = float(self.model.configuration['configuration']['microscopes']['high']['zoom']['pixel_size']['N/A'])
+        high_res_microscope_name = self.model.configuration['configuration']['gui']['resolution_modes']['high']
+        pixel_size = float(self.model.configuration['configuration']['microscopes'][high_res_microscope_name]['zoom']['pixel_size']['N/A'])
         # calculate pieces
         self.pieces_num = int(curr_pixel_size / pixel_size)
         self.pieces_size = ceil(float(self.model.configuration['experiment']['CameraParameters']['x_pixels']) / self.pieces_num)

@@ -53,7 +53,7 @@ class ChangeResolution:
         # end active microscope
         self.model.active_microscope.end_acquisition()
         # prepare new microscope
-        self.model.configuration['experiment']['MicroscopeState']['microscope_name'] = self.resolution_mode
+        self.model.configuration['experiment']['MicroscopeState']['microscope_name'] = self.model.configuration['configuration']['gui']['resolution_modes'][self.resolution_mode]
         self.model.configuration['experiment']['MicroscopeState']['resolution_mode'] = self.resolution_mode
         self.model.configuration['experiment']['MicroscopeState']['zoom'] = self.zoom_value
         self.model.change_resolution(self.resolution_mode)

@@ -523,8 +523,9 @@ class Controller:
             """
             resolution = 'high' if self.resolution_value.get() == 'high' else 'low'
             zoom = 'N/A' if resolution == 'high' else self.resolution_value.get()
-            if resolution != self.configuration['experiment']['MicroscopeState']['microscope_name']:
-                self.change_microscope(resolution)
+            microscope_name = self.configuration['configuration']['gui']['resolution_modes'][resolution]
+            if microscope_name != self.configuration['experiment']['MicroscopeState']['microscope_name']:
+                self.change_microscope(microscope_name)
             self.configuration['experiment']['MicroscopeState']['resolution_mode'] = resolution
             self.configuration['experiment']['MicroscopeState']['zoom'] = zoom
             work_thread = self.threads_pool.createThread('model', lambda: self.model.run_command('update_setting', 'resolution'))

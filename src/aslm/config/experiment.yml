@@ -65,7 +65,7 @@ StageParameters:
   theta: 55.00006
   f: 66122.8
 MicroscopeState:
-  microscope_name: low
+  microscope_name: microscope_low_res
   resolution_mode: low
   image_mode: live
   zoom: 1x

@@ -72,7 +72,8 @@ class GalvoBase:
     def adjust(self, readout_time):
         # calculate waveform
         microscope_state = self.configuration['experiment']['MicroscopeState']
-        galvo_parameters = self.configuration['experiment']['GalvoParameters'][self.microscope_name]
+        resolution_value = microscope_state['resolution_mode']
+        galvo_parameters = self.configuration['experiment']['GalvoParameters'][resolution_value]
         self.sample_rate = self.configuration['configuration']['microscopes'][self.microscope_name]['daq']['sample_rate']
 
         for channel_key in microscope_state['channels'].keys():

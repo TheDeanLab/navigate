@@ -47,7 +47,7 @@ from aslm.model.devices.APIs.asi.asi_tiger_controller import TigerController
 
 def build_ASI_Stage_connection(com_port="COM7", baud_rate=115200):
 
-    # wait until pi_device is ready
+    # wait until ASI device is ready
     blockflag = True
     while blockflag:
         asi_stage = TigerController(com_port=com_port, baud_rate=baud_rate)
@@ -63,6 +63,12 @@ class ASIStage(StageBase):
     """
     Detailed documentation: http://asiimaging.com/docs/products/serial_commands
     Quick Start Guide: http://asiimaging.com/docs/command_quick_start
+    Stage API provides all distances in a 10th of a micron unit.  To convert to microns, 
+    requires division by factor of 10 to get to micron units...
+
+    NOTE: Do not ever change the F axis. This will alter the relative position of each 
+    FTP stilt, adding strain to the system. Only move the Z axis, which will change both
+    stilt positions stimultaneously.
     """
     def __init__(self, microscope_name, device_connection, configuration, device_id=0):
         super().__init__(microscope_name, device_connection, configuration, device_id)
@@ -104,8 +110,8 @@ class ASIStage(StageBase):
                 # Remove leading :A from response. e.g., ":A -57585.3"
                 pos = pos[2:].strip()
 
-                # Set class attributes
-                setattr(self, f"{ax}_pos", float(pos))
+                # Set class attributes and convert to microns
+                setattr(self, f"{ax}_pos", float(pos)/10)
         except BaseException as e:
             print('Failed to report ASI Stage Position')
             #logger.exception(e)
@@ -118,7 +124,7 @@ class ASIStage(StageBase):
         """
         Implement movement logic along a single axis.
 
-        Move absolute command for ASI is MOVE [Axis]=[units 1/10 microns
+        Move absolute command for ASI is MOVE [Axis]=[units 1/10 microns]
         Move relative command for ASI is MOVREL [Axis]= [units 1/10 microns]
 
         Example calls:
@@ -128,11 +134,11 @@ class ASIStage(StageBase):
         axis : str
             An axis prefix in move_dictionary. For example, axis='x' corresponds to 'x_abs', 'x_min', etc.
         axis_num : int
-            The corresponding number of this axis on a PI stage.
+            The corresponding number of this axis on a PI stage. Not applicable to the ASI stage.
         move_dictionary : dict
             A dictionary of values required for movement. Includes 'x_abs', 'x_min', etc. for one or more axes.
             Expects values in micrometers.
-            
+
         Returns
         -------
         bool
@@ -178,17 +184,35 @@ class ASIStage(StageBase):
 
         if wait_until_done is True:
             try:
-                # TODO: Implement some sort of wait on target.
-                #self.pitools.waitontarget(self.pidevice)
-                pass
+                self.busy()
+                success = True
             except BaseException as e:
-                print("Wait on target failed for the ASI stage")
+                print("Problem communicating with tiger controller during wait command")
                 success = False
                 #logger.exception(e)
 
         return success
+    
+    def busy(self):
+        """
+        Queries the stage to see if it is busy moving
+        """
+        blockflag = True
+        while blockflag:
+            self.tiger_controller.send_command("STATUS")
+            response = self.tiger_controller.read_response()
+            if response == "N":
+                blockflag = False
+            elif response == "B":
+                print("ASI stages are moving - waiting 50 ms.")
+                time.sleep(0.05)
+            else: 
+                print("Unknown response from ASI stage during status query")
 
     def stop(self):
+        """
+        Stop all stage movement immediately
+        """
         try:
             self.tiger_controller.send_command("HALT")
             response = self.tiger_controller.read_response()
@@ -197,7 +221,8 @@ class ASIStage(StageBase):
             pass
 
         if response == ":A":
-            print("ASI Stages Stopped")
+            pass
+            # print("ASI Stages Stopped")
         elif response == ":N-21":
             print("Stp[] Failed for ASI Stage")
         else:

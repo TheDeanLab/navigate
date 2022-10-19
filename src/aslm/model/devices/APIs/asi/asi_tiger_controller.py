@@ -12,7 +12,7 @@ class TigerController:
  
     """
  
-    def __init__(self, com_port: str, baud_rate: int, verbose: bool = True):
+    def __init__(self, com_port: str, baud_rate: int, verbose: bool = False):
         self.serial_port = Serial()
         self.com_port = com_port
         self.baud_rate = baud_rate

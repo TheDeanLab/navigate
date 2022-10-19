@@ -196,7 +196,8 @@ class StageBase:
         axis : str
             An axis prefix in move_dictionary. For example, axis='x' corresponds to 'x_abs', 'x_min', etc.
         move_dictionary : dict
-            A dictionary of values required for movement. Includes 'x_abs', 'x_min', etc. for one or more axes.
+            A dictionary of values required for movement. 
+            Includes 'x_abs', 'x_min', etc. for one or more axes.
             Expects values in micrometers, except for theta, which is in degrees.
 
         Returns

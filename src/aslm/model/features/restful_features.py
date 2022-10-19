@@ -66,7 +66,7 @@ class IlastikSegmentation:
                                     'main': self.data_func}}
 
     def init_func(self, *args):
-        if self.resolution != self.model.configuration['experiment']['MicroscopeState']['resolution_mode'] \
+        if self.resolution != self.model.configuration['experiment']['MicroscopeState']['microscope_name'] \
             or self.zoom != self.model.configuration['experiment']['MicroscopeState']['zoom']:
             self.update_setting()
 
@@ -95,13 +95,14 @@ class IlastikSegmentation:
             print('There is something wrong!')
 
     def update_setting(self):
-        self.resolution = self.model.configuration['experiment']['MicroscopeState']['resolution_mode']
+        self.resolution = self.model.configuration['experiment']['MicroscopeState']['microscope_name']
         self.zoom = self.model.configuration['experiment']['MicroscopeState']['zoom']
         # Get current mag
-        current_microscope_name = self.model.configuration['experiment']['MicroscopeState']['microscope_name']
+        current_microscope_name = self.resolution
         curr_pixel_size = float(self.model.configuration['configuration']['microscopes'][current_microscope_name]['zoom']['pixel_size'][self.zoom])
         # target resolution is 'high'
-        high_res_microscope_name = self.model.configuration['configuration']['gui']['resolution_modes']['high']
+        # TODO:
+        high_res_microscope_name = 'Nanoscale'
         pixel_size = float(self.model.configuration['configuration']['microscopes'][high_res_microscope_name]['zoom']['pixel_size']['N/A'])
         # calculate pieces
         self.pieces_num = int(curr_pixel_size / pixel_size)

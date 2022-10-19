@@ -157,7 +157,6 @@ class CameraSettingController(GUIController):
         # Retrieve settings.
         self.camera_setting_dict = self.parent_controller.configuration['experiment']['CameraParameters']
         self.microscope_state_dict = self.parent_controller.configuration['experiment']['MicroscopeState']
-        self.resolution_value = 'high' if self.microscope_state_dict['resolution_mode'] == 'high' else self.microscope_state_dict['zoom']
 
         # Readout Settings
         self.mode_widgets['Sensor'].set(self.camera_setting_dict['sensor_mode'])
@@ -183,7 +182,7 @@ class CameraSettingController(GUIController):
         self.framerate_widgets['frames_to_average'].set(self.camera_setting_dict['frames_to_average'])
 
         # Physical Dimensions
-        self.calculate_physical_dimensions(self.resolution_value)
+        self.calculate_physical_dimensions()
         # readout time
         self.calculate_readout_time()
         
@@ -272,7 +271,7 @@ class CameraSettingController(GUIController):
         """
         if self.in_initialization:
             return
-        self.calculate_physical_dimensions(self.resolution_value)
+        self.calculate_physical_dimensions()
 
     def set_mode(self, mode):
         r"""
@@ -302,7 +301,7 @@ class CameraSettingController(GUIController):
         for btn_name in self.roi_btns:
             self.roi_btns[btn_name]['state'] = state
         
-    def calculate_physical_dimensions(self, magnification):
+    def calculate_physical_dimensions(self):
         """
         Calculates the size of the field of view according to the magnification of the system,
         the physical size of the pixel, and the number of pixels.
@@ -312,7 +311,7 @@ class CameraSettingController(GUIController):
         elegantly in a configuration file and dictionary structure.
         """
         # magnification == 'N/A' is a proxy for resolution == 'high'
-        if (magnification == 'N/A') or (magnification == 'high'):
+        if self.parent_controller.configuration['experiment']['MicroscopeState']['zoom'] == 'N/A':
             # 54-12-8 - EFLobj = 12.19 mm / RI
             tube_lens_focal_length = 300
             extended_focal_length = 12.19
@@ -335,6 +334,7 @@ class CameraSettingController(GUIController):
             multi_immersion_focal_length = extended_focal_length/refractive_index
             magnification = tube_lens_focal_length / multi_immersion_focal_length
         else:
+            magnification = self.parent_controller.configuration['experiment']['MicroscopeState']['zoom']
             magnification = float(magnification[:-1])
 
         pixel_size = self.default_pixel_size

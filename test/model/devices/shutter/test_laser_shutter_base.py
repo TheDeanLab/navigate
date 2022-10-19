@@ -38,7 +38,7 @@ from aslm.model.dummy import DummyModel
 class TestLaserBase(unittest.TestCase):
     r"""Unit Test for ShutterBase Class"""
     dummy_model = DummyModel()
-    microscope_name = 'microscope_low_res'
+    microscope_name = 'Mesoscale'
 
     def test_shutter_base_attributes(self):
         shutter = ShutterBase(self.microscope_name, None, self.dummy_model.configuration)

@@ -44,7 +44,7 @@ class TestZoomSynthetic(unittest.TestCase):
     r"""Unit Test for SyntheticZoom Class"""
 
     dummy_model = DummyModel()
-    microscope_name = 'microscope_low_res'
+    microscope_name = 'Mesoscale'
     zoom_class = SyntheticZoom(microscope_name, None, dummy_model.configuration)
 
     def test_zoom_synthetic_attributes(self):

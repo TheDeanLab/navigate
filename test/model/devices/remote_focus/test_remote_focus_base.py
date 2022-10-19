@@ -45,7 +45,7 @@ class TestRemoteFocusBase(unittest.TestCase):
 
     def test_shutter_base_attributes(self):
         dummy_model = DummyModel()
-        RemoteFocusBase('microscope_low_res', None, dummy_model.configuration)
+        RemoteFocusBase('Mesoscale', None, dummy_model.configuration)
 
 if __name__ == '__main__':
     unittest.main()

@@ -321,22 +321,21 @@ class Controller:
 
         # add resolution menu
         self.resolution_value = tkinter.StringVar()
-        self.view.menubar.menu_resolution.add_radiobutton(label='Nanoscale',
-                                                          variable=self.resolution_value,
-                                                          value='high')
+        for microscope_name in self.configuration['configuration']['microscopes'].keys():
+            zoom_positions = self.configuration['configuration']['microscopes'][microscope_name]['zoom']['position']
+            if len(zoom_positions) > 1:
+                sub_menu = tkinter.Menu(self.view.menubar.menu_resolution)
+                self.view.menubar.menu_resolution.add_cascade(menu=sub_menu,
+                                                              label=microscope_name)
+                for res in zoom_positions.keys():
+                    sub_menu.add_radiobutton(label=res,
+                                             variable=self.resolution_value,
+                                             value=f"{microscope_name} {res}")
+            else:
+                self.view.menubar.menu_resolution.add_radiobutton(label=microscope_name,
+                                                                  variable=self.resolution_value,
+                                                                  value=f"{microscope_name} {zoom_positions.keys()[0]}")
 
-        # low resolution sub menu
-        # Should only be one checkbox selected, depending on what mode we are initialized in.
-        # In order to make sure only one checkbox would be selected, they need
-        # to share one variable: resolution_value
-        meso_res_sub_menu = tkinter.Menu(self.view.menubar.menu_resolution)
-        self.view.menubar.menu_resolution.add_cascade(menu=meso_res_sub_menu,
-                                                      label='Mesoscale')
-
-        for res in self.configuration['etl_constants']['ETLConstants']['low'].keys():
-            meso_res_sub_menu.add_radiobutton(label=res,
-                                              variable=self.resolution_value,
-                                              value=res)
         # event binding
         self.resolution_value.trace_add('write', lambda *args: self.execute('resolution', self.resolution_value.get()))
 
@@ -387,12 +386,8 @@ class Controller:
         self.update_buffer()
 
         # Configure GUI
-        resolution_mode = self.configuration['experiment']['MicroscopeState']['resolution_mode']
-        if resolution_mode == 'high':
-            self.configuration['experiment']['MicroscopeState']['zoom'] = 'N/A'
-            self.resolution_value.set('high')
-        else:
-            self.resolution_value.set(self.configuration['experiment']['MicroscopeState']['zoom'])
+        microscope_name = self.configuration['experiment']['MicroscopeState']['microscope_name']
+        self.resolution_value.set(f"{microscope_name} {self.configuration['experiment']['MicroscopeState']['zoom']}")
 
         self.acquire_bar_controller.populate_experiment_values()
         self.stage_controller.populate_experiment_values()
@@ -521,17 +516,15 @@ class Controller:
                 'laser_info': self.resolution_info['ETLConstants'][self.resolution][self.mag]
                 }
             """
-            resolution = 'high' if self.resolution_value.get() == 'high' else 'low'
-            zoom = 'N/A' if resolution == 'high' else self.resolution_value.get()
-            microscope_name = self.configuration['configuration']['gui']['resolution_modes'][resolution]
+            microscope_name, zoom = self.resolution_value.get().split()
             if microscope_name != self.configuration['experiment']['MicroscopeState']['microscope_name']:
                 self.change_microscope(microscope_name)
-            self.configuration['experiment']['MicroscopeState']['resolution_mode'] = resolution
+            # self.configuration['experiment']['MicroscopeState']['resolution_mode'] = microscope_name
             self.configuration['experiment']['MicroscopeState']['zoom'] = zoom
             work_thread = self.threads_pool.createThread('model', lambda: self.model.run_command('update_setting', 'resolution'))
             work_thread.join()
             # self.model.change_resolution(resolution_value=args[0])
-            self.camera_setting_controller.calculate_physical_dimensions(zoom)
+            self.camera_setting_controller.calculate_physical_dimensions()
             if hasattr(self, 'etl_controller') and self.etl_controller:
                 self.etl_controller.populate_experiment_values()
             ret_pos_dict = self.model.get_stage_position()
@@ -594,8 +587,7 @@ class Controller:
             file_directory = create_save_path(saving_settings)
             save_yaml_file(file_directory, self.configuration['experiment'], filename='experiment.yml')
             self.camera_setting_controller.solvent = self.configuration['experiment']['Saving']['solvent']
-            self.camera_setting_controller.calculate_physical_dimensions(
-                self.configuration['experiment']['MicroscopeState']['zoom'])
+            self.camera_setting_controller.calculate_physical_dimensions()
             self.execute('acquire')
 
         elif command == 'acquire':

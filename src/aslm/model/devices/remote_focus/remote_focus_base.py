@@ -74,7 +74,7 @@ class RemoteFocusBase:
         # calculate waveform
         microscope_state = self.configuration['experiment']['MicroscopeState']
         etl_constants = self.configuration['etl_constants']
-        imaging_mode = microscope_state['resolution_mode']
+        imaging_mode = microscope_state['microscope_name']
         zoom = microscope_state['zoom']
         self.sample_rate = self.configuration['configuration']['microscopes'][self.microscope_name]['daq']['sample_rate']
 

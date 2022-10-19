@@ -35,30 +35,39 @@ class ChangeResolution:
     def __init__(self, model, resolution_mode='high'):
         self.model = model
 
-        self.config_table={'signal': {'main': self.signal_func},
+        self.config_table={'signal': {'main': self.signal_func,
+                                      'cleanup': self.cleanup},
                            'node': {'device_related': True}}
 
-        self.resolution_mode = resolution_mode
+        if resolution_mode == 'high':
+            self.resolution_mode = resolution_mode
+            self.zoom_value = 'N/A'
+        else:
+            self.resolution_mode = 'low'
+            self.zoom_value = resolution_mode
 
         
     def signal_func(self):
-        self.model.logger.debug('prepare to change resolution')
-        self.model.pause_data_ready_lock.acquire()
-        self.model.ask_to_pause_data_thread = True
-        self.model.logger.debug('wait to change resolution')
-        self.model.pause_data_ready_lock.acquire()
+        # pause data thread
+        self.model.pause_data_thread()
+        # end active microscope
+        self.model.active_microscope.end_acquisition()
+        # prepare new microscope
+        self.model.configuration['experiment']['MicroscopeState']['microscope_name'] = self.resolution_mode
+        self.model.configuration['experiment']['MicroscopeState']['resolution_mode'] = self.resolution_mode
+        self.model.configuration['experiment']['MicroscopeState']['zoom'] = self.zoom_value
         self.model.change_resolution(self.resolution_mode)
-        self.model.logger.debug('changed resolution')
-        self.model.ask_to_pause_data_thread = False
-        self.model.prepare_acquisition(False)
-        self.model.pause_data_event.set()
-        self.model.logger.debug('wake up data thread ')
-        self.model.pause_data_ready_lock.release()
+        self.model.logger.debug(f'current resolution is {self.resolution_mode}')
+        self.model.logger.debug(f'current active microscope is {self.model.active_microscope_name}')
+        # prepare active microscope
+        waveform_dict = self.model.active_microscope.prepare_acquisition()
+        self.model.event_queue.put(('waveform', waveform_dict))
+        # resume data thread
+        self.model.resume_data_thread()
         return True
 
-    def generate_meta_data(self, *args):
-        # print('This frame: change resolution', self.resolution_mode, self.model.frame_id)
-        return True
+    def cleanup(self):
+        self.model.resume_data_thread()
 
 
 class Snap:
@@ -68,11 +77,7 @@ class Snap:
         self.config_table = {'data': {'main': self.data_func}}
 
     def data_func(self, frame_ids):
-        print('the camera is:', self.model.camera.serial_number, frame_ids, self.model.frame_id)
-        return True
-
-    def generate_meta_data(self, *args):
-        # print('This frame: snap one frame', self.model.frame_id)
+        self.model.logger.info(f'the camera is:{self.model.active_microscope_name}, {frame_ids}')
         return True
 
 class WaitToContinue:

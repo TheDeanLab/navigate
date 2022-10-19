@@ -58,7 +58,12 @@ class NIDAQ(DAQBase):
         super().__init__(configuration)
         self.camera_trigger_task = None
         self.master_trigger_task = None
-        self.laser_switching_task = nidaqmx.Task()
+        try:
+            switching_port = self.configuration['configuration']['microscopes'][self.microscope_name]['daq']['laser_port_switcher']
+            self.laser_switching_task = nidaqmx.Task()
+        except:
+            self.laser_switching_task = None
+
 
         self.analog_outputs = {}  # keep track of analog outputs and their waveforms
         self.analog_output_tasks = []
@@ -102,7 +107,7 @@ class NIDAQ(DAQBase):
         # Create one analog output task per board, grouping the channels
         boards = list(set([x.split('/')[0] for x in self.analog_outputs.keys()]))
         for board in boards:
-            channel = ', '.join(list(set([x for x in self.analog_outputs.keys() if x.split('/')[0] == board])))
+            channel = ', '.join(list([x for x in self.analog_outputs.keys() if x.split('/')[0] == board]))
             self.analog_output_tasks.append(nidaqmx.Task())
             self.analog_output_tasks[-1].ao_channels.add_ao_voltage_chan(channel)
 
@@ -123,7 +128,7 @@ class NIDAQ(DAQBase):
             self.analog_output_tasks[-1].triggers.start_trigger.cfg_dig_edge_start_trig(triggers[0])
 
             # Write values to board
-            waveforms = np.vstack([v['waveform'][channel_key][:n_sample] for k, v in self.analog_outputs.items() if k.split('/')[0] == board])
+            waveforms = np.vstack([v['waveform'][channel_key][:n_sample] for k, v in self.analog_outputs.items() if k.split('/')[0] == board]).squeeze()
             self.analog_output_tasks[-1].write(waveforms)
 
     def prepare_acquisition(self, channel_key, exposure_time):
@@ -177,11 +182,14 @@ class NIDAQ(DAQBase):
             self.microscope_name = microscope_name
             self.analog_outputs = {}
 
-        switching_port = self.configuration['configuration']['microscopes'][self.microscope_name]['daq']['laser_port_switcher']
-        switching_on_state = self.configuration['configuration']['microscopes'][self.microscope_name]['daq']['laser_switch_state']
-        
-        self.laser_switching_task.close()
-        self.laser_switching_task = nidaqmx.Task()
-        self.laser_switching_task.do_channels.add_do_chan(
-            switching_port, line_grouping=nidaqmx.constants.LineGrouping.CHAN_FOR_ALL_LINES)
-        self.laser_switching_task.write(switching_on_state, auto_start=True)
+        try:
+            switching_port = self.configuration['configuration']['microscopes'][self.microscope_name]['daq']['laser_port_switcher']
+            switching_on_state = self.configuration['configuration']['microscopes'][self.microscope_name]['daq']['laser_switch_state']
+            
+            self.laser_switching_task.close()
+            self.laser_switching_task = nidaqmx.Task()
+            self.laser_switching_task.do_channels.add_do_chan(
+                switching_port, line_grouping=nidaqmx.constants.LineGrouping.CHAN_FOR_ALL_LINES)
+            self.laser_switching_task.write(switching_on_state, auto_start=True)
+        except KeyError:
+            pass

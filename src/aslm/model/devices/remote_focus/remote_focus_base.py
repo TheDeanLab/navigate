@@ -98,6 +98,10 @@ class RemoteFocusBase:
                 self.samples = int(self.sample_rate * self.sweep_time)
 
                 # ETL Parameters
+                temp = etl_constants['ETLConstants'][imaging_mode][zoom][laser]['amplitude']
+                if temp == '-' or temp == '.':
+                    etl_constants['ETLConstants'][imaging_mode][zoom][laser]['amplitude'] = '0'
+
                 etl_amplitude = float(etl_constants['ETLConstants'][imaging_mode][zoom][laser]['amplitude'])
 
                 # Validation for when user puts a '-' in spinbox

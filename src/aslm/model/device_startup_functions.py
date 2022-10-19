@@ -445,7 +445,7 @@ def start_lasers(microscope_name, device_connection, configuration, id=0, is_syn
     if is_synthetic:
         device_type = 'SyntheticLaser'
     else:
-        device_type = configuration['configuration']['microscopes'][microscope_name]['lasers'][id]['onoff']['hardware']['type']
+        device_type = configuration['configuration']['microscopes'][microscope_name]['lasers'][id]['power']['hardware']['type']
 
     if device_type == 'NI':
         if device_connection is not None:
@@ -493,7 +493,7 @@ def start_galvo(microscope_name, device_connection, configuration, id=0, is_synt
 def device_not_found(*args):
 
     print("Device Not Found in Configuration.YML:", args)
-    sys.exit()
+    raise RuntimeError(f"Device not found in configuration: {args}")
 
 def load_devices(configuration, is_synthetic=False)->dict:
     devices = {}

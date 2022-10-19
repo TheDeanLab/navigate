@@ -1,0 +1,15 @@
+To add a new section to the main landing page:
+
+1. Create a .rst file with the name that fits subject.
+2. Write rst style text to fit needs
+3. Add name to list of files in index.rst
+
+
+To format a class, function or method:
+
+1. Add proper NumPy style docstrings to appropriate places
+
+
+
+
+On Model Concurrency organize

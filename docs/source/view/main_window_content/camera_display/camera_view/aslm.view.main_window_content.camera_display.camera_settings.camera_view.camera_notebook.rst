@@ -1,7 +1,7 @@
-aslm.view.main_window_content.camera_display.camera_settings.camera_view.camera_notebook module
+aslm.view.main_window_content.camera_display.camera_view.camera_notebook module
 ===============================================================================================
 
-.. automodule:: aslm.view.main_window_content.camera_display.camera_settings.camera_view.camera_notebook
+.. automodule:: aslm.view.main_window_content.camera_display.camera_view.camera_notebook
    :members:
    :undoc-members:
    :show-inheritance:

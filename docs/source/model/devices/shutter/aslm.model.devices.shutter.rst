@@ -15,7 +15,7 @@ TTL Laser Shutter Class
    aslm.model.devices.shutter.laser_shutter_ttl
 
 Synthetic Laser Shutter Class
-------------------------
+-----------------------------
 
 .. toctree::
    :maxdepth: 4

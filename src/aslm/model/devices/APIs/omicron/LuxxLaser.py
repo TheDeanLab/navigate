@@ -5,7 +5,7 @@ import serial
 import re
 from time import time
 
-from aslm.model.devices.lasers.LaserBase import LaserBase
+from aslm.model.devices.lasers.laser_base import LaserBase
 
 # Logger Setup
 p = __name__.split(".")[1]

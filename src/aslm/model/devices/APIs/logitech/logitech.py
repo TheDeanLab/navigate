@@ -177,3 +177,4 @@ class FarmSimulatorSidePanel(QtCore.QObject):
             else:
                 #self.sig_stop_timer.emit(axis_id)
                 #self.sig_axis_moved.emit(axis_id, value)
+                pass

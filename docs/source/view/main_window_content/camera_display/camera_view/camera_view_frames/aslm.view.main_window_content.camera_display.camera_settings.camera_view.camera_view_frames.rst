@@ -4,7 +4,7 @@ Image Metrics
 .. toctree::
    :maxdepth: 4
 
-   aslm.view.main_window_content.camera_display.camera_settings.camera_view.camera_view_frames.image_metrics
+   aslm.view.main_window_content.camera_display.camera_view.camera_view_frames.image_metrics
 
 Live Frame
 ----------
@@ -12,7 +12,7 @@ Live Frame
 .. toctree::
    :maxdepth: 4
 
-   aslm.view.main_window_content.camera_display.camera_settings.camera_view.camera_view_frames.live_frame
+   aslm.view.main_window_content.camera_display.camera_view.camera_view_frames.live_frame
 
 
 Palette
@@ -21,7 +21,7 @@ Palette
 .. toctree::
    :maxdepth: 4
 
-   aslm.view.main_window_content.camera_display.camera_settings.camera_view.camera_view_frames.palette
+   aslm.view.main_window_content.camera_display.camera_view.camera_view_frames.palette
 
 
 RGB Selection
@@ -30,4 +30,4 @@ RGB Selection
 .. toctree::
    :maxdepth: 4
 
-   aslm.view.main_window_content.camera_display.camera_settings.camera_view.camera_view_frames.rgb_selection
+   aslm.view.main_window_content.camera_display.camera_view.camera_view_frames.rgb_selection

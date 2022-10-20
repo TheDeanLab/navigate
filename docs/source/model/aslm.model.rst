@@ -21,7 +21,7 @@ Model Analysis
    analysis/aslm.model.analysis
 
 Model Concurrency
---------------
+-----------------
 
 .. toctree::
    :maxdepth: 4

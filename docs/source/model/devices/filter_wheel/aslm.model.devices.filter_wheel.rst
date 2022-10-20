@@ -15,7 +15,7 @@ Sutter Filter Wheel Class
    aslm.model.devices.filter_wheel.filter_wheel_sutter
 
 Synthetic Filter Wheel Class
------------------------
+----------------------------
 
 .. toctree::
    :maxdepth: 4

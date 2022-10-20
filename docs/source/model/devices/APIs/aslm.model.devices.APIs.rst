@@ -7,7 +7,7 @@ Coherent APIs
    coherent/aslm.model.devices.APIs.coherent
 
 Dynamixel APIs
--------------
+--------------
 
 .. toctree::
    :maxdepth: 4

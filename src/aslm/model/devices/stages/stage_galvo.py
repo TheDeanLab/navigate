@@ -20,16 +20,24 @@ class GalvoNIStage(StageBase):
 
         # eval(self.volts_per_micron, {"x": 100})
         if type(device_config) == ListProxy:
-            self.volts_per_micron = device_config[id]['volts_per_micron']
+            self.volts_per_micron = device_config[device_id]['volts_per_micron']
+            self.axes_channels = device_config[device_id]['axes_channels']
+            self.galvo_max_voltage = device_config[device_id]['max']
+            self.galvo_min_voltage = device_config[device_id]['min']
         else:
             self.volts_per_micron = device_config['volts_per_micron']
+            self.axes_channels = device_config['axes_channels']
+            self.galvo_max_voltage = device_config['max']
+            self.galvo_min_voltage = device_config['min']
 
         self.daq = device_connection
 
         self.microscope_name = microscope_name
+        self.configuration = configuration
 
-        self.galvo_max_voltage = self.device_config['hardware']['max']
-        self.galvo_min_voltage = self.device_config['hardware']['min']
+        self.trigger_source = configuration['configuration']['microscopes'][microscope_name]['daq']['trigger_source']
+        self.camera_delay_percent = configuration['configuration']['microscopes'][microscope_name]['camera']['delay_percent']
+        self.etl_ramp_falling = configuration['configuration']['microscopes'][microscope_name]['remote_focus_device']['ramp_falling_percent']
 
         self.waveform_dict = {}
         for i in range(int(configuration['configuration']['gui']['channels']['count'])):
@@ -82,6 +90,7 @@ class GalvoNIStage(StageBase):
                 # Get the Waveform Parameters - Assumes ETL Delay < Camera Delay.  Should Assert.
                 exposure_time = channel['camera_exposure_time'] / 1000
                 self.sweep_time = exposure_time + exposure_time * ((self.camera_delay_percent + self.etl_ramp_falling) / 100)
+                readout_time = 0  # TODO: find a way to pass this to the stages
                 if readout_time > 0:
                     # This addresses the dovetail nature of the camera readout in normal mode. The camera reads middle
                     # out, and the delay in start of the last lines compared to the first lines causes the exposure
@@ -97,6 +106,10 @@ class GalvoNIStage(StageBase):
                 self.waveform_dict[channel_key][self.waveform_dict[channel_key] > self.galvo_max_voltage] = self.galvo_max_voltage
                 self.waveform_dict[channel_key][self.waveform_dict[channel_key] < self.galvo_min_voltage] = self.galvo_min_voltage
 
+        self.daq.analog_outputs[self.axes_channels[axis_num]] = {'sample_rate': self.sample_rate,
+                                                                 'samples': self.samples,
+                                                                 'trigger_source': self.trigger_source,
+                                                                 'waveform': self.waveform_dict}
         return True
 
     def move_absolute(self, move_dictionary, wait_until_done=False):
@@ -116,8 +129,8 @@ class GalvoNIStage(StageBase):
             Was the move successful?
         """
 
-        for ax in self.axes:
-            success = self.move_axis_absolute(ax, None, move_dictionary)
+        for i, ax in enumerate(self.axes):
+            success = self.move_axis_absolute(ax, i, move_dictionary)
             if success and wait_until_done is True:
                 stage_pos, n_tries, i = -1e50, 10, 0
                 target_pos = move_dictionary[f"{ax}_abs"] - getattr(self, f"int_{ax}_pos_offset",
@@ -132,7 +145,3 @@ class GalvoNIStage(StageBase):
 
         return success
     
-    def __del__(self):
-        self.stop_task()
-        self.close_task()
-

@@ -294,7 +294,10 @@ class Model:
             if self.imaging_mode == 'single':
                 self.configuration['experiment']['MicroscopeState']['stack_cycling_mode'] = 'per_z'
 
-            if self.imaging_mode == 'live':
+            if self.imaging_mode == 'projection':
+                self.move_stage({'z_abs': 0})
+
+            if self.imaging_mode == 'live' or self.imaging_mode == 'projection':
                 self.signal_thread = threading.Thread(target=self.run_live_acquisition)
             else:
                 self.signal_thread = threading.Thread(target=self.run_acquisition)

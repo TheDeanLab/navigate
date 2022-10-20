@@ -4,7 +4,7 @@ from multiprocessing.managers import ListProxy
 
 from aslm.model.devices.stages.stage_base import StageBase
 
-from aslm.model.waveforms import dc_value
+from aslm.model.waveforms import dc_value, tunable_lens_ramp
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -100,9 +100,24 @@ class GalvoNIStage(StageBase):
                 self.samples = int(self.sample_rate * self.sweep_time)
 
                 # Calculate the Waveforms
-                self.waveform_dict[channel_key] = dc_value(sample_rate=self.sample_rate,
-                                                           sweep_time=self.sweep_time,
-                                                           amplitude=volts)
+                print("Microscope state is: ", self.configuration['experiment']['MicroscopeState']['image_mode'])
+                if self.configuration['experiment']['MicroscopeState']['image_mode'] == 'projection':
+                    z_start = self.configuration['experiment']['MicroscopeState']['abs_z_start']
+                    z_end = self.configuration['experiment']['MicroscopeState']['abs_z_end']
+                    amp = eval(self.volts_per_micron, {"x": 0.5*(z_end-z_start)})
+                    off = eval(self.volts_per_micron, {"x": 0.5*(z_end+z_start)})
+                    self.waveform_dict[channel_key] = tunable_lens_ramp(sample_rate=self.sample_rate,
+                                                                    exposure_time=exposure_time,
+                                                                    sweep_time=self.sweep_time,
+                                                                    etl_delay=0,
+                                                                    camera_delay=self.camera_delay_percent,
+                                                                    fall=self.etl_ramp_falling,
+                                                                    amplitude=amp,
+                                                                    offset=off)
+                else:
+                    self.waveform_dict[channel_key] = dc_value(sample_rate=self.sample_rate,
+                                                            sweep_time=self.sweep_time,
+                                                            amplitude=volts)
                 self.waveform_dict[channel_key][self.waveform_dict[channel_key] > self.galvo_max_voltage] = self.galvo_max_voltage
                 self.waveform_dict[channel_key][self.waveform_dict[channel_key] < self.galvo_min_voltage] = self.galvo_min_voltage
 

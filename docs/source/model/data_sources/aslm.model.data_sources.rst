@@ -1,8 +1,5 @@
-aslm.model.data\_sources package
-================================
-
-Submodules
-----------
+Data Sources Modules
+--------------------
 
 .. toctree::
    :maxdepth: 4
@@ -12,11 +9,3 @@ Submodules
    aslm.model.data_sources.tiff_data_source
    aslm.model.data_sources.zarr_data_source
 
-Module contents
----------------
-
-.. automodule:: aslm.model.data_sources
-   :members:
-   :undoc-members:
-   :show-inheritance:
-   :private-members:

@@ -1,8 +1,5 @@
-aslm.model.concurrency package
-==============================
-
-Submodules
-----------
+Concurrency Modules
+-------------------
 
 .. toctree::
    :maxdepth: 4
@@ -14,11 +11,4 @@ Submodules
    aslm.model.concurrency.shared_memory
    aslm.model.concurrency.write_parameters
 
-Module contents
----------------
 
-.. automodule:: aslm.model.concurrency
-   :members:
-   :undoc-members:
-   :show-inheritance:
-   :private-members:

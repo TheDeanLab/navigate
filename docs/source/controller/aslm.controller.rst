@@ -1,29 +1,33 @@
-aslm.controller package
-=======================
-
-Subpackages
------------
+Main Controller
+---------------
 
 .. toctree::
    :maxdepth: 4
 
-   aslm.controller.sub_controllers
+   aslm.controller.controller
+   
 
-Submodules
-----------
+Sub Controllers
+---------------
+
+.. toctree::
+   :maxdepth: 4
+
+   sub_controllers/aslm.controller.sub_controllers
+
+Configuration Controller
+------------------------
 
 .. toctree::
    :maxdepth: 4
 
    aslm.controller.configuration_controller
-   aslm.controller.controller
+
+Thread Pool
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
    aslm.controller.thread_pool
 
-Module contents
----------------
-
-.. automodule:: aslm.controller
-   :members:
-   :undoc-members:
-   :show-inheritance:
-   :private-members:

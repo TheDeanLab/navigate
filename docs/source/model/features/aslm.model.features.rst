@@ -1,8 +1,5 @@
-aslm.model.features package
-===========================
-
-Submodules
-----------
+Feature Modules
+---------------
 
 .. toctree::
    :maxdepth: 4
@@ -14,11 +11,3 @@ Submodules
    aslm.model.features.image_writer
    aslm.model.features.restful_features
 
-Module contents
----------------
-
-.. automodule:: aslm.model.features
-   :members:
-   :undoc-members:
-   :show-inheritance:
-   :private-members:

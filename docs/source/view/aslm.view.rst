@@ -1,28 +1,33 @@
-aslm.view package
-=================
-
-Subpackages
------------
+Menus and Popups
+----------------
 
 .. toctree::
    :maxdepth: 4
 
-   aslm.view.menus
+   menus/aslm.view.menus
 
-Submodules
-----------
+Main Application Window
+-----------------------
 
 .. toctree::
    :maxdepth: 4
 
-   aslm.view.benchmark
    aslm.view.main_application_window
 
-Module contents
----------------
+Main Application Window Content
+-------------------------------
 
-.. automodule:: aslm.view
-   :members:
-   :undoc-members:
-   :show-inheritance:
-   :private-members:
+.. toctree::
+   :maxdepth: 4
+
+   main_window_content/aslm.view.main_window_content
+
+
+Custom Front End Widgets
+------------------------
+
+.. toctree::
+   :maxdepth: 4
+
+   custom_widgets/aslm.view.custom_widgets
+

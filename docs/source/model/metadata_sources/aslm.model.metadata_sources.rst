@@ -1,8 +1,5 @@
-aslm.model.metadata\_sources package
-====================================
-
-Submodules
-----------
+Metadata Sources Modules
+------------------------
 
 .. toctree::
    :maxdepth: 4
@@ -11,11 +8,3 @@ Submodules
    aslm.model.metadata_sources.metadata
    aslm.model.metadata_sources.ome_tiff_metadata
 
-Module contents
----------------
-
-.. automodule:: aslm.model.metadata_sources
-   :members:
-   :undoc-members:
-   :show-inheritance:
-   :private-members:

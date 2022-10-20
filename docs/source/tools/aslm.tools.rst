@@ -1,8 +1,5 @@
-aslm.tools package
-==================
-
-Submodules
-----------
+Tool Modules
+------------
 
 .. toctree::
    :maxdepth: 4
@@ -19,11 +16,3 @@ Submodules
    aslm.tools.vibration_analysis
    aslm.tools.xml_tools
 
-Module contents
----------------
-
-.. automodule:: aslm.tools
-   :members:
-   :undoc-members:
-   :show-inheritance:
-   :private-members:

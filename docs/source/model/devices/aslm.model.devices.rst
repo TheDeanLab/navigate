@@ -1,37 +1,96 @@
-aslm.model.devices package
-==========================
-
-Subpackages
+Device APIs
 -----------
 
 .. toctree::
    :maxdepth: 4
 
-   aslm.model.devices.APIs
-   aslm.model.devices.camera
-   aslm.model.devices.daq
-   aslm.model.devices.filter_wheel
-   aslm.model.devices.galvo
-   aslm.model.devices.joystick
-   aslm.model.devices.lasers
-   aslm.model.devices.remote_focus
-   aslm.model.devices.shutter
-   aslm.model.devices.stages
-   aslm.model.devices.zoom
+   APIs/aslm.model.devices.APIs
 
-Submodules
-----------
+Camera Modules
+--------------
 
 .. toctree::
    :maxdepth: 4
 
-   aslm.model.devices.objectives
+   camera/aslm.model.devices.camera
 
-Module contents
+DAQ Modules
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   daq/aslm.model.devices.daq
+
+Filter Wheel Modules
+--------------------
+
+.. toctree::
+   :maxdepth: 4
+   
+   filter_wheel/aslm.model.devices.filter_wheel
+
+Galvo Modules
+-------------
+
+.. toctree::
+   :maxdepth: 4
+
+   galvo/aslm.model.devices.galvo
+
+Joystick Modules
+----------------
+
+.. toctree::
+   :maxdepth: 4
+
+   joystick/aslm.model.devices.joystick
+
+Laser Modules
+-------------
+
+.. toctree::
+   :maxdepth: 4
+
+   lasers/aslm.model.devices.lasers
+
+Remote Focus Modules
+--------------------
+
+.. toctree::
+   :maxdepth: 4
+
+   remote_focus/aslm.model.devices.remote_focus
+
+Shutter Modules
 ---------------
 
-.. automodule:: aslm.model.devices
-   :members:
-   :undoc-members:
-   :show-inheritance:
-   :private-members:
+.. toctree::
+   :maxdepth: 4
+
+   shutter/aslm.model.devices.shutter
+
+Stage Modules
+--------------
+
+.. toctree::
+   :maxdepth: 4
+
+   stages/aslm.model.devices.stages
+
+Zoom Modules
+------------
+
+.. toctree::
+   :maxdepth: 4
+
+   zoom/aslm.model.devices.zoom
+
+Objective Modules
+-----------------
+
+.. toctree::
+   :maxdepth: 4
+
+   objectives/aslm.model.devices.objectives
+

@@ -98,9 +98,11 @@ class Microscope:
                 
                 device_ref_name = build_ref_name('_', *ref_list)
 
+                print(device_name, device_ref_name)
+
                 if device_name in devices_dict and device_ref_name in devices_dict[device_name]:
                     device_connection = devices_dict[device_name][device_ref_name]
-                elif device_ref_name.startswith('NI') and (device_name == 'galvo' or device_name == 'remote_focus_device'):
+                elif device_ref_name.startswith('NI') and (device_name == 'galvo' or device_name == 'remote_focus_device' or device_name == 'stage'):
                     # TODO: Remove this. We should not have this hardcoded.
                     device_connection = self.daq
 

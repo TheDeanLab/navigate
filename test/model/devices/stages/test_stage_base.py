@@ -45,7 +45,7 @@ class TestStageBase(unittest.TestCase):
 
     def test_stage_base_attributes(self):
         dummy_model = DummyModel()
-        microscope_name = 'low'
+        microscope_name = 'Mesoscale'
         stage_base = StageBase(microscope_name, None, dummy_model.configuration)
 
         assert hasattr(stage_base, 'x_pos')

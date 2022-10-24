@@ -332,7 +332,7 @@ class Model:
                 self.current_channel = 0
 
             if args[0] == 'resolution':
-                self.change_resolution(self.configuration['experiment']['MicroscopeState']['resolution_mode'])
+                self.change_resolution(self.configuration['experiment']['MicroscopeState']['microscope_name'])
             
             if reboot:
                 # prepare active microscope

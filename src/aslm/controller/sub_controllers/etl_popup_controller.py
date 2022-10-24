@@ -84,8 +84,8 @@ class EtlPopupController(GUIController):
         self.variables = self.view.get_variables()
 
         self.lasers = self.configuration_controller.lasers_info
-        galvo_dict = self.configuration_controller.galvo_parameter_dict
-        self.galvos = [galvo['name'] for galvo in galvo_dict]
+        self.galvo_dict = self.configuration_controller.galvo_parameter_dict
+        self.galvos = [galvo['name'] for galvo in self.galvo_dict]
         
         self.resolution = None
         self.mag = None
@@ -165,7 +165,7 @@ class EtlPopupController(GUIController):
             self.widgets[laser + ' Off'].widget.configure(increment=increment)
             self.widgets[laser + ' Off'].widget.set_precision(precision)
 
-        for galvo in self.galvos:
+        for galvo, d in zip(self.galvos, self.galvo_dict):
             self.widgets[galvo + ' Amp'].widget.configure(from_=galvo_min)
             self.widgets[galvo + ' Amp'].widget.configure(to=galvo_max)
             self.widgets[galvo + ' Amp'].widget.configure(increment=increment)
@@ -182,6 +182,10 @@ class EtlPopupController(GUIController):
             self.widgets[galvo + ' Freq'].widget.configure(increment=increment)
             self.widgets[galvo + ' Freq'].widget.set_precision(precision)
 
+            if d.get('amplitude') is None:
+                self.widgets[galvo + ' Amp'].widget['state'] = "disabled"
+                self.widgets[galvo + ' Freq'].widget['state'] = "disabled"
+
         # The galvo by default uses a sawtooth waveform. However, sometimes we have a resonant galvo.
         # In the case of the resonant galvo, the amplitude must be zero and only the offset can be
         # controlled. We only define the offset in the configuration.yml file. If only the offset is
@@ -192,9 +196,9 @@ class EtlPopupController(GUIController):
         #       configuration? That is, should we pass galvo_l_waveform: sawtooth and galvo_r_waveform: dc_value?
         #       And then adjust the ETL_Popup_Controller accordingly? We could do the same for ETL vs. voice coil.
         # TODO this might have buggy behavior adding the dynamic galvo stuff
-        if 'amplitude' not in self.configuration_controller.galvo_parameter_dict[0].keys():
-            self.widgets['Galvo Amp'].widget['state'] = "disabled"
-            self.widgets['Galvo Freq'].widget['state'] = "disabled"
+        # if 'amplitude' not in self.configuration_controller.galvo_parameter_dict[0].keys():
+        #     self.widgets[self.galvo[0] + ' Amp'].widget['state'] = "disabled"
+        #     self.widgets['Galvo Freq'].widget['state'] = "disabled"
         # TODO this might not be needed at all since it defaults to normal on creation. Will also need to check all galvos not just one
         # else:
         #     self.widgets['Galvo Amp'].widget['state'] = "normal"

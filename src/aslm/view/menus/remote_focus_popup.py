@@ -161,9 +161,7 @@ class remote_popup():
             self.inputs[laser_labels[i] + ' Off'].grid(row=i + 1, column=2, sticky=(tk.NSEW), pady=(20,0))
 
         galvo_dict = self.configuration_controller.galvo_parameter_dict
-        galvo_labels = []
-        for i, galvo in enumerate(galvo_dict):
-            galvo_labels.append(f"Galvo {i}")
+        galvo_labels = [galvo['name'] for galvo in galvo_dict]
 
         prev = len(laser_labels)
 

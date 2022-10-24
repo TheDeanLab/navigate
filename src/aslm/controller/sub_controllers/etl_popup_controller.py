@@ -85,9 +85,8 @@ class EtlPopupController(GUIController):
 
         self.lasers = self.configuration_controller.lasers_info
         galvo_dict = self.configuration_controller.galvo_parameter_dict
-        self.galvos = []
-        for i, galvo in enumerate(galvo_dict):
-            self.galvos.append(f"Galvo {i}")
+        self.galvos = [galvo['name'] for galvo in galvo_dict]
+        
         self.resolution = None
         self.mag = None
         self.mode = 'stop'

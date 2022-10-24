@@ -232,6 +232,10 @@ class ConfigurationController:
     @property
     def galvo_parameter_dict(self):
         if self.microscope_config is not None:
+            # Inject names into unnammed galvos
+            for i, galvo in enumerate(self.microscope_config['galvo']):
+                if galvo.get('name') is None:
+                    self.microscope_config['galvo'][i]['name'] = f"Galvo {i}"
             return self.microscope_config['galvo']
         return None
 

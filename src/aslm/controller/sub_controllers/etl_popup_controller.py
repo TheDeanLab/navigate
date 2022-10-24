@@ -136,16 +136,14 @@ class EtlPopupController(GUIController):
         """
         Update the widget ranges and precisions based on the current resolution mode.
         """
-
-        if self.resolution == 'high':
+        # TODO: 
+        if self.resolution == 'Nanoscale':
             precision = -3
             increment = 0.001
-            focus_prefix = 'r'
         else:
             # resolution is low
             precision = -2
             increment = 0.01
-            focus_prefix = 'l'
 
         laser_min = self.configuration_controller.remote_focus_dict['hardware']['min']
         laser_max = self.configuration_controller.remote_focus_dict['hardware']['max']
@@ -208,9 +206,9 @@ class EtlPopupController(GUIController):
         """
         self.galvo_setting = self.parent_controller.configuration['experiment']['GalvoParameters']
         self.remote_focus_experment_dict = self.parent_controller.configuration['experiment']['MicroscopeState']
-        resolution_value = self.remote_focus_experment_dict['resolution_mode']
+        resolution_value = self.remote_focus_experment_dict['microscope_name']
         zoom_value = self.remote_focus_experment_dict['zoom']
-        mag = 'N/A' if resolution_value == 'high' else zoom_value
+        mag = zoom_value
         if self.widgets['Mode'].get() == resolution_value and self.widgets['Mag'].get() == mag:
             return
         self.widgets['Mode'].set(resolution_value)
@@ -262,9 +260,9 @@ class EtlPopupController(GUIController):
         self.update_galvo_device_flag = True
 
         # update resolution value in central controller (menu)
-        value = 'high' if self.resolution == 'high' else self.mag
+        value = f"{self.resolution} {self.mag}"
         if self.parent_controller.resolution_value.get() != value:
-            self.parent_controller.resolution_value.set('high' if self.resolution == 'high' else self.mag)
+            self.parent_controller.resolution_value.set(value)
         # reconfigure widgets
         self.configure_widget_range()
 

@@ -32,19 +32,15 @@ POSSIBILITY OF SUCH DAMAGE.
 
 
 class ChangeResolution:
-    def __init__(self, model, resolution_mode='high'):
+    def __init__(self, model, resolution_mode='high', zoom_value='N/A'):
         self.model = model
 
         self.config_table={'signal': {'main': self.signal_func,
                                       'cleanup': self.cleanup},
                            'node': {'device_related': True}}
 
-        if resolution_mode == 'high':
-            self.resolution_mode = resolution_mode
-            self.zoom_value = 'N/A'
-        else:
-            self.resolution_mode = 'low'
-            self.zoom_value = resolution_mode
+        self.resolution_mode = resolution_mode
+        self.zoom_value = zoom_value
 
         
     def signal_func(self):
@@ -54,7 +50,6 @@ class ChangeResolution:
         self.model.active_microscope.end_acquisition()
         # prepare new microscope
         self.model.configuration['experiment']['MicroscopeState']['microscope_name'] = self.resolution_mode
-        self.model.configuration['experiment']['MicroscopeState']['resolution_mode'] = self.resolution_mode
         self.model.configuration['experiment']['MicroscopeState']['zoom'] = self.zoom_value
         self.model.change_resolution(self.resolution_mode)
         self.model.logger.debug(f'current resolution is {self.resolution_mode}')
@@ -295,7 +290,7 @@ class FindTissueSimple2D:
             img = self.model.data_buffer[idx]
 
             # Get current mag
-            if self.model.configuration['experiment']['MicroscopeState']['resolution_mode'] == 'high':
+            if self.model.configuration['experiment']['MicroscopeState']['microscope_name'] == 'Nanoscale':
                 curr_pixel_size = self.model.configuration['ZoomParameters']['high_res_zoom_pixel_size']
                 curr_mag = 300/(12.19/1.56)  # TODO: Don't hardcode
             else:

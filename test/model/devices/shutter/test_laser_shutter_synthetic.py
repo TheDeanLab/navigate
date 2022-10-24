@@ -43,7 +43,7 @@ from aslm.model.dummy import DummyModel
 class TestSyntheticShutter(unittest.TestCase):
     r"""Unit Test for SyntheticShutter Class"""
     dummy_model = DummyModel()
-    microscope_name = 'low'
+    microscope_name = 'Mesoscale'
 
     def test_synthetic_shutter_attributes(self):
         shutter = SyntheticShutter(self.microscope_name, None, self.dummy_model.configuration)

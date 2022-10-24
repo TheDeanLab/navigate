@@ -43,7 +43,7 @@ from aslm.model.dummy import DummyModel
 class TestSyntheticCamera(unittest.TestCase):
     r"""Unit Test for FilterWheel Class"""
     dummy_model = DummyModel()
-    microscope_name = 'low'
+    microscope_name = 'Mesoscale'
     scc = SyntheticCameraController()
     synthetic_camera = SyntheticCamera(microscope_name, scc, dummy_model.configuration)
 

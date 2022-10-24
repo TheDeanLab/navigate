@@ -18,6 +18,7 @@
 
 
 .. toctree::
+   :maxdepth: 2
    
    userguide
    api

@@ -6,4 +6,8 @@ API Reference
    :template: custom_module.rst
    :recursive:
    
-   aslm
+   aslm.config
+   aslm.model
+   aslm.controller
+   aslm.view
+   aslm.tools

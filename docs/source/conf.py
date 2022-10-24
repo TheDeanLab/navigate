@@ -12,7 +12,8 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../..'))
+sys.path.insert(0, os.path.abspath('../../src'))
+
 
 
 # -- Project information -----------------------------------------------------
@@ -66,7 +67,7 @@ autodoc_default_flags = [
 ]  
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['../_templates']
+templates_path = ['./_templates']
 
 # The suffix of source filenames.
 source_suffix = ".rst"

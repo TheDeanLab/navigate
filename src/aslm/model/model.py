@@ -642,21 +642,6 @@ class Model:
         if hasattr(self, 'signal_container'):
             self.signal_container.run()
 
-        # Camera Settings - Exposure Time in Milliseconds
-        # only set exposure time after the previous trigger has been done.
-        if self.pre_exposure_time != self.current_exposure_time:
-            # In order to change exposure time, we need to stop the camera
-            # if self.camera.camera_controller.is_acquiring:
-            #     self.camera.close_image_series()
-            self.active_microscope.camera.set_exposure_time(self.current_exposure_time)
-            # cam_exposure_time = self.camera.camera_controller.get_property_value('exposure_time')
-            self.pre_exposure_time = self.current_exposure_time
-            # And then re-set it
-            # self.camera.initialize_image_series(self.data_buffer, self.number_of_frames)
-
-        # get time when send out the trigger
-        # self.pre_trigger_time = time.perf_counter()
-
         #  Initialize, run, and stop the acquisition.
         #  Consider putting below to not block thread.
         self.active_microscope.daq.prepare_acquisition(channel_key, self.current_exposure_time)

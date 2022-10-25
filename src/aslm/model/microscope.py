@@ -197,6 +197,7 @@ class Microscope:
             self.current_exposure_time, self.camera_line_interval = self.camera.calculate_light_sheet_exposure_time(
                 self.current_exposure_time,
                 int(self.configuration['experiment']['CameraParameters']['number_of_pixels']))
+            self.camera.set_exposure_time(self.current_exposure_time)
             self.camera.camera_controller.set_property_value("internal_line_interval", self.camera_line_interval)
 
         # Laser Settings

@@ -30,20 +30,77 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
+
+# Standard Library Imports
+import logging
+
+# Third Party Imports
 import tkinter as tk
 from tkinter import ttk
-import logging
+from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg)
+from matplotlib.figure import Figure
+
+# Local Imports
+from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-class waveform_tab(tk.Frame):
+class WaveformTab(tk.Frame):
     def __init__(self, cam_wave, *args, **kwargs):
-        #Init Frame
+        # Init Frame
         tk.Frame.__init__(self, cam_wave, *args, **kwargs)
 
         self.index = 1
+
+        # Formatting
+        tk.Grid.columnconfigure(self, 'all', weight=1)
+        tk.Grid.rowconfigure(self, 'all', weight=1)
+
+        self.waveform_plots = ttk.Frame(self)
+        self.waveform_plots.grid(row=0, column=0, sticky=tk.NSEW)
+
+        self.fig = Figure(figsize=(6, 6), dpi=100)
+        self.canvas = FigureCanvasTkAgg(self.fig, master=self.waveform_plots)
+        self.canvas.draw()
+
+        self.waveform_settings = WaveformSettings(self)
+        self.waveform_settings.grid(row=1, column=0, sticky=tk.NSEW, padx=5, pady=5)
+
+class WaveformSettings(ttk.Labelframe):
+    def __init__(self, wav_view, *args, **kwargs):
+         # Init Frame
+        text_label = 'Settings'
+        ttk.Labelframe.__init__(
+            self,
+            wav_view,
+            text=text_label,
+            *args,
+            **kwargs)
         
         # Formatting
         tk.Grid.columnconfigure(self, 'all', weight=1)
         tk.Grid.rowconfigure(self, 'all', weight=1)
+
+        # Dictionary for widgets
+        self.inputs = {}
+
+        self.inputs['sample_rate'] = LabelInput(parent=self,
+                                                label='Sample rate',
+                                                input_class=ttk.Spinbox,
+                                                input_var=tk.IntVar(),
+                                                input_args={'from_': 1,
+                                                            'to': 2**16-1,
+                                                            'increment': 1,
+                                                            'width': 5})
+        self.inputs['sample_rate'].grid(row=0, column=0, sticky=tk.NSEW, padx=3, pady=3)
+
+    def get_variables(self):
+        variables = {}
+        for key, widget in self.inputs.items():
+            variables[key] = widget.get()
+        return variables
+
+    def get_widgets(self):
+        return self.inputs

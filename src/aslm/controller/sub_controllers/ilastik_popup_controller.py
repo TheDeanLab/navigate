@@ -35,7 +35,7 @@ POSSIBILITY OF SUCH DAMAGE.
 from tkinter import filedialog, messagebox, Checkbutton, Label
 import traceback
 
-from aslm.controller.sub_controllers.gui_controller import GUI_Controller
+from aslm.controller.sub_controllers.gui_controller import GUIController
 from aslm.model.features.restful_features import prepare_service
 
 import logging
@@ -45,7 +45,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class IlastikPopupController(GUI_Controller):
+class IlastikPopupController(GUIController):
 
     def __init__(self, view, parent_controller, service_url):
         super().__init__(view, parent_controller)

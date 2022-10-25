@@ -65,31 +65,29 @@ def test_fast_normalized_dct_shannon_entropy_tent():
     from scipy.ndimage import gaussian_filter
     from scipy.optimize import least_squares
 
-    from aslm.model.aslm_analysis import Analysis
+    from aslm.model.analysis.image_contrast import fast_normalized_dct_shannon_entropy
 
-    anal = Analysis()
 
     im = box(0.5)
 
     r = range(0,60)
     points = np.zeros((len(r),))
     for i in r:
-        points[i] = anal.fast_normalized_dct_shannon_entropy(gaussian_filter(im,i),1)[0]
+        points[i] = fast_normalized_dct_shannon_entropy(gaussian_filter(im,i),1)[0]
         
     res = least_squares(power_tent_res, [np.min(points),np.max(points),1,0.5], args=(r,points))
 
     assert(rsq(power_tent_res, res.x, r, points) > 0.9)
 
 def test_fast_normalized_dct_shannon_entropy():
-    from aslm.model.aslm_analysis import Analysis
+    from aslm.model.analysis.image_contrast import fast_normalized_dct_shannon_entropy
 
-    anal = Analysis()
 
     # image_array = np.ones((np.random.randint(1,4),128,128)).squeeze()
     image_array = np.ones((128, 128)).squeeze()
     psf_support_diameter_xy = np.random.randint(3, 10)
 
-    entropy = anal.fast_normalized_dct_shannon_entropy(image_array, psf_support_diameter_xy)
+    entropy = fast_normalized_dct_shannon_entropy(image_array, psf_support_diameter_xy)
 
     assert(np.all(entropy == 0))
 

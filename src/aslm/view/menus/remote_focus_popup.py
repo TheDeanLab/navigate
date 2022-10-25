@@ -48,7 +48,7 @@ class remote_popup():
     #### Class creates the popup that has the ETL or voice coil parameters.
     """
 
-    def __init__(self, root, *args, **kwargs):
+    def __init__(self, root, configuration_controller, *args, **kwargs):
         # Creating popup window with this name and size/placement, PopUp is a
         # Toplevel window
         self.popup = PopUp(
@@ -57,6 +57,8 @@ class remote_popup():
             '+320+180',
             top=False,
             transient=False)
+
+        self.configuration_controller = configuration_controller
 
         # Storing the content frame of the popup, this will be the parent of
         # the widgets
@@ -116,9 +118,14 @@ class remote_popup():
                 5, 0), pady=(
                 5, 0))
 
+
+
+        laser_labels = self.configuration_controller.lasers_info
+        print(laser_labels)
+
         # Laser Frame
         title_labels = ['Laser', 'Amplitude', 'Offset']
-        laser_labels = ['488nm', '562nm', '642nm']
+        # laser_labels = ['488nm', '562nm', '642nm']
         # Loop for widgets
         for i in range(3):
             # Title labels
@@ -131,6 +138,7 @@ class remote_popup():
                     0,
                     0))
             title.grid(row=0, column=i, sticky=(tk.NSEW), padx=(0,5))
+        for i, label in enumerate(laser_labels):
             # Laser labels
             laser = ttk.Label(
                 self.laser_frame,
@@ -152,43 +160,59 @@ class remote_popup():
 
             self.inputs[laser_labels[i] + ' Off'].grid(row=i + 1, column=2, sticky=(tk.NSEW), pady=(20,0))
 
+        galvo_dict = self.configuration_controller.galvo_parameter_dict
+        galvo_labels = [galvo['name'] for galvo in galvo_dict]
+
+        prev = len(laser_labels)
+
+        for i, label in enumerate(galvo_labels):
+            galvo = ttk.Label(
+                self.laser_frame,
+                text=galvo_labels[i],
+                padding=(
+                    2,
+                    5,
+                    0,
+                    0))
         # Add galvo amplitude and offset to laser_frame
-        galvo = ttk.Label(
-            self.laser_frame,
-            text='Galvo',
-            padding=(
-                2,
-                5,
-                0,
-                0))
+        # galvo = ttk.Label(
+        #     self.laser_frame,
+        #     text='Galvo',
+        #     padding=(
+        #         2,
+        #         5,
+        #         0,
+        #         0))
 
-        galvo.grid(row=5, column=0, sticky=(tk.NSEW))
+            galvo.grid(row=prev + 1, column=0, sticky=(tk.NSEW))
 
-        self.inputs['Galvo Amp'] = LabelInput(
-            parent=self.laser_frame, input_class=ValidatedSpinbox, input_var=tk.StringVar())
+            self.inputs[galvo_labels[i] + ' Amp'] = LabelInput(
+                parent=self.laser_frame, input_class=ValidatedSpinbox, input_var=tk.StringVar())
 
-        self.inputs['Galvo Amp'].grid(row=5, column=1, sticky=(tk.NSEW), pady=(20, 0), padx=(0, 5))
+            self.inputs[galvo_labels[i] + ' Amp'].grid(row=prev + 1, column=1, sticky=(tk.NSEW), pady=(20, 0), padx=(0, 5))
 
-        self.inputs['Galvo Off'] = LabelInput(
-            parent=self.laser_frame, input_class=ValidatedSpinbox, input_var=tk.StringVar())
+            self.inputs[galvo_labels[i] + ' Off'] = LabelInput(
+                parent=self.laser_frame, input_class=ValidatedSpinbox, input_var=tk.StringVar())
 
-        self.inputs['Galvo Off'].grid(row=5, column=2, sticky=(tk.NSEW), pady=(20, 0))
+            self.inputs[galvo_labels[i] + ' Off'].grid(row=prev + 1, column=2, sticky=(tk.NSEW), pady=(20, 0))
 
-        galvo_freq = ttk.Label(
-            self.laser_frame,
-            text='Galvo Freq',
-            padding=(
-                2,
-                5,
-                0,
-                0))
+            galvo_freq = ttk.Label(
+                self.laser_frame,
+                text=galvo_labels[i] + ' Freq',
+                padding=(
+                    2,
+                    5,
+                    0,
+                    0))
 
-        galvo_freq.grid(row=6, column=0, sticky=(tk.NSEW))
+            galvo_freq.grid(row=prev + 2, column=0, sticky=(tk.NSEW))
 
-        self.inputs['Galvo Freq'] = LabelInput(
-            parent=self.laser_frame, input_class=ValidatedSpinbox, input_var=tk.StringVar())
+            self.inputs[galvo_labels[i] + ' Freq'] = LabelInput(
+                parent=self.laser_frame, input_class=ValidatedSpinbox, input_var=tk.StringVar())
 
-        self.inputs['Galvo Freq'].grid(row=6, column=1, sticky=(tk.NSEW), pady=(20, 0))
+            self.inputs[galvo_labels[i] + ' Freq'].grid(row=prev + 2, column=1, sticky=(tk.NSEW), pady=(20, 0))
+            
+            prev = prev + 2
 
         # High/Low Resolution
         hi_lo_labels = ['Percent Delay', 'Duty Cycle', 'Percent Smoothing']

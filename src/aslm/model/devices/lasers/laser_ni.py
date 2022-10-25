@@ -54,19 +54,24 @@ class LaserNI(LaserBase):
     def __init__(self, microscope_name, device_connection, configuration, laser_id):
         super().__init__(microscope_name, device_connection, configuration, laser_id)
 
-        laser_do_port = self.device_config['onoff']['hardware']['channel']
+        # Digital out (if using mixed modulation mode)
+        try:
+            laser_do_port = self.device_config['onoff']['hardware']['channel']
+            
+            self.laser_do_task = nidaqmx.Task()
+            self.laser_do_task.do_channels.add_do_chan(
+                laser_do_port, line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
+        except KeyError:
+            self.laser_do_task = None
+
+        self._current_intensity = 0
+
+        # Analog out
         laser_ao_port = self.device_config['power']['hardware']['channel']
         self.laser_min_ao = self.device_config['power']['hardware']['min']
         self.laser_max_ao = self.device_config['power']['hardware']['max']
 
-        self.laser_do_task = nidaqmx.Task()
-
-        # Initialize Analog Tasks
         self.laser_ao_task = nidaqmx.Task()
-
-        # Add Ports to each Task
-        self.laser_do_task.do_channels.add_do_chan(
-            laser_do_port, line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
         self.laser_ao_task.ao_channels.add_ao_voltage_chan(
             laser_ao_port, min_val=self.laser_min_ao, max_val=self.laser_max_ao)
 
@@ -74,16 +79,25 @@ class LaserNI(LaserBase):
         scaled_laser_voltage = (
             int(laser_intensity) / 100) * self.laser_max_ao
         self.laser_ao_task.write(scaled_laser_voltage, auto_start=True)
+        self._current_intensity = laser_intensity
 
     def turn_on(self):
-        self.laser_do_task.write(True, auto_start=True)
+        if self.laser_do_task is not None:
+            self.laser_do_task.write(True, auto_start=True)
+        self.set_power(self._current_intensity)
 
     def turn_off(self):
-        self.laser_do_task.write(False, auto_start=True)
+        if self.laser_do_task is None:
+            tmp = self._current_intensity
+            self.set_power(0)
+            self._current_intensity = tmp
+        else:
+            self.laser_do_task.write(False, auto_start=True)
 
     def close(self):
         """
         # Close the port before exit.
         """
         self.laser_ao_task.close()
-        self.laser_do_task.close()
+        if self.laser_do_task is not None:
+            self.laser_do_task.close()

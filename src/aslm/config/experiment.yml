@@ -47,11 +47,11 @@ AutoFocusParameters:
   fine_step_size: 5
   fine_selected: True
 GalvoParameters:
-  low:
+  Mesoscale:
     frequency: 99.9
     amplitude: 2.5
     offset: 0
-  high:
+  Nanoscale:
     offset: 0
     frequency: 0
 StageParameters:
@@ -65,7 +65,8 @@ StageParameters:
   theta: 55.00006
   f: 66122.8
 MicroscopeState:
-  resolution_mode: low
+  microscope_name: Mesoscale
+  resolution_mode: Mesoscale
   image_mode: live
   zoom: 1x
   stack_cycling_mode: per_stack

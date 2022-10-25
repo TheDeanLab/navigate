@@ -33,7 +33,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 from aslm.controller.sub_controllers.widget_functions import validate_wrapper
-from aslm.controller.sub_controllers.gui_controller import GUI_Controller
+from aslm.controller.sub_controllers.gui_controller import GUIController
 import logging
 
 # Logger Setup
@@ -45,7 +45,7 @@ TODO Create a dictionary for widgets that holds a list of widgets for each colum
 """
 
 
-class ChannelSettingController(GUI_Controller):
+class ChannelSettingController(GUIController):
     def __init__(self, view, parent_controller=None, configuration_controller=None):
         super().__init__(view, parent_controller)
 
@@ -82,7 +82,6 @@ class ChannelSettingController(GUI_Controller):
                 self.view.exptime_pulldowns[i].config(state=state)
             if not self.view.channel_variables[i].get():
                 self.view.laserpower_pulldowns[i].config(state=state)
-                self.view.filterwheel_pulldowns[i]['state'] = state_readonly
                 self.view.filterwheel_pulldowns[i]['state'] = state
                 self.view.defocus_spins[i].config(state=state)
 
@@ -155,13 +154,10 @@ class ChannelSettingController(GUI_Controller):
         channel_vals = self.get_vals_by_channel(channel_id)
         prefix = 'channel_'
 
-        def func(*args):
-            if self.in_initialization:
-                return
-            setting_dict = self.channel_setting_dict[prefix + str(channel_id+1)]
+        def update_setting_dict(setting_dict, widget_name):
+            if channel_vals[widget_name].get() is None:
+                return False
             
-            if widget_name != 'is_selected' and not channel_vals[widget_name]:
-                return
             if widget_name == 'laser':
                 setting_dict['laser'] = channel_vals['laser'].get()
                 setting_dict['laser_index'] = self.get_index('laser', channel_vals['laser'].get())
@@ -173,11 +169,41 @@ class ChannelSettingController(GUI_Controller):
                     setting_dict[widget_name] = float(channel_vals[widget_name].get())
                 except:
                     setting_dict[widget_name] = 0
+                    return False
             else:
                 setting_dict[widget_name] = channel_vals[widget_name].get()
 
             if widget_name == 'camera_exposure_time':
                 self.parent_controller.execute('recalculate_timepoint')
+            return True
+
+        def func(*args):
+            if self.in_initialization:
+                return
+            
+            if channel_vals[widget_name].get() is None:
+                return
+
+            channel_key = prefix + str(channel_id+1)
+            # unselect one channel
+            if widget_name == 'is_selected' and channel_vals['is_selected'].get() is False:
+                if channel_key in self.channel_setting_dict.keys():
+                    del self.channel_setting_dict[channel_key]
+                return
+            # a channel that hasn't been saved in self.channel_setting_dict
+            elif channel_key not in self.channel_setting_dict.keys():
+                # update self.channel_setting_dict
+                setting_dict = self.parent_controller.parent_controller.manager.dict()
+                # check whether all the settings are validate
+                for name in channel_vals:
+                    if not update_setting_dict(setting_dict, name):
+                        return    
+                self.channel_setting_dict[channel_key] = setting_dict
+                return
+
+            setting_dict = self.channel_setting_dict[channel_key]
+
+            update_setting_dict(setting_dict, widget_name)
 
             if self.mode == 'live':
                 # call central controller

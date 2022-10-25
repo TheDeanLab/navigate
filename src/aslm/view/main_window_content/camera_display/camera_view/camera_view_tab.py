@@ -51,7 +51,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class camera_tab(tk.Frame):
+class CameraTab(tk.Frame):
     def __init__(self, cam_wave, *args, **kwargs):
         #  Init Frame
         tk.Frame.__init__(self, cam_wave, *args, **kwargs)
@@ -67,7 +67,8 @@ class camera_tab(tk.Frame):
         self.cam_image.grid(row=0, column=0, rowspan=3, sticky=tk.NSEW)
 
         # Frame for the Waveforms
-        self.canvas = tk.Canvas(self.cam_image, width=512, height=512)
+        self.canvas_width, self.canvas_height = 512, 512
+        self.canvas = tk.Canvas(self.cam_image, width=self.canvas_width, height=self.canvas_height)
         self.canvas.grid(row=0, column=0, sticky=tk.NSEW, padx=5, pady=5)
         self.matplotlib_figure = Figure(figsize=[6, 6], tight_layout=True)
         self.matplotlib_canvas = FigureCanvasTkAgg(self.matplotlib_figure, self.canvas)

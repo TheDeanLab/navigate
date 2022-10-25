@@ -699,8 +699,8 @@ class DCAM:
         self.__open_hdcamwait()
 
         # TODO: get maximum supported image width and height
-        self.max_image_width = 2048
-        self.max_image_height = 2048
+        self.max_image_width = self.get_property_value('subarray_hsize')
+        self.max_image_height = self.get_property_value('subarray_vsize')
         self.is_acquiring = False
 
         self._serial_number = self.get_string_value(c_int32(int("0x04000102", 0))).strip('S/N: ')

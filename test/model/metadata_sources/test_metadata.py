@@ -9,7 +9,7 @@ def test_metadata_voxel_size():
     md.configuration = model.configuration
 
     zoom = model.configuration['experiment']['MicroscopeState']['zoom']
-    active_microscope = model.configuration['experiment']['MicroscopeState']['resolution_mode']
+    active_microscope = model.configuration['experiment']['MicroscopeState']['microscope_name']
     pixel_size = float(model.configuration['configuration']['microscopes'][active_microscope]['zoom']['pixel_size'][zoom])
 
     dx, dy, dz = md.voxel_size

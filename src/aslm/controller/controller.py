@@ -1,34 +1,34 @@
-"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
-All rights reserved.
+# """Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# All rights reserved.
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-provided that the following conditions are met:
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# provided that the following conditions are met:
 
-     * Redistributions of source code must retain the above copyright notice,
-     this list of conditions and the following disclaimer.
+#      * Redistributions of source code must retain the above copyright notice,
+#      this list of conditions and the following disclaimer.
 
-     * Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in the
-     documentation and/or other materials provided with the distribution.
+#      * Redistributions in binary form must reproduce the above copyright
+#      notice, this list of conditions and the following disclaimer in the
+#      documentation and/or other materials provided with the distribution.
 
-     * Neither the name of the copyright holders nor the names of its
-     contributors may be used to endorse or promote products derived from this
-     software without specific prior written permission.
+#      * Neither the name of the copyright holders nor the names of its
+#      contributors may be used to endorse or promote products derived from this
+#      software without specific prior written permission.
 
-NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
-THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
-CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
-CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
-BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-"""
+# NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
+# THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+# CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+# PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+# """
 
 #  Standard Library Imports
 from multiprocessing import Manager
@@ -106,7 +106,7 @@ class Controller:
                                         configuration=configuration_path,
                                         experiment=experiment_path,
                                         etl_constants=etl_constants_path,
-                                        rest_api_path=rest_api_path)
+                                        rest_api_config=rest_api_path)
         
         # Initialize the Model
         self.model = ObjectInSubprocess(Model,
@@ -125,8 +125,7 @@ class Controller:
         self.etl_constants_path = etl_constants_path
 
         # Configuration Reader
-        microscope_name = 'high' if self.configuration['experiment']['MicroscopeState']['resolution_mode'] == 'high' else 'low'
-        self.configuration_controller = ConfigurationController(self.configuration, microscope_name)
+        self.configuration_controller = ConfigurationController(self.configuration)
 
         # Initialize the View
         self.view = view(root)
@@ -170,6 +169,11 @@ class Controller:
 
         self.initialize_menus(args.synthetic_hardware)
 
+        # Create default data buffer
+        self.img_width = 0
+        self.img_height = 0
+        self.data_buffer = None
+
         # Set view based on model.experiment
         self.populate_experiment_setting()
 
@@ -178,12 +182,6 @@ class Controller:
 
         # Wire up pipes
         self.show_img_pipe = self.model.create_pipe('show_img_pipe')
-
-        # Create default data buffer
-        self.img_width = 0
-        self.img_height = 0
-        self.data_buffer = None
-        self.update_buffer()
 
     def update_buffer(self):
         r""" Update the buffer size according to the camera dimensions listed in the experimental parameters.
@@ -209,6 +207,13 @@ class Controller:
 
     def update_acquire_control(self):
             self.view.acqbar.stop_stage.config(command=self.stage_controller.stop_button_handler)
+
+    def change_microscope(self, microscope_name):
+        self.configuration['experiment']['MicroscopeState']['microscope_name'] = microscope_name
+        if self.configuration_controller.change_microscope():
+            # update widgets
+            self.stage_controller.initialize()
+            self.channels_tab_controller.initialize()
 
     def initialize_cam_view(self):
         """ Populate view tab.
@@ -236,7 +241,7 @@ class Controller:
 
         def load_experiment():
             filename = filedialog.askopenfilename(defaultextension='.yml',
-                                                   filetypes=[('Yaml files', '*.yml')])
+                                                   filetypes=[('Yaml files', '*.yml *.yaml')])
             if not filename:
                 return
             self.populate_experiment_setting(filename)
@@ -248,7 +253,7 @@ class Controller:
                                              message='Incorrect/missing settings. Cannot save current experiment file.')
                 return
             filename = filedialog.asksaveasfilename(defaultextension='.yml',
-                                                    filetypes=[('Yaml file', '*.yml')])
+                                                    filetypes=[('Yaml file', '*.yml *.yaml')])
             if not filename:
                 return
             save_yaml_file('',
@@ -257,7 +262,7 @@ class Controller:
 
         def load_images():
             filenames = filedialog.askopenfilenames(defaultextension='.tif',
-                                                    filetypes=[('tiff files', '*.tif')])
+                                                    filetypes=[('tiff files', '*.tif *.tiff')])
             if not filenames:
                 return
             self.model.load_images(filenames)
@@ -266,7 +271,7 @@ class Controller:
             if hasattr(self, 'etl_controller'):
                 self.etl_controller.showup()
                 return
-            etl_setting_popup = remote_popup(self.view)  # TODO: should we rename etl_setting popup to remote_focus_popup?
+            etl_setting_popup = remote_popup(self.view, self.configuration_controller)  # TODO: should we rename etl_setting popup to remote_focus_popup?
             self.etl_controller = EtlPopupController(etl_setting_popup,
                                                        self,
                                                        self.etl_constants_path)
@@ -282,7 +287,7 @@ class Controller:
 
         def popup_ilastik_setting():
             ilastik_popup_window = ilastik_setting_popup(self.view)
-            ilastik_url = self.configuration['rest_api_path']['Ilastik']['url']
+            ilastik_url = self.configuration['rest_api_config']['Ilastik']['url']
             if hasattr(self, 'ilastik_controller'):
                 self.ilastik_controller.showup(ilastik_popup_window)
             else:
@@ -316,22 +321,21 @@ class Controller:
 
         # add resolution menu
         self.resolution_value = tkinter.StringVar()
-        self.view.menubar.menu_resolution.add_radiobutton(label='Nanoscale',
-                                                          variable=self.resolution_value,
-                                                          value='high')
+        for microscope_name in self.configuration['configuration']['microscopes'].keys():
+            zoom_positions = self.configuration['configuration']['microscopes'][microscope_name]['zoom']['position']
+            if len(zoom_positions) > 1:
+                sub_menu = tkinter.Menu(self.view.menubar.menu_resolution)
+                self.view.menubar.menu_resolution.add_cascade(menu=sub_menu,
+                                                              label=microscope_name)
+                for res in zoom_positions.keys():
+                    sub_menu.add_radiobutton(label=res,
+                                             variable=self.resolution_value,
+                                             value=f"{microscope_name} {res}")
+            else:
+                self.view.menubar.menu_resolution.add_radiobutton(label=microscope_name,
+                                                                  variable=self.resolution_value,
+                                                                  value=f"{microscope_name} {zoom_positions.keys()[0]}")
 
-        # low resolution sub menu
-        # Should only be one checkbox selected, depending on what mode we are initialized in.
-        # In order to make sure only one checkbox would be selected, they need
-        # to share one variable: resolution_value
-        meso_res_sub_menu = tkinter.Menu(self.view.menubar.menu_resolution)
-        self.view.menubar.menu_resolution.add_cascade(menu=meso_res_sub_menu,
-                                                      label='Mesoscale')
-
-        for res in self.configuration['etl_constants']['ETLConstants']['low'].keys():
-            meso_res_sub_menu.add_radiobutton(label=res,
-                                              variable=self.resolution_value,
-                                              value=res)
         # event binding
         self.resolution_value.trace_add('write', lambda *args: self.execute('resolution', self.resolution_value.get()))
 
@@ -375,30 +379,24 @@ class Controller:
             file_name = path to the non-default experiment yaml file.
 
         """
-        if file_name:
-            file_path = Path(file_name)
-            if file_path.exists():
-                # TODO: tell model the experiment dict is changed.
+        # read the new file and update info of the configuration dict
+        update_config_dict(self.manager, self.configuration, 'experiment', file_name)
 
-                # TODO: read the new file and update info of the configuration dict
-                update_config_dict(self.manager, self.configuration, 'experiment', file_name)
+        # update buffer
+        self.update_buffer()
 
         # Configure GUI
-        resolution_mode = self.configuration['experiment']['MicroscopeState']['resolution_mode']
-        if self.configuration_controller.change_microscope(resolution_mode):
-            #TODO: update widgets
-            pass
-        if resolution_mode == 'high':
-            self.configuration['experiment']['MicroscopeState']['zoom'] = 'N/A'
-            self.resolution_value.set('high')
-        else:
-            self.resolution_value.set(self.configuration['experiment']['MicroscopeState']['zoom'])
+        microscope_name = self.configuration['experiment']['MicroscopeState']['microscope_name']
+        self.resolution_value.set(f"{microscope_name} {self.configuration['experiment']['MicroscopeState']['zoom']}")
 
         self.acquire_bar_controller.populate_experiment_values()
         self.stage_controller.populate_experiment_values()
         self.multiposition_tab_controller.set_positions(self.configuration['experiment']['MultiPositions']['stage_positions'])
         self.channels_tab_controller.populate_experiment_values()
         self.camera_setting_controller.populate_experiment_values()
+
+        # set widget modes
+        self.set_mode_of_sub('stop')
 
     def update_experiment_setting(self):
         r"""Update model.experiment according to values in the GUI
@@ -410,12 +408,7 @@ class Controller:
         """
         # acquire_bar_controller - update image mode
         self.configuration['experiment']['MicroscopeState']['image_mode'] = self.acquire_bar_controller.get_mode()
-        if self.resolution_value.get() == 'high':
-            self.configuration['experiment']['MicroscopeState']['resolution_mode'] = 'high'
-            self.configuration['experiment']['MicroscopeState']['zoom'] = 'N/A'
-        else:
-            self.configuration['experiment']['MicroscopeState']['resolution_mode'] = 'low'
-            self.configuration['experiment']['MicroscopeState']['zoom'] = self.resolution_value.get()
+        self.camera_setting_controller.update_experiment_values()
 
         # TODO: validate experiment dict
         return True
@@ -523,14 +516,15 @@ class Controller:
                 'laser_info': self.resolution_info['ETLConstants'][self.resolution][self.mag]
                 }
             """
-            resolution = 'high' if self.resolution_value.get() == 'high' else 'low'
-            zoom = 'N/A' if resolution == 'high' else self.resolution_value.get()
-            self.configuration['experiment']['MicroscopeState']['resolution_mode'] = resolution
+            microscope_name, zoom = self.resolution_value.get().split()
+            if microscope_name != self.configuration['experiment']['MicroscopeState']['microscope_name']:
+                self.change_microscope(microscope_name)
+            # self.configuration['experiment']['MicroscopeState']['resolution_mode'] = microscope_name
             self.configuration['experiment']['MicroscopeState']['zoom'] = zoom
             work_thread = self.threads_pool.createThread('model', lambda: self.model.run_command('update_setting', 'resolution'))
             work_thread.join()
             # self.model.change_resolution(resolution_value=args[0])
-            self.camera_setting_controller.calculate_physical_dimensions(zoom)
+            self.camera_setting_controller.calculate_physical_dimensions()
             if hasattr(self, 'etl_controller') and self.etl_controller:
                 self.etl_controller.populate_experiment_values()
             ret_pos_dict = self.model.get_stage_position()
@@ -566,7 +560,7 @@ class Controller:
 
         elif command == 'autofocus':
             r"""Execute autofocus routine."""
-            self.threads_pool.createThread('camera', self.capture_autofocus_image)
+            self.threads_pool.createThread('camera', self.capture_image, args=('autofocus', 'live',))
 
         elif command == 'load_feature':
             r"""Tell model to load/unload features."""
@@ -593,8 +587,7 @@ class Controller:
             file_directory = create_save_path(saving_settings)
             save_yaml_file(file_directory, self.configuration['experiment'], filename='experiment.yml')
             self.camera_setting_controller.solvent = self.configuration['experiment']['Saving']['solvent']
-            self.camera_setting_controller.calculate_physical_dimensions(
-                self.configuration['experiment']['MicroscopeState']['zoom'])
+            self.camera_setting_controller.calculate_physical_dimensions()
             self.execute('acquire')
 
         elif command == 'acquire':
@@ -615,7 +608,7 @@ class Controller:
             # if select 'ilastik segmentation', 'show segmentation', and in 'single acquisition'
             self.camera_view_controller.display_mask_flag = self.acquire_bar_controller.mode == 'single' and self.feature_id_val.get() == 4 and self.ilastik_controller.show_segmentation_flag
 
-            self.threads_pool.createThread('camera', self.capture_image, args=(self.acquire_bar_controller.mode,))
+            self.threads_pool.createThread('camera', self.capture_image, args=('acquire', self.acquire_bar_controller.mode,))
 
         elif command == 'stop_acquire':
             # self.model.run_command('stop')
@@ -658,6 +651,7 @@ class Controller:
                 e = RuntimeError
 
     def capture_image(self,
+                      command,
                       mode):
         r"""Trigger the model to capture images.
 
@@ -675,7 +669,7 @@ class Controller:
                                                  mode=mode,
                                                  stop=False)
 
-        self.model.run_command('acquire')
+        self.model.run_command(command)
 
         self.camera_view_controller.initialize_non_live_display(self.data_buffer,
                                                                 self.configuration['experiment']['MicroscopeState'],
@@ -714,49 +708,6 @@ class Controller:
                                                  microscope_state=self.configuration['experiment']['MicroscopeState'],
                                                  mode=mode,
                                                  stop=True)
-
-    def capture_autofocus_image(self):
-        r"""Trigger model to capture a single image
-        """
-        if not self.prepare_acquire_data():
-            return
-        pos = self.configuration['experiment']['StageParameters']['f']
-        self.camera_view_controller.image_count = 0
-        images_received = 0
-
-        # open pipe
-        autofocus_plot_pipe = self.model.create_pipe('autofocus_plot_pipe')
-
-        self.model.run_command(
-            'autofocus',
-            self.configuration['experiment']['MicroscopeState'],
-            self.configuration['experiment']['AutoFocusParameters'],
-            pos
-            )
-        while True:
-            image_id = self.show_img_pipe.recv()
-            logger.info(f"ASLM Controller - Received image frame id {image_id}")
-            if image_id == 'stop':
-                break
-            # Display the Image in the View
-            self.camera_view_controller.display_image(
-                image=self.data_buffer[image_id],
-                microscope_state=self.configuration['experiment']['MicroscopeState'],
-                images_received=images_received)
-            images_received += 1
-            # get focus position and update it in GUI
-
-        # Rec plot data from model and send to sub controller to display plot
-        plot_data = autofocus_plot_pipe.recv()
-        logger.info(f"ASLM Controller - Received plot data: {plot_data}")
-        if hasattr(self, 'af_popup_controller'):
-            self.af_popup_controller.display_plot(plot_data)
-        
-        # release pipe
-        autofocus_plot_pipe.close()
-        self.model.release_pipe('autofocus_plot_pipe')
-        
-        self.execute('stop_acquire')
 
     def move_stage(self, pos_dict):
         r""" Trigger the model to move the stage.
@@ -802,6 +753,9 @@ class Controller:
                 self.view.settings.channels_tab.multipoint_frame.on_off.set(True)  # assume we want to use multipos
             elif event == 'ilastik_mask':
                 self.camera_view_controller.display_mask(value)
+            elif event == 'autofocus':
+                if hasattr(self, 'af_popup_controller'):
+                    self.af_popup_controller.display_plot(value)
             elif event == 'stop':
                 break
     

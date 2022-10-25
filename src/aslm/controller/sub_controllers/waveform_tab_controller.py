@@ -32,19 +32,24 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-from aslm.controller.sub_controllers.gui_controller import GUI_Controller
-from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg)
-from matplotlib.figure import Figure
+
+# Standard Library Imports
 import logging
+from random import sample
+
+# Third Party Imports
 import numpy as np
 from tkinter import NSEW
+
+# Local Imports
+from aslm.controller.sub_controllers.gui_controller import GUIController
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class WaveformTabController(GUI_Controller):
+class WaveformTabController(GUIController):
     def __init__(self, view, parent_controller=None):
         super().__init__(view, parent_controller)
         self.remote_focus_waveform = 0
@@ -55,18 +60,26 @@ class WaveformTabController(GUI_Controller):
         
         self.initialize_plots()
 
+        microscope_name = self.parent_controller.configuration['experiment']['MicroscopeState']['microscope_name']
+        self.view.waveform_settings.inputs['sample_rate'].set(self.parent_controller.configuration['configuration']['microscopes'][microscope_name]['daq']['sample_rate'])
+        self.view.waveform_settings.inputs['sample_rate'].get_variable().trace_add('write', self.update_sample_rate)
+
         self.view.bind('<Enter>', self.plot_waveforms)  # TODO: This means we have to move our mouse off and then back
                                                         #       on to the plot to see an update. Better event to bind?
+
+    def update_sample_rate(self, *args):
+        sample_rate = self.view.waveform_settings.inputs['sample_rate'].get()
+        if sample_rate == '':
+            return
+        microscope_name = self.parent_controller.configuration['experiment']['MicroscopeState']['microscope_name']
+        self.parent_controller.configuration['configuration']['microscopes'][microscope_name]['daq']['sample_rate'] = int(sample_rate)
+        self.sample_rate = int(sample_rate)
 
     def update_waveforms(self, waveform_dict, sample_rate):
         self.waveform_dict = waveform_dict
         self.sample_rate = sample_rate
 
     def initialize_plots(self):
-        self.view.fig = Figure(figsize=(6, 6), dpi=100)
-        self.view.canvas = FigureCanvasTkAgg(self.view.fig, master=self.view)
-        self.view.canvas.draw()
-
         self.view.plot_etl = self.view.fig.add_subplot(211)
         self.view.plot_galvo = self.view.fig.add_subplot(212)
 

@@ -1,34 +1,34 @@
 """Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
-All rights reserved.
+# All rights reserved.
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-provided that the following conditions are met:
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# provided that the following conditions are met:
 
-     * Redistributions of source code must retain the above copyright notice,
-     this list of conditions and the following disclaimer.
+#      * Redistributions of source code must retain the above copyright notice,
+#      this list of conditions and the following disclaimer.
 
-     * Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in the
-     documentation and/or other materials provided with the distribution.
+#      * Redistributions in binary form must reproduce the above copyright
+#      notice, this list of conditions and the following disclaimer in the
+#      documentation and/or other materials provided with the distribution.
 
-     * Neither the name of the copyright holders nor the names of its
-     contributors may be used to endorse or promote products derived from this
-     software without specific prior written permission.
+#      * Neither the name of the copyright holders nor the names of its
+#      contributors may be used to endorse or promote products derived from this
+#      software without specific prior written permission.
 
-NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
-THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
-CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
-CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
-BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-"""
+# NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
+# THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+# CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+# PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+# """
 import base64
 import requests
 import numpy
@@ -66,7 +66,7 @@ class IlastikSegmentation:
                                     'main': self.data_func}}
 
     def init_func(self, *args):
-        if self.resolution != self.model.configuration['experiment']['MicroscopeState']['resolution_mode'] \
+        if self.resolution != self.model.configuration['experiment']['MicroscopeState']['microscope_name'] \
             or self.zoom != self.model.configuration['experiment']['MicroscopeState']['zoom']:
             self.update_setting()
 
@@ -95,12 +95,15 @@ class IlastikSegmentation:
             print('There is something wrong!')
 
     def update_setting(self):
-        self.resolution = self.model.configuration['experiment']['MicroscopeState']['resolution_mode']
+        self.resolution = self.model.configuration['experiment']['MicroscopeState']['microscope_name']
         self.zoom = self.model.configuration['experiment']['MicroscopeState']['zoom']
         # Get current mag
-        curr_pixel_size = float(self.model.configuration['configuration']['microscopes'][self.resolution]['zoom']['pixel_size'][self.zoom])
+        current_microscope_name = self.resolution
+        curr_pixel_size = float(self.model.configuration['configuration']['microscopes'][current_microscope_name]['zoom']['pixel_size'][self.zoom])
         # target resolution is 'high'
-        pixel_size = float(self.model.configuration['configuration']['microscopes']['high']['zoom']['pixel_size']['N/A'])
+        # TODO:
+        high_res_microscope_name = 'Nanoscale'
+        pixel_size = float(self.model.configuration['configuration']['microscopes'][high_res_microscope_name]['zoom']['pixel_size']['N/A'])
         # calculate pieces
         self.pieces_num = int(curr_pixel_size / pixel_size)
         self.pieces_size = ceil(float(self.model.configuration['experiment']['CameraParameters']['x_pixels']) / self.pieces_num)

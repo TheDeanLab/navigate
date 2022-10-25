@@ -1,34 +1,34 @@
 """Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
-All rights reserved.
+# All rights reserved.
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-provided that the following conditions are met:
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# provided that the following conditions are met:
 
-     * Redistributions of source code must retain the above copyright notice,
-     this list of conditions and the following disclaimer.
+#      * Redistributions of source code must retain the above copyright notice,
+#      this list of conditions and the following disclaimer.
 
-     * Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in the
-     documentation and/or other materials provided with the distribution.
+#      * Redistributions in binary form must reproduce the above copyright
+#      notice, this list of conditions and the following disclaimer in the
+#      documentation and/or other materials provided with the distribution.
 
-     * Neither the name of the copyright holders nor the names of its
-     contributors may be used to endorse or promote products derived from this
-     software without specific prior written permission.
+#      * Neither the name of the copyright holders nor the names of its
+#      contributors may be used to endorse or promote products derived from this
+#      software without specific prior written permission.
 
-NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
-THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
-CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
-CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
-BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-"""
+# NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
+# THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+# CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+# PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+# """
 from aslm.controller.sub_controllers.gui_controller import GUIController
 
 import logging
@@ -157,7 +157,6 @@ class CameraSettingController(GUIController):
         # Retrieve settings.
         self.camera_setting_dict = self.parent_controller.configuration['experiment']['CameraParameters']
         self.microscope_state_dict = self.parent_controller.configuration['experiment']['MicroscopeState']
-        self.resolution_value = 'high' if self.microscope_state_dict['resolution_mode'] == 'high' else self.microscope_state_dict['zoom']
 
         # Readout Settings
         self.mode_widgets['Sensor'].set(self.camera_setting_dict['sensor_mode'])
@@ -183,7 +182,7 @@ class CameraSettingController(GUIController):
         self.framerate_widgets['frames_to_average'].set(self.camera_setting_dict['frames_to_average'])
 
         # Physical Dimensions
-        self.calculate_physical_dimensions(self.resolution_value)
+        self.calculate_physical_dimensions()
         # readout time
         self.calculate_readout_time()
         
@@ -272,7 +271,7 @@ class CameraSettingController(GUIController):
         """
         if self.in_initialization:
             return
-        self.calculate_physical_dimensions(self.resolution_value)
+        self.calculate_physical_dimensions()
 
     def set_mode(self, mode):
         r"""
@@ -302,7 +301,7 @@ class CameraSettingController(GUIController):
         for btn_name in self.roi_btns:
             self.roi_btns[btn_name]['state'] = state
         
-    def calculate_physical_dimensions(self, magnification):
+    def calculate_physical_dimensions(self):
         """
         Calculates the size of the field of view according to the magnification of the system,
         the physical size of the pixel, and the number of pixels.
@@ -312,7 +311,7 @@ class CameraSettingController(GUIController):
         elegantly in a configuration file and dictionary structure.
         """
         # magnification == 'N/A' is a proxy for resolution == 'high'
-        if (magnification == 'N/A') or (magnification == 'high'):
+        if self.parent_controller.configuration['experiment']['MicroscopeState']['zoom'] == 'N/A':
             # 54-12-8 - EFLobj = 12.19 mm / RI
             tube_lens_focal_length = 300
             extended_focal_length = 12.19
@@ -335,6 +334,7 @@ class CameraSettingController(GUIController):
             multi_immersion_focal_length = extended_focal_length/refractive_index
             magnification = tube_lens_focal_length / multi_immersion_focal_length
         else:
+            magnification = self.parent_controller.configuration['experiment']['MicroscopeState']['zoom']
             magnification = float(magnification[:-1])
 
         pixel_size = self.default_pixel_size

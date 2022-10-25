@@ -52,7 +52,7 @@ class LaserTriggerBase:
     def __init__(self, configuration):
         self.configuration = configuration
         self.experiment = self.configuration['experiment']
-        self.microscope = self.experiment['MicroscopeState']['resolution_mode'] 
+        self.microscope = self.experiment['MicroscopeState']['microscope_name'] 
 
         # Number of Lasers
         # TODO: Make it so that we can iterate through each laser and create a
@@ -68,7 +68,7 @@ class LaserTriggerBase:
 
         # Digital Ports
         try:
-            self.switching_port = self.configuration['configuration']['microscopes']['low']['daq']['laser_port_switcher']
+            self.switching_port = self.configuration['configuration']['microscopes'][self.microscope]['daq']['laser_port_switcher']
         except KeyError:
             self.switching_port = None
         self.laser_0_do_port = self.lasers[0]['onoff']['hardware']['channel']

@@ -1,34 +1,34 @@
 """Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
-All rights reserved.
+# All rights reserved.
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-provided that the following conditions are met:
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# provided that the following conditions are met:
 
-     * Redistributions of source code must retain the above copyright notice,
-     this list of conditions and the following disclaimer.
+#      * Redistributions of source code must retain the above copyright notice,
+#      this list of conditions and the following disclaimer.
 
-     * Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in the
-     documentation and/or other materials provided with the distribution.
+#      * Redistributions in binary form must reproduce the above copyright
+#      notice, this list of conditions and the following disclaimer in the
+#      documentation and/or other materials provided with the distribution.
 
-     * Neither the name of the copyright holders nor the names of its
-     contributors may be used to endorse or promote products derived from this
-     software without specific prior written permission.
+#      * Neither the name of the copyright holders nor the names of its
+#      contributors may be used to endorse or promote products derived from this
+#      software without specific prior written permission.
 
-NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
-THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
-CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
-CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
-BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-"""
+# NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
+# THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+# CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+# PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+# """
 
 # Standard Library Imports
 import time
@@ -294,7 +294,10 @@ class Model:
             if self.imaging_mode == 'single':
                 self.configuration['experiment']['MicroscopeState']['stack_cycling_mode'] = 'per_z'
 
-            if self.imaging_mode == 'live':
+            if self.imaging_mode == 'projection':
+                self.move_stage({'z_abs': 0})
+
+            if self.imaging_mode == 'live' or self.imaging_mode == 'projection':
                 self.signal_thread = threading.Thread(target=self.run_live_acquisition)
             else:
                 self.signal_thread = threading.Thread(target=self.run_acquisition)
@@ -332,7 +335,7 @@ class Model:
                 self.current_channel = 0
 
             if args[0] == 'resolution':
-                self.change_resolution(self.configuration['experiment']['MicroscopeState']['resolution_mode'])
+                self.change_resolution(self.configuration['experiment']['MicroscopeState']['microscope_name'])
             
             if reboot:
                 # prepare active microscope
@@ -638,21 +641,6 @@ class Model:
         """
         if hasattr(self, 'signal_container'):
             self.signal_container.run()
-
-        # Camera Settings - Exposure Time in Milliseconds
-        # only set exposure time after the previous trigger has been done.
-        if self.pre_exposure_time != self.current_exposure_time:
-            # In order to change exposure time, we need to stop the camera
-            # if self.camera.camera_controller.is_acquiring:
-            #     self.camera.close_image_series()
-            self.active_microscope.camera.set_exposure_time(self.current_exposure_time)
-            # cam_exposure_time = self.camera.camera_controller.get_property_value('exposure_time')
-            self.pre_exposure_time = self.current_exposure_time
-            # And then re-set it
-            # self.camera.initialize_image_series(self.data_buffer, self.number_of_frames)
-
-        # get time when send out the trigger
-        # self.pre_trigger_time = time.perf_counter()
 
         #  Initialize, run, and stop the acquisition.
         #  Consider putting below to not block thread.

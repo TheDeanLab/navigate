@@ -1,34 +1,34 @@
-"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
-All rights reserved.
+# """Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# All rights reserved.
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-provided that the following conditions are met:
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# provided that the following conditions are met:
 
-     * Redistributions of source code must retain the above copyright notice,
-     this list of conditions and the following disclaimer.
+#      * Redistributions of source code must retain the above copyright notice,
+#      this list of conditions and the following disclaimer.
 
-     * Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in the
-     documentation and/or other materials provided with the distribution.
+#      * Redistributions in binary form must reproduce the above copyright
+#      notice, this list of conditions and the following disclaimer in the
+#      documentation and/or other materials provided with the distribution.
 
-     * Neither the name of the copyright holders nor the names of its
-     contributors may be used to endorse or promote products derived from this
-     software without specific prior written permission.
+#      * Neither the name of the copyright holders nor the names of its
+#      contributors may be used to endorse or promote products derived from this
+#      software without specific prior written permission.
 
-NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
-THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
-CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
-CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
-BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-"""
+# NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
+# THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+# CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+# PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+# """
 
 #  Standard Library Imports
 from multiprocessing import Manager
@@ -271,7 +271,7 @@ class Controller:
             if hasattr(self, 'etl_controller'):
                 self.etl_controller.showup()
                 return
-            etl_setting_popup = remote_popup(self.view)  # TODO: should we rename etl_setting popup to remote_focus_popup?
+            etl_setting_popup = remote_popup(self.view, self.configuration_controller)  # TODO: should we rename etl_setting popup to remote_focus_popup?
             self.etl_controller = EtlPopupController(etl_setting_popup,
                                                        self,
                                                        self.etl_constants_path)
@@ -321,22 +321,21 @@ class Controller:
 
         # add resolution menu
         self.resolution_value = tkinter.StringVar()
-        self.view.menubar.menu_resolution.add_radiobutton(label='Nanoscale',
-                                                          variable=self.resolution_value,
-                                                          value='high')
+        for microscope_name in self.configuration['configuration']['microscopes'].keys():
+            zoom_positions = self.configuration['configuration']['microscopes'][microscope_name]['zoom']['position']
+            if len(zoom_positions) > 1:
+                sub_menu = tkinter.Menu(self.view.menubar.menu_resolution)
+                self.view.menubar.menu_resolution.add_cascade(menu=sub_menu,
+                                                              label=microscope_name)
+                for res in zoom_positions.keys():
+                    sub_menu.add_radiobutton(label=res,
+                                             variable=self.resolution_value,
+                                             value=f"{microscope_name} {res}")
+            else:
+                self.view.menubar.menu_resolution.add_radiobutton(label=microscope_name,
+                                                                  variable=self.resolution_value,
+                                                                  value=f"{microscope_name} {zoom_positions.keys()[0]}")
 
-        # low resolution sub menu
-        # Should only be one checkbox selected, depending on what mode we are initialized in.
-        # In order to make sure only one checkbox would be selected, they need
-        # to share one variable: resolution_value
-        meso_res_sub_menu = tkinter.Menu(self.view.menubar.menu_resolution)
-        self.view.menubar.menu_resolution.add_cascade(menu=meso_res_sub_menu,
-                                                      label='Mesoscale')
-
-        for res in self.configuration['etl_constants']['ETLConstants']['low'].keys():
-            meso_res_sub_menu.add_radiobutton(label=res,
-                                              variable=self.resolution_value,
-                                              value=res)
         # event binding
         self.resolution_value.trace_add('write', lambda *args: self.execute('resolution', self.resolution_value.get()))
 
@@ -387,12 +386,8 @@ class Controller:
         self.update_buffer()
 
         # Configure GUI
-        resolution_mode = self.configuration['experiment']['MicroscopeState']['resolution_mode']
-        if resolution_mode == 'high':
-            self.configuration['experiment']['MicroscopeState']['zoom'] = 'N/A'
-            self.resolution_value.set('high')
-        else:
-            self.resolution_value.set(self.configuration['experiment']['MicroscopeState']['zoom'])
+        microscope_name = self.configuration['experiment']['MicroscopeState']['microscope_name']
+        self.resolution_value.set(f"{microscope_name} {self.configuration['experiment']['MicroscopeState']['zoom']}")
 
         self.acquire_bar_controller.populate_experiment_values()
         self.stage_controller.populate_experiment_values()
@@ -521,16 +516,15 @@ class Controller:
                 'laser_info': self.resolution_info['ETLConstants'][self.resolution][self.mag]
                 }
             """
-            resolution = 'high' if self.resolution_value.get() == 'high' else 'low'
-            zoom = 'N/A' if resolution == 'high' else self.resolution_value.get()
-            if resolution != self.configuration['experiment']['MicroscopeState']['microscope_name']:
-                self.change_microscope(resolution)
-            self.configuration['experiment']['MicroscopeState']['resolution_mode'] = resolution
+            microscope_name, zoom = self.resolution_value.get().split()
+            if microscope_name != self.configuration['experiment']['MicroscopeState']['microscope_name']:
+                self.change_microscope(microscope_name)
+            # self.configuration['experiment']['MicroscopeState']['resolution_mode'] = microscope_name
             self.configuration['experiment']['MicroscopeState']['zoom'] = zoom
             work_thread = self.threads_pool.createThread('model', lambda: self.model.run_command('update_setting', 'resolution'))
             work_thread.join()
             # self.model.change_resolution(resolution_value=args[0])
-            self.camera_setting_controller.calculate_physical_dimensions(zoom)
+            self.camera_setting_controller.calculate_physical_dimensions()
             if hasattr(self, 'etl_controller') and self.etl_controller:
                 self.etl_controller.populate_experiment_values()
             ret_pos_dict = self.model.get_stage_position()
@@ -593,8 +587,7 @@ class Controller:
             file_directory = create_save_path(saving_settings)
             save_yaml_file(file_directory, self.configuration['experiment'], filename='experiment.yml')
             self.camera_setting_controller.solvent = self.configuration['experiment']['Saving']['solvent']
-            self.camera_setting_controller.calculate_physical_dimensions(
-                self.configuration['experiment']['MicroscopeState']['zoom'])
+            self.camera_setting_controller.calculate_physical_dimensions()
             self.execute('acquire')
 
         elif command == 'acquire':

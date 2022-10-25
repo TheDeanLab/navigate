@@ -60,7 +60,7 @@ class WaveformTabController(GUIController):
         
         self.initialize_plots()
 
-        microscope_name = self.parent_controller.configuration['experiment']['MicroscopeState']['resolution_mode']
+        microscope_name = self.parent_controller.configuration['experiment']['MicroscopeState']['microscope_name']
         self.view.waveform_settings.inputs['sample_rate'].set(self.parent_controller.configuration['configuration']['microscopes'][microscope_name]['daq']['sample_rate'])
         self.view.waveform_settings.inputs['sample_rate'].get_variable().trace_add('write', self.update_sample_rate)
 
@@ -71,7 +71,7 @@ class WaveformTabController(GUIController):
         sample_rate = self.view.waveform_settings.inputs['sample_rate'].get()
         if sample_rate == '':
             return
-        microscope_name = self.parent_controller.configuration['experiment']['MicroscopeState']['resolution_mode']
+        microscope_name = self.parent_controller.configuration['experiment']['MicroscopeState']['microscope_name']
         self.parent_controller.configuration['configuration']['microscopes'][microscope_name]['daq']['sample_rate'] = int(sample_rate)
         self.sample_rate = int(sample_rate)
 

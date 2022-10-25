@@ -100,7 +100,7 @@ class Microscope:
 
                 if device_name in devices_dict and device_ref_name in devices_dict[device_name]:
                     device_connection = devices_dict[device_name][device_ref_name]
-                elif device_ref_name.startswith('NI') and (device_name == 'galvo' or device_name == 'remote_focus_device'):
+                elif (device_ref_name.startswith('NI') and (device_name == 'galvo' or device_name == 'remote_focus_device')):
                     # TODO: Remove this. We should not have this hardcoded.
                     device_connection = self.daq
 
@@ -123,6 +123,9 @@ class Microscope:
             if device_ref_name not in devices_dict['stages']:
                 logger.debug('stage has not been loaded!')
                 raise Exception('no stage device!')
+            if device_ref_name.startswith('GalvoNIStage'):
+                # TODO: Remove this. We should not have this hardcoded.
+                devices_dict['stages'][device_ref_name] = self.daq
             stage = start_stage(self.microscope_name, devices_dict['stages'][device_ref_name], self.configuration, i, is_synthetic)
             for axes in device_config['axes']:
                 self.stages[axes] = stage
@@ -194,6 +197,7 @@ class Microscope:
             self.current_exposure_time, self.camera_line_interval = self.camera.calculate_light_sheet_exposure_time(
                 self.current_exposure_time,
                 int(self.configuration['experiment']['CameraParameters']['number_of_pixels']))
+            self.camera.set_exposure_time(self.current_exposure_time)
             self.camera.camera_controller.set_property_value("internal_line_interval", self.camera_line_interval)
 
         # Laser Settings

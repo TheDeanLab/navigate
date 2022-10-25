@@ -209,6 +209,8 @@ def load_stages(configuration, is_synthetic=False):
             from aslm.model.devices.stages.stage_mcl import build_MCLStage_connection
             from aslm.model.devices.APIs.mcl.madlib import MadlibError
             stage_devices.append(auto_redial(build_MCLStage_connection, (stage_config['serial_number'],), exception=MadlibError))
+        elif stage_type == 'GalvoNIStage' and platform.system() == 'Windows':
+            stage_devices.append(DummyDeviceConnection())
         elif stage_type == 'SyntheticStage':
             stage_devices.append(DummyDeviceConnection())
         else:
@@ -234,6 +236,9 @@ def start_stage(microscope_name, device_connection, configuration, id=0, is_synt
     elif device_type == 'MCL':
         from aslm.model.devices.stages.stage_mcl import MCLStage
         return MCLStage(microscope_name, device_connection, configuration, id)
+    elif device_type == 'GalvoNIStage':
+        from aslm.model.devices.stages.stage_galvo import GalvoNIStage
+        return GalvoNIStage(microscope_name, device_connection, configuration, id)
     elif device_type == 'SyntheticStage':
         from aslm.model.devices.stages.stage_synthetic import SyntheticStage
         return SyntheticStage(microscope_name, device_connection, configuration, id)

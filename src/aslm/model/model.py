@@ -1,34 +1,34 @@
 """Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
-All rights reserved.
+# All rights reserved.
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-provided that the following conditions are met:
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# provided that the following conditions are met:
 
-     * Redistributions of source code must retain the above copyright notice,
-     this list of conditions and the following disclaimer.
+#      * Redistributions of source code must retain the above copyright notice,
+#      this list of conditions and the following disclaimer.
 
-     * Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in the
-     documentation and/or other materials provided with the distribution.
+#      * Redistributions in binary form must reproduce the above copyright
+#      notice, this list of conditions and the following disclaimer in the
+#      documentation and/or other materials provided with the distribution.
 
-     * Neither the name of the copyright holders nor the names of its
-     contributors may be used to endorse or promote products derived from this
-     software without specific prior written permission.
+#      * Neither the name of the copyright holders nor the names of its
+#      contributors may be used to endorse or promote products derived from this
+#      software without specific prior written permission.
 
-NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
-THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
-CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
-CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
-BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-"""
+# NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
+# THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+# CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+# PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+# """
 
 # Standard Library Imports
 import time
@@ -259,7 +259,7 @@ class Model:
             delattr(self, pipe_name)
 
     def get_active_microscope(self):
-        self.active_microscope_name = self.configuration['experiment']['MicroscopeState']['resolution_mode']
+        self.active_microscope_name = self.configuration['experiment']['MicroscopeState']['microscope_name']
         self.active_microscope = self.microscopes[self.active_microscope_name]
         return self.active_microscope
 
@@ -319,27 +319,28 @@ class Model:
             e.g., self.resolution_info['ETLConstants'][self.resolution][self.mag]
             """
             reboot = False
-            resolution_value = self.configuration['experiment']['MicroscopeState']['resolution_mode']
+            microscope_name = self.configuration['experiment']['MicroscopeState']['microscope_name']
             if self.is_acquiring:
                 # We called this while in the middle of an acquisition
                 # stop live thread
                 self.stop_send_signal = True
                 self.signal_thread.join()
-                if args[0] == 'resolution' and resolution_value != self.active_microscope_name:
+                if microscope_name != self.active_microscope_name:
                     self.pause_data_thread()
                     self.active_microscope.end_acquisition()
                     reboot = True
                 self.current_channel = 0
 
             if args[0] == 'resolution':
-                self.change_resolution(resolution_value)
-                if reboot:
-                    # prepare active microscope
-                    waveform_dict = self.active_microscope.prepare_acquisition()
-                    self.resume_data_thread()
-
-            if not reboot:
+                self.change_resolution(self.configuration['experiment']['MicroscopeState']['microscope_name'])
+            
+            if reboot:
+                # prepare active microscope
+                waveform_dict = self.active_microscope.prepare_acquisition()
+                self.resume_data_thread()
+            else:
                 waveform_dict = self.active_microscope.calculate_all_waveform()
+            
             self.event_queue.put(('waveform', waveform_dict))
 
             if self.is_acquiring:
@@ -522,7 +523,8 @@ class Model:
     def resume_data_thread(self):
         self.ask_to_pause_data_thread = False
         self.pause_data_event.set()
-        self.pause_data_ready_lock.release()
+        if self.pause_data_ready_lock.locked():
+            self.pause_data_ready_lock.release()
 
     def prepare_acquisition(self, turn_off_flags=True):
         r"""Prepare the acquisition.
@@ -609,6 +611,10 @@ class Model:
         for channel_key in microscope_state['channels'].keys():
             if self.stop_acquisition or self.stop_send_signal:
                 break
+
+            if not microscope_state['channels'][channel_key]['is_selected']:
+                continue
+            
             channel_idx = int(channel_key[prefix_len:])
             self.run_single_channel_acquisition_with_features(channel_idx)
 

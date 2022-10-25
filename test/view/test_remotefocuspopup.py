@@ -33,6 +33,8 @@ POSSIBILITY OF SUCH DAMAGE.
 
 import tkinter as tk
 from aslm.view.menus.remote_focus_popup import remote_popup
+from aslm.model.dummy import DummyModel
+from aslm.controller.configuration_controller import ConfigurationController
 import time
 
 def test_remotefocuspopup():
@@ -49,8 +51,10 @@ def test_remotefocuspopup():
     bool : bool
         True or False as to whether the test passed
     """
+    model = DummyModel()
+    config_control = ConfigurationController(model.configuration)
     root = tk.Tk()
-    r_pop = remote_popup(root)
+    r_pop = remote_popup(root, config_control)
     root.update()
     time.sleep(3)
     bool = isinstance(r_pop, remote_popup)

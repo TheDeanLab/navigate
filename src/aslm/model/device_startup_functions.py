@@ -1,34 +1,34 @@
 """Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
-All rights reserved.
+# All rights reserved.
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-provided that the following conditions are met:
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# provided that the following conditions are met:
 
-     * Redistributions of source code must retain the above copyright notice,
-     this list of conditions and the following disclaimer.
+#      * Redistributions of source code must retain the above copyright notice,
+#      this list of conditions and the following disclaimer.
 
-     * Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in the
-     documentation and/or other materials provided with the distribution.
+#      * Redistributions in binary form must reproduce the above copyright
+#      notice, this list of conditions and the following disclaimer in the
+#      documentation and/or other materials provided with the distribution.
 
-     * Neither the name of the copyright holders nor the names of its
-     contributors may be used to endorse or promote products derived from this
-     software without specific prior written permission.
+#      * Neither the name of the copyright holders nor the names of its
+#      contributors may be used to endorse or promote products derived from this
+#      software without specific prior written permission.
 
-NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
-THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
-CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
-CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
-BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-"""
+# NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
+# THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+# CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+# PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+# """
 
 
 # Standard Library Imports
@@ -75,9 +75,9 @@ def auto_redial(func, args, n_tries=10, exception=Exception, **kwargs):
     for i in range(n_tries):
         try:
             val = func(*args, **kwargs)
-        except exception:
+        except exception as e:
             if i < (n_tries-1):
-                print(f"Failed {str(func)} attempt {i+1}/{n_tries}.")
+                logger.debug(f"auto_redial - Failed {str(func)} attempt {i+1}/{n_tries} with exception {e}.")
                 # If we failed, but part way through object creation, we must
                 # delete the object prior to trying again. This lets us restart
                 # the connection process with a clean slate
@@ -205,6 +205,10 @@ def load_stages(configuration, is_synthetic=False):
             from aslm.model.devices.stages.stage_tl_kcube_inertial import build_TLKIMStage_connection
             from aslm.model.devices.APIs.thorlabs.kcube_inertial import TLFTDICommunicationError
             stage_devices.append(auto_redial(build_TLKIMStage_connection, (stage_config['serial_number'],), exception=TLFTDICommunicationError))
+        elif stage_type == 'MCL' and platform.system() == 'Windows':
+            from aslm.model.devices.stages.stage_mcl import build_MCLStage_connection
+            from aslm.model.devices.APIs.mcl.madlib import MadlibError
+            stage_devices.append(auto_redial(build_MCLStage_connection, (stage_config['serial_number'],), exception=MadlibError))
         elif stage_type == 'SyntheticStage':
             stage_devices.append(DummyDeviceConnection())
         else:
@@ -227,6 +231,9 @@ def start_stage(microscope_name, device_connection, configuration, id=0, is_synt
     elif device_type == 'Thorlabs':
         from aslm.model.devices.stages.stage_tl_kcube_inertial import TLKIMStage
         return TLKIMStage(microscope_name, device_connection, configuration, id)
+    elif device_type == 'MCL':
+        from aslm.model.devices.stages.stage_mcl import MCLStage
+        return MCLStage(microscope_name, device_connection, configuration, id)
     elif device_type == 'SyntheticStage':
         from aslm.model.devices.stages.stage_synthetic import SyntheticStage
         return SyntheticStage(microscope_name, device_connection, configuration, id)
@@ -438,7 +445,7 @@ def start_lasers(microscope_name, device_connection, configuration, id=0, is_syn
     if is_synthetic:
         device_type = 'SyntheticLaser'
     else:
-        device_type = configuration['configuration']['microscopes'][microscope_name]['lasers'][id]['onoff']['hardware']['type']
+        device_type = configuration['configuration']['microscopes'][microscope_name]['lasers'][id]['power']['hardware']['type']
 
     if device_type == 'NI':
         if device_connection is not None:
@@ -486,7 +493,7 @@ def start_galvo(microscope_name, device_connection, configuration, id=0, is_synt
 def device_not_found(*args):
 
     print("Device Not Found in Configuration.YML:", args)
-    sys.exit()
+    raise RuntimeError(f"Device not found in configuration: {args}")
 
 def load_devices(configuration, is_synthetic=False)->dict:
     devices = {}

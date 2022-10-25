@@ -33,7 +33,7 @@ hardware:
 
 # Only one microscope can be active in the GUI at a time, but all microscopes will be accessible
 microscopes:
-  low:
+  Mesoscale:
     daq:
       hardware:
         name: daq
@@ -260,7 +260,7 @@ microscopes:
         index: 2
         delay_percent: 10
         pulse_percent: 87
-  high:
+  Nanoscale:
     daq:
       hardware:
         name: daq

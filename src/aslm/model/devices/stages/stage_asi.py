@@ -147,7 +147,6 @@ class ASIStage(StageBase):
         # Move stage
         try:
             self.tiger_controller.move_axis(axis, axis_abs)
-            self.tiger_controller.wait_for_device() # Do we want to wait for device on hardware level? This is an ASI command call
             return True
         except TigerException as e:
             print("ASI stage move axis absolute failed.")
@@ -177,6 +176,8 @@ class ASIStage(StageBase):
 
         for ax, n in zip(self.axes, self.asi_axes):
             success = self.move_axis_absolute(ax, n, move_dictionary)
+            if wait_until_done:
+                self.tiger_controller.wait_for_device() # Do we want to wait for device on hardware level? This is an ASI command call
 
         # TODO This seems to be handled by each individual move_axis_absolute bc of ASI's wait_for_device. Each axis will move and the stage waits until the axis is done before moving on
         # if success and wait_until_done is True:

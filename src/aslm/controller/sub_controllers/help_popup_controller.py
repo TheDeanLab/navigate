@@ -32,7 +32,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-from aslm.controller.sub_controllers.gui_controller import GUI_Controller
+from aslm.controller.sub_controllers.gui_controller import GUIController
 
 
 
@@ -42,7 +42,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class HelpPopupController(GUI_Controller):
+class HelpPopupController(GUIController):
 
     def __init__(self, view, parent_controller):
         super().__init__(view, parent_controller)

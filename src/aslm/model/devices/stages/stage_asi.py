@@ -39,11 +39,11 @@ import time
 
 # Local Imports
 from aslm.model.devices.stages.stage_base import StageBase
-from aslm.model.devices.APIs.asi.asi_tiger_controller import TigerController
+from aslm.model.devices.APIs.asi.asi_tiger_controller import TigerController, TigerException
 
 # Logger Setup
-# p = __name__.split(".")[1]
-# logger = logging.getLogger(p)
+p = __name__.split(".")[1]
+logger = logging.getLogger(p)
 
 def build_ASI_Stage_connection(com_port="COM7", baud_rate=115200):
 
@@ -89,10 +89,10 @@ class ASIStage(StageBase):
             Close the ASI Stage connection
             """
             self.tiger_controller.disconnect_from_serial()
-            # logger.debug("ASI stage connection closed")
+            logger.debug("ASI stage connection closed")
         except BaseException as e:
             print('Error while disconnecting the ASI stage')
-            # logger.exception(e)
+            logger.exception(e)
             raise
 
     def report_position(self):
@@ -104,17 +104,13 @@ class ASIStage(StageBase):
         try:
             # positions from the device are in microns
             for ax, n in zip(self.axes, self.asi_axes):
-                self.tiger_controller.send_command("WHERE " + str(n))
-                pos = self.tiger_controller.read_response()
-                
-                # Remove leading :A from response. e.g., ":A -57585.3"
-                pos = pos[2:].strip()
+                pos = self.tiger_controller.get_position_um()
 
                 # Set class attributes and convert to microns
-                setattr(self, f"{ax}_pos", float(pos)/10)
-        except BaseException as e:
+                setattr(self, f"{ax}_pos", pos)
+        except TigerException as e:
             print('Failed to report ASI Stage Position')
-            #logger.exception(e)
+            logger.exception(e)
 
         # Update internal dictionaries
         self.update_position_dictionaries()
@@ -144,20 +140,20 @@ class ASIStage(StageBase):
         bool
             Was the move successful?
         """
-
         axis_abs = self.get_abs_position(axis, move_dictionary)
         if axis_abs == -1e50:
             return False
-
-        # Move the stage
+        
+        # Move stage
         try:
-            pos = axis_abs
-            self.pidevice.MOV({axis_num: pos})
-
+            self.tiger_controller.move_axis(axis, axis_abs)
+            self.tiger_controller.wait_for_device() # Do we want to wait for device on hardware level? This is an ASI command call
             return True
-        except BaseException as e:
-            #logger.exception(GCSError(e))
+        except TigerException as e:
+            print("ASI stage move axis absolute failed.")
+            logger.exception(e)
             return False
+
 
     def move_absolute(self, move_dictionary, wait_until_done=False):
         """
@@ -182,51 +178,18 @@ class ASIStage(StageBase):
         for ax, n in zip(self.axes, self.asi_axes):
             success = self.move_axis_absolute(ax, n, move_dictionary)
 
-        if wait_until_done is True:
-            try:
-                self.busy()
-                success = True
-            except BaseException as e:
-                print("Problem communicating with tiger controller during wait command")
-                success = False
-                #logger.exception(e)
+        # TODO This seems to be handled by each individual move_axis_absolute bc of ASI's wait_for_device. Each axis will move and the stage waits until the axis is done before moving on
+        # if success and wait_until_done is True:
+        #     try:
+        #         self.busy()
+        #         success = True
+        #     except BaseException as e:
+        #         print("Problem communicating with tiger controller during wait command")
+        #         success = False
+        #         #logger.exception(e)
 
         return success
-    
-    def busy(self):
-        """
-        Queries the stage to see if it is busy moving
-        """
-        blockflag = True
-        while blockflag:
-            self.tiger_controller.send_command("STATUS")
-            response = self.tiger_controller.read_response()
-            if response == "N":
-                blockflag = False
-            elif response == "B":
-                print("ASI stages are moving - waiting 50 ms.")
-                time.sleep(0.05)
-            else: 
-                print("Unknown response from ASI stage during status query")
 
-    def stop(self):
-        """
-        Stop all stage movement immediately
-        """
-        try:
-            self.tiger_controller.send_command("HALT")
-            response = self.tiger_controller.read_response()
-        except BaseException as e:
-            #logger.exception(e)
-            pass
-
-        if response == ":A":
-            pass
-            # print("ASI Stages Stopped")
-        elif response == ":N-21":
-            print("Stp[] Failed for ASI Stage")
-        else:
-            print("Unknown ASI Stage response to stop command")
             
     # def zero_axes(self, list):
     #     for axis in list:

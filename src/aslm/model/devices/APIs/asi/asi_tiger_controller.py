@@ -5,6 +5,37 @@ from serial import EIGHTBITS
 from serial import PARITY_NONE
 from serial import STOPBITS_ONE
 from serial.tools import list_ports
+
+class TigerException(Exception):
+    """
+    Exception raised when error code from Tiger Console is received.
+    
+    Atrributes:
+        - command: error code received from Tiger Console
+
+    """
+
+    def __init__(self, code: str):
+
+        self.error_codes = { 
+            ":N-1": "Unknown Command (Not Issued in TG-1000)",
+            ":N-2": "Unrecognized Axis Parameter (valid axes are dependent on the controller)",
+            ":N-3": "Missing parameters (command received requires an axis parameter such as x=1234)",
+            ":N-4": "Parameter Out of Range",
+            ":N-5": "Operation failed",
+            ":N-6": "Undefined Error (command is incorrect, but the controller does not know exactly why.",
+            ":N-7": "Invalid Card Address",
+            ":N-21": "Serial Command halted by the HALT command"
+        }
+
+        self.code = code
+        self.message = self.error_codes[code] # Gets the proper message based on error code received.
+        super().__init__(self.message) # Sends message to base exception constructor for python purposes
+
+    def __str__(self):
+        return f'{self.code} -> {self.message}' # Overrides base Exception string to be displayed in traceback
+
+
  
 class TigerController:
     """
@@ -107,3 +138,102 @@ class TigerController:
         response = response.strip()
         self.print(f"Received Response: {response}")
         return response # in case we want to read the response
+
+    # Basic Serial Commands
+
+    def moverel(self, x: int=0, y: int=0, z: int=0) -> None:
+        """Move the stage with a relative move on multiple axes"""
+        self.send_command(f"MOVREL X={x} Y={y} Z={z}\r")
+        res = self.read_response()
+        if res.startswith(":N"):
+            raise TigerException(res)
+ 
+    def moverel_axis(self, axis: str, distance: int) -> None:
+        """Move the stage with a relative move on one axis"""
+        self.send_command(f"MOVREL {axis}={distance}\r")
+        res = self.read_response()
+        if res.startswith(":N"):
+            raise TigerException(res)
+ 
+    def move(self, x: int=0, y: int=0, z: int=0) -> None:
+        """Move the stage with an absolute move on multiple axes"""
+        self.send_command(f"MOVE X={x} Y={y} Z={z}\r")
+        res = self.read_response()
+        if res.startswith(":N"):
+            raise TigerException(res)
+ 
+    def move_axis(self, axis: str, distance: int) -> None:
+        """Move the stage with an absolute move on one axis"""
+        self.send_command(f"MOVE {axis}={distance}\r")
+        res = self.read_response()
+        if res.startswith(":N"):
+            raise TigerException(res)
+ 
+    def set_max_speed(self, axis: str, speed:int) -> None:
+        """Set the speed on a specific axis. Speed is in mm/s."""
+        self.send_command(f"SPEED {axis}={speed}\r")
+        res = self.read_response()
+        if res.startswith(":N"):
+            raise TigerException(res)
+ 
+    def get_position(self, axis: str) -> int:
+        """Return the position of the stage in ASI units (tenths of microns)."""
+        self.send_command(f"WHERE {axis}\r")
+        response = self.read_response()
+        if response.startswith(":N"):
+            raise TigerException(response)
+        else:
+            return int(response.split(" ")[1])
+ 
+    def get_position_um(self, axis: str) -> float:
+        """Return the position of the stage in microns."""
+        self.send_command(f"WHERE {axis}\r")
+        response = self.read_response()
+        if response.startswith(":N"):
+            raise TigerException(response)
+        else:
+            return float(response.split(" ")[1])/10.0
+
+    # Utility Functions
+
+    def is_axis_busy(self, axis: str) -> bool:
+        """Returns True if the axis is busy."""
+        self.send_command(f"RS {axis}?\r")
+        res = self.read_response()
+        if res.startswith(":N"):
+            raise TigerException(res)
+        else:
+            return "B" in res
+ 
+    def is_device_busy(self) -> bool:
+        """Returns True if any axis is busy."""
+        self.send_command("/")
+        res = self.read_response()
+        if res.startswith(":N"):
+            raise TigerException(res)
+        else:
+            return "B" in res
+ 
+    def wait_for_device(self, report: bool = False) -> None:
+        """Waits for the all motors to stop moving."""
+        if not report:
+            print("Waiting for device...")
+        temp = self.report
+        self.report = report
+        busy = True
+        while busy:
+            busy = self.is_device_busy()
+        self.report = temp
+
+    def stop(self):
+        """
+        Stop all stage movement immediately
+        """
+
+        self.send_command("HALT")
+        response = self.read_response()
+        if response.startswith(":N"):
+            raise TigerException(response)
+        else:
+            print("ASI Stages stopped successfully")
+

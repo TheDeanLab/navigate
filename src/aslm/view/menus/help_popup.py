@@ -37,6 +37,8 @@ from aslm.view.custom_widgets.popup import PopUp
 
 
 import logging
+
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -51,14 +53,18 @@ class help_popup():
         # Toplevel window
         self.popup = PopUp(
             root,
-            "Autofocus Settings",
+            "Help",
             '+320+180',
             top=False,
             transient=False)
 
         # Creating content frame
         content_frame = self.popup.get_frame()   
+
         
+           # Formatting
+        tk.Grid.columnconfigure(content_frame, 'all', weight=1)
+        tk.Grid.rowconfigure(content_frame, 'all', weight=1)
 
         """Creating the widgets for the popup"""
         # Dictionary for all the variables
@@ -66,16 +72,60 @@ class help_popup():
 
 
         # Label Lists
-        labels = []
+        text = [
+            "Left Click: Toggles cross-hair on image",
+            "Right Click: Brings up popup window to select Move Here and Reset Display options",
+            "Mouse Wheel: Digitally zoom in or out on image based on scroll direction",
+            "Double Click Row Header: Moves stage to the position given by the row",
+            "Control + 1, 2, 3 or 4: Changes to selected tab",
+            "This is where all the basic usage instructions will go"
+        ]
 
         
 
-        # Widgets
+        # Titles
+        basic_title = ttk.Labelframe(content_frame, text="Basic Operating Info")
+        hotkey_title = ttk.Labelframe(content_frame, text="Hotkeys")
+        cam_view = ttk.Labelframe(hotkey_title, text="Camera View")
+        multitable = ttk.Labelframe(hotkey_title, text="Multiposition Table")
+        main_win = ttk.Labelframe(hotkey_title, text="Main Window")
+
+        # Text for Basic Operations
+        basic = ttk.Label(basic_title, text=text[5])
+
+        # Text for CameraView
+        left = ttk.Label(cam_view, text=text[0])
+        right = ttk.Label(cam_view, text=text[1])
+        mousewheel = ttk.Label(cam_view, text=text[2])
+
+        # Text for MultiTable
+        double_click = ttk.Label(multitable, text=text[3])
+
+        # Text for Main Window
+        switch_tab = ttk.Label(main_win, text=text[4])
 
 
-        # Buttons
+        # Gridding Titles
+        basic_title.grid(row=0, column=0, sticky=(tk.NSEW), padx=5, pady=5)
+        hotkey_title.grid(row=1, column=0, sticky=(tk.NSEW), padx=5, pady=5)
 
+        # Gridding subtitles
+        cam_view.grid(row=0, column=0, sticky=(tk.NSEW), padx=5, pady=5)
+        multitable.grid(row=1, column=0, sticky=(tk.NSEW), padx=5, pady=5)
+        main_win.grid(row=2, column=0, sticky=(tk.NSEW), padx=5, pady=5)
 
+        # Gridding text
+        left.grid(row=0, column=0, sticky=(tk.NSEW), padx=5, pady=5)
+        right.grid(row=1, column=0, sticky=(tk.NSEW), padx=5, pady=5)
+        mousewheel.grid(row=2, column=0, sticky=(tk.NSEW), padx=5, pady=5)
+
+        double_click.grid(row=0, column=0, sticky=(tk.NSEW), padx=5, pady=5)
+
+        switch_tab.grid(row=0, column=0, sticky=(tk.NSEW), padx=5, pady=5)
+
+        basic.grid(row=0, column=0, sticky=(tk.NSEW), padx=5, pady=5)
 
     def get_widgets(self):
         return self.inputs
+
+

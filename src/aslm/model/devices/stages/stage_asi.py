@@ -152,7 +152,7 @@ class ASIStage(StageBase):
             self.tiger_controller.move_axis(axis_num, axis_abs_um)
             return True
         except TigerException as e:
-            print("ASI stage move axis absolute failed.")
+            print(f"ASI stage move axis absolute failed or is trying to move out of range: {e}")
             logger.exception(e)
             return False
 

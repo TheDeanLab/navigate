@@ -218,12 +218,12 @@ class TigerController:
         """Waits for the all motors to stop moving."""
         if not report:
             print("Waiting for device...")
-        temp = self.report
-        self.report = report
+        temp = self.verbose
+        self.verbose = report
         busy = True
         while busy:
             busy = self.is_device_busy()
-        self.report = temp
+        self.verbose = temp
 
     def stop(self):
         """

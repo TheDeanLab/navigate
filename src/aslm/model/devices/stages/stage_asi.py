@@ -45,12 +45,12 @@ from aslm.model.devices.APIs.asi.asi_tiger_controller import TigerController, Ti
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-def build_ASI_Stage_connection(com_port="COM7", baud_rate=115200):
+def build_ASI_Stage_connection(com_port, baud_rate):
 
     # wait until ASI device is ready
     blockflag = True
     while blockflag:
-        asi_stage = TigerController(com_port=com_port, baud_rate=baud_rate)
+        asi_stage = TigerController(com_port, baud_rate)
         asi_stage.connect_to_serial()
         if asi_stage.is_open():
             blockflag = False
@@ -83,7 +83,7 @@ class ASIStage(StageBase):
             'f': 'Z'
         }
         self.asi_axes = list(map(lambda a: axes_mapping[a], self.axes))
-        self.tiger_controller = build_ASI_Stage_connection()
+        self.tiger_controller = device_connection
 
     def __del__(self):
         try:

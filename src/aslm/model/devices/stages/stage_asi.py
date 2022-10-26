@@ -72,13 +72,15 @@ class ASIStage(StageBase):
     """
     def __init__(self, microscope_name, device_connection, configuration, device_id=0):
         super().__init__(microscope_name, device_connection, configuration, device_id)
-        self.axes = ["x", "y", "z"]
+        
 
         # Mapping from self.axes to corresponding ASI axis labelling
         axes_mapping = {
             'x': 'X',
             'y': 'Y',
             'z': 'Z',
+            'theta': 'Z',
+            'f': 'Z'
         }
         self.asi_axes = list(map(lambda a: axes_mapping[a], self.axes))
         self.tiger_controller = build_ASI_Stage_connection()
@@ -104,7 +106,7 @@ class ASIStage(StageBase):
         try:
             # positions from the device are in microns
             for ax, n in zip(self.axes, self.asi_axes):
-                pos = self.tiger_controller.get_position_um()
+                pos = self.tiger_controller.get_position_um(n)
 
                 # Set class attributes and convert to microns
                 setattr(self, f"{ax}_pos", pos)
@@ -146,7 +148,8 @@ class ASIStage(StageBase):
         
         # Move stage
         try:
-            self.tiger_controller.move_axis(axis, axis_abs)
+            axis_abs_um = axis_abs * 10 # This is to account for the asi 1/10 of a micron units
+            self.tiger_controller.move_axis(axis_num, axis_abs_um)
             return True
         except TigerException as e:
             print("ASI stage move axis absolute failed.")

@@ -78,9 +78,7 @@ class ASIStage(StageBase):
         axes_mapping = {
             'x': 'X',
             'y': 'Y',
-            'z': 'Z',
-            'theta': 'Z',
-            'f': 'Z'
+            'z': 'Z'
         }
         self.asi_axes = list(map(lambda a: axes_mapping[a], self.axes))
         self.tiger_controller = device_connection

@@ -84,7 +84,7 @@ class ConfigurationController:
         -------
         setting : dict
             Channel settings, e.g. {
-                'laser': ['488nm', '562nm', '642nm'],
+                'laser': ['488nm', '561nm', '642nm'],
                 'filter': ['Empty-Alignment', 'GFP - FF01-515/30-32', '...}
         """
         if self.microscope_config is None:
@@ -101,7 +101,7 @@ class ConfigurationController:
         Returns
         -------
         laser_list : list
-            List of lasers, e.g. ['488nm', '562nm', '642nm']
+            List of lasers, e.g. ['488nm', '561nm', '642nm']
         """
         if self.microscope_config is None:
             return []

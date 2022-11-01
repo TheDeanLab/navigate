@@ -192,6 +192,13 @@ class ASIStage(StageBase):
 
         return success
 
+    def stop(self):
+        try:
+            self.tiger_controller.stop()
+        except TigerException as e:
+            print(f"ASI stage halt command failed: {e}")
+            logger.exception(e)
+
             
     # def zero_axes(self, list):
     #     for axis in list:

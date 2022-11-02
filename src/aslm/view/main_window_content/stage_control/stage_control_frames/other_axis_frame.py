@@ -117,7 +117,7 @@ class other_axis_frame(ttk.Labelframe):
         #Gridding out buttons
         other_axis_frame.up_btn.grid(row=0, column=0, pady=2) #UP
         other_axis_frame.down_btn.grid(row=3, column=0, pady=2) #DOWN
-        other_axis_frame.zero_btn.grid(row=1, column=0, pady=(5,2)) #Zero Z
+        # other_axis_frame.zero_btn.grid(row=1, column=0, pady=(5,2)) #Zero Z
         other_axis_frame.increment_box.grid(row=2, column=0, pady=2) #Increment spinbox
         other_axis_frame.increment_box.widget.set_precision(-1)
 

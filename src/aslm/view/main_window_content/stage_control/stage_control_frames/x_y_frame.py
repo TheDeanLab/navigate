@@ -153,7 +153,7 @@ class x_y_frame(ttk.Labelframe):
         x_y_frame.up_x_btn.grid(row=2, column=4, rowspan=2, columnspan=2, padx=2, pady=2) #RIGHT
         x_y_frame.down_y_btn.grid(row=4, column=2, rowspan=2, columnspan=2, padx=2, pady=2) #DOWN
         x_y_frame.down_x_btn.grid(row=2, column=0, rowspan=2, columnspan=2, padx=2, pady=2) #LEFT
-        x_y_frame.zero_xy_btn.grid(row=2, column=2, rowspan=1, columnspan=2, padx=2, pady=(5,2)) #Zero xy
+        # x_y_frame.zero_xy_btn.grid(row=2, column=2, rowspan=1, columnspan=2, padx=2, pady=(5,2)) #Zero xy
         x_y_frame.increment_box.grid(row=3, column=2, rowspan=1, columnspan=2, padx=2, pady=2) #Increment spinbox
         x_y_frame.increment_box.widget.set_precision(-1)
 

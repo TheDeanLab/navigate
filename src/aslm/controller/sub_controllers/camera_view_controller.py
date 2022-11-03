@@ -318,10 +318,10 @@ class CameraViewController(GUIController):
         threshold = event.delta/delta
         if (event.num == 4) or (threshold > 0):
             # Zoom out event.
-            self.zoom_value = 0.80
+            self.zoom_value = 0.95
         if (event.num == 5) or (threshold < 0):
             # Zoom in event.
-            self.zoom_value = 1.25
+            self.zoom_value = 1.05
         
         self.zoom_scale *= self.zoom_value
         self.zoom_width /= self.zoom_value

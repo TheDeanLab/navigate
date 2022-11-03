@@ -494,6 +494,20 @@ class Controller:
             """
             self.stage_controller.set_position(args[0])
 
+        elif command == 'move_stage_and_acquire_image':
+            r"""update stage and acquire an image
+            
+            Parameters
+            __________
+            args[0] : dict
+                dict = {'x': value, 'y': value, 'z': value, 'theta': value, 'f': value}
+            """
+            stage_pos = dict(map(lambda axis: (axis+'_abs', args[0][axis]), args[0]))
+            self.move_stage(stage_pos)
+            self.update_stage_controller_silent(stage_pos)
+            self.acquire_bar_controller.set_mode('single')
+            self.execute('acquire')
+
         elif command == 'get_stage_position':
             r"""Returns the current stage position
             
@@ -717,7 +731,6 @@ class Controller:
         pos_dict : dict
             Dictionary of axis positions
         """
-
         # Update our local stage dictionary
         update_stage_dict(self, pos_dict)
 

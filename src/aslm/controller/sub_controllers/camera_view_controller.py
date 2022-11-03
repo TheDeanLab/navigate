@@ -273,11 +273,30 @@ class CameraViewController(GUIController):
 
     def move_stage(self):
         r"""Move the stage according to the position the user clicked."""
-        # TODO: Account for the digital zoom value when calculating these values.
-        height_scaling_factor = self.original_image_height / self.view.canvas_height
-        width_scaling_factor = self.original_image_width / self.view.canvas_width
-        print("Move stage to pixel:", height_scaling_factor * self.move_to_y, width_scaling_factor * self.move_to_x)
+        current_center_x = (self.zoom_rect[0][0] + self.zoom_rect[0][1]) / 2
+        current_center_y = (self.zoom_rect[1][0] + self.zoom_rect[1][1]) / 2
 
+        microscope_name = self.parent_controller.configuration['experiment']['MicroscopeState']['microscope_name']
+        zoom_value = self.parent_controller.configuration['experiment']['MicroscopeState']['zoom']
+        pixel_size = self.parent_controller.configuration['configuration']['microscopes'][microscope_name]['zoom']['pixel_size'][zoom_value]
+        
+        offset_x = (self.move_to_x - current_center_x) / self.zoom_scale * self.canvas_width_scale * pixel_size
+        offset_y = (self.move_to_y - current_center_y) / self.zoom_scale * self.canvas_height_scale * pixel_size
+
+        self.show_verbose_info(f'Try moving stage by {offset_x} in x and {offset_y} in y')
+
+        stage_position = self.parent_controller.execute('get_stage_position')
+        
+        if stage_position is not None:
+            stage_position['x'] -= offset_x
+            stage_position['y'] += offset_y
+            self.parent_controller.execute('move_stage_and_acquire_image', stage_position)
+        else:
+            tk.messagebox.showerror(
+                title='Warning',
+                message="Can't move to there! Invalid stage position!")
+
+        
     def reset_display(self, display_flag=True):
         r"""Set the display back to the original digital zoom."""
         self.zoom_rect = np.array([[0, self.view.canvas_width],

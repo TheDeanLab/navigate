@@ -128,7 +128,6 @@ class DummyModel:
         self.camera = {}
         microscope_name = self.configuration['experiment']['MicroscopeState']['microscope_name']
         for k in self.configuration['configuration']['microscopes'].keys():
-            print(f"Creating camera {k}")
             self.camera[k] = SyntheticCamera(microscope_name, SyntheticCameraController(), self.configuration)
             self.camera[k].initialize_image_series(self.data_buffer, n_frames)
 

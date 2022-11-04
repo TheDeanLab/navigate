@@ -37,10 +37,14 @@ from multiprocessing import Manager
 import threading
 import time
 import random
+
+import numpy as np
+
 from aslm.model.features.feature_container import SignalNode, DataNode, DataContainer, load_features
 from aslm.model.features.common_features import WaitToContinue
 from aslm.model.features.feature_container import dummy_True
 from aslm.config.config import load_configs
+from aslm.model.devices.camera.camera_synthetic import SyntheticCamera, SyntheticCameraController
 
 
 
@@ -115,6 +119,18 @@ class DummyModel:
         self.data = []
         self.signal_records = []
         self.data_records = []
+
+        img_width = int(self.configuration['experiment']['CameraParameters']['x_pixels'])
+        img_height = int(self.configuration['experiment']['CameraParameters']['y_pixels'])
+        n_frames = 10
+        self.data_buffer = np.zeros((n_frames, img_width, img_height))
+
+        self.camera = {}
+        microscope_name = self.configuration['experiment']['MicroscopeState']['microscope_name']
+        for k in self.configuration['configuration']['microscopes'].keys():
+            print(f"Creating camera {k}")
+            self.camera[k] = SyntheticCamera(microscope_name, SyntheticCameraController(), self.configuration)
+            self.camera[k].initialize_image_series(self.data_buffer, n_frames)
 
     def signal_func(self):
         self.signal_container.reset()

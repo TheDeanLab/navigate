@@ -66,6 +66,7 @@ class StageController(GUIController):
         # variables
         self.widget_vals = self.view.get_variables()
 
+
         # gui event bind
         buttons = self.view.get_buttons()
         for k in buttons:
@@ -140,18 +141,19 @@ class StageController(GUIController):
         self.position_min = config.get_stage_position_limits('_min')
         self.position_max = config.get_stage_position_limits('_max')
 
+
         widgets = self.view.get_widgets()
         step_dict = config.stage_step
         for axis in ['x', 'y', 'z', 'theta', 'f']:
             widgets[axis].widget.min = self.position_min[axis]
             widgets[axis].widget.max = self.position_max[axis]
-            if axis == 'x' or 'y':
+            if axis == 'x' or axis == 'y':
                 step_axis = 'xy'
             else:
                 step_axis = axis
-            widgets[step_axis+'_step'].widget.configure(from_=1)
+            widgets[step_axis+'_step'].widget.configure(from_=self.position_min[axis])
             widgets[step_axis+'_step'].widget.configure(to=self.position_max[axis])
-            widgets[step_axis+'_step'].widget.configure(increment=step_dict[axis])          
+            widgets[step_axis+'_step'].widget.configure(increment=step_dict[axis])
 
     def bind_position_callbacks(self):
         r"""Binds position_callback() to each axis, records the trace name so we can unbind later.

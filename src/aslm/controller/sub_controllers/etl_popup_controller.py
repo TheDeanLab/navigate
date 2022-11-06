@@ -137,7 +137,7 @@ class EtlPopupController(GUIController):
         Update the widget ranges and precisions based on the current resolution mode.
         """
         # TODO: 
-        if self.resolution == 'Nanoscale':
+        if self.resolution == 'high':
             precision = -3
             increment = 0.001
         else:

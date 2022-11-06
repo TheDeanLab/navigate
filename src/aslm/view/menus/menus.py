@@ -73,6 +73,10 @@ class menubar(Menu):
         self.menu_features = Menu(self)
         self.add_cascade(menu=self.menu_features, label='Add-on Features')
 
+        # Help Menu
+        self.menu_help = Menu(self)
+        self.add_cascade(menu=self.menu_help, label='Help')
+
         # Debug Menu
         self.menu_debug = Menu(self)
         self.add_cascade(menu=self.menu_debug, label='Debug')

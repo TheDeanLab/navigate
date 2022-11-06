@@ -131,8 +131,14 @@ class CameraViewController(GUIController):
         self.rolling_frames = 1
         self.bit_depth = 8  # bit-depth for PIL presentation.
         self.zoom_value = 1
-        self.zoom_x_pos = 0
-        self.zoom_y_pos = 0
+        self.zoom_scale = 1
+        self.zoom_rect = np.array([[0, self.view.canvas_width],
+                                  [0, self.view.canvas_height]])
+        self.zoom_offset = np.array([[0], [0]])
+        self.zoom_width = self.view.canvas_width
+        self.zoom_height = self.view.canvas_height
+        self.canvas_width_scale = 4
+        self.canvas_height_scale = 4
         self.original_image_height = None
         self.original_image_width = None
         self.number_of_slices = 0
@@ -267,15 +273,41 @@ class CameraViewController(GUIController):
 
     def move_stage(self):
         r"""Move the stage according to the position the user clicked."""
-        # TODO: Account for the digital zoom value when calculating these values.
-        height_scaling_factor = self.original_image_height / self.view.canvas_height
-        width_scaling_factor = self.original_image_width / self.view.canvas_width
-        print("Move stage to pixel:", height_scaling_factor * self.move_to_y, width_scaling_factor * self.move_to_x)
+        current_center_x = (self.zoom_rect[0][0] + self.zoom_rect[0][1]) / 2
+        current_center_y = (self.zoom_rect[1][0] + self.zoom_rect[1][1]) / 2
 
-    def reset_display(self):
+        microscope_name = self.parent_controller.configuration['experiment']['MicroscopeState']['microscope_name']
+        zoom_value = self.parent_controller.configuration['experiment']['MicroscopeState']['zoom']
+        pixel_size = self.parent_controller.configuration['configuration']['microscopes'][microscope_name]['zoom']['pixel_size'][zoom_value]
+        
+        offset_x = (self.move_to_x - current_center_x) / self.zoom_scale * self.canvas_width_scale * pixel_size
+        offset_y = (self.move_to_y - current_center_y) / self.zoom_scale * self.canvas_height_scale * pixel_size
+
+        self.show_verbose_info(f'Try moving stage by {offset_x} in x and {offset_y} in y')
+
+        stage_position = self.parent_controller.execute('get_stage_position')
+        
+        if stage_position is not None:
+            stage_position['x'] -= offset_x
+            stage_position['y'] += offset_y
+            self.parent_controller.execute('move_stage_and_acquire_image', stage_position)
+        else:
+            tk.messagebox.showerror(
+                title='Warning',
+                message="Can't move to there! Invalid stage position!")
+
+        
+    def reset_display(self, display_flag=True):
         r"""Set the display back to the original digital zoom."""
+        self.zoom_rect = np.array([[0, self.view.canvas_width],
+                                  [0, self.view.canvas_height]])
+        self.zoom_offset = np.array([[0], [0]])
         self.zoom_value = 1
-        self.process_image()
+        self.zoom_scale = 1
+        self.zoom_width = self.view.canvas_width
+        self.zoom_height = self.view.canvas_height
+        if display_flag:
+            self.process_image()
 
     def process_image(self):
         self.digital_zoom()  # self.image -> self.zoom_image.
@@ -300,19 +332,25 @@ class CameraViewController(GUIController):
             x, y location.  0,0 is top left corner.
 
         """
-        self.zoom_x_pos = int(event.x)
-        self.zoom_y_pos = int(event.y)
+        self.zoom_offset = np.array([[int(event.x)], [int(event.y)]])
         delta = 120 if platform.system() != 'Darwin' else 1
         threshold = event.delta/delta
         if (event.num == 4) or (threshold > 0):
             # Zoom out event.
-            if self.zoom_value < 1:
-                self.zoom_value = self.zoom_value + .05
+            self.zoom_value = 0.95
         if (event.num == 5) or (threshold < 0):
             # Zoom in event.
-            if self.zoom_value > 0.05:
-                self.zoom_value = self.zoom_value - .05
+            self.zoom_value = 1.05
+        
+        self.zoom_scale *= self.zoom_value
+        self.zoom_width /= self.zoom_value
+        self.zoom_height /= self.zoom_value
 
+        if self.zoom_width > self.view.canvas_width or self.zoom_height > self.view.canvas_height:
+            self.reset_display(False)
+        elif self.zoom_width < 5 or self.zoom_height < 5:
+            return
+            
         self.process_image()
 
     def digital_zoom(self):
@@ -321,45 +359,20 @@ class CameraViewController(GUIController):
         The x and y positions are between 0 and the canvas width and height respectively.
 
         """
-        # New image size. Should be an integer value that is divisible by 2.
-        new_image_height = int(np.floor(self.zoom_value * self.original_image_height))
-        if new_image_height % 2 == 1:
-            new_image_height = new_image_height - 1
+        self.zoom_rect = self.zoom_rect - self.zoom_offset
+        self.zoom_rect = self.zoom_rect * self.zoom_value
+        self.zoom_rect = self.zoom_rect + self.zoom_offset
 
-        new_image_width = int(np.floor(self.zoom_value * self.original_image_width))
-        if new_image_width % 2 == 1:
-            new_image_width = new_image_width - 1
+        if self.zoom_rect[0][0] > 0 or self.zoom_rect[1][0] > 0:
+            self.reset_display(False)
 
-        # zoom_x_pos and y_pos are between 0 and 512.
-        scaling_factor_x = self.original_image_width / self.view.canvas_width
-        scaling_factor_y = self.original_image_height / self.view.canvas_height
-        x_start_index = (self.zoom_x_pos * scaling_factor_x) - (new_image_width / 2)
-        x_end_index = (self.zoom_x_pos * scaling_factor_x) + (new_image_width / 2)
-        y_start_index = (self.zoom_y_pos * scaling_factor_y) - (new_image_height / 2)
-        y_end_index = (self.zoom_y_pos * scaling_factor_y) + (new_image_height / 2)
+        x_start_index = int(- self.zoom_rect[0][0] / self.zoom_scale)
+        x_end_index = int(x_start_index + self.zoom_width)
+        y_start_index = int(- self.zoom_rect[1][0] / self.zoom_scale)
+        y_end_index = int(y_start_index + self.zoom_height)
 
-        if y_start_index < 0:
-            y_start_index = 0
-            y_end_index = new_image_height
-
-        if x_start_index < 0:
-            x_start_index = 0
-            x_end_index = new_image_width
-
-        if y_end_index > self.original_image_height:
-            y_start_index = self.original_image_height - new_image_height
-            y_end_index = self.original_image_height
-
-        if x_end_index > self.original_image_width:
-            x_start_index = self.original_image_width - new_image_width
-            x_end_index = self.original_image_width
-
-        # Guarantee type int.
-        x_start_index = int(x_start_index)
-        x_end_index = int(x_end_index)
-        y_start_index = int(y_start_index)
-        y_end_index = int(y_end_index)
-        self.zoom_image = self.image[y_start_index:y_end_index, x_start_index:x_end_index]
+        self.zoom_image = self.image[y_start_index * self.canvas_height_scale : y_end_index * self.canvas_height_scale,
+                                     x_start_index * self.canvas_width_scale : x_end_index * self.canvas_width_scale]
 
     def left_click(self,
                    event):
@@ -404,9 +417,9 @@ class CameraViewController(GUIController):
                 # Update GUI
                 self.image_metrics['Image'].set(np.max(self.temp_array))
 
-    def down_sample_image(self, factor=4):
+    def down_sample_image(self):
         r"""Down-sample the data for image display according to widget size.."""
-        sx, sy = self.original_image_width//factor, self.original_image_height//factor
+        sx, sy = self.view.canvas_width, self.view.canvas_height
         self.down_sampled_image = cv2.resize(self.zoom_image, (sx, sy))
 
     def scale_image_intensity(self):
@@ -455,6 +468,10 @@ class CameraViewController(GUIController):
         self.total_images_per_volume = self.number_of_channels * self.number_of_slices
         self.original_image_width = int(camera_parameters['x_pixels'])
         self.original_image_height = int(camera_parameters['y_pixels'])
+        self.canvas_width_scale = int(self.original_image_width / self.view.canvas_width)
+        self.canvas_height_scale = int(self.original_image_height / self.view.canvas_height)
+        self.reset_display(False)
+
         # self.image_volume = np.zeros((self.original_image_width,
         #                               self.original_image_height,
         #                               self.number_of_slices,

@@ -29,7 +29,7 @@ jobs:
           pip install -e .
       - name: Test with pytest
         run: |
-          python3 -m pytest --cov=./ --cov-report=xml
+          python3 -m pytest -m "not hardware" --cov=./ --cov-report=xml
       - name: Build wheel
         run: python setup.py bdist_wheel
       - uses: actions/upload-artifact@v3

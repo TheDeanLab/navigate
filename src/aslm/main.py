@@ -201,7 +201,10 @@ def main():
             number_GPUs = len(tf.config.list_physical_devices('GPU'))
             if number_GPUs > 0:
                 use_gpu = True
+
+    # Destroy splash screen instance
     splash_root.destroy()
+
     # Start the GUI
     root = tk.Tk()
     Controller(root,
@@ -221,6 +224,9 @@ if __name__ == '__main__':
               "Please try Linux or Windows for this functionality")
 
     main()
-splash_root.after(3000, main)
 
+# Delay after splash screen initiation in ms before main window initializes
+splash_root.after(1000, main)
+
+# Initialize splash screen root
 splash_root.mainloop()

@@ -200,8 +200,10 @@ if __name__ == '__main__':
               "Tensorflow and CuPy based analysis is not possible. ",
               "Please try Linux or Windows for this functionality")
 
-    main()
+    #main()
 
+
+# Initialize Splash Screen
 splash_root = tk.Tk()
 
 splash_root.geometry("740x400")

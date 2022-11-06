@@ -38,12 +38,37 @@ import platform
 import os
 from aslm.log_files.log_functions import log_setup
 from aslm.config import get_configuration_paths
+import tkinter.font as tkFont
+import webbrowser
 
 # Local Imports
 from aslm.controller.controller import Controller
 
 os.environ['http_proxy'] = ''
 os.environ['https_proxy'] = ''
+
+splash_root = tk.Tk()
+
+splash_root.geometry("740x400")
+splash_root.resizable(0, 0)
+splash_frame = tk.Frame(splash_root).grid(column=0, row=0)
+title_font = tkFont.Font(family='Times New Roman', size=18)
+software_title = tk.Label(splash_root, text="Axially Swept Light-Sheet Microscope", font=title_font, borderwidth=0)
+
+UTSW_font = tkFont.Font(family='Helvetica-Neue-Heavy')
+UTSW_label = tk.Label(splash_root, text="UTSouthwestern", font='Helvetica-Neue-Heavy 18 bold', borderwidth=0, fg='#004278')
+link_label = tk.Label(splash_root, text="The Dean Lab's Organization Website", font='Times 12', justify=tk.CENTER, borderwidth=0, fg='#1010FF', cursor='hand2')
+med_center_label = tk.Label(splash_root, text="\tMedical Center", font='Helvetica-Neue-Roman 12', borderwidth=0, fg='#333333')
+
+def callback(url):
+    webbrowser.open_new_tab(url)
+
+link_label.bind("<Button-1>", lambda e:callback('https://www.dean-lab.org'))
+
+link_label.grid(splash_frame, row=3, column=1)
+UTSW_label.grid(splash_frame, row=0, column=0, ipadx=0)
+med_center_label.grid(splash_frame, row=1, column=0)
+software_title.grid(splash_frame, row=2, column=1, ipady=125)
 
 def main():
     r"""Multiscale ASLM Microscope Software.
@@ -176,7 +201,7 @@ def main():
             number_GPUs = len(tf.config.list_physical_devices('GPU'))
             if number_GPUs > 0:
                 use_gpu = True
-
+    splash_root.destroy()
     # Start the GUI
     root = tk.Tk()
     Controller(root,
@@ -196,4 +221,6 @@ if __name__ == '__main__':
               "Please try Linux or Windows for this functionality")
 
     main()
+splash_root.after(3000, main)
 
+splash_root.mainloop()

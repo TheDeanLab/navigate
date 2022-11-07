@@ -27,6 +27,7 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 
 # Standard Imports
+from curses import baudrate
 import logging
 import time
 import sys
@@ -52,10 +53,10 @@ def build_sutter_stage_connection(com_port, baud_rate):
     baudrate : int
         Baud rate for communicating with the filter wheel, e.g., 9600.
     """
-    logging.debug(f"SutterStage - Opening Serial Port {comport}")
+    logging.debug(f"SutterStage - Opening Serial Port {com_port}")
     try:
-        return serial.Serial(com_port=comport,
-                             baud_rate=baudrate,
+        return serial.Serial(port=com_port,
+                             baudrate=baud_rate,
                              timeout=.25,
                              parity=serial.PARITY_NONE,
                              bytesize=serial.EIGHTBITS,
@@ -64,7 +65,7 @@ def build_sutter_stage_connection(com_port, baud_rate):
                              )
     except serial.SerialException:
         logger.warning("SutterStage - Could not establish Serial Port Connection")
-        raise UserWarning('Could not communicate with Sutter MP-285 via COMPORT', self.comport)
+        raise UserWarning('Could not communicate with Sutter MP-285 via COMPORT', com_port)
 
 
 class SutterStage(StageBase):
@@ -138,34 +139,19 @@ class SutterStage(StageBase):
         logger.debug("SutterStage - Closing Serial Port")
         self.serial.close()
 
-    def read(self,
-             num_bytes):
-        r"""Reads the specified number of bytes from the serial port.
-
-        Parameters
-        ----------
-        num_bytes : int
-            Number of bytes to read from the serial port.
-        """
-        for i in range(100):
-            num_waiting = self.serial.inWaiting()
-            if num_waiting == num_bytes:
-                break
-            time.sleep(0.02)
-        else:
-            logger.error("The serial port to the Sutter MP-285 is on, but it isn't responding as expected.")
-            raise UserWarning("The serial port to the Sutter MP-285 is on, but it isn't responding as expected.")
-        return self.serial.read(num_bytes)
+    def flush_buffers(self):
+        r"""Flush Serial I/O Buffers"""
+        self.serial.reset_input_buffer()
+        self.serial.reset_output_buffer()
 
     def check_byte_order(self, command):
         r""" Confirm OS Byte Order
-        Position information received by the MP-285 is in microsteps.
-        Microsteps are stored as signed 32-bit values (e.g., long).
-        32-bit value consists of 4 contiguous bytes in Little Endian format
-        (e.g., most significant byte is first, least significant is last).
+        MP-285 requires commands and responses to be interpreted as Little Endian.
 
         Parameters
         ----------
+        command : bytes
+            Command in format bytes.
         """
 
         if self.byte_order == 'little':
@@ -178,7 +164,6 @@ class SutterStage(StageBase):
         else:
             logger.error("Unknown byte order received from OS:", self.byte_order)
         return command
-
 
     @staticmethod
     def convert_microsteps_to_microns(self, microsteps):
@@ -216,19 +201,18 @@ class SutterStage(StageBase):
         microsteps = np.divide(microns, 0.04)
         return microsteps
 
-    def set_stage_resolution(self, resolution):
-        r"""Sets the MP-285 stage resolution
+    def set_stage_speed_and_resolution(self, speed, resolution):
+        r"""Sets the MP-285 stage speed and resolution.
 
-        Low - 0.2 microns/microstep = 10 microsteps/step
-        High - 0.04 microns/microstep = 50 microsteps/step
-        """
-        self.resolution = resolution
+        Parameters
+        ----------
+        speed : int
+            Low Resolution = 0-3000 microns/sec
+            High Resolution = 0-1310 microns/sec
+        resolution : int
+            Low - 0.2 microns/microstep = 10 microsteps/step
+            High - 0.04 microns/microstep = 50 microsteps/step
 
-    def set_stage_speed(self, speed):
-        r"""Sets the MP-285 stage speed.
-
-        Low Resolution = 0-3000 microns/sec
-        High Resolution = 0-1310 microns/sec
         """
         logger.debug(f"Setting MP-285 Stage Speed")
         if self.resolution == 'high':
@@ -245,14 +229,24 @@ class SutterStage(StageBase):
         else:
             logger.error("Unknown MP-285 stage resolution:", self.resolution)
 
-        output_command = resolution_bit * 32768 + speed
-        output_command = output_command.to_bytes(length=2, byteorder='little')
-        self.serial.write(bytes.fromhex('56') + output_command + bytes.fromhex('0d'))
 
-        response = self.read(1)
+        # Generate Command
+        # One unsigned short (16-bit integer (2 bytes) containing both resolution and velocity values.
+        speed_and_res = int(resolution_bit * 32768 + speed)
+        command = bytes.fromhex('56') + speed_and_res.to_bytes(length=2, byteorder='little', signed=False) + bytes.fromhex('0d')
+
+        # Write Command
+        self.flush_buffers()
+        self.serial.write(command)
+
+        # Get Response
+        response = self.serial.read_until(expected=bytes.fromhex('0d'), size=100)
         if response == bytes.fromhex('0d'):
-            pass
-
+            self.resolution = resolution
+            self.speed = speed
+        else:
+            logger.error("MP-285 unable to change resolution and/or speed.")
+            raise UserWarning("MP-285 unable to change resolution and/or speed")
 
     def report_position(self):
         """
@@ -260,22 +254,27 @@ class SutterStage(StageBase):
         Creates the hardware position dictionary.
         Updates the internal position dictionary.
         """
-        # Send Command
-        command = bytes.fromhex('63') + bytes.fromhex('0d')
-        self.serial.write(command)
 
-        # Receive Position Information -  The data returned consists of 13 bytes: 12 bytes containing X, Y, & Z
-        # position values in microsteps (4 bytes each), followed with the task-complete indicator (1 byte).
-        position_information = self.read(13)
-        self.x_pos = self.convert_microsteps_to_microns(position_information[0:3])
-        self.y_pos = self.convert_microsteps_to_microns(position_information[4:7])
-        self.z_pos = self.convert_microsteps_to_microns(position_information[8:11])
+        try:
+            # Send Command
+            self.flush_buffers()
+            command = bytes.fromhex('63') + bytes.fromhex('0d')
+            self.serial.write(command)
 
-        assert bytes(position_information).endswith(bytes.fromhex('0d'))
+            # Receive Position Information -  The data returned consists of 13 bytes: 12 bytes containing X, Y, & Z
+            # position values in microsteps (4 bytes each), followed with the task-complete indicator (1 byte).
+            position_information = self.serial.read_until(expected=bytes.fromhex('0d'), size=100)
+            self.x_pos = self.convert_microsteps_to_microns(int.from_bytes(position_information[0:3], byteorder='little', signed=True))
+            self.y_pos = self.convert_microsteps_to_microns(int.from_bytes(position_information[4:7], byteorder='little', signed=True))
+            self.z_pos = self.convert_microsteps_to_microns(int.from_bytes(position_information[8:11], byteorder='little', signed=True))
+        
+            # Update internal dictionaries
+            self.update_position_dictionaries()
+            return self.position_dict
 
-        # Update internal dictionaries
-        self.update_position_dictionaries()
-        return self.position_dict
+        except serial.SerialException as error:
+            logger.debug(f"MP-285 - Error: {error}")
+            raise UserWarning("Communication error with MP-285 Stage")
 
     def move_axis_absolute(self, axis, axis_num, move_dictionary):
         """
@@ -304,14 +303,24 @@ class SutterStage(StageBase):
         if axis_abs == -1e50:
             return False
 
-        x_target = self.convert_microns_to_microsteps(self.x_pos)
-        y_target = self.convert_microns_to_microsteps(self.y_pos)
-        z_target = self.convert_microns_to_microsteps(self.z_pos)
+        x_target = int(self.convert_microns_to_microsteps(self.x_pos))
+        y_target = int(self.convert_microns_to_microsteps(self.y_pos))
+        z_target = int(self.convert_microns_to_microsteps(self.z_pos))
+
+        x_steps = x_target.to_bytes(length=4, byteorder='little', signed=True)
+        y_steps = y_target.to_bytes(length=4, byteorder='little', signed=True)
+        z_steps = z_target.to_bytes(length=4, byteorder='little', signed=True)
 
         # Move stage
         try:
-            command = bytes.fromhex('6d') + bytes.
-            return True
+            self.serial.write(bytes.fromhex('6d') + x_steps + y_steps + z_steps + bytes.fromhex('0d'))
+            response = self.serial.read(1)
+            if response == bytes.fromhex('0d'):
+                pass
+            else:
+                logger.debug("MP-285 - Unknown response after attempt to mvoe stage")
+                raise UserWarning("MP-285 - Unknown response after attempt to mvoe stage")        
+
         except BaseException as e:
             print(f"MP-285 stage move axis absolute failed or is trying to move out of range: {e}")
             logger.exception(e)
@@ -343,17 +352,17 @@ class SutterStage(StageBase):
 
         try:
             # Send Command
-            command = bytes.fromhex('03')
-            self.serial.write(command)
+            self.flush_buffers()
+            self.serial.write(bytes.fromhex('03'))
 
             # Get Response
-            response = self.read(1)
+            response = self.serial.read(1)
             if response == bytes.fromhex('0d'):
                 # Stage halted.
                 pass
             elif response == bytes.fromhex('3d'):
                 # Move in progress
-                second_response = self.read(1)
+                second_response = self.serial.read(1)
                 assert second_response == bytes.fromhex('0d')
         except BaseException as e:
             print(f"MP-285 stage halt command failed: {e}")

@@ -41,6 +41,7 @@ import logging
 
 # Third Party Imports
 import nidaqmx
+from nidaqmx.errors import DaqError
 from nidaqmx.constants import LineGrouping
 
 # Local Imports
@@ -61,43 +62,70 @@ class LaserNI(LaserBase):
             self.laser_do_task = nidaqmx.Task()
             self.laser_do_task.do_channels.add_do_chan(
                 laser_do_port, line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
-        except KeyError:
+        except (KeyError, DaqError) as e:
             self.laser_do_task = None
+            if isinstance(e, DaqError):
+                logger.exception(e)
+                logger.debug(e.error_code)
+                logger.debug(e.error_type)
+                print(e)
+                print(e.error_code)
+                print(e.error_type)
 
         self._current_intensity = 0
 
         # Analog out
-        laser_ao_port = self.device_config['power']['hardware']['channel']
-        self.laser_min_ao = self.device_config['power']['hardware']['min']
-        self.laser_max_ao = self.device_config['power']['hardware']['max']
+        try:
+            laser_ao_port = self.device_config['power']['hardware']['channel']
+            self.laser_min_ao = self.device_config['power']['hardware']['min']
+            self.laser_max_ao = self.device_config['power']['hardware']['max']
 
-        self.laser_ao_task = nidaqmx.Task()
-        self.laser_ao_task.ao_channels.add_ao_voltage_chan(
-            laser_ao_port, min_val=self.laser_min_ao, max_val=self.laser_max_ao)
+            self.laser_ao_task = nidaqmx.Task()
+            self.laser_ao_task.ao_channels.add_ao_voltage_chan(
+                laser_ao_port, min_val=self.laser_min_ao, max_val=self.laser_max_ao)
+        except DaqError as e:
+            logger.exception(e)
+            logger.debug(e.error_code)
+            logger.debug(e.error_type)
+            print(e)
+            print(e.error_code)
+            print(e.error_type)
 
     def set_power(self, laser_intensity):
-        scaled_laser_voltage = (
-            int(laser_intensity) / 100) * self.laser_max_ao
-        self.laser_ao_task.write(scaled_laser_voltage, auto_start=True)
-        self._current_intensity = laser_intensity
+        try:
+            scaled_laser_voltage = (
+                int(laser_intensity) / 100) * self.laser_max_ao
+            self.laser_ao_task.write(scaled_laser_voltage, auto_start=True)
+            self._current_intensity = laser_intensity
+        except DaqError as e:
+            logger.exception(e)
 
     def turn_on(self):
-        if self.laser_do_task is not None:
-            self.laser_do_task.write(True, auto_start=True)
-        self.set_power(self._current_intensity)
+        try:
+            if self.laser_do_task is not None:
+                self.laser_do_task.write(True, auto_start=True)
+            self.set_power(self._current_intensity)
+        except DaqError as e:
+            logger.exception(e)
 
     def turn_off(self):
-        if self.laser_do_task is None:
-            tmp = self._current_intensity
-            self.set_power(0)
-            self._current_intensity = tmp
-        else:
-            self.laser_do_task.write(False, auto_start=True)
+        try:
+            if self.laser_do_task is None:
+                tmp = self._current_intensity
+                self.set_power(0)
+                self._current_intensity = tmp
+            else:
+                self.laser_do_task.write(False, auto_start=True)
+        except DaqError as e:
+            logger.exception(e)
 
     def close(self):
         """
         # Close the port before exit.
         """
-        self.laser_ao_task.close()
-        if self.laser_do_task is not None:
-            self.laser_do_task.close()
+        try:
+            self.laser_ao_task.close()
+            if self.laser_do_task is not None:
+                self.laser_do_task.close()
+        except DaqError as e:
+            logger.exception(e)

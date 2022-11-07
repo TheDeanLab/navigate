@@ -1,10 +1,4 @@
-"""
-ASLM stage communication classes.
-Class for mixed digital and analog modulation of laser devices.
-Goal is to set the DC value of the laser intensity with the analog voltage, and then rapidly turn it on and off
-with the digital signal.
-
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

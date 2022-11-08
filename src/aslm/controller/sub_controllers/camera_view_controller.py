@@ -362,6 +362,8 @@ class CameraViewController(GUIController):
         self.zoom_rect = self.zoom_rect - self.zoom_offset
         self.zoom_rect = self.zoom_rect * self.zoom_value
         self.zoom_rect = self.zoom_rect + self.zoom_offset
+        self.zoom_offset.fill(0)
+        self.zoom_value = 1
 
         if self.zoom_rect[0][0] > 0 or self.zoom_rect[1][0] > 0:
             self.reset_display(False)

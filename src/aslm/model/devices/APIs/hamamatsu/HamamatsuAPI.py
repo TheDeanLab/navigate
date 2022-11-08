@@ -661,12 +661,12 @@ class camReg(object):
 
     Cribbed from https://github.com/python-microscopy/python-microscopy/blob/master/PYME/Acquire/Hardware/HamamatsuDCAM/HamamatsuDCAM.py
     """
-    numCameras = -1
+    numCameras = 0
     maxCameras = 0
 
     @classmethod
     def regCamera(cls):
-        if cls.numCameras == -1:
+        if cls.numCameras <= 0:
             # Initialize the API
             paraminit = DCAMAPI_INIT()
             if int(dcamapi_init(byref(paraminit))) < 0:
@@ -686,8 +686,6 @@ class camReg(object):
             dcamapi_uninit()
 
 
-camReg.regCamera()  # Make sure DCAMAPI is initialized
-
 
 class DCAM:
     def __init__(self, index=0):
@@ -698,12 +696,17 @@ class DCAM:
         self.dev_open(index)
         self.__open_hdcamwait()
 
-        self.max_image_width = self.get_property_value('subarray_hsize')
-        self.max_image_height = self.get_property_value('subarray_vsize')
+        self.prop_setvalue(property_dict['subarray_mode'], DCAMPROP_MODE__OFF)
+        self.max_image_width = self.get_property_value('image_width')
+        self.max_image_height = self.get_property_value('image_height')
+        
         self.is_acquiring = False
 
 
         self._serial_number = self.get_string_value(c_int32(int("0x04000102", 0))).strip('S/N: ')
+
+    def __del__(self):
+        self.dev_close()
 
     def __result(self, errvalue):
         """
@@ -771,6 +774,8 @@ class DCAM:
             print("Camera already open")
             return self.__result(DCAMERR.ALREADYOPENED)  # instance is already opened. New Error.
 
+        camReg.regCamera() # Make sure DCAMAPI is initialized
+
         paramopen = DCAMDEV_OPEN()
         if index >= 0:
             paramopen.index = index
@@ -785,8 +790,6 @@ class DCAM:
             print("Camera Open")
 
         self.__hdcam = c_void_p(paramopen.hdcam)
-
-        camReg.regCamera()
 
         return True
 
@@ -986,8 +989,9 @@ class DCAM:
         # if the same, set subarray_mode to DCAMPROP_MODE__OFF
         if right-left+1 == self.max_image_width and bottom-top+1 == self.max_image_height:
             self.prop_setgetvalue(property_dict['subarray_mode'], DCAMPROP_MODE__OFF)
-            self.prop_setvalue(property_dict['image_width'], self.max_image_width)
-            self.prop_setvalue(property_dict['image_height'], self.max_image_height)
+            # TODO: double check if the width/height is set to maximum value.
+            # self.prop_setvalue(property_dict['image_width'], self.max_image_width)
+            # self.prop_setvalue(property_dict['image_height'], self.max_image_height)
             return (self.max_image_width, self.max_image_height)
         
         width = self.prop_getvalue(property_dict['image_width'])
@@ -1012,9 +1016,7 @@ class DCAM:
         
         # set DCAM_IDPROP_SUBARRAYMODE to 'ON'
         self.prop_setgetvalue(property_dict['subarray_mode'], DCAMPROP_MODE__ON)
-        # TODO:return new image width and height
-        # will changing hsize and vsize affect iamge width and height?
-        # not sure, need to test
+
         return (self.prop_getvalue(property_dict['image_width']), self.prop_getvalue(property_dict['image_height']))
 
     def start_acquisition(self, data_buffer, number_of_frames=100):

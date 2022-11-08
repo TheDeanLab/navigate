@@ -270,6 +270,10 @@ class CameraViewController(GUIController):
             camera_view_controller mode.
         """
         self.mode = mode
+        if mode == 'live' or mode == 'stop':
+            self.menu.entryconfig('Move Here', state='normal')
+        else:
+            self.menu.entryconfig('Move Here', state='disabled')
 
     def move_stage(self):
         r"""Move the stage according to the position the user clicked."""
@@ -290,7 +294,11 @@ class CameraViewController(GUIController):
         if stage_position is not None:
             stage_position['x'] -= offset_x
             stage_position['y'] += offset_y
-            self.parent_controller.execute('move_stage_and_acquire_image', stage_position)
+            if self.mode == 'stop':
+                command = 'move_stage_and_acquire_image'
+            else:
+                command = 'move_stage_and_update_info'
+            self.parent_controller.execute(command, stage_position)
         else:
             tk.messagebox.showerror(
                 title='Warning',

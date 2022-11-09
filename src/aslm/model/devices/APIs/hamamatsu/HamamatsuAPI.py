@@ -675,6 +675,7 @@ class camReg(object):
                 dcamapi_uninit()
                 raise Exception("DCAM initialization failed.")
             cls.maxCameras = paraminit.iDeviceCount
+            cls.numCameras = 0
 
         cls.numCameras += 1
         print(f"Number of cameras is {cls.numCameras}")

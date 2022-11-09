@@ -56,6 +56,9 @@ class CameraBase:
 
     """
     def __init__(self, microscope_name, device_connection, configuration):
+        if microscope_name not in configuration['configuration']['microscopes'].keys():
+            raise NameError(f'Microscope {microscope_name} does not exist!')
+
         self.configuration = configuration
         self.camera_controller = device_connection
         self.camera_parameters = self.configuration['configuration']['microscopes'][microscope_name]['camera']

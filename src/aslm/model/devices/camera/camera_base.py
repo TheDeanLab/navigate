@@ -62,7 +62,6 @@ class CameraBase:
         self.configuration = configuration
         self.camera_controller = device_connection
         self.camera_parameters = self.configuration['configuration']['microscopes'][microscope_name]['camera']
-        self.stop_flag = False
         self.is_acquiring = False
 
         # Initialize Pixel Information

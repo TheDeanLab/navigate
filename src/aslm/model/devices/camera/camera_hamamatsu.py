@@ -79,10 +79,11 @@ class HamamatsuOrca(CameraBase):
                                                   self.camera_parameters['trigger_polarity'])
         self.camera_controller.set_property_value("trigger_source",
                                                   self.camera_parameters['trigger_source'])
-        self.camera_controller.set_property_value("image_height",
-                                                   self.camera_parameters['y_pixels'])
-        self.camera_controller.set_property_value("image_width",
-                                                   self.camera_parameters['x_pixels'])
+        # DCAM_IDPROP_IMAGE_WIDTH/HEIGHT is readonly
+        # self.camera_controller.set_property_value("image_height",
+        #                                            self.camera_parameters['y_pixels'])
+        # self.camera_controller.set_property_value("image_width",
+        #                                            self.camera_parameters['x_pixels'])
 
         logger.info("HamamatsuOrca Initialized")
 
@@ -101,10 +102,6 @@ class HamamatsuOrca(CameraBase):
             Serial number for the camera.
         """
         return self.camera_controller._serial_number
-
-    def stop(self):
-        r""" Set stop_flag as True"""
-        self.stop_flag = True
 
     def report_settings(self):
         r"""Print Camera Settings."""

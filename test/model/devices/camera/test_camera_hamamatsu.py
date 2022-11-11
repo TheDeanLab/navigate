@@ -30,22 +30,61 @@
 # POSSIBILITY OF SUCH DAMAGE.
 # """
 
-# Standard Library Imports
-import unittest
-from pathlib import Path
-
 # Third Party Imports
+import pytest
 
 # Local Imports
 from aslm.model.devices.camera.camera_hamamatsu import HamamatsuOrca
 
-class TestHamamatsuOrca(unittest.TestCase):
+@pytest.mark.hardware
+class TestHamamatsuOrca:
     r"""Unit Test for HamamamatsuOrca Class"""
+
+    @classmethod
+    def setup_class(self):
+        from aslm.model.devices.APIs.hamamatsu.HamamatsuAPI import DCAM, camReg
+        from aslm.model.dummy import DummyModel
+
+        self.num_of_tests = 10
+
+        self.model = DummyModel()
+
+        temp = {}
+        for microscope_name in self.model.configuration['configuration']['microscopes'].keys():
+            serial_number = self.model.configuration['configuration']['microscopes'][microscope_name]['camera']['hardware']['serial_number']
+            temp[serial_number] = microscope_name
+
+        self.camera_connections = {}
+
+        camera = DCAM()
+        for i in range(camReg.maxCameras):
+            if i > 0:
+                camera = DCAM(i)
+            if camera._serial_number in temp:
+                self.camera_connections[temp[camera._serial_number]] = camera
+
+        microscope_name = self.model.configuration['experiment']['MicroscopeState']['microscope_name']
+        self.camera = self.start_camera(microscope_name)
+        
+    @classmethod
+    def teardown_class(self):
+        for microscope_name in self.camera_connections:
+            self.camera_connection[microscope_name].dev_close()
+
+    def start_camera(self, microscope_name):
+        if microscope_name not in self.camera_connections:
+            return None
+        camera = HamamatsuOrca(microscope_name, self.camera_connections[microscope_name], self.model.configuration)
+        return camera
+
+    def is_in_range(self, value, target, precision=100):
+        target_min -= target / precision
+        target_max += target / precision
+        return value > target_min and value < target_max
 
     def test_hamamatsu_camera_attributes(self):
         attributes = dir(HamamatsuOrca)
         desired_attributes = ['serial_number',
-                              'stop',
                               'report_settings',
                               'close_camera',
                               'set_sensor_mode',
@@ -64,6 +103,179 @@ class TestHamamatsuOrca(unittest.TestCase):
         for da in desired_attributes:
             assert da in attributes
 
+    def test_init_camera(self):
+        for microscope_name in self.model.configuration['configuration']['microscopes'].keys():
+        
+            camera = self.start_camera(microscope_name)
+            
+            assert camera != None, f"Should start the camera {microscope_name}"
 
-if __name__ == '__main__':
-    unittest.main()
+            camera_controller = camera.camera_controller
+            camera_configs = self.model.configuration['configuration']['microscopes'][microscope_name]['camera']
+
+            # serial number
+            assert camera_controller._serial_number == camera_configs['hardware']['serial_number'], f"the camera serial number isn't right for {microscope_name}!"
+            assert camera.serial_number == camera_configs['hardware']['serial_number'], f"the camera serial number isn't right for {microscope_name}!"
+
+            # verify camera is initialized with the attributes from configuration.yaml
+            parameters = ['defect_correct_mode', 'readout_speed', 'trigger_active', 'trigger_mode', 'trigger_polarity', 'trigger_source']
+            for parameter in parameters:
+                value = camera_controller.get_property_value(parameter)
+                assert value == camera_configs[parameter]
+
+            # sensor mode
+            sensor_mode = camera_controller.get_property_value('sensor_mode')
+            expected_value = 1 if camera_configs['sensor_mode'] == 'Normal' else 12
+            assert sensor_mode == expected_value, "Sensor mode isn't right!"
+
+            # exposure time
+            exposure_time = camera_controller.get_property_value('exposure_time')
+            assert exposure_time == camera_configs['exposure_time'] / 1000, "Exposure time isn't right!"
+
+            # binning
+            binning = camera_controller.get_property_value('binning')
+            assert binning == camera_configs['binning'][0], "Binning isn't right!"
+
+            # image width and height
+            width = camera_controller.get_property_value('image_width')
+            assert width == camera_configs['x_pixels'], "image width isn't right"
+            height = camera_controller.get_property_value('image_height')
+            assert height == camera_configs['y_pixels'], "image height isn't right"
+
+    def test_set_sensor_mode(self):
+        modes = {'Normal': 1,
+                 'Light-Sheet': 12,
+                 'RandomMode': None
+                }
+        for mode in modes:
+            pre_value = self.camera.camera_controller.get_property_value('sensor_mode')
+            self.camera.set_sensor_mode(mode)
+            value = self.camera.camera_controller.get_property_value('sensor_mode')
+            if modes[mode] != None:
+                assert value == modes[mode], f"sensor mode {mode} isn't right!"
+            else:
+                assert value == pre_value, f"sensor mode shouldn't be set!"
+
+    def test_set_readout_direction(self):
+        readout_directions = {
+            'Top-to-Bottom': 1,
+            'Bottom-to-Top': 2,
+            'bytrigger': 3,
+            'diverge': 5
+        }
+        for direction in readout_directions:
+            self.camera.set_readout_direction(direction)
+            value = self.camera.camera_controller.get_property_value('readout_direction')
+            assert value == readout_directions[direction], f"readout direction setting isn't right for {direction}"
+    
+    def test_calculate_readout_time(self):
+        pass
+
+    def test_set_exposure_time(self):
+        import random
+        for i in range(self.num_of_tests):
+            exposure_time = random.randint(1, 1000)
+            self.camera.set_exposure_time(exposure_time)
+            value = self.camera.camera_controller.get_property_value('exposure_time')
+            assert value == exposure_time / 1000, f"exposure time({exposure_time}) isn't right!"
+
+    def test_set_line_interval(self):
+        import random
+        for i in range(self.num_of_tests):
+            line_interval = random.random()
+            self.camera.set_line_interval(line_interval)
+            value = self.camera.camera_controller.get_property_value('internal_line_interval')
+            assert self.is_in_range(value, line_interval), f"line interval {line_interval} isn't right!"
+
+    def test_set_binning(self):
+        import random
+
+        binning_dict={
+            '1x1': 1,
+            '2x2': 2,
+            '4x4': 4,
+            '8x8': 8,
+            '16x16': 16,
+            '1x2': 102,
+            '2x4': 204
+            }
+        for binning_string in binning_dict:
+            self.camera.set_binning(binning_string)
+            value = self.camera.camera_controller.get_property_value('binning')
+            assert value == binning_dict[binning_string], f"binning {binning_string} isn't right!"
+
+        for i in range(self.num_of_tests):
+            x = random.randint(1, 20)
+            y = random.randint(1, 20)
+            binning_string = f'{x}x{y}'
+            assert self.camera.set_binning(binning_string) == (binning_string in binning_dict)
+
+    def test_set_ROI(self):
+        import random
+        for i in range(self.num_of_tests):
+            pre_x, pre_y = self.camera.x_pixels, self.camera.y_pixels
+            x = random.randint(1, self.camera.camera_parameters['x_pixels'])
+            y = random.randint(1, self.camera.camera_parameters['y_pixels'])
+            self.camera.set_ROI(x, y)
+            if x % 2 == 1 or y % 2 == 1:
+                assert self.camera.x_pixels == pre_x, "width shouldn't be chaged!"
+                assert self.camera.y_pixels == pre_y, "height shouldn't be changed!"
+            else:
+                assert self.camera.x_pixels == x, f"width should be changed to {x}"
+                assert self.camera.y_pixels == y, f"height should be chagned to {y}"
+        
+        self.camera.set_ROI(512, 512)
+        assert self.camera.x_pixels == 512
+        assert self.camera.y_pixels == 512
+
+        self.camera.set_ROI(self.camera.camera_parameters['x_pixels'], self.camera.camera_parameters['y_pixels'])
+        assert self.camera.x_pixels == self.camera.camera_parameters['x_pixels']
+        assert self.camera.y_pixels == self.camera.camera_parameters['y_pixels']
+
+        self.camera.set_ROI(self.camera.camera_parameters['x_pixels']+100, self.camera.camera_parameters['y_pixels']+100)
+        assert self.camera.x_pixels == self.camera.camera_parameters['x_pixels']
+        assert self.camera.y_pixels == self.camera.camera_parameters['y_pixels']
+
+    
+    def test_acquire_image(self):
+        import random
+        import time
+        from aslm.model.concurrency.concurrency_tools import SharedNDArray
+
+        # set software trigger
+        self.camera.camera_controller.set_property_value('trigger_source', 3)
+
+        assert self.camera.is_acquiring == False
+
+        number_of_frames = 100
+        data_buffer = [SharedNDArray(shape=(2048, 2048), dtype='uint16') for i in range(number_of_frames)]
+
+        # initialize without release/close the camera
+        self.camera.initialize_image_series(data_buffer, number_of_frames)
+        self.camera.initialize_image_series(data_buffer, number_of_frames)
+        assert self.camera.is_acquiring == True
+
+        self.camera.initialize_image_series(data_buffer, number_of_frames)
+        assert self.camera.is_acquiring == True
+
+        for i in range(self.num_of_tests):
+            triggers = random.randint(1, 100)
+            for j in range(triggers):
+                self.camera.camera_controller.fire_software_trigger()
+
+            frames = self.camera.get_new_frame()
+            assert len(frames) == triggers
+
+        self.camera.close_image_series()
+        assert self.camera.is_acquring == False
+
+        for i in range(self.num_of_tests):
+            self.camera.initialize_image_series(data_buffer, number_of_frames)
+            assert self.camera.is_acquiring == True
+            self.camera.close_image_series()
+            assert self.camera.is_acquring == False
+
+        # close a closed camera
+        self.camera.close_image_series()
+        self.camera.close_image_series()
+        assert self.camera.is_acquring == False

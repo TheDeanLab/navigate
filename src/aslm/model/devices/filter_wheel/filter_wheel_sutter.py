@@ -108,8 +108,7 @@ class SutterFilterWheel(FilterWheelBase):
 
         self.number_of_filter_wheels = configuration['configuration']['microscopes'][microscope_name]['filter_wheel']['hardware']['wheel_number']
         self.wait_until_done_delay = configuration['configuration']['microscopes'][microscope_name]['filter_wheel']['filter_wheel_delay']
-        self.wait_until_done = True        
-
+        self.wait_until_done = True
         self.read_on_init = True
         self.speed = 2
 

@@ -142,6 +142,14 @@ class TestHamamatsuAPI:
         number_of_frames = 100
 
         data_buffer = [SharedNDArray(shape=(2048, 2048), dtype='uint16') for i in range(number_of_frames)]
+        
+        # attach a buffer without detach a buffer
+        r = self.camera.start_acquisition(data_buffer, number_of_frames)
+        assert r == True, 'attach the buffer correctly!'
+        r = self.camera.start_acquisition(data_buffer, number_of_frames)
+        # TODO: True/False?
+        assert r == True, 'attach the buffer correctly!'
+
         self.camera.start_acquisition(data_buffer, number_of_frames)
 
         assert self.camera.is_acquiring == True, 'camera should start acquiring data!'
@@ -157,5 +165,8 @@ class TestHamamatsuAPI:
 
         self.camera.stop_acquisition()
         assert self.camera.is_acquiring == False, 'camera should stop acquiring data!'
+
+        # detach a detached buffer
+        self.camera.stop_acquisition()
 
         self.close_camera()

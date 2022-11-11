@@ -61,8 +61,8 @@ class HamamatsuOrca(CameraBase):
 
         # Values are pulled from the CameraParameters section of the configuration.yml file.
         # Exposure time converted here from milliseconds to seconds.
-        self.camera_controller.set_property_value("sensor_mode",
-                                                  1)
+        self.set_sensor_mode(self.camera_parameters['sensor_mdoe'])
+        
         self.camera_controller.set_property_value("defect_correct_mode",
                                                   self.camera_parameters['defect_correct_mode'])
         self.camera_controller.set_property_value("exposure_time",
@@ -246,14 +246,34 @@ class HamamatsuOrca(CameraBase):
         Parameters
         ----------
         binning_string : str
-            Desired binning properties (e.g., '2x2', '4x4', '8x8'
+            Desired binning properties (e.g., '1x1', '2x2', '4x4', '8x8', '16x16', '1x2', '2x4')
+        
+        Returns
+        -------
+        result: bool
         """
-        self.camera_controller.set_property_value("binning", binning_string)
-        self.x_binning = int(binning_string[0])
-        self.y_binning = int(binning_string[2])
+        binning_dict={
+            '1x1': 1,
+            '2x2': 2,
+            '4x4': 4,
+            '8x8': 8,
+            '16x16': 16,
+            '1x2': 102,
+            '2x4': 204
+            }
+        if binning_string not in binning_string.keys():
+            logger.debug(f"can't set binning to {binning_string}")
+            print(f"can't set binning to {binning_string}")
+            return False
+        self.camera_controller.set_property_value("binning", binning_dict[binning_string])
+        idx = binning_string.index('x')
+        self.x_binning = int(binning_string[:idx])
+        self.y_binning = int(binning_string[idx+1:])
         self.x_pixels = int(self.x_pixels / self.x_binning)
         self.y_pixels = int(self.y_pixels / self.y_binning)
-        self.configuration['experiment']['CameraParameters']['camera_binning'] = str(self.x_binning) + 'x' + str(self.y_binning)
+        # should update experiment in controller side
+        # self.configuration['experiment']['CameraParameters']['camera_binning'] = str(self.x_binning) + 'x' + str(self.y_binning)
+        return True
 
     def set_ROI(self, roi_height=2048, roi_width=2048):
         r"""Change the size of the active region on the camera.
@@ -268,6 +288,10 @@ class HamamatsuOrca(CameraBase):
         # Get the Maximum Number of Pixels from the Configuration File
         camera_height = self.camera_parameters['y_pixels']
         camera_width = self.camera_parameters['x_pixels']
+
+        if roi_height > camera_height or roi_width > camera_width or roi_height % 2 == 1 or roi_width % 2 == 1:
+            logger.debug(f"can't set roi to {roi_width} and {roi_height}")
+            return
 
         # Calculate Location of Image Edges
         roi_top = (camera_height - roi_height) / 2

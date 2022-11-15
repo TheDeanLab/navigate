@@ -64,7 +64,7 @@ class TestHamamatsuOrca:
                 self.camera_connections[temp[camera._serial_number]] = camera
 
         microscope_name = self.model.configuration['experiment']['MicroscopeState']['microscope_name']
-        self.camera = self.start_camera(microscope_name)
+        self.camera = self.start_camera(self, microscope_name)
         
     @classmethod
     def teardown_class(self):

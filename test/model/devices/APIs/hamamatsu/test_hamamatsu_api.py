@@ -33,40 +33,46 @@
 import pytest
 
 @pytest.mark.hardware
+def test_open_and_close_camera():
+    from aslm.model.devices.APIs.hamamatsu.HamamatsuAPI import camReg, DCAM
+    # open camera
+    camera = DCAM()
+    if camReg.maxCameras > 0:
+        assert camera.__hdcam != 0, "didn't open camera correctly!"
+        assert camReg.numCameras == 1, "didn't register camera correctly!"
+        camera.dev_close()
+        assert camera.__hdcam == 0, "didn't close camera correctly!"
+        assert camReg.numCameras == 0, "didn't register camera correctly!"
+
+
+@pytest.mark.hardware
+@pytest.fixture(autouse=True, scope='class')
+def open_camera():
+    from aslm.model.devices.APIs.hamamatsu.HamamatsuAPI import DCAM
+    # open camera
+    for i in range(10):
+        try:
+            camera = DCAM()
+            # TODO: __hdcam is accessible?
+            if camera.__hdcam != 0:
+                break
+            camera.dev_close()
+            camera = None
+        except:
+            continue
+    yield camera
+    if camera != None:
+        camera.dev_close()
+
+@pytest.mark.hardware
 class TestHamamatsuAPI:
-    camera = None
 
-    def open_camera(self):
-        from aslm.model.devices.APIs.hamamatsu.HamamatsuAPI import DCAM
-        # open camera
-        for i in range(10):
-            try:
-                self.camera = DCAM()
-                if self.camera.__hdcam != 0:
-                    break
-                self.camera.dev_close()
-            except:
-                continue
-
-    def close_camera(self):
-        if self.camera != None:
-            self.camera.dev_close()
-
-    def test_open_and_close_camera(self):
-        from aslm.model.devices.APIs.hamamatsu.HamamatsuAPI import camReg
-        # open camera
-        self.open_camera()
-        if camReg.maxCameras > 0:
-            assert self.camera.__hdcam != 0, "didn't open camera correctly!"
-            assert camReg.numCameras == 1, "didn't register camera correctly!"
-            self.camera.dev_close()
-            assert self.camera.__hdcam == 0, "didn't close camera correctly!"
-            assert camReg.numCameras == 0, "didn't register camera correctly!"
-
+    @pytest.fixture(autouse=True)
+    def _prepare_camera(self, open_camera):
+        self.camera = open_camera
+        assert self.camera != None
 
     def test_get_and_set_property_value(self):
-        self.open_camera()
-
         # set property
         configuration = {
             'subarray_mode': 1,
@@ -97,11 +103,8 @@ class TestHamamatsuAPI:
         #set a non-exist property
         assert self.camera.set_property_value('non-exist-property', 100) == False, "can't handle non-exist property name"
 
-        self.close_camera()
-
     def test_ROI(self):
         import random
-        self.open_camera()
 
         rects = [(0, 0, 2047, 2047), (512, 512, 1535, 1535), (768, 768, 1279, 1279)]
 
@@ -111,16 +114,12 @@ class TestHamamatsuAPI:
             self.camera.set_ROI(*rect)
             assert self.camera.get_property_value('image_width') == (rect[2]-rect[0]+1), f'ROI Width: {(rect[2]-rect[0]+1)}'
             assert self.camera.get_property_value('image_height') == (rect[3]-rect[1]+1), f'ROI Height: {(rect[3]-rect[1]+1)}'
-
-        self.close_camera()
         
     
     def test_acquisition(self):
         import random
         import time
         from aslm.model.concurrency.concurrency_tools import SharedNDArray
-
-        self.open_camera()
 
         configuration = {
             'sensor_mode': 12,  # 12 for progressive
@@ -169,4 +168,3 @@ class TestHamamatsuAPI:
         # detach a detached buffer
         self.camera.stop_acquisition()
 
-        self.close_camera()

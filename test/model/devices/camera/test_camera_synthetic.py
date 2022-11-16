@@ -37,16 +37,20 @@ import numpy as np
 from aslm.model.devices.camera.camera_synthetic import SyntheticCamera, SyntheticCameraController
 from aslm.model.dummy import DummyModel
 
+@pytest.fixture(scope='class')
+def synthetic_camera():
+    dummy_model = DummyModel()
+    scc = SyntheticCameraController()
+    microscope_name = dummy_model.configuration['experiment']['MicroscopeState']['microscope_name']
+    synthetic_camera = SyntheticCamera(microscope_name, scc, dummy_model.configuration)
+    return synthetic_camera
+
 class TestSyntheticCamera:
     r"""Unit Test for Camera Synthetic Class"""
 
-    @classmethod
-    def setup_class(self):
-        self.dummy_model = DummyModel()
-        scc = SyntheticCameraController()
-        microscope_name = self.dummy_model.configuration['experiment']['MicroscopeState']['microscope_name']
-        self.synthetic_camera = SyntheticCamera(microscope_name, scc,self.dummy_model.configuration)
-
+    @pytest.fixture(autouse=True)
+    def _prepare_camera(self, synthetic_camera):
+        self.synthetic_camera = synthetic_camera
 
     def test_synthetic_camera_attributes(self):
         desired_attributes = ['x_pixels',
@@ -84,7 +88,6 @@ class TestSyntheticCamera:
 
 
     def test_synthetic_camera_methods(self):
-
         methods = ['report_settings',
                    'close_camera',
                    'set_sensor_mode',

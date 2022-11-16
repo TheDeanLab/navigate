@@ -36,18 +36,21 @@ from pathlib import Path
 import tkinter as tk
 import platform
 import os
-from aslm.log_files.log_functions import log_setup
-from aslm.config import get_configuration_paths
+import threading
+
+# Third Party Imports
 from PIL import ImageTk, Image
 
 # Local Imports
 from aslm.controller.controller import Controller
+from aslm.log_files.log_functions import log_setup
+from aslm.config import get_configuration_paths
 
 os.environ['http_proxy'] = ''
 os.environ['https_proxy'] = ''
 
 def main():
-    r"""Multiscale ASLM Microscope Software.
+    """Multiscale ASLM Microscope Software.
     Microscope control software built in a Model-View-Controller architecture.
     Provides control of cameras, data acquisition cards, filter wheels, lasers
     stages, voice coils, and zoom servos.
@@ -178,9 +181,6 @@ def main():
             if number_GPUs > 0:
                 use_gpu = True
 
-    # Destroy splash screen instance
-    splash_root.destroy()
-
     # Start the GUI
     root = tk.Tk()
     Controller(root,
@@ -193,34 +193,51 @@ def main():
     root.mainloop()
 
 
+def splash_screen(view_directory):
+    """Initialize Splash Screen"""
+    splash_root = tk.Tk()
+
+    photo_image = view_directory.joinpath("view", "icon", "splash_screen_image.png")
+
+    image1 = Image.open(photo_image)
+    splash_width, splash_height = image1.size
+
+    # get screen width and height
+    ws = splash_root.winfo_screenwidth()  # width of the screen
+    hs = splash_root.winfo_screenheight()  # height of the screen
+
+    # calculate x and y coordinates for the Tk root window
+    x = (ws/2) - (splash_width/2)
+    y = (hs/2) - (splash_height/2)
+
+    splash_root.geometry('%dx%d+%d+%d' % (splash_width, splash_height, x, y))
+    splash_root.resizable(0, 0)
+
+    splash = ImageTk.PhotoImage(image1)
+    label1 = tk.Label(splash_root, image=splash)
+    label1.pack()
+
+    # Delay after splash screen initiation in ms before main window initializes
+    splash_root.after(1000, main)
+
+    # Initialize splash screen root
+    splash_root.mainloop()
+
+    # Kill the splash screen
+    splash_root.destroy()
+
 if __name__ == '__main__':
     if platform.system() == 'Darwin':
         print("Apple OS Not Fully Supported. ",
               "Tensorflow and CuPy based analysis is not possible. ",
               "Please try Linux or Windows for this functionality")
 
-    #main()
 
-
-# Initialize Splash Screen
-splash_root = tk.Tk()
-
-view_directory = Path(__file__).resolve().parent
-photo_image = view_directory.joinpath("view", "icon", "splash_screen_image.png")
-
-image1 = Image.open(photo_image)
-splash_width, splash_height = image1.size
-
-splash_root.geometry("{height}x{width}".format(height=splash_width, width=splash_height))
-splash_root.resizable(0, 0)
-
-splash = ImageTk.PhotoImage(image1)
-
-label1 = tk.Label(splash_root, image=splash)
-label1.pack()
-
-# Delay after splash screen initiation in ms before main window initializes
-splash_root.after(1000, main)
-
-# Initialize splash screen root
-splash_root.mainloop()
+    # Launch Splash Screen
+    # view_directory = Path(__file__).resolve().parent
+    # splash_thread = threading.Thread(target=splash_screen, args=view_directory, daemon=True)
+    # splash_thread.start()
+    #
+    # main_thread = threading.Thread(target=main)
+    # main_thread.start()
+    main()

@@ -37,49 +37,70 @@ import pytest
 from aslm.model.devices.camera.camera_hamamatsu import HamamatsuOrca
 
 @pytest.mark.hardware
+@pytest.fixture(autouse=True, scope='class')
+def prepare_cameras(dummy_model):
+    from aslm.model.devices.APIs.hamamatsu.HamamatsuAPI import DCAM, camReg
+
+    def start_camera(idx=0):
+        # open camera
+        for i in range(10):
+            assert camReg.numCameras == 0
+            try:
+                camera = DCAM(idx)
+                if camera.get_camera_handler() != 0:
+                    break
+                camera.dev_close()
+            except:
+                continue
+            camera = None
+        return camera
+
+    model = dummy_model
+
+    temp = {}
+    for microscope_name in model.configuration['configuration']['microscopes'].keys():
+        serial_number = model.configuration['configuration']['microscopes'][microscope_name]['camera']['hardware']['serial_number']
+        temp[serial_number] = microscope_name
+
+    camera_connections = {}
+
+    camera = start_camera()
+    for i in range(camReg.maxCameras):
+        if i > 0:
+            camera = start_camera(i)
+        if camera._serial_number in temp:
+            camera_connections[temp[camera._serial_number]] = camera
+
+    yield camera_connections
+
+    # close all the cameras
+    for k in camera_connections:
+        camera_connections[k].dev_close() 
+
+@pytest.mark.hardware
 class TestHamamatsuOrca:
     r"""Unit Test for HamamamatsuOrca Class"""
 
-    @classmethod
-    def setup_class(self):
-        from aslm.model.devices.APIs.hamamatsu.HamamatsuAPI import DCAM, camReg
-        from aslm.model.dummy import DummyModel
-
+    @pytest.fixture(autouse=True, scope='class')
+    def _prepare_test(self, dummy_model, prepare_cameras):
         self.num_of_tests = 10
+        self.model = dummy_model
+        self.camera_connections = prepare_cameras
 
-        self.model = DummyModel()
+        self.microscope_name = self.model.configuration['experiment']['MicroscopeState']['microscope_name']
+        self.camera = self.start_camera()
 
-        temp = {}
-        for microscope_name in self.model.configuration['configuration']['microscopes'].keys():
-            serial_number = self.model.configuration['configuration']['microscopes'][microscope_name]['camera']['hardware']['serial_number']
-            temp[serial_number] = microscope_name
-
-        self.camera_connections = {}
-
-        camera = DCAM()
-        for i in range(camReg.maxCameras):
-            if i > 0:
-                camera = DCAM(i)
-            if camera._serial_number in temp:
-                self.camera_connections[temp[camera._serial_number]] = camera
-
-        microscope_name = self.model.configuration['experiment']['MicroscopeState']['microscope_name']
-        self.camera = self.start_camera(self, microscope_name)
-        
-    @classmethod
-    def teardown_class(self):
-        for microscope_name in self.camera_connections:
-            self.camera_connection[microscope_name].dev_close()
-
-    def start_camera(self, microscope_name):
+    def start_camera(self, microscope_name=None):
+        if microscope_name == None:
+            microscope_name = self.microscope_name
         if microscope_name not in self.camera_connections:
             return None
         camera = HamamatsuOrca(microscope_name, self.camera_connections[microscope_name], self.model.configuration)
         return camera
 
     def is_in_range(self, value, target, precision=100):
-        target_min -= target / precision
-        target_max += target / precision
+        target_min = target - target / precision
+        target_max = target + target / precision
         return value > target_min and value < target_max
 
     def test_hamamatsu_camera_attributes(self):
@@ -242,6 +263,7 @@ class TestHamamatsuOrca:
         import time
         from aslm.model.concurrency.concurrency_tools import SharedNDArray
 
+        self.camera = self.start_camera()
         # set software trigger
         self.camera.camera_controller.set_property_value('trigger_source', 3)
 
@@ -252,16 +274,19 @@ class TestHamamatsuOrca:
 
         # initialize without release/close the camera
         self.camera.initialize_image_series(data_buffer, number_of_frames)
-        self.camera.initialize_image_series(data_buffer, number_of_frames)
         assert self.camera.is_acquiring == True
 
         self.camera.initialize_image_series(data_buffer, number_of_frames)
         assert self.camera.is_acquiring == True
+
+        exposure_time = self.camera.camera_controller.get_property_value('exposure_time')
+        readout_time = self.camera.camera_controller.get_property_value('readout_time')
 
         for i in range(self.num_of_tests):
             triggers = random.randint(1, 100)
             for j in range(triggers):
                 self.camera.camera_controller.fire_software_trigger()
+                time.sleep(exposure_time + readout_time)
 
             frames = self.camera.get_new_frame()
             assert len(frames) == triggers
@@ -279,3 +304,5 @@ class TestHamamatsuOrca:
         self.camera.close_image_series()
         self.camera.close_image_series()
         assert self.camera.is_acquring == False
+        
+        self.camera = self.start_camera()

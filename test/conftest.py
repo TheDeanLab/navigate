@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -28,46 +28,14 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-#
+# """
 
-# Standard Library Imports
-import logging
+import pytest
 
-# Third Party Imports
+@pytest.fixture(scope='package')
+def dummy_model():
+    from aslm.model.dummy import DummyModel
 
-# Local Imports
-from aslm.model.devices.shutter.laser_shutter_base import ShutterBase
+    model = DummyModel()
 
-# Logger Setup
-p = __name__.split(".")[1]
-logger = logging.getLogger(p)
-
-
-class SyntheticShutter(ShutterBase):
-    """SyntheticShutter Class
-
-    Triggering for shutters delivered from synthetically.
-
-    Attributes
-    ----------
-    microscope_name : str
-        Name of microscope in configuration
-    device_connection : object
-        Hardware device to connect to
-    configuration : multiprocesing.managers.DictProxy
-        Global configuration of the microscope
-
-    Methods
-    -------
-    open_left()
-        Open the left shutter, close the right shutter.
-    open_right()
-        Open the right shutter, close the left shutter.
-    close_shutters()
-        Close both shutters
-    state()
-        Return the current state of the shutters
-    """
-
-    def __init__(self, microscope_name, device_connection, configuration):
-        super().__init__(microscope_name, device_connection, configuration)
+    return model

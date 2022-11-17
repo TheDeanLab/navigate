@@ -1,4 +1,4 @@
-"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# """
+#
 
 
 class ChangeResolution:
@@ -257,17 +257,13 @@ class ZStackAcquisition:
             return True
         return False
 
-    def generate_meta_data(self, *args):
-        # print('This frame: z stack', self.model.frame_id)
-        return True
-
     def update_channel(self):
         self.current_channel_in_list = (self.current_channel_in_list+1) % len(self.channels)
         self.model.target_channel = self.channels[self.current_channel_in_list]
 
 
 class FindTissueSimple2D:
-    def __init__(self, model, overlap=0.1, target_resolution='high'):
+    def __init__(self, model, overlap=0.1, target_resolution='Nanoscale', target_zoom='N/A'):
         """
         Detect tissue and grid out the space to image.
         """
@@ -278,6 +274,7 @@ class FindTissueSimple2D:
 
         self.overlap = overlap
         self.target_resolution = target_resolution
+        self.target_zoom = target_zoom
 
     def data_func(self, frame_ids):
         from skimage import filters
@@ -290,30 +287,20 @@ class FindTissueSimple2D:
             img = self.model.data_buffer[idx]
 
             # Get current mag
-            if self.model.configuration['experiment']['MicroscopeState']['microscope_name'] == 'Nanoscale':
-                curr_pixel_size = self.model.configuration['ZoomParameters']['high_res_zoom_pixel_size']
-                curr_mag = 300/(12.19/1.56)  # TODO: Don't hardcode
-            else:
-                zoom = self.model.configuration['experiment']['MicroscopeState']['zoom']
-                curr_pixel_size = self.model.configuration['ZoomParameters']['low_res_zoom_pixel_size'][zoom]
-                curr_mag = float(zoom[:-1])
-
-            # get target mag
-            if self.target_resolution == 'high':
-                pixel_size = self.model.configuration['ZoomParameters']['high_res_zoom_pixel_size']
-                mag = 300/(12.19/1.56)  # TODO: Don't hardcode
-            else:
-                pixel_size = self.model.configuration['ZoomParameters']['low_res_zoom_pixel_size'][self.target_resolution]
-                mag = float(self.target_resolution)
+            microscope_name = self.model.configuration['experiment']['MicroscopeState']['microscope_name']
+            zoom = self.model.configuration['experiment']['MicroscopeState']['zoom']
+            curr_pixel_size = self.model.configuration['configuration']['microscopes'][microscope_name]['zoom'][zoom]['pixel_size']
+            # get target pixel size
+            pixel_size = self.model.configuration['configuration']['microscopes'][self.target_resolution]['zoom'][self.target_zoom]['pixel_size']
 
             # Downsample according to the desired magnification change. Note, we could downsample by whatever we want.
-            ds = int(mag/curr_mag)
+            ds = int(curr_pixel_size/pixel_size)
             ds_img = downscale_local_mean(img, (ds, ds))
 
             # Threshold
             thresh_img = ds_img > filters.threshold_otsu(img)
 
-            tifffile.imwrite("C:\\Users\\MicroscopyInnovation\\Desktop\\Data\\Zach\\thresh.tiff", thresh_img)
+            # tifffile.imwrite("C:\\Users\\MicroscopyInnovation\\Desktop\\Data\\Zach\\thresh.tiff", thresh_img)
 
             # Find the bounding box
             # In the real-deal, non-transposed image, x increase corresponds to a decrease in row number
@@ -328,7 +315,7 @@ class FindTissueSimple2D:
             # grab z, theta, f starting positions
             z_start = self.model.configuration['experiment']['StageParameters']['z']
             r_start = self.model.configuration['experiment']['StageParameters']['theta']
-            if self.target_resolution == 'high':
+            if self.target_resolution == 'Nanoscale':
                 f_start = 0  # very different range of focus values in high-res
             else:
                 f_start = self.model.configuration['experiment']['StageParameters']['f']
@@ -341,24 +328,15 @@ class FindTissueSimple2D:
             x_start += self.model.configuration['experiment']['StageParameters']['x'] + curr_fov_x/2
             y_start += self.model.configuration['experiment']['StageParameters']['y'] - curr_fov_y/2
 
-            if self.target_resolution == 'high':
-                x_start += float(self.model.configuration['StageParameters']['x_r_offset']) \
-                           - float(self.model.configuration['StageParameters']['x_l_offset'])
-                y_start += float(self.model.configuration['StageParameters']['y_r_offset']) \
-                           - float(self.model.configuration['StageParameters']['y_l_offset'])
-                z_start += float(self.model.configuration['StageParameters']['z_r_offset']) \
-                           - float(self.model.configuration['StageParameters']['z_l_offset'])
-                r_start += float(self.model.configuration['StageParameters']['theta_r_offset']) \
-                           - float(self.model.configuration['StageParameters']['theta_l_offset'])
-            else:
-                x_start += -float(self.model.configuration['StageParameters']['x_r_offset']) \
-                           + float(self.model.configuration['StageParameters']['x_l_offset'])
-                y_start += -float(self.model.configuration['StageParameters']['y_r_offset']) \
-                           + float(self.model.configuration['StageParameters']['y_l_offset'])
-                z_start += -float(self.model.configuration['StageParameters']['z_r_offset']) \
-                           + float(self.model.configuration['StageParameters']['z_l_offset'])
-                r_start += -float(self.model.configuration['StageParameters']['theta_r_offset']) \
-                           + float(self.model.configuration['StageParameters']['theta_l_offset'])
+            # stage offset
+            x_start += float(self.model.configuration['configuration']['microscopes'][self.target_resolution]['stage']['x_offset']) \
+                       - float(self.model.configuration['configuration']['microscopes'][microscope_name]['stage']['x_offset'])
+            y_start += float(self.model.configuration['configuration']['microscopes'][self.target_resolution]['stage']['y_offset']) \
+                       - float(self.model.configuration['configuration']['microscopes'][microscope_name]['stage']['y_offset'])
+            z_start += float(self.model.configuration['configuration']['microscopes'][self.target_resolution]['stage']['z_offset']) \
+                       - float(self.model.configuration['configuration']['microscopes'][microscope_name]['stage']['z_offset'])
+            r_start += float(self.model.configuration['configuration']['microscopes'][self.target_resolution]['stage']['r_offset']) \
+                       - float(self.model.configuration['configuration']['microscopes'][microscope_name]['stage']['r_offset'])
 
             # grid out the 2D space
             fov_x = float(self.model.configuration['experiment']['CameraParameters']['x_pixels']) * pixel_size

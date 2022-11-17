@@ -14,6 +14,7 @@ def image_writer(dummy_model):
     from aslm.model.features.image_writer import ImageWriter
 
     model = dummy_model
+    model.configuration['experiment']['Saving']['save_directory'] = 'test_save_dir'
 
     writer = ImageWriter(dummy_model)
 

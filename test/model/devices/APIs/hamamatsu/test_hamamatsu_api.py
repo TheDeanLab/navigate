@@ -33,28 +33,15 @@
 import pytest
 
 @pytest.mark.hardware
-def test_open_and_close_camera():
-    from aslm.model.devices.APIs.hamamatsu.HamamatsuAPI import camReg, DCAM
-    # open camera
-    camera = DCAM()
-    if camReg.maxCameras > 0:
-        assert camera.__hdcam != 0, "didn't open camera correctly!"
-        assert camReg.numCameras == 1, "didn't register camera correctly!"
-        camera.dev_close()
-        assert camera.__hdcam == 0, "didn't close camera correctly!"
-        assert camReg.numCameras == 0, "didn't register camera correctly!"
-
-
-@pytest.mark.hardware
 @pytest.fixture(autouse=True, scope='class')
 def open_camera():
-    from aslm.model.devices.APIs.hamamatsu.HamamatsuAPI import DCAM
+    from aslm.model.devices.APIs.hamamatsu.HamamatsuAPI import DCAM, camReg
     # open camera
     for i in range(10):
+        assert camReg.numCameras == 0
         try:
             camera = DCAM()
-            # TODO: __hdcam is accessible?
-            if camera.__hdcam != 0:
+            if camera.get_camera_handler() != 0:
                 break
             camera.dev_close()
             camera = None
@@ -62,7 +49,9 @@ def open_camera():
             continue
     yield camera
     if camera != None:
+        assert camReg.numCameras == 1
         camera.dev_close()
+        assert camReg.numCameras == 0
 
 @pytest.mark.hardware
 class TestHamamatsuAPI:
@@ -91,8 +80,8 @@ class TestHamamatsuAPI:
             assert self.camera.set_property_value(k, configuration[k]), f"can't set property{k} with value{configuration[k]}"
 
         def is_in_range(value, target, precision=100):
-            target_min -= target / precision
-            target_max += target / precision
+            target_min = target - target / precision
+            target_max = target + target / precision
             return value > target_min and value < target_max
 
         # get property
@@ -109,7 +98,7 @@ class TestHamamatsuAPI:
         rects = [(0, 0, 2047, 2047), (512, 512, 1535, 1535), (768, 768, 1279, 1279)]
 
         for i in range(10):
-            r = random.randint(0, len(rects))
+            r = random.randint(0, len(rects)-1)
             rect = rects[r]
             self.camera.set_ROI(*rect)
             assert self.camera.get_property_value('image_width') == (rect[2]-rect[0]+1), f'ROI Width: {(rect[2]-rect[0]+1)}'
@@ -146,18 +135,20 @@ class TestHamamatsuAPI:
         r = self.camera.start_acquisition(data_buffer, number_of_frames)
         assert r == True, 'attach the buffer correctly!'
         r = self.camera.start_acquisition(data_buffer, number_of_frames)
-        # TODO: True/False?
-        assert r == True, 'attach the buffer correctly!'
+        # Confirmed that we can't attach a new buffer before detaching one
+        assert r == False, 'attach the buffer correctly!'
 
         self.camera.start_acquisition(data_buffer, number_of_frames)
 
         assert self.camera.is_acquiring == True, 'camera should start acquiring data!'
 
+        readout_time = self.camera.get_property_value('readout_time')
+
         for i in range(10):
             trigger_num = random.randint(0, 30)
             for j in range(trigger_num):
                 self.camera.fire_software_trigger()
-                time.sleep(configuration['exposure_time'] + 0.005)
+                time.sleep(configuration['exposure_time'] + readout_time)
 
             frames = self.camera.get_frames()
             assert len(frames) == trigger_num, 'can not get all the frames back!'

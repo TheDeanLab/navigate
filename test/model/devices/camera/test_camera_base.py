@@ -33,11 +33,10 @@
 # Third Party Imports
 import pytest
 
-from aslm.model.dummy import DummyModel
 from aslm.model.devices.camera.camera_base import CameraBase
 
-def test_start_camera():
-    model = DummyModel()
+def test_start_camera(dummy_model):
+    model = dummy_model
     for microscope_name in model.configuration['configuration']['microscopes'].keys():
         camera = CameraBase(microscope_name, None, model.configuration)
         assert camera.camera_parameters['hardware']['serial_number'] == model.configuration['configuration']['microscopes'][microscope_name]['camera']['hardware']['serial_number'], f"didn't load correct camera parameter for microscope {microscope_name}"
@@ -51,10 +50,10 @@ def test_start_camera():
         raised_error = True
     assert raised_error, "should raise NameError when the microscope name doesn't exist!"
 
-def test_camera_base_functions():
+def test_camera_base_functions(dummy_model):
     import random
 
-    model = DummyModel()
+    model = dummy_model
     microscope_name = model.configuration['experiment']['MicroscopeState']['microscope_name']
 
     camera = CameraBase(microscope_name, None, model.configuration)

@@ -1,8 +1,9 @@
-import os
+import pytest 
 
-import numpy as np
+def tiff_write_read(is_ome=False, multiposition=False, per_stack=True):
+    import os
+    import numpy as np
 
-def tiff_write_read(is_ome=False, multiposition=False):
     from aslm.model.dummy import DummyModel
     from aslm.model.data_sources.tiff_data_source import TiffDataSource
 
@@ -11,8 +12,11 @@ def tiff_write_read(is_ome=False, multiposition=False):
     z_steps = np.random.randint(1,10)
     model.configuration['experiment']['MicroscopeState']['image_mode'] = 'z-stack'
     model.configuration['experiment']['MicroscopeState']['number_z_steps'] = z_steps
-    if multiposition:
-        model.configuration['experiment']['MicroscopeState']['is_multiposition'] = True
+    model.configuration['experiment']['MicroscopeState']['is_multiposition'] = multiposition
+    if per_stack:
+        model.configuration['experiment']['MicroscopeState']['stack_cycling_mode'] == 'per_stack'
+    else:
+        model.configuration['experiment']['MicroscopeState']['stack_cycling_mode'] == 'per_slice'
 
     # Establish a TIFF data source
     if is_ome:
@@ -22,13 +26,13 @@ def tiff_write_read(is_ome=False, multiposition=False):
     ds = TiffDataSource(fn)
     ds.set_metadata_from_configuration_experiment(model.configuration)
 
-    # Populate one image per channel per timepoint per positioj
+    # Populate one image per channel per timepoint per position
     n_images = ds.shape_c*ds.shape_z*ds.shape_t*ds.positions
     data = np.random.rand(n_images, ds.shape_x, ds.shape_y)
     file_names = []
     for i in range(n_images):
         ds.write(data[i,...].squeeze())
-        c, z, _, _ = ds._cztp_indices(i, True)
+        c, z, _, _ = ds._cztp_indices(i, per_stack)
         if c == 0 and z == 0:
             file_names.extend(ds.file_name)
     ds.close()
@@ -56,11 +60,8 @@ def tiff_write_read(is_ome=False, multiposition=False):
         # Windows seems to think these files are still open
         pass
 
-def test_tiff_write_read():
-    tiff_write_read(False)
-
-def test_tiff_write_read_ome():
-    tiff_write_read(True)
-
-def test_tiff_write_read_ome_multiposition():
-    tiff_write_read(True, True)
+@pytest.mark.parametrize("is_ome", [True, False])
+@pytest.mark.parametrize("multiposition", [True, False])
+@pytest.mark.parametrize("per_stack", [True, False])
+def test_tiff_write_read(is_ome, multiposition, per_stack):
+    tiff_write_read(is_ome=is_ome, multiposition=multiposition, per_stack=per_stack)

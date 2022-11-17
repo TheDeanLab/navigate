@@ -35,11 +35,10 @@ import pytest
 import numpy as np
 
 from aslm.model.devices.camera.camera_synthetic import SyntheticCamera, SyntheticCameraController
-from aslm.model.dummy import DummyModel
 
 @pytest.fixture(scope='class')
-def synthetic_camera():
-    dummy_model = DummyModel()
+def synthetic_camera(dummy_model):
+    dummy_model = dummy_model
     scc = SyntheticCameraController()
     microscope_name = dummy_model.configuration['experiment']['MicroscopeState']['microscope_name']
     synthetic_camera = SyntheticCamera(microscope_name, scc, dummy_model.configuration)

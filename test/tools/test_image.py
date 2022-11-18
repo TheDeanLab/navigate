@@ -42,7 +42,7 @@ from aslm.tools.image import text_array
 def test_text_array_output_type():
     """Confirm output is np.ndarray object"""
     text_output = text_array(text='ASLM')
-    assert text_output == np.ndarray
+    assert type(text_output) == np.ndarray
 
 
 def test_text_array_output_height():

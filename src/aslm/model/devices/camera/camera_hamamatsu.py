@@ -61,7 +61,7 @@ class HamamatsuOrca(CameraBase):
 
         # Values are pulled from the CameraParameters section of the configuration.yml file.
         # Exposure time converted here from milliseconds to seconds.
-        self.set_sensor_mode(self.camera_parameters['sensor_mdoe'])
+        self.set_sensor_mode(self.camera_parameters['sensor_mode'])
         
         self.camera_controller.set_property_value("defect_correct_mode",
                                                   self.camera_parameters['defect_correct_mode'])
@@ -98,7 +98,7 @@ class HamamatsuOrca(CameraBase):
 
         Returns
         -------
-        serial_number : int
+        serial_number : str
             Serial number for the camera.
         """
         return self.camera_controller._serial_number
@@ -133,10 +133,9 @@ class HamamatsuOrca(CameraBase):
         mode : str
             'Normal' or 'Light-Sheet'
         """
-        if mode == 'Normal':
-            self.camera_controller.set_property_value("sensor_mode", 1)
-        elif mode == 'Light-Sheet':
-            self.camera_controller.set_property_value("sensor_mode", 12)
+        modes_dict = {'Normal': 1, 'Light-Sheet': 12}
+        if mode in modes_dict:
+            self.camera_controller.set_property_value("sensor_mode", modes_dict[mode])
         else:
             print('Camera mode not supported')
             logger.info("Camera mode not supported")
@@ -256,12 +255,12 @@ class HamamatsuOrca(CameraBase):
             '1x1': 1,
             '2x2': 2,
             '4x4': 4,
-            '8x8': 8,
-            '16x16': 16,
-            '1x2': 102,
-            '2x4': 204
+            # '8x8': 8,
+            # '16x16': 16,
+            # '1x2': 102,
+            # '2x4': 204
             }
-        if binning_string not in binning_string.keys():
+        if binning_string not in binning_dict.keys():
             logger.debug(f"can't set binning to {binning_string}")
             print(f"can't set binning to {binning_string}")
             return False
@@ -291,13 +290,17 @@ class HamamatsuOrca(CameraBase):
 
         if roi_height > camera_height or roi_width > camera_width or roi_height % 2 == 1 or roi_width % 2 == 1:
             logger.debug(f"can't set roi to {roi_width} and {roi_height}")
-            return
+            return False
 
         # Calculate Location of Image Edges
         roi_top = (camera_height - roi_height) / 2
         roi_bottom = roi_top + roi_height - 1
         roi_left = (camera_width - roi_width) / 2
         roi_right = roi_left + roi_width - 1
+
+        if roi_top % 2 != 0 or roi_bottom % 2 == 0:
+            logger.debug(f"can't set ROI to {roi_width} and {roi_height}")
+            return False
 
         # Set ROI
         self.x_pixels, self.y_pixels = self.camera_controller.set_ROI(
@@ -307,6 +310,8 @@ class HamamatsuOrca(CameraBase):
         logger.info(f"HamamatsuOrca - subarray_hsize,{self.camera_controller.get_property_value('subarray_hsize')}")
         logger.info(f"HamamatsuOrca - subarray_vpos, {self.camera_controller.get_property_value('subarray_vpos')}")
         logger.info(f"HamamatsuOrca - subarray_vsize,{self.camera_controller.get_property_value('subarray_vsize')}")
+
+        return self.x_pixels == roi_width and self.y_pixels == roi_height
 
     def initialize_image_series(self, data_buffer=None, number_of_frames=100):
         r"""Initialize HamamatsuOrca image series.

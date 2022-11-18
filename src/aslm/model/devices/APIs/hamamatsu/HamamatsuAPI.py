@@ -825,13 +825,14 @@ class DCAM:
             if False, error happened.  lasterr() returns the DCAMERR value
         """
         if not self.__hdcam:
-            return self.__result(DCAMERR.INVALIDHANDLE)  # instance is not opened yet.
+            self.__result(DCAMERR.INVALIDHANDLE)  # instance is not opened yet.
+            return None
 
         propattr = DCAMPROP_ATTR()
         propattr.iProp = idprop
         ret = self.__result(dcamprop_getattr(self.__hdcam, byref(propattr)))
         if ret is False:
-            return False
+            return None
 
         return propattr
 
@@ -909,7 +910,9 @@ class DCAM:
         # Returns the range of appropriate values
         """
         property_attribute = self.prop_getattr(idprop)
-        return [float(property_attribute.valuemin), float(property_attribute.valuemax)]
+        if property_attribute != None:
+            return [float(property_attribute.valuemin), float(property_attribute.valuemax)]
+        return [None, None]
 
     def set_property_value(self, name, value):
         """
@@ -924,7 +927,14 @@ class DCAM:
         idprop = property_dict[name]
 
         # Find property limits and correct value if necessary
-        [property_value_min, property_value_max] = self.get_property_range(idprop)
+        r = self.get_property_range(idprop)
+        
+        [property_value_min, property_value_max] = r #self.get_property_range(idprop)
+        if property_value_min is None:
+            print('Could not set attribute', name)
+            print('property range:', name, r)
+            return False
+
         if value < property_value_min:
             print(" The property value of ", value, "is less than minimum of", property_value_min, name,
                   "setting to minimum")
@@ -985,7 +995,8 @@ class DCAM:
         # TODO: parameter verification
         if top % 2 or bottom % 2 == 0 or (right-left+1) > self.max_image_width or (bottom-top+1) > self.max_image_height:
             print("Invalid size")
-            return (0, 0)
+            return (self.prop_getvalue(property_dict['image_width']), self.prop_getvalue(property_dict['image_height']))
+
         # test if hsize and vsize equal to maximum image width and height
         # if the same, set subarray_mode to DCAMPROP_MODE__OFF
         if right-left+1 == self.max_image_width and bottom-top+1 == self.max_image_height:

@@ -33,18 +33,17 @@
 # Third Party Imports
 import pytest
 
-# Local Imports
-from aslm.model.devices.camera.camera_hamamatsu import HamamatsuOrca
 
 @pytest.mark.hardware
-@pytest.fixture(autouse=True, scope='class')
+@pytest.fixture(scope='module')
 def prepare_cameras(dummy_model):
     from aslm.model.devices.APIs.hamamatsu.HamamatsuAPI import DCAM, camReg
+    from aslm.model.devices.camera.camera_hamamatsu import HamamatsuOrca
 
     def start_camera(idx=0):
         # open camera
         for i in range(10):
-            assert camReg.numCameras == 0
+            assert camReg.numCameras == idx
             try:
                 camera = DCAM(idx)
                 if camera.get_camera_handler() != 0:
@@ -60,7 +59,7 @@ def prepare_cameras(dummy_model):
     temp = {}
     for microscope_name in model.configuration['configuration']['microscopes'].keys():
         serial_number = model.configuration['configuration']['microscopes'][microscope_name]['camera']['hardware']['serial_number']
-        temp[serial_number] = microscope_name
+        temp[str(serial_number)] = microscope_name
 
     camera_connections = {}
 
@@ -68,35 +67,32 @@ def prepare_cameras(dummy_model):
     for i in range(camReg.maxCameras):
         if i > 0:
             camera = start_camera(i)
-        if camera._serial_number in temp:
-            camera_connections[temp[camera._serial_number]] = camera
+        if str(camera._serial_number) in temp:
+            microscope_name = temp[str(camera._serial_number)]
+            camera = HamamatsuOrca(microscope_name, camera, model.configuration)
+            camera_connections[microscope_name] = camera
+
 
     yield camera_connections
 
     # close all the cameras
     for k in camera_connections:
-        camera_connections[k].dev_close() 
+        camera_connections[k].camera_controller.dev_close() 
 
 @pytest.mark.hardware
 class TestHamamatsuOrca:
     r"""Unit Test for HamamamatsuOrca Class"""
+    model = None
 
-    @pytest.fixture(autouse=True, scope='class')
+    @pytest.fixture(autouse=True)
     def _prepare_test(self, dummy_model, prepare_cameras):
         self.num_of_tests = 10
         self.model = dummy_model
-        self.camera_connections = prepare_cameras
+        self.cameras = prepare_cameras
 
         self.microscope_name = self.model.configuration['experiment']['MicroscopeState']['microscope_name']
-        self.camera = self.start_camera()
+        self.camera = self.cameras[self.microscope_name]
 
-    def start_camera(self, microscope_name=None):
-        if microscope_name == None:
-            microscope_name = self.microscope_name
-        if microscope_name not in self.camera_connections:
-            return None
-        camera = HamamatsuOrca(microscope_name, self.camera_connections[microscope_name], self.model.configuration)
-        return camera
 
     def is_in_range(self, value, target, precision=100):
         target_min = target - target / precision
@@ -104,6 +100,7 @@ class TestHamamatsuOrca:
         return value > target_min and value < target_max
 
     def test_hamamatsu_camera_attributes(self):
+        from aslm.model.devices.camera.camera_hamamatsu import HamamatsuOrca
         attributes = dir(HamamatsuOrca)
         desired_attributes = ['serial_number',
                               'report_settings',
@@ -127,7 +124,7 @@ class TestHamamatsuOrca:
     def test_init_camera(self):
         for microscope_name in self.model.configuration['configuration']['microscopes'].keys():
         
-            camera = self.start_camera(microscope_name)
+            camera = self.cameras[microscope_name]
             
             assert camera != None, f"Should start the camera {microscope_name}"
 
@@ -135,8 +132,8 @@ class TestHamamatsuOrca:
             camera_configs = self.model.configuration['configuration']['microscopes'][microscope_name]['camera']
 
             # serial number
-            assert camera_controller._serial_number == camera_configs['hardware']['serial_number'], f"the camera serial number isn't right for {microscope_name}!"
-            assert camera.serial_number == camera_configs['hardware']['serial_number'], f"the camera serial number isn't right for {microscope_name}!"
+            assert str(camera_controller._serial_number) == str(camera_configs['hardware']['serial_number']), f"the camera serial number isn't right for {microscope_name}!"
+            assert str(camera.serial_number) == str(camera_configs['hardware']['serial_number']), f"the camera serial number isn't right for {microscope_name}!"
 
             # verify camera is initialized with the attributes from configuration.yaml
             parameters = ['defect_correct_mode', 'readout_speed', 'trigger_active', 'trigger_mode', 'trigger_polarity', 'trigger_source']
@@ -151,11 +148,11 @@ class TestHamamatsuOrca:
 
             # exposure time
             exposure_time = camera_controller.get_property_value('exposure_time')
-            assert exposure_time == camera_configs['exposure_time'] / 1000, "Exposure time isn't right!"
+            assert self.is_in_range(exposure_time, camera_configs['exposure_time'] / 1000, 10), "Exposure time isn't right!"
 
             # binning
             binning = camera_controller.get_property_value('binning')
-            assert binning == camera_configs['binning'][0], "Binning isn't right!"
+            assert int(binning) == int(camera_configs['binning'][0]), "Binning isn't right!"
 
             # image width and height
             width = camera_controller.get_property_value('image_width')
@@ -180,33 +177,41 @@ class TestHamamatsuOrca:
     def test_set_readout_direction(self):
         readout_directions = {
             'Top-to-Bottom': 1,
-            'Bottom-to-Top': 2,
-            'bytrigger': 3,
-            'diverge': 5
+            'Bottom-to-Top': 2
         }
         for direction in readout_directions:
             self.camera.set_readout_direction(direction)
             value = self.camera.camera_controller.get_property_value('readout_direction')
             assert value == readout_directions[direction], f"readout direction setting isn't right for {direction}"
     
-    def test_calculate_readout_time(self):
-        pass
+    # def test_calculate_readout_time(self):
+    #     pass
 
     def test_set_exposure_time(self):
         import random
-        for i in range(self.num_of_tests):
-            exposure_time = random.randint(1, 1000)
-            self.camera.set_exposure_time(exposure_time)
-            value = self.camera.camera_controller.get_property_value('exposure_time')
-            assert value == exposure_time / 1000, f"exposure time({exposure_time}) isn't right!"
+        modes_dict = {
+            'Normal': 10000,
+            'Light-Sheet': 20,
+        }
+        for mode in modes_dict:
+            self.camera.set_sensor_mode(mode)
+            for i in range(self.num_of_tests):
+                exposure_time = random.randint(1, modes_dict[mode])
+                self.camera.set_exposure_time(exposure_time)
+                value = self.camera.camera_controller.get_property_value('exposure_time')
+                assert self.is_in_range(value, exposure_time / 1000, 10), f"exposure time({exposure_time}) isn't right!"
+        self.camera.set_sensor_mode('Normal')
 
     def test_set_line_interval(self):
         import random
+        self.camera.set_sensor_mode('Light-Sheet')
         for i in range(self.num_of_tests):
-            line_interval = random.random()
-            self.camera.set_line_interval(line_interval)
-            value = self.camera.camera_controller.get_property_value('internal_line_interval')
-            assert self.is_in_range(value, line_interval), f"line interval {line_interval} isn't right!"
+            line_interval = random.random() / 10.0
+            r = self.camera.set_line_interval(line_interval)
+            if r is True:
+                value = self.camera.camera_controller.get_property_value('internal_line_interval')
+                assert self.is_in_range(value, line_interval), f"line interval {line_interval} isn't right! {value}"
+        self.camera.set_sensor_mode('Normal')
 
     def test_set_binning(self):
         import random
@@ -215,15 +220,15 @@ class TestHamamatsuOrca:
             '1x1': 1,
             '2x2': 2,
             '4x4': 4,
-            '8x8': 8,
-            '16x16': 16,
-            '1x2': 102,
-            '2x4': 204
+            # '8x8': 8,
+            # '16x16': 16,
+            # '1x2': 102,
+            # '2x4': 204
             }
         for binning_string in binning_dict:
             self.camera.set_binning(binning_string)
             value = self.camera.camera_controller.get_property_value('binning')
-            assert value == binning_dict[binning_string], f"binning {binning_string} isn't right!"
+            assert int(value) == binning_dict[binning_string], f"binning {binning_string} isn't right!"
 
         for i in range(self.num_of_tests):
             x = random.randint(1, 20)
@@ -233,17 +238,32 @@ class TestHamamatsuOrca:
 
     def test_set_ROI(self):
         import random
+        self.camera.set_binning('1x1')
+        width = self.camera.camera_parameters['x_pixels']
+        height = self.camera.camera_parameters['x_pixels']
+        w = self.camera.camera_controller.get_property_value('image_width')
+        h = self.camera.camera_controller.get_property_value('image_height')
+        assert width == w, f"maximum width should be the same {width} - {w}"
+        assert height == h, f"maximum height should be the same {height} -{h}"
+
         for i in range(self.num_of_tests):
             pre_x, pre_y = self.camera.x_pixels, self.camera.y_pixels
             x = random.randint(1, self.camera.camera_parameters['x_pixels'])
             y = random.randint(1, self.camera.camera_parameters['y_pixels'])
-            self.camera.set_ROI(x, y)
+            r = self.camera.set_ROI(y, x)
             if x % 2 == 1 or y % 2 == 1:
+                assert r == False
                 assert self.camera.x_pixels == pre_x, "width shouldn't be chaged!"
                 assert self.camera.y_pixels == pre_y, "height shouldn't be changed!"
             else:
-                assert self.camera.x_pixels == x, f"width should be changed to {x}"
-                assert self.camera.y_pixels == y, f"height should be chagned to {y}"
+                top = (height - y) / 2
+                bottom = top + y - 1
+                if top % 2 == 1 or bottom % 2 == 0:
+                    assert r == False
+                else:
+                    assert r == True, f"try to set{x}x{y}, but get {self.camera.x_pixels}x{self.camera.y_pixels}"
+                    assert self.camera.x_pixels == x, f"trying to set {x}x{y}. width should be changed to {x}"
+                    assert self.camera.y_pixels == y, f"height should be chagned to {y}"
         
         self.camera.set_ROI(512, 512)
         assert self.camera.x_pixels == 512
@@ -263,7 +283,6 @@ class TestHamamatsuOrca:
         import time
         from aslm.model.concurrency.concurrency_tools import SharedNDArray
 
-        self.camera = self.start_camera()
         # set software trigger
         self.camera.camera_controller.set_property_value('trigger_source', 3)
 
@@ -288,21 +307,21 @@ class TestHamamatsuOrca:
                 self.camera.camera_controller.fire_software_trigger()
                 time.sleep(exposure_time + readout_time)
 
+            time.sleep(0.01)
             frames = self.camera.get_new_frame()
             assert len(frames) == triggers
 
         self.camera.close_image_series()
-        assert self.camera.is_acquring == False
+        assert self.camera.is_acquiring == False
 
         for i in range(self.num_of_tests):
             self.camera.initialize_image_series(data_buffer, number_of_frames)
             assert self.camera.is_acquiring == True
             self.camera.close_image_series()
-            assert self.camera.is_acquring == False
+            assert self.camera.is_acquiring == False
 
         # close a closed camera
         self.camera.close_image_series()
         self.camera.close_image_series()
-        assert self.camera.is_acquring == False
+        assert self.camera.is_acquiring == False
         
-        self.camera = self.start_camera()

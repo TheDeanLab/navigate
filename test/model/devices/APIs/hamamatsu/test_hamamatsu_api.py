@@ -150,6 +150,8 @@ class TestHamamatsuAPI:
                 self.camera.fire_software_trigger()
                 time.sleep(configuration['exposure_time'] + readout_time)
 
+            time.sleep(0.1)
+
             frames = self.camera.get_frames()
             assert len(frames) == trigger_num, 'can not get all the frames back!'
 

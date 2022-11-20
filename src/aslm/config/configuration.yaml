@@ -62,7 +62,7 @@ microscopes:
       y_pixels: 2048.0
       pixel_size_in_microns: 6.5
       subsampling: [1, 2, 4]
-      sensor_mode: Normal  # 12 for progressive, 1 for normal.
+      sensor_mode: Normal  # 12 for progressive, 1 for normal. Normal/Light-Sheet
       readout_direction: Top-to-Bottom  # Top-to-Bottom', 'Bottom-to-Top'
       lightsheet_rolling_shutter_width: 608
       defect_correct_mode: 2.0

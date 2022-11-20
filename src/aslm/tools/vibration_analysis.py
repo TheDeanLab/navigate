@@ -100,7 +100,7 @@ def plot_frequency_response(frequency_axis, single_sided_spectrum, ax=None, titl
     if ax is None:
         fig, ax = plt.subplots()
     ax.plot(frequency_axis, single_sided_spectrum)
-    ax.set_yscale("log")
+    # ax.set_yscale("log")
     ax.set_ylabel('Amplitude')
     ax.set_xlabel('Frequency (Hz)')
     if title is not None:

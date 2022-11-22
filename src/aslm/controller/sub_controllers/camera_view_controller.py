@@ -386,7 +386,7 @@ class CameraViewController(GUIController):
         crosshair_y = (self.zoom_rect[1][0] + self.zoom_rect[1][1]) / 2
         if crosshair_x < 0 or crosshair_x >= self.view.canvas_width:
             crosshair_x = -1
-        if crosshair_y < 0 or crosshair_y >= self.view.canvas_width:
+        if crosshair_y < 0 or crosshair_y >= self.view.canvas_height:
             crosshair_y = -1
         self.crosshair_x = int(crosshair_x)
         self.crosshair_y = int(crosshair_y)

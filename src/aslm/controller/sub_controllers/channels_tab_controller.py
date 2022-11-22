@@ -521,6 +521,5 @@ class ChannelsTabController(GUIController):
             self.update_timepoint_setting()
         elif (command == 'channel') or (command == 'move_stage_and_update_info') or (command == 'update_setting'):
             self.view.after(1000, lambda: self.parent_controller.execute(command, *args))
-        elif command == 'get_stage_position':
-            return self.view.after(1000, lambda: self.parent_controller.execute(command))
+
         self.show_verbose_info('Received command from child', command, args)

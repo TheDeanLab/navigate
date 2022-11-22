@@ -228,7 +228,7 @@ class Microscope:
         success = True
         for pos_axis in pos_dict:
             axis = pos_axis[:pos_axis.index('_')]
-            success = success and self.stages[axis].move_absolute({pos_axis: pos_dict[pos_axis]}, wait_until_done)
+            success = self.stages[axis].move_absolute({pos_axis: pos_dict[pos_axis]}, wait_until_done) and success
         return success
 
     def stop_stage(self):

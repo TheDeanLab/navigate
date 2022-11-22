@@ -381,6 +381,16 @@ class CameraViewController(GUIController):
         y_start_index = int(- self.zoom_rect[1][0] / self.zoom_scale)
         y_end_index = int(y_start_index + self.zoom_height)
 
+        # crosshair
+        crosshair_x = (self.zoom_rect[0][0] + self.zoom_rect[0][1]) / 2
+        crosshair_y = (self.zoom_rect[1][0] + self.zoom_rect[1][1]) / 2
+        if crosshair_x < 0 or crosshair_x >= self.view.canvas_width:
+            crosshair_x = -1
+        if crosshair_y < 0 or crosshair_y >= self.view.canvas_width:
+            crosshair_y = -1
+        self.crosshair_x = int(crosshair_x)
+        self.crosshair_y = int(crosshair_y)
+
         self.zoom_image = self.image[y_start_index * self.canvas_height_scale : y_end_index * self.canvas_height_scale,
                                      x_start_index * self.canvas_width_scale : x_end_index * self.canvas_width_scale]
 
@@ -608,11 +618,8 @@ class CameraViewController(GUIController):
         """
         self.cross_hair_image = np.copy(self.down_sampled_image)
         if self.apply_cross_hair:
-            (height, width) = np.shape(self.down_sampled_image)
-            height = int(np.floor(height / 2))
-            width = int(np.floor(width / 2))
-            self.cross_hair_image[:, width] = 1
-            self.cross_hair_image[height, :] = 1
+            self.cross_hair_image[:, self.crosshair_x] = 1
+            self.cross_hair_image[self.crosshair_y, :] = 1
 
     def apply_LUT(self):
         r"""Applies a LUT to the image.

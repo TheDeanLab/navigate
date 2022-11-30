@@ -130,3 +130,58 @@ def binary_detect(img_data, boundary, width=1):
         expand_row(bottom, n-1, 1, new_boundary)
 
     return new_boundary
+
+
+def map_boundary(boundary, direction=True):
+    if direction:
+        start, end, step = 0, len(boundary), 1
+        offset = -1
+    else:
+        start, end, step = len(boundary)-1, -1, -1
+        offset = 1
+    
+    def dp_shortest_path(start, end, step, offset=-1):
+        dp_path = []
+        dp_cost = [0, 0]
+        visited = False
+        for i in range(start, end, step):
+            if boundary[i] is None:
+                if visited:
+                    break
+                continue
+            w = boundary[i][1] - boundary[i][0] + 1
+            if not visited:
+                visited = True
+                dp_cost[0], dp_cost[1] = w, w
+                dp_path.append([i, -1, -1])
+            else:
+                dp_path.append([i, 0, 0])
+                for j in range(2):
+                    l = abs(boundary[i+offset][0] - boundary[i][j])
+                    r = abs(boundary[i+offset][1] - boundary[i][j])
+                    if l < r:
+                        dp_cost[1-j] += w + l
+                        dp_path[-1][2-j] = 0
+                    else:
+                        dp_cost[1-j] += w + r
+                        dp_path[-1][2-j] = 1
+
+        # reverse path
+        if dp_cost[0] < dp_cost[1]:
+            idx = 0
+        else:
+            idx = 1
+        path = []
+        for item in reversed(dp_path):
+            x = item[0]
+            if idx == 0:
+                path += map(lambda y: (x, y), range(boundary[x][0], boundary[x][1]+1))
+            else:
+                path += map(lambda y: (x, y), range(boundary[x][1], boundary[x][0]-1, -1))
+            idx = item[idx+1]
+        path.reverse()
+        return path
+        
+    result = dp_shortest_path(start, end, step, offset)
+    return result
+   

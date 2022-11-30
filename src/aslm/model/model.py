@@ -184,6 +184,8 @@ class Model:
         self.feature_list.append([[{'name': FindTissueSimple2D}]])
         # Ilastik segmentation
         self.feature_list.append([[{'name': IlastikSegmentation}]])
+        # confocal projection acquisition
+        self.feature_list.append([[{'name': ConProAcquisition}]])
 
     def update_data_buffer(self, img_width=512, img_height=512):
         r"""Update the Data Buffer
@@ -269,7 +271,7 @@ class Model:
         Parameters
         ----------
         command : str
-            Type of command to run.  Can be 'single', 'live', 'z-stack', 'projection', 'update_setting'
+            Type of command to run.  Can be 'single', 'live', 'z-stack', 'projection', 'confocal-projection', 'update_setting'
             'autofocus', 'stop', and 'debug'.
         *args : str
             ...
@@ -290,9 +292,13 @@ class Model:
             # TODO: put it here now.
             if self.imaging_mode == 'z-stack':
                 self.signal_container, self.data_container = load_features(self, [[{'name': ZStackAcquisition}]])
+
+            if self.imaging_mode == 'confocal-projection':
+                self.signal_container, self.data_container = load_features(self, [[{'name': ConProAcquisition}]])
             
             if self.imaging_mode == 'single':
                 self.configuration['experiment']['MicroscopeState']['stack_cycling_mode'] = 'per_z'
+                self.configuration['experiment']['MicroscopeState']['conpro_cycling_mode'] = 'per_plane'
 
             if self.imaging_mode == 'projection':
                 self.move_stage({'z_abs': 0})
@@ -410,6 +416,25 @@ class Model:
             Was the move successful?
         """
         return self.active_microscope.move_stage(pos_dict, wait_until_done)
+
+    def update_offset(self, pos_dict, wait_until_done=False):
+        r"""Moves the stages.
+
+        Updates the stage dictionary, moves to the desired position, and reports the position.
+
+        Parameters
+        ----------
+        pos_dict : dict
+            Dictionary of stage positions.
+        wait_until_done : bool
+            Checks "on target state" after command and waits until done.
+
+        Returns
+        -------
+        success : bool
+            Was the move successful?
+        """
+        return self.active_microscope.update_offset(pos_dict, wait_until_done)
 
     def get_stage_position(self):
         r"""Get the position of the stage.

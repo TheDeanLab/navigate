@@ -112,6 +112,25 @@ class GalvoNIStage(StageBase):
                                                                         camera_delay=self.camera_delay_percent,
                                                                         fall=self.etl_ramp_falling,
                                                                         amplitude=amp,
+                                                                        offset=off)                                                    
+                elif self.configuration['experiment']['MicroscopeState']['image_mode'] == 'confocal-projection':
+                    z_range = self.configuration['experiment']['MicroscopeState']['scanrange']
+                    z_offset_start = self.configuration['experiment']['MicroscopeState']['offset_start']
+                    z_offset_end = self.configuration['experiment']['MicroscopeState']['offset_end']
+                    z_planes = self.configuration['experiment']['MicroscopeState']['plane_spin']
+                    if z_planes == 1:
+                        amp = eval(self.volts_per_micron, {"x": 0.5*(z_range)})
+                        off = eval(self.volts_per_micron, {"x": 0.5*(z_offset_start)})
+                    else:
+                        amp = eval(self.volts_per_micron, {"x": 0.5*(z_range)})
+                        off = eval(self.volts_per_micron, {"x": 0.5*(z_offset_end)})
+                    self.waveform_dict[channel_key] = tunable_lens_ramp(sample_rate=self.sample_rate,
+                                                                        exposure_time=exposure_time,
+                                                                        sweep_time=self.sweep_time,
+                                                                        etl_delay=7.5,
+                                                                        camera_delay=self.camera_delay_percent,
+                                                                        fall=self.etl_ramp_falling,
+                                                                        amplitude=amp,
                                                                         offset=off)
                 else:
                     self.waveform_dict[channel_key] = dc_value(sample_rate=self.sample_rate,

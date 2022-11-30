@@ -63,9 +63,7 @@ class ChannelsTabController(GUIController):
 
         # sub-controllers
         self.channel_setting_controller = ChannelSettingController(self.view.channel_widgets_frame, self, self.parent_controller.configuration_controller)
-        
 
-        
 
         # add validation functions to spinbox
         # this function validate user's input (not from experiment file)
@@ -88,9 +86,6 @@ class ChannelsTabController(GUIController):
         self.stack_acq_vals['end_position'].trace_add('write', self.update_z_steps)
         self.stack_acq_buttons['set_start'].configure(command=self.update_start_position)
         self.stack_acq_buttons['set_end'].configure(command=self.update_end_position)
-
-
-
 
         # stack acquisition_variables
         self.z_origin = 0
@@ -121,7 +116,34 @@ class ChannelsTabController(GUIController):
         self.view.multipoint_frame.save_check.configure(command=self.toggle_multiposition)
         self.view.quick_launch.buttons["tiling"].configure(command=self.launch_tiling_wizard)
 
+         # Get Widgets from confocal_projection_settings in view
+        self.conpro_acq_widgets = self.view.conpro_acq_frame.get_widgets()
+        self.conpro_acq_vals = self.view.conpro_acq_frame.get_variables()
+
+        # laser/stack cycling event binds
+        self.conpro_acq_vals['cycling'].trace_add('write', self.update_cycling_setting)
+
+        # confocal-projection event binds
+        self.conpro_acq_vals['scanrange'].trace_add('write', self.update_scanrange)
+        self.conpro_acq_vals['n_plane'].trace_add('write', self.update_plane_number)
+        self.conpro_acq_vals['offset_start'].trace_add('write', self.update_offset_start)
+        self.conpro_acq_vals['offset_end'].trace_add('write', self.update_offset_end)
+        
+        # confocal-projection setting variables
+    
         self.initialize()
+
+    def update_offset_start(self, *args):
+        print(f"Update offset start: {args}")
+ 
+    def update_offset_end(self, *args):
+        print(f"Update offset end: {args}")
+
+    def update_plane_number(self, *args):
+        print(f"Update plane number: {args}")
+
+    def update_scanrange(self, *args):
+        print(f"Update scan range: {args}")
 
 
     def initialize(self):
@@ -135,6 +157,7 @@ class ChannelsTabController(GUIController):
         config = self.parent_controller.configuration_controller
 
         self.stack_acq_widgets['cycling'].widget['values'] = ['Per Z', 'Per Stack']
+        self.conpro_acq_widgets['cycling'].widget['values'] = ['Per Plane', 'Per Stack']
         self.stage_velocity = config.stage_setting_dict['velocity']
         self.filter_wheel_delay = config.filter_wheel_setting_dict['filter_wheel_delay']
         self.channel_setting_controller.initialize()
@@ -147,6 +170,7 @@ class ChannelsTabController(GUIController):
         self.in_initialization = True
         self.microscope_state_dict = self.parent_controller.configuration['experiment']['MicroscopeState']
         self.set_info(self.stack_acq_vals, self.microscope_state_dict)
+        self.set_info(self.conpro_acq_vals, self.microscope_state_dict)
         self.set_info(self.timepoint_vals, self.microscope_state_dict)
 
         # validate
@@ -154,6 +178,7 @@ class ChannelsTabController(GUIController):
         self.view.stack_timepoint_frame.exp_time_spinbox.validate()
 
         self.stack_acq_vals['cycling'].set('Per Z' if self.microscope_state_dict['stack_cycling_mode'] == 'per_z' else 'Per Stack')
+        self.conpro_acq_vals['cycling'].set('Per Plane' if self.microscope_state_dict['conpro_cycling_mode'] == 'per_plane' else 'Per Stack')
         self.channel_setting_controller.populate_experiment_values(self.microscope_state_dict['channels'])
         
         # after initialization
@@ -344,6 +369,7 @@ class ChannelsTabController(GUIController):
             return
         # update experiment MicroscopeState dict
         self.microscope_state_dict['stack_cycling_mode'] = 'per_stack' if self.stack_acq_vals['cycling'].get() == 'Per Stack' else 'per_z'
+        self.microscope_state_dict['conpro_cycling_mode'] = 'per_stack' if self.conpro_acq_vals['cycling'].get() == 'Per Stack' else 'per_plane'
         
         # recalculate time point settings
         self.update_timepoint_setting()

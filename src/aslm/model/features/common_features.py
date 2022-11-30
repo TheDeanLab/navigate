@@ -266,6 +266,109 @@ class ZStackAcquisition:
         self.model.target_channel = self.channels[self.current_channel_in_list]
 
 
+class ConProAcquisition:   # don't have the part for multi-position for now
+    def __init__(self, model):
+        self.model = model
+
+        self.scanrange = 0
+        self.n_plane = 0
+        self.offset_start = 0
+        self.offset_end = 0
+        self.offset_step_size = 0
+        self.timepoints = 0
+
+        self.need_to_move_new_plane = True
+        self.offset_update_time = 0
+
+        self.conpro_cycling_mode = 'per_stack'
+        self.channels = [1]
+
+        self.config_table = {'signal': {'init': self.pre_signal_func,
+                                        'main': self.signal_func,
+                                        'end': self.signal_end},
+                             'node': {'node_type': 'multi-step',
+                                      'device_related': True}}
+
+    def pre_signal_func(self):
+        microscope_state = self.model.configuration['experiment']['MicroscopeState']
+
+        self.conpro_cycling_mode = microscope_state['conpro_cycling_mode']
+        # get available channels
+        prefix_len = len('channel_')
+        self.channels = [int(channel_key[prefix_len:]) for channel_key in microscope_state['channels'].keys()]
+        self.current_channel_in_list = 0
+
+        self.n_plane = int(microscope_state['n_plane'])
+
+        self.start_offset = float(microscope_state['offset_start'])
+        self.end_offset = float(microscope_state['offset_end'])
+        self.offset_step_size = (self.end_offset - self.start_offset) / self.n_plane
+        
+        self.timepoints = int(microscope_state['timepoints'])
+
+        self.need_update_offset = True
+        self.current_offset = 0
+    
+    def signal_func(self):
+        if self.model.stop_acquisition:
+            return False
+
+        if self.need_update_offset:
+            # update offset
+            self.model.pause_data_ready_lock.acquire()
+            self.model.ask_to_pause_data_thread = True
+            self.model.pause_data_ready_lock.acquire()
+
+            self.model.update_offset({'offset_abs': self.current_offset}, wait_until_done=True)
+
+            self.model.ask_to_pause_data_thread = False
+            self.model.pause_data_event.set()
+            self.model.pause_data_ready_lock.release()
+
+        if self.stack_cycling_mode != 'per_stack':
+            # update channel for each z position in 'per_slice'
+            self.update_channel()
+            self.need_update_offset = (self.current_channel_in_list == 0)
+
+        # in 'per_slice', update the offset if all the channels have been acquired
+        if self.need_update_offset:
+            # next z, f position
+            self.current_offset += self.offset_step_size
+
+            # update offset moved time
+            self.offset_update_time += 1
+
+        return True
+
+    def signal_end(self):
+        # end this node
+        if self.model.stop_acquisition:
+            return True
+        
+        # decide whether to update offset
+        if self.offset_update_time >= self.n_plane:
+            self.offset_update_time = 0
+
+            # calculate first z, f position
+            self.current_offset = self.offset_start
+
+            # after running through a z-stack, update channel
+            if self.stack_cycling_mode == 'per_stack':
+                self.update_channel()
+                # if run through all the channels, move to next position
+                if self.current_channel_in_list == 0:
+                    self.need_to_move_new_position = True
+            else:
+                self.need_to_move_new_position = True
+
+    def generate_meta_data(self, *args):
+        # print('This frame: z stack', self.model.frame_id)
+        return True
+
+    def update_channel(self):
+        self.current_channel_in_list = (self.current_channel_in_list+1) % len(self.channels)
+        self.model.target_channel = self.channels[self.current_channel_in_list]
+
 class FindTissueSimple2D:
     def __init__(self, model, overlap=0.1, target_resolution='high'):
         """

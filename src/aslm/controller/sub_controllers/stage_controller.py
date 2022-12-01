@@ -154,6 +154,9 @@ class StageController(GUIController):
             widgets[step_axis+'_step'].widget.configure(from_=self.position_min[axis])
             widgets[step_axis+'_step'].widget.configure(to=self.position_max[axis])
             widgets[step_axis+'_step'].widget.configure(increment=step_dict[axis])
+            # Hardcoded minimums for xy_step and z_step
+            widgets['xy_step'].widget.configure(from_=0)
+            widgets['z_step'].widget.configure(from_=0)
 
     def bind_position_callbacks(self):
         r"""Binds position_callback() to each axis, records the trace name so we can unbind later.

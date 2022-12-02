@@ -47,6 +47,7 @@ from aslm.model.features.dummy_detective import Dummy_Detective
 from aslm.model.features.common_features import *
 from aslm.model.features.feature_container import load_features
 from aslm.model.features.restful_features import IlastikSegmentation
+from aslm.model.features.volume_search import VolumeSearch
 from aslm.log_files.log_functions import log_setup
 from aslm.tools.common_dict_tools import update_settings_common, update_stage_dict
 from aslm.model.device_startup_functions import load_devices
@@ -184,6 +185,8 @@ class Model:
         self.feature_list.append([[{'name': FindTissueSimple2D}]])
         # Ilastik segmentation
         self.feature_list.append([[{'name': IlastikSegmentation}]])
+        # volume search
+        self.feature_list.append([[{'name': VolumeSearch}]])
 
     def update_data_buffer(self, img_width=512, img_height=512):
         r"""Update the Data Buffer

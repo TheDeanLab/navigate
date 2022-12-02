@@ -109,18 +109,18 @@ class VolumeSearch:
         curr_zoom = self.model.configuration['experiment']['MicroscopeState']['zoom']
         curr_pixel_size = float(self.model.configuration['configuration']['microscopes'][microscope_name]['zoom']['pixel_size'][curr_zoom])
         target_pixel_size = float(self.model.configuration['configuration']['microscopes'][self.target_resolution]['zoom']['pixel_size'][self.target_zoom])
-        self.mag = math.ceil(curr_pixel_size / target_pixel_size)
         # consider the image as a square
         img_width = self.model.configuration['experiment']['CameraParameters']['x_pixels']
-        self.target_grid_width = self.mag * target_pixel_size
+        self.target_grid_pixels = img_width // math.ceil(curr_pixel_size / target_pixel_size)
+        self.target_grid_width = img_width * target_pixel_size
         axes = ['x', 'y', 'z', 'theta', 'f']
         self.offset = [0, 0, 0, 0, 0]
         for i, axis in enumerate(axes):
             t = axis + '_offset'
             self.offset[i] = float(self.model.configuration['configuration']['microscopes'][self.target_resolution]['stage'][t]) - \
                              float(self.model.configuration['configuration']['microscopes'][microscope_name]['stage'][t])
-        self.offset[0] += (img_width-self.mag) // 2 * target_pixel_size + self.model.configuration['experiment']['StageParameters']['x']
-        self.offset[1] += self.model.configuration['experiment']['StageParameters']['y'] - (img_width-self.mag) // 2 * target_pixel_size
+        self.offset[0] += (img_width - self.target_grid_pixels) // 2 * curr_pixel_size + self.model.configuration['experiment']['StageParameters']['x']
+        self.offset[1] += self.model.configuration['experiment']['StageParameters']['y'] - (img_width - self.target_grid_pixels) // 2 * curr_pixel_size
         self.offset[2] += self.z_pos
         self.offset[3] += self.model.configuration['experiment']['StageParameters']['theta']
         self.offset[4] += self.f_pos
@@ -133,9 +133,9 @@ class VolumeSearch:
         for idx in frame_ids:
             img_data = self.model.data_buffer[idx]
             if self.pre_boundary is None:
-                boundary = find_tissue_boundary_2d(img_data, self.mag)
+                boundary = find_tissue_boundary_2d(img_data, self.target_grid_pixels)
             else:
-                boundary = binary_detect(img_data, self.pre_boundary, self.mag)
+                boundary = binary_detect(img_data, self.pre_boundary, self.target_grid_pixels)
 
             self.has_tissue = any(boundary)
             self.boundary[self.curr_z_index] = boundary

@@ -1,4 +1,4 @@
-"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -28,43 +28,20 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# """
+#
 
-import pytest
-import tkinter as tk
+from aslm.controller.sub_controllers import AcquireBarController
 
 
-@pytest.fixture(scope='package')
-def dummy_model():
-    from aslm.model.dummy import DummyModel
-
-    model = DummyModel()
-
-    return model
-
-@pytest.fixture(scope='session')
-def dummy_view():
-    '''
-    Creates a dummy view for the controller tests. Will be deleted post test session
-    '''
-    from aslm.view.main_application_window import MainApp
+class TestAcquireBarController():
     
-    root = tk.Tk()
-    view = MainApp(root)
-    root.update()
-    yield view
-    root.destroy()
     
-@pytest.fixture(scope="package")
-def dummy_controller(dummy_model):
-    '''
-    Fixture that will mock controller functions called by sub controllers
-    '''
-    from aslm.model.dummy import DummyController
-    
-    model = dummy_model
-    controller = DummyController()
-    
-    controller.configuration = model.configuration
-    
-    return controller
+    def test_init(self, dummy_view, dummy_controller):
+        v = dummy_view
+        c = dummy_controller
+        
+        a = AcquireBarController(v.acqbar, v.settings.channels_tab, c)
+        
+        assert isinstance(a, AcquireBarController)
+        
+

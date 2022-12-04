@@ -39,12 +39,17 @@ import time
 import random
 
 import numpy as np
+import tkinter as tk
 
 from aslm.model.features.feature_container import SignalNode, DataNode, DataContainer, load_features
 from aslm.model.features.common_features import WaitToContinue
 from aslm.model.features.feature_container import dummy_True
 from aslm.config.config import load_configs
 from aslm.model.devices.camera.camera_synthetic import SyntheticCamera, SyntheticCameraController
+from aslm.controller.thread_pool import SynchronizedThreadPool
+from aslm.view.main_application_window import MainApp
+from aslm.config import get_configuration_paths
+from aslm.controller.controller import Controller
 
 
 
@@ -84,6 +89,13 @@ from aslm.model.devices.camera.camera_synthetic import SyntheticCamera, Syntheti
     
 #     return dumb_model
 
+class DummyController:
+    def __init__(self):
+        self.configuration = None
+    
+    def execute(str):
+        return str
+
 class DummyModel:
     def __init__(self):
         # Set up the model, experiment, ETL dictionaries
@@ -91,15 +103,15 @@ class DummyModel:
         configuration_directory = Path.joinpath(base_directory, 'config')
 
 
-        config = Path.joinpath(configuration_directory, 'configuration.yaml')
-        experiment = Path.joinpath(configuration_directory, 'experiment.yml')
-        etl_constants = Path.joinpath(configuration_directory, 'etl_constants.yml')
+        self.config = Path.joinpath(configuration_directory, 'configuration.yaml')
+        self.experiment = Path.joinpath(configuration_directory, 'experiment.yml')
+        self.etl_constants = Path.joinpath(configuration_directory, 'etl_constants.yml')
 
         self.manager = Manager()
         self.configuration = load_configs(self.manager,
-                                        configuration=config,
-                                        experiment=experiment,
-                                        etl_constants=etl_constants)
+                                        configuration=self.config,
+                                        experiment=self.experiment,
+                                        etl_constants=self.etl_constants)
 
         # self.configuration = Configurator(config)
         # self.experiment = Configurator(experiment)

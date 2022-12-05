@@ -31,17 +31,120 @@
 #
 
 from aslm.controller.sub_controllers import AcquireBarController
+import pytest
+
+
 
 
 class TestAcquireBarController():
-    
-    
-    def test_init(self, dummy_view, dummy_controller):
+
+    @pytest.fixture(autouse=True)
+    def setup_class(self, dummy_view, dummy_controller):
         v = dummy_view
         c = dummy_controller
         
-        a = AcquireBarController(v.acqbar, v.settings.channels_tab, c)
+        self.acqbarController = AcquireBarController(v.acqbar, v.settings.channels_tab, c)
         
-        assert isinstance(a, AcquireBarController)
+    def test_init(self):
+        
+        assert isinstance(self.acqbarController, AcquireBarController)
+
+
+    def test_attr(self):
+
+        # Listing off attributes to check existence
+        attrs = ['parent_view', 'mode', 'is_save', 'mode_dict']
+
+        for attr in attrs:
+            assert hasattr(self.acqbarController, attr)
+
+    @pytest.mark.parametrize("mode,mode_expected,value_expected", [ ('live', 'indeterminate', None), ('single', 'determinate', 0), ('projection', 'determinate', 0), ('z-stack', 'determinate', 0) ])
+    def test_progress_bar(self, mode, mode_expected, value_expected):
+        
+        # Simulating an image series
+
+        # Startup progress bars
+        images_received = 0
+        mode = mode
+        stop = False
+        self.acqbarController.progress_bar(images_received=images_received,
+                                           microscope_state=self.acqbarController.parent_controller.configuration['experiment']['MicroscopeState'],
+                                           mode=mode,
+                                           stop=stop)
+        progress_mode = str(self.acqbarController.view.CurAcq['mode'])
+        ovr_mode = str(self.acqbarController.view.OvrAcq['mode'])
+
+        assert progress_mode == mode_expected, f"Wrong progress bar mode ({progress_mode}) relative to microscope mode ({mode})"
+        assert ovr_mode == mode_expected, f"Wrong progress bar mode ({progress_mode}) relative to microscope mode ({mode})"
+
+        if value_expected != None:
+            progress_start = int(self.acqbarController.view.CurAcq['value'])
+            ovr_start = int(self.acqbarController.view.OvrAcq['value'])
+            assert progress_start == value_expected, "Wrong starting value for progress bar"
+            assert ovr_start == value_expected, "Wrong starting value for progress bar"
+
+        # Updating progress bar
+        images_received += 1
+        while images_received > 0 and images_received < 6:
+            self.acqbarController.progress_bar(images_received=images_received,
+                                           microscope_state=self.acqbarController.parent_controller.configuration['experiment']['MicroscopeState'],
+                                           mode=mode,
+                                           stop=stop)
+            making_progress = float(self.acqbarController.view.CurAcq['value'])
+            ovr_progress = float(self.acqbarController.view.OvrAcq['value'])
+            if mode != 'projection': # Ignoring projection until setup
+                assert making_progress > 0, "Progress bar should be moving"
+                assert ovr_progress > 0, "Progress bar should be moving"
+            
+
+            images_received += 1
         
 
+        # Stopping progress bar
+        stop = True
+        self.acqbarController.progress_bar(images_received=images_received,
+                                           microscope_state=self.acqbarController.parent_controller.configuration['experiment']['MicroscopeState'],
+                                           mode=mode,
+                                           stop=stop)
+
+        after_stop = float(self.acqbarController.view.CurAcq['value'])
+        after_ovr = float(self.acqbarController.view.OvrAcq['value'])
+
+        assert after_stop == 0, "Progress Bar did not stop"
+        assert after_ovr == 0, "Progress Bar did not stop"
+            
+
+
+
+    def test_update_stack_acq(self):
+
+        stack = self.acqbarController.parent_view.stack_acq_frame.get_widgets()
+
+        # This test assumes starting mode is 'live' so checking for all normal state
+        for key, widget in stack.items():
+            state = str(widget.widget['state'])
+            assert state == 'disabled'
+
+
+        # Now switching modes and checking disabled
+        self.acqbarController.update_stack_acq('z-stack')
+        for key, widget in stack.items():
+            state = str(widget.widget['state'])
+            assert state == 'normal'
+
+        # Checking projection
+        self.acqbarController.update_stack_acq('projection')
+        for key, widget in stack.items():
+            state = str(widget.widget['state'])
+            assert state == 'normal'
+
+        # Switching back to orginal live
+        self.acqbarController.update_stack_acq('live')
+        for key, widget in stack.items():
+            state = str(widget.widget['state'])
+            assert state == 'disabled'
+
+    
+    def test_launch_popup_window(self):
+
+        pass

@@ -1,4 +1,4 @@
-"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# """
+#
 
 # Standard Library Imports
 import logging
@@ -64,9 +64,7 @@ class SyntheticCameraController:
         property_value : int
             Currently hard-coded to -1.
         """
-        # return self.prop_getvalue(property_dict[name])
-
-        return -1  # {}
+        return -1
 
     def set_property_value(self, name, value):
         logger.debug(f'set camera property {name}: {value}')
@@ -103,10 +101,6 @@ class SyntheticCamera(CameraBase):
     def __del__(self):
         logger.info("SyntheticCamera Shutdown")
         pass
-
-    def stop(self):
-        r""" Set stop_flag as True"""
-        self.stop_flag = True
 
     def report_settings(self):
         r"""Print Camera Settings."""
@@ -177,6 +171,7 @@ class SyntheticCamera(CameraBase):
         self.current_frame_idx = 0
         self.pre_frame_idx = 0
         self.camera_controller.is_acquiring = True
+        self.is_acquiring = True
 
     def close_image_series(self):
         r"""Close image series.
@@ -186,6 +181,7 @@ class SyntheticCamera(CameraBase):
         self.pre_frame_idx = 0
         self.current_frame_idx = 0
         self.camera_controller.is_acquiring = False
+        self.is_acquiring = False
 
     def load_images(self, filenames=None):
         if filenames is None:

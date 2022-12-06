@@ -1,4 +1,4 @@
-"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# """
+#
 from pathlib import Path
 
 # Annies imports for dummy feature containter
@@ -116,20 +116,23 @@ class DummyModel:
         self.stop_flag = False
         self.frame_id = 0 #signal_num
 
+        self.current_channel = 0
+
         self.data = []
         self.signal_records = []
         self.data_records = []
 
-        img_width = int(self.configuration['experiment']['CameraParameters']['x_pixels'])
-        img_height = int(self.configuration['experiment']['CameraParameters']['y_pixels'])
-        n_frames = 10
-        self.data_buffer = np.zeros((n_frames, img_width, img_height))
+        self.img_width = int(self.configuration['experiment']['CameraParameters']['x_pixels'])
+        self.img_height = int(self.configuration['experiment']['CameraParameters']['y_pixels'])
+        self.number_of_frames = 10
+        self.data_buffer = np.zeros((self.number_of_frames, self.img_width, self.img_height))
+        self.data_buffer_positions = np.zeros(shape=(self.number_of_frames, 5), dtype=float)  # z-index, x, y, z, theta, f
 
         self.camera = {}
         microscope_name = self.configuration['experiment']['MicroscopeState']['microscope_name']
         for k in self.configuration['configuration']['microscopes'].keys():
             self.camera[k] = SyntheticCamera(microscope_name, SyntheticCameraController(), self.configuration)
-            self.camera[k].initialize_image_series(self.data_buffer, n_frames)
+            self.camera[k].initialize_image_series(self.data_buffer, self.number_of_frames)
 
     def signal_func(self):
         self.signal_container.reset()

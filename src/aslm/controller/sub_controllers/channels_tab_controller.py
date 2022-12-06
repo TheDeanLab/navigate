@@ -1,4 +1,4 @@
-"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# """
+#
 
 # Standard Library Imports
 import logging
@@ -521,6 +521,5 @@ class ChannelsTabController(GUIController):
             self.update_timepoint_setting()
         elif (command == 'channel') or (command == 'move_stage_and_update_info') or (command == 'update_setting'):
             self.view.after(1000, lambda: self.parent_controller.execute(command, *args))
-        elif command == 'get_stage_position':
-            return self.view.after(1000, lambda: self.parent_controller.execute(command))
+
         self.show_verbose_info('Received command from child', command, args)

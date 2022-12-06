@@ -33,32 +33,26 @@ POSSIBILITY OF SUCH DAMAGE.
 # Standard Library Imports
 
 # Third Party Imports
-from PIL import Image, ImageDraw, ImageFont
 import numpy as np
 
 # Local Imports
+from aslm.tools.image import text_array
 
 
-def text_array(text: str,
-               offset: tuple = (0, 0),
-               font_size: int = 16):
-    """Create a binary array from a piece of text
+def test_text_array_output_type():
+    """Confirm output is np.ndarray object"""
+    text_output = text_array(text='ASLM')
+    assert type(text_output) == np.ndarray
 
-    Original font type was arial.ttf.
-    Not by default available on Darwin-based devices.
-    Switched to cambriab.ttf
 
-    Parameters
-    ----------
-    text : str
-        Text to convert
-    offset : tuple
-        (x,y) offset from upper left of image
-    font_size: int
-        Size of font in pixels
+def test_text_array_output_height():
+    """Confirm that the output is approximately the correct height
+
+    Initially thought that the height should be ~= font_size, but this
+    turned out to be much more variable than I anticipated
     """
-    font = ImageFont.truetype("cambriab.ttf", font_size)
-    bbox = font.getbbox(text)
-    im = Image.new("1", (bbox[2] + offset[0], bbox[3] + offset[1]))
-    ImageDraw.Draw(im).text(offset, text, 1, font=font)
-    return np.array(im, dtype=bool)
+    for i in np.linspace(start=10, stop=50, num=5):
+        text_output = text_array(text="ASLM", font_size=int(i))
+        height = np.shape(text_output)[0]
+        assert np.abs(i - height) < 10
+

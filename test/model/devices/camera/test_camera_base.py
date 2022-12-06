@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -28,46 +28,40 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-#
-
-# Standard Library Imports
-import logging
+# """
 
 # Third Party Imports
+import pytest
 
-# Local Imports
-from aslm.model.devices.shutter.laser_shutter_base import ShutterBase
+from aslm.model.devices.camera.camera_base import CameraBase
 
-# Logger Setup
-p = __name__.split(".")[1]
-logger = logging.getLogger(p)
+def test_start_camera(dummy_model):
+    model = dummy_model
+    for microscope_name in model.configuration['configuration']['microscopes'].keys():
+        camera = CameraBase(microscope_name, None, model.configuration)
+        assert camera.camera_parameters['hardware']['serial_number'] == model.configuration['configuration']['microscopes'][microscope_name]['camera']['hardware']['serial_number'], f"didn't load correct camera parameter for microscope {microscope_name}"
 
+    # non-exist microscope name
+    microscope_name = model.configuration['configuration']['microscopes'].keys()[0] + '_random_error'
+    raised_error = False
+    try:
+        camera = CameraBase(microscope_name, None, model.configuration)
+    except NameError:
+        raised_error = True
+    assert raised_error, "should raise NameError when the microscope name doesn't exist!"
 
-class SyntheticShutter(ShutterBase):
-    """SyntheticShutter Class
+def test_camera_base_functions(dummy_model):
+    import random
 
-    Triggering for shutters delivered from synthetically.
+    model = dummy_model
+    microscope_name = model.configuration['experiment']['MicroscopeState']['microscope_name']
 
-    Attributes
-    ----------
-    microscope_name : str
-        Name of microscope in configuration
-    device_connection : object
-        Hardware device to connect to
-    configuration : multiprocesing.managers.DictProxy
-        Global configuration of the microscope
+    camera = CameraBase(microscope_name, None, model.configuration)
+    funcs = ['set_readout_direction', 'calculate_light_sheet_exposure_time']
+    args = [[random.random()], [random.random(), random.random()]]
 
-    Methods
-    -------
-    open_left()
-        Open the left shutter, close the right shutter.
-    open_right()
-        Open the right shutter, close the left shutter.
-    close_shutters()
-        Close both shutters
-    state()
-        Return the current state of the shutters
-    """
-
-    def __init__(self, microscope_name, device_connection, configuration):
-        super().__init__(microscope_name, device_connection, configuration)
+    for f, a in zip(funcs, args):
+        if a is not None:
+            getattr(camera, f)(*a)
+        else:
+            getattr(camera, f)()

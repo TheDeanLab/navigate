@@ -21,7 +21,7 @@
    :maxdepth: 2
    
    userguide
-   api
+   hacking
 
 
 **Index and search**

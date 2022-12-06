@@ -12,7 +12,7 @@ def test_synthetic_daq_functions():
     from aslm.model.dummy import DummyModel
 
     model = DummyModel()
-    daq = SyntheticDAQ(model.configuration)
+    daq = SyntheticDAQ(model.configuration) 
     microscope_name = model.configuration['experiment']['MicroscopeState']['microscope_name']
 
     funcs = ['add_camera', 'create_camera_task', 'create_master_trigger_task', 

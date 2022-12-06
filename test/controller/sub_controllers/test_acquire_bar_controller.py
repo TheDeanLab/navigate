@@ -186,6 +186,16 @@ class TestAcquireBarController():
         self.acqbarController.view.pull_down.set('Continuous Scan')
         self.acqbarController.view.pull_down.event_generate('<<ComboboxSelected>>')
         assert self.acqbarController.mode == 'live'
+        
+    def test_populate_experiment_values(self):
+        
+        # Calling function to populate values
+        self.acqbarController.populate_experiment_values()
+        
+        # Checking values are what we expect
+        assert self.acqbarController.saving_settings == self.acqbarController.parent_controller.configuration['experiment']['Saving']
+        assert self.acqbarController.saving_settings['date'] == '2022-06-07' # Assuming default value in exp file, can be altered TODO maybe set default to current date
+        assert self.acqbarController.mode == self.acqbarController.parent_controller.configuration['experiment']['MicroscopeState']['image_mode']
 
     def test_launch_popup_window(self):
 

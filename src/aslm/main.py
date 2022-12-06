@@ -46,6 +46,7 @@ from aslm.view.splash_screen import SplashScreen
 os.environ['http_proxy'] = ''
 os.environ['https_proxy'] = ''
 
+
 def main():
     """Multiscale ASLM Microscope Software.
     Microscope control software built in a Model-View-Controller architecture.
@@ -71,8 +72,10 @@ def main():
     """
     # Start the GUI
     root = tk.Tk()
+
     # withdraw main screen
     root.withdraw()
+
     # show splash screen
     splash_screen = SplashScreen(root, './icon/splash_screen_image.png')
 
@@ -201,12 +204,4 @@ if __name__ == '__main__':
               "Tensorflow and CuPy based analysis is not possible. ",
               "Please try Linux or Windows for this functionality")
 
-
-    # Launch Splash Screen
-    # view_directory = Path(__file__).resolve().parent
-    # splash_thread = threading.Thread(target=splash_screen, args=view_directory, daemon=True)
-    # splash_thread.start()
-    #
-    # main_thread = threading.Thread(target=main)
-    # main_thread.start()
     main()

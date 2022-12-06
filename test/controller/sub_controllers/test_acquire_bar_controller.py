@@ -167,7 +167,26 @@ class TestAcquireBarController():
         self.acqbarController.set_save_option(False)
         assert self.acqbarController.is_save == False, "Save option did not return to original value"
     
-    
+    @pytest.mark.parametrize("user_mode,expected_mode", [ ('Continuous Scan', 'live'), ('Z-Stack', 'z-stack'), ('Single Acquisition', 'single'), ('Alignment', 'alignment'), ('Projection', 'projection') ])
+    def test_update_microscope_mode(self, user_mode, expected_mode):
+        
+        # Assuming mode starts on live
+        assert self.acqbarController.mode == 'live'
+        
+        # Setting to mode specified by user
+        self.acqbarController.view.pull_down.set(user_mode)
+        
+        # Generate event that calls update microscope mode
+        self.acqbarController.view.pull_down.event_generate('<<ComboboxSelected>>')
+
+        # Checking that new mode gets set by function
+        assert self.acqbarController.mode == expected_mode
+        
+        # Resetting to live
+        self.acqbarController.view.pull_down.set('Continuous Scan')
+        self.acqbarController.view.pull_down.event_generate('<<ComboboxSelected>>')
+        assert self.acqbarController.mode == 'live'
+
     def test_launch_popup_window(self):
 
         pass

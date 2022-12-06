@@ -36,15 +36,12 @@ from pathlib import Path
 import tkinter as tk
 import platform
 import os
-import threading
-
-# Third Party Imports
-from PIL import ImageTk, Image
 
 # Local Imports
 from aslm.controller.controller import Controller
 from aslm.log_files.log_functions import log_setup
 from aslm.config import get_configuration_paths
+from aslm.view.splash_screen import SplashScreen
 
 os.environ['http_proxy'] = ''
 os.environ['https_proxy'] = ''
@@ -72,6 +69,12 @@ def main():
     --------
     python main.py --synthetic_hardware
     """
+    # Start the GUI
+    root = tk.Tk()
+    # withdraw main screen
+    root.withdraw()
+    # show splash screen
+    splash_screen = SplashScreen(root, './icon/splash_screen_image.png')
 
     # Specify the Default Configuration paths
     configuration_path, experiment_path, etl_constants_path, rest_api_path = get_configuration_paths()
@@ -181,9 +184,8 @@ def main():
             if number_GPUs > 0:
                 use_gpu = True
 
-    # Start the GUI
-    root = tk.Tk()
     Controller(root,
+               splash_screen,
                configuration_path,
                experiment_path,
                etl_constants_path,
@@ -192,39 +194,6 @@ def main():
                args)
     root.mainloop()
 
-
-def splash_screen(view_directory):
-    """Initialize Splash Screen"""
-    splash_root = tk.Tk()
-
-    photo_image = view_directory.joinpath("view", "icon", "splash_screen_image.png")
-
-    image1 = Image.open(photo_image)
-    splash_width, splash_height = image1.size
-
-    # get screen width and height
-    ws = splash_root.winfo_screenwidth()  # width of the screen
-    hs = splash_root.winfo_screenheight()  # height of the screen
-
-    # calculate x and y coordinates for the Tk root window
-    x = (ws/2) - (splash_width/2)
-    y = (hs/2) - (splash_height/2)
-
-    splash_root.geometry('%dx%d+%d+%d' % (splash_width, splash_height, x, y))
-    splash_root.resizable(0, 0)
-
-    splash = ImageTk.PhotoImage(image1)
-    label1 = tk.Label(splash_root, image=splash)
-    label1.pack()
-
-    # Delay after splash screen initiation in ms before main window initializes
-    splash_root.after(1000, main)
-
-    # Initialize splash screen root
-    splash_root.mainloop()
-
-    # Kill the splash screen
-    splash_root.destroy()
 
 if __name__ == '__main__':
     if platform.system() == 'Darwin':

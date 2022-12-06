@@ -90,13 +90,13 @@ class Controller:
 
     def __init__(self,
                  root,
+                 splash_screen,
                  configuration_path,
                  experiment_path,
                  etl_constants_path,
                  rest_api_path,
                  use_gpu,
                  args):
-        
 
 
         # Create a thread pool
@@ -185,6 +185,10 @@ class Controller:
 
         # Wire up pipes
         self.show_img_pipe = self.model.create_pipe('show_img_pipe')
+        
+        # destroy splash screen and show main screen
+        splash_screen.destroy()
+        root.deiconify()
 
     def update_buffer(self):
         r""" Update the buffer size according to the camera dimensions listed in the experimental parameters.

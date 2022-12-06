@@ -113,37 +113,60 @@ class TestAcquireBarController():
         assert after_stop == 0, "Progress Bar did not stop"
         assert after_ovr == 0, "Progress Bar did not stop"
             
-
-
-
-    def test_update_stack_acq(self):
+    @pytest.mark.parametrize("mode,expected_state", [ ('live', 'disabled'), ('z-stack', 'normal'), ('single', 'disabled'), ('alignment', 'disabled'), ('projection', 'normal') ])
+    def test_update_stack_acq(self, mode, expected_state):
 
         stack = self.acqbarController.parent_view.stack_acq_frame.get_widgets()
 
-        # This test assumes starting mode is 'live' so checking for all normal state
+        # Checking mode and expected state
+        self.acqbarController.update_stack_acq(mode)
         for key, widget in stack.items():
             state = str(widget.widget['state'])
-            assert state == 'disabled'
-
-
-        # Now switching modes and checking disabled
-        self.acqbarController.update_stack_acq('z-stack')
-        for key, widget in stack.items():
-            state = str(widget.widget['state'])
-            assert state == 'normal'
-
-        # Checking projection
-        self.acqbarController.update_stack_acq('projection')
-        for key, widget in stack.items():
-            state = str(widget.widget['state'])
-            assert state == 'normal'
+            assert state == expected_state, f"Widget state not correct for {mode} mode"
 
         # Switching back to orginal live
         self.acqbarController.update_stack_acq('live')
         for key, widget in stack.items():
             state = str(widget.widget['state'])
-            assert state == 'disabled'
+            assert state == 'disabled', "Widget state not correct for switching back to live mode"
+            
+    @pytest.mark.parametrize("mode,expected_state", [ ('live', 'disabled'), ('z-stack', 'normal'), ('single', 'normal'), ('alignment', 'disabled'), ('projection', 'normal') ])
+    def test_update_stack_time(self, mode, expected_state):
+        
+        stack_time = self.acqbarController.parent_view.stack_timepoint_frame.get_widgets()
+        
+        # Checking mode and expected state
+        self.acqbarController.update_stack_time(mode)
+        for key, widget in stack_time.items():
+            state = str(widget.widget['state'])
+            assert state == expected_state, f"Widget state not correct for {mode} mode"
+            
+        
+        # Switching back to orginal live
+        self.acqbarController.update_stack_time('live')
+        for key, widget in stack_time.items():
+            state = str(widget.widget['state'])
+            assert state == 'disabled', "Widget state not correct for switching back to live mode"
 
+    @pytest.mark.parametrize("mode", ['live', 'single', 'z-stack', 'projection'])
+    def test_get_set_mode(self, mode):
+        
+        self.acqbarController.set_mode(mode)
+        test = self.acqbarController.get_mode()
+        
+        assert test == mode, "Mode not set correctly"
+        
+    
+    def test_set_save(self):
+        
+        # Assuming save state starts as False
+        self.acqbarController.set_save_option(True)
+        assert self.acqbarController.is_save == True, "Save option not correct"
+
+        # Return value to False
+        self.acqbarController.set_save_option(False)
+        assert self.acqbarController.is_save == False, "Save option did not return to original value"
+    
     
     def test_launch_popup_window(self):
 

@@ -64,13 +64,14 @@ class RemoteFocusBase:
         self.samples = int(self.sample_rate * self.sweep_time)
 
         self.waveform_dict = {}
-        for i in range(int(configuration['configuration']['gui']['channels']['count'])):
-            self.waveform_dict['channel_'+str(i+1)] = None
+        for k in configuration['configuration']['gui']['channels'].keys():
+            self.waveform_dict[k] = None
 
     def __del__(self):
         pass
 
     def adjust(self, readout_time):
+        self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
         # calculate waveform
         microscope_state = self.configuration['experiment']['MicroscopeState']
         etl_constants = self.configuration['etl_constants']

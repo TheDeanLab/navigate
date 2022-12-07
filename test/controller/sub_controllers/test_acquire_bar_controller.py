@@ -197,6 +197,70 @@ class TestAcquireBarController():
         assert self.acqbarController.saving_settings['date'] == '2022-06-07' # Assuming default value in exp file, can be altered TODO maybe set default to current date
         assert self.acqbarController.mode == self.acqbarController.parent_controller.configuration['experiment']['MicroscopeState']['image_mode']
 
-    def test_launch_popup_window(self):
-
-        pass
+    @pytest.mark.parametrize("text,save,mode,file_types", [ ('Stop', None, None, [] ), ('Acquire', True, 'live', []), ('Acquire', False, 'z-stack', []), ('Acquire', True, 'z-stack', ['TIFF', 'OME-TIFF', 'BDV']) ])
+    def test_launch_popup_window(self, text, save, mode, file_types):
+        '''
+        This is the largest test for this controller. It will test multiple functions that are all used together
+        and difficult to isolate.
+        
+        Funcs Tested:
+        launch_popup_window
+        update_file_type
+        launch_acquisition
+        update_experiment_values
+        acquire_pop.popup.dismiss # This will be double tested in view
+        '''
+        
+        # Setup Gui for test
+        self.acqbarController.view.acquire_btn.configure(text=text)
+        self.acqbarController.is_save = save
+        self.acqbarController.set_mode(mode)
+        
+        # Test based on setup
+        self.acqbarController.view.acquire_btn.invoke()
+        
+        # Checking things are what we expect
+        if text == 'Stop':
+            assert self.acqbarController.view.acquire_btn['text'] == 'Acquire'
+            res = self.acqbarController.parent_controller.pop()
+            assert res == 'stop_acquire'
+            
+        if text == 'Acquire':
+            # First scenario Save is on and in live mode
+            if save == True and mode == 'live':
+                assert self.acqbarController.view.acquire_btn['text'] == 'Stop'
+                res = self.acqbarController.parent_controller.pop()
+                assert res == 'acquire'
+            
+            # Second scenario Save is off and mode is not live
+            if save == False and mode != 'live':
+                assert self.acqbarController.view.acquire_btn['text'] == 'Stop'
+                res = self.acqbarController.parent_controller.pop()
+                assert res == 'acquire'
+                
+            # Third and final scenario Save is on and mode is not live
+            if save == True and mode != 'live':
+                from aslm.view.main_window_content.acquire_bar_frame.acquire_popup import AcquirePopUp
+                
+                # Checking if popup created
+                assert isinstance(self.acqbarController.acquire_pop, AcquirePopUp)
+                
+                # Testing update_file_type if list exists
+                widgets = self.acqbarController.acquire_pop.get_widgets()
+                if len(file_types) > 0:
+                    for file in file_types:
+                        widgets['file_type'].set(file)
+                        assert self.acqbarController.saving_settings['file_type'] == file
+                    # Resetting file type back to orginal 
+                    widgets['file_type'].set('TIFF')
+                    assert self.acqbarController.saving_settings['file_type'] == 'TIFF'
+                    
+                # Check that loop thru saving settings is correct
+                for k, v in self.acqbarController.saving_settings.items():
+                    value = widgets[k].get()
+                    assert value == v
+                    
+                # Testing Done button which calls launch_acquisition
+                buttons = self.acqbarController.acquire_pop.get_buttons()
+                buttons['Done'].invoke()
+                

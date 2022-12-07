@@ -92,9 +92,22 @@ from aslm.controller.controller import Controller
 class DummyController:
     def __init__(self):
         self.configuration = None
+        self.commands = []
     
-    def execute(str):
-        return str
+    def execute(self, str):
+        '''
+        Appends commands sent via execute, first element is oldest command/first to pop off
+        '''
+        self.commands.append(str)
+        
+    def pop(self):
+        '''
+        Use this method in testing code to grab the next command
+        '''
+        if len(self.commands) > 0:
+            return self.commands[0]
+        else:
+            return "Empty command list"
 
 class DummyModel:
     def __init__(self):

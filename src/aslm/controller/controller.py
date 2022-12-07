@@ -45,7 +45,7 @@ from tkinter import filedialog, messagebox
 from aslm.controller.sub_controllers.help_popup_controller import HelpPopupController
 from aslm.view.main_application_window import MainApp as view
 from aslm.view.menus.remote_focus_popup import remote_popup
-from aslm.view.menus.autofocus_setting_popup import autofocus_popup
+from aslm.view.menus.autofocus_setting_popup import AutofocusPopup
 from aslm.view.menus.ilastik_setting_popup import ilastik_setting_popup
 from aslm.view.menus.help_popup import help_popup
 
@@ -290,7 +290,7 @@ class Controller:
             if hasattr(self, 'af_popup_controller'):
                 self.af_popup_controller.showup()
                 return
-            af_popup = autofocus_popup(self.view)
+            af_popup = AutofocusPopup(self.view)
             self.af_popup_controller = AutofocusPopupController(af_popup, self)
 
         def popup_ilastik_setting():

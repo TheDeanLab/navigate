@@ -34,8 +34,23 @@ POSSIBILITY OF SUCH DAMAGE.
 import tkinter as tk
 from pathlib import Path
 
+
 class SplashScreen(tk.Toplevel):
-    def __init__(self, root, imgDir, *args, **kargs):
+    """Display Splash Screen
+
+    Briefly shows a splash screen upon loading the software.
+    Centered depending upon the host computer being used.
+
+    Parameters
+    tk.Toplevel : tk window
+        Top level GUI.
+
+    """
+    def __init__(self,
+                 root,
+                 imgDir,
+                 *args,
+                 **kargs):
         tk.Toplevel.__init__(self, root)
         # without navigation panel
         self.overrideredirect(True)

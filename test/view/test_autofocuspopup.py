@@ -32,7 +32,7 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 
 import tkinter as tk
-from aslm.view.menus.autofocus_setting_popup import autofocus_popup
+from aslm.view.menus.autofocus_setting_popup import AutofocusPopup
 import time
 
 def test_autofocuspopup():
@@ -50,10 +50,9 @@ def test_autofocuspopup():
         True or False as to whether the test passed
     """
     root = tk.Tk()
-    auto_pop = autofocus_popup(root)
+    auto_pop = AutofocusPopup(root)
     root.update()
     time.sleep(3)
-    bool = isinstance(auto_pop, autofocus_popup)
+    bool = isinstance(auto_pop, AutofocusPopup)
     root.destroy()
-    
     assert bool

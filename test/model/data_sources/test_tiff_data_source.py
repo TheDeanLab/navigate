@@ -15,8 +15,8 @@ def test_tiff_write_read(is_ome, multiposition, per_stack, z_stack):
 
     # Set up model with a random number of z-steps to modulate the shape
     model = DummyModel()
-    z_steps = np.random.randint(1,10)
-    timepoints = np.random.randint(1,10)
+    z_steps = np.random.randint(1,5)
+    timepoints = np.random.randint(1,5)
     model.configuration['experiment']['MicroscopeState']['image_mode'] = 'z-stack' if z_stack else 'single'
     model.configuration['experiment']['MicroscopeState']['number_z_steps'] = z_steps
     model.configuration['experiment']['MicroscopeState']['is_multiposition'] = multiposition
@@ -36,7 +36,7 @@ def test_tiff_write_read(is_ome, multiposition, per_stack, z_stack):
 
     # Populate one image per channel per timepoint per position
     n_images = ds.shape_c*ds.shape_z*ds.shape_t*ds.positions
-    data = np.random.rand(n_images, ds.shape_x, ds.shape_y)
+    data = (np.random.rand(n_images, ds.shape_x, ds.shape_y)*2**16).astype(np.uint16)
     file_names_raw = []
     for i in range(n_images):
         ds.write(data[i,...].squeeze())

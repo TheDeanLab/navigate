@@ -111,7 +111,7 @@ class DataSource:
             # Timepoint acqusition, only c varies faster than t
             c = frame_id % self.shape_c
             t = (frame_id // self.shape_c) % self.shape_t
-            z = frame_id // (self.shape_c*self.shape_t)
+            z = (frame_id // (self.shape_c*self.shape_t)) % self.shape_z
             p = (frame_id // (self.shape_c*self.shape_t)) % self.positions
 
         return c, z, t, p

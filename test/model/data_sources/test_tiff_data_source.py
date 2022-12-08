@@ -1,18 +1,26 @@
 import pytest 
 
-def tiff_write_read(is_ome=False, multiposition=False, per_stack=True):
+@pytest.mark.parametrize("is_ome", [True, False])
+@pytest.mark.parametrize("multiposition", [True, False])
+@pytest.mark.parametrize("per_stack", [True, False])
+@pytest.mark.parametrize("z_stack", [True, False])
+def test_tiff_write_read(is_ome, multiposition, per_stack, z_stack):
     import os
     import numpy as np
 
     from aslm.model.dummy import DummyModel
     from aslm.model.data_sources.tiff_data_source import TiffDataSource
 
+    print(f"Conditions are is_ome: {is_ome} multiposition: {multiposition} per_stack: {per_stack} z_stack: {z_stack}")
+
     # Set up model with a random number of z-steps to modulate the shape
     model = DummyModel()
     z_steps = np.random.randint(1,10)
-    model.configuration['experiment']['MicroscopeState']['image_mode'] = 'z-stack'
+    timepoints = np.random.randint(1,10)
+    model.configuration['experiment']['MicroscopeState']['image_mode'] = 'z-stack' if z_stack else 'single'
     model.configuration['experiment']['MicroscopeState']['number_z_steps'] = z_steps
     model.configuration['experiment']['MicroscopeState']['is_multiposition'] = multiposition
+    model.configuration['experiment']['MicroscopeState']['timepoints'] = timepoints
     if per_stack:
         model.configuration['experiment']['MicroscopeState']['stack_cycling_mode'] == 'per_stack'
     else:
@@ -29,13 +37,17 @@ def tiff_write_read(is_ome=False, multiposition=False, per_stack=True):
     # Populate one image per channel per timepoint per position
     n_images = ds.shape_c*ds.shape_z*ds.shape_t*ds.positions
     data = np.random.rand(n_images, ds.shape_x, ds.shape_y)
-    file_names = []
+    file_names_raw = []
     for i in range(n_images):
         ds.write(data[i,...].squeeze())
-        c, z, _, _ = ds._cztp_indices(i, per_stack)
-        if c == 0 and z == 0:
-            file_names.extend(ds.file_name)
+        file_names_raw.extend(ds.file_name)
     ds.close()
+
+    file_names = []
+    for fn in file_names_raw:
+        if fn not in file_names:
+            file_names.append(fn)
+    print(file_names)
 
     # For each file...
     for i, fn in enumerate(file_names):
@@ -59,9 +71,3 @@ def tiff_write_read(is_ome=False, multiposition=False, per_stack=True):
     except PermissionError:
         # Windows seems to think these files are still open
         pass
-
-@pytest.mark.parametrize("is_ome", [True, False])
-@pytest.mark.parametrize("multiposition", [True, False])
-@pytest.mark.parametrize("per_stack", [True, False])
-def test_tiff_write_read(is_ome, multiposition, per_stack):
-    tiff_write_read(is_ome=is_ome, multiposition=multiposition, per_stack=per_stack)

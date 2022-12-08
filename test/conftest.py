@@ -56,14 +56,15 @@ def dummy_view():
     root.destroy()
     
 @pytest.fixture(scope="package")
-def dummy_controller(dummy_model):
+def dummy_controller(dummy_model, dummy_view):
     '''
     Fixture that will mock controller functions called by sub controllers
     '''
     from aslm.model.dummy import DummyController
     
     model = dummy_model
-    controller = DummyController()
+    view = dummy_view
+    controller = DummyController(view)
     
     controller.configuration = model.configuration
     

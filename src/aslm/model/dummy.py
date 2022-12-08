@@ -90,9 +90,10 @@ from aslm.controller.controller import Controller
 #     return dumb_model
 
 class DummyController:
-    def __init__(self):
+    def __init__(self, view):
         self.configuration = None
         self.commands = []
+        self.view = view
     
     def execute(self, str):
         '''
@@ -105,7 +106,7 @@ class DummyController:
         Use this method in testing code to grab the next command
         '''
         if len(self.commands) > 0:
-            return self.commands[0]
+            return self.commands.pop(0)
         else:
             return "Empty command list"
 

@@ -22,6 +22,7 @@ def test_metadata_shape():
     from aslm.model.metadata_sources.metadata import Metadata
 
     model = DummyModel()
+    model.configuration['experiment']['MicroscopeState']['image_mode'] = 'z-stack'
 
     md = Metadata()
 

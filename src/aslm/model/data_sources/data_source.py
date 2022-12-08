@@ -105,6 +105,8 @@ class DataSource:
         p = frame_id // (self.shape_c*self.shape_z)
         t = frame_id // (self.shape_c*self.shape_z*self.positions)
 
+        print(f"C: {c} Z: {z} T: {t} P: {p}")
+
         return c, z, t, p
 
     def _mode_checks(self) -> None:

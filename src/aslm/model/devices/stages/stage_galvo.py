@@ -40,8 +40,8 @@ class GalvoNIStage(StageBase):
         self.etl_ramp_falling = configuration['configuration']['microscopes'][microscope_name]['remote_focus_device']['ramp_falling_percent']
 
         self.waveform_dict = {}
-        for i in range(int(configuration['configuration']['gui']['channels']['count'])):
-            self.waveform_dict['channel_'+str(i+1)] = None
+        for k in configuration['configuration']['gui']['channels'].keys():
+            self.waveform_dict[k] = None
 
     # for stacking, we could have 2 axis here or not, y is for tiling, not necessary
     def report_position(self):
@@ -70,7 +70,7 @@ class GalvoNIStage(StageBase):
         bool
             Was the move successful?
         """
-
+        self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
         axis_abs = self.get_abs_position(axis, move_dictionary)
         if axis_abs == -1e50:
             return False

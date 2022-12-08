@@ -164,11 +164,13 @@ class ZStackAcquisition:
         self.current_focus_position = self.start_focus + self.positions[self.current_position_idx]['f']
 
         self.restore_z = -1
+        self.restore_f = -1
 
         if not bool(microscope_state['is_multiposition']):
             # TODO: Make relative to stage coordinates.
             self.model.get_stage_position()
             self.restore_z = self.model.active_microscope.get_stage_position()['z_pos']
+            self.restore_f = self.model.active_microscope.get_stage_position()['f_pos']
     
     def signal_func(self):
         if self.model.stop_acquisition:
@@ -195,15 +197,11 @@ class ZStackAcquisition:
 
         if self.need_to_move_z_position:
             # move z, f
-            self.model.pause_data_ready_lock.acquire()
-            self.model.ask_to_pause_data_thread = True
-            self.model.pause_data_ready_lock.acquire()
+            self.model.pause_data_thread()
 
             self.model.move_stage({'z_abs': self.current_z_position, 'f_abs': self.current_focus_position}, wait_until_done=True)
 
-            self.model.ask_to_pause_data_thread = False
-            self.model.pause_data_event.set()
-            self.model.pause_data_ready_lock.release()
+            self.model.resume_data_thread()
 
         if self.stack_cycling_mode != 'per_stack':
             # update channel for each z position in 'per_slice'
@@ -253,7 +251,7 @@ class ZStackAcquisition:
         if self.timepoints == 0:
             # restore z if need
             if self.restore_z >= 0:
-                self.model.move_stage({'z_abs': self.restore_z}, wait_until_done=True)  # Update position
+                self.model.move_stage({'z_abs': self.restore_z, 'f_abs': self.restore_f}, wait_until_done=True)  # Update position
             return True
         return False
 

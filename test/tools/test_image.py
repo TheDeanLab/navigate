@@ -1,5 +1,4 @@
-"""
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -29,30 +28,31 @@ BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
 IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
+
 """
+# Standard Library Imports
 
-import tkinter as tk
-from aslm.view.menus.autofocus_setting_popup import AutofocusPopup
-import time
+# Third Party Imports
+import numpy as np
 
-def test_autofocuspopup():
+# Local Imports
+from aslm.tools.image import text_array
+
+
+def test_text_array_output_type():
+    """Confirm output is np.ndarray object"""
+    text_output = text_array(text='ASLM')
+    assert type(text_output) == np.ndarray
+
+
+def test_text_array_output_height():
+    """Confirm that the output is approximately the correct height
+
+    Initially thought that the height should be ~= font_size, but this
+    turned out to be much more variable than I anticipated
     """
-    Tests that the autofocus popup and all its widgets gets created and does not
-    throw any exceptions. Test will fail if any exceptions.
+    for i in np.linspace(start=10, stop=50, num=5):
+        text_output = text_array(text="ASLM", font_size=int(i))
+        height = np.shape(text_output)[0]
+        assert np.abs(i - height) < 10
 
-    Parameters
-    ----------
-    None
-
-    Returns
-    -------
-    bool : bool
-        True or False as to whether the test passed
-    """
-    root = tk.Tk()
-    auto_pop = AutofocusPopup(root)
-    root.update()
-    time.sleep(3)
-    bool = isinstance(auto_pop, AutofocusPopup)
-    root.destroy()
-    assert bool

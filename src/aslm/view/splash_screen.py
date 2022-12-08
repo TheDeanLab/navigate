@@ -1,5 +1,4 @@
-"""
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -29,30 +28,52 @@ BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
 IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
+
 """
 
 import tkinter as tk
-from aslm.view.menus.autofocus_setting_popup import AutofocusPopup
-import time
+from pathlib import Path
 
-def test_autofocuspopup():
-    """
-    Tests that the autofocus popup and all its widgets gets created and does not
-    throw any exceptions. Test will fail if any exceptions.
+
+class SplashScreen(tk.Toplevel):
+    """Display Splash Screen
+
+    Briefly shows a splash screen upon loading the software.
+    Centered depending upon the host computer being used.
 
     Parameters
-    ----------
-    None
+    tk.Toplevel : tk window
+        Top level GUI.
 
-    Returns
-    -------
-    bool : bool
-        True or False as to whether the test passed
     """
-    root = tk.Tk()
-    auto_pop = AutofocusPopup(root)
-    root.update()
-    time.sleep(3)
-    bool = isinstance(auto_pop, AutofocusPopup)
-    root.destroy()
-    assert bool
+    def __init__(self,
+                 root,
+                 imgDir,
+                 *args,
+                 **kargs):
+        tk.Toplevel.__init__(self, root)
+        # without navigation panel
+        self.overrideredirect(True)
+
+        img_dir = Path.joinpath(Path(__file__).resolve().parent, imgDir)
+        try:
+            img = tk.PhotoImage(file=img_dir)
+            w, h = img.width(), img.height() # width, height of the image
+            loading_label = tk.Label(self, image=img)
+        except:
+            w, h = 300, 100
+            loading_label = tk.Label(self, text='Loading ASLM Software ...')
+        loading_label.pack()
+
+        # get screen width and height
+        ws = root.winfo_screenwidth()  # width of the screen
+        hs = root.winfo_screenheight()  # height of the screen
+
+        # calculate x and y coordinates for the Tk root window
+        x = (ws/2) - (w/2)
+        y = (hs/2) - (h/2)
+
+        # draw the window in the center of the window
+        self.geometry('%dx%d+%d+%d' % (w, h, x, y))
+        self.resizable(0, 0)
+        self.update()

@@ -1,7 +1,7 @@
 # Multiscale Axially Swept Light-Sheet Microscopy Project
 
 [![Tests](https://github.com/AdvancedImagingUTSW/ASLM/actions/workflows/push_checks.yaml/badge.svg)](https://github.com/AdvancedImagingUTSW/ASLM/actions/workflows/push_checks.yaml)
-[![codecov](https://codecov.io/gh/AdvancedImagingUTSW/ASLM/branch/develop/graph/badge.svg?token=270RFSZGG5)](https://codecov.io/gh/AdvancedImagingUTSW/ASLM)
+[![codecov](https://codecov.io/gh/TheDeanLab/ASLM/branch/develop/graph/badge.svg?token=270RFSZGG5)](https://codecov.io/gh/TheDeanLab/ASLM)
 
 ### Project Philosophy
 * Minimal number of dependencies. Prioritize standard library Python imports for maximum stability.

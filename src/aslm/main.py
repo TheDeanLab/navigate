@@ -36,17 +36,19 @@ from pathlib import Path
 import tkinter as tk
 import platform
 import os
-from aslm.log_files.log_functions import log_setup
-from aslm.config import get_configuration_paths
 
 # Local Imports
 from aslm.controller.controller import Controller
+from aslm.log_files.log_functions import log_setup
+from aslm.config import get_configuration_paths
+from aslm.view.splash_screen import SplashScreen
 
 os.environ['http_proxy'] = ''
 os.environ['https_proxy'] = ''
 
+
 def main():
-    r"""Multiscale ASLM Microscope Software.
+    """Multiscale ASLM Microscope Software.
     Microscope control software built in a Model-View-Controller architecture.
     Provides control of cameras, data acquisition cards, filter wheels, lasers
     stages, voice coils, and zoom servos.
@@ -68,6 +70,14 @@ def main():
     --------
     python main.py --synthetic_hardware
     """
+    # Start the GUI
+    root = tk.Tk()
+
+    # withdraw main screen
+    root.withdraw()
+
+    # show splash screen
+    splash_screen = SplashScreen(root, './icon/splash_screen_image.png')
 
     # Specify the Default Configuration paths
     configuration_path, experiment_path, etl_constants_path, rest_api_path = get_configuration_paths()
@@ -177,9 +187,8 @@ def main():
             if number_GPUs > 0:
                 use_gpu = True
 
-    # Start the GUI
-    root = tk.Tk()
     Controller(root,
+               splash_screen,
                configuration_path,
                experiment_path,
                etl_constants_path,
@@ -196,4 +205,3 @@ if __name__ == '__main__':
               "Please try Linux or Windows for this functionality")
 
     main()
-

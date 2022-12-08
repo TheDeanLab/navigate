@@ -519,8 +519,10 @@ class ChannelsTabController(GUIController):
         """
         if command == 'recalculate_timepoint':
             self.update_timepoint_setting()
-        elif (command == 'channel') or (command == 'move_stage_and_update_info') or (command == 'update_setting'):
+            # update framerate info in camera setting tab
+            exposure_time = max(map(lambda channel: float(channel['camera_exposure_time']) if channel['is_selected'] else 0, self.microscope_state_dict['channels'].values()))
+            self.parent_controller.camera_setting_controller.update_exposure_time(exposure_time)
+        elif (command == 'channel') or (command == 'update_setting'):
             self.view.after(1000, lambda: self.parent_controller.execute(command, *args))
-        elif command == 'get_stage_position':
-            return self.view.after(1000, lambda: self.parent_controller.execute(command))
+
         self.show_verbose_info('Received command from child', command, args)

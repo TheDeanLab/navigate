@@ -33,7 +33,6 @@
 
 # Standard Library Imports
 import platform
-import sys
 import logging
 import time
 import importlib
@@ -48,10 +47,17 @@ from aslm.tools.common_functions import build_ref_name
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+
 class DummyDeviceConnection:
+    """Dummy Device"""
     pass
 
-def auto_redial(func, args, n_tries=10, exception=Exception, **kwargs):
+
+def auto_redial(func,
+                args,
+                n_tries=10,
+                exception=Exception,
+                **kwargs):
     r"""Retries connections to a startup device defined by func n_tries times.
 
     Parameters
@@ -101,7 +107,7 @@ def load_camera_connection(configuration,
 
     Parameters
     ----------
-    configuration : multiprocesing.managers.DictProxy
+    configuration : multiprocessing.managers.DictProxy
         Global configuration of the microscope
     camera_id : int
         Device ID (0, 1...)
@@ -123,24 +129,26 @@ def load_camera_connection(configuration,
         # Locally Import Hamamatsu API and Initialize Camera Controller
         HamamatsuController = importlib.import_module('aslm.model.devices.APIs.hamamatsu.HamamatsuAPI')
         return auto_redial(HamamatsuController.DCAM, (camera_id,), exception=Exception)
-    elif cam_type == 'SyntheticCamera':
+    elif cam_type.lower() == 'syntheticcamera' or 'synthetic':
         from aslm.model.devices.camera.camera_synthetic import SyntheticCameraController
         return SyntheticCameraController()
     else:
         device_not_found('camera', camera_id, cam_type)
 
-def start_camera(microscope_name, device_connection, configuration, is_synthetic=False):
+
+def start_camera(microscope_name,
+                 device_connection,
+                 configuration,
+                 is_synthetic=False):
     r"""Initializes the camera class.
 
-    Parameters
-    ----------
     Parameters
     ----------
     microscope_name : str
         Name of microscope in configuration
     device_connection : object
         Hardware device to connect to
-    configuration : multiprocesing.managers.DictProxy
+    configuration : multiprocessing.managers.DictProxy
         Global configuration of the microscope
     is_synthetic : bool
         Run synthetic version of hardware?
@@ -161,19 +169,20 @@ def start_camera(microscope_name, device_connection, configuration, is_synthetic
     if cam_type == 'HamamatsuOrca':
         from aslm.model.devices.camera.camera_hamamatsu import HamamatsuOrca
         return HamamatsuOrca(microscope_name, device_connection, configuration)
-    elif cam_type == 'SyntheticCamera':
+    elif cam_type.lower() == 'syntheticcamera' or 'synthetic':
         from aslm.model.devices.camera.camera_synthetic import SyntheticCamera
         return SyntheticCamera(microscope_name, device_connection, configuration)
     else:
         device_not_found(microscope_name, 'camera', cam_type)
 
 
-def load_stages(configuration, is_synthetic=False):
+def load_stages(configuration,
+                is_synthetic=False):
     r"""Initializes the stage class on a dedicated thread.
 
     Parameters
     ----------
-    configuration : multiprocesing.managers.DictProxy
+    configuration : multiprocessing.managers.DictProxy
         Global configuration of the microscope
     is_synthetic : bool
         Run synthetic version of hardware?
@@ -200,29 +209,72 @@ def load_stages(configuration, is_synthetic=False):
         if stage_type == 'PI' and platform.system() == 'Windows':
             from aslm.model.devices.stages.stage_pi import build_PIStage_connection
             from pipython.pidevice.gcserror import GCSError
-            stage_devices.append(auto_redial(build_PIStage_connection, (stage_config['controllername'], stage_config['serial_number'], stage_config['stages'], stage_config['refmode'],), exception=GCSError))
+            stage_devices.append(auto_redial(build_PIStage_connection,
+                                             (stage_config['controllername'],
+                                              stage_config['serial_number'],
+                                              stage_config['stages'],
+                                              stage_config['refmode'],),
+                                             exception=GCSError))
+
         elif stage_type == 'Thorlabs' and platform.system() == 'Windows':
             from aslm.model.devices.stages.stage_tl_kcube_inertial import build_TLKIMStage_connection
             from aslm.model.devices.APIs.thorlabs.kcube_inertial import TLFTDICommunicationError
-            stage_devices.append(auto_redial(build_TLKIMStage_connection, (stage_config['serial_number'],), exception=TLFTDICommunicationError))
+            stage_devices.append(auto_redial(build_TLKIMStage_connection,
+                                             (stage_config['serial_number'],),
+                                             exception=TLFTDICommunicationError))
+
         elif stage_type == 'MCL' and platform.system() == 'Windows':
             from aslm.model.devices.stages.stage_mcl import build_MCLStage_connection
             from aslm.model.devices.APIs.mcl.madlib import MadlibError
-            stage_devices.append(auto_redial(build_MCLStage_connection, (stage_config['serial_number'],), exception=MadlibError))
+            stage_devices.append(auto_redial(build_MCLStage_connection,
+                                             (stage_config['serial_number'],),
+                                             exception=MadlibError))
+
         elif stage_type == 'ASI' and platform.system() == 'Windows':
             from aslm.model.devices.stages.stage_asi import build_ASI_Stage_connection
             from aslm.model.devices.APIs.asi.asi_tiger_controller import TigerException
-            stage_devices.append(auto_redial(build_ASI_Stage_connection, (stage_config['port'], stage_config['baudrate'],), exception=TigerException))
+            stage_devices.append(auto_redial(build_ASI_Stage_connection,
+                                             (stage_config['port'],
+                                              stage_config['baudrate'],),
+                                             exception=TigerException))
+
         elif stage_type == 'GalvoNIStage' and platform.system() == 'Windows':
             stage_devices.append(DummyDeviceConnection())
-        elif stage_type == 'SyntheticStage':
+
+        elif stage_type.lower() == 'syntheticstage' or 'synthetic':
             stage_devices.append(DummyDeviceConnection())
+
         else:
             device_not_found(stage_type)
 
     return stage_devices
 
-def start_stage(microscope_name, device_connection, configuration, id=0, is_synthetic=False):
+
+def start_stage(microscope_name,
+                device_connection,
+                configuration,
+                id=0,
+                is_synthetic=False):
+    r"""Initializes the Stage class.
+
+    Parameters
+    ----------
+    microscope_name : str
+        Name of microscope in configuration
+    device_connection : object
+        Hardware device to connect to
+    configuration : multiprocesing.managers.DictProxy
+        Global configuration of the microscope
+    id : int
+        ID of the stage
+    is_synthetic : bool
+        Run synthetic version of hardware?
+
+    Returns
+    -------
+    Stage : class
+        Stage class.
+    """
     device_config = configuration['configuration']['microscopes'][microscope_name]['stage']['hardware']
     if is_synthetic:
         device_type = 'SyntheticStage'
@@ -246,13 +298,30 @@ def start_stage(microscope_name, device_connection, configuration, id=0, is_synt
     elif device_type == 'GalvoNIStage':
         from aslm.model.devices.stages.stage_galvo import GalvoNIStage
         return GalvoNIStage(microscope_name, device_connection, configuration, id)
-    elif device_type == 'SyntheticStage':
+    elif device_type.lower() == 'syntheticstage' or 'synthetic':
         from aslm.model.devices.stages.stage_synthetic import SyntheticStage
         return SyntheticStage(microscope_name, device_connection, configuration, id)
     else:
         device_not_found(microscope_name, 'stage', device_type, id)
 
-def load_zoom_connection(configuration, is_synthetic=False):
+
+def load_zoom_connection(configuration,
+                         is_synthetic=False):
+    r"""Initializes the Zoom class on a dedicated thread.
+
+    Parameters
+    ----------
+    configuration : multiprocesing.managers.DictProxy
+        Global configuration of the microscope
+    is_synthetic : bool
+        Run synthetic version of hardware?
+
+    Returns
+    -------
+    Zoom : class
+        Zoom class.
+    """
+
     device_info = configuration['configuration']['hardware']['zoom']
     if is_synthetic:
         device_type = 'SyntheticZoom'
@@ -262,12 +331,16 @@ def load_zoom_connection(configuration, is_synthetic=False):
     if device_type == 'DynamixelZoom':
         from aslm.model.devices.zoom.zoom_dynamixel import build_dynamixel_zoom_connection
         return auto_redial(build_dynamixel_zoom_connection, (configuration,), exception=Exception)
-    elif device_type == 'SyntheticZoom':
+    elif device_type.lower() == 'syntheticzoom' or 'synthetic':
         return DummyDeviceConnection()
     else:
         device_not_found('Zoom', device_type)
 
-def start_zoom(microscope_name, device_connection, configuration, is_synthetic=False):
+
+def start_zoom(microscope_name,
+               device_connection,
+               configuration,
+               is_synthetic=False):
     r"""Initializes the zoom class on a dedicated thread.
 
     Parameters
@@ -296,16 +369,32 @@ def start_zoom(microscope_name, device_connection, configuration, is_synthetic=F
     if device_type == 'DynamixelZoom':
         from aslm.model.devices.zoom.zoom_dynamixel import DynamixelZoom
         return DynamixelZoom(microscope_name, device_connection, configuration)
-    elif device_type == 'SyntheticZoom':
+    elif device_type.lower() == 'syntheticzoom' or 'synthetic':
         from aslm.model.devices.zoom.zoom_synthetic import SyntheticZoom
         return SyntheticZoom(microscope_name, device_connection, configuration)
-    elif device_type == 'NoDevice':
+    elif device_type == 'NoDevice' or 'None':
         from aslm.model.devices.zoom.zoom_base import ZoomBase
         return ZoomBase(microscope_name, device_connection, configuration)
     else:
         device_not_found(configuration['configuration']['hardware']['zoom']['type'])
 
-def load_filter_wheel_connection(configuration, is_synthetic=False):
+
+def load_filter_wheel_connection(configuration,
+                                 is_synthetic=False):
+    r"""Initializes the Filter Wheel class on a dedicated thread.
+
+    Parameters
+    ----------
+    configuration : multiprocesing.managers.DictProxy
+        Global configuration of the microscope
+    is_synthetic : bool
+        Run synthetic version of hardware?
+
+    Returns
+    -------
+    Filter : class
+        Filter class.
+    """
     device_info = configuration['configuration']['hardware']['filter_wheel']
     if is_synthetic:
         device_type = 'SyntheticFilterWheel'
@@ -314,13 +403,20 @@ def load_filter_wheel_connection(configuration, is_synthetic=False):
     
     if device_type == 'SutterFilterWheel':
         from aslm.model.devices.filter_wheel.filter_wheel_sutter import build_filter_wheel_connection
-        return auto_redial(build_filter_wheel_connection, (device_info['port'], device_info['baudrate'], 0.25), exception=Exception)
-    elif device_type == 'SyntheticFilterWheel':
+        return auto_redial(build_filter_wheel_connection,
+                           (device_info['port'],
+                            device_info['baudrate'], 0.25),
+                           exception=Exception)
+    elif device_type.lower() == 'syntheticfilterwheel' or 'synthetic':
         return DummyDeviceConnection()
     else:
         device_not_found('filter_wheel', device_type)
 
-def start_filter_wheel(microscope_name, device_connection, configuration, is_synthetic=False):
+
+def start_filter_wheel(microscope_name,
+                       device_connection,
+                       configuration,
+                       is_synthetic=False):
     r"""Initializes the filter wheel class on a dedicated thread.
 
     Parameters
@@ -350,14 +446,17 @@ def start_filter_wheel(microscope_name, device_connection, configuration, is_syn
     if device_type == 'SutterFilterWheel':        
         from aslm.model.devices.filter_wheel.filter_wheel_sutter import SutterFilterWheel
         return SutterFilterWheel(microscope_name, device_connection, configuration)
-    elif device_type == 'SyntheticFilterWheel':
+
+    elif device_type.lower() == 'syntheticfilterwheel' or 'synthetic':
         from aslm.model.devices.filter_wheel.filter_wheel_synthetic import SyntheticFilterWheel
         return SyntheticFilterWheel(microscope_name, device_connection, configuration)
+
     else:
         device_not_found(microscope_name, 'filter_wheel', device_type)
 
 
-def start_daq(configuration, is_synthetic=False):
+def start_daq(configuration,
+              is_synthetic=False):
     r"""Initializes the data acquisition (DAQ) class on a dedicated thread.
 
     Parameters
@@ -380,14 +479,17 @@ def start_daq(configuration, is_synthetic=False):
     if device_type == 'NI':
         from aslm.model.devices.daq.daq_ni import NIDAQ
         return NIDAQ(configuration)
-    elif device_type == 'SyntheticDAQ':
+    elif device_type.lower() == 'syntheticdaq' or 'synthetic':
         from aslm.model.devices.daq.daq_synthetic import SyntheticDAQ
         return SyntheticDAQ(configuration)
     else:
         device_not_found(configuration['configuration']['hardware']['daq']['type'])
 
 
-def start_shutter(microscope_name, device_connection, configuration, is_synthetic=False):
+def start_shutter(microscope_name,
+                  device_connection,
+                  configuration,
+                  is_synthetic=False):
     r"""Initializes the shutter class on a dedicated thread.
 
     Initializes the shutters: ThorlabsShutter or SyntheticShutter
@@ -421,7 +523,7 @@ def start_shutter(microscope_name, device_connection, configuration, is_syntheti
             return device_connection
         from aslm.model.devices.shutter.laser_shutter_ttl import ShutterTTL
         return ShutterTTL(microscope_name, None, configuration)
-    elif device_type == 'SyntheticShutter':
+    elif device_type.lower() == 'syntheticshutter' or 'synthetic':
         if device_connection is not None:
             return device_connection
         from aslm.model.devices.shutter.laser_shutter_synthetic import SyntheticShutter
@@ -430,7 +532,11 @@ def start_shutter(microscope_name, device_connection, configuration, is_syntheti
         device_not_found(microscope_name, 'shutter', device_type)
 
 
-def start_lasers(microscope_name, device_connection, configuration, id=0, is_synthetic=False):
+def start_lasers(microscope_name,
+                 device_connection,
+                 configuration,
+                 id=0,
+                 is_synthetic=False):
     r"""Initializes the laser trigger class on a dedicated thread.
 
     Initializes the Laser Switching, Analog, and Digital DAQ Outputs.
@@ -464,7 +570,7 @@ def start_lasers(microscope_name, device_connection, configuration, id=0, is_syn
             return device_connection
         from aslm.model.devices.lasers.laser_ni import LaserNI
         return LaserNI(microscope_name, device_connection, configuration, id)
-    elif device_type == 'SyntheticLaser':
+    elif device_type.lower() == 'syntheticlaser' or 'synthetic':
         if device_connection is not None:
             return device_connection
         from aslm.model.devices.lasers.laser_synthetic import SyntheticLaser
@@ -472,7 +578,32 @@ def start_lasers(microscope_name, device_connection, configuration, id=0, is_syn
     else:
         device_not_found(microscope_name, 'laser', device_type, id)
 
-def start_remote_focus_device(microscope_name, device_connection, configuration, is_synthetic=False):
+
+def start_remote_focus_device(microscope_name,
+                              device_connection,
+                              configuration,
+                              is_synthetic=False):
+    r"""Initializes the remote focus class.
+
+    Initializes the Remote Focusing Device.
+
+    Parameters
+    ----------
+    microscope_name : str
+        Name of microscope in configuration
+    device_connection : object
+        Hardware device to connect to
+    configuration : multiprocesing.managers.DictProxy
+        Global configuration of the microscope
+    is_synthetic : bool
+        Run synthetic version of hardware?
+
+    Returns
+    -------
+    Remote Focus : class
+        Remote focusing class.
+    """
+
     if is_synthetic:
         device_type = 'SyntheticRemoteFocus'
     else:
@@ -481,13 +612,41 @@ def start_remote_focus_device(microscope_name, device_connection, configuration,
     if device_type == 'NI':
         from aslm.model.devices.remote_focus.remote_focus_ni import RemoteFocusNI
         return RemoteFocusNI(microscope_name, device_connection, configuration)
-    elif device_type == 'SyntheticRemoteFocus':
+    elif device_type.lower() == 'syntheticremotefocus' or 'synthetic':
         from aslm.model.devices.remote_focus.remote_focus_synthetic import SyntheticRemoteFocus
         return SyntheticRemoteFocus(microscope_name, device_connection, configuration)
     else:
         device_not_found(microscope_name, 'remote_focus', device_type)
 
-def start_galvo(microscope_name, device_connection, configuration, id=0, is_synthetic=False):
+
+def start_galvo(microscope_name,
+                device_connection,
+                configuration,
+                id=0,
+                is_synthetic=False):
+    r"""Initializes the Galvo class.
+
+    Initializes the Galvo Device.
+
+    Parameters
+    ----------
+    microscope_name : str
+        Name of microscope in configuration
+    device_connection : object
+        Hardware device to connect to
+    configuration : multiprocesing.managers.DictProxy
+        Global configuration of the microscope
+    id : int
+        Index of galvo in the configuration dictionary
+    is_synthetic : bool
+        Run synthetic version of hardware?
+
+    Returns
+    -------
+    Galvo : class
+        Galvo scanning class.
+    """
+
     if is_synthetic:
         device_type = 'SyntheticGalvo'
     else:
@@ -496,18 +655,32 @@ def start_galvo(microscope_name, device_connection, configuration, id=0, is_synt
     if device_type == 'NI':
         from aslm.model.devices.galvo.galvo_ni import GalvoNI
         return GalvoNI(microscope_name, device_connection, configuration, id)
-    elif device_type == 'SyntheticGalvo':
+    elif device_type.lower() == 'syntheticgalvo' or 'synthetic':
         from aslm.model.devices.galvo.galvo_synthetic import SyntheticGalvo
         return SyntheticGalvo(microscope_name, device_connection, configuration, id)
     else:
         device_not_found(microscope_name, 'galvo', id, device_type)
 
-def device_not_found(*args):
 
+def device_not_found(*args):
+    """Display error message if device not found.
+
+    Raises error if the configuration is incorrect and/or the device is not found.
+
+    Parameters
+    ----------
+    *args
+        microscope_name
+        device
+        device id
+        device type
+
+    """
     print("Device Not Found in Configuration.YML:", args)
     raise RuntimeError(f"Device not found in configuration: {args}")
 
-def load_devices(configuration, is_synthetic=False)->dict:
+
+def load_devices(configuration, is_synthetic=False) -> dict:
     devices = {}
     # load camera
     if 'camera' in configuration['configuration']['hardware'].keys():

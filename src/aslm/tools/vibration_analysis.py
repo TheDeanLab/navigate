@@ -1,11 +1,11 @@
 # Third Party Imports
 import nidaqmx
-from nidaqmx.constants import AcquisitionType
+from nidaqmx.constants import AcquisitionType, TerminalConfiguration, AccelUnits, AccelSensitivityUnits, ExcitationSource
 import numpy as np
 import matplotlib.pyplot as plt
 
 
-def make_measurement(analog_input_line='cDAQ1Mod1/ai0', sampling_frequency=1 * 10 ** 3, experiment_duration=1):
+def make_measurement(analog_input_line='cDAQ1Mod1/ai0', sampling_frequency=1 * 10 ** 3, experiment_duration=1, sensitivity=1000, current_excit_val=0.004):
     """
     Measure samples from a NIDAQ accelerometer.
 
@@ -17,6 +17,10 @@ def make_measurement(analog_input_line='cDAQ1Mod1/ai0', sampling_frequency=1 * 1
         Rate for acquiring samples (Hz)
     experiment_duration : float
         Duration of acquisition (seconds)
+    sensitivity : float
+        Sensitivity of the sensor in mV/G
+    current_excit_val : float
+        Milliamps of excitation for sensor
 
     Returns
     -------
@@ -29,7 +33,15 @@ def make_measurement(analog_input_line='cDAQ1Mod1/ai0', sampling_frequency=1 * 1
 
     # Construct analog input task
     analog_input = nidaqmx.Task()
-    analog_input.ai_channels.add_ai_accel_chan(analog_input_line)
+    analog_input.ai_channels.add_ai_accel_chan(analog_input_line,
+                                               terminal_config=TerminalConfiguration.PSEUDODIFFERENTIAL,
+                                               min_val=-5,
+                                               max_val=5,
+                                               units=AccelUnits.G,
+                                               sensitivity=sensitivity,
+                                               sensitivity_units=AccelSensitivityUnits.M_VOLTS_PER_G,
+                                               current_excit_source=ExcitationSource.INTERNAL,
+                                               current_excit_val=current_excit_val)
     analog_input.timing.cfg_samp_clk_timing(rate=float(sampling_frequency),
                                             samps_per_chan=total_samples,
                                             sample_mode=AcquisitionType.FINITE)
@@ -88,7 +100,7 @@ def plot_frequency_response(frequency_axis, single_sided_spectrum, ax=None, titl
     if ax is None:
         fig, ax = plt.subplots()
     ax.plot(frequency_axis, single_sided_spectrum)
-    ax.set_yscale("log")
+    # ax.set_yscale("log")
     ax.set_ylabel('Amplitude')
     ax.set_xlabel('Frequency (Hz)')
     if title is not None:

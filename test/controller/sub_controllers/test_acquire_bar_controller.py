@@ -224,7 +224,7 @@ class TestAcquireBarController():
         self.acqbarController.is_save = save
         self.acqbarController.set_mode(mode)
         
-        # Test based on setup
+        # Test based on setup, launches popup
         self.acqbarController.view.acquire_btn.invoke()
         
         # Checking things are what we expect
@@ -254,6 +254,7 @@ class TestAcquireBarController():
                 
                 # Checking if popup created
                 assert isinstance(self.acqbarController.acquire_pop, AcquirePopUp)
+                assert self.acqbarController.acquire_pop.popup.winfo_exists() == 1
 
                 
                 # Testing update_file_type if list exists

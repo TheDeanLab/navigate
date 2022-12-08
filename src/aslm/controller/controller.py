@@ -121,6 +121,9 @@ class Controller:
         logger.info(f"Spec - Experiment Path: {experiment_path}")
         logger.info(f"Spec - ETL Constants Path: {etl_constants_path}")
         logger.info(f"Spec - Rest API Path: {rest_api_path}")
+        
+        # Wire up pipes
+        self.show_img_pipe = self.model.create_pipe('show_img_pipe')
 
         # save default experiment file
         self.default_experiment_file = experiment_path
@@ -183,9 +186,6 @@ class Controller:
 
         # Camera View Tab
         self.initialize_cam_view()
-
-        # Wire up pipes
-        self.show_img_pipe = self.model.create_pipe('show_img_pipe')
         
         # destroy splash screen and show main screen
         splash_screen.destroy()

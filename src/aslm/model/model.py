@@ -676,7 +676,8 @@ class Model:
     def run_acquisition(self):
         r"""Run acquisition along with a feature list one time.
         """
-        self.run_single_acquisition()
+        for _ in range(self.configuration['experiment']['MicroscopeState']['timepoints']):
+            self.run_single_acquisition()
         # wait a very short time to the data thread to get the last frame
         # TODO: maybe need to adjust
         # time.sleep(0.005)

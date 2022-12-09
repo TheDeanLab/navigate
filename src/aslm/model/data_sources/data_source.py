@@ -95,15 +95,24 @@ class DataSource:
         p : int
             Index of multiposition position.
         """
-        if per_stack:
-            c = (frame_id // self.shape_z) % self.shape_c
-            z = frame_id % self.shape_z
+        # If z-stacking, if multi-position
+        if self.shape_z > 1:
+            # We're z-stacking, make z, c vary faster than t
+            if per_stack:
+                c = (frame_id // self.shape_z) % self.shape_c
+                z = frame_id % self.shape_z
+            else:
+                c = frame_id % self.shape_c
+                z = (frame_id // self.shape_c) % self.shape_z
+            
+            t = frame_id // (self.shape_c*self.shape_z*self.positions)
+            p = (frame_id // (self.shape_c*self.shape_z)) % self.positions
         else:
+            # Timepoint acqusition, only c varies faster than t
             c = frame_id % self.shape_c
-            z = (frame_id // self.shape_c) % self.shape_z
-
-        p = frame_id // (self.shape_c*self.shape_z)
-        t = frame_id // (self.shape_c*self.shape_z*self.positions)
+            t = (frame_id // self.shape_c) % self.shape_t
+            z = (frame_id // (self.shape_c*self.shape_t)) % self.shape_z
+            p = (frame_id // (self.shape_c*self.shape_t)) % self.positions
 
         return c, z, t, p
 

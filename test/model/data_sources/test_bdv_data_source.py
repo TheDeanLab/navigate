@@ -14,8 +14,8 @@ def test_bdv_write(multiposition, per_stack, z_stack):
 
     # Set up model with a random number of z-steps to modulate the shape
     model = DummyModel()
-    z_steps = np.random.randint(1,5)
-    timepoints = np.random.randint(1,5)
+    z_steps = np.random.randint(1,3)
+    timepoints = np.random.randint(1,3)
     model.configuration['experiment']['MicroscopeState']['image_mode'] = 'z-stack' if z_stack else 'single'
     model.configuration['experiment']['MicroscopeState']['number_z_steps'] = z_steps
     model.configuration['experiment']['MicroscopeState']['is_multiposition'] = multiposition

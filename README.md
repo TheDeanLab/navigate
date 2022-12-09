@@ -1,24 +1,15 @@
-# Multiscale Axially Swept Light-Sheet Microscopy Project
+# Axially Swept Light-Sheet Microscopy
 
 [![Tests](https://github.com/AdvancedImagingUTSW/ASLM/actions/workflows/push_checks.yaml/badge.svg)](https://github.com/AdvancedImagingUTSW/ASLM/actions/workflows/push_checks.yaml)
 [![codecov](https://codecov.io/gh/TheDeanLab/ASLM/branch/develop/graph/badge.svg?token=270RFSZGG5)](https://codecov.io/gh/TheDeanLab/ASLM)
 
 ### Project Philosophy
-* Minimal number of dependencies. Prioritize standard library Python imports for maximum stability.
-* Sufficiently generic that it can drive all of our microscopes, different camera types, etc.
-* Brutally obvious and well documented so that it can be understood up with by future users years from now.
-* Should resemble Danuser/Dean/Fiolka LabView software so that people do not have to relearn a new GUI for every microscope.  Maximize productivity for biological users.
-* Must be high-performance and responsive.  Will implement threading approaches inspired by Andrew York's concurrency tools.
-* Based upon the proven Model-View-Controller architecture.  
-
-### Equipment
-* Laser source - Omicron LightHUB Ultra.  Requires ACC operating mode with analog modulation enabled for 488 nm and 642 nm lasers.  561, which operates separately, requires the mixed modulation mode (Obis).
-* Sample Scanning System - L-509.20DG10.  Has a unidirectional repeatability of 100 nm, bidirectional repeatablility of 2 microns, and a minimum incremental motion of 100 nm.  This is borderline too coarse.
-* GPUs - 2x NVIDIA Titan RTX with an NVLINK bridge - CUDA Architecture = 7.5, Driver Version = 456.71. 
-* Camera - 2x Hamamatsu Flash 4.0 with framegrabbers.
-* Remote Focusing Units - Optotune Electrotunable Lens for low-resolution imaging and a ThorLabs BLINK for high-resolution imaging.
-* National Instruments PXIe-1073 Chassis equipped with PXI6733 and PXI6259 Data Acquisition Devices
-* Filter Wheels - 2x 32mm High-Speed Filter Wheels
+* Minimal number of dependencies. Prioritize standard library imports for maximum stability.
+* Abstraction layer to drive different camera types, etc.
+* Brutally obvious, well-documented, clean code so that it can be understood up with by future users years from now.
+* Maximize productivity for biological users.
+* Performant and responsive. 
+* Model-View-Controller architecture.  
 
 ### GPU Dependencies for TensorFlow (1.15), PyTorch (1.10.2), CuPy, ...
 Excellent directions can be found for CuPy. https://docs.cupy.dev/en/stable/install.html
@@ -56,18 +47,6 @@ If running the software on campus at UTSW you may need to update some of your pr
 	set https_proxy=http://username:password@proxy.example.com:8080
 	set http_proxy=http://username:password@proxy.example.com:8080
 
-### Hardware Dependencies
-* DLL for Dynamixel Servo Motor
-
-### Software Overview
-The software is started by launching `main.py`. This configures the path to the base and configuration directories,
-starts the tkinter GUi, instantiates the controller, and then begins the main loop. The controller then:
-* Builds the Model from the configuration yaml file.
-* Starts the hardware (camera, stages, etc.)
-* Starts the View
-* Begins the callbacks to trace GUI events.  Any changes are updated in both the GUI and the model.
-
-![alt text](https://github.com/AdvancedImagingUTSW/ASLM/blob/develop/aslm_architecture.jpg?raw=true)
 
 ### Command Line Input Arguments (optional)
 * --synthetic_hardware or -sh: Use simulated hardware.
@@ -86,9 +65,3 @@ python main.py --synthetic_hardware -sh
 * Renil Gupta
 * Andrew Jamieson
 
-
-Includes inspiration from a number of open-source projects, including:
-* https://github.com/mesoSPIM/
-* https://github.com/bicarlsen/obis_laser_controller
-* https://github.com/uetke/UUTrack
-* https://github.com/AndrewGYork/tools

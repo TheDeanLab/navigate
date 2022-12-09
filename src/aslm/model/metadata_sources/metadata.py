@@ -27,6 +27,7 @@ class Metadata:
         self.dc = 1                          # step size between channels, should always be 1
         self._order = 'XYCZT'
         self._per_stack = True
+        self._multiposition = False
 
         # shape
         self.shape_x, self.shape_y, self.shape_z, self.shape_t, self.shape_c = 1, 1, 1, 1, 1
@@ -66,7 +67,9 @@ class Metadata:
         self.shape_t = int(self.configuration['experiment']['MicroscopeState']['timepoints'])
         self.shape_c = sum([v['is_selected'] == True for k, v in self.configuration['experiment']['MicroscopeState']['channels'].items()])
 
-        if bool(self.configuration['experiment']['MicroscopeState']['is_multiposition']):
+        self._multiposition = self.configuration['experiment']['MicroscopeState']['is_multiposition']
+
+        if bool(self._multiposition):
             self.positions = len(self.configuration['experiment']['MultiPositions']['stage_positions'])
         else:
             self.positions = 1

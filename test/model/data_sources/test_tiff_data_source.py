@@ -11,8 +11,6 @@ def test_tiff_write_read(is_ome, multiposition, per_stack, z_stack):
     from aslm.model.dummy import DummyModel
     from aslm.model.data_sources.tiff_data_source import TiffDataSource
 
-    print(f"Conditions are is_ome: {is_ome} multiposition: {multiposition} per_stack: {per_stack} z_stack: {z_stack}")
-
     # Set up model with a random number of z-steps to modulate the shape
     model = DummyModel()
     z_steps = np.random.randint(1,5)
@@ -67,7 +65,8 @@ def test_tiff_write_read(is_ome, multiposition, per_stack, z_stack):
             os.remove(fn)
             dirs.append(os.path.dirname(fn))
         for dn in list(set(dirs)):
-            os.rmdir(dn)
+            if dn != '.':
+                os.rmdir(dn)
     except PermissionError:
         # Windows seems to think these files are still open
         pass

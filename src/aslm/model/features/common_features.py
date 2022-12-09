@@ -179,16 +179,16 @@ class ZStackAcquisition:
         if self.need_to_move_new_position:
             self.need_to_move_new_position = False
 
-            self.model.pause_data_ready_lock.acquire()
-            self.model.ask_to_pause_data_thread = True
-            self.model.pause_data_ready_lock.acquire()
+            # self.model.pause_data_ready_lock.acquire()
+            # self.model.ask_to_pause_data_thread = True
+            # self.model.pause_data_ready_lock.acquire()
 
             pos_dict = dict(map(lambda ax: (f'{ax}_abs', self.positions[self.current_position_idx][ax]), ['x', 'y', 'theta']))
             self.model.move_stage(pos_dict, wait_until_done=True)
 
-            self.model.ask_to_pause_data_thread = False
-            self.model.pause_data_event.set()
-            self.model.pause_data_ready_lock.release()
+            # self.model.ask_to_pause_data_thread = False
+            # self.model.pause_data_event.set()
+            # self.model.pause_data_ready_lock.release()
             
             # self.z_position_moved_time = 0
             # # calculate first z, f position
@@ -197,11 +197,11 @@ class ZStackAcquisition:
 
         if self.need_to_move_z_position:
             # move z, f
-            self.model.pause_data_thread()
+            # self.model.pause_data_thread()
 
             self.model.move_stage({'z_abs': self.current_z_position, 'f_abs': self.current_focus_position}, wait_until_done=True)
 
-            self.model.resume_data_thread()
+            # self.model.resume_data_thread()
 
         if self.stack_cycling_mode != 'per_stack':
             # update channel for each z position in 'per_slice'

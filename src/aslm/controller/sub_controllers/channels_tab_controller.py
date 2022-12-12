@@ -134,16 +134,24 @@ class ChannelsTabController(GUIController):
         self.initialize()
 
     def update_offset_start(self, *args):
-        print(f"Update offset start: {args}")
+        offset_start = float(self.conpro_acq_vals['offset_start'].get())
+        self.config.configuration['experiment']['MicroscopeState']['offset_start'] = offset_start
+        print(f"Update offset start: {offset_start}")
  
     def update_offset_end(self, *args):
-        print(f"Update offset end: {args}")
+        offset_end = float(self.conpro_acq_vals['offset_end'].get())
+        self.config.configuration['experiment']['MicroscopeState']['offset_end'] = offset_end
+        print(f"Update offset end: {offset_end}")
 
     def update_plane_number(self, *args):
-        print(f"Update plane number: {args}")
+        n_plane = float(self.conpro_acq_vals['n_plane'].get())
+        self.config.configuration['experiment']['MicroscopeState']['n_plane'] = n_plane
+        print(f"Update plane number: {n_plane}")
 
     def update_scanrange(self, *args):
-        print(f"Update scan range: {args}")
+        scanrange = float(self.conpro_acq_vals['scanrange'].get())
+        self.config.configuration['experiment']['MicroscopeState']['scanrange'] = scanrange
+        print(f"Update scan range: {scanrange}")
 
 
     def initialize(self):
@@ -154,14 +162,14 @@ class ChannelsTabController(GUIController):
         config : multiprocesing.managers.DictProxy
             Global configuration of the microscope
         """
-        config = self.parent_controller.configuration_controller
+        self.config = self.parent_controller.configuration_controller
 
         self.stack_acq_widgets['cycling'].widget['values'] = ['Per Z', 'Per Stack']
         self.conpro_acq_widgets['cycling'].widget['values'] = ['Per Plane', 'Per Stack']
-        self.stage_velocity = config.stage_setting_dict['velocity']
-        self.filter_wheel_delay = config.filter_wheel_setting_dict['filter_wheel_delay']
+        self.stage_velocity = self.config.stage_setting_dict['velocity']
+        self.filter_wheel_delay = self.config.filter_wheel_setting_dict['filter_wheel_delay']
         self.channel_setting_controller.initialize()
-        self.set_spinbox_range_limits(config.configuration['configuration']['gui'])
+        self.set_spinbox_range_limits(self.config.configuration['configuration']['gui'])
         self.show_verbose_info('channels tab has been initialized')
 
     def populate_experiment_values(self):
@@ -288,10 +296,10 @@ class ChannelsTabController(GUIController):
         self.microscope_state_dict['end_position'] = end_position
         self.microscope_state_dict['step_size'] = step_size
         self.microscope_state_dict['number_z_steps'] = number_z_steps
-        self.microscope_state_dict['abs_z_start'] = self.stack_acq_vals['abs_z_start'].get()
-        self.microscope_state_dict['abs_z_end'] = self.stack_acq_vals['abs_z_end'].get()
-        self.microscope_state_dict['start_focus'] = self.stack_acq_vals['start_focus'].get()
-        self.microscope_state_dict['end_focus'] = self.stack_acq_vals['end_focus'].get()
+        self.microscope_state_dict['abs_z_start'] = float(self.stack_acq_vals['abs_z_start'].get())
+        self.microscope_state_dict['abs_z_end'] = float(self.stack_acq_vals['abs_z_end'].get())
+        self.microscope_state_dict['start_focus'] = float(self.stack_acq_vals['start_focus'].get())
+        self.microscope_state_dict['end_focus'] = float(self.stack_acq_vals['end_focus'].get())
         self.microscope_state_dict['stack_z_origin'] = self.z_origin
         self.microscope_state_dict['stack_focus_origin'] = self.focus_origin
 
@@ -545,7 +553,10 @@ class ChannelsTabController(GUIController):
         """
         if command == 'recalculate_timepoint':
             self.update_timepoint_setting()
-        elif (command == 'channel') or (command == 'move_stage_and_update_info') or (command == 'update_setting'):
+            # update framerate info in camera setting tab
+            exposure_time = max(map(lambda channel: float(channel['camera_exposure_time']) if channel['is_selected'] else 0, self.microscope_state_dict['channels'].values()))
+            self.parent_controller.camera_setting_controller.update_exposure_time(exposure_time)
+        elif (command == 'channel') or (command == 'update_setting'):
             self.view.after(1000, lambda: self.parent_controller.execute(command, *args))
         elif command == 'get_stage_position':
             return self.view.after(1000, lambda: self.parent_controller.execute(command))

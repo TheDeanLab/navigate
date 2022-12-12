@@ -93,7 +93,7 @@ class conpro_acq_frame(ttk.Labelframe):
         self.inputs['offset_start'] = LabelInput(parent=self.pos_slice,
                                               input_class=ValidatedSpinbox,
                                               input_var=tk.DoubleVar(),
-                                              input_args={"from_": 0.0, "increment": 0.1, "width": 6}
+                                              input_args={"from_": -300.0, "increment": 0.1, "width": 6}
                                               )
         self.inputs['offset_start'].grid(row=0, column=3, sticky='N', padx=6)
         self.inputs['offset_start'].label.grid(sticky='N')
@@ -104,7 +104,7 @@ class conpro_acq_frame(ttk.Labelframe):
         self.inputs['offset_end'] = LabelInput(parent=self.pos_slice,
                                               input_class=ValidatedSpinbox,
                                               input_var=tk.DoubleVar(),
-                                              input_args={"from_": 0.0, "increment": 0.1, "width": 6}
+                                              input_args={"from_": -300.0, "increment": 0.1, "width": 6}
                                               )
         self.inputs['offset_end'].grid(row=1, column=3, sticky='N', padx=6)
         self.inputs['offset_end'].label.grid(sticky='N')

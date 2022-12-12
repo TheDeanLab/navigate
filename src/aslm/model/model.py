@@ -507,6 +507,8 @@ class Model:
                 wait_num -= 1
                 if wait_num <= 0:
                     # it has waited for wait_num * 500 ms, it's sure there won't be any frame coming
+                    self.logger.debug(f"ASLM Model - ERROR - Timed out waiting for camera response.")
+                    print("ERROR - Timed out waiting for camera response.")
                     break
                 continue
 

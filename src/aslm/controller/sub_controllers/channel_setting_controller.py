@@ -173,7 +173,7 @@ class ChannelSettingController(GUIController):
             else:
                 setting_dict[widget_name] = channel_vals[widget_name].get()
 
-            if widget_name == 'camera_exposure_time':
+            if widget_name == 'camera_exposure_time' or widget_name == 'is_selected':
                 self.parent_controller.execute('recalculate_timepoint')
             return True
 
@@ -185,13 +185,7 @@ class ChannelSettingController(GUIController):
                 return
 
             channel_key = prefix + str(channel_id+1)
-            # unselect one channel
-            if widget_name == 'is_selected' and channel_vals['is_selected'].get() is False:
-                if channel_key in self.channel_setting_dict.keys():
-                    del self.channel_setting_dict[channel_key]
-                return
-            # a channel that hasn't been saved in self.channel_setting_dict
-            elif channel_key not in self.channel_setting_dict.keys():
+            if channel_key not in self.channel_setting_dict.keys():
                 # update self.channel_setting_dict
                 setting_dict = self.parent_controller.parent_controller.manager.dict()
                 # check whether all the settings are validate

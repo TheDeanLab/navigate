@@ -117,7 +117,7 @@ class GalvoNIStage(StageBase):
                     z_range = self.configuration['experiment']['MicroscopeState']['scanrange']
                     z_offset_start = self.configuration['experiment']['MicroscopeState']['offset_start']
                     z_offset_end = self.configuration['experiment']['MicroscopeState']['offset_end']
-                    z_planes = self.configuration['experiment']['MicroscopeState']['plane_spin']
+                    z_planes = self.configuration['experiment']['MicroscopeState']['n_plane']
                     if z_planes == 1:
                         amp = eval(self.volts_per_micron, {"x": 0.5*(z_range)})
                         off = eval(self.volts_per_micron, {"x": 0.5*(z_offset_start)})

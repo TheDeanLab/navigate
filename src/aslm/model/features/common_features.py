@@ -268,6 +268,7 @@ class ZStackAcquisition:
 
 class ConProAcquisition:   # don't have the part for multi-position for now
     def __init__(self, model):
+
         self.model = model
 
         self.scanrange = 0
@@ -290,6 +291,7 @@ class ConProAcquisition:   # don't have the part for multi-position for now
                                       'device_related': True}}
 
     def pre_signal_func(self):
+        import copy
         microscope_state = self.model.configuration['experiment']['MicroscopeState']
 
         self.conpro_cycling_mode = microscope_state['conpro_cycling_mode']
@@ -300,32 +302,40 @@ class ConProAcquisition:   # don't have the part for multi-position for now
 
         self.n_plane = int(microscope_state['n_plane'])
 
-        self.start_offset = float(microscope_state['offset_start'])
-        self.end_offset = float(microscope_state['offset_end'])
-        self.offset_step_size = (self.end_offset - self.start_offset) / self.n_plane
+        self.start_offset = float(copy.copy(microscope_state['offset_start']))
+        self.end_offset = float(copy.copy(microscope_state['offset_end']))
+        if self.n_plane == 1:
+            self.offset_step_size = 0
+        else:
+            self.offset_step_size = (self.end_offset - self.start_offset) / float(self.n_plane-1)
         
         self.timepoints = int(microscope_state['timepoints'])
 
         self.need_update_offset = True
-        self.current_offset = 0
+        self.current_offset = self.start_offset
+        self.offset_update_time = 0
     
     def signal_func(self):
+        # print(f"Signal with time {self.offset_update_time} and offset {self.current_offset}")
         if self.model.stop_acquisition:
             return False
 
         if self.need_update_offset:
             # update offset
-            self.model.pause_data_ready_lock.acquire()
-            self.model.ask_to_pause_data_thread = True
-            self.model.pause_data_ready_lock.acquire()
+            # self.model.pause_data_thread()
 
-            self.model.update_offset({'offset_abs': self.current_offset}, wait_until_done=True)
+            # self.model.update_offset({'offset_abs': self.current_offset}, wait_until_done=True)
+            
+            # Update the offset by changing the dictionary value used by GalvoNIStage
+            self.model.configuration['experiment']['MicroscopeState']['offset_start'] = self.current_offset
+            self.model.configuration['experiment']['MicroscopeState']['offset_end'] = self.current_offset
+            
+            # Call a modification of the waveform
+            self.model.move_stage({'z_abs': 0})
 
-            self.model.ask_to_pause_data_thread = False
-            self.model.pause_data_event.set()
-            self.model.pause_data_ready_lock.release()
+            # self.model.resume_data_thread()
 
-        if self.stack_cycling_mode != 'per_stack':
+        if self.conpro_cycling_mode != 'per_stack':
             # update channel for each z position in 'per_slice'
             self.update_channel()
             self.need_update_offset = (self.current_channel_in_list == 0)
@@ -343,23 +353,25 @@ class ConProAcquisition:   # don't have the part for multi-position for now
     def signal_end(self):
         # end this node
         if self.model.stop_acquisition:
+            self.model.configuration['experiment']['MicroscopeState']['offset_start'] = self.start_offset
+            self.model.configuration['experiment']['MicroscopeState']['offset_end'] = self.end_offset
             return True
         
         # decide whether to update offset
         if self.offset_update_time >= self.n_plane:
+            self.timepoints -=1
+
+            self.model.configuration['experiment']['MicroscopeState']['offset_start'] = self.start_offset
+            self.model.configuration['experiment']['MicroscopeState']['offset_end'] = self.end_offset
+
+            self.current_offset = self.start_offset
+
             self.offset_update_time = 0
 
-            # calculate first z, f position
-            self.current_offset = self.offset_start
+        if self.timepoints == 0:
+            return True
 
-            # after running through a z-stack, update channel
-            if self.stack_cycling_mode == 'per_stack':
-                self.update_channel()
-                # if run through all the channels, move to next position
-                if self.current_channel_in_list == 0:
-                    self.need_to_move_new_position = True
-            else:
-                self.need_to_move_new_position = True
+        return False
 
     def generate_meta_data(self, *args):
         # print('This frame: z stack', self.model.frame_id)

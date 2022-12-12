@@ -81,6 +81,20 @@ class DummyModelToTestFeatures:
         self.data = []
         self.signal_records = []
         self.data_records = []
+        
+        self._target_channel = 1
+
+    def get_channel(self):
+        return self._target_channel
+
+    def set_channel(self, c):
+        self._target_channel = c
+        self.signal_records.append(('change_channel', (c,)))
+
+    def del_channel(self):
+        del self._target_channel
+
+    target_channel = property(get_channel, set_channel, del_channel)
 
     def signal_func(self):
         self.signal_container.reset()

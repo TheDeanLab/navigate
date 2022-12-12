@@ -130,7 +130,7 @@ class ZStackAcquisition:
         # get available channels
         prefix_len = len('channel_')
         channel_dict = microscope_state['channels']
-        self.channels = filter(lambda c: c is not None, [int(channel_key[prefix_len:]) if channel_dict[channel_key]['is_selected'] else None for channel_key in channel_dict.keys()])
+        self.channels = list(filter(lambda c: c is not None, [int(channel_key[prefix_len:]) if channel_dict[channel_key]['is_selected'] else None for channel_key in channel_dict.keys()]))
         self.current_channel_in_list = 0
 
         self.number_z_steps = int(microscope_state['number_z_steps'])
@@ -148,15 +148,12 @@ class ZStackAcquisition:
         if bool(microscope_state['is_multiposition']):
             self.positions = microscope_state['stage_positions']
         else:
-            self.positions = dict({
-                    0 : {
-                        'x': float(self.model.configuration['experiment']['StageParameters']['x']),
-                        'y': float(self.model.configuration['experiment']['StageParameters']['y']),
-                        'z': float(microscope_state.get('stack_z_origin', self.model.configuration['experiment']['StageParameters']['z'])),
-                        'theta': float(self.model.configuration['experiment']['StageParameters']['theta']),
-                        'f': float(microscope_state.get('stack_focus_origin', self.model.configuration['experiment']['StageParameters']['f']))
-                    }
-                })
+            self.positions = [{'x': float(self.model.configuration['experiment']['StageParameters']['x']),
+                               'y': float(self.model.configuration['experiment']['StageParameters']['y']),
+                               'z': float(microscope_state.get('stack_z_origin', self.model.configuration['experiment']['StageParameters']['z'])),
+                               'theta': float(self.model.configuration['experiment']['StageParameters']['theta']),
+                               'f': float(microscope_state.get('stack_focus_origin', self.model.configuration['experiment']['StageParameters']['f']))
+                            }]
         self.current_position_idx = 0
         self.z_position_moved_time = 0
         self.need_to_move_new_position = True
@@ -169,9 +166,9 @@ class ZStackAcquisition:
 
         if not bool(microscope_state['is_multiposition']):
             # TODO: Make relative to stage coordinates.
-            self.model.get_stage_position()
-            self.restore_z = self.model.active_microscope.get_stage_position()['z_pos']
-            self.restore_f = self.model.active_microscope.get_stage_position()['f_pos']
+            pos_dict = self.model.get_stage_position()
+            self.restore_z = pos_dict['z_pos']
+            self.restore_f = pos_dict['f_pos']
     
     def signal_func(self):
         if self.model.stop_acquisition:

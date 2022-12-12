@@ -1,4 +1,4 @@
-# """Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# # Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# """
+#
 
 #  Standard Library Imports
 from multiprocessing import Manager
@@ -42,10 +42,13 @@ import sys
 
 # Local View Imports
 from tkinter import filedialog, messagebox
+from aslm.controller.sub_controllers.help_popup_controller import HelpPopupController
 from aslm.view.main_application_window import MainApp as view
 from aslm.view.menus.remote_focus_popup import remote_popup
-from aslm.view.menus.autofocus_setting_popup import autofocus_popup
+from aslm.view.menus.autofocus_setting_popup import AutofocusPopup
 from aslm.view.menus.ilastik_setting_popup import ilastik_setting_popup
+from aslm.view.menus.help_popup import help_popup
+
 
 from aslm.config.config import load_configs, update_config_dict
 # Local Sub-Controller Imports
@@ -87,13 +90,13 @@ class Controller:
 
     def __init__(self,
                  root,
+                 splash_screen,
                  configuration_path,
                  experiment_path,
                  etl_constants_path,
                  rest_api_path,
                  use_gpu,
                  args):
-        
 
 
         # Create a thread pool
@@ -118,9 +121,13 @@ class Controller:
         logger.info(f"Spec - Experiment Path: {experiment_path}")
         logger.info(f"Spec - ETL Constants Path: {etl_constants_path}")
         logger.info(f"Spec - Rest API Path: {rest_api_path}")
+        
+        # Wire up pipes
+        self.show_img_pipe = self.model.create_pipe('show_img_pipe')
 
         # save default experiment file
         self.default_experiment_file = experiment_path
+
         # etl setting file
         self.etl_constants_path = etl_constants_path
 
@@ -179,9 +186,10 @@ class Controller:
 
         # Camera View Tab
         self.initialize_cam_view()
-
-        # Wire up pipes
-        self.show_img_pipe = self.model.create_pipe('show_img_pipe')
+        
+        # destroy splash screen and show main screen
+        splash_screen.destroy()
+        root.deiconify()
 
     def update_buffer(self):
         r""" Update the buffer size according to the camera dimensions listed in the experimental parameters.
@@ -282,7 +290,7 @@ class Controller:
             if hasattr(self, 'af_popup_controller'):
                 self.af_popup_controller.showup()
                 return
-            af_popup = autofocus_popup(self.view)
+            af_popup = AutofocusPopup(self.view)
             self.af_popup_controller = AutofocusPopupController(af_popup, self)
 
         def popup_ilastik_setting():
@@ -292,6 +300,16 @@ class Controller:
                 self.ilastik_controller.showup(ilastik_popup_window)
             else:
                 self.ilastik_controller = IlastikPopupController(ilastik_popup_window, self, ilastik_url)
+
+        # Help popup
+        def popup_help():
+            if hasattr(self, 'help_controller'):
+                self.help_controller.showup()
+                return
+            help_pop = help_popup(self.view)
+            self.help_controller = HelpPopupController(help_pop, self)  
+
+
 
         menus_dict = {
             self.view.menubar.menu_file: {
@@ -348,6 +366,9 @@ class Controller:
         # autofocus menu
         self.view.menubar.menu_autofocus.add_command(label='Autofocus', command=lambda: self.execute('autofocus'))
         self.view.menubar.menu_autofocus.add_command(label='setting', command=popup_autofocus_setting)
+
+        # Help menu
+        self.view.menubar.menu_help.add_command(label='Help', command=popup_help)
 
         # add-on features
         feature_list = ['None', 'Switch Resolution', 'Z Stack Acquisition', 'Threshold', 'Ilastik Segmentation']
@@ -493,6 +514,20 @@ class Controller:
                 dict = {'x': value, 'y': value, 'z': value, 'theta': value, 'f': value}
             """
             self.stage_controller.set_position(args[0])
+
+        elif command == 'move_stage_and_acquire_image':
+            r"""update stage and acquire an image
+            
+            Parameters
+            __________
+            args[0] : dict
+                dict = {'x': value, 'y': value, 'z': value, 'theta': value, 'f': value}
+            """
+            stage_pos = dict(map(lambda axis: (axis+'_abs', args[0][axis]), args[0]))
+            self.move_stage(stage_pos)
+            self.update_stage_controller_silent(stage_pos)
+            self.acquire_bar_controller.set_mode('single')
+            self.execute('acquire')
 
         elif command == 'get_stage_position':
             r"""Returns the current stage position
@@ -717,7 +752,6 @@ class Controller:
         pos_dict : dict
             Dictionary of axis positions
         """
-
         # Update our local stage dictionary
         update_stage_dict(self, pos_dict)
 

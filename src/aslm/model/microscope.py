@@ -1,4 +1,4 @@
-"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# """
+#
 import logging
 from multiprocessing.managers import ListProxy
 
@@ -228,7 +228,7 @@ class Microscope:
         success = True
         for pos_axis in pos_dict:
             axis = pos_axis[:pos_axis.index('_')]
-            success = success and self.stages[axis].move_absolute({pos_axis: pos_dict[pos_axis]}, wait_until_done)
+            success = self.stages[axis].move_absolute({pos_axis: pos_dict[pos_axis]}, wait_until_done) and success
         return success
 
     def stop_stage(self):

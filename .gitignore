@@ -161,7 +161,8 @@ coverage.xml
 .scrapy
 
 # Sphinx documentation
-docs/_build/
+docs/_*
+docs/source/_autosummary
 
 # PyBuilder
 target/
@@ -286,5 +287,5 @@ temp-BICF-JG-LE4350.txt
 
 # Custom Ignore
 *.log
-src/log_files/*.log
 *.icloud
+src/aslm/log_files/LOGS

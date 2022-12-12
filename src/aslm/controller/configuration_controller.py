@@ -1,4 +1,4 @@
-"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# """
+#
 
 # Standard Library Imports
 import logging
@@ -84,7 +84,7 @@ class ConfigurationController:
         -------
         setting : dict
             Channel settings, e.g. {
-                'laser': ['488nm', '562nm', '642nm'],
+                'laser': ['488nm', '561nm', '642nm'],
                 'filter': ['Empty-Alignment', 'GFP - FF01-515/30-32', '...}
         """
         if self.microscope_config is None:
@@ -101,7 +101,7 @@ class ConfigurationController:
         Returns
         -------
         laser_list : list
-            List of lasers, e.g. ['488nm', '562nm', '642nm']
+            List of lasers, e.g. ['488nm', '561nm', '642nm']
         """
         if self.microscope_config is None:
             return []

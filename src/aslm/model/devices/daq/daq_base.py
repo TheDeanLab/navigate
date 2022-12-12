@@ -1,4 +1,4 @@
-"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# """
+#
 
 # Standard Imports
 import logging
@@ -74,8 +74,8 @@ class DAQBase:
         self.camera_delay = self.camera_delay_percent * 0.01 * self.sweep_time
 
         self.waveform_dict = {}
-        for i in range(int(configuration['configuration']['gui']['channels']['count'])):
-            self.waveform_dict['channel_'+str(i+1)] = None
+        for k in configuration['configuration']['gui']['channels'].keys():
+            self.waveform_dict[k] = None
 
     def calculate_all_waveforms(self, microscope_name, readout_time):
         r"""Pre-calculates all waveforms necessary for the acquisition and organizes in a dictionary format.
@@ -92,6 +92,7 @@ class DAQBase:
             self.waveform_dict : dict
                 Dictionary of waveforms to pass to galvo and ETL, plus a camera waveform for display purposes.
             """
+        self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
         self.enable_microscope(microscope_name)
 
         microscope_state = self.configuration['experiment']['MicroscopeState']

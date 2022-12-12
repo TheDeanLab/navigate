@@ -1,4 +1,4 @@
-"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# """
+#
 
 #  Standard Imports
 import os
@@ -47,10 +47,18 @@ logger = logging.getLogger(p)
 
 
 class ImageWriter:
-    r"""Class for saving acquired data to disk.
-
-    """
     def __init__(self, model, sub_dir=''):
+        """
+        Class for saving acquired data to disk.
+
+        Parameters
+        ----------
+        model : aslm.model.model.Model
+            ASLM Model class for controlling hardware/acqusition.
+        sub_dir : str
+            Sub-directory of self.model.configuration['experiment']['Saving']['save_directory']
+            indicating where to save data
+        """
         self.model = model
         self.save_directory = ''
         self.sub_dir = sub_dir
@@ -86,12 +94,12 @@ class ImageWriter:
         self.data_source.set_metadata_from_configuration_experiment(self.model.configuration)
 
     def save_image(self, frame_ids):
-        r"""Save the data to disk.
+        """Save the data to disk.
 
         Parameters
         ----------
         frame_ids : int
-            Frame ID.
+            Index into self.model.data_buffer.
         """
         for idx in frame_ids:
             # data = self.model.data_buffer[idx]
@@ -106,16 +114,23 @@ class ImageWriter:
 
     def generate_image_name(self, current_channel, ext=".tif"):
         """
-        #  Generates a string for the filename
-        #  e.g., CH00_000000.tif
+        Generates a string for the filename, e.g., CH00_000000.tif.
+
+        Parameters
+        ----------
+        current_channel : int
+            Index into self.model.configuration['experiment']['MicroscopeState']['channels'] 
+            of saved color channel.
         """
         image_name = "CH0" + str(current_channel) + "_" + str(self.current_time_point).zfill(6) + ext
         self.current_time_point += 1
         return image_name
 
     def generate_meta_data(self):
+        # TODO: Is this a vestigial function? DELETE???
         print('meta data: write', self.model.frame_id)
         return True
     
     def close(self):
-        self.data_source.close()
+        """ Close the data source we are writing to. """
+        self.data_source.close() 

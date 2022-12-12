@@ -1,4 +1,4 @@
-"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# """
+#
 from aslm.controller.sub_controllers.gui_controller import GUIController
 import logging
 
@@ -66,6 +66,7 @@ class StageController(GUIController):
         # variables
         self.widget_vals = self.view.get_variables()
 
+
         # gui event bind
         buttons = self.view.get_buttons()
         for k in buttons:
@@ -88,45 +89,22 @@ class StageController(GUIController):
         self.bind_position_callbacks()
 
         self.initialize()
-
-        # binding mouse wheel event on camera view
-        # self.canvas.bind("<Enter>", self.on_enter)
-        # self.canvas.bind("<Leave>", self.on_leave)
-
-        # WASD key movement
-        self.main_view.root.bind("<Key>", self.key_press)
-   
-    # def on_enter(self, event):
-    #     self.canvas.bind("<MouseWheel>", self.update_focus)
-    #
-    # def on_leave(self, event):
-    #     self.canvas.unbind("<MouseWheel>")
-    #
-    # def update_focus(self, event):
-    #     current_position = self.get_position()
-    #     f_increment = self.widget_vals["f_step"].get()
-    #     if event.delta > 0:
-    #         current_position["f"] += f_increment
-    #     else:
-    #         current_position["f"] -= f_increment
-    #     self.set_position(current_position)
         
-    def key_press(self, event):
+    def stage_key_press(self, event):
         char = event.char.lower()
-        if char in ['w', 'a', 's', 'd']:
-            current_position = self.get_position()
-            if current_position is None:
-                return
-            xy_increment = self.widget_vals["xy_step"].get()
-            if char == "w":
-                current_position['y'] += xy_increment
-            elif char == "a":
-                current_position['x'] -= xy_increment
-            elif char == "s":
-                current_position['y'] -= xy_increment
-            elif char == "d":
-                current_position['x'] += xy_increment
-            self.set_position(current_position)
+        current_position = self.get_position()
+        if current_position is None:
+            return
+        xy_increment = self.widget_vals["xy_step"].get()
+        if char == "w":
+            current_position['y'] += xy_increment
+        elif char == "a":
+            current_position['x'] -= xy_increment
+        elif char == "s":
+            current_position['y'] -= xy_increment
+        elif char == "d":
+            current_position['x'] += xy_increment
+        self.set_position(current_position)
 
     def initialize(self):
         r"""Initialize the Stage limits of steps and positions
@@ -140,18 +118,23 @@ class StageController(GUIController):
         self.position_min = config.get_stage_position_limits('_min')
         self.position_max = config.get_stage_position_limits('_max')
 
+
         widgets = self.view.get_widgets()
         step_dict = config.stage_step
         for axis in ['x', 'y', 'z', 'theta', 'f']:
             widgets[axis].widget.min = self.position_min[axis]
             widgets[axis].widget.max = self.position_max[axis]
-            if axis == 'x' or 'y':
+            if axis == 'x' or axis == 'y':
                 step_axis = 'xy'
             else:
                 step_axis = axis
+            # the minimum step should be non-zero and non-negative.
             widgets[step_axis+'_step'].widget.configure(from_=1)
             widgets[step_axis+'_step'].widget.configure(to=self.position_max[axis])
-            widgets[step_axis+'_step'].widget.configure(increment=step_dict[axis])          
+            step_increment = step_dict[axis] // 10
+            if step_increment == 0:
+                step_increment = 1
+            widgets[step_axis+'_step'].widget.configure(increment=step_increment)
 
     def bind_position_callbacks(self):
         r"""Binds position_callback() to each axis, records the trace name so we can unbind later.

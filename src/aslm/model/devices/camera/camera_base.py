@@ -1,4 +1,4 @@
-"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# """
+#
 
 # Standard Library Imports
 import logging
@@ -56,10 +56,12 @@ class CameraBase:
 
     """
     def __init__(self, microscope_name, device_connection, configuration):
+        if microscope_name not in configuration['configuration']['microscopes'].keys():
+            raise NameError(f'Microscope {microscope_name} does not exist!')
+
         self.configuration = configuration
         self.camera_controller = device_connection
         self.camera_parameters = self.configuration['configuration']['microscopes'][microscope_name]['camera']
-        self.stop_flag = False
         self.is_acquiring = False
 
         # Initialize Pixel Information

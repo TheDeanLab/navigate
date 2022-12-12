@@ -19,3 +19,4 @@ cupy-cuda112==10.2.0; sys_platform != "darwin"
 zarr==2.11.3
 fsspec
 h5py
+requests==2.28.1

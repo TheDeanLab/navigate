@@ -1,4 +1,4 @@
-"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# """
+#
 
 # Standard Library Imports
 import time
@@ -703,7 +703,8 @@ class Model:
     def run_acquisition(self):
         r"""Run acquisition along with a feature list one time.
         """
-        self.run_single_acquisition()
+        for _ in range(self.configuration['experiment']['MicroscopeState']['timepoints']):
+            self.run_single_acquisition()
         # wait a very short time to the data thread to get the last frame
         # TODO: maybe need to adjust
         # time.sleep(0.005)

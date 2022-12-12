@@ -1,4 +1,4 @@
-"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -28,53 +28,23 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# """
+#
 
-# Standard Library Imports
-import unittest
+def test_synthetic_filter_wheel_functions():
+    import random
 
-# Third Party Imports
-import pytest
+    from aslm.model.devices.filter_wheel.filter_wheel_synthetic import SyntheticFilterWheel
+    from aslm.model.dummy import DummyModel
 
-from aslm.model.devices.filter_wheel.filter_wheel_synthetic import SyntheticFilterWheel
-from aslm.model.dummy import DummyModel
+    model = DummyModel()
+    microscope_name = model.configuration['experiment']['MicroscopeState']['microscope_name']
+    fw = SyntheticFilterWheel(microscope_name, None, model.configuration)
 
-class TestSyntheticFilterWheel(unittest.TestCase):
-    r"""Unit Test for FilterWheel Class"""
-    dummy_model = DummyModel()
-    microscope_name = 'Mesoscale'
-    synthetic_filter = SyntheticFilterWheel(microscope_name, None, dummy_model.configuration)
+    funcs = ['filter_change_delay', 'set_filter', 'read', 'close']
+    args = [['channel_dummy'], ['channel_dummy'], [int(random.random()*100)], None]
 
-    # def test_synthetic_filter_wheel_attributes(self):
-    #     assert hasattr(self.synthetic_filter, 'comport')
-    #     assert hasattr(self.synthetic_filter, 'baudrate')
-    #     assert hasattr(self.synthetic_filter, 'filter_dictionary')
-    #     assert hasattr(self.synthetic_filter, 'number_of_filter_wheels')
-    #     assert hasattr(self.synthetic_filter, 'wait_until_done_delay')
-    #     assert hasattr(self.synthetic_filter, 'wait_until_done')
-
-    # def test_synthetic_filter_wheel_attributes_type(self):
-    #     assert type(self.synthetic_filter.comport == str)
-    #     assert type(self.synthetic_filter.baudrate == int)
-    #     assert type(self.synthetic_filter.filter_dictionary == dict)
-    #     assert type(self.synthetic_filter.number_of_filter_wheels == int)
-    #     assert type(self.synthetic_filter.wheel_position == int)
-    #     assert type(self.synthetic_filter.wait_until_done_delay == float)
-    #     assert type(self.synthetic_filter.wait_until_done == bool)
-
-    def test_synthetic_filter_wheel_methods(self):
-        assert hasattr(self.synthetic_filter, 'filter_change_delay') and callable(getattr(self.synthetic_filter, 'filter_change_delay'))
-        assert hasattr(self.synthetic_filter, 'set_filter') and callable(getattr(self.synthetic_filter, 'set_filter'))
-        assert hasattr(self.synthetic_filter, 'read') and callable(getattr(self.synthetic_filter, 'read'))
-        assert hasattr(self.synthetic_filter, 'close') and callable(getattr(self.synthetic_filter, 'close'))
-
-    def test_synthetic_filter_wheel_method_calls(self):
-        self.synthetic_filter.filter_change_delay(filter_name='Empty-Alignment')
-        self.synthetic_filter.set_filter(filter_name='Empty-Alignment')
-        self.synthetic_filter.read(num_bytes=1)
-        self.synthetic_filter.close()
-        pass
-
-if (__name__ == "__main__"):
-    unittest.main()
-
+    for f, a in zip(funcs, args):
+        if a is not None:
+            getattr(fw, f)(*a)
+        else:
+            getattr(fw, f)()

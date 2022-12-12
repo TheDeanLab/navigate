@@ -1,4 +1,4 @@
-"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -28,24 +28,28 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# """
-
-# Standard Library Imports
-import unittest
+#
 
 # Third Party Imports
 import pytest
 import numpy as np
 
 from aslm.model.devices.camera.camera_synthetic import SyntheticCamera, SyntheticCameraController
-from aslm.model.dummy import DummyModel
 
-class TestSyntheticCamera(unittest.TestCase):
-    r"""Unit Test for FilterWheel Class"""
-    dummy_model = DummyModel()
-    microscope_name = 'Mesoscale'
+@pytest.fixture(scope='class')
+def synthetic_camera(dummy_model):
+    dummy_model = dummy_model
     scc = SyntheticCameraController()
+    microscope_name = dummy_model.configuration['experiment']['MicroscopeState']['microscope_name']
     synthetic_camera = SyntheticCamera(microscope_name, scc, dummy_model.configuration)
+    return synthetic_camera
+
+class TestSyntheticCamera:
+    r"""Unit Test for Camera Synthetic Class"""
+
+    @pytest.fixture(autouse=True)
+    def _prepare_camera(self, synthetic_camera):
+        self.synthetic_camera = synthetic_camera
 
     def test_synthetic_camera_attributes(self):
         desired_attributes = ['x_pixels',
@@ -59,7 +63,7 @@ class TestSyntheticCamera(unittest.TestCase):
                               'data_buffer',
                               'num_of_frame',
                               'pre_frame_idx',
-]
+        ]
         for da in desired_attributes:
             assert hasattr(self.synthetic_camera, da)
 
@@ -83,9 +87,7 @@ class TestSyntheticCamera(unittest.TestCase):
 
 
     def test_synthetic_camera_methods(self):
-
-        methods = ['stop',
-                   'report_settings',
+        methods = ['report_settings',
                    'close_camera',
                    'set_sensor_mode',
                    'set_exposure_time',
@@ -102,7 +104,6 @@ class TestSyntheticCamera(unittest.TestCase):
             assert hasattr(self.synthetic_camera, m) and callable(getattr(self.synthetic_camera, m))
 
     def test_synthetic_camera_wheel_method_calls(self):
-        self.synthetic_camera.stop()
         self.synthetic_camera.report_settings()
         self.synthetic_camera.close_camera()
         self.synthetic_camera.set_sensor_mode(mode='test')
@@ -114,11 +115,6 @@ class TestSyntheticCamera(unittest.TestCase):
         self.synthetic_camera.get_new_frame()
         self.synthetic_camera.set_ROI()
         self.synthetic_camera.get_minimum_waiting_time()
-
-    def test_synthetic_camera_stop(self):
-        self.synthetic_camera.stop_flag = False
-        self.synthetic_camera.stop()
-        assert self.synthetic_camera.stop_flag is True
 
     def test_synthetic_camera_exposure(self):
         exposure_time = 200
@@ -148,15 +144,32 @@ class TestSyntheticCamera(unittest.TestCase):
         assert self.synthetic_camera.current_frame_idx == 0
         assert self.synthetic_camera.camera_controller.is_acquiring is False
 
-    def test_synthetic_camera_generate_new_frame(self):
-        self.synthetic_camera.initialize_image_series(data_buffer=100, number_of_frames=100)
-        # TODO - get the data buffer to not be type None
+    def test_synthetic_camera_acquire_images(self):
+        import random
+        from aslm.model.concurrency.concurrency_tools import SharedNDArray
+        
+        number_of_frames = 100
+        data_buffer = [SharedNDArray(shape=(2048, 2048), dtype='uint16') for i in range(number_of_frames)]
 
-    def test_synthetic_camera_get_new_frame(self):
-        self.synthetic_camera.initialize_image_series(data_buffer=100, number_of_frames=100)
-        # synthetic_camera.generate_new_frame()
-        # synthetic_camera.get_new_frame()
-        # TODO - get the data buffer to not be type None
+        self.synthetic_camera.initialize_image_series(data_buffer, number_of_frames)
+        
+        assert self.synthetic_camera.is_acquiring == True, 'should be acquring'
+        
+        frame_idx = 0
+
+        for i in range(10):
+            frame_num = random.randint(1, 30)
+            for j in range(frame_num):
+                self.synthetic_camera.generate_new_frame()
+            frames = self.synthetic_camera.get_new_frame()
+            
+            assert len(frames) == frame_num, "frame number isn't right!"
+            assert frames[0] == frame_idx, "frame idx isn't right!"
+
+            frame_idx = (frame_idx + frame_num) % number_of_frames
+
+        self.synthetic_camera.close_image_series()
+        assert self.synthetic_camera.is_acquiring == False, 'is_acquiring should be False'
 
     def test_synthetic_get_camera_minimum_wating_time(self):
         wait_time = self.synthetic_camera.get_minimum_waiting_time()
@@ -169,8 +182,3 @@ class TestSyntheticCamera(unittest.TestCase):
         self.synthetic_camera.set_ROI(roi_height=500, roi_width=700)
         assert self.synthetic_camera.x_pixels == 700
         assert self.synthetic_camera.y_pixels == 500
-
-
-if (__name__ == "__main__"):
-    unittest.main()
-

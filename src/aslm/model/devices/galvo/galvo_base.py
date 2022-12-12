@@ -1,4 +1,4 @@
-"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# """
+#
 
 #  Standard Library Imports
 import logging
@@ -63,13 +63,14 @@ class GalvoBase:
         self.samples = int(self.sample_rate * self.sweep_time)
 
         self.waveform_dict = {}
-        for i in range(int(configuration['configuration']['gui']['channels']['count'])):
-            self.waveform_dict['channel_'+str(i+1)] = None
+        for k in configuration['configuration']['gui']['channels'].keys():
+            self.waveform_dict[k] = None
 
     def __del__(self):
         pass
 
     def adjust(self, readout_time):
+        self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
         # calculate waveform
         microscope_state = self.configuration['experiment']['MicroscopeState']
         microscope_name = microscope_state['microscope_name']

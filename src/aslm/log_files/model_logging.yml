@@ -17,26 +17,33 @@ handlers:
     stream: ext://sys.stdout
     filters: [not_performance]
   model_info:
-    class: logging.FileHandler
+    class: logging.handlers.RotatingFileHandler
     level: INFO
     formatter: base
-    filename: model_info.log
+    filename: LOGS/model_info.log
     filters: [not_performance]
-    mode: w
+    mode: a
   model_debug:
-    class: logging.FileHandler
+    class: logging.handlers.RotatingFileHandler
     level: DEBUG
     formatter: base
-    filename: model_debug.log
+    filename: LOGS/model_debug.log
     filters: [not_performance]
-    mode: w
+    mode: a
+  model_error:
+    class: logging.handlers.RotatingFileHandler
+    level: ERROR
+    formatter: base
+    filename: LOGS/model_error.log
+    filters: [not_performance]
+    mode: a
   model_performance:
-    class: logging.FileHandler
+    class: logging.handlers.RotatingFileHandler
     level: DEBUG
     formatter: base
-    filename: model_performance.log
+    filename: LOGS/model_performance.log
     filters: [performance_specs]
-    mode: w
+    mode: a
 loggers:
   model:
     level: DEBUG

@@ -1,4 +1,4 @@
-"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# """
+#
 
 #  Standard Library Imports
 import logging
@@ -108,8 +108,7 @@ class SutterFilterWheel(FilterWheelBase):
 
         self.number_of_filter_wheels = configuration['configuration']['microscopes'][microscope_name]['filter_wheel']['hardware']['wheel_number']
         self.wait_until_done_delay = configuration['configuration']['microscopes'][microscope_name]['filter_wheel']['filter_wheel_delay']
-        self.wait_until_done = True        
-
+        self.wait_until_done = True
         self.read_on_init = True
         self.speed = 2
 

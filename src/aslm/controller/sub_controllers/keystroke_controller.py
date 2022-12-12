@@ -1,4 +1,4 @@
-"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# """
+#
 from aslm.controller.sub_controllers.gui_controller import GUIController
 import logging
 import platform
@@ -43,9 +43,9 @@ class KeystrokeController(GUIController):
         super().__init__(main_view, parent_controller)
 
         # References to all sub frames
-        self.camera_view = main_view.camera_waveform.camera_tab # Camera View
-        self.multi_table = main_view.settings.multiposition_tab.multipoint_list # Multiposition Table
-        self.main_view = main_view.root # Main view
+        self.camera_view = main_view.camera_waveform.camera_tab  # Camera View
+        self.multi_table = main_view.settings.multiposition_tab.multipoint_list  # Multiposition Table
+        self.main_view = main_view.root  # Main view
         self.main_tabs = main_view.settings
 
         # Controllers for all sub frames
@@ -76,19 +76,14 @@ class KeystrokeController(GUIController):
         self.mp_table.rowheader.bind("<Double-Button-1>", self.multi_controller.handle_double_click)
 
         """Keystrokes for Main Window"""
-        self.main_view.bind("<Key>", self.stage_controller.key_press)
-        # self.main_view.bind("<Key>", self.test)
-        self.main_view.bind("1", self.switch_tab1)
-        self.main_view.bind("2", self.switch_tab2)
-        self.main_view.bind("3", self.switch_tab3)
-        self.main_view.bind("4", self.switch_tab4)
-
-    # def test(self, event):
-    #     print(event.state)
-    #     print(event.keysym)
-    #     print(event.keycode)
-    #     print(event)
-
+        self.main_view.bind("w", self.stage_controller.stage_key_press)
+        self.main_view.bind("s", self.stage_controller.stage_key_press)
+        self.main_view.bind("a", self.stage_controller.stage_key_press)
+        self.main_view.bind("d", self.stage_controller.stage_key_press)
+        self.main_view.bind("<Control-Key-1>", self.switch_tab)
+        self.main_view.bind("<Control-Key-2>", self.switch_tab)
+        self.main_view.bind("<Control-Key-3>", self.switch_tab)
+        self.main_view.bind("<Control-Key-4>", self.switch_tab)
 
     def camera_controller_mouse_wheel_enter(self, event):
         self.view.root.unbind("<MouseWheel>")  # get rid of scrollbar mousewheel
@@ -106,24 +101,7 @@ class KeystrokeController(GUIController):
             self.camera_view.canvas.unbind("<Button-5>")
         self.view.root.bind("<MouseWheel>", self.view.scroll_frame.mouse_wheel)  # reinstate scrollbar mousewheel
 
-    # Refactorable when we have time
-
-    def switch_tab1(self, event):
-        if event.state == 4:
-            if self.main_tabs.index("end") > 0:
-                self.main_tabs.select(0)
-
-    def switch_tab2(self, event):
-        if event.state == 4:
-            if self.main_tabs.index("end") > 1:
-                self.main_tabs.select(1)
-    
-    def switch_tab3(self, event):
-        if event.state == 4:
-            if self.main_tabs.index("end") > 2:
-                self.main_tabs.select(2)
-
-    def switch_tab4(self, event):
-        if event.state == 4:
-            if self.main_tabs.index("end") > 3:
-                self.main_tabs.select(3)
+    def switch_tab(self, event):
+        key_val = int(event.keysym)
+        if (key_val > 0) and (self.main_tabs.index("end") >= key_val):
+            self.main_tabs.select(key_val-1)

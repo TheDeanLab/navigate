@@ -100,21 +100,27 @@ class AutofocusPopupController(GUIController):
 
         coarse_range = self.setting_dict['coarse_range']
         coarse_step = self.setting_dict['coarse_step_size']
+        fine_range = self.setting_dict['fine_range']
+        fine_step = self.setting_dict['fine_step_size']
 
 
         # Calculate the coarse portion of the data
         coarse_steps = int(coarse_range) // int(coarse_step) + 1
+        fine_steps = int(fine_range) // int(fine_step) + 1
 
         
         # Plotting coarse data
         self.autofocus_coarse.clear()
-        self.autofocus_coarse.plot(data[:coarse_steps, 0], data[:coarse_steps, 1], 'bo')
+        self.coarse_plot, = self.autofocus_coarse.plot(data[:coarse_steps, 0], data[:coarse_steps, 1], 'bo')
+        
 
         # Plotting fine data
         self.autofocus_fine.clear()
-        self.autofocus_fine.plot(data[coarse_steps:, 0], data[coarse_steps:, 1], 'g*')
+        self.fine_plot, = self.autofocus_fine.plot(data[fine_steps:, 0], data[fine_steps:, 1], 'g*')
+        
         
         # To redraw the plot
         self.autofocus_fig.canvas.draw_idle()
         
+
         

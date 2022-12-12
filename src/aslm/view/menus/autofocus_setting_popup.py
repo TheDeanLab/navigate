@@ -121,6 +121,7 @@ class autofocus_popup():
         self.coarse.set_ylabel("Entropy")
         self.coarse.set_xlabel("Focus Position")
         self.fine = self.fig.add_subplot(212)
+        # print(f"Funcs: {dir(self.fine)}")
         self.fine.set_title("Fine Autofocus")
         self.fine.set_ylabel("Entropy")
         self.fine.set_xlabel("Focus Position")

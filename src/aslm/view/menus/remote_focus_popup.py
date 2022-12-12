@@ -121,7 +121,6 @@ class remote_popup():
 
 
         laser_labels = self.configuration_controller.lasers_info
-        print(laser_labels)
 
         # Laser Frame
         title_labels = ['Laser', 'Amplitude', 'Offset']

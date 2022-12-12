@@ -145,7 +145,7 @@ class DummyModelToTestFeatures:
 
     def __getattr__(self, __name: str):
         print('calling function', __name)
-        return record_func
+        return record_func(self.signal_records, __name)
 
     
 

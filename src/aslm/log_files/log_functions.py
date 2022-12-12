@@ -1,8 +1,9 @@
-from email.mime import base
 import logging.config
 import logging.handlers
-import yaml
 from pathlib import Path
+import os
+
+import yaml
 
 def update_nested_dict(d, find_func, apply_func):
     """
@@ -56,13 +57,17 @@ def log_setup(fname):
 
     # the path to fname is set relative to the location of the folder containing this file (log_functions.py)
     base_directory = Path(__file__).resolve().parent
-    logging_path = Path.joinpath(base_directory, fname)
+    config_path = Path.joinpath(base_directory, fname)
+
+    logging_path = Path.joinpath(base_directory, 'LOGS')
+    if not os.path.exists(logging_path):
+        os.mkdir(logging_path)
 
     # Function to map filename to base_directory/filename in the dictionary
     def update_filename(v):
         return Path.joinpath(base_directory, v)
 
-    with open(logging_path, 'r') as f:
+    with open(config_path, 'r') as f:
         try:
             config_data = yaml.load(f.read(), Loader=yaml.FullLoader)
             # Force all log files to be created relative to base_directory

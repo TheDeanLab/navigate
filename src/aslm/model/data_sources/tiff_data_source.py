@@ -75,8 +75,6 @@ class TiffDataSource(DataSource):
         """One channel, all z-position, one timepoint = one stack.
         N channels are opened simultaneously for writing.
         At each time point, a new file is opened for each channel.
-
-        TODO: Update this to work for multi-position.
         """
         self.mode = 'w'
 
@@ -137,7 +135,11 @@ class TiffDataSource(DataSource):
         self.file_name = []
         self.uid = []
         self._views = []
-        position_directory = os.path.join(self.save_directory, f"Position{self._current_position}")
+
+        if self.metadata._multiposition:
+            position_directory = os.path.join(self.save_directory, f"Position{self._current_position}")
+        else:
+            position_directory = self.save_directory
         if not os.path.exists(position_directory):
             os.mkdir(position_directory)
         for ch in range(self.shape_c):

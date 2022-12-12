@@ -1,22 +1,36 @@
 import os
 
+import pytest
 import numpy as np
 
-def test_bdv_write():
+@pytest.mark.parametrize("multiposition", [True, False])
+@pytest.mark.parametrize("per_stack", [True, False])
+@pytest.mark.parametrize("z_stack", [True, False])
+def test_bdv_write(multiposition, per_stack, z_stack):
     from aslm.model.dummy import DummyModel
     from aslm.model.data_sources.bdv_data_source import BigDataViewerDataSource
 
+    print(f"Conditions are multiposition: {multiposition} per_stack: {per_stack} z_stack: {z_stack}")
+
     # Set up model with a random number of z-steps to modulate the shape
     model = DummyModel()
-    z_steps = np.random.randint(1,10)
+    z_steps = np.random.randint(1,3)
+    timepoints = np.random.randint(1,3)
+    model.configuration['experiment']['MicroscopeState']['image_mode'] = 'z-stack' if z_stack else 'single'
     model.configuration['experiment']['MicroscopeState']['number_z_steps'] = z_steps
+    model.configuration['experiment']['MicroscopeState']['is_multiposition'] = multiposition
+    model.configuration['experiment']['MicroscopeState']['timepoints'] = timepoints
+    if per_stack:
+        model.configuration['experiment']['MicroscopeState']['stack_cycling_mode'] == 'per_stack'
+    else:
+        model.configuration['experiment']['MicroscopeState']['stack_cycling_mode'] == 'per_slice'
 
     # Establish a BDV data source
     ds = BigDataViewerDataSource('test.h5')
     ds.set_metadata_from_configuration_experiment(model.configuration)
 
     # Populate one image per channel per timepoint
-    n_images = ds.shape_c*ds.shape_z*ds.shape_t
+    n_images = ds.shape_c*ds.shape_z*ds.shape_t*ds.positions
     # TODO: Why does 2**16 make ImageJ crash??? But 2**8 works???
     data = (np.random.rand(n_images, ds.shape_x, ds.shape_y)*2**8).astype('uint16')
     data_positions = (np.random.rand(n_images, 5)*50e3).astype(float)

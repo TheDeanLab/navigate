@@ -45,7 +45,7 @@ from tkinter import filedialog, messagebox
 from aslm.controller.sub_controllers.help_popup_controller import HelpPopupController
 from aslm.view.main_application_window import MainApp as view
 from aslm.view.menus.remote_focus_popup import remote_popup
-from aslm.view.menus.autofocus_setting_popup import autofocus_popup
+from aslm.view.menus.autofocus_setting_popup import AutofocusPopup
 from aslm.view.menus.ilastik_setting_popup import ilastik_setting_popup
 from aslm.view.menus.help_popup import help_popup
 
@@ -90,13 +90,13 @@ class Controller:
 
     def __init__(self,
                  root,
+                 splash_screen,
                  configuration_path,
                  experiment_path,
                  etl_constants_path,
                  rest_api_path,
                  use_gpu,
                  args):
-        
 
 
         # Create a thread pool
@@ -121,9 +121,13 @@ class Controller:
         logger.info(f"Spec - Experiment Path: {experiment_path}")
         logger.info(f"Spec - ETL Constants Path: {etl_constants_path}")
         logger.info(f"Spec - Rest API Path: {rest_api_path}")
+        
+        # Wire up pipes
+        self.show_img_pipe = self.model.create_pipe('show_img_pipe')
 
         # save default experiment file
         self.default_experiment_file = experiment_path
+
         # etl setting file
         self.etl_constants_path = etl_constants_path
 
@@ -182,9 +186,10 @@ class Controller:
 
         # Camera View Tab
         self.initialize_cam_view()
-
-        # Wire up pipes
-        self.show_img_pipe = self.model.create_pipe('show_img_pipe')
+        
+        # destroy splash screen and show main screen
+        splash_screen.destroy()
+        root.deiconify()
 
     def update_buffer(self):
         r""" Update the buffer size according to the camera dimensions listed in the experimental parameters.
@@ -285,7 +290,7 @@ class Controller:
             if hasattr(self, 'af_popup_controller'):
                 self.af_popup_controller.showup()
                 return
-            af_popup = autofocus_popup(self.view)
+            af_popup = AutofocusPopup(self.view)
             self.af_popup_controller = AutofocusPopupController(af_popup, self)
 
         def popup_ilastik_setting():

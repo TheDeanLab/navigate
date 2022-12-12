@@ -107,6 +107,7 @@ class BigDataViewerMetadata(XMLMetadata):
                     for z in range(self.shape_z):
                         matrix_id = z + self.shape_z*c + p*self.shape_c*self.shape_z \
                                     + t*self.shape_c*self.shape_z*self.positions
+                        
                         # Construct centroid of volume matrix
                         # print(matrix_id, views[matrix_id])
                         mat += self.stage_positions_to_affine_matrix(**views[matrix_id])/self.shape_z

@@ -31,24 +31,28 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 
+# Standard Library Imports
 import tkinter as tk
 from tkinter import ttk
+import logging
+
+# Third Party Imports
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
+
+# Local Imports
 from aslm.view.custom_widgets.popup import PopUp
 from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from aslm.view.custom_widgets.validation import ValidatedSpinbox
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,
-NavigationToolbar2Tk)
 
-import logging
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
+# class autofocus_popup():
 
-class autofocus_popup():
-    """
-    #### Class creates the popup to configure autofocus parameters.
-    """
+
+class AutofocusPopup:
+    """Class creates the popup to configure autofocus parameters. """
 
     def __init__(self, root, *args, **kwargs):
         # Creating popup window with this name and size/placement, PopUp is a
@@ -63,8 +67,6 @@ class autofocus_popup():
         # Creating content frame
         content_frame = self.popup.get_frame()   
         
-
-        """Creating the widgets for the popup"""
         # Dictionary for all the variables
         self.inputs = {}
         self.stage_vars = [tk.BooleanVar(False), tk.BooleanVar(False)]
@@ -86,7 +88,6 @@ class autofocus_popup():
                     0,
                     0))
             title.grid(row=0, column=i, sticky=(tk.NSEW))
-        
 
         # Widgets
         for i in range(2):
@@ -97,43 +98,54 @@ class autofocus_popup():
                 variable=self.stage_vars[i]
                 )
             stage.grid(row=i + 1, column=0, sticky=(tk.NSEW), padx=5)
+
             # Entry Widgets
             self.inputs[setting_names[i] + '_range'] = LabelInput(parent=content_frame,
                                                                   input_class=ValidatedSpinbox,
                                                                   input_var=tk.StringVar()
                                                                   )
-            self.inputs[setting_names[i] + '_range'].grid(row=i + 1, column=1, sticky=(tk.NSEW), padx=(0, 5), pady=(15, 0))
+
+            self.inputs[setting_names[i] + '_range'].grid(row=i + 1,
+                                                          column=1,
+                                                          sticky=tk.NSEW,
+                                                          padx=(0, 5),
+                                                          pady=(15, 0))
 
             self.inputs[setting_names[i] + '_step_size'] = LabelInput(parent=content_frame,
                                                                       input_class=ValidatedSpinbox,
                                                                       input_var=tk.StringVar()
                                                                       )
-            self.inputs[setting_names[i] + '_step_size'].grid(row=i + 1, column=2, sticky=(tk.NSEW), padx=(0, 5), pady=(15, 0))
+
+            self.inputs[setting_names[i] + '_step_size'].grid(row=i + 1,
+                                                              column=2,
+                                                              sticky=tk.NSEW,
+                                                              padx=(0, 5),
+                                                              pady=(15, 0))
 
         # Buttons
         self.autofocus_btn = ttk.Button(content_frame, text='Autofocus')
         self.autofocus_btn.grid(row=4, column=2, pady=(0, 10))
 
         # Plot
-        self.fig = Figure(figsize = (5, 5), dpi = 100)
+        self.fig = Figure(figsize=(5, 5), dpi=100)
         self.coarse = self.fig.add_subplot(211)
         self.coarse.set_title("Coarse Autofocus")
-        self.coarse.set_ylabel("Entropy")
+        self.coarse.set_ylabel("DCTS")
         self.coarse.set_xlabel("Focus Position")
         self.fine = self.fig.add_subplot(212)
         # print(f"Funcs: {dir(self.fine)}")
         self.fine.set_title("Fine Autofocus")
-        self.fine.set_ylabel("Entropy")
+        self.fine.set_ylabel("DCTS")
         self.fine.set_xlabel("Focus Position")
         self.fig.tight_layout()
         canvas = FigureCanvasTkAgg(self.fig, master=content_frame)
         canvas.draw()
-        canvas.get_tk_widget().grid(row=5, column=0, columnspan=3, sticky=(tk.NSEW), padx=(5,5), pady=(5,5))
-        # Adding toolbar
-        toolbar = NavigationToolbar2Tk(canvas, content_frame, pack_toolbar=False)
-        toolbar.update()
-        toolbar.grid(row=5, column=4)
+        canvas.get_tk_widget().grid(row=5, column=0, columnspan=3, sticky=tk.NSEW, padx=(5, 5), pady=(5, 5))
 
+        # Adding toolbar
+        # toolbar = NavigationToolbar2Tk(canvas, content_frame, pack_toolbar=False)
+        # toolbar.update()
+        # toolbar.grid(row=5, column=4)
 
     def get_widgets(self):
         return self.inputs

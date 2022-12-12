@@ -129,7 +129,8 @@ class ZStackAcquisition:
         self.stack_cycling_mode = microscope_state['stack_cycling_mode']
         # get available channels
         prefix_len = len('channel_')
-        self.channels = [int(channel_key[prefix_len:]) for channel_key in microscope_state['channels'].keys()]
+        channel_dict = microscope_state['channels']
+        self.channels = filter(lambda c: c is not None, [int(channel_key[prefix_len:]) if channel_dict[channel_key]['is_selected'] else None for channel_key in channel_dict.keys()])
         self.current_channel_in_list = 0
 
         self.number_z_steps = int(microscope_state['number_z_steps'])

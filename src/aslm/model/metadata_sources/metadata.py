@@ -55,19 +55,25 @@ class Metadata:
             self.set_stack_order_from_configuration_experiment()
 
     def set_shape_from_configuration_experiment(self) -> None:
-        zoom = self.configuration['experiment']['MicroscopeState']['zoom']
+        microscope_state = self.configuration['experiment']['MicroscopeState']
+        zoom = microscope_state['zoom']
         pixel_size = float(self.configuration['configuration']['microscopes'][self.active_microscope]['zoom']['pixel_size'][zoom])
         self.dx, self.dy = pixel_size, pixel_size
-        self.dz = float(self.configuration['experiment']['MicroscopeState']['step_size'])
-        self.dt = float(self.configuration['experiment']['MicroscopeState']['timepoint_interval'])
+        self.dz = float(microscope_state['step_size'])
+        self.dt = float(microscope_state['timepoint_interval'])
 
         self.shape_x = int(self.configuration['experiment']['CameraParameters']['x_pixels'])
         self.shape_y = int(self.configuration['experiment']['CameraParameters']['y_pixels'])
-        self.shape_z = int(self.configuration['experiment']['MicroscopeState']['number_z_steps']) if (self.configuration['experiment']['MicroscopeState']['image_mode'] == 'z-stack') else 1
-        self.shape_t = int(self.configuration['experiment']['MicroscopeState']['timepoints'])
-        self.shape_c = sum([v['is_selected'] == True for k, v in self.configuration['experiment']['MicroscopeState']['channels'].items()])
+        if (microscope_state['image_mode'] == 'z-stack'):
+            self.shape_z = int(microscope_state['number_z_steps'])
+        elif (microscope_state['image_mode'] == 'confocal-projection'):
+            self.shape_z = int(microscope_state['n_plane'])
+        else:
+            self.shape_z = 1
+        self.shape_t = int(microscope_state['timepoints'])
+        self.shape_c = sum([v['is_selected'] == True for k, v in microscope_state['channels'].items()])
 
-        self._multiposition = self.configuration['experiment']['MicroscopeState']['is_multiposition']
+        self._multiposition = microscope_state['is_multiposition']
 
         if bool(self._multiposition):
             self.positions = len(self.configuration['experiment']['MultiPositions']['stage_positions'])
@@ -75,7 +81,11 @@ class Metadata:
             self.positions = 1
 
     def set_stack_order_from_configuration_experiment(self) -> None:
-        self._per_stack = self.configuration['experiment']['MicroscopeState']['stack_cycling_mode'] == 'per_stack'
+        microscope_state = self.configuration['experiment']['MicroscopeState']
+        if (microscope_state['stack_cycling_mode'] == 'per_stack') or (microscope_state['conpro_cycling_mode'] == 'per_stack'):
+            self._per_stack = True
+        else:
+            self._per_stack = False
 
     @property
     def voxel_size(self) -> tuple:

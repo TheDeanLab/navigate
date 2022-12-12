@@ -258,7 +258,7 @@ class ZStackAcquisition:
         self.model.target_channel = self.channels[self.current_channel_in_list]
 
 
-class ConProAcquisition:   # don't have the part for multi-position for now
+class ConProAcquisition:   # don't have the multi-position part for now
     def __init__(self, model):
 
         self.model = model
@@ -289,7 +289,10 @@ class ConProAcquisition:   # don't have the part for multi-position for now
         self.conpro_cycling_mode = microscope_state['conpro_cycling_mode']
         # get available channels
         prefix_len = len('channel_')
-        self.channels = [int(channel_key[prefix_len:]) for channel_key in microscope_state['channels'].keys()]
+        # self.channels = [int(channel_key[prefix_len:]) for channel_key in microscope_state['channels'].keys()]
+        # self.current_channel_in_list = 0
+        channel_dict = microscope_state['channels']
+        self.channels = list(filter(lambda c: c is not None, [int(channel_key[prefix_len:]) if channel_dict[channel_key]['is_selected'] else None for channel_key in channel_dict.keys()]))
         self.current_channel_in_list = 0
 
         self.n_plane = int(microscope_state['n_plane'])
@@ -301,7 +304,7 @@ class ConProAcquisition:   # don't have the part for multi-position for now
         else:
             self.offset_step_size = (self.end_offset - self.start_offset) / float(self.n_plane-1)
         
-        self.timepoints = int(microscope_state['timepoints'])
+        self.timepoints = 1  # int(microscope_state['timepoints'])
 
         self.need_update_offset = True
         self.current_offset = self.start_offset
@@ -314,7 +317,7 @@ class ConProAcquisition:   # don't have the part for multi-position for now
 
         if self.need_update_offset:
             # update offset
-            # self.model.pause_data_thread()
+            # self.model.pause_data_thread()CH00_000000
 
             # self.model.update_offset({'offset_abs': self.current_offset}, wait_until_done=True)
             

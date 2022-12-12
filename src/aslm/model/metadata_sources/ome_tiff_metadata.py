@@ -52,6 +52,11 @@ class OMETIFFMetadata(XMLMetadata):
         if self.configuration['experiment']['MicroscopeState']['image_mode'] == 'z-stack':
             z_steps = int(self.configuration['experiment']['MicroscopeState']['number_z_steps'])
             ome_dict['Image']['Pixels']['PhysicalSizeZ'] = float(self.configuration['experiment']['MicroscopeState']['step_size'])
+        elif self.configuration['experiment']['MicroscopeState']['image_mode'] == 'confocal-projection':
+            z_steps = int(self.configuration['experiment']['MicroscopeState']['n_plane'])
+            ome_dict['Image']['Pixels']['PhysicalSizeZ'] = (float(self.configuration['experiment']['MicroscopeState']['offset_end'])\
+                                                           - float(self.configuration['experiment']['MicroscopeState']['offset_start']))\
+                                                           /(z_steps - 1)
 
         ome_dict['Image']['Pixels']['SizeZ'] = z_steps
 

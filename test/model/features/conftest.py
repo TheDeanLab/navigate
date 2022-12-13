@@ -57,10 +57,10 @@ class DummyDevice:
             self.out_port.send(list(range(self.sendout_msg_count, self.msg_count.value)))
             self.sendout_msg_count = self.msg_count.value
 
-def record_func(record_list, name):
+def record_func(record_list, name, frame_id):
     def func(*args, **kwargs):
         record_list.append((name, args, kwargs))
-        print(name, 'calling with parameters:', args, kwargs)
+        print('*', frame_id, name, 'calling with parameters:', args, kwargs)
     return func
 
 class DummyModelToTestFeatures:
@@ -89,7 +89,7 @@ class DummyModelToTestFeatures:
 
     def set_channel(self, c):
         self._target_channel = c
-        self.signal_records.append(('change_channel', (c,)))
+        self.signal_records.append(('change_channel', (c,), {'frame_id': self.frame_id}))
 
     def del_channel(self):
         del self._target_channel
@@ -159,7 +159,7 @@ class DummyModelToTestFeatures:
 
     def __getattr__(self, __name: str):
         print('calling function', __name)
-        return record_func(self.signal_records, __name)
+        return record_func(self.signal_records, __name, self.frame_id)
 
     
 

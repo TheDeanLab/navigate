@@ -91,9 +91,11 @@ from aslm.controller.controller import Controller
 
 class DummyController:
     def __init__(self, view):
-        self.configuration = None
+        from aslm.controller.configuration_controller import ConfigurationController
+        self.configuration = DummyModel().configuration
         self.commands = []
         self.view = view
+        self.configuration_controller = ConfigurationController(self.configuration)
     
     def execute(self, str):
         '''

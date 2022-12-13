@@ -132,10 +132,13 @@ class VolumeSearch:
     def data_func(self, frame_ids):
         for idx in frame_ids:
             img_data = self.model.data_buffer[idx]
-            if self.pre_boundary is None:
-                boundary = find_tissue_boundary_2d(img_data, self.target_grid_pixels)
-            else:
-                boundary = binary_detect(img_data, self.pre_boundary, self.target_grid_pixels)
+            # TODO: make sure set the right threshold_value in model\analysis\boundary_detect.py when use if/else
+            boundary = find_tissue_boundary_2d(img_data, self.target_grid_pixels)
+            
+            # if self.pre_boundary is None:
+            #     boundary = find_tissue_boundary_2d(img_data, self.target_grid_pixels)
+            # else:
+            #     boundary = binary_detect(img_data, self.pre_boundary, self.target_grid_pixels)
 
             self.has_tissue = any(boundary)
             self.boundary[self.curr_z_index] = boundary

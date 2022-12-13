@@ -31,7 +31,7 @@
 #
 
 from aslm.controller.sub_controllers import AutofocusPopupController
-from aslm.view.menus.autofocus_setting_popup import autofocus_popup
+from aslm.view.menus.autofocus_setting_popup import AutofocusPopup
 import pytest
 
 class TestAutofocusPopupController():
@@ -40,7 +40,7 @@ class TestAutofocusPopupController():
     def setup_class(self, dummy_controller):
         c = dummy_controller
         v = dummy_controller.view
-        afpop = autofocus_popup(v)
+        afpop = AutofocusPopup(v)
 
         self.af_controller = AutofocusPopupController(afpop, c)
 
@@ -99,6 +99,8 @@ class TestAutofocusPopupController():
 
     def test_display_plot(self):
         
+        # Make this robust by sending data and then checking each plot is plotting correct data low priority TODO
+        
         # Data pulled from Autofocus run on default Synthetic Hardware probably a better way to do this
         data = [[69750.0, 0.000551137577494905],
                 [69800.0, 0.0005513108908586421],
@@ -127,3 +129,12 @@ class TestAutofocusPopupController():
 
         coarse_data = self.af_controller.coarse_plot.get_data()
         fine_data = self.af_controller.fine_plot.get_data()
+        
+        # print(coarse_data[0])
+        # print(coarse_data[1])
+        # print(type(coarse_data))
+        # print(fine_data)
+        
+        
+
+        

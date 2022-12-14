@@ -153,7 +153,7 @@ class Microscope:
             self.stages[axes].move_absolute({axes+'_pos': pos}, wait_until_done=True)
 
     def prepare_acquisition(self):
-        if self.camera.camera_controller.is_acquiring:
+        if self.camera.is_acquiring:
             self.camera.close_image_series()
         # Set Camera Sensor Mode - Must be done before camera is initialized.
         sensor_mode = self.configuration['experiment']['CameraParameters']['sensor_mode']

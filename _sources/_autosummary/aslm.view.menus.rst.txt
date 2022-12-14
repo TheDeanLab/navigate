@@ -1,0 +1,36 @@
+aslm.view.menus
+===============
+
+.. automodule:: aslm.view.menus
+  
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom_module.rst
+   :recursive:
+
+   aslm.view.menus.autofocus_setting_popup
+   aslm.view.menus.help_popup
+   aslm.view.menus.ilastik_setting_popup
+   aslm.view.menus.menus
+   aslm.view.menus.remote_focus_popup
+

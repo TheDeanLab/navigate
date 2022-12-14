@@ -1,0 +1,6 @@
+aslm.model.features.feature\_container.load\_features
+=====================================================
+
+.. currentmodule:: aslm.model.features.feature_container
+
+.. autofunction:: load_features

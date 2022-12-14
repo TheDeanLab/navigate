@@ -1,0 +1,33 @@
+aslm.view.main\_window\_content.channel\_settings
+=================================================
+
+.. automodule:: aslm.view.main_window_content.channel_settings
+  
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom_module.rst
+   :recursive:
+
+   aslm.view.main_window_content.channel_settings.channel_settings_frames
+   aslm.view.main_window_content.channel_settings.channels_tab
+

@@ -1,0 +1,45 @@
+aslm.model.devices.camera.camera\_hamamatsu.HamamatsuOrca
+=========================================================
+
+.. currentmodule:: aslm.model.devices.camera.camera_hamamatsu
+
+.. autoclass:: HamamatsuOrca
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~HamamatsuOrca.__init__
+      ~HamamatsuOrca.calculate_light_sheet_exposure_time
+      ~HamamatsuOrca.calculate_readout_time
+      ~HamamatsuOrca.close_camera
+      ~HamamatsuOrca.close_image_series
+      ~HamamatsuOrca.get_minimum_waiting_time
+      ~HamamatsuOrca.get_new_frame
+      ~HamamatsuOrca.initialize_image_series
+      ~HamamatsuOrca.report_settings
+      ~HamamatsuOrca.set_ROI
+      ~HamamatsuOrca.set_binning
+      ~HamamatsuOrca.set_exposure_time
+      ~HamamatsuOrca.set_line_interval
+      ~HamamatsuOrca.set_readout_direction
+      ~HamamatsuOrca.set_sensor_mode
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~HamamatsuOrca.serial_number
+   
+   

@@ -1,0 +1,36 @@
+aslm.view.main\_window\_content.channel\_settings.channel\_settings\_frames
+===========================================================================
+
+.. automodule:: aslm.view.main_window_content.channel_settings.channel_settings_frames
+  
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom_module.rst
+   :recursive:
+
+   aslm.view.main_window_content.channel_settings.channel_settings_frames.channel_settings
+   aslm.view.main_window_content.channel_settings.channel_settings_frames.quick_launch
+   aslm.view.main_window_content.channel_settings.channel_settings_frames.stack_acquisition_settings
+   aslm.view.main_window_content.channel_settings.channel_settings_frames.stack_timepoint_settings
+   aslm.view.main_window_content.channel_settings.channel_settings_frames.tiling_wizard_popup
+

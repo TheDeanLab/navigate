@@ -1,0 +1,35 @@
+aslm.view.main\_window\_content
+===============================
+
+.. automodule:: aslm.view.main_window_content
+  
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom_module.rst
+   :recursive:
+
+   aslm.view.main_window_content.acquire_bar_frame
+   aslm.view.main_window_content.channel_settings
+   aslm.view.main_window_content.settings_notebook
+   aslm.view.main_window_content.stage_control
+

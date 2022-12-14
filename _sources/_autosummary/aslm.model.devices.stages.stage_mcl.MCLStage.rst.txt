@@ -1,0 +1,33 @@
+aslm.model.devices.stages.stage\_mcl.MCLStage
+=============================================
+
+.. currentmodule:: aslm.model.devices.stages.stage_mcl
+
+.. autoclass:: MCLStage
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~MCLStage.__init__
+      ~MCLStage.create_internal_position_dict
+      ~MCLStage.create_position_dict
+      ~MCLStage.get_abs_position
+      ~MCLStage.move_absolute
+      ~MCLStage.move_axis_absolute
+      ~MCLStage.report_position
+      ~MCLStage.stop
+      ~MCLStage.update_position_dictionaries
+   
+   
+
+   
+   
+   

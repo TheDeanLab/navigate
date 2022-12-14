@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Guide &mdash; ASLM 0.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Extending ASLM" href="hacking.html" />
+    <link rel="prev" title="ASLM Python Package" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> ASLM
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">User Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="hacking.html">Extending ASLM</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">ASLM</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">User Guide</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/userguide.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="user-guide">
+<h1>User Guide<a class="headerlink" href="#user-guide" title="Permalink to this heading"></a></h1>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h2>
+<p>First we need to setup our python enviornment. Head over to the <a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html#latest-miniconda-installer-links">miniconda website</a>
+and install the appropriate version based on your operating system.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>It is also handy to have the <a class="reference external" href="https://docs.conda.io/projects/conda/en/4.6.0/_downloads/52a95608c49671267e40c689e0bc00ca/conda-cheatsheet.pdf">conda cheatsheet</a> open when first using miniconda to get accustomed to the commands available.</p>
+</div>
+<p>Once you have installed miniconda its time to use it to create our python enviornment.
+Search your computer for the anaconda prompt window. If you are on a Linux/Mac you can just use the terminal.
+From there you will need to use the below commands:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(base) MyComputer ~ $ conda create -n ASLM python=3.9.7
+</pre></div>
+</div>
+<p>This will create our python enviornment with the correct version.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(base) MyComputer ~ $ conda activate ASLM
+</pre></div>
+</div>
+<p>Now we need to activate our new enviornment.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(ASLM) MyComputer ~ $ python -m pip install --upgrade pip
+</pre></div>
+</div>
+<p>We will now update our package manager. Python has a builtin called pip. Also notice that our enviornment is now reflected on the far left of our terminal as (ASLM). This will confirm you are in the correct environment.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(ASLM) MyComputer ~ $ mkdir ~/MyFolderName
+(ASLM) MyComputer ~ $ cd ~/MyFolderName
+</pre></div>
+</div>
+<p>It is important to stay organized. Create a folder in a path/location that is easy to find and access. We will be saving the repo(the code!) here. After creating the folder we can change to it.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(ASLM) MyComputer MyFolderName $ git clone https://github.com/AdvancedImagingUTSW/ASLM.git
+</pre></div>
+</div>
+<p>After creating the folder and changing to it, we need to download the code. We can use the git command for this task.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you do not have <a class="reference external" href="https://git-scm.com/downloads">Git already downloaded</a>. You will need to do that before downloading the repo.</p>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(ASLM) MyComputer MyFolderName $ cd ASLM
+(ASLM) MyComputer ASLM $ pip install -e .
+</pre></div>
+</div>
+<p>The last step requires you to change into the ASLM directory and the install the repo as a package locally on your machine.</p>
+<p>Finally once this is all finished you can run the software with the below command.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(ASLM) MyComputer ASLM $ aslm
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you are running the software on a computer that does not have the appropriate hardware you will need to add the flag -sh after aslm:</p>
+<blockquote>
+<div><p>aslm -sh</p>
+</div></blockquote>
+</div>
+<p>After completeting these steps you will only need to do the below to start the software upon opening the prompt:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(base) MyComputer ~ $ conda activate ASLM
+(ASLM) MyComputer ~ $ aslm -sh
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="ASLM Python Package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="hacking.html" class="btn btn-neutral float-right" title="Extending ASLM" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Dean Lab @ UT Southwestern.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

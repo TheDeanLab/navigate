@@ -1,0 +1,6 @@
+aslm.model.device\_startup\_functions.start\_filter\_wheel
+==========================================================
+
+.. currentmodule:: aslm.model.device_startup_functions
+
+.. autofunction:: start_filter_wheel

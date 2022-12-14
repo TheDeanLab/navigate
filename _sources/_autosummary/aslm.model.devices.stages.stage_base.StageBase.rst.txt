@@ -1,0 +1,30 @@
+aslm.model.devices.stages.stage\_base.StageBase
+===============================================
+
+.. currentmodule:: aslm.model.devices.stages.stage_base
+
+.. autoclass:: StageBase
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~StageBase.__init__
+      ~StageBase.create_internal_position_dict
+      ~StageBase.create_position_dict
+      ~StageBase.get_abs_position
+      ~StageBase.stop
+      ~StageBase.update_position_dictionaries
+   
+   
+
+   
+   
+   

@@ -1,0 +1,30 @@
+aslm.tools.decorators
+=====================
+
+.. automodule:: aslm.tools.decorators
+  
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      function_timer
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

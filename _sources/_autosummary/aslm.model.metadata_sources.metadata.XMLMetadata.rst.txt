@@ -1,0 +1,39 @@
+aslm.model.metadata\_sources.metadata.XMLMetadata
+=================================================
+
+.. currentmodule:: aslm.model.metadata_sources.metadata
+
+.. autoclass:: XMLMetadata
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~XMLMetadata.__init__
+      ~XMLMetadata.set_from_configuration_experiment
+      ~XMLMetadata.set_shape_from_configuration_experiment
+      ~XMLMetadata.set_stack_order_from_configuration_experiment
+      ~XMLMetadata.to_xml
+      ~XMLMetadata.write_xml
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~XMLMetadata.configuration
+      ~XMLMetadata.per_stack
+      ~XMLMetadata.shape
+      ~XMLMetadata.voxel_size
+   
+   

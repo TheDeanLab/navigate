@@ -1,0 +1,6 @@
+aslm.tools.project\_stats.countlines
+====================================
+
+.. currentmodule:: aslm.tools.project_stats
+
+.. autofunction:: countlines

@@ -1,0 +1,31 @@
+aslm.model.devices.lasers.laser\_base
+=====================================
+
+.. automodule:: aslm.model.devices.lasers.laser_base
+  
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom_class.rst
+   
+      LaserBase
+   
+   
+
+   
+   
+   
+
+
+

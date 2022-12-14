@@ -1,0 +1,31 @@
+aslm.model.devices.objectives
+=============================
+
+.. automodule:: aslm.model.devices.objectives
+  
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom_class.rst
+   
+      Objective
+   
+   
+
+   
+   
+   
+
+
+

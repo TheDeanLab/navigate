@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hardware Setup &mdash; ASLM 0.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> ASLM
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="userguide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hacking.html">Extending ASLM</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">ASLM</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">Hardware Setup</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/hardware.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="hardware-setup">
+<h1>Hardware Setup<a class="headerlink" href="#hardware-setup" title="Permalink to this heading"></a></h1>
+<section id="data-acquisition-card">
+<h2>Data Acquisition Card<a class="headerlink" href="#data-acquisition-card" title="Permalink to this heading"></a></h2>
+<p>We have used several different NI-based data acquisition cards to run the software. These include PCIe-6738, PXIe-6259, and PXIe-6733.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>To find the device pinouts for your NI-based data acquisition card, open up NI MAX, find the card under devices,
+right-click and select ‘device pinouts’.</p>
+</div>
+<p>The most important aspect is to wire up the triggering properly. The software first calculates all of the analog and digital waveforms, creates the NI tasks, and then queues these waveforms on the data acquisition board.
+Upon receipt of a trigger, all of the analog an digital tasks are delivered in parallel. This provides us with deterministic behavior on a per-frame basis, which is necessary for proper ASLM-style acquisitions. It does not
+however provide us with deterministic behavior between image frames, and some jitter in timing is anticipated.</p>
+</section>
+<section id="configuration-file">
+<h2>Configuration File<a class="headerlink" href="#configuration-file" title="Permalink to this heading"></a></h2>
+<p>Upon running the software the first time, a copy of the configuration file is created in <code class="docutils literal notranslate"><span class="pre">/Users/&lt;username&gt;/AppData/Local/.ASLM/config</span></code> on Windows-based machines, and in <code class="docutils literal notranslate"><span class="pre">~/.ASLM/config</span></code> on Mac and
+Linux-based machines. All changes will need to be made to this file. The local copy avoids conflicts between different microscopes after pulling new changes on GitHub.</p>
+</section>
+<section id="directions">
+<h2>Directions<a class="headerlink" href="#directions" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>Identify the device name in NI MAX, and change it if you would like. Common names are <code class="docutils literal notranslate"><span class="pre">Dev1</span></code>, <code class="docutils literal notranslate"><span class="pre">Dev2</span></code>, etc. This name must correspond with the pinouts provided in the configuration file.</p></li>
+<li><p>Connect the <cite>camera_trigger_out_line</cite> to the External Trigger of the Hamamatsu Camera. Commonly, this is done with a</p></li>
+</ul>
+<p>counter port, e.g., <code class="docutils literal notranslate"><span class="pre">/PXI6259/ctr0</span></code>
+- Connect the <code class="docutils literal notranslate"><span class="pre">master_trigger_out_line</span></code> to the <code class="docutils literal notranslate"><span class="pre">trigger_source</span></code> with a direct wire, commonly <code class="docutils literal notranslate"><span class="pre">PXI6259/port0/line1</span></code> and <code class="docutils literal notranslate"><span class="pre">/PXI6259/PFI0</span></code></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For NI-based cards, port0/line1 is the equivalent of <code class="docutils literal notranslate"><span class="pre">P0.1</span></code>.
+There are multiple pins for each PFIO, including source, out, gate, etc. You must use the out terminal.</p>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Dean Lab @ UT Southwestern.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

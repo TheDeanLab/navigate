@@ -1,0 +1,31 @@
+aslm.model.devices.stages.stage\_synthetic
+==========================================
+
+.. automodule:: aslm.model.devices.stages.stage_synthetic
+  
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom_class.rst
+   
+      SyntheticStage
+   
+   
+
+   
+   
+   
+
+
+

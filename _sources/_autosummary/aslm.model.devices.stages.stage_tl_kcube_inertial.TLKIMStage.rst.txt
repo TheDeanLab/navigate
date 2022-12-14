@@ -1,0 +1,33 @@
+aslm.model.devices.stages.stage\_tl\_kcube\_inertial.TLKIMStage
+===============================================================
+
+.. currentmodule:: aslm.model.devices.stages.stage_tl_kcube_inertial
+
+.. autoclass:: TLKIMStage
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~TLKIMStage.__init__
+      ~TLKIMStage.create_internal_position_dict
+      ~TLKIMStage.create_position_dict
+      ~TLKIMStage.get_abs_position
+      ~TLKIMStage.move_absolute
+      ~TLKIMStage.move_axis_absolute
+      ~TLKIMStage.report_position
+      ~TLKIMStage.stop
+      ~TLKIMStage.update_position_dictionaries
+   
+   
+
+   
+   
+   

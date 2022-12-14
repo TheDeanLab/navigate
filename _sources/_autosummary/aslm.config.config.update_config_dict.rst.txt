@@ -1,0 +1,6 @@
+aslm.config.config.update\_config\_dict
+=======================================
+
+.. currentmodule:: aslm.config.config
+
+.. autofunction:: update_config_dict

@@ -1,0 +1,40 @@
+aslm.model.devices.joystick.joystick\_logitech.JoystickLogitech
+===============================================================
+
+.. currentmodule:: aslm.model.devices.joystick.joystick_logitech
+
+.. autoclass:: JoystickLogitech
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~JoystickLogitech.__init__
+      ~JoystickLogitech.axis_handler
+      ~JoystickLogitech.button_handler
+      ~JoystickLogitech.decrease_slider
+      ~JoystickLogitech.decrement_combobox
+      ~JoystickLogitech.increase_slider
+      ~JoystickLogitech.increment_combobox
+      ~JoystickLogitech.mode_handler
+      ~JoystickLogitech.set_combobox_to_index
+      ~JoystickLogitech.set_combobox_to_string
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~JoystickLogitech.cfg
+   
+   

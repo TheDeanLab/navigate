@@ -1,0 +1,25 @@
+aslm.model.devices.joystick.joystick\_synthetic.SyntheticJoystick
+=================================================================
+
+.. currentmodule:: aslm.model.devices.joystick.joystick_synthetic
+
+.. autoclass:: SyntheticJoystick
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~SyntheticJoystick.__init__
+   
+   
+
+   
+   
+   

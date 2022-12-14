@@ -1,0 +1,6 @@
+aslm.tools.common\_dict\_tools.update\_stage\_dict
+==================================================
+
+.. currentmodule:: aslm.tools.common_dict_tools
+
+.. autofunction:: update_stage_dict

@@ -1,0 +1,28 @@
+aslm.model.features.feature\_container.SignalContainer
+======================================================
+
+.. currentmodule:: aslm.model.features.feature_container
+
+.. autoclass:: SignalContainer
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~SignalContainer.__init__
+      ~SignalContainer.cleanup
+      ~SignalContainer.reset
+      ~SignalContainer.run
+   
+   
+
+   
+   
+   

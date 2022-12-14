@@ -1,0 +1,6 @@
+aslm.tools.decorators.function\_timer
+=====================================
+
+.. currentmodule:: aslm.tools.decorators
+
+.. autofunction:: function_timer

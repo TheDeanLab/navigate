@@ -1,0 +1,33 @@
+aslm.model.devices.shutter.laser\_shutter\_synthetic.SyntheticShutter
+=====================================================================
+
+.. currentmodule:: aslm.model.devices.shutter.laser_shutter_synthetic
+
+.. autoclass:: SyntheticShutter
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~SyntheticShutter.__init__
+      ~SyntheticShutter.close_shutter
+      ~SyntheticShutter.open_shutter
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~SyntheticShutter.state
+   
+   

@@ -1,0 +1,28 @@
+aslm.model.devices.zoom.zoom\_synthetic.SyntheticZoom
+=====================================================
+
+.. currentmodule:: aslm.model.devices.zoom.zoom_synthetic
+
+.. autoclass:: SyntheticZoom
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~SyntheticZoom.__init__
+      ~SyntheticZoom.move
+      ~SyntheticZoom.read_position
+      ~SyntheticZoom.set_zoom
+   
+   
+
+   
+   
+   

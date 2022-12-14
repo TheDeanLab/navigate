@@ -1,0 +1,28 @@
+aslm.model.devices.zoom.zoom\_base.ZoomBase
+===========================================
+
+.. currentmodule:: aslm.model.devices.zoom.zoom_base
+
+.. autoclass:: ZoomBase
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~ZoomBase.__init__
+      ~ZoomBase.move
+      ~ZoomBase.read_position
+      ~ZoomBase.set_zoom
+   
+   
+
+   
+   
+   

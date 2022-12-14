@@ -1,0 +1,35 @@
+aslm.model.microscope.Microscope
+================================
+
+.. currentmodule:: aslm.model.microscope
+
+.. autoclass:: Microscope
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~Microscope.__init__
+      ~Microscope.calculate_all_waveform
+      ~Microscope.end_acquisition
+      ~Microscope.get_readout_time
+      ~Microscope.get_stage_position
+      ~Microscope.move_stage
+      ~Microscope.move_stage_offset
+      ~Microscope.prepare_acquisition
+      ~Microscope.prepare_channel
+      ~Microscope.stop_stage
+      ~Microscope.update_data_buffer
+   
+   
+
+   
+   
+   

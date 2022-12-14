@@ -1,0 +1,36 @@
+aslm.view.main\_window\_content.stage\_control.stage\_control\_frames
+=====================================================================
+
+.. automodule:: aslm.view.main_window_content.stage_control.stage_control_frames
+  
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom_module.rst
+   :recursive:
+
+   aslm.view.main_window_content.stage_control.stage_control_frames.goto_frame
+   aslm.view.main_window_content.stage_control.stage_control_frames.other_axis_frame
+   aslm.view.main_window_content.stage_control.stage_control_frames.position_frame
+   aslm.view.main_window_content.stage_control.stage_control_frames.stop_frame
+   aslm.view.main_window_content.stage_control.stage_control_frames.x_y_frame
+

@@ -1,0 +1,6 @@
+aslm.config.config.load\_configs
+================================
+
+.. currentmodule:: aslm.config.config
+
+.. autofunction:: load_configs

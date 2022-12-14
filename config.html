@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Configuring ASLM &mdash; ASLM 0.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="aslm.tools.xml_tools.parse_xml" href="_autosummary/aslm.tools.xml_tools.parse_xml.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> ASLM
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="userguide.html">User Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="hacking.html">Extending ASLM</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="features.html">ASLM feature container</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Configuring ASLM</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#configuration-yaml">Configuration.yaml</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#hardware-section">Hardware Section</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#microscope-section">Microscope Section</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gui-section">GUI Section</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">ASLM</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="hacking.html">Extending ASLM</a></li>
+      <li class="breadcrumb-item active">Configuring ASLM</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/config.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="configuring-aslm">
+<h1>Configuring ASLM<a class="headerlink" href="#configuring-aslm" title="Permalink to this heading"></a></h1>
+<p>In order to properly use the ASLM software you will need to configure the specifications of the various hardware that you will be using.
+This is done by updating the configuration.yaml file located in either <code class="docutils literal notranslate"><span class="pre">Users\name\AppData\Local\.ASLM</span></code> if on Windows or <code class="docutils literal notranslate"><span class="pre">~/.ASLM</span></code> if on Mac/Linux.</p>
+<section id="configuration-yaml">
+<h2>Configuration.yaml<a class="headerlink" href="#configuration-yaml" title="Permalink to this heading"></a></h2>
+<section id="hardware-section">
+<h3>Hardware Section<a class="headerlink" href="#hardware-section" title="Permalink to this heading"></a></h3>
+<p>The first section of the file is called hardware. It contains all the necessary information to find and connect each hardware device to the computer/software.</p>
+<p>Here is an example of what the section will look like:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Configuration in YAML</span><span class="w"></span>
+<span class="nt">hardware</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">daq</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NI</span><span class="w"></span>
+<span class="w">    </span><span class="nt">camera</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"></span>
+<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HamamatsuOrca</span><span class="w"></span>
+<span class="w">          </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">302158</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"></span>
+<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HamamatsuOrca</span><span class="w"></span>
+<span class="w">          </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">302352</span><span class="w"></span>
+<span class="w">    </span><span class="nt">filter_wheel</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SutterFilterWheel</span><span class="w"></span>
+<span class="w">        </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM19</span><span class="w"></span>
+<span class="w">        </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">9600</span><span class="w"></span>
+<span class="w">        </span><span class="nt">number_of_wheels</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w"></span>
+<span class="w">    </span><span class="nt">stage</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"></span>
+<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PI</span><span class="w"></span>
+<span class="w">          </span><span class="nt">controllername</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;C-884&#39;</span><span class="w"></span>
+<span class="w">          </span><span class="nt">stages</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">L-509.20DG10 L-509.40DG10 L-509.20DG10 M-060.DG M-406.4PD NOSTAGE</span><span class="w"></span>
+<span class="w">          </span><span class="nt">refmode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">FRF FRF FRF FRF FRF FRF</span><span class="w"></span>
+<span class="w">          </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">119060508</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"></span>
+<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Thorlabs</span><span class="w"></span>
+<span class="w">          </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">74000375</span><span class="w"></span>
+<span class="w">    </span><span class="nt">zoom</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DynamixelZoom</span><span class="w"></span>
+<span class="w">        </span><span class="nt">servo_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="w">        </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM18</span><span class="w"></span>
+<span class="w">        </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000000</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Make sure that all the hardware that will be used is included as a dictionary item in yaml format.
+For example, if you wanted to remove the Thorlabs stage and replace the PI stage with a different manufacturer:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">stage</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ASI</span><span class="w"></span>
+<span class="w">    </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">123456789</span><span class="w"></span>
+<span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM7</span><span class="w"></span>
+<span class="w">    </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">115200</span><span class="w"></span>
+</pre></div>
+</div>
+<p>You would add it to the hardware section:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Configuration in YAML</span><span class="w"></span>
+<span class="nt">hardware</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">daq</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NI</span><span class="w"></span>
+<span class="w">    </span><span class="nt">camera</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"></span>
+<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HamamatsuOrca</span><span class="w"></span>
+<span class="w">          </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">302158</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"></span>
+<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HamamatsuOrca</span><span class="w"></span>
+<span class="w">          </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">302352</span><span class="w"></span>
+<span class="w">    </span><span class="nt">filter_wheel</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SutterFilterWheel</span><span class="w"></span>
+<span class="w">        </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM19</span><span class="w"></span>
+<span class="w">        </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">9600</span><span class="w"></span>
+<span class="w">        </span><span class="nt">number_of_wheels</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w"></span>
+<span class="w">    </span><span class="nt">stage</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ASI</span><span class="w"></span>
+<span class="w">        </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">123456789</span><span class="w"></span>
+<span class="w">        </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM7</span><span class="w"></span>
+<span class="w">        </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">115200</span><span class="w"></span>
+<span class="w">    </span><span class="nt">zoom</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DynamixelZoom</span><span class="w"></span>
+<span class="w">        </span><span class="nt">servo_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="w">        </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM18</span><span class="w"></span>
+<span class="w">        </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000000</span><span class="w"></span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The type of the device is needed when deciding which python object to instantiate on startup of the software. (eg type: ASI)
+The other fields are specified by the manufacturers API software. They help the API software communicate with the computer
+you are using which in turn allows the ASLM software to communicate with the device. (eg port: COM7)</p>
+</div>
+<p>Running the software with our current microscope setup would fail. It turns out our ASI stage only moves in the x, y, z axes.
+We need a way to handle theta and f axes.</p>
+<p>To do this we will employ the SyntheticStage:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Configuration in YAML</span><span class="w"></span>
+<span class="nt">hardware</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">daq</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NI</span><span class="w"></span>
+<span class="w">    </span><span class="nt">camera</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"></span>
+<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HamamatsuOrca</span><span class="w"></span>
+<span class="w">          </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">302158</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"></span>
+<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HamamatsuOrca</span><span class="w"></span>
+<span class="w">          </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">302352</span><span class="w"></span>
+<span class="w">    </span><span class="nt">filter_wheel</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SutterFilterWheel</span><span class="w"></span>
+<span class="w">        </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM19</span><span class="w"></span>
+<span class="w">        </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">9600</span><span class="w"></span>
+<span class="w">        </span><span class="nt">number_of_wheels</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w"></span>
+<span class="w">    </span><span class="nt">stage</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"></span>
+<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ASI</span><span class="w"></span>
+<span class="w">          </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">123456789</span><span class="w"></span>
+<span class="w">          </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM7</span><span class="w"></span>
+<span class="w">          </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">115200</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"></span>
+<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SyntheticStage</span><span class="w"></span>
+<span class="w">          </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">987654321</span><span class="w"></span>
+<span class="w">    </span><span class="nt">zoom</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DynamixelZoom</span><span class="w"></span>
+<span class="w">        </span><span class="nt">servo_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="w">        </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM18</span><span class="w"></span>
+<span class="w">        </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000000</span><span class="w"></span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Notice how there are two entries in the stage field. Each field that you need to add to a section is done by placing a ‘-’
+and then the information below that. This formats the stage field to behave like a python list in the code.</p>
+</div>
+<p>If your microscope system does not have a device listed in the hardware section using the Synthetic typing will allow the software to run without it.
+Another example would be replacing the zoom type with SyntheticZoom in the instance your microscope does not use that hardware. Your system will still run as you expect.</p>
+</section>
+<section id="microscope-section">
+<h3>Microscope Section<a class="headerlink" href="#microscope-section" title="Permalink to this heading"></a></h3>
+<p>The second section contains the microscopes that you will be using with the software. Each is represented as a yaml dictionary similar
+to the hardware section. The GUI uses this dictionary to switch between the microscopes.</p>
+<p>Here is an abbreviated example, the full file contains field entries for all of the hardware specified:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">microscopes</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">name of microscope</span><span class="p">:</span><span class="w"></span>
+
+<span class="w">        </span><span class="c1">#Other hardware</span><span class="w"></span>
+
+<span class="w">        </span><span class="c1"># ...</span><span class="w"></span>
+
+
+<span class="w">        </span><span class="nt">stage</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">hardware</span><span class="p">:</span><span class="w"></span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"></span>
+<span class="w">                </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">stage</span><span class="w"></span>
+<span class="w">                </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ASI</span><span class="w"></span>
+<span class="w">                </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">123456789</span><span class="w"></span>
+<span class="w">                </span><span class="nt">axes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">x</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">y</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">z</span><span class="p p-Indicator">]</span><span class="w"></span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"></span>
+<span class="w">                </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">stage</span><span class="w"></span>
+<span class="w">                </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SyntheticStage</span><span class="w"></span>
+<span class="w">                </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">987654321</span><span class="w"></span>
+<span class="w">                </span><span class="nt">axes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">theta</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">f</span><span class="p p-Indicator">]</span><span class="w"></span>
+<span class="w">            </span><span class="nt">y_unload_position</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10000</span><span class="w"></span>
+<span class="w">            </span><span class="nt">y_load_position</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">90000</span><span class="w"></span>
+
+<span class="w">            </span><span class="nt">startfocus</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">75000</span><span class="w"></span>
+<span class="w">            </span><span class="nt">x_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">33500</span><span class="w"></span>
+<span class="w">            </span><span class="nt">x_min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">16000</span><span class="w"></span>
+<span class="w">            </span><span class="nt">y_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100000</span><span class="w"></span>
+<span class="w">            </span><span class="nt">y_min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2000</span><span class="w"></span>
+<span class="w">            </span><span class="nt">z_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50000</span><span class="w"></span>
+<span class="w">            </span><span class="nt">z_min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">25000</span><span class="w"></span>
+<span class="w">            </span><span class="nt">f_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100000</span><span class="w"></span>
+<span class="w">            </span><span class="nt">f_min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-100000</span><span class="w"></span>
+<span class="w">            </span><span class="nt">theta_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">360</span><span class="w"></span>
+<span class="w">            </span><span class="nt">theta_min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"></span>
+
+<span class="w">            </span><span class="nt">x_rot_position</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2000</span><span class="w"></span>
+<span class="w">            </span><span class="nt">y_rot_position</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2000</span><span class="w"></span>
+<span class="w">            </span><span class="nt">z_rot_position</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2000</span><span class="w"></span>
+
+<span class="w">            </span><span class="nt">x_step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">500</span><span class="w"></span>
+<span class="w">            </span><span class="nt">y_step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">500</span><span class="w"></span>
+<span class="w">            </span><span class="nt">z_step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">500</span><span class="w"></span>
+<span class="w">            </span><span class="nt">theta_step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span><span class="w"></span>
+<span class="w">            </span><span class="nt">f_step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">500</span><span class="w"></span>
+
+<span class="w">            </span><span class="nt">position</span><span class="p">:</span><span class="w"></span>
+<span class="w">                </span><span class="nt">x_pos</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">25250</span><span class="w"></span>
+<span class="w">                </span><span class="nt">y_pos</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">40000</span><span class="w"></span>
+<span class="w">                </span><span class="nt">z_pos</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">40000</span><span class="w"></span>
+<span class="w">                </span><span class="nt">f_pos</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">70000</span><span class="w"></span>
+<span class="w">                </span><span class="nt">theta_pos</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"></span>
+<span class="w">            </span><span class="nt">velocity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w"></span>
+
+<span class="w">            </span><span class="nt">x_offset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"></span>
+<span class="w">            </span><span class="nt">y_offset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"></span>
+<span class="w">            </span><span class="nt">z_offset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"></span>
+<span class="w">            </span><span class="nt">f_offset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"></span>
+<span class="w">            </span><span class="nt">theta_offset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"></span>
+
+<span class="w">        </span><span class="c1">#More hardware</span><span class="w"></span>
+
+<span class="w">        </span><span class="c1"># ...</span><span class="w"></span>
+</pre></div>
+</div>
+<p>The stage field has a hardware section that should reflect similar values to the hardware section at the top of the
+configuration file. The only difference is the axes entry that explicility states the axes that the stage will control.
+This lines up with earlier, we needed to add the SyntheticStage to control theta and f. The rest of the values in the
+stage field relate to the bounds of the physical stage. This is what the software uses to set the minimum and maximum values
+for stage movement. Most stages will have different values respectively.</p>
+</section>
+<section id="gui-section">
+<h3>GUI Section<a class="headerlink" href="#gui-section" title="Permalink to this heading"></a></h3>
+<p>The third and final section of the configuration file is the GUI parameters.</p>
+<p>It will look something like the below:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">gui</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">channels</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w"></span>
+<span class="w">        </span><span class="nt">laser_power</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"></span>
+<span class="w">        </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span><span class="w"></span>
+<span class="w">        </span><span class="nt">step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
+<span class="w">        </span><span class="nt">exposure_time</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="w">        </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w"></span>
+<span class="w">        </span><span class="nt">step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w"></span>
+<span class="w">        </span><span class="nt">interval_time</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"></span>
+<span class="w">        </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w"></span>
+<span class="w">        </span><span class="nt">step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w"></span>
+<span class="w">    </span><span class="nt">stack_acquisition</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">step_size</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.200</span><span class="w"></span>
+<span class="w">        </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w"></span>
+<span class="w">        </span><span class="nt">step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span><span class="w"></span>
+<span class="w">        </span><span class="nt">start_pos</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-5000</span><span class="w"></span>
+<span class="w">        </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5000</span><span class="w"></span>
+<span class="w">        </span><span class="nt">step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="w">        </span><span class="nt">end_pos</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-5000</span><span class="w"></span>
+<span class="w">        </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10000</span><span class="w"></span>
+<span class="w">        </span><span class="nt">step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="w">    </span><span class="nt">timepoint</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">timepoints</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="w">        </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w"></span>
+<span class="w">        </span><span class="nt">step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="w">        </span><span class="nt">stack_pause</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"></span>
+<span class="w">        </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w"></span>
+<span class="w">        </span><span class="nt">step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+</pre></div>
+</div>
+<p>The values in each field relate to GUI widgets. They will set the min, max and step size for each of the
+respective spinboxes in the example above.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This section is still under development. The plan going forward is to have all widgets be controlled in this
+manner.</p>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="_autosummary/aslm.tools.xml_tools.parse_xml.html" class="btn btn-neutral float-left" title="aslm.tools.xml_tools.parse_xml" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Dean Lab @ UT Southwestern.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,6 @@
+aslm.model.devices.stages.stage\_asi.build\_ASI\_Stage\_connection
+==================================================================
+
+.. currentmodule:: aslm.model.devices.stages.stage_asi
+
+.. autofunction:: build_ASI_Stage_connection

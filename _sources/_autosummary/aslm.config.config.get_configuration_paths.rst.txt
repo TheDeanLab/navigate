@@ -1,0 +1,6 @@
+aslm.config.config.get\_configuration\_paths
+============================================
+
+.. currentmodule:: aslm.config.config
+
+.. autofunction:: get_configuration_paths

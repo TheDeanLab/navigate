@@ -1,0 +1,29 @@
+aslm.model.features.image\_writer.ImageWriter
+=============================================
+
+.. currentmodule:: aslm.model.features.image_writer
+
+.. autoclass:: ImageWriter
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~ImageWriter.__init__
+      ~ImageWriter.close
+      ~ImageWriter.generate_image_name
+      ~ImageWriter.generate_meta_data
+      ~ImageWriter.save_image
+   
+   
+
+   
+   
+   

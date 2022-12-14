@@ -1,0 +1,30 @@
+aslm.model.devices.lasers.laser\_trigger\_base.LaserTriggerBase
+===============================================================
+
+.. currentmodule:: aslm.model.devices.lasers.laser_trigger_base
+
+.. autoclass:: LaserTriggerBase
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~LaserTriggerBase.__init__
+      ~LaserTriggerBase.enable_high_resolution_laser
+      ~LaserTriggerBase.enable_low_resolution_laser
+      ~LaserTriggerBase.set_laser_analog_voltage
+      ~LaserTriggerBase.trigger_digital_laser
+      ~LaserTriggerBase.turn_off_lasers
+   
+   
+
+   
+   
+   

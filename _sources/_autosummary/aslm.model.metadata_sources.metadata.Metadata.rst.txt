@@ -1,0 +1,37 @@
+aslm.model.metadata\_sources.metadata.Metadata
+==============================================
+
+.. currentmodule:: aslm.model.metadata_sources.metadata
+
+.. autoclass:: Metadata
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~Metadata.__init__
+      ~Metadata.set_from_configuration_experiment
+      ~Metadata.set_shape_from_configuration_experiment
+      ~Metadata.set_stack_order_from_configuration_experiment
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Metadata.configuration
+      ~Metadata.per_stack
+      ~Metadata.shape
+      ~Metadata.voxel_size
+   
+   

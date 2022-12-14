@@ -1,0 +1,25 @@
+aslm.model.devices.joystick.joystick\_base.JoystickBase
+=======================================================
+
+.. currentmodule:: aslm.model.devices.joystick.joystick_base
+
+.. autoclass:: JoystickBase
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~JoystickBase.__init__
+   
+   
+
+   
+   
+   

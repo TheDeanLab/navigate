@@ -1,0 +1,39 @@
+aslm.model.devices.stages
+=========================
+
+.. automodule:: aslm.model.devices.stages
+  
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom_module.rst
+   :recursive:
+
+   aslm.model.devices.stages.stage_asi
+   aslm.model.devices.stages.stage_base
+   aslm.model.devices.stages.stage_galvo
+   aslm.model.devices.stages.stage_mcl
+   aslm.model.devices.stages.stage_pi
+   aslm.model.devices.stages.stage_sutter
+   aslm.model.devices.stages.stage_synthetic
+   aslm.model.devices.stages.stage_tl_kcube_inertial
+

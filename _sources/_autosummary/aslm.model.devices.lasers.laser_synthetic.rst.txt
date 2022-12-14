@@ -1,0 +1,31 @@
+aslm.model.devices.lasers.laser\_synthetic
+==========================================
+
+.. automodule:: aslm.model.devices.lasers.laser_synthetic
+  
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom_class.rst
+   
+      SyntheticLaser
+   
+   
+
+   
+   
+   
+
+
+

@@ -1,0 +1,34 @@
+aslm.model.devices.filter\_wheel
+================================
+
+.. automodule:: aslm.model.devices.filter_wheel
+  
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom_module.rst
+   :recursive:
+
+   aslm.model.devices.filter_wheel.filter_wheel_base
+   aslm.model.devices.filter_wheel.filter_wheel_sutter
+   aslm.model.devices.filter_wheel.filter_wheel_synthetic
+

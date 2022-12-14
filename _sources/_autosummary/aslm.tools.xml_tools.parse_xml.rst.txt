@@ -1,0 +1,6 @@
+aslm.tools.xml\_tools.parse\_xml
+================================
+
+.. currentmodule:: aslm.tools.xml_tools
+
+.. autofunction:: parse_xml

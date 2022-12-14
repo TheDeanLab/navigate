@@ -1,0 +1,6 @@
+aslm.tools.common\_functions.copy\_proxy\_object
+================================================
+
+.. currentmodule:: aslm.tools.common_functions
+
+.. autofunction:: copy_proxy_object

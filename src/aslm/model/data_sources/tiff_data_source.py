@@ -13,7 +13,7 @@ from ..metadata_sources.metadata import Metadata
 from ..metadata_sources.ome_tiff_metadata import OMETIFFMetadata
 
 class TiffDataSource(DataSource):
-    def __init__(self, file_name: str = '', mode: str = 'w', is_bigtiff: bool = True) -> None:
+    def __init__(self, file_name: str = '', mode: str = 'w', is_bigtiff: bool = False) -> None:
         self.image = None
         self._write_mode = None
         self._views = []

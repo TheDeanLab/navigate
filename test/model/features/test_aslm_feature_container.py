@@ -378,12 +378,17 @@ class TestFeatureContainer(unittest.TestCase):
 
         print('----multi-step function')
         feature.clear()
+        node = SignalNode('test_1', func_dict, device_related=True)
         node.node_type = 'multi-step'
         assert func_dict.get('main-response', None) == None
         assert node.need_response == False
         steps = 5
         for i in range(steps+1):
             feature.is_end = (i == steps)
+            if i == 0:
+                assert node.is_initialized == False
+            else:
+                assert node.is_initialized == True
             result, is_end = node.run()
             if i < steps:
                 assert node.is_initialized == True

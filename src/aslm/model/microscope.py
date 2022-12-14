@@ -221,7 +221,7 @@ class Microscope:
         """
         readout_time = 0
         if self.configuration['experiment']['CameraParameters']['sensor_mode'] == 'Normal':
-            readout_time = self.camera.camera_controller.get_property_value("readout_time")
+            readout_time, _ = self.camera.calculate_readout_time()
         return readout_time
 
     def move_stage(self, pos_dict, wait_until_done=False):

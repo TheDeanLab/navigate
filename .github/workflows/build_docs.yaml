@@ -50,10 +50,11 @@ jobs:
           cd docs
           make html
           
+      - name: Folder location sanity check
+        run: pwd
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         # if: ${{ github.ref == 'refs/heads/main' }}
-        run: pwd
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs/build/html

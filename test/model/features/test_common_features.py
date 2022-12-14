@@ -29,7 +29,13 @@ def test_z_stack(dummy_model_to_test_features):
         if is_multiposition:
             positions = model.configuration['experiment']['MultiPositions']['stage_positions']
         else:
-            positions = [model.configuration['experiment']['StageParameters']]
+            pos_dict = model.configuration['experiment']['StageParameters']
+            positions = [{'x': pos_dict['x'],
+                          'y': pos_dict['y'],
+                          'z': config.get('stack_z_origin', pos_dict['z']),
+                          'theta': pos_dict['theta'],
+                          'f': config.get('stack_focus_origin', pos_dict['f'])
+                        }]
 
         z_step = config['step_size']
         f_step = (config['end_focus'] - config['start_focus']) / config['number_z_steps']
@@ -86,22 +92,21 @@ def test_z_stack(dummy_model_to_test_features):
 
 
     feature_list = [[{'name': ZStackAcquisition}]]
-    
-    # 1 channel per_stack
-    config['stack_cycling_mode'] = 'per_stack'
-    config['channels']['channel_1']['is_selected'] = True
-    config['channels']['channel_2']['is_selected'] = False
-    config['channels']['channel_3']['is_selected'] = False
         
     config['start_position'] = 0
     config['end_position'] = 200
     config['number_z_steps'] = 10
     config['step_size'] = (config['end_position'] - config['start_position']) / config['number_z_steps']
     
+    config['is_multiposition'] = False
+    
+    # 1 channel per_stack
+    config['stack_cycling_mode'] = 'per_stack'
+    config['channels']['channel_1']['is_selected'] = True
+    config['channels']['channel_2']['is_selected'] = False
+    config['channels']['channel_3']['is_selected'] = False
     model.start(feature_list)
-
     print(model.signal_records)
-
     z_stack_verification()
 
     # 1 channel per_z
@@ -126,3 +131,6 @@ def test_z_stack(dummy_model_to_test_features):
         config['channels']['channel_'+str(i+1)]['is_selected'] = False
         model.start(feature_list)
         z_stack_verification()
+
+    config['is_multiposition'] = True
+    model.configuration['experiment']['MultiPositions']['stage_positions']

@@ -148,12 +148,11 @@ class ZStackAcquisition:
         if bool(microscope_state['is_multiposition']):
             self.positions = microscope_state['stage_positions']
         else:
-            # TODO: z and f start position?
             self.positions = [{'x': float(self.model.configuration['experiment']['StageParameters']['x']),
                                'y': float(self.model.configuration['experiment']['StageParameters']['y']),
-                               'z': float(self.model.configuration['experiment']['StageParameters']['z']), #float(microscope_state.get('stack_z_origin', self.model.configuration['experiment']['StageParameters']['z'])),
+                               'z': float(microscope_state.get('stack_z_origin', self.model.configuration['experiment']['StageParameters']['z'])),
                                'theta': float(self.model.configuration['experiment']['StageParameters']['theta']),
-                               'f': float(self.model.configuration['experiment']['StageParameters']['f']) #float(microscope_state.get('stack_focus_origin', self.model.configuration['experiment']['StageParameters']['f']))
+                               'f': float(microscope_state.get('stack_focus_origin', self.model.configuration['experiment']['StageParameters']['f']))
                             }]
         self.current_position_idx = 0
         self.z_position_moved_time = 0

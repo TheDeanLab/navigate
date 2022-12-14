@@ -1,0 +1,38 @@
+aslm.model.devices.daq.daq\_synthetic.SyntheticDAQ
+==================================================
+
+.. currentmodule:: aslm.model.devices.daq.daq_synthetic
+
+.. autoclass:: SyntheticDAQ
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~SyntheticDAQ.__init__
+      ~SyntheticDAQ.add_camera
+      ~SyntheticDAQ.calculate_all_waveforms
+      ~SyntheticDAQ.close_tasks
+      ~SyntheticDAQ.create_camera_task
+      ~SyntheticDAQ.create_galvo_etl_task
+      ~SyntheticDAQ.create_master_trigger_task
+      ~SyntheticDAQ.enable_microscope
+      ~SyntheticDAQ.prepare_acquisition
+      ~SyntheticDAQ.run_acquisition
+      ~SyntheticDAQ.start_tasks
+      ~SyntheticDAQ.stop_acquisition
+      ~SyntheticDAQ.stop_tasks
+      ~SyntheticDAQ.write_waveforms_to_tasks
+   
+   
+
+   
+   
+   

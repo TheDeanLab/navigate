@@ -1,0 +1,6 @@
+aslm.model.analysis.image\_decorrelation.linear\_map
+====================================================
+
+.. currentmodule:: aslm.model.analysis.image_decorrelation
+
+.. autofunction:: linear_map

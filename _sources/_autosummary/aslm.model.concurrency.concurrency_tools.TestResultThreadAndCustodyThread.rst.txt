@@ -1,0 +1,35 @@
+aslm.model.concurrency.concurrency\_tools.TestResultThreadAndCustodyThread
+==========================================================================
+
+.. currentmodule:: aslm.model.concurrency.concurrency_tools
+
+.. autoclass:: TestResultThreadAndCustodyThread
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~TestResultThreadAndCustodyThread.__init__
+      ~TestResultThreadAndCustodyThread.run
+      ~TestResultThreadAndCustodyThread.test_catching_exception
+      ~TestResultThreadAndCustodyThread.test_custody_thread_target_args
+      ~TestResultThreadAndCustodyThread.test_getting_result
+      ~TestResultThreadAndCustodyThread.test_new_start_behavior
+      ~TestResultThreadAndCustodyThread.test_passing_args_and_kwargs
+      ~TestResultThreadAndCustodyThread.test_providing_first_resource
+      ~TestResultThreadAndCustodyThread.test_subclassed_threading_types
+      ~TestResultThreadAndCustodyThread.test_threadlike_behavior
+      ~TestResultThreadAndCustodyThread.time_it
+   
+   
+
+   
+   
+   

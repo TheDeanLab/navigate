@@ -1,0 +1,6 @@
+aslm.model.analysis.detection.log\_detection
+============================================
+
+.. currentmodule:: aslm.model.analysis.detection
+
+.. autofunction:: log_detection

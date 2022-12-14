@@ -1,0 +1,6 @@
+aslm.model.analysis.detection.three\_level\_segmentation
+========================================================
+
+.. currentmodule:: aslm.model.analysis.detection
+
+.. autofunction:: three_level_segmentation

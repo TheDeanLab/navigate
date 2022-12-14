@@ -1,0 +1,27 @@
+aslm.model.devices.daq.daq\_base.DAQBase
+========================================
+
+.. currentmodule:: aslm.model.devices.daq.daq_base
+
+.. autoclass:: DAQBase
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~DAQBase.__init__
+      ~DAQBase.calculate_all_waveforms
+      ~DAQBase.enable_microscope
+   
+   
+
+   
+   
+   

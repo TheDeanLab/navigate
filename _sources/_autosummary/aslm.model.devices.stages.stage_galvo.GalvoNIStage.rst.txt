@@ -1,0 +1,33 @@
+aslm.model.devices.stages.stage\_galvo.GalvoNIStage
+===================================================
+
+.. currentmodule:: aslm.model.devices.stages.stage_galvo
+
+.. autoclass:: GalvoNIStage
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~GalvoNIStage.__init__
+      ~GalvoNIStage.create_internal_position_dict
+      ~GalvoNIStage.create_position_dict
+      ~GalvoNIStage.get_abs_position
+      ~GalvoNIStage.move_absolute
+      ~GalvoNIStage.move_axis_absolute
+      ~GalvoNIStage.report_position
+      ~GalvoNIStage.stop
+      ~GalvoNIStage.update_position_dictionaries
+   
+   
+
+   
+   
+   

@@ -1,0 +1,48 @@
+aslm.model.model.Model
+======================
+
+.. currentmodule:: aslm.model.model
+
+.. autoclass:: Model
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~Model.__init__
+      ~Model.change_resolution
+      ~Model.create_pipe
+      ~Model.end_acquisition
+      ~Model.get_active_microscope
+      ~Model.get_data_buffer
+      ~Model.get_stage_position
+      ~Model.load_images
+      ~Model.move_stage
+      ~Model.pause_data_thread
+      ~Model.prepare_acquisition
+      ~Model.release_pipe
+      ~Model.resume_data_thread
+      ~Model.run_acquisition
+      ~Model.run_command
+      ~Model.run_data_process
+      ~Model.run_live_acquisition
+      ~Model.run_single_acquisition
+      ~Model.run_single_channel_acquisition
+      ~Model.run_single_channel_acquisition_with_features
+      ~Model.snap_image
+      ~Model.stop_stage
+      ~Model.update_data_buffer
+      ~Model.update_ilastik_setting
+   
+   
+
+   
+   
+   

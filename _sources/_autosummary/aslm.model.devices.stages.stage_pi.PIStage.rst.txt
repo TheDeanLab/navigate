@@ -1,0 +1,37 @@
+aslm.model.devices.stages.stage\_pi.PIStage
+===========================================
+
+.. currentmodule:: aslm.model.devices.stages.stage_pi
+
+.. autoclass:: PIStage
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~PIStage.__init__
+      ~PIStage.create_internal_position_dict
+      ~PIStage.create_position_dict
+      ~PIStage.get_abs_position
+      ~PIStage.load_sample
+      ~PIStage.move_absolute
+      ~PIStage.move_axis_absolute
+      ~PIStage.report_position
+      ~PIStage.stop
+      ~PIStage.unload_sample
+      ~PIStage.unzero_axes
+      ~PIStage.update_position_dictionaries
+      ~PIStage.zero_axes
+   
+   
+
+   
+   
+   

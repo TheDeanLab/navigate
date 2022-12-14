@@ -1,0 +1,6 @@
+aslm.model.concurrency.proxy\_objects.launch\_thread
+====================================================
+
+.. currentmodule:: aslm.model.concurrency.proxy_objects
+
+.. autofunction:: launch_thread

@@ -1,0 +1,41 @@
+aslm.model.data\_sources.tiff\_data\_source.TiffDataSource
+==========================================================
+
+.. currentmodule:: aslm.model.data_sources.tiff_data_source
+
+.. autoclass:: TiffDataSource
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~TiffDataSource.__init__
+      ~TiffDataSource.close
+      ~TiffDataSource.generate_image_name
+      ~TiffDataSource.read
+      ~TiffDataSource.set_metadata_from_configuration_experiment
+      ~TiffDataSource.write
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~TiffDataSource.data
+      ~TiffDataSource.is_bigtiff
+      ~TiffDataSource.is_ome
+      ~TiffDataSource.mode
+      ~TiffDataSource.shape
+      ~TiffDataSource.voxel_size
+   
+   

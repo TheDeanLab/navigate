@@ -1,0 +1,6 @@
+aslm.model.waveforms.tunable\_lens\_ramp
+========================================
+
+.. currentmodule:: aslm.model.waveforms
+
+.. autofunction:: tunable_lens_ramp

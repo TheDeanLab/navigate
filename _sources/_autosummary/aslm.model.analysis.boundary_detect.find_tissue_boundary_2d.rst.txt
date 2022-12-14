@@ -1,0 +1,6 @@
+aslm.model.analysis.boundary\_detect.find\_tissue\_boundary\_2d
+===============================================================
+
+.. currentmodule:: aslm.model.analysis.boundary_detect
+
+.. autofunction:: find_tissue_boundary_2d

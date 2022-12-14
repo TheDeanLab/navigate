@@ -1,0 +1,37 @@
+aslm.model.waveforms
+====================
+
+.. automodule:: aslm.model.waveforms
+  
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      camera_exposure
+      dc_value
+      sawtooth
+      sine_wave
+      single_pulse
+      smooth_waveform
+      square
+      tunable_lens_ramp
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

@@ -1,0 +1,33 @@
+aslm.model.features.volume\_search.VolumeSearch
+===============================================
+
+.. currentmodule:: aslm.model.features.volume_search
+
+.. autoclass:: VolumeSearch
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~VolumeSearch.__init__
+      ~VolumeSearch.cleanup
+      ~VolumeSearch.data_func
+      ~VolumeSearch.end_data_func
+      ~VolumeSearch.init_data_func
+      ~VolumeSearch.pre_signal_func
+      ~VolumeSearch.signal_end
+      ~VolumeSearch.signal_func
+      ~VolumeSearch.signal_response_func
+   
+   
+
+   
+   
+   

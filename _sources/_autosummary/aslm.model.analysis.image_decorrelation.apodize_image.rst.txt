@@ -1,0 +1,6 @@
+aslm.model.analysis.image\_decorrelation.apodize\_image
+=======================================================
+
+.. currentmodule:: aslm.model.analysis.image_decorrelation
+
+.. autofunction:: apodize_image

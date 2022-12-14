@@ -1,0 +1,30 @@
+aslm.model.devices.galvo.galvo\_base.GalvoBase
+==============================================
+
+.. currentmodule:: aslm.model.devices.galvo.galvo_base
+
+.. autoclass:: GalvoBase
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~GalvoBase.__init__
+      ~GalvoBase.adjust
+      ~GalvoBase.close_task
+      ~GalvoBase.prepare_task
+      ~GalvoBase.start_task
+      ~GalvoBase.stop_task
+   
+   
+
+   
+   
+   

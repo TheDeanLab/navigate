@@ -1,0 +1,43 @@
+aslm.model.concurrency.concurrency\_tools.FancyThread
+=====================================================
+
+.. currentmodule:: aslm.model.concurrency.concurrency_tools
+
+.. autoclass:: FancyThread
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~FancyThread.__init__
+      ~FancyThread.getName
+      ~FancyThread.get_result
+      ~FancyThread.isDaemon
+      ~FancyThread.is_alive
+      ~FancyThread.join
+      ~FancyThread.run
+      ~FancyThread.setDaemon
+      ~FancyThread.setName
+      ~FancyThread.start
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~FancyThread.daemon
+      ~FancyThread.ident
+      ~FancyThread.name
+      ~FancyThread.native_id
+   
+   

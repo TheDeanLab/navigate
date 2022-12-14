@@ -1,0 +1,30 @@
+aslm.model.devices.remote\_focus.remote\_focus\_base.RemoteFocusBase
+====================================================================
+
+.. currentmodule:: aslm.model.devices.remote_focus.remote_focus_base
+
+.. autoclass:: RemoteFocusBase
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~RemoteFocusBase.__init__
+      ~RemoteFocusBase.adjust
+      ~RemoteFocusBase.close_task
+      ~RemoteFocusBase.prepare_task
+      ~RemoteFocusBase.start_task
+      ~RemoteFocusBase.stop_task
+   
+   
+
+   
+   
+   

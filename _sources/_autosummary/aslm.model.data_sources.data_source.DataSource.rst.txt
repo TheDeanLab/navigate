@@ -1,0 +1,38 @@
+aslm.model.data\_sources.data\_source.DataSource
+================================================
+
+.. currentmodule:: aslm.model.data_sources.data_source
+
+.. autoclass:: DataSource
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~DataSource.__init__
+      ~DataSource.close
+      ~DataSource.read
+      ~DataSource.set_metadata_from_configuration_experiment
+      ~DataSource.write
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~DataSource.data
+      ~DataSource.mode
+      ~DataSource.shape
+      ~DataSource.voxel_size
+   
+   

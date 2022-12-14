@@ -1,0 +1,30 @@
+aslm.model.analysis.noise\_model
+================================
+
+.. automodule:: aslm.model.analysis.noise_model
+  
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      compute_noise_sigma
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

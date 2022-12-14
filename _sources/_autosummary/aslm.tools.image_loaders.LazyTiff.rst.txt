@@ -1,0 +1,31 @@
+aslm.tools.image\_loaders.LazyTiff
+==================================
+
+.. currentmodule:: aslm.tools.image_loaders
+
+.. autoclass:: LazyTiff
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~LazyTiff.__init__
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~LazyTiff.shape
+   
+   

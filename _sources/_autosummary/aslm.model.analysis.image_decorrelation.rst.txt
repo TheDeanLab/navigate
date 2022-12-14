@@ -1,0 +1,37 @@
+aslm.model.analysis.image\_decorrelation
+========================================
+
+.. automodule:: aslm.model.analysis.image_decorrelation
+  
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      apodize_image
+      get_correlation_coefficient
+      get_decorrelation_local_maxima
+      get_image_decorrelation
+      get_radial_average
+      image_to_polar
+      linear_map
+      main_image_decorr
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

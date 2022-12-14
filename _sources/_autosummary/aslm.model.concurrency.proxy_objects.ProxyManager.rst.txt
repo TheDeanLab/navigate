@@ -1,0 +1,27 @@
+aslm.model.concurrency.proxy\_objects.ProxyManager
+==================================================
+
+.. currentmodule:: aslm.model.concurrency.proxy_objects
+
+.. autoclass:: ProxyManager
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~ProxyManager.__init__
+      ~ProxyManager.proxy_object
+      ~ProxyManager.shared_numpy_array
+   
+   
+
+   
+   
+   

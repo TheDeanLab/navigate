@@ -1,0 +1,6 @@
+aslm.model.analysis.boundary\_detect.has\_tissue
+================================================
+
+.. currentmodule:: aslm.model.analysis.boundary_detect
+
+.. autofunction:: has_tissue

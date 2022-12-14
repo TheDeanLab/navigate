@@ -1,0 +1,42 @@
+aslm.model.metadata\_sources.bdv\_metadata.BigDataViewerMetadata
+================================================================
+
+.. currentmodule:: aslm.model.metadata_sources.bdv_metadata
+
+.. autoclass:: BigDataViewerMetadata
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~BigDataViewerMetadata.__init__
+      ~BigDataViewerMetadata.bdv_xml_dict
+      ~BigDataViewerMetadata.parse_bdv_xml
+      ~BigDataViewerMetadata.set_from_configuration_experiment
+      ~BigDataViewerMetadata.set_shape_from_configuration_experiment
+      ~BigDataViewerMetadata.set_stack_order_from_configuration_experiment
+      ~BigDataViewerMetadata.stage_positions_to_affine_matrix
+      ~BigDataViewerMetadata.to_xml
+      ~BigDataViewerMetadata.write_xml
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~BigDataViewerMetadata.configuration
+      ~BigDataViewerMetadata.per_stack
+      ~BigDataViewerMetadata.shape
+      ~BigDataViewerMetadata.voxel_size
+   
+   

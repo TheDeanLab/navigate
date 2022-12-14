@@ -1,0 +1,6 @@
+aslm.tools.multipos\_table\_tools.sign
+======================================
+
+.. currentmodule:: aslm.tools.multipos_table_tools
+
+.. autofunction:: sign

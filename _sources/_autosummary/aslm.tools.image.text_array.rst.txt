@@ -1,0 +1,6 @@
+aslm.tools.image.text\_array
+============================
+
+.. currentmodule:: aslm.tools.image
+
+.. autofunction:: text_array

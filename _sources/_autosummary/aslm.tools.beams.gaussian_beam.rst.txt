@@ -1,0 +1,6 @@
+aslm.tools.beams.gaussian\_beam
+===============================
+
+.. currentmodule:: aslm.tools.beams
+
+.. autofunction:: gaussian_beam

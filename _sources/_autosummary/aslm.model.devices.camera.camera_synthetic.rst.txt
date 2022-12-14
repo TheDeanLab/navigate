@@ -1,0 +1,32 @@
+aslm.model.devices.camera.camera\_synthetic
+===========================================
+
+.. automodule:: aslm.model.devices.camera.camera_synthetic
+  
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom_class.rst
+   
+      SyntheticCamera
+      SyntheticCameraController
+   
+   
+
+   
+   
+   
+
+
+

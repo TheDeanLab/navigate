@@ -1,0 +1,6 @@
+aslm.model.analysis.detection.make\_inside\_image
+=================================================
+
+.. currentmodule:: aslm.model.analysis.detection
+
+.. autofunction:: make_inside_image

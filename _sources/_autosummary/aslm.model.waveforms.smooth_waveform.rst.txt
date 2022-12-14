@@ -1,0 +1,6 @@
+aslm.model.waveforms.smooth\_waveform
+=====================================
+
+.. currentmodule:: aslm.model.waveforms
+
+.. autofunction:: smooth_waveform

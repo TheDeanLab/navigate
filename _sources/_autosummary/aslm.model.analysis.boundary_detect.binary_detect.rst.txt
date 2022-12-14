@@ -1,0 +1,6 @@
+aslm.model.analysis.boundary\_detect.binary\_detect
+===================================================
+
+.. currentmodule:: aslm.model.analysis.boundary_detect
+
+.. autofunction:: binary_detect

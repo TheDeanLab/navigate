@@ -1,0 +1,6 @@
+aslm.model.analysis.detection.surface\_filter\_gauss\_3D
+========================================================
+
+.. currentmodule:: aslm.model.analysis.detection
+
+.. autofunction:: surface_filter_gauss_3D

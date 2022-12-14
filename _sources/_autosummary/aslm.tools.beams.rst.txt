@@ -1,0 +1,32 @@
+aslm.tools.beams
+================
+
+.. automodule:: aslm.tools.beams
+  
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      fit_gaussian_beam_error
+      fit_gaussian_beam_mse
+      gaussian_beam
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

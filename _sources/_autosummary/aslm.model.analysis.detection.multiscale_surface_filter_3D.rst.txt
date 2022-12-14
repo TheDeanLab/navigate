@@ -1,0 +1,6 @@
+aslm.model.analysis.detection.multiscale\_surface\_filter\_3D
+=============================================================
+
+.. currentmodule:: aslm.model.analysis.detection
+
+.. autofunction:: multiscale_surface_filter_3D

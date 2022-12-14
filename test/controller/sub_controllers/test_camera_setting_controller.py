@@ -47,7 +47,7 @@ class TestCameraSettingController():
         
         assert isinstance(self.camera_settings, CameraSettingController)
         
-        # Setup
+        # Setup, going to check what the default values widgets are set too
         microscope_name = self.camera_settings.parent_controller.configuration['experiment']['MicroscopeState']['microscope_name']
         camera_config_dict = self.camera_settings.parent_controller.configuration['configuration']['microscopes'][microscope_name]['camera']
         
@@ -105,7 +105,6 @@ class TestCameraSettingController():
         assert str(self.camera_settings.roi_widgets['FOV_X'].widget['state']) == 'disabled'
         assert str(self.camera_settings.roi_widgets['FOV_Y'].widget['state']) == 'disabled'
         
-        
     def test_attr(self):
         
         attrs = [ 'in_initialization', 'resolution_value', 'number_of_pixels', 'mode', 'solvent', 'mode_widgets', 'framerate_widgets', 'roi_widgets', 'roi_btns', 'default_pixel_size', 'default_width', 'default_height', 'trigger_source', 'trigger_active', 'readout_speed', 'pixel_event_id']
@@ -113,3 +112,71 @@ class TestCameraSettingController():
         for attr in attrs:
             assert hasattr(self.camera_settings, attr)
             
+
+    def test_populate_experiment_values(self):
+        
+        # Populate widgets with values from experiment file and check
+        self.camera_settings.populate_experiment_values()
+        camera_setting_dict = self.camera_settings.parent_controller.configuration['experiment']['CameraParameters']
+        
+
+        # Checking values altered are correct
+        assert dict(self.camera_settings.camera_setting_dict) == dict(self.camera_settings.parent_controller.configuration['experiment']['CameraParameters'])
+        assert str(self.camera_settings.mode_widgets['Sensor'].get()) == camera_setting_dict['sensor_mode']
+        if camera_setting_dict['sensor_mode'] == 'Normal':
+            assert str(self.camera_settings.mode_widgets['Readout'].get()) == ''
+            assert str(self.camera_settings.mode_widgets['Pixels'].get()) == ''
+        elif camera_setting_dict['sensor_mode'] == 'Light-Sheet':
+            assert str(self.camera_settings.mode_widgets['Readout'].get()) == self.camera_settings.camera_setting_dict['readout_direction']
+            assert str(self.camera_settings.mode_widgets['Pixels'].get()) == self.camera_settings.camera_setting_dict['number_of_pixels']
+            
+        # ROI
+        assert self.camera_settings.roi_widgets['Width'].get() == camera_setting_dict['x_pixels']
+        assert self.camera_settings.roi_widgets['Height'].get() == camera_setting_dict['y_pixels']
+        
+        # Binning
+        assert str(self.camera_settings.roi_widgets['Binning'].get()) == camera_setting_dict['binning']
+        
+        # Exposure Time
+        channels = self.camera_settings.microscope_state_dict['channels']
+        exposure_time = channels[list(channels.keys())[0]]['camera_exposure_time']
+        assert self.camera_settings.framerate_widgets['exposure_time'].get() == exposure_time
+        assert self.camera_settings.framerate_widgets['frames_to_average'].get() == camera_setting_dict['frames_to_average']
+        assert self.camera_settings.in_initialization == False
+        
+    @pytest.mark.parametrize("mode", ['Normal', 'Light-Sheet'])    
+    def test_update_experiment_values(self, mode):
+        
+        # Setup basic default experiment
+        self.camera_settings.populate_experiment_values()
+        
+
+        # Setting up new values
+        self.camera_settings.mode_widgets['Sensor'].set(mode)
+        # if mode == 'Normal':
+            # self.camera_settings.mode_widgets['Readout'].set('')
+            # self.camera_settings.mode_widgets['Pixels'].set('')
+        # if mode == 'Light-Sheet':
+            # self.camera_settings.mode_widgets['Readout'].set('Top-to-Bottom')
+            # self.camera_settings.mode_widgets['Pixels'].set(15)
+        self.camera_settings.roi_widgets['Binning'].set('4x4')
+        self.camera_settings.roi_widgets['Width'].set(1600)
+        self.camera_settings.roi_widgets['Height'].set(1600)
+        self.camera_settings.framerate_widgets['frames_to_average'].set(5)
+        
+        # Update and assert
+        self.camera_settings.update_experiment_values()
+        assert self.camera_settings.camera_setting_dict['sensor_mode'] == mode
+        # if mode == 'Normal':
+            # assert self.camera_settings.camera_setting_dict['readout_direction'] == ''
+            # assert self.camera_settings.camera_setting_dict['number_of_pixels'] == ''
+        # if mode == 'Light-Sheet':
+            # assert self.camera_settings.camera_setting_dict['readout_direction'] == 'Top-to-Bottom'
+            # assert int(self.camera_settings.camera_setting_dict['number_of_pixels']) == 15
+        
+        assert self.camera_settings.camera_setting_dict['binning'] == '4x4'
+        assert self.camera_settings.camera_setting_dict['x_pixels'] == 1600
+        assert self.camera_settings.camera_setting_dict['y_pixels'] == 1600
+        assert self.camera_settings.camera_setting_dict['number_of_cameras'] == 1
+        assert self.camera_settings.camera_setting_dict['pixel_size'] == self.camera_settings.default_pixel_size
+        assert self.camera_settings.camera_setting_dict['frames_to_average'] == 5

@@ -8,13 +8,16 @@ from multiprocessing import Manager
 
 import yaml
 
-def get_configuration_paths():
+def get_aslm_path():
     # Establish a base directory in AppData/Local/.ASLM for Windows or ~/.ASLM for Mac and Linux
     if platform.system() == 'Windows':
         base_directory = os.getenv('LOCALAPPDATA')
     else:
         base_directory = os.getenv('HOME')
-    aslm_directory = os.path.join(base_directory, '.ASLM')
+    return os.path.join(base_directory, '.ASLM')
+
+def get_configuration_paths():
+    aslm_directory = get_aslm_path()
     if not os.path.exists(aslm_directory):
         os.mkdir(aslm_directory)
     configuration_directory = Path(os.path.join(aslm_directory, 'config'))

@@ -97,11 +97,15 @@ class DummyController:
         self.view = view
         self.configuration_controller = ConfigurationController(self.configuration)
     
-    def execute(self, str):
+    def execute(self, str, sec=None):
         '''
         Appends commands sent via execute, first element is oldest command/first to pop off
         '''
-        self.commands.append(str)
+        if sec == None:
+            self.commands.append(str)
+        else:
+            self.commands.append(str)
+            self.commands.append(sec)
         
     def pop(self):
         '''

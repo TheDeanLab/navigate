@@ -153,7 +153,7 @@ class Microscope:
             self.stages[axes].move_absolute({axes+'_pos': pos}, wait_until_done=True)
 
     def prepare_acquisition(self):
-        if self.camera.camera_controller.is_acquiring:
+        if self.camera.is_acquiring:
             self.camera.close_image_series()
         # Set Camera Sensor Mode - Must be done before camera is initialized.
         sensor_mode = self.configuration['experiment']['CameraParameters']['sensor_mode']
@@ -198,7 +198,7 @@ class Microscope:
                 self.current_exposure_time,
                 int(self.configuration['experiment']['CameraParameters']['number_of_pixels']))
             self.camera.set_exposure_time(self.current_exposure_time)
-            self.camera.camera_controller.set_property_value("internal_line_interval", self.camera_line_interval)
+            self.camera.set_line_interval(self.camera_line_interval)
 
         # Laser Settings
         current_laser_index = channel['laser_index']
@@ -221,7 +221,7 @@ class Microscope:
         """
         readout_time = 0
         if self.configuration['experiment']['CameraParameters']['sensor_mode'] == 'Normal':
-            readout_time = self.camera.camera_controller.get_property_value("readout_time")
+            readout_time, _ = self.camera.calculate_readout_time()
         return readout_time
 
     def move_stage(self, pos_dict, wait_until_done=False):

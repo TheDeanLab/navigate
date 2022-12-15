@@ -20,7 +20,7 @@ def compute_scmos_offset_and_variance_map(image: npt.ArrayLike) \
 
     return offset_map, variance_map
 
-def compute_flatfield_map(image: np.ArrayLike, offset_map: np.ArrayLike, 
+def compute_flatfield_map(image: npt.ArrayLike, offset_map: npt.ArrayLike, 
                            local: bool = False) -> npt.ArrayLike:
     """Compute the flatfield map for our system.
     

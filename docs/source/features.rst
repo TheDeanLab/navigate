@@ -20,8 +20,8 @@ The feature object
 ------------------
 
 Each feature is an object that accepts a pointer to ``aslm.model.model`` in its
-``__init()__``  arguments and contains a configuration dictionary that dictates 
-feature behavior in its ``__init()__`` function. A complete configuration 
+``__init__()``  arguments and contains a configuration dictionary that dictates 
+feature behavior in its ``__init__()`` function. A complete configuration 
 dictionary is shown below. As few or as many of these options can be specified 
 as needed.
 

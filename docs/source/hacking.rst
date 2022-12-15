@@ -5,5 +5,6 @@ Extending ASLM
     :maxdepth: 1
 
     features
-    api
     config
+    api
+    

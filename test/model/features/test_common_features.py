@@ -37,7 +37,7 @@ from aslm.model.features.common_features import ZStackAcquisition
 
 class TestZStack:
     @pytest.fixture(autouse=True)
-    def _prepare_camera(self, dummy_model_to_test_features):
+    def _prepare_test(self, dummy_model_to_test_features):
         self.model = dummy_model_to_test_features
         self.config = self.model.configuration['experiment']['MicroscopeState']
         self.record_num = 0

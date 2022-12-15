@@ -1,4 +1,4 @@
-Contribution Guidelines
+Contributing Guidelines
 =======================
 
 We welcome contributions in the form of bug reports, bug fixes, new features 
@@ -24,7 +24,7 @@ General principles
   However, please do not modify something that is already working without 
   discussing this with the software team in advance.
 - All code that modifies microscope control behavior must be tested on a live
-  system prior to merging into the main branch.
+  system prior to merging into the ``develop`` branch.
 
 Coding style
 --------------
@@ -38,8 +38,9 @@ Coding style
 Unit tests
 ----------
 Ideally, each line of code is unit tested to ensure it behaves appropriately
-and alert future coders to code modifications that break expected functionality.
+and alert future coders to modifications that break expected functionality.
 Guidelines for writing good unit tests can be found `here <https://stackoverflow.com/questions/61400/what-makes-a-good-unit-test>`_
-and `here <https://medium.com/chris-nielsen/so-whats-a-good-unit-test-look-like-71f750333ac0>_`.
-We use the `pytest library <https://docs.pytest.org/en/7.2.x/>_` to evaluate 
-unit tests.
+and `here <https://medium.com/chris-nielsen/so-whats-a-good-unit-test-look-like-71f750333ac0>_`,
+or see examples of other unit tests in this application's ``test`` folder. We 
+use the `pytest library <https://docs.pytest.org/en/7.2.x/>_` to evaluate unit 
+tests.

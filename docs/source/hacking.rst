@@ -6,5 +6,4 @@ Extending ASLM
 
     contributing
     features
-    config
     api

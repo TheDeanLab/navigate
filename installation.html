@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Installation &mdash; ASLM 0.1 documentation</title>
+  <title>Software Installation &mdash; ASLM 0.1 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -20,7 +20,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Configuring ASLM" href="config.html" />
+    <link rel="next" title="Hardware Setup" href="hardware.html" />
     <link rel="prev" title="User Guide" href="userguide.html" /> 
 </head>
 
@@ -41,7 +41,10 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="userguide.html">User Guide</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Installation</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Software Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gpu-dependencies">GPU Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hardware.html">Hardware Setup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="config.html">Configuring ASLM</a></li>
 </ul>
 </li>
@@ -63,7 +66,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home"></a></li>
           <li class="breadcrumb-item"><a href="userguide.html">User Guide</a></li>
-      <li class="breadcrumb-item active">Installation</li>
+      <li class="breadcrumb-item active">Software Installation</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/installation.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -73,8 +76,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="installation">
-<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h1>
+  <section id="software-installation">
+<h1>Software Installation<a class="headerlink" href="#software-installation" title="Permalink to this heading"></a></h1>
 <p>First we need to setup our python enviornment. Head over to the <a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html#latest-miniconda-installer-links">miniconda website</a>
 and install the appropriate version based on your operating system.</p>
 <div class="admonition tip">
@@ -131,13 +134,61 @@ From there you will need to use the below commands:</p>
 </pre></div>
 </div>
 </section>
+<section id="gpu-dependencies">
+<h1>GPU Dependencies<a class="headerlink" href="#gpu-dependencies" title="Permalink to this heading"></a></h1>
+<p>A CUDA GPU device is necessary to use TensorFlow (1.15), PyTorch (1.10.2), CuPy, …
+<a class="reference external" href="https://docs.cupy.dev/en/stable/install.html">Excellent directions can be found for CuPy</a>.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference external" href="https://developer.nvidia.com/cuda-11.2.0-download-archive?target_os=Windows&amp;target_arch=x86_64&amp;target_version=10&amp;target_type=exelocal">NVIDIA CUDA Version 11.2</a></p></li>
+<li><p><a class="reference external" href="https://developer.nvidia.com/rdp/cudnn-download">cuDNN SDK 8.4.1</a></p></li>
+<li><p>NVIDIA Graphics Driver &gt;450.80.02</p></li>
+<li><p>TensorRT 7</p></li>
+<li><p>Microsoft Visual C++ Redistributable for Visual Studio 2015, 2017 and 2019</p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="troubleshooting">
+<h1>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this heading"></a></h1>
+<dl class="simple">
+<dt>If running the software on campus at UTSW you may need to update some of your proxy settings to allow pip/conda to install the proper packages.</dt><dd><ul class="simple">
+<li><p>This can be done by going to Environment Variables for Windows, or another OS equivalent.</p></li>
+<li><dl class="simple">
+<dt>Create the following variables at the system level:</dt><dd><ul>
+<li><p>Variable = HTTP_PROXY; Value = <a class="reference external" href="http://proxy.swmed.edu:3128">http://proxy.swmed.edu:3128</a></p></li>
+<li><p>Variable = HTTPS_PROXY; Value = <a class="reference external" href="http://proxy.swmed.edu:3128">http://proxy.swmed.edu:3128</a> (please see that they are both http, this is purposeful and not a typo)</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>If you continue to have issues then change the value of Variable HTTPS_PROXY to <a class="reference external" href="https://proxy.swmed.edu:3128">https://proxy.swmed.edu:3128</a></p></li>
+<li><dl class="simple">
+<dt>If you still have issues then you will need to create/update both configuration files for conda and pip to include proxy settings, if they are not in the paths below you will need to create them. This assumes a Windows perspective. Mac/Linux users will have different paths, they can be found online.</dt><dd><ul>
+<li><p>Conda’s Config file = C:UsersUserProfile.condarc</p></li>
+<li><p>Pip’s Config file = C:UsersUserProfilepippip.ini</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>You can also try to set the proxy from within the Anaconda Prompt:</dt><dd><ul>
+<li><p>set https_proxy=http://username:password&#64;proxy.example.com:8080</p></li>
+<li><p>set http_proxy=http://username:password&#64;proxy.example.com:8080</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="userguide.html" class="btn btn-neutral float-left" title="User Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="config.html" class="btn btn-neutral float-right" title="Configuring ASLM" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="hardware.html" class="btn btn-neutral float-right" title="Hardware Setup" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

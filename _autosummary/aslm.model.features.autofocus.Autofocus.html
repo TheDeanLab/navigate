@@ -128,8 +128,8 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.autofocus.Autofocus.get_autofocus_frame_num" title="aslm.model.features.autofocus.Autofocus.get_autofocus_frame_num"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_autofocus_frame_num</span></code></a>()</p></td>
 <td><p>Calculate how many frames are needed to get the best focus position.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_steps</span></code>(ranges, step_size)</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.autofocus.Autofocus.get_steps" title="aslm.model.features.autofocus.Autofocus.get_steps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_steps</span></code></a>(ranges, step_size)</p></td>
+<td><p>Calculate number of steps for autofocusing routine.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">in_func_data</span></code>([frame_ids])</p></td>
 <td><p></p></td>
@@ -152,6 +152,27 @@
 <dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.get_autofocus_frame_num">
 <span class="sig-name descname"><span class="pre">get_autofocus_frame_num</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.get_autofocus_frame_num" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate how many frames are needed to get the best focus position.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.get_steps">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_steps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ranges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.get_steps" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate number of steps for autofocusing routine.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ranges</strong> (<em>float</em>) – Distance to be traveled during the autofocusing routine</p></li>
+<li><p><strong>step_size</strong> (<em>float</em>) – Step size for autofocusing routine</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>steps</strong> (<em>float</em>) – Number of steps for the stack</p></li>
+<li><p><strong>pos_offset</strong> (<em>float</em>) – Need to figure out.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">

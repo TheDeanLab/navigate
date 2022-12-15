@@ -99,13 +99,14 @@ class CameraBase:
         full_chip_exposure_time : float
             Normal mode exposure time.
         shutter_width : int
+            Width of ASLM rolling shutter.
 
         Returns
         -------
         exposure_time : float
-            Light-sheet mode exposure time.
+            Light-sheet mode exposure time (ms).
         camera_line_interval : float
-            HamamatsuOrca line interval duration.
+            HamamatsuOrca line interval duration (s).
         """
 
         self.camera_line_interval = (full_chip_exposure_time / 1000)/(shutter_width + self.y_pixels + 10)

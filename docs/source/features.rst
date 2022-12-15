@@ -66,4 +66,7 @@ dictionaries are methods of the feature object.
 Writing custom features
 -----------------------
 
+.. note::
 
+    This section is still under development. 
+    

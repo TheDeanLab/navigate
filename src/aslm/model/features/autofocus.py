@@ -34,21 +34,36 @@
 from queue import Queue
 import threading
 
+# Third Party Imports
+
 # Local imports
 from aslm.model.features.feature_container import load_features
 from aslm.model.analysis.image_contrast import fast_normalized_dct_shannon_entropy
 
-class Autofocus():
+
+class Autofocus:
     def __init__(self, model):
         self.model = model
         self.max_entropy = None
         self.f_frame_id = None
         self.frame_num = None
+
+        self.init_pos = None
         self.f_pos = None
+        self.focus_pos = None
+
         self.target_frame_id = None
         self.get_frames_num = None
         self.plot_data = None
         self.total_frame_num = None
+
+        self.fine_step_size = None
+        self.fine_pos_offset = None
+
+        self.coarse_step_size = None
+        self.coarse_steps = None
+
+        self.signal_id = None
 
         # Queue
         self.autofocus_frame_queue = Queue()
@@ -64,10 +79,11 @@ class Autofocus():
                                       'main': self.in_func_data,
                                       'end': self.end_func_data},
                              'node': {'node_type': 'multi-step',
-                                      'device_related': True },
-                            }
+                                      'device_related': True},
+                             }
 
-    def run(self, *args):
+    def run(self,
+            *args):
         r"""Run the Autofocusing Routine
 
         Parameters
@@ -87,8 +103,8 @@ class Autofocus():
         self.model.signal_container, self.model.data_container = load_features(self.model, [[{'name': Autofocus}]])
 
         self.model.signal_thread = threading.Thread(target=self.model.run_single_channel_acquisition_with_features,
-                                                kwargs={'target_channel': self.target_channel},
-                                                name='Autofocus Signal')
+                                                    kwargs={'target_channel': self.target_channel},
+                                                    name='Autofocus Signal')
 
         self.model.data_thread = threading.Thread(target=self.model.run_data_process,
                                                   args=(frame_num+1,),
@@ -108,7 +124,25 @@ class Autofocus():
             frames += int(settings['fine_range']) // int(settings['fine_step_size']) + 1
         return frames
 
-    def get_steps(self, ranges, step_size):
+    @staticmethod
+    def get_steps(ranges, step_size):
+        r"""Calculate number of steps for autofocusing routine.
+
+        Parameters
+        ----------
+        ranges : float
+            Distance to be traveled during the autofocusing routine
+        step_size : float
+            Step size for autofocusing routine
+
+        Returns
+        -------
+        steps : float
+            Number of steps for the stack
+        pos_offset : float
+            Need to figure out.
+
+        """
         steps = ranges // step_size + 1
         pos_offset = (steps // 2) * step_size + step_size
         return steps, pos_offset
@@ -118,7 +152,7 @@ class Autofocus():
         # self.focus_pos = args[2]  # Current position
         self.focus_pos = self.model.configuration['experiment']['StageParameters']['f']
         # self.focus_pos = self.model.get_stage_position()['f_pos']
-        self.total_frame_num = self.get_autofocus_frame_num() #total frame num
+        self.total_frame_num = self.get_autofocus_frame_num()  # Total frame num
         self.coarse_steps, self.init_pos = 0, 0
         if settings['fine_selected']:
             self.fine_step_size = int(settings['fine_step_size'])
@@ -158,10 +192,10 @@ class Autofocus():
 
     def pre_func_data(self):
         self.max_entropy = 0
-        self.f_frame_id = -1  #  to indicate if there is one frame need to calculate shannon value, but the image frame isn't ready
+        self.f_frame_id = -1  # Need to calculate DCTS value, but the image frame isn't ready
         self.frame_num = 10  # any value but not 1
         self.f_pos = 0
-        self.target_frame_id = 0 # frame id in the buffer with best focus
+        self.target_frame_id = 0  # frame id in the buffer with best focus
         self.get_frames_num = 0
         self.plot_data = []
         self.total_frame_num = self.get_autofocus_frame_num()
@@ -180,9 +214,8 @@ class Autofocus():
             entropy = fast_normalized_dct_shannon_entropy(self.model.data_buffer[self.f_frame_id], 3)
             # entropy = self.model.analysis.image_intensity(self.model.data_buffer[self.f_frame_id], 3)
 
-            # print('entropy:', self.f_frame_id, self.frame_num, self.f_pos, entropy)
-
-            self.model.logger.debug(f'Appending plot data for frame {self.f_frame_id} focus: {self.f_pos}, entropy: {entropy[0]}')
+            self.model.logger.debug(f'Appending plot data for frame {self.f_frame_id} focus: {self.f_pos}, '
+                                    f'entropy: {entropy[0]}')
             self.plot_data.append([self.f_pos, entropy[0]])
             # Need to initialize entropy above for the first iteration of the autofocus routine.
             # Need to initialize entropy_vector above for the first iteration of the autofocus routine.
@@ -213,4 +246,3 @@ class Autofocus():
         self.model.event_queue.put(('autofocus', self.plot_data))
 
         return self.get_frames_num > self.total_frame_num
-

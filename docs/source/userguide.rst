@@ -5,4 +5,5 @@ User Guide
     :maxdepth: 1
 
     installation
+    hardware
     config

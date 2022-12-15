@@ -3,7 +3,7 @@ Contribution Guidelines
 
 We welcome contributions in the form of bug reports, bug fixes, new features 
 and documentation. If you are contributing code, please create it in a fork or
-branch separate from the main ``develop`` brance and then make a pull request 
+branch separate from the main ``develop`` branch and then make a pull request 
 to the ``develop`` branch for code review. Some best practices for new code are 
 outlined below.
 
@@ -23,6 +23,8 @@ General principles
 - We are happy to discuss code refactors for improved clarity and speed. 
   However, please do not modify something that is already working without 
   discussing this with the software team in advance.
+- All code that modifies microscope control behavior must be tested on a live
+  system prior to merging into the main branch.
 
 Coding style
 --------------

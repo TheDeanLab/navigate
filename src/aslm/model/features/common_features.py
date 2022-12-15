@@ -104,7 +104,6 @@ class ZStackAcquisition:
         self.start_focus = 0
         self.z_step_size = 0
         self.focus_step_size = 0
-        self.timepoints = 0
 
         self.positions = {}
         self.current_position_idx = 0
@@ -142,8 +141,6 @@ class ZStackAcquisition:
         self.start_focus = float(microscope_state['start_focus'])
         end_focus = float(microscope_state['end_focus'])
         self.focus_step_size = (end_focus - self.start_focus) / self.number_z_steps
-        
-        self.timepoints = int(microscope_state['timepoints'])
 
         if bool(microscope_state['is_multiposition']):
             self.positions = self.model.configuration['experiment']['MultiPositions']['stage_positions']
@@ -239,14 +236,12 @@ class ZStackAcquisition:
                 # move to next position
                 self.current_position_idx += 1
             
-            if self.need_to_move_new_position and self.current_position_idx == len(self.positions):
-                self.timepoints -= 1
-                self.current_position_idx = 0
-
-        if self.timepoints == 0:
-            # restore z if need
+        if self.current_position_idx >= len(self.positions):
+            self.current_position_idx = 0
+            # restore z
             self.model.move_stage({'z_abs': self.restore_z, 'f_abs': self.restore_f}, wait_until_done=True)  # Update position
             return True
+            
         return False
 
     def update_channel(self):

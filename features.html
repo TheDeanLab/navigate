@@ -21,7 +21,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="API Reference" href="api.html" />
-    <link rel="prev" title="Extending ASLM" href="hacking.html" /> 
+    <link rel="prev" title="Contributing Guidelines" href="contributing.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -42,13 +42,13 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="userguide.html">User Guide</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="hacking.html">Extending ASLM</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="contributing.html">Contributing Guidelines</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">ASLM feature container</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#the-feature-object">The feature object</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#writing-custom-features">Writing custom features</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="api.html">API Reference</a></li>
-<li class="toctree-l2"><a class="reference internal" href="config.html">Configuring ASLM</a></li>
 </ul>
 </li>
 </ul>
@@ -95,8 +95,8 @@ ideal plane of focus of a sample using a Discrete Cosine Transform.</p>
 <section id="the-feature-object">
 <h2>The feature object<a class="headerlink" href="#the-feature-object" title="Permalink to this heading"></a></h2>
 <p>Each feature is an object that accepts a pointer to <code class="docutils literal notranslate"><span class="pre">aslm.model.model</span></code> in its
-<code class="docutils literal notranslate"><span class="pre">__init()__</span></code>  arguments and contains a configuration dictionary that dictates
-feature behavior in its <code class="docutils literal notranslate"><span class="pre">__init()__</span></code> function. A complete configuration
+<code class="docutils literal notranslate"><span class="pre">__init__()</span></code>  arguments and contains a configuration dictionary that dictates
+feature behavior in its <code class="docutils literal notranslate"><span class="pre">__init__()</span></code> function. A complete configuration
 dictionary is shown below. As few or as many of these options can be specified
 as needed.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">config_table</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;signal&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;init&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">pre_func_signal</span><span class="p">,</span>
@@ -137,6 +137,10 @@ dictionaries are methods of the feature object.</p>
 </section>
 <section id="writing-custom-features">
 <h2>Writing custom features<a class="headerlink" href="#writing-custom-features" title="Permalink to this heading"></a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This section is still under development.</p>
+</div>
 </section>
 </section>
 
@@ -144,7 +148,7 @@ dictionaries are methods of the feature object.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="hacking.html" class="btn btn-neutral float-left" title="Extending ASLM" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="contributing.html" class="btn btn-neutral float-left" title="Contributing Guidelines" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="api.html" class="btn btn-neutral float-right" title="API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

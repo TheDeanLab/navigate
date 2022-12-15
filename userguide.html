@@ -20,7 +20,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Extending ASLM" href="hacking.html" />
+    <link rel="next" title="Installation" href="installation.html" />
     <link rel="prev" title="ASLM Python Package" href="index.html" /> 
 </head>
 
@@ -41,7 +41,8 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">User Guide</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config.html">Configuring ASLM</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="hacking.html">Extending ASLM</a></li>
@@ -73,64 +74,12 @@
              
   <section id="user-guide">
 <h1>User Guide<a class="headerlink" href="#user-guide" title="Permalink to this heading"></a></h1>
-<section id="installation">
-<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h2>
-<p>First we need to setup our python enviornment. Head over to the <a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html#latest-miniconda-installer-links">miniconda website</a>
-and install the appropriate version based on your operating system.</p>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>It is also handy to have the <a class="reference external" href="https://docs.conda.io/projects/conda/en/4.6.0/_downloads/52a95608c49671267e40c689e0bc00ca/conda-cheatsheet.pdf">conda cheatsheet</a> open when first using miniconda to get accustomed to the commands available.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config.html">Configuring ASLM</a></li>
+</ul>
 </div>
-<p>Once you have installed miniconda its time to use it to create our python enviornment.
-Search your computer for the anaconda prompt window. If you are on a Linux/Mac you can just use the terminal.
-From there you will need to use the below commands:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(base) MyComputer ~ $ conda create -n ASLM python=3.9.7
-</pre></div>
-</div>
-<p>This will create our python enviornment with the correct version.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(base) MyComputer ~ $ conda activate ASLM
-</pre></div>
-</div>
-<p>Now we need to activate our new enviornment.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(ASLM) MyComputer ~ $ python -m pip install --upgrade pip
-</pre></div>
-</div>
-<p>We will now update our package manager. Python has a builtin called pip. Also notice that our enviornment is now reflected on the far left of our terminal as (ASLM). This will confirm you are in the correct environment.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(ASLM) MyComputer ~ $ mkdir ~/MyFolderName
-(ASLM) MyComputer ~ $ cd ~/MyFolderName
-</pre></div>
-</div>
-<p>It is important to stay organized. Create a folder in a path/location that is easy to find and access. We will be saving the repo(the code!) here. After creating the folder we can change to it.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(ASLM) MyComputer MyFolderName $ git clone https://github.com/AdvancedImagingUTSW/ASLM.git
-</pre></div>
-</div>
-<p>After creating the folder and changing to it, we need to download the code. We can use the git command for this task.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>If you do not have <a class="reference external" href="https://git-scm.com/downloads">Git already downloaded</a>. You will need to do that before downloading the repo.</p>
-</div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(ASLM) MyComputer MyFolderName $ cd ASLM
-(ASLM) MyComputer ASLM $ pip install -e .
-</pre></div>
-</div>
-<p>The last step requires you to change into the ASLM directory and the install the repo as a package locally on your machine.</p>
-<p>Finally once this is all finished you can run the software with the below command.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(ASLM) MyComputer ASLM $ aslm
-</pre></div>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>If you are running the software on a computer that does not have the appropriate hardware you will need to add the flag -sh after aslm:</p>
-<blockquote>
-<div><p>aslm -sh</p>
-</div></blockquote>
-</div>
-<p>After completeting these steps you will only need to do the below to start the software upon opening the prompt:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(base) MyComputer ~ $ conda activate ASLM
-(ASLM) MyComputer ~ $ aslm -sh
-</pre></div>
-</div>
-</section>
 </section>
 
 
@@ -138,7 +87,7 @@ From there you will need to use the below commands:</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="index.html" class="btn btn-neutral float-left" title="ASLM Python Package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="hacking.html" class="btn btn-neutral float-right" title="Extending ASLM" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

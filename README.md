@@ -21,8 +21,9 @@ Please refer to and contribute to the documentation, which can be found on GitHu
 	*  --rest_api_file REST_API_FILE
   	* --logging_config LOGGING_CONFIG
 
+To launch in synthetic mode:
 ~~~
-python main.py --synthetic_hardware -sh
+python main.py -sh
 ~~~
 
 ### Authors

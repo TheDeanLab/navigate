@@ -83,7 +83,7 @@ class CameraBase:
         self.camera_display_acquisition_subsampling = self.camera_parameters['display_acquisition_subsampling']
 
         # Initialize offset and variance maps, if present
-        self._offset, self._variance = None
+        self._offset, self._variance = None, None
         self.get_offset_variance_maps()
 
     def get_offset_variance_maps(self):

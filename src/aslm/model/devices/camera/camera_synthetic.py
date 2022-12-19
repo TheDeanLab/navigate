@@ -208,10 +208,10 @@ class SyntheticCamera(CameraBase):
     def generate_new_frame(self):
         r"""Generate a synthetic image."""
         if self.random_image:
-            image = np.random.Generator.normal(0,
-                                               self._noise_sigma/0.47,  # TODO: Don't hardcode 0.47 electrons per count
-                                               size=(self.x_pixels, self.y_pixels),
-                                               ).astype(np.uint16) + int(self._mean_background_count)
+            image = np.random.normal(0,
+                                    self._noise_sigma/0.47,  # TODO: Don't hardcode 0.47 electrons per count
+                                    size=(self.x_pixels, self.y_pixels),
+                                    ).astype(np.uint16) + int(self._mean_background_count)
         else:
             image = self.tif_images[self.current_tif_id].pages[self.img_id].asarray()
             self.img_id += 1

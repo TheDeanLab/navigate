@@ -22,7 +22,8 @@ def compute_scmos_offset_and_variance_map(image: npt.ArrayLike) \
 
 def compute_flatfield_map(image: npt.ArrayLike, offset_map: npt.ArrayLike, 
                            local: bool = False) -> npt.ArrayLike:
-    """Compute the flatfield map for our system.
+    """Compute the flatfield map for an evenly-illuminated set of frames from
+    an sCMOS camera.
     
     Parameters
     ----------
@@ -42,10 +43,10 @@ def compute_flatfield_map(image: npt.ArrayLike, offset_map: npt.ArrayLike,
     else:
         return offset_image/(np.max(np.abs(offset_image)) + 1)
 
-def compute_noise_sigma(Fn=1.0, qe=0.82, S=0.0, Ib=100.0, Nr=1.4, M=1.0):
+def compute_noise_sigma(Fn=1.0, qe=0.82, S=0.0, Ib=0.0, Nr=1.4, M=1.0):
     """
     Using https://www.hamamatsu.com/content/dam/hamamatsu-photonics/sites/documents/99_SALES_LIBRARY/sys/SCAS0134E_C13440-20CU_tec.pdf
-    the noise sigma is given by
+    the sCMOS mean noise sigma is given by
 
     Parameters
     ----------
@@ -60,20 +61,22 @@ def compute_noise_sigma(Fn=1.0, qe=0.82, S=0.0, Ib=100.0, Nr=1.4, M=1.0):
     Nr : float
         Readout noise (e- rms)
     M : float
-        EM Gain
+        EM gain
 
     Returns
     --------
     noise : float or np.array
-        Estimated noise model
+        Estimated noise model (electrons)
     """
     noise = np.sqrt(Fn*Fn*qe*(S+Ib)+(Nr/M)**2)
     return noise
 
-def compute_signal_to_noise(Fn=1.0, qe=0.82, S=0.0, Ib=100.0, Nr=1.4, M=1.0, offset_map=None):
-    """https://www.hamamatsu.com/content/dam/hamamatsu-photonics/sites/documents/99_SALES_LIBRARY/sys/SCAS0134E_C13440-20CU_tec.pdf"""
-    if offset_map is not None and S.shape == offset_map.shape:
-        S -= offset_map
-        Ib = 0.0
-    sig = compute_noise_sigma(Fn=Fn, qe=qe, S=S, Ib=Ib, Nr=Nr, M=M)
-    return qe*S/sig
+def compute_signal_to_noise(image, offset_map, variance_map):
+    """
+    Compute the SNR of an image from offset and variance maps.
+    """
+    S = (image - offset_map)
+    N = np.sqrt(S + variance_map)
+    
+    # +1 to avoid div by zero error
+    return S/(N+1) 

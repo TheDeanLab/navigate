@@ -48,6 +48,7 @@ from aslm.view.menus.remote_focus_popup import remote_popup
 from aslm.view.menus.autofocus_setting_popup import AutofocusPopup
 from aslm.view.menus.ilastik_setting_popup import ilastik_setting_popup
 from aslm.view.menus.help_popup import help_popup
+from aslm.view.menus.camera_map_setting_popup import CameraMapSettingPopup
 
 
 from aslm.config.config import load_configs, update_config_dict
@@ -293,6 +294,13 @@ class Controller:
             af_popup = AutofocusPopup(self.view)
             self.af_popup_controller = AutofocusPopupController(af_popup, self)
 
+        def popup_camera_map_setting():
+            if hasattr(self, 'camera_map_popup_controller'):
+                self.camera_map_popup_controller.showup()
+                return
+            map_popup = CameraMapSettingPopup(self.view)
+            self.camera_map_popup_controller = CameraMapSettingPopupController(map_popup, self)
+
         def popup_ilastik_setting():
             ilastik_popup_window = ilastik_setting_popup(self.view)
             ilastik_url = self.configuration['rest_api_config']['Ilastik']['url']
@@ -366,7 +374,7 @@ class Controller:
         # autofocus menu
         self.view.menubar.menu_autofocus.add_command(label='Autofocus', command=lambda: self.execute('autofocus'))
         self.view.menubar.menu_autofocus.add_command(label='setting', command=popup_autofocus_setting)
-
+        
         # Help menu
         self.view.menubar.menu_help.add_command(label='Help', command=popup_help)
 
@@ -382,6 +390,8 @@ class Controller:
         self.view.menubar.menu_features.add_command(label='ilastik setting', command=popup_ilastik_setting)
         # disable ilastik menu
         self.view.menubar.menu_features.entryconfig('Ilastik Segmentation', state='disabled')
+        self.view.menubar.menu_features.add_command(label='Camera offset and variance maps', 
+                                                    command=popup_camera_map_setting)
         
         # debug menu
         # if self.debug:

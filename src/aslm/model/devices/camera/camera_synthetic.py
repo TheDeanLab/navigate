@@ -88,9 +88,8 @@ class SyntheticCamera(CameraBase):
         super().__init__(microscope_name, device_connection, configuration)
 
         self.is_acquiring = False
-        self._mean_background_count = 100.0
-        self._noise_sigma = camera.compute_noise_sigma(Ib=self._mean_background_count)
-        self.blah = camera.compute_noise_sigma
+        self._mean_background_count = 100
+        self._noise_sigma = camera.compute_noise_sigma()
         self.current_frame_idx = None
         self.data_buffer = None
         self.num_of_frame = None
@@ -209,10 +208,10 @@ class SyntheticCamera(CameraBase):
     def generate_new_frame(self):
         r"""Generate a synthetic image."""
         if self.random_image:
-            image = np.random.normal(self._mean_background_count,
-                                    self._noise_sigma,
-                                    size=(self.x_pixels, self.y_pixels),
-                                    ).astype(np.uint16)
+            image = np.random.Generator.normal(0,
+                                               self._noise_sigma/0.47,  # TODO: Don't hardcode 0.47 electrons per count
+                                               size=(self.x_pixels, self.y_pixels),
+                                               ).astype(np.uint16) + int(self._mean_background_count)
         else:
             image = self.tif_images[self.current_tif_id].pages[self.img_id].asarray()
             self.img_id += 1

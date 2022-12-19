@@ -104,9 +104,14 @@ class PopUp(tk.Toplevel):
     #Catching close buttons/destroying window procedures
         #Dismiss function for destroying window when done
 
+    def showup(self):
+        """ Display popup as top-level window. """
+        self.deiconify()
+        self.attributes("-topmost", 1)
+
     def dismiss(self):
         """
-        #### Releases control back to main window from popup
+        Releases control back to main window from popup
         """
         self.grab_release() #Ensures input can be anywhere now
         self.destroy()

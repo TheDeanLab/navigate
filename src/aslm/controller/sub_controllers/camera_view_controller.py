@@ -153,7 +153,7 @@ class CameraViewController(GUIController):
         self.display_mask_flag = False
         self.ilastik_mask_ready_lock = threading.Lock()
         self.ilastik_seg_mask = None
-
+        
     def slider_update(self, event):
         slider_index = self.view.slider.get()
         channel_display_index = 0

@@ -46,17 +46,16 @@ logger = logging.getLogger(p)
 
 
 class CameraBase:
-    r"""CameraBase Parent camera class.
+    """CameraBase Parent camera class.
 
     Parameters
     ----------
-   microscope_name : str
+    microscope_name : str
         Name of microscope in configuration
     device_connection : object
         Hardware device to connect to
     configuration : multiprocesing.managers.DictProxy
         Global configuration of the microscope
-
     """
     def __init__(self, microscope_name, device_connection, configuration):
         if microscope_name not in configuration['configuration']['microscopes'].keys():

@@ -31,7 +31,6 @@
 #
 # Standard Library Imports
 import platform
-import sys
 import tkinter as tk
 import logging
 import threading
@@ -41,9 +40,11 @@ import cv2
 from PIL import Image, ImageTk
 import matplotlib.pyplot as plt
 import numpy as np
+import copy
 
 # Local Imports
 from aslm.controller.sub_controllers.gui_controller import GUIController
+from aslm.model.analysis.camera import compute_signal_to_noise
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -76,6 +77,13 @@ class CameraViewController(GUIController):
         # keys = ['Gray','Gradient','Rainbow']
         for color in self.image_palette.values():
             color.widget.config(command=self.update_LUT)
+        if self.parent_controller.model.active_microscope.camera.offset is None:
+            self.image_palette['SNR'].grid_remove()
+            self._offset, self._variance = None, None
+        else:
+            self._offset = copy.deepcopy(self.parent_controller.model.active_microscope.camera.offset)
+            self._variance = copy.deepcopy(self.parent_controller.model.active_microscope.camera.variance)
+        self._snr_selected = False
         # self.image_palette['Gray'].widget.config(command=self.update_LUT)
         # self.image_palette['Gradient'].widget.config(command=self.update_LUT)
         # self.image_palette['Rainbow'].widget.config(command=self.update_LUT)
@@ -397,8 +405,7 @@ class CameraViewController(GUIController):
         self.zoom_image = self.image[y_start_index * self.canvas_height_scale : y_end_index * self.canvas_height_scale,
                                      x_start_index * self.canvas_width_scale : x_end_index * self.canvas_width_scale]
 
-    def left_click(self,
-                   event):
+    def left_click(self, event):
         r"""Toggles cross-hair on image upon left click event."""
         if self.image is not None:
             # If True, make False. If False, make True.
@@ -593,6 +600,11 @@ class CameraViewController(GUIController):
         else:
             self.image = image  # self.image_volume[:, :, self.slice_index, self.channel_index]  # pass by reference
 
+        if self._snr_selected:
+            self.image = compute_signal_to_noise(self.image,
+                                                 self._offset,
+                                                 self._variance)
+
         # MIP and Slice Mode TODO: Consider channels
         # if self.display_state != 'Live':
         #     slider_index = self.view.slider.slider_widget.get()
@@ -664,11 +676,14 @@ class CameraViewController(GUIController):
             pass
         else:
             cmap_name = self.view.scale_palette.color.get()
+            self._snr_selected = True if cmap_name == 'RdBu_r' else False # TODO: Don't use a proxy for SNR
             self.colormap = plt.get_cmap(cmap_name)
             self.add_crosshair()
             self.apply_LUT()
             self.populate_image()
             logger.debug(f"Updating the LUT, {cmap_name}")
+
+
 
     def detect_saturation(self):
         r"""Look for any pixels at the maximum intensity allowable for the camera. """

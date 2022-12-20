@@ -5,12 +5,12 @@ def test_compute_scmos_offset_and_variance_map():
     from aslm.model.analysis.camera import compute_scmos_offset_and_variance_map
 
     mu, sig = 100*np.random.rand()+1, 100*np.random.rand()+1
-    im = sig*np.random.randn(100,256,256) + mu
+    im = sig*np.random.randn(256,256,256) + mu
 
     offset, variance = compute_scmos_offset_and_variance_map(im)
 
     print(mu, sig)
-    # TODO: 10 is a bit high?
+    # TODO: 1 is a bit high?
     np.testing.assert_allclose(offset, mu, rtol=1)
     np.testing.assert_allclose(variance, sig*sig, rtol=1)
 

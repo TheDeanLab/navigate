@@ -44,3 +44,8 @@ and `here <https://medium.com/chris-nielsen/so-whats-a-good-unit-test-look-like-
 or see examples of other unit tests in this application's ``test`` folder. We 
 use the `pytest library <https://docs.pytest.org/en/7.2.x/>`_ to evaluate unit 
 tests.
+
+Units
+-----
+
+Ideally time is always measured in milliseconds and distance is measured in micrometers. Deviations from this can occur where it is necessary to pass a different unit to a piece of hardware.

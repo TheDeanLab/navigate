@@ -9,7 +9,14 @@ from multiprocessing import Manager
 import yaml
 
 def get_aslm_path():
-    # Establish a base directory in AppData/Local/.ASLM for Windows or ~/.ASLM for Mac and Linux
+    """ Establish a program home directory in AppData/Local/.ASLM for Windows 
+    or ~/.ASLM for Mac and Linux. 
+    
+    Returns
+    -------
+    str
+        Path to ASLM home directory.
+    """
     if platform.system() == 'Windows':
         base_directory = os.getenv('LOCALAPPDATA')
     else:
@@ -17,6 +24,20 @@ def get_aslm_path():
     return os.path.join(base_directory, '.ASLM')
 
 def get_configuration_paths():
+    """ Get the paths of the various configuration files used by ASLM.
+    
+    Returns
+    --------
+    configuration_path : str
+        Path to file containing global microscope configuration, 
+        i.e. hardware setup
+    experiment_path : str 
+        Path to file containing per-experiment parameters
+    etl_constants_path : str
+        Path to file containing remote focus parameters for all magnifications
+    rest_api_path : str
+        Path to file containing REST API configuration
+    """
     aslm_directory = get_aslm_path()
     if not os.path.exists(aslm_directory):
         os.mkdir(aslm_directory)
@@ -54,6 +75,21 @@ def get_configuration_paths():
     return configuration_path, experiment_path, etl_constants_path, rest_api_path
 
 def load_configs(manager, **kwargs):
+    """
+    Load configuration files.
+
+    Parameters
+    ----------
+    manager : multiprocessing.Manager
+        Shares objects (e.g., dict) between processes
+    **kwargs
+        List of configuration file paths
+
+    Returns
+    -------
+    config_dict : dict 
+        Shared ditionary containing amalgamation of input configurations. 
+    """
     if kwargs == {}:
         print("No files provided to load_yaml_config()")
         sys.exit(1)
@@ -74,6 +110,24 @@ def load_configs(manager, **kwargs):
     return config_dict
 
 def build_nested_dict(manager, parent_dict, key_name, dict_data):
+    """Nest dictionaries recursively.
+    
+    Parameters
+    ----------
+    manager : multiprocessing.Manager
+        Shares objects (e.g., dict) between processes
+    parent_dict : dict
+        Dictionary we are adding to
+    key_name : str
+        Name of dictionary to insert
+    dict_data : dict
+        Dictionary to insert
+
+    Returns
+    -------
+    parent_dict : dict
+        Dictionary with subdictionary inserted
+    """
     if type(dict_data) != dict and type(dict_data) != list:
         parent_dict[key_name] = dict_data
         return
@@ -89,6 +143,24 @@ def build_nested_dict(manager, parent_dict, key_name, dict_data):
     parent_dict[key_name] = d
 
 def update_config_dict(manager, parent_dict, config_name, new_config) -> bool:
+    """ Read a new file and update info of the configuration dict.
+    
+    Parameters
+    ----------
+    manager : multiprocessing.Manager
+        Shares objects (e.g., dict) between processes
+    parent_dict : dict
+        Dictionary we are adding to
+    config_name : str
+        Name of subdictionary to replace
+    new_config : dict
+        Dictionary values
+
+    Returns
+    -------
+    dict
+        Dictionary with replaced sub dictionary
+    """
     if type(new_config) != dict:
         file_path = str(new_config)
         if isfile(file_path) and (file_path.endswith('.yml') or file_path.endswith('.yaml')):

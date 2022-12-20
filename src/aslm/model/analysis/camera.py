@@ -76,7 +76,6 @@ def compute_signal_to_noise(image, offset_map, variance_map):
     Compute the SNR of an image from offset and variance maps.
     """
     S = (image - offset_map)
-    N = np.sqrt(S + variance_map)
-    
-    # +1 to avoid div by zero error
-    return S/(N+1) 
+    N = np.sqrt(S + variance_map + 1)  # +1 to avoid div by zero error
+
+    return S/N

@@ -63,8 +63,8 @@ class palette(ttk.Labelframe):
         self.inputs = {}
 
         # LUT Radio buttons - Gray is default
-        self.color_labels = ['Gray', 'Gradient', 'Rainbow', 'SNR']
-        self.color_values = ['gist_gray', 'plasma', 'afmhot', 'RdBu_r']
+        self.color_labels = ['Gray', 'Gradient', 'Rainbow', 'SNR']       # Human-readable names
+        self.color_values = ['gist_gray', 'plasma', 'afmhot', 'RdBu_r']  # maplotlib cmap names
         self.color = tk.StringVar()
         for i in range(len(self.color_labels)):
             self.inputs[self.color_labels[i]] = LabelInput(parent=self,

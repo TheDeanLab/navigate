@@ -15,8 +15,8 @@ def compute_scmos_offset_and_variance_map(image: npt.ArrayLike) \
     image : npt.ArrayLike
         ZYX image of multiple dark camera frames, taken sequentially.
     """
-    offset_map = np.mean(image, axis=0)
-    variance_map = np.var(image, axis=0)
+    offset_map = np.mean(image, axis=0).astype(image.dtype)
+    variance_map = np.var(image, axis=0).astype(image.dtype)
 
     return offset_map, variance_map
 
@@ -75,7 +75,9 @@ def compute_signal_to_noise(image, offset_map, variance_map):
     """
     Compute the SNR of an image from offset and variance maps.
     """
-    S = (image - offset_map)
-    N = np.sqrt(S + variance_map + 1)  # +1 to avoid div by zero error
+    S = (image.astype(float) - offset_map.astype(float))
+    S[S < 0] = 0  # clip
+    N = np.sqrt(S + variance_map.astype(float) + 1.0)  # +1 to avoid div by zero error
+    # print(f"Image min: {image.min()} offset_map min: {offset_map.min()} S min: {S.min()} variance_map min: {variance_map.min()} N min: {N.min()}")
 
-    return S/N
+    return 1.0*S/N

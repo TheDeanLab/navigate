@@ -575,6 +575,7 @@ class Controller:
             ret_pos_dict = self.model.get_stage_position()
             update_stage_dict(self, ret_pos_dict)
             self.update_stage_controller_silent(ret_pos_dict)
+            self.camera_view_controller.update_snr()
 
         elif command == 'set_save':
             r"""Set whether the image will be saved.

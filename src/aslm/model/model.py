@@ -263,6 +263,9 @@ class Model:
         self.active_microscope = self.microscopes[self.active_microscope_name]
         return self.active_microscope
 
+    def get_offset_variance_maps(self):
+        return self.active_microscope.camera.get_offset_variance_maps()
+
     def run_command(self, command, *args, **kwargs):
         r"""Receives commands from the controller.
 

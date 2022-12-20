@@ -77,13 +77,7 @@ class CameraViewController(GUIController):
         # keys = ['Gray','Gradient','Rainbow']
         for color in self.image_palette.values():
             color.widget.config(command=self.update_LUT)
-        if self.parent_controller.model.active_microscope.camera.offset is None:
-            self.image_palette['SNR'].grid_remove()
-            self._offset, self._variance = None, None
-        else:
-            self._offset = copy.deepcopy(self.parent_controller.model.active_microscope.camera.offset)
-            self._variance = copy.deepcopy(self.parent_controller.model.active_microscope.camera.variance)
-        self._snr_selected = False
+        self.update_snr()
         # self.image_palette['Gray'].widget.config(command=self.update_LUT)
         # self.image_palette['Gradient'].widget.config(command=self.update_LUT)
         # self.image_palette['Rainbow'].widget.config(command=self.update_LUT)
@@ -164,6 +158,16 @@ class CameraViewController(GUIController):
         self.display_mask_flag = False
         self.ilastik_mask_ready_lock = threading.Lock()
         self.ilastik_seg_mask = None
+
+    def update_snr(self):
+        self._snr_selected = False
+        self._offset, self._variance = None, None
+        off, var = self.parent_controller.model.get_offset_variance_maps()
+        if off is None:
+            self.image_palette['SNR'].grid_remove()
+        else:
+            self._offset, self._variance = copy.deepcopy(off), copy.deepcopy(var)
+            self.image_palette['SNR'].grid(row=3, column=0, sticky=tk.NSEW, pady=3)
         
     def slider_update(self, event):
         slider_index = self.view.slider.get()
@@ -423,21 +427,17 @@ class CameraViewController(GUIController):
          Reports the rolling average.
         """
         self.rolling_frames = int(self.image_metrics['Frames'].get())
+        self.image_metrics['Image'].set(f"{self.max_counts:.2f}")
+
         if self.rolling_frames == 0:
             # Cannot average 0 frames. Set to 1, and report max intensity
             self.image_metrics['Frames'].set(1)
-            self.image_metrics['Image'].set(self.max_counts)
-
-        elif self.rolling_frames == 1:
-            self.image_metrics['Image'].set(self.max_counts)
-
-        else:
+        elif self.rolling_frames > 1:
             #  Rolling Average
             self.image_count = self.image_count + 1
             if self.image_count == 1:
                 # First frame of the rolling average
                 self.temp_array = self.down_sampled_image
-                self.image_metrics['Image'].set(self.max_counts)
             else:
                 # Subsequent frames of the rolling average
                 self.temp_array = np.dstack((self.temp_array, self.down_sampled_image))

@@ -63,8 +63,8 @@ class palette(ttk.Labelframe):
         self.inputs = {}
 
         # LUT Radio buttons - Gray is default
-        self.color_labels = ['Gray', 'Gradient', 'Rainbow']
-        self.color_values = ['gray', 'gradient', 'rainbow']
+        self.color_labels = ['Gray', 'Gradient', 'Rainbow', 'SNR']
+        self.color_values = ['gist_gray', 'plasma', 'afmhot', 'RdBu_r']
         self.color = tk.StringVar()
         for i in range(len(self.color_labels)):
             self.inputs[self.color_labels[i]] = LabelInput(parent=self,
@@ -84,7 +84,7 @@ class palette(ttk.Labelframe):
                                             input_class=ttk.Checkbutton,
                                             input_var=self.transpose
                                             )
-        self.inputs[self.trans].grid(row=3, column=0, sticky=tk.NSEW, pady=3)
+        self.inputs[self.trans].grid(row=len(self.color_labels), column=0, sticky=tk.NSEW, pady=3)
 
         # Autoscale
         self.autoscale = tk.BooleanVar()
@@ -96,7 +96,7 @@ class palette(ttk.Labelframe):
                                             input_class=ttk.Checkbutton,
                                             input_var=self.autoscale
                                             )
-        self.inputs[self.auto].grid(row=4, column=0, sticky=tk.NSEW, pady=3)
+        self.inputs[self.auto].grid(row=len(self.color_labels)+1, column=0, sticky=tk.NSEW, pady=3)
 
         # Max and Min Counts
         for i in range(len(self.minmax)):
@@ -108,7 +108,7 @@ class palette(ttk.Labelframe):
                                                                        'to': 2**16-1,
                                                                        'increment': 1,
                                                                        'width': 5})
-            self.inputs[self.minmax_names[i]].grid(row=i + 5, column=0, sticky=tk.NSEW, padx=3, pady=3)
+            self.inputs[self.minmax_names[i]].grid(row=i + len(self.color_labels) + 2, column=0, sticky=tk.NSEW, padx=3, pady=3)
 
     def get_variables(self):
         """

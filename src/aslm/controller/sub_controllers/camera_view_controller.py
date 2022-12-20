@@ -74,9 +74,11 @@ class CameraViewController(GUIController):
 
         # Bindings for changes to the LUT
         # keys = ['Gray','Gradient','Rainbow']
-        self.image_palette['Gray'].widget.config(command=self.update_LUT)
-        self.image_palette['Gradient'].widget.config(command=self.update_LUT)
-        self.image_palette['Rainbow'].widget.config(command=self.update_LUT)
+        for color in self.image_palette.values():
+            color.widget.config(command=self.update_LUT)
+        # self.image_palette['Gray'].widget.config(command=self.update_LUT)
+        # self.image_palette['Gradient'].widget.config(command=self.update_LUT)
+        # self.image_palette['Rainbow'].widget.config(command=self.update_LUT)
 
         # Transpose and live bindings
         self.image_palette['Flip XY'].widget.config(command=self.transpose_image)
@@ -121,10 +123,11 @@ class CameraViewController(GUIController):
         self.display_state = "Live"
 
         # Colormap Information
-        self.colormap = 'gray'
-        self.gray_lut = plt.get_cmap('gist_gray')
-        self.gradient_lut = plt.get_cmap('plasma')
-        self.rainbow_lut = plt.get_cmap('afmhot')
+        self.colormap = plt.get_cmap('gist_gray')
+        # self.gray_lut = plt.get_cmap('gist_gray')
+        # self.gradient_lut = plt.get_cmap('plasma')
+        # self.rainbow_lut = plt.get_cmap('afmhot')
+        # self.rdbu_r_lut = plt.get_cmap('RdBu_r')
 
         self.image_count = 0
         self.temp_array = None
@@ -627,12 +630,15 @@ class CameraViewController(GUIController):
         Red is reserved for saturated pixels.
         self.color_values = ['gray', 'gradient', 'rainbow']
         """
-        if self.colormap == 'gradient':
-            self.cross_hair_image = self.rainbow_lut(self.cross_hair_image)
-        elif self.colormap == 'rainbow':
-            self.cross_hair_image = self.gradient_lut(self.cross_hair_image)
-        else:
-            self.cross_hair_image = self.gray_lut(self.cross_hair_image)
+        # if self.colormap == 'gradient':
+        #     self.cross_hair_image = self.rainbow_lut(self.cross_hair_image)
+        # elif self.colormap == 'rainbow':
+        #     self.cross_hair_image = self.gradient_lut(self.cross_hair_image)
+        # elif self.colormap == 'RdBu_r':
+        #     self.cross_hair_image = self.rdbu_r_lut(self.cross_hair_image)
+        # else:
+        #     self.cross_hair_image = self.gray_lut(self.cross_hair_image)
+        self.cross_hair_image = self.colormap(self.cross_hair_image)
 
         # Convert RGBA to RGB Image.
         self.cross_hair_image = self.cross_hair_image[:, :, :3]
@@ -657,11 +663,12 @@ class CameraViewController(GUIController):
         if self.image is None:
             pass
         else:
-            self.colormap = self.view.scale_palette.color.get()
+            cmap_name = self.view.scale_palette.color.get()
+            self.colormap = plt.get_cmap(cmap_name)
             self.add_crosshair()
             self.apply_LUT()
             self.populate_image()
-            logger.debug(f"Updating the LUT, {self.colormap}")
+            logger.debug(f"Updating the LUT, {cmap_name}")
 
     def detect_saturation(self):
         r"""Look for any pixels at the maximum intensity allowable for the camera. """

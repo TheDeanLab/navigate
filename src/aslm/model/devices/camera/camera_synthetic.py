@@ -95,6 +95,7 @@ class SyntheticCamera(CameraBase):
         self.num_of_frame = None
         self.pre_frame_idx = None
         self.random_image = True
+        self.serial_number = 'synthetic'
 
         logger.info("SyntheticCamera Class Initialized")
 
@@ -203,7 +204,6 @@ class SyntheticCamera(CameraBase):
                     pass
             if idx == 0:
                 self.random_image = False
-
 
     def generate_new_frame(self):
         r"""Generate a synthetic image."""

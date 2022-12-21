@@ -5,7 +5,8 @@ from .metadata import XMLMetadata
 from aslm import __version__
 
 class OMETIFFMetadata(XMLMetadata):
-
+    """Metadata for OME-TIFF files. OME-XML spec at 
+    https://docs.openmicroscopy.org/ome-model/6.3.1/ome-xml/index.html. """
     def ome_tiff_xml_dict(self, c: int = 0, t: int = 0, file_name: Union[str, list, None] = None,
                           uid: Union[str, list, None] = None, views: Optional[list] = None, **kw):
         """

@@ -31,7 +31,6 @@
 #
 # Standard Library Imports
 import platform
-import sys
 import tkinter as tk
 import logging
 import threading
@@ -41,9 +40,11 @@ import cv2
 from PIL import Image, ImageTk
 import matplotlib.pyplot as plt
 import numpy as np
+import copy
 
 # Local Imports
 from aslm.controller.sub_controllers.gui_controller import GUIController
+from aslm.model.analysis.camera import compute_signal_to_noise
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -74,9 +75,12 @@ class CameraViewController(GUIController):
 
         # Bindings for changes to the LUT
         # keys = ['Gray','Gradient','Rainbow']
-        self.image_palette['Gray'].widget.config(command=self.update_LUT)
-        self.image_palette['Gradient'].widget.config(command=self.update_LUT)
-        self.image_palette['Rainbow'].widget.config(command=self.update_LUT)
+        for color in self.image_palette.values():
+            color.widget.config(command=self.update_LUT)
+        self.update_snr()
+        # self.image_palette['Gray'].widget.config(command=self.update_LUT)
+        # self.image_palette['Gradient'].widget.config(command=self.update_LUT)
+        # self.image_palette['Rainbow'].widget.config(command=self.update_LUT)
 
         # Transpose and live bindings
         self.image_palette['Flip XY'].widget.config(command=self.transpose_image)
@@ -121,10 +125,11 @@ class CameraViewController(GUIController):
         self.display_state = "Live"
 
         # Colormap Information
-        self.colormap = 'gray'
-        self.gray_lut = plt.get_cmap('gist_gray')
-        self.gradient_lut = plt.get_cmap('plasma')
-        self.rainbow_lut = plt.get_cmap('afmhot')
+        self.colormap = plt.get_cmap('gist_gray')
+        # self.gray_lut = plt.get_cmap('gist_gray')
+        # self.gradient_lut = plt.get_cmap('plasma')
+        # self.rainbow_lut = plt.get_cmap('afmhot')
+        # self.rdbu_r_lut = plt.get_cmap('RdBu_r')
 
         self.image_count = 0
         self.temp_array = None
@@ -154,6 +159,16 @@ class CameraViewController(GUIController):
         self.ilastik_mask_ready_lock = threading.Lock()
         self.ilastik_seg_mask = None
 
+    def update_snr(self):
+        self._snr_selected = False
+        self._offset, self._variance = None, None
+        off, var = self.parent_controller.model.get_offset_variance_maps()
+        if off is None:
+            self.image_palette['SNR'].grid_remove()
+        else:
+            self._offset, self._variance = copy.deepcopy(off), copy.deepcopy(var)
+            self.image_palette['SNR'].grid(row=3, column=0, sticky=tk.NSEW, pady=3)
+        
     def slider_update(self, event):
         slider_index = self.view.slider.get()
         channel_display_index = 0
@@ -394,8 +409,7 @@ class CameraViewController(GUIController):
         self.zoom_image = self.image[y_start_index * self.canvas_height_scale : y_end_index * self.canvas_height_scale,
                                      x_start_index * self.canvas_width_scale : x_end_index * self.canvas_width_scale]
 
-    def left_click(self,
-                   event):
+    def left_click(self, event):
         r"""Toggles cross-hair on image upon left click event."""
         if self.image is not None:
             # If True, make False. If False, make True.
@@ -413,21 +427,17 @@ class CameraViewController(GUIController):
          Reports the rolling average.
         """
         self.rolling_frames = int(self.image_metrics['Frames'].get())
+        self.image_metrics['Image'].set(f"{self.max_counts:.2f}")
+
         if self.rolling_frames == 0:
             # Cannot average 0 frames. Set to 1, and report max intensity
             self.image_metrics['Frames'].set(1)
-            self.image_metrics['Image'].set(self.max_counts)
-
-        elif self.rolling_frames == 1:
-            self.image_metrics['Image'].set(self.max_counts)
-
-        else:
+        elif self.rolling_frames > 1:
             #  Rolling Average
             self.image_count = self.image_count + 1
             if self.image_count == 1:
                 # First frame of the rolling average
                 self.temp_array = self.down_sampled_image
-                self.image_metrics['Image'].set(self.max_counts)
             else:
                 # Subsequent frames of the rolling average
                 self.temp_array = np.dstack((self.temp_array, self.down_sampled_image))
@@ -590,6 +600,11 @@ class CameraViewController(GUIController):
         else:
             self.image = image  # self.image_volume[:, :, self.slice_index, self.channel_index]  # pass by reference
 
+        if self._snr_selected:
+            self.image = compute_signal_to_noise(self.image,
+                                                 self._offset,
+                                                 self._variance)
+
         # MIP and Slice Mode TODO: Consider channels
         # if self.display_state != 'Live':
         #     slider_index = self.view.slider.slider_widget.get()
@@ -627,12 +642,15 @@ class CameraViewController(GUIController):
         Red is reserved for saturated pixels.
         self.color_values = ['gray', 'gradient', 'rainbow']
         """
-        if self.colormap == 'gradient':
-            self.cross_hair_image = self.rainbow_lut(self.cross_hair_image)
-        elif self.colormap == 'rainbow':
-            self.cross_hair_image = self.gradient_lut(self.cross_hair_image)
-        else:
-            self.cross_hair_image = self.gray_lut(self.cross_hair_image)
+        # if self.colormap == 'gradient':
+        #     self.cross_hair_image = self.rainbow_lut(self.cross_hair_image)
+        # elif self.colormap == 'rainbow':
+        #     self.cross_hair_image = self.gradient_lut(self.cross_hair_image)
+        # elif self.colormap == 'RdBu_r':
+        #     self.cross_hair_image = self.rdbu_r_lut(self.cross_hair_image)
+        # else:
+        #     self.cross_hair_image = self.gray_lut(self.cross_hair_image)
+        self.cross_hair_image = self.colormap(self.cross_hair_image)
 
         # Convert RGBA to RGB Image.
         self.cross_hair_image = self.cross_hair_image[:, :, :3]
@@ -657,11 +675,15 @@ class CameraViewController(GUIController):
         if self.image is None:
             pass
         else:
-            self.colormap = self.view.scale_palette.color.get()
+            cmap_name = self.view.scale_palette.color.get()
+            self._snr_selected = True if cmap_name == 'RdBu_r' else False # TODO: Don't use a proxy for SNR
+            self.colormap = plt.get_cmap(cmap_name)
             self.add_crosshair()
             self.apply_LUT()
             self.populate_image()
-            logger.debug(f"Updating the LUT, {self.colormap}")
+            logger.debug(f"Updating the LUT, {cmap_name}")
+
+
 
     def detect_saturation(self):
         r"""Look for any pixels at the maximum intensity allowable for the camera. """

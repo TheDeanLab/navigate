@@ -270,6 +270,9 @@ class Model:
         self.active_microscope = self.microscopes[self.active_microscope_name]
         return self.active_microscope
 
+    def get_offset_variance_maps(self):
+        return self.active_microscope.camera.get_offset_variance_maps()
+
     def run_command(self, command, *args, **kwargs):
         r"""Receives commands from the controller.
 
@@ -313,7 +316,7 @@ class Model:
             else:
                 self.signal_thread = threading.Thread(target=self.run_acquisition)
             
-            self.signal_thread.name = self.imaging_mode + " signal"
+            self.signal_thread.name = f"{self.imaging_mode} signal"
             if self.is_save and self.imaging_mode != 'live':
                 # self.configuration['experiment']['Saving'] = kwargs['saving_info']
                 self.image_writer = ImageWriter(self)
@@ -321,7 +324,7 @@ class Model:
             else:
                 self.is_save = False
                 self.data_thread = threading.Thread(target=self.run_data_process)
-            self.data_thread.name = self.imaging_mode + " Data"
+            self.data_thread.name = f"{self.imaging_mode} Data"
             self.signal_thread.start()
             self.data_thread.start()
 
@@ -383,13 +386,23 @@ class Model:
             """
             args[0]: int, args[0]-1 is the id of features
                    : 0 no features
+                   : str, name of feature, case sensitive
             """
             if hasattr(self, 'signal_container'):
                 delattr(self, 'signal_container')
                 delattr(self, 'data_container')
-            
-            if args[0] != 0:
-                self.signal_container, self.data_container = load_features(self, self.feature_list[args[0]-1])
+
+            if type(args[0]) == int:
+                if args[0] != 0:
+                    self.signal_container, self.data_container = load_features(self, self.feature_list[args[0]-1])
+            elif type(args[0]) == str:
+                try:
+                    if len(args) > 1:
+                        self.signal_container, self.data_container = load_features(self, [[{'name': globals()[args[0]], 'args': (args[1],)}]])
+                    else:
+                        self.signal_container, self.data_container = load_features(self, [[{'name': globals()[args[0]]}]])
+                except KeyError:
+                    self.logger.debug(f"run_command - load_feature - Unknown feature {args[0]}.")
             
         elif command == 'stop':
             """

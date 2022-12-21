@@ -103,7 +103,6 @@ class ZStackAcquisition:
         self.start_focus = 0
         self.z_step_size = 0
         self.focus_step_size = 0
-        self.timepoints = 0
 
         self.positions = {}
         self.current_position_idx = 0
@@ -141,11 +140,9 @@ class ZStackAcquisition:
         self.start_focus = float(microscope_state['start_focus'])
         end_focus = float(microscope_state['end_focus'])
         self.focus_step_size = (end_focus - self.start_focus) / self.number_z_steps
-        
-        self.timepoints = int(microscope_state['timepoints'])
 
         if bool(microscope_state['is_multiposition']):
-            self.positions = microscope_state['stage_positions']
+            self.positions = self.model.configuration['experiment']['MultiPositions']['stage_positions']
         else:
             self.positions = [{'x': float(self.model.configuration['experiment']['StageParameters']['x']),
                                'y': float(self.model.configuration['experiment']['StageParameters']['y']),
@@ -157,17 +154,13 @@ class ZStackAcquisition:
         self.z_position_moved_time = 0
         self.need_to_move_new_position = True
         self.need_to_move_z_position = True
-        self.current_z_position = self.start_z_position + self.positions[self.current_position_idx]['z']
-        self.current_focus_position = self.start_focus + self.positions[self.current_position_idx]['f']
+        # self.current_z_position = self.start_z_position + self.positions[self.current_position_idx]['z']
+        # self.current_focus_position = self.start_focus + self.positions[self.current_position_idx]['f']
 
-        self.restore_z = -1
-        self.restore_f = -1
-
-        if not bool(microscope_state['is_multiposition']):
-            # TODO: Make relative to stage coordinates.
-            pos_dict = self.model.get_stage_position()
-            self.restore_z = pos_dict['z_pos']
-            self.restore_f = pos_dict['f_pos']
+        # restore z, f
+        pos_dict = self.model.get_stage_position()
+        self.restore_z = pos_dict['z_pos']
+        self.restore_f = pos_dict['f_pos']
     
     def signal_func(self):
         if self.model.stop_acquisition:
@@ -175,6 +168,10 @@ class ZStackAcquisition:
         # move stage X, Y, Theta
         if self.need_to_move_new_position:
             self.need_to_move_new_position = False
+
+            # calculate first z, f position
+            self.current_z_position = self.start_z_position + self.positions[self.current_position_idx]['z']
+            self.current_focus_position = self.start_focus + self.positions[self.current_position_idx]['f']
 
             # self.model.pause_data_ready_lock.acquire()
             # self.model.ask_to_pause_data_thread = True
@@ -188,9 +185,6 @@ class ZStackAcquisition:
             # self.model.pause_data_ready_lock.release()
             
             # self.z_position_moved_time = 0
-            # # calculate first z, f position
-            # self.current_z_position = self.start_z_position + self.positions[self.current_position_idx]['z']
-            # self.current_focus_position = self.start_focus + self.positions[self.current_position_idx]['f']
 
         if self.need_to_move_z_position:
             # move z, f
@@ -241,15 +235,12 @@ class ZStackAcquisition:
                 # move to next position
                 self.current_position_idx += 1
             
-            if self.need_to_move_new_position and self.current_position_idx == len(self.positions):
-                self.timepoints -= 1
-                self.current_position_idx = 0
-
-        if self.timepoints == 0:
-            # restore z if need
-            if self.restore_z >= 0:
-                self.model.move_stage({'z_abs': self.restore_z, 'f_abs': self.restore_f}, wait_until_done=True)  # Update position
+        if self.current_position_idx >= len(self.positions):
+            self.current_position_idx = 0
+            # restore z
+            self.model.move_stage({'z_abs': self.restore_z, 'f_abs': self.restore_f}, wait_until_done=True)  # Update position
             return True
+            
         return False
 
     def update_channel(self):

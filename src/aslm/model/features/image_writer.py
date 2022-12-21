@@ -47,7 +47,7 @@ logger = logging.getLogger(p)
 
 
 class ImageWriter:
-    def __init__(self, model, sub_dir=''):
+    def __init__(self, model, sub_dir='', image_name=None):
         """
         Class for saving acquired data to disk.
 
@@ -58,6 +58,8 @@ class ImageWriter:
         sub_dir : str
             Sub-directory of self.model.configuration['experiment']['Saving']['save_directory']
             indicating where to save data
+        image_writer : str
+            Optionally override the generate_image_name() naming scheme.
         """
         self.model = model
         self.save_directory = ''
@@ -84,7 +86,8 @@ class ImageWriter:
         self.file_type = self.model.configuration['experiment']['Saving']['file_type']
         current_channel = self.model.current_channel
         ext = '.' + self.file_type.lower().replace(' ','.').replace('-','.')
-        image_name = self.generate_image_name(current_channel, ext=ext)
+        if image_name is None:
+            image_name = self.generate_image_name(current_channel, ext=ext)
         file_name = os.path.join(self.save_directory, image_name)
 
         # Initialize data source, pointing to the new file name

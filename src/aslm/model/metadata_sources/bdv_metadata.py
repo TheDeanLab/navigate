@@ -11,6 +11,8 @@ import numpy.typing as npt
 from .metadata import XMLMetadata
 
 class BigDataViewerMetadata(XMLMetadata):
+    """ Metadata for BigDataViewer files. XML spec in section 2.3 of 
+    https://arxiv.org/abs/1412.0488. """
     def __init__(self) -> None:
         super().__init__()
 

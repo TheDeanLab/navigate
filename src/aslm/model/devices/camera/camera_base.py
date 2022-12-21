@@ -32,10 +32,13 @@
 
 # Standard Library Imports
 import logging
+import os
 
 # Third Party Imports
+import tifffile
 
 # Local Imports
+from aslm.config import get_aslm_path
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -43,17 +46,16 @@ logger = logging.getLogger(p)
 
 
 class CameraBase:
-    r"""CameraBase Parent camera class.
+    """CameraBase Parent camera class.
 
     Parameters
     ----------
-   microscope_name : str
+    microscope_name : str
         Name of microscope in configuration
     device_connection : object
         Hardware device to connect to
     configuration : multiprocesing.managers.DictProxy
         Global configuration of the microscope
-
     """
     def __init__(self, microscope_name, device_connection, configuration):
         if microscope_name not in configuration['configuration']['microscopes'].keys():
@@ -79,6 +81,31 @@ class CameraBase:
         self.camera_exposure_time = self.camera_parameters['exposure_time'] / 1000
         self.camera_display_acquisition_subsampling = self.camera_parameters['display_acquisition_subsampling']
 
+        # Initialize offset and variance maps, if present
+        self._offset, self._variance = None, None
+        self.get_offset_variance_maps()
+
+    def get_offset_variance_maps(self):
+        serial_number = self.camera_parameters['hardware']['serial_number']
+        try:
+            map_path = os.path.join(get_aslm_path(), 'camera_maps')
+            self._offset = tifffile.imread(os.path.join(map_path, f'{serial_number}_off.tiff'))
+            self._variance = tifffile.imread(os.path.join(map_path, f'{serial_number}_var.tiff'))
+        except FileNotFoundError:
+            self._offset, self._variance = None, None
+        return self._offset, self._variance
+
+    @property
+    def offset(self):
+        if self._offset is None:
+            self.get_offset_variance_maps()
+        return self._offset
+
+    @property
+    def variance(self):
+        if self._variance is None:
+            self.get_offset_variance_maps()
+        return self._variance
 
     def set_readout_direction(self, mode):
         r"""Set HamamatsuOrca readout direction.
@@ -99,13 +126,14 @@ class CameraBase:
         full_chip_exposure_time : float
             Normal mode exposure time.
         shutter_width : int
+            Width of ASLM rolling shutter.
 
         Returns
         -------
         exposure_time : float
-            Light-sheet mode exposure time.
+            Light-sheet mode exposure time (ms).
         camera_line_interval : float
-            HamamatsuOrca line interval duration.
+            HamamatsuOrca line interval duration (s).
         """
 
         self.camera_line_interval = (full_chip_exposure_time / 1000)/(shutter_width + self.y_pixels + 10)

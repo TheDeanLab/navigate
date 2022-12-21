@@ -189,6 +189,8 @@ class Model:
         self.feature_list.append([[{'name': ConProAcquisition}]])
         # volume search
         self.feature_list.append([[{'name': VolumeSearch}]])
+        # snap
+        self.feature_list.append([[{'name': Snap}]])
 
     def update_data_buffer(self, img_width=512, img_height=512):
         r"""Update the Data Buffer

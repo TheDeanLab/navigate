@@ -38,6 +38,7 @@ class GalvoNIStage(StageBase):
         self.trigger_source = configuration['configuration']['microscopes'][microscope_name]['daq']['trigger_source']
         self.camera_delay_percent = configuration['configuration']['microscopes'][microscope_name]['camera']['delay_percent']
         self.etl_ramp_falling = configuration['configuration']['microscopes'][microscope_name]['remote_focus_device']['ramp_falling_percent']
+        self.etl_delay = configuration['configuration']['microscopes'][microscope_name]['remote_focus_device']['delay_percent']
 
         self.waveform_dict = {}
         for k in configuration['configuration']['gui']['channels'].keys():
@@ -108,7 +109,7 @@ class GalvoNIStage(StageBase):
                     self.waveform_dict[channel_key] = tunable_lens_ramp(sample_rate=self.sample_rate,
                                                                         exposure_time=exposure_time,
                                                                         sweep_time=self.sweep_time,
-                                                                        etl_delay=7.5,
+                                                                        etl_delay=self.etl_delay,
                                                                         camera_delay=self.camera_delay_percent,
                                                                         fall=self.etl_ramp_falling,
                                                                         amplitude=amp,
@@ -127,7 +128,7 @@ class GalvoNIStage(StageBase):
                     self.waveform_dict[channel_key] = tunable_lens_ramp(sample_rate=self.sample_rate,
                                                                         exposure_time=exposure_time,
                                                                         sweep_time=self.sweep_time,
-                                                                        etl_delay=7.5,
+                                                                        etl_delay=self.etl_delay,
                                                                         camera_delay=self.camera_delay_percent,
                                                                         fall=self.etl_ramp_falling,
                                                                         amplitude=amp,

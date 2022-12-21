@@ -30,7 +30,6 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-
 class ChangeResolution:
     def __init__(self, model, resolution_mode='high', zoom_value='N/A'):
         self.model = model

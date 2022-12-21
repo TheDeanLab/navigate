@@ -144,7 +144,6 @@ class NIDAQ(DAQBase):
         exposure_time : float
             Camera exposure duration.
         """
-
         self.camera_trigger_task = nidaqmx.Task()
         self.master_trigger_task = nidaqmx.Task()
 
@@ -162,8 +161,10 @@ class NIDAQ(DAQBase):
         self.camera_trigger_task.start()
         for task in self.analog_output_tasks:
             task.start()
+        
         self.master_trigger_task.write([False, True, True, True, False], auto_start=True)
         self.camera_trigger_task.wait_until_done()
+        
         for task in self.analog_output_tasks:
             task.wait_until_done()
 

@@ -567,10 +567,11 @@ class Model:
         waveform_dict = self.active_microscope.prepare_acquisition()
 
         self.event_queue.put(('waveform', waveform_dict))
-
         
         self.frame_id = 0
 
+        #  Initialize, run, and stop the acquisition.
+        self.active_microscope.daq.prepare_acquisition('channel_key', self.current_exposure_time)
 
     def run_single_channel_acquisition(self, target_channel=None):
         r"""Acquire a single channel.
@@ -627,6 +628,7 @@ class Model:
         #  Get the Experiment Settings
         microscope_state = self.configuration['experiment']['MicroscopeState']
         prefix_len = len('channel_')
+        self.active_microscope.daq.run_acquisition()
         for channel_key in microscope_state['channels'].keys():
             if self.stop_acquisition or self.stop_send_signal:
                 break
@@ -639,6 +641,7 @@ class Model:
 
             if self.imaging_mode == 'z-stack':
                 break
+        self.active_microscope.daq.stop_acquisition()
 
     def snap_image(self, channel_key):
         r"""Acquire an image after updating the waveforms.
@@ -658,9 +661,9 @@ class Model:
         if hasattr(self, 'signal_container'):
             self.signal_container.run()
 
-        #  Initialize, run, and stop the acquisition.
-        #  Consider putting below to not block thread.
-        self.active_microscope.daq.prepare_acquisition(channel_key, self.current_exposure_time)
+        # #  Initialize, run, and stop the acquisition.
+        # #  Consider putting below to not block thread.
+        # self.active_microscope.daq.prepare_acquisition(channel_key, self.current_exposure_time)
 
         # Stash current position, channel, timepoint
         # Do this here, because signal container functions can inject changes to the stage
@@ -671,8 +674,8 @@ class Model:
         self.data_buffer_positions[self.frame_id][4] = self.configuration['experiment']['StageParameters']['f']
 
         # Run the acquisition
-        self.active_microscope.daq.run_acquisition()
-        self.active_microscope.daq.stop_acquisition()
+        # self.active_microscope.daq.run_acquisition()
+        # self.active_microscope.daq.stop_acquisition()
 
         if hasattr(self, 'signal_container'):
             self.signal_container.run(wait_response=True)

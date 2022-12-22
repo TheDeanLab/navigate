@@ -266,4 +266,5 @@ class SyntheticCamera(CameraBase):
         """
         return 0.01
 
-
+    def calculate_readout_time(self):
+        return 0, 0

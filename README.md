@@ -1,4 +1,4 @@
-# Axially Swept Light-Sheet Microscopy
+# ASLM - Autonomouse Software for Light Microscopy
 
 [![Tests](https://github.com/AdvancedImagingUTSW/ASLM/actions/workflows/push_checks.yaml/badge.svg)](https://github.com/AdvancedImagingUTSW/ASLM/actions/workflows/push_checks.yaml)
 [![codecov](https://codecov.io/gh/TheDeanLab/ASLM/branch/develop/graph/badge.svg?token=270RFSZGG5)](https://codecov.io/gh/TheDeanLab/ASLM)

@@ -68,8 +68,8 @@ class GalvoNI(GalvoBase):
         self.task.ao_channels.add_ao_voltage_chan(channel)
         print(f"Initializing galvo with sample rate {self.sample_rate} and {self.samples} samples")
         self.task.timing.cfg_samp_clk_timing(rate=self.sample_rate,
-                                             sample_mode=AcquisitionType.FINITE,
-                                             samps_per_chan=self.samples)
+                                             sample_mode=AcquisitionType.CONTINUOUS)  # ,
+                                             # samps_per_chan=self.samples)
         self.task.triggers.start_trigger.cfg_dig_edge_start_trig(self.trigger_source)
 
     def __del__(self):

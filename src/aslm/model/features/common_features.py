@@ -272,6 +272,8 @@ class ConProAcquisition:   # don't have the multi-position part for now
                              'node': {'node_type': 'multi-step',
                                       'device_related': True}}
 
+        self.model.move_stage({'z_abs': 0})
+
     def pre_signal_func(self):
         import copy
         microscope_state = self.model.configuration['experiment']['MicroscopeState']
@@ -299,26 +301,28 @@ class ConProAcquisition:   # don't have the multi-position part for now
         self.need_update_offset = True
         self.current_offset = self.start_offset
         self.offset_update_time = 0
+
+        # self.model.move_stage({'z_abs': 0})
     
     def signal_func(self):
         # print(f"Signal with time {self.offset_update_time} and offset {self.current_offset}")
         if self.model.stop_acquisition:
             return False
 
-        if self.need_update_offset:
-            # update offset
-            # self.model.pause_data_thread()CH00_000000
+        # if self.need_update_offset:
+        #     # update offset
+        #     # self.model.pause_data_thread()CH00_000000
 
-            # self.model.update_offset({'offset_abs': self.current_offset}, wait_until_done=True)
+        #     # self.model.update_offset({'offset_abs': self.current_offset}, wait_until_done=True)
             
-            # Update the offset by changing the dictionary value used by GalvoNIStage
-            self.model.configuration['experiment']['MicroscopeState']['offset_start'] = self.current_offset
-            self.model.configuration['experiment']['MicroscopeState']['offset_end'] = self.current_offset
+        #     # Update the offset by changing the dictionary value used by GalvoNIStage
+        #     self.model.configuration['experiment']['MicroscopeState']['offset_start'] = self.current_offset
+        #     self.model.configuration['experiment']['MicroscopeState']['offset_end'] = self.current_offset
             
-            # Call a modification of the waveform
-            self.model.move_stage({'z_abs': 0})
+        #     # Call a modification of the waveform
+        #     self.model.move_stage({'z_abs': 0})
 
-            # self.model.resume_data_thread()
+        #     # self.model.resume_data_thread()
 
         if self.conpro_cycling_mode != 'per_stack':
             # update channel for each z position in 'per_slice'
@@ -328,7 +332,7 @@ class ConProAcquisition:   # don't have the multi-position part for now
         # in 'per_slice', update the offset if all the channels have been acquired
         if self.need_update_offset:
             # next z, f position
-            self.current_offset += self.offset_step_size
+            # self.current_offset += self.offset_step_size
 
             # update offset moved time
             self.offset_update_time += 1

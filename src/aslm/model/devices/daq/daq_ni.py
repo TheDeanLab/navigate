@@ -82,13 +82,25 @@ class NIDAQ(DAQBase):
         """
         camera_trigger_out_line = self.configuration['configuration']['microscopes'][self.microscope_name]['daq']['camera_trigger_out_line']
         self.camera_high_time = 0.004  # (self.camera_pulse_percent / 100) * (exposure_time/1000)  # self.sweep_time
+        self.camera_low_time = self.sweep_time - self.camera_high_time
         self.camera_delay = (self.camera_delay_percent / 100) * (exposure_time/1000)  # * 0.01 * self.sweep_time
 
         self.camera_trigger_task.co_channels.add_co_pulse_chan_time(camera_trigger_out_line,
+                                                                    low_time=self.camera_low_time,
                                                                     high_time=self.camera_high_time,
                                                                     initial_delay=self.camera_delay)
         trigger_source = self.configuration['configuration']['microscopes'][self.microscope_name]['daq']['trigger_source']
         self.camera_trigger_task.triggers.start_trigger.cfg_dig_edge_start_trig(trigger_source)
+
+        n_timepoints = self.configuration['experiment']['MicroscopeState']['timepoints']
+        print(f"n_timepoints is {n_timepoints}")
+        if self.configuration['experiment']['MicroscopeState']['image_mode'] == 'confocal-projection':
+            n_timepoints *= self.configuration['experiment']['MicroscopeState']['n_plane']
+            print(f"times equals {self.configuration['experiment']['MicroscopeState']['n_plane']} is {n_timepoints}")
+        if n_timepoints > 1:
+            self.camera_trigger_task.timing.cfg_implicit_timing(sample_mode=nidaqmx.constants.AcquisitionType.FINITE, samps_per_chan=int(n_timepoints))
+        else:
+            self.camera_trigger_task.timing.cfg_implicit_timing(sample_mode=nidaqmx.constants.AcquisitionType.CONTINUOUS)
 
     def create_master_trigger_task(self):
         r"""Set up the DO master trigger task."""
@@ -104,6 +116,10 @@ class NIDAQ(DAQBase):
 
         self.analog_output_tasks = []
 
+        n_timepoints = self.configuration['experiment']['MicroscopeState']['timepoints']
+        if self.configuration['experiment']['MicroscopeState']['image_mode'] == 'confocal-projection':
+            n_timepoints *= self.configuration['experiment']['MicroscopeState']['n_plane']
+
         # Create one analog output task per board, grouping the channels
         boards = list(set([x.split('/')[0] for x in self.analog_outputs.keys()]))
         for board in boards:
@@ -117,10 +133,19 @@ class NIDAQ(DAQBase):
             n_samples = list(set([v['samples'] for v in self.analog_outputs.values()]))
             if len(n_samples) > 1:
                 logger.debug("NI DAQ - Different number of samples provided for each analog channel. Defaulting to the minimum number of samples provided. Waveforms will be clipped to this length.")
+            print("Sample sizes")
+            for k, v in self.analog_outputs.items():
+                print(f"Channel {k} has samples of length {v['samples']}")
             n_sample = min(n_samples)
-            self.analog_output_tasks[-1].timing.cfg_samp_clk_timing(rate=sample_rates[0],
+            print(f"How many samples? {n_sample}")
+            if n_timepoints > 1:
+                self.analog_output_tasks[-1].timing.cfg_samp_clk_timing(rate=sample_rates[0],
                                                  sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
-                                                 samps_per_chan=n_sample)
+                                                 samps_per_chan=int(n_sample*n_timepoints))
+            else:
+                self.analog_output_tasks[-1].timing.cfg_samp_clk_timing(rate=sample_rates[0],
+                                                    sample_mode=nidaqmx.constants.AcquisitionType.CONTINUOUS)  #,
+                                                    # samps_per_chan=n_sample)
 
             triggers = list(set([v['trigger_source'] for v in self.analog_outputs.values()]))
             if len(triggers) > 1:
@@ -128,7 +153,7 @@ class NIDAQ(DAQBase):
             self.analog_output_tasks[-1].triggers.start_trigger.cfg_dig_edge_start_trig(triggers[0])
 
             # Write values to board
-            waveforms = np.vstack([v['waveform'][channel_key][:n_sample] for k, v in self.analog_outputs.items() if k.split('/')[0] == board]).squeeze()
+            waveforms = np.vstack([np.hstack([v['waveform'][channel_key][:n_sample] for _ in range(int(n_timepoints))]) for k, v in self.analog_outputs.items() if k.split('/')[0] == board]).squeeze()
             self.analog_output_tasks[-1].write(waveforms)
 
     def prepare_acquisition(self, channel_key, exposure_time):
@@ -149,8 +174,8 @@ class NIDAQ(DAQBase):
 
         # Specify ports, timing, and triggering
         self.create_master_trigger_task()
-        self.create_camera_task(exposure_time)
         self.create_analog_output_tasks(channel_key)
+        self.create_camera_task(exposure_time)
 
     def run_acquisition(self):
         r"""Run DAQ Acquisition.
@@ -163,20 +188,34 @@ class NIDAQ(DAQBase):
             task.start()
         
         self.master_trigger_task.write([False, True, True, True, False], auto_start=True)
-        self.camera_trigger_task.wait_until_done()
-        
-        for task in self.analog_output_tasks:
-            task.wait_until_done()
+        n_timepoints = self.configuration['experiment']['MicroscopeState']['timepoints']
+        if n_timepoints > 1 and self.configuration['experiment']['MicroscopeState']['image_mode'] != 'live':
+            self.camera_trigger_task.wait_until_done()
+            
+            # for task in self.analog_output_tasks:
+            #     task.wait_until_done()
 
     def stop_acquisition(self):
         r"""Stop Acquisition."""
-        self.camera_trigger_task.stop()
-        self.master_trigger_task.stop()
-        self.camera_trigger_task.close()
-        self.master_trigger_task.close()
-        for task in self.analog_output_tasks:
-            task.stop()
-            task.close()
+        try:
+            self.camera_trigger_task.stop()
+            self.master_trigger_task.stop()
+            # self.camera_trigger_task.close()
+            # self.master_trigger_task.close()
+            for task in self.analog_output_tasks:
+                task.stop()
+                # task.close()
+        except:
+            pass
+
+    def close_acquisition(self):
+        try:
+            self.camera_trigger_task.close()
+            self.master_trigger_task.close()
+            for task in self.analog_output_tasks:
+                task.close()
+        except:
+            pass
 
     def enable_microscope(self, microscope_name):
         if microscope_name != self.microscope_name:

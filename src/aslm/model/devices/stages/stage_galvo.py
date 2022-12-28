@@ -2,6 +2,8 @@ import logging
 import time
 from multiprocessing.managers import ListProxy
 
+import numpy as np
+
 from aslm.model.devices.stages.stage_base import StageBase
 
 from aslm.model.waveforms import dc_value, tunable_lens_ramp
@@ -101,9 +103,9 @@ class GalvoNIStage(StageBase):
                 self.samples = int(self.sample_rate * self.sweep_time)
 
                 # Calculate the Waveforms
-                if self.configuration['experiment']['MicroscopeState']['image_mode'] == 'projection':
-                    z_start = self.configuration['experiment']['MicroscopeState']['abs_z_start']
-                    z_end = self.configuration['experiment']['MicroscopeState']['abs_z_end']
+                if microscope_state['image_mode'] == 'projection':
+                    z_start = microscope_state['abs_z_start']
+                    z_end = microscope_state['abs_z_end']
                     amp = eval(self.volts_per_micron, {"x": 0.5*(z_end-z_start)})
                     off = eval(self.volts_per_micron, {"x": 0.5*(z_end+z_start)})
                     self.waveform_dict[channel_key] = tunable_lens_ramp(sample_rate=self.sample_rate,
@@ -114,25 +116,52 @@ class GalvoNIStage(StageBase):
                                                                         fall=self.etl_ramp_falling,
                                                                         amplitude=amp,
                                                                         offset=off)                                                    
-                elif self.configuration['experiment']['MicroscopeState']['image_mode'] == 'confocal-projection':
-                    z_range = self.configuration['experiment']['MicroscopeState']['scanrange']
-                    z_offset_start = self.configuration['experiment']['MicroscopeState']['offset_start']
-                    z_offset_end = self.configuration['experiment']['MicroscopeState']['offset_end']
-                    z_planes = self.configuration['experiment']['MicroscopeState']['n_plane']
-                    if z_planes == 1:
-                        amp = eval(self.volts_per_micron, {"x": 0.5*(z_range)})
-                        off = eval(self.volts_per_micron, {"x": 0.5*(z_offset_start)})
+                # elif self.configuration['experiment']['MicroscopeState']['image_mode'] == 'confocal-projection':
+                #     z_range = self.configuration['experiment']['MicroscopeState']['scanrange']
+                #     z_offset_start = self.configuration['experiment']['MicroscopeState']['offset_start']
+                #     z_offset_end = self.configuration['experiment']['MicroscopeState']['offset_end']
+                #     z_planes = self.configuration['experiment']['MicroscopeState']['n_plane']
+                #     if z_planes == 1:
+                #         amp = eval(self.volts_per_micron, {"x": 0.5*(z_range)})
+                #         off = eval(self.volts_per_micron, {"x": 0.5*(z_offset_start)})
+                #     else:
+                #         amp = eval(self.volts_per_micron, {"x": 0.5*(z_range)})
+                #         off = eval(self.volts_per_micron, {"x": 0.5*(z_offset_end)})
+                #     self.waveform_dict[channel_key] = tunable_lens_ramp(sample_rate=self.sample_rate,
+                #                                                         exposure_time=exposure_time,
+                #                                                         sweep_time=self.sweep_time,
+                #                                                         etl_delay=self.etl_delay,
+                #                                                         camera_delay=self.camera_delay_percent,
+                #                                                         fall=self.etl_ramp_falling,
+                #                                                         amplitude=amp,
+                #                                                         offset=off)
+                elif microscope_state['image_mode'] == 'confocal-projection':
+                    z_range = microscope_state['scanrange']
+                    z_planes = microscope_state['n_plane']
+                    z_offset_start = microscope_state['offset_start']
+                    z_offset_end = microscope_state['offset_end'] if z_planes > 1 else z_offset_start
+                    waveforms = []
+                    if z_planes > 1:
+                        offsets = np.arange(int(z_planes)) * (z_offset_end - z_offset_start) / float(z_planes-1)
                     else:
+                        offsets = [z_offset_start]
+                    print(offsets)
+                    for z_offset in offsets:
                         amp = eval(self.volts_per_micron, {"x": 0.5*(z_range)})
-                        off = eval(self.volts_per_micron, {"x": 0.5*(z_offset_end)})
-                    self.waveform_dict[channel_key] = tunable_lens_ramp(sample_rate=self.sample_rate,
-                                                                        exposure_time=exposure_time,
-                                                                        sweep_time=self.sweep_time,
-                                                                        etl_delay=self.etl_delay,
-                                                                        camera_delay=self.camera_delay_percent,
-                                                                        fall=self.etl_ramp_falling,
-                                                                        amplitude=amp,
-                                                                        offset=off)
+                        off = eval(self.volts_per_micron, {"x": 0.5*(z_offset)})
+                        waveforms.append(tunable_lens_ramp(sample_rate=self.sample_rate,
+                                                            exposure_time=exposure_time,
+                                                            sweep_time=self.sweep_time,
+                                                            etl_delay=self.etl_delay,
+                                                            camera_delay=self.camera_delay_percent,
+                                                            fall=self.etl_ramp_falling,
+                                                            amplitude=amp,
+                                                            offset=off))
+                        print(waveforms[-1].shape)
+                        print(np.min(waveforms[-1]), np.mean(waveforms[-1]), np.max(waveforms[-1]))
+                    self.waveform_dict[channel_key] = np.hstack(waveforms)
+                    self.samples = int(self.sample_rate * self.sweep_time * z_planes)
+                    print(f"Waveform with {z_planes} planes is of length {self.waveform_dict[channel_key].shape}")
                 else:
                     self.waveform_dict[channel_key] = dc_value(sample_rate=self.sample_rate,
                                                             sweep_time=self.sweep_time,

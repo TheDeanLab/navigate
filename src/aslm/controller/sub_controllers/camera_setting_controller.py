@@ -361,6 +361,10 @@ class CameraSettingController(GUIController):
         vn = float(self.roi_widgets['Height'].get())
         exposure_time = float(self.framerate_widgets['exposure_time'].get())
 
+        microscope_name = self.parent_controller.configuration['experiment']['MicroscopeState']['microscope_name']
+        camera_delay_percent = self.parent_controller.configuration['configuration']['microscopes'][microscope_name]['camera']['delay_percent']
+        etl_ramp_falling = self.parent_controller.configuration['configuration']['microscopes'][microscope_name]['remote_focus_device']['ramp_falling_percent']
+
         if sensor_mode == 'Normal':
             #  Area sensor mode operation
             if self.trigger_source == 1:
@@ -387,7 +391,9 @@ class CameraSettingController(GUIController):
 
         # return readout_time, max_frame_rate
         self.framerate_widgets['readout_time'].set(readout_time)
-        self.framerate_widgets['max_framerate'].set(max_frame_rate*1000)
+        # self.framerate_widgets['max_framerate'].set(max_frame_rate*1000)
+        sweep_time = exposure_time/1000 + exposure_time/1000 * ((camera_delay_percent + etl_ramp_falling) / 100)
+        self.framerate_widgets['max_framerate'].set(1.0/sweep_time)
 
     def update_number_of_pixels(self, *args):
         """

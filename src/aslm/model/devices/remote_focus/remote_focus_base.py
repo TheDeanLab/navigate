@@ -34,6 +34,7 @@
 import logging
 
 # Third Party Imports
+import numpy as np
 
 # Local Imports
 from aslm.model.waveforms import tunable_lens_ramp
@@ -123,6 +124,10 @@ class RemoteFocusBase:
                                                                     offset=etl_offset)
                 self.waveform_dict[channel_key][self.waveform_dict[channel_key] > self.etl_max_voltage] = self.etl_max_voltage
                 self.waveform_dict[channel_key][self.waveform_dict[channel_key] < self.etl_min_voltage] = self.etl_min_voltage
+
+                if self.configuration['experiment']['MicroscopeState']['image_mode'] == 'confocal-projection':
+                    self.waveform_dict[channel_key] = np.hstack([self.waveform_dict[channel_key]]*int(microscope_state['n_plane']))
+                    self.samples = int(self.sample_rate * self.sweep_time * microscope_state['n_plane'])
 
         return self.waveform_dict
 

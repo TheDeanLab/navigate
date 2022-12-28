@@ -492,6 +492,8 @@ class Model:
             self.image_writer.close()
         
         self.active_microscope.end_acquisition()
+        self.active_microscope.daq.stop_acquisition()
+        self.active_microscope.daq.close_acquisition()
 
     def run_data_process(self, num_of_frames=0, data_func=None):
         r"""Run the data process.
@@ -632,16 +634,23 @@ class Model:
                 #     self.stop_acquisition = True
                 return
 
+            self.active_microscope.daq.close_acquisition()
+            self.active_microscope.daq.stop_acquisition()
+
             # Update Microscope State Dictionary
             channel = channels[channel_key]
             self.current_channel = target_channel
 
             self.active_microscope.prepare_channel(channel_key)
+            self.active_microscope.daq.prepare_acquisition(channel_key, self.current_exposure_time)
 
             # Defocus Settings
             curr_focus = self.configuration['experiment']['StageParameters']['f']
             self.move_stage({'f_abs': curr_focus + float(channel['defocus'])}, wait_until_done=True)
             self.configuration['experiment']['StageParameters']['f'] = curr_focus  # do something very hacky so we keep using the same focus reference
+
+            # Run the acquisition
+            self.active_microscope.daq.run_acquisition()
 
         # Take the image
         self.snap_image(channel_key)
@@ -657,17 +666,17 @@ class Model:
         microscope_state = self.configuration['experiment']['MicroscopeState']
         prefix_len = len('channel_')
         for channel_key in microscope_state['channels'].keys():
-            if self.stop_acquisition or self.stop_send_signal:
-                break
+                if self.stop_acquisition or self.stop_send_signal:
+                    break
 
-            if not microscope_state['channels'][channel_key]['is_selected']:
-                continue
-            
-            channel_idx = int(channel_key[prefix_len:])
-            self.run_single_channel_acquisition_with_features(channel_idx)
+                if not microscope_state['channels'][channel_key]['is_selected']:
+                    continue
+                
+                channel_idx = int(channel_key[prefix_len:])
+                self.run_single_channel_acquisition_with_features(channel_idx)
 
-            if self.imaging_mode == 'z-stack':
-                break
+                if self.imaging_mode == 'z-stack':
+                    break
 
     def snap_image(self, channel_key):
         r"""Acquire an image after updating the waveforms.
@@ -687,10 +696,6 @@ class Model:
         if hasattr(self, 'signal_container'):
             self.signal_container.run()
 
-        #  Initialize, run, and stop the acquisition.
-        #  Consider putting below to not block thread.
-        self.active_microscope.daq.prepare_acquisition(channel_key, self.current_exposure_time)
-
         # Stash current position, channel, timepoint
         # Do this here, because signal container functions can inject changes to the stage
         self.data_buffer_positions[self.frame_id][0] = self.configuration['experiment']['StageParameters']['x']
@@ -698,10 +703,6 @@ class Model:
         self.data_buffer_positions[self.frame_id][2] = self.configuration['experiment']['StageParameters']['z']
         self.data_buffer_positions[self.frame_id][3] = self.configuration['experiment']['StageParameters']['theta']
         self.data_buffer_positions[self.frame_id][4] = self.configuration['experiment']['StageParameters']['f']
-
-        # Run the acquisition
-        self.active_microscope.daq.run_acquisition()
-        self.active_microscope.daq.stop_acquisition()
 
         if hasattr(self, 'signal_container'):
             self.signal_container.run(wait_response=True)
@@ -721,8 +722,7 @@ class Model:
     def run_acquisition(self):
         r"""Run acquisition along with a feature list one time.
         """
-        for _ in range(self.configuration['experiment']['MicroscopeState']['timepoints']):
-            self.run_single_acquisition()
+        self.run_single_acquisition()
         # wait a very short time to the data thread to get the last frame
         # TODO: maybe need to adjust
         # time.sleep(0.005)

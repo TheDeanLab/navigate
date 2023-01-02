@@ -1,35 +1,34 @@
-# ASLM Model Waveforms
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+All rights reserved.
 
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
-# All rights reserved.
+Redistribution and use in source and binary forms, with or without
+modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+provided that the following conditions are met:
 
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+     * Redistributions of source code must retain the above copyright notice,
+     this list of conditions and the following disclaimer.
 
-#      * Redistributions of source code must retain the above copyright notice,
-#      this list of conditions and the following disclaimer.
+     * Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in the
+     documentation and/or other materials provided with the distribution.
 
-#      * Redistributions in binary form must reproduce the above copyright
-#      notice, this list of conditions and the following disclaimer in the
-#      documentation and/or other materials provided with the distribution.
+     * Neither the name of the copyright holders nor the names of its
+     contributors may be used to endorse or promote products derived from this
+     software without specific prior written permission.
 
-#      * Neither the name of the copyright holders nor the names of its
-#      contributors may be used to endorse or promote products derived from this
-#      software without specific prior written permission.
-
-# NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
-# THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
-# CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-# PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
-# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
-# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
-# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-# POSSIBILITY OF SUCH DAMAGE.
+NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
+THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+"""
 
 # Standard Imports
 import logging
@@ -45,7 +44,7 @@ logger = logging.getLogger(p)
 
 
 class StageBase:
-    r"""StageBase Parent Class
+    """StageBase Parent Class
 
     Parameters
     ----------
@@ -56,7 +55,7 @@ class StageBase:
     configuration : multiprocesing.managers.DictProxy
         Global configuration of the microscope
 
-    Attribiutes
+    Attributes
     -----------
     x_pos : float
         True x position
@@ -90,21 +89,16 @@ class StageBase:
         Min focus positoin
     theta_min : float
         Min rotation position
-    x_rot_position : float
-        Location to move the specimen in x while rotating.
-    y_rot_position : float
-        Location to move the specimen in y while rotating.
-    z_rot_position : float
-        Location to move the specimen in z while rotating.
-    startfocus : float
-        Location to initialize the focusing stage to.
 
     Methods
     -------
     create_position_dict()
         Creates a dictionary with the hardware stage positions.
-    create_internal_position_dict()
-        Creates a dictionary with the software stage positions.
+    get_abs_position()
+        Makes sure that the move is within the min and max stage limits.
+    stop()
+        Emergency halt of stage operation.
+
     """
     def __init__(self,
                  microscope_name,
@@ -113,7 +107,6 @@ class StageBase:
                  device_id=0):
 
         self.position_dict = None
-        self.int_position_dict = None
         stage = configuration['configuration']['microscopes'][microscope_name]['stage']
         if type(stage['hardware']) == ListProxy:
             self.axes = stage['hardware'][device_id]['axes']
@@ -128,45 +121,14 @@ class StageBase:
             setattr(self, f"{ax}_pos", None)
             setattr(self, f"{ax}_min", stage[f'{ax}_min'])  # Units are in microns
             setattr(self, f"{ax}_max", stage[f'{ax}_max'])  # Units are in microns
-
         self.create_position_dict()
 
-        # Sample Position When Rotating
-        self.x_rot_position = stage['x_rot_position']
-        self.y_rot_position = stage['y_rot_position']
-        self.z_rot_position = stage['z_rot_position']
-
-        self.y_load_position = stage['y_load_position']
-        self.y_unload_position = stage['y_unload_position']
-
-        # Starting Position of Focusing Device
-        self.startfocus = stage['startfocus']
-
     def create_position_dict(self):
-        r"""Creates a dictionary with the hardware stage positions.
-        """
+        """Creates a dictionary with the hardware stage positions."""
         self.position_dict = {}
         for ax in self.axes:
             ax_str = f"{ax}_pos"
             self.position_dict[ax_str] = getattr(self, ax_str)
-
-    def create_internal_position_dict(self):
-        r"""Creates a dictionary with the software stage positions.
-        Internal position includes the offset for each stage position.
-        e.g, int_x_pos = x_pos + int_x_pos_offset
-        """
-        self.int_position_dict = {}
-        for ax in self.axes:
-            self.int_position_dict[f"{ax}_pos"] = getattr(self,  f"int_{ax}_pos")
-
-    def update_position_dictionaries(self):
-        """Update the Stage Position Dictionaries."""
-        self.create_position_dict()
-        # for ax in self.axes:
-        #     int_pos = getattr(self, f"{ax}_pos") + getattr(self, f"int_{ax}_pos_offset")
-        #     setattr(self, f"int_{ax}_pos", int_pos)
-        # self.create_internal_position_dict()
-        # logger.debug(f"Stage Position:, {self.int_position_dict}")
 
     def get_abs_position(self, axis, move_dictionary):
         """Ensure the requested position is within axis bounds and return it.
@@ -178,7 +140,7 @@ class StageBase:
         move_dictionary : dict
             A dictionary of values required for movement. 
             Includes 'x_abs', 'x_min', etc. for one or more axes.
-            Expects values in micrometers, except for theta, which is in degrees.
+            Expect values in micrometers, except for theta, which is in degrees.
 
         Returns
         -------
@@ -187,8 +149,8 @@ class StageBase:
         """
         try:
             # Get all necessary attributes. If we can't we'll move to the error case.
-            axis_abs = move_dictionary[f"{axis}_abs"] - getattr(self, f"int_{axis}_pos_offset",
-                                                                0)  # TODO: should we default to 0?
+            axis_abs = move_dictionary[f"{axis}_abs"] - getattr(self, f"int_{axis}_pos_offset", 0)
+            # TODO: should we default to 0?
             axis_min, axis_max = getattr(self, f"{axis}_min"), getattr(self, f"{axis}_max")
 
             # Check that our position is within the axis bounds, fail if it's not.

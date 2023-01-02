@@ -141,7 +141,8 @@ class ASIStage(StageBase):
             Emergency halt of stage operation.
 
     """
-    def __init__(self, microscope_name,
+    def __init__(self,
+                 microscope_name,
                  device_connection,
                  configuration,
                  device_id=0):

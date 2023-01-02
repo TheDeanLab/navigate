@@ -75,7 +75,7 @@ def build_PIStage_connection(controller_name,
 
 
 class PIStage(StageBase):
-    """StageBase Parent Class
+    """Physik Instrumente Stage Class
 
         Parameters
         ----------
@@ -83,7 +83,7 @@ class PIStage(StageBase):
             Name of microscope in configuration
         device_connection : object
             Hardware device to connect to
-        configuration : multiprocesing.managers.DictProxy
+        configuration : multiprocessing.managers.DictProxy
             Global configuration of the microscope
 
         Attributes
@@ -107,7 +107,7 @@ class PIStage(StageBase):
         z_max : float
             Max y position
         f_max : float
-            Max focus positoin
+            Max focus position
         theta_max : float
             Max rotation position
         x_min : float
@@ -117,7 +117,7 @@ class PIStage(StageBase):
         z_min : float
             Min y position
         f_min : float
-            Min focus positoin
+            Min focus position
         theta_min : float
             Min rotation position
 

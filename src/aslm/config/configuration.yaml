@@ -156,13 +156,6 @@ microscopes:
       z_step: 500
       theta_step: 30
       f_step: 500
-
-      position:
-        x_pos: 25250
-        y_pos: 40000
-        z_pos: 40000
-        f_pos: 70000
-        theta_pos: 0
       velocity: 1000
 
     zoom:
@@ -379,13 +372,6 @@ microscopes:
       z_step: 500
       theta_step: 30
       f_step: 500
-
-      position:
-        x_pos: 25250
-        y_pos: 40000
-        z_pos: 40000
-        f_pos: 0
-        theta_pos: 0
       velocity: 1000
 
     zoom:

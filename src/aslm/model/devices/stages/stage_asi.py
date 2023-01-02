@@ -86,6 +86,60 @@ class ASIStage(StageBase):
     NOTE: Do not ever change the F axis. This will alter the relative position of each 
     FTP stilt, adding strain to the system. Only move the Z axis, which will change both
     stilt positions simultaneously.
+
+         Parameters
+        ----------
+        microscope_name : str
+            Name of microscope in configuration
+        device_connection : object
+            Hardware device to connect to
+        configuration : multiprocessing.managers.DictProxy
+            Global configuration of the microscope
+
+        Attributes
+        -----------
+        x_pos : float
+            True x position
+        y_pos : float
+            True y position
+        z_pos : float
+            True z position
+        f_pos : float
+            True focus position
+        theta_pos : float
+            True rotation position
+        position_dict : dict
+            Dictionary of true stage positions
+        x_max : float
+            Max x position
+        y_max : float
+            Max y position
+        z_max : float
+            Max y position
+        f_max : float
+            Max focus position
+        theta_max : float
+            Max rotation position
+        x_min : float
+            Min x position
+        y_min : float
+            Min y position
+        z_min : float
+            Min y position
+        f_min : float
+            Min focus position
+        theta_min : float
+            Min rotation position
+
+        Methods
+        -------
+        create_position_dict()
+            Creates a dictionary with the hardware stage positions.
+        get_abs_position()
+            Makes sure that the move is within the min and max stage limits.
+        stop()
+            Emergency halt of stage operation.
+
     """
     def __init__(self, microscope_name,
                  device_connection,

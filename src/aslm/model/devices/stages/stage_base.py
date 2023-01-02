@@ -51,7 +51,7 @@ class StageBase:
         Name of microscope in configuration
     device_connection : object
         Hardware device to connect to
-    configuration : multiprocesing.managers.DictProxy
+    configuration : multiprocessing.managers.DictProxy
         Global configuration of the microscope
 
     Attributes
@@ -75,7 +75,7 @@ class StageBase:
     z_max : float
         Max y position
     f_max : float
-        Max focus positoin
+        Max focus position
     theta_max : float
         Max rotation position
     x_min : float

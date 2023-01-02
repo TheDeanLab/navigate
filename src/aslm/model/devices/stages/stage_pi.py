@@ -52,10 +52,10 @@ def build_PIStage_connection(controllername, serialnum, stages, refmodes):
     pi_device.ConnectUSB(serialnum=serialnum)
     pi_tools.startup(pi_device, stages=list(pi_stages), refmodes=list(pi_refmodes))
     # wait until pi_device is ready
-    blockflag = True
-    while blockflag:
+    block_flag = True
+    while block_flag:
         if pi_device.IsControllerReady():
-            blockflag = False
+            block_flag = False
         else:
             time.sleep(0.1)
     
@@ -66,7 +66,11 @@ def build_PIStage_connection(controllername, serialnum, stages, refmodes):
     return stage_connection
 
 class PIStage(StageBase):
-    def __init__(self, microscope_name, device_connection, configuration, device_id=0):
+    def __init__(self,
+                 microscope_name,
+                 device_connection,
+                 configuration,
+                 device_id=0):
         super().__init__(microscope_name, device_connection, configuration, device_id)
 
         # Mapping from self.axes to corresponding PI axis labelling
@@ -78,20 +82,16 @@ class PIStage(StageBase):
             'theta': 4
         }
         self.pi_axes = list(map(lambda a: axes_mapping[a], self.axes))
-
         self.pitools = device_connection['pitools']
         self.pidevice = device_connection['pidevice']
 
     def __del__(self):
+        """Close the PI Connection"""
         try:
-            """
-            # Close the PI connection
-            """
             self.stop()
             self.pidevice.unload()
             logger.debug("PI connection closed")
         except GCSError as e:  # except BaseException:
-            # logger.exception("Error while disconnecting the PI stage")
             print('Error while disconnecting the PI stage')
             logger.exception(e)
             raise

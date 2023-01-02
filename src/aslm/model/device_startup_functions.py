@@ -129,7 +129,7 @@ def load_camera_connection(configuration,
         # Locally Import Hamamatsu API and Initialize Camera Controller
         HamamatsuController = importlib.import_module('aslm.model.devices.APIs.hamamatsu.HamamatsuAPI')
         return auto_redial(HamamatsuController.DCAM, (camera_id,), exception=Exception)
-    elif cam_type.lower() == 'syntheticcamera' or device_type.lower() == 'synthetic':
+    elif cam_type.lower() == 'syntheticcamera' or cam_type.lower() == 'synthetic':
         from aslm.model.devices.camera.camera_synthetic import SyntheticCameraController
         return SyntheticCameraController()
     else:
@@ -169,7 +169,7 @@ def start_camera(microscope_name,
     if cam_type == 'HamamatsuOrca':
         from aslm.model.devices.camera.camera_hamamatsu import HamamatsuOrca
         return HamamatsuOrca(microscope_name, device_connection, configuration)
-    elif cam_type.lower() == 'syntheticcamera' or device_type.lower() == 'synthetic':
+    elif cam_type.lower() == 'syntheticcamera' or cam_type.lower() == 'synthetic':
         from aslm.model.devices.camera.camera_synthetic import SyntheticCamera
         return SyntheticCamera(microscope_name, device_connection, configuration)
     else:

@@ -165,11 +165,6 @@ microscopes:
         theta_pos: 0
       velocity: 1000
 
-      x_offset: 0
-      y_offset: 0
-      z_offset: 0
-      f_offset: 0
-      theta_offset: 0
     zoom:
       hardware:
         name: zoom
@@ -393,11 +388,6 @@ microscopes:
         theta_pos: 0
       velocity: 1000
 
-      x_offset: 1500
-      y_offset: 1720
-      z_offset: -14311
-      f_offset: 0
-      theta_offset: 0
     zoom:
       position:
         N/A: 0

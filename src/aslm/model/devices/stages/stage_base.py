@@ -70,28 +70,6 @@ class StageBase:
         True rotation position
     position_dict : dict
         Dictionary of true stage positions
-    int_x_pos : float
-        Software x position
-    int_y_pos : float
-        Software y position
-    int_z_pos : float
-        Software z position
-    int_f_pos : float
-        Software focus position
-    int_theta_pos : float
-        Software theta position
-    int_position_dict : dict
-        Dictionary of software stage positions
-    int_x_pos_offset : float
-        x position offset
-    int_y_pos_offset : float
-        y position offset
-    int_z_pos_offset : float
-        z position offset
-    int_f_pos_offset : float
-        focus position offset
-    int_theta_pos_offset : float
-        theta position offset
     x_max : float
         Max x position
     y_max : float
@@ -128,7 +106,12 @@ class StageBase:
     create_internal_position_dict()
         Creates a dictionary with the software stage positions.
     """
-    def __init__(self, microscope_name, device_connection, configuration, device_id=0):
+    def __init__(self,
+                 microscope_name,
+                 device_connection,
+                 configuration,
+                 device_id=0):
+
         self.position_dict = None
         self.int_position_dict = None
         stage = configuration['configuration']['microscopes'][microscope_name]['stage']
@@ -142,14 +125,11 @@ class StageBase:
         the stages are zeroed or not.
         """
         for ax in self.axes:
-            setattr(self, f"{ax}_pos", stage['position'][f'{ax}_pos'])  # True stage position
-            setattr(self, f"int_{ax}_pos", 0)                                       # Internal stage position
-            setattr(self, f"int_{ax}_pos_offset", 0)                                # Offset between true and internal
+            setattr(self, f"{ax}_pos", None)
             setattr(self, f"{ax}_min", stage[f'{ax}_min'])  # Units are in microns
             setattr(self, f"{ax}_max", stage[f'{ax}_max'])  # Units are in microns
 
         self.create_position_dict()
-        self.create_internal_position_dict()
 
         # Sample Position When Rotating
         self.x_rot_position = stage['x_rot_position']
@@ -180,16 +160,16 @@ class StageBase:
             self.int_position_dict[f"{ax}_pos"] = getattr(self,  f"int_{ax}_pos")
 
     def update_position_dictionaries(self):
+        """Update the Stage Position Dictionaries."""
         self.create_position_dict()
-        for ax in self.axes:
-            int_pos = getattr(self, f"{ax}_pos") + getattr(self, f"int_{ax}_pos_offset")
-            setattr(self, f"int_{ax}_pos", int_pos)
-        self.create_internal_position_dict()
-        logger.debug(f"Stage Position:, {self.int_position_dict}")
+        # for ax in self.axes:
+        #     int_pos = getattr(self, f"{ax}_pos") + getattr(self, f"int_{ax}_pos_offset")
+        #     setattr(self, f"int_{ax}_pos", int_pos)
+        # self.create_internal_position_dict()
+        # logger.debug(f"Stage Position:, {self.int_position_dict}")
 
     def get_abs_position(self, axis, move_dictionary):
-        r"""
-        Ensure the requested position is within axis bounds and return it.
+        """Ensure the requested position is within axis bounds and return it.
 
         Parameters
         ----------
@@ -225,6 +205,5 @@ class StageBase:
             return -1e50
 
     def stop(self):
-        r"""Stop all stage movement abruptly.
-        """
+        """Stop all stage movement abruptly."""
         pass

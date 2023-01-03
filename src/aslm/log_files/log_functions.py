@@ -112,16 +112,17 @@ def log_setup(logging_configuration):
                                           f'{time.hour:02d}',
                                           f'{time.minute:02d}'))
 
-    logging_path = Path(get_aslm_path())
-    logging_path = Path.joinpath(logging_path,
-                                 'logs',
-                                 time_stamp)
+    logging_path = Path.joinpath(Path(get_aslm_path()),
+                                 'logs')
+    todays_path = Path.joinpath(logging_path, time_stamp)
     if not os.path.exists(logging_path):
         os.mkdir(logging_path)
+    if not os.path.exists(todays_path):
+        os.mkdir(todays_path)
 
     def update_filename(v):
         """Function to map filename to base_directory/filename in the dictionary"""
-        return Path.joinpath(logging_path, v)
+        return Path.joinpath(todays_path, v)
 
     # Read the logging configuration file.
     with open(logging_configuration_path, 'r') as f:

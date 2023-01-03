@@ -191,7 +191,7 @@ class ASIStage(StageBase):
         except TigerException as e:
             print('Failed to report ASI Stage Position')
             logger.exception(e)
-        self.update_position_dictionaries()
+        # self.update_position_dictionaries()
         return self.position_dict
 
     def move_axis_absolute(self,

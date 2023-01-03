@@ -2,9 +2,20 @@ import numpy as np
 import numpy.typing as npt
 
 
-def gaussian_beam(r0: int, z0: int, rl: int, zl: int, w0: float, NA: float = 0.15,  n: float = 1.33,
-                  wvl: float = 488.0, pixel_size: float = 1, I0: float = 1, bg: float = 0) -> npt.ArrayLike:
-    """ Generate a Gaussian beam
+def gaussian_beam(
+    r0: int,
+    z0: int,
+    rl: int,
+    zl: int,
+    w0: float,
+    NA: float = 0.15,
+    n: float = 1.33,
+    wvl: float = 488.0,
+    pixel_size: float = 1,
+    I0: float = 1,
+    bg: float = 0,
+) -> npt.ArrayLike:
+    """Generate a Gaussian beam
 
     Parameters
     ----------
@@ -64,9 +75,25 @@ def gaussian_beam(r0: int, z0: int, rl: int, zl: int, w0: float, NA: float = 0.1
 #                             NA, n, wvl, pixel_size, res.x[3], res.x[4]))
 #
 
+
 def fit_gaussian_beam_error(x, image, NA, n, wvl, pixel_size, ravel=True):
     """x = (r0, z0, w0, I0, bg0)"""
-    diff = (gaussian_beam(x[0], x[1], image.shape[0], image.shape[1], x[2], NA, n, wvl, pixel_size, x[3], x[4]) - image)
+    diff = (
+        gaussian_beam(
+            x[0],
+            x[1],
+            image.shape[0],
+            image.shape[1],
+            x[2],
+            NA,
+            n,
+            wvl,
+            pixel_size,
+            x[3],
+            x[4],
+        )
+        - image
+    )
     # diff += x[2]  # regularize by beam waist size
     if ravel:
         return diff.ravel()
@@ -75,6 +102,9 @@ def fit_gaussian_beam_error(x, image, NA, n, wvl, pixel_size, ravel=True):
 
 
 def fit_gaussian_beam_mse(x, image, NA, n, wvl, pixel_size):
-    return (fit_gaussian_beam_error(x, image, NA, n, wvl, pixel_size, ravel=False)**2).mean()
+    return (
+        fit_gaussian_beam_error(x, image, NA, n, wvl, pixel_size, ravel=False) ** 2
+    ).mean()
+
 
 ######## End fitting functions #########

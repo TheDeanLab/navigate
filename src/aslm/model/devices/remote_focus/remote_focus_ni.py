@@ -46,16 +46,16 @@ logger = logging.getLogger(p)
 
 
 class RemoteFocusNI(RemoteFocusBase):
-    r"""RemoteFocusNI Class
-
-     """
+    r"""RemoteFocusNI Class"""
 
     def __init__(self, microscope_name, device_connection, configuration):
         super().__init__(microscope_name, device_connection, configuration)
 
         self.task = None
 
-        self.trigger_source = configuration['configuration']['microscopes'][microscope_name]['daq']['trigger_source']
+        self.trigger_source = configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["daq"]["trigger_source"]
 
         # self.initialize_task()
 
@@ -64,12 +64,16 @@ class RemoteFocusNI(RemoteFocusBase):
     def initialize_task(self):
         # TODO: makesure the task is reusable, Or need to create and close each time.
         self.task = nidaqmx.Task()
-        channel = self.device_config['hardware']['channel']
+        channel = self.device_config["hardware"]["channel"]
         self.task.ao_channels.add_ao_voltage_chan(channel)
-        print(f"Initializing remote focus with sample rate {self.sample_rate} and {self.samples} samples")
-        self.task.timing.cfg_samp_clk_timing(rate=self.sample_rate,
-                                             sample_mode=AcquisitionType.FINITE,
-                                             samps_per_chan=self.samples)
+        print(
+            f"Initializing remote focus with sample rate {self.sample_rate} and {self.samples} samples"
+        )
+        self.task.timing.cfg_samp_clk_timing(
+            rate=self.sample_rate,
+            sample_mode=AcquisitionType.FINITE,
+            samps_per_chan=self.samples,
+        )
         self.task.triggers.start_trigger.cfg_dig_edge_start_trig(self.trigger_source)
 
     def __del__(self):
@@ -79,10 +83,12 @@ class RemoteFocusNI(RemoteFocusBase):
     def adjust(self, readout_time):
         waveform_dict = super().adjust(readout_time)
 
-        self.daq.analog_outputs[self.device_config['hardware']['channel']] = {'sample_rate': self.sample_rate,
-                                                                              'samples': self.samples,
-                                                                              'trigger_source': self.trigger_source,
-                                                                              'waveform': waveform_dict}
+        self.daq.analog_outputs[self.device_config["hardware"]["channel"]] = {
+            "sample_rate": self.sample_rate,
+            "samples": self.samples,
+            "trigger_source": self.trigger_source,
+            "waveform": waveform_dict,
+        }
 
         return waveform_dict
 
@@ -100,7 +106,7 @@ class RemoteFocusNI(RemoteFocusBase):
         #     self.task.wait_until_done()
         # self.task.stop()
         pass
-    
+
     def close_task(self):
         # self.task.close()
         pass

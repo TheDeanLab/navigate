@@ -36,39 +36,47 @@ from tkinter import ttk
 
 
 import numpy as np
-from aslm.view.main_window_content.camera_display.camera_settings.camera_settings_frames.camera_mode import camera_mode
-from aslm.view.main_window_content.camera_display.camera_settings.camera_settings_frames.framerate_info import framerate_info
-from aslm.view.main_window_content.camera_display.camera_settings.camera_settings_frames.camera_roi import camera_roi
+from aslm.view.main_window_content.camera_display.camera_settings.camera_settings_frames.camera_mode import (
+    camera_mode,
+)
+from aslm.view.main_window_content.camera_display.camera_settings.camera_settings_frames.framerate_info import (
+    framerate_info,
+)
+from aslm.view.main_window_content.camera_display.camera_settings.camera_settings_frames.camera_roi import (
+    camera_roi,
+)
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
+
 
 class camera_settings_tab(tk.Frame):
     """
     # This class holds and controls the layout of the major label frames for the camera settings tab in the settings notebook. Any imported classes are children that makeup
     # the content of the major frames. If you need to adjust anything in the frames follow the children.
     """
+
     def __init__(self, setntbk, *args, **kwargs):
-        #Init Frame
+        # Init Frame
         tk.Frame.__init__(self, setntbk, *args, **kwargs)
 
         self.index = 1
-        
-        # Formatting
-        tk.Grid.columnconfigure(self, 'all', weight=1)
-        tk.Grid.rowconfigure(self, 'all', weight=1)
 
-        #Camera Modes Frame
+        # Formatting
+        tk.Grid.columnconfigure(self, "all", weight=1)
+        tk.Grid.rowconfigure(self, "all", weight=1)
+
+        # Camera Modes Frame
         self.camera_mode = camera_mode(self)
         self.camera_mode.grid(row=0, column=0, sticky=(tk.NSEW), padx=10, pady=10)
-        
-        #Framerate Label Frame
+
+        # Framerate Label Frame
         self.framerate_info = framerate_info(self)
         self.framerate_info.grid(row=0, column=1, sticky=(tk.NSEW), padx=10, pady=10)
 
-        #Region of Interest Settings
+        # Region of Interest Settings
         self.camera_roi = camera_roi(self)
-        self.camera_roi.grid(row=1, column=0,columnspan=2, sticky=(tk.NSEW), padx=10, pady=10)
-
-
+        self.camera_roi.grid(
+            row=1, column=0, columnspan=2, sticky=(tk.NSEW), padx=10, pady=10
+        )

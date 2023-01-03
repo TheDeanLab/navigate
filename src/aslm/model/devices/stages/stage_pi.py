@@ -44,6 +44,7 @@ from aslm.model.devices.stages.stage_base import StageBase
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+
 def build_PIStage_connection(controllername, serialnum, stages, refmodes):
     pi_stages = stages.split()
     pi_refmodes = refmodes.split()
@@ -58,29 +59,21 @@ def build_PIStage_connection(controllername, serialnum, stages, refmodes):
             blockflag = False
         else:
             time.sleep(0.1)
-    
-    stage_connection = {
-        'pitools': pi_tools,
-        'pidevice': pi_device
-    }
+
+    stage_connection = {"pitools": pi_tools, "pidevice": pi_device}
     return stage_connection
+
 
 class PIStage(StageBase):
     def __init__(self, microscope_name, device_connection, configuration, device_id=0):
         super().__init__(microscope_name, device_connection, configuration, device_id)
 
         # Mapping from self.axes to corresponding PI axis labelling
-        axes_mapping = {
-            'x': 1,
-            'y': 2,
-            'z': 3,
-            'f': 5,
-            'theta': 4
-        }
+        axes_mapping = {"x": 1, "y": 2, "z": 3, "f": 5, "theta": 4}
         self.pi_axes = list(map(lambda a: axes_mapping[a], self.axes))
 
-        self.pitools = device_connection['pitools']
-        self.pidevice = device_connection['pidevice']
+        self.pitools = device_connection["pitools"]
+        self.pidevice = device_connection["pidevice"]
 
     def __del__(self):
         try:
@@ -92,7 +85,7 @@ class PIStage(StageBase):
             logger.debug("PI connection closed")
         except GCSError as e:  # except BaseException:
             # logger.exception("Error while disconnecting the PI stage")
-            print('Error while disconnecting the PI stage')
+            print("Error while disconnecting the PI stage")
             logger.exception(e)
             raise
 
@@ -102,16 +95,18 @@ class PIStage(StageBase):
         # position dictionary.
         """
         try:
-            positions = self.pidevice.qPOS(self.pidevice.axes)  # positions from the device are in mm
+            positions = self.pidevice.qPOS(
+                self.pidevice.axes
+            )  # positions from the device are in mm
 
             # convert to um
             for ax, n in zip(self.axes, self.pi_axes):
                 pos = positions[str(n)]
-                if ax != 'theta':
+                if ax != "theta":
                     pos = round(pos * 1000, 2)
                 setattr(self, f"{ax}_pos", pos)
         except GCSError as e:
-            print('Failed to report position')
+            print("Failed to report position")
             logger.exception(e)
 
         # Update internal dictionaries
@@ -150,7 +145,7 @@ class PIStage(StageBase):
         # Move the stage
         try:
             pos = axis_abs
-            if axis != 'theta':
+            if axis != "theta":
                 pos /= 1000  # convert to mm
             self.pidevice.MOV({axis_num: pos})
 
@@ -201,23 +196,18 @@ class PIStage(StageBase):
     def zero_axes(self, list):
         for axis in list:
             try:
-                exec(
-                    'self.int_' +
-                    axis +
-                    '_pos_offset = -self.' +
-                    axis +
-                    '_pos')
+                exec("self.int_" + axis + "_pos_offset = -self." + axis + "_pos")
             except BaseException:
                 logger.exception(f"Zeroing of axis: {axis} failed")
-                print('Zeroing of axis: ', axis, 'failed')
+                print("Zeroing of axis: ", axis, "failed")
 
     def unzero_axes(self, list):
         for axis in list:
             try:
-                exec('self.int_' + axis + '_pos_offset = 0')
+                exec("self.int_" + axis + "_pos_offset = 0")
             except BaseException:
                 logger.exception(f"Unzeroing of axis: {axis} failed")
-                print('Unzeroing of axis: ', axis, 'failed')
+                print("Unzeroing of axis: ", axis, "failed")
 
     def load_sample(self):
         y_abs = self.y_load_position / 1000
@@ -232,4 +222,3 @@ class PIStage(StageBase):
             self.pidevice.MOV({2: y_abs})
         except GCSError as e:
             logger.exception(GCSError(e))
-

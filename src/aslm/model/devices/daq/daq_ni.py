@@ -54,16 +54,18 @@ class NIDAQ(DAQBase):
         Global configuration of the microscope
 
     """
+
     def __init__(self, configuration):
         super().__init__(configuration)
         self.camera_trigger_task = None
         self.master_trigger_task = None
         try:
-            switching_port = self.configuration['configuration']['microscopes'][self.microscope_name]['daq']['laser_port_switcher']
+            switching_port = self.configuration["configuration"]["microscopes"][
+                self.microscope_name
+            ]["daq"]["laser_port_switcher"]
             self.laser_switching_task = nidaqmx.Task()
         except:
             self.laser_switching_task = None
-
 
         self.analog_outputs = {}  # keep track of analog outputs and their waveforms
         self.analog_output_tasks = []
@@ -80,21 +82,35 @@ class NIDAQ(DAQBase):
         exposure_time : float
             Duration of camera exposure.
         """
-        camera_trigger_out_line = self.configuration['configuration']['microscopes'][self.microscope_name]['daq']['camera_trigger_out_line']
+        camera_trigger_out_line = self.configuration["configuration"]["microscopes"][
+            self.microscope_name
+        ]["daq"]["camera_trigger_out_line"]
         self.camera_high_time = 0.004  # (self.camera_pulse_percent / 100) * (exposure_time/1000)  # self.sweep_time
-        self.camera_delay = (self.camera_delay_percent / 100) * (exposure_time/1000)  # * 0.01 * self.sweep_time
+        self.camera_delay = (self.camera_delay_percent / 100) * (
+            exposure_time / 1000
+        )  # * 0.01 * self.sweep_time
 
-        self.camera_trigger_task.co_channels.add_co_pulse_chan_time(camera_trigger_out_line,
-                                                                    high_time=self.camera_high_time,
-                                                                    initial_delay=self.camera_delay)
-        trigger_source = self.configuration['configuration']['microscopes'][self.microscope_name]['daq']['trigger_source']
-        self.camera_trigger_task.triggers.start_trigger.cfg_dig_edge_start_trig(trigger_source)
+        self.camera_trigger_task.co_channels.add_co_pulse_chan_time(
+            camera_trigger_out_line,
+            high_time=self.camera_high_time,
+            initial_delay=self.camera_delay,
+        )
+        trigger_source = self.configuration["configuration"]["microscopes"][
+            self.microscope_name
+        ]["daq"]["trigger_source"]
+        self.camera_trigger_task.triggers.start_trigger.cfg_dig_edge_start_trig(
+            trigger_source
+        )
 
     def create_master_trigger_task(self):
         r"""Set up the DO master trigger task."""
-        master_trigger_out_line = self.configuration['configuration']['microscopes'][self.microscope_name]['daq']['master_trigger_out_line']
-        self.master_trigger_task.do_channels.add_do_chan(master_trigger_out_line,
-                                                         line_grouping=nidaqmx.constants.LineGrouping.CHAN_FOR_ALL_LINES)
+        master_trigger_out_line = self.configuration["configuration"]["microscopes"][
+            self.microscope_name
+        ]["daq"]["master_trigger_out_line"]
+        self.master_trigger_task.do_channels.add_do_chan(
+            master_trigger_out_line,
+            line_grouping=nidaqmx.constants.LineGrouping.CHAN_FOR_ALL_LINES,
+        )
 
     def create_analog_output_tasks(self, channel_key):
         """
@@ -105,30 +121,54 @@ class NIDAQ(DAQBase):
         self.analog_output_tasks = []
 
         # Create one analog output task per board, grouping the channels
-        boards = list(set([x.split('/')[0] for x in self.analog_outputs.keys()]))
+        boards = list(set([x.split("/")[0] for x in self.analog_outputs.keys()]))
         for board in boards:
-            channel = ', '.join(list([x for x in self.analog_outputs.keys() if x.split('/')[0] == board]))
+            channel = ", ".join(
+                list(
+                    [x for x in self.analog_outputs.keys() if x.split("/")[0] == board]
+                )
+            )
             self.analog_output_tasks.append(nidaqmx.Task())
             self.analog_output_tasks[-1].ao_channels.add_ao_voltage_chan(channel)
 
-            sample_rates = list(set([v['sample_rate'] for v in self.analog_outputs.values()]))
+            sample_rates = list(
+                set([v["sample_rate"] for v in self.analog_outputs.values()])
+            )
             if len(sample_rates) > 1:
-                logger.debug("NI DAQ - Different sample rates provided for each analog channel. Defaulting to the first sample rate provided.")
-            n_samples = list(set([v['samples'] for v in self.analog_outputs.values()]))
+                logger.debug(
+                    "NI DAQ - Different sample rates provided for each analog channel. Defaulting to the first sample rate provided."
+                )
+            n_samples = list(set([v["samples"] for v in self.analog_outputs.values()]))
             if len(n_samples) > 1:
-                logger.debug("NI DAQ - Different number of samples provided for each analog channel. Defaulting to the minimum number of samples provided. Waveforms will be clipped to this length.")
+                logger.debug(
+                    "NI DAQ - Different number of samples provided for each analog channel. Defaulting to the minimum number of samples provided. Waveforms will be clipped to this length."
+                )
             n_sample = min(n_samples)
-            self.analog_output_tasks[-1].timing.cfg_samp_clk_timing(rate=sample_rates[0],
-                                                 sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
-                                                 samps_per_chan=n_sample)
+            self.analog_output_tasks[-1].timing.cfg_samp_clk_timing(
+                rate=sample_rates[0],
+                sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
+                samps_per_chan=n_sample,
+            )
 
-            triggers = list(set([v['trigger_source'] for v in self.analog_outputs.values()]))
+            triggers = list(
+                set([v["trigger_source"] for v in self.analog_outputs.values()])
+            )
             if len(triggers) > 1:
-                logger.debug("NI DAQ - Different triggers provided for each analog channel. Defaulting to the first trigger provided.")
-            self.analog_output_tasks[-1].triggers.start_trigger.cfg_dig_edge_start_trig(triggers[0])
+                logger.debug(
+                    "NI DAQ - Different triggers provided for each analog channel. Defaulting to the first trigger provided."
+                )
+            self.analog_output_tasks[-1].triggers.start_trigger.cfg_dig_edge_start_trig(
+                triggers[0]
+            )
 
             # Write values to board
-            waveforms = np.vstack([v['waveform'][channel_key][:n_sample] for k, v in self.analog_outputs.items() if k.split('/')[0] == board]).squeeze()
+            waveforms = np.vstack(
+                [
+                    v["waveform"][channel_key][:n_sample]
+                    for k, v in self.analog_outputs.items()
+                    if k.split("/")[0] == board
+                ]
+            ).squeeze()
             self.analog_output_tasks[-1].write(waveforms)
 
     def prepare_acquisition(self, channel_key, exposure_time):
@@ -162,7 +202,9 @@ class NIDAQ(DAQBase):
         self.camera_trigger_task.start()
         for task in self.analog_output_tasks:
             task.start()
-        self.master_trigger_task.write([False, True, True, True, False], auto_start=True)
+        self.master_trigger_task.write(
+            [False, True, True, True, False], auto_start=True
+        )
         self.camera_trigger_task.wait_until_done()
         for task in self.analog_output_tasks:
             task.wait_until_done()
@@ -183,13 +225,19 @@ class NIDAQ(DAQBase):
             self.analog_outputs = {}
 
         try:
-            switching_port = self.configuration['configuration']['microscopes'][self.microscope_name]['daq']['laser_port_switcher']
-            switching_on_state = self.configuration['configuration']['microscopes'][self.microscope_name]['daq']['laser_switch_state']
-            
+            switching_port = self.configuration["configuration"]["microscopes"][
+                self.microscope_name
+            ]["daq"]["laser_port_switcher"]
+            switching_on_state = self.configuration["configuration"]["microscopes"][
+                self.microscope_name
+            ]["daq"]["laser_switch_state"]
+
             self.laser_switching_task.close()
             self.laser_switching_task = nidaqmx.Task()
             self.laser_switching_task.do_channels.add_do_chan(
-                switching_port, line_grouping=nidaqmx.constants.LineGrouping.CHAN_FOR_ALL_LINES)
+                switching_port,
+                line_grouping=nidaqmx.constants.LineGrouping.CHAN_FOR_ALL_LINES,
+            )
             self.laser_switching_task.write(switching_on_state, auto_start=True)
         except KeyError:
             pass

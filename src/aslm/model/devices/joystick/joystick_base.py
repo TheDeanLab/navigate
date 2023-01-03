@@ -47,7 +47,7 @@ logger = logging.getLogger(p)
 
 class JoystickBase:
     def __init__(self):
-        self.mode = 'undefined'
+        self.mode = "undefined"
 
     """
     TODO: Has to be completely revamped to remove PyQT software.

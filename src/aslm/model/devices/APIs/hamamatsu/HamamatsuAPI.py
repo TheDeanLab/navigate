@@ -22,7 +22,7 @@ logger = logging.getLogger(p)
 
 # ==== load shared library ====
 
-__dll = windll.LoadLibrary('dcamapi.dll')
+__dll = windll.LoadLibrary("dcamapi.dll")
 
 # ==== declare constants ====
 DCAMBUF_ATTACHKIND_FRAME = 0
@@ -32,10 +32,12 @@ DCAMWAIT_CAPEVENT_STOPPED = 16
 DCAMPROP_MODE__OFF = 1  # OFF
 DCAMPROP_MODE__ON = 2  # ON
 
+
 class DCAMPROP:
     """
     Valuable reference for understanding the values returned by the camera
     """
+
     class SENSORMODE(IntEnum):
         AREA = 1
         LINE = 3
@@ -436,61 +438,66 @@ class DCAMPROP:
         OFF = 1
         ON = 2
 
+
 class DCAMDEV_OPEN(Structure):
     _pack_ = 8
-    _fields_ = [
-        ('size', c_int32),
-        ('index', c_int32),
-        ('hdcam', c_void_p)  # out
-    ]
+    _fields_ = [("size", c_int32), ("index", c_int32), ("hdcam", c_void_p)]  # out
 
     def __init__(self):
         self.size = sizeof(DCAMDEV_OPEN)
         self.index = 0
 
+
 class DCAMAPI_INIT(Structure):
     _pack_ = 8
     _fields_ = [
-        ('size', c_int32),
-        ('iDeviceCount', c_int32),  # out
-        ('reserved', c_int32),
-        ('initoptionbytes', c_int32),
-        ('initoption', POINTER(c_int32)),
-        ('guid', c_void_p)  # const DCAM_GUID*
+        ("size", c_int32),
+        ("iDeviceCount", c_int32),  # out
+        ("reserved", c_int32),
+        ("initoptionbytes", c_int32),
+        ("initoption", POINTER(c_int32)),
+        ("guid", c_void_p),  # const DCAM_GUID*
     ]
 
     def __init__(self):
         self.size = sizeof(DCAMAPI_INIT)
 
+
 class DCAMWAIT_OPEN(Structure):
     _pack_ = 8
     _fields_ = [
-        ('size', c_int32),
-        ('supportevent', c_int32),  # out
-        ('hwait', c_void_p),  # out
-        ('hdcam', c_void_p)
+        ("size", c_int32),
+        ("supportevent", c_int32),  # out
+        ("hwait", c_void_p),  # out
+        ("hdcam", c_void_p),
     ]
 
     def __init__(self):
         self.size = sizeof(DCAMWAIT_OPEN)
 
+
 class DCAMWAIT_START(Structure):
     _pack_ = 8
     _fields_ = [
-        ('size', c_int32),
-        ('eventhappened', c_int32),  # out
-        ('eventmask', c_int32),
-        ('timeout', c_int32)
+        ("size", c_int32),
+        ("eventhappened", c_int32),  # out
+        ("eventmask", c_int32),
+        ("timeout", c_int32),
     ]
 
     def __init__(self):
         self.size = sizeof(DCAMWAIT_START)
 
+
 class DCAMERR(IntEnum):
     # success
-    SUCCESS = 1  # 1, no error, general success code, app should check the value is positive
+    SUCCESS = (
+        1  # 1, no error, general success code, app should check the value is positive
+    )
     ALREADYOPENED = -520093694  # 0xE1000002
-    NOTSUPPORT = -2147479805  # 0x80000f03, camera does not support the function or property with current settings
+    NOTSUPPORT = (
+        -2147479805
+    )  # 0x80000f03, camera does not support the function or property with current settings
     TIMEOUT = -2147483386  # 0x80000106, timeout
 
     # status error
@@ -509,51 +516,54 @@ class DCAMERR(IntEnum):
     NOTREADABLE = -2147481564  # 0x80000824, the property is not readable
     INVALIDPROPERTYID = -2147481563  # 0x80000825, the property id is invalid
 
+
 class DCAMPROP_ATTR(Structure):
     _pack_ = 8
     _fields_ = [
-        ('cbSize', c_int32),
-        ('iProp', c_int32),
-        ('option', c_int32),
-        ('iReserved1', c_int32),
-        ('attribute', c_int32),
-        ('iGroup', c_int32),
-        ('iUnit', c_int32),
-        ('attribute2', c_int32),
-        ('valuemin', c_double),
-        ('valuemax', c_double),
-        ('valuestep', c_double),
-        ('valuedefault', c_double),
-        ('nMaxChannel', c_int32),
-        ('iReserved3', c_int32),
-        ('nMaxView', c_int32),
-        ('iProp_NumberOfElement', c_int32),
-        ('iProp_ArrayBase', c_int32),
-        ('iPropStep_Element', c_int32)
+        ("cbSize", c_int32),
+        ("iProp", c_int32),
+        ("option", c_int32),
+        ("iReserved1", c_int32),
+        ("attribute", c_int32),
+        ("iGroup", c_int32),
+        ("iUnit", c_int32),
+        ("attribute2", c_int32),
+        ("valuemin", c_double),
+        ("valuemax", c_double),
+        ("valuestep", c_double),
+        ("valuedefault", c_double),
+        ("nMaxChannel", c_int32),
+        ("iReserved3", c_int32),
+        ("nMaxView", c_int32),
+        ("iProp_NumberOfElement", c_int32),
+        ("iProp_ArrayBase", c_int32),
+        ("iPropStep_Element", c_int32),
     ]
 
     def __init__(self):
         self.cbSize = sizeof(DCAMPROP_ATTR)
 
+
 class DCAMBUF_ATTACH(Structure):
     _pack_ = 8
     _fields_ = [
-        ('size', c_int32), # sizeof(*this)
-        ('iKind', c_int32), # DCAMBUF_ATTAHKIND: DCAMBUF_ATTACHKIND_FRAME = 0
-        ('buffer', POINTER(c_void_p)), # array of buffer pointers
-        ('buffercount', c_int32) # number of pointers in array "buffer"
+        ("size", c_int32),  # sizeof(*this)
+        ("iKind", c_int32),  # DCAMBUF_ATTAHKIND: DCAMBUF_ATTACHKIND_FRAME = 0
+        ("buffer", POINTER(c_void_p)),  # array of buffer pointers
+        ("buffercount", c_int32),  # number of pointers in array "buffer"
     ]
 
     def __init__(self):
         self.size = sizeof(DCAMBUF_ATTACH)
 
+
 class DCAMCAP_TRANSFERINFO(Structure):
     _pack_ = 8
     _fields_ = [
-        ('size', c_int32),
-        ('iKind', c_int32),
-        ('nNewestFrameIndex', c_int32),
-        ('nFrameCount', c_int32)
+        ("size", c_int32),
+        ("iKind", c_int32),
+        ("nNewestFrameIndex", c_int32),
+        ("nFrameCount", c_int32),
     ]
 
     def __init__(self):
@@ -562,73 +572,79 @@ class DCAMCAP_TRANSFERINFO(Structure):
         self.nNewestFrameIndex = -1
         self.nFrameCount = 0
 
+
 class DCAMDATA_HDR(Structure):
     _pack_ = 8
     _fields_ = [
-        ('size', c_int32),
-        ('iKind', c_int32),
-        ('option', c_int32),
-        ('reserved2', c_int32)
+        ("size", c_int32),
+        ("iKind", c_int32),
+        ("option", c_int32),
+        ("reserved2", c_int32),
     ]
+
     def __init__(self):
         self.size = sizeof(DCAMDATA_HDR)
         self.iKind = 0
         self.option = 0
         self.reserved2 = 0
 
+
 class DCAMDATA_REGIONRECT(Structure):
     _pack_ = 8
     _fields_ = [
-        ('left', c_short),
-        ('top', c_short),
-        ('right', c_short),
-        ('bottom', c_short)
+        ("left", c_short),
+        ("top", c_short),
+        ("right", c_short),
+        ("bottom", c_short),
     ]
+
 
 class DCAMDATA_REGION(Structure):
     _pack_ = 8
     _fields_ = [
-        ('hdr', POINTER(DCAMDATA_HDR)),
-        ('option', c_int32),
-        ('type', c_int32),
-        ('data', c_void_p),
-        ('datasize', c_int32),
-        ('reserved', c_int32)
+        ("hdr", POINTER(DCAMDATA_HDR)),
+        ("option", c_int32),
+        ("type", c_int32),
+        ("data", c_void_p),
+        ("datasize", c_int32),
+        ("reserved", c_int32),
     ]
+
 
 class DCAMDEV_STRING(Structure):
     _fields_ = [
-        ('size', c_int32),
-        ('iString', c_int32),
-        ('text', c_char_p),
-        ('textbytes', c_int32)
+        ("size", c_int32),
+        ("iString", c_int32),
+        ("text", c_char_p),
+        ("textbytes", c_int32),
     ]
 
+
 property_dict = {
-    'exposure_time': 2031888,  # 0x001F0110, R/W, sec, "EXPOSURE TIME"
-    'sensor_mode': 4194832,  # 0x00400210, R/W, mode,  "SENSOR MODE"
-    'defect_correct_mode': 4653072,  # 0x00470010, R/W, mode,  "DEFECT CORRECT MODE"
-    'binning': 4198672,  # 0x00401110, R/W, mode, "BINNING"
-    'readout_speed': 4194576,  # 0x00400110, R/W, long,    "READOUT SPEED"
-    'readout_direction': 4194608,  # 0x00400130, R/W, mode,   "READOUT DIRECTION"
-    'readout_time': 4206608,  # 0x00403010, R/O, sec,   "TIMING READOUT TIME"
-    'trigger_active': 1048864,  # 0x00100120, R/W, mode,   "TRIGGER ACTIVE"
-    'trigger_mode': 1049104,  # 0x00100210, R/W, mode,    "TRIGGER MODE"
-    'trigger_polarity': 1049120,  # 0x00100220, R/W, mode, "TRIGGER POLARITY"
-    'trigger_source': 1048848,  # 0x00100110, R/W, mode,   "TRIGGER SOURCE"
-    'trigger_delay': 1049184,  # 0x00100260,	/* R/W, sec,	"TRIGGER DELAY"			*/
-    'internal_line_interval': 4208720,  # 0x00403850, R/W, sec,    "INTERNAL LINE INTERVAL"
-    'image_width': 4325904,  # 0x00420210, R/O, long, "IMAGE WIDTH"
-    'image_height': 4325920,  # 0x00420220, R/O, long,    "IMAGE HEIGHT"
-    'exposuretime_control': 2031920,  # 0x001F0130, R/W, mode,    "EXPOSURE TIME CONTROL"
-    'subarray_hpos': 4202768,  # 0x00402110, R/W, long,    "SUBARRAY HPOS"
-    'subarray_hsize': 4202784,  # 0x00402120, R/W, long,   "SUBARRAY HSIZE"
-    'subarray_vpos': 4202800,  # 0x00402130, R/W, long,    "SUBARRAY VPOS"
-    'subarray_vsize': 4202816,  # 0x00402140, R/W, long,   "SUBARRAY VSIZE"
-    'subarray_mode': 4202832,  # 0x00402150, R/W, mode,    "SUBARRAY MODE"
-    'cyclic_trigger_period': 4206624,  # 0x00403020, R/O, sec,	"TIMING CYCLIC TRIGGER PERIOD"
-	'minimum_trigger_blank':  4206640, # 0x00403030, R/O, sec,	"TIMING MINIMUM TRIGGER BLANKING"
-    'minimum_trigger_interval': 4206672 # 0x00403050, R/O, sec,	"TIMING MINIMUM TRIGGER INTERVAL"
+    "exposure_time": 2031888,  # 0x001F0110, R/W, sec, "EXPOSURE TIME"
+    "sensor_mode": 4194832,  # 0x00400210, R/W, mode,  "SENSOR MODE"
+    "defect_correct_mode": 4653072,  # 0x00470010, R/W, mode,  "DEFECT CORRECT MODE"
+    "binning": 4198672,  # 0x00401110, R/W, mode, "BINNING"
+    "readout_speed": 4194576,  # 0x00400110, R/W, long,    "READOUT SPEED"
+    "readout_direction": 4194608,  # 0x00400130, R/W, mode,   "READOUT DIRECTION"
+    "readout_time": 4206608,  # 0x00403010, R/O, sec,   "TIMING READOUT TIME"
+    "trigger_active": 1048864,  # 0x00100120, R/W, mode,   "TRIGGER ACTIVE"
+    "trigger_mode": 1049104,  # 0x00100210, R/W, mode,    "TRIGGER MODE"
+    "trigger_polarity": 1049120,  # 0x00100220, R/W, mode, "TRIGGER POLARITY"
+    "trigger_source": 1048848,  # 0x00100110, R/W, mode,   "TRIGGER SOURCE"
+    "trigger_delay": 1049184,  # 0x00100260,	/* R/W, sec,	"TRIGGER DELAY"			*/
+    "internal_line_interval": 4208720,  # 0x00403850, R/W, sec,    "INTERNAL LINE INTERVAL"
+    "image_width": 4325904,  # 0x00420210, R/O, long, "IMAGE WIDTH"
+    "image_height": 4325920,  # 0x00420220, R/O, long,    "IMAGE HEIGHT"
+    "exposuretime_control": 2031920,  # 0x001F0130, R/W, mode,    "EXPOSURE TIME CONTROL"
+    "subarray_hpos": 4202768,  # 0x00402110, R/W, long,    "SUBARRAY HPOS"
+    "subarray_hsize": 4202784,  # 0x00402120, R/W, long,   "SUBARRAY HSIZE"
+    "subarray_vpos": 4202800,  # 0x00402130, R/W, long,    "SUBARRAY VPOS"
+    "subarray_vsize": 4202816,  # 0x00402140, R/W, long,   "SUBARRAY VSIZE"
+    "subarray_mode": 4202832,  # 0x00402150, R/W, mode,    "SUBARRAY MODE"
+    "cyclic_trigger_period": 4206624,  # 0x00403020, R/O, sec,	"TIMING CYCLIC TRIGGER PERIOD"
+    "minimum_trigger_blank": 4206640,  # 0x00403030, R/O, sec,	"TIMING MINIMUM TRIGGER BLANKING"
+    "minimum_trigger_interval": 4206672,  # 0x00403050, R/O, sec,	"TIMING MINIMUM TRIGGER INTERVAL"
 }
 
 
@@ -654,6 +670,7 @@ dcamcap_firetrigger = __dll.dcamcap_firetrigger
 dcamdev_setdata = __dll.dcamdev_setdata
 dcamdev_getstring = __dll.dcamdev_getstring
 
+
 class camReg(object):
     """
     Keep track of the number of cameras initialised so we can initialise and
@@ -661,6 +678,7 @@ class camReg(object):
 
     Cribbed from https://github.com/python-microscopy/python-microscopy/blob/master/PYME/Acquire/Hardware/HamamatsuDCAM/HamamatsuDCAM.py
     """
+
     numCameras = 0
     maxCameras = 0
 
@@ -687,24 +705,24 @@ class camReg(object):
             dcamapi_uninit()
 
 
-
 class DCAM:
     def __init__(self, index=0):
         self.__hdcam = 0
         self.__hdcamwait = 0
-        
+
         # open camera
         self.dev_open(index)
         self.__open_hdcamwait()
 
-        self.prop_setvalue(property_dict['subarray_mode'], DCAMPROP_MODE__OFF)
-        self.max_image_width = self.get_property_value('image_width')
-        self.max_image_height = self.get_property_value('image_height')
-        
+        self.prop_setvalue(property_dict["subarray_mode"], DCAMPROP_MODE__OFF)
+        self.max_image_width = self.get_property_value("image_width")
+        self.max_image_height = self.get_property_value("image_height")
+
         self.is_acquiring = False
 
-
-        self._serial_number = self.get_string_value(c_int32(int("0x04000102", 0))).strip('S/N: ')
+        self._serial_number = self.get_string_value(
+            c_int32(int("0x04000102", 0))
+        ).strip("S/N: ")
 
     def __del__(self):
         self.dev_close()
@@ -715,9 +733,9 @@ class DCAM:
         """
         if errvalue < 0:
             try:
-                print('error message: ', DCAMERR(errvalue))
+                print("error message: ", DCAMERR(errvalue))
             except:
-                print('error message: ', errvalue)
+                print("error message: ", errvalue)
             return False
 
         return True
@@ -773,9 +791,11 @@ class DCAM:
         print("Opening Camera")
         if self.__hdcam:
             print("Camera already open")
-            return self.__result(DCAMERR.ALREADYOPENED)  # instance is already opened. New Error.
+            return self.__result(
+                DCAMERR.ALREADYOPENED
+            )  # instance is already opened. New Error.
 
-        camReg.regCamera() # Make sure DCAMAPI is initialized
+        camReg.regCamera()  # Make sure DCAMAPI is initialized
 
         paramopen = DCAMDEV_OPEN()
         if index >= 0:
@@ -899,7 +919,9 @@ class DCAM:
         cDouble = c_double(fValue)
         cOption = c_int32(option)
         cIDProp = c_int32(idprop)
-        ret = self.__result(dcamprop_setgetvalue(self.__hdcam, cIDProp, byref(cDouble), cOption))
+        ret = self.__result(
+            dcamprop_setgetvalue(self.__hdcam, cIDProp, byref(cDouble), cOption)
+        )
         if ret is False:
             return False
 
@@ -911,7 +933,10 @@ class DCAM:
         """
         property_attribute = self.prop_getattr(idprop)
         if property_attribute != None:
-            return [float(property_attribute.valuemin), float(property_attribute.valuemax)]
+            return [
+                float(property_attribute.valuemin),
+                float(property_attribute.valuemax),
+            ]
         return [None, None]
 
     def set_property_value(self, name, value):
@@ -919,8 +944,11 @@ class DCAM:
         # this function will set property value according to property name
         """
         if name not in property_dict:
-            print('could not set value for', name,
-                  'please make sure the property name is correct and is added to property_dict!')
+            print(
+                "could not set value for",
+                name,
+                "please make sure the property name is correct and is added to property_dict!",
+            )
             return False
 
         # get property code setPropertyValue
@@ -928,26 +956,41 @@ class DCAM:
 
         # Find property limits and correct value if necessary
         r = self.get_property_range(idprop)
-        
-        [property_value_min, property_value_max] = r #self.get_property_range(idprop)
+
+        [property_value_min, property_value_max] = r  # self.get_property_range(idprop)
         if property_value_min is None:
-            print('Could not set attribute', name)
-            print('property range:', name, r)
+            print("Could not set attribute", name)
+            print("property range:", name, r)
             return False
 
         if value < property_value_min:
-            print(" The property value of ", value, "is less than minimum of", property_value_min, name,
-                  "setting to minimum")
+            print(
+                " The property value of ",
+                value,
+                "is less than minimum of",
+                property_value_min,
+                name,
+                "setting to minimum",
+            )
             value = property_value_min
         if value > property_value_max:
-            print(" The property value of", value, "is greater than maximum of", property_value_max, name,
-                  "setting to maximum")
+            print(
+                " The property value of",
+                value,
+                "is greater than maximum of",
+                property_value_max,
+                name,
+                "setting to maximum",
+            )
             value = property_value_max
 
         # Set value and get what is set
         final_configuration = self.prop_setgetvalue(idprop, value)
-        
-        if final_configuration >= value - value/100 and final_configuration <= value + value/100:
+
+        if (
+            final_configuration >= value - value / 100
+            and final_configuration <= value + value / 100
+        ):
             return True
         else:
             print(name, "Configuration Failed", value, final_configuration)
@@ -993,43 +1036,59 @@ class DCAM:
         # Bottom must be even number.
         """
         # TODO: parameter verification
-        if top % 2 or bottom % 2 == 0 or (right-left+1) > self.max_image_width or (bottom-top+1) > self.max_image_height:
+        if (
+            top % 2
+            or bottom % 2 == 0
+            or (right - left + 1) > self.max_image_width
+            or (bottom - top + 1) > self.max_image_height
+        ):
             print("Invalid size")
-            return (self.prop_getvalue(property_dict['image_width']), self.prop_getvalue(property_dict['image_height']))
+            return (
+                self.prop_getvalue(property_dict["image_width"]),
+                self.prop_getvalue(property_dict["image_height"]),
+            )
 
         # test if hsize and vsize equal to maximum image width and height
         # if the same, set subarray_mode to DCAMPROP_MODE__OFF
-        if right-left+1 == self.max_image_width and bottom-top+1 == self.max_image_height:
-            self.prop_setgetvalue(property_dict['subarray_mode'], DCAMPROP_MODE__OFF)
+        if (
+            right - left + 1 == self.max_image_width
+            and bottom - top + 1 == self.max_image_height
+        ):
+            self.prop_setgetvalue(property_dict["subarray_mode"], DCAMPROP_MODE__OFF)
             # TODO: double check if the width/height is set to maximum value.
             # self.prop_setvalue(property_dict['image_width'], self.max_image_width)
             # self.prop_setvalue(property_dict['image_height'], self.max_image_height)
             return (self.max_image_width, self.max_image_height)
-        
-        width = self.prop_getvalue(property_dict['image_width'])
-        height = self.prop_getvalue(property_dict['image_height'])
-        if right-left+1 == width and bottom-top+1 == height:
-            self.prop_setvalue(property_dict['subarray_hpos'], left)
-            self.prop_setvalue(property_dict['subarray_vpos'], top)
+
+        width = self.prop_getvalue(property_dict["image_width"])
+        height = self.prop_getvalue(property_dict["image_height"])
+        if right - left + 1 == width and bottom - top + 1 == height:
+            self.prop_setvalue(property_dict["subarray_hpos"], left)
+            self.prop_setvalue(property_dict["subarray_vpos"], top)
         else:
             # set DCAM_IDPROP_SUBARRAYMODE to 'OFF'
-            if self.prop_setgetvalue(property_dict['subarray_mode'], DCAMPROP_MODE__OFF):
+            if self.prop_setgetvalue(
+                property_dict["subarray_mode"], DCAMPROP_MODE__OFF
+            ):
                 # set hpos, hsize, vpos, vsize
                 # self.prop_setvalue(property_dict['subarray_hpos'], 0)
-                self.prop_setvalue(property_dict['subarray_hpos'], left)
+                self.prop_setvalue(property_dict["subarray_hpos"], left)
 
                 # hsize works.
-                self.prop_setvalue(property_dict['subarray_hsize'], right-left+1)
+                self.prop_setvalue(property_dict["subarray_hsize"], right - left + 1)
 
-                self.prop_setvalue(property_dict['subarray_vpos'], top)
+                self.prop_setvalue(property_dict["subarray_vpos"], top)
 
                 # vsize must be an even number? Probably need a mod statement.
-                self.prop_setvalue(property_dict['subarray_vsize'], bottom-top+1)
-        
-        # set DCAM_IDPROP_SUBARRAYMODE to 'ON'
-        self.prop_setgetvalue(property_dict['subarray_mode'], DCAMPROP_MODE__ON)
+                self.prop_setvalue(property_dict["subarray_vsize"], bottom - top + 1)
 
-        return (self.prop_getvalue(property_dict['image_width']), self.prop_getvalue(property_dict['image_height']))
+        # set DCAM_IDPROP_SUBARRAYMODE to 'ON'
+        self.prop_setgetvalue(property_dict["subarray_mode"], DCAMPROP_MODE__ON)
+
+        return (
+            self.prop_getvalue(property_dict["image_width"]),
+            self.prop_getvalue(property_dict["image_height"]),
+        )
 
     def start_acquisition(self, data_buffer, number_of_frames=100):
         """
@@ -1059,7 +1118,6 @@ class DCAM:
             self.is_acquiring = True
             return self.__result(dcamcap_start(self.__hdcam, DCAMCAP_START_SEQUENCE))
         return False
-        
 
     def stop_acquisition(self):
         """
@@ -1077,10 +1135,10 @@ class DCAM:
         """
         # this function will return a list of frame index
         # following lines are from documents: 'dcamapi4-en.html'
-        # The host software can check the capturing status with the dcamcap_status() function. It will return a DCAMCAP_STATUS. 
-        # The dcamcap_transferinfo() function returns the total number of images captured and the frame index of the last captured image. 
-        # These functions do not wait for any events and will return with their values immediately. 
-        # These functions are useful for polling however this is stressful to the CPU. 
+        # The host software can check the capturing status with the dcamcap_status() function. It will return a DCAMCAP_STATUS.
+        # The dcamcap_transferinfo() function returns the total number of images captured and the frame index of the last captured image.
+        # These functions do not wait for any events and will return with their values immediately.
+        # These functions are useful for polling however this is stressful to the CPU.
         # We recommend using dcamwait functions to wait for events such as the arrival of new frames, then calling these functions to check status and/or transferred information.
         """
         # current solution: wait for a new frame, then call dcamcap_transferinfo()
@@ -1103,11 +1161,22 @@ class DCAM:
             # print("Newest Frame Index - cap_info", cap_info.nNewestFrameIndex)
             #
             if frame_count <= cap_info.nNewestFrameIndex + 1:
-                frame_idx_list = list(range(cap_info.nNewestFrameIndex - frame_count + 1,
-                                            cap_info.nNewestFrameIndex + 1))
+                frame_idx_list = list(
+                    range(
+                        cap_info.nNewestFrameIndex - frame_count + 1,
+                        cap_info.nNewestFrameIndex + 1,
+                    )
+                )
             else:
-                frame_idx_list = list(range(self.number_of_frames - frame_count + cap_info.nNewestFrameIndex +
-                                            1, self.number_of_frames)) + list(range(0, cap_info.nNewestFrameIndex + 1))
+                frame_idx_list = list(
+                    range(
+                        self.number_of_frames
+                        - frame_count
+                        + cap_info.nNewestFrameIndex
+                        + 1,
+                        self.number_of_frames,
+                    )
+                ) + list(range(0, cap_info.nNewestFrameIndex + 1))
 
             # check if backlog happens
             # if (self.pre_index+1) % self.number_of_frames != frame_idx_list[0]:
@@ -1121,22 +1190,23 @@ class DCAM:
         return self.__hdcam
 
     def fire_software_trigger(self):
-        trigger_source = self.get_property_value('trigger_source')
+        trigger_source = self.get_property_value("trigger_source")
         if trigger_source == 3.0:
             # fire trigger to camera
             err = dcamcap_firetrigger(self.__hdcam, 0)
             if err < 0:
-                print('an error happened when sending trigger to the camera', err)
+                print("an error happened when sending trigger to the camera", err)
         else:
             print(f"Camera is in mode {trigger_source}, not software mode (3).")
 
 
-if __name__ == '__main__':
-    print('start testing Hamamatsu API!')
+if __name__ == "__main__":
+    print("start testing Hamamatsu API!")
 
     # create shared memory buffer
     import sys
-    sys.path.append('../../../concurrency')
+
+    sys.path.append("../../../concurrency")
     from concurrency_tools import SharedNDArray
     import threading
     import time
@@ -1150,9 +1220,16 @@ if __name__ == '__main__':
     # y_pixels: 2048.0
 
     start_time = time.time()
-    data_buffer = [SharedNDArray(shape=(2048, 2048), dtype='uint16') for i in range(number_of_frames)]
+    data_buffer = [
+        SharedNDArray(shape=(2048, 2048), dtype="uint16")
+        for i in range(number_of_frames)
+    ]
     stop_time = time.time()
-    print("Duration of time to create a buffer for ", number_of_frames, stop_time - start_time)
+    print(
+        "Duration of time to create a buffer for ",
+        number_of_frames,
+        stop_time - start_time,
+    )
     # Grows linearly with the number of frames.
 
     # start camera
@@ -1160,18 +1237,18 @@ if __name__ == '__main__':
 
     # initialize camera
     configuration = {
-        'image_width': 2048.0,
-        'image_height': 2048.0,
-        'sensor_mode': 12,  # 12 for progressive
-        'defect_correct_mode': 2.0,
-        'binning': 1.0,
-        'readout_speed': 1.0,
-        'trigger_active': 1.0,
-        'trigger_mode': 1.0,  # external light-sheet mode
-        'trigger_polarity': 2.0,  # positive pulse
-        'trigger_source': 3.0,  # software
-        'exposure_time': 0.02,
-        'internal_line_interval': 0.000075
+        "image_width": 2048.0,
+        "image_height": 2048.0,
+        "sensor_mode": 12,  # 12 for progressive
+        "defect_correct_mode": 2.0,
+        "binning": 1.0,
+        "readout_speed": 1.0,
+        "trigger_active": 1.0,
+        "trigger_mode": 1.0,  # external light-sheet mode
+        "trigger_polarity": 2.0,  # positive pulse
+        "trigger_source": 3.0,  # software
+        "exposure_time": 0.02,
+        "internal_line_interval": 0.000075,
     }
     # camera.prop_getvalue(property_dict['exposuretime_control'])
 
@@ -1190,7 +1267,6 @@ if __name__ == '__main__':
                 break
             # print('get image frame:', frames)
 
-
     def test_acquisition():
         data_process = threading.Thread(target=data_func)
         data_process.name = "HamamatsuAPI Data Process"
@@ -1201,19 +1277,21 @@ if __name__ == '__main__':
 
         # set camera that trigger from software
         TRIGGERSOURCE_SOFTWARE = 3
-        if camera.prop_setgetvalue(property_dict['trigger_source'], TRIGGERSOURCE_SOFTWARE):
+        if camera.prop_setgetvalue(
+            property_dict["trigger_source"], TRIGGERSOURCE_SOFTWARE
+        ):
 
             # fire trigger to camera
             for i in range(10):
                 err = dcamcap_firetrigger(camera.get_camera_handler(), 0)
                 if err < 0:
-                    print('an error happened when sending trigger to the camera', err)
+                    print("an error happened when sending trigger to the camera", err)
                     break
-                time.sleep(configuration['exposure_time'] + 0.005)
+                time.sleep(configuration["exposure_time"] + 0.005)
         # end acquisition
         camera.stop_acquisition()
         data_process.join()
-    
+
     def get_buffer_duration():
         # get time cost of attaching and detaching buffer
         for i in range(20):
@@ -1222,7 +1300,12 @@ if __name__ == '__main__':
             camera.start_acquisition()
             camera.stop_acquisition()
             end_time = time.perf_counter()
-            print('time cost to attach a buffer(', number_of_frames, '):', end_time - start_time )
+            print(
+                "time cost to attach a buffer(",
+                number_of_frames,
+                "):",
+                end_time - start_time,
+            )
 
     # test ROI setting
     def test_ROI(roi_height=2048, roi_width=2048):
@@ -1236,12 +1319,15 @@ if __name__ == '__main__':
 
         width, height = camera.set_ROI(roi_left, roi_top, roi_right, roi_bottom)
 
-        print('image width and height:', width, height)
-        print("subarray_hpos", camera.prop_getvalue(property_dict['subarray_hpos']))
-        print("subarray_hsize", camera.prop_getvalue(property_dict['subarray_hsize']))
-        print("subarray_vpos", camera.prop_getvalue(property_dict['subarray_vpos']))
-        print("subarray_vsize", camera.prop_getvalue(property_dict['subarray_vsize']))
-        print('sub array mode(1: OFF, 2: ON): ', camera.prop_getvalue(property_dict['subarray_mode']))
+        print("image width and height:", width, height)
+        print("subarray_hpos", camera.prop_getvalue(property_dict["subarray_hpos"]))
+        print("subarray_hsize", camera.prop_getvalue(property_dict["subarray_hsize"]))
+        print("subarray_vpos", camera.prop_getvalue(property_dict["subarray_vpos"]))
+        print("subarray_vsize", camera.prop_getvalue(property_dict["subarray_vsize"]))
+        print(
+            "sub array mode(1: OFF, 2: ON): ",
+            camera.prop_getvalue(property_dict["subarray_mode"]),
+        )
 
     # test_ROI(1024, 1024)
     # print("camera.prop_getvalue:")
@@ -1256,5 +1342,7 @@ if __name__ == '__main__':
     # test_ROI(100, 100, 1124, 1123)
     # test_ROI(0, 0, 1024, 1023)
     # test_ROI(0, 0, 2047, 2047)
-    data_buffer = [SharedNDArray(shape=(512, 512), dtype='uint16') for i in range(number_of_frames)]
+    data_buffer = [
+        SharedNDArray(shape=(512, 512), dtype="uint16") for i in range(number_of_frames)
+    ]
     test_acquisition()

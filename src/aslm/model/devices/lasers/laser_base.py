@@ -13,7 +13,9 @@ class LaserBase:
         self.configuration = configuration
         self.microscope_name = microscope_name
 
-        self.device_config = configuration['configuration']['microscopes'][microscope_name]['lasers'][laser_id]
+        self.device_config = configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["lasers"][laser_id]
 
     def set_power(self, laser_intensity):
         pass

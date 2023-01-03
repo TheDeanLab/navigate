@@ -27,28 +27,35 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 
 import tkinter as tk
-from tkinter import ttk        
+from tkinter import ttk
 from aslm.view.custom_widgets.hover import hover
 
-class HoverMixin:
-     def __init__(self, *args, **kwargs):
-          super().__init__(*args, **kwargs) # Calls base class that is mixed in with this class
 
-          # Adds hover attribute
-          self.hover = hover(self, text=None, type="free")
-          
+class HoverMixin:
+    def __init__(self, *args, **kwargs):
+        super().__init__(
+            *args, **kwargs
+        )  # Calls base class that is mixed in with this class
+
+        # Adds hover attribute
+        self.hover = hover(self, text=None, type="free")
+
+
 class HoverButton(HoverMixin, ttk.Button):
-     def __init__(self, *args, **kwargs):
-          super().__init__(*args, **kwargs) 
-          
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
 class HoverTkButton(HoverMixin, tk.Button):
-     def __init__(self, *args, **kwargs):
-          super().__init__(*args, **kwargs) 
-          
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
 class HoverRadioButton(HoverMixin, ttk.Radiobutton):
-     def __init__(self, *args, **kwargs):
-          super().__init__(*args, **kwargs)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
 
 class HoverCheckButton(HoverMixin, ttk.Checkbutton):
-     def __init__(self, *args, **kwargs):
-          super().__init__(*args, **kwargs) 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)

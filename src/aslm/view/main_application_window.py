@@ -49,8 +49,12 @@ import sys
 
 # Local Imports
 from aslm.view.main_window_content.settings_notebook import settings_notebook
-from aslm.view.main_window_content.camera_display.camera_view.camera_notebook import CameraNotebook
-from aslm.view.main_window_content.stage_control.stagecontrol_notebook import stagecontrol_notebook
+from aslm.view.main_window_content.camera_display.camera_view.camera_notebook import (
+    CameraNotebook,
+)
+from aslm.view.main_window_content.stage_control.stagecontrol_notebook import (
+    stagecontrol_notebook,
+)
 from aslm.view.main_window_content.acquire_bar_frame.acquire_bar import AcquireBar
 from aslm.view.menus.menus import menubar
 from aslm.view.custom_widgets.scrollbars import ScrolledFrame
@@ -59,30 +63,27 @@ from aslm.view.custom_widgets.scrollbars import ScrolledFrame
 # Logger Setup
 p = __name__.split(".")[1]
 
+
 class MainApp(ttk.Frame):
     r"""Creates the frame that will hold the GUI content, its parent is the main window or root Tk object
-``
-    Placing the notebooks using tk.Grid. While the grid is called on each frame it is actually calling
-    the main window since those are the parent to the frames. The labels have already been packed into each respective
-    frame so can be ignored in the grid setup. This layout uses a 2x2 grid to start.
+    ``
+        Placing the notebooks using tk.Grid. While the grid is called on each frame it is actually calling
+        the main window since those are the parent to the frames. The labels have already been packed into each respective
+        frame so can be ignored in the grid setup. This layout uses a 2x2 grid to start.
 
-    1   2
-    3   4
-    5   6
+        1   2
+        3   4
+        5   6
 
-    The above is the grid "spots" the left frame will take spots 3 & 5 while top right takes
-    spot 4 and bottom right frame takes spot 6. Top frame will be spots 1 & 2
+        The above is the grid "spots" the left frame will take spots 3 & 5 while top right takes
+        spot 4 and bottom right frame takes spot 6. Top frame will be spots 1 & 2
     """
 
-    def __init__(self,
-                 root,
-                 *args,
-                 **kwargs):
+    def __init__(self, root, *args, **kwargs):
 
         # Inits this class as a frame subclass with the root as its parent
         self.scroll_frame = ScrolledFrame(root)
         self.scroll_frame.grid(row=0, column=0, sticky=tk.NSEW)
-        
 
         ttk.Frame.__init__(self, self.scroll_frame.interior, *args, **kwargs)
 
@@ -100,8 +101,8 @@ class MainApp(ttk.Frame):
         self.root.iconphoto(True, tk.PhotoImage(file=photo_image))
         self.root.resizable(True, True)
         self.root.geometry("")
-        tk.Grid.columnconfigure(root, 'all', weight=1)
-        tk.Grid.rowconfigure(root, 'all', weight=1)
+        tk.Grid.columnconfigure(root, "all", weight=1)
+        tk.Grid.rowconfigure(root, "all", weight=1)
 
         # Creating and linking menu to main window/app
         self.menubar = menubar(root)
@@ -120,7 +121,9 @@ class MainApp(ttk.Frame):
 
         # Gridding out foundational frames
         self.grid(column=0, row=0, sticky=tk.NSEW)
-        self.top_frame.grid(row=0, column=0, columnspan=2, sticky=tk.NSEW, padx=3, pady=3)
+        self.top_frame.grid(
+            row=0, column=0, columnspan=2, sticky=tk.NSEW, padx=3, pady=3
+        )
         self.frame_left.grid(row=1, column=0, rowspan=2, sticky=tk.NSEW, padx=3, pady=3)
         self.frame_top_right.grid(row=1, column=1, sticky=tk.NSEW, padx=3, pady=3)
         self.frame_bottom_right.grid(row=2, column=1, sticky=tk.NSEW, padx=3, pady=3)
@@ -138,13 +141,13 @@ class MainApp(ttk.Frame):
 
         # TODO: We do not understand the GUI sizing.  Notes here. Follow-up later when this becomes a problem.
         # Adjust Canvas Width for Screen Resolution
-        # Appears that Windows has 96 DPI, and Apple has 72.  
+        # Appears that Windows has 96 DPI, and Apple has 72.
         # iMac Built in Retina Display is 4480 x 2520
         # In the settings, can adjust display scaling -> 2560 x 1440
         # dpi = int(self.root.winfo_fpixels('1i'))
         # tk_screen_width, tk_screen_height = int(root.winfo_screenwidth()), int(root.winfo_screenheight()) # 1920 x 1080
         # TK screen width is the correct width according to the OS.
-        
+
         # Tk doesn't take into account the DPI?
         # actual_screen_width, actual_screen_height = int(tk_screen_width * (dpi / 96)), int(tk_screen_height * (dpi / 96))
         # Take into account the fact that we actually do not have 96 DPI, but actually 72. 2560 x 1440.
@@ -156,16 +159,13 @@ class MainApp(ttk.Frame):
 
         # if canvas_width > screen_width or canvas_height > screen_height:
         #     screen_scaling_factor = dpi / 72
-        #     
+        #
         #     self.root.tk.call('tk', 'scaling', screen_scaling_factor)
 
         # self.root.geometry(f"{actual_screen_width}x{actual_screen_height}")
-    
-
-         
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     root = tk.Tk()
     MainApp(root)
     root.mainloop()

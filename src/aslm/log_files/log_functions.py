@@ -5,6 +5,7 @@ import os
 
 import yaml
 
+
 def update_nested_dict(d, find_func, apply_func):
     """
     Loops through a nested dictionary and if find_func() conditions are met,
@@ -12,7 +13,7 @@ def update_nested_dict(d, find_func, apply_func):
 
     TODO: This is highly general and doesn't belong here.
     TODO: It might be nice to make this non-recursive.
-    
+
     Parameters
     ----------
     find_func : func
@@ -35,13 +36,15 @@ def update_nested_dict(d, find_func, apply_func):
             d2[k] = update_nested_dict(v, find_func, apply_func)
     return d2
 
+
 def find_filename(k, v):
     """
     Check that we've met the condition dictionary key == 'filename'
     """
-    if k == 'filename':
+    if k == "filename":
         return True
     return False
+
 
 def log_setup(fname):
     """
@@ -59,7 +62,7 @@ def log_setup(fname):
     base_directory = Path(__file__).resolve().parent
     config_path = Path.joinpath(base_directory, fname)
 
-    logging_path = Path.joinpath(base_directory, 'LOGS')
+    logging_path = Path.joinpath(base_directory, "LOGS")
     if not os.path.exists(logging_path):
         os.mkdir(logging_path)
 
@@ -67,14 +70,19 @@ def log_setup(fname):
     def update_filename(v):
         return Path.joinpath(base_directory, v)
 
-    with open(config_path, 'r') as f:
+    with open(config_path, "r") as f:
         try:
             config_data = yaml.load(f.read(), Loader=yaml.FullLoader)
             # Force all log files to be created relative to base_directory
-            config_data2 = update_nested_dict(config_data, find_filename, update_filename)
-            logging.config.dictConfig(config_data2)  # Configures our loggers from updated logging.yml
+            config_data2 = update_nested_dict(
+                config_data, find_filename, update_filename
+            )
+            logging.config.dictConfig(
+                config_data2
+            )  # Configures our loggers from updated logging.yml
         except yaml.YAMLError as yaml_error:
             print(yaml_error)
+
 
 def main_process_listener(queue):
     """
@@ -83,11 +91,12 @@ def main_process_listener(queue):
     while True:
         try:
             record = queue.get()
-            if record is None: # Sentinel to tell listener to stop
+            if record is None:  # Sentinel to tell listener to stop
                 break
             logger = logging.getLogger(record.name)
             logger.handle(record)
         except Exception:
             import sys, traceback
+
             print("Whoops! Problem: ", file=sys.stderr)
             traceback.print_exc(file=sys.stderr)

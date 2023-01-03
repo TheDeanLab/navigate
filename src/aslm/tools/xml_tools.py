@@ -3,7 +3,7 @@ import xml.etree.ElementTree as ET
 
 def dict_to_xml(d, tag=None):
     """Parse a Python dictionary to XML.
-    
+
     Parameters
     ----------
     d: dict
@@ -35,7 +35,7 @@ def dict_to_xml(d, tag=None):
                 if k == "text":
                     text = str(v)
                 else:
-                    xml += f" {k}=\"{v}\""
+                    xml += f' {k}="{v}"'
         if text != "" or next_xml != "":
             xml += ">"
             xml += text
@@ -43,7 +43,7 @@ def dict_to_xml(d, tag=None):
             xml += f"</{tag}>"
         else:
             xml += "/>"
-    
+
     return xml
 
 
@@ -57,7 +57,7 @@ def parse_xml(root: ET.Element) -> dict:
     ----------
     root : xml.etree.ElementTree.Element
         root Element of XML ElementTree
-    
+
     Returns
     -------
     d : dict
@@ -68,12 +68,12 @@ def parse_xml(root: ET.Element) -> dict:
         d[k] = v
     try:
         text = root.text.strip()
-        if text != '':
-            d['text'] = text
+        if text != "":
+            d["text"] = text
     except AttributeError:
         # root.text is None
         pass
-    prev_tag = ''
+    prev_tag = ""
     for child in root:
         tag = child.tag
         if tag == prev_tag:

@@ -51,4 +51,3 @@ class SyntheticJoystick(JoystickBase):
         super().__init__()
         self.parent = parent
         self.cfg = parent.cfg
-

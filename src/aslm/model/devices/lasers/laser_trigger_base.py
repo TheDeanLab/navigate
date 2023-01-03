@@ -51,34 +51,38 @@ logger = logging.getLogger(p)
 class LaserTriggerBase:
     def __init__(self, configuration):
         self.configuration = configuration
-        self.experiment = self.configuration['experiment']
-        self.microscope = self.experiment['MicroscopeState']['microscope_name'] 
+        self.experiment = self.configuration["experiment"]
+        self.microscope = self.experiment["MicroscopeState"]["microscope_name"]
 
         # Number of Lasers
         # TODO: Make it so that we can iterate through each laser and create a
         # task.
-        self.lasers = self.configuration['configuration']['microscopes'][self.microscope]['lasers']
+        self.lasers = self.configuration["configuration"]["microscopes"][
+            self.microscope
+        ]["lasers"]
         self.number_of_lasers = len(self.lasers)
 
         # Minimum and Maximum Laser Voltages
-        self.laser_min_do = self.lasers[0]['onoff']['hardware']['min']
-        self.laser_max_do = self.lasers[0]['onoff']['hardware']['max']
-        self.laser_min_ao = self.lasers[0]['power']['hardware']['min']
-        self.laser_max_ao = self.lasers[0]['power']['hardware']['max']
+        self.laser_min_do = self.lasers[0]["onoff"]["hardware"]["min"]
+        self.laser_max_do = self.lasers[0]["onoff"]["hardware"]["max"]
+        self.laser_min_ao = self.lasers[0]["power"]["hardware"]["min"]
+        self.laser_max_ao = self.lasers[0]["power"]["hardware"]["max"]
 
         # Digital Ports
         try:
-            self.switching_port = self.configuration['configuration']['microscopes'][self.microscope]['daq']['laser_port_switcher']
+            self.switching_port = self.configuration["configuration"]["microscopes"][
+                self.microscope
+            ]["daq"]["laser_port_switcher"]
         except KeyError:
             self.switching_port = None
-        self.laser_0_do_port = self.lasers[0]['onoff']['hardware']['channel']
-        self.laser_1_do_port = self.lasers[1]['onoff']['hardware']['channel']
-        self.laser_2_do_port = self.lasers[2]['onoff']['hardware']['channel']
+        self.laser_0_do_port = self.lasers[0]["onoff"]["hardware"]["channel"]
+        self.laser_1_do_port = self.lasers[1]["onoff"]["hardware"]["channel"]
+        self.laser_2_do_port = self.lasers[2]["onoff"]["hardware"]["channel"]
 
         # Analog Ports
-        self.laser_0_ao_port = self.lasers[0]['power']['hardware']['channel']
-        self.laser_1_ao_port = self.lasers[1]['power']['hardware']['channel']
-        self.laser_2_ao_port = self.lasers[2]['power']['hardware']['channel']
+        self.laser_0_ao_port = self.lasers[0]["power"]["hardware"]["channel"]
+        self.laser_1_ao_port = self.lasers[1]["power"]["hardware"]["channel"]
+        self.laser_2_ao_port = self.lasers[2]["power"]["hardware"]["channel"]
 
         # Digital Output Default State
         self.switching_state = False
@@ -107,18 +111,15 @@ class LaserTriggerBase:
         # Triggers the DAQ to select the correct laser path.
         """
         logger.debug("Not Implemented in LaserTriggerBase")
+
     def trigger_digital_laser(self, current_laser_index):
         logger.debug("Not Implemented in LaserTriggerBase")
 
     def turn_off_lasers(self):
         logger.debug("Not Implemented in LaserTriggerBase")
 
-    def set_laser_analog_voltage(
-            self,
-            current_laser_index,
-            current_laser_intensity):
+    def set_laser_analog_voltage(self, current_laser_index, current_laser_intensity):
         """
         # Sets the constant voltage on the DAQ according to the laser index and intensity, which is a percentage.
         """
         logger.debug("Not Implemented in LaserTriggerBase")
-

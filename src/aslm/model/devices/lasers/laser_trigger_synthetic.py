@@ -48,6 +48,7 @@ from aslm.model.devices.lasers.laser_trigger_base import LaserTriggerBase
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+
 class SyntheticLaserTriggers(LaserTriggerBase):
     def __init__(self, model):
         super().__init__(model)
@@ -78,10 +79,7 @@ class SyntheticLaserTriggers(LaserTriggerBase):
     def turn_off_lasers(self):
         pass
 
-    def set_laser_analog_voltage(
-            self,
-            current_laser_index,
-            current_laser_intensity):
+    def set_laser_analog_voltage(self, current_laser_index, current_laser_intensity):
         """
         # Sets the constant voltage on the DAQ according to the laser index and intensity, which is a percentage.
         """

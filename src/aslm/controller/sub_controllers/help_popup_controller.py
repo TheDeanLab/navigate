@@ -35,15 +35,14 @@ POSSIBILITY OF SUCH DAMAGE.
 from aslm.controller.sub_controllers.gui_controller import GUIController
 
 
-
 import logging
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
 class HelpPopupController(GUIController):
-
     def __init__(self, view, parent_controller):
         super().__init__(view, parent_controller)
 
@@ -51,14 +50,9 @@ class HelpPopupController(GUIController):
 
         self.view.popup.protocol("WM_DELETE_WINDOW", self.view.popup.dismiss)
 
-
     def showup(self):
         """
         # this function will let the popup window show in front
         """
         self.view.popup.deiconify()
         self.view.popup.attributes("-topmost", 1)
-
-        
-        
-        

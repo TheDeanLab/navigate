@@ -39,11 +39,15 @@ import time
 
 # Local Imports
 from aslm.model.devices.stages.stage_base import StageBase
-from aslm.model.devices.APIs.asi.asi_tiger_controller import TigerController, TigerException
+from aslm.model.devices.APIs.asi.asi_tiger_controller import (
+    TigerController,
+    TigerException,
+)
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
+
 
 def build_ASI_Stage_connection(com_port, baud_rate):
 
@@ -59,27 +63,24 @@ def build_ASI_Stage_connection(com_port, baud_rate):
             time.sleep(0.1)
     return asi_stage
 
+
 class ASIStage(StageBase):
     """
     Detailed documentation: http://asiimaging.com/docs/products/serial_commands
     Quick Start Guide: http://asiimaging.com/docs/command_quick_start
-    Stage API provides all distances in a 10th of a micron unit.  To convert to microns, 
+    Stage API provides all distances in a 10th of a micron unit.  To convert to microns,
     requires division by factor of 10 to get to micron units...
 
-    NOTE: Do not ever change the F axis. This will alter the relative position of each 
+    NOTE: Do not ever change the F axis. This will alter the relative position of each
     FTP stilt, adding strain to the system. Only move the Z axis, which will change both
     stilt positions stimultaneously.
     """
+
     def __init__(self, microscope_name, device_connection, configuration, device_id=0):
         super().__init__(microscope_name, device_connection, configuration, device_id)
-        
 
         # Mapping from self.axes to corresponding ASI axis labelling
-        axes_mapping = {
-            'x': 'X',
-            'y': 'Y',
-            'z': 'Z'
-        }
+        axes_mapping = {"x": "X", "y": "Y", "z": "Z"}
         self.asi_axes = list(map(lambda a: axes_mapping[a], self.axes))
         self.tiger_controller = device_connection
 
@@ -91,7 +92,7 @@ class ASIStage(StageBase):
             self.tiger_controller.disconnect_from_serial()
             logger.debug("ASI stage connection closed")
         except BaseException as e:
-            print('Error while disconnecting the ASI stage')
+            print("Error while disconnecting the ASI stage")
             logger.exception(e)
             raise
 
@@ -109,7 +110,7 @@ class ASIStage(StageBase):
                 # Set class attributes and convert to microns
                 setattr(self, f"{ax}_pos", pos)
         except TigerException as e:
-            print('Failed to report ASI Stage Position')
+            print("Failed to report ASI Stage Position")
             logger.exception(e)
 
         # Update internal dictionaries
@@ -143,17 +144,20 @@ class ASIStage(StageBase):
         axis_abs = self.get_abs_position(axis, move_dictionary)
         if axis_abs == -1e50:
             return False
-        
+
         # Move stage
         try:
-            axis_abs_um = axis_abs * 10 # This is to account for the asi 1/10 of a micron units
+            axis_abs_um = (
+                axis_abs * 10
+            )  # This is to account for the asi 1/10 of a micron units
             self.tiger_controller.move_axis(axis_num, axis_abs_um)
             return True
         except TigerException as e:
-            print(f"ASI stage move axis absolute failed or is trying to move out of range: {e}")
+            print(
+                f"ASI stage move axis absolute failed or is trying to move out of range: {e}"
+            )
             logger.exception(e)
             return False
-
 
     def move_absolute(self, move_dictionary, wait_until_done=False):
         """
@@ -178,7 +182,7 @@ class ASIStage(StageBase):
         for ax, n in zip(self.axes, self.asi_axes):
             success = self.move_axis_absolute(ax, n, move_dictionary)
             if wait_until_done:
-                self.tiger_controller.wait_for_device() # Do we want to wait for device on hardware level? This is an ASI command call
+                self.tiger_controller.wait_for_device()  # Do we want to wait for device on hardware level? This is an ASI command call
 
         # TODO This seems to be handled by each individual move_axis_absolute bc of ASI's wait_for_device. Each axis will move and the stage waits until the axis is done before moving on
         # if success and wait_until_done is True:
@@ -199,7 +203,6 @@ class ASIStage(StageBase):
             print(f"ASI stage halt command failed: {e}")
             logger.exception(e)
 
-            
     # def zero_axes(self, list):
     #     for axis in list:
     #         try:
@@ -234,4 +237,3 @@ class ASIStage(StageBase):
     #         self.pidevice.MOV({2: y_abs})
     #     except GCSError as e:
     #         logger.exception(GCSError(e))
-

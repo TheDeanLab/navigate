@@ -15,28 +15,29 @@ from aslm.model.devices.lasers.LaserBase import LaserBase
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+
 class ObisLaser(LaserBase):
-    def __init__(self,
-                 port='COM4'):
+    def __init__(self, port="COM4"):
         self.timeout = 0.05
-        self.end_of_line = '\r'
+        self.end_of_line = "\r"
 
         try:
             # Open serial port
             self.laser = serial.Serial()
             self.laser.port = port
             self.laser.baudrate = 115200
-            self.laser.parity = 'N'
+            self.laser.parity = "N"
             self.laser.stopbits = 1
             self.laser.bytesize = 8
             self.laser.timeout = self.timeout
             self.laser.open()
 
-
         except serial.SerialException:
-            raise OSError('Port "%s" is unavailable.\n' % port + \
-                          'Maybe the laser is not connected, the wrong' + \
-                          ' port is specified or the port is already opened')
+            raise OSError(
+                'Port "%s" is unavailable.\n' % port
+                + "Maybe the laser is not connected, the wrong"
+                + " port is specified or the port is already opened"
+            )
 
     def __del__(self):
         """
@@ -47,7 +48,7 @@ class ObisLaser(LaserBase):
             self.laser.close()
 
         except serial.SerialException:
-            print('Could not close the port')
+            print("Could not close the port")
 
     def close(self):
         """
@@ -57,7 +58,7 @@ class ObisLaser(LaserBase):
             self.laser.close()
 
         except serial.SerialException:
-            print('could not close the port')
+            print("could not close the port")
 
     def get_laser_model(self):
         """
@@ -135,19 +136,19 @@ class ObisLaser(LaserBase):
         # MIXSO (External mixed modulation with power feedback) Note: This
         # operating mode is not supported in some device models.
         """
-        if mode == 'cwp':
+        if mode == "cwp":
             command = "SOURce:AM:INTernal CWP"
-        elif mode == 'cwc':
+        elif mode == "cwc":
             command = "SOURce:AM:INTernal CWC"
-        elif mode == 'digital':
+        elif mode == "digital":
             command = "SOURce:AM:EXTernal DIGital"
-        elif mode == 'analog':
+        elif mode == "analog":
             command = "SOURce:AM:EXTernal ANALog"
-        elif mode == 'mixed':
+        elif mode == "mixed":
             command = "SOURce:AM:EXTernal MIXed"
-        elif mode == 'digso':
+        elif mode == "digso":
             command = "SOURce:AM:EXTernal DIGSO"
-        elif mode == 'mixso':
+        elif mode == "mixso":
             command = "SOURce:AM:EXTernal MIXSO"
         else:
             print("Invalid mode")
@@ -163,19 +164,19 @@ class ObisLaser(LaserBase):
 
         command = "SOURce:AM:SOURce?"
         laser_operating_mode = self.ask(command)
-        if ("CWP" in laser_operating_mode):
+        if "CWP" in laser_operating_mode:
             self.laser_operating_mode = "cwp"
-        elif ("CWC" in laser_operating_mode):
+        elif "CWC" in laser_operating_mode:
             self.laser_operating_mode = "cwc"
-        elif ("DIGITAL" in laser_operating_mode):
+        elif "DIGITAL" in laser_operating_mode:
             self.laser_operating_mode = "digital"
-        elif ("ANALOG" in laser_operating_mode):
+        elif "ANALOG" in laser_operating_mode:
             self.laser_operating_mode = "analog"
-        elif ("MIXED" in laser_operating_mode):
+        elif "MIXED" in laser_operating_mode:
             self.laser_operating_mode = "mixed"
-        elif ("DIGSO" in laser_operating_mode):
+        elif "DIGSO" in laser_operating_mode:
             self.laser_operating_mode = "digso"
-        elif ("MIXSO" in laser_operating_mode):
+        elif "MIXSO" in laser_operating_mode:
             self.laser_operating_mode = "mixso"
         else:
             print("Invalid Laser Operating Mode")
@@ -184,9 +185,9 @@ class ObisLaser(LaserBase):
 
     def ask(self, command):
         self.laser.write(str(command + self.end_of_line).encode())
-        response = ''
+        response = ""
         read_iteration = self.laser.read()
-        while read_iteration != b'\r':
+        while read_iteration != b"\r":
             response += read_iteration.decode()
             sleep(self.timeout)
             read_iteration = self.laser.read()
@@ -196,18 +197,5 @@ class ObisLaser(LaserBase):
         """
         # Initialize the laser.
         """
-        self.set_laser_operating_mode('mixed')
+        self.set_laser_operating_mode("mixed")
         self.set_laser_power(self.get_maximum_laser_power())
-
-
-
-
-
-
-
-
-
-
-
-
-

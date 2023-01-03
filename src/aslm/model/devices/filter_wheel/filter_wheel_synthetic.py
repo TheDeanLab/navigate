@@ -65,6 +65,7 @@ class SyntheticFilterWheel(FilterWheelBase):
     wait_until_done = bool
         Flag for enabling the wait period for a filter wheel change.
     """
+
     def __init__(self, microscope_name, device_connection, configuration):
         super().__init__(microscope_name, device_connection, configuration)
 

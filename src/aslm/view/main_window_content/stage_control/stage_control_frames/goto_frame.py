@@ -44,7 +44,7 @@ class goto_frame(ttk.Frame):
     def __init__(goto_frame, stage_control_tab, *args, **kwargs):
         # Init Frame
         ttk.Frame.__init__(goto_frame, stage_control_tab, *args, **kwargs)
-        
+
         # Formatting
-        tk.Grid.columnconfigure(goto_frame, 'all', weight=1)
-        tk.Grid.rowconfigure(goto_frame, 'all', weight=1)
+        tk.Grid.columnconfigure(goto_frame, "all", weight=1)
+        tk.Grid.rowconfigure(goto_frame, "all", weight=1)

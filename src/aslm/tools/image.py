@@ -39,9 +39,7 @@ import numpy as np
 # Local Imports
 
 
-def text_array(text: str,
-               offset: tuple = (0, 0),
-               font_size: int = 16):
+def text_array(text: str, offset: tuple = (0, 0), font_size: int = 16):
     """Create a binary array from a piece of text
 
     Original font type was arial.ttf.

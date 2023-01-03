@@ -50,23 +50,16 @@ class stop_frame(ttk.Frame):
         self.name = name
 
         # Formatting
-        tk.Grid.columnconfigure(self, 'all', weight=1)
-        tk.Grid.rowconfigure(self, 'all', weight=1)
+        tk.Grid.columnconfigure(self, "all", weight=1)
+        tk.Grid.rowconfigure(self, "all", weight=1)
 
         # Stop button
         self.stop_btn = tk.Button(
-            self,
-            bg='red',
-            fg='white',
-            text="STOP",
-            width=10,
-            height=5
+            self, bg="red", fg="white", text="STOP", width=10, height=5
         )
 
         # Gridding out buttons
         self.stop_btn.grid(row=0, column=0, rowspan=2, pady=2)
 
     def get_buttons(self):
-        return {
-            'stop': self.stop_btn
-        }
+        return {"stop": self.stop_btn}

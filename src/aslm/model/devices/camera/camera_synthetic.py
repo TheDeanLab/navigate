@@ -47,8 +47,10 @@ from aslm.model.devices.camera.camera_base import CameraBase
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+
 class SyntheticCameraController:
     r"""SyntheticCameraController. Synthetic Camera API."""
+
     def __init__(self):
         self.is_acquiring = False
 
@@ -67,7 +69,7 @@ class SyntheticCameraController:
         return -1
 
     def set_property_value(self, name, value):
-        logger.debug(f'set camera property {name}: {value}')
+        logger.debug(f"set camera property {name}: {value}")
 
 
 class SyntheticCamera(CameraBase):
@@ -83,12 +85,15 @@ class SyntheticCamera(CameraBase):
         Global configuration of the microscope
 
     """
+
     def __init__(self, microscope_name, device_connection, configuration):
         super().__init__(microscope_name, device_connection, configuration)
 
         self.is_acquiring = False
         self._mean_background_count = 100.0
-        self._noise_sigma = noise_model.compute_noise_sigma(Ib=self._mean_background_count)
+        self._noise_sigma = noise_model.compute_noise_sigma(
+            Ib=self._mean_background_count
+        )
         self.blah = noise_model.compute_noise_sigma
         self.current_frame_idx = None
         self.data_buffer = None
@@ -204,23 +209,26 @@ class SyntheticCamera(CameraBase):
             if idx == 0:
                 self.random_image = False
 
-
     def generate_new_frame(self):
         r"""Generate a synthetic image."""
         if self.random_image:
-            image = np.random.normal(self._mean_background_count,
-                                    self._noise_sigma,
-                                    size=(self.x_pixels, self.y_pixels),
-                                    ).astype(np.uint16)
+            image = np.random.normal(
+                self._mean_background_count,
+                self._noise_sigma,
+                size=(self.x_pixels, self.y_pixels),
+            ).astype(np.uint16)
         else:
             image = self.tif_images[self.current_tif_id].pages[self.img_id].asarray()
             self.img_id += 1
             if self.img_id >= len(self.tif_images[self.current_tif_id].pages):
                 self.img_id = 0
                 self.current_tif_id = (self.current_tif_id + 1) % len(self.tif_images)
-            
-        ctypes.memmove(self.data_buffer[self.current_frame_idx].ctypes.data,
-                    image.ctypes.data, self.x_pixels * self.y_pixels * 2)
+
+        ctypes.memmove(
+            self.data_buffer[self.current_frame_idx].ctypes.data,
+            image.ctypes.data,
+            self.x_pixels * self.y_pixels * 2,
+        )
 
         self.current_frame_idx = (self.current_frame_idx + 1) % self.num_of_frame
 
@@ -265,5 +273,3 @@ class SyntheticCamera(CameraBase):
         according to the document, trigger_blank should be bigger than trigger_interval.
         """
         return 0.01
-
-

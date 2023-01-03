@@ -1,5 +1,3 @@
-
-
 """
 Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
@@ -41,14 +39,15 @@ import logging
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+
 class quick_launch(ttk.Labelframe):
     def __init__(self, settings_tab, *args, **kwargs):
-        text_label = 'Quick Launch Buttons'
+        text_label = "Quick Launch Buttons"
         ttk.Labelframe.__init__(self, settings_tab, text=text_label, *args, **kwargs)
 
         # Formatting
-        tk.Grid.columnconfigure(self, 'all', weight=1)
-        tk.Grid.rowconfigure(self, 'all', weight=1)
+        tk.Grid.columnconfigure(self, "all", weight=1)
+        tk.Grid.rowconfigure(self, "all", weight=1)
 
         # Dicts
         self.buttons = {}
@@ -56,4 +55,6 @@ class quick_launch(ttk.Labelframe):
         # Buttons
         # Tiling Wizard Button
         self.buttons["tiling"] = ttk.Button(self, text="Launch Tiling Wizard")
-        self.buttons["tiling"].grid(row=0, column=2, sticky=(tk.NSEW), padx=(10,0), pady=(4,6))
+        self.buttons["tiling"].grid(
+            row=0, column=2, sticky=(tk.NSEW), padx=(10, 0), pady=(4, 6)
+        )

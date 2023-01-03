@@ -37,24 +37,27 @@ from io import BytesIO
 from math import ceil
 
 import logging
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+
 def prepare_service(service_url, **kwargs):
-    service_url = service_url.rstrip('/')
-    if service_url.endswith('ilastik'):
+    service_url = service_url.rstrip("/")
+    if service_url.endswith("ilastik"):
         r = requests.get(f"{service_url}/load?project={kwargs['project_file']}")
-        logger.info(f'get response:{r.status_code}, {r.content}')
+        logger.info(f"get response:{r.status_code}, {r.content}")
         if r.status_code == 200:
             return json.loads(r.content)
     return None
+
 
 class IlastikSegmentation:
     def __init__(self, model):
         self.model = model
 
-        self.service_url = self.model.configuration['rest_api_config']['Ilastik']['url']
+        self.service_url = self.model.configuration["rest_api_config"]["Ilastik"]["url"]
         self.project_file = None
 
         self.resolution = None
@@ -62,57 +65,97 @@ class IlastikSegmentation:
         self.pieces_num = 1
         self.pieces_size = 1
 
-        self.config_table={'data': {'init': self.init_func,
-                                    'main': self.data_func}}
+        self.config_table = {"data": {"init": self.init_func, "main": self.data_func}}
 
     def init_func(self, *args):
-        if self.resolution != self.model.configuration['experiment']['MicroscopeState']['microscope_name'] \
-            or self.zoom != self.model.configuration['experiment']['MicroscopeState']['zoom']:
+        if (
+            self.resolution
+            != self.model.configuration["experiment"]["MicroscopeState"][
+                "microscope_name"
+            ]
+            or self.zoom
+            != self.model.configuration["experiment"]["MicroscopeState"]["zoom"]
+        ):
             self.update_setting()
 
     def data_func(self, frame_ids):
         # Ilastik process multiple images in sequence.
         img_data = [base64.b64encode(self.model.data_buffer[idx]) for idx in frame_ids]
         json_data = {
-            'dtype': 'uint16', 
-            'shape': (self.model.img_height, self.model.img_width),
-            'image': [img.decode('utf-8') for img in img_data]
-            }
+            "dtype": "uint16",
+            "shape": (self.model.img_height, self.model.img_width),
+            "image": [img.decode("utf-8") for img in img_data],
+        }
 
-        response = requests.post(f"{self.service_url}/segmentation", json=json_data, stream=True)
+        response = requests.post(
+            f"{self.service_url}/segmentation", json=json_data, stream=True
+        )
         if response.status_code == 200:
             # segmentation_mask is a dictionary like object with keys 'arr_0', 'arr_1'...
             segmentation_mask = numpy.load(BytesIO(response.raw.read()))
             # display segmentation
             for idx in range(len(segmentation_mask)):
-                segmentation_id = 'arr_{}'.format(idx)
-                if self.model.display_ilastik_segmentation: 
-                    self.model.event_queue.put(('ilastik_mask', segmentation_mask[segmentation_id]))
+                segmentation_id = "arr_{}".format(idx)
+                if self.model.display_ilastik_segmentation:
+                    self.model.event_queue.put(
+                        ("ilastik_mask", segmentation_mask[segmentation_id])
+                    )
                 # mark position
                 if self.model.mark_ilastik_position:
                     self.mark_position(segmentation_mask[segmentation_id])
         else:
-            print('There is something wrong!')
+            print("There is something wrong!")
 
     def update_setting(self):
-        self.resolution = self.model.configuration['experiment']['MicroscopeState']['microscope_name']
-        self.zoom = self.model.configuration['experiment']['MicroscopeState']['zoom']
+        self.resolution = self.model.configuration["experiment"]["MicroscopeState"][
+            "microscope_name"
+        ]
+        self.zoom = self.model.configuration["experiment"]["MicroscopeState"]["zoom"]
         # Get current mag
         current_microscope_name = self.resolution
-        curr_pixel_size = float(self.model.configuration['configuration']['microscopes'][current_microscope_name]['zoom']['pixel_size'][self.zoom])
+        curr_pixel_size = float(
+            self.model.configuration["configuration"]["microscopes"][
+                current_microscope_name
+            ]["zoom"]["pixel_size"][self.zoom]
+        )
         # target resolution is 'high'
         # TODO:
-        high_res_microscope_name = 'Nanoscale'
-        pixel_size = float(self.model.configuration['configuration']['microscopes'][high_res_microscope_name]['zoom']['pixel_size']['N/A'])
+        high_res_microscope_name = "Nanoscale"
+        pixel_size = float(
+            self.model.configuration["configuration"]["microscopes"][
+                high_res_microscope_name
+            ]["zoom"]["pixel_size"]["N/A"]
+        )
         # calculate pieces
         self.pieces_num = int(curr_pixel_size / pixel_size)
-        self.pieces_size = ceil(float(self.model.configuration['experiment']['CameraParameters']['x_pixels']) / self.pieces_num)
+        self.pieces_size = ceil(
+            float(
+                self.model.configuration["experiment"]["CameraParameters"]["x_pixels"]
+            )
+            / self.pieces_num
+        )
         self.posistion_step_size = self.pieces_size * pixel_size
         # calculate corner (x,y)
-        curr_fov_x = float(self.model.configuration['experiment']['CameraParameters']['x_pixels']) * curr_pixel_size
-        curr_fov_y = float(self.model.configuration['experiment']['CameraParameters']['y_pixels']) * curr_pixel_size
-        self.x_start = float(self.model.configuration['experiment']['StageParameters']['x']) - curr_fov_x/2
-        self.y_start = float(self.model.configuration['experiment']['StageParameters']['y']) - curr_fov_y/2
+        curr_fov_x = (
+            float(
+                self.model.configuration["experiment"]["CameraParameters"]["x_pixels"]
+            )
+            * curr_pixel_size
+        )
+        curr_fov_y = (
+            float(
+                self.model.configuration["experiment"]["CameraParameters"]["y_pixels"]
+            )
+            * curr_pixel_size
+        )
+        self.x_start = (
+            float(self.model.configuration["experiment"]["StageParameters"]["x"])
+            - curr_fov_x / 2
+        )
+        self.y_start = (
+            float(self.model.configuration["experiment"]["StageParameters"]["y"])
+            - curr_fov_y / 2
+        )
 
     def mark_position(self, mask):
         # target_label = self.model.ilastik_target
@@ -120,9 +163,9 @@ class IlastikSegmentation:
         lx, rx = 0, self.pieces_size
         # get current z, theta, focus
         # TODO: are they same as high resolution?
-        z = self.model.configuration['experiment']['StageParameters']['z']
-        theta = self.model.configuration['experiment']['StageParameters']['theta']
-        f = self.model.configuration['experiment']['StageParameters']['f']
+        z = self.model.configuration["experiment"]["StageParameters"]["z"]
+        theta = self.model.configuration["experiment"]["StageParameters"]["theta"]
+        f = self.model.configuration["experiment"]["StageParameters"]["f"]
         pos_x, pos_y = self.x_start, self.y_start
         table_values = []
         for i in range(self.pieces_num):
@@ -139,5 +182,4 @@ class IlastikSegmentation:
             rx += self.pieces_size
             pos_x += self.posistion_step_size
             pos_y = self.y_start
-        self.model.event_queue.put(('multiposition', table_values))
-
+        self.model.event_queue.put(("multiposition", table_values))

@@ -56,7 +56,9 @@ class ZoomBase:
     """
 
     def __init__(self, microscope_name, device_controller, configuration):
-        self.zoomdict = configuration['configuration']['microscopes'][microscope_name]['zoom']['position']
+        self.zoomdict = configuration["configuration"]["microscopes"][microscope_name][
+            "zoom"
+        ]["position"]
         self.zoomvalue = None
 
     def set_zoom(self, zoom, wait_until_done=False):
@@ -77,12 +79,12 @@ class ZoomBase:
             self.zoomvalue = zoom
         else:
             logger.error(f"Zoom designation, {zoom}, not in the configuration")
-            raise ValueError('Zoom designation not in the configuration')
+            raise ValueError("Zoom designation not in the configuration")
         logger.debug(f"Changed Zoom to {zoom}")
         logger.debug(f"Zoom position: {self.read_position()}")
 
     def move(self, position=0, wait_until_done=False):
-        r""" Move the Zoom Servo
+        r"""Move the Zoom Servo
 
         Parameters
         ----------

@@ -51,17 +51,19 @@ from aslm.model.devices.lasers.laser_base import LaserBase
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+
 class LaserNI(LaserBase):
     def __init__(self, microscope_name, device_connection, configuration, laser_id):
         super().__init__(microscope_name, device_connection, configuration, laser_id)
 
         # Digital out (if using mixed modulation mode)
         try:
-            laser_do_port = self.device_config['onoff']['hardware']['channel']
-            
+            laser_do_port = self.device_config["onoff"]["hardware"]["channel"]
+
             self.laser_do_task = nidaqmx.Task()
             self.laser_do_task.do_channels.add_do_chan(
-                laser_do_port, line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
+                laser_do_port, line_grouping=LineGrouping.CHAN_FOR_ALL_LINES
+            )
         except (KeyError, DaqError) as e:
             self.laser_do_task = None
             if isinstance(e, DaqError):
@@ -76,13 +78,14 @@ class LaserNI(LaserBase):
 
         # Analog out
         try:
-            laser_ao_port = self.device_config['power']['hardware']['channel']
-            self.laser_min_ao = self.device_config['power']['hardware']['min']
-            self.laser_max_ao = self.device_config['power']['hardware']['max']
+            laser_ao_port = self.device_config["power"]["hardware"]["channel"]
+            self.laser_min_ao = self.device_config["power"]["hardware"]["min"]
+            self.laser_max_ao = self.device_config["power"]["hardware"]["max"]
 
             self.laser_ao_task = nidaqmx.Task()
             self.laser_ao_task.ao_channels.add_ao_voltage_chan(
-                laser_ao_port, min_val=self.laser_min_ao, max_val=self.laser_max_ao)
+                laser_ao_port, min_val=self.laser_min_ao, max_val=self.laser_max_ao
+            )
         except DaqError as e:
             logger.exception(e)
             logger.debug(e.error_code)
@@ -93,8 +96,7 @@ class LaserNI(LaserBase):
 
     def set_power(self, laser_intensity):
         try:
-            scaled_laser_voltage = (
-                int(laser_intensity) / 100) * self.laser_max_ao
+            scaled_laser_voltage = (int(laser_intensity) / 100) * self.laser_max_ao
             self.laser_ao_task.write(scaled_laser_voltage, auto_start=True)
             self._current_intensity = laser_intensity
         except DaqError as e:

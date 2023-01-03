@@ -1,6 +1,7 @@
 import numpy as np
-import PIL 
-import glob 
+import PIL
+import glob
+
 
 class LazyTiff:
     def __init__(self, fp):
@@ -20,9 +21,9 @@ class LazyTiff:
         fp : str
             Path to folder containting sequence of TIFF (.tif) files.
         """
-            
+
         # How many images in this sequence?
-        self._files = sorted(glob.glob(fp+'/*.tif'))
+        self._files = sorted(glob.glob(fp + "/*.tif"))
         self._n_files = len(self._files)
         self._image_index = 0
         try:
@@ -36,17 +37,17 @@ class LazyTiff:
     @property
     def shape(self):
         return (self._width, self._height, self._n_files)
-    
+
     def __getitem__(self, keys):
         """Numpy slicing access."""
-        
+
         if not isinstance(keys, tuple):
             keys = (keys,)
         if len(keys) > 3:
             raise IndexError(f"Cannot access this index. Shape is {self.shape}.")
-            
+
         print(keys, self._image_index)
-        
+
         image_index = self._image_index
         if len(keys) == 0:
             return self._image.squeeze()
@@ -60,14 +61,16 @@ class LazyTiff:
             if not isinstance(new_files, list):
                 new_files = [new_files]
             self._image_index = keys[2]
-        
+
         if image_index != self._image_index:
-            self._image = np.zeros((self._width, self._height, len(new_files)), dtype=np.uint16)
+            self._image = np.zeros(
+                (self._width, self._height, len(new_files)), dtype=np.uint16
+            )
             for i, file in enumerate(new_files):
                 with PIL.Image.open(file) as im:
-                    self._image[...,i] = im
-                    
+                    self._image[..., i] = im
+
         if len(keys) == 1:
-            return self._image[keys[0],...].squeeze()
-        
-        return self._image[keys[0],keys[1],:].squeeze()
+            return self._image[keys[0], ...].squeeze()
+
+        return self._image[keys[0], keys[1], :].squeeze()

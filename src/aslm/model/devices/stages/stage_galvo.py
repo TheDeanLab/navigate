@@ -16,31 +16,39 @@ class GalvoNIStage(StageBase):
         super().__init__(microscope_name, device_connection, configuration, device_id)
 
         # 1 V/ 100 um
-        device_config = configuration['configuration']['microscopes'][microscope_name]['stage']['hardware']
+        device_config = configuration["configuration"]["microscopes"][microscope_name][
+            "stage"
+        ]["hardware"]
 
         # eval(self.volts_per_micron, {"x": 100})
         if type(device_config) == ListProxy:
-            self.volts_per_micron = device_config[device_id]['volts_per_micron']
-            self.axes_channels = device_config[device_id]['axes_channels']
-            self.galvo_max_voltage = device_config[device_id]['max']
-            self.galvo_min_voltage = device_config[device_id]['min']
+            self.volts_per_micron = device_config[device_id]["volts_per_micron"]
+            self.axes_channels = device_config[device_id]["axes_channels"]
+            self.galvo_max_voltage = device_config[device_id]["max"]
+            self.galvo_min_voltage = device_config[device_id]["min"]
         else:
-            self.volts_per_micron = device_config['volts_per_micron']
-            self.axes_channels = device_config['axes_channels']
-            self.galvo_max_voltage = device_config['max']
-            self.galvo_min_voltage = device_config['min']
+            self.volts_per_micron = device_config["volts_per_micron"]
+            self.axes_channels = device_config["axes_channels"]
+            self.galvo_max_voltage = device_config["max"]
+            self.galvo_min_voltage = device_config["min"]
 
         self.daq = device_connection
 
         self.microscope_name = microscope_name
         self.configuration = configuration
 
-        self.trigger_source = configuration['configuration']['microscopes'][microscope_name]['daq']['trigger_source']
-        self.camera_delay_percent = configuration['configuration']['microscopes'][microscope_name]['camera']['delay_percent']
-        self.etl_ramp_falling = configuration['configuration']['microscopes'][microscope_name]['remote_focus_device']['ramp_falling_percent']
+        self.trigger_source = configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["daq"]["trigger_source"]
+        self.camera_delay_percent = configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["camera"]["delay_percent"]
+        self.etl_ramp_falling = configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["remote_focus_device"]["ramp_falling_percent"]
 
         self.waveform_dict = {}
-        for k in configuration['configuration']['gui']['channels'].keys():
+        for k in configuration["configuration"]["gui"]["channels"].keys():
             self.waveform_dict[k] = None
 
     # for stacking, we could have 2 axis here or not, y is for tiling, not necessary
@@ -77,19 +85,23 @@ class GalvoNIStage(StageBase):
 
         volts = eval(self.volts_per_micron, {"x": axis_abs})
 
-        microscope_state = self.configuration['experiment']['MicroscopeState']
-        self.sample_rate = self.configuration['configuration']['microscopes'][self.microscope_name]['daq']['sample_rate']
+        microscope_state = self.configuration["experiment"]["MicroscopeState"]
+        self.sample_rate = self.configuration["configuration"]["microscopes"][
+            self.microscope_name
+        ]["daq"]["sample_rate"]
 
-        for channel_key in microscope_state['channels'].keys():
+        for channel_key in microscope_state["channels"].keys():
             # channel includes 'is_selected', 'laser', 'filter', 'camera_exposure'...
-            channel = microscope_state['channels'][channel_key]
+            channel = microscope_state["channels"][channel_key]
 
             # Only proceed if it is enabled in the GUI
-            if channel['is_selected'] is True:
+            if channel["is_selected"] is True:
 
                 # Get the Waveform Parameters - Assumes ETL Delay < Camera Delay.  Should Assert.
-                exposure_time = channel['camera_exposure_time'] / 1000
-                self.sweep_time = exposure_time + exposure_time * ((self.camera_delay_percent + self.etl_ramp_falling) / 100)
+                exposure_time = channel["camera_exposure_time"] / 1000
+                self.sweep_time = exposure_time + exposure_time * (
+                    (self.camera_delay_percent + self.etl_ramp_falling) / 100
+                )
                 readout_time = 0  # TODO: find a way to pass this to the stages
                 if readout_time > 0:
                     # This addresses the dovetail nature of the camera readout in normal mode. The camera reads middle
@@ -100,30 +112,47 @@ class GalvoNIStage(StageBase):
                 self.samples = int(self.sample_rate * self.sweep_time)
 
                 # Calculate the Waveforms
-                if self.configuration['experiment']['MicroscopeState']['image_mode'] == 'projection':
-                    z_start = self.configuration['experiment']['MicroscopeState']['abs_z_start']
-                    z_end = self.configuration['experiment']['MicroscopeState']['abs_z_end']
-                    amp = eval(self.volts_per_micron, {"x": 0.5*(z_end-z_start)})
-                    off = eval(self.volts_per_micron, {"x": 0.5*(z_end+z_start)})
-                    self.waveform_dict[channel_key] = tunable_lens_ramp(sample_rate=self.sample_rate,
-                                                                        exposure_time=exposure_time,
-                                                                        sweep_time=self.sweep_time,
-                                                                        etl_delay=7.5,
-                                                                        camera_delay=self.camera_delay_percent,
-                                                                        fall=self.etl_ramp_falling,
-                                                                        amplitude=amp,
-                                                                        offset=off)
+                if (
+                    self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+                    == "projection"
+                ):
+                    z_start = self.configuration["experiment"]["MicroscopeState"][
+                        "abs_z_start"
+                    ]
+                    z_end = self.configuration["experiment"]["MicroscopeState"][
+                        "abs_z_end"
+                    ]
+                    amp = eval(self.volts_per_micron, {"x": 0.5 * (z_end - z_start)})
+                    off = eval(self.volts_per_micron, {"x": 0.5 * (z_end + z_start)})
+                    self.waveform_dict[channel_key] = tunable_lens_ramp(
+                        sample_rate=self.sample_rate,
+                        exposure_time=exposure_time,
+                        sweep_time=self.sweep_time,
+                        etl_delay=7.5,
+                        camera_delay=self.camera_delay_percent,
+                        fall=self.etl_ramp_falling,
+                        amplitude=amp,
+                        offset=off,
+                    )
                 else:
-                    self.waveform_dict[channel_key] = dc_value(sample_rate=self.sample_rate,
-                                                            sweep_time=self.sweep_time,
-                                                            amplitude=volts)
-                self.waveform_dict[channel_key][self.waveform_dict[channel_key] > self.galvo_max_voltage] = self.galvo_max_voltage
-                self.waveform_dict[channel_key][self.waveform_dict[channel_key] < self.galvo_min_voltage] = self.galvo_min_voltage
+                    self.waveform_dict[channel_key] = dc_value(
+                        sample_rate=self.sample_rate,
+                        sweep_time=self.sweep_time,
+                        amplitude=volts,
+                    )
+                self.waveform_dict[channel_key][
+                    self.waveform_dict[channel_key] > self.galvo_max_voltage
+                ] = self.galvo_max_voltage
+                self.waveform_dict[channel_key][
+                    self.waveform_dict[channel_key] < self.galvo_min_voltage
+                ] = self.galvo_min_voltage
 
-        self.daq.analog_outputs[self.axes_channels[axis_num]] = {'sample_rate': self.sample_rate,
-                                                                 'samples': self.samples,
-                                                                 'trigger_source': self.trigger_source,
-                                                                 'waveform': self.waveform_dict}
+        self.daq.analog_outputs[self.axes_channels[axis_num]] = {
+            "sample_rate": self.sample_rate,
+            "samples": self.samples,
+            "trigger_source": self.trigger_source,
+            "waveform": self.waveform_dict,
+        }
         return True
 
     def move_absolute(self, move_dictionary, wait_until_done=False):
@@ -147,15 +176,15 @@ class GalvoNIStage(StageBase):
             success = self.move_axis_absolute(ax, i, move_dictionary)
             if success and wait_until_done is True:
                 stage_pos, n_tries, i = -1e50, 10, 0
-                target_pos = move_dictionary[f"{ax}_abs"] - getattr(self, f"int_{ax}_pos_offset",
-                                                                    0)  # TODO: should we default to 0?
+                target_pos = move_dictionary[f"{ax}_abs"] - getattr(
+                    self, f"int_{ax}_pos_offset", 0
+                )  # TODO: should we default to 0?
                 while (abs(stage_pos - target_pos) < 0.01) and (i < n_tries):
-                    #replace: stage_pos = self.mcl_controller.MCL_SingleReadN(ax, self.handle)
-                    #todo: include a call to the NI board to set a voltage
+                    # replace: stage_pos = self.mcl_controller.MCL_SingleReadN(ax, self.handle)
+                    # todo: include a call to the NI board to set a voltage
                     i += 1
                     time.sleep(0.01)
                 if abs(stage_pos - target_pos) > 0.01:
                     success = False
 
         return success
-    

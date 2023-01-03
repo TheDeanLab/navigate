@@ -13,11 +13,28 @@ def sign(x):
     return -1 if x < 0 else 1  # (1 if x > 0 else 0)
 
 
-def compute_tiles_from_bounding_box(x_start, x_tiles, x_length, x_overlap,
-                                    y_start, y_tiles, y_length, y_overlap,
-                                    z_start, z_tiles, z_length, z_overlap,
-                                    theta_start, theta_tiles, theta_length, theta_overlap,
-                                    f_start, f_tiles, f_length, f_overlap):
+def compute_tiles_from_bounding_box(
+    x_start,
+    x_tiles,
+    x_length,
+    x_overlap,
+    y_start,
+    y_tiles,
+    y_length,
+    y_overlap,
+    z_start,
+    z_tiles,
+    z_length,
+    z_overlap,
+    theta_start,
+    theta_tiles,
+    theta_length,
+    theta_overlap,
+    f_start,
+    f_tiles,
+    f_length,
+    f_overlap,
+):
     r"""Create a grid of ROIs to image based on start position, number of tiles, and signed FOV length in each dimension.
 
     Focus currently tracks with z, since focus is z-dependent. TODO: Change this behavior? Make it a flag?
@@ -79,29 +96,37 @@ def compute_tiles_from_bounding_box(x_start, x_tiles, x_length, x_overlap,
     f_tiles = 1 if f_tiles <= 0 else f_tiles
 
     # Calculate the step between the edge of each frame
-    x_step = x_length*(1 - x_overlap)
-    y_step = y_length*(1 - y_overlap)
-    z_step = z_length*(1 - z_overlap)
+    x_step = x_length * (1 - x_overlap)
+    y_step = y_length * (1 - y_overlap)
+    z_step = z_length * (1 - z_overlap)
     theta_step = theta_length * (1 - theta_overlap)
-    f_step = f_length * (1 - f_overlap)              # Although we assume focus FOVs have no thickness, we include
-                                                     # overlap to adjust for z-ramping. We have no excuse for the
-                                                     # theta overlap.
+    f_step = f_length * (
+        1 - f_overlap
+    )  # Although we assume focus FOVs have no thickness, we include
+    # overlap to adjust for z-ramping. We have no excuse for the
+    # theta overlap.
 
     # grid out each dimension starting from (x_start, y_start, z_start) in steps
     def dim_vector(start, n_tiles, step):
         return start + np.arange(0, n_tiles, 1) * step
 
-    xs = dim_vector(x_start, x_tiles, x_step)                  # x-coordinate is centered on FOV
-    ys = dim_vector(y_start, y_tiles, y_step)                  # y-coordinate is centered on FOV
-    zs = dim_vector(z_start, z_tiles, z_step)                  # z-coordinate is centered on local z-stack origin
-    thetas = dim_vector(theta_start, theta_tiles, theta_step)  # we assume theta FOVs have no thickness
-    fs = dim_vector(f_start, f_tiles, f_step)                  # we assume focus FOVs have no thickness
+    xs = dim_vector(x_start, x_tiles, x_step)  # x-coordinate is centered on FOV
+    ys = dim_vector(y_start, y_tiles, y_step)  # y-coordinate is centered on FOV
+    zs = dim_vector(
+        z_start, z_tiles, z_step
+    )  # z-coordinate is centered on local z-stack origin
+    thetas = dim_vector(
+        theta_start, theta_tiles, theta_step
+    )  # we assume theta FOVs have no thickness
+    fs = dim_vector(f_start, f_tiles, f_step)  # we assume focus FOVs have no thickness
 
     # grid out the 4D space...
     x, y, z, t = np.meshgrid(xs, ys, zs, thetas)
 
     # we need to make f vary the same as z, for now, since focus changes with z
-    f = np.repeat(fs, int(len(t.ravel())/len(fs)))  # This only works if len(fs) = len(zs)
+    f = np.repeat(
+        fs, int(len(t.ravel()) / len(fs))
+    )  # This only works if len(fs) = len(zs)
 
     return np.vstack([x.ravel(), y.ravel(), z.ravel(), t.ravel(), f]).T
 
@@ -140,7 +165,7 @@ def calc_num_tiles(dist, overlap, roi_length):
 def update_table(table, pos, append=False):
     """
     Updates and redraws table based on given list. List is converted to a pandas dataframe before setting data in table.
-    
+
     Parameters
     ----------
     table: Multi_Position_Table object
@@ -149,19 +174,18 @@ def update_table(table, pos, append=False):
         List or np.array of positions to be added to table. Each row contains an X, Y, Z, R, F position
     append: bool
         Append the new positions to the table
-        
+
     Returns
     -------
-    None : 
+    None :
         Table is updated
     """
-    frame = pd.DataFrame(pos, columns=list('XYZRF'))
+    frame = pd.DataFrame(pos, columns=list("XYZRF"))
     if append:
         table.model.df.append(frame, ignore_index=True)
     else:
         table.model.df = frame
-    table.currentrow = table.model.df.shape[0]-1
+    table.currentrow = table.model.df.shape[0] - 1
     table.update_rowcolors()
     table.redraw()
     table.tableChanged()
-

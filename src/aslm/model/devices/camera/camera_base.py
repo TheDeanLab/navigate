@@ -45,40 +45,44 @@ logger = logging.getLogger(p)
 class CameraBase:
     r"""CameraBase Parent camera class.
 
-    Parameters
-    ----------
-   microscope_name : str
-        Name of microscope in configuration
-    device_connection : object
-        Hardware device to connect to
-    configuration : multiprocesing.managers.DictProxy
-        Global configuration of the microscope
+     Parameters
+     ----------
+    microscope_name : str
+         Name of microscope in configuration
+     device_connection : object
+         Hardware device to connect to
+     configuration : multiprocesing.managers.DictProxy
+         Global configuration of the microscope
 
     """
+
     def __init__(self, microscope_name, device_connection, configuration):
-        if microscope_name not in configuration['configuration']['microscopes'].keys():
-            raise NameError(f'Microscope {microscope_name} does not exist!')
+        if microscope_name not in configuration["configuration"]["microscopes"].keys():
+            raise NameError(f"Microscope {microscope_name} does not exist!")
 
         self.configuration = configuration
         self.camera_controller = device_connection
-        self.camera_parameters = self.configuration['configuration']['microscopes'][microscope_name]['camera']
+        self.camera_parameters = self.configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["camera"]
         self.is_acquiring = False
 
         # Initialize Pixel Information
-        self.pixel_size_in_microns = self.camera_parameters['pixel_size_in_microns']
-        self.binning_string = self.camera_parameters['binning']
+        self.pixel_size_in_microns = self.camera_parameters["pixel_size_in_microns"]
+        self.binning_string = self.camera_parameters["binning"]
         self.x_binning = int(self.binning_string[0])
         self.y_binning = int(self.binning_string[2])
-        self.x_pixels = self.camera_parameters['x_pixels']
-        self.y_pixels = self.camera_parameters['y_pixels']
+        self.x_pixels = self.camera_parameters["x_pixels"]
+        self.y_pixels = self.camera_parameters["y_pixels"]
         self.x_pixels = int(self.x_pixels / self.x_binning)
         self.y_pixels = int(self.y_pixels / self.y_binning)
 
         # Initialize Exposure and Display Information - Convert from milliseconds to seconds.
-        self.camera_line_interval = self.camera_parameters['line_interval']
-        self.camera_exposure_time = self.camera_parameters['exposure_time'] / 1000
-        self.camera_display_acquisition_subsampling = self.camera_parameters['display_acquisition_subsampling']
-
+        self.camera_line_interval = self.camera_parameters["line_interval"]
+        self.camera_exposure_time = self.camera_parameters["exposure_time"] / 1000
+        self.camera_display_acquisition_subsampling = self.camera_parameters[
+            "display_acquisition_subsampling"
+        ]
 
     def set_readout_direction(self, mode):
         r"""Set HamamatsuOrca readout direction.
@@ -88,9 +92,11 @@ class CameraBase:
             mode : str
                 'Top-to-Bottom', 'Bottom-to-Top', 'bytrigger', or 'diverge'.
         """
-        logger.debug(f'set camera readout direction to: {mode}')
+        logger.debug(f"set camera readout direction to: {mode}")
 
-    def calculate_light_sheet_exposure_time(self, full_chip_exposure_time, shutter_width):
+    def calculate_light_sheet_exposure_time(
+        self, full_chip_exposure_time, shutter_width
+    ):
         r"""Convert normal mode exposure time to light-sheet mode exposure time.
         Calculate the parameters for an ASLM acquisition
 
@@ -108,6 +114,8 @@ class CameraBase:
             HamamatsuOrca line interval duration.
         """
 
-        self.camera_line_interval = (full_chip_exposure_time / 1000)/(shutter_width + self.y_pixels + 10)
-        exposure_time = self.camera_line_interval*shutter_width*1000
+        self.camera_line_interval = (full_chip_exposure_time / 1000) / (
+            shutter_width + self.y_pixels + 10
+        )
+        exposure_time = self.camera_line_interval * shutter_width * 1000
         return exposure_time, self.camera_line_interval

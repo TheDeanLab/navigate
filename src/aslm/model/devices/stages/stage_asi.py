@@ -45,7 +45,8 @@ logger = logging.getLogger(p)
 
 
 def build_ASI_Stage_connection(com_port,
-                               baud_rate):
+                               baud_rate,
+                               timeout=1000):
     """Connect to the ASI Stage
 
     Parameters
@@ -54,6 +55,8 @@ def build_ASI_Stage_connection(com_port,
         Communication port for ASI Tiger Controller - e.g., COM1
     baud_rate : int
         Baud rate for ASI Tiger Controller - e.g., 9600
+    timeout: int
+        Time to wait for stage in milliseconds.
 
     Returns
     -------
@@ -63,6 +66,8 @@ def build_ASI_Stage_connection(com_port,
 
     # wait until ASI device is ready
     block_flag = True
+    wait_start = time.time()
+    timeout_s = timeout/1000
     while block_flag:
         asi_stage = TigerController(com_port, baud_rate)
         asi_stage.connect_to_serial()
@@ -70,7 +75,11 @@ def build_ASI_Stage_connection(com_port,
             block_flag = False
         else:
             print("Trying to connect to the ASI Stage again")
+            elapsed = time.time()
+            if (elapsed - wait_start) > timeout_s:
+                break
             time.sleep(0.1)
+
     return asi_stage
 
 

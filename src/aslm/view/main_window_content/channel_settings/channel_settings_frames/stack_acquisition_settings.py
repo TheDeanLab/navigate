@@ -1,5 +1,3 @@
-# ASLM Model Waveforms
-
 # Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 

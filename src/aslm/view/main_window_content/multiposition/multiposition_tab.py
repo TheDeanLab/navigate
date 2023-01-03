@@ -1,5 +1,3 @@
-# ASLM Model Waveforms
-
 # Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
@@ -30,16 +28,18 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+
 import tkinter as tk
 from tkinter import ttk
 import logging
 
-from aslm.view.main_window_content.multiposition.multipoint_settings import multipoint_list
+from aslm.view.main_window_content.multiposition.multipoint_settings import (
+    multipoint_list,
+)
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
-
 
 
 class multiposition_tab(tk.Frame):
@@ -48,12 +48,13 @@ class multiposition_tab(tk.Frame):
         tk.Frame.__init__(self, setntbk, *args, **kwargs)
 
         self.index = 3
-        
-        # Formatting
-        tk.Grid.columnconfigure(self, 'all', weight=1)
-        tk.Grid.rowconfigure(self, 'all', weight=1)
 
+        # Formatting
+        tk.Grid.columnconfigure(self, "all", weight=1)
+        tk.Grid.rowconfigure(self, "all", weight=1)
 
         # Multipoint List
         self.multipoint_list = multipoint_list(self)
-        self.multipoint_list.grid(row=5, column=0, columnspan=3, sticky=(tk.NSEW), padx=10, pady=10)
+        self.multipoint_list.grid(
+            row=5, column=0, columnspan=3, sticky=(tk.NSEW), padx=10, pady=10
+        )

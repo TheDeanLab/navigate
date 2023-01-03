@@ -52,6 +52,7 @@ class SyntheticDAQ(DAQBase):
     configuration : multiprocesing.managers.DictProxy
         Global configuration of the microscope
     """
+
     def __init__(self, configuration):
         super().__init__(configuration)
         self.camera = {}

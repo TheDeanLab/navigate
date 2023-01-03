@@ -54,60 +54,77 @@ class DAQBase:
 
     def __init__(self, configuration):
         self.configuration = configuration
-        self.etl_constants = self.configuration['etl_constants']
-        self.microscope_name = self.configuration['experiment']['MicroscopeState']['microscope_name']
-        self.daq_parameters = self.configuration['configuration']['microscopes'][self.microscope_name]['daq']
+        self.etl_constants = self.configuration["etl_constants"]
+        self.microscope_name = self.configuration["experiment"]["MicroscopeState"][
+            "microscope_name"
+        ]
+        self.daq_parameters = self.configuration["configuration"]["microscopes"][
+            self.microscope_name
+        ]["daq"]
 
         # Initialize Variables
-        self.sample_rate = self.daq_parameters['sample_rate']
-        self.sweep_time = self.daq_parameters['sweep_time']
+        self.sample_rate = self.daq_parameters["sample_rate"]
+        self.sweep_time = self.daq_parameters["sweep_time"]
 
         # ETL Parameters
         self.etl_ramp_falling = {}
-        for m in self.configuration['configuration']['microscopes'].keys():
-            self.etl_ramp_falling[m] = self.configuration['configuration']['microscopes'][m]['remote_focus_device']['ramp_falling_percent']
+        for m in self.configuration["configuration"]["microscopes"].keys():
+            self.etl_ramp_falling[m] = self.configuration["configuration"][
+                "microscopes"
+            ][m]["remote_focus_device"]["ramp_falling_percent"]
 
         # Camera Parameters
-        self.camera_delay_percent = self.configuration['configuration']['microscopes'][self.microscope_name]['camera']['delay_percent']
-        self.camera_pulse_percent = self.configuration['configuration']['microscopes'][self.microscope_name]['camera']['pulse_percent']
+        self.camera_delay_percent = self.configuration["configuration"]["microscopes"][
+            self.microscope_name
+        ]["camera"]["delay_percent"]
+        self.camera_pulse_percent = self.configuration["configuration"]["microscopes"][
+            self.microscope_name
+        ]["camera"]["pulse_percent"]
         self.camera_high_time = self.camera_pulse_percent * 0.01 * self.sweep_time
         self.camera_delay = self.camera_delay_percent * 0.01 * self.sweep_time
 
         self.waveform_dict = {}
-        for k in configuration['configuration']['gui']['channels'].keys():
+        for k in configuration["configuration"]["gui"]["channels"].keys():
             self.waveform_dict[k] = None
 
     def calculate_all_waveforms(self, microscope_name, readout_time):
         r"""Pre-calculates all waveforms necessary for the acquisition and organizes in a dictionary format.
 
-            Parameters
-            ----------
-            microscope_name : str
-                Name of the active microscope
-            readout_time : float
-                Readout time of the camera (seconds) if we are operating the camera in Normal mode, otherwise -1.
+        Parameters
+        ----------
+        microscope_name : str
+            Name of the active microscope
+        readout_time : float
+            Readout time of the camera (seconds) if we are operating the camera in Normal mode, otherwise -1.
 
-            Returns
-            -------
-            self.waveform_dict : dict
-                Dictionary of waveforms to pass to galvo and ETL, plus a camera waveform for display purposes.
-            """
+        Returns
+        -------
+        self.waveform_dict : dict
+            Dictionary of waveforms to pass to galvo and ETL, plus a camera waveform for display purposes.
+        """
         self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
         self.enable_microscope(microscope_name)
 
-        microscope_state = self.configuration['experiment']['MicroscopeState']
-        self.camera_delay_percent = self.configuration['configuration']['microscopes'][microscope_name]['camera']['delay_percent']
-        self.sample_rate = self.configuration['configuration']['microscopes'][microscope_name]['daq']['sample_rate']
+        microscope_state = self.configuration["experiment"]["MicroscopeState"]
+        self.camera_delay_percent = self.configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["camera"]["delay_percent"]
+        self.sample_rate = self.configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["daq"]["sample_rate"]
 
         # Iterate through the dictionary.
-        for channel_key in microscope_state['channels'].keys():
+        for channel_key in microscope_state["channels"].keys():
             # channel includes 'is_selected', 'laser', 'filter', 'camera_exposure'...
-            channel = microscope_state['channels'][channel_key]
+            channel = microscope_state["channels"][channel_key]
 
             # Only proceed if it is enabled in the GUI
-            if channel['is_selected'] is True:
-                exposure_time = channel['camera_exposure_time'] / 1000
-                self.sweep_time = exposure_time + exposure_time * ((self.camera_delay_percent + self.etl_ramp_falling[microscope_name]) / 100)
+            if channel["is_selected"] is True:
+                exposure_time = channel["camera_exposure_time"] / 1000
+                self.sweep_time = exposure_time + exposure_time * (
+                    (self.camera_delay_percent + self.etl_ramp_falling[microscope_name])
+                    / 100
+                )
                 if readout_time > 0:
                     # This addresses the dovetail nature of the camera readout in normal mode. The camera reads middle
                     # out, and the delay in start of the last lines compared to the first lines causes the exposure
@@ -115,10 +132,12 @@ class DAQBase:
                     # exposure time.
                     self.sweep_time += readout_time
 
-                self.waveform_dict[channel_key] = camera_exposure(sample_rate=self.sample_rate,
-                                                                  sweep_time=self.sweep_time,
-                                                                  exposure=exposure_time,
-                                                                  camera_delay=self.camera_delay_percent)
+                self.waveform_dict[channel_key] = camera_exposure(
+                    sample_rate=self.sample_rate,
+                    sweep_time=self.sweep_time,
+                    exposure=exposure_time,
+                    camera_delay=self.camera_delay_percent,
+                )
 
         return self.waveform_dict
 

@@ -45,19 +45,16 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-def build_PIStage_connection(controller_name,
-                             serial_number,
-                             stages,
-                             reference_modes):
+def build_PIStage_connection(controller_name, serial_number, stages, reference_modes):
     """Connect to the Physik Instrumente Stage"""
     pi_stages = stages.split()
     pi_reference_modes = reference_modes.split()
     pi_tools = pitools
     pi_device = GCSDevice(controller_name)
     pi_device.ConnectUSB(serialnum=serial_number)
-    pi_tools.startup(pi_device,
-                     stages=list(pi_stages),
-                     refmodes=list(pi_reference_modes))
+    pi_tools.startup(
+        pi_device, stages=list(pi_stages), refmodes=list(pi_reference_modes)
+    )
 
     # wait until pi_device is ready
     block_flag = True
@@ -66,92 +63,77 @@ def build_PIStage_connection(controller_name,
             block_flag = False
         else:
             time.sleep(0.1)
-    
-    stage_connection = {
-        'pi_tools': pi_tools,
-        'pi_device': pi_device
-    }
+
+    stage_connection = {"pi_tools": pi_tools, "pi_device": pi_device}
     return stage_connection
 
 
 class PIStage(StageBase):
     """Physik Instrumente Stage Class
 
-        Parameters
-        ----------
-        microscope_name : str
-            Name of microscope in configuration
-        device_connection : object
-            Hardware device to connect to
-        configuration : multiprocessing.managers.DictProxy
-            Global configuration of the microscope
+    Parameters
+    ----------
+    microscope_name : str
+        Name of microscope in configuration
+    device_connection : object
+        Hardware device to connect to
+    configuration : multiprocessing.managers.DictProxy
+        Global configuration of the microscope
 
-        Attributes
-        -----------
-        x_pos : float
-            True x position
-        y_pos : float
-            True y position
-        z_pos : float
-            True z position
-        f_pos : float
-            True focus position
-        theta_pos : float
-            True rotation position
-        position_dict : dict
-            Dictionary of true stage positions
-        x_max : float
-            Max x position
-        y_max : float
-            Max y position
-        z_max : float
-            Max y position
-        f_max : float
-            Max focus position
-        theta_max : float
-            Max rotation position
-        x_min : float
-            Min x position
-        y_min : float
-            Min y position
-        z_min : float
-            Min y position
-        f_min : float
-            Min focus position
-        theta_min : float
-            Min rotation position
+    Attributes
+    -----------
+    x_pos : float
+        True x position
+    y_pos : float
+        True y position
+    z_pos : float
+        True z position
+    f_pos : float
+        True focus position
+    theta_pos : float
+        True rotation position
+    position_dict : dict
+        Dictionary of true stage positions
+    x_max : float
+        Max x position
+    y_max : float
+        Max y position
+    z_max : float
+        Max y position
+    f_max : float
+        Max focus position
+    theta_max : float
+        Max rotation position
+    x_min : float
+        Min x position
+    y_min : float
+        Min y position
+    z_min : float
+        Min y position
+    f_min : float
+        Min focus position
+    theta_min : float
+        Min rotation position
 
-        Methods
-        -------
-        create_position_dict()
-            Creates a dictionary with the hardware stage positions.
-        get_abs_position()
-            Makes sure that the move is within the min and max stage limits.
-        stop()
-            Emergency halt of stage operation.
+    Methods
+    -------
+    create_position_dict()
+        Creates a dictionary with the hardware stage positions.
+    get_abs_position()
+        Makes sure that the move is within the min and max stage limits.
+    stop()
+        Emergency halt of stage operation.
 
-        """
-    def __init__(self,
-                 microscope_name,
-                 device_connection,
-                 configuration,
-                 device_id=0):
-        super().__init__(microscope_name,
-                         device_connection,
-                         configuration,
-                         device_id)
+    """
+
+    def __init__(self, microscope_name, device_connection, configuration, device_id=0):
+        super().__init__(microscope_name, device_connection, configuration, device_id)
 
         # Mapping from self.axes to corresponding PI axis labelling
-        axes_mapping = {
-            'x': 1,
-            'y': 2,
-            'z': 3,
-            'f': 5,
-            'theta': 4
-        }
+        axes_mapping = {"x": 1, "y": 2, "z": 3, "f": 5, "theta": 4}
         self.pi_axes = list(map(lambda a: axes_mapping[a], self.axes))
-        self.pi_tools = device_connection['pi_tools']
-        self.pi_device = device_connection['pi_device']
+        self.pi_tools = device_connection["pi_tools"]
+        self.pi_device = device_connection["pi_device"]
 
     def __del__(self):
         """Delete the PI Connection"""
@@ -159,7 +141,7 @@ class PIStage(StageBase):
             self.stop()
             logger.debug("PI connection closed")
         except GCSError as e:  # except BaseException:
-            print('Error while disconnecting the PI stage')
+            print("Error while disconnecting the PI stage")
             logger.exception(e)
             raise
 
@@ -174,21 +156,18 @@ class PIStage(StageBase):
             # convert to um
             for ax, n in zip(self.axes, self.pi_axes):
                 pos = positions[str(n)]
-                if ax != 'theta':
+                if ax != "theta":
                     pos = round(pos * 1000, 2)
                 setattr(self, f"{ax}_pos", pos)
         except GCSError as e:
-            print('Failed to report position')
+            print("Failed to report position")
             logger.exception(e)
 
         # Update Position Dictionary
         self.create_position_dict()
         return self.position_dict
 
-    def move_axis_absolute(self,
-                           axis,
-                           axis_num,
-                           move_dictionary):
+    def move_axis_absolute(self, axis, axis_num, move_dictionary):
         """Move stage along a single axis.
 
         Parameters
@@ -214,7 +193,7 @@ class PIStage(StageBase):
         # Move the stage
         try:
             pos = axis_abs
-            if axis != 'theta':
+            if axis != "theta":
                 pos /= 1000  # convert to mm
             self.pi_device.MOV({axis_num: pos})
             return True
@@ -222,10 +201,8 @@ class PIStage(StageBase):
             logger.exception(GCSError(e))
             return False
 
-    def move_absolute(self,
-                      move_dictionary,
-                      wait_until_done=False):
-        """ Move Absolute Method.
+    def move_absolute(self, move_dictionary, wait_until_done=False):
+        """Move Absolute Method.
         XYZF Values are converted to millimeters for PI API.
         Theta Values are not converted.
 

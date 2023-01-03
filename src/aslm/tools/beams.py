@@ -1,10 +1,52 @@
+# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# All rights reserved.
+
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# provided that the following conditions are met:
+
+#      * Redistributions of source code must retain the above copyright notice,
+#      this list of conditions and the following disclaimer.
+
+#      * Redistributions in binary form must reproduce the above copyright
+#      notice, this list of conditions and the following disclaimer in the
+#      documentation and/or other materials provided with the distribution.
+
+#      * Neither the name of the copyright holders nor the names of its
+#      contributors may be used to endorse or promote products derived from this
+#      software without specific prior written permission.
+
+# NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
+# THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+# CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+# PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+
 import numpy as np
 import numpy.typing as npt
 
 
-def gaussian_beam(r0: int, z0: int, rl: int, zl: int, w0: float, NA: float = 0.15,  n: float = 1.33,
-                  wvl: float = 488.0, pixel_size: float = 1, I0: float = 1, bg: float = 0) -> npt.ArrayLike:
-    """ Generate a Gaussian beam
+def gaussian_beam(
+    r0: int,
+    z0: int,
+    rl: int,
+    zl: int,
+    w0: float,
+    NA: float = 0.15,
+    n: float = 1.33,
+    wvl: float = 488.0,
+    pixel_size: float = 1,
+    I0: float = 1,
+    bg: float = 0,
+) -> npt.ArrayLike:
+    """Generate a Gaussian beam
 
     Parameters
     ----------
@@ -64,9 +106,25 @@ def gaussian_beam(r0: int, z0: int, rl: int, zl: int, w0: float, NA: float = 0.1
 #                             NA, n, wvl, pixel_size, res.x[3], res.x[4]))
 #
 
+
 def fit_gaussian_beam_error(x, image, NA, n, wvl, pixel_size, ravel=True):
     """x = (r0, z0, w0, I0, bg0)"""
-    diff = (gaussian_beam(x[0], x[1], image.shape[0], image.shape[1], x[2], NA, n, wvl, pixel_size, x[3], x[4]) - image)
+    diff = (
+        gaussian_beam(
+            x[0],
+            x[1],
+            image.shape[0],
+            image.shape[1],
+            x[2],
+            NA,
+            n,
+            wvl,
+            pixel_size,
+            x[3],
+            x[4],
+        )
+        - image
+    )
     # diff += x[2]  # regularize by beam waist size
     if ravel:
         return diff.ravel()
@@ -75,6 +133,9 @@ def fit_gaussian_beam_error(x, image, NA, n, wvl, pixel_size, ravel=True):
 
 
 def fit_gaussian_beam_mse(x, image, NA, n, wvl, pixel_size):
-    return (fit_gaussian_beam_error(x, image, NA, n, wvl, pixel_size, ravel=False)**2).mean()
+    return (
+        fit_gaussian_beam_error(x, image, NA, n, wvl, pixel_size, ravel=False) ** 2
+    ).mean()
+
 
 ######## End fitting functions #########

@@ -1,5 +1,3 @@
-# ASLM Model Waveforms
-
 # Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
@@ -46,12 +44,12 @@ logger = logging.getLogger(p)
 class channel_creator(ttk.Labelframe):
     def __init__(self, channels_tab, *args, **kwargs):
         #  Init Frame
-        self.title = 'Channel Settings'
+        self.title = "Channel Settings"
         ttk.Labelframe.__init__(self, channels_tab, text=self.title, *args, **kwargs)
-        
+
         # Formatting
-        tk.Grid.columnconfigure(self, 'all', weight=1)
-        tk.Grid.rowconfigure(self, 'all', weight=1)
+        tk.Grid.columnconfigure(self, "all", weight=1)
+        tk.Grid.rowconfigure(self, "all", weight=1)
 
         #  Arrays with Widget Variables and widgets themselves
         #  TODO refactor using dicts for variables and one for widgets,
@@ -88,7 +86,15 @@ class channel_creator(ttk.Labelframe):
         #  Channel Creation
 
         #  Grids labels them across the top row of each column
-        self.label_text = ["Channel", "Laser", "Power", "Filter", "Exp. Time (ms)", "Interval", "Defocus"]
+        self.label_text = [
+            "Channel",
+            "Laser",
+            "Power",
+            "Filter",
+            "Exp. Time (ms)",
+            "Interval",
+            "Defocus",
+        ]
         self.labels = []
         self.frame_columns = []
 
@@ -96,14 +102,17 @@ class channel_creator(ttk.Labelframe):
         for idx in range(len(self.label_text)):
             self.frame_columns.append(ttk.Frame(self))
             self.frame_columns[idx].columnconfigure(0, weight=1, uniform=1)
-            self.frame_columns[idx].rowconfigure('all', weight=1, uniform=1)
-            self.frame_columns[idx].grid(row=0, column=idx, sticky=tk.NSEW, padx=1, pady=(4, 6))
-            self.labels.append(ttk.Label(self.frame_columns[idx], text=self.label_text[idx]))
+            self.frame_columns[idx].rowconfigure("all", weight=1, uniform=1)
+            self.frame_columns[idx].grid(
+                row=0, column=idx, sticky=tk.NSEW, padx=1, pady=(4, 6)
+            )
+            self.labels.append(
+                ttk.Label(self.frame_columns[idx], text=self.label_text[idx])
+            )
             self.labels[idx].grid(row=0, column=0, sticky=tk.N, pady=1, padx=1)
         self.frame_columns[5].grid(padx=(1, 4))
         self.frame_columns[0].grid(padx=(4, 1))
-            
-        
+
         #  Adds and grids widgets to respective column
         #  TODO add connection to config file to specify the range.
         #   This will allow custom selection of amount of channels.
@@ -112,49 +121,112 @@ class channel_creator(ttk.Labelframe):
             #  This will add a widget to each column frame for the respecitive types
             #  Channel Checkboxes
             self.channel_variables.append(tk.BooleanVar())
-            self.channel_checks.append(ttk.Checkbutton(self.frame_columns[0], text='CH' + str(num+1),
-                                                       variable=self.channel_variables[num]))
-            self.channel_checks[num].grid(row=num+1, column=0, sticky=tk.NSEW, padx=1, pady=1)
+            self.channel_checks.append(
+                ttk.Checkbutton(
+                    self.frame_columns[0],
+                    text="CH" + str(num + 1),
+                    variable=self.channel_variables[num],
+                )
+            )
+            self.channel_checks[num].grid(
+                row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
+            )
 
             #  Laser Dropdowns
             self.laser_variables.append(tk.StringVar())
-            self.laser_pulldowns.append(ttk.Combobox(self.frame_columns[1],
-                                                     textvariable=self.laser_variables[num], width=6))
+            self.laser_pulldowns.append(
+                ttk.Combobox(
+                    self.frame_columns[1],
+                    textvariable=self.laser_variables[num],
+                    width=6,
+                )
+            )
             self.laser_pulldowns[num].state(["readonly"])
-            self.laser_pulldowns[num].grid(row=num+1, column=0, sticky=tk.NSEW, padx=1, pady=1)
+            self.laser_pulldowns[num].grid(
+                row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
+            )
 
             #  Laser Power Spinbox
             self.laserpower_variables.append(tk.StringVar())
-            self.laserpower_pulldowns.append(ttk.Spinbox(self.frame_columns[2], from_=0, to=100.0,
-                                                         textvariable=self.laserpower_variables[num],
-                                                         increment=5, width=3, font=Font(size=11)))
-            self.laserpower_pulldowns[num].grid(row=num+1, column=0, sticky=tk.NS, padx=1, pady=1)
+            self.laserpower_pulldowns.append(
+                ttk.Spinbox(
+                    self.frame_columns[2],
+                    from_=0,
+                    to=100.0,
+                    textvariable=self.laserpower_variables[num],
+                    increment=5,
+                    width=3,
+                    font=Font(size=11),
+                )
+            )
+            self.laserpower_pulldowns[num].grid(
+                row=num + 1, column=0, sticky=tk.NS, padx=1, pady=1
+            )
 
             #  FilterWheel Dropdowns
             self.filterwheel_variables.append(tk.StringVar())
-            self.filterwheel_pulldowns.append(ttk.Combobox(self.frame_columns[3],
-                                                           textvariable=self.filterwheel_variables[num], width=10))
+            self.filterwheel_pulldowns.append(
+                ttk.Combobox(
+                    self.frame_columns[3],
+                    textvariable=self.filterwheel_variables[num],
+                    width=10,
+                )
+            )
             self.filterwheel_pulldowns[num].state(["readonly"])
-            self.filterwheel_pulldowns[num].grid(row=num+1, column=0, sticky=tk.NSEW, padx=1, pady=1)
+            self.filterwheel_pulldowns[num].grid(
+                row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
+            )
 
             #  Exposure Time Spinboxes
             self.exptime_variables.append(tk.StringVar())
-            self.exptime_pulldowns.append(ttk.Spinbox(self.frame_columns[4], from_=0, to=5000.0,
-                                                      textvariable=self.exptime_variables[num], increment=25, width=5, font=Font(size=11)))
-            self.exptime_pulldowns[num].grid(row=num+1, column=0, sticky=tk.NSEW, padx=1, pady=1)
+            self.exptime_pulldowns.append(
+                ttk.Spinbox(
+                    self.frame_columns[4],
+                    from_=0,
+                    to=5000.0,
+                    textvariable=self.exptime_variables[num],
+                    increment=25,
+                    width=5,
+                    font=Font(size=11),
+                )
+            )
+            self.exptime_pulldowns[num].grid(
+                row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
+            )
 
             #  Time Interval Spinboxes
             self.interval_variables.append(tk.StringVar())
-            self.interval_spins.append(ttk.Spinbox(self.frame_columns[5], from_=0, to=5000.0,
-                                                   textvariable=self.interval_variables[num], increment=1, width=3, font=Font(size=11)))
-            self.interval_spins[num].grid(row=num+1, column=0, sticky=tk.NSEW, padx=1, pady=1)
+            self.interval_spins.append(
+                ttk.Spinbox(
+                    self.frame_columns[5],
+                    from_=0,
+                    to=5000.0,
+                    textvariable=self.interval_variables[num],
+                    increment=1,
+                    width=3,
+                    font=Font(size=11),
+                )
+            )
+            self.interval_spins[num].grid(
+                row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
+            )
 
             # Defocus Spinbox
             self.defocus_variables.append(tk.DoubleVar())
-            self.defocus_spins.append(ValidatedSpinbox(self.frame_columns[6], from_=0.0, to=200.0,
-                                                  textvariable=self.defocus_variables[num], increment=0.1, width=4, font=Font(size=11)))
-            self.defocus_spins[num].grid(row=num+1, column=0, sticky=tk.NSEW, padx=1, pady=1)
-
+            self.defocus_spins.append(
+                ValidatedSpinbox(
+                    self.frame_columns[6],
+                    from_=0.0,
+                    to=200.0,
+                    textvariable=self.defocus_variables[num],
+                    increment=0.1,
+                    width=4,
+                    font=Font(size=11),
+                )
+            )
+            self.defocus_spins[num].grid(
+                row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
+            )
 
         self.filterwheel_pulldowns[1].grid(pady=2)
         self.filterwheel_pulldowns[2].grid(pady=2)
@@ -163,7 +235,8 @@ class channel_creator(ttk.Labelframe):
         self.channel_checks[1].grid(pady=2)
         self.channel_checks[2].grid(pady=2)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     root = tk.Tk()
     channel_creator(root).grid(row=0, column=0, sticky=tk.NSEW)
     root.mainloop()

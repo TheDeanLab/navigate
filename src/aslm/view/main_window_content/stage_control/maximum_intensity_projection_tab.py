@@ -1,5 +1,3 @@
-# ASLM Model Waveforms
-
 # Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
@@ -30,6 +28,7 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+
 # Standard Imports
 from tkinter import ttk
 import tkinter as tk
@@ -45,12 +44,12 @@ logger = logging.getLogger(p)
 
 class maximum_intensity_projection_tab(ttk.Frame):
     def __init__(self, note3, *args, **kwargs):
-        #Init Frame
+        # Init Frame
         ttk.Frame.__init__(self, note3, *args, **kwargs)
-        
+
         # Formatting
-        tk.Grid.columnconfigure(self, 'all', weight=1)
-        tk.Grid.rowconfigure(self, 'all', weight=1)
+        tk.Grid.columnconfigure(self, "all", weight=1)
+        tk.Grid.rowconfigure(self, "all", weight=1)
 
         # Generate MIPs
         def xy_mip():
@@ -67,8 +66,8 @@ class maximum_intensity_projection_tab(ttk.Frame):
 
         #  Data to just fill void
         t = np.arange(0.0, 2.0, 0.01)
-        s1 = np.sin(2*np.pi*t)
-        s2 = np.sin(4*np.pi*t)
+        s1 = np.sin(2 * np.pi * t)
+        s2 = np.sin(4 * np.pi * t)
 
         # adding the subplot
         plot1 = fig.add_subplot(131)
@@ -80,7 +79,7 @@ class maximum_intensity_projection_tab(ttk.Frame):
         fig.gca().set_axis_off()
 
         plot3 = fig.add_subplot(133)
-        plot3.plot(t, s2*2)
+        plot3.plot(t, s2 * 2)
         fig.gca().set_axis_off()
 
         # creating the Tkinter canvas

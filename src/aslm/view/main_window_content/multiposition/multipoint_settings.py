@@ -1,5 +1,3 @@
-# ASLM Model Waveforms
-
 # Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
@@ -30,8 +28,11 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+
 import pandas as pd
-from aslm.view.main_window_content.multiposition.multi_position_table import Multi_Position_Table as MPTable
+from aslm.view.main_window_content.multiposition.multi_position_table import (
+    Multi_Position_Table as MPTable,
+)
 import tkinter as tk
 from tkinter import ttk
 import logging
@@ -41,29 +42,30 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-
 class multipoint_frame(ttk.Labelframe):
     def __init__(self, settings_tab, *args, **kwargs):
-        text_label = 'Multi-position Acquisition'
+        text_label = "Multi-position Acquisition"
         ttk.Labelframe.__init__(self, settings_tab, text=text_label, *args, **kwargs)
-        
+
         # Formatting
-        tk.Grid.columnconfigure(self, 'all', weight=1)
-        tk.Grid.rowconfigure(self, 'all', weight=1)
+        tk.Grid.columnconfigure(self, "all", weight=1)
+        tk.Grid.rowconfigure(self, "all", weight=1)
 
         # Dict
 
         # Save Data Label
-        self.laser_label = ttk.Label(self, text='Enable')
-        self.laser_label.grid(row=0, column=0, sticky=(tk.NSEW), padx=(4,1), pady=(4,6))
+        self.laser_label = ttk.Label(self, text="Enable")
+        self.laser_label.grid(
+            row=0, column=0, sticky=(tk.NSEW), padx=(4, 1), pady=(4, 6)
+        )
 
         # Save Data Checkbox
         self.on_off = tk.BooleanVar()
-        self.save_check = ttk.Checkbutton(self, text='', variable=self.on_off)
-        self.save_check.grid(row=0, column=1, sticky=(tk.NSEW), pady=(4,6))
-
+        self.save_check = ttk.Checkbutton(self, text="", variable=self.on_off)
+        self.save_check.grid(row=0, column=1, sticky=(tk.NSEW), pady=(4, 6))
 
         # Getters
+
     def get_variables(self):
         """
         This function returns a dictionary of all the variables that are tied to each widget name.
@@ -87,37 +89,31 @@ class multipoint_list(ttk.Frame):
     Exploring using a pandastable for embedding an interactive list within a tk Frame.
     https://pandastable.readthedocs.io/en/latest/
     """
+
     def __init__(self, settings_tab, *args, **kwargs):
-        #Init Frame
+        # Init Frame
         ttk.Frame.__init__(self, settings_tab, *args, **kwargs)
 
-        df = pd.DataFrame({
-            'X': [0],
-            'Y': [0],
-            'Z': [0],
-            'R': [0],
-            'F': [0]
-        })
+        df = pd.DataFrame({"X": [0], "Y": [0], "Z": [0], "R": [0], "F": [0]})
         # pt = Table(self, showtoolbar=False)
         self.pt = MPTable(self, showtoolbar=False)
         self.pt.show()
         self.pt.model.df = df
-    
+
     def get_table(self):
-        '''
+        """
         Returns a reference to multipoint table dataframe.
 
         Parameters
         ----------
         self : object
             Multipoint List instance
-        
+
 
         Returns
         -------
         self.pt.model.df: Pandas DataFrame
             Reference to table data as dataframe
-        '''
+        """
 
         return self.pt
-

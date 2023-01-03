@@ -1,5 +1,3 @@
-# ASLM Model Waveforms
-
 # Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
@@ -47,68 +45,86 @@ logger = logging.getLogger(p)
 class palette(ttk.Labelframe):
     def __init__(self, cam_view, *args, **kwargs):
         # Init Frame
-        text_label = 'LUT'
-        ttk.Labelframe.__init__(
-            self,
-            cam_view,
-            text=text_label,
-            *args,
-            **kwargs)
-        
+        text_label = "LUT"
+        ttk.Labelframe.__init__(self, cam_view, text=text_label, *args, **kwargs)
+
         # Formatting
-        tk.Grid.columnconfigure(self, 'all', weight=1)
-        tk.Grid.rowconfigure(self, 'all', weight=1)
+        tk.Grid.columnconfigure(self, "all", weight=1)
+        tk.Grid.rowconfigure(self, "all", weight=1)
 
         # Dictionary for widgets
         self.inputs = {}
 
         # LUT Radio buttons - Gray is default
-        self.color_labels = ['Gray', 'Gradient', 'Rainbow', 'SNR']       # Human-readable names
-        self.color_values = ['gist_gray', 'plasma', 'afmhot', 'RdBu_r']  # maplotlib cmap names
+        self.color_labels = [
+            "Gray",
+            "Gradient",
+            "Rainbow",
+            "SNR",
+        ]  # Human-readable names
+        self.color_values = [
+            "gist_gray",
+            "plasma",
+            "afmhot",
+            "RdBu_r",
+        ]  # maplotlib cmap names
         self.color = tk.StringVar()
         for i in range(len(self.color_labels)):
-            self.inputs[self.color_labels[i]] = LabelInput(parent=self,
-                                                           label=self.color_labels[i],
-                                                           input_class=ttk.Radiobutton,
-                                                           input_var=self.color,
-                                                           input_args={'value': self.color_values[i]}
-                                                           )
+            self.inputs[self.color_labels[i]] = LabelInput(
+                parent=self,
+                label=self.color_labels[i],
+                input_class=ttk.Radiobutton,
+                input_var=self.color,
+                input_args={"value": self.color_values[i]},
+            )
             self.inputs[self.color_labels[i]].grid(
-                row=i, column=0, sticky=tk.NSEW, pady=3)
+                row=i, column=0, sticky=tk.NSEW, pady=3
+            )
 
         # Flip xy
         self.transpose = tk.BooleanVar()
-        self.trans = 'Flip XY'
-        self.inputs[self.trans] = LabelInput(parent=self,
-                                            label=self.trans,
-                                            input_class=ttk.Checkbutton,
-                                            input_var=self.transpose
-                                            )
-        self.inputs[self.trans].grid(row=len(self.color_labels), column=0, sticky=tk.NSEW, pady=3)
+        self.trans = "Flip XY"
+        self.inputs[self.trans] = LabelInput(
+            parent=self,
+            label=self.trans,
+            input_class=ttk.Checkbutton,
+            input_var=self.transpose,
+        )
+        self.inputs[self.trans].grid(
+            row=len(self.color_labels), column=0, sticky=tk.NSEW, pady=3
+        )
 
         # Autoscale
         self.autoscale = tk.BooleanVar()
-        self.auto = 'Autoscale'
-        self.minmax = ['Min Counts', 'Max Counts']
-        self.minmax_names = ['Min', 'Max']
-        self.inputs[self.auto] = LabelInput(parent=self,
-                                            label=self.auto,
-                                            input_class=ttk.Checkbutton,
-                                            input_var=self.autoscale
-                                            )
-        self.inputs[self.auto].grid(row=len(self.color_labels)+1, column=0, sticky=tk.NSEW, pady=3)
+        self.auto = "Autoscale"
+        self.minmax = ["Min Counts", "Max Counts"]
+        self.minmax_names = ["Min", "Max"]
+        self.inputs[self.auto] = LabelInput(
+            parent=self,
+            label=self.auto,
+            input_class=ttk.Checkbutton,
+            input_var=self.autoscale,
+        )
+        self.inputs[self.auto].grid(
+            row=len(self.color_labels) + 1, column=0, sticky=tk.NSEW, pady=3
+        )
 
         # Max and Min Counts
         for i in range(len(self.minmax)):
-            self.inputs[self.minmax_names[i]] = LabelInput(parent=self,
-                                                           label=self.minmax[i],
-                                                           input_class=ttk.Spinbox,
-                                                           input_var=tk.IntVar(),
-                                                           input_args={'from_': 1,
-                                                                       'to': 2**16-1,
-                                                                       'increment': 1,
-                                                                       'width': 5})
-            self.inputs[self.minmax_names[i]].grid(row=i + len(self.color_labels) + 2, column=0, sticky=tk.NSEW, padx=3, pady=3)
+            self.inputs[self.minmax_names[i]] = LabelInput(
+                parent=self,
+                label=self.minmax[i],
+                input_class=ttk.Spinbox,
+                input_var=tk.IntVar(),
+                input_args={"from_": 1, "to": 2**16 - 1, "increment": 1, "width": 5},
+            )
+            self.inputs[self.minmax_names[i]].grid(
+                row=i + len(self.color_labels) + 2,
+                column=0,
+                sticky=tk.NSEW,
+                padx=3,
+                pady=3,
+            )
 
     def get_variables(self):
         """

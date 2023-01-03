@@ -1,15 +1,48 @@
+# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# All rights reserved.
+
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# provided that the following conditions are met:
+
+#      * Redistributions of source code must retain the above copyright notice,
+#      this list of conditions and the following disclaimer.
+
+#      * Redistributions in binary form must reproduce the above copyright
+#      notice, this list of conditions and the following disclaimer in the
+#      documentation and/or other materials provided with the distribution.
+
+#      * Neither the name of the copyright holders nor the names of its
+#      contributors may be used to endorse or promote products derived from this
+#      software without specific prior written permission.
+
+# NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
+# THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+# CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+# PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+
 import numpy as np
 import numpy.typing as npt
 
-# Mostly follows Lin R, Clowsley AH, Jayasinghe ID, Baddeley D, Soeller C. 
+# Mostly follows Lin R, Clowsley AH, Jayasinghe ID, Baddeley D, Soeller C.
 # Algorithmic corrections for localization microscopy with sCMOS cameras -
-# characterisation of a computationally efficient localization approach. 
-# Optics Express. 2017;25(10):11701–11701. 
+# characterisation of a computationally efficient localization approach.
+# Optics Express. 2017;25(10):11701–11701.
 
-def compute_scmos_offset_and_variance_map(image: npt.ArrayLike) \
-    -> tuple[npt.ArrayLike, npt.ArrayLike]:
-    """ Compute the offset and variance map of an sCMOS camera.
-    
+
+def compute_scmos_offset_and_variance_map(
+    image: npt.ArrayLike,
+) -> tuple[npt.ArrayLike, npt.ArrayLike]:
+    """Compute the offset and variance map of an sCMOS camera.
+
     Parameters
     ----------
     image : npt.ArrayLike
@@ -20,11 +53,13 @@ def compute_scmos_offset_and_variance_map(image: npt.ArrayLike) \
 
     return offset_map, variance_map
 
-def compute_flatfield_map(image: npt.ArrayLike, offset_map: npt.ArrayLike, 
-                           local: bool = False) -> npt.ArrayLike:
+
+def compute_flatfield_map(
+    image: npt.ArrayLike, offset_map: npt.ArrayLike, local: bool = False
+) -> npt.ArrayLike:
     """Compute the flatfield map for an evenly-illuminated set of frames from
     an sCMOS camera.
-    
+
     Parameters
     ----------
     image : npt.ArrayLike
@@ -37,11 +72,12 @@ def compute_flatfield_map(image: npt.ArrayLike, offset_map: npt.ArrayLike,
     offset_image = np.mean(image, axis=0) - offset_map
     if local:
         from scipy.ndimage import gaussian_filter
-        
+
         gaussian_image = gaussian_filter(offset_image, 9)
-        return offset_image/(gaussian_image + 1)
+        return offset_image / (gaussian_image + 1)
     else:
-        return offset_image/(np.max(np.abs(offset_image)) + 1)
+        return offset_image / (np.max(np.abs(offset_image)) + 1)
+
 
 def compute_noise_sigma(Fn=1.0, qe=0.82, S=0.0, Ib=0.0, Nr=1.4, M=1.0):
     """
@@ -68,16 +104,17 @@ def compute_noise_sigma(Fn=1.0, qe=0.82, S=0.0, Ib=0.0, Nr=1.4, M=1.0):
     noise : float or np.array
         Estimated noise model (electrons)
     """
-    noise = np.sqrt(Fn*Fn*qe*(S+Ib)+(Nr/M)**2)
+    noise = np.sqrt(Fn * Fn * qe * (S + Ib) + (Nr / M) ** 2)
     return noise
+
 
 def compute_signal_to_noise(image, offset_map, variance_map):
     """
     Compute the SNR of an image from offset and variance maps.
     """
-    S = (image.astype(float) - offset_map.astype(float))
+    S = image.astype(float) - offset_map.astype(float)
     S[S < 0] = 0  # clip
     N = np.sqrt(S + variance_map.astype(float) + 1.0)  # +1 to avoid div by zero error
     # print(f"Image min: {image.min()} offset_map min: {offset_map.min()} S min: {S.min()} variance_map min: {variance_map.min()} N min: {N.min()}")
 
-    return 1.0*S/N
+    return 1.0 * S / N

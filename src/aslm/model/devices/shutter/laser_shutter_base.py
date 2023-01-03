@@ -61,8 +61,7 @@ class ShutterBase:
         self.shutter_state = False
 
     def __del__(self):
-        r"""Close the Shutter at exit.
-        """
+        r"""Close the Shutter at exit."""
         pass
 
     def open_shutter(self):

@@ -49,35 +49,23 @@ logger = logging.getLogger(p)
 
 class SelfLockThread(threading.Thread):
     def __init__(
-            self,
-            group=None,
-            target=None,
-            name=None,
-            args=(),
-            kwargs={},
-            *,
-            daemon=None):
-        super().__init__(group,
-                         target,
-                         name,
-                         args,
-                         kwargs,
-                         daemon=daemon)
+        self, group=None, target=None, name=None, args=(), kwargs={}, *, daemon=None
+    ):
+        super().__init__(group, target, name, args, kwargs, daemon=daemon)
         self.selfLock = threading.Lock()
         # lock itself
         self.selfLock.acquire()
 
     def run(self):
-        self._kwargs['thread'] = self
+        self._kwargs["thread"] = self
         if self._target:
             try:
                 self._target(*self._args, **self._kwargs)
             except Exception as e:
-                print(f'{self.name} thread ended because of exception!: {e}')
-                logger.debug(f'{self.name} thread ended because of exception!: {e}')
+                print(f"{self.name} thread ended because of exception!: {e}")
+                logger.debug(f"{self.name} thread ended because of exception!: {e}")
             finally:
                 pass
-
 
     def wait(self):
         self.selfLock.acquire()
@@ -89,6 +77,7 @@ class SelfLockThread(threading.Thread):
     def isLocked(self):
         return self.selfLock.locked()
 
+
 class SynchronizedThreadPool:
     def __init__(self):
         self.resources = {}
@@ -99,40 +88,33 @@ class SynchronizedThreadPool:
             self.resources[resourceName] = ThreadWaitlist()
 
     def createThread(
-            self,
-            resourceName,
-            target,
-            args=(),
-            kwargs={},
-            *,
-            callback=None,
-            cbArgs=(),
-            cbKargs={}):
+        self,
+        resourceName,
+        target,
+        args=(),
+        kwargs={},
+        *,
+        callback=None,
+        cbArgs=(),
+        cbKargs={},
+    ):
         if resourceName not in self.resources:
             self.registerResource(resourceName)
         task = self.threadTaskWrapping(
-            resourceName,
-            target,
-            callback=callback,
-            cbArgs=cbArgs,
-            cbKargs=cbKargs)
+            resourceName, target, callback=callback, cbArgs=cbArgs, cbKargs=cbKargs
+        )
         taskThread = SelfLockThread(None, task, resourceName, args, kwargs, daemon=True)
         taskThread.start()
         return taskThread
 
     def threadTaskWrapping(
-            self,
-            resourceName,
-            target,
-            *,
-            callback=None,
-            cbArgs=(),
-            cbKargs={}):
+        self, resourceName, target, *, callback=None, cbArgs=(), cbKargs={}
+    ):
         def func(*args, **kwargs):
-            thread = kwargs.get('thread', None)
+            thread = kwargs.get("thread", None)
             if not thread:
                 return
-            del kwargs['thread']
+            del kwargs["thread"]
             # add thread to the waitlist of the resource
             with self.resources[resourceName] as resource:
                 resource.waitlist.append(thread)
@@ -145,8 +127,18 @@ class SynchronizedThreadPool:
                 try:
                     target(*args, **kwargs)
                 except Exception as e:
-                    print(threading.current_thread().name, 'thread exception happened!', e, traceback.format_exc())
-                    logger.debug(threading.current_thread().name, 'thread exception happened!', e, traceback.format_exc())
+                    print(
+                        threading.current_thread().name,
+                        "thread exception happened!",
+                        e,
+                        traceback.format_exc(),
+                    )
+                    logger.debug(
+                        threading.current_thread().name,
+                        "thread exception happened!",
+                        e,
+                        traceback.format_exc(),
+                    )
 
             # wake up next thread if any
             with self.resources[resourceName] as resource:
@@ -156,6 +148,7 @@ class SynchronizedThreadPool:
             # run callback
             if callback:
                 callback(*cbArgs, **cbKargs)
+
         return func
 
     def removeThread(self, resourceName, taskThread):
@@ -179,9 +172,12 @@ class SynchronizedThreadPool:
             temp.waitlist.append(taskThread)
 
     def getRunningThread(self, resourceName):
-        if resourceName not in self.resources or len(self.resources[resourceName].waitlist) < 1:
+        if (
+            resourceName not in self.resources
+            or len(self.resources[resourceName].waitlist) < 1
+        ):
             return None
-        return self.resources[resourceName].waitlist[0]       
+        return self.resources[resourceName].waitlist[0]
 
     def clear(self):
         # move all the threads except first one to toDeleteList
@@ -215,22 +211,22 @@ class SynchronizedThreadPool:
                         temp.waitlist.append(thread)
 
     def globaltrace(self, frame, event, arg):
-        if event == 'call':
+        if event == "call":
             return self.localtrace
         else:
             return None
- 
+
     def localtrace(self, frame, event, arg):
-        if event == 'exception':
-            print('****in local trace: exception stops the thread')
-            logger.debug('****in local trace: exception stops the thread')
+        if event == "exception":
+            print("****in local trace: exception stops the thread")
+            logger.debug("****in local trace: exception stops the thread")
             raise SystemExit()
         return self.localtrace
 
     def _raiseError(self, threadId):
-        ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_ulong(threadId),
-            ctypes.py_object(SystemExit))
-
+        ctypes.pythonapi.PyThreadState_SetAsyncExc(
+            ctypes.c_ulong(threadId), ctypes.py_object(SystemExit)
+        )
 
 
 class ThreadWaitlist:

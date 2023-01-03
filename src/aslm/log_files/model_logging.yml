@@ -20,28 +20,28 @@ handlers:
     class: logging.handlers.RotatingFileHandler
     level: INFO
     formatter: base
-    filename: LOGS/model_info.log
+    filename: model_info.log
     filters: [not_performance]
     mode: a
   model_debug:
     class: logging.handlers.RotatingFileHandler
     level: DEBUG
     formatter: base
-    filename: LOGS/model_debug.log
+    filename: model_debug.log
     filters: [not_performance]
     mode: a
   model_error:
     class: logging.handlers.RotatingFileHandler
     level: ERROR
     formatter: base
-    filename: LOGS/model_error.log
+    filename: model_error.log
     filters: [not_performance]
     mode: a
   model_performance:
     class: logging.handlers.RotatingFileHandler
     level: DEBUG
     formatter: base
-    filename: LOGS/model_performance.log
+    filename: model_performance.log
     filters: [performance_specs]
     mode: a
 loggers:

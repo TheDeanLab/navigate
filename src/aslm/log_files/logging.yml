@@ -20,21 +20,21 @@ handlers:
     class: logging.handlers.RotatingFileHandler
     level: INFO
     formatter: base
-    filename: LOGS/view_controller_info.log
+    filename: view_controller_info.log
     filters: [not_performance]
     mode: a
   vc_debug:
     class: logging.handlers.RotatingFileHandler
     level: DEBUG
     formatter: base
-    filename: LOGS/view_controller_debug.log
+    filename: view_controller_debug.log
     filters: [not_performance]
     mode: a
   performance:
     class: logging.handlers.RotatingFileHandler
     level: DEBUG
     formatter: base
-    filename: LOGS/performance.log
+    filename: performance.log
     filters: [performance_specs]
     mode: a
 loggers:

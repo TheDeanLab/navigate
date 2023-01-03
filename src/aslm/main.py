@@ -28,6 +28,7 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+
 # Standard Library Imports
 import argparse
 from pathlib import Path
@@ -35,18 +36,21 @@ import tkinter as tk
 import platform
 import os
 
+# Third Party Imports
+
 # Local Imports
 from aslm.controller.controller import Controller
 from aslm.log_files.log_functions import log_setup
 from aslm.config import get_configuration_paths
 from aslm.view.splash_screen import SplashScreen
 
+# Proxy Configuration
 os.environ['http_proxy'] = ''
 os.environ['https_proxy'] = ''
 
 
 def main():
-    """Multiscale ASLM Microscope Software.
+    """Autonomous Software for Light Microscopy (ASLM).
     Microscope control software built in a Model-View-Controller architecture.
     Provides control of cameras, data acquisition cards, filter wheels, lasers
     stages, voice coils, and zoom servos.
@@ -81,7 +85,7 @@ def main():
     configuration_path, experiment_path, etl_constants_path, rest_api_path = get_configuration_paths()
 
     # Parse command line arguments
-    parser = argparse.ArgumentParser(description='Multiscale Microscope Command Line Arguments')
+    parser = argparse.ArgumentParser(description='Autonomous Software for Light Microscopy Command Line Arguments')
     input_args = parser.add_argument_group('Input Arguments')
 
     input_args.add_argument('-sh', '--synthetic_hardware',
@@ -149,7 +153,6 @@ def main():
     args = parser.parse_args()
 
     # If non-default configuration, experiment, or ETL constant file is provided as an input argument.
-    # TODO: Possibly make sub-routine to check properties of file before loading.
     if args.config_file:
         assert args.config_file.exists(), "Configuration file Path {} not valid".format(args.config_file)
         configuration_path = args.config_file

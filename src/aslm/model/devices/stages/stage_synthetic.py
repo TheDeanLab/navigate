@@ -116,23 +116,18 @@ class SyntheticStage(StageBase):
     def zero_axes(self, list):
         for axis in list:
             try:
-                exec(
-                    'self.int_' +
-                    axis +
-                    '_pos_offset = -self.' +
-                    axis +
-                    '_pos')
+                exec("self.int_" + axis + "_pos_offset = -self." + axis + "_pos")
             except BaseException:
                 logger.exception(f"Zeroing of axis: {axis} failed")
-                print('Zeroing of axis: ', axis, 'failed')
+                print("Zeroing of axis: ", axis, "failed")
 
     def unzero_axes(self, list):
         for axis in list:
             try:
-                exec('self.int_' + axis + '_pos_offset = 0')
+                exec("self.int_" + axis + "_pos_offset = 0")
             except BaseException:
                 logger.exception(f"Unzeroing of axis: {axis} failed")
-                print('Unzeroing of axis: ', axis, 'failed')
+                print("Unzeroing of axis: ", axis, "failed")
 
     def load_sample(self):
         self.y_pos = self.y_load_position

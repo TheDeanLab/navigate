@@ -57,22 +57,36 @@ class WaveformTabController(GUIController):
         self.galvo_l_waveform = 0
         self.galvo_r_waveform = 0
         self.laser_ao_waveforms = 0
-        
+
         self.initialize_plots()
 
-        microscope_name = self.parent_controller.configuration['experiment']['MicroscopeState']['microscope_name']
-        self.view.waveform_settings.inputs['sample_rate'].set(self.parent_controller.configuration['configuration']['microscopes'][microscope_name]['daq']['sample_rate'])
-        self.view.waveform_settings.inputs['sample_rate'].get_variable().trace_add('write', self.update_sample_rate)
+        microscope_name = self.parent_controller.configuration["experiment"][
+            "MicroscopeState"
+        ]["microscope_name"]
+        self.view.waveform_settings.inputs["sample_rate"].set(
+            self.parent_controller.configuration["configuration"]["microscopes"][
+                microscope_name
+            ]["daq"]["sample_rate"]
+        )
+        self.view.waveform_settings.inputs["sample_rate"].get_variable().trace_add(
+            "write", self.update_sample_rate
+        )
 
-        self.view.bind('<Enter>', self.plot_waveforms)  # TODO: This means we have to move our mouse off and then back
-                                                        #       on to the plot to see an update. Better event to bind?
+        self.view.bind(
+            "<Enter>", self.plot_waveforms
+        )  # TODO: This means we have to move our mouse off and then back
+        #       on to the plot to see an update. Better event to bind?
 
     def update_sample_rate(self, *args):
-        sample_rate = self.view.waveform_settings.inputs['sample_rate'].get()
-        if sample_rate == '':
+        sample_rate = self.view.waveform_settings.inputs["sample_rate"].get()
+        if sample_rate == "":
             return
-        microscope_name = self.parent_controller.configuration['experiment']['MicroscopeState']['microscope_name']
-        self.parent_controller.configuration['configuration']['microscopes'][microscope_name]['daq']['sample_rate'] = int(sample_rate)
+        microscope_name = self.parent_controller.configuration["experiment"][
+            "MicroscopeState"
+        ]["microscope_name"]
+        self.parent_controller.configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["daq"]["sample_rate"] = int(sample_rate)
         self.sample_rate = int(sample_rate)
 
     def update_waveforms(self, waveform_dict, sample_rate):
@@ -83,7 +97,9 @@ class WaveformTabController(GUIController):
         self.view.plot_etl = self.view.fig.add_subplot(211)
         self.view.plot_galvo = self.view.fig.add_subplot(212)
 
-        self.view.canvas.get_tk_widget().grid(row=5, column=0, columnspan=3, sticky=(NSEW), padx=(5,5), pady=(5,5))
+        self.view.canvas.get_tk_widget().grid(
+            row=5, column=0, columnspan=3, sticky=(NSEW), padx=(5, 5), pady=(5, 5)
+        )
 
     def plot_waveforms(self, event):
 
@@ -93,29 +109,47 @@ class WaveformTabController(GUIController):
         last_etl = 0
         last_galvo = 0
         last_camera = 0
-        for k in self.waveform_dict['camera_waveform'].keys():
-            if self.waveform_dict['etl_waveform'][k] is None:
+        for k in self.waveform_dict["camera_waveform"].keys():
+            if self.waveform_dict["etl_waveform"][k] is None:
                 continue
-            etl_waveform = self.waveform_dict['etl_waveform'][k]
+            etl_waveform = self.waveform_dict["etl_waveform"][k]
             # TODO: multiple galvos
-            galvo_waveform = self.waveform_dict['galvo_waveform'][0][k]
-            camera_waveform = self.waveform_dict['camera_waveform'][k]
-            self.view.plot_etl.plot(np.arange(len(etl_waveform))/self.sample_rate + last_etl, etl_waveform, label=k)
-            self.view.plot_galvo.plot(np.arange(len(galvo_waveform))/self.sample_rate + last_galvo, galvo_waveform, label=k)
-            self.view.plot_etl.plot(np.arange(len(camera_waveform))/self.sample_rate + last_camera, camera_waveform, c='k', linestyle='--')
-            self.view.plot_galvo.plot(np.arange(len(camera_waveform)) / self.sample_rate + last_camera, camera_waveform, c='k', linestyle='--')
-            last_etl += len(etl_waveform)/self.sample_rate
-            last_galvo += len(galvo_waveform)/self.sample_rate
-            last_camera += len(camera_waveform)/self.sample_rate
+            galvo_waveform = self.waveform_dict["galvo_waveform"][0][k]
+            camera_waveform = self.waveform_dict["camera_waveform"][k]
+            self.view.plot_etl.plot(
+                np.arange(len(etl_waveform)) / self.sample_rate + last_etl,
+                etl_waveform,
+                label=k,
+            )
+            self.view.plot_galvo.plot(
+                np.arange(len(galvo_waveform)) / self.sample_rate + last_galvo,
+                galvo_waveform,
+                label=k,
+            )
+            self.view.plot_etl.plot(
+                np.arange(len(camera_waveform)) / self.sample_rate + last_camera,
+                camera_waveform,
+                c="k",
+                linestyle="--",
+            )
+            self.view.plot_galvo.plot(
+                np.arange(len(camera_waveform)) / self.sample_rate + last_camera,
+                camera_waveform,
+                c="k",
+                linestyle="--",
+            )
+            last_etl += len(etl_waveform) / self.sample_rate
+            last_galvo += len(galvo_waveform) / self.sample_rate
+            last_camera += len(camera_waveform) / self.sample_rate
 
-        self.view.plot_etl.set_title('ETL Waveform')
-        self.view.plot_galvo.set_title('Galvo Waveform')
+        self.view.plot_etl.set_title("ETL Waveform")
+        self.view.plot_galvo.set_title("Galvo Waveform")
 
-        self.view.plot_etl.set_xlabel('Duration (s)')
-        self.view.plot_galvo.set_xlabel('Duration (s)')
+        self.view.plot_etl.set_xlabel("Duration (s)")
+        self.view.plot_galvo.set_xlabel("Duration (s)")
 
-        self.view.plot_etl.set_ylabel('Amplitude')
-        self.view.plot_galvo.set_ylabel('Amplitude')
+        self.view.plot_etl.set_ylabel("Amplitude")
+        self.view.plot_galvo.set_ylabel("Amplitude")
 
         self.view.plot_etl.legend()
 

@@ -9,6 +9,7 @@ from aslm.controller.sub_controllers.gui_controller import GUIController
 from aslm.config import get_aslm_path
 from aslm.model.analysis.camera import compute_scmos_offset_and_variance_map
 
+
 class CameraMapSettingPopupController(GUIController):
     def __init__(self, view, parent_controller=None):
         """
@@ -18,7 +19,7 @@ class CameraMapSettingPopupController(GUIController):
         """
         super().__init__(view, parent_controller)
 
-        self.map_path = os.path.join(get_aslm_path(), 'camera_maps')
+        self.map_path = os.path.join(get_aslm_path(), "camera_maps")
         self.off = None
         self.var = None
 
@@ -26,21 +27,24 @@ class CameraMapSettingPopupController(GUIController):
         self.view.map_btn.configure(command=self.create_camera_maps)
 
         menu = self.get_camera_menu()
-        self.view.inputs['camera'].set_menu(menu[0], *menu)
+        self.view.inputs["camera"].set_menu(menu[0], *menu)
 
     def showup(self):
         self.view.showup()
 
     def get_camera_menu(self):
-        """Return list of serial numbers of available cameras. """
-        menu = ['synthetic']
-        for v in self.parent_controller.configuration['configuration']['microscopes'].values():
-            menu.append(v['camera']['hardware']['serial_number'])
+        """Return list of serial numbers of available cameras."""
+        menu = ["synthetic"]
+        for v in self.parent_controller.configuration["configuration"][
+            "microscopes"
+        ].values():
+            menu.append(v["camera"]["hardware"]["serial_number"])
         return menu
 
     def open_frames(self):
-        filename = filedialog.askopenfilename(defaultextension='.tif',
-                                              filetypes=[('tiff files', '*.tif *.tiff')])
+        filename = filedialog.askopenfilename(
+            defaultextension=".tif", filetypes=[("tiff files", "*.tif *.tiff")]
+        )
         if not filename:
             return
         self.view.file_name.set(filename)
@@ -53,13 +57,12 @@ class CameraMapSettingPopupController(GUIController):
 
         self.display_plot()
 
-
         save_dir = self.map_path
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
         camera_name = self.view.camera.get()
-        save_name_offset = f'{camera_name}_off.tiff'
-        save_name_variance = f'{camera_name}_var.tiff'
+        save_name_offset = f"{camera_name}_off.tiff"
+        save_name_variance = f"{camera_name}_var.tiff"
         save_path_offset = Path(save_dir).joinpath(save_name_offset)
         save_path_variance = Path(save_dir).joinpath(save_name_variance)
 
@@ -70,16 +73,15 @@ class CameraMapSettingPopupController(GUIController):
         for ax in self.view.axs:
             ax.clear()
 
-        self.view.axs[0].hist(self.off.ravel(), bins=range(0,2**8))
-        self.view.axs[1].hist(self.var.ravel()*0.47*0.47, bins=range(0,2**8))
+        self.view.axs[0].hist(self.off.ravel(), bins=range(0, 2**8))
+        self.view.axs[1].hist(self.var.ravel() * 0.47 * 0.47, bins=range(0, 2**8))
 
-        self.view.axs[0].set_xlabel('Offset (counts)')
-        self.view.axs[0].set_ylabel('Frequency')
-        self.view.axs[0].set_yscale('log')
-        self.view.axs[1].set_xlabel('Variance (counts$^2$)')
-        self.view.axs[1].set_ylabel('Frequency')
-        self.view.axs[1].set_yscale('log')
+        self.view.axs[0].set_xlabel("Offset (counts)")
+        self.view.axs[0].set_ylabel("Frequency")
+        self.view.axs[0].set_yscale("log")
+        self.view.axs[1].set_xlabel("Variance (counts$^2$)")
+        self.view.axs[1].set_ylabel("Frequency")
+        self.view.axs[1].set_yscale("log")
         self.view.fig.tight_layout()
 
         self.view.fig.canvas.draw_idle()
-    

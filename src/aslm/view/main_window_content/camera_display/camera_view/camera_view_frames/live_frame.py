@@ -46,41 +46,32 @@ logger = logging.getLogger(p)
 
 
 class live_frame(ttk.Labelframe):
-    def __init__(self,
-                 cam_view,
-                 *args,
-                 **kwargs):
+    def __init__(self, cam_view, *args, **kwargs):
 
         # Init Frame
-        text_label = 'Image Display'
-        ttk.Labelframe.__init__(
-            self,
-            cam_view,
-            text=text_label,
-            *args,
-            **kwargs)
+        text_label = "Image Display"
+        ttk.Labelframe.__init__(self, cam_view, text=text_label, *args, **kwargs)
 
         # Formatting
-        Grid.columnconfigure(self, 'all', weight=1)
-        Grid.rowconfigure(self, 'all', weight=1)
+        Grid.columnconfigure(self, "all", weight=1)
+        Grid.rowconfigure(self, "all", weight=1)
 
         self.live_var = StringVar()
-        self.live = ttk.Combobox(self,
-                                 textvariable=self.live_var,
-                                 state="readonly",
-                                 width=6
-                                 )
-        self.live['values'] = ('Live',
-                               'XY Slice',
-                               'YZ Slice',
-                               'ZY Slice',
-                               'XY MIP',
-                               'YZ MIP',
-                               'ZY MIP')
-        self.live.set('Live')
+        self.live = ttk.Combobox(
+            self, textvariable=self.live_var, state="readonly", width=6
+        )
+        self.live["values"] = (
+            "Live",
+            "XY Slice",
+            "YZ Slice",
+            "ZY Slice",
+            "XY MIP",
+            "YZ MIP",
+            "ZY MIP",
+        )
+        self.live.set("Live")
         self.live.grid(row=0, column=0)
         self.live.state = "readonly"
-
 
     def get_variables(self):
         """

@@ -29,10 +29,11 @@ class LuxxLaser(LaserBase):
 
         try:
             # Open serial port
-            self.laser = serial.Serial(self.comport, self.baudrate, timeout=self.timeout)
+            self.laser = serial.Serial(
+                self.comport, self.baudrate, timeout=self.timeout
+            )
 
             logger.debug(f"The laser is connected via {self.comport}")
-
 
             # Confirm the Laser Wavelength
             # Must remove non-standard ASCII codes that cause errors in the utf-8 codec
@@ -61,9 +62,11 @@ class LuxxLaser(LaserBase):
             logger.debug(f"Laser max power: {power_max}")
 
         except serial.SerialException:
-            raise OSError('Port "%s" is unavailable.\n' % self.comport +
-                          'Maybe the laser is not connected, the wrong' +
-                          ' port is specified or the port is already opened')
+            raise OSError(
+                'Port "%s" is unavailable.\n' % self.comport
+                + "Maybe the laser is not connected, the wrong"
+                + " port is specified or the port is already opened"
+            )
 
     def __del__(self):
         """
@@ -78,7 +81,7 @@ class LuxxLaser(LaserBase):
             logger.debug(f"Port closed")
 
         except serial.SerialException:
-            print('Could not close the port')
+            print("Could not close the port")
 
     def close(self):
         """
@@ -88,7 +91,7 @@ class LuxxLaser(LaserBase):
             self.laser.close()
 
         except serial.SerialException:
-            print('could not close the port')
+            print("could not close the port")
 
     def write(self, command):
         """
@@ -171,7 +174,7 @@ class LuxxLaser(LaserBase):
             print("Laser provides %imW only. The maximum power is set", self.pmax)
             self.write("SLPFFF")
         else:
-            code = hex(int(4095*power/self.pmax))[2:].upper().zfill(3)
+            code = hex(int(4095 * power / self.pmax))[2:].upper().zfill(3)
             stopwatch(self.ask, "SLP%s" % code)
 
     def get_power(self):
@@ -179,7 +182,7 @@ class LuxxLaser(LaserBase):
         # Get the current power value in mW
         """
         code = stopwatch(self.ask, "GLP")
-        return int(code, 16)*self.pmax/4095.
+        return int(code, 16) * self.pmax / 4095.0
 
     def set_mode(self, mode):
         """
@@ -206,8 +209,10 @@ class LuxxLaser(LaserBase):
         elif mode == "Analog" or mode == 3:
             mode = 3
         else:
-            print("**mode** must be one of 'Standby', 'CW-ACC', " +
-                  "'CW-APC', 'Analog' or number 0-3. Nothing changed.")
+            print(
+                "**mode** must be one of 'Standby', 'CW-ACC', "
+                + "'CW-APC', 'Analog' or number 0-3. Nothing changed."
+            )
             return
         stopwatch(self.ask, "ROM%i" % mode)
 
@@ -289,7 +294,9 @@ class LuxxLaser(LaserBase):
         self.set_power(self.pmax)
         self.set_mode("CW-APC")
         self.start()
-        logger.debug(f"{self.wavelength}nm Laser Initialized - Max Power: {self.pmax}mW")
+        logger.debug(
+            f"{self.wavelength}nm Laser Initialized - Max Power: {self.pmax}mW"
+        )
 
 
 def stopwatch(func, *func_args, **func_kwargs):
@@ -314,14 +321,14 @@ def print_hex(hex_code):
     """
     # If the number is odd, pad it with leading zero
     length = len(hex_code)
-    byte_number = (length/2) + (length % 2)
+    byte_number = (length / 2) + (length % 2)
     if length % 2:
         hex_code = "0" + hex_code
 
     # Split it into 8-bit numbers coded in ASCII HEX
     hex_numbers = []
     for i in range(int(byte_number)):
-        hex_numbers.append(hex_code[i*2:i*2+2])
+        hex_numbers.append(hex_code[i * 2 : i * 2 + 2])
 
     # Convert each of them into decimal
     decimals = []
@@ -341,7 +348,7 @@ def print_hex(hex_code):
         byte = len(decimals) - i - 1
 
         # data_range is type Range
-        data_range = range(byte*8, byte*8+8)[::-1]
+        data_range = range(byte * 8, byte * 8 + 8)[::-1]
 
         # data_list is type list
         data_list = list(bin(number)[2:].zfill(8))

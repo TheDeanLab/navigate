@@ -99,18 +99,15 @@ class StageBase:
         Emergency halt of stage operation.
 
     """
-    def __init__(self,
-                 microscope_name,
-                 device_connection,
-                 configuration,
-                 device_id=0):
+
+    def __init__(self, microscope_name, device_connection, configuration, device_id=0):
 
         self.position_dict = None
-        stage = configuration['configuration']['microscopes'][microscope_name]['stage']
-        if type(stage['hardware']) == ListProxy:
-            self.axes = stage['hardware'][device_id]['axes']
+        stage = configuration["configuration"]["microscopes"][microscope_name]["stage"]
+        if type(stage["hardware"]) == ListProxy:
+            self.axes = stage["hardware"][device_id]["axes"]
         else:
-            self.axes = stage['hardware']['axes']
+            self.axes = stage["hardware"]["axes"]
 
         """Initial setting for all positions
         self.x_pos, self.y_pos etc are the true axis positions, no matter whether
@@ -118,8 +115,8 @@ class StageBase:
         """
         for ax in self.axes:
             setattr(self, f"{ax}_pos", None)
-            setattr(self, f"{ax}_min", stage[f'{ax}_min'])  # Units are in microns
-            setattr(self, f"{ax}_max", stage[f'{ax}_max'])  # Units are in microns
+            setattr(self, f"{ax}_min", stage[f"{ax}_min"])  # Units are in microns
+            setattr(self, f"{ax}_max", stage[f"{ax}_max"])  # Units are in microns
         self.create_position_dict()
 
     def create_position_dict(self):
@@ -137,7 +134,7 @@ class StageBase:
         axis : str
             An axis prefix in move_dictionary. For example, axis='x' corresponds to 'x_abs', 'x_min', etc.
         move_dictionary : dict
-            A dictionary of values required for movement. 
+            A dictionary of values required for movement.
             Includes 'x_abs', 'x_min', etc. for one or more axes.
             Expect values in micrometers, except for theta, which is in degrees.
 
@@ -148,14 +145,20 @@ class StageBase:
         """
         try:
             # Get all necessary attributes. If we can't we'll move to the error case.
-            axis_abs = move_dictionary[f"{axis}_abs"] - getattr(self, f"int_{axis}_pos_offset", 0)
+            axis_abs = move_dictionary[f"{axis}_abs"] - getattr(
+                self, f"int_{axis}_pos_offset", 0
+            )
             # TODO: should we default to 0?
-            axis_min, axis_max = getattr(self, f"{axis}_min"), getattr(self, f"{axis}_max")
+            axis_min, axis_max = getattr(self, f"{axis}_min"), getattr(
+                self, f"{axis}_max"
+            )
 
             # Check that our position is within the axis bounds, fail if it's not.
             if (axis_min > axis_abs) or (axis_max < axis_abs):
-                log_string = f"Absolute movement stopped: {axis} limit would be reached!" \
-                             f"{axis_abs} is not in the range {axis_min} to {axis_max}."
+                log_string = (
+                    f"Absolute movement stopped: {axis} limit would be reached!"
+                    f"{axis_abs} is not in the range {axis_min} to {axis_max}."
+                )
                 logger.info(log_string)
                 print(log_string)
                 # Return a ridiculous value to make it clear we've failed.

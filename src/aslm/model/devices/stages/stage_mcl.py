@@ -10,26 +10,27 @@ logger = logging.getLogger(p)
 
 
 def build_MCLStage_connection(serialnum):
-    mcl_controller = importlib.import_module('aslm.model.devices.APIs.mcl.madlib')
+    mcl_controller = importlib.import_module("aslm.model.devices.APIs.mcl.madlib")
 
     # Initialize
     mcl_controller.MCL_GrabAllHandles()
 
     handle = mcl_controller.MCL_GetHandleBySerial(int(serialnum))
 
-    stage_connection = {'handle': handle,
-                        'controller': mcl_controller}
+    stage_connection = {"handle": handle, "controller": mcl_controller}
 
     return stage_connection
 
 
 class MCLStage(StageBase):
     def __init__(self, microscope_name, device_connection, configuration, device_id=0):
-        super().__init__(microscope_name, device_connection, configuration, device_id)  # only initialize the focus axis
+        super().__init__(
+            microscope_name, device_connection, configuration, device_id
+        )  # only initialize the focus axis
 
         # Mapping from self.axes to corresponding MCL channels
-        self.mcl_controller = device_connection['controller']
-        self.handle = device_connection['handle']
+        self.mcl_controller = device_connection["controller"]
+        self.handle = device_connection["handle"]
 
     def report_position(self):
         """
@@ -41,7 +42,7 @@ class MCLStage(StageBase):
                 pos = self.mcl_controller.MCL_SingleReadN(ax, self.handle)
                 setattr(self, f"{ax}_pos", pos)
             except self.mcl_controller.MadlibError as e:
-                logger.debug(f'MCL - {e}')
+                logger.debug(f"MCL - {e}")
                 pass
 
         # Update internal dictionaries
@@ -99,8 +100,9 @@ class MCLStage(StageBase):
             success = self.move_axis_absolute(ax, None, move_dictionary)
             if success and wait_until_done is True:
                 stage_pos, n_tries, i = -1e50, 10, 0
-                target_pos = move_dictionary[f"{ax}_abs"] - getattr(self, f"int_{ax}_pos_offset",
-                                                                    0)  # TODO: should we default to 0?
+                target_pos = move_dictionary[f"{ax}_abs"] - getattr(
+                    self, f"int_{ax}_pos_offset", 0
+                )  # TODO: should we default to 0?
                 while (abs(stage_pos - target_pos) < 0.01) and (i < n_tries):
                     stage_pos = self.mcl_controller.MCL_SingleReadN(ax, self.handle)
                     i += 1
@@ -116,16 +118,19 @@ class MCLStage(StageBase):
         """
         try:
             # Get all necessary attributes. If we can't we'll move to the error case.
-            axis_abs = move_dictionary[f"{axis}_abs"] - getattr(self, f"int_{axis}_pos_offset",
-                                                                0)  # TODO: should we default to 0?
+            axis_abs = move_dictionary[f"{axis}_abs"] - getattr(
+                self, f"int_{axis}_pos_offset", 0
+            )  # TODO: should we default to 0?
 
             # axis_min, axis_max = getattr(self, f"{axis}_min"), getattr(self, f"{axis}_max")
             axis_min, axis_max = -1e6, 1e6
 
             # Check that our position is within the axis bounds, fail if it's not.
             if (axis_min > axis_abs) or (axis_max < axis_abs):
-                log_string = f"Absolute movement stopped: {axis} limit would be reached!" \
-                             f"{axis_abs} is not in the range {axis_min} to {axis_max}."
+                log_string = (
+                    f"Absolute movement stopped: {axis} limit would be reached!"
+                    f"{axis_abs} is not in the range {axis_min} to {axis_max}."
+                )
                 logger.info(log_string)
                 print(log_string)
                 # Return a ridiculous value to make it clear we've failed.

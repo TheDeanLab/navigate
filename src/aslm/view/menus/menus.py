@@ -45,38 +45,38 @@ class menubar(Menu):
         Menu.__init__(self, window, *args, **kwargs)
 
         #  Creates operating system attribute
-        self.opsystem = window.tk.call('tk', 'windowingsystem')
+        self.opsystem = window.tk.call("tk", "windowingsystem")
 
         #  Prevents menu from tearing off bar
-        window.option_add('*tearOff', False)
+        window.option_add("*tearOff", False)
 
         #  Linking menu to option of parent to this menu class
-        window['menu'] = self
+        window["menu"] = self
 
         #  File Menu
         self.menu_file = Menu(self)
-        self.add_cascade(menu=self.menu_file, label='File')
+        self.add_cascade(menu=self.menu_file, label="File")
 
         #  Multi-Position Menu
         self.menu_multi_positions = Menu(self)
-        self.add_cascade(menu=self.menu_multi_positions, label='Multi-Position')
+        self.add_cascade(menu=self.menu_multi_positions, label="Multi-Position")
 
         #  Resolution Menu
         self.menu_resolution = Menu(self)
-        self.add_cascade(menu=self.menu_resolution, label='Resolution')
+        self.add_cascade(menu=self.menu_resolution, label="Resolution")
 
         # Autofocus Menu
         self.menu_autofocus = Menu(self)
-        self.add_cascade(menu=self.menu_autofocus, label='Autofocus')
+        self.add_cascade(menu=self.menu_autofocus, label="Autofocus")
 
         # Add-on Features menu
         self.menu_features = Menu(self)
-        self.add_cascade(menu=self.menu_features, label='Add-on Features')
+        self.add_cascade(menu=self.menu_features, label="Add-on Features")
 
         # Help Menu
         self.menu_help = Menu(self)
-        self.add_cascade(menu=self.menu_help, label='Help')
+        self.add_cascade(menu=self.menu_help, label="Help")
 
         # Debug Menu
         self.menu_debug = Menu(self)
-        self.add_cascade(menu=self.menu_debug, label='Debug')
+        self.add_cascade(menu=self.menu_debug, label="Debug")

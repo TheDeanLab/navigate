@@ -37,8 +37,6 @@ except ImportError:
     # np = None
 
 
-
-
 class SharedNDArray(np.ndarray):
     """A numpy array that lives in shared memory
 
@@ -79,15 +77,22 @@ class SharedNDArray(np.ndarray):
 
     To implement this we used memmap from numpy.core as a template.
     """
-    def __new__(cls, shape=None, dtype=float, shared_memory_name=None,
-                offset=0, strides=None, order=None):
+
+    def __new__(
+        cls,
+        shape=None,
+        dtype=float,
+        shared_memory_name=None,
+        offset=0,
+        strides=None,
+        order=None,
+    ):
         if shared_memory_name is None:
             dtype = np.dtype(dtype)
-            requested_bytes = np.prod(shape, dtype='uint64') * dtype.itemsize
+            requested_bytes = np.prod(shape, dtype="uint64") * dtype.itemsize
             requested_bytes = int(requested_bytes)
             try:
-                shm = shared_memory.SharedMemory(
-                    create=True, size=requested_bytes)
+                shm = shared_memory.SharedMemory(create=True, size=requested_bytes)
             except OSError as e:
                 if e.args == (24, "Too many open files"):
                     raise OSError(
@@ -98,11 +103,11 @@ class SharedNDArray(np.ndarray):
                     raise e
             must_unlink = True  # This process is responsible for unlinking
         else:
-            shm = shared_memory.SharedMemory(
-                name=shared_memory_name, create=False)
+            shm = shared_memory.SharedMemory(name=shared_memory_name, create=False)
             must_unlink = False
         obj = super(SharedNDArray, cls).__new__(
-            cls, shape, dtype, shm.buf, offset, strides, order)
+            cls, shape, dtype, shm.buf, offset, strides, order
+        )
         obj.shared_memory = shm
         obj.offset = offset
         if must_unlink:
@@ -113,13 +118,13 @@ class SharedNDArray(np.ndarray):
         if obj is None:
             return
         if not isinstance(obj, SharedNDArray):
-            raise ValueError(
-                "You can't view non-shared memory as shared memory.")
+            raise ValueError("You can't view non-shared memory as shared memory.")
         if hasattr(obj, "shared_memory") and np.may_share_memory(self, obj):
             self.shared_memory = obj.shared_memory
             self.offset = obj.offset
-            self.offset += (self.__array_interface__["data"][0] -
-                            obj.__array_interface__["data"][0])
+            self.offset += (
+                self.__array_interface__["data"][0] - obj.__array_interface__["data"][0]
+            )
 
     def __array_wrap__(self, arr, context=None):
         arr = super().__array_wrap__(arr, context)
@@ -145,8 +150,14 @@ class SharedNDArray(np.ndarray):
         return res
 
     def __reduce__(self):
-        args = (self.shape, self.dtype, self.shared_memory.name,
-                self.offset, self.strides, None)
+        args = (
+            self.shape,
+            self.dtype,
+            self.shared_memory.name,
+            self.offset,
+            self.strides,
+            None,
+        )
         return (SharedNDArray, args)
 
 
@@ -209,8 +220,7 @@ class ResultThread(threading.Thread):
     this class definition and expect it to work.
     """
 
-    def __init__(self, group=None, target=None, name=None, args=(),
-                 kwargs=None):
+    def __init__(self, group=None, target=None, name=None, args=(), kwargs=None):
         super().__init__(group, target, name, args, kwargs)
         self._return = None
 
@@ -225,9 +235,7 @@ class ResultThread(threading.Thread):
             if e.args == ("can't start new thread",):
                 print("*" * 80)
                 print("Failed to launch a thread.")
-                print(
-                    threading.active_count(),
-                    "threads are currently active.")
+                print(threading.active_count(), "threads are currently active.")
                 print("You might have reached a limit of your system;")
                 print("let some of your threads finish before launching more.")
                 print("*" * 80)
@@ -242,8 +250,8 @@ class ResultThread(threading.Thread):
         """
         super().join(timeout=timeout)
         if self.is_alive():  # Thread could potentially not be done yet!
-            return TimeoutError('Thread did not return!')
-        if hasattr(self, 'exc_value'):
+            return TimeoutError("Thread did not return!")
+        if hasattr(self, "exc_value"):
             raise self.exc_value
         return self._return
 
@@ -254,11 +262,20 @@ class CustodyThread(ResultThread):
     See the docstring at the top of this module for examples.
     """
 
-    def __init__(self, first_resource=None,
-                 group=None, target=None, name=None, args=(), kwargs=None):
+    def __init__(
+        self,
+        first_resource=None,
+        group=None,
+        target=None,
+        name=None,
+        args=(),
+        kwargs=None,
+    ):
         if "custody" not in inspect.signature(target).parameters:
-            raise ValueError("The function 'target' passed to a CustodyThread"
-                             " must accept an argument named 'custody'")
+            raise ValueError(
+                "The function 'target' passed to a CustodyThread"
+                " must accept an argument named 'custody'"
+            )
         custody = _Custody()  # Useful for synchronization in the launched thread
         if first_resource is not None:
             # Get in line for custody of the first resource the launched
@@ -271,7 +288,8 @@ class CustodyThread(ResultThread):
             raise ValueError(
                 "CustodyThread will create and pass a keyword argument to"
                 " 'target' named 'custody', so keyword arguments to a"
-                " CustodyThread can't be named 'custody'")
+                " CustodyThread can't be named 'custody'"
+            )
         kwargs["custody"] = custody
         super().__init__(group, target, name, args, kwargs)
         self.custody = custody
@@ -281,8 +299,7 @@ _original_threading_excepthook = threading.excepthook
 
 
 def _my_threading_excepthook(args):
-    """Show a traceback when a child exception isn't handled by the parent.
-    """
+    """Show a traceback when a child exception isn't handled by the parent."""
     if isinstance(args.thread, ResultThread):
         args.thread.exc_value = args.exc_value
         args.thread.exc_traceback = args.exc_traceback
@@ -299,9 +316,17 @@ PoliteThread = CustodyThread
 
 
 class ObjectInSubprocess:
-    def __init__(self, initializer, *initargs, custom_loop=None,
-                 close_method_name=None, closeargs=None, closekwargs=None,
-                 with_lock=False, **initkwargs):
+    def __init__(
+        self,
+        initializer,
+        *initargs,
+        custom_loop=None,
+        close_method_name=None,
+        closeargs=None,
+        closekwargs=None,
+        with_lock=False,
+        **initkwargs,
+    ):
         """
         Make an object in a child process, that acts like it isn't.
 
@@ -326,8 +351,16 @@ class ObjectInSubprocess:
         child_process = mp.Process(
             target=child_loop,
             name=initializer.__name__,
-            args=(child_pipe, initializer, initargs, initkwargs,
-                  close_method_name, closeargs, closekwargs))
+            args=(
+                child_pipe,
+                initializer,
+                initargs,
+                initkwargs,
+                close_method_name,
+                closeargs,
+                closekwargs,
+            ),
+        )
         # Attribute-setting looks weird here because we override __setattr__,
         # and because we use a dummy object's namespace to hold our attributes
         # so we shadow as little of the object's namespace as possible:
@@ -363,7 +396,7 @@ class ObjectInSubprocess:
         """
         if self._.resource_lock:
             self._.resource_lock.acquire()
-        if name == 'terminate':
+        if name == "terminate":
             with self._.parent_pipe_lock:
                 self._.parent_pipe.send(None)
                 self._.child_process.terminate()
@@ -374,10 +407,12 @@ class ObjectInSubprocess:
             self._.parent_pipe.send(("__getattribute__", (name,), {}))
             attr = _get_response(self)
         if callable(attr):
+
             def attr(*args, **kwargs):
                 with self._.parent_pipe_lock:
                     self._.parent_pipe.send((name, args, kwargs))
                     return _get_response(self, True)
+
         elif self._.resource_lock:
             self._.resource_lock.release()
         return attr
@@ -395,11 +430,14 @@ def _get_response(object_in_subprocess, release=False):
     """
     resp, printed_output = object_in_subprocess._.parent_pipe.recv()
     if len(printed_output) > 0:
-        print(printed_output, end='')
+        print(printed_output, end="")
     if isinstance(resp, Exception):
         raise resp
-    if release and object_in_subprocess._.resource_lock and \
-            object_in_subprocess._.resource_lock.locked():
+    if (
+        release
+        and object_in_subprocess._.resource_lock
+        and object_in_subprocess._.resource_lock.locked()
+    ):
         object_in_subprocess._.resource_lock.release()
     return resp
 
@@ -418,13 +456,15 @@ def _close(dummy_namespace):
         dummy_namespace.parent_pipe.close()
 
 
-def _child_loop(child_pipe,
-                initializer,
-                initargs,
-                initkwargs,
-                close_method_name,
-                closeargs,
-                closekwargs):
+def _child_loop(
+    child_pipe,
+    initializer,
+    initargs,
+    initkwargs,
+    close_method_name,
+    closeargs,
+    closekwargs,
+):
     r"""The event loop of a ObjectInSubprocess's child process
 
     Parameters
@@ -456,14 +496,10 @@ def _child_loop(child_pipe,
                 close_method = getattr(obj, close_method_name)
                 closeargs = tuple() if closeargs is None else closeargs
                 closekwargs = dict() if closekwargs is None else closekwargs
-                atexit.register(
-                    lambda: close_method(
-                        *closeargs, **closekwargs))
+                atexit.register(lambda: close_method(*closeargs, **closekwargs))
                 # Note: We don't know if print statements in the close method
                 # will print in the main process.
-        child_pipe.send(
-            ("Successfully initialized",
-             printed_output.getvalue()))
+        child_pipe.send(("Successfully initialized", printed_output.getvalue()))
     except Exception as e:  # If we fail to initialize, just give up.
         e.child_traceback_string = traceback.format_exc()
         child_pipe.send((e, printed_output.getvalue()))
@@ -486,14 +522,16 @@ def _child_loop(child_pipe,
             child_pipe.send((result, printed_output.getvalue()))
         except Exception as e:
             # e.child_traceback_string = traceback.format_exc()
-            print('Exception inside ObjectInSubprocess:', traceback.format_exc())
+            print("Exception inside ObjectInSubprocess:", traceback.format_exc())
             child_pipe.send((Exception(str(e)), printed_output.getvalue()))
+
 
 # A minimal class that we use just to get another namespace:
 
 
 class _DummyClass:
     pass
+
 
 # If we're trying to return a (presumably worthless) "callable" to
 # the parent, it might as well be small and simple:
@@ -539,7 +577,8 @@ class _ObjectInSubprocessPipeLock:
                 "Two different threads tried to use the same "
                 "ObjectInSubprocess at the same time! This is bad. Look at the "
                 "docstring of concurrency_tools.py to see an example of how "
-                "to use a _Custody object to avoid this problem.")
+                "to use a _Custody object to avoid this problem."
+            )
         return self.lock
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -622,8 +661,7 @@ class _Custody:
         else:
             if self.target_resource is None:
                 return
-            waiting_list, waiting_list_lock = _get_list_and_lock(
-                self.target_resource)
+            waiting_list, waiting_list_lock = _get_list_and_lock(self.target_resource)
             with waiting_list_lock:
                 waiting_list.remove(self)
 
@@ -639,6 +677,7 @@ class _Custody:
         self.permission_slip.acquire()  # Blocks if we're not first in line
         self.has_custody = True
 
+
 # When an exception from a child process isn't handled by the parent
 # process, we'd like the parent to print the child traceback. Overriding
 # sys.excepthook and threading.excepthook seems to be the standard way
@@ -647,15 +686,16 @@ class _Custody:
 
 def _try_to_print_child_traceback(v):
     if hasattr(v, "child_traceback_string"):
-        print(f'{" Child Process Traceback ":v^79s}\n',
-              v.child_traceback_string,
-              f'{" Child Process Traceback ":^^79s}\n',
-              f'{" Main Process Traceback ":v^79s}')
+        print(
+            f'{" Child Process Traceback ":v^79s}\n',
+            v.child_traceback_string,
+            f'{" Child Process Traceback ":^^79s}\n',
+            f'{" Main Process Traceback ":v^79s}',
+        )
 
 
 def _my_excepthook(t, v, tb):
-    """Show a traceback when a child exception isn't handled by the parent.
-    """
+    """Show a traceback when a child exception isn't handled by the parent."""
     _try_to_print_child_traceback(v)
     return sys.__excepthook__(t, v, tb)
 
@@ -690,14 +730,14 @@ class MyTestClass:
     return that expected output as a string from the test function.
     """
 
-    def run(self, test_prefix='test_', fail=False, fail_fast=False):
+    def run(self, test_prefix="test_", fail=False, fail_fast=False):
         """Runs all methods that begin with `test_prefix`"""
         tests = [i for i in dir(self) if i.startswith(test_prefix)]
         tests = [i for i in tests if callable(getattr(self, i))]
 
-        print('#' * 80)
+        print("#" * 80)
         print(f'{f" Running Tests of {self.__class__.__name__} ":#^80s}')
-        print('#' * 80)
+        print("#" * 80)
         self.num_tests = len(tests)
         self.num_passed = 0
         for i, t in enumerate(tests):
@@ -710,39 +750,42 @@ class MyTestClass:
 
     def _run_single_test(self, i, t):
         printed_output = io.StringIO()
-        name = t[5:].replace('_', ' ')
+        name = t[5:].replace("_", " ")
         print(f'{f"     {i+1} of {self.num_tests} | Testing {name}    ":-^80s}')
         try:
             with redirect_stdout(printed_output):
                 expected_output = getattr(self, t)()
             if expected_output is not None:
                 o = printed_output.getvalue()
-                assert expected_output == o, \
-                    f'\n Returned result:\n'\
-                    f'    `{repr(o)}`\n'\
-                    f' Did not match expected output:\n'\
+                assert expected_output == o, (
+                    f"\n Returned result:\n"
+                    f"    `{repr(o)}`\n"
+                    f" Did not match expected output:\n"
                     f'     "{repr(expected_output)}"\n'
+                )
         except Exception as e:
-            print('v' * 80)
-            print(traceback.format_exc().strip('\n'))
-            print('^' * 80)
-            print('v' * 80)
+            print("v" * 80)
+            print(traceback.format_exc().strip("\n"))
+            print("^" * 80)
+            print("v" * 80)
             print(printed_output.getvalue())
-            print('^' * 80)
+            print("^" * 80)
             return False
         else:
             self.num_passed += 1
             if printed_output.getvalue():
-                for l in printed_output.getvalue().strip('\n').split('\n'):
-                    print(f'   {l}')
+                for l in printed_output.getvalue().strip("\n").split("\n"):
+                    print(f"   {l}")
             print(f'{f"> Success <":-^80s}')
             return True
 
     def _summarize_results(self):
-        fill = '#' if self.num_passed == self.num_tests else '!'
+        fill = "#" if self.num_passed == self.num_tests else "!"
         print(fill * 80)
-        message = (f"Completed Tests for {self.__class__.__name__} "
-                   f"-- passed {self.num_passed} of {self.num_tests}")
+        message = (
+            f"Completed Tests for {self.__class__.__name__} "
+            f"-- passed {self.num_passed} of {self.num_tests}"
+        )
         if self.num_passed == self.num_tests:
             print(f'{f"  {message}  ":#^80s}')
         else:
@@ -751,8 +794,16 @@ class MyTestClass:
         print()
         return self.num_passed == self.num_tests
 
-    def time_it(self, n_loops, func, args=None, kwargs=None, fail=True,
-                timeout_us=None, name=None):
+    def time_it(
+        self,
+        n_loops,
+        func,
+        args=None,
+        kwargs=None,
+        fail=True,
+        timeout_us=None,
+        name=None,
+    ):
         """Useful for testing the performance of a specific function.
 
         Args:
@@ -765,6 +816,7 @@ class MyTestClass:
             - name <str> | formatted name for the progress bar.
         """
         import time
+
         try:
             from tqdm import tqdm
         except ImportError:
@@ -774,7 +826,7 @@ class MyTestClass:
         if kwargs is None:
             kwargs = {}
         if tqdm is not None:
-            f = '{desc: <38}{n: 7d}-{bar:17}|[{rate_fmt}]'
+            f = "{desc: <38}{n: 7d}-{bar:17}|[{rate_fmt}]"
             pb = tqdm(total=n_loops, desc=name, bar_format=f)
         start = time.perf_counter()
         for i in range(n_loops):
@@ -795,11 +847,12 @@ class MyTestClass:
             if time_per_loop_us > timeout_us:
                 name = func.__name__ if name is None else name
                 raise TimeoutError(
-                    f'Timed out on {name}\n'
-                    f'   args:{args}\n'
-                    f'   kwargs: {kwargs}\n'
-                    f' Each loop took {time_per_loop_us:.2f} \u03BCs'
-                    f' (Allowed: {timeout_us:.2f} \u03BCs)')
+                    f"Timed out on {name}\n"
+                    f"   args:{args}\n"
+                    f"   kwargs: {kwargs}\n"
+                    f" Each loop took {time_per_loop_us:.2f} \u03BCs"
+                    f" (Allowed: {timeout_us:.2f} \u03BCs)"
+                )
         return time_per_loop_us
 
 
@@ -832,7 +885,7 @@ class TestResultThreadAndCustodyThread(MyTestClass):
 
     def test_getting_result(self):
         th = ResultThread(target=lambda: 1).start()
-        assert hasattr(th, '_return')
+        assert hasattr(th, "_return")
         th.join()
         assert th.get_result() == 1
         assert th.get_result() == 1, "Couldn't get result twice!"
@@ -840,6 +893,7 @@ class TestResultThreadAndCustodyThread(MyTestClass):
     def test_passing_args_and_kwargs(self):
         def mirror(*args, **kwargs):
             return args, kwargs
+
         a = (1,)
         k = dict(a=1)
         th = ResultThread(target=mirror, args=a, kwargs=k).start()
@@ -849,11 +903,11 @@ class TestResultThreadAndCustodyThread(MyTestClass):
 
     def test_catching_exception(self):
         def e():
-            raise ValueError(
-                "Don't worry, this exception occurred on purpose!")
+            raise ValueError("Don't worry, this exception occurred on purpose!")
+
         th = ResultThread(target=e).start()
         th.join()  # join won't reraise exception in main thread
-        assert hasattr(th, 'exc_value')
+        assert hasattr(th, "exc_value")
         try:
             th.get_result()
         except ValueError:
@@ -873,16 +927,19 @@ class TestResultThreadAndCustodyThread(MyTestClass):
         # CustodyThread accepts a target with a kwarg 'custody'
         def custody_f(custody=None):
             return 1
+
         th = CustodyThread(target=custody_f, first_resource=None).start()
         # CustodyThread accepts a target with a positional arg 'custody'
 
         def custody_f(custody):
             return 1
+
         th = CustodyThread(target=custody_f, first_resource=None).start()
 
         # CustodyThread will otherwise raise a ValueError
         def f():
             return 1
+
         try:
             th = CustodyThread(target=f, first_resource=None).start()
         except ValueError:
@@ -892,6 +949,7 @@ class TestResultThreadAndCustodyThread(MyTestClass):
 
         def f(a):
             return 1
+
         try:
             th = CustodyThread(target=f, first_resource=None).start()
         except ValueError:
@@ -901,6 +959,7 @@ class TestResultThreadAndCustodyThread(MyTestClass):
 
         def f(a=1):
             return 1
+
         try:
             th = CustodyThread(target=f, first_resource=None).start()
         except ValueError:
@@ -910,45 +969,46 @@ class TestResultThreadAndCustodyThread(MyTestClass):
 
     def test_providing_first_resource(self):
         resource = _WaitingList()
-        mutable_variables = {'step': 0, 'progress': 0}
+        mutable_variables = {"step": 0, "progress": 0}
 
         def f(custody):
-            while mutable_variables['step'] == 0:
+            while mutable_variables["step"] == 0:
                 pass
             custody.switch_from(None, resource)
-            mutable_variables['progress'] += 1
-            while mutable_variables['step'] == 1:
+            mutable_variables["progress"] += 1
+            while mutable_variables["step"] == 1:
                 pass
             custody.switch_from(resource, None)
-            mutable_variables['progress'] += 1
+            mutable_variables["progress"] += 1
             return
+
         try:
             th = CustodyThread(target=f, first_resource=resource).start()
-            assert hasattr(th, "custody"), 'Should have a custody attribute.'
-            assert not th.custody.has_custody, 'Should not have custody yet.'
-            assert th.custody.target_resource is resource, 'Should be in line.'
+            assert hasattr(th, "custody"), "Should have a custody attribute."
+            assert not th.custody.has_custody, "Should not have custody yet."
+            assert th.custody.target_resource is resource, "Should be in line."
             # Make target thread progress one step and acquire custody
-            mutable_variables['step'] = 1
-            while mutable_variables['progress'] == 0:
+            mutable_variables["step"] = 1
+            while mutable_variables["progress"] == 0:
                 pass  # Wait for thread
-            assert th.custody.has_custody, 'Should have gotten custody.'
+            assert th.custody.has_custody, "Should have gotten custody."
             assert th.custody.target_resource is resource
             # Make target thread progress one step, release custody, and exit
-            mutable_variables['step'] = 2
-            while mutable_variables['progress'] == 1:
+            mutable_variables["step"] = 2
+            while mutable_variables["progress"] == 1:
                 pass  # Wait for thread
             assert not th.custody.has_custody
             assert th.custody.target_resource is None
             th.join()
         finally:  # if anything goes wrong, make sure the thread exits
-            mutable_variables['step'] = -1
+            mutable_variables["step"] = -1
 
 
 class TestSharedNDArray(MyTestClass):
     """Various tests of the SharedNDArray class"""
 
     def test_subclassed_numpy_array_types(self):
-        a = SharedNDArray(shape=(1,), dtype='uint8')
+        a = SharedNDArray(shape=(1,), dtype="uint8")
         assert isinstance(a, SharedNDArray)
         assert isinstance(a, np.ndarray)
         assert type(a) is SharedNDArray, type(a)
@@ -960,8 +1020,8 @@ class TestSharedNDArray(MyTestClass):
         """Testing if we broke how an ndarray is supposed to behave."""
         ri = np.random.randint  # Just to get short lines
         original_dimensions = (3, 3, 3, 256, 256)
-        a = SharedNDArray(shape=original_dimensions, dtype='uint8')
-        c = ri(0, 255, original_dimensions, dtype='uint8')
+        a = SharedNDArray(shape=original_dimensions, dtype="uint8")
+        c = ri(0, 255, original_dimensions, dtype="uint8")
         a[:] = c  # Fill 'a' with 'c's random values
         # A slice should still share memory
         view_by_slice = a[:1, 2:3, ..., :10, 100:-100]
@@ -986,10 +1046,11 @@ class TestSharedNDArray(MyTestClass):
     def test_serialization(self):
         """Testing serializing/deserializing a SharedNDArray"""
         import pickle
+
         ri = np.random.randint  # Just to get short lines
         original_dimensions = (3, 3, 3, 256, 256)
-        a = SharedNDArray(shape=original_dimensions, dtype='uint8')
-        c = ri(0, 255, original_dimensions, dtype='uint8')
+        a = SharedNDArray(shape=original_dimensions, dtype="uint8")
+        c = ri(0, 255, original_dimensions, dtype="uint8")
         a[:] = c  # Fill 'a' with 'c's random values
         view_by_slice = a[:1, 2:3, ..., :10, 100:-100]
         view_of_a_view = view_by_slice[..., 1:, 10:-10:3]
@@ -1021,6 +1082,7 @@ class TestSharedNDArray(MyTestClass):
 
     def test_auto_unlinking_memory(self):
         import gc
+
         a = SharedNDArray(shape=(1,))
         name = str(a.shared_memory.name)  # Really make sure we don't get a ref
         del a
@@ -1051,8 +1113,9 @@ class TestSharedNDArray(MyTestClass):
 
     def test_accessing_unlinked_memory_during_deserialization(self):
         import pickle
+
         original_dimensions = (3, 3, 3, 256, 256)
-        a = SharedNDArray(shape=original_dimensions, dtype='uint8')
+        a = SharedNDArray(shape=original_dimensions, dtype="uint8")
         string_of_a = pickle.dumps(a)
         del a
         try:
@@ -1060,12 +1123,12 @@ class TestSharedNDArray(MyTestClass):
         except FileNotFoundError:
             pass  # We expected this error
         else:
-            raise AssertionError('Did not get the error we expected')
+            raise AssertionError("Did not get the error we expected")
 
     def test_accessing_unlinked_memory_in_subprocess(self):
         p = ObjectInSubprocess(TestObjectInSubprocess.TestClass)
         original_dimensions = (3, 3, 3, 256, 256)
-        a = SharedNDArray(shape=original_dimensions, dtype='uint8')
+        a = SharedNDArray(shape=original_dimensions, dtype="uint8")
         p.store_array(a)
         p.a.sum()
         del a
@@ -1075,7 +1138,8 @@ class TestSharedNDArray(MyTestClass):
             pass  # we expected this error
         else:
             import os
-            if os.name == 'nt':
+
+            if os.name == "nt":
                 # This is allowed on Windows. Windows will keep memory
                 # allocated until all references have been lost from every
                 # process.
@@ -1084,7 +1148,7 @@ class TestSharedNDArray(MyTestClass):
                 # However, on posix systems, we expect the system to unlink
                 # the memory once the process that originally allocated it
                 # loses all references to the array.
-                raise AssertionError('Did not get the error we expected')
+                raise AssertionError("Did not get the error we expected")
 
     def test_serializing_and_deserializing(self):
         """Test serializing/deserializing arrays with random shapes, dtypes, and
@@ -1095,26 +1159,25 @@ class TestSharedNDArray(MyTestClass):
 
     def _trial_slicing_of_shared_array(self):
         import pickle
+
         ri = np.random.randint  # Just to get short lines
-        dtype = np.dtype(np.random.choice(
-            [int, np.uint8, np.uint16, float, np.float32, np.float64]))
-        original_dimensions = tuple(
-            ri(2, 100) for d in range(ri(2, 5)))
+        dtype = np.dtype(
+            np.random.choice([int, np.uint8, np.uint16, float, np.float32, np.float64])
+        )
+        original_dimensions = tuple(ri(2, 100) for d in range(ri(2, 5)))
         slicer = tuple(
-            slice(
-                ri(0, a // 2),
-                ri(0, a // 2) * -1,
-                ri(1, min(6, a))
-            )
-            for a in original_dimensions)
+            slice(ri(0, a // 2), ri(0, a // 2) * -1, ri(1, min(6, a)))
+            for a in original_dimensions
+        )
         a = SharedNDArray(shape=original_dimensions, dtype=dtype)
         a.fill(0)
         b = a[slicer]  # Should be a view
         b.fill(1)
         expected_total = int(b.sum())
         reloaded_total = int(pickle.loads(pickle.dumps(b)).sum())
-        assert expected_total == reloaded_total, \
-            f'Failed {dtype.name}/{original_dimensions}/{slicer}'
+        assert (
+            expected_total == reloaded_total
+        ), f"Failed {dtype.name}/{original_dimensions}/{slicer}"
 
 
 class TestObjectInSubprocess(MyTestClass):
@@ -1125,7 +1188,7 @@ class TestObjectInSubprocess(MyTestClass):
             for k, v in kwargs.items():
                 setattr(self, k, v)
             for i, a in enumerate(args):
-                setattr(self, f'arg_{i}', a)
+                setattr(self, f"arg_{i}", a)
 
         def printing_method(self, *args, **kwargs):
             print(*args, **kwargs)
@@ -1148,6 +1211,7 @@ class TestObjectInSubprocess(MyTestClass):
 
         def sleep(self, seconds):
             import time
+
             time.sleep(seconds)
 
         def return_slice(self, a, *args):
@@ -1164,10 +1228,11 @@ class TestObjectInSubprocess(MyTestClass):
 
         def _nested_method(self, crash):
             if crash:
-                raise ValueError('This error was supposed to be raised')
+                raise ValueError("This error was supposed to be raised")
 
     def test_create_and_close_object_in_subprocess(self):
         import gc
+
         p = ObjectInSubprocess(TestObjectInSubprocess.TestClass)
         dummy_namespace = p._
         del p
@@ -1188,42 +1253,41 @@ class TestObjectInSubprocess(MyTestClass):
         assert np.array_equal(a, b)
 
     def test_attribute_access(self):
-        p = ObjectInSubprocess(
-            TestObjectInSubprocess.TestClass, 'attribute', x=4)
+        p = ObjectInSubprocess(TestObjectInSubprocess.TestClass, "attribute", x=4)
         assert p.x == 4
-        assert getattr(p, 'arg_0') == 'attribute'
+        assert getattr(p, "arg_0") == "attribute"
         try:
             p.z
         except AttributeError as e:  # Get __this__ specific error
             print("Expected attribute error handled by parent process:\n ", e)
         else:
-            raise AssertionError('Did not get the error we expected')
+            raise AssertionError("Did not get the error we expected")
 
     def test_printing_in_child_processes(self):
         a = ObjectInSubprocess(TestObjectInSubprocess.TestClass)
         b = ObjectInSubprocess(TestObjectInSubprocess.TestClass)
-        expected_output = ''
-        b.printing_method('Hello')
-        expected_output += 'Hello\n'
-        a.printing_method('Hello from subprocess a.')
-        expected_output += 'Hello from subprocess a.\n'
-        b.printing_method('Hello from subprocess b.')
-        expected_output += 'Hello from subprocess b.\n'
-        a.printing_method('Hello world', end=', ', flush=True)
-        expected_output += 'Hello world, '
-        b.printing_method('Hello world!', end='', flush=True)
-        expected_output += 'Hello world!'
+        expected_output = ""
+        b.printing_method("Hello")
+        expected_output += "Hello\n"
+        a.printing_method("Hello from subprocess a.")
+        expected_output += "Hello from subprocess a.\n"
+        b.printing_method("Hello from subprocess b.")
+        expected_output += "Hello from subprocess b.\n"
+        a.printing_method("Hello world", end=", ", flush=True)
+        expected_output += "Hello world, "
+        b.printing_method("Hello world!", end="", flush=True)
+        expected_output += "Hello world!"
         return expected_output
 
     def test_setting_attribute_of_object_in_subprocess(self):
         p = ObjectInSubprocess(TestObjectInSubprocess.TestClass)
-        assert not hasattr(p, 'z')
+        assert not hasattr(p, "z")
         p.z = 10
-        assert hasattr(p, 'z')
+        assert hasattr(p, "z")
         assert p.z == 10
-        setattr(p, 'z', 100)
+        setattr(p, "z", 100)
         assert p.z == 100
-        assert p.get_attribute('z') == 100
+        assert p.get_attribute("z") == 100
 
     def test_array_values_after_passing_to_subprocess(self):
         p = ObjectInSubprocess(TestObjectInSubprocess.TestClass)
@@ -1232,22 +1296,24 @@ class TestObjectInSubprocess(MyTestClass):
         assert a.sum() == p.sum(a)
 
     def test_object_in_subprocess_overhead(self):
-        """Test the overhead of accessing ObjectInSubprocess methods/attributes.
-        """
-        print('Performance summary:')
+        """Test the overhead of accessing ObjectInSubprocess methods/attributes."""
+        print("Performance summary:")
         n_loops = 10000
         p = ObjectInSubprocess(TestObjectInSubprocess.TestClass, x=4)
-        t = self.time_it(
-            n_loops, lambda: p.x, timeout_us=100, name='Attribute access')
+        t = self.time_it(n_loops, lambda: p.x, timeout_us=100, name="Attribute access")
         print(f" {t:.2f} \u03BCs per get-attribute.")
-        t = self.time_it(n_loops, lambda: setattr(p, 'x', 5),
-                         timeout_us=100, name='Attribute setting')
-        print(f" {t:.2f} \u03BCs per set-attribute.")
-        t = self.time_it(n_loops, lambda: p.z, fail=False, timeout_us=200,
-                         name='Attribute error')
-        print(f" {t:.2f} \u03BCs per parent-handled exception.")
         t = self.time_it(
-            n_loops, p.mirror, timeout_us=100, name='Trivial method call')
+            n_loops,
+            lambda: setattr(p, "x", 5),
+            timeout_us=100,
+            name="Attribute setting",
+        )
+        print(f" {t:.2f} \u03BCs per set-attribute.")
+        t = self.time_it(
+            n_loops, lambda: p.z, fail=False, timeout_us=200, name="Attribute error"
+        )
+        print(f" {t:.2f} \u03BCs per parent-handled exception.")
+        t = self.time_it(n_loops, p.mirror, timeout_us=100, name="Trivial method call")
         print(f" {t:.2f} \u03BCs per trivial method call.")
         self._test_passing_array_performance()
 
@@ -1256,34 +1322,35 @@ class TestObjectInSubprocess(MyTestClass):
         ObjectInSubprocess.
         """
         from itertools import product
-        pass_by = ['reference', 'serialization']
-        methods = ['black_hole', 'mirror']
+
+        pass_by = ["reference", "serialization"]
+        methods = ["black_hole", "mirror"]
         shapes = [(10, 10), (1000, 1000)]
         for s, pb, m in product(shapes, pass_by, methods):
-            self._test_array_passing(s, pb, m, 'uint8', 1000)
+            self._test_array_passing(s, pb, m, "uint8", 1000)
 
     def _test_array_passing(self, shape, pass_by, method_name, dtype, n_loops):
         dtype = np.dtype(dtype)
-        sz = int(np.prod(shape, dtype='uint64') * np.dtype(int).itemsize)
-        direction = '<->' if method_name == 'mirror' else '->'
-        name = f'{shape} array {direction} {pass_by}'
+        sz = int(np.prod(shape, dtype="uint64") * np.dtype(int).itemsize)
+        direction = "<->" if method_name == "mirror" else "->"
+        name = f"{shape} array {direction} {pass_by}"
         shm_obj = ObjectInSubprocess(TestObjectInSubprocess.TestClass)
-        if pass_by == 'reference':
+        if pass_by == "reference":
             a = SharedNDArray(shape, dtype=dtype)
             timeout_us = 5e3
-        elif pass_by == 'serialization':
+        elif pass_by == "serialization":
             a = np.zeros(shape=shape, dtype=dtype)
             timeout_us = 1e6
         func = getattr(shm_obj, method_name)
-        t_per_loop = self.time_it(n_loops, func, (a,), timeout_us=timeout_us,
-                                  name=name)
-        print(f' {t_per_loop:.2f} \u03BCs per {name}')
+        t_per_loop = self.time_it(n_loops, func, (a,), timeout_us=timeout_us, name=name)
+        print(f" {t_per_loop:.2f} \u03BCs per {name}")
 
     def test_lock_with_waitlist(self):
         """Test that CustodyThreads stay in order while using resources.
         ObjectsInSubprocess are just mocked as _WaitingList objects.
         """
         import time
+
         try:
             from tqdm import tqdm
         except ImportError:
@@ -1293,50 +1360,56 @@ class TestObjectInSubprocess(MyTestClass):
         display_lock = _WaitingList()
 
         num_snaps = 100
-        usage_record = {'camera': [], 'display': []}
+        usage_record = {"camera": [], "display": []}
         if tqdm is not None:
             pbars = {
                 resource: tqdm(
-                    total=num_snaps, bar_format='{desc: <30}{n: 3d}-{bar:45}|',
-                    desc=f'Threads waiting on {resource}')
-                for resource in usage_record.keys()}
+                    total=num_snaps,
+                    bar_format="{desc: <30}{n: 3d}-{bar:45}|",
+                    desc=f"Threads waiting on {resource}",
+                )
+                for resource in usage_record.keys()
+            }
 
         def snap(i, custody):
             if tqdm is not None:
-                pbars['camera'].update(1)
+                pbars["camera"].update(1)
             if tqdm is not None:
-                pbars['camera'].refresh()
+                pbars["camera"].refresh()
             # We're already in line for the camera; wait until we're first
             custody.switch_from(None, camera_lock)
             # Pretend to use the resource
             time.sleep(0.02)
-            usage_record['camera'].append(i)
+            usage_record["camera"].append(i)
 
             custody.switch_from(camera_lock, display_lock, wait=False)
             if tqdm is not None:
-                pbars['camera'].update(-1)
+                pbars["camera"].update(-1)
             if tqdm is not None:
-                pbars['camera'].refresh()
+                pbars["camera"].refresh()
             if tqdm is not None:
-                pbars['display'].update(1)
+                pbars["display"].update(1)
             if tqdm is not None:
-                pbars['display'].refresh()
+                pbars["display"].refresh()
             custody._wait_in_line()
             # Pretend to use the resource
             time.sleep(0.05)
-            usage_record['display'].append(i)
+            usage_record["display"].append(i)
             # Move to the next resource
             custody.switch_from(display_lock, None)
             if tqdm is not None:
-                pbars['display'].update(-1)
+                pbars["display"].update(-1)
             if tqdm is not None:
-                pbars['display'].refresh()
+                pbars["display"].refresh()
             return None
 
         threads = []
         for i in range(num_snaps):
-            threads.append(CustodyThread(
-                target=snap, first_resource=camera_lock, args=(i,)).start())
+            threads.append(
+                CustodyThread(
+                    target=snap, first_resource=camera_lock, args=(i,)
+                ).start()
+            )
         for th in threads:
             th.get_result()
 
@@ -1344,8 +1417,8 @@ class TestObjectInSubprocess(MyTestClass):
             for pb in pbars.values():
                 pb.close()
 
-        assert usage_record['camera'] == list(range(num_snaps))
-        assert usage_record['display'] == list(range(num_snaps))
+        assert usage_record["camera"] == list(range(num_snaps))
+        assert usage_record["display"] == list(range(num_snaps))
 
     def test_incorrect_thread_management(self):
         """Test accessing an object in a subprocess from multiple threads
@@ -1357,22 +1430,23 @@ class TestObjectInSubprocess(MyTestClass):
 
         def unsafe_fn():
             try:
-                p.sleep(.1)
+                p.sleep(0.1)
             except RuntimeError:  # Should raise this sometimes
                 exceptions.append(1)
+
         threads = [threading.Thread(target=unsafe_fn) for i in range(20)]
         for th in threads:
             th.start()
         for th in threads:
             th.join()
-        assert len(exceptions) == 19, 'This should have raised some exceptions.'
+        assert len(exceptions) == 19, "This should have raised some exceptions."
 
     def test_sending_shared_arrays(self):
         """Testing sending a SharedNDArray to a ObjectInSubprocess."""
 
         p = ObjectInSubprocess(TestObjectInSubprocess.TestClass)
         original_dimensions = (3, 3, 3, 256, 256)
-        a = SharedNDArray(shape=original_dimensions, dtype='uint8')
+        a = SharedNDArray(shape=original_dimensions, dtype="uint8")
 
         (_a,), _ = p.mirror(a)
         assert isinstance(_a, SharedNDArray)

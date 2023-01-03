@@ -35,7 +35,13 @@ from tkinter import ttk
 import logging
 
 from aslm.view.custom_widgets.validation import ValidatedCombobox, ValidatedSpinbox
-from aslm.view.custom_widgets.hovermixin import HoverButton, HoverCheckButton, HoverRadioButton, HoverTkButton
+from aslm.view.custom_widgets.hovermixin import (
+    HoverButton,
+    HoverCheckButton,
+    HoverRadioButton,
+    HoverTkButton,
+)
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -78,21 +84,23 @@ The widget within a LabelInput class can be directly referenced with self.widget
 
 class LabelInput(ttk.Frame):
     """Widget class that contains label and input together."""
+
     # The below takes a parent frame, the postition of the label(left or top defaults to left),
     # type of widget (defaults to entry), the input variable used, input arguments, label arguments and
     # finally the keyword arguments that will be passed to the super
     # constructor for the frame
 
     def __init__(
-            self,
-            parent,
-            label_pos="left",
-            label='',
-            input_class=ttk.Entry,
-            input_var=None,
-            input_args=None,
-            label_args=None,
-            **kwargs):
+        self,
+        parent,
+        label_pos="left",
+        label="",
+        input_class=ttk.Entry,
+        input_var=None,
+        input_args=None,
+        label_args=None,
+        **kwargs,
+    ):
         # Calls frame constructor using parent and keyword args
         super().__init__(parent, **kwargs)
         # creating access point to input args for input type constructor (uses
@@ -107,7 +115,15 @@ class LabelInput(ttk.Frame):
 
         """This if statement will check for the type of widget being created and will create it based on that, since certain
         widgets need different formatting, like how button types don't need a textvariable like a StringVar()"""
-        if input_class in (ttk.Checkbutton, ttk.Button, ttk.Radiobutton, HoverButton, HoverTkButton, HoverCheckButton, HoverRadioButton):
+        if input_class in (
+            ttk.Checkbutton,
+            ttk.Button,
+            ttk.Radiobutton,
+            HoverButton,
+            HoverTkButton,
+            HoverCheckButton,
+            HoverRadioButton,
+        ):
             input_args["text"] = label
             input_args["variable"] = input_var
         else:
@@ -150,13 +166,15 @@ class LabelInput(ttk.Frame):
             elif isinstance(self.widget, tk.Text):
                 # This is to account for the different formatting with Text
                 # widgets
-                return self.widget.get('1.0', tk.END)
+                return self.widget.get("1.0", tk.END)
             else:
-                return self.widget.get()  # Cathces all others like the normal entry widget
-        except(TypeError, tk.TclError):
+                return (
+                    self.widget.get()
+                )  # Cathces all others like the normal entry widget
+        except (TypeError, tk.TclError):
             # Catches times when a numeric entry input has a blank, since this
             # cannot be converted into a numeric value
-            return ''
+            return ""
 
     def get_variable(self):
         """
@@ -177,7 +195,9 @@ class LabelInput(ttk.Frame):
             # No casting needed this will set any of the other var types
             # (String, Int, etc)
             self.variable.set(value, *args, **kwargs)
-        elif type(self.widget).__name__.endswith('button'):  # Catches button style widgets
+        elif type(self.widget).__name__.endswith(
+            "button"
+        ):  # Catches button style widgets
             # The below if statment is needed for button types because it needs
             # to be selected or enabled based on some value
             if value:
@@ -187,12 +207,12 @@ class LabelInput(ttk.Frame):
         # Catches Text type objects so the Multiline Text widget and the Entry
         # widget
         elif isinstance(self.widget, tk.Text):
-            self.widget.delete('1.0', tk.END)
+            self.widget.delete("1.0", tk.END)
             # These lines are used for the specfic formatting of the Text
             # widget, 1 is the line and 0 is the char pos of that line
-            self.widget.insert('1.0', value)
+            self.widget.insert("1.0", value)
         elif isinstance(self.widget, ValidatedCombobox):
-            self.widget.current(self.widget['values'].index(value))
+            self.widget.current(self.widget["values"].index(value))
         else:
             self.widget.delete(0, tk.END)
             # Basic entry widget formatting, dont need the string as the first
@@ -204,13 +224,22 @@ class LabelInput(ttk.Frame):
         #### Values should be a list of strings or numbers that you want to be options in the specific widget
         """
 
-        if self.input_class in (ttk.Combobox, tk.Listbox, ttk.Spinbox, ValidatedCombobox, ValidatedSpinbox):
-            self.widget['values'] = values
+        if self.input_class in (
+            ttk.Combobox,
+            tk.Listbox,
+            ttk.Spinbox,
+            ValidatedCombobox,
+            ValidatedSpinbox,
+        ):
+            self.widget["values"] = values
         else:
             print(
-                "This widget class does not support list options: " +
-                str(self.input_class))
-            logger.info(f"This widget class does not support list options: {self.input_class}")
+                "This widget class does not support list options: "
+                + str(self.input_class)
+            )
+            logger.info(
+                f"This widget class does not support list options: {self.input_class}"
+            )
 
     def pad_input(self, left, up, right, down):
         self.widget.grid(padx=(left, right), pady=(up, down))

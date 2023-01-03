@@ -44,11 +44,8 @@ class SplashScreen(tk.Toplevel):
         Top level GUI.
 
     """
-    def __init__(self,
-                 root,
-                 imgDir,
-                 *args,
-                 **kargs):
+
+    def __init__(self, root, imgDir, *args, **kargs):
         tk.Toplevel.__init__(self, root)
         # without navigation panel
         self.overrideredirect(True)
@@ -56,11 +53,11 @@ class SplashScreen(tk.Toplevel):
         img_dir = Path.joinpath(Path(__file__).resolve().parent, imgDir)
         try:
             img = tk.PhotoImage(file=img_dir)
-            w, h = img.width(), img.height() # width, height of the image
+            w, h = img.width(), img.height()  # width, height of the image
             loading_label = tk.Label(self, image=img)
         except:
             w, h = 300, 100
-            loading_label = tk.Label(self, text='Loading ASLM Software ...')
+            loading_label = tk.Label(self, text="Loading ASLM Software ...")
         loading_label.pack()
 
         # get screen width and height
@@ -68,10 +65,10 @@ class SplashScreen(tk.Toplevel):
         hs = root.winfo_screenheight()  # height of the screen
 
         # calculate x and y coordinates for the Tk root window
-        x = (ws/2) - (w/2)
-        y = (hs/2) - (h/2)
+        x = (ws / 2) - (w / 2)
+        y = (hs / 2) - (h / 2)
 
         # draw the window in the center of the window
-        self.geometry('%dx%d+%d+%d' % (w, h, x, y))
+        self.geometry("%dx%d+%d+%d" % (w, h, x, y))
         self.resizable(0, 0)
         self.update()

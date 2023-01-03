@@ -47,11 +47,12 @@ from aslm.model.devices.zoom.zoom_base import ZoomBase
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+
 def build_dynamixel_zoom_connection(configuration):
-    id = configuration['configuration']['hardware']['zoom']['servo_id']
-    comport = configuration['configuration']['hardware']['zoom']['port']
-    devicename = comport.encode('utf-8')
-    baudrate = configuration['configuration']['hardware']['zoom']['baudrate']
+    id = configuration["configuration"]["hardware"]["zoom"]["servo_id"]
+    comport = configuration["configuration"]["hardware"]["zoom"]["port"]
+    devicename = comport.encode("utf-8")
+    baudrate = configuration["configuration"]["hardware"]["zoom"]["baudrate"]
 
     port_num = dynamixel.portHandler(devicename)
     dynamixel.packetHandler()
@@ -82,10 +83,13 @@ class DynamixelZoom(ZoomBase):
         Read the position of the DynamixelZoom servo.
 
     """
+
     def __init__(self, microscope_name, device_connection, configuration):
         super().__init__(microscope_name, device_connection, configuration)
         self.dynamixel = dynamixel
-        self.id = configuration['configuration']['microscopes'][microscope_name]['zoom']['hardware']['servo_id']
+        self.id = configuration["configuration"]["microscopes"][microscope_name][
+            "zoom"
+        ]["hardware"]["servo_id"]
         self.addr_mx_torque_enable = 24
         self.addr_mx_goal_position = 30
         self.addr_mx_present_position = 36
@@ -113,7 +117,7 @@ class DynamixelZoom(ZoomBase):
         self.dynamixel.closePort(self.port_num)
 
     def set_zoom(self, zoom, wait_until_done=False):
-        r""" Change the DynamixelZoom Servo.
+        r"""Change the DynamixelZoom Servo.
 
         Confirms tha the zoom position is available in the zoomdict
 
@@ -131,12 +135,12 @@ class DynamixelZoom(ZoomBase):
             self.zoomvalue = zoom
         else:
             logger.error(f"Zoom designation, {zoom}, not in the configuration")
-            raise ValueError('Zoom designation not in the configuration')
+            raise ValueError("Zoom designation not in the configuration")
         logger.debug(f"Changed DynamixelZoom to {zoom}")
         logger.debug(f"DynamixelZoom position: {self.read_position()}")
 
     def move(self, position, wait_until_done=False):
-        r""" Move the DynamixelZoom Servo
+        r"""Move the DynamixelZoom Servo
 
         Parameters
         ----------
@@ -147,19 +151,29 @@ class DynamixelZoom(ZoomBase):
         """
 
         # Enable servo
-        self.dynamixel.write1ByteTxRx( self.port_num, 1, self.id, self.addr_mx_torque_enable, self.torque_enable)
+        self.dynamixel.write1ByteTxRx(
+            self.port_num, 1, self.id, self.addr_mx_torque_enable, self.torque_enable
+        )
 
         # Write Moving Speed
-        self.dynamixel.write2ByteTxRx(self.port_num, 1, self.id, self.addr_mx_moving_speed, 100)
+        self.dynamixel.write2ByteTxRx(
+            self.port_num, 1, self.id, self.addr_mx_moving_speed, 100
+        )
 
         # Write Torque Limit
-        self.dynamixel.write2ByteTxRx(self.port_num, 1, self.id, self.addr_mx_torque_limit, 200)
+        self.dynamixel.write2ByteTxRx(
+            self.port_num, 1, self.id, self.addr_mx_torque_limit, 200
+        )
 
         # Write P Gain
-        self.dynamixel.write1ByteTxRx(self.port_num, 1, self.id, self.addr_mx_p_gain, 44)
+        self.dynamixel.write1ByteTxRx(
+            self.port_num, 1, self.id, self.addr_mx_p_gain, 44
+        )
 
         # Write Goal Position
-        self.dynamixel.write2ByteTxRx(self.port_num, 1, self.id, self.addr_mx_goal_position, position)
+        self.dynamixel.write2ByteTxRx(
+            self.port_num, 1, self.id, self.addr_mx_goal_position, position
+        )
 
         # Check position
         if wait_until_done:
@@ -170,7 +184,9 @@ class DynamixelZoom(ZoomBase):
             lower_limit = position - self.goal_position_offset
             logger.debug(f"DynamixelZoom Lower Limit: {lower_limit}")
 
-            cur_position = self.dynamixel.read4ByteTxRx(self.port_num, 1, self.id, self.addr_mx_present_position)
+            cur_position = self.dynamixel.read4ByteTxRx(
+                self.port_num, 1, self.id, self.addr_mx_present_position
+            )
 
             while (cur_position < lower_limit) or (cur_position > upper_limit):
                 # Timeout function
@@ -178,7 +194,9 @@ class DynamixelZoom(ZoomBase):
                     logger.debug(f"DynamixelZoom Timeout Event")
                     break
                 time.sleep(0.05)
-                cur_position = self.dynamixel.read4ByteTxRx(self.port_num, 1, self.id, self.addr_mx_present_position)
+                cur_position = self.dynamixel.read4ByteTxRx(
+                    self.port_num, 1, self.id, self.addr_mx_present_position
+                )
                 logger.debug(f"DynamixelZoom Current Position: {cur_position}")
 
     def read_position(self):
@@ -193,6 +211,7 @@ class DynamixelZoom(ZoomBase):
             Servo position.
         """
         cur_position = self.dynamixel.read4ByteTxRx(
-            self.port_num, 1, self.id, self.addr_mx_present_position)
+            self.port_num, 1, self.id, self.addr_mx_present_position
+        )
         logger.debug(f"Zoom position {cur_position}")
         return cur_position

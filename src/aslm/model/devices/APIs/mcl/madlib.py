@@ -23,10 +23,11 @@ MadlibErrorCodeDescription = {
     MadlibErrorCode.MCL_DEV_NOT_READY: "Device not ready",
     MadlibErrorCode.MCL_ARGUMENT_ERROR: "Invalid argument",
     MadlibErrorCode.MCL_INVALID_AXIS: "Invalid axis",
-    MadlibErrorCode.MCL_INVALID_HANDLE: "Invalid axis handle"
+    MadlibErrorCode.MCL_INVALID_HANDLE: "Invalid axis handle",
 }
 
-axes = {'x': 1, 'y': 2, 'z': 3, 'f': 3, "aux": 4}
+axes = {"x": 1, "y": 2, "z": 3, "f": 3, "aux": 4}
+
 
 class MadlibError(Exception):
     r"""Exception for Mad City Labs device run off Madlib API."""

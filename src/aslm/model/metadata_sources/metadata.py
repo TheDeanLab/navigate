@@ -12,6 +12,7 @@ from multiprocessing.managers import DictProxy
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+
 class Metadata:
     def __init__(self) -> None:
         """
@@ -23,14 +24,20 @@ class Metadata:
         """
         self._configuration = None
         self.dx, self.dy, self.dz = 1, 1, 1  # pixel sizes (um)
-        self.dt = 1                          # time displacement (s)
-        self.dc = 1                          # step size between channels, should always be 1
-        self._order = 'XYCZT'
+        self.dt = 1  # time displacement (s)
+        self.dc = 1  # step size between channels, should always be 1
+        self._order = "XYCZT"
         self._per_stack = True
         self._multiposition = False
 
         # shape
-        self.shape_x, self.shape_y, self.shape_z, self.shape_t, self.shape_c = 1, 1, 1, 1, 1
+        self.shape_x, self.shape_y, self.shape_z, self.shape_t, self.shape_c = (
+            1,
+            1,
+            1,
+            1,
+            1,
+        )
         self.positions = 1
 
         self.active_microscope = None
@@ -49,33 +56,73 @@ class Metadata:
         return self._per_stack
 
     def set_from_configuration_experiment(self) -> None:
-        if self.configuration.get('experiment') is not None and self.configuration.get('configuration') is not None:
-            self.active_microscope = self.configuration['experiment']['MicroscopeState']['microscope_name']
+        if (
+            self.configuration.get("experiment") is not None
+            and self.configuration.get("configuration") is not None
+        ):
+            self.active_microscope = self.configuration["experiment"][
+                "MicroscopeState"
+            ]["microscope_name"]
             self.set_shape_from_configuration_experiment()
             self.set_stack_order_from_configuration_experiment()
 
     def set_shape_from_configuration_experiment(self) -> None:
-        zoom = self.configuration['experiment']['MicroscopeState']['zoom']
-        pixel_size = float(self.configuration['configuration']['microscopes'][self.active_microscope]['zoom']['pixel_size'][zoom])
+        zoom = self.configuration["experiment"]["MicroscopeState"]["zoom"]
+        pixel_size = float(
+            self.configuration["configuration"]["microscopes"][self.active_microscope][
+                "zoom"
+            ]["pixel_size"][zoom]
+        )
         self.dx, self.dy = pixel_size, pixel_size
-        self.dz = float(self.configuration['experiment']['MicroscopeState']['step_size'])
-        self.dt = float(self.configuration['experiment']['MicroscopeState']['timepoint_interval'])
+        self.dz = float(
+            self.configuration["experiment"]["MicroscopeState"]["step_size"]
+        )
+        self.dt = float(
+            self.configuration["experiment"]["MicroscopeState"]["timepoint_interval"]
+        )
 
-        self.shape_x = int(self.configuration['experiment']['CameraParameters']['x_pixels'])
-        self.shape_y = int(self.configuration['experiment']['CameraParameters']['y_pixels'])
-        self.shape_z = int(self.configuration['experiment']['MicroscopeState']['number_z_steps']) if (self.configuration['experiment']['MicroscopeState']['image_mode'] == 'z-stack') else 1
-        self.shape_t = int(self.configuration['experiment']['MicroscopeState']['timepoints'])
-        self.shape_c = sum([v['is_selected'] == True for k, v in self.configuration['experiment']['MicroscopeState']['channels'].items()])
+        self.shape_x = int(
+            self.configuration["experiment"]["CameraParameters"]["x_pixels"]
+        )
+        self.shape_y = int(
+            self.configuration["experiment"]["CameraParameters"]["y_pixels"]
+        )
+        self.shape_z = (
+            int(self.configuration["experiment"]["MicroscopeState"]["number_z_steps"])
+            if (
+                self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+                == "z-stack"
+            )
+            else 1
+        )
+        self.shape_t = int(
+            self.configuration["experiment"]["MicroscopeState"]["timepoints"]
+        )
+        self.shape_c = sum(
+            [
+                v["is_selected"] == True
+                for k, v in self.configuration["experiment"]["MicroscopeState"][
+                    "channels"
+                ].items()
+            ]
+        )
 
-        self._multiposition = self.configuration['experiment']['MicroscopeState']['is_multiposition']
+        self._multiposition = self.configuration["experiment"]["MicroscopeState"][
+            "is_multiposition"
+        ]
 
         if bool(self._multiposition):
-            self.positions = len(self.configuration['experiment']['MultiPositions']['stage_positions'])
+            self.positions = len(
+                self.configuration["experiment"]["MultiPositions"]["stage_positions"]
+            )
         else:
             self.positions = 1
 
     def set_stack_order_from_configuration_experiment(self) -> None:
-        self._per_stack = self.configuration['experiment']['MicroscopeState']['stack_cycling_mode'] == 'per_stack'
+        self._per_stack = (
+            self.configuration["experiment"]["MicroscopeState"]["stack_cycling_mode"]
+            == "per_stack"
+        )
 
     @property
     def voxel_size(self) -> tuple:
@@ -99,13 +146,15 @@ class XMLMetadata(Metadata):
     of metadata values (TODO: Not implemented. Will use xml_tools.parse_xml() for the first bit.)
     """
 
-    def write_xml(self, file_name: str, file_type: str, root: Optional[str] = None, **kw) -> None:
+    def write_xml(
+        self, file_name: str, file_type: str, root: Optional[str] = None, **kw
+    ) -> None:
         """Write to XML file. Assumes we do not include the XML header in our nested metadata dictionary."""
         xml = '<?xml version="1.0" encoding="UTF-8"?>'  # XML file header
         # TODO: should os.path.basename be the default? Added this for BigDataViewer's relative path.
         xml += self.to_xml(file_type, root, file_name=os.path.basename(file_name), **kw)
-        file_name = '.'.join(file_name.split('.')[:-1])+'.xml'
-        with open(file_name, 'w') as fp:
+        file_name = ".".join(file_name.split(".")[:-1]) + ".xml"
+        with open(file_name, "w") as fp:
             fp.write(xml)
 
     def to_xml(self, file_type: str, root: Optional[str] = None, **kw) -> str:
@@ -114,8 +163,12 @@ class XMLMetadata(Metadata):
         """
         xml = ""
         try:
-            d = getattr(self, f"{file_type.lower().replace(' ','_').replace('-','_')}_xml_dict")(**kw)
+            d = getattr(
+                self, f"{file_type.lower().replace(' ','_').replace('-','_')}_xml_dict"
+            )(**kw)
             xml = xml_tools.dict_to_xml(d, root)
         except AttributeError:
-            logging.debug(f"Metadata Writer - I do not know how to export {file_type} metadata to XML.")
+            logging.debug(
+                f"Metadata Writer - I do not know how to export {file_type} metadata to XML."
+            )
         return xml

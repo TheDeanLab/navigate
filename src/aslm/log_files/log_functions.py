@@ -45,16 +45,14 @@ import yaml
 from aslm.config.config import get_aslm_path
 
 
-def update_nested_dict(d,
-                       find_func,
-                       apply_func):
+def update_nested_dict(d, find_func, apply_func):
     """
     Loops through a nested dictionary and if find_func() conditions are met,
     run apply_func on that key.
 
     TODO: This is highly general and doesn't belong here.
     TODO: It might be nice to make this non-recursive.
-    
+
     Parameters
     ----------
     find_func : func
@@ -74,21 +72,19 @@ def update_nested_dict(d,
         else:
             d2[k] = v
         if isinstance(v, dict):
-            d2[k] = update_nested_dict(v,
-                                       find_func,
-                                       apply_func)
+            d2[k] = update_nested_dict(v, find_func, apply_func)
     return d2
 
 
 def find_filename(k, v):
-    """Check that we've met the condition dictionary key == 'filename' """
-    if k == 'filename':
+    """Check that we've met the condition dictionary key == 'filename'"""
+    if k == "filename":
         return True
     return False
 
 
 def log_setup(logging_configuration):
-    """ Initialize Logger
+    """Initialize Logger
     Initialize a logger from a YAML file containing information in the Python logging
     dictionary format
     (see https://docs.python.org/3/library/logging.config.html#logging-config-dictschema).
@@ -106,14 +102,18 @@ def log_setup(logging_configuration):
 
     # Save directory for logging information.
     time = datetime.now()
-    time_stamp = Path(f"%s-%s-%s-%s%s" % (f'{time.year:04d}',
-                                          f'{time.month:02d}',
-                                          f'{time.day:02d}',
-                                          f'{time.hour:02d}',
-                                          f'{time.minute:02d}'))
+    time_stamp = Path(
+        f"%s-%s-%s-%s%s"
+        % (
+            f"{time.year:04d}",
+            f"{time.month:02d}",
+            f"{time.day:02d}",
+            f"{time.hour:02d}",
+            f"{time.minute:02d}",
+        )
+    )
 
-    logging_path = Path.joinpath(Path(get_aslm_path()),
-                                 'logs')
+    logging_path = Path.joinpath(Path(get_aslm_path()), "logs")
     todays_path = Path.joinpath(logging_path, time_stamp)
     if not os.path.exists(logging_path):
         os.mkdir(logging_path)
@@ -125,15 +125,14 @@ def log_setup(logging_configuration):
         return Path.joinpath(todays_path, v)
 
     # Read the logging configuration file.
-    with open(logging_configuration_path, 'r') as f:
+    with open(logging_configuration_path, "r") as f:
         try:
-            config_data = yaml.load(f.read(),
-                                    Loader=yaml.FullLoader)
+            config_data = yaml.load(f.read(), Loader=yaml.FullLoader)
 
             # Force all log files to be created relative to logging_path
-            config_data2 = update_nested_dict(config_data,
-                                              find_filename,
-                                              update_filename)
+            config_data2 = update_nested_dict(
+                config_data, find_filename, update_filename
+            )
             logging.config.dictConfig(config_data2)
 
             # Configures our loggers from updated logging.yml

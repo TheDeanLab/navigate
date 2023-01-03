@@ -46,14 +46,11 @@ logger = logging.getLogger(p)
 
 
 class SyntheticGalvo(GalvoBase):
-    r"""SyntheticGalvo Class
-
-     """
+    r"""SyntheticGalvo Class"""
 
     def __init__(self, microscope_name, device_connection, configuration, galvo_id=0):
         super().__init__(microscope_name, device_connection, configuration, galvo_id)
         pass
-
 
     def __del__(self):
         self.stop_task()
@@ -61,13 +58,13 @@ class SyntheticGalvo(GalvoBase):
 
     def prepare_task(self, channel_key):
         # write waveform
-        logger.debug(f'galvo writes the waveform for {channel_key}')
+        logger.debug(f"galvo writes the waveform for {channel_key}")
 
     def start_task(self):
-        logger.debug('galvo started task!')
+        logger.debug("galvo started task!")
 
     def stop_task(self):
-        logger.debug('galvo stopped task!')
-    
+        logger.debug("galvo stopped task!")
+
     def close_task(self):
-        logger.debug('galvo closed task!')
+        logger.debug("galvo closed task!")

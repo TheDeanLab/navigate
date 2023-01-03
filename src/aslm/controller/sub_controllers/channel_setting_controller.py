@@ -53,7 +53,7 @@ class ChannelSettingController(GUIController):
         # num: numbers of channels
         self.num = self.configuration_controller.number_of_channels
         # 'live': acquire mode is set to 'continuous'
-        self.mode = 'stop'
+        self.mode = "stop"
         self.in_initialization = True
         self.event_id = None
 
@@ -67,22 +67,23 @@ class ChannelSettingController(GUIController):
         for i in range(self.num):
             channel_vals = self.get_vals_by_channel(i)
             for name in channel_vals:
-                channel_vals[name].trace_add('write', self.channel_callback(i, name))
+                channel_vals[name].trace_add("write", self.channel_callback(i, name))
 
-
-    def set_mode(self, mode='stop'):
+    def set_mode(self, mode="stop"):
         self.mode = mode
-        state = 'normal' if mode == 'stop' else 'disabled'
-        state_readonly = 'readonly' if mode == 'stop' else 'disabled'
+        state = "normal" if mode == "stop" else "disabled"
+        state_readonly = "readonly" if mode == "stop" else "disabled"
         for i in range(5):
             self.view.channel_checks[i].config(state=state)
             self.view.interval_spins[i].config(state=state)
-            self.view.laser_pulldowns[i]['state'] = state_readonly
-            if self.mode != 'live' or (self.mode == 'live' and not self.view.channel_variables[i].get()):
+            self.view.laser_pulldowns[i]["state"] = state_readonly
+            if self.mode != "live" or (
+                self.mode == "live" and not self.view.channel_variables[i].get()
+            ):
                 self.view.exptime_pulldowns[i].config(state=state)
             if not self.view.channel_variables[i].get():
                 self.view.laserpower_pulldowns[i].config(state=state)
-                self.view.filterwheel_pulldowns[i]['state'] = state
+                self.view.filterwheel_pulldowns[i]["state"] = state
                 self.view.defocus_spins[i].config(state=state)
 
     def initialize(self):
@@ -95,9 +96,9 @@ class ChannelSettingController(GUIController):
         """
         setting_dict = self.configuration_controller.channels_info
         for i in range(self.num):
-            self.view.laser_pulldowns[i]['values'] = setting_dict['laser']
-            self.view.filterwheel_pulldowns[i]['values'] = setting_dict['filter']
-        self.show_verbose_info('channel has been initialized')
+            self.view.laser_pulldowns[i]["values"] = setting_dict["laser"]
+            self.view.filterwheel_pulldowns[i]["values"] = setting_dict["filter"]
+        self.show_verbose_info("channel has been initialized")
 
     def populate_experiment_values(self, setting_dict):
         """
@@ -113,9 +114,9 @@ class ChannelSettingController(GUIController):
         }
         """
         self.channel_setting_dict = setting_dict
-        prefix = 'channel_'
+        prefix = "channel_"
         for channel in setting_dict.keys():
-            channel_id = int(channel[len(prefix):]) - 1
+            channel_id = int(channel[len(prefix) :]) - 1
             channel_vals = self.get_vals_by_channel(channel_id)
             if not channel_vals:
                 return
@@ -127,23 +128,23 @@ class ChannelSettingController(GUIController):
             self.view.interval_spins[channel_id].validate()
             self.view.laserpower_pulldowns[channel_id].validate()
 
-        self.show_verbose_info('channel has been set new value')
+        self.show_verbose_info("channel has been set new value")
 
     def set_spinbox_range_limits(self, settings):
         """
         # this function will set the spinbox widget's values of from_, to, step
         """
         temp_dict = {
-            'laser_power': self.view.laserpower_pulldowns,
-            'exposure_time': self.view.exptime_pulldowns,
-            'interval_time': self.view.interval_spins
+            "laser_power": self.view.laserpower_pulldowns,
+            "exposure_time": self.view.exptime_pulldowns,
+            "interval_time": self.view.interval_spins,
         }
         for k in temp_dict:
             widgets = temp_dict[k]
             for i in range(self.num):
-                widgets[i].configure(from_=settings[k]['min'])
-                widgets[i].configure(to=settings[k]['max'])
-                widgets[i].configure(increment=settings[k]['step'])
+                widgets[i].configure(from_=settings[k]["min"])
+                widgets[i].configure(to=settings[k]["max"])
+                widgets[i].configure(increment=settings[k]["step"])
 
     def channel_callback(self, channel_id, widget_name):
         """
@@ -152,19 +153,27 @@ class ChannelSettingController(GUIController):
         # this function will call the central controller to response user's request
         """
         channel_vals = self.get_vals_by_channel(channel_id)
-        prefix = 'channel_'
+        prefix = "channel_"
 
         def update_setting_dict(setting_dict, widget_name):
             if channel_vals[widget_name].get() is None:
                 return False
-            
-            if widget_name == 'laser':
-                setting_dict['laser'] = channel_vals['laser'].get()
-                setting_dict['laser_index'] = self.get_index('laser', channel_vals['laser'].get())
-            elif widget_name == 'filter':
-                setting_dict['filter'] = channel_vals['filter'].get()
-                setting_dict['filter_position'] = self.get_index('filter', channel_vals['filter'].get())
-            elif widget_name in ['laser_power', 'camera_exposure_time', 'interval_time']:
+
+            if widget_name == "laser":
+                setting_dict["laser"] = channel_vals["laser"].get()
+                setting_dict["laser_index"] = self.get_index(
+                    "laser", channel_vals["laser"].get()
+                )
+            elif widget_name == "filter":
+                setting_dict["filter"] = channel_vals["filter"].get()
+                setting_dict["filter_position"] = self.get_index(
+                    "filter", channel_vals["filter"].get()
+                )
+            elif widget_name in [
+                "laser_power",
+                "camera_exposure_time",
+                "interval_time",
+            ]:
                 try:
                     setting_dict[widget_name] = float(channel_vals[widget_name].get())
                 except:
@@ -173,25 +182,25 @@ class ChannelSettingController(GUIController):
             else:
                 setting_dict[widget_name] = channel_vals[widget_name].get()
 
-            if widget_name == 'camera_exposure_time' or widget_name == 'is_selected':
-                self.parent_controller.execute('recalculate_timepoint')
+            if widget_name == "camera_exposure_time" or widget_name == "is_selected":
+                self.parent_controller.execute("recalculate_timepoint")
             return True
 
         def func(*args):
             if self.in_initialization:
                 return
-            
+
             if channel_vals[widget_name].get() is None:
                 return
 
-            channel_key = prefix + str(channel_id+1)
+            channel_key = prefix + str(channel_id + 1)
             if channel_key not in self.channel_setting_dict.keys():
                 # update self.channel_setting_dict
                 setting_dict = self.parent_controller.parent_controller.manager.dict()
                 # check whether all the settings are validate
                 for name in channel_vals:
                     if not update_setting_dict(setting_dict, name):
-                        return    
+                        return
                 self.channel_setting_dict[channel_key] = setting_dict
                 return
 
@@ -199,13 +208,17 @@ class ChannelSettingController(GUIController):
 
             update_setting_dict(setting_dict, widget_name)
 
-            if self.mode == 'live':
+            if self.mode == "live":
                 # call central controller
                 if self.event_id:
                     self.view.after_cancel(self.event_id)
-                self.event_id = self.view.after(500, lambda: self.parent_controller.execute('update_setting', 'channel'))
+                self.event_id = self.view.after(
+                    500,
+                    lambda: self.parent_controller.execute("update_setting", "channel"),
+                )
 
-            self.show_verbose_info('channel setting has been changed')
+            self.show_verbose_info("channel setting has been changed")
+
         return func
 
     def get_vals_by_channel(self, index):
@@ -215,21 +228,21 @@ class ChannelSettingController(GUIController):
         if index < 0 or index >= self.num:
             return {}
         result = {
-            'is_selected': self.view.channel_variables[index],
-            'laser': self.view.laser_variables[index],
-            'filter': self.view.filterwheel_variables[index],
-            'camera_exposure_time': self.view.exptime_variables[index],
-            'laser_power': self.view.laserpower_variables[index],
-            'interval_time': self.view.interval_variables[index],
-            'defocus': self.view.defocus_variables[index]
+            "is_selected": self.view.channel_variables[index],
+            "laser": self.view.laser_variables[index],
+            "filter": self.view.filterwheel_variables[index],
+            "camera_exposure_time": self.view.exptime_variables[index],
+            "laser_power": self.view.laserpower_variables[index],
+            "interval_time": self.view.interval_variables[index],
+            "defocus": self.view.defocus_variables[index],
         }
         return result
 
     def get_index(self, dropdown_name, value):
         if not value:
             return -1
-        if dropdown_name == 'laser':
-            return self.view.laser_pulldowns[0]['values'].index(value)
-        elif dropdown_name == 'filter':
-            return self.view.filterwheel_pulldowns[0]['values'].index(value)
+        if dropdown_name == "laser":
+            return self.view.laser_pulldowns[0]["values"].index(value)
+        elif dropdown_name == "filter":
+            return self.view.filterwheel_pulldowns[0]["values"].index(value)
         return -1

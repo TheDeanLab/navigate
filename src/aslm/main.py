@@ -45,8 +45,8 @@ from aslm.config import get_configuration_paths
 from aslm.view.splash_screen import SplashScreen
 
 # Proxy Configuration
-os.environ['http_proxy'] = ''
-os.environ['https_proxy'] = ''
+os.environ["http_proxy"] = ""
+os.environ["https_proxy"] = ""
 
 
 def main():
@@ -79,102 +79,137 @@ def main():
     root.withdraw()
 
     # show splash screen
-    splash_screen = SplashScreen(root, './icon/splash_screen_image.png')
+    splash_screen = SplashScreen(root, "./icon/splash_screen_image.png")
 
     # Specify the Default Configuration paths
-    configuration_path, experiment_path, etl_constants_path, rest_api_path = get_configuration_paths()
+    (
+        configuration_path,
+        experiment_path,
+        etl_constants_path,
+        rest_api_path,
+    ) = get_configuration_paths()
 
     # Parse command line arguments
-    parser = argparse.ArgumentParser(description='Autonomous Software for Light Microscopy Command Line Arguments')
-    input_args = parser.add_argument_group('Input Arguments')
+    parser = argparse.ArgumentParser(
+        description="Autonomous Software for Light Microscopy Command Line Arguments"
+    )
+    input_args = parser.add_argument_group("Input Arguments")
 
-    input_args.add_argument('-sh', '--synthetic_hardware',
-                            required=False,
-                            default=False,
-                            action='store_true',
-                            help='Synthetic Hardware - '
-                                 'Allows launching of the software without the physical devices attached.')
+    input_args.add_argument(
+        "-sh",
+        "--synthetic_hardware",
+        required=False,
+        default=False,
+        action="store_true",
+        help="Synthetic Hardware - "
+        "Allows launching of the software without the physical devices attached.",
+    )
 
-    input_args.add_argument('-d', '--debug',
-                            required=False,
-                            default=False,
-                            action='store_true',
-                            help='Enables debugging tool menu to be accessible.')
+    input_args.add_argument(
+        "-d",
+        "--debug",
+        required=False,
+        default=False,
+        action="store_true",
+        help="Enables debugging tool menu to be accessible.",
+    )
 
-    input_args.add_argument('--CPU',
-                            required=False,
-                            default=False,
-                            action='store_true',
-                            help='Forces software to use CPU for analytical operations.  '
-                                 'Overrides the automatic selection of a CUDA GPU if it is present by TensorFlow.')
+    input_args.add_argument(
+        "--CPU",
+        required=False,
+        default=False,
+        action="store_true",
+        help="Forces software to use CPU for analytical operations.  "
+        "Overrides the automatic selection of a CUDA GPU if it is present by TensorFlow.",
+    )
 
     # Non-Default Configuration and Experiment Input Arguments
-    input_args.add_argument('--config_file',
-                            type=Path,
-                            required=False,
-                            default=None,
-                            help='Non-default path to the configuration.yml file.  \n'
-                                 'This file sets the default global physical'
-                                 'state of the microscope.  For example, number of lasers, number of cameras, '
-                                 'digital I/O, analog I/O, etc.')
+    input_args.add_argument(
+        "--config_file",
+        type=Path,
+        required=False,
+        default=None,
+        help="Non-default path to the configuration.yml file.  \n"
+        "This file sets the default global physical"
+        "state of the microscope.  For example, number of lasers, number of cameras, "
+        "digital I/O, analog I/O, etc.",
+    )
 
-    input_args.add_argument('--experiment_file',
-                            type=Path,
-                            required=False,
-                            default=None,
-                            help='Non-default path to the experiment.yml file. \n'
-                                 'This file sets the default user-specified '
-                                 'physical state of the microscope. For example, how many channels, '
-                                 'and what are their exposure time, filter position, laser, etc. ')
+    input_args.add_argument(
+        "--experiment_file",
+        type=Path,
+        required=False,
+        default=None,
+        help="Non-default path to the experiment.yml file. \n"
+        "This file sets the default user-specified "
+        "physical state of the microscope. For example, how many channels, "
+        "and what are their exposure time, filter position, laser, etc. ",
+    )
 
-    input_args.add_argument('--etl_const_file',
-                            type=Path,
-                            required=False,
-                            default=None,
-                            help='Non-default path to the etl_constants.yml file.  \n'
-                                 'This file specifies the wavelength- and zoom-specific amplitude and offset '
-                                 'of the ETL waveform generation.')
+    input_args.add_argument(
+        "--etl_const_file",
+        type=Path,
+        required=False,
+        default=None,
+        help="Non-default path to the etl_constants.yml file.  \n"
+        "This file specifies the wavelength- and zoom-specific amplitude and offset "
+        "of the ETL waveform generation.",
+    )
 
-    input_args.add_argument('--rest_api_file',
-                            type=Path,
-                            required=False,
-                            default=None,
-                            help='Non-default path to the rest_api_config.yml config file \n'
-                                 'This file specifies urls of restful api services.')
+    input_args.add_argument(
+        "--rest_api_file",
+        type=Path,
+        required=False,
+        default=None,
+        help="Non-default path to the rest_api_config.yml config file \n"
+        "This file specifies urls of restful api services.",
+    )
 
-    input_args.add_argument('--logging_config',
-                            type=Path,
-                            required=False,
-                            default=None,
-                            help='Non-default path to the logging.yml config file \n'
-                                 'This file specifies how the logging will be performed.')
+    input_args.add_argument(
+        "--logging_config",
+        type=Path,
+        required=False,
+        default=None,
+        help="Non-default path to the logging.yml config file \n"
+        "This file specifies how the logging will be performed.",
+    )
 
     #  Parse Arguments
     args = parser.parse_args()
 
     # If non-default configuration, experiment, or ETL constant file is provided as an input argument.
     if args.config_file:
-        assert args.config_file.exists(), "Configuration file Path {} not valid".format(args.config_file)
+        assert args.config_file.exists(), "Configuration file Path {} not valid".format(
+            args.config_file
+        )
         configuration_path = args.config_file
 
     if args.experiment_file:
-        assert args.experiment_file.exists(), "experiment_file file Path {} not valid".format(args.experiment_file)
+        assert (
+            args.experiment_file.exists()
+        ), "experiment_file file Path {} not valid".format(args.experiment_file)
         experiment_path = args.experiment_file
 
     if args.etl_const_file:
-        assert args.etl_const_file.exists(), "etl_const_file Path {} not valid".format(args.etl_const_file)
+        assert args.etl_const_file.exists(), "etl_const_file Path {} not valid".format(
+            args.etl_const_file
+        )
         etl_constants_path = args.etl_const_file
 
     if args.rest_api_file:
-        assert args.rest_api_file.exists(), "rest_api_file Path {} not valid".format(args.rest_api_file)
+        assert args.rest_api_file.exists(), "rest_api_file Path {} not valid".format(
+            args.rest_api_file
+        )
         rest_api_path = args.rest_api_file
 
     # Creating Loggers etc., they exist globally so no need to pass
     if args.logging_config:
-        assert args.logging_config.exists(), "Logging Config Path {} not valid".format(args.logging_config)
+        assert args.logging_config.exists(), "Logging Config Path {} not valid".format(
+            args.logging_config
+        )
         logging_path = args.logging_config
 
-    log_setup('logging.yml')
+    log_setup("logging.yml")
 
     # Evaluate GPU Status for Analysis Routines
     use_gpu = False
@@ -182,27 +217,32 @@ def main():
         # If user overrides GPU search, keep use_gpu flag as False.
         pass
     else:
-        if platform.system() != 'Darwin':
+        if platform.system() != "Darwin":
             import tensorflow as tf
-            number_GPUs = len(tf.config.list_physical_devices('GPU'))
+
+            number_GPUs = len(tf.config.list_physical_devices("GPU"))
             if number_GPUs > 0:
                 use_gpu = True
 
-    Controller(root,
-               splash_screen,
-               configuration_path,
-               experiment_path,
-               etl_constants_path,
-               rest_api_path,
-               use_gpu,
-               args)
+    Controller(
+        root,
+        splash_screen,
+        configuration_path,
+        experiment_path,
+        etl_constants_path,
+        rest_api_path,
+        use_gpu,
+        args,
+    )
     root.mainloop()
 
 
-if __name__ == '__main__':
-    if platform.system() == 'Darwin':
-        print("Apple OS Not Fully Supported. ",
-              "Tensorflow and CuPy based analysis is not possible. ",
-              "Please try Linux or Windows for this functionality")
+if __name__ == "__main__":
+    if platform.system() == "Darwin":
+        print(
+            "Apple OS Not Fully Supported. ",
+            "Tensorflow and CuPy based analysis is not possible. ",
+            "Please try Linux or Windows for this functionality",
+        )
 
     main()

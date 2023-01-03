@@ -37,16 +37,17 @@ import time
 
 # Local Imports
 from aslm.model.devices.stages.stage_base import StageBase
-from aslm.model.devices.APIs.asi.asi_tiger_controller import TigerController, TigerException
+from aslm.model.devices.APIs.asi.asi_tiger_controller import (
+    TigerController,
+    TigerException,
+)
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-def build_ASI_Stage_connection(com_port,
-                               baud_rate,
-                               timeout=1000):
+def build_ASI_Stage_connection(com_port, baud_rate, timeout=1000):
     """Connect to the ASI Stage
 
     Parameters
@@ -67,7 +68,7 @@ def build_ASI_Stage_connection(com_port,
     # wait until ASI device is ready
     block_flag = True
     wait_start = time.time()
-    timeout_s = timeout/1000
+    timeout_s = timeout / 1000
     while block_flag:
         asi_stage = TigerController(com_port, baud_rate)
         asi_stage.connect_to_serial()
@@ -92,7 +93,7 @@ class ASIStage(StageBase):
     Stage API provides all distances in a 10th of a micron unit.  To convert to microns,
     requires division by factor of 10 to get to micron units...
 
-    NOTE: Do not ever change the F axis. This will alter the relative position of each 
+    NOTE: Do not ever change the F axis. This will alter the relative position of each
     FTP stilt, adding strain to the system. Only move the Z axis, which will change both
     stilt positions simultaneously.
 
@@ -150,22 +151,12 @@ class ASIStage(StageBase):
             Emergency halt of stage operation.
 
     """
-    def __init__(self,
-                 microscope_name,
-                 device_connection,
-                 configuration,
-                 device_id=0):
-        super().__init__(microscope_name,
-                         device_connection,
-                         configuration,
-                         device_id)
+
+    def __init__(self, microscope_name, device_connection, configuration, device_id=0):
+        super().__init__(microscope_name, device_connection, configuration, device_id)
 
         # Mapping from self.axes to corresponding ASI axis labelling
-        axes_mapping = {
-            'x': 'X',
-            'y': 'Y',
-            'z': 'Z'
-        }
+        axes_mapping = {"x": "X", "y": "Y", "z": "Z"}
         self.asi_axes = list(map(lambda a: axes_mapping[a], self.axes))
         self.tiger_controller = device_connection
 
@@ -175,7 +166,7 @@ class ASIStage(StageBase):
             self.tiger_controller.disconnect_from_serial()
             logger.debug("ASI stage connection closed")
         except BaseException as e:
-            print('Error while disconnecting the ASI stage')
+            print("Error while disconnecting the ASI stage")
             logger.exception(e)
             raise
 
@@ -189,15 +180,12 @@ class ASIStage(StageBase):
                 # Set class attributes and convert to microns
                 setattr(self, f"{ax}_pos", pos)
         except TigerException as e:
-            print('Failed to report ASI Stage Position')
+            print("Failed to report ASI Stage Position")
             logger.exception(e)
         # self.update_position_dictionaries()
         return self.position_dict
 
-    def move_axis_absolute(self,
-                           axis,
-                           axis_num,
-                           move_dictionary):
+    def move_axis_absolute(self, axis, axis_num, move_dictionary):
         """Move stage along a single axis.
 
         Move absolute command for ASI is MOVE [Axis]=[units 1/10 microns]
@@ -220,19 +208,23 @@ class ASIStage(StageBase):
         axis_abs = self.get_abs_position(axis, move_dictionary)
         if axis_abs == -1e50:
             return False
-        
+
         # Move stage
         try:
-            axis_abs_um = axis_abs * 10 # This is to account for the asi 1/10 of a micron units
+            axis_abs_um = (
+                axis_abs * 10
+            )  # This is to account for the asi 1/10 of a micron units
             self.tiger_controller.move_axis(axis_num, axis_abs_um)
             return True
         except TigerException as e:
-            print(f"ASI stage move axis absolute failed or is trying to move out of range: {e}")
+            print(
+                f"ASI stage move axis absolute failed or is trying to move out of range: {e}"
+            )
             logger.exception(e)
             return False
 
     def move_absolute(self, move_dictionary, wait_until_done=False):
-        """ Move Absolute Method.
+        """Move Absolute Method.
         XYZ Values should remain in microns for the ASI API
         Theta Values are not accepted.
 

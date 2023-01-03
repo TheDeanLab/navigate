@@ -34,6 +34,7 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 import logging
 from pathlib import Path
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -48,7 +49,7 @@ class GUIController:
         """
         # this function initializes GUI based on configuration setting
         # parameter: configuration_controller
-        # set range value for entry or spinbox widgets; 
+        # set range value for entry or spinbox widgets;
         # add values to combobox
         # get other necessary information for configuration.yml
         """
@@ -68,11 +69,10 @@ class GUIController:
         # update the dictionary directly
         """
         pass
-        
+
     def execute(self, command, *args):
-        self.show_verbose_info('command passed from child:', command)
+        self.show_verbose_info("command passed from child:", command)
         pass
 
     def show_verbose_info(self, *info):
         logger.info(f"{self.__class__.__name__} : {info}")
-        

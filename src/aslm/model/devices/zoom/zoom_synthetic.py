@@ -65,5 +65,3 @@ class SyntheticZoom(ZoomBase):
     def __del__(self):
         logger.debug("SyntheticZoom Servo instance Deleted")
         pass
-
-

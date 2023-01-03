@@ -46,38 +46,42 @@ logger = logging.getLogger(p)
 
 
 class AutofocusPopupController(GUIController):
-
     def __init__(self, view, parent_controller):
         super().__init__(view, parent_controller)
 
         self.widgets = self.view.get_widgets()
-        
+
         self.autofocus_fig = self.view.fig
         self.autofocus_coarse = self.view.coarse
         self.autofocus_fine = self.view.fine
 
-        self.populate_experiment_values()    
+        self.populate_experiment_values()
 
         # add saving function to the function closing the window
-        exit_func = combine_funcs(self.update_experiment_values, self.view.popup.dismiss,
-                                    lambda: delattr(self.parent_controller, 'af_popup_controller'))
+        exit_func = combine_funcs(
+            self.update_experiment_values,
+            self.view.popup.dismiss,
+            lambda: delattr(self.parent_controller, "af_popup_controller"),
+        )
         self.view.popup.protocol("WM_DELETE_WINDOW", exit_func)
 
         self.view.autofocus_btn.configure(command=self.start_autofocus)
 
     def populate_experiment_values(self):
-        self.setting_dict = self.parent_controller.configuration['experiment']['AutoFocusParameters']
+        self.setting_dict = self.parent_controller.configuration["experiment"][
+            "AutoFocusParameters"
+        ]
         # show the value
         for k in self.widgets:
             self.widgets[k].set(self.setting_dict[k])
-        self.view.stage_vars[0].set(self.setting_dict['coarse_selected'])
-        self.view.stage_vars[1].set(self.setting_dict['fine_selected'])
+        self.view.stage_vars[0].set(self.setting_dict["coarse_selected"])
+        self.view.stage_vars[1].set(self.setting_dict["fine_selected"])
 
     def update_experiment_values(self):
         for k in self.widgets:
             self.setting_dict[k] = self.widgets[k].get()
-        self.setting_dict['coarse_selected'] = self.view.stage_vars[0].get()
-        self.setting_dict['fine_selected'] = self.view.stage_vars[1].get()
+        self.setting_dict["coarse_selected"] = self.view.stage_vars[0].get()
+        self.setting_dict["fine_selected"] = self.view.stage_vars[1].get()
 
     def showup(self):
         """
@@ -90,31 +94,27 @@ class AutofocusPopupController(GUIController):
         self.update_experiment_values()
         # self.view.popup.dismiss()
         # delattr(self.parent_controller,'af_popup_controller')
-        self.parent_controller.execute('autofocus')
-        
+        self.parent_controller.execute("autofocus")
+
     def display_plot(self, data):
         """
         ### Displays a plot of [focus, entropy] with data from autofocus routine
         """
         data = np.asarray(data)
 
-        coarse_range = self.setting_dict['coarse_range']
-        coarse_step = self.setting_dict['coarse_step_size']
-
+        coarse_range = self.setting_dict["coarse_range"]
+        coarse_step = self.setting_dict["coarse_step_size"]
 
         # Calculate the coarse portion of the data
         coarse_steps = int(coarse_range) // int(coarse_step) + 1
 
-        
         # Plotting coarse data
         self.autofocus_coarse.clear()
-        self.autofocus_coarse.plot(data[:coarse_steps, 0], data[:coarse_steps, 1], 'bo')
+        self.autofocus_coarse.plot(data[:coarse_steps, 0], data[:coarse_steps, 1], "bo")
 
         # Plotting fine data
         self.autofocus_fine.clear()
-        self.autofocus_fine.plot(data[coarse_steps:, 0], data[coarse_steps:, 1], 'g*')
-        
+        self.autofocus_fine.plot(data[coarse_steps:, 0], data[coarse_steps:, 1], "g*")
+
         # To redraw the plot
         self.autofocus_fig.canvas.draw_idle()
-        
-        

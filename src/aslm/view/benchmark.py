@@ -1,4 +1,3 @@
-
 """
 Benchmark different GUI image draw times in tkinter
 Environment setup instructions:
@@ -156,39 +155,108 @@ if __name__ == "__main__":
     import matplotlib.pyplot as plt
     from tifffile import imread
 
-    arr = imread('/Users/S155475/Desktop/test.tif')
+    arr = imread("/Users/S155475/Desktop/test.tif")
     arr_max = np.max(arr)
     arr_min = np.min(arr)
-    scaling_factor = 2**8-1
-    arr = ((arr - arr_min) / (arr_max - arr_min))
+    scaling_factor = 2**8 - 1
+    arr = (arr - arr_min) / (arr_max - arr_min)
 
     # https://matplotlib.org/3.5.0/tutorials/colors/colormaps.html
-    uniform_sequential=(['viridis', 'plasma', 'inferno', 'magma', 'cividis'])
+    uniform_sequential = ["viridis", "plasma", "inferno", "magma", "cividis"]
 
-    sequential=(['Greys', 'Purples', 'Blues', 'Greens', 'Oranges', 'Reds',
-                      'YlOrBr', 'YlOrRd', 'OrRd', 'PuRd', 'RdPu', 'BuPu',
-                      'GnBu', 'PuBu', 'YlGnBu', 'PuBuGn', 'BuGn', 'YlGn'])
+    sequential = [
+        "Greys",
+        "Purples",
+        "Blues",
+        "Greens",
+        "Oranges",
+        "Reds",
+        "YlOrBr",
+        "YlOrRd",
+        "OrRd",
+        "PuRd",
+        "RdPu",
+        "BuPu",
+        "GnBu",
+        "PuBu",
+        "YlGnBu",
+        "PuBuGn",
+        "BuGn",
+        "YlGn",
+    ]
 
-    sequential_2=(['binary', 'gist_yarg', 'gist_gray', 'gray', 'bone',
-                          'pink', 'spring', 'summer', 'autumn', 'winter', 'cool',
-                          'Wistia', 'hot', 'afmhot', 'gist_heat', 'copper'])
+    sequential_2 = [
+        "binary",
+        "gist_yarg",
+        "gist_gray",
+        "gray",
+        "bone",
+        "pink",
+        "spring",
+        "summer",
+        "autumn",
+        "winter",
+        "cool",
+        "Wistia",
+        "hot",
+        "afmhot",
+        "gist_heat",
+        "copper",
+    ]
 
-    diverging=(['PiYG', 'PRGn', 'BrBG', 'PuOr', 'RdGy', 'RdBu', 'RdYlBu',
-                          'RdYlGn', 'Spectral', 'coolwarm', 'bwr', 'seismic'])
+    diverging = [
+        "PiYG",
+        "PRGn",
+        "BrBG",
+        "PuOr",
+        "RdGy",
+        "RdBu",
+        "RdYlBu",
+        "RdYlGn",
+        "Spectral",
+        "coolwarm",
+        "bwr",
+        "seismic",
+    ]
 
-    cyclic=(['twilight', 'twilight_shifted', 'hsv'])
+    cyclic = ["twilight", "twilight_shifted", "hsv"]
 
-    qualitative=(['Pastel1', 'Pastel2', 'Paired', 'Accent', 'Dark2',
-                          'Set1', 'Set2', 'Set3', 'tab10', 'tab20', 'tab20b',
-                          'tab20c'])
+    qualitative = [
+        "Pastel1",
+        "Pastel2",
+        "Paired",
+        "Accent",
+        "Dark2",
+        "Set1",
+        "Set2",
+        "Set3",
+        "tab10",
+        "tab20",
+        "tab20b",
+        "tab20c",
+    ]
 
-    miscellaneous=(['flag', 'prism', 'ocean', 'gist_earth', 'terrain',
-                          'gist_stern', 'gnuplot', 'gnuplot2', 'CMRmap',
-                          'cubehelix', 'brg', 'gist_rainbow', 'rainbow', 'jet',
-                          'turbo', 'nipy_spectral', 'gist_ncar'])
+    miscellaneous = [
+        "flag",
+        "prism",
+        "ocean",
+        "gist_earth",
+        "terrain",
+        "gist_stern",
+        "gnuplot",
+        "gnuplot2",
+        "CMRmap",
+        "cubehelix",
+        "brg",
+        "gist_rainbow",
+        "rainbow",
+        "jet",
+        "turbo",
+        "nipy_spectral",
+        "gist_ncar",
+    ]
 
-
-    cm = plt.get_cmap('prism')
+    cm = plt.get_cmap("prism")
 
     arr_lut = cm(arr)
     print("Image Shape:", np.shape(arr_lut))

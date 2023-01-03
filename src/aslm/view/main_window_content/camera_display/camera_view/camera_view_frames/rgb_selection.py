@@ -49,58 +49,55 @@ logger = logging.getLogger(p)
 class rgb_selection(ttk.Labelframe):
     def __init__(self, cam_view, *args, **kwargs):
         # Init Frame
-        text_label = 'RGB Selection'
-        ttk.Labelframe.__init__(
-            self,
-            cam_view,
-            text=text_label,
-            *args,
-            **kwargs)
-        
+        text_label = "RGB Selection"
+        ttk.Labelframe.__init__(self, cam_view, text=text_label, *args, **kwargs)
+
         # Formatting
-        Grid.columnconfigure(self, 'all', weight=1)
-        Grid.rowconfigure(self, 'all', weight=1)
+        Grid.columnconfigure(self, "all", weight=1)
+        Grid.rowconfigure(self, "all", weight=1)
 
         # Dictionary for widgets
         self.inputs = {}
 
         # Labels and names
-        self.color_labels = ['R', 'G', 'B']
-        self.color_values = ['R', 'G', 'B']
+        self.color_labels = ["R", "G", "B"]
+        self.color_values = ["R", "G", "B"]
         for i in range(len(self.color_labels)):
-            self.inputs[self.color_labels[i]] = LabelInput(parent=self,
-                                                           label=self.color_labels[i],
-                                                           input_class=ttk.Label)
-            self.inputs[self.color_labels[i]].grid(row=i+1, column=0, sticky=NSEW)
+            self.inputs[self.color_labels[i]] = LabelInput(
+                parent=self, label=self.color_labels[i], input_class=ttk.Label
+            )
+            self.inputs[self.color_labels[i]].grid(row=i + 1, column=0, sticky=NSEW)
 
-        #Channels
+        # Channels
         self.channel_labels = ["CH1", "CH2", "CH3", "CH4", "CH5"]
         self.labels = []
         self.frame_columns = []
 
-        #CH1
+        # CH1
         self.ch1_btns = []
 
-        #CH2
+        # CH2
         self.ch2_btns = []
 
-        #CH3
+        # CH3
         self.ch3_btns = []
 
-        #CH4
+        # CH4
         self.ch4_btns = []
 
-        #CH5
+        # CH5
         self.ch5_btns = []
 
         #  Creates a column frame for each widget
         for i in range(len(self.channel_labels)):
             self.frame_columns.append(ttk.Frame(self))
             self.frame_columns[i].columnconfigure(0, weight=1, uniform=1)
-            self.frame_columns[i].rowconfigure('all', weight=1, uniform=1)
-            self.frame_columns[i].grid(row=1, column=i+1, sticky=NSEW, padx=1, pady=(4, 6), rowspan=3)
+            self.frame_columns[i].rowconfigure("all", weight=1, uniform=1)
+            self.frame_columns[i].grid(
+                row=1, column=i + 1, sticky=NSEW, padx=1, pady=(4, 6), rowspan=3
+            )
             self.labels.append(ttk.Label(self, text=self.channel_labels[i]))
-            self.labels[i].grid(row=0, column=i+1, sticky=N, pady=1, padx=1)
+            self.labels[i].grid(row=0, column=i + 1, sticky=N, pady=1, padx=1)
         self.frame_columns[3].grid(padx=(1, 4))
         self.frame_columns[0].grid(padx=(4, 1))
 
@@ -111,38 +108,55 @@ class rgb_selection(ttk.Labelframe):
         self.ch4 = StringVar()
         self.ch5 = StringVar()
         for num in range(0, 3):
-            self.ch1_btns.append(LabelInput(parent=self.frame_columns[0],
-                                            input_class=ttk.Radiobutton,
-                                            input_var=self.ch1,
-                                            input_args={'value': self.color_values[num]}))
-            self.ch1_btns[num].grid(row=num+1, column=0, sticky=NSEW, padx=1, pady=1)
+            self.ch1_btns.append(
+                LabelInput(
+                    parent=self.frame_columns[0],
+                    input_class=ttk.Radiobutton,
+                    input_var=self.ch1,
+                    input_args={"value": self.color_values[num]},
+                )
+            )
+            self.ch1_btns[num].grid(row=num + 1, column=0, sticky=NSEW, padx=1, pady=1)
 
-            self.ch2_btns.append(LabelInput(parent=self.frame_columns[1],
-                                            input_class=ttk.Radiobutton,
-                                            input_var=self.ch2,
-                                            input_args={'value': self.color_values[num]}))
-            self.ch2_btns[num].grid(row=num+1, column=0, sticky=NSEW, padx=1, pady=1)
+            self.ch2_btns.append(
+                LabelInput(
+                    parent=self.frame_columns[1],
+                    input_class=ttk.Radiobutton,
+                    input_var=self.ch2,
+                    input_args={"value": self.color_values[num]},
+                )
+            )
+            self.ch2_btns[num].grid(row=num + 1, column=0, sticky=NSEW, padx=1, pady=1)
 
-            self.ch3_btns.append(LabelInput(parent=self.frame_columns[2],
-                                            input_class=ttk.Radiobutton,
-                                            input_var=self.ch3,
-                                            input_args={'value': self.color_values[num]}))
-            self.ch3_btns[num].grid(row=num+1, column=0, sticky=NSEW, padx=1, pady=1)
+            self.ch3_btns.append(
+                LabelInput(
+                    parent=self.frame_columns[2],
+                    input_class=ttk.Radiobutton,
+                    input_var=self.ch3,
+                    input_args={"value": self.color_values[num]},
+                )
+            )
+            self.ch3_btns[num].grid(row=num + 1, column=0, sticky=NSEW, padx=1, pady=1)
 
-            self.ch4_btns.append(LabelInput(parent=self.frame_columns[3],
-                                            input_class=ttk.Radiobutton,
-                                            input_var=self.ch4,
-                                            input_args={'value': self.color_values[num]}))
-            self.ch4_btns[num].grid(row=num+1, column=0, sticky=NSEW, padx=1, pady=1)
+            self.ch4_btns.append(
+                LabelInput(
+                    parent=self.frame_columns[3],
+                    input_class=ttk.Radiobutton,
+                    input_var=self.ch4,
+                    input_args={"value": self.color_values[num]},
+                )
+            )
+            self.ch4_btns[num].grid(row=num + 1, column=0, sticky=NSEW, padx=1, pady=1)
 
-            self.ch5_btns.append(LabelInput(parent=self.frame_columns[4],
-                                            input_class=ttk.Radiobutton,
-                                            input_var=self.ch5,
-                                            input_args={'value': self.color_values[num]}))
-            self.ch5_btns[num].grid(row=num+1, column=0, sticky=NSEW, padx=1, pady=1)
-
-
-
+            self.ch5_btns.append(
+                LabelInput(
+                    parent=self.frame_columns[4],
+                    input_class=ttk.Radiobutton,
+                    input_var=self.ch5,
+                    input_args={"value": self.color_values[num]},
+                )
+            )
+            self.ch5_btns[num].grid(row=num + 1, column=0, sticky=NSEW, padx=1, pady=1)
 
     def get_variables(self):
         """

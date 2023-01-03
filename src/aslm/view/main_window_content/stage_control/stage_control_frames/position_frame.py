@@ -48,31 +48,35 @@ logger = logging.getLogger(p)
 class position_frame(ttk.Labelframe):
     def __init__(position_frame, stage_control_tab, *args, **kwargs):
 
-        #Init Frame
-        ttk.Labelframe.__init__(position_frame, stage_control_tab, text="Stage Positions", *args, **kwargs)
-        
-        # Formatting
-        tk.Grid.columnconfigure(position_frame, 'all', weight=1)
-        tk.Grid.rowconfigure(position_frame, 'all', weight=1)
+        # Init Frame
+        ttk.Labelframe.__init__(
+            position_frame, stage_control_tab, text="Stage Positions", *args, **kwargs
+        )
 
-        #Creating each entry frame for a label and entry
+        # Formatting
+        tk.Grid.columnconfigure(position_frame, "all", weight=1)
+        tk.Grid.rowconfigure(position_frame, "all", weight=1)
+
+        # Creating each entry frame for a label and entry
         position_frame.inputs = {}
-        entry_names = ['x', 'y', 'z', 'theta', 'f']
-        entry_labels = ['X', 'Y', 'Z', "\N{Greek Capital Theta Symbol}", 'F']       
+        entry_names = ["x", "y", "z", "theta", "f"]
+        entry_labels = ["X", "Y", "Z", "\N{Greek Capital Theta Symbol}", "F"]
 
         # entries
         for i in range(len(entry_names)):
-            position_frame.inputs[entry_names[i]] = LabelInput(parent=position_frame,
-                                                            label=entry_labels[i],
-                                                            input_class=ValidatedEntry,
-                                                            input_var=tk.DoubleVar(),
-                                                            input_args={'required': True, 'precision': 0.1, 'width': 6, 'takefocus': False}
-                                                            )
+            position_frame.inputs[entry_names[i]] = LabelInput(
+                parent=position_frame,
+                label=entry_labels[i],
+                input_class=ValidatedEntry,
+                input_var=tk.DoubleVar(),
+                input_args={
+                    "required": True,
+                    "precision": 0.1,
+                    "width": 6,
+                    "takefocus": False,
+                },
+            )
             position_frame.inputs[entry_names[i]].grid(row=i, column=0)
-
-
-
-       
 
         """
         Grid for frames
@@ -89,6 +93,7 @@ class position_frame(ttk.Labelframe):
         theta is 4
         focus is 5
         """
+
     def get_widgets(position_frame):
         return position_frame.inputs
 

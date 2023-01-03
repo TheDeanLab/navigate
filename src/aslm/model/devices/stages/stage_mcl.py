@@ -45,7 +45,7 @@ class MCLStage(StageBase):
                 pass
 
         # Update internal dictionaries
-        self.update_position_dictionaries()
+        # self.update_position_dictionaries()
 
         return self.position_dict
 

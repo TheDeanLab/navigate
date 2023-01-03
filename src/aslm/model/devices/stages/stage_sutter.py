@@ -269,7 +269,7 @@ class SutterStage(StageBase):
             self.z_pos = self.convert_microsteps_to_microns(int.from_bytes(position_information[8:11], byteorder='little', signed=True))
         
             # Update internal dictionaries
-            self.update_position_dictionaries()
+            # self.update_position_dictionaries()
             return self.position_dict
 
         except serial.SerialException as error:

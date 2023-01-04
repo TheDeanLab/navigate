@@ -157,6 +157,13 @@ class ASIStage(StageBase):
 
         # Mapping from self.axes to corresponding ASI axis labelling
         axes_mapping = {"x": "X", "y": "Y", "z": "Z"}
+
+        # Focus and Theta axes are not supported for ASI Stage
+        if 'theta' in self.axes:
+            self.axes.remove('theta')
+        if 'f' in self.axes:
+            self.axes.remove('f')
+
         self.asi_axes = list(map(lambda a: axes_mapping[a], self.axes))
         self.tiger_controller = device_connection
 
@@ -248,7 +255,8 @@ class ASIStage(StageBase):
                 self.tiger_controller.wait_for_device()
                 # Do we want to wait for device on hardware level? This is an ASI command call
 
-        # TODO This seems to be handled by each individual move_axis_absolute bc of ASI's wait_for_device. Each axis will move and the stage waits until the axis is done before moving on
+        #  TODO This seems to be handled by each individual move_axis_absolute bc of ASI's wait_for_device.
+        #  Each axis will move and the stage waits until the axis is done before moving on
         # if success and wait_until_done is True:
         #     try:
         #         self.busy()

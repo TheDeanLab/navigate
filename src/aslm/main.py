@@ -43,7 +43,6 @@ from aslm.log_files.log_functions import log_setup
 from aslm.view.splash_screen import SplashScreen
 from aslm.tools.main_functions import (
     identify_gpu,
-    add_parser_input_arguments,
     evaluate_parser_input_arguments,
 )
 

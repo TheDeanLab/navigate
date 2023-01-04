@@ -30,9 +30,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 # Standard Imports
-from curses import baudrate
 import logging
-import time
 import sys
 
 # Third Party Imports
@@ -108,10 +106,10 @@ class SutterStage(StageBase):
         axes_mapping = {"x": "X", "y": "Y", "z": "Z"}
 
         # Focus and Theta axes are not supported for Sutter Stage
-        if 'theta' in self.axes:
-            self.axes.remove('theta')
-        if 'f' in self.axes:
-            self.axes.remove('f')
+        if "theta" in self.axes:
+            self.axes.remove("theta")
+        if "f" in self.axes:
+            self.axes.remove("f")
 
         self.sutter_axes = list(map(lambda a: axes_mapping[a], self.axes))
         self.byte_order = sys.byteorder

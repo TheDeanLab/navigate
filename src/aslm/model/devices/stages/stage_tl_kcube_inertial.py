@@ -69,7 +69,9 @@ class TLKIMStage(StageBase):
             self.kim_controller = device_connection
 
         self.serial_number = str(
-            configuration["configuration"]["microscopes"][microscope_name]["stage"]["hardware"][device_id]["serial_number"]
+            configuration["configuration"]["microscopes"][microscope_name]["stage"][
+                "hardware"
+            ][device_id]["serial_number"]
         )
 
     def __del__(self):
@@ -87,7 +89,9 @@ class TLKIMStage(StageBase):
         for i, ax in zip(self.kim_axes, self.axes):
             try:
                 # need to request before we get the current position
-                err = self.kim_controller.KIM_RequestCurrentPosition(self.serial_number, i)
+                err = self.kim_controller.KIM_RequestCurrentPosition(
+                    self.serial_number, i
+                )
                 pos = self.kim_controller.KIM_GetCurrentPosition(self.serial_number, i)
                 setattr(self, f"{ax}_pos", pos)
             except (
@@ -128,7 +132,9 @@ class TLKIMStage(StageBase):
         if axis_abs == -1e50:
             return False
 
-        self.kim_controller.KIM_MoveAbsolute(self.serial_number, axis_num, int(axis_abs))
+        self.kim_controller.KIM_MoveAbsolute(
+            self.serial_number, axis_num, int(axis_abs)
+        )
         return True
 
     def move_absolute(self, move_dictionary, wait_until_done=False):

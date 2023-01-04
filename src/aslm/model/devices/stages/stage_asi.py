@@ -159,10 +159,10 @@ class ASIStage(StageBase):
         axes_mapping = {"x": "X", "y": "Y", "z": "Z"}
 
         # Focus and Theta axes are not supported for ASI Stage
-        if 'theta' in self.axes:
-            self.axes.remove('theta')
-        if 'f' in self.axes:
-            self.axes.remove('f')
+        if "theta" in self.axes:
+            self.axes.remove("theta")
+        if "f" in self.axes:
+            self.axes.remove("f")
 
         self.asi_axes = list(map(lambda a: axes_mapping[a], self.axes))
         self.tiger_controller = device_connection

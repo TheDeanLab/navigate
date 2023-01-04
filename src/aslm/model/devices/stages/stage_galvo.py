@@ -72,7 +72,9 @@ class GalvoNIStage(StageBase):
         super().__init__(microscope_name, device_connection, configuration, device_id)
 
         # 1 V/ 100 um
-        device_config = configuration["configuration"]["microscopes"][microscope_name]["stage"]["hardware"]
+        device_config = configuration["configuration"]["microscopes"][microscope_name][
+            "stage"
+        ]["hardware"]
 
         # eval(self.volts_per_micron, {"x": 100})
         if type(device_config) == ListProxy:

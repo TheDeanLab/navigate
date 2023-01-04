@@ -41,7 +41,11 @@ import os
 from aslm.controller.controller import Controller
 from aslm.log_files.log_functions import log_setup
 from aslm.view.splash_screen import SplashScreen
-from aslm.tools.main_functions import identify_gpu, add_parser_input_arguments, evaluate_parser_input_arguments
+from aslm.tools.main_functions import (
+    identify_gpu,
+    add_parser_input_arguments,
+    evaluate_parser_input_arguments,
+)
 
 # Proxy Configuration
 os.environ["http_proxy"] = ""
@@ -102,7 +106,6 @@ def main():
         args,
     )
     root.mainloop()
-
 
 
 if __name__ == "__main__":

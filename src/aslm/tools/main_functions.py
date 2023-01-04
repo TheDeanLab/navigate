@@ -38,7 +38,7 @@ from aslm.config import get_configuration_paths
 
 
 def evaluate_parser_input_arguments(parser):
-    """ If non-default configuration, experiment, or ETL constant file is provided as an input argument.
+    """If non-default configuration, experiment, or ETL constant file is provided as an input argument.
 
     Accepts a ArgumentParser object
     Retrieves the default configuration/experiment/etc paths.
@@ -108,7 +108,14 @@ def evaluate_parser_input_arguments(parser):
         )
         logging_path = args.logging_config
 
-    return configuration_path, experiment_path, etl_constants_path, rest_api_path, logging_path
+    return (
+        configuration_path,
+        experiment_path,
+        etl_constants_path,
+        rest_api_path,
+        logging_path,
+    )
+
 
 def identify_gpu(args):
     """Evaluate GPU Status for CUDA Analysis Routines
@@ -130,6 +137,7 @@ def identify_gpu(args):
     else:
         if platform.system() != "Darwin":
             import tensorflow as tf
+
             number_gpus = len(tf.config.list_physical_devices("GPU"))
             if number_gpus > 0:
                 use_gpu = True
@@ -137,7 +145,7 @@ def identify_gpu(args):
 
 
 def add_parser_input_arguments(parser):
-    """ Add Parser Input Arguments to ArgumentParser Object.
+    """Add Parser Input Arguments to ArgumentParser Object.
 
     Parameters
     ----------

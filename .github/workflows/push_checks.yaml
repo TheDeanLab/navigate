@@ -23,7 +23,11 @@ jobs:
           pip install pytest
           pip install pytest-cov
           pip install pytest-xvfb
+          pip install black
           pip install -e .
+      - name: autoformat code with black
+        run: |
+          python3 -m black ./src
       - name: Test with pytest
         run: |
           python3 -m pytest -m "not hardware" --cov=./ --cov-report=xml

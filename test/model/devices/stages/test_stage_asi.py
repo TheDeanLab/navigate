@@ -49,7 +49,7 @@ class TestStageASI(unittest.TestCase):
         stage = ASIStage(microscope_name,
                          None,
                          dummy_model.configuration)
-
+        # Attributes
         assert hasattr(stage, 'x_pos')
         assert hasattr(stage, 'y_pos')
         assert hasattr(stage, 'z_pos')
@@ -65,8 +65,20 @@ class TestStageASI(unittest.TestCase):
         assert hasattr(stage, 'z_min')
         assert hasattr(stage, 'f_min')
         assert hasattr(stage, 'theta_min')
+
+        # Methods
         assert hasattr(stage, 'create_position_dict') and \
                callable(getattr(stage, 'create_position_dict'))
+        assert hasattr(stage, 'report_position') and \
+               callable(getattr(stage, 'report_position'))
+        assert hasattr(stage, 'move_axis_absolute') and \
+               callable(getattr(stage, 'move_axis_absolute'))
+        assert hasattr(stage, 'move_absolute') and \
+               callable(getattr(stage, 'move_absolute'))
+        assert hasattr(stage, 'stop') and \
+               callable(getattr(stage, 'stop'))
+        assert hasattr(stage, 'get_abs_position') and \
+               callable(getattr(stage, 'get_abs_position'))
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,62 +1,75 @@
 Software Installation
-============
-First we need to setup our python enviornment. Head over to the `miniconda website <https://docs.conda.io/en/latest/miniconda.html#latest-miniconda-installer-links>`_
+*********************
+
+Download Git
+-------------------------------
+If you do not have `Git already installed <https://git-scm.com/downloads>`_, you will need to do so before downloading the repo. 
+We also recommend installing `GitHub Desktop <https://desktop.github.com/>`_ for a more user-friendly experience.
+
+
+Setup your Python Environement.
+-------------------------------
+Head over to the `miniconda website <https://docs.conda.io/en/latest/miniconda.html#latest-miniconda-installer-links>`_
 and install the appropriate version based on your operating system.
 
 .. tip::
 
     It is also handy to have the `conda cheatsheet <https://docs.conda.io/projects/conda/en/4.6.0/_downloads/52a95608c49671267e40c689e0bc00ca/conda-cheatsheet.pdf>`_ open when first using miniconda to get accustomed to the commands available.
 
-Once you have installed miniconda its time to use it to create our python enviornment.
-Search your computer for the anaconda prompt window. If you are on a Linux/Mac you can just use the terminal.
-From there you will need to use the below commands:
 
-.. code-block::
+
+* Windows: Search your computer for the anaconda prompt window. Given how frequently you will use this, we recommend pinning it to your taskbar.
+* Linux/Mac: Search your computer for Terminal. 
+
+**Create a python environment called ASLM with Python version 3.9.7**::
     
     (base) MyComputer ~ $ conda create -n ASLM python=3.9.7
 
-This will create our python enviornment with the correct version.
+.. note::
+    If you are inside of a firewall, e.g., on the UTSW campus, you will likely run into a proxy error. 
+    See the Troubleshooting section below for information on how to add the proxy address to your environment variables to circumvent this problem.
 
-.. code-block::
+
+**Activate the ASLM environment**::
     
     (base) MyComputer ~ $ conda activate ASLM
 
-Now we need to activate our new enviornment.
+The active environment is shown in parentheses on the far-left.  Originally, we were in the miniconda base environment.
+After activatin the ASLM environment, it should now show (ASLM).
 
-.. code-block::
-    
+**Update the pip python package manager**::
+   
     (ASLM) MyComputer ~ $ python -m pip install --upgrade pip
 
-We will now update our package manager. Python has a builtin called pip. Also notice that our enviornment is now reflected on the far left of our terminal as (ASLM). This will confirm you are in the correct environment.
 
-.. code-block::
+**Create a directory where the repository will be cloned**
+    We recommend a path/location that is easy to find and access such as the your Desktop or Documents. 
+    Once the folder is created, we will want to change that to our working directory (e.g., cd)
+
+* Windows::
+
+    (ASLM) C:\Users\Dean-Lab cd Desktop
+    (ASLM) C:\Users\Dean-Lab\Desktop mkdir ASLM
+    (ASLM) C:\users\Dean-Lab\Desktop cd ASLM
+
+* Linux/Mac::
     
-    (ASLM) MyComputer ~ $ mkdir ~/MyFolderName
-    (ASLM) MyComputer ~ $ cd ~/MyFolderName
+    (ASLM) MyComputer ~ $ mkdir ~/Desktop/ASLM
+    (ASLM) MyComputer ~ $ cd ~/Desktop/ASLM
 
-It is important to stay organized. Create a folder in a path/location that is easy to find and access. We will be saving the repo(the code!) here. After creating the folder we can change to it.
-
-.. code-block::
+**Clone the GitHub repository**::
     
     (ASLM) MyComputer MyFolderName $ git clone https://github.com/AdvancedImagingUTSW/ASLM.git
 
-After creating the folder and changing to it, we need to download the code. We can use the git command for this task.
+**Install the ASLM repository**
 
-.. note::
+The last step requires you to change into the ASLM directory and the install the repo as a package locally on your machine.::    
 
-    If you do not have `Git already downloaded <https://git-scm.com/downloads>`_. You will need to do that before downloading the repo.
-
-.. code-block::
-    
     (ASLM) MyComputer MyFolderName $ cd ASLM
     (ASLM) MyComputer ASLM $ pip install -e .
 
-The last step requires you to change into the ASLM directory and the install the repo as a package locally on your machine.
 
-Finally once this is all finished you can run the software with the below command.
-
-.. code-block::
-    
+**Run the ASLM software**::  
     (ASLM) MyComputer ASLM $ aslm
 
 .. note::
@@ -64,7 +77,6 @@ Finally once this is all finished you can run the software with the below comman
     If you are running the software on a computer that does not have the appropriate hardware you will need to add the flag -sh after aslm:
 
         aslm -sh
-
 
 
 After completeting these steps you will only need to do the below to start the software upon opening the prompt:
@@ -75,8 +87,9 @@ After completeting these steps you will only need to do the below to start the s
     (ASLM) MyComputer ~ $ aslm
 
 GPU Dependencies
-============
-A CUDA GPU device is necessary to use TensorFlow (1.15), PyTorch (1.10.2), CuPy, ...
+-------------------------------
+Some of the software routines for microscope feedback are accelerated using GPU computing. 
+These require a CUDA GPU device that is compatible with TensorFlow (1.15), PyTorch (1.10.2), CuPy, ...
 `Excellent directions can be found for CuPy <https://docs.cupy.dev/en/stable/install.html>`_.
     * `NVIDIA CUDA Version 11.2 <https://developer.nvidia.com/cuda-11.2.0-download-archive?target_os=Windows&target_arch=x86_64&target_version=10&target_type=exelocal>`_
     * `cuDNN SDK 8.4.1 <https://developer.nvidia.com/rdp/cudnn-download>`_
@@ -85,11 +98,11 @@ A CUDA GPU device is necessary to use TensorFlow (1.15), PyTorch (1.10.2), CuPy,
     * Microsoft Visual C++ Redistributable for Visual Studio 2015, 2017 and 2019
 
 Troubleshooting
-============
+-------------------------------
 
 If running the software on campus at UTSW you may need to update some of your proxy settings to allow pip/conda to install the proper packages.
     * This can be done by going to Environment Variables for Windows, or another OS equivalent.
-    * Create the following variables at the system level:
+    * Create the following new System Variables:
         *  Variable = HTTP_PROXY; Value = http://proxy.swmed.edu:3128
         *  Variable = HTTPS_PROXY; Value = http://proxy.swmed.edu:3128 (please see that they are both http, this is purposeful and not a typo)
     * If you continue to have issues then change the value of Variable HTTPS_PROXY to https://proxy.swmed.edu:3128

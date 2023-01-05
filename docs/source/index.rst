@@ -2,7 +2,7 @@
 .. _aslm-home:
 
 #######################
-**ASLM Python Package**
+**Autonomous Software for Light Microscopy**
 #######################
 
 
@@ -26,7 +26,7 @@
 
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    
    userguide
    hacking

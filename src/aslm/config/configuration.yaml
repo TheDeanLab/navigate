@@ -128,10 +128,15 @@ microscopes:
         Blocked6: 9
     stage:
       hardware:
-        name: stage
-        type: PI
-        serial_number: 119060508
-        axes: [x, y, z, theta, f]
+        -
+          name: stage
+          type: PI
+          serial_number: 119060508
+          axes: [x, y, z, theta, f]
+          volts_per_micron: None
+          axes_channels: None
+          max: None
+          min: None
 
       x_max: 33500
       x_min: 16000
@@ -336,11 +341,19 @@ microscopes:
           type: PI
           serial_number: 119060508
           axes: [x, y, z, theta]
+          volts_per_micron: None
+          axes_channels: None
+          max: None
+          min: None
         -
           name: stage
           type: Thorlabs
           serial_number: 74000375
           axes: [f]
+          volts_per_micron: None
+          axes_channels: None
+          max: None
+          min: None
 
       x_max: 33500
       x_min: 16000

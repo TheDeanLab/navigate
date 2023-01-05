@@ -64,17 +64,22 @@ class TLKIMStage(StageBase):
 
         # Mapping from self.axes to corresponding KIM channels
         self.kim_axes = [1]
-        self.kim_controller = device_connection
 
-        self.serialnum = str(
+        if device_connection is not None:
+            self.kim_controller = device_connection
+
+        self.serial_number = str(
             configuration["configuration"]["microscopes"][microscope_name]["stage"][
                 "hardware"
             ][device_id]["serial_number"]
         )
 
     def __del__(self):
-        self.stop()
-        self.kim_controller.KIM_Close(self.serialnum)
+        try:
+            self.stop()
+            self.kim_controller.KIM_Close(self.serial_number)
+        except AttributeError:
+            pass
 
     def report_position(self):
         """
@@ -84,8 +89,10 @@ class TLKIMStage(StageBase):
         for i, ax in zip(self.kim_axes, self.axes):
             try:
                 # need to request before we get the current position
-                err = self.kim_controller.KIM_RequestCurrentPosition(self.serialnum, i)
-                pos = self.kim_controller.KIM_GetCurrentPosition(self.serialnum, i)
+                err = self.kim_controller.KIM_RequestCurrentPosition(
+                    self.serial_number, i
+                )
+                pos = self.kim_controller.KIM_GetCurrentPosition(self.serial_number, i)
                 setattr(self, f"{ax}_pos", pos)
             except (
                 self.kim_controller.TLFTDICommunicationError,
@@ -125,7 +132,9 @@ class TLKIMStage(StageBase):
         if axis_abs == -1e50:
             return False
 
-        self.kim_controller.KIM_MoveAbsolute(self.serialnum, axis_num, int(axis_abs))
+        self.kim_controller.KIM_MoveAbsolute(
+            self.serial_number, axis_num, int(axis_abs)
+        )
         return True
 
     def move_absolute(self, move_dictionary, wait_until_done=False):
@@ -154,7 +163,7 @@ class TLKIMStage(StageBase):
                 )  # TODO: should we default to 0?
                 while (stage_pos != target_pos) and (i < n_tries):
                     stage_pos = self.kim_controller.KIM_GetCurrentPosition(
-                        self.serialnum, n
+                        self.serial_number, n
                     )
                     i += 1
                     time.sleep(0.01)
@@ -165,7 +174,7 @@ class TLKIMStage(StageBase):
 
     def stop(self):
         for i in self.kim_axes:
-            self.kim_controller.KIM_MoveStop(self.serialnum, i)
+            self.kim_controller.KIM_MoveStop(self.serial_number, i)
 
     def get_abs_position(self, axis, move_dictionary):
         r"""

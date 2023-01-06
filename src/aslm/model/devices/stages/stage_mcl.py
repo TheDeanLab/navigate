@@ -60,8 +60,9 @@ class MCLStage(StageBase):
         )  # only initialize the focus axis
 
         # Mapping from self.axes to corresponding MCL channels
-        self.mcl_controller = device_connection["controller"]
-        self.handle = device_connection["handle"]
+        if device_connection is not None:
+            self.mcl_controller = device_connection["controller"]
+            self.handle = device_connection["handle"]
 
     def report_position(self):
         """

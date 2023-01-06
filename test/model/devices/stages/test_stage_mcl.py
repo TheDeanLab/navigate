@@ -32,21 +32,20 @@
 
 # Standard Library Imports
 import unittest
-from pathlib import Path
 
 # Third Party Imports
 
 # Local Imports
-from aslm.model.devices.stages.stage_base import StageBase
+from aslm.model.devices.stages.stage_mcl import MCLStage
 from aslm.model.dummy import DummyModel
 
-class TestStageBase(unittest.TestCase):
+class TestStageMCL(unittest.TestCase):
     r"""Unit Test for StageBase Class"""
 
     def test_stage_attributes(self):
         dummy_model = DummyModel()
         microscope_name = 'Mesoscale'
-        stage = StageBase(microscope_name, None, dummy_model.configuration)
+        stage = MCLStage(microscope_name, None, dummy_model.configuration)
 
         # Attributes
         assert hasattr(stage, 'x_pos')
@@ -68,7 +67,16 @@ class TestStageBase(unittest.TestCase):
         # Methods
         assert hasattr(stage, 'create_position_dict') and \
                callable(getattr(stage, 'create_position_dict'))
-
+        assert hasattr(stage, 'report_position') and \
+               callable(getattr(stage, 'report_position'))
+        assert hasattr(stage, 'move_axis_absolute') and \
+               callable(getattr(stage, 'move_axis_absolute'))
+        assert hasattr(stage, 'move_absolute') and \
+               callable(getattr(stage, 'move_absolute'))
+        assert hasattr(stage, 'stop') and \
+               callable(getattr(stage, 'stop'))
+        assert hasattr(stage, 'get_abs_position') and \
+               callable(getattr(stage, 'get_abs_position'))
 
 if __name__ == '__main__':
     unittest.main()

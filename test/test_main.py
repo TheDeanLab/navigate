@@ -32,42 +32,49 @@
 
 # Standard Library Imports
 import unittest
+import argparse
 from pathlib import Path
 
 # Third Party Imports
 
 # Local Imports
-from aslm.model.devices.stages.stage_base import StageBase
-from aslm.model.dummy import DummyModel
+from aslm.tools.main_functions import identify_gpu, add_parser_input_arguments
+from aslm.config.config import get_aslm_path
+class TestMain(unittest.TestCase):
+    r"""Unit Test for main.py"""
+    def test_identify_gpu(self):
+        parser = argparse.ArgumentParser()
+        parser = add_parser_input_arguments(parser)
+        args = parser.parse_args(['--CPU'])
+        args.CPU = True
+        use_gpu = identify_gpu(args)
+        assert use_gpu is not args.CPU
 
-class TestStageBase(unittest.TestCase):
-    r"""Unit Test for StageBase Class"""
+    def test_argument_parser(self):
+        parser = argparse.ArgumentParser()
+        parser = add_parser_input_arguments(parser)
 
-    def test_stage_attributes(self):
-        dummy_model = DummyModel()
-        microscope_name = 'Mesoscale'
-        stage = StageBase(microscope_name, None, dummy_model.configuration)
+        # Boolean arguments
+        input_arguments = ['-sh',
+                           '--synthetic_hardware',
+                           '-d',
+                           '--debug',
+                           '--CPU']
+        for arg in input_arguments:
+            args = parser.parse_args([arg])
+            pass
 
-        # Attributes
-        assert hasattr(stage, 'x_pos')
-        assert hasattr(stage, 'y_pos')
-        assert hasattr(stage, 'z_pos')
-        assert hasattr(stage, 'f_pos')
-        assert hasattr(stage, 'theta_pos')
-        assert hasattr(stage, 'position_dict')
-        assert hasattr(stage, 'x_max')
-        assert hasattr(stage, 'y_max')
-        assert hasattr(stage, 'z_max')
-        assert hasattr(stage, 'f_max')
-        assert hasattr(stage, 'x_min')
-        assert hasattr(stage, 'y_min')
-        assert hasattr(stage, 'z_min')
-        assert hasattr(stage, 'f_min')
-        assert hasattr(stage, 'theta_min')
-
-        # Methods
-        assert hasattr(stage, 'create_position_dict') and \
-               callable(getattr(stage, 'create_position_dict'))
+        # Path Arguments.
+        aslm_path = Path(get_aslm_path())
+        input_arguments = ['--config_file',
+                           '--experiment_file',
+                           '--etl_const_file',
+                           '--rest_api_file',
+                           '--logging_config']
+        for arg in input_arguments:
+            #  TODO: Figure out why this is throwing an error.
+            #  args = parser.parse_args([arg], Path.joinpath(aslm_path, 'test.yml'))
+            pass
 
 
 if __name__ == '__main__':

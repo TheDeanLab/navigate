@@ -110,10 +110,6 @@ class DummyModel:
             etl_constants=etl_constants,
         )
 
-        # self.configuration = Configurator(config)
-        # self.experiment = Configurator(experiment)
-        # self.etl_constants = Configurator(etl_constants)
-
         self.device = DummyDevice()
         self.signal_pipe, self.data_pipe = None, None
 

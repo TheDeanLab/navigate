@@ -132,8 +132,10 @@ class PIStage(StageBase):
         # Mapping from self.axes to corresponding PI axis labelling
         axes_mapping = {"x": 1, "y": 2, "z": 3, "f": 5, "theta": 4}
         self.pi_axes = list(map(lambda a: axes_mapping[a], self.axes))
-        self.pi_tools = device_connection["pi_tools"]
-        self.pi_device = device_connection["pi_device"]
+
+        if device_connection is not None:
+            self.pi_tools = device_connection["pi_tools"]
+            self.pi_device = device_connection["pi_device"]
 
     def __del__(self):
         """Delete the PI Connection"""

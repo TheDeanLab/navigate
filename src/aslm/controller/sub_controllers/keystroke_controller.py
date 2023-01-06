@@ -84,8 +84,8 @@ class KeystrokeController(GUIController):
         self.main_view.bind("2", self.switch_tab2)
         self.main_view.bind("3", self.switch_tab3)
         self.main_view.bind("4", self.switch_tab4)
-        self.main_view.bind_all('z', self.undo)
-        self.main_view.bind_all('y', self.redo)
+        self.main_view.bind_all('<Control-Key-z>', self.widget_undo)
+        self.main_view.bind_all('<Control-Key-y>', self.widget_redo)
         
 
     # def test(self, event):
@@ -136,28 +136,31 @@ class KeystrokeController(GUIController):
 
     # Need to make sure that the entry is undo/redo and that the underlying variable for the entry is being updated to what is shown
 
-    def undo(self, event):
+    def widget_undo(self, event):
+    #     if isinstance(event.widget, ValidatedEntry): #Add all widgets that you want to be able to undo here
+    #         widget = event.widget
+    #         if event.state == 4:
+    #             if len(widget.undo_history) > 1:
+    #                 widget.variable.set(widget.undo_history[-2]) # Should this be widget.variable.set()
+    #                 widget.redo_history.append(widget.undo_history.pop())
+    #             if len(widget.undo_history) == 1:
+    #                 widget.redo_history.append(widget.undo_history.pop())
         if isinstance(event.widget, ValidatedEntry): #Add all widgets that you want to be able to undo here
-            widget = event.widget
-            if event.state == 4:
-                if len(widget.undo_history) > 1:
-                    widget.variable.set(widget.undo_history[-2]) # Should this be widget.variable.set()
-                    widget.redo_history.append(widget.undo_history.pop())
-                if len(widget.undo_history) == 1:
-                    widget.redo_history.append(widget.undo_history.pop())
+            event.widget.undo(event)
 
 
-    def redo(self, event):
-        print("Redo triggered")
-        if isinstance(event.widget, ValidatedEntry):
-            widget = event.widget
-            if event.state == 4:
-                if widget.redo_history:
-                    if not widget.undo_history:
-                        widget.undo_history.append(widget.redo_history.pop())
-                        if not widget.redo_history:
-                            return
-                    widget.variable.set(widget.redo_history[-1])
-                    widget.undo_history.append(widget.redo_history.pop())
-
+    def widget_redo(self, event):
+    #     print("Redo triggered")
+    #     if isinstance(event.widget, ValidatedEntry):
+    #         widget = event.widget
+    #         if event.state == 4:
+    #             if widget.redo_history:
+    #                 if not widget.undo_history:
+    #                     widget.undo_history.append(widget.redo_history.pop())
+    #                     if not widget.redo_history:
+    #                         return
+    #                 widget.variable.set(widget.redo_history[-1])
+    #                 widget.undo_history.append(widget.redo_history.pop())
+        if isinstance(event.widget, ValidatedEntry): #Add all widgets that you want to be able to undo here
+            event.widget.redo(event)
         

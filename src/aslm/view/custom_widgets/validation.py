@@ -31,6 +31,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 import tkinter as tk
+from tkinter.constants import END
 from tkinter import ttk        
 from decimal import Decimal, InvalidOperation
 from aslm.view.custom_widgets.hover import hover
@@ -158,8 +159,33 @@ class ValidatedMixin:
     def add_history(self, event):
         if self.get() != "":
             if not self.undo_history or self.get() != self.undo_history[-1]:
-                self.undo_history.append(self.get())
-                print("Adding history: ", self.undo_history)
+                if len(self.undo_history) < 3:
+                    print(f"Undo history list: {self.undo_history}")
+                    self.undo_history.append(self.get())
+                    self.redo_history.clear()
+                else:
+                    print(f"Undo history list larger than 3: {self.undo_history}")
+                    self.undo_history.append(self.get())
+                    self.undo_history.pop(0)
+                    self.redo_history.clear()
+
+    def undo(self, event):
+        if self.undo_history:
+            if len(self.undo_history) > 1:
+                self.set(self.undo_history[-2])
+                self.redo_history.append(self.undo_history.pop())
+            if len(self.undo_history) == 1:
+                self.redo_history.append(self.undo_history.pop())
+
+    def redo(self, event):
+        if self.redo_history:
+            if not self.undo_history:
+                self.undo_history.append(self.redo_history.pop())
+                if not self.redo_history:
+                    return
+            self.set(self.redo_history[-1])
+            self.undo_history.append(self.redo_history.pop())
+            
 
 
 # Entry class that requires Entry
@@ -184,6 +210,11 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         #     self.max_var.trace_add('w', self._set_maximum)
         # self.focus_update_var = focus_update_var
         # self.bind('<FocusOut>', self._set_focus_update_var)
+
+    def set(self, value):
+        self.delete(0, tk.END)
+        self.variable.set(value)
+        self.insert(0, value)
 
 
     def set_precision(self, prec):

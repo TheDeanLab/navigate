@@ -1,35 +1,34 @@
-"""
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
-All rights reserved.
+# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# All rights reserved.
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-provided that the following conditions are met:
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# provided that the following conditions are met:
 
-     * Redistributions of source code must retain the above copyright notice,
-     this list of conditions and the following disclaimer.
+#      * Redistributions of source code must retain the above copyright notice,
+#      this list of conditions and the following disclaimer.
 
-     * Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in the
-     documentation and/or other materials provided with the distribution.
+#      * Redistributions in binary form must reproduce the above copyright
+#      notice, this list of conditions and the following disclaimer in the
+#      documentation and/or other materials provided with the distribution.
 
-     * Neither the name of the copyright holders nor the names of its
-     contributors may be used to endorse or promote products derived from this
-     software without specific prior written permission.
+#      * Neither the name of the copyright holders nor the names of its
+#      contributors may be used to endorse or promote products derived from this
+#      software without specific prior written permission.
 
-NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
-THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
-CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
-CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
-BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-"""
+# NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
+# THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+# CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+# PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+
 import tkinter as tk
 import tkinter.ttk as ttk
 import logging
@@ -71,13 +70,16 @@ class Tooltip:
     It creates a tooltip for a given widget as the mouse goes on it.
     """
 
-    def __init__(self, widget,
-                 *,
-                 bg='#FFFFEA',
-                 pad=(5, 3, 5, 3),
-                 text='widget info',
-                 waittime=400,
-                 wraplength=250):
+    def __init__(
+        self,
+        widget,
+        *,
+        bg="#FFFFEA",
+        pad=(5, 3, 5, 3),
+        text="widget info",
+        waittime=400,
+        wraplength=250
+    ):
         self.waittime = waittime  # in miliseconds, originally 500
         self.wraplength = wraplength  # in pixels, originally 180
         self.widget = widget
@@ -109,16 +111,16 @@ class Tooltip:
             self.widget.after_cancel(id_)
 
     def show(self):
-        def tip_pos_calculator(widget, label,
-                               *,
-                               tip_delta=(10, 5), pad=(5, 3, 5, 3)):
+        def tip_pos_calculator(widget, label, *, tip_delta=(10, 5), pad=(5, 3, 5, 3)):
 
             w = widget
 
             s_width, s_height = w.winfo_screenwidth(), w.winfo_screenheight()
 
-            width, height = (pad[0] + label.winfo_reqwidth() + pad[2],
-                             pad[1] + label.winfo_reqheight() + pad[3])
+            width, height = (
+                pad[0] + label.winfo_reqwidth() + pad[2],
+                pad[1] + label.winfo_reqheight() + pad[3],
+            )
 
             mouse_x, mouse_y = w.winfo_pointerxy()
 
@@ -165,20 +167,18 @@ class Tooltip:
         # Leaves only the label and removes the app window
         self.tw.wm_overrideredirect(True)
 
-        win = tk.Frame(self.tw,
-                       background=bg,
-                       borderwidth=0)
-        label = tk.Label(win,
-                          text=self.text,
-                          justify=tk.LEFT,
-                          background=bg,
-                          relief=tk.SOLID,
-                          borderwidth=0,
-                          wraplength=self.wraplength)
+        win = tk.Frame(self.tw, background=bg, borderwidth=0)
+        label = tk.Label(
+            win,
+            text=self.text,
+            justify=tk.LEFT,
+            background=bg,
+            relief=tk.SOLID,
+            borderwidth=0,
+            wraplength=self.wraplength,
+        )
 
-        label.grid(padx=(pad[0], pad[2]),
-                   pady=(pad[1], pad[3]),
-                   sticky=tk.NSEW)
+        label.grid(padx=(pad[0], pad[2]), pady=(pad[1], pad[3]), sticky=tk.NSEW)
         win.grid()
 
         x, y = tip_pos_calculator(widget, label)
@@ -192,62 +192,68 @@ class Tooltip:
         self.tw = None
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     import random
 
     def further_text():
         # texts generated at http://lorem-ipsum.perbang.dk/
-        short_text = ('Here are some words to fill the space.'
-                     'Microscopes look at small stuff! :)  '
-                     'Widgets run the world!  '
-                     'Stay hydrated. '
-                     'lectus, amet cras, neque lacus quis. Malesuada '
-                     'nibh. Eleifend nam, in eget a. Nec turpis, erat '
-                     'wisi semper')
-        medium_text = ('Lorem ipsum dolor sit amet, suspendisse aenean '
-                       'ipsum sollicitudin, pellentesque nunc ultrices ac '
-                       'ut, arcu elit turpis senectus convallis. Ac orci '
-                       'pretium sed gravida, tortor nulla felis '
-                       'consectetuer, mauris egestas est erat. Ut enim '
-                       'tellus at diam, ac sagittis vel proin. Massa '
-                       'eleifend orci tortor sociis, scelerisque in pede '
-                       'metus phasellus, est tempor gravida nam, ante '
-                       'fusce sem tempor. Mi diam auctor vel pede, mus '
-                       'non mi luctus luctus, lectus sit varius repellat '
-                       'eu')
-        long_text = ('Lorem ipsum dolor sit amet, velit eu nam cursus '
-                     'quisque gravida sollicitudin, felis arcu interdum '
-                     'error quam quis massa, et velit libero ligula est '
-                     'donec. Suspendisse fringilla urna ridiculus dui '
-                     'volutpat justo, quisque nisl eget sed blandit '
-                     'egestas, libero nullam magna sem dui nam, auctor '
-                     'vehicula nunc arcu vel sed dictum, tincidunt vitae '
-                     'id tristique aptent platea. Lacus eros nec proin '
-                     'morbi sollicitudin integer, montes suspendisse '
-                     'augue lorem iaculis sed, viverra sed interdum eget '
-                     'ut at pulvinar, turpis vivamus ac pharetra nulla '
-                     'maecenas ut. Consequat dui condimentum lectus nulla '
-                     'vitae, nam consequat fusce ac facilisis eget orci, '
-                     'cras enim donec aenean sed dolor aliquam, elit '
-                     'lorem in a nec fringilla, malesuada curabitur diam '
-                     'nonummy nisl nibh ipsum. In odio nunc nec porttitor '
-                     'ipsum, nunc ridiculus platea wisi turpis praesent '
-                     'vestibulum, suspendisse hendrerit amet quis vivamus '
-                     'adipiscing elit, ut dolor nec nonummy mauris nec '
-                     'libero, ad rutrum id tristique facilisis sed '
-                     'ultrices. Convallis velit posuere mauris lectus sit '
-                     'turpis, lobortis volutpat et placerat leo '
-                     'malesuada, vulputate id maecenas at a volutpat '
-                     'vulputate, est augue nec proin ipsum pellentesque '
-                     'fringilla. Mattis feugiat metus ultricies repellat '
-                     'dictum, suspendisse erat rhoncus ultricies in ipsum, '
-                     'nulla ante pellentesque blandit ligula sagittis '
-                     'ultricies, sed tortor sodales pede et duis platea')
+        short_text = (
+            "Here are some words to fill the space."
+            "Microscopes look at small stuff! :)  "
+            "Widgets run the world!  "
+            "Stay hydrated. "
+            "lectus, amet cras, neque lacus quis. Malesuada "
+            "nibh. Eleifend nam, in eget a. Nec turpis, erat "
+            "wisi semper"
+        )
+        medium_text = (
+            "Lorem ipsum dolor sit amet, suspendisse aenean "
+            "ipsum sollicitudin, pellentesque nunc ultrices ac "
+            "ut, arcu elit turpis senectus convallis. Ac orci "
+            "pretium sed gravida, tortor nulla felis "
+            "consectetuer, mauris egestas est erat. Ut enim "
+            "tellus at diam, ac sagittis vel proin. Massa "
+            "eleifend orci tortor sociis, scelerisque in pede "
+            "metus phasellus, est tempor gravida nam, ante "
+            "fusce sem tempor. Mi diam auctor vel pede, mus "
+            "non mi luctus luctus, lectus sit varius repellat "
+            "eu"
+        )
+        long_text = (
+            "Lorem ipsum dolor sit amet, velit eu nam cursus "
+            "quisque gravida sollicitudin, felis arcu interdum "
+            "error quam quis massa, et velit libero ligula est "
+            "donec. Suspendisse fringilla urna ridiculus dui "
+            "volutpat justo, quisque nisl eget sed blandit "
+            "egestas, libero nullam magna sem dui nam, auctor "
+            "vehicula nunc arcu vel sed dictum, tincidunt vitae "
+            "id tristique aptent platea. Lacus eros nec proin "
+            "morbi sollicitudin integer, montes suspendisse "
+            "augue lorem iaculis sed, viverra sed interdum eget "
+            "ut at pulvinar, turpis vivamus ac pharetra nulla "
+            "maecenas ut. Consequat dui condimentum lectus nulla "
+            "vitae, nam consequat fusce ac facilisis eget orci, "
+            "cras enim donec aenean sed dolor aliquam, elit "
+            "lorem in a nec fringilla, malesuada curabitur diam "
+            "nonummy nisl nibh ipsum. In odio nunc nec porttitor "
+            "ipsum, nunc ridiculus platea wisi turpis praesent "
+            "vestibulum, suspendisse hendrerit amet quis vivamus "
+            "adipiscing elit, ut dolor nec nonummy mauris nec "
+            "libero, ad rutrum id tristique facilisis sed "
+            "ultrices. Convallis velit posuere mauris lectus sit "
+            "turpis, lobortis volutpat et placerat leo "
+            "malesuada, vulputate id maecenas at a volutpat "
+            "vulputate, est augue nec proin ipsum pellentesque "
+            "fringilla. Mattis feugiat metus ultricies repellat "
+            "dictum, suspendisse erat rhoncus ultricies in ipsum, "
+            "nulla ante pellentesque blandit ligula sagittis "
+            "ultricies, sed tortor sodales pede et duis platea"
+        )
 
         text = random.choice([short_text, medium_text, long_text, long_text])
 
-        return '\nFurther info: ' + text
+        return "\nFurther info: " + text
 
     def main_01(wraplength=200):
 
@@ -257,25 +263,25 @@ if __name__ == '__main__':
         root = tk.Tk()
         frame = ttk.Frame(root)
 
-        btn_ne = ttk.Button(frame, text='North East')
-        btn_se = ttk.Button(frame, text='South East')
-        btn_sw = ttk.Button(frame, text='South West')
-        btn_nw = ttk.Button(frame, text='North West')
-        btn_center = ttk.Button(frame, text='Center')
-        btn_n = ttk.Button(frame, text='North')
-        btn_e = ttk.Button(frame, text='East')
-        btn_s = ttk.Button(frame, text='South')
-        btn_w = ttk.Button(frame, text='West')
+        btn_ne = ttk.Button(frame, text="North East")
+        btn_se = ttk.Button(frame, text="South East")
+        btn_sw = ttk.Button(frame, text="South West")
+        btn_nw = ttk.Button(frame, text="North West")
+        btn_center = ttk.Button(frame, text="Center")
+        btn_n = ttk.Button(frame, text="North")
+        btn_e = ttk.Button(frame, text="East")
+        btn_s = ttk.Button(frame, text="South")
+        btn_w = ttk.Button(frame, text="West")
 
-        Tooltip(btn_nw, text='North West' + stuff(), wraplength=wraplength)
-        Tooltip(btn_ne, text='North East' + stuff(), wraplength=wraplength)
-        Tooltip(btn_se, text='South East' + stuff(), wraplength=wraplength)
-        Tooltip(btn_sw, text='South West' + stuff(), wraplength=wraplength)
-        Tooltip(btn_center, text='Center' + stuff(), wraplength=wraplength)
-        Tooltip(btn_n, text='North' + stuff(), wraplength=wraplength)
-        Tooltip(btn_e, text='East' + stuff(), wraplength=wraplength)
-        Tooltip(btn_s, text='South' + stuff(), wraplength=wraplength)
-        Tooltip(btn_w, text='West' + stuff(), wraplength=wraplength)
+        Tooltip(btn_nw, text="North West" + stuff(), wraplength=wraplength)
+        Tooltip(btn_ne, text="North East" + stuff(), wraplength=wraplength)
+        Tooltip(btn_se, text="South East" + stuff(), wraplength=wraplength)
+        Tooltip(btn_sw, text="South West" + stuff(), wraplength=wraplength)
+        Tooltip(btn_center, text="Center" + stuff(), wraplength=wraplength)
+        Tooltip(btn_n, text="North" + stuff(), wraplength=wraplength)
+        Tooltip(btn_e, text="East" + stuff(), wraplength=wraplength)
+        Tooltip(btn_s, text="South" + stuff(), wraplength=wraplength)
+        Tooltip(btn_w, text="West" + stuff(), wraplength=wraplength)
 
         r = 0
         c = 0
@@ -286,8 +292,7 @@ if __name__ == '__main__':
 
         r += 1
         btn_w.grid(row=r, column=c + 0, padx=pad, pady=pad, sticky=tk.W)
-        btn_center.grid(row=r, column=c + 1, padx=pad, pady=pad,
-                    sticky=tk.NSEW)
+        btn_center.grid(row=r, column=c + 1, padx=pad, pady=pad, sticky=tk.NSEW)
         btn_e.grid(row=r, column=c + 2, padx=pad, pady=pad, sticky=tk.E)
 
         r += 1
@@ -303,17 +308,17 @@ if __name__ == '__main__':
         root.rowconfigure(0, weight=1)
         root.columnconfigure(0, weight=1)
 
-        root.title('Tooltip wraplength = {}'.format(wraplength))
+        root.title("Tooltip wraplength = {}".format(wraplength))
         root.mainloop()
 
     def main():
-        print('Trying out three different wraplengths:')
+        print("Trying out three different wraplengths:")
         logger.info("Trying out three different wraplengths:")
         for i, wl in enumerate((200, 250, 400), 1):
             logger.info(i)
-            print(' ', i)
+            print(" ", i)
             main_01(wl)
-        print('Done.')
+        print("Done.")
         logger.info("Done")
 
     main()

@@ -1,4 +1,4 @@
-"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# """
+#
 
 # Standard Library Imports
 import logging
@@ -64,28 +64,28 @@ class ShutterTTL(ShutterBase):
     def __init__(self, microscope_name, device_connection, configuration):
         super().__init__(microscope_name, device_connection, configuration)
 
-        shutter_channel = configuration['configuration']['microscopes'][microscope_name]['shutter']['hardware']['channel']
+        shutter_channel = configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["shutter"]["hardware"]["channel"]
 
         self.shutter_task = nidaqmx.Task()
-        self.shutter_task.do_channels.add_do_chan(shutter_channel, line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
+        self.shutter_task.do_channels.add_do_chan(
+            shutter_channel, line_grouping=LineGrouping.CHAN_FOR_ALL_LINES
+        )
         self.shutter_task.write(self.shutter_state, auto_start=True)
 
     def __del__(self):
-        """Close the ShutterTTL at exit.
-        """
+        """Close the ShutterTTL at exit."""
         self.shutter_task.close()
 
     def open_shutter(self):
-        r"""Open the shutter
-        """
+        r"""Open the shutter"""
         self.shutter_state = True
         self.shutter_task.write(self.shutter_state, auto_start=True)
         logger.debug("ShutterTTL - Shutter opened")
 
-
     def close_shutter(self):
-        r"""CLose the shutter
-        """
+        r"""CLose the shutter"""
         self.shutter_state = False
         self.shutter_task.write(self.shutter_state, auto_start=True)
         logger.debug("ShutterTTL - The shutter is closed")

@@ -1,11 +1,54 @@
+# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# All rights reserved.
+
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# provided that the following conditions are met:
+
+#      * Redistributions of source code must retain the above copyright notice,
+#      this list of conditions and the following disclaimer.
+
+#      * Redistributions in binary form must reproduce the above copyright
+#      notice, this list of conditions and the following disclaimer in the
+#      documentation and/or other materials provided with the distribution.
+
+#      * Neither the name of the copyright holders nor the names of its
+#      contributors may be used to endorse or promote products derived from this
+#      software without specific prior written permission.
+
+# NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
+# THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+# CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+# PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+
 # Third Party Imports
 import nidaqmx
-from nidaqmx.constants import AcquisitionType
+from nidaqmx.constants import (
+    AcquisitionType,
+    TerminalConfiguration,
+    AccelUnits,
+    AccelSensitivityUnits,
+    ExcitationSource,
+)
 import numpy as np
 import matplotlib.pyplot as plt
 
 
-def make_measurement(analog_input_line='cDAQ1Mod1/ai0', sampling_frequency=1 * 10 ** 3, experiment_duration=1):
+def make_measurement(
+    analog_input_line="cDAQ1Mod1/ai0",
+    sampling_frequency=1 * 10**3,
+    experiment_duration=1,
+    sensitivity=1000,
+    current_excit_val=0.004,
+):
     """
     Measure samples from a NIDAQ accelerometer.
 
@@ -17,6 +60,10 @@ def make_measurement(analog_input_line='cDAQ1Mod1/ai0', sampling_frequency=1 * 1
         Rate for acquiring samples (Hz)
     experiment_duration : float
         Duration of acquisition (seconds)
+    sensitivity : float
+        Sensitivity of the sensor in mV/G
+    current_excit_val : float
+        Milliamps of excitation for sensor
 
     Returns
     -------
@@ -29,13 +76,26 @@ def make_measurement(analog_input_line='cDAQ1Mod1/ai0', sampling_frequency=1 * 1
 
     # Construct analog input task
     analog_input = nidaqmx.Task()
-    analog_input.ai_channels.add_ai_accel_chan(analog_input_line)
-    analog_input.timing.cfg_samp_clk_timing(rate=float(sampling_frequency),
-                                            samps_per_chan=total_samples,
-                                            sample_mode=AcquisitionType.FINITE)
+    analog_input.ai_channels.add_ai_accel_chan(
+        analog_input_line,
+        terminal_config=TerminalConfiguration.PSEUDODIFFERENTIAL,
+        min_val=-5,
+        max_val=5,
+        units=AccelUnits.G,
+        sensitivity=sensitivity,
+        sensitivity_units=AccelSensitivityUnits.M_VOLTS_PER_G,
+        current_excit_source=ExcitationSource.INTERNAL,
+        current_excit_val=current_excit_val,
+    )
+    analog_input.timing.cfg_samp_clk_timing(
+        rate=float(sampling_frequency),
+        samps_per_chan=total_samples,
+        sample_mode=AcquisitionType.FINITE,
+    )
     # Read the samples
-    data = analog_input.read(number_of_samples_per_channel=total_samples,
-                             timeout=timeout_duration)
+    data = analog_input.read(
+        number_of_samples_per_channel=total_samples, timeout=timeout_duration
+    )
     analog_input.close()
 
     return data
@@ -63,9 +123,13 @@ def calculate_single_sided_spectrum(data, sampling_frequency):
     """
     n_samples = len(data)
     frequency_domain_data = np.fft.fft(data)
-    two_sided_spectrum = np.abs(frequency_domain_data) / n_samples  # convert to power spectrum
-    single_sided_spectrum = two_sided_spectrum[0:int(n_samples / 2)]  # cut
-    single_sided_spectrum[1:] = 2 * single_sided_spectrum[1:]  # reflect power (except on DC term)
+    two_sided_spectrum = (
+        np.abs(frequency_domain_data) / n_samples
+    )  # convert to power spectrum
+    single_sided_spectrum = two_sided_spectrum[0 : int(n_samples / 2)]  # cut
+    single_sided_spectrum[1:] = (
+        2 * single_sided_spectrum[1:]
+    )  # reflect power (except on DC term)
     frequency_axis = (sampling_frequency / n_samples) * np.arange(0, int(n_samples / 2))
 
     return frequency_axis, single_sided_spectrum
@@ -74,11 +138,11 @@ def calculate_single_sided_spectrum(data, sampling_frequency):
 def fast_moving_average(data, n=3):
     ret = np.cumsum(data)  # cumulative sum
     ret[n:] = ret[n:] - ret[:-n]  # sum of n previous points
-    return ret[(n - 1):] / n  # averaged
+    return ret[(n - 1) :] / n  # averaged
 
 
 def moving_average(data, n=3):
-    return np.convolve(data, np.ones(n), 'valid') / n
+    return np.convolve(data, np.ones(n), "valid") / n
 
 
 def plot_frequency_response(frequency_axis, single_sided_spectrum, ax=None, title=None):
@@ -88,24 +152,34 @@ def plot_frequency_response(frequency_axis, single_sided_spectrum, ax=None, titl
     if ax is None:
         fig, ax = plt.subplots()
     ax.plot(frequency_axis, single_sided_spectrum)
-    ax.set_yscale("log")
-    ax.set_ylabel('Amplitude')
-    ax.set_xlabel('Frequency (Hz)')
+    # ax.set_yscale("log")
+    ax.set_ylabel("Amplitude")
+    ax.set_xlabel("Frequency (Hz)")
     if title is not None:
         ax.set_title(title)
 
 
-if __name__ == '__main__':
-    sampling_frequency = 1 * 10 ** 4  # Hz
-    experiment_duration = 10          # seconds
-    w = 10                            # size of power spectrum smoothing window (average over w frequencies)
+if __name__ == "__main__":
+    sampling_frequency = 1 * 10**4  # Hz
+    experiment_duration = 10  # seconds
+    w = 10  # size of power spectrum smoothing window (average over w frequencies)
 
     # Multiscale, camera off...
-    ms_cam_off_data = make_measurement(sampling_frequency=sampling_frequency, experiment_duration=experiment_duration)
-    ms_cam_off_freq_ax, ms_cam_off_sssp = calculate_single_sided_spectrum(ms_cam_off_data, sampling_frequency)
+    ms_cam_off_data = make_measurement(
+        sampling_frequency=sampling_frequency, experiment_duration=experiment_duration
+    )
+    ms_cam_off_freq_ax, ms_cam_off_sssp = calculate_single_sided_spectrum(
+        ms_cam_off_data, sampling_frequency
+    )
 
     fig, axs = plt.subplots(1, 2, figsize=(12, 6))
-    plot_frequency_response(ms_cam_off_freq_ax, ms_cam_off_sssp, axs[0], "Raw power spectrum")
-    plot_frequency_response(ms_cam_off_freq_ax[(w - 1):], fast_moving_average(ms_cam_off_sssp, w), axs[1],
-                            f"Moving average (w={w}) power spectrum")
+    plot_frequency_response(
+        ms_cam_off_freq_ax, ms_cam_off_sssp, axs[0], "Raw power spectrum"
+    )
+    plot_frequency_response(
+        ms_cam_off_freq_ax[(w - 1) :],
+        fast_moving_average(ms_cam_off_sssp, w),
+        axs[1],
+        f"Moving average (w={w}) power spectrum",
+    )
     fig.tight_layout()

@@ -1,4 +1,4 @@
-"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -28,14 +28,145 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# """
+#
 import unittest
 import random
+import threading
 
 from aslm.model.features.feature_container import SignalNode, DataNode, DataContainer, load_features
 from aslm.model.features.common_features import WaitToContinue
 from aslm.model.features.feature_container import dummy_True
-from aslm.model.dummy import DummyFeature, DummyModel
+from aslm.model.dummy import DummyModel
+
+class DummyFeature:
+    def __init__(self, *args):
+        '''
+        args: 
+            0: model
+            1: name
+            2: with response (True/False) (1/0)
+            3: device related (True/False) (1/0)
+            4: multi step (integer >= 1)
+            5: has data function? There could be no data functions when node_type is 'multi-step'
+        '''
+        self.init_times = 0
+        self.running_times_main_func = 0
+        self.running_times_response_func = 0
+        self.running_times_cleanup_func = 0
+        self.is_end = False
+        self.is_closed = False
+
+        self.model = None if len(args) == 0 else args[0]
+        self.feature_name = args[1] if len(args) > 1 else 'none'
+        self.config_table = {'signal':{'name-for-test': self.feature_name,
+                                       'init': self.signal_init_func,
+                                       'main': self.signal_main_func},
+                            'data':  {'name-for-test': self.feature_name,
+                                      'init': self.data_init_func,
+                                      'main': self.data_main_func},
+                            'node': {}}
+
+        if len(args) > 2 and args[2]:
+            self.config_table['signal']['main-response'] = self.signal_wait_func
+            self.has_response_func = True
+        else:
+            self.has_response_func = False
+
+        if len(args) > 3:
+            self.config_table['node']['device_related'] = (args[3] == 1)
+
+        if len(args) > 4 and args[4]>1:
+            self.config_table['node']['node_type'] = 'multi-step'
+            self.multi_steps = args[4]
+            self.config_table['signal']['end'] = self.signal_end_func
+            self.config_table['data']['end'] = self.data_end_func
+        else:
+            self.multi_steps = 1
+
+        if len(args)>5 and args[4]>1 and args[2]==False and args[5]==False:
+            self.config_table['data'] = {}
+
+        self.target_frame_id = 0
+        self.response_value = 0
+        self.current_signal_step = 0
+        self.current_data_step = 0
+        self.wait_lock = threading.Lock()
+
+    def init_func(self):
+        self.init_times += 1
+
+    def main_func(self, value=None):
+        self.running_times_main_func += 1
+        return value
+
+    def response_func(self, value=None):
+        self.running_times_response_func += 1
+        return value
+
+    def end_func(self):
+        return self.is_end
+
+    def close(self):
+        self.is_closed = True
+        self.running_times_cleanup_func += 1
+
+    def clear(self):
+        self.init_times = 0
+        self.running_times_main_func = 0
+        self.running_times_response_func = 0
+        self.running_times_cleanup_func = 0
+        self.is_end = False
+        self.is_closed = False
+
+    def signal_init_func(self, *args):
+        self.target_frame_id = -1
+        self.current_signal_step = 0
+        if self.wait_lock.locked():
+            self.wait_lock.release()
+
+    def signal_main_func(self, *args):
+        self.target_frame_id = self.model.frame_id # signal_num
+        if self.feature_name.startswith('node'):
+            self.model.signal_records.append((self.target_frame_id, self.feature_name))
+        if self.has_response_func:
+            self.wait_lock.acquire()
+            print(self.feature_name, ': wait lock is acquired!!!!')
+
+        return True
+
+    def signal_wait_func(self, *args):
+        self.wait_lock.acquire()
+        self.wait_lock.release()
+        print(self.feature_name, ': wait response!(signal)', self.response_value)
+        return self.response_value
+
+    def signal_end_func(self):
+        self.current_signal_step += 1
+        return self.current_signal_step >= self.multi_steps
+
+    def data_init_func(self):
+        self.current_data_step = 0
+        pass
+
+    def data_pre_main_func(self, frame_ids):
+        return self.target_frame_id in frame_ids
+
+    def data_main_func(self, frame_ids):
+        # assert self.target_frame_id in frame_ids, 'frame is not ready'
+        if self.feature_name.startswith('node'):
+            self.model.data_records.append((frame_ids[0], self.feature_name))
+
+        if self.has_response_func and self.wait_lock.locked():
+            # random Yes/No
+            self.response_value = random.randint(0, 1)
+            print(self.feature_name, ': wait lock is released!(data)', self.response_value)
+            self.wait_lock.release()
+            return self.response_value
+        return True
+
+    def data_end_func(self):
+        self.current_data_step += 1
+        return self.current_data_step >= self.multi_steps
 
 def generate_random_feature_list(has_response_func=False, multi_step=False, with_data_func=True):
     feature_list = []
@@ -247,12 +378,17 @@ class TestFeatureContainer(unittest.TestCase):
 
         print('----multi-step function')
         feature.clear()
+        node = SignalNode('test_1', func_dict, device_related=True)
         node.node_type = 'multi-step'
         assert func_dict.get('main-response', None) == None
         assert node.need_response == False
         steps = 5
         for i in range(steps+1):
             feature.is_end = (i == steps)
+            if i == 0:
+                assert node.is_initialized == False
+            else:
+                assert node.is_initialized == True
             result, is_end = node.run()
             if i < steps:
                 assert node.is_initialized == True

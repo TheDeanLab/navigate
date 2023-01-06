@@ -1,4 +1,4 @@
-"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# """
+#
 
 # Standard Library Imports
 import logging
@@ -82,16 +82,16 @@ def image_to_polar(input_image):
     xR = x * sx + xc
     yR = y * sy + yc
 
-    #imP = ndimage.map_coordinates(input_image, [xR, yR])
-    #imP = interp2(imC, xR, yR,'cubic');
-    a = (len(input_image))
-    imP = interpolate.interp2d(xR[:, 0], yR[:, 0], input_image, kind='cubic')
+    # imP = ndimage.map_coordinates(input_image, [xR, yR])
+    # imP = interp2(imC, xR, yR,'cubic');
+    a = len(input_image)
+    imP = interpolate.interp2d(xR[:, 0], yR[:, 0], input_image, kind="cubic")
 
     test1 = np.mean(imP)
     test2 = np.min(imP)
     test3 = np.max(imP)
     imP[np.isnan(imP)] = 0
-    print('test')
+    print("test")
 
     return imP
 
@@ -106,7 +106,7 @@ def get_radial_average(input_image):
     """
     image_size = np.shape(input_image)
     if len(image_size) != 2:
-        raise ValueError('Input image must 2D')
+        raise ValueError("Input image must 2D")
     elif image_size[0] != image_size[1]:
         N = np.min(image_size)
         x_start = int(np.floor(np.shape(input_image)[0] / 2 - N / 2) + 1)
@@ -143,18 +143,27 @@ def get_decorrelation_local_maxima(decorrelation_function):
 
         while np.shape(decorrelation_function)[0] > 0:
             if max_index == np.shape(decorrelation_function)[0]:
-                decorrelation_function = decorrelation_function[0:np.shape(
-                    decorrelation_function)[0] - 1]
+                decorrelation_function = decorrelation_function[
+                    0 : np.shape(decorrelation_function)[0] - 1
+                ]
                 max_index = np.argmax(decorrelation_function)
                 max_amplitude = decorrelation_function[max_index]
             elif max_index == 0:
                 break
-            elif (max_amplitude - np.min(decorrelation_function[max_index:np.shape(decorrelation_function)[0]])) >= 0.0005:
+            elif (
+                max_amplitude
+                - np.min(
+                    decorrelation_function[
+                        max_index : np.shape(decorrelation_function)[0]
+                    ]
+                )
+            ) >= 0.0005:
                 # Between max index and end of array
                 break
             else:
-                decorrelation_function = decorrelation_function[0:np.shape(
-                    decorrelation_function)[0] - 1]
+                decorrelation_function = decorrelation_function[
+                    0 : np.shape(decorrelation_function)[0] - 1
+                ]
                 max_index = np.argmax(decorrelation_function)
                 max_amplitude = decorrelation_function[max_index]
 
@@ -166,12 +175,13 @@ def get_decorrelation_local_maxima(decorrelation_function):
     return max_index, max_amplitude
 
 
-def linear_map(input_value,
-               minimum_value,
-               maximum_value,
-               mapped_minimum_value=None,
-               mapped_maximum_value=None
-               ):
+def linear_map(
+    input_value,
+    minimum_value,
+    maximum_value,
+    mapped_minimum_value=None,
+    mapped_maximum_value=None,
+):
     """
     # Performs a linear mapping of input_value from the range [minimum_value,maximum_value] to the range [mapped_minimum_value,mapped_maximum_value]
     # Inputs:
@@ -191,8 +201,7 @@ def linear_map(input_value,
         maximum_value = np.max(input_value)  # Incorrect.
 
     # convert the input value between 0 and 1
-    temporary_value = (input_value - minimum_value) / \
-        (maximum_value - minimum_value)
+    temporary_value = (input_value - minimum_value) / (maximum_value - minimum_value)
 
     # clamp the value between 0 and 1
     map0 = temporary_value < 0
@@ -201,14 +210,14 @@ def linear_map(input_value,
     temporary_value[map1] = 1
 
     # rescale and return
-    rescaled_value = np.multiply(
-        temporary_value,
-        (mapped_maximum_value - mapped_minimum_value)) + mapped_minimum_value
+    rescaled_value = (
+        np.multiply(temporary_value, (mapped_maximum_value - mapped_minimum_value))
+        + mapped_minimum_value
+    )
     return rescaled_value
 
 
-def apodize_image(input_image,
-                  number_pixels):
+def apodize_image(input_image, number_pixels):
     """
     # Apodize the edges of a 2D image
     # Inputs:
@@ -252,16 +261,13 @@ def apodize_image(input_image,
     xy_mask = np.multiply(y_mask, np.transpose(x_mask))
 
     # IMAGE APODIZATION
-    output_image = np.multiply(
-        (input_image - image_mean),
-        np.transpose(xy_mask)) + image_mean
+    output_image = (
+        np.multiply((input_image - image_mean), np.transpose(xy_mask)) + image_mean
+    )
     return output_image
 
 
-def get_correlation_coefficient(image_1,
-                                image_2,
-                                c1=None,
-                                c2=None):
+def get_correlation_coefficient(image_1, image_2, c1=None, c2=None):
     """
     # Return the normalized correlation coefficient expressed in Fourier space
     #
@@ -274,7 +280,7 @@ def get_correlation_coefficient(image_1,
     """
 
     # Suppress numpy warnings for invalid values
-    numpy.seterr(invalid='ignore')
+    numpy.seterr(invalid="ignore")
 
     if c2 is None:
         c2 = np.sqrt(np.sum(np.square(np.abs(image_2))))
@@ -286,18 +292,15 @@ def get_correlation_coefficient(image_1,
     #  and the complex conjugate of signal 2.
     #  Here it is normalized to provide a convenient value between 0 and 1.
     correlation_coefficient = np.divide(
-        np.sum(
-            np.real(
-                np.multiply(
-                    image_1, np.conj(image_2)))), np.multiply(
-            c1, c2))
+        np.sum(np.real(np.multiply(image_1, np.conj(image_2)))), np.multiply(c1, c2)
+    )
     correlation_coefficient = np.floor(1000 * correlation_coefficient) / 1000
     return correlation_coefficient
 
 
-def get_image_decorrelation(input_image,
-                            fourier_sampling=None,
-                            number_highpass_filters=None):
+def get_image_decorrelation(
+    input_image, fourier_sampling=None, number_highpass_filters=None
+):
     """
     # Estimate the image cut-off frequency based on decorrelation analysis
     # Inputs:
@@ -317,7 +320,8 @@ def get_image_decorrelation(input_image,
 
     if np.shape(fourier_sampling)[0] < 30:
         fourier_sampling = np.linspace(
-            np.min(fourier_sampling), np.max(fourier_sampling), 30)
+            np.min(fourier_sampling), np.max(fourier_sampling), 30
+        )
 
     if number_highpass_filters < 5:
         number_highpass_filters = 5
@@ -343,10 +347,11 @@ def get_image_decorrelation(input_image,
 
     # Masked Fourier Normalized Image
     fourier_normalized_image = np.fft.fftshift(
-        np.fft.fft2(np.fft.fftshift(input_image)))
+        np.fft.fft2(np.fft.fftshift(input_image))
+    )
     fourier_normalized_image = np.divide(
-        fourier_normalized_image,
-        np.abs(fourier_normalized_image))
+        fourier_normalized_image, np.abs(fourier_normalized_image)
+    )
     fourier_normalized_image[np.isinf(fourier_normalized_image)] = 0
     fourier_normalized_image[np.isnan(fourier_normalized_image)] = 0
     fourier_normalized_image = np.multiply(fourier_normalized_image, mask0)
@@ -354,10 +359,13 @@ def get_image_decorrelation(input_image,
     # Masked Fourier Image
     fourier_image = np.fft.fftshift(np.fft.fft2(np.fft.fftshift(input_image)))
     fourier_image = np.multiply(fourier_image, mask0)
-    c = np.real(np.sqrt(np.sum(np.multiply(fourier_image, np.conjugate(fourier_image)))))
+    c = np.real(
+        np.sqrt(np.sum(np.multiply(fourier_image, np.conjugate(fourier_image))))
+    )
 
     sampling_interval = np.linspace(
-        fourier_sampling[0], fourier_sampling[-1], number_fourier_samples)
+        fourier_sampling[0], fourier_sampling[-1], number_fourier_samples
+    )
 
     # Preallocate memory
     d0 = np.zeros(np.shape(fourier_sampling)[0])
@@ -366,7 +374,7 @@ def get_image_decorrelation(input_image,
     # Iterate through different frequency masks, and calculate the correlation
     # coefficient
     for k in range(np.shape(fourier_sampling)[0] - 1, -1, -1):
-        mask1 = zero_frequency_distance**2 < sampling_interval[k]**2
+        mask1 = zero_frequency_distance**2 < sampling_interval[k] ** 2
         masked_image = np.multiply(fourier_normalized_image, mask1)
         cc = get_correlation_coefficient(fourier_image, masked_image, c)
         if np.isnan(cc):
@@ -387,12 +395,11 @@ def get_image_decorrelation(input_image,
 
     # Secondary sampling interval
     g = np.hstack(
-        (np.shape(input_image)[0] / 4,
-         np.exp(
-            np.linspace(
-                np.log(gMax),
-                np.log(0.15),
-                number_highpass_filters))))
+        (
+            np.shape(input_image)[0] / 4,
+            np.exp(np.linspace(np.log(gMax), np.log(0.15), number_highpass_filters)),
+        )
+    )
 
     # Preallocate memory
     kc = np.zeros(np.shape(g)[0] * number_iterations + 1)
@@ -409,14 +416,24 @@ def get_image_decorrelation(input_image,
         for sampling_idx in range(np.shape(g)[0] - 1):  # 0..10
 
             # Fourier Gaussian Filtering
-            Ir = np.multiply(fourier_image, (1 - np.exp(-2 * \
-                             g[sampling_idx] * g[sampling_idx] * zero_frequency_distance**2)))
-            c = np.sqrt(np.sum(np.abs(Ir)**2))
-            for k in range(
-                    np.shape(fourier_sampling)[0] - 1, ind0 - 1, -1):  # 49...0
-                mask = zero_frequency_distance**2 < fourier_sampling[k]**2
+            Ir = np.multiply(
+                fourier_image,
+                (
+                    1
+                    - np.exp(
+                        -2
+                        * g[sampling_idx]
+                        * g[sampling_idx]
+                        * zero_frequency_distance**2
+                    )
+                ),
+            )
+            c = np.sqrt(np.sum(np.abs(Ir) ** 2))
+            for k in range(np.shape(fourier_sampling)[0] - 1, ind0 - 1, -1):  # 49...0
+                mask = zero_frequency_distance**2 < fourier_sampling[k] ** 2
                 cc = get_correlation_coefficient(
-                    Ir[mask], fourier_normalized_image[mask], c)
+                    Ir[mask], fourier_normalized_image[mask], c
+                )
                 if np.isnan(cc):
                     cc = 0
                 d[k, sampling_idx + number_highpass_filters * iteration_idx] = cc
@@ -426,11 +443,13 @@ def get_image_decorrelation(input_image,
                 # iteration_idx = 0:1
 
             ind, amp = get_decorrelation_local_maxima(
-                d[k:len(d), sampling_idx + number_highpass_filters * iteration_idx])
+                d[k : len(d), sampling_idx + number_highpass_filters * iteration_idx]
+            )
             snr = d[ind, sampling_idx + number_highpass_filters * iteration_idx]
             ind = ind + k
-            kc[sampling_idx + number_highpass_filters *
-                iteration_idx + 1] = fourier_sampling[ind]
+            kc[
+                sampling_idx + number_highpass_filters * iteration_idx + 1
+            ] = fourier_sampling[ind]
             SNR[sampling_idx + number_highpass_filters * iteration_idx + 1] = snr
 
         # refining the high-pass threshold and the radius sampling
@@ -455,11 +474,7 @@ def get_image_decorrelation(input_image,
                 g1 = g[ind1]
                 g2 = g[ind2]
 
-            g = np.exp(
-                np.linspace(
-                    np.log(g1),
-                    np.log(g2),
-                    number_highpass_filters))
+            g = np.exp(np.linspace(np.log(g1), np.log(g2), number_highpass_filters))
             # Radius Sampling Refinement
             r1 = kc[indmax[-1]] - (fourier_sampling[1] - fourier_sampling[0])
             r2 = kc[indmax[-1]] + 0.4
@@ -469,8 +484,9 @@ def get_image_decorrelation(input_image,
                 r2 = 1
 
             # np.minimum is the pairwise minimum of the array elements.
-            fourier_sampling = np.linspace(r1, np.minimum(
-                r2, fourier_sampling[-1]), number_fourier_samples)
+            fourier_sampling = np.linspace(
+                r1, np.minimum(r2, fourier_sampling[-1]), number_fourier_samples
+            )
             ind0 = 0
             r2 = fourier_sampling
 
@@ -501,5 +517,5 @@ def main_image_decorr():
     get_radial_average(raw_image)
 
 
-if (__name__ == '__main__'):
+if __name__ == "__main__":
     main_image_decorr()

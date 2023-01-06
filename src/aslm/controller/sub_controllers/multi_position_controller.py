@@ -1,4 +1,4 @@
-"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# """
+#
 
 # Standard Library Imports
 from tkinter import filedialog
@@ -50,12 +50,8 @@ logger = logging.getLogger(p)
 
 
 class MultiPositionController(GUIController):
-    
-    def __init__(self,
-                 view,
-                 parent_controller=None):
-        super().__init__(view,
-                         parent_controller)
+    def __init__(self, view, parent_controller=None):
+        super().__init__(view, parent_controller)
         self.table = self.view.pt
         # self.table.rowheader.bind("<Double-Button-1>", self.handle_double_click)
         self.table.loadCSV = self.load_positions
@@ -68,13 +64,7 @@ class MultiPositionController(GUIController):
         """
         # This function set positions to multi-position's table
         """
-        axis_dict = {
-            'x': 'X',
-            'y': 'Y',
-            'z': 'Z',
-            'theta': 'R',
-            'f': 'F'
-        }
+        axis_dict = {"x": "X", "y": "Y", "z": "Z", "theta": "R", "f": "F"}
         data = {}
 
         for name in axis_dict:
@@ -82,24 +72,23 @@ class MultiPositionController(GUIController):
         self.table.model.df = pd.DataFrame(data)
         self.table.redraw()
 
-        self.show_verbose_info('loaded new positions')
+        self.show_verbose_info("loaded new positions")
 
     def get_positions(self):
         """
         # This function will return all positions
         """
-        axis_dict = {
-            'X': 'x',
-            'Y': 'y',
-            'Z': 'z',
-            'R': 'theta',
-            'F': 'f'
-        }
+        axis_dict = {"X": "x", "Y": "y", "Z": "z", "R": "theta", "F": "f"}
         positions = {}
         rows = self.table.model.df.shape[0]
         for i in range(rows):
             temp = list(self.table.model.df.iloc[i])
-            if len(list(filter(lambda v: type(v) == float and not math.isnan(v), temp))) == 5:
+            if (
+                len(
+                    list(filter(lambda v: type(v) == float and not math.isnan(v), temp))
+                )
+                == 5
+            ):
                 temp = dict(self.table.model.df.iloc[i])
                 positions[i] = {}
                 for k in axis_dict:
@@ -117,18 +106,18 @@ class MultiPositionController(GUIController):
         # validate position
         if list(filter(lambda v: type(v) != int and type(v) != float, temp)):
             #  TODO: show error: position is invalid
-            print('position is invalid')
+            print("position is invalid")
             logger.info("position is invalid")
             return
         position = {
-            'x': temp[0],
-            'y': temp[1],
-            'z': temp[2],
-            'theta': temp[3],
-            'f': temp[4]
+            "x": temp[0],
+            "y": temp[1],
+            "z": temp[2],
+            "theta": temp[3],
+            "f": temp[4],
         }
-        self.parent_controller.execute('move_stage_and_update_info', position)
-        self.show_verbose_info('move stage to', position)
+        self.parent_controller.execute("move_stage_and_update_info", position)
+        self.show_verbose_info("move stage to", position)
 
     def get_position_num(self):
         """
@@ -141,14 +130,16 @@ class MultiPositionController(GUIController):
         # this function load a csv file,
         # the valid csv file should contain the line of headers ['X', 'Y', 'Z', 'R', 'F']
         """
-        filename = filedialog.askopenfilenames(defaultextension='.csv', filetypes=(('CSV files', '*.csv'),
-                                                                                   ('Text files', '*.txt')))
+        filename = filedialog.askopenfilenames(
+            defaultextension=".csv",
+            filetypes=(("CSV files", "*.csv"), ("Text files", "*.txt")),
+        )
         if not filename:
             return
         df = pd.read_csv(filename[0])
         # validate the csv file
         df.columns = map(lambda v: v.upper(), df.columns)
-        cmp_header = df.columns == ['X', 'Y', 'Z', 'R', 'F']
+        cmp_header = df.columns == ["X", "Y", "Z", "R", "F"]
         if not cmp_header.all():
             #  TODO: show error message
             print("The csv file isn't right, it should contain [X, Y, Z, R, F]")
@@ -157,23 +148,25 @@ class MultiPositionController(GUIController):
         model = TableModel(dataframe=df)
         self.table.updateModel(model)
         self.table.redraw()
-        self.show_verbose_info('loaded csv file', filename)
+        self.show_verbose_info("loaded csv file", filename)
 
     def export_positions(self):
         """
         # this function opens a dialog that let the user input a filename
         # then, it will export positions to that csv file
         """
-        filename = filedialog.asksaveasfilename(defaultextension='.csv', filetypes=(('CSV file', '*.csv'),
-                                                                                    ('Text file', '*.txt')))
+        filename = filedialog.asksaveasfilename(
+            defaultextension=".csv",
+            filetypes=(("CSV file", "*.csv"), ("Text file", "*.txt")),
+        )
         if not filename:
             return
-        self.table.model.df.to_csv(filename, index=False)   
-        self.show_verbose_info('exporting csv file', filename)
+        self.table.model.df.to_csv(filename, index=False)
+        self.show_verbose_info("exporting csv file", filename)
 
     def move_to_position(self):
         r"""Move to a position within the Multi-Position Acquisition Interface."""
-        event = type('MyEvent', (object,), {})
+        event = type("MyEvent", (object,), {})
         event.x, event.y = 0, 0
         self.handle_double_click(event)
 
@@ -185,7 +178,7 @@ class MultiPositionController(GUIController):
         self.table.update_rowcolors()
         self.table.redraw()
         self.table.tableChanged()
-        self.show_verbose_info('insert a row before current row')
+        self.show_verbose_info("insert a row before current row")
 
     def generate_positions(self):
         """
@@ -199,12 +192,14 @@ class MultiPositionController(GUIController):
         # this function will get the stage's current position,
         # then add it to position list
         """
-        position = self.parent_controller.execute('get_stage_position')
+        position = self.parent_controller.execute("get_stage_position")
         temp = list(map(lambda k: position[k], position))
-        self.table.model.df = self.table.model.df.append(pd.DataFrame([temp], columns=list('XYZRF')), ignore_index=True)
-        self.table.currentrow = self.table.model.df.shape[0]-1
+        self.table.model.df = self.table.model.df.append(
+            pd.DataFrame([temp], columns=list("XYZRF")), ignore_index=True
+        )
+        self.table.currentrow = self.table.model.df.shape[0] - 1
         self.table.update_rowcolors()
         self.table.redraw()
         self.table.tableChanged()
 
-        self.show_verbose_info('add current stage position to position list')
+        self.show_verbose_info("add current stage position to position list")

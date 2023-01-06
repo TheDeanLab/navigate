@@ -1,4 +1,4 @@
-"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# """
+#
 
 #  Standard Library Imports
 import logging
@@ -61,8 +61,10 @@ class FilterWheelBase:
     """
 
     def __init__(self, microscope_name, device_connection, configuration):
-        
-        self.filter_dictionary = configuration['configuration']['microscopes'][microscope_name]['filter_wheel']['available_filters']
+
+        self.filter_dictionary = configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["filter_wheel"]["available_filters"]
         self.wheel_position = 0
 
     def check_if_filter_in_filter_dictionary(self, filter_name):
@@ -83,8 +85,6 @@ class FilterWheelBase:
             filter_exists = True
         else:
             filter_exists = False
-            logger.debug('Filter Name not in the Filter Dictionary')
-            raise ValueError('Filter Name not in the Filter Dictionary.')
+            logger.debug("Filter Name not in the Filter Dictionary")
+            raise ValueError("Filter Name not in the Filter Dictionary.")
         return filter_exists
-
-

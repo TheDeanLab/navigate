@@ -1,4 +1,4 @@
-"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# """
+#
 
 import logging
 
@@ -36,13 +36,22 @@ p = __name__.split(".")[1]
 
 logger = logging.getLogger(p)
 
+
 class TreeNode:
-    def __init__(self, feature_name, func_dict, *, node_type='one-step', device_related=False, need_response=False):
+    def __init__(
+        self,
+        feature_name,
+        func_dict,
+        *,
+        node_type="one-step",
+        device_related=False,
+        need_response=False,
+    ):
         self.node_name = str(feature_name)
         self.node_funcs = func_dict
-        self.node_type = node_type # 'one-step', 'multi-step'
+        self.node_type = node_type  # 'one-step', 'multi-step'
         self.device_related = device_related
-        self.need_response = need_response # True, False
+        self.need_response = need_response  # True, False
         self.is_initialized = False
         self.child = None
         self.sibling = None
@@ -52,43 +61,79 @@ class TreeNode:
             if hasattr(self, key):
                 setattr(self, key, kwargs[key])
 
+
 class SignalNode(TreeNode):
-    def __init__(self, feature_name, func_dict, *, node_type='one-step', device_related=False, need_response=False, **kwargs):
-        super().__init__(feature_name, func_dict, node_type=node_type, device_related=device_related, need_response=need_response)
+    def __init__(
+        self,
+        feature_name,
+        func_dict,
+        *,
+        node_type="one-step",
+        device_related=False,
+        need_response=False,
+        **kwargs,
+    ):
+        super().__init__(
+            feature_name,
+            func_dict,
+            node_type=node_type,
+            device_related=device_related,
+            need_response=need_response,
+        )
         self.wait_response = False
 
     def run(self, *args, wait_response=False):
         # initialize the node when first time entering it
         if not self.is_initialized:
-            self.node_funcs['init']()
+            self.node_funcs["init"]()
             self.is_initialized = True
 
         if not wait_response:
             # print(self.node_name, 'running function:', self.node_funcs['main'])
-            result = self.node_funcs['main'](*args)
+            result = self.node_funcs["main"](*args)
             if self.need_response:
                 self.wait_response = True
                 return result, False
 
         elif self.wait_response:
             # print(self.node_name, 'running response function:', self.node_funcs['main-response'])
-            result = self.node_funcs['main-response'](*args)
+            result = self.node_funcs["main-response"](*args)
             self.wait_response = False
         elif self.device_related or self.need_response:
             return None, False
         else:
             # run(wait_response=True)
-            result = self.node_funcs['main'](*args)
+            result = self.node_funcs["main"](*args)
 
-        if self.wait_response or self.node_type == 'multi-step' and not self.node_funcs['end']():
+        if (
+            self.wait_response
+            or self.node_type == "multi-step"
+            and not self.node_funcs["end"]()
+        ):
             return result, False
-        
+
         self.is_initialized = False
         return result, True
 
+
 class DataNode(TreeNode):
-    def __init__(self, feature_name, func_dict, *, node_type='one-step', device_related=False, need_response=False, **kwargs):
-        super().__init__(feature_name, func_dict, node_type=node_type, device_related=device_related, need_response=need_response)
+    def __init__(
+        self,
+        feature_name,
+        func_dict,
+        *,
+        node_type="one-step",
+        device_related=False,
+        need_response=False,
+        **kwargs,
+    ):
+        super().__init__(
+            feature_name,
+            func_dict,
+            node_type=node_type,
+            device_related=device_related,
+            need_response=need_response,
+        )
         self.is_marked = False
 
     def run(self, *args):
@@ -97,16 +142,16 @@ class DataNode(TreeNode):
 
         # initialize the node when first time entering it
         if not self.is_initialized:
-            self.node_funcs['init']()
+            self.node_funcs["init"]()
             self.is_initialized = True
 
         # to decide whether it is the target frame
-        if not self.node_funcs['pre-main'](*args):
+        if not self.node_funcs["pre-main"](*args):
             return False, False
 
-        result = self.node_funcs['main'](*args)
+        result = self.node_funcs["main"](*args)
 
-        if self.node_type == 'multi-step' and not self.node_funcs['end']():
+        if self.node_type == "multi-step" and not self.node_funcs["end"]():
             return result, False
 
         # erase flag when exit the node
@@ -116,10 +161,12 @@ class DataNode(TreeNode):
 
 class Container:
     def __init__(self, root=None, cleanup_list=[]):
-        self.root = root # root node of the tree
-        self.curr_node = None # current running node
-        self.end_flag = False # stop running flag
-        self.cleanup_list = cleanup_list # a list of nodes containing 'cleanup' functions.
+        self.root = root  # root node of the tree
+        self.curr_node = None  # current running node
+        self.end_flag = False  # stop running flag
+        self.cleanup_list = (
+            cleanup_list  # a list of nodes containing 'cleanup' functions.
+        )
         self.is_closed = False
 
     def reset(self):
@@ -129,7 +176,7 @@ class Container:
     def cleanup(self):
         for node in self.cleanup_list:
             try:
-                node.node_funcs['cleanup']()
+                node.node_funcs["cleanup"]()
             except:
                 pass
         self.is_closed = True
@@ -152,11 +199,11 @@ class SignalContainer(Container):
         if not self.curr_node:
             self.curr_node = self.root
         while self.curr_node:
-            logger.debug(f'running signal node: {self.curr_node.node_name}')
+            logger.debug(f"running signal node: {self.curr_node.node_name}")
             try:
                 result, is_end = self.curr_node.run(*args, wait_response=wait_response)
             except Exception as e:
-                logger.debug(f'SignalContainer - {e}')
+                logger.debug(f"SignalContainer - {e}")
                 self.end_flag = True
                 self.cleanup()
                 return
@@ -165,17 +212,17 @@ class SignalContainer(Container):
             if self.curr_node.sibling:
                 self.curr_node = self.curr_node.sibling
             elif result and self.curr_node.child:
-                logger.debug(f'Signal running child of {self.curr_node.node_name}')
+                logger.debug(f"Signal running child of {self.curr_node.node_name}")
                 self.curr_node = self.curr_node.child
             else:
                 self.curr_node = None
                 if self.remaining_number_of_execution > 0:
                     self.remaining_number_of_execution -= 1
-                    self.end_flag = (self.remaining_number_of_execution == 0)
+                    self.end_flag = self.remaining_number_of_execution == 0
                 return
-            
+
             if self.curr_node.device_related:
-                return       
+                return
 
 
 class DataContainer(Container):
@@ -193,19 +240,26 @@ class DataContainer(Container):
             try:
                 result, is_end = self.curr_node.run(*args)
             except Exception as e:
-                logger.debug(f'DataContainer - {e}')
-                if self.curr_node.need_response == False and self.curr_node.node_type == 'one-step':
+                logger.debug(f"DataContainer - {e}")
+                if (
+                    self.curr_node.need_response == False
+                    and self.curr_node.node_type == "one-step"
+                ):
                     try:
-                        logger.debug(f'Datacontainer cleanup node {self.curr_node.node_name}')
-                        self.curr_node.node_funcs.get('cleanup', dummy_func)()
+                        logger.debug(
+                            f"Datacontainer cleanup node {self.curr_node.node_name}"
+                        )
+                        self.curr_node.node_funcs.get("cleanup", dummy_func)()
                     except:
-                        logger.debug(f'The node({self.curr_node.node_name}) is not closed correctly! Please check the cleanup function')
+                        logger.debug(
+                            f"The node({self.curr_node.node_name}) is not closed correctly! Please check the cleanup function"
+                        )
                         pass
                     self.curr_node.is_marked = True
                     result, is_end = False, True
                 else:
                     # terminate the container.
-                    # the signal container may stuck there waiting a response, 
+                    # the signal container may stuck there waiting a response,
                     # the cleanup function of that node should give it a fake response to make it stop
                     self.end_flag = True
                     self.cleanup()
@@ -224,53 +278,64 @@ class DataContainer(Container):
                 self.curr_node = None
                 return
 
-            if self.curr_node.device_related or (self.curr_node.need_response and self.returned_a_response):
+            if self.curr_node.device_related or (
+                self.curr_node.need_response and self.returned_a_response
+            ):
                 return
 
 
-def get_registered_funcs(feature_module, func_type='signal'):
+def get_registered_funcs(feature_module, func_type="signal"):
     func_dict = feature_module.config_table.get(func_type, {})
-    
-    if 'init' not in func_dict:
-        func_dict['init'] = dummy_func
-    if 'main' not in func_dict:
-        func_dict['main'] = dummy_True
-    if 'end' not in func_dict:
-        func_dict['end'] = dummy_True
-    if func_type == 'data' and 'pre-main' not in func_dict:
-        func_dict['pre-main'] = dummy_True
+
+    if "init" not in func_dict:
+        func_dict["init"] = dummy_func
+    if "main" not in func_dict:
+        func_dict["main"] = dummy_True
+    if "end" not in func_dict:
+        func_dict["end"] = dummy_True
+    if func_type == "data" and "pre-main" not in func_dict:
+        func_dict["pre-main"] = dummy_True
     return func_dict
 
+
 def load_features(model, feature_list):
-    """ turn list to child-sibling tree"""
+    """turn list to child-sibling tree"""
     signal_cleanup_list, data_cleanup_list = [], []
-    signal_root, data_root = TreeNode('none', None), TreeNode('none', None)
+    signal_root, data_root = TreeNode("none", None), TreeNode("none", None)
     pre_signal = signal_root
     pre_data = data_root
     for temp in feature_list:
         for i in range(len(temp)):
             args = ()
-            if 'args' in temp[i]:
-                args = temp[i]['args']
-            feature = temp[i]['name'](model, *args)
+            if "args" in temp[i]:
+                args = temp[i]["args"]
+            feature = temp[i]["name"](model, *args)
 
-            node_config = feature.config_table.get('node', {})
+            node_config = feature.config_table.get("node", {})
             # if signal function has a waiting func, then the nodes are 'need_response' nodes
-            if 'main-response' in feature.config_table.get('signal', {}):
-                node_config['need_response'] = True
-            if 'node' in temp[i]:
-                for k, v in temp[i]['node'].items():
+            if "main-response" in feature.config_table.get("signal", {}):
+                node_config["need_response"] = True
+            if "node" in temp[i]:
+                for k, v in temp[i]["node"].items():
                     node_config[k] = v
             # 'multi-step' must set to be 'device_related'
-            if node_config.get('node_type', '') == 'multi-step':
-                node_config['device_related'] = True
+            if node_config.get("node_type", "") == "multi-step":
+                node_config["device_related"] = True
 
-            signal_node = SignalNode(temp[i]['name'].__name__, get_registered_funcs(feature, 'signal'), **node_config)
-            data_node = DataNode(temp[i]['name'].__name__, get_registered_funcs(feature, 'data'), **node_config)
+            signal_node = SignalNode(
+                temp[i]["name"].__name__,
+                get_registered_funcs(feature, "signal"),
+                **node_config,
+            )
+            data_node = DataNode(
+                temp[i]["name"].__name__,
+                get_registered_funcs(feature, "data"),
+                **node_config,
+            )
 
-            if 'cleanup' in feature.config_table.get('signal', {}):
+            if "cleanup" in feature.config_table.get("signal", {}):
                 signal_cleanup_list.append(signal_node)
-            if 'cleanup' in feature.config_table.get('data', {}):
+            if "cleanup" in feature.config_table.get("data", {}):
                 data_cleanup_list.append(data_node)
 
             if i == 0:
@@ -282,11 +347,14 @@ def load_features(model, feature_list):
             pre_signal = signal_node
             pre_data = data_node
 
-    return SignalContainer(signal_root.child, signal_cleanup_list), DataContainer(data_root.child, data_cleanup_list)
+    return SignalContainer(signal_root.child, signal_cleanup_list), DataContainer(
+        data_root.child, data_cleanup_list
+    )
 
 
 def dummy_True(*args):
     return True
+
 
 def dummy_func(*args):
     pass

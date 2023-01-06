@@ -1,4 +1,4 @@
-"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# """
+#
 from aslm.controller.sub_controllers.gui_controller import GUIController
 import logging
 
@@ -38,26 +38,17 @@ logger = logging.getLogger(p)
 
 
 class StageController(GUIController):
-    def __init__(self,
-                 view,
-                 main_view,
-                 canvas,
-                 parent_controller):
-        super().__init__(view,
-                         parent_controller)
+    def __init__(self, view, main_view, canvas, parent_controller):
+        super().__init__(view, parent_controller)
 
         self.main_view = main_view
         self.canvas = canvas
 
-        self.stage_setting_dict = self.parent_controller.configuration['experiment']['StageParameters']
+        self.stage_setting_dict = self.parent_controller.configuration["experiment"][
+            "StageParameters"
+        ]
 
-        self.event_id = {
-            'x': None,
-            'y': None,
-            'z': None,
-            'theta': None,
-            'f': None
-        }
+        self.event_id = {"x": None, "y": None, "z": None, "theta": None, "f": None}
 
         # stage movement limits
         self.position_min = {}
@@ -69,64 +60,37 @@ class StageController(GUIController):
         # gui event bind
         buttons = self.view.get_buttons()
         for k in buttons:
-            if k[:2] == 'up':
+            if k[:2] == "up":
                 buttons[k].configure(command=self.up_btn_handler(k[3:-4]))
-            elif k[:4] == 'down':
+            elif k[:4] == "down":
                 buttons[k].configure(command=self.down_btn_handler(k[5:-4]))
-            elif k[5:-4] == 'xy':
-                buttons[k].configure(
-                    command=self.xy_zero_btn_handler()
-                )
-            elif k.startswith('zero'):
-                buttons[k].configure(
-                    command=self.zero_btn_handler(k[5:-4])
-                )
+            elif k[5:-4] == "xy":
+                buttons[k].configure(command=self.xy_zero_btn_handler())
+            elif k.startswith("zero"):
+                buttons[k].configure(command=self.zero_btn_handler(k[5:-4]))
 
-        buttons['stop'].configure(command=self.stop_button_handler)
+        buttons["stop"].configure(command=self.stop_button_handler)
         self.position_callback_traces = {}
         self.position_callbacks_bound = False
         self.bind_position_callbacks()
 
         self.initialize()
 
-        # binding mouse wheel event on camera view
-        # self.canvas.bind("<Enter>", self.on_enter)
-        # self.canvas.bind("<Leave>", self.on_leave)
-
-        # WASD key movement
-        self.main_view.root.bind("<Key>", self.key_press)
-   
-    # def on_enter(self, event):
-    #     self.canvas.bind("<MouseWheel>", self.update_focus)
-    #
-    # def on_leave(self, event):
-    #     self.canvas.unbind("<MouseWheel>")
-    #
-    # def update_focus(self, event):
-    #     current_position = self.get_position()
-    #     f_increment = self.widget_vals["f_step"].get()
-    #     if event.delta > 0:
-    #         current_position["f"] += f_increment
-    #     else:
-    #         current_position["f"] -= f_increment
-    #     self.set_position(current_position)
-        
-    def key_press(self, event):
+    def stage_key_press(self, event):
         char = event.char.lower()
-        if char in ['w', 'a', 's', 'd']:
-            current_position = self.get_position()
-            if current_position is None:
-                return
-            xy_increment = self.widget_vals["xy_step"].get()
-            if char == "w":
-                current_position['y'] += xy_increment
-            elif char == "a":
-                current_position['x'] -= xy_increment
-            elif char == "s":
-                current_position['y'] -= xy_increment
-            elif char == "d":
-                current_position['x'] += xy_increment
-            self.set_position(current_position)
+        current_position = self.get_position()
+        if current_position is None:
+            return
+        xy_increment = self.widget_vals["xy_step"].get()
+        if char == "w":
+            current_position["y"] += xy_increment
+        elif char == "a":
+            current_position["x"] -= xy_increment
+        elif char == "s":
+            current_position["y"] -= xy_increment
+        elif char == "d":
+            current_position["x"] += xy_increment
+        self.set_position(current_position)
 
     def initialize(self):
         r"""Initialize the Stage limits of steps and positions
@@ -137,38 +101,42 @@ class StageController(GUIController):
             Global configuration of the microscope
         """
         config = self.parent_controller.configuration_controller
-        self.position_min = config.get_stage_position_limits('_min')
-        self.position_max = config.get_stage_position_limits('_max')
+        self.position_min = config.get_stage_position_limits("_min")
+        self.position_max = config.get_stage_position_limits("_max")
 
         widgets = self.view.get_widgets()
         step_dict = config.stage_step
-        for axis in ['x', 'y', 'z', 'theta', 'f']:
+        for axis in ["x", "y", "z", "theta", "f"]:
             widgets[axis].widget.min = self.position_min[axis]
             widgets[axis].widget.max = self.position_max[axis]
-            if axis == 'x' or 'y':
-                step_axis = 'xy'
+            if axis == "x" or axis == "y":
+                step_axis = "xy"
             else:
                 step_axis = axis
-            widgets[step_axis+'_step'].widget.configure(from_=1)
-            widgets[step_axis+'_step'].widget.configure(to=self.position_max[axis])
-            widgets[step_axis+'_step'].widget.configure(increment=step_dict[axis])          
+            # the minimum step should be non-zero and non-negative.
+            widgets[step_axis + "_step"].widget.configure(from_=1)
+            widgets[step_axis + "_step"].widget.configure(to=self.position_max[axis])
+            step_increment = step_dict[axis] // 10
+            if step_increment == 0:
+                step_increment = 1
+            widgets[step_axis + "_step"].widget.configure(increment=step_increment)
 
     def bind_position_callbacks(self):
-        r"""Binds position_callback() to each axis, records the trace name so we can unbind later.
-        """
+        r"""Binds position_callback() to each axis, records the trace name so we can unbind later."""
         if not self.position_callbacks_bound:
-            for axis in ['x', 'y', 'z', 'theta', 'f']:
+            for axis in ["x", "y", "z", "theta", "f"]:
                 # add event bind to position entry variables
-                cbname = self.widget_vals[axis].trace_add('write', self.position_callback(axis))
+                cbname = self.widget_vals[axis].trace_add(
+                    "write", self.position_callback(axis)
+                )
                 self.position_callback_traces[axis] = cbname
             self.position_callbacks_bound = True
 
     def unbind_position_callbacks(self):
-        r"""Unbinds position callbacks.
-        """
+        r"""Unbinds position callbacks."""
         if self.position_callbacks_bound:
             for axis, cbname in self.position_callback_traces.items():
-                self.widget_vals[axis].trace_remove('write', cbname)
+                self.widget_vals[axis].trace_remove("write", cbname)
             self.position_callbacks_bound = False
 
     def populate_experiment_values(self):
@@ -180,12 +148,14 @@ class StageController(GUIController):
              setting_dict = { 'x': value, 'y': value, 'z': value, 'theta': value, 'f': value
                            'xy_step': value, 'z_step': value, 'theta_step': value, 'f_step': value}
         """
-        self.stage_setting_dict = self.parent_controller.configuration['experiment']['StageParameters']
+        self.stage_setting_dict = self.parent_controller.configuration["experiment"][
+            "StageParameters"
+        ]
         widgets = self.view.get_widgets()
         for k in widgets:
             self.widget_vals[k].set(self.stage_setting_dict.get(k, 0))
             widgets[k].widget.trigger_focusout_validation()
-    
+
     def set_position(self, position):
         r"""This function is to populate(set) position in the View
 
@@ -195,12 +165,12 @@ class StageController(GUIController):
             {'x': value, 'y': value, 'z': value, 'theta': value, 'f': value}
         """
         widgets = self.view.get_widgets()
-        for axis in ['x', 'y', 'z', 'theta', 'f']:
+        for axis in ["x", "y", "z", "theta", "f"]:
             self.widget_vals[axis].set(position.get(axis, 0))
             # validate position value if set through variable
             widgets[axis].widget.trigger_focusout_validation()
             self.stage_setting_dict[axis] = position.get(axis, 0)
-        self.show_verbose_info('Set stage position')
+        self.show_verbose_info("Set stage position")
 
     def set_position_silent(self, position):
         r"""This function is to populate(set) position in the View without a trace.
@@ -226,9 +196,12 @@ class StageController(GUIController):
         """
         position = {}
         try:
-            for axis in ['x' , 'y', 'z', 'theta', 'f']:
+            for axis in ["x", "y", "z", "theta", "f"]:
                 position[axis] = self.widget_vals[axis].get()
-                if position[axis] < self.position_min[axis] or position[axis] > self.position_max[axis]:
+                if (
+                    position[axis] < self.position_min[axis]
+                    or position[axis] > self.position_max[axis]
+                ):
                     return None
         except:
             # Tkinter will raise error when the variable is DoubleVar and the value is empty
@@ -250,10 +223,10 @@ class StageController(GUIController):
             Function for setting desired stage positions in the View.
         """
         position_val = self.widget_vals[axis]
-        if axis == 'x' or axis == 'y':
-            step_val = self.widget_vals['xy_step']
+        if axis == "x" or axis == "y":
+            step_val = self.widget_vals["xy_step"]
         else:
-            step_val = self.widget_vals[axis+'_step']
+            step_val = self.widget_vals[axis + "_step"]
 
         def handler():
             # guarantee stage won't move out of limits
@@ -266,6 +239,7 @@ class StageController(GUIController):
             if temp > self.position_max[axis]:
                 temp = self.position_max[axis]
             position_val.set(temp)
+
         return handler
 
     def down_btn_handler(self, axis):
@@ -284,10 +258,10 @@ class StageController(GUIController):
             Function for setting desired stage positions in the View.
         """
         position_val = self.widget_vals[axis]
-        if axis == 'x' or axis == 'y':
-            step_val = self.widget_vals['xy_step']
+        if axis == "x" or axis == "y":
+            step_val = self.widget_vals["xy_step"]
         else:
-            step_val = self.widget_vals[axis+'_step']
+            step_val = self.widget_vals[axis + "_step"]
 
         def handler():
             # guarantee stage won't move out of limits
@@ -300,6 +274,7 @@ class StageController(GUIController):
             if temp < self.position_min[axis]:
                 temp = self.position_min[axis]
             position_val.set(temp)
+
         return handler
 
     def zero_btn_handler(self, axis):
@@ -321,6 +296,7 @@ class StageController(GUIController):
 
         def handler():
             position_val.set(0)
+
         return handler
 
     def xy_zero_btn_handler(self):
@@ -331,17 +307,18 @@ class StageController(GUIController):
         handler : object
             Function for setting desired stage positions in the View.
         """
-        x_val = self.widget_vals['x']
-        y_val = self.widget_vals['y']
+        x_val = self.widget_vals["x"]
+        y_val = self.widget_vals["y"]
 
         def handler():
             x_val.set(0)
             y_val.set(0)
+
         return handler
 
     def stop_button_handler(self):
         r"""This function stops the stage after a 250 ms debouncing period of time."""
-        self.view.after(250, lambda: self.parent_controller.execute('stop_stage'))
+        self.view.after(250, lambda: self.parent_controller.execute("stop_stage"))
 
     def position_callback(self, axis, **kwargs):
         r"""Callback functions bind to position variables.
@@ -373,7 +350,10 @@ class StageController(GUIController):
                 widget.trigger_focusout_validation()
                 position = position_var.get()
                 # if position is not inside limits do not move stage
-                if position < self.position_min[axis] or position > self.position_max[axis]:
+                if (
+                    position < self.position_min[axis]
+                    or position > self.position_max[axis]
+                ):
                     if self.event_id[axis]:
                         self.view.after_cancel(self.event_id[axis])
                     return
@@ -385,10 +365,13 @@ class StageController(GUIController):
             self.stage_setting_dict[axis] = position
             # Debouncing wait duration - Duration of time to integrate the number of clicks that a user provides.
             # If 1000 ms, if user hits button 10x within 1s, only moves to the final value.
-            self.event_id[axis] = self.view.after(250, lambda: self.parent_controller.execute('stage',
-                                                                                              position_var.get(),
-                                                                                              axis))
+            self.event_id[axis] = self.view.after(
+                250,
+                lambda: self.parent_controller.execute(
+                    "stage", position_var.get(), axis
+                ),
+            )
 
-            self.show_verbose_info('Stage position changed')
-        
+            self.show_verbose_info("Stage position changed")
+
         return handler

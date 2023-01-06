@@ -9,6 +9,7 @@ problems.
 
 from PyQt4 import QtCore
 
+
 class FarmSimulatorSidePanel(QtCore.QObject):
     """
     The joystick is set up using the pyqinusb package by using an HidDeviceFilter
@@ -18,20 +19,19 @@ class FarmSimulatorSidePanel(QtCore.QObject):
     designated "0" to "5".
     """
 
-
     def __init__(self):
         super().__init__()
 
         import pywinusb.hid as hid
 
-        self.hid_filter = hid.HidDeviceFilter(vendor_id = 0x0738, product_id = 0x2218)
+        self.hid_filter = hid.HidDeviceFilter(vendor_id=0x0738, product_id=0x2218)
         self.hid_device = self.hid_filter.get_devices()
         self.joystick = self.hid_device[0]
 
         self.joystick.open()
         self.joystick.set_raw_data_handler(self.farm_panel_handler)
 
-        self.mode = 'undefined'
+        self.mode = "undefined"
 
         # Communicate to previous GUI that button was pressed
         # self.sig_mode_changed.emit(self.mode)
@@ -68,17 +68,17 @@ class FarmSimulatorSidePanel(QtCore.QObject):
         # self.axis5_timer.timeout.connect(lambda: self.sig_axis_moved.emit(5, self.axis5_value))
 
     def start_axis_timer(self, axis):
-        value = exec('self.axis'+str(axis)+'_value')
-        exec('self.axis'+str(axis)+'_timer.start(self.timeout_interval)')
+        value = exec("self.axis" + str(axis) + "_value")
+        exec("self.axis" + str(axis) + "_timer.start(self.timeout_interval)")
 
     def stop_axis_timer(self, axis):
-        exec('self.axis'+str(axis)+'_timer.stop()')
+        exec("self.axis" + str(axis) + "_timer.stop()")
 
     def __del__(self):
         try:
             self.joystick.close()
         except:
-            print('Closing HID device failed')
+            print("Closing HID device failed")
 
     def sample_handler(self, data):
         print("Raw data: {0}".format(data))
@@ -97,53 +97,53 @@ class FarmSimulatorSidePanel(QtCore.QObject):
         -------
         str
         """
-        return format(x, 'b').zfill(n)
+        return format(x, "b").zfill(n)
 
     def farm_panel_handler(self, data):
-        """ Each group is checked to see if events are different from off-events
+        """Each group is checked to see if events are different from off-events
         '00000000' is the off-event.
         Buttons 1 to 8"""
         self.group_1to8 = data[1]
 
-        self.group_1to8_string = self.get_bin(self.group_1to8,8)
-        if self.group_1to8_string != '00000000':
-            button = 8 - self.group_1to8_string.find('1')
-            #self.sig_button_pressed.emit(button)
+        self.group_1to8_string = self.get_bin(self.group_1to8, 8)
+        if self.group_1to8_string != "00000000":
+            button = 8 - self.group_1to8_string.find("1")
+            # self.sig_button_pressed.emit(button)
 
         self.group_9to16 = data[2]
-        self.group_9to16_string = self.get_bin(self.group_9to16,8)
-        if self.group_9to16_string != '00000000':
-            button = 16 - self.group_9to16_string.find('1')
-            #self.sig_button_pressed.emit(button)
+        self.group_9to16_string = self.get_bin(self.group_9to16, 8)
+        if self.group_9to16_string != "00000000":
+            button = 16 - self.group_9to16_string.find("1")
+            # self.sig_button_pressed.emit(button)
 
         self.group_17to24 = data[3]
-        self.group_17to24_string = self.get_bin(self.group_17to24,8)
-        if self.group_17to24_string != '00000000':
-            button = 24 - self.group_17to24_string.find('1')
-            #self.sig_button_pressed.emit(button)
+        self.group_17to24_string = self.get_bin(self.group_17to24, 8)
+        if self.group_17to24_string != "00000000":
+            button = 24 - self.group_17to24_string.find("1")
+            # self.sig_button_pressed.emit(button)
 
         self.group_25to29 = data[4]
-        self.group_25to29_string = self.get_bin(self.group_25to29,8)
-        if self.group_25to29_string != '00000000':
-            index = self.group_25to29_string.find('1')
+        self.group_25to29_string = self.get_bin(self.group_25to29, 8)
+        if self.group_25to29_string != "00000000":
+            index = self.group_25to29_string.find("1")
             if index == 0:
                 """
                 29 is the mode changing button, so the corresponding
                 signal should be emitted as well:
                 """
-                print('self mode: ', self.mode)
-                if self.mode == '012':
-                    self.mode = '345'
-                    #self.sig_mode_changed.emit(self.mode)
-                elif self.mode == '345':
-                    self.mode = '012'
-                    #self.sig_mode_changed.emit(self.mode)
+                print("self mode: ", self.mode)
+                if self.mode == "012":
+                    self.mode = "345"
+                    # self.sig_mode_changed.emit(self.mode)
+                elif self.mode == "345":
+                    self.mode = "012"
+                    # self.sig_mode_changed.emit(self.mode)
 
                 self.sig_button_pressed.emit(29)
             elif index == 4:
                 self.sig_button_pressed.emit(28)
             else:
-                button = 32-index
+                button = 32 - index
                 self.sig_button_pressed.emit(button)
 
         """Joystick handling:
@@ -152,28 +152,29 @@ class FarmSimulatorSidePanel(QtCore.QObject):
         started. This allows every new arriving HID package to stop the
         persistent sending of messages.
         """
-        self.handle_axis_value_changes(0,'012',5,data)
-        self.handle_axis_value_changes(1,'012',6,data)
-        self.handle_axis_value_changes(2,'012',7,data)
-        self.handle_axis_value_changes(3,'345',8,data)
-        self.handle_axis_value_changes(4,'345',9,data)
-        self.handle_axis_value_changes(5,'345',10,data)
+        self.handle_axis_value_changes(0, "012", 5, data)
+        self.handle_axis_value_changes(1, "012", 6, data)
+        self.handle_axis_value_changes(2, "012", 7, data)
+        self.handle_axis_value_changes(3, "345", 8, data)
+        self.handle_axis_value_changes(4, "345", 9, data)
+        self.handle_axis_value_changes(5, "345", 10, data)
 
     def handle_axis_value_changes(self, axis_id, axis_group, data_group, data):
         value = data[data_group]
         if value != 128:
             if self.mode != axis_group:
                 self.mode = axis_group
-                #self.sig_mode_changed.emit(axis_group)
+                # self.sig_mode_changed.emit(axis_group)
 
-            if value-128 == -128 or value-128 == 127:
-                """ Assign a certain axis the min or max value """
+            if value - 128 == -128 or value - 128 == 127:
+                """Assign a certain axis the min or max value"""
 
-                exec('self.axis'+str(axis_id)+'_value = value')
+                exec("self.axis" + str(axis_id) + "_value = value")
                 """ Start timers. Because this is executed from
                 another thread, a signal has to be used here."""
-                #self.sig_start_timer.emit(axis_id)
-                #self.sig_axis_moved.emit(axis_id, value)
+                # self.sig_start_timer.emit(axis_id)
+                # self.sig_axis_moved.emit(axis_id, value)
             else:
-                #self.sig_stop_timer.emit(axis_id)
-                #self.sig_axis_moved.emit(axis_id, value)
+                # self.sig_stop_timer.emit(axis_id)
+                # self.sig_axis_moved.emit(axis_id, value)
+                pass

@@ -1,3 +1,34 @@
+# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# All rights reserved.
+
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# provided that the following conditions are met:
+
+#      * Redistributions of source code must retain the above copyright notice,
+#      this list of conditions and the following disclaimer.
+
+#      * Redistributions in binary form must reproduce the above copyright
+#      notice, this list of conditions and the following disclaimer in the
+#      documentation and/or other materials provided with the distribution.
+
+#      * Neither the name of the copyright holders nor the names of its
+#      contributors may be used to endorse or promote products derived from this
+#      software without specific prior written permission.
+
+# NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
+# THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+# CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+# PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+
 #  Standard Imports
 
 # Third Party Imports
@@ -12,14 +43,16 @@ from multiprocessing.managers import DictProxy
 
 
 class BigDataViewerDataSource(DataSource):
-    def __init__(self, file_name: str = None, mode: str = 'w') -> None:
-        self._resolutions = np.array([[1,1,1],[2,2,2],[4,4,4],[8,8,8]],dtype=int)
+    def __init__(self, file_name: str = None, mode: str = "w") -> None:
+        self._resolutions = np.array(
+            [[1, 1, 1], [2, 2, 2], [4, 4, 4], [8, 8, 8]], dtype=int
+        )
         self._subdivisions = None
         self._shapes = None
         self.image = None
         self._views = []
 
-        file_name = '.'.join(file_name.split('.')[:-1])+'.hdf'
+        file_name = ".".join(file_name.split(".")[:-1]) + ".hdf"
         super().__init__(file_name, mode)
 
         self._current_frame = 0
@@ -34,89 +67,110 @@ class BigDataViewerDataSource(DataSource):
     def subdivisions(self) -> npt.ArrayLike:
         """Store as XYZ per BDV spec."""
         if self._subdivisions is None:
-            self._subdivisions = np.zeros((4,3), dtype=int)
-            self._subdivisions[:,0] = np.gcd(32, self.shapes[:,0])
-            self._subdivisions[:,1] = np.gcd(32, self.shapes[:,1])
-            self._subdivisions[:,2] = np.gcd(32, self.shapes[:,2])
+            self._subdivisions = np.zeros((4, 3), dtype=int)
+            self._subdivisions[:, 0] = np.gcd(32, self.shapes[:, 0])
+            self._subdivisions[:, 1] = np.gcd(32, self.shapes[:, 1])
+            self._subdivisions[:, 2] = np.gcd(32, self.shapes[:, 2])
 
             # Safety
             self._subdivisions = np.maximum(self._subdivisions, 1)
 
             # Reverse to XYZ
-            self._subdivisions = self._subdivisions[:,::-1]
+            self._subdivisions = self._subdivisions[:, ::-1]
         return self._subdivisions
 
     @property
     def shapes(self) -> npt.ArrayLike:
         """Store as ZYX rather than XYZ, per BDV spec."""
         if self._shapes is None:
-            self._shapes = np.maximum(np.array([self.shape_z, self.shape_y, self.shape_x])[None,:]//self.resolutions[:,::-1], 1)
+            self._shapes = np.maximum(
+                np.array([self.shape_z, self.shape_y, self.shape_x])[None, :]
+                // self.resolutions[:, ::-1],
+                1,
+            )
         return self._shapes
 
-    def set_metadata_from_configuration_experiment(self, configuration: DictProxy) -> None:
+    def set_metadata_from_configuration_experiment(
+        self, configuration: DictProxy
+    ) -> None:
         self._subdivisions = None
         self._shapes = None
         return super().set_metadata_from_configuration_experiment(configuration)
 
     def write(self, data: npt.ArrayLike, **kw) -> None:
-        self.mode = 'w'
+        self.mode = "w"
 
-        c, z, t, p = self._cztp_indices(self._current_frame, self.metadata.per_stack)  # find current channel
-        if (z==0) and (c==0) and (t==0) and (p==0):
+        c, z, t, p = self._cztp_indices(
+            self._current_frame, self.metadata.per_stack
+        )  # find current channel
+        if (z == 0) and (c == 0) and (t == 0) and (p == 0):
             self._setup_h5()
 
         time_group_name = f"t{t:05}"
         setup_group_name = f"s{(c*self.positions+p):02}"
         for i in range(self.subdivisions.shape[0]):
-            dx, dy, dz = self.resolutions[i,...]
+            dx, dy, dz = self.resolutions[i, ...]
             if z % dz == 0:
-                dataset_name = '/'.join([time_group_name, setup_group_name, f"{i}", "cells"])
+                dataset_name = "/".join(
+                    [time_group_name, setup_group_name, f"{i}", "cells"]
+                )
                 # print(z, dz, dataset_name, self.image[dataset_name].shape, data[::dx, ::dy].shape)
-                zs = np.minimum(z//dz, self.shapes[i,0]-1)  # TODO: Is this necessary?
-                self.image[dataset_name][zs,...] = data[::dx, ::dy].T
-                if (i==0) and len(kw) > 0:
+                zs = np.minimum(
+                    z // dz, self.shapes[i, 0] - 1
+                )  # TODO: Is this necessary?
+                self.image[dataset_name][zs, ...] = data[::dx, ::dy].T
+                if (i == 0) and len(kw) > 0:
                     self._views.append(kw)
         self._current_frame += 1
 
         # Check if this was the last frame to write
         c, z, t, p = self._cztp_indices(self._current_frame, self.metadata.per_stack)
-        if (z==0) and (c==0) and (t==self.shape_t) and (p==self.positions):
+        if (z == 0) and (c == 0) and (t == self.shape_t) and (p == self.positions):
             self.close()
 
     def read(self) -> None:
-        self.mode = 'r'
-        self.image = h5py.File(self.file_name, 'r')
+        self.mode = "r"
+        self.image = h5py.File(self.file_name, "r")
 
     def _setup_h5(self):
         # Create setups
-        for i in range(self.shape_c*self.positions):
+        for i in range(self.shape_c * self.positions):
             setup_group_name = f"s{i:02}"
             if setup_group_name in self.image:
                 del self.image[setup_group_name]
-            self.image.create_dataset(f"{setup_group_name}/resolutions", data=self.resolutions)
-            self.image.create_dataset(f"{setup_group_name}/subdivisions", data=self.subdivisions)
+            self.image.create_dataset(
+                f"{setup_group_name}/resolutions", data=self.resolutions
+            )
+            self.image.create_dataset(
+                f"{setup_group_name}/subdivisions", data=self.subdivisions
+            )
 
         # Create the datasets to populate
         for t in range(self.shape_t):
             time_group_name = f"t{t:05}"
-            for i in range(self.shape_c*self.positions):
+            for i in range(self.shape_c * self.positions):
                 setup_group_name = f"s{i:02}"
                 for j in range(self.subdivisions.shape[0]):
-                    dataset_name = '/'.join([time_group_name, setup_group_name, f"{j}", "cells"])
+                    dataset_name = "/".join(
+                        [time_group_name, setup_group_name, f"{j}", "cells"]
+                    )
                     if dataset_name in self.image:
                         del self.image[dataset_name]
                     # print(f"Creating {dataset_name} with shape {self.shapes[j,...]}")
-                    self.image.create_dataset(dataset_name,
-                                chunks=tuple(self.subdivisions[j,...][::-1]),
-                                shape=self.shapes[j,...], dtype='uint16')
+                    self.image.create_dataset(
+                        dataset_name,
+                        chunks=tuple(self.subdivisions[j, ...][::-1]),
+                        shape=self.shapes[j, ...],
+                        dtype="uint16",
+                    )
 
     def _mode_checks(self) -> None:
-        self._write_mode = self._mode == 'w'
+        self._write_mode = self._mode == "w"
         self.close()  # if anything was already open, close it
         if self._write_mode:
             self._current_frame = 0
             self._views = []
-            self.image = h5py.File(self.file_name, 'a')
+            self.image = h5py.File(self.file_name, "a")
             self._setup_h5()
         else:
             self.read()

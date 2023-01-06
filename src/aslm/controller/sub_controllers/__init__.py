@@ -9,3 +9,4 @@ from .autofocus_popup_controller import AutofocusPopupController
 from .keystroke_controller import KeystrokeController
 from .multi_position_controller import MultiPositionController
 from .ilastik_popup_controller import IlastikPopupController
+from .camera_map_setting_popup_controller import CameraMapSettingPopupController

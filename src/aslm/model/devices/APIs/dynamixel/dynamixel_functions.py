@@ -31,18 +31,28 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 is_64bits = sys.maxsize > 2**32
-if platform.system() == 'Darwin':
-    dxl_config = (str(Path(__file__).resolve().parent) + '/libdxl_mac_c.dylib').replace('\\', '/')
-elif platform.system() == 'Windows':
+if platform.system() == "Darwin":
+    dxl_config = (str(Path(__file__).resolve().parent) + "/libdxl_mac_c.dylib").replace(
+        "\\", "/"
+    )
+elif platform.system() == "Windows":
     if is_64bits:
-        dxl_config = (str(Path(__file__).resolve().parent) + '/dxl_x64_c.dll').replace('\\', '/')
+        dxl_config = (str(Path(__file__).resolve().parent) + "/dxl_x64_c.dll").replace(
+            "\\", "/"
+        )
     else:
-        dxl_config = (str(Path(__file__).resolve().parent) + '/dxl_x86_c.dll').replace('\\', '/')
-elif platform.system() == 'Linux':
+        dxl_config = (str(Path(__file__).resolve().parent) + "/dxl_x86_c.dll").replace(
+            "\\", "/"
+        )
+elif platform.system() == "Linux":
     if is_64bits:
-        dxl_config = (str(Path(__file__).resolve().parent) + '/libdxl_x64_c.so').replace('\\', '/')
+        dxl_config = (
+            str(Path(__file__).resolve().parent) + "/libdxl_x64_c.so"
+        ).replace("\\", "/")
     else:
-        dxl_config = (str(Path(__file__).resolve().parent) + '/libdxl_x86_c.so').replace('\\', '/')
+        dxl_config = (
+            str(Path(__file__).resolve().parent) + "/libdxl_x86_c.so"
+        ).replace("\\", "/")
 
 if Path(dxl_config).exists():
     dxl_lib = cdll.LoadLibrary(dxl_config)
@@ -156,7 +166,7 @@ groupBulkReadTxRxPacket = dxl_lib.groupBulkReadTxRxPacket
 groupBulkReadIsAvailable = dxl_lib.groupBulkReadIsAvailable
 groupBulkReadGetData = dxl_lib.groupBulkReadGetData
 
-#group_bulk_write
+# group_bulk_write
 groupBulkWrite = dxl_lib.groupBulkWrite
 
 groupBulkWriteAddParam = dxl_lib.groupBulkWriteAddParam
@@ -166,7 +176,7 @@ groupBulkWriteClearParam = dxl_lib.groupBulkWriteClearParam
 
 groupBulkWriteTxPacket = dxl_lib.groupBulkWriteTxPacket
 
-#group_sync_read
+# group_sync_read
 groupSyncRead = dxl_lib.groupSyncRead
 
 groupSyncReadAddParam = dxl_lib.groupSyncReadAddParam
@@ -180,7 +190,7 @@ groupSyncReadTxRxPacket = dxl_lib.groupSyncReadTxRxPacket
 groupSyncReadIsAvailable = dxl_lib.groupSyncReadIsAvailable
 groupSyncReadGetData = dxl_lib.groupSyncReadGetData
 
-#group_sync_write
+# group_sync_write
 groupSyncWrite = dxl_lib.groupSyncWrite
 
 groupSyncWriteAddParam = dxl_lib.groupSyncWriteAddParam

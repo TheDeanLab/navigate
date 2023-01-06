@@ -1,4 +1,4 @@
-"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -28,20 +28,24 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# """
+#
+
 
 def combine_funcs(*funclist):
-    """this function will combine a list of functions to a new function
-    """
+    """this function will combine a list of functions to a new function"""
+
     def new_func():
         for func in funclist:
             if callable(func):
                 func()
+
     return new_func
+
 
 def build_ref_name(separator, *args):
     alist = list(map(lambda a: str(a), args))
     return separator.join(alist)
+
 
 def copy_proxy_object(content):
     r"""This function will serialize proxy dict and list
@@ -51,7 +55,7 @@ def copy_proxy_object(content):
     result: dict/list
     """
     from multiprocessing import managers
-    
+
     def func(content):
         if type(content) == managers.DictProxy:
             result = {}

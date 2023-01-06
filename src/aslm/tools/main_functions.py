@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -37,8 +38,9 @@ import platform
 from aslm.config import get_configuration_paths
 
 
-def evaluate_parser_input_arguments(parser):
-    """If non-default configuration, experiment, or ETL constant file is provided as an input argument.
+def evaluate_parser_input_arguments(args):
+    """If non-default configuration, experiment, or ETL constant file is provided as an
+    input argument.
 
     Accepts a ArgumentParser object
     Retrieves the default configuration/experiment/etc paths.
@@ -47,8 +49,8 @@ def evaluate_parser_input_arguments(parser):
 
     Parameters
     ----------
-    parser : object
-        ArgumentParser object.
+    args : argparse.Namespace
+        Dictionary of parser input arguments
 
     Returns
     -------
@@ -69,12 +71,6 @@ def evaluate_parser_input_arguments(parser):
         etl_constants_path,
         rest_api_path,
     ) = get_configuration_paths()
-
-    # Add Parser Input Arguments
-    parser = add_parser_input_arguments(parser)
-
-    # Parse Input Arguments
-    args = parser.parse_args()
 
     # Evaluate Input Arguments
     if args.config_file:
@@ -107,6 +103,8 @@ def evaluate_parser_input_arguments(parser):
             args.logging_config
         )
         logging_path = args.logging_config
+    else:
+        logging_path = None  # TODO: What should the default be?
 
     return (
         configuration_path,
@@ -144,18 +142,18 @@ def identify_gpu(args):
     return use_gpu
 
 
-def add_parser_input_arguments(parser):
+def create_parser():
     """Add Parser Input Arguments to ArgumentParser Object.
-
-    Parameters
-    ----------
-    parser : object
-        Default ArgumentParser Object
 
     Returns
     -------
     parser : object
         ArgumentParserObject with Added Input Arguments"""
+
+    parser = argparse.ArgumentParser(
+        description="Autonomous Software for Light Microscopy Command Line Arguments"
+    )
+
     input_args = parser.add_argument_group("Input Arguments")
 
     input_args.add_argument(
@@ -183,7 +181,8 @@ def add_parser_input_arguments(parser):
         default=False,
         action="store_true",
         help="Forces software to use CPU for analytical operations.  "
-        "Overrides the automatic selection of a CUDA GPU if it is present by TensorFlow.",
+        "Overrides the automatic selection of a CUDA GPU if it is present by"
+        " TensorFlow.",
     )
 
     # Non-Default Configuration and Experiment Input Arguments

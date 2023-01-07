@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -32,50 +33,46 @@
 
 # Standard Library Imports
 import unittest
-import argparse
 from pathlib import Path
 
 # Third Party Imports
 
 # Local Imports
-from aslm.tools.main_functions import identify_gpu, add_parser_input_arguments
+from aslm.tools.main_functions import identify_gpu, create_parser
 from aslm.config.config import get_aslm_path
+
+
 class TestMain(unittest.TestCase):
     r"""Unit Test for main.py"""
+
     def test_identify_gpu(self):
-        parser = argparse.ArgumentParser()
-        parser = add_parser_input_arguments(parser)
-        args = parser.parse_args(['--CPU'])
+        parser = create_parser()
+        args = parser.parse_args(["--CPU"])
         args.CPU = True
         use_gpu = identify_gpu(args)
         assert use_gpu is not args.CPU
 
     def test_argument_parser(self):
-        parser = argparse.ArgumentParser()
-        parser = add_parser_input_arguments(parser)
+        parser = create_parser()
 
         # Boolean arguments
-        input_arguments = ['-sh',
-                           '--synthetic_hardware',
-                           '-d',
-                           '--debug',
-                           '--CPU']
+        input_arguments = ["-sh", "--synthetic_hardware", "-d", "--debug", "--CPU"]
         for arg in input_arguments:
-            args = parser.parse_args([arg])
-            pass
+            parser.parse_args([arg])
 
         # Path Arguments.
         aslm_path = Path(get_aslm_path())
-        input_arguments = ['--config_file',
-                           '--experiment_file',
-                           '--etl_const_file',
-                           '--rest_api_file',
-                           '--logging_config']
+        input_arguments = [
+            "--config_file",
+            "--experiment_file",
+            "--etl_const_file",
+            "--rest_api_file",
+            "--logging_config",
+        ]
         for arg in input_arguments:
             #  TODO: Figure out why this is throwing an error.
-            #  args = parser.parse_args([arg], Path.joinpath(aslm_path, 'test.yml'))
-            pass
+            parser.parse_args([arg, str(Path.joinpath(aslm_path, "test.yml"))])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

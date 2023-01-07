@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -48,7 +49,8 @@ REGEX_DICT = {
 }
 
 # Base design courtesy of below book.
-# Learning Path: Python GUI Programming - A Complete Reference Guide by Alan D. Moore and B. M. Harwani
+# Learning Path: Python GUI Programming - A Complete Reference Guide by Alan D. Moore
+# and B. M. Harwani
 """
 The below classes take advantage of multiple inheritance to achieve validation.
 
@@ -64,9 +66,9 @@ Substitution Codes for validation in tkinter: %P, %s, %i, %S, %v, %V, %W, %d
 - %v = widgets validate value
 - %V = event that triggered validation
 - %W = widgets name in TK as string
-- %d = code that indicates action attempted. 0 for delete, 1 for insert, -1 for other. String
+- %d = code that indicates action attempted. 0 for delete, 1 for insert, -1 for other.
 
-Tkinter Validation process:
+String Tkinter Validation process:
 - validate sets the event that triggers callback
 - validatecommand takes in command that determines if data is valid
 - invalidcommand runs command given if validatecommand is False
@@ -77,7 +79,8 @@ def otherFun(): do something
 widget = ttk.Entry()
 wrapped_function = widget.register(someFun)
 other_function = widget.register(otherFun)
-validation_function = (wrapped_function, '%P') # Can use any amount of substitution codes above to pass in various data
+validation_function = (wrapped_function, '%P') # Can use any amount of substitution
+codes above to pass in various data
 invalid = (other_function, '%P', '%s')
 widget.config(
             validate='all',
@@ -99,6 +102,8 @@ class ValidatedMixin:
         super().__init__(
             *args, **kwargs
         )  # Calls base class that is mixed in with this class
+        self.undo_history = []
+        self.redo_history = []  # History for each widgets to undo and redo
 
         # Validation setup
         validcmd = self.register(self._validate)
@@ -127,7 +132,8 @@ class ValidatedMixin:
             foreground=("red" if on else "black")
         )  # Changes text to red on error
 
-    # Validation, args are the sub codes. This just sets up validation then runs based on event type
+    # Validation, args are the sub codes. This just sets up validation then runs based
+    # on event type
     def _validate(self, proposed, current, char, event, index, action):
         self._toggle_error(False)  # Error is off
         self.error.set("")  # No error to start
@@ -148,7 +154,8 @@ class ValidatedMixin:
     # Sub validation functions to be overridden by specific widgets
     def _focusout_validate(
         self, **kwargs
-    ):  # **kwargs lets us just specify needed keywords or get args from **kwargs(double pointer ie array) rather than getting args in right order
+    ):  # **kwargs lets us just specify needed keywords or get args from **kwargs
+        # (double pointer i.e. array) rather than getting args in right order
         return True
 
     def _key_validate(self, **kwargs):
@@ -181,9 +188,41 @@ class ValidatedMixin:
             self._focusout_invalid(event="focusout")
         return valid
 
+    def add_history(self, event):
+        if self.get() != "":
+            if not self.undo_history or self.get() != self.undo_history[-1]:
+                if len(self.undo_history) < 3:
+                    print(f"Undo history list: {self.undo_history}")
+                    self.undo_history.append(self.get())
+                    self.redo_history.clear()
+                else:
+                    print(f"Undo history list larger than 3: {self.undo_history}")
+                    self.undo_history.append(self.get())
+                    self.undo_history.pop(0)
+                    self.redo_history.clear()
+
+    def undo(self, event):
+        if self.undo_history:
+            if len(self.undo_history) > 1:
+                self.set(self.undo_history[-2])
+                self.redo_history.append(self.undo_history.pop())
+            elif len(self.undo_history) == 1:
+                self.redo_history.append(self.undo_history.pop())
+
+    def redo(self, event):
+        if self.redo_history:
+            if not self.undo_history:
+                self.undo_history.append(self.redo_history.pop())
+                if not self.redo_history:
+                    return
+            self.set(self.redo_history[-1])
+            self.undo_history.append(self.redo_history.pop())
+
 
 # Entry class that requires Entry
-# Can optionally pass in a precision, min value, max value and a boolean for whether the entry requires a value. The min_var, max_var and focus_update_var are the same as spinbox
+# Can optionally pass in a precision, min value, max value and a boolean for whether the
+# entry requires a value. The min_var, max_var and focus_update_var are the same as
+# spinbox
 class ValidatedEntry(ValidatedMixin, ttk.Entry):
     def __init__(
         self,
@@ -195,7 +234,7 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         focus_update_var=None,
         min="-Infinity",
         max="Infinity",
-        **kwargs
+        **kwargs,
     ):
         super().__init__(*args, **kwargs)
         self.resolution = Decimal(precision)  # Number for precision given on creation
@@ -207,20 +246,25 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         self.max = max
         self.required = required
 
-        # Dynamic range checker
-        if min_var:
-            self.min_var = min_var
-            self.min_var.trace_add("w", self._set_minimum)
-        if max_var:
-            self.max_var = max_var
-            self.max_var.trace_add("w", self._set_maximum)
-        self.focus_update_var = focus_update_var
-        self.bind("<FocusOut>", self._set_focus_update_var)
+    # Dynamic range checker
+    # if min_var:
+    #     self.min_var = min_var
+    #     self.min_var.trace_add('w', self._set_minimum)
+    # if max_var:
+    #     self.max_var = max_var
+    #     self.max_var.trace_add('w', self._set_maximum)
+    # self.focus_update_var = focus_update_var
+    # self.bind('<FocusOut>', self._set_focus_update_var)
+
+    def set(self, value):
+        self.delete(0, tk.END)
+        self.variable.set(value)
+        self.insert(0, value)
 
     def set_precision(self, prec):
         """
-        Given a precision it will update the spinboxes ability to handle more or less precision for validation.
-        This is separate from the increment value.
+        Given a precision it will update the spinboxes ability to handle more or less
+        precision for validation. This is separate from the increment value.
         """
         self.precision = prec
 
@@ -257,7 +301,8 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         ):
             return False
 
-        # Proposed is either a Decimal, '-', '.', or '-.' need one final check for '-' and '.'
+        # Proposed is either a Decimal, '-', '.', or '-.' need one final check for '-'
+        # and '.'
         if proposed in "-.":
             return True
 
@@ -269,7 +314,8 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
 
         return valid
 
-    # If entry widget is empty set the error string and return False TODO add hover bubble with error message
+    # If entry widget is empty set the error string and return False TODO add hover
+    # bubble with error message
     def _focusout_validate(self, event):
         valid = True
         value = self.get()
@@ -284,6 +330,7 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
 
         # check if there are range limits
         if min_val == "-Infinity" or max_val == "Infinity":
+            self.add_history(event)
             return True
 
         try:
@@ -301,9 +348,14 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         if value > int(max_val):
             self.error.set("Value is too high (max {})".format(max_val))
 
+        # If input is valid on focusout add to history of widget
+        if valid:
+            self.add_history(event)
+
         return valid
 
-    # Gets current value of widget and if focus_update_var is present it sets it to the same value
+    # Gets current value of widget and if focus_update_var is present it sets it to the
+    # same value
     def _set_focus_update_var(self, event):
         value = self.get()
         if self.focus_update_var and not self.error.get():
@@ -345,7 +397,8 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
             self.hover.hidetip()
 
 
-# Clears box on backspace, allows fully typed words that match values to be accepted, and an option to require a value
+# Clears box on backspace, allows fully typed words that match values to be accepted,
+# and an option to require a value
 class ValidatedCombobox(ValidatedMixin, ttk.Combobox):
     def _key_validate(self, proposed, action, **kwargs):
         valid = True
@@ -374,11 +427,12 @@ class ValidatedCombobox(ValidatedMixin, ttk.Combobox):
         return valid
 
 
-# Deletion always allowed, digits always allowed, if from < 0 '-' is allowed as first char,
-# if increment is decimal '.' allowed, if proposed value is greater than to ignore key
-# if proposed value requires more precision than increment, ignore key
-# On focusout, make sure number is a valid number string and greater than from value
-# If given a min_var, max_var, or focus_update_var then the spinbox range will update dynamically when those valuse are changed (can be used to link to other widgets)
+# Deletion always allowed, digits always allowed, if from < 0 '-' is allowed as first
+# char, if increment is decimal '.' allowed, if proposed value is greater than to ignore
+# key if proposed value requires more precision than increment, ignore key
+# On focus out, make sure number is a valid number string and greater than from value
+# If given a min_var, max_var, or focus_update_var then the spinbox range will update
+# dynamically when those valuse are changed (can be used to link to other widgets)
 class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
     def __init__(
         self,
@@ -389,7 +443,7 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         from_="-Infinity",
         to="Infinity",
         required=False,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(*args, from_=from_, to=to, **kwargs)
         self.resolution = str(kwargs.get("increment", "1.0"))  # Number put into spinbox
@@ -409,8 +463,8 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
 
     def set_precision(self, prec):
         """
-        Given a precision it will update the spinboxes ability to handle more or less precision for validation.
-        This is separate from the increment value.
+        Given a precision it will update the spinboxes ability to handle more or less
+        precision for validation. This is separate from the increment value.
         """
         self.precision = prec
 
@@ -474,7 +528,8 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         ):
             return False
 
-        # # Proposed is either a Decimal, '-', '.', or '-.' need one final check for '-' and '.'
+        # Proposed is either a Decimal, '-', '.', or '-.' need one final check for '-'
+        # and '.'
         if proposed == "-" or proposed == ".":
             return True
 
@@ -519,7 +574,8 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
 
         return valid
 
-    # Gets current value of widget and if focus_update_var is present it sets it to the same value
+    # Gets current value of widget and if focus_update_var is present it sets it to the
+    # same value
     def _set_focus_update_var(self, event):
         value = self.get()
         if self.focus_update_var and not self.error.get():
@@ -563,6 +619,7 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
 
 if __name__ == "__main__":
     from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+    from aslm.view.custom_widgets.hoverbar import Tooltip
 
     root = tk.Tk()
     frame = ttk.Frame(root)

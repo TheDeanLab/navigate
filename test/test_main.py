@@ -70,7 +70,6 @@ class TestMain(unittest.TestCase):
             "--logging_config",
         ]
         for arg in input_arguments:
-            #  TODO: Figure out why this is throwing an error.
             parser.parse_args([arg, str(Path.joinpath(aslm_path, "test.yml"))])
 
 

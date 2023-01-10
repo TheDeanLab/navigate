@@ -106,6 +106,26 @@ class WaitToContinue:
         return self.can_continue and (self.target_frame_id in frame_ids)
 
 
+class LoopByCount:
+    def __init__(self, model, steps):
+        self.model = model
+        self.signals = steps
+        self.data_frames = steps
+
+        self.config_table = {
+            "signal": {"main": self.signal_func},
+            "data": {"main": self.data_func},
+        }
+
+    def signal_func(self):
+        self.signals -= 1
+        return self.signals > 0
+
+    def data_func(self, frame_ids):
+        self.data_frames -= len(frame_ids)
+        return self.data_frames > 0
+
+
 class ZStackAcquisition:
     def __init__(self, model):
         self.model = model

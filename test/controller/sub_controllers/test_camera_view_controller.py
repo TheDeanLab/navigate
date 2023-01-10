@@ -32,6 +32,7 @@
 
 from aslm.controller.sub_controllers.camera_view_controller import CameraViewController
 import pytest
+import random
 
 class TestCameraViewController():
     
@@ -50,10 +51,12 @@ class TestCameraViewController():
     def test_slider_update(self, monkeypatch):
         
         # Testing it can be triggered, other functions within are tested later
-        self.image = (5,5)
+        self.image = (int(random.random()),int(random.random()))
         self.reset = False
         def mock_retrieve(slider_index, channel_display_index):
-            self.image = (0,0)
+            self.x = int(random.random())
+            self.y = int(random.random())
+            self.image = (self.x,self.y)
         def mock_reset():
             self.reset = True
         monkeypatch.setattr(self.camera_view, "retrieve_image_slice_from_volume", mock_retrieve)
@@ -62,7 +65,7 @@ class TestCameraViewController():
 
         self.camera_view.slider_update(event)
 
-        assert self.image == (0,0)
+        assert self.image == (self.x,self.y)
         assert self.reset == True
 
     def test_update_display_state(self):
@@ -72,9 +75,11 @@ class TestCameraViewController():
     def test_get_absolute_position(self, monkeypatch):
         
         def mock_winfo_pointerx():
-            return 10
+            self.x = int(random.random())
+            return self.x
         def mock_winfo_pointery():
-            return 20
+            self.y = int(random.random())
+            return self.y
         monkeypatch.setattr(self.v, 'winfo_pointerx', mock_winfo_pointerx)
         monkeypatch.setattr(self.v, 'winfo_pointery', mock_winfo_pointery)
         
@@ -82,21 +87,27 @@ class TestCameraViewController():
         x, y = self.camera_view.get_absolute_position()
         
         # make assertions about the return value
-        assert x == 10
-        assert y == 20
+        assert x == self.x
+        assert y == self.y
 
     def test_popup_menu(self, monkeypatch):
         
         # create a fake event object
-        event = type('Event', (object,), {'x': 10, 'y': 20})()
+        self.startx = int(random.random())
+        self.starty = int(random.random())
+        event = type('Event', (object,), {'x': self.startx, 'y': self.starty})()
         self.grab_released = False
-        self.x = 5
-        self.y = 5
+        self.x = int(random.random())
+        self.y = int(random.random())
+        self.absx = int(random.random())
+        self.absy = int(random.random())
 
 
         # monkey patch the get_absolute_position method to return specific values
         def mock_get_absolute_position():
-            return 30, 40
+            self.absx = int(random.random())
+            self.absy = int(random.random())
+            return self.absx, self.absy
         monkeypatch.setattr(self.camera_view, 'get_absolute_position', mock_get_absolute_position)
 
         def mock_tk_popup(x, y):
@@ -112,9 +123,22 @@ class TestCameraViewController():
 
         
         # make assertions about the state of the view object
-        assert self.camera_view.move_to_x == 10
-        assert self.camera_view.move_to_y == 20
-        assert self.x == 30
-        assert self.y == 40
+        assert self.camera_view.move_to_x == self.startx
+        assert self.camera_view.move_to_y == self.starty
+        assert self.x == self.absx
+        assert self.y == self.absy
         assert self.grab_released == True
+
+    @pytest.mark.parametrize("name", ['minmax', 'image'])
+    @pytest.mark.parametrize("data", [[random.randint(0, 49), random.randint(50, 100)]])
+    def test_initialize(self, name, data):
+        
+        self.camera_view.initialize(name, data)
+
+        # Checking values
+        if name == 'minmax':
+            assert self.camera_view.image_palette['Min'].get() == data[0]
+            assert self.camera_view.image_palette['Max'].get() == data[1]
+        if name == 'image':
+            assert self.camera_view.image_metrics['Frames'].get() == data[0]
 

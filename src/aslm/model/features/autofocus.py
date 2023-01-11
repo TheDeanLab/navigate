@@ -108,8 +108,7 @@ class Autofocus:
         )
 
         self.model.signal_thread = threading.Thread(
-            target=self.model.run_single_channel_acquisition_with_features,
-            kwargs={"target_channel": self.target_channel},
+            target=self.model.run_acquisition,
             name="Autofocus Signal",
         )
 

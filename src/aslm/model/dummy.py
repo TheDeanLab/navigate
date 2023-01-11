@@ -99,6 +99,7 @@ class DummyController:
         self.view = view
         self.configuration_controller = ConfigurationController(self.configuration)
         self.stage_pos = {}
+        self.off_stage_pos = {}
     
     def execute(self, str, sec=None):
         '''
@@ -116,6 +117,9 @@ class DummyController:
             self.stage_pos['y'] = int(random.random())
 
             return self.stage_pos
+
+
+
         
     def pop(self):
         '''

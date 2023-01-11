@@ -277,31 +277,37 @@ class TestFeatureContainer(unittest.TestCase):
     def setUp(self):
         print("-------------new test case-----------------")
 
-    @unittest.skip('takes long time to finish the test')
+    @unittest.skip("takes long time to finish the test")
     def test_feature_container(self):
         model = DummyModel()
         print("# test signal and data are synchronous")
         print("--all function nodes are single step")
 
-        print('----all signal nodes are without waiting function')
+        print("----all signal nodes are without waiting function")
         for i in range(10):
             feature_list = generate_random_feature_list()
             model.start(feature_list)
             print(model.signal_records)
             print(model.data_records)
-            assert model.signal_records == model.data_records, print_feature_list(feature_list)
+            assert model.signal_records == model.data_records, print_feature_list(
+                feature_list
+            )
 
-        print('----some signal nodes have waiting function')
+        print("----some signal nodes have waiting function")
         for i in range(10):
             feature_list = generate_random_feature_list(has_response_func=True)
             print_feature_list(feature_list)
             model.start(feature_list)
             print(model.signal_records)
             print(model.data_records)
-            assert model.signal_records == model.data_records, print_feature_list(feature_list)
+            assert model.signal_records == model.data_records, print_feature_list(
+                feature_list
+            )
 
-        print('--Some function nodes are multi-step')
-        print('----multi-step nodes have both signal and data functions, and without waiting function')
+        print("--Some function nodes are multi-step")
+        print(
+            "----multi-step nodes have both signal and data functions, and without waiting function"
+        )
         for i in range(10):
             feature_list = generate_random_feature_list(multi_step=True)
             # feature_list = convert_to_feature_list([[('node0', 0, 1, 2), ('node1', 0, 0, 3)]])
@@ -310,29 +316,65 @@ class TestFeatureContainer(unittest.TestCase):
             model.start(feature_list)
             print(model.signal_records)
             print(model.data_records)
-            assert model.signal_records == model.data_records, print_feature_list(feature_list)
+            assert model.signal_records == model.data_records, print_feature_list(
+                feature_list
+            )
 
-        print('----multi-step nodes have both signal and data functions, and with waiting function')
+        print(
+            "----multi-step nodes have both signal and data functions, and with waiting function"
+        )
         for i in range(10):
-            feature_list = generate_random_feature_list(has_response_func=True, multi_step=True)
+            feature_list = generate_random_feature_list(
+                has_response_func=True, multi_step=True
+            )
             print_feature_list(feature_list)
             model.start(feature_list)
             print(model.signal_records)
             print(model.data_records)
-            assert model.signal_records == model.data_records, print_feature_list(feature_list)
+            assert model.signal_records == model.data_records, print_feature_list(
+                feature_list
+            )
 
         print("----some multi-step nodes don't have data functions")
         for i in range(10):
             # feature_list = convert_to_feature_list([[('node0', 0, 1, 1), ('multi-step1', False, 0, 6, False), 'WaitToContinue', ('multi-step2', False, 0, 8, False), 'WaitToContinue', ('node3', 0, 1, 1), ('multi-step4', False, 0, 9, False), 'WaitToContinue'], [('node5', 0, 0, 6)]])
             # feature_list = convert_to_feature_list([[('node0', 1, 1, 1)], [('node1', 0, 1, 9), ('node2', 0, 1, 1), ('node3', 0, 0, 1), ('multi-step4', False, 0, 9, False), 'WaitToContinue', ('multi-step5', False, 0, 5, False), 'WaitToContinue', ('node6', 1, 1, 1)]])
-            feature_list = generate_random_feature_list(has_response_func=True, multi_step=True, with_data_func=False)
+            feature_list = generate_random_feature_list(
+                has_response_func=True, multi_step=True, with_data_func=False
+            )
             print_feature_list(feature_list)
             model.start(feature_list)
             print(model.signal_records)
             print(model.data_records)
-            assert model.signal_records == model.data_records, print_feature_list(feature_list)
+            assert model.signal_records == model.data_records, print_feature_list(
+                feature_list
+            )
 
         print("----with loop node")
+        # test case: (,)
+        feature_list = [
+            (
+                {
+                    "name": DummyFeature,
+                    "args": (
+                        "node0",
+                        0,
+                        0,
+                        1,
+                    ),
+                },
+                {"name": LoopByCount, "args": (3,)},
+            )
+        ]
+        model.start(feature_list)
+        print(model.signal_records)
+        print(model.data_records)
+        assert model.signal_records == model.data_records, print_feature_list(
+            feature_list
+        )
+        assert model.signal_records == [(0, "node0"), (1, "node0"), (2, "node0")]
+
+        # test case: random loop
         for i in range(20):
             # feature_list = [({'name': DummyFeature, 'args': ('node0', 0, 0, 1,),}, {'name': LoopByCount, 'args': (3,)}), [{'name': DummyFeature, 'args': ('node1', 0, 0, 1,),}, {'name': DummyFeature, 'args': ('node2', 0, 0, 1,),}], ({'name': DummyFeature, 'args': ('node3', 0, 0, 1,),}, {'name': LoopByCount, 'args': (3,)}), ({'name': DummyFeature, 'args': ('node4', 0, 0, 1,),}, {'name': DummyFeature, 'args': ('node5', 0, 0, 1,),}, {'name': LoopByCount, 'args': (3,)})]
             feature_list = generate_random_feature_list(
@@ -348,6 +390,241 @@ class TestFeatureContainer(unittest.TestCase):
             assert model.signal_records == model.data_records, print_feature_list(
                 feature_list
             )
+
+        print("----nested loop nodes")
+        # test case: ((), , ), , ,
+        feature_list = [
+            (
+                (
+                    generate_random_feature_list(
+                        has_response_func=True,
+                        multi_step=True,
+                        with_data_func=False,
+                        loop_node=True,
+                    ),
+                    {"name": LoopByCount, "args": (3,)},
+                ),
+                {
+                    "name": DummyFeature,
+                    "args": (
+                        "node100",
+                        0,
+                        1,
+                        1,
+                    ),
+                },
+                {"name": LoopByCount, "args": (3,)},
+            ),
+            {
+                "name": DummyFeature,
+                "args": (
+                    "node101",
+                    0,
+                    1,
+                    1,
+                ),
+            },
+            {
+                "name": DummyFeature,
+                "args": (
+                    "node102",
+                    0,
+                    1,
+                    1,
+                ),
+            },
+        ]
+        model.start(feature_list)
+        print(model.signal_records)
+        print(model.data_records)
+        assert model.signal_records == model.data_records, print_feature_list(
+            feature_list
+        )
+
+        # test case: (,,(),), ,
+        feature_list = [
+            (
+                {
+                    "name": DummyFeature,
+                    "args": (
+                        "node200",
+                        0,
+                        0,
+                        1,
+                    ),
+                },
+                {
+                    "name": DummyFeature,
+                    "args": (
+                        "node201",
+                        0,
+                        1,
+                        1,
+                    ),
+                },
+                (
+                    generate_random_feature_list(
+                        has_response_func=True,
+                        multi_step=True,
+                        with_data_func=False,
+                        loop_node=True,
+                    ),
+                    {"name": LoopByCount, "args": (3,)},
+                ),
+                {
+                    "name": DummyFeature,
+                    "args": (
+                        "node100",
+                        0,
+                        1,
+                        1,
+                    ),
+                },
+                {"name": LoopByCount, "args": (3,)},
+            ),
+            {
+                "name": DummyFeature,
+                "args": (
+                    "node101",
+                    0,
+                    1,
+                    1,
+                ),
+            },
+            {
+                "name": DummyFeature,
+                "args": (
+                    "node102",
+                    0,
+                    0,
+                    1,
+                ),
+            },
+        ]
+        model.start(feature_list)
+        print(model.signal_records)
+        print(model.data_records)
+        assert model.signal_records == model.data_records, print_feature_list(
+            feature_list
+        )
+
+        # test case: (((((),),),),), ,
+        feature_list = [
+            (
+                (
+                    (
+                        (
+                            generate_random_feature_list(loop_node=True),
+                            {"name": LoopByCount, "args": (3,)},
+                        ),
+                        {"name": LoopByCount, "args": (3,)},
+                    ),
+                    {"name": LoopByCount, "args": (3,)},
+                ),
+                {"name": LoopByCount, "args": (3,)},
+            ),
+            {
+                "name": DummyFeature,
+                "args": (
+                    "node101",
+                    0,
+                    1,
+                    1,
+                ),
+            },
+            {
+                "name": DummyFeature,
+                "args": (
+                    "node102",
+                    0,
+                    0,
+                    1,
+                ),
+            },
+        ]
+        model.start(feature_list)
+        print(model.signal_records)
+        print(model.data_records)
+        assert model.signal_records == model.data_records, print_feature_list(
+            feature_list
+        )
+
+        # test case: (,(,(,(,(),),),),), ,
+        feature_list = [
+            {
+                "name": DummyFeature,
+                "args": (
+                    "node200",
+                    0,
+                    0,
+                    1,
+                ),
+            },
+            (
+                {
+                    "name": DummyFeature,
+                    "args": (
+                        "node300",
+                        0,
+                        0,
+                        1,
+                    ),
+                },
+                (
+                    {
+                        "name": DummyFeature,
+                        "args": (
+                            "node400",
+                            0,
+                            0,
+                            1,
+                        ),
+                    },
+                    (
+                        {
+                            "name": DummyFeature,
+                            "args": (
+                                "node500",
+                                0,
+                                0,
+                                1,
+                            ),
+                        },
+                        (
+                            generate_random_feature_list(loop_node=True),
+                            {"name": LoopByCount, "args": (3,)},
+                        ),
+                        {"name": LoopByCount, "args": (3,)},
+                    ),
+                    {"name": LoopByCount, "args": (3,)},
+                ),
+                {"name": LoopByCount, "args": (3,)},
+            ),
+            {
+                "name": DummyFeature,
+                "args": (
+                    "node101",
+                    0,
+                    1,
+                    1,
+                ),
+            },
+            {
+                "name": DummyFeature,
+                "args": (
+                    "node102",
+                    0,
+                    0,
+                    1,
+                ),
+            },
+        ]
+        model.start(feature_list)
+        print(model.signal_records)
+        print(model.data_records)
+        assert model.signal_records == model.data_records, print_feature_list(
+            feature_list
+        )
 
     def test_load_feature(self):
         def check(tnode1, tnode2):

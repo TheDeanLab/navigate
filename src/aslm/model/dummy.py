@@ -92,10 +92,13 @@ from aslm.controller.controller import Controller
 class DummyController:
     def __init__(self, view):
         from aslm.controller.configuration_controller import ConfigurationController
+        import random
+
         self.configuration = DummyModel().configuration
         self.commands = []
         self.view = view
         self.configuration_controller = ConfigurationController(self.configuration)
+        self.stage_pos = {}
     
     def execute(self, str, sec=None):
         '''
@@ -106,6 +109,13 @@ class DummyController:
         else:
             self.commands.append(str)
             self.commands.append(sec)
+
+        if str == 'get_stage_position':
+            
+            self.stage_pos['x'] = int(random.random())
+            self.stage_pos['y'] = int(random.random())
+
+            return self.stage_pos
         
     def pop(self):
         '''

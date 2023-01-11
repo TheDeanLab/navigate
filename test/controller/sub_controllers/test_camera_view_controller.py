@@ -142,3 +142,41 @@ class TestCameraViewController():
         if name == 'image':
             assert self.camera_view.image_metrics['Frames'].get() == data[0]
 
+    
+    def test_set_mode(self):
+
+        # Test default mode
+        self.camera_view.set_mode()
+        assert self.camera_view.mode == ''
+        assert self.camera_view.menu.entrycget("Move Here", 'state') == 'disabled'
+
+        # Test 'live' mode
+        self.camera_view.set_mode('live')
+        assert self.camera_view.mode == 'live'
+        assert self.camera_view.menu.entrycget("Move Here", 'state') == 'normal'
+
+        # Test 'stop' mode
+        self.camera_view.set_mode('stop')
+        assert self.camera_view.mode == 'stop'
+        assert self.camera_view.menu.entrycget("Move Here", 'state') == 'normal'
+
+        # Test invalid mode
+        self.camera_view.set_mode('invalid')
+        assert self.camera_view.mode == 'invalid'
+        assert self.camera_view.menu.entrycget("Move Here", 'state') == 'disabled'
+
+
+    def test_move_stage(self):
+
+        microscope_name = self.camera_view.parent_controller.configuration['experiment']['MicroscopeState']['microscope_name']
+        zoom_value = self.camera_view.parent_controller.configuration['experiment']['MicroscopeState']['zoom']
+        pixel_size = self.camera_view.parent_controller.configuration['configuration']['microscopes'][microscope_name]['zoom']['pixel_size'][zoom_value]
+        
+        current_center_x = (self.camera_view.zoom_rect[0][0] + self.camera_view.zoom_rect[0][1]) / 2
+        current_center_y = (self.camera_view.zoom_rect[1][0] + self.camera_view.zoom_rect[1][1]) / 2
+        
+        
+        offset_x = (self.camera_view.move_to_x - current_center_x) / self.camera_view.zoom_scale * self.camera_view.canvas_width_scale * pixel_size
+        offset_y = (self.camera_view.move_to_y - current_center_y) / self.camera_view.zoom_scale * self.camera_view.canvas_width_scale * pixel_size
+
+        

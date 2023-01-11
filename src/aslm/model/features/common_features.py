@@ -30,6 +30,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
+from functools import reduce
+
 
 class ChangeResolution:
     def __init__(self, model, resolution_mode="high", zoom_value="N/A"):
@@ -107,10 +109,19 @@ class WaitToContinue:
 
 
 class LoopByCount:
-    def __init__(self, model, steps):
+    def __init__(self, model, steps=1):
         self.model = model
-        self.signals = steps
-        self.data_frames = steps
+        self.steps = steps
+        if type(steps) is str:
+            try:
+                parameters = steps.split(".")
+                config_ref = reduce((lambda pre, n: f"{pre}['{n}']"), parameters, "")
+                exec(f"self.steps = int(self.model.configuration{config_ref})")
+            except:
+                self.steps = 1
+
+        self.signals = self.steps
+        self.data_frames = self.steps
 
         self.config_table = {
             "signal": {"main": self.signal_func},
@@ -119,11 +130,68 @@ class LoopByCount:
 
     def signal_func(self):
         self.signals -= 1
-        return self.signals > 0
+        if self.signals <= 0:
+            self.signals = self.steps
+            return False
+        return True
 
     def data_func(self, frame_ids):
         self.data_frames -= len(frame_ids)
-        return self.data_frames > 0
+        if self.data_frames <= 0:
+            self.data_frames = self.steps
+            return False
+        return True
+
+
+class PrepareNextChannel:
+    def __init__(self, model):
+        self.model = model
+        channels = self.model.configuration["experiment"]["MicroscopeState"]["channels"]
+        prefix = len("channel_")
+        self.available_channels = list(
+            map(
+                lambda c: int(c[prefix:]),
+                filter(lambda k: channels[k]["is_selected"], channels.keys()),
+            )
+        )
+        self.defocus = list(
+            map(
+                lambda c: channels["channel_" + str(c)]["defocus"],
+                self.available_channels,
+            )
+        )
+        self.idx = -1
+
+        self.config_table = {"signal": {"main": self.signal_func}}
+
+    def __call__(self, model):
+        self.__init__(model)
+        self.signal_func()
+
+    def signal_func(self):
+        if self.model.current_channel > 0:
+            self.idx = self.available_channels.index(self.model.current_channel)
+        self.idx = (self.idx + 1) % len(self.available_channels)
+        self.model.current_channel = self.available_channels[self.idx]
+        channel_key = "channel_" + str(self.model.current_channel)
+        # prepare camera
+        self.model.active_microscope.prepare_channel(channel_key)
+        # prepare daq: write waveform
+        self.model.active_microscope.daq.prepare_acquisition(
+            channel_key, self.model.active_microscope.current_exposure_time
+        )
+
+        # TODO: Defocus Settings
+        # curr_focus = self.model.configuration["experiment"]["StageParameters"]["f"]
+        # self.model.move_stage(
+        #     {"f_abs": curr_focus + float(self.defocus[self.idx])}, wait_until_done=True
+        # )
+        # print("*****4 start to use channel", channel_key)
+        # self.model.configuration["experiment"]["StageParameters"][
+        #     "f"
+        # ] = curr_focus  # do something very hacky so we keep using the same focus reference
+
+        return True
 
 
 class ZStackAcquisition:

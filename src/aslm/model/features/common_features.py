@@ -174,6 +174,8 @@ class PrepareNextChannel:
         self.idx = (self.idx + 1) % len(self.available_channels)
         self.model.current_channel = self.available_channels[self.idx]
         channel_key = "channel_" + str(self.model.current_channel)
+        # stop daq before writing new waveform
+        self.model.active_microscope.daq.stop_acquisition()
         # prepare camera
         self.model.active_microscope.prepare_channel(channel_key)
         # prepare daq: write waveform

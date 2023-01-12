@@ -225,6 +225,7 @@ class Microscope:
         return self.calculate_all_waveform()
 
     def end_acquisition(self):
+        self.daq.stop_acquisition()
         if self.camera.is_acquiring:
             self.camera.close_image_series()
         self.shutter.close_shutter()

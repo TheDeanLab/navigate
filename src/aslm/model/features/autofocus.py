@@ -101,6 +101,7 @@ class Autofocus:
         if frame_num < 1:
             return
         self.model.prepare_acquisition()  # Opens correct shutter and puts all signals to false
+        self.model.active_microscope.prepare_next_channel()
 
         # load Autofocus
         self.model.signal_container, self.model.data_container = load_features(

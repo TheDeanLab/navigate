@@ -205,6 +205,14 @@ class Microscope:
             self.stages[axes].move_absolute({axes + "_pos": pos}, wait_until_done=True)
 
     def prepare_acquisition(self):
+        self.current_channel = 0
+        self.channels = self.configuration["experiment"]["MicroscopeState"]["channels"]
+        self.available_channels = list(
+            map(
+                lambda c: int(c[len("channel_"):]),
+                filter(lambda k: self.channels[k]["is_selected"], self.channels.keys()),
+            )
+        )
         if self.camera.is_acquiring:
             self.camera.close_image_series()
         # Set Camera Sensor Mode - Must be done before camera is initialized.
@@ -231,6 +239,7 @@ class Microscope:
         self.shutter.close_shutter()
         for k in self.lasers:
             self.lasers[k].turn_off()
+        self.current_channel = 0
 
     def calculate_all_waveform(self):
         readout_time = self.get_readout_time()
@@ -246,7 +255,15 @@ class Microscope:
         }
         return waveform_dict
 
-    def prepare_channel(self, channel_key):
+    def prepare_next_channel(self):
+        prefix = "channel_"
+        if self.current_channel == 0:
+            self.current_channel = self.available_channels[0]
+        else:
+            idx = (self.available_channels.index(self.current_channel) + 1) % len(self.available_channels)
+            self.current_channel = self.available_channels[idx]
+
+        channel_key = prefix + str(self.current_channel)
         channel = self.configuration["experiment"]["MicroscopeState"]["channels"][
             channel_key
         ]
@@ -281,6 +298,22 @@ class Microscope:
         for k in self.lasers:
             self.lasers[k].turn_off()
         self.lasers[str(self.laser_wavelength[current_laser_index])].turn_on()
+
+        # stop daq before writing new waveform
+        self.daq.stop_acquisition()
+        # prepare daq: write waveform
+        self.daq.prepare_acquisition(
+            channel_key, self.current_exposure_time
+        )
+
+        # TODO: Defocus Settings
+        # curr_focus = self.configuration["experiment"]["StageParameters"]["f"]
+        # self.move_stage(
+        #     {"f_abs": curr_focus + float(self.defocus[self.idx])}, wait_until_done=True
+        # )
+        # self.configuration["experiment"]["StageParameters"][
+        #     "f"
+        # ] = curr_focus  # do something very hacky so we keep using the same focus reference
 
     def get_readout_time(self):
         r"""Get readout time from camera.

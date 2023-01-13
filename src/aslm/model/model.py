@@ -120,7 +120,6 @@ class Model:
         self.acquisition_count = 0
         self.total_acquisition_count = None
         self.total_image_count = None
-        self.current_channel = 0
         self.current_filter = "Empty"
         self.current_laser = "488nm"
         self.current_laser_index = 1
@@ -213,7 +212,7 @@ class Model:
                     },
                 )
             ],
-            "z-stack": [{"name": PrepareNextChannel}, {"name": ZStackAcquisition}],
+            "z-stack": [{"name": ZStackAcquisition}],
             "projection": [{"name": PrepareNextChannel}],
         }
 
@@ -386,7 +385,7 @@ class Model:
                     self.pause_data_thread()
                     self.active_microscope.end_acquisition()
                     reboot = True
-                self.current_channel = 0
+                self.active_microscope.current_channel = 0
 
             if args[0] == "resolution":
                 self.change_resolution(
@@ -427,7 +426,6 @@ class Model:
             'fine_step_size': 5,
             'fine_selected': True}
             """
-            PrepareNextChannel(self)
             autofocus = Autofocus(self)
             autofocus.run(*args)
 
@@ -516,7 +514,6 @@ class Model:
         and closes the shutters.
         #
         """
-        self.current_channel = 0
         self.is_acquiring = False
         if hasattr(self, "signal_container"):
             self.signal_container.cleanup()

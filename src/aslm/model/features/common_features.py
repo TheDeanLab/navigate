@@ -146,52 +146,10 @@ class LoopByCount:
 class PrepareNextChannel:
     def __init__(self, model):
         self.model = model
-        channels = self.model.configuration["experiment"]["MicroscopeState"]["channels"]
-        prefix = len("channel_")
-        self.available_channels = list(
-            map(
-                lambda c: int(c[prefix:]),
-                filter(lambda k: channels[k]["is_selected"], channels.keys()),
-            )
-        )
-        self.defocus = list(
-            map(
-                lambda c: channels["channel_" + str(c)]["defocus"],
-                self.available_channels,
-            )
-        )
-        self.idx = -1
-
         self.config_table = {"signal": {"main": self.signal_func}}
 
-    def __call__(self, model):
-        self.__init__(model)
-        self.signal_func()
-
     def signal_func(self):
-        if self.model.current_channel > 0:
-            self.idx = self.available_channels.index(self.model.current_channel)
-        self.idx = (self.idx + 1) % len(self.available_channels)
-        self.model.current_channel = self.available_channels[self.idx]
-        channel_key = "channel_" + str(self.model.current_channel)
-        # stop daq before writing new waveform
-        self.model.active_microscope.daq.stop_acquisition()
-        # prepare camera
-        self.model.active_microscope.prepare_channel(channel_key)
-        # prepare daq: write waveform
-        self.model.active_microscope.daq.prepare_acquisition(
-            channel_key, self.model.active_microscope.current_exposure_time
-        )
-
-        # TODO: Defocus Settings
-        # curr_focus = self.model.configuration["experiment"]["StageParameters"]["f"]
-        # self.model.move_stage(
-        #     {"f_abs": curr_focus + float(self.defocus[self.idx])}, wait_until_done=True
-        # )
-        # print("*****4 start to use channel", channel_key)
-        # self.model.configuration["experiment"]["StageParameters"][
-        #     "f"
-        # ] = curr_focus  # do something very hacky so we keep using the same focus reference
+        self.model.active_microscope.prepare_next_channel()
 
         return True
 
@@ -215,7 +173,7 @@ class ZStackAcquisition:
         self.z_position_moved_time = 0
 
         self.stack_cycling_mode = "per_stack"
-        self.channels = [1]
+        self.channels = 1
 
         self.config_table = {
             "signal": {
@@ -233,18 +191,10 @@ class ZStackAcquisition:
         # get available channels
         prefix_len = len("channel_")
         channel_dict = microscope_state["channels"]
-        self.channels = list(
-            filter(
-                lambda c: c is not None,
-                [
-                    int(channel_key[prefix_len:])
-                    if channel_dict[channel_key]["is_selected"]
-                    else None
-                    for channel_key in channel_dict.keys()
-                ],
-            )
-        )
+        self.channels = microscope_state['selected_channels']
         self.current_channel_in_list = 0
+        self.model.active_microscope.current_channel = 0
+        self.model.active_microscope.prepare_next_channel()
 
         self.number_z_steps = int(microscope_state["number_z_steps"])
 
@@ -410,10 +360,8 @@ class ZStackAcquisition:
         return False
 
     def update_channel(self):
-        self.current_channel_in_list = (self.current_channel_in_list + 1) % len(
-            self.channels
-        )
-        self.model.target_channel = self.channels[self.current_channel_in_list]
+        self.current_channel_in_list = (self.current_channel_in_list + 1) % self.channels
+        self.model.active_microscope.prepare_next_channel()
 
 
 class FindTissueSimple2D:

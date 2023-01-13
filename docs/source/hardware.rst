@@ -3,14 +3,14 @@ Hardware Setup
 
 Configuration File
 ------------------
-Upon running the software the first time, a copy of the configuration file is created in 
+Upon running the software the first time, a copy of the configuration file is created in
 ``/Users/<username>/AppData/Local/.ASLM/config`` on Windows-based machines, and in ``~/.ASLM/config`` on Mac and
-Linux-based machines. All changes will need to be made to this file. 
+Linux-based machines. All changes will need to be made to this file.
 The local copy avoids conflicts between different microscopes after pulling new changes on GitHub.
 
 Data Acquisition Card
 ------------------------
-We have used several different NI-based data acquisition cards to run the software. 
+We have used several different NI-based data acquisition cards to run the software.
 These include PCIe-6738, PXIe-6259, and PXIe-6733. Prior to installing the card within the computer, first install
 the `NI-DAQmx drivers <https://www.ni.com/en-us/support/downloads/drivers/download.ni-daqmx.html#464560>`_. Once installed,
 connect the PCIe or PXIe-based device to the computer. A functioning system should be recognized by the operating system,
@@ -39,13 +39,8 @@ Wiring
     For NI-based cards, port0/line1 is the equivalent of ``P0.1``.
     There are multiple pins for each PFIO, including source, out, gate, etc. You must use the out terminal.
 
-Camera
+Cameras
 ----------
-The software currently supports the following camera manufacturers:
-
-* Hamamatsu
-* Photometrics
-
 Hamamatsu
 ^^^^^^^^^^
 * Insert the USB that came with the camera into the computer and install HCImageLive.
@@ -61,8 +56,17 @@ counter port, e.g., ``/PXI6259/ctr0``
 
 Photometrics
 ^^^^^^^^^^^^
-* Download the `PVCAM software <https://www.photometrics.com/support/software-and-drivers>`_ from Photometrics. 
+* Download the `PVCAM software <https://www.photometrics.com/support/software-and-drivers>`_ from Photometrics.
 The PVCAM SDK is also available form this location.
 You will likely have to register and agree to Photometrics terms.
 * Perform the Full Installation of the PVCAM software.
-* 
+
+
+Stages
+------
+ASI
+^^^^^
+Software designed to acquire data in a continuous stage scanning mode. Rather than using the default SYNC ignal
+from the ASI stage to synchronize the start of imaging, we use the encoder output pulsing mode of the ASI stage to
+trigger the acquisition of every frame at precise intervals.  Important for multi-channel imaging that is acquired in
+the per-stack mode, but less so for perZ-based acquisitions.

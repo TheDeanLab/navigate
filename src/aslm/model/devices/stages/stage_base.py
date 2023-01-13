@@ -114,7 +114,7 @@ class StageBase:
         the stages are zeroed or not.
         """
         for ax in self.axes:
-            setattr(self, f"{ax}_pos", None)
+            setattr(self, f"{ax}_pos", 0)
             setattr(self, f"{ax}_min", stage[f"{ax}_min"])  # Units are in microns
             setattr(self, f"{ax}_max", stage[f"{ax}_max"])  # Units are in microns
         self.create_position_dict()

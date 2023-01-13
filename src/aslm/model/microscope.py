@@ -209,7 +209,7 @@ class Microscope:
         self.channels = self.configuration["experiment"]["MicroscopeState"]["channels"]
         self.available_channels = list(
             map(
-                lambda c: int(c[len("channel_"):]),
+                lambda c: int(c[len("channel_") :]),
                 filter(lambda k: self.channels[k]["is_selected"], self.channels.keys()),
             )
         )
@@ -260,7 +260,9 @@ class Microscope:
         if self.current_channel == 0:
             self.current_channel = self.available_channels[0]
         else:
-            idx = (self.available_channels.index(self.current_channel) + 1) % len(self.available_channels)
+            idx = (self.available_channels.index(self.current_channel) + 1) % len(
+                self.available_channels
+            )
             self.current_channel = self.available_channels[idx]
 
         channel_key = prefix + str(self.current_channel)
@@ -302,9 +304,7 @@ class Microscope:
         # stop daq before writing new waveform
         self.daq.stop_acquisition()
         # prepare daq: write waveform
-        self.daq.prepare_acquisition(
-            channel_key, self.current_exposure_time
-        )
+        self.daq.prepare_acquisition(channel_key, self.current_exposure_time)
 
         # TODO: Defocus Settings
         # curr_focus = self.configuration["experiment"]["StageParameters"]["f"]

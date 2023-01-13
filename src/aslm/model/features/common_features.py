@@ -191,7 +191,7 @@ class ZStackAcquisition:
         # get available channels
         prefix_len = len("channel_")
         channel_dict = microscope_state["channels"]
-        self.channels = microscope_state['selected_channels']
+        self.channels = microscope_state["selected_channels"]
         self.current_channel_in_list = 0
         self.model.active_microscope.current_channel = 0
         self.model.active_microscope.prepare_next_channel()
@@ -360,7 +360,9 @@ class ZStackAcquisition:
         return False
 
     def update_channel(self):
-        self.current_channel_in_list = (self.current_channel_in_list + 1) % self.channels
+        self.current_channel_in_list = (
+            self.current_channel_in_list + 1
+        ) % self.channels
         self.model.active_microscope.prepare_next_channel()
 
 

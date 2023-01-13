@@ -208,6 +208,12 @@ class NIDAQ(DAQBase):
         self.camera_trigger_task.wait_until_done()
         for task in self.analog_output_tasks:
             task.wait_until_done()
+            task.stop()
+        try:
+            self.camera_trigger_task.stop()
+            self.master_trigger_task.stop()
+        except:
+            pass
 
     def stop_acquisition(self):
         r"""Stop Acquisition."""

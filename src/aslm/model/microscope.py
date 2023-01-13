@@ -256,6 +256,7 @@ class Microscope:
         return waveform_dict
 
     def prepare_next_channel(self):
+        curr_channel = self.current_channel
         prefix = "channel_"
         if self.current_channel == 0:
             self.current_channel = self.available_channels[0]
@@ -301,10 +302,11 @@ class Microscope:
             self.lasers[k].turn_off()
         self.lasers[str(self.laser_wavelength[current_laser_index])].turn_on()
 
-        # stop daq before writing new waveform
-        self.daq.stop_acquisition()
-        # prepare daq: write waveform
-        self.daq.prepare_acquisition(channel_key, self.current_exposure_time)
+        if curr_channel != self.current_channel:
+            # stop daq before writing new waveform
+            self.daq.stop_acquisition()
+            # prepare daq: write waveform
+            self.daq.prepare_acquisition(channel_key, self.current_exposure_time)
 
         # TODO: Defocus Settings
         # curr_focus = self.configuration["experiment"]["StageParameters"]["f"]

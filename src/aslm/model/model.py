@@ -212,7 +212,7 @@ class Model:
                     },
                 )
             ],
-            "z-stack": [{"name": ZStackAcquisition}],
+            "z-stack": [({"name": ZStackAcquisition}, {"name": LoopByCount, "args": ("experiment.MicroscopeState.timepoints",)})],
             "projection": [{"name": PrepareNextChannel}],
         }
 

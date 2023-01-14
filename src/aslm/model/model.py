@@ -49,7 +49,7 @@ from aslm.model.features.feature_container import load_features
 from aslm.model.features.restful_features import IlastikSegmentation
 from aslm.model.features.volume_search import VolumeSearch
 from aslm.log_files.log_functions import log_setup
-from aslm.tools.common_dict_tools import update_settings_common, update_stage_dict
+from aslm.tools.common_dict_tools import update_stage_dict
 from aslm.model.device_startup_functions import load_devices
 from aslm.model.microscope import Microscope
 
@@ -120,7 +120,6 @@ class Model:
         self.acquisition_count = 0
         self.total_acquisition_count = None
         self.total_image_count = None
-        self.current_channel = 0
         self.current_filter = "Empty"
         self.current_laser = "488nm"
         self.current_laser_index = 1
@@ -194,13 +193,28 @@ class Model:
             ]
         )
         # z stack acquisition
-        self.feature_list.append([[{"name": ZStackAcquisition}]])
+        self.feature_list.append([{"name": ZStackAcquisition}])
         # threshold and tile
-        self.feature_list.append([[{"name": FindTissueSimple2D}]])
+        self.feature_list.append([{"name": FindTissueSimple2D}])
         # Ilastik segmentation
-        self.feature_list.append([[{"name": IlastikSegmentation}]])
+        self.feature_list.append([{"name": IlastikSegmentation}])
         # volume search
-        self.feature_list.append([[{"name": VolumeSearch}]])
+        self.feature_list.append([{"name": VolumeSearch}])
+
+        self.acquisition_modes_feature_setting = {
+            "single": [{"name": PrepareNextChannel}],
+            "live": [
+                (
+                    {"name": PrepareNextChannel},
+                    {
+                        "name": LoopByCount,
+                        "args": ("experiment.MicroscopeState.selected_channels",),
+                    },
+                )
+            ],
+            "z-stack": [({"name": ZStackAcquisition}, {"name": LoopByCount, "args": ("experiment.MicroscopeState.timepoints",)})],
+            "projection": [{"name": PrepareNextChannel}],
+        }
 
     def update_data_buffer(self, img_width=512, img_height=512):
         r"""Update the Data Buffer
@@ -319,11 +333,9 @@ class Model:
             ]
             self.prepare_acquisition()
             # load features
-            # TODO: put it here now.
-            if self.imaging_mode == "z-stack":
-                self.signal_container, self.data_container = load_features(
-                    self, [[{"name": ZStackAcquisition}]]
-                )
+            self.signal_container, self.data_container = load_features(
+                self, self.acquisition_modes_feature_setting[self.imaging_mode]
+            )
 
             if self.imaging_mode == "single":
                 self.configuration["experiment"]["MicroscopeState"][
@@ -373,7 +385,7 @@ class Model:
                     self.pause_data_thread()
                     self.active_microscope.end_acquisition()
                     reboot = True
-                self.current_channel = 0
+                self.active_microscope.current_channel = 0
 
             if args[0] == "resolution":
                 self.change_resolution(
@@ -393,6 +405,10 @@ class Model:
 
             if self.is_acquiring:
                 # prepare devices based on updated info
+                # load features
+                self.signal_container, self.data_container = load_features(
+                    self, self.acquisition_modes_feature_setting[self.imaging_mode]
+                )
                 self.stop_send_signal = False
                 self.signal_thread = threading.Thread(target=self.run_live_acquisition)
                 self.signal_thread.name = "ETL Popup Signal"
@@ -498,7 +514,6 @@ class Model:
         and closes the shutters.
         #
         """
-        self.current_channel = 0
         self.is_acquiring = False
         if hasattr(self, "signal_container"):
             self.signal_container.cleanup()
@@ -619,78 +634,7 @@ class Model:
 
         self.frame_id = 0
 
-    def run_single_channel_acquisition(self, target_channel=None):
-        r"""Acquire a single channel.
-
-        Updates MicroscopeState dictionary.
-        Changes the filter wheel position.
-        Configures the camera mode and exposure time.
-        Mixed modulation control of laser intensity.
-
-        Parameters
-        ----------
-        target_channel : int
-            Index of channel to acquire.
-
-        """
-        # stop acquisition if no channel specified
-        if target_channel is None:
-            self.logger.info("ASLM Model - Target channel is none.")
-            self.stop_acquisition = True
-            return
-
-        # Confirm that target channel exists
-        channel_key = "channel_" + str(target_channel)
-        microscope_state = self.configuration["experiment"]["MicroscopeState"]
-        channels = microscope_state["channels"]
-        if target_channel != self.current_channel:
-            if channel_key not in channels or not channels[channel_key]["is_selected"]:
-                # if self.imaging_mode != 'z-stack':
-                #     self.stop_acquisition = True
-                return
-
-            # Update Microscope State Dictionary
-            channel = channels[channel_key]
-            self.current_channel = target_channel
-
-            self.active_microscope.prepare_channel(channel_key)
-
-            # Defocus Settings
-            curr_focus = self.configuration["experiment"]["StageParameters"]["f"]
-            self.move_stage(
-                {"f_abs": curr_focus + float(channel["defocus"])}, wait_until_done=True
-            )
-            self.configuration["experiment"]["StageParameters"][
-                "f"
-            ] = curr_focus  # do something very hacky so we keep using the same focus reference
-
-        # Take the image
-        self.snap_image(channel_key)
-
-    def run_single_acquisition(self):
-        r"""Run a single acquisition.
-
-        Called by model.run_command().
-        target_channel called only during the autofocus routine.
-        """
-
-        #  Get the Experiment Settings
-        microscope_state = self.configuration["experiment"]["MicroscopeState"]
-        prefix_len = len("channel_")
-        for channel_key in microscope_state["channels"].keys():
-            if self.stop_acquisition or self.stop_send_signal:
-                break
-
-            if not microscope_state["channels"][channel_key]["is_selected"]:
-                continue
-
-            channel_idx = int(channel_key[prefix_len:])
-            self.run_single_channel_acquisition_with_features(channel_idx)
-
-            if self.imaging_mode == "z-stack":
-                break
-
-    def snap_image(self, channel_key):
+    def snap_image(self):
         r"""Acquire an image after updating the waveforms.
 
         Can be used in acquisitions where changing waveforms are required,
@@ -701,18 +645,15 @@ class Model:
 
         Parameters
         ----------
-        channel_key : int
-            Channel index to acquire.
-
         """
         if hasattr(self, "signal_container"):
             self.signal_container.run()
 
         #  Initialize, run, and stop the acquisition.
         #  Consider putting below to not block thread.
-        self.active_microscope.daq.prepare_acquisition(
-            channel_key, self.current_exposure_time
-        )
+        # self.active_microscope.daq.prepare_acquisition(
+        #     channel_key, self.current_exposure_time
+        # )
 
         # Stash current position, channel, timepoint
         # Do this here, because signal container functions can inject changes to the stage
@@ -734,7 +675,7 @@ class Model:
 
         # Run the acquisition
         self.active_microscope.daq.run_acquisition()
-        self.active_microscope.daq.stop_acquisition()
+        # self.active_microscope.daq.stop_acquisition()
 
         if hasattr(self, "signal_container"):
             self.signal_container.run(wait_response=True)
@@ -749,48 +690,30 @@ class Model:
         """
         self.stop_acquisition = False
         while self.stop_acquisition is False and self.stop_send_signal is False:
-            self.run_single_acquisition()
+            self.run_acquisition()
 
     def run_acquisition(self):
         r"""Run acquisition along with a feature list one time."""
-        for _ in range(
-            self.configuration["experiment"]["MicroscopeState"]["timepoints"]
-        ):
-            self.run_single_acquisition()
-        # wait a very short time to the data thread to get the last frame
-        # TODO: maybe need to adjust
-        # time.sleep(0.005)
-        self.logger.info("ASLM Model - Stopping in run acquisition.")
-        self.stop_acquisition = True
-
-    def run_single_channel_acquisition_with_features(self, target_channel=1):
-        r"""Acquire data with ...
-
-        Parameters
-        ----------
-        target_channel : int
-            Desired channel to acquire.
-
-        """
         if not hasattr(self, "signal_container"):
-            self.run_single_channel_acquisition(target_channel)
+            self.snap_image()
             return
 
         self.signal_container.reset()
-        self.target_channel = target_channel
 
         while (
             not self.signal_container.end_flag
             and not self.stop_send_signal
             and not self.stop_acquisition
         ):
-            self.run_single_channel_acquisition(self.target_channel)
+            self.snap_image()
             if not hasattr(self, "signal_container"):
                 return
             if self.signal_container.is_closed:
                 self.logger.info("ASLM Model - Signal container is closed.")
                 self.stop_acquisition = True
                 return
+        if self.imaging_mode != "live":
+            self.stop_acquisition = True
 
     def change_resolution(self, resolution_value):
         r"""Switch resolution mode of the microscope.

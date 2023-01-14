@@ -61,12 +61,20 @@ class DummyDevice:
             self.sendout_msg_count = self.msg_count.value
 
 
-def record_func(record_list, name, frame_id):
-    def func(*args, **kwargs):
-        record_list.append((name, args, kwargs))
-        print("*", frame_id, name, "calling with parameters:", args, kwargs)
+class RecordObj:
+    def __init__(self, name_list, record_list, frame_id):
+        self.name_list = name_list
+        self.record_list = record_list
+        self.frame_id = frame_id
 
-    return func
+    def __getattr__(self, __name: str):
+        self.name_list += "." + __name
+        return self
+
+    def __call__(self, *args, **kwargs):
+        kwargs["__test_frame_id"] = self.frame_id
+        print("* calling", self.name_list, args, kwargs)
+        self.record_list.append((self.name_list, args, kwargs))
 
 
 class DummyModelToTestFeatures:
@@ -87,22 +95,6 @@ class DummyModelToTestFeatures:
         self.data = []
         self.signal_records = []
         self.data_records = []
-
-        self._target_channel = 1
-
-    def get_channel(self):
-        return self._target_channel
-
-    def set_channel(self, c):
-        self._target_channel = c
-        self.signal_records.append(
-            ("change_channel", (c,), {"frame_id": self.frame_id})
-        )
-
-    def del_channel(self):
-        del self._target_channel
-
-    target_channel = property(get_channel, set_channel, del_channel)
 
     def signal_func(self):
         self.signal_container.reset()
@@ -166,8 +158,7 @@ class DummyModelToTestFeatures:
         return dict(map(lambda axis: (axis + "_pos", stage_pos[axis]), axes))
 
     def __getattr__(self, __name: str):
-        print("calling function", __name)
-        return record_func(self.signal_records, __name, self.frame_id)
+        return RecordObj(__name, self.signal_records, self.frame_id)
 
 
 @pytest.fixture(scope="module")

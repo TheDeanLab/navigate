@@ -209,11 +209,11 @@ class SignalContainer(Container):
                 return
             if not is_end:
                 return
-            if self.curr_node.sibling:
-                self.curr_node = self.curr_node.sibling
-            elif result and self.curr_node.child:
-                logger.debug(f"Signal running child of {self.curr_node.node_name}")
+            if result and self.curr_node.child:
+                logger.debug(f"Signal running child of {self.curr_node.node_name} ")
                 self.curr_node = self.curr_node.child
+            elif self.curr_node.sibling:
+                self.curr_node = self.curr_node.sibling
             else:
                 self.curr_node = None
                 if self.remaining_number_of_execution > 0:
@@ -269,11 +269,11 @@ class DataContainer(Container):
                 return
             if self.curr_node.need_response:
                 self.returned_a_response = True
-            if self.curr_node.sibling:
-                self.curr_node = self.curr_node.sibling
-            elif result and self.curr_node.child:
+            if result and self.curr_node.child:
                 # print('Data running child of', self.curr_node.node_name)
                 self.curr_node = self.curr_node.child
+            elif self.curr_node.sibling:
+                self.curr_node = self.curr_node.sibling
             else:
                 self.curr_node = None
                 return
@@ -301,54 +301,73 @@ def get_registered_funcs(feature_module, func_type="signal"):
 def load_features(model, feature_list):
     """turn list to child-sibling tree"""
     signal_cleanup_list, data_cleanup_list = [], []
-    signal_root, data_root = TreeNode("none", None), TreeNode("none", None)
-    pre_signal = signal_root
-    pre_data = data_root
-    for temp in feature_list:
-        for i in range(len(temp)):
-            args = ()
-            if "args" in temp[i]:
-                args = temp[i]["args"]
-            feature = temp[i]["name"](model, *args)
 
-            node_config = feature.config_table.get("node", {})
-            # if signal function has a waiting func, then the nodes are 'need_response' nodes
-            if "main-response" in feature.config_table.get("signal", {}):
-                node_config["need_response"] = True
-            if "node" in temp[i]:
-                for k, v in temp[i]["node"].items():
-                    node_config[k] = v
-            # 'multi-step' must set to be 'device_related'
-            if node_config.get("node_type", "") == "multi-step":
-                node_config["device_related"] = True
+    def create_node(feature_dict):
+        args = ()
+        if "args" in feature_dict:
+            args = feature_dict["args"]
+        feature = feature_dict["name"](model, *args)
 
-            signal_node = SignalNode(
-                temp[i]["name"].__name__,
-                get_registered_funcs(feature, "signal"),
-                **node_config,
-            )
-            data_node = DataNode(
-                temp[i]["name"].__name__,
-                get_registered_funcs(feature, "data"),
-                **node_config,
-            )
+        node_config = feature.config_table.get("node", {})
+        # if signal function has a waiting func, then the nodes are 'need_response' nodes
+        if "main-response" in feature.config_table.get("signal", {}):
+            node_config["need_response"] = True
+        if "node" in feature_dict:
+            for k, v in feature_dict["node"].items():
+                node_config[k] = v
+        # 'multi-step' must set to be 'device_related'
+        if node_config.get("node_type", "") == "multi-step":
+            node_config["device_related"] = True
 
-            if "cleanup" in feature.config_table.get("signal", {}):
-                signal_cleanup_list.append(signal_node)
-            if "cleanup" in feature.config_table.get("data", {}):
-                data_cleanup_list.append(data_node)
+        signal_node = SignalNode(
+            feature_dict["name"].__name__,
+            get_registered_funcs(feature, "signal"),
+            **node_config,
+        )
+        data_node = DataNode(
+            feature_dict["name"].__name__,
+            get_registered_funcs(feature, "data"),
+            **node_config,
+        )
 
-            if i == 0:
-                pre_signal.child = signal_node
-                pre_data.child = data_node
+        if "cleanup" in feature.config_table.get("signal", {}):
+            signal_cleanup_list.append(signal_node)
+        if "cleanup" in feature.config_table.get("data", {}):
+            data_cleanup_list.append(data_node)
+
+        return signal_node, data_node
+
+    def build_feature_tree(feature_list):
+        signal_root, data_root = None, None
+        pre_signal, pre_data = None, None
+        for temp in feature_list:
+            if type(temp) is dict:
+                signal_head, data_head = create_node(temp)
+                signal_tail = signal_head
+                data_tail = data_head
             else:
-                pre_signal.sibling = signal_node
-                pre_data.sibling = data_node
-            pre_signal = signal_node
-            pre_data = data_node
+                signal_head, data_head, signal_tail, data_tail = build_feature_tree(
+                    temp
+                )
+                if type(temp) is tuple:
+                    signal_head.device_related = True
+                    data_head.device_related = True
+                    signal_tail.child = signal_head
+                    data_tail.child = data_head
+            if pre_signal:
+                pre_signal.sibling = signal_head
+                pre_data.sibling = data_head
+            else:
+                signal_root = signal_head
+                data_root = data_head
+            pre_signal = signal_tail
+            pre_data = data_tail
 
-    return SignalContainer(signal_root.child, signal_cleanup_list), DataContainer(
-        data_root.child, data_cleanup_list
+        return signal_root, data_root, pre_signal, pre_data
+
+    signal_root, data_root, pre_signal, pre_data = build_feature_tree(feature_list)
+    return SignalContainer(signal_root, signal_cleanup_list), DataContainer(
+        data_root, data_cleanup_list
     )
 
 

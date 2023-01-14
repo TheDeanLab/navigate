@@ -117,13 +117,13 @@ class WaveformPopupController(GUIController):
         # self.variables['Galvo Off'].trace_add('write', self.update_galvo_setting('Galvo Off', 'offset'))
         # self.variables['Galvo Freq'].trace_add('write', self.update_galvo_setting('Galvo Freq', 'frequency'))
 
-        self.view.get_buttons()["Save"].configure(command=self.save_etl_info)
+        self.view.get_buttons()["Save"].configure(command=self.save_waveform_constants)
 
         # add saving function to the function closing the window
         self.view.popup.protocol(
             "WM_DELETE_WINDOW",
             combine_funcs(
-                self.save_etl_info,
+                self.save_waveform_constants,
                 self.view.popup.dismiss,
                 lambda: delattr(self.parent_controller, "waveform_popup_controller"),
             ),
@@ -370,19 +370,11 @@ class WaveformPopupController(GUIController):
 
         return func_galvo
 
-    def save_etl_info(self):
-        """
-        This function will save updated remote focus parameters to their yaml file.
-
-        TODO: This currently does not save the galvo parameters, even though they are controlled here.
-              Right now, these must be saved in the experiment file separately.
-        """
+    def save_waveform_constants(self):
+        """Save updated waveform parameters to yaml file."""
         # errors = self.get_errors()
         # if errors:
         #     return  # Dont save if any errors TODO needs testing
-
-        output_yaml = self.resolution_info
-
         save_yaml_file("", self.resolution_info, self.waveform_constants_path)
 
     def update_popup_lasers(self):

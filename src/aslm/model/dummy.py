@@ -29,85 +29,49 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-from pathlib import Path
 
-# Annies imports for dummy feature containter
+# Standard Library Imports
+from pathlib import Path
 import multiprocessing as mp
 from multiprocessing import Manager
 import threading
 import time
-import random
 
+# Third Party Imports
 import numpy as np
 
+# Local Imports
+from aslm.config.config import load_configs
+from aslm.model.devices.camera.camera_synthetic import (
+    SyntheticCamera,
+    SyntheticCameraController,
+)
 from aslm.model.features.feature_container import (
     SignalNode,
     DataNode,
     DataContainer,
     load_features,
 )
-from aslm.model.features.common_features import WaitToContinue
-from aslm.model.features.feature_container import dummy_True
-from aslm.config.config import load_configs
-from aslm.model.devices.camera.camera_synthetic import (
-    SyntheticCamera,
-    SyntheticCameraController,
-)
-
-
-# def get_dummy_model():
-#     """
-#     Creates a dummy model to be used for testing. All hardware is synthetic and the current config settings are loaded.
-#     """
-#     # Set up the model, experiment, ETL dictionaries
-#     base_directory = Path(__file__).resolve().parent.parent
-#     configuration_directory = Path.joinpath(base_directory, 'config')
-
-
-#     config = Path.joinpath(configuration_directory, 'configuration.yml')
-#     experiment = Path.joinpath(configuration_directory, 'experiment.yml')
-#     etl_constants = Path.joinpath(configuration_directory, 'waveform_constants.yml')
-
-#     class args():
-#         """
-#         Leaving this class here in case we need to instantiate a full synthetic model
-#         """
-#         def __init__(self):
-#             self.synthetic_hardware = True
-
-#     # This return is used when you want a full syntethic model instead of just variable data from config files
-#     # return Model(False, args(), config, experiment, etl_constants)
-
-#     class dummy_model():
-#         def __init__(self):
-#             self.configuration = Configurator(config)
-#             self.experiment = Configurator(experiment)
-#             self.etl_constants = Configurator(etl_constants)
-#             self.data_buffer = None
-
-#     # Instantiate fake model to return
-#     dumb_model = dummy_model()
-
-
-#     return dumb_model
 
 
 class DummyModel:
     def __init__(self):
-        # Set up the model, experiment, ETL dictionaries
+        # Set up the model, experiment, waveform dictionaries
         base_directory = Path(__file__).resolve().parent.parent
         configuration_directory = Path.joinpath(base_directory, "config")
 
         config = Path.joinpath(configuration_directory, "configuration.yaml")
         experiment = Path.joinpath(configuration_directory, "experiment.yml")
-        etl_constants = Path.joinpath(configuration_directory, "waveform_constants.yml")
+        waveform_constants = Path.joinpath(
+            configuration_directory, "waveform_constants.yml"
+        )
 
         self.manager = Manager()
         self.configuration = load_configs(
             self.manager,
             configuration=config,
             experiment=experiment,
-            etl_constants=etl_constants,
+            waveform_constants=waveform_constants,
         )
 
         self.device = DummyDevice()

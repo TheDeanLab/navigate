@@ -785,7 +785,7 @@ class Controller:
             # self.model.run_command('stop')
             self.sloppy_stop()
             if hasattr(self, "etl_controller"):
-                self.waveform_popup_controller.save_etl_info()
+                self.waveform_popup_controller.save_waveform_constants()
             self.model.terminate()
             self.model = None
             self.event_queue.put(("stop", ""))

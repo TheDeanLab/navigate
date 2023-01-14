@@ -101,6 +101,7 @@ class Autofocus:
         if frame_num < 1:
             return
         self.model.prepare_acquisition()  # Opens correct shutter and puts all signals to false
+        self.model.active_microscope.prepare_next_channel()
 
         # load Autofocus
         self.model.signal_container, self.model.data_container = load_features(
@@ -108,8 +109,7 @@ class Autofocus:
         )
 
         self.model.signal_thread = threading.Thread(
-            target=self.model.run_single_channel_acquisition_with_features,
-            kwargs={"target_channel": self.target_channel},
+            target=self.model.run_acquisition,
             name="Autofocus Signal",
         )
 

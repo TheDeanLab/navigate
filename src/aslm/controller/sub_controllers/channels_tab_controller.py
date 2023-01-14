@@ -32,6 +32,7 @@
 
 # Standard Library Imports
 import logging
+from functools import reduce
 
 # Third Party Imports
 import numpy as np
@@ -587,6 +588,8 @@ class ChannelsTabController(GUIController):
             Returns parent_controller.execute(command) if command = 'get_stage_position',
         """
         if command == "recalculate_timepoint":
+            # update selected channels num
+            self.microscope_state_dict['selected_channels'] = reduce(lambda count, channel: count + (channel['is_selected'] == True), self.microscope_state_dict["channels"].values(), 0)
             self.update_timepoint_setting()
             # update framerate info in camera setting tab
             exposure_time = max(

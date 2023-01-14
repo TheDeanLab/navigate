@@ -84,8 +84,6 @@ def main():
     parser = create_parser()
     args = parser.parse_args()
 
-    print(f"Args type: {type(args)}")
-
     (
         configuration_path,
         experiment_path,

@@ -30,6 +30,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
+from functools import reduce
+
 
 class ChangeResolution:
     def __init__(self, model, resolution_mode="high", zoom_value="N/A"):
@@ -106,6 +108,52 @@ class WaitToContinue:
         return self.can_continue and (self.target_frame_id in frame_ids)
 
 
+class LoopByCount:
+    def __init__(self, model, steps=1):
+        self.model = model
+        self.steps = steps
+        if type(steps) is str:
+            try:
+                parameters = steps.split(".")
+                config_ref = reduce((lambda pre, n: f"{pre}['{n}']"), parameters, "")
+                exec(f"self.steps = int(self.model.configuration{config_ref})")
+            except:
+                self.steps = 1
+
+        self.signals = self.steps
+        self.data_frames = self.steps
+
+        self.config_table = {
+            "signal": {"main": self.signal_func},
+            "data": {"main": self.data_func},
+        }
+
+    def signal_func(self):
+        self.signals -= 1
+        if self.signals <= 0:
+            self.signals = self.steps
+            return False
+        return True
+
+    def data_func(self, frame_ids):
+        self.data_frames -= len(frame_ids)
+        if self.data_frames <= 0:
+            self.data_frames = self.steps
+            return False
+        return True
+
+
+class PrepareNextChannel:
+    def __init__(self, model):
+        self.model = model
+        self.config_table = {"signal": {"main": self.signal_func}}
+
+    def signal_func(self):
+        self.model.active_microscope.prepare_next_channel()
+
+        return True
+
+
 class ZStackAcquisition:
     def __init__(self, model):
         self.model = model
@@ -125,7 +173,7 @@ class ZStackAcquisition:
         self.z_position_moved_time = 0
 
         self.stack_cycling_mode = "per_stack"
-        self.channels = [1]
+        self.channels = 1
 
         self.config_table = {
             "signal": {
@@ -143,18 +191,10 @@ class ZStackAcquisition:
         # get available channels
         prefix_len = len("channel_")
         channel_dict = microscope_state["channels"]
-        self.channels = list(
-            filter(
-                lambda c: c is not None,
-                [
-                    int(channel_key[prefix_len:])
-                    if channel_dict[channel_key]["is_selected"]
-                    else None
-                    for channel_key in channel_dict.keys()
-                ],
-            )
-        )
+        self.channels = microscope_state["selected_channels"]
         self.current_channel_in_list = 0
+        self.model.active_microscope.current_channel = 0
+        self.model.active_microscope.prepare_next_channel()
 
         self.number_z_steps = int(microscope_state["number_z_steps"])
 
@@ -320,10 +360,10 @@ class ZStackAcquisition:
         return False
 
     def update_channel(self):
-        self.current_channel_in_list = (self.current_channel_in_list + 1) % len(
-            self.channels
-        )
-        self.model.target_channel = self.channels[self.current_channel_in_list]
+        self.current_channel_in_list = (
+            self.current_channel_in_list + 1
+        ) % self.channels
+        self.model.active_microscope.prepare_next_channel()
 
 
 class FindTissueSimple2D:

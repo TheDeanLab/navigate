@@ -44,7 +44,7 @@ import sys
 from tkinter import filedialog, messagebox
 from aslm.controller.sub_controllers.help_popup_controller import HelpPopupController
 from aslm.view.main_application_window import MainApp as view
-from aslm.view.menus.remote_focus_popup import WaveformParameterPopupWindow
+from aslm.view.menus.waveform_parameter_popup_window import WaveformParameterPopupWindow
 from aslm.view.menus.autofocus_setting_popup import AutofocusPopup
 from aslm.view.menus.ilastik_setting_popup import ilastik_setting_popup
 from aslm.view.menus.help_popup import help_popup

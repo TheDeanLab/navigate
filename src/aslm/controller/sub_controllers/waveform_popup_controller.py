@@ -334,7 +334,6 @@ class WaveformPopupController(GUIController):
 
     def update_galvo_setting(self, name, parameter):
         variable = self.variables[name]
-        print("update here:", variable)
 
         def func_galvo(*args):
             if not self.update_galvo_device_flag:

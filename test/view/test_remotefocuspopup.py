@@ -32,7 +32,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import tkinter as tk
-from aslm.view.menus.remote_focus_popup import WaveformParameterPopupWindow
+from aslm.view.menus.waveform_parameter_popup_window import WaveformParameterPopupWindow
 from aslm.model.dummy import DummyModel
 from aslm.controller.configuration_controller import ConfigurationController
 import time

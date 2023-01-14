@@ -44,17 +44,24 @@ from attr import has
 class TestZoomBase(unittest.TestCase):
     r"""Unit Test for Zoom Base Class"""
     dummy_model = DummyModel()
-    microscope_name = 'Mesoscale'
+    microscope_name = "Mesoscale"
     zoom_class = ZoomBase(microscope_name, None, dummy_model.configuration)
 
     def test_zoom_base_attributes(self):
 
-        assert hasattr(self.zoom_class, 'zoomdict')
-        assert hasattr(self.zoom_class, 'zoomvalue')
+        assert hasattr(self.zoom_class, "zoomdict")
+        assert hasattr(self.zoom_class, "zoomvalue")
 
-        assert hasattr(self.zoom_class, 'set_zoom') and callable(getattr(self.zoom_class, 'set_zoom'))
-        assert hasattr(self.zoom_class, 'move') and callable(getattr(self.zoom_class, 'move'))
-        assert hasattr(self.zoom_class, 'read_position') and callable(getattr(self.zoom_class, 'read_position'))
+        assert hasattr(self.zoom_class, "set_zoom") and callable(
+            getattr(self.zoom_class, "set_zoom")
+        )
+        assert hasattr(self.zoom_class, "move") and callable(
+            getattr(self.zoom_class, "move")
+        )
+        assert hasattr(self.zoom_class, "read_position") and callable(
+            getattr(self.zoom_class, "read_position")
+        )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

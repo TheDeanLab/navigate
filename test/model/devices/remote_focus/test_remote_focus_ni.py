@@ -1,5 +1,6 @@
 import pytest
 
+
 @pytest.mark.hardware
 def test_remote_focus_ni_functions():
     import random
@@ -10,11 +11,20 @@ def test_remote_focus_ni_functions():
 
     model = DummyModel()
     daq = NIDAQ(model.configuration)
-    microscope_name = model.configuration['experiment']['MicroscopeState']['microscope_name']
+    microscope_name = model.configuration["experiment"]["MicroscopeState"][
+        "microscope_name"
+    ]
     rf = RemoteFocusNI(microscope_name, daq, model.configuration)
 
-    funcs = ['initialize_task', 'adjust', 'prepare_task', 'start_task', 'stop_task', 'close_task']
-    args = [None, [random.random()], ['channel_dummy'], None, None, None]
+    funcs = [
+        "initialize_task",
+        "adjust",
+        "prepare_task",
+        "start_task",
+        "stop_task",
+        "close_task",
+    ]
+    args = [None, [random.random()], ["channel_dummy"], None, None, None]
 
     for f, a in zip(funcs, args):
         if a is not None:

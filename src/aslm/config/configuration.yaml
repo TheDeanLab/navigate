@@ -265,7 +265,7 @@ microscopes:
       # Digital Laser Outputs
       laser_port_switcher: PXI6733/port0/line0
       laser_switch_state: True
-      
+
     camera:
       hardware:
         type: HamamatsuOrca

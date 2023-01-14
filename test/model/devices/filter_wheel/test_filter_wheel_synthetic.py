@@ -30,18 +30,23 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
+
 def test_synthetic_filter_wheel_functions():
     import random
 
-    from aslm.model.devices.filter_wheel.filter_wheel_synthetic import SyntheticFilterWheel
+    from aslm.model.devices.filter_wheel.filter_wheel_synthetic import (
+        SyntheticFilterWheel,
+    )
     from aslm.model.dummy import DummyModel
 
     model = DummyModel()
-    microscope_name = model.configuration['experiment']['MicroscopeState']['microscope_name']
+    microscope_name = model.configuration["experiment"]["MicroscopeState"][
+        "microscope_name"
+    ]
     fw = SyntheticFilterWheel(microscope_name, None, model.configuration)
 
-    funcs = ['filter_change_delay', 'set_filter', 'read', 'close']
-    args = [['channel_dummy'], ['channel_dummy'], [int(random.random()*100)], None]
+    funcs = ["filter_change_delay", "set_filter", "read", "close"]
+    args = [["channel_dummy"], ["channel_dummy"], [int(random.random() * 100)], None]
 
     for f, a in zip(funcs, args):
         if a is not None:

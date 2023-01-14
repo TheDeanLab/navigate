@@ -12,32 +12,32 @@ Search your computer for the anaconda prompt window. If you are on a Linux/Mac y
 From there you will need to use the below commands:
 
 .. code-block::
-    
+
     (base) MyComputer ~ $ conda create -n ASLM python=3.9.7
 
 This will create our python enviornment with the correct version.
 
 .. code-block::
-    
+
     (base) MyComputer ~ $ conda activate ASLM
 
 Now we need to activate our new enviornment.
 
 .. code-block::
-    
+
     (ASLM) MyComputer ~ $ python -m pip install --upgrade pip
 
 We will now update our package manager. Python has a builtin called pip. Also notice that our enviornment is now reflected on the far left of our terminal as (ASLM). This will confirm you are in the correct environment.
 
 .. code-block::
-    
+
     (ASLM) MyComputer ~ $ mkdir ~/MyFolderName
     (ASLM) MyComputer ~ $ cd ~/MyFolderName
 
 It is important to stay organized. Create a folder in a path/location that is easy to find and access. We will be saving the repo(the code!) here. After creating the folder we can change to it.
 
 .. code-block::
-    
+
     (ASLM) MyComputer MyFolderName $ git clone https://github.com/AdvancedImagingUTSW/ASLM.git
 
 After creating the folder and changing to it, we need to download the code. We can use the git command for this task.
@@ -47,7 +47,7 @@ After creating the folder and changing to it, we need to download the code. We c
     If you do not have `Git already downloaded <https://git-scm.com/downloads>`_. You will need to do that before downloading the repo.
 
 .. code-block::
-    
+
     (ASLM) MyComputer MyFolderName $ cd ASLM
     (ASLM) MyComputer ASLM $ pip install -e .
 
@@ -56,7 +56,7 @@ The last step requires you to change into the ASLM directory and the install the
 Finally once this is all finished you can run the software with the below command.
 
 .. code-block::
-    
+
     (ASLM) MyComputer ASLM $ aslm
 
 .. note::
@@ -70,7 +70,7 @@ Finally once this is all finished you can run the software with the below comman
 After completeting these steps you will only need to do the below to start the software upon opening the prompt:
 
 .. code-block::
-    
+
     (base) MyComputer ~ $ conda activate ASLM
     (ASLM) MyComputer ~ $ aslm
 

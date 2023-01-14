@@ -27,7 +27,7 @@
 
 .. toctree::
    :maxdepth: 2
-   
+
    userguide
    hacking
 

@@ -40,9 +40,8 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-# TODO: Should we rename to remote_focus_popup_controller?
-class EtlPopupController(GUIController):
-    def __init__(self, view, parent_controller, etl_file_name):
+class WaveformPopupController(GUIController):
+    def __init__(self, view, parent_controller, waveform_constants_path):
         """
         Controller for remote focus parameters.
 
@@ -52,15 +51,8 @@ class EtlPopupController(GUIController):
             GUI element containing widgets and variables to control. Likely tk.Toplevel-derived.
         parent_controller : ASLM_controller
             The main controller.
-        remote_focus_dict : dict
-            Dictionary of remote focus device parameters for each zoom/wavelength.
-        etl_file_name : str
+        waveform_constants_path : str
             Location of file where remote_focus_dict is read from/saved to.
-        configuration_dict : dict
-            Dictionary containing microscope hardware configuration, such as voltage limits for remote focus hardware.
-        galvo_dict : dict
-            Dictionary containing galvo frequency, amplitude, offset. From the experiment dictionary.
-
 
         Returns
         -------
@@ -68,14 +60,17 @@ class EtlPopupController(GUIController):
         """
         super().__init__(view, parent_controller)
 
-        self.resolution_info = self.parent_controller.configuration["etl_constants"]
+        self.resolution_info = self.parent_controller.configuration[
+            "waveform_constants"
+        ]
         self.configuration_controller = self.parent_controller.configuration_controller
-        self.etl_file_name = etl_file_name
+        self.waveform_constants_path = waveform_constants_path
+
         # get mode and mag widgets
         self.widgets = self.view.get_widgets()
-
         self.variables = self.view.get_variables()
 
+        # get configuration
         self.lasers = self.configuration_controller.lasers_info
         self.galvo_dict = self.configuration_controller.galvo_parameter_dict
         self.galvos = [galvo["name"] for galvo in self.galvo_dict]
@@ -84,13 +79,13 @@ class EtlPopupController(GUIController):
         self.mag = None
         self.mode = "stop"
 
-        # Checks if number of lasers in etl_contstants matches config file
-        self.update_etl_lasers()
+        # Checks if number of lasers in etl_constants matches config file
+        self.update_popup_lasers()
 
         # event id list
         self.event_ids = {}
-        for mode in self.resolution_info["ETLConstants"].keys():
-            for mag in self.resolution_info["ETLConstants"][mode].keys():
+        for mode in self.resolution_info["remote_focus_constants"].keys():
+            for mag in self.resolution_info["remote_focus_constants"][mode].keys():
                 self.event_ids[mode + "_" + mag] = None
 
         # event combination
@@ -130,13 +125,13 @@ class EtlPopupController(GUIController):
             combine_funcs(
                 self.save_etl_info,
                 self.view.popup.dismiss,
-                lambda: delattr(self.parent_controller, "etl_controller"),
+                lambda: delattr(self.parent_controller, "waveform_popup_controller"),
             ),
         )
 
         # Populate widgets
         self.widgets["Mode"].widget["values"] = list(
-            self.resolution_info["ETLConstants"].keys()
+            self.resolution_info["remote_focus_constants"].keys()
         )
         self.widgets["Mode"].widget["state"] = "readonly"
         self.widgets["Mag"].widget["state"] = "readonly"
@@ -239,8 +234,6 @@ class EtlPopupController(GUIController):
             return
         self.widgets["Mode"].set(resolution_value)
         self.show_magnification(mag)
-        # self.widgets['Mag'].set('N/A' if resolution_value == 'high' else resolution_value)
-        # self.show_laser_info()
 
     def showup(self):
         """
@@ -255,7 +248,9 @@ class EtlPopupController(GUIController):
         """
         # get resolution setting
         self.resolution = self.widgets["Mode"].widget.get()
-        temp = list(self.resolution_info["ETLConstants"][self.resolution].keys())
+        temp = list(
+            self.resolution_info["remote_focus_constants"][self.resolution].keys()
+        )
         self.widgets["Mag"].widget["values"] = temp
 
         if args[0] in temp:
@@ -273,14 +268,14 @@ class EtlPopupController(GUIController):
         self.mag = self.widgets["Mag"].widget.get()
         for laser in self.lasers:
             self.variables[laser + " Amp"].set(
-                self.resolution_info["ETLConstants"][self.resolution][self.mag][laser][
-                    "amplitude"
-                ]
+                self.resolution_info["remote_focus_constants"][self.resolution][
+                    self.mag
+                ][laser]["amplitude"]
             )
             self.variables[laser + " Off"].set(
-                self.resolution_info["ETLConstants"][self.resolution][self.mag][laser][
-                    "offset"
-                ]
+                self.resolution_info["remote_focus_constants"][self.resolution][
+                    self.mag
+                ][laser]["offset"]
             )
 
         # do not tell the model to update galvo
@@ -312,9 +307,9 @@ class EtlPopupController(GUIController):
         # BUG Upon startup this will always run 0.63x, and when changing magnification it will run 0.63x
         # before whatever mag is selected
         def func_laser(*args):
-            value = self.resolution_info["ETLConstants"][self.resolution][self.mag][
-                laser
-            ][etl_name]
+            value = self.resolution_info["remote_focus_constants"][self.resolution][
+                self.mag
+            ][laser][etl_name]
 
             # Will only run code if value in constants does not match whats in GUI for Amp or Off AND in Live mode
             # TODO: Make also work in the 'single' acquisition mode.
@@ -323,9 +318,9 @@ class EtlPopupController(GUIController):
                 f"ETL Amplitude/Offset Changed pre if statement: {variable_value}"
             )
             if value != variable_value and variable_value != "":
-                self.resolution_info["ETLConstants"][self.resolution][self.mag][laser][
-                    etl_name
-                ] = variable_value
+                self.resolution_info["remote_focus_constants"][self.resolution][
+                    self.mag
+                ][laser][etl_name] = variable_value
                 logger.debug(f"ETL Amplitude/Offset Changed:, {variable_value}")
                 # tell parent controller (the device)
                 event_id_name = self.resolution + "_" + self.mag
@@ -386,14 +381,16 @@ class EtlPopupController(GUIController):
         # if errors:
         #     return  # Dont save if any errors TODO needs testing
 
-        save_yaml_file("", self.resolution_info, self.etl_file_name)
+        output_yaml = self.resolution_info
 
-    def update_etl_lasers(self):
+        save_yaml_file("", self.resolution_info, self.waveform_constants_path)
+
+    def update_popup_lasers(self):
         num_lasers = len(self.lasers)
         num_etl_lasers = self.resolution_info
 
     """
-    Example for preventing submission of a field/controller. So if there is an error in any field that 
+    Example for preventing submission of a field/controller. So if there is an error in any field that
     is supposed to have validation then the config cannot be saved.
     """
     # TODO needs testing may also need to be moved to the remote_focus_popup class. Opinions welcome

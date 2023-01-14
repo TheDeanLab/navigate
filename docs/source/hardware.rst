@@ -31,4 +31,3 @@ counter port, e.g., ``/PXI6259/ctr0``
 
     For NI-based cards, port0/line1 is the equivalent of ``P0.1``.
     There are multiple pins for each PFIO, including source, out, gate, etc. You must use the out terminal.
-

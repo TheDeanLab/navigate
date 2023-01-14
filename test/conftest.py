@@ -32,7 +32,8 @@
 
 import pytest
 
-@pytest.fixture(scope='package')
+
+@pytest.fixture(scope="package")
 def dummy_model():
     from aslm.model.dummy import DummyModel
 

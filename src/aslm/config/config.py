@@ -85,10 +85,12 @@ def get_configuration_paths():
     # Configuration files should be stored in this directory
     configuration_path = Path.joinpath(configuration_directory, "configuration.yaml")
     experiment_path = Path.joinpath(configuration_directory, "experiment.yml")
-    etl_constants_path = Path.joinpath(configuration_directory, "etl_constants.yml")
+    etl_constants_path = Path.joinpath(
+        configuration_directory, "waveform_constants.yml"
+    )
     rest_api_path = Path.joinpath(configuration_directory, "rest_api_config.yml")
 
-    # If they are not already, copy the default ones that ship with the software too this folder
+    # If they are not already, copy the default ones that ship with the software to this folder
     if not os.path.exists(configuration_path):
         copy_base_directory = Path(__file__).resolve().parent
         copy_configuration_path = Path.joinpath(
@@ -104,7 +106,7 @@ def get_configuration_paths():
     if not os.path.exists(etl_constants_path):
         copy_base_directory = Path(__file__).resolve().parent
         copy_etl_constants_path = Path.joinpath(
-            copy_base_directory, "etl_constants.yml"
+            copy_base_directory, "waveform_constants.yml"
         )
         shutil.copyfile(copy_etl_constants_path, etl_constants_path)
 
@@ -130,7 +132,7 @@ def load_configs(manager, **kwargs):
     Returns
     -------
     config_dict : dict
-        Shared ditionary containing amalgamation of input configurations.
+        Shared dictionary containing amalgamation of input configurations.
     """
     if kwargs == {}:
         print("No files provided to load_yaml_config()")
@@ -169,7 +171,7 @@ def build_nested_dict(manager, parent_dict, key_name, dict_data):
     Returns
     -------
     parent_dict : dict
-        Dictionary with subdictionary inserted
+        Dictionary with sub-dictionary inserted
     """
     if type(dict_data) != dict and type(dict_data) != list:
         parent_dict[key_name] = dict_data

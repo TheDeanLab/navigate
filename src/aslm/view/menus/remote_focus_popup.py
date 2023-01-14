@@ -40,17 +40,14 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-# TODO: Should we rename to remote_focus_popup?
-class remote_popup:
-    """
-    #### Class creates the popup that has the ETL or voice coil parameters.
-    """
+class WaveformParameterPopupWindow:
+    """Popup window with waveform parameters for galvos, remote focusing, etc."""
 
     def __init__(self, root, configuration_controller, *args, **kwargs):
         # Creating popup window with this name and size/placement, PopUp is a
         # Toplevel window
         self.popup = PopUp(
-            root, "Remote Focus Settings", "+320+180", top=False, transient=False
+            root, "Waveform Parameter Settings", "+320+180", top=False, transient=False
         )
 
         self.configuration_controller = configuration_controller
@@ -79,11 +76,11 @@ class remote_popup:
         self.laser_frame = ttk.Frame(content_frame)
         self.high_low_frame = ttk.Frame(content_frame, padding=(0, 5, 0, 0))
 
-        # Gridding Frames
-        self.mode_mag_frame.grid(row=0, column=0, sticky=(tk.NSEW))
-        self.save_frame.grid(row=0, column=1, sticky=(tk.NSEW))
-        self.laser_frame.grid(row=1, column=0, columnspan=2, sticky=(tk.NSEW))
-        self.high_low_frame.grid(row=2, column=0, columnspan=2, sticky=(tk.NSEW))
+        # Griding Frames
+        self.mode_mag_frame.grid(row=0, column=0, sticky=tk.NSEW)
+        self.save_frame.grid(row=0, column=1, sticky=tk.NSEW)
+        self.laser_frame.grid(row=1, column=0, columnspan=2, sticky=tk.NSEW)
+        self.high_low_frame.grid(row=2, column=0, columnspan=2, sticky=tk.NSEW)
 
         # Filling Frames with widgets
         # Mode/Mag Frame
@@ -110,28 +107,25 @@ class remote_popup:
         # Save Frame
         self.buttons["Save"] = ttk.Button(self.save_frame, text="Save Configuration")
         self.buttons["Save"].grid(
-            row=0, column=0, sticky=(tk.NSEW), padx=(5, 0), pady=(5, 0)
+            row=0, column=0, sticky=tk.NSEW, padx=(5, 0), pady=(5, 0)
         )
 
-        laser_labels = self.configuration_controller.lasers_info
-        print(laser_labels)
-
         # Laser Frame
+        laser_labels = self.configuration_controller.lasers_info
         title_labels = ["Laser", "Amplitude", "Offset"]
-        # laser_labels = ['488nm', '561nm', '642nm']
         # Loop for widgets
         for i in range(3):
             # Title labels
             title = ttk.Label(
                 self.laser_frame, text=title_labels[i], padding=(2, 5, 0, 0)
             )
-            title.grid(row=0, column=i, sticky=(tk.NSEW), padx=(0, 5))
+            title.grid(row=0, column=i, sticky=tk.NSEW, padx=(0, 5))
         for i, label in enumerate(laser_labels):
             # Laser labels
             laser = ttk.Label(
                 self.laser_frame, text=laser_labels[i], padding=(2, 5, 0, 0)
             )
-            laser.grid(row=i + 1, column=0, sticky=(tk.NSEW))
+            laser.grid(row=i + 1, column=0, sticky=tk.NSEW)
             # Entry Widgets
             self.inputs[laser_labels[i] + " Amp"] = LabelInput(
                 parent=self.laser_frame,
@@ -140,7 +134,7 @@ class remote_popup:
             )
 
             self.inputs[laser_labels[i] + " Amp"].grid(
-                row=i + 1, column=1, sticky=(tk.NSEW), pady=(20, 0), padx=(0, 5)
+                row=i + 1, column=1, sticky=tk.NSEW, pady=(20, 0), padx=(0, 5)
             )
 
             self.inputs[laser_labels[i] + " Off"] = LabelInput(
@@ -150,7 +144,7 @@ class remote_popup:
             )
 
             self.inputs[laser_labels[i] + " Off"].grid(
-                row=i + 1, column=2, sticky=(tk.NSEW), pady=(20, 0)
+                row=i + 1, column=2, sticky=tk.NSEW, pady=(20, 0)
             )
 
         galvo_dict = self.configuration_controller.galvo_parameter_dict
@@ -162,17 +156,8 @@ class remote_popup:
             galvo = ttk.Label(
                 self.laser_frame, text=galvo_labels[i], padding=(2, 5, 0, 0)
             )
-            # Add galvo amplitude and offset to laser_frame
-            # galvo = ttk.Label(
-            #     self.laser_frame,
-            #     text='Galvo',
-            #     padding=(
-            #         2,
-            #         5,
-            #         0,
-            #         0))
 
-            galvo.grid(row=prev + 1, column=0, sticky=(tk.NSEW))
+            galvo.grid(row=prev + 1, column=0, sticky=tk.NSEW)
 
             self.inputs[galvo_labels[i] + " Amp"] = LabelInput(
                 parent=self.laser_frame,
@@ -181,7 +166,7 @@ class remote_popup:
             )
 
             self.inputs[galvo_labels[i] + " Amp"].grid(
-                row=prev + 1, column=1, sticky=(tk.NSEW), pady=(20, 0), padx=(0, 5)
+                row=prev + 1, column=1, sticky=tk.NSEW, pady=(20, 0), padx=(0, 5)
             )
 
             self.inputs[galvo_labels[i] + " Off"] = LabelInput(
@@ -191,14 +176,14 @@ class remote_popup:
             )
 
             self.inputs[galvo_labels[i] + " Off"].grid(
-                row=prev + 1, column=2, sticky=(tk.NSEW), pady=(20, 0)
+                row=prev + 1, column=2, sticky=tk.NSEW, pady=(20, 0)
             )
 
             galvo_freq = ttk.Label(
                 self.laser_frame, text=galvo_labels[i] + " Freq", padding=(2, 5, 0, 0)
             )
 
-            galvo_freq.grid(row=prev + 2, column=0, sticky=(tk.NSEW))
+            galvo_freq.grid(row=prev + 2, column=0, sticky=tk.NSEW)
 
             self.inputs[galvo_labels[i] + " Freq"] = LabelInput(
                 parent=self.laser_frame,
@@ -207,7 +192,7 @@ class remote_popup:
             )
 
             self.inputs[galvo_labels[i] + " Freq"].grid(
-                row=prev + 2, column=1, sticky=(tk.NSEW), pady=(20, 0)
+                row=prev + 2, column=1, sticky=tk.NSEW, pady=(20, 0)
             )
 
             prev = prev + 2
@@ -226,7 +211,7 @@ class remote_popup:
                 label_args={"padding": (2, 5, 5, 0)},
             )
             self.inputs[dict_labels[i]].grid(
-                row=i, column=0, sticky=(tk.NSEW), padx=(2, 5)
+                row=i, column=0, sticky=tk.NSEW, padx=(2, 5)
             )
 
         # Padding Entry Widgets
@@ -262,5 +247,5 @@ class remote_popup:
 
 if __name__ == "__main__":
     root = tk.Tk()
-    remote_popup(root)
+    WaveformParameterPopupWindow(root)
     root.mainloop()

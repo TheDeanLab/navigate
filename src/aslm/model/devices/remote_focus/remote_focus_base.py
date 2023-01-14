@@ -28,7 +28,7 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-#
+
 
 #  Standard Library Imports
 import logging
@@ -50,6 +50,7 @@ class RemoteFocusBase:
     """
 
     def __init__(self, microscope_name, device_connection, configuration):
+
         self.configuration = configuration
         self.microscope_name = microscope_name
         self.device_config = configuration["configuration"]["microscopes"][
@@ -64,13 +65,13 @@ class RemoteFocusBase:
         self.camera_delay_percent = configuration["configuration"]["microscopes"][
             microscope_name
         ]["camera"]["delay_percent"]
-        self.etl_delay = self.device_config["delay_percent"]
-        self.etl_ramp_falling = self.device_config["ramp_falling_percent"]
-        self.etl_max_voltage = self.device_config["hardware"]["max"]
-        self.etl_min_voltage = self.device_config["hardware"]["min"]
 
+        # Waveform Parameters
+        self.remote_focus_delay = self.device_config["delay_percent"]
+        self.remote_focus_ramp_falling = self.device_config["ramp_falling_percent"]
+        self.remote_focus_max_voltage = self.device_config["hardware"]["max"]
+        self.remote_focus_min_voltage = self.device_config["hardware"]["min"]
         self.samples = int(self.sample_rate * self.sweep_time)
-
         self.waveform_dict = {}
         for k in configuration["configuration"]["gui"]["channels"].keys():
             self.waveform_dict[k] = None
@@ -79,10 +80,10 @@ class RemoteFocusBase:
         pass
 
     def adjust(self, readout_time):
-        self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
         # calculate waveform
+        self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
         microscope_state = self.configuration["experiment"]["MicroscopeState"]
-        etl_constants = self.configuration["etl_constants"]
+        waveform_constants = self.configuration["waveform_constants"]
         imaging_mode = microscope_state["microscope_name"]
         zoom = microscope_state["zoom"]
         self.sample_rate = self.configuration["configuration"]["microscopes"][
@@ -96,11 +97,11 @@ class RemoteFocusBase:
             # Only proceed if it is enabled in the GUI
             if channel["is_selected"] is True:
 
-                # Get the Waveform Parameters - Assumes ETL Delay < Camera Delay.  Should Assert.
+                # Get the Waveform Parameters - Assumes Remote Focus Delay < Camera Delay.  Should Assert.
                 laser = channel["laser"]
                 exposure_time = channel["camera_exposure_time"] / 1000
                 self.sweep_time = exposure_time + exposure_time * (
-                    (self.camera_delay_percent + self.etl_ramp_falling) / 100
+                    (self.camera_delay_percent + self.remote_focus_ramp_falling) / 100
                 )
                 if readout_time > 0:
                     # This addresses the dovetail nature of the camera readout in normal mode. The camera reads middle
@@ -110,32 +111,34 @@ class RemoteFocusBase:
                     self.sweep_time += readout_time
                 self.samples = int(self.sample_rate * self.sweep_time)
 
-                # ETL Parameters
-                temp = etl_constants["ETLConstants"][imaging_mode][zoom][laser][
-                    "amplitude"
-                ]
+                # Remote Focus Parameters
+                temp = waveform_constants["remote_focus_constants"][imaging_mode][zoom][
+                    laser
+                ]["amplitude"]
                 if temp == "-" or temp == ".":
-                    etl_constants["ETLConstants"][imaging_mode][zoom][laser][
-                        "amplitude"
-                    ] = "0"
+                    waveform_constants["remote_focus_constants"][imaging_mode][zoom][
+                        laser
+                    ]["amplitude"] = "0"
 
                 etl_amplitude = float(
-                    etl_constants["ETLConstants"][imaging_mode][zoom][laser][
-                        "amplitude"
-                    ]
+                    waveform_constants["remote_focus_constants"][imaging_mode][zoom][
+                        laser
+                    ]["amplitude"]
                 )
 
                 # Validation for when user puts a '-' in spinbox
-                temp = etl_constants["ETLConstants"][imaging_mode][zoom][laser][
-                    "offset"
-                ]
+                temp = waveform_constants["remote_focus_constants"][imaging_mode][zoom][
+                    laser
+                ]["offset"]
                 if temp == "-" or temp == ".":
-                    etl_constants["ETLConstants"][imaging_mode][zoom][laser][
-                        "offset"
-                    ] = "0"
+                    waveform_constants["remote_focus_constants"][imaging_mode][zoom][
+                        laser
+                    ]["offset"] = "0"
 
                 etl_offset = float(
-                    etl_constants["ETLConstants"][imaging_mode][zoom][laser]["offset"]
+                    waveform_constants["remote_focus_constants"][imaging_mode][zoom][
+                        laser
+                    ]["offset"]
                 )
 
                 # Calculate the Waveforms
@@ -143,18 +146,18 @@ class RemoteFocusBase:
                     sample_rate=self.sample_rate,
                     exposure_time=exposure_time,
                     sweep_time=self.sweep_time,
-                    etl_delay=self.etl_delay,
+                    remote_focus_delay=self.remote_focus_delay,
                     camera_delay=self.camera_delay_percent,
-                    fall=self.etl_ramp_falling,
+                    fall=self.remote_focus_ramp_falling,
                     amplitude=etl_amplitude,
                     offset=etl_offset,
                 )
                 self.waveform_dict[channel_key][
-                    self.waveform_dict[channel_key] > self.etl_max_voltage
-                ] = self.etl_max_voltage
+                    self.waveform_dict[channel_key] > self.remote_focus_max_voltage
+                ] = self.remote_focus_max_voltage
                 self.waveform_dict[channel_key][
-                    self.waveform_dict[channel_key] < self.etl_min_voltage
-                ] = self.etl_min_voltage
+                    self.waveform_dict[channel_key] < self.remote_focus_min_voltage
+                ] = self.remote_focus_min_voltage
 
         return self.waveform_dict
 

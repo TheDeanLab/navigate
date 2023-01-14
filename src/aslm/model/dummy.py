@@ -66,7 +66,7 @@ from aslm.model.devices.camera.camera_synthetic import (
 
 #     config = Path.joinpath(configuration_directory, 'configuration.yml')
 #     experiment = Path.joinpath(configuration_directory, 'experiment.yml')
-#     etl_constants = Path.joinpath(configuration_directory, 'etl_constants.yml')
+#     etl_constants = Path.joinpath(configuration_directory, 'waveform_constants.yml')
 
 #     class args():
 #         """
@@ -100,7 +100,7 @@ class DummyModel:
 
         config = Path.joinpath(configuration_directory, "configuration.yaml")
         experiment = Path.joinpath(configuration_directory, "experiment.yml")
-        etl_constants = Path.joinpath(configuration_directory, "etl_constants.yml")
+        etl_constants = Path.joinpath(configuration_directory, "waveform_constants.yml")
 
         self.manager = Manager()
         self.configuration = load_configs(

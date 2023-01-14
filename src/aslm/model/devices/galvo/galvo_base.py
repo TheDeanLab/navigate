@@ -66,7 +66,7 @@ class GalvoBase:
         ]["camera"]["delay_percent"]
         self.galvo_max_voltage = self.device_config["hardware"]["max"]
         self.galvo_min_voltage = self.device_config["hardware"]["min"]
-        self.etl_ramp_falling = configuration["configuration"]["microscopes"][
+        self.remote_focus_ramp_falling = configuration["configuration"]["microscopes"][
             microscope_name
         ]["remote_focus_device"]["ramp_falling_percent"]
 
@@ -98,10 +98,10 @@ class GalvoBase:
             # Only proceed if it is enabled in the GUI
             if channel["is_selected"] is True:
 
-                # Get the Waveform Parameters - Assumes ETL Delay < Camera Delay.  Should Assert.
+                # Get the Waveform Parameters - Assumes Remote Focus Delay < Camera Delay.  Should Assert.
                 exposure_time = channel["camera_exposure_time"] / 1000
                 self.sweep_time = exposure_time + exposure_time * (
-                    (self.camera_delay_percent + self.etl_ramp_falling) / 100
+                    (self.camera_delay_percent + self.remote_focus_ramp_falling) / 100
                 )
                 if readout_time > 0:
                     # This addresses the dovetail nature of the camera readout in normal mode. The camera reads middle

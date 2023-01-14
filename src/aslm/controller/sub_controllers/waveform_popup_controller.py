@@ -60,6 +60,7 @@ class WaveformPopupController(GUIController):
         """
         super().__init__(view, parent_controller)
 
+        # Microscope information
         self.resolution_info = self.parent_controller.configuration[
             "waveform_constants"
         ]
@@ -78,6 +79,9 @@ class WaveformPopupController(GUIController):
         self.resolution = None
         self.mag = None
         self.mode = "stop"
+        self.galvo_setting = None
+        self.remote_focus_experiment_dict = None
+        self.update_galvo_device_flag = None
 
         # Checks if number of lasers in etl_constants matches config file
         self.update_popup_lasers()
@@ -96,10 +100,12 @@ class WaveformPopupController(GUIController):
 
         for laser in self.lasers:
             self.variables[laser + " Amp"].trace_add(
-                "write", self.update_etl_setting(laser + " Amp", laser, "amplitude")
+                "write",
+                self.update_remote_focus_settings(laser + " Amp", laser, "amplitude"),
             )
             self.variables[laser + " Off"].trace_add(
-                "write", self.update_etl_setting(laser + " Off", laser, "offset")
+                "write",
+                self.update_remote_focus_settings(laser + " Off", laser, "offset"),
             )
 
         for galvo in self.galvos:
@@ -112,10 +118,6 @@ class WaveformPopupController(GUIController):
             self.variables[galvo + " Freq"].trace_add(
                 "write", self.update_galvo_setting(galvo + " Freq", "frequency")
             )
-
-        # self.variables['Galvo Amp'].trace_add('write', self.update_galvo_setting('Galvo Amp', 'amplitude'))
-        # self.variables['Galvo Off'].trace_add('write', self.update_galvo_setting('Galvo Off', 'offset'))
-        # self.variables['Galvo Freq'].trace_add('write', self.update_galvo_setting('Galvo Freq', 'frequency'))
 
         self.view.get_buttons()["Save"].configure(command=self.save_waveform_constants)
 
@@ -169,7 +171,7 @@ class WaveformPopupController(GUIController):
             self.widgets[laser + " Amp"].widget.set_precision(precision)
             # TODO: The offset bounds should adjust based on the amplitude bounds,
             #       so that amp + offset does not exceed the bounds. Can be done
-            #       in update_etl_setting()
+            #       in update_remote_focus_settings()
             self.widgets[laser + " Off"].widget.configure(from_=laser_min)
             self.widgets[laser + " Off"].widget.configure(to=laser_max)
             self.widgets[laser + " Off"].widget.configure(increment=increment)
@@ -182,7 +184,7 @@ class WaveformPopupController(GUIController):
             self.widgets[galvo + " Amp"].widget.set_precision(precision)
             # TODO: The offset bounds should adjust based on the amplitude bounds,
             #       so that amp + offset does not exceed the bounds. Can be done
-            #       in update_etl_setting()
+            #       in update_remote_focus_settings()
             self.widgets[galvo + " Off"].widget.configure(from_=galvo_min)
             self.widgets[galvo + " Off"].widget.configure(to=galvo_max)
             self.widgets[galvo + " Off"].widget.configure(increment=increment)
@@ -215,17 +217,15 @@ class WaveformPopupController(GUIController):
         #     self.widgets['Galvo Freq'].widget['state'] = "normal"
 
     def populate_experiment_values(self):
-        """
-        # set experiment values
-        """
+        """set experiment values"""
         self.galvo_setting = self.parent_controller.configuration["experiment"][
             "GalvoParameters"
         ]
-        self.remote_focus_experment_dict = self.parent_controller.configuration[
+        self.remote_focus_experiment_dict = self.parent_controller.configuration[
             "experiment"
         ]["MicroscopeState"]
-        resolution_value = self.remote_focus_experment_dict["microscope_name"]
-        zoom_value = self.remote_focus_experment_dict["zoom"]
+        resolution_value = self.remote_focus_experiment_dict["microscope_name"]
+        zoom_value = self.remote_focus_experiment_dict["zoom"]
         mag = zoom_value
         if (
             self.widgets["Mode"].get() == resolution_value
@@ -236,16 +236,13 @@ class WaveformPopupController(GUIController):
         self.show_magnification(mag)
 
     def showup(self):
-        """
-        # this function will let the popup window show in front
-        """
+        """This function will let the popup window show in front."""
         self.view.popup.deiconify()
         self.view.popup.attributes("-topmost", 1)
 
     def show_magnification(self, *args):
-        """
-        # show magnification options when the user changes the focus mode
-        """
+        """Show magnification options when the user changes the focus mode"""
+
         # get resolution setting
         self.resolution = self.widgets["Mode"].widget.get()
         temp = list(
@@ -261,9 +258,7 @@ class WaveformPopupController(GUIController):
         self.show_laser_info()
 
     def show_laser_info(self, *args):
-        """
-        # show laser info when the user changes magnification setting
-        """
+        """Show laser info when the user changes magnification setting."""
         # get magnification setting
         self.mag = self.widgets["Mag"].widget.get()
         for laser in self.lasers:
@@ -299,8 +294,8 @@ class WaveformPopupController(GUIController):
         # reconfigure widgets
         self.configure_widget_range()
 
-    def update_etl_setting(self, name, laser, etl_name):
-        r"""This function will update ETLConstants in memory"""
+    def update_remote_focus_settings(self, name, laser, etl_name):
+        """This function will update remote focus settings in memory"""
         variable = self.variables[name]
 
         # TODO: Is this still a bug?
@@ -339,6 +334,7 @@ class WaveformPopupController(GUIController):
 
     def update_galvo_setting(self, name, parameter):
         variable = self.variables[name]
+        print("update here:", variable)
 
         def func_galvo(*args):
             if not self.update_galvo_device_flag:

@@ -116,36 +116,36 @@ class TestWaveforms(unittest.TestCase):
     @pytest.mark.skip(
         reason="double the correct value, have not bothered to figure out why"
     )
-    def test_tunable_lens_ramp_specified_delay(self):
+    def test_remote_focus_ramp_specified_delay(self):
         sample_rate = 100000
         sweep_time = 0.4
         delay = 10.5
-        data = waveforms.tunable_lens_ramp(
-            sample_rate=sample_rate, sweep_time=sweep_time, etl_delay=delay
+        data = waveforms.remote_focus_ramp(
+            sample_rate=sample_rate, sweep_time=sweep_time, remote_focus_delay=delay
         )
         first_index = self.find_first_index_above_threshold(data=data, threshold=-1)
         self.assertEqual(delay * sample_rate * sweep_time / 100, first_index - 1)
 
-    def test_tunable_lens_ramp_amplitude_max(self):
+    def test_remote_focus_ramp_amplitude_max(self):
         amplitude = 1.5
-        data = waveforms.tunable_lens_ramp(amplitude=amplitude)
+        data = waveforms.remote_focus_ramp(amplitude=amplitude)
         self.assertEqual(np.max(data), amplitude)
 
-    def test_tunable_lens_ramp_amplitude_min(self):
+    def test_remote_focus_ramp_amplitude_min(self):
         amplitude = 1.5
-        data = waveforms.tunable_lens_ramp(amplitude=amplitude)
+        data = waveforms.remote_focus_ramp(amplitude=amplitude)
         self.assertEqual(np.min(data), -1 * amplitude)
 
-    def test_tunable_lens_offset_min(self):
+    def test_remote_focus_offset_min(self):
         default_amplitude = 1
         offset = 0.5
-        data = waveforms.tunable_lens_ramp(offset=offset)
+        data = waveforms.remote_focus_ramp(offset=offset)
         self.assertEqual(np.min(data), -1 * default_amplitude + offset)
 
-    def test_tunable_lens_offset_max(self):
+    def test_remote_focus_offset_max(self):
         default_amplitude = 1
         offset = 0.5
-        data = waveforms.tunable_lens_ramp(offset=offset)
+        data = waveforms.remote_focus_ramp(offset=offset)
         self.assertEqual(np.max(data), default_amplitude + offset)
 
     def test_dc_value(self):

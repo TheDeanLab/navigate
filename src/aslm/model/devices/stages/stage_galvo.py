@@ -38,7 +38,7 @@ from multiprocessing.managers import ListProxy
 
 # Local Imports
 from aslm.model.devices.stages.stage_base import StageBase
-from aslm.model.waveforms import dc_value, tunable_lens_ramp
+from aslm.model.waveforms import dc_value, remote_focus_ramp
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -99,7 +99,7 @@ class GalvoNIStage(StageBase):
         self.camera_delay_percent = configuration["configuration"]["microscopes"][
             microscope_name
         ]["camera"]["delay_percent"]
-        self.etl_ramp_falling = configuration["configuration"]["microscopes"][
+        self.remote_focus_ramp_falling = configuration["configuration"]["microscopes"][
             microscope_name
         ]["remote_focus_device"]["ramp_falling_percent"]
         self.sample_rate = self.configuration["configuration"]["microscopes"][
@@ -154,10 +154,10 @@ class GalvoNIStage(StageBase):
             # Only proceed if it is enabled in the GUI
             if channel["is_selected"] is True:
 
-                # Get the Waveform Parameters - Assumes ETL Delay < Camera Delay.  Should Assert.
+                # Get the Waveform Parameters - Assumes Remote Focus Delay < Camera Delay.  Should Assert.
                 exposure_time = channel["camera_exposure_time"] / 1000
                 self.sweep_time = exposure_time + exposure_time * (
-                    (self.camera_delay_percent + self.etl_ramp_falling) / 100
+                    (self.camera_delay_percent + self.remote_focus_ramp_falling) / 100
                 )
                 readout_time = 0  # TODO: find a way to pass this to the stages
                 if readout_time > 0:
@@ -181,13 +181,13 @@ class GalvoNIStage(StageBase):
                     ]
                     amp = eval(self.volts_per_micron, {"x": 0.5 * (z_end - z_start)})
                     off = eval(self.volts_per_micron, {"x": 0.5 * (z_end + z_start)})
-                    self.waveform_dict[channel_key] = tunable_lens_ramp(
+                    self.waveform_dict[channel_key] = remote_focus_ramp(
                         sample_rate=self.sample_rate,
                         exposure_time=exposure_time,
                         sweep_time=self.sweep_time,
-                        etl_delay=7.5,
+                        remote_focus_delay=7.5,
                         camera_delay=self.camera_delay_percent,
-                        fall=self.etl_ramp_falling,
+                        fall=self.remote_focus_ramp_falling,
                         amplitude=amp,
                         offset=off,
                     )

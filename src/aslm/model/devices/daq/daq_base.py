@@ -100,7 +100,8 @@ class DAQBase:
         Returns
         -------
         self.waveform_dict : dict
-            Dictionary of waveforms to pass to galvo and ETL, plus a camera waveform for display purposes.
+            Dictionary of waveforms to pass to galvo and remote focus device,
+            plus a camera waveform for display purposes.
         """
         self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
         self.enable_microscope(microscope_name)

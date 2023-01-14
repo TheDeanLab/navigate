@@ -28,7 +28,7 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-#
+
 
 # Standard Library Imports
 
@@ -70,8 +70,8 @@ def test_remote_focus_base_adjust():
             ]
             if not channel["is_selected"]:
                 continue
-            assert np.all(v <= rf.etl_max_voltage)
-            assert np.all(v >= rf.etl_min_voltage)
+            assert np.all(v <= rf.remote_focus_max_voltage)
+            assert np.all(v >= rf.remote_focus_min_voltage)
         except KeyError:
             # The channel doesn't exist. Points to an issue in how waveform dict is created.
             continue

@@ -22,7 +22,7 @@ def test_synthetic_daq_functions():
         "add_camera",
         "create_camera_task",
         "create_master_trigger_task",
-        "create_galvo_etl_task",
+        "create_galvo_remote_focus_tasks",
         "start_tasks",
         "stop_tasks",
         "close_tasks",

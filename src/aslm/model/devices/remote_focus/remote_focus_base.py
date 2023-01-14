@@ -36,7 +36,7 @@ import logging
 # Third Party Imports
 
 # Local Imports
-from aslm.model.waveforms import tunable_lens_ramp
+from aslm.model.waveforms import remote_focus_ramp
 
 # # Logger Setup
 p = __name__.split(".")[1]
@@ -120,7 +120,7 @@ class RemoteFocusBase:
                         laser
                     ]["amplitude"] = "0"
 
-                etl_amplitude = float(
+                remote_focus_amplitude = float(
                     waveform_constants["remote_focus_constants"][imaging_mode][zoom][
                         laser
                     ]["amplitude"]
@@ -135,22 +135,22 @@ class RemoteFocusBase:
                         laser
                     ]["offset"] = "0"
 
-                etl_offset = float(
+                remote_focus_offset = float(
                     waveform_constants["remote_focus_constants"][imaging_mode][zoom][
                         laser
                     ]["offset"]
                 )
 
                 # Calculate the Waveforms
-                self.waveform_dict[channel_key] = tunable_lens_ramp(
+                self.waveform_dict[channel_key] = remote_focus_ramp(
                     sample_rate=self.sample_rate,
                     exposure_time=exposure_time,
                     sweep_time=self.sweep_time,
                     remote_focus_delay=self.remote_focus_delay,
                     camera_delay=self.camera_delay_percent,
                     fall=self.remote_focus_ramp_falling,
-                    amplitude=etl_amplitude,
-                    offset=etl_offset,
+                    amplitude=remote_focus_amplitude,
+                    offset=remote_focus_offset,
                 )
                 self.waveform_dict[channel_key][
                     self.waveform_dict[channel_key] > self.remote_focus_max_voltage

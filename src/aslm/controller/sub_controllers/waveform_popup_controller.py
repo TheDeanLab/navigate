@@ -82,6 +82,7 @@ class WaveformPopupController(GUIController):
         self.galvo_setting = None
         self.remote_focus_experiment_dict = None
         self.update_galvo_device_flag = None
+        self.waveforms_enabled = True
 
         # Checks if number of lasers in etl_constants matches config file
         self.update_popup_lasers()
@@ -120,6 +121,9 @@ class WaveformPopupController(GUIController):
             )
 
         self.view.get_buttons()["Save"].configure(command=self.save_waveform_constants)
+        self.view.get_buttons()["toggle_waveform_button"].configure(
+            command=self.toggle_waveform_state
+        )
 
         # add saving function to the function closing the window
         self.view.popup.protocol(
@@ -254,6 +258,7 @@ class WaveformPopupController(GUIController):
             self.widgets["Mag"].widget.set(args[0])
         else:
             self.widgets["Mag"].widget.set(temp[0])
+
         # update laser info
         self.show_laser_info()
 
@@ -291,11 +296,12 @@ class WaveformPopupController(GUIController):
         value = f"{self.resolution} {self.mag}"
         if self.parent_controller.resolution_value.get() != value:
             self.parent_controller.resolution_value.set(value)
+
         # reconfigure widgets
         self.configure_widget_range()
 
-    def update_remote_focus_settings(self, name, laser, etl_name):
-        """This function will update remote focus settings in memory"""
+    def update_remote_focus_settings(self, name, laser, remote_focus_name):
+        """Update remote focus settings in memory"""
         variable = self.variables[name]
 
         # TODO: Is this still a bug?
@@ -304,7 +310,7 @@ class WaveformPopupController(GUIController):
         def func_laser(*args):
             value = self.resolution_info["remote_focus_constants"][self.resolution][
                 self.mag
-            ][laser][etl_name]
+            ][laser][remote_focus_name]
 
             # Will only run code if value in constants does not match whats in GUI for Amp or Off AND in Live mode
             # TODO: Make also work in the 'single' acquisition mode.
@@ -315,7 +321,7 @@ class WaveformPopupController(GUIController):
             if value != variable_value and variable_value != "":
                 self.resolution_info["remote_focus_constants"][self.resolution][
                     self.mag
-                ][laser][etl_name] = variable_value
+                ][laser][remote_focus_name] = variable_value
                 logger.debug(f"ETL Amplitude/Offset Changed:, {variable_value}")
                 # tell parent controller (the device)
                 event_id_name = self.resolution + "_" + self.mag
@@ -393,3 +399,20 @@ class WaveformPopupController(GUIController):
     #         if labelInput.error.get():
     #             errors[key] = labelInput.error.get()
     #     return errors
+    def toggle_waveform_state(self):
+        """Temporarily disable waveform amplitude for quick alignment on stationary beam"""
+        if self.waveforms_enabled is True:
+            self.view.buttons["toggle_waveform_button"].config(text="Disable Waveforms")
+            for laser in self.lasers:
+                self.variables[laser + " Amp"].set(0)
+                # Need to update main controller.
+            self.waveforms_enabled = False
+        else:
+            self.view.buttons["toggle_waveform_button"].config(text="Enable Waveforms")
+            for laser in self.lasers:
+                self.variables[laser + " Amp"].set(
+                    self.resolution_info["remote_focus_constants"][self.resolution][
+                        self.mag
+                    ][laser]["amplitude"]
+                )
+            self.waveforms_enabled = True

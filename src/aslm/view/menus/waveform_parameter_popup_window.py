@@ -71,16 +71,16 @@ class WaveformParameterPopupWindow:
         self.buttons = {}
 
         # Frames for widgets
-        self.mode_mag_frame = ttk.Frame(content_frame, padding=(0, 5, 0, 0))
-        self.save_frame = ttk.Frame(content_frame)
-        self.laser_frame = ttk.Frame(content_frame)
-        self.high_low_frame = ttk.Frame(content_frame, padding=(0, 5, 0, 0))
+        self.mode_mag_frame = ttk.Frame(content_frame, padding=(0, 0, 0, 0))
+        self.save_frame = ttk.Frame(content_frame, padding=(0, 0, 0, 0))
+        self.laser_frame = ttk.Frame(content_frame, padding=(0, 0, 0, 0))
+        self.high_low_frame = ttk.Frame(content_frame, padding=(0, 0, 0, 0))
 
         # Griding Frames
         self.mode_mag_frame.grid(row=0, column=0, sticky=tk.NSEW)
         self.save_frame.grid(row=0, column=1, sticky=tk.NSEW)
-        self.laser_frame.grid(row=1, column=0, columnspan=2, sticky=tk.NSEW)
-        self.high_low_frame.grid(row=2, column=0, columnspan=2, sticky=tk.NSEW)
+        self.laser_frame.grid(row=2, column=0, columnspan=2, sticky=tk.NSEW)
+        self.high_low_frame.grid(row=3, column=0, columnspan=2, sticky=tk.NSEW)
 
         # Filling Frames with widgets
         # Mode/Mag Frame
@@ -104,10 +104,19 @@ class WaveformParameterPopupWindow:
         self.inputs["Mag"].grid(row=1, column=0)
         self.inputs["Mag"].state(["readonly"])
 
-        # Save Frame
+        # Save Waveform Parameters Frame
         self.buttons["Save"] = ttk.Button(self.save_frame, text="Save Configuration")
         self.buttons["Save"].grid(
-            row=0, column=0, sticky=tk.NSEW, padx=(5, 0), pady=(5, 0)
+            row=0, column=0, sticky=tk.NSEW, padx=(5, 0), pady=(0, 0)
+        )
+
+        # Toggle Waveform Button
+        self.buttons["toggle_waveform_button"] = ttk.Button(
+            self.save_frame,
+            text="Disable Waveforms",
+        )
+        self.buttons["toggle_waveform_button"].grid(
+            row=1, column=0, sticky=tk.NSEW, padx=(5, 0), pady=(0, 0)
         )
 
         # Laser Frame
@@ -126,6 +135,7 @@ class WaveformParameterPopupWindow:
                 self.laser_frame, text=laser_labels[i], padding=(2, 5, 0, 0)
             )
             laser.grid(row=i + 1, column=0, sticky=tk.NSEW)
+
             # Entry Widgets
             self.inputs[laser_labels[i] + " Amp"] = LabelInput(
                 parent=self.laser_frame,
@@ -200,6 +210,7 @@ class WaveformParameterPopupWindow:
         # High/Low Resolution
         hi_lo_labels = ["Percent Delay", "Duty Cycle", "Percent Smoothing"]
         dict_labels = ["Delay", "Duty", "Smoothing"]
+
         # The below code could be in the loop above but I thought it was best
         # to make it separate since they are different frames
         for i in range(3):

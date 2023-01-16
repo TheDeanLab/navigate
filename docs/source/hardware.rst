@@ -65,4 +65,20 @@ Photometrics
 The PVCAM SDK is also available form this location.
 You will likely have to register and agree to Photometrics terms.
 * Perform the Full Installation of the PVCAM software.
-* 
+* Should a 'Base Device' still show up as unknown in the device manager, you may need to install the 
+`Broadcom PCI/PCIe Software Development Kit <https://www.broadcom.com/products/pcie-switches-bridges/software-dev-kits`_
+* Upon successfully installation, one should be able to acquire images with the manufacturer provided PVCamTest software.
+ 
+
+Voicecoil
+--------------
+
+Equipment Solutions
+^^^^^^^^^^^^^^^^^^^^^
+
+* `SCA814 Linear Servo Controller <https://www.equipsolutions.com/products/linear-servo-controllers/sca814-linear-servo-controller/>`_
+
+    * +/- 2.5 Volt Analog Input
+
+* `LFA-2010 Linear Focus Actuator <https://www.equipsolutions.com/products/linear-focus-actuators/lfa-2010-linear-focus-actuator/>`_
+

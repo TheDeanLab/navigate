@@ -192,11 +192,11 @@ class ValidatedMixin:
         if self.get() != "":
             if not self.undo_history or self.get() != self.undo_history[-1]:
                 if len(self.undo_history) < 3:
-                    print(f"Undo history list: {self.undo_history}")
+                    # print(f"Undo history list: {self.undo_history}")
                     self.undo_history.append(self.get())
                     self.redo_history.clear()
                 else:
-                    print(f"Undo history list larger than 3: {self.undo_history}")
+                    # print(f"Undo history list larger than 2: {self.undo_history}")
                     self.undo_history.append(self.get())
                     self.undo_history.pop(0)
                     self.redo_history.clear()

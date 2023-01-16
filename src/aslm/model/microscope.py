@@ -202,7 +202,7 @@ class Microscope:
                 + self_offset_dict[axes + "_offset"]
                 - former_offset_dict[axes + "_offset"]
             )
-            self.stages[axes].move_absolute({axes + "_pos": pos}, wait_until_done=True)
+            self.stages[axes].move_absolute({axes + "_abs": pos}, wait_until_done=True)
 
     def prepare_acquisition(self):
         self.current_channel = 0

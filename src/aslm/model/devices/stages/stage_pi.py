@@ -2,8 +2,8 @@
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 #
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -144,7 +144,7 @@ class PIStage(StageBase):
             logger.debug("PI connection closed")
         except GCSError as e:  # except BaseException:
             print("Error while disconnecting the PI stage")
-            logger.exception(e)
+            logger.exception(f"Error while disconnecting the PI stage - {e}")
             raise
 
     def report_position(self):
@@ -163,7 +163,7 @@ class PIStage(StageBase):
                 setattr(self, f"{ax}_pos", pos)
         except GCSError as e:
             print("Failed to report position")
-            logger.exception(e)
+            logger.exception(f"report_position failed - {e}")
 
         # Update Position Dictionary
         self.create_position_dict()
@@ -175,12 +175,14 @@ class PIStage(StageBase):
         Parameters
         ----------
         axis : str
-            An axis prefix in move_dictionary. For example, axis='x' corresponds to 'x_abs', 'x_min', etc.
+            An axis prefix in move_dictionary. For example, axis='x' corresponds to
+            'x_abs', 'x_min', etc.
         axis_num : int
             The corresponding number of this axis on a PI stage.
         move_dictionary : dict
-            A dictionary of values required for movement. Includes 'x_abs', 'x_min', etc. for one or more axes.
-            Expects values in micrometers, except for theta, which is in degrees.
+            A dictionary of values required for movement. Includes 'x_abs', 'x_min',
+            etc. for one or more axes. Expects values in micrometers, except for theta,
+            which is in degrees.
 
         Returns
         -------
@@ -200,7 +202,7 @@ class PIStage(StageBase):
             self.pi_device.MOV({axis_num: pos})
             return True
         except GCSError as e:
-            logger.exception(GCSError(e))
+            logger.exception(f"move_axis_absolute failed - {e}")
             return False
 
     def move_absolute(self, move_dictionary, wait_until_done=False):
@@ -211,8 +213,9 @@ class PIStage(StageBase):
         Parameters
         ----------
         move_dictionary : dict
-            A dictionary of values required for movement. Includes 'x_abs', etc. for one or more axes.
-            Expect values in micrometers, except for theta, which is in degrees.
+            A dictionary of values required for movement. Includes 'x_abs', etc. for one
+            or more axes. Expect values in micrometers, except for theta, which is
+            in degrees.
         wait_until_done : bool
             Block until stage has moved to its new spot.
 
@@ -229,9 +232,9 @@ class PIStage(StageBase):
             try:
                 self.pi_tools.waitontarget(self.pi_device)
             except GCSError as e:
-                print("wait on target failed")
+                print("Wait on target failed")
                 success = False
-                logger.exception(e)
+                logger.exception(f"Wait on target failed - {e}")
         return success
 
     def stop(self):
@@ -239,4 +242,4 @@ class PIStage(StageBase):
         try:
             self.pi_device.STP(noraise=True)
         except GCSError as e:
-            logger.exception(e)
+            logger.exception(f"Stage stop failed - {e}")

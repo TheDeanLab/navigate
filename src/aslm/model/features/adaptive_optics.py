@@ -132,13 +132,21 @@ class TonyWilson:
         # load signal and data containers
         self.model.signal_container, self.model.data_container = load_features(self.model, [[{'name': TonyWilson}]])
 
-        self.model.signal_thread = threading.Thread(target=self.model.run_single_channel_acquisition_with_features,
-                                                kwargs={'target_channel': self.target_channel},
-                                                name='TonyWilson Signal')
+        # load signal and data containers
+        self.model.signal_container, self.model.data_container = load_features(
+            self.model, [[{'name': TonyWilson}]]
+        )
 
-        self.model.data_thread = threading.Thread(target=self.model.run_data_process,
-                                                  args=(frame_num+1,),
-                                                  name='TonyWilson Data')
+        self.model.signal_thread = threading.Thread(
+            target=self.model.run_acquisition,
+            name='TonyWilson Signal'
+        )
+
+        self.model.data_thread = threading.Thread(
+            target=self.model.run_data_process,
+            args=(frame_num+1,),
+            name='TonyWilson Data'
+        )
 
         # Start Threads
         self.model.signal_thread.start()

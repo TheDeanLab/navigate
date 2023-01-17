@@ -170,7 +170,7 @@ def start_camera(microscope_name, device_connection, configuration, id=0, is_syn
     
     if camera_type == 'HamamatsuOrca':
         from aslm.model.devices.camera.camera_hamamatsu import HamamatsuOrca
-        return HamamatsuOrca(microscope_name, device_connection, configuration)
+        return HamamatsuOrca(microscope_name, device_connection, configuration, id)
     elif camera_type.lower() == "syntheticcamera" or camera_type.lower() == "synthetic":
         from aslm.model.devices.camera.camera_synthetic import SyntheticCamera
         return SyntheticCamera(microscope_name, device_connection, configuration)

@@ -58,16 +58,19 @@ class CameraBase:
         Global configuration of the microscope
     """
 
-    def __init__(self, microscope_name, device_connection, configuration):
+    def __init__(self, microscope_name, device_connection, configuration, id=0):
         if microscope_name not in configuration["configuration"]["microscopes"].keys():
             raise NameError(f"Microscope {microscope_name} does not exist!")
 
+        self.camera_id = id
         self.configuration = configuration
         self.camera_controller = device_connection
         self.camera_parameters = self.configuration["configuration"]["microscopes"][
             microscope_name
         ]["camera"]
         self.is_acquiring = False
+
+        print(f"\nIn CameraBase:: type(self.camera_parameters['hardware']) = {str(type(self.camera_parameters['hardware']))}\n")
 
         # Initialize Pixel Information
         self.pixel_size_in_microns = self.camera_parameters["pixel_size_in_microns"]
@@ -91,7 +94,10 @@ class CameraBase:
         self.get_offset_variance_maps()
 
     def get_offset_variance_maps(self):
-        serial_number = self.camera_parameters["hardware"]["serial_number"]
+        if str(type(self.camera_parameters["hardware"])) == "<class 'multiprocessing.managers.ListProxy'>":
+            serial_number = self.camera_parameters["hardware"][self.camera_id]["serial_number"]
+        else:
+            serial_number = self.camera_parameters["hardware"]["serial_number"]    
         try:
             map_path = os.path.join(get_aslm_path(), "camera_maps")
             self._offset = tifffile.imread(

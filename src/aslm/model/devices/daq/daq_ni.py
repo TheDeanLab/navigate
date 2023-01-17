@@ -208,16 +208,25 @@ class NIDAQ(DAQBase):
         self.camera_trigger_task.wait_until_done()
         for task in self.analog_output_tasks:
             task.wait_until_done()
+            task.stop()
+        try:
+            self.camera_trigger_task.stop()
+            self.master_trigger_task.stop()
+        except:
+            pass
 
     def stop_acquisition(self):
         r"""Stop Acquisition."""
-        self.camera_trigger_task.stop()
-        self.master_trigger_task.stop()
-        self.camera_trigger_task.close()
-        self.master_trigger_task.close()
-        for task in self.analog_output_tasks:
-            task.stop()
-            task.close()
+        try:
+            self.camera_trigger_task.stop()
+            self.master_trigger_task.stop()
+            self.camera_trigger_task.close()
+            self.master_trigger_task.close()
+            for task in self.analog_output_tasks:
+                task.stop()
+                task.close()
+        except:
+            pass
 
     def enable_microscope(self, microscope_name):
         if microscope_name != self.microscope_name:

@@ -99,7 +99,7 @@ class ImageWriter:
 
         # Set up the file name and path in the save directory
         self.file_type = self.model.configuration["experiment"]["Saving"]["file_type"]
-        current_channel = self.model.current_channel
+        current_channel = self.model.active_microscope.current_channel
         ext = "." + self.file_type.lower().replace(" ", ".").replace("-", ".")
         if image_name is None:
             image_name = self.generate_image_name(current_channel, ext=ext)

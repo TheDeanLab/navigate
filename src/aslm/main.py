@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -30,7 +31,6 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 # Standard Library Imports
-import argparse
 import tkinter as tk
 import platform
 import os
@@ -44,6 +44,7 @@ from aslm.view.splash_screen import SplashScreen
 from aslm.tools.main_functions import (
     identify_gpu,
     evaluate_parser_input_arguments,
+    create_parser,
 )
 
 # Proxy Configuration
@@ -80,16 +81,16 @@ def main():
     splash_screen = SplashScreen(root, "./icon/splash_screen_image.png")
 
     # Parse command line arguments
-    parser = argparse.ArgumentParser(
-        description="Autonomous Software for Light Microscopy Command Line Arguments"
-    )
+    parser = create_parser()
+    args = parser.parse_args()
+
     (
         configuration_path,
         experiment_path,
         etl_constants_path,
         rest_api_path,
         logging_path,
-    ) = evaluate_parser_input_arguments(parser)
+    ) = evaluate_parser_input_arguments(args)
 
     log_setup("logging.yml")
     use_gpu = identify_gpu(args)

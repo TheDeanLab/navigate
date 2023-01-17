@@ -30,6 +30,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 from aslm.controller.sub_controllers.gui_controller import GUIController
+from aslm.view.custom_widgets.validation import ValidatedEntry
+import tkinter as tk
 import logging
 import platform
 
@@ -96,6 +98,8 @@ class KeystrokeController(GUIController):
         self.main_view.bind("<Control-Key-2>", self.switch_tab)
         self.main_view.bind("<Control-Key-3>", self.switch_tab)
         self.main_view.bind("<Control-Key-4>", self.switch_tab)
+        self.main_view.bind_all('<Control-Key-z>', self.widget_undo)
+        self.main_view.bind_all('<Control-Key-y>', self.widget_redo)
 
     def camera_controller_mouse_wheel_enter(self, event):
         self.view.root.unbind("<MouseWheel>")  # get rid of scrollbar mousewheel
@@ -125,3 +129,11 @@ class KeystrokeController(GUIController):
         key_val = int(event.keysym)
         if (key_val > 0) and (self.main_tabs.index("end") >= key_val):
             self.main_tabs.select(key_val - 1)
+
+    def widget_undo(self, event):
+        if isinstance(event.widget, ValidatedEntry): #Add all widgets that you want to be able to undo here
+            event.widget.undo(event)
+
+    def widget_redo(self, event):
+        if isinstance(event.widget, ValidatedEntry): #Add all widgets that you want to be able to undo here
+            event.widget.redo(event)

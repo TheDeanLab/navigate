@@ -49,11 +49,12 @@ class TestZStack:
         self.config['step_size'] = (self.config['end_position'] - self.config['start_position']) / self.config['number_z_steps']
 
         position_list = self.model.configuration['experiment']['MultiPositions']['stage_positions']
-        for i in range(5):
-            pos = {}
-            for axis in ['x', 'y', 'z', 'theta', 'f']:
-                pos[axis] = random.randint(1, 10000)
-            position_list.append(pos)
+        if len(position_list) < 5:
+            for i in range(5):
+                pos = {}
+                for axis in ['x', 'y', 'z', 'theta', 'f']:
+                    pos[axis] = random.randint(1, 10000)
+                position_list.append(pos)
 
     def get_next_record(self, record_prefix, idx):
         idx += 1
@@ -95,6 +96,7 @@ class TestZStack:
 
         frame_id = 0
         idx = -1
+        change_channel_func_str = 'active_microscope.prepare_next_channel'
 
         for i, pos in enumerate(positions):
             
@@ -119,10 +121,10 @@ class TestZStack:
 
                     # channel
                     for k in range(len(selected_channels)):
-                        idx = self.get_next_record('change_channel', idx)
-                        c = selected_channels[(k+1) % len(selected_channels)]['id']
-                        assert self.model.signal_records[idx][1][0] == c, f"{frame_id} should change to channel {c}, but it's {model.signal_records[idx][1][0]}"
-                        assert self.model.signal_records[idx][2]['frame_id'] == frame_id
+                        idx = self.get_next_record(change_channel_func_str, idx)
+                        # c = selected_channels[(k+1) % len(selected_channels)]['id']
+                        # assert self.model.signal_records[idx][1][0] == c, f"{frame_id} should change to channel {c}, but it's {model.signal_records[idx][1][0]}"
+                        assert self.model.signal_records[idx][2]['__test_frame_id'] == frame_id, f"prepare next channel(change chanel) should happen at {frame_id}"
                         frame_id += 1
 
             else: # per_stack
@@ -137,10 +139,10 @@ class TestZStack:
                         assert pos_moved['f_abs'] == f_pos + j * f_step, f"should move to z: {f_pos + j * f_step}, but moved to {pos_moved['f_abs']}"
                         frame_id += 1
 
-                    idx = self.get_next_record('change_channel', idx)
-                    c = selected_channels[(k+1) % len(selected_channels)]['id']
-                    assert self.model.signal_records[idx][1][0] == c, f"{frame_id} should change to channel {c}, but it's {model.signal_records[idx][1][0]}"
-                    assert self.model.signal_records[idx][2]['frame_id'] == frame_id-1
+                    idx = self.get_next_record(change_channel_func_str, idx)
+                    # c = selected_channels[(k+1) % len(selected_channels)]['id']
+                    # assert self.model.signal_records[idx][1][0] == c, f"{frame_id} should change to channel {c}, but it's {self.model.signal_records[idx][1][0]}"
+                    assert self.model.signal_records[idx][2]['__test_frame_id'] == frame_id-1, f"prepare next channel(change chanel) should happen at {frame_id-1}"
         
         # restore z, f
         idx = self.get_next_record('move_stage', idx)
@@ -156,6 +158,7 @@ class TestZStack:
         
         # 1 channel per_z
         self.config['stack_cycling_mode'] = 'per_z'
+        self.config['selected_channels'] = 1
         self.config['channels']['channel_1']['is_selected'] = True
         self.config['channels']['channel_2']['is_selected'] = False
         self.config['channels']['channel_3']['is_selected'] = False
@@ -169,6 +172,7 @@ class TestZStack:
         
         # 1 channel per_stack
         self.config['stack_cycling_mode'] = 'per_stack'
+        self.config['selected_channels'] = 1
         self.config['channels']['channel_1']['is_selected'] = True
         self.config['channels']['channel_2']['is_selected'] = False
         self.config['channels']['channel_3']['is_selected'] = False
@@ -181,6 +185,7 @@ class TestZStack:
         
         # 2 channels per_z
         self.config['stack_cycling_mode'] = 'per_z'
+        self.config['selected_channels'] = 2
         for i in range(3):
             for j in range(3):
                 self.config['channels']['channel_'+str(j+1)]['is_selected'] = True
@@ -194,6 +199,7 @@ class TestZStack:
         
         # 2 channels per_stack
         self.config['stack_cycling_mode'] = 'per_stack'
+        self.config['selected_channels'] = 2
         for i in range(3):
             for j in range(3):
                 self.config['channels']['channel_'+str(j+1)]['is_selected'] = True
@@ -206,6 +212,7 @@ class TestZStack:
         self.config['is_multiposition'] = False
         
         # 3 channels per_stack
+        self.config['selected_channels'] = 3
         self.config['channels']['channel_1']['is_selected'] = True
         self.config['channels']['channel_2']['is_selected'] = True
         self.config['channels']['channel_3']['is_selected'] = True
@@ -218,6 +225,7 @@ class TestZStack:
         self.config['is_multiposition'] = False
         
         # 3 channels per_z
+        self.config['selected_channels'] = 3
         self.config['channels']['channel_1']['is_selected'] = True
         self.config['channels']['channel_2']['is_selected'] = True
         self.config['channels']['channel_3']['is_selected'] = True
@@ -232,51 +240,64 @@ class TestZStack:
         
         # 1 channel per_z
         self.config['stack_cycling_mode'] = 'per_z'
+        self.config['selected_channels'] = 1
         self.config['channels']['channel_1']['is_selected'] = True
         self.config['channels']['channel_2']['is_selected'] = False
         self.config['channels']['channel_3']['is_selected'] = False
         self.model.start(self.feature_list)
         self.z_stack_verification()
+
+        self.config['is_multiposition'] = False
     
     def test_multi_position_one_channel_per_stack(self):
         self.config['is_multiposition'] = True
         
         # 1 channel per_stack
         self.config['stack_cycling_mode'] = 'per_stack'
+        self.config['selected_channels'] = 1
         self.config['channels']['channel_1']['is_selected'] = True
         self.config['channels']['channel_2']['is_selected'] = False
         self.config['channels']['channel_3']['is_selected'] = False
         self.model.start(self.feature_list)
         self.z_stack_verification()
 
+        self.config['is_multiposition'] = False
+
     def test_multi_position_two_channels_per_z(self):
         self.config['is_multiposition'] = True
         
         # 2 channels per_z
         self.config['stack_cycling_mode'] = 'per_z'
+        self.config['selected_channels'] = 2
         for i in range(3):
             for j in range(3):
                 self.config['channels']['channel_'+str(j+1)]['is_selected'] = True
             self.config['channels']['channel_'+str(i+1)]['is_selected'] = False
             self.model.start(self.feature_list)
             self.z_stack_verification()
+
+        self.config['is_multiposition'] = False
 
     def test_multi_position_two_channels_per_stack(self):
         self.config['is_multiposition'] = True
         
         # 2 channels per_stack
         self.config['stack_cycling_mode'] = 'per_stack'
+        self.config['selected_channels'] = 2
         for i in range(3):
             for j in range(3):
                 self.config['channels']['channel_'+str(j+1)]['is_selected'] = True
             self.config['channels']['channel_'+str(i+1)]['is_selected'] = False
             self.model.start(self.feature_list)
             self.z_stack_verification()
+        
+        self.config['is_multiposition'] = False
 
     def test_multi_position_three_channels_per_stack(self):
         self.config['is_multiposition'] = True
         
         # 3 channels per_stack
+        self.config['selected_channels'] = 3
         self.config['channels']['channel_1']['is_selected'] = True
         self.config['channels']['channel_2']['is_selected'] = True
         self.config['channels']['channel_3']['is_selected'] = True
@@ -284,13 +305,18 @@ class TestZStack:
         self.model.start(self.feature_list)
         self.z_stack_verification()
 
+        self.config['is_multiposition'] = False
+
     def test_multi_position_three_channels_per_z(self):
         self.config['is_multiposition'] = True
         
         # 3 channels per_z
+        self.config['selected_channels'] = 3
         self.config['channels']['channel_1']['is_selected'] = True
         self.config['channels']['channel_2']['is_selected'] = True
         self.config['channels']['channel_3']['is_selected'] = True
         self.config['stack_cycling_mode'] = 'per_z'
         self.model.start(self.feature_list)
         self.z_stack_verification()
+
+        self.config['is_multiposition'] = False

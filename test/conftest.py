@@ -42,34 +42,39 @@ def dummy_model():
     return model
 
 
-# @pytest.fixture(scope="package")
-# def dummy_model():
-#     from types import SimpleNamespace
+@pytest.fixture(scope="package")
+def model():
+    from types import SimpleNamespace
+    from pathlib import Path
 
-#     from aslm.model.model import Model
-#     from multiprocessing import Manager, Queue
-#     from aslm.config.config import get_configuration_paths, load_configs
+    from aslm.model.model import Model
+    from multiprocessing import Manager, Queue
+    from aslm.config.config import load_configs
 
-#     event_queue = Queue(100)
-#     manager = Manager()
-#     (
-#         configuration_path,
-#         experiment_path,
-#         etl_constants_path,
-#         rest_api_path,
-#     ) = get_configuration_paths()
-#     configuration = load_configs(
-#         manager,
-#         configuration=configuration_path,
-#         experiment=experiment_path,
-#         etl_constants=etl_constants_path,
-#         rest_api_config=rest_api_path,
-#     )
-#     model = Model(
-#         USE_GPU=False,
-#         args=SimpleNamespace(synthetic_hardware=True),
-#         configuration=configuration,
-#         event_queue=event_queue,
-#     )
+    # Use configuration files that ship with the code base
+    configuration_directory = Path.joinpath(
+        Path(__file__).resolve().parent.parent, "src", "aslm", "config"
+    )
+    configuration_path = Path.joinpath(configuration_directory, "configuration.yaml")
+    experiment_path = Path.joinpath(configuration_directory, "experiment.yml")
+    etl_constants_path = Path.joinpath(configuration_directory, "etl_constants.yml")
+    rest_api_path = Path.joinpath(configuration_directory, "rest_api_config.yml")
 
-#     return model
+    event_queue = Queue(100)
+    manager = Manager()
+
+    configuration = load_configs(
+        manager,
+        configuration=configuration_path,
+        experiment=experiment_path,
+        etl_constants=etl_constants_path,
+        rest_api_config=rest_api_path,
+    )
+    model = Model(
+        USE_GPU=False,
+        args=SimpleNamespace(synthetic_hardware=True),
+        configuration=configuration,
+        event_queue=event_queue,
+    )
+
+    return model

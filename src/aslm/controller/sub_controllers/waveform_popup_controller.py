@@ -64,6 +64,7 @@ class WaveformPopupController(GUIController):
         self.resolution_info = self.parent_controller.configuration[
             "waveform_constants"
         ]
+        self.galvo_setting = self.resolution_info["galvo_constants"]
         self.configuration_controller = self.parent_controller.configuration_controller
         self.waveform_constants_path = waveform_constants_path
 
@@ -79,12 +80,11 @@ class WaveformPopupController(GUIController):
         self.resolution = None
         self.mag = None
         self.mode = "stop"
-        self.galvo_setting = None
         self.remote_focus_experiment_dict = None
         self.update_galvo_device_flag = None
         self.waveforms_enabled = True
 
-        # Checks if number of lasers in etl_constants matches config file
+        # Checks if number of lasers in remote_focus_constants matches config file
         self.update_popup_lasers()
 
         # event id list
@@ -111,13 +111,13 @@ class WaveformPopupController(GUIController):
 
         for galvo in self.galvos:
             self.variables[galvo + " Amp"].trace_add(
-                "write", self.update_galvo_setting(galvo + " Amp", "amplitude")
+                "write", self.update_galvo_setting(galvo, " Amp", "amplitude")
             )
             self.variables[galvo + " Off"].trace_add(
-                "write", self.update_galvo_setting(galvo + " Off", "offset")
+                "write", self.update_galvo_setting(galvo, " Off", "offset")
             )
             self.variables[galvo + " Freq"].trace_add(
-                "write", self.update_galvo_setting(galvo + " Freq", "frequency")
+                "write", self.update_galvo_setting(galvo, " Freq", "frequency")
             )
 
         self.view.get_buttons()["Save"].configure(command=self.save_waveform_constants)
@@ -222,9 +222,6 @@ class WaveformPopupController(GUIController):
 
     def populate_experiment_values(self):
         """set experiment values"""
-        self.galvo_setting = self.parent_controller.configuration["experiment"][
-            "GalvoParameters"
-        ]
         self.remote_focus_experiment_dict = self.parent_controller.configuration[
             "experiment"
         ]["MicroscopeState"]
@@ -282,13 +279,17 @@ class WaveformPopupController(GUIController):
         self.update_galvo_device_flag = False
         for galvo in self.galvos:
             self.variables[galvo + " Amp"].set(
-                self.galvo_setting[self.resolution].get(f"amplitude", 0)
+                self.galvo_setting[galvo][self.resolution][self.mag].get(
+                    f"amplitude", 0
+                )
             )
             self.variables[galvo + " Off"].set(
-                self.galvo_setting[self.resolution].get(f"offset", 0)
+                self.galvo_setting[galvo][self.resolution][self.mag].get(f"offset", 0)
             )
             self.variables[galvo + " Freq"].set(
-                self.galvo_setting[self.resolution].get(f"frequency", 0)
+                self.galvo_setting[galvo][self.resolution][self.mag].get(
+                    f"frequency", 0
+                )
             )
         self.update_galvo_device_flag = True
 
@@ -316,13 +317,15 @@ class WaveformPopupController(GUIController):
             # TODO: Make also work in the 'single' acquisition mode.
             variable_value = variable.get()
             logger.debug(
-                f"ETL Amplitude/Offset Changed pre if statement: {variable_value}"
+                f"Remote Focus Amplitude/Offset Changed pre if statement: {variable_value}"
             )
             if value != variable_value and variable_value != "":
                 self.resolution_info["remote_focus_constants"][self.resolution][
                     self.mag
                 ][laser][remote_focus_name] = variable_value
-                logger.debug(f"ETL Amplitude/Offset Changed:, {variable_value}")
+                logger.debug(
+                    f"Remote Focus Amplitude/Offset Changed:, {variable_value}"
+                )
                 # tell parent controller (the device)
                 event_id_name = self.resolution + "_" + self.mag
                 if self.event_ids[event_id_name]:
@@ -338,14 +341,17 @@ class WaveformPopupController(GUIController):
 
         return func_laser
 
-    def update_galvo_setting(self, name, parameter):
+    def update_galvo_setting(self, galvo_name, widget_name, parameter):
+        name = galvo_name + widget_name
         variable = self.variables[name]
 
         def func_galvo(*args):
             if not self.update_galvo_device_flag:
                 return
             try:
-                value = self.galvo_setting[self.resolution][parameter]
+                value = self.galvo_setting[galvo_name][self.resolution][self.mag][
+                    parameter
+                ]
             except KeyError:
                 # Special case for galvo amplitude not being defined
                 value = 0
@@ -354,7 +360,9 @@ class WaveformPopupController(GUIController):
                 f"Galvo parameter {parameter} changed: {variable_value} pre if statement"
             )
             if value != variable_value and variable_value != "":
-                self.galvo_setting[self.resolution][parameter] = variable_value
+                self.galvo_setting[galvo_name][self.resolution][self.mag][
+                    parameter
+                ] = variable_value
                 logger.debug(f"Galvo parameter {parameter} changed: {variable_value}")
                 # change any galvo parameters as one event
                 event_id_name = "galvo"

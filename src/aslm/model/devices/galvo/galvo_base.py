@@ -52,6 +52,7 @@ class GalvoBase:
     def __init__(self, microscope_name, device_connection, configuration, galvo_id=0):
         self.configuration = configuration
         self.microscope_name = microscope_name
+        self.galvo_name = "Galvo " + str(galvo_id)
         self.device_config = configuration["configuration"]["microscopes"][
             microscope_name
         ]["galvo"][galvo_id]
@@ -84,9 +85,10 @@ class GalvoBase:
         # calculate waveform
         microscope_state = self.configuration["experiment"]["MicroscopeState"]
         microscope_name = microscope_state["microscope_name"]
-        galvo_parameters = self.configuration["experiment"]["GalvoParameters"][
-            microscope_name
-        ]
+        zoom_value = microscope_state["zoom"]
+        galvo_parameters = self.configuration["waveform_constants"]["galvo_constants"][
+            self.galvo_name
+        ][microscope_name][zoom_value]
         self.sample_rate = self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ]["daq"]["sample_rate"]

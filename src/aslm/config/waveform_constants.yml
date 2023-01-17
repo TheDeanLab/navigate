@@ -166,123 +166,49 @@
         }
     },
     "galvo_constants": {
-        "Nanoscale": {
-            "N/A": {
-                "488nm": {
+        "Galvo 0": {
+            "Nanoscale": {
+                "N/A": {
+                    "amplitude": "0.11",
+                    "offset": "0.10",
+                    "frequency": "99"
+                }
+            },
+            "Mesoscale": {
+                "0.63x": {
                     "amplitude": "0.11",
                     "offset": "0.10",
                     "frequency": "99"
                 },
-                "562nm": {
-                    "amplitude": "0.115",
-                    "offset": "0.062",
+                "1x": {
+                    "amplitude": "0.11",
+                    "offset": "0.10",
                     "frequency": "99"
                 },
-                "642nm": {
-                    "amplitude": "0",
-                    "offset": "0",
+                "2x": {
+                    "amplitude": "0.11",
+                    "offset": "0.10",
                     "frequency": "99"
-                }
-            }
-        },
-        "Mesoscale": {
-            "0.63x": {
-                "frequency": "99",
-                "488nm": {
-                    "amplitude": "2.5",
-                    "offset": "2.336"                },
-                "562nm": {
-                    "amplitude": "2.5",
-                    "offset": "2.336"                },
-                "642nm": {
-                    "amplitude": "2.5",
-                    "offset": "2.336"                }
-            },
-            "1x": {
-                "frequency": "99",
-                "488nm": {
-                    "amplitude": "1",
-                    "offset": "2.60"                },
-                "562nm": {
-                    "amplitude": "0.53",
-                    "offset": "2.46"                },
-                "642nm": {
-                    "amplitude": "0.23",
-                    "offset": "2.50"                }
-            },
-            "2x": {
-                "frequency": "99",
-                "488nm": {
-                    "amplitude": "0.20",
-                    "offset": "2.52",
                 },
-                "562nm": {
-                    "amplitude": "0.466",
-                    "offset": "1.534",
+                "3x": {
+                    "amplitude": "0.11",
+                    "offset": "0.10",
+                    "frequency": "99"
                 },
-                "642nm": {
-                    "amplitude": "0.20",
-                    "offset": "2.53",
-                }
-            },
-            "3x": {
-                "frequency": "99",
-                "488nm": {
-                    "amplitude": "1",
-                    "offset": "2.60",
+                "4x": {
+                    "amplitude": "0.11",
+                    "offset": "0.10",
+                    "frequency": "99"
                 },
-                "562nm": {
-                    "amplitude": "0.15",
-                    "offset": "2.50",
+                "5x": {
+                    "amplitude": "0.11",
+                    "offset": "0.10",
+                    "frequency": "99"
                 },
-                "642nm": {
-                    "amplitude": "0.16",
-                    "offset": "2.50"
-                }
-            },
-            "4x": {
-                "frequency": "99",
-                "488nm": {
-                    "amplitude": "0.141",
-                    "offset": "2.392"
-                },
-                "562nm": {
-                    "amplitude": "0.141",
-                    "offset": "2.392"
-                },
-                "642nm": {
-                    "amplitude": "0.141",
-                    "offset": "2.392"
-                }
-            },
-            "5x": {
-                "frequency": "99",
-                "488nm": {
-                    "amplitude": "0.141",
-                    "offset": "2.392"
-                },
-                "562nm": {
-                    "amplitude": "0.141",
-                    "offset": "2.392"
-                },
-                "642nm": {
-                    "amplitude": "0.141",
-                    "offset": "2.392"
-                }
-            },
-            "6x": {
-                "frequency": "99",
-                "488nm": {
-                    "amplitude": "0.15",
-                    "offset": "2.52"
-                },
-                "562nm": {
-                    "amplitude": "0.15",
-                    "offset": "2.51"
-                },
-                "642nm": {
-                    "amplitude": "0.15",
-                    "offset": "2.51"
+                "6x": {
+                    "amplitude": "0.11",
+                    "offset": "0.10",
+                    "frequency": "99"
                 }
             }
         }

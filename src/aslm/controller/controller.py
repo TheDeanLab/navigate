@@ -84,7 +84,7 @@ class Controller:
     experiment_path : string
         Path to the experiment yaml file. Provides experiment-specific microscope configuration.
     waveform_constants_path : string
-        Path to the etl constants yaml file. Provides magnification and wavelength-specific parameters.
+        Path to the waveform constants yaml file. Provides magnification and wavelength-specific parameters.
     use_gpu : Boolean
         Flag for utilizing CUDA functionality.
     *args :
@@ -134,7 +134,7 @@ class Controller:
         # save default experiment file
         self.default_experiment_file = experiment_path
 
-        # etl setting file
+        # waveform setting file
         self.waveform_constants_path = waveform_constants_path
 
         # Configuration Reader
@@ -304,8 +304,8 @@ class Controller:
                 return
             self.model.load_images(filenames)
 
-        def popup_etl_setting():
-            if hasattr(self, "etl_controller"):
+        def popup_waveform_setting():
+            if hasattr(self, "waveform_controller"):
                 self.waveform_popup_controller.showup()
                 return
             waveform_constants_popup = WaveformParameterPopupWindow(
@@ -418,7 +418,7 @@ class Controller:
 
         # waveform popup
         self.view.menubar.menu_resolution.add_command(
-            label="Waveform Parameters", command=popup_etl_setting
+            label="Waveform Parameters", command=popup_waveform_setting
         )
 
         # autofocus menu
@@ -634,14 +634,14 @@ class Controller:
         elif command == "resolution":
             r"""Changes the resolution mode and zoom position.
             Recalculates FOV_X and FOV_Y
-            If ETL Popup is open, communicates changes to it.
+            If Waveform Popup is open, communicates changes to it.
 
             Parameters
             ----------
             args : dict
                 dict = {'resolution_mode': self.resolution,
                 'zoom': self.mag,
-                'laser_info': self.resolution_info['ETLConstants'][self.resolution][self.mag]
+                'laser_info': self.resolution_info['remote_focus_constants'][self.resolution][self.mag]
                 }
             """
             microscope_name, zoom = self.resolution_value.get().split()
@@ -660,7 +660,7 @@ class Controller:
             work_thread.join()
             # self.model.change_resolution(resolution_value=args[0])
             self.camera_setting_controller.calculate_physical_dimensions()
-            if hasattr(self, "etl_controller") and self.waveform_popup_controller:
+            if hasattr(self, "waveform_controller") and self.waveform_popup_controller:
                 self.waveform_popup_controller.populate_experiment_values()
             ret_pos_dict = self.model.get_stage_position()
             update_stage_dict(self, ret_pos_dict)
@@ -678,7 +678,7 @@ class Controller:
             self.acquire_bar_controller.set_save_option(args[0])
 
         elif command == "update_setting":
-            r"""Called by the ETL Popup Controller to update the ETL settings in memory.
+            r"""Called by the Waveform Constants Popup Controller to update the Waveform constants settings in memory.
 
             Parameters
             __________
@@ -688,7 +688,7 @@ class Controller:
                 dict = {
                 'resolution_mode': self.resolution,
                 'zoom': self.mag,
-                'laser_info': self.resolution_info['ETLConstants'][self.resolution][self.mag]
+                'laser_info': self.resolution_info['remote_focus_constants'][self.resolution][self.mag]
                 }
             """
             # update_settings_common(self, args)
@@ -784,7 +784,7 @@ class Controller:
         elif command == "exit":
             # self.model.run_command('stop')
             self.sloppy_stop()
-            if hasattr(self, "etl_controller"):
+            if hasattr(self, "waveform_controller"):
                 self.waveform_popup_controller.save_waveform_constants()
             self.model.terminate()
             self.model = None

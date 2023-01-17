@@ -28,17 +28,6 @@ CameraParameters:
   pixel_size: 6.5
   frames_to_average: 1.0
   databuffer_size: 100
-RemoteFocusParameters:
-  remote_focus_l_delay_percent: 7.5
-  remote_focus_l_ramp_rising_percent: 85
-  remote_focus_l_ramp_falling_percent: 2.5
-  remote_focus_l_amplitude: 0.7
-  remote_focus_l_offset: 2.3
-  remote_focus_r_delay_percent: 7.5
-  remote_focus_r_ramp_rising_percent: 85
-  remote_focus_r_ramp_falling_percent: 2.5
-  remote_focus_r_amplitude: 0.7
-  remote_focus_r_offset: 2.3
 AutoFocusParameters:
   coarse_range: 500
   coarse_step_size: 50
@@ -76,8 +65,6 @@ MicroscopeState:
   number_z_steps: 1000.0
   timepoints: 1
   stack_pause: 0.0
-  etl_amplitude: 0
-  etl_offset: 0
   is_save: False
   stack_acq_time: 199.9999999999972
   timepoint_interval: 0

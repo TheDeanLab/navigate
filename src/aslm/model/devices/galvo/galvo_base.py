@@ -46,46 +46,63 @@ logger = logging.getLogger(p)
 class GalvoBase:
     r"""GalvoBase Class
 
-     Parent class for voice coil models.
-     """
+    Parent class for voice coil models.
+    """
 
     def __init__(self, microscope_name, device_connection, configuration, galvo_id=0):
         self.configuration = configuration
         self.microscope_name = microscope_name
-        self.device_config = configuration['configuration']['microscopes'][microscope_name]['galvo'][galvo_id]
-        self.sample_rate = configuration['configuration']['microscopes'][microscope_name]['daq']['sample_rate']
-        self.sweep_time = configuration['configuration']['microscopes'][microscope_name]['daq']['sweep_time']
-        self.camera_delay_percent = configuration['configuration']['microscopes'][microscope_name]['camera']['delay_percent']
-        self.galvo_max_voltage = self.device_config['hardware']['max']
-        self.galvo_min_voltage = self.device_config['hardware']['min']
-        self.etl_ramp_falling = configuration['configuration']['microscopes'][microscope_name]['remote_focus_device']['ramp_falling_percent']
+        self.device_config = configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["galvo"][galvo_id]
+        self.sample_rate = configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["daq"]["sample_rate"]
+        self.sweep_time = configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["daq"]["sweep_time"]
+        self.camera_delay_percent = configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["camera"]["delay_percent"]
+        self.galvo_max_voltage = self.device_config["hardware"]["max"]
+        self.galvo_min_voltage = self.device_config["hardware"]["min"]
+        self.etl_ramp_falling = configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["remote_focus_device"]["ramp_falling_percent"]
 
         self.samples = int(self.sample_rate * self.sweep_time)
 
         self.waveform_dict = {}
-        for i in range(int(configuration['configuration']['gui']['channels']['count'])):
-            self.waveform_dict['channel_'+str(i+1)] = None
+        for k in configuration["configuration"]["gui"]["channels"].keys():
+            self.waveform_dict[k] = None
 
     def __del__(self):
         pass
 
     def adjust(self, readout_time):
+        self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
         # calculate waveform
-        microscope_state = self.configuration['experiment']['MicroscopeState']
-        microscope_name = microscope_state['microscope_name']
-        galvo_parameters = self.configuration['experiment']['GalvoParameters'][microscope_name]
-        self.sample_rate = self.configuration['configuration']['microscopes'][self.microscope_name]['daq']['sample_rate']
+        microscope_state = self.configuration["experiment"]["MicroscopeState"]
+        microscope_name = microscope_state["microscope_name"]
+        galvo_parameters = self.configuration["experiment"]["GalvoParameters"][
+            microscope_name
+        ]
+        self.sample_rate = self.configuration["configuration"]["microscopes"][
+            self.microscope_name
+        ]["daq"]["sample_rate"]
 
-        for channel_key in microscope_state['channels'].keys():
+        for channel_key in microscope_state["channels"].keys():
             # channel includes 'is_selected', 'laser', 'filter', 'camera_exposure'...
-            channel = microscope_state['channels'][channel_key]
+            channel = microscope_state["channels"][channel_key]
 
             # Only proceed if it is enabled in the GUI
-            if channel['is_selected'] is True:
+            if channel["is_selected"] is True:
 
                 # Get the Waveform Parameters - Assumes ETL Delay < Camera Delay.  Should Assert.
-                exposure_time = channel['camera_exposure_time'] / 1000
-                self.sweep_time = exposure_time + exposure_time * ((self.camera_delay_percent + self.etl_ramp_falling) / 100)
+                exposure_time = channel["camera_exposure_time"] / 1000
+                self.sweep_time = exposure_time + exposure_time * (
+                    (self.camera_delay_percent + self.etl_ramp_falling) / 100
+                )
                 if readout_time > 0:
                     # This addresses the dovetail nature of the camera readout in normal mode. The camera reads middle
                     # out, and the delay in start of the last lines compared to the first lines causes the exposure
@@ -95,25 +112,33 @@ class GalvoBase:
                 self.samples = int(self.sample_rate * self.sweep_time)
 
                 # galvo Parameters
-                galvo_amplitude = float(galvo_parameters.get('amplitude', 0))
-                galvo_offset = float(galvo_parameters.get('offset', 0))
-                galvo_frequency = float(galvo_parameters.get('frequency', 0)) / exposure_time
+                galvo_amplitude = float(galvo_parameters.get("amplitude", 0))
+                galvo_offset = float(galvo_parameters.get("offset", 0))
+                galvo_frequency = (
+                    float(galvo_parameters.get("frequency", 0)) / exposure_time
+                )
 
                 # Calculate the Waveforms
-                self.waveform_dict[channel_key] = sawtooth(sample_rate=self.sample_rate,
-                                                            sweep_time=self.sweep_time,
-                                                            frequency=galvo_frequency,
-                                                            amplitude=galvo_amplitude,
-                                                            offset=galvo_offset,
-                                                            phase=(self.camera_delay_percent/100)*exposure_time)
-                self.waveform_dict[channel_key][self.waveform_dict[channel_key] > self.galvo_max_voltage] = self.galvo_max_voltage
-                self.waveform_dict[channel_key][self.waveform_dict[channel_key] < self.galvo_min_voltage] = self.galvo_min_voltage
+                self.waveform_dict[channel_key] = sawtooth(
+                    sample_rate=self.sample_rate,
+                    sweep_time=self.sweep_time,
+                    frequency=galvo_frequency,
+                    amplitude=galvo_amplitude,
+                    offset=galvo_offset,
+                    phase=(self.camera_delay_percent / 100) * exposure_time,
+                )
+                self.waveform_dict[channel_key][
+                    self.waveform_dict[channel_key] > self.galvo_max_voltage
+                ] = self.galvo_max_voltage
+                self.waveform_dict[channel_key][
+                    self.waveform_dict[channel_key] < self.galvo_min_voltage
+                ] = self.galvo_min_voltage
 
         return self.waveform_dict
 
     def prepare_task(self, channel_key):
         pass
-    
+
     def start_task(self):
         pass
 

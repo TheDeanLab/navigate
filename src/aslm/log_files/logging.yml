@@ -17,26 +17,26 @@ handlers:
     stream: ext://sys.stdout
     filters: [not_performance]
   vc_info:
-    class: logging.FileHandler
+    class: logging.handlers.RotatingFileHandler
     level: INFO
     formatter: base
     filename: view_controller_info.log
     filters: [not_performance]
-    mode: w
+    mode: a
   vc_debug:
-    class: logging.FileHandler
+    class: logging.handlers.RotatingFileHandler
     level: DEBUG
     formatter: base
     filename: view_controller_debug.log
     filters: [not_performance]
-    mode: w
+    mode: a
   performance:
-    class: logging.FileHandler
+    class: logging.handlers.RotatingFileHandler
     level: DEBUG
     formatter: base
     filename: performance.log
     filters: [performance_specs]
-    mode: w
+    mode: a
 loggers:
   view:
     level: DEBUG

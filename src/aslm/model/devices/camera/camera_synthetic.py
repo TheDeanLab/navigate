@@ -40,22 +40,25 @@ import numpy as np
 from tifffile import TiffFile
 
 # Local Imports
-from aslm.model.analysis import noise_model
+from aslm.model.analysis import camera
 from aslm.model.devices.camera.camera_base import CameraBase
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+
 class SyntheticCameraController:
     r"""SyntheticCameraController. Synthetic Camera API."""
+
     def __init__(self):
         self.is_acquiring = False
 
     def get_property_value(self, name):
-        r"""Provides the idprop value after looking it up in the property_dict
+        """Provides the idprop value after looking it up in the property_dict
 
         Parameters
+        ----------
         name : str
             Not currently used.
 
@@ -67,7 +70,7 @@ class SyntheticCameraController:
         return -1
 
     def set_property_value(self, name, value):
-        logger.debug(f'set camera property {name}: {value}')
+        logger.debug(f"set camera property {name}: {value}")
 
 
 class SyntheticCamera(CameraBase):
@@ -83,18 +86,19 @@ class SyntheticCamera(CameraBase):
         Global configuration of the microscope
 
     """
+
     def __init__(self, microscope_name, device_connection, configuration):
         super().__init__(microscope_name, device_connection, configuration)
 
         self.is_acquiring = False
-        self._mean_background_count = 100.0
-        self._noise_sigma = noise_model.compute_noise_sigma(Ib=self._mean_background_count)
-        self.blah = noise_model.compute_noise_sigma
+        self._mean_background_count = 100
+        self._noise_sigma = camera.compute_noise_sigma()
         self.current_frame_idx = None
         self.data_buffer = None
         self.num_of_frame = None
         self.pre_frame_idx = None
         self.random_image = True
+        self.serial_number = "synthetic"
 
         logger.info("SyntheticCamera Class Initialized")
 
@@ -204,23 +208,27 @@ class SyntheticCamera(CameraBase):
             if idx == 0:
                 self.random_image = False
 
-
     def generate_new_frame(self):
         r"""Generate a synthetic image."""
         if self.random_image:
-            image = np.random.normal(self._mean_background_count,
-                                    self._noise_sigma,
-                                    size=(self.x_pixels, self.y_pixels),
-                                    ).astype(np.uint16)
+            image = np.random.normal(
+                0,
+                self._noise_sigma
+                / 0.47,  # TODO: Don't hardcode 0.47 electrons per count
+                size=(self.x_pixels, self.y_pixels),
+            ).astype(np.uint16) + int(self._mean_background_count)
         else:
             image = self.tif_images[self.current_tif_id].pages[self.img_id].asarray()
             self.img_id += 1
             if self.img_id >= len(self.tif_images[self.current_tif_id].pages):
                 self.img_id = 0
                 self.current_tif_id = (self.current_tif_id + 1) % len(self.tif_images)
-            
-        ctypes.memmove(self.data_buffer[self.current_frame_idx].ctypes.data,
-                    image.ctypes.data, self.x_pixels * self.y_pixels * 2)
+
+        ctypes.memmove(
+            self.data_buffer[self.current_frame_idx].ctypes.data,
+            image.ctypes.data,
+            self.x_pixels * self.y_pixels * 2,
+        )
 
         self.current_frame_idx = (self.current_frame_idx + 1) % self.num_of_frame
 
@@ -266,4 +274,19 @@ class SyntheticCamera(CameraBase):
         """
         return 0.01
 
+    def calculate_readout_time(self):
+        r"""Calculate duration of time needed to readout an image.
+        Calculates the readout time and maximum frame rate according to the camera configuration settings.
 
+        Returns
+        -------
+        readout_time : float
+            Duration of time needed to readout an image.
+        max_frame_rate : float
+            Maximum framerate for a given camera acquisition mode.
+
+        """
+        exposure_time = self.camera_controller.get_property_value("exposure_time")
+        readout_time = 0.01  # 10 milliseconds.
+        max_frame_rate = 1 / (exposure_time + readout_time)
+        return readout_time, max_frame_rate

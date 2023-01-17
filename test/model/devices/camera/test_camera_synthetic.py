@@ -57,7 +57,6 @@ class TestSyntheticCamera:
                               'is_acquiring',
                               '_mean_background_count',
                               '_noise_sigma',
-                              'blah',
                               'camera_controller',
                               'current_frame_idx',
                               'data_buffer',

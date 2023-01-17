@@ -10,9 +10,11 @@ import ctypes
 import ctypes.wintypes
 from enum import IntEnum
 
-CODING = 'ascii'
+CODING = "ascii"
 
-__dll = ctypes.WinDLL("C:\Program Files\Thorlabs\Kinesis\Thorlabs.MotionControl.KCube.InertialMotor.dll")
+__dll = ctypes.WinDLL(
+    "C:\Program Files\Thorlabs\Kinesis\Thorlabs.MotionControl.KCube.InertialMotor.dll"
+)
 
 
 class TLFTDICommunicationError(Exception):
@@ -29,95 +31,101 @@ class TLMotorDLLError(Exception):
 
 class FT_Status(IntEnum):
     r"""The following errors are generated from the FTDI communications module, supporting code or device libraries."""
-    FT_OK                    = 0  # No error
-    FT_InvalidHandle         = 1  # The FTDI functions have not been initialized.
-    FT_DeviceNotFound        = 2  # The Device could not be found. This can be generated if the function TLI_BuildDeviceList() has not been called.
-    FT_DeviceNotOpened       = 3  # The Device must be opened before it can be accessed
-    FT_IOError               = 4  # An I/O Error has occured in the FTDI chip.
-    FT_InsufficientResources = 5  # There are Insufficient resources to run this application.
-    FT_InvalidParameter      = 6  # An invalid parameter has been supplied to the device.
-    FT_DeviceNotPresent      = 7  # The Device is no longer present. The device may have been disconnected since the last TLI_BuildDeviceList() call.
-    FT_IncorrectDevice       = 8  # The device detected does not match that expected
-    FT_NoDLLLoaded          = 16  # The library for this device could not be found
+    FT_OK = 0  # No error
+    FT_InvalidHandle = 1  # The FTDI functions have not been initialized.
+    FT_DeviceNotFound = 2  # The Device could not be found. This can be generated if the function TLI_BuildDeviceList() has not been called.
+    FT_DeviceNotOpened = 3  # The Device must be opened before it can be accessed
+    FT_IOError = 4  # An I/O Error has occured in the FTDI chip.
+    FT_InsufficientResources = (
+        5  # There are Insufficient resources to run this application.
+    )
+    FT_InvalidParameter = 6  # An invalid parameter has been supplied to the device.
+    FT_DeviceNotPresent = 7  # The Device is no longer present. The device may have been disconnected since the last TLI_BuildDeviceList() call.
+    FT_IncorrectDevice = 8  # The device detected does not match that expected
+    FT_NoDLLLoaded = 16  # The library for this device could not be found
     FT_NoFunctionsAvailable = 17  # No functions available for this device
     FT_FunctionNotAvailable = 18  # The function is not available for this device.
-    FT_BadFunctionPointer   = 19  # Bad function pointer detected
-    FT_GenericFunctionFail  = 20  # The function failed to complete successfully.
+    FT_BadFunctionPointer = 19  # Bad function pointer detected
+    FT_GenericFunctionFail = 20  # The function failed to complete successfully.
     FT_SpecificFunctionFail = 21  # The function failed to complete successfully.
 
 
 FT_Status_Description = {
-    FT_Status.FT_OK                    :  "No error",
-    FT_Status.FT_InvalidHandle         :  "The FTDI functions have not been initialized.",
-    FT_Status.FT_DeviceNotFound        :  "The Device could not be found. This can be generated if the function TLI_"
-                                          "BuildDeviceList() has not been called.",
-    FT_Status.FT_DeviceNotOpened       :  "The Device must be opened before it can be accessed.",
-    FT_Status.FT_IOError               :  "An I/O Error has occured in the FTDI chip.",
-    FT_Status.FT_InsufficientResources :  "There are Insufficient resources to run this application.",
-    FT_Status.FT_InvalidParameter      :  "An invalid parameter has been supplied to the device.",
-    FT_Status.FT_DeviceNotPresent      :  "The Device is no longer present. The device may have been disconnected "
-                                          "since the last TLI_BuildDeviceList() call.",
-    FT_Status.FT_IncorrectDevice       :  "The device detected does not match that expected.",
-    FT_Status.FT_NoDLLLoaded           :  "The library for this device could not be found.",
-    FT_Status.FT_FunctionNotAvailable  :  "The function is not available for this device.",
-    FT_Status.FT_NoFunctionsAvailable  :  "No functions available for this device.",
-    FT_Status.FT_BadFunctionPointer    :  "Bad function pointer detected.",
-    FT_Status.FT_GenericFunctionFail   :  "The function failed to complete successfully.",
-    FT_Status.FT_SpecificFunctionFail  :  "The function failed to complete successfully."
+    FT_Status.FT_OK: "No error",
+    FT_Status.FT_InvalidHandle: "The FTDI functions have not been initialized.",
+    FT_Status.FT_DeviceNotFound: "The Device could not be found. This can be generated if the function TLI_"
+    "BuildDeviceList() has not been called.",
+    FT_Status.FT_DeviceNotOpened: "The Device must be opened before it can be accessed.",
+    FT_Status.FT_IOError: "An I/O Error has occured in the FTDI chip.",
+    FT_Status.FT_InsufficientResources: "There are Insufficient resources to run this application.",
+    FT_Status.FT_InvalidParameter: "An invalid parameter has been supplied to the device.",
+    FT_Status.FT_DeviceNotPresent: "The Device is no longer present. The device may have been disconnected "
+    "since the last TLI_BuildDeviceList() call.",
+    FT_Status.FT_IncorrectDevice: "The device detected does not match that expected.",
+    FT_Status.FT_NoDLLLoaded: "The library for this device could not be found.",
+    FT_Status.FT_FunctionNotAvailable: "The function is not available for this device.",
+    FT_Status.FT_NoFunctionsAvailable: "No functions available for this device.",
+    FT_Status.FT_BadFunctionPointer: "Bad function pointer detected.",
+    FT_Status.FT_GenericFunctionFail: "The function failed to complete successfully.",
+    FT_Status.FT_SpecificFunctionFail: "The function failed to complete successfully.",
 }
 
 
 class TL_DLL_Error(IntEnum):
-    r"""The following errors are general errors generated by all DLLs. """
-    TL_ALREADY_OPEN           = 32  # Attempt to open a device that was already open.
-    TL_NO_RESPONSE            = 33  # The device has stopped responding.
-    TL_NOT_IMPLEMENTED        = 34  # This function has not been implemented.
-    TL_FAULT_REPORTED         = 35  # The device has reported a fault.
-    TL_INVALID_OPERATION      = 36  # The function could not be completed at this time.
-    TL_DISCONNECTING          = 40  # The function could not be completed because the device is disconnected.
-    TL_FIRMWARE_BUG           = 41  # The firmware has thrown an error.
+    r"""The following errors are general errors generated by all DLLs."""
+    TL_ALREADY_OPEN = 32  # Attempt to open a device that was already open.
+    TL_NO_RESPONSE = 33  # The device has stopped responding.
+    TL_NOT_IMPLEMENTED = 34  # This function has not been implemented.
+    TL_FAULT_REPORTED = 35  # The device has reported a fault.
+    TL_INVALID_OPERATION = 36  # The function could not be completed at this time.
+    TL_DISCONNECTING = (
+        40  # The function could not be completed because the device is disconnected.
+    )
+    TL_FIRMWARE_BUG = 41  # The firmware has thrown an error.
     TL_INITIALIZATION_FAILURE = 42  # The device has failed to initialize
-    TL_INVALID_CHANNEL        = 43  # An Invalid channel address was supplied
+    TL_INVALID_CHANNEL = 43  # An Invalid channel address was supplied
 
 
 TL_DLL_Error_Description = {
-    TL_DLL_Error.TL_ALREADY_OPEN           :  "Attempt to open a device that was already open.",
-    TL_DLL_Error.TL_NO_RESPONSE            :  "The device has stopped responding.",
-    TL_DLL_Error.TL_NOT_IMPLEMENTED        :  "This function has not been implemented.",
-    TL_DLL_Error.TL_FAULT_REPORTED         :  "The device has reported a fault.",
-    TL_DLL_Error.TL_INVALID_OPERATION      :  "The function could not be completed at this time.",
-    TL_DLL_Error.TL_DISCONNECTING          :  "The function could not be completed because the device is "
-                                              "disconnected.",
-    TL_DLL_Error.TL_FIRMWARE_BUG           :  "The firmware has thrown an error.",
-    TL_DLL_Error.TL_INITIALIZATION_FAILURE :  "The device has failed to initialize.",
-    TL_DLL_Error.TL_INVALID_CHANNEL        :  "An Invalid channel address was supplied.",
+    TL_DLL_Error.TL_ALREADY_OPEN: "Attempt to open a device that was already open.",
+    TL_DLL_Error.TL_NO_RESPONSE: "The device has stopped responding.",
+    TL_DLL_Error.TL_NOT_IMPLEMENTED: "This function has not been implemented.",
+    TL_DLL_Error.TL_FAULT_REPORTED: "The device has reported a fault.",
+    TL_DLL_Error.TL_INVALID_OPERATION: "The function could not be completed at this time.",
+    TL_DLL_Error.TL_DISCONNECTING: "The function could not be completed because the device is "
+    "disconnected.",
+    TL_DLL_Error.TL_FIRMWARE_BUG: "The firmware has thrown an error.",
+    TL_DLL_Error.TL_INITIALIZATION_FAILURE: "The device has failed to initialize.",
+    TL_DLL_Error.TL_INVALID_CHANNEL: "An Invalid channel address was supplied.",
 }
 
 
 class Motor_DLL_Error(IntEnum):
     r"""The following errors are motor specific errors generated by the Motor DLLs."""
-    TL_UNHOMED                    = 37  # The device cannot perform this function until it has been Homed.
-    TL_INVALID_POSITION           = 38  # The function cannot be performed as it would result in an illegal position.
+    TL_UNHOMED = 37  # The device cannot perform this function until it has been Homed.
+    TL_INVALID_POSITION = 38  # The function cannot be performed as it would result in an illegal position.
     TL_INVALID_VELOCITY_PARAMETER = 39  # An invalid velocity parameter was supplied. The velocity must be greater than zero.
-    TL_CANNOT_HOME_DEVICE         = 44  # This device does not support Homing. Check the Limit switch parameters are correct.
-    TL_JOG_CONTINOUS_MODE         = 45  # An invalid jog mode was supplied for the jog function.
-    TL_NO_MOTOR_INFO              = 46  # There is no Motor Parameters available to convert Real World Units.
-    TL_CMD_TEMP_UNAVAILABLE       = 47  # Command temporarily unavailable, Device may be busy.
+    TL_CANNOT_HOME_DEVICE = 44  # This device does not support Homing. Check the Limit switch parameters are correct.
+    TL_JOG_CONTINOUS_MODE = 45  # An invalid jog mode was supplied for the jog function.
+    TL_NO_MOTOR_INFO = (
+        46  # There is no Motor Parameters available to convert Real World Units.
+    )
+    TL_CMD_TEMP_UNAVAILABLE = 47  # Command temporarily unavailable, Device may be busy.
 
 
 Motor_DLL_Error_Description = {
-    Motor_DLL_Error.TL_UNHOMED                    :  "The device cannot perform this function until it has been"
-                                                     "Homed.",
-    Motor_DLL_Error.TL_INVALID_POSITION           :  "The function cannot be performed as it would result in an"
-                                                     "illegal position.",
-    Motor_DLL_Error.TL_INVALID_VELOCITY_PARAMETER :  "An invalid velocity parameter was supplied. The velocity must "
-                                                     "be greater than zero.",
-    Motor_DLL_Error.TL_CANNOT_HOME_DEVICE         :  "This device does not support Homing. Check the Limit switch "
-                                                     "parameters are correct.",
-    Motor_DLL_Error.TL_JOG_CONTINOUS_MODE         :  "An invalid jog mode was supplied for the jog function.",
-    Motor_DLL_Error.TL_NO_MOTOR_INFO              :  "There is no Motor Parameters available to convert Real World "
-                                                     "Units.",
-    Motor_DLL_Error.TL_CMD_TEMP_UNAVAILABLE       :  "Command temporarily unavailable, Device may be busy."
+    Motor_DLL_Error.TL_UNHOMED: "The device cannot perform this function until it has been"
+    "Homed.",
+    Motor_DLL_Error.TL_INVALID_POSITION: "The function cannot be performed as it would result in an"
+    "illegal position.",
+    Motor_DLL_Error.TL_INVALID_VELOCITY_PARAMETER: "An invalid velocity parameter was supplied. The velocity must "
+    "be greater than zero.",
+    Motor_DLL_Error.TL_CANNOT_HOME_DEVICE: "This device does not support Homing. Check the Limit switch "
+    "parameters are correct.",
+    Motor_DLL_Error.TL_JOG_CONTINOUS_MODE: "An invalid jog mode was supplied for the jog function.",
+    Motor_DLL_Error.TL_NO_MOTOR_INFO: "There is no Motor Parameters available to convert Real World "
+    "Units.",
+    Motor_DLL_Error.TL_CMD_TEMP_UNAVAILABLE: "Command temporarily unavailable, Device may be busy.",
 }
 
 
@@ -205,10 +213,14 @@ def TLI_GetDeviceListExt():
     c_buf = ctypes.create_string_buffer(c_buf_len)
     __dll.TLI_GetDeviceListExt(c_buf, c_buf_len)
 
-    return str(c_buf.value.decode(CODING)).split(',')[:-1]
+    return str(c_buf.value.decode(CODING)).split(",")[:-1]
 
 
-__dll.TLI_GetDeviceListByTypeExt.argtypes = [ctypes.c_char_p, ctypes.wintypes.DWORD, ctypes.c_int]
+__dll.TLI_GetDeviceListByTypeExt.argtypes = [
+    ctypes.c_char_p,
+    ctypes.wintypes.DWORD,
+    ctypes.c_int,
+]
 __dll.TLI_GetDeviceListByTypeExt.restype = ctypes.c_short
 __dll.TLI_GetDeviceListByTypeExt.errcheck = errcheck
 
@@ -231,33 +243,42 @@ def TLI_GetDeviceListByTypeExt(type_id):
     c_buf = ctypes.create_string_buffer(c_buf_len)
     __dll.TLI_GetDeviceListByTypeExt(c_buf, c_buf_len, type_id)
 
-    return str(c_buf.value.decode(CODING)).split(',')[:-1]
+    return str(c_buf.value.decode(CODING)).split(",")[:-1]
 
 
 class MOT_MotorTypes(IntEnum):
     r"""Values that represent THORLABSDEVICE_API."""
-    MOT_NotMotor       = 0
-    MOT_DCMotor        = 1
-    MOT_StepperMotor   = 2
+    MOT_NotMotor = 0
+    MOT_DCMotor = 1
+    MOT_StepperMotor = 2
     MOT_BrushlessMotor = 3
-    MOT_CustomMotor    = 100
+    MOT_CustomMotor = 100
 
 
 class TLI_DeviceInfo(ctypes.Structure):
     r"""Information about the device generated from serial number."""
     _pack_ = 1
     _fields_ = [
-        ("typeID", ctypes.wintypes.DWORD),        # The device Type ID
-        ("description", ctypes.c_char * 65),      # The device description.
-        ("serialNo", ctypes.c_char * 16),         # The device serial number.
-        ("PID", ctypes.wintypes.DWORD),           # The USB PID number.
-        ("isKnownType", ctypes.wintypes.BOOL),    # True if this object is a type known to the Motion Control software.
-        ("motorType", ctypes.c_int),              # The motor type (if a motor)
-        ("isPiezoDevice", ctypes.wintypes.BOOL),  # True if the device is a piezo device.
-        ("isLaser", ctypes.wintypes.BOOL),        # True if the device is a laser.
-        ("isCustomType", ctypes.wintypes.BOOL),   # True if the device is a custom type.
-        ("isRack", ctypes.wintypes.BOOL),         # True if the device is a rack.
-        ("maxChannels", ctypes.c_short)           # Defines the number of channels available in this device.
+        ("typeID", ctypes.wintypes.DWORD),  # The device Type ID
+        ("description", ctypes.c_char * 65),  # The device description.
+        ("serialNo", ctypes.c_char * 16),  # The device serial number.
+        ("PID", ctypes.wintypes.DWORD),  # The USB PID number.
+        (
+            "isKnownType",
+            ctypes.wintypes.BOOL,
+        ),  # True if this object is a type known to the Motion Control software.
+        ("motorType", ctypes.c_int),  # The motor type (if a motor)
+        (
+            "isPiezoDevice",
+            ctypes.wintypes.BOOL,
+        ),  # True if the device is a piezo device.
+        ("isLaser", ctypes.wintypes.BOOL),  # True if the device is a laser.
+        ("isCustomType", ctypes.wintypes.BOOL),  # True if the device is a custom type.
+        ("isRack", ctypes.wintypes.BOOL),  # True if the device is a rack.
+        (
+            "maxChannels",
+            ctypes.c_short,
+        ),  # Defines the number of channels available in this device.
     ]
 
 
@@ -283,7 +304,9 @@ def TLI_GetDeviceInfo(serial_no):
 
     info = TLI_DeviceInfo()
 
-    __dll.TLI_GetDeviceInfo(serial_no.encode(CODING), ctypes.byref(info))  # 1 if successful, 0 if not
+    __dll.TLI_GetDeviceInfo(
+        serial_no.encode(CODING), ctypes.byref(info)
+    )  # 1 if successful, 0 if not
 
     return info
 

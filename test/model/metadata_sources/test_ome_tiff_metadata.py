@@ -1,11 +1,8 @@
-import pytest
+import urllib.request
+import os
+import platform
 
-
-def test_ome_metadata_valid():
-    import urllib.request
-    import os
-    import platform
-    from aslm.model.dummy import DummyModel
+def test_ome_metadata_valid(dummy_model):
     from aslm.model.metadata_sources.ome_tiff_metadata import OMETIFFMetadata
 
     # First, download OME-XML validation tools
@@ -16,11 +13,9 @@ def test_ome_metadata_valid():
     output = os.popen('tar -xzvf bftools.zip').read()
 
     # Create metadata
-    model = DummyModel()
-
     md = OMETIFFMetadata()
 
-    md.configuration = model.configuration
+    md.configuration = dummy_model.configuration
 
     # Write metadata to file
     md.write_xml('test.xml')

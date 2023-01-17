@@ -46,14 +46,11 @@ logger = logging.getLogger(p)
 
 
 class SyntheticRemoteFocus(RemoteFocusBase):
-    r"""SyntheticRemoteFocus Class
-
-     """
+    r"""SyntheticRemoteFocus Class"""
 
     def __init__(self, microscope_name, device_connection, configuration):
         super().__init__(microscope_name, device_connection, configuration)
         pass
-
 
     def __del__(self):
         self.stop_task()
@@ -61,13 +58,13 @@ class SyntheticRemoteFocus(RemoteFocusBase):
 
     def prepare_task(self, channel_key):
         # write waveform
-        logger.debug(f'remote focus writes the waveform for {channel_key}')
+        logger.debug(f"remote focus writes the waveform for {channel_key}")
 
     def start_task(self):
-        logger.debug('remote focus started task!')
+        logger.debug("remote focus started task!")
 
     def stop_task(self):
-        logger.debug('remote focus stopped task!')
-    
+        logger.debug("remote focus stopped task!")
+
     def close_task(self):
-        logger.debug('remote focus closed task!')
+        logger.debug("remote focus closed task!")

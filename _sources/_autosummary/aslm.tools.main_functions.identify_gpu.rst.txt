@@ -1,0 +1,6 @@
+aslm.tools.main\_functions.identify\_gpu
+========================================
+
+.. currentmodule:: aslm.tools.main_functions
+
+.. autofunction:: identify_gpu

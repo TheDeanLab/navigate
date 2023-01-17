@@ -24,7 +24,7 @@ aslm.model.microscope.Microscope
       ~Microscope.move_stage
       ~Microscope.move_stage_offset
       ~Microscope.prepare_acquisition
-      ~Microscope.prepare_channel
+      ~Microscope.prepare_next_channel
       ~Microscope.stop_stage
       ~Microscope.update_data_buffer
    

@@ -17,7 +17,6 @@ aslm.model.devices.stages.stage\_synthetic.SyntheticStage
    .. autosummary::
    
       ~SyntheticStage.__init__
-      ~SyntheticStage.create_internal_position_dict
       ~SyntheticStage.create_position_dict
       ~SyntheticStage.get_abs_position
       ~SyntheticStage.load_sample
@@ -27,7 +26,6 @@ aslm.model.devices.stages.stage\_synthetic.SyntheticStage
       ~SyntheticStage.stop
       ~SyntheticStage.unload_sample
       ~SyntheticStage.unzero_axes
-      ~SyntheticStage.update_position_dictionaries
       ~SyntheticStage.zero_axes
    
    

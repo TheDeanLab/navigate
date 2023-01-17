@@ -1,37 +1,73 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
   <title>Hardware Setup &mdash; ASLM 0.1 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/sphinx_highlight.js"></script>
-    <script src="_static/js/theme.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Configuring ASLM" href="config.html" />
     <link rel="prev" title="Software Installation" href="installation.html" /> 
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
+
+   
   <div class="wy-grid-for-nav">
+    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
+          
+
+          
             <a href="index.html" class="icon icon-home"> ASLM
-            <img src="_static/mic.png" class="logo" alt="Logo"/>
+          
+
+          
           </a>
+
+          
+            
+            
+          
+
+          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -39,16 +75,40 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
               <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="userguide.html">User Guide</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="installation.html">Software Installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#gpu-dependencies">GPU Dependencies</a></li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#troubleshooting">Troubleshooting</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Hardware Setup</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#data-acquisition-card">Data Acquisition Card</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#configuration-file">Configuration File</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#directions">Directions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data-acquisition-card">Data Acquisition Card</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#wiring">Wiring</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#cameras">Cameras</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#hamamatsu">Hamamatsu</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#photometrics">Photometrics</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#voicecoil">Voicecoil</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#equipment-solutions">Equipment Solutions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#stages">Stages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#asi">ASI</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="config.html">Configuring ASLM</a></li>
@@ -57,36 +117,89 @@
 <li class="toctree-l1"><a class="reference internal" href="hacking.html">Extending ASLM</a></li>
 </ul>
 
+            
+          
         </div>
+        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">ASLM</a>
+        
       </nav>
 
+
       <div class="wy-nav-content">
+        
         <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a></li>
-          <li class="breadcrumb-item"><a href="userguide.html">User Guide</a></li>
-      <li class="breadcrumb-item active">Hardware Setup</li>
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="userguide.html">User Guide</a> &raquo;</li>
+        
+      <li>Hardware Setup</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
+        
+          
             <a href="_sources/hardware.rst.txt" rel="nofollow"> View page source</a>
+          
+        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+            
   <section id="hardware-setup">
-<h1>Hardware Setup<a class="headerlink" href="#hardware-setup" title="Permalink to this heading"></a></h1>
+<h1>Hardware Setup<a class="headerlink" href="#hardware-setup" title="Permalink to this heading">¶</a></h1>
+<section id="configuration-file">
+<h2>Configuration File<a class="headerlink" href="#configuration-file" title="Permalink to this heading">¶</a></h2>
+<p>Upon running the software the first time, a copy of the configuration file is created in
+<code class="docutils literal notranslate"><span class="pre">/Users/&lt;username&gt;/AppData/Local/.ASLM/config</span></code> on Windows-based machines, and in <code class="docutils literal notranslate"><span class="pre">~/.ASLM/config</span></code> on Mac and
+Linux-based machines. All changes will need to be made to this file.
+The local copy avoids conflicts between different microscopes after pulling new changes on GitHub.</p>
+</section>
 <section id="data-acquisition-card">
-<h2>Data Acquisition Card<a class="headerlink" href="#data-acquisition-card" title="Permalink to this heading"></a></h2>
-<p>We have used several different NI-based data acquisition cards to run the software. These include PCIe-6738, PXIe-6259, and PXIe-6733.</p>
+<h2>Data Acquisition Card<a class="headerlink" href="#data-acquisition-card" title="Permalink to this heading">¶</a></h2>
+<p>We have used several different NI-based data acquisition cards to run the software.
+These include PCIe-6738, PXIe-6259, and PXIe-6733. Prior to installing the card within the computer, first install
+the <a class="reference external" href="https://www.ni.com/en-us/support/downloads/drivers/download.ni-daqmx.html#464560">NI-DAQmx drivers</a>. Once installed,
+connect the PCIe or PXIe-based device to the computer. A functioning system should be recognized by the operating system,
+and visible in the Windows Device Manager as a <strong>NI Data Acquisition Device</strong>.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>To find the device pinouts for your NI-based data acquisition card, open up NI MAX, find the card under devices,
@@ -95,20 +208,12 @@ right-click and select ‘device pinouts’.</p>
 <p>The most important aspect is to wire up the triggering properly. The software first calculates all of the analog and digital waveforms, creates the NI tasks, and then queues these waveforms on the data acquisition board.
 Upon receipt of a trigger, all of the analog an digital tasks are delivered in parallel. This provides us with deterministic behavior on a per-frame basis, which is necessary for proper ASLM-style acquisitions. It does not
 however provide us with deterministic behavior between image frames, and some jitter in timing is anticipated.</p>
-</section>
-<section id="configuration-file">
-<h2>Configuration File<a class="headerlink" href="#configuration-file" title="Permalink to this heading"></a></h2>
-<p>Upon running the software the first time, a copy of the configuration file is created in <code class="docutils literal notranslate"><span class="pre">/Users/&lt;username&gt;/AppData/Local/.ASLM/config</span></code> on Windows-based machines, and in <code class="docutils literal notranslate"><span class="pre">~/.ASLM/config</span></code> on Mac and
-Linux-based machines. All changes will need to be made to this file. The local copy avoids conflicts between different microscopes after pulling new changes on GitHub.</p>
-</section>
-<section id="directions">
-<h2>Directions<a class="headerlink" href="#directions" title="Permalink to this heading"></a></h2>
+<section id="wiring">
+<h3>Wiring<a class="headerlink" href="#wiring" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>Identify the device name in NI MAX, and change it if you would like. Common names are <code class="docutils literal notranslate"><span class="pre">Dev1</span></code>, <code class="docutils literal notranslate"><span class="pre">Dev2</span></code>, etc. This name must correspond with the pinouts provided in the configuration file.</p></li>
-<li><p>Connect the <cite>camera_trigger_out_line</cite> to the External Trigger of the Hamamatsu Camera. Commonly, this is done with a</p></li>
+<li><p>Connect the <code class="docutils literal notranslate"><span class="pre">master_trigger_out_line</span></code> to the <code class="docutils literal notranslate"><span class="pre">trigger_source</span></code> with a direct wire, commonly <code class="docutils literal notranslate"><span class="pre">PXI6259/port0/line1</span></code> and <code class="docutils literal notranslate"><span class="pre">/PXI6259/PFI0</span></code></p></li>
 </ul>
-<p>counter port, e.g., <code class="docutils literal notranslate"><span class="pre">/PXI6259/ctr0</span></code>
-- Connect the <code class="docutils literal notranslate"><span class="pre">master_trigger_out_line</span></code> to the <code class="docutils literal notranslate"><span class="pre">trigger_source</span></code> with a direct wire, commonly <code class="docutils literal notranslate"><span class="pre">PXI6259/port0/line1</span></code> and <code class="docutils literal notranslate"><span class="pre">/PXI6259/PFI0</span></code></p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>For NI-based cards, port0/line1 is the equivalent of <code class="docutils literal notranslate"><span class="pre">P0.1</span></code>.
@@ -116,36 +221,113 @@ There are multiple pins for each PFIO, including source, out, gate, etc. You mus
 </div>
 </section>
 </section>
+<section id="cameras">
+<h2>Cameras<a class="headerlink" href="#cameras" title="Permalink to this heading">¶</a></h2>
+<section id="hamamatsu">
+<h3>Hamamatsu<a class="headerlink" href="#hamamatsu" title="Permalink to this heading">¶</a></h3>
+<ul>
+<li><p>Insert the USB that came with the camera into the computer and install HCImageLive.</p></li>
+<li><p>When prompted with the DCAM-API Setup</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Intall the Active Silicon Firebird drivers for the FrameGrabber</p></li>
+<li><p>Select … next to the tools button, and install DCAM tools onto the computer.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Shutdown the computer and intall the Hamamatsu frame grabber into an apporpriate PCIe-x16 slot on the motherboard.</p></li>
+<li><p>Turn on the computer and the camera, and confirm that it is functioning properly in HCImageLive or Excap (one of the DCAM tools installed)</p></li>
+<li><p>Connect the <cite>camera_trigger_out_line</cite> to the External Trigger of the Hamamatsu Camera. Commonly, this is done with a</p></li>
+</ul>
+<p>counter port, e.g., <code class="docutils literal notranslate"><span class="pre">/PXI6259/ctr0</span></code></p>
+</section>
+<section id="photometrics">
+<h3>Photometrics<a class="headerlink" href="#photometrics" title="Permalink to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Download the <a class="reference external" href="https://www.photometrics.com/support/software-and-drivers">PVCAM software</a> from Photometrics.</p></li>
+</ul>
+<p>The PVCAM SDK is also available form this location.
+You will likely have to register and agree to Photometrics terms.
+* Perform the Full Installation of the PVCAM software.
+* Should a ‘Base Device’ still show up as unknown in the device manager, you may need to install the
+<a href="#id1"><span class="problematic" id="id2">`Broadcom PCI/PCIe Software Development Kit &lt;https://www.broadcom.com/products/pcie-switches-bridges/software-dev-kits`_</span></a>
+* Upon successfully installation, one should be able to acquire images with the manufacturer provided PVCamTest software.</p>
+</section>
+</section>
+<section id="voicecoil">
+<h2>Voicecoil<a class="headerlink" href="#voicecoil" title="Permalink to this heading">¶</a></h2>
+<section id="equipment-solutions">
+<h3>Equipment Solutions<a class="headerlink" href="#equipment-solutions" title="Permalink to this heading">¶</a></h3>
+<ul>
+<li><p><a class="reference external" href="https://www.equipsolutions.com/products/linear-servo-controllers/sca814-linear-servo-controller/">SCA814 Linear Servo Controller</a></p>
+<blockquote>
+<div><ul class="simple">
+<li><p>+/- 2.5 Volt Analog Input</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p><a class="reference external" href="https://www.equipsolutions.com/products/linear-focus-actuators/lfa-2010-linear-focus-actuator/">LFA-2010 Linear Focus Actuator</a></p></li>
+</ul>
+</section>
+</section>
+<section id="stages">
+<h2>Stages<a class="headerlink" href="#stages" title="Permalink to this heading">¶</a></h2>
+<section id="asi">
+<h3>ASI<a class="headerlink" href="#asi" title="Permalink to this heading">¶</a></h3>
+<p>Software designed to acquire data in a continuous stage scanning mode. Rather than using the default SYNC ignal
+from the ASI stage to synchronize the start of imaging, we use the encoder output pulsing mode of the ASI stage to
+trigger the acquisition of every frame at precise intervals.  Important for multi-channel imaging that is acquired in
+the per-stack mode, but less so for perZ-based acquisitions.</p>
+</section>
+</section>
+</section>
 
 
            </div>
+           
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="installation.html" class="btn btn-neutral float-left" title="Software Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="config.html" class="btn btn-neutral float-right" title="Configuring ASLM" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="installation.html" class="btn btn-neutral float-left" title="Software Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Dean Lab @ UT Southwestern.</p>
-  </div>
+    <p>
+        &#169; Copyright 2022, Dean Lab @ UT Southwestern.
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
         </div>
       </div>
+
     </section>
+
   </div>
-  <script>
+  
+
+  <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

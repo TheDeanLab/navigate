@@ -17,11 +17,9 @@ aslm.model.devices.stages.stage\_base.StageBase
    .. autosummary::
    
       ~StageBase.__init__
-      ~StageBase.create_internal_position_dict
       ~StageBase.create_position_dict
       ~StageBase.get_abs_position
       ~StageBase.stop
-      ~StageBase.update_position_dictionaries
    
    
 

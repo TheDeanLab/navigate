@@ -1,0 +1,6 @@
+aslm.model.analysis.camera.compute\_noise\_sigma
+================================================
+
+.. currentmodule:: aslm.model.analysis.camera
+
+.. autofunction:: compute_noise_sigma

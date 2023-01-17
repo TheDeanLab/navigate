@@ -17,14 +17,12 @@ aslm.model.devices.stages.stage\_galvo.GalvoNIStage
    .. autosummary::
    
       ~GalvoNIStage.__init__
-      ~GalvoNIStage.create_internal_position_dict
       ~GalvoNIStage.create_position_dict
       ~GalvoNIStage.get_abs_position
       ~GalvoNIStage.move_absolute
       ~GalvoNIStage.move_axis_absolute
       ~GalvoNIStage.report_position
       ~GalvoNIStage.stop
-      ~GalvoNIStage.update_position_dictionaries
    
    
 

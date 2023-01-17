@@ -15,6 +15,7 @@ aslm.config.config
       :toctree:
    
       build_nested_dict
+      get_aslm_path
       get_configuration_paths
       load_configs
       update_config_dict

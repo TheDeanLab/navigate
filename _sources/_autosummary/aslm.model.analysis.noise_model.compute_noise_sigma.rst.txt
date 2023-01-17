@@ -1,6 +1,0 @@
-aslm.model.analysis.noise\_model.compute\_noise\_sigma
-======================================================
-
-.. currentmodule:: aslm.model.analysis.noise_model
-
-.. autofunction:: compute_noise_sigma

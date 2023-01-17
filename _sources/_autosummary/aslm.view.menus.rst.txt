@@ -29,6 +29,7 @@ aslm.view.menus
    :recursive:
 
    aslm.view.menus.autofocus_setting_popup
+   aslm.view.menus.camera_map_setting_popup
    aslm.view.menus.help_popup
    aslm.view.menus.ilastik_setting_popup
    aslm.view.menus.menus

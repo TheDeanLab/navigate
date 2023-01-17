@@ -18,11 +18,13 @@ aslm.model.devices.camera.camera\_synthetic.SyntheticCamera
    
       ~SyntheticCamera.__init__
       ~SyntheticCamera.calculate_light_sheet_exposure_time
+      ~SyntheticCamera.calculate_readout_time
       ~SyntheticCamera.close_camera
       ~SyntheticCamera.close_image_series
       ~SyntheticCamera.generate_new_frame
       ~SyntheticCamera.get_minimum_waiting_time
       ~SyntheticCamera.get_new_frame
+      ~SyntheticCamera.get_offset_variance_maps
       ~SyntheticCamera.initialize_image_series
       ~SyntheticCamera.load_images
       ~SyntheticCamera.report_settings
@@ -36,5 +38,12 @@ aslm.model.devices.camera.camera\_synthetic.SyntheticCamera
    
 
    
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~SyntheticCamera.offset
+      ~SyntheticCamera.variance
    
    

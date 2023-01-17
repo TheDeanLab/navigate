@@ -23,6 +23,7 @@ aslm.model.devices.camera.camera\_hamamatsu.HamamatsuOrca
       ~HamamatsuOrca.close_image_series
       ~HamamatsuOrca.get_minimum_waiting_time
       ~HamamatsuOrca.get_new_frame
+      ~HamamatsuOrca.get_offset_variance_maps
       ~HamamatsuOrca.initialize_image_series
       ~HamamatsuOrca.report_settings
       ~HamamatsuOrca.set_ROI
@@ -40,6 +41,8 @@ aslm.model.devices.camera.camera\_hamamatsu.HamamatsuOrca
 
    .. autosummary::
    
+      ~HamamatsuOrca.offset
       ~HamamatsuOrca.serial_number
+      ~HamamatsuOrca.variance
    
    

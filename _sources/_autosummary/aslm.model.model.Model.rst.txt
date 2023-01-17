@@ -22,6 +22,7 @@ aslm.model.model.Model
       ~Model.end_acquisition
       ~Model.get_active_microscope
       ~Model.get_data_buffer
+      ~Model.get_offset_variance_maps
       ~Model.get_stage_position
       ~Model.load_images
       ~Model.move_stage
@@ -33,9 +34,6 @@ aslm.model.model.Model
       ~Model.run_command
       ~Model.run_data_process
       ~Model.run_live_acquisition
-      ~Model.run_single_acquisition
-      ~Model.run_single_channel_acquisition
-      ~Model.run_single_channel_acquisition_with_features
       ~Model.snap_image
       ~Model.stop_stage
       ~Model.update_data_buffer

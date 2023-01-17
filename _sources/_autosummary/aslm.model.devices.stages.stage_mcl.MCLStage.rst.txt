@@ -17,14 +17,12 @@ aslm.model.devices.stages.stage\_mcl.MCLStage
    .. autosummary::
    
       ~MCLStage.__init__
-      ~MCLStage.create_internal_position_dict
       ~MCLStage.create_position_dict
       ~MCLStage.get_abs_position
       ~MCLStage.move_absolute
       ~MCLStage.move_axis_absolute
       ~MCLStage.report_position
       ~MCLStage.stop
-      ~MCLStage.update_position_dictionaries
    
    
 

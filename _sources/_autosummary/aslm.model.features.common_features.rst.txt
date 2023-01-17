@@ -21,6 +21,8 @@ aslm.model.features.common\_features
    
       ChangeResolution
       FindTissueSimple2D
+      LoopByCount
+      PrepareNextChannel
       Snap
       WaitToContinue
       ZStackAcquisition

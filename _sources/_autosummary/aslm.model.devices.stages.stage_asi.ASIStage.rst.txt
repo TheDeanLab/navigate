@@ -17,14 +17,12 @@ aslm.model.devices.stages.stage\_asi.ASIStage
    .. autosummary::
    
       ~ASIStage.__init__
-      ~ASIStage.create_internal_position_dict
       ~ASIStage.create_position_dict
       ~ASIStage.get_abs_position
       ~ASIStage.move_absolute
       ~ASIStage.move_axis_absolute
       ~ASIStage.report_position
       ~ASIStage.stop
-      ~ASIStage.update_position_dictionaries
    
    
 

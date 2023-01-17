@@ -29,12 +29,14 @@
    :recursive:
 
    aslm.tools.beams
+   aslm.tools.benchmark
    aslm.tools.common_dict_tools
    aslm.tools.common_functions
    aslm.tools.decorators
    aslm.tools.file_functions
    aslm.tools.image
    aslm.tools.image_loaders
+   aslm.tools.main_functions
    aslm.tools.multipos_table_tools
    aslm.tools.project_stats
    aslm.tools.vibration_analysis

@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -32,10 +32,44 @@
 
 import pytest
 
-@pytest.fixture(scope='package')
+
+@pytest.fixture(scope="package")
 def dummy_model():
     from aslm.model.dummy import DummyModel
 
     model = DummyModel()
 
     return model
+
+
+# @pytest.fixture(scope="package")
+# def dummy_model():
+#     from types import SimpleNamespace
+
+#     from aslm.model.model import Model
+#     from multiprocessing import Manager, Queue
+#     from aslm.config.config import get_configuration_paths, load_configs
+
+#     event_queue = Queue(100)
+#     manager = Manager()
+#     (
+#         configuration_path,
+#         experiment_path,
+#         etl_constants_path,
+#         rest_api_path,
+#     ) = get_configuration_paths()
+#     configuration = load_configs(
+#         manager,
+#         configuration=configuration_path,
+#         experiment=experiment_path,
+#         etl_constants=etl_constants_path,
+#         rest_api_config=rest_api_path,
+#     )
+#     model = Model(
+#         USE_GPU=False,
+#         args=SimpleNamespace(synthetic_hardware=True),
+#         configuration=configuration,
+#         event_queue=event_queue,
+#     )
+
+#     return model

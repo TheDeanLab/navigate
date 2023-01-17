@@ -651,7 +651,7 @@ dcamcap_transferinfo = __dll.dcamcap_transferinfo
 dcamwait_start = __dll.dcamwait_start
 dcamwait_abort = __dll.dcamwait_abort
 dcamcap_firetrigger = __dll.dcamcap_firetrigger
-dcamdev_setdata = __dll.dcamdev_setdata
+#dcamdev_setdata = __dll.dcamdev_setdata
 dcamdev_getstring = __dll.dcamdev_getstring
 
 class camReg(object):
@@ -684,6 +684,7 @@ class camReg(object):
     def unregCamera(cls):
         cls.numCameras -= 1
         if cls.numCameras == 0:
+            print('Uninit DCAM API!')
             dcamapi_uninit()
 
 
@@ -694,7 +695,8 @@ class DCAM:
         self.__hdcamwait = 0
         
         # open camera
-        self.dev_open(index)
+        if not self.dev_open(index):
+            raise Exception(f"DCAM_{index} failed to open!")
         self.__open_hdcamwait()
 
         self.prop_setvalue(property_dict['subarray_mode'], DCAMPROP_MODE__OFF)
@@ -706,7 +708,10 @@ class DCAM:
 
         self._serial_number = self.get_string_value(c_int32(int("0x04000102", 0))).strip('S/N: ')
 
+        print(f'>>> IN DCAM CLASS: {index} | {self._serial_number}')
+
     def __del__(self):
+        print("DCAM::__del__ called!")
         self.dev_close()
 
     def __result(self, errvalue):
@@ -802,6 +807,7 @@ class DCAM:
         Returns:
             True:
         """
+        print(f"Closing camera...")
         if self.__hdcam:
             self.__close_hdcamwait()
             dcamdev_close(self.__hdcam)

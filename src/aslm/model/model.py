@@ -42,6 +42,8 @@ import numpy as np
 # Local Imports
 from aslm.model.concurrency.concurrency_tools import ResultThread, SharedNDArray
 from aslm.model.features.autofocus import Autofocus
+from aslm.model.features.adaptive_optics import TonyWilson
+# CONOR: The AO routine should be a "feature"!
 from aslm.model.features.image_writer import ImageWriter
 from aslm.model.features.dummy_detective import Dummy_Detective
 from aslm.model.features.common_features import *
@@ -353,6 +355,20 @@ class Model:
                 self.signal_thread.name = "ETL Popup Signal"
                 self.signal_thread.start()
 
+        elif command == 'flatten_mirror':
+            self.update_mirror(coef=[], flatten=True)
+        elif command == 'set_mirror':
+            coef = list(self.configuration['experiment']['MirrorParameters']['modes'].values())
+            self.update_mirror(coef=coef)
+        elif command == 'save_wcs_file':
+            self.active_microscope.mirror.save_wcs_file(path=args[0])
+        elif command == 'set_mirror_from_wcs':
+            coef = self.active_microscope.mirror.set_from_wcs_file(path=args[0])
+            self.update_mirror(coef=coef)
+        elif command == 'tony_wilson':
+            tony_wilson = TonyWilson(self)
+            tony_wilson.run(*args)
+
         elif command == 'autofocus':
             """
             Autofocus Routine
@@ -391,6 +407,28 @@ class Model:
             if self.data_thread:
                 self.data_thread.join()
             self.end_acquisition()
+
+        elif command == 'change_camera':
+            new_camera = list(self.active_microscope.cameras.values())[args[0]]
+            print(f'Using new camera >> {new_camera.camera_controller._serial_number}')
+            self.active_microscope.camera = new_camera
+
+        elif command == 'exit':
+            for camera in self.active_microscope.cameras.values():
+                camera.camera_controller.dev_close()
+
+    # main function to update mirror/set experiment mode values
+    def update_mirror(self, coef=[], flatten=False):
+        if coef:
+            self.active_microscope.mirror.display_modes(coef)
+        elif flatten:
+            self.active_microscope.mirror.flat()
+
+        mirror_img = self.active_microscope.mirror.mirror_controller.get_wavefront_pix()
+
+        self.event_queue.put(('mirror_update', {'mirror_img': mirror_img, 'coefs': coef}))
+
+        # print(self.configuration['experiment']['MirrorParameters']['modes'])
 
     def move_stage(self, pos_dict, wait_until_done=False):
         r"""Moves the stages.

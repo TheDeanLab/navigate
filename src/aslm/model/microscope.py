@@ -32,7 +32,7 @@
 import logging
 from multiprocessing.managers import ListProxy
 
-from aslm.model.device_startup_functions import start_camera, start_filter_wheel, start_zoom, start_shutter, start_remote_focus_device, start_galvo, start_lasers, start_stage
+from aslm.model.device_startup_functions import start_mirror, start_camera, start_filter_wheel, start_zoom, start_shutter, start_remote_focus_device, start_galvo, start_lasers, start_stage
 from aslm.tools.common_functions import build_ref_name
 
 p = __name__.split(".")[1]
@@ -44,18 +44,20 @@ class Microscope:
         self.configuration = configuration
         self.data_buffer = None
         self.stages = {}
+        self.cameras = {}
         self.lasers = {}
         self.galvo = {}
         self.daq = devices_dict.get('daq', None)
 
         device_ref_dict = {
-            'camera': ['type', 'serial_number'],
+            # 'camera': ['type', 'serial_number'],
             'filter_wheel': ['type'],
             'zoom': ['type', 'servo_id'],
             'shutter': ['type', 'channel'],
             'remote_focus_device': ['type', 'channel'],
             'galvo': ['type', 'channel'],
-            'lasers': ['wavelength']
+            'lasers': ['wavelength'],
+            'mirror': ['type']
         }
 
         device_name_dict = {
@@ -89,6 +91,8 @@ class Microscope:
             for i, device in enumerate(device_config_list):
                 device_ref_name = None
                 if 'hardware' in device.keys():
+                    print(device['hardware'])
+                    print(device_ref_dict[device_name])
                     ref_list = [device['hardware'][k] for k in device_ref_dict[device_name]]
                 else:
                     try:
@@ -108,11 +112,28 @@ class Microscope:
                     exec(f"self.{device_name}['{device_name_list[i]}'] = start_{device_name}(name, device_connection, configuration, i, is_synthetic)")
                 else:
                     exec(f'self.{device_name} = start_{device_name}(name, device_connection, configuration, is_synthetic)')
-                
+
                 if device_connection is None and device_ref_name != None:
                     if device_name not in devices_dict:
                         devices_dict[device_name] = {}
                     devices_dict[device_name][device_ref_name] = getattr(self, device_name)[device_name_list[i]] if is_list else getattr(self, device_name)
+
+        # cameras (handle camera list similar to stages...)
+        camera_devices = self.configuration['configuration']['microscopes'][self.microscope_name]['camera']['hardware']
+        if type(camera_devices) != ListProxy:
+            camera_devices = [camera_devices]
+        for i, device_config in enumerate(camera_devices):
+            device_ref_name = build_ref_name('_', device_config['type'], device_config['serial_number'])            
+            if device_ref_name not in devices_dict['camera']:
+                logger.debug(f'Camera {device_ref_name} has not been loaded!')
+                raise Exception('No camera device!')
+            print(f"{device_ref_name} : {devices_dict['camera'][device_ref_name]}")
+            self.cameras[device_ref_name] = start_camera(self.microscope_name, devices_dict['camera'][device_ref_name], self.configuration, i, is_synthetic)
+
+        self.camera = list(self.cameras.values())[0] # just use the first one for now...
+
+        print('>>> Use Camera:')
+        print(self.camera.camera_controller._serial_number)
 
         # stages
         stage_devices = self.configuration['configuration']['microscopes'][self.microscope_name]['stage']['hardware']
@@ -129,6 +150,9 @@ class Microscope:
             stage = start_stage(self.microscope_name, devices_dict['stages'][device_ref_name], self.configuration, i, is_synthetic)
             for axes in device_config['axes']:
                 self.stages[axes] = stage
+
+        # flatten the mirror
+        self.mirror.flat()
 
         # connect daq and camera in synthetic mode
         if is_synthetic:

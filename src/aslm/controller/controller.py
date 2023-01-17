@@ -47,6 +47,7 @@ from aslm.view.main_application_window import MainApp as view
 from aslm.view.menus.remote_focus_popup import remote_popup
 from aslm.view.menus.autofocus_setting_popup import autofocus_popup
 from aslm.view.menus.ilastik_setting_popup import ilastik_setting_popup
+from aslm.view.menus.adaptiveoptics_popup import adaptiveoptics_popup
 from aslm.view.menus.help_popup import help_popup
 
 
@@ -54,6 +55,7 @@ from aslm.config.config import load_configs, update_config_dict
 # Local Sub-Controller Imports
 from aslm.controller.configuration_controller import ConfigurationController
 from aslm.controller.sub_controllers import *
+from aslm.controller.sub_controllers.adaptiveoptics_popup_controller import AdaptiveOpticsPopupController
 from aslm.tools.file_functions import create_save_path, save_yaml_file
 from aslm.controller.thread_pool import SynchronizedThreadPool
 
@@ -301,6 +303,13 @@ class Controller:
             else:
                 self.ilastik_controller = IlastikPopupController(ilastik_popup_window, self, ilastik_url)
 
+        def popup_adaptiveoptics():
+            if hasattr(self, 'adaptiveoptics_popup_controller'):
+                self.adaptiveoptics_popup_controller.showup()
+                return
+            ao_popup = adaptiveoptics_popup(self.view)
+            self.ao_popup_controller = AdaptiveOpticsPopupController(ao_popup, self)
+
         # Help popup
         def popup_help():
             if hasattr(self, 'help_controller'):
@@ -380,6 +389,7 @@ class Controller:
         self.feature_id_val.trace_add('write', lambda *args: self.execute('load_feature', self.feature_id_val.get()))
         self.view.menubar.menu_features.add_separator()
         self.view.menubar.menu_features.add_command(label='ilastik setting', command=popup_ilastik_setting)
+        self.view.menubar.menu_features.add_command(label='Adaptive Optics', command=popup_adaptiveoptics)
         # disable ilastik menu
         self.view.menubar.menu_features.entryconfig('Ilastik Segmentation', state='disabled')
         
@@ -593,6 +603,21 @@ class Controller:
             # update_settings_common(self, args)
             self.threads_pool.createThread('model', lambda: self.model.run_command('update_setting', *args))
 
+        # mirror commands:
+        elif command == 'flatten_mirror':
+            self.model.run_command('flatten_mirror', *args)
+        elif command == 'set_mirror':
+            self.model.run_command('set_mirror', *args)
+        elif command == 'set_mirror_from_wcs':
+            self.model.run_command('set_mirror_from_wcs', *args)
+        elif command == 'save_wcs_file':
+            self.model.run_command('save_wcs_file', *args)
+        elif command == 'tony_wilson':
+            self.threads_pool.createThread('camera', self.capture_image, args=('tony_wilson', 'live',))
+
+        elif command == 'change_camera':
+            self.model.run_command('change_camera', *args)
+
         elif command == 'autofocus':
             r"""Execute autofocus routine."""
             self.threads_pool.createThread('camera', self.capture_image, args=('autofocus', 'live',))
@@ -658,6 +683,7 @@ class Controller:
             self.sloppy_stop()
             if hasattr(self, 'etl_controller'):
                 self.etl_controller.save_etl_info()
+            self.model.run_command('exit')
             self.model.terminate()
             self.model = None
             self.event_queue.put(('stop', ''))
@@ -790,6 +816,18 @@ class Controller:
             elif event == 'autofocus':
                 if hasattr(self, 'af_popup_controller'):
                     self.af_popup_controller.display_plot(value)
+            elif event == 'tonywilson':
+                if hasattr(self, 'ao_popup_controller'):
+                    # self.ao_popup_controller.set_widgets_from_coef(value['coefs'])
+                    self.ao_popup_controller.plot_tonywilson(value)
+                    # self.ao_popup_controller.plot_mirror(value)
+                    if value['done']:
+                        print('Tony Wilson done! Updating expt...')
+                        self.ao_popup_controller.update_experiment_values()
+            elif event == 'mirror_update':
+                if hasattr(self, 'ao_popup_controller'):
+                    self.ao_popup_controller.set_widgets_from_coef(value['coefs'])
+                    self.ao_popup_controller.plot_mirror(value)
             elif event == 'stop':
                 break
     

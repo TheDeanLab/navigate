@@ -88,6 +88,7 @@ class HamamatsuOrca(CameraBase):
         logger.info("HamamatsuOrca Initialized")
 
     def __del__(self):
+        print("HamamatsuOrca::__del__ called!")
         if hasattr(self, 'camera_controller'):
             self.camera_controller.dev_close()
         logger.info("HamamatsuOrca Shutdown")

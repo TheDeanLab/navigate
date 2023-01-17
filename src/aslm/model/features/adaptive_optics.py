@@ -128,9 +128,7 @@ class TonyWilson:
         if frame_num < 1:
             return
         self.model.prepare_acquisition()  # Opens correct shutter and puts all signals to false
-        
-        # load signal and data containers
-        self.model.signal_container, self.model.data_container = load_features(self.model, [[{'name': TonyWilson}]])
+        self.model.prepare_next_channel()
 
         # load signal and data containers
         self.model.signal_container, self.model.data_container = load_features(

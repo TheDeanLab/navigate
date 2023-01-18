@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -94,21 +95,61 @@ def gaussian_beam(
 # w0 = wvl
 # rb, zb = image.shape[0]//2, image.shape[1]//2
 #
-# x0 = (np.argmax(np.max(image, axis=0))-1024, np.argmax(np.max(image, axis=1))-1024, w0, np.max(image), 100)
+# x0 = (np.argmax(np.max(image, axis=0))-1024,
+# np.argmax(np.max(image, axis=1))-1024,
+# w0, np.max(image), 100)
 # # The bounds are optional
 # res = least_squares(fit_gaussian_beam_error, x0, args=(image, NA, n, wvl, pixel_size),
-#                     bounds=([-rb,-zb, 0, np.max(image)-100, 0], [rb, zb, 5*wvl, np.max(image), np.inf]))
+#                     bounds=([-rb,-zb, 0,
+#                     np.max(image)-100, 0], [rb, zb,
+#                     5*wvl, np.max(image), np.inf]))
 # # res = minimize(fit_gaussian_beam_mse, x0, args=(image, NA, n, wvl, pixel_size))
 #
 # fig, axs = plt.subplots(1,2,figsize=(12,6))
 # axs[0].imshow(image)
-# axs[1].imshow(gaussian_beam(res.x[0], res.x[1], image.shape[0], image.shape[1], res.x[2],
+# axs[1].imshow(gaussian_beam(res.x[0],
+# res.x[1],
+# image.shape[0],
+# image.shape[1],
+# res.x[2],
 #                             NA, n, wvl, pixel_size, res.x[3], res.x[4]))
 #
 
 
 def fit_gaussian_beam_error(x, image, NA, n, wvl, pixel_size, ravel=True):
-    """x = (r0, z0, w0, I0, bg0)"""
+    """Error function for fitting a Gaussian beam
+
+
+    Parameters
+    ----------
+    x : np.ndarray
+        Parameters to fit.
+        x[0] and x[1] are the offsets in pixels in radial and z direction of the beam.
+        x[2] is the beam waist width [nm].
+        x[3] is the peak intensity of the beam.
+        x[4] is the background intensity.
+    image : np.ndarray
+        Image to fit
+    NA : float
+        Numerical aperture of the optical system generating the Gaussian beam
+    n : float
+        Refractive index of the sample
+    wvl : float
+        Wavelength of the beam [nm]
+    pixel_size : float
+        Effective pixel size [nm]
+    ravel : bool
+        If True, return a flattened array.  If False, return a 2D array.
+
+    Returns
+    -------
+    np.ndarray
+        Error between the image and the Gaussian beam
+
+    Examples
+    --------
+    >>> x = (r0, z0, w0, I0, bg0)
+    """
     diff = (
         gaussian_beam(
             x[0],

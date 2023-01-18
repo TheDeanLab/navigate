@@ -86,3 +86,5 @@ Software designed to acquire data in a continuous stage scanning mode. Rather th
 from the ASI stage to synchronize the start of imaging, we use the encoder output pulsing mode of the ASI stage to
 trigger the acquisition of every frame at precise intervals.  Important for multi-channel imaging that is acquired in
 the per-stack mode, but less so for perZ-based acquisitions.
+
+FTP-2000 Stage. Whatever you do, don't change the F position. You will your stage.

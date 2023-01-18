@@ -78,3 +78,52 @@ def model():
     )
 
     return model
+
+
+@pytest.fixture(scope="package")
+def root():
+    import tkinter as tk
+
+    root = tk.Tk()
+    yield root
+    root.destroy()
+
+
+@pytest.fixture(scope="package")
+def splash_screen(root):
+    from aslm.view.splash_screen import SplashScreen
+
+    splash_screen = SplashScreen(root, "./icon/splash_screen_image.png")
+
+    return splash_screen
+
+
+@pytest.fixture(scope="package")
+def controller(root, splash_screen):
+    from types import SimpleNamespace
+    from pathlib import Path
+
+    from aslm.controller.controller import Controller
+
+    # Use configuration files that ship with the code base
+    configuration_directory = Path.joinpath(
+        Path(__file__).resolve().parent.parent, "src", "aslm", "config"
+    )
+    configuration_path = Path.joinpath(configuration_directory, "configuration.yaml")
+    experiment_path = Path.joinpath(configuration_directory, "experiment.yml")
+    etl_constants_path = Path.joinpath(configuration_directory, "etl_constants.yml")
+    rest_api_path = Path.joinpath(configuration_directory, "rest_api_config.yml")
+
+    controller = Controller(
+        root,
+        splash_screen,
+        configuration_path,
+        experiment_path,
+        etl_constants_path,
+        rest_api_path,
+        False,
+        SimpleNamespace(synthetic_hardware=True),
+    )
+
+    yield controller
+    controller.execute("exit")

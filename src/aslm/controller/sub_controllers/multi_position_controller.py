@@ -28,7 +28,7 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-#
+
 
 # Standard Library Imports
 from tkinter import filedialog
@@ -61,8 +61,22 @@ class MultiPositionController(GUIController):
         self.table.addStagePosition = self.add_stage_position
 
     def set_positions(self, positions):
-        """
-        # This function set positions to multi-position's table
+        """Set positions to multi-position's table
+
+        Parameters
+        ----------
+        positions : dict
+            positions to be set
+
+        Example
+        -------
+        positions = {
+            0: {'x': 0, 'y': 0, 'z': 0, 'theta': 0, 'f': 0},
+            1: {'x': 1, 'y': 1, 'z': 1, 'theta': 1, 'f': 1},
+            2: {'x': 2, 'y': 2, 'z': 2, 'theta': 2, 'f': 2}
+            }
+
+        >>> set_positions(positions)
         """
         axis_dict = {"x": "X", "y": "Y", "z": "Z", "theta": "R", "f": "F"}
         data = {}
@@ -71,12 +85,19 @@ class MultiPositionController(GUIController):
             data[axis_dict[name]] = list(pos[name] for pos in positions)
         self.table.model.df = pd.DataFrame(data)
         self.table.redraw()
-
         self.show_verbose_info("loaded new positions")
 
     def get_positions(self):
-        """
-        # This function will return all positions
+        """Return all positions from the Multi-Position Acquisition Interface.
+
+        Returns
+        -------
+        dict
+            positions in the format of {index: {axis: value}}
+
+        Example
+        -------
+        >>> get_positions()
         """
         axis_dict = {"X": "x", "Y": "y", "Z": "z", "R": "theta", "F": "f"}
         positions = {}
@@ -96,9 +117,23 @@ class MultiPositionController(GUIController):
         return positions
 
     def handle_double_click(self, event):
-        """
-        # when double clicked the row head, it will call the parent/central controller
-        # to move stage and update stage view
+        """ "Move to a position within the Multi-Position Acquisition Interface.
+
+        When double clicked the row head, it will call the parent/central controller
+        to move stage and update stage view
+
+        Parameters
+        ----------
+        event : tkinter event
+            event that triggers the function
+
+        Returns
+        -------
+        None
+
+        Example
+        -------
+        >>> handle_double_click(event)
         """
         rowclicked = self.table.get_row_clicked(event)
         df = self.table.model.df
@@ -120,15 +155,31 @@ class MultiPositionController(GUIController):
         self.show_verbose_info("move stage to", position)
 
     def get_position_num(self):
-        """
-        # this function return the number of positions
+        """Return the number of positions in the Multi-Position Acquisition Interface.
+
+        Returns
+        -------
+        int
+            number of positions
+
+        Example
+        -------
+        >>> get_position_num()
         """
         return self.table.model.df.shape[0]
 
     def load_positions(self):
-        """
-        # this function load a csv file,
-        # the valid csv file should contain the line of headers ['X', 'Y', 'Z', 'R', 'F']
+        """Load a csv file.
+
+        The valid csv file should contain the line of headers ['X', 'Y', 'Z', 'R', 'F']
+
+        Returns
+        -------
+        None
+
+        Example
+        -------
+        >>> load_positions()
         """
         filename = filedialog.askopenfilenames(
             defaultextension=".csv",
@@ -151,9 +202,18 @@ class MultiPositionController(GUIController):
         self.show_verbose_info("loaded csv file", filename)
 
     def export_positions(self):
-        """
-        # this function opens a dialog that let the user input a filename
-        # then, it will export positions to that csv file
+        """Export the positions in the Multi-Position Acquisition Interface to a csv file.
+
+        This function opens a dialog that let the user input a filename
+        Then, it will export positions to that csv file
+
+        Returns
+        -------
+        None
+
+        Example
+        -------
+        >>> export_positions()
         """
         filename = filedialog.asksaveasfilename(
             defaultextension=".csv",
@@ -165,14 +225,31 @@ class MultiPositionController(GUIController):
         self.show_verbose_info("exporting csv file", filename)
 
     def move_to_position(self):
-        """ "Move to a position within the Multi-Position Acquisition Interface."""
+        """Move to a position within the Multi-Position Acquisition Interface.
+
+        Returns
+        -------
+        None
+
+        Example
+        -------
+        >>> move_to_position()
+        """
         event = type("MyEvent", (object,), {})
         event.x, event.y = 0, 0
         self.handle_double_click(event)
 
     def insert_row_func(self):
-        """
-        # this function insert a row before selected row
+        """Insert a row in the Multi-Position Acquisition Interface.
+
+
+        Returns
+            -------
+            None
+
+        Example
+        -------
+        >>> insert_row_func()
         """
         self.table.model.addRow(self.table.currentrow)
         self.table.update_rowcolors()
@@ -181,16 +258,34 @@ class MultiPositionController(GUIController):
         self.show_verbose_info("insert a row before current row")
 
     def generate_positions(self):
-        """
-        # this function opens a dialog to let the user input start and end position
-        # then it will generate positions for the user
+        """Generate positions in the Multi-Position Acquisition Interface.
+
+        This function opens a dialog to let the user input start and end position
+        Then it will generate positions for the user.
+
+        Returns
+        -------
+        None
+
+        Example
+        -------
+        >>> generate_positions()
         """
         pass
 
     def add_stage_position(self):
-        """
-        # this function will get the stage's current position,
-        # then add it to position list
+        """Add the current stage position to the Multi-Position Acquisition Interface.
+
+        This function will get the stage's current position,
+        Then add it to position list
+
+        Returns
+        -------
+        None
+
+        Example
+        -------
+        >>> add_stage_position()
         """
         position = self.parent_controller.execute("get_stage_position")
         temp = list(map(lambda k: position[k], position))

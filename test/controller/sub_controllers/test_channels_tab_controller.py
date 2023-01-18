@@ -159,3 +159,70 @@ def test_update_end_position(channels_tab_controller):
         channels_tab_controller.stack_acq_vals["start_focus"].get() == start_focus_minus
     )
     assert channels_tab_controller.stack_acq_vals["end_focus"].get() == end_focus_minus
+
+
+def test_update_start_update_end_position(channels_tab_controller):
+    configuration = channels_tab_controller.parent_controller.configuration
+
+    # Initialize
+    z, f = random.randint(0, 1000), random.randint(0, 1000)
+    z_shift, f_shift = random.randint(1, 500), random.randint(1, 500)
+    configuration["experiment"]["StageParameters"]["z"] = z - z_shift
+    configuration["experiment"]["StageParameters"]["f"] = f - f_shift
+    channels_tab_controller.update_start_position()
+
+    print(f"z: {z} z-shift: {z_shift} f: {f} f-shift: {f_shift}")
+    print(f'z-dict: {configuration["experiment"]["StageParameters"]["z"]}')
+    print(f'f-dict: {configuration["experiment"]["StageParameters"]["f"]}')
+
+    # Step forward and record results
+    configuration["experiment"]["StageParameters"]["z"] = z + z_shift
+    configuration["experiment"]["StageParameters"]["f"] = f + f_shift
+    channels_tab_controller.update_end_position()
+    z_origin_minus = copy.deepcopy(channels_tab_controller.z_origin)
+    f_origin_minus = copy.deepcopy(channels_tab_controller.focus_origin)
+    start_position_minus = copy.deepcopy(
+        channels_tab_controller.stack_acq_vals["start_position"].get()
+    )
+    end_position_minus = copy.deepcopy(
+        channels_tab_controller.stack_acq_vals["end_position"].get()
+    )
+    start_focus_minus = copy.deepcopy(
+        channels_tab_controller.stack_acq_vals["start_focus"].get()
+    )
+    end_focus_minus = copy.deepcopy(
+        channels_tab_controller.stack_acq_vals["end_focus"].get()
+    )
+
+    print("back")
+    print(f"z: {z} z-shift: {z_shift} f: {f} f-shift: {f_shift}")
+    print(f'z-dict: {configuration["experiment"]["StageParameters"]["z"]}')
+    print(f'f-dict: {configuration["experiment"]["StageParameters"]["f"]}')
+
+    channels_tab_controller.update_start_position()
+
+    # Step back
+    configuration["experiment"]["StageParameters"]["z"] = z - z_shift
+    configuration["experiment"]["StageParameters"]["f"] = f - f_shift
+    channels_tab_controller.update_end_position()
+
+    print("forward")
+    print(f"z: {z} z-shift: {z_shift} f: {f} f-shift: {f_shift}")
+    print(f'z-dict: {configuration["experiment"]["StageParameters"]["z"]}')
+    print(f'f-dict: {configuration["experiment"]["StageParameters"]["f"]}')
+
+    # Ensure we achieve the same origin
+    assert channels_tab_controller.z_origin == z_origin_minus
+    assert channels_tab_controller.focus_origin == f_origin_minus
+    assert (
+        channels_tab_controller.stack_acq_vals["start_position"].get()
+        == start_position_minus
+    )
+    assert (
+        channels_tab_controller.stack_acq_vals["end_position"].get()
+        == end_position_minus
+    )
+    assert (
+        channels_tab_controller.stack_acq_vals["start_focus"].get() == start_focus_minus
+    )
+    assert channels_tab_controller.stack_acq_vals["end_focus"].get() == end_focus_minus

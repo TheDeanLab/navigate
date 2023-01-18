@@ -39,7 +39,7 @@ from .common_functions import copy_proxy_object
 
 
 def create_save_path(saving_settings):
-    r"""Create path to save the data to.
+    """ "Create path to save the data to.
 
     This function retrieves the user inputs from the popup save window.
     It then creates a new directory in the user specified path.
@@ -103,7 +103,7 @@ def create_save_path(saving_settings):
 
 
 def save_yaml_file(file_directory, content_dict, filename="experiment.yml"):
-    r"""Same YAML file to Disk
+    """ "Same YAML file to Disk
 
     Parameters
     ----------

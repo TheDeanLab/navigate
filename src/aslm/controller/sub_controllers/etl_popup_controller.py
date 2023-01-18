@@ -305,7 +305,7 @@ class EtlPopupController(GUIController):
         self.configure_widget_range()
 
     def update_etl_setting(self, name, laser, etl_name):
-        r"""This function will update ETLConstants in memory"""
+        """ "This function will update ETLConstants in memory"""
         variable = self.variables[name]
 
         # TODO: Is this still a bug?
@@ -393,7 +393,7 @@ class EtlPopupController(GUIController):
         num_etl_lasers = self.resolution_info
 
     """
-    Example for preventing submission of a field/controller. So if there is an error in any field that 
+    Example for preventing submission of a field/controller. So if there is an error in any field that
     is supposed to have validation then the config cannot be saved.
     """
     # TODO needs testing may also need to be moved to the remote_focus_popup class. Opinions welcome

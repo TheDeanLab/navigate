@@ -46,7 +46,7 @@ logger = logging.getLogger(p)
 
 
 class GalvoNI(GalvoBase):
-    r"""GalvoNI Class"""
+    """ "GalvoNI Class"""
 
     def __init__(self, microscope_name, device_connection, configuration, galvo_id=0):
         super().__init__(microscope_name, device_connection, configuration, galvo_id)

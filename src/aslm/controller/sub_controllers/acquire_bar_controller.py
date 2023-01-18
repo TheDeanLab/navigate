@@ -348,7 +348,7 @@ class AcquireBarController(GUIController):
         self.saving_settings["file_type"] = file_type.get()
 
     def launch_acquisition(self, popup_window):
-        r"""Launch the Acquisition.
+        """ "Launch the Acquisition.
 
         Once the popup window has been filled out, we first create the save path using the create_save_path function.
         This automatically removes spaces and replaces them with underscores.

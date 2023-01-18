@@ -443,7 +443,7 @@ def _get_response(object_in_subprocess, release=False):
 
 
 def _close(dummy_namespace):
-    r"""Externally defined close function.
+    """ "Externally defined close function.
 
     Effectively a method of ObjectInSubprocess, but defined externally to
     minimize shadowing of the object's namespace
@@ -465,7 +465,7 @@ def _child_loop(
     closeargs,
     closekwargs,
 ):
-    r"""The event loop of a ObjectInSubprocess's child process
+    """ "The event loop of a ObjectInSubprocess's child process
 
     Parameters
     ----------

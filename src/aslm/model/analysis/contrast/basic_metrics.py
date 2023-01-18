@@ -38,7 +38,7 @@ from scipy.ndimage import laplace
 
 
 def normalize_norm_l1(image):
-    r"""Calculate and normalize image by L1 norm.
+    """ "Calculate and normalize image by L1 norm.
 
     Parameters
     ----------
@@ -56,7 +56,7 @@ def normalize_norm_l1(image):
 
 
 def down_sample_by_sum(input_array, binning_factor=3):
-    r"""Down-sample image by taking sum of pixel neighborhood.
+    """ "Down-sample image by taking sum of pixel neighborhood.
 
     Implemented using a 2D convolution.
     Parameters
@@ -85,7 +85,7 @@ def brenner_method(input_array):
     image = image[1:-1] - image[:]
     print(np.shape(image))
 
-    """		
+    """
 		for (int yi = 0; yi < height * width; yi += width)
 		{
 			for (int x = 1; x < width - 1; x++)
@@ -100,7 +100,7 @@ def brenner_method(input_array):
 
 
 def get_absolute_laplace(input_array):
-    r"""Measure the absolute summed Laplace of an image.
+    """ "Measure the absolute summed Laplace of an image.
 
     Convolution-based.
 

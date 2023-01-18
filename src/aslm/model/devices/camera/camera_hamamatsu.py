@@ -44,7 +44,7 @@ logger = logging.getLogger(p)
 
 
 class HamamatsuOrca(CameraBase):
-    r"""HamamatsuOrca camera class.
+    """ "HamamatsuOrca camera class.
 
     Parameters
     ----------
@@ -103,7 +103,7 @@ class HamamatsuOrca(CameraBase):
 
     @property
     def serial_number(self):
-        r"""Get Camera Serial Number
+        """ "Get Camera Serial Number
 
         Returns
         -------
@@ -113,7 +113,7 @@ class HamamatsuOrca(CameraBase):
         return self.camera_controller._serial_number
 
     def report_settings(self):
-        r"""Print Camera Settings."""
+        """ "Print Camera Settings."""
         params = [
             "defect_correct_mode",
             "sensor_mode",
@@ -133,11 +133,11 @@ class HamamatsuOrca(CameraBase):
             logger.info(param, self.camera_controller.get_property_value(param))
 
     def close_camera(self):
-        r"""Close HamamatsuOrca Camera"""
+        """ "Close HamamatsuOrca Camera"""
         self.camera_controller.dev_close()
 
     def set_sensor_mode(self, mode):
-        r"""Set HamamatsuOrca sensor mode.
+        """ "Set HamamatsuOrca sensor mode.
 
         Parameters
         ----------
@@ -154,7 +154,7 @@ class HamamatsuOrca(CameraBase):
         # print("Camera Sensor Mode:", self.camera_controller.get_property_value("sensor_mode"))
 
     def set_readout_direction(self, mode):
-        r"""Set HamamatsuOrca readout direction.
+        """ "Set HamamatsuOrca readout direction.
 
         Parameters
         ----------
@@ -176,7 +176,7 @@ class HamamatsuOrca(CameraBase):
             logger.info("Camera readout direction not supported")
 
     def calculate_readout_time(self):
-        r"""Calculate duration of time needed to readout an image.
+        """ "Calculate duration of time needed to readout an image.
         Calculates the readout time and maximum frame rate according to the camera configuration settings.
         Assumes model C13440 with Camera Link communication from Hamamatsu.
         Currently pulling values directly from the camera.
@@ -226,7 +226,7 @@ class HamamatsuOrca(CameraBase):
         return readout_time, max_frame_rate
 
     def set_exposure_time(self, exposure_time):
-        r"""Set HamamatsuOrca exposure time.
+        """ "Set HamamatsuOrca exposure time.
 
         Units of the Hamamatsu API are in seconds.
         All of our units are in milliseconds. Function convert to seconds.
@@ -241,7 +241,7 @@ class HamamatsuOrca(CameraBase):
         return self.camera_controller.set_property_value("exposure_time", exposure_time)
 
     def set_line_interval(self, line_interval_time):
-        r"""Set HamamatsuOrca line interval.
+        """ "Set HamamatsuOrca line interval.
 
         Parameters
         ----------
@@ -253,7 +253,7 @@ class HamamatsuOrca(CameraBase):
         )
 
     def set_binning(self, binning_string):
-        r"""Set HamamatsuOrca binning mode.
+        """ "Set HamamatsuOrca binning mode.
 
         Parameters
         ----------
@@ -290,7 +290,7 @@ class HamamatsuOrca(CameraBase):
         return True
 
     def set_ROI(self, roi_height=2048, roi_width=2048):
-        r"""Change the size of the active region on the camera.
+        """ "Change the size of the active region on the camera.
 
         Parameters
         ----------
@@ -343,7 +343,7 @@ class HamamatsuOrca(CameraBase):
         return self.x_pixels == roi_width and self.y_pixels == roi_height
 
     def initialize_image_series(self, data_buffer=None, number_of_frames=100):
-        r"""Initialize HamamatsuOrca image series.
+        """ "Initialize HamamatsuOrca image series.
 
         Parameters
         ----------
@@ -356,7 +356,7 @@ class HamamatsuOrca(CameraBase):
         self.is_acquiring = True
 
     def close_image_series(self):
-        r"""Close image series.
+        """ "Close image series.
 
         Stops the acquisition and sets is_acquiring flag to False.
         """
@@ -364,11 +364,11 @@ class HamamatsuOrca(CameraBase):
         self.is_acquiring = False
 
     def get_new_frame(self):
-        r"""Get frame from HamamatsuOrca camera."""
+        """ "Get frame from HamamatsuOrca camera."""
         return self.camera_controller.get_frames()
 
     def get_minimum_waiting_time(self):
-        r"""Get minimum waiting time for HamamatsuOrca.
+        """ "Get minimum waiting time for HamamatsuOrca.
 
         This function get timing information from the camera device
         cyclic_trigger_period, minimum_trigger_blank, minimum_trigger_interval

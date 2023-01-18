@@ -46,7 +46,7 @@ logger = logging.getLogger(p)
 
 
 class NIDAQ(DAQBase):
-    r"""NIDAQ class for Data Acquisition (DAQ).
+    """ "NIDAQ class for Data Acquisition (DAQ).
 
     Attributes
     ----------
@@ -75,7 +75,7 @@ class NIDAQ(DAQBase):
             self.stop_acquisition()
 
     def create_camera_task(self, exposure_time):
-        r"""Set up the camera trigger task.
+        """ "Set up the camera trigger task.
 
         Parameters
         ----------
@@ -103,7 +103,7 @@ class NIDAQ(DAQBase):
         )
 
     def create_master_trigger_task(self):
-        r"""Set up the DO master trigger task."""
+        """ "Set up the DO master trigger task."""
         master_trigger_out_line = self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ]["daq"]["master_trigger_out_line"]
@@ -172,7 +172,7 @@ class NIDAQ(DAQBase):
             self.analog_output_tasks[-1].write(waveforms)
 
     def prepare_acquisition(self, channel_key, exposure_time):
-        r"""Prepare the acquisition.
+        """ "Prepare the acquisition.
 
         Creates and configures the DAQ tasks.
         Writes the waveforms to each task.
@@ -194,7 +194,7 @@ class NIDAQ(DAQBase):
         self.create_analog_output_tasks(channel_key)
 
     def run_acquisition(self):
-        r"""Run DAQ Acquisition.
+        """ "Run DAQ Acquisition.
         Run the tasks for triggering, analog and counter outputs.
         The master trigger initiates all other tasks via a shared trigger
         For this to work, all analog output and counter tasks have to be started so that
@@ -216,7 +216,7 @@ class NIDAQ(DAQBase):
             pass
 
     def stop_acquisition(self):
-        r"""Stop Acquisition."""
+        """ "Stop Acquisition."""
         try:
             self.camera_trigger_task.stop()
             self.master_trigger_task.stop()

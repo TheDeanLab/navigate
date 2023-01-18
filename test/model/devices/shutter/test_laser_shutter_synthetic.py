@@ -41,12 +41,15 @@ from aslm.model.dummy import DummyModel
 
 
 class TestSyntheticShutter(unittest.TestCase):
-    r"""Unit Test for SyntheticShutter Class"""
+    """ "Unit Test for SyntheticShutter Class"""
+
     dummy_model = DummyModel()
-    microscope_name = 'Mesoscale'
+    microscope_name = "Mesoscale"
 
     def test_synthetic_shutter_attributes(self):
-        shutter = SyntheticShutter(self.microscope_name, None, self.dummy_model.configuration)
+        shutter = SyntheticShutter(
+            self.microscope_name, None, self.dummy_model.configuration
+        )
 
         # Attributes
         # assert hasattr(shutter, 'configuration')
@@ -57,9 +60,14 @@ class TestSyntheticShutter(unittest.TestCase):
         # assert hasattr(shutter, 'shutter_left_state')
 
         # Methods
-        assert hasattr(shutter, 'open_shutter') and callable(getattr(shutter, 'open_shutter'))
-        assert hasattr(shutter, 'close_shutter') and callable(getattr(shutter, 'close_shutter'))
-        assert hasattr(shutter, 'state')
+        assert hasattr(shutter, "open_shutter") and callable(
+            getattr(shutter, "open_shutter")
+        )
+        assert hasattr(shutter, "close_shutter") and callable(
+            getattr(shutter, "close_shutter")
+        )
+        assert hasattr(shutter, "state")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

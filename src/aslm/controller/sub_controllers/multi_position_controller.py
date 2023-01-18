@@ -165,7 +165,7 @@ class MultiPositionController(GUIController):
         self.show_verbose_info("exporting csv file", filename)
 
     def move_to_position(self):
-        r"""Move to a position within the Multi-Position Acquisition Interface."""
+        """ "Move to a position within the Multi-Position Acquisition Interface."""
         event = type("MyEvent", (object,), {})
         event.x, event.y = 0, 0
         self.handle_double_click(event)

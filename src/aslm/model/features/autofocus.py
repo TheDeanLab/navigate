@@ -87,7 +87,7 @@ class Autofocus:
         }
 
     def run(self, *args):
-        r"""Run the Autofocusing Routine
+        """ "Run the Autofocusing Routine
 
         Parameters
         ----------
@@ -124,7 +124,7 @@ class Autofocus:
         self.model.data_thread.start()
 
     def get_autofocus_frame_num(self):
-        r"""Calculate how many frames are needed to get the best focus position."""
+        """ "Calculate how many frames are needed to get the best focus position."""
         settings = self.model.configuration["experiment"]["AutoFocusParameters"]
         frames = 0
         if settings["coarse_selected"]:
@@ -137,7 +137,7 @@ class Autofocus:
 
     @staticmethod
     def get_steps(ranges, step_size):
-        r"""Calculate number of steps for autofocusing routine.
+        """ "Calculate number of steps for autofocusing routine.
 
         Parameters
         ----------

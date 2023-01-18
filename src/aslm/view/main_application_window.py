@@ -71,7 +71,7 @@ p = __name__.split(".")[1]
 
 
 class MainApp(ttk.Frame):
-    r"""Creates the frame that will hold the GUI content, its parent is the main window or root Tk object
+    """ "Creates the frame that will hold the GUI content, its parent is the main window or root Tk object
     ``
         Placing the notebooks using tk.Grid. While the grid is called on each frame it is actually calling
         the main window since those are the parent to the frames. The labels have already been packed into each respective

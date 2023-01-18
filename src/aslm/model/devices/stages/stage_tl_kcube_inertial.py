@@ -177,7 +177,7 @@ class TLKIMStage(StageBase):
             self.kim_controller.KIM_MoveStop(self.serial_number, i)
 
     def get_abs_position(self, axis, move_dictionary):
-        r"""
+        """ "
         Hack in a lack of bounds checking. TODO: Don't do this.
         """
         try:

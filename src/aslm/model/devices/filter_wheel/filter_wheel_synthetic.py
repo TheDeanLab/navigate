@@ -43,7 +43,7 @@ logger = logging.getLogger(p)
 
 
 class SyntheticFilterWheel(FilterWheelBase):
-    r"""SyntheticFilterWheel Class
+    """ "SyntheticFilterWheel Class
 
     Attributes
     ----------
@@ -67,7 +67,7 @@ class SyntheticFilterWheel(FilterWheelBase):
         super().__init__(microscope_name, device_connection, configuration)
 
     def filter_change_delay(self, filter_name):
-        r"""Calculate duration of time necessary to change filter wheel positions
+        """ "Calculate duration of time necessary to change filter wheel positions
 
         Parameters
         ----------
@@ -77,7 +77,7 @@ class SyntheticFilterWheel(FilterWheelBase):
         pass
 
     def set_filter(self, filter_name, wait_until_done=True):
-        r"""Change the filter wheel to the filter designated by the filter position argument.
+        """ "Change the filter wheel to the filter designated by the filter position argument.
 
         Parameters
         ----------
@@ -89,7 +89,7 @@ class SyntheticFilterWheel(FilterWheelBase):
         pass
 
     def read(self, num_bytes):
-        r"""Reads the specified number of bytes from the serial port.
+        """ "Reads the specified number of bytes from the serial port.
 
         Parameters
         ----------
@@ -99,7 +99,7 @@ class SyntheticFilterWheel(FilterWheelBase):
         pass
 
     def close(self):
-        r"""Close the SyntheticFilterWheel.
+        """ "Close the SyntheticFilterWheel.
 
         Sets the filter wheel to the Empty-Alignment position and then closes the port.
         """

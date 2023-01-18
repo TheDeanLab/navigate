@@ -46,7 +46,7 @@ logger = logging.getLogger(p)
 
 
 class RemoteFocusEquipmentSolutions(RemoteFocusBase):
-    r"""RemoteFocusEquipmentSolutions Class
+    """ "RemoteFocusEquipmentSolutions Class
 
     The SCA814 has a single character input buffer that can be overflowed if the proper steps are not taken.
     To avoid overflowing the input buffer the user should send a single character at a time and wait for that
@@ -177,7 +177,7 @@ class RemoteFocusEquipmentSolutions(RemoteFocusBase):
                     )
 
     def __del__(self):
-        r"""Close the RemoteFocusEquipmentSolutions Class"""
+        """ "Close the RemoteFocusEquipmentSolutions Class"""
         logger.debug("Closing RemoteFocusEquipmentSolutions Serial Port")
         self.serial.close()
 
@@ -211,7 +211,7 @@ class RemoteFocusEquipmentSolutions(RemoteFocusBase):
         return received_bytes
 
     def send_command(self, message):
-        r"""Send write command to the RemoteFocusEquipmentSolutions device.
+        """ "Send write command to the RemoteFocusEquipmentSolutions device.
 
         Parameters
         ----------
@@ -240,7 +240,7 @@ class RemoteFocusEquipmentSolutions(RemoteFocusBase):
             )
 
     def close_connection(self):
-        r"""Close RemoteFocusEquipmentSolutions class"""
+        """ "Close RemoteFocusEquipmentSolutions class"""
         self.serial.close()
 
 

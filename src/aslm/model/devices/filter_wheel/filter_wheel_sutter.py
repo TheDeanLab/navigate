@@ -47,7 +47,7 @@ logger = logging.getLogger(p)
 
 
 def build_filter_wheel_connection(comport, baudrate, timeout=0.25):
-    r"""Build SutterFilterWheel Serial Port connection
+    """ "Build SutterFilterWheel Serial Port connection
     Attributes
     ----------
     comport : str
@@ -66,7 +66,7 @@ def build_filter_wheel_connection(comport, baudrate, timeout=0.25):
 
 
 class SutterFilterWheel(FilterWheelBase):
-    r"""SutterFilterWheel Class
+    """ "SutterFilterWheel Class
 
     Class for controlling Sutter Lambda Filter Wheels
     https://www.sutter.com/manuals/LB10-3_OpMan.pdf
@@ -151,7 +151,7 @@ class SutterFilterWheel(FilterWheelBase):
         self.close()
 
     def filter_change_delay(self, filter_name):
-        r"""Calculate duration of time necessary to change filter wheel positions.
+        """ "Calculate duration of time necessary to change filter wheel positions.
         Identifies the number of positions that must be switched, and then retrieves
         the duration of time necessary to perform the switch from self.delay_matrix.
         Detailed information on timing located on page 38: https://www.sutter.com/manuals/LB10-3_OpMan.pdf
@@ -168,7 +168,7 @@ class SutterFilterWheel(FilterWheelBase):
         self.wait_until_done_delay = self.delay_matrix[self.speed, delta_position]
 
     def set_filter(self, filter_name, wait_until_done=True):
-        r"""Change the filter wheel to the filter designated by the filter position argument.
+        """ "Change the filter wheel to the filter designated by the filter position argument.
 
         Parameters
         ----------
@@ -210,7 +210,7 @@ class SutterFilterWheel(FilterWheelBase):
                 time.sleep(self.wait_until_done_delay)
 
     def read(self, num_bytes):
-        r"""Reads the specified number of bytes from the serial port.
+        """ "Reads the specified number of bytes from the serial port.
 
         Parameters
         ----------
@@ -232,7 +232,7 @@ class SutterFilterWheel(FilterWheelBase):
         return self.serial.read(num_bytes)
 
     def close(self):
-        r"""Close the SutterFilterWheel serial port.
+        """ "Close the SutterFilterWheel serial port.
 
         Sets the filter wheel to the Empty-Alignment position and then closes the port.
         """

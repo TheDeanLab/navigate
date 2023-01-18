@@ -65,7 +65,7 @@ def build_dynamixel_zoom_connection(configuration):
 
 
 class DynamixelZoom(ZoomBase):
-    r"""DynamixelZoom Class
+    """ "DynamixelZoom Class
 
     Controls the Dynamixel Servo.
 
@@ -113,7 +113,7 @@ class DynamixelZoom(ZoomBase):
         self.dynamixel.closePort(self.port_num)
 
     def set_zoom(self, zoom, wait_until_done=False):
-        r"""Change the DynamixelZoom Servo.
+        """ "Change the DynamixelZoom Servo.
 
         Confirms tha the zoom position is available in the zoomdict
 
@@ -136,7 +136,7 @@ class DynamixelZoom(ZoomBase):
         logger.debug(f"DynamixelZoom position: {self.read_position()}")
 
     def move(self, position, wait_until_done=False):
-        r"""Move the DynamixelZoom Servo
+        """ "Move the DynamixelZoom Servo
 
         Parameters
         ----------
@@ -196,7 +196,7 @@ class DynamixelZoom(ZoomBase):
                 logger.debug(f"DynamixelZoom Current Position: {cur_position}")
 
     def read_position(self):
-        r"""Read the position of the Zoom Servo.
+        """ "Read the position of the Zoom Servo.
 
         Returned position is an int between 0 and 4096.
         Opens and closes the port.

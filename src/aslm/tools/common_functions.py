@@ -48,7 +48,7 @@ def build_ref_name(separator, *args):
 
 
 def copy_proxy_object(content):
-    r"""This function will serialize proxy dict and list
+    """ "This function will serialize proxy dict and list
 
     Returns
     -------

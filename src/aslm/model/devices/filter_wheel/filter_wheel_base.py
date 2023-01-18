@@ -43,7 +43,7 @@ logger = logging.getLogger(p)
 
 
 class FilterWheelBase:
-    r"""FilterWheelBase Class
+    """ "FilterWheelBase Class
 
     Parent class for controlling filter wheels.
 
@@ -68,7 +68,7 @@ class FilterWheelBase:
         self.wheel_position = 0
 
     def check_if_filter_in_filter_dictionary(self, filter_name):
-        r"""Checks if the filter designation (string) given exists in the filter dictionary
+        """ "Checks if the filter designation (string) given exists in the filter dictionary
 
         Parameters
         ----------

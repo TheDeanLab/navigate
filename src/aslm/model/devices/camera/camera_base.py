@@ -117,7 +117,7 @@ class CameraBase:
         return self._variance
 
     def set_readout_direction(self, mode):
-        r"""Set HamamatsuOrca readout direction.
+        """ "Set HamamatsuOrca readout direction.
 
         Parameters
         ----------
@@ -129,7 +129,7 @@ class CameraBase:
     def calculate_light_sheet_exposure_time(
         self, full_chip_exposure_time, shutter_width
     ):
-        r"""Convert normal mode exposure time to light-sheet mode exposure time.
+        """ "Convert normal mode exposure time to light-sheet mode exposure time.
         Calculate the parameters for an ASLM acquisition
 
         Parameters

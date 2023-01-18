@@ -66,7 +66,7 @@ def compute_tiles_from_bounding_box(
     f_length,
     f_overlap,
 ):
-    r"""Create a grid of ROIs to image based on start position, number of tiles, and signed FOV length in each dimension.
+    """ "Create a grid of ROIs to image based on start position, number of tiles, and signed FOV length in each dimension.
 
     Focus currently tracks with z, since focus is z-dependent. TODO: Change this behavior? Make it a flag?
 
@@ -163,7 +163,7 @@ def compute_tiles_from_bounding_box(
 
 
 def calc_num_tiles(dist, overlap, roi_length):
-    r"""Calculate the number of tiles to divide a space dist along a single axis with an ROI of size roi_length
+    """ "Calculate the number of tiles to divide a space dist along a single axis with an ROI of size roi_length
     and a fractional overlap between ROIs of overlap.
 
     Watch out! This has no indication of what the tiles should actually look like (no information about sign, etc.).

@@ -326,7 +326,7 @@ class ChannelsTabController(GUIController):
         )
 
     def update_start_position(self, *args):
-        r"""Get new z starting position from current stage parameters.
+        """ "Get new z starting position from current stage parameters.
 
         Parameters
         ----------
@@ -449,7 +449,7 @@ class ChannelsTabController(GUIController):
         self.show_verbose_info("Save data option has been changed to", self.is_save)
 
     def update_timepoint_setting(self, call_parent=False):
-        r"""Automatically calculates the stack acquisition time based on the number of time points,
+        """ "Automatically calculates the stack acquisition time based on the number of time points,
         channels, and exposure time.
 
         TODO: Add necessary computation for 'Stack Acq.Time', 'Timepoint Interval', 'Experiment Duration'?

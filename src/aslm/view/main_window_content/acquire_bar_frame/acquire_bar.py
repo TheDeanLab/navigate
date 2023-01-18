@@ -39,7 +39,7 @@ logger = logging.getLogger(p)
 
 
 class AcquireBar(ttk.Frame):
-    r"""
+    """ "
     Class for the acquisition bar found at the top of the main application window.
     Main function is to change acq setting and then call the acquisition top level window
     """

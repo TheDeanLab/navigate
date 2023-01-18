@@ -46,7 +46,7 @@ logger = logging.getLogger(p)
 
 
 class SyntheticRemoteFocus(RemoteFocusBase):
-    r"""SyntheticRemoteFocus Class"""
+    """ "SyntheticRemoteFocus Class"""
 
     def __init__(self, microscope_name, device_connection, configuration):
         super().__init__(microscope_name, device_connection, configuration)

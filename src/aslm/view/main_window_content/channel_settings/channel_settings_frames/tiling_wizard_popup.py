@@ -47,7 +47,7 @@ logger = logging.getLogger(p)
 
 
 class tiling_wizard_popup:
-    r"""Popup for tiling parameters in View.
+    """ "Popup for tiling parameters in View.
 
     Parameters
     ----------

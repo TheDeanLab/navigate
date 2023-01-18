@@ -93,7 +93,7 @@ class StageController(GUIController):
         self.set_position(current_position)
 
     def initialize(self):
-        r"""Initialize the Stage limits of steps and positions
+        """ "Initialize the Stage limits of steps and positions
 
         Parameters
         ----------
@@ -122,7 +122,7 @@ class StageController(GUIController):
             widgets[step_axis + "_step"].widget.configure(increment=step_increment)
 
     def bind_position_callbacks(self):
-        r"""Binds position_callback() to each axis, records the trace name so we can unbind later."""
+        """ "Binds position_callback() to each axis, records the trace name so we can unbind later."""
         if not self.position_callbacks_bound:
             for axis in ["x", "y", "z", "theta", "f"]:
                 # add event bind to position entry variables
@@ -133,14 +133,14 @@ class StageController(GUIController):
             self.position_callbacks_bound = True
 
     def unbind_position_callbacks(self):
-        r"""Unbinds position callbacks."""
+        """ "Unbinds position callbacks."""
         if self.position_callbacks_bound:
             for axis, cbname in self.position_callback_traces.items():
                 self.widget_vals[axis].trace_remove("write", cbname)
             self.position_callbacks_bound = False
 
     def populate_experiment_values(self):
-        r"""This function set all the position and step values
+        """ "This function set all the position and step values
 
         Parameters
         ----------
@@ -157,7 +157,7 @@ class StageController(GUIController):
             widgets[k].widget.trigger_focusout_validation()
 
     def set_position(self, position):
-        r"""This function is to populate(set) position in the View
+        """ "This function is to populate(set) position in the View
 
         Parameters
         ----------
@@ -173,7 +173,7 @@ class StageController(GUIController):
         self.show_verbose_info("Set stage position")
 
     def set_position_silent(self, position):
-        r"""This function is to populate(set) position in the View without a trace.
+        """ "This function is to populate(set) position in the View without a trace.
 
         Parameters
         ----------
@@ -187,7 +187,7 @@ class StageController(GUIController):
         self.bind_position_callbacks()
 
     def get_position(self):
-        r"""This function returns current position from the view.
+        """ "This function returns current position from the view.
 
         Returns
         -------
@@ -209,7 +209,7 @@ class StageController(GUIController):
         return position
 
     def up_btn_handler(self, axis):
-        r"""This function generates command functions according to the desired axis to move.
+        """ "This function generates command functions according to the desired axis to move.
 
         Parameters
         ----------
@@ -243,7 +243,7 @@ class StageController(GUIController):
         return handler
 
     def down_btn_handler(self, axis):
-        r"""This function generates command functions according to the desired axis to move.
+        """ "This function generates command functions according to the desired axis to move.
 
 
         Parameters
@@ -278,7 +278,7 @@ class StageController(GUIController):
         return handler
 
     def zero_btn_handler(self, axis):
-        r"""This function generates command functions according to the desired axis to move.
+        """ "This function generates command functions according to the desired axis to move.
 
 
         Parameters
@@ -300,7 +300,7 @@ class StageController(GUIController):
         return handler
 
     def xy_zero_btn_handler(self):
-        r"""This function generates command functions to set xy position to zero
+        """ "This function generates command functions to set xy position to zero
 
         Returns
         -------
@@ -317,11 +317,11 @@ class StageController(GUIController):
         return handler
 
     def stop_button_handler(self):
-        r"""This function stops the stage after a 250 ms debouncing period of time."""
+        """ "This function stops the stage after a 250 ms debouncing period of time."""
         self.view.after(250, lambda: self.parent_controller.execute("stop_stage"))
 
     def position_callback(self, axis, **kwargs):
-        r"""Callback functions bind to position variables.
+        """ "Callback functions bind to position variables.
 
         Implements debounce functionality for user inputs (or click buttons) to reduce time costs of moving stage.
 

@@ -42,13 +42,17 @@ from aslm.model.dummy import DummyModel
 
 
 class TestShutterTTL(unittest.TestCase):
-    r"""Unit Test for ShutterTTL Class"""
+    """ "Unit Test for ShutterTTL Class"""
 
     def test_shutter_ttl_attributes(self):
-        assert hasattr(ShutterTTL, 'open_shutter') and callable(getattr(ShutterTTL, 'open_shutter'))
-        assert hasattr(ShutterTTL, 'close_shutter') and callable(getattr(ShutterTTL, 'close_shutter'))
-        assert hasattr(ShutterTTL, 'state')
+        assert hasattr(ShutterTTL, "open_shutter") and callable(
+            getattr(ShutterTTL, "open_shutter")
+        )
+        assert hasattr(ShutterTTL, "close_shutter") and callable(
+            getattr(ShutterTTL, "close_shutter")
+        )
+        assert hasattr(ShutterTTL, "state")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

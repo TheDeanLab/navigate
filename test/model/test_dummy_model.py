@@ -38,10 +38,11 @@ import unittest
 # Local imports
 from aslm.model.dummy import DummyModel
 
+
 class TestDummyModel(unittest.TestCase):
-    r"""Unit Test for Dummy Model"""
+    """ "Unit Test for Dummy Model"""
+
     pass
-    
 
     # def test_synthetic_camera_initialization(self):
     #     self.dummy_model = get_dummy_model()
@@ -256,7 +257,5 @@ class TestDummyModel(unittest.TestCase):
     #     assert synthetic_camera.y_pixels == 500
 
 
-
-if (__name__ == "__main__"):
+if __name__ == "__main__":
     unittest.main()
-

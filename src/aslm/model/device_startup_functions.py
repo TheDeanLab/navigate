@@ -54,7 +54,7 @@ class DummyDeviceConnection:
 
 
 def auto_redial(func, args, n_tries=10, exception=Exception, **kwargs):
-    r"""Retries connections to a startup device defined by func n_tries times.
+    """ "Retries connections to a startup device defined by func n_tries times.
 
     Parameters
     ----------
@@ -147,7 +147,7 @@ def load_camera_connection(configuration, camera_id=0, is_synthetic=False):
 
 
 def start_camera(microscope_name, device_connection, configuration, is_synthetic=False):
-    r"""Initializes the camera class.
+    """ "Initializes the camera class.
 
     Parameters
     ----------
@@ -649,7 +649,7 @@ def start_shutter(
 def start_lasers(
     microscope_name, device_connection, configuration, id=0, is_synthetic=False
 ):
-    r"""Initializes the laser trigger class on a dedicated thread.
+    """ "Initializes the laser trigger class on a dedicated thread.
 
     Initializes the Laser Switching, Analog, and Digital DAQ Outputs.
 
@@ -702,7 +702,7 @@ def start_lasers(
 def start_remote_focus_device(
     microscope_name, device_connection, configuration, is_synthetic=False
 ):
-    r"""Initializes the remote focus class.
+    """ "Initializes the remote focus class.
 
     Initializes the Remote Focusing Device.
 

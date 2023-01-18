@@ -46,7 +46,7 @@ logger = logging.getLogger(p)
 
 
 def build_sutter_stage_connection(com_port, baud_rate):
-    r"""Build SutterStage Serial Port connection
+    """ "Build SutterStage Serial Port connection
 
     Attributes
     ----------
@@ -74,7 +74,7 @@ def build_sutter_stage_connection(com_port, baud_rate):
 
 
 class SutterStage(StageBase):
-    r"""SutterStage Class
+    """ "SutterStage Class
 
     Class for controlling Sutter MP-285 Stage.
     All commands return an ASCII CR (Carriage Return; 13 decimal, 0D hexadecimal) to indicate that the task associated
@@ -119,7 +119,7 @@ class SutterStage(StageBase):
         self.speed = 1000  # in units microns/s.
 
     def __del__(self):
-        r"""Delete SutterStage Serial Port."""
+        """ "Delete SutterStage Serial Port."""
         try:
             """
             Close the MP-285 Stage connection
@@ -132,26 +132,26 @@ class SutterStage(StageBase):
             raise
 
     def __enter__(self):
-        r"""Establish SutterStage content manager."""
+        """ "Establish SutterStage content manager."""
         return self
 
     def __exit__(self, type, value, traceback):
-        r"""Releases the SutterStage resources"""
+        """ "Releases the SutterStage resources"""
         logger.debug("SutterStage - Closing Device.")
         self.close()
 
     def close(self):
-        r"""Close the SutterStage serial port."""
+        """ "Close the SutterStage serial port."""
         logger.debug("SutterStage - Closing Serial Port")
         self.serial.close()
 
     def flush_buffers(self):
-        r"""Flush Serial I/O Buffers"""
+        """ "Flush Serial I/O Buffers"""
         self.serial.reset_input_buffer()
         self.serial.reset_output_buffer()
 
     def check_byte_order(self, command):
-        r"""Confirm OS Byte Order
+        """ "Confirm OS Byte Order
         MP-285 requires commands and responses to be interpreted as Little Endian.
 
         Parameters
@@ -173,7 +173,7 @@ class SutterStage(StageBase):
 
     @staticmethod
     def convert_microsteps_to_microns(self, microsteps):
-        r"""Converts MP-285 microsteps to microns
+        """ "Converts MP-285 microsteps to microns
 
         Parameters
         ----------
@@ -191,7 +191,7 @@ class SutterStage(StageBase):
 
     @staticmethod
     def convert_microns_to_microsteps(self, microns):
-        r"""Converts microsteps to microns for MP-285 communication.
+        """ "Converts microsteps to microns for MP-285 communication.
 
         Parameters
         ----------
@@ -208,7 +208,7 @@ class SutterStage(StageBase):
         return microsteps
 
     def set_stage_speed_and_resolution(self, speed, resolution):
-        r"""Sets the MP-285 stage speed and resolution.
+        """ "Sets the MP-285 stage speed and resolution.
 
         Parameters
         ----------
@@ -376,7 +376,7 @@ class SutterStage(StageBase):
         pass
 
     def stop(self):
-        r"""This command interrupts and stops a move in progress that originally initiated by the Move (‘m’) command.
+        """ "This command interrupts and stops a move in progress that originally initiated by the Move (‘m’) command.
         The command sequence consists of 1 byte: Command byte (no terminator).
 
         Return data consists of 1 byte if movement is not in progress, or 2 bytes (‘=’ (move-in- progress indicator)

@@ -44,7 +44,7 @@ logger = logging.getLogger(p)
 
 
 class GalvoBase:
-    r"""GalvoBase Class
+    """ "GalvoBase Class
 
     Parent class for voice coil models.
     """

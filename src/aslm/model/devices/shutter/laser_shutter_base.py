@@ -43,7 +43,7 @@ logger = logging.getLogger(p)
 
 
 class ShutterBase:
-    r"""ShutterBase Class
+    """ "ShutterBase Class
     Parent class for the laser shutters.
 
     Attributes
@@ -61,7 +61,7 @@ class ShutterBase:
         self.shutter_state = False
 
     def __del__(self):
-        r"""Close the Shutter at exit."""
+        """ "Close the Shutter at exit."""
         pass
 
     def open_shutter(self):

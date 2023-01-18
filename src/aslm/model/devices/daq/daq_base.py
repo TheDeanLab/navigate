@@ -44,7 +44,7 @@ logger = logging.getLogger(p)
 
 
 class DAQBase:
-    r"""Parent class for Data Acquisition (DAQ) classes.
+    """ "Parent class for Data Acquisition (DAQ) classes.
 
     Attributes
     ----------
@@ -88,7 +88,7 @@ class DAQBase:
             self.waveform_dict[k] = None
 
     def calculate_all_waveforms(self, microscope_name, readout_time):
-        r"""Pre-calculates all waveforms necessary for the acquisition and organizes in a dictionary format.
+        """ "Pre-calculates all waveforms necessary for the acquisition and organizes in a dictionary format.
 
         Parameters
         ----------

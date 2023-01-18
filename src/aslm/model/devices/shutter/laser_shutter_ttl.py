@@ -79,20 +79,20 @@ class ShutterTTL(ShutterBase):
         self.shutter_task.close()
 
     def open_shutter(self):
-        r"""Open the shutter"""
+        """Open the shutter"""
         self.shutter_state = True
         self.shutter_task.write(self.shutter_state, auto_start=True)
         logger.debug("ShutterTTL - Shutter opened")
 
     def close_shutter(self):
-        r"""CLose the shutter"""
+        """CLose the shutter"""
         self.shutter_state = False
         self.shutter_task.write(self.shutter_state, auto_start=True)
         logger.debug("ShutterTTL - The shutter is closed")
 
     @property
     def state(self):
-        r"""Return the state of both shutters
+        """ "Return the state of both shutters
 
         Returns
         -------

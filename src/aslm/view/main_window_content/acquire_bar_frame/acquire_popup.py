@@ -49,7 +49,7 @@ logger = logging.getLogger(p)
 
 
 class AcquirePopUp:
-    r"""Class creates the popup that is generated when the Acquire button is pressed and Save File checkbox is selected."""
+    """ "Class creates the popup that is generated when the Acquire button is pressed and Save File checkbox is selected."""
 
     def __init__(self, root, *args, **kwargs):
         # Creating popup window with this name and size/placement, PopUp is a Toplevel window

@@ -39,44 +39,50 @@ import unittest
 from aslm.model.devices.stages.stage_sutter import SutterStage
 from aslm.model.dummy import DummyModel
 
+
 class TestStageSutter(unittest.TestCase):
-    r"""Unit Test for StageBase Class"""
+    """ "Unit Test for StageBase Class"""
 
     def test_stage_attributes(self):
         dummy_model = DummyModel()
-        microscope_name = 'Mesoscale'
+        microscope_name = "Mesoscale"
         stage = SutterStage(microscope_name, None, dummy_model.configuration)
 
         # Attributes
-        assert hasattr(stage, 'x_pos')
-        assert hasattr(stage, 'y_pos')
-        assert hasattr(stage, 'z_pos')
-        assert hasattr(stage, 'f_pos')
-        assert hasattr(stage, 'theta_pos')
-        assert hasattr(stage, 'position_dict')
-        assert hasattr(stage, 'x_max')
-        assert hasattr(stage, 'y_max')
-        assert hasattr(stage, 'z_max')
-        assert hasattr(stage, 'f_max')
-        assert hasattr(stage, 'x_min')
-        assert hasattr(stage, 'y_min')
-        assert hasattr(stage, 'z_min')
-        assert hasattr(stage, 'f_min')
-        assert hasattr(stage, 'theta_min')
+        assert hasattr(stage, "x_pos")
+        assert hasattr(stage, "y_pos")
+        assert hasattr(stage, "z_pos")
+        assert hasattr(stage, "f_pos")
+        assert hasattr(stage, "theta_pos")
+        assert hasattr(stage, "position_dict")
+        assert hasattr(stage, "x_max")
+        assert hasattr(stage, "y_max")
+        assert hasattr(stage, "z_max")
+        assert hasattr(stage, "f_max")
+        assert hasattr(stage, "x_min")
+        assert hasattr(stage, "y_min")
+        assert hasattr(stage, "z_min")
+        assert hasattr(stage, "f_min")
+        assert hasattr(stage, "theta_min")
 
         # Methods
-        assert hasattr(stage, 'create_position_dict') and \
-               callable(getattr(stage, 'create_position_dict'))
-        assert hasattr(stage, 'report_position') and \
-               callable(getattr(stage, 'report_position'))
-        assert hasattr(stage, 'move_axis_absolute') and \
-               callable(getattr(stage, 'move_axis_absolute'))
-        assert hasattr(stage, 'move_absolute') and \
-               callable(getattr(stage, 'move_absolute'))
-        assert hasattr(stage, 'stop') and \
-               callable(getattr(stage, 'stop'))
-        assert hasattr(stage, 'get_abs_position') and \
-               callable(getattr(stage, 'get_abs_position'))
+        assert hasattr(stage, "create_position_dict") and callable(
+            getattr(stage, "create_position_dict")
+        )
+        assert hasattr(stage, "report_position") and callable(
+            getattr(stage, "report_position")
+        )
+        assert hasattr(stage, "move_axis_absolute") and callable(
+            getattr(stage, "move_axis_absolute")
+        )
+        assert hasattr(stage, "move_absolute") and callable(
+            getattr(stage, "move_absolute")
+        )
+        assert hasattr(stage, "stop") and callable(getattr(stage, "stop"))
+        assert hasattr(stage, "get_abs_position") and callable(
+            getattr(stage, "get_abs_position")
+        )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

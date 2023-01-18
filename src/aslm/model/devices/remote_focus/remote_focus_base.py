@@ -44,7 +44,7 @@ logger = logging.getLogger(p)
 
 
 class RemoteFocusBase:
-    r"""RemoteFocusBase Class
+    """ "RemoteFocusBase Class
 
     Parent class for voice coil models.
     """

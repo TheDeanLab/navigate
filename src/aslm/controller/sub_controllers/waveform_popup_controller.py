@@ -83,15 +83,13 @@ class WaveformPopupController(GUIController):
         self.remote_focus_experiment_dict = None
         self.update_galvo_device_flag = None
         self.waveforms_enabled = True
+        self.amplitude_dict = None
 
         # Checks if number of lasers in remote_focus_constants matches config file
         self.update_popup_lasers()
 
         # event id list
-        self.event_ids = {}
-        for mode in self.resolution_info["remote_focus_constants"].keys():
-            for mag in self.resolution_info["remote_focus_constants"][mode].keys():
-                self.event_ids[mode + "_" + mag] = None
+        self.event_id = None
 
         # event combination
         self.widgets["Mode"].widget.bind(
@@ -129,6 +127,7 @@ class WaveformPopupController(GUIController):
         self.view.popup.protocol(
             "WM_DELETE_WINDOW",
             combine_funcs(
+                self.restore_amplitude,
                 self.save_waveform_constants,
                 self.view.popup.dismiss,
                 lambda: delattr(self.parent_controller, "waveform_popup_controller"),
@@ -243,7 +242,8 @@ class WaveformPopupController(GUIController):
 
     def show_magnification(self, *args):
         """Show magnification options when the user changes the focus mode"""
-
+        # restore amplitude before change resolution if needed
+        self.restore_amplitude()
         # get resolution setting
         self.resolution = self.widgets["Mode"].widget.get()
         temp = list(
@@ -261,6 +261,8 @@ class WaveformPopupController(GUIController):
 
     def show_laser_info(self, *args):
         """Show laser info when the user changes magnification setting."""
+        # restore amplitude before change mag if needed
+        self.restore_amplitude()
         # get magnification setting
         self.mag = self.widgets["Mag"].widget.get()
         for laser in self.lasers:
@@ -327,12 +329,11 @@ class WaveformPopupController(GUIController):
                     f"Remote Focus Amplitude/Offset Changed:, {variable_value}"
                 )
                 # tell parent controller (the device)
-                event_id_name = self.resolution + "_" + self.mag
-                if self.event_ids[event_id_name]:
-                    self.view.popup.after_cancel(self.event_ids[event_id_name])
+                if self.event_id:
+                    self.view.popup.after_cancel(self.event_id)
 
                 # Delay feature.
-                self.event_ids[event_id_name] = self.view.popup.after(
+                self.event_id = self.view.popup.after(
                     500,
                     lambda: self.parent_controller.execute(
                         "update_setting", "resolution"
@@ -365,14 +366,13 @@ class WaveformPopupController(GUIController):
                 ] = variable_value
                 logger.debug(f"Galvo parameter {parameter} changed: {variable_value}")
                 # change any galvo parameters as one event
-                event_id_name = "galvo"
                 try:
-                    if self.event_ids[event_id_name]:
-                        self.view.popup.after_cancel(self.event_ids[event_id_name])
+                    if self.event_id:
+                        self.view.popup.after_cancel(self.event_id)
                 except KeyError:
                     pass
 
-                self.event_ids[event_id_name] = self.view.popup.after(
+                self.event_id = self.view.popup.after(
                     500,
                     lambda: self.parent_controller.execute("update_setting", "galvo"),
                 )
@@ -410,17 +410,68 @@ class WaveformPopupController(GUIController):
     def toggle_waveform_state(self):
         """Temporarily disable waveform amplitude for quick alignment on stationary beam"""
         if self.waveforms_enabled is True:
-            self.view.buttons["toggle_waveform_button"].config(text="Disable Waveforms")
+            self.view.buttons["toggle_waveform_button"].config(state="disabled")
+            self.view.buttons["toggle_waveform_button"].config(text="Enable Waveforms")
+            self.amplitude_dict = {}
+            self.amplitude_dict["resolution"] = self.resolution
+            self.amplitude_dict["mag"] = self.mag
             for laser in self.lasers:
+                self.amplitude_dict[laser] = self.resolution_info[
+                    "remote_focus_constants"
+                ][self.resolution][self.mag][laser]["amplitude"]
                 self.variables[laser + " Amp"].set(0)
+                self.widgets[laser + " Amp"].widget.config(state="disabled")
+            # galvo
+            for galvo in self.galvos:
+                self.amplitude_dict[galvo] = self.resolution_info["galvo_constants"][
+                    galvo
+                ][self.resolution][self.mag]["amplitude"]
+                self.variables[galvo + " Amp"].set(0)
+                self.widgets[galvo + " Amp"].widget.config(state="disabled")
                 # Need to update main controller.
             self.waveforms_enabled = False
+            self.view.popup.after(
+                500,
+                lambda: self.view.buttons["toggle_waveform_button"].config(
+                    state="normal"
+                ),
+            )
         else:
-            self.view.buttons["toggle_waveform_button"].config(text="Enable Waveforms")
-            for laser in self.lasers:
-                self.variables[laser + " Amp"].set(
-                    self.resolution_info["remote_focus_constants"][self.resolution][
-                        self.mag
-                    ][laser]["amplitude"]
-                )
-            self.waveforms_enabled = True
+            self.view.buttons["toggle_waveform_button"].config(state="disabled")
+            self.show_laser_info()
+            # call the parent controller the amplitude values are updated
+            try:
+                if self.event_id:
+                    self.view.popup.after_cancel(self.event_id)
+            except KeyError:
+                pass
+
+            self.event_id = self.view.popup.after(
+                500,
+                lambda: self.parent_controller.execute("update_setting", "galvo"),
+            )
+            self.view.popup.after(
+                500,
+                lambda: self.view.buttons["toggle_waveform_button"].config(
+                    state="normal"
+                ),
+            )
+
+    def restore_amplitude(self):
+        self.view.buttons["toggle_waveform_button"].config(text="Disable Waveforms")
+        self.waveforms_enabled = True
+        if self.amplitude_dict == None:
+            return
+        resolution = self.amplitude_dict["resolution"]
+        mag = self.amplitude_dict["mag"]
+        for laser in self.lasers:
+            self.resolution_info["remote_focus_constants"][resolution][mag][laser][
+                "amplitude"
+            ] = self.amplitude_dict[laser]
+            self.widgets[laser + " Amp"].widget.config(state="normal")
+        for galvo in self.galvos:
+            self.resolution_info["galvo_constants"][galvo][resolution][mag][
+                "amplitude"
+            ] = self.amplitude_dict[galvo]
+            self.widgets[galvo + " Amp"].widget.config(state="normal")
+        self.amplitude_dict = None

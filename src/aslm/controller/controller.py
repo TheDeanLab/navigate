@@ -305,7 +305,7 @@ class Controller:
             self.model.load_images(filenames)
 
         def popup_waveform_setting():
-            if hasattr(self, "waveform_controller"):
+            if hasattr(self, "waveform_popup_controller"):
                 self.waveform_popup_controller.showup()
                 return
             waveform_constants_popup = WaveformParameterPopupWindow(
@@ -660,7 +660,10 @@ class Controller:
             work_thread.join()
             # self.model.change_resolution(resolution_value=args[0])
             self.camera_setting_controller.calculate_physical_dimensions()
-            if hasattr(self, "waveform_controller") and self.waveform_popup_controller:
+            if (
+                hasattr(self, "waveform_popup_controller")
+                and self.waveform_popup_controller
+            ):
                 self.waveform_popup_controller.populate_experiment_values()
             ret_pos_dict = self.model.get_stage_position()
             update_stage_dict(self, ret_pos_dict)
@@ -784,7 +787,7 @@ class Controller:
         elif command == "exit":
             # self.model.run_command('stop')
             self.sloppy_stop()
-            if hasattr(self, "waveform_controller"):
+            if hasattr(self, "waveform_popup_controller"):
                 self.waveform_popup_controller.save_waveform_constants()
             self.model.terminate()
             self.model = None

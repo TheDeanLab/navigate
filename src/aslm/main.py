@@ -77,7 +77,7 @@ def main():
 
     Examples
     --------
-    python main.py --synthetic_hardware
+    >>> python main.py --synthetic_hardware
     """
     # Start the GUI, withdraw main screen, and show splash screen.
     root = tk.Tk()

@@ -102,6 +102,9 @@ class ChannelsTabController(GUIController):
         # stack acquisition_variables
         self.z_origin = 0
         self.focus_origin = 0
+        self.stage_velocity = None
+        self.filter_wheel_delay = None
+        self.microscope_state_dict = None
 
         # laser/stack cycling event binds
         self.stack_acq_vals["cycling"].trace_add("write", self.update_cycling_setting)
@@ -126,6 +129,7 @@ class ChannelsTabController(GUIController):
         )
 
         # multiposition
+        self.tiling_wizard_controller = None
         self.is_multiposition = False
         self.is_multiposition_val = self.view.multipoint_frame.on_off
         self.view.multipoint_frame.save_check.configure(
@@ -138,12 +142,11 @@ class ChannelsTabController(GUIController):
         self.initialize()
 
     def initialize(self):
-        r"""Function initializes widgets and gets other necessary configuration
+        """Initializes widgets and gets other necessary configuration
 
-        Parameters
-        ----------
-        config : multiprocesing.managers.DictProxy
-            Global configuration of the microscope
+        Examples
+        --------
+        >>> self.initialize()
         """
         config = self.parent_controller.configuration_controller
 
@@ -155,7 +158,12 @@ class ChannelsTabController(GUIController):
         self.show_verbose_info("channels tab has been initialized")
 
     def populate_experiment_values(self):
-        """Distribute initial MicroscopeState values to this and sub-controllers and associated views."""
+        """Distribute initial MicroscopeState values to this and sub-controllers and associated views.
+
+        Examples
+        --------
+        >>> self.populate_experiment_values()
+        """
         self.in_initialization = True
         self.microscope_state_dict = self.parent_controller.configuration["experiment"][
             "MicroscopeState"
@@ -184,11 +192,16 @@ class ChannelsTabController(GUIController):
         self.show_verbose_info("Channels tab has been set new values")
 
     def set_spinbox_range_limits(self, settings):
-        r"""This function will set the spinbox widget's values of from_, to, step
+        """This function will set the spinbox widget's values of from_, to, step
 
         Parameters
         ----------
-        settings :
+        settings : dict
+            dictionary of settings from configuration file
+
+        Examples
+        --------
+        >>> self.set_spinbox_range_limits(settings)
         """
         temp_dict = {
             self.stack_acq_widgets["step_size"]: settings["stack_acquisition"][
@@ -222,12 +235,16 @@ class ChannelsTabController(GUIController):
         self.channel_setting_controller.set_spinbox_range_limits(settings["channels"])
 
     def set_mode(self, mode):
-        r"""Change acquisition mode.
+        """Change acquisition mode.
 
         Parameters
         ----------
         mode : str
-            'stop'
+            acquisition mode
+
+        Examples
+        --------
+        >>> self.set_mode(mode)
         """
         self.mode = mode
         self.channel_setting_controller.set_mode(mode)
@@ -241,7 +258,7 @@ class ChannelsTabController(GUIController):
         self.show_verbose_info("acquisition mode has been changed to", mode)
 
     def update_z_steps(self, *args):
-        r"""Recalculates the number of slices that will be acquired in a z-stack.
+        """Recalculates the number of slices that will be acquired in a z-stack.
 
         Requires GUI to have start position, end position, or step size changed.
         Sets the number of slices in the model and the GUI.
@@ -313,8 +330,12 @@ class ChannelsTabController(GUIController):
 
         Parameters
         ----------
-        args : None
-            ?
+        args : dict
+            Values is a dict as follows {'start_position': , 'abs_z_start': , 'stack_z_origin': }
+
+        Examples
+        --------
+        >>> self.update_start_position()
         """
 
         # We have a new origin
@@ -331,12 +352,16 @@ class ChannelsTabController(GUIController):
         self.update_z_steps()
 
     def update_end_position(self, *args):
-        r"""Get new z ending position from current stage parameters
+        """Get new z ending position from current stage parameters
 
         Parameters
         ----------
-        args : ?
-            ?
+        args : dict
+            Values is a dict as follows {'end_position': , 'abs_z_end': , 'stack_z_origin': }
+
+        Examples
+        --------
+        >>> self.update_end_position()
         """
         # Grab current values
         z_end = self.parent_controller.configuration["experiment"]["StageParameters"][
@@ -378,8 +403,12 @@ class ChannelsTabController(GUIController):
 
         Parameters
         ----------
-        args : ?
-            ?
+        args : dict
+            Values is a dict as follows {'cycling_setting': , 'cycling_setting': , 'stack_z_origin': }
+
+        Examples
+        --------
+        >>> self.update_cycling_setting()
         """
         # won't do any calculation when initializing
         if self.in_initialization:
@@ -397,15 +426,20 @@ class ChannelsTabController(GUIController):
         self.show_verbose_info("Cycling setting on channels tab has been changed")
 
     def update_save_setting(self, *args):
-        r"""Tell the centrol/parent controller 'save_data' is selected.
+        """Tell the centrol/parent controller 'save_data' is selected.
 
         Does not do any calculation when initializing the software.
 
         Parameters
         ----------
-        args : ?
-            ?
+        args : dict
+            Values is a dict as follows {'save_data': , 'save_data': , 'stack_z_origin': }
+
+        Examples
+        --------
+        >>> self.update_save_setting()
         """
+
         if self.in_initialization:
             return
         self.is_save = self.timepoint_vals["is_save"].get()
@@ -428,7 +462,12 @@ class ChannelsTabController(GUIController):
         ----------
         call_parent : bool
             Tell parent controller that time point setting has changed.
+
+        Examples
+        --------
+        >>> self.update_timepoint_setting()
         """
+
         if self.in_initialization:
             return
         channel_settings = self.microscope_state_dict["channels"]
@@ -546,18 +585,23 @@ class ChannelsTabController(GUIController):
         )
 
     def toggle_multiposition(self):
-        r"""Toggle Multi-position Acquisition.
+        """Toggle Multi-position Acquisition.
 
         Recalculates the experiment duration.
+
+        Examples
+        --------
+        >>> self.toggle_multiposition()
         """
         self.is_multiposition = self.is_multiposition_val.get()
         self.update_timepoint_setting()
         self.show_verbose_info("Multi-position:", self.is_multiposition)
 
     def launch_tiling_wizard(self):
-        r"""Launches tiling wizard popup.
+        """Launches tiling wizard popup.
 
-        Will only launch when button in GUI is pressed, and will not duplicate. Pressing button again brings popup to top
+        Will only launch when button in GUI is pressed, and will not duplicate.
+        Pressing button again brings popup to top
         """
 
         if hasattr(self, "tiling_wizard_controller"):
@@ -569,27 +613,49 @@ class ChannelsTabController(GUIController):
         )
 
     def set_info(self, vals, values):
-        r"""Set values to a list of variables."""
+        """Set values to a list of variables.
+
+        Parameters
+        ----------
+        vals : list
+            List of variables to set.
+        values : list
+            List of values to set to variables.
+
+        Examples
+        --------
+        >>> self.set_info([self.timepoint_vals['timepoint_interval'], self.timepoint_vals['stack_pause']], [1, 1])
+        """
         for name in values.keys():
             if name in vals:
                 vals[name].set(values[name])
 
     def execute(self, command, *args):
-        r"""Execute Command in the parent controller.
+        """Execute Command in the parent controller.
 
         Parameters
         ----------
         command : str
             recalculate_timepoint, channel, move_stage_and_update_info, get_stage_position
+        args : list
+            List of arguments to pass to the command.
 
         Returns
         -------
         command : object
             Returns parent_controller.execute(command) if command = 'get_stage_position',
+
+        Examples
+        --------
+        >>> self.execute('recalculate_timepoint')
         """
         if command == "recalculate_timepoint":
             # update selected channels num
-            self.microscope_state_dict['selected_channels'] = reduce(lambda count, channel: count + (channel['is_selected'] == True), self.microscope_state_dict["channels"].values(), 0)
+            self.microscope_state_dict["selected_channels"] = reduce(
+                lambda count, channel: count + (channel["is_selected"] == True),
+                self.microscope_state_dict["channels"].values(),
+                0,
+            )
             self.update_timepoint_setting()
             # update framerate info in camera setting tab
             exposure_time = max(

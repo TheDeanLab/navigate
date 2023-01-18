@@ -65,6 +65,13 @@ class AutofocusPopupController(GUIController):
         self.view.autofocus_btn.configure(command=self.start_autofocus)
 
     def populate_experiment_values(self):
+        """Populate Experiment Values
+
+        Populates the experiment values from the experiment settings dictionary
+
+        Example:
+        >>> populate_experiment_values()
+        """
         self.setting_dict = self.parent_controller.configuration["experiment"][
             "AutoFocusParameters"
         ]
@@ -75,30 +82,55 @@ class AutofocusPopupController(GUIController):
         self.view.stage_vars[1].set(self.setting_dict["fine_selected"])
 
     def update_experiment_values(self):
+        """Update Experiment Values
+
+        Updates the experiment values from the experiment settings dictionary
+
+        Example:
+        >>> update_experiment_values()
+        """
         for k in self.widgets:
             self.setting_dict[k] = self.widgets[k].get()
         self.setting_dict["coarse_selected"] = self.view.stage_vars[0].get()
         self.setting_dict["fine_selected"] = self.view.stage_vars[1].get()
 
     def showup(self):
-        """
-        # this function will let the popup window show in front
+        """Show Up
+
+        Shows the popup window
+
+        Example:
+        >>> showup()
         """
         self.view.popup.deiconify()
         self.view.popup.attributes("-topmost", 1)
 
     def start_autofocus(self):
+        """Start Autofocus
+
+        Starts the autofocus process
+
+        Example:
+        >>> start_autofocus()
+        """
         self.update_experiment_values()
         # self.view.popup.dismiss()
         # delattr(self.parent_controller,'af_popup_controller')
         self.parent_controller.execute("autofocus")
 
     def display_plot(self, data):
-        """
-        ### Displays a plot of [focus, entropy] with data from autofocus routine
-        """
-        data = np.asarray(data)
+        """Display Plot
 
+        Displays the autofocus plot
+
+        Args:
+            data (dict): autofocus data
+
+        Example:
+        >>> display_plot(data)
+        """
+
+        data = np.asarray(data)
         coarse_range = self.setting_dict["coarse_range"]
         coarse_step = self.setting_dict["coarse_step_size"]
 

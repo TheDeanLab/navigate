@@ -72,7 +72,7 @@ class AcquireBarController(GUIController):
         self.view.exit_btn.config(command=self.exit_program)
 
     def progress_bar(self, images_received, microscope_state, mode, stop=False):
-        r"""Update progress bars.
+        """Update progress bars.
 
         Parameters
         ----------
@@ -84,6 +84,10 @@ class AcquireBarController(GUIController):
             Number of images received in the controller.
         stop : bool
             Stop flag to set back to 0.
+
+        Examples
+        --------
+        >>> progress_bar(0, microscope_state, mode)
         """
 
         if images_received == 0:
@@ -159,17 +163,21 @@ class AcquireBarController(GUIController):
                 self.stop_progress_bar()
 
     def stop_progress_bar(self):
-        r"""Stop moving the continuous progress bar."""
+        """Stop moving the continuous progress bar."""
         self.view.CurAcq.stop()
         self.view.OvrAcq.stop()
 
     def set_mode(self, mode):
-        r"""Set imaging mode.
+        """Set imaging mode.
 
         Parameters
         ----------
         mode: str
             Mode could be: 'live', 'z-stack', 'single', 'projection'
+
+        Examples
+        --------
+        >>> set_mode('live')
         """
         self.mode = mode
         # update pull down combobox
@@ -178,37 +186,54 @@ class AcquireBarController(GUIController):
         self.show_verbose_info("Image mode is set to", mode)
 
     def get_mode(self):
-        r"""Get the current imaging mode.
+        """Get the current imaging mode.
 
         Returns
         -------
         mode : str
             Current imaging mode.
+
+        Examples
+        --------
+        >>> get_mode()
         """
         return self.mode
 
     def stop_acquire(self):
-        r"""Stop the acquisition."""
+        """Stop the acquisition.
+
+        Examples
+        --------
+        >>> stop_acquire()
+        """
         self.view.acquire_btn.configure(text="Acquire")
 
     def set_save_option(self, is_save):
-        r"""Set whether the image will be saved.
+        """Set whether the image will be saved.
 
         Parameters
         ----------
         is_save : bool
             True if we will save the data.  False if we will not.
+
+        Examples
+        --------
+        >>> set_save_option(True)
         """
         self.is_save = is_save
         self.show_verbose_info("set save data option:", is_save)
 
     def launch_popup_window(self):
-        r"""Launches the Save Dialog Popup Window
+        """Launch the Save Dialog Popup Window
 
         The popup window should only be launched if the microscope is set to save the data,
         with the exception of the continuous acquisition mode.
         The popup window provides the user with the opportunity to fill in fields that describe the experiment and
         also dictate the save path of the data in a standardized format.
+
+        Examples
+        --------
+        >>> launch_popup_window()
         """
         if self.view.acquire_btn["text"] == "Stop":
             # change the button to 'Acquire'
@@ -241,13 +266,17 @@ class AcquireBarController(GUIController):
             self.parent_controller.execute("acquire")
 
     def update_microscope_mode(self, *args):
-        r"""Gets the state of the pull-down menu and tells the central controller
+        """Gets the state of the pull-down menu and tells the central controller
             Will additionally call functions to disable and enable widgets based on mode
 
         Parameters
         ----------
         args : str
             Imaging Mode.
+
+        Examples
+        --------
+        >>> update_microscope_mode('live')
         """
         self.mode = self.mode_dict[self.view.pull_down.get()]
         self.show_verbose_info("The Microscope State is now:", self.get_mode())
@@ -263,6 +292,10 @@ class AcquireBarController(GUIController):
         ----------
         mode : str
             Imaging Mode.
+
+        Examples
+        --------
+        >>> update_stack_acq('live')
         """
 
         # Get ref to widgets
@@ -283,6 +316,10 @@ class AcquireBarController(GUIController):
         ----------
         mode : str
             Imaging Mode.
+
+        Examples
+        --------
+        >>> update_stack_time('live')
         """
 
         # Get ref to widgets
@@ -297,12 +334,16 @@ class AcquireBarController(GUIController):
             widget["state"] = state
 
     def update_file_type(self, file_type):
-        r"""Updates the file type when the drop down in save dialog is changed.
+        """Updates the file type when the drop down in save dialog is changed.
 
         Parameters
         ----------
         file_type : str
             File type.
+
+        Examples
+        --------
+        >>> update_file_type('tiff')
         """
         self.saving_settings["file_type"] = file_type.get()
 
@@ -318,6 +359,10 @@ class AcquireBarController(GUIController):
         ----------
         popup_window : object
             Instance of the popup save dialog.
+
+        Examples
+        --------
+        >>> launch_acquisition(popup_window)
         """
         # update saving settings according to user's input
         self.update_experiment_values(popup_window)
@@ -341,9 +386,13 @@ class AcquireBarController(GUIController):
             self.view.acquire_btn.configure(text="Stop")
 
     def exit_program(self):
-        r"""Exit Button
+        """Exit Button
 
-        Quits the software.
+        Quit the software.
+
+        Examples
+        --------
+        >>> exit_program()
         """
         if messagebox.askyesno("Exit", "Are you sure?"):
             self.show_verbose_info("Exiting Program")
@@ -352,6 +401,12 @@ class AcquireBarController(GUIController):
             sys.exit()
 
     def populate_experiment_values(self):
+        """Populate the experiment values from the config file.
+
+        Examples
+        --------
+        >>> populate_experiment_values()
+        """
         self.saving_settings = self.parent_controller.configuration["experiment"][
             "Saving"
         ]
@@ -362,7 +417,17 @@ class AcquireBarController(GUIController):
         self.set_mode(mode)
 
     def update_experiment_values(self, popup_window):
-        r"""Gets the entries from the popup save dialog and overwrites the saving_settings dictionary."""
+        """Gets the entries from the popup save dialog and overwrites the saving_settings dictionary.
+
+        Parameters
+        ----------
+        popup_window : object
+            Instance of the popup save dialog.
+
+        Examples
+        --------
+        >>> update_experiment_values(popup_window)
+        """
         popup_vals = popup_window.get_variables()
         for name in popup_vals:
             # remove leading and tailing whitespaces

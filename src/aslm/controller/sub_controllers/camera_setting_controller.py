@@ -28,7 +28,7 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-#
+
 from aslm.controller.sub_controllers.gui_controller import GUIController
 
 import logging
@@ -79,13 +79,7 @@ class CameraSettingController(GUIController):
             self.roi_btns[btn_name].config(command=self.update_roi(btn_name))
 
     def initialize(self):
-        r"""Sets widgets based on data given from main controller/config.
-
-        Parameters
-        ----------
-        config : dict
-            Dictionary with various camera parameters.
-        """
+        """Sets widgets based on data given from main controller/config."""
 
         # Get Default Configuration Values
         camera_config_dict = (
@@ -167,7 +161,7 @@ class CameraSettingController(GUIController):
         self.roi_widgets["FOV_Y"].widget["state"] = "disabled"
 
     def populate_experiment_values(self):
-        r"""Sets values in View according to the experiment yaml file.
+        """Sets values in View according to the experiment yaml file.
 
         Experiment yaml filed passed by controller.
         """
@@ -219,9 +213,13 @@ class CameraSettingController(GUIController):
         self.in_initialization = False
 
     def update_experiment_values(self, *args):
-        """
-        Update the dictionary so that it can be combined with all of the other
+        """Updates experiment yaml file according to the values in View.
+
+        Update the dictionary so that it can be combined with all the other
         sub-controllers, and then sent to the model.
+
+        Args:
+            *args: Variable length argument list.
         """
         # Camera Operation Mode
         self.camera_setting_dict["sensor_mode"] = self.mode_widgets["Sensor"].get()
@@ -249,7 +247,8 @@ class CameraSettingController(GUIController):
         return True
 
     def update_sensor_mode(self, *args):
-        """
+        """Updates the camera sensor mode.
+
         Updates text in readout widget based on what sensor mode is selected
         If we are in the Light Sheet mode, then we want the camera
         self.model['CameraParameters']['sensor_mode']) == 12
@@ -258,6 +257,10 @@ class CameraSettingController(GUIController):
         self.model['CameraParameters']['sensor_mode']) == 1
 
         Should initialize from the configuration file to the default version
+
+        Parameters
+        ----------
+        *args : Variable length argument list.
         """
         # Camera Mode
         sensor_value = self.mode_widgets["Sensor"].widget.get()
@@ -285,15 +288,23 @@ class CameraSettingController(GUIController):
         self.calculate_readout_time()
 
     def update_exposure_time(self, exposure_time):
-        """
-        # when camera exposure time is changed, recalculate readout time
+        """When camera exposure time is changed, recalculate readout time
+
+        Parameters
+        ----------
+        exposure_time : float
+            exposure time in seconds
         """
         self.framerate_widgets["exposure_time"].set(exposure_time)
         self.calculate_readout_time()
 
     def update_roi(self, width):
-        """
-        # update roi width and height
+        """Update ROI width and height.
+
+        Parameters
+        ----------
+        width : int
+            width of roi in pixels
         """
         width = self.default_width if width == "All" else float(width)
 
@@ -305,18 +316,22 @@ class CameraSettingController(GUIController):
         return handler
 
     def update_fov(self, *args):
-        """
-        # recalculate fov and update the widgets: FOV_X and FOV_Y
+        """Recalculate fov and update the widgets: FOV_X and FOV_Y
+
+        Parameters
+        ----------
+        *args : Variable length argument list.
         """
         if self.in_initialization:
             return
         self.calculate_physical_dimensions()
 
     def set_mode(self, mode):
-        r"""
-        # this function will change state of widgets according to different mode
-        # 'stop' mode will let the editable widget be 'normal'
-        # in 'live' and 'stack' mode, some widgets are disabled
+        """Set widget configuration based upon imaging mode.
+
+        This function will change state of widgets according to different mode
+        'stop' mode will let the editable widget be 'normal'
+        in 'live' and 'stack' mode, some widgets are disabled
 
         Parameters
         ----------
@@ -343,7 +358,8 @@ class CameraSettingController(GUIController):
             self.roi_btns[btn_name]["state"] = state
 
     def calculate_physical_dimensions(self):
-        """
+        """Calculate size of the FOV in microns.
+
         Calculates the size of the field of view according to the magnification of the system,
         the physical size of the pixel, and the number of pixels.
         update FOV_X and FOV_Y
@@ -396,9 +412,11 @@ class CameraSettingController(GUIController):
         self.roi_widgets["FOV_Y"].set(physical_dimensions_y)
 
     def calculate_readout_time(self):
-        """
-        # Calculates it here
-        # TODO: Highly specific to Hamamatsu. Should find a way to pass this from the camera to here.
+        """Calculate camera readout time.
+
+
+        TODO: Highly specific to Hamamatsu. Should find a way to pass this from the camera to here.
+        This should be moved to the camera device/API, ideally by calling a command from the camera.
         """
 
         h = 9.74436e-6  # Readout timing constant
@@ -438,8 +456,15 @@ class CameraSettingController(GUIController):
         self.framerate_widgets["max_framerate"].set(max_frame_rate * 1000)
 
     def update_number_of_pixels(self, *args):
-        """
-        # in live mode, we should let the device know the number of pixels changed
+        """Update the number of pixels in the ROI.
+
+        In live mode, we should let the device know the number of pixels changed.
+
+        Parameters
+        ----------
+        *args : tuple
+            Unused
+
         """
         pixels = self.mode_widgets["Pixels"].get()
         if pixels != "":

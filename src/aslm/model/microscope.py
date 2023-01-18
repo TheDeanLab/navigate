@@ -28,7 +28,7 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-#
+
 import logging
 from multiprocessing.managers import ListProxy
 
@@ -179,6 +179,20 @@ class Microscope:
             self.daq.add_camera(self.microscope_name, self.camera)
 
     def update_data_buffer(self, img_width, img_height, data_buffer, number_of_frames):
+        """Update the data buffer for the camera.
+
+        Parameters
+        ----------
+        img_width : int
+            Width of the image.
+        img_height : int
+            Height of the image.
+        data_buffer : numpy.ndarray
+            Data buffer for the camera.
+        number_of_frames : int
+            Number of frames to be acquired.
+        """
+
         if self.camera.is_acquiring:
             self.camera.close_image_series()
         self.camera.set_ROI(img_width, img_height)
@@ -186,6 +200,14 @@ class Microscope:
         self.number_of_frames = number_of_frames
 
     def move_stage_offset(self, former_microscope=None):
+        """Move the stage to the offset position.
+
+        Parameters
+        ----------
+        former_microscope : str
+            Name of the former microscope.
+        """
+
         if former_microscope:
             former_offset_dict = self.configuration["configuration"]["microscopes"][
                 former_microscope
@@ -205,6 +227,7 @@ class Microscope:
             self.stages[axes].move_absolute({axes + "_abs": pos}, wait_until_done=True)
 
     def prepare_acquisition(self):
+        """Prepare the acquisition."""
         self.current_channel = 0
         self.channels = self.configuration["experiment"]["MicroscopeState"]["channels"]
         self.available_channels = list(
@@ -233,6 +256,7 @@ class Microscope:
         return self.calculate_all_waveform()
 
     def end_acquisition(self):
+        """End the acquisition."""
         self.daq.stop_acquisition()
         if self.camera.is_acquiring:
             self.camera.close_image_series()
@@ -242,6 +266,13 @@ class Microscope:
         self.current_channel = 0
 
     def calculate_all_waveform(self):
+        """Calculate all the waveforms.
+
+        Returns
+        -------
+        waveform : dict
+            Dictionary of all the waveforms.
+        """
         readout_time = self.get_readout_time()
         camera_waveform = self.daq.calculate_all_waveforms(
             self.microscope_name, readout_time
@@ -256,6 +287,7 @@ class Microscope:
         return waveform_dict
 
     def prepare_next_channel(self):
+        """Prepare the next channel."""
         curr_channel = self.current_channel
         prefix = "channel_"
         if self.current_channel == 0:
@@ -318,7 +350,7 @@ class Microscope:
         # ] = curr_focus  # do something very hacky so we keep using the same focus reference
 
     def get_readout_time(self):
-        r"""Get readout time from camera.
+        """Get readout time from camera.
 
         Get the camera readout time if we are in normal mode.
         Return a -1 to indicate when we are not in normal mode.
@@ -338,6 +370,16 @@ class Microscope:
         return readout_time
 
     def move_stage(self, pos_dict, wait_until_done=False):
+        """Move stage to a position.
+
+        Parameters
+        ----------
+        pos_dict : dict
+            Dictionary of stage positions.
+        wait_until_done : bool, optional
+            Wait until stage is done moving, by default False
+        """
+
         success = True
         for pos_axis in pos_dict:
             axis = pos_axis[: pos_axis.index("_")]
@@ -350,10 +392,20 @@ class Microscope:
         return success
 
     def stop_stage(self):
+        """Stop stage."""
+
         for axis in self.stages:
             self.stages[axis].stop()
 
     def get_stage_position(self):
+        """Get stage position.
+
+        Returns
+        -------
+        stage_position : dict
+            Dictionary of stage positions.
+        """
+
         ret_pos_dict = {}
         for axis in self.stages:
             pos_axis = axis + "_pos"

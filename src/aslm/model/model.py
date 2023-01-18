@@ -212,12 +212,20 @@ class Model:
                     },
                 )
             ],
-            "z-stack": [({"name": ZStackAcquisition}, {"name": LoopByCount, "args": ("experiment.MicroscopeState.timepoints",)})],
+            "z-stack": [
+                (
+                    {"name": ZStackAcquisition},
+                    {
+                        "name": LoopByCount,
+                        "args": ("experiment.MicroscopeState.timepoints",),
+                    },
+                )
+            ],
             "projection": [{"name": PrepareNextChannel}],
         }
 
     def update_data_buffer(self, img_width=512, img_height=512):
-        r"""Update the Data Buffer
+        """Update the Data Buffer
 
         Parameters
         ----------
@@ -241,7 +249,7 @@ class Model:
             )
 
     def get_data_buffer(self, img_width=512, img_height=512):
-        r"""Get the data buffer.
+        """Get the data buffer.
 
         If the number of active pixels in x and y changes, updates the data buffer and returns in.
 
@@ -262,7 +270,7 @@ class Model:
         return self.data_buffer
 
     def create_pipe(self, pipe_name):
-        r"""Create a data pipe.
+        """Create a data pipe.
 
         Creates a pair of connection objects connected by a pipe which by default is duplex (two-way)
 
@@ -282,7 +290,7 @@ class Model:
         return end1
 
     def release_pipe(self, pipe_name):
-        r"""Close a data pipe.
+        """Close a data pipe.
 
         Parameters
         ----------
@@ -296,6 +304,14 @@ class Model:
             delattr(self, pipe_name)
 
     def get_active_microscope(self):
+        """Get the active microscope.
+
+        Returns
+        -------
+        microscope : Microscope
+            Active microscope.
+        """
+
         self.active_microscope_name = self.configuration["experiment"][
             "MicroscopeState"
         ]["microscope_name"]
@@ -303,20 +319,28 @@ class Model:
         return self.active_microscope
 
     def get_offset_variance_maps(self):
+        """Get the offset variance maps.
+
+        Returns
+        -------
+        offset_variance_maps : dict
+            Offset variance maps.
+        """
+
         return self.active_microscope.camera.get_offset_variance_maps()
 
     def run_command(self, command, *args, **kwargs):
-        r"""Receives commands from the controller.
+        """ "Receives commands from the controller.
 
         Parameters
         ----------
         command : str
             Type of command to run.  Can be 'single', 'live', 'z-stack', 'projection', 'update_setting'
             'autofocus', 'stop', and 'debug'.
-        *args : str
-            ...
-        **kwargs : str
-            ...
+        *args : list
+            List of arguments to pass to the command.
+        **kwargs : dict
+            Dictionary of keyword arguments to pass to the command.
         """
         logging.info("ASLM Model - Received command from controller:", command, args)
         if not self.data_buffer:
@@ -472,7 +496,7 @@ class Model:
             self.end_acquisition()
 
     def move_stage(self, pos_dict, wait_until_done=False):
-        r"""Moves the stages.
+        """Moves the stages.
 
         Updates the stage dictionary, moves to the desired position, and reports the position.
 
@@ -491,7 +515,7 @@ class Model:
         return self.active_microscope.move_stage(pos_dict, wait_until_done)
 
     def get_stage_position(self):
-        r"""Get the position of the stage.
+        """Get the position of the stage.
 
         Returns
         -------
@@ -501,14 +525,14 @@ class Model:
         return self.active_microscope.get_stage_position()
 
     def stop_stage(self):
-        r"""Stop the stages."""
+        """Stop the stages."""
         self.active_microscope.stop_stage()
 
         ret_pos_dict = self.get_stage_position()
         update_stage_dict(self, ret_pos_dict)
 
     def end_acquisition(self):
-        r"""End the acquisition.
+        """End the acquisition.
 
         Sets the current channel to 0, clears the signal and data containers, disconnects buffer in live mode
         and closes the shutters.
@@ -527,14 +551,14 @@ class Model:
         self.active_microscope.end_acquisition()
 
     def run_data_process(self, num_of_frames=0, data_func=None):
-        r"""Run the data process.
+        """Run the data process.
 
         This function is the structure of data thread.
 
         Parameters
         ----------
         num_of_frames : int
-            ...
+            Number of frames to acquire.
         data_func : object
             Function to run on the acquired data.
         """
@@ -599,26 +623,41 @@ class Model:
         self.end_acquisition()  # Need this to turn off the lasers/close the shutters
 
     def pause_data_thread(self):
+        """Pause the data thread.
+
+        This function is called when user pauses the acquisition.
+        """
+
         self.pause_data_ready_lock.acquire()
         self.ask_to_pause_data_thread = True
         self.pause_data_ready_lock.acquire()
 
     def resume_data_thread(self):
+        """Resume the data thread.
+
+        This function is called when user resumes the acquisition.
+        """
+
         self.ask_to_pause_data_thread = False
         self.pause_data_event.set()
         if self.pause_data_ready_lock.locked():
             self.pause_data_ready_lock.release()
 
     def prepare_acquisition(self, turn_off_flags=True):
-        r"""Prepare the acquisition.
+        """Prepare the acquisition.
 
+        This function is called when user starts the acquisition.
         Sets flags, calculates all of the waveforms.
         Sets the Camera Sensor Mode, initializes the data buffer, starts camera, and opens shutters
-        Sets flags.
         Calculates all of the waveforms.
         Sets the Camera Sensor Mode
         Initializes the data buffer and starts camera.
         Opens Shutters
+
+        Parameters
+        ----------
+        turn_off_flags : bool
+            Turn off the flags.
         """
         # turn off flags
         if turn_off_flags:
@@ -635,16 +674,13 @@ class Model:
         self.frame_id = 0
 
     def snap_image(self):
-        r"""Acquire an image after updating the waveforms.
+        """Acquire an image after updating the waveforms.
 
         Can be used in acquisitions where changing waveforms are required,
         but there is additional overhead due to the need to write the
         waveforms into the buffers of the DAQ cards.
 
         TODO: Cleanup.
-
-        Parameters
-        ----------
         """
         if hasattr(self, "signal_container"):
             self.signal_container.run()
@@ -683,7 +719,7 @@ class Model:
         self.frame_id = (self.frame_id + 1) % self.number_of_frames
 
     def run_live_acquisition(self):
-        r"""Stream live image to the GUI.
+        """Stream live image to the GUI.
 
         Recalculates the waveforms for each image, thereby allowing people to adjust
         acquisition parameters in real-time.
@@ -693,7 +729,7 @@ class Model:
             self.run_acquisition()
 
     def run_acquisition(self):
-        r"""Run acquisition along with a feature list one time."""
+        """Run acquisition along with a feature list one time."""
         if not hasattr(self, "signal_container"):
             self.snap_image()
             return
@@ -716,19 +752,21 @@ class Model:
             self.stop_acquisition = True
 
     def change_resolution(self, resolution_value):
-        r"""Switch resolution mode of the microscope.
+        """Switch resolution mode of the microscope.
 
         Parameters
         ----------
         resolution_value : str
-            'high' for high-resolution mode, and 'low' for low-resolution mode.
+            Resolution mode.
         """
-        print(f"CHANGING RESOLUTION from {self.active_microscope_name} to {resolution_value}")
+        print(
+            f"CHANGING RESOLUTION from {self.active_microscope_name} to {resolution_value}"
+        )
         if resolution_value != self.active_microscope_name:
             former_microscope = self.active_microscope_name
             self.get_active_microscope()
             self.active_microscope.move_stage_offset(former_microscope)
-        
+
         # update zoom if possible
         try:
             zoom_value = self.configuration["experiment"]["MicroscopeState"]["zoom"]
@@ -742,7 +780,13 @@ class Model:
             )
 
     def load_images(self, filenames=None):
-        r"""Load/Unload images to the Synthetic Camera"""
+        """Load/Unload images to the Synthetic Camera
+
+        Parameters
+        ----------
+        filenames : list
+            List of filenames to load.
+        """
         self.active_microscope.camera.initialize_image_series(
             self.data_buffer, self.number_of_frames
         )
@@ -752,6 +796,17 @@ class Model:
     def update_ilastik_setting(
         self, display_segmentation=False, mark_position=True, target_labels=[1]
     ):
+        """Update the ilastik setting.
+
+        Parameters
+        ----------
+        display_segmentation : bool
+            Display segmentation.
+        mark_position : bool
+            Mark position.
+        target_labels : list
+            Target labels.
+        """
         self.display_ilastik_segmentation = display_segmentation
         self.mark_ilastik_position = mark_position
         self.ilastik_target_labels = target_labels

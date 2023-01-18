@@ -71,6 +71,10 @@ def main():
         --rest_api_file
         --logging_config
 
+    Returns
+    -------
+    None
+
     Examples
     --------
     python main.py --synthetic_hardware

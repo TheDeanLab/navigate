@@ -42,6 +42,28 @@ logger = logging.getLogger(p)
 def camera_exposure(sample_rate=100000, sweep_time=0.4, exposure=0.4, camera_delay=10):
     """Calculates timing and duration of camera exposure.
     Not actually used to trigger the camera.  Only meant for visualization.
+
+    Parameters
+    ----------
+    sample_rate : Integer
+        Unit - Hz
+    sweep_time : Float
+        Unit - Seconds
+    exposure : Float
+        Unit - Seconds
+    camera_delay : Float
+        Unit - Percent
+
+    Returns
+    -------
+    exposure_start : Float
+        Unit - Seconds
+    exposure_end : Float
+        Unit - Seconds
+
+    Examples
+    --------
+    exposure_start, exposure_end = camera_exposure(sample_rate, sweep_time, exposure, camera_delay)
     """
     amplitude = 5
 
@@ -68,17 +90,28 @@ def single_pulse(
     Used for creating TTL pulses out of analog outputs and laser intensity
     pulses.
 
-    Units:
-    sample_rate (samples/second): Integer
-    sweep_time:  Seconds
-    delay:      Percent
-    pulse_width: Percent
-    amplitude:  Volts
-    offset:     Volts
+    Parameters
+    ----------
+    sample_rate : Integer
+        Unit - Hz
+    sweep_time : Float
+        Unit - Seconds
+    delay : Float
+        Unit - Percent
+    pulse_width : Float
+        Unit - Percent
+    amplitude : Float
+        Unit - Volts
+    offset : Float
+        Unit - Volts
 
-    Examples:
-    typical_TTL_pulse = single_pulse(sample_rate, sweep_time, 10, 1, 5, 0)
-    typical_laser_pulse = single_pulse(sample_rate, sweep_time, 10, 80, 1.25, 0)
+    Returns
+    -------
+    waveform : np.array
+
+    Examples
+    --------
+    typical_TTL_pulse = single_pulse(sample_rate, sweep_time, 10, 1, 1, 0)
     """
     # get an integer number of samples
     samples = int(np.floor(np.multiply(sample_rate, sweep_time)))
@@ -105,7 +138,7 @@ def tunable_lens_ramp(
     amplitude=1,
     offset=0,
 ):
-    r"""Returns a numpy array with a sawtooth ramp - typically used for remote focusing.
+    """Returns a numpy array with a sawtooth ramp - typically used for remote focusing.
 
     The waveform starts at offset and stays there for the delay period, then
     rises linearly to 2x amplitude (amplitude here refers to 1/2 peak-to-peak)
@@ -136,6 +169,12 @@ def tunable_lens_ramp(
     Returns
     -------
     waveform : np.array
+
+    Examples
+    --------
+    etl_ramp = tunable_lens_ramp(sample_rate, exposure_time, sweep_time, etl_delay,
+        camera_delay, fall, amplitude, offset)
+
     """
 
     # create an array just containing the negative amplitude voltage:
@@ -178,7 +217,31 @@ def sawtooth(
     """
     Returns a numpy array with a sawtooth function.
     Used for creating the galvo signal.
-    Example:  galvosignal =  sawtooth(100000, 0.4, 199, 3.67, 0, 50, np.pi)
+
+    Parameters
+    ----------
+    sample_rate : Integer
+        Unit - Hz
+    sweep_time : Float
+        Unit - Seconds
+    frequency : Float
+        Unit - Hz
+    amplitude : Float
+        Unit - Volts
+    offset : Float
+        Unit - Volts
+    duty_cycle : Float
+        Unit - Percent
+    phase : Float
+        Unit - Radians
+
+    Returns
+    -------
+    waveform : np.array
+
+    Examples
+    --------
+    typical_galvo = sawtooth(sample_rate, sweep_time, 10, 1, 0, 50, np.pi/2)
     """
 
     samples = int(np.multiply(sample_rate, sweep_time))
@@ -194,6 +257,24 @@ def dc_value(sample_rate=100000, sweep_time=0.4, amplitude=1):
     """
     Returns a numpy array with a DC value
     Used for creating the resonant galvo drive voltage.
+
+    Parameters
+    ----------
+    sample_rate : Integer
+        Unit - Hz
+    sweep_time : Float
+        Unit - Seconds
+    amplitude : Float
+        Unit - Volts
+
+    Returns
+    -------
+    waveform : np.array
+
+    Examples
+    --------
+    typical_galvo = dc_value(sample_rate, sweep_time, 1)
+
     """
     samples = np.multiply(float(sample_rate), sweep_time)
     waveform = np.zeros(int(samples))
@@ -210,9 +291,33 @@ def square(
     duty_cycle=50,
     phase=np.pi,
 ):
-    """
-    Returns a numpy array with a square waveform
+    """Returns a numpy array with a square function.
     Used for creating analog laser drive voltage.
+
+    Parameters
+    ----------
+    sample_rate : Integer
+        Unit - Hz
+    sweep_time : Float
+        Unit - Seconds
+    frequency : Float
+        Unit - Hz
+    amplitude : Float
+        Unit - Volts
+    offset : Float
+        Unit - Volts
+    duty_cycle : Float
+        Unit - Percent
+    phase : Float
+        Unit - Radians
+
+    Returns
+    -------
+    waveform : np.array
+
+    Examples
+    --------
+    typical_laser = square(sample_rate, sweep_time, 10, 1, 0, 50, np.pi)
     """
     samples = int(sample_rate * sweep_time)
     duty_cycle = duty_cycle / 100
@@ -225,8 +330,33 @@ def square(
 def sine_wave(
     sample_rate=100000, sweep_time=0.4, frequency=10, amplitude=1, offset=0, phase=0
 ):
-    """
-    # Returns a numpy array with a sine waveform
+    """Returns a numpy array with a sine waveform
+
+    Used for creating analog laser drive voltage.
+
+    Parameters
+    ----------
+    sample_rate : int, optional
+        Unit - Hz, by default 100000
+    sweep_time : float, optional
+        Unit - Seconds, by default 0.4
+    frequency : int, optional
+        Unit - Hz, by default 10
+    amplitude : float, optional
+        Unit - Volts, by default 1
+    offset : float, optional
+        Unit - Volts, by default 0
+    phase : float, optional
+        Unit - Radians, by default 0
+
+    Returns
+    -------
+    waveform : np.array
+
+    Examples
+    --------
+    typical_laser = sine_wave(sample_rate, sweep_time, 10, 1, 0, 0)
+
     """
     samples = int(sample_rate * sweep_time)
     t = np.linspace(0, sweep_time, samples)
@@ -235,8 +365,20 @@ def sine_wave(
 
 
 def smooth_waveform(waveform, percent_smoothing=10):
-    """
-    # Smooths a numpy array via convolution
+    """Smooths a numpy array via convolution
+
+    Parameters
+    ----------
+    waveform : np.array
+        The waveform to be smoothed
+    percent_smoothing : int
+        The percentage of the waveform to be smoothed
+
+    Returns
+    -------
+    smoothed_waveform : np.array
+        The smoothed waveform
+
     """
     waveform_length = np.size(waveform)
     window_len = int(np.floor(waveform_length * percent_smoothing / 100))

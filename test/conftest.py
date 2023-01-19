@@ -50,6 +50,9 @@ def model():
     from aslm.model.model import Model
     from multiprocessing import Manager, Queue
     from aslm.config.config import load_configs
+    from aslm.log_files.log_functions import log_setup
+    
+    log_setup("logging.yaml")
 
     # Use configuration files that ship with the code base
     configuration_directory = Path.joinpath(
@@ -104,6 +107,9 @@ def controller(root, splash_screen):
     from pathlib import Path
 
     from aslm.controller.controller import Controller
+    from aslm.log_files.log_functions import log_setup
+    
+    log_setup("logging.yaml")
 
     # Use configuration files that ship with the code base
     configuration_directory = Path.joinpath(

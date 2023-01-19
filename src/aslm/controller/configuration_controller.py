@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -107,7 +108,10 @@ class ConfigurationController:
 
     @property
     def channels_info(self):
-        """Populate the channel combobox with the channels that are available in the configuration
+        """Return the channels info
+
+        Populate the channel combobox with the channels
+        that are available in the configuration
 
         Returns
         -------
@@ -129,7 +133,10 @@ class ConfigurationController:
 
     @property
     def lasers_info(self):
-        """Populate the laser combobox with the lasers that are available in the configuration
+        """Return the lasers info
+
+        Populate the laser combobox with the lasers
+        that are available in the configuration
 
         Returns
         -------
@@ -233,7 +240,8 @@ class ConfigurationController:
         Returns
         -------
         position_limits : dict
-            Depending on suffix, min or max stage limits, e.g. {'x': 2000, 'y': 2000, 'z': 2000, 'theta': 0, 'f': 2000}.
+            Depending on suffix, min or max stage limits, e.g.
+            {'x': 2000, 'y': 2000, 'z': 2000, 'theta': 0, 'f': 2000}.
 
         """
         axis = ["x", "y", "z", "theta", "f"]

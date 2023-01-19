@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -30,13 +30,12 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 import unittest
-from pathlib import Path
 from aslm.model.devices.shutter.laser_shutter_base import ShutterBase
 from aslm.model.dummy import DummyModel
 
 
 class TestLaserBase(unittest.TestCase):
-    """ "Unit Test for ShutterBase Class"""
+    """Unit Test for ShutterBase Class"""
 
     dummy_model = DummyModel()
     microscope_name = "Mesoscale"

@@ -30,7 +30,7 @@ axes = {"x": 1, "y": 2, "z": 3, "f": 3, "aux": 4}
 
 
 class MadlibError(Exception):
-    """ "Exception for Mad City Labs device run off Madlib API."""
+    """Exception for Mad City Labs device run off Madlib API."""
 
 
 def in_enum(value, enum):
@@ -70,13 +70,14 @@ __dll.MCL_InitHandle.errcheck = errcheck
 
 
 def MCL_InitHandle():
-    """ "Requests control of a single Mad City Labs Nano-Drive.
+    """Requests control of a single Mad City Labs Nano-Drive.
 
-    If multiple Mad City Labs Nano-Drives are attached but not yet controlled, it is indeterminate which of the
-    uncontrolled Nano-Drives this function will gain control of.
+    If multiple Mad City Labs Nano-Drives are attached but not yet controlled, it is
+    indeterminate which of the uncontrolled Nano-Drives this function will gain
+    control of.
 
-    Use a combination of MCL_GrabHandle, MCL_GrabAllHandles, MCL_GetAllHandles, and MCL_GetHandleBySerial to acquire the
-    handle to a specific device.
+    Use a combination of MCL_GrabHandle, MCL_GrabAllHandles, MCL_GetAllHandles, and
+    MCL_GetHandleBySerial to acquire the handle to a specific device.
 
     Returns
     -------
@@ -91,14 +92,18 @@ __dll.MCL_GrabAllHandles.errcheck = errcheck
 
 
 def MCL_GrabAllHandles():
-    """ "Requests control of all of the attached  Mad City Labs Nano-Drives that are not yet under control.
+    """Requests control of all of the attached  Mad City Labs Nano-Drives that are not
+    yet under control.
 
-    After calling this function use MCL_GetHandleBySerialNumber to get the handle of a specific device.
+    After calling this function use MCL_GetHandleBySerialNumber to get the handle of a
+    specific device.
 
-    Use MCL_NumberOfCurrentHandles and MCL_GetAllHandles to get a list of the handles acquired by this function.
+    Use MCL_NumberOfCurrentHandles and MCL_GetAllHandles to get a list of the handles
+    acquired by this function.
 
-    Remember that this function will take control of all of the attached Nano-Drives not currently under control. Some
-    of the acquired handles may need to be released if those Nano-Drives are needed in other applications.
+    Remember that this function will take control of all of the attached Nano-Drives not
+    currently under control. Some of the acquired handles may need to be released if
+    those Nano-Drives are needed in other applications.
 
     Returns
     -------
@@ -114,7 +119,8 @@ __dll.MCL_GetHandleBySerial.errcheck = errcheck
 
 
 def MCL_GetHandleBySerial(serial_number):
-    """ "Searches Nano-Drives currently controlled for a Nano-Drive whose serial number matches 'serial_number'.
+    """Searches Nano-Drives currently controlled for a Nano-Drive whose serial number
+    matches 'serial_number'.
 
     Parameters
     ----------
@@ -135,7 +141,7 @@ __dll.MCL_ReleaseHandle.errcheck = errcheck
 
 
 def MCL_ReleaseHandle(handle):
-    """ "Releases control of the specified Nano-Drive."""
+    """Releases control of the specified Nano-Drive."""
     return __dll.MCL_ReleaseHandle(handle)
 
 
@@ -145,7 +151,7 @@ __dll.MCL_SingleWriteN.errcheck = errcheck
 
 
 def MCL_SingleWriteN(position, axis, handle):
-    """ "Commands the Nano-Drive to move the specified axis to a position.
+    """Commands the Nano-Drive to move the specified axis to a position.
 
     Parameters
     ----------
@@ -170,7 +176,7 @@ __dll.MCL_SingleReadN.errcheck = errcheck
 
 
 def MCL_SingleReadN(axis, handle):
-    """ "Read the current position of the specified axis.
+    """Read the current position of the specified axis.
 
     Parameters
     ----------

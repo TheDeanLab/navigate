@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -31,20 +31,24 @@
 #
 
 # Standard Library Imports
-import time
 import threading
 import logging
 import multiprocessing as mp
 
 # Third Party Imports
-import numpy as np
 
 # Local Imports
-from aslm.model.concurrency.concurrency_tools import ResultThread, SharedNDArray
+from aslm.model.concurrency.concurrency_tools import SharedNDArray
 from aslm.model.features.autofocus import Autofocus
 from aslm.model.features.image_writer import ImageWriter
-from aslm.model.features.dummy_detective import Dummy_Detective
-from aslm.model.features.common_features import *
+from aslm.model.features.common_features import (
+    ChangeResolution,
+    Snap,
+    ZStackAcquisition,
+    FindTissueSimple2D,
+    PrepareNextChannel,
+    LoopByCount,
+)
 from aslm.model.features.feature_container import load_features
 from aslm.model.features.restful_features import IlastikSegmentation
 from aslm.model.features.volume_search import VolumeSearch
@@ -251,7 +255,8 @@ class Model:
     def get_data_buffer(self, img_width=512, img_height=512):
         """Get the data buffer.
 
-        If the number of active pixels in x and y changes, updates the data buffer and returns in.
+        If the number of active pixels in x and y changes, updates the data buffer and
+        returns in.
 
         Parameters
         ----------
@@ -272,7 +277,8 @@ class Model:
     def create_pipe(self, pipe_name):
         """Create a data pipe.
 
-        Creates a pair of connection objects connected by a pipe which by default is duplex (two-way)
+        Creates a pair of connection objects connected by a pipe which by default is
+        duplex (two-way)
 
         Parameters
         ----------
@@ -330,13 +336,12 @@ class Model:
         return self.active_microscope.camera.get_offset_variance_maps()
 
     def run_command(self, command, *args, **kwargs):
-        """ "Receives commands from the controller.
+        """Receives commands from the controller.
 
         Parameters
         ----------
         command : str
-            Type of command to run.  Can be 'single', 'live', 'z-stack', 'projection', 'update_setting'
-            'autofocus', 'stop', and 'debug'.
+            Type of command to run.
         *args : list
             List of arguments to pass to the command.
         **kwargs : dict
@@ -441,7 +446,7 @@ class Model:
         elif command == "autofocus":
             """
             Autofocus Routine
-            Args[0] is a dictionary of the microscope state (resolution, mode, zoom, ...)
+            Args[0] is a dictionary of the microscope state (resolution, zoom, ...)
             Args[1] is a dictionary of the user-defined autofocus parameters:
             {'coarse_range': 500,
             'coarse_step_size': 50,
@@ -498,7 +503,8 @@ class Model:
     def move_stage(self, pos_dict, wait_until_done=False):
         """Moves the stages.
 
-        Updates the stage dictionary, moves to the desired position, and reports the position.
+        Updates the stage dictionary, moves to the desired position, and reports the
+        position.
 
         Parameters
         ----------
@@ -534,8 +540,8 @@ class Model:
     def end_acquisition(self):
         """End the acquisition.
 
-        Sets the current channel to 0, clears the signal and data containers, disconnects buffer in live mode
-        and closes the shutters.
+        Sets the current channel to 0, clears the signal and data containers,
+        disconnects buffer in live mode and closes the shutters.
         #
         """
         self.is_acquiring = False
@@ -585,7 +591,8 @@ class Model:
                 self.logger.info(f"ASLM Model - Waiting {wait_num}")
                 wait_num -= 1
                 if wait_num <= 0:
-                    # it has waited for wait_num * 500 ms, it's sure there won't be any frame coming
+                    # it has waited for wait_num * 500 ms, it's sure there won't be any
+                    # frame coming
                     break
                 continue
 
@@ -648,7 +655,8 @@ class Model:
 
         This function is called when user starts the acquisition.
         Sets flags, calculates all of the waveforms.
-        Sets the Camera Sensor Mode, initializes the data buffer, starts camera, and opens shutters
+        Sets the Camera Sensor Mode, initializes the data buffer, starts camera, and
+        opens shutters
         Calculates all of the waveforms.
         Sets the Camera Sensor Mode
         Initializes the data buffer and starts camera.
@@ -692,7 +700,8 @@ class Model:
         # )
 
         # Stash current position, channel, timepoint
-        # Do this here, because signal container functions can inject changes to the stage
+        # Do this here, because signal container functions can inject changes to
+        # the stage
         self.data_buffer_positions[self.frame_id][0] = self.configuration["experiment"][
             "StageParameters"
         ]["x"]
@@ -760,7 +769,8 @@ class Model:
             Resolution mode.
         """
         print(
-            f"CHANGING RESOLUTION from {self.active_microscope_name} to {resolution_value}"
+            f"CHANGING RESOLUTION from {self.active_microscope_name}"
+            f"to {resolution_value}"
         )
         if resolution_value != self.active_microscope_name:
             former_microscope = self.active_microscope_name
@@ -774,7 +784,7 @@ class Model:
             self.logger.debug(
                 f"Change zoom of {self.active_microscope_name} to {zoom_value}"
             )
-        except:
+        except KeyError:
             self.logger.debug(
                 f"There is no zoom in microscope: {self.active_microscope_name}"
             )

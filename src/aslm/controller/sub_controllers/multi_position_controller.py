@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -34,7 +34,6 @@
 from tkinter import filedialog
 import math
 import logging
-from pathlib import Path
 
 # Third Party Imports
 import pandas as pd
@@ -117,7 +116,7 @@ class MultiPositionController(GUIController):
         return positions
 
     def handle_double_click(self, event):
-        """ "Move to a position within the Multi-Position Acquisition Interface.
+        """Move to a position within the Multi-Position Acquisition Interface.
 
         When double clicked the row head, it will call the parent/central controller
         to move stage and update stage view
@@ -202,7 +201,8 @@ class MultiPositionController(GUIController):
         self.show_verbose_info("loaded csv file", filename)
 
     def export_positions(self):
-        """Export the positions in the Multi-Position Acquisition Interface to a csv file.
+        """Export the positions in the Multi-Position Acquisition Interface to a
+        csv file.
 
         This function opens a dialog that let the user input a filename
         Then, it will export positions to that csv file

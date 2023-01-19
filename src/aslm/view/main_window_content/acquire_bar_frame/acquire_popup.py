@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -49,10 +49,12 @@ logger = logging.getLogger(p)
 
 
 class AcquirePopUp:
-    """ "Class creates the popup that is generated when the Acquire button is pressed and Save File checkbox is selected."""
+    """Class creates the popup that is generated when the Acquire button is pressed and
+    Save File checkbox is selected."""
 
     def __init__(self, root, *args, **kwargs):
-        # Creating popup window with this name and size/placement, PopUp is a Toplevel window
+        # Creating popup window with this name and size/placement, PopUp is a Toplevel
+        # window
         self.popup = PopUp(
             root, "File Saving Dialog", "430x530+320+180", transient=True
         )
@@ -164,7 +166,8 @@ class AcquirePopUp:
 
     def get_variables(self):
         """
-        # This function returns a dictionary of all the variables that are tied to each widget name.
+        # This function returns a dictionary of all the variables that are tied to each
+        # widget name.
         The key is the widget name, value is the variable associated.
         """
         variables = {}

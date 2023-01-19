@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -33,6 +33,7 @@
 import logging
 
 # Third Party Imports
+from aslm.model.devices.APIs.logitech.logitech import FarmSimulatorSidePanel
 
 # Local Imports
 from aslm.model.devices.joystick.joystick_base import JoystickBase
@@ -55,10 +56,9 @@ class JoystickLogitech(JoystickBase):
             # self.joystick.sig_button_pressed.connect(self.button_handler)
             # self.joystick.sig_mode_changed.connect(self.mode_handler)
             # self.joystick.sig_axis_moved.connect(self.axis_handler)
-        elif self.cfg.sidepanel == "Demo":
-            self.joystick = Demo_SidePanel()
+        # elif self.cfg.sidepanel == "Demo":
+        #     self.joystick = Demo_SidePanel()
 
-        """ """
         self.SliderChangeCount = 0
 
     def button_handler(self, button_id):

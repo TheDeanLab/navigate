@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -44,7 +44,7 @@ logger = logging.getLogger(p)
 
 
 class DAQBase:
-    """ "Parent class for Data Acquisition (DAQ) classes.
+    """Parent class for Data Acquisition (DAQ) classes.
 
     Attributes
     ----------
@@ -88,19 +88,22 @@ class DAQBase:
             self.waveform_dict[k] = None
 
     def calculate_all_waveforms(self, microscope_name, readout_time):
-        """ "Pre-calculates all waveforms necessary for the acquisition and organizes in a dictionary format.
+        """Pre-calculates all waveforms necessary for the acquisition and organizes in
+        a dictionary format.
 
         Parameters
         ----------
         microscope_name : str
             Name of the active microscope
         readout_time : float
-            Readout time of the camera (seconds) if we are operating the camera in Normal mode, otherwise -1.
+            Readout time of the camera (seconds) if we are operating the camera in
+            Normal mode, otherwise -1.
 
         Returns
         -------
         self.waveform_dict : dict
-            Dictionary of waveforms to pass to galvo and ETL, plus a camera waveform for display purposes.
+            Dictionary of waveforms to pass to galvo and ETL, plus a camera waveform for
+            display purposes.
         """
         self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
         self.enable_microscope(microscope_name)
@@ -126,10 +129,11 @@ class DAQBase:
                     / 100
                 )
                 if readout_time > 0:
-                    # This addresses the dovetail nature of the camera readout in normal mode. The camera reads middle
-                    # out, and the delay in start of the last lines compared to the first lines causes the exposure
-                    # to be net longer than exposure_time. This helps the galvo keep sweeping for the full camera
-                    # exposure time.
+                    # This addresses the dovetail nature of the camera readout in normal
+                    # mode. The camera reads middle out, and the delay in start of the
+                    # last lines compared to the first lines causes the exposure to be
+                    # net longer than exposure_time. This helps the galvo keep sweeping
+                    # for the full camera exposure time.
                     self.sweep_time += readout_time
 
                 self.waveform_dict[channel_key] = camera_exposure(

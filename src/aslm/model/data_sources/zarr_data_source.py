@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -49,15 +49,17 @@ class ZarrDataSource(DataSource):
         zarr.save(self.file_name, z)
 
     def copy_to_zarr(self, frame_ids):
-        """ "Write data to Zarr.
+        """Write data to Zarr.
 
         Will take in camera frames and move data fom SharedND Array into a Zarr Array.
         If there is more than one channel there will be that many frames.
         For example, if there are 3 channels selected there should be three frames.
-        Making the assumption there is only one frame per channel on a single acquisition
+        Making the assumption there is only one frame per channel on a single
+        acquisition
         """
 
-        # Getting needed info, I am doing it in the function because i think if we do not reinit the class,
+        # Getting needed info, I am doing it in the function because i think if we do
+        # not reinit the class,
         # save directory will be a stagnant var. If we just leave
         # self.model = model then that ref will alwasy be up to date
         num_of_channels = len(
@@ -122,10 +124,13 @@ class ZarrDataSource(DataSource):
         # Copy data to Zarr
         # Saving Acq By Slice
         """
-        Starts on first channel and increments with the loop. Each image is saved by slice, channel and timepoint.
+        Starts on first channel and increments with the loop. Each image is saved by
+        slice, channel and timepoint.
         After each channel has been taken off data buffer then the slice is incremented.
-        After the amount of slices set by zslice has been reached, time is then incremented.
-        TODO do we need to store the actual channel number? Or just make sure that frames are in an order than channels can be interpreted?
+        After the amount of slices set by zslice has been reached, time is then
+        incremented.
+        TODO do we need to store the actual channel number? Or just make sure that
+        frames are in an order than channels can be interpreted?
         """
         if by_slice:
             time = 0

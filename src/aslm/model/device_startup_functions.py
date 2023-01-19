@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -54,7 +54,7 @@ class DummyDeviceConnection:
 
 
 def auto_redial(func, args, n_tries=10, exception=Exception, **kwargs):
-    """ "Retries connections to a startup device defined by func n_tries times.
+    """Retries connections to a startup device defined by func n_tries times.
 
     Parameters
     ----------
@@ -85,7 +85,8 @@ def auto_redial(func, args, n_tries=10, exception=Exception, **kwargs):
         except exception as e:
             if i < (n_tries - 1):
                 logger.debug(
-                    f"auto_redial - Failed {str(func)} attempt {i+1}/{n_tries} with exception {e}."
+                    f"auto_redial - Failed {str(func)} attempt {i+1}/{n_tries} "
+                    f"with exception {e}."
                 )
                 # If we failed, but part way through object creation, we must
                 # delete the object prior to trying again. This lets us restart
@@ -147,7 +148,7 @@ def load_camera_connection(configuration, camera_id=0, is_synthetic=False):
 
 
 def start_camera(microscope_name, device_connection, configuration, is_synthetic=False):
-    """ "Initializes the camera class.
+    """Initializes the camera class.
 
     Parameters
     ----------
@@ -167,7 +168,8 @@ def start_camera(microscope_name, device_connection, configuration, is_synthetic
 
     Examples
     --------
-    >>> start_camera(microscope_name, device_connection, configuration, is_synthetic=False)
+    >>> start_camera(microscope_name, device_connection, configuration,
+        is_synthetic=False)
     """
     if device_connection is None:
         device_not_found(microscope_name, "camera")
@@ -288,7 +290,7 @@ def load_stages(configuration, is_synthetic=False):
             stage_devices.append(DummyDeviceConnection())
 
         elif (
-            stage_type.lower() == "syntheticstage" or device_type.lower() == "synthetic"
+            stage_type.lower() == "syntheticstage" or stage_type.lower() == "synthetic"
         ):
             stage_devices.append(DummyDeviceConnection())
 
@@ -323,7 +325,8 @@ def start_stage(
 
     Examples
     --------
-    >>> start_stage(microscope_name, device_connection, configuration, id=0, is_synthetic=False)
+    >>> start_stage(microscope_name, device_connection, configuration, id=0,
+                    is_synthetic=False)
     """
     device_config = configuration["configuration"]["microscopes"][microscope_name][
         "stage"
@@ -424,7 +427,8 @@ def start_zoom(microscope_name, device_connection, configuration, is_synthetic=F
 
     Examples
     --------
-    >>> start_zoom(microscope_name, device_connection, configuration, is_synthetic=False)
+    >>> start_zoom(microscope_name, device_connection, configuration,
+                   is_synthetic=False)
     """
     if is_synthetic:
         device_type = "SyntheticZoom"
@@ -521,7 +525,8 @@ def start_filter_wheel(
 
     Examples
     --------
-    >>> start_filter_wheel(microscope_name, device_connection, configuration, is_synthetic=False)
+    >>> start_filter_wheel(microscope_name, device_connection, configuration,
+                           is_synthetic=False)
 
     """
     if device_connection is None:
@@ -618,7 +623,8 @@ def start_shutter(
 
     Examples
     --------
-    >>> start_shutter(microscope_name, device_connection, configuration, is_synthetic=False)
+    >>> start_shutter(microscope_name, device_connection, configuration,
+                      is_synthetic=False)
     """
 
     if is_synthetic:
@@ -649,7 +655,7 @@ def start_shutter(
 def start_lasers(
     microscope_name, device_connection, configuration, id=0, is_synthetic=False
 ):
-    """ "Initializes the laser trigger class on a dedicated thread.
+    """Initializes the laser trigger class on a dedicated thread.
 
     Initializes the Laser Switching, Analog, and Digital DAQ Outputs.
 
@@ -673,7 +679,8 @@ def start_lasers(
 
     Examples
     --------
-    >>> start_lasers(microscope_name, device_connection, configuration, id=0, is_synthetic=False)
+    >>> start_lasers(microscope_name, device_connection, configuration, id=0,
+                     is_synthetic=False)
     """
 
     if is_synthetic:
@@ -702,7 +709,7 @@ def start_lasers(
 def start_remote_focus_device(
     microscope_name, device_connection, configuration, is_synthetic=False
 ):
-    """ "Initializes the remote focus class.
+    """Initializes the remote focus class.
 
     Initializes the Remote Focusing Device.
 
@@ -724,7 +731,8 @@ def start_remote_focus_device(
 
     Examples
     --------
-    >>> start_remote_focus_device(microscope_name, device_connection, configuration, is_synthetic=False)
+    >>> start_remote_focus_device(microscope_name, device_connection, configuration,
+                                  is_synthetic=False)
     """
 
     if is_synthetic:
@@ -778,7 +786,8 @@ def start_galvo(
 
     Examples
     --------
-    >>> start_galvo(microscope_name, device_connection, configuration, id=0, is_synthetic=False)
+    >>> start_galvo(microscope_name, device_connection, configuration, id=0,
+                    is_synthetic=False)
     """
 
     if is_synthetic:

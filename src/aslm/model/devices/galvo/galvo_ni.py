@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -46,7 +46,7 @@ logger = logging.getLogger(p)
 
 
 class GalvoNI(GalvoBase):
-    """ "GalvoNI Class"""
+    """GalvoNI Class"""
 
     def __init__(self, microscope_name, device_connection, configuration, galvo_id=0):
         super().__init__(microscope_name, device_connection, configuration, galvo_id)
@@ -67,7 +67,8 @@ class GalvoNI(GalvoBase):
         channel = self.device_config["hardware"]["channel"]
         self.task.ao_channels.add_ao_voltage_chan(channel)
         print(
-            f"Initializing galvo with sample rate {self.sample_rate} and {self.samples} samples"
+            f"Initializing galvo with sample rate {self.sample_rate} and"
+            f"{self.samples} samples"
         )
         self.task.timing.cfg_samp_clk_timing(
             rate=self.sample_rate,

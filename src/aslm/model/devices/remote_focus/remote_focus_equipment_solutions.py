@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -46,13 +46,15 @@ logger = logging.getLogger(p)
 
 
 class RemoteFocusEquipmentSolutions(RemoteFocusBase):
-    """ "RemoteFocusEquipmentSolutions Class
+    """RemoteFocusEquipmentSolutions Class
 
-    The SCA814 has a single character input buffer that can be overflowed if the proper steps are not taken.
-    To avoid overflowing the input buffer the user should send a single character at a time and wait for that
-    same character to be echoed back by the controller. While not necessary, it is advisable to verify that the
-    character received from the controller is the same character sent. Once the character is received the next
-    character can be processed. Uses pyserial: https://pyserial.readthedocs.io/en/latest/pyserial_api.html
+    The SCA814 has a single character input buffer that can be overflowed if the proper
+    steps are not taken. To avoid overflowing the input buffer the user should send a
+    single character at a time and wait for that same character to be echoed back by the
+    controller. While not necessary, it is advisable to verify that the character
+    received from the controller is the same character sent. Once the character is
+    received the next character can be processed. Uses pyserial:
+    https://pyserial.readthedocs.io/en/latest/pyserial_api.html
 
     Attributes
     ----------
@@ -97,7 +99,8 @@ class RemoteFocusEquipmentSolutions(RemoteFocusBase):
         #
         try:
             logger.debug(
-                f"RemoteFocusEquipmentSolutions - Opening Voice Coil on COM: {self.comport}"
+                f"RemoteFocusEquipmentSolutions - Opening Voice Coil on COM: "
+                f"{self.comport}"
             )
             self.serial = serial.Serial(
                 port=self.comport,
@@ -131,12 +134,13 @@ class RemoteFocusEquipmentSolutions(RemoteFocusBase):
                     self.serial.out_waiting,
                 )
                 print(
-                    "RemoteFocusEquipmentSolutions - Sending Command to the voice coil:",
+                    "RemoteFocusEquipmentSolutions - "
+                    "Sending Command to the voice coil:",
                     string,
                 )
             logger.debug(f"RemoteFocusEquipmentSolutions - Sending command: {string}")
             try:
-                hold = self.serial.write(string)
+                self.serial.write(string)
             except serial.SerialTimeoutException as e:
                 logger.debug(f"RemoteFocusEquipmentSolutions - Error: {e}")
                 raise UserWarning("RemoteFocusEquipmentSolutions Timeout Exception")
@@ -177,7 +181,7 @@ class RemoteFocusEquipmentSolutions(RemoteFocusBase):
                     )
 
     def __del__(self):
-        """ "Close the RemoteFocusEquipmentSolutions Class"""
+        """Close the RemoteFocusEquipmentSolutions Class"""
         logger.debug("Closing RemoteFocusEquipmentSolutions Serial Port")
         self.serial.close()
 
@@ -205,18 +209,20 @@ class RemoteFocusEquipmentSolutions(RemoteFocusBase):
                 "but it isn't responding as expected."
             )
             raise UserWarning(
-                "The serial port to the Voice Coil is connected, but it isn't responding as expected."
+                "The serial port to the Voice Coil is connected, but it isn't "
+                "responding as expected."
             )
         received_bytes = self.serial.read(num_bytes)
         return received_bytes
 
     def send_command(self, message):
-        """ "Send write command to the RemoteFocusEquipmentSolutions device.
+        """Send write command to the RemoteFocusEquipmentSolutions device.
 
         Parameters
         ----------
         message : str
-            Message to send to the RemoteFocusEquipmentSolutions device. If str == 'close', shutdown device.
+            Message to send to the RemoteFocusEquipmentSolutions device. If str ==
+            'close', shutdown device.
 
         """
         try:
@@ -240,7 +246,7 @@ class RemoteFocusEquipmentSolutions(RemoteFocusBase):
             )
 
     def close_connection(self):
-        """ "Close RemoteFocusEquipmentSolutions class"""
+        """Close RemoteFocusEquipmentSolutions class"""
         self.serial.close()
 
 

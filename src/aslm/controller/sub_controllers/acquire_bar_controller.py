@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -31,7 +31,6 @@
 
 
 # Standard Library Imports
-from email import message
 import sys
 import logging
 from tkinter import messagebox
@@ -97,7 +96,7 @@ class AcquireBarController(GUIController):
                 self.view.OvrAcq["mode"] = "indeterminate"
             else:
                 # Set to Determinate mode and initialize at zero.
-                stack_index = 0
+                # stack_index = 0
                 self.view.CurAcq["mode"] = "determinate"
                 self.view.OvrAcq["mode"] = "determinate"
                 self.view.CurAcq["value"] = 0
@@ -110,7 +109,7 @@ class AcquireBarController(GUIController):
         number_of_timepoints = int(microscope_state["timepoints"])
 
         # Multiposition
-        if microscope_state["is_multiposition"] == False:
+        if microscope_state["is_multiposition"] is False:
             number_of_positions = 1
         else:
             number_of_positions = len(microscope_state["stage_positions"])
@@ -226,10 +225,11 @@ class AcquireBarController(GUIController):
     def launch_popup_window(self):
         """Launch the Save Dialog Popup Window
 
-        The popup window should only be launched if the microscope is set to save the data,
-        with the exception of the continuous acquisition mode.
-        The popup window provides the user with the opportunity to fill in fields that describe the experiment and
-        also dictate the save path of the data in a standardized format.
+        The popup window should only be launched if the microscope is set to save the
+        data, with the exception of the continuous acquisition mode.
+        The popup window provides the user with the opportunity to fill in fields that
+        describe the experiment and also dictate the save path of the data in a
+        standardized format.
 
         Examples
         --------
@@ -253,7 +253,8 @@ class AcquireBarController(GUIController):
             buttons["Cancel"].config(command=lambda: acquire_pop.popup.dismiss())
             buttons["Done"].config(command=lambda: self.launch_acquisition(acquire_pop))
 
-            # Configure drop down callbacks, will update save settings when file type is changed
+            # Configure drop down callbacks, will update save settings when file type is
+            # changed
             file_type = widgets["file_type"].get_variable()
             file_type.trace_add("write", lambda *args: self.update_file_type(file_type))
 
@@ -286,7 +287,8 @@ class AcquireBarController(GUIController):
         self.update_stack_time(self.mode)
 
     def update_stack_acq(self, mode):
-        """Changes state behavior of widgets in the stack acquisition frame based on mode of microscope
+        """Changes state behavior of widgets in the stack acquisition frame based on
+        mode of microscope
 
         Parameters
         ----------
@@ -310,7 +312,8 @@ class AcquireBarController(GUIController):
             widget.widget["state"] = state
 
     def update_stack_time(self, mode):
-        """Changes state behavior of widgets in the stack timepoint frame based on mode of microscope
+        """Changes state behavior of widgets in the stack timepoint frame based on mode
+        of microscope
 
         Parameters
         ----------
@@ -348,9 +351,10 @@ class AcquireBarController(GUIController):
         self.saving_settings["file_type"] = file_type.get()
 
     def launch_acquisition(self, popup_window):
-        """ "Launch the Acquisition.
+        """Launch the Acquisition.
 
-        Once the popup window has been filled out, we first create the save path using the create_save_path function.
+        Once the popup window has been filled out, we first create the save path using
+        the create_save_path function.
         This automatically removes spaces and replaces them with underscores.
         Then it makes the directory.
         Thereafter, the experiment is ready to go.
@@ -417,7 +421,8 @@ class AcquireBarController(GUIController):
         self.set_mode(mode)
 
     def update_experiment_values(self, popup_window):
-        """Gets the entries from the popup save dialog and overwrites the saving_settings dictionary.
+        """Gets the entries from the popup save dialog and overwrites the
+        saving_settings dictionary.
 
         Parameters
         ----------

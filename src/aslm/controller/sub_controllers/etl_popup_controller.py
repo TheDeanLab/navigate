@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -49,7 +49,8 @@ class EtlPopupController(GUIController):
         Parameters
         ----------
         view : object
-            GUI element containing widgets and variables to control. Likely tk.Toplevel-derived.
+            GUI element containing widgets and variables to control. Likely
+            tk.Toplevel-derived.
         parent_controller : ASLM_controller
             The main controller.
         remote_focus_dict : dict
@@ -57,9 +58,11 @@ class EtlPopupController(GUIController):
         etl_file_name : str
             Location of file where remote_focus_dict is read from/saved to.
         configuration_dict : dict
-            Dictionary containing microscope hardware configuration, such as voltage limits for remote focus hardware.
+            Dictionary containing microscope hardware configuration, such as voltage
+            limits for remote focus hardware.
         galvo_dict : dict
-            Dictionary containing galvo frequency, amplitude, offset. From the experiment dictionary.
+            Dictionary containing galvo frequency, amplitude, offset. From the
+            experiment dictionary.
 
 
         Returns
@@ -118,9 +121,12 @@ class EtlPopupController(GUIController):
                 "write", self.update_galvo_setting(galvo + " Freq", "frequency")
             )
 
-        # self.variables['Galvo Amp'].trace_add('write', self.update_galvo_setting('Galvo Amp', 'amplitude'))
-        # self.variables['Galvo Off'].trace_add('write', self.update_galvo_setting('Galvo Off', 'offset'))
-        # self.variables['Galvo Freq'].trace_add('write', self.update_galvo_setting('Galvo Freq', 'frequency'))
+        # self.variables['Galvo Amp'].trace_add('write',
+        #  self.update_galvo_setting('Galvo Amp', 'amplitude'))
+        # self.variables['Galvo Off'].trace_add('write',
+        #  self.update_galvo_setting('Galvo Off', 'offset'))
+        # self.variables['Galvo Freq'].trace_add('write',
+        #  self.update_galvo_setting('Galvo Freq', 'frequency'))
 
         self.view.get_buttons()["Save"].configure(command=self.save_etl_info)
 
@@ -201,20 +207,26 @@ class EtlPopupController(GUIController):
                 self.widgets[galvo + " Amp"].widget["state"] = "disabled"
                 self.widgets[galvo + " Freq"].widget["state"] = "disabled"
 
-        # The galvo by default uses a sawtooth waveform. However, sometimes we have a resonant galvo.
-        # In the case of the resonant galvo, the amplitude must be zero and only the offset can be
-        # controlled. We only define the offset in the configuration.yml file. If only the offset is
-        # defined for galvo_{focus_prefix}, we disable the amplitude.
+        # The galvo by default uses a sawtooth waveform. However, sometimes we have a
+        # resonant galvo. In the case of the resonant galvo, the amplitude must be zero
+        # and only the offset can be controlled. We only define the offset in the
+        # configuration.yml file. If only the offset is defined for
+        # galvo_{focus_prefix}, we disable the amplitude.
         #
-        # TODO: Are there other parameters we wish to enable/disable based on configuration?
-        # TODO: Should we instead change galvo amp/offset behavior based on a waveform type passed in the
-        #       configuration? That is, should we pass galvo_l_waveform: sawtooth and galvo_r_waveform: dc_value?
-        #       And then adjust the ETL_Popup_Controller accordingly? We could do the same for ETL vs. voice coil.
+        # TODO: Are there other parameters we wish to enable/disable based
+        #       on configuration?
+        # TODO: Should we instead change galvo amp/offset behavior based on a waveform
+        #       type passed in the configuration? That is, should we pass
+        #       galvo_l_waveform: sawtooth and galvo_r_waveform: dc_value?
+        #       And then adjust the ETL_Popup_Controller accordingly? We could do the
+        #       same for ETL vs. voice coil.
         # TODO this might have buggy behavior adding the dynamic galvo stuff
-        # if 'amplitude' not in self.configuration_controller.galvo_parameter_dict[0].keys():
+        # if 'amplitude' not in
+        #          self.configuration_controller.galvo_parameter_dict[0].keys():
         #     self.widgets[self.galvo[0] + ' Amp'].widget['state'] = "disabled"
         #     self.widgets['Galvo Freq'].widget['state'] = "disabled"
-        # TODO this might not be needed at all since it defaults to normal on creation. Will also need to check all galvos not just one
+        # TODO this might not be needed at all since it defaults to normal on creation.
+        #      Will also need to check all galvos not just one
         # else:
         #     self.widgets['Galvo Amp'].widget['state'] = "normal"
         #     self.widgets['Galvo Freq'].widget['state'] = "normal"
@@ -239,7 +251,8 @@ class EtlPopupController(GUIController):
             return
         self.widgets["Mode"].set(resolution_value)
         self.show_magnification(mag)
-        # self.widgets['Mag'].set('N/A' if resolution_value == 'high' else resolution_value)
+        # self.widgets['Mag'].set('N/A' if resolution_value == 'high' else
+        #   resolution_value)
         # self.show_laser_info()
 
     def showup(self):
@@ -287,13 +300,13 @@ class EtlPopupController(GUIController):
         self.update_galvo_device_flag = False
         for galvo in self.galvos:
             self.variables[galvo + " Amp"].set(
-                self.galvo_setting[self.resolution].get(f"amplitude", 0)
+                self.galvo_setting[self.resolution].get("amplitude", 0)
             )
             self.variables[galvo + " Off"].set(
-                self.galvo_setting[self.resolution].get(f"offset", 0)
+                self.galvo_setting[self.resolution].get("offset", 0)
             )
             self.variables[galvo + " Freq"].set(
-                self.galvo_setting[self.resolution].get(f"frequency", 0)
+                self.galvo_setting[self.resolution].get("frequency", 0)
             )
         self.update_galvo_device_flag = True
 
@@ -305,18 +318,19 @@ class EtlPopupController(GUIController):
         self.configure_widget_range()
 
     def update_etl_setting(self, name, laser, etl_name):
-        """ "This function will update ETLConstants in memory"""
+        """This function will update ETLConstants in memory"""
         variable = self.variables[name]
 
         # TODO: Is this still a bug?
-        # BUG Upon startup this will always run 0.63x, and when changing magnification it will run 0.63x
-        # before whatever mag is selected
+        # BUG Upon startup this will always run 0.63x, and when changing magnification
+        # it will run 0.63x before whatever mag is selected
         def func_laser(*args):
             value = self.resolution_info["ETLConstants"][self.resolution][self.mag][
                 laser
             ][etl_name]
 
-            # Will only run code if value in constants does not match whats in GUI for Amp or Off AND in Live mode
+            # Will only run code if value in constants does not match whats in GUI for
+            # Amp or Off AND in Live mode
             # TODO: Make also work in the 'single' acquisition mode.
             variable_value = variable.get()
             logger.debug(
@@ -355,7 +369,8 @@ class EtlPopupController(GUIController):
                 value = 0
             variable_value = variable.get()
             logger.debug(
-                f"Galvo parameter {parameter} changed: {variable_value} pre if statement"
+                f"Galvo parameter {parameter} changed: {variable_value} pre if "
+                "statement"
             )
             if value != variable_value and variable_value != "":
                 self.galvo_setting[self.resolution][parameter] = variable_value
@@ -379,7 +394,8 @@ class EtlPopupController(GUIController):
         """
         This function will save updated remote focus parameters to their yaml file.
 
-        TODO: This currently does not save the galvo parameters, even though they are controlled here.
+        TODO: This currently does not save the galvo parameters, even though they are
+              controlled here.
               Right now, these must be saved in the experiment file separately.
         """
         # errors = self.get_errors()
@@ -389,14 +405,16 @@ class EtlPopupController(GUIController):
         save_yaml_file("", self.resolution_info, self.etl_file_name)
 
     def update_etl_lasers(self):
-        num_lasers = len(self.lasers)
-        num_etl_lasers = self.resolution_info
+        # num_lasers = len(self.lasers)
+        # num_etl_lasers = self.resolution_info
+        pass
 
     """
-    Example for preventing submission of a field/controller. So if there is an error in any field that
-    is supposed to have validation then the config cannot be saved.
+    Example for preventing submission of a field/controller. So if there is an error in
+    any field that is supposed to have validation then the config cannot be saved.
     """
-    # TODO needs testing may also need to be moved to the remote_focus_popup class. Opinions welcome
+    # TODO needs testing may also need to be moved to the remote_focus_popup class.
+    # Opinions welcome
     # def get_errors(self):
     #     """
     #     Get a list of field errors in popup

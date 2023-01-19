@@ -10,7 +10,6 @@ from contextlib import redirect_stdout
 import sys
 import traceback
 import inspect
-import platform
 
 # Making sure objects are cleaned up nicely is tricky:
 import weakref
@@ -20,7 +19,6 @@ import atexit
 import signal
 
 import logging
-from pathlib import Path
 import numpy as np
 
 # Logger Setup
@@ -443,7 +441,7 @@ def _get_response(object_in_subprocess, release=False):
 
 
 def _close(dummy_namespace):
-    """ "Externally defined close function.
+    """Externally defined close function.
 
     Effectively a method of ObjectInSubprocess, but defined externally to
     minimize shadowing of the object's namespace
@@ -465,7 +463,7 @@ def _child_loop(
     closeargs,
     closekwargs,
 ):
-    """ "The event loop of a ObjectInSubprocess's child process
+    """The event loop of a ObjectInSubprocess's child process
 
     Parameters
     ----------
@@ -474,10 +472,14 @@ def _child_loop(
     initializer :
         ...
     initargs : tuple
-        e.g., (False, Namespace(verbose=False, synthetic_hardware=True, debug=False, CPU=True, config_file=None, experiment_file=None, etl_const_file=None, logging_config=None))
+        e.g., (False, Namespace(verbose=False, synthetic_hardware=True, debug=False,
+        CPU=True, config_file=None, experiment_file=None, etl_const_file=None,
+        logging_config=None))
     initkwargs : dict
-        e.g., {'configuration_path': PosixPath('.../config/configuration.yml'), 'experiment_path':
-        PosixPath('.../config/experiment.yml'), 'etl_constants_path': PosixPath('.../config/etl_constants.yml'),
+        e.g., {'configuration_path': PosixPath('.../config/configuration.yml'),
+        'experiment_path':
+        PosixPath('.../config/experiment.yml'),
+        'etl_constants_path': PosixPath('.../config/etl_constants.yml'),
         'event_queue': <multiprocessing.queues.Queue object at 0x7fdd509c7c40>}
     close_method_name : NoneType
         None
@@ -763,7 +765,7 @@ class MyTestClass:
                     f" Did not match expected output:\n"
                     f'     "{repr(expected_output)}"\n'
                 )
-        except Exception as e:
+        except Exception:
             print("v" * 80)
             print(traceback.format_exc().strip("\n"))
             print("^" * 80)
@@ -774,8 +776,8 @@ class MyTestClass:
         else:
             self.num_passed += 1
             if printed_output.getvalue():
-                for l in printed_output.getvalue().strip("\n").split("\n"):
-                    print(f"   {l}")
+                for ll in printed_output.getvalue().strip("\n").split("\n"):
+                    print(f"   {ll}")
             print(f'{f"> Success <":-^80s}')
             return True
 
@@ -928,20 +930,20 @@ class TestResultThreadAndCustodyThread(MyTestClass):
         def custody_f(custody=None):
             return 1
 
-        th = CustodyThread(target=custody_f, first_resource=None).start()
+        CustodyThread(target=custody_f, first_resource=None).start()
         # CustodyThread accepts a target with a positional arg 'custody'
 
         def custody_f(custody):
             return 1
 
-        th = CustodyThread(target=custody_f, first_resource=None).start()
+        CustodyThread(target=custody_f, first_resource=None).start()
 
         # CustodyThread will otherwise raise a ValueError
         def f():
             return 1
 
         try:
-            th = CustodyThread(target=f, first_resource=None).start()
+            CustodyThread(target=f, first_resource=None).start()
         except ValueError:
             pass  # We expect this
         else:
@@ -951,7 +953,7 @@ class TestResultThreadAndCustodyThread(MyTestClass):
             return 1
 
         try:
-            th = CustodyThread(target=f, first_resource=None).start()
+            CustodyThread(target=f, first_resource=None).start()
         except ValueError:
             pass  # We expect this
         else:
@@ -961,7 +963,7 @@ class TestResultThreadAndCustodyThread(MyTestClass):
             return 1
 
         try:
-            th = CustodyThread(target=f, first_resource=None).start()
+            CustodyThread(target=f, first_resource=None).start()
         except ValueError:
             pass  # We expect this
         else:
@@ -1331,7 +1333,7 @@ class TestObjectInSubprocess(MyTestClass):
 
     def _test_array_passing(self, shape, pass_by, method_name, dtype, n_loops):
         dtype = np.dtype(dtype)
-        sz = int(np.prod(shape, dtype="uint64") * np.dtype(int).itemsize)
+        int(np.prod(shape, dtype="uint64") * np.dtype(int).itemsize)
         direction = "<->" if method_name == "mirror" else "->"
         name = f"{shape} array {direction} {pass_by}"
         shm_obj = ObjectInSubprocess(TestObjectInSubprocess.TestClass)

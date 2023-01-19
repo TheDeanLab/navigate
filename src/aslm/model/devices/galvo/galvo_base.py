@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -44,7 +44,7 @@ logger = logging.getLogger(p)
 
 
 class GalvoBase:
-    """ "GalvoBase Class
+    """GalvoBase Class
 
     Parent class for voice coil models.
     """
@@ -98,16 +98,18 @@ class GalvoBase:
             # Only proceed if it is enabled in the GUI
             if channel["is_selected"] is True:
 
-                # Get the Waveform Parameters - Assumes ETL Delay < Camera Delay.  Should Assert.
+                # Get the Waveform Parameters - Assumes ETL Delay < Camera Delay.
+                # Should Assert.
                 exposure_time = channel["camera_exposure_time"] / 1000
                 self.sweep_time = exposure_time + exposure_time * (
                     (self.camera_delay_percent + self.etl_ramp_falling) / 100
                 )
                 if readout_time > 0:
-                    # This addresses the dovetail nature of the camera readout in normal mode. The camera reads middle
-                    # out, and the delay in start of the last lines compared to the first lines causes the exposure
-                    # to be net longer than exposure_time. This helps the galvo keep sweeping for the full camera
-                    # exposure time.
+                    # This addresses the dovetail nature of the camera readout in normal
+                    # mode. The camera reads middle out, and the delay in start of the
+                    # last lines compared to the first lines causes the exposure to be
+                    # net longer than exposure_time. This helps the galvo keep sweeping
+                    # for the full camera exposure time.
                     self.sweep_time += readout_time
                 self.samples = int(self.sample_rate * self.sweep_time)
 

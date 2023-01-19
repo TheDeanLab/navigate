@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -31,7 +32,6 @@
 
 # Standard Library Imports
 import logging
-from random import sample
 
 # Third Party Imports
 import numpy as np
@@ -74,6 +74,22 @@ class WaveformTabController(GUIController):
         #       on to the plot to see an update. Better event to bind?
 
     def update_sample_rate(self, *args):
+        """Update the sample rate in the waveform settings
+
+        Parameters
+        ----------
+        *args : tuple
+            Unused
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> self.update_sample_rate()
+        """
+
         sample_rate = self.view.waveform_settings.inputs["sample_rate"].get()
         if sample_rate == "":
             return
@@ -86,18 +102,65 @@ class WaveformTabController(GUIController):
         self.sample_rate = int(sample_rate)
 
     def update_waveforms(self, waveform_dict, sample_rate):
+        """Update the waveforms in the waveform tab
+
+        Parameters
+        ----------
+        waveform_dict : dict
+            Dictionary of waveforms
+        sample_rate : int
+            Sample rate of the waveforms
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> self.update_waveforms(waveform_dict, sample_rate)
+        """
+
         self.waveform_dict = waveform_dict
         self.sample_rate = sample_rate
 
     def initialize_plots(self):
+        """Initialize the plots in the waveform tab
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> self.initialize_plots()
+        """
+
         self.view.plot_etl = self.view.fig.add_subplot(211)
         self.view.plot_galvo = self.view.fig.add_subplot(212)
-
         self.view.canvas.get_tk_widget().grid(
             row=5, column=0, columnspan=3, sticky=(NSEW), padx=(5, 5), pady=(5, 5)
         )
 
     def plot_waveforms(self, event):
+        """Plot the waveforms in the waveform tab
+
+        Parameters
+        ----------
+        event : Tkinter event
+            Tkinter event
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> self.plot_waveforms(event)
+        """
 
         self.view.plot_etl.clear()
         self.view.plot_galvo.clear()

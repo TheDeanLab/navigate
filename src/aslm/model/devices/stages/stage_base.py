@@ -168,8 +168,9 @@ class StageBase:
             return axis_abs
         except (KeyError, AttributeError) as e:
             # Alert the user, but don't kill the thread
-            logger.debug(e)
-            print(e)
+            msg = f"No key {e} in move_dictionary or axis missing from {self.axes}."
+            logger.debug(msg)
+            print(msg)
             return -1e50
 
     def stop(self):

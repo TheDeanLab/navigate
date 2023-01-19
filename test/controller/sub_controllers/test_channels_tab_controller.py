@@ -39,11 +39,7 @@ import numpy as np
 
 @pytest.fixture
 def channels_tab_controller(controller):
-    from aslm.controller.sub_controllers.channels_tab_controller import (
-        ChannelsTabController,
-    )
-
-    return ChannelsTabController(controller.view.settings.channels_tab, controller)
+    return controller.channels_tab_controller
 
 
 def test_update_z_steps(channels_tab_controller):

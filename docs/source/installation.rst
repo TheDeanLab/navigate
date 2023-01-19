@@ -59,7 +59,7 @@ After activatin the ASLM environment, it should now show (ASLM).
 
 **Clone the GitHub repository**::
     
-    (ASLM) MyComputer MyFolderName $ git clone https://github.com/AdvancedImagingUTSW/ASLM.git
+    (ASLM) MyComputer MyFolderName $ git clone https://github.com/TheDeanLab/ASLM.git
 
 **Install the ASLM repository**
 

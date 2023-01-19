@@ -2,8 +2,8 @@
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 #
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -132,7 +132,8 @@ class StageBase:
         Parameters
         ----------
         axis : str
-            An axis prefix in move_dictionary. For example, axis='x' corresponds to 'x_abs', 'x_min', etc.
+            An axis prefix in move_dictionary. For example, axis='x' corresponds to
+            'x_abs', 'x_min', etc.
         move_dictionary : dict
             A dictionary of values required for movement.
             Includes 'x_abs', 'x_min', etc. for one or more axes.
@@ -165,7 +166,11 @@ class StageBase:
                 # This is to avoid returning a duck type.
                 return -1e50
             return axis_abs
-        except (KeyError, AttributeError):
+        except (KeyError, AttributeError) as e:
+            # Alert the user, but don't kill the thread
+            msg = f"No key {e} in move_dictionary or axis missing from {self.axes}."
+            logger.debug(msg)
+            print(msg)
             return -1e50
 
     def stop(self):

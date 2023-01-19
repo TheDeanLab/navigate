@@ -51,7 +51,7 @@ dictionaries that can contain ``init``, ``main``, ``end`` and/or
 - ``end`` entries describe any closing operations that must be performed when
   exiting the node
 - ``cleanup`` entries dictate what happens if the node fails. This is for
-  failsafe controls such as ``turn off all lasers''
+  failsafe controls such as "turn off all lasers"
 
 The ``node`` configuration dictionary contains general properties of feature
 nodes. ``node_type`` can be ``one-step`` or ``multi-step``, the latter indicating

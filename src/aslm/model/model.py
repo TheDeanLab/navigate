@@ -731,22 +731,23 @@ class Model:
         resolution_value : str
             'high' for high-resolution mode, and 'low' for low-resolution mode.
         """
+        print(f"CHANGING RESOLUTION from {self.active_microscope_name} to {resolution_value}")
         if resolution_value != self.active_microscope_name:
             former_microscope = self.active_microscope_name
             self.get_active_microscope()
             self.active_microscope.move_stage_offset(former_microscope)
-        else:
-            # update zoom if possible
-            try:
-                zoom_value = self.configuration["experiment"]["MicroscopeState"]["zoom"]
-                self.active_microscope.zoom.set_zoom(zoom_value)
-                self.logger.debug(
-                    f"Change zoom of {self.active_microscope_name} to {zoom_value}"
-                )
-            except:
-                self.logger.debug(
-                    f"There is no zoom in microscope: {self.active_microscope_name}"
-                )
+        
+        # update zoom if possible
+        try:
+            zoom_value = self.configuration["experiment"]["MicroscopeState"]["zoom"]
+            self.active_microscope.zoom.set_zoom(zoom_value)
+            self.logger.debug(
+                f"Change zoom of {self.active_microscope_name} to {zoom_value}"
+            )
+        except:
+            self.logger.debug(
+                f"There is no zoom in microscope: {self.active_microscope_name}"
+            )
 
     def load_images(self, filenames=None):
         r"""Load/Unload images to the Synthetic Camera"""

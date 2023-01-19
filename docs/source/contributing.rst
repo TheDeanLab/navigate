@@ -34,6 +34,16 @@ Coding style
   variable names are ``lowercase_and_separated_by_underscores``.
 - All classes and functions should have docstrings written in
   `Numpydoc style <https://numpydoc.readthedocs.io/en/latest/format.html>`_.
+- We leverage pre-commit workflows to enforce consistent code formatting.
+Installation is optional. Use this only if it helps you. You could alternatively install Ruff (linter) and
+Black (code formatter) extensions in VSCode and have them do the work there. Whatever
+To enable pre-commits on your machine, follow the directions below::
+
+    conda activate ASLM
+    pip install pre-commit
+    cd /path/to/ASLM
+    pre-commit install
+
 
 Unit tests
 ----------
@@ -45,7 +55,9 @@ or see examples of other unit tests in this application's ``test`` folder. We
 use the `pytest library <https://docs.pytest.org/en/7.2.x/>`_ to evaluate unit
 tests.
 
-Units
------
+Scientific Units
+----------------
+Deviations from this can occur where it is necessary to pass a different unit to a piece of hardware.
 
-Ideally time is always measured in milliseconds and distance is measured in micrometers. Deviations from this can occur where it is necessary to pass a different unit to a piece of hardware.
+* Time - Milliseconds
+* Distance - Micrometers

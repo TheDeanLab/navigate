@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -36,7 +37,12 @@ import logging
 # Third Party Imports
 
 # Local Imports
-from aslm.tools.multipos_table_tools import *
+from aslm.tools.multipos_table_tools import (
+    sign,
+    compute_tiles_from_bounding_box,
+    calc_num_tiles,
+    update_table,
+)
 from aslm.controller.sub_controllers.gui_controller import GUIController
 from aslm.tools.common_functions import combine_funcs
 
@@ -46,17 +52,22 @@ logger = logging.getLogger(p)
 
 
 class TilingWizardController(GUIController):
-    """
+    """Tiling Wizard Controller
+
     Controller for tiling wizard parameters.
-    Gathers the FOV from the camera settings tab and will update when user changes this value.
-    Set start/end position buttons will grab the stage values for the respective axis when pressed and display in popup
-    Number of images we need to acquire with our desired percent overlap is calculated and then displayed in third column
+    Gathers the FOV from the camera settings tab and will
+    update when user changes this value.
+    Set start/end position buttons will grab the stage
+    values for the respective axis when pressed and display in popup
+    Number of images we need to acquire with our desired
+    percent overlap is calculated and then displayed in third column
 
 
     Parameters
     ----------
     view : object
-        GUI element containing widgets and variables to control. Likely tk.Toplevel-derived. In this case tiling_wizard_popup.py
+        GUI element containing widgets and variables to control.
+        Likely tk.Toplevel-derived. In this case tiling_wizard_popup.py
     parent_controller : channels_tab_controller
         The controller that creates the popup/this controller.
 
@@ -86,7 +97,8 @@ class TilingWizardController(GUIController):
             self.variables[f"{ax}_dist"].set(0.0)
             self.variables[f"{ax}_tiles"].set(1)
 
-        # Ref to widgets in other views (Camera Settings, Stage Control Positions, Stack Acq Settings)
+        # Ref to widgets in other views
+        # (Camera Settings, Stage Control Positions, Stack Acq Settings)
         main_view = (
             self.parent_controller.parent_controller.view
         )  # channels_tab_controller -> aslm_controller -> view
@@ -125,7 +137,8 @@ class TilingWizardController(GUIController):
         )
 
         # Calculate distances
-        # TODO: For reasons that make no sense to me at all, these can't go in a for ax in self._axes loop?
+        # TODO: For reasons that make no sense to me at all,
+        #  these can't go in a for ax in self._axes loop?
         self.variables["x_start"].trace_add(
             "write", lambda *args: self.calculate_distance("x")
         )
@@ -153,7 +166,8 @@ class TilingWizardController(GUIController):
         self.variables["z_end"].trace_add("write", lambda *args: self.update_fov())
 
         # Calculating Number of Tiles traces
-        # TODO: For reasons that make no sense to me at all, these can't go in a for ax in self._axes loop?
+        # TODO: For reasons that make no sense to me at all,
+        #  these can't go in a for ax in self._axes loop?
         self.variables["x_dist"].trace_add(
             "write", lambda *args: self.calculate_tiles("x")
         )
@@ -199,20 +213,27 @@ class TilingWizardController(GUIController):
         )
 
     def set_table(self):
-        """
-        Sets multiposition table with values from tiling wizard after Populate Multiposition Table button is pressed
-        Compute grid will return a list of all position combinations. This list is then converted to a
-        pandas dataframe which is then set as the new table data. The table is then redrawn.
+        """Set the multipoint table to the values in the tiling wizard
+
+        Sets multiposition table with values from tiling wizard after
+        populate Multiposition Table button is pressed
+        Compute grid will return a list of all position combinations.
+        This list is then converted to a
+        pandas dataframe which is then set as the new table data.
+        The table is then redrawn.
 
         Parameters
         ----------
         self : object
             Tiling Wizard Controller instance
 
-
         Returns
         -------
         None
+
+        Examples
+        --------
+        >>> self.set_table()
         """
 
         x_start = float(self.variables["x_start"].get())
@@ -284,8 +305,10 @@ class TilingWizardController(GUIController):
         update_table(self.multipoint_table, table_values)
 
     def update_total_tiles(self):
-        """
-        Sums the tiles for each axis in the tiling wizard. Will update when any axis has a tile amount change.
+        """Update the total number of tiles in the tiling wizard
+
+        Sums the tiles for each axis in the tiling wizard.
+        Will update when any axis has a tile amount change.
 
         Parameters
         ----------
@@ -296,6 +319,10 @@ class TilingWizardController(GUIController):
         Returns
         -------
         None
+
+        Examples
+        --------
+        >>> self.update_total_tiles()
         """
 
         x = float(self.variables["x_tiles"].get())
@@ -307,8 +334,10 @@ class TilingWizardController(GUIController):
         self.variables["total_tiles"].set(total_tiles)
 
     def calculate_tiles(self, axis=None):
-        """
-        Calculates the number of tiles of the acquisition for each axis or an individual axis
+        """Calculate the number of tiles for a given axis
+
+        Calculates the number of tiles of the acquisition for
+        each axis or an individual axis
         Num of Tiles = dist - (overlay * FOV)  /  FOV * (1 - overlay)
         (D-OF)/(F-OF) = N
 
@@ -322,6 +351,10 @@ class TilingWizardController(GUIController):
         Returns
         -------
         None
+
+        Examples
+        --------
+        >>> self.calculate_tiles()
         """
 
         if axis not in self._axes + [None]:
@@ -344,8 +377,11 @@ class TilingWizardController(GUIController):
             self.variables[f"{ax}_tiles"].set(num_tiles)
 
     def calculate_distance(self, axis):
-        """
-        This function will calculate the distance for a given axis of the stage when the start or end position is changed via the Set buttons
+        """Calculate the distance for a given axis
+
+        This function will calculate the distance for a given
+        axis of the stage when the start or end position is changed
+        via the Set buttons
 
         Parameters
         ----------
@@ -358,15 +394,21 @@ class TilingWizardController(GUIController):
         -------
         None
 
+        Examples
+        --------
+        >>> self.calculate_distance()
         """
+
         start = float(self.variables[axis + "_start"].get())
         end = float(self.variables[axis + "_end"].get())
         dist = abs(end - start)
         self.variables[axis + "_dist"].set(dist)
 
     def update_overlay(self):
-        """
-        Updates percent overlay when a user changes the widget in the popup. This value is used for backend calculations.
+        """Update the overlay percentage for the tiling wizard
+
+        Updates percent overlay when a user changes the widget in the popup.
+        This value is used for backend calculations.
         The number of tiles will then be recalculated
 
         Parameters
@@ -377,6 +419,10 @@ class TilingWizardController(GUIController):
         Returns
         -------
         None
+
+        Examples
+        --------
+        >>> self.update_overlay()
         """
 
         try:
@@ -387,8 +433,10 @@ class TilingWizardController(GUIController):
             pass
 
     def position_handler(self, axis, start_end):
-        """
-        When the Set [axis] Start/End button is pressed then the stage position is polled from the stage controller
+        """Set the start or end position for a given axis
+
+        When the Set [axis] Start/End button is pressed then the
+        stage position is polled from the stage controller
 
         Parameters
         ----------
@@ -404,6 +452,9 @@ class TilingWizardController(GUIController):
         handler : func
             Function for setting positional spinbox based on parameters passed in
 
+        Examples
+        --------
+        >>> self.position_handler()
         """
 
         def handler():
@@ -415,8 +466,10 @@ class TilingWizardController(GUIController):
         return handler
 
     def update_fov(self):
-        """
-        Grabs the updated FOV if changed by user, will recalculate num of tiles for each axis after
+        """Update the FOV for the tiling wizard
+
+        Grabs the updated FOV if changed by user,
+        will recalculate num of tiles for each axis after
 
         Parameters
         ----------
@@ -426,6 +479,10 @@ class TilingWizardController(GUIController):
         Returns
         -------
         None
+
+        Examples
+        --------
+        >>> self.update_fov()
         """
 
         # Calculate signed fov
@@ -445,8 +502,9 @@ class TilingWizardController(GUIController):
         self.calculate_tiles()
 
     def showup(self):
-        """
-        # this function will let the popup window show in front
+        """Show the tiling wizard
+
+        Brings popup window to front
 
         Parameters
         ----------
@@ -456,6 +514,10 @@ class TilingWizardController(GUIController):
         Returns
         -------
         None
+
+        Examples
+        --------
+        >>> self.showup()
         """
         self.view.popup.deiconify()
         self.view.popup.attributes("-topmost", 1)

@@ -35,14 +35,6 @@ AutoFocusParameters:
   fine_range: 50
   fine_step_size: 5
   fine_selected: True
-GalvoParameters:
-  Mesoscale:
-    frequency: 99.9
-    amplitude: 2.5
-    offset: 0
-  Nanoscale:
-    offset: 0
-    frequency: 0
 StageParameters:
   xy_step: 500.0
   z_step: 500.0

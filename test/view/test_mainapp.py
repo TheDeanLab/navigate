@@ -50,11 +50,9 @@ def test_mainapp():
         True or False as to whether the test passed
     """
     root = tk.Tk()
-    try:
-        main_app = MainApp(root)
-    finally:
-        root.update()
-        bool = isinstance(main_app, MainApp)
-        root.destroy()
+    main_app = MainApp(root)
+    root.update()
+    bool = isinstance(main_app, MainApp)
+    root.destroy()
 
     assert bool

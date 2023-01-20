@@ -101,8 +101,11 @@ class MainApp(ttk.Frame):
 
         # keep icons relative to view directory structure
         view_directory = Path(__file__).resolve().parent
-        photo_image = view_directory.joinpath("icon", "mic.png")
-        self.root.iconphoto(True, tk.PhotoImage(file=photo_image))
+        try:
+            photo_image = view_directory.joinpath("icon", "mic.png")
+            self.root.iconphoto(True, tk.PhotoImage(file=photo_image))
+        except tk.TclError:
+            pass
         self.root.resizable(True, True)
         self.root.geometry("")
         tk.Grid.columnconfigure(root, "all", weight=1)

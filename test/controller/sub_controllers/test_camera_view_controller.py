@@ -553,28 +553,131 @@ class TestCameraViewController():
 
 
     def test_apply_LUT(self):
-
-        # # Arrange
-        # self.camera_view.zoom_image = np.random.rand(200, 200)
-        # temp = self.camera_view.zoom_image
-        # saturation_value = 2**16-1
-        # self.camera_view.saturated_pixels = self.camera_view.zoom_image[self.camera_view.zoom_image > saturation_value]
-        # self.camera_view.cross_hair_image = self.camera_view.zoom_image
-
-        # # Act
-        # # Need to figure out how to test the colormapping changes and what self.gradient_lut returns to the image and how to know what the colormap is
-        # # Might need to test detect_saturation first then find a reasonable value to pass to this
-        # self.camera_view.apply_LUT()
-        # assert np.shape(self.camera_view.cross_hair_image) == np.shape(temp)
-
-        # Someone else with better numpy understanding will need to do this
+        # Someone else with better numpy understanding will need to do this TODO
 
         pass
 
+    @pytest.mark.parametrize('color',["rainbow", "grey","gradient"])
+    def test_update_LUT(self, color):
 
-    def test_update_LUT(self):
+        # Create a dummy image
+        self.camera_view.image = np.random.rand(100, 100)
+        self.camera_view.view.scale_palette.color.set(color)
+        self.camera_view.add_crosshair = MagicMock()
+        self.camera_view.apply_LUT = MagicMock()
+        self.camera_view.populate_image = MagicMock()
 
+        self.camera_view.update_LUT()
+        # Assert that the colormap is set to color
+        assert self.camera_view.colormap == color
+        self.camera_view.add_crosshair.assert_called()
+        self.camera_view.apply_LUT.assert_called()
+        self.camera_view.populate_image.assert_called()
+
+
+    def test_detect_saturation(self):
+        test_image = np.random.randint(0, 2**16, size=(100, 100))
+        test_image[:50, :50] = 2**16-1  # set top left corner to saturation value
+        self.camera_view.zoom_image = test_image
+
+        # Call the function to detect saturation
+        self.camera_view.detect_saturation()
+
+        # Assert that the saturated pixels were correctly detected
+        assert np.all(self.camera_view.saturated_pixels == 2**16-1)
+
+    
+    def test_toggle_min_max_button(self):
+
+        # Setup for true path
+        self.camera_view.image_palette['Autoscale'].set(True)
+
+        # Act by calling function
+        self.camera_view.toggle_min_max_buttons()
+
+        # Assert things are correct
+        assert str(self.camera_view.image_palette['Min'].widget['state']) == 'disabled'
+        assert str(self.camera_view.image_palette['Max'].widget['state']) == 'disabled'
+
+        # Setup for false path
+        self.camera_view.image_palette['Autoscale'].set(False)
+
+        # Mock function call to isolate
+        self.camera_view.update_min_max_counts = MagicMock()
+
+        # Act by calling function
+        self.camera_view.toggle_min_max_buttons()
+
+        # Assert things are correct and called
+        assert str(self.camera_view.image_palette['Min'].widget['state']) == 'normal'
+        assert str(self.camera_view.image_palette['Max'].widget['state']) == 'normal'
+        self.camera_view.update_min_max_counts.assert_called()
+
+
+    def test_transpose_image(self):
+        # Create test data
+        self.camera_view.image_palette['Flip XY'].set(True)
+        self.camera_view.transpose = None
+        
+        # Call the function
+        self.camera_view.transpose_image()
+        
+        # Assert the output
+        assert self.camera_view.transpose == True
+
+        # Create test data
+        self.camera_view.image_palette['Flip XY'].set(False)
+        self.camera_view.transpose = None
+        
+        # Call the function
+        self.camera_view.transpose_image()
+        
+        # Assert the output
+        assert self.camera_view.transpose == False
+
+
+    def test_update_min_max_counts(self):
+        # Create test data
+        min = np.random.randint(0, 10)
+        max = np.random.randint(0, 10)
+        self.camera_view.image_palette['Min'].set(min)
+        self.camera_view.image_palette['Max'].set(max)
+        
+        self.camera_view.min_counts = None
+        self.camera_view.max_counts = None
+
+        # Call the function
+        self.camera_view.update_min_max_counts()
+
+        # Assert the output
+        assert self.camera_view.min_counts == min
+        assert self.camera_view.max_counts == max
+
+
+    def test_set_mask_color_table(self):
+        # This is beyond me currently TODO
         pass
 
+    
+    def test_display_mask(self, monkeypatch):
+        import cv2
+        # Create test data
+        self.camera_view.ilastik_seg_mask = None
+        self.camera_view.ilastik_mask_ready_lock.acquire()
+        mask = np.zeros((5,5), dtype=np.uint8)
+        self.camera_view.mask_color_table = np.zeros((256, 1, 3), dtype=np.uint8)
 
+        # Define the monkeypatch
+        def mock_applyColorMap(mask, mask_color_table):
+            return mask
+
+        # Apply the monkeypatch
+        monkeypatch.setattr(cv2, "applyColorMap", mock_applyColorMap)
+
+        # Call the function
+        self.camera_view.display_mask(mask)
+
+        # Assert the output
+        assert (self.camera_view.ilastik_seg_mask == mask).all()
+        assert not self.camera_view.ilastik_mask_ready_lock.locked()
 

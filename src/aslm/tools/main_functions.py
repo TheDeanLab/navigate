@@ -58,8 +58,8 @@ def evaluate_parser_input_arguments(args):
         Path to configuration file.
     experiment_path : str
         Path to experiment file
-    etl_constants_path,
-        Path to ETL constants file
+    waveform_constants_path,
+        Path to remote focusing and galvo waveform constants file
     rest_api_path
         Path to REST API file
 
@@ -68,7 +68,7 @@ def evaluate_parser_input_arguments(args):
     (
         configuration_path,
         experiment_path,
-        etl_constants_path,
+        waveform_constants_path,
         rest_api_path,
     ) = get_configuration_paths()
 
@@ -85,11 +85,13 @@ def evaluate_parser_input_arguments(args):
         ), "experiment_file file Path {} not valid".format(args.experiment_file)
         experiment_path = args.experiment_file
 
-    if args.etl_const_file:
-        assert args.etl_const_file.exists(), "etl_const_file Path {} not valid".format(
-            args.etl_const_file
+    if args.waveform_constants_path:
+        assert (
+            args.waveform_constants_path.exists()
+        ), "waveform_constants_path Path {} not valid".format(
+            args.waveform_constants_path
         )
-        etl_constants_path = args.etl_const_file
+        waveform_constants_path = args.waveform_constants_path
 
     if args.rest_api_file:
         assert args.rest_api_file.exists(), "rest_api_file Path {} not valid".format(
@@ -109,7 +111,7 @@ def evaluate_parser_input_arguments(args):
     return (
         configuration_path,
         experiment_path,
-        etl_constants_path,
+        waveform_constants_path,
         rest_api_path,
         logging_path,
     )
@@ -209,11 +211,11 @@ def create_parser():
     )
 
     input_args.add_argument(
-        "--etl_const_file",
+        "--waveform_constants_path",
         type=Path,
         required=False,
         default=None,
-        help="Non-default path to the etl_constants.yml file.  \n"
+        help="Non-default path to the waveform_constants.yml file.  \n"
         "This file specifies the wavelength- and zoom-specific amplitude and offset "
         "of the ETL waveform generation.",
     )

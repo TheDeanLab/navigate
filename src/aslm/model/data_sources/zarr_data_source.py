@@ -143,7 +143,7 @@ class ZarrDataSource(DataSource):
 
         # Saved by stack
         """
-        Starts on first channel and increments thru loop. 
+        Starts on first channel and increments thru loop.
         Each increment of the loop increases the slice index.
         Once the slice has reached max count increment to next channel.
         After all channels and slices have been incremented, increase the time by one.

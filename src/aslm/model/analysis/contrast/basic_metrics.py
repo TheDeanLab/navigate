@@ -85,7 +85,7 @@ def brenner_method(input_array):
     image = image[1:-1] - image[:]
     print(np.shape(image))
 
-    """		
+    """
 		for (int yi = 0; yi < height * width; yi += width)
 		{
 			for (int x = 1; x < width - 1; x++)

@@ -32,10 +32,12 @@
 
 import pytest
 
+
 @pytest.mark.hardware
-@pytest.fixture(autouse=True, scope='class')
+@pytest.fixture(autouse=True, scope="class")
 def open_camera():
     from aslm.model.devices.APIs.hamamatsu.HamamatsuAPI import DCAM, camReg
+
     # open camera
     for i in range(10):
         assert camReg.numCameras == 0
@@ -53,9 +55,9 @@ def open_camera():
         camera.dev_close()
         assert camReg.numCameras == 0
 
+
 @pytest.mark.hardware
 class TestHamamatsuAPI:
-
     @pytest.fixture(autouse=True)
     def _prepare_camera(self, open_camera):
         self.camera = open_camera
@@ -64,20 +66,22 @@ class TestHamamatsuAPI:
     def test_get_and_set_property_value(self):
         # set property
         configuration = {
-            'subarray_mode': 1,
-            'sensor_mode': 12,  # 12 for progressive
-            'defect_correct_mode': 2.0,
-            'binning': 1.0,
-            'readout_speed': 1.0,
-            'trigger_active': 1.0,
-            'trigger_mode': 1.0,  # external light-sheet mode
-            'trigger_polarity': 2.0,  # positive pulse
-            'trigger_source': 3.0,  # software
-            'exposure_time': 0.02,
-            'internal_line_interval': 0.000075
+            "subarray_mode": 1,
+            "sensor_mode": 12,  # 12 for progressive
+            "defect_correct_mode": 2.0,
+            "binning": 1.0,
+            "readout_speed": 1.0,
+            "trigger_active": 1.0,
+            "trigger_mode": 1.0,  # external light-sheet mode
+            "trigger_polarity": 2.0,  # positive pulse
+            "trigger_source": 3.0,  # software
+            "exposure_time": 0.02,
+            "internal_line_interval": 0.000075,
         }
         for k in configuration:
-            assert self.camera.set_property_value(k, configuration[k]), f"can't set property{k} with value{configuration[k]}"
+            assert self.camera.set_property_value(
+                k, configuration[k]
+            ), f"can't set property{k} with value{configuration[k]}"
 
         def is_in_range(value, target, precision=100):
             target_min = target - target / precision
@@ -89,8 +93,10 @@ class TestHamamatsuAPI:
             v = self.camera.get_property_value(k)
             assert is_in_range(v, configuration[k]), f"The value of {k} isn't right!"
 
-        #set a non-exist property
-        assert self.camera.set_property_value('non-exist-property', 100) == False, "can't handle non-exist property name"
+        # set a non-exist property
+        assert (
+            self.camera.set_property_value("non-exist-property", 100) == False
+        ), "can't handle non-exist property name"
 
     def test_ROI(self):
         import random
@@ -98,66 +104,70 @@ class TestHamamatsuAPI:
         rects = [(0, 0, 2047, 2047), (512, 512, 1535, 1535), (768, 768, 1279, 1279)]
 
         for i in range(10):
-            r = random.randint(0, len(rects)-1)
+            r = random.randint(0, len(rects) - 1)
             rect = rects[r]
             self.camera.set_ROI(*rect)
-            assert self.camera.get_property_value('image_width') == (rect[2]-rect[0]+1), f'ROI Width: {(rect[2]-rect[0]+1)}'
-            assert self.camera.get_property_value('image_height') == (rect[3]-rect[1]+1), f'ROI Height: {(rect[3]-rect[1]+1)}'
-        
-    
+            assert self.camera.get_property_value("image_width") == (
+                rect[2] - rect[0] + 1
+            ), f"ROI Width: {(rect[2]-rect[0]+1)}"
+            assert self.camera.get_property_value("image_height") == (
+                rect[3] - rect[1] + 1
+            ), f"ROI Height: {(rect[3]-rect[1]+1)}"
+
     def test_acquisition(self):
         import random
         import time
         from aslm.model.concurrency.concurrency_tools import SharedNDArray
 
         configuration = {
-            'sensor_mode': 12,  # 12 for progressive
-            'defect_correct_mode': 2.0,
-            'binning': 1.0,
-            'readout_speed': 1.0,
-            'trigger_active': 1.0,
-            'trigger_mode': 1.0,  # external light-sheet mode
-            'trigger_polarity': 2.0,  # positive pulse
-            'trigger_source': 3.0,  # software
-            'exposure_time': 0.02,
-            'internal_line_interval': 0.000075
+            "sensor_mode": 12,  # 12 for progressive
+            "defect_correct_mode": 2.0,
+            "binning": 1.0,
+            "readout_speed": 1.0,
+            "trigger_active": 1.0,
+            "trigger_mode": 1.0,  # external light-sheet mode
+            "trigger_polarity": 2.0,  # positive pulse
+            "trigger_source": 3.0,  # software
+            "exposure_time": 0.02,
+            "internal_line_interval": 0.000075,
         }
 
         for k in configuration:
             self.camera.set_property_value(k, configuration[k])
 
-
         number_of_frames = 100
 
-        data_buffer = [SharedNDArray(shape=(2048, 2048), dtype='uint16') for i in range(number_of_frames)]
-        
+        data_buffer = [
+            SharedNDArray(shape=(2048, 2048), dtype="uint16")
+            for i in range(number_of_frames)
+        ]
+
         # attach a buffer without detach a buffer
         r = self.camera.start_acquisition(data_buffer, number_of_frames)
-        assert r == True, 'attach the buffer correctly!'
+        assert r == True, "attach the buffer correctly!"
         r = self.camera.start_acquisition(data_buffer, number_of_frames)
         # Confirmed that we can't attach a new buffer before detaching one
-        assert r == False, 'attach the buffer correctly!'
+        assert r == False, "attach the buffer correctly!"
 
         self.camera.start_acquisition(data_buffer, number_of_frames)
 
-        assert self.camera.is_acquiring == True, 'camera should start acquiring data!'
+        assert self.camera.is_acquiring == True, "camera should start acquiring data!"
 
-        readout_time = self.camera.get_property_value('readout_time')
+        readout_time = self.camera.get_property_value("readout_time")
 
         for i in range(10):
             trigger_num = random.randint(0, 30)
             for j in range(trigger_num):
                 self.camera.fire_software_trigger()
-                time.sleep(configuration['exposure_time'] + readout_time)
+                time.sleep(configuration["exposure_time"] + readout_time)
 
             time.sleep(0.1)
 
             frames = self.camera.get_frames()
-            assert len(frames) == trigger_num, 'can not get all the frames back!'
+            assert len(frames) == trigger_num, "can not get all the frames back!"
 
         self.camera.stop_acquisition()
-        assert self.camera.is_acquiring == False, 'camera should stop acquiring data!'
+        assert self.camera.is_acquiring == False, "camera should stop acquiring data!"
 
         # detach a detached buffer
         self.camera.stop_acquisition()
-

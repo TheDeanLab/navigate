@@ -67,6 +67,10 @@ class Microscope:
             "galvo": ["type", "channel"],
             "lasers": ["wavelength"],
         }
+        self.current_channel = None
+        self.channels = None
+        self.available_channels = None
+        self.number_of_frames = None
 
         device_name_dict = {"lasers": "wavelength"}
 
@@ -215,6 +219,7 @@ class Microscope:
         )
         if self.camera.is_acquiring:
             self.camera.close_image_series()
+
         # Set Camera Sensor Mode - Must be done before camera is initialized.
         sensor_mode = self.configuration["experiment"]["CameraParameters"][
             "sensor_mode"
@@ -228,6 +233,7 @@ class Microscope:
             )
         # Initialize Image Series - Attaches camera buffer and start imaging
         self.camera.initialize_image_series(self.data_buffer, self.number_of_frames)
+
         # calculate all the waveform
         self.shutter.open_shutter()
         return self.calculate_all_waveform()
@@ -246,11 +252,11 @@ class Microscope:
         camera_waveform = self.daq.calculate_all_waveforms(
             self.microscope_name, readout_time
         )
-        etl_waveform = self.remote_focus_device.adjust(readout_time)
+        remote_focus_waveform = self.remote_focus_device.adjust(readout_time)
         galvo_waveform = [self.galvo[k].adjust(readout_time) for k in self.galvo]
         waveform_dict = {
             "camera_waveform": camera_waveform,
-            "etl_waveform": etl_waveform,
+            "remote_focus_waveform": remote_focus_waveform,
             "galvo_waveform": galvo_waveform,
         }
         return waveform_dict

@@ -10,7 +10,6 @@ from contextlib import redirect_stdout
 import sys
 import traceback
 import inspect
-import platform
 
 # Making sure objects are cleaned up nicely is tricky:
 import weakref
@@ -20,7 +19,6 @@ import atexit
 import signal
 
 import logging
-from pathlib import Path
 import numpy as np
 
 # Logger Setup
@@ -474,10 +472,10 @@ def _child_loop(
     initializer :
         ...
     initargs : tuple
-        e.g., (False, Namespace(verbose=False, synthetic_hardware=True, debug=False, CPU=True, config_file=None, experiment_file=None, etl_const_file=None, logging_config=None))
+        e.g., (False, Namespace(verbose=False, synthetic_hardware=True, debug=False, CPU=True, config_file=None, experiment_file=None, waveform_constants_path=None, logging_config=None))
     initkwargs : dict
         e.g., {'configuration_path': PosixPath('.../config/configuration.yml'), 'experiment_path':
-        PosixPath('.../config/experiment.yml'), 'etl_constants_path': PosixPath('.../config/etl_constants.yml'),
+        PosixPath('.../config/experiment.yml'), 'etl_constants_path': PosixPath('.../config/waveform_constants.yml'),
         'event_queue': <multiprocessing.queues.Queue object at 0x7fdd509c7c40>}
     close_method_name : NoneType
         None

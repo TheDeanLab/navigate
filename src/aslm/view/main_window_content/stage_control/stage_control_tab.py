@@ -95,7 +95,7 @@ class stage_control_tab(tk.Frame):
         """
         Grid for frames
                 1   2   3   4   5
-                6   7   8   9   10 
+                6   7   8   9   10
 
         Position frame is 1-5
         xy is 6

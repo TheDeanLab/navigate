@@ -98,8 +98,8 @@ class KeystrokeController(GUIController):
         self.main_view.bind("<Control-Key-2>", self.switch_tab)
         self.main_view.bind("<Control-Key-3>", self.switch_tab)
         self.main_view.bind("<Control-Key-4>", self.switch_tab)
-        self.main_view.bind_all('<Control-Key-z>', self.widget_undo)
-        self.main_view.bind_all('<Control-Key-y>', self.widget_redo)
+        self.main_view.bind_all("<Control-Key-z>", self.widget_undo)
+        self.main_view.bind_all("<Control-Key-y>", self.widget_redo)
 
     def camera_controller_mouse_wheel_enter(self, event):
         self.view.root.unbind("<MouseWheel>")  # get rid of scrollbar mousewheel
@@ -131,9 +131,13 @@ class KeystrokeController(GUIController):
             self.main_tabs.select(key_val - 1)
 
     def widget_undo(self, event):
-        if isinstance(event.widget, ValidatedEntry): #Add all widgets that you want to be able to undo here
+        if isinstance(
+            event.widget, ValidatedEntry
+        ):  # Add all widgets that you want to be able to undo here
             event.widget.undo(event)
 
     def widget_redo(self, event):
-        if isinstance(event.widget, ValidatedEntry): #Add all widgets that you want to be able to undo here
+        if isinstance(
+            event.widget, ValidatedEntry
+        ):  # Add all widgets that you want to be able to undo here
             event.widget.redo(event)

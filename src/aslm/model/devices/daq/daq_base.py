@@ -28,7 +28,7 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-#
+
 
 # Standard Imports
 import logging
@@ -54,7 +54,7 @@ class DAQBase:
 
     def __init__(self, configuration):
         self.configuration = configuration
-        self.etl_constants = self.configuration["etl_constants"]
+        self.waveform_constants = self.configuration["waveform_constants"]
         self.microscope_name = self.configuration["experiment"]["MicroscopeState"][
             "microscope_name"
         ]
@@ -66,10 +66,10 @@ class DAQBase:
         self.sample_rate = self.daq_parameters["sample_rate"]
         self.sweep_time = self.daq_parameters["sweep_time"]
 
-        # ETL Parameters
-        self.etl_ramp_falling = {}
+        # Remote Focus Parameters
+        self.remote_focus_ramp_falling = {}
         for m in self.configuration["configuration"]["microscopes"].keys():
-            self.etl_ramp_falling[m] = self.configuration["configuration"][
+            self.remote_focus_ramp_falling[m] = self.configuration["configuration"][
                 "microscopes"
             ][m]["remote_focus_device"]["ramp_falling_percent"]
 
@@ -100,7 +100,8 @@ class DAQBase:
         Returns
         -------
         self.waveform_dict : dict
-            Dictionary of waveforms to pass to galvo and ETL, plus a camera waveform for display purposes.
+            Dictionary of waveforms to pass to galvo and remote focus device,
+            plus a camera waveform for display purposes.
         """
         self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
         self.enable_microscope(microscope_name)
@@ -122,7 +123,10 @@ class DAQBase:
             if channel["is_selected"] is True:
                 exposure_time = channel["camera_exposure_time"] / 1000
                 self.sweep_time = exposure_time + exposure_time * (
-                    (self.camera_delay_percent + self.etl_ramp_falling[microscope_name])
+                    (
+                        self.camera_delay_percent
+                        + self.remote_focus_ramp_falling[microscope_name]
+                    )
                     / 100
                 )
                 if readout_time > 0:

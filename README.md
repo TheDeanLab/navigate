@@ -14,8 +14,8 @@ Please refer to and contribute to the documentation, which can be found on GitHu
 
 * Input Arguments:
   	* -sh, --synthetic_hardware
- 	* -d, --debug   
-	* --CPU 
+ 	* -d, --debug
+	* --CPU
   	* --config_file CONFIG_FILE
   	* --experiment_file EXPERIMENT_FILE
   	* --etl_const_file ETL_CONST_FILE
@@ -36,4 +36,3 @@ python main.py -sh
 * Samir Mamtani
 * Renil Gupta
 * Andrew Jamieson
-

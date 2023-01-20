@@ -95,11 +95,11 @@ def single_pulse(
     return np.array(array)
 
 
-def tunable_lens_ramp(
+def remote_focus_ramp(
     sample_rate=100000,
     exposure_time=0.2,
     sweep_time=0.24,
-    etl_delay=7.5,
+    remote_focus_delay=7.5,
     camera_delay=10,
     fall=2.5,
     amplitude=1,
@@ -111,7 +111,7 @@ def tunable_lens_ramp(
     rises linearly to 2x amplitude (amplitude here refers to 1/2 peak-to-peak)
     and drops back down to the offset voltage during the fall period.
 
-    Switching from a left to right ETL ramp is possible by exchanging the
+    Switching from a left to right remote focus ramp is possible by exchanging the
     rise and fall periods.
 
     Parameters
@@ -122,7 +122,7 @@ def tunable_lens_ramp(
         Unit - Seconds
     sweep_time : Float
         Unit - Seconds
-    etl_delay : Float
+    remote_focus_delay : Float
         Unit - Percent
     camera_delay : Float
         Unit - Percent
@@ -139,13 +139,14 @@ def tunable_lens_ramp(
     """
 
     # create an array just containing the negative amplitude voltage:
-    delay_samples = int(etl_delay * exposure_time * sample_rate / 100)
+    delay_samples = int(remote_focus_delay * exposure_time * sample_rate / 100)
     delay_array = np.zeros(delay_samples) + offset - amplitude
 
     # 10-7.5 -> 1.025 * .2
     #
     ramp_samples = int(
-        (exposure_time + exposure_time * (camera_delay - etl_delay) / 100) * sample_rate
+        (exposure_time + exposure_time * (camera_delay - remote_focus_delay) / 100)
+        * sample_rate
     )
     ramp_array = np.linspace(offset - amplitude, offset + amplitude, ramp_samples)
 
@@ -251,29 +252,16 @@ if __name__ == "__main__":
     sample_rate = 100000
     exposure_time = 0.25
 
-    # ETL
-    etl_delay = 7.5
-    etl_ramp_rising = 85
-    etl_ramp_falling = 2.5
-    etl_amplitude = 1
-    etl_offset = 1
+    # Remote Focus Device
+    remote_focus_delay = 7.5
+    remote_focus_ramp_rising = 85
+    remote_focus_ramp_falling = 2.5
+    remote_focus_amplitude = 1
+    remote_focus_offset = 1
     camera_delay = 10
 
-    waveform_padding = (camera_delay + etl_ramp_falling) / 100
-    # waveform_padding = 20/100
+    waveform_padding = (camera_delay + remote_focus_ramp_falling) / 100
     sweep_time = exposure_time + exposure_time * waveform_padding
-    # sweep_time = .24 seconds.
-
-    etl_waveform = tunable_lens_ramp_v2(
-        sample_rate=sample_rate,
-        exposure_time=exposure_time,
-        sweep_time=sweep_time,
-        etl_delay=etl_delay,
-        camera_delay=camera_delay,
-        fall=etl_ramp_falling,
-        amplitude=etl_amplitude,
-        offset=etl_offset,
-    )
 
     galvo_waveform = sawtooth(
         sample_rate=sample_rate,
@@ -289,7 +277,6 @@ if __name__ == "__main__":
         exposure=exposure_time,
         camera_delay=camera_delay,
     )
-    plt.plot(etl_waveform)
     plt.plot(galvo_waveform)
     plt.plot(camera_waveform)
     plt.show()

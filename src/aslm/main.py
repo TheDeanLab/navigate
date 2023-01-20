@@ -67,7 +67,7 @@ def main():
         --CPU
         --config_file
         --experiment_file
-        --etl_const_file
+        --waveform_constants_path
         --rest_api_file
         --logging_config
 
@@ -87,7 +87,7 @@ def main():
     (
         configuration_path,
         experiment_path,
-        etl_constants_path,
+        waveform_constants_path,
         rest_api_path,
         logging_path,
     ) = evaluate_parser_input_arguments(args)
@@ -100,7 +100,7 @@ def main():
         splash_screen,
         configuration_path,
         experiment_path,
-        etl_constants_path,
+        waveform_constants_path,
         rest_api_path,
         use_gpu,
         args,

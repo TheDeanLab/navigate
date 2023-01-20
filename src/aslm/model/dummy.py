@@ -29,21 +29,29 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-from pathlib import Path
 
-# Annies imports for dummy feature containter
+# Standard Library Imports
+from pathlib import Path
 import multiprocessing as mp
 from multiprocessing import Manager
 import threading
 import time
 
+# Third Party Imports
 import numpy as np
 
+# Local Imports
 from aslm.model.features.feature_container import load_features
 from aslm.config.config import load_configs
 from aslm.model.devices.camera.camera_synthetic import (
     SyntheticCamera,
     SyntheticCameraController,
+)
+from aslm.model.features.feature_container import (
+    SignalNode,
+    DataNode,
+    DataContainer,
+    load_features,
 )
 
 
@@ -88,20 +96,22 @@ from aslm.model.devices.camera.camera_synthetic import (
 
 class DummyModel:
     def __init__(self):
-        # Set up the model, experiment, ETL dictionaries
+        # Set up the model, experiment, waveform dictionaries
         base_directory = Path(__file__).resolve().parent.parent
         configuration_directory = Path.joinpath(base_directory, "config")
 
         config = Path.joinpath(configuration_directory, "configuration.yaml")
         experiment = Path.joinpath(configuration_directory, "experiment.yml")
-        etl_constants = Path.joinpath(configuration_directory, "etl_constants.yml")
+        waveform_constants = Path.joinpath(
+            configuration_directory, "waveform_constants.yml"
+        )
 
         self.manager = Manager()
         self.configuration = load_configs(
             self.manager,
             configuration=config,
             experiment=experiment,
-            etl_constants=etl_constants,
+            waveform_constants=waveform_constants,
         )
 
         self.device = DummyDevice()

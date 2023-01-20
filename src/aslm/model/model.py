@@ -383,7 +383,7 @@ class Model:
             Called by the controller
             Passes the string 'resolution' and a dictionary
             consisting of the resolution_mode, the zoom, and the laser_info.
-            e.g., self.resolution_info['ETLConstants'][self.resolution][self.mag]
+            e.g., self.resolution_info['waveform_constants'][self.resolution][self.mag]
             """
             reboot = False
             microscope_name = self.configuration["experiment"]["MicroscopeState"][
@@ -424,7 +424,7 @@ class Model:
                 )
                 self.stop_send_signal = False
                 self.signal_thread = threading.Thread(target=self.run_live_acquisition)
-                self.signal_thread.name = "ETL Popup Signal"
+                self.signal_thread.name = "Waveform Popup Signal"
                 self.signal_thread.start()
 
         elif command == "autofocus":

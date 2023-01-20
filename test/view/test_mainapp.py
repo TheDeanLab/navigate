@@ -35,6 +35,7 @@ import tkinter as tk
 from aslm.view.main_application_window import MainApp
 import time
 
+
 def test_mainapp():
     """
     Tests that the main application and all its widgets gets created and does not
@@ -55,5 +56,5 @@ def test_mainapp():
     time.sleep(3)
     bool = isinstance(main_app, MainApp)
     root.destroy()
-    
+
     assert bool

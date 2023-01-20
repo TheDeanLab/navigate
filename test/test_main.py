@@ -47,7 +47,7 @@ class TestMain(unittest.TestCase):
 
     def test_identify_gpu(self):
         parser = create_parser()
-        args = parser.parse_args(["--CPU"])
+        args = parser.parse_args(["--GPU"])
         args.CPU = True
         use_gpu = identify_gpu(args)
         assert use_gpu is not args.CPU
@@ -56,7 +56,7 @@ class TestMain(unittest.TestCase):
         parser = create_parser()
 
         # Boolean arguments
-        input_arguments = ["-sh", "--synthetic_hardware", "-d", "--debug", "--CPU"]
+        input_arguments = ["-sh", "--synthetic_hardware", "-d", "--debug", "--GPU"]
         for arg in input_arguments:
             parser.parse_args([arg])
 

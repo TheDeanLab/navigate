@@ -64,7 +64,7 @@ def main():
         --synthetic_hardware
         --sh
         --debug
-        --CPU
+        --GPU
         --config_file
         --experiment_file
         --waveform_constants_path

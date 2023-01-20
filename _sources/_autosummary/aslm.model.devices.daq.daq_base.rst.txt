@@ -2,7 +2,7 @@ aslm.model.devices.daq.daq\_base
 ================================
 
 .. automodule:: aslm.model.devices.daq.daq_base
-  
+
    
    
    

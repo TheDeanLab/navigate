@@ -2,7 +2,7 @@ aslm.model.devices.stages
 =========================
 
 .. automodule:: aslm.model.devices.stages
-  
+
    
    
    

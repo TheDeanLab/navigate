@@ -2,7 +2,7 @@ aslm.view.main\_window\_content.acquire\_bar\_frame
 ===================================================
 
 .. automodule:: aslm.view.main_window_content.acquire_bar_frame
-  
+
    
    
    

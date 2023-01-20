@@ -2,7 +2,7 @@ aslm.model.device\_startup\_functions
 =====================================
 
 .. automodule:: aslm.model.device_startup_functions
-  
+
    
    
    

@@ -2,7 +2,7 @@ aslm.model.metadata\_sources.ome\_tiff\_metadata
 ================================================
 
 .. automodule:: aslm.model.metadata_sources.ome_tiff_metadata
-  
+
    
    
    

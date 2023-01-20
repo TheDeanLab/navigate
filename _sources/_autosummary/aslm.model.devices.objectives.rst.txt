@@ -2,7 +2,7 @@ aslm.model.devices.objectives
 =============================
 
 .. automodule:: aslm.model.devices.objectives
-  
+
    
    
    

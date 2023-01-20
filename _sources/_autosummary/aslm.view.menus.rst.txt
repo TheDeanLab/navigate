@@ -2,7 +2,7 @@ aslm.view.menus
 ===============
 
 .. automodule:: aslm.view.menus
-  
+
    
    
    
@@ -33,5 +33,5 @@ aslm.view.menus
    aslm.view.menus.help_popup
    aslm.view.menus.ilastik_setting_popup
    aslm.view.menus.menus
-   aslm.view.menus.remote_focus_popup
+   aslm.view.menus.waveform_parameter_popup_window
 

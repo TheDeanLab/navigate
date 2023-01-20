@@ -2,7 +2,7 @@ aslm.controller.configuration\_controller
 =========================================
 
 .. automodule:: aslm.controller.configuration_controller
-  
+
    
    
    

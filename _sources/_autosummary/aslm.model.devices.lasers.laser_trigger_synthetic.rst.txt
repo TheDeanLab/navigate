@@ -2,7 +2,7 @@ aslm.model.devices.lasers.laser\_trigger\_synthetic
 ===================================================
 
 .. automodule:: aslm.model.devices.lasers.laser_trigger_synthetic
-  
+
    
    
    

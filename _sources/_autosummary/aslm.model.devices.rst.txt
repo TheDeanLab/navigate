@@ -2,7 +2,7 @@ aslm.model.devices
 ==================
 
 .. automodule:: aslm.model.devices
-  
+
    
    
    

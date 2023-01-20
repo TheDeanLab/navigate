@@ -2,7 +2,7 @@ aslm.model.metadata\_sources.metadata
 =====================================
 
 .. automodule:: aslm.model.metadata_sources.metadata
-  
+
    
    
    

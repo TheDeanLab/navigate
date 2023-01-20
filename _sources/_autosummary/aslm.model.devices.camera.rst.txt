@@ -2,7 +2,7 @@ aslm.model.devices.camera
 =========================
 
 .. automodule:: aslm.model.devices.camera
-  
+
    
    
    

@@ -2,7 +2,7 @@ aslm.model.devices.remote\_focus.remote\_focus\_base
 ====================================================
 
 .. automodule:: aslm.model.devices.remote_focus.remote_focus_base
-  
+
    
    
    

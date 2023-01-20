@@ -2,7 +2,7 @@ aslm.model.features.dummy\_detective
 ====================================
 
 .. automodule:: aslm.model.features.dummy_detective
-  
+
    
    
    

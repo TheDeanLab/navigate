@@ -2,7 +2,7 @@ aslm.view.main\_window\_content.channel\_settings.channel\_settings\_frames
 ===========================================================================
 
 .. automodule:: aslm.view.main_window_content.channel_settings.channel_settings_frames
-  
+
    
    
    

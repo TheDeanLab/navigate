@@ -2,7 +2,7 @@ aslm.model.devices.APIs.omicron
 ===============================
 
 .. automodule:: aslm.model.devices.APIs.omicron
-  
+
    
    
    

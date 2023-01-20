@@ -2,7 +2,7 @@ aslm.model.devices.zoom.zoom\_synthetic
 =======================================
 
 .. automodule:: aslm.model.devices.zoom.zoom_synthetic
-  
+
    
    
    

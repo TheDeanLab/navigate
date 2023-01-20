@@ -2,7 +2,7 @@ aslm.model.analysis.detection
 =============================
 
 .. automodule:: aslm.model.analysis.detection
-  
+
    
    
    

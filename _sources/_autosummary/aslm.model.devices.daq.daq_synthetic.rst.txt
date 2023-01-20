@@ -2,7 +2,7 @@ aslm.model.devices.daq.daq\_synthetic
 =====================================
 
 .. automodule:: aslm.model.devices.daq.daq_synthetic
-  
+
    
    
    

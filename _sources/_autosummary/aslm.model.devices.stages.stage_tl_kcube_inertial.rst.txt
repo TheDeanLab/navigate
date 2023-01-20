@@ -2,7 +2,7 @@ aslm.model.devices.stages.stage\_tl\_kcube\_inertial
 ====================================================
 
 .. automodule:: aslm.model.devices.stages.stage_tl_kcube_inertial
-  
+
    
    
    

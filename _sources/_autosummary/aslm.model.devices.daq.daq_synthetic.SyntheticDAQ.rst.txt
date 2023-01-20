@@ -21,7 +21,7 @@ aslm.model.devices.daq.daq\_synthetic.SyntheticDAQ
       ~SyntheticDAQ.calculate_all_waveforms
       ~SyntheticDAQ.close_tasks
       ~SyntheticDAQ.create_camera_task
-      ~SyntheticDAQ.create_galvo_etl_task
+      ~SyntheticDAQ.create_galvo_remote_focus_tasks
       ~SyntheticDAQ.create_master_trigger_task
       ~SyntheticDAQ.enable_microscope
       ~SyntheticDAQ.prepare_acquisition

@@ -2,7 +2,7 @@ aslm.model.devices.shutter.laser\_shutter\_synthetic
 ====================================================
 
 .. automodule:: aslm.model.devices.shutter.laser_shutter_synthetic
-  
+
    
    
    

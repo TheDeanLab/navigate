@@ -2,7 +2,7 @@ aslm.model.devices.APIs.coherent
 ================================
 
 .. automodule:: aslm.model.devices.APIs.coherent
-  
+
    
    
    

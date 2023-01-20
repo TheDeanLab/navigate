@@ -2,7 +2,7 @@ aslm.model.devices.stages.stage\_base
 =====================================
 
 .. automodule:: aslm.model.devices.stages.stage_base
-  
+
    
    
    

@@ -235,8 +235,8 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.create_camera_task" title="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.create_camera_task"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_camera_task</span></code></a>()</p></td>
 <td><p>Set up the camera trigger task.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.create_galvo_etl_task" title="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.create_galvo_etl_task"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_galvo_etl_task</span></code></a>()</p></td>
-<td><p>Create galvo and ETL tasks</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.create_galvo_remote_focus_tasks" title="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.create_galvo_remote_focus_tasks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_galvo_remote_focus_tasks</span></code></a>()</p></td>
+<td><p>Create galvo and remote focus tasks</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.create_master_trigger_task" title="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.create_master_trigger_task"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_master_trigger_task</span></code></a>()</p></td>
 <td><p>Set up the DO master trigger task.</p></td>
@@ -260,7 +260,7 @@
 <td><p>Stop the tasks for triggering, analog and counter outputs.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.write_waveforms_to_tasks" title="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.write_waveforms_to_tasks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_waveforms_to_tasks</span></code></a>()</p></td>
-<td><p>Write the galvo, etl, and laser waveforms to each task.</p></td>
+<td><p>Write the galvo, remote focus, and laser waveforms to each task.</p></td>
 </tr>
 </tbody>
 </table>
@@ -282,7 +282,8 @@
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>self.waveform_dict</strong> – Dictionary of waveforms to pass to galvo and ETL, plus a camera waveform for display purposes.</p>
+<dd class="field-even"><p><strong>self.waveform_dict</strong> – Dictionary of waveforms to pass to galvo and remote focus device,
+plus a camera waveform for display purposes.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>dict</p>
@@ -303,9 +304,9 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.create_galvo_etl_task">
-<span class="sig-name descname"><span class="pre">create_galvo_etl_task</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.create_galvo_etl_task" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create galvo and ETL tasks</p>
+<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.create_galvo_remote_focus_tasks">
+<span class="sig-name descname"><span class="pre">create_galvo_remote_focus_tasks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.create_galvo_remote_focus_tasks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create galvo and remote focus tasks</p>
 </dd></dl>
 
 <dl class="py method">
@@ -360,7 +361,7 @@ they are waiting for the trigger signal.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.write_waveforms_to_tasks">
 <span class="sig-name descname"><span class="pre">write_waveforms_to_tasks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.write_waveforms_to_tasks" title="Permalink to this definition">¶</a></dt>
-<dd><p>Write the galvo, etl, and laser waveforms to each task.</p>
+<dd><p>Write the galvo, remote focus, and laser waveforms to each task.</p>
 </dd></dl>
 
 </dd></dl>

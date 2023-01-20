@@ -2,7 +2,7 @@ aslm.model.dummy
 ================
 
 .. automodule:: aslm.model.dummy
-  
+
    
    
    
@@ -20,6 +20,7 @@ aslm.model.dummy
       :template: custom_class.rst
    
       DummyDevice
+      DummyMicroscope
       DummyModel
    
    

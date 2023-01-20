@@ -2,7 +2,7 @@ aslm.model.devices.APIs
 =======================
 
 .. automodule:: aslm.model.devices.APIs
-  
+
    
    
    

@@ -2,7 +2,7 @@ aslm.model.analysis.image\_decorrelation
 ========================================
 
 .. automodule:: aslm.model.analysis.image_decorrelation
-  
+
    
    
    

@@ -2,7 +2,7 @@ aslm.view.main\_window\_content.stage\_control.stage\_control\_frames
 =====================================================================
 
 .. automodule:: aslm.view.main_window_content.stage_control.stage_control_frames
-  
+
    
    
    

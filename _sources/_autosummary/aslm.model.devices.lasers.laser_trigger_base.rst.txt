@@ -2,7 +2,7 @@ aslm.model.devices.lasers.laser\_trigger\_base
 ==============================================
 
 .. automodule:: aslm.model.devices.lasers.laser_trigger_base
-  
+
    
    
    

@@ -23,4 +23,3 @@ OPM-V2
 ------------
 - Laser source - Omicron LightHUB Ultra. Requires ACC operating mode with analog modulation enabled for 488 nm and 642 nm lasers. 561, which operates separately, requires the mixed modulation mode (Obis).
 - Camera - Hamamatsu Flash 4.0 with frame grabbers.
-

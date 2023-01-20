@@ -2,7 +2,7 @@ aslm.model.devices.stages.stage\_synthetic
 ==========================================
 
 .. automodule:: aslm.model.devices.stages.stage_synthetic
-  
+
    
    
    

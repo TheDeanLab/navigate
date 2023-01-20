@@ -2,7 +2,7 @@ aslm.model.devices.joystick.joystick\_base
 ==========================================
 
 .. automodule:: aslm.model.devices.joystick.joystick_base
-  
+
    
    
    

@@ -274,7 +274,6 @@ class ChannelsTabController(GUIController):
                                          'end_position': ,'number_z_steps'}
         """
 
-        print("This getting called????")
         # won't do any calculation when initialization
         if self.in_initialization:
             return
@@ -295,8 +294,6 @@ class ChannelsTabController(GUIController):
             self.stack_acq_vals["abs_z_start"].set(0)
             self.stack_acq_vals["abs_z_end"].set(0)
             return
-
-        print("PAST THE RETURN VALUE")
 
         # if step_size < 0.001:
         #     step_size = 0.001

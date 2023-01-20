@@ -73,6 +73,7 @@ class AcquireBarController(GUIController):
 
     def progress_bar(self, images_received, microscope_state, mode, stop=False):
         """Update progress bars.
+
         Parameters
         ----------
         microscope_state : dict
@@ -273,6 +274,7 @@ class AcquireBarController(GUIController):
     def update_microscope_mode(self, *args):
         """Gets the state of the pull-down menu and tells the central controller
             Will additionally call functions to disable and enable widgets based on mode
+
         Parameters
 
         ----------

@@ -189,6 +189,7 @@ class HamamatsuOrca(CameraBase):
             Duration of time needed to readout an image.
         max_frame_rate : float
             Maximum framerate for a given camera acquisition mode.
+
         TODO: I think self.camera_controller.get_property_value("readout_time") pulls
               out the actual readout_time
               calculated here (i.e. we don't need to do the calculations).

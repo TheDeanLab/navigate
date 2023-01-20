@@ -518,6 +518,7 @@ class ChannelsTabController(GUIController):
         Order of priority for perStack: timepoints > positions > channels > z-steps
                                         > delay
         ORder of priority for perZ: timepoints > positions > z-steps > delays > channels
+
         Parameters
         ----------
         call_parent : bool

@@ -33,7 +33,6 @@
 
 import tkinter as tk
 from aslm.view.main_application_window import MainApp
-import time
 
 
 def test_mainapp():
@@ -51,10 +50,11 @@ def test_mainapp():
         True or False as to whether the test passed
     """
     root = tk.Tk()
-    main_app = MainApp(root)
-    root.update()
-    time.sleep(3)
-    bool = isinstance(main_app, MainApp)
-    root.destroy()
+    try:
+        main_app = MainApp(root)
+    finally:
+        root.update()
+        bool = isinstance(main_app, MainApp)
+        root.destroy()
 
     assert bool

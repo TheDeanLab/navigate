@@ -128,48 +128,40 @@ microscopes:
         Blocked6: 9
     stage:
       hardware:
-        name: stage
-        type: PI
-        serial_number: 119060508
-        axes: [x, y, z, theta, f]
-      y_unload_position: 10000
-      y_load_position: 90000
+        -
+          name: stage
+          type: PI
+          serial_number: 119060508
+          axes: [x, y, z, theta, f]
+          volts_per_micron: None
+          axes_channels: None
+          max: None
+          min: None
 
-      startfocus: 75000
-      x_max: 33500
-      x_min: 16000
+      x_max: 100000
+      x_min: -100000
       y_max: 100000
-      y_min: 2000
-      z_max: 50000
-      z_min: 25000
+      y_min: -100000
+      z_max: 100000
+      z_min: -100000
       f_max: 100000
-      f_min: -100000
+      f_min: 0
       theta_max: 360
       theta_min: 0
-
-      x_rot_position: 2000
-      y_rot_position: 2000
-      z_rot_position: 2000
 
       x_step: 500
       y_step: 500
       z_step: 500
       theta_step: 30
       f_step: 500
-
-      position:
-        x_pos: 25250
-        y_pos: 40000
-        z_pos: 40000
-        f_pos: 70000
-        theta_pos: 0
       velocity: 1000
 
       x_offset: 0
       y_offset: 0
       z_offset: 0
-      f_offset: 0
       theta_offset: 0
+      f_offset: 0
+
     zoom:
       hardware:
         name: zoom
@@ -279,7 +271,7 @@ microscopes:
       # Digital Laser Outputs
       laser_port_switcher: PXI6733/port0/line0
       laser_switch_state: True
-      
+
     camera:
       hardware:
         type: HamamatsuOrca
@@ -355,49 +347,44 @@ microscopes:
           type: PI
           serial_number: 119060508
           axes: [x, y, z, theta]
+          volts_per_micron: None
+          axes_channels: None
+          max: None
+          min: None
         -
           name: stage
           type: Thorlabs
           serial_number: 74000375
           axes: [f]
-      y_unload_position: 10000
-      y_load_position: 90000
+          volts_per_micron: None
+          axes_channels: None
+          max: None
+          min: None
 
-      startfocus: 75000
-      x_max: 33500
-      x_min: 16000
+      x_max: 100000
+      x_min: -100000
       y_max: 100000
-      y_min: 2000
-      z_max: 50000
-      z_min: 25000
+      y_min: -100000
+      z_max: 100000
+      z_min: -100000
       f_max: 100000
-      f_min: -100000
+      f_min: 0
       theta_max: 360
       theta_min: 0
-
-      x_rot_position: 2000
-      y_rot_position: 2000
-      z_rot_position: 2000
 
       x_step: 500
       y_step: 500
       z_step: 500
       theta_step: 30
       f_step: 500
-
-      position:
-        x_pos: 25250
-        y_pos: 40000
-        z_pos: 40000
-        f_pos: 0
-        theta_pos: 0
       velocity: 1000
 
-      x_offset: 1500
-      y_offset: 1720
-      z_offset: -14311
-      f_offset: 0
+      x_offset: 1
+      y_offset: 1
+      z_offset: 1
       theta_offset: 0
+      f_offset: 0
+
     zoom:
       position:
         N/A: 0

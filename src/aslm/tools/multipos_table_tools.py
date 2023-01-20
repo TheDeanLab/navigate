@@ -1,10 +1,41 @@
+# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# All rights reserved.
+
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
+
+#      * Redistributions of source code must retain the above copyright notice,
+#      this list of conditions and the following disclaimer.
+
+#      * Redistributions in binary form must reproduce the above copyright
+#      notice, this list of conditions and the following disclaimer in the
+#      documentation and/or other materials provided with the distribution.
+
+#      * Neither the name of the copyright holders nor the names of its
+#      contributors may be used to endorse or promote products derived from this
+#      software without specific prior written permission.
+
+# NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
+# THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+# CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+# PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+
 """
-This holds functions commonly used to interact with the Multiposition Pandas Table in the GUI
+This holds functions commonly used to interact with the Multiposition Pandas Table in
+the GUI
 
 """
 
 import numpy as np
-import itertools
 import pandas as pd
 from math import ceil
 
@@ -13,14 +44,33 @@ def sign(x):
     return -1 if x < 0 else 1  # (1 if x > 0 else 0)
 
 
-def compute_tiles_from_bounding_box(x_start, x_tiles, x_length, x_overlap,
-                                    y_start, y_tiles, y_length, y_overlap,
-                                    z_start, z_tiles, z_length, z_overlap,
-                                    theta_start, theta_tiles, theta_length, theta_overlap,
-                                    f_start, f_tiles, f_length, f_overlap):
-    r"""Create a grid of ROIs to image based on start position, number of tiles, and signed FOV length in each dimension.
+def compute_tiles_from_bounding_box(
+    x_start,
+    x_tiles,
+    x_length,
+    x_overlap,
+    y_start,
+    y_tiles,
+    y_length,
+    y_overlap,
+    z_start,
+    z_tiles,
+    z_length,
+    z_overlap,
+    theta_start,
+    theta_tiles,
+    theta_length,
+    theta_overlap,
+    f_start,
+    f_tiles,
+    f_length,
+    f_overlap,
+):
+    """Create a grid of ROIs to image based on start position, number of tiles, and
+    signed FOV length in each dimension.
 
-    Focus currently tracks with z, since focus is z-dependent. TODO: Change this behavior? Make it a flag?
+    Focus currently tracks with z, since focus is z-dependent.
+    TODO: Change this behavior? Make it a flag?
 
     Parameters
     ----------
@@ -79,44 +129,54 @@ def compute_tiles_from_bounding_box(x_start, x_tiles, x_length, x_overlap,
     f_tiles = 1 if f_tiles <= 0 else f_tiles
 
     # Calculate the step between the edge of each frame
-    x_step = x_length*(1 - x_overlap)
-    y_step = y_length*(1 - y_overlap)
-    z_step = z_length*(1 - z_overlap)
+    x_step = x_length * (1 - x_overlap)
+    y_step = y_length * (1 - y_overlap)
+    z_step = z_length * (1 - z_overlap)
     theta_step = theta_length * (1 - theta_overlap)
-    f_step = f_length * (1 - f_overlap)              # Although we assume focus FOVs have no thickness, we include
-                                                     # overlap to adjust for z-ramping. We have no excuse for the
-                                                     # theta overlap.
+    f_step = f_length * (
+        1 - f_overlap
+    )  # Although we assume focus FOVs have no thickness, we include
+    # overlap to adjust for z-ramping. We have no excuse for the
+    # theta overlap.
 
     # grid out each dimension starting from (x_start, y_start, z_start) in steps
     def dim_vector(start, n_tiles, step):
         return start + np.arange(0, n_tiles, 1) * step
 
-    xs = dim_vector(x_start, x_tiles, x_step)                  # x-coordinate is centered on FOV
-    ys = dim_vector(y_start, y_tiles, y_step)                  # y-coordinate is centered on FOV
-    zs = dim_vector(z_start, z_tiles, z_step)                  # z-coordinate is centered on local z-stack origin
-    thetas = dim_vector(theta_start, theta_tiles, theta_step)  # we assume theta FOVs have no thickness
-    fs = dim_vector(f_start, f_tiles, f_step)                  # we assume focus FOVs have no thickness
+    xs = dim_vector(x_start, x_tiles, x_step)  # x-coordinate is centered on FOV
+    ys = dim_vector(y_start, y_tiles, y_step)  # y-coordinate is centered on FOV
+    zs = dim_vector(
+        z_start, z_tiles, z_step
+    )  # z-coordinate is centered on local z-stack origin
+    thetas = dim_vector(
+        theta_start, theta_tiles, theta_step
+    )  # we assume theta FOVs have no thickness
+    fs = dim_vector(f_start, f_tiles, f_step)  # we assume focus FOVs have no thickness
 
     # grid out the 4D space...
     x, y, z, t = np.meshgrid(xs, ys, zs, thetas)
 
     # we need to make f vary the same as z, for now, since focus changes with z
-    f = np.repeat(fs, int(len(t.ravel())/len(fs)))  # This only works if len(fs) = len(zs)
+    f = np.repeat(
+        fs, int(len(t.ravel()) / len(fs))
+    )  # This only works if len(fs) = len(zs)
 
     return np.vstack([x.ravel(), y.ravel(), z.ravel(), t.ravel(), f]).T
 
 
 def calc_num_tiles(dist, overlap, roi_length):
-    r"""Calculate the number of tiles to divide a space dist along a single axis with an ROI of size roi_length
-    and a fractional overlap between ROIs of overlap.
+    """Calculate the number of tiles to divide a space dist along a single axis with an
+    ROI of size roi_length and a fractional overlap between ROIs of overlap.
 
-    Watch out! This has no indication of what the tiles should actually look like (no information about sign, etc.).
+    Watch out! This has no indication of what the tiles should actually look like (no
+    information about sign, etc.).
 
     Parameters
     ----------
     dist : float
-        Total distance to tile with ROIs. A measure from the closed boundaries of the region to tile (e.g. left side
-        of the first tile all the way to the right side of the last tile for x-dimension low -> high). Positive.
+        Total distance to tile with ROIs. A measure from the closed boundaries of the
+        region to tile (e.g. left side of the first tile all the way to the right side
+        of the last tile for x-dimension low -> high). Positive.
     overlap : float
         Fraction of roi_length that overlaps in each tile. Value between 0 and 1.
     roi_length : float
@@ -139,29 +199,30 @@ def calc_num_tiles(dist, overlap, roi_length):
 
 def update_table(table, pos, append=False):
     """
-    Updates and redraws table based on given list. List is converted to a pandas dataframe before setting data in table.
-    
+    Updates and redraws table based on given list. List is converted to a pandas
+    dataframe before setting data in table.
+
     Parameters
     ----------
     table: Multi_Position_Table object
         Instance of multiposition table in GUI
     pos: list or np.array
-        List or np.array of positions to be added to table. Each row contains an X, Y, Z, R, F position
+        List or np.array of positions to be added to table. Each row contains an X, Y,
+        Z, R, F position
     append: bool
         Append the new positions to the table
-        
+
     Returns
     -------
-    None : 
+    None :
         Table is updated
     """
-    frame = pd.DataFrame(pos, columns=list('XYZRF'))
+    frame = pd.DataFrame(pos, columns=list("XYZRF"))
     if append:
         table.model.df.append(frame, ignore_index=True)
     else:
         table.model.df = frame
-    table.currentrow = table.model.df.shape[0]-1
+    table.currentrow = table.model.df.shape[0] - 1
     table.update_rowcolors()
     table.redraw()
     table.tableChanged()
-

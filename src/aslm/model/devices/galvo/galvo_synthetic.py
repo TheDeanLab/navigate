@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -34,8 +34,6 @@
 import logging
 
 # Third Party Imports
-import nidaqmx
-from nidaqmx.constants import AcquisitionType
 
 # Local Imports
 from aslm.model.devices.galvo.galvo_base import GalvoBase
@@ -46,14 +44,11 @@ logger = logging.getLogger(p)
 
 
 class SyntheticGalvo(GalvoBase):
-    r"""SyntheticGalvo Class
-
-     """
+    """SyntheticGalvo Class"""
 
     def __init__(self, microscope_name, device_connection, configuration, galvo_id=0):
         super().__init__(microscope_name, device_connection, configuration, galvo_id)
         pass
-
 
     def __del__(self):
         self.stop_task()
@@ -61,13 +56,13 @@ class SyntheticGalvo(GalvoBase):
 
     def prepare_task(self, channel_key):
         # write waveform
-        logger.debug(f'galvo writes the waveform for {channel_key}')
+        logger.debug(f"galvo writes the waveform for {channel_key}")
 
     def start_task(self):
-        logger.debug('galvo started task!')
+        logger.debug("galvo started task!")
 
     def stop_task(self):
-        logger.debug('galvo stopped task!')
-    
+        logger.debug("galvo stopped task!")
+
     def close_task(self):
-        logger.debug('galvo closed task!')
+        logger.debug("galvo closed task!")

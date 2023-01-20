@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -28,34 +28,36 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-#
-from pathlib import Path
 
-# Annies imports for dummy feature containter
+from pathlib import Path
 import multiprocessing as mp
 from multiprocessing import Manager
 import threading
 import time
-import random
 
+# Third Party Imports
 import numpy as np
 import tkinter as tk
 
-from aslm.model.features.feature_container import SignalNode, DataNode, DataContainer, load_features
-from aslm.model.features.common_features import WaitToContinue
-from aslm.model.features.feature_container import dummy_True
+# Local Imports
+from aslm.model.features.feature_container import load_features
 from aslm.config.config import load_configs
-from aslm.model.devices.camera.camera_synthetic import SyntheticCamera, SyntheticCameraController
-from aslm.controller.thread_pool import SynchronizedThreadPool
-from aslm.view.main_application_window import MainApp
-from aslm.config import get_configuration_paths
-from aslm.controller.controller import Controller
-
+from aslm.model.devices.camera.camera_synthetic import (
+    SyntheticCamera,
+    SyntheticCameraController,
+)
+from aslm.model.features.feature_container import (
+    SignalNode,
+    DataNode,
+    DataContainer,
+    load_features,
+)
 
 
 # def get_dummy_model():
 #     """
-#     Creates a dummy model to be used for testing. All hardware is synthetic and the current config settings are loaded.
+#     Creates a dummy model to be used for testing. All hardware is synthetic and the
+#     current config settings are loaded.
 #     """
 #     # Set up the model, experiment, ETL dictionaries
 #     base_directory = Path(__file__).resolve().parent.parent
@@ -73,9 +75,10 @@ from aslm.controller.controller import Controller
 #         def __init__(self):
 #             self.synthetic_hardware = True
 
-#     # This return is used when you want a full syntethic model instead of just variable data from config files
+#     # This return is used when you want a full syntethic model instead of just
+#     # variable data from config files
 #     # return Model(False, args(), config, experiment, etl_constants)
-    
+
 #     class dummy_model():
 #         def __init__(self):
 #             self.configuration = Configurator(config)
@@ -86,7 +89,7 @@ from aslm.controller.controller import Controller
 #     # Instantiate fake model to return
 #     dumb_model = dummy_model()
 
-    
+
 #     return dumb_model
 
 class DummyController:
@@ -132,27 +135,30 @@ class DummyController:
 
 class DummyModel:
     def __init__(self):
-        # Set up the model, experiment, ETL dictionaries
+        # Set up the model, experiment, waveform dictionaries
         base_directory = Path(__file__).resolve().parent.parent
-        configuration_directory = Path.joinpath(base_directory, 'config')
+        configuration_directory = Path.joinpath(base_directory, "config")
 
-
-        self.config = Path.joinpath(configuration_directory, 'configuration.yaml')
-        self.experiment = Path.joinpath(configuration_directory, 'experiment.yml')
-        self.etl_constants = Path.joinpath(configuration_directory, 'etl_constants.yml')
+        config = Path.joinpath(configuration_directory, "configuration.yaml")
+        experiment = Path.joinpath(configuration_directory, "experiment.yml")
+        waveform_constants = Path.joinpath(
+            configuration_directory, "waveform_constants.yml"
+        )
 
         self.manager = Manager()
-        self.configuration = load_configs(self.manager,
-                                        configuration=self.config,
-                                        experiment=self.experiment,
-                                        etl_constants=self.etl_constants)
+        self.configuration = load_configs(
+            self.manager,
+            configuration=config,
+            experiment=experiment,
+            waveform_constants=waveform_constants,
+        )
 
-        # self.configuration = Configurator(config)
-        # self.experiment = Configurator(experiment)
-        # self.etl_constants = Configurator(etl_constants)
-        
         self.device = DummyDevice()
         self.signal_pipe, self.data_pipe = None, None
+
+        self.active_microscope = DummyMicroscope(
+            "dummy", self.configuration, devices_dict={}, is_synthetic=True
+        )
 
         self.signal_container = None
         self.data_container = None
@@ -160,25 +166,37 @@ class DummyModel:
         self.data_thread = None
 
         self.stop_flag = False
-        self.frame_id = 0 #signal_num
-
-        self.current_channel = 0
+        self.frame_id = 0  # signal_num
 
         self.data = []
         self.signal_records = []
         self.data_records = []
 
-        self.img_width = int(self.configuration['experiment']['CameraParameters']['x_pixels'])
-        self.img_height = int(self.configuration['experiment']['CameraParameters']['y_pixels'])
+        self.img_width = int(
+            self.configuration["experiment"]["CameraParameters"]["x_pixels"]
+        )
+        self.img_height = int(
+            self.configuration["experiment"]["CameraParameters"]["y_pixels"]
+        )
         self.number_of_frames = 10
-        self.data_buffer = np.zeros((self.number_of_frames, self.img_width, self.img_height))
-        self.data_buffer_positions = np.zeros(shape=(self.number_of_frames, 5), dtype=float)  # z-index, x, y, z, theta, f
+        self.data_buffer = np.zeros(
+            (self.number_of_frames, self.img_width, self.img_height)
+        )
+        self.data_buffer_positions = np.zeros(
+            shape=(self.number_of_frames, 5), dtype=float
+        )  # z-index, x, y, z, theta, f
 
         self.camera = {}
-        microscope_name = self.configuration['experiment']['MicroscopeState']['microscope_name']
-        for k in self.configuration['configuration']['microscopes'].keys():
-            self.camera[k] = SyntheticCamera(microscope_name, SyntheticCameraController(), self.configuration)
-            self.camera[k].initialize_image_series(self.data_buffer, self.number_of_frames)
+        microscope_name = self.configuration["experiment"]["MicroscopeState"][
+            "microscope_name"
+        ]
+        for k in self.configuration["configuration"]["microscopes"].keys():
+            self.camera[k] = SyntheticCamera(
+                microscope_name, SyntheticCameraController(), self.configuration
+            )
+            self.camera[k].initialize_image_series(
+                self.data_buffer, self.number_of_frames
+            )
 
     def signal_func(self):
         self.signal_container.reset()
@@ -186,23 +204,23 @@ class DummyModel:
             if self.signal_container:
                 self.signal_container.run()
 
-            self.signal_pipe.send('signal')
+            self.signal_pipe.send("signal")
             self.signal_pipe.recv()
 
             if self.signal_container:
                 self.signal_container.run(wait_response=True)
 
-            self.frame_id += 1 # signal_num
+            self.frame_id += 1  # signal_num
 
-        self.signal_pipe.send('shutdown')
+        self.signal_pipe.send("shutdown")
 
         self.stop_flag = True
 
     def data_func(self):
         while not self.stop_flag:
-            self.data_pipe.send('getData')
+            self.data_pipe.send("getData")
             frame_ids = self.data_pipe.recv()
-            print('receive: ', frame_ids)
+            print("receive: ", frame_ids)
             if not frame_ids:
                 continue
 
@@ -210,7 +228,7 @@ class DummyModel:
 
             if self.data_container:
                 self.data_container.run(frame_ids)
-        self.data_pipe.send('shutdown')
+        self.data_pipe.send("shutdown")
 
     def start(self, feature_list):
         if feature_list is None:
@@ -219,13 +237,13 @@ class DummyModel:
         self.signal_records = []
         self.data_records = []
         self.stop_flag = False
-        self.frame_id = 0 # signal_num
+        self.frame_id = 0  # signal_num
 
         self.signal_pipe, self.data_pipe = self.device.setup()
 
         self.signal_container, self.data_container = load_features(self, feature_list)
-        self.signal_thread = threading.Thread(target=self.signal_func, name='signal')
-        self.data_thread = threading.Thread(target=self.data_func, name='data')
+        self.signal_thread = threading.Thread(target=self.signal_func, name="signal")
+        self.data_thread = threading.Thread(target=self.data_func, name="data")
         self.signal_thread.start()
         self.data_thread.start()
 
@@ -235,9 +253,10 @@ class DummyModel:
 
         return True
 
+
 class DummyDevice:
     def __init__(self, timecost=0.2):
-        self.msg_count = mp.Value('i', 0)
+        self.msg_count = mp.Value("i", 0)
         self.sendout_msg_count = 0
         self.out_port = None
         self.in_port = None
@@ -268,22 +287,37 @@ class DummyDevice:
     def listen(self):
         while not self.stop_flag:
             signal = self.in_port.recv()
-            if signal == 'shutdown':
+            if signal == "shutdown":
                 self.stop_flag = True
                 self.in_port.close()
                 break
             self.generate_message()
-            self.in_port.send('done')
+            self.in_port.send("done")
 
     def sendout(self, timeout=100):
         while not self.stop_flag:
             msg = self.out_port.recv()
-            if msg == 'shutdown':
+            if msg == "shutdown":
                 self.out_port.close()
                 break
             c = 0
             while self.msg_count.value == self.sendout_msg_count and c < timeout:
                 time.sleep(0.01)
                 c += 1
-            self.out_port.send(list(range(self.sendout_msg_count, self.msg_count.value)))
+            self.out_port.send(
+                list(range(self.sendout_msg_count, self.msg_count.value))
+            )
             self.sendout_msg_count = self.msg_count.value
+
+
+class DummyMicroscope:
+    def __init__(self, name, configuration, devices_dict, is_synthetic=False):
+        self.microscope_name = name
+        self.configuration = configuration
+        self.data_buffer = None
+        self.stages = {}
+        self.lasers = {}
+        self.galvo = {}
+        self.daq = devices_dict.get("daq", None)
+
+        self.current_channel = 0

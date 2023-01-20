@@ -65,30 +65,28 @@ def image_intensity(input_array, psf_support_diameter_xy):
     #  Preallocate Array
     entropy = np.zeros(number_of_images)
 
-    s = np.prod([input_array.shape[x]**2 / psf_support_diameter_xy for x in axes])
+    s = np.prod([input_array.shape[x] ** 2 / psf_support_diameter_xy for x in axes])
 
     if number_of_images == 1:
-        entropy[0] = np.sum(input_array)/s
+        entropy[0] = np.sum(input_array) / s
     else:
         for image_idx in range(int(number_of_images)):
             # Add entropy value to the entropy array
-            entropy[image_idx] = np.sum(input_array[image_idx,...])/s
+            entropy[image_idx] = np.sum(input_array[image_idx, ...]) / s
 
     return entropy
 
 
-def normalized_dct_shannon_entropy(input_array,
-                                   psf_support_diameter_xy,
-                                   use_gpu=False):
+def normalized_dct_shannon_entropy(input_array, psf_support_diameter_xy, use_gpu=False):
     """
     # input_array : 2D or 3D image.  If 3D, will iterate through each 2D plane.
     # otf_support_x : Support for the OTF in the x-dimension.
     # otf_support_y : Support for the OTF in the y-dimension.
     # Returns the entropy value.
     """
-    if platform.system() != 'Darwin' and use_gpu:
+    if platform.system() != "Darwin" and use_gpu:
         import tensorflow as tf
-        
+
     # Get Image Attributes
     input_array = np.double(input_array)
     image_dimensions = input_array.ndim
@@ -140,22 +138,27 @@ def normalized_dct_shannon_entropy(input_array,
         entropy[image_idx] = image_entropy
     return entropy
 
-def fast_normalized_dct_shannon_entropy(input_array,
-                                        psf_support_diameter_xy):
+
+def fast_normalized_dct_shannon_entropy(input_array, psf_support_diameter_xy):
 
     dct_array = dctn(input_array, type=2)
     abs_array = np.abs(dct_array / np.linalg.norm(dct_array))
-    yh = int(input_array.shape[1]//psf_support_diameter_xy)
-    xh = int(input_array.shape[0]//psf_support_diameter_xy)
-    entropy = -2*np.nansum(abs_array[:xh,:yh]*np.log2(abs_array[:xh,:yh]))/(yh*xh)
+    yh = int(input_array.shape[1] // psf_support_diameter_xy)
+    xh = int(input_array.shape[0] // psf_support_diameter_xy)
+    entropy = (
+        -2 * np.nansum(abs_array[:xh, :yh] * np.log2(abs_array[:xh, :yh])) / (yh * xh)
+    )
 
     return np.atleast_1d(entropy)
 
-def estimate_image_resolution(input_array,
-                              pixel_size,
-                              number_high_pass_filters=10,
-                              fourier_samples=50,
-                              apodization_pixels=20):
+
+def estimate_image_resolution(
+    input_array,
+    pixel_size,
+    number_high_pass_filters=10,
+    fourier_samples=50,
+    apodization_pixels=20,
+):
     """
     Estimates the resolution of an image using decorrelation analysis
     https://github.com/Ades91/ImDecorr/blob/master/main_imageDecorr.m
@@ -166,11 +169,13 @@ def estimate_image_resolution(input_array,
     image = image_decorrelation.apodize_image(raw_image, apodization_pixels)
 
     # Compute Resolution
-    kcMax, A0 = image_decorrelation.get_image_decorrelation(image, np.linspace(0, 1, fourier_samples),
-                                                            number_high_pass_filters)
+    kcMax, A0 = image_decorrelation.get_image_decorrelation(
+        image, np.linspace(0, 1, fourier_samples), number_high_pass_filters
+    )
 
     resolution = 2 * pixel_size / kcMax
     return resolution
+
 
 def estimate_and_correct_flatfield(image_data: np.ndarray):
     """
@@ -186,7 +191,7 @@ def estimate_and_correct_flatfield(image_data: np.ndarray):
 
     assert image_data.ndim == 3, "Flatfield Correction: Data must be 3D"
 
-    flatfield = importlib.import_module('aslm.model.analysis.flatfield')
+    flatfield = importlib.import_module("aslm.model.analysis.flatfield")
     # Estimate Flat_Field and Dark_Field
     flat_field, dark_field = flatfield.calculate_flat_field(image_data)
 
@@ -198,11 +203,11 @@ def estimate_and_correct_flatfield(image_data: np.ndarray):
     return image_data
 
 
-if (__name__ == '__main__'):
+if __name__ == "__main__":
     from tifffile import imread
     import matplotlib.pyplot as plt
 
-    image_path = r'F:\Dean\flatfield_test.tif'
+    image_path = r"F:\Dean\flatfield_test.tif"
     raw_image = np.array(imread(image_path))
     # resolution = estimate_image_resolution(raw_image,
     #                                                 pixel_size=1.044)

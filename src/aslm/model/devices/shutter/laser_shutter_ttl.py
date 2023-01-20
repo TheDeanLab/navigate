@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -49,7 +49,8 @@ class ShutterTTL(ShutterBase):
     """ShutterTTL Class
 
     Triggering for shutters delivered from DAQ using digital outputs.
-    Each output keeps their last digital state for as long the device is not powered down.
+    Each output keeps their last digital state for as long the device is not
+    powered down.
 
     Parameters
     ----------
@@ -64,35 +65,35 @@ class ShutterTTL(ShutterBase):
     def __init__(self, microscope_name, device_connection, configuration):
         super().__init__(microscope_name, device_connection, configuration)
 
-        shutter_channel = configuration['configuration']['microscopes'][microscope_name]['shutter']['hardware']['channel']
+        shutter_channel = configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["shutter"]["hardware"]["channel"]
 
         self.shutter_task = nidaqmx.Task()
-        self.shutter_task.do_channels.add_do_chan(shutter_channel, line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
+        self.shutter_task.do_channels.add_do_chan(
+            shutter_channel, line_grouping=LineGrouping.CHAN_FOR_ALL_LINES
+        )
         self.shutter_task.write(self.shutter_state, auto_start=True)
 
     def __del__(self):
-        """Close the ShutterTTL at exit.
-        """
+        """Close the ShutterTTL at exit."""
         self.shutter_task.close()
 
     def open_shutter(self):
-        r"""Open the shutter
-        """
+        """Open the shutter"""
         self.shutter_state = True
         self.shutter_task.write(self.shutter_state, auto_start=True)
         logger.debug("ShutterTTL - Shutter opened")
 
-
     def close_shutter(self):
-        r"""CLose the shutter
-        """
+        """CLose the shutter"""
         self.shutter_state = False
         self.shutter_task.write(self.shutter_state, auto_start=True)
         logger.debug("ShutterTTL - The shutter is closed")
 
     @property
     def state(self):
-        r"""Return the state of both shutters
+        """Return the state of both shutters
 
         Returns
         -------

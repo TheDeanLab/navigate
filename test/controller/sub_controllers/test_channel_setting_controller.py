@@ -42,13 +42,14 @@ class TestChannelSettingController():
         c = dummy_controller
         self.v = dummy_controller.view
         
-        self.channel_setting = ChannelSettingController(self.v.camera_waveform.settings.channels_tab.channel_widgets_frame, c)
+        self.channel_setting = ChannelSettingController(self.v.settings.channels_tab.channel_widgets_frame, c, c.configuration_controller)
 
 
     @pytest.mark.parametrize('mode,state,state_readonly', [("stop", "normal", "readonly"), ("live", "disabled", "disabled")])
     def test_set_mode(self, mode, state, state_readonly):
 
-        self.channel_setting.mode = "stop"
+
+        self.channel_setting.set_mode(mode)
 
         for i in range(5):
             assert str(self.channel_setting.view.channel_checks[i]['state']) == state
@@ -62,3 +63,18 @@ class TestChannelSettingController():
                 assert str(self.channel_setting.view.laserpower_pulldowns[i]['state']) == state
                 assert str(self.channel_setting.view.filterwheel_pulldowns[i]["state"]) == state
                 assert str(self.channel_setting.view.defocus_spins[i]['state']) == state
+
+
+    def test_channel_callback(self):
+        # Over my head to test
+        pass
+
+
+    def test_get_vals_by_channel(self):
+        # Not needed to test IMO
+        pass
+
+
+    def test_get_index(self):
+        # Not needed to test IMO
+        pass

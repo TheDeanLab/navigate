@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -30,28 +30,32 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
+
 def combine_funcs(*funclist):
-    """this function will combine a list of functions to a new function
-    """
+    """this function will combine a list of functions to a new function"""
+
     def new_func():
         for func in funclist:
             if callable(func):
                 func()
+
     return new_func
+
 
 def build_ref_name(separator, *args):
     alist = list(map(lambda a: str(a), args))
     return separator.join(alist)
 
+
 def copy_proxy_object(content):
-    r"""This function will serialize proxy dict and list
+    """This function will serialize proxy dict and list
 
     Returns
     -------
     result: dict/list
     """
     from multiprocessing import managers
-    
+
     def func(content):
         if type(content) == managers.DictProxy:
             result = {}

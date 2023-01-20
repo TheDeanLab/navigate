@@ -1,7 +1,11 @@
 # https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
 name: Tests
 
-on: [push]
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
 
 jobs:
   test:
@@ -38,4 +42,3 @@ jobs:
           flags: unittests
           name: codecov-umbrella
           verbose: true
-  

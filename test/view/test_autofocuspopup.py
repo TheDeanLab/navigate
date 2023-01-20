@@ -35,6 +35,7 @@ import tkinter as tk
 from aslm.view.menus.autofocus_setting_popup import AutofocusPopup
 import time
 
+
 def test_autofocuspopup():
     """
     Tests that the autofocus popup and all its widgets gets created and does not

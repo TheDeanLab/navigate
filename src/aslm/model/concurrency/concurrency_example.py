@@ -1,5 +1,10 @@
 import numpy as np
-from concurrency_tools import ObjectInSubprocess, CustodyThread, ResultThread, SharedNDArray
+from concurrency_tools import (
+    ObjectInSubprocess,
+    CustodyThread,
+    ResultThread,
+    SharedNDArray,
+)
 import time
 import logging
 
@@ -9,12 +14,13 @@ logger = logging.getLogger(p)
 
 
 # Tune these values to get reliable operation on your machine:
-fps = 500           # Camera frames per second
+fps = 500  # Camera frames per second
 shape = (16, 512, 512)  # Pixel dimensions of each data buffer
-N = 10            # Number of data buffers to acquire
+N = 10  # Number of data buffers to acquire
 description = (
-    "Record -> Deconvolve -> Display -> Detect motion -> Save\n" +
-    "%d bursts of %d %dx%d frames at %d frames/second" % (N, *shape, fps))
+    "Record -> Deconvolve -> Display -> Detect motion -> Save\n"
+    + "%d bursts of %d %dx%d frames at %d frames/second" % (N, *shape, fps)
+)
 
 
 def without_concurrency():
@@ -28,7 +34,7 @@ def without_concurrency():
     display = Display()
     postprocessor = Postprocessor()
     storage = Storage()
-    data_buffers = [np.zeros(shape, dtype='uint16') for x in range(N)]
+    data_buffers = [np.zeros(shape, dtype="uint16") for x in range(N)]
 
     def timelapse(data_buffer):
         camera.record(data_buffer, fps)
@@ -40,8 +46,9 @@ def without_concurrency():
     for db in data_buffers:
         timelapse(db)
     print(
-        "Camera spends %0.0f ms working, but also spends %0.0f ms waiting!" %
-        (camera.time_working * 1000, camera.time_waiting * 1000))
+        "Camera spends %0.0f ms working, but also spends %0.0f ms waiting!"
+        % (camera.time_working * 1000, camera.time_waiting * 1000)
+    )
 
 
 def with_concurrency():
@@ -56,7 +63,7 @@ def with_concurrency():
     display = ObjectInSubprocess(Display)  # Slightly CPU-bound
     postprocessor = ObjectInSubprocess(Postprocessor)  # CPU-bound
     storage = Storage()  # IO-bound, not CPU-bound
-    data_buffers = [SharedNDArray(shape, dtype='uint16') for x in range(N)]
+    data_buffers = [SharedNDArray(shape, dtype="uint16") for x in range(N)]
 
     def timelapse(data_buffer, custody):
         # Wait in line to use the camera...
@@ -76,14 +83,18 @@ def with_concurrency():
 
     threads = []
     for db in data_buffers:
-        threads.append(CustodyThread(  # This provides the "custody" object above
-            first_resource=camera, target=timelapse, args=(db,)).start())
+        threads.append(
+            CustodyThread(  # This provides the "custody" object above
+                first_resource=camera, target=timelapse, args=(db,)
+            ).start()
+        )
     for th in threads:  # Wait for all our threads to finish
         th.get_result()
     end_time = time.perf_counter()
     print(
-        "Camera spends %0.0f ms working, but only spends %0.0f ms waiting." %
-        (camera.time_working * 1000, camera.time_waiting * 1000))
+        "Camera spends %0.0f ms working, but only spends %0.0f ms waiting."
+        % (camera.time_working * 1000, camera.time_waiting * 1000)
+    )
     print("total time cost: ", (end_time - start_time) * 1000)
 
 
@@ -96,13 +107,11 @@ def with_concurrency_lock():
     ####################################################################
     # Can't tolerate threadswitching
     camera = ObjectInSubprocess(Camera, with_lock=True)
-    preprocessor = ObjectInSubprocess(
-        Preprocessor, with_lock=True)  # CPU-bound
+    preprocessor = ObjectInSubprocess(Preprocessor, with_lock=True)  # CPU-bound
     display = ObjectInSubprocess(Display, with_lock=True)  # Slightly CPU-bound
-    postprocessor = ObjectInSubprocess(
-        Postprocessor, with_lock=True)  # CPU-bound
+    postprocessor = ObjectInSubprocess(Postprocessor, with_lock=True)  # CPU-bound
     storage = Storage()  # IO-bound, not CPU-bound
-    data_buffers = [SharedNDArray(shape, dtype='uint16') for x in range(N)]
+    data_buffers = [SharedNDArray(shape, dtype="uint16") for x in range(N)]
 
     def timelapse(data_buffer):
         camera.record(data_buffer, fps)
@@ -113,14 +122,18 @@ def with_concurrency_lock():
 
     threads = []
     for db in data_buffers:
-        threads.append(ResultThread(  # This provides the "custody" object above
-            target=timelapse, args=(db,)).start())
+        threads.append(
+            ResultThread(  # This provides the "custody" object above
+                target=timelapse, args=(db,)
+            ).start()
+        )
     for th in threads:  # Wait for all our threads to finish
         th.get_result()
     end_time = time.perf_counter()
     print(
-        "Camera spends %0.0f ms working, but only spends %0.0f ms waiting." %
-        (camera.time_working * 1000, camera.time_waiting * 1000))
+        "Camera spends %0.0f ms working, but only spends %0.0f ms waiting."
+        % (camera.time_working * 1000, camera.time_waiting * 1000)
+    )
     print("total time cost: ", (end_time - start_time) * 1000)
     ####################################################################
     # We got huge performance gains using threads, subprocesses, and
@@ -133,6 +146,7 @@ class Camera:
     def record(self, out, fps):
         """Reliable high-framerate recording doesn't tolerate any pauses"""
         import time
+
         dt = 1 / fps
         frames_dropped = 0
         start = time.perf_counter()
@@ -147,17 +161,14 @@ class Camera:
             out[which_frame, 1::2, 0::2].fill(2)
         end = time.perf_counter()
         if frames_dropped > 0:
-            print(
-                "Warning: the dummy camera dropped",
-                frames_dropped,
-                "frames")
+            print("Warning: the dummy camera dropped", frames_dropped, "frames")
         # Timing bookkeeping:
-        if not hasattr(self, 'time_working'):
+        if not hasattr(self, "time_working"):
             self.time_working = 0
             self.time_waiting = 0
-        if hasattr(self, 'last_end'):
-            self.time_waiting += (start - self.last_end)
-        self.time_working += (end - start)
+        if hasattr(self, "last_end"):
+            self.time_waiting += start - self.last_end
+        self.time_working += end - start
         self.last_end = end
 
 
@@ -173,7 +184,7 @@ class Preprocessor:
 class Display:
     def show(self, x):
         """Log-scale and normalize data, a little CPU-hungry"""
-        im = np.log1p(x, dtype='float64')
+        im = np.log1p(x, dtype="float64")
         im -= im.min()
         if im.max() > 0:
             im /= im.max()
@@ -194,11 +205,12 @@ class Storage:
     def save(self, x):
         """Saving data to disk is IO-bound rather than CPU-bound"""
         from tempfile import TemporaryFile
+
         with TemporaryFile() as f:
             np.save(f, x)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # without_concurrency()
     with_concurrency()
     with_concurrency_lock()

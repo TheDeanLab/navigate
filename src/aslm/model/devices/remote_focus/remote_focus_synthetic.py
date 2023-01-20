@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -34,8 +34,6 @@
 import logging
 
 # Third Party Imports
-import nidaqmx
-from nidaqmx.constants import AcquisitionType
 
 # Local Imports
 from aslm.model.devices.remote_focus.remote_focus_base import RemoteFocusBase
@@ -46,14 +44,11 @@ logger = logging.getLogger(p)
 
 
 class SyntheticRemoteFocus(RemoteFocusBase):
-    r"""SyntheticRemoteFocus Class
-
-     """
+    """SyntheticRemoteFocus Class"""
 
     def __init__(self, microscope_name, device_connection, configuration):
         super().__init__(microscope_name, device_connection, configuration)
         pass
-
 
     def __del__(self):
         self.stop_task()
@@ -61,13 +56,13 @@ class SyntheticRemoteFocus(RemoteFocusBase):
 
     def prepare_task(self, channel_key):
         # write waveform
-        logger.debug(f'remote focus writes the waveform for {channel_key}')
+        logger.debug(f"remote focus writes the waveform for {channel_key}")
 
     def start_task(self):
-        logger.debug('remote focus started task!')
+        logger.debug("remote focus started task!")
 
     def stop_task(self):
-        logger.debug('remote focus stopped task!')
-    
+        logger.debug("remote focus stopped task!")
+
     def close_task(self):
-        logger.debug('remote focus closed task!')
+        logger.debug("remote focus closed task!")

@@ -1,12 +1,44 @@
+# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# provided that the following conditions are met:
+#
+#      * Redistributions of source code must retain the above copyright notice,
+#      this list of conditions and the following disclaimer.
+#
+#      * Redistributions in binary form must reproduce the above copyright
+#      notice, this list of conditions and the following disclaimer in the
+#      documentation and/or other materials provided with the distribution.
+#
+#      * Neither the name of the copyright holders nor the names of its
+#      contributors may be used to endorse or promote products derived from this
+#      software without specific prior written permission.
+#
+# NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
+# THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+# CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+# PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+
+# Standard Library Imports
 import logging
 import time
 from multiprocessing.managers import ListProxy
 
 import numpy as np
 
+# Local Imports
 from aslm.model.devices.stages.stage_base import StageBase
-
-from aslm.model.waveforms import dc_value, tunable_lens_ramp
+from aslm.model.waveforms import dc_value, remote_focus_ramp
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -14,50 +46,81 @@ logger = logging.getLogger(p)
 
 
 class GalvoNIStage(StageBase):
+    """Physik Instrumente Stage Class
+    Parameters
+    ----------
+    microscope_name : str
+        Name of microscope in configuration
+    device_connection : object
+        Hardware device to connect to
+    configuration : multiprocessing.managers.DictProxy
+        Global configuration of the microscope
+    Methods
+    -------
+    create_position_dict()
+        Creates a dictionary with the hardware stage positions.
+    get_abs_position()
+        Makes sure that the move is within the min and max stage limits.
+    stop()
+        Emergency halt of stage operation.
+    """
+
     def __init__(self, microscope_name, device_connection, configuration, device_id=0):
         super().__init__(microscope_name, device_connection, configuration, device_id)
 
         # 1 V/ 100 um
-        device_config = configuration['configuration']['microscopes'][microscope_name]['stage']['hardware']
+        device_config = configuration["configuration"]["microscopes"][microscope_name][
+            "stage"
+        ]["hardware"]
 
         # eval(self.volts_per_micron, {"x": 100})
         if type(device_config) == ListProxy:
-            self.volts_per_micron = device_config[device_id]['volts_per_micron']
-            self.axes_channels = device_config[device_id]['axes_channels']
-            self.galvo_max_voltage = device_config[device_id]['max']
-            self.galvo_min_voltage = device_config[device_id]['min']
+            self.volts_per_micron = device_config[device_id]["volts_per_micron"]
+            self.axes_channels = device_config[device_id]["axes_channels"]
+            self.galvo_max_voltage = device_config[device_id]["max"]
+            self.galvo_min_voltage = device_config[device_id]["min"]
         else:
-            self.volts_per_micron = device_config['volts_per_micron']
-            self.axes_channels = device_config['axes_channels']
-            self.galvo_max_voltage = device_config['max']
-            self.galvo_min_voltage = device_config['min']
+            self.volts_per_micron = device_config["volts_per_micron"]
+            self.axes_channels = device_config["axes_channels"]
+            self.galvo_max_voltage = device_config["max"]
+            self.galvo_min_voltage = device_config["min"]
 
         self.daq = device_connection
 
         self.microscope_name = microscope_name
         self.configuration = configuration
 
-        self.trigger_source = configuration['configuration']['microscopes'][microscope_name]['daq']['trigger_source']
-        self.camera_delay_percent = configuration['configuration']['microscopes'][microscope_name]['camera']['delay_percent']
-        self.etl_ramp_falling = configuration['configuration']['microscopes'][microscope_name]['remote_focus_device']['ramp_falling_percent']
-        self.etl_delay = configuration['configuration']['microscopes'][microscope_name]['remote_focus_device']['delay_percent']
+        self.trigger_source = configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["daq"]["trigger_source"]
+        self.camera_delay_percent = configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["camera"]["delay_percent"]
+        self.remote_focus_ramp_falling = configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["remote_focus_device"]["ramp_falling_percent"]
+        self.remote_focus_delay = self.remote_focus_ramp_falling = configuration[
+            "configuration"
+        ]["microscopes"][microscope_name]["remote_focus_device"]["delay_percent"]
+        self.sample_rate = self.configuration["configuration"]["microscopes"][
+            self.microscope_name
+        ]["daq"]["sample_rate"]
+        self.sweep_time = None
+        self.samples = None
 
         self.waveform_dict = {}
-        for k in configuration['configuration']['gui']['channels'].keys():
+        for k in configuration["configuration"]["gui"]["channels"].keys():
             self.waveform_dict[k] = None
 
     # for stacking, we could have 2 axis here or not, y is for tiling, not necessary
     def report_position(self):
-        self.update_position_dictionaries()
-
+        """Reports the position for all axes, and create position dictionary."""
+        self.create_position_dict()
         return self.position_dict
 
     def move_axis_absolute(self, axis, axis_num, move_dictionary):
-        """
-        Implement movement logic along a single axis.
-
+        """Implement movement logic along a single axis.
         Example calls:
-
         Parameters
         ----------
         axis : str
@@ -66,8 +129,7 @@ class GalvoNIStage(StageBase):
             The corresponding number of this axis on a PI stage.
         move_dictionary : dict
             A dictionary of values required for movement. Includes 'x_abs', 'x_min', etc. for one or more axes.
-            Expects values in micrometers, except for theta, which is in degrees.
-
+            Expect values in micrometers, except for theta, which is in degrees.
         Returns
         -------
         bool
@@ -80,19 +142,20 @@ class GalvoNIStage(StageBase):
 
         volts = eval(self.volts_per_micron, {"x": axis_abs})
 
-        microscope_state = self.configuration['experiment']['MicroscopeState']
-        self.sample_rate = self.configuration['configuration']['microscopes'][self.microscope_name]['daq']['sample_rate']
+        microscope_state = self.configuration["experiment"]["MicroscopeState"]
 
-        for channel_key in microscope_state['channels'].keys():
+        for channel_key in microscope_state["channels"].keys():
             # channel includes 'is_selected', 'laser', 'filter', 'camera_exposure'...
-            channel = microscope_state['channels'][channel_key]
+            channel = microscope_state["channels"][channel_key]
 
             # Only proceed if it is enabled in the GUI
-            if channel['is_selected'] is True:
+            if channel["is_selected"] is True:
 
-                # Get the Waveform Parameters - Assumes ETL Delay < Camera Delay.  Should Assert.
-                exposure_time = channel['camera_exposure_time'] / 1000
-                self.sweep_time = exposure_time + exposure_time * ((self.camera_delay_percent + self.etl_ramp_falling) / 100)
+                # Get the Waveform Parameters - Assumes Remote Focus Delay < Camera Delay.  Should Assert.
+                exposure_time = channel["camera_exposure_time"] / 1000
+                self.sweep_time = exposure_time + exposure_time * (
+                    (self.camera_delay_percent + self.remote_focus_ramp_falling) / 100
+                )
                 readout_time = 0  # TODO: find a way to pass this to the stages
                 if readout_time > 0:
                     # This addresses the dovetail nature of the camera readout in normal mode. The camera reads middle
@@ -103,81 +166,99 @@ class GalvoNIStage(StageBase):
                 self.samples = int(self.sample_rate * self.sweep_time)
 
                 # Calculate the Waveforms
-                if microscope_state['image_mode'] == 'projection':
-                    z_start = microscope_state['abs_z_start']
-                    z_end = microscope_state['abs_z_end']
-                    amp = eval(self.volts_per_micron, {"x": 0.5*(z_end-z_start)})
-                    off = eval(self.volts_per_micron, {"x": 0.5*(z_end+z_start)})
-                    self.waveform_dict[channel_key] = tunable_lens_ramp(sample_rate=self.sample_rate,
-                                                                        exposure_time=exposure_time,
-                                                                        sweep_time=self.sweep_time,
-                                                                        etl_delay=self.etl_delay,
-                                                                        camera_delay=self.camera_delay_percent,
-                                                                        fall=self.etl_ramp_falling,
-                                                                        amplitude=amp,
-                                                                        offset=off)                                                    
-                # elif self.configuration['experiment']['MicroscopeState']['image_mode'] == 'confocal-projection':
-                #     z_range = self.configuration['experiment']['MicroscopeState']['scanrange']
-                #     z_offset_start = self.configuration['experiment']['MicroscopeState']['offset_start']
-                #     z_offset_end = self.configuration['experiment']['MicroscopeState']['offset_end']
-                #     z_planes = self.configuration['experiment']['MicroscopeState']['n_plane']
-                #     if z_planes == 1:
-                #         amp = eval(self.volts_per_micron, {"x": 0.5*(z_range)})
-                #         off = eval(self.volts_per_micron, {"x": 0.5*(z_offset_start)})
-                #     else:
-                #         amp = eval(self.volts_per_micron, {"x": 0.5*(z_range)})
-                #         off = eval(self.volts_per_micron, {"x": 0.5*(z_offset_end)})
-                #     self.waveform_dict[channel_key] = tunable_lens_ramp(sample_rate=self.sample_rate,
-                #                                                         exposure_time=exposure_time,
-                #                                                         sweep_time=self.sweep_time,
-                #                                                         etl_delay=self.etl_delay,
-                #                                                         camera_delay=self.camera_delay_percent,
-                #                                                         fall=self.etl_ramp_falling,
-                #                                                         amplitude=amp,
-                #                                                         offset=off)
-                elif microscope_state['image_mode'] == 'confocal-projection':
-                    z_range = microscope_state['scanrange']
-                    z_planes = microscope_state['n_plane']
-                    z_offset_start = microscope_state['offset_start']
-                    z_offset_end = microscope_state['offset_end'] if z_planes > 1 else z_offset_start
+                if (
+                    self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+                    == "projection"
+                ):
+                    z_start = self.configuration["experiment"]["MicroscopeState"][
+                        "abs_z_start"
+                    ]
+                    z_end = self.configuration["experiment"]["MicroscopeState"][
+                        "abs_z_end"
+                    ]
+                    amp = eval(self.volts_per_micron, {"x": 0.5 * (z_end - z_start)})
+                    off = eval(self.volts_per_micron, {"x": 0.5 * (z_end + z_start)})
+                    self.waveform_dict[channel_key] = remote_focus_ramp(
+                        sample_rate=self.sample_rate,
+                        exposure_time=exposure_time,
+                        sweep_time=self.sweep_time,
+                        remote_focus_delay=self.remote_focus_delay,
+                        camera_delay=self.camera_delay_percent,
+                        fall=self.remote_focus_ramp_falling,
+                        amplitude=amp,
+                        offset=off,
+                    )
+                elif (
+                    self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+                    == "confocal-projection"
+                ):
+                    z_range = microscope_state["scanrange"]
+                    z_planes = microscope_state["n_plane"]
+                    z_offset_start = microscope_state["offset_start"]
+                    z_offset_end = (
+                        microscope_state["offset_end"]
+                        if z_planes > 1
+                        else z_offset_start
+                    )
                     waveforms = []
                     if z_planes > 1:
-                        offsets = np.arange(int(z_planes)) * (z_offset_end - z_offset_start) / float(z_planes-1)
+                        offsets = (
+                            np.arange(int(z_planes))
+                            * (z_offset_end - z_offset_start)
+                            / float(z_planes - 1)
+                        )
                     else:
                         offsets = [z_offset_start]
                     print(offsets)
                     for z_offset in offsets:
-                        amp = eval(self.volts_per_micron, {"x": 0.5*(z_range)})
-                        off = eval(self.volts_per_micron, {"x": 0.5*(z_offset)})
-                        waveforms.append(tunable_lens_ramp(sample_rate=self.sample_rate,
-                                                            exposure_time=exposure_time,
-                                                            sweep_time=self.sweep_time,
-                                                            etl_delay=self.etl_delay,
-                                                            camera_delay=self.camera_delay_percent,
-                                                            fall=self.etl_ramp_falling,
-                                                            amplitude=amp,
-                                                            offset=off))
+                        amp = eval(self.volts_per_micron, {"x": 0.5 * (z_range)})
+                        off = eval(self.volts_per_micron, {"x": 0.5 * (z_offset)})
+                        waveforms.append(
+                            remote_focus_ramp(
+                                sample_rate=self.sample_rate,
+                                exposure_time=exposure_time,
+                                sweep_time=self.sweep_time,
+                                remote_focus_delay=self.remote_focus_delay,
+                                camera_delay=self.camera_delay_percent,
+                                fall=self.remote_focus_ramp_falling,
+                                amplitude=amp,
+                                offset=off,
+                            )
+                        )
                         print(waveforms[-1].shape)
-                        print(np.min(waveforms[-1]), np.mean(waveforms[-1]), np.max(waveforms[-1]))
+                        print(
+                            np.min(waveforms[-1]),
+                            np.mean(waveforms[-1]),
+                            np.max(waveforms[-1]),
+                        )
                     self.waveform_dict[channel_key] = np.hstack(waveforms)
                     self.samples = int(self.sample_rate * self.sweep_time * z_planes)
-                    print(f"Waveform with {z_planes} planes is of length {self.waveform_dict[channel_key].shape}")
+                    print(
+                        f"Waveform with {z_planes} planes is of length {self.waveform_dict[channel_key].shape}"
+                    )
                 else:
-                    self.waveform_dict[channel_key] = dc_value(sample_rate=self.sample_rate,
-                                                            sweep_time=self.sweep_time,
-                                                            amplitude=volts)
-                self.waveform_dict[channel_key][self.waveform_dict[channel_key] > self.galvo_max_voltage] = self.galvo_max_voltage
-                self.waveform_dict[channel_key][self.waveform_dict[channel_key] < self.galvo_min_voltage] = self.galvo_min_voltage
+                    self.waveform_dict[channel_key] = dc_value(
+                        sample_rate=self.sample_rate,
+                        sweep_time=self.sweep_time,
+                        amplitude=volts,
+                    )
+                self.waveform_dict[channel_key][
+                    self.waveform_dict[channel_key] > self.galvo_max_voltage
+                ] = self.galvo_max_voltage
+                self.waveform_dict[channel_key][
+                    self.waveform_dict[channel_key] < self.galvo_min_voltage
+                ] = self.galvo_min_voltage
 
-        self.daq.analog_outputs[self.axes_channels[axis_num]] = {'sample_rate': self.sample_rate,
-                                                                 'samples': self.samples,
-                                                                 'trigger_source': self.trigger_source,
-                                                                 'waveform': self.waveform_dict}
+        self.daq.analog_outputs[self.axes_channels[axis_num]] = {
+            "sample_rate": self.sample_rate,
+            "samples": self.samples,
+            "trigger_source": self.trigger_source,
+            "waveform": self.waveform_dict,
+        }
         return True
 
     def move_absolute(self, move_dictionary, wait_until_done=False):
-        """
-
+        """Move Absolute Method.
         Parameters
         ----------
         move_dictionary : dict
@@ -185,7 +266,6 @@ class GalvoNIStage(StageBase):
             Expects values in micrometers, except for theta, which is in degrees.
         wait_until_done : bool
             Block until stage has moved to its new spot.
-
         Returns
         -------
         success : bool
@@ -196,15 +276,18 @@ class GalvoNIStage(StageBase):
             success = self.move_axis_absolute(ax, i, move_dictionary)
             if success and wait_until_done is True:
                 stage_pos, n_tries, i = -1e50, 10, 0
-                target_pos = move_dictionary[f"{ax}_abs"] - getattr(self, f"int_{ax}_pos_offset",
-                                                                    0)  # TODO: should we default to 0?
+                target_pos = move_dictionary[f"{ax}_abs"] - getattr(
+                    self, f"int_{ax}_pos_offset", 0
+                )  # TODO: should we default to 0?
                 while (abs(stage_pos - target_pos) < 0.01) and (i < n_tries):
-                    #replace: stage_pos = self.mcl_controller.MCL_SingleReadN(ax, self.handle)
-                    #todo: include a call to the NI board to set a voltage
+                    #  replace: stage_pos = self.mcl_controller.MCL_SingleReadN(ax, self.handle)
+                    #  todo: include a call to the NI board to set a voltage
                     i += 1
                     time.sleep(0.01)
                 if abs(stage_pos - target_pos) > 0.01:
                     success = False
-
         return success
-    
+
+    def stop(self):
+        """Stop all stage movement abruptly."""
+        pass

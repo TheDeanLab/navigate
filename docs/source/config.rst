@@ -217,16 +217,16 @@ Here is an abbreviated example, the full file contains field entries for all of 
 
             # ...
 
-The stage field has a hardware section that should reflect similar values to the hardware section at the top of the 
+The stage field has a hardware section that should reflect similar values to the hardware section at the top of the
 configuration file. The only difference is the axes entry that explicility states the axes that the stage will control.
 This lines up with earlier, we needed to add the SyntheticStage to control theta and f. The rest of the values in the
 stage field relate to the bounds of the physical stage. This is what the software uses to set the minimum and maximum values
-for stage movement. Most stages will have different values respectively. 
+for stage movement. Most stages will have different values respectively.
 
 GUI Section
 +++++++++++
 
-The third and final section of the configuration file is the GUI parameters. 
+The third and final section of the configuration file is the GUI parameters.
 
 It will look something like the below:
 
@@ -270,7 +270,7 @@ It will look something like the below:
             max: 1000
             step: 1
 
-The values in each field relate to GUI widgets. They will set the min, max and step size for each of the 
+The values in each field relate to GUI widgets. They will set the min, max and step size for each of the
 respective spinboxes in the example above.
 
 .. note::

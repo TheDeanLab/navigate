@@ -28,17 +28,6 @@ CameraParameters:
   pixel_size: 6.5
   frames_to_average: 1.0
   databuffer_size: 100
-RemoteFocusParameters:
-  remote_focus_l_delay_percent: 7.5
-  remote_focus_l_ramp_rising_percent: 85
-  remote_focus_l_ramp_falling_percent: 2.5
-  remote_focus_l_amplitude: 0.7
-  remote_focus_l_offset: 2.3
-  remote_focus_r_delay_percent: 7.5
-  remote_focus_r_ramp_rising_percent: 85
-  remote_focus_r_ramp_falling_percent: 2.5
-  remote_focus_r_amplitude: 0.7
-  remote_focus_r_offset: 2.3
 AutoFocusParameters:
   coarse_range: 500
   coarse_step_size: 50
@@ -46,14 +35,6 @@ AutoFocusParameters:
   fine_range: 50
   fine_step_size: 5
   fine_selected: True
-GalvoParameters:
-  Mesoscale:
-    frequency: 99.9
-    amplitude: 2.5
-    offset: 0
-  Nanoscale:
-    offset: 0
-    frequency: 0
 StageParameters:
   xy_step: 500.0
   z_step: 500.0
@@ -76,13 +57,12 @@ MicroscopeState:
   number_z_steps: 500.0
   timepoints: 1
   stack_pause: 0.0
-  etl_amplitude: 0
-  etl_offset: 0
   is_save: False
   stack_acq_time: 199.9999999999972
   timepoint_interval: 0
   experiment_duration: 600.0899999999995
   is_multiposition: False
+  selected_channels: 3
   channels: {'channel_1': {'is_selected': True, 'laser': '488nm', 'laser_index': 0, 'filter': 'GFP - FF01-515/30-32', 'filter_position': 1, 'camera_exposure_time': 200.0, 'laser_power': '20', 'interval_time': '1', 'defocus': 0.0}, 'channel_2': {'is_selected': True, 'laser': '562nm', 'laser_index': 1, 'filter': 'RFP - FF01-595/31-32', 'filter_position': 2, 'camera_exposure_time': 200.0, 'laser_power': '20', 'interval_time': '1', 'defocus': 0.0}, 'channel_3': {'is_selected': True, 'laser': '642nm', 'laser_index': 2, 'filter': 'Far-Red - BLP01-647R/31-32', 'filter_position': 3, 'camera_exposure_time': 200.0, 'laser_power': '20', 'interval_time': '1', 'defocus': 0.0}}
   stack_z_origin: 0
   stack_focus_origin: 0

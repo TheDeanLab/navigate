@@ -3,7 +3,7 @@ name: Build Wheel
 
 on:
   release:
-    types: 
+    types:
       - published
 
 jobs:

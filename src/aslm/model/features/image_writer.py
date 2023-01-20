@@ -39,6 +39,7 @@ import logging
 
 # Local imports
 from aslm.model import data_sources
+
 # from aslm.tools.image import text_array
 
 # Logger Setup
@@ -47,7 +48,7 @@ logger = logging.getLogger(p)
 
 
 class ImageWriter:
-    def __init__(self, model, sub_dir='', image_name=None):
+    def __init__(self, model, sub_dir="", image_name=None):
         """
         Class for saving acquired data to disk.
 
@@ -62,30 +63,44 @@ class ImageWriter:
             Optionally override the generate_image_name() naming scheme.
         """
         self.model = model
-        self.save_directory = ''
+        self.save_directory = ""
         self.sub_dir = sub_dir
         # self.num_of_channels = len(self.model.configuration['experiment']['MicroscopeState']['channels'].keys())
-        self.num_of_channels = len([k for k, v in self.model.configuration['experiment']['MicroscopeState']['channels'].items() if v['is_selected']])
+        self.num_of_channels = len(
+            [
+                k
+                for k, v in self.model.configuration["experiment"]["MicroscopeState"][
+                    "channels"
+                ].items()
+                if v["is_selected"]
+            ]
+        )
         self.data_buffer = self.model.data_buffer
         self.current_time_point = 0
-        self.config_table = {'signal': {},
-                             'data': {'main': self.save_image,
-                                      'cleanup': self.close}}
+        self.config_table = {
+            "signal": {},
+            "data": {"main": self.save_image, "cleanup": self.close},
+        }
 
         # create the save directory if it doesn't already exist
-        self.save_directory = os.path.join(self.model.configuration['experiment']['Saving']['save_directory'], self.sub_dir)
+        self.save_directory = os.path.join(
+            self.model.configuration["experiment"]["Saving"]["save_directory"],
+            self.sub_dir,
+        )
         try:
             # create saving folder if not exits
             if not os.path.exists(self.save_directory):
                 os.makedirs(self.save_directory)
         except FileNotFoundError as e:
-            logger.debug(f"ASLM Image Writer - Cannot create directory {self.save_directory}. Maybe the drive does not exist?")
+            logger.debug(
+                f"ASLM Image Writer - Cannot create directory {self.save_directory}. Maybe the drive does not exist?"
+            )
             logger.exception(e)
-        
+
         # Set up the file name and path in the save directory
-        self.file_type = self.model.configuration['experiment']['Saving']['file_type']
-        current_channel = self.model.current_channel
-        ext = '.' + self.file_type.lower().replace(' ','.').replace('-','.')
+        self.file_type = self.model.configuration["experiment"]["Saving"]["file_type"]
+        current_channel = self.model.active_microscope.current_channel
+        ext = "." + self.file_type.lower().replace(" ", ".").replace("-", ".")
         if image_name is None:
             image_name = self.generate_image_name(current_channel, ext=ext)
         file_name = os.path.join(self.save_directory, image_name)
@@ -94,7 +109,9 @@ class ImageWriter:
         self.data_source = data_sources.get_data_source(self.file_type)(file_name)
 
         # Pass experiment and configuration to metadata
-        self.data_source.set_metadata_from_configuration_experiment(self.model.configuration)
+        self.data_source.set_metadata_from_configuration_experiment(
+            self.model.configuration
+        )
 
     def save_image(self, frame_ids):
         """Save the data to disk.
@@ -108,12 +125,14 @@ class ImageWriter:
             # data = self.model.data_buffer[idx]
             # text_im = text_array(f"Image {idx}")
             # data[:text_im.shape[0], :text_im.shape[1]] += text_im.astype('uint16')*np.maximum(np.max(data)//2, 1)
-            self.data_source.write(self.model.data_buffer[idx],  # data,
-                                   x=self.model.data_buffer_positions[idx][0],
-                                   y=self.model.data_buffer_positions[idx][1],
-                                   z=self.model.data_buffer_positions[idx][2],
-                                   theta=self.model.data_buffer_positions[idx][3],
-                                   f=self.model.data_buffer_positions[idx][4])
+            self.data_source.write(
+                self.model.data_buffer[idx],  # data,
+                x=self.model.data_buffer_positions[idx][0],
+                y=self.model.data_buffer_positions[idx][1],
+                z=self.model.data_buffer_positions[idx][2],
+                theta=self.model.data_buffer_positions[idx][3],
+                f=self.model.data_buffer_positions[idx][4],
+            )
 
     def generate_image_name(self, current_channel, ext=".tif"):
         """
@@ -122,18 +141,24 @@ class ImageWriter:
         Parameters
         ----------
         current_channel : int
-            Index into self.model.configuration['experiment']['MicroscopeState']['channels'] 
+            Index into self.model.configuration['experiment']['MicroscopeState']['channels']
             of saved color channel.
         """
-        image_name = "CH0" + str(current_channel) + "_" + str(self.current_time_point).zfill(6) + ext
+        image_name = (
+            "CH0"
+            + str(current_channel)
+            + "_"
+            + str(self.current_time_point).zfill(6)
+            + ext
+        )
         self.current_time_point += 1
         return image_name
 
     def generate_meta_data(self):
         # TODO: Is this a vestigial function? DELETE???
-        print('meta data: write', self.model.frame_id)
+        print("meta data: write", self.model.frame_id)
         return True
-    
+
     def close(self):
-        """ Close the data source we are writing to. """
-        self.data_source.close() 
+        """Close the data source we are writing to."""
+        self.data_source.close()

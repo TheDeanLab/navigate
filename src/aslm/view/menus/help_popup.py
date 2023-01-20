@@ -1,5 +1,3 @@
-# ASLM Model Waveforms
-
 # Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
@@ -43,7 +41,8 @@ import logging
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-class help_popup():
+
+class help_popup:
     """
     #### Class creates the popup that provides list of hot keys.
     """
@@ -51,25 +50,18 @@ class help_popup():
     def __init__(self, root, *args, **kwargs):
         # Creating popup window with this name and size/placement, PopUp is a
         # Toplevel window
-        self.popup = PopUp(
-            root,
-            "Help",
-            '+320+180',
-            top=False,
-            transient=False)
+        self.popup = PopUp(root, "Help", "+320+180", top=False, transient=False)
 
         # Creating content frame
-        content_frame = self.popup.get_frame()   
+        content_frame = self.popup.get_frame()
 
-        
-           # Formatting
-        tk.Grid.columnconfigure(content_frame, 'all', weight=1)
-        tk.Grid.rowconfigure(content_frame, 'all', weight=1)
+        # Formatting
+        tk.Grid.columnconfigure(content_frame, "all", weight=1)
+        tk.Grid.rowconfigure(content_frame, "all", weight=1)
 
         """Creating the widgets for the popup"""
         # Dictionary for all the variables
         self.inputs = {}
-
 
         # Label Lists
         text = [
@@ -78,10 +70,8 @@ class help_popup():
             "Mouse Wheel: Digitally zoom in or out on image based on scroll direction",
             "Double Click Row Header: Moves stage to the position given by the row",
             "Control + 1, 2, 3 or 4: Changes to selected tab",
-            "This is where all the basic usage instructions will go"
+            "This is where all the basic usage instructions will go",
         ]
-
-        
 
         # Titles
         basic_title = ttk.Labelframe(content_frame, text="Basic Operating Info")
@@ -103,7 +93,6 @@ class help_popup():
 
         # Text for Main Window
         switch_tab = ttk.Label(main_win, text=text[4])
-
 
         # Gridding Titles
         basic_title.grid(row=0, column=0, sticky=(tk.NSEW), padx=5, pady=5)
@@ -127,5 +116,3 @@ class help_popup():
 
     def get_widgets(self):
         return self.inputs
-
-

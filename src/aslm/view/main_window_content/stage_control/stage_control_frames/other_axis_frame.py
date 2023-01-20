@@ -1,5 +1,3 @@
-# ASLM Model Waveforms
-
 # Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
@@ -30,6 +28,7 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+
 # Standard Imports
 import tkinter as tk
 from tkinter import ttk
@@ -40,30 +39,42 @@ from aslm.view.custom_widgets.validation import ValidatedSpinbox
 
 import logging
 from pathlib import Path
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+
 class other_axis_frame(ttk.Labelframe):
     def __init__(other_axis_frame, stage_control_tab, name, *args, **kwargs):
-        #Init Frame
+        # Init Frame
         label = name
-        ttk.Labelframe.__init__(other_axis_frame, stage_control_tab, text= label + " Movement", *args, **kwargs)
+        ttk.Labelframe.__init__(
+            other_axis_frame,
+            stage_control_tab,
+            text=label + " Movement",
+            *args,
+            **kwargs
+        )
         other_axis_frame.name = name
-        
+
         # Formatting
-        tk.Grid.columnconfigure(other_axis_frame, 'all', weight=1)
-        tk.Grid.rowconfigure(other_axis_frame, 'all', weight=1)
+        tk.Grid.columnconfigure(other_axis_frame, "all", weight=1)
+        tk.Grid.rowconfigure(other_axis_frame, "all", weight=1)
 
         image_directory = Path(__file__).resolve().parent
-        other_axis_frame.up_image = tk.PhotoImage(file=image_directory.joinpath("images", "greyup.png"))
-        other_axis_frame.down_image = tk.PhotoImage(file=image_directory.joinpath("images", "greydown.png"))
-        other_axis_frame.up_image = other_axis_frame.up_image.subsample(2,2)
-        other_axis_frame.down_image = other_axis_frame.down_image.subsample(2,2)
+        other_axis_frame.up_image = tk.PhotoImage(
+            file=image_directory.joinpath("images", "greyup.png")
+        )
+        other_axis_frame.down_image = tk.PhotoImage(
+            file=image_directory.joinpath("images", "greydown.png")
+        )
+        other_axis_frame.up_image = other_axis_frame.up_image.subsample(2, 2)
+        other_axis_frame.down_image = other_axis_frame.down_image.subsample(2, 2)
 
-        #Setting up buttons for up, down, zero and increment spinbox
+        # Setting up buttons for up, down, zero and increment spinbox
 
-        #Up button
+        # Up button
         other_axis_frame.up_btn = tk.Button(
             other_axis_frame,
             image=other_axis_frame.up_image,
@@ -72,7 +83,7 @@ class other_axis_frame(ttk.Labelframe):
             # text="\N{UPWARDS BLACK ARROW}",
         )
 
-        #Down button
+        # Down button
         other_axis_frame.down_btn = tk.Button(
             other_axis_frame,
             image=other_axis_frame.down_image,
@@ -81,21 +92,20 @@ class other_axis_frame(ttk.Labelframe):
             # text="\N{DOWNWARDS BLACK ARROW}",
         )
 
-        #Zero button
+        # Zero button
         other_axis_frame.zero_btn = ttk.Button(
             other_axis_frame,
             text="ZERO " + other_axis_frame.name,
         )
 
-        #Increment spinbox
+        # Increment spinbox
 
         other_axis_frame.increment_box = LabelInput(
             parent=other_axis_frame,
             input_class=ValidatedSpinbox,
             input_var=tk.DoubleVar(),
-            input_args={'width': 5}
+            input_args={"width": 5},
         )
-
 
         """
         Grid for buttons
@@ -113,21 +123,21 @@ class other_axis_frame(ttk.Labelframe):
         Zero is 4
         """
 
-
-        #Gridding out buttons
-        other_axis_frame.up_btn.grid(row=0, column=0, pady=2) #UP
-        other_axis_frame.down_btn.grid(row=3, column=0, pady=2) #DOWN
+        # Gridding out buttons
+        other_axis_frame.up_btn.grid(row=0, column=0, pady=2)  # UP
+        other_axis_frame.down_btn.grid(row=3, column=0, pady=2)  # DOWN
         # other_axis_frame.zero_btn.grid(row=1, column=0, pady=(5,2)) #Zero Z
-        other_axis_frame.increment_box.grid(row=2, column=0, pady=2) #Increment spinbox
+        other_axis_frame.increment_box.grid(
+            row=2, column=0, pady=2
+        )  # Increment spinbox
         other_axis_frame.increment_box.widget.set_precision(-1)
-
 
     def get_widget(other_axis_frame):
         return other_axis_frame.increment_box
 
     def get_buttons(other_axis_frame):
         return {
-            'up': other_axis_frame.up_btn,
-            'down': other_axis_frame.down_btn,
-            'zero': other_axis_frame.zero_btn
+            "up": other_axis_frame.up_btn,
+            "down": other_axis_frame.down_btn,
+            "zero": other_axis_frame.zero_btn,
         }

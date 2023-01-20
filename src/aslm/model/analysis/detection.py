@@ -1,37 +1,33 @@
-"""
-ASLM detection protocols.
+# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# All rights reserved.
 
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
-All rights reserved.
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# provided that the following conditions are met:
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-provided that the following conditions are met:
+#      * Redistributions of source code must retain the above copyright notice,
+#      this list of conditions and the following disclaimer.
 
-     * Redistributions of source code must retain the above copyright notice,
-     this list of conditions and the following disclaimer.
+#      * Redistributions in binary form must reproduce the above copyright
+#      notice, this list of conditions and the following disclaimer in the
+#      documentation and/or other materials provided with the distribution.
 
-     * Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in the
-     documentation and/or other materials provided with the distribution.
+#      * Neither the name of the copyright holders nor the names of its
+#      contributors may be used to endorse or promote products derived from this
+#      software without specific prior written permission.
 
-     * Neither the name of the copyright holders nor the names of its
-     contributors may be used to endorse or promote products derived from this
-     software without specific prior written permission.
-
-NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
-THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
-CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
-CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
-BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-"""
+# NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
+# THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+# CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+# PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
 
 # Third Party Modules
 import numpy as np
@@ -44,6 +40,7 @@ from scipy import ndimage, signal
 import matplotlib.pyplot as plt
 import logging
 from pathlib import Path
+
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -56,9 +53,8 @@ def add_median_border(image_data):
     """
     (z_len, y_len, x_len) = image_data.shape
     median_intensity = np.median(image_data)
-    padded_image_data = np.full(
-        (z_len + 2, y_len + 2, x_len + 2), median_intensity)
-    padded_image_data[1:z_len + 1, 1:y_len + 1, 1:x_len + 1] = image_data
+    padded_image_data = np.full((z_len + 2, y_len + 2, x_len + 2), median_intensity)
+    padded_image_data[1 : z_len + 1, 1 : y_len + 1, 1 : x_len + 1] = image_data
     return padded_image_data
 
 
@@ -78,11 +74,8 @@ def make_sphere_3D(radius):
 
 
 def make_inside_image(
-        padded_image_data,
-        insideGamma,
-        insideBlur,
-        insideDilateRadius,
-        insideErodeRadius):
+    padded_image_data, insideGamma, insideBlur, insideDilateRadius, insideErodeRadius
+):
     """
     # Function tries to fill the interior of a cell.
     # Gaussian blur followed by Otsu thresholding, dilation, hole filling, and erosion.
@@ -92,10 +85,7 @@ def make_inside_image(
     image_binary = image_blurred > threshold_otsu(image_blurred)
     image_binary = dilation(image_binary, make_sphere_3D(insideDilateRadius))
     image_binary = ndimage.binary_fill_holes(image_binary)
-    image_binary = np.double(
-        erosion(
-            image_binary,
-            make_sphere_3D(insideErodeRadius)))
+    image_binary = np.double(erosion(image_binary, make_sphere_3D(insideErodeRadius)))
     inside_image = gaussian_filter(image_binary, sigma=1)
     return inside_image
 
@@ -120,13 +110,14 @@ def surface_filter_gauss_3D(image_data, sigma):
 
     # Calculate 1D Gaussian
     for i in range(int(x.size)):
-        g[i] = np.exp(-x[i]**2 / (2 * sigma**2))
+        g[i] = np.exp(-x[i] ** 2 / (2 * sigma**2))
 
     # Calculate Second Derivative of 1D Gaussian
     d2g = np.zeros(x.shape)
     for i in range(int(x.size)):
-        d2g[i] = (-(x[i]**2 / sigma**2 - 1) / sigma**2) * \
-            (np.exp(-x[i]**2 / (2 * sigma**2)))
+        d2g[i] = (-(x[i] ** 2 / sigma**2 - 1) / sigma**2) * (
+            np.exp(-x[i] ** 2 / (2 * sigma**2))
+        )
 
     gSum = np.sum(g)
 
@@ -136,19 +127,19 @@ def surface_filter_gauss_3D(image_data, sigma):
     d2g = d2g / gSum
 
     # Second Derivative of 1D Gaussian Kernel in Z
-    d2z_image = signal.fftconvolve(image_data, d2g[:, None, None], mode='same')
-    d2z_image = signal.fftconvolve(d2z_image, g[None, :, None], mode='same')
-    d2z_image = signal.fftconvolve(d2z_image, g[None, None, :], mode='same')
+    d2z_image = signal.fftconvolve(image_data, d2g[:, None, None], mode="same")
+    d2z_image = signal.fftconvolve(d2z_image, g[None, :, None], mode="same")
+    d2z_image = signal.fftconvolve(d2z_image, g[None, None, :], mode="same")
 
     # Second Derivative of 1D Gaussian Kernel in Y
-    d2y_image = signal.fftconvolve(image_data, d2g[None, :, None], mode='same')
-    d2y_image = signal.fftconvolve(d2y_image, g[None, None, :], mode='same')
-    d2y_image = signal.fftconvolve(d2y_image, g[:, None, None], mode='same')
+    d2y_image = signal.fftconvolve(image_data, d2g[None, :, None], mode="same")
+    d2y_image = signal.fftconvolve(d2y_image, g[None, None, :], mode="same")
+    d2y_image = signal.fftconvolve(d2y_image, g[:, None, None], mode="same")
 
     # Second Derivative of 1D Gaussian Kernel in X
-    d2x_image = signal.fftconvolve(image_data, d2g[None, None, :], mode='same')
-    d2x_image = signal.fftconvolve(d2x_image, g[:, None, None], mode='same')
-    d2x_image = signal.fftconvolve(d2x_image, g[None, :, None], mode='same')
+    d2x_image = signal.fftconvolve(image_data, d2g[None, None, :], mode="same")
+    d2x_image = signal.fftconvolve(d2x_image, g[:, None, None], mode="same")
+    d2x_image = signal.fftconvolve(d2x_image, g[None, :, None], mode="same")
 
     return d2z_image, d2y_image, d2x_image
 
@@ -162,8 +153,7 @@ def multiscale_surface_filter_3D(input, scales: list):
     max_response_scale = np.zeros(np.shape(input))
 
     for i in range(n_scales):
-        d2z_temp, d2y_temp, d2x_temp = surface_filter_gauss_3D(
-            input, scales[i])
+        d2z_temp, d2y_temp, d2x_temp = surface_filter_gauss_3D(input, scales[i])
         d2z_temp[d2z_temp < 0] = 0
         d2y_temp[d2y_temp < 0] = 0
         d2x_temp[d2x_temp < 0] = 0
@@ -175,8 +165,7 @@ def multiscale_surface_filter_3D(input, scales: list):
 
     surface_background_mean = np.mean(max_response)
     surface_background_std = np.std(max_response)
-    surface_threshold = surface_background_mean + \
-        (nSTDsurface * surface_background_std)
+    surface_threshold = surface_background_mean + (nSTDsurface * surface_background_std)
     surface_cell = max_response - surface_threshold
     surface_cell = max_response / np.std(max_response)
 
@@ -188,11 +177,7 @@ def combine_images(inside_image, normalized_cell, surface_cell):
     # Function combines the inside image, normalized cell, and surface cell images.
     """
     level = 0.999
-    combined_image = np.maximum(
-        np.maximum(
-            inside_image,
-            normalized_cell),
-        surface_cell)
+    combined_image = np.maximum(np.maximum(inside_image, normalized_cell), surface_cell)
     combined_image[combined_image < 0] = 0
     combined_image = combined_image > level
     combined_image = binary_fill_holes(combined_image)
@@ -220,7 +205,8 @@ def three_level_segmentation(image_data):
         insideGamma,
         insideBlur,
         insideDilateRadius,
-        insideErodeRadius)
+        insideErodeRadius,
+    )
     normalized_cell = make_normalized_image(padded_image_data)
     surface_cell = multiscale_surface_filter_3D(padded_image_data, scales)
     final_image = combine_images(inside_image, normalized_cell, surface_cell)
@@ -230,18 +216,16 @@ def three_level_segmentation(image_data):
 def log_detection(image_data, image_threshold=None, pixel_size=0.206):
     # https://github.com/scikit-image/scikit-image/blob/v0.19.0/skimage/feature/blob.py#L401-L564
     blobs_log = blob_log(
-        image_data,
-        max_sigma=20,
-        num_sigma=3,
-        threshold=image_threshold)
+        image_data, max_sigma=20, num_sigma=3, threshold=image_threshold
+    )
     blobs_log[:, 2] = blobs_log[:, 2] * np.sqrt(2) * pixel_size
 
     blobs_dog = blob_dog(image_data, max_sigma=20, threshold=image_threshold)
     blobs_dog[:, 2] = blobs_dog[:, 2] * np.sqrt(2) * pixel_size
 
     blobs_list = [blobs_log, blobs_dog]
-    colors = ['yellow', 'lime']
-    titles = ['Laplacian of Gaussian', 'Difference of Gaussian']
+    colors = ["yellow", "lime"]
+    titles = ["Laplacian of Gaussian", "Difference of Gaussian"]
     sequence = zip(blobs_list, colors, titles)
 
     fig, axes = plt.subplots(1, 2, figsize=(9, 3), sharex=True, sharey=True)
@@ -263,7 +247,7 @@ def log_detection(image_data, image_threshold=None, pixel_size=0.206):
     plt.show()
 
 
-if (__name__ == "__main__"):
+if __name__ == "__main__":
     from tifffile import imread
 
     # # Define Inputs
@@ -281,6 +265,6 @@ if (__name__ == "__main__"):
     # print('The Image Dimensions Are: ' + str(image_data.shape))
     #
 
-    image_directory = '/Users/S155475/Downloads/1_CH00_000000-1.tif'
+    image_directory = "/Users/S155475/Downloads/1_CH00_000000-1.tif"
     image_data = np.array(imread(image_directory))
     log_detection(image_data, image_threshold=None, pixel_size=0.206)

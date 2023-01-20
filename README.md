@@ -1,4 +1,5 @@
-# Axially Swept Light-Sheet Microscopy
+# ASLM - Autonomous Software for Light Microscopy
+
 
 [![Tests](https://github.com/AdvancedImagingUTSW/ASLM/actions/workflows/push_checks.yaml/badge.svg)](https://github.com/AdvancedImagingUTSW/ASLM/actions/workflows/push_checks.yaml)
 [![codecov](https://codecov.io/gh/TheDeanLab/ASLM/branch/develop/graph/badge.svg?token=270RFSZGG5)](https://codecov.io/gh/TheDeanLab/ASLM)
@@ -13,8 +14,8 @@ Please refer to and contribute to the documentation, which can be found on GitHu
 
 * Input Arguments:
   	* -sh, --synthetic_hardware
- 	* -d, --debug   
-	* --CPU 
+ 	* -d, --debug
+	* --CPU
   	* --config_file CONFIG_FILE
   	* --experiment_file EXPERIMENT_FILE
   	* --etl_const_file ETL_CONST_FILE
@@ -35,4 +36,3 @@ python main.py -sh
 * Samir Mamtani
 * Renil Gupta
 * Andrew Jamieson
-

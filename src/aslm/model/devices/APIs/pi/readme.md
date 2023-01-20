@@ -10,7 +10,7 @@ By using PIPython you agree to the license agreement, see the provided file:
 
     eula.md
 
-### From local folder 
+### From local folder
 
 Unzip the file PIPython.zip, open a command entry (Linux Console or Windows CMD window) and run:
 
@@ -28,9 +28,9 @@ For further reading open the *index.html* file in your browser and see the sampl
 
 ### From pypi.org
 
-    pip install PIPython    
+    pip install PIPython
 
-### Feedback 
+### Feedback
 
 We appreciate your feedback at:
 
@@ -244,7 +244,7 @@ raise GCSError(gcserror.E_1024_PI_MOTION_ERROR)
 
 #### GCS 3.0
 
-- to reset the error state of 1 or more axes 
+- to reset the error state of 1 or more axes
 ~~~python
 for axis in device.axes:
     if axis_has_error(device):

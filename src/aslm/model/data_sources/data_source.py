@@ -1,11 +1,43 @@
+# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# All rights reserved.
+
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# provided that the following conditions are met:
+
+#      * Redistributions of source code must retain the above copyright notice,
+#      this list of conditions and the following disclaimer.
+
+#      * Redistributions in binary form must reproduce the above copyright
+#      notice, this list of conditions and the following disclaimer in the
+#      documentation and/or other materials provided with the distribution.
+
+#      * Neither the name of the copyright holders nor the names of its
+#      contributors may be used to endorse or promote products derived from this
+#      software without specific prior written permission.
+
+# NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
+# THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+# CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+# PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+
 import logging
 
 import numpy.typing as npt
 
 from multiprocessing.managers import DictProxy
 
+
 class DataSource:
-    def __init__(self, file_name: str = '', mode: str = 'w') -> None:
+    def __init__(self, file_name: str = "", mode: str = "w") -> None:
         """
         Base class for data sources, which can be of arbitrary file type.
         This implements read and write methods for accessing each data source.
@@ -25,10 +57,16 @@ class DataSource:
         self._mode = None
 
         self.dx, self.dy, self.dz = 1, 1, 1  # pixel sizes (um)
-        self.dt = 1                          # time displacement (s)
-        self.dc = 1                          # step size between channels, should always be 1
+        self.dt = 1  # time displacement (s)
+        self.dc = 1  # step size between channels, should always be 1
         # shape
-        self.shape_x, self.shape_y, self.shape_z, self.shape_t, self.shape_c = 1, 1, 1, 1, 1
+        self.shape_x, self.shape_y, self.shape_z, self.shape_t, self.shape_c = (
+            1,
+            1,
+            1,
+            1,
+            1,
+        )
         self.positions = 1
 
         self.mode = mode
@@ -41,17 +79,17 @@ class DataSource:
     def mode(self, mode_str) -> None:
         if mode_str == self._mode:
             return
-        if mode_str in ['r', 'w']:
+        if mode_str in ["r", "w"]:
             self._mode = mode_str
         else:
             self.logger.warning(f"Unknown mode {mode_str}. Setting to 'r'.")
-            self._mode = 'r'
+            self._mode = "r"
         self._mode_checks()
 
     @property
     def data(self) -> npt.ArrayLike:
         """Return array representation of data stored in data source."""
-        raise NotImplementedError('Implemented in a derived class.')
+        raise NotImplementedError("Implemented in a derived class.")
 
     @property
     def voxel_size(self) -> tuple:
@@ -63,12 +101,20 @@ class DataSource:
         """Return shape as XYCZT."""
         return (self.shape_x, self.shape_y, self.shape_c, self.shape_z, self.shape_t)
 
-    def set_metadata_from_configuration_experiment(self, configuration: DictProxy) -> None:
+    def set_metadata_from_configuration_experiment(
+        self, configuration: DictProxy
+    ) -> None:
         self.metadata.configuration = configuration
 
         # pull new values from the metadata
         self.dx, self.dy, self.dz = self.metadata.voxel_size
-        self.shape_x, self.shape_y, self.shape_c, self.shape_z, self.shape_t = self.metadata.shape
+        (
+            self.shape_x,
+            self.shape_y,
+            self.shape_c,
+            self.shape_z,
+            self.shape_t,
+        ) = self.metadata.shape
         self.positions = self.metadata.positions
 
     def _cztp_indices(self, frame_id: int, per_stack: bool = True) -> tuple:
@@ -76,10 +122,10 @@ class DataSource:
 
         per_stack indicates if we move through z (per_stack=True) or c fastest.
         we move through positions slower than z or c. we move through time slower than z, c or p.
-        
+
         Parameters
         ----------
-        frame_id : int 
+        frame_id : int
             Frame number in the stack.
         per_stack : bool
             Are we acquiring images along z before c? See experiment.yml.
@@ -104,29 +150,29 @@ class DataSource:
             else:
                 c = frame_id % self.shape_c
                 z = (frame_id // self.shape_c) % self.shape_z
-            
-            t = frame_id // (self.shape_c*self.shape_z*self.positions)
-            p = (frame_id // (self.shape_c*self.shape_z)) % self.positions
+
+            t = frame_id // (self.shape_c * self.shape_z * self.positions)
+            p = (frame_id // (self.shape_c * self.shape_z)) % self.positions
         else:
             # Timepoint acqusition, only c varies faster than t
             c = frame_id % self.shape_c
             t = (frame_id // self.shape_c) % self.shape_t
-            z = (frame_id // (self.shape_c*self.shape_t)) % self.shape_z
-            p = (frame_id // (self.shape_c*self.shape_t)) % self.positions
+            z = (frame_id // (self.shape_c * self.shape_t)) % self.shape_z
+            p = (frame_id // (self.shape_c * self.shape_t)) % self.positions
 
         return c, z, t, p
 
     def _mode_checks(self) -> None:
         """Run additional checks after setting the mode."""
         pass
-    
+
     def write(self, data: npt.ArrayLike, **kw) -> None:
         """Write data to file."""
-        raise NotImplementedError('Implemented in a derived class.')
-    
+        raise NotImplementedError("Implemented in a derived class.")
+
     def read(self) -> None:
         """Read data from file."""
-        raise NotImplementedError('Implemented in a derived class.')
+        raise NotImplementedError("Implemented in a derived class.")
 
     def close(self) -> None:
         """Clean up any leftover file pointers, etc."""

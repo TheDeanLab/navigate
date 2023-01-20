@@ -1,5 +1,3 @@
-# ASLM Model Waveforms
-
 # Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
@@ -35,6 +33,7 @@ import tkinter as tk
 from aslm.view.main_window_content.acquire_bar_frame.acquire_popup import AcquirePopUp
 import time
 
+
 def test_acquirepopup():
     """
     Tests that the acquire popup and all its widgets gets created and does not
@@ -55,5 +54,5 @@ def test_acquirepopup():
     time.sleep(3)
     bool = isinstance(acq_pop, AcquirePopUp)
     root.destroy()
-    
+
     assert bool

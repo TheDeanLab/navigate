@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -37,8 +37,9 @@ import os
 
 from .common_functions import copy_proxy_object
 
+
 def create_save_path(saving_settings):
-    r"""Create path to save the data to.
+    """Create path to save the data to.
 
     This function retrieves the user inputs from the popup save window.
     It then creates a new directory in the user specified path.
@@ -53,11 +54,11 @@ def create_save_path(saving_settings):
     save_directory : str
         Path to save data to.
     """
-    root_directory = saving_settings['root_directory']
-    user_string = saving_settings['user']
-    tissue_string = saving_settings['tissue']
-    cell_type_string = saving_settings['celltype']
-    label_string = saving_settings['label']
+    root_directory = saving_settings["root_directory"]
+    user_string = saving_settings["user"]
+    tissue_string = saving_settings["tissue"]
+    cell_type_string = saving_settings["celltype"]
+    label_string = saving_settings["label"]
     date_string = str(datetime.now().date())
 
     # Make sure that there are no spaces in the variables
@@ -67,18 +68,22 @@ def create_save_path(saving_settings):
     label_string = label_string.replace(" ", "-")
 
     # Create the save directory on disk.
-    save_directory = os.path.join(root_directory,
-                                  user_string,
-                                  tissue_string,
-                                  cell_type_string,
-                                  label_string,
-                                  date_string)
+    save_directory = os.path.join(
+        root_directory,
+        user_string,
+        tissue_string,
+        cell_type_string,
+        label_string,
+        date_string,
+    )
     if not os.path.exists(save_directory):
         os.makedirs(save_directory)
 
     # Determine Number of Cells in Directory
     # Cell1/Position1/1_CH00_000000.tif
-    cell_directories = list(filter(lambda v: v[:5] == 'Cell_', os.listdir(save_directory)))
+    cell_directories = list(
+        filter(lambda v: v[:5] == "Cell_", os.listdir(save_directory))
+    )
     if len(cell_directories) != 0:
         cell_directories.sort()
         cell_index = int(cell_directories[-1][5:]) + 1
@@ -91,16 +96,14 @@ def create_save_path(saving_settings):
         os.makedirs(save_directory)
 
     # Update the experiment dict
-    saving_settings['save_directory'] = save_directory
-    saving_settings['date'] = date_string
+    saving_settings["save_directory"] = save_directory
+    saving_settings["date"] = date_string
 
     return save_directory
 
 
-def save_yaml_file(file_directory,
-                   content_dict,
-                   filename='experiment.yml'):
-    r"""Same YAML file to Disk
+def save_yaml_file(file_directory, content_dict, filename="experiment.yml"):
+    """Same YAML file to Disk
 
     Parameters
     ----------
@@ -113,10 +116,11 @@ def save_yaml_file(file_directory,
 
     """
     import json
+
     try:
         file_name = os.path.join(file_directory, filename)
-        with open(file_name, 'w') as f:
-            f.write(json.dumps(copy_proxy_object(content_dict)))
+        with open(file_name, "w") as f:
+            f.write(json.dumps(copy_proxy_object(content_dict), indent=4))
     except BaseException:
         return False
     return True

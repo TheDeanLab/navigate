@@ -28,8 +28,10 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-#
+
 from aslm.controller.sub_controllers.gui_controller import GUIController
+from aslm.view.custom_widgets.validation import ValidatedEntry
+import tkinter as tk
 import logging
 import platform
 
@@ -44,7 +46,9 @@ class KeystrokeController(GUIController):
 
         # References to all sub frames
         self.camera_view = main_view.camera_waveform.camera_tab  # Camera View
-        self.multi_table = main_view.settings.multiposition_tab.multipoint_list  # Multiposition Table
+        self.multi_table = (
+            main_view.settings.multiposition_tab.multipoint_list
+        )  # Multiposition Table
         self.main_view = main_view.root  # Main view
         self.main_tabs = main_view.settings
 
@@ -62,18 +66,28 @@ class KeystrokeController(GUIController):
 
         # MouseWheel Binding
         self.view.root.bind("<MouseWheel>", self.view.scroll_frame.mouse_wheel)
-        self.camera_view.canvas.bind("<Enter>", self.camera_controller_mouse_wheel_enter)
-        self.camera_view.canvas.bind("<Leave>", self.camera_controller_mouse_wheel_leave)
+        self.camera_view.canvas.bind(
+            "<Enter>", self.camera_controller_mouse_wheel_enter
+        )
+        self.camera_view.canvas.bind(
+            "<Leave>", self.camera_controller_mouse_wheel_leave
+        )
 
         # Right Click Binding
-        if platform.system() == 'Darwin':
-            self.camera_view.canvas.bind("<Button-2>", self.camera_controller.popup_menu)
+        if platform.system() == "Darwin":
+            self.camera_view.canvas.bind(
+                "<Button-2>", self.camera_controller.popup_menu
+            )
         else:
-            self.camera_view.canvas.bind("<Button-3>", self.camera_controller.popup_menu)
+            self.camera_view.canvas.bind(
+                "<Button-3>", self.camera_controller.popup_menu
+            )
 
         """Keystrokes for MultiTable"""
         self.mp_table = self.multi_table.pt
-        self.mp_table.rowheader.bind("<Double-Button-1>", self.multi_controller.handle_double_click)
+        self.mp_table.rowheader.bind(
+            "<Double-Button-1>", self.multi_controller.handle_double_click
+        )
 
         """Keystrokes for Main Window"""
         self.main_view.bind("w", self.stage_controller.stage_key_press)
@@ -84,24 +98,124 @@ class KeystrokeController(GUIController):
         self.main_view.bind("<Control-Key-2>", self.switch_tab)
         self.main_view.bind("<Control-Key-3>", self.switch_tab)
         self.main_view.bind("<Control-Key-4>", self.switch_tab)
+        self.main_view.bind_all("<Control-Key-z>", self.widget_undo)
+        self.main_view.bind_all("<Control-Key-y>", self.widget_redo)
 
     def camera_controller_mouse_wheel_enter(self, event):
+        """Mouse wheel binding for camera view
+
+        Parameters
+        ----------
+        event : tkinter event
+            Mouse wheel event
+
+        Returns
+        -------
+        None
+
+        Example
+        -------
+        >>> self.camera_view.canvas.bind("<Enter>", self.camera_controller_mouse_wheel_enter)
+        """
         self.view.root.unbind("<MouseWheel>")  # get rid of scrollbar mousewheel
-        if platform.system() != 'Linux':
-            self.camera_view.canvas.bind("<MouseWheel>", self.camera_controller.mouse_wheel)
+        if platform.system() != "Linux":
+            self.camera_view.canvas.bind(
+                "<MouseWheel>", self.camera_controller.mouse_wheel
+            )
         else:
-            self.camera_view.canvas.bind("<Button-4>", self.camera_controller.mouse_wheel)
-            self.camera_view.canvas.bind("<Button-5>", self.camera_controller.mouse_wheel)
+            self.camera_view.canvas.bind(
+                "<Button-4>", self.camera_controller.mouse_wheel
+            )
+            self.camera_view.canvas.bind(
+                "<Button-5>", self.camera_controller.mouse_wheel
+            )
 
     def camera_controller_mouse_wheel_leave(self, event):
+        """Mouse wheel binding for camera view
+
+        Parameters
+        ----------
+        event : tkinter event
+            Mouse wheel event
+
+        Returns
+        -------
+        None
+
+        Example
+        -------
+        >>> self.camera_view.canvas.bind("<Leave>", self.camera_controller_mouse_wheel_leave)
+        """
+
         if platform.system() != "Linux":
             self.camera_view.canvas.unbind("<MouseWheel>")
         else:
             self.camera_view.canvas.unbind("<Button-4>")
             self.camera_view.canvas.unbind("<Button-5>")
-        self.view.root.bind("<MouseWheel>", self.view.scroll_frame.mouse_wheel)  # reinstate scrollbar mousewheel
+        self.view.root.bind(
+            "<MouseWheel>", self.view.scroll_frame.mouse_wheel
+        )  # reinstate scrollbar mousewheel
 
     def switch_tab(self, event):
+        """Switches between tabs
+
+        Parameters
+        ----------
+        event : tkinter event
+            Tab key event
+
+        Returns
+        -------
+        None
+
+        Example
+        -------
+        >>> self.main_view.bind("<Control-Key-1>", self.switch_tab)
+        """
+
         key_val = int(event.keysym)
         if (key_val > 0) and (self.main_tabs.index("end") >= key_val):
-            self.main_tabs.select(key_val-1)
+            self.main_tabs.select(key_val - 1)
+
+    def widget_undo(self, event):
+        """Undo widget changes
+
+        Parameters
+        ----------
+        event : tkinter event
+            Undo key event
+
+        Returns
+        -------
+        None
+
+        Example
+        -------
+        >>> self.main_view.bind_all('<Control-Key-z>', self.widget_undo)
+        """
+        if isinstance(
+            event.widget, ValidatedEntry
+        ):  # Add all widgets that you want to be able to undo here
+            event.widget.undo(event)
+
+    def widget_redo(self, event):
+        """Redo widget changes
+
+        Parameters
+        ----------
+        event : tkinter event
+            Redo key event
+
+        Returns
+        -------
+        None
+
+        Example
+        -------
+        >>> self.main_view.bind_all('<Control-Key-y>', self.widget_redo)
+        """
+
+        if isinstance(
+            event.widget, ValidatedEntry
+        ):  # Add all widgets that you want to be able to undo here
+            event.widget.redo(event)

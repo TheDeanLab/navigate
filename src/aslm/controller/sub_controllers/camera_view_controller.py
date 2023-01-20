@@ -706,7 +706,7 @@ class CameraViewController(GUIController):
             if self.slice_index == self.total_images_per_volume:
                 self.slice_index = 0
 
-        print(self.channel_index, self.slice_index)
+        # print(self.channel_index, self.slice_index) 
 
     def retrieve_image_slice_from_volume(self, slider_index, channel_display_index):
         """Retrieve image slice from volume.

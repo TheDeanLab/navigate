@@ -37,6 +37,8 @@ import time
 
 # Third Party Imports
 import numpy as np
+import tkinter as tk
+import random
 
 # Local Imports
 from aslm.model.features.feature_container import load_features
@@ -91,6 +93,45 @@ from aslm.model.features.feature_container import (
 
 #     return dumb_model
 
+class DummyController:
+    def __init__(self, view):
+        from aslm.controller.configuration_controller import ConfigurationController
+
+
+        self.configuration = DummyModel().configuration
+        self.commands = []
+        self.view = view
+        self.configuration_controller = ConfigurationController(self.configuration)
+        self.stage_pos = {}
+        self.off_stage_pos = {}
+
+    
+    def execute(self, str, sec=None):
+        '''
+        Appends commands sent via execute, first element is oldest command/first to pop off
+        '''
+        if sec == None:
+            self.commands.append(str)
+        else:
+            self.commands.append(str)
+            self.commands.append(sec)
+
+        if str == 'get_stage_position':
+            
+            self.stage_pos['x'] = int(random.random())
+            self.stage_pos['y'] = int(random.random())
+
+            return self.stage_pos
+
+        
+    def pop(self):
+        '''
+        Use this method in testing code to grab the next command
+        '''
+        if len(self.commands) > 0:
+            return self.commands.pop(0)
+        else:
+            return "Empty command list"
 
 class DummyModel:
     def __init__(self):

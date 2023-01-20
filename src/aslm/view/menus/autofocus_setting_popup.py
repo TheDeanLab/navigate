@@ -117,6 +117,7 @@ class AutofocusPopup:
         self.coarse.set_ylabel("DCTS")
         self.coarse.set_xlabel("Focus Position")
         self.fine = self.fig.add_subplot(212)
+        # print(f"Funcs: {dir(self.fine)}")
         self.fine.set_title("Fine Autofocus")
         self.fine.set_ylabel("DCTS")
         self.fine.set_xlabel("Focus Position")

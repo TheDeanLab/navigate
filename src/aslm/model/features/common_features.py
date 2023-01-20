@@ -398,11 +398,7 @@ class ConProAcquisition:   # don't have the multi-position part for now
 
         self.conpro_cycling_mode = microscope_state['conpro_cycling_mode']
         # get available channels
-        prefix_len = len('channel_')
-        # self.channels = [int(channel_key[prefix_len:]) for channel_key in microscope_state['channels'].keys()]
-        # self.current_channel_in_list = 0
-        channel_dict = microscope_state['channels']
-        self.channels = list(filter(lambda c: c is not None, [int(channel_key[prefix_len:]) if channel_dict[channel_key]['is_selected'] else None for channel_key in channel_dict.keys()]))
+        self.channels = microscope_state["selected_channels"]
         self.current_channel_in_list = 0
 
         self.n_plane = int(microscope_state['n_plane'])

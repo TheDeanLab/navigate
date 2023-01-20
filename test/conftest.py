@@ -31,6 +31,8 @@
 # """
 
 import pytest
+import tkinter as tk
+
 
 
 @pytest.fixture(scope="package")
@@ -41,6 +43,30 @@ def dummy_model():
 
     return model
 
+@pytest.fixture(scope='session')
+def dummy_view():
+    '''
+    Creates a dummy view for the controller tests. Will be deleted post test session
+    '''
+    from aslm.view.main_application_window import MainApp
+    
+    root = tk.Tk()
+    view = MainApp(root)
+    root.update()
+    yield view
+    root.destroy()
+    
+@pytest.fixture(scope="package")
+def dummy_controller(dummy_view):
+    '''
+    Fixture that will mock controller functions called by sub controllers
+    '''
+    from aslm.model.dummy import DummyController
+    
+    view = dummy_view
+    controller = DummyController(view)
+
+    return controller
 
 # @pytest.fixture(scope="package")
 # def root():

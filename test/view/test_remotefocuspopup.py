@@ -38,7 +38,7 @@ from aslm.controller.configuration_controller import ConfigurationController
 import time
 
 
-def test_remotefocuspopup():
+def test_waveform_parameter_popup():
     """
     Tests that the remote focus popup and all its widgets gets created and does not
     throw any exceptions. Test will fail if any exceptions.

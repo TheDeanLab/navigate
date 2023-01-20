@@ -41,15 +41,18 @@ from aslm.model.dummy import DummyModel
 
 class TestSyntheticHardware(unittest.TestCase):
     dummy_model = DummyModel()
-    microscope_name = 'Mesoscale'
+    microscope_name = "Mesoscale"
 
     def test_synthetic_daq(self):
         from aslm.model.devices.daq.daq_synthetic import SyntheticDAQ
-        
+
         SyntheticDAQ(self.dummy_model.configuration)
 
     def test_synthetic_camera(self):
-        from aslm.model.devices.camera.camera_synthetic import SyntheticCamera, SyntheticCameraController
+        from aslm.model.devices.camera.camera_synthetic import (
+            SyntheticCamera,
+            SyntheticCameraController,
+        )
 
         scc = SyntheticCameraController()
         SyntheticCamera(self.microscope_name, scc, self.dummy_model.configuration)

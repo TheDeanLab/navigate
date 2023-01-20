@@ -37,36 +37,28 @@ import logging
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-# https://stackoverflow.com/questions/28560209/transient-input-window
-# Above link is a resource for using popups. Some helpful tips of an easy way to access the data inputted by a user into the popup
-# Also discusses transience of a popup (whether you can click out of the popup)
 
-## goal of this class is to create a generic popup that can be used for any purpose
-
-# Class that handles the dialog box that has all the user entry stuff when you press the Acquisition button
 class PopUp(tk.Toplevel):
     def __init__(self, root, name, size, top=True, transient=True, *args, **kwargs):
-        """
-        #### Creates the popup window based on the root window being passed, title that you want the window to have and the size of the window.
+        """Generic Popup Window class
+
+        Creates the popup window based on the root window being passed,
+        title that you want the window to have and the size of the window.
         Some important things to consider:
-
         - Root has to be the main application window to work
-
         - Name has to be a string
-
         - Size also has to be a string in the format '600x400+320+180'
-
         - 600x400 represents the pixel size
-
         - +320 means 320 pixels from left edge, +180 means 180 pixels from top edge.
-
         - If a '-' is used insetead of '+' it will be from the opposite edge.
-
         - Top is a boolean that if true means popup will always be on top of other windows
-
         - Transient is a boolean that if true means the main app will not be usable until popup is closed
-
         - The parent frame for any widgets you add to the popup will be retrieved with the get_frame() function
+
+        https://stackoverflow.com/questions/28560209/transient-input-window
+        Above link is a resource for using popups.
+        Some helpful tips of an easy way to access the data inputted by a user into the popup
+        Also discusses transience of a popup (whether you can click out of the popup)
         """
         tk.Toplevel.__init__(self)
         # This starts the popup window config, and makes sure that any child widgets can be resized with the window
@@ -77,20 +69,20 @@ class PopUp(tk.Toplevel):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         self.resizable(tk.FALSE, tk.FALSE)  # Makes it so user cannot resize
-        if top == True:
+        if top is True:
             self.attributes("-topmost", 1)  # Makes it be on top of mainapp when called
 
         self.protocol("WM_DELETE_WINDOW", self.dismiss)  # Intercepting close button
 
         # Checks if you want transience
-        if transient == True:
+        if transient is True:
             self.transient(root)  # Prevents clicking outside of window
             self.wait_visibility()  # Can't grab until window appears, so we wait
             self.grab_set()  # Ensures any input goes to this window
 
         # Putting popup frame into toplevel window
         self.content_frame = ttk.Frame(self)
-        self.content_frame.grid(row=0, column=0, sticky=(tk.NSEW))
+        self.content_frame.grid(row=0, column=0, sticky=tk.NSEW)
 
     # Catching close buttons/destroying window procedures
     # Dismiss function for destroying window when done

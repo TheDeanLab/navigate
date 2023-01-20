@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -35,7 +36,6 @@ from multiprocessing import Manager
 import tkinter
 import multiprocessing as mp
 import threading
-from pathlib import Path
 import sys
 
 # Third Party Imports
@@ -44,7 +44,7 @@ import sys
 from tkinter import filedialog, messagebox
 from aslm.controller.sub_controllers.help_popup_controller import HelpPopupController
 from aslm.view.main_application_window import MainApp as view
-from aslm.view.menus.remote_focus_popup import remote_popup
+from aslm.view.menus.waveform_parameter_popup_window import WaveformParameterPopupWindow
 from aslm.view.menus.autofocus_setting_popup import AutofocusPopup
 from aslm.view.menus.ilastik_setting_popup import ilastik_setting_popup
 from aslm.view.menus.help_popup import help_popup
@@ -83,8 +83,8 @@ class Controller:
         Path to the configuration yaml file. Provides global microscope configuration parameters.
     experiment_path : string
         Path to the experiment yaml file. Provides experiment-specific microscope configuration.
-    etl_constants_path : string
-        Path to the etl constants yaml file. Provides magnification and wavelength-specific parameters.
+    waveform_constants_path : string
+        Path to the waveform constants yaml file. Provides magnification and wavelength-specific parameters.
     use_gpu : Boolean
         Flag for utilizing CUDA functionality.
     *args :
@@ -97,7 +97,7 @@ class Controller:
         splash_screen,
         configuration_path,
         experiment_path,
-        etl_constants_path,
+        waveform_constants_path,
         rest_api_path,
         use_gpu,
         args,
@@ -116,7 +116,7 @@ class Controller:
             self.manager,
             configuration=configuration_path,
             experiment=experiment_path,
-            etl_constants=etl_constants_path,
+            waveform_constants=waveform_constants_path,
             rest_api_config=rest_api_path,
         )
 
@@ -127,7 +127,7 @@ class Controller:
 
         logger.info(f"Spec - Configuration Path: {configuration_path}")
         logger.info(f"Spec - Experiment Path: {experiment_path}")
-        logger.info(f"Spec - ETL Constants Path: {etl_constants_path}")
+        logger.info(f"Spec - Waveform Constants Path: {waveform_constants_path}")
         logger.info(f"Spec - Rest API Path: {rest_api_path}")
 
         # Wire up pipes
@@ -136,8 +136,8 @@ class Controller:
         # save default experiment file
         self.default_experiment_file = experiment_path
 
-        # etl setting file
-        self.etl_constants_path = etl_constants_path
+        # waveform setting file
+        self.waveform_constants_path = waveform_constants_path
 
         # Configuration Reader
         self.configuration_controller = ConfigurationController(self.configuration)
@@ -190,7 +190,8 @@ class Controller:
         t = threading.Thread(target=self.update_event)
         t.start()
 
-        # self.microscope = self.configuration['configuration']['microscopes'].keys()[0]  # Default to the first microscope
+        # self.microscope = self.configuration['configuration']
+        # ['microscopes'].keys()[0]  # Default to the first microscope
 
         self.initialize_menus(args.synthetic_hardware)
 
@@ -329,19 +330,18 @@ class Controller:
                 return
             self.model.load_images(filenames)
 
-        def popup_etl_setting():
-            """Pop up the Remote Focus setting window."""
-            if hasattr(self, "etl_controller"):
-                self.etl_controller.showup()
+        def popup_waveform_setting():
+            if hasattr(self, "waveform_popup_controller"):
+                self.waveform_popup_controller.showup()
                 return
-            etl_setting_popup = remote_popup(
+            waveform_constants_popup = WaveformParameterPopupWindow(
                 self.view, self.configuration_controller
-            )  # TODO: should we rename etl_setting popup to remote_focus_popup?
-            self.etl_controller = EtlPopupController(
-                etl_setting_popup, self, self.etl_constants_path
+            )
+            self.waveform_popup_controller = WaveformPopupController(
+                waveform_constants_popup, self, self.waveform_constants_path
             )
 
-            self.etl_controller.populate_experiment_values()
+            self.waveform_popup_controller.populate_experiment_values()
 
         def popup_autofocus_setting():
             """Pop up the Autofocus setting window."""
@@ -445,9 +445,9 @@ class Controller:
         # add separator
         self.view.menubar.menu_resolution.add_separator()
 
-        # etl popup
+        # waveform popup
         self.view.menubar.menu_resolution.add_command(
-            label="ETL Parameters", command=popup_etl_setting
+            label="Waveform Parameters", command=popup_waveform_setting
         )
 
         # autofocus menu
@@ -664,14 +664,14 @@ class Controller:
             """Changes the resolution mode and zoom position.
 
             Recalculates FOV_X and FOV_Y
-            If ETL Popup is open, communicates changes to it.
+            If Waveform Popup is open, communicates changes to it.
 
             Parameters
             ----------
             args : dict
                 dict = {'resolution_mode': self.resolution,
                 'zoom': self.mag,
-                'laser_info': self.resolution_info['ETLConstants'][self.resolution][self.mag]
+                'laser_info': self.resolution_info['remote_focus_constants'][self.resolution][self.mag]
                 }
             """
             microscope_name, zoom = self.resolution_value.get().split()
@@ -689,8 +689,11 @@ class Controller:
             )
             work_thread.join()
             self.camera_setting_controller.calculate_physical_dimensions()
-            if hasattr(self, "etl_controller") and self.etl_controller:
-                self.etl_controller.populate_experiment_values()
+            if (
+                hasattr(self, "waveform_popup_controller")
+                and self.waveform_popup_controller
+            ):
+                self.waveform_popup_controller.populate_experiment_values()
             ret_pos_dict = self.model.get_stage_position()
             update_stage_dict(self, ret_pos_dict)
             self.update_stage_controller_silent(ret_pos_dict)
@@ -707,7 +710,7 @@ class Controller:
             self.acquire_bar_controller.set_save_option(args[0])
 
         elif command == "update_setting":
-            """Called by the ETL Popup Controller to update the ETL settings in memory.
+            r"""Called by the Waveform Constants Popup Controller to update the Waveform constants settings in memory.
 
             Parameters
             __________
@@ -717,7 +720,7 @@ class Controller:
                 dict = {
                 'resolution_mode': self.resolution,
                 'zoom': self.mag,
-                'laser_info': self.resolution_info['ETLConstants'][self.resolution][self.mag]
+                'laser_info': self.resolution_info['remote_focus_constants'][self.resolution][self.mag]
                 }
             """
             # update_settings_common(self, args)
@@ -816,8 +819,8 @@ class Controller:
 
             # self.model.run_command('stop')
             self.sloppy_stop()
-            if hasattr(self, "etl_controller"):
-                self.etl_controller.save_etl_info()
+            if hasattr(self, "waveform_popup_controller"):
+                self.waveform_popup_controller.save_waveform_constants()
             self.model.terminate()
             self.model = None
             self.event_queue.put(("stop", ""))
@@ -972,7 +975,7 @@ class Controller:
                 )
                 self.view.settings.channels_tab.multipoint_frame.on_off.set(
                     True
-                )  # assume we want to use multipos
+                )  # assume we want to use multi-position
             elif event == "ilastik_mask":
                 self.camera_view_controller.display_mask(value)
             elif event == "autofocus":

@@ -41,8 +41,8 @@ import numpy as np
 # sys.path.append('../../../../')
 from aslm.model.analysis.detection import add_median_border
 
-class TestDetection(unittest.TestCase):
 
+class TestDetection(unittest.TestCase):
     def test_matrix_expansion(self):
         data = np.random.rand(50, 50, 50)
         test_output = add_median_border(data)
@@ -53,5 +53,6 @@ class TestDetection(unittest.TestCase):
         test_output = add_median_border(data)
         self.assertEqual(test_output[0, 0, 0], np.median(data))
 
-if (__name__ == "__main__"):
+
+if __name__ == "__main__":
     unittest.main()

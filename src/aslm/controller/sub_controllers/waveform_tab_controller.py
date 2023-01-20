@@ -49,9 +49,6 @@ class WaveformTabController(GUIController):
     def __init__(self, view, parent_controller=None):
         super().__init__(view, parent_controller)
         self.remote_focus_waveform = 0
-        self.etl_r_waveform = 0
-        self.galvo_l_waveform = 0
-        self.galvo_r_waveform = 0
         self.laser_ao_waveforms = 0
 
         self.initialize_plots()
@@ -169,15 +166,15 @@ class WaveformTabController(GUIController):
         last_galvo = 0
         last_camera = 0
         for k in self.waveform_dict["camera_waveform"].keys():
-            if self.waveform_dict["etl_waveform"][k] is None:
+            if self.waveform_dict["remote_focus_waveform"][k] is None:
                 continue
-            etl_waveform = self.waveform_dict["etl_waveform"][k]
+            remote_focus_waveform = self.waveform_dict["remote_focus_waveform"][k]
             # TODO: multiple galvos
             galvo_waveform = self.waveform_dict["galvo_waveform"][0][k]
             camera_waveform = self.waveform_dict["camera_waveform"][k]
             self.view.plot_etl.plot(
-                np.arange(len(etl_waveform)) / self.sample_rate + last_etl,
-                etl_waveform,
+                np.arange(len(remote_focus_waveform)) / self.sample_rate + last_etl,
+                remote_focus_waveform,
                 label=k,
             )
             self.view.plot_galvo.plot(
@@ -197,11 +194,11 @@ class WaveformTabController(GUIController):
                 c="k",
                 linestyle="--",
             )
-            last_etl += len(etl_waveform) / self.sample_rate
+            last_etl += len(remote_focus_waveform) / self.sample_rate
             last_galvo += len(galvo_waveform) / self.sample_rate
             last_camera += len(camera_waveform) / self.sample_rate
 
-        self.view.plot_etl.set_title("ETL Waveform")
+        self.view.plot_etl.set_title("Remote Focus Waveform")
         self.view.plot_galvo.set_title("Galvo Waveform")
 
         self.view.plot_etl.set_xlabel("Duration (s)")

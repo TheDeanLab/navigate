@@ -75,7 +75,7 @@ def get_configuration_paths():
         i.e. hardware setup
     experiment_path : str
         Path to file containing per-experiment parameters
-    etl_constants_path : str
+    waveform_constants_path : str
         Path to file containing remote focus parameters for all magnifications
     rest_api_path : str
         Path to file containing REST API configuration
@@ -98,7 +98,9 @@ def get_configuration_paths():
     # Configuration files should be stored in this directory
     configuration_path = Path.joinpath(configuration_directory, "configuration.yaml")
     experiment_path = Path.joinpath(configuration_directory, "experiment.yml")
-    etl_constants_path = Path.joinpath(configuration_directory, "etl_constants.yml")
+    waveform_constants_path = Path.joinpath(
+        configuration_directory, "waveform_constants.yml"
+    )
     rest_api_path = Path.joinpath(configuration_directory, "rest_api_config.yml")
 
     # If they are not already,
@@ -115,19 +117,19 @@ def get_configuration_paths():
         copy_experiment_path = Path.joinpath(copy_base_directory, "experiment.yml")
         shutil.copyfile(copy_experiment_path, experiment_path)
 
-    if not os.path.exists(etl_constants_path):
+    if not os.path.exists(waveform_constants_path):
         copy_base_directory = Path(__file__).resolve().parent
-        copy_etl_constants_path = Path.joinpath(
-            copy_base_directory, "etl_constants.yml"
+        copy_waveform_constants_path = Path.joinpath(
+            copy_base_directory, "waveform_constants.yml"
         )
-        shutil.copyfile(copy_etl_constants_path, etl_constants_path)
+        shutil.copyfile(copy_waveform_constants_path, waveform_constants_path)
 
     if not os.path.exists(rest_api_path):
         copy_base_directory = Path(__file__).resolve().parent
         copy_rest_api_path = Path.joinpath(copy_base_directory, "rest_api_config.yml")
         shutil.copyfile(copy_rest_api_path, rest_api_path)
 
-    return configuration_path, experiment_path, etl_constants_path, rest_api_path
+    return configuration_path, experiment_path, waveform_constants_path, rest_api_path
 
 
 def load_configs(manager, **kwargs):

@@ -11,5 +11,3 @@ call conda activate aslm
 call python main.py --synthetic_hardware
 
 cmd /k
-
-

@@ -65,8 +65,8 @@ class SyntheticDAQ(DAQBase):
         """Set up the DO master trigger task."""
         pass
 
-    def create_galvo_etl_task(self):
-        """Create galvo and ETL tasks"""
+    def create_galvo_remote_focus_tasks(self):
+        r"""Create galvo and remote focus tasks"""
         pass
 
     def start_tasks(self):
@@ -109,7 +109,7 @@ class SyntheticDAQ(DAQBase):
         pass
 
     def write_waveforms_to_tasks(self):
-        """Write the galvo, etl, and laser waveforms to each task."""
+        r"""Write the galvo, remote focus, and laser waveforms to each task."""
         pass
 
     def add_camera(self, microscope_name, camera):

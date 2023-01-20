@@ -65,7 +65,7 @@ class TestMain(unittest.TestCase):
         input_arguments = [
             "--config_file",
             "--experiment_file",
-            "--etl_const_file",
+            "--waveform_constants_path",
             "--rest_api_file",
             "--logging_config",
         ]

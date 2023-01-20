@@ -183,7 +183,7 @@ class TestSyntheticCamera:
 
         self.synthetic_camera.close_image_series()
         assert (
-            self.synthetic_camera.is_acquiring is False
+            self.synthetic_camera.is_acquiring == False
         ), "is_acquiring should be False"
 
     def test_synthetic_get_camera_minimum_wating_time(self):

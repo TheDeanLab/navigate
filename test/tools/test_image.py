@@ -39,7 +39,7 @@ from aslm.tools.image import text_array
 
 def test_text_array_output_type():
     """Confirm output is np.ndarray object"""
-    text_output = text_array(text='ASLM')
+    text_output = text_array(text="ASLM")
     assert type(text_output) == np.ndarray
 
 
@@ -53,4 +53,3 @@ def test_text_array_output_height():
         text_output = text_array(text="ASLM", font_size=int(i))
         height = np.shape(text_output)[0]
         assert np.abs(i - height) < 10
-

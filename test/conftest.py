@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -32,10 +32,104 @@
 
 import pytest
 
-@pytest.fixture(scope='package')
+
+@pytest.fixture(scope="package")
 def dummy_model():
     from aslm.model.dummy import DummyModel
 
     model = DummyModel()
 
     return model
+
+
+@pytest.fixture(scope="package")
+def model():
+    from types import SimpleNamespace
+    from pathlib import Path
+
+    from aslm.model.model import Model
+    from multiprocessing import Manager, Queue
+    from aslm.config.config import load_configs
+    from aslm.log_files.log_functions import log_setup
+    
+    log_setup("logging.yaml")
+
+    # Use configuration files that ship with the code base
+    configuration_directory = Path.joinpath(
+        Path(__file__).resolve().parent.parent, "src", "aslm", "config"
+    )
+    configuration_path = Path.joinpath(configuration_directory, "configuration.yaml")
+    experiment_path = Path.joinpath(configuration_directory, "experiment.yml")
+    etl_constants_path = Path.joinpath(configuration_directory, "etl_constants.yml")
+    rest_api_path = Path.joinpath(configuration_directory, "rest_api_config.yml")
+
+    event_queue = Queue(100)
+    manager = Manager()
+
+    configuration = load_configs(
+        manager,
+        configuration=configuration_path,
+        experiment=experiment_path,
+        etl_constants=etl_constants_path,
+        rest_api_config=rest_api_path,
+    )
+    model = Model(
+        USE_GPU=False,
+        args=SimpleNamespace(synthetic_hardware=True),
+        configuration=configuration,
+        event_queue=event_queue,
+    )
+
+    return model
+
+
+@pytest.fixture(scope="package")
+def root():
+    import tkinter as tk
+
+    root = tk.Tk()
+    yield root
+    root.destroy()
+
+
+@pytest.fixture(scope="package")
+def splash_screen(root):
+    from aslm.view.splash_screen import SplashScreen
+
+    splash_screen = SplashScreen(root, "./icon/splash_screen_image.png")
+
+    return splash_screen
+
+
+@pytest.fixture(scope="package")
+def controller(root, splash_screen):
+    from types import SimpleNamespace
+    from pathlib import Path
+
+    from aslm.controller.controller import Controller
+    from aslm.log_files.log_functions import log_setup
+    
+    log_setup("logging.yaml")
+
+    # Use configuration files that ship with the code base
+    configuration_directory = Path.joinpath(
+        Path(__file__).resolve().parent.parent, "src", "aslm", "config"
+    )
+    configuration_path = Path.joinpath(configuration_directory, "configuration.yaml")
+    experiment_path = Path.joinpath(configuration_directory, "experiment.yml")
+    etl_constants_path = Path.joinpath(configuration_directory, "etl_constants.yml")
+    rest_api_path = Path.joinpath(configuration_directory, "rest_api_config.yml")
+
+    controller = Controller(
+        root,
+        splash_screen,
+        configuration_path,
+        experiment_path,
+        etl_constants_path,
+        rest_api_path,
+        False,
+        SimpleNamespace(synthetic_hardware=True),
+    )
+
+    yield controller
+    controller.execute("exit")

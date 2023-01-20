@@ -256,7 +256,7 @@ class Model:
         """Get the data buffer.
 
         If the number of active pixels in x and y changes, updates the data buffer and
-        returns in.
+        returns newly-sized buffer.
 
         Parameters
         ----------
@@ -399,7 +399,7 @@ class Model:
             Called by the controller
             Passes the string 'resolution' and a dictionary
             consisting of the resolution_mode, the zoom, and the laser_info.
-            e.g., self.resolution_info['ETLConstants'][self.resolution][self.mag]
+            e.g., self.resolution_info['waveform_constants'][self.resolution][self.mag]
             """
             reboot = False
             microscope_name = self.configuration["experiment"]["MicroscopeState"][
@@ -440,7 +440,7 @@ class Model:
                 )
                 self.stop_send_signal = False
                 self.signal_thread = threading.Thread(target=self.run_live_acquisition)
-                self.signal_thread.name = "ETL Popup Signal"
+                self.signal_thread.name = "Waveform Popup Signal"
                 self.signal_thread.start()
 
         elif command == "autofocus":
@@ -503,8 +503,8 @@ class Model:
     def move_stage(self, pos_dict, wait_until_done=False):
         """Moves the stages.
 
-        Updates the stage dictionary, moves to the desired position, and reports the
-        position.
+        Updates the stage dictionary, moves to the desired position, and reports
+        the position.
 
         Parameters
         ----------
@@ -655,8 +655,9 @@ class Model:
 
         This function is called when user starts the acquisition.
         Sets flags, calculates all of the waveforms.
-        Sets the Camera Sensor Mode, initializes the data buffer, starts camera, and
-        opens shutters
+        Sets the Camera Sensor Mode, initializes the data buffer, starts camera,
+        and opens shutters
+        Sets flags.
         Calculates all of the waveforms.
         Sets the Camera Sensor Mode
         Initializes the data buffer and starts camera.
@@ -700,8 +701,8 @@ class Model:
         # )
 
         # Stash current position, channel, timepoint
-        # Do this here, because signal container functions can inject changes to
-        # the stage
+        # Do this here, because signal container functions can inject changes
+        # to the stage
         self.data_buffer_positions[self.frame_id][0] = self.configuration["experiment"][
             "StageParameters"
         ]["x"]
@@ -768,10 +769,6 @@ class Model:
         resolution_value : str
             Resolution mode.
         """
-        print(
-            f"CHANGING RESOLUTION from {self.active_microscope_name}"
-            f"to {resolution_value}"
-        )
         if resolution_value != self.active_microscope_name:
             former_microscope = self.active_microscope_name
             self.get_active_microscope()
@@ -784,10 +781,8 @@ class Model:
             self.logger.debug(
                 f"Change zoom of {self.active_microscope_name} to {zoom_value}"
             )
-        except KeyError:
-            self.logger.debug(
-                f"There is no zoom in microscope: {self.active_microscope_name}"
-            )
+        except ValueError as e:
+            self.logger.debug(f"{self.active_microscope_name}: {e}")
 
     def load_images(self, filenames=None):
         """Load/Unload images to the Synthetic Camera

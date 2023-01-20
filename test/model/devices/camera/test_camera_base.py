@@ -35,29 +35,42 @@ import pytest
 
 from aslm.model.devices.camera.camera_base import CameraBase
 
+
 def test_start_camera(dummy_model):
     model = dummy_model
-    for microscope_name in model.configuration['configuration']['microscopes'].keys():
+    for microscope_name in model.configuration["configuration"]["microscopes"].keys():
         camera = CameraBase(microscope_name, None, model.configuration)
-        assert camera.camera_parameters['hardware']['serial_number'] == model.configuration['configuration']['microscopes'][microscope_name]['camera']['hardware']['serial_number'], f"didn't load correct camera parameter for microscope {microscope_name}"
+        assert (
+            camera.camera_parameters["hardware"]["serial_number"]
+            == model.configuration["configuration"]["microscopes"][microscope_name][
+                "camera"
+            ]["hardware"]["serial_number"]
+        ), f"didn't load correct camera parameter for microscope {microscope_name}"
 
     # non-exist microscope name
-    microscope_name = model.configuration['configuration']['microscopes'].keys()[0] + '_random_error'
+    microscope_name = (
+        model.configuration["configuration"]["microscopes"].keys()[0] + "_random_error"
+    )
     raised_error = False
     try:
         camera = CameraBase(microscope_name, None, model.configuration)
     except NameError:
         raised_error = True
-    assert raised_error, "should raise NameError when the microscope name doesn't exist!"
+    assert (
+        raised_error
+    ), "should raise NameError when the microscope name doesn't exist!"
+
 
 def test_camera_base_functions(dummy_model):
     import random
 
     model = dummy_model
-    microscope_name = model.configuration['experiment']['MicroscopeState']['microscope_name']
+    microscope_name = model.configuration["experiment"]["MicroscopeState"][
+        "microscope_name"
+    ]
 
     camera = CameraBase(microscope_name, None, model.configuration)
-    funcs = ['set_readout_direction', 'calculate_light_sheet_exposure_time']
+    funcs = ["set_readout_direction", "calculate_light_sheet_exposure_time"]
     args = [[random.random()], [random.random(), random.random()]]
 
     for f, a in zip(funcs, args):

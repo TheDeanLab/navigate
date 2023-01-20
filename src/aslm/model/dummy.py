@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -30,34 +30,33 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 from pathlib import Path
-
-# Annies imports for dummy feature containter
 import multiprocessing as mp
 from multiprocessing import Manager
 import threading
 import time
-import random
 
+# Third Party Imports
 import numpy as np
 
+# Local Imports
+from aslm.model.features.feature_container import load_features
+from aslm.config.config import load_configs
+from aslm.model.devices.camera.camera_synthetic import (
+    SyntheticCamera,
+    SyntheticCameraController,
+)
 from aslm.model.features.feature_container import (
     SignalNode,
     DataNode,
     DataContainer,
     load_features,
 )
-from aslm.model.features.common_features import WaitToContinue
-from aslm.model.features.feature_container import dummy_True
-from aslm.config.config import load_configs
-from aslm.model.devices.camera.camera_synthetic import (
-    SyntheticCamera,
-    SyntheticCameraController,
-)
 
 
 # def get_dummy_model():
 #     """
-#     Creates a dummy model to be used for testing. All hardware is synthetic and the current config settings are loaded.
+#     Creates a dummy model to be used for testing. All hardware is synthetic and the
+#     current config settings are loaded.
 #     """
 #     # Set up the model, experiment, ETL dictionaries
 #     base_directory = Path(__file__).resolve().parent.parent
@@ -75,7 +74,8 @@ from aslm.model.devices.camera.camera_synthetic import (
 #         def __init__(self):
 #             self.synthetic_hardware = True
 
-#     # This return is used when you want a full syntethic model instead of just variable data from config files
+#     # This return is used when you want a full syntethic model instead of just
+#     # variable data from config files
 #     # return Model(False, args(), config, experiment, etl_constants)
 
 #     class dummy_model():
@@ -94,24 +94,30 @@ from aslm.model.devices.camera.camera_synthetic import (
 
 class DummyModel:
     def __init__(self):
-        # Set up the model, experiment, ETL dictionaries
+        # Set up the model, experiment, waveform dictionaries
         base_directory = Path(__file__).resolve().parent.parent
         configuration_directory = Path.joinpath(base_directory, "config")
 
         config = Path.joinpath(configuration_directory, "configuration.yaml")
         experiment = Path.joinpath(configuration_directory, "experiment.yml")
-        etl_constants = Path.joinpath(configuration_directory, "etl_constants.yml")
+        waveform_constants = Path.joinpath(
+            configuration_directory, "waveform_constants.yml"
+        )
 
         self.manager = Manager()
         self.configuration = load_configs(
             self.manager,
             configuration=config,
             experiment=experiment,
-            etl_constants=etl_constants,
+            waveform_constants=waveform_constants,
         )
 
         self.device = DummyDevice()
         self.signal_pipe, self.data_pipe = None, None
+
+        self.active_microscope = DummyMicroscope(
+            "dummy", self.configuration, devices_dict={}, is_synthetic=True
+        )
 
         self.signal_container = None
         self.data_container = None
@@ -120,8 +126,6 @@ class DummyModel:
 
         self.stop_flag = False
         self.frame_id = 0  # signal_num
-
-        self.current_channel = 0
 
         self.data = []
         self.signal_records = []
@@ -263,3 +267,16 @@ class DummyDevice:
                 list(range(self.sendout_msg_count, self.msg_count.value))
             )
             self.sendout_msg_count = self.msg_count.value
+
+
+class DummyMicroscope:
+    def __init__(self, name, configuration, devices_dict, is_synthetic=False):
+        self.microscope_name = name
+        self.configuration = configuration
+        self.data_buffer = None
+        self.stages = {}
+        self.lasers = {}
+        self.galvo = {}
+        self.daq = devices_dict.get("daq", None)
+
+        self.current_channel = 0

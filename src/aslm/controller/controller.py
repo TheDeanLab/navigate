@@ -47,7 +47,7 @@ from aslm.view.main_application_window import MainApp as view
 from aslm.view.menus.waveform_parameter_popup_window import WaveformParameterPopupWindow
 from aslm.view.menus.autofocus_setting_popup import AutofocusPopup
 from aslm.view.menus.ilastik_setting_popup import ilastik_setting_popup
-from aslm.view.menus.help_popup import help_popup
+from aslm.view.menus.help_popup import HelpPopup
 from aslm.view.menus.camera_map_setting_popup import CameraMapSettingPopup
 
 
@@ -377,7 +377,7 @@ class Controller:
             if hasattr(self, "help_controller"):
                 self.help_controller.showup()
                 return
-            help_pop = help_popup(self.view)
+            help_pop = HelpPopup(self.view)
             self.help_controller = HelpPopupController(help_pop, self)
 
         menus_dict = {

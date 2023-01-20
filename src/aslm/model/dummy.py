@@ -38,6 +38,7 @@ import time
 # Third Party Imports
 import numpy as np
 import tkinter as tk
+import random
 
 # Local Imports
 from aslm.model.features.feature_container import load_features
@@ -95,7 +96,7 @@ from aslm.model.features.feature_container import (
 class DummyController:
     def __init__(self, view):
         from aslm.controller.configuration_controller import ConfigurationController
-        import random
+
 
         self.configuration = DummyModel().configuration
         self.commands = []
@@ -103,6 +104,7 @@ class DummyController:
         self.configuration_controller = ConfigurationController(self.configuration)
         self.stage_pos = {}
         self.off_stage_pos = {}
+
     
     def execute(self, str, sec=None):
         '''
@@ -120,8 +122,6 @@ class DummyController:
             self.stage_pos['y'] = int(random.random())
 
             return self.stage_pos
-
-
 
         
     def pop(self):

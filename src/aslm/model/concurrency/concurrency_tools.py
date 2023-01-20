@@ -479,7 +479,7 @@ def _child_loop(
         e.g., {'configuration_path': PosixPath('.../config/configuration.yml'),
         'experiment_path':
         PosixPath('.../config/experiment.yml'),
-        'etl_constants_path': PosixPath('.../config/etl_constants.yml'),
+        'waveform_constants_path': PosixPath('.../config/waveform_constants.yml'),
         'event_queue': <multiprocessing.queues.Queue object at 0x7fdd509c7c40>}
     close_method_name : NoneType
         None

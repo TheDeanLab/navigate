@@ -35,12 +35,12 @@ import os
 import logging
 
 # Third Party Imports
-# import numpy as np
+import numpy as np
+from tifffile import imsave
 
 # Local imports
 from aslm.model import data_sources
 
-# from aslm.tools.image import text_array
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -87,13 +87,29 @@ class ImageWriter:
             self.model.configuration["experiment"]["Saving"]["save_directory"],
             self.sub_dir,
         )
+
         try:
             # create saving folder if not exits
             if not os.path.exists(self.save_directory):
                 os.makedirs(self.save_directory)
         except FileNotFoundError as e:
             logger.debug(
-                f"ASLM Image Writer - Cannot create directory {self.save_directory}. Maybe the drive does not exist?"
+                f"ASLM Image Writer - Cannot create directory {self.save_directory}. "
+                f"Maybe the drive does not exist?"
+            )
+            logger.exception(e)
+
+        # create the maximum intensity projection directory if it doesn't already exist
+        self.mip = None
+        self.mip_directory = os.path.join(self.save_directory, "MIP")
+        try:
+            # create saving folder if not exits
+            if not os.path.exists(self.mip_directory):
+                os.makedirs(self.mip_directory)
+        except FileNotFoundError as e:
+            logger.debug(
+                f"ASLM Image Writer - Cannot create MIP directory {self.mip_directory}. "
+                f"Maybe the drive does not exist?"
             )
             logger.exception(e)
 
@@ -104,6 +120,7 @@ class ImageWriter:
         if image_name is None:
             image_name = self.generate_image_name(current_channel, ext=ext)
         file_name = os.path.join(self.save_directory, image_name)
+        self.mip_name = image_name
 
         # Initialize data source, pointing to the new file name
         self.data_source = data_sources.get_data_source(self.file_type)(file_name)
@@ -120,19 +137,30 @@ class ImageWriter:
         ----------
         frame_ids : int
             Index into self.model.data_buffer.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> self.save_image(0)
         """
         for idx in frame_ids:
-            # data = self.model.data_buffer[idx]
-            # text_im = text_array(f"Image {idx}")
-            # data[:text_im.shape[0], :text_im.shape[1]] += text_im.astype('uint16')*np.maximum(np.max(data)//2, 1)
+            if idx == 0:
+                self.mip = self.model.data_buffer[idx]
+
             self.data_source.write(
-                self.model.data_buffer[idx],  # data,
+                self.model.data_buffer[idx],
                 x=self.model.data_buffer_positions[idx][0],
                 y=self.model.data_buffer_positions[idx][1],
                 z=self.model.data_buffer_positions[idx][2],
                 theta=self.model.data_buffer_positions[idx][3],
                 f=self.model.data_buffer_positions[idx][4],
             )
+
+            self.mip = np.maximum(self.mip, self.model.data_buffer[idx])
+        imsave(os.path.join(self.mip_directory, self.mip_name), self.mip)
 
     def generate_image_name(self, current_channel, ext=".tif"):
         """
@@ -143,6 +171,22 @@ class ImageWriter:
         current_channel : int
             Index into self.model.configuration['experiment']['MicroscopeState']['channels']
             of saved color channel.
+
+        ext : str
+            File extension, e.g., '.tif'
+
+        Returns
+        -------
+        str
+            File name, e.g., CH00_000000.tif
+
+        Examples
+        --------
+        >>> model = aslm.model.model.Model()
+        >>> image_writer = aslm.model.image_writer.ImageWriter(model)
+        >>> image_writer.generate_image_name(current_channel=0)
+        'CH00_000000.tif'
+
         """
         image_name = (
             "CH0"

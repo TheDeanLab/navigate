@@ -243,15 +243,15 @@ class AcquireBarController(GUIController):
             self.parent_controller.execute("stop_acquire")
 
         elif self.is_save and self.mode != "live":
-            acquire_pop = AcquirePopUp(self.view)
+            self.acquire_pop = AcquirePopUp(self.view)
             buttons = (
-                acquire_pop.get_buttons()
+                self.acquire_pop.get_buttons()
             )  # This holds all the buttons in the popup
-            widgets = acquire_pop.get_widgets()
+            widgets = self.acquire_pop.get_widgets()
 
             # Configure the button callbacks on the popup window
-            buttons["Cancel"].config(command=lambda: acquire_pop.popup.dismiss())
-            buttons["Done"].config(command=lambda: self.launch_acquisition(acquire_pop))
+            buttons["Cancel"].config(command=lambda: self.acquire_pop.popup.dismiss())
+            buttons["Done"].config(command=lambda: self.launch_acquisition(self.acquire_pop))
 
             # Configure drop down callbacks, will update save settings when file type is
             # changed

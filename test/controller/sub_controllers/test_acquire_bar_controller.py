@@ -59,7 +59,7 @@ class TestAcquireBarController():
         for attr in attrs:
             assert hasattr(self.acqbarController, attr)
 
-    @pytest.mark.parametrize("mode,mode_expected,value_expected", [ ('live', 'indeterminate', None), ('single', 'determinate', 0), ('projection', 'determinate', 0), ('z-stack', 'determinate', 0) ])
+    @pytest.mark.parametrize("mode,mode_expected,value_expected", [ ('live', 'determinate', None), ('single', 'determinate', 0), ('projection', 'determinate', 0), ('z-stack', 'determinate', 0) ])
     def test_progress_bar(self, mode, mode_expected, value_expected):
         
         # Simulating an image series

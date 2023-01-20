@@ -142,7 +142,7 @@ class PIStage(StageBase):
         try:
             self.stop()
             logger.debug("PI connection closed")
-        except GCSError as e:  # except BaseException:
+        except (AttributeError, GCSError) as e:  # except BaseException:
             print("Error while disconnecting the PI stage")
             logger.exception(f"Error while disconnecting the PI stage - {e}")
             raise

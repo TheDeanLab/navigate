@@ -32,6 +32,45 @@
 
 import random
 
+import pytest
+
+@pytest.fixture(scope="function")
+def model():
+    from types import SimpleNamespace
+    from pathlib import Path
+
+    from aslm.model.model import Model
+    from multiprocessing import Manager, Queue
+    from aslm.config.config import load_configs
+
+    # Use configuration files that ship with the code base
+    configuration_directory = Path.joinpath(
+        Path(__file__).resolve().parent.parent.parent, "src", "aslm", "config"
+    )
+    configuration_path = Path.joinpath(configuration_directory, "configuration.yaml")
+    experiment_path = Path.joinpath(configuration_directory, "experiment.yml")
+    waveform_constants_path = Path.joinpath(configuration_directory, "waveform_constants.yml")
+    rest_api_path = Path.joinpath(configuration_directory, "rest_api_config.yml")
+
+    event_queue = Queue(100)
+    manager = Manager()
+
+    configuration = load_configs(
+        manager,
+        configuration=configuration_path,
+        experiment=experiment_path,
+        waveform_constants=waveform_constants_path,
+        rest_api_config=rest_api_path,
+    )
+    model = Model(
+        USE_GPU=False,
+        args=SimpleNamespace(synthetic_hardware=True),
+        configuration=configuration,
+        event_queue=event_queue,
+    )
+
+    return model
+
 
 def test_change_resolution(model):
     """

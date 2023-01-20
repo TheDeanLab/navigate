@@ -127,7 +127,7 @@ class SutterStage(StageBase):
             """
             self.serial.close()
             logger.debug("MP-285 stage connection closed")
-        except BaseException as e:
+        except (AttributeError, BaseException) as e:
             print("Error while disconnecting the MP-285 stage")
             logger.exception(e)
             raise

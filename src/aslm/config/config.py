@@ -62,7 +62,12 @@ def get_aslm_path():
         base_directory = os.getenv("LOCALAPPDATA")
     else:
         base_directory = os.getenv("HOME")
-    return os.path.join(base_directory, ".ASLM")
+    aslm_path = os.path.join(base_directory, ".ASLM")
+
+    if not os.path.exists(aslm_path):
+        os.mkdir(aslm_path)
+
+    return aslm_path
 
 
 def get_configuration_paths():

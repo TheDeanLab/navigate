@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -38,11 +38,11 @@ import unittest
 # Local Imports
 from aslm.model.devices.zoom.zoom_base import ZoomBase
 from aslm.model.dummy import DummyModel
-from attr import has
 
 
 class TestZoomBase(unittest.TestCase):
-    r"""Unit Test for Zoom Base Class"""
+    """Unit Test for Zoom Base Class"""
+
     dummy_model = DummyModel()
     microscope_name = "Mesoscale"
     zoom_class = ZoomBase(microscope_name, None, dummy_model.configuration)

@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -49,7 +49,7 @@ def prepare_cameras(dummy_model):
                 if camera.get_camera_handler() != 0:
                     break
                 camera.dev_close()
-            except:
+            except Exception:
                 continue
             camera = None
         return camera
@@ -83,7 +83,8 @@ def prepare_cameras(dummy_model):
 
 @pytest.mark.hardware
 class TestHamamatsuOrca:
-    r"""Unit Test for HamamamatsuOrca Class"""
+    """Unit Test for HamamamatsuOrca Class"""
+
     model = None
 
     @pytest.fixture(autouse=True)
@@ -191,10 +192,10 @@ class TestHamamatsuOrca:
             pre_value = self.camera.camera_controller.get_property_value("sensor_mode")
             self.camera.set_sensor_mode(mode)
             value = self.camera.camera_controller.get_property_value("sensor_mode")
-            if modes[mode] != None:
+            if modes[mode] is not None:
                 assert value == modes[mode], f"sensor mode {mode} isn't right!"
             else:
-                assert value == pre_value, f"sensor mode shouldn't be set!"
+                assert value == pre_value, "sensor mode shouldn't be set!"
 
     def test_set_readout_direction(self):
         readout_directions = {"Top-to-Bottom": 1, "Bottom-to-Top": 2}
@@ -290,14 +291,14 @@ class TestHamamatsuOrca:
             y = random.randint(1, self.camera.camera_parameters["y_pixels"])
             r = self.camera.set_ROI(y, x)
             if x % 2 == 1 or y % 2 == 1:
-                assert r == False
+                assert r is False
                 assert self.camera.x_pixels == pre_x, "width shouldn't be chaged!"
                 assert self.camera.y_pixels == pre_y, "height shouldn't be changed!"
             else:
                 top = (height - y) / 2
                 bottom = top + y - 1
                 if top % 2 == 1 or bottom % 2 == 0:
-                    assert r == False
+                    assert r is False
                 else:
                     assert (
                         r == True
@@ -333,7 +334,7 @@ class TestHamamatsuOrca:
         # set software trigger
         self.camera.camera_controller.set_property_value("trigger_source", 3)
 
-        assert self.camera.is_acquiring == False
+        assert self.camera.is_acquiring is False
 
         number_of_frames = 100
         data_buffer = [
@@ -343,10 +344,10 @@ class TestHamamatsuOrca:
 
         # initialize without release/close the camera
         self.camera.initialize_image_series(data_buffer, number_of_frames)
-        assert self.camera.is_acquiring == True
+        assert self.camera.is_acquiring is True
 
         self.camera.initialize_image_series(data_buffer, number_of_frames)
-        assert self.camera.is_acquiring == True
+        assert self.camera.is_acquiring is True
 
         exposure_time = self.camera.camera_controller.get_property_value(
             "exposure_time"
@@ -364,15 +365,15 @@ class TestHamamatsuOrca:
             assert len(frames) == triggers
 
         self.camera.close_image_series()
-        assert self.camera.is_acquiring == False
+        assert self.camera.is_acquiring is False
 
         for i in range(self.num_of_tests):
             self.camera.initialize_image_series(data_buffer, number_of_frames)
-            assert self.camera.is_acquiring == True
+            assert self.camera.is_acquiring is True
             self.camera.close_image_series()
-            assert self.camera.is_acquiring == False
+            assert self.camera.is_acquiring is False
 
         # close a closed camera
         self.camera.close_image_series()
         self.camera.close_image_series()
-        assert self.camera.is_acquiring == False
+        assert self.camera.is_acquiring is False

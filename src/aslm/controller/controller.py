@@ -29,7 +29,7 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-#
+
 
 #  Standard Library Imports
 from multiprocessing import Manager
@@ -110,6 +110,7 @@ class Controller:
         )  # pass events from the model to the view via controller
         # accepts tuples, ('event_name', value)
 
+        # Create a shared memory manager
         self.manager = Manager()
         self.configuration = load_configs(
             self.manager,
@@ -123,6 +124,7 @@ class Controller:
         self.model = ObjectInSubprocess(
             Model, use_gpu, args, self.configuration, event_queue=self.event_queue
         )
+
         logger.info(f"Spec - Configuration Path: {configuration_path}")
         logger.info(f"Spec - Experiment Path: {experiment_path}")
         logger.info(f"Spec - Waveform Constants Path: {waveform_constants_path}")
@@ -209,7 +211,7 @@ class Controller:
         root.deiconify()
 
     def update_buffer(self):
-        r"""Update the buffer size according to the camera dimensions listed in the experimental parameters.
+        """Update the buffer size according to the camera dimensions listed in the experimental parameters.
 
         Returns
         -------
@@ -235,11 +237,19 @@ class Controller:
         self.img_height = img_height
 
     def update_acquire_control(self):
+        """Update the acquire control based on the current experiment parameters."""
         self.view.acqbar.stop_stage.config(
             command=self.stage_controller.stop_button_handler
         )
 
     def change_microscope(self, microscope_name):
+        """Change the microscope configuration.
+
+        Parameters
+        ----------
+        microscope_name : string
+            Name of the microscope to change to.
+        """
         self.configuration["experiment"]["MicroscopeState"][
             "microscope_name"
         ] = microscope_name
@@ -250,8 +260,13 @@ class Controller:
 
     def initialize_cam_view(self):
         """Populate view tab.
+
         Populate widgets with necessary data from config file via config controller. For the entire view tab.
         Sets the minimum and maximum counts for when the data is not being autoscaled.
+
+        Returns
+        -------
+        None
         """
         # Populating Min and Max Counts
         minmax_values = [0, 2**16 - 1]
@@ -260,8 +275,13 @@ class Controller:
         self.camera_view_controller.initialize("image", image_metrics)
 
     def initialize_menus(self, is_synthetic_hardware=False):
-        r"""Initialize menus
+        """Initialize menus
         This function defines all the menus in the menubar
+
+        Parameters
+        ----------
+        is_synthetic_hardware : bool
+            If True, then the hardware is simulated. If False, then the hardware is real.
 
         Returns
         -------
@@ -271,9 +291,11 @@ class Controller:
         """
 
         def new_experiment():
+            """Create a new experiment file."""
             self.populate_experiment_setting(self.default_experiment_file)
 
         def load_experiment():
+            """Load an experiment file."""
             filename = filedialog.askopenfilename(
                 defaultextension=".yml", filetypes=[("Yaml files", "*.yml *.yaml")]
             )
@@ -282,7 +304,10 @@ class Controller:
             self.populate_experiment_setting(filename)
 
         def save_experiment():
-            # update model.experiment and save it to file
+            """Save an experiment file.
+
+            Updates model.experiment and saves it to file.
+            """
             if not self.update_experiment_setting():
                 tkinter.messagebox.showerror(
                     title="Warning",
@@ -297,6 +322,7 @@ class Controller:
             save_yaml_file("", self.configuration["experiment"], filename)
 
         def load_images():
+            """Load images from a file."""
             filenames = filedialog.askopenfilenames(
                 defaultextension=".tif", filetypes=[("tiff files", "*.tif *.tiff")]
             )
@@ -318,6 +344,7 @@ class Controller:
             self.waveform_popup_controller.populate_experiment_values()
 
         def popup_autofocus_setting():
+            """Pop up the Autofocus setting window."""
             if hasattr(self, "af_popup_controller"):
                 self.af_popup_controller.showup()
                 return
@@ -325,6 +352,7 @@ class Controller:
             self.af_popup_controller = AutofocusPopupController(af_popup, self)
 
         def popup_camera_map_setting():
+            """Pop up the Camera Map setting window."""
             if hasattr(self, "camera_map_popup_controller"):
                 self.camera_map_popup_controller.showup()
                 return
@@ -334,6 +362,7 @@ class Controller:
             )
 
         def popup_ilastik_setting():
+            """Pop up the Ilastik setting window."""
             ilastik_popup_window = ilastik_setting_popup(self.view)
             ilastik_url = self.configuration["rest_api_config"]["Ilastik"]["url"]
             if hasattr(self, "ilastik_controller"):
@@ -343,8 +372,8 @@ class Controller:
                     ilastik_popup_window, self, ilastik_url
                 )
 
-        # Help popup
         def popup_help():
+            """Pop up the help window."""
             if hasattr(self, "help_controller"):
                 self.help_controller.showup()
                 return
@@ -467,7 +496,7 @@ class Controller:
         #     Debug_Module(self, self.view.menubar.menu_debug)
 
     def populate_experiment_setting(self, file_name=None):
-        r"""Load experiment file and populate model.experiment and configure view.
+        """Load experiment file and populate model.experiment and configure view.
 
         Confirms that the experiment file exists.
         Sends the experiment file to the model and the controller.
@@ -505,7 +534,7 @@ class Controller:
         self.set_mode_of_sub("stop")
 
     def update_experiment_setting(self):
-        r"""Update model.experiment according to values in the GUI
+        """Update model.experiment according to values in the GUI
 
         Collect settings from sub-controllers
         sub-controllers will validate the value, if something is wrong, it will
@@ -522,7 +551,7 @@ class Controller:
         return True
 
     def prepare_acquire_data(self):
-        r"""Prepare the acquisition data.
+        """Prepare the acquisition data.
 
         Updates model.experiment.
         Sets sub-controller's mode to 'live' when 'continuous is selected, or 'stop'.
@@ -539,7 +568,7 @@ class Controller:
         return True
 
     def set_mode_of_sub(self, mode):
-        r"""Communicates imaging mode to sub-controllers.
+        """Communicates imaging mode to sub-controllers.
 
         Parameters
         __________
@@ -555,7 +584,7 @@ class Controller:
             self.feature_id_val.set(0)
 
     def update_camera_view(self):
-        r"""Update the real-time parameters in the camera view (channel number, max counts, image, etc.)"""
+        """Update the real-time parameters in the camera view (channel number, max counts, image, etc.)"""
         create_threads = False
         if create_threads:
             self.threads_pool.createThread(
@@ -573,7 +602,7 @@ class Controller:
             self.camera_view_controller.update_channel_idx(self.model.current_channel)
 
     def execute(self, command, *args):
-        r"""Functions listens to the Sub_Gui_Controllers.
+        """Functions listens to the Sub_Gui_Controllers.
 
         The controller.experiment is passed as an argument to the model, which then overwrites
         the model.experiment.  Workaround due to model being in a sub-process.
@@ -581,10 +610,9 @@ class Controller:
         Parameters
         __________
         args* : function-specific passes.
-
         """
         if command == "stage":
-            r"""Creates a thread and uses it to call the model to move stage
+            """Creates a thread and uses it to call the model to move stage
 
             Parameters
             __________
@@ -596,10 +624,11 @@ class Controller:
             )
 
         elif command == "stop_stage":
+            """Creates a thread and uses it to call the model to stop stage"""
             self.threads_pool.createThread("stop_stage", self.stop_stage)
 
         elif command == "move_stage_and_update_info":
-            r"""update stage view to show the position
+            """update stage view to show the position
 
             Parameters
             __________
@@ -609,7 +638,7 @@ class Controller:
             self.stage_controller.set_position(args[0])
 
         elif command == "move_stage_and_acquire_image":
-            r"""update stage and acquire an image
+            """update stage and acquire an image
 
             Parameters
             __________
@@ -623,7 +652,7 @@ class Controller:
             self.execute("acquire")
 
         elif command == "get_stage_position":
-            r"""Returns the current stage position
+            """Returns the current stage position
 
             Returns
             -------
@@ -632,7 +661,8 @@ class Controller:
             return self.stage_controller.get_position()
 
         elif command == "resolution":
-            r"""Changes the resolution mode and zoom position.
+            """Changes the resolution mode and zoom position.
+
             Recalculates FOV_X and FOV_Y
             If Waveform Popup is open, communicates changes to it.
 
@@ -658,7 +688,6 @@ class Controller:
                 "model", lambda: self.model.run_command("update_setting", "resolution")
             )
             work_thread.join()
-            # self.model.change_resolution(resolution_value=args[0])
             self.camera_setting_controller.calculate_physical_dimensions()
             if (
                 hasattr(self, "waveform_popup_controller")
@@ -671,7 +700,7 @@ class Controller:
             self.camera_view_controller.update_snr()
 
         elif command == "set_save":
-            r"""Set whether the image will be saved.
+            """Set whether the image will be saved.
 
             Parameters
             __________
@@ -700,7 +729,7 @@ class Controller:
             )
 
         elif command == "autofocus":
-            r"""Execute autofocus routine."""
+            """Execute autofocus routine."""
             self.threads_pool.createThread(
                 "camera",
                 self.capture_image,
@@ -711,13 +740,13 @@ class Controller:
             )
 
         elif command == "load_feature":
-            r"""Tell model to load/unload features."""
+            """Tell model to load/unload features."""
             self.threads_pool.createThread(
                 "model", lambda: self.model.run_command("load_feature", *args)
             )
 
         elif command == "acquire_and_save":
-            r"""Acquire data and save it.
+            """Acquire data and save it.
 
             Prepares the acquisition data.
             Creates the file directory for saving the data.
@@ -747,7 +776,7 @@ class Controller:
             self.execute("acquire")
 
         elif command == "acquire":
-            r"""Acquire data.  Triggered when the Acquire button is hit by the user in the GUI.
+            """Acquire data.  Triggered when the Acquire button is hit by the user in the GUI.
 
             Prepares the acquisition data.
 
@@ -778,13 +807,16 @@ class Controller:
             )
 
         elif command == "stop_acquire":
+            """Stop the acquisition."""
+
             # self.model.run_command('stop')
             self.sloppy_stop()
             self.set_mode_of_sub("stop")
-
             self.acquire_bar_controller.stop_progress_bar()
 
         elif command == "exit":
+            """Exit the program."""
+
             # self.model.run_command('stop')
             self.sloppy_stop()
             if hasattr(self, "waveform_popup_controller"):
@@ -797,7 +829,7 @@ class Controller:
         logger.info(f"ASLM Controller - command passed from child, {command}, {args}")
 
     def sloppy_stop(self):
-        r"""Keep trying to stop the model until successful.
+        """Keep trying to stop the model until successful.
 
         TODO: Delete this function!!!
 
@@ -817,12 +849,14 @@ class Controller:
                 e = RuntimeError
 
     def capture_image(self, command, mode):
-        r"""Trigger the model to capture images.
+        """Trigger the model to capture images.
 
         Parameters
         ----------
-        mode : str
-            'z-stack', ...
+        command : string
+            string = 'acquire' or 'autofocus'
+        mode : string
+            string = 'continuous', 'z-stack', 'single', or 'projection'
         """
         self.camera_view_controller.image_count = 0
 
@@ -887,7 +921,7 @@ class Controller:
         )
 
     def move_stage(self, pos_dict):
-        r"""Trigger the model to move the stage.
+        """Trigger the model to move the stage.
 
         Parameters
         ----------
@@ -901,8 +935,9 @@ class Controller:
         self.model.move_stage(pos_dict)
 
     def stop_stage(self):
-        r"""
-        Stop the stage. Grab the stopped position from the stage and update the GUI control values accordingly.
+        """Stop the stage.
+
+        Grab the stopped position from the stage and update the GUI control values accordingly.
         """
         self.model.stop_stage()
         ret_pos_dict = self.model.get_stage_position()
@@ -910,7 +945,13 @@ class Controller:
         self.update_stage_controller_silent(ret_pos_dict)
 
     def update_stage_controller_silent(self, ret_pos_dict):
-        r"""Send updates to the stage GUI"""
+        """Send updates to the stage GUI
+
+        Parameters
+        ----------
+        ret_pos_dict : dict
+            Dictionary of axis positions
+        """
         stage_gui_dict = {}
         for axis, val in ret_pos_dict.items():
             ax = axis.split("_")[0]
@@ -918,7 +959,7 @@ class Controller:
         self.stage_controller.set_position_silent(stage_gui_dict)
 
     def update_event(self):
-        r"""Update the waveforms in the View."""
+        """Update the waveforms in the View."""
         while True:
             event, value = self.event_queue.get()
             if event == "waveform":
@@ -944,6 +985,10 @@ class Controller:
                 break
 
     def exit_program(self):
+        """Exit the program.
+
+        This function is called when the user clicks the exit button in the GUI.
+        """
         if messagebox.askyesno("Exit", "Are you sure?"):
             logger.info("Exiting Program")
             self.execute("exit")

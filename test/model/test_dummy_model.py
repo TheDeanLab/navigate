@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -36,11 +36,12 @@ import unittest
 # Third Party Imports
 
 # Local imports
-from aslm.model.dummy import DummyModel
+# from aslm.model.dummy import DummyModel
 
 
 class TestDummyModel(unittest.TestCase):
-    r"""Unit Test for Dummy Model"""
+    """Unit Test for Dummy Model"""
+
     pass
 
     # def test_synthetic_camera_initialization(self):
@@ -122,7 +123,8 @@ class TestDummyModel(unittest.TestCase):
     #                'get_minimum_waiting_time']
     #
     #     for m in methods:
-    #         assert hasattr(synthetic_camera, m) and callable(getattr(synthetic_camera, m))
+    #         assert hasattr(synthetic_camera, m) and
+    #                callable(getattr(synthetic_camera, m))
     #
     # def test_synthetic_camera_wheel_method_calls(self):
     #     self.dummy_model = get_dummy_model()
@@ -215,7 +217,8 @@ class TestDummyModel(unittest.TestCase):
     #     synthetic_camera = SyntheticCamera(configuration=self.configuration,
     #                                        experiment=self.experiment,
     #                                        camera_id=0)
-    #     synthetic_camera.initialize_image_series(data_buffer=100, number_of_frames=100)
+    #     synthetic_camera.initialize_image_series(data_buffer=100,
+    #                                              number_of_frames=100)
     #     # TODO - get the data buffer to not be type None
     #
     # def test_synthetic_camera_get_new_frame(self):
@@ -225,7 +228,8 @@ class TestDummyModel(unittest.TestCase):
     #     synthetic_camera = SyntheticCamera(configuration=self.configuration,
     #                                        experiment=self.experiment,
     #                                        camera_id=0)
-    #     synthetic_camera.initialize_image_series(data_buffer=100, number_of_frames=100)
+    #     synthetic_camera.initialize_image_series(data_buffer=100,
+    #                                              number_of_frames=100)
     #     # synthetic_camera.generate_new_frame()
     #     # synthetic_camera.get_new_frame()
     #     # TODO - get the data buffer to not be type None

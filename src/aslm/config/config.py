@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -36,7 +37,6 @@ import shutil
 import platform
 from pathlib import Path
 from os.path import isfile
-from multiprocessing import Manager
 
 # Third Party Imports
 import yaml
@@ -52,6 +52,11 @@ def get_aslm_path():
     -------
     str
         Path to ASLM home directory.
+
+    Examples
+    --------
+    >>> get_aslm_path()
+    'C:\\Users\\username\\AppData\\Local\\.ASLM'
     """
     if platform.system() == "Windows":
         base_directory = os.getenv("LOCALAPPDATA")
@@ -74,6 +79,14 @@ def get_configuration_paths():
         Path to file containing remote focus parameters for all magnifications
     rest_api_path : str
         Path to file containing REST API configuration
+
+    Examples
+    --------
+    >>> get_configuration_paths()
+    ('C:\\Users\\username\\AppData\\Local\\.ASLM\\config\\configuration.yaml',
+        'C:\\Users\\username\\AppData\\Local\\.ASLM\\config\\experiment.yaml',
+        'C:\\Users\\username\\AppData\\Local\\.ASLM\\config\\etl_constants.yaml',
+        'C:\\Users\\username\\AppData\\Local\\.ASLM\\config\\rest_api.yaml')
     """
     aslm_directory = get_aslm_path()
     if not os.path.exists(aslm_directory):
@@ -90,7 +103,8 @@ def get_configuration_paths():
     )
     rest_api_path = Path.joinpath(configuration_directory, "rest_api_config.yml")
 
-    # If they are not already, copy the default ones that ship with the software to this folder
+    # If they are not already,
+    # copy the default ones that ship with the software to this folder
     if not os.path.exists(configuration_path):
         copy_base_directory = Path(__file__).resolve().parent
         copy_configuration_path = Path.joinpath(
@@ -172,6 +186,10 @@ def build_nested_dict(manager, parent_dict, key_name, dict_data):
     -------
     parent_dict : dict
         Dictionary with sub-dictionary inserted
+
+    Examples
+    --------
+    >>> build_nested_dict(manager, parent_dict, key_name, dict_data)
     """
     if type(dict_data) != dict and type(dict_data) != list:
         parent_dict[key_name] = dict_data
@@ -206,6 +224,10 @@ def update_config_dict(manager, parent_dict, config_name, new_config) -> bool:
     -------
     dict
         Dictionary with replaced sub dictionary
+
+    Examples
+    --------
+    >>> update_config_dict(manager, parent_dict, config_name, new_config)
     """
     if type(new_config) != dict:
         file_path = str(new_config)

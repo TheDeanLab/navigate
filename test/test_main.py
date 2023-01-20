@@ -43,7 +43,7 @@ from aslm.config.config import get_aslm_path
 
 
 class TestMain(unittest.TestCase):
-    r"""Unit Test for main.py"""
+    """Unit Test for main.py"""
 
     def test_identify_gpu(self):
         parser = create_parser()

@@ -102,6 +102,21 @@ class KeystrokeController(GUIController):
         self.main_view.bind_all("<Control-Key-y>", self.widget_redo)
 
     def camera_controller_mouse_wheel_enter(self, event):
+        """Mouse wheel binding for camera view
+
+        Parameters
+        ----------
+        event : tkinter event
+            Mouse wheel event
+
+        Returns
+        -------
+        None
+
+        Example
+        -------
+        >>> self.camera_view.canvas.bind("<Enter>", self.camera_controller_mouse_wheel_enter)
+        """
         self.view.root.unbind("<MouseWheel>")  # get rid of scrollbar mousewheel
         if platform.system() != "Linux":
             self.camera_view.canvas.bind(
@@ -116,6 +131,22 @@ class KeystrokeController(GUIController):
             )
 
     def camera_controller_mouse_wheel_leave(self, event):
+        """Mouse wheel binding for camera view
+
+        Parameters
+        ----------
+        event : tkinter event
+            Mouse wheel event
+
+        Returns
+        -------
+        None
+
+        Example
+        -------
+        >>> self.camera_view.canvas.bind("<Leave>", self.camera_controller_mouse_wheel_leave)
+        """
+
         if platform.system() != "Linux":
             self.camera_view.canvas.unbind("<MouseWheel>")
         else:
@@ -126,17 +157,64 @@ class KeystrokeController(GUIController):
         )  # reinstate scrollbar mousewheel
 
     def switch_tab(self, event):
+        """Switches between tabs
+
+        Parameters
+        ----------
+        event : tkinter event
+            Tab key event
+
+        Returns
+        -------
+        None
+
+        Example
+        -------
+        >>> self.main_view.bind("<Control-Key-1>", self.switch_tab)
+        """
+
         key_val = int(event.keysym)
         if (key_val > 0) and (self.main_tabs.index("end") >= key_val):
             self.main_tabs.select(key_val - 1)
 
     def widget_undo(self, event):
+        """Undo widget changes
+
+        Parameters
+        ----------
+        event : tkinter event
+            Undo key event
+
+        Returns
+        -------
+        None
+
+        Example
+        -------
+        >>> self.main_view.bind_all('<Control-Key-z>', self.widget_undo)
+        """
         if isinstance(
             event.widget, ValidatedEntry
         ):  # Add all widgets that you want to be able to undo here
             event.widget.undo(event)
 
     def widget_redo(self, event):
+        """Redo widget changes
+
+        Parameters
+        ----------
+        event : tkinter event
+            Redo key event
+
+        Returns
+        -------
+        None
+
+        Example
+        -------
+        >>> self.main_view.bind_all('<Control-Key-y>', self.widget_redo)
+        """
+
         if isinstance(
             event.widget, ValidatedEntry
         ):  # Add all widgets that you want to be able to undo here

@@ -61,10 +61,24 @@ class CameraMapSettingPopupController(GUIController):
         self.view.inputs["camera"].set_menu(menu[0], *menu)
 
     def showup(self):
+        """Show the popup.
+
+        This method is called by the parent controller.
+
+        Example
+        -------
+        >>> self.parent_controller.show_popup("camera_map_setting_popup")
+        """
         self.view.showup()
 
     def get_camera_menu(self):
-        """Return list of serial numbers of available cameras."""
+        """Return list of serial numbers of available cameras.
+
+        Returns
+        -------
+        list
+            List of serial numbers of available cameras.
+        """
         menu = ["synthetic"]
         for v in self.parent_controller.configuration["configuration"][
             "microscopes"
@@ -73,6 +87,7 @@ class CameraMapSettingPopupController(GUIController):
         return menu
 
     def open_frames(self):
+        """Open a file dialog to select a series of dark frames."""
         filename = filedialog.askopenfilename(
             defaultextension=".tif", filetypes=[("tiff files", "*.tif *.tiff")]
         )
@@ -81,6 +96,7 @@ class CameraMapSettingPopupController(GUIController):
         self.view.file_name.set(filename)
 
     def create_camera_maps(self):
+        """Create offset and variance maps from a series of dark frames."""
         # TODO: This should not be in the controller logic.
         image_name = self.view.file_name.get()
         im = tifffile.imread(image_name)
@@ -101,6 +117,7 @@ class CameraMapSettingPopupController(GUIController):
         tifffile.imsave(save_path_variance, self.var)
 
     def display_plot(self):
+        """Display the offset and variance maps."""
         for ax in self.view.axs:
             ax.clear()
 

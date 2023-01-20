@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -47,7 +47,7 @@ logger = logging.getLogger(p)
 
 
 def build_filter_wheel_connection(comport, baudrate, timeout=0.25):
-    r"""Build SutterFilterWheel Serial Port connection
+    """Build SutterFilterWheel Serial Port connection
     Attributes
     ----------
     comport : str
@@ -61,12 +61,12 @@ def build_filter_wheel_connection(comport, baudrate, timeout=0.25):
     except serial.SerialException:
         logger.warning("SutterFilterWheel - Could not establish Serial Port Connection")
         raise UserWarning(
-            "Could not communicate with Sutter Lambda 10-B via COMPORT", self.comport
+            "Could not communicate with Sutter Lambda 10-B via COMPORT", comport
         )
 
 
 class SutterFilterWheel(FilterWheelBase):
-    r"""SutterFilterWheel Class
+    """SutterFilterWheel Class
 
     Class for controlling Sutter Lambda Filter Wheels
     https://www.sutter.com/manuals/LB10-3_OpMan.pdf
@@ -151,24 +151,27 @@ class SutterFilterWheel(FilterWheelBase):
         self.close()
 
     def filter_change_delay(self, filter_name):
-        r"""Calculate duration of time necessary to change filter wheel positions.
+        """Calculate duration of time necessary to change filter wheel positions.
         Identifies the number of positions that must be switched, and then retrieves
         the duration of time necessary to perform the switch from self.delay_matrix.
-        Detailed information on timing located on page 38: https://www.sutter.com/manuals/LB10-3_OpMan.pdf
+        Detailed information on timing located on page 38:
+        https://www.sutter.com/manuals/LB10-3_OpMan.pdf
 
         Parameters
         ----------
         filter_name : str
             Name of filter that we want to move to.
         """
-        # Find the old and new positions, the distance between them, and the delay necessary.
+        # Find the old and new positions, the distance between them, and the
+        # delay necessary.
         old_position = self.wheel_position
         self.wheel_position = self.filter_dictionary[filter_name]
         delta_position = int(abs(old_position - self.wheel_position))
         self.wait_until_done_delay = self.delay_matrix[self.speed, delta_position]
 
     def set_filter(self, filter_name, wait_until_done=True):
-        r"""Change the filter wheel to the filter designated by the filter position argument.
+        """Change the filter wheel to the filter designated by the filter
+        position argument.
 
         Parameters
         ----------
@@ -182,11 +185,13 @@ class SutterFilterWheel(FilterWheelBase):
             # Calculate the Delay Needed to Change the Positions
             self.filter_change_delay(filter_name)
 
-            # Make sure you are moving it to a reasonable filter position at a reasonable speed.
+            # Make sure you are moving it to a reasonable filter position at a
+            # reasonable speed.
             assert self.wheel_position in range(10)
             assert self.speed in range(8)
 
-            # If previously we did not confirm that the initialization was complete, check now.
+            # If previously we did not confirm that the initialization was complete,
+            # check now.
             if not self.init_finished:
                 self.read(2)
                 self.init_finished = True
@@ -195,10 +200,11 @@ class SutterFilterWheel(FilterWheelBase):
             for wheel_idx in range(self.number_of_filter_wheels):
                 """Loop through each filter, and send the binary sequence via serial to
                 move to the desired filter wheel position
-                When number_of_filter_wheels = 1, loop executes once, and only wheel A changes.
-                When number_of_filter_wheels = 2, loop executes twice, with both wheel A and
-                B moving to the same position sequentially
-                Filter Wheel Command Byte Encoding = wheel + (self.speed*16) + position = command byte
+                When number_of_filter_wheels = 1, loop executes once, and only wheel A
+                changes. When number_of_filter_wheels = 2, loop executes twice, with
+                both wheel A and B moving to the same position sequentially
+                Filter Wheel Command Byte Encoding = wheel + (self.speed*16) +
+                position = command byte
                 """
                 logger.debug(f"SutterFilterWheel - Moving to Position {wheel_idx}")
                 output_command = wheel_idx * 128 + self.wheel_position + 16 * self.speed
@@ -210,7 +216,7 @@ class SutterFilterWheel(FilterWheelBase):
                 time.sleep(self.wait_until_done_delay)
 
     def read(self, num_bytes):
-        r"""Reads the specified number of bytes from the serial port.
+        """Reads the specified number of bytes from the serial port.
 
         Parameters
         ----------
@@ -224,15 +230,17 @@ class SutterFilterWheel(FilterWheelBase):
             time.sleep(0.02)
         else:
             logger.error(
-                "The serial port to the Sutter Lambda 10-B is on, but it isn't responding as expected."
+                "The serial port to the Sutter Lambda 10-B is on, but it isn't "
+                "responding as expected."
             )
             raise UserWarning(
-                "The serial port to the Sutter Lambda 10-B is on, but it isn't responding as expected."
+                "The serial port to the Sutter Lambda 10-B is on, but it isn't "
+                "responding as expected."
             )
         return self.serial.read(num_bytes)
 
     def close(self):
-        r"""Close the SutterFilterWheel serial port.
+        """Close the SutterFilterWheel serial port.
 
         Sets the filter wheel to the Empty-Alignment position and then closes the port.
         """

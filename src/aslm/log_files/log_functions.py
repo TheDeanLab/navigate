@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -46,7 +47,8 @@ from aslm.config.config import get_aslm_path
 
 
 def update_nested_dict(d, find_func, apply_func):
-    """
+    """Update a nested dictionary by applying a function to a value
+
     Loops through a nested dictionary and if find_func() conditions are met,
     run apply_func on that key.
 
@@ -55,6 +57,8 @@ def update_nested_dict(d, find_func, apply_func):
 
     Parameters
     ----------
+    d : dict
+        Dictionary to be updated
     find_func : func
         Accepts key, value pair and matches a condition based on these. Returns bool.
     apply_func : func
@@ -77,22 +81,41 @@ def update_nested_dict(d, find_func, apply_func):
 
 
 def find_filename(k, v):
-    """Check that we've met the condition dictionary key == 'filename'"""
+    """Check that we've met the condition dictionary key == 'filename'
+
+    Parameters
+    ----------
+    k : str
+        Dictionary key
+    v : str
+        Dictionary value
+
+    Returns
+    -------
+    bool
+        True if k == 'filename', False otherwise
+
+    Examples
+    --------
+    >>> find_filename('filename', 'test')
+    """
     if k == "filename":
         return True
     return False
 
 
 def log_setup(logging_configuration):
-    """Initialize Logger
+    """Setup logging configuration
+
     Initialize a logger from a YAML file containing information in the Python logging
-    dictionary format
-    (see https://docs.python.org/3/library/logging.config.html#logging-config-dictschema).
+    dictionary format.  Additional information here:
+    https://docs.python.org/3/library/logging.config.html#logging-config-dictschema
 
     Parameters
     ----------
     logging_configuration : str
-        Path to file to be loaded. Relative to the location of the folder containing this file.
+        Path to file to be loaded.
+        Relative to the location of the folder containing this file.
     """
 
     # path to logging_configuration is set relative
@@ -103,7 +126,7 @@ def log_setup(logging_configuration):
     # Save directory for logging information.
     time = datetime.now()
     time_stamp = Path(
-        f"%s-%s-%s-%s%s"
+        "%s-%s-%s-%s%s"
         % (
             f"{time.year:04d}",
             f"{time.month:02d}",
@@ -121,7 +144,14 @@ def log_setup(logging_configuration):
         os.mkdir(todays_path)
 
     def update_filename(v):
-        """Function to map filename to base_directory/filename in the dictionary"""
+        """Function to map filename to base_directory/filename in the dictionary
+
+        Parameters
+        ----------
+        v : str
+            Value to be updated
+
+        """
         return Path.joinpath(todays_path, v)
 
     # Read the logging configuration file.
@@ -141,8 +171,15 @@ def log_setup(logging_configuration):
 
 
 def main_process_listener(queue):
-    """
-    This function will listen for new logs put in queue from sub processes, it will then log via the main process.
+    """Listener function for the main process
+
+    This function will listen for new logs put in queue from sub processes,
+    it will then log via the main process.
+
+    Parameters
+    ----------
+    queue : multiprocessing.Queue
+        Queue to listen for new logs
     """
     while True:
         try:

@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -52,7 +52,7 @@ def synthetic_camera(dummy_model):
 
 
 class TestSyntheticCamera:
-    r"""Unit Test for Camera Synthetic Class"""
+    """Unit Test for Camera Synthetic Class"""
 
     @pytest.fixture(autouse=True)
     def _prepare_camera(self, synthetic_camera):
@@ -79,7 +79,7 @@ class TestSyntheticCamera:
             "x_pixels": int,
             "y_pixels": int,
             "is_acquiring": bool,
-            "_mean_background_count": float,
+            "_mean_background_count": int,
             "_noise_sigma": np.float64,
             # 'current_frame_idx': None,
             # 'data_buffer': None,
@@ -89,8 +89,8 @@ class TestSyntheticCamera:
 
         for key in desired_attributes:
             attribute = getattr(self.synthetic_camera, key)
-            # print(key, type(attribute), desired_attributes[key])
-            # assert type(attribute) == desired_attributes[key]
+            print(key, type(attribute), desired_attributes[key])
+            assert type(attribute) == desired_attributes[key]
 
     def test_synthetic_camera_methods(self):
         methods = [
@@ -166,7 +166,7 @@ class TestSyntheticCamera:
 
         self.synthetic_camera.initialize_image_series(data_buffer, number_of_frames)
 
-        assert self.synthetic_camera.is_acquiring == True, "should be acquring"
+        assert self.synthetic_camera.is_acquiring is True, "should be acquring"
 
         frame_idx = 0
 

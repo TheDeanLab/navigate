@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -32,17 +32,15 @@
 
 # Standard Library Imports
 import unittest
-from pathlib import Path
 
 # Third Party Imports
 
 # Local Imports
 from aslm.model.devices.shutter.laser_shutter_ttl import ShutterTTL
-from aslm.model.dummy import DummyModel
 
 
 class TestShutterTTL(unittest.TestCase):
-    r"""Unit Test for ShutterTTL Class"""
+    """Unit Test for ShutterTTL Class"""
 
     def test_shutter_ttl_attributes(self):
         assert hasattr(ShutterTTL, "open_shutter") and callable(

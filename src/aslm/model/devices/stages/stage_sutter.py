@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -46,7 +46,7 @@ logger = logging.getLogger(p)
 
 
 def build_sutter_stage_connection(com_port, baud_rate):
-    r"""Build SutterStage Serial Port connection
+    """Build SutterStage Serial Port connection
 
     Attributes
     ----------
@@ -74,13 +74,14 @@ def build_sutter_stage_connection(com_port, baud_rate):
 
 
 class SutterStage(StageBase):
-    r"""SutterStage Class
+    """SutterStage Class
 
     Class for controlling Sutter MP-285 Stage.
-    All commands return an ASCII CR (Carriage Return; 13 decimal, 0D hexadecimal) to indicate that the task associated
-    with the command has completed. When the controller completes the task associated with a command, it sends ASCII CR
-    back to the host computer indicating that it is ready to receive a new command. If a command returns data, the last
-    byte returned is the task-completed indicator.
+    All commands return an ASCII CR (Carriage Return; 13 decimal, 0D hexadecimal) to
+    indicate that the task associated with the command has completed. When the
+    controller completes the task associated with a command, it sends ASCII CR back to
+    the host computer indicating that it is ready to receive a new command. If a command
+    returns data, the last byte returned is the task-completed indicator.
 
     Attributes
     ----------
@@ -119,7 +120,7 @@ class SutterStage(StageBase):
         self.speed = 1000  # in units microns/s.
 
     def __del__(self):
-        r"""Delete SutterStage Serial Port."""
+        """Delete SutterStage Serial Port."""
         try:
             """
             Close the MP-285 Stage connection
@@ -132,26 +133,26 @@ class SutterStage(StageBase):
             raise
 
     def __enter__(self):
-        r"""Establish SutterStage content manager."""
+        """Establish SutterStage content manager."""
         return self
 
     def __exit__(self, type, value, traceback):
-        r"""Releases the SutterStage resources"""
+        """Releases the SutterStage resources"""
         logger.debug("SutterStage - Closing Device.")
         self.close()
 
     def close(self):
-        r"""Close the SutterStage serial port."""
+        """Close the SutterStage serial port."""
         logger.debug("SutterStage - Closing Serial Port")
         self.serial.close()
 
     def flush_buffers(self):
-        r"""Flush Serial I/O Buffers"""
+        """Flush Serial I/O Buffers"""
         self.serial.reset_input_buffer()
         self.serial.reset_output_buffer()
 
     def check_byte_order(self, command):
-        r"""Confirm OS Byte Order
+        """Confirm OS Byte Order
         MP-285 requires commands and responses to be interpreted as Little Endian.
 
         Parameters
@@ -173,7 +174,7 @@ class SutterStage(StageBase):
 
     @staticmethod
     def convert_microsteps_to_microns(self, microsteps):
-        r"""Converts MP-285 microsteps to microns
+        """Converts MP-285 microsteps to microns
 
         Parameters
         ----------
@@ -191,7 +192,7 @@ class SutterStage(StageBase):
 
     @staticmethod
     def convert_microns_to_microsteps(self, microns):
-        r"""Converts microsteps to microns for MP-285 communication.
+        """Converts microsteps to microns for MP-285 communication.
 
         Parameters
         ----------
@@ -208,7 +209,7 @@ class SutterStage(StageBase):
         return microsteps
 
     def set_stage_speed_and_resolution(self, speed, resolution):
-        r"""Sets the MP-285 stage speed and resolution.
+        """Sets the MP-285 stage speed and resolution.
 
         Parameters
         ----------
@@ -220,7 +221,7 @@ class SutterStage(StageBase):
             High - 0.04 microns/microstep = 50 microsteps/step
 
         """
-        logger.debug(f"Setting MP-285 Stage Speed")
+        logger.debug("Setting MP-285 Stage Speed")
         if self.resolution == "high":
             resolution_bit = 1
             if speed > 1310:
@@ -240,7 +241,8 @@ class SutterStage(StageBase):
             logger.error("Unknown MP-285 stage resolution:", self.resolution)
 
         # Generate Command
-        # One unsigned short (16-bit integer (2 bytes) containing both resolution and velocity values.
+        # One unsigned short (16-bit integer (2 bytes) containing both resolution and
+        # velocity values.
         speed_and_res = int(resolution_bit * 32768 + speed)
         command = (
             bytes.fromhex("56")
@@ -274,8 +276,10 @@ class SutterStage(StageBase):
             command = bytes.fromhex("63") + bytes.fromhex("0d")
             self.serial.write(command)
 
-            # Receive Position Information -  The data returned consists of 13 bytes: 12 bytes containing X, Y, & Z
-            # position values in microsteps (4 bytes each), followed with the task-complete indicator (1 byte).
+            # Receive Position Information -  The data returned consists of 13 bytes:
+            # 12 bytes containing X, Y, & Z
+            # position values in microsteps (4 bytes each), followed with the
+            # task-complete indicator (1 byte).
             position_information = self.serial.read_until(
                 expected=bytes.fromhex("0d"), size=100
             )
@@ -308,19 +312,22 @@ class SutterStage(StageBase):
         Implement movement logic along multiple axes for the MP-285 stage.
 
         The command sequence consists of 14 bytes:
-        Command byte followed by three sets of four bytes containing position information in microsteps for X, Y, and Z,
-        and ending with the terminator.
-        Return data consists of 1 byte (task-complete indicator), which occurs after the move is complete.
+        Command byte followed by three sets of four bytes containing position
+        information in microsteps for X, Y, and Z, and ending with the terminator.
+        Return data consists of 1 byte (task-complete indicator), which occurs after the
+        move is complete.
 
         Parameters
         ----------
         axis : str
-            An axis prefix in move_dictionary. For example, axis='x' corresponds to 'x_abs', 'x_min', etc.
+            An axis prefix in move_dictionary. For example, axis='x' corresponds to
+            'x_abs', 'x_min', etc.
         axis_num : int
-            The corresponding number of this axis on a PI stage. Not applicable to the ASI stage.
+            The corresponding number of this axis on a PI stage. Not applicable to the
+            ASI stage.
         move_dictionary : dict
-            A dictionary of values required for movement. Includes 'x_abs', 'x_min', etc. for one or more axes.
-            Expects values in micrometers.
+            A dictionary of values required for movement. Includes 'x_abs', 'x_min',
+            etc. for one or more axes. Expects values in micrometers.
         Returns
         -------
         bool
@@ -354,7 +361,8 @@ class SutterStage(StageBase):
 
         except BaseException as e:
             print(
-                f"MP-285 stage move axis absolute failed or is trying to move out of range: {e}"
+                "MP-285 stage move axis absolute failed or is trying to move out of"
+                f"range: {e}"
             )
             logger.exception(e)
             return False
@@ -364,8 +372,9 @@ class SutterStage(StageBase):
         Parameters
         ----------
         move_dictionary : dict
-            A dictionary of values required for movement. Includes 'x_abs', etc. for one or more axes.
-            Expects values in micrometers, except for theta, which is in degrees.
+            A dictionary of values required for movement. Includes 'x_abs', etc. for one
+            or more axes. Expects values in micrometers, except for theta, which is
+            in degrees.
         wait_until_done : bool
             Block until stage has moved to its new spot.
         Returns
@@ -376,11 +385,12 @@ class SutterStage(StageBase):
         pass
 
     def stop(self):
-        r"""This command interrupts and stops a move in progress that originally initiated by the Move (‘m’) command.
-        The command sequence consists of 1 byte: Command byte (no terminator).
+        """This command interrupts and stops a move in progress that originally
+        initiated by the Move (‘m’) command. The command sequence consists of 1 byte:
+        Command byte (no terminator).
 
-        Return data consists of 1 byte if movement is not in progress, or 2 bytes (‘=’ (move-in- progress indicator)
-        and task-complete indicator."""
+        Return data consists of 1 byte if movement is not in progress, or 2 bytes
+        ('=' (move-in- progress indicator)and task-complete indicator."""
 
         try:
             # Send Command

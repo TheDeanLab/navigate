@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -46,7 +46,7 @@ logger = logging.getLogger(p)
 
 
 class NIDAQ(DAQBase):
-    r"""NIDAQ class for Data Acquisition (DAQ).
+    """NIDAQ class for Data Acquisition (DAQ).
 
     Attributes
     ----------
@@ -60,11 +60,11 @@ class NIDAQ(DAQBase):
         self.camera_trigger_task = None
         self.master_trigger_task = None
         try:
-            switching_port = self.configuration["configuration"]["microscopes"][
-                self.microscope_name
-            ]["daq"]["laser_port_switcher"]
+            # switching_port = self.configuration["configuration"]["microscopes"][
+            #     self.microscope_name
+            # ]["daq"]["laser_port_switcher"]
             self.laser_switching_task = nidaqmx.Task()
-        except:
+        except KeyError:
             self.laser_switching_task = None
 
         self.analog_outputs = {}  # keep track of analog outputs and their waveforms
@@ -75,7 +75,7 @@ class NIDAQ(DAQBase):
             self.stop_acquisition()
 
     def create_camera_task(self, exposure_time):
-        r"""Set up the camera trigger task.
+        """Set up the camera trigger task.
 
         Parameters
         ----------
@@ -85,7 +85,8 @@ class NIDAQ(DAQBase):
         camera_trigger_out_line = self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ]["daq"]["camera_trigger_out_line"]
-        self.camera_high_time = 0.004  # (self.camera_pulse_percent / 100) * (exposure_time/1000)  # self.sweep_time
+        self.camera_high_time = 0.004  # (self.camera_pulse_percent / 100) *
+        # (exposure_time/1000)  # self.sweep_time
         self.camera_delay = (self.camera_delay_percent / 100) * (
             exposure_time / 1000
         )  # * 0.01 * self.sweep_time
@@ -103,7 +104,7 @@ class NIDAQ(DAQBase):
         )
 
     def create_master_trigger_task(self):
-        r"""Set up the DO master trigger task."""
+        """Set up the DO master trigger task."""
         master_trigger_out_line = self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ]["daq"]["master_trigger_out_line"]
@@ -114,8 +115,9 @@ class NIDAQ(DAQBase):
 
     def create_analog_output_tasks(self, channel_key):
         """
-        Create a single analog output task for all channels per board. Most NI DAQ cards have only one clock for analog
-        output sample timing, and as such all channels must be grouped here.
+        Create a single analog output task for all channels per board. Most NI DAQ cards
+        have only one clock for analog output sample timing, and as such all channels
+        must be grouped here.
         """
 
         self.analog_output_tasks = []
@@ -136,12 +138,15 @@ class NIDAQ(DAQBase):
             )
             if len(sample_rates) > 1:
                 logger.debug(
-                    "NI DAQ - Different sample rates provided for each analog channel. Defaulting to the first sample rate provided."
+                    "NI DAQ - Different sample rates provided for each analog channel."
+                    "Defaulting to the first sample rate provided."
                 )
             n_samples = list(set([v["samples"] for v in self.analog_outputs.values()]))
             if len(n_samples) > 1:
                 logger.debug(
-                    "NI DAQ - Different number of samples provided for each analog channel. Defaulting to the minimum number of samples provided. Waveforms will be clipped to this length."
+                    "NI DAQ - Different number of samples provided for each analog"
+                    "channel. Defaulting to the minimum number of samples provided."
+                    "Waveforms will be clipped to this length."
                 )
             n_sample = min(n_samples)
             self.analog_output_tasks[-1].timing.cfg_samp_clk_timing(
@@ -155,7 +160,8 @@ class NIDAQ(DAQBase):
             )
             if len(triggers) > 1:
                 logger.debug(
-                    "NI DAQ - Different triggers provided for each analog channel. Defaulting to the first trigger provided."
+                    "NI DAQ - Different triggers provided for each analog channel."
+                    "Defaulting to the first trigger provided."
                 )
             self.analog_output_tasks[-1].triggers.start_trigger.cfg_dig_edge_start_trig(
                 triggers[0]
@@ -172,7 +178,7 @@ class NIDAQ(DAQBase):
             self.analog_output_tasks[-1].write(waveforms)
 
     def prepare_acquisition(self, channel_key, exposure_time):
-        r"""Prepare the acquisition.
+        """Prepare the acquisition.
 
         Creates and configures the DAQ tasks.
         Writes the waveforms to each task.
@@ -194,7 +200,7 @@ class NIDAQ(DAQBase):
         self.create_analog_output_tasks(channel_key)
 
     def run_acquisition(self):
-        r"""Run DAQ Acquisition.
+        """Run DAQ Acquisition.
         Run the tasks for triggering, analog and counter outputs.
         The master trigger initiates all other tasks via a shared trigger
         For this to work, all analog output and counter tasks have to be started so that
@@ -212,11 +218,11 @@ class NIDAQ(DAQBase):
         try:
             self.camera_trigger_task.stop()
             self.master_trigger_task.stop()
-        except:
+        except nidaqmx.DaqError:
             pass
 
     def stop_acquisition(self):
-        r"""Stop Acquisition."""
+        """Stop Acquisition."""
         try:
             self.camera_trigger_task.stop()
             self.master_trigger_task.stop()
@@ -225,7 +231,7 @@ class NIDAQ(DAQBase):
             for task in self.analog_output_tasks:
                 task.stop()
                 task.close()
-        except:
+        except nidaqmx.DaqError:
             pass
 
     def enable_microscope(self, microscope_name):

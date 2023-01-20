@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -41,6 +41,7 @@ import time
 import numpy as np
 
 # Local Imports
+from aslm.model.features.feature_container import load_features
 from aslm.config.config import load_configs
 from aslm.model.devices.camera.camera_synthetic import (
     SyntheticCamera,
@@ -52,6 +53,45 @@ from aslm.model.features.feature_container import (
     DataContainer,
     load_features,
 )
+
+
+# def get_dummy_model():
+#     """
+#     Creates a dummy model to be used for testing. All hardware is synthetic and the
+#     current config settings are loaded.
+#     """
+#     # Set up the model, experiment, ETL dictionaries
+#     base_directory = Path(__file__).resolve().parent.parent
+#     configuration_directory = Path.joinpath(base_directory, 'config')
+
+
+#     config = Path.joinpath(configuration_directory, 'configuration.yml')
+#     experiment = Path.joinpath(configuration_directory, 'experiment.yml')
+#     etl_constants = Path.joinpath(configuration_directory, 'etl_constants.yml')
+
+#     class args():
+#         """
+#         Leaving this class here in case we need to instantiate a full synthetic model
+#         """
+#         def __init__(self):
+#             self.synthetic_hardware = True
+
+#     # This return is used when you want a full syntethic model instead of just
+#     # variable data from config files
+#     # return Model(False, args(), config, experiment, etl_constants)
+
+#     class dummy_model():
+#         def __init__(self):
+#             self.configuration = Configurator(config)
+#             self.experiment = Configurator(experiment)
+#             self.etl_constants = Configurator(etl_constants)
+#             self.data_buffer = None
+
+#     # Instantiate fake model to return
+#     dumb_model = dummy_model()
+
+
+#     return dumb_model
 
 
 class DummyModel:
@@ -77,6 +117,10 @@ class DummyModel:
         self.device = DummyDevice()
         self.signal_pipe, self.data_pipe = None, None
 
+        self.active_microscope = DummyMicroscope(
+            "dummy", self.configuration, devices_dict={}, is_synthetic=True
+        )
+
         self.signal_container = None
         self.data_container = None
         self.signal_thread = None
@@ -84,8 +128,6 @@ class DummyModel:
 
         self.stop_flag = False
         self.frame_id = 0  # signal_num
-
-        self.current_channel = 0
 
         self.data = []
         self.signal_records = []
@@ -227,3 +269,16 @@ class DummyDevice:
                 list(range(self.sendout_msg_count, self.msg_count.value))
             )
             self.sendout_msg_count = self.msg_count.value
+
+
+class DummyMicroscope:
+    def __init__(self, name, configuration, devices_dict, is_synthetic=False):
+        self.microscope_name = name
+        self.configuration = configuration
+        self.data_buffer = None
+        self.stages = {}
+        self.lasers = {}
+        self.galvo = {}
+        self.daq = devices_dict.get("daq", None)
+
+        self.current_channel = 0

@@ -226,6 +226,8 @@ class PIStage(StageBase):
         """
 
         for ax, n in zip(self.axes, self.pi_axes):
+            if f"{ax}_abs" not in move_dictionary:
+                continue
             success = self.move_axis_absolute(ax, n, move_dictionary)
 
         if wait_until_done is True:

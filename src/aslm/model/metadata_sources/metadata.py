@@ -49,6 +49,7 @@ class Metadata:
         """
         Store and convert internal representation of metadata (configuration, experiment, etc.)
         to alternative file types.
+
         Concept and some of the code borrowed from python-microscopy
         (https://github.com/python-microscopy/python-microscopy/).
         """

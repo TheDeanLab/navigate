@@ -74,6 +74,7 @@ logger = logging.getLogger(p)
 
 class Controller:
     """ASLM Controller
+
     Parameters
     ----------
     root : Tk top-level widget.
@@ -211,6 +212,7 @@ class Controller:
 
     def update_buffer(self):
         """Update the buffer size according to the camera dimensions listed in the experimental parameters.
+
         Returns
         -------
         self.img_width : int
@@ -242,6 +244,7 @@ class Controller:
 
     def change_microscope(self, microscope_name):
         """Change the microscope configuration.
+
         Parameters
         ----------
         microscope_name : string
@@ -257,8 +260,10 @@ class Controller:
 
     def initialize_cam_view(self):
         """Populate view tab.
+
         Populate widgets with necessary data from config file via config controller. For the entire view tab.
         Sets the minimum and maximum counts for when the data is not being autoscaled.
+
         Returns
         -------
         None
@@ -272,14 +277,17 @@ class Controller:
     def initialize_menus(self, is_synthetic_hardware=False):
         """Initialize menus
         This function defines all the menus in the menubar
+
         Parameters
         ----------
         is_synthetic_hardware : bool
             If True, then the hardware is simulated. If False, then the hardware is real.
+
         Returns
         -------
         configuration_controller : class
             Camera view sub-controller.
+
         """
 
         def new_experiment():
@@ -297,6 +305,7 @@ class Controller:
 
         def save_experiment():
             """Save an experiment file.
+
             Updates model.experiment and saves it to file.
             """
             if not self.update_experiment_setting():
@@ -488,13 +497,16 @@ class Controller:
 
     def populate_experiment_setting(self, file_name=None):
         """Load experiment file and populate model.experiment and configure view.
+
         Confirms that the experiment file exists.
         Sends the experiment file to the model and the controller.
         Populates the GUI with these settings.
+
         Parameters
         __________
         file_name : string
             file_name = path to the non-default experiment yaml file.
+
         """
         # read the new file and update info of the configuration dict
         update_config_dict(self.manager, self.configuration, "experiment", file_name)
@@ -523,9 +535,11 @@ class Controller:
 
     def update_experiment_setting(self):
         """Update model.experiment according to values in the GUI
+
         Collect settings from sub-controllers
         sub-controllers will validate the value, if something is wrong, it will
         return False
+
         """
         # acquire_bar_controller - update image mode
         self.configuration["experiment"]["MicroscopeState"][
@@ -538,6 +552,7 @@ class Controller:
 
     def prepare_acquire_data(self):
         """Prepare the acquisition data.
+
         Updates model.experiment.
         Sets sub-controller's mode to 'live' when 'continuous is selected, or 'stop'.
         """
@@ -554,6 +569,7 @@ class Controller:
 
     def set_mode_of_sub(self, mode):
         """Communicates imaging mode to sub-controllers.
+
         Parameters
         __________
         mode : string
@@ -587,14 +603,17 @@ class Controller:
 
     def execute(self, command, *args):
         """Functions listens to the Sub_Gui_Controllers.
+
         The controller.experiment is passed as an argument to the model, which then overwrites
         the model.experiment.  Workaround due to model being in a sub-process.
+
         Parameters
         __________
         args* : function-specific passes.
         """
         if command == "stage":
             """Creates a thread and uses it to call the model to move stage
+
             Parameters
             __________
             args[0] : dict
@@ -610,6 +629,7 @@ class Controller:
 
         elif command == "move_stage_and_update_info":
             """update stage view to show the position
+
             Parameters
             __________
             args[0] : dict
@@ -619,6 +639,7 @@ class Controller:
 
         elif command == "move_stage_and_acquire_image":
             """update stage and acquire an image
+
             Parameters
             __________
             args[0] : dict
@@ -632,6 +653,7 @@ class Controller:
 
         elif command == "get_stage_position":
             """Returns the current stage position
+
             Returns
             -------
                 dict = {'x': value, 'y': value, 'z': value, 'theta': value, 'f': value}
@@ -640,8 +662,10 @@ class Controller:
 
         elif command == "resolution":
             """Changes the resolution mode and zoom position.
+
             Recalculates FOV_X and FOV_Y
             If Waveform Popup is open, communicates changes to it.
+
             Parameters
             ----------
             args : dict
@@ -677,6 +701,7 @@ class Controller:
 
         elif command == "set_save":
             """Set whether the image will be saved.
+
             Parameters
             __________
             args : Boolean
@@ -686,6 +711,7 @@ class Controller:
 
         elif command == "update_setting":
             r"""Called by the Waveform Constants Popup Controller to update the Waveform constants settings in memory.
+
             Parameters
             __________
             args[0] : string
@@ -721,14 +747,17 @@ class Controller:
 
         elif command == "acquire_and_save":
             """Acquire data and save it.
+
             Prepares the acquisition data.
             Creates the file directory for saving the data.
             Saves the experiment file to that directory.
             Acquires the data.
+
             Parameters
             __________
             args[0] : dict
                 dict = self.save_settings from the experiment.yaml file.
+
             """
             if not self.prepare_acquire_data():
                 self.acquire_bar_controller.stop_acquire()
@@ -748,7 +777,9 @@ class Controller:
 
         elif command == "acquire":
             """Acquire data.  Triggered when the Acquire button is hit by the user in the GUI.
+
             Prepares the acquisition data.
+
             Parameters
             __________
             args[0] : string
@@ -799,7 +830,9 @@ class Controller:
 
     def sloppy_stop(self):
         """Keep trying to stop the model until successful.
+
         TODO: Delete this function!!!
+
         This is set up to get around the conflict between self.threads_pool.createThread('model', target)
         commands and the need to stop as abruptly as possible when the user hits stop. Here we leverage
         ObjectInSubprocess's refusal to let us access the model from two threads to our advantage, and just
@@ -817,6 +850,7 @@ class Controller:
 
     def capture_image(self, command, mode):
         """Trigger the model to capture images.
+
         Parameters
         ----------
         command : string
@@ -888,6 +922,7 @@ class Controller:
 
     def move_stage(self, pos_dict):
         """Trigger the model to move the stage.
+
         Parameters
         ----------
         pos_dict : dict
@@ -901,6 +936,7 @@ class Controller:
 
     def stop_stage(self):
         """Stop the stage.
+
         Grab the stopped position from the stage and update the GUI control values accordingly.
         """
         self.model.stop_stage()
@@ -910,6 +946,7 @@ class Controller:
 
     def update_stage_controller_silent(self, ret_pos_dict):
         """Send updates to the stage GUI
+
         Parameters
         ----------
         ret_pos_dict : dict
@@ -949,6 +986,7 @@ class Controller:
 
     def exit_program(self):
         """Exit the program.
+
         This function is called when the user clicks the exit button in the GUI.
         """
         if messagebox.askyesno("Exit", "Are you sure?"):

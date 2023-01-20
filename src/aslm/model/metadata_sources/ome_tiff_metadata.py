@@ -52,6 +52,7 @@ class OMETIFFMetadata(XMLMetadata):
         """
         Generates dictionary with same heirarchical structure as OME-XML. Useful for
         OME-TIFF and OME-XML.
+
         Returns
         -------
         ome_dict

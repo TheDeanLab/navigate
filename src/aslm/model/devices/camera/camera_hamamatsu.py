@@ -45,6 +45,7 @@ logger = logging.getLogger(p)
 
 class HamamatsuOrca(CameraBase):
     """HamamatsuOrca camera class.
+
     Parameters
     ----------
     microscope_name : str
@@ -102,6 +103,7 @@ class HamamatsuOrca(CameraBase):
     @property
     def serial_number(self):
         """Get Camera Serial Number
+
         Returns
         -------
         serial_number : str
@@ -135,6 +137,7 @@ class HamamatsuOrca(CameraBase):
 
     def set_sensor_mode(self, mode):
         """Set HamamatsuOrca sensor mode.
+
         Parameters
         ----------
         mode : str
@@ -152,6 +155,7 @@ class HamamatsuOrca(CameraBase):
 
     def set_readout_direction(self, mode):
         """Set HamamatsuOrca readout direction.
+
         Parameters
         ----------
             mode : str
@@ -173,10 +177,12 @@ class HamamatsuOrca(CameraBase):
 
     def calculate_readout_time(self):
         """Calculate duration of time needed to readout an image.
+    
         Calculates the readout time and maximum frame rate according to the camera
         configuration settings.
         Assumes model C13440 with Camera Link communication from Hamamatsu.
         Currently pulling values directly from the camera.
+
         Returns
         -------
         readout_time : float
@@ -227,8 +233,10 @@ class HamamatsuOrca(CameraBase):
 
     def set_exposure_time(self, exposure_time):
         """Set HamamatsuOrca exposure time.
+
         Units of the Hamamatsu API are in seconds.
         All of our units are in milliseconds. Function convert to seconds.
+
         Parameters
         ----------
         exposure_time : float
@@ -239,6 +247,7 @@ class HamamatsuOrca(CameraBase):
 
     def set_line_interval(self, line_interval_time):
         """Set HamamatsuOrca line interval.
+
         Parameters
         ----------
         line_interval_time : float
@@ -250,11 +259,13 @@ class HamamatsuOrca(CameraBase):
 
     def set_binning(self, binning_string):
         """Set HamamatsuOrca binning mode.
+
         Parameters
         ----------
         binning_string : str
             Desired binning properties (e.g., '1x1', '2x2', '4x4', '8x8', '16x16',
             '1x2', '2x4')
+
         Returns
         -------
         result: bool
@@ -287,6 +298,7 @@ class HamamatsuOrca(CameraBase):
 
     def set_ROI(self, roi_height=2048, roi_width=2048):
         """Change the size of the active region on the camera.
+
         Parameters
         ----------
         roi_height : int
@@ -343,6 +355,7 @@ class HamamatsuOrca(CameraBase):
 
     def initialize_image_series(self, data_buffer=None, number_of_frames=100):
         """Initialize HamamatsuOrca image series.
+
         Parameters
         ----------
         data_buffer : int
@@ -355,6 +368,7 @@ class HamamatsuOrca(CameraBase):
 
     def close_image_series(self):
         """Close image series.
+
         Stops the acquisition and sets is_acquiring flag to False.
         """
         self.camera_controller.stop_acquisition()
@@ -366,6 +380,7 @@ class HamamatsuOrca(CameraBase):
 
     def get_minimum_waiting_time(self):
         """Get minimum waiting time for HamamatsuOrca.
+
         This function get timing information from the camera device
         cyclic_trigger_period, minimum_trigger_blank, minimum_trigger_interval
         'cyclic_trigger_period' of current device is 0

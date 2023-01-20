@@ -182,6 +182,7 @@ class ChannelsTabController(GUIController):
 
     def initialize(self):
         """Initializes widgets and gets other necessary configuration
+
         Examples
         --------
         >>> self.initialize()
@@ -199,6 +200,7 @@ class ChannelsTabController(GUIController):
     def populate_experiment_values(self):
         """Distribute initial MicroscopeState values to this and sub-controllers and
         associated views.
+
         Examples
         --------
         >>> self.populate_experiment_values()
@@ -238,10 +240,12 @@ class ChannelsTabController(GUIController):
 
     def set_spinbox_range_limits(self, settings):
         """This function will set the spinbox widget's values of from_, to, step
+
         Parameters
         ----------
         settings : dict
             dictionary of settings from configuration file
+
         Examples
         --------
         >>> self.set_spinbox_range_limits(settings)
@@ -279,10 +283,12 @@ class ChannelsTabController(GUIController):
 
     def set_mode(self, mode):
         """Change acquisition mode.
+
         Parameters
         ----------
         mode : str
             acquisition mode
+
         Examples
         --------
         >>> self.set_mode(mode)
@@ -300,9 +306,11 @@ class ChannelsTabController(GUIController):
 
     def update_z_steps(self, *args):
         """Recalculates the number of slices that will be acquired in a z-stack.
+
         Requires GUI to have start position, end position, or step size changed.
         Sets the number of slices in the model and the GUI.
         Sends the current values to central/parent controller
+
         Parameters
         ----------
         args : dict
@@ -368,11 +376,13 @@ class ChannelsTabController(GUIController):
 
     def update_start_position(self, *args):
         """Get new z starting position from current stage parameters.
+
         Parameters
         ----------
         args : dict
             Values is a dict as follows {'start_position': , 'abs_z_start': ,
             'stack_z_origin': }
+
         Examples
         --------
         >>> self.update_start_position()
@@ -393,11 +403,13 @@ class ChannelsTabController(GUIController):
 
     def update_end_position(self, *args):
         """Get new z ending position from current stage parameters
+
         Parameters
         ----------
         args : dict
             Values is a dict as follows {'end_position': , 'abs_z_end': ,
             'stack_z_origin': }
+
         Examples
         --------
         >>> self.update_end_position()
@@ -435,15 +447,18 @@ class ChannelsTabController(GUIController):
 
     def update_cycling_setting(self, *args):
         """Update the cycling settings in the model and the GUI.
+
         You can collect different channels in different formats.
         In the perZ format: Slice 0/Ch0, Slice0/Ch1, Slice1/Ch0, Slice1/Ch1, etc
         in the perStack format: Slice 0/Ch0, Slice1/Ch0... SliceN/Ch0.  Then it repeats
         with Ch1
+
         Parameters
         ----------
         args : dict
             Values is a dict as follows {'cycling_setting': , 'cycling_setting': ,
                                          'stack_z_origin': }
+
         Examples
         --------
         >>> self.update_cycling_setting()
@@ -470,12 +485,15 @@ class ChannelsTabController(GUIController):
 
     def update_save_setting(self, *args):
         """Tell the centrol/parent controller 'save_data' is selected.
+
         Does not do any calculation when initializing the software.
+
         Parameters
         ----------
         args : dict
             Values is a dict as follows {'save_data': , 'save_data': ,
                                          'stack_z_origin': }
+
         Examples
         --------
         >>> self.update_save_setting()
@@ -492,8 +510,10 @@ class ChannelsTabController(GUIController):
     def update_timepoint_setting(self, call_parent=False):
         """Automatically calculates the stack acquisition time based on the number of
         time points, channels, and exposure time.
+
         TODO: Add necessary computation for 'Stack Acq.Time', 'Timepoint Interval',
         'Experiment Duration'?
+
         Does not do any calculation when initializing the software.
         Order of priority for perStack: timepoints > positions > channels > z-steps
                                         > delay
@@ -502,6 +522,7 @@ class ChannelsTabController(GUIController):
         ----------
         call_parent : bool
             Tell parent controller that time point setting has changed.
+
         Examples
         --------
         >>> self.update_timepoint_setting()
@@ -631,7 +652,9 @@ class ChannelsTabController(GUIController):
 
     def toggle_multiposition(self):
         """Toggle Multi-position Acquisition.
+
         Recalculates the experiment duration.
+
         Examples
         --------
         >>> self.toggle_multiposition()
@@ -642,6 +665,7 @@ class ChannelsTabController(GUIController):
 
     def launch_tiling_wizard(self):
         """Launches tiling wizard popup.
+
         Will only launch when button in GUI is pressed, and will not duplicate.
         Pressing button again brings popup to top
         """
@@ -654,12 +678,14 @@ class ChannelsTabController(GUIController):
 
     def set_info(self, vals, values):
         """Set values to a list of variables.
+
         Parameters
         ----------
         vals : list
             List of variables to set.
         values : list
             List of values to set to variables.
+
         Examples
         --------
         >>> self.set_info([self.timepoint_vals['timepoint_interval'],
@@ -671,6 +697,7 @@ class ChannelsTabController(GUIController):
 
     def execute(self, command, *args):
         """Execute Command in the parent controller.
+
         Parameters
         ----------
         command : str
@@ -678,10 +705,12 @@ class ChannelsTabController(GUIController):
             get_stage_position
         args : list
             List of arguments to pass to the command.
+
         Returns
         -------
         command : object
             Returns parent_controller.execute(command) if command = 'get_stage_position'
+
         Examples
         --------
         >>> self.execute('recalculate_timepoint')

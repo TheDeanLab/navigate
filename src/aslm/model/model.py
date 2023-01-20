@@ -65,7 +65,9 @@ p = __name__.split(".")[1]
 
 class Model:
     """ASLM Model Class
+
     Model for Model-View-Controller Software Architecture.
+
     Attributes
     ----------
     USE_GPU : bool
@@ -78,6 +80,7 @@ class Model:
         File path for the experiment configuration of the microscope
     event_queue : ...
         ...
+
     Methods
     -------
     update_data_buffer()
@@ -229,6 +232,7 @@ class Model:
 
     def update_data_buffer(self, img_width=512, img_height=512):
         """Update the Data Buffer
+
         Parameters
         ----------
         img_width : int
@@ -252,14 +256,17 @@ class Model:
 
     def get_data_buffer(self, img_width=512, img_height=512):
         """Get the data buffer.
+
         If the number of active pixels in x and y changes, updates the data buffer and
         returns newly-sized buffer.
+
         Parameters
         ----------
         img_height : int
             Number of active pixels in the x-dimension.
         img_width : int
             Number of active pixels in the y-dimension.
+
         Returns
         -------
         data_buffer : SharedNDArray
@@ -271,12 +278,15 @@ class Model:
 
     def create_pipe(self, pipe_name):
         """Create a data pipe.
+
         Creates a pair of connection objects connected by a pipe which by default is
         duplex (two-way)
+
         Parameters
         ----------
         pipe_name : str
             Name of pipe to create.
+
         Returns
         -------
         end1 : object
@@ -289,6 +299,7 @@ class Model:
 
     def release_pipe(self, pipe_name):
         """Close a data pipe.
+
         Parameters
         ----------
         pipe_name : str
@@ -302,6 +313,7 @@ class Model:
 
     def get_active_microscope(self):
         """Get the active microscope.
+
         Returns
         -------
         microscope : Microscope
@@ -316,6 +328,7 @@ class Model:
 
     def get_offset_variance_maps(self):
         """Get the offset variance maps.
+
         Returns
         -------
         offset_variance_maps : dict
@@ -326,6 +339,7 @@ class Model:
 
     def run_command(self, command, *args, **kwargs):
         """Receives commands from the controller.
+
         Parameters
         ----------
         command : str
@@ -490,14 +504,17 @@ class Model:
 
     def move_stage(self, pos_dict, wait_until_done=False):
         """Moves the stages.
+
         Updates the stage dictionary, moves to the desired position, and reports
         the position.
+
         Parameters
         ----------
         pos_dict : dict
             Dictionary of stage positions.
         wait_until_done : bool
             Checks "on target state" after command and waits until done.
+
         Returns
         -------
         success : bool
@@ -507,6 +524,7 @@ class Model:
 
     def get_stage_position(self):
         """Get the position of the stage.
+
         Returns
         -------
         ret_pos_dict : dict
@@ -523,6 +541,7 @@ class Model:
 
     def end_acquisition(self):
         """End the acquisition.
+
         Sets the current channel to 0, clears the signal and data containers,
         disconnects buffer in live mode and closes the shutters.
         #
@@ -541,7 +560,9 @@ class Model:
 
     def run_data_process(self, num_of_frames=0, data_func=None):
         """Run the data process.
+
         This function is the structure of data thread.
+
         Parameters
         ----------
         num_of_frames : int
@@ -612,6 +633,7 @@ class Model:
 
     def pause_data_thread(self):
         """Pause the data thread.
+
         This function is called when user pauses the acquisition.
         """
 
@@ -621,6 +643,7 @@ class Model:
 
     def resume_data_thread(self):
         """Resume the data thread.
+
         This function is called when user resumes the acquisition.
         """
 
@@ -631,6 +654,7 @@ class Model:
 
     def prepare_acquisition(self, turn_off_flags=True):
         """Prepare the acquisition.
+
         This function is called when user starts the acquisition.
         Sets flags, calculates all of the waveforms.
         Sets the Camera Sensor Mode, initializes the data buffer, starts camera,
@@ -640,6 +664,7 @@ class Model:
         Sets the Camera Sensor Mode
         Initializes the data buffer and starts camera.
         Opens Shutters
+
         Parameters
         ----------
         turn_off_flags : bool
@@ -661,9 +686,11 @@ class Model:
 
     def snap_image(self):
         """Acquire an image after updating the waveforms.
+
         Can be used in acquisitions where changing waveforms are required,
         but there is additional overhead due to the need to write the
         waveforms into the buffers of the DAQ cards.
+
         TODO: Cleanup.
         """
         if hasattr(self, "signal_container"):
@@ -705,6 +732,7 @@ class Model:
 
     def run_live_acquisition(self):
         """Stream live image to the GUI.
+
         Recalculates the waveforms for each image, thereby allowing people to adjust
         acquisition parameters in real-time.
         """
@@ -737,6 +765,7 @@ class Model:
 
     def change_resolution(self, resolution_value):
         """Switch resolution mode of the microscope.
+
         Parameters
         ----------
         resolution_value : str
@@ -759,6 +788,7 @@ class Model:
 
     def load_images(self, filenames=None):
         """Load/Unload images to the Synthetic Camera
+
         Parameters
         ----------
         filenames : list
@@ -774,6 +804,7 @@ class Model:
         self, display_segmentation=False, mark_position=True, target_labels=[1]
     ):
         """Update the ilastik setting.
+
         Parameters
         ----------
         display_segmentation : bool

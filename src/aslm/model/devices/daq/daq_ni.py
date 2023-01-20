@@ -47,6 +47,7 @@ logger = logging.getLogger(p)
 
 class NIDAQ(DAQBase):
     """NIDAQ class for Data Acquisition (DAQ).
+
     Attributes
     ----------
     configuration : multiprocesing.managers.DictProxy
@@ -74,6 +75,7 @@ class NIDAQ(DAQBase):
 
     def create_camera_task(self, exposure_time):
         """Set up the camera trigger task.
+
         Parameters
         ----------
         exposure_time : float
@@ -190,8 +192,10 @@ class NIDAQ(DAQBase):
 
     def prepare_acquisition(self, channel_key, exposure_time):
         """Prepare the acquisition.
+
         Creates and configures the DAQ tasks.
         Writes the waveforms to each task.
+
         Parameters
         ----------
         channel_key : int
@@ -210,6 +214,7 @@ class NIDAQ(DAQBase):
 
     def run_acquisition(self):
         """Run DAQ Acquisition.
+
         Run the tasks for triggering, analog and counter outputs.
         The master trigger initiates all other tasks via a shared trigger
         For this to work, all analog output and counter tasks have to be started so that

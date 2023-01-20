@@ -162,6 +162,7 @@ class CameraSettingController(GUIController):
 
     def populate_experiment_values(self):
         """Sets values in View according to the experiment yaml file.
+
         Experiment yaml filed passed by controller.
         """
         self.in_initialization = True
@@ -213,8 +214,10 @@ class CameraSettingController(GUIController):
 
     def update_experiment_values(self, *args):
         """Updates experiment yaml file according to the values in View.
+
         Update the dictionary so that it can be combined with all the other
         sub-controllers, and then sent to the model.
+
         Args:
             *args: Variable length argument list.
         """
@@ -245,12 +248,16 @@ class CameraSettingController(GUIController):
 
     def update_sensor_mode(self, *args):
         """Updates the camera sensor mode.
+
         Updates text in readout widget based on what sensor mode is selected
         If we are in the Light Sheet mode, then we want the camera
         self.model['CameraParameters']['sensor_mode']) == 12
+
         If we are in the normal mode, then we want the camera
         self.model['CameraParameters']['sensor_mode']) == 1
+
         Should initialize from the configuration file to the default version
+
         Parameters
         ----------
         *args : Variable length argument list.
@@ -282,6 +289,7 @@ class CameraSettingController(GUIController):
 
     def update_exposure_time(self, exposure_time):
         """When camera exposure time is changed, recalculate readout time
+
         Parameters
         ----------
         exposure_time : float
@@ -292,6 +300,7 @@ class CameraSettingController(GUIController):
 
     def update_roi(self, width):
         """Update ROI width and height.
+
         Parameters
         ----------
         width : int
@@ -308,6 +317,7 @@ class CameraSettingController(GUIController):
 
     def update_fov(self, *args):
         """Recalculate fov and update the widgets: FOV_X and FOV_Y
+
         Parameters
         ----------
         *args : Variable length argument list.
@@ -318,9 +328,11 @@ class CameraSettingController(GUIController):
 
     def set_mode(self, mode):
         """Set widget configuration based upon imaging mode.
+
         This function will change state of widgets according to different mode
         'stop' mode will let the editable widget be 'normal'
         in 'live' and 'stack' mode, some widgets are disabled
+
         Parameters
         ----------
         mode : str
@@ -347,9 +359,11 @@ class CameraSettingController(GUIController):
 
     def calculate_physical_dimensions(self):
         """Calculate size of the FOV in microns.
+
         Calculates the size of the field of view according to the magnification of the system,
         the physical size of the pixel, and the number of pixels.
         update FOV_X and FOV_Y
+
         TODO: Should make sure that this is updated before we run the tiling wizard.  Also can probably be done more
         elegantly in a configuration file and dictionary structure.
         """
@@ -399,6 +413,8 @@ class CameraSettingController(GUIController):
 
     def calculate_readout_time(self):
         """Calculate camera readout time.
+
+
         TODO: Highly specific to Hamamatsu. Should find a way to pass this from the camera to here.
         This should be moved to the camera device/API, ideally by calling a command from the camera.
         """
@@ -441,11 +457,14 @@ class CameraSettingController(GUIController):
 
     def update_number_of_pixels(self, *args):
         """Update the number of pixels in the ROI.
+
         In live mode, we should let the device know the number of pixels changed.
+
         Parameters
         ----------
         *args : tuple
             Unused
+
         """
         pixels = self.mode_widgets["Pixels"].get()
         if pixels != "":

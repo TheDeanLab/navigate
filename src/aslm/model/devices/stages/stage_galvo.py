@@ -47,6 +47,7 @@ logger = logging.getLogger(p)
 
 class GalvoNIStage(StageBase):
     """Physik Instrumente Stage Class
+
     Parameters
     ----------
     microscope_name : str
@@ -55,6 +56,7 @@ class GalvoNIStage(StageBase):
         Hardware device to connect to
     configuration : multiprocessing.managers.DictProxy
         Global configuration of the microscope
+
     Methods
     -------
     create_position_dict()
@@ -120,7 +122,9 @@ class GalvoNIStage(StageBase):
 
     def move_axis_absolute(self, axis, axis_num, move_dictionary):
         """Implement movement logic along a single axis.
+
         Example calls:
+
         Parameters
         ----------
         axis : str
@@ -130,6 +134,7 @@ class GalvoNIStage(StageBase):
         move_dictionary : dict
             A dictionary of values required for movement. Includes 'x_abs', 'x_min', etc. for one or more axes.
             Expect values in micrometers, except for theta, which is in degrees.
+
         Returns
         -------
         bool
@@ -259,6 +264,7 @@ class GalvoNIStage(StageBase):
 
     def move_absolute(self, move_dictionary, wait_until_done=False):
         """Move Absolute Method.
+
         Parameters
         ----------
         move_dictionary : dict
@@ -266,6 +272,7 @@ class GalvoNIStage(StageBase):
             Expects values in micrometers, except for theta, which is in degrees.
         wait_until_done : bool
             Block until stage has moved to its new spot.
+
         Returns
         -------
         success : bool

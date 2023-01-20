@@ -789,7 +789,6 @@ class Controller:
                 self.camera_view_controller.display_mask(value)
             elif event == 'autofocus':
                 if hasattr(self, 'af_popup_controller'):
-                    print(f"Popup event: {event}, Value: {value}")
                     self.af_popup_controller.display_plot(value)
             elif event == 'stop':
                 break

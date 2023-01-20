@@ -436,6 +436,7 @@ class CameraViewController(GUIController):
 
                 # Update GUI
                 self.image_metrics['Image'].set(np.max(self.temp_array))
+                
 
     def down_sample_image(self):
         r"""Down-sample the data for image display according to widget size.."""
@@ -540,7 +541,7 @@ class CameraViewController(GUIController):
             if self.slice_index == self.total_images_per_volume:
                 self.slice_index = 0
 
-        print(self.channel_index, self.slice_index)
+        # print(self.channel_index, self.slice_index) 
 
     def retrieve_image_slice_from_volume(self,
                                          slider_index,

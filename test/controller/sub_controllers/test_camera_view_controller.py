@@ -333,5 +333,248 @@ class TestCameraViewController():
         assert self.camera_view.crosshair_x == int(crosshair_x)
         assert self.camera_view.crosshair_y == int(crosshair_y)
         # Check reset display
-        assert self.camera_view.reset_display.called == True
+        self.camera_view.reset_display.assert_called()
+
+    @pytest.mark.parametrize('onoff', [True, False])
+    def test_left_click(self, onoff):
         
+        self.camera_view.add_crosshair = MagicMock()
+        self.camera_view.apply_LUT = MagicMock()
+        self.camera_view.populate_image = MagicMock()
+        event = MagicMock()
+
+        self.camera_view.image = np.random.randint(0, 256, (600, 800))
+        self.camera_view.apply_cross_hair = onoff
+
+        self.camera_view.left_click(event)
+
+        self.camera_view.add_crosshair.assert_called()
+        self.camera_view.apply_LUT.assert_called()
+        self.camera_view.populate_image.assert_called()
+        assert self.camera_view.apply_cross_hair == (not onoff)
+
+    @pytest.mark.parametrize('frames', [0, 1, 2])
+    @pytest.mark.parametrize('count', [0, 1])
+    def test_update_max_count(self, frames, count):
+        
+        # Arrange
+        max = random.randint(10,50)
+        self.camera_view.image_metrics['Frames'].set(frames)
+        self.camera_view.max_counts = max
+        self.camera_view.image_count = count
+        if count == 1:
+            self.camera_view.down_sampled_image = [max]
+            self.camera_view.temp_array = [max]
+
+        # Act
+        self.camera_view.update_max_counts()
+
+        # Assert
+        if frames == 0:
+            assert self.camera_view.image_metrics['Frames'].get() == 1
+            assert self.camera_view.image_metrics['Image'].get() == max
+
+        if frames == 1:
+            assert self.camera_view.image_metrics['Image'].get() == max
+
+        if frames == 2:
+            if count == 0:
+                assert self.camera_view.temp_array == self.camera_view.down_sampled_image
+                assert self.camera_view.image_metrics['Image'].get() == max
+            else:
+                assert self.camera_view.image_metrics['Image'].get() == max
+
+        
+    def test_down_sample_image(self, monkeypatch):
+        import cv2
+        # create a test image
+        test_image = np.random.rand(100, 100)
+        self.zoom_image = test_image
+
+        # set the widget size
+        self.camera_view.view.canvas_width = np.random.randint(5,99)
+        self.camera_view.view.canvas_height = np.random.randint(5,99)
+
+         # monkeypatch cv2.resize
+        def mocked_resize(img, size):
+            return np.ones((size[0], size[1]))
+        monkeypatch.setattr(cv2, "resize", mocked_resize)
+
+        # call the function
+        self.camera_view.down_sample_image()
+
+        # assert that the image has been resized correctly
+        assert np.shape(self.camera_view.down_sampled_image) == (self.camera_view.view.canvas_width, self.camera_view.view.canvas_height)
+
+        # assert that the image has not been modified
+        assert not np.array_equal(self.camera_view.down_sampled_image, test_image)
+
+    @pytest.mark.parametrize('auto', [True, False])
+    def test_scale_image_intensity(self, auto):
+        # Create a test image
+        test_image = np.random.rand(100, 100)
+        self.camera_view.down_sampled_image = test_image
+
+        # Set autoscale to True
+        self.camera_view.autoscale = auto
+
+        if auto == False:
+            self.camera_view.max_counts = 1.5
+            self.camera_view.min_counts = 0.5
+
+        # Call the function
+        self.camera_view.scale_image_intensity()
+
+        # Assert that max_counts and min_counts have been set correctly
+        if auto == True:
+            assert self.camera_view.max_counts == np.max(test_image)
+            assert self.camera_view.min_counts == np.min(test_image)
+    
+        # Assert that the image has been scaled correctly
+        assert np.min(self.camera_view.down_sampled_image) >= 0
+        assert np.max(self.camera_view.down_sampled_image) <= 1
+
+    
+    def test_populate_image(self, monkeypatch):
+        from PIL import Image, ImageTk
+        import cv2
+        # Create test image
+        self.camera_view.cross_hair_image = np.random.rand(100, 100)
+        self.camera_view.ilastik_seg_mask = np.random.rand(100, 100)
+
+        # Set display_mask_flag to True
+        self.camera_view.display_mask_flag = True
+
+        # Monkeypatch the Image.fromarray() method of PIL
+        def mocked_fromarray(arr):
+            return arr
+        monkeypatch.setattr(Image, "fromarray", mocked_fromarray)
+
+        # Monkeypatch the cv2.resize() function
+        def mocked_resize(arr, size):
+            return arr
+        monkeypatch.setattr(cv2, "resize", mocked_resize)
+
+        # Monkeypatch the Image.blend() method of PIL
+        def mocked_blend(img1, img2, alpha):
+            return img1 * alpha + img2 * (1-alpha)
+        monkeypatch.setattr(Image, "blend", mocked_blend)
+
+        def mocked_PhotoImage(img):
+            return img
+        monkeypatch.setattr(ImageTk, "PhotoImage", mocked_PhotoImage)
+
+        self.camera_view.canvas.create_image = MagicMock()
+
+
+        # Call the function
+        self.camera_view.populate_image()
+
+        # Assert that the tk_image has been created correctly
+        assert self.camera_view.tk_image is not None
+        self.camera_view.canvas.create_image.assert_called()
+
+        # Set display_mask_flag to True
+        self.camera_view.display_mask_flag = False
+
+        # Call the function
+        self.camera_view.populate_image()
+
+        # Assert that the tk_image has been created correctly
+        assert self.camera_view.tk_image is not None
+
+
+    def test_initialize_non_live_display(self):
+        # Create test buffer and microscope_state
+        buffer = np.random.rand(100, 100)
+        microscope_state = {'channels': ['channel1', 'channel2', 'channel3'], 'number_z_steps': np.random.randint(0, 100)}
+        camera_parameters = {'x_pixels': np.random.randint(1, 200), 'y_pixels': np.random.randint(1, 200)}
+
+        # Call the function
+        self.camera_view.initialize_non_live_display(buffer, microscope_state, camera_parameters)
+
+        # Assert that the variables have been set correctly
+        assert self.camera_view.image_counter == 0
+        assert self.camera_view.slice_index == 0
+        assert self.camera_view.number_of_channels == len(microscope_state['channels'])
+        assert self.camera_view.number_of_slices == microscope_state['number_z_steps']
+        assert self.camera_view.total_images_per_volume == self.camera_view.number_of_channels * self.camera_view.number_of_slices
+        assert self.camera_view.original_image_width == int(camera_parameters['x_pixels'])
+        assert self.camera_view.original_image_height == int(camera_parameters['y_pixels'])
+        assert self.camera_view.canvas_width_scale == int(self.camera_view.original_image_width / self.camera_view.view.canvas_width)
+        assert self.camera_view.canvas_height_scale == int(self.camera_view.original_image_height / self.camera_view.view.canvas_height)
+
+        
+    def test_identify_channel_index_and_slice(self):
+        # Not currently in use
+        pass
+
+    
+    def test_retrieve_image_slice_from_volume(self):
+        # Not currently in use
+        pass
+
+    @pytest.mark.parametrize('transpose', [True, False])
+    def test_display_image(self, transpose):
+        image = np.random.rand(100, 100)
+        microscope_state = {'stack_cycling_mode': 'per_stack'}
+        images_received = 0
+
+        self.camera_view.transpose = transpose
+        count = np.random.randint(0, 10)
+        self.camera_view.image_count = count
+        self.camera_view.image_metrics = {'Channel': MagicMock()}
+        self.camera_view.process_image = MagicMock()
+        self.camera_view.update_max_counts = MagicMock()
+
+        self.camera_view.display_image(image, microscope_state, images_received)
+
+        assert np.shape(self.camera_view.image) == np.shape(image)
+        self.camera_view.image_metrics['Channel'].set.assert_called_with(self.camera_view.channel_index)
+        assert self.camera_view.image_count == count + 1
+
+
+    def test_add_crosshair(self):
+
+        # Arrange
+        image = np.random.rand(500, 500)
+        self.camera_view.down_sampled_image = image
+        self.camera_view.apply_cross_hair = True
+        num = np.random.randint(1, 50)
+        self.camera_view.crosshair_x = num
+        self.camera_view.crosshair_y = num
+
+        # Act
+        self.camera_view.add_crosshair()
+
+        # Assert
+        assert np.all(self.camera_view.cross_hair_image[:, self.camera_view.crosshair_x] == 1)
+        assert np.all(self.camera_view.cross_hair_image[self.camera_view.crosshair_y, :] == 1)
+
+
+    def test_apply_LUT(self):
+
+        # # Arrange
+        # self.camera_view.zoom_image = np.random.rand(200, 200)
+        # temp = self.camera_view.zoom_image
+        # saturation_value = 2**16-1
+        # self.camera_view.saturated_pixels = self.camera_view.zoom_image[self.camera_view.zoom_image > saturation_value]
+        # self.camera_view.cross_hair_image = self.camera_view.zoom_image
+
+        # # Act
+        # # Need to figure out how to test the colormapping changes and what self.gradient_lut returns to the image and how to know what the colormap is
+        # # Might need to test detect_saturation first then find a reasonable value to pass to this
+        # self.camera_view.apply_LUT()
+        # assert np.shape(self.camera_view.cross_hair_image) == np.shape(temp)
+
+        # Someone else with better numpy understanding will need to do this
+
+        pass
+
+
+    def test_update_LUT(self):
+
+        pass
+
+
+

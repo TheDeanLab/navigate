@@ -100,7 +100,6 @@
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.data_sources.html">aslm.model.data_sources</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.device_startup_functions.html">aslm.model.device_startup_functions</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.devices.html">aslm.model.devices</a></li>
-<li class="toctree-l4"><a class="reference internal" href="aslm.model.dummy.html">aslm.model.dummy</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.features.html">aslm.model.features</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.metadata_sources.html">aslm.model.metadata_sources</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.microscope.html">aslm.model.microscope</a></li>
@@ -197,6 +196,25 @@
 <span class="sig-prename descclassname"><span class="pre">aslm.model.waveforms.</span></span><span class="sig-name descname"><span class="pre">camera_exposure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sweep_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exposure</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">camera_delay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.waveforms.camera_exposure" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates timing and duration of camera exposure.
 Not actually used to trigger the camera.  Only meant for visualization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sample_rate</strong> (<em>Integer</em>) – Unit - Hz</p></li>
+<li><p><strong>sweep_time</strong> (<em>Float</em>) – Unit - Seconds</p></li>
+<li><p><strong>exposure</strong> (<em>Float</em>) – Unit - Seconds</p></li>
+<li><p><strong>camera_delay</strong> (<em>Float</em>) – Unit - Percent</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>exposure_start</strong> (<em>Float</em>) – Unit - Seconds</p></li>
+<li><p><strong>exposure_end</strong> (<em>Float</em>) – Unit - Seconds</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>exposure_start, exposure_end = camera_exposure(sample_rate, sweep_time, exposure, camera_delay)</p>
 </dd></dl>
 
 </section>

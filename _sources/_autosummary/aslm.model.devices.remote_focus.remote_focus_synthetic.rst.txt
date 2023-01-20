@@ -1,0 +1,31 @@
+aslm.model.devices.remote\_focus.remote\_focus\_synthetic
+=========================================================
+
+.. automodule:: aslm.model.devices.remote_focus.remote_focus_synthetic
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom_class.rst
+   
+      SyntheticRemoteFocus
+   
+   
+
+   
+   
+   
+
+
+

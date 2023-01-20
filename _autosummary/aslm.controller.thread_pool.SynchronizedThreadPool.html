@@ -198,38 +198,174 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.controller.thread_pool.SynchronizedThreadPool.__init__" title="aslm.controller.thread_pool.SynchronizedThreadPool.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.controller.thread_pool.SynchronizedThreadPool.clear" title="aslm.controller.thread_pool.SynchronizedThreadPool.clear"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear</span></code></a>()</p></td>
+<td><p>Clear all the threads in the pool.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">createThread</span></code>(resourceName, target[, args, ...])</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.controller.thread_pool.SynchronizedThreadPool.createThread" title="aslm.controller.thread_pool.SynchronizedThreadPool.createThread"><code class="xref py py-obj docutils literal notranslate"><span class="pre">createThread</span></code></a>(resourceName, target[, args, ...])</p></td>
+<td><p>Create a thread and add it to the waitlist of the resource.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">getRunningThread</span></code>(resourceName)</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.controller.thread_pool.SynchronizedThreadPool.getRunningThread" title="aslm.controller.thread_pool.SynchronizedThreadPool.getRunningThread"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getRunningThread</span></code></a>(resourceName)</p></td>
+<td><p>Get the running thread of the resource.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">globaltrace</span></code>(frame, event, arg)</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.controller.thread_pool.SynchronizedThreadPool.globaltrace" title="aslm.controller.thread_pool.SynchronizedThreadPool.globaltrace"><code class="xref py py-obj docutils literal notranslate"><span class="pre">globaltrace</span></code></a>(frame, event, arg)</p></td>
+<td><p>Global trace function.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">killThreadInList</span></code>(resourceName, threadList)</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.controller.thread_pool.SynchronizedThreadPool.killThreadInList" title="aslm.controller.thread_pool.SynchronizedThreadPool.killThreadInList"><code class="xref py py-obj docutils literal notranslate"><span class="pre">killThreadInList</span></code></a>(resourceName, threadList)</p></td>
+<td><p>Kill all the threads in the threadList.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">localtrace</span></code>(frame, event, arg)</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.controller.thread_pool.SynchronizedThreadPool.localtrace" title="aslm.controller.thread_pool.SynchronizedThreadPool.localtrace"><code class="xref py py-obj docutils literal notranslate"><span class="pre">localtrace</span></code></a>(frame, event, arg)</p></td>
+<td><p>Local trace function.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">moveToDelete</span></code>(resourceName, taskThread)</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.controller.thread_pool.SynchronizedThreadPool.moveToDelete" title="aslm.controller.thread_pool.SynchronizedThreadPool.moveToDelete"><code class="xref py py-obj docutils literal notranslate"><span class="pre">moveToDelete</span></code></a>(resourceName, taskThread)</p></td>
+<td><p>Move a thread to the toDeleteList.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">registerResource</span></code>(resourceName)</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.controller.thread_pool.SynchronizedThreadPool.registerResource" title="aslm.controller.thread_pool.SynchronizedThreadPool.registerResource"><code class="xref py py-obj docutils literal notranslate"><span class="pre">registerResource</span></code></a>(resourceName)</p></td>
+<td><p>Register a resource to the pool.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">removeThread</span></code>(resourceName, taskThread)</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.controller.thread_pool.SynchronizedThreadPool.removeThread" title="aslm.controller.thread_pool.SynchronizedThreadPool.removeThread"><code class="xref py py-obj docutils literal notranslate"><span class="pre">removeThread</span></code></a>(resourceName, taskThread)</p></td>
+<td><p>Remove a thread from the waitlist of the resource.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">threadTaskWrapping</span></code>(resourceName, target, *)</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.controller.thread_pool.SynchronizedThreadPool.threadTaskWrapping" title="aslm.controller.thread_pool.SynchronizedThreadPool.threadTaskWrapping"><code class="xref py py-obj docutils literal notranslate"><span class="pre">threadTaskWrapping</span></code></a>(resourceName, target, *)</p></td>
+<td><p>Wrap the target function of the thread.</p></td>
 </tr>
 </tbody>
 </table>
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.controller.thread_pool.SynchronizedThreadPool.clear">
+<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SynchronizedThreadPool.clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear all the threads in the pool.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.controller.thread_pool.SynchronizedThreadPool.createThread">
+<span class="sig-name descname"><span class="pre">createThread</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resourceName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbArgs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbKargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SynchronizedThreadPool.createThread" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a thread and add it to the waitlist of the resource.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>resourceName</strong> (<em>str</em>) – The name of the resource.</p></li>
+<li><p><strong>target</strong> (<em>callable</em>) – The target function of the thread.</p></li>
+<li><p><strong>args</strong> (<em>tuple</em><em>, </em><em>optional</em>) – The arguments of the target function, by default ()</p></li>
+<li><p><strong>kwargs</strong> (<em>dict</em><em>, </em><em>optional</em>) – The keyword arguments of the target function, by default {}</p></li>
+<li><p><strong>callback</strong> (<em>callable</em><em>, </em><em>optional</em>) – The callback function of the thread, by default None</p></li>
+<li><p><strong>cbArgs</strong> (<em>tuple</em><em>, </em><em>optional</em>) – The arguments of the callback function, by default ()</p></li>
+<li><p><strong>cbKargs</strong> (<em>dict</em><em>, </em><em>optional</em>) – The keyword arguments of the callback function, by default {}</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.controller.thread_pool.SynchronizedThreadPool.getRunningThread">
+<span class="sig-name descname"><span class="pre">getRunningThread</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resourceName</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SynchronizedThreadPool.getRunningThread" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the running thread of the resource.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>resourceName</strong> (<em>str</em>) – The name of the resource.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.controller.thread_pool.SynchronizedThreadPool.globaltrace">
+<span class="sig-name descname"><span class="pre">globaltrace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SynchronizedThreadPool.globaltrace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Global trace function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>frame</strong> (<em>frame</em>) – The frame of the thread.</p></li>
+<li><p><strong>event</strong> (<em>str</em>) – The event of the thread.</p></li>
+<li><p><strong>arg</strong> (<em>any</em>) – The argument of the thread.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.controller.thread_pool.SynchronizedThreadPool.killThreadInList">
+<span class="sig-name descname"><span class="pre">killThreadInList</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resourceName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threadList</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SynchronizedThreadPool.killThreadInList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Kill all the threads in the threadList.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>resourceName</strong> (<em>str</em>) – The name of the resource.</p></li>
+<li><p><strong>threadList</strong> (<em>dict</em>) – The threadList to kill.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.controller.thread_pool.SynchronizedThreadPool.localtrace">
+<span class="sig-name descname"><span class="pre">localtrace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SynchronizedThreadPool.localtrace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Local trace function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>frame</strong> (<em>frame</em>) – The frame of the thread.</p></li>
+<li><p><strong>event</strong> (<em>str</em>) – The event of the thread.</p></li>
+<li><p><strong>arg</strong> (<em>any</em>) – The argument of the thread.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.controller.thread_pool.SynchronizedThreadPool.moveToDelete">
+<span class="sig-name descname"><span class="pre">moveToDelete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resourceName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">taskThread</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SynchronizedThreadPool.moveToDelete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Move a thread to the toDeleteList.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>resourceName</strong> (<em>str</em>) – The name of the resource.</p></li>
+<li><p><strong>taskThread</strong> (<a class="reference internal" href="aslm.controller.thread_pool.SelfLockThread.html#aslm.controller.thread_pool.SelfLockThread" title="aslm.controller.thread_pool.SelfLockThread"><em>SelfLockThread</em></a>) – The thread to move.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.controller.thread_pool.SynchronizedThreadPool.registerResource">
+<span class="sig-name descname"><span class="pre">registerResource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resourceName</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SynchronizedThreadPool.registerResource" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register a resource to the pool.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>resourceName</strong> (<em>str</em>) – The name of the resource.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.controller.thread_pool.SynchronizedThreadPool.removeThread">
+<span class="sig-name descname"><span class="pre">removeThread</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resourceName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">taskThread</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SynchronizedThreadPool.removeThread" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove a thread from the waitlist of the resource.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>resourceName</strong> (<em>str</em>) – The name of the resource.</p></li>
+<li><p><strong>taskThread</strong> (<a class="reference internal" href="aslm.controller.thread_pool.SelfLockThread.html#aslm.controller.thread_pool.SelfLockThread" title="aslm.controller.thread_pool.SelfLockThread"><em>SelfLockThread</em></a>) – The thread to remove.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.controller.thread_pool.SynchronizedThreadPool.threadTaskWrapping">
+<span class="sig-name descname"><span class="pre">threadTaskWrapping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resourceName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbArgs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbKargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SynchronizedThreadPool.threadTaskWrapping" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrap the target function of the thread.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>resourceName</strong> (<em>str</em>) – The name of the resource.</p></li>
+<li><p><strong>target</strong> (<em>callable</em>) – The target function of the thread.</p></li>
+<li><p><strong>callback</strong> (<em>callable</em><em>, </em><em>optional</em>) – The callback function of the thread, by default None</p></li>
+<li><p><strong>cbArgs</strong> (<em>tuple</em><em>, </em><em>optional</em>) – The arguments of the callback function, by default ()</p></li>
+<li><p><strong>cbKargs</strong> (<em>dict</em><em>, </em><em>optional</em>) – The keyword arguments of the callback function, by default {}</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </section>

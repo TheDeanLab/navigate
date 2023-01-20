@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>aslm.model.dummy.DummyMicroscope &mdash; ASLM 0.1 documentation</title>
+  <title>aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus &mdash; ASLM 0.1 documentation</title>
   
 
   
@@ -41,8 +41,8 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="aslm.model.dummy.DummyModel" href="aslm.model.dummy.DummyModel.html" />
-    <link rel="prev" title="aslm.model.dummy.DummyDevice" href="aslm.model.dummy.DummyDevice.html" /> 
+    <link rel="next" title="aslm.model.devices.shutter" href="aslm.model.devices.shutter.html" />
+    <link rel="prev" title="aslm.model.devices.remote_focus.remote_focus_synthetic" href="aslm.model.devices.remote_focus.remote_focus_synthetic.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -99,8 +99,7 @@
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.concurrency.html">aslm.model.concurrency</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.data_sources.html">aslm.model.data_sources</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.device_startup_functions.html">aslm.model.device_startup_functions</a></li>
-<li class="toctree-l4"><a class="reference internal" href="aslm.model.devices.html">aslm.model.devices</a></li>
-<li class="toctree-l4 current"><a class="reference internal" href="aslm.model.dummy.html">aslm.model.dummy</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="aslm.model.devices.html">aslm.model.devices</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.features.html">aslm.model.features</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.metadata_sources.html">aslm.model.metadata_sources</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.microscope.html">aslm.model.microscope</a></li>
@@ -169,15 +168,19 @@
         
           <li><a href="aslm.model.html">aslm.model</a> &raquo;</li>
         
-          <li><a href="aslm.model.dummy.html">aslm.model.dummy</a> &raquo;</li>
+          <li><a href="aslm.model.devices.html">aslm.model.devices</a> &raquo;</li>
         
-      <li>aslm.model.dummy.DummyMicroscope</li>
+          <li><a href="aslm.model.devices.remote_focus.html">aslm.model.devices.remote_focus</a> &raquo;</li>
+        
+          <li><a href="aslm.model.devices.remote_focus.remote_focus_synthetic.html">aslm.model.devices.remote_focus.remote_focus_synthetic</a> &raquo;</li>
+        
+      <li>aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/_autosummary/aslm.model.dummy.DummyMicroscope.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/_autosummary/aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -190,21 +193,37 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="aslm-model-dummy-dummymicroscope">
-<h1>aslm.model.dummy.DummyMicroscope<a class="headerlink" href="#aslm-model-dummy-dummymicroscope" title="Permalink to this heading">¶</a></h1>
+  <section id="aslm-model-devices-remote-focus-remote-focus-synthetic-syntheticremotefocus">
+<h1>aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus<a class="headerlink" href="#aslm-model-devices-remote-focus-remote-focus-synthetic-syntheticremotefocus" title="Permalink to this heading">¶</a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="aslm.model.dummy.DummyMicroscope">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.model.dummy.</span></span><span class="sig-name descname"><span class="pre">DummyMicroscope</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">devices_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_synthetic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.dummy.DummyMicroscope" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dt class="sig sig-object py" id="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.model.devices.remote_focus.remote_focus_synthetic.</span></span><span class="sig-name descname"><span class="pre">SyntheticRemoteFocus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="aslm.model.devices.remote_focus.remote_focus_base.RemoteFocusBase.html#aslm.model.devices.remote_focus.remote_focus_base.RemoteFocusBase" title="aslm.model.devices.remote_focus.remote_focus_base.RemoteFocusBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">RemoteFocusBase</span></code></a></p>
+<p>SyntheticRemoteFocus Class</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="aslm.model.dummy.DummyMicroscope.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">devices_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_synthetic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.dummy.DummyMicroscope.__init__" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.__init__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.dummy.DummyMicroscope.__init__" title="aslm.model.dummy.DummyMicroscope.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(name, configuration, devices_dict)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.__init__" title="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(microscope_name, device_connection, ...)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">adjust</span></code>(readout_time)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">close_task</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">prepare_task</span></code>(channel_key)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_task</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_task</span></code>()</p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -219,8 +238,8 @@
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="aslm.model.dummy.DummyModel.html" class="btn btn-neutral float-right" title="aslm.model.dummy.DummyModel" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="aslm.model.dummy.DummyDevice.html" class="btn btn-neutral float-left" title="aslm.model.dummy.DummyDevice" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="aslm.model.devices.shutter.html" class="btn btn-neutral float-right" title="aslm.model.devices.shutter" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="aslm.model.devices.remote_focus.remote_focus_synthetic.html" class="btn btn-neutral float-left" title="aslm.model.devices.remote_focus.remote_focus_synthetic" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

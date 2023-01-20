@@ -100,7 +100,6 @@
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.data_sources.html">aslm.model.data_sources</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.device_startup_functions.html">aslm.model.device_startup_functions</a></li>
 <li class="toctree-l4 current"><a class="reference internal" href="aslm.model.devices.html">aslm.model.devices</a></li>
-<li class="toctree-l4"><a class="reference internal" href="aslm.model.dummy.html">aslm.model.dummy</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.features.html">aslm.model.features</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.metadata_sources.html">aslm.model.metadata_sources</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.microscope.html">aslm.model.microscope</a></li>
@@ -337,7 +336,8 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="id0">
 <span class="sig-name descname"><span class="pre">check_if_filter_in_filter_dictionary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id0" title="Permalink to this definition">¶</a></dt>
-<dd><p>Checks if the filter designation (string) given exists in the filter dictionary</p>
+<dd><p>Checks if the filter designation (string) given exists in the
+filter dictionary</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>filter_name</strong> (<em>str</em>) – Name of filter.</p>
@@ -364,7 +364,8 @@
 <dd><p>Calculate duration of time necessary to change filter wheel positions.
 Identifies the number of positions that must be switched, and then retrieves
 the duration of time necessary to perform the switch from self.delay_matrix.
-Detailed information on timing located on page 38: <a class="reference external" href="https://www.sutter.com/manuals/LB10-3_OpMan.pdf">https://www.sutter.com/manuals/LB10-3_OpMan.pdf</a></p>
+Detailed information on timing located on page 38:
+<a class="reference external" href="https://www.sutter.com/manuals/LB10-3_OpMan.pdf">https://www.sutter.com/manuals/LB10-3_OpMan.pdf</a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>filter_name</strong> (<em>str</em>) – Name of filter that we want to move to.</p>
@@ -386,7 +387,8 @@ Detailed information on timing located on page 38: <a class="reference external"
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.set_filter">
 <span class="sig-name descname"><span class="pre">set_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait_until_done</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.set_filter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Change the filter wheel to the filter designated by the filter position argument.</p>
+<dd><p>Change the filter wheel to the filter designated by the filter
+position argument.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">

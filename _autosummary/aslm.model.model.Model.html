@@ -100,7 +100,6 @@
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.data_sources.html">aslm.model.data_sources</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.device_startup_functions.html">aslm.model.device_startup_functions</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.devices.html">aslm.model.devices</a></li>
-<li class="toctree-l4"><a class="reference internal" href="aslm.model.dummy.html">aslm.model.dummy</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.features.html">aslm.model.features</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.metadata_sources.html">aslm.model.metadata_sources</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.microscope.html">aslm.model.microscope</a></li>
@@ -353,14 +352,14 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#id1" title="aslm.model.model.Model.end_acquisition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">end_acquisition</span></code></a>()</p></td>
 <td><p>End the acquisition.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_active_microscope</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.model.Model.get_active_microscope" title="aslm.model.model.Model.get_active_microscope"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_active_microscope</span></code></a>()</p></td>
+<td><p>Get the active microscope.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#id2" title="aslm.model.model.Model.get_data_buffer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_data_buffer</span></code></a>([img_width, img_height])</p></td>
 <td><p>Get the data buffer.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_offset_variance_maps</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.model.Model.get_offset_variance_maps" title="aslm.model.model.Model.get_offset_variance_maps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_offset_variance_maps</span></code></a>()</p></td>
+<td><p>Get the offset variance maps.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.model.Model.get_stage_position" title="aslm.model.model.Model.get_stage_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_stage_position</span></code></a>()</p></td>
 <td><p>Get the position of the stage.</p></td>
@@ -371,8 +370,8 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#id3" title="aslm.model.model.Model.move_stage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move_stage</span></code></a>(pos_dict[, wait_until_done])</p></td>
 <td><p>Moves the stages.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pause_data_thread</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.model.Model.pause_data_thread" title="aslm.model.model.Model.pause_data_thread"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pause_data_thread</span></code></a>()</p></td>
+<td><p>Pause the data thread.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#id4" title="aslm.model.model.Model.prepare_acquisition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prepare_acquisition</span></code></a>([turn_off_flags])</p></td>
 <td><p>Prepare the acquisition.</p></td>
@@ -380,8 +379,8 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#id5" title="aslm.model.model.Model.release_pipe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">release_pipe</span></code></a>(pipe_name)</p></td>
 <td><p>Close a data pipe.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">resume_data_thread</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.model.Model.resume_data_thread" title="aslm.model.model.Model.resume_data_thread"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resume_data_thread</span></code></a>()</p></td>
+<td><p>Resume the data thread.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.model.Model.run_acquisition" title="aslm.model.model.Model.run_acquisition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_acquisition</span></code></a>()</p></td>
 <td><p>Run acquisition along with a feature list one time.</p></td>
@@ -404,8 +403,8 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#id10" title="aslm.model.model.Model.update_data_buffer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_data_buffer</span></code></a>([img_width, img_height])</p></td>
 <td><p>Update the Data Buffer</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_ilastik_setting</span></code>([...])</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.model.Model.update_ilastik_setting" title="aslm.model.model.Model.update_ilastik_setting"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_ilastik_setting</span></code></a>([...])</p></td>
+<td><p>Update the ilastik setting.</p></td>
 </tr>
 </tbody>
 </table>
@@ -415,7 +414,7 @@
 <dd><p>Switch resolution mode of the microscope.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>resolution_value</strong> (<em>str</em>) – ‘high’ for high-resolution mode, and ‘low’ for low-resolution mode.</p>
+<dd class="field-odd"><p><strong>resolution_value</strong> (<em>str</em>) – Resolution mode.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -449,6 +448,20 @@ disconnects buffer in live mode and closes the shutters.
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.model.Model.get_active_microscope">
+<span class="sig-name descname"><span class="pre">get_active_microscope</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.get_active_microscope" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the active microscope.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>microscope</strong> – Active microscope.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="aslm.model.microscope.Microscope.html#aslm.model.microscope.Microscope" title="aslm.model.microscope.Microscope">Microscope</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="id2">
 <span class="sig-name descname"><span class="pre">get_data_buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">512</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">512</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id2" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the data buffer.</p>
@@ -471,6 +484,20 @@ returns newly-sized buffer.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.model.Model.get_offset_variance_maps">
+<span class="sig-name descname"><span class="pre">get_offset_variance_maps</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.get_offset_variance_maps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the offset variance maps.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>offset_variance_maps</strong> – Offset variance maps.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.model.Model.get_stage_position">
 <span class="sig-name descname"><span class="pre">get_stage_position</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.get_stage_position" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the position of the stage.</p>
@@ -488,6 +515,11 @@ returns newly-sized buffer.</p>
 <dt class="sig sig-object py" id="aslm.model.model.Model.load_images">
 <span class="sig-name descname"><span class="pre">load_images</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filenames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.load_images" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load/Unload images to the Synthetic Camera</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filenames</strong> (<em>list</em>) – List of filenames to load.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -513,10 +545,18 @@ the position.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.model.Model.pause_data_thread">
+<span class="sig-name descname"><span class="pre">pause_data_thread</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.pause_data_thread" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pause the data thread.</p>
+<p>This function is called when user pauses the acquisition.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="id4">
 <span class="sig-name descname"><span class="pre">prepare_acquisition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">turn_off_flags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id4" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prepare the acquisition.</p>
-<p>Sets flags, calculates all of the waveforms.
+<p>This function is called when user starts the acquisition.
+Sets flags, calculates all of the waveforms.
 Sets the Camera Sensor Mode, initializes the data buffer, starts camera,
 and opens shutters
 Sets flags.
@@ -524,6 +564,11 @@ Calculates all of the waveforms.
 Sets the Camera Sensor Mode
 Initializes the data buffer and starts camera.
 Opens Shutters</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>turn_off_flags</strong> (<em>bool</em>) – Turn off the flags.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -535,6 +580,13 @@ Opens Shutters</p>
 <dd class="field-odd"><p><strong>pipe_name</strong> (<em>str</em>) – Name of pipe to close.</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.model.Model.resume_data_thread">
+<span class="sig-name descname"><span class="pre">resume_data_thread</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.resume_data_thread" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resume the data thread.</p>
+<p>This function is called when user resumes the acquisition.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -551,10 +603,8 @@ Opens Shutters</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>command</strong> (<em>str</em>) – Type of command to run.</p></li>
-<li><p><strong>*args</strong> (<em>str</em>) – <p>…</p>
-</p></li>
-<li><p><strong>**kwargs</strong> (<em>str</em>) – <p>…</p>
-</p></li>
+<li><p><strong>*args</strong> (<em>list</em>) – List of arguments to pass to the command.</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em>) – Dictionary of keyword arguments to pass to the command.</p></li>
 </ul>
 </dd>
 </dl>
@@ -568,8 +618,7 @@ Opens Shutters</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>num_of_frames</strong> (<em>int</em>) – <p>…</p>
-</p></li>
+<li><p><strong>num_of_frames</strong> (<em>int</em>) – Number of frames to acquire.</p></li>
 <li><p><strong>data_func</strong> (<em>object</em>) – Function to run on the acquired data.</p></li>
 </ul>
 </dd>
@@ -609,6 +658,21 @@ waveforms into the buffers of the DAQ cards.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>img_width</strong> (<em>int</em>) – Number of active pixels in the x-dimension.</p></li>
 <li><p><strong>img_height</strong> (<em>int</em>) – Number of active pixels in the y-dimension.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.model.Model.update_ilastik_setting">
+<span class="sig-name descname"><span class="pre">update_ilastik_setting</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">display_segmentation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mark_position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[1]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.update_ilastik_setting" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the ilastik setting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>display_segmentation</strong> (<em>bool</em>) – Display segmentation.</p></li>
+<li><p><strong>mark_position</strong> (<em>bool</em>) – Mark position.</p></li>
+<li><p><strong>target_labels</strong> (<em>list</em>) – Target labels.</p></li>
 </ul>
 </dd>
 </dl>

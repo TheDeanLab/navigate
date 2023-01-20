@@ -1,0 +1,30 @@
+aslm.model.devices.galvo.galvo\_synthetic.SyntheticGalvo
+========================================================
+
+.. currentmodule:: aslm.model.devices.galvo.galvo_synthetic
+
+.. autoclass:: SyntheticGalvo
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~SyntheticGalvo.__init__
+      ~SyntheticGalvo.adjust
+      ~SyntheticGalvo.close_task
+      ~SyntheticGalvo.prepare_task
+      ~SyntheticGalvo.start_task
+      ~SyntheticGalvo.stop_task
+   
+   
+
+   
+   
+   

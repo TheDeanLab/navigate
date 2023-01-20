@@ -100,7 +100,6 @@
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.data_sources.html">aslm.model.data_sources</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.device_startup_functions.html">aslm.model.device_startup_functions</a></li>
 <li class="toctree-l4 current"><a class="reference internal" href="aslm.model.devices.html">aslm.model.devices</a></li>
-<li class="toctree-l4"><a class="reference internal" href="aslm.model.dummy.html">aslm.model.dummy</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.features.html">aslm.model.features</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.metadata_sources.html">aslm.model.metadata_sources</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.microscope.html">aslm.model.microscope</a></li>
@@ -308,7 +307,8 @@ Calculate the parameters for an ASLM acquisition</p>
 <dt class="sig sig-object py" id="aslm.model.devices.camera.camera_hamamatsu.HamamatsuOrca.calculate_readout_time">
 <span class="sig-name descname"><span class="pre">calculate_readout_time</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.camera.camera_hamamatsu.HamamatsuOrca.calculate_readout_time" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate duration of time needed to readout an image.
-Calculates the readout time and maximum frame rate according to the camera configuration settings.
+Calculates the readout time and maximum frame rate according to the camera
+configuration settings.
 Assumes model C13440 with Camera Link communication from Hamamatsu.
 Currently pulling values directly from the camera.</p>
 <dl class="field-list simple">
@@ -316,7 +316,8 @@ Currently pulling values directly from the camera.</p>
 <dd class="field-odd"><p><ul class="simple">
 <li><p><strong>readout_time</strong> (<em>float</em>) – Duration of time needed to readout an image.</p></li>
 <li><p><strong>max_frame_rate</strong> (<em>float</em>) – Maximum framerate for a given camera acquisition mode.</p></li>
-<li><p><strong>TODO</strong> (<em>I think self.camera_controller.get_property_value(“readout_time”) pulls out the actual readout_time</em>) – calculated here (i.e. we don’t need to do the calculations).</p></li>
+<li><p><strong>TODO</strong> (<em>I think self.camera_controller.get_property_value(“readout_time”) pulls</em>) – out the actual readout_time
+calculated here (i.e. we don’t need to do the calculations).</p></li>
 </ul>
 </p>
 </dd>
@@ -392,7 +393,8 @@ according to the document, trigger_blank should be bigger than trigger_interval.
 <dd><p>Set HamamatsuOrca binning mode.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>binning_string</strong> (<em>str</em>) – Desired binning properties (e.g., ‘1x1’, ‘2x2’, ‘4x4’, ‘8x8’, ‘16x16’, ‘1x2’, ‘2x4’)</p>
+<dd class="field-odd"><p><strong>binning_string</strong> (<em>str</em>) – Desired binning properties (e.g., ‘1x1’, ‘2x2’, ‘4x4’, ‘8x8’, ‘16x16’,
+‘1x2’, ‘2x4’)</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>result</strong></p>

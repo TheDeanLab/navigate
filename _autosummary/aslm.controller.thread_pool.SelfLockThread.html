@@ -230,8 +230,8 @@ else to the thread.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.controller.thread_pool.SelfLockThread.isDaemon" title="aslm.controller.thread_pool.SelfLockThread.isDaemon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">isDaemon</span></code></a>()</p></td>
 <td><p>Return whether this thread is a daemon.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isLocked</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.controller.thread_pool.SelfLockThread.isLocked" title="aslm.controller.thread_pool.SelfLockThread.isLocked"><code class="xref py py-obj docutils literal notranslate"><span class="pre">isLocked</span></code></a>()</p></td>
+<td><p>Check if the thread is locked.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.controller.thread_pool.SelfLockThread.is_alive" title="aslm.controller.thread_pool.SelfLockThread.is_alive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_alive</span></code></a>()</p></td>
 <td><p>Return whether the thread is alive.</p></td>
@@ -240,7 +240,7 @@ else to the thread.</p>
 <td><p>Wait until the thread terminates.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.controller.thread_pool.SelfLockThread.run" title="aslm.controller.thread_pool.SelfLockThread.run"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run</span></code></a>()</p></td>
-<td><p>Method representing the thread's activity.</p></td>
+<td><p>Run the thread.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.controller.thread_pool.SelfLockThread.setDaemon" title="aslm.controller.thread_pool.SelfLockThread.setDaemon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setDaemon</span></code></a>(daemonic)</p></td>
 <td><p>Set whether this thread is a daemon.</p></td>
@@ -251,11 +251,11 @@ else to the thread.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.controller.thread_pool.SelfLockThread.start" title="aslm.controller.thread_pool.SelfLockThread.start"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start</span></code></a>()</p></td>
 <td><p>Start the thread's activity.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">unlock</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.controller.thread_pool.SelfLockThread.unlock" title="aslm.controller.thread_pool.SelfLockThread.unlock"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unlock</span></code></a>()</p></td>
+<td><p>Unlock the thread.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">wait</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.controller.thread_pool.SelfLockThread.wait" title="aslm.controller.thread_pool.SelfLockThread.wait"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wait</span></code></a>()</p></td>
+<td><p>Wait for the thread to finish.</p></td>
 </tr>
 </tbody>
 </table>
@@ -291,6 +291,12 @@ else to the thread.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="aslm.controller.thread_pool.SelfLockThread.isLocked">
+<span class="sig-name descname"><span class="pre">isLocked</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread.isLocked" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if the thread is locked.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="aslm.controller.thread_pool.SelfLockThread.is_alive">
 <span class="sig-name descname"><span class="pre">is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread.is_alive" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return whether the thread is alive.</p>
@@ -323,11 +329,7 @@ exception.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.controller.thread_pool.SelfLockThread.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread.run" title="Permalink to this definition">¶</a></dt>
-<dd><p>Method representing the thread’s activity.</p>
-<p>You may override this method in a subclass. The standard run() method
-invokes the callable object passed to the object’s constructor as the
-target argument, if any, with sequential and keyword arguments taken
-from the args and kwargs arguments, respectively.</p>
+<dd><p>Run the thread.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -352,6 +354,18 @@ from the args and kwargs arguments, respectively.</p>
 object’s run() method to be invoked in a separate thread of control.</p>
 <p>This method will raise a RuntimeError if called more than once on the
 same thread object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.controller.thread_pool.SelfLockThread.unlock">
+<span class="sig-name descname"><span class="pre">unlock</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread.unlock" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unlock the thread.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.controller.thread_pool.SelfLockThread.wait">
+<span class="sig-name descname"><span class="pre">wait</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread.wait" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wait for the thread to finish.</p>
 </dd></dl>
 
 <dl class="py property">

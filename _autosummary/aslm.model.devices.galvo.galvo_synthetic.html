@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>aslm.model.dummy.DummyDevice &mdash; ASLM 0.1 documentation</title>
+  <title>aslm.model.devices.galvo.galvo_synthetic &mdash; ASLM 0.1 documentation</title>
   
 
   
@@ -41,8 +41,8 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="aslm.model.dummy.DummyMicroscope" href="aslm.model.dummy.DummyMicroscope.html" />
-    <link rel="prev" title="aslm.model.dummy" href="aslm.model.dummy.html" /> 
+    <link rel="next" title="aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo" href="aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo.html" />
+    <link rel="prev" title="aslm.model.devices.galvo.galvo_base.GalvoBase" href="aslm.model.devices.galvo.galvo_base.GalvoBase.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -99,8 +99,7 @@
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.concurrency.html">aslm.model.concurrency</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.data_sources.html">aslm.model.data_sources</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.device_startup_functions.html">aslm.model.device_startup_functions</a></li>
-<li class="toctree-l4"><a class="reference internal" href="aslm.model.devices.html">aslm.model.devices</a></li>
-<li class="toctree-l4 current"><a class="reference internal" href="aslm.model.dummy.html">aslm.model.dummy</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="aslm.model.devices.html">aslm.model.devices</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.features.html">aslm.model.features</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.metadata_sources.html">aslm.model.metadata_sources</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.microscope.html">aslm.model.microscope</a></li>
@@ -169,15 +168,17 @@
         
           <li><a href="aslm.model.html">aslm.model</a> &raquo;</li>
         
-          <li><a href="aslm.model.dummy.html">aslm.model.dummy</a> &raquo;</li>
+          <li><a href="aslm.model.devices.html">aslm.model.devices</a> &raquo;</li>
         
-      <li>aslm.model.dummy.DummyDevice</li>
+          <li><a href="aslm.model.devices.galvo.html">aslm.model.devices.galvo</a> &raquo;</li>
+        
+      <li>aslm.model.devices.galvo.galvo_synthetic</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/_autosummary/aslm.model.dummy.DummyDevice.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/_autosummary/aslm.model.devices.galvo.galvo_synthetic.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -190,42 +191,16 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="aslm-model-dummy-dummydevice">
-<h1>aslm.model.dummy.DummyDevice<a class="headerlink" href="#aslm-model-dummy-dummydevice" title="Permalink to this heading">¶</a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="aslm.model.dummy.DummyDevice">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.model.dummy.</span></span><span class="sig-name descname"><span class="pre">DummyDevice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timecost</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.dummy.DummyDevice" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="aslm.model.dummy.DummyDevice.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timecost</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.dummy.DummyDevice.__init__" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<p class="rubric">Methods</p>
+  <section id="module-aslm.model.devices.galvo.galvo_synthetic">
+<span id="aslm-model-devices-galvo-galvo-synthetic"></span><h1>aslm.model.devices.galvo.galvo_synthetic<a class="headerlink" href="#module-aslm.model.devices.galvo.galvo_synthetic" title="Permalink to this heading">¶</a></h1>
+<p class="rubric">Classes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.dummy.DummyDevice.__init__" title="aslm.model.dummy.DummyDevice.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([timecost])</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear</span></code>()</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_message</span></code>()</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">listen</span></code>()</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sendout</span></code>([timeout])</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setup</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo.html#aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo" title="aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SyntheticGalvo</span></code></a>(microscope_name, ...[, galvo_id])</p></td>
+<td><p>SyntheticGalvo Class</p></td>
 </tr>
 </tbody>
 </table>
-</dd></dl>
-
 </section>
 
 
@@ -234,8 +209,8 @@
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="aslm.model.dummy.DummyMicroscope.html" class="btn btn-neutral float-right" title="aslm.model.dummy.DummyMicroscope" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="aslm.model.dummy.html" class="btn btn-neutral float-left" title="aslm.model.dummy" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo.html" class="btn btn-neutral float-right" title="aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="aslm.model.devices.galvo.galvo_base.GalvoBase.html" class="btn btn-neutral float-left" title="aslm.model.devices.galvo.galvo_base.GalvoBase" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

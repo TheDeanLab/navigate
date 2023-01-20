@@ -195,14 +195,16 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="aslm.tools.multipos_table_tools.calc_num_tiles">
 <span class="sig-prename descclassname"><span class="pre">aslm.tools.multipos_table_tools.</span></span><span class="sig-name descname"><span class="pre">calc_num_tiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roi_length</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.tools.multipos_table_tools.calc_num_tiles" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate the number of tiles to divide a space dist along a single axis with an ROI of size roi_length
-and a fractional overlap between ROIs of overlap.</p>
-<p>Watch out! This has no indication of what the tiles should actually look like (no information about sign, etc.).</p>
+<dd><p>Calculate the number of tiles to divide a space dist along a single axis with an
+ROI of size roi_length and a fractional overlap between ROIs of overlap.</p>
+<p>Watch out! This has no indication of what the tiles should actually look like (no
+information about sign, etc.).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dist</strong> (<em>float</em>) – Total distance to tile with ROIs. A measure from the closed boundaries of the region to tile (e.g. left side
-of the first tile all the way to the right side of the last tile for x-dimension low -&gt; high). Positive.</p></li>
+<li><p><strong>dist</strong> (<em>float</em>) – Total distance to tile with ROIs. A measure from the closed boundaries of the
+region to tile (e.g. left side of the first tile all the way to the right side
+of the last tile for x-dimension low -&gt; high). Positive.</p></li>
 <li><p><strong>overlap</strong> (<em>float</em>) – Fraction of roi_length that overlaps in each tile. Value between 0 and 1.</p></li>
 <li><p><strong>roi_length</strong> (<em>float</em>) – The length of the ROI along this dimension. Positive.</p></li>
 </ul>

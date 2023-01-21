@@ -46,11 +46,30 @@ class TestMain(unittest.TestCase):
     """Unit Test for main.py"""
 
     def test_identify_gpu(self):
+        import platform
+
         parser = create_parser()
         args = parser.parse_args(["--GPU"])
-        args.CPU = True
+
+        # we turned GPU on
+        expected_use_gpu = True
+
+        # we don't support macs
+        if platform.system() == "Darwin":
+            expected_use_gpu = False
+
+        # We need tensorflow installed
+        try:
+            import tensorflow as tf
+
+            # we need at least one GPU
+            if len(tf.config.list_physical_devices("GPU")) < 1:
+                expected_use_gpu = False
+        except ModuleNotFoundError:
+            expected_use_gpu = False
+
         use_gpu = identify_gpu(args)
-        assert use_gpu is not args.CPU
+        assert use_gpu is expected_use_gpu
 
     def test_argument_parser(self):
         parser = create_parser()

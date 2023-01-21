@@ -104,7 +104,7 @@ def find_filename(k, v):
     return False
 
 
-def log_setup(logging_configuration):
+def log_setup(logging_configuration, logging_path=None):
     """Setup logging configuration
 
     Initialize a logger from a YAML file containing information in the Python logging
@@ -116,6 +116,8 @@ def log_setup(logging_configuration):
     logging_configuration : str
         Path to file to be loaded.
         Relative to the location of the folder containing this file.
+    logging_path : str, optional
+        Path to store logs. Defaults to aslm_path/logs
     """
 
     # path to logging_configuration is set relative
@@ -136,7 +138,8 @@ def log_setup(logging_configuration):
         )
     )
 
-    logging_path = Path.joinpath(Path(get_aslm_path()), "logs")
+    if logging_path is None:
+        logging_path = Path.joinpath(Path(get_aslm_path()), "logs")
     todays_path = Path.joinpath(logging_path, time_stamp)
     if not os.path.exists(logging_path):
         os.mkdir(logging_path)

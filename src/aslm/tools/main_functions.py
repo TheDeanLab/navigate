@@ -62,6 +62,8 @@ def evaluate_parser_input_arguments(args):
         Path to remote focusing and galvo waveform constants file
     rest_api_path
         Path to REST API file
+    logging_path
+        Path to non-default logging location
 
     """
     # Retrieve the Default Configuration paths
@@ -107,7 +109,6 @@ def evaluate_parser_input_arguments(args):
         logging_path = args.logging_config
     else:
         logging_path = None
-        # TODO: What should the default be?
 
     return (
         configuration_path,
@@ -140,13 +141,12 @@ def identify_gpu(args):
     """
 
     use_gpu = False
-    if args.GPU is True:
-        if platform.system() != "Darwin":
-            import tensorflow as tf
+    if args.GPU and platform.system() != "Darwin":
+        import tensorflow as tf
 
-            number_gpus = len(tf.config.list_physical_devices("GPU"))
-            if number_gpus > 0:
-                use_gpu = True
+        number_gpus = len(tf.config.list_physical_devices("GPU"))
+        if number_gpus > 0:
+            use_gpu = True
     return use_gpu
 
 

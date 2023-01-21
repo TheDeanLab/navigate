@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -106,9 +107,22 @@ class TiffDataSource(DataSource):
             setattr(self, f"shape_{ax.lower()}", self.data.shape[i])
 
     def write(self, data: npt.ArrayLike, **kw) -> None:
-        """One channel, all z-position, one timepoint = one stack.
+        """Write data to a tiff file.
+
+        One channel, all z-position, one timepoint = one stack.
         N channels are opened simultaneously for writing.
         At each time point, a new file is opened for each channel.
+
+        Parameters
+        ----------
+        data : npt.ArrayLike
+            Data to write to file.
+        kw : dict
+            Keyword arguments to pass to tifffile.imsave.
+
+        Returns
+        -------
+        None
         """
         self.mode = "w"
 

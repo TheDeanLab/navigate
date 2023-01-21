@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -29,10 +30,13 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Standard Library Imports
 import logging
 
+# Third Party Imports
 import numpy.typing as npt
 
+# Local Imports
 from multiprocessing.managers import DictProxy
 
 
@@ -50,6 +54,27 @@ class DataSource:
 
         Concept and some of the code borrowed from python-microscopy
         (https://github.com/python-microscopy/python-microscopy/).
+
+        Parameters
+        ----------
+        file_name : str
+            Name of the file to read/write from.
+        mode : str
+            Mode to open the file in. Can be 'r' or 'w'.
+
+        Returns
+        -------
+        None
+
+        Attributes
+        ----------
+        file_name : str
+            Name of the file to read/write from.
+        data : npt.ArrayLike
+            Pointer to the actual data in the data source.
+        metadata : npt.ArrayLike
+            Pointer to the metadata.
+
         """
         self.logger = logging.getLogger(__name__.split(".")[1])
         self.file_name = file_name
@@ -68,15 +93,41 @@ class DataSource:
             1,
         )
         self.positions = 1
-
         self.mode = mode
 
     @property
     def mode(self) -> str:
+        """Get the mode of the data source.
+
+        Returns
+        -------
+        str
+            Mode of the data source.
+
+        Examples
+        --------
+        >>> data_source.mode
+        'r'
+        """
         return self._mode
 
     @mode.setter
     def mode(self, mode_str) -> None:
+        """Set the mode of the data source.
+
+        Parameters
+        ----------
+        mode_str : str
+            Mode to set the data source to. Can be 'r' or 'w'.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> data_source.mode = 'r'
+        """
         if mode_str == self._mode:
             return
         if mode_str in ["r", "w"]:
@@ -88,22 +139,82 @@ class DataSource:
 
     @property
     def data(self) -> npt.ArrayLike:
-        """Return array representation of data stored in data source."""
+        """Return array representation of data stored in data source.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        npt.ArrayLike
+            Array representation of data stored in data source.
+
+        Examples
+        --------
+        >>> data_source.data
+        """
         raise NotImplementedError("Implemented in a derived class.")
 
     @property
     def voxel_size(self) -> tuple:
-        """Return voxel size"""
+        """Return voxel size
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        tuple
+            Voxel size in x, y, z dimensions.
+
+        Examples
+        --------
+        >>> data_source.voxel_size
+        (1, 1, 1)
+        """
         return (self.dx, self.dy, self.dz)
 
     @property
     def shape(self) -> tuple:
-        """Return shape as XYCZT."""
+        """Return shape as XYCZT.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        tuple
+            Shape of the data source in XYCZT format.
+
+        Examples
+        --------
+        >>> data_source.shape
+        (1, 1, 1, 1, 1)
+        """
         return (self.shape_x, self.shape_y, self.shape_c, self.shape_z, self.shape_t)
 
     def set_metadata_from_configuration_experiment(
         self, configuration: DictProxy
     ) -> None:
+        """Set metadata from configuration experiment.
+
+        Parameters
+        ----------
+        configuration : DictProxy
+            Configuration experiment.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> data_source.set_metadata_from_configuration_experiment(configuration)
+        """
+
         self.metadata.configuration = configuration
 
         # pull new values from the metadata
@@ -139,7 +250,12 @@ class DataSource:
         t : int
             Index of time position
         p : int
-            Index of multiposition position.
+            Index of multi-position position.
+
+        Examples
+        --------
+        >>> data_source._cztp_indices(frame_id)
+        (0, 0, 0, 0)
         """
         # If z-stacking, if multi-position
         if self.shape_z > 1:
@@ -154,7 +270,7 @@ class DataSource:
             t = frame_id // (self.shape_c * self.shape_z * self.positions)
             p = (frame_id // (self.shape_c * self.shape_z)) % self.positions
         else:
-            # Timepoint acqusition, only c varies faster than t
+            # Timepoint acquisition, only c varies faster than t
             c = frame_id % self.shape_c
             t = (frame_id // self.shape_c) % self.shape_t
             z = (frame_id // (self.shape_c * self.shape_t)) % self.shape_z
@@ -163,20 +279,73 @@ class DataSource:
         return c, z, t, p
 
     def _mode_checks(self) -> None:
-        """Run additional checks after setting the mode."""
+        """Run additional checks after setting the mode.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> data_source._mode_checks()"""
         pass
 
     def write(self, data: npt.ArrayLike, **kw) -> None:
-        """Write data to file."""
+        """Write data to file.
+
+        Parameters
+        ----------
+        data : npt.ArrayLike
+            Data to write to file.
+        **kw : dict
+            Additional keyword arguments.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> data_source.write(data)
+        """
         raise NotImplementedError("Implemented in a derived class.")
 
     def read(self) -> None:
-        """Read data from file."""
+        """Read data from file.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> data_source.read()"""
         raise NotImplementedError("Implemented in a derived class.")
 
     def close(self) -> None:
-        """Clean up any leftover file pointers, etc."""
+        """Clean up any leftover file pointers, etc.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> data_source.close()"""
         pass
 
     def __del__(self):
+        """Destructor"""
         self.close()

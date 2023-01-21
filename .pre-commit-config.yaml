@@ -10,9 +10,9 @@ repos:
     hooks:
     -   id: black
 - repo: https://github.com/charliermarsh/ruff-pre-commit
- # Ruff version.
- rev: 'v0.0.191'
- hooks:
-   - id: ruff
-     # Respect `exclude` and `extend-exclude` settings.
-     args: ["--force-exclude"]
+  # Ruff version.
+  rev: 'v0.0.191'
+  hooks:
+    - id: ruff
+      # Respect `exclude` and `extend-exclude` settings.
+      args: ["--force-exclude"]

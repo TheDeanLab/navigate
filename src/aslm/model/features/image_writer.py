@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -55,7 +56,8 @@ class ImageWriter:
         model : aslm.model.model.Model
             ASLM Model class for controlling hardware/acquisition.
         sub_dir : str
-            Sub-directory of self.model.configuration['experiment']['Saving']['save_directory']
+            Sub-directory of self.model.configuration['experiment']
+            ['Saving']['save_directory']
             indicating where to save data
         image_writer : str
             Optionally override the generate_image_name() naming scheme.
@@ -127,7 +129,8 @@ class ImageWriter:
                 os.makedirs(self.mip_directory)
         except FileNotFoundError as e:
             logger.debug(
-                f"ASLM Image Writer - Cannot create MIP directory {self.mip_directory}. "
+                f"ASLM Image Writer - "
+                f"Cannot create MIP directory {self.mip_directory}. "
                 f"Maybe the drive does not exist?"
             )
             logger.exception(e)
@@ -200,7 +203,14 @@ class ImageWriter:
             ):
                 for c_save_idx in range(self.data_source.shape_c):
                     mip_name = (
-                        "CH0" + str(c_save_idx) + "_" + str(t_idx).zfill(6) + ".tif"
+                        "P"
+                        + str(p_idx).zfill(4)
+                        + "_"
+                        + "CH0"
+                        + str(c_save_idx)
+                        + "_"
+                        + str(t_idx).zfill(6)
+                        + ".tif"
                     )
                     imsave(
                         os.path.join(self.mip_directory, mip_name),
@@ -214,7 +224,8 @@ class ImageWriter:
         Parameters
         ----------
         current_channel : int
-            Index into self.model.configuration['experiment']['MicroscopeState']['channels']
+            Index into self.model.configuration['experiment']
+            ['MicroscopeState']['channels']
             of saved color channel.
 
         ext : str

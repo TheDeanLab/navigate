@@ -231,7 +231,7 @@ class NIDAQ(DAQBase):
             for task in self.analog_output_tasks:
                 task.stop()
                 task.close()
-        except nidaqmx.DaqError:
+        except (AttributeError, nidaqmx.errors.DaqError):
             pass
 
     def enable_microscope(self, microscope_name):

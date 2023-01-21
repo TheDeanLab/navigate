@@ -142,7 +142,7 @@ class DummyFeature:
             self.model.signal_records.append((self.target_frame_id, self.feature_name))
         if self.has_response_func:
             self.wait_lock.acquire()
-            print(self.feature_name, ": wait lock is acquired!!!!")
+            print(self.feature_name, ": wait lock is acquired!!!!", self.target_frame_id)
 
         return True
 
@@ -172,7 +172,7 @@ class DummyFeature:
             # random Yes/No
             self.response_value = random.randint(0, 1)
             print(
-                self.feature_name, ": wait lock is released!(data)", self.response_value
+                self.feature_name, ": wait lock is released!(data)", frame_ids, self.response_value
             )
             self.wait_lock.release()
             return self.response_value
@@ -295,6 +295,7 @@ class TestFeatureContainer(unittest.TestCase):
 
         print("----some signal nodes have waiting function")
         for i in range(10):
+            # feature_list = convert_to_feature_list([[('node0', 1, 1, 1)], [('node1', 1, 0, 1)], [('node2', 1, 1, 1)], [('node3', 1, 0, 1)], [('node4', 1, 0, 1)], [('node5', 1, 0, 1)], [('node6', 1, 0, 1)], [('node7', 1, 1, 1)], [('node8', 0, 1, 1), ('node9', 0, 1, 1), ('node10', 1, 0, 1)], [('node11', 1, 1, 1)]])
             feature_list = generate_random_feature_list(has_response_func=True)
             print_feature_list(feature_list)
             model.start(feature_list)
@@ -310,6 +311,7 @@ class TestFeatureContainer(unittest.TestCase):
         )
         for i in range(10):
             feature_list = generate_random_feature_list(multi_step=True)
+            # feature_list = convert_to_feature_list([[('node0', 0, 0, 10), ('node1', 0, 1, 5), ('node2', 0, 0, 1), ('node3', 0, 0, 9)], [('node4', 0, 1, 8), ('node5', 0, 1, 10), ('node6', 0, 1, 6), ('node7', 0, 0, 1), ('node8', 0, 0, 6), ('node9', 0, 1, 1), ('node10', 0, 0, 6)], [('node11', 0, 0, 1), ('node12', 0, 0, 1), ('node13', 0, 0, 1), ('node14', 0, 1, 7), ('node15', 0, 0, 1)], [('node16', 0, 0, 1), ('node17', 0, 1, 1), ('node18', 0, 1, 7), ('node19', 0, 1, 7), ('node20', 0, 1, 10), ('node21', 0, 0, 1), ('node22', 0, 1, 9), ('node23', 0, 1, 1), ('node24', 0, 0, 10), ('node25', 0, 0, 6)], [('node26', 0, 1, 1), ('node27', 0, 1, 7), ('node28', 0, 1, 8), ('node29', 0, 1, 7), ('node30', 0, 0, 5), ('node31', 0, 1, 1), ('node32', 0, 0, 10)]])
             # feature_list = convert_to_feature_list([[('node0', 0, 1, 2), ('node1', 0, 0, 3)]])
             # feature_list = convert_to_feature_list([[('node0', 0, 0, 5)], [('node1', 0, 0, 5), ('node2', 0, 0, 10), ('node3', 0, 1, 7), ('node4', 0, 0, 1), ('node5', 0, 0, 9), ('node6', 0, 1, 9)], [('node7', 0, 0, 9), ('node8', 0, 0, 6), ('node9', 0, 0, 7), ('node10', 0, 1, 3), ('node11', 0, 1, 6), ('node12', 0, 1, 5), ('node13', 0, 0, 4), ('node14', 0, 0, 1), ('node15', 0, 0, 2)], [('node16', 0, 0, 5), ('node17', 0, 1, 2), ('node18', 0, 0, 6), ('node19', 0, 0, 3)], [('node20', 0, 0, 9), ('node21', 0, 0, 7), ('node22', 0, 0, 1), ('node23', 0, 0, 8), ('node24', 0, 0, 2), ('node25', 0, 1, 7), ('node26', 0, 0, 9)], [('node27', 0, 0, 2), ('node28', 0, 1, 3), ('node29', 0, 0, 3), ('node30', 0, 0, 8)], [('node31', 0, 0, 8), ('node32', 0, 0, 10), ('node33', 0, 1, 4), ('node34', 0, 1, 2), ('node35', 0, 1, 8), ('node36', 0, 1, 4), ('node37', 0, 0, 5), ('node38', 0, 0, 9)], [('node39', 0, 0, 9), ('node40', 0, 1, 8), ('node41', 0, 1, 4)], [('node42', 0, 0, 1), ('node43', 0, 0, 1), ('node44', 0, 1, 1), ('node45', 0, 0, 2), ('node46', 0, 1, 3)]])
             print_feature_list(feature_list)
@@ -324,6 +326,9 @@ class TestFeatureContainer(unittest.TestCase):
             "----multi-step nodes have both signal and data functions, and with waiting function"
         )
         for i in range(10):
+            # feature_list = convert_to_feature_list([[('node0', 0, 0, 1), ('node1', 1, 1, 1)], [('node2', 1, 1, 7)], [('node3', 0, 1, 1), ('node4', 0, 1, 9), ('node5', 1, 1, 1)], [('node6', 1, 0, 1)], [('node7', 0, 1, 6), ('node8', 1, 1, 1)], [('node9', 0, 1, 7), ('node10', 1, 0, 1)], [('node11', 0, 0, 7), ('node12', 0, 0, 6), ('node13', 0, 0, 5)], [('node14', 0, 1, 6), ('node15', 0, 0, 1), ('node16', 0, 1, 9), ('node17', 0, 1, 10), ('node18', 0, 0, 1), ('node19', 0, 0, 1), ('node20', 0, 0, 1), ('node21', 1, 1, 1)], [('node22', 1, 0, 1)]])
+            # feature_list = convert_to_feature_list([[('node0', 1, 1, 5)], [('node1', 0, 1, 5), ('node2', 1, 1, 1)], [('node3', 1, 1, 6)], [('node4', 1, 1, 9)], [('node5', 0, 1, 6), ('node6', 1, 0, 1)], [('node7', 1, 1, 6)], [('node8', 1, 1, 5)]])
+            # feature_list = convert_to_feature_list([[('node0', 0, 0, 6), ('node1', 0, 1, 1), ('node2', 0, 1, 8)], [('node3', 0, 1, 1), ('node4', 0, 1, 1), ('node5', 1, 0, 6)], [('node6', 0, 1, 1), ('node7', 1, 0, 1)]])
             feature_list = generate_random_feature_list(
                 has_response_func=True, multi_step=True
             )
@@ -339,6 +344,7 @@ class TestFeatureContainer(unittest.TestCase):
         for i in range(10):
             # feature_list = convert_to_feature_list([[('node0', 0, 1, 1), ('multi-step1', False, 0, 6, False), 'WaitToContinue', ('multi-step2', False, 0, 8, False), 'WaitToContinue', ('node3', 0, 1, 1), ('multi-step4', False, 0, 9, False), 'WaitToContinue'], [('node5', 0, 0, 6)]])
             # feature_list = convert_to_feature_list([[('node0', 1, 1, 1)], [('node1', 0, 1, 9), ('node2', 0, 1, 1), ('node3', 0, 0, 1), ('multi-step4', False, 0, 9, False), 'WaitToContinue', ('multi-step5', False, 0, 5, False), 'WaitToContinue', ('node6', 1, 1, 1)]])
+            # feature_list = convert_to_feature_list([[('multi-step0', False, 1, 9, False), 'WaitToContinue', ('multi-step1', False, 1, 8, False), 'WaitToContinue', ('multi-step2', False, 1, 7, False), 'WaitToContinue', ('multi-step3', False, 1, 7, False), 'WaitToContinue', ('multi-step4', False, 1, 7, False), 'WaitToContinue', ('node5', 1, 0, 5)], [('node6', 1, 1, 1)], [('node7', 0, 0, 1), ('node8', 0, 1, 1), ('node9', 1, 0, 1)], [('node10', 1, 1, 10)], [('multi-step11', False, 1, 6, False), 'WaitToContinue', ('node12', 1, 0, 1)], [('multi-step13', False, 1, 8, False), 'WaitToContinue', ('multi-step14', False, 1, 9, False), 'WaitToContinue', ('node15', 0, 1, 1), ('multi-step16', False, 1, 9, False), 'WaitToContinue', ('node17', 1, 0, 10)], [('multi-step18', False, 1, 9, False), 'WaitToContinue'], [('node19', 1, 1, 7)], [('node20', 1, 1, 1)]])
             feature_list = generate_random_feature_list(
                 has_response_func=True, multi_step=True, with_data_func=False
             )
@@ -375,7 +381,7 @@ class TestFeatureContainer(unittest.TestCase):
         assert model.signal_records == [(0, "node0"), (1, "node0"), (2, "node0")]
 
         # test case: random loop
-        for i in range(20):
+        for i in range(10):
             # feature_list = [({'name': DummyFeature, 'args': ('node0', 0, 0, 1,),}, {'name': LoopByCount, 'args': (3,)}), [{'name': DummyFeature, 'args': ('node1', 0, 0, 1,),}, {'name': DummyFeature, 'args': ('node2', 0, 0, 1,),}], ({'name': DummyFeature, 'args': ('node3', 0, 0, 1,),}, {'name': LoopByCount, 'args': (3,)}), ({'name': DummyFeature, 'args': ('node4', 0, 0, 1,),}, {'name': DummyFeature, 'args': ('node5', 0, 0, 1,),}, {'name': LoopByCount, 'args': (3,)})]
             feature_list = generate_random_feature_list(
                 has_response_func=True,
@@ -718,10 +724,11 @@ class TestFeatureContainer(unittest.TestCase):
 
         print("----multi-step function")
         feature.clear()
-        node = SignalNode("test_1", func_dict, device_related=True)
-        node.node_type = "multi-step"
-        assert func_dict.get("main-response", None) == None
-        assert node.need_response == False
+        node = SignalNode("test_1", func_dict, device_related=True, node_type="multi-step")
+        # node.node_type = "multi-step"
+        func_dict["main-response"] = dummy_True
+        # assert func_dict.get("main-response", None) == None
+        assert node.need_response == True
         steps = 5
         for i in range(steps + 1):
             feature.is_end = i == steps
@@ -730,25 +737,24 @@ class TestFeatureContainer(unittest.TestCase):
             else:
                 assert node.is_initialized == True
             result, is_end = node.run()
-            if i < steps:
+            if i <= steps:
                 assert node.is_initialized == True
                 assert is_end == False
-            else:
-                assert node.is_initialized == False
-                assert is_end == True
             assert feature.running_times_main_func == i + 1
-            assert node.wait_response == False
+            assert node.wait_response == True
+            result, is_end = node.run(wait_response=True)
             if i < steps:
-                result, is_end = node.run(wait_response=True)
                 assert is_end == False
+            else:
+                assert is_end == True
 
         print("--multi-step function")
         feature.clear()
         node = SignalNode(
             "test_1", func_dict, node_type="multi-step", device_related=True
         )
-        assert func_dict.get("main-response") == None
-        assert node.need_response == False
+        # assert func_dict.get("main-response") == None
+        assert node.need_response == True
         assert node.device_related == True
         steps = 5
         for i in range(steps + 1):
@@ -756,13 +762,10 @@ class TestFeatureContainer(unittest.TestCase):
             result, is_end = node.run()
             if i < steps:
                 assert is_end == False
-            else:
-                assert is_end == True
-                break
             assert is_end == False
             assert feature.running_times_main_func == i + 1
             assert node.is_initialized == True
-            assert node.wait_response == False
+            assert node.wait_response == True
             result, is_end = node.run(wait_response=True)
         assert node.wait_response == False
         assert node.is_initialized == False

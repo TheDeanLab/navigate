@@ -7,7 +7,7 @@ If you do not have `Git already installed <https://git-scm.com/downloads>`_, you
 We also recommend installing `GitHub Desktop <https://desktop.github.com/>`_ for a more user-friendly experience.
 
 
-Setup your Python Environement.
+Setup your Python Environment.
 -------------------------------
 Head over to the `miniconda website <https://docs.conda.io/en/latest/miniconda.html#latest-miniconda-installer-links>`_
 and install the appropriate version based on your operating system.

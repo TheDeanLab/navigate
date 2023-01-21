@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -30,24 +31,22 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
+# Standard Library Imports
+
+# Third Party Imports
+import pytest
+
+# Local Imports
 from aslm.controller.sub_controllers.help_popup_controller import HelpPopupController
 from aslm.view.menus.help_popup import HelpPopup
-import pytest
-from unittest.mock import MagicMock
 
-class TestHelpPopupController():
 
+class TestHelpPopupController:
     @pytest.fixture(autouse=True)
     def setup_class(self, dummy_controller):
-        c = dummy_controller
-        self.v = dummy_controller.view
-        pop = HelpPopup(self.v)
-        
-        self.help_controller = HelpPopupController(pop, c)
+        pop = HelpPopup(dummy_controller.view)
+        self.help_controller = HelpPopupController(pop, dummy_controller)
 
     def test_init(self):
-
         assert isinstance(self.help_controller, HelpPopupController)
         assert self.help_controller.view.popup.winfo_exists() == 1
-
-    

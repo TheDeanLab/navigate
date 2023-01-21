@@ -96,7 +96,7 @@ def main():
         logging_path,
     ) = evaluate_parser_input_arguments(args)
 
-    log_setup("logging.yml")
+    log_setup("logging.yml", logging_path)
     use_gpu = identify_gpu(args)
 
     Controller(

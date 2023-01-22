@@ -37,66 +37,37 @@ import time
 
 # Third Party Imports
 import numpy as np
-import tkinter as tk
 import random
 
 # Local Imports
-from aslm.model.features.feature_container import load_features
 from aslm.config.config import load_configs
 from aslm.model.devices.camera.camera_synthetic import (
     SyntheticCamera,
     SyntheticCameraController,
 )
 from aslm.model.features.feature_container import (
-    SignalNode,
-    DataNode,
-    DataContainer,
     load_features,
 )
 
 
-# def get_dummy_model():
-#     """
-#     Creates a dummy model to be used for testing. All hardware is synthetic and the
-#     current config settings are loaded.
-#     """
-#     # Set up the model, experiment, ETL dictionaries
-#     base_directory = Path(__file__).resolve().parent.parent
-#     configuration_directory = Path.joinpath(base_directory, 'config')
-
-
-#     config = Path.joinpath(configuration_directory, 'configuration.yml')
-#     experiment = Path.joinpath(configuration_directory, 'experiment.yml')
-#     etl_constants = Path.joinpath(configuration_directory, 'etl_constants.yml')
-
-#     class args():
-#         """
-#         Leaving this class here in case we need to instantiate a full synthetic model
-#         """
-#         def __init__(self):
-#             self.synthetic_hardware = True
-
-#     # This return is used when you want a full syntethic model instead of just
-#     # variable data from config files
-#     # return Model(False, args(), config, experiment, etl_constants)
-
-#     class dummy_model():
-#         def __init__(self):
-#             self.configuration = Configurator(config)
-#             self.experiment = Configurator(experiment)
-#             self.etl_constants = Configurator(etl_constants)
-#             self.data_buffer = None
-
-#     # Instantiate fake model to return
-#     dumb_model = dummy_model()
-
-
-#     return dumb_model
-
 class DummyController:
     def __init__(self, view):
-        from aslm.controller.configuration_controller import ConfigurationController
+        """Initialize the Dummy controller.
 
+        Args
+        ----
+        view : DummyView
+            The view to be controlled by this controller.
+
+        Returns
+        -------
+        None
+
+        Example
+        -------
+        >>> controller = DummyController(view)
+        """
+        from aslm.controller.configuration_controller import ConfigurationController
 
         self.configuration = DummyModel().configuration
         self.commands = []
@@ -105,35 +76,103 @@ class DummyController:
         self.stage_pos = {}
         self.off_stage_pos = {}
 
-    
     def execute(self, str, sec=None):
-        '''
-        Appends commands sent via execute, first element is oldest command/first to pop off
-        '''
-        if sec == None:
-            self.commands.append(str)
-        else:
-            self.commands.append(str)
+        """Execute a command.
+
+        Appends commands sent via execute,
+        first element is oldest command/first to pop off
+
+
+        Args
+        ----
+        str : str
+            The command to be executed.
+        sec : float
+            The time to wait before executing the command.
+
+        Returns
+        -------
+        None
+
+        Example
+        -------
+        >>> controller.execute('move_stage', 1)
+        """
+
+        self.commands.append(str)
+        if sec is not None:
             self.commands.append(sec)
 
-        if str == 'get_stage_position':
-            
-            self.stage_pos['x'] = int(random.random())
-            self.stage_pos['y'] = int(random.random())
-
+        if str == "get_stage_position":
+            self.stage_pos["x"] = int(random.random())
+            self.stage_pos["y"] = int(random.random())
             return self.stage_pos
 
-        
     def pop(self):
-        '''
-        Use this method in testing code to grab the next command
-        '''
+        """Pop the oldest command.
+
+        Use this method in testing code to grab the next command.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        str
+            The oldest command.
+
+        Example
+        -------
+        >>> controller.pop()
+        """
+
         if len(self.commands) > 0:
             return self.commands.pop(0)
         else:
             return "Empty command list"
 
+
 class DummyModel:
+    """Dummy Model
+
+    This class is used to test the controller and view.
+
+    Attributes
+    ----------
+    configuration : Configuration
+        The configuration object.
+    signal_container : SignalContainer
+        The signal container.
+    data_container : DataContainer
+        The data container.
+    signal_pipe : Pipe
+        The pipe for sending signals.
+    data_pipe : Pipe
+        The pipe for sending data.
+    signal_thread : Thread
+        The thread for sending signals.
+    data_thread : Thread
+        The thread for sending data.
+    stop_flag : bool
+        The flag for stopping the threads.
+    frame_id : int
+        The frame id.
+    data : list
+        The list of data.
+
+    Methods
+    -------
+    signal_func()
+        The function for sending signals.
+    data_func()
+        The function for sending data.
+
+    Example
+    -------
+    >>> model = DummyModel()
+    """
+
     def __init__(self):
         # Set up the model, experiment, waveform dictionaries
         base_directory = Path(__file__).resolve().parent.parent
@@ -217,6 +256,20 @@ class DummyModel:
         self.stop_flag = True
 
     def data_func(self):
+        """The function for sending data.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Example
+        -------
+        >>> model.data_func()
+        """
         while not self.stop_flag:
             self.data_pipe.send("getData")
             frame_ids = self.data_pipe.recv()
@@ -231,6 +284,22 @@ class DummyModel:
         self.data_pipe.send("shutdown")
 
     def start(self, feature_list):
+        """Start the model.
+
+        Parameters
+        ----------
+        feature_list : list
+            The list of features to be used.
+
+        Returns
+        -------
+        None
+
+        Example
+        -------
+        >>> model.start(['signal', 'data'])
+        """
+
         if feature_list is None:
             return False
         self.data = []
@@ -255,6 +324,29 @@ class DummyModel:
 
 
 class DummyDevice:
+    """Dummy Device
+
+    This class is used to test the controller and view.
+
+    Attributes
+    ----------
+    signal_pipe : Pipe
+        The pipe for sending signals.
+    data_pipe : Pipe
+        The pipe for sending data.
+
+    Methods
+    -------
+    setup()
+        Set up the pipes.
+    shutdown()
+        Shutdown the pipes.
+
+    Example
+    -------
+    >>> device = DummyDevice()
+    """
+
     def __init__(self, timecost=0.2):
         self.msg_count = mp.Value("i", 0)
         self.sendout_msg_count = 0
@@ -264,6 +356,21 @@ class DummyDevice:
         self.stop_flag = False
 
     def setup(self):
+        """Set up the pipes.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Example
+        -------
+        >>> device.setup()
+        """
+
         signalPort, self.in_port = mp.Pipe()
         dataPort, self.out_port = mp.Pipe()
         in_process = mp.Process(target=self.listen)
@@ -278,13 +385,56 @@ class DummyDevice:
         return signalPort, dataPort
 
     def generate_message(self):
+        """Generate a message.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Example
+        -------
+        >>> device.generate_message()
+        """
+
         time.sleep(self.timecost)
         self.msg_count.value += 1
 
     def clear(self):
+        """Clear the pipes.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Example
+        -------
+        >>> device.clear()
+        """
         self.msg_count.value = 0
 
     def listen(self):
+        """Listen to the pipe.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Example
+        -------
+        >>> device.listen()
+        """
         while not self.stop_flag:
             signal = self.in_port.recv()
             if signal == "shutdown":
@@ -295,6 +445,20 @@ class DummyDevice:
             self.in_port.send("done")
 
     def sendout(self, timeout=100):
+        """Send out the message.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Example
+        -------
+        >>> device.sendout()
+        """
         while not self.stop_flag:
             msg = self.out_port.recv()
             if msg == "shutdown":
@@ -311,6 +475,29 @@ class DummyDevice:
 
 
 class DummyMicroscope:
+    """Dummy Microscope
+
+    This class is used to test the controller and view.
+
+    Attributes
+    ----------
+    signal_pipe : Pipe
+        The pipe for sending signals.
+    data_pipe : Pipe
+        The pipe for sending data.
+
+    Methods
+    -------
+    setup()
+        Set up the pipes.
+    shutdown()
+        Shutdown the pipes.
+
+    Example
+    -------
+    >>> device = DummyMicroscope()
+    """
+
     def __init__(self, name, configuration, devices_dict, is_synthetic=False):
         self.microscope_name = name
         self.configuration = configuration
@@ -319,5 +506,4 @@ class DummyMicroscope:
         self.lasers = {}
         self.galvo = {}
         self.daq = devices_dict.get("daq", None)
-
         self.current_channel = 0

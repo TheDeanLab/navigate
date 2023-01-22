@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -30,284 +31,598 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-from aslm.controller.sub_controllers import AcquireBarController
+# Standard library imports
+
+# Third party imports
 import pytest
 
+# Local imports
+from aslm.controller.sub_controllers import AcquireBarController
+from aslm.view.main_window_content.acquire_bar_frame.acquire_popup import (
+    AcquirePopUp,
+)
 
 
+class TestAcquireBarController:
+    """Tests for the AcquireBarController class
 
-class TestAcquireBarController():
+    Attributes
+    ----------
+    acqbarController : AcquireBarController
+        Instance of the AcquireBarController class
+
+    Methods
+    -------
+    test_init()
+        Tests the initialization of the AcquireBarController class
+    test_attr()
+        Tests the attributes of the AcquireBarController class
+    test_set_save()
+        Tests the set_save_option method of the AcquireBarController class
+    test_stop_acquire()
+        Tests the stop_acquire method of the AcquireBarController class
+    test_populate_experiment_values()
+        Tests the populate_experiment_values method of the AcquireBarController class
+    """
 
     @pytest.fixture(autouse=True)
     def setup_class(self, dummy_controller):
+        """Setup for the TestAcquireBarController class
+
+        Parameters
+        ----------
+        dummy_controller : DummyController
+            Instance of the DummyController class
+        """
         c = dummy_controller
         v = dummy_controller.view
-        
-        self.acqbarController = AcquireBarController(v.acqbar, v.settings.channels_tab, c)
-        self.acqbarController.populate_experiment_values()
-        
-    def test_init(self):
-        
-        assert isinstance(self.acqbarController, AcquireBarController)
 
+        self.acquire_bar_controller = AcquireBarController(
+            v.acqbar, v.settings.channels_tab, c
+        )
+        self.acquire_bar_controller.populate_experiment_values()
+
+    def test_init(self):
+        """Tests the initialization of the AcquireBarController class
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        AssertionError
+            If the initialization of the AcquireBarController class is not correct
+        """
+        assert isinstance(self.acquire_bar_controller, AcquireBarController)
 
     def test_attr(self):
+        """Tests the attributes of the AcquireBarController class
 
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        AssertionError
+            If the attributes of the AcquireBarController class are not correct
+        """
         # Listing off attributes to check existence
-        attrs = ['parent_view', 'mode', 'is_save', 'mode_dict']
+        attrs = ["parent_view", "mode", "is_save", "mode_dict"]
 
         for attr in attrs:
-            assert hasattr(self.acqbarController, attr)
+            assert hasattr(self.acquire_bar_controller, attr)
 
-    @pytest.mark.parametrize("mode,mode_expected,value_expected", [ ('live', 'determinate', None), ('single', 'determinate', 0), ('projection', 'determinate', 0), ('z-stack', 'determinate', 0) ])
+    @pytest.mark.parametrize(
+        "mode,mode_expected,value_expected",
+        [
+            ("live", "determinate", None),
+            ("single", "determinate", 0),
+            ("projection", "determinate", 0),
+            ("z-stack", "determinate", 0),
+        ],
+    )
     def test_progress_bar(self, mode, mode_expected, value_expected):
-        
-        # Simulating an image series
+        """Tests the progress bar of the AcquireBarController class
+
+        Parameters
+        ----------
+        mode : str
+            Mode of the progress bar
+        mode_expected : str
+            Expected mode of the progress bar
+        value_expected : int
+            Expected value of the progress bar
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        AssertionError
+            If the progress bar of the AcquireBarController class is not correct
+        """
 
         # Startup progress bars
         images_received = 0
         mode = mode
         stop = False
-        self.acqbarController.progress_bar(images_received=images_received,
-                                           microscope_state=self.acqbarController.parent_controller.configuration['experiment']['MicroscopeState'],
-                                           mode=mode,
-                                           stop=stop)
-        progress_mode = str(self.acqbarController.view.CurAcq['mode'])
-        ovr_mode = str(self.acqbarController.view.OvrAcq['mode'])
+        self.acquire_bar_controller.progress_bar(
+            images_received=images_received,
+            microscope_state=self.acquire_bar_controller.parent_controller.configuration[
+                "experiment"
+            ][
+                "MicroscopeState"
+            ],
+            mode=mode,
+            stop=stop,
+        )
 
-        assert progress_mode == mode_expected, f"Wrong progress bar mode ({progress_mode}) relative to microscope mode ({mode})"
-        assert ovr_mode == mode_expected, f"Wrong progress bar mode ({progress_mode}) relative to microscope mode ({mode})"
+        progress_mode = str(self.acquire_bar_controller.view.CurAcq["mode"])
+        ovr_mode = str(self.acquire_bar_controller.view.OvrAcq["mode"])
 
-        if value_expected != None:
-            progress_start = int(self.acqbarController.view.CurAcq['value'])
-            ovr_start = int(self.acqbarController.view.OvrAcq['value'])
-            assert progress_start == value_expected, "Wrong starting value for progress bar"
+        assert progress_mode == mode_expected, (
+            f"Wrong progress bar mode ({progress_mode}) "
+            f"relative to microscope mode ({mode})"
+        )
+        assert ovr_mode == mode_expected, (
+            f"Wrong progress bar mode ({progress_mode}) "
+            f"relative to microscope mode ({mode})"
+        )
+
+        if value_expected is not None:
+            progress_start = int(self.acquire_bar_controller.view.CurAcq["value"])
+            ovr_start = int(self.acquire_bar_controller.view.OvrAcq["value"])
+            assert (
+                progress_start == value_expected
+            ), "Wrong starting value for progress bar"
             assert ovr_start == value_expected, "Wrong starting value for progress bar"
 
         # Updating progress bar
-        images_received += 1
-        while images_received > 0 and images_received < 6:
-            self.acqbarController.progress_bar(images_received=images_received,
-                                           microscope_state=self.acqbarController.parent_controller.configuration['experiment']['MicroscopeState'],
-                                           mode=mode,
-                                           stop=stop)
-            making_progress = float(self.acqbarController.view.CurAcq['value'])
-            ovr_progress = float(self.acqbarController.view.OvrAcq['value'])
-            if mode != 'projection': # Ignoring projection until setup
+        images_received = 1
+        while images_received < 6:
+            self.acquire_bar_controller.progress_bar(
+                images_received=images_received,
+                microscope_state=self.acquire_bar_controller.parent_controller.configuration[
+                    "experiment"
+                ][
+                    "MicroscopeState"
+                ],
+                mode=mode,
+                stop=stop,
+            )
+            making_progress = float(self.acquire_bar_controller.view.CurAcq["value"])
+            ovr_progress = float(self.acquire_bar_controller.view.OvrAcq["value"])
+            if mode != "projection":  # Ignoring projection until setup
                 assert making_progress > 0, "Progress bar should be moving"
                 assert ovr_progress > 0, "Progress bar should be moving"
-            
-
             images_received += 1
-        
 
         # Stopping progress bar
-        stop = True
-        self.acqbarController.progress_bar(images_received=images_received,
-                                           microscope_state=self.acqbarController.parent_controller.configuration['experiment']['MicroscopeState'],
-                                           mode=mode,
-                                           stop=stop)
+        self.acquire_bar_controller.progress_bar(
+            images_received=images_received,
+            microscope_state=self.acquire_bar_controller.parent_controller.configuration[
+                "experiment"
+            ][
+                "MicroscopeState"
+            ],
+            mode=mode,
+            stop=True,
+        )
 
-        after_stop = float(self.acqbarController.view.CurAcq['value'])
-        after_ovr = float(self.acqbarController.view.OvrAcq['value'])
+        after_stop = float(self.acquire_bar_controller.view.CurAcq["value"])
+        after_ovr = float(self.acquire_bar_controller.view.OvrAcq["value"])
 
         assert after_stop == 0, "Progress Bar did not stop"
         assert after_ovr == 0, "Progress Bar did not stop"
-            
-    @pytest.mark.parametrize("mode,expected_state", [ ('live', 'disabled'), ('z-stack', 'normal'), ('single', 'disabled'), ('alignment', 'disabled'), ('projection', 'normal') ])
+
+    @pytest.mark.parametrize(
+        "mode,expected_state",
+        [
+            ("live", "disabled"),
+            ("z-stack", "normal"),
+            ("single", "disabled"),
+            ("alignment", "disabled"),
+            ("projection", "normal"),
+        ],
+    )
     def test_update_stack_acq(self, mode, expected_state):
+        """Tests the update_stack_acq method of the AcquireBarController class
 
-        stack = self.acqbarController.parent_view.stack_acq_frame.get_widgets()
+        Parameters
+        ----------
+        mode : str
+            Mode of the progress bar
+        expected_state : str
+            Expected state of the progress bar
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        AssertionError
+            If the update_stack_acq method of the
+            AcquireBarController class is not correct
+        """
+
+        stack = self.acquire_bar_controller.parent_view.stack_acq_frame.get_widgets()
 
         # Checking mode and expected state
-        self.acqbarController.update_stack_acq(mode)
+        self.acquire_bar_controller.update_stack_acq(mode)
         for key, widget in stack.items():
-            state = str(widget.widget['state'])
+            state = str(widget.widget["state"])
             assert state == expected_state, f"Widget state not correct for {mode} mode"
 
-        # Switching back to orginal live
-        self.acqbarController.update_stack_acq('live')
+        # Switching back to original live
+        self.acquire_bar_controller.update_stack_acq("live")
         for key, widget in stack.items():
-            state = str(widget.widget['state'])
-            assert state == 'disabled', "Widget state not correct for switching back to live mode"
-            
-    @pytest.mark.parametrize("mode,expected_state", [ ('live', 'disabled'), ('z-stack', 'normal'), ('single', 'normal'), ('alignment', 'disabled'), ('projection', 'normal') ])
+            state = str(widget.widget["state"])
+            assert (
+                state == "disabled"
+            ), "Widget state not correct for switching back to live mode"
+
+    @pytest.mark.parametrize(
+        "mode,expected_state",
+        [
+            ("live", "disabled"),
+            ("z-stack", "normal"),
+            ("single", "normal"),
+            ("alignment", "disabled"),
+            ("projection", "normal"),
+        ],
+    )
     def test_update_stack_time(self, mode, expected_state):
-        
-        stack_time = self.acqbarController.parent_view.stack_timepoint_frame.get_widgets()
-        
-        # Checking mode and expected state
-        self.acqbarController.update_stack_time(mode)
-        for key, widget in stack_time.items():
-            state = str(widget['state'])
-            assert state == expected_state, f"Widget state not correct for {mode} mode"
-            
-        
-        # Switching back to orginal live
-        self.acqbarController.update_stack_time('live')
-        for key, widget in stack_time.items():
-            state = str(widget['state'])
-            assert state == 'disabled', "Widget state not correct for switching back to live mode"
+        """Tests the update_stack_time method of the AcquireBarController class
 
-    @pytest.mark.parametrize("mode", ['live', 'single', 'z-stack', 'projection'])
+        Parameters
+        ----------
+        mode : str
+            Mode of the progress bar
+        expected_state : str
+            Expected state of the progress bar
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        AssertionError
+            If the update_stack_time method of the
+            AcquireBarController class is not correct
+        """
+
+        stack_time = (
+            self.acquire_bar_controller.parent_view.stack_timepoint_frame.get_widgets()
+        )
+
+        # Checking mode and expected state
+        self.acquire_bar_controller.update_stack_time(mode)
+        for key, widget in stack_time.items():
+            state = str(widget["state"])
+            assert state == expected_state, f"Widget state not correct for {mode} mode"
+
+        # Switching back to orginal live
+        self.acquire_bar_controller.update_stack_time("live")
+        for key, widget in stack_time.items():
+            state = str(widget["state"])
+            assert (
+                state == "disabled"
+            ), "Widget state not correct for switching back to live mode"
+
+    @pytest.mark.parametrize("mode", ["live", "single", "z-stack", "projection"])
     def test_get_set_mode(self, mode):
-        
-        self.acqbarController.set_mode(mode)
-        test = self.acqbarController.get_mode()
-        
+        """Tests the get_mode and set_mode methods of the AcquireBarController class
+
+        Parameters
+        ----------
+        mode : str
+            Mode of the progress bar
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        AssertionError
+            If the get_mode and set_mode methods of the
+            AcquireBarController class are not correct
+        """
+        self.acquire_bar_controller.set_mode(mode)
+        test = self.acquire_bar_controller.get_mode()
         assert test == mode, "Mode not set correctly"
-        
-    
+
     def test_set_save(self):
-        
+        """Tests the set_save method of the AcquireBarController class
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        AssertionError
+            If the set_save method of the AcquireBarController class is not correct
+        """
+
         # Assuming save state starts as False
-        self.acqbarController.set_save_option(True)
-        assert self.acqbarController.is_save == True, "Save option not correct"
+        self.acquire_bar_controller.set_save_option(True)
+        assert self.acquire_bar_controller.is_save is True, "Save option not correct"
 
         # Return value to False
-        self.acqbarController.set_save_option(False)
-        assert self.acqbarController.is_save == False, "Save option did not return to original value"
+        self.acquire_bar_controller.set_save_option(False)
+        assert (
+            self.acquire_bar_controller.is_save is False
+        ), "Save option did not return to original value"
 
     def test_stop_acquire(self):
+        """Tests the stop_acquire method of the AcquireBarController class
 
-        # Stopping acquitition
-        self.acqbarController.stop_acquire()
-        assert self.acqbarController.view.acquire_btn['text'] == 'Acquire'
-    
-    @pytest.mark.parametrize("user_mode,expected_mode", [ ('Continuous Scan', 'live'), ('Z-Stack', 'z-stack'), ('Single Acquisition', 'single'), ('Alignment', 'alignment'), ('Projection', 'projection') ])
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        AssertionError
+            If the stop_acquire method of the AcquireBarController class is not correct
+        """
+
+        # Stopping acquisition
+        self.acquire_bar_controller.stop_acquire()
+        assert self.acquire_bar_controller.view.acquire_btn["text"] == "Acquire"
+
+    @pytest.mark.parametrize(
+        "user_mode,expected_mode",
+        [
+            ("Continuous Scan", "live"),
+            ("Z-Stack", "z-stack"),
+            ("Single Acquisition", "single"),
+            ("Alignment", "alignment"),
+            ("Projection", "projection"),
+        ],
+    )
     def test_update_microscope_mode(self, user_mode, expected_mode):
-        
+        """Tests the update_microscope_mode method of the AcquireBarController class
+
+        Parameters
+        ----------
+        user_mode : str
+            Mode of the progress bar
+        expected_mode : str
+            Expected state of the progress bar
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        AssertionError
+            If the update_microscope_mode method of
+            the AcquireBarController class is not correct
+        """
         # Assuming mode starts on live
-        assert self.acqbarController.mode == 'live'
-        
+        assert self.acquire_bar_controller.mode == "live"
+
         # Setting to mode specified by user
-        self.acqbarController.view.pull_down.set(user_mode)
-        
+        self.acquire_bar_controller.view.pull_down.set(user_mode)
+
         # Generate event that calls update microscope mode
-        self.acqbarController.view.pull_down.event_generate('<<ComboboxSelected>>')
+        self.acquire_bar_controller.view.pull_down.event_generate(
+            "<<ComboboxSelected>>"
+        )
 
         # Checking that new mode gets set by function
-        assert self.acqbarController.mode == expected_mode
-        
-        # Resetting to live
-        self.acqbarController.view.pull_down.set('Continuous Scan')
-        self.acqbarController.view.pull_down.event_generate('<<ComboboxSelected>>')
-        assert self.acqbarController.mode == 'live'
-        
-    def test_populate_experiment_values(self):
-        
-        # Calling function to populate values
-        self.acqbarController.populate_experiment_values()
-        
-        # Checking values are what we expect
-        for key, value in self.acqbarController.saving_settings.items():
-            assert self.acqbarController.saving_settings[key] == self.acqbarController.parent_controller.configuration['experiment']['Saving'][key]
-        assert self.acqbarController.saving_settings['date'] == '2022-06-07' # Assuming default value in exp file, can be altered TODO maybe set default to current date
-        assert self.acqbarController.mode == self.acqbarController.parent_controller.configuration['experiment']['MicroscopeState']['image_mode']
+        assert self.acquire_bar_controller.mode == expected_mode
 
-    @pytest.mark.parametrize("text,save,mode,file_types,choice", [ ('Stop', None, 'live', [], None ), ('Acquire', True, 'live', [], None), ('Acquire', False, 'z-stack', [], None), ('Acquire', True, 'z-stack', ['TIFF', 'OME-TIFF', 'BDV'], 'Done'), ('Acquire', True, 'z-stack', ['TIFF', 'OME-TIFF', 'BDV'], 'Cancel')  ])
+        # Resetting to live
+        self.acquire_bar_controller.view.pull_down.set("Continuous Scan")
+        self.acquire_bar_controller.view.pull_down.event_generate(
+            "<<ComboboxSelected>>"
+        )
+        assert self.acquire_bar_controller.mode == "live"
+
+    def test_populate_experiment_values(self):
+        """Tests the populate_experiment_values method of the AcquireBarController class
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        AssertionError
+            If the populate_experiment_values method
+            of the AcquireBarController class is not correct
+        """
+
+        # Calling function to populate values
+        self.acquire_bar_controller.populate_experiment_values()
+
+        # Checking values are what we expect
+        for key, value in self.acquire_bar_controller.saving_settings.items():
+            assert (
+                self.acquire_bar_controller.saving_settings[key]
+                == self.acquire_bar_controller.parent_controller.configuration[
+                    "experiment"
+                ]["Saving"][key]
+            )
+
+        # Assuming default value in exp file,
+        # can be altered TODO maybe set default to current date
+        assert self.acquire_bar_controller.saving_settings["date"] == "2022-06-07"
+        assert (
+            self.acquire_bar_controller.mode
+            == self.acquire_bar_controller.parent_controller.configuration[
+                "experiment"
+            ]["MicroscopeState"]["image_mode"]
+        )
+
+    @pytest.mark.parametrize(
+        "text,save,mode,file_types,choice",
+        [
+            ("Stop", None, "live", [], None),
+            ("Acquire", True, "live", [], None),
+            ("Acquire", False, "z-stack", [], None),
+            ("Acquire", True, "z-stack", ["TIFF", "OME-TIFF", "BDV"], "Done"),
+            ("Acquire", True, "z-stack", ["TIFF", "OME-TIFF", "BDV"], "Cancel"),
+        ],
+    )
     def test_launch_popup_window(self, text, save, mode, file_types, choice):
-        '''
-        This is the largest test for this controller. It will test multiple functions that are all used together
+        """Tests the launch_popup_window method of the AcquireBarController class
+
+        This is the largest test for this controller.
+        It will test multiple functions that are all used together
         and difficult to isolate.
-        
+
         Funcs Tested:
         launch_popup_window
         update_file_type
         launch_acquisition
         update_experiment_values
         acquire_pop.popup.dismiss # This will be double tested in view
-        '''
+
+        Parameters
+        ----------
+        text : str
+            Text of the button that is clicked
+        save : bool
+            Whether or not to save the image
+        mode : str
+            Mode of the progress bar
+        file_types : list
+            List of file types to save as
+        choice : str
+            Choice of the user in the popup window
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        AssertionError
+            If the launch_popup_window method of the
+            AcquireBarController class is not correct
+        """
 
         # Setup Gui for test
-        self.acqbarController.view.acquire_btn.configure(text=text)
-        self.acqbarController.is_save = save
-        self.acqbarController.set_mode(mode)
-        
-        # Test based on setup, launches popup
-        self.acqbarController.view.acquire_btn.invoke()
-        
-        # Checking things are what we expect
-        if text == 'Stop':
-            assert self.acqbarController.view.acquire_btn['text'] == 'Acquire'
-            res = self.acqbarController.parent_controller.pop()
-            assert res == 'stop_acquire'
-            
-        if text == 'Acquire':
-            # First scenario Save is on and in live mode
-            if save == True and mode == 'live':
-                assert self.acqbarController.view.acquire_btn['text'] == 'Stop'
-                res = self.acqbarController.parent_controller.pop()
-                print(res)
-                print(self.acqbarController.parent_controller.pop())
-                assert res == 'acquire'
-            
-            # Second scenario Save is off and mode is not live
-            if save == False and mode != 'live':
-                assert self.acqbarController.view.acquire_btn['text'] == 'Stop'
-                res = self.acqbarController.parent_controller.pop()
-                assert res == 'acquire'
-                
-            # Third and final scenario Save is on and mode is not live
-            if save == True and mode != 'live':
-                from aslm.view.main_window_content.acquire_bar_frame.acquire_popup import AcquirePopUp
-                
-                # Checking if popup created
-                assert isinstance(self.acqbarController.acquire_pop, AcquirePopUp)
-                assert self.acqbarController.acquire_pop.popup.winfo_exists() == 1
+        self.acquire_bar_controller.view.acquire_btn.configure(text=text)
+        self.acquire_bar_controller.is_save = save
+        self.acquire_bar_controller.set_mode(mode)
 
-                
+        # Test based on setup, launches popup
+        self.acquire_bar_controller.view.acquire_btn.invoke()
+
+        # Checking things are what we expect
+        if text == "Stop":
+            assert self.acquire_bar_controller.view.acquire_btn["text"] == "Acquire"
+            res = self.acquire_bar_controller.parent_controller.pop()
+            assert res == "stop_acquire"
+
+        if text == "Acquire":
+            # First scenario Save is on and in live mode
+            if save is True and mode == "live":
+                assert self.acquire_bar_controller.view.acquire_btn["text"] == "Stop"
+                res = self.acquire_bar_controller.parent_controller.pop()
+                print(res)
+                print(self.acquire_bar_controller.parent_controller.pop())
+                assert res == "acquire"
+
+            # Second scenario Save is off and mode is not live
+            if save is False and mode != "live":
+                assert self.acquire_bar_controller.view.acquire_btn["text"] == "Stop"
+                res = self.acquire_bar_controller.parent_controller.pop()
+                assert res == "acquire"
+
+            # Third and final scenario Save is on and mode is not live
+            if save is True and mode != "live":
+
+                # Checking if popup created
+                assert isinstance(self.acquire_bar_controller.acquire_pop, AcquirePopUp)
+                assert self.acquire_bar_controller.acquire_pop.popup.winfo_exists() == 1
+
                 # Testing update_file_type if list exists
-                widgets = self.acqbarController.acquire_pop.get_widgets()
+                widgets = self.acquire_bar_controller.acquire_pop.get_widgets()
                 if len(file_types) > 0:
                     for file in file_types:
-                        widgets['file_type'].set(file)
-                        assert self.acqbarController.saving_settings['file_type'] == file
-                    # Resetting file type back to orginal 
-                    widgets['file_type'].set('TIFF')
-                    assert self.acqbarController.saving_settings['file_type'] == 'TIFF'
-                    
+                        widgets["file_type"].set(file)
+                        assert (
+                            self.acquire_bar_controller.saving_settings["file_type"]
+                            == file
+                        )
+                    # Resetting file type back to orginal
+                    widgets["file_type"].set("TIFF")
+                    assert (
+                        self.acquire_bar_controller.saving_settings["file_type"]
+                        == "TIFF"
+                    )
+
                 # Check that loop thru saving settings is correct
-                for k, v in self.acqbarController.saving_settings.items():
+                for k, v in self.acquire_bar_controller.saving_settings.items():
                     if widgets.get(k, None):
                         value = widgets[k].get().strip()
                         assert value == v
-                    
-                # Grabbing buttons to test
-                buttons = self.acqbarController.acquire_pop.get_buttons()
 
-                if choice == 'Cancel':
+                # Grabbing buttons to test
+                buttons = self.acquire_bar_controller.acquire_pop.get_buttons()
+
+                if choice == "Cancel":
                     # Testing cancel button
 
-                    buttons['Cancel'].invoke() # Call to dismiss popup
+                    buttons["Cancel"].invoke()  # Call to dismiss popup
                     # Check toplevel gone
-                    assert self.acqbarController.acquire_pop.popup.winfo_exists() == 0
+                    assert (
+                        self.acquire_bar_controller.acquire_pop.popup.winfo_exists()
+                        == 0
+                    )
 
-                elif choice == 'Done':
+                elif choice == "Done":
                     # Testing done button
 
                     # Update experiment values test
-                    # Changing popup vals to test update experiment values inside launch acquisition
-                    widgets['user'].set("John")
-                    widgets['tissue'].set("Heart")
-                    widgets['celltype'].set("34T")
-                    widgets['label'].set("BCB")
-                    widgets['solvent'].set("uDISCO")
-                    widgets['file_type'].set("OME-TIFF")
-                    widgets['misc'].set("This is a test!")
+                    # Changing popup vals to test update
+                    # experiment values inside launch acquisition
+                    widgets["user"].set("John")
+                    widgets["tissue"].set("Heart")
+                    widgets["celltype"].set("34T")
+                    widgets["label"].set("BCB")
+                    widgets["solvent"].set("uDISCO")
+                    widgets["file_type"].set("OME-TIFF")
+                    widgets["misc"].set("This is a test!")
 
                     # Launch acquisition start/test
-                    buttons['Done'].invoke() # Call to launch acquisition
+                    buttons["Done"].invoke()  # Call to launch acquisition
 
                     # Check if update experiment values works correctly
-                    pop_vals = self.acqbarController.acquire_pop.get_variables()
-                    for k, v in self.acqbarController.saving_settings.items():
+                    pop_vals = self.acquire_bar_controller.acquire_pop.get_variables()
+                    for k, v in self.acquire_bar_controller.saving_settings.items():
                         if pop_vals.get(k, None):
                             value = pop_vals[k].strip()
-                            assert value == v             
+                            assert value == v
 
-                    # Check command sent to controller and if acquire button changed to Stop
-                    res = self.acqbarController.parent_controller.pop()
-                    assert res == 'acquire_and_save'
-                    assert self.acqbarController.view.acquire_btn['text'] == 'Stop'
-                    assert self.acqbarController.acquire_pop.popup.winfo_exists() == 0
+                    # Check command sent to controller
+                    # and if acquire button changed to Stop
+                    res = self.acquire_bar_controller.parent_controller.pop()
+                    assert res == "acquire_and_save"
+                    assert (
+                        self.acquire_bar_controller.view.acquire_btn["text"] == "Stop"
+                    )
+                    assert (
+                        self.acquire_bar_controller.acquire_pop.popup.winfo_exists()
+                        == 0
+                    )

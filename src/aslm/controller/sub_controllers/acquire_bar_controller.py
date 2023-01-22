@@ -112,7 +112,7 @@ class AcquireBarController(GUIController):
         if microscope_state["is_multiposition"] is False:
             number_of_positions = 1
         else:
-            number_of_positions = len(microscope_state["stage_positions"])
+            number_of_positions = len(self.parent_controller.configuration["experiment"]["MultiPositions"]["stage_positions"])
 
         if mode == "single":
             number_of_slices = 1

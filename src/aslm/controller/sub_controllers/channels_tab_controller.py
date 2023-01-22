@@ -612,6 +612,7 @@ class ChannelsTabController(GUIController):
         >>> self.toggle_multiposition()
         """
         self.is_multiposition = self.is_multiposition_val.get()
+        self.microscope_state_dict['is_multiposition'] = self.is_multiposition
         self.update_timepoint_setting()
         self.show_verbose_info("Multi-position:", self.is_multiposition)
 

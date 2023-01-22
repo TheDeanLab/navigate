@@ -562,6 +562,9 @@ class Controller:
                 message="There are some missing/wrong settings! Cannot start acquisition!",
             )
             return False
+        # update multi-positions
+        positions = self.multiposition_tab_controller.get_positions()
+        update_config_dict(self.manager, self.configuration["experiment"]["MultiPositions"], "stage_positions", positions)
 
         self.set_mode_of_sub(self.acquire_bar_controller.mode)
         self.update_buffer()

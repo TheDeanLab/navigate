@@ -72,7 +72,7 @@ class TiffDataSource(DataSource):
         self.__double_f = self.file_name.endswith("tiff")
 
         # Keep track of z, time, channel indices
-        self._current_frame = 0
+        # self._current_frame = 0
         self._current_time = 0
         self._current_position = 0
 

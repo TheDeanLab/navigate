@@ -170,9 +170,9 @@ class ImageWriter:
 
         for idx in frame_ids:
             # Identify channel, z, time, and position indices
-            c_idx, z_idx, t_idx, p_idx = self.data_source._cztp_indices(idx)
+            c_idx, z_idx, t_idx, p_idx = self.data_source._cztp_indices(self.data_source._current_frame, self.data_source.metadata.per_stack)
 
-            if c_idx == 0 and z_idx == 0 or idx == 0:
+            if c_idx == 0 and z_idx == 0:
                 # Initialize MIP array with same number of channels as the data
                 self.mip = np.ndarray(
                     (

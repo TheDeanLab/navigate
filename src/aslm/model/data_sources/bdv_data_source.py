@@ -55,7 +55,7 @@ class BigDataViewerDataSource(DataSource):
         file_name = ".".join(file_name.split(".")[:-1]) + ".hdf"
         super().__init__(file_name, mode)
 
-        self._current_frame = 0
+        # self._current_frame = 0
         self.metadata = BigDataViewerMetadata()
 
     @property

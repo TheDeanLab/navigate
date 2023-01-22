@@ -94,6 +94,7 @@ class DataSource:
         )
         self.positions = 1
         self.mode = mode
+        self._current_frame = 0
 
     @property
     def mode(self) -> str:

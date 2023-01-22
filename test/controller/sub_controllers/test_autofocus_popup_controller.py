@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -30,111 +31,220 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
+# Standard library imports
+
+# Third party imports
+import pytest
+import numpy as np
+
+# Local application imports
 from aslm.controller.sub_controllers import AutofocusPopupController
 from aslm.view.menus.autofocus_setting_popup import AutofocusPopup
-import pytest
 
-class TestAutofocusPopupController():
+
+class TestAutofocusPopupController:
+    """Class for testing autofocus popup controller
+
+    Attributes
+    ----------
+    af_controller : AutofocusPopupController
+        Controller for autofocus popup
+
+    Methods
+    -------
+    test_init()
+        Tests that the controller is initialized correctly
+    test_attr()
+        Tests that the attributes are initialized correctly
+    test_populate_experiment_values()
+        Tests that the values are populated correctly
+    test_update_experiment_values()
+        Tests that the values are updated correctly
+    test_start_autofocus()
+        Tests that the start autofocus function works correctly
+    test_display_plot()
+        Tests that the display plot function works correctly
+    """
 
     @pytest.fixture(autouse=True)
     def setup_class(self, dummy_controller):
-        c = dummy_controller
-        v = dummy_controller.view
-        afpop = AutofocusPopup(v)
+        """Setup for testing autofocus popup controller
 
-        self.af_controller = AutofocusPopupController(afpop, c)
+        Parameters
+        ----------
+        dummy_controller : DummyController
+            Dummy controller for testing
 
+        Returns
+        -------
+        None
+        """
+        autofocus_popup = AutofocusPopup(dummy_controller.view)
+        self.autofocus_controller = AutofocusPopupController(
+            autofocus_popup, dummy_controller
+        )
 
     def test_init(self):
+        """Tests that the controller is initialized correctly
 
-        assert isinstance(self.af_controller, AutofocusPopupController)
-        assert self.af_controller.view.popup.winfo_exists() == 1
+        Parameters
+        ----------
+        None
 
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        AssertionError
+            If the controller is not initialized correctly
+        """
+        assert isinstance(self.autofocus_controller, AutofocusPopupController)
+        assert self.autofocus_controller.view.popup.winfo_exists() == 1
 
     def test_attr(self):
+        """Tests that the attributes are initialized correctly
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        AssertionError
+            If the attributes are not initialized correctly
+        """
 
         # Listing off attributes to check existence
-        attrs = [ 'autofocus_fig', 'autofocus_coarse', 'autofocus_fine', 'widgets', 'setting_dict' ]
+        attrs = [
+            "autofocus_fig",
+            "autofocus_coarse",
+            "autofocus_fine",
+            "widgets",
+            "setting_dict",
+        ]
 
         for attr in attrs:
-            assert hasattr(self.af_controller, attr)
-
+            assert hasattr(self.autofocus_controller, attr)
 
     def test_populate_experiment_values(self):
-         
-         # Because this function runs inside of init, we can check that things are correct
-         for k in self.af_controller.widgets:
-            assert self.af_controller.widgets[k].get() == str(self.af_controller.setting_dict[k]) # Some values are ints but Tkinter only uses strings
+        """Tests that the values are populated correctly
 
-    
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        AssertionError
+            If the values are not populated correctly
+        """
+        for k in self.autofocus_controller.widgets:
+            assert self.autofocus_controller.widgets[k].get() == str(
+                self.autofocus_controller.setting_dict[k]
+            )
+            # Some values are ints but Tkinter only uses strings
+
     def test_update_experiment_values(self):
-        
+        """Tests that the values are updated correctly
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        AssertionError
+            If the values are not updated correctly
+        """
         # Changing values
-        self.af_controller.widgets['coarse_range'].set(200)
-        self.af_controller.widgets['coarse_step_size'].set(30)
-        self.af_controller.view.stage_vars[0].set(False)
-        self.af_controller.widgets['fine_range'].set(25)
-        self.af_controller.widgets['fine_step_size'].set(2)
-        self.af_controller.view.stage_vars[1].set(False)
+        self.autofocus_controller.widgets["coarse_range"].set(200)
+        self.autofocus_controller.widgets["coarse_step_size"].set(30)
+        self.autofocus_controller.view.stage_vars[0].set(False)
+        self.autofocus_controller.widgets["fine_range"].set(25)
+        self.autofocus_controller.widgets["fine_step_size"].set(2)
+        self.autofocus_controller.view.stage_vars[1].set(False)
 
         # Updating file
-        self.af_controller.update_experiment_values()
+        self.autofocus_controller.update_experiment_values()
 
         # Checking values match
-        for k in self.af_controller.widgets:
-            assert self.af_controller.widgets[k].get() == str(self.af_controller.setting_dict[k])
-        assert self.af_controller.view.stage_vars[0].get() == self.af_controller.setting_dict['coarse_selected']
-        assert self.af_controller.view.stage_vars[1].get() == self.af_controller.setting_dict['fine_selected']
+        for k in self.autofocus_controller.widgets:
+            assert self.autofocus_controller.widgets[k].get() == str(
+                self.autofocus_controller.setting_dict[k]
+            )
 
-    
+        assert (
+            self.autofocus_controller.view.stage_vars[0].get()
+            == self.autofocus_controller.setting_dict["coarse_selected"]
+        )
+
+        assert (
+            self.autofocus_controller.view.stage_vars[1].get()
+            == self.autofocus_controller.setting_dict["fine_selected"]
+        )
+
     def test_start_autofocus(self):
+        """Tests that the start autofocus function works correctly
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        AssertionError
+            If the start autofocus function does not work correctly
+        """
 
         # Calling function
-        self.af_controller.start_autofocus()
+        self.autofocus_controller.start_autofocus()
 
         # Checking message sent
-        res = self.af_controller.parent_controller.pop()
-        assert res == 'autofocus'
-
+        res = self.autofocus_controller.parent_controller.pop()
+        assert res == "autofocus"
 
     def test_display_plot(self):
-        
-        # Make this robust by sending data and then checking each plot is plotting correct data low priority TODO
-        
-        # Data pulled from Autofocus run on default Synthetic Hardware probably a better way to do this
-        data = [[69750.0, 0.000551137577494905],
-                [69800.0, 0.0005513108908586421],
-                [69850.0, 0.0005511440977099466],
-                [69900.0, 0.0005515991989334315],
-                [69950.0, 0.0005503980282526086],
-                [70000.0, 0.0005508038799721153],
-                [70050.0, 0.0005510748168564522],
-                [70100.0, 0.0005515166792365542],
-                [70150.0, 0.0005511039527703917],
-                [70200.0, 0.000550851212273853],
-                [70250.0, 0.0005510488919155696],
-                [69875.0, 0.0005514429463643719],
-                [69880.0, 0.0005517772978224409],
-                [69885.0, 0.0005509750970890169],
-                [69890.0, 0.0005516391174063529],
-                [69895.0, 0.0005519924978453183],
-                [69900.0, 0.0005509559046771523],
-                [69905.0, 0.0005523494088203089],
-                [69910.0, 0.0005521193774931229],
-                [69915.0, 0.0005515962972751562],
-                [69920.0, 0.0005516672258927012],
-                [69925.0, 0.0005512487762525105]]
+        """Tests that the display plot function works correctly
 
-        self.af_controller.display_plot(data)
+        Todo: Retrieve data from axessubplot instance and
+        check that it is correct
 
-        coarse_data = self.af_controller.coarse_plot.get_data()
-        fine_data = self.af_controller.fine_plot.get_data()
-        
-        # print(coarse_data[0])
-        # print(coarse_data[1])
-        # print(type(coarse_data))
-        # print(fine_data)
-        
-        
+        Parameters
+        ----------
+        None
 
-        
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        AssertionError
+            If the display plot function does not work correctly
+        """
+        # Make this robust by sending data and then
+        # checking each plot is plotting correct data low priority
+
+        x_data = np.linspace(start=69750.0, stop=70250.0, num=101)
+        y_data = np.random.rand(101)
+        data = [x_data, y_data]
+        self.autofocus_controller.display_plot(data)
+        pass

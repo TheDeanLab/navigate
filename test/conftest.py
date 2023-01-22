@@ -30,43 +30,65 @@
 # POSSIBILITY OF SUCH DAMAGE.
 # """
 
-import pytest
+# Standard Library Imports
 import tkinter as tk
 
+# Third Party Imports
+import pytest
+
+# Local Imports
 
 
 @pytest.fixture(scope="package")
 def dummy_model():
+    """Dummy model for testing.
+
+    Returns
+    -------
+    DummyModel
+        Dummy model for testing.
+    """
     from aslm.model.dummy import DummyModel
 
     model = DummyModel()
-
     return model
 
-@pytest.fixture(scope='session')
+
+@pytest.fixture(scope="session")
 def dummy_view():
-    '''
-    Creates a dummy view for the controller tests. Will be deleted post test session
-    '''
+    """Dummy view for testing.
+
+    Creates a dummy view for the controller tests.
+     Will be deleted post test session
+
+    Returns:
+        tkinter.Tk: Dummy view
+    """
     from aslm.view.main_application_window import MainApp
-    
+
     root = tk.Tk()
     view = MainApp(root)
     root.update()
     yield view
     root.destroy()
-    
+
+
 @pytest.fixture(scope="package")
 def dummy_controller(dummy_view):
-    '''
-    Fixture that will mock controller functions called by sub controllers
-    '''
-    from aslm.model.dummy import DummyController
-    
-    view = dummy_view
-    controller = DummyController(view)
+    """Dummy controller for testing.
 
+    Fixture that will mock controller functions called by sub controllers
+
+    Returns
+    -------
+    DummyController
+        Dummy controller for testing.
+    """
+    from aslm.model.dummy import DummyController
+
+    controller = DummyController(dummy_view)
     return controller
+
 
 # @pytest.fixture(scope="package")
 # def root():
@@ -99,7 +121,8 @@ def dummy_controller(dummy_view):
 #     )
 #     configuration_path = Path.joinpath(configuration_directory, "configuration.yaml")
 #     experiment_path = Path.joinpath(configuration_directory, "experiment.yml")
-#     waveform_constants_path = Path.joinpath(configuration_directory, "waveform_constants.yml")
+#     waveform_constants_path = Path.joinpath(configuration_directory,
+#                                       "waveform_constants.yml")
 #     rest_api_path = Path.joinpath(configuration_directory, "rest_api_config.yml")
 
 #     controller = Controller(

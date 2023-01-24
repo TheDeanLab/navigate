@@ -361,6 +361,7 @@ class Model:
                 "is_save"
             ]
             self.prepare_acquisition()
+
             # load features
             self.signal_container, self.data_container = load_features(
                 self, self.acquisition_modes_feature_setting[self.imaging_mode]
@@ -654,9 +655,6 @@ class Model:
         """Prepare the acquisition.
 
         This function is called when user starts the acquisition.
-        Sets flags, calculates all of the waveforms.
-        Sets the Camera Sensor Mode, initializes the data buffer, starts camera,
-        and opens shutters
         Sets flags.
         Calculates all of the waveforms.
         Sets the Camera Sensor Mode

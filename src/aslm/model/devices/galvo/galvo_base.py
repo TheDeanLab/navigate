@@ -36,7 +36,7 @@ import logging
 # Third Party Imports
 
 # Local Imports
-from aslm.model.waveforms import sawtooth
+from aslm.model.waveforms import sawtooth, sine_wave
 
 # # Logger Setup
 p = __name__.split(".")[1]
@@ -70,6 +70,11 @@ class GalvoBase:
         self.remote_focus_ramp_falling = configuration["configuration"]["microscopes"][
             microscope_name
         ]["remote_focus_device"]["ramp_falling_percent"]
+
+        # Identify galvo waveform. Sine, Sawtooth, ...
+        self.galvo_waveform = configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["galvo"][galvo_id]["waveform"]
 
         self.samples = int(self.sample_rate * self.sweep_time)
 
@@ -123,14 +128,27 @@ class GalvoBase:
                 )
 
                 # Calculate the Waveforms
-                self.waveform_dict[channel_key] = sawtooth(
-                    sample_rate=self.sample_rate,
-                    sweep_time=self.sweep_time,
-                    frequency=galvo_frequency,
-                    amplitude=galvo_amplitude,
-                    offset=galvo_offset,
-                    phase=(self.camera_delay_percent / 100) * exposure_time,
-                )
+                if self.galvo_waveform == "sawtooth":
+                    self.waveform_dict[channel_key] = sawtooth(
+                        sample_rate=self.sample_rate,
+                        sweep_time=self.sweep_time,
+                        frequency=galvo_frequency,
+                        amplitude=galvo_amplitude,
+                        offset=galvo_offset,
+                        phase=(self.camera_delay_percent / 100) * exposure_time,
+                    )
+                elif self.galvo_waveform == "sine":
+                    self.waveform_dict[channel_key] = sine_wave(
+                        sample_rate=self.sample_rate,
+                        sweep_time=self.sweep_time,
+                        frequency=galvo_frequency,
+                        amplitude=galvo_amplitude,
+                        offset=galvo_offset,
+                        phase=self.device_config["phase"]
+                    )
+                else:
+                    print("Mistakes were made. "
+                          "Unknown waveform specified in configuration file.")
                 self.waveform_dict[channel_key][
                     self.waveform_dict[channel_key] > self.galvo_max_voltage
                 ] = self.galvo_max_voltage

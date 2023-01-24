@@ -303,7 +303,7 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
 
         # Proposed is either a Decimal, '-', '.', or '-.' need one final check for '-'
         # and '.'
-        if proposed in "-.":
+        if proposed in "-." or proposed == "":
             return True
 
         # Proposed value is a Decimal, so convert and check further
@@ -337,16 +337,24 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
             value = Decimal(value)
         except InvalidOperation:
             self.error.set("Invalid number string: {}".format(value))
+            # if len(self.undo_history) > 0:
+            #     self.set(self.undo_history[0])
             return False
 
         # Checking if greater than minimum
         if value < int(min_val):
             self.error.set("Value is too low (min {})".format(min_val))
+            # if len(self.undo_history) > 0:
+            #     self.set(self.undo_history[0])
+                
             valid = False
 
         # Checking if less than max
         if value > int(max_val):
             self.error.set("Value is too high (max {})".format(max_val))
+            # if len(self.undo_history) > 0:
+            #     self.set(self.undo_history[0])
+            valid = False
 
         # If input is valid on focusout add to history of widget
         if valid:
@@ -530,7 +538,7 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
 
         # Proposed is either a Decimal, '-', '.', or '-.' need one final check for '-'
         # and '.'
-        if proposed == "-" or proposed == ".":
+        if proposed == "-" or proposed == "." or proposed == "":
             return True
 
         # Proposed value is a Decimal, so convert and check further

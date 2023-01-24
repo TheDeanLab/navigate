@@ -36,6 +36,7 @@ from functools import reduce
 
 # Third Party Imports
 import numpy as np
+import tkinter as tk
 
 # Local Imports
 from aslm.controller.sub_controllers.widget_functions import validate_wrapper
@@ -294,7 +295,10 @@ class ChannelsTabController(GUIController):
             self.stack_acq_vals["abs_z_start"].set(0)
             self.stack_acq_vals["abs_z_end"].set(0)
             return
-
+        except tk._tkinter.TclError as e:
+            logger.error(f"Tcl Error caught: trying to set position and {e}")
+            return
+        
         # if step_size < 0.001:
         #     step_size = 0.001
         #     self.stack_acq_vals['step_size'].set(step_size)
@@ -502,6 +506,12 @@ class ChannelsTabController(GUIController):
         except (KeyError, AttributeError):
             self.timepoint_vals["experiment_duration"].set("")
             self.timepoint_vals["stack_acq_time"].set("")
+            return
+        except tk._tkinter.TclError as e:
+            logger.error(f"Tcl Error caught: trying to set position and {e}")
+            return
+        except ValueError as e:
+            logger.error(f"{e} similar to TclError")
             return
 
         perStack = self.stack_acq_vals["cycling"].get() == "Per Stack"

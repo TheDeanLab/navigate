@@ -32,6 +32,7 @@
 from aslm.controller.sub_controllers.widget_functions import validate_wrapper
 from aslm.controller.sub_controllers.gui_controller import GUIController
 import logging
+import tkinter as tk
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -244,7 +245,11 @@ class ChannelSettingController(GUIController):
             if self.in_initialization:
                 return
 
-            if channel_vals[widget_name].get() is None:
+            try:
+                if channel_vals[widget_name].get() is None:
+                    return
+            except tk._tkinter.TclError as e:
+                logger.error(f"Tcl Error caught: trying to set position and {e}")
                 return
 
             channel_key = prefix + str(channel_id + 1)

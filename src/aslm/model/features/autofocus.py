@@ -359,9 +359,6 @@ class Autofocus:
         >>> autofocus = Autofocus()
         >>> autofocus.pre_func_data()
         """
-        # Update the stage controller
-        self.model.event_queue.put(("update_stage", self.model.get_stage_position()))
-
         # Initialize the autofocus data
         self.max_entropy = 0
         self.f_frame_id = (
@@ -468,9 +465,17 @@ class Autofocus:
         # Update the configuration with the new focus position
         self.model.configuration["experiment"]["StageParameters"]["f"] = self.focus_pos
 
-        # TODO How to tell the controller to update the view from the model?
         # Tell the controller to update the view
-        self.model.event_queue.put(("update_stage", self.model.get_stage_position()))
+        stage_position = dict(
+            map(
+                lambda axis: (
+                    f"{axis}_abs",
+                    self.model.configuration["experiment"]["StageParameters"][axis],
+                ),
+                ["x", "y", "z", "f", "theta"],
+            )
+        )
+        self.model.event_queue.put(("update_stage", stage_position))
 
         # Log the new focus position
         self.model.logger.info("***********final focus: %s" % self.focus_pos)

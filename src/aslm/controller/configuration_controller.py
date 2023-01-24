@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -28,7 +29,7 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-#
+
 
 # Standard Library Imports
 import logging
@@ -43,6 +44,29 @@ logger = logging.getLogger(p)
 
 
 class ConfigurationController:
+    """Configuration Controller
+
+    This class is used to get the configuration of the microscope.
+
+    Parameters
+    ----------
+    configuration : dict
+        The configuration dictionary.
+    microscope_name : str
+        The name of the microscope.
+    microscope_config : dict
+        The configuration of the microscope.
+
+    Methods
+    -------
+    change_microscope()
+        Get the new microscope configuration dict according to the name.
+    get_microscope_configuration_dict()
+        Return microscope configuration dict.
+    get_stage_position_limits(suffix)
+        Return the position limits of the stage.
+    """
+
     def __init__(self, configuration):
         self.configuration = configuration
         self.microscope_name = None
@@ -51,7 +75,7 @@ class ConfigurationController:
         self.change_microscope()
 
     def change_microscope(self) -> bool:
-        r"""Get the new microscope configuration dict according to the name
+        """Get the new microscope configuration dict according to the name
 
         Returns
         -------
@@ -74,7 +98,7 @@ class ConfigurationController:
         return True
 
     def get_microscope_configuration_dict(self):
-        r"""Return microscope configuration dict
+        """Return microscope configuration dictionary
 
         Returns
         -------
@@ -84,7 +108,10 @@ class ConfigurationController:
 
     @property
     def channels_info(self):
-        r"""Populate the channel combobox with the channels that are available in the configuration
+        """Return the channels info
+
+        Populate the channel combobox with the channels
+        that are available in the configuration
 
         Returns
         -------
@@ -106,7 +133,10 @@ class ConfigurationController:
 
     @property
     def lasers_info(self):
-        r"""Populate the laser combobox with the lasers that are available in the configuration
+        """Return the lasers info
+
+        Populate the laser combobox with the lasers
+        that are available in the configuration
 
         Returns
         -------
@@ -123,7 +153,7 @@ class ConfigurationController:
 
     @property
     def camera_config_dict(self):
-        r"""Get camera configuration dict
+        """Get camera configuration dict
 
         Returns
         -------
@@ -138,7 +168,7 @@ class ConfigurationController:
 
     @property
     def camera_pixels(self):
-        r"""Get default pixel values from camera
+        """Get default pixel values from camera
 
         Returns
         -------
@@ -157,7 +187,7 @@ class ConfigurationController:
 
     @property
     def stage_default_position(self):
-        r"""Get current position of the stage
+        """Get current position of the stage
 
         Returns
         -------
@@ -179,7 +209,7 @@ class ConfigurationController:
 
     @property
     def stage_step(self):
-        r"""Get the step size of the stage
+        """Get the step size of the stage
 
         Returns
         -------
@@ -200,7 +230,7 @@ class ConfigurationController:
         return steps
 
     def get_stage_position_limits(self, suffix):
-        r"""Return the position limits of the stage
+        """Return the position limits of the stage
 
         Parameters
         ----------
@@ -210,7 +240,8 @@ class ConfigurationController:
         Returns
         -------
         position_limits : dict
-            Depending on suffix, min or max stage limits, e.g. {'x': 2000, 'y': 2000, 'z': 2000, 'theta': 0, 'f': 2000}.
+            Depending on suffix, min or max stage limits, e.g.
+            {'x': 2000, 'y': 2000, 'z': 2000, 'theta': 0, 'f': 2000}.
 
         """
         axis = ["x", "y", "z", "theta", "f"]
@@ -226,7 +257,7 @@ class ConfigurationController:
 
     @property
     def remote_focus_dict(self):
-        r"""Return delay_percent, pulse_percent.
+        """Return delay_percent, pulse_percent.
 
         Returns
         -------
@@ -240,6 +271,13 @@ class ConfigurationController:
 
     @property
     def galvo_parameter_dict(self):
+        """Return galvo parameter dict.
+
+        Returns
+        -------
+        galvo_parameter_dict : dict
+            Dictionary with the galvo parameters.
+        """
         if self.microscope_config is not None:
             # Inject names into unnammed galvos
             for i, galvo in enumerate(self.microscope_config["galvo"]):
@@ -250,24 +288,52 @@ class ConfigurationController:
 
     @property
     def daq_sample_rate(self):
+        """Return daq sample rate.
+
+        Returns
+        -------
+        daq_sample_rate : float
+            Sample rate of the daq.
+        """
         if self.microscope_config is not None:
             return self.microscope_config["daq"]["sample_rate"]
         return 100000
 
     @property
     def filter_wheel_setting_dict(self):
+        """Return filter wheel setting dict.
+
+        Returns
+        -------
+        filter_wheel_setting_dict : dict
+            Dictionary with the filter wheel settings.
+        """
         if self.microscope_config is not None:
             return self.microscope_config["filter_wheel"]
         return None
 
     @property
     def stage_setting_dict(self):
+        """Return stage setting dict.
+
+        Returns
+        -------
+        stage_setting_dict : dict
+            Dictionary with the stage settings.
+        """
         if self.microscope_config is not None:
             return self.microscope_config["stage"]
         return None
 
     @property
     def number_of_channels(self):
+        """Return number of channels.
+
+        Returns
+        -------
+        number_of_channels : int
+            Number of channels.
+        """
         if self.microscope_config is not None:
             return self.configuration["configuration"]["gui"]["channels"]["count"]
         return 5

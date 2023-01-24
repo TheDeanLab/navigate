@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -87,7 +87,7 @@ class Autofocus:
         }
 
     def run(self, *args):
-        r"""Run the Autofocusing Routine
+        """Run the Autofocusing Routine
 
         Parameters
         ----------
@@ -100,7 +100,8 @@ class Autofocus:
         frame_num = self.get_autofocus_frame_num()
         if frame_num < 1:
             return
-        self.model.prepare_acquisition()  # Opens correct shutter and puts all signals to false
+        self.model.prepare_acquisition()  # Opens correct shutter and puts all signals
+        # to false
         self.model.active_microscope.prepare_next_channel()
 
         # load Autofocus
@@ -124,7 +125,7 @@ class Autofocus:
         self.model.data_thread.start()
 
     def get_autofocus_frame_num(self):
-        r"""Calculate how many frames are needed to get the best focus position."""
+        """Calculate how many frames are needed to get the best focus position."""
         settings = self.model.configuration["experiment"]["AutoFocusParameters"]
         frames = 0
         if settings["coarse_selected"]:
@@ -137,7 +138,7 @@ class Autofocus:
 
     @staticmethod
     def get_steps(ranges, step_size):
-        r"""Calculate number of steps for autofocusing routine.
+        """Calculate number of steps for autofocusing routine.
 
         Parameters
         ----------
@@ -183,7 +184,8 @@ class Autofocus:
         if self.signal_id < self.coarse_steps:
             self.init_pos += self.coarse_step_size
             self.model.move_stage({"f_abs": self.init_pos}, wait_until_done=True)
-            # print('put to queue:', (self.model.frame_id, self.coarse_steps - self.signal_id, self.init_pos))
+            # print('put to queue:', (self.model.frame_id, self.coarse_steps -
+            # self.signal_id, self.init_pos))
             self.autofocus_frame_queue.put(
                 (self.model.frame_id, self.coarse_steps - self.signal_id, self.init_pos)
             )
@@ -239,23 +241,26 @@ class Autofocus:
                     ) = self.autofocus_frame_queue.get_nowait()
                 if self.f_frame_id not in frame_ids:
                     break
-            except:
+            except Exception:
                 break
-            # entropy = self.model.analysis.normalized_dct_shannon_entropy(self.model.data_buffer[self.f_frame_id], 3)
+            # entropy = self.model.analysis.normalized_dct_shannon_entropy(
+            # self.model.data_buffer[self.f_frame_id], 3)
             entropy = fast_normalized_dct_shannon_entropy(
                 self.model.data_buffer[self.f_frame_id], 3
             )
-            # entropy = self.model.analysis.image_intensity(self.model.data_buffer[self.f_frame_id], 3)
+            # entropy = self.model.analysis.image_intensity(
+            # self.model.data_buffer[self.f_frame_id], 3)
 
             self.model.logger.debug(
                 f"Appending plot data for frame {self.f_frame_id} focus: {self.f_pos}, "
                 f"entropy: {entropy[0]}"
             )
             self.plot_data.append([self.f_pos, entropy[0]])
-            # Need to initialize entropy above for the first iteration of the autofocus routine.
-            # Need to initialize entropy_vector above for the first iteration of the autofocus routine.
-            # Then need to append each measurement to the entropy_vector.  First column will be the focus position,
-            # second column would be the DCT entropy value.
+            # Need to initialize entropy above for the first iteration of the autofocus
+            # routine. Need to initialize entropy_vector above for the first iteration
+            # of the autofocus routine. Then need to append each measurement to the
+            # entropy_vector.  First column will be the focus position, second column
+            # would be the DCT entropy value.
             #
             if entropy > self.max_entropy:
                 self.max_entropy = entropy
@@ -267,7 +272,8 @@ class Autofocus:
             if self.frame_num == 1:
                 self.frame_num = 10  # any value but not 1
                 self.model.logger.info(
-                    f"***********max shannon entropy: {self.max_entropy}, {self.focus_pos}"
+                    f"***********max shannon entropy: {self.max_entropy}, "
+                    f"{self.focus_pos}"
                 )
                 # find out the focus
                 self.autofocus_pos_queue.put(self.focus_pos)

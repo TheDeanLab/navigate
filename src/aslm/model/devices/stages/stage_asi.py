@@ -172,7 +172,7 @@ class ASIStage(StageBase):
         try:
             self.tiger_controller.disconnect_from_serial()
             logger.debug("ASI stage connection closed")
-        except BaseException as e:
+        except (AttributeError, BaseException) as e:
             print("Error while disconnecting the ASI stage")
             logger.exception(e)
             raise

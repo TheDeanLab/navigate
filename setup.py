@@ -9,21 +9,20 @@ with open(os.path.join(HERE, "src", "aslm", "_version.py")) as f:
     if match:
         VERSION = match.groups()[0]
 
-with open('requirements.txt', 'r') as fp:
+with open("requirements.txt", "r") as fp:
     install_requires = list(fp.read().splitlines())
 
 print(VERSION)
 
 setup(
-     name='aslm',
-     version=VERSION,
-     package_dir={"": "src"},
-     entry_points={
-         'console_scripts': [
-             'aslm = aslm.main:main',
-         ]
-     },
-     include_package_data=True,
-     install_requires=install_requires
- ) 
-
+    name="aslm",
+    version=VERSION,
+    package_dir={"": "src"},
+    entry_points={
+        "console_scripts": [
+            "aslm = aslm.main:main",
+        ]
+    },
+    include_package_data=True,
+    install_requires=install_requires,
+)

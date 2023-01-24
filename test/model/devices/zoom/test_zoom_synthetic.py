@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -41,21 +41,27 @@ from aslm.model.dummy import DummyModel
 
 
 class TestZoomSynthetic(unittest.TestCase):
-    r"""Unit Test for SyntheticZoom Class"""
+    """Unit Test for SyntheticZoom Class"""
 
     dummy_model = DummyModel()
-    microscope_name = 'Mesoscale'
+    microscope_name = "Mesoscale"
     zoom_class = SyntheticZoom(microscope_name, None, dummy_model.configuration)
 
     def test_zoom_synthetic_attributes(self):
 
-        assert hasattr(self.zoom_class, 'zoomdict')
-        assert hasattr(self.zoom_class, 'zoomvalue')
+        assert hasattr(self.zoom_class, "zoomdict")
+        assert hasattr(self.zoom_class, "zoomvalue")
 
-        assert hasattr(self.zoom_class, 'set_zoom') and callable(getattr(self.zoom_class, 'set_zoom'))
-        assert hasattr(self.zoom_class, 'move') and callable(getattr(self.zoom_class, 'move'))
-        assert hasattr(self.zoom_class, 'read_position') and callable(getattr(self.zoom_class, 'read_position'))
+        assert hasattr(self.zoom_class, "set_zoom") and callable(
+            getattr(self.zoom_class, "set_zoom")
+        )
+        assert hasattr(self.zoom_class, "move") and callable(
+            getattr(self.zoom_class, "move")
+        )
+        assert hasattr(self.zoom_class, "read_position") and callable(
+            getattr(self.zoom_class, "read_position")
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

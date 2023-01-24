@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -43,7 +43,7 @@ logger = logging.getLogger(p)
 
 
 class FilterWheelBase:
-    r"""FilterWheelBase Class
+    """FilterWheelBase Class
 
     Parent class for controlling filter wheels.
 
@@ -68,7 +68,8 @@ class FilterWheelBase:
         self.wheel_position = 0
 
     def check_if_filter_in_filter_dictionary(self, filter_name):
-        r"""Checks if the filter designation (string) given exists in the filter dictionary
+        """Checks if the filter designation (string) given exists in the
+        filter dictionary
 
         Parameters
         ----------

@@ -14,17 +14,21 @@ def test_calculate_all_waveforms():
 
     model = DummyModel()
     daq = DAQBase(model.configuration)
-    microscope_name = model.configuration['experiment']['MicroscopeState']['microscope_name']
+    microscope_name = model.configuration["experiment"]["MicroscopeState"][
+        "microscope_name"
+    ]
     waveform_dict = daq.calculate_all_waveforms(microscope_name, np.random.rand())
 
     for k, v in waveform_dict.items():
         try:
-            channel = model.configuration['experiment']['MicroscopeState']['channels'][k]
-            if not channel['is_selected']:
+            channel = model.configuration["experiment"]["MicroscopeState"]["channels"][
+                k
+            ]
+            if not channel["is_selected"]:
                 continue
-            exposure_time = channel['camera_exposure_time']/1000
-            print(k, channel['is_selected'], np.sum(v>0), exposure_time)
-            assert(np.sum(v>0) == daq.sample_rate*exposure_time) 
+            exposure_time = channel["camera_exposure_time"] / 1000
+            print(k, channel["is_selected"], np.sum(v > 0), exposure_time)
+            assert np.sum(v > 0) == daq.sample_rate * exposure_time
         except KeyError:
             # The channel doesn't exist. Points to an issue in how waveform dict is created.
             continue

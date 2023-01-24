@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -28,7 +28,7 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-#
+
 
 #  Standard Library Imports
 import logging
@@ -46,7 +46,7 @@ logger = logging.getLogger(p)
 
 
 class RemoteFocusNI(RemoteFocusBase):
-    r"""RemoteFocusNI Class"""
+    """RemoteFocusNI Class"""
 
     def __init__(self, microscope_name, device_connection, configuration):
         super().__init__(microscope_name, device_connection, configuration)
@@ -67,7 +67,8 @@ class RemoteFocusNI(RemoteFocusBase):
         channel = self.device_config["hardware"]["channel"]
         self.task.ao_channels.add_ao_voltage_chan(channel)
         print(
-            f"Initializing remote focus with sample rate {self.sample_rate} and {self.samples} samples"
+            f"Initializing remote focus with sample rate {self.sample_rate} and"
+            f"{self.samples} samples"
         )
         self.task.timing.cfg_samp_clk_timing(
             rate=self.sample_rate,

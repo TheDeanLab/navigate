@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -48,8 +48,8 @@ from aslm.controller.sub_controllers.tiling_wizard_controller import (
 )
 
 # View Imports that are not called on startup
-from aslm.view.main_window_content.channel_settings.channel_settings_frames.tiling_wizard_popup import (
-    tiling_wizard_popup as tiling_wizard,
+from aslm.view.main_window_content.channel_settings.channel_settings_frames import (
+    tiling_wizard_popup,
 )
 
 
@@ -102,6 +102,9 @@ class ChannelsTabController(GUIController):
         # stack acquisition_variables
         self.z_origin = 0
         self.focus_origin = 0
+        self.stage_velocity = None
+        self.filter_wheel_delay = None
+        self.microscope_state_dict = None
 
         # laser/stack cycling event binds
         self.stack_acq_vals["cycling"].trace_add("write", self.update_cycling_setting)
@@ -112,9 +115,11 @@ class ChannelsTabController(GUIController):
             "timepoints": self.view.stack_timepoint_frame.exp_time_spinval,
             "stack_acq_time": self.view.stack_timepoint_frame.stack_acq_spinval,
             "stack_pause": self.view.stack_timepoint_frame.stack_pause_spinval,
-            "timepoint_interval": self.view.stack_timepoint_frame.timepoint_interval_spinval,
             "experiment_duration": self.view.stack_timepoint_frame.total_time_spinval,
         }
+        self.timepoint_vals[
+            "timepoint_interval"
+        ] = self.view.stack_timepoint_frame.timepoint_interval_spinval
 
         # timepoint event binds
         self.timepoint_vals["is_save"].trace_add("write", self.update_save_setting)
@@ -126,6 +131,7 @@ class ChannelsTabController(GUIController):
         )
 
         # multiposition
+        self.tiling_wizard_controller = None
         self.is_multiposition = False
         self.is_multiposition_val = self.view.multipoint_frame.on_off
         self.view.multipoint_frame.save_check.configure(
@@ -138,12 +144,11 @@ class ChannelsTabController(GUIController):
         self.initialize()
 
     def initialize(self):
-        r"""Function initializes widgets and gets other necessary configuration
+        """Initializes widgets and gets other necessary configuration
 
-        Parameters
-        ----------
-        config : multiprocesing.managers.DictProxy
-            Global configuration of the microscope
+        Examples
+        --------
+        >>> self.initialize()
         """
         config = self.parent_controller.configuration_controller
 
@@ -155,7 +160,13 @@ class ChannelsTabController(GUIController):
         self.show_verbose_info("channels tab has been initialized")
 
     def populate_experiment_values(self):
-        """Distribute initial MicroscopeState values to this and sub-controllers and associated views."""
+        """Distribute initial MicroscopeState values to this and sub-controllers and
+        associated views.
+
+        Examples
+        --------
+        >>> self.populate_experiment_values()
+        """
         self.in_initialization = True
         self.microscope_state_dict = self.parent_controller.configuration["experiment"][
             "MicroscopeState"
@@ -184,11 +195,16 @@ class ChannelsTabController(GUIController):
         self.show_verbose_info("Channels tab has been set new values")
 
     def set_spinbox_range_limits(self, settings):
-        r"""This function will set the spinbox widget's values of from_, to, step
+        """This function will set the spinbox widget's values of from_, to, step
 
         Parameters
         ----------
-        settings :
+        settings : dict
+            dictionary of settings from configuration file
+
+        Examples
+        --------
+        >>> self.set_spinbox_range_limits(settings)
         """
         temp_dict = {
             self.stack_acq_widgets["step_size"]: settings["stack_acquisition"][
@@ -222,12 +238,16 @@ class ChannelsTabController(GUIController):
         self.channel_setting_controller.set_spinbox_range_limits(settings["channels"])
 
     def set_mode(self, mode):
-        r"""Change acquisition mode.
+        """Change acquisition mode.
 
         Parameters
         ----------
         mode : str
-            'stop'
+            acquisition mode
+
+        Examples
+        --------
+        >>> self.set_mode(mode)
         """
         self.mode = mode
         self.channel_setting_controller.set_mode(mode)
@@ -241,7 +261,7 @@ class ChannelsTabController(GUIController):
         self.show_verbose_info("acquisition mode has been changed to", mode)
 
     def update_z_steps(self, *args):
-        r"""Recalculates the number of slices that will be acquired in a z-stack.
+        """Recalculates the number of slices that will be acquired in a z-stack.
 
         Requires GUI to have start position, end position, or step size changed.
         Sets the number of slices in the model and the GUI.
@@ -250,7 +270,8 @@ class ChannelsTabController(GUIController):
         Parameters
         ----------
         args : dict
-            Values is a dict as follows {'step_size':  'start_position': , 'end_position': ,'number_z_steps'}
+            Values is a dict as follows {'step_size':  'start_position': ,
+                                         'end_position': ,'number_z_steps'}
         """
 
         # won't do any calculation when initialization
@@ -268,7 +289,7 @@ class ChannelsTabController(GUIController):
                 self.stack_acq_vals["abs_z_start"].set(0)
                 self.stack_acq_vals["abs_z_end"].set(0)
                 return
-        except:
+        except (KeyError, AttributeError):
             self.stack_acq_vals["number_z_steps"].set(0)
             self.stack_acq_vals["abs_z_start"].set(0)
             self.stack_acq_vals["abs_z_end"].set(0)
@@ -305,16 +326,22 @@ class ChannelsTabController(GUIController):
 
         self.update_timepoint_setting()
         self.show_verbose_info(
-            "stack acquisition settings on channels tab have been changed and recalculated"
+            "stack acquisition settings on channels tab have been changed and "
+            "recalculated"
         )
 
     def update_start_position(self, *args):
-        r"""Get new z starting position from current stage parameters.
+        """Get new z starting position from current stage parameters.
 
         Parameters
         ----------
-        args : None
-            ?
+        args : dict
+            Values is a dict as follows {'start_position': , 'abs_z_start': ,
+            'stack_z_origin': }
+
+        Examples
+        --------
+        >>> self.update_start_position()
         """
 
         # We have a new origin
@@ -331,12 +358,17 @@ class ChannelsTabController(GUIController):
         self.update_z_steps()
 
     def update_end_position(self, *args):
-        r"""Get new z ending position from current stage parameters
+        """Get new z ending position from current stage parameters
 
         Parameters
         ----------
-        args : ?
-            ?
+        args : dict
+            Values is a dict as follows {'end_position': , 'abs_z_end': ,
+            'stack_z_origin': }
+
+        Examples
+        --------
+        >>> self.update_end_position()
         """
         # Grab current values
         z_end = self.parent_controller.configuration["experiment"]["StageParameters"][
@@ -374,12 +406,18 @@ class ChannelsTabController(GUIController):
 
         You can collect different channels in different formats.
         In the perZ format: Slice 0/Ch0, Slice0/Ch1, Slice1/Ch0, Slice1/Ch1, etc
-        in the perStack format: Slice 0/Ch0, Slice1/Ch0... SliceN/Ch0.  Then it repeats with Ch1
+        in the perStack format: Slice 0/Ch0, Slice1/Ch0... SliceN/Ch0.  Then it repeats
+        with Ch1
 
         Parameters
         ----------
-        args : ?
-            ?
+        args : dict
+            Values is a dict as follows {'cycling_setting': , 'cycling_setting': ,
+                                         'stack_z_origin': }
+
+        Examples
+        --------
+        >>> self.update_cycling_setting()
         """
         # won't do any calculation when initializing
         if self.in_initialization:
@@ -397,15 +435,21 @@ class ChannelsTabController(GUIController):
         self.show_verbose_info("Cycling setting on channels tab has been changed")
 
     def update_save_setting(self, *args):
-        r"""Tell the centrol/parent controller 'save_data' is selected.
+        """Tell the centrol/parent controller 'save_data' is selected.
 
         Does not do any calculation when initializing the software.
 
         Parameters
         ----------
-        args : ?
-            ?
+        args : dict
+            Values is a dict as follows {'save_data': , 'save_data': ,
+                                         'stack_z_origin': }
+
+        Examples
+        --------
+        >>> self.update_save_setting()
         """
+
         if self.in_initialization:
             return
         self.is_save = self.timepoint_vals["is_save"].get()
@@ -415,20 +459,27 @@ class ChannelsTabController(GUIController):
         self.show_verbose_info("Save data option has been changed to", self.is_save)
 
     def update_timepoint_setting(self, call_parent=False):
-        r"""Automatically calculates the stack acquisition time based on the number of time points,
-        channels, and exposure time.
+        """Automatically calculates the stack acquisition time based on the number of
+        time points, channels, and exposure time.
 
-        TODO: Add necessary computation for 'Stack Acq.Time', 'Timepoint Interval', 'Experiment Duration'?
+        TODO: Add necessary computation for 'Stack Acq.Time', 'Timepoint Interval',
+        'Experiment Duration'?
 
         Does not do any calculation when initializing the software.
-        Order of priority for perStack: timepoints > positions > channels > z-steps > delay
+        Order of priority for perStack: timepoints > positions > channels > z-steps
+                                        > delay
         ORder of priority for perZ: timepoints > positions > z-steps > delays > channels
 
         Parameters
         ----------
         call_parent : bool
             Tell parent controller that time point setting has changed.
+
+        Examples
+        --------
+        >>> self.update_timepoint_setting()
         """
+
         if self.in_initialization:
             return
         channel_settings = self.microscope_state_dict["channels"]
@@ -448,7 +499,7 @@ class ChannelsTabController(GUIController):
                     channel_exposure_time.append(float(channel["camera_exposure_time"]))
             if len(channel_exposure_time) == 0:
                 return
-        except:
+        except (KeyError, AttributeError):
             self.timepoint_vals["experiment_duration"].set("")
             self.timepoint_vals["stack_acq_time"].set("")
             return
@@ -459,36 +510,42 @@ class ChannelsTabController(GUIController):
         # Includes time, positions, channels...
         experiment_duration = 0
 
-        # Initialize variable to calculate how long it takes to acquire a single volume for all of the channels.
-        # Only calculate once at the beginning.
+        # Initialize variable to calculate how long it takes to acquire a single volume
+        # for all of the channels. Only calculate once at the beginning.
         stack_acquisition_duration = 0
 
         for timepoint_idx in range(number_of_timepoints):
 
             for position_idx in range(number_of_positions):
-                # For multiple positions, need to account for the time necessary to move the stages that distance.
-                # In theory, these positions would be populated in that 'pandastable' or some other data structure.
+                # For multiple positions, need to account for the time necessary to move
+                # the stages that distance. In theory, these positions would be
+                # populated in that 'pandastable' or some other data structure.
 
-                # Determine the largest distance to travel between positions.  Assume all axes move the same velocity
-                # This assumes that we are in a multi-position mode. Not yet implemented.
+                # Determine the largest distance to travel between positions.  Assume
+                # all axes move the same velocity This assumes that we are in a
+                # multi-position mode. Not yet implemented.
                 # x1, y1, z1, theta1, f1, = position_start.values()
                 # x2, y2, z1, theta2, f1 = position_end.values()
                 # distance = [x2-x1, y2-y1, z2-z1, theta2-theta1, f2-f1]
                 # max_distance_idx = np.argmax(distance)
-                # Now if we are going to do this properly, we would need to do this for all of the positions
-                # so that we can calculate the total experiment time.
-                # Probably assemble a matrix of all the positions and then do the calculations.
+                # Now if we are going to do this properly, we would need to do this for
+                # all of the positions so that we can calculate the total experiment
+                # time. Probably assemble a matrix of all the positions and then do
+                # the calculations.
 
-                stage_delay = 0  # distance[max_distance_idx]/self.stage_velocity #TODO False value.
+                stage_delay = 0  # distance[max_distance_idx]/self.stage_velocity
+                # TODO False value.
 
-                # If we were actually acquiring the data, we would call the function to move the stage here.
+                # If we were actually acquiring the data, we would call the function to
+                # move the stage here.
                 experiment_duration = experiment_duration + stage_delay
 
                 for channel_idx in range(len(channel_exposure_time)):
                     # Change the filter wheel here before the start of the acquisition.
                     if perStack:
-                        # In the perStack mode, we only need to account for the time necessary for the filter wheel
-                        # to change between each image stack.
+                        # In the perStack mode, we only need to account for the time
+                        # necessary for the filter wheel to change between each
+                        # image stack.
                         experiment_duration = (
                             experiment_duration + self.filter_wheel_delay
                         )
@@ -513,8 +570,8 @@ class ChannelsTabController(GUIController):
                             )
 
                         if not perStack:
-                            # In the perZ mode, we need to account for the time necessary to move the filter wheel
-                            # at each slice
+                            # In the perZ mode, we need to account for the time
+                            # necessary to move the filter wheel at each slice
                             experiment_duration = (
                                 experiment_duration + self.filter_wheel_delay
                             )
@@ -546,50 +603,78 @@ class ChannelsTabController(GUIController):
         )
 
     def toggle_multiposition(self):
-        r"""Toggle Multi-position Acquisition.
+        """Toggle Multi-position Acquisition.
 
         Recalculates the experiment duration.
+
+        Examples
+        --------
+        >>> self.toggle_multiposition()
         """
         self.is_multiposition = self.is_multiposition_val.get()
+        self.microscope_state_dict['is_multiposition'] = self.is_multiposition
         self.update_timepoint_setting()
         self.show_verbose_info("Multi-position:", self.is_multiposition)
 
     def launch_tiling_wizard(self):
-        r"""Launches tiling wizard popup.
+        """Launches tiling wizard popup.
 
-        Will only launch when button in GUI is pressed, and will not duplicate. Pressing button again brings popup to top
+        Will only launch when button in GUI is pressed, and will not duplicate.
+        Pressing button again brings popup to top
         """
 
         if hasattr(self, "tiling_wizard_controller"):
             self.tiling_wizard_controller.showup()
             return
-        tiling_wizard_popup = tiling_wizard(self.view)
-        self.tiling_wizard_controller = TilingWizardController(
-            tiling_wizard_popup, self
-        )
+        tiling_wizard = tiling_wizard_popup.tiling_wizard_popup(self.view)
+        self.tiling_wizard_controller = TilingWizardController(tiling_wizard, self)
 
     def set_info(self, vals, values):
-        r"""Set values to a list of variables."""
+        """Set values to a list of variables.
+
+        Parameters
+        ----------
+        vals : list
+            List of variables to set.
+        values : list
+            List of values to set to variables.
+
+        Examples
+        --------
+        >>> self.set_info([self.timepoint_vals['timepoint_interval'],
+                           self.timepoint_vals['stack_pause']], [1, 1])
+        """
         for name in values.keys():
             if name in vals:
                 vals[name].set(values[name])
 
     def execute(self, command, *args):
-        r"""Execute Command in the parent controller.
+        """Execute Command in the parent controller.
 
         Parameters
         ----------
         command : str
-            recalculate_timepoint, channel, move_stage_and_update_info, get_stage_position
+            recalculate_timepoint, channel, move_stage_and_update_info,
+            get_stage_position
+        args : list
+            List of arguments to pass to the command.
 
         Returns
         -------
         command : object
-            Returns parent_controller.execute(command) if command = 'get_stage_position',
+            Returns parent_controller.execute(command) if command = 'get_stage_position'
+
+        Examples
+        --------
+        >>> self.execute('recalculate_timepoint')
         """
         if command == "recalculate_timepoint":
             # update selected channels num
-            self.microscope_state_dict['selected_channels'] = reduce(lambda count, channel: count + (channel['is_selected'] == True), self.microscope_state_dict["channels"].values(), 0)
+            self.microscope_state_dict["selected_channels"] = reduce(
+                lambda count, channel: count + (channel["is_selected"] is True),
+                self.microscope_state_dict["channels"].values(),
+                0,
+            )
             self.update_timepoint_setting()
             # update framerate info in camera setting tab
             exposure_time = max(

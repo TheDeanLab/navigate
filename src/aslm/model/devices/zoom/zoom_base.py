@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -43,7 +43,7 @@ logger = logging.getLogger(p)
 
 
 class ZoomBase:
-    r"""ZoomBase parent class.
+    """ZoomBase parent class.
 
     Parameters
     ----------
@@ -62,7 +62,7 @@ class ZoomBase:
         self.zoomvalue = None
 
     def set_zoom(self, zoom, wait_until_done=False):
-        r"""Change the Zoom Servo.
+        """Change the Zoom Servo.
 
         Confirms tha the zoom position is available in the zoomdict
 
@@ -84,7 +84,7 @@ class ZoomBase:
         logger.debug(f"Zoom position: {self.read_position()}")
 
     def move(self, position=0, wait_until_done=False):
-        r"""Move the Zoom Servo
+        """Move the Zoom Servo
 
         Parameters
         ----------
@@ -97,7 +97,7 @@ class ZoomBase:
         pass
 
     def read_position(self):
-        r"""Read the position of the Zoom Servo
+        """Read the position of the Zoom Servo
 
         Returns
         -------

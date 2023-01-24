@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -47,7 +47,7 @@ logger = logging.getLogger(p)
 
 
 class tiling_wizard_popup:
-    r"""Popup for tiling parameters in View.
+    """Popup for tiling parameters in View.
 
     Parameters
     ----------
@@ -62,7 +62,8 @@ class tiling_wizard_popup:
 
     def __init__(self, root, *args, **kwargs):
         # Creating popup window with this name and size/placement, PopUp is a
-        # Toplevel window #300x200 pixels, first +320 means 320 pixels from left edge, +180 means 180 pixels from top edge
+        # Toplevel window #300x200 pixels, first +320 means 320 pixels from left edge,
+        # +180 means 180 pixels from top edge
         self.popup = PopUp(
             root,
             "Multiposition Tiling Wizard",
@@ -173,9 +174,9 @@ class tiling_wizard_popup:
             self.inputs[entry_names[i]].widget.state(["disabled"])
 
         # Data widgets
-        data_labels = ["Percent Overlay", "Total Tiles"]
+        # data_labels = ["Percent Overlay", "Total Tiles"]
 
-        data_names = ["percent_overlay", "total_tiles"]
+        # data_names = ["percent_overlay", "total_tiles"]
 
         self.inputs["percent_overlay"] = LabelInput(
             parent=data,
@@ -205,8 +206,8 @@ class tiling_wizard_popup:
     # Getters
     def get_variables(self):
         """
-        This function returns a dictionary of all the variables that are tied to each widget name.
-        The key is the widget name, value is the variable associated.
+        This function returns a dictionary of all the variables that are tied to each
+        widget name. The key is the widget name, value is the variable associated.
         """
         variables = {}
         for key, widget in self.inputs.items():

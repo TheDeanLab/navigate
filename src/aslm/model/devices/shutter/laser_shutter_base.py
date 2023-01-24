@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -43,7 +43,7 @@ logger = logging.getLogger(p)
 
 
 class ShutterBase:
-    r"""ShutterBase Class
+    """ShutterBase Class
     Parent class for the laser shutters.
 
     Attributes
@@ -61,7 +61,7 @@ class ShutterBase:
         self.shutter_state = False
 
     def __del__(self):
-        r"""Close the Shutter at exit."""
+        """Close the Shutter at exit."""
         pass
 
     def open_shutter(self):

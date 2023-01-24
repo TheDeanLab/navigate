@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -79,7 +79,8 @@ class CameraBase:
         self.x_pixels = int(self.x_pixels / self.x_binning)
         self.y_pixels = int(self.y_pixels / self.y_binning)
 
-        # Initialize Exposure and Display Information - Convert from milliseconds to seconds.
+        # Initialize Exposure and Display Information - Convert from milliseconds
+        # to seconds.
         self.camera_line_interval = self.camera_parameters["line_interval"]
         self.camera_exposure_time = self.camera_parameters["exposure_time"] / 1000
         self.camera_display_acquisition_subsampling = self.camera_parameters[
@@ -117,7 +118,7 @@ class CameraBase:
         return self._variance
 
     def set_readout_direction(self, mode):
-        r"""Set HamamatsuOrca readout direction.
+        """Set HamamatsuOrca readout direction.
 
         Parameters
         ----------
@@ -129,7 +130,7 @@ class CameraBase:
     def calculate_light_sheet_exposure_time(
         self, full_chip_exposure_time, shutter_width
     ):
-        r"""Convert normal mode exposure time to light-sheet mode exposure time.
+        """Convert normal mode exposure time to light-sheet mode exposure time.
         Calculate the parameters for an ASLM acquisition
 
         Parameters

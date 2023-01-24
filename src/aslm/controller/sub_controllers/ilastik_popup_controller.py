@@ -54,12 +54,16 @@ class IlastikPopupController(GUIController):
         self.showup()
 
     def load_project(self):
+        """load ilastik project file."""
         filename = filedialog.askopenfilename(
             defaultextension=".ilp", filetypes=[("Ilastik Project File", "*.ilp")]
         )
         try:
             r = prepare_service(self.service_url, project_file=filename)
-            message = "There is something wrong when loading the ilastik project file, please make sure the file exists and is correct!"
+            message = (
+                "There is something wrong when loading the ilastik project file, "
+                "please make sure the file exists and is correct!"
+            )
         except Exception as e:
             r = None
             message = "Please make sure the aslm_server for ilastik is running!"
@@ -83,6 +87,17 @@ class IlastikPopupController(GUIController):
             self.update_project(filename, r)
 
     def update_project(self, filename, label_dict):
+        """update project file name and labels
+
+        Parameters
+        ----------
+        filename : str
+            project file name
+        label_dict : dict
+            label dictionary
+
+        """
+
         self.project_filename_var.set(filename)
         logger.info(f"{filename} is loaded successfully!")
 
@@ -105,6 +120,14 @@ class IlastikPopupController(GUIController):
             color_block.grid(row=1 + i, column=1, pady=(0, 10), padx=(0, 10))
 
     def toggle_label(self, label_id):
+        """toggle label status
+
+        Parameters
+        ----------
+        label_id : int
+            label id
+        """
+
         def func():
             self.label_dict["status"][label_id] = not self.label_dict["status"][
                 label_id
@@ -113,13 +136,15 @@ class IlastikPopupController(GUIController):
         return func
 
     def toggle_display(self):
+        """toggle display of ilastik segmentation results"""
         self.show_segmentation_flag = not self.show_segmentation_flag
 
     def toggle_mark_position(self):
+        """toggle mark position of ilastik segmentation results"""
         self.mark_position_flag = not self.mark_position_flag
 
     def confirm_setting(self):
-        """confirm setting
+        """Confirm settings
 
         tell the model which labels will be used
         activate features containing ilastik
@@ -159,7 +184,7 @@ class IlastikPopupController(GUIController):
             self.view.popup.dismiss()
 
     def showup(self, popup_window=None):
-        """show the popup window
+        """show the ilastik popup window
 
         this function will let the popup window show in front
         """

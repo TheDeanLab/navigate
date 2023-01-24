@@ -7,22 +7,22 @@ on:
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
-  
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    permissions: 
+    permissions:
       contents: write
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Python ${{ matrix.python-version }}
         uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python-version }}
-      
+
       - name: Upgrade pip
         run: |
           python3 -m pip install --upgrade pip
@@ -30,7 +30,7 @@ jobs:
       - name: Get pip cache dir
         id: pip-cache
         run: echo "dir=$(pip cache dir)" >> $GITHUB_OUTPUT
-        
+
       - name: Cache dependencies
         uses: actions/cache@v3
         with:
@@ -38,18 +38,18 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
-            
+
       - name: Install dependencies
         run: |
           python3 -m pip install -r ./requirements.txt
           pip install sphinx sphinx_rtd_theme
           pip install -e .
-          
+
       - name: Build docs
         run: |
           cd docs
           make html
-          
+
       - name: Folder location sanity check
         run: pwd
       - name: Deploy
@@ -58,5 +58,3 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs/build/html
- 
- 

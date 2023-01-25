@@ -534,7 +534,6 @@ class Model:
     def stop_stage(self):
         """Stop the stages."""
         self.active_microscope.stop_stage()
-
         ret_pos_dict = self.get_stage_position()
         update_stage_dict(self, ret_pos_dict)
 

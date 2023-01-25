@@ -31,6 +31,7 @@
 #
 import tkinter as tk
 
+
 from aslm.controller.sub_controllers.gui_controller import GUIController
 import logging
 
@@ -357,8 +358,8 @@ class StageController(GUIController):
                 self.view.after_cancel(self.event_id[axis])
             # if position is not a number, then do not move stage
             try:
-                widget.trigger_focusout_validation()
                 position = position_var.get()
+                widget.trigger_focusout_validation()
                 # if position is not inside limits do not move stage
                 if (
                     position < self.position_min[axis]
@@ -367,10 +368,14 @@ class StageController(GUIController):
                     if self.event_id[axis]:
                         self.view.after_cancel(self.event_id[axis])
                     return
-            except AttributeError:
+            except tk._tkinter.TclError:
                 if self.event_id[axis]:
                     self.view.after_cancel(self.event_id[axis])
                 return
+            except AttributeError:
+                logger.error(f"Attribute Error Caught: trying to set position {axis}")
+                return
+                
             # update stage position
             self.stage_setting_dict[axis] = position
             # Debouncing wait duration - Duration of time to integrate the number of

@@ -106,6 +106,10 @@ class AdaptiveOpticsPopupController(GUIController):
                 for mode_name in tw_param_dict['modes_armed'].keys():
                     self.modes_armed[mode_name]['variable'].set(tw_param_dict['modes_armed'][mode_name])
             else:
+                if type(self.widgets[k]) == dict:
+                    self.widgets[k]['variable'].set(tw_param_dict[k])
+                    continue
+
                 self.widgets[k].set(tw_param_dict[k])
 
     def update_experiment_values(self):
@@ -119,6 +123,7 @@ class AdaptiveOpticsPopupController(GUIController):
         self.parent_controller.configuration['experiment']['AdaptiveOpticsParameters']['TonyWilson']['iterations'] = int(self.widgets['iterations'].get())
         self.parent_controller.configuration['experiment']['AdaptiveOpticsParameters']['TonyWilson']['steps'] = int(self.widgets['steps'].get())
         self.parent_controller.configuration['experiment']['AdaptiveOpticsParameters']['TonyWilson']['amplitude'] = float(self.widgets['amplitude'].get())
+        self.parent_controller.configuration['experiment']['AdaptiveOpticsParameters']['TonyWilson']['from'] = self.widgets['from']['variable'].get()        
 
         for k in self.modes_armed.keys():
             self.parent_controller.configuration['experiment']['AdaptiveOpticsParameters']['TonyWilson']['modes_armed'][k] = self.modes_armed[k]['variable'].get()

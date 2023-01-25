@@ -76,6 +76,8 @@ class TonyWilson:
         self.coef_amp = None
         self.done_all = False
         self.done_itr = False
+        self.laser = None
+        self.laser_power = 0
         
         self.model = model
         self.mirror_controller = self.model.active_microscope.mirror.mirror_controller
@@ -90,8 +92,15 @@ class TonyWilson:
                 self.change_coef += [i]
         self.n_coefs = len(self.change_coef)
 
-        self.best_coefs = np.zeros(self.n_modes, dtype=np.float32)
-        self.best_coefs_overall = np.zeros(self.n_modes, dtype=np.float32)
+        start_from = self.model.configuration['experiment']['AdaptiveOpticsParameters']['TonyWilson']['from']
+        if start_from == 'flat':
+            self.best_coefs = np.zeros(self.n_modes, dtype=np.float32)
+        elif start_from == 'current':
+            curr_expt_coefs = list(self.model.configuration['experiment']['MirrorParameters']['modes'].values())
+            self.best_coefs = np.asarray(curr_expt_coefs, dtype=np.float32)
+
+        # self.best_coefs_overall = np.zeros(self.n_modes, dtype=np.float32)
+        self.best_coefs_overall = deepcopy(self.best_coefs)
         self.best_metric = 0.0
         self.coef_sweep = None
         self.best_peaks = []
@@ -174,6 +183,9 @@ class TonyWilson:
         self.n_steps = tw_settings['steps']
         self.coef_amp = tw_settings['amplitude']
 
+        # curr_channel = self.model.active_microscope.current_channel
+        # self.laser = self.model.active_microscope.lasers[str(self.model.active_microscope.laser_wavelength[curr_channel])]
+
         # initalize coefs to current
         """ numpy arrays screw up the threading...? need to use SharedNDArray? """
         # self.best_coefs = SharedNDArray(shape=(self.n_modes,), dtype=np.float32)
@@ -223,7 +235,7 @@ class TonyWilson:
             if coef == self.n_coefs-1:
                 if step == self.n_steps-1:
                     
-                    self.coef_sweep *= 0.9
+                    self.coef_sweep *= 0.95
                     self.done_itr = True
 
                     if itr == self.n_iter-1:

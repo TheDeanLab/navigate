@@ -102,6 +102,14 @@ class adaptiveoptics_popup():
         self.tony_wilson_button = ttk.Button(tw_widget_frame, text='RUN', width=15)
         self.tony_wilson_button.grid(row=4, column=1, pady=5)
 
+        tw_start_from_var = tk.StringVar()
+        tw_start_from_combo = ttk.Combobox(tw_widget_frame, textvariable=tw_start_from_var, width=15)
+        tw_start_from_combo['values'] = ('flat', 'current')
+        tw_start_from_combo.state(['readonly'])
+        tw_start_from_combo.grid(row=5, column=1, pady=5)
+        tw_start_from_combo.current(0)
+        self.inputs['from'] = {'button': tw_start_from_combo, 'variable': tw_start_from_var}
+
         # Buttons
         button_frame = ttk.Frame(master=content_frame)
         button_frame.grid(row=0, column=0)

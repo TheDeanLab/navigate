@@ -165,11 +165,15 @@ class GalvoBase:
                 self.samples = int(self.sample_rate * self.sweep_time)
 
                 # galvo Parameters
-                galvo_amplitude = float(galvo_parameters.get("amplitude", 0))
-                galvo_offset = float(galvo_parameters.get("offset", 0))
-                galvo_frequency = (
-                    float(galvo_parameters.get("frequency", 0)) / exposure_time
-                )
+                try:
+                    galvo_amplitude = float(galvo_parameters.get("amplitude", 0))
+                    galvo_offset = float(galvo_parameters.get("offset", 0))
+                    galvo_frequency = (
+                        float(galvo_parameters.get("frequency", 0)) / exposure_time
+                    )
+                except ValueError as e:
+                    logger.error(f"{e} similar to TclError")
+                    return
 
                 # Calculate the Waveforms
                 if self.galvo_waveform == "sawtooth":

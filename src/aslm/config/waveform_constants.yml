@@ -45,20 +45,20 @@
             },
             "1x": {
                 "488nm": {
-                    "amplitude": "0",
-                    "offset": "0",
+                    "amplitude": "1",
+                    "offset": "2.60",
                     "percent_smoothing": "0",
                     "percent_delay": "0"
                 },
                 "562nm": {
-                    "amplitude": "0",
-                    "offset": "0",
+                    "amplitude": "0.53",
+                    "offset": "2.46",
                     "percent_smoothing": "0",
                     "percent_delay": "0"
                 },
                 "642nm": {
-                    "amplitude": "0",
-                    "offset": "0",
+                    "amplitude": "0.23",
+                    "offset": "2.50",
                     "percent_smoothing": "0",
                     "percent_delay": "0"
                 }
@@ -167,52 +167,6 @@
     },
     "galvo_constants": {
         "Galvo 0": {
-            "Nanoscale": {
-                "N/A": {
-                    "amplitude": "0.11",
-                    "offset": "0.10",
-                    "frequency": "99"
-                }
-            },
-            "Mesoscale": {
-                "0.63x": {
-                    "amplitude": "0.11",
-                    "offset": "0.10",
-                    "frequency": "99"
-                },
-                "1x": {
-                    "amplitude": "0.11",
-                    "offset": "0.10",
-                    "frequency": "99"
-                },
-                "2x": {
-                    "amplitude": "0.11",
-                    "offset": "0.10",
-                    "frequency": "99"
-                },
-                "3x": {
-                    "amplitude": "0.11",
-                    "offset": "0.10",
-                    "frequency": "99"
-                },
-                "4x": {
-                    "amplitude": "0.11",
-                    "offset": "0.10",
-                    "frequency": "99"
-                },
-                "5x": {
-                    "amplitude": "0.11",
-                    "offset": "0.10",
-                    "frequency": "99"
-                },
-                "6x": {
-                    "amplitude": "0.11",
-                    "offset": "0.10",
-                    "frequency": "99"
-                }
-            }
-        },
-        "Galvo 1": {
             "Nanoscale": {
                 "N/A": {
                     "amplitude": "0.11",

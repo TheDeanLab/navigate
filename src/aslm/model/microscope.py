@@ -159,7 +159,10 @@ class Microscope:
                 else:
                     try:
                         ref_list = [device[k] for k in device_ref_dict[device_name]]
-                    finally:
+                    except KeyError:
+                        print(
+                            "KeyError encountered in device_ref_dict, " "microscope.py"
+                        )
                         ref_list = []
 
                 device_ref_name = build_ref_name("_", *ref_list)

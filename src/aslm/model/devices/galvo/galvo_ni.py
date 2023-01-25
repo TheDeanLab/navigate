@@ -46,7 +46,54 @@ logger = logging.getLogger(p)
 
 
 class GalvoNI(GalvoBase):
-    """GalvoNI Class"""
+    """GalvoNI Class
+
+    This class is used to control the galvo mirrors on the microscope.
+
+    Attributes
+    ----------
+    microscope_name : str
+        The name of the microscope.
+    device_connection : nidaqmx.Task
+        The connection to the DAQ device.
+    configuration : dict
+        The configuration dictionary.
+    galvo_id : int
+        The ID of the galvo.
+    task : nidaqmx.Task
+        The task for the galvo.
+    trigger_source : str
+        The trigger source for the galvo.
+    daq : nidaqmx.Task
+        The connection to the DAQ device.
+
+    Methods
+    -------
+    initialize_task()
+        Initializes the task.
+    __del__()
+        Deletes the task.
+    adjust(readout_time)
+        Adjusts the galvo.
+    prepare_task(channel_key)
+        Prepares the task.
+    start_task()
+        Starts the task.
+    stop_task(force=False)
+        Stops the task.
+    close_task()
+        Closes the task.
+
+    Examples
+    --------
+    >>> galvo = GalvoNI(microscope_name, device_connection, configuration, galvo_id=0)
+    >>> galvo.adjust(readout_time)
+    >>> galvo.prepare_task(channel_key)
+    >>> galvo.start_task()
+    >>> galvo.stop_task(force=False)
+    >>> galvo.close_task()
+
+    """
 
     def __init__(self, microscope_name, device_connection, configuration, galvo_id=0):
         super().__init__(microscope_name, device_connection, configuration, galvo_id)
@@ -62,6 +109,22 @@ class GalvoNI(GalvoBase):
         self.daq = device_connection
 
     def initialize_task(self):
+        """Initializes the task.
+
+        This method initializes the task.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> galvo.initialize_task()
+        """
         # TODO: make sure the task is reusable, Or need to create and close each time.
         self.task = nidaqmx.Task()
         channel = self.device_config["hardware"]["channel"]
@@ -78,10 +141,45 @@ class GalvoNI(GalvoBase):
         self.task.triggers.start_trigger.cfg_dig_edge_start_trig(self.trigger_source)
 
     def __del__(self):
+        """Deletes the task.
+
+        This method deletes the task.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> del galvo
+        """
+
         self.stop_task()
         self.close_task()
 
     def adjust(self, readout_time):
+        """Adjusts the galvo.
+
+        This method adjusts the galvo.
+
+        Parameters
+        ----------
+        readout_time : float
+            The readout time.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> galvo.adjust(readout_time)
+        """
+
         waveform_dict = super().adjust(readout_time)
 
         self.daq.analog_outputs[self.device_config["hardware"]["channel"]] = {
@@ -94,20 +192,89 @@ class GalvoNI(GalvoBase):
         return waveform_dict
 
     def prepare_task(self, channel_key):
+        """Prepares the task.
+
+        This method prepares the task.
+
+        Parameters
+        ----------
+        channel_key : str
+            The channel key.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> galvo.prepare_task(channel_key)
+        """
+
         # write waveform
         # self.task.write(self.waveform_dict[channel_key])
         pass
 
     def start_task(self):
+        """Starts the task.
+
+        This method starts the task.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> galvo.start_task()
+        """
         # self.task.start()
         pass
 
     def stop_task(self, force=False):
+        """Stops the task.
+
+        This method stops the task.
+
+        Parameters
+        ----------
+        force : bool
+            Force stop the task.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> galvo.stop_task(force=False)
+        """
+
         # if not force:
         #     self.task.wait_until_done()
         # self.task.stop()
         pass
 
     def close_task(self):
+        """Closes the task.
+
+        This method closes the task.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> galvo.close_task()
+        """
+
         # self.task.close()
         pass

@@ -44,25 +44,135 @@ logger = logging.getLogger(p)
 
 
 class SyntheticGalvo(GalvoBase):
-    """SyntheticGalvo Class"""
+    """SyntheticGalvo Class
+
+    This class is used to control the galvo mirrors on the microscope.
+
+    Attributes
+    ----------
+    microscope_name : str
+        Microscope name.
+    device_connection : str
+        Device connection.
+    configuration : dict
+        Configuration dictionary.
+    galvo_id : int
+        Galvo ID.
+
+    Methods
+    -------
+    prepare_task(channel_key)
+        Prepare task.
+    start_task()
+        Start task.
+    stop_task()
+        Stop task.
+    close_task()
+        Close task.
+
+    Examples
+    --------
+    >>> from aslm.model.devices.galvo.galvo_synthetic
+    >>> import SyntheticGalvo
+    >>> galvo = SyntheticGalvo("microscope_name",
+    >>> "device_connection", "configuration", 0)
+    galvo.prepare_task("channel_key")
+    galvo.start_task()
+    galvo.stop_task()
+    galvo.close_task()
+    """
 
     def __init__(self, microscope_name, device_connection, configuration, galvo_id=0):
         super().__init__(microscope_name, device_connection, configuration, galvo_id)
         pass
 
     def __del__(self):
+        """Destructor
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> del galvo
+        """
+
         self.stop_task()
         self.close_task()
 
     def prepare_task(self, channel_key):
+        """Prepare task
+
+        Parameters
+        ----------
+        channel_key : str
+            Channel key.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> galvo.prepare_task("channel_key")
+        """
         # write waveform
         logger.debug(f"galvo writes the waveform for {channel_key}")
 
     def start_task(self):
+        """Start task
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> galvo.start_task()
+        """
         logger.debug("galvo started task!")
 
     def stop_task(self):
+        """Stop task
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> galvo.stop_task()
+        """
+
         logger.debug("galvo stopped task!")
 
     def close_task(self):
+        """Close task
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> galvo.close_task()
+        """
+
         logger.debug("galvo closed task!")

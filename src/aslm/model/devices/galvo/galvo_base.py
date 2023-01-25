@@ -46,7 +46,36 @@ logger = logging.getLogger(p)
 class GalvoBase:
     """GalvoBase Class
 
-    Parent class for voice coil models.
+    Parent class for galvo devices.
+
+    This class is used to generate the waveforms for the galvo devices.
+
+    Parameters
+    ----------
+    microscope_name : str
+        Microscope name.
+    device_connection : str
+        Device connection.
+    configuration : dict
+        Configuration dictionary.
+    galvo_id : int, optional
+        Galvo ID, by default 0
+
+    Attributes
+    ----------
+    configuration : dict
+        Configuration dictionary.
+
+    Methods
+    -------
+    prepare_task(channel_key)
+        Prepare the task for the specified channel.
+    start_task()
+        Start the task.
+    stop_task()
+        Stop the task.
+    close_task()
+        Close the task.
     """
 
     def __init__(self, microscope_name, device_connection, configuration, galvo_id=0):
@@ -86,6 +115,21 @@ class GalvoBase:
         pass
 
     def adjust(self, readout_time):
+        """Adjust the galvo waveforms to account for the camera readout time.
+
+        Parameters
+        ----------
+        readout_time : float
+            Camera readout time in seconds.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> galvo.adjust(0.1)
+        """
         self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
         # calculate waveform
         microscope_state = self.configuration["experiment"]["MicroscopeState"]
@@ -144,11 +188,13 @@ class GalvoBase:
                         frequency=galvo_frequency,
                         amplitude=galvo_amplitude,
                         offset=galvo_offset,
-                        phase=self.device_config["phase"]
+                        phase=self.device_config["phase"],
                     )
                 else:
-                    print("Mistakes were made. "
-                          "Unknown waveform specified in configuration file.")
+                    print(
+                        "Mistakes were made. "
+                        "Unknown waveform specified in configuration file."
+                    )
                 self.waveform_dict[channel_key][
                     self.waveform_dict[channel_key] > self.galvo_max_voltage
                 ] = self.galvo_max_voltage
@@ -159,13 +205,61 @@ class GalvoBase:
         return self.waveform_dict
 
     def prepare_task(self, channel_key):
+        """Prepare the task for the specified channel.
+
+        Parameters
+        ----------
+        channel_key : str
+            Channel key.
+
+        Returns
+        -------
+        task : nidaqmx.Task
+            Task for the specified channel.
+
+        Examples
+        --------
+        >>> task = galvo.prepare_task('488')
+        """
         pass
 
     def start_task(self):
+        """Start the task.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> galvo.start_task()
+        """
         pass
 
     def stop_task(self):
+        """Stop the task.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> galvo.stop_task()
+        """
+
         pass
 
     def close_task(self):
+        """Close the task.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> galvo.close_task()
+        """
+
         pass

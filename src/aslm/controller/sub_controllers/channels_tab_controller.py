@@ -290,13 +290,13 @@ class ChannelsTabController(GUIController):
                 self.stack_acq_vals["abs_z_start"].set(0)
                 self.stack_acq_vals["abs_z_end"].set(0)
                 return
-        except (KeyError, AttributeError):
+        except tk._tkinter.TclError:
             self.stack_acq_vals["number_z_steps"].set(0)
             self.stack_acq_vals["abs_z_start"].set(0)
             self.stack_acq_vals["abs_z_end"].set(0)
             return
-        except tk._tkinter.TclError as e:
-            logger.error(f"Tcl Error caught: trying to set position and {e}")
+        except (KeyError, AttributeError):
+            logger.error(f"Error caught: updating z_steps")
             return
         
         # if step_size < 0.001:
@@ -503,15 +503,12 @@ class ChannelsTabController(GUIController):
                     channel_exposure_time.append(float(channel["camera_exposure_time"]))
             if len(channel_exposure_time) == 0:
                 return
+        except (tk._tkinter.TclError, ValueError):
+            self.timepoint_vals["experiment_duration"].set("0")
+            self.timepoint_vals["stack_acq_time"].set("0")
+            return
         except (KeyError, AttributeError):
-            self.timepoint_vals["experiment_duration"].set("")
-            self.timepoint_vals["stack_acq_time"].set("")
-            return
-        except tk._tkinter.TclError as e:
-            logger.error(f"Tcl Error caught: trying to set position and {e}")
-            return
-        except ValueError as e:
-            logger.error(f"{e} similar to TclError")
+            logger.error(f"Error caught: updating timepoint setting")
             return
 
         perStack = self.stack_acq_vals["cycling"].get() == "Per Stack"

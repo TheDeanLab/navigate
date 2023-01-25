@@ -368,12 +368,12 @@ class StageController(GUIController):
                     if self.event_id[axis]:
                         self.view.after_cancel(self.event_id[axis])
                     return
-            except AttributeError:
+            except tk._tkinter.TclError:
                 if self.event_id[axis]:
                     self.view.after_cancel(self.event_id[axis])
                 return
-            except tk._tkinter.TclError as e:
-                logger.error(f"Tcl Error caught: trying to set position and {e}")
+            except AttributeError:
+                logger.error(f"Attribute Error Caught: trying to set position {axis}")
                 return
                 
             # update stage position

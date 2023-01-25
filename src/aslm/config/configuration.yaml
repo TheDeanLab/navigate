@@ -104,6 +104,7 @@ microscopes:
           channel: PXI6259/ao0
           min: -5
           max: 5
+        waveform: sine
         frequency: 99.9
         amplitude: 2.5
         offset: 0

@@ -34,13 +34,13 @@ import logging
 from multiprocessing.managers import ListProxy
 
 from aslm.model.device_startup_functions import (
-    # start_camera,
-    # start_filter_wheel,
-    # start_zoom,
-    # start_shutter,
-    # start_remote_focus_device,
-    # start_galvo,
-    # start_lasers,
+    start_camera,
+    start_filter_wheel,
+    start_zoom,
+    start_shutter,
+    start_remote_focus_device,
+    start_galvo,
+    start_lasers,
     start_stage,
 )
 from aslm.tools.common_functions import build_ref_name

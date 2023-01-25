@@ -190,5 +190,116 @@ def test_get_position(stage_controller):
     assert position is None
 
 
+def test_up_btn_handler(stage_controller):
+
+    vals = {}
+    for axis in ['x', 'y', 'z', 'theta', 'f']:
+        vals[axis] = np.random.randint(1,9)
+        stage_controller.widget_vals[axis].get = MagicMock(return_value=vals[axis])
+        stage_controller.widget_vals[axis].set = MagicMock()
+
+    step_vals = {}
+    for axis in ['xy', 'z', 'theta', 'f']:
+        step_vals[axis] = np.random.randint(1,9)
+        stage_controller.widget_vals[ axis + "_step" ].get = MagicMock(return_value=step_vals[axis])
+
+    stage_controller.position_max = {
+        "x": 10,
+        "y": 10,
+        "z": 10,
+        "theta": 10,
+        "f": 10
+    }
+
+    # Test for each axis
+    for axis in ["x", "y", "z", "theta", "f"]:
+        pos = stage_controller.widget_vals[axis].get()
+        if axis == 'x' or axis == 'y':
+            step = stage_controller.widget_vals["xy_step"].get()
+        else:
+            step = stage_controller.widget_vals[axis + "_step"].get()
+        temp = pos + step
+        if temp > stage_controller.position_max[axis]:
+            temp = stage_controller.position_max[axis]
+        up_btn_handler = stage_controller.up_btn_handler(axis)
+        up_btn_handler()
+        stage_controller.widget_vals[axis].set.assert_called_once_with(temp)
+
+
+
+    # Test for out of limit condition
+    for axis in ['x', 'y', 'z', 'theta', 'f']:
+        stage_controller.widget_vals[axis].set.reset_mock()
+        stage_controller.widget_vals[axis].get.return_value = 10
+        up_btn_handler = stage_controller.up_btn_handler(axis)
+        up_btn_handler()
+        stage_controller.widget_vals[axis].set.assert_not_called()
+
+
+def test_down_btn_handler(stage_controller):
+
+    vals = {}
+    for axis in ['x', 'y', 'z', 'theta', 'f']:
+        vals[axis] = np.random.randint(1,9)
+        stage_controller.widget_vals[axis].get = MagicMock(return_value=vals[axis])
+        stage_controller.widget_vals[axis].set = MagicMock()
+
+    step_vals = {}
+    for axis in ['xy', 'z', 'theta', 'f']:
+        step_vals[axis] = np.random.randint(1,9)
+        stage_controller.widget_vals[ axis + "_step" ].get = MagicMock(return_value=step_vals[axis])
+
+    stage_controller.position_min = {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "theta": 0,
+        "f": 0
+    }
+
+    # Test for each axis
+    for axis in ["x", "y", "z", "theta", "f"]:
+        pos = stage_controller.widget_vals[axis].get()
+        if axis == 'x' or axis == 'y':
+            step = stage_controller.widget_vals["xy_step"].get()
+        else:
+            step = stage_controller.widget_vals[axis + "_step"].get()
+        temp = pos - step
+        if temp < stage_controller.position_min[axis]:
+            temp = stage_controller.position_min[axis]
+        down_btn_handler = stage_controller.down_btn_handler(axis)
+        down_btn_handler()
+        stage_controller.widget_vals[axis].set.assert_called_once_with(temp)
+
+
+    # Test for out of limit condition
+    for axis in ['x', 'y', 'z', 'theta', 'f']:
+        stage_controller.widget_vals[axis].set.reset_mock()
+        stage_controller.widget_vals[axis].get.return_value = 0
+        down_btn_handler = stage_controller.down_btn_handler(axis)
+        down_btn_handler()
+        stage_controller.widget_vals[axis].set.assert_not_called()
+
+
+def test_zero_btn_handler(stage_controller):
+
+    vals = {}
+    for axis in ['x', 'y', 'z', 'theta', 'f']:
+        vals[axis] = np.random.randint(1,9)
+        stage_controller.widget_vals[axis].get = MagicMock(return_value=vals[axis])
+        stage_controller.widget_vals[axis].set = MagicMock()
+
+    # Test for each axis
+    for axis in ["x", "y", "z", "theta", "f"]:
+        pos = stage_controller.widget_vals[axis].get()
+        zero_btn_handler = stage_controller.zero_btn_handler(axis)
+        zero_btn_handler()
+        stage_controller.widget_vals[axis].set.assert_called_once_with(0)
+
+
+    
+
+    
+
 
 

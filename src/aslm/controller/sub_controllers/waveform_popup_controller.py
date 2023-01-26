@@ -197,10 +197,6 @@ class WaveformPopupController(GUIController):
             self.widgets[galvo + " Freq"].widget.configure(increment=increment)
             self.widgets[galvo + " Freq"].widget.set_precision(precision)
 
-            if d.get("amplitude") is None:
-                self.widgets[galvo + " Amp"].widget["state"] = "disabled"
-                self.widgets[galvo + " Freq"].widget["state"] = "disabled"
-
         # The galvo by default uses a sawtooth waveform. However, sometimes we have a resonant galvo.
         # In the case of the resonant galvo, the amplitude must be zero and only the offset can be
         # controlled. We only define the offset in the configuration.yml file. If only the offset is

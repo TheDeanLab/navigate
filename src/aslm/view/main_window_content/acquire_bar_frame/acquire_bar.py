@@ -62,14 +62,6 @@ class AcquireBar(ttk.Frame):
         # Read Only Pull down menu: continuous, z-stack, single acquisition, projection.
         self.options = tk.StringVar()
         self.pull_down = ttk.Combobox(self, textvariable=self.options)
-        self.pull_down["values"] = (
-            "Continuous Scan",
-            "Z-Stack",
-            "Single Acquisition",
-            "Alignment",
-            "Projection",
-        )
-        self.pull_down.current(0)
         self.pull_down.state(["readonly"])
 
         #  Progress Bar: Current Acquisitions and Overall

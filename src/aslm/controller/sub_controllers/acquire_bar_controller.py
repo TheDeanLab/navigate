@@ -63,7 +63,11 @@ class AcquireBarController(GUIController):
             "Single Acquisition": "single",
             "Alignment": "alignment",
             "Projection": "projection",
+            "Customized": "customized"
         }
+
+        self.view.pull_down["values"] = list(self.mode_dict.keys())
+        self.view.pull_down.current(0)
 
         # gui event bind
         self.view.acquire_btn.config(command=self.launch_popup_window)
@@ -116,7 +120,7 @@ class AcquireBarController(GUIController):
 
         if mode == "single":
             number_of_slices = 1
-        elif mode == "live":
+        elif mode == "live" or mode == "customized":
             number_of_slices = 1
         elif mode == "projection":
             number_of_slices = 1
@@ -134,7 +138,7 @@ class AcquireBarController(GUIController):
         if images_received > 0:
             # Update progress bars according to imaging mode.
             if stop is False:
-                if mode == "live":
+                if mode == "live" or mode == "customized":
                     self.view.CurAcq.start()
                     self.view.OvrAcq.start()
 

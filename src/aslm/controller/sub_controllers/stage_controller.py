@@ -58,6 +58,7 @@ class StageController(GUIController):
 
         # variables
         self.widget_vals = self.view.get_variables()
+        print(f"Widget variables: {self.widget_vals}")
 
         # gui event bind
         buttons = self.view.get_buttons()

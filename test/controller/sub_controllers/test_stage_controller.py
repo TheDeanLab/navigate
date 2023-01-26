@@ -103,29 +103,18 @@ def test_stage_key_press(stage_controller):
 
 
 def test_set_position(stage_controller):
-    widgets = {
-        "x": MagicMock(),
-        "y": MagicMock(),
-        "z": MagicMock(),
-        "theta": MagicMock(),
-        "f": MagicMock()
-    }
+    
+    widgets = stage_controller.view.get_widgets()
+    for axis in ["x", "y", "z", "theta", "f"]:
+        widgets[axis].widget.trigger_focusout_validation = MagicMock()
+        
+    vals = {}
+    for axis in ['x', 'y', 'z', 'theta', 'f']:
+        vals[axis] = np.random.randint(0,9)
+        stage_controller.widget_vals[axis].set = MagicMock()
+    
     stage_controller.view.get_widgets = MagicMock(return_value=widgets)
     stage_controller.show_verbose_info = MagicMock()
-    stage_controller.widget_vals = {
-        "x": MagicMock(),
-        "y": MagicMock(),
-        "z": MagicMock(),
-        "theta": MagicMock(),
-        "f": MagicMock()
-    }
-    stage_controller.stage_setting_dict = {
-        "x": 0,
-        "y": 0,
-        "z": 0,
-        "theta": 0,
-        "f": 0
-    }
     position = {
         "x": np.random.random(),
         "y": np.random.random(),
@@ -137,14 +126,23 @@ def test_set_position(stage_controller):
         widgets[axis].widget.trigger_focusout_validation.assert_called_once()
         assert stage_controller.stage_setting_dict[axis] == position.get(axis, 0)
     stage_controller.show_verbose_info.assert_called_once_with("Set stage position")
+    
+    
+    
 
 
 def test_get_position(stage_controller):
     import tkinter as tk
+    
     vals = {}
     for axis in ['x', 'y', 'z', 'theta', 'f']:
         vals[axis] = np.random.randint(0,9)
         stage_controller.widget_vals[axis].get = MagicMock(return_value=vals[axis])
+        
+    step_vals = {}
+    for axis in ['xy', 'z', 'theta', 'f']:
+        step_vals[axis] = np.random.randint(1,9)
+        stage_controller.widget_vals[ axis + "_step" ].get = MagicMock(return_value=step_vals[axis])
     
     stage_controller.position_min = {
         "x": 0,
@@ -188,6 +186,13 @@ def test_get_position(stage_controller):
     stage_controller.widget_vals["x"].get.side_effect = tk.TclError
     position = stage_controller.get_position()
     assert position is None
+    
+    # for axis in ['x', 'y', 'z', 'theta', 'f']:
+    #     stage_controller.widget_vals[axis].get.reset_mock()
+    #     if axis == 'x' or axis == 'y':
+    #         stage_controller.widget_vals[ "xy_step" ].get.reset_mock()
+    #     else:
+    #         stage_controller.widget_vals[ axis + "_step" ].get.reset_mock()
 
 
 def test_up_btn_handler(stage_controller):
@@ -297,9 +302,58 @@ def test_zero_btn_handler(stage_controller):
         stage_controller.widget_vals[axis].set.assert_called_once_with(0)
 
 
+def test_position_callback(stage_controller):
     
-
+    stage_controller.show_verbose_info = MagicMock()
     
+    vals = {}
+    widgets = stage_controller.view.get_widgets()
+    for axis in ['x', 'y', 'z', 'theta', 'f']:
+        vals[axis] = np.random.randint(1,9)
+        stage_controller.widget_vals[axis].get = MagicMock(return_value=vals[axis])
+        stage_controller.widget_vals[axis].set = MagicMock()
+        widgets[axis].widget.set(vals[axis])
+        widgets[axis].widget.trigger_focusout_validation = MagicMock()
+        
+    stage_controller.position_min = {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "theta": 0,
+        "f": 0
+    }
+    
+    stage_controller.position_max = {
+        "x": 10,
+        "y": 10,
+        "z": 10,
+        "theta": 10,
+        "f": 10
+    }
+    
+    
+    stage_controller.parent_controller.execute = MagicMock()
+    stage_controller.stage_setting_dict = {}
 
+    for axis in ['x', 'y', 'z', 'theta', 'f']:
+        callback = stage_controller.position_callback(axis)
 
+        # Test case 1: Position variable is not a number
+        widgets[axis].widget.get = MagicMock(return_value='a')
+        callback()
+        assert not stage_controller.parent_controller.execute.called
 
+        # Test case 2: Position variable is within limits
+        widgets[axis].widget.get = MagicMock(return_value=vals[axis])
+        callback()
+        assert stage_controller.parent_controller.execute.called
+        assert stage_controller.stage_setting_dict[axis] == vals[axis]
+        stage_controller.parent_controller.execute.reset_mock()
+
+        # Test case 3: Position variable is outside limits
+        widgets[axis].widget.get = MagicMock(return_value=11)
+        callback()
+        assert not stage_controller.parent_controller.execute.called
+   
+        
+    

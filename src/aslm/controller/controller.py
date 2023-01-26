@@ -45,6 +45,7 @@ from tkinter import filedialog, messagebox
 from aslm.controller.sub_controllers.help_popup_controller import HelpPopupController
 from aslm.view.main_application_window import MainApp as view
 from aslm.view.menus.waveform_parameter_popup_window import WaveformParameterPopupWindow
+from aslm.view.menus.microscope_setting_popup_window import MicroscopeSettingPopupWindow
 from aslm.view.menus.autofocus_setting_popup import AutofocusPopup
 from aslm.view.menus.ilastik_setting_popup import ilastik_setting_popup
 from aslm.view.menus.help_popup import HelpPopup
@@ -68,6 +69,7 @@ from aslm.controller.sub_controllers import (
     MultiPositionController,
     ChannelsTabController,
     AcquireBarController,
+    MicroscopePopupController
 )
 from aslm.tools.file_functions import create_save_path, save_yaml_file
 from aslm.controller.thread_pool import SynchronizedThreadPool
@@ -368,6 +370,15 @@ class Controller:
 
             self.waveform_popup_controller.populate_experiment_values()
 
+        def popup_microscope_setting():
+            if hasattr(self, "microscope_popup_controller"):
+                self.microscope_popup_controller.showup()
+                return
+            microscope_info = self.model.get_microscope_info()
+            self.microscope_popup_controller = MicroscopePopupController(
+                self.view, self, microscope_info
+            )
+
         def popup_autofocus_setting():
             """Pop up the Autofocus setting window."""
             if hasattr(self, "af_popup_controller"):
@@ -481,6 +492,10 @@ class Controller:
         # waveform popup
         self.view.menubar.menu_resolution.add_command(
             label="Waveform Parameters", command=popup_waveform_setting
+        )
+        # microscope setting popup
+        self.view.menubar.menu_resolution.add_command(
+            label="Microscope Setting", command=popup_microscope_setting
         )
 
         # autofocus menu
@@ -620,25 +635,6 @@ class Controller:
             # GUI Failsafe
             self.acquire_bar_controller.stop_acquire()
             self.feature_id_val.set(0)
-
-    def update_camera_view(self):
-        """Update the real-time parameters in the camera view
-        (channel number, max counts, image, etc.)"""
-        create_threads = False
-        if create_threads:
-            self.threads_pool.createThread(
-                "camera_display",
-                self.camera_view_controller.display_image(self.model.data),
-            )
-            self.threads_pool.createThread(
-                "update_GUI",
-                self.camera_view_controller.update_channel_idx(
-                    self.model.current_channel
-                ),
-            )
-        else:
-            self.camera_view_controller.display_image(self.model.data)
-            self.camera_view_controller.update_channel_idx(self.model.current_channel)
 
     def execute(self, command, *args):
         """Functions listens to the Sub_Gui_Controllers.

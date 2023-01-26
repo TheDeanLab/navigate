@@ -814,3 +814,11 @@ class Model:
         self.display_ilastik_segmentation = display_segmentation
         self.mark_ilastik_position = mark_position
         self.ilastik_target_labels = target_labels
+
+    def get_microscope_info(self):
+        """Return Microscopes device information
+        """
+        microscope_info = {}
+        for microscope_name in self.microscopes:
+            microscope_info[microscope_name] = self.microscopes[microscope_name].info
+        return microscope_info

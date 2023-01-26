@@ -402,8 +402,12 @@ class CameraSettingController(GUIController):
             magnification = float(magnification[:-1])
 
         pixel_size = self.default_pixel_size
-        x_pixel = float(self.roi_widgets["Width"].get())
-        y_pixel = float(self.roi_widgets["Height"].get())
+        try:
+            x_pixel = float(self.roi_widgets["Width"].get())
+            y_pixel = float(self.roi_widgets["Height"].get())
+        except ValueError as e:
+            logger.error(f"{e} similar to TclError")
+            return
 
         physical_dimensions_x = x_pixel * pixel_size / magnification
         physical_dimensions_y = y_pixel * pixel_size / magnification

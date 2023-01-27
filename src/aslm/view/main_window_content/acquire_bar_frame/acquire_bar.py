@@ -31,7 +31,8 @@
 
 import logging
 import tkinter as tk
-from tkinter import ttk
+# from tkinter import ttk
+import ttkbootstrap as ttk
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -57,7 +58,7 @@ class AcquireBar(ttk.Frame):
         self.grid(row=0, column=0)
 
         # Acquire Button
-        self.acquire_btn = ttk.Button(self, text="Acquire")
+        self.acquire_btn = ttk.Button(self, text="Acquire", bootstyle='success')
 
         # Read Only Pull down menu: continuous, z-stack, single acquisition, projection.
         self.options = tk.StringVar()
@@ -89,10 +90,10 @@ class AcquireBar(ttk.Frame):
         self.OvrAcq.grid(row=1, column=0)
 
         #  Exit Button
-        self.exit_btn = ttk.Button(self, text="Exit")
+        self.exit_btn = ttk.Button(self, text="Exit", bootstyle='warning')
 
         # Stop Stage Button
-        self.stop_stage = ttk.Button(self, text="Stop Stage")
+        self.stop_stage = ttk.Button(self, text="Stop Stage", bootstyle='danger')
 
         #  Gridding out Bar
         """

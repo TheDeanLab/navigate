@@ -83,6 +83,7 @@ def main():
     # Start the GUI, withdraw main screen, and show splash screen.
     root = tk.Tk()
     style = ttk.Style("superhero") #https://ttkbootstrap.readthedocs.io/en/latest/themes/dark/
+    # https://ttkbootstrap.readthedocs.io/en/latest/styleguide/#colors
     root.withdraw()
     splash_screen = SplashScreen(root, "./icon/splash_screen_image.png")
 

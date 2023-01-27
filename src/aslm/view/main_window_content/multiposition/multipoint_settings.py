@@ -45,7 +45,7 @@ logger = logging.getLogger(p)
 class multipoint_frame(ttk.Labelframe):
     def __init__(self, settings_tab, *args, **kwargs):
         text_label = "Multi-position Acquisition"
-        ttk.Labelframe.__init__(self, settings_tab, text=text_label, *args, **kwargs)
+        ttk.Labelframe.__init__(self, settings_tab, text=text_label, *args, **kwargs, bootstyle='warning')
 
         # Formatting
         tk.Grid.columnconfigure(self, "all", weight=1)

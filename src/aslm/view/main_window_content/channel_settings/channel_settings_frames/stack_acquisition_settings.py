@@ -46,7 +46,7 @@ class stack_acq_frame(ttk.Labelframe):
     def __init__(self, settings_tab, *args, **kwargs):
         # Init Frame
         text_label = "Stack Acquisition Settings (" + "\N{GREEK SMALL LETTER MU}" + "m)"
-        ttk.Labelframe.__init__(self, settings_tab, text=text_label, *args, **kwargs)
+        ttk.Labelframe.__init__(self, settings_tab, text=text_label, *args, **kwargs, bootstyle='light')
 
         # Formatting
         tk.Grid.columnconfigure(self, "all", weight=1)

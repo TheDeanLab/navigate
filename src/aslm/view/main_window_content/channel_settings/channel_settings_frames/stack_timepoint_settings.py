@@ -40,7 +40,7 @@ logger = logging.getLogger(p)
 class stack_timepoint_frame(ttk.Labelframe):
     def __init__(self, settings_tab, *args, **kwargs):
         text_label = "Timepoint Settings"
-        ttk.Labelframe.__init__(self, settings_tab, text=text_label, *args, **kwargs)
+        ttk.Labelframe.__init__(self, settings_tab, text=text_label, *args, **kwargs, bootstyle='primary')
 
         # Formatting
         tk.Grid.columnconfigure(self, "all", weight=1)

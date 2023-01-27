@@ -45,7 +45,7 @@ class channel_creator(ttk.Labelframe):
     def __init__(self, channels_tab, *args, **kwargs):
         #  Init Frame
         self.title = "Channel Settings"
-        ttk.Labelframe.__init__(self, channels_tab, text=self.title, *args, **kwargs)
+        ttk.Labelframe.__init__(self, channels_tab, text=self.title, *args, **kwargs, bootstyle='info')
 
         # Formatting
         tk.Grid.columnconfigure(self, "all", weight=1)
@@ -139,6 +139,7 @@ class channel_creator(ttk.Labelframe):
                     self.frame_columns[1],
                     textvariable=self.laser_variables[num],
                     width=6,
+                    
                 )
             )
             self.laser_pulldowns[num].state(["readonly"])
@@ -156,7 +157,8 @@ class channel_creator(ttk.Labelframe):
                     textvariable=self.laserpower_variables[num],
                     increment=5,
                     width=3,
-                    font=Font(size=11),
+                    # font=Font(size=11),
+                    
                 )
             )
             self.laserpower_pulldowns[num].grid(
@@ -170,6 +172,7 @@ class channel_creator(ttk.Labelframe):
                     self.frame_columns[3],
                     textvariable=self.filterwheel_variables[num],
                     width=10,
+                    
                 )
             )
             self.filterwheel_pulldowns[num].state(["readonly"])
@@ -187,7 +190,8 @@ class channel_creator(ttk.Labelframe):
                     textvariable=self.exptime_variables[num],
                     increment=25,
                     width=5,
-                    font=Font(size=11),
+                    # font=Font(size=11),
+                    
                 )
             )
             self.exptime_pulldowns[num].grid(
@@ -204,7 +208,8 @@ class channel_creator(ttk.Labelframe):
                     textvariable=self.interval_variables[num],
                     increment=1,
                     width=3,
-                    font=Font(size=11),
+                    # font=Font(size=11),
+                    
                 )
             )
             self.interval_spins[num].grid(
@@ -221,7 +226,8 @@ class channel_creator(ttk.Labelframe):
                     textvariable=self.defocus_variables[num],
                     increment=0.1,
                     width=4,
-                    font=Font(size=11),
+                    # font=Font(size=11),
+                    
                 )
             )
             self.defocus_spins[num].grid(
@@ -235,7 +241,7 @@ class channel_creator(ttk.Labelframe):
         self.channel_checks[1].grid(pady=2)
         self.channel_checks[2].grid(pady=2)
 
-
+ 
 if __name__ == "__main__":
     root = tk.Tk()
     channel_creator(root).grid(row=0, column=0, sticky=tk.NSEW)

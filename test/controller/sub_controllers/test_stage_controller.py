@@ -301,6 +301,14 @@ def test_zero_btn_handler(stage_controller):
         zero_btn_handler()
         stage_controller.widget_vals[axis].set.assert_called_once_with(0)
 
+def test_stop_button_handler(stage_controller):
+
+    stage_controller.view.after = MagicMock()
+
+    stage_controller.stop_button_handler()
+
+    stage_controller.view.after.assert_called_once()
+
 
 def test_position_callback(stage_controller):
     

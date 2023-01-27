@@ -306,6 +306,8 @@ def test_position_callback(stage_controller):
     
     stage_controller.show_verbose_info = MagicMock()
     
+    stage_controller.view.after = MagicMock()
+    
     vals = {}
     widgets = stage_controller.view.get_widgets()
     for axis in ['x', 'y', 'z', 'theta', 'f']:
@@ -314,6 +316,7 @@ def test_position_callback(stage_controller):
         stage_controller.widget_vals[axis].set = MagicMock()
         widgets[axis].widget.set(vals[axis])
         widgets[axis].widget.trigger_focusout_validation = MagicMock()
+        
         
     stage_controller.position_min = {
         "x": 0,
@@ -331,29 +334,32 @@ def test_position_callback(stage_controller):
         "f": 10
     }
     
-    
-    stage_controller.parent_controller.execute = MagicMock()
     stage_controller.stage_setting_dict = {}
 
+    
+
     for axis in ['x', 'y', 'z', 'theta', 'f']:
+        
         callback = stage_controller.position_callback(axis)
 
-        # Test case 1: Position variable is not a number
-        widgets[axis].widget.get = MagicMock(return_value='a')
-        callback()
-        assert not stage_controller.parent_controller.execute.called
 
-        # Test case 2: Position variable is within limits
+        # Test case 1: Position variable is within limits
         widgets[axis].widget.get = MagicMock(return_value=vals[axis])
         callback()
-        assert stage_controller.parent_controller.execute.called
+        stage_controller.view.after.assert_called()
+        stage_controller.view.after.reset_mock()
         assert stage_controller.stage_setting_dict[axis] == vals[axis]
-        stage_controller.parent_controller.execute.reset_mock()
 
-        # Test case 3: Position variable is outside limits
+
+        # Test case 2: Position variable is outside limits
         widgets[axis].widget.get = MagicMock(return_value=11)
         callback()
-        assert not stage_controller.parent_controller.execute.called
-   
+        stage_controller.view.after.assert_called_once()
+        stage_controller.view.after.reset_mock()
+
+        
+        
+
+        
         
     

@@ -32,6 +32,7 @@
 
 # Standard Library Imports
 import tkinter as tk
+import ttkbootstrap as ttk
 import platform
 import os
 
@@ -81,6 +82,7 @@ def main():
     """
     # Start the GUI, withdraw main screen, and show splash screen.
     root = tk.Tk()
+    style = ttk.Style("superhero") #https://ttkbootstrap.readthedocs.io/en/latest/themes/dark/
     root.withdraw()
     splash_screen = SplashScreen(root, "./icon/splash_screen_image.png")
 

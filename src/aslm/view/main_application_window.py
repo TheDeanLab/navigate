@@ -45,7 +45,9 @@ read. So for Main_App self is now mainapp.
 
 # Import Standard Libraries
 import tkinter as tk
-from tkinter import ttk
+# from tkinter import ttk
+import ttkbootstrap as ttk
+from ttkbootstrap.constants import *
 import logging
 from pathlib import Path
 

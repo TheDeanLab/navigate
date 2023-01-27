@@ -55,7 +55,20 @@ from aslm.config.config import load_configs, update_config_dict
 
 # Local Sub-Controller Imports
 from aslm.controller.configuration_controller import ConfigurationController
-from aslm.controller.sub_controllers import *
+from aslm.controller.sub_controllers import (
+    IlastikPopupController,
+    CameraMapSettingPopupController,
+    AutofocusPopupController,
+    WaveformPopupController,
+    KeystrokeController,
+    WaveformTabController,
+    StageController,
+    CameraSettingController,
+    CameraViewController,
+    MultiPositionController,
+    ChannelsTabController,
+    AcquireBarController,
+)
 from aslm.tools.file_functions import create_save_path, save_yaml_file
 from aslm.controller.thread_pool import SynchronizedThreadPool
 
@@ -80,15 +93,19 @@ class Controller:
     root : Tk top-level widget.
         Tk.tk GUI instance.
     configuration_path : string
-        Path to the configuration yaml file. Provides global microscope configuration parameters.
+        Path to the configuration yaml file.
+        Provides global microscope configuration parameters.
     experiment_path : string
-        Path to the experiment yaml file. Provides experiment-specific microscope configuration.
+        Path to the experiment yaml file.
+        Provides experiment-specific microscope configuration.
     waveform_constants_path : string
-        Path to the waveform constants yaml file. Provides magnification and wavelength-specific parameters.
+        Path to the waveform constants yaml file.
+        Provides magnification and wavelength-specific parameters.
     use_gpu : Boolean
         Flag for utilizing CUDA functionality.
     *args :
-        Command line input arguments for non-default file paths or using synthetic hardware modes.
+        Command line input arguments for non-default
+        file paths or using synthetic hardware modes.
     """
 
     def __init__(
@@ -147,7 +164,9 @@ class Controller:
         self.view.root.protocol("WM_DELETE_WINDOW", self.exit_program)
 
         # Sub Gui Controllers
-        # Acquire bar, channels controller, camera view, camera settings, stage, waveforms, menus.
+        # Acquire bar, channels controller,
+        # camera view, camera settings,
+        # stage, waveforms, menus.
         self.acquire_bar_controller = AcquireBarController(
             self.view.acqbar, self.view.settings.channels_tab, self
         )
@@ -211,7 +230,8 @@ class Controller:
         root.deiconify()
 
     def update_buffer(self):
-        """Update the buffer size according to the camera dimensions listed in the experimental parameters.
+        """Update the buffer size according to the camera
+        dimensions listed in the experimental parameters.
 
         Returns
         -------
@@ -220,7 +240,8 @@ class Controller:
         self.image_height : int
             Number of y_pixels from microscope configuration file.
         self.data_buffer : SharedNDArray
-            Pre-allocated shared memory array. Size dictated by x_pixels, y_pixels, an number_of_frames in
+            Pre-allocated shared memory array.
+            Size dictated by x_pixels, y_pixels, an number_of_frames in
             configuration file.
         """
         img_width = int(
@@ -261,8 +282,10 @@ class Controller:
     def initialize_cam_view(self):
         """Populate view tab.
 
-        Populate widgets with necessary data from config file via config controller. For the entire view tab.
-        Sets the minimum and maximum counts for when the data is not being autoscaled.
+        Populate widgets with necessary data from
+        config file via config controller. For the entire view tab.
+        Sets the minimum and maximum counts
+        for when the data is not being autoscaled.
 
         Returns
         -------
@@ -281,7 +304,8 @@ class Controller:
         Parameters
         ----------
         is_synthetic_hardware : bool
-            If True, then the hardware is simulated. If False, then the hardware is real.
+            If True, then the hardware is simulated.
+            If False, then the hardware is real.
 
         Returns
         -------
@@ -311,7 +335,8 @@ class Controller:
             if not self.update_experiment_setting():
                 tkinter.messagebox.showerror(
                     title="Warning",
-                    message="Incorrect/missing settings. Cannot save current experiment file.",
+                    message="Incorrect/missing settings. "
+                    "Cannot save current experiment file.",
                 )
                 return
             filename = filedialog.asksaveasfilename(
@@ -387,11 +412,19 @@ class Controller:
                 "Save Experiment": save_experiment,
             },
             self.view.menubar.menu_multi_positions: {
-                "Load Positions": self.multiposition_tab_controller.load_positions,
-                "Export Positions": self.multiposition_tab_controller.export_positions,
-                "Append Current Position": self.multiposition_tab_controller.add_stage_position,
-                "Generate Positions": self.multiposition_tab_controller.generate_positions,
-                "Move to Selected Position": self.multiposition_tab_controller.move_to_position,
+                "Load Positions": (self.multiposition_tab_controller.load_positions),
+                "Export Positions": (
+                    self.multiposition_tab_controller.export_positions
+                ),
+                "Append Current Position": (
+                    self.multiposition_tab_controller.add_stage_position
+                ),
+                "Generate Positions": (
+                    self.multiposition_tab_controller.generate_positions
+                ),
+                "Move to Selected Position": (
+                    self.multiposition_tab_controller.move_to_position
+                ),
                 # 'Sort Positions': ,
             },
         }
@@ -519,7 +552,8 @@ class Controller:
             "microscope_name"
         ]
         self.resolution_value.set(
-            f"{microscope_name} {self.configuration['experiment']['MicroscopeState']['zoom']}"
+            f"{microscope_name} "
+            f"{self.configuration['experiment']['MicroscopeState']['zoom']}"
         )
 
         self.acquire_bar_controller.populate_experiment_values()
@@ -559,7 +593,8 @@ class Controller:
         if not self.update_experiment_setting():
             tkinter.messagebox.showerror(
                 title="Warning",
-                message="There are some missing/wrong settings! Cannot start acquisition!",
+                message="There are some missing/wrong settings! "
+                "Cannot start acquisition!",
             )
             return False
         # update multi-positions
@@ -587,7 +622,8 @@ class Controller:
             self.feature_id_val.set(0)
 
     def update_camera_view(self):
-        """Update the real-time parameters in the camera view (channel number, max counts, image, etc.)"""
+        """Update the real-time parameters in the camera view
+        (channel number, max counts, image, etc.)"""
         create_threads = False
         if create_threads:
             self.threads_pool.createThread(
@@ -607,8 +643,10 @@ class Controller:
     def execute(self, command, *args):
         """Functions listens to the Sub_Gui_Controllers.
 
-        The controller.experiment is passed as an argument to the model, which then overwrites
-        the model.experiment.  Workaround due to model being in a sub-process.
+        The controller.experiment is passed as
+        an argument to the model, which then overwrites
+        the model.experiment.
+        Workaround due to model being in a sub-process.
 
         Parameters
         __________
@@ -674,7 +712,8 @@ class Controller:
             args : dict
                 dict = {'resolution_mode': self.resolution,
                 'zoom': self.mag,
-                'laser_info': self.resolution_info['remote_focus_constants'][self.resolution][self.mag]
+                'laser_info': self.resolution_info[
+                'remote_focus_constants'][self.resolution][self.mag]
                 }
             """
             microscope_name, zoom = self.resolution_value.get().split()
@@ -685,7 +724,6 @@ class Controller:
                 ]
             ):
                 self.change_microscope(microscope_name)
-            # self.configuration['experiment']['MicroscopeState']['resolution_mode'] = microscope_name
             self.configuration["experiment"]["MicroscopeState"]["zoom"] = zoom
             work_thread = self.threads_pool.createThread(
                 "model", lambda: self.model.run_command("update_setting", "resolution")
@@ -713,7 +751,8 @@ class Controller:
             self.acquire_bar_controller.set_save_option(args[0])
 
         elif command == "update_setting":
-            r"""Called by the Waveform Constants Popup Controller to update the Waveform constants settings in memory.
+            r"""Called by the Waveform Constants Popup Controller
+            to update the Waveform constants settings in memory.
 
             Parameters
             __________
@@ -723,7 +762,9 @@ class Controller:
                 dict = {
                 'resolution_mode': self.resolution,
                 'zoom': self.mag,
-                'laser_info': self.resolution_info['remote_focus_constants'][self.resolution][self.mag]
+                'laser_info': self.resolution_info[
+                'remote_focus_constants'][self.resolution][self.mag
+                ]
                 }
             """
             # update_settings_common(self, args)
@@ -779,7 +820,9 @@ class Controller:
             self.execute("acquire")
 
         elif command == "acquire":
-            """Acquire data.  Triggered when the Acquire button is hit by the user in the GUI.
+            """Acquire data.
+
+            Triggered when the Acquire button is hit by the user in the GUI.
 
             Prepares the acquisition data.
 
@@ -793,7 +836,9 @@ class Controller:
                 self.acquire_bar_controller.stop_acquire()
                 return
 
-            # if select 'ilastik segmentation', 'show segmentation', and in 'single acquisition'
+            # if select 'ilastik segmentation',
+            # 'show segmentation',
+            # and in 'single acquisition'
             self.camera_view_controller.display_mask_flag = (
                 self.acquire_bar_controller.mode == "single"
                 and self.feature_id_val.get() == 4
@@ -836,11 +881,16 @@ class Controller:
 
         TODO: Delete this function!!!
 
-        This is set up to get around the conflict between self.threads_pool.createThread('model', target)
-        commands and the need to stop as abruptly as possible when the user hits stop. Here we leverage
-        ObjectInSubprocess's refusal to let us access the model from two threads to our advantage, and just
-        try repeatedly until we get a command in front of the next command in the model threads_pool resource.
-        We should instead pause the model thread pool and interject our stop command, or clear the queue
+        This is set up to get around the conflict between
+        self.threads_pool.createThread('model', target)
+        commands and the need to stop as abruptly as
+        possible when the user hits stop. Here we leverage
+        ObjectInSubprocess's refusal to let us access
+        the model from two threads to our advantage, and just
+        try repeatedly until we get a command in front
+        of the next command in the model threads_pool resource.
+        We should instead pause the model thread pool
+        and interject our stop command, or clear the queue
         in threads_pool.
         """
         e = RuntimeError
@@ -890,7 +940,8 @@ class Controller:
                 break
             if not isinstance(image_id, int):
                 logger.debug(
-                    f"ASLM Controller - Something wrong happened, stop the model!, {image_id}"
+                    f"ASLM Controller - Something wrong happened, stop the model!, "
+                    f"{image_id}"
                 )
                 self.execute("stop_acquire")
 
@@ -911,7 +962,8 @@ class Controller:
             )
 
         logger.info(
-            f"ASLM Controller - Captured {self.camera_view_controller.image_count}, {mode} Images"
+            f"ASLM Controller - Captured {self.camera_view_controller.image_count}, "
+            f"{mode} Images"
         )
         self.set_mode_of_sub("stop")
 
@@ -940,7 +992,8 @@ class Controller:
     def stop_stage(self):
         """Stop the stage.
 
-        Grab the stopped position from the stage and update the GUI control values accordingly.
+        Grab the stopped position from the stage
+        and update the GUI control values accordingly.
         """
         self.model.stop_stage()
         ret_pos_dict = self.model.get_stage_position()
@@ -986,6 +1039,8 @@ class Controller:
                     self.af_popup_controller.display_plot(value)
             elif event == "stop":
                 break
+            elif event == "update_stage":
+                self.update_stage_controller_silent(value)
 
     def exit_program(self):
         """Exit the program.

@@ -45,7 +45,7 @@ from tkinter import filedialog, messagebox
 from aslm.controller.sub_controllers.help_popup_controller import HelpPopupController
 from aslm.view.main_application_window import MainApp as view
 from aslm.view.menus.waveform_parameter_popup_window import WaveformParameterPopupWindow
-from aslm.view.menus.microscope_setting_popup_window import MicroscopeSettingPopupWindow
+from aslm.view.menus.camera_view_popup_window import CameraViewPopupWindow
 from aslm.view.menus.autofocus_setting_popup import AutofocusPopup
 from aslm.view.menus.ilastik_setting_popup import ilastik_setting_popup
 from aslm.view.menus.help_popup import HelpPopup
@@ -72,6 +72,7 @@ from aslm.controller.sub_controllers import (
     MicroscopePopupController
 )
 from aslm.tools.file_functions import create_save_path, save_yaml_file
+from aslm.tools.common_functions import combine_funcs
 from aslm.controller.thread_pool import SynchronizedThreadPool
 
 # Local Model Imports
@@ -220,6 +221,8 @@ class Controller:
         self.img_width = 0
         self.img_height = 0
         self.data_buffer = None
+        self.additional_microscopes = {}
+        self.additional_microscopes_configs = {}
 
         # Set view based on model.experiment
         self.populate_experiment_setting()
@@ -539,10 +542,6 @@ class Controller:
             label="Camera offset and variance maps", command=popup_camera_map_setting
         )
 
-        # debug menu
-        # if self.debug:
-        #     Debug_Module(self, self.view.menubar.menu_debug)
-
     def populate_experiment_setting(self, file_name=None):
         """Load experiment file and populate model.experiment and configure view.
 
@@ -841,6 +840,8 @@ class Controller:
                 and self.ilastik_controller.show_segmentation_flag
             )
 
+            self.launch_additional_microscopes()
+
             self.threads_pool.createThread(
                 "camera",
                 self.capture_image,
@@ -970,6 +971,74 @@ class Controller:
             mode=mode,
             stop=True,
         )
+
+    def launch_additional_microscopes(self):
+        def display_images(camera_view_controller, show_img_pipe, data_buffer):
+            images_received = 0
+            while True:
+                # Receive the Image and log it.
+                image_id = show_img_pipe.recv()
+                logger.info(f"ASLM Controller - Received Image: {image_id}")
+
+                if image_id == "stop":
+                    break
+                if not isinstance(image_id, int):
+                    logger.debug(
+                        f"ASLM Controller - Something wrong happened in additional microscope!, "
+                        f"{image_id}"
+                    )
+                    break
+
+                # Display the Image in the View
+                try:
+                    camera_view_controller.display_image(
+                        image=data_buffer[image_id],
+                        microscope_state=self.configuration["experiment"]["MicroscopeState"],
+                        images_received=images_received,
+                    )
+                except tkinter._tkinter.TclError:
+                    print("Can't show images for the additional microscope!")
+                    break
+                images_received += 1
+
+        # destroy unnecessary additional microscopes
+        temp = []
+        for microscope_name in self.additional_microscopes:
+            if microscope_name not in self.additional_microscopes_configs:
+                temp.append(microscope_name)
+        for microscope_name in temp:
+            del self.additional_microscopes[microscope_name]
+            self.model.destroy_virtual_microscope(microscope_name)
+            
+        # show additional camera view popup
+        for microscope_name in self.additional_microscopes_configs:
+            if microscope_name not in self.additional_microscopes:
+                show_img_pipe = self.model.create_pipe(f"{microscope_name}_show_img_pipe")
+                data_buffer = self.model.launch_virtual_microscope(microscope_name, self.additional_microscopes_configs[microscope_name])
+
+                self.additional_microscopes[microscope_name] = {
+                    "show_img_pipe": show_img_pipe,
+                    "data_buffer": data_buffer,
+                }
+            if self.additional_microscopes[microscope_name].get("camera_view_controller", None) == None:
+                popup_window = CameraViewPopupWindow(self.view, microscope_name)
+                camera_view_controller = CameraViewController(popup_window.camera_view, self)
+                self.additional_microscopes[microscope_name]["camera_view_controller"] = camera_view_controller
+                popup_window.popup.protocol(
+                    "WM_DELETE_WINDOW",
+                    combine_funcs(
+                        popup_window.popup.dismiss,
+                        lambda: self.additional_microscopes[microscope_name].pop("camera_view_controller")
+                    )
+                )
+
+            # start thread
+            capture_img_thread = threading.Thread(target=display_images, args=(
+                self.additional_microscopes[microscope_name]["camera_view_controller"], 
+                self.additional_microscopes[microscope_name]["show_img_pipe"], 
+                self.additional_microscopes[microscope_name]["data_buffer"],
+            ))
+            capture_img_thread.start()
 
     def move_stage(self, pos_dict):
         """Trigger the model to move the stage.

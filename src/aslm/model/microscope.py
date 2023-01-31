@@ -49,7 +49,7 @@ logger = logging.getLogger(p)
 
 
 class Microscope:
-    def __init__(self, name, configuration, devices_dict, is_synthetic=False):
+    def __init__(self, name, configuration, devices_dict, is_synthetic=False, is_virtual=False):
         self.microscope_name = name
         self.configuration = configuration
         self.data_buffer = None
@@ -58,6 +58,16 @@ class Microscope:
         self.galvo = {}
         self.daq = devices_dict.get("daq", None)
         self.info = {}
+
+        self.current_channel = None
+        self.channels = None
+        self.available_channels = None
+        self.number_of_frames = None
+
+        self.laser_wavelength = []
+
+        if is_virtual:
+            return
 
         device_ref_dict = {
             "camera": ["type", "serial_number"],
@@ -68,10 +78,6 @@ class Microscope:
             "galvo": ["type", "channel"],
             "lasers": ["wavelength"],
         }
-        self.current_channel = None
-        self.channels = None
-        self.available_channels = None
-        self.number_of_frames = None
 
         device_name_dict = {"lasers": "wavelength"}
 

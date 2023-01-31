@@ -66,6 +66,7 @@ class MicroscopePopupController(GUIController):
         self.buttons = self.view.get_buttons()
 
         self.microscope_info = microscope_info
+        self.primary_microscope = None
 
         # add saving function to the function closing the window
         self.view.popup.protocol(
@@ -110,11 +111,14 @@ class MicroscopePopupController(GUIController):
         def func(*args):
             setting_value = variable.get()
             if setting_value == "Primary Microscope":
+                self.primary_microscope = microscope_name
                 # check the status of other microscopes
                 for microscope in self.microscope_info.keys():
                     if microscope != microscope_name and self.variables[microscope].get() == setting_value:
                         self.variables[microscope].set("Additional Microscope")
                         clear_device_info(microscope)
+            elif self.primary_microscope == microscope_name:
+                self.primary_microscope = None
         
             if setting_value == "Additional Microscope":
                 clear_device_info(microscope_name)
@@ -127,12 +131,7 @@ class MicroscopePopupController(GUIController):
 
     def confirm_microscope_setting(self):
         # must have one primary microscope
-        flag = False
-        for microscope_name in self.microscope_info.keys():
-            if self.variables[microscope_name].get() == "Primary Microscope":
-                flag = True
-                break
-        if not flag:
+        if not self.primary_microscope:
             tkinter.messagebox.showerror(
                 title="Warning",
                 message="There is no Primary Microscope! "
@@ -141,5 +140,31 @@ class MicroscopePopupController(GUIController):
             self.showup()
             return
         # tell the controller to start a new Camera View Window and prepare a virtual microscope
-        pass
+        if self.primary_microscope != self.parent_controller.configuration["experiment"]["MicroscopeState"]["microscope_name"]:
+            self.parent_controller.configuration["experiment"]["MicroscopeState"]["microscope_name"] = self.primary_microscope
+            zoom = self.parent_controller.configuration["waveform_constants"]["remote_focus_constants"][self.primary_microscope].keys()[0]
+            self.parent_controller.configuration["experiment"]["MicroscopeState"]["zoom"] = zoom
+            self.parent_controller.resolution_value.set(f"{self.primary_microscope} {zoom}")
+
+        has_multi_cameras = False
+        for microscope_name in self.microscope_info.keys():
+            if self.variables[microscope_name].get() == "Additional Microscope":
+                config = {}
+                for k in self.microscope_info[microscope_name].keys():
+                    config[k] = self.variables[f"{microscope_name} {k}"].get()
+                self.parent_controller.additional_microscopes_configs[microscope_name] = config
+                has_multi_cameras = True
+            elif microscope_name in self.parent_controller.additional_microscopes_configs:
+                del self.parent_controller.additional_microscopes_configs[microscope_name]
+
+        # enable/disable change 'resolution'(microscope) menu if there are multiple cameras running
+        # enable primary camera
+        for microscope_name in self.microscope_info.keys():
+            if microscope_name == self.primary_microscope or not has_multi_cameras:
+                # enable
+                self.parent_controller.view.menubar.menu_resolution.entryconfig(microscope_name, state="normal")
+            else:
+                # disable
+                self.parent_controller.view.menubar.menu_resolution.entryconfig(microscope_name, state="disabled")
+
         self.exit_func()

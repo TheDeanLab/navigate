@@ -105,6 +105,8 @@ class CameraViewController(GUIController):
         self.menu = tk.Menu(self.canvas, tearoff=0)
         self.menu.add_command(label="Move Here", command=self.move_stage)
         self.menu.add_command(label="Reset Display", command=self.reset_display)
+        self.menu.add_command(label="Mark Position", command=self.mark_position)
+
         # self.canvas.bind("<Button-3>", self.popup_menu)
         self.move_to_x = None
         self.move_to_y = None

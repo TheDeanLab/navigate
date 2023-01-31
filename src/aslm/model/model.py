@@ -203,7 +203,17 @@ class Model:
         # Ilastik segmentation
         self.feature_list.append([{"name": IlastikSegmentation}])
         # volume search
-        self.feature_list.append([{"name": VolumeSearch}])
+        self.feature_list.append(
+            [
+                {
+                    "name": VolumeSearch,
+                    "args": (
+                        "Mesoscale",
+                        "6x",
+                    ),
+                }
+            ]
+        )
 
         self.acquisition_modes_feature_setting = {
             "single": [{"name": PrepareNextChannel}],
@@ -226,7 +236,7 @@ class Model:
                 )
             ],
             "projection": [{"name": PrepareNextChannel}],
-            "customized": []
+            "customized": [],
         }
 
     def update_data_buffer(self, img_width=512, img_height=512):
@@ -365,8 +375,12 @@ class Model:
             # load features
             if self.imaging_mode == "customized":
                 if self.addon_feature is None:
-                    self.addon_feature = self.acquisition_modes_feature_setting["single"]
-                self.signal_container, self.data_container = load_features(self, self.addon_feature)
+                    self.addon_feature = self.acquisition_modes_feature_setting[
+                        "single"
+                    ]
+                self.signal_container, self.data_container = load_features(
+                    self, self.addon_feature
+                )
             else:
                 self.signal_container, self.data_container = load_features(
                     self, self.acquisition_modes_feature_setting[self.imaging_mode]
@@ -484,7 +498,9 @@ class Model:
             elif type(args[0]) == str:
                 try:
                     if len(args) > 1:
-                        self.addon_feature = [{"name": globals()[args[0]], "args": (args[1],)}]
+                        self.addon_feature = [
+                            {"name": globals()[args[0]], "args": (args[1],)}
+                        ]
                         self.signal_container, self.data_container = load_features(
                             self, self.addon_feature
                         )

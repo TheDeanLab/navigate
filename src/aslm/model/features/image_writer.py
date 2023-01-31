@@ -48,13 +48,15 @@ logger = logging.getLogger(p)
 
 
 class ImageWriter:
-    def __init__(self, model, sub_dir="", image_name=None):
+    def __init__(self, model, data_buffer=None, sub_dir="", image_name=None):
         """Class for saving acquired data to disk.
 
         Parameters
         ----------
         model : aslm.model.model.Model
             ASLM Model class for controlling hardware/acquisition.
+        data_buffer: [SharedNDArray]
+            data_buffer will use model's default data_buffer if it's not specified
         sub_dir : str
             Sub-directory of self.model.configuration['experiment']
             ['Saving']['save_directory']
@@ -78,6 +80,8 @@ class ImageWriter:
             Maximum intensity projection image.
         current_time_point : int
             Current time point for saving data.
+        data_bffer: [SharedNDArray]
+            The data_buffer where images are.
 
         Examples
         --------
@@ -85,6 +89,7 @@ class ImageWriter:
         >>> image_writer = aslm.model.image_writer.ImageWriter(model)
         """
         self.model = model
+        self.data_buffer = self.model.data_buffer if data_buffer is None else data_buffer
         self.save_directory = ""
         self.sub_dir = sub_dir
         self.num_of_channels = len(
@@ -96,7 +101,6 @@ class ImageWriter:
                 if v["is_selected"]
             ]
         )
-        self.data_buffer = self.model.data_buffer
         self.current_time_point = 0
         self.config_table = {
             "signal": {},
@@ -184,7 +188,7 @@ class ImageWriter:
 
             # Save data to disk
             self.data_source.write(
-                self.model.data_buffer[idx],
+                self.data_buffer[idx],
                 x=self.model.data_buffer_positions[idx][0],
                 y=self.model.data_buffer_positions[idx][1],
                 z=self.model.data_buffer_positions[idx][2],

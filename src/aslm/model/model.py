@@ -401,7 +401,8 @@ class Model:
             self.signal_thread.start()
             self.data_thread.start()
             for m in self.virtual_microscopes:
-                threading.Thread(target=self.simplified_data_process, args=(self.virtual_microscopes[m], getattr(self, f"{m}_show_img_pipe"))).start()
+                image_writer = ImageWriter(self, self.virtual_microscopes[m].data_buffer, m).save_image if self.is_save else None
+                threading.Thread(target=self.simplified_data_process, args=(self.virtual_microscopes[m], getattr(self, f"{m}_show_img_pipe"), image_writer)).start()
 
         elif command == "update_setting":
             """

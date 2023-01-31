@@ -341,22 +341,23 @@ class TestCameraSettingController():
         '''
         pass
 
-    def test_update_number_of_pixels(self):
-        '''
-        This might not work as we expect TODO need to do a further deep dive, moving on for now
-        '''
-        
-        # import time
-        # Setup/Call
-        # self.camera_settings.mode_widgets['Sensor'].set('Light-Sheet')
-        # self.camera_settings.mode_widgets['Pixels'].set(12)
+    @pytest.mark.parametrize('mode', ['single', 'live', 'customized', 'projection', 'z-stack', 'stop'])
+    def test_update_number_of_pixels(self, mode):
+        import random
 
-        # # Check
-        # time.sleep(11)
-        # res = self.camera_settings.parent_controller.pop()
-        # if res == 'update_setting':
-        #     res1 = self.camera_settings.parent_controller.pop()
-        # assert res == 'update_setting'
-        # assert res1 == 'number_of_pixels'
-        # assert self.camera_settings.camera_setting_dict['number_of_pixels'] == 12
-        pass
+        self.camera_settings.populate_experiment_values()
+
+        self.camera_settings.mode = mode
+        
+        self.camera_settings.mode_widgets['Pixels'].set("")
+        assert self.camera_settings.number_of_pixels != ""
+        assert self.camera_settings.camera_setting_dict['number_of_pixels'] != ""
+
+        n_pixels = random.randint(1,100)
+        self.camera_settings.mode_widgets['Pixels'].set(n_pixels)
+
+        # Check
+        assert self.camera_settings.number_of_pixels == int(n_pixels)
+        if mode != 'live' and mode != 'stop':
+            assert self.camera_settings.camera_setting_dict['number_of_pixels'] == n_pixels
+            

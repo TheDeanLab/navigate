@@ -544,8 +544,14 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
     def _focusout_validate(self, **kwargs):
         valid = True
         value = self.get()
-        max_val = self.cget("to")
-        min_val = self.cget("from")
+        try:
+            max_val = round(Decimal(self.cget("to")), 16)
+            min_val = round(Decimal(self.cget("from")), 16)
+        except InvalidOperation:
+            max_val = self.cget("to")
+            min_val = self.cget("from")
+            print(f"Either min_val or max_val couldn't be case to a Decimal. min_val: {min_val} max_val: {max_val}")
+
         # Check for error upon leaving widget
         if value.strip() == "" and self.required:
             self.error.set("A value is required")
@@ -565,12 +571,13 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
 
         # Checking if greater than minimum
         if value < min_val:
-            self.error.set("Value is too low (min {})".format(min_val))
+            self.error.set(f"Value is too low (min {min_val:.3f})")
             valid = False
 
         # Checking if less than max
         if value > max_val:
-            self.error.set("Value is too high (max {})".format(max_val))
+            self.error.set(f"Value is too high (max {max_val:.3f})")
+            valid = False
 
         return valid
 

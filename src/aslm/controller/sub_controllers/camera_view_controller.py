@@ -349,7 +349,6 @@ class CameraViewController(GUIController):
             stage_position["y"] += offset_y
 
         # Place the stage position in the multi-position table.
-        print("Marking position at: ", stage_position)
         self.parent_controller.execute("mark_position", stage_position)
 
     def calculate_offset(self):

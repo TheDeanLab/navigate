@@ -713,13 +713,9 @@ class Controller:
             __________
             args[0] : dict
                 dict = {'x': value, 'y': value, 'z': value, 'theta': value, 'f': value}
+                values are in float64
             """
-            print("received mark position", args[0])
-            current_positions = self.multiposition_tab_controller.get_positions()
-            current_positions[len(current_positions)] = args[0]
-            print("current positions", current_positions)
-            # TODO: Figure out why this does not work.
-            self.multiposition_tab_controller.set_positions(current_positions)
+            self.multiposition_tab_controller.append_position(args[0])
 
         elif command == "resolution":
             """Changes the resolution mode and zoom position.

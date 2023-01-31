@@ -288,6 +288,24 @@ class MultiPositionController(GUIController):
         >>> add_stage_position()
         """
         position = self.parent_controller.execute("get_stage_position")
+        self.append_position(position)
+
+    def append_position(self, position):
+        """Append a position to the Multi-Position Acquisition Interface.
+
+        Parameters
+        ----------
+        position : dict
+            position in the format of {axis: value}
+
+        Returns
+        -------
+        None
+
+        Example
+        -------
+        >>> append_position(position)
+        """
         temp = list(map(lambda k: position[k], position))
         self.table.model.df = self.table.model.df.append(
             pd.DataFrame([temp], columns=list("XYZRF")), ignore_index=True
@@ -296,5 +314,4 @@ class MultiPositionController(GUIController):
         self.table.update_rowcolors()
         self.table.redraw()
         self.table.tableChanged()
-
         self.show_verbose_info("add current stage position to position list")

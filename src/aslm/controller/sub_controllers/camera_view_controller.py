@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -193,8 +194,9 @@ class CameraViewController(GUIController):
     def update_display_state(self, event):
         """Image Display Combobox Called.
 
-        Sets self.display_state to desired display format.  Toggles state of slider widget. Sets number of
-        positions.
+        Sets self.display_state to desired display format.
+        Toggles state of slider widget.
+        Sets number of positions.
 
         Parameters
         ----------
@@ -335,8 +337,34 @@ class CameraViewController(GUIController):
         else:
             self.menu.entryconfig("Move Here", state="disabled")
 
-    def move_stage(self):
-        """Move the stage according to the position the user clicked."""
+    def mark_position(self):
+        """Marks the current position of the microscope in
+        the multi-position acquisition table."""
+        offset_x, offset_y = self.calculate_offset()
+        stage_position = self.parent_controller.execute("get_stage_position")
+        if stage_position is not None:
+            stage_position["x"] -= offset_x
+            stage_position["y"] += offset_y
+
+        # Place the stage position in the multi-position table.
+        print("Marking position at: ", stage_position)
+        self.parent_controller.execute("mark_position", stage_position)
+
+    def calculate_offset(self):
+        """Calculates the offset of the image.
+
+        Parameters
+        ----------
+        event : tkinter event
+            The tkinter event that triggered the function.
+
+        Returns
+        -------
+        offset_x : int
+            The offset of the image in x.
+        offset_y : int
+            The offset of the image in y.
+        """
         current_center_x = (self.zoom_rect[0][0] + self.zoom_rect[0][1]) / 2
         current_center_y = (self.zoom_rect[1][0] + self.zoom_rect[1][1]) / 2
 
@@ -362,6 +390,12 @@ class CameraViewController(GUIController):
             * self.canvas_height_scale
             * pixel_size
         )
+
+        return offset_x, offset_y
+
+    def move_stage(self):
+        """Move the stage according to the position the user clicked."""
+        offset_x, offset_y = self.calculate_offset()
 
         self.show_verbose_info(
             f"Try moving stage by {offset_x} in x and {offset_y} in y"
@@ -412,13 +446,26 @@ class CameraViewController(GUIController):
         --------
         >>> self.process_image()
         """
-        self.digital_zoom()  # self.image -> self.zoom_image.
-        self.detect_saturation()  # self.zoom_image -> self.zoom_image
-        self.down_sample_image()  # self.zoom_image -> self.down_sampled_image
-        self.scale_image_intensity()  # self.down_sampled_image  -> self.down_sampled_image
-        self.add_crosshair()  # self_down_sampled_image -> self.cross_hair_image
-        self.apply_LUT()  # self_cross_hair_image -> self.cross_hair_image)
-        self.populate_image()  # self.cross_hair_image -> display...
+        # self.image -> self.zoom_image.
+        self.digital_zoom()
+
+        # self.zoom_image -> self.zoom_image
+        self.detect_saturation()
+
+        # self.zoom_image -> self.down_sampled_image
+        self.down_sample_image()
+
+        # self.down_sampled_image  -> self.down_sampled_image
+        self.scale_image_intensity()
+
+        # self_down_sampled_image -> self.cross_hair_image
+        self.add_crosshair()
+
+        # self_cross_hair_image -> self.cross_hair_image)
+        self.apply_LUT()
+
+        # self.cross_hair_image -> display...
+        self.populate_image()
 
     def mouse_wheel(self, event):
         """Digitally zooms in or out on the image upon scroll wheel event.
@@ -463,7 +510,8 @@ class CameraViewController(GUIController):
     def digital_zoom(self):
         """Apply digital zoom.
 
-        The x and y positions are between 0 and the canvas width and height respectively.
+        The x and y positions are between 0
+        and the canvas width and height respectively.
 
         """
         self.zoom_rect = self.zoom_rect - self.zoom_offset
@@ -518,9 +566,15 @@ class CameraViewController(GUIController):
         """Update the max counts in the camera view.
 
         Function gets the number of frames to average from the VIEW.
-        If frames to average == 0 or 1, provides the maximum value from the last acquired data.
-        If frames to average >1, initializes a temporary array, and appends each subsequent image to it.
-        Once the number of frames to average has been reached, deletes the first image in.
+        If frames to average == 0 or 1,
+        provides the maximum value from the last acquired data.
+
+        If frames to average >1, initializes a temporary array,
+        and appends each subsequent image to it.
+
+        Once the number of frames to average has been reached,
+        deletes the first image in.
+
         Reports the rolling average.
         """
         self.rolling_frames = int(self.image_metrics["Frames"].get())
@@ -601,7 +655,11 @@ class CameraViewController(GUIController):
     def initialize_non_live_display(self, buffer, microscope_state, camera_parameters):
         """Initialize the non-live display.
 
-        Starts image and slice counter, number of channels, number of slices, images per volume, and image volume.
+        Starts image and slice counter,
+        number of channels,
+        number of slices,
+        images per volume,
+        and image volume.
 
         Parameters
         ----------
@@ -614,7 +672,8 @@ class CameraViewController(GUIController):
 
         Example
         -------
-        >>> self.initialize_non_live_display(buffer, microscope_state, camera_parameters)
+        >>> self.initialize_non_live_display(buffer,
+        >>> microscope_state, camera_parameters)
         """
         self.image_counter = 0
         self.slice_index = 0
@@ -689,7 +748,8 @@ class CameraViewController(GUIController):
             else:
                 self.channel_index = 0
                 print(
-                    "Camera View Controller - Cannot identify proper channel for per_stack imaging mode."
+                    "Camera View Controller - "
+                    "Cannot identify proper channel for per_stack imaging mode."
                 )
 
             self.slice_index = self.image_counter - (
@@ -706,7 +766,7 @@ class CameraViewController(GUIController):
             if self.slice_index == self.total_images_per_volume:
                 self.slice_index = 0
 
-        # print(self.channel_index, self.slice_index) 
+        # print(self.channel_index, self.slice_index)
 
     def retrieve_image_slice_from_volume(self, slider_index, channel_display_index):
         """Retrieve image slice from volume.
@@ -744,8 +804,11 @@ class CameraViewController(GUIController):
     def display_image(self, image, microscope_state, images_received=0):
         """Display an image using the LUT specified in the View.
 
-        If Autoscale is selected, automatically calculates the min and max values for the data.
-        If Autoscale is not selected, takes the user values as specified in the min and max counts.
+        If Autoscale is selected, automatically calculates
+        the min and max values for the data.
+
+        If Autoscale is not selected, takes the user values
+        as specified in the min and max counts.
 
         Parameters
         ----------
@@ -767,12 +830,15 @@ class CameraViewController(GUIController):
 
         # Place image in memory
         # TODO: This is the slow part
-        # self.image_volume[:, :, self.slice_index, self.channel_index] = image[:, ]       # copy
+        # self.image_volume[:, :, self.slice_index,
+        # self.channel_index] = image[:, ] # copy
 
         if self.transpose:
             self.image = image.T
         else:
-            self.image = image  # self.image_volume[:, :, self.slice_index, self.channel_index]  # pass by reference
+            self.image = image
+            # self.image_volume[:, :, self.slice_index, self.channel_index]
+            # pass by reference
 
         if self._snr_selected:
             self.image = compute_signal_to_noise(
@@ -803,7 +869,8 @@ class CameraViewController(GUIController):
         Returns
         -------
         self.apply_cross_hair_image : np.arrays
-            2D image, scaled between 0 and 1 with cross-hair if self.apply_cross_hair == True
+            2D image, scaled between 0 and 1 with
+            cross-hair if self.apply_cross_hair == True
         """
         self.cross_hair_image = np.copy(self.down_sampled_image)
         if self.apply_cross_hair:
@@ -844,8 +911,11 @@ class CameraViewController(GUIController):
 
         # Specify the saturated values in the red channel
         if np.any(self.saturated_pixels):
-            # Saturated pixels is an array of True False statements same size as the image.
-            # Pull out the red image from the RGBA, set saturated pixels to 1, put back into array.
+            # Saturated pixels is an array of True or
+            # False statements same size as the image.
+
+            # Pull out the red image from the RGBA
+            # Set saturated pixels to 1, put back into array.
             red_image = self.cross_hair_image[:, :, 2]
             red_image[self.saturated_pixels] = 1
             self.cross_hair_image[:, :, 2] = red_image
@@ -904,8 +974,11 @@ class CameraViewController(GUIController):
     def toggle_min_max_buttons(self):
         """Checks the value of the autoscale widget.
 
-        If enabled, the min and max widgets are disabled and the image intensity is autoscaled.
-        If disabled, miu and max widgets are enabled, and image intensity scaled.
+        If enabled, the min and max widgets are
+        disabled and the image intensity is autoscaled.
+
+        If disabled, miu and max widgets are
+        enabled, and image intensity scaled.
         """
         self.autoscale = self.image_palette["Autoscale"].get()
         if self.autoscale is True:  # Autoscale Enabled

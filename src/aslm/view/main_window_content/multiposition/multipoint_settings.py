@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -44,7 +45,7 @@ logger = logging.getLogger(p)
 
 class multipoint_frame(ttk.Labelframe):
     def __init__(self, settings_tab, *args, **kwargs):
-        text_label = "Multi-position Acquisition"
+        text_label = "Multi-Position Acquisition"
         ttk.Labelframe.__init__(self, settings_tab, text=text_label, *args, **kwargs)
 
         # Formatting
@@ -55,21 +56,21 @@ class multipoint_frame(ttk.Labelframe):
 
         # Save Data Label
         self.laser_label = ttk.Label(self, text="Enable")
-        self.laser_label.grid(
-            row=0, column=0, sticky=(tk.NSEW), padx=(4, 1), pady=(4, 6)
-        )
+        self.laser_label.grid(row=0, column=0, sticky=tk.NSEW, padx=(4, 1), pady=(4, 6))
 
         # Save Data Checkbox
         self.on_off = tk.BooleanVar()
         self.save_check = ttk.Checkbutton(self, text="", variable=self.on_off)
-        self.save_check.grid(row=0, column=1, sticky=(tk.NSEW), pady=(4, 6))
+        self.save_check.grid(row=0, column=1, sticky=tk.NSEW, pady=(4, 6))
 
         # Getters
 
     def get_variables(self):
         """
-        This function returns a dictionary of all the variables that are tied to each widget name.
-        The key is the widget name, value is the variable associated.
+        This function returns a dictionary of all the
+        variables that are tied to each widget name.
+        The key is the widget name,
+        value is the variable associated.
         """
         variables = {}
         for key, widget in self.inputs.items():

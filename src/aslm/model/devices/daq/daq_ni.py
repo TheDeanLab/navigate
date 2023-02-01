@@ -101,6 +101,12 @@ class NIDAQ(DAQBase):
         self.camera_trigger_task.triggers.start_trigger.cfg_dig_edge_start_trig(
             trigger_source
         )
+        print(f"n_timepoints is {n_timepoints}")
+        if self.configuration['experiment']['MicroscopeState']['image_mode'] == 'confocal-projection':
+            n_timepoints = self.configuration['experiment']['MicroscopeState']['timepoints']
+            n_timepoints *= self.configuration['experiment']['MicroscopeState']['n_plane']
+            print(f"times equals {self.configuration['experiment']['MicroscopeState']['n_plane']} is {n_timepoints}")
+            self.camera_trigger_task.timing.cfg_implicit_timing(sample_mode=nidaqmx.constants.AcquisitionType.FINITE, samps_per_chan=int(n_timepoints))
 
     def create_master_trigger_task(self):
         """Set up the DO master trigger task."""

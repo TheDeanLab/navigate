@@ -40,8 +40,8 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 REGEX_DICT = {
-    "float": "(^-?$)|(^-?[0-9]+\.?[0-9]*$)",
-    "float_nonnegative": "(^$)|(^[0-9]+\.?[0-9]*$)",
+    "float": "(^-?$)|(^-?[0-9]+\\.?[0-9]*$)",
+    "float_nonnegative": "(^$)|(^[0-9]+\\.?[0-9]*$)",
     "int": "^-?[0-9]*$",
     "int_nonnegative": "^[0-9]*$",
 }

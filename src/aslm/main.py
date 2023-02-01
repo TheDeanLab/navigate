@@ -64,7 +64,7 @@ def main():
         --synthetic_hardware
         --sh
         --debug
-        --CPU
+        --GPU
         --config_file
         --experiment_file
         --waveform_constants_path
@@ -96,7 +96,7 @@ def main():
         logging_path,
     ) = evaluate_parser_input_arguments(args)
 
-    log_setup("logging.yml")
+    log_setup("logging.yml", logging_path)
     use_gpu = identify_gpu(args)
 
     Controller(

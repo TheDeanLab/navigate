@@ -62,6 +62,8 @@ def evaluate_parser_input_arguments(args):
         Path to remote focusing and galvo waveform constants file
     rest_api_path
         Path to REST API file
+    logging_path
+        Path to non-default logging location
 
     """
     # Retrieve the Default Configuration paths
@@ -106,7 +108,7 @@ def evaluate_parser_input_arguments(args):
         )
         logging_path = args.logging_config
     else:
-        logging_path = None  # TODO: What should the default be?
+        logging_path = None
 
     return (
         configuration_path,
@@ -128,19 +130,23 @@ def identify_gpu(args):
     Returns
     -------
     use_gpu : bool
-        Boolean for whether or not CUDA compatible GPU is present.
+        True if GPU is available and user has requested it
 
+    Examples
+    --------
+    >>> args = argparse.Namespace()
+    >>> args.GPU = True
+    >>> identify_gpu(args)
+    True
     """
-    use_gpu = False
-    if args.CPU:
-        pass
-    else:
-        if platform.system() != "Darwin":
-            import tensorflow as tf
 
-            number_gpus = len(tf.config.list_physical_devices("GPU"))
-            if number_gpus > 0:
-                use_gpu = True
+    use_gpu = False
+    if args.GPU and platform.system() != "Darwin":
+        import tensorflow as tf
+
+        number_gpus = len(tf.config.list_physical_devices("GPU"))
+        if number_gpus > 0:
+            use_gpu = True
     return use_gpu
 
 
@@ -178,13 +184,11 @@ def create_parser():
     )
 
     input_args.add_argument(
-        "--CPU",
+        "--GPU",
         required=False,
         default=False,
         action="store_true",
-        help="Forces software to use CPU for analytical operations.  "
-        "Overrides the automatic selection of a CUDA GPU if it is present by"
-        " TensorFlow.",
+        help="Forces software to use GPU for analytical operations.",
     )
 
     # Non-Default Configuration and Experiment Input Arguments

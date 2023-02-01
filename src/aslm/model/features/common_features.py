@@ -353,7 +353,7 @@ class ZStackAcquisition:
             self.current_position_idx = 0
             # restore z
             self.model.move_stage(
-                {"z_abs": self.restore_z, "f_abs": self.restore_f}, wait_until_done=True
+                {"z_abs": self.restore_z, "f_abs": self.restore_f}, wait_until_done=False
             )  # Update position
             return True
 

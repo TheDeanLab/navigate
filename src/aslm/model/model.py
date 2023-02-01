@@ -227,7 +227,8 @@ class Model:
                 )
             ],
             "projection": [{"name": PrepareNextChannel}],
-            "confocal-projection" : [{"name": PrepareNextChannel}, {"name": ConProAcquisition}]
+            "confocal-projection" : [{"name": PrepareNextChannel}, {"name": ConProAcquisition}],
+            "customized": []
         }
 
     def update_data_buffer(self, img_width=512, img_height=512):
@@ -364,9 +365,14 @@ class Model:
             ]
             self.prepare_acquisition()
             # load features
-            self.signal_container, self.data_container = load_features(
-                self, self.acquisition_modes_feature_setting[self.imaging_mode]
-            )
+            if self.imaging_mode == "customized":
+                if self.addon_feature is None:
+                    self.addon_feature = self.acquisition_modes_feature_setting["single"]
+                self.signal_container, self.data_container = load_features(self, self.addon_feature)
+            else:
+                self.signal_container, self.data_container = load_features(
+                    self, self.acquisition_modes_feature_setting[self.imaging_mode]
+                )
 
             if self.imaging_mode == "single":
                 self.configuration["experiment"]["MicroscopeState"][
@@ -471,19 +477,23 @@ class Model:
                 delattr(self, "data_container")
 
             if type(args[0]) == int:
+                self.addon_feature = None
                 if args[0] != 0:
+                    self.addon_feature = self.feature_list[args[0] - 1]
                     self.signal_container, self.data_container = load_features(
-                        self, self.feature_list[args[0] - 1]
+                        self, self.addon_feature
                     )
             elif type(args[0]) == str:
                 try:
                     if len(args) > 1:
+                        self.addon_feature = [{"name": globals()[args[0]], "args": (args[1],)}]
                         self.signal_container, self.data_container = load_features(
-                            self, [[{"name": globals()[args[0]], "args": (args[1],)}]]
+                            self, self.addon_feature
                         )
                     else:
+                        self.addon_feature = [{"name": globals()[args[0]]}]
                         self.signal_container, self.data_container = load_features(
-                            self, [[{"name": globals()[args[0]]}]]
+                            self, self.addon_feature
                         )
                 except KeyError:
                     self.logger.debug(
@@ -535,7 +545,6 @@ class Model:
     def stop_stage(self):
         """Stop the stages."""
         self.active_microscope.stop_stage()
-
         ret_pos_dict = self.get_stage_position()
         update_stage_dict(self, ret_pos_dict)
 
@@ -557,6 +566,7 @@ class Model:
             self.image_writer.close()
 
         self.active_microscope.end_acquisition()
+        self.addon_feature = None
 
     def run_data_process(self, num_of_frames=0, data_func=None):
         """Run the data process.

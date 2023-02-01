@@ -142,7 +142,7 @@ class PIStage(StageBase):
         try:
             self.stop()
             logger.debug("PI connection closed")
-        except GCSError as e:  # except BaseException:
+        except (AttributeError, GCSError) as e:  # except BaseException:
             print("Error while disconnecting the PI stage")
             logger.exception(f"Error while disconnecting the PI stage - {e}")
             raise
@@ -226,6 +226,8 @@ class PIStage(StageBase):
         """
 
         for ax, n in zip(self.axes, self.pi_axes):
+            if f"{ax}_abs" not in move_dictionary:
+                continue
             success = self.move_axis_absolute(ax, n, move_dictionary)
 
         if wait_until_done is True:

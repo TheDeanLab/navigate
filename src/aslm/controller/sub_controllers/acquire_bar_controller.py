@@ -64,7 +64,11 @@ class AcquireBarController(GUIController):
             "Alignment": "alignment",
             "Projection": "projection",
             "Confocal-Projection": "confocal-projection",
+            "Customized": "customized"
         }
+
+        self.view.pull_down["values"] = list(self.mode_dict.keys())
+        self.view.pull_down.current(0)
 
         # gui event bind
         self.view.acquire_btn.config(command=self.launch_popup_window)
@@ -113,11 +117,11 @@ class AcquireBarController(GUIController):
         if microscope_state["is_multiposition"] is False:
             number_of_positions = 1
         else:
-            number_of_positions = len(microscope_state["stage_positions"])
+            number_of_positions = len(self.parent_controller.configuration["experiment"]["MultiPositions"]["stage_positions"])
 
         if mode == "single":
             number_of_slices = 1
-        elif mode == "live":
+        elif mode == "live" or mode == "customized":
             number_of_slices = 1
         elif mode == "projection":
             number_of_slices = 1
@@ -137,7 +141,7 @@ class AcquireBarController(GUIController):
         if images_received > 0:
             # Update progress bars according to imaging mode.
             if stop is False:
-                if mode == "live":
+                if mode == "live" or mode == "customized":
                     self.view.CurAcq.start()
                     self.view.OvrAcq.start()
 
@@ -248,15 +252,15 @@ class AcquireBarController(GUIController):
             self.parent_controller.execute("stop_acquire")
 
         elif self.is_save and self.mode != "live":
-            acquire_pop = AcquirePopUp(self.view)
+            self.acquire_pop = AcquirePopUp(self.view)
             buttons = (
-                acquire_pop.get_buttons()
+                self.acquire_pop.get_buttons()
             )  # This holds all the buttons in the popup
-            widgets = acquire_pop.get_widgets()
+            widgets = self.acquire_pop.get_widgets()
 
             # Configure the button callbacks on the popup window
-            buttons["Cancel"].config(command=lambda: acquire_pop.popup.dismiss())
-            buttons["Done"].config(command=lambda: self.launch_acquisition(acquire_pop))
+            buttons["Cancel"].config(command=lambda: self.acquire_pop.popup.dismiss())
+            buttons["Done"].config(command=lambda: self.launch_acquisition(self.acquire_pop))
 
             # Configure drop down callbacks, will update save settings when file type is
             # changed

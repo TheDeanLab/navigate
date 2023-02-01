@@ -42,7 +42,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class help_popup:
+class HelpPopup:
     """
     #### Class creates the popup that provides list of hot keys.
     """

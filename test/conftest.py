@@ -30,106 +30,115 @@
 # POSSIBILITY OF SUCH DAMAGE.
 # """
 
+# Standard Library Imports
+import tkinter as tk
+
+# Third Party Imports
 import pytest
+
+# Local Imports
 
 
 @pytest.fixture(scope="package")
 def dummy_model():
+    """Dummy model for testing.
+
+    Returns
+    -------
+    DummyModel
+        Dummy model for testing.
+    """
     from aslm.model.dummy import DummyModel
 
     model = DummyModel()
-
     return model
 
 
-@pytest.fixture(scope="package")
-def model():
-    from types import SimpleNamespace
-    from pathlib import Path
+@pytest.fixture(scope="session")
+def dummy_view():
+    """Dummy view for testing.
 
-    from aslm.model.model import Model
-    from multiprocessing import Manager, Queue
-    from aslm.config.config import load_configs
-    from aslm.log_files.log_functions import log_setup
-    
-    log_setup("logging.yaml")
+    Creates a dummy view for the controller tests.
+     Will be deleted post test session
 
-    # Use configuration files that ship with the code base
-    configuration_directory = Path.joinpath(
-        Path(__file__).resolve().parent.parent, "src", "aslm", "config"
-    )
-    configuration_path = Path.joinpath(configuration_directory, "configuration.yaml")
-    experiment_path = Path.joinpath(configuration_directory, "experiment.yml")
-    etl_constants_path = Path.joinpath(configuration_directory, "etl_constants.yml")
-    rest_api_path = Path.joinpath(configuration_directory, "rest_api_config.yml")
-
-    event_queue = Queue(100)
-    manager = Manager()
-
-    configuration = load_configs(
-        manager,
-        configuration=configuration_path,
-        experiment=experiment_path,
-        etl_constants=etl_constants_path,
-        rest_api_config=rest_api_path,
-    )
-    model = Model(
-        USE_GPU=False,
-        args=SimpleNamespace(synthetic_hardware=True),
-        configuration=configuration,
-        event_queue=event_queue,
-    )
-
-    return model
-
-
-@pytest.fixture(scope="package")
-def root():
-    import tkinter as tk
+    Returns:
+        tkinter.Tk: Dummy view
+    """
+    from aslm.view.main_application_window import MainApp
 
     root = tk.Tk()
-    yield root
+    view = MainApp(root)
+    root.update()
+    yield view
     root.destroy()
 
 
 @pytest.fixture(scope="package")
-def splash_screen(root):
-    from aslm.view.splash_screen import SplashScreen
+def dummy_controller(dummy_view):
+    """Dummy controller for testing.
 
-    splash_screen = SplashScreen(root, "./icon/splash_screen_image.png")
+    Fixture that will mock controller functions called by sub controllers
 
-    return splash_screen
+    Returns
+    -------
+    DummyController
+        Dummy controller for testing.
+    """
+    from aslm.model.dummy import DummyController
+
+    controller = DummyController(dummy_view)
+    return controller
 
 
-@pytest.fixture(scope="package")
-def controller(root, splash_screen):
-    from types import SimpleNamespace
-    from pathlib import Path
+# @pytest.fixture(scope="package")
+# def root():
+#     import tkinter as tk
 
-    from aslm.controller.controller import Controller
-    from aslm.log_files.log_functions import log_setup
-    
-    log_setup("logging.yaml")
+#     root = tk.Tk()
+#     yield root
+#     root.destroy()
 
-    # Use configuration files that ship with the code base
-    configuration_directory = Path.joinpath(
-        Path(__file__).resolve().parent.parent, "src", "aslm", "config"
-    )
-    configuration_path = Path.joinpath(configuration_directory, "configuration.yaml")
-    experiment_path = Path.joinpath(configuration_directory, "experiment.yml")
-    etl_constants_path = Path.joinpath(configuration_directory, "etl_constants.yml")
-    rest_api_path = Path.joinpath(configuration_directory, "rest_api_config.yml")
 
-    controller = Controller(
-        root,
-        splash_screen,
-        configuration_path,
-        experiment_path,
-        etl_constants_path,
-        rest_api_path,
-        False,
-        SimpleNamespace(synthetic_hardware=True),
-    )
+# @pytest.fixture(scope="package")
+# def splash_screen(root):
+#     from aslm.view.splash_screen import SplashScreen
 
-    yield controller
-    controller.execute("exit")
+#     splash_screen = SplashScreen(root, "./icon/splash_screen_image.png")
+
+#     return splash_screen
+
+
+# @pytest.fixture(scope="package")
+# def controller(root, splash_screen):
+#     from types import SimpleNamespace
+#     from pathlib import Path
+
+#     from aslm.controller.controller import Controller
+
+#     # Use configuration files that ship with the code base
+#     configuration_directory = Path.joinpath(
+#         Path(__file__).resolve().parent.parent, "src", "aslm", "config"
+#     )
+#     configuration_path = Path.joinpath(configuration_directory, "configuration.yaml")
+#     experiment_path = Path.joinpath(configuration_directory, "experiment.yml")
+#     waveform_constants_path = Path.joinpath(configuration_directory,
+#                                       "waveform_constants.yml")
+#     rest_api_path = Path.joinpath(configuration_directory, "rest_api_config.yml")
+
+#     controller = Controller(
+#         root,
+#         splash_screen,
+#         configuration_path,
+#         experiment_path,
+#         waveform_constants_path,
+#         rest_api_path,
+#         False,
+#         SimpleNamespace(synthetic_hardware=True),
+#     )
+
+#     yield controller
+#     controller.execute("exit")
+
+# @pytest.fixture(scope="package")
+# def model(controller):
+#     return controller.model

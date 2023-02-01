@@ -148,7 +148,7 @@ class WaveformPopupController(GUIController):
         Update the widget ranges and precisions based on the current resolution mode.
         """
         # TODO:
-        if self.resolution == "high":
+        if self.resolution == "high" or self.resolution == "Nanoscale":
             precision = -3
             increment = 0.001
         else:
@@ -196,10 +196,6 @@ class WaveformPopupController(GUIController):
             self.widgets[galvo + " Freq"].widget.configure(from_=0)
             self.widgets[galvo + " Freq"].widget.configure(increment=increment)
             self.widgets[galvo + " Freq"].widget.set_precision(precision)
-
-            if d.get("amplitude") is None:
-                self.widgets[galvo + " Amp"].widget["state"] = "disabled"
-                self.widgets[galvo + " Freq"].widget["state"] = "disabled"
 
         # The galvo by default uses a sawtooth waveform. However, sometimes we have a resonant galvo.
         # In the case of the resonant galvo, the amplitude must be zero and only the offset can be

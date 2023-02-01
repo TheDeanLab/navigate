@@ -101,7 +101,7 @@ class NIDAQ(DAQBase):
         self.camera_trigger_task.triggers.start_trigger.cfg_dig_edge_start_trig(
             trigger_source
         )
-        print(f"n_timepoints is {n_timepoints}")
+
         if self.configuration['experiment']['MicroscopeState']['image_mode'] == 'confocal-projection':
             n_timepoints = self.configuration['experiment']['MicroscopeState']['timepoints']
             n_timepoints *= self.configuration['experiment']['MicroscopeState']['n_plane']

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2023  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -29,6 +29,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import math
 from typing import Optional
 
 from skimage import filters
@@ -90,7 +91,7 @@ def has_tissue(
 
 
 def find_tissue_boundary_2d(
-    image_data: npt.ArrayLike, mag_ratio: Optional[float] = 1.0, resample: bool = True
+    image_data: npt.ArrayLike, mag_ratio: Optional[float] = 1.0
 ) -> list:
     """
     Find all pixels containing tissue, based on an Otsu threshold. Optionally,
@@ -102,19 +103,17 @@ def find_tissue_boundary_2d(
         Image
     mag_ratio : float
         Ratio between pixel sizes of current over target tiles.
-    resample : bool
-        Return boundary resampled at size of [x*mag_ratio for x in image_data.shape].
 
     Returns
     -------
     boundary : list
-        List of xy pixel positions containing tissue.
+        List of boundaries of tissue by row of downsampled image.
     """
 
     # Threshold
     thresh_img = image_data > filters.threshold_otsu(image_data)
 
-    if resample:
+    if mag_ratio > 1:
         ds_img = downscale_local_mean(thresh_img, (mag_ratio, mag_ratio))
     else:
         ds_img = image_data
@@ -123,7 +122,7 @@ def find_tissue_boundary_2d(
     idx_x, idx_y = np.where(ds_img)
 
     # Assume square image
-    m = int(image_data.shape[0] / mag_ratio)
+    m = math.ceil(image_data.shape[0] / mag_ratio)
     # n = math.ceil(image_data.shape[1] / mag_ratio)
     boundary = [None] * m
     for x, y in zip(idx_x, idx_y):
@@ -163,8 +162,6 @@ def binary_detect(
     m, n = img_data.shape
     m = int(m / width)
     n = int(n / width)
-
-    print(f"m: {m} n: {n}")
 
     def binary_search_func_left(row, left, right):
         """Binary search function."""

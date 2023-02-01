@@ -145,7 +145,7 @@ class AcquireBarController(GUIController):
                     self.view.CurAcq.start()
                     self.view.OvrAcq.start()
 
-                elif mode == "z-stack" or "confocal-projection":
+                elif mode == "z-stack" or mode == "confocal-projection":
                     top_percent_complete = 100 * (
                         images_received / top_anticipated_images
                     )

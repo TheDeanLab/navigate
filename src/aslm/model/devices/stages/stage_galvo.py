@@ -260,6 +260,9 @@ class GalvoNIStage(StageBase):
             "trigger_source": self.trigger_source,
             "waveform": self.waveform_dict,
         }
+
+        # TODO: Force an update of the waveform after writing, if in live mode or z-stack.
+
         return True
 
     def move_absolute(self, move_dictionary, wait_until_done=False):

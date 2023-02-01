@@ -114,14 +114,13 @@ class VolumeSearch:
             self.model.configuration["experiment"]["MicroscopeState"]["step_size"]
         )
 
-        # f_start = float(
-        #     self.model.configuration["experiment"]["MicroscopeState"]["start_focus"]
-        # )
-        # f_end = float(
-        #     self.model.configuration["experiment"]["MicroscopeState"]["end_focus"]
-        # )
-        # TODO: focus step size
-        self.f_step_size = self.z_step_size  # (f_end - f_start) / self.z_steps
+        f_start = float(
+            self.model.configuration["experiment"]["MicroscopeState"]["start_focus"]
+        )
+        f_end = float(
+            self.model.configuration["experiment"]["MicroscopeState"]["end_focus"]
+        )
+        self.f_step_size = (f_end - f_start) / self.z_steps
 
         self.curr_z_index = int(self.z_steps / 2)
 

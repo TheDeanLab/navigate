@@ -265,16 +265,17 @@ class ChannelSettingController(GUIController):
 
             setting_dict = self.channel_setting_dict[channel_key]
 
-            update_setting_dict(setting_dict, widget_name)
+            r = update_setting_dict(setting_dict, widget_name)
 
             if self.mode == "live":
                 # call central controller
                 if self.event_id:
                     self.view.after_cancel(self.event_id)
-                self.event_id = self.view.after(
-                    500,
-                    lambda: self.parent_controller.execute("update_setting", "channel"),
-                )
+                if r:
+                    self.event_id = self.view.after(
+                        500,
+                        lambda: self.parent_controller.execute("update_setting", "channel"),
+                    )
 
             self.show_verbose_info("channel setting has been changed")
 

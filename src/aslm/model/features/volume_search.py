@@ -147,7 +147,6 @@ class VolumeSearch:
         return self.end_flag
 
     def init_data_func(self):
-        print("Initializing")
         # Establish current and target pixel sizes
         microscope_name = self.model.active_microscope_name
         curr_zoom = self.model.configuration["experiment"]["MicroscopeState"]["zoom"]
@@ -172,15 +171,6 @@ class VolumeSearch:
         self.target_grid_pixels = int(img_width // self.mag_ratio)
         # The target image size in microns
         self.target_grid_width = img_width * target_pixel_size
-
-        print(
-            f"img_width: {img_width} mag_ratio: {self.mag_ratio} target_grid_pixels: "
-            f"{self.target_grid_pixels} target_grid_width: {self.target_grid_width} "
-        )
-        print(
-            f"current_scope: {microscope_name} target_scope: {self.target_resolution}"
-        )
-        print(f"current_resolution: {curr_zoom} target_resolution: {self.target_zoom}")
 
         # For each axis, establish the offset between this image and the target
         # image as the difference in the physical offsets of the two microscopes
@@ -218,7 +208,6 @@ class VolumeSearch:
         self.boundary = {}
 
     def data_func(self, frame_ids):
-        print(f"Data: {frame_ids}")
         for idx in frame_ids:
             img_data = self.model.data_buffer[idx]
             # TODO: make sure set the right threshold_value in
@@ -253,7 +242,6 @@ class VolumeSearch:
             self.has_tissue_queue.put(self.has_tissue)
 
     def end_data_func(self):
-        print(f"End? {self.end_flag}")
         if self.end_flag:
             direction = True
             positions = []

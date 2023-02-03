@@ -34,7 +34,7 @@ import numpy as np
 # https://iquilezles.org/articles/distfunctions/
 
 
-def volume_from_sdf(sdf, N, pixel_size=1):
+def volume_from_sdf(sdf, N, pixel_size=1, subsample_z=1):
     """
     Generate an (N, N, N) image from sdf.
 
@@ -47,6 +47,8 @@ def volume_from_sdf(sdf, N, pixel_size=1):
         Length of volume axis.
     pixel_size : float
         Rescale the image. Scaling must match object.
+    subsample_z : int
+        Return only the values every subsample slices.
 
     Returns
     -------
@@ -61,8 +63,9 @@ def volume_from_sdf(sdf, N, pixel_size=1):
     128//2+29 in z, 128//2-15 to 128//2+14 in x and y.
     """
     # Evaluate the SDF at the center of each pixel
-    x = np.arange(-N // 2 + 0.5 * pixel_size, N // 2 + 0.5 * pixel_size, 1)
-    X, Y, Z = np.meshgrid(x, x, x)
+    x = (np.arange(-N // 2, N // 2) + 0.5) * pixel_size
+    z = (np.arange(-N // 2, N // 2, subsample_z) + 0.5) * pixel_size
+    X, Y, Z = np.meshgrid(x, x, z)
 
     return sdf(np.vstack([X.ravel(), Y.ravel(), Z.ravel()])).reshape(N, N, -1).T
 

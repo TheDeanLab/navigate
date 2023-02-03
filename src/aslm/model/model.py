@@ -48,6 +48,7 @@ from aslm.model.features.common_features import (
     FindTissueSimple2D,
     PrepareNextChannel,
     LoopByCount,
+    ConProAcquisition,
 )
 from aslm.model.features.feature_container import load_features
 from aslm.model.features.restful_features import IlastikSegmentation
@@ -226,6 +227,7 @@ class Model:
                 )
             ],
             "projection": [{"name": PrepareNextChannel}],
+            "confocal-projection" : [{"name": PrepareNextChannel}, {"name": ConProAcquisition}],
             "customized": []
         }
 

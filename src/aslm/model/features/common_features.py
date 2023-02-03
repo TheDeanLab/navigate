@@ -366,6 +366,126 @@ class ZStackAcquisition:
         self.model.active_microscope.prepare_next_channel()
 
 
+class ConProAcquisition:   # don't have the multi-position part for now
+    def __init__(self, model):
+
+        self.model = model
+
+        self.scanrange = 0
+        self.n_plane = 0
+        self.offset_start = 0
+        self.offset_end = 0
+        self.offset_step_size = 0
+        self.timepoints = 0
+
+        self.need_to_move_new_plane = True
+        self.offset_update_time = 0
+
+        self.conpro_cycling_mode = 'per_stack'
+        self.channels = [1]
+
+        self.config_table = {'signal': {'init': self.pre_signal_func,
+                                        'main': self.signal_func,
+                                        'end': self.signal_end},
+                             'node': {'node_type': 'multi-step',
+                                      'device_related': True}}
+
+        self.model.move_stage({'z_abs': 0})
+
+    def pre_signal_func(self):
+        import copy
+        microscope_state = self.model.configuration['experiment']['MicroscopeState']
+
+        self.conpro_cycling_mode = microscope_state['conpro_cycling_mode']
+        # get available channels
+        self.channels = microscope_state["selected_channels"]
+        self.current_channel_in_list = 0
+
+        self.n_plane = int(microscope_state['n_plane'])
+
+        self.start_offset = float(copy.copy(microscope_state['offset_start']))
+        self.end_offset = float(copy.copy(microscope_state['offset_end']))
+        if self.n_plane == 1:
+            self.offset_step_size = 0
+        else:
+            self.offset_step_size = (self.end_offset - self.start_offset) / float(self.n_plane-1)
+        
+        self.timepoints = 1  # int(microscope_state['timepoints'])
+
+        self.need_update_offset = True
+        self.current_offset = self.start_offset
+        self.offset_update_time = 0
+
+        # self.model.move_stage({'z_abs': 0})
+    
+    def signal_func(self):
+        # print(f"Signal with time {self.offset_update_time} and offset {self.current_offset}")
+        if self.model.stop_acquisition:
+            return False
+
+        # if self.need_update_offset:
+        #     # update offset
+        #     # self.model.pause_data_thread()CH00_000000
+
+        #     # self.model.update_offset({'offset_abs': self.current_offset}, wait_until_done=True)
+            
+        #     # Update the offset by changing the dictionary value used by GalvoNIStage
+        #     self.model.configuration['experiment']['MicroscopeState']['offset_start'] = self.current_offset
+        #     self.model.configuration['experiment']['MicroscopeState']['offset_end'] = self.current_offset
+            
+        #     # Call a modification of the waveform
+        #     self.model.move_stage({'z_abs': 0})
+
+        #     # self.model.resume_data_thread()
+
+        if self.conpro_cycling_mode != 'per_stack':
+            # update channel for each z position in 'per_slice'
+            self.update_channel()
+            self.need_update_offset = (self.current_channel_in_list == 0)
+
+        # in 'per_slice', update the offset if all the channels have been acquired
+        if self.need_update_offset:
+            # next z, f position
+            # self.current_offset += self.offset_step_size
+
+            # update offset moved time
+            self.offset_update_time += 1
+
+        return True
+
+    def signal_end(self):
+        # end this node
+        if self.model.stop_acquisition:
+            self.model.configuration['experiment']['MicroscopeState']['offset_start'] = self.start_offset
+            self.model.configuration['experiment']['MicroscopeState']['offset_end'] = self.end_offset
+            return True
+        
+        # decide whether to update offset
+        if self.offset_update_time >= self.n_plane:
+            self.timepoints -=1
+
+            self.model.configuration['experiment']['MicroscopeState']['offset_start'] = self.start_offset
+            self.model.configuration['experiment']['MicroscopeState']['offset_end'] = self.end_offset
+
+            self.current_offset = self.start_offset
+
+            self.offset_update_time = 0
+
+        if self.timepoints == 0:
+            return True
+
+        return False
+
+    def generate_meta_data(self, *args):
+        # print('This frame: z stack', self.model.frame_id)
+        return True
+
+    def update_channel(self):
+        self.current_channel_in_list = (
+            self.current_channel_in_list + 1
+        ) % self.channels
+        self.model.active_microscope.prepare_next_channel()
+
 class FindTissueSimple2D:
     def __init__(
         self, model, overlap=0.1, target_resolution="Nanoscale", target_zoom="N/A"

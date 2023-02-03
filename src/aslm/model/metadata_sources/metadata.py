@@ -118,14 +118,12 @@ class Metadata:
         self.shape_y = int(
             self.configuration["experiment"]["CameraParameters"]["y_pixels"]
         )
-        self.shape_z = (
-            int(self.configuration["experiment"]["MicroscopeState"]["number_z_steps"])
-            if (
-                self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-                == "z-stack"
-            )
-            else 1
-        )
+        if (self.configuration["experiment"]["MicroscopeState"]["image_mode"] == "z-stack"):
+            self.shape_z = int(self.configuration["experiment"]["MicroscopeState"]["number_z_steps"])
+        elif (self.configuration["experiment"]["MicroscopeState"]["image_mode"] == "confocal-projection"):
+            self.shape_z = int(self.configuration["experiment"]["MicroscopeState"]["n_plane"])
+        else:
+            self.shape_z = 1
         self.shape_t = int(
             self.configuration["experiment"]["MicroscopeState"]["timepoints"]
         )
@@ -152,7 +150,7 @@ class Metadata:
     def set_stack_order_from_configuration_experiment(self) -> None:
         self._per_stack = (
             self.configuration["experiment"]["MicroscopeState"]["stack_cycling_mode"]
-            == "per_stack"
+            == "per_stack" or self.configuration["experiment"]["MicroscopeState"]["conpro_cycling_mode"] == "per_stack"
         )
 
     @property

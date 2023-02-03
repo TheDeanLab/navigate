@@ -227,8 +227,11 @@ class Model:
                 )
             ],
             "projection": [{"name": PrepareNextChannel}],
-            "confocal-projection" : [{"name": PrepareNextChannel}, {"name": ConProAcquisition}],
-            "customized": []
+            "confocal-projection": [
+                {"name": PrepareNextChannel},
+                {"name": ConProAcquisition},
+            ],
+            "customized": [],
         }
 
     def update_data_buffer(self, img_width=512, img_height=512):
@@ -367,8 +370,12 @@ class Model:
             # load features
             if self.imaging_mode == "customized":
                 if self.addon_feature is None:
-                    self.addon_feature = self.acquisition_modes_feature_setting["single"]
-                self.signal_container, self.data_container = load_features(self, self.addon_feature)
+                    self.addon_feature = self.acquisition_modes_feature_setting[
+                        "single"
+                    ]
+                self.signal_container, self.data_container = load_features(
+                    self, self.addon_feature
+                )
             else:
                 self.signal_container, self.data_container = load_features(
                     self, self.acquisition_modes_feature_setting[self.imaging_mode]
@@ -486,7 +493,9 @@ class Model:
             elif type(args[0]) == str:
                 try:
                     if len(args) > 1:
-                        self.addon_feature = [{"name": globals()[args[0]], "args": (args[1],)}]
+                        self.addon_feature = [
+                            {"name": globals()[args[0]], "args": (args[1],)}
+                        ]
                         self.signal_container, self.data_container = load_features(
                             self, self.addon_feature
                         )
@@ -556,6 +565,9 @@ class Model:
         #
         """
         self.is_acquiring = False
+
+        self.active_microscope.end_acquisition()
+
         if hasattr(self, "signal_container"):
             self.signal_container.cleanup()
             delattr(self, "signal_container")
@@ -565,7 +577,6 @@ class Model:
         if self.image_writer is not None:
             self.image_writer.close()
 
-        self.active_microscope.end_acquisition()
         self.addon_feature = None
 
     def run_data_process(self, num_of_frames=0, data_func=None):

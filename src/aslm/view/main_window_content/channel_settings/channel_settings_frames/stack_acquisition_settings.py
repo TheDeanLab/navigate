@@ -124,7 +124,7 @@ class stack_acq_frame(ttk.Labelframe):
             parent=self.pos_slice,
             input_class=ValidatedSpinbox,
             input_var=tk.DoubleVar(),
-            input_args={"from_": 0.1, "to": 10000, "increment": 0.5, "width": 6},
+            input_args={"width": 6},
         )
         self.inputs["step_size"].grid(row=1, column=2, sticky="N", padx=6)
 

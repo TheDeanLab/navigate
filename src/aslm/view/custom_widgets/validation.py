@@ -475,23 +475,16 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         min_var=None,
         max_var=None,
         focus_update_var=None,
-        # from_="-Infinity",
-        # to="Infinity",
         required=False,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
-        # , from_=from_, to=to,
 
         """ Initialize the spinbox """
         self.resolution = str(kwargs.get("increment", "1.0"))  # Number put into spinbox
         self.precision = self._get_precision()
         self.variable = kwargs.get("textvariable") or tk.DoubleVar
         self.required = required
-
-        # # parse the kwargs to get the min and max values
-        # self.min = from_
-        # self.max = to
 
         # Dynamic range checker
         if min_var:
@@ -543,29 +536,6 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
 
         nums_after = self.resolution.find(".")
         return (-1) * len(self.resolution[nums_after + 1 :])
-
-    # def _key_invalid(self, char, index, current, proposed, action, **kwargs):
-    #     new_prop = '0'
-    #     cursor_val = 0
-    #     if proposed == '.':
-    #         new_prop = '0.0'
-    #         cursor_val = 3
-    #     elif proposed == '-':
-    #         new_prop = '-0'
-    #         cursor_val = 2
-    #     else:
-    #         if proposed[0:1:1] == '-0' and len(proposed) > 2:
-    #             new_prop = '-' + proposed[2:]
-    #             cursor_val = self.index(tk.END)
-    #         proposed = Decimal(new_prop)
-    #         proposed_precision = proposed.as_tuple().exponent
-    #         if any([
-    #             (proposed > self.cget('to')),
-    #             (proposed_precision < self.precision)
-    #         ]):
-    #             return False
-    #     self.variable.set(new_prop)
-    #     self.icursor(cursor_val)
 
     def _key_validate(self, char, index, current, proposed, action, **kwargs):
         """Validate the key pressed

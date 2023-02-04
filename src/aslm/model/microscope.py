@@ -32,9 +32,6 @@
 import logging
 from multiprocessing.managers import ListProxy
 
-# Third Party Imports
-
-# Local Imports
 from aslm.model.device_startup_functions import (
     start_mirror,
     start_camera,
@@ -48,7 +45,6 @@ from aslm.model.device_startup_functions import (
 )
 from aslm.tools.common_functions import build_ref_name
 
-# Logging Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
@@ -76,15 +72,14 @@ class Microscope:
             return
 
         device_ref_dict = {
-            # TODO: List proxy setup. Camera called later. @zach @annie.
-            # 'camera': ['type', 'serial_number'],
-            'filter_wheel': ['type'],
-            'zoom': ['type', 'servo_id'],
-            'shutter': ['type', 'channel'],
-            'remote_focus_device': ['type', 'channel'],
-            'galvo': ['type', 'channel'],
-            'lasers': ['wavelength'],
-            'mirror': ['type']
+            "camera": ["type", "serial_number"],
+            "filter_wheel": ["type"],
+            "zoom": ["type", "servo_id"],
+            "shutter": ["type", "channel"],
+            "remote_focus_device": ["type", "channel"],
+            "galvo": ["type", "channel"],
+            "lasers": ["wavelength"],
+            "mirror": ["type"]
         }
         device_name_dict = {"lasers": "wavelength"}
 
@@ -170,21 +165,21 @@ class Microscope:
                     )
 
         # cameras (handle camera list similar to stages...)
-        camera_devices = self.configuration['configuration']['microscopes'][self.microscope_name]['camera']['hardware']
-        if type(camera_devices) != ListProxy:
-            camera_devices = [camera_devices]
-        for i, device_config in enumerate(camera_devices):
-            device_ref_name = build_ref_name('_', device_config['type'], device_config['serial_number'])            
-            if device_ref_name not in devices_dict['camera']:
-                logger.debug(f'Camera {device_ref_name} has not been loaded!')
-                raise Exception('No camera device!')
-            print(f"{device_ref_name} : {devices_dict['camera'][device_ref_name]}")
-            self.cameras[device_ref_name] = start_camera(self.microscope_name, devices_dict['camera'][device_ref_name], self.configuration, i, is_synthetic)
+        # camera_devices = self.configuration['configuration']['microscopes'][self.microscope_name]['camera']['hardware']
+        # if type(camera_devices) != ListProxy:
+        #     camera_devices = [camera_devices]
+        # for i, device_config in enumerate(camera_devices):
+        #     device_ref_name = build_ref_name('_', device_config['type'], device_config['serial_number'])            
+        #     if device_ref_name not in devices_dict['camera']:
+        #         logger.debug(f'Camera {device_ref_name} has not been loaded!')
+        #         raise Exception('No camera device!')
+        #     print(f"{device_ref_name} : {devices_dict['camera'][device_ref_name]}")
+        #     self.cameras[device_ref_name] = start_camera(self.microscope_name, devices_dict['camera'][device_ref_name], self.configuration, i, is_synthetic)
 
-        self.camera = list(self.cameras.values())[0] # just use the first one for now...
+        # self.camera = list(self.cameras.values())[0] # just use the first one for now...
 
-        print('>>> Use Camera:')
-        print(self.camera.camera_controller._serial_number)
+        # print('>>> Use Camera:')
+        # print(self.camera.camera_controller._serial_number)
 
         # stages
         stage_devices = self.configuration["configuration"]["microscopes"][

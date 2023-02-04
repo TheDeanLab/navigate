@@ -434,22 +434,64 @@ class ValidatedCombobox(ValidatedMixin, ttk.Combobox):
 # If given a min_var, max_var, or focus_update_var then the spinbox range will update
 # dynamically when those valuse are changed (can be used to link to other widgets)
 class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
+    """A spinbox that validates input and can be linked to other widgets
+
+    Parameters
+    ----------
+    master : tk.Widget
+        The parent widget
+    from_ : int or float
+        The minimum value of the spinbox
+    to : int or float
+        The maximum value of the spinbox
+    increment : int or float
+        The increment of the spinbox
+    min_var : tk.Variable
+        A variable that will be used to update the minimum value of the spinbox
+    max_var : tk.Variable
+        A variable that will be used to update the maximum value of the spinbox
+    focus_update_var : tk.Variable
+        A variable that will be used to update the value of the spinbox when it loses
+        focus
+    no_negative : bool
+        If True, the spinbox will not allow negative values
+    no_decimal : bool
+        If True, the spinbox will not allow decimal values
+    required : bool
+        If True, the spinbox will require a value
+    precision : int
+        The number of decimal places allowed in the spinbox
+
+    Returns
+    -------
+    ValidatedSpinbox
+        A spinbox that validates input and can be linked to other widgets
+
+    """
+
     def __init__(
         self,
         *args,
         min_var=None,
         max_var=None,
         focus_update_var=None,
-        from_="-Infinity",
-        to="Infinity",
+        # from_="-Infinity",
+        # to="Infinity",
         required=False,
         **kwargs,
     ):
-        super().__init__(*args, from_=from_, to=to, **kwargs)
+        super().__init__(*args, **kwargs)
+        # , from_=from_, to=to,
+
+        """ Initialize the spinbox """
         self.resolution = str(kwargs.get("increment", "1.0"))  # Number put into spinbox
         self.precision = self._get_precision()
         self.variable = kwargs.get("textvariable") or tk.DoubleVar
         self.required = required
+
+        # # parse the kwargs to get the min and max values
+        # self.min = from_
+        # self.max = to
 
         # Dynamic range checker
         if min_var:
@@ -462,15 +504,44 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         self.bind("<FocusOut>", self._set_focus_update_var)
 
     def set_precision(self, prec):
-        """
+        """Set the precision of the spinbox
+
         Given a precision it will update the spinboxes ability to handle more or less
         precision for validation. This is separate from the increment value.
+
+        Parameters
+        ----------
+        prec : int
+            The number of decimal places allowed in the spinbox
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> spinbox.set_precision(2)
         """
         self.precision = prec
 
     def _get_precision(self):
-        nums_after = self.resolution.find(".")
+        """Get the precision of the spinbox
 
+        Returns
+        -------
+        int
+            The number of decimal places allowed in the spinbox
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> spinbox._get_precision()
+        """
+
+        nums_after = self.resolution.find(".")
         return (-1) * len(self.resolution[nums_after + 1 :])
 
     # def _key_invalid(self, char, index, current, proposed, action, **kwargs):
@@ -497,6 +568,32 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
     #     self.icursor(cursor_val)
 
     def _key_validate(self, char, index, current, proposed, action, **kwargs):
+        """Validate the key pressed
+
+        Parameters
+        ----------
+        char : str
+            The character of the key pressed
+        index : int
+            The index of the cursor
+        current : str
+            The current value of the spinbox
+        proposed : str
+            The proposed value of the spinbox
+        action : str
+            The action of the key pressed
+        **kwargs
+            Additional keyword arguments
+
+        Returns
+        -------
+        bool
+            True if the key is valid, False if not
+
+        Examples
+        --------
+        >>> spinbox._key_validate('1', 0, '0', '1', 'insert')
+        """
 
         valid = True
         min_val = self.cget("from")
@@ -542,15 +639,34 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         return valid
 
     def _focusout_validate(self, **kwargs):
+        """Validate the spinbox when it loses focus
+
+        Parameters
+        ----------
+        **kwargs
+            Additional keyword arguments
+
+        Returns
+        -------
+        bool
+            True if the spinbox is valid, False if not
+
+        Examples
+        --------
+        >>> spinbox._focusout_validate()
+        """
         valid = True
         value = self.get()
+        max_val = self.cget("to")
+        min_val = self.cget("from")
         try:
-            max_val = round(Decimal(self.cget("to")), 16)
-            min_val = round(Decimal(self.cget("from")), 16)
+            max_val = round(Decimal(max_val), 16)
+            min_val = round(Decimal(min_val), 16)
         except InvalidOperation:
-            max_val = self.cget("to")
-            min_val = self.cget("from")
-            print(f"Either min_val or max_val couldn't be case to a Decimal. min_val: {min_val} max_val: {max_val}")
+            print(
+                f"Either min_val or max_val couldn't be case to a Decimal. "
+                f"min_val: {min_val} max_val: {max_val}"
+            )
 
         # Check for error upon leaving widget
         if value.strip() == "" and self.required:

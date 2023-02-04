@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -47,20 +48,29 @@ logger = logging.getLogger(p)
 
 
 """
-Base design courtesy of: Python GUI Programming - A Complete Reference Guide by Alan D. Moore and B. M. Harwani
-If you need a reference for the types of arguments that different widgets accept you can use the below:
+Base design courtesy of: Python GUI Programming
+A Complete Reference Guide by Alan D. Moore and B. M. Harwani
+
+If you need a reference for the types of arguments that
+different widgets accept you can use the below:
 https://tkdocs.com/shipman/
-It will help with creating the input_args and label_args dictionaries if you so choose to use them
+
+It will help with creating the input_args and
+label_args dictionaries if you so choose to use them
 
 Kwargs can be used to communicate arguments to the parent thru the super init function
 To use the kwargs argument:
 treat the kwargs as an array or dict of arguments
 So if you wanted to pass a width and height to the parent you can do so with
-kwargs.update(width=900, height=600) #do it this way to override any values currently there otherwise funky behavior could occur
+kwargs.update(width=900, height=600)
+
+do it this way to override any values currently there
+otherwise funky behavior could occur
 super().__init__(parent, **kwargs) # this passes the two arguments above
 
 User Guide for the Class
-If you need reference for default functions in python: https://www.geeksforgeeks.org/default-arguments-in-python/
+If you need reference for default functions in python:
+https://www.geeksforgeeks.org/default-arguments-in-python/
 
 Lets assume the parent in this case is Settings Frame
 
@@ -75,20 +85,41 @@ LabelInput( settings,
 
 Please note that these values are arbitrary and just to show usage.
 
-Typically this class will be called as a child of a LabelFrame for a related grouping of data or fields.
+Typically this class will be called as a child of a
+LabelFrame for a related grouping of data or fields.
+
 Each widget you need to create will be a new instance of the LabelInput class.
 The widget within a LabelInput class can be directly referenced with self.widget,
-this allows base tkinter calls to be made on the internal widget (ex grid or when setting readonly)
+this allows base tkinter calls to be made on the internal widget
+(ex grid or when setting readonly)
 """
 
 
 class LabelInput(ttk.Frame):
-    """Widget class that contains label and input together."""
+    """Widget class that contains label and input together.
 
-    # The below takes a parent frame, the position of the label(left or top defaults to left),
-    # type of widget (defaults to entry), the input variable used, input arguments, label arguments and
-    # finally the keyword arguments that will be passed to the super
-    # constructor for the frame
+    Parameters
+    ----------
+    parent : tk.Frame
+        The parent frame that the widget will be placed in
+    label_pos : str
+        The position of the label, defaults to left
+    input_class : tk.Widget
+        The type of widget to be used, defaults to entry
+    input_var : tk.Variable
+        The variable to be used for the widget
+    input_args : dict
+        The arguments to be passed to the widget
+    label_args : dict
+        The arguments to be passed to the label
+    kwargs : dict
+        The keyword arguments to be passed to the super constructor
+
+    Returns
+    -------
+    None
+
+    """
 
     def __init__(
         self,
@@ -105,7 +136,7 @@ class LabelInput(ttk.Frame):
         super().__init__(parent, **kwargs)
 
         # creating access point to input args for input type constructor (uses
-        # these args to create the combobox etc)
+        # these args to create the combobox etc.)
         input_args = input_args or {}
 
         # same for label args (args to create label etc)
@@ -136,12 +167,14 @@ class LabelInput(ttk.Frame):
             self.label.grid(row=0, column=0, sticky=(tk.W + tk.E))
             input_args["textvariable"] = input_var
 
-        """This will call the passed in widget types constructor, the **input_args is the dict passed in with the arguments needed for
+        """This will call the passed in widget types constructor,
+        the **input_args is the dict passed in with the arguments needed for
         that type if desired, its totally optional"""
         self.widget = input_class(self, **input_args)
-        # This if will change the pos of the label based on what is passed in
-        # top will put label on top of widge, while left will put it on the
-        # left
+
+        """ This if will change the pos of the label based on what is passed in
+        top will put label on top of widge, while left will put it on the
+        left"""
         if label_pos == "top":
             self.widget.grid(row=1, column=0, sticky=(tk.W + tk.E))
             self.columnconfigure(0, weight=1)
@@ -157,13 +190,29 @@ class LabelInput(ttk.Frame):
 
     # def grid(self, sticky=(tk.E + tk.W), **kwargs):
     #     """
-    #     #### Creating a custom grid function that will default LabelInput.grid() to sticky=tk.W + tk.E
+    #     #### Creating a custom grid function that
+    #     will default LabelInput.grid() to sticky=tk.W + tk.E
     #     """
     #     super().grid(sticky=sticky, **kwargs)
 
     def get(self):
-        """
-        #### Creating a generic get function to catch all types of widgets, this uses the try except block for instances when tkintervariables fails
+        """Returns the value of the input widget
+
+        Creating a generic get function to catch all types of widgets,
+        this uses the try except block for instances when tkintervariables fails
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        value : str
+            The value of the input widget
+
+        Examples
+        --------
+        >>> value = self.get()
         """
         try:
             if self.variable:
@@ -182,13 +231,39 @@ class LabelInput(ttk.Frame):
             return ""
 
     def get_variable(self):
-        """
-        # return varaible tied with the widget if any
+        """Returns the variable of the input widget
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        variable : tk variable
+            The variable of the input widget
+
+        Examples
+        --------
+        >>> variable = self.get_variable()
         """
         return self.variable
 
     def set(self, value, *args, **kwargs):
-        """Creating a generic set function to complement the above get"""
+        """Sets the value of the input widget
+
+        Parameters
+        ----------
+        value : str
+            The value to set the input widget to
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> self.set(value)
+        """
         if isinstance(self.variable, tk.BooleanVar):
             # This will cast the value to bool if the variable is a Tk
             # BooleanVar, bc Boolean.Var().set() can only accept bool type
@@ -223,10 +298,25 @@ class LabelInput(ttk.Frame):
             self.widget.insert(0, value)
 
     def set_values(self, values):
-        """
-        #### Values should be a list of strings or numbers that you want to be options in the specific widget
-        """
+        """This is a function to set the values of a combobox, it will
+        automatically set the values and set the first value as the current
 
+        Values should be a list of strings or numbers that
+        you want to be options in the specific widget
+
+        Parameters
+        ----------
+        values : list
+            list of values to be set in the widget
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> widget.set_values(['a', 'b', 'c'])
+        """
         if self.input_class in (
             ttk.Combobox,
             tk.Listbox,
@@ -245,4 +335,26 @@ class LabelInput(ttk.Frame):
             )
 
     def pad_input(self, left, up, right, down):
+        """This is a function to pad the input widget, it will
+        automatically set the padding of the widget
+
+        Parameters
+        ----------
+        left : int
+            left padding
+        up : int
+            up padding
+        right : int
+            right padding
+        down : int
+            down padding
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> widget.pad_input(10, 10, 10, 10)
+        """
         self.widget.grid(padx=(left, right), pady=(up, down))

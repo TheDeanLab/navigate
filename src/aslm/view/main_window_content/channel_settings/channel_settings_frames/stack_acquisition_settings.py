@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -28,14 +29,18 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+
+# Standard Library Imports
 import tkinter as tk
 from tkinter import ttk
 import logging
+
+# Third Party Imports
+
+# Local Imports
 from aslm.view.custom_widgets.hovermixin import HoverButton
 from aslm.view.custom_widgets.validation import ValidatedSpinbox, ValidatedCombobox
 from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
-from aslm.view.custom_widgets.hover import hover
-
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -43,6 +48,8 @@ logger = logging.getLogger(p)
 
 
 class stack_acq_frame(ttk.Labelframe):
+    """This class is the frame that holds the stack acquisition settings."""
+
     def __init__(self, settings_tab, *args, **kwargs):
         # Init Frame
         text_label = "Stack Acquisition Settings (" + "\N{GREEK SMALL LETTER MU}" + "m)"
@@ -61,23 +68,21 @@ class stack_acq_frame(ttk.Labelframe):
         self.cycling = ttk.Frame(self)
 
         # Gridding Each Holder Frame
-        self.pos_slice.grid(row=0, column=0, sticky=(tk.NSEW))
-        self.cycling.grid(row=1, column=0, sticky=(tk.NSEW))
+        self.pos_slice.grid(row=0, column=0, sticky=tk.NSEW)
+        self.cycling.grid(row=1, column=0, sticky=tk.NSEW)
 
         # Start Pos Frame (Vertically oriented)
         start_names = ["start_position", "start_focus"]
         start_labels = ["Pos", "Foc"]
-
         self.start_label = ttk.Label(self.pos_slice, text="Start")
         self.start_label.grid(row=0, column=0, sticky="S")
-
         for i in range(len(start_names)):
             self.inputs[start_names[i]] = LabelInput(
                 parent=self.pos_slice,
                 label=start_labels[i],
                 input_class=ValidatedSpinbox,
                 input_var=tk.DoubleVar(),
-                input_args={"from_": -50000.0, "increment": 0.5, "width": 6},
+                input_args={"from_": 0.0, "to": 10000, "increment": 0.5, "width": 6},
             )
             self.inputs[start_names[i]].grid(
                 row=i + 1, column=0, sticky="N", pady=2, padx=(6, 0)
@@ -93,7 +98,6 @@ class stack_acq_frame(ttk.Labelframe):
         # End Pos Frame (Vertically Oriented)
         end_names = ["end_position", "end_focus"]
         end_labels = ["Pos", "Foc"]
-
         self.end_label = ttk.Label(self.pos_slice, text="End")
         self.end_label.grid(row=0, column=1, sticky="S")
         for i in range(len(end_names)):
@@ -102,14 +106,14 @@ class stack_acq_frame(ttk.Labelframe):
                 label=end_labels[i],
                 input_class=ValidatedSpinbox,
                 input_var=tk.DoubleVar(),
-                input_args={"from_": -50000.0, "increment": 0.5, "width": 6},
+                input_args={"from_": 0.0, "to": 10000, "increment": 0.5, "width": 6},
             )
             self.inputs[end_names[i]].grid(
                 row=i + 1, column=1, sticky="N", pady=2, padx=(6, 0)
             )
             self.inputs[end_names[i]].label.grid(sticky="N")
 
-            # End Button
+        # End Button
         self.buttons["set_end"] = HoverButton(self.pos_slice, text="Set End Pos/Foc")
         self.buttons["set_end"].grid(row=3, column=1, sticky="N", pady=2, padx=(6, 0))
 
@@ -120,7 +124,7 @@ class stack_acq_frame(ttk.Labelframe):
             parent=self.pos_slice,
             input_class=ValidatedSpinbox,
             input_var=tk.DoubleVar(),
-            input_args={"from_": -50000.0, "increment": 0.5, "width": 6},
+            input_args={"from_": 0.1, "to": 10000, "increment": 0.5, "width": 6},
         )
         self.inputs["step_size"].grid(row=1, column=2, sticky="N", padx=6)
 
@@ -129,17 +133,14 @@ class stack_acq_frame(ttk.Labelframe):
         self.empty_label.grid(row=0, column=3, sticky="N")
         slice_names = ["number_z_steps", "abs_z_start", "abs_z_end"]
         slice_labels = ["# slices      ", "Abs Z Start", "Abs Z Stop"]
-
         for i in range(len(slice_names)):
             self.inputs[slice_names[i]] = LabelInput(
                 parent=self.pos_slice,
                 label=slice_labels[i],
                 input_class=ValidatedSpinbox,
                 input_var=tk.DoubleVar(),
-                input_args={"from_": -50000.0, "increment": 0.5, "width": 6},
+                input_args={"from_": 0.0, "increment": 0.5, "width": 6},
             )
-            # self.inputs[slice_names[i]].label.grid(sticky='E')
-            # self.inputs[slice_names[i]].widget.grid(sticky='E')
             self.inputs[slice_names[i]].widget.configure(state="disabled")
             self.inputs[slice_names[i]].grid(
                 row=i + 1, column=3, sticky="NSEW", pady=2, padx=(6, 0)
@@ -164,9 +165,21 @@ class stack_acq_frame(ttk.Labelframe):
 
     # Getters
     def get_variables(self):
-        """
-        # This function returns a dictionary of all the variables that are tied to each widget name.
+        """Returns a dictionary of the variables in the widget
+
+        This function returns a dictionary of all the variables
+        that are tied to each widget name.
         The key is the widget name, value is the variable associated.
+
+        Returns
+        -------
+        dict
+            Dictionary of the variables in the widget
+
+        Examples
+        --------
+        >>> widget = PositionSliceWidget()
+        >>> widget.get_variables()
         """
         variables = {}
         for key, widget in self.inputs.items():

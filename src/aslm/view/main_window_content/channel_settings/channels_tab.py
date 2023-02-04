@@ -52,6 +52,9 @@ from aslm.view.main_window_content.multiposition.multipoint_settings import (
 from aslm.view.main_window_content.channel_settings.channel_settings_frames.quick_launch import (
     quick_launch,
 )
+from aslm.view.main_window_content.channel_settings.channel_settings_frames.confocal_projection_settings import (
+    conpro_acq_frame,
+)
 
 
 class channels_tab(tk.Frame):
@@ -93,4 +96,10 @@ class channels_tab(tk.Frame):
         self.quick_launch = quick_launch(self)
         self.quick_launch.grid(
             row=4, column=1, columnspan=2, sticky=(tk.NSEW), padx=10, pady=10
+        )
+
+        # Confocal Projection Settings
+        self.conpro_acq_frame = conpro_acq_frame(self)
+        self.conpro_acq_frame.grid(
+            row=5, column=0, columnspan=2, sticky=(tk.NSEW), padx=10, pady=10
         )

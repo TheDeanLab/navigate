@@ -52,7 +52,6 @@ class NIDAQ(DAQBase):
     ----------
     configuration : multiprocesing.managers.DictProxy
         Global configuration of the microscope
-
     """
 
     def __init__(self, configuration):
@@ -69,6 +68,7 @@ class NIDAQ(DAQBase):
 
         self.analog_outputs = {}  # keep track of analog outputs and their waveforms
         self.analog_output_tasks = []
+        self.n_sample = None
 
     def __del__(self):
         if self.camera_trigger_task is not None:
@@ -87,6 +87,7 @@ class NIDAQ(DAQBase):
         ]["daq"]["camera_trigger_out_line"]
         self.camera_high_time = 0.004  # (self.camera_pulse_percent / 100) *
         # (exposure_time/1000)  # self.sweep_time
+        self.camera_low_time = self.sweep_time - self.camera_high_time
         self.camera_delay = (self.camera_delay_percent / 100) * (
             exposure_time / 1000
         )  # * 0.01 * self.sweep_time
@@ -94,6 +95,7 @@ class NIDAQ(DAQBase):
         self.camera_trigger_task.co_channels.add_co_pulse_chan_time(
             camera_trigger_out_line,
             high_time=self.camera_high_time,
+            low_time=self.camera_low_time,
             initial_delay=self.camera_delay,
         )
         trigger_source = self.configuration["configuration"]["microscopes"][
@@ -102,6 +104,12 @@ class NIDAQ(DAQBase):
         self.camera_trigger_task.triggers.start_trigger.cfg_dig_edge_start_trig(
             trigger_source
         )
+
+        if self.configuration['experiment']['MicroscopeState']['image_mode'] == 'confocal-projection':
+            n_timepoints = self.configuration['experiment']['MicroscopeState']['timepoints']
+            n_timepoints *= self.configuration['experiment']['MicroscopeState']['n_plane']
+            print(f"times equals {self.configuration['experiment']['MicroscopeState']['n_plane']} is {n_timepoints}")
+            self.camera_trigger_task.timing.cfg_implicit_timing(sample_mode=nidaqmx.constants.AcquisitionType.FINITE, samps_per_chan=int(n_timepoints))
 
     def create_master_trigger_task(self):
         """Set up the DO master trigger task."""
@@ -113,13 +121,12 @@ class NIDAQ(DAQBase):
             line_grouping=nidaqmx.constants.LineGrouping.CHAN_FOR_ALL_LINES,
         )
 
-    def create_analog_output_tasks(self, channel_key):
+    def create_analog_output_tasks(self, channel_key, create_new_tasks=True):
         """
         Create a single analog output task for all channels per board. Most NI DAQ cards
         have only one clock for analog output sample timing, and as such all channels
         must be grouped here.
         """
-
         self.analog_output_tasks = []
 
         # Create one analog output task per board, grouping the channels
@@ -130,47 +137,62 @@ class NIDAQ(DAQBase):
                     [x for x in self.analog_outputs.keys() if x.split("/")[0] == board]
                 )
             )
-            self.analog_output_tasks.append(nidaqmx.Task())
-            self.analog_output_tasks[-1].ao_channels.add_ao_voltage_chan(channel)
+            if create_new_tasks or self.n_sample is None:
+                self.analog_output_tasks.append(nidaqmx.Task())
+                self.analog_output_tasks[-1].ao_channels.add_ao_voltage_chan(channel)
 
-            sample_rates = list(
-                set([v["sample_rate"] for v in self.analog_outputs.values()])
-            )
-            if len(sample_rates) > 1:
-                logger.debug(
-                    "NI DAQ - Different sample rates provided for each analog channel."
-                    "Defaulting to the first sample rate provided."
+                sample_rates = list(
+                    set([v["sample_rate"] for v in self.analog_outputs.values()])
                 )
-            n_samples = list(set([v["samples"] for v in self.analog_outputs.values()]))
-            if len(n_samples) > 1:
-                logger.debug(
-                    "NI DAQ - Different number of samples provided for each analog"
-                    "channel. Defaulting to the minimum number of samples provided."
-                    "Waveforms will be clipped to this length."
-                )
-            n_sample = min(n_samples)
-            self.analog_output_tasks[-1].timing.cfg_samp_clk_timing(
-                rate=sample_rates[0],
-                sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
-                samps_per_chan=n_sample,
-            )
+                if len(sample_rates) > 1:
+                    logger.debug(
+                        "NI DAQ - Different sample rates provided for each analog channel."
+                        "Defaulting to the first sample rate provided."
+                    )
+                n_samples = list(set([v["samples"] for v in self.analog_outputs.values()]))
+                if len(n_samples) > 1:
+                    logger.debug(
+                        "NI DAQ - Different number of samples provided for each analog"
+                        "channel. Defaulting to the minimum number of samples provided."
+                        "Waveforms will be clipped to this length."
+                    )
+                self.n_sample = min(n_samples)
+                if (
+                    self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+                    == "confocal-projection"
+                ):
+                    n_timepoints = self.configuration["experiment"]["MicroscopeState"]["timepoints"]
+                    n_timepoints *= self.configuration["experiment"]["MicroscopeState"][
+                        "n_plane"
+                    ]
+                    self.analog_output_tasks[-1].timing.cfg_samp_clk_timing(
+                        rate=sample_rates[0],
+                        sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
+                        samps_per_chan=int(self.n_sample * n_timepoints),
+                    )
+                else:
+                    self.analog_output_tasks[-1].timing.cfg_samp_clk_timing(
+                        rate=sample_rates[0],
+                        sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
+                        samps_per_chan=self.n_sample,
+                    )
 
-            triggers = list(
-                set([v["trigger_source"] for v in self.analog_outputs.values()])
-            )
-            if len(triggers) > 1:
-                logger.debug(
-                    "NI DAQ - Different triggers provided for each analog channel."
-                    "Defaulting to the first trigger provided."
+                triggers = list(
+                    set([v["trigger_source"] for v in self.analog_outputs.values()])
                 )
-            self.analog_output_tasks[-1].triggers.start_trigger.cfg_dig_edge_start_trig(
-                triggers[0]
-            )
+                if len(triggers) > 1:
+                    logger.debug(
+                        "NI DAQ - Different triggers provided for each analog channel."
+                        "Defaulting to the first trigger provided."
+                    )
+                self.analog_output_tasks[-1].triggers.start_trigger.cfg_dig_edge_start_trig(
+                    triggers[0]
+                )
 
             # Write values to board
             waveforms = np.vstack(
                 [
-                    v["waveform"][channel_key][:n_sample]
+                    v["waveform"][channel_key][:self.n_sample]
                     for k, v in self.analog_outputs.items()
                     if k.split("/")[0] == board
                 ]
@@ -201,6 +223,7 @@ class NIDAQ(DAQBase):
 
     def run_acquisition(self):
         """Run DAQ Acquisition.
+
         Run the tasks for triggering, analog and counter outputs.
         The master trigger initiates all other tasks via a shared trigger
         For this to work, all analog output and counter tasks have to be started so that
@@ -211,7 +234,7 @@ class NIDAQ(DAQBase):
         self.master_trigger_task.write(
             [False, True, True, True, False], auto_start=True
         )
-        self.camera_trigger_task.wait_until_done()
+        # self.camera_trigger_task.wait_until_done()
         for task in self.analog_output_tasks:
             task.wait_until_done()
             task.stop()

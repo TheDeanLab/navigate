@@ -204,8 +204,8 @@ class TestAcquireBarController:
             making_progress = float(self.acquire_bar_controller.view.CurAcq["value"])
             ovr_progress = float(self.acquire_bar_controller.view.OvrAcq["value"])
             if mode != "projection":  # Ignoring projection until setup
-                assert making_progress > 0, "Progress bar should be moving"
-                assert ovr_progress > 0, "Progress bar should be moving"
+                assert making_progress > 0, f"Progress bar should be moving in {mode} mode (making_progress)"
+                assert ovr_progress > 0, f"Progress bar should be moving in {mode} mode (ovr_progress)"
             images_received += 1
 
         # Stopping progress bar

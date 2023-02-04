@@ -54,7 +54,6 @@ class HamamatsuOrca(CameraBase):
         Hardware device to connect to
     configuration : multiprocesing.managers.DictProxy
         Global configuration of the microscope
-
     """
 
     def __init__(self, microscope_name, device_connection, configuration):
@@ -97,8 +96,6 @@ class HamamatsuOrca(CameraBase):
         logger.info("HamamatsuOrca Initialized")
 
     def __del__(self):
-        if hasattr(self, "camera_controller"):
-            self.camera_controller.dev_close()
         logger.info("HamamatsuOrca Shutdown")
 
     @property
@@ -178,6 +175,7 @@ class HamamatsuOrca(CameraBase):
 
     def calculate_readout_time(self):
         """Calculate duration of time needed to readout an image.
+    
         Calculates the readout time and maximum frame rate according to the camera
         configuration settings.
         Assumes model C13440 with Camera Link communication from Hamamatsu.
@@ -225,6 +223,10 @@ class HamamatsuOrca(CameraBase):
             #  Progressive sensor mode operation
             max_frame_rate = 1 / (exposure_time + (vn + 10) * h)
             readout_time = exposure_time - 1 / (exposure_time + (vn + 10) * h)
+        else:
+            # TODO: make sure this works with Confocal-Projection
+            readout_time = h
+            max_frame_rate = 1.0/(exposure_time + readout_time)
 
         return readout_time, max_frame_rate
 
@@ -238,7 +240,6 @@ class HamamatsuOrca(CameraBase):
         ----------
         exposure_time : float
             Exposure time in milliseconds.
-
         """
         exposure_time = exposure_time / 1000
         return self.camera_controller.set_property_value("exposure_time", exposure_time)

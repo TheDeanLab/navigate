@@ -34,7 +34,7 @@ import logging
 import time
 from multiprocessing.managers import ListProxy
 
-# Third Party Imports
+import numpy as np
 
 # Local Imports
 from aslm.model.devices.stages.stage_base import StageBase
@@ -65,7 +65,6 @@ class GalvoNIStage(StageBase):
         Makes sure that the move is within the min and max stage limits.
     stop()
         Emergency halt of stage operation.
-
     """
 
     def __init__(self, microscope_name, device_connection, configuration, device_id=0):
@@ -102,6 +101,9 @@ class GalvoNIStage(StageBase):
         self.remote_focus_ramp_falling = configuration["configuration"]["microscopes"][
             microscope_name
         ]["remote_focus_device"]["ramp_falling_percent"]
+        self.remote_focus_delay = self.remote_focus_ramp_falling = configuration[
+            "configuration"
+        ]["microscopes"][microscope_name]["remote_focus_device"]["delay_percent"]
         self.sample_rate = self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ]["daq"]["sample_rate"]
@@ -185,11 +187,59 @@ class GalvoNIStage(StageBase):
                         sample_rate=self.sample_rate,
                         exposure_time=exposure_time,
                         sweep_time=self.sweep_time,
-                        remote_focus_delay=7.5,
+                        remote_focus_delay=self.remote_focus_delay,
                         camera_delay=self.camera_delay_percent,
                         fall=self.remote_focus_ramp_falling,
                         amplitude=amp,
                         offset=off,
+                    )
+                elif (
+                    self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+                    == "confocal-projection"
+                ):
+                    z_range = microscope_state["scanrange"]
+                    z_planes = microscope_state["n_plane"]
+                    z_offset_start = microscope_state["offset_start"]
+                    z_offset_end = (
+                        microscope_state["offset_end"]
+                        if z_planes > 1
+                        else z_offset_start
+                    )
+                    waveforms = []
+                    if z_planes > 1:
+                        offsets = (
+                            np.arange(int(z_planes))
+                            * (z_offset_end - z_offset_start)
+                            / float(z_planes - 1)
+                        )
+                    else:
+                        offsets = [z_offset_start]
+                    print(offsets)
+                    for z_offset in offsets:
+                        amp = eval(self.volts_per_micron, {"x": 0.5 * (z_range)})
+                        off = eval(self.volts_per_micron, {"x": 0.5 * (z_offset)})
+                        waveforms.append(
+                            remote_focus_ramp(
+                                sample_rate=self.sample_rate,
+                                exposure_time=exposure_time,
+                                sweep_time=self.sweep_time,
+                                remote_focus_delay=self.remote_focus_delay,
+                                camera_delay=self.camera_delay_percent,
+                                fall=self.remote_focus_ramp_falling,
+                                amplitude=amp,
+                                offset=off,
+                            )
+                        )
+                        print(waveforms[-1].shape)
+                        print(
+                            np.min(waveforms[-1]),
+                            np.mean(waveforms[-1]),
+                            np.max(waveforms[-1]),
+                        )
+                    self.waveform_dict[channel_key] = np.hstack(waveforms)
+                    self.samples = int(self.sample_rate * self.sweep_time * z_planes)
+                    print(
+                        f"Waveform with {z_planes} planes is of length {self.waveform_dict[channel_key].shape}"
                     )
                 else:
                     self.waveform_dict[channel_key] = dc_value(
@@ -210,6 +260,9 @@ class GalvoNIStage(StageBase):
             "trigger_source": self.trigger_source,
             "waveform": self.waveform_dict,
         }
+
+        # TODO: Force an update of the waveform after writing, if in live mode or z-stack.
+
         return True
 
     def move_absolute(self, move_dictionary, wait_until_done=False):

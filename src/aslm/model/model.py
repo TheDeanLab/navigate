@@ -927,7 +927,7 @@ class Model:
         ]
 
         # create virtual microscope
-        from aslm.model.devices import SyntheticDAQ, SyntheticCamera, SyntheticGalvo, SyntheticFilterWheel, SyntheticShutter, SyntheticRemoteFocus, SyntheticStage, SyntheticZoom
+        from aslm.model.devices import SyntheticDAQ, SyntheticCamera, SyntheticGalvo, SyntheticFilterWheel, SyntheticShutter, SyntheticRemoteFocus, SyntheticStage, SyntheticZoom, SyntheticMirror
         
         microscope = Microscope(microscope_name, self.configuration, {}, False, is_virtual=True)
         microscope.daq = SyntheticDAQ(self.configuration)
@@ -941,6 +941,7 @@ class Model:
             'filter_wheel': 'SyntheticFilterWheel',
             'shutter': 'SyntheticShutter',
             'remote_focus_device': 'SyntheticRemoteFocus',
+            'mirror': 'SyntheticMirror'
         }
 
         for k in microscope_config:

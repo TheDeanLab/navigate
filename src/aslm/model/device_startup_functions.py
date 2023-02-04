@@ -41,7 +41,6 @@ from multiprocessing.managers import ListProxy
  
 # Local Imports
 from aslm.tools.common_functions import build_ref_name
-# import aslm.model.devices.APIs.hamamatsu.HamamatsuAPI as HamamatsuController
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -128,21 +127,21 @@ def load_camera_connection(configuration, camera_id=0, is_synthetic=False):
     """
 
     if is_synthetic:
-        cam_type = 'SyntheticCamera'
+        cam_type = "SyntheticCamera"
     else:
-        cam_type = configuration['configuration']['hardware']['camera'][camera_id]['type']
+        cam_type = configuration["configuration"]["hardware"]["camera"][camera_id][
+            "type"
+        ]
 
-    if cam_type == 'HamamatsuOrca':
+    if cam_type == "HamamatsuOrca":
         # Locally Import Hamamatsu API and Initialize Camera Controller
-        HamamatsuController = importlib.import_module('aslm.model.devices.APIs.hamamatsu.HamamatsuAPI')
-        
-        # TODO: Cameras are loaded in arbitrary order. Explicitly define camera ID in configuration.yaml.
-        #       Remove if not going with the camera ListProxy method.
-        camera_id = configuration['configuration']['hardware']['camera'][camera_id]['id']
-        
+        HamamatsuController = importlib.import_module(
+            "aslm.model.devices.APIs.hamamatsu.HamamatsuAPI"
+        )
         return auto_redial(HamamatsuController.DCAM, (camera_id,), exception=Exception)
     elif cam_type.lower() == "syntheticcamera" or cam_type.lower() == "synthetic":
         from aslm.model.devices.camera.camera_synthetic import SyntheticCameraController
+
         return SyntheticCameraController()
     else:
         device_not_found("camera", camera_id, cam_type)
@@ -173,24 +172,25 @@ def start_camera(microscope_name, device_connection, configuration, is_synthetic
         is_synthetic=False)
     """
     if device_connection is None:
-        device_not_found(microscope_name, 'camera')
-    
-    device_config = configuration['configuration']['microscopes'][microscope_name]['camera']['hardware']
+        device_not_found(microscope_name, "camera")
+
     if is_synthetic:
-        camera_type = 'SyntheticCamera'
-    elif type(device_config) == ListProxy:
-        camera_type = device_config[id]['type']
+        cam_type = "SyntheticCamera"
     else:
-        camera_type = device_config['type']    
-    
-    if camera_type == 'HamamatsuOrca':
+        cam_type = configuration["configuration"]["microscopes"][microscope_name][
+            "camera"
+        ]["hardware"]["type"]
+
+    if cam_type == "HamamatsuOrca":
         from aslm.model.devices.camera.camera_hamamatsu import HamamatsuOrca
-        return HamamatsuOrca(microscope_name, device_connection, configuration, id)
-    elif camera_type.lower() == "syntheticcamera" or camera_type.lower() == "synthetic":
+
+        return HamamatsuOrca(microscope_name, device_connection, configuration)
+    elif cam_type.lower() == "syntheticcamera" or cam_type.lower() == "synthetic":
         from aslm.model.devices.camera.camera_synthetic import SyntheticCamera
+
         return SyntheticCamera(microscope_name, device_connection, configuration)
     else:
-        device_not_found(microscope_name, 'camera', camera_type)
+        device_not_found(microscope_name, "camera", cam_type)
 
 def load_mirror(configuration, is_synthetic=False):
     r"""Initializes the deformable mirror class on a dedicated thread.

@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -29,16 +29,14 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import cv2
 from tifffile import imread
 import numpy as np
 from scipy.signal import convolve2d
 from scipy.stats import kurtosis
-from scipy.ndimage import laplace
 
 
 def normalize_norm_l1(image):
-    r"""Calculate and normalize image by L1 norm.
+    """Calculate and normalize image by L1 norm.
 
     Parameters
     ----------
@@ -56,7 +54,7 @@ def normalize_norm_l1(image):
 
 
 def down_sample_by_sum(input_array, binning_factor=3):
-    r"""Down-sample image by taking sum of pixel neighborhood.
+    """Down-sample image by taking sum of pixel neighborhood.
 
     Implemented using a 2D convolution.
     Parameters
@@ -85,7 +83,7 @@ def brenner_method(input_array):
     image = image[1:-1] - image[:]
     print(np.shape(image))
 
-    """		
+    """
 		for (int yi = 0; yi < height * width; yi += width)
 		{
 			for (int x = 1; x < width - 1; x++)
@@ -100,7 +98,7 @@ def brenner_method(input_array):
 
 
 def get_absolute_laplace(input_array):
-    r"""Measure the absolute summed Laplace of an image.
+    """Measure the absolute summed Laplace of an image.
 
     Convolution-based.
 
@@ -162,7 +160,6 @@ def test_down_sample_by_sum_3x():
 
 
 if __name__ == "__main__":
-    import time
 
     image_path = r"/Users/S155475/Desktop/test_image.tif"
     image = imread(image_path)

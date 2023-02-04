@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -35,12 +36,11 @@ import os
 import logging
 
 # Third Party Imports
-# import numpy as np
+import numpy as np
+from tifffile import imsave
 
 # Local imports
 from aslm.model import data_sources
-
-# from aslm.tools.image import text_array
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -48,24 +48,50 @@ logger = logging.getLogger(p)
 
 
 class ImageWriter:
-    def __init__(self, model, sub_dir="", image_name=None):
-        """
-        Class for saving acquired data to disk.
+    def __init__(self, model, data_buffer=None, sub_dir="", image_name=None):
+        """Class for saving acquired data to disk.
 
         Parameters
         ----------
         model : aslm.model.model.Model
-            ASLM Model class for controlling hardware/acqusition.
+            ASLM Model class for controlling hardware/acquisition.
+        data_buffer: [SharedNDArray]
+            data_buffer will use model's default data_buffer if it's not specified
         sub_dir : str
-            Sub-directory of self.model.configuration['experiment']['Saving']['save_directory']
+            Sub-directory of self.model.configuration['experiment']
+            ['Saving']['save_directory']
             indicating where to save data
         image_writer : str
             Optionally override the generate_image_name() naming scheme.
+
+        Returns
+        -------
+        None
+
+        Attributes
+        ----------
+        model : aslm.model.model.Model
+            ASLM Model class for controlling hardware/acquisition.
+        data_source : aslm.model.data_sources.DataSource
+            Data source for saving data to disk.
+        mip_directory : str
+            Directory for saving maximum intensity projection images.
+        mip : np.ndarray
+            Maximum intensity projection image.
+        current_time_point : int
+            Current time point for saving data.
+        data_bffer: [SharedNDArray]
+            The data_buffer where images are.
+
+        Examples
+        --------
+        >>> model = aslm.model.model.Model()
+        >>> image_writer = aslm.model.image_writer.ImageWriter(model)
         """
         self.model = model
+        self.data_buffer = self.model.data_buffer if data_buffer is None else data_buffer
         self.save_directory = ""
         self.sub_dir = sub_dir
-        # self.num_of_channels = len(self.model.configuration['experiment']['MicroscopeState']['channels'].keys())
         self.num_of_channels = len(
             [
                 k
@@ -75,7 +101,6 @@ class ImageWriter:
                 if v["is_selected"]
             ]
         )
-        self.data_buffer = self.model.data_buffer
         self.current_time_point = 0
         self.config_table = {
             "signal": {},
@@ -87,13 +112,30 @@ class ImageWriter:
             self.model.configuration["experiment"]["Saving"]["save_directory"],
             self.sub_dir,
         )
+
         try:
-            # create saving folder if not exits
+            # create saving folder if it does not exist
             if not os.path.exists(self.save_directory):
                 os.makedirs(self.save_directory)
         except FileNotFoundError as e:
             logger.debug(
-                f"ASLM Image Writer - Cannot create directory {self.save_directory}. Maybe the drive does not exist?"
+                f"ASLM Image Writer - Cannot create directory {self.save_directory}. "
+                f"Maybe the drive does not exist?"
+            )
+            logger.exception(e)
+
+        # create the maximum intensity projection directory if it doesn't already exist
+        self.mip = None
+        self.mip_directory = os.path.join(self.save_directory, "MIP")
+        try:
+            # create saving folder if not exits
+            if not os.path.exists(self.mip_directory):
+                os.makedirs(self.mip_directory)
+        except FileNotFoundError as e:
+            logger.debug(
+                f"ASLM Image Writer - "
+                f"Cannot create MIP directory {self.mip_directory}. "
+                f"Maybe the drive does not exist?"
             )
             logger.exception(e)
 
@@ -120,19 +162,64 @@ class ImageWriter:
         ----------
         frame_ids : int
             Index into self.model.data_buffer.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> self.save_image(0)
         """
+
         for idx in frame_ids:
-            # data = self.model.data_buffer[idx]
-            # text_im = text_array(f"Image {idx}")
-            # data[:text_im.shape[0], :text_im.shape[1]] += text_im.astype('uint16')*np.maximum(np.max(data)//2, 1)
+            # Identify channel, z, time, and position indices
+            c_idx, z_idx, t_idx, p_idx = self.data_source._cztp_indices(self.data_source._current_frame, self.data_source.metadata.per_stack)
+
+            if c_idx == 0 and z_idx == 0:
+                # Initialize MIP array with same number of channels as the data
+                self.mip = np.ndarray(
+                    (
+                        int(self.data_source.shape_c),
+                        int(self.data_source.shape_y),
+                        int(self.data_source.shape_x),
+                    )
+                ).astype(np.uint16)
+
+            # Save data to disk
             self.data_source.write(
-                self.model.data_buffer[idx],  # data,
+                self.data_buffer[idx],
                 x=self.model.data_buffer_positions[idx][0],
                 y=self.model.data_buffer_positions[idx][1],
                 z=self.model.data_buffer_positions[idx][2],
                 theta=self.model.data_buffer_positions[idx][3],
                 f=self.model.data_buffer_positions[idx][4],
             )
+
+            # Update MIP
+            self.mip[c_idx, :, :] = np.maximum(
+                self.mip[c_idx, :, :], self.model.data_buffer[idx]
+            )
+
+            # Save the MIP
+            if (c_idx == self.data_source.shape_c - 1) and (
+                z_idx == self.data_source.shape_z - 1
+            ):
+                for c_save_idx in range(self.data_source.shape_c):
+                    mip_name = (
+                        "P"
+                        + str(p_idx).zfill(4)
+                        + "_"
+                        + "CH0"
+                        + str(c_save_idx)
+                        + "_"
+                        + str(t_idx).zfill(6)
+                        + ".tif"
+                    )
+                    imsave(
+                        os.path.join(self.mip_directory, mip_name),
+                        self.mip[c_idx, :, :],
+                    )
 
     def generate_image_name(self, current_channel, ext=".tif"):
         """
@@ -141,8 +228,25 @@ class ImageWriter:
         Parameters
         ----------
         current_channel : int
-            Index into self.model.configuration['experiment']['MicroscopeState']['channels']
+            Index into self.model.configuration['experiment']
+            ['MicroscopeState']['channels']
             of saved color channel.
+
+        ext : str
+            File extension, e.g., '.tif'
+
+        Returns
+        -------
+        str
+            File name, e.g., CH00_000000.tif
+
+        Examples
+        --------
+        >>> model = aslm.model.model.Model()
+        >>> image_writer = aslm.model.image_writer.ImageWriter(model)
+        >>> image_writer.generate_image_name(current_channel=0)
+        'CH00_000000.tif'
+
         """
         image_name = (
             "CH0"
@@ -155,10 +259,37 @@ class ImageWriter:
         return image_name
 
     def generate_meta_data(self):
-        # TODO: Is this a vestigial function? DELETE???
+        """Generate meta data for the image.
+
+        TODO: Is this a vestigial function? DELETE???
+
+        Returns
+        -------
+        dict
+            Meta data for the image.
+
+        Examples
+        --------
+        >>> model = aslm.model.model.Model()
+        >>> image_writer = aslm.model.image_writer.ImageWriter(model)
+        >>> image_writer.generate_meta_data()
+        """
         print("meta data: write", self.model.frame_id)
         return True
 
     def close(self):
-        """Close the data source we are writing to."""
+        """Close the data source we are writing to.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> self.close()
+        """
         self.data_source.close()

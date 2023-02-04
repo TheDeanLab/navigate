@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -30,12 +30,115 @@
 # POSSIBILITY OF SUCH DAMAGE.
 # """
 
+# Standard Library Imports
+import tkinter as tk
+
+# Third Party Imports
 import pytest
 
-@pytest.fixture(scope='package')
+# Local Imports
+
+
+@pytest.fixture(scope="package")
 def dummy_model():
+    """Dummy model for testing.
+
+    Returns
+    -------
+    DummyModel
+        Dummy model for testing.
+    """
     from aslm.model.dummy import DummyModel
 
     model = DummyModel()
-
     return model
+
+
+@pytest.fixture(scope="session")
+def dummy_view():
+    """Dummy view for testing.
+
+    Creates a dummy view for the controller tests.
+     Will be deleted post test session
+
+    Returns:
+        tkinter.Tk: Dummy view
+    """
+    from aslm.view.main_application_window import MainApp
+
+    root = tk.Tk()
+    view = MainApp(root)
+    root.update()
+    yield view
+    root.destroy()
+
+
+@pytest.fixture(scope="package")
+def dummy_controller(dummy_view):
+    """Dummy controller for testing.
+
+    Fixture that will mock controller functions called by sub controllers
+
+    Returns
+    -------
+    DummyController
+        Dummy controller for testing.
+    """
+    from aslm.model.dummy import DummyController
+
+    controller = DummyController(dummy_view)
+    return controller
+
+
+# @pytest.fixture(scope="package")
+# def root():
+#     import tkinter as tk
+
+#     root = tk.Tk()
+#     yield root
+#     root.destroy()
+
+
+# @pytest.fixture(scope="package")
+# def splash_screen(root):
+#     from aslm.view.splash_screen import SplashScreen
+
+#     splash_screen = SplashScreen(root, "./icon/splash_screen_image.png")
+
+#     return splash_screen
+
+
+# @pytest.fixture(scope="package")
+# def controller(root, splash_screen):
+#     from types import SimpleNamespace
+#     from pathlib import Path
+
+#     from aslm.controller.controller import Controller
+
+#     # Use configuration files that ship with the code base
+#     configuration_directory = Path.joinpath(
+#         Path(__file__).resolve().parent.parent, "src", "aslm", "config"
+#     )
+#     configuration_path = Path.joinpath(configuration_directory, "configuration.yaml")
+#     experiment_path = Path.joinpath(configuration_directory, "experiment.yml")
+#     waveform_constants_path = Path.joinpath(configuration_directory,
+#                                       "waveform_constants.yml")
+#     rest_api_path = Path.joinpath(configuration_directory, "rest_api_config.yml")
+
+#     controller = Controller(
+#         root,
+#         splash_screen,
+#         configuration_path,
+#         experiment_path,
+#         waveform_constants_path,
+#         rest_api_path,
+#         False,
+#         SimpleNamespace(synthetic_hardware=True),
+#     )
+
+#     yield controller
+#     controller.execute("exit")
+
+# @pytest.fixture(scope="package")
+# def model(controller):
+#     return controller.model

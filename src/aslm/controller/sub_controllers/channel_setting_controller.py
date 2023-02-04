@@ -32,6 +32,7 @@
 from aslm.controller.sub_controllers.widget_functions import validate_wrapper
 from aslm.controller.sub_controllers.gui_controller import GUIController
 import logging
+import tkinter as tk
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -53,6 +54,7 @@ class ChannelSettingController(GUIController):
         self.mode = "stop"
         self.in_initialization = True
         self.event_id = None
+        self.channel_setting_dict = None
 
         # add validation functions to spinbox
         for i in range(self.num):
@@ -67,6 +69,18 @@ class ChannelSettingController(GUIController):
                 channel_vals[name].trace_add("write", self.channel_callback(i, name))
 
     def set_mode(self, mode="stop"):
+        """Set the mode of the channel setting controller.
+
+        Parameters
+        ----------
+        mode : str
+            "stop" or "live"
+
+        Examples
+        --------
+        >>> self.set_mode("live")
+        """
+
         self.mode = mode
         state = "normal" if mode == "stop" else "disabled"
         state_readonly = "readonly" if mode == "stop" else "disabled"
@@ -84,12 +98,11 @@ class ChannelSettingController(GUIController):
                 self.view.defocus_spins[i].config(state=state)
 
     def initialize(self):
-        r"""Populates the laser and filter wheel options in the View.
+        """Populates the laser and filter wheel options in the View.
 
-        Parameters
-        ----------
-        config : object
-            ASLM_Configuration_Controller - config.configuration is Configurator instance of configuration.
+        Examples
+        --------
+        >>> self.initialize()
         """
         setting_dict = self.configuration_controller.channels_info
         for i in range(self.num):
@@ -98,10 +111,11 @@ class ChannelSettingController(GUIController):
         self.show_verbose_info("channel has been initialized")
 
     def populate_experiment_values(self, setting_dict):
-        """
-        # set channel values according to channel id
-        # the value should be a dict {
-        # 'channel_id': {
+        """Populates the View with the values from the setting dictionary.
+
+        Set channel values according to channel id
+        the value should be a dict {
+        'channel_id': {
             'is_selected': True(False),
             'laser': ,
             'filter': ,
@@ -109,6 +123,11 @@ class ChannelSettingController(GUIController):
             'laser_power': ,
             'interval_time':}
         }
+
+        Parameters
+        ----------
+        setting_dict : dict
+            Dictionary containing the values for the experiment.
         """
         self.channel_setting_dict = setting_dict
         prefix = "channel_"
@@ -120,6 +139,7 @@ class ChannelSettingController(GUIController):
             channel_value = setting_dict[channel]
             for name in channel_vals:
                 channel_vals[name].set(channel_value[name])
+
             # validate exposure_time, interval, laser_power
             self.view.exptime_pulldowns[channel_id].validate()
             self.view.interval_spins[channel_id].validate()
@@ -128,9 +148,26 @@ class ChannelSettingController(GUIController):
         self.show_verbose_info("channel has been set new value")
 
     def set_spinbox_range_limits(self, settings):
+        """Set the range limits for the spinboxes in the View.
+
+        Parameters
+        ----------
+        settings : dict
+            Dictionary containing the range limits for the spinboxes.
+
+            This function will set the spinbox widget's values of from_, to, step
+
+            Examples
+            --------
+            >>> settings = {
+            >>>     "exposure_time": [0.001, 10],
+            >>>     "interval_time": [0.001, 10],
+            >>>     "laser_power": [0.001, 10],
+            >>>     "defocus": [-10, 10]
+            >>> }
+            >>> self.set_spinbox_range_limits(settings)
         """
-        # this function will set the spinbox widget's values of from_, to, step
-        """
+
         temp_dict = {
             "laser_power": self.view.laserpower_pulldowns,
             "exposure_time": self.view.exptime_pulldowns,
@@ -144,11 +181,24 @@ class ChannelSettingController(GUIController):
                 widgets[i].configure(increment=settings[k]["step"])
 
     def channel_callback(self, channel_id, widget_name):
+        """Callback function for the channel widgets.
+
+        In 'live' mode (when acquire mode is set to 'continuous') and a channel is selected,
+        any change of the channel setting will influence devices instantly
+        this function will call the central controller to response user's request
+
+        Parameters
+        ----------
+        channel_id : int
+            The channel id.
+        widget_name : str
+            The name of the widget.
+
+        Examples
+        --------
+        >>> self.channel_callback(0, "laser")
         """
-        # in 'live' mode (when acquire mode is set to 'continuous') and a channel is selected,
-        # any change of the channel setting will influence devices instantly
-        # this function will call the central controller to response user's request
-        """
+
         channel_vals = self.get_vals_by_channel(channel_id)
         prefix = "channel_"
 
@@ -184,10 +234,22 @@ class ChannelSettingController(GUIController):
             return True
 
         def func(*args):
+            """The function to be called when the channel widget is changed.
+
+            Parameters
+            ----------
+            *args : tuple
+                The arguments passed to the callback function.
+            """
+
             if self.in_initialization:
                 return
 
-            if channel_vals[widget_name].get() is None:
+            try:
+                if channel_vals[widget_name].get() is None:
+                    return
+            except tk._tkinter.TclError as e:
+                logger.error(f"Tcl Error caught: trying to set position and {e}")
                 return
 
             channel_key = prefix + str(channel_id + 1)
@@ -219,8 +281,23 @@ class ChannelSettingController(GUIController):
         return func
 
     def get_vals_by_channel(self, index):
-        """
-        # this function return all the variables according channel_id
+        """Get the values of the channel widgets by channel id.
+
+        This function return all the variables according channel_id
+
+        Parameters
+        ----------
+        index : int
+            The channel id.
+
+        Returns
+        -------
+        dict
+            The values of the channel widgets.
+
+        Examples
+        --------
+        >>> self.get_vals_by_channel(0)
         """
         if index < 0 or index >= self.num:
             return {}
@@ -236,6 +313,24 @@ class ChannelSettingController(GUIController):
         return result
 
     def get_index(self, dropdown_name, value):
+        """Get the index of the value in the dropdown list.
+
+        Parameters
+        ----------
+        dropdown_name : str
+            The name of the dropdown list.
+        value : str
+            The value of the dropdown list.
+
+        Returns
+        -------
+        int
+            The index of the value in the dropdown list.
+
+        Examples
+        --------
+        >>> self.get_index("laser", "488")
+        """
         if not value:
             return -1
         if dropdown_name == "laser":

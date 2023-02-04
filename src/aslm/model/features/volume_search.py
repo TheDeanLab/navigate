@@ -74,6 +74,9 @@ class VolumeSearch:
         }
 
     def pre_signal_func(self):
+        self.model.active_microscope.current_channel = 0
+        self.model.active_microscope.prepare_next_channel()
+
         self.z_pos = float(
             self.model.configuration["experiment"]["StageParameters"]["z"]
         )

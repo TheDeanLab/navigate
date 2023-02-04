@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -39,9 +39,10 @@ logger = logging.getLogger(p)
 
 
 class AcquireBar(ttk.Frame):
-    r"""
+    """
     Class for the acquisition bar found at the top of the main application window.
-    Main function is to change acq setting and then call the acquisition top level window
+    Main function is to change acq setting and then call the acquisition top-
+    level window
     """
 
     def __init__(self, top_frame, root, *args, **kwargs):
@@ -52,23 +53,15 @@ class AcquireBar(ttk.Frame):
         tk.Grid.columnconfigure(self, "all", weight=1)
         tk.Grid.rowconfigure(self, "all", weight=1)
 
-        #  Putting bar into frame
+        # Putting bar into frame
         self.grid(row=0, column=0)
 
-        #  Acquire Button
+        # Acquire Button
         self.acquire_btn = ttk.Button(self, text="Acquire")
 
-        #  Read Only Pull down menu: continuous, z-stack, single acquisition, projection.
+        # Read Only Pull down menu: continuous, z-stack, single acquisition, projection.
         self.options = tk.StringVar()
         self.pull_down = ttk.Combobox(self, textvariable=self.options)
-        self.pull_down["values"] = (
-            "Continuous Scan",
-            "Z-Stack",
-            "Single Acquisition",
-            "Alignment",
-            "Projection",
-        )
-        self.pull_down.current(0)
         self.pull_down.state(["readonly"])
 
         #  Progress Bar: Current Acquisitions and Overall

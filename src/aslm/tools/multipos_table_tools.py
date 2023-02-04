@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -30,12 +30,12 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 """
-This holds functions commonly used to interact with the Multiposition Pandas Table in the GUI
+This holds functions commonly used to interact with the Multiposition Pandas Table in
+the GUI
 
 """
 
 import numpy as np
-import itertools
 import pandas as pd
 from math import ceil
 
@@ -66,9 +66,11 @@ def compute_tiles_from_bounding_box(
     f_length,
     f_overlap,
 ):
-    r"""Create a grid of ROIs to image based on start position, number of tiles, and signed FOV length in each dimension.
+    """Create a grid of ROIs to image based on start position, number of tiles, and
+    signed FOV length in each dimension.
 
-    Focus currently tracks with z, since focus is z-dependent. TODO: Change this behavior? Make it a flag?
+    Focus currently tracks with z, since focus is z-dependent.
+    TODO: Change this behavior? Make it a flag?
 
     Parameters
     ----------
@@ -163,16 +165,18 @@ def compute_tiles_from_bounding_box(
 
 
 def calc_num_tiles(dist, overlap, roi_length):
-    r"""Calculate the number of tiles to divide a space dist along a single axis with an ROI of size roi_length
-    and a fractional overlap between ROIs of overlap.
+    """Calculate the number of tiles to divide a space dist along a single axis with an
+    ROI of size roi_length and a fractional overlap between ROIs of overlap.
 
-    Watch out! This has no indication of what the tiles should actually look like (no information about sign, etc.).
+    Watch out! This has no indication of what the tiles should actually look like (no
+    information about sign, etc.).
 
     Parameters
     ----------
     dist : float
-        Total distance to tile with ROIs. A measure from the closed boundaries of the region to tile (e.g. left side
-        of the first tile all the way to the right side of the last tile for x-dimension low -> high). Positive.
+        Total distance to tile with ROIs. A measure from the closed boundaries of the
+        region to tile (e.g. left side of the first tile all the way to the right side
+        of the last tile for x-dimension low -> high). Positive.
     overlap : float
         Fraction of roi_length that overlaps in each tile. Value between 0 and 1.
     roi_length : float
@@ -195,14 +199,16 @@ def calc_num_tiles(dist, overlap, roi_length):
 
 def update_table(table, pos, append=False):
     """
-    Updates and redraws table based on given list. List is converted to a pandas dataframe before setting data in table.
+    Updates and redraws table based on given list. List is converted to a pandas
+    dataframe before setting data in table.
 
     Parameters
     ----------
     table: Multi_Position_Table object
         Instance of multiposition table in GUI
     pos: list or np.array
-        List or np.array of positions to be added to table. Each row contains an X, Y, Z, R, F position
+        List or np.array of positions to be added to table. Each row contains an X, Y,
+        Z, R, F position
     append: bool
         Append the new positions to the table
 

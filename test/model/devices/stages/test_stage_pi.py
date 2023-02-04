@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -39,44 +39,50 @@ import unittest
 from aslm.model.devices.stages.stage_pi import PIStage
 from aslm.model.dummy import DummyModel
 
+
 class TestStagePI(unittest.TestCase):
-    r"""Unit Test for StageBase Class"""
+    """Unit Test for StageBase Class"""
 
     def test_stage_attributes(self):
         dummy_model = DummyModel()
-        microscope_name = 'Mesoscale'
+        microscope_name = "Mesoscale"
         stage = PIStage(microscope_name, None, dummy_model.configuration)
 
         # Attributes
-        assert hasattr(stage, 'x_pos')
-        assert hasattr(stage, 'y_pos')
-        assert hasattr(stage, 'z_pos')
-        assert hasattr(stage, 'f_pos')
-        assert hasattr(stage, 'theta_pos')
-        assert hasattr(stage, 'position_dict')
-        assert hasattr(stage, 'x_max')
-        assert hasattr(stage, 'y_max')
-        assert hasattr(stage, 'z_max')
-        assert hasattr(stage, 'f_max')
-        assert hasattr(stage, 'x_min')
-        assert hasattr(stage, 'y_min')
-        assert hasattr(stage, 'z_min')
-        assert hasattr(stage, 'f_min')
-        assert hasattr(stage, 'theta_min')
+        assert hasattr(stage, "x_pos")
+        assert hasattr(stage, "y_pos")
+        assert hasattr(stage, "z_pos")
+        assert hasattr(stage, "f_pos")
+        assert hasattr(stage, "theta_pos")
+        assert hasattr(stage, "position_dict")
+        assert hasattr(stage, "x_max")
+        assert hasattr(stage, "y_max")
+        assert hasattr(stage, "z_max")
+        assert hasattr(stage, "f_max")
+        assert hasattr(stage, "x_min")
+        assert hasattr(stage, "y_min")
+        assert hasattr(stage, "z_min")
+        assert hasattr(stage, "f_min")
+        assert hasattr(stage, "theta_min")
 
         # Methods
-        assert hasattr(stage, 'create_position_dict') and \
-               callable(getattr(stage, 'create_position_dict'))
-        assert hasattr(stage, 'report_position') and \
-               callable(getattr(stage, 'report_position'))
-        assert hasattr(stage, 'move_axis_absolute') and \
-               callable(getattr(stage, 'move_axis_absolute'))
-        assert hasattr(stage, 'move_absolute') and \
-               callable(getattr(stage, 'move_absolute'))
-        assert hasattr(stage, 'stop') and \
-               callable(getattr(stage, 'stop'))
-        assert hasattr(stage, 'get_abs_position') and \
-               callable(getattr(stage, 'get_abs_position'))
+        assert hasattr(stage, "create_position_dict") and callable(
+            getattr(stage, "create_position_dict")
+        )
+        assert hasattr(stage, "report_position") and callable(
+            getattr(stage, "report_position")
+        )
+        assert hasattr(stage, "move_axis_absolute") and callable(
+            getattr(stage, "move_axis_absolute")
+        )
+        assert hasattr(stage, "move_absolute") and callable(
+            getattr(stage, "move_absolute")
+        )
+        assert hasattr(stage, "stop") and callable(getattr(stage, "stop"))
+        assert hasattr(stage, "get_abs_position") and callable(
+            getattr(stage, "get_abs_position")
+        )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

@@ -4,9 +4,10 @@ import threading
 import multiprocessing as mp
 from aslm.model.features.feature_container import load_features
 
+
 class DummyDevice:
     def __init__(self, timecost=0.2):
-        self.msg_count = mp.Value('i', 0)
+        self.msg_count = mp.Value("i", 0)
         self.sendout_msg_count = 0
         self.out_port = None
         self.in_port = None
@@ -37,25 +38,28 @@ class DummyDevice:
     def listen(self):
         while not self.stop_acquisition:
             signal = self.in_port.recv()
-            if signal == 'shutdown':
+            if signal == "shutdown":
                 self.stop_acquisition = True
                 self.in_port.close()
                 break
             self.generate_message()
-            self.in_port.send('done')
+            self.in_port.send("done")
 
     def sendout(self, timeout=100):
         while not self.stop_acquisition:
             msg = self.out_port.recv()
-            if msg == 'shutdown':
+            if msg == "shutdown":
                 self.out_port.close()
                 break
             c = 0
             while self.msg_count.value == self.sendout_msg_count and c < timeout:
                 time.sleep(0.01)
                 c += 1
-            self.out_port.send(list(range(self.sendout_msg_count, self.msg_count.value)))
+            self.out_port.send(
+                list(range(self.sendout_msg_count, self.msg_count.value))
+            )
             self.sendout_msg_count = self.msg_count.value
+
 
 class RecordObj:
     def __init__(self, name_list, record_list, frame_id):
@@ -64,13 +68,14 @@ class RecordObj:
         self.frame_id = frame_id
 
     def __getattr__(self, __name: str):
-        self.name_list += '.' + __name
+        self.name_list += "." + __name
         return self
 
     def __call__(self, *args, **kwargs):
-        kwargs['__test_frame_id'] = self.frame_id
-        print('* calling', self.name_list, args, kwargs)
+        kwargs["__test_frame_id"] = self.frame_id
+        print("* calling", self.name_list, args, kwargs)
         self.record_list.append((self.name_list, args, kwargs))
+
 
 class DummyModelToTestFeatures:
     def __init__(self, configuration):
@@ -85,7 +90,7 @@ class DummyModelToTestFeatures:
         self.data_thread = None
 
         self.stop_acquisition = False
-        self.frame_id = 0 #signal_num
+        self.frame_id = 0  # signal_num
 
         self.data = []
         self.signal_records = []
@@ -94,27 +99,27 @@ class DummyModelToTestFeatures:
     def signal_func(self):
         self.signal_container.reset()
         while not self.signal_container.end_flag:
-            print('**** sending out signal!', self.frame_id)
+            print("**** sending out signal!", self.frame_id)
             if self.signal_container:
                 self.signal_container.run()
 
-            self.signal_pipe.send('signal')
+            self.signal_pipe.send("signal")
             self.signal_pipe.recv()
 
             if self.signal_container:
                 self.signal_container.run(wait_response=True)
 
-            self.frame_id += 1 # signal_num
+            self.frame_id += 1  # signal_num
 
-        self.signal_pipe.send('shutdown')
+        self.signal_pipe.send("shutdown")
 
         self.stop_acquisition = True
 
     def data_func(self):
         while not self.stop_acquisition:
-            self.data_pipe.send('getData')
+            self.data_pipe.send("getData")
             frame_ids = self.data_pipe.recv()
-            print('receive: ', frame_ids)
+            print("receive: ", frame_ids)
             if not frame_ids:
                 continue
 
@@ -122,7 +127,7 @@ class DummyModelToTestFeatures:
 
             if self.data_container:
                 self.data_container.run(frame_ids)
-        self.data_pipe.send('shutdown')
+        self.data_pipe.send("shutdown")
 
     def start(self, feature_list):
         if feature_list is None:
@@ -131,13 +136,13 @@ class DummyModelToTestFeatures:
         self.signal_records = []
         self.data_records = []
         self.stop_acquisition = False
-        self.frame_id = 0 # signal_num
+        self.frame_id = 0  # signal_num
 
         self.signal_pipe, self.data_pipe = self.device.setup()
 
         self.signal_container, self.data_container = load_features(self, feature_list)
-        self.signal_thread = threading.Thread(target=self.signal_func, name='signal')
-        self.data_thread = threading.Thread(target=self.data_func, name='data')
+        self.signal_thread = threading.Thread(target=self.signal_func, name="signal")
+        self.data_thread = threading.Thread(target=self.data_func, name="data")
         self.signal_thread.start()
         self.data_thread.start()
 
@@ -148,16 +153,15 @@ class DummyModelToTestFeatures:
         return True
 
     def get_stage_position(self):
-        axes = ['x', 'y', 'z', 'theta', 'f']
-        stage_pos = self.configuration['experiment']['StageParameters']
-        return dict(map(lambda axis: (axis+'_pos', stage_pos[axis]), axes))
+        axes = ["x", "y", "z", "theta", "f"]
+        stage_pos = self.configuration["experiment"]["StageParameters"]
+        return dict(map(lambda axis: (axis + "_pos", stage_pos[axis]), axes))
 
     def __getattr__(self, __name: str):
         return RecordObj(__name, self.signal_records, self.frame_id)
 
-    
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope="module")
 def dummy_model_to_test_features(dummy_model):
     model = DummyModelToTestFeatures(dummy_model.configuration)
     return model

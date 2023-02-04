@@ -81,6 +81,8 @@ class SignalNode(TreeNode):
             need_response=need_response,
         )
         self.wait_response = False
+        if self.device_related and self.node_type == "multi-step":
+            self.need_response = True
 
     def run(self, *args, wait_response=False):
         # initialize the node when first time entering it
@@ -228,14 +230,12 @@ class SignalContainer(Container):
 class DataContainer(Container):
     def __init__(self, root=None, cleanup_list=[]):
         super().__init__(root, cleanup_list)
-        self.returned_a_response = False
 
     def run(self, *args):
         if self.end_flag or not self.root:
             return
         if not self.curr_node:
             self.curr_node = self.root
-        self.returned_a_response = False
         while self.curr_node:
             try:
                 result, is_end = self.curr_node.run(*args)
@@ -267,8 +267,6 @@ class DataContainer(Container):
             # print('Data running node:', self.curr_node.node_name, 'get result:', result)
             if not is_end:
                 return
-            if self.curr_node.need_response:
-                self.returned_a_response = True
             if result and self.curr_node.child:
                 # print('Data running child of', self.curr_node.node_name)
                 self.curr_node = self.curr_node.child
@@ -278,9 +276,7 @@ class DataContainer(Container):
                 self.curr_node = None
                 return
 
-            if self.curr_node.device_related or (
-                self.curr_node.need_response and self.returned_a_response
-            ):
+            if self.curr_node.device_related or self.curr_node.need_response:
                 return
 
 
@@ -295,6 +291,8 @@ def get_registered_funcs(feature_module, func_type="signal"):
         func_dict["end"] = dummy_True
     if func_type == "data" and "pre-main" not in func_dict:
         func_dict["pre-main"] = dummy_True
+    if func_type == "signal" and "main-response" not in func_dict:
+        func_dict["main-response"] = dummy_True
     return func_dict
 
 
@@ -312,6 +310,7 @@ def load_features(model, feature_list):
         # if signal function has a waiting func, then the nodes are 'need_response' nodes
         if "main-response" in feature.config_table.get("signal", {}):
             node_config["need_response"] = True
+            node_config["device_related"] = True
         if "node" in feature_dict:
             for k, v in feature_dict["node"].items():
                 node_config[k] = v

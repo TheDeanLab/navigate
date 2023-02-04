@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -32,32 +33,66 @@
 
 import re
 import tkinter as Tk
-from traceback import format_exception
 import logging
-from pathlib import Path
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 REGEX_DICT = {
-    "float": "(^-?$)|(^-?[0-9]+\.?[0-9]*$)",
-    "float_nonnegative": "(^$)|(^[0-9]+\.?[0-9]*$)",
+    "float": "(^-?$)|(^-?[0-9]+\\.?[0-9]*$)",
+    "float_nonnegative": "(^$)|(^[0-9]+\\.?[0-9]*$)",
     "int": "^-?[0-9]*$",
     "int_nonnegative": "^[0-9]*$",
 }
 
 
 def validate_wrapper(widget, negative=False, is_entry=False, is_integer=False):
-    """
-    # this function will add validatecommand and invalidcommand to widgets
-    # it supports float and integer, negative and nonnegative, entry and spinbox
+    """Wrapper for validate function
+
+    This function will add validatecommand and invalidcommand to widgets
+    it supports float and integer, negative and nonnegative, entry and spinbox
+
+    Parameters
+    ----------
+    widget : Tk.Widget
+        The widget to add validation to
+    negative : bool, optional
+        If the widget should allow negative numbers, by default False
+    is_entry : bool, optional
+        If the widget is an entry, by default False
+    is_integer : bool, optional
+        If the widget should only allow integers, by default False
+
+    Returns
+    -------
+    valid : bool
+        True if the widget is valid, False otherwise
+
+    Examples
+    --------
+    >>> validate_wrapper(widget, negative=True, is_entry=True, is_integer=True)
     """
 
     def check_range_spinbox(value):
         """
-        # this function used to validate wether the value is inside specified range.
-        # this function used to validate spinbox widget.
+
+        This function used to validate whether the value is inside specified range.
+        This function used to validate spinbox widget.
+
+        Parameters
+        ----------
+        value : str
+            The value to validate
+
+        Returns
+        -------
+        valid : bool
+            True if the value is valid, False otherwise
+
+        Examples
+        --------
+        >>> check_range_spinbox(value)
         """
         valid = True
         if widget["from"] and float(value) < widget["from"]:
@@ -69,9 +104,23 @@ def validate_wrapper(widget, negative=False, is_entry=False, is_integer=False):
         return valid
 
     def check_range_entry(value):
-        """
-        # this function used to validate wether the value is inside specified range.
-        # this function used to validate entry widget
+        """This function used to validate whether the value is inside specified range.
+
+        Used to validate entry widget.
+
+        Parameters
+        ----------
+        value : str
+            The value to validate
+
+        Returns
+        -------
+        valid : bool
+            True if the value is valid, False otherwise
+
+        Examples
+        --------
+        >>> check_range_entry(value)
         """
         valid = True
         if widget.from_ and float(value) < widget.from_:
@@ -94,8 +143,23 @@ def validate_wrapper(widget, negative=False, is_entry=False, is_integer=False):
     match_string = REGEX_DICT[float_or_integer + is_negative]
 
     def check_float(value):
-        """
-        # this function binds to validatecommand
+        """This function used to validate whether the value is float or integer.
+
+        Function binds to validatecommand
+
+        Parameters
+        ----------
+        value : str
+            The value to validate
+
+        Returns
+        -------
+        valid : bool
+            True if the value is valid, False otherwise
+
+        Examples
+        --------
+        >>> check_float(value)
         """
         valid = re.match(match_string, value) is not None
         if negative and value == "-":
@@ -105,8 +169,23 @@ def validate_wrapper(widget, negative=False, is_entry=False, is_integer=False):
         return valid
 
     def show_error_func(is_entry=False):
-        """
-        # this function generate functions that bind to invalidcommand
+        """This function used to show error message.
+
+        Function generate functions that bind to invalidcommand
+
+        Parameters
+        ----------
+        is_entry : bool, optional
+            If the widget is an entry, by default False
+
+        Returns
+        -------
+        show_error : function
+            The function to show error message
+
+        Examples
+        --------
+        >>> show_error_func(is_entry=True)
         """
 
         def func():

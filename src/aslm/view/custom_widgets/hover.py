@@ -43,11 +43,11 @@ logger = logging.getLogger(p)
 User guide for the class
 Each instance of hover is intended to be an attribute of a tk or ttk widget (see validated fields or hovermixins), and by default is set only to show error messages
 
-In this case, the parent widget is the Stage Control GUI y position label. 
-To instantiate the description, 
+In this case, the parent widget is the Stage Control GUI y position label.
+To instantiate the description,
     widget.hover.setdescription("Y position of the stage")
-    
-Please note: when dealing with LabelInput widgets, be sure to use 
+
+Please note: when dealing with LabelInput widgets, be sure to use
     LabelInput.widget.hover.setdescription(),
     which will target the specific widget and not the LabelInput frame
 

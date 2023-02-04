@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -45,7 +45,7 @@ logger = logging.getLogger(p)
 
 
 class SyntheticDAQ(DAQBase):
-    r"""SyntheticDAQ class for Data Acquisition (DAQ).
+    """SyntheticDAQ class for Data Acquisition (DAQ).
 
     Attributes
     ----------
@@ -58,32 +58,33 @@ class SyntheticDAQ(DAQBase):
         self.camera = {}
 
     def create_camera_task(self):
-        r"""Set up the camera trigger task."""
+        """Set up the camera trigger task."""
         pass
 
     def create_master_trigger_task(self):
-        r"""Set up the DO master trigger task."""
+        """Set up the DO master trigger task."""
         pass
 
-    def create_galvo_etl_task(self):
-        r"""Create galvo and ETL tasks"""
+    def create_galvo_remote_focus_tasks(self):
+        r"""Create galvo and remote focus tasks"""
         pass
 
     def start_tasks(self):
-        r"""Start the tasks for camera triggering and analog outputs
-        # If the tasks are configured to be triggered, they won't start until run_tasks() is called."""
+        """Start the tasks for camera triggering and analog outputs
+        # If the tasks are configured to be triggered, they won't start until
+        # run_tasks() is called."""
         pass
 
     def stop_tasks(self):
-        r"""Stop the tasks for triggering, analog and counter outputs."""
+        """Stop the tasks for triggering, analog and counter outputs."""
         pass
 
     def close_tasks(self):
-        r"""Close the tasks for triggering, analog, and counter outputs."""
+        """Close the tasks for triggering, analog, and counter outputs."""
         pass
 
     def prepare_acquisition(self, channel_key, exposure_time):
-        r"""Prepare the acquisition.
+        """Prepare the acquisition.
 
         Parameters
         ----------
@@ -95,22 +96,23 @@ class SyntheticDAQ(DAQBase):
         pass
 
     def run_acquisition(self):
-        r"""Run DAQ Acquisition.
+        """Run DAQ Acquisition.
         Run the tasks for triggering, analog and counter outputs.
         The master trigger initiates all other tasks via a shared trigger
         For this to work, all analog output and counter tasks have to be started so that
         they are waiting for the trigger signal."""
         time.sleep(0.01)
-        self.camera[self.microscope_name].generate_new_frame()
+        for microscope_name in self.camera:
+            self.camera[microscope_name].generate_new_frame()
 
     def stop_acquisition(self):
-        r"""Stop Acquisition."""
+        """Stop Acquisition."""
         pass
 
     def write_waveforms_to_tasks(self):
-        r"""Write the galvo, etl, and laser waveforms to each task."""
+        r"""Write the galvo, remote focus, and laser waveforms to each task."""
         pass
 
     def add_camera(self, microscope_name, camera):
-        r"""Connect camera with daq: only in syntheticDAQ."""
+        """Connect camera with daq: only in syntheticDAQ."""
         self.camera[microscope_name] = camera

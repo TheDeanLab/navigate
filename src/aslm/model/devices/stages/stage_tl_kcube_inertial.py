@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -89,9 +89,7 @@ class TLKIMStage(StageBase):
         for i, ax in zip(self.kim_axes, self.axes):
             try:
                 # need to request before we get the current position
-                err = self.kim_controller.KIM_RequestCurrentPosition(
-                    self.serial_number, i
-                )
+                self.kim_controller.KIM_RequestCurrentPosition(self.serial_number, i)
                 pos = self.kim_controller.KIM_GetCurrentPosition(self.serial_number, i)
                 setattr(self, f"{ax}_pos", pos)
             except (
@@ -115,12 +113,14 @@ class TLKIMStage(StageBase):
         Parameters
         ----------
         axis : str
-            An axis prefix in move_dictionary. For example, axis='x' corresponds to 'x_abs', 'x_min', etc.
+            An axis prefix in move_dictionary. For example, axis='x' corresponds to
+            'x_abs', 'x_min', etc.
         axis_num : int
             The corresponding number of this axis on a PI stage.
         move_dictionary : dict
-            A dictionary of values required for movement. Includes 'x_abs', 'x_min', etc. for one or more axes.
-            Expects values in micrometers, except for theta, which is in degrees.
+            A dictionary of values required for movement. Includes 'x_abs', 'x_min',
+            etc. for one or more axes. Expects values in micrometers, except for theta,
+            which is in degrees.
 
         Returns
         -------
@@ -143,8 +143,9 @@ class TLKIMStage(StageBase):
         Parameters
         ----------
         move_dictionary : dict
-            A dictionary of values required for movement. Includes 'x_abs', etc. for one or more axes.
-            Expects values in micrometers, except for theta, which is in degrees.
+            A dictionary of values required for movement. Includes 'x_abs', etc. for
+            one or more axes. Expects values in micrometers, except for theta, which is
+            in degrees.
         wait_until_done : bool
             Block until stage has moved to its new spot.
 
@@ -177,7 +178,7 @@ class TLKIMStage(StageBase):
             self.kim_controller.KIM_MoveStop(self.serial_number, i)
 
     def get_abs_position(self, axis, move_dictionary):
-        r"""
+        """
         Hack in a lack of bounds checking. TODO: Don't do this.
         """
         try:
@@ -186,7 +187,8 @@ class TLKIMStage(StageBase):
                 self, f"int_{axis}_pos_offset", 0
             )  # TODO: should we default to 0?
 
-            # axis_min, axis_max = getattr(self, f"{axis}_min"), getattr(self, f"{axis}_max")
+            # axis_min, axis_max = getattr(self, f"{axis}_min"),
+            # getattr(self, f"{axis}_max")
             axis_min, axis_max = -1e6, 1e6
 
             # Check that our position is within the axis bounds, fail if it's not.

@@ -77,14 +77,15 @@ Please note that these values are arbitrary and just to show usage.
 
 Typically this class will be called as a child of a LabelFrame for a related grouping of data or fields.
 Each widget you need to create will be a new instance of the LabelInput class.
-The widget within a LabelInput class can be directly referenced with self.widget, this allows base tkinter calls to be made on the internal widget (ex grid or when setting readonly)
+The widget within a LabelInput class can be directly referenced with self.widget,
+this allows base tkinter calls to be made on the internal widget (ex grid or when setting readonly)
 """
 
 
 class LabelInput(ttk.Frame):
     """Widget class that contains label and input together."""
 
-    # The below takes a parent frame, the postition of the label(left or top defaults to left),
+    # The below takes a parent frame, the position of the label(left or top defaults to left),
     # type of widget (defaults to entry), the input variable used, input arguments, label arguments and
     # finally the keyword arguments that will be passed to the super
     # constructor for the frame
@@ -102,18 +103,23 @@ class LabelInput(ttk.Frame):
     ):
         # Calls frame constructor using parent and keyword args
         super().__init__(parent, **kwargs)
+
         # creating access point to input args for input type constructor (uses
         # these args to create the combobox etc)
         input_args = input_args or {}
+
         # same for label args (args to create label etc)
         label_args = label_args or {}
+
         # same for variable of the input, typically this will be a Tk style var
         # like StringVar which can be accessed by any widget in the app
         self.variable = input_var
         self.input_class = input_class
 
-        """This if statement will check for the type of widget being created and will create it based on that, since certain
-        widgets need different formatting, like how button types don't need a textvariable like a StringVar()"""
+        """This if statement will check for the type of widget being created
+        and will create it based on that, since certain
+        widgets need different formatting, like how button types
+        don't need a textvariable like a StringVar()"""
         if input_class in (
             ttk.Checkbutton,
             ttk.Button,
@@ -169,7 +175,7 @@ class LabelInput(ttk.Frame):
             else:
                 return (
                     self.widget.get()
-                )  # Cathces all others like the normal entry widget
+                )  # Catches all others like the normal entry widget
         except (TypeError, tk.TclError):
             # Catches times when a numeric entry input has a blank, since this
             # cannot be converted into a numeric value
@@ -182,9 +188,7 @@ class LabelInput(ttk.Frame):
         return self.variable
 
     def set(self, value, *args, **kwargs):
-        """
-        #### Creating a generic set funciton to complement the above get
-        """
+        """Creating a generic set function to complement the above get"""
         if isinstance(self.variable, tk.BooleanVar):
             # This will cast the value to bool if the variable is a Tk
             # BooleanVar, bc Boolean.Var().set() can only accept bool type

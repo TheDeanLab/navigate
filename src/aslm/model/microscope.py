@@ -29,7 +29,6 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-# Standard Library Imports
 import logging
 from multiprocessing.managers import ListProxy
 
@@ -55,7 +54,7 @@ logger = logging.getLogger(p)
 
 
 class Microscope:
-    def __init__(self, name, configuration, devices_dict, is_synthetic=False):
+    def __init__(self, name, configuration, devices_dict, is_synthetic=False, is_virtual=False):
         self.microscope_name = name
         self.configuration = configuration
         self.data_buffer = None
@@ -64,6 +63,17 @@ class Microscope:
         self.lasers = {}
         self.galvo = {}
         self.daq = devices_dict.get("daq", None)
+        self.info = {}
+
+        self.current_channel = None
+        self.channels = None
+        self.available_channels = None
+        self.number_of_frames = None
+
+        self.laser_wavelength = []
+
+        if is_virtual:
+            return
 
         device_ref_dict = {
             # TODO: List proxy setup. Camera called later. @zach @annie.
@@ -142,10 +152,14 @@ class Microscope:
                     exec(
                         f"self.{device_name}['{device_name_list[i]}'] = start_{device_name}(name, device_connection, configuration, i, is_synthetic)"
                     )
+                    if device_name in device_name_list[i]:
+                        self.info[device_name_list[i]] = device_ref_name
                 else:
                     exec(
                         f"self.{device_name} = start_{device_name}(name, device_connection, configuration, is_synthetic)"
                     )
+                    self.info[device_name] = device_ref_name
+
                 if device_connection is None and device_ref_name != None:
                     if device_name not in devices_dict:
                         devices_dict[device_name] = {}
@@ -195,8 +209,9 @@ class Microscope:
                 i,
                 is_synthetic,
             )
-            for axes in device_config["axes"]:
-                self.stages[axes] = stage
+            for axis in device_config["axes"]:
+                self.stages[axis] = stage
+                self.info[f'stage_{axis}'] = device_ref_name
 
         # flatten the mirror
         self.mirror.flat()
@@ -206,6 +221,20 @@ class Microscope:
             self.daq.add_camera(self.microscope_name, self.camera)
 
     def update_data_buffer(self, img_width, img_height, data_buffer, number_of_frames):
+        """Update the data buffer for the camera.
+
+        Parameters
+        ----------
+        img_width : int
+            Width of the image.
+        img_height : int
+            Height of the image.
+        data_buffer : numpy.ndarray
+            Data buffer for the camera.
+        number_of_frames : int
+            Number of frames to be acquired.
+        """
+
         if self.camera.is_acquiring:
             self.camera.close_image_series()
         self.camera.set_ROI(img_width, img_height)
@@ -213,6 +242,14 @@ class Microscope:
         self.number_of_frames = number_of_frames
 
     def move_stage_offset(self, former_microscope=None):
+        """Move the stage to the offset position.
+
+        Parameters
+        ----------
+        former_microscope : str
+            Name of the former microscope.
+        """
+
         if former_microscope:
             former_offset_dict = self.configuration["configuration"]["microscopes"][
                 former_microscope
@@ -232,6 +269,7 @@ class Microscope:
             self.stages[axes].move_absolute({axes + "_abs": pos}, wait_until_done=True)
 
     def prepare_acquisition(self):
+        """Prepare the acquisition."""
         self.current_channel = 0
         self.channels = self.configuration["experiment"]["MicroscopeState"]["channels"]
         self.available_channels = list(
@@ -242,6 +280,7 @@ class Microscope:
         )
         if self.camera.is_acquiring:
             self.camera.close_image_series()
+
         # Set Camera Sensor Mode - Must be done before camera is initialized.
         sensor_mode = self.configuration["experiment"]["CameraParameters"][
             "sensor_mode"
@@ -255,11 +294,13 @@ class Microscope:
             )
         # Initialize Image Series - Attaches camera buffer and start imaging
         self.camera.initialize_image_series(self.data_buffer, self.number_of_frames)
+
         # calculate all the waveform
         self.shutter.open_shutter()
         return self.calculate_all_waveform()
 
     def end_acquisition(self):
+        """End the acquisition."""
         self.daq.stop_acquisition()
         if self.camera.is_acquiring:
             self.camera.close_image_series()
@@ -269,20 +310,28 @@ class Microscope:
         self.current_channel = 0
 
     def calculate_all_waveform(self):
+        """Calculate all the waveforms.
+
+        Returns
+        -------
+        waveform : dict
+            Dictionary of all the waveforms.
+        """
         readout_time = self.get_readout_time()
         camera_waveform = self.daq.calculate_all_waveforms(
             self.microscope_name, readout_time
         )
-        etl_waveform = self.remote_focus_device.adjust(readout_time)
+        remote_focus_waveform = self.remote_focus_device.adjust(readout_time)
         galvo_waveform = [self.galvo[k].adjust(readout_time) for k in self.galvo]
         waveform_dict = {
             "camera_waveform": camera_waveform,
-            "etl_waveform": etl_waveform,
+            "remote_focus_waveform": remote_focus_waveform,
             "galvo_waveform": galvo_waveform,
         }
         return waveform_dict
 
     def prepare_next_channel(self):
+        """Prepare the next channel."""
         curr_channel = self.current_channel
         prefix = "channel_"
         if self.current_channel == 0:
@@ -292,6 +341,8 @@ class Microscope:
                 self.available_channels
             )
             self.current_channel = self.available_channels[idx]
+        if curr_channel == self.current_channel:
+            return
 
         channel_key = prefix + str(self.current_channel)
         channel = self.configuration["experiment"]["MicroscopeState"]["channels"][
@@ -317,8 +368,8 @@ class Microscope:
                     ]
                 ),
             )
-            self.camera.set_exposure_time(self.current_exposure_time)
             self.camera.set_line_interval(self.camera_line_interval)
+        self.camera.set_exposure_time(self.current_exposure_time)
 
         # Laser Settings
         current_laser_index = channel["laser_index"]
@@ -329,11 +380,10 @@ class Microscope:
             self.lasers[k].turn_off()
         self.lasers[str(self.laser_wavelength[current_laser_index])].turn_on()
 
-        if curr_channel != self.current_channel:
-            # stop daq before writing new waveform
-            self.daq.stop_acquisition()
-            # prepare daq: write waveform
-            self.daq.prepare_acquisition(channel_key, self.current_exposure_time)
+        # stop daq before writing new waveform
+        self.daq.stop_acquisition()
+        # prepare daq: write waveform
+        self.daq.prepare_acquisition(channel_key, self.current_exposure_time)
 
         # TODO: Defocus Settings
         # curr_focus = self.configuration["experiment"]["StageParameters"]["f"]
@@ -345,7 +395,7 @@ class Microscope:
         # ] = curr_focus  # do something very hacky so we keep using the same focus reference
 
     def get_readout_time(self):
-        r"""Get readout time from camera.
+        """Get readout time from camera.
 
         Get the camera readout time if we are in normal mode.
         Return a -1 to indicate when we are not in normal mode.
@@ -365,6 +415,16 @@ class Microscope:
         return readout_time
 
     def move_stage(self, pos_dict, wait_until_done=False):
+        """Move stage to a position.
+
+        Parameters
+        ----------
+        pos_dict : dict
+            Dictionary of stage positions.
+        wait_until_done : bool, optional
+            Wait until stage is done moving, by default False
+        """
+
         success = True
         for pos_axis in pos_dict:
             axis = pos_axis[: pos_axis.index("_")]
@@ -377,10 +437,20 @@ class Microscope:
         return success
 
     def stop_stage(self):
+        """Stop stage."""
+
         for axis in self.stages:
             self.stages[axis].stop()
 
     def get_stage_position(self):
+        """Get stage position.
+
+        Returns
+        -------
+        stage_position : dict
+            Dictionary of stage positions.
+        """
+
         ret_pos_dict = {}
         for axis in self.stages:
             pos_axis = axis + "_pos"

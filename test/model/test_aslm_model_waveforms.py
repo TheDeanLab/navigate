@@ -51,49 +51,47 @@ class TestWaveforms(unittest.TestCase):
         """
         Finds the first index in the data array above the threshold
         """
-        first_index = next(x for x, val in enumerate(data)
-                           if val > threshold)
+        first_index = next(x for x, val in enumerate(data) if val > threshold)
         return first_index
 
     def test_single_pulse_max_default_amplitude(self):
         sample_rate = 100000
         sweep_time = 0.4
-        data = waveforms.single_pulse(sample_rate=sample_rate,
-                                                 sweep_time=sweep_time)
+        data = waveforms.single_pulse(sample_rate=sample_rate, sweep_time=sweep_time)
         self.assertEqual(np.max(data), 1)
 
     def test_single_pulse_max_specified_amplitude(self):
         sample_rate = 100000
         sweep_time = 0.4
         amplitude = 2
-        data = waveforms.single_pulse(sample_rate=sample_rate,
-                                                 sweep_time=sweep_time,
-                                                 amplitude=amplitude)
+        data = waveforms.single_pulse(
+            sample_rate=sample_rate, sweep_time=sweep_time, amplitude=amplitude
+        )
         self.assertEqual(np.max(data), amplitude)
 
     def test_single_pulse_min_default_amplitude(self):
         sample_rate = 100000
         sweep_time = 0.4
-        data = waveforms.single_pulse(sample_rate=sample_rate,
-                                                 sweep_time=sweep_time)
+        data = waveforms.single_pulse(sample_rate=sample_rate, sweep_time=sweep_time)
         self.assertEqual(np.min(data), 0)
 
     def test_single_pulse_onset_default_delay(self):
         sample_rate = 100000
         sweep_time = 0.4
         default_delay = 10
-        data = waveforms.single_pulse(sample_rate=sample_rate,
-                                                 sweep_time=sweep_time)
+        data = waveforms.single_pulse(sample_rate=sample_rate, sweep_time=sweep_time)
         first_index = self.find_first_index_above_threshold(data=data, threshold=0)
-        self.assertEqual(int(sample_rate * sweep_time * default_delay / 100), first_index)
+        self.assertEqual(
+            int(sample_rate * sweep_time * default_delay / 100), first_index
+        )
 
     def test_single_pulse_onset_specified_delay(self):
         sample_rate = 100000
         sweep_time = 0.4
         delay = 20
-        data = waveforms.single_pulse(sample_rate=sample_rate,
-                                                 sweep_time=sweep_time,
-                                                 delay=delay)
+        data = waveforms.single_pulse(
+            sample_rate=sample_rate, sweep_time=sweep_time, delay=delay
+        )
         first_index = self.find_first_index_above_threshold(data, 0.5)
         # first_index = next(x for x, val in enumerate(data)
         #                    if val > 0.5)
@@ -103,78 +101,81 @@ class TestWaveforms(unittest.TestCase):
         sample_rate = 100000
         sweep_time = 0.4
         default_offset = 0
-        data = waveforms.single_pulse(sample_rate=sample_rate,
-                                                 sweep_time=sweep_time)
+        data = waveforms.single_pulse(sample_rate=sample_rate, sweep_time=sweep_time)
         self.assertEqual(np.min(data), default_offset)
 
     def test_single_pulse_specified_offset(self):
         sample_rate = 100000
         sweep_time = 0.4
         offset = 0.2
-        data = waveforms.single_pulse(sample_rate=sample_rate,
-                                                 sweep_time=sweep_time,
-                                                 offset=offset)
+        data = waveforms.single_pulse(
+            sample_rate=sample_rate, sweep_time=sweep_time, offset=offset
+        )
         self.assertEqual(np.min(data), offset)
 
-    @pytest.mark.skip(reason='double the correct value, have not bothered to figure out why')
-    def test_tunable_lens_ramp_specified_delay(self):
+    @pytest.mark.skip(
+        reason="double the correct value, have not bothered to figure out why"
+    )
+    def test_remote_focus_ramp_specified_delay(self):
         sample_rate = 100000
         sweep_time = 0.4
         delay = 10.5
-        data = waveforms.tunable_lens_ramp(sample_rate=sample_rate,
-                                                      sweep_time=sweep_time,
-                                                      etl_delay=delay)
+        data = waveforms.remote_focus_ramp(
+            sample_rate=sample_rate, sweep_time=sweep_time, remote_focus_delay=delay
+        )
         first_index = self.find_first_index_above_threshold(data=data, threshold=-1)
         self.assertEqual(delay * sample_rate * sweep_time / 100, first_index - 1)
 
-    def test_tunable_lens_ramp_amplitude_max(self):
+    def test_remote_focus_ramp_amplitude_max(self):
         amplitude = 1.5
-        data = waveforms.tunable_lens_ramp(amplitude=amplitude)
+        data = waveforms.remote_focus_ramp(amplitude=amplitude)
         self.assertEqual(np.max(data), amplitude)
 
-    def test_tunable_lens_ramp_amplitude_min(self):
+    def test_remote_focus_ramp_amplitude_min(self):
         amplitude = 1.5
-        data = waveforms.tunable_lens_ramp(amplitude=amplitude)
+        data = waveforms.remote_focus_ramp(amplitude=amplitude)
         self.assertEqual(np.min(data), -1 * amplitude)
 
-    def test_tunable_lens_offset_min(self):
+    def test_remote_focus_offset_min(self):
         default_amplitude = 1
         offset = 0.5
-        data = waveforms.tunable_lens_ramp(offset=offset)
+        data = waveforms.remote_focus_ramp(offset=offset)
         self.assertEqual(np.min(data), -1 * default_amplitude + offset)
 
-    def test_tunable_lens_offset_max(self):
+    def test_remote_focus_offset_max(self):
         default_amplitude = 1
         offset = 0.5
-        data = waveforms.tunable_lens_ramp(offset=offset)
+        data = waveforms.remote_focus_ramp(offset=offset)
         self.assertEqual(np.max(data), default_amplitude + offset)
 
     def test_dc_value(self):
         sample_rate = 100000
         sweep_time = 0.4
         for amplitude in np.linspace(-5, 5, 3):
-            data = waveforms.dc_value(sample_rate=sample_rate,
-                                                 sweep_time=sweep_time,
-                                                 amplitude=amplitude)
+            data = waveforms.dc_value(
+                sample_rate=sample_rate, sweep_time=sweep_time, amplitude=amplitude
+            )
             self.assertEqual(np.max(data), amplitude)
-        self.assertEqual(np.size(data), sample_rate*sweep_time)
+        self.assertEqual(np.size(data), sample_rate * sweep_time)
 
     def test_sawtooth_amplitude(self):
         sample_rate = 100000
         sweep_time = 0.4
         for amplitude in np.linspace(-5, 5, 3):
-            data = waveforms.sawtooth(sample_rate=sample_rate,
-                                                 sweep_time=sweep_time,
-                                                 amplitude=amplitude)
-            self.assertAlmostEqual(np.max(data), np.abs(amplitude), delta=np.abs(amplitude) / 100)
+            data = waveforms.sawtooth(
+                sample_rate=sample_rate, sweep_time=sweep_time, amplitude=amplitude
+            )
+            self.assertAlmostEqual(
+                np.max(data), np.abs(amplitude), delta=np.abs(amplitude) / 100
+            )
 
     def test_square_amplitude(self):
         sample_rate = 100000
         sweep_time = 0.4
         for amplitude in np.linspace(-5, 5, 3):
-            data = waveforms.square(sample_rate=sample_rate,
-                                               sweep_time=sweep_time,
-                                               amplitude=amplitude)
+            data = waveforms.square(
+                sample_rate=sample_rate, sweep_time=sweep_time, amplitude=amplitude
+            )
             self.assertEqual(np.max(data), np.abs(amplitude))
             self.assertEqual(np.min(data), -1 * np.abs(amplitude))
 
@@ -183,12 +184,15 @@ class TestWaveforms(unittest.TestCase):
         sweep_time = 0.4
         for amplitude in np.linspace(0, 5, 5):
             for offset in np.linspace(0, 3, 3):
-                data = waveforms.square(sample_rate=sample_rate,
-                                                   offset=offset,
-                                                   amplitude=amplitude,
-                                                   sweep_time=sweep_time)
+                data = waveforms.square(
+                    sample_rate=sample_rate,
+                    offset=offset,
+                    amplitude=amplitude,
+                    sweep_time=sweep_time,
+                )
                 self.assertEqual(np.max(data), amplitude + offset)
                 self.assertEqual(np.min(data), -1 * amplitude + offset)
 
-if (__name__ == "__main__"):
+
+if __name__ == "__main__":
     unittest.main()

@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -39,7 +39,7 @@ from .common_functions import copy_proxy_object
 
 
 def create_save_path(saving_settings):
-    r"""Create path to save the data to.
+    """Create path to save the data to.
 
     This function retrieves the user inputs from the popup save window.
     It then creates a new directory in the user specified path.
@@ -103,7 +103,7 @@ def create_save_path(saving_settings):
 
 
 def save_yaml_file(file_directory, content_dict, filename="experiment.yml"):
-    r"""Same YAML file to Disk
+    """Same YAML file to Disk
 
     Parameters
     ----------
@@ -120,7 +120,7 @@ def save_yaml_file(file_directory, content_dict, filename="experiment.yml"):
     try:
         file_name = os.path.join(file_directory, filename)
         with open(file_name, "w") as f:
-            f.write(json.dumps(copy_proxy_object(content_dict)))
+            f.write(json.dumps(copy_proxy_object(content_dict), indent=4))
     except BaseException:
         return False
     return True

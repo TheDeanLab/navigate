@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -48,8 +48,7 @@ class SyntheticStage(StageBase):
         super().__init__(microscope_name, device_connection, configuration, device_id)
 
     def report_position(self):
-        # self.update_position_dictionaries()
-
+        self.create_position_dict()
         return self.position_dict
 
     def move_axis_absolute(self, axis, move_dictionary):
@@ -61,12 +60,14 @@ class SyntheticStage(StageBase):
         Parameters
         ----------
         axis : str
-            An axis prefix in move_dictionary. For example, axis='x' corresponds to 'x_abs', 'x_min', etc.
+            An axis prefix in move_dictionary. For example, axis='x' corresponds to
+            'x_abs', 'x_min', etc.
         axis_num : int
             The corresponding number of this axis on a PI stage.
         move_dictionary : dict
-            A dictionary of values required for movement. Includes 'x_abs', 'x_min', etc. for one or more axes.
-            Expects values in micrometers, except for theta, which is in degrees.
+            A dictionary of values required for movement. Includes 'x_abs', 'x_min',
+            etc. for one or more axes. Expects values in micrometers, except for theta,
+            which is in degrees.
 
         Returns
         -------
@@ -87,8 +88,9 @@ class SyntheticStage(StageBase):
         Parameters
         ----------
         move_dictionary : dict
-            A dictionary of values required for movement. Includes 'x_abs', etc. for one or more axes.
-            Expects values in micrometers, except for theta, which is in degrees.
+            A dictionary of values required for movement. Includes 'x_abs', etc. for one
+            or more axes. Expects values in micrometers, except for theta, which is
+            in degrees.
         wait_until_done : bool
             Block until stage has moved to its new spot.
 
@@ -99,10 +101,12 @@ class SyntheticStage(StageBase):
         """
 
         for ax in self.axes:
+            if f"{ax}_abs" not in move_dictionary:
+                continue
             success = self.move_axis_absolute(ax, move_dictionary)
 
         if wait_until_done is True:
-            time.sleep(0.25)
+            time.sleep(0.025)
 
         return success
 

@@ -48,8 +48,11 @@ class HelpPopupController(GUIController):
         self.view.popup.protocol("WM_DELETE_WINDOW", self.view.popup.dismiss)
 
     def showup(self):
-        """
-        # this function will let the popup window show in front
+        """Show the help popup window
+
+        Example:
+        --------
+        >>> help_popup_controller.showup()
         """
         self.view.popup.deiconify()
         self.view.popup.attributes("-topmost", 1)

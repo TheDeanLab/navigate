@@ -137,11 +137,11 @@ microscopes:
       x_max: 33500
       x_min: 16000
       y_max: 100000
-      y_min: 2000
-      z_max: 50000
-      z_min: 25000
+      y_min: -100000
+      z_max: 100000
+      z_min: -100000
       f_max: 100000
-      f_min: -100000
+      f_min: 0
       theta_max: 360
       theta_min: 0
 
@@ -151,6 +151,12 @@ microscopes:
       theta_step: 30
       f_step: 500
       velocity: 1000
+
+      x_offset: 0
+      y_offset: 0
+      z_offset: 0
+      theta_offset: 0
+      f_offset: 0
 
     zoom:
       hardware:
@@ -261,7 +267,7 @@ microscopes:
       # Digital Laser Outputs
       laser_port_switcher: PXI6733/port0/line0
       laser_switch_state: True
-      
+
     camera:
       hardware:
         type: HamamatsuOrca
@@ -351,14 +357,14 @@ microscopes:
           max: None
           min: None
 
-      x_max: 33500
-      x_min: 16000
+      x_max: 100000
+      x_min: -100000
       y_max: 100000
-      y_min: 2000
-      z_max: 50000
-      z_min: 25000
+      y_min: -100000
+      z_max: 100000
+      z_min: -100000
       f_max: 100000
-      f_min: -100000
+      f_min: 0
       theta_max: 360
       theta_min: 0
 
@@ -368,6 +374,12 @@ microscopes:
       theta_step: 30
       f_step: 500
       velocity: 1000
+
+      x_offset: 1
+      y_offset: 1
+      z_offset: 1
+      theta_offset: 0
+      f_offset: 0
 
     zoom:
       position:

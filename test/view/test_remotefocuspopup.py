@@ -32,12 +32,13 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import tkinter as tk
-from aslm.view.menus.remote_focus_popup import remote_popup
+from aslm.view.menus.waveform_parameter_popup_window import WaveformParameterPopupWindow
 from aslm.model.dummy import DummyModel
 from aslm.controller.configuration_controller import ConfigurationController
 import time
 
-def test_remotefocuspopup():
+
+def test_waveform_parameter_popup():
     """
     Tests that the remote focus popup and all its widgets gets created and does not
     throw any exceptions. Test will fail if any exceptions.
@@ -54,10 +55,10 @@ def test_remotefocuspopup():
     model = DummyModel()
     config_control = ConfigurationController(model.configuration)
     root = tk.Tk()
-    r_pop = remote_popup(root, config_control)
+    r_pop = WaveformParameterPopupWindow(root, config_control)
     root.update()
     time.sleep(3)
-    bool = isinstance(r_pop, remote_popup)
+    bool = isinstance(r_pop, WaveformParameterPopupWindow)
     root.destroy()
-    
+
     assert bool

@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -39,8 +40,20 @@ import logging
 
 class PerformanceFilter(logging.Filter):
     def filter(self, record):
-        # Checking if log message should be sent to performance.log based on if it starts with Performance or Spec
+        """Filter out performance messages
 
+        Parameters
+        ----------
+        record : logging.LogRecord
+            The log record to filter
+
+        Returns
+        -------
+        bool
+            True if the record should be logged, False otherwise
+        """
+        # Checking if log message should be sent to performance.log
+        # based on if it starts with Performance or Spec
         if record.getMessage().startswith("Performance"):
             return True
         if record.getMessage().startswith("Spec"):
@@ -51,11 +64,22 @@ class PerformanceFilter(logging.Filter):
 
 class NonPerfFilter(logging.Filter):
     def filter(self, record):
+        """Filter out non-performance messages
+
+        Parameters
+        ----------
+        record : logging.LogRecord
+            The log record to filter
+
+        Returns
+        -------
+        bool
+            True if the record should be logged, False otherwise
+        """
         # Making sure performance data only goes to performance.log
 
         if record.getMessage().startswith("Performance"):
             return False
         if record.getMessage().startswith("Spec"):
             return False
-
         return True

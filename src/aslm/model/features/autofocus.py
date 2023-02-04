@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -42,6 +42,61 @@ from aslm.model.analysis.image_contrast import fast_normalized_dct_shannon_entro
 
 
 class Autofocus:
+    """Autofocus Data Process
+
+    This function is called by the data thread. It will get the data from the
+    autofocus_frame_queue and calculate the entropy of the image. The entropy
+    is then compared to the maximum entropy and the position is saved if it is
+    higher. The autofocus_pos_queue is then filled with the next position to
+    move to. If the autofocus_pos_queue is empty, the autofocus is finished.
+
+    Attributes
+    ----------
+    autofocus_frame_queue : Queue
+        Queue containing the frames to be processed.
+    autofocus_pos_queue : Queue
+        Queue containing the positions to move to.
+    max_entropy : float
+        Maximum entropy of the image.
+    f_frame_id : int
+        Frame ID of the frame with the maximum entropy.
+    frame_num : int
+        Number of frames to be processed.
+    init_pos : float
+        Initial position of the stage.
+    f_pos : float
+        Position of the stage with the maximum entropy.
+    focus_pos : float
+        Position of the stage with the maximum entropy.
+    target_frame_id : int
+        Frame ID of the frame to be processed.
+    get_frames_num : int
+        Number of frames to be processed.
+    plot_data : list
+        List containing the entropy of the image for each frame.
+    total_frame_num : int
+        Total number of frames to be processed.
+    fine_step_size : float
+        Step size of the fine autofocus.
+    fine_pos_offset : float
+        Offset of the fine autofocus.
+    coarse_step_size : float
+        Step size of the coarse autofocus.
+    coarse_steps : int
+        Number of steps of the coarse autofocus.
+    signal_id : int
+        ID of the frame to be processed.
+    target_channel : int
+        Channel of the image to be processed.
+
+    Methods
+    -------
+    run()
+        Run the autofocus data process.
+
+
+    """
+
     def __init__(self, model):
         self.model = model
         self.max_entropy = None
@@ -87,7 +142,7 @@ class Autofocus:
         }
 
     def run(self, *args):
-        r"""Run the Autofocusing Routine
+        """Run the Autofocusing Routine
 
         Parameters
         ----------
@@ -96,11 +151,21 @@ class Autofocus:
         args[1] : dict
             Autofocus parameters
 
+        Returns
+        -------
+        dict
+            Autofocus parameters.
+
+        Examples
+        --------
+        >>> autofocus = Autofocus()
+        >>> autofocus.run(microscope_state, autofocus_params)
         """
         frame_num = self.get_autofocus_frame_num()
         if frame_num < 1:
             return
-        self.model.prepare_acquisition()  # Opens correct shutter and puts all signals to false
+        self.model.prepare_acquisition()  # Opens correct shutter and puts all signals
+        # to false
         self.model.active_microscope.prepare_next_channel()
 
         # load Autofocus
@@ -124,7 +189,22 @@ class Autofocus:
         self.model.data_thread.start()
 
     def get_autofocus_frame_num(self):
-        r"""Calculate how many frames are needed to get the best focus position."""
+        """Calculate how many frames are needed to get the best focus position.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        int
+            Number of frames to be processed.
+
+        Examples
+        --------
+        >>> autofocus = Autofocus()
+        >>> autofocus.get_autofocus_frame_num()
+        """
         settings = self.model.configuration["experiment"]["AutoFocusParameters"]
         frames = 0
         if settings["coarse_selected"]:
@@ -137,7 +217,7 @@ class Autofocus:
 
     @staticmethod
     def get_steps(ranges, step_size):
-        r"""Calculate number of steps for autofocusing routine.
+        """Calculate number of steps for autofocusing routine.
 
         Parameters
         ----------
@@ -159,6 +239,21 @@ class Autofocus:
         return steps, pos_offset
 
     def pre_func_signal(self):
+        """Prepare the autofocus routine.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> autofocus = Autofocus()
+        >>> autofocus.pre_func_signal()
+        """
         settings = self.model.configuration["experiment"]["AutoFocusParameters"]
         # self.focus_pos = args[2]  # Current position
         self.focus_pos = self.model.configuration["experiment"]["StageParameters"]["f"]
@@ -180,10 +275,27 @@ class Autofocus:
         self.signal_id = 0
 
     def in_func_signal(self):
+        """Run the autofocus routine.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> autofocus = Autofocus()
+        >>> autofocus.in_func_signal()
+        """
+
         if self.signal_id < self.coarse_steps:
             self.init_pos += self.coarse_step_size
             self.model.move_stage({"f_abs": self.init_pos}, wait_until_done=True)
-            # print('put to queue:', (self.model.frame_id, self.coarse_steps - self.signal_id, self.init_pos))
+            # print('put to queue:', (self.model.frame_id, self.coarse_steps -
+            # self.signal_id, self.init_pos))
             self.autofocus_frame_queue.put(
                 (self.model.frame_id, self.coarse_steps - self.signal_id, self.init_pos)
             )
@@ -213,9 +325,41 @@ class Autofocus:
         return self.init_pos if self.signal_id > self.total_frame_num else None
 
     def end_func_signal(self):
+        """End the autofocus routine.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> autofocus = Autofocus()
+        >>> autofocus.end_func_signal()
+        """
+
         return self.signal_id > self.total_frame_num
 
     def pre_func_data(self):
+        """Prepare the autofocus routine.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> autofocus = Autofocus()
+        >>> autofocus.pre_func_data()
+        """
+        # Initialize the autofocus data
         self.max_entropy = 0
         self.f_frame_id = (
             -1
@@ -228,6 +372,23 @@ class Autofocus:
         self.total_frame_num = self.get_autofocus_frame_num()
 
     def in_func_data(self, frame_ids=[]):
+        """Run the autofocus routine.
+
+        Parameters
+        ----------
+        frame_ids : list
+            List of frame ids to be processed
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> autofocus = Autofocus()
+        >>> autofocus.in_func_data()
+        """
+
         self.get_frames_num += len(frame_ids)
         while True:
             try:
@@ -239,24 +400,27 @@ class Autofocus:
                     ) = self.autofocus_frame_queue.get_nowait()
                 if self.f_frame_id not in frame_ids:
                     break
-            except:
+            except Exception:
                 break
-            # entropy = self.model.analysis.normalized_dct_shannon_entropy(self.model.data_buffer[self.f_frame_id], 3)
+            # entropy = self.model.analysis.normalized_dct_shannon_entropy(
+            # self.model.data_buffer[self.f_frame_id], 3)
             entropy = fast_normalized_dct_shannon_entropy(
-                self.model.data_buffer[self.f_frame_id], 3
+                input_array=self.model.data_buffer[self.f_frame_id],
+                psf_support_diameter_xy=3,
             )
-            # entropy = self.model.analysis.image_intensity(self.model.data_buffer[self.f_frame_id], 3)
 
             self.model.logger.debug(
                 f"Appending plot data for frame {self.f_frame_id} focus: {self.f_pos}, "
                 f"entropy: {entropy[0]}"
             )
             self.plot_data.append([self.f_pos, entropy[0]])
-            # Need to initialize entropy above for the first iteration of the autofocus routine.
-            # Need to initialize entropy_vector above for the first iteration of the autofocus routine.
-            # Then need to append each measurement to the entropy_vector.  First column will be the focus position,
-            # second column would be the DCT entropy value.
-            #
+            # Need to initialize entropy above for the first iteration of the autofocus
+            # routine. Need to initialize entropy_vector above for the first iteration
+            # of the autofocus routine. Then need to append each measurement to the
+            # entropy_vector.  First column will be the focus position, second column
+            # would be the DCT entropy value.
+
+            # Find Maximum Focus Position
             if entropy > self.max_entropy:
                 self.max_entropy = entropy
                 self.focus_pos = self.f_pos
@@ -267,7 +431,8 @@ class Autofocus:
             if self.frame_num == 1:
                 self.frame_num = 10  # any value but not 1
                 self.model.logger.info(
-                    f"***********max shannon entropy: {self.max_entropy}, {self.focus_pos}"
+                    f"***********max shannon entropy: {self.max_entropy}, "
+                    f"{self.focus_pos}"
                 )
                 # find out the focus
                 self.autofocus_pos_queue.put(self.focus_pos)
@@ -277,9 +442,41 @@ class Autofocus:
             return frame_ids
 
     def end_func_data(self):
+        """End the autofocus routine.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> autofocus = Autofocus()
+        >>> autofocus.end_func_data()
+        """
         if self.get_frames_num <= self.total_frame_num:
             return False
         # send out plot data
         self.model.event_queue.put(("autofocus", self.plot_data))
 
+        # Update the configuration with the new focus position
+        self.model.configuration["experiment"]["StageParameters"]["f"] = self.focus_pos
+
+        # Tell the controller to update the view
+        stage_position = dict(
+            map(
+                lambda axis: (
+                    f"{axis}_abs",
+                    self.model.configuration["experiment"]["StageParameters"][axis],
+                ),
+                ["x", "y", "z", "f", "theta"],
+            )
+        )
+        self.model.event_queue.put(("update_stage", stage_position))
+
+        # Log the new focus position
+        self.model.logger.info("***********final focus: %s" % self.focus_pos)
         return self.get_frames_num > self.total_frame_num

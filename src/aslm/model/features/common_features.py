@@ -149,6 +149,10 @@ class PrepareNextChannel:
         self.config_table = {"signal": {"main": self.signal_func}}
 
     def signal_func(self):
+        # prepare virtual microscopes before the primary microscope
+        for microscope_name in self.model.virtual_microscopes:
+            self.model.virtual_microscopes[microscope_name].prepare_next_channel()
+
         self.model.active_microscope.prepare_next_channel()
 
         return True

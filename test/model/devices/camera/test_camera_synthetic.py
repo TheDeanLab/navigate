@@ -146,13 +146,13 @@ class TestSyntheticCamera:
         assert self.synthetic_camera.data_buffer is None
         assert self.synthetic_camera.current_frame_idx == 0
         assert self.synthetic_camera.pre_frame_idx == 0
-        assert self.synthetic_camera.camera_controller.is_acquiring is True
+        assert self.synthetic_camera.is_acquiring is True
 
     def test_synthetic_camera_close_image_series(self):
         self.synthetic_camera.close_image_series()
         assert self.synthetic_camera.pre_frame_idx == 0
         assert self.synthetic_camera.current_frame_idx == 0
-        assert self.synthetic_camera.camera_controller.is_acquiring is False
+        assert self.synthetic_camera.is_acquiring is False
 
     def test_synthetic_camera_acquire_images(self):
         import random

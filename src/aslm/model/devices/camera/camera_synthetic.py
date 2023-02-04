@@ -52,7 +52,7 @@ class SyntheticCameraController:
     """SyntheticCameraController. Synthetic Camera API."""
 
     def __init__(self):
-        self.is_acquiring = False
+        pass
 
     def get_property_value(self, name):
         """Provides the idprop value after looking it up in the property_dict
@@ -174,7 +174,6 @@ class SyntheticCamera(CameraBase):
         self.num_of_frame = number_of_frames
         self.current_frame_idx = 0
         self.pre_frame_idx = 0
-        self.camera_controller.is_acquiring = True
         self.is_acquiring = True
 
     def close_image_series(self):
@@ -210,6 +209,8 @@ class SyntheticCamera(CameraBase):
 
     def generate_new_frame(self):
         """Generate a synthetic image."""
+        if not self.is_acquiring:
+            return
         if self.random_image:
             image = np.random.normal(
                 0,

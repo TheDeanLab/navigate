@@ -345,11 +345,11 @@ class CameraViewController(GUIController):
         offset_x, offset_y = self.calculate_offset()
         stage_position = self.parent_controller.execute("get_stage_position")
         if stage_position is not None:
-            stage_position["x"] -= offset_x
-            stage_position["y"] += offset_y
+            stage_position["x"] += offset_x
+            stage_position["y"] -= offset_y
 
-        # Place the stage position in the multi-position table.
-        self.parent_controller.execute("mark_position", stage_position)
+            # Place the stage position in the multi-position table.
+            self.parent_controller.execute("mark_position", stage_position)
 
     def calculate_offset(self):
         """Calculates the offset of the image.
@@ -405,8 +405,8 @@ class CameraViewController(GUIController):
         stage_position = self.parent_controller.execute("get_stage_position")
 
         if stage_position is not None:
-            stage_position["x"] -= offset_x
-            stage_position["y"] += offset_y
+            stage_position["x"] += offset_x
+            stage_position["y"] -= offset_y
             if self.mode == "stop":
                 command = "move_stage_and_acquire_image"
             else:

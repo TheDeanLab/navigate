@@ -340,9 +340,9 @@ class ChannelsTabController(GUIController):
             self.stack_acq_vals["abs_z_end"].set(0)
             return
         except (KeyError, AttributeError):
-            logger.error(f"Error caught: updating z_steps")
+            logger.error("Error caught: updating z_steps")
             return
-        
+
         # if step_size < 0.001:
         #     step_size = 0.001
         #     self.stack_acq_vals['step_size'].set(step_size)
@@ -557,7 +557,7 @@ class ChannelsTabController(GUIController):
             self.timepoint_vals["stack_acq_time"].set("0")
             return
         except (KeyError, AttributeError):
-            logger.error(f"Error caught: updating timepoint setting")
+            logger.error("Error caught: updating timepoint setting")
             return
 
         perStack = self.stack_acq_vals["cycling"].get() == "Per Stack"
@@ -668,7 +668,7 @@ class ChannelsTabController(GUIController):
         >>> self.toggle_multiposition()
         """
         self.is_multiposition = self.is_multiposition_val.get()
-        self.microscope_state_dict['is_multiposition'] = self.is_multiposition
+        self.microscope_state_dict["is_multiposition"] = self.is_multiposition
         self.update_timepoint_setting()
         self.show_verbose_info("Multi-position:", self.is_multiposition)
 

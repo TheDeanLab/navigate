@@ -477,7 +477,7 @@ gui:
       step: 5
   stack_acquisition:
     step_size:
-      min: 0.200
+      min: 0.100
       max: 1000
       step: 0.1
     start_pos:

@@ -205,7 +205,17 @@ class Model:
         # Ilastik segmentation
         self.feature_list.append([{"name": IlastikSegmentation}])
         # volume search
-        self.feature_list.append([{"name": VolumeSearch}])
+        self.feature_list.append(
+            [
+                {
+                    "name": VolumeSearch,
+                    "args": (
+                        "Mesoscale",
+                        "6x",
+                    ),
+                }
+            ]
+        )
 
         self.acquisition_modes_feature_setting = {
             "single": [{"name": PrepareNextChannel}],

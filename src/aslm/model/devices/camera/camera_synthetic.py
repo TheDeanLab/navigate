@@ -186,26 +186,35 @@ class SyntheticCamera(CameraBase):
         self.camera_controller.is_acquiring = False
         self.is_acquiring = False
 
-    def load_images(self, filenames=None):
-        if filenames is None:
-            self.random_image = True
-        else:
-            self.random_image = False
-            self.img_id = 0
-            self.current_tif_id = 0
-            self.tif_images = []
-            idx = 0
+    def load_images(self, filenames=None, ds=None):
+        """Pre-populate the buffer with images. Can either come from TIFF files or
+        Numpy stacks."""
+        self.random_image = False
+        self.img_id = 0
+        self.current_tif_id = 0
+        self.tif_images = []
+        idx = 0
+        if filenames is not None:
+            # Load TIFF file into buffer as slices
             for image_file in filenames:
                 try:
                     tif = TiffFile(image_file)
-                    self.tif_images.append(tif)
+                    self.tif_images.append(tif.asarray())
                     idx += len(tif.pages)
                     if idx >= self.num_of_frame:
                         return
                 except TiffFileError:
                     pass
-            if idx == 0:
-                self.random_image = False
+        elif ds is not None:
+            # Load a Numpy stack into buffer as slices
+            # Assume the stack is in the order ZYX
+            for idx, data in enumerate(ds):
+                self.tif_images.append(data)
+                idx += len(data)
+                if idx >= self.num_of_frame:
+                    return
+        else:
+            self.random_image = True
 
     def generate_new_frame(self):
         """Generate a synthetic image."""
@@ -219,9 +228,9 @@ class SyntheticCamera(CameraBase):
                 size=(self.x_pixels, self.y_pixels),
             ).astype(np.uint16) + int(self._mean_background_count)
         else:
-            image = self.tif_images[self.current_tif_id].pages[self.img_id].asarray()
+            image = self.tif_images[self.current_tif_id][self.img_id]
             self.img_id += 1
-            if self.img_id >= len(self.tif_images[self.current_tif_id].pages):
+            if self.img_id >= len(self.tif_images[self.current_tif_id]):
                 self.img_id = 0
                 self.current_tif_id = (self.current_tif_id + 1) % len(self.tif_images)
 

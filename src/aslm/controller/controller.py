@@ -34,6 +34,7 @@
 #  Standard Library Imports
 from multiprocessing import Manager
 import tkinter
+from tkinter import filedialog, messagebox
 import multiprocessing as mp
 import threading
 import sys
@@ -41,8 +42,6 @@ import sys
 # Third Party Imports
 
 # Local View Imports
-from tkinter import filedialog, messagebox
-from aslm.controller.sub_controllers.help_popup_controller import HelpPopupController
 from aslm.view.main_application_window import MainApp as view
 from aslm.view.menus.waveform_parameter_popup_window import WaveformParameterPopupWindow
 from aslm.view.menus.camera_view_popup_window import CameraViewPopupWindow
@@ -51,10 +50,8 @@ from aslm.view.menus.ilastik_setting_popup import ilastik_setting_popup
 from aslm.view.menus.help_popup import HelpPopup
 from aslm.view.menus.camera_map_setting_popup import CameraMapSettingPopup
 
-
-from aslm.config.config import load_configs, update_config_dict
-
 # Local Sub-Controller Imports
+from aslm.controller.sub_controllers.help_popup_controller import HelpPopupController
 from aslm.controller.configuration_controller import ConfigurationController
 from aslm.controller.sub_controllers import (
     IlastikPopupController,
@@ -71,15 +68,18 @@ from aslm.controller.sub_controllers import (
     AcquireBarController,
     MicroscopePopupController
 )
-from aslm.tools.file_functions import create_save_path, save_yaml_file
-from aslm.tools.common_functions import combine_funcs
 from aslm.controller.thread_pool import SynchronizedThreadPool
 
 # Local Model Imports
 from aslm.model.model import Model
 from aslm.model.concurrency.concurrency_tools import ObjectInSubprocess
-from aslm.tools.common_dict_tools import update_stage_dict
 
+# Misc. Local Imports
+from aslm.config.config import load_configs, update_config_dict
+from aslm.tools.file_functions import create_save_path, save_yaml_file
+from aslm.tools.common_dict_tools import update_stage_dict
+from aslm.tools.multipos_table_tools import update_table
+from aslm.tools.common_functions import combine_funcs
 
 # Logger Setup
 import logging
@@ -613,7 +613,12 @@ class Controller:
             return False
         # update multi-positions
         positions = self.multiposition_tab_controller.get_positions()
-        update_config_dict(self.manager, self.configuration["experiment"]["MultiPositions"], "stage_positions", positions)
+        update_config_dict(
+            self.manager,
+            self.configuration["experiment"]["MultiPositions"],
+            "stage_positions",
+            positions,
+        )
 
         self.set_mode_of_sub(self.acquire_bar_controller.mode)
         self.update_buffer()
@@ -695,6 +700,17 @@ class Controller:
                 dict = {'x': value, 'y': value, 'z': value, 'theta': value, 'f': value}
             """
             return self.stage_controller.get_position()
+
+        elif command == "mark_position":
+            """Appends a position to the multi-position list.
+
+            Parameters
+            __________
+            args[0] : dict
+                dict = {'x': value, 'y': value, 'z': value, 'theta': value, 'f': value}
+                values are in float64
+            """
+            self.multiposition_tab_controller.append_position(args[0])
 
         elif command == "resolution":
             """Changes the resolution mode and zoom position.
@@ -1088,15 +1104,12 @@ class Controller:
                     value, self.configuration_controller.daq_sample_rate
                 )
             elif event == "multiposition":
-                from aslm.tools.multipos_table_tools import update_table
-
+                # Updates the multi-position tab without appending to the list
                 update_table(
                     self.view.settings.multiposition_tab.multipoint_list.get_table(),
                     value,
                 )
-                self.view.settings.channels_tab.multipoint_frame.on_off.set(
-                    True
-                )  # assume we want to use multi-position
+                self.view.settings.channels_tab.multipoint_frame.on_off.set(True)
             elif event == "ilastik_mask":
                 self.camera_view_controller.display_mask(value)
             elif event == "autofocus":

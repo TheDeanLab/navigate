@@ -596,7 +596,7 @@ class Model:
 
         for microscope_name in self.virtual_microscopes:
             self.virtual_microscopes[microscope_name].end_acquisition()
-        self.active_microscope.end_acquisition()
+
         self.addon_feature = None
 
     def run_data_process(self, num_of_frames=0, data_func=None):

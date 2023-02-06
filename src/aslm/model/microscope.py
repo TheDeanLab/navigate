@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -33,13 +33,13 @@ import logging
 from multiprocessing.managers import ListProxy
 
 from aslm.model.device_startup_functions import (
-    start_camera,
-    start_filter_wheel,
-    start_zoom,
-    start_shutter,
-    start_remote_focus_device,
-    start_galvo,
-    start_lasers,
+    start_camera,  # noqa: F401
+    start_filter_wheel,  # noqa: F401
+    start_zoom,  # noqa: F401
+    start_shutter,  # noqa: F401
+    start_remote_focus_device,  # noqa: F401
+    start_galvo,  # noqa: F401
+    start_lasers,  # noqa: F401
     start_stage,
 )
 from aslm.tools.common_functions import build_ref_name
@@ -49,7 +49,9 @@ logger = logging.getLogger(p)
 
 
 class Microscope:
-    def __init__(self, name, configuration, devices_dict, is_synthetic=False, is_virtual=False):
+    def __init__(
+        self, name, configuration, devices_dict, is_synthetic=False, is_virtual=False
+    ):
         self.microscope_name = name
         self.configuration = configuration
         self.data_buffer = None
@@ -63,6 +65,7 @@ class Microscope:
         self.channels = None
         self.available_channels = None
         self.number_of_frames = None
+        self.central_focus = None
 
         self.laser_wavelength = []
 
@@ -123,9 +126,12 @@ class Microscope:
                         device["hardware"][k] for k in device_ref_dict[device_name]
                     ]
                 else:
+                    print(device_name)
+                    print(device_ref_dict[device_name])
+                    print(device)
                     try:
                         ref_list = [device[k] for k in device_ref_dict[device_name]]
-                    except:
+                    except KeyError:
                         ref_list = []
 
                 device_ref_name = build_ref_name("_", *ref_list)
@@ -143,17 +149,20 @@ class Microscope:
 
                 if is_list:
                     exec(
-                        f"self.{device_name}['{device_name_list[i]}'] = start_{device_name}(name, device_connection, configuration, i, is_synthetic)"
+                        f"self.{device_name}['{device_name_list[i]}'] = "
+                        f"start_{device_name}(name, device_connection, configuration, "
+                        f"i, is_synthetic)"
                     )
                     if device_name in device_name_list[i]:
                         self.info[device_name_list[i]] = device_ref_name
                 else:
                     exec(
-                        f"self.{device_name} = start_{device_name}(name, device_connection, configuration, is_synthetic)"
+                        f"self.{device_name} = start_{device_name}(name, "
+                        f"device_connection, configuration, is_synthetic)"
                     )
                     self.info[device_name] = device_ref_name
 
-                if device_connection is None and device_ref_name != None:
+                if device_connection is None and device_ref_name is not None:
                     if device_name not in devices_dict:
                         devices_dict[device_name] = {}
                     devices_dict[device_name][device_ref_name] = (
@@ -187,7 +196,7 @@ class Microscope:
             )
             for axis in device_config["axes"]:
                 self.stages[axis] = stage
-                self.info[f'stage_{axis}'] = device_ref_name
+                self.info[f"stage_{axis}"] = device_ref_name
 
         # connect daq and camera in synthetic mode
         if is_synthetic:
@@ -244,6 +253,7 @@ class Microscope:
     def prepare_acquisition(self):
         """Prepare the acquisition."""
         self.current_channel = 0
+        self.central_focus = None
         self.channels = self.configuration["experiment"]["MicroscopeState"]["channels"]
         self.available_channels = list(
             map(
@@ -281,6 +291,7 @@ class Microscope:
         for k in self.lasers:
             self.lasers[k].turn_off()
         self.current_channel = 0
+        self.central_focus = None
 
     def calculate_all_waveform(self):
         """Calculate all the waveforms.
@@ -358,14 +369,15 @@ class Microscope:
         # prepare daq: write waveform
         self.daq.prepare_acquisition(channel_key, self.current_exposure_time)
 
-        # TODO: Defocus Settings
-        # curr_focus = self.configuration["experiment"]["StageParameters"]["f"]
-        # self.move_stage(
-        #     {"f_abs": curr_focus + float(self.defocus[self.idx])}, wait_until_done=True
-        # )
-        # self.configuration["experiment"]["StageParameters"][
-        #     "f"
-        # ] = curr_focus  # do something very hacky so we keep using the same focus reference
+        # Add Defocus term
+        # Assume wherever we start is the central focus
+        # TODO: is this the correct assumption?
+        if self.central_focus is None:
+            self.central_focus = self.get_stage_position()["f_pos"]
+        self.move_stage(
+            {"f_abs": self.central_focus + float(channel["defocus"])},
+            wait_until_done=True,
+        )
 
     def get_readout_time(self):
         """Get readout time from camera.

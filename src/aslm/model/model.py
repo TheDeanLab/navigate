@@ -228,8 +228,11 @@ class Model:
                 )
             ],
             "projection": [{"name": PrepareNextChannel}],
-            "confocal-projection" : [{"name": PrepareNextChannel}, {"name": ConProAcquisition}],
-            "customized": []
+            "confocal-projection": [
+                {"name": PrepareNextChannel},
+                {"name": ConProAcquisition},
+            ],
+            "customized": [],
         }
 
     def update_data_buffer(self, img_width=512, img_height=512):
@@ -368,8 +371,12 @@ class Model:
             # load features
             if self.imaging_mode == "customized":
                 if self.addon_feature is None:
-                    self.addon_feature = self.acquisition_modes_feature_setting["single"]
-                self.signal_container, self.data_container = load_features(self, self.addon_feature)
+                    self.addon_feature = self.acquisition_modes_feature_setting[
+                        "single"
+                    ]
+                self.signal_container, self.data_container = load_features(
+                    self, self.addon_feature
+                )
             else:
                 self.signal_container, self.data_container = load_features(
                     self, self.acquisition_modes_feature_setting[self.imaging_mode]
@@ -403,8 +410,21 @@ class Model:
             self.signal_thread.start()
             self.data_thread.start()
             for m in self.virtual_microscopes:
-                image_writer = ImageWriter(self, self.virtual_microscopes[m].data_buffer, m).save_image if self.is_save else None
-                threading.Thread(target=self.simplified_data_process, args=(self.virtual_microscopes[m], getattr(self, f"{m}_show_img_pipe"), image_writer)).start()
+                image_writer = (
+                    ImageWriter(
+                        self, self.virtual_microscopes[m].data_buffer, m
+                    ).save_image
+                    if self.is_save
+                    else None
+                )
+                threading.Thread(
+                    target=self.simplified_data_process,
+                    args=(
+                        self.virtual_microscopes[m],
+                        getattr(self, f"{m}_show_img_pipe"),
+                        image_writer,
+                    ),
+                ).start()
 
         elif command == "update_setting":
             """
@@ -490,7 +510,9 @@ class Model:
             elif type(args[0]) == str:
                 try:
                     if len(args) > 1:
-                        self.addon_feature = [{"name": globals()[args[0]], "args": (args[1],)}]
+                        self.addon_feature = [
+                            {"name": globals()[args[0]], "args": (args[1],)}
+                        ]
                         self.signal_container, self.data_container = load_features(
                             self, self.addon_feature
                         )
@@ -560,6 +582,11 @@ class Model:
         #
         """
         self.is_acquiring = False
+
+        self.active_microscope.end_acquisition()
+        for microscope_name in self.virtual_microscopes:
+            self.virtual_microscopes[microscope_name].end_acquisition()
+
         if hasattr(self, "signal_container"):
             self.signal_container.cleanup()
             delattr(self, "signal_container")
@@ -569,9 +596,6 @@ class Model:
         if self.image_writer is not None:
             self.image_writer.close()
 
-        for microscope_name in self.virtual_microscopes:
-            self.virtual_microscopes[microscope_name].end_acquisition()
-        self.active_microscope.end_acquisition()
         self.addon_feature = None
 
     def run_data_process(self, num_of_frames=0, data_func=None):
@@ -677,7 +701,8 @@ class Model:
                 microscope.camera.get_new_frame()
             )  # This is the 500 ms wait for Hamamatsu
             self.logger.info(
-                f"ASLM Model - Running data process, get frames {frame_ids} from {microscope.microscope_name}"
+                f"ASLM Model - Running data process, get frames {frame_ids} from "
+                f"{microscope.microscope_name}"
             )
             # if there is at least one frame available
             if not frame_ids:
@@ -697,7 +722,10 @@ class Model:
                 data_func(frame_ids)
 
             # show image
-            self.logger.info(f"ASLM Model - Sent through pipe{frame_ids[0]} -- {microscope.microscope_name}")
+            self.logger.info(
+                f"ASLM Model - Sent through pipe{frame_ids[0]} -- "
+                f"{microscope.microscope_name}"
+            )
             show_img_pipe.send(frame_ids[0])
 
             acquired_frame_num += len(frame_ids)
@@ -876,8 +904,7 @@ class Model:
         self.ilastik_target_labels = target_labels
 
     def get_microscope_info(self):
-        """Return Microscopes device information
-        """
+        """Return Microscopes device information"""
         microscope_info = {}
         for microscope_name in self.microscopes:
             microscope_info[microscope_name] = self.microscopes[microscope_name].info
@@ -891,42 +918,66 @@ class Model:
         ]
 
         # create virtual microscope
-        from aslm.model.devices import SyntheticDAQ, SyntheticCamera, SyntheticGalvo, SyntheticFilterWheel, SyntheticShutter, SyntheticRemoteFocus, SyntheticStage, SyntheticZoom
-        
-        microscope = Microscope(microscope_name, self.configuration, {}, False, is_virtual=True)
+        from aslm.model.devices import (
+            SyntheticDAQ,
+            SyntheticCamera,  # noqa: F401
+            SyntheticGalvo,
+            SyntheticFilterWheel,  # noqa: F401
+            SyntheticShutter,  # noqa: F401
+            SyntheticRemoteFocus,  # noqa: F401
+            SyntheticStage,
+            SyntheticZoom,  # noqa: F401
+        )
+
+        microscope = Microscope(
+            microscope_name, self.configuration, {}, False, is_virtual=True
+        )
         microscope.daq = SyntheticDAQ(self.configuration)
         microscope.laser_wavelength = self.microscopes[microscope_name].laser_wavelength
         microscope.lasers = self.microscopes[microscope_name].lasers
         microscope.camera = self.microscopes[microscope_name].camera
-        
+
         # TODO: lasers
         temp = {
-            'zoom': 'SyntheticZoom',
-            'filter_wheel': 'SyntheticFilterWheel',
-            'shutter': 'SyntheticShutter',
-            'remote_focus_device': 'SyntheticRemoteFocus',
+            "zoom": "SyntheticZoom",
+            "filter_wheel": "SyntheticFilterWheel",
+            "shutter": "SyntheticShutter",
+            "remote_focus_device": "SyntheticRemoteFocus",
         }
 
         for k in microscope_config:
             if k.startswith("stage"):
-                axis = k[len("stage_"):]
+                axis = k[len("stage_") :]
                 if microscope_config[k] == "":
-                    microscope.stages[axis] = SyntheticStage(microscope_name, None, self.configuration)
+                    microscope.stages[axis] = SyntheticStage(
+                        microscope_name, None, self.configuration
+                    )
                 else:
-                    microscope.stages[axis] = self.microscopes[microscope_name].stages[axis]
+                    microscope.stages[axis] = self.microscopes[microscope_name].stages[
+                        axis
+                    ]
             elif k.startswith("galvo"):
                 if microscope_config[k] == "":
-                    microscope.galvo[k] = SyntheticGalvo(microscope_name, None, self.configuration)
+                    microscope.galvo[k] = SyntheticGalvo(
+                        microscope_name, None, self.configuration
+                    )
                 else:
                     microscope.galvo[k] = self.microscopes[microscope_name].galvo[k]
             else:
                 if microscope_config[k] == "":
-                    exec(f"microscope.{k} = {temp[k]}('{microscope_name}', None, self.configuration)")
+                    exec(
+                        f"microscope.{k} = {temp[k]}('{microscope_name}', None, "
+                        f"self.configuration)"
+                    )
                 else:
-                    setattr(microscope, k, getattr(self.microscopes[microscope_name], k))
+                    setattr(
+                        microscope, k, getattr(self.microscopes[microscope_name], k)
+                    )
 
         # connect virtual microscope with data_buffer
-        microscope.update_data_buffer(self.img_width, self.img_height, data_buffer, self.number_of_frames)
+        microscope.update_data_buffer(
+            self.img_width, self.img_height, data_buffer, self.number_of_frames
+        )
 
         # add microscope to self.virtual_microscopes
         self.virtual_microscopes[microscope_name] = microscope

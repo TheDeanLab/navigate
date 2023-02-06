@@ -584,6 +584,8 @@ class Model:
         self.is_acquiring = False
 
         self.active_microscope.end_acquisition()
+        for microscope_name in self.virtual_microscopes:
+            self.virtual_microscopes[microscope_name].end_acquisition()
 
         if hasattr(self, "signal_container"):
             self.signal_container.cleanup()
@@ -593,9 +595,6 @@ class Model:
             delattr(self, "data_container")
         if self.image_writer is not None:
             self.image_writer.close()
-
-        for microscope_name in self.virtual_microscopes:
-            self.virtual_microscopes[microscope_name].end_acquisition()
 
         self.addon_feature = None
 

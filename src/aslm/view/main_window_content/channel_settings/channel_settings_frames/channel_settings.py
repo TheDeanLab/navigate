@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -98,7 +99,8 @@ class channel_creator(ttk.Labelframe):
         self.labels = []
         self.frame_columns = []
 
-        #  Creates a column frame for each widget, this is to help with the lables lining up
+        #  Creates a column frame for each widget,
+        # this is to help with the lables lining up
         for idx in range(len(self.label_text)):
             self.frame_columns.append(ttk.Frame(self))
             self.frame_columns[idx].columnconfigure(0, weight=1, uniform=1)
@@ -216,8 +218,8 @@ class channel_creator(ttk.Labelframe):
             self.defocus_spins.append(
                 ValidatedSpinbox(
                     self.frame_columns[6],
-                    from_=0.0,
-                    to=200.0,
+                    from_=-500.0,
+                    to=500.0,
                     textvariable=self.defocus_variables[num],
                     increment=0.1,
                     width=4,

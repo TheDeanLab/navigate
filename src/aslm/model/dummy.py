@@ -226,12 +226,14 @@ class DummyModel:
         )  # z-index, x, y, z, theta, f
 
         self.camera = {}
-        microscope_name = self.configuration["experiment"]["MicroscopeState"][
-            "microscope_name"
-        ]
+        self.active_microscope_name = self.configuration["experiment"][
+            "MicroscopeState"
+        ]["microscope_name"]
         for k in self.configuration["configuration"]["microscopes"].keys():
             self.camera[k] = SyntheticCamera(
-                microscope_name, SyntheticCameraController(), self.configuration
+                self.active_microscope_name,
+                SyntheticCameraController(),
+                self.configuration,
             )
             self.camera[k].initialize_image_series(
                 self.data_buffer, self.number_of_frames

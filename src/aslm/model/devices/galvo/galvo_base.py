@@ -101,10 +101,8 @@ class GalvoBase:
             microscope_name
         ]["remote_focus_device"]["ramp_falling_percent"]
 
-        # Identify galvo waveform. Sine, Sawtooth, ...
-        self.galvo_waveform = configuration["configuration"]["microscopes"][
-            microscope_name
-        ]["galvo"][galvo_id]["waveform"]
+        # Galvo Waveform Information
+        self.galvo_waveform = self.device_config["waveform"]
 
         self.samples = int(self.sample_rate * self.sweep_time)
 

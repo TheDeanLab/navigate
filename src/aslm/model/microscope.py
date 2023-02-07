@@ -30,21 +30,14 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Standard Library imports
 import logging
+import importlib
 from multiprocessing.managers import ListProxy
 
-from aslm.model.device_startup_functions import start_stage
+# Third Party Imports
 
-# (
-# start_camera,
-# start_filter_wheel,
-# start_zoom,
-# start_shutter,
-# start_remote_focus_device,
-# start_galvo,
-# start_lasers,
-# start_stage,
-# )
+# Local Imports
 from aslm.tools.common_functions import build_ref_name
 
 p = __name__.split(".")[1]
@@ -191,6 +184,16 @@ class Microscope:
                     # TODO: Remove this. We should not have this hardcoded.
                     device_connection = self.daq
 
+                # Import start_device classes
+                try:
+                    exec(
+                        f"start_{device_name}=importlib.import_module("
+                        f"'aslm.model.device_startup_functions').start_{device_name}"
+                    )
+                except ImportError:
+                    print(f"Could not import start_{device_name}")
+
+                # Start the devices
                 if is_list:
                     exec(
                         f"self.{device_name}"
@@ -231,6 +234,11 @@ class Microscope:
             if device_ref_name.startswith("GalvoNIStage"):
                 # TODO: Remove this. We should not have this hardcoded.
                 devices_dict["stages"][device_ref_name] = self.daq
+
+            # Import and Start the Stage
+            start_stage = importlib.import_module(
+                "aslm.model.device_startup_functions"
+            ).start_stage
             stage = start_stage(
                 self.microscope_name,
                 devices_dict["stages"][device_ref_name],

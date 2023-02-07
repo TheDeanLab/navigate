@@ -97,12 +97,22 @@ class TestChannelSettingController:
                 "experiment"
             ]["MicroscopeState"]["channels"]
         )
+        # shuffle the channels
+        new_channel_dict = {
+            k: v
+            for k, v in zip(
+                channel_dict.keys(),
+                random.choices(channel_dict.values(), k=len(channel_dict.keys())),
+            )
+        }
+
         self.channel_setting.populate_experiment_values(channel_dict)
         for channel_id in range(self.channel_setting.num):
             vals = self.channel_setting.get_vals_by_channel(channel_id)
             channel_key = f"channel_{str(channel_id + 1)}"
             try:
                 setting_dict = channel_dict[channel_key]
+                new_setting_dict = new_channel_dict[channel_key]
             except KeyError:
                 continue
 
@@ -113,17 +123,29 @@ class TestChannelSettingController:
                 if k == "defocus":
                     new_val = float(random.randint(1, 10))
                 else:
-                    new_val = setting_dict[k]
+                    new_val = new_setting_dict[k]
+
                 vals[k].set(new_val)
+
                 assert str(vals[k].get()) == str(new_val)
-                if k == "camera_exposure_time" or k == "is_selected":
+                if k != "defocus":
+                    assert setting_dict[k] == new_setting_dict[k]
+
+                if k == "laser":
+                    assert (
+                        setting_dict["laser_index"] == new_setting_dict["laser_index"]
+                    )
+                elif k == "filter":
+                    assert (
+                        setting_dict["filter_position"]
+                        == new_setting_dict["filter_position"]
+                    )
+                elif k == "camera_exposure_time" or k == "is_selected":
                     assert (
                         self.channel_setting.parent_controller.commands.pop()
                         == "recalculate_timepoint"
                     )
                     self.channel_setting.parent_controller.commands = []  # reset
-
-            # assert False
 
     def test_get_vals_by_channel(self):
         # Not needed to test IMO

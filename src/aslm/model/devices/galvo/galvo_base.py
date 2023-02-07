@@ -47,7 +47,7 @@ logger = logging.getLogger(p)
 class GalvoBase:
     """GalvoBase Class
 
-    Parent class for voice coil models.
+    Parent class for galvanometers.
     """
 
     def __init__(self, microscope_name, device_connection, configuration, galvo_id=0):
@@ -79,9 +79,25 @@ class GalvoBase:
             self.waveform_dict[k] = None
 
     def __del__(self):
+        """Destructor"""
         pass
 
     def adjust(self, readout_time):
+        """Adjust the galvo waveform to account for the camera readout time.
+
+        Parameters
+        ----------
+        readout_time : float
+            Camera readout time in seconds.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> galvo.adjust(0.1)
+        """
         self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
         # calculate waveform
         microscope_state = self.configuration["experiment"]["MicroscopeState"]
@@ -139,20 +155,84 @@ class GalvoBase:
                     self.waveform_dict[channel_key] < self.galvo_min_voltage
                 ] = self.galvo_min_voltage
 
-                if microscope_state['image_mode'] == 'confocal-projection':
-                    self.waveform_dict[channel_key] = np.hstack([self.waveform_dict[channel_key]]*int(microscope_state['n_plane']))
-                    self.samples = int(self.sample_rate * self.sweep_time * microscope_state['n_plane'])
+                if microscope_state["image_mode"] == "confocal-projection":
+                    self.waveform_dict[channel_key] = np.hstack(
+                        [self.waveform_dict[channel_key]]
+                        * int(microscope_state["n_plane"])
+                    )
+                    self.samples = int(
+                        self.sample_rate * self.sweep_time * microscope_state["n_plane"]
+                    )
 
         return self.waveform_dict
 
     def prepare_task(self, channel_key):
+        """Prepare the task for the given channel.
+
+        Parameters
+        ----------
+        channel_key : str
+            Channel key.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> galvo.prepare_task('488')
+        """
+
         pass
 
     def start_task(self):
+        """Start the task.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> galvo.start_task()
+        """
+
         pass
 
     def stop_task(self):
+        """Stop the task.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> galvo.stop_task()
+        """
         pass
 
     def close_task(self):
+        """Close the task.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> galvo.close_task()
+        """
         pass

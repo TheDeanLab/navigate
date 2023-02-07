@@ -62,6 +62,21 @@ class GalvoNI(GalvoBase):
         self.daq = device_connection
 
     def initialize_task(self):
+        """Initialize the NI DAQ task for the galvo
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> galvo.initialize_task()
+        """
+
         # TODO: make sure the task is reusable, Or need to create and close each time.
         self.task = nidaqmx.Task()
         channel = self.device_config["hardware"]["channel"]
@@ -70,18 +85,35 @@ class GalvoNI(GalvoBase):
             f"Initializing galvo with sample rate {self.sample_rate} and"
             f"{self.samples} samples"
         )
+        # TODO: does it work with confo-projection?
         self.task.timing.cfg_samp_clk_timing(
             rate=self.sample_rate,
-            sample_mode=AcquisitionType.FINITE,  # TODO: does it work with confo-projection?
+            sample_mode=AcquisitionType.FINITE,
             samps_per_chan=self.samples,
         )
         self.task.triggers.start_trigger.cfg_dig_edge_start_trig(self.trigger_source)
 
     def __del__(self):
+        """Destructor"""
         self.stop_task()
         self.close_task()
 
     def adjust(self, readout_time):
+        """Adjust the galvo to the readout time
+
+        Parameters
+        ----------
+        readout_time : float
+            The readout time in seconds
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> galvo.adjust(0.1)
+        """
         waveform_dict = super().adjust(readout_time)
 
         self.daq.analog_outputs[self.device_config["hardware"]["channel"]] = {
@@ -90,24 +122,82 @@ class GalvoNI(GalvoBase):
             "trigger_source": self.trigger_source,
             "waveform": waveform_dict,
         }
-
         return waveform_dict
 
     def prepare_task(self, channel_key):
+        """Prepare the task for the given channel
+
+        Parameters
+        ----------
+        channel_key : str
+            The channel key for the task
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> galvo.prepare_task('x')
+        """
+
         # write waveform
         # self.task.write(self.waveform_dict[channel_key])
         pass
 
     def start_task(self):
+        """Start the NI DAQ task for the galvo
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> galvo.start_task()
+        """
         # self.task.start()
         pass
 
     def stop_task(self, force=False):
+        """Stop the NI DAQ task for the galvo
+
+        Parameters
+        ----------
+        force : bool
+            Force stop the task
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> galvo.stop_task()
+        """
         # if not force:
         #     self.task.wait_until_done()
         # self.task.stop()
         pass
 
     def close_task(self):
+        """Close the NI DAQ task for the galvo
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> galvo.close_task()
+        """
         # self.task.close()
         pass

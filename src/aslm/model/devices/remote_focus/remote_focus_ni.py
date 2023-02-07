@@ -50,6 +50,15 @@ class RemoteFocusNI(RemoteFocusBase):
 
     This class is used to control the remote focus device.
 
+    Parameters
+    ----------
+    microscope_name : str
+        The microscope name.
+    device_connection : object
+        The device connection.
+    configuration : dict
+        The configuration.
+
     Attributes
     ----------
     microscope_name : str

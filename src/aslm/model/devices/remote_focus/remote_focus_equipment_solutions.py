@@ -56,6 +56,17 @@ class RemoteFocusEquipmentSolutions(RemoteFocusBase):
     received the next character can be processed. Uses pyserial:
     https://pyserial.readthedocs.io/en/latest/pyserial_api.html
 
+    Parameters
+    ----------
+    comport : str
+        COM port to connect to the RemoteFocusEquipmentSolutions device.
+    baudrate : int
+        Baudrate to connect to the RemoteFocusEquipmentSolutions device.
+    timeout : float
+        Timeout to connect to the RemoteFocusEquipmentSolutions device.
+    debug : bool
+        Debug mode for the RemoteFocusEquipmentSolutions device.
+
     Attributes
     ----------
     comport : str

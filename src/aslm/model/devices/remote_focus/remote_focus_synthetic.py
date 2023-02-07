@@ -46,6 +46,15 @@ logger = logging.getLogger(p)
 class SyntheticRemoteFocus(RemoteFocusBase):
     """SyntheticRemoteFocus Class
 
+    Parameters
+    ----------
+    microscope_name : str
+        The name of the microscope.
+    device_connection : DeviceConnection
+        The device connection.
+    configuration : dict
+        The configuration.
+
     Attributes
     ----------
     microscope_name : str
@@ -65,8 +74,6 @@ class SyntheticRemoteFocus(RemoteFocusBase):
         Stops the task.
     close_task()
         Closes the task.
-
-
     """
 
     def __init__(self, microscope_name, device_connection, configuration):

@@ -323,6 +323,7 @@ microscopes:
           channel: PXI6259/ao1
           min: -5
           max: 5
+        waveform: sine
         offset: 0.5
     filter_wheel:
       hardware:

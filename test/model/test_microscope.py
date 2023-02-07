@@ -74,6 +74,19 @@ def test_prepare_acquisition(dummy_microscope):
     ]
 
 
+def test_get_stage_position(dummy_microscope):
+    stage_dict = dummy_microscope.get_stage_position()
+
+    ret_pos_dict = {}
+    for axis in dummy_microscope.stages:
+        pos_axis = axis + "_pos"
+        temp_pos = dummy_microscope.stages[axis].report_position()
+        ret_pos_dict[pos_axis] = temp_pos[pos_axis]
+
+    assert type(stage_dict) == dict
+    assert ret_pos_dict == stage_dict
+
+
 def test_prepare_next_channel(dummy_microscope):
     dummy_microscope.prepare_acquisition()
 

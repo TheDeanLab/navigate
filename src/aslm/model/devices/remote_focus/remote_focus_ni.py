@@ -46,7 +46,43 @@ logger = logging.getLogger(p)
 
 
 class RemoteFocusNI(RemoteFocusBase):
-    """RemoteFocusNI Class"""
+    """RemoteFocusNI Class
+
+    This class is used to control the remote focus device.
+
+    Attributes
+    ----------
+    microscope_name : str
+        The name of the microscope.
+    device_connection : nidaqmx.Task
+        The connection to the device.
+    configuration : dict
+        The configuration of the device.
+    task : nidaqmx.Task
+        The task to control the device.
+    trigger_source : str
+        The trigger source of the device.
+    daq : nidaqmx.Task
+        The connection to the device.
+
+    Methods
+    -------
+    initialize_task()
+        Initialize the task.
+    __del__()
+        Delete the task.
+    adjust(readout_time)
+        Adjust the waveform.
+    prepare_task(channel_key)
+        Prepare the task.
+    start_task()
+        Start the task.
+    stop_task(force=False)
+        Stop the task.
+    close_task()
+        Close the task.
+
+    """
 
     def __init__(self, microscope_name, device_connection, configuration):
         super().__init__(microscope_name, device_connection, configuration)
@@ -62,6 +98,22 @@ class RemoteFocusNI(RemoteFocusBase):
         self.daq = device_connection
 
     def initialize_task(self):
+        """Initialize the task.
+
+        This method initializes the task.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> self.initialize_task()
+        """
         # TODO: makesure the task is reusable, Or need to create and close each time.
         self.task = nidaqmx.Task()
         channel = self.device_config["hardware"]["channel"]
@@ -70,18 +122,38 @@ class RemoteFocusNI(RemoteFocusBase):
             f"Initializing remote focus with sample rate {self.sample_rate} and"
             f"{self.samples} samples"
         )
+
+        # TODO: does it work with confocal-projection?
         self.task.timing.cfg_samp_clk_timing(
             rate=self.sample_rate,
-            sample_mode=AcquisitionType.FINITE,  # TODO: does it work with confocal-projection?
+            sample_mode=AcquisitionType.FINITE,
             samps_per_chan=self.samples,
         )
         self.task.triggers.start_trigger.cfg_dig_edge_start_trig(self.trigger_source)
 
     def __del__(self):
+        """Delete the task."""
         self.stop_task()
         self.close_task()
 
     def adjust(self, readout_time):
+        """Adjust the waveform.
+
+        This method adjusts the waveform.
+
+        Parameters
+        ----------
+        readout_time : float
+            The readout time.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> self.adjust(readout_time)
+        """
         waveform_dict = super().adjust(readout_time)
 
         self.daq.analog_outputs[self.device_config["hardware"]["channel"]] = {
@@ -94,20 +166,88 @@ class RemoteFocusNI(RemoteFocusBase):
         return waveform_dict
 
     def prepare_task(self, channel_key):
+        """Prepare the task.
+
+        This method prepares the task.
+
+        Parameters
+        ----------
+        channel_key : str
+            The channel key.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> self.prepare_task(channel_key)
+        """
+
         # write waveform
         # self.task.write(self.waveform_dict[channel_key])
         pass
 
     def start_task(self):
+        """Start the task.
+
+        This method starts the task.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> self.start_task()
+        """
         # self.task.start()
         pass
 
     def stop_task(self, force=False):
+        """Stop the task.
+
+        This method stops the task.
+
+        Parameters
+        ----------
+        force : bool
+            Force the task to stop.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> self.stop_task(force)
+        """
+
         # if not force:
         #     self.task.wait_until_done()
         # self.task.stop()
         pass
 
     def close_task(self):
+        """Close the task.
+
+        This method closes the task.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> self.close_task()
+        """
         # self.task.close()
         pass

@@ -96,7 +96,6 @@ class RemoteFocusEquipmentSolutions(RemoteFocusBase):
         self.debug = False
 
         # Open Serial Port
-        #
         try:
             logger.debug(
                 f"RemoteFocusEquipmentSolutions - Opening Voice Coil on COM: "
@@ -197,6 +196,11 @@ class RemoteFocusEquipmentSolutions(RemoteFocusBase):
         -------
         received_bytes : bytearray
             Number of bytes received from the RemoteFocusEquipmentSolutions device.
+
+        Examples
+        --------
+        >>> read_bytes(1)
+
         """
         for i in range(100):
             num_waiting = self.serial.inWaiting()
@@ -224,6 +228,13 @@ class RemoteFocusEquipmentSolutions(RemoteFocusBase):
             Message to send to the RemoteFocusEquipmentSolutions device. If str ==
             'close', shutdown device.
 
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> remote_focus_equipment_solutions.send_command('d0')
         """
         try:
             if message == "close":
@@ -246,7 +257,20 @@ class RemoteFocusEquipmentSolutions(RemoteFocusBase):
             )
 
     def close_connection(self):
-        """Close RemoteFocusEquipmentSolutions class"""
+        """Close RemoteFocusEquipmentSolutions class
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> remote_focus_equipment_solutions.close_connection()
+        """
         self.serial.close()
 
 

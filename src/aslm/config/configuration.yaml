@@ -107,7 +107,7 @@ microscopes:
         waveform: sine
         frequency: 99.9
         amplitude: 2.5
-        offset: 0
+        offset: 0.5
         duty_cycle: 50
         phase: 1.57079 # pi/2
     filter_wheel:
@@ -324,7 +324,11 @@ microscopes:
           min: -5
           max: 5
         waveform: sine
+        frequency: 99.9
+        amplitude: 2.5
         offset: 0.5
+        duty_cycle: 50
+        phase: 1.57079 # pi/2
     filter_wheel:
       hardware:
         name: filter_wheel

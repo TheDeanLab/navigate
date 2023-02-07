@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -29,11 +30,15 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from aslm.controller.sub_controllers.gui_controller import GUIController
-from aslm.view.custom_widgets.validation import ValidatedEntry
-import tkinter as tk
+# Standard Library Imports
 import logging
 import platform
+
+# Third Party Imports
+
+# Local Imports
+from aslm.controller.sub_controllers.gui_controller import GUIController
+from aslm.view.custom_widgets.validation import ValidatedEntry
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -46,10 +51,12 @@ class KeystrokeController(GUIController):
 
         # References to all sub frames
         self.camera_view = main_view.camera_waveform.camera_tab  # Camera View
-        self.multi_table = (
-            main_view.settings.multiposition_tab.multipoint_list
-        )  # Multiposition Table
-        self.main_view = main_view.root  # Main view
+
+        # Multiposition Table
+        self.multi_table = main_view.settings.multiposition_tab.multipoint_list
+
+        # Main view
+        self.main_view = main_view.root
         self.main_tabs = main_view.settings
 
         # Controllers for all sub frames
@@ -115,7 +122,8 @@ class KeystrokeController(GUIController):
 
         Example
         -------
-        >>> self.camera_view.canvas.bind("<Enter>", self.camera_controller_mouse_wheel_enter)
+        >>> self.camera_view.canvas.bind("<Enter>",
+        >>> self.camera_controller_mouse_wheel_enter)
         """
         self.view.root.unbind("<MouseWheel>")  # get rid of scrollbar mousewheel
         if platform.system() != "Linux":
@@ -144,7 +152,8 @@ class KeystrokeController(GUIController):
 
         Example
         -------
-        >>> self.camera_view.canvas.bind("<Leave>", self.camera_controller_mouse_wheel_leave)
+        >>> self.camera_view.canvas.bind("<Leave>",
+        >>> self.camera_controller_mouse_wheel_leave)
         """
 
         if platform.system() != "Linux":

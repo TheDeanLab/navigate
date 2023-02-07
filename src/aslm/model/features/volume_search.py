@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -31,11 +31,34 @@
 #
 
 from queue import Queue
-from aslm.model.analysis.boundary_detect import *
+from aslm.model.analysis.boundary_detect import (
+    find_tissue_boundary_2d,
+    binary_detect,
+    map_boundary,
+)
 
 
 class VolumeSearch:
     def __init__(self, model, target_resolution="Nanoscale", target_zoom="N/A"):
+        """
+        Find the outer boundary of a tissue, moving the stage through z. Assumes
+        there is no tissue out-of-frame in the x,y-directions.
+
+        Construct a list of stage positions that will tile the entire tissue
+        boundary in x,y,z at target_resolution, target_zoom. Current resolution
+        and zoom is self.model.active_microscope_name and
+        self.model.configuration["experiment"]["MicroscopeState"]["zoom"].
+
+        Parameters
+        ----------
+        model : aslm.model.model.Model
+            ASLM Model
+        target_resolution : str
+            Name of microscope to use for tiled imaging of tissue
+        target_zoom : str
+            Resolution of microscope (target_resolution) to use for tiled imaging
+            of tissue
+        """
         self.model = model
         self.target_resolution = target_resolution
         self.target_zoom = target_zoom
@@ -74,6 +97,9 @@ class VolumeSearch:
         }
 
     def pre_signal_func(self):
+        self.model.active_microscope.current_channel = 0
+        self.model.active_microscope.prepare_next_channel()
+
         self.z_pos = float(
             self.model.configuration["experiment"]["StageParameters"]["z"]
         )
@@ -94,8 +120,7 @@ class VolumeSearch:
         f_end = float(
             self.model.configuration["experiment"]["MicroscopeState"]["end_focus"]
         )
-        # TODO: focus step size
-        self.f_step_size = self.z_step_size  # (f_end - f_start) / self.z_steps
+        self.f_step_size = (f_end - f_start) / self.z_steps
 
         self.curr_z_index = int(self.z_steps / 2)
 
@@ -122,7 +147,7 @@ class VolumeSearch:
         return self.end_flag
 
     def init_data_func(self):
-        # calculate mag
+        # Establish current and target pixel sizes
         microscope_name = self.model.active_microscope_name
         curr_zoom = self.model.configuration["experiment"]["MicroscopeState"]["zoom"]
         curr_pixel_size = float(
@@ -135,14 +160,20 @@ class VolumeSearch:
                 self.target_resolution
             ]["zoom"]["pixel_size"][self.target_zoom]
         )
+
         # consider the image as a square
         img_width = self.model.configuration["experiment"]["CameraParameters"][
             "x_pixels"
         ]
-        self.target_grid_pixels = img_width // math.ceil(
-            curr_pixel_size / target_pixel_size
-        )
+
+        # The target image size in pixels
+        self.mag_ratio = int(curr_pixel_size / target_pixel_size)
+        self.target_grid_pixels = int(img_width // self.mag_ratio)
+        # The target image size in microns
         self.target_grid_width = img_width * target_pixel_size
+
+        # For each axis, establish the offset between this image and the target
+        # image as the difference in the physical offsets of the two microscopes
         axes = ["x", "y", "z", "theta", "f"]
         self.offset = [0, 0, 0, 0, 0]
         for i, axis in enumerate(axes):
@@ -156,13 +187,12 @@ class VolumeSearch:
                     microscope_name
                 ]["stage"][t]
             )
+
+        # Add to this the offset between
         self.offset[0] += (
-            img_width - self.target_grid_pixels
-        ) // 2 * curr_pixel_size + self.model.configuration["experiment"][
-            "StageParameters"
-        ][
-            "x"
-        ]
+            self.model.configuration["experiment"]["StageParameters"]["x"]
+            - (img_width - self.target_grid_pixels) // 2 * curr_pixel_size
+        )
         self.offset[1] += (
             self.model.configuration["experiment"]["StageParameters"]["y"]
             - (img_width - self.target_grid_pixels) // 2 * curr_pixel_size
@@ -180,13 +210,17 @@ class VolumeSearch:
     def data_func(self, frame_ids):
         for idx in frame_ids:
             img_data = self.model.data_buffer[idx]
-            # TODO: make sure set the right threshold_value in model\analysis\boundary_detect.py when use if/else
-            boundary = find_tissue_boundary_2d(img_data, self.target_grid_pixels)
+            # TODO: make sure set the right threshold_value in
+            # model\analysis\boundary_detect.py when use if/else
+            # boundary = find_tissue_boundary_2d(img_data, self.target_grid_pixels)
 
-            # if self.pre_boundary is None:
-            #     boundary = find_tissue_boundary_2d(img_data, self.target_grid_pixels)
-            # else:
-            #     boundary = binary_detect(img_data, self.pre_boundary, self.target_grid_pixels)
+            if self.pre_boundary is None:
+                boundary = find_tissue_boundary_2d(img_data, self.target_grid_pixels)
+            else:
+                off, var = self.model.get_offset_variance_maps()
+                boundary = binary_detect(
+                    img_data, self.pre_boundary, self.target_grid_pixels, off, var
+                )
 
             self.has_tissue = any(boundary)
             self.boundary[self.curr_z_index] = boundary

@@ -290,3 +290,4 @@ temp-BICF-JG-LE4350.txt
 *.icloud
 src/aslm/log_files/LOGS
 *.tiff
+*.ipynb

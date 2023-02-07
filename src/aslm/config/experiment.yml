@@ -54,7 +54,7 @@ MicroscopeState:
   start_position: 0.0
   end_position: 200.0
   step_size: 0.2
-  number_z_steps: 1000.0
+  number_z_steps: 500.0
   timepoints: 1
   stack_pause: 0.0
   is_save: False
@@ -70,6 +70,10 @@ MicroscopeState:
   end_focus: 0.0
   abs_z_start: 0.0
   abs_z_end: 200.0
-  cycling: Per Stack
+  scanrange: 500.0
+  n_plane: 1
+  offset_start: 0.0
+  offset_end: 10.0
+  conpro_cycling_mode: Per Stack
 MultiPositions:
   stage_positions: [{'x': 15000.0, 'y': 12000.0, 'z': 15500.0, 'theta': 0.0, 'f': 70000.0}, {'x': 35000.0, 'y': 42000.0, 'z': 15500.0, 'theta': 0.0, 'f': 70000.0}]

@@ -2,8 +2,7 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only
-# (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -30,47 +29,53 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import pandas as pd
-from aslm.view.main_window_content.multiposition.multi_position_table import (
-    Multi_Position_Table as MPTable,
-)
 import tkinter as tk
 from tkinter import ttk
+from aslm.view.custom_widgets.popup import PopUp
+from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 import logging
+from aslm.view.main_window_content.camera_display.camera_view.camera_view_tab import CameraTab
 
-# Logger Setup
-p = __name__.split(".")[1]
-logger = logging.getLogger(p)
+# p = __name__.split(".")[1]
+# logger = logging.getLogger(p)
 
 
-class multipoint_frame(ttk.Labelframe):
-    def __init__(self, settings_tab, *args, **kwargs):
-        text_label = "Multi-Position Acquisition"
-        ttk.Labelframe.__init__(self, settings_tab, text=text_label, *args, **kwargs)
+class CameraViewPopupWindow:
+    """Popup window with waveform parameters for galvos, remote focusing, etc."""
+
+    def __init__(self, root, microscope_name, *args, **kwargs):
+        # Creating popup window with this name and size/placement, PopUp is a
+        # Toplevel window
+        self.popup = PopUp(
+            root, f"{microscope_name} Additional Camera View", "+320+180", top=False, transient=False
+        )
+
+        # Storing the content frame of the popup, this will be the parent of
+        # the widgets
+        content_frame = self.popup.get_frame()
+        content_frame.columnconfigure(0, pad=5)
+        content_frame.columnconfigure(1, pad=5)
+        content_frame.rowconfigure(0, pad=5)
+        content_frame.rowconfigure(1, pad=5)
+        content_frame.rowconfigure(2, pad=5)
 
         # Formatting
-        tk.Grid.columnconfigure(self, "all", weight=1)
-        tk.Grid.rowconfigure(self, "all", weight=1)
+        tk.Grid.columnconfigure(content_frame, "all", weight=1)
+        tk.Grid.rowconfigure(content_frame, "all", weight=1)
 
-        # Dict
+        """Creating the widgets for the popup"""
+        # Dictionary for all the variables
+        self.inputs = {}
+        self.buttons = {}
 
-        # Save Data Label
-        self.laser_label = ttk.Label(self, text="Enable")
-        self.laser_label.grid(row=0, column=0, sticky=tk.NSEW, padx=(4, 1), pady=(4, 6))
+        self.camera_view = CameraTab(content_frame)
+        self.camera_view.grid(row=0, column=0, sticky=tk.NSEW)
 
-        # Save Data Checkbox
-        self.on_off = tk.BooleanVar()
-        self.save_check = ttk.Checkbutton(self, text="", variable=self.on_off)
-        self.save_check.grid(row=0, column=1, sticky=tk.NSEW, pady=(4, 6))
-
-        # Getters
-
+    # Getters
     def get_variables(self):
         """
-        This function returns a dictionary of all the
-        variables that are tied to each widget name.
-        The key is the widget name,
-        value is the variable associated.
+        This function returns a dictionary of all the variables that are tied to each widget name.
+        The key is the widget name, value is the variable associated.
         """
         variables = {}
         for key, widget in self.inputs.items():
@@ -84,37 +89,15 @@ class multipoint_frame(ttk.Labelframe):
         """
         return self.inputs
 
-
-class multipoint_list(ttk.Frame):
-    """
-    Exploring using a pandastable for embedding an interactive list within a tk Frame.
-    https://pandastable.readthedocs.io/en/latest/
-    """
-
-    def __init__(self, settings_tab, *args, **kwargs):
-        # Init Frame
-        ttk.Frame.__init__(self, settings_tab, *args, **kwargs)
-
-        df = pd.DataFrame({"X": [0], "Y": [0], "Z": [0], "R": [0], "F": [0]})
-        # pt = Table(self, showtoolbar=False)
-        self.pt = MPTable(self, showtoolbar=False)
-        self.pt.show()
-        self.pt.model.df = df
-
-    def get_table(self):
+    def get_buttons(self):
         """
-        Returns a reference to multipoint table dataframe.
-
-        Parameters
-        ----------
-        self : object
-            Multipoint List instance
-
-
-        Returns
-        -------
-        self.pt.model.df: Pandas DataFrame
-            Reference to table data as dataframe
+        This function returns the dictionary that holds the buttons.
+        The key is the button name, value is the button.
         """
+        return self.buttons
 
-        return self.pt
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    CameraViewPopupWindow(root)
+    root.mainloop()

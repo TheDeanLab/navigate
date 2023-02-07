@@ -33,16 +33,18 @@
 import logging
 from multiprocessing.managers import ListProxy
 
-from aslm.model.device_startup_functions import (
-    start_camera,
-    start_filter_wheel,
-    start_zoom,
-    start_shutter,
-    start_remote_focus_device,
-    start_galvo,
-    start_lasers,
-    start_stage,
-)
+from aslm.model.device_startup_functions import start_stage
+
+# (
+# start_camera,
+# start_filter_wheel,
+# start_zoom,
+# start_shutter,
+# start_remote_focus_device,
+# start_galvo,
+# start_lasers,
+# start_stage,
+# )
 from aslm.tools.common_functions import build_ref_name
 
 p = __name__.split(".")[1]
@@ -90,7 +92,11 @@ class Microscope:
 
     """
 
-    def __init__(self, name, configuration, devices_dict, is_synthetic=False):
+    def __init__(
+        self, name, configuration, devices_dict, is_synthetic=False, is_virtual=False
+    ):
+
+        # Initialize microscope object
         self.microscope_name = name
         self.configuration = configuration
         self.data_buffer = None
@@ -98,6 +104,17 @@ class Microscope:
         self.lasers = {}
         self.galvo = {}
         self.daq = devices_dict.get("daq", None)
+        self.info = {}
+
+        self.current_channel = None
+        self.channels = None
+        self.available_channels = None
+        self.number_of_frames = None
+
+        self.laser_wavelength = []
+
+        if is_virtual:
+            return
 
         device_ref_dict = {
             "camera": ["type", "serial_number"],
@@ -108,10 +125,6 @@ class Microscope:
             "galvo": ["type", "channel"],
             "lasers": ["wavelength"],
         }
-        self.current_channel = None
-        self.channels = None
-        self.available_channels = None
-        self.number_of_frames = None
 
         device_name_dict = {"lasers": "wavelength"}
 
@@ -184,11 +197,14 @@ class Microscope:
                         f"['{device_name_list[i]}'] = start_{device_name}("
                         f"name, device_connection, configuration, i, is_synthetic)"
                     )
+                    if device_name in device_name_list[i]:
+                        self.info[device_name_list[i]] = device_ref_name
                 else:
                     exec(
                         f"self.{device_name} = start_{device_name}("
                         f"name, device_connection, configuration, is_synthetic)"
                     )
+                    self.info[device_name] = device_ref_name
 
                 if device_connection is None and device_ref_name is not None:
                     if device_name not in devices_dict:
@@ -222,8 +238,9 @@ class Microscope:
                 i,
                 is_synthetic,
             )
-            for axes in device_config["axes"]:
-                self.stages[axes] = stage
+            for axis in device_config["axes"]:
+                self.stages[axis] = stage
+                self.info[f"stage_{axis}"] = device_ref_name
 
         # connect daq and camera in synthetic mode
         if is_synthetic:
@@ -418,6 +435,8 @@ class Microscope:
                 self.available_channels
             )
             self.current_channel = self.available_channels[idx]
+        if curr_channel == self.current_channel:
+            return
 
         channel_key = prefix + str(self.current_channel)
         channel = self.configuration["experiment"]["MicroscopeState"]["channels"][
@@ -443,8 +462,8 @@ class Microscope:
                     ]
                 ),
             )
-            self.camera.set_exposure_time(self.current_exposure_time)
             self.camera.set_line_interval(self.camera_line_interval)
+        self.camera.set_exposure_time(self.current_exposure_time)
 
         # Laser Settings
         current_laser_index = channel["laser_index"]
@@ -455,11 +474,10 @@ class Microscope:
             self.lasers[k].turn_off()
         self.lasers[str(self.laser_wavelength[current_laser_index])].turn_on()
 
-        if curr_channel != self.current_channel:
-            # stop daq before writing new waveform
-            self.daq.stop_acquisition()
-            # prepare daq: write waveform
-            self.daq.prepare_acquisition(channel_key, self.current_exposure_time)
+        # stop daq before writing new waveform
+        self.daq.stop_acquisition()
+        # prepare daq: write waveform
+        self.daq.prepare_acquisition(channel_key, self.current_exposure_time)
 
         # TODO: Defocus Settings
         # curr_focus = self.configuration["experiment"]["StageParameters"]["f"]

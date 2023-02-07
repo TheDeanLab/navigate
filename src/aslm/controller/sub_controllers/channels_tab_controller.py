@@ -142,7 +142,44 @@ class ChannelsTabController(GUIController):
             command=self.launch_tiling_wizard
         )
 
+        # Get Widgets from confocal_projection_settings in view
+        self.conpro_acq_widgets = self.view.conpro_acq_frame.get_widgets()
+        self.conpro_acq_vals = self.view.conpro_acq_frame.get_variables()
+
+        # laser/stack cycling event binds
+        self.conpro_acq_vals["cycling"].trace_add("write", self.update_cycling_setting)
+
+        # confocal-projection event binds
+        self.conpro_acq_vals["scanrange"].trace_add("write", self.update_scanrange)
+        self.conpro_acq_vals["n_plane"].trace_add("write", self.update_plane_number)
+        self.conpro_acq_vals["offset_start"].trace_add(
+            "write", self.update_offset_start
+        )
+        self.conpro_acq_vals["offset_end"].trace_add("write", self.update_offset_end)
+
+        # confocal-projection setting variables
+
         self.initialize()
+
+    def update_offset_start(self, *args):
+        offset_start = float(self.conpro_acq_vals["offset_start"].get())
+        self.microscope_state_dict["offset_start"] = offset_start
+        print(f"Update offset start: {offset_start}")
+
+    def update_offset_end(self, *args):
+        offset_end = float(self.conpro_acq_vals["offset_end"].get())
+        self.microscope_state_dict["offset_end"] = offset_end
+        print(f"Update offset end: {offset_end}")
+
+    def update_plane_number(self, *args):
+        n_plane = float(self.conpro_acq_vals["n_plane"].get())
+        self.microscope_state_dict["n_plane"] = n_plane
+        print(f"Update plane number: {n_plane}")
+
+    def update_scanrange(self, *args):
+        scanrange = float(self.conpro_acq_vals["scanrange"].get())
+        self.microscope_state_dict["scanrange"] = scanrange
+        print(f"Update scan range: {scanrange}")
 
     def initialize(self):
         """Initializes widgets and gets other necessary configuration
@@ -154,6 +191,7 @@ class ChannelsTabController(GUIController):
         config = self.parent_controller.configuration_controller
 
         self.stack_acq_widgets["cycling"].widget["values"] = ["Per Z", "Per Stack"]
+        self.conpro_acq_widgets["cycling"].widget["values"] = ["Per Plane", "Per Stack"]
         self.stage_velocity = config.stage_setting_dict["velocity"]
         self.filter_wheel_delay = config.filter_wheel_setting_dict["filter_wheel_delay"]
         self.channel_setting_controller.initialize()
@@ -173,6 +211,7 @@ class ChannelsTabController(GUIController):
             "MicroscopeState"
         ]
         self.set_info(self.stack_acq_vals, self.microscope_state_dict)
+        self.set_info(self.conpro_acq_vals, self.microscope_state_dict)
         self.set_info(self.timepoint_vals, self.microscope_state_dict)
 
         # validate
@@ -182,6 +221,11 @@ class ChannelsTabController(GUIController):
         self.stack_acq_vals["cycling"].set(
             "Per Z"
             if self.microscope_state_dict["stack_cycling_mode"] == "per_z"
+            else "Per Stack"
+        )
+        self.conpro_acq_vals["cycling"].set(
+            "Per Plane"
+            if self.microscope_state_dict["conpro_cycling_mode"] == "per_plane"
             else "Per Stack"
         )
         self.channel_setting_controller.populate_experiment_values(
@@ -296,9 +340,9 @@ class ChannelsTabController(GUIController):
             self.stack_acq_vals["abs_z_end"].set(0)
             return
         except (KeyError, AttributeError):
-            logger.error(f"Error caught: updating z_steps")
+            logger.error("Error caught: updating z_steps")
             return
-        
+
         # if step_size < 0.001:
         #     step_size = 0.001
         #     self.stack_acq_vals['step_size'].set(step_size)
@@ -432,6 +476,11 @@ class ChannelsTabController(GUIController):
             if self.stack_acq_vals["cycling"].get() == "Per Stack"
             else "per_z"
         )
+        self.microscope_state_dict["conpro_cycling_mode"] = (
+            "per_stack"
+            if self.conpro_acq_vals["cycling"].get() == "Per Stack"
+            else "per_plane"
+        )
 
         # recalculate time point settings
         self.update_timepoint_setting()
@@ -508,7 +557,7 @@ class ChannelsTabController(GUIController):
             self.timepoint_vals["stack_acq_time"].set("0")
             return
         except (KeyError, AttributeError):
-            logger.error(f"Error caught: updating timepoint setting")
+            logger.error("Error caught: updating timepoint setting")
             return
 
         perStack = self.stack_acq_vals["cycling"].get() == "Per Stack"
@@ -619,7 +668,7 @@ class ChannelsTabController(GUIController):
         >>> self.toggle_multiposition()
         """
         self.is_multiposition = self.is_multiposition_val.get()
-        self.microscope_state_dict['is_multiposition'] = self.is_multiposition
+        self.microscope_state_dict["is_multiposition"] = self.is_multiposition
         self.update_timepoint_setting()
         self.show_verbose_info("Multi-position:", self.is_multiposition)
 

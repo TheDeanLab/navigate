@@ -63,7 +63,12 @@ class AcquireBarController(GUIController):
             "Single Acquisition": "single",
             "Alignment": "alignment",
             "Projection": "projection",
+            "Confocal-Projection": "confocal-projection",
+            "Customized": "customized"
         }
+
+        self.view.pull_down["values"] = list(self.mode_dict.keys())
+        self.view.pull_down.current(0)
 
         # gui event bind
         self.view.acquire_btn.config(command=self.launch_popup_window)
@@ -116,10 +121,12 @@ class AcquireBarController(GUIController):
 
         if mode == "single":
             number_of_slices = 1
-        elif mode == "live":
+        elif mode == "live" or mode == "customized":
             number_of_slices = 1
         elif mode == "projection":
             number_of_slices = 1
+        elif mode == "confocal-projection":
+            number_of_slices = microscope_state['n_plane']
         elif mode == "z-stack":
             number_of_slices = microscope_state["number_z_steps"]
 
@@ -134,11 +141,11 @@ class AcquireBarController(GUIController):
         if images_received > 0:
             # Update progress bars according to imaging mode.
             if stop is False:
-                if mode == "live":
+                if mode == "live" or mode == "customized":
                     self.view.CurAcq.start()
                     self.view.OvrAcq.start()
 
-                elif mode == "z-stack":
+                elif mode == "z-stack" or mode == "confocal-projection":
                     top_percent_complete = 100 * (
                         images_received / top_anticipated_images
                     )
@@ -156,7 +163,9 @@ class AcquireBarController(GUIController):
                     self.view.OvrAcq["value"] = top_percent_complete
 
                 elif mode == "projection":
-                    pass
+                    bottom_anticipated_images = 100 * (images_received / bottom_anticipated_images)
+                    self.view.CurAcq['value'] = bottom_anticipated_images
+                    self.view.OvrAcq['value'] = bottom_anticipated_images
 
             elif stop is True:
                 self.stop_progress_bar()
@@ -172,7 +181,7 @@ class AcquireBarController(GUIController):
         Parameters
         ----------
         mode: str
-            Mode could be: 'live', 'z-stack', 'single', 'projection'
+            Mode could be: 'live', 'z-stack', 'single', 'projection', 'confocal-projection'
 
         Examples
         --------
@@ -271,6 +280,7 @@ class AcquireBarController(GUIController):
             Will additionally call functions to disable and enable widgets based on mode
 
         Parameters
+
         ----------
         args : str
             Imaging Mode.
@@ -285,6 +295,7 @@ class AcquireBarController(GUIController):
         # Update state status of other widgets in the GUI based on what mode is set
         self.update_stack_acq(self.mode)
         self.update_stack_time(self.mode)
+        self.update_conpro_acq(self.mode)
 
     def update_stack_acq(self, mode):
         """Changes state behavior of widgets in the stack acquisition frame based on
@@ -309,6 +320,30 @@ class AcquireBarController(GUIController):
         else:
             state = "disabled"
         for key, widget in stack_widgets.items():
+            widget.widget["state"] = state
+
+    def update_conpro_acq(self, mode):
+        """Changes state behavior of widgets in the confocal-projection acquisition frame based on mode of microscope
+
+        Parameters
+        ----------
+        mode : str
+            Imaging Mode.
+
+        Examples
+        --------
+        >>> update_conpro_acq('live')
+        """
+
+        # Get ref to widgets
+        conpro_widgets = self.parent_view.conpro_acq_frame.get_widgets()
+
+        # Grey out conpro acq widgets when not confocal-projection
+        if mode == "confocal-projection":
+            state = "normal"
+        else:
+            state = "disabled"
+        for _, widget in conpro_widgets.items():
             widget.widget["state"] = state
 
     def update_stack_time(self, mode):

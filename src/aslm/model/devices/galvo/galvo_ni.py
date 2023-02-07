@@ -125,7 +125,8 @@ class GalvoNI(GalvoBase):
         --------
         >>> galvo.initialize_task()
         """
-        # TODO: make sure the task is reusable, Or need to create and close each time.
+        # TODO: make sure the task is reusable,
+        #  Or need to create and close each time.
         self.task = nidaqmx.Task()
         channel = self.device_config["hardware"]["channel"]
         self.task.ao_channels.add_ao_voltage_chan(channel)
@@ -133,6 +134,8 @@ class GalvoNI(GalvoBase):
             f"Initializing galvo with sample rate {self.sample_rate} and"
             f"{self.samples} samples"
         )
+
+        # TODO: does it work with confo-projection?
         self.task.timing.cfg_samp_clk_timing(
             rate=self.sample_rate,
             sample_mode=AcquisitionType.FINITE,

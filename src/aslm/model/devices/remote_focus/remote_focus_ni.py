@@ -72,7 +72,7 @@ class RemoteFocusNI(RemoteFocusBase):
         )
         self.task.timing.cfg_samp_clk_timing(
             rate=self.sample_rate,
-            sample_mode=AcquisitionType.FINITE,
+            sample_mode=AcquisitionType.FINITE,  # TODO: does it work with confocal-projection?
             samps_per_chan=self.samples,
         )
         self.task.triggers.start_trigger.cfg_dig_edge_start_trig(self.trigger_source)

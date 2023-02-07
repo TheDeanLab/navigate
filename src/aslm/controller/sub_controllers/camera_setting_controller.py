@@ -471,8 +471,9 @@ class CameraSettingController(GUIController):
 
         """
         pixels = self.mode_widgets["Pixels"].get()
-        if pixels != "":
-            self.number_of_pixels = int(pixels)
+        if pixels == "":
+            return
+        self.number_of_pixels = int(pixels)
 
         if self.mode != "live" and self.mode != "stop":
             return

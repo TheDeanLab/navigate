@@ -126,9 +126,6 @@ class Microscope:
                         device["hardware"][k] for k in device_ref_dict[device_name]
                     ]
                 else:
-                    print(device_name)
-                    print(device_ref_dict[device_name])
-                    print(device)
                     try:
                         ref_list = [device[k] for k in device_ref_dict[device_name]]
                     except KeyError:

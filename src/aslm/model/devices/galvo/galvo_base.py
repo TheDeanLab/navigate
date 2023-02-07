@@ -102,7 +102,7 @@ class GalvoBase:
         ]["remote_focus_device"]["ramp_falling_percent"]
 
         # Galvo Waveform Information
-        self.galvo_waveform = self.device_config["waveform"]
+        self.galvo_waveform = self.device_config.get("waveform", "sawtooth")
 
         self.samples = int(self.sample_rate * self.sweep_time)
 

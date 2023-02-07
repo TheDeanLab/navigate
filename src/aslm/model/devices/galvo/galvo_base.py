@@ -48,6 +48,56 @@ class GalvoBase:
     """GalvoBase Class
 
     Parent class for galvanometers.
+
+    Parameters
+    ----------
+    microscope_name : str
+        Microscope name.
+    device_connection : str
+        Device connection.
+    configuration : dict
+        Configuration dictionary.
+    galvo_id : int, optional
+        Galvo ID, by default 0
+
+    Attributes
+    ----------
+    configuration : dict
+        Configuration dictionary.
+    microscope_name : str
+        Microscope name.
+    galvo_name : str
+        Galvo name.
+    device_config : dict
+        Device configuration dictionary.
+    sample_rate : int
+        Sample rate.
+    sweep_time : float
+        Sweep time.
+    camera_delay_percent : float
+        Camera delay percent.
+    galvo_max_voltage : float
+        Galvo maximum voltage.
+    galvo_min_voltage : float
+        Galvo minimum voltage.
+    remote_focus_ramp_falling : float
+        Remote focus ramp falling percent.
+    samples : int
+        Number of samples.
+    waveform_dict : dict
+        Waveform dictionary.
+
+    Methods
+    -------
+    prepare_task(channel_key)
+        Prepare the task for the given channel.
+    start_task()
+        Start the task.
+    stop_task()
+        Stop the task.
+    close_task()
+        Close the task.
+
     """
 
     def __init__(self, microscope_name, device_connection, configuration, galvo_id=0):

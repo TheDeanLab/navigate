@@ -44,7 +44,38 @@ logger = logging.getLogger(p)
 
 
 class SyntheticGalvo(GalvoBase):
-    """SyntheticGalvo Class"""
+    """SyntheticGalvo Class
+
+    This class is a synthetic galvo class
+    that does is used for testing purposes.
+
+    Parameters
+    ----------
+    microscope_name : str
+        The name of the microscope
+    device_connection : str
+        The device connection string
+    configuration : dict
+        The configuration dictionary
+    galvo_id : int
+        The galvo id
+
+    Attributes
+    ----------
+    None
+
+    Methods
+    -------
+    prepare_task(channel_key)
+        Prepare the task for the given channel
+    start_task()
+        Start the task
+    stop_task()
+        Stop the task
+    close_task()
+        Close the task
+
+    """
 
     def __init__(self, microscope_name, device_connection, configuration, galvo_id=0):
         super().__init__(microscope_name, device_connection, configuration, galvo_id)

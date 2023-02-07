@@ -46,7 +46,44 @@ logger = logging.getLogger(p)
 
 
 class GalvoNI(GalvoBase):
-    """GalvoNI Class"""
+    """GalvoNI Class
+
+    This class is the NI DAQ implementation of the GalvoBase class.
+
+    Parameters
+    ----------
+    microscope_name : str
+        The name of the microscope
+    device_connection : object
+        The device connection object
+    configuration : dict
+        The configuration dictionary
+    galvo_id : int
+        The galvo id
+
+    Attributes
+    ----------
+    task : object
+        The NI DAQ task object
+    trigger_source : str
+        The trigger source for the galvo
+
+    Methods
+    -------
+    initialize_task()
+        Initialize the NI DAQ task for the galvo
+    adjust(readout_time)
+        Adjust the galvo to the readout time
+    prepare_task(channel_key)
+        Prepare the task for the given channel
+    start_task()
+        Start the NI DAQ task
+    stop_task()
+        Stop the NI DAQ task
+    close_task()
+        Close the NI DAQ task
+
+    """
 
     def __init__(self, microscope_name, device_connection, configuration, galvo_id=0):
         super().__init__(microscope_name, device_connection, configuration, galvo_id)

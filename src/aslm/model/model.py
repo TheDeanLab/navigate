@@ -884,6 +884,7 @@ class Model:
             if offsets is not None and curr_zoom is not None:
                 solvent = self.configuration["experiment"]["Saving"]["solvent"]
                 curr_pos = self.get_stage_position()
+                update_stage_dict(self, curr_pos)
                 for axis, mags in offsets[solvent].items():
                     self.move_stage(
                         {
@@ -892,6 +893,8 @@ class Model:
                         },
                         wait_until_done=True,
                     )
+                curr_pos = self.get_stage_position()
+                update_stage_dict(self, curr_pos)
 
         except ValueError as e:
             self.logger.debug(f"{self.active_microscope_name}: {e}")

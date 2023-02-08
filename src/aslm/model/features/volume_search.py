@@ -207,7 +207,7 @@ class VolumeSearch:
         if offsets is not None:
             solvent = self.model.configuration["experiment"]["Saving"]["solvent"]
             try:
-                focus_offset = offsets[solvent][curr_zoom][self.target_zoom]
+                focus_offset = offsets[solvent]["f"][curr_zoom][self.target_zoom]
             except Exception:
                 focus_offset = 0
         self.offset[4] += self.f_pos + focus_offset

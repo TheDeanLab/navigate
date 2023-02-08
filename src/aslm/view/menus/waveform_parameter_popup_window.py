@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -199,6 +200,7 @@ class WaveformParameterPopupWindow:
                 parent=self.laser_frame,
                 input_class=ValidatedSpinbox,
                 input_var=tk.StringVar(),
+                input_args={"from_": 0, "to": 1000, "increment": 0.1},
             )
 
             self.inputs[galvo_labels[i] + " Freq"].grid(
@@ -233,7 +235,8 @@ class WaveformParameterPopupWindow:
     # Getters
     def get_variables(self):
         """
-        This function returns a dictionary of all the variables that are tied to each widget name.
+        This function returns a dictionary of all the variables
+        that are tied to each widget name.
         The key is the widget name, value is the variable associated.
         """
         variables = {}

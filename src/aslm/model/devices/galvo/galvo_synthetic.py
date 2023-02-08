@@ -75,6 +75,17 @@ class SyntheticGalvo(GalvoBase):
     close_task()
         Close the task
 
+    Examples
+    --------
+    >>> from aslm.model.devices.galvo.galvo_synthetic
+    >>> import SyntheticGalvo
+    >>> galvo = SyntheticGalvo("microscope_name",
+    >>> "device_connection", "configuration", 0)
+    >>> galvo.prepare_task("channel_key")
+    >>> galvo.start_task()
+    >>> galvo.stop_task()
+    >>> galvo.close_task()
+
     """
 
     def __init__(self, microscope_name, device_connection, configuration, galvo_id=0):
@@ -82,7 +93,21 @@ class SyntheticGalvo(GalvoBase):
         pass
 
     def __del__(self):
-        """Destructor"""
+        """Destructor
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> del galvo task
+        """
+
         self.stop_task()
         self.close_task()
 

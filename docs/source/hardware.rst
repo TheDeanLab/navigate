@@ -21,6 +21,9 @@ and visible in the Windows Device Manager as a **NI Data Acquisition Device**.
     To find the device pinouts for your NI-based data acquisition card, open up NI MAX, find the card under devices,
     right-click and select 'device pinouts'.
 
+    Important: Should you use the SCB-68A breakout box, do not look at the pinout on the back of the cover.
+    This is misleading. You must look at the device pinouts in NI MAX.
+
 The most important aspect is to wire up the triggering properly. The software first calculates all of the analog and digital waveforms, creates the NI tasks, and then queues these waveforms on the data acquisition board.
 Upon receipt of a trigger, all of the analog an digital tasks are delivered in parallel. This provides us with deterministic behavior on a per-frame basis, which is necessary for proper ASLM-style acquisitions. It does not
 however provide us with deterministic behavior between image frames, and some jitter in timing is anticipated.
@@ -86,3 +89,5 @@ Software designed to acquire data in a continuous stage scanning mode. Rather th
 from the ASI stage to synchronize the start of imaging, we use the encoder output pulsing mode of the ASI stage to
 trigger the acquisition of every frame at precise intervals.  Important for multi-channel imaging that is acquired in
 the per-stack mode, but less so for perZ-based acquisitions.
+
+FTP-2000 Stage. Whatever you do, don't change the F position. You will your stage.

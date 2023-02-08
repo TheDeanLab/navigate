@@ -72,6 +72,8 @@ class GalvoNI(GalvoBase):
     -------
     initialize_task()
         Initialize the NI DAQ task for the galvo
+    __del__()
+        Deletes the task.
     adjust(readout_time)
         Adjust the galvo to the readout time
     prepare_task(channel_key)
@@ -82,6 +84,15 @@ class GalvoNI(GalvoBase):
         Stop the NI DAQ task
     close_task()
         Close the NI DAQ task
+
+    Examples
+    --------
+    >>> galvo = GalvoNI(microscope_name, device_connection, configuration, galvo_id=0)
+    >>> galvo.adjust(readout_time)
+    >>> galvo.prepare_task(channel_key)
+    >>> galvo.start_task()
+    >>> galvo.stop_task(force=False)
+    >>> galvo.close_task()
 
     """
 
@@ -131,7 +142,19 @@ class GalvoNI(GalvoBase):
         self.task.triggers.start_trigger.cfg_dig_edge_start_trig(self.trigger_source)
 
     def __del__(self):
-        """Destructor"""
+        """Deletes the task.
+        This method deletes the task.
+        Parameters
+        ----------
+        None
+        Returns
+        -------
+        None
+        Examples
+        --------
+        >>> del galvo
+        """
+
         self.stop_task()
         self.close_task()
 
@@ -149,7 +172,7 @@ class GalvoNI(GalvoBase):
 
         Examples
         --------
-        >>> galvo.adjust(0.1)
+        >>> galvo.adjust(readout_time)
         """
         waveform_dict = super().adjust(readout_time)
 
@@ -175,7 +198,7 @@ class GalvoNI(GalvoBase):
 
         Examples
         --------
-        >>> galvo.prepare_task('x')
+        >>> galvo.prepare_task(channel_key)
         """
 
         # write waveform
@@ -197,6 +220,7 @@ class GalvoNI(GalvoBase):
         --------
         >>> galvo.start_task()
         """
+
         # self.task.start()
         pass
 
@@ -216,6 +240,7 @@ class GalvoNI(GalvoBase):
         --------
         >>> galvo.stop_task()
         """
+
         # if not force:
         #     self.task.wait_until_done()
         # self.task.stop()
@@ -236,5 +261,6 @@ class GalvoNI(GalvoBase):
         --------
         >>> galvo.close_task()
         """
+        
         # self.task.close()
         pass

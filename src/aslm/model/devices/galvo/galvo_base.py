@@ -37,7 +37,7 @@ import logging
 import numpy as np
 
 # Local Imports
-from aslm.model.waveforms import sawtooth
+from aslm.model.waveforms import sawtooth, sine_wave
 
 # # Logger Setup
 p = __name__.split(".")[1]
@@ -97,7 +97,6 @@ class GalvoBase:
         Stop the task.
     close_task()
         Close the task.
-
     """
 
     def __init__(self, microscope_name, device_connection, configuration, galvo_id=0):
@@ -121,6 +120,9 @@ class GalvoBase:
         self.remote_focus_ramp_falling = configuration["configuration"]["microscopes"][
             microscope_name
         ]["remote_focus_device"]["ramp_falling_percent"]
+
+        # Galvo Waveform Information
+        self.galvo_waveform = self.device_config.get("waveform", "sawtooth")
 
         self.samples = int(self.sample_rate * self.sweep_time)
 
@@ -183,21 +185,42 @@ class GalvoBase:
                 self.samples = int(self.sample_rate * self.sweep_time)
 
                 # galvo Parameters
-                galvo_amplitude = float(galvo_parameters.get("amplitude", 0))
-                galvo_offset = float(galvo_parameters.get("offset", 0))
-                galvo_frequency = (
-                    float(galvo_parameters.get("frequency", 0)) / exposure_time
-                )
+                try:
+                    galvo_amplitude = float(galvo_parameters.get("amplitude", 0))
+                    galvo_offset = float(galvo_parameters.get("offset", 0))
+                    galvo_frequency = (
+                        float(galvo_parameters.get("frequency", 0)) / exposure_time
+                    )
+                except ValueError as e:
+                    logger.error(f"{e} waveform constants.yml doesn't have parameter amplitude/offset/frequency for {self.galvo_name}")
+                    return
 
                 # Calculate the Waveforms
-                self.waveform_dict[channel_key] = sawtooth(
-                    sample_rate=self.sample_rate,
-                    sweep_time=self.sweep_time,
-                    frequency=galvo_frequency,
-                    amplitude=galvo_amplitude,
-                    offset=galvo_offset,
-                    phase=(self.camera_delay_percent / 100) * exposure_time,
-                )
+                if self.galvo_waveform == "sawtooth":
+                    self.waveform_dict[channel_key] = sawtooth(
+                        sample_rate=self.sample_rate,
+                        sweep_time=self.sweep_time,
+                        frequency=galvo_frequency,
+                        amplitude=galvo_amplitude,
+                        offset=galvo_offset,
+                        phase=(self.camera_delay_percent / 100) * exposure_time,
+                    )
+                elif self.galvo_waveform == "sine":
+                    self.waveform_dict[channel_key] = sine_wave(
+                        sample_rate=self.sample_rate,
+                        sweep_time=self.sweep_time,
+                        frequency=galvo_frequency,
+                        amplitude=galvo_amplitude,
+                        offset=galvo_offset,
+                        phase=self.device_config["phase"],
+                    )
+                else:
+                    print(
+                        "Mistakes were made. "
+                        "Unknown waveform specified in configuration file."
+                    )
+                    self.waveform_dict[channel_key] = None
+                    continue
                 self.waveform_dict[channel_key][
                     self.waveform_dict[channel_key] > self.galvo_max_voltage
                 ] = self.galvo_max_voltage
@@ -250,7 +273,6 @@ class GalvoBase:
         --------
         >>> galvo.start_task()
         """
-
         pass
 
     def stop_task(self):

@@ -29,17 +29,12 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Standard Library imports
 import logging
+import importlib
 from multiprocessing.managers import ListProxy
 
 from aslm.model.device_startup_functions import (
-    start_camera,  # noqa: F401
-    start_filter_wheel,  # noqa: F401
-    start_zoom,  # noqa: F401
-    start_shutter,  # noqa: F401
-    start_remote_focus_device,  # noqa: F401
-    start_galvo,  # noqa: F401
-    start_lasers,  # noqa: F401
     start_stage,
 )
 from aslm.tools.common_functions import build_ref_name
@@ -49,9 +44,51 @@ logger = logging.getLogger(p)
 
 
 class Microscope:
+    """Microscope Class
+
+    This class is used to control the microscope.
+
+    Attributes
+    ----------
+    configuration : dict
+        Configuration dictionary.
+    data_buffer : ListProxy
+        Data buffer.
+    daq : Daq
+        Daq object.
+    microscope_name : str
+        Microscope name.
+    number_of_frames : int
+        Number of frames.
+
+    Methods
+    -------
+    update_data_buffer(img_width, img_height, data_buffer, number_of_frames)
+        Update the data buffer for the camera.
+    move_stage_offset(former_microscope=None)
+        Move the stage to the offset position.
+    end_acquisition()
+        End the acquisition.
+    get_readout_time()
+        Get readout time from camera.
+
+    Examples
+    --------
+    >>> microscope = Microscope(configuration,
+    >>> data_buffer, daq, microscope_name, number_of_frames)
+    >>> microscope.update_data_buffer(img_width, img_height,
+    >>> data_buffer, number_of_frames)
+    >>> microscope.move_stage_offset(former_microscope=None)
+    >>> microscope.end_acquisition()
+    >>> microscope.get_readout_time()
+
+    """
+
     def __init__(
         self, name, configuration, devices_dict, is_synthetic=False, is_virtual=False
     ):
+
+        # Initialize microscope object
         self.microscope_name = name
         self.configuration = configuration
         self.data_buffer = None
@@ -144,6 +181,17 @@ class Microscope:
                     # TODO: Remove this. We should not have this hardcoded.
                     device_connection = self.daq
 
+                # Import start_device classes
+                try:
+                    exec(
+                        f"start_{device_name}=importlib.import_module("
+                        f"'aslm.model.device_startup_functions').start_{device_name}"
+                    )
+                except AttributeError:
+                    print(f"Could not import start_{device_name}")
+                    print(f"Could not load device {device_name}")
+
+                # Start the devices
                 if is_list:
                     exec(
                         f"self.{device_name}['{device_name_list[i]}'] = "
@@ -184,6 +232,7 @@ class Microscope:
             if device_ref_name.startswith("GalvoNIStage"):
                 # TODO: Remove this. We should not have this hardcoded.
                 devices_dict["stages"][device_ref_name] = self.daq
+
             stage = start_stage(
                 self.microscope_name,
                 devices_dict["stages"][device_ref_name],
@@ -212,6 +261,16 @@ class Microscope:
             Data buffer for the camera.
         number_of_frames : int
             Number of frames to be acquired.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> microscope.update_data_buffer(img_width=512,
+        >>> img_height=512, data_buffer=None, number_of_frames=1)
+
         """
 
         if self.camera.is_acquiring:
@@ -227,6 +286,15 @@ class Microscope:
         ----------
         former_microscope : str
             Name of the former microscope.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> microscope.move_stage_offset(former_microscope="microscope1")
+
         """
 
         if former_microscope:
@@ -248,7 +316,21 @@ class Microscope:
             self.stages[axes].move_absolute({axes + "_abs": pos}, wait_until_done=True)
 
     def prepare_acquisition(self):
-        """Prepare the acquisition."""
+        """Prepare the acquisition.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> microscope.prepare_acquisition()
+
+        """
         self.current_channel = 0
         self.central_focus = None
         self.channels = self.configuration["experiment"]["MicroscopeState"]["channels"]
@@ -280,7 +362,20 @@ class Microscope:
         return self.calculate_all_waveform()
 
     def end_acquisition(self):
-        """End the acquisition."""
+        """End the acquisition.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> microscope.end_acquisition()
+        """
         self.daq.stop_acquisition()
         if self.camera.is_acquiring:
             self.camera.close_image_series()
@@ -293,10 +388,19 @@ class Microscope:
     def calculate_all_waveform(self):
         """Calculate all the waveforms.
 
+        Parameters
+        ----------
+        None
+
         Returns
         -------
         waveform : dict
             Dictionary of all the waveforms.
+
+        Examples
+        --------
+        >>> waveform = microscope.calculate_all_waveform()
+
         """
         readout_time = self.get_readout_time()
         camera_waveform = self.daq.calculate_all_waveforms(
@@ -312,7 +416,20 @@ class Microscope:
         return waveform_dict
 
     def prepare_next_channel(self):
-        """Prepare the next channel."""
+        """Prepare the next channel.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> microscope.prepare_next_channel()
+        """
         curr_channel = self.current_channel
         prefix = "channel_"
         if self.current_channel == 0:
@@ -386,10 +503,19 @@ class Microscope:
         Return a -1 to indicate when we are not in normal mode.
         This is needed in daq.calculate_all_waveforms()
 
+        Parameters
+        ----------
+        None
+
         Returns
         -------
         readout_time : float
             Camera readout time in seconds or -1 if not in Normal mode.
+
+        Examples
+        --------
+        >>> readout_time = microscope.get_readout_time()
+
         """
         readout_time = 0
         if (
@@ -408,6 +534,14 @@ class Microscope:
             Dictionary of stage positions.
         wait_until_done : bool, optional
             Wait until stage is done moving, by default False
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> microscope.move_stage({"x_abs": 0, "y_abs": 0, "z_abs": 0, "f_abs": 0})
         """
 
         success = True
@@ -422,7 +556,20 @@ class Microscope:
         return success
 
     def stop_stage(self):
-        """Stop stage."""
+        """Stop stage.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> microscope.stop_stage()
+        """
 
         for axis in self.stages:
             self.stages[axis].stop()
@@ -430,10 +577,18 @@ class Microscope:
     def get_stage_position(self):
         """Get stage position.
 
+        Parameters
+        ----------
+        None
+
         Returns
         -------
         stage_position : dict
             Dictionary of stage positions.
+
+        Examples
+        --------
+        >>> stage_position = microscope.get_stage_position()
         """
 
         ret_pos_dict = {}

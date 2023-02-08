@@ -2,7 +2,8 @@
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 #
 #      * Redistributions of source code must retain the above copyright notice,
@@ -34,6 +35,7 @@ import logging
 import time
 from multiprocessing.managers import ListProxy
 
+# Third Party Imports
 import numpy as np
 
 # Local Imports
@@ -128,11 +130,13 @@ class GalvoNIStage(StageBase):
         Parameters
         ----------
         axis : str
-            An axis prefix in move_dictionary. For example, axis='x' corresponds to 'x_abs', 'x_min', etc.
+            An axis prefix in move_dictionary.
+            For example, axis='x' corresponds to 'x_abs', 'x_min', etc.
         axis_num : int
             The corresponding number of this axis on a PI stage.
         move_dictionary : dict
-            A dictionary of values required for movement. Includes 'x_abs', 'x_min', etc. for one or more axes.
+            A dictionary of values required for movement.
+            Includes 'x_abs', 'x_min', etc. for one or more axes.
             Expect values in micrometers, except for theta, which is in degrees.
 
         Returns
@@ -156,16 +160,20 @@ class GalvoNIStage(StageBase):
             # Only proceed if it is enabled in the GUI
             if channel["is_selected"] is True:
 
-                # Get the Waveform Parameters - Assumes Remote Focus Delay < Camera Delay.  Should Assert.
+                # Get the Waveform Parameters
+                # Assumes Remote Focus Delay < Camera Delay.  Should Assert.
                 exposure_time = channel["camera_exposure_time"] / 1000
                 self.sweep_time = exposure_time + exposure_time * (
                     (self.camera_delay_percent + self.remote_focus_ramp_falling) / 100
                 )
                 readout_time = 0  # TODO: find a way to pass this to the stages
                 if readout_time > 0:
-                    # This addresses the dovetail nature of the camera readout in normal mode. The camera reads middle
-                    # out, and the delay in start of the last lines compared to the first lines causes the exposure
-                    # to be net longer than exposure_time. This helps the galvo keep sweeping for the full camera
+                    # This addresses the dovetail nature of the
+                    # camera readout in normal mode. The camera reads middle
+                    # out, and the delay in start of the last lines
+                    # compared to the first lines causes the exposure
+                    # to be net longer than exposure_time.
+                    # This helps the galvo keep sweeping for the full camera
                     # exposure time.
                     self.sweep_time += readout_time
                 self.samples = int(self.sample_rate * self.sweep_time)
@@ -239,7 +247,8 @@ class GalvoNIStage(StageBase):
                     self.waveform_dict[channel_key] = np.hstack(waveforms)
                     self.samples = int(self.sample_rate * self.sweep_time * z_planes)
                     print(
-                        f"Waveform with {z_planes} planes is of length {self.waveform_dict[channel_key].shape}"
+                        f"Waveform with {z_planes} planes is of length"
+                        f" {self.waveform_dict[channel_key].shape}"
                     )
                 else:
                     self.waveform_dict[channel_key] = dc_value(
@@ -261,7 +270,8 @@ class GalvoNIStage(StageBase):
             "waveform": self.waveform_dict,
         }
 
-        # TODO: Force an update of the waveform after writing, if in live mode or z-stack.
+        # TODO: Force an update of the waveform after writing,
+        #  if in live mode or z-stack.
 
         return True
 
@@ -271,7 +281,8 @@ class GalvoNIStage(StageBase):
         Parameters
         ----------
         move_dictionary : dict
-            A dictionary of values required for movement. Includes 'x_abs', etc. for one or more axes.
+            A dictionary of values required for movement.
+            Includes 'x_abs', etc. for one or more axes.
             Expects values in micrometers, except for theta, which is in degrees.
         wait_until_done : bool
             Block until stage has moved to its new spot.
@@ -290,7 +301,8 @@ class GalvoNIStage(StageBase):
                     self, f"int_{ax}_pos_offset", 0
                 )  # TODO: should we default to 0?
                 while (abs(stage_pos - target_pos) < 0.01) and (i < n_tries):
-                    #  replace: stage_pos = self.mcl_controller.MCL_SingleReadN(ax, self.handle)
+                    #  replace: stage_pos =
+                    #  self.mcl_controller.MCL_SingleReadN(ax, self.handle)
                     #  todo: include a call to the NI board to set a voltage
                     i += 1
                     time.sleep(0.01)

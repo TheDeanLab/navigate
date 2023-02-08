@@ -1,92 +1,47 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>Configuring ASLM &mdash; ASLM 0.1 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/sphinx_highlight.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Extending ASLM" href="hacking.html" />
     <link rel="prev" title="Hardware Setup" href="hardware.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="index.html" class="icon icon-home"> ASLM
           
-
-          
+          <a href="index.html" class="icon icon-home">
+            ASLM
+              <img src="_static/mic.png" class="logo" alt="Logo"/>
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="userguide.html">User Guide</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="installation.html">Software Installation</a></li>
@@ -105,81 +60,39 @@
 <li class="toctree-l1"><a class="reference internal" href="hacking.html">Extending ASLM</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">ASLM</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="userguide.html">User Guide</a> &raquo;</li>
-        
-      <li>Configuring ASLM</li>
-    
-    
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="userguide.html">User Guide</a></li>
+      <li class="breadcrumb-item active">Configuring ASLM</li>
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="_sources/config.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <section id="configuring-aslm">
-<h1>Configuring ASLM<a class="headerlink" href="#configuring-aslm" title="Permalink to this heading">¶</a></h1>
+<h1>Configuring ASLM<a class="headerlink" href="#configuring-aslm" title="Permalink to this heading"></a></h1>
 <p>In order to properly use the ASLM software you will need to configure the specifications of the various hardware that you will be using.
 This is done by updating the configuration.yaml file located in either <code class="docutils literal notranslate"><span class="pre">Users\name\AppData\Local\.ASLM</span></code> if on Windows or <code class="docutils literal notranslate"><span class="pre">~/.ASLM</span></code> if on Mac/Linux.</p>
 <section id="configuration-yaml">
-<h2>Configuration.yaml<a class="headerlink" href="#configuration-yaml" title="Permalink to this heading">¶</a></h2>
+<h2>Configuration.yaml<a class="headerlink" href="#configuration-yaml" title="Permalink to this heading"></a></h2>
 <section id="hardware-section">
-<h3>Hardware Section<a class="headerlink" href="#hardware-section" title="Permalink to this heading">¶</a></h3>
+<h3>Hardware Section<a class="headerlink" href="#hardware-section" title="Permalink to this heading"></a></h3>
 <p>The first section of the file is called hardware. It contains all the necessary information to find and connect each hardware device to the computer/software.</p>
 <p>Here is an example of what the section will look like:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Configuration in YAML</span>
@@ -303,7 +216,7 @@ and then the information below that. This formats the stage field to behave like
 Another example would be replacing the zoom type with SyntheticZoom in the instance your microscope does not use that hardware. Your system will still run as you expect.</p>
 </section>
 <section id="microscope-section">
-<h3>Microscope Section<a class="headerlink" href="#microscope-section" title="Permalink to this heading">¶</a></h3>
+<h3>Microscope Section<a class="headerlink" href="#microscope-section" title="Permalink to this heading"></a></h3>
 <p>The second section contains the microscopes that you will be using with the software. Each is represented as a yaml dictionary similar
 to the hardware section. The GUI uses this dictionary to switch between the microscopes.</p>
 <p>Here is an abbreviated example, the full file contains field entries for all of the hardware specified:</p>
@@ -378,7 +291,7 @@ stage field relate to the bounds of the physical stage. This is what the softwar
 for stage movement. Most stages will have different values respectively.</p>
 </section>
 <section id="gui-section">
-<h3>GUI Section<a class="headerlink" href="#gui-section" title="Permalink to this heading">¶</a></h3>
+<h3>GUI Section<a class="headerlink" href="#gui-section" title="Permalink to this heading"></a></h3>
 <p>The third and final section of the configuration file is the GUI parameters.</p>
 <p>It will look something like the below:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">gui</span><span class="p">:</span>
@@ -433,50 +346,33 @@ manner.</p>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="hacking.html" class="btn btn-neutral float-right" title="Extending ASLM" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="hardware.html" class="btn btn-neutral float-left" title="Hardware Setup" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="hacking.html" class="btn btn-neutral float-right" title="Extending ASLM" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2022, Dean Lab @ UT Southwestern.
-
-    </p>
+    <p>&#169; Copyright 2022, Dean Lab @ UT Southwestern.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

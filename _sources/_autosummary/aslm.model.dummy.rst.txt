@@ -1,0 +1,34 @@
+aslm.model.dummy
+================
+
+.. automodule:: aslm.model.dummy
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom_class.rst
+   
+      DummyController
+      DummyDevice
+      DummyMicroscope
+      DummyModel
+   
+   
+
+   
+   
+   
+
+
+

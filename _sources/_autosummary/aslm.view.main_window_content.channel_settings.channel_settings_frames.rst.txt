@@ -29,6 +29,7 @@ aslm.view.main\_window\_content.channel\_settings.channel\_settings\_frames
    :recursive:
 
    aslm.view.main_window_content.channel_settings.channel_settings_frames.channel_settings
+   aslm.view.main_window_content.channel_settings.channel_settings_frames.confocal_projection_settings
    aslm.view.main_window_content.channel_settings.channel_settings_frames.quick_launch
    aslm.view.main_window_content.channel_settings.channel_settings_frames.stack_acquisition_settings
    aslm.view.main_window_content.channel_settings.channel_settings_frames.stack_timepoint_settings

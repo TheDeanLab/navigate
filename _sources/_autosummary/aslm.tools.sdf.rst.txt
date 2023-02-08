@@ -1,0 +1,32 @@
+aslm.tools.sdf
+==============
+
+.. automodule:: aslm.tools.sdf
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      box
+      sphere
+      volume_from_sdf
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

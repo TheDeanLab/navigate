@@ -1,92 +1,47 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>aslm.model.devices.camera.camera_base.CameraBase &mdash; ASLM 0.1 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="aslm.model.devices.camera.camera_hamamatsu" href="aslm.model.devices.camera.camera_hamamatsu.html" />
     <link rel="prev" title="aslm.model.devices.camera.camera_base" href="aslm.model.devices.camera.camera_base.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="../index.html" class="icon icon-home"> ASLM
           
-
-          
+          <a href="../index.html" class="icon icon-home">
+            ASLM
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../userguide.html">User Guide</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../hacking.html">Extending ASLM</a><ul class="current">
@@ -100,6 +55,7 @@
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.data_sources.html">aslm.model.data_sources</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.device_startup_functions.html">aslm.model.device_startup_functions</a></li>
 <li class="toctree-l4 current"><a class="reference internal" href="aslm.model.devices.html">aslm.model.devices</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.dummy.html">aslm.model.dummy</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.features.html">aslm.model.features</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.metadata_sources.html">aslm.model.metadata_sources</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.microscope.html">aslm.model.microscope</a></li>
@@ -116,88 +72,41 @@
 </li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">ASLM</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="../hacking.html">Extending ASLM</a> &raquo;</li>
-        
-          <li><a href="../api.html">API Reference</a> &raquo;</li>
-        
-          <li><a href="aslm.model.html">aslm.model</a> &raquo;</li>
-        
-          <li><a href="aslm.model.devices.html">aslm.model.devices</a> &raquo;</li>
-        
-          <li><a href="aslm.model.devices.camera.html">aslm.model.devices.camera</a> &raquo;</li>
-        
-          <li><a href="aslm.model.devices.camera.camera_base.html">aslm.model.devices.camera.camera_base</a> &raquo;</li>
-        
-      <li>aslm.model.devices.camera.camera_base.CameraBase</li>
-    
-    
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../hacking.html">Extending ASLM</a></li>
+          <li class="breadcrumb-item"><a href="../api.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="aslm.model.html">aslm.model</a></li>
+          <li class="breadcrumb-item"><a href="aslm.model.devices.html">aslm.model.devices</a></li>
+          <li class="breadcrumb-item"><a href="aslm.model.devices.camera.html">aslm.model.devices.camera</a></li>
+          <li class="breadcrumb-item"><a href="aslm.model.devices.camera.camera_base.html">aslm.model.devices.camera.camera_base</a></li>
+      <li class="breadcrumb-item active">aslm.model.devices.camera.camera_base.CameraBase</li>
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../_sources/_autosummary/aslm.model.devices.camera.camera_base.CameraBase.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <section id="aslm-model-devices-camera-camera-base-camerabase">
-<h1>aslm.model.devices.camera.camera_base.CameraBase<a class="headerlink" href="#aslm-model-devices-camera-camera-base-camerabase" title="Permalink to this heading">¶</a></h1>
+<h1>aslm.model.devices.camera.camera_base.CameraBase<a class="headerlink" href="#aslm-model-devices-camera-camera-base-camerabase" title="Permalink to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="aslm.model.devices.camera.camera_base.CameraBase">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.model.devices.camera.camera_base.</span></span><span class="sig-name descname"><span class="pre">CameraBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.camera.camera_base.CameraBase" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.model.devices.camera.camera_base.</span></span><span class="sig-name descname"><span class="pre">CameraBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.camera.camera_base.CameraBase" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>CameraBase Parent camera class.</p>
 <dl class="field-list simple">
@@ -211,7 +120,7 @@
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.devices.camera.camera_base.CameraBase.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.camera.camera_base.CameraBase.__init__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.camera.camera_base.CameraBase.__init__" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>
@@ -244,7 +153,7 @@
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.devices.camera.camera_base.CameraBase.calculate_light_sheet_exposure_time">
-<span class="sig-name descname"><span class="pre">calculate_light_sheet_exposure_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">full_chip_exposure_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shutter_width</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.camera.camera_base.CameraBase.calculate_light_sheet_exposure_time" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">calculate_light_sheet_exposure_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">full_chip_exposure_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shutter_width</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.camera.camera_base.CameraBase.calculate_light_sheet_exposure_time" title="Permalink to this definition"></a></dt>
 <dd><p>Convert normal mode exposure time to light-sheet mode exposure time.
 Calculate the parameters for an ASLM acquisition</p>
 <dl class="field-list simple">
@@ -266,7 +175,7 @@ Calculate the parameters for an ASLM acquisition</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.devices.camera.camera_base.CameraBase.set_readout_direction">
-<span class="sig-name descname"><span class="pre">set_readout_direction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.camera.camera_base.CameraBase.set_readout_direction" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">set_readout_direction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.camera.camera_base.CameraBase.set_readout_direction" title="Permalink to this definition"></a></dt>
 <dd><p>Set HamamatsuOrca readout direction.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -281,50 +190,33 @@ Calculate the parameters for an ASLM acquisition</p>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="aslm.model.devices.camera.camera_hamamatsu.html" class="btn btn-neutral float-right" title="aslm.model.devices.camera.camera_hamamatsu" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="aslm.model.devices.camera.camera_base.html" class="btn btn-neutral float-left" title="aslm.model.devices.camera.camera_base" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="aslm.model.devices.camera.camera_hamamatsu.html" class="btn btn-neutral float-right" title="aslm.model.devices.camera.camera_hamamatsu" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2022, Dean Lab @ UT Southwestern.
-
-    </p>
+    <p>&#169; Copyright 2022, Dean Lab @ UT Southwestern.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

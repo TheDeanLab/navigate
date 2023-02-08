@@ -20,6 +20,7 @@ aslm.model.features.common\_features
       :template: custom_class.rst
    
       ChangeResolution
+      ConProAcquisition
       FindTissueSimple2D
       LoopByCount
       PrepareNextChannel

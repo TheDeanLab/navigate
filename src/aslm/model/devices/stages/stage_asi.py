@@ -2,7 +2,8 @@
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 #
 #      * Redistributions of source code must retain the above copyright notice,
@@ -97,58 +98,69 @@ class ASIStage(StageBase):
     FTP stilt, adding strain to the system. Only move the Z axis, which will change both
     stilt positions simultaneously.
 
-         Parameters
-        ----------
-        microscope_name : str
-            Name of microscope in configuration
-        device_connection : object
-            Hardware device to connect to
-        configuration : multiprocessing.managers.DictProxy
-            Global configuration of the microscope
+    Parameters
+    ----------
+    microscope_name : str
+        Name of microscope in configuration
+    device_connection : object
+        Hardware device to connect to
+    configuration : multiprocessing.managers.DictProxy
+        Global configuration of the microscope
 
-        Attributes
-        -----------
-        x_pos : float
-            True x position
-        y_pos : float
-            True y position
-        z_pos : float
-            True z position
-        f_pos : float
-            True focus position
-        theta_pos : float
-            True rotation position
-        position_dict : dict
-            Dictionary of true stage positions
-        x_max : float
-            Max x position
-        y_max : float
-            Max y position
-        z_max : float
-            Max y position
-        f_max : float
-            Max focus position
-        theta_max : float
-            Max rotation position
-        x_min : float
-            Min x position
-        y_min : float
-            Min y position
-        z_min : float
-            Min y position
-        f_min : float
-            Min focus position
-        theta_min : float
-            Min rotation position
+    Attributes
+    -----------
+    x_pos : float
+        True x position
+    y_pos : float
+        True y position
+    z_pos : float
+        True z position
+    f_pos : float
+        True focus position
+    theta_pos : float
+        True rotation position
+    position_dict : dict
+        Dictionary of true stage positions
+    x_max : float
+        Max x position
+    y_max : float
+        Max y position
+    z_max : float
+        Max y position
+    f_max : float
+        Max focus position
+    theta_max : float
+        Max rotation position
+    x_min : float
+        Min x position
+    y_min : float
+        Min y position
+    z_min : float
+        Min y position
+    f_min : float
+        Min focus position
+    theta_min : float
+        Min rotation position
 
-        Methods
-        -------
-        create_position_dict()
-            Creates a dictionary with the hardware stage positions.
-        get_abs_position()
-            Makes sure that the move is within the min and max stage limits.
-        stop()
-            Emergency halt of stage operation.
+    Methods
+    -------
+    create_position_dict()
+        Creates a dictionary with the hardware stage positions.
+    get_abs_position()
+        Makes sure that the move is within the min and max stage limits.
+    stop()
+        Emergency halt of stage operation.
+    report_position()
+        Reports the current stage position.
+    move_to_position()
+        Moves the stage to the specified position.
+    move_absolute()
+        Moves the stage to the specified absolute position.
+    move_axis_absolute()
+        Moves the stage to the specified absolute position.
+    stop()
+        Emergency halt of stage operation.
+
 
     """
 
@@ -178,7 +190,20 @@ class ASIStage(StageBase):
             raise
 
     def report_position(self):
-        """Reports the position for all axes in microns, and create position dictionary."""
+        """Reports the position for all axes in microns, and create position dictionary.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> asi_stage.report_position()
+        """
         try:
             # positions from the device are in microns
             for ax, n in zip(self.axes, self.asi_axes):
@@ -200,17 +225,25 @@ class ASIStage(StageBase):
         Parameters
         ----------
         axis : str
-            An axis prefix in move_dictionary. For example, axis='x' corresponds to 'x_abs', 'x_min', etc.
+            An axis prefix in move_dictionary.
+            For example, axis='x' corresponds to 'x_abs', 'x_min', etc.
         axis_num : int
-            The corresponding number of this axis on a PI stage. Not applicable to the ASI stage.
+            The corresponding number of this axis on a PI stage.
+            Not applicable to the ASI stage.
         move_dictionary : dict
-            A dictionary of values required for movement. Includes 'x_abs', 'x_min', etc. for one or more axes.
+            A dictionary of values required for movement.
+            Includes 'x_abs', 'x_min', etc. for one or more axes.
             Expect values in micrometers.
 
         Returns
         -------
         bool
             Was the move successful?
+
+        Examples
+        --------
+        >>> asi_stage.move_axis_absolute('x', 1, {'x_abs': 100})
+
         """
         axis_abs = self.get_abs_position(axis, move_dictionary)
         if axis_abs == -1e50:
@@ -225,20 +258,23 @@ class ASIStage(StageBase):
             return True
         except TigerException as e:
             print(
-                f"ASI stage move axis absolute failed or is trying to move out of range: {e}"
+                f"ASI stage move axis absolute failed or is "
+                f"trying to move out of range: {e}"
             )
             logger.exception(e)
             return False
 
     def move_absolute(self, move_dictionary, wait_until_done=False):
         """Move Absolute Method.
+
         XYZ Values should remain in microns for the ASI API
         Theta Values are not accepted.
 
         Parameters
         ----------
         move_dictionary : dict
-            A dictionary of values required for movement. Includes 'x_abs', etc. for one or more axes.
+            A dictionary of values required for movement.
+            Includes 'x_abs', etc. for one or more axes.
             Expect values in micrometers, except for theta, which is in degrees.
         wait_until_done : bool
             Block until stage has moved to its new spot.
@@ -247,28 +283,50 @@ class ASIStage(StageBase):
         -------
         success : bool
             Was the move successful?
+
+        Examples
+        --------
+        >>> asi_stage.move_absolute({'x_abs': 100, 'y_abs': 100, 'z_abs': 100})
+
         """
 
         for ax, n in zip(self.axes, self.asi_axes):
             success = self.move_axis_absolute(ax, n, move_dictionary)
             if wait_until_done:
                 self.tiger_controller.wait_for_device()
-                # Do we want to wait for device on hardware level? This is an ASI command call
+                # Do we want to wait for device on hardware level?
+                # This is an ASI command call
 
-        #  TODO This seems to be handled by each individual move_axis_absolute bc of ASI's wait_for_device.
-        #  Each axis will move and the stage waits until the axis is done before moving on
+        #  TODO This seems to be handled by each individual move_axis_absolute
+        #   bc of ASI's wait_for_device.
+        #  Each axis will move and the stage waits until
+        #  the axis is done before moving on
         # if success and wait_until_done is True:
         #     try:
         #         self.busy()
         #         success = True
         #     except BaseException as e:
-        #         print("Problem communicating with tiger controller during wait command")
+        #         print("Problem communicating with tiger controller
+        #         during wait command")
         #         success = False
         #         #logger.exception(e)
         return success
 
     def stop(self):
-        """Stop all stage movement abruptly."""
+        """Stop all stage movement abruptly.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> asi_stage.stop()
+        """
         try:
             self.tiger_controller.stop()
         except TigerException as e:

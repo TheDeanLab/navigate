@@ -120,7 +120,20 @@ class StageBase:
         self.create_position_dict()
 
     def create_position_dict(self):
-        """Creates a dictionary with the hardware stage positions."""
+        """Creates a dictionary with the hardware stage positions.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> self.create_position_dict()
+        """
         self.position_dict = {}
         for ax in self.axes:
             ax_str = f"{ax}_pos"
@@ -143,6 +156,11 @@ class StageBase:
         -------
         float
             Position to move the stage to for this axis.
+
+        Examples
+        --------
+        >>> self.get_abs_position('x', move_dictionary)
+
         """
         try:
             # Get all necessary attributes. If we can't we'll move to the error case.
@@ -174,5 +192,17 @@ class StageBase:
             return -1e50
 
     def stop(self):
-        """Stop all stage movement abruptly."""
+        """Stop all stage movement abruptly.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> self.stop()"""
         pass

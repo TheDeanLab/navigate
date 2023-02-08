@@ -41,6 +41,23 @@ logger = logging.getLogger(p)
 
 
 def build_MCLStage_connection(serialnum):
+    """Build MCLStage Connection
+
+    Parameters
+    ----------
+    serialnum : str
+        The serial number of the MCL stage.
+
+    Returns
+    -------
+    MCLStage
+        The MCL stage.
+
+    Examples
+    --------
+    >>> from aslm.model.devices.stages.stage_mcl import build_MCLStage_connection
+    >>> mcl = build_MCLStage_connection("123456")
+    """
     mcl_controller = importlib.import_module("aslm.model.devices.APIs.mcl.madlib")
 
     # Initialize
@@ -54,6 +71,49 @@ def build_MCLStage_connection(serialnum):
 
 
 class MCLStage(StageBase):
+    """MCLStage Class
+
+    This class is a wrapper for the MCL stage API.
+
+    Parameters
+    ----------
+    microscope_name : str
+        The name of the microscope.
+    device_connection : dict
+        The device connection dictionary.
+    configuration : dict
+        The configuration dictionary.
+    device_id : int, optional
+        The device ID, by default 0
+
+    Attributes
+    ----------
+    microscope_name : str
+        The name of the microscope.
+    device_connection : dict
+        The device connection dictionary.
+    configuration : dict
+        The configuration dictionary.
+    device_id : int
+        The device ID.
+    mcl_controller : module
+        The MCL controller module.
+    handle : int
+        The MCL handle.
+
+    Methods
+    -------
+    report_position()
+        Reports the position of the stage for all axes, and creates the hardware
+        position dictionary.
+    move_axis_absolute(axis, axis_num, move_dictionary)
+        Implement movement logic along a single axis.
+    get_abs_position(axis, move_dictionary)
+        Get the absolute position of an axis.
+    move_absolute(move_dictionary)
+        Move the stage to an absolute position.
+    """
+
     def __init__(self, microscope_name, device_connection, configuration, device_id=0):
         super().__init__(
             microscope_name, device_connection, configuration, device_id
@@ -65,9 +125,22 @@ class MCLStage(StageBase):
             self.handle = device_connection["handle"]
 
     def report_position(self):
-        """
-        # Reports the position of the stage for all axes, and creates the hardware
-        # position dictionary.
+        """Reports the position of the stage for all axes, creates position dictionary.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        dict
+            The position dictionary.
+
+        Examples
+        --------
+        >>> from aslm.model.devices.stages.stage_mcl import build_MCLStage_connection
+        >>> mcl = build_MCLStage_connection("123456")
+        >>> mcl.report_position()
         """
         for ax in self.axes:
             try:
@@ -83,10 +156,7 @@ class MCLStage(StageBase):
         return self.position_dict
 
     def move_axis_absolute(self, axis, axis_num, move_dictionary):
-        """
-        Implement movement logic along a single axis.
-
-        Example calls:
+        """Implement movement logic along a single axis.
 
         Parameters
         ----------
@@ -104,6 +174,12 @@ class MCLStage(StageBase):
         -------
         bool
             Was the move successful?
+
+        Examples
+        --------
+        >>> from aslm.model.devices.stages.stage_mcl import build_MCLStage_connection
+        >>> mcl = build_MCLStage_connection("123456")
+        >>> mcl.move_axis_absolute("x", 1, {"x_abs": 100})
         """
 
         axis_abs = self.get_abs_position(axis, move_dictionary)
@@ -114,7 +190,7 @@ class MCLStage(StageBase):
         return True
 
     def move_absolute(self, move_dictionary, wait_until_done=False):
-        """
+        """Move the stage to an absolute position.
 
         Parameters
         ----------
@@ -129,6 +205,12 @@ class MCLStage(StageBase):
         -------
         success : bool
             Was the move successful?
+
+        Examples
+        --------
+        >>> from aslm.model.devices.stages.stage_mcl import build_MCLStage_connection
+        >>> mcl = build_MCLStage_connection("123456")
+        >>> mcl.move_absolute({"x_abs": 100, "y_abs": 100})
         """
 
         for ax in self.axes:
@@ -148,8 +230,30 @@ class MCLStage(StageBase):
         return success
 
     def get_abs_position(self, axis, move_dictionary):
-        """
+        """Get absolute position of an axis.
+
         Hack in a lack of bounds checking. TODO: Don't do this.
+
+        Parameters
+        ----------
+        axis : str
+            An axis prefix in move_dictionary. For example, axis='x' corresponds to
+            'x_abs', 'x_min', etc.
+        move_dictionary : dict
+            A dictionary of values required for movement. Includes 'x_abs', 'x_min',
+            etc. for one or more axes. Expects values in micrometers, except for theta,
+            which is in degrees.
+
+        Returns
+        -------
+        float
+            The absolute position of the axis.
+
+        Examples
+        --------
+        >>> from aslm.model.devices.stages.stage_mcl import build_MCLStage_connection
+        >>> mcl = build_MCLStage_connection("123456")
+        >>> mcl.get_abs_position("x", {"x_abs": 100})
         """
         try:
             # Get all necessary attributes. If we can't we'll move to the error case.

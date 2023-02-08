@@ -46,7 +46,40 @@ logger = logging.getLogger(p)
 
 
 def build_PIStage_connection(controller_name, serial_number, stages, reference_modes):
-    """Connect to the Physik Instrumente Stage"""
+    """Connect to the Physik Instrumente Stage
+
+    Parameters
+    ----------
+    controller_name : str
+        The name of the controller.
+    serial_number : str
+        The serial number of the controller.
+    stages : list
+        The list of stages.
+    reference_modes : list
+        The list of reference modes.
+
+    Returns
+    -------
+    GCSDevice
+        The connection to the controller.
+
+    Raises
+    ------
+    GCSError
+        If the connection fails.
+
+    Examples
+    --------
+    >>> from aslm.model.devices.stages.stage_pi import build_PIStage_connection
+    >>> controller_name = "E-517"
+    >>> serial_number = "12345678"
+    >>> stages = ["M-527", "M-527"]
+    >>> reference_modes = ["FNL", "FNL"]
+    >>> build_PIStage_connection(controller_name, serial_number, stages,
+    >>> reference_modes)
+    <pipython.gcscommands.GCSCommands object at 0x7f8b1c0b0a90>
+    """
     pi_stages = stages.split()
     pi_reference_modes = reference_modes.split()
     pi_tools = pitools
@@ -123,7 +156,12 @@ class PIStage(StageBase):
         Makes sure that the move is within the min and max stage limits.
     stop()
         Emergency halt of stage operation.
-
+    report_position()
+        Reports the current position of the stage.
+    move_axis_absolute(axis, position)
+        Moves the stage to the specified position.
+    move_absolute(position_dict, wait=True)
+        Moves the stage to the specified position.
     """
 
     def __init__(self, microscope_name, device_connection, configuration, device_id=0):
@@ -151,6 +189,19 @@ class PIStage(StageBase):
         """Reports the position for all axes, and create position dictionary.
 
         Positions from Physik Instrumente device are in millimeters
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        position_dict : dict
+            Dictionary of true stage positions
+
+        Examples
+        --------
+        >>> self.report_position()
         """
         try:
             positions = self.pi_device.qPOS(self.pi_device.axes)
@@ -188,6 +239,10 @@ class PIStage(StageBase):
         -------
         bool
             Was the move successful?
+
+        Examples
+        --------
+        >>> self.move_axis_absolute('x', 1, {'x_abs': 1000})
         """
 
         axis_abs = self.get_abs_position(axis, move_dictionary)
@@ -207,6 +262,7 @@ class PIStage(StageBase):
 
     def move_absolute(self, move_dictionary, wait_until_done=False):
         """Move Absolute Method.
+
         XYZF Values are converted to millimeters for PI API.
         Theta Values are not converted.
 
@@ -223,6 +279,12 @@ class PIStage(StageBase):
         -------
         success : bool
             Was the move successful?
+
+        Examples
+        --------
+        >>> self.move_absolute({'x_abs': 1000, 'y_abs': 1000, 'z_abs': 1000, 'f_abs':
+                                1000, 'theta_abs': 0})
+
         """
 
         for ax, n in zip(self.axes, self.pi_axes):
@@ -240,7 +302,20 @@ class PIStage(StageBase):
         return success
 
     def stop(self):
-        """Stop all stage movement abruptly."""
+        """Stop all stage movement abruptly.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> self.stop()
+        """
         try:
             self.pi_device.STP(noraise=True)
         except GCSError as e:

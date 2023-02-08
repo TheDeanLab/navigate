@@ -2,7 +2,8 @@
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 #
 #      * Redistributions of source code must retain the above copyright notice,
@@ -46,7 +47,7 @@ logger = logging.getLogger(p)
 
 
 class GalvoNIStage(StageBase):
-    """Physik Instrumente Stage Class
+    """Galvo Stage Class
 
     Parameters
     ----------
@@ -57,6 +58,39 @@ class GalvoNIStage(StageBase):
     configuration : multiprocessing.managers.DictProxy
         Global configuration of the microscope
 
+    Attributes
+    ----------
+    microscope_name : str
+        Name of microscope in configuration
+    volts_per_micron : float
+        Volts per micron of the stage
+    axes_channels : dict
+        Dictionary of axes and their corresponding channels
+    galvo_max_voltage : float
+        Maximum voltage of the galvo
+    galvo_min_voltage : float
+        Minimum voltage of the galvo
+    daq : object
+        Hardware device to connect to
+    configuration : multiprocessing.managers.DictProxy
+        Global configuration of the microscope
+    trigger_source : str
+        Source of the trigger
+    camera_delay_percent : float
+        Percent of the sweep time to delay the camera
+    remote_focus_ramp_falling : float
+        Percent of the ramp to fall
+    remote_focus_delay : float
+        Percent of the sweep time to delay the remote focus
+    sample_rate : float
+        Sample rate of the DAQ
+    sweep_time : float
+        Time of the sweep
+    samples : int
+        Number of samples in the sweep
+    waveform_dict : dict
+        Dictionary of waveforms to be played
+
     Methods
     -------
     create_position_dict()
@@ -65,6 +99,12 @@ class GalvoNIStage(StageBase):
         Makes sure that the move is within the min and max stage limits.
     stop()
         Emergency halt of stage operation.
+    report_position()
+        Reports the position for all axes, and create position dictionary.
+    move_absolute()
+        Moves the stage to the specified position.
+    move_axis_absolute()
+        Moves the stage to the specified position.
     """
 
     def __init__(self, microscope_name, device_connection, configuration, device_id=0):
@@ -116,7 +156,21 @@ class GalvoNIStage(StageBase):
 
     # for stacking, we could have 2 axis here or not, y is for tiling, not necessary
     def report_position(self):
-        """Reports the position for all axes, and create position dictionary."""
+        """Reports the position for all axes, and create position dictionary.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        position_dict : dict
+            Dictionary of the current position of the stage
+
+        Examples
+        --------
+        >>> stage.report_position()
+        """
         self.create_position_dict()
         return self.position_dict
 
@@ -128,17 +182,23 @@ class GalvoNIStage(StageBase):
         Parameters
         ----------
         axis : str
-            An axis prefix in move_dictionary. For example, axis='x' corresponds to 'x_abs', 'x_min', etc.
+            An axis prefix in move_dictionary.
+            For example, axis='x' corresponds to 'x_abs', 'x_min', etc.
         axis_num : int
             The corresponding number of this axis on a PI stage.
         move_dictionary : dict
-            A dictionary of values required for movement. Includes 'x_abs', 'x_min', etc. for one or more axes.
+            A dictionary of values required for movement.
+            Includes 'x_abs', 'x_min', etc. for one or more axes.
             Expect values in micrometers, except for theta, which is in degrees.
 
         Returns
         -------
         bool
             Was the move successful?
+
+        Examples
+        --------
+        >>> stage.move_axis_absolute('x', 1, {'x_abs': 100})
         """
         self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
         axis_abs = self.get_abs_position(axis, move_dictionary)
@@ -156,16 +216,20 @@ class GalvoNIStage(StageBase):
             # Only proceed if it is enabled in the GUI
             if channel["is_selected"] is True:
 
-                # Get the Waveform Parameters - Assumes Remote Focus Delay < Camera Delay.  Should Assert.
+                # Get the Waveform Parameters
+                # Assumes Remote Focus Delay < Camera Delay.  Should Assert.
                 exposure_time = channel["camera_exposure_time"] / 1000
                 self.sweep_time = exposure_time + exposure_time * (
                     (self.camera_delay_percent + self.remote_focus_ramp_falling) / 100
                 )
                 readout_time = 0  # TODO: find a way to pass this to the stages
                 if readout_time > 0:
-                    # This addresses the dovetail nature of the camera readout in normal mode. The camera reads middle
-                    # out, and the delay in start of the last lines compared to the first lines causes the exposure
-                    # to be net longer than exposure_time. This helps the galvo keep sweeping for the full camera
+                    # This addresses the dovetail nature of the camera
+                    # readout in normal mode. The camera reads middle
+                    # out, and the delay in start of the last lines compared
+                    # to the first lines causes the exposure
+                    # to be net longer than exposure_time. This helps the
+                    # galvo keep sweeping for the full camera
                     # exposure time.
                     self.sweep_time += readout_time
                 self.samples = int(self.sample_rate * self.sweep_time)
@@ -239,7 +303,8 @@ class GalvoNIStage(StageBase):
                     self.waveform_dict[channel_key] = np.hstack(waveforms)
                     self.samples = int(self.sample_rate * self.sweep_time * z_planes)
                     print(
-                        f"Waveform with {z_planes} planes is of length {self.waveform_dict[channel_key].shape}"
+                        f"Waveform with {z_planes} planes is of length "
+                        f"{self.waveform_dict[channel_key].shape}"
                     )
                 else:
                     self.waveform_dict[channel_key] = dc_value(
@@ -261,8 +326,8 @@ class GalvoNIStage(StageBase):
             "waveform": self.waveform_dict,
         }
 
-        # TODO: Force an update of the waveform after writing, if in live mode or z-stack.
-
+        # TODO: Force an update of the waveform after writing,
+        #  if in live mode or z-stack.
         return True
 
     def move_absolute(self, move_dictionary, wait_until_done=False):
@@ -271,7 +336,8 @@ class GalvoNIStage(StageBase):
         Parameters
         ----------
         move_dictionary : dict
-            A dictionary of values required for movement. Includes 'x_abs', etc. for one or more axes.
+            A dictionary of values required for movement.
+            Includes 'x_abs', etc. for one or more axes.
             Expects values in micrometers, except for theta, which is in degrees.
         wait_until_done : bool
             Block until stage has moved to its new spot.
@@ -280,6 +346,11 @@ class GalvoNIStage(StageBase):
         -------
         success : bool
             Was the move successful?
+
+        Examples
+        --------
+        >>> move_dictionary = {'x_abs': 0, 'y_abs': 0, 'z_abs': 0}
+        >>> success = stage.move_absolute(move_dictionary)
         """
 
         for i, ax in enumerate(self.axes):
@@ -290,7 +361,8 @@ class GalvoNIStage(StageBase):
                     self, f"int_{ax}_pos_offset", 0
                 )  # TODO: should we default to 0?
                 while (abs(stage_pos - target_pos) < 0.01) and (i < n_tries):
-                    #  replace: stage_pos = self.mcl_controller.MCL_SingleReadN(ax, self.handle)
+                    #  replace: stage_pos = self.mcl_controller.MCL_SingleReadN(
+                    #  ax, self.handle)
                     #  todo: include a call to the NI board to set a voltage
                     i += 1
                     time.sleep(0.01)
@@ -299,5 +371,17 @@ class GalvoNIStage(StageBase):
         return success
 
     def stop(self):
-        """Stop all stage movement abruptly."""
+        """Stop all stage movement abruptly.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+
+        Examples
+        --------
+        >>> stage.stop()
+        """
         pass

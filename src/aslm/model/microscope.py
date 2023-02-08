@@ -35,13 +35,6 @@ import importlib
 from multiprocessing.managers import ListProxy
 
 from aslm.model.device_startup_functions import (
-    start_camera,  # noqa: F401
-    start_filter_wheel,  # noqa: F401
-    start_zoom,  # noqa: F401
-    start_shutter,  # noqa: F401
-    start_remote_focus_device,  # noqa: F401
-    start_galvo,  # noqa: F401
-    start_lasers,  # noqa: F401
     start_stage,
 )
 from aslm.tools.common_functions import build_ref_name
@@ -194,8 +187,9 @@ class Microscope:
                         f"start_{device_name}=importlib.import_module("
                         f"'aslm.model.device_startup_functions').start_{device_name}"
                     )
-                except ImportError:
+                except AttributeError:
                     print(f"Could not import start_{device_name}")
+                    print(f"Could not load device {device_name}")
 
                 # Start the devices
                 if is_list:
@@ -239,10 +233,6 @@ class Microscope:
                 # TODO: Remove this. We should not have this hardcoded.
                 devices_dict["stages"][device_ref_name] = self.daq
 
-            # Import and Start the Stage
-            start_stage = importlib.import_module(
-                "aslm.model.device_startup_functions"
-            ).start_stage
             stage = start_stage(
                 self.microscope_name,
                 devices_dict["stages"][device_ref_name],

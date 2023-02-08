@@ -873,11 +873,22 @@ class Model:
 
         # update zoom if possible
         try:
+            curr_zoom = self.active_microscope.zoom.zoomvalue
             zoom_value = self.configuration["experiment"]["MicroscopeState"]["zoom"]
             self.active_microscope.zoom.set_zoom(zoom_value)
             self.logger.debug(
                 f"Change zoom of {self.active_microscope_name} to {zoom_value}"
             )
+
+            offsets = self.active_microscope.zoom.stage_offsets
+            if offsets is not None:
+                solvent = self.configuration["experiment"]["Saving"]["Solvent"]
+                curr_pos = self.get_stage_position()
+                for axis, mags in offsets[solvent].items():
+                    self.move_stage(
+                        {f"{axis}_abs": curr_pos + mags[curr_zoom][zoom_value]}
+                    )
+
         except ValueError as e:
             self.logger.debug(f"{self.active_microscope_name}: {e}")
 

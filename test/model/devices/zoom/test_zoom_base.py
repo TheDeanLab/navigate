@@ -29,39 +29,55 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-
-# Standard Library Imports
-import unittest
-
-# Third Party Imports
-
-# Local Imports
-from aslm.model.devices.zoom.zoom_base import ZoomBase
-from aslm.model.dummy import DummyModel
+import pytest
 
 
-class TestZoomBase(unittest.TestCase):
-    """Unit Test for Zoom Base Class"""
+@pytest.fixture
+def dummy_zoom(dummy_model):
+    from aslm.model.devices.zoom.zoom_base import ZoomBase
 
-    dummy_model = DummyModel()
-    microscope_name = "Mesoscale"
-    zoom_class = ZoomBase(microscope_name, None, dummy_model.configuration)
-
-    def test_zoom_base_attributes(self):
-
-        assert hasattr(self.zoom_class, "zoomdict")
-        assert hasattr(self.zoom_class, "zoomvalue")
-
-        assert hasattr(self.zoom_class, "set_zoom") and callable(
-            getattr(self.zoom_class, "set_zoom")
-        )
-        assert hasattr(self.zoom_class, "move") and callable(
-            getattr(self.zoom_class, "move")
-        )
-        assert hasattr(self.zoom_class, "read_position") and callable(
-            getattr(self.zoom_class, "read_position")
-        )
+    return ZoomBase(dummy_model.active_microscope_name, None, dummy_model.configuration)
 
 
-if __name__ == "__main__":
-    unittest.main()
+def test_zoom_base_attributes(dummy_zoom):
+
+    assert hasattr(dummy_zoom, "zoomdict")
+    assert hasattr(dummy_zoom, "zoomvalue")
+
+    assert hasattr(dummy_zoom, "set_zoom") and callable(getattr(dummy_zoom, "set_zoom"))
+    assert hasattr(dummy_zoom, "move") and callable(getattr(dummy_zoom, "move"))
+    assert hasattr(dummy_zoom, "read_position") and callable(
+        getattr(dummy_zoom, "read_position")
+    )
+
+
+def test_build_stage_dict(dummy_zoom):
+    import random
+
+    a, b, c = random.randint(1, 1000), random.randint(1, 1000), random.randint(1, 1000)
+    dummy_zoom.configuration["stage_positions"] = {
+        "BABB": {"f": {"0.63x": a, "1x": b, "2x": c}}
+    }
+    dummy_zoom.build_stage_dict()
+
+    assert dummy_zoom.stage_offsets["BABB"]["f"]["0.63x"]["0.63x"] == 0
+    assert dummy_zoom.stage_offsets["BABB"]["f"]["0.63x"]["1x"] == b - a
+    assert dummy_zoom.stage_offsets["BABB"]["f"]["0.63x"]["2x"] == c - a
+    assert dummy_zoom.stage_offsets["BABB"]["f"]["1x"]["0.63x"] == a - b
+    assert dummy_zoom.stage_offsets["BABB"]["f"]["1x"]["1x"] == 0
+    assert dummy_zoom.stage_offsets["BABB"]["f"]["1x"]["2x"] == c - b
+    assert dummy_zoom.stage_offsets["BABB"]["f"]["2x"]["0.63x"] == a - c
+    assert dummy_zoom.stage_offsets["BABB"]["f"]["2x"]["1x"] == b - c
+    assert dummy_zoom.stage_offsets["BABB"]["f"]["2x"]["2x"] == 0
+
+
+def test_set_zoom(dummy_zoom):
+    for zoom in dummy_zoom.zoomdict.keys():
+        dummy_zoom.set_zoom(zoom)
+        assert dummy_zoom.zoomvalue == zoom
+
+    try:
+        dummy_zoom.set_zoom("not_a_zoom")
+        assert False
+    except ValueError:
+        assert True

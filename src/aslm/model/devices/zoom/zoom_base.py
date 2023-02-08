@@ -56,10 +56,53 @@ class ZoomBase:
     """
 
     def __init__(self, microscope_name, device_controller, configuration):
-        self.zoomdict = configuration["configuration"]["microscopes"][microscope_name][
-            "zoom"
-        ]["position"]
+        self.configuration = configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["zoom"]
+        self.zoomdict = self.configuration["position"]
+        self.build_stage_dict()
         self.zoomvalue = None
+
+    def build_stage_dict(self):
+        """
+        Construct a dictionary of stage offsets in between different zoom values.
+
+        This assumes self.configuration["stage_positions"] is a dictionary of ideal
+        focus positions for the same object taken in the same solvent at
+        each magnification. e.g.,
+
+        stage_positions:
+            BABB:
+                f:
+                    0.63x: 0
+                    1x: 70775
+                    2x: 72455
+                    3x: 72710
+                    4x: 72795
+                    5x: 72850
+                    6x: 72880
+
+        The resulting dictionary is keyed first on solvent (refractive index),
+        followed by the stage axis to offset, followed by the current magnification
+        and then the target magnification.
+        """
+        try:
+            stage_positions = self.configuration["stage_positions"]
+        except KeyError:
+            self.stage_offsets = None
+            return
+
+        self.stage_offsets = {}
+        for solvent, axes in stage_positions.items():
+            self.stage_offsets[solvent] = {}
+            for axis, mags in axes.items():
+                self.stage_offsets[solvent][axis] = {}
+                for mag_curr, focus_curr in mags.items():
+                    self.stage_offsets[solvent][axis][mag_curr] = {}
+                    for mag_target, focus_target in mags.items():
+                        self.stage_offsets[solvent][axis][mag_curr][mag_target] = (
+                            focus_target - focus_curr
+                        )
 
     def set_zoom(self, zoom, wait_until_done=False):
         """Change the Zoom Servo.

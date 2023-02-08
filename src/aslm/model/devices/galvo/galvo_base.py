@@ -171,7 +171,7 @@ class GalvoBase:
                         float(galvo_parameters.get("frequency", 0)) / exposure_time
                     )
                 except ValueError as e:
-                    logger.error(f"{e} similar to TclError")
+                    logger.error(f"{e} waveform constants.yml doesn't have parameter amplitude/offset/frequency for {self.galvo_name}")
                     return
 
                 # Calculate the Waveforms
@@ -198,6 +198,8 @@ class GalvoBase:
                         "Mistakes were made. "
                         "Unknown waveform specified in configuration file."
                     )
+                    self.waveform_dict[channel_key] = None
+                    continue
                 self.waveform_dict[channel_key][
                     self.waveform_dict[channel_key] > self.galvo_max_voltage
                 ] = self.galvo_max_voltage

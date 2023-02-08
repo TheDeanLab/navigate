@@ -2,9 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only
-# (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -35,9 +34,16 @@ import logging
 import importlib
 from multiprocessing.managers import ListProxy
 
-# Third Party Imports
-
-# Local Imports
+from aslm.model.device_startup_functions import (
+    start_camera,  # noqa: F401
+    start_filter_wheel,  # noqa: F401
+    start_zoom,  # noqa: F401
+    start_shutter,  # noqa: F401
+    start_remote_focus_device,  # noqa: F401
+    start_galvo,  # noqa: F401
+    start_lasers,  # noqa: F401
+    start_stage,
+)
 from aslm.tools.common_functions import build_ref_name
 
 p = __name__.split(".")[1]
@@ -103,6 +109,7 @@ class Microscope:
         self.channels = None
         self.available_channels = None
         self.number_of_frames = None
+        self.central_focus = None
 
         self.laser_wavelength = []
 
@@ -166,9 +173,6 @@ class Microscope:
                     try:
                         ref_list = [device[k] for k in device_ref_dict[device_name]]
                     except KeyError:
-                        print(
-                            "KeyError encountered in device_ref_dict, " "microscope.py"
-                        )
                         ref_list = []
 
                 device_ref_name = build_ref_name("_", *ref_list)
@@ -196,16 +200,16 @@ class Microscope:
                 # Start the devices
                 if is_list:
                     exec(
-                        f"self.{device_name}"
-                        f"['{device_name_list[i]}'] = start_{device_name}("
-                        f"name, device_connection, configuration, i, is_synthetic)"
+                        f"self.{device_name}['{device_name_list[i]}'] = "
+                        f"start_{device_name}(name, device_connection, configuration, "
+                        f"i, is_synthetic)"
                     )
                     if device_name in device_name_list[i]:
                         self.info[device_name_list[i]] = device_ref_name
                 else:
                     exec(
-                        f"self.{device_name} = start_{device_name}("
-                        f"name, device_connection, configuration, is_synthetic)"
+                        f"self.{device_name} = start_{device_name}(name, "
+                        f"device_connection, configuration, is_synthetic)"
                     )
                     self.info[device_name] = device_ref_name
 
@@ -338,6 +342,7 @@ class Microscope:
 
         """
         self.current_channel = 0
+        self.central_focus = None
         self.channels = self.configuration["experiment"]["MicroscopeState"]["channels"]
         self.available_channels = list(
             map(
@@ -388,6 +393,7 @@ class Microscope:
         for k in self.lasers:
             self.lasers[k].turn_off()
         self.current_channel = 0
+        self.central_focus = None
 
     def calculate_all_waveform(self):
         """Calculate all the waveforms.
@@ -487,16 +493,18 @@ class Microscope:
         # prepare daq: write waveform
         self.daq.prepare_acquisition(channel_key, self.current_exposure_time)
 
-        # TODO: Defocus Settings
-        # curr_focus = self.configuration["experiment"]["StageParameters"]["f"]
-        # self.move_stage(
-        #     {"f_abs": curr_focus + float(self.defocus[self.idx])},
-        #     wait_until_done=True
-        # )
-        # self.configuration["experiment"]["StageParameters"][
-        #     "f"
-        # ] = curr_focus  # do something very hacky so
-        # we keep using the same focus reference
+        # Add Defocus term
+        # Assume wherever we start is the central focus
+        # TODO: is this the correct assumption?
+        if self.central_focus is None:
+            try:
+                self.central_focus = self.get_stage_position()["f_pos"]
+            except KeyError:
+                self.central_focus = 0.0
+        self.move_stage(
+            {"f_abs": self.central_focus + float(channel["defocus"])},
+            wait_until_done=True,
+        )
 
     def get_readout_time(self):
         """Get readout time from camera.

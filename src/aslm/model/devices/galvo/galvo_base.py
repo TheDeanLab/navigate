@@ -47,9 +47,7 @@ logger = logging.getLogger(p)
 class GalvoBase:
     """GalvoBase Class
 
-    Parent class for galvo devices.
-
-    This class is used to generate the waveforms for the galvo devices.
+    Parent class for galvanometers.
 
     Parameters
     ----------
@@ -66,11 +64,33 @@ class GalvoBase:
     ----------
     configuration : dict
         Configuration dictionary.
+    microscope_name : str
+        Microscope name.
+    galvo_name : str
+        Galvo name.
+    device_config : dict
+        Device configuration dictionary.
+    sample_rate : int
+        Sample rate.
+    sweep_time : float
+        Sweep time.
+    camera_delay_percent : float
+        Camera delay percent.
+    galvo_max_voltage : float
+        Galvo maximum voltage.
+    galvo_min_voltage : float
+        Galvo minimum voltage.
+    remote_focus_ramp_falling : float
+        Remote focus ramp falling percent.
+    samples : int
+        Number of samples.
+    waveform_dict : dict
+        Waveform dictionary.
 
     Methods
     -------
     prepare_task(channel_key)
-        Prepare the task for the specified channel.
+        Prepare the task for the given channel.
     start_task()
         Start the task.
     stop_task()
@@ -111,10 +131,11 @@ class GalvoBase:
             self.waveform_dict[k] = None
 
     def __del__(self):
+        """Destructor"""
         pass
 
     def adjust(self, readout_time):
-        """Adjust the galvo waveforms to account for the camera readout time.
+        """Adjust the galvo waveform to account for the camera readout time.
 
         Parameters
         ----------
@@ -219,7 +240,7 @@ class GalvoBase:
         return self.waveform_dict
 
     def prepare_task(self, channel_key):
-        """Prepare the task for the specified channel.
+        """Prepare the task for the given channel.
 
         Parameters
         ----------
@@ -228,17 +249,21 @@ class GalvoBase:
 
         Returns
         -------
-        task : nidaqmx.Task
-            Task for the specified channel.
+        None
 
         Examples
         --------
-        >>> task = galvo.prepare_task('488')
+        >>> galvo.prepare_task('488')
         """
+
         pass
 
     def start_task(self):
         """Start the task.
+
+        Parameters
+        ----------
+        None
 
         Returns
         -------
@@ -253,6 +278,10 @@ class GalvoBase:
     def stop_task(self):
         """Stop the task.
 
+        Parameters
+        ----------
+        None
+
         Returns
         -------
         None
@@ -261,11 +290,14 @@ class GalvoBase:
         --------
         >>> galvo.stop_task()
         """
-
         pass
 
     def close_task(self):
         """Close the task.
+
+        Parameters
+        ----------
+        None
 
         Returns
         -------
@@ -275,5 +307,4 @@ class GalvoBase:
         --------
         >>> galvo.close_task()
         """
-
         pass

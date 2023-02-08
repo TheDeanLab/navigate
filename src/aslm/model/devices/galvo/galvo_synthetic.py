@@ -46,29 +46,34 @@ logger = logging.getLogger(p)
 class SyntheticGalvo(GalvoBase):
     """SyntheticGalvo Class
 
-    This class is used to control the galvo mirrors on the microscope.
+    This class is a synthetic galvo class
+    that does is used for testing purposes.
+
+    Parameters
+    ----------
+    microscope_name : str
+        The name of the microscope
+    device_connection : str
+        The device connection string
+    configuration : dict
+        The configuration dictionary
+    galvo_id : int
+        The galvo id
 
     Attributes
     ----------
-    microscope_name : str
-        Microscope name.
-    device_connection : str
-        Device connection.
-    configuration : dict
-        Configuration dictionary.
-    galvo_id : int
-        Galvo ID.
+    None
 
     Methods
     -------
     prepare_task(channel_key)
-        Prepare task.
+        Prepare the task for the given channel
     start_task()
-        Start task.
+        Start the task
     stop_task()
-        Stop task.
+        Stop the task
     close_task()
-        Close task.
+        Close the task
 
     Examples
     --------
@@ -76,10 +81,11 @@ class SyntheticGalvo(GalvoBase):
     >>> import SyntheticGalvo
     >>> galvo = SyntheticGalvo("microscope_name",
     >>> "device_connection", "configuration", 0)
-    galvo.prepare_task("channel_key")
-    galvo.start_task()
-    galvo.stop_task()
-    galvo.close_task()
+    >>> galvo.prepare_task("channel_key")
+    >>> galvo.start_task()
+    >>> galvo.stop_task()
+    >>> galvo.close_task()
+
     """
 
     def __init__(self, microscope_name, device_connection, configuration, galvo_id=0):
@@ -99,19 +105,19 @@ class SyntheticGalvo(GalvoBase):
 
         Examples
         --------
-        >>> del galvo
+        >>> del galvo task
         """
 
         self.stop_task()
         self.close_task()
 
     def prepare_task(self, channel_key):
-        """Prepare task
+        """Prepare the task for the given channel
 
         Parameters
         ----------
         channel_key : str
-            Channel key.
+            The channel key to prepare the task for
 
         Returns
         -------
@@ -119,13 +125,13 @@ class SyntheticGalvo(GalvoBase):
 
         Examples
         --------
-        >>> galvo.prepare_task("channel_key")
+        >>> prepare_task("488")
         """
         # write waveform
         logger.debug(f"galvo writes the waveform for {channel_key}")
 
     def start_task(self):
-        """Start task
+        """Start the task
 
         Parameters
         ----------
@@ -137,12 +143,12 @@ class SyntheticGalvo(GalvoBase):
 
         Examples
         --------
-        >>> galvo.start_task()
+        >>> start_task()
         """
         logger.debug("galvo started task!")
 
     def stop_task(self):
-        """Stop task
+        """Stop the task
 
         Parameters
         ----------
@@ -154,13 +160,12 @@ class SyntheticGalvo(GalvoBase):
 
         Examples
         --------
-        >>> galvo.stop_task()
+        >>> stop_task()
         """
-
         logger.debug("galvo stopped task!")
 
     def close_task(self):
-        """Close task
+        """Close the task
 
         Parameters
         ----------
@@ -172,7 +177,6 @@ class SyntheticGalvo(GalvoBase):
 
         Examples
         --------
-        >>> galvo.close_task()
+        >>> close_task()
         """
-
         logger.debug("galvo closed task!")

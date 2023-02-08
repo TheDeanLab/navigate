@@ -47,7 +47,45 @@ logger = logging.getLogger(p)
 class RemoteFocusBase:
     """RemoteFocusBase Class
 
-    Parent class for voice coil models.
+    Parent class for Remote Focusing Device.
+
+    Attributes
+    ----------
+    configuration : dict
+        Configuration dictionary.
+    microscope_name : str
+        Microscope name.
+    device_config : dict
+        Remote focus device configuration dictionary.
+    sample_rate : int
+        Sample rate.
+    sweep_time : float
+        Sweep time.
+    camera_delay_percent : float
+        Camera delay percent.
+    remote_focus_delay : float
+        Remote focus delay percent.
+    remote_focus_ramp_falling : float
+        Remote focus ramp falling percent.
+    remote_focus_max_voltage : float
+        Remote focus maximum voltage.
+    remote_focus_min_voltage : float
+        Remote focus minimum voltage.
+    samples : int
+        Number of samples.
+    waveform_dict : dict
+        Dictionary of waveforms.
+
+    Methods
+    -------
+    prepare_task(channel_key)
+        Prepares the task for the remote focus device.
+    start_task()
+        Starts the task for the remote focus device.
+    stop_task()
+        Stops the task for the remote focus device.
+    close_task()
+        Closes the task for the remote focus device.
     """
 
     def __init__(self, microscope_name, device_connection, configuration):
@@ -78,9 +116,27 @@ class RemoteFocusBase:
             self.waveform_dict[k] = None
 
     def __del__(self):
+        """Destructor"""
         pass
 
     def adjust(self, readout_time):
+        """Adjusts the remote focus waveform based on the readout time.
+
+        Parameters
+        ----------
+        readout_time : float
+            Readout time in seconds.
+
+        Returns
+        -------
+        waveform : numpy.ndarray
+            Waveform for the remote focus device.
+
+        Examples
+        --------
+        >>> remote_focus.adjust(0.1)
+        """
+
         # calculate waveform
         self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
         microscope_state = self.configuration["experiment"]["MicroscopeState"]
@@ -162,19 +218,74 @@ class RemoteFocusBase:
                     self.waveform_dict[channel_key] < self.remote_focus_min_voltage
                 ] = self.remote_focus_min_voltage
 
-                if self.configuration['experiment']['MicroscopeState']['image_mode'] == 'confocal-projection':
-                    self.waveform_dict[channel_key] = np.hstack([self.waveform_dict[channel_key]]*int(microscope_state['n_plane']))
-                    self.samples = int(self.sample_rate * self.sweep_time * microscope_state['n_plane'])
+                if (
+                    self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+                    == "confocal-projection"
+                ):
+                    self.waveform_dict[channel_key] = np.hstack(
+                        [self.waveform_dict[channel_key]]
+                        * int(microscope_state["n_plane"])
+                    )
+                    self.samples = int(
+                        self.sample_rate * self.sweep_time * microscope_state["n_plane"]
+                    )
 
         return self.waveform_dict
 
     def prepare_task(self, channel_key):
+        """Prepares the task for the remote focus device.
+
+        Parameters
+        ----------
+        channel_key : str
+            Channel key.
+
+        Returns
+        -------
+        task : nidaqmx.Task
+            Task for the remote focus device.
+
+        Examples
+        --------
+        >>> remote_focus.prepare_task('488')
+        """
+
         pass
 
     def start_task(self):
+        """Starts the task for the remote focus device.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> remote_focus.start_task()
+        """
+
         pass
 
     def stop_task(self):
+        """Stops the task for the remote focus device.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> remote_focus.stop_task()
+        """
+
         pass
 
     def close_task(self):

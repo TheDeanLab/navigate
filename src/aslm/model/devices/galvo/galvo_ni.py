@@ -48,41 +48,42 @@ logger = logging.getLogger(p)
 class GalvoNI(GalvoBase):
     """GalvoNI Class
 
-    This class is used to control the galvo mirrors on the microscope.
+    This class is the NI DAQ implementation of the GalvoBase class.
+
+    Parameters
+    ----------
+    microscope_name : str
+        The name of the microscope
+    device_connection : object
+        The device connection object
+    configuration : dict
+        The configuration dictionary
+    galvo_id : int
+        The galvo id
 
     Attributes
     ----------
-    microscope_name : str
-        The name of the microscope.
-    device_connection : nidaqmx.Task
-        The connection to the DAQ device.
-    configuration : dict
-        The configuration dictionary.
-    galvo_id : int
-        The ID of the galvo.
-    task : nidaqmx.Task
-        The task for the galvo.
+    task : object
+        The NI DAQ task object
     trigger_source : str
-        The trigger source for the galvo.
-    daq : nidaqmx.Task
-        The connection to the DAQ device.
+        The trigger source for the galvo
 
     Methods
     -------
     initialize_task()
-        Initializes the task.
+        Initialize the NI DAQ task for the galvo
     __del__()
         Deletes the task.
     adjust(readout_time)
-        Adjusts the galvo.
+        Adjust the galvo to the readout time
     prepare_task(channel_key)
-        Prepares the task.
+        Prepare the task for the given channel
     start_task()
-        Starts the task.
-    stop_task(force=False)
-        Stops the task.
+        Start the NI DAQ task
+    stop_task()
+        Stop the NI DAQ task
     close_task()
-        Closes the task.
+        Close the NI DAQ task
 
     Examples
     --------
@@ -109,9 +110,7 @@ class GalvoNI(GalvoBase):
         self.daq = device_connection
 
     def initialize_task(self):
-        """Initializes the task.
-
-        This method initializes the task.
+        """Initialize the NI DAQ task for the galvo
 
         Parameters
         ----------
@@ -125,8 +124,8 @@ class GalvoNI(GalvoBase):
         --------
         >>> galvo.initialize_task()
         """
-        # TODO: make sure the task is reusable,
-        #  Or need to create and close each time.
+
+        # TODO: make sure the task is reusable, Or need to create and close each time.
         self.task = nidaqmx.Task()
         channel = self.device_config["hardware"]["channel"]
         self.task.ao_channels.add_ao_voltage_chan(channel)
@@ -134,7 +133,6 @@ class GalvoNI(GalvoBase):
             f"Initializing galvo with sample rate {self.sample_rate} and"
             f"{self.samples} samples"
         )
-
         # TODO: does it work with confo-projection?
         self.task.timing.cfg_samp_clk_timing(
             rate=self.sample_rate,
@@ -145,17 +143,13 @@ class GalvoNI(GalvoBase):
 
     def __del__(self):
         """Deletes the task.
-
         This method deletes the task.
-
         Parameters
         ----------
         None
-
         Returns
         -------
         None
-
         Examples
         --------
         >>> del galvo
@@ -165,14 +159,12 @@ class GalvoNI(GalvoBase):
         self.close_task()
 
     def adjust(self, readout_time):
-        """Adjusts the galvo.
-
-        This method adjusts the galvo.
+        """Adjust the galvo to the readout time
 
         Parameters
         ----------
         readout_time : float
-            The readout time.
+            The readout time in seconds
 
         Returns
         -------
@@ -182,7 +174,6 @@ class GalvoNI(GalvoBase):
         --------
         >>> galvo.adjust(readout_time)
         """
-
         waveform_dict = super().adjust(readout_time)
 
         self.daq.analog_outputs[self.device_config["hardware"]["channel"]] = {
@@ -191,18 +182,15 @@ class GalvoNI(GalvoBase):
             "trigger_source": self.trigger_source,
             "waveform": waveform_dict,
         }
-
         return waveform_dict
 
     def prepare_task(self, channel_key):
-        """Prepares the task.
-
-        This method prepares the task.
+        """Prepare the task for the given channel
 
         Parameters
         ----------
         channel_key : str
-            The channel key.
+            The channel key for the task
 
         Returns
         -------
@@ -218,9 +206,7 @@ class GalvoNI(GalvoBase):
         pass
 
     def start_task(self):
-        """Starts the task.
-
-        This method starts the task.
+        """Start the NI DAQ task for the galvo
 
         Parameters
         ----------
@@ -234,18 +220,17 @@ class GalvoNI(GalvoBase):
         --------
         >>> galvo.start_task()
         """
+
         # self.task.start()
         pass
 
     def stop_task(self, force=False):
-        """Stops the task.
-
-        This method stops the task.
+        """Stop the NI DAQ task for the galvo
 
         Parameters
         ----------
         force : bool
-            Force stop the task.
+            Force stop the task
 
         Returns
         -------
@@ -253,7 +238,7 @@ class GalvoNI(GalvoBase):
 
         Examples
         --------
-        >>> galvo.stop_task(force=False)
+        >>> galvo.stop_task()
         """
 
         # if not force:
@@ -262,9 +247,7 @@ class GalvoNI(GalvoBase):
         pass
 
     def close_task(self):
-        """Closes the task.
-
-        This method closes the task.
+        """Close the NI DAQ task for the galvo
 
         Parameters
         ----------
@@ -278,6 +261,6 @@ class GalvoNI(GalvoBase):
         --------
         >>> galvo.close_task()
         """
-
+        
         # self.task.close()
         pass

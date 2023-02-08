@@ -44,25 +44,114 @@ logger = logging.getLogger(p)
 
 
 class SyntheticRemoteFocus(RemoteFocusBase):
-    """SyntheticRemoteFocus Class"""
+    """SyntheticRemoteFocus Class
+
+    Parameters
+    ----------
+    microscope_name : str
+        The name of the microscope.
+    device_connection : DeviceConnection
+        The device connection.
+    configuration : dict
+        The configuration.
+
+    Attributes
+    ----------
+    microscope_name : str
+        The name of the microscope.
+    device_connection : nidaqmx.Task
+        The connection to the device.
+    configuration : dict
+        The configuration of the device.
+
+    Methods
+    -------
+    prepare_task(channel_key)
+        Prepares the task for the given channel.
+    start_task()
+        Starts the task.
+    stop_task()
+        Stops the task.
+    close_task()
+        Closes the task.
+    """
 
     def __init__(self, microscope_name, device_connection, configuration):
         super().__init__(microscope_name, device_connection, configuration)
         pass
 
     def __del__(self):
+        """Destructor"""
         self.stop_task()
         self.close_task()
 
     def prepare_task(self, channel_key):
+        """Prepares the task for the given channel.
+
+        Parameters
+        ----------
+        channel_key : str
+            The channel key.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> prepare_task("remote_focus")
+        """
         # write waveform
         logger.debug(f"remote focus writes the waveform for {channel_key}")
 
     def start_task(self):
+        """Starts the task.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> start_task()
+        """
+
         logger.debug("remote focus started task!")
 
     def stop_task(self):
+        """Stops the task.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> stop_task()
+        """
         logger.debug("remote focus stopped task!")
 
     def close_task(self):
+        """Closes the task.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> close_task()
+        """
         logger.debug("remote focus closed task!")

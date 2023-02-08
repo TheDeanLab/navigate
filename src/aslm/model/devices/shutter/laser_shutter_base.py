@@ -65,10 +65,10 @@ class ShutterBase:
         pass
 
     def open_shutter(self):
-        pass
+        self.shutter_state = True
 
     def close_shutter(self):
-        pass
+        self.shutter_state = False
 
     @property
     def state(self):

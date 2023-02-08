@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -41,7 +42,39 @@ logger = logging.getLogger(p)
 
 
 class WaveformParameterPopupWindow:
-    """Popup window with waveform parameters for galvos, remote focusing, etc."""
+    """Popup window with waveform parameters for galvos, remote focusing, etc.
+
+    Parameters
+    ----------
+    root : tkinter.Tk
+        The root window.
+    configuration_controller : ConfigurationController
+        The configuration controller.
+    *args : tuple
+        Positional arguments.
+    **kwargs : dict
+        Keyword arguments.
+
+    Attributes
+    ----------
+    inputs : dict
+        The input widgets.
+    buttons : dict
+        The buttons.
+
+    Methods
+    -------
+    get_variables()
+        This function returns a dictionary of all the variables
+        that are tied to each widget name.
+        The key is the widget name, value is the variable associated.
+    get_widgets()
+        This function returns the dictionary that holds the input widgets.
+        The key is the widget name, value is the LabelInput class that has all the data.
+    get_buttons()
+        This function returns the dictionary that holds the buttons.
+        The key is the button name, value is the button.
+    """
 
     def __init__(self, root, configuration_controller, *args, **kwargs):
         # Creating popup window with this name and size/placement, PopUp is a
@@ -199,6 +232,7 @@ class WaveformParameterPopupWindow:
                 parent=self.laser_frame,
                 input_class=ValidatedSpinbox,
                 input_var=tk.StringVar(),
+                input_args={"from_": 0, "to": 1000, "increment": 0.1},
             )
 
             self.inputs[galvo_labels[i] + " Freq"].grid(
@@ -232,9 +266,24 @@ class WaveformParameterPopupWindow:
 
     # Getters
     def get_variables(self):
-        """
-        This function returns a dictionary of all the variables that are tied to each widget name.
+        """Returns the variables of the inputs
+
+        This function returns a dictionary of all the variables
+        that are tied to each widget name.
         The key is the widget name, value is the variable associated.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        dict
+            Dictionary of all the variables tied to each widget name
+
+        Examples
+        --------
+        >>> self.get_variables()
         """
         variables = {}
         for key, widget in self.inputs.items():
@@ -242,21 +291,43 @@ class WaveformParameterPopupWindow:
         return variables
 
     def get_widgets(self):
-        """
+        """Returns the widgets
+
         This function returns the dictionary that holds the input widgets.
         The key is the widget name, value is the LabelInput class that has all the data.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        dict
+            Dictionary of all the widgets
+
+        Examples
+        --------
+        >>> self.get_widgets()
         """
         return self.inputs
 
     def get_buttons(self):
-        """
+        """Returns the buttons
+
         This function returns the dictionary that holds the buttons.
         The key is the button name, value is the button.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        dict
+            Dictionary of all the buttons
+
+        Examples
+        --------
+        >>> self.get_buttons()
         """
         return self.buttons
-
-
-if __name__ == "__main__":
-    root = tk.Tk()
-    WaveformParameterPopupWindow(root)
-    root.mainloop()

@@ -56,6 +56,23 @@ To avoid this error, you can add a `# noqa` comment to the end of the line to te
 
         from aslm.model.device_startup_functions import start_stage  # noqa
 
+Dictionary Parsing
+------------------
+The configuration file is loaded a large dictionary object, and it is easy to have
+small errors in it that ultimately can crash the program. To avoid this, when getting
+properties from the configuration dictionary, it is best to use the `.get()` command,
+which provides you with the opportunity to also have a default value should the key
+provided not be found.  For example::
+
+        # Galvo Waveform Information
+         self.galvo_waveform = self.device_config.get("waveform", "sawtooth")
+
+Here, we try to retrieve the `waveform` key from a the `self.device_config`
+dictionary.  In the case that this key is not available, it then by default returns
+`sawtooth`. If however the `waveform` key is found, it will provide the value
+associated with it.
+
+
 Unit tests
 ----------
 Ideally, each line of code is unit tested to ensure it behaves appropriately
@@ -65,10 +82,3 @@ and `here <https://medium.com/chris-nielsen/so-whats-a-good-unit-test-look-like-
 or see examples of other unit tests in this application's ``test`` folder. We
 use the `pytest library <https://docs.pytest.org/en/7.2.x/>`_ to evaluate unit
 tests.
-
-Scientific Units
-----------------
-Deviations from this can occur where it is necessary to pass a different unit to a piece of hardware.
-
-* Time - Milliseconds
-* Distance - Micrometers

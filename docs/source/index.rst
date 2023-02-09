@@ -27,9 +27,9 @@
 
 .. toctree::
    :maxdepth: 3
-   
+
    userguide
-   hacking
+   contributing_home
 
 
 **Index and search**

@@ -74,8 +74,6 @@ class WaveformPopupController(GUIController):
 
         # get configuration
         self.lasers = self.configuration_controller.lasers_info
-        self.galvo_dict = self.configuration_controller.galvo_parameter_dict
-        self.galvos = [galvo["name"] for galvo in self.galvo_dict]
 
         self.resolution = None
         self.mag = None
@@ -106,8 +104,8 @@ class WaveformPopupController(GUIController):
                 "write",
                 self.update_remote_focus_settings(laser + " Off", laser, "offset"),
             )
-
-        for galvo in self.galvos:
+        for i in range(self.configuration_controller.galvo_num):
+            galvo = f"Galvo {i}"
             self.variables[galvo + " Amp"].trace_add(
                 "write", self.update_galvo_setting(galvo, " Amp", "amplitude")
             )
@@ -141,8 +139,6 @@ class WaveformPopupController(GUIController):
         self.widgets["Mode"].widget["state"] = "readonly"
         self.widgets["Mag"].widget["state"] = "readonly"
 
-        self.configure_widget_range()
-
     def configure_widget_range(self):
         """
         Update the widget ranges and precisions based on the current resolution mode.
@@ -158,13 +154,6 @@ class WaveformPopupController(GUIController):
 
         laser_min = self.configuration_controller.remote_focus_dict["hardware"]["min"]
         laser_max = self.configuration_controller.remote_focus_dict["hardware"]["max"]
-        # TODO: support multiple galvos
-        galvo_min = self.configuration_controller.galvo_parameter_dict[0]["hardware"][
-            "min"
-        ]
-        galvo_max = self.configuration_controller.galvo_parameter_dict[0]["hardware"][
-            "max"
-        ]
 
         # set ranges of value for those lasers
         for laser in self.lasers:
@@ -181,10 +170,13 @@ class WaveformPopupController(GUIController):
             self.widgets[laser + " Off"].widget.set_precision(precision)
 
         for galvo, d in zip(self.galvos, self.galvo_dict):
+            galvo_min = d["hardware"]["min"]
+            galvo_max = d["hardware"]["max"]
             self.widgets[galvo + " Amp"].widget.configure(from_=galvo_min)
             self.widgets[galvo + " Amp"].widget.configure(to=galvo_max)
             self.widgets[galvo + " Amp"].widget.configure(increment=increment)
             self.widgets[galvo + " Amp"].widget.set_precision(precision)
+            self.widgets[galvo + " Amp"].widget['state'] = "normal"
             # TODO: The offset bounds should adjust based on the amplitude bounds,
             #       so that amp + offset does not exceed the bounds. Can be done
             #       in update_remote_focus_settings()
@@ -192,10 +184,19 @@ class WaveformPopupController(GUIController):
             self.widgets[galvo + " Off"].widget.configure(to=galvo_max)
             self.widgets[galvo + " Off"].widget.configure(increment=increment)
             self.widgets[galvo + " Off"].widget.set_precision(precision)
+            self.widgets[galvo + " Off"].widget['state'] = "normal"
 
+            self.widgets[galvo + " Freq"].widget.configure(from_=0)
             self.widgets[galvo + " Freq"].widget.configure(from_=0)
             self.widgets[galvo + " Freq"].widget.configure(increment=increment)
             self.widgets[galvo + " Freq"].widget.set_precision(precision)
+            self.widgets[galvo + " Freq"].widget['state'] = "normal"
+
+        for i in range(len(self.galvos), self.configuration_controller.galvo_num):
+            galvo_name = f"Galvo {i}"
+            self.widgets[galvo_name + " Amp"].widget['state'] = "disabled"
+            self.widgets[galvo_name + " Off"].widget['state'] = "disabled"
+            self.widgets[galvo_name + " Freq"].widget['state'] = "disabled"
 
         # The galvo by default uses a sawtooth waveform. However, sometimes we have a resonant galvo.
         # In the case of the resonant galvo, the amplitude must be zero and only the offset can be
@@ -257,6 +258,9 @@ class WaveformPopupController(GUIController):
 
     def show_laser_info(self, *args):
         """Show laser info when the user changes magnification setting."""
+        # get galvo dict for the specified microscope/magnification
+        self.galvo_dict = self.parent_controller.configuration["configuration"]["microscopes"][self.resolution]["galvo"]
+        self.galvos = [f"Galvo {i}" for i in range(len(self.galvo_dict))]
         # restore amplitude before change mag if needed
         self.restore_amplitude()
         # get magnification setting

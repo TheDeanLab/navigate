@@ -895,6 +895,9 @@ class Model:
                     )
                 curr_pos = self.get_stage_position()
                 update_stage_dict(self, curr_pos)
+                self.event_queue.put(
+                    ("update_stage", {k.replace("pos", "abs"): v for k, v in curr_pos})
+                )
 
         except ValueError as e:
             self.logger.debug(f"{self.active_microscope_name}: {e}")

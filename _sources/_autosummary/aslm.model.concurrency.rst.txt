@@ -32,6 +32,5 @@ aslm.model.concurrency
    aslm.model.concurrency.concurrency_example
    aslm.model.concurrency.concurrency_tools
    aslm.model.concurrency.proxy_objects
-   aslm.model.concurrency.shared_memory
    aslm.model.concurrency.write_parameters
 

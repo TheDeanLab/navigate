@@ -1,4 +1,4 @@
-ASLM feature container
+ASLM Feature Container
 =========================
 
 The ASLM **feature container** allows for reconfigurable acquisition and

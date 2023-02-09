@@ -187,7 +187,6 @@ class WaveformPopupController(GUIController):
             self.widgets[galvo + " Off"].widget['state'] = "normal"
 
             self.widgets[galvo + " Freq"].widget.configure(from_=0)
-            self.widgets[galvo + " Freq"].widget.configure(from_=0)
             self.widgets[galvo + " Freq"].widget.configure(increment=increment)
             self.widgets[galvo + " Freq"].widget.set_precision(precision)
             self.widgets[galvo + " Freq"].widget['state'] = "normal"
@@ -207,14 +206,6 @@ class WaveformPopupController(GUIController):
         # TODO: Should we instead change galvo amp/offset behavior based on a waveform type passed in the
         #       configuration? That is, should we pass galvo_l_waveform: sawtooth and galvo_r_waveform: dc_value?
         #       And then adjust the ETL_Popup_Controller accordingly? We could do the same for ETL vs. voice coil.
-        # TODO this might have buggy behavior adding the dynamic galvo stuff
-        # if 'amplitude' not in self.configuration_controller.galvo_parameter_dict[0].keys():
-        #     self.widgets[self.galvo[0] + ' Amp'].widget['state'] = "disabled"
-        #     self.widgets['Galvo Freq'].widget['state'] = "disabled"
-        # TODO this might not be needed at all since it defaults to normal on creation. Will also need to check all galvos not just one
-        # else:
-        #     self.widgets['Galvo Amp'].widget['state'] = "normal"
-        #     self.widgets['Galvo Freq'].widget['state'] = "normal"
 
     def populate_experiment_values(self):
         """set experiment values"""

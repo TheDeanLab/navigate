@@ -459,6 +459,7 @@ class Model:
                 self.active_microscope.current_channel = 0
 
             if args[0] == "resolution":
+                self.active_microscope.central_focus = None
                 self.change_resolution(
                     self.configuration["experiment"]["MicroscopeState"][
                         "microscope_name"
@@ -883,6 +884,7 @@ class Model:
             offsets = self.active_microscope.zoom.stage_offsets
             if offsets is not None and curr_zoom is not None:
                 solvent = self.configuration["experiment"]["Saving"]["solvent"]
+                self.stop_stage()
                 curr_pos = self.get_stage_position()
                 update_stage_dict(self, curr_pos)
                 for axis, mags in offsets[solvent].items():
@@ -893,11 +895,16 @@ class Model:
                         },
                         wait_until_done=True,
                     )
+                self.stop_stage()
                 curr_pos = self.get_stage_position()
                 update_stage_dict(self, curr_pos)
-                self.event_queue.put(
-                    ("update_stage", {k.replace("pos", "abs"): v for k, v in curr_pos})
-                )
+                # self.stop_stage()
+                # curr_pos = self.get_stage_position()
+                # update_stage_dict(self, curr_pos)
+                # print(f"putting {curr_pos}")
+                # self.event_queue.put(
+                #     ("update_stage", curr_pos)
+                # )
 
         except ValueError as e:
             self.logger.debug(f"{self.active_microscope_name}: {e}")

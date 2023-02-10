@@ -459,7 +459,6 @@ class Model:
                 self.active_microscope.current_channel = 0
 
             if args[0] == "resolution":
-                self.active_microscope.central_focus = None
                 self.change_resolution(
                     self.configuration["experiment"]["MicroscopeState"][
                         "microscope_name"
@@ -867,8 +866,10 @@ class Model:
         resolution_value : str
             Resolution mode.
         """
+        self.active_microscope.central_focus = None
+
+        former_microscope = self.active_microscope_name
         if resolution_value != self.active_microscope_name:
-            former_microscope = self.active_microscope_name
             self.get_active_microscope()
             self.active_microscope.move_stage_offset(former_microscope)
 
@@ -882,19 +883,26 @@ class Model:
             )
 
             offsets = self.active_microscope.zoom.stage_offsets
-            if offsets is not None and curr_zoom is not None:
+            if (
+                offsets is not None
+                and curr_zoom is not None
+                and self.active_microscope_name == former_microscope
+            ):
                 solvent = self.configuration["experiment"]["Saving"]["solvent"]
                 self.stop_stage()
                 curr_pos = self.get_stage_position()
                 update_stage_dict(self, curr_pos)
                 for axis, mags in offsets[solvent].items():
-                    self.move_stage(
-                        {
-                            f"{axis}_abs": curr_pos[f"{axis}_pos"]
-                            + float(mags[curr_zoom][zoom_value])
-                        },
-                        wait_until_done=True,
-                    )
+                    try:
+                        shift_axis = curr_pos[f"{axis}_pos"] + float(
+                            mags[curr_zoom][zoom_value]
+                        )
+                        self.move_stage(
+                            {f"{axis}_abs": shift_axis},
+                            wait_until_done=True,
+                        )
+                    except KeyError:
+                        pass
                 self.stop_stage()
                 curr_pos = self.get_stage_position()
                 update_stage_dict(self, curr_pos)

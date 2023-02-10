@@ -34,6 +34,7 @@ import random
 
 import pytest
 
+
 @pytest.fixture(scope="function")
 def model():
     from types import SimpleNamespace
@@ -49,7 +50,9 @@ def model():
     )
     configuration_path = Path.joinpath(configuration_directory, "configuration.yaml")
     experiment_path = Path.joinpath(configuration_directory, "experiment.yml")
-    waveform_constants_path = Path.joinpath(configuration_directory, "waveform_constants.yml")
+    waveform_constants_path = Path.joinpath(
+        configuration_directory, "waveform_constants.yml"
+    )
     rest_api_path = Path.joinpath(configuration_directory, "rest_api_config.yml")
 
     event_queue = Queue(100)
@@ -93,24 +96,30 @@ def test_change_resolution(model):
     axes = ["x", "y", "z", "theta", "f"]
 
     for scope, zoom in zip(scopes, zooms):
+        # reset stage axes to all zeros, to match default SyntheticStage behaviour
+        for microscope in model.microscopes:
+            for ax in axes:
+                model.microscopes[microscope].stages[ax].move_absolute(
+                    {ax + "_abs": 0}, wait_until_done=True
+                )
+
         former_offset_dict = model.configuration["configuration"]["microscopes"][
             model.configuration["experiment"]["MicroscopeState"]["microscope_name"]
         ]["stage"]
-        # reset stage axes to all zeros, to match default SyntheticStage behaviour
-        for ax in axes:
-            model.active_microscope.stages[ax].move_absolute(
-                {ax + "_abs": 0}, wait_until_done=True
-            )
         former_pos_dict = model.get_stage_position()
+        former_zoom = model.configuration["experiment"]["MicroscopeState"]["zoom"]
+        model.active_microscope.zoom.set_zoom(former_zoom)
         print(f"{model.active_microscope_name}: {former_pos_dict}")
 
         print(
-            f"CHANGING {model.active_microscope_name} at"
-            '{model.configuration["experiment"]["MicroscopeState"]["zoom"]} to {scope}'
-            "at {zoom}"
+            f"CHANGING {model.active_microscope_name} at "
+            f'{model.configuration["experiment"]["MicroscopeState"]["zoom"]} to {scope}'
+            f" at {zoom}"
         )
         model.configuration["experiment"]["MicroscopeState"]["microscope_name"] = scope
         model.configuration["experiment"]["MicroscopeState"]["zoom"] = zoom
+        solvent = model.configuration["experiment"]["Saving"]["solvent"]
+
         model.change_resolution(scope)
 
         self_offset_dict = model.configuration["configuration"]["microscopes"][scope][
@@ -123,16 +132,21 @@ def test_change_resolution(model):
         # reset stage axes to all zeros, to match default SyntheticStage behaviour
         for ax in model.active_microscope.stages:
             print(f"axis {ax}")
+            try:
+                shift_ax = float(
+                    model.active_microscope.zoom.stage_offsets[solvent][ax][
+                        former_zoom
+                    ][zoom]
+                )
+                print(f"shift_ax {shift_ax}")
+            except (TypeError, KeyError):
+                shift_ax = 0
             assert (
                 pos_dict[ax + "_pos"]
                 - self_offset_dict[ax + "_offset"]
                 + former_offset_dict[ax + "_offset"]
+                - shift_ax
             ) == 0
-
-        for ax in axes:
-            model.active_microscope.stages[ax].move_absolute(
-                {ax + "_abs": 0}, wait_until_done=True
-            )
 
         assert model.active_microscope_name == scope
         assert model.active_microscope.zoom.zoomvalue == zoom

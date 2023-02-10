@@ -201,7 +201,16 @@ class VolumeSearch:
         self.offset[3] += self.model.configuration["experiment"]["StageParameters"][
             "theta"
         ]
-        self.offset[4] += self.f_pos
+
+        offsets = self.model.active_microscope.zoom.stage_offsets
+        focus_offset = 0
+        if offsets is not None:
+            solvent = self.model.configuration["experiment"]["Saving"]["solvent"]
+            try:
+                focus_offset = offsets[solvent]["f"][curr_zoom][self.target_zoom]
+            except Exception:
+                focus_offset = 0
+        self.offset[4] += self.f_pos + focus_offset
 
         self.first_boundary = None
         self.pre_boundary = None

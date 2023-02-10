@@ -74,6 +74,9 @@ class ConfigurationController:
 
         self.change_microscope()
 
+        microscopes_config = configuration["configuration"]["microscopes"]
+        self.galvo_num = max(map(lambda microscope_name: len(microscopes_config[microscope_name]["galvo"]), microscopes_config.keys()))
+
     def change_microscope(self) -> bool:
         """Get the new microscope configuration dict according to the name
 

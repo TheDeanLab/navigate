@@ -384,7 +384,7 @@ class StageController(GUIController):
             self.event_id[axis] = self.view.after(
                 250,
                 lambda: self.parent_controller.execute(
-                    "stage", position_var.get(), axis
+                    "stage", position, axis
                 ),
             )
 

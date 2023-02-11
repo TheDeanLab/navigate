@@ -66,7 +66,7 @@ from aslm.controller.sub_controllers import (
     MultiPositionController,
     ChannelsTabController,
     AcquireBarController,
-    MicroscopePopupController
+    MicroscopePopupController,
 )
 from aslm.controller.thread_pool import SynchronizedThreadPool
 
@@ -225,7 +225,7 @@ class Controller:
         self.additional_microscopes_configs = {}
 
         # Set view based on model.experiment
-        self.populate_experiment_setting()
+        self.populate_experiment_setting(in_initialize=True)
 
         # Camera View Tab
         self.initialize_cam_view()
@@ -542,7 +542,7 @@ class Controller:
             label="Camera offset and variance maps", command=popup_camera_map_setting
         )
 
-    def populate_experiment_setting(self, file_name=None):
+    def populate_experiment_setting(self, file_name=None, in_initialize=False):
         """Load experiment file and populate model.experiment and configure view.
 
         Confirms that the experiment file exists.
@@ -569,6 +569,11 @@ class Controller:
             f"{microscope_name} "
             f"{self.configuration['experiment']['MicroscopeState']['zoom']}"
         )
+
+        if in_initialize:
+            # Force stage update (should have happened in self.resolution_value.set())
+            ret_pos_dict = self.model.get_stage_position()
+            update_stage_dict(self, ret_pos_dict)
 
         self.acquire_bar_controller.populate_experiment_values()
         self.stage_controller.populate_experiment_values()
@@ -1000,8 +1005,8 @@ class Controller:
                     break
                 if not isinstance(image_id, int):
                     logger.debug(
-                        f"ASLM Controller - Something wrong happened in additional microscope!, "
-                        f"{image_id}"
+                        f"ASLM Controller - Something wrong happened in additional "
+                        f"microscope!, {image_id}"
                     )
                     break
 
@@ -1009,7 +1014,9 @@ class Controller:
                 try:
                     camera_view_controller.display_image(
                         image=data_buffer[image_id],
-                        microscope_state=self.configuration["experiment"]["MicroscopeState"],
+                        microscope_state=self.configuration["experiment"][
+                            "MicroscopeState"
+                        ],
                         images_received=images_received,
                     )
                 except tkinter._tkinter.TclError:
@@ -1025,35 +1032,56 @@ class Controller:
         for microscope_name in temp:
             del self.additional_microscopes[microscope_name]
             self.model.destroy_virtual_microscope(microscope_name)
-            
+
         # show additional camera view popup
         for microscope_name in self.additional_microscopes_configs:
             if microscope_name not in self.additional_microscopes:
-                show_img_pipe = self.model.create_pipe(f"{microscope_name}_show_img_pipe")
-                data_buffer = self.model.launch_virtual_microscope(microscope_name, self.additional_microscopes_configs[microscope_name])
+                show_img_pipe = self.model.create_pipe(
+                    f"{microscope_name}_show_img_pipe"
+                )
+                data_buffer = self.model.launch_virtual_microscope(
+                    microscope_name,
+                    self.additional_microscopes_configs[microscope_name],
+                )
 
                 self.additional_microscopes[microscope_name] = {
                     "show_img_pipe": show_img_pipe,
                     "data_buffer": data_buffer,
                 }
-            if self.additional_microscopes[microscope_name].get("camera_view_controller", None) == None:
+            if (
+                self.additional_microscopes[microscope_name].get(
+                    "camera_view_controller", None
+                )
+                is None
+            ):
                 popup_window = CameraViewPopupWindow(self.view, microscope_name)
-                camera_view_controller = CameraViewController(popup_window.camera_view, self)
-                self.additional_microscopes[microscope_name]["camera_view_controller"] = camera_view_controller
+                camera_view_controller = CameraViewController(
+                    popup_window.camera_view, self
+                )
+                self.additional_microscopes[microscope_name][
+                    "camera_view_controller"
+                ] = camera_view_controller
                 popup_window.popup.protocol(
                     "WM_DELETE_WINDOW",
                     combine_funcs(
                         popup_window.popup.dismiss,
-                        lambda: self.additional_microscopes[microscope_name].pop("camera_view_controller")
-                    )
+                        lambda: self.additional_microscopes[microscope_name].pop(
+                            "camera_view_controller"
+                        ),
+                    ),
                 )
 
             # start thread
-            capture_img_thread = threading.Thread(target=display_images, args=(
-                self.additional_microscopes[microscope_name]["camera_view_controller"], 
-                self.additional_microscopes[microscope_name]["show_img_pipe"], 
-                self.additional_microscopes[microscope_name]["data_buffer"],
-            ))
+            capture_img_thread = threading.Thread(
+                target=display_images,
+                args=(
+                    self.additional_microscopes[microscope_name][
+                        "camera_view_controller"
+                    ],
+                    self.additional_microscopes[microscope_name]["show_img_pipe"],
+                    self.additional_microscopes[microscope_name]["data_buffer"],
+                ),
+            )
             capture_img_thread.start()
 
     def move_stage(self, pos_dict):

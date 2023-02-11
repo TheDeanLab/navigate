@@ -152,18 +152,21 @@ class PIStage(StageBase):
 
         Positions from Physik Instrumente device are in millimeters
         """
-        try:
-            positions = self.pi_device.qPOS(self.pi_device.axes)
+        # Attempt to prevent GCSError from breaking internal dictionary
+        for _ in range(10):
+            try:
+                positions = self.pi_device.qPOS(self.pi_device.axes)
 
-            # convert to um
-            for ax, n in zip(self.axes, self.pi_axes):
-                pos = positions[str(n)]
-                if ax != "theta":
-                    pos = round(pos * 1000, 2)
-                setattr(self, f"{ax}_pos", pos)
-        except GCSError as e:
-            print("Failed to report position")
-            logger.exception(f"report_position failed - {e}")
+                # convert to um
+                for ax, n in zip(self.axes, self.pi_axes):
+                    pos = positions[str(n)]
+                    if ax != "theta":
+                        pos = round(pos * 1000, 2)
+                    setattr(self, f"{ax}_pos", pos)
+                break
+            except GCSError as e:
+                print("Failed to report position")
+                logger.exception(f"report_position failed - {e}")
 
         # Update Position Dictionary
         self.create_position_dict()

@@ -572,7 +572,7 @@ class Controller:
 
         if in_initialize:
             # Force stage update (should have happened in self.resolution_value.set())
-            ret_pos_dict = self.model.get_stage_position()
+            ret_pos_dict = self.model.get_stage_position(in_initialize=True)
             update_stage_dict(self, ret_pos_dict)
 
         self.acquire_bar_controller.populate_experiment_values()

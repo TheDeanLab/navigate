@@ -47,7 +47,7 @@ class SyntheticStage(StageBase):
     def __init__(self, microscope_name, device_connection, configuration, device_id=0):
         super().__init__(microscope_name, device_connection, configuration, device_id)
 
-    def report_position(self):
+    def report_position(self, in_initialize=False):
         self.create_position_dict()
         return self.position_dict
 

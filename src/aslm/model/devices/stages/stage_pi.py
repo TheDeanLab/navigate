@@ -147,13 +147,14 @@ class PIStage(StageBase):
             logger.exception(f"Error while disconnecting the PI stage - {e}")
             raise
 
-    def report_position(self):
+    def report_position(self, in_initialize=False):
         """Reports the position for all axes, and create position dictionary.
 
         Positions from Physik Instrumente device are in millimeters
         """
         # Attempt to prevent GCSError from breaking internal dictionary
-        for _ in range(10):
+        tries = 10 if in_initialize else 1
+        for _ in range(tries):
             try:
                 positions = self.pi_device.qPOS(self.pi_device.axes)
 

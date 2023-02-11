@@ -81,7 +81,7 @@ class TLKIMStage(StageBase):
         except AttributeError:
             pass
 
-    def report_position(self):
+    def report_position(self, in_initialize=False):
         """
         # Reports the position of the stage for all axes, and creates the hardware
         # position dictionary.

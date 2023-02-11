@@ -168,6 +168,7 @@ class PIStage(StageBase):
             except GCSError as e:
                 print("Failed to report position")
                 logger.exception(f"report_position failed - {e}")
+                time.sleep(0.01)
 
         # Update Position Dictionary
         self.create_position_dict()

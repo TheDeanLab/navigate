@@ -216,6 +216,17 @@ class Model:
                 }
             ]
         )
+        self.feature_list.append(
+            [
+                (
+                    {"name": PrepareNextChannel},
+                    {
+                        "name": LoopByCount,
+                        "args": ("experiment.MicroscopeState.timepoints",),
+                    },
+                )
+            ]
+        )
 
         self.acquisition_modes_feature_setting = {
             "single": [{"name": PrepareNextChannel}],

@@ -263,7 +263,7 @@ class SutterStage(StageBase):
             logger.error("MP-285 unable to change resolution and/or speed.")
             raise UserWarning("MP-285 unable to change resolution and/or speed")
 
-    def report_position(self, in_initialize=False):
+    def report_position(self):
         """
         Reports the position of the stage for all axes in microns
         Creates the hardware position dictionary.

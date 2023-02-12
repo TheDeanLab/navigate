@@ -574,7 +574,7 @@ class Microscope:
         for axis in self.stages:
             self.stages[axis].stop()
 
-    def get_stage_position(self, in_initialize=False):
+    def get_stage_position(self):
         """Get stage position.
 
         Parameters
@@ -594,6 +594,6 @@ class Microscope:
         ret_pos_dict = {}
         for axis in self.stages:
             pos_axis = axis + "_pos"
-            temp_pos = self.stages[axis].report_position(in_initialize=in_initialize)
+            temp_pos = self.stages[axis].report_position()
             ret_pos_dict[pos_axis] = temp_pos[pos_axis]
         return ret_pos_dict

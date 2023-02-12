@@ -117,7 +117,7 @@ class GalvoNIStage(StageBase):
             self.waveform_dict[k] = None
 
     # for stacking, we could have 2 axis here or not, y is for tiling, not necessary
-    def report_position(self, in_initialize=False):
+    def report_position(self):
         """Reports the position for all axes, and create position dictionary."""
         self.create_position_dict()
         return self.position_dict

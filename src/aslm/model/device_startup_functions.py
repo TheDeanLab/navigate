@@ -341,7 +341,14 @@ def start_stage(
     if device_type == "PI":
         from aslm.model.devices.stages.stage_pi import PIStage
 
-        return PIStage(microscope_name, device_connection, configuration, id)
+        pistage = PIStage(microscope_name, device_connection, configuration, id)
+
+        # Try to avoid GCS Error creating improper initial stage conditions
+        # Usually we don't get 10 of these in a row
+        for _ in range(10):
+            pistage.report_position()
+            time.sleep(0.01)
+
     elif device_type == "Thorlabs":
         from aslm.model.devices.stages.stage_tl_kcube_inertial import TLKIMStage
 

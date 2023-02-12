@@ -64,7 +64,7 @@ class MCLStage(StageBase):
             self.mcl_controller = device_connection["controller"]
             self.handle = device_connection["handle"]
 
-    def report_position(self, in_initialize=False):
+    def report_position(self):
         """
         # Reports the position of the stage for all axes, and creates the hardware
         # position dictionary.

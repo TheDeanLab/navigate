@@ -177,7 +177,7 @@ class ASIStage(StageBase):
             logger.exception(e)
             raise
 
-    def report_position(self, in_initialize=False):
+    def report_position(self):
         """Reports the position for all axes in microns, and create
         position dictionary."""
         try:

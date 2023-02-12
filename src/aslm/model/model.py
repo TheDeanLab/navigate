@@ -569,7 +569,7 @@ class Model:
         """
         return self.active_microscope.move_stage(pos_dict, wait_until_done)
 
-    def get_stage_position(self, in_initialize=False):
+    def get_stage_position(self):
         """Get the position of the stage.
 
         Returns
@@ -577,7 +577,7 @@ class Model:
         ret_pos_dict : dict
             Dictionary of stage positions.
         """
-        return self.active_microscope.get_stage_position(in_initialize=in_initialize)
+        return self.active_microscope.get_stage_position()
 
     def stop_stage(self):
         """Stop the stages."""

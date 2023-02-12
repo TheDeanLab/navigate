@@ -629,12 +629,9 @@ class Model:
         # whether acquire specific number of frames.
         count_frame = num_of_frames > 0
 
-        # Timer for framerate.
-        elapsed_time = 0
+        start_time = time.time()
 
         while not self.stop_acquisition:
-            if wait_num == 10:
-                start_time = time.time()
             if self.ask_to_pause_data_thread:
                 self.pause_data_ready_lock.release()
                 self.pause_data_event.clear()
@@ -656,8 +653,7 @@ class Model:
 
             acquired_frame_num += len(frame_ids)
             stop_time = time.time()
-            elapsed_time += stop_time - start_time
-            frames_per_second = acquired_frame_num / elapsed_time
+            frames_per_second = acquired_frame_num / (stop_time - start_time)
             self.event_queue.put(("framerate", frames_per_second))
 
             wait_num = 10

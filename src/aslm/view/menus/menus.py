@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -40,6 +41,37 @@ logger = logging.getLogger(p)
 
 #  Menubar class
 class menubar(Menu):
+    """Menu bar class for ASLM GUI
+
+    Parameters
+    ----------
+    window : tkinter.Tk
+        Parent window for menu bar
+    *args : list
+        List of arguments
+    **kwargs : dict
+        Dictionary of arguments
+
+    Attributes
+    ----------
+    opsystem : str
+        Operating system of parent window
+    menu_file : tkinter.Menu
+        File menu
+    menu_multi_positions : tkinter.Menu
+        Multi-Position menu
+    menu_resolution : tkinter.Menu
+        Resolution menu
+    menu_autofocus : tkinter.Menu
+        Autofocus menu
+    menu_features : tkinter.Menu
+        Add-on Features menu
+    menu_help : tkinter.Menu
+        Help menu
+    menu_debug : tkinter.Menu
+        Debug menu
+    """
+
     def __init__(self, window, *args, **kwargs):
         #  Init Menu with parent
         Menu.__init__(self, window, *args, **kwargs)
@@ -57,13 +89,13 @@ class menubar(Menu):
         self.menu_file = Menu(self)
         self.add_cascade(menu=self.menu_file, label="File")
 
+        #  Resolution Menu
+        self.menu_resolution = Menu(self)
+        self.add_cascade(menu=self.menu_resolution, label="Microscope Settings")
+
         #  Multi-Position Menu
         self.menu_multi_positions = Menu(self)
         self.add_cascade(menu=self.menu_multi_positions, label="Multi-Position")
-
-        #  Resolution Menu
-        self.menu_resolution = Menu(self)
-        self.add_cascade(menu=self.menu_resolution, label="Resolution")
 
         # Autofocus Menu
         self.menu_autofocus = Menu(self)
@@ -71,7 +103,7 @@ class menubar(Menu):
 
         # Add-on Features menu
         self.menu_features = Menu(self)
-        self.add_cascade(menu=self.menu_features, label="Add-on Features")
+        self.add_cascade(menu=self.menu_features, label="Features")
 
         # Help Menu
         self.menu_help = Menu(self)

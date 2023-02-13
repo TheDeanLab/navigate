@@ -60,6 +60,30 @@ logger = logging.getLogger(p)
 
 
 class ChannelsTabController(GUIController):
+    """Controller for the channels tab in the main window
+
+    Parameters
+    ----------
+    view : aslm.view.main_window_content.channels_tab.ChannelsTab
+        The view for the channels tab
+    parent_controller : aslm.controller.main_window_controller.MainWindowController
+        The parent controller for the channels tab
+
+    Attributes
+    ----------
+    view : aslm.view.main_window_content.channels_tab.ChannelsTab
+        The view for the channels tab
+    parent_controller : aslm.controller.main_window_controller.MainWindowController
+        The parent controller for the channels tab
+    is_save : bool
+        Whether or not the current experiment is saved
+    mode : str
+        The current mode of the experiment
+    in_initialization : bool
+        Whether or not the controller is in initialization
+    ...
+    """
+
     def __init__(self, view, parent_controller=None):
         super().__init__(view, parent_controller)
 
@@ -162,27 +186,95 @@ class ChannelsTabController(GUIController):
         self.initialize()
 
     def update_offset_start(self, *args):
+        """Update offset start value in the controller
+
+        Parameters
+        ----------
+        *args
+            Not used
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> self.update_offset_start()
+        """
         offset_start = float(self.conpro_acq_vals["offset_start"].get())
         self.microscope_state_dict["offset_start"] = offset_start
-        print(f"Update offset start: {offset_start}")
+        logger.info(f"Controller updated offset start: {offset_start}")
 
     def update_offset_end(self, *args):
+        """Update offset end value in the controller
+
+        Parameters
+        ----------
+        *args
+            Not used
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> self.update_offset_end()
+        """
         offset_end = float(self.conpro_acq_vals["offset_end"].get())
         self.microscope_state_dict["offset_end"] = offset_end
-        print(f"Update offset end: {offset_end}")
+        logger.info(f"Controller updated offset end: {offset_end}")
 
     def update_plane_number(self, *args):
+        """Update plane number value in the controller
+
+        Parameters
+        ----------
+        *args
+            Not used
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> self.update_plane_number()
+        """
         n_plane = float(self.conpro_acq_vals["n_plane"].get())
         self.microscope_state_dict["n_plane"] = n_plane
-        print(f"Update plane number: {n_plane}")
+        logger.info(f"Controller updated plane number: {n_plane}")
 
     def update_scanrange(self, *args):
+        """Update scan range value in the controller
+
+        Parameters
+        ----------
+        *args
+            Not used
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> self.update_scanrange()
+        """
         scanrange = float(self.conpro_acq_vals["scanrange"].get())
         self.microscope_state_dict["scanrange"] = scanrange
-        print(f"Update scan range: {scanrange}")
+        logger.info(f"Controller updated scan range: {scanrange}")
 
     def initialize(self):
         """Initializes widgets and gets other necessary configuration
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
 
         Examples
         --------
@@ -201,6 +293,14 @@ class ChannelsTabController(GUIController):
     def populate_experiment_values(self):
         """Distribute initial MicroscopeState values to this and sub-controllers and
         associated views.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
 
         Examples
         --------
@@ -247,6 +347,10 @@ class ChannelsTabController(GUIController):
         settings : dict
             dictionary of settings from configuration file
 
+        Returns
+        -------
+        None
+
         Examples
         --------
         >>> self.set_spinbox_range_limits(settings)
@@ -290,6 +394,10 @@ class ChannelsTabController(GUIController):
         mode : str
             acquisition mode
 
+        Returns
+        -------
+        None
+
         Examples
         --------
         >>> self.set_mode(mode)
@@ -317,6 +425,14 @@ class ChannelsTabController(GUIController):
         args : dict
             Values is a dict as follows {'step_size':  'start_position': ,
                                          'end_position': ,'number_z_steps'}
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> self.update_z_steps()
         """
 
         # won't do any calculation when initialization
@@ -387,6 +503,10 @@ class ChannelsTabController(GUIController):
             Values is a dict as follows {'start_position': , 'abs_z_start': ,
             'stack_z_origin': }
 
+        Returns
+        -------
+        None
+
         Examples
         --------
         >>> self.update_start_position()
@@ -413,6 +533,10 @@ class ChannelsTabController(GUIController):
         args : dict
             Values is a dict as follows {'end_position': , 'abs_z_end': ,
             'stack_z_origin': }
+
+        Returns
+        -------
+        None
 
         Examples
         --------
@@ -463,6 +587,10 @@ class ChannelsTabController(GUIController):
             Values is a dict as follows {'cycling_setting': , 'cycling_setting': ,
                                          'stack_z_origin': }
 
+        Returns
+        -------
+        None
+
         Examples
         --------
         >>> self.update_cycling_setting()
@@ -498,6 +626,10 @@ class ChannelsTabController(GUIController):
             Values is a dict as follows {'save_data': , 'save_data': ,
                                          'stack_z_origin': }
 
+        Returns
+        -------
+        None
+
         Examples
         --------
         >>> self.update_save_setting()
@@ -527,6 +659,10 @@ class ChannelsTabController(GUIController):
         ----------
         call_parent : bool
             Tell parent controller that time point setting has changed.
+
+        Returns
+        -------
+        None
 
         Examples
         --------
@@ -663,6 +799,14 @@ class ChannelsTabController(GUIController):
 
         Recalculates the experiment duration.
 
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
         Examples
         --------
         >>> self.toggle_multiposition()
@@ -677,6 +821,18 @@ class ChannelsTabController(GUIController):
 
         Will only launch when button in GUI is pressed, and will not duplicate.
         Pressing button again brings popup to top
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> self.launch_tiling_wizard()
         """
 
         if hasattr(self, "tiling_wizard_controller"):
@@ -694,6 +850,10 @@ class ChannelsTabController(GUIController):
             List of variables to set.
         values : list
             List of values to set to variables.
+
+        Returns
+        -------
+        None
 
         Examples
         --------

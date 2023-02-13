@@ -374,6 +374,16 @@ class Controller:
             self.waveform_popup_controller.populate_experiment_values()
 
         def popup_microscope_setting():
+            """Pop up the microscope setting window.
+
+            Parameters
+            ----------
+            None
+
+            Returns
+            -------
+            None
+            """
             if hasattr(self, "microscope_popup_controller"):
                 self.microscope_popup_controller.showup()
                 return
@@ -498,7 +508,7 @@ class Controller:
         )
         # microscope setting popup
         self.view.menubar.menu_resolution.add_command(
-            label="Microscope Setting", command=popup_microscope_setting
+            label="Configure Microscopes", command=popup_microscope_setting
         )
 
         # autofocus menu

@@ -42,7 +42,33 @@ logger = logging.getLogger(p)
 
 
 class MicroscopeSettingPopupWindow:
-    """Popup window with waveform parameters for galvos, remote focusing, etc."""
+    """Popup window with waveform parameters for galvos, remote focusing, etc.
+
+    Parameters
+    ----------
+    root : tkinter.Tk
+        The root window
+    microscope_info : dict
+        Dictionary of microscope information
+    *args
+        Arguments for the popup window
+    **kwargs
+        Keyword arguments for the popup window
+
+    Attributes
+    ----------
+    popup : aslm.view.custom_widgets.popup.PopUp
+        The popup window
+    inputs : dict
+        Dictionary of input widgets
+    buttons : dict
+        Dictionary of buttons
+    labels : list
+        List of labels for the input widgets
+    microscopes_frame : tkinter.Frame
+        Frame for the input widgets
+
+    """
 
     def __init__(self, root, microscope_info, *args, **kwargs):
         # Creating popup window with this name and size/placement, PopUp is a
@@ -107,6 +133,18 @@ class MicroscopeSettingPopupWindow:
         )
 
     def list_microscope_info(self, microscope_info):
+        """List the microscope information in the popup window
+
+        Parameters
+        ----------
+        microscope_info : dict
+            Dictionary of microscope information
+
+        Returns
+        -------
+        None
+
+        """
         c = 0
         for microscope_name in microscope_info.keys():
             frame = ttk.Frame(self.microscopes_frame, padding=(0, 0, 0, 0))
@@ -142,11 +180,19 @@ class MicroscopeSettingPopupWindow:
 
     # Getters
     def get_variables(self):
-        """
-        This function returns a dictionary of all the variables
-        that are tied to each widget name.
+        """This function returns a dictionary of all the variables tied to each widget.
 
         The key is the widget name, value is the variable associated.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        dict
+            Dictionary of variables
+
         """
         variables = {}
         for key, widget in self.inputs.items():
@@ -154,16 +200,36 @@ class MicroscopeSettingPopupWindow:
         return variables
 
     def get_widgets(self):
-        """
-        This function returns the dictionary that holds the input widgets.
+        """This function returns the dictionary that holds the input widgets.
+
         The key is the widget name, value is the LabelInput class that has all the data.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        dict
+            Dictionary of widgets
+
         """
         return self.inputs
 
     def get_buttons(self):
-        """
-        This function returns the dictionary that holds the buttons.
+        """This function returns the dictionary that holds the buttons.
+
         The key is the button name, value is the button.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        dict
+            Dictionary of buttons
+
         """
         return self.buttons
 

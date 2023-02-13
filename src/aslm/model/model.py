@@ -222,6 +222,10 @@ class Model:
                     {"name": PrepareNextChannel},
                     {
                         "name": LoopByCount,
+                        "args": ("experiment.MicroscopeState.selected_channels",),
+                    },
+                    {
+                        "name": LoopByCount,
                         "args": ("experiment.MicroscopeState.timepoints",),
                     },
                 )

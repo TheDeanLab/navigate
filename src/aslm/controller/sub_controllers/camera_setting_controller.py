@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -29,10 +30,13 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from aslm.controller.sub_controllers.gui_controller import GUIController
-
+# Standard Library Imports
 import logging
-from pathlib import Path
+
+# Third Party Imports
+
+# Local Imports
+from aslm.controller.sub_controllers.gui_controller import GUIController
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -195,7 +199,8 @@ class CameraSettingController(GUIController):
         # Binning settins
         self.roi_widgets["Binning"].set(self.camera_setting_dict["binning"])
 
-        # Camera Framerate Info - 'exposure_time', 'readout_time', 'framerate', 'frames_to_average'
+        # Camera Framerate Info - 'exposure_time', 'readout_time',
+        # 'framerate', 'frames_to_average'
         # Exposure time is currently for just the first active channel
         channels = self.microscope_state_dict["channels"]
         exposure_time = channels[list(channels.keys())[0]]["camera_exposure_time"]
@@ -360,12 +365,13 @@ class CameraSettingController(GUIController):
     def calculate_physical_dimensions(self):
         """Calculate size of the FOV in microns.
 
-        Calculates the size of the field of view according to the magnification of the system,
-        the physical size of the pixel, and the number of pixels.
+        Calculates the size of the field of view according to the magnification of the
+        system, the physical size of the pixel, and the number of pixels.
         update FOV_X and FOV_Y
 
-        TODO: Should make sure that this is updated before we run the tiling wizard.  Also can probably be done more
-        elegantly in a configuration file and dictionary structure.
+        TODO: Should make sure that this is updated before we run the tiling wizard.
+        Also can probably be done more elegantly in a configuration file and
+        dictionary structure.
         """
         # magnification == 'N/A' is a proxy for resolution == 'high'
         if (
@@ -419,8 +425,10 @@ class CameraSettingController(GUIController):
         """Calculate camera readout time.
 
 
-        TODO: Highly specific to Hamamatsu. Should find a way to pass this from the camera to here.
-        This should be moved to the camera device/API, ideally by calling a command from the camera.
+        TODO: Highly specific to Hamamatsu.
+        Should find a way to pass this from the camera to here.
+        This should be moved to the camera device/API,
+        ideally by calling a command from the camera.
         """
 
         h = 9.74436e-6  # Readout timing constant
@@ -435,29 +443,24 @@ class CameraSettingController(GUIController):
             #  Area sensor mode operation
             if self.trigger_source == 1:
                 # Internal Trigger Source
-                max_frame_rate = 1 / ((vn / 2) * h)
                 readout_time = exposure_time - ((vn / 2) * h)
 
             if self.trigger_active in [1, 2]:
                 #  External Trigger Source
                 #  Edge == 1, Level == 2
-                max_frame_rate = 1 / ((vn / 2) * h + exposure_time + 10 * h)
                 readout_time = exposure_time - ((vn / 2) * h + 10 * h)
 
             elif self.trigger_active == 3:
                 #  External Trigger Source
                 #  Synchronous Readout == 3
-                max_frame_rate = 1 / ((vn / 2) * h + 5 * h)
                 readout_time = exposure_time - ((vn / 2) * h + 5 * h)
 
         elif sensor_mode == "Light-Sheet":
             #  Progressive sensor mode operation
-            max_frame_rate = 1 / (exposure_time + (vn + 10) * h)
             readout_time = exposure_time - 1 / (exposure_time + (vn + 10) * h)
 
-        # return readout_time, max_frame_rate
+        # return readout_time
         self.framerate_widgets["readout_time"].set(readout_time)
-        self.framerate_widgets["max_framerate"].set(max_frame_rate * 1000)
 
     def update_number_of_pixels(self, *args):
         """Update the number of pixels in the ROI.

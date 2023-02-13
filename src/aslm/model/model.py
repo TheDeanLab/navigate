@@ -34,6 +34,7 @@
 import threading
 import logging
 import multiprocessing as mp
+import time
 
 # Third Party Imports
 
@@ -628,14 +629,15 @@ class Model:
         # whether acquire specific number of frames.
         count_frame = num_of_frames > 0
 
+        start_time = time.time()
+
         while not self.stop_acquisition:
             if self.ask_to_pause_data_thread:
                 self.pause_data_ready_lock.release()
                 self.pause_data_event.clear()
                 self.pause_data_event.wait()
-            frame_ids = (
-                self.active_microscope.camera.get_new_frame()
-            )  # This is the 500 ms wait for Hamamatsu
+            # This is the 500 ms wait for Hamamatsu
+            frame_ids = self.active_microscope.camera.get_new_frame()
             self.logger.info(
                 f"ASLM Model - Running data process, get frames {frame_ids}"
             )
@@ -648,6 +650,11 @@ class Model:
                     # frame coming
                     break
                 continue
+
+            acquired_frame_num += len(frame_ids)
+            stop_time = time.time()
+            frames_per_second = acquired_frame_num / (stop_time - start_time)
+            self.event_queue.put(("framerate", frames_per_second))
 
             wait_num = 10
 
@@ -667,7 +674,6 @@ class Model:
             self.logger.info(f"ASLM Model - Sent through pipe{frame_ids[0]}")
             self.show_img_pipe.send(frame_ids[0])
 
-            acquired_frame_num += len(frame_ids)
             if count_frame and acquired_frame_num >= num_of_frames:
                 self.logger.info("ASLM Model - Loop stop condition met.")
                 self.stop_acquisition = True

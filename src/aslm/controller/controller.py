@@ -1140,13 +1140,22 @@ class Controller:
                 self.view.settings.channels_tab.multipoint_frame.on_off.set(True)
             elif event == "ilastik_mask":
                 self.camera_view_controller.display_mask(value)
+
             elif event == "autofocus":
                 if hasattr(self, "af_popup_controller"):
                     self.af_popup_controller.display_plot(value)
+
             elif event == "stop":
                 break
+
             elif event == "update_stage":
                 self.update_stage_controller_silent(value)
+
+            elif event == "framerate":
+                self.camera_setting_controller.framerate_widgets["max_framerate"].set(
+                    value
+                )
+                # (value)
 
     def exit_program(self):
         """Exit the program.

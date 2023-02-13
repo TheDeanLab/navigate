@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -33,7 +34,6 @@ import tkinter as tk
 from tkinter import ttk
 from aslm.view.custom_widgets.popup import PopUp
 from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
-from aslm.view.custom_widgets.validation import ValidatedSpinbox
 import logging
 from aslm.tools.common_functions import build_ref_name
 
@@ -48,7 +48,7 @@ class MicroscopeSettingPopupWindow:
         # Creating popup window with this name and size/placement, PopUp is a
         # Toplevel window
         self.popup = PopUp(
-            root, "Microscope Settings", "+320+180", top=False, transient=False
+            root, "Configure Microscopes", "+320+180", top=False, transient=False
         )
 
         # Storing the content frame of the popup, this will be the parent of
@@ -79,20 +79,20 @@ class MicroscopeSettingPopupWindow:
         self.microscopes_frame.grid(row=0, column=1, sticky=tk.NSEW)
         button_frame.grid(row=1, column=1, sticky=tk.SE)
 
-        self.labels = ['Microscope Name']
+        self.labels = ["Microscope Name"]
         for microscope_name in microscope_info:
             for k in microscope_info[microscope_name].keys():
-                device = " ".join(map(lambda v: v.capitalize(), k.split('_')))
+                device = " ".join(map(lambda v: v.capitalize(), k.split("_")))
                 if device not in self.labels:
                     self.labels.append(device)
-        self.labels.append('Setting')
+        self.labels.append("Setting")
 
         for i, name in enumerate(self.labels):
-            l = ttk.Label(label_frame, text=name, padding=(2, 0, 0, 0))
+            row = ttk.Label(label_frame, text=name, padding=(2, 0, 0, 0))
             if i == 0:
-                l.grid(row=i, column=0, padx=(0, 5), pady=(5, 30))
+                row.grid(row=i, column=0, padx=(0, 5), pady=(5, 30))
             else:
-                l.grid(row=i, column=0, padx=(0, 5), pady=(0, 22))
+                row.grid(row=i, column=0, padx=(0, 5), pady=(0, 22))
 
         self.list_microscope_info(microscope_info)
 
@@ -114,8 +114,10 @@ class MicroscopeSettingPopupWindow:
             c += 1
             m_name = ttk.Label(frame, text=microscope_name, padding=(2, 0, 0, 0))
             m_name.grid(row=0, column=0, sticky=tk.NSEW, padx=(0, 5), pady=(5, 16))
-            for i in range(1, len(self.labels)-1):
-                device_ref_name = build_ref_name('_', *self.labels[i].lower().split(' '))
+            for i in range(1, len(self.labels) - 1):
+                device_ref_name = build_ref_name(
+                    "_", *self.labels[i].lower().split(" ")
+                )
                 entry = LabelInput(
                     parent=frame,
                     input_class=ttk.Entry,
@@ -131,15 +133,19 @@ class MicroscopeSettingPopupWindow:
                 parent=frame,
                 input_class=ttk.Combobox,
                 input_var=tk.StringVar(),
-                label_args={"padding": (0, 0, 5, 20)}
+                label_args={"padding": (0, 0, 5, 20)},
             )
-            combo.grid(row=len(self.labels), column=0, sticky=tk.SE, padx=(2, 5), pady=(2, 0))
+            combo.grid(
+                row=len(self.labels), column=0, sticky=tk.SE, padx=(2, 5), pady=(2, 0)
+            )
             self.inputs[f"{microscope_name}"] = combo
 
     # Getters
     def get_variables(self):
         """
-        This function returns a dictionary of all the variables that are tied to each widget name.
+        This function returns a dictionary of all the variables
+        that are tied to each widget name.
+
         The key is the widget name, value is the variable associated.
         """
         variables = {}

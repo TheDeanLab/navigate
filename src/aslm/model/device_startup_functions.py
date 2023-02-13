@@ -342,6 +342,7 @@ def start_stage(
         from aslm.model.devices.stages.stage_pi import PIStage
 
         return PIStage(microscope_name, device_connection, configuration, id)
+
     elif device_type == "Thorlabs":
         from aslm.model.devices.stages.stage_tl_kcube_inertial import TLKIMStage
 

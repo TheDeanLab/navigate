@@ -31,7 +31,7 @@
 
 # Standard Library imports
 import logging
-import importlib
+import importlib  # noqa: F401
 from multiprocessing.managers import ListProxy
 
 from aslm.model.device_startup_functions import (

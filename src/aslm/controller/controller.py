@@ -225,7 +225,7 @@ class Controller:
         self.additional_microscopes_configs = {}
 
         # Set view based on model.experiment
-        self.populate_experiment_setting()
+        self.populate_experiment_setting(in_initialize=True)
 
         # Camera View Tab
         self.initialize_cam_view()
@@ -552,7 +552,7 @@ class Controller:
             label="Camera offset and variance maps", command=popup_camera_map_setting
         )
 
-    def populate_experiment_setting(self, file_name=None):
+    def populate_experiment_setting(self, file_name=None, in_initialize=False):
         """Load experiment file and populate model.experiment and configure view.
 
         Confirms that the experiment file exists.
@@ -579,6 +579,11 @@ class Controller:
             f"{microscope_name} "
             f"{self.configuration['experiment']['MicroscopeState']['zoom']}"
         )
+
+        if in_initialize:
+            # Force stage update (should have happened in self.resolution_value.set())
+            ret_pos_dict = self.model.get_stage_position()
+            update_stage_dict(self, ret_pos_dict)
 
         self.acquire_bar_controller.populate_experiment_values()
         self.stage_controller.populate_experiment_values()
@@ -1010,9 +1015,8 @@ class Controller:
                     break
                 if not isinstance(image_id, int):
                     logger.debug(
-                        f"ASLM Controller - "
-                        f"Something wrong happened in additional microscope!, "
-                        f"{image_id}"
+                        f"ASLM Controller - Something wrong happened in additional "
+                        f"microscope!, {image_id}"
                     )
                     break
 

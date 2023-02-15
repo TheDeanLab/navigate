@@ -82,7 +82,9 @@ class ConstantVelocityAcquisition:
         step_size_mm = step_size_nm / 1*10**6  # 264 * 10^-6 mm
         camera_integration_time = 0.05  # 50 ms.
         stage_velocity = step_size_mm / camera_integration_time  # 5.28 * 10^-3 mm/s.
-        self.model.dev
+
+        # Set the x-axis of the ASI stage to operate at that velocity.
+        # self.model.active_microscope.stage
 
         # Set Stage Limits - Units in millimeters
         start_position = -55.2320

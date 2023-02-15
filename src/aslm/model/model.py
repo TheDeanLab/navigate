@@ -41,6 +41,9 @@ import time
 # Local Imports
 from aslm.model.concurrency.concurrency_tools import SharedNDArray
 from aslm.model.features.autofocus import Autofocus
+from aslm.model.features.constant_velocity_acquisition import (
+    ConstantVelocityAcquisition,
+)
 from aslm.model.features.image_writer import ImageWriter
 from aslm.model.features.common_features import (
     ChangeResolution,
@@ -217,6 +220,9 @@ class Model:
                 }
             ]
         )
+        # ASI Acquisition Mode
+        self.feature_list.append([{"name": ConstantVelocityAcquisition}])
+
 
         self.acquisition_modes_feature_setting = {
             "single": [{"name": PrepareNextChannel}],
@@ -501,6 +507,10 @@ class Model:
             """
             autofocus = Autofocus(self)
             autofocus.run(*args)
+
+        elif command == "constant_velocity_acquisition":
+            constant_velocity_acquisition = ConstantVelocityAcquisition(self)
+            constant_velocity_acquisition.run(*args)
 
         elif command == "load_feature":
             """

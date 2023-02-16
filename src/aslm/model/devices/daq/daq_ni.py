@@ -172,7 +172,6 @@ class NIDAQ(DAQBase):
                         sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
                         samps_per_chan=int(self.n_sample * n_timepoints),
                     )
-                    print("*** confocal projection waveform setting:", n_timepoints)
                 else:
                     self.analog_output_tasks[board].timing.cfg_samp_clk_timing(
                         rate=sample_rates[0],
@@ -300,7 +299,6 @@ class NIDAQ(DAQBase):
             pass
 
     def update_analog_task(self, board_name):
-        print("*** board name:", board_name)
         # if there is no such analog task, it means it's not acquiring and nothing needs to do.        
         if board_name not in self.analog_output_tasks:
             return False
@@ -314,7 +312,6 @@ class NIDAQ(DAQBase):
         try:
             self.analog_output_tasks[board_name].wait_until_done()
             self.analog_output_tasks[board_name].stop()
-            print("**** update the task!!!")
 
             # Write values to board
             waveforms = np.vstack(
@@ -325,8 +322,8 @@ class NIDAQ(DAQBase):
                 ]
             ).squeeze()
             self.analog_output_tasks[board_name].write(waveforms)
-        except:
-            print("*** daq error")
+        except Exception as e:
+            print(f"*** daq error {e} happens!")
 
         self.is_updating_analog_task = False
         self.wait_to_run_lock.release()

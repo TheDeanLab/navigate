@@ -121,37 +121,11 @@ class GalvoNIStage(StageBase):
         """Reports the position for all axes, and create position dictionary."""
         self.create_position_dict()
         return self.position_dict
-
-    def move_axis_absolute(self, axis, axis_num, move_dictionary):
-        """Implement movement logic along a single axis.
-
-        Example calls:
-
-        Parameters
-        ----------
-        axis : str
-            An axis prefix in move_dictionary.
-            For example, axis='x' corresponds to 'x_abs', 'x_min', etc.
-        axis_num : int
-            The corresponding number of this axis on a PI stage.
-        move_dictionary : dict
-            A dictionary of values required for movement.
-            Includes 'x_abs', 'x_min', etc. for one or more axes.
-            Expect values in micrometers, except for theta, which is in degrees.
-
-        Returns
-        -------
-        bool
-            Was the move successful?
-        """
+    
+    def calculate_waveform(self):
         self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
-        axis_abs = self.get_abs_position(axis, move_dictionary)
-        if axis_abs == -1e50:
-            return False
-
-        volts = eval(self.volts_per_micron, {"x": axis_abs})
-
         microscope_state = self.configuration["experiment"]["MicroscopeState"]
+        volts = eval(self.volts_per_micron, {"x": self.configuration["experiment"]["StageParameters"][self.axes[0]]})
 
         for channel_key in microscope_state["channels"].keys():
             # channel includes 'is_selected', 'laser', 'filter', 'camera_exposure'...
@@ -256,6 +230,84 @@ class GalvoNIStage(StageBase):
                         sweep_time=self.sweep_time,
                         amplitude=volts,
                     )
+                
+                self.waveform_dict[channel_key][
+                    self.waveform_dict[channel_key] > self.galvo_max_voltage
+                ] = self.galvo_max_voltage
+                self.waveform_dict[channel_key][
+                    self.waveform_dict[channel_key] < self.galvo_min_voltage
+                ] = self.galvo_min_voltage
+
+        self.daq.analog_outputs[self.axes_channels[0]] = {
+            "sample_rate": self.sample_rate,
+            "samples": self.samples,
+            "trigger_source": self.trigger_source,
+            "waveform": self.waveform_dict,
+        }
+        return self.waveform_dict
+
+    def move_axis_absolute(self, axis, axis_num, move_dictionary):
+        """Implement movement logic along a single axis.
+
+        Example calls:
+
+        Parameters
+        ----------
+        axis : str
+            An axis prefix in move_dictionary.
+            For example, axis='x' corresponds to 'x_abs', 'x_min', etc.
+        axis_num : int
+            The corresponding number of this axis on a PI stage.
+        move_dictionary : dict
+            A dictionary of values required for movement.
+            Includes 'x_abs', 'x_min', etc. for one or more axes.
+            Expect values in micrometers, except for theta, which is in degrees.
+
+        Returns
+        -------
+        bool
+            Was the move successful?
+        """
+        self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
+        axis_abs = self.get_abs_position(axis, move_dictionary)
+        if axis_abs == -1e50:
+            return False
+
+        volts = eval(self.volts_per_micron, {"x": axis_abs})
+
+        microscope_state = self.configuration["experiment"]["MicroscopeState"]
+
+        for channel_key in microscope_state["channels"].keys():
+            # channel includes 'is_selected', 'laser', 'filter', 'camera_exposure'...
+            channel = microscope_state["channels"][channel_key]
+
+            # Only proceed if it is enabled in the GUI
+            if channel["is_selected"] is True:
+
+                # Get the Waveform Parameters
+                # Assumes Remote Focus Delay < Camera Delay.  Should Assert.
+                exposure_time = channel["camera_exposure_time"] / 1000
+                self.sweep_time = exposure_time + exposure_time * (
+                    (self.camera_delay_percent + self.remote_focus_ramp_falling) / 100
+                )
+                readout_time = 0  # TODO: find a way to pass this to the stages
+                if readout_time > 0:
+                    # This addresses the dovetail nature of the
+                    # camera readout in normal mode. The camera reads middle
+                    # out, and the delay in start of the last lines
+                    # compared to the first lines causes the exposure
+                    # to be net longer than exposure_time.
+                    # This helps the galvo keep sweeping for the full camera
+                    # exposure time.
+                    self.sweep_time += readout_time
+                self.samples = int(self.sample_rate * self.sweep_time)
+
+                # Calculate the Waveforms
+                self.waveform_dict[channel_key] = dc_value(
+                    sample_rate=self.sample_rate,
+                    sweep_time=self.sweep_time,
+                    amplitude=volts,
+                )
                 self.waveform_dict[channel_key][
                     self.waveform_dict[channel_key] > self.galvo_max_voltage
                 ] = self.galvo_max_voltage
@@ -272,6 +324,7 @@ class GalvoNIStage(StageBase):
 
         # TODO: Force an update of the waveform after writing,
         #  if in live mode or z-stack.
+        self.daq.update_analog_task(self.axes_channels[axis_num].split("/")[0])
 
         return True
 

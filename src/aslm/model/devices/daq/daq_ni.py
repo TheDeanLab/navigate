@@ -32,6 +32,7 @@
 
 # Standard Imports
 import logging
+from threading import Lock
 
 # Third Party Imports
 import nidaqmx
@@ -69,6 +70,9 @@ class NIDAQ(DAQBase):
         self.analog_outputs = {}  # keep track of analog outputs and their waveforms
         self.analog_output_tasks = {}
         self.n_sample = None
+        self.current_channel_key = ""
+        self.is_updating_analog_task = False
+        self.wait_to_run_lock = Lock()
 
     def __del__(self):
         if self.camera_trigger_task is not None:
@@ -219,6 +223,11 @@ class NIDAQ(DAQBase):
         self.create_camera_task(exposure_time)
         self.create_analog_output_tasks(channel_key)
 
+        self.current_channel_key = channel_key
+        self.is_updating_analog_task = False
+        if self.wait_to_run_lock.locked():
+            self.wait_to_run_lock.release()
+
     def run_acquisition(self):
         """Run DAQ Acquisition.
 
@@ -226,6 +235,11 @@ class NIDAQ(DAQBase):
         The master trigger initiates all other tasks via a shared trigger
         For this to work, all analog output and counter tasks have to be started so that
         they are waiting for the trigger signal."""
+        # wait if writing analog tasks
+        if self.is_updating_analog_task:
+            self.wait_to_run_lock.acquire()
+            self.wait_to_run_lock.release()
+
         self.camera_trigger_task.start()
         for task in self.analog_output_tasks.values():
             task.start()
@@ -255,6 +269,9 @@ class NIDAQ(DAQBase):
         except (AttributeError, nidaqmx.errors.DaqError):
             pass
 
+        if self.wait_to_run_lock.locked():
+            self.wait_to_run_lock.release()
+
     def enable_microscope(self, microscope_name):
         if microscope_name != self.microscope_name:
             self.microscope_name = microscope_name
@@ -278,3 +295,30 @@ class NIDAQ(DAQBase):
             self.laser_switching_task.write(switching_on_state, auto_start=True)
         except KeyError:
             pass
+
+    def update_analog_task(self, board_name):
+        # if there is no such analog task, it means it's not acquiring and nothing needs to do.        
+        if board_name not in self.analog_output_tasks:
+            return False
+        # can't update an analog task while updating one.
+        if self.is_updating_analog_task:
+            return False
+        
+        self.wait_to_run_lock.acquire()
+        self.is_updating_analog_task = True
+
+        self.analog_output_tasks[board_name].wait_until_done()
+        self.analog_output_tasks[board_name].stop()
+
+        # Write values to board
+        waveforms = np.vstack(
+            [
+                v["waveform"][self.current_channel_key][:self.n_sample]
+                for k, v in self.analog_outputs.items()
+                if k.split("/")[0] == board_name
+            ]
+        ).squeeze()
+        self.analog_output_tasks[board_name].write(waveforms)
+
+        self.is_updating_analog_task = False
+        self.wait_to_run_lock.release()

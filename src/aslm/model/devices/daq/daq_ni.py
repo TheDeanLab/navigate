@@ -172,6 +172,7 @@ class NIDAQ(DAQBase):
                         sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
                         samps_per_chan=int(self.n_sample * n_timepoints),
                     )
+                    print("*** confocal projection waveform setting:", n_timepoints)
                 else:
                     self.analog_output_tasks[board].timing.cfg_samp_clk_timing(
                         rate=sample_rates[0],
@@ -272,6 +273,8 @@ class NIDAQ(DAQBase):
         if self.wait_to_run_lock.locked():
             self.wait_to_run_lock.release()
 
+        self.analog_output_tasks = {}
+
     def enable_microscope(self, microscope_name):
         if microscope_name != self.microscope_name:
             self.microscope_name = microscope_name
@@ -297,6 +300,7 @@ class NIDAQ(DAQBase):
             pass
 
     def update_analog_task(self, board_name):
+        print("*** board name:", board_name)
         # if there is no such analog task, it means it's not acquiring and nothing needs to do.        
         if board_name not in self.analog_output_tasks:
             return False
@@ -307,18 +311,22 @@ class NIDAQ(DAQBase):
         self.wait_to_run_lock.acquire()
         self.is_updating_analog_task = True
 
-        self.analog_output_tasks[board_name].wait_until_done()
-        self.analog_output_tasks[board_name].stop()
+        try:
+            self.analog_output_tasks[board_name].wait_until_done()
+            self.analog_output_tasks[board_name].stop()
+            print("**** update the task!!!")
 
-        # Write values to board
-        waveforms = np.vstack(
-            [
-                v["waveform"][self.current_channel_key][:self.n_sample]
-                for k, v in self.analog_outputs.items()
-                if k.split("/")[0] == board_name
-            ]
-        ).squeeze()
-        self.analog_output_tasks[board_name].write(waveforms)
+            # Write values to board
+            waveforms = np.vstack(
+                [
+                    v["waveform"][self.current_channel_key][:self.n_sample]
+                    for k, v in self.analog_outputs.items()
+                    if k.split("/")[0] == board_name
+                ]
+            ).squeeze()
+            self.analog_output_tasks[board_name].write(waveforms)
+        except:
+            print("*** daq error")
 
         self.is_updating_analog_task = False
         self.wait_to_run_lock.release()

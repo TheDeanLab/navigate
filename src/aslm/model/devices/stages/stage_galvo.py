@@ -155,7 +155,7 @@ class GalvoNIStage(StageBase):
                 # Calculate the Waveforms
                 if (
                     self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-                    == "projection"
+                    == "z-stack"
                 ):
                     z_start = self.configuration["experiment"]["MicroscopeState"][
                         "abs_z_start"

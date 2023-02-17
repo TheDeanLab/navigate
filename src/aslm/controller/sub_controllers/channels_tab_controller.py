@@ -201,7 +201,10 @@ class ChannelsTabController(GUIController):
         --------
         >>> self.update_offset_start()
         """
-        offset_start = float(self.conpro_acq_vals["offset_start"].get())
+        try:
+            offset_start = float(self.conpro_acq_vals["offset_start"].get())
+        except tk._tkinter.TclError:
+            offset_start = 0
         self.microscope_state_dict["offset_start"] = offset_start
         logger.info(f"Controller updated offset start: {offset_start}")
 
@@ -221,7 +224,10 @@ class ChannelsTabController(GUIController):
         --------
         >>> self.update_offset_end()
         """
-        offset_end = float(self.conpro_acq_vals["offset_end"].get())
+        try:
+            offset_end = float(self.conpro_acq_vals["offset_end"].get())
+        except tk._tkinter.TclError:
+            offset_end = 0
         self.microscope_state_dict["offset_end"] = offset_end
         logger.info(f"Controller updated offset end: {offset_end}")
 
@@ -241,7 +247,10 @@ class ChannelsTabController(GUIController):
         --------
         >>> self.update_plane_number()
         """
-        n_plane = float(self.conpro_acq_vals["n_plane"].get())
+        try:
+            n_plane = float(self.conpro_acq_vals["n_plane"].get())
+        except tk._tkinter.TclError:
+            n_plane = 1
         self.microscope_state_dict["n_plane"] = n_plane
         logger.info(f"Controller updated plane number: {n_plane}")
 
@@ -261,7 +270,10 @@ class ChannelsTabController(GUIController):
         --------
         >>> self.update_scanrange()
         """
-        scanrange = float(self.conpro_acq_vals["scanrange"].get())
+        try:
+            scanrange = float(self.conpro_acq_vals["scanrange"].get())
+        except tk._tkinter.TclError:
+            scanrange = 0
         self.microscope_state_dict["scanrange"] = scanrange
         logger.info(f"Controller updated scan range: {scanrange}")
 

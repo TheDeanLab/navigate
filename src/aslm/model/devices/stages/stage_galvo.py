@@ -321,9 +321,7 @@ class GalvoNIStage(StageBase):
             "trigger_source": self.trigger_source,
             "waveform": self.waveform_dict,
         }
-
-        # TODO: Force an update of the waveform after writing,
-        #  if in live mode or z-stack.
+        # update analog waveform
         self.daq.update_analog_task(self.axes_channels[axis_num].split("/")[0])
 
         return True

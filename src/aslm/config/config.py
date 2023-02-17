@@ -83,7 +83,7 @@ def get_configuration_paths():
         os.mkdir(configuration_directory)
 
     # Configuration files should be stored in this directory
-    configuration_path = Path.joinpath(configuration_directory, "configuration.yaml")
+    configuration_path = Path.joinpath(configuration_directory, "configuration_old.yaml")
     experiment_path = Path.joinpath(configuration_directory, "experiment.yml")
     etl_constants_path = Path.joinpath(configuration_directory, "etl_constants.yml")
     rest_api_path = Path.joinpath(configuration_directory, "rest_api_config.yml")

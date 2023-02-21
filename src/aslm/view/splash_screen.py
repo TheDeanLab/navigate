@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -46,6 +47,23 @@ class SplashScreen(tk.Toplevel):
     """
 
     def __init__(self, root, imgDir, *args, **kargs):
+        """Initialize the splash screen
+
+        Parameters
+        ----------
+        root : tk window
+            Top level GUI.
+        imgDir : str
+            Path to the splash screen image.
+        *args : tk args
+            Tk args.
+        **kargs : tk kargs
+            Tk kargs.
+
+        Returns
+        -------
+        None
+        """
         tk.Toplevel.__init__(self, root)
         # without navigation panel
         self.overrideredirect(True)
@@ -55,9 +73,11 @@ class SplashScreen(tk.Toplevel):
             img = tk.PhotoImage(file=img_dir)
             w, h = img.width(), img.height()  # width, height of the image
             loading_label = tk.Label(self, image=img)
-        except:
+        except tk.TclError:
             w, h = 300, 100
             loading_label = tk.Label(self, text="Loading ASLM Software ...")
+
+        # set the window size
         loading_label.pack()
 
         # get screen width and height

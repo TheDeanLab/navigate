@@ -38,6 +38,7 @@ from tkinter import filedialog, messagebox
 import multiprocessing as mp
 import threading
 import sys
+import atexit
 
 # Third Party Imports
 
@@ -88,6 +89,20 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
+def destroy_splash_screen(root, splash_screen):
+    """Destroy splash screen and show main screen
+
+    Parameters
+    ----------
+    root : Tk top-level widget.
+        Tk.tk GUI instance.
+    splash_screen : Tk top-level widget.
+        Tk.tk GUI instance.
+    """
+    splash_screen.destroy()
+    root.deiconify()
+
+
 class Controller:
     """ASLM Controller
 
@@ -122,13 +137,15 @@ class Controller:
         use_gpu,
         args,
     ):
+        # Register to destroy the splash screen when the program exits
+        atexit.register(destroy_splash_screen, root=root, splash_screen=splash_screen)
 
         # Create a thread pool
         self.threads_pool = SynchronizedThreadPool()
-        self.event_queue = mp.Queue(
-            100
-        )  # pass events from the model to the view via controller
+
+        # Event queue passes events from the model to the view via controller
         # accepts tuples, ('event_name', value)
+        self.event_queue = mp.Queue(100)
 
         # Create a shared memory manager
         self.manager = Manager()
@@ -230,9 +247,8 @@ class Controller:
         # Camera View Tab
         self.initialize_cam_view()
 
-        # destroy splash screen and show main screen
-        splash_screen.destroy()
-        root.deiconify()
+        # Destroy the Splash Screen
+        destroy_splash_screen(root, splash_screen)
 
     def update_buffer(self):
         """Update the buffer size according to the camera

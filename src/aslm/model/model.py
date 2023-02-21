@@ -219,11 +219,13 @@ class Model:
         self.feature_list.append(
             [
                 (
-                    {"name": PrepareNextChannel},
-                    {
-                        "name": LoopByCount,
-                        "args": ("experiment.MicroscopeState.selected_channels",),
-                    },
+                    (
+                        {"name": PrepareNextChannel},
+                        {
+                            "name": LoopByCount,
+                            "args": ("experiment.MicroscopeState.selected_channels",),
+                        },
+                    ),
                     {
                         "name": LoopByCount,
                         "args": ("experiment.MicroscopeState.timepoints",),

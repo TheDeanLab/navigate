@@ -530,6 +530,7 @@ class Controller:
             "Threshold",
             "Ilastik Segmentation",
             "Volume Search",
+            "Time Series",
         ]
         self.feature_id_val = tkinter.IntVar(0)
         for i in range(len(feature_list)):

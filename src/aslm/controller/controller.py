@@ -923,6 +923,7 @@ class Controller:
         )
 
         self.model.run_command(command)
+        self.acquire_bar_controller.view.acquire_btn.configure(state="normal")
 
         self.camera_view_controller.initialize_non_live_display(
             self.data_buffer,

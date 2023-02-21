@@ -310,7 +310,9 @@ class NIDAQ(DAQBase):
         self.is_updating_analog_task = True
 
         try:
-            self.analog_output_tasks[board_name].wait_until_done()
+            # this function waits only happens when interacting through GUI in continuous mode,
+            # updating an analog task happens after the task is done when running a feature, so it will check and return immediately.
+            self.analog_output_tasks[board_name].wait_until_done(timeout=1.0)
             self.analog_output_tasks[board_name].stop()
 
             # Write values to board

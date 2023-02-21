@@ -99,7 +99,11 @@ def destroy_splash_screen(root, splash_screen):
     splash_screen : Tk top-level widget.
         Tk.tk GUI instance.
     """
-    splash_screen.destroy()
+
+    if hasattr(root, "splash_screen"):
+        splash_screen.destroy()
+    else:
+        pass
     root.deiconify()
 
 

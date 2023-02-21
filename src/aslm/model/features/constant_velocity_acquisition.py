@@ -39,11 +39,10 @@ import numpy as np
 
 
 class ConstantVelocityAcquisition:
-    """ Class for acquiring data using the ASI internal encoder. """
+    """Class for acquiring data using the ASI internal encoder."""
 
     def __init__(self, model):
         self.model = model
-
 
         self.config_table = {
             "signal": {
@@ -71,50 +70,82 @@ class ConstantVelocityAcquisition:
         None
         """
 
-        # Calculate Stage Velocity and set it.
+        # Change hardware Triggering.
+        # Default run_acquisition in daq_ni triggers on the rising edge of the
+        # trigger_source: /PXI6259/PFI0
+        # When 5V is received at the trigger_source, the acquisition starts.
+
+        # Inject new trigger source.
+        self.model.active_microscope.daq.trigger_source = "/PXI6259/PFI1"
+
+        # Create all of our tasks so that they are triggered by the new trigger source.
+        # get the current channel - only operating in a per-stack mode.
+        channel = 0
+        # get the current exposure time for that channel.
+        exposure_time = 0.05
+        self.model.active_microscope.daq.prepare_acquisition(channel, exposure_time)
+
+        # Prepare the stage for a constant scan velocity mode.
+        # Calculate Stage Velocity
         # Rotary encoder has a resolution of 45,396 counts/mm, or 1 count per 22 nm.
         # But it is in quadrature, so I thought it was actually 4x.
-        minimum_encoder_divide = 88
+        minimum_encoder_divide = 88  # Smallest step size in nanometers is 88 nm.
+
+        # Get step size from the GUI. For now, assume 160 nm.
+        # Default units should probably be microns I believe. Confirm.
         desired_sampling = 160  # nm
+
+        # The stage is at 45 degrees relative to the illumination and detection paths.
         step_size = desired_sampling * np.sqrt(2)  # 45 degrees, 226 nm
-        desired_encoder_divide = np.ceil(step_size / minimum_encoder_divide) # 3
-        step_size_nm = desired_encoder_divide * minimum_encoder_divide # 264 nm.
-        step_size_mm = step_size_nm / 1*10**6  # 264 * 10^-6 mm
-        camera_integration_time = 0.05  # 50 ms.
-        stage_velocity = step_size_mm / camera_integration_time  # 5.28 * 10^-3 mm/s.
 
-        # Set the x-axis of the ASI stage to operate at that velocity.
-        # self.model.active_microscope.stage
+        # Calculate the desired encoder divide. Must be multiple of
+        # minimum_encoder_divide. 2.6 encoder divides, round up to 3.
+        desired_encoder_divide = np.ceil(step_size / minimum_encoder_divide)
 
+        # Calculate the actual step size in nanometers. 264 nm.
+        step_size_nm = desired_encoder_divide * minimum_encoder_divide
+
+        # Calculate the actual step size in millimeters. 264 * 10^-6 mm
+        step_size_mm = step_size_nm / 1 * 10**6  # 264 * 10^-6 mm
+
+        # Calculate the stage velocity in mm/seconds. 5.28 * 10^-3 s
+        stage_velocity = step_size_mm / exposure_time
+
+        # Set the start and end position of the scan in millimeters.
+        # Retrieved from the GUI.
         # Set Stage Limits - Units in millimeters
         start_position = -55.2320
         stop_position = -54.2320
 
-        box.set_speed(X=0.01, y=0.02)
+        # Set the x-axis of the ASI stage to operate at that velocity.
+        # uses the scanr command from the TigerASI repository that I mention in Github
+        # Need to add a similar command to the ASI stage class.
+        self.model.active_microscope.stage.set_speed(X=stage_velocity, y=1)
 
-        box.scanr(scan_start_mm=12.7, scan_stop_mm=10.7, pulse_interval_enc_ticks=8)
+        # Configure the encoder to operate in constant velocity mode.
+        # Must add similar scanr functionality to our ASI stage class.
+        self.model.active_microscope.stage.scanr(
+            scan_start_mm=start_position,
+            scan_stop_mm=stop_position,
+            pulse_interval_enc_ticks=desired_encoder_divide,
+        )
 
-        # Change hardware Triggering
+        # Start the daq acquisition.  Basically places all of the waveforms in a ready
+        # state so that they will be run one time when the trigger is received.
+        self.model.active_microscope.daq.run_acquisition()
 
+        # Start the stage scan.  Also get this functionality into the ASI stage class.
+        self.model.active_microscope.stage.start_scan()
 
+        # Stage starts to move and sends a trigger to the DAQ.
+        # HOw do we know how many images to acquire?
 
+    def cleanup(self):
+        """Clean up the constant velocity acquisition.
 
-        settings = self.model.configuration["experiment"]["AutoFocusParameters"]
-        # self.focus_pos = args[2]  # Current position
-        self.focus_pos = self.model.configuration["experiment"]["StageParameters"]["f"]
-        # self.focus_pos = self.model.get_stage_position()['f_pos']
-        self.total_frame_num = self.get_autofocus_frame_num()  # Total frame num
-        self.coarse_steps, self.init_pos = 0, 0
-        if settings["fine_selected"]:
-            self.fine_step_size = int(settings["fine_step_size"])
-            fine_steps, self.fine_pos_offset = self.get_steps(
-                int(settings["fine_range"]), self.fine_step_size
-            )
-            self.init_pos = self.focus_pos - self.fine_pos_offset
-        if settings["coarse_selected"]:
-            self.coarse_step_size = int(settings["coarse_step_size"])
-            self.coarse_steps, coarse_pos_offset = self.get_steps(
-                int(settings["coarse_range"]), self.coarse_step_size
-            )
-            self.init_pos = self.focus_pos - coarse_pos_offset
-        self.signal_id = 0
+        Need to reset the trigger source to the default.
+
+        """
+        self.model.active_microscope.daq.trigger_source = self.configuration[
+            "configuration"
+        ]["microscopes"][self.microscope_name]["daq"]["trigger_source"]

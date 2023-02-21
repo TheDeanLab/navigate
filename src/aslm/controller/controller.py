@@ -861,6 +861,7 @@ class Controller:
             self.sloppy_stop()
             self.set_mode_of_sub("stop")
             self.acquire_bar_controller.stop_progress_bar()
+            self.acquire_bar_controller.view.acquire_btn.configure(state="normal")
 
         elif command == "exit":
             """Exit the program."""

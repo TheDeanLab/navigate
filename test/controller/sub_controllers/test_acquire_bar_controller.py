@@ -521,6 +521,7 @@ class TestAcquireBarController:
         """
 
         # Setup Gui for test
+        self.acquire_bar_controller.view.acquire_btn.configure(state="normal")
         self.acquire_bar_controller.view.acquire_btn.configure(text=text)
         self.acquire_bar_controller.is_save = save
         self.acquire_bar_controller.set_mode(mode)

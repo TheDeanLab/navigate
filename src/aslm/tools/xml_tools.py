@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -79,8 +80,7 @@ def dict_to_xml(d, tag=None):
 
 
 def parse_xml(root: ET.Element) -> dict:
-    """
-    Parse an XML ElementTree.
+    """Parse an XML ElementTree.
 
     TODO: Does not account for namespacing. See OME-XML.
 

@@ -35,8 +35,7 @@ import numpy as np
 
 
 def volume_from_sdf(sdf, N, pixel_size=1, subsample_z=1):
-    """
-    Generate an (N, N, N) image from sdf.
+    """Generate an (N, N, N) image from sdf.
 
     Parameters
     ----------
@@ -71,8 +70,7 @@ def volume_from_sdf(sdf, N, pixel_size=1, subsample_z=1):
 
 
 def sphere(p, R):
-    """
-    Signed distance function for a sphere.
+    """Signed distance function for a sphere.
 
     Parameters
     ----------
@@ -90,8 +88,7 @@ def sphere(p, R):
 
 
 def box(p, w):
-    """
-    Signed distance function for a box.
+    """Signed distance function for a box.
 
     Parameters
     ----------

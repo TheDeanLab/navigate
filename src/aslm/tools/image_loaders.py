@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -36,21 +37,30 @@ import glob
 
 class LazyTiff:
     def __init__(self, fp):
-        """
-        Lazy-loads a folder containing a sequence of TIFF files using PIL.
+        """Lazy-loads a folder containing a sequence of TIFF files using PIL.
+
         Assumes all TIFF files are single slices, with the same x and y dims.
-
-        Usage is, e.g.
-
-        low_res_fp = '/endosome/archive/MIL/marin/Zach/Lung/Alignment/AntiRFP/2022-07-02/Cell_001'
-
-        low_res = LazyTiff(fp)
-        imshow(low_res[:,:,500])
 
         Parameters
         ----------
         fp : str
             Path to folder containting sequence of TIFF (.tif) files.
+
+        Returns
+        -------
+        LazyTiff
+            A LazyTiff object that can be indexed like a numpy array.
+
+        Raises
+        ------
+        FileNotFoundError
+            If there are no TIFF files in the folder.
+
+        Examples
+        --------
+        >>> low_res_fp = '~/2022-07-02/Cell_001'
+        >>> low_res = LazyTiff(fp)
+        >>> imshow(low_res[:,:,500])
         """
 
         # How many images in this sequence?
@@ -67,10 +77,32 @@ class LazyTiff:
 
     @property
     def shape(self):
+        """Shape of the image sequence.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        tuple
+            Shape of the image sequence.
+        """
         return (self._width, self._height, self._n_files)
 
     def __getitem__(self, keys):
-        """Numpy slicing access."""
+        """Custom __getitem__ for numpy slicing access.
+
+        Parameters
+        ----------
+        keys : tuple
+            Tuple of indices to access. Can be 1, 2, or 3 indices.
+
+        Returns
+        -------
+        np.ndarray
+            The image slice.
+        """
 
         if not isinstance(keys, tuple):
             keys = (keys,)

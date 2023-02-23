@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -36,27 +37,37 @@ Environment setup instructions:
     pip install pyopengltk
 """
 
+# Standard Library Imports
 import time
 import tkinter as tk
-import numpy as np
-
-from PIL import Image, ImageTk
 import logging
+
+# Third Party Imports
+import numpy as np
+from PIL import Image, ImageTk
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
+
+# Local Imports
 
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from matplotlib.figure import Figure
-import matplotlib as mpl
-
-# import vispy
-# from vispy import scene
-# from vispy.app import use_app
-
 
 def pil_gui_test(arr):
-    # https://stackoverflow.com/questions/52459277/convert-a-c-or-numpy-array-to-a-tkinter-photoimage-with-a-minimum-number-of-copi
+    """Benchmark PIL image display
+
+    Parameters
+    ----------
+    arr : np.ndarray
+        Image array to display
+
+    Returns
+    -------
+    None
+    """
+    # https://stackoverflow.com/questions/52459277/convert-a-c-or-numpy-array-
+    # to-a-tkinter-photoimage-with-a-minimum-number-of-copi
 
     root = tk.Tk()
 
@@ -72,6 +83,17 @@ def pil_gui_test(arr):
 
 
 def matplotlib_gui_test(arr):
+    """Benchmark matplotlib image display
+
+    Parameters
+    ----------
+    arr : np.ndarray
+        Image array to display
+
+    Returns
+    -------
+    None
+    """
     # https://matplotlib.org/3.1.0/gallery/user_interfaces/embedding_in_tk_sgskip.html
 
     root = tk.Tk()

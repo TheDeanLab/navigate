@@ -29,11 +29,6 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-"""
-This holds functions commonly used to interact with the Multiposition Pandas Table in
-the GUI
-
-"""
 
 import numpy as np
 import pandas as pd
@@ -41,6 +36,18 @@ from math import ceil
 
 
 def sign(x):
+    """Return the sign of x.
+
+    Parameters
+    ----------
+    x : float
+        The number to be signed.
+
+    Returns
+    -------
+    int
+        The sign of x.
+    """
     return -1 if x < 0 else 1  # (1 if x > 0 else 0)
 
 
@@ -198,8 +205,7 @@ def calc_num_tiles(dist, overlap, roi_length):
 
 
 def update_table(table, pos, append=False):
-    """
-    Updates and redraws table based on given list. List is converted to a pandas
+    """Updates and redraws table based on given list. List is converted to a pandas
     dataframe before setting data in table.
 
     Parameters

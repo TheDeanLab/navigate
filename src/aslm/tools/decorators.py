@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -33,8 +34,17 @@ from time import time
 
 
 def function_timer(func):
-    """
-    Decorator for evaluating the duration of time necessary to execute a statement.
+    """Decorator for evaluating the duration of time necessary to execute a statement.
+
+    Parameters
+    ----------
+    func : function
+        The function to be timed.
+
+    Returns
+    -------
+    wrap_func : function
+        The wrapped function.
     """
 
     def wrap_func(*args, **kwargs):

@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -49,8 +50,7 @@ def make_measurement(
     sensitivity=1000,
     current_excit_val=0.004,
 ):
-    """
-    Measure samples from a NIDAQ accelerometer.
+    """Measure samples from a NIDAQ accelerometer.
 
     Parameters
     ----------
@@ -102,8 +102,7 @@ def make_measurement(
 
 
 def calculate_single_sided_spectrum(data, sampling_frequency):
-    """
-    Convert a set of samples into a single-sided frequency power spectrum.
+    """Convert a set of samples into a single-sided frequency power spectrum.
 
     TODO: Support when data is list of lists.
 
@@ -136,18 +135,60 @@ def calculate_single_sided_spectrum(data, sampling_frequency):
 
 
 def fast_moving_average(data, n=3):
+    """Calculate the moving average of a set of samples.
+
+    Parameters
+    ----------
+    data : list
+        List of sample values.
+    n : int
+        Number of samples to average over.
+
+    Returns
+    -------
+    np.array
+        Moving average of data.
+    """
     ret = np.cumsum(data)  # cumulative sum
     ret[n:] = ret[n:] - ret[:-n]  # sum of n previous points
     return ret[(n - 1) :] / n  # averaged
 
 
 def moving_average(data, n=3):
+    """Calculate the moving average of a set of samples via convolution.
+
+    Parameters
+    ----------
+    data : list
+        List of sample values.
+    n : int
+        Number of samples to average over.
+
+    Returns
+    -------
+    np.array
+        Moving average of data.
+    """
     return np.convolve(data, np.ones(n), "valid") / n
 
 
 def plot_frequency_response(frequency_axis, single_sided_spectrum, ax=None, title=None):
-    """
-    Display a frequency response plot.
+    """Display a frequency response plot.
+
+    Parameters
+    ----------
+    frequency_axis : np.array
+        Frequency bins for single_sided_spectrum
+    single_sided_spectrum : np.array
+        Single-sided frequency power spectrum of samples in data
+    ax : matplotlib.axes.Axes
+        Axes to plot on.
+    title : str
+        Title for plot.
+
+    Returns
+    -------
+    None
     """
     if ax is None:
         fig, ax = plt.subplots()

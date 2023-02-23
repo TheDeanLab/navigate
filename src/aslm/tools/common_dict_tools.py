@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -29,25 +30,35 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-"""
-This stores functions that are update the dictionary common to aslm.model and aslm.controller.
-"""
-
 
 def update_settings_common(target, args):
-    """
-    Update dictionary entries common to the model and controller. This helps us percolate changes through the
-    copies of the dictionaries in each major object.
+    """Update dictionary entries common to the model and controller.
+
+    This helps us percolate changes through the copies of the dictionaries in each
+    major object.
+
+    Parameters
+    ----------
+    target : aslm.model.Model or aslm.controller.Controller
+        The object that is being updated.
+    args : list
+        The list of arguments that are being passed to the function.
+
+    Returns
+    -------
+    None
     """
     if args[0] == "channel":
         target.configuration["experiment"]["MicroscopeState"]["channels"] = args[1]
 
     if args[0] == "resolution":
         """
-        args[1] is a dictionary that includes 'resolution_mode': 'low', 'zoom': '1x', 'laser_info': ...
+        args[1] is a dictionary that includes 'resolution_mode': 'low', 'zoom': '1x',
+        'laser_info': ...
         ETL popup window updating the self.etl_constants.
         Passes new self.etl_constants to the self.model.daq
-        TODO: Make sure the daq knows which etl data to use based upon wavelength, zoom, resolution mode, etc.
+        TODO: Make sure the daq knows which etl data to use based upon wavelength, zoom,
+        resolution mode, etc.
         """
         updated_settings = args[1]
         resolution_mode = updated_settings["resolution_mode"]
@@ -62,13 +73,6 @@ def update_settings_common(target, args):
             target.configuration["etl_constants"]["ETLConstants"]["high"][
                 zoom
             ] = laser_info
-        # if target.verbose:
-        #     print(target.etl_constants['ETLConstants']['low'][zoom])
-
-        # Modify DAQ to pull the initial values from the waveform_constants.yml file, or be passed it from the model.
-        # Pass to the self.model.daq to
-        #             value = self.resolution_info['ETLConstants'][self.resolution][self.mag][laser][remote_focus_name]
-        # print(args[1])
 
     if args[0] == "galvo":
         ((param, value),) = args[1].items()
@@ -81,6 +85,19 @@ def update_settings_common(target, args):
 
 
 def update_stage_dict(target, pos_dict):
+    """Update dictionary entries common to the model and controller.
+
+    Parameters
+    ----------
+    target : aslm.model.Model or aslm.controller.Controller
+        The object that is being updated.
+    pos_dict : dict
+        The dictionary of positions to update.
+
+    Returns
+    -------
+    None
+    """
     # Update our local experiment parameters
     for axis, val in pos_dict.items():
         ax = axis.split("_")[0]

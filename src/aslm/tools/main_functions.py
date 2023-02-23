@@ -153,6 +153,10 @@ def identify_gpu(args):
 def create_parser():
     """Add Parser Input Arguments to ArgumentParser Object.
 
+    Parameters
+    ----------
+    None
+
     Returns
     -------
     parser : object

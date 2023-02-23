@@ -138,8 +138,7 @@ def get_configuration_paths():
 
 
 def load_configs(manager, **kwargs):
-    """
-    Load configuration files.
+    """Load configuration files.
 
     Parameters
     ----------

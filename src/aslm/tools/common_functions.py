@@ -32,7 +32,18 @@
 
 
 def combine_funcs(*funclist):
-    """this function will combine a list of functions to a new function"""
+    """this function will combine a list of functions to a new function
+
+    Parameters
+    ----------
+    funclist: list
+        a list of functions
+
+    Returns
+    -------
+    new_func: function
+        a new function
+    """
 
     def new_func():
         for func in funclist:
@@ -43,12 +54,31 @@ def combine_funcs(*funclist):
 
 
 def build_ref_name(separator, *args):
+    """this function will build a reference name
+
+    Parameters
+    ----------
+    separator: str
+        the separator between each argument
+    args: list
+        a list of arguments
+
+    Returns
+    -------
+    ref_name: str
+        the reference name
+    """
     alist = list(map(lambda a: str(a), args))
     return separator.join(alist)
 
 
 def copy_proxy_object(content):
     """This function will serialize proxy dict and list
+
+    Parameters
+    ----------
+    content: dict/list
+        the proxy object
 
     Returns
     -------
@@ -67,7 +97,6 @@ def copy_proxy_object(content):
                 result.append(func(v))
         else:
             result = content
-
         return result
 
     return func(content)

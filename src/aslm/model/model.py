@@ -50,6 +50,7 @@ from aslm.model.features.common_features import (
     PrepareNextChannel,
     LoopByCount,
     ConProAcquisition,
+    StackPause,
 )
 from aslm.model.features.feature_container import load_features
 from aslm.model.features.restful_features import IlastikSegmentation
@@ -249,6 +250,7 @@ class Model:
             "z-stack": [
                 (
                     {"name": ZStackAcquisition},
+                    {"name": StackPause},
                     {
                         "name": LoopByCount,
                         "args": ("experiment.MicroscopeState.timepoints",),

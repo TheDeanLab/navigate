@@ -273,7 +273,7 @@ class CameraSettingController(GUIController):
 
             self.show_verbose_info("Normal Camera Readout Mode")
 
-        if sensor_value == "Light-Sheet":
+        elif sensor_value == "Light-Sheet":
             self.mode_widgets["Readout"].widget.set("Top-to-Bottom")
             self.mode_widgets["Readout"].widget["state"] = "readonly"
             self.mode_widgets["Pixels"].set(
@@ -474,7 +474,7 @@ class CameraSettingController(GUIController):
         if pixels != "":
             self.number_of_pixels = int(pixels)
 
-        if self.mode != "live" and self.mode != "stop":
+        if self.mode != "live":
             return
 
         self.camera_setting_dict["number_of_pixels"] = self.number_of_pixels
@@ -482,8 +482,8 @@ class CameraSettingController(GUIController):
         # tell central controller to update model
         if self.pixel_event_id:
             self.view.after_cancel(self.pixel_event_id)
-        self.view.after(
-            10,
+        self.pixel_event_id = self.view.after(
+            500,
             lambda: self.parent_controller.execute(
                 "update_setting", "number_of_pixels"
             ),

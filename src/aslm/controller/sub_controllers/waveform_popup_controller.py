@@ -102,10 +102,6 @@ class WaveformPopupController(GUIController):
         self.waveforms_enabled = True
         self.amplitude_dict = None
 
-        # Checks if number of lasers in remote_focus_constants matches config file
-        # TODO: Commented out. This function changes and returns nothing.
-        # self.update_popup_lasers()
-
         # event id list
         self.event_id = None
 
@@ -493,21 +489,6 @@ class WaveformPopupController(GUIController):
         # if errors:
         #     return  # Dont save if any errors TODO needs testing
         save_yaml_file("", self.resolution_info, self.waveform_constants_path)
-
-    # def update_popup_lasers(self):
-    #     """Update the lasers in the popup.
-    #     COMMENTED because this appears to be unused.
-    #
-    #     Parameters
-    #     ----------
-    #     None
-    #
-    #     Returns
-    #     -------
-    #     None
-    #     """
-    #     num_lasers = len(self.lasers)
-    #     num_etl_lasers = self.resolution_info
 
     """
     Example for preventing submission of a field/controller. So if there is an error in

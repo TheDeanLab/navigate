@@ -42,6 +42,41 @@ Wiring
     For NI-based cards, port0/line1 is the equivalent of ``P0.1``.
     There are multiple pins for each PFIO, including source, out, gate, etc. You must use the out terminal.
 
+Lasers
+----------
+Currently, we only externally trigger the lasers using either analog, digital, or
+mixed modulation modes (depends on the laser type).  Each laser is accompanied by a
+description in the configuration.yaml file.
+
+**Default Configuration for a single laser.**::
+
+      - wavelength: 488
+        onoff:
+          hardware:
+            name: daq
+            type: NI
+            channel: PXI6733/port0/line2
+            min: 0
+            max: 5
+        power:
+          hardware:
+            name: daq
+            type: NI
+            channel: PXI6733/ao0
+            min: 0
+            max: 5
+        type: LuxX
+        index: 0
+        delay_percent: 10
+        pulse_percent: 87
+
+In this case, we are using both analog (power) and digital (onoff) illumination modes.
+
+Omicron LightHub ULTRA
+^^^^^^^^^^^^^^^^^^^^^^^^
+You need to set it in a specific mode...
+
+
 Cameras
 ----------
 Hamamatsu
@@ -63,10 +98,10 @@ Photometrics
 The PVCAM SDK is also available form this location.
 You will likely have to register and agree to Photometrics terms.
 * Perform the Full Installation of the PVCAM software.
-* Should a 'Base Device' still show up as unknown in the device manager, you may need to install the 
+* Should a 'Base Device' still show up as unknown in the device manager, you may need to install the
 `Broadcom PCI/PCIe Software Development Kit <https://www.broadcom.com/products/pcie-switches-bridges/software-dev-kits`_
 * Upon successfully installation, one should be able to acquire images with the manufacturer provided PVCamTest software.
- 
+
 
 Voicecoil
 --------------

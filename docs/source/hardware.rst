@@ -84,7 +84,7 @@ Hamamatsu
 * Insert the USB that came with the camera into the computer and install HCImageLive.
 * When prompted with the DCAM-API Setup
 
-    * Intall the Active Silicon Firebird drivers for the FrameGrabber
+    * Install the Active Silicon Firebird drivers for the FrameGrabber
     * Select ... next to the tools button, and install DCAM tools onto the computer.
 
 * Shutdown the computer and intall the Hamamatsu frame grabber into an apporpriate PCIe-x16 slot on the motherboard.

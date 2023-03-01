@@ -7,6 +7,8 @@ Upon running the software the first time, a copy of the configuration file is cr
 ``/Users/<username>/AppData/Local/.ASLM/config`` on Windows-based machines, and in ``~/.ASLM/config`` on Mac and
 Linux-based machines. All changes will need to be made to this file.
 The local copy avoids conflicts between different microscopes after pulling new changes on GitHub.
+Please see the page dedicated to setting up your configuration file here.
+TODO: Figure out how to reference an internal link to config.rst
 
 Data Acquisition Card
 ------------------------

@@ -750,9 +750,11 @@ class ChannelsTabController(GUIController):
                     channel_exposure_time[channel_idx] / 1000 * number_of_slices
                 )
 
-            experiment_duration = experiment_duration + float(
-                self.timepoint_vals["stack_pause"].get()
-            )
+            try:
+                stack_pause = float( self.timepoint_vals["stack_pause"].get())
+            except ValueError:
+                stack_pause = 0
+            experiment_duration = experiment_duration + stack_pause
         experiment_duration *= number_of_timepoints
 
         # Change the filter wheel here before the start of the acquisition.

@@ -106,10 +106,11 @@ class NIDAQ(DAQBase):
         )
 
         if self.configuration['experiment']['MicroscopeState']['image_mode'] == 'confocal-projection':
-            n_timepoints = self.configuration['experiment']['MicroscopeState']['timepoints']
-            n_timepoints *= self.configuration['experiment']['MicroscopeState']['n_plane']
-            print(f"times equals {self.configuration['experiment']['MicroscopeState']['n_plane']} is {n_timepoints}")
-            self.camera_trigger_task.timing.cfg_implicit_timing(sample_mode=nidaqmx.constants.AcquisitionType.FINITE, samps_per_chan=int(n_timepoints))
+            # n_timepoints = self.configuration['experiment']['MicroscopeState']['timepoints']
+            # n_timepoints *= self.configuration['experiment']['MicroscopeState']['n_plane']
+            n_plane = self.configuration['experiment']['MicroscopeState']['n_plane']
+            print(f"times equals {self.configuration['experiment']['MicroscopeState']['n_plane']} is {n_plane}")
+            self.camera_trigger_task.timing.cfg_implicit_timing(sample_mode=nidaqmx.constants.AcquisitionType.FINITE, samps_per_chan=int(n_plane))
 
     def create_master_trigger_task(self):
         """Set up the DO master trigger task."""
@@ -161,14 +162,15 @@ class NIDAQ(DAQBase):
                     self.configuration["experiment"]["MicroscopeState"]["image_mode"]
                     == "confocal-projection"
                 ):
-                    n_timepoints = self.configuration["experiment"]["MicroscopeState"]["timepoints"]
-                    n_timepoints *= self.configuration["experiment"]["MicroscopeState"][
-                        "n_plane"
-                    ]
+                    # n_timepoints = self.configuration["experiment"]["MicroscopeState"]["timepoints"]
+                    # n_timepoints *= self.configuration["experiment"]["MicroscopeState"][
+                    #     "n_plane"
+                    # ]
+                    n_plane = self.configuration['experiment']['MicroscopeState']['n_plane']
                     self.analog_output_tasks[-1].timing.cfg_samp_clk_timing(
                         rate=sample_rates[0],
                         sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
-                        samps_per_chan=int(self.n_sample * n_timepoints),
+                        samps_per_chan=int(self.n_sample * n_plane),
                     )
                 else:
                     self.analog_output_tasks[-1].timing.cfg_samp_clk_timing(

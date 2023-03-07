@@ -259,8 +259,14 @@ class Model:
             ],
             "projection": [{"name": PrepareNextChannel}],
             "confocal-projection": [
-                {"name": PrepareNextChannel},
-                {"name": ConProAcquisition},
+                (
+                    {"name": ConProAcquisition},
+                    {"name": StackPause},
+                    {
+                        "name": LoopByCount,
+                        "args": ("experiment.MicroscopeState.timepoints",),
+                    }
+                )
             ],
             "customized": [],
         }

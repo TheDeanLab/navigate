@@ -119,7 +119,6 @@ def gaussian_beam(
 def fit_gaussian_beam_error(x, image, NA, n, wvl, pixel_size, ravel=True):
     """Error function for fitting a Gaussian beam
 
-
     Parameters
     ----------
     x : np.ndarray
@@ -174,6 +173,32 @@ def fit_gaussian_beam_error(x, image, NA, n, wvl, pixel_size, ravel=True):
 
 
 def fit_gaussian_beam_mse(x, image, NA, n, wvl, pixel_size):
+    """Mean squared error function for fitting a Gaussian beam
+
+    Parameters
+    ----------
+    x : np.ndarray
+        Parameters to fit.
+        x[0] and x[1] are the offsets in pixels in radial and z direction of the beam.
+        x[2] is the beam waist width [nm].
+        x[3] is the peak intensity of the beam.
+        x[4] is the background intensity.
+    image : np.ndarray
+        Image to fit
+    NA : float
+        Numerical aperture of the optical system generating the Gaussian beam
+    n : float
+        Refractive index of the sample
+    wvl : float
+        Wavelength of the beam [nm]
+    pixel_size : float
+        Effective pixel size [nm]
+
+    Returns
+    -------
+    float
+        Mean squared error between the image and the Gaussian beam
+    """
     return (
         fit_gaussian_beam_error(x, image, NA, n, wvl, pixel_size, ravel=False) ** 2
     ).mean()

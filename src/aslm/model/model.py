@@ -217,6 +217,23 @@ class Model:
                 }
             ]
         )
+        self.feature_list.append(
+            [
+                (
+                    (
+                        {"name": PrepareNextChannel},
+                        {
+                            "name": LoopByCount,
+                            "args": ("experiment.MicroscopeState.selected_channels",),
+                        },
+                    ),
+                    {
+                        "name": LoopByCount,
+                        "args": ("experiment.MicroscopeState.timepoints",),
+                    },
+                )
+            ]
+        )
 
         self.acquisition_modes_feature_setting = {
             "single": [{"name": PrepareNextChannel}],
@@ -803,21 +820,12 @@ class Model:
         # Stash current position, channel, timepoint
         # Do this here, because signal container functions can inject changes
         # to the stage
-        self.data_buffer_positions[self.frame_id][0] = self.configuration["experiment"][
-            "StageParameters"
-        ]["x"]
-        self.data_buffer_positions[self.frame_id][1] = self.configuration["experiment"][
-            "StageParameters"
-        ]["y"]
-        self.data_buffer_positions[self.frame_id][2] = self.configuration["experiment"][
-            "StageParameters"
-        ]["z"]
-        self.data_buffer_positions[self.frame_id][3] = self.configuration["experiment"][
-            "StageParameters"
-        ]["theta"]
-        self.data_buffer_positions[self.frame_id][4] = self.configuration["experiment"][
-            "StageParameters"
-        ]["f"]
+        stage_pos = self.get_stage_position()
+        self.data_buffer_positions[self.frame_id][0] = stage_pos["x_pos"]
+        self.data_buffer_positions[self.frame_id][1] = stage_pos["y_pos"]
+        self.data_buffer_positions[self.frame_id][2] = stage_pos["z_pos"]
+        self.data_buffer_positions[self.frame_id][3] = stage_pos["theta_pos"]
+        self.data_buffer_positions[self.frame_id][4] = stage_pos["f_pos"]
 
         # Run the acquisition
         self.active_microscope.daq.run_acquisition()

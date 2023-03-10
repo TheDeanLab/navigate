@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -33,6 +34,20 @@ import os
 
 
 def countlines(start, lines=0, header=True, begin_start=None):
+    """Count the number of lines of code in a directory.
+
+    Parameters
+    ----------
+    start : str
+        The directory to start counting lines from.
+    lines : int
+        The number of lines to start counting from.
+    header : bool
+        Whether or not to print a header.
+    begin_start : str
+        The directory to start counting lines from, relative to the start directory.
+        This is useful for printing the relative path of a file.
+    """
     if header:
         print("{:>10} |{:>10} | {:<20}".format("ADDED", "TOTAL", "FILE"))
         print("{:->11}|{:->11}|{:->20}".format("", "", ""))

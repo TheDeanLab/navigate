@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -53,6 +54,11 @@ def text_array(text: str, offset: tuple = (0, 0), font_size: int = 16):
         (x,y) offset from upper left of image
     font_size: int
         Size of font in pixels
+
+    Returns
+    -------
+    np.array
+        Binary array of text
     """
     font = ImageFont.truetype("cambriab.ttf", font_size)
     bbox = font.getbbox(text)

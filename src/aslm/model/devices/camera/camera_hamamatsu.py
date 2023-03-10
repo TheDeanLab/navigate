@@ -175,7 +175,7 @@ class HamamatsuOrca(CameraBase):
 
     def calculate_readout_time(self):
         """Calculate duration of time needed to readout an image.
-    
+
         Calculates the readout time and maximum frame rate according to the camera
         configuration settings.
         Assumes model C13440 with Camera Link communication from Hamamatsu.
@@ -219,15 +219,19 @@ class HamamatsuOrca(CameraBase):
                 max_frame_rate = 1 / ((vn / 2) * h + 5 * h)
                 readout_time = exposure_time - ((vn / 2) * h + 5 * h)
 
-        if sensor_mode == 12:
+            readout_time = h
+            max_frame_rate = 1.0 / (exposure_time + readout_time)
+
+        elif sensor_mode == 12:
             #  Progressive sensor mode operation
             max_frame_rate = 1 / (exposure_time + (vn + 10) * h)
             readout_time = exposure_time - 1 / (exposure_time + (vn + 10) * h)
-        else:
-            # TODO: make sure this works with Confocal-Projection
-            readout_time = h
-            max_frame_rate = 1.0/(exposure_time + readout_time)
 
+        else:
+            print(f"Hamamatsu Camera. Sensor mode {sensor_mode} not supported")
+            logger.error(f"Hamamatsu Camera. Sensor mode {sensor_mode} not supported")
+            max_frame_rate = 0
+            readout_time = 0
         return readout_time, max_frame_rate
 
     def set_exposure_time(self, exposure_time):

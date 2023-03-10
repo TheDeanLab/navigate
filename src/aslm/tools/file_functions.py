@@ -114,6 +114,10 @@ def save_yaml_file(file_directory, content_dict, filename="experiment.yml"):
     filename : str
         String of name to save data to.  Default is experiment.yml.
 
+    Returns
+    -------
+    bool
+        True if file was saved successfully, False otherwise.
     """
     import json
 

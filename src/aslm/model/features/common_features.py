@@ -30,6 +30,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
+import time
 from functools import reduce
 
 
@@ -156,6 +157,26 @@ class PrepareNextChannel:
         self.model.active_microscope.prepare_next_channel()
 
         return True
+    
+class StackPause:
+    def __init__(self, model):
+        self.model = model
+        self.config_table = {
+            "signal": {"main": self.signal_func}
+        }
+
+    def signal_func(self):
+        pause_time = float(self.model.configuration["experiment"]["MicroscopeState"]["stack_pause"])
+        if pause_time <= 0:
+            return
+        current_channel = f"channel_{self.model.active_microscope.current_channel}"
+        current_exposure_time = float(self.model.configuration["experiment"]["MicroscopeState"]["channels"][current_channel]["camera_exposure_time"]) / 1000.0
+        if pause_time < 5 * current_exposure_time:
+            time.sleep(pause_time)
+        else:
+            self.model.pause_data_thread()
+            time.sleep(pause_time - current_exposure_time)
+            self.model.resume_data_thread()
 
 
 class ZStackAcquisition:

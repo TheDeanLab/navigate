@@ -425,21 +425,23 @@ class ConProAcquisition:   # don't have the multi-position part for now
         # get available channels
         self.channels = microscope_state["selected_channels"]
         self.current_channel_in_list = 0
+        self.model.active_microscope.current_channel = 0
+        self.model.active_microscope.prepare_next_channel()
 
-        self.n_plane = int(microscope_state['n_plane'])
+        # self.n_plane = int(microscope_state['n_plane'])
 
-        self.start_offset = float(copy.copy(microscope_state['offset_start']))
-        self.end_offset = float(copy.copy(microscope_state['offset_end']))
-        if self.n_plane == 1:
-            self.offset_step_size = 0
-        else:
-            self.offset_step_size = (self.end_offset - self.start_offset) / float(self.n_plane-1)
+        # self.start_offset = float(copy.copy(microscope_state['offset_start']))
+        # self.end_offset = float(copy.copy(microscope_state['offset_end']))
+        # if self.n_plane == 1:
+        #     self.offset_step_size = 0
+        # else:
+        #     self.offset_step_size = (self.end_offset - self.start_offset) / float(self.n_plane-1)
         
-        self.timepoints = 1  # int(microscope_state['timepoints'])
+        # self.timepoints = 1  # int(microscope_state['timepoints'])
 
-        self.need_update_offset = True
-        self.current_offset = self.start_offset
-        self.offset_update_time = 0
+        # self.need_update_offset = True
+        # self.current_offset = self.start_offset
+        # self.offset_update_time = 0
 
         # self.model.move_stage({'z_abs': 0})
     
@@ -463,18 +465,18 @@ class ConProAcquisition:   # don't have the multi-position part for now
 
         #     # self.model.resume_data_thread()
 
-        if self.conpro_cycling_mode != 'per_stack':
-            # update channel for each z position in 'per_slice'
-            self.update_channel()
-            self.need_update_offset = (self.current_channel_in_list == 0)
+        # if self.conpro_cycling_mode != 'per_stack':
+        #     # update channel for each z position in 'per_slice'
+        #     self.update_channel()
+        #     self.need_update_offset = (self.current_channel_in_list == 0)
 
-        # in 'per_slice', update the offset if all the channels have been acquired
-        if self.need_update_offset:
-            # next z, f position
-            # self.current_offset += self.offset_step_size
+        # # in 'per_slice', update the offset if all the channels have been acquired
+        # if self.need_update_offset:
+        #     # next z, f position
+        #     # self.current_offset += self.offset_step_size
 
-            # update offset moved time
-            self.offset_update_time += 1
+        #     # update offset moved time
+        #     self.offset_update_time += 1
 
         return True
 
@@ -486,20 +488,20 @@ class ConProAcquisition:   # don't have the multi-position part for now
             return True
         
         # decide whether to update offset
-        if self.offset_update_time >= self.n_plane:
-            self.timepoints -=1
+        # if self.offset_update_time >= self.n_plane:
+        #     self.timepoints -=1
 
-            self.model.configuration['experiment']['MicroscopeState']['offset_start'] = self.start_offset
-            self.model.configuration['experiment']['MicroscopeState']['offset_end'] = self.end_offset
+        #     self.model.configuration['experiment']['MicroscopeState']['offset_start'] = self.start_offset
+        #     self.model.configuration['experiment']['MicroscopeState']['offset_end'] = self.end_offset
 
-            self.current_offset = self.start_offset
+        #     self.current_offset = self.start_offset
 
-            self.offset_update_time = 0
+        #     self.offset_update_time = 0
 
-        if self.timepoints == 0:
-            return True
+        # if self.timepoints == 0:
+        #     return True
 
-        return False
+        return True
 
     def generate_meta_data(self, *args):
         # print('This frame: z stack', self.model.frame_id)

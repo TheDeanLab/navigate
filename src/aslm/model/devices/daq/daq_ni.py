@@ -325,7 +325,12 @@ class NIDAQ(DAQBase):
             ).squeeze()
             self.analog_output_tasks[board_name].write(waveforms)
         except Exception as e:
-            print(f"*** daq error {e} happens!")
+            for board in self.analog_output_tasks.keys():
+                self.analog_output_tasks[board].stop()
+                self.analog_output_tasks[board].close()
+
+            self.create_analog_output_tasks(self.current_channel_key, True)
+            print(f"create new daq analog output task because DAQmx Write failed!")
 
         self.is_updating_analog_task = False
         self.wait_to_run_lock.release()

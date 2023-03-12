@@ -219,6 +219,9 @@ class HamamatsuOrca(CameraBase):
                 max_frame_rate = 1 / ((vn / 2) * h + 5 * h)
                 readout_time = exposure_time - ((vn / 2) * h + 5 * h)
 
+            readout_time = h
+            max_frame_rate = 1.0 / (exposure_time + readout_time)
+
         elif sensor_mode == 12:
             #  Progressive sensor mode operation
             max_frame_rate = 1 / (exposure_time + (vn + 10) * h)

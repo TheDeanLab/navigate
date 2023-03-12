@@ -338,7 +338,7 @@ class StageController(GUIController):
 
         Parameters
         ----------
-        axis = str
+        axis : str
             Should be one of 'x', 'y', 'z', 'theta', 'f'
             position_axis += step_axis
 
@@ -373,7 +373,7 @@ class StageController(GUIController):
 
         Parameters
         ----------
-        axis = str
+        axis : str
             Should be one of 'x', 'y', 'z', 'theta', 'f'
             position_axis += step_axis
 
@@ -408,7 +408,7 @@ class StageController(GUIController):
 
         Parameters
         ----------
-        axis = str
+        axis : str
             Should be one of 'z', 'theta', 'f'
             position_axis = 0
 

@@ -247,6 +247,7 @@ class AcquireBarController(GUIController):
         if self.view.acquire_btn["text"] == "Stop":
             # change the button to 'Acquire'
             self.view.acquire_btn.configure(text="Acquire")
+            self.view.acquire_btn.configure(state="disabled")
 
             # tell the controller to stop acquire (continuous mode)
             self.parent_controller.execute("stop_acquire")
@@ -273,6 +274,7 @@ class AcquireBarController(GUIController):
 
         else:
             self.view.acquire_btn.configure(text="Stop")
+            self.view.acquire_btn.configure(state="disabled")
             self.parent_controller.execute("acquire")
 
     def update_microscope_mode(self, *args):
@@ -423,6 +425,7 @@ class AcquireBarController(GUIController):
 
             # We are now acquiring
             self.view.acquire_btn.configure(text="Stop")
+            self.view.acquire_btn.configure(state="disabled")
 
     def exit_program(self):
         """Exit Button

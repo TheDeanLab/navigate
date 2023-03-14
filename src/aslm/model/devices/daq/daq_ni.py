@@ -32,6 +32,7 @@
 
 # Standard Imports
 import logging
+from threading import Lock
 
 # Third Party Imports
 import nidaqmx
@@ -67,8 +68,11 @@ class NIDAQ(DAQBase):
             self.laser_switching_task = None
 
         self.analog_outputs = {}  # keep track of analog outputs and their waveforms
-        self.analog_output_tasks = []
+        self.analog_output_tasks = {}
         self.n_sample = None
+        self.current_channel_key = ""
+        self.is_updating_analog_task = False
+        self.wait_to_run_lock = Lock()
 
     def __del__(self):
         if self.camera_trigger_task is not None:
@@ -127,8 +131,6 @@ class NIDAQ(DAQBase):
         have only one clock for analog output sample timing, and as such all channels
         must be grouped here.
         """
-        self.analog_output_tasks = []
-
         # Create one analog output task per board, grouping the channels
         boards = list(set([x.split("/")[0] for x in self.analog_outputs.keys()]))
         for board in boards:
@@ -138,8 +140,8 @@ class NIDAQ(DAQBase):
                 )
             )
             if create_new_tasks or self.n_sample is None:
-                self.analog_output_tasks.append(nidaqmx.Task())
-                self.analog_output_tasks[-1].ao_channels.add_ao_voltage_chan(channel)
+                self.analog_output_tasks[board] = nidaqmx.Task()
+                self.analog_output_tasks[board].ao_channels.add_ao_voltage_chan(channel)
 
                 sample_rates = list(
                     set([v["sample_rate"] for v in self.analog_outputs.values()])
@@ -165,13 +167,13 @@ class NIDAQ(DAQBase):
                     n_timepoints *= self.configuration["experiment"]["MicroscopeState"][
                         "n_plane"
                     ]
-                    self.analog_output_tasks[-1].timing.cfg_samp_clk_timing(
+                    self.analog_output_tasks[board].timing.cfg_samp_clk_timing(
                         rate=sample_rates[0],
                         sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
                         samps_per_chan=int(self.n_sample * n_timepoints),
                     )
                 else:
-                    self.analog_output_tasks[-1].timing.cfg_samp_clk_timing(
+                    self.analog_output_tasks[board].timing.cfg_samp_clk_timing(
                         rate=sample_rates[0],
                         sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
                         samps_per_chan=self.n_sample,
@@ -185,7 +187,7 @@ class NIDAQ(DAQBase):
                         "NI DAQ - Different triggers provided for each analog channel."
                         "Defaulting to the first trigger provided."
                     )
-                self.analog_output_tasks[-1].triggers.start_trigger.cfg_dig_edge_start_trig(
+                self.analog_output_tasks[board].triggers.start_trigger.cfg_dig_edge_start_trig(
                     triggers[0]
                 )
 
@@ -197,7 +199,7 @@ class NIDAQ(DAQBase):
                     if k.split("/")[0] == board
                 ]
             ).squeeze()
-            self.analog_output_tasks[-1].write(waveforms)
+            self.analog_output_tasks[board].write(waveforms)
 
     def prepare_acquisition(self, channel_key, exposure_time):
         """Prepare the acquisition.
@@ -221,6 +223,11 @@ class NIDAQ(DAQBase):
         self.create_camera_task(exposure_time)
         self.create_analog_output_tasks(channel_key)
 
+        self.current_channel_key = channel_key
+        self.is_updating_analog_task = False
+        if self.wait_to_run_lock.locked():
+            self.wait_to_run_lock.release()
+
     def run_acquisition(self):
         """Run DAQ Acquisition.
 
@@ -228,14 +235,19 @@ class NIDAQ(DAQBase):
         The master trigger initiates all other tasks via a shared trigger
         For this to work, all analog output and counter tasks have to be started so that
         they are waiting for the trigger signal."""
+        # wait if writing analog tasks
+        if self.is_updating_analog_task:
+            self.wait_to_run_lock.acquire()
+            self.wait_to_run_lock.release()
+
         self.camera_trigger_task.start()
-        for task in self.analog_output_tasks:
+        for task in self.analog_output_tasks.values():
             task.start()
         self.master_trigger_task.write(
             [False, True, True, True, False], auto_start=True
         )
         # self.camera_trigger_task.wait_until_done()
-        for task in self.analog_output_tasks:
+        for task in self.analog_output_tasks.values():
             task.wait_until_done()
             task.stop()
         try:
@@ -251,16 +263,22 @@ class NIDAQ(DAQBase):
             self.master_trigger_task.stop()
             self.camera_trigger_task.close()
             self.master_trigger_task.close()
-            for task in self.analog_output_tasks:
+            for task in self.analog_output_tasks.values():
                 task.stop()
                 task.close()
         except (AttributeError, nidaqmx.errors.DaqError):
             pass
 
+        if self.wait_to_run_lock.locked():
+            self.wait_to_run_lock.release()
+
+        self.analog_output_tasks = {}
+
     def enable_microscope(self, microscope_name):
         if microscope_name != self.microscope_name:
             self.microscope_name = microscope_name
             self.analog_outputs = {}
+            self.analog_output_tasks = {}
 
         try:
             switching_port = self.configuration["configuration"]["microscopes"][
@@ -279,3 +297,40 @@ class NIDAQ(DAQBase):
             self.laser_switching_task.write(switching_on_state, auto_start=True)
         except KeyError:
             pass
+
+    def update_analog_task(self, board_name):
+        # if there is no such analog task, it means it's not acquiring and nothing needs to do.        
+        if board_name not in self.analog_output_tasks:
+            return False
+        # can't update an analog task while updating one.
+        if self.is_updating_analog_task:
+            return False
+        
+        self.wait_to_run_lock.acquire()
+        self.is_updating_analog_task = True
+
+        try:
+            # this function waits only happens when interacting through GUI in continuous mode,
+            # updating an analog task happens after the task is done when running a feature, so it will check and return immediately.
+            self.analog_output_tasks[board_name].wait_until_done(timeout=1.0)
+            self.analog_output_tasks[board_name].stop()
+
+            # Write values to board
+            waveforms = np.vstack(
+                [
+                    v["waveform"][self.current_channel_key][:self.n_sample]
+                    for k, v in self.analog_outputs.items()
+                    if k.split("/")[0] == board_name
+                ]
+            ).squeeze()
+            self.analog_output_tasks[board_name].write(waveforms)
+        except Exception as e:
+            for board in self.analog_output_tasks.keys():
+                self.analog_output_tasks[board].stop()
+                self.analog_output_tasks[board].close()
+
+            self.create_analog_output_tasks(self.current_channel_key, True)
+            print(f"create new daq analog output task because DAQmx Write failed!")
+
+        self.is_updating_analog_task = False
+        self.wait_to_run_lock.release()

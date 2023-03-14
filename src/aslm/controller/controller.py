@@ -612,6 +612,8 @@ class Controller:
         self.camera_setting_controller.update_experiment_values()
 
         # TODO: validate experiment dict
+        if self.configuration["experiment"]["MicroscopeState"]["scanrange"] == 0:
+            return False
         return True
 
     def prepare_acquire_data(self):

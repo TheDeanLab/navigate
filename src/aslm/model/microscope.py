@@ -38,6 +38,7 @@ from aslm.model.device_startup_functions import (
     start_stage,
 )
 from aslm.tools.common_functions import build_ref_name
+from aslm.model.devices.stages.stage_galvo import GalvoNIStage
 
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -408,6 +409,10 @@ class Microscope:
         )
         remote_focus_waveform = self.remote_focus_device.adjust(readout_time)
         galvo_waveform = [self.galvo[k].adjust(readout_time) for k in self.galvo]
+        #TODO: calculate waveform for galvo stage
+        for axis in self.stages:           
+            if type(self.stages[axis]) == GalvoNIStage:
+                self.stages[axis].calculate_waveform()
         waveform_dict = {
             "camera_waveform": camera_waveform,
             "remote_focus_waveform": remote_focus_waveform,

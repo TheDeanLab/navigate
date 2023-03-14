@@ -258,7 +258,6 @@ class Model:
             "projection": [{"name": PrepareNextChannel}],
             "confocal-projection": [
                 {"name": PrepareNextChannel},
-                {"name": ConProAcquisition},
             ],
             "customized": [],
         }

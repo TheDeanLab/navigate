@@ -894,41 +894,37 @@ class Model:
             )
 
             offsets = self.active_microscope.zoom.stage_offsets
+            solvent = self.configuration["experiment"]["Saving"]["solvent"]
             if (
                 offsets is not None
                 and curr_zoom is not None
                 and self.active_microscope_name == former_microscope
+                and solvent in offsets.keys()
             ):
-                solvent = self.configuration["experiment"]["Saving"]["solvent"]
-                if solvent in offsets.keys():
-                    self.stop_stage()
-                    curr_pos = self.get_stage_position()
-                    update_stage_dict(self, curr_pos)
-                    for axis, mags in offsets[solvent].items():
-                        try:
-                            shift_axis = curr_pos[f"{axis}_pos"] + float(
-                                mags[curr_zoom][zoom_value]
-                            )
-                            self.move_stage(
-                                {f"{axis}_abs": shift_axis},
-                                wait_until_done=True,
-                            )
-                        except KeyError:
-                            pass
-                    self.stop_stage()
-                    curr_pos = self.get_stage_position()
-                    update_stage_dict(self, curr_pos)
-                    # self.stop_stage()
-                    # curr_pos = self.get_stage_position()
-                    # update_stage_dict(self, curr_pos)
-                    # print(f"putting {curr_pos}")
-                    # self.event_queue.put(
-                    #     ("update_stage", curr_pos)
-                    # )
-                else:
-                    self.logger.debug(
-                        f"{self.active_microscope_name} - Unknown solvent: {solvent}."
-                    )
+                self.stop_stage()
+                curr_pos = self.get_stage_position()
+                update_stage_dict(self, curr_pos)
+                for axis, mags in offsets[solvent].items():
+                    try:
+                        shift_axis = curr_pos[f"{axis}_pos"] + float(
+                            mags[curr_zoom][zoom_value]
+                        )
+                        self.move_stage(
+                            {f"{axis}_abs": shift_axis},
+                            wait_until_done=True,
+                        )
+                    except KeyError:
+                        pass
+                self.stop_stage()
+                curr_pos = self.get_stage_position()
+                update_stage_dict(self, curr_pos)
+                # self.stop_stage()
+                # curr_pos = self.get_stage_position()
+                # update_stage_dict(self, curr_pos)
+                # print(f"putting {curr_pos}")
+                # self.event_queue.put(
+                #     ("update_stage", curr_pos)
+                # )
 
         except ValueError as e:
             self.logger.debug(f"{self.active_microscope_name} - {e}")

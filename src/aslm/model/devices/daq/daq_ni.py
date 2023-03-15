@@ -105,12 +105,33 @@ class NIDAQ(DAQBase):
             trigger_source
         )
 
-        if self.configuration['experiment']['MicroscopeState']['image_mode'] == 'confocal-projection':
-            # n_timepoints = self.configuration['experiment']['MicroscopeState']['timepoints']
-            # n_timepoints *= self.configuration['experiment']['MicroscopeState']['n_plane']
-            n_plane = self.configuration['experiment']['MicroscopeState']['n_plane']
-            print(f"times equals {self.configuration['experiment']['MicroscopeState']['n_plane']} is {n_plane}")
-            self.camera_trigger_task.timing.cfg_implicit_timing(sample_mode=nidaqmx.constants.AcquisitionType.FINITE, samps_per_chan=int(n_plane))
+        if (
+            self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+            == "confocal-projection"
+        ):
+
+            # n_timepoints = self.configuration[
+            # 'experiment'][
+            # 'MicroscopeState'][
+            # 'timepoints']
+
+            # n_timepoints *= self.configuration[
+            # 'experiment'][
+            # 'MicroscopeState'][
+            # 'n_plane']
+
+            n_plane = self.configuration["experiment"]["MicroscopeState"]["n_plane"]
+
+            print(
+                f"times equals "
+                f"{self.configuration['experiment']['MicroscopeState']['n_plane']} "
+                f"is {n_plane}"
+            )
+
+            self.camera_trigger_task.timing.cfg_implicit_timing(
+                sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
+                samps_per_chan=int(n_plane),
+            )
 
     def create_master_trigger_task(self):
         """Set up the DO master trigger task."""
@@ -147,10 +168,13 @@ class NIDAQ(DAQBase):
                 )
                 if len(sample_rates) > 1:
                     logger.debug(
-                        "NI DAQ - Different sample rates provided for each analog channel."
+                        "NI DAQ - Different sample rates provided "
+                        "for each analog channel."
                         "Defaulting to the first sample rate provided."
                     )
-                n_samples = list(set([v["samples"] for v in self.analog_outputs.values()]))
+                n_samples = list(
+                    set([v["samples"] for v in self.analog_outputs.values()])
+                )
                 if len(n_samples) > 1:
                     logger.debug(
                         "NI DAQ - Different number of samples provided for each analog"
@@ -162,11 +186,16 @@ class NIDAQ(DAQBase):
                     self.configuration["experiment"]["MicroscopeState"]["image_mode"]
                     == "confocal-projection"
                 ):
-                    # n_timepoints = self.configuration["experiment"]["MicroscopeState"]["timepoints"]
-                    # n_timepoints *= self.configuration["experiment"]["MicroscopeState"][
+                    # n_timepoints = self.configuration[
+                    # "experiment"]["MicroscopeState"]["timepoints"]
+                    # n_timepoints *= self.configuration[
+                    # "experiment"]["MicroscopeState"][
                     #     "n_plane"
                     # ]
-                    n_plane = self.configuration['experiment']['MicroscopeState']['n_plane']
+                    n_plane = self.configuration["experiment"]["MicroscopeState"][
+                        "n_plane"
+                    ]
+
                     self.analog_output_tasks[-1].timing.cfg_samp_clk_timing(
                         rate=sample_rates[0],
                         sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
@@ -182,19 +211,21 @@ class NIDAQ(DAQBase):
                 triggers = list(
                     set([v["trigger_source"] for v in self.analog_outputs.values()])
                 )
+
                 if len(triggers) > 1:
                     logger.debug(
                         "NI DAQ - Different triggers provided for each analog channel."
                         "Defaulting to the first trigger provided."
                     )
-                self.analog_output_tasks[-1].triggers.start_trigger.cfg_dig_edge_start_trig(
-                    triggers[0]
-                )
+
+                self.analog_output_tasks[
+                    -1
+                ].triggers.start_trigger.cfg_dig_edge_start_trig(triggers[0])
 
             # Write values to board
             waveforms = np.vstack(
                 [
-                    v["waveform"][channel_key][:self.n_sample]
+                    v["waveform"][channel_key][: self.n_sample]
                     for k, v in self.analog_outputs.items()
                     if k.split("/")[0] == board
                 ]

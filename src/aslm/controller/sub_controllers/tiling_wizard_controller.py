@@ -71,9 +71,50 @@ class TilingWizardController(GUIController):
     parent_controller : channels_tab_controller
         The controller that creates the popup/this controller.
 
-    Returns
+    Attributes
+    ----------
+    widgets : dict
+        Dictionary of widgets in the view
+    buttons : dict
+        Dictionary of buttons in the view
+    variables : dict
+        Dictionary of variables in the view
+    _axes : list
+        List of axes to iterate over
+    _percent_overlay : float
+        Percent overlap of tiles
+    _fov : dict
+        Dictionary of fov values for each axis
+    cam_settings_widgets : dict
+        Dictionary of widgets in the camera settings tab
+    stack_acq_widgets : dict
+        Dictionary of widgets in the stack acquisition tab
+    stage_position_vars : dict
+        Dictionary of variables in the stage control tab
+    multipoint_table : ttk.Treeview
+        Treeview of multipoint table in the multipoint tab
+
+    Methods
     -------
-    None
+    calculate_distance()
+        Calculate the distance between start and end positions for each axis
+    calculate_tiles()
+        Calculate the number of tiles for each axis
+    update_table()
+        Update the multipoint table with the new tiling parameters
+    update_fov()
+        Update the fov values when the user changes the camera settings
+    position_handler()
+        Handler for the set start/end position buttons
+    set_table()
+        Set the multipoint table to the tiling parameters
+    showup()
+        Show the popup
+    update_overlay()
+        Update the percent overlap when the user changes the value
+    update_total_tiles()
+        Update the total number of tiles when the user changes the value
+
     """
 
     def __init__(self, view, parent_controller):
@@ -314,7 +355,6 @@ class TilingWizardController(GUIController):
         ----------
         self : object
             Tiling Wizard Controller instance
-
 
         Returns
         -------

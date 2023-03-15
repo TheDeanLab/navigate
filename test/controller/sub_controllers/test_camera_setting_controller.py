@@ -254,6 +254,9 @@ class TestCameraSettingController():
     @pytest.mark.parametrize("readout", ['Normal', 'Light-Sheet'])
     def test_set_mode(self, mode, readout):
         
+        # Populate widgets with values from experiment file
+        self.camera_settings.populate_experiment_values()
+
         # Set mode
         self.camera_settings.mode_widgets['Sensor'].widget.set(readout)
         self.camera_settings.update_sensor_mode()

@@ -76,10 +76,8 @@ class Model:
         Flag for whether or not to leverage CUDA analysis engine.
     args : str
         ...
-    configuration_path : str
+    configuration : str
         File path for the global configuration of the microscope
-    experiment_path : str
-        File path for the experiment configuration of the microscope
     event_queue : ...
         ...
 
@@ -265,7 +263,7 @@ class Model:
                     {
                         "name": LoopByCount,
                         "args": ("experiment.MicroscopeState.timepoints",),
-                    }
+                    },
                 )
             ],
             "customized": [],
@@ -829,21 +827,12 @@ class Model:
         # Stash current position, channel, timepoint
         # Do this here, because signal container functions can inject changes
         # to the stage
-        self.data_buffer_positions[self.frame_id][0] = self.configuration["experiment"][
-            "StageParameters"
-        ]["x"]
-        self.data_buffer_positions[self.frame_id][1] = self.configuration["experiment"][
-            "StageParameters"
-        ]["y"]
-        self.data_buffer_positions[self.frame_id][2] = self.configuration["experiment"][
-            "StageParameters"
-        ]["z"]
-        self.data_buffer_positions[self.frame_id][3] = self.configuration["experiment"][
-            "StageParameters"
-        ]["theta"]
-        self.data_buffer_positions[self.frame_id][4] = self.configuration["experiment"][
-            "StageParameters"
-        ]["f"]
+        stage_pos = self.get_stage_position()
+        self.data_buffer_positions[self.frame_id][0] = stage_pos["x_pos"]
+        self.data_buffer_positions[self.frame_id][1] = stage_pos["y_pos"]
+        self.data_buffer_positions[self.frame_id][2] = stage_pos["z_pos"]
+        self.data_buffer_positions[self.frame_id][3] = stage_pos["theta_pos"]
+        self.data_buffer_positions[self.frame_id][4] = stage_pos["f_pos"]
 
         # Run the acquisition
         self.active_microscope.daq.run_acquisition()
@@ -912,12 +901,13 @@ class Model:
             )
 
             offsets = self.active_microscope.zoom.stage_offsets
+            solvent = self.configuration["experiment"]["Saving"]["solvent"]
             if (
                 offsets is not None
                 and curr_zoom is not None
                 and self.active_microscope_name == former_microscope
+                and solvent in offsets.keys()
             ):
-                solvent = self.configuration["experiment"]["Saving"]["solvent"]
                 self.stop_stage()
                 curr_pos = self.get_stage_position()
                 update_stage_dict(self, curr_pos)
@@ -944,7 +934,7 @@ class Model:
                 # )
 
         except ValueError as e:
-            self.logger.debug(f"{self.active_microscope_name}: {e}")
+            self.logger.debug(f"{self.active_microscope_name} - {e}")
 
     def load_images(self, filenames=None):
         """Load/Unload images to the Synthetic Camera

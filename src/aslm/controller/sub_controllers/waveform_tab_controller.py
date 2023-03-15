@@ -46,6 +46,38 @@ logger = logging.getLogger(p)
 
 
 class WaveformTabController(GUIController):
+    """Controller for the waveform tab
+
+    Parameters
+    ----------
+    view : aslm.view.waveform_tab.WaveformTab
+        View for the waveform tab
+    parent_controller : aslm.controller.main_controller.MainController
+        Parent controller for the waveform tab
+
+    Attributes
+    ----------
+    waveform_dict : dict
+        Dictionary of waveforms
+    sample_rate : int
+        Sample rate of the waveforms
+    remote_focus_waveform : int
+        Remote focus waveform
+    laser_ao_waveforms : int
+        Laser analog output waveforms
+
+    Methods
+    -------
+    update_sample_rate(*args)
+        Update the sample rate in the waveform settings
+    update_waveforms(waveform_dict, sample_rate)
+        Update the waveforms in the waveform tab
+    initialize_plots()
+        Initialize the plots in the waveform tab
+    plot_waveforms(event)
+        Plot the waveforms in the waveform tab
+    """
+
     def __init__(self, view, parent_controller=None):
         super().__init__(view, parent_controller)
         self.remote_focus_waveform = 0

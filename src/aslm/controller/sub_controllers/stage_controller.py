@@ -41,6 +41,76 @@ logger = logging.getLogger(p)
 
 
 class StageController(GUIController):
+    """StageController
+
+    This class is the controller for the stage GUI. It handles the stage movement
+    and the stage limits. It also handles the stage movement buttons and the
+    stage movement limits.
+
+    Parameters
+    ----------
+    view : aslm.view.stage_view.StageView
+        The stage view
+    main_view : tkinter.Tk
+        The main view of the microscope
+    canvas : tkinter.Canvas
+        The canvas of the microscope
+    parent_controller : aslm.controller.microscope_controller.MicroscopeController
+        The parent controller of the stage controller
+
+    Attributes
+    ----------
+    main_view : tkinter.Tk
+        The main view of the microscope
+    canvas : tkinter.Canvas
+        The canvas of the microscope
+    stage_setting_dict : dict
+        The stage settings dictionary
+    event_id : dict
+        The event id dictionary
+    position_min : dict
+        The minimum position dictionary
+    position_max : dict
+        The maximum position dictionary
+    widget_vals : dict
+        The widget values dictionary
+    position_callback_traces : dict
+        The position callback traces dictionary
+    position_callbacks_bound : bool
+        The position callbacks bound boolean
+
+    Methods
+    -------
+    bind_position_callbacks()
+        Bind the position callbacks
+    down_btn_handler(axis)
+        The down button handler
+    get_position()
+        Get the position
+    initialize()
+        Initialize the stage limits of steps and positions
+    populate_experiment_values()
+        Populate the experiment values
+    position_callback(axis, position)
+        The position callback
+    set_position(position)
+        Set the position
+    set_position_silent(position)
+        Set the position silently
+    stage_key_press(event)
+        The stage key press
+    stop_button_handler()
+        The stop button handler
+    unbind_position_callbacks()
+        Unbind the position callbacks
+    up_btn_handler(axis)
+        The up button handler
+    xy_zero_btn_handler()
+        The xy zero button handler
+    zero_btn_handler(axis)
+        The zero button handler
+    """
+
     def __init__(self, view, main_view, canvas, parent_controller):
         super().__init__(view, parent_controller)
 
@@ -80,6 +150,17 @@ class StageController(GUIController):
         self.initialize()
 
     def stage_key_press(self, event):
+        """The stage key press
+
+        Parameters
+        ----------
+        event : tkinter.Event
+            The tkinter event
+
+        Returns
+        -------
+        None
+        """
         char = event.char.lower()
         current_position = self.get_position()
         if current_position is None:
@@ -102,6 +183,11 @@ class StageController(GUIController):
         ----------
         config : multiprocesing.managers.DictProxy
             Global configuration of the microscope
+
+        Returns
+        -------
+        None
+
         """
         config = self.parent_controller.configuration_controller
         self.position_min = config.get_stage_position_limits("_min")
@@ -126,7 +212,16 @@ class StageController(GUIController):
 
     def bind_position_callbacks(self):
         """Binds position_callback() to each axis, records the trace name so we can
-        unbind later."""
+        unbind later.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
         if not self.position_callbacks_bound:
             for axis in ["x", "y", "z", "theta", "f"]:
                 # add event bind to position entry variables
@@ -137,7 +232,16 @@ class StageController(GUIController):
             self.position_callbacks_bound = True
 
     def unbind_position_callbacks(self):
-        """Unbinds position callbacks."""
+        """Unbinds position callbacks.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
         if self.position_callbacks_bound:
             for axis, cbname in self.position_callback_traces.items():
                 self.widget_vals[axis].trace_remove("write", cbname)
@@ -148,10 +252,11 @@ class StageController(GUIController):
 
         Parameters
         ----------
-        setting_dict : dict
-             setting_dict = { 'x': value, 'y': value, 'z': value, 'theta': value,
-                              'f': value, 'xy_step': value, 'z_step': value,
-                              'theta_step': value, 'f_step': value}
+        None
+
+        Returns
+        -------
+        None
         """
         self.stage_setting_dict = self.parent_controller.configuration["experiment"][
             "StageParameters"
@@ -168,6 +273,10 @@ class StageController(GUIController):
         ----------
         position : dict
             {'x': value, 'y': value, 'z': value, 'theta': value, 'f': value}
+
+        Returns
+        -------
+        None
         """
         widgets = self.view.get_widgets()
         for axis in ["x", "y", "z", "theta", "f"]:
@@ -184,6 +293,10 @@ class StageController(GUIController):
         ----------
         position : dict
             {'x': value, 'y': value, 'z': value, 'theta': value, 'f': value}
+
+        Returns
+        -------
+        None
         """
         self.unbind_position_callbacks()
 
@@ -194,10 +307,15 @@ class StageController(GUIController):
     def get_position(self):
         """This function returns current position from the view.
 
+        Parameters
+        ----------
+        None
+
         Returns
         -------
         position : dict
             Dictionary of x, y, z, theta, and f values.
+
         """
         position = {}
         try:
@@ -220,7 +338,7 @@ class StageController(GUIController):
 
         Parameters
         ----------
-        axis = str
+        axis : str
             Should be one of 'x', 'y', 'z', 'theta', 'f'
             position_axis += step_axis
 
@@ -253,10 +371,9 @@ class StageController(GUIController):
         """This function generates command functions according to the desired axis
         to move.
 
-
         Parameters
         ----------
-        axis = str
+        axis : str
             Should be one of 'x', 'y', 'z', 'theta', 'f'
             position_axis += step_axis
 
@@ -289,10 +406,9 @@ class StageController(GUIController):
         """This function generates command functions according to the desired axis
         to move.
 
-
         Parameters
         ----------
-        axis = str
+        axis : str
             Should be one of 'z', 'theta', 'f'
             position_axis = 0
 
@@ -311,6 +427,10 @@ class StageController(GUIController):
     def xy_zero_btn_handler(self):
         """This function generates command functions to set xy position to zero
 
+        Parameters
+        ----------
+        None
+
         Returns
         -------
         handler : object
@@ -326,7 +446,16 @@ class StageController(GUIController):
         return handler
 
     def stop_button_handler(self):
-        """This function stops the stage after a 250 ms debouncing period of time."""
+        """This function stops the stage after a 250 ms debouncing period of time.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
         self.view.after(250, lambda: self.parent_controller.execute("stop_stage"))
 
     def position_callback(self, axis, **kwargs):
@@ -375,7 +504,7 @@ class StageController(GUIController):
             except AttributeError:
                 logger.error(f"Attribute Error Caught: trying to set position {axis}")
                 return
-                
+
             # update stage position
             self.stage_setting_dict[axis] = position
             # Debouncing wait duration - Duration of time to integrate the number of
@@ -383,9 +512,7 @@ class StageController(GUIController):
             # 1s, only moves to the final value.
             self.event_id[axis] = self.view.after(
                 250,
-                lambda: self.parent_controller.execute(
-                    "stage", position, axis
-                ),
+                lambda: self.parent_controller.execute("stage", position, axis),
             )
 
             self.show_verbose_info("Stage position changed")

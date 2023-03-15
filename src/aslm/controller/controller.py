@@ -612,6 +612,8 @@ class Controller:
         self.camera_setting_controller.update_experiment_values()
 
         # TODO: validate experiment dict
+        if self.configuration["experiment"]["MicroscopeState"]["scanrange"] == 0:
+            return False
         return True
 
     def prepare_acquire_data(self):
@@ -890,6 +892,7 @@ class Controller:
             self.sloppy_stop()
             self.set_mode_of_sub("stop")
             self.acquire_bar_controller.stop_progress_bar()
+            self.acquire_bar_controller.view.acquire_btn.configure(state="normal")
 
         elif command == "exit":
             """Exit the program."""
@@ -952,6 +955,7 @@ class Controller:
         )
 
         self.model.run_command(command)
+        self.acquire_bar_controller.view.acquire_btn.configure(state="normal")
 
         self.camera_view_controller.initialize_non_live_display(
             self.data_buffer,

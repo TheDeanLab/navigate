@@ -170,7 +170,7 @@ class NIDAQ(DAQBase):
                     n_timepoints *= self.configuration["experiment"]["MicroscopeState"][
                         "n_plane"
                     ]
-                    self.analog_output_tasks[-1].timing.cfg_samp_clk_timing(
+                    self.analog_output_tasks[board].timing.cfg_samp_clk_timing(
                         rate=sample_rates[0],
                         sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
                         samps_per_chan=int(self.n_sample * n_timepoints),

@@ -49,7 +49,7 @@ from aslm.model.features.common_features import (
     FindTissueSimple2D,
     PrepareNextChannel,
     LoopByCount,
-    ConProAcquisition,
+    ConProAcquisition, # noqa
     StackPause,
 )
 from aslm.model.features.feature_container import load_features

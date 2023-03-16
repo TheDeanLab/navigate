@@ -49,7 +49,7 @@ from aslm.model.features.common_features import (
     FindTissueSimple2D,
     PrepareNextChannel,
     LoopByCount,
-    ConProAcquisition,
+    ConProAcquisition,  # noqa
 )
 from aslm.model.features.feature_container import load_features
 from aslm.model.features.restful_features import IlastikSegmentation
@@ -894,12 +894,13 @@ class Model:
             )
 
             offsets = self.active_microscope.zoom.stage_offsets
+            solvent = self.configuration["experiment"]["Saving"]["solvent"]
             if (
                 offsets is not None
                 and curr_zoom is not None
                 and self.active_microscope_name == former_microscope
+                and solvent in offsets.keys()
             ):
-                solvent = self.configuration["experiment"]["Saving"]["solvent"]
                 self.stop_stage()
                 curr_pos = self.get_stage_position()
                 update_stage_dict(self, curr_pos)
@@ -926,7 +927,7 @@ class Model:
                 # )
 
         except ValueError as e:
-            self.logger.debug(f"{self.active_microscope_name}: {e}")
+            self.logger.debug(f"{self.active_microscope_name} - {e}")
 
     def load_images(self, filenames=None):
         """Load/Unload images to the Synthetic Camera

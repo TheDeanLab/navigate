@@ -228,15 +228,6 @@ class GalvoBase:
                     self.waveform_dict[channel_key] < self.galvo_min_voltage
                 ] = self.galvo_min_voltage
 
-                if microscope_state["image_mode"] == "confocal-projection":
-                    self.waveform_dict[channel_key] = np.hstack(
-                        [self.waveform_dict[channel_key]]
-                        * int(microscope_state["n_plane"])
-                    )
-                    self.samples = int(
-                        self.sample_rate * self.sweep_time * microscope_state["n_plane"]
-                    )
-
         return self.waveform_dict
 
     def prepare_task(self, channel_key):

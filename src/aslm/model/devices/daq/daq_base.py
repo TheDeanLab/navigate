@@ -140,7 +140,7 @@ class DAQBase:
                     # last lines compared to the first lines causes the exposure to be
                     # net longer than exposure_time. This helps the galvo keep sweeping
                     # for the full camera exposure time.
-                    self.sweep_time += readout_time
+                    self.sweep_time += readout_time # we could set it to 0.14 instead of 0.16384 according to the test
 
                 self.waveform_dict[channel_key] = camera_exposure(
                     sample_rate=self.sample_rate,

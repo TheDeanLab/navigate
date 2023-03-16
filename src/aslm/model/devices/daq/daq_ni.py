@@ -201,6 +201,17 @@ class NIDAQ(DAQBase):
         have only one clock for analog output sample timing, and as such all channels
         must be grouped here.
         """
+        n_samples = list(set([v["samples"] for v in self.analog_outputs.values()]))
+        if len(n_samples) > 1:
+            logger.debug(
+                "NI DAQ - Different number of samples provided for each analog"
+                "channel. Defaulting to the minimum number of samples provided."
+                "Waveforms will be clipped to this length."
+            )
+        self.n_sample = min(n_samples)
+        max_sample = self.n_sample * self.waveform_expand_num
+        # TODO: GalvoStage and remote_focus waveform are not calculated based on a same sweep time. There needs some fix.
+
         # Create one analog output task per board, grouping the channels
         boards = list(set([x.split("/")[0] for x in self.analog_outputs.keys()]))
         for board in boards:
@@ -209,7 +220,7 @@ class NIDAQ(DAQBase):
                     [x for x in self.analog_outputs.keys() if x.split("/")[0] == board]
                 )
             )
-            if create_new_tasks or self.n_sample is None:
+            if create_new_tasks:
                 self.analog_output_tasks[board] = nidaqmx.Task()
                 self.analog_output_tasks[board].ao_channels.add_ao_voltage_chan(channel)
 
@@ -221,34 +232,13 @@ class NIDAQ(DAQBase):
                         "NI DAQ - Different sample rates provided for each analog channel."
                         "Defaulting to the first sample rate provided."
                     )
-                n_samples = list(set([v["samples"] for v in self.analog_outputs.values()]))
-                if len(n_samples) > 1:
-                    logger.debug(
-                        "NI DAQ - Different number of samples provided for each analog"
-                        "channel. Defaulting to the minimum number of samples provided."
-                        "Waveforms will be clipped to this length."
-                    )
-                self.n_sample = min(n_samples)
-                #TODO: apply templates to analog tasks
-                if (
-                    self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-                    == "confocal-projection"
-                ):
-                    n_timepoints = self.configuration["experiment"]["MicroscopeState"]["timepoints"]
-                    n_timepoints *= self.configuration["experiment"]["MicroscopeState"][
-                        "n_plane"
-                    ]
-                    self.analog_output_tasks[board].timing.cfg_samp_clk_timing(
-                        rate=sample_rates[0],
-                        sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
-                        samps_per_chan=int(self.n_sample * n_timepoints),
-                    )
-                else:
-                    self.analog_output_tasks[board].timing.cfg_samp_clk_timing(
-                        rate=sample_rates[0],
-                        sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
-                        samps_per_chan=self.n_sample,
-                    )
+
+                #apply templates to analog tasks
+                self.analog_output_tasks[board].timing.cfg_samp_clk_timing(
+                    rate=sample_rates[0],
+                    sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
+                    samps_per_chan=max_sample * self.waveform_repeat_num,
+                )
 
                 # triggers = list(
                 #     set([v["trigger_source"] for v in self.analog_outputs.values()])
@@ -261,11 +251,16 @@ class NIDAQ(DAQBase):
                 # self.analog_output_tasks[board].triggers.start_trigger.cfg_dig_edge_start_trig(
                 #     triggers[0]
                 # )
-
+            # TODO: may change this later to automatically expand the waveform to the longest
+            for k, v in self.analog_outputs.items():
+                if k.split("/")[0] == board and v["samples"] < max_sample:
+                    v["waveform"][channel_key] = np.hstack(
+                        [v["waveform"][channel_key]] * self.waveform_expand_num
+                    )
             # Write values to board
             waveforms = np.vstack(
                 [
-                    v["waveform"][channel_key][:self.n_sample]
+                    v["waveform"][channel_key][:max_sample]
                     for k, v in self.analog_outputs.items()
                     if k.split("/")[0] == board
                 ]

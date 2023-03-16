@@ -67,7 +67,7 @@ microscopes:
       lightsheet_rolling_shutter_width: 608
       defect_correct_mode: 2.0
       binning: 1x1
-      readout_speed: 1.0
+      readout_speed: 0x7FFFFFFF
       trigger_active: 1.0
       trigger_mode: 1.0 # external light-sheet mode
       trigger_polarity: 2.0  # positive pulse
@@ -296,7 +296,7 @@ microscopes:
       lightsheet_rolling_shutter_width: 100
       defect_correct_mode: 2.0
       binning: 1x1
-      readout_speed: 1.0
+      readout_speed: 0x7FFFFFFF
       trigger_active: 1.0
       trigger_mode: 1.0 # external light-sheet mode
       trigger_polarity: 2.0  # positive pulse

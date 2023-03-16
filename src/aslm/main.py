@@ -69,6 +69,7 @@ def main():
         --experiment_file
         --waveform_constants_path
         --rest_api_file
+        --waveform_templates_file
         --logging_config
 
     Returns
@@ -93,6 +94,7 @@ def main():
         experiment_path,
         waveform_constants_path,
         rest_api_path,
+        waveform_templates_path,
         logging_path,
     ) = evaluate_parser_input_arguments(args)
 
@@ -106,6 +108,7 @@ def main():
         experiment_path,
         waveform_constants_path,
         rest_api_path,
+        waveform_templates_path,
         use_gpu,
         args,
     )

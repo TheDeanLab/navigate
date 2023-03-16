@@ -1,0 +1,10 @@
+{
+  "Default": {
+    "repeat": 1,
+    "expand": False,
+  },
+  "Confocal-Projection": {
+    "repeat": timepoints,
+    "expand": n_plane,
+  }
+}

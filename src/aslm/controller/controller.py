@@ -119,6 +119,7 @@ class Controller:
         experiment_path,
         waveform_constants_path,
         rest_api_path,
+        waveform_templates_path,
         use_gpu,
         args,
     ):
@@ -138,6 +139,7 @@ class Controller:
             experiment=experiment_path,
             waveform_constants=waveform_constants_path,
             rest_api_config=rest_api_path,
+            waveform_templates=waveform_templates_path,
         )
 
         # Initialize the Model

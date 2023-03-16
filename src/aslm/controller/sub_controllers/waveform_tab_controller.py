@@ -70,6 +70,8 @@ class WaveformTabController(GUIController):
     -------
     update_sample_rate(*args)
         Update the sample rate in the waveform settings
+    update_waveform_template(*args)
+        Update waveform_template selection
     update_waveforms(waveform_dict, sample_rate)
         Update the waveforms in the waveform tab
     initialize_plots()
@@ -95,6 +97,12 @@ class WaveformTabController(GUIController):
         )
         self.view.waveform_settings.inputs["sample_rate"].get_variable().trace_add(
             "write", self.update_sample_rate
+        )
+
+        self.view.waveform_settings.inputs["waveform_template"].widget["values"] = list(self.parent_controller.configuration["waveform_templates"].keys())
+        self.view.waveform_settings.inputs["waveform_template"].set("Default")
+        self.view.waveform_settings.inputs["waveform_template"].widget.bind(
+            "<<ComboboxSelected>>", self.update_waveform_template
         )
 
         self.view.bind(
@@ -129,6 +137,25 @@ class WaveformTabController(GUIController):
             microscope_name
         ]["daq"]["sample_rate"] = int(sample_rate)
         self.sample_rate = int(sample_rate)
+
+    def update_waveform_template(self, *args):
+        """Update waveform template selection
+
+        Parameters
+        ----------
+        *args : tuple
+            Unused
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> self.update_waveform_template()
+        """
+        self.parent_controller.configuration["experiment"]["MicroscopeState"]["waveform_template"] = \
+            self.view.waveform_settings.inputs["waveform_template"].get()
 
     def update_waveforms(self, waveform_dict, sample_rate):
         """Update the waveforms in the waveform tab

@@ -59,6 +59,8 @@ class NIDAQ(DAQBase):
         super().__init__(configuration)
         self.camera_trigger_task = None
         self.master_trigger_task = None
+        self.trigger_mode = 0 # 0: self-trigger, 1: external-trigger
+        self.external_trigger = None
         try:
             # switching_port = self.configuration["configuration"]["microscopes"][
             #     self.microscope_name
@@ -78,6 +80,74 @@ class NIDAQ(DAQBase):
         if self.camera_trigger_task is not None:
             self.stop_acquisition()
 
+    def set_trigger_mode(self, mode, external_trigger=None):
+        self.trigger_mode = mode
+        self.external_trigger = external_trigger
+
+        # change trigger mode during acquisition in a feature
+        if mode == 0:
+            self.create_master_trigger_task()
+            trigger_source = self.configuration["configuration"]["microscopes"][
+            self.microscope_name
+            ]["daq"]["trigger_source"]
+            # set camera task trigger source
+            self.camera_trigger_task.triggers.start_trigger.cfg_dig_edge_start_trig(
+                trigger_source
+            )
+            self.camera_trigger_task.triggers.start_trigger.retriggerable = False
+            # set analog task trigger source
+            for board_name in self.analog_output_tasks.keys():
+                self.analog_output_tasks[board_name].triggers.start_trigger.cfg_dig_edge_start_trig(trigger_source)
+                self.analog_output_tasks[board_name].register_done_event(None)
+
+        else:
+            # close master trigger task
+            if self.master_trigger_task:
+                self.master_trigger_task.stop()
+                self.master_trigger_task.close()
+            self.master_trigger_task = None
+            # camera task trigger source
+            self.camera_trigger_task.triggers.start_trigger.cfg_dig_edge_start_trig(self.external_trigger)
+            # change camera task to regeneratable.
+            self.camera_trigger_task.triggers.start_trigger.retriggerable = True
+            # add callback function to analog tasks
+            for board_name in self.analog_output_tasks.keys():
+                task = self.analog_output_tasks[board_name]
+                task.triggers.start_trigger.cfg_dig_edge_start_trig(self.external_trigger)
+                task.register_done_event(self.restart_callback_func(task))
+
+    def restart_analog_task_callback_func(self, task):
+        def callback_func(task_handle, status, callback_data):
+            try:
+                task.stop()
+                task.start()
+            except:
+                print("*** there is some error when restarting the analog task")
+            return status
+        return callback_func
+    
+    def get_waveform_template_parameters(self):
+        waveform_template_name = self.configuration['experiment']['MicroscopeState']["waveform_template"]
+        waveform_template = self.configuration["waveform_templates"][waveform_template_name]
+        try:
+            if type(waveform_template["repeat"]) is int:
+                repeat_num = waveform_template["repeat"]
+            else:
+                repeat_num = int(self.configuration['experiment']['MicroscopeState'][waveform_template["repeat"]])
+        except:
+            repeat_num = 1
+
+        try:
+            if type(waveform_template["expand"]) is int:
+                expand_num = waveform_template["expand"]
+            else:
+                expand_num = int(self.configuration['experiment']['MicroscopeState'][waveform_template["expand"]])
+        except:
+            expand_num = 1
+
+        return repeat_num, expand_num
+
+
     def create_camera_task(self, exposure_time):
         """Set up the camera trigger task.
 
@@ -86,6 +156,7 @@ class NIDAQ(DAQBase):
         exposure_time : float
             Duration of camera exposure.
         """
+        self.camera_trigger_task = nidaqmx.Task()
         camera_trigger_out_line = self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ]["daq"]["camera_trigger_out_line"]
@@ -102,21 +173,20 @@ class NIDAQ(DAQBase):
             low_time=self.camera_low_time,
             initial_delay=self.camera_delay,
         )
-        trigger_source = self.configuration["configuration"]["microscopes"][
-            self.microscope_name
-        ]["daq"]["trigger_source"]
-        self.camera_trigger_task.triggers.start_trigger.cfg_dig_edge_start_trig(
-            trigger_source
-        )
+        # trigger_source = self.configuration["configuration"]["microscopes"][
+        #     self.microscope_name
+        # ]["daq"]["trigger_source"]
+        # self.camera_trigger_task.triggers.start_trigger.cfg_dig_edge_start_trig(
+        #     trigger_source
+        # )
 
-        if self.configuration['experiment']['MicroscopeState']['image_mode'] == 'confocal-projection':
-            n_timepoints = self.configuration['experiment']['MicroscopeState']['timepoints']
-            n_timepoints *= self.configuration['experiment']['MicroscopeState']['n_plane']
-            print(f"times equals {self.configuration['experiment']['MicroscopeState']['n_plane']} is {n_timepoints}")
-            self.camera_trigger_task.timing.cfg_implicit_timing(sample_mode=nidaqmx.constants.AcquisitionType.FINITE, samps_per_chan=int(n_timepoints))
+        # apply waveform templates
+        camera_waveform_repeat_num = self.waveform_repeat_num * self.waveform_expand_num
+        self.camera_trigger_task.timing.cfg_implicit_timing(sample_mode=nidaqmx.constants.AcquisitionType.FINITE, samps_per_chan=camera_waveform_repeat_num)
 
     def create_master_trigger_task(self):
         """Set up the DO master trigger task."""
+        self.master_trigger_task = nidaqmx.Task()
         master_trigger_out_line = self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ]["daq"]["master_trigger_out_line"]
@@ -159,6 +229,7 @@ class NIDAQ(DAQBase):
                         "Waveforms will be clipped to this length."
                     )
                 self.n_sample = min(n_samples)
+                #TODO: apply templates to analog tasks
                 if (
                     self.configuration["experiment"]["MicroscopeState"]["image_mode"]
                     == "confocal-projection"
@@ -179,17 +250,17 @@ class NIDAQ(DAQBase):
                         samps_per_chan=self.n_sample,
                     )
 
-                triggers = list(
-                    set([v["trigger_source"] for v in self.analog_outputs.values()])
-                )
-                if len(triggers) > 1:
-                    logger.debug(
-                        "NI DAQ - Different triggers provided for each analog channel."
-                        "Defaulting to the first trigger provided."
-                    )
-                self.analog_output_tasks[board].triggers.start_trigger.cfg_dig_edge_start_trig(
-                    triggers[0]
-                )
+                # triggers = list(
+                #     set([v["trigger_source"] for v in self.analog_outputs.values()])
+                # )
+                # if len(triggers) > 1:
+                #     logger.debug(
+                #         "NI DAQ - Different triggers provided for each analog channel."
+                #         "Defaulting to the first trigger provided."
+                #     )
+                # self.analog_output_tasks[board].triggers.start_trigger.cfg_dig_edge_start_trig(
+                #     triggers[0]
+                # )
 
             # Write values to board
             waveforms = np.vstack(
@@ -214,12 +285,7 @@ class NIDAQ(DAQBase):
         exposure_time : float
             Camera exposure duration.
         """
-
-        self.camera_trigger_task = nidaqmx.Task()
-        self.master_trigger_task = nidaqmx.Task()
-
-        # Specify ports, timing, and triggering
-        self.create_master_trigger_task()
+        self.waveform_repeat_num, self.waveform_expand_num = self.get_waveform_template_parameters()
         self.create_camera_task(exposure_time)
         self.create_analog_output_tasks(channel_key)
 
@@ -227,6 +293,8 @@ class NIDAQ(DAQBase):
         self.is_updating_analog_task = False
         if self.wait_to_run_lock.locked():
             self.wait_to_run_lock.release()
+        # Specify ports, timing, and triggering
+        self.set_trigger_mode(self.trigger_mode, self.external_trigger)
 
     def run_acquisition(self):
         """Run DAQ Acquisition.

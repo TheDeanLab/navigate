@@ -1,7 +1,7 @@
 {
   "Default": {
     "repeat": 1,
-    "expand": False,
+    "expand": 1,
   },
   "Confocal-Projection": {
     "repeat": timepoints,

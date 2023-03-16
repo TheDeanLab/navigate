@@ -87,6 +87,9 @@ class DAQBase:
         for k in configuration["configuration"]["gui"]["channels"].keys():
             self.waveform_dict[k] = None
 
+        self.waveform_repeat_num = 1
+        self.waveform_expand_num = 1
+
     def calculate_all_waveforms(self, microscope_name, readout_time):
         """Pre-calculates all waveforms necessary for the acquisition and organizes in
         a dictionary format.

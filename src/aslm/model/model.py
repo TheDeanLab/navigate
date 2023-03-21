@@ -262,6 +262,9 @@ class Model:
             "confocal-projection": [
                 {"name": PrepareNextChannel},
             ],
+            "ConstantVelocityAcquisition": [
+                {"name": ConstantVelocityAcquisition}
+            ],
             "customized": [],
         }
 
@@ -520,11 +523,6 @@ class Model:
             """
             autofocus = Autofocus(self)
             autofocus.run(*args)
-
-        elif command == "constant_velocity_acquisition":
-            constant_velocity_acquisition = ConstantVelocityAcquisition(self)
-            constant_velocity_acquisition.run(*args)
-
         elif command == "load_feature":
             """
             args[0]: int, args[0]-1 is the id of features
@@ -567,11 +565,15 @@ class Model:
             """
             self.logger.info("ASLM Model - Stopping with stop command.")
             self.stop_acquisition = True
+            if self.imaging_mode == "ConstantVelocityAcquisition":
+                self.active_microscope.stages['x'].tiger_controller.stop_scan()
+                self.active_microscope.stages['x'].tiger_controller.halt()
             if self.signal_thread:
                 self.signal_thread.join()
             if self.data_thread:
                 self.data_thread.join()
-            self.end_acquisition()
+            else:
+                self.end_acquisition()
 
     def move_stage(self, pos_dict, wait_until_done=False):
         """Moves the stages.
@@ -827,12 +829,12 @@ class Model:
         # Stash current position, channel, timepoint
         # Do this here, because signal container functions can inject changes
         # to the stage
-        stage_pos = self.get_stage_position()
-        self.data_buffer_positions[self.frame_id][0] = stage_pos["x_pos"]
-        self.data_buffer_positions[self.frame_id][1] = stage_pos["y_pos"]
-        self.data_buffer_positions[self.frame_id][2] = stage_pos["z_pos"]
-        self.data_buffer_positions[self.frame_id][3] = stage_pos["theta_pos"]
-        self.data_buffer_positions[self.frame_id][4] = stage_pos["f_pos"]
+        # stage_pos = self.get_stage_position()
+        # self.data_buffer_positions[self.frame_id][0] = stage_pos["x_pos"]
+        # self.data_buffer_positions[self.frame_id][1] = stage_pos["y_pos"]
+        # self.data_buffer_positions[self.frame_id][2] = stage_pos["z_pos"]
+        # self.data_buffer_positions[self.frame_id][3] = stage_pos["theta_pos"]
+        # self.data_buffer_positions[self.frame_id][4] = stage_pos["f_pos"]
 
         # Run the acquisition
         self.active_microscope.daq.run_acquisition()

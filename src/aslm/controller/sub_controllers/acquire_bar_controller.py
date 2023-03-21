@@ -64,6 +64,7 @@ class AcquireBarController(GUIController):
             "Alignment": "alignment",
             "Projection": "projection",
             "Confocal-Projection": "confocal-projection",
+            "ConstantVelocityAcquisition": "ConstantVelocityAcquisition",
             "Customized": "customized"
         }
 
@@ -129,6 +130,8 @@ class AcquireBarController(GUIController):
             number_of_slices = microscope_state['n_plane']
         elif mode == "z-stack":
             number_of_slices = microscope_state["number_z_steps"]
+        elif mode == "ConstantVelocityAcquisition":
+            number_of_slices = 100 # TODO
 
         top_anticipated_images = number_of_slices
         bottom_anticipated_images = (

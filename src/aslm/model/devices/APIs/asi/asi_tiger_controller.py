@@ -6,6 +6,8 @@ from serial import PARITY_NONE
 from serial import STOPBITS_ONE
 from serial.tools import list_ports
 
+import time
+
 
 class TigerException(Exception):
     """
@@ -226,15 +228,20 @@ class TigerController:
         else:
             return "B" in res
 
-    def wait_for_device(self, report: bool = False) -> None:
+    def wait_for_device(self, report: bool = False, timeout: float = 100) -> None:
         """Waits for the all motors to stop moving."""
         if not report:
             print("Waiting for device...")
         temp = self.verbose
         self.verbose = report
         busy = True
+        waiting_time = 0.0
         while busy:
             busy = self.is_device_busy()
+            if waiting_time >= timeout:
+                break
+            waiting_time += 0.1
+            time.sleep(0.1)
         self.verbose = temp
 
     def stop(self):
@@ -248,3 +255,52 @@ class TigerController:
             raise TigerException(response)
         else:
             print("ASI Stages stopped successfully")
+
+    def get_encoder_counts_per_mm(self, axis: str):
+        """
+        Get encoder counts pre mm of axis
+        """
+
+        self.send_command(f"CNTS {axis}")
+        response = self.read_response()
+        if response.startswith(":N"):
+            raise TigerException(response)
+        else:
+            return float(response.split("=")[1].split()[0])
+        
+    def scanr(self, start_position: float, end_position: float, enc_divide: int=0):
+        """
+        Set scan range.
+        """
+        if enc_divide == 0:
+            enc_divide = self.get_encoder_counts_per_mm()
+        command = f"SCANR X={start_position} Y={end_position} Z={enc_divide}"
+        self.send_command(command)
+        response = self.read_response()
+        if response.startswith(":N"):
+            raise TigerException(response)
+        
+    def start_scan(self, axis: str, is_single_axis_scan: bool=True):
+        """
+        Start scan
+
+        axis: 'X' or 'Y'
+        is_single_axis_scan: True for single axis scan
+        """
+        fast_axis_id = 0 if axis == 'X' else 1
+        slow_axis_id = 1 - fast_axis_id
+        if is_single_axis_scan:
+            slow_axis_id = 9
+        self.send_command(f"SCAN S Y={fast_axis_id} Z={slow_axis_id}")
+        response = self.read_response()
+        if response.startswith(":N"):
+            raise TigerException(response)
+
+    def stop_scan(self):
+        """
+        Stop scan.
+        """
+        self.send_command("SCAN P")
+        response = self.read_response()
+        if response.startswith(":N"):
+            raise TigerException(response)

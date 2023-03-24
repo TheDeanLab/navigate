@@ -35,7 +35,7 @@ Wiring
 
 - Identify the device name in NI MAX, and change it if you would like. Common names are ``Dev1``, ``Dev2``, etc. This name must correspond with the pinouts provided in the configuration file.
 
-- Connect the ``master_trigger_out_line`` to the ``trigger_source`` with a direct wire, commonly ``PXI6259/port0/line1`` and ``/PXI6259/PFI0``
+- Connect the ``global_trigger_output`` to the ``trigger_source`` with a direct wire, commonly ``PXI6259/port0/line1`` and ``/PXI6259/PFI0``
 
 .. note::
 
@@ -54,7 +54,7 @@ Hamamatsu
 
 * Shutdown the computer and intall the Hamamatsu frame grabber into an apporpriate PCIe-x16 slot on the motherboard.
 * Turn on the computer and the camera, and confirm that it is functioning properly in HCImageLive or Excap (one of the DCAM tools installed)
-* Connect the `camera_trigger_out_line` to the External Trigger of the Hamamatsu Camera. Commonly, this is done with a
+* Connect the `camera_trigger_output` to the External Trigger of the Hamamatsu Camera. Commonly, this is done with a
 counter port, e.g., ``/PXI6259/ctr0``
 
 Photometrics

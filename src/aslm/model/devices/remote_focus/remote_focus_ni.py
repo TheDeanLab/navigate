@@ -69,7 +69,7 @@ class RemoteFocusNI(RemoteFocusBase):
         The configuration of the device.
     task : nidaqmx.Task
         The task to control the device.
-    trigger_source : str
+    global_trigger_input : str
         The trigger source of the device.
     daq : nidaqmx.Task
         The connection to the device.
@@ -98,9 +98,9 @@ class RemoteFocusNI(RemoteFocusBase):
 
         self.task = None
 
-        self.trigger_source = configuration["configuration"]["microscopes"][
+        self.global_trigger_input = configuration["configuration"]["microscopes"][
             microscope_name
-        ]["daq"]["trigger_source"]
+        ]["daq"]["global_trigger_input"]
 
         # self.initialize_task()
 
@@ -138,7 +138,7 @@ class RemoteFocusNI(RemoteFocusBase):
             sample_mode=AcquisitionType.FINITE,
             samps_per_chan=self.samples,
         )
-        self.task.triggers.start_trigger.cfg_dig_edge_start_trig(self.trigger_source)
+        self.task.triggers.start_trigger.cfg_dig_edge_start_trig(self.global_trigger_input)
 
     def __del__(self):
         """Delete the task."""
@@ -168,7 +168,7 @@ class RemoteFocusNI(RemoteFocusBase):
         self.daq.analog_outputs[self.device_config["hardware"]["channel"]] = {
             "sample_rate": self.sample_rate,
             "samples": self.samples,
-            "trigger_source": self.trigger_source,
+            "global_trigger_input": self.global_trigger_input,
             "waveform": waveform_dict,
         }
 

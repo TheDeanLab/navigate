@@ -55,7 +55,7 @@ class TestCameraSettingController():
         assert self.camera_settings.default_pixel_size == camera_config_dict['pixel_size_in_microns']
         assert self.camera_settings.default_height == camera_config_dict['y_pixels']
         assert self.camera_settings.default_width == camera_config_dict['x_pixels']
-        assert self.camera_settings.trigger_source == camera_config_dict['trigger_source']
+        assert self.camera_settings.global_trigger_input == camera_config_dict['global_trigger_input']
         assert self.camera_settings.trigger_active == camera_config_dict['trigger_active']
         assert self.camera_settings.readout_speed == camera_config_dict['readout_speed']
         
@@ -108,7 +108,7 @@ class TestCameraSettingController():
 
     def test_attr(self):
         
-        attrs = [ 'in_initialization', 'resolution_value', 'number_of_pixels', 'mode', 'solvent', 'mode_widgets', 'framerate_widgets', 'roi_widgets', 'roi_btns', 'default_pixel_size', 'default_width', 'default_height', 'trigger_source', 'trigger_active', 'readout_speed', 'pixel_event_id']
+        attrs = [ 'in_initialization', 'resolution_value', 'number_of_pixels', 'mode', 'solvent', 'mode_widgets', 'framerate_widgets', 'roi_widgets', 'roi_btns', 'default_pixel_size', 'default_width', 'default_height', 'global_trigger_input', 'trigger_active', 'readout_speed', 'pixel_event_id']
         
         for attr in attrs:
             assert hasattr(self.camera_settings, attr)

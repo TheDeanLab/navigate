@@ -94,9 +94,9 @@ class GalvoNIStage(StageBase):
         self.microscope_name = microscope_name
         self.configuration = configuration
 
-        self.trigger_source = configuration["configuration"]["microscopes"][
+        self.global_trigger_input = configuration["configuration"]["microscopes"][
             microscope_name
-        ]["daq"]["trigger_source"]
+        ]["daq"]["global_trigger_input"]
         self.camera_delay_percent = configuration["configuration"]["microscopes"][
             microscope_name
         ]["camera"]["delay_percent"]
@@ -241,7 +241,7 @@ class GalvoNIStage(StageBase):
         self.daq.analog_outputs[self.axes_channels[0]] = {
             "sample_rate": self.sample_rate,
             "samples": self.samples,
-            "trigger_source": self.trigger_source,
+            "global_trigger_input": self.global_trigger_input,
             "waveform": self.waveform_dict,
         }
         return self.waveform_dict
@@ -318,7 +318,7 @@ class GalvoNIStage(StageBase):
         self.daq.analog_outputs[self.axes_channels[axis_num]] = {
             "sample_rate": self.sample_rate,
             "samples": self.samples,
-            "trigger_source": self.trigger_source,
+            "global_trigger_input": self.global_trigger_input,
             "waveform": self.waveform_dict,
         }
         # update analog waveform

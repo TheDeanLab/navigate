@@ -157,7 +157,7 @@ class TestHamamatsuOrca:
                 "trigger_active",
                 "trigger_mode",
                 "trigger_polarity",
-                "trigger_source",
+                "global_trigger_input",
             ]
             for parameter in parameters:
                 value = camera_controller.get_property_value(parameter)
@@ -332,7 +332,7 @@ class TestHamamatsuOrca:
         from aslm.model.concurrency.concurrency_tools import SharedNDArray
 
         # set software trigger
-        self.camera.camera_controller.set_property_value("trigger_source", 3)
+        self.camera.camera_controller.set_property_value("global_trigger_input", 3)
 
         assert self.camera.is_acquiring is False
 

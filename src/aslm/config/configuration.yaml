@@ -45,8 +45,8 @@ microscopes:
       sweep_time: 0.2
 
       # triggers
-      master_trigger_out_line: PXI6259/port0/line1
-      camera_trigger_out_line: /PXI6259/ctr0
+      global_trigger_output: PXI6259/port0/line1
+      camera_trigger_output: /PXI6259/ctr0
       trigger_source: /PXI6259/PFI0
 
       # Digital Laser Outputs
@@ -275,8 +275,8 @@ microscopes:
       sweep_time: 0.2
 
       # triggers
-      master_trigger_out_line: PXI6259/port0/line1
-      camera_trigger_out_line: /PXI6259/ctr0
+      global_trigger_output: PXI6259/port0/line1
+      camera_trigger_output: /PXI6259/ctr0
       trigger_source: /PXI6259/PFI0
 
       # Digital Laser Outputs

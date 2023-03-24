@@ -86,9 +86,9 @@ class NIDAQ(DAQBase):
         exposure_time : float
             Duration of camera exposure.
         """
-        camera_trigger_out_line = self.configuration["configuration"]["microscopes"][
+        camera_trigger_output = self.configuration["configuration"]["microscopes"][
             self.microscope_name
-        ]["daq"]["camera_trigger_out_line"]
+        ]["daq"]["camera_trigger_output"]
         self.camera_high_time = 0.004  # (self.camera_pulse_percent / 100) *
         # (exposure_time/1000)  # self.sweep_time
         self.camera_low_time = self.sweep_time - self.camera_high_time
@@ -97,16 +97,16 @@ class NIDAQ(DAQBase):
         )  # * 0.01 * self.sweep_time
 
         self.camera_trigger_task.co_channels.add_co_pulse_chan_time(
-            camera_trigger_out_line,
+            camera_trigger_output,
             high_time=self.camera_high_time,
             low_time=self.camera_low_time,
             initial_delay=self.camera_delay,
         )
-        trigger_source = self.configuration["configuration"]["microscopes"][
+        global_trigger_input = self.configuration["configuration"]["microscopes"][
             self.microscope_name
-        ]["daq"]["trigger_source"]
+        ]["daq"]["global_trigger_input"]
         self.camera_trigger_task.triggers.start_trigger.cfg_dig_edge_start_trig(
-            trigger_source
+            global_trigger_input
         )
 
         if self.configuration['experiment']['MicroscopeState']['image_mode'] == 'confocal-projection':
@@ -117,11 +117,11 @@ class NIDAQ(DAQBase):
 
     def create_master_trigger_task(self):
         """Set up the DO master trigger task."""
-        master_trigger_out_line = self.configuration["configuration"]["microscopes"][
+        global_trigger_output = self.configuration["configuration"]["microscopes"][
             self.microscope_name
-        ]["daq"]["master_trigger_out_line"]
+        ]["daq"]["global_trigger_output"]
         self.master_trigger_task.do_channels.add_do_chan(
-            master_trigger_out_line,
+            global_trigger_output,
             line_grouping=nidaqmx.constants.LineGrouping.CHAN_FOR_ALL_LINES,
         )
 
@@ -180,7 +180,7 @@ class NIDAQ(DAQBase):
                     )
 
                 triggers = list(
-                    set([v["trigger_source"] for v in self.analog_outputs.values()])
+                    set([v["global_trigger_input"] for v in self.analog_outputs.values()])
                 )
                 if len(triggers) > 1:
                     logger.debug(

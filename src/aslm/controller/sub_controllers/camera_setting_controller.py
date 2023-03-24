@@ -92,6 +92,7 @@ class CameraSettingController(GUIController):
         if camera_config_dict is None:
             return
 
+        # TODO: This should be retrieved from the camera itself.
         self.default_pixel_size = camera_config_dict["pixel_size_in_microns"]
         (
             self.default_width,

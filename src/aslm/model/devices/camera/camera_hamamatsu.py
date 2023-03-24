@@ -59,44 +59,75 @@ class HamamatsuOrca(CameraBase):
     def __init__(self, microscope_name, device_connection, configuration):
         super().__init__(microscope_name, device_connection, configuration)
 
-        # Values are pulled from the CameraParameters section of the configuration.yml
-        # file. Exposure time converted here from milliseconds to seconds.
-        self.set_sensor_mode(self.camera_parameters["sensor_mode"])
+        # Some values pulled from the CameraParameters section of the configuration.yml
+        # file.
 
+        # 12 for progressive, 1 for normal. Normal/Light-Sheet
+        sensor_mode = "Normal"
+        self.set_sensor_mode(sensor_mode)
+
+        defect_correct_mode = 2.0
         self.camera_controller.set_property_value(
-            "defect_correct_mode", self.camera_parameters["defect_correct_mode"]
+            "defect_correct_mode", defect_correct_mode
         )
+
+        # Exposure time converted here from milliseconds to seconds.
         self.camera_controller.set_property_value(
             "exposure_time", self.camera_parameters["exposure_time"] / 1000
         )
+
         self.camera_controller.set_property_value(
             "binning", int(self.camera_parameters["binning"][0])
         )
+
+        # 0x7FFFFFFF = FASTEST, or 1
+        # readout_speed = "0x7FFFFFFF"
         self.camera_controller.set_property_value(
             "readout_speed", self.camera_parameters["readout_speed"]
         )
+
+        trigger_active = 1.0
         self.camera_controller.set_property_value(
-            "trigger_active", self.camera_parameters["trigger_active"]
+            "trigger_active", trigger_active
         )
+
+        # external light-sheet mode
+        trigger_mode = 1.0
         self.camera_controller.set_property_value(
-            "trigger_mode", self.camera_parameters["trigger_mode"]
+            "trigger_mode", trigger_mode
         )
+
+        # positive pulse
+        trigger_polarity = 2.0
         self.camera_controller.set_property_value(
-            "trigger_polarity", self.camera_parameters["trigger_polarity"]
+            "trigger_polarity", trigger_polarity
         )
+
+        # 2 = external, 3 = software
+        trigger_source = 2.0
         self.camera_controller.set_property_value(
-            "trigger_source", self.camera_parameters["trigger_source"]
+            "trigger_source", trigger_source
         )
+
+        self.pixel_size_in_microns = self.camera_controller.get_property_value(
+            "physical_pixel_size"
+        )
+
+
+        # self.prop_setgetvalue(
+        #                 property_dict["subarray_mode"], DCAMPROP_MODE__OFF
+        #             )
+
         # DCAM_IDPROP_IMAGE_WIDTH/HEIGHT is readonly
         # self.camera_controller.set_property_value("image_height",
         #                                            self.camera_parameters['y_pixels'])
         # self.camera_controller.set_property_value("image_width",
         #                                            self.camera_parameters['x_pixels'])
 
-        logger.info("HamamatsuOrca Initialized")
+        logger.info("Hamamatsu Initialized")
 
     def __del__(self):
-        logger.info("HamamatsuOrca Shutdown")
+        logger.info("Hamamatsu Shutdown")
 
     @property
     def serial_number(self):
@@ -123,14 +154,15 @@ class HamamatsuOrca(CameraBase):
             "internal_line_interval",
             "image_height",
             "image_width",
-            "exposure_time",
+            "exposure_time"
+            "physical_pixel_size",
         ]
         for param in params:
             print(param, self.camera_controller.get_property_value(param))
             logger.info(param, self.camera_controller.get_property_value(param))
 
     def close_camera(self):
-        """Close HamamatsuOrca Camera"""
+        """Close Hamamatsu Camera"""
         self.camera_controller.dev_close()
 
     def set_sensor_mode(self, mode):

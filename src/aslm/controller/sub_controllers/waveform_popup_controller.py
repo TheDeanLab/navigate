@@ -96,6 +96,7 @@ class WaveformPopupController(GUIController):
 
         # Initialize variables
         self.resolution = None
+        self.resolution_value = None
         self.mag = None
         self.mode = "stop"
         self.remote_focus_experiment_dict = None
@@ -272,25 +273,27 @@ class WaveformPopupController(GUIController):
         self.remote_focus_experiment_dict = self.parent_controller.configuration[
             "experiment"
         ]["MicroscopeState"]
-        resolution_value = self.remote_focus_experiment_dict["microscope_name"]
+        self.resolution_value = self.remote_focus_experiment_dict["microscope_name"]
         zoom_value = self.remote_focus_experiment_dict["zoom"]
         mag = zoom_value
         if (
-            self.widgets["Mode"].get() == resolution_value
+            self.widgets["Mode"].get() == self.resolution_value
             and self.widgets["Mag"].get() == mag
         ):
             return
-        self.widgets["Mode"].set(resolution_value)
+        self.widgets["Mode"].set(self.resolution_value)
         self.show_magnification(mag)
 
         # Load waveform parameters from configuration - Smooth, Delay, Duty Cycle.
         # Provide defaults should loading fail.
-        waveform_parameters = self.parent_controller.configuration["configuration"][
+        # Currently pulls from the original microscope configuration YAML file, not the
+        # current microscope configuration according to the model
+        waveform_configuration = self.parent_controller.configuration["configuration"][
             "microscopes"
-        ][resolution_value]["remote_focus_device"]
-        self.widgets["Smoothing"].set(waveform_parameters.get("smoothing", 0))
-        self.widgets["Delay"].set(waveform_parameters.get("delay_percent", 7.5))
-        self.widgets["Duty"].set(waveform_parameters.get("ramp_rising_percent", 85))
+        ][self.resolution_value]["remote_focus_device"]
+        self.widgets["Smoothing"].set(waveform_configuration.get("smoothing", 0))
+        self.widgets["Delay"].set(waveform_configuration.get("delay_percent", 7.5))
+        self.widgets["Duty"].set(waveform_configuration.get("ramp_rising_percent", 85))
 
     def showup(self):
         """This function will let the popup window show in front.
@@ -462,11 +465,26 @@ class WaveformPopupController(GUIController):
         -------
         None
         """
-        # Get the waveform parameters.
         try:
+            # Get the values from the widgets.
             delay = float(self.widgets["Delay"].widget.get())
             duty_cycle = float(self.widgets["Duty"].widget.get())
             smoothing = float(self.widgets["Smoothing"].widget.get())
+
+            # Update the configuration parameters
+            self.parent_controller.configuration["configuration"]["microscopes"][
+                self.resolution_value
+            ]["remote_focus_device"]["smoothing"] = smoothing
+
+            self.parent_controller.configuration["configuration"]["microscopes"][
+                self.resolution_value
+            ]["remote_focus_device"]["delay_percent"] = delay
+
+            self.parent_controller.configuration["configuration"]["microscopes"][
+                self.resolution_value
+            ]["remote_focus_device"]["ramp_rising_percent"] = duty_cycle
+
+            # Create a dictionary to pass to the controller.
             waveform_parameters = {
                 "delay": delay,
                 "duty_cycle": duty_cycle,

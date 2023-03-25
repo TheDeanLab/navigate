@@ -65,6 +65,7 @@ class DAQBase:
         # Initialize Variables
         self.sample_rate = self.daq_parameters["sample_rate"]
         self.sweep_time = self.daq_parameters["sweep_time"]
+        self.percent_smoothing = self.daq_parameters.get("smoothing", 0)
 
         # Remote Focus Parameters
         self.remote_focus_ramp_falling = {}

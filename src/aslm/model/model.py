@@ -482,6 +482,20 @@ class Model:
                         "microscope_name"
                     ]
                 )
+            elif args[0] == "waveform_parameters":
+                # TODO: I think we should have a conversation about how to proceed.
+                # Previously we have added a duration of time at the end of every
+                # exposure to account for delays in the voice coil - e.g.,
+                # duty cycle. Also appears as if the ramp rising isn't necessary
+                # anymore.
+                self.active_microscope.remote_focus_device.remote_focus_delay = args[1][
+                    "delay"
+                ]
+                self.active_microscope.remote_focus_device.percent_smoothing = args[1][
+                    "smoothing"
+                ]
+                # self.active_microscope.remote_focus_device.duty_cycle = args[
+                # 1]["duty_cycle"]
 
             if reboot:
                 # prepare active microscope

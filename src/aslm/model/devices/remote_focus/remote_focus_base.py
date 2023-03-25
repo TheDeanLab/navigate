@@ -37,7 +37,7 @@ import logging
 import numpy as np
 
 # Local Imports
-from aslm.model.waveforms import remote_focus_ramp
+from aslm.model.waveforms import remote_focus_ramp, smooth_waveform
 
 # # Logger Setup
 p = __name__.split(".")[1]
@@ -107,6 +107,7 @@ class RemoteFocusBase:
 
         # Waveform Parameters
         self.remote_focus_delay = self.device_config["delay_percent"]
+        self.percent_smoothing = self.device_config["smoothing"]
         self.remote_focus_ramp_falling = self.device_config["ramp_falling_percent"]
         self.remote_focus_max_voltage = self.device_config["hardware"]["max"]
         self.remote_focus_min_voltage = self.device_config["hardware"]["min"]
@@ -211,6 +212,14 @@ class RemoteFocusBase:
                     amplitude=remote_focus_amplitude,
                     offset=remote_focus_offset,
                 )
+
+                # Smooth the Waveform if specified
+                if self.percent_smoothing > 0:
+                    self.waveform_dict[channel_key] = smooth_waveform(
+                        self.waveform_dict[channel_key], self.percent_smoothing
+                    )
+
+                # Clip any values outside of the hardware limits
                 self.waveform_dict[channel_key][
                     self.waveform_dict[channel_key] > self.remote_focus_max_voltage
                 ] = self.remote_focus_max_voltage

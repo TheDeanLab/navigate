@@ -283,7 +283,7 @@ class WaveformPopupController(GUIController):
         self.widgets["Mode"].set(resolution_value)
         self.show_magnification(mag)
 
-        # Waveform parameters - Smooth, Delay, Duty Cycle.
+        # Load waveform parameters from configuration - Smooth, Delay, Duty Cycle.
         # Provide defaults should loading fail.
         waveform_parameters = self.parent_controller.configuration["configuration"][
             "microscopes"
@@ -449,14 +449,39 @@ class WaveformPopupController(GUIController):
     def update_waveform_parameters(self, *args, **wargs):
         """Update the waveform parameters for delay, duty cycle, and smoothing.
 
+        Communicate changes to the parent controller.
+
+        Parameters
+        ----------
+        *args : tuple
+            The first element is the new waveform.
+        **wargs : dict
+            The key is the name of the waveform and the value is the waveform
+
         Returns
         -------
         None
         """
-        # update the waveform parameters for delay, duty cycle, and smoothing
-        delay = self.widgets["Delay"].widget.get()  # noqa
-        duty_cycle = self.widgets["Duty"].widget.get()  # noqa
-        smoothing = self.widgets["Smoothing"].widget.get()  # noqa
+        # Get the waveform parameters.
+        try:
+            delay = float(self.widgets["Delay"].widget.get())
+            duty_cycle = float(self.widgets["Duty"].widget.get())
+            smoothing = float(self.widgets["Smoothing"].widget.get())
+            waveform_parameters = {
+                "delay": delay,
+                "duty_cycle": duty_cycle,
+                "smoothing": smoothing,
+            }
+
+            # Pass the values to the parent controller.
+            self.event_id = self.view.popup.after(
+                500,
+                lambda: self.parent_controller.execute(
+                    "update_setting", "waveform_parameters", waveform_parameters
+                ),
+            )
+        except ValueError:
+            logger.debug("Waveform parameters not updated by waveform_popup_controller")
 
     def update_galvo_setting(self, galvo_name, widget_name, parameter):
         """Update galvo settings in memory.

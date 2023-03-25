@@ -780,13 +780,13 @@ class Controller:
             self.acquire_bar_controller.set_save_option(args[0])
 
         elif command == "update_setting":
-            r"""Called by the Waveform Constants Popup Controller
+            """Called by the Waveform Constants Popup Controller
             to update the Waveform constants settings in memory.
 
             Parameters
             __________
             args[0] : string
-                string = 'resolution'
+                string = 'resolution' or 'waveform' or 'galvo'...
             args[1] : dict
                 dict = {
                 'resolution_mode': self.resolution,
@@ -795,7 +795,6 @@ class Controller:
                 'remote_focus_constants'][self.resolution][self.mag]
                 }
             """
-            print("***controller***", command, args[1])
             self.threads_pool.createThread(
                 "model", lambda: self.model.run_command("update_setting", *args)
             )

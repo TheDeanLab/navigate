@@ -5,7 +5,7 @@ import pandas as pd
 
 from .enums import *
 
-basepath = 'E:\\WaveKitX64'
+basepath = 'D:\\WaveKitX64'
 # wfc_config_file_path = os.path.join(basepath, 'MirrorFiles', 'WaveFrontCorrector_Mirao52-e_0259.dat')
 # haso_config_file_path = os.path.join(basepath, 'MirrorFiles', 'HASO4_first_7458.dat')
 
@@ -84,7 +84,8 @@ class IMOP_Mirror:
                  #positions_file_path=os.path.join(basepath, 'Matlab', 'FlouresceinJuly19th22_3iter.wcs'),
                  #positions_file_path=os.path.join(basepath, 'MirrorFiles', 'FEP-tube-2022-11-10.wcs'),
                  #positions_file_path=os.path.join(basepath, 'MirrorFiles', 'Louis-2022-11-03.wcs'),
-                 positions_file_path=os.path.join(basepath, 'MirrorFiles', 'Fluorescein-2022-11-15.wcs'),
+                 #positions_file_path=os.path.join(basepath, 'MirrorFiles', 'Fluorescein-2022-11-15.wcs'),
+                 positions_file_path=os.path.join(basepath, 'MirrorFiles', 'OPMv3_SysCorr_517nm_20230324.wcs'),
                  #positions_file_path=os.path.join(basepath, 'MirrorFiles', 'best.wcs'),
                  #interaction_matrix_file_path=os.path.join(basepath, 'MirrorFiles', 'OlympusJuly5.aoc'),
                  interaction_matrix_file_path=os.path.join(basepath, 'MirrorFiles', 'OlympusApril22.aoc'),

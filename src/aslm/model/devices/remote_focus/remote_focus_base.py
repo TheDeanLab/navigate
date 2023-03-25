@@ -216,7 +216,8 @@ class RemoteFocusBase:
                 # Smooth the Waveform if specified
                 if self.percent_smoothing > 0:
                     self.waveform_dict[channel_key] = smooth_waveform(
-                        self.waveform_dict[channel_key], self.percent_smoothing
+                        waveform=self.waveform_dict[channel_key],
+                        percent_smoothing=self.percent_smoothing,
                     )
 
                 # Clip any values outside of the hardware limits

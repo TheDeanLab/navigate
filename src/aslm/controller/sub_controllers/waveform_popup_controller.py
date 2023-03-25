@@ -90,7 +90,6 @@ class WaveformPopupController(GUIController):
         # Get mode and mag widgets
         self.widgets = self.view.get_widgets()
         self.variables = self.view.get_variables()
-        print(self.variables)
 
         # Get configuration
         self.lasers = self.configuration_controller.lasers_info
@@ -284,6 +283,15 @@ class WaveformPopupController(GUIController):
         self.widgets["Mode"].set(resolution_value)
         self.show_magnification(mag)
 
+        # Waveform parameters - Smooth, Delay, Duty Cycle.
+        # Provide defaults should loading fail.
+        waveform_parameters = self.parent_controller.configuration["configuration"][
+            "microscopes"
+        ][resolution_value]["remote_focus_device"]
+        self.widgets["Smoothing"].set(waveform_parameters.get("smoothing", 0))
+        self.widgets["Delay"].set(waveform_parameters.get("delay_percent", 7.5))
+        self.widgets["Duty"].set(waveform_parameters.get("ramp_rising_percent", 85))
+
     def showup(self):
         """This function will let the popup window show in front.
 
@@ -446,10 +454,9 @@ class WaveformPopupController(GUIController):
         None
         """
         # update the waveform parameters for delay, duty cycle, and smoothing
-        delay = self.widgets["Delay"].widget.get()
-        duty_cycle = self.widgets["Duty"].widget.get()
-        smoothing = self.widgets["Smoothing"].widget.get()
-        print("delay, duty_cycle, smoothing", delay, duty_cycle, smoothing)
+        delay = self.widgets["Delay"].widget.get()  # noqa
+        duty_cycle = self.widgets["Duty"].widget.get()  # noqa
+        smoothing = self.widgets["Smoothing"].widget.get()  # noqa
 
     def update_galvo_setting(self, galvo_name, widget_name, parameter):
         """Update galvo settings in memory.

@@ -792,11 +792,10 @@ class Controller:
                 'resolution_mode': self.resolution,
                 'zoom': self.mag,
                 'laser_info': self.resolution_info[
-                'remote_focus_constants'][self.resolution][self.mag
-                ]
+                'remote_focus_constants'][self.resolution][self.mag]
                 }
             """
-            # update_settings_common(self, args)
+            print("***controller***", command, args[1])
             self.threads_pool.createThread(
                 "model", lambda: self.model.run_command("update_setting", *args)
             )

@@ -87,13 +87,15 @@ class WaveformPopupController(GUIController):
         self.configuration_controller = self.parent_controller.configuration_controller
         self.waveform_constants_path = waveform_constants_path
 
-        # get mode and mag widgets
+        # Get mode and mag widgets
         self.widgets = self.view.get_widgets()
         self.variables = self.view.get_variables()
+        print(self.variables)
 
-        # get configuration
+        # Get configuration
         self.lasers = self.configuration_controller.lasers_info
 
+        # Initialize variables
         self.resolution = None
         self.mag = None
         self.mode = "stop"
@@ -105,12 +107,16 @@ class WaveformPopupController(GUIController):
         # event id list
         self.event_id = None
 
-        # event combination
+        # Event Binding
+        # Switching microscopes modes (e.g., meso, nano, etc.)
         self.widgets["Mode"].widget.bind(
             "<<ComboboxSelected>>", self.show_magnification
         )
+
+        # Switching magnifications (e.g., 10x, 20x, etc.)
         self.widgets["Mag"].widget.bind("<<ComboboxSelected>>", self.show_laser_info)
 
+        # Changes to the waveform constants (amplitude, offset, etc.)
         for laser in self.lasers:
             self.variables[laser + " Amp"].trace_add(
                 "write",
@@ -120,6 +126,8 @@ class WaveformPopupController(GUIController):
                 "write",
                 self.update_remote_focus_settings(laser + " Off", laser, "offset"),
             )
+
+        # Changes to the galvo constants (amplitude, offset, etc.)
         for i in range(self.configuration_controller.galvo_num):
             galvo = f"Galvo {i}"
             self.variables[galvo + " Amp"].trace_add(
@@ -132,12 +140,21 @@ class WaveformPopupController(GUIController):
                 "write", self.update_galvo_setting(galvo, " Freq", "frequency")
             )
 
+        # Changes in the delay, duty cycle, and smoothing waveform parameters
+        # Delay, Duty, and Smoothing
+        self.variables["Delay"].trace_add("write", self.update_waveform_parameters)
+        self.variables["Duty"].trace_add("write", self.update_waveform_parameters)
+        self.variables["Smoothing"].trace_add("write", self.update_waveform_parameters)
+
+        # Save waveform constants
         self.view.get_buttons()["Save"].configure(command=self.save_waveform_constants)
+
+        # Temporarily disable waveforms
         self.view.get_buttons()["toggle_waveform_button"].configure(
             command=self.toggle_waveform_state
         )
 
-        # add saving function to the function closing the window
+        # Save waveform constants upon closing the popup window
         self.view.popup.protocol(
             "WM_DELETE_WINDOW",
             combine_funcs(
@@ -420,6 +437,19 @@ class WaveformPopupController(GUIController):
                 )
 
         return func_laser
+
+    def update_waveform_parameters(self, *args, **wargs):
+        """Update the waveform parameters for delay, duty cycle, and smoothing.
+
+        Returns
+        -------
+        None
+        """
+        # update the waveform parameters for delay, duty cycle, and smoothing
+        delay = self.widgets["Delay"].widget.get()
+        duty_cycle = self.widgets["Duty"].widget.get()
+        smoothing = self.widgets["Smoothing"].widget.get()
+        print("delay, duty_cycle, smoothing", delay, duty_cycle, smoothing)
 
     def update_galvo_setting(self, galvo_name, widget_name, parameter):
         """Update galvo settings in memory.

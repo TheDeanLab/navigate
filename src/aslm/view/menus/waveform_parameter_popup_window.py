@@ -190,7 +190,9 @@ class WaveformParameterPopupWindow:
                 row=i + 1, column=2, sticky=tk.NSEW, pady=(20, 0)
             )
 
-        galvo_labels = list(map(lambda i: f"Galvo {i}", range(self.configuration_controller.galvo_num)))
+        galvo_labels = list(
+            map(lambda i: f"Galvo {i}", range(self.configuration_controller.galvo_num))
+        )
 
         prev = len(laser_labels)
 
@@ -243,16 +245,14 @@ class WaveformParameterPopupWindow:
         # High/Low Resolution
         hi_lo_labels = ["Percent Delay", "Duty Cycle", "Percent Smoothing"]
         dict_labels = ["Delay", "Duty", "Smoothing"]
-
-        # The below code could be in the loop above but I thought it was best
-        # to make it separate since they are different frames
         for i in range(3):
             self.inputs[dict_labels[i]] = LabelInput(
                 parent=self.high_low_frame,
-                input_class=ttk.Entry,
+                input_class=ValidatedSpinbox,
                 label=hi_lo_labels[i],
                 input_var=tk.StringVar(),
                 label_args={"padding": (2, 5, 5, 0)},
+                input_args={"from_": 0, "to": 100, "increment": 0.1},
             )
             self.inputs[dict_labels[i]].grid(
                 row=i, column=0, sticky=tk.NSEW, padx=(2, 5)
@@ -261,7 +261,7 @@ class WaveformParameterPopupWindow:
         # Padding Entry Widgets
         self.inputs["Delay"].pad_input(30, 0, 0, 0)
         self.inputs["Duty"].pad_input(45, 0, 0, 0)
-        # self.inputs['Smoothing'].pad_input(0,0,0,0)
+        self.inputs["Smoothing"].pad_input(0, 0, 0, 0)
 
     # Getters
     def get_variables(self):

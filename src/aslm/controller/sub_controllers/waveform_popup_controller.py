@@ -603,23 +603,23 @@ class WaveformPopupController(GUIController):
         if self.waveforms_enabled is True:
             self.view.buttons["toggle_waveform_button"].config(state="disabled")
             self.view.buttons["toggle_waveform_button"].config(text="Enable Waveforms")
-            self.amplitude_dict = {}
-            self.amplitude_dict["resolution"] = self.resolution
-            self.amplitude_dict["mag"] = self.mag
+            self.amplitude_dict = {"resolution": self.resolution, "mag": self.mag}
+
             for laser in self.lasers:
                 self.amplitude_dict[laser] = self.resolution_info[
                     "remote_focus_constants"
                 ][self.resolution][self.mag][laser]["amplitude"]
                 self.variables[laser + " Amp"].set(0)
                 self.widgets[laser + " Amp"].widget.config(state="disabled")
-            # galvo
+
             for galvo in self.galvos:
                 self.amplitude_dict[galvo] = self.resolution_info["galvo_constants"][
                     galvo
                 ][self.resolution][self.mag]["amplitude"]
                 self.variables[galvo + " Amp"].set(0)
                 self.widgets[galvo + " Amp"].widget.config(state="disabled")
-                # Need to update main controller.
+
+            # Need to update main controller.
             self.waveforms_enabled = False
             self.view.popup.after(
                 500,

@@ -107,7 +107,7 @@ class RemoteFocusBase:
 
         # Waveform Parameters
         self.remote_focus_delay = self.device_config["delay_percent"]
-        self.percent_smoothing = self.device_config["smoothing"]
+        self.percent_smoothing = self.device_config.get("smoothing", 0)
         self.remote_focus_ramp_falling = self.device_config["ramp_falling_percent"]
         self.remote_focus_max_voltage = self.device_config["hardware"]["max"]
         self.remote_focus_min_voltage = self.device_config["hardware"]["min"]

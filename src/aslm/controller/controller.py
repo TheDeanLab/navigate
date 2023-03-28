@@ -589,7 +589,7 @@ class Controller:
             update_stage_dict(self, ret_pos_dict)
 
         self.acquire_bar_controller.populate_experiment_values()
-        self.stage_controller.populate_experiment_values()
+        # self.stage_controller.populate_experiment_values()
         self.multiposition_tab_controller.set_positions(
             self.configuration["experiment"]["MultiPositions"]["stage_positions"]
         )

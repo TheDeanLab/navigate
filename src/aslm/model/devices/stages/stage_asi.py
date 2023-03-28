@@ -70,7 +70,7 @@ def build_ASI_Stage_connection(com_port, baud_rate, timeout=1000):
     wait_start = time.time()
     timeout_s = timeout / 1000
     while block_flag:
-        asi_stage = TigerController(com_port, baud_rate)
+        asi_stage = TigerController(com_port, baud_rate, verbose=True)
         asi_stage.connect_to_serial()
         if asi_stage.is_open():
             block_flag = False
@@ -140,6 +140,8 @@ class ASIStage(StageBase):
             Min focus position
         theta_min : float
             Min rotation position
+        default_speed: float
+            Default speed in millimeters per second
 
         Methods
         -------
@@ -156,7 +158,7 @@ class ASIStage(StageBase):
         super().__init__(microscope_name, device_connection, configuration, device_id)
 
         # Mapping from self.axes to corresponding ASI axis labelling
-        axes_mapping = {"x": "X", "y": "Y", "z": "Z"}
+        axes_mapping = {"x": "Z", "y": "Y", "z": "X"}
 
         # Focus and Theta axes are not supported for ASI Stage
         if "theta" in self.axes:
@@ -166,6 +168,10 @@ class ASIStage(StageBase):
 
         self.asi_axes = list(map(lambda a: axes_mapping[a], self.axes))
         self.tiger_controller = device_connection
+        # set default speed
+        self.default_speed =5.745760 #7.68 * 0.67
+        default_speeds = [(axis,self.default_speed) for axis in self.asi_axes]
+        self.tiger_controller.set_speed(**dict(default_speeds))
 
     def __del__(self):
         """Delete the ASI Stage connection."""
@@ -190,7 +196,7 @@ class ASIStage(StageBase):
         except TigerException as e:
             print("Failed to report ASI Stage Position")
             logger.exception(e)
-        # self.update_position_dictionaries()
+        self.update_position_dict()
         return self.position_dict
 
     def move_axis_absolute(self, axis, axis_num, move_dictionary):
@@ -224,6 +230,7 @@ class ASIStage(StageBase):
             axis_abs_um = (
                 axis_abs * 10
             )  # This is to account for the asi 1/10 of a micron units
+            print("*** trying to move stage:", axis_num, axis_abs_um)
             self.tiger_controller.move_axis(axis_num, axis_abs_um)
             return True
         except TigerException as e:
@@ -253,8 +260,9 @@ class ASIStage(StageBase):
         success : bool
             Was the move successful?
         """
-
         for ax, n in zip(self.axes, self.asi_axes):
+            if f"{ax}_abs" not in move_dictionary:
+                continue
             success = self.move_axis_absolute(ax, n, move_dictionary)
             if wait_until_done:
                 self.tiger_controller.wait_for_device()

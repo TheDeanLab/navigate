@@ -197,7 +197,11 @@ class TigerController:
         if response.startswith(":N"):
             raise TigerException(response)
         else:
-            return int(response.split(" ")[1])
+            try:
+                pos = int(response.split(" ")[1])
+            except:
+                pos = float('Inf')
+            return pos
 
     def get_position_um(self, axis: str) -> float:
         """Return the position of the stage in microns."""
@@ -256,25 +260,44 @@ class TigerController:
         else:
             print("ASI Stages stopped successfully")
 
+    def set_speed(self, **axes:float):
+        """Set speed"""
+        axes = " ".join([f"{x}={round(v, 6)}" for x,v in axes.items()])
+        self.send_command(f"SPEED {axes}")
+        response = self.read_response()
+        if response.startswith(":N"):
+            raise TigerException(response)
+        
+    def get_speed(self, axis: str):
+        self.send_command(f"SPEED {axis}?")
+        response = self.read_response()
+        if response.startswith(":N"):
+            raise TigerException(response)
+        else:
+            return float(response.split("=")[1])
+
     def get_encoder_counts_per_mm(self, axis: str):
         """
         Get encoder counts pre mm of axis
         """
 
-        self.send_command(f"CNTS {axis}")
+        self.send_command(f"CNTS {axis}?")
         response = self.read_response()
         if response.startswith(":N"):
             raise TigerException(response)
         else:
             return float(response.split("=")[1].split()[0])
         
-    def scanr(self, start_position: float, end_position: float, enc_divide: int=0):
+    def scanr(self, start_position_mm: float, end_position_mm: float, enc_divide: int=0, axis: str='X'):
         """
         Set scan range.
         """
+        enc_divide_mm = self.get_encoder_counts_per_mm(axis)
         if enc_divide == 0:
-            enc_divide = self.get_encoder_counts_per_mm()
-        command = f"SCANR X={start_position} Y={end_position} Z={enc_divide}"
+            enc_divide = enc_divide_mm
+        else:
+            enc_divide = enc_divide * enc_divide_mm
+        command = f"SCANR X={round(start_position_mm, 6)} Y={round(end_position_mm, 6)} Z={round(enc_divide)}"
         self.send_command(command)
         response = self.read_response()
         if response.startswith(":N"):

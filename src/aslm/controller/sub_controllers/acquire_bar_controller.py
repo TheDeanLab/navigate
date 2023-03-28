@@ -320,7 +320,7 @@ class AcquireBarController(GUIController):
         stack_widgets = self.parent_view.stack_acq_frame.get_widgets()
 
         # Grey out stack acq widgets when not Zstack or projection
-        if mode == "z-stack" or mode == "projection":
+        if mode == "z-stack" or mode == "projection" or mode == "ConstantVelocityAcquisition":
             state = "normal"
         else:
             state = "disabled"

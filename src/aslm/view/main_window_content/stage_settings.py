@@ -50,7 +50,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class stagecontrol_notebook(ttk.Notebook):
+class StageControlNotebook(ttk.Notebook):
     def __init__(self, frame_bot_right, *args, **kwargs):
         # Init notebook
         ttk.Notebook.__init__(self, frame_bot_right, *args, **kwargs)

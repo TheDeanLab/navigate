@@ -43,7 +43,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class hover(object):
+class Hover(object):
     """Hover that allows for information to be displayed additionally without
     interrupting the GUI
 

@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -29,27 +30,19 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-# Local Imports
-from aslm.view.main_window_content.stage_control.stage_control_frames.other_axis_frame import (
-    other_axis_frame,
-)
-from aslm.view.main_window_content.stage_control.stage_control_frames.position_frame import (
-    position_frame,
-)
-from aslm.view.main_window_content.stage_control.stage_control_frames.x_y_frame import (
-    x_y_frame,
-)
-from aslm.view.main_window_content.stage_control.stage_control_frames.goto_frame import (
-    goto_frame,
-)
-from aslm.view.main_window_content.stage_control.stage_control_frames.stop_frame import (
-    stop_frame,
-)
-
 # Standard Imports
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, Grid
 import logging
+from pathlib import Path
+
+# Third Party Imports
+
+# Local Imports
+from aslm.view.custom_widgets.hovermixin import HoverButton, HoverTkButton
+from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from aslm.view.custom_widgets.validation import ValidatedSpinbox
+from aslm.view.custom_widgets.validation import ValidatedEntry
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -163,3 +156,320 @@ class stage_control_tab(tk.Frame):
             result.update({k + "_" + axis + "_btn": temp[k] for k in temp})
         result.update(self.stop_frame.get_buttons())
         return result
+
+
+class other_axis_frame(ttk.Labelframe):
+    def __init__(other_axis_frame, stage_control_tab, name, *args, **kwargs):
+        # Init Frame
+        label = name
+        ttk.Labelframe.__init__(
+            other_axis_frame,
+            stage_control_tab,
+            text=label + " Movement",
+            *args,
+            **kwargs
+        )
+        other_axis_frame.name = name
+
+        # Formatting
+        tk.Grid.columnconfigure(other_axis_frame, "all", weight=1)
+        tk.Grid.rowconfigure(other_axis_frame, "all", weight=1)
+
+        image_directory = Path(__file__).resolve().parent
+        other_axis_frame.up_image = tk.PhotoImage(
+            file=image_directory.joinpath("images", "greyup.png")
+        )
+        other_axis_frame.down_image = tk.PhotoImage(
+            file=image_directory.joinpath("images", "greydown.png")
+        )
+        other_axis_frame.up_image = other_axis_frame.up_image.subsample(2, 2)
+        other_axis_frame.down_image = other_axis_frame.down_image.subsample(2, 2)
+
+        # Setting up buttons for up, down, zero and increment spinbox
+
+        # Up button
+        other_axis_frame.up_btn = tk.Button(
+            other_axis_frame,
+            image=other_axis_frame.up_image,
+            borderwidth=0
+            # style='arrow.TButton',
+            # text="\N{UPWARDS BLACK ARROW}",
+        )
+
+        # Down button
+        other_axis_frame.down_btn = tk.Button(
+            other_axis_frame,
+            image=other_axis_frame.down_image,
+            borderwidth=0
+            # style='arrow.TButton',
+            # text="\N{DOWNWARDS BLACK ARROW}",
+        )
+
+        # Zero button
+        other_axis_frame.zero_btn = ttk.Button(
+            other_axis_frame,
+            text="ZERO " + other_axis_frame.name,
+        )
+
+        # Increment spinbox
+
+        other_axis_frame.increment_box = LabelInput(
+            parent=other_axis_frame,
+            input_class=ValidatedSpinbox,
+            input_var=tk.DoubleVar(),
+            input_args={"width": 5},
+        )
+
+        """
+        Grid for buttons
+
+                1
+                2
+                3
+                4
+                5
+                6
+
+        Up is 1,2
+        Down is 5,6
+        Increment is 3
+        Zero is 4
+        """
+
+        # Gridding out buttons
+        other_axis_frame.up_btn.grid(row=0, column=0, pady=2)  # UP
+        other_axis_frame.down_btn.grid(row=3, column=0, pady=2)  # DOWN
+        # other_axis_frame.zero_btn.grid(row=1, column=0, pady=(5,2)) #Zero Z
+        other_axis_frame.increment_box.grid(
+            row=2, column=0, pady=2
+        )  # Increment spinbox
+        other_axis_frame.increment_box.widget.set_precision(-1)
+
+    def get_widget(other_axis_frame):
+        return other_axis_frame.increment_box
+
+    def get_buttons(other_axis_frame):
+        return {
+            "up": other_axis_frame.up_btn,
+            "down": other_axis_frame.down_btn,
+            "zero": other_axis_frame.zero_btn,
+        }
+
+
+class position_frame(ttk.Labelframe):
+    def __init__(position_frame, stage_control_tab, *args, **kwargs):
+
+        # Init Frame
+        ttk.Labelframe.__init__(
+            position_frame, stage_control_tab, text="Stage Positions", *args, **kwargs
+        )
+
+        # Formatting
+        tk.Grid.columnconfigure(position_frame, "all", weight=1)
+        tk.Grid.rowconfigure(position_frame, "all", weight=1)
+
+        # Creating each entry frame for a label and entry
+        position_frame.inputs = {}
+        entry_names = ["x", "y", "z", "theta", "f"]
+        entry_labels = ["X", "Y", "Z", "\N{Greek Capital Theta Symbol}", "F"]
+
+        # entries
+        for i in range(len(entry_names)):
+            position_frame.inputs[entry_names[i]] = LabelInput(
+                parent=position_frame,
+                label=entry_labels[i],
+                input_class=ValidatedEntry,
+                input_var=tk.DoubleVar(),
+                input_args={
+                    "required": True,
+                    "precision": 0.1,
+                    "width": 6,
+                    "takefocus": False,
+                },
+            )
+            position_frame.inputs[entry_names[i]].grid(row=i, column=0)
+
+        """
+        Grid for frames
+
+                1
+                2
+                3
+                4
+                5
+
+        x is 1
+        y is 2
+        z is 3
+        theta is 4
+        focus is 5
+        """
+
+    def get_widgets(position_frame):
+        return position_frame.inputs
+
+    def get_variables(position_frame):
+        variables = {}
+        for name in position_frame.inputs:
+            variables[name] = position_frame.inputs[name].get_variable()
+        return variables
+
+
+class x_y_frame(ttk.Labelframe):
+    def __init__(x_y_frame, stage_control_tab, *args, **kwargs):
+        # Init Frame
+        ttk.Labelframe.__init__(
+            x_y_frame, stage_control_tab, text="X Y Movement", *args, **kwargs
+        )
+
+        # Formatting
+        Grid.columnconfigure(x_y_frame, "all", weight=1)
+        Grid.rowconfigure(x_y_frame, "all", weight=1)
+
+        # Setting up buttons for up, down, left, right, zero and increment spinbox
+        s = ttk.Style()
+        s.configure("arrow.TButton", font=(None, 20))
+
+        # Path to arrows
+        image_directory = Path(__file__).resolve().parent
+        x_y_frame.up_image = tk.PhotoImage(
+            file=image_directory.joinpath("images", "greyup.png")
+        )
+        x_y_frame.down_image = tk.PhotoImage(
+            file=image_directory.joinpath("images", "greydown.png")
+        )
+        x_y_frame.left_image = tk.PhotoImage(
+            file=image_directory.joinpath("images", "greyleft.png")
+        )
+        x_y_frame.right_image = tk.PhotoImage(
+            file=image_directory.joinpath("images", "greyright.png")
+        )
+        x_y_frame.up_image = x_y_frame.up_image.subsample(2, 2)
+        x_y_frame.down_image = x_y_frame.down_image.subsample(2, 2)
+        x_y_frame.left_image = x_y_frame.left_image.subsample(2, 2)
+        x_y_frame.right_image = x_y_frame.right_image.subsample(2, 2)
+
+        # Up button
+        x_y_frame.up_y_btn = HoverTkButton(
+            x_y_frame,
+            image=x_y_frame.up_image,
+            borderwidth=0
+            # style='arrow.TButton',
+            # width=5
+            # text="\N{UPWARDS BLACK ARROW}"
+        )
+        # Down button
+        x_y_frame.down_y_btn = tk.Button(
+            x_y_frame,
+            image=x_y_frame.down_image,
+            borderwidth=0
+            # style='arrow.TButton',
+            # width=10,
+            # text="\N{DOWNWARDS BLACK ARROW}"
+        )
+
+        # Right button
+        x_y_frame.up_x_btn = tk.Button(
+            x_y_frame,
+            image=x_y_frame.right_image,
+            borderwidth=0
+            # style='arrow.TButton',
+            # width=10,
+            # text="\N{RIGHTWARDS BLACK ARROW}"
+        )
+
+        # Left button
+        x_y_frame.down_x_btn = tk.Button(
+            x_y_frame,
+            image=x_y_frame.left_image,
+            borderwidth=0
+            # style='arrow.TButton',
+            # width=10,
+            # text="\N{LEFTWARDS BLACK ARROW}"
+        )
+
+        # Zero button
+        x_y_frame.zero_xy_btn = HoverButton(x_y_frame, text="ZERO XY")
+
+        # Increment spinbox
+        x_y_frame.increment_box = LabelInput(
+            parent=x_y_frame,
+            input_class=ValidatedSpinbox,
+            input_var=tk.DoubleVar(),
+            input_args={"width": 5},
+        )
+
+        """
+        Grid for buttons
+
+                01  02  03  04  05  06
+                07  08  09  10  11  12
+                13  14  15  16  17  18
+                19  20  21  22  23  24
+                25  26  27  28  29  30
+                31  32  33  34  35  36
+
+        Up is 03,04,09,10
+        Right is 17,18,23,24
+        Down is 27,28,33,34
+        Left is 13,14,19,20
+        Increment is 15,16
+        Zero XY is 21,22
+        """
+
+        # Gridding out buttons
+        x_y_frame.up_y_btn.grid(
+            row=0, column=2, rowspan=2, columnspan=2, padx=2, pady=2
+        )  # UP
+        x_y_frame.up_x_btn.grid(
+            row=2, column=4, rowspan=2, columnspan=2, padx=2, pady=2
+        )  # RIGHT
+        x_y_frame.down_y_btn.grid(
+            row=4, column=2, rowspan=2, columnspan=2, padx=2, pady=2
+        )  # DOWN
+        x_y_frame.down_x_btn.grid(
+            row=2, column=0, rowspan=2, columnspan=2, padx=2, pady=2
+        )  # LEFT
+        x_y_frame.increment_box.grid(
+            row=3, column=2, rowspan=1, columnspan=2, padx=2, pady=2
+        )  # Increment spinbox
+        x_y_frame.increment_box.widget.set_precision(-1)
+
+    def get_widget(x_y_frame):
+        return x_y_frame.increment_box
+
+    def get_buttons(x_y_frame):
+        names = ["up_x_btn", "down_x_btn", "up_y_btn", "down_y_btn", "zero_xy_btn"]
+        return {k: getattr(x_y_frame, k) for k in names}
+
+
+class goto_frame(ttk.Frame):
+    def __init__(goto_frame, stage_control_tab, *args, **kwargs):
+        # Init Frame
+        ttk.Frame.__init__(goto_frame, stage_control_tab, *args, **kwargs)
+
+        # Formatting
+        tk.Grid.columnconfigure(goto_frame, "all", weight=1)
+        tk.Grid.rowconfigure(goto_frame, "all", weight=1)
+
+
+class stop_frame(ttk.Frame):
+    def __init__(self, stage_control_tab, name, *args, **kwargs):
+        # Init Frame
+        ttk.Frame.__init__(self, stage_control_tab, *args, **kwargs)
+        self.name = name
+
+        # Formatting
+        tk.Grid.columnconfigure(self, "all", weight=1)
+        tk.Grid.rowconfigure(self, "all", weight=1)
+
+        # Stop button
+        self.stop_btn = tk.Button(
+            self, bg="red", fg="white", text="STOP", width=10, height=5
+        )
+
+        # Gridding out buttons
+        self.stop_btn.grid(row=0, column=0, rowspan=2, pady=2)
+
+    def get_buttons(self):
+        return {"stop": self.stop_btn}

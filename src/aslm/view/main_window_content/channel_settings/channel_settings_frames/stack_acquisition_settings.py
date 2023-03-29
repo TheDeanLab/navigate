@@ -48,7 +48,43 @@ logger = logging.getLogger(p)
 
 
 class stack_acq_frame(ttk.Labelframe):
-    """This class is the frame that holds the stack acquisition settings."""
+    """This class is the frame that holds the stack acquisition settings.
+
+    Parameters
+    ----------
+    settings_tab : tkinter.Frame
+        The frame that holds the settings tab.
+    *args : tuple
+        Variable length argument list.
+    **kwargs : dict
+        Arbitrary keyword arguments.
+
+    Attributes
+    ----------
+    inputs : dict
+        Dictionary of inputs.
+    buttons : dict
+        Dictionary of buttons.
+    pos_slice : tkinter.Frame
+        Frame that holds the position slice inputs.
+    cycling : tkinter.Frame
+        Frame that holds the cycling inputs.
+    start_label : tkinter.Label
+        Label for the start position slice inputs.
+    end_label : tkinter.Label
+        Label for the end position slice inputs.
+    cycle_label : tkinter.Label
+        Label for the cycling inputs.
+
+    Methods
+    -------
+    get_buttons()
+        Returns the buttons dictionary.
+    get_variables()
+        Returns the variables dictionary.
+    get_widgets()
+        Returns the widgets dictionary.
+    """
 
     def __init__(self, settings_tab, *args, **kwargs):
         # Init Frame

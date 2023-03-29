@@ -53,7 +53,7 @@ from pathlib import Path
 
 # Local Imports
 from aslm.view.main_window_content.settings_notebook import settings_notebook
-from aslm.view.main_window_content.camera_display.camera_view.camera_notebook import (
+from aslm.view.main_window_content.camera.display import (
     CameraNotebook,
 )
 from aslm.view.main_window_content.acquire_bar_frame.acquire_bar import AcquireBar

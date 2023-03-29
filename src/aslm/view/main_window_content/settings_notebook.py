@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -31,26 +32,28 @@
 #
 # Standard Imports
 import tkinter as tk
-from tkinter import ttk
 import logging
 
-# Logger Setup
-p = __name__.split(".")[1]
-logger = logging.getLogger(p)
+# Third Party Imports
 
+# Local Imports
 from aslm.view.custom_widgets.DockableNotebook import DockableNotebook
 
 # Import Sub-Frames
-from aslm.view.main_window_content.camera_display.camera_settings.camera_settings_tab import (
+from aslm.view.main_window_content.camera.settings import (
     camera_settings_tab,
 )
 from aslm.view.main_window_content.channel_settings.channels_tab import channels_tab
 from aslm.view.main_window_content.stage_control.stage_control_tab import (
-    stage_control_tab,
+    StageControlTab,
 )
 from aslm.view.main_window_content.multiposition.multiposition_tab import (
     multiposition_tab,
 )
+
+# Logger Setup
+p = __name__.split(".")[1]
+logger = logging.getLogger(p)
 
 
 class settings_notebook(DockableNotebook):
@@ -69,7 +72,7 @@ class settings_notebook(DockableNotebook):
         self.camera_settings_tab = camera_settings_tab(self)
 
         # Creating Stage Control Tab
-        self.stage_control_tab = stage_control_tab(self)
+        self.stage_control_tab = StageControlTab(self)
 
         # Creating Multiposition Table Tab
         self.multiposition_tab = multiposition_tab(self)

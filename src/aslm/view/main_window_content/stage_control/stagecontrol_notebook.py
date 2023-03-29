@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -34,18 +35,17 @@ import tkinter as tk
 from tkinter import ttk
 import logging
 
-# Logger Setup
-p = __name__.split(".")[1]
-logger = logging.getLogger(p)
-
+# Third Party Imports
 
 # Local Imports
 from aslm.view.main_window_content.stage_control.stage_control_tab import (
-    stage_control_tab,
+    StageControlTab,
 )
-from aslm.view.main_window_content.stage_control.maximum_intensity_projection_tab import (
-    maximum_intensity_projection_tab,
-)
+
+
+# Logger Setup
+p = __name__.split(".")[1]
+logger = logging.getLogger(p)
 
 
 class stagecontrol_notebook(ttk.Notebook):
@@ -61,10 +61,7 @@ class stagecontrol_notebook(ttk.Notebook):
         self.grid(row=0, column=0)
 
         # Creating Stage Control Tab
-        self.stage_control_tab = stage_control_tab(self)
-
-        # Creating Max intensity projection Tab
-        # self.maximum_intensity_projection_tab = maximum_intensity_projection_tab(self)
+        self.stage_control_tab = StageControlTab(self)
 
         # Adding tabs to notebook
         self.add(self.stage_control_tab, text="Stage Control", sticky=tk.NSEW)
@@ -75,8 +72,3 @@ class goto_frame(ttk.Frame):
     def __init__(goto_frame, stage_control_tab, *args, **kwargs):
         # Init Frame
         ttk.Frame.__init__(goto_frame, stage_control_tab, *args, **kwargs)
-
-
-"""
-End of Stage Control Tab Frame Classes
-"""

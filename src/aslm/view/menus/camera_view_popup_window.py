@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -29,12 +30,14 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Standard Library Imports
 import tkinter as tk
-from tkinter import ttk
+
+# Third Party Imports
+
+# Local Imports
 from aslm.view.custom_widgets.popup import PopUp
-from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
-import logging
-from aslm.view.main_window_content.camera_display.camera_view.camera_view_tab import CameraTab
+from aslm.view.main_window_content.camera.display import CameraTab
 
 # p = __name__.split(".")[1]
 # logger = logging.getLogger(p)
@@ -47,7 +50,11 @@ class CameraViewPopupWindow:
         # Creating popup window with this name and size/placement, PopUp is a
         # Toplevel window
         self.popup = PopUp(
-            root, f"{microscope_name} Additional Camera View", "+320+180", top=False, transient=False
+            root,
+            f"{microscope_name} Additional Camera View",
+            "+320+180",
+            top=False,
+            transient=False,
         )
 
         # Storing the content frame of the popup, this will be the parent of
@@ -74,7 +81,9 @@ class CameraViewPopupWindow:
     # Getters
     def get_variables(self):
         """
-        This function returns a dictionary of all the variables that are tied to each widget name.
+        This function returns a dictionary of all the variables that are tied to each
+        widget name.
+
         The key is the widget name, value is the variable associated.
         """
         variables = {}

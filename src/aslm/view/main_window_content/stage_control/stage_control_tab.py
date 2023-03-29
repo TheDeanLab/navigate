@@ -49,7 +49,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class stage_control_tab(tk.Frame):
+class StageControlTab(tk.Frame):
     def __init__(self, note3, *args, **kwargs):
         # Init Frame
         tk.Frame.__init__(self, note3, *args, **kwargs)

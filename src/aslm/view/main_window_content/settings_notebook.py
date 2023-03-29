@@ -40,9 +40,7 @@ import logging
 from aslm.view.custom_widgets.DockableNotebook import DockableNotebook
 
 # Import Sub-Frames
-from aslm.view.main_window_content.camera.settings import (
-    camera_settings_tab,
-)
+from aslm.view.main_window_content.camera.settings import CameraSettingsTab
 from aslm.view.main_window_content.channel_settings.channels_tab import channels_tab
 from aslm.view.main_window_content.stage_control.stage_control_tab import (
     StageControlTab,
@@ -69,7 +67,7 @@ class settings_notebook(DockableNotebook):
         self.channels_tab = channels_tab(self)
 
         # Creating the Camera tab
-        self.camera_settings_tab = camera_settings_tab(self)
+        self.camera_settings_tab = CameraSettingsTab(self)
 
         # Creating Stage Control Tab
         self.stage_control_tab = StageControlTab(self)

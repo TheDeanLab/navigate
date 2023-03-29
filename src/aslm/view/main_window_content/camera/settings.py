@@ -46,7 +46,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class camera_settings_tab(tk.Frame):
+class CameraSettingsTab(tk.Frame):
     """
     This class holds and controls the layout of the major label frames for the
     camera  settings tab in the settings notebook. Any imported classes are children

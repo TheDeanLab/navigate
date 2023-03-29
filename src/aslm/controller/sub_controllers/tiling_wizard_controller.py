@@ -144,7 +144,7 @@ class TilingWizardController(GUIController):
             self.parent_controller.parent_controller.view
         )  # channels_tab_controller -> aslm_controller -> view
         self.cam_settings_widgets = (
-            main_view.settings.camera_settings_tab.camera_roi.get_widgets()
+            main_view.settings.CameraSettingsTab.camera_roi.get_widgets()
         )
         self.stack_acq_widgets = (
             main_view.settings.channels_tab.stack_acq_frame.get_widgets()

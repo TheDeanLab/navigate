@@ -37,7 +37,7 @@ import tkinter as tk
 
 # Local Imports
 from aslm.view.custom_widgets.popup import PopUp
-from aslm.view.main_window_content.camera.display import CameraTab
+from aslm.view.main_window_content.display_notebook import CameraTab
 
 # p = __name__.split(".")[1]
 # logger = logging.getLogger(p)

@@ -52,8 +52,8 @@ from pathlib import Path
 # Third Party Imports
 
 # Local Imports
-from aslm.view.main_window_content.settings_notebook import settings_notebook
-from aslm.view.main_window_content.camera.display import (
+from aslm.view.main_window_content.settings_notebook import SettingsNotebook
+from aslm.view.main_window_content.display_notebook import (
     CameraNotebook,
 )
 from aslm.view.main_window_content.acquire_bar_frame.acquire_bar import AcquireBar
@@ -137,7 +137,7 @@ class MainApp(ttk.Frame):
 
         # Putting Notebooks into frames, tabs are held within the class of each
         # notebook
-        self.settings = settings_notebook(self.frame_left, self.root)
+        self.settings = SettingsNotebook(self.frame_left, self.root)
         self.camera_waveform = CameraNotebook(self.frame_top_right, self.root)
         # self.stage_control = stagecontrol_notebook(self.frame_bottom_right)
 

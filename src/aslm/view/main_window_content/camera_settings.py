@@ -65,21 +65,21 @@ class CameraSettingsTab(tk.Frame):
         tk.Grid.rowconfigure(self, "all", weight=1)
 
         # Camera Modes Frame
-        self.camera_mode = camera_mode(self)
+        self.camera_mode = CameraMode(self)
         self.camera_mode.grid(row=0, column=0, sticky=(tk.NSEW), padx=10, pady=10)
 
         # Framerate Label Frame
-        self.framerate_info = framerate_info(self)
+        self.framerate_info = FramerateInfo(self)
         self.framerate_info.grid(row=0, column=1, sticky=(tk.NSEW), padx=10, pady=10)
 
         # Region of Interest Settings
-        self.camera_roi = camera_roi(self)
+        self.camera_roi = ROI(self)
         self.camera_roi.grid(
             row=1, column=0, columnspan=2, sticky=(tk.NSEW), padx=10, pady=10
         )
 
 
-class camera_mode(ttk.Labelframe):
+class CameraMode(ttk.Labelframe):
     """This class generates the camera mode label frame.
     Widgets can be adjusted below. Dropdown values need to be set in the controller.
     The function widget.set_values(values) allows this. It can be found in the
@@ -160,7 +160,7 @@ class camera_mode(ttk.Labelframe):
         return self.inputs
 
 
-class framerate_info(ttk.LabelFrame):
+class FramerateInfo(ttk.LabelFrame):
     """Framerate Info Frame
 
     This class generates the framerate label frame.
@@ -292,7 +292,7 @@ class framerate_info(ttk.LabelFrame):
         return self.inputs
 
 
-class camera_roi(ttk.Labelframe):
+class ROI(ttk.Labelframe):
     """
     This class generates the camera roi label frame.
     Widgets can be adjusted below. Dropdown values need to be set in the controller.

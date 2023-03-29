@@ -40,9 +40,9 @@ import logging
 from aslm.view.custom_widgets.DockableNotebook import DockableNotebook
 
 # Import Sub-Frames
-from aslm.view.main_window_content.camera.settings import CameraSettingsTab
+from aslm.view.main_window_content.camera_settings import CameraSettingsTab
 from aslm.view.main_window_content.channel_settings.channels_tab import channels_tab
-from aslm.view.main_window_content.stage_control.stage_control_tab import (
+from aslm.view.main_window_content.stage_control.stagecontrol_notebook import (
     StageControlTab,
 )
 from aslm.view.main_window_content.multiposition.multiposition_tab import (
@@ -54,7 +54,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class settings_notebook(DockableNotebook):
+class SettingsNotebook(DockableNotebook):
     def __init__(self, frame_left, root, *args, **kwargs):
 
         # Init notebook

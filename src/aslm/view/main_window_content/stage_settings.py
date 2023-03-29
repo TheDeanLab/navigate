@@ -51,6 +51,29 @@ logger = logging.getLogger(p)
 
 
 class StageControlNotebook(ttk.Notebook):
+    """Notebook for stage control tab.
+
+    Parameters
+    ----------
+    frame_bot_right : tk.Frame
+        Frame to put notebook into.
+    *args
+        Arguments for ttk.Notebook
+    **kwargs
+        Keyword arguments for ttk.Notebook
+
+    Attributes
+    ----------
+    stage_control_tab : StageControlTab
+        Stage control tab.
+    maximum_intensity_projection_tab : MaximumIntensityProjectionTab
+        Maximum intensity projection tab.
+
+    Methods
+    -------
+    None
+    """
+
     def __init__(self, frame_bot_right, *args, **kwargs):
         # Init notebook
         ttk.Notebook.__init__(self, frame_bot_right, *args, **kwargs)
@@ -67,10 +90,29 @@ class StageControlNotebook(ttk.Notebook):
 
         # Adding tabs to notebook
         self.add(self.stage_control_tab, text="Stage Control", sticky=tk.NSEW)
-        self.add(self.maximum_intensity_projection_tab, text="MIPs", sticky=tk.NSEW)
 
 
-class goto_frame(ttk.Frame):
+class GoToFrame(ttk.Frame):
+    """GoTo Frame for stage control tab.
+
+    Parameters
+    ----------
+    stage_control_tab : StageControlTab
+        Stage control tab.
+    *args
+        Arguments for ttk.Frame
+    **kwargs
+        Keyword arguments for ttk.Frame
+
+    Attributes
+    ----------
+    None
+
+    Methods
+    -------
+    None
+    """
+
     def __init__(goto_frame, stage_control_tab, *args, **kwargs):
         # Init Frame
         ttk.Frame.__init__(goto_frame, stage_control_tab, *args, **kwargs)
@@ -81,6 +123,39 @@ class goto_frame(ttk.Frame):
 
 
 class StageControlTab(tk.Frame):
+    """Stage Control Tab for stage control notebook.
+
+    Parameters
+    ----------
+    note3 : ttk.Notebook
+        Stage control notebook.
+    *args
+        Arguments for tk.Frame
+    **kwargs
+        Keyword arguments for tk.Frame
+
+    Attributes
+    ----------
+    index : int
+        Index of tab in notebook.
+    position_frame : PositionFrame
+        Position frame.
+    xy_frame : XYFrame
+        XY frame.
+    z_frame : OtherAxisFrame
+        Z frame.
+    theta_frame : OtherAxisFrame
+        Theta frame.
+    f_frame : OtherAxisFrame
+        Focus frame.
+    goto_frame : GoToFrame
+        GoTo frame.
+
+    Methods
+    -------
+    None
+    """
+
     def __init__(self, note3, *args, **kwargs):
         # Init Frame
         tk.Frame.__init__(self, note3, *args, **kwargs)
@@ -94,27 +169,27 @@ class StageControlTab(tk.Frame):
         # Building out stage control elements, frame by frame
 
         # Position Frame
-        self.position_frame = position_frame(self)
+        self.position_frame = PositionFrame(self)
 
         # XY Frame
-        self.xy_frame = x_y_frame(self)
+        self.xy_frame = XYFrame(self)
 
         # Z Frame
-        self.z_frame = other_axis_frame(self, "Z")
+        self.z_frame = OtherAxisFrame(self, "Z")
 
         # Theta Frame
-        self.theta_frame = other_axis_frame(self, "Theta")
+        self.theta_frame = OtherAxisFrame(self, "Theta")
 
         # Focus Frame
-        self.f_frame = other_axis_frame(self, "Focus")
+        self.f_frame = OtherAxisFrame(self, "Focus")
 
         # GoTo Frame
-        self.goto_frame = goto_frame(self)
+        self.goto_frame = GoToFrame(self)
         self.goto_frame_label = ttk.Label(self.goto_frame, text="Goto Frame")
         self.goto_frame_label.pack()  # For visual mockup purposes
 
         # stop frame
-        self.stop_frame = stop_frame(self, "Stop")
+        self.stop_frame = StopFrame(self, "Stop")
 
         """
         Grid for frames
@@ -163,9 +238,19 @@ class StageControlTab(tk.Frame):
         )
 
     def get_widgets(self):
-        """
-        # this function will return all the input widgets as a dictionary
-        # the reference name in the dictionary is the same as in the widget list file
+        """Get all widgets in the stage control tab.
+
+        This function will return all the input widgets as a dictionary
+        The reference name in the dictionary is the same as in the widget list file
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        dict
+            Dictionary of widgets
         """
         temp = {**self.position_frame.get_widgets()}
         for axis in ["xy", "z", "theta", "f"]:
@@ -173,13 +258,34 @@ class StageControlTab(tk.Frame):
         return temp
 
     def get_variables(self):
+        """Get all variables in the stage control tab.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        dict
+            Dictionary of variables
+        """
         temp = self.get_widgets()
         return {k: temp[k].get_variable() for k in temp}
 
     def get_buttons(self):
-        """
-        # this function returns all the buttons in a dictionary
-        # the reference name is the same as in widget list
+        """Get all buttons in the stage control tab.
+
+        this function returns all the buttons in a dictionary
+        the reference name is the same as in widget list
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        dict
+            Dictionary of buttons
         """
         result = {**self.xy_frame.get_buttons()}
         for axis in ["z", "theta", "f"]:
@@ -189,7 +295,41 @@ class StageControlTab(tk.Frame):
         return result
 
 
-class other_axis_frame(ttk.Labelframe):
+class OtherAxisFrame(ttk.Labelframe):
+    """Frame for the other axis movement buttons.
+
+    This frame is used for the z, theta, and focus axis movement buttons.
+
+    Parameters
+    ----------
+    other_axis_frame : tk.Frame
+        The frame to be used for the other axis movement buttons
+    stage_control_tab : tk.Frame
+        The stage control tab that the other axis frame is in
+    name : str
+        The name of the axis that the frame is for
+    *args : tuple
+        Positional arguments for the ttk.Labelframe
+    **kwargs : dict
+        Keyword arguments for the ttk.Labelframe
+
+    Attributes
+    ----------
+    name : str
+        The name of the axis that the frame is for
+    up_image : tk.PhotoImage
+        The image for the up button
+    down_image : tk.PhotoImage
+        The image for the down button
+
+    Methods
+    -------
+    get_widgets()
+        Get all widgets in the other axis frame
+    get_buttons()
+        Get all buttons in the other axis frame
+    """
+
     def __init__(other_axis_frame, stage_control_tab, name, *args, **kwargs):
         # Init Frame
         label = name
@@ -287,7 +427,35 @@ class other_axis_frame(ttk.Labelframe):
         }
 
 
-class position_frame(ttk.Labelframe):
+class PositionFrame(ttk.Labelframe):
+    """Frame for the stage position entries.
+
+    This frame is used for the x, y, z, theta, and focus position entries.
+
+    Parameters
+    ----------
+    position_frame : tk.Frame
+        The frame to be used for the stage position entries
+    stage_control_tab : tk.Frame
+        The stage control tab that the position frame is in
+    *args : tuple
+        Positional arguments for the ttk.Labelframe
+    **kwargs : dict
+        Keyword arguments for the ttk.Labelframe
+
+    Attributes
+    ----------
+    inputs : dict
+        A dictionary of the label input widgets for the position entries
+
+    Methods
+    -------
+    get_widgets()
+        Get all widgets in the position frame
+    get_variables()
+        Get all variables in the position frame
+    """
+
     def __init__(position_frame, stage_control_tab, *args, **kwargs):
 
         # Init Frame
@@ -337,16 +505,78 @@ class position_frame(ttk.Labelframe):
         """
 
     def get_widgets(position_frame):
+        """Get all widgets in the position frame
+
+        Parameters
+        ----------
+        position_frame : tk.Frame
+            The frame to be used for the stage position entries
+
+        Returns
+        -------
+        dict
+            A dictionary of the label input widgets for the position entries
+        """
         return position_frame.inputs
 
     def get_variables(position_frame):
+        """Get all variables in the position frame
+
+        Parameters
+        ----------
+        position_frame : tk.Frame
+            The frame to be used for the stage position entries
+
+        Returns
+        -------
+        dict
+            A dictionary of the variables for the position entries
+        """
         variables = {}
         for name in position_frame.inputs:
             variables[name] = position_frame.inputs[name].get_variable()
         return variables
 
 
-class x_y_frame(ttk.Labelframe):
+class XYFrame(ttk.Labelframe):
+    """Frame for the x and y movement buttons.
+
+    This frame is used for the up, down, left, right, zero, and increment buttons.
+
+    Parameters
+    ----------
+    x_y_frame : tk.Frame
+        The frame to be used for the x and y movement buttons
+    stage_control_tab : tk.Frame
+        The stage control tab that the x y frame is in
+    *args : tuple
+        Positional arguments for the ttk.Labelframe
+    **kwargs : dict
+        Keyword arguments for the ttk.Labelframe
+
+    Attributes
+    ----------
+    up_btn : tk.Button
+        The button for moving up
+    down_btn : tk.Button
+        The button for moving down
+    left_btn : tk.Button
+        The button for moving left
+    right_btn : tk.Button
+        The button for moving right
+    zero_btn : tk.Button
+        The button for zeroing the x and y positions
+    increment_box : tk.Spinbox
+        The spinbox for the increment value
+
+    Methods
+    -------
+    get_buttons()
+        Get all buttons in the x y frame
+    get_widget()
+        Get the increment widget in the x y frame
+    """
+
     def __init__(x_y_frame, stage_control_tab, *args, **kwargs):
         # Init Frame
         ttk.Labelframe.__init__(
@@ -467,14 +697,65 @@ class x_y_frame(ttk.Labelframe):
         x_y_frame.increment_box.widget.set_precision(-1)
 
     def get_widget(x_y_frame):
+        """Returns the frame widget
+
+        Parameters
+        ----------
+        x_y_frame : XYFrame
+            The XYFrame object
+
+        Returns
+        -------
+        tk.Frame
+            The frame widget
+        """
+
         return x_y_frame.increment_box
 
     def get_buttons(x_y_frame):
+        """Returns the buttons in the frame
+
+        Parameters
+        ----------
+        x_y_frame : XYFrame
+            The XYFrame object
+
+        Returns
+        -------
+        dict
+            A dictionary of the buttons
+        """
         names = ["up_x_btn", "down_x_btn", "up_y_btn", "down_y_btn", "zero_xy_btn"]
         return {k: getattr(x_y_frame, k) for k in names}
 
 
-class stop_frame(ttk.Frame):
+class StopFrame(ttk.Frame):
+    """Frame for the stop button
+
+    Parameters
+    ----------
+    stage_control_tab : StageControlTab
+        The stage control tab
+    name : str
+        The name of the frame
+    *args
+        Variable length argument list
+    **kwargs
+        Arbitrary keyword arguments
+
+    Attributes
+    ----------
+    name : str
+        The name of the frame
+    stop_btn : tk.Button
+        The stop button
+
+    Methods
+    -------
+    get_buttons()
+        Returns the buttons in the frame
+    """
+
     def __init__(self, stage_control_tab, name, *args, **kwargs):
         # Init Frame
         ttk.Frame.__init__(self, stage_control_tab, *args, **kwargs)

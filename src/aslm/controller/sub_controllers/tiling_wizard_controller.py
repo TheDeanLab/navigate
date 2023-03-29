@@ -150,7 +150,7 @@ class TilingWizardController(GUIController):
             main_view.settings.channels_tab.stack_acq_frame.get_widgets()
         )
         self.stage_position_vars = (
-            main_view.settings.stage_control_tab.position_frame.get_variables()
+            main_view.settings.stage_control_tab.PositionFrame.get_variables()
         )
         self.multipoint_table = (
             main_view.settings.multiposition_tab.multipoint_list.get_table()

@@ -42,8 +42,9 @@ import numpy as np
 class ConstantVelocityAcquisition:
     """Class for acquiring data using the ASI internal encoder."""
 
-    def __init__(self, model):
+    def __init__(self, model, axis='z'):
         self.model = model
+        self.axis = axis
 
         self.config_table = {
             "signal": {
@@ -75,7 +76,7 @@ class ConstantVelocityAcquisition:
         # self.model.active_microscope.daq.trigger_source = "/PXI6259/PFI1"
         self.model.active_microscope.prepare_next_channel()
         self.model.active_microscope.daq.set_trigger_mode(1, "/PXI6259/PFI1")
-        self.asi_stage = self.model.active_microscope.stages['z']
+        self.asi_stage = self.model.active_microscope.stages[self.axis]
 
         # Create all of our tasks so that they are triggered by the new trigger source.
         # get the current channel - only operating in a per-stack mode.
@@ -123,20 +124,21 @@ class ConstantVelocityAcquisition:
         # TODO: stage name and stage controller!
         self.default_speed = self.asi_stage.default_speed
         # basic speed
-        self.asi_stage.tiger_controller.set_speed(X=0.0001)
-        basic_speed = self.asi_stage.tiger_controller.get_speed("X")
+        self.asi_stage.set_speed({self.axis: 0.0001})
+        basic_speed = self.asi_stage.get_speed(self.axis)
         # mm/s
         # TODO: set the speed from GUI? step size?
         stage_velocity = basic_speed * round(float(self.model.configuration["experiment"]["MicroscopeState"]["step_size"]))
-        self.asi_stage.tiger_controller.set_speed(X=stage_velocity)
+        self.asi_stage.set_speed({self.axis: stage_velocity})
 
 
         # Configure the encoder to operate in constant velocity mode.
         # Must add similar scanr functionality to our ASI stage class.
-        self.asi_stage.tiger_controller.scanr(
+        self.asi_stage.scanr(
             start_position_mm=start_position,
             end_position_mm=self.stop_position,
             enc_divide=round(float(self.model.configuration["experiment"]["MicroscopeState"]["start_position"])) / 45397.6,
+            axis=self.axis
         )
 
         # Start the daq acquisition.  Basically places all of the waveforms in a ready
@@ -144,17 +146,15 @@ class ConstantVelocityAcquisition:
         # self.model.active_microscope.daq.run_acquisition()
 
         # Start the stage scan.  Also get this functionality into the ASI stage class.
-        self.asi_stage.tiger_controller.start_scan("X")
+        self.asi_stage.start_scan(self.axis)
         # start scan won't start the scan, but when calling stop_scan it will start scan. So weird.
-        self.asi_stage.tiger_controller.stop_scan()
-        # the position will be set to start_position_mm after scan by default
-        # self.asi_stage.tiger_controller.send_command("SCAN a")
+        self.asi_stage.stop_scan()
 
         # Stage starts to move and sends a trigger to the DAQ.
         # HOw do we know how many images to acquire?
 
     def end_func_signal(self):
-        pos = self.asi_stage.tiger_controller.get_position('x')
+        pos = self.asi_stage.get_position(self.axis)
         print("*** stage position:", pos)
         # TODO: after scan, the stage will go back to the start position and stop sending out triggers.
         if abs(pos - self.stop_position * 10000) < 100:
@@ -170,6 +170,6 @@ class ConstantVelocityAcquisition:
 
         """
         self.model.active_microscope.daq.set_trigger_mode(0, None)
-        self.asi_stage.tiger_controller.stop()
+        self.asi_stage.stop()
         # reset stage speed
-        self.asi_stage.tiger_controller.set_speed(X=self.default_speed)
+        self.asi_stage.set_speed({self.axis: self.default_speed})

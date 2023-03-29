@@ -50,6 +50,32 @@ logger = logging.getLogger(p)
 
 
 class CameraNotebook(DockableNotebook):
+    """This class is the notebook that holds the camera view and waveform settings tabs.
+
+    Parameters
+    ----------
+    frame_top_right : tk.Frame
+        The frame that will hold the notebook.
+    *args : tuple
+        Variable length argument list.
+    **kwargs : dict
+        Arbitrary keyword arguments.
+
+    Attributes
+    ----------
+    camera_tab : CameraTab
+        The camera tab.
+    waveform_tab : WaveformTab
+        The waveform settings tab.
+
+    Methods
+    -------
+    set_tablist(tab_list)
+        Sets the tab list.
+    add(tab, text, sticky)
+        Adds a tab to the notebook.
+    """
+
     def __init__(self, frame_top_right, *args, **kwargs):
         # Init notebook
         DockableNotebook.__init__(self, frame_top_right, *args, **kwargs)
@@ -73,6 +99,36 @@ class CameraNotebook(DockableNotebook):
 
 
 class CameraTab(tk.Frame):
+    """This class is the camera tab.
+
+    Parameters
+    ----------
+    cam_wave : tk.Frame
+        The frame that will hold the camera tab.
+    *args : tuple
+        Variable length argument list.
+    **kwargs : dict
+        Arbitrary keyword arguments.
+
+    Attributes
+    ----------
+    index : int
+        The index of the current frame.
+    cam_image : ttk.Frame
+        The frame that will hold the camera image.
+    canvas : tk.Canvas
+        The canvas that will hold the matplotlib figure.
+    matplotlib_figure : matplotlib.figure.Figure
+        The matplotlib figure that will hold the camera image.
+    matplotlib_canvas : matplotlib.backends.backend_tkagg.FigureCanvasTkAgg
+        The matplotlib canvas that will hold the camera image.
+
+    Methods
+    -------
+    None
+
+    """
+
     def __init__(self, cam_wave, *args, **kwargs):
         #  Init Frame
         tk.Frame.__init__(self, cam_wave, *args, **kwargs)
@@ -97,7 +153,7 @@ class CameraTab(tk.Frame):
         self.matplotlib_canvas = FigureCanvasTkAgg(self.matplotlib_figure, self.canvas)
 
         #  Frame for scale settings/palette color
-        self.scale_palette = palette(self)
+        self.scale_palette = IntensityFrame(self)
         self.scale_palette.grid(row=0, column=1, sticky=tk.NSEW, padx=5, pady=5)
 
         # Slider
@@ -114,15 +170,41 @@ class CameraTab(tk.Frame):
         self.slider.grid(row=3, column=0, sticky=tk.NSEW, padx=5, pady=5)
 
         #  Frame for camera selection and counts
-        self.image_metrics = image_metrics(self)
+        self.image_metrics = MetricsFrame(self)
         self.image_metrics.grid(row=1, column=1, sticky=tk.NSEW, padx=5, pady=5)
 
         # Frame for controlling the live display functionality.
-        self.live_frame = live_frame(self)
+        self.live_frame = RenderFrame(self)
         self.live_frame.grid(row=2, column=1, sticky=tk.NSEW, padx=5, pady=5)
 
 
-class live_frame(ttk.Labelframe):
+class RenderFrame(ttk.Labelframe):
+    """This class is the frame that holds the live display functionality.
+
+    Parameters
+    ----------
+    cam_view : tk.Frame
+        The frame that will hold the live display functionality.
+    *args : tuple
+        Variable length argument list.
+    **kwargs : dict
+        Arbitrary keyword arguments.
+
+    Attributes
+    ----------
+    live_var : tk.StringVar
+        The variable that holds the live display functionality.
+    live : ttk.Combobox
+        The combobox that holds the live display functionality.
+
+    Methods
+    -------
+    get_variables()
+        Returns the variables.
+    get_widgets()
+        Returns the widgets.
+    """
+
     def __init__(self, cam_view, *args, **kwargs):
 
         # Init Frame
@@ -151,11 +233,18 @@ class live_frame(ttk.Labelframe):
         self.live.state = "readonly"
 
     def get_variables(self):
-        """
-        This function returns a dictionary of all the variables that are tied to each
-        widget name.
+        """Function to get the variables.
 
         The key is the widget name, value is the variable associated.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        variables : dict
+            The dictionary that holds the variables.
         """
         variables = {}
         for key, widget in self.inputs.items():
@@ -163,14 +252,52 @@ class live_frame(ttk.Labelframe):
         return variables
 
     def get_widgets(self):
-        """
-        # This function returns the dictionary that holds the widgets.
+        """Function to get the widgets.
+
         The key is the widget name, value is the LabelInput class that has all the data.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        self.inputs : dict
+            The dictionary that holds the widgets.
         """
         return self.inputs
 
 
 class WaveformTab(tk.Frame):
+    """This class is the frame that holds the waveform tab.
+
+    Parameters
+    ----------
+    cam_wave : tk.Frame
+        The frame that will hold the waveform tab.
+    *args : tuple
+        Variable length argument list.
+    **kwargs : dict
+        Arbitrary keyword arguments.
+
+    Attributes
+    ----------
+    index : int
+        The index of the tab.
+    waveform_plots : ttk.Frame
+        The frame that will hold the waveform plots.
+    fig : matplotlib.figure.Figure
+        The figure that will hold the waveform plots.
+    canvas : matplotlib.backends.backend_tkagg.FigureCanvasTkAgg
+        The canvas that will hold the waveform plots.
+    waveform_settings : WaveformSettingsFrame
+        The frame that will hold the waveform settings.
+
+    Methods
+    -------
+    None
+    """
+
     def __init__(self, cam_wave, *args, **kwargs):
         # Init Frame
         tk.Frame.__init__(self, cam_wave, *args, **kwargs)
@@ -188,11 +315,35 @@ class WaveformTab(tk.Frame):
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.waveform_plots)
         self.canvas.draw()
 
-        self.waveform_settings = WaveformSettings(self)
+        self.waveform_settings = WaveformSettingsFrame(self)
         self.waveform_settings.grid(row=1, column=0, sticky=tk.NSEW, padx=5, pady=5)
 
 
-class WaveformSettings(ttk.Labelframe):
+class WaveformSettingsFrame(ttk.Labelframe):
+    """This class is the frame that holds the waveform settings.
+
+    Parameters
+    ----------
+    wav_view : tk.Frame
+        The frame that will hold the waveform settings.
+    *args : tuple
+        Variable length argument list.
+    **kwargs : dict
+        Arbitrary keyword arguments.
+
+    Attributes
+    ----------
+    inputs : dict
+        The dictionary that holds the widgets.
+
+    Methods
+    -------
+    get_variables()
+        Returns the variables.
+    get_widgets()
+        Returns the widgets.
+    """
+
     def __init__(self, wav_view, *args, **kwargs):
         # Init Frame
         text_label = "Settings"
@@ -215,16 +366,66 @@ class WaveformSettings(ttk.Labelframe):
         self.inputs["sample_rate"].grid(row=0, column=0, sticky=tk.NSEW, padx=3, pady=3)
 
     def get_variables(self):
+        """Function to get the variables.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        variables : dict
+            The dictionary that holds the variables.
+        """
         variables = {}
         for key, widget in self.inputs.items():
             variables[key] = widget.get()
         return variables
 
     def get_widgets(self):
+        """Function to get the widgets.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        self.inputs : dict
+            The dictionary that holds the widgets.
+        """
         return self.inputs
 
 
-class image_metrics(ttk.Labelframe):
+class MetricsFrame(ttk.Labelframe):
+    """This class is the frame that holds the image metrics.
+
+    Parameters
+    ----------
+    cam_view : tk.Frame
+        The frame that will hold the image metrics.
+    *args : tuple
+        Variable length argument list.
+    **kwargs : dict
+        Arbitrary keyword arguments.
+
+    Attributes
+    ----------
+    inputs : dict
+        The dictionary that holds the widgets.
+    self.labels : list
+        The list of labels for the widgets.
+    self.names : list
+        The list of names for the widgets.
+
+    Methods
+    -------
+    get_variables()
+        Returns the variables.
+    get_widgets()
+        Returns the widgets.
+    """
+
     def __init__(self, cam_view, *args, **kwargs):
         # Init Labelframe
         text_label = "Image Metrics"
@@ -274,6 +475,15 @@ class image_metrics(ttk.Labelframe):
         each  widget name.
 
         The key is the widget name, value is the variable associated.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        variables : dict
+            The dictionary that holds the variables.
         """
         variables = {}
         for key, widget in self.inputs.items():
@@ -282,12 +492,64 @@ class image_metrics(ttk.Labelframe):
 
     def get_widgets(self):
         """This function returns the dictionary that holds the widgets.
+
         The key is the widget name, value is the LabelInput class that has all the data.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        self.inputs : dict
+            The dictionary that holds the widgets.
         """
         return self.inputs
 
 
-class palette(ttk.Labelframe):
+class IntensityFrame(ttk.Labelframe):
+    """This class is the frame that holds the intensity controls.
+
+    Parameters
+    ----------
+    cam_view : tk.Frame
+        The frame that will hold the intensity controls.
+    *args : tuple
+        Variable length argument list.
+    **kwargs : dict
+        Arbitrary keyword arguments.
+
+    Attributes
+    ----------
+    inputs : dict
+        The dictionary that holds the widgets.
+    self.labels : list
+        The list of labels for the widgets.
+    self.color_labels : list
+        The list of human-readable names for the color maps.
+    self.color_values : list
+        The list of matplotlib cmap names for the color maps.
+    self.transpose : bool
+        The transpose flag for the image.
+    self.flip : bool
+        The flip flag for the image.
+    self.autoscale : bool
+        The autoscale flag for the image.
+    self.auto : bool
+        The auto flag for the image.
+    self.minmax : list
+        The list of human-readable names for the min/max widgets.
+    self.minmax_names : list
+        Labels for the min/max widgets.
+
+    Methods
+    -------
+    get_variables()
+        Returns the variables.
+    get_widgets()
+        Returns the widgets.
+    """
+
     def __init__(self, cam_view, *args, **kwargs):
         # Init Frame
         text_label = "LUT"
@@ -376,6 +638,15 @@ class palette(ttk.Labelframe):
         each  widget name.
 
         The key is the widget name, value is the variable associated.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        variables : dict
+            The dictionary that holds the variables.
         """
         variables = {}
         for key, widget in self.inputs.items():
@@ -384,148 +655,16 @@ class palette(ttk.Labelframe):
 
     def get_widgets(self):
         """This function returns the dictionary that holds the widgets.
+
         The key is the widget name, value is the LabelInput class that has all the data.
-        """
-        return self.inputs
 
+        Parameters
+        ----------
+        None
 
-class rgb_selection(ttk.Labelframe):
-    def __init__(self, cam_view, *args, **kwargs):
-        # Init Frame
-        text_label = "RGB Selection"
-        ttk.Labelframe.__init__(self, cam_view, text=text_label, *args, **kwargs)
-
-        # Formatting
-        Grid.columnconfigure(self, "all", weight=1)
-        Grid.rowconfigure(self, "all", weight=1)
-
-        # Dictionary for widgets
-        self.inputs = {}
-
-        # Labels and names
-        self.color_labels = ["R", "G", "B"]
-        self.color_values = ["R", "G", "B"]
-        for i in range(len(self.color_labels)):
-            self.inputs[self.color_labels[i]] = LabelInput(
-                parent=self, label=self.color_labels[i], input_class=ttk.Label
-            )
-            self.inputs[self.color_labels[i]].grid(row=i + 1, column=0, sticky=tk.NSEW)
-
-        # Channels
-        self.channel_labels = ["CH1", "CH2", "CH3", "CH4", "CH5"]
-        self.labels = []
-        self.frame_columns = []
-
-        # CH1
-        self.ch1_btns = []
-
-        # CH2
-        self.ch2_btns = []
-
-        # CH3
-        self.ch3_btns = []
-
-        # CH4
-        self.ch4_btns = []
-
-        # CH5
-        self.ch5_btns = []
-
-        #  Creates a column frame for each widget
-        for i in range(len(self.channel_labels)):
-            self.frame_columns.append(ttk.Frame(self))
-            self.frame_columns[i].columnconfigure(0, weight=1, uniform=1)
-            self.frame_columns[i].rowconfigure("all", weight=1, uniform=1)
-            self.frame_columns[i].grid(
-                row=1, column=i + 1, sticky=tk.NSEW, padx=1, pady=(4, 6), rowspan=3
-            )
-            self.labels.append(ttk.Label(self, text=self.channel_labels[i]))
-            self.labels[i].grid(row=0, column=i + 1, sticky=tk.N, pady=1, padx=1)
-        self.frame_columns[3].grid(padx=(1, 4))
-        self.frame_columns[0].grid(padx=(4, 1))
-
-        #  Adds and grids widgets to respective column
-        self.ch1 = tk.StringVar()
-        self.ch2 = tk.StringVar()
-        self.ch3 = tk.StringVar()
-        self.ch4 = tk.StringVar()
-        self.ch5 = tk.StringVar()
-        for num in range(0, 3):
-            self.ch1_btns.append(
-                LabelInput(
-                    parent=self.frame_columns[0],
-                    input_class=ttk.Radiobutton,
-                    input_var=self.ch1,
-                    input_args={"value": self.color_values[num]},
-                )
-            )
-            self.ch1_btns[num].grid(
-                row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
-            )
-
-            self.ch2_btns.append(
-                LabelInput(
-                    parent=self.frame_columns[1],
-                    input_class=ttk.Radiobutton,
-                    input_var=self.ch2,
-                    input_args={"value": self.color_values[num]},
-                )
-            )
-            self.ch2_btns[num].grid(
-                row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
-            )
-
-            self.ch3_btns.append(
-                LabelInput(
-                    parent=self.frame_columns[2],
-                    input_class=ttk.Radiobutton,
-                    input_var=self.ch3,
-                    input_args={"value": self.color_values[num]},
-                )
-            )
-            self.ch3_btns[num].grid(
-                row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
-            )
-
-            self.ch4_btns.append(
-                LabelInput(
-                    parent=self.frame_columns[3],
-                    input_class=ttk.Radiobutton,
-                    input_var=self.ch4,
-                    input_args={"value": self.color_values[num]},
-                )
-            )
-            self.ch4_btns[num].grid(
-                row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
-            )
-
-            self.ch5_btns.append(
-                LabelInput(
-                    parent=self.frame_columns[4],
-                    input_class=ttk.Radiobutton,
-                    input_var=self.ch5,
-                    input_args={"value": self.color_values[num]},
-                )
-            )
-            self.ch5_btns[num].grid(
-                row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
-            )
-
-    def get_variables(self):
-        """
-        # This function returns a dictionary of all the variables that are tied to
-        each  widget name.
-
-        The key is the widget name, value is the variable associated.
-        """
-        variables = {}
-        for key, widget in self.inputs.items():
-            variables[key] = widget.get()
-        return variables
-
-    def get_widgets(self):
-        """
-        # This function returns the dictionary that holds the widgets.
-        The key is the widget name, value is the LabelInput class that has all the data.
+        Returns
+        -------
+        self.inputs : dict
+            The dictionary that holds the widgets.
         """
         return self.inputs

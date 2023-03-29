@@ -60,6 +60,7 @@ class SyntheticDAQ(DAQBase):
         self.wait_to_run_lock = Lock()
         self.analog_outputs = {}
         self.is_updating_analog_task = False
+        self.mode = 0
 
     def create_camera_task(self):
         """Set up the camera trigger task."""

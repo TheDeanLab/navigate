@@ -30,12 +30,15 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-
+# Standard library imports
 import tkinter as tk
 from tkinter import ttk
 import logging
 import platform
 
+# Third party imports
+
+# Local application imports
 
 # Logger Setup
 p = __name__.split(".")[1]

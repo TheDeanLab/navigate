@@ -288,7 +288,7 @@ class TigerController:
         else:
             return float(response.split("=")[1].split()[0])
         
-    def scanr(self, start_position_mm: float, end_position_mm: float, enc_divide: int=0, axis: str='X'):
+    def scanr(self, start_position_mm: float, end_position_mm: float, enc_divide: float=0, axis: str='X'):
         """
         Set scan range.
         """

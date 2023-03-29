@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -42,28 +43,49 @@ logger = logging.getLogger(p)
 
 
 class DockableNotebook(ttk.Notebook):
-    """
-    Dockable Notebook that allows for tabs to be popped out into a separate window by right clicking on the tab. The tab must be selected before right clicking.
+    """Dockable Notebook that allows for tabs to be popped out into a separate
+    windows by right clicking on the tab. The tab must be selected before right
+    clicking.
 
     Parameters
     ----------
     parent: Tk parent widget.
-        The parent widget being passed down for hierarchy and organization. Typically a ttk.Frame or tk.Frame.
+        The parent widget being passed down for hierarchy and organization.
+        Typically a ttk.Frame or tk.Frame.
     root : Tk top-level widget.
         Tk.tk GUI instance.
     *args :
         Options for the ttk.Notebook class
-    **kwards:
+    **kwargs:
         Keyword options for the ttk.Notebook class
 
-    Returns
+    Attributes
+    ----------
+    root : Tk top-level widget.
+        Tk.tk GUI instance.
+    tab_list : list
+        List of tab variables
+    menu : Tk Menu
+        Menu that pops up when right-clicking on a tab
+
+    Methods
     -------
-    None
+    set_tablist(tab_list)
+        Setter for tab list
+    get_absolute_position()
+        This helps the popup menu appear where the mouse is right clicked.
+    find(event)
+        Will check if the proper widget element in the event is what we expect.
+        In this case its checking that the the label in the tab has been selected.
+    dismiss()
+        Dismisses the popup menu
+    popout()
+        Gets the currently selected tab, the tabs name and checks if the tab name is
+        in the tab list.
     """
 
     def __init__(self, parent, root, *args, **kwargs):
-        """
-        Constructor for DockableNotebook.
+        """Constructor for DockableNotebook.
 
         Formats the widget, creates right click menu and bindings for menu
 
@@ -88,8 +110,7 @@ class DockableNotebook(ttk.Notebook):
             self.bind("<ButtonPress-3>", self.find)
 
     def set_tablist(self, tab_list):
-        """
-        Setter for tab list
+        """Setter for tab list
 
         Parameters
         ----------
@@ -103,8 +124,7 @@ class DockableNotebook(ttk.Notebook):
         self.tab_list = tab_list
 
     def get_absolute_position(self):
-        """
-        This helps the popup menu appear where the mouse is right clicked.
+        """This helps the popup menu appear where the mouse is right clicked.
 
         Parameters
         ----------
@@ -120,15 +140,16 @@ class DockableNotebook(ttk.Notebook):
         return x, y
 
     def find(self, event):
-        """
-        Will check if the proper widget element in the event is what we expect.
+        """Will check if the proper widget element in the event is what we expect.
+
         In this case its checking that the the label in the tab has been selected.
         It then gets the proper position and calls the popup.
 
         Parameters
         ----------
         event: Tkinter event
-            Holds information about the event that was triggered and caught by Tkinters event system
+            Holds information about the event that was triggered and caught by Tkinters
+            event system
 
         Returns
         -------
@@ -143,9 +164,9 @@ class DockableNotebook(ttk.Notebook):
                 self.menu.grab_release()
 
     def popout(self):
-        """
-        Gets the currently selected tab, the tabs name and checks if the tab name is in the tab list.
-        If the tab is in the list, its removed from the list, hidden, and then passed to a new Top Level window.
+        """Gets the currently selected tab, the tabs name and checks if the tab name is
+        in the tab list. If the tab is in the list, its removed from the list,
+        hidden, and then passed to a new Top Level window.
 
         Parameters
         ----------
@@ -170,14 +191,17 @@ class DockableNotebook(ttk.Notebook):
         tk.Wm.protocol(tab, "WM_DELETE_WINDOW", lambda: self.dismiss(tab, tab_text))
 
     def dismiss(self, tab, tab_text):
-        """
-        This function is called when the top level that the tab was originally passed to has been closed.
-        The window manager releases control and then the tab is added back to its original ttk.Notebook.
+        """Dismisses the popup menu
+
+        This function is called when the top level that the tab was originally passed to
+        has been closed. The window manager releases control and then the tab is
+        added back to its original ttk.Notebook.
 
         Parameters
         ----------
         tab: Tkinter tab (path to widget represented as a str)
-            The tab that was popped out, this reference to the dismiss function is associated with this tab
+            The tab that was popped out, this reference to the dismiss function is
+            associated with this tab
         tab_text: string
             Name of the tab as it appears in the GUI
 

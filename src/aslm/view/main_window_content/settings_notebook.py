@@ -51,6 +51,43 @@ logger = logging.getLogger(p)
 
 
 class SettingsNotebook(DockableNotebook):
+    """Settings Notebook
+
+    This class is the settings notebook. It contains the following tabs:
+    - Channels
+    - Camera Settings
+    - Stage Control
+    - Multiposition
+
+    Parameters
+    ----------
+    frame_left : tk.Frame
+        The left frame of the main window
+    root : tk.Tk
+        The main window
+    *args
+        Variable length argument list.
+    **kwargs
+        Arbitrary keyword arguments.
+
+    Attributes
+    ----------
+    channels_tab : ChannelsTab
+        The Channels tab
+    camera_settings_tab : CameraSettingsTab
+        The Camera Settings tab
+    stage_control_tab : StageControlTab
+        The Stage Control tab
+    multiposition_tab : MultiPositionTab
+        The Multiposition tab
+    tab_list : list
+        A list of all the tabs
+
+    Methods
+    -------
+    None
+    """
+
     def __init__(self, frame_left, root, *args, **kwargs):
 
         # Init notebook

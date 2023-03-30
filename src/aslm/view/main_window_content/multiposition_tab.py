@@ -65,7 +65,7 @@ class MultiPositionTab(tk.Frame):
     ----------
     index : int
         The index of the tab in the notebook.
-    multipoint_list : multipoint_list
+    multipoint_list : MultiPointList
         The multipoint_list object that contains the list of multipoint
         experiments.
 
@@ -85,7 +85,7 @@ class MultiPositionTab(tk.Frame):
         tk.Grid.rowconfigure(self, "all", weight=1)
 
         # Multipoint List
-        self.multipoint_list = multipoint_list(self)
+        self.multipoint_list = MultiPointList(self)
         self.multipoint_list.grid(
             row=5, column=0, columnspan=3, sticky=(tk.NSEW), padx=10, pady=10
         )
@@ -184,10 +184,43 @@ class MultiPointFrame(ttk.Labelframe):
         return self.inputs
 
 
-class multipoint_list(ttk.Frame):
-    """
-    Exploring using a pandastable for embedding an interactive list within a tk Frame.
-    https://pandastable.readthedocs.io/en/latest/
+class MultiPointList(ttk.Frame):
+    """MultiPointList
+
+    MultiPointList is a frame that contains the widgets for the multipoint
+    experiment settings. uses Pandastable for embedding an interactive list within a
+    tk Frame. https://pandastable.readthedocs.io/en/latest/
+
+    Parameters
+    ----------
+    settings_tab : tk.Frame
+        The frame that contains the settings tab.
+    *args : tuple
+        Variable length argument list.
+    **kwargs : dict
+        Arbitrary keyword arguments.
+
+    Attributes
+    ----------
+    laser_label : ttk.Label
+        The label for the laser checkbox.
+    on_off : tk.BooleanVar
+        The variable that holds the state of the laser checkbox.
+    save_check : ttk.Checkbutton
+        The checkbox that enables or disables the laser.
+
+    Methods
+    -------
+    get_variables()
+        This function returns a dictionary of all the
+        variables that are tied to each widget name.
+        The key is the widget name,
+        value is the variable associated.
+    get_widgets()
+        This function returns a dictionary of all the
+        widgets that are tied to each widget name.
+        The key is the widget name,
+        value is the widget associated.
     """
 
     def __init__(self, settings_tab, *args, **kwargs):
@@ -195,14 +228,12 @@ class multipoint_list(ttk.Frame):
         ttk.Frame.__init__(self, settings_tab, *args, **kwargs)
 
         df = pd.DataFrame({"X": [0], "Y": [0], "Z": [0], "R": [0], "F": [0]})
-        # pt = Table(self, showtoolbar=False)
-        self.pt = Multi_Position_Table(self, showtoolbar=False)
+        self.pt = MultiPositionTable(self, showtoolbar=False)
         self.pt.show()
         self.pt.model.df = df
 
     def get_table(self):
-        """
-        Returns a reference to multipoint table dataframe.
+        """Returns a reference to multipoint table dataframe.
 
         Parameters
         ----------
@@ -215,11 +246,36 @@ class multipoint_list(ttk.Frame):
         self.pt.model.df: Pandas DataFrame
             Reference to table data as dataframe
         """
-
         return self.pt
 
 
-class Multi_Position_RowHeader(RowHeader):
+class MultiPositionRowHeader(RowHeader):
+    """MultiPositionRowHeader
+
+    MultiPositionRowHeader is a class that inherits from RowHeader. It is used to
+    customize the row header for the multipoint table.
+
+    Parameters
+    ----------
+    parent : tk.Frame
+        The frame that contains the settings tab.
+    table : PandasTable
+        The PandasTable instance that is being used.
+    width : int
+        The width of the row header.
+
+    Attributes
+    ----------
+    None
+
+    Methods
+    -------
+    popupMenu(event, rows=None, cols=None, outside=None)
+        This function creates a popup menu for the row header.
+    toggleIndex()
+        This function toggles the index column.
+    """
+
     def __init__(self, parent=None, table=None, width=50):
         super().__init__(parent, table, width)
 
@@ -261,7 +317,31 @@ class Multi_Position_RowHeader(RowHeader):
         return popupmenu
 
 
-class Multi_Position_ColumnHeader(ColumnHeader):
+class MultiPositionColumnHeader(ColumnHeader):
+    """MultiPositionColumnHeader
+
+    MultiPositionColumnHeader is a class that inherits from ColumnHeader. It is used to
+    customize the column header for the multipoint table.
+
+    Parameters
+    ----------
+    parent : tk.Frame
+        The frame that contains the settings tab.
+    table : PandasTable
+        The PandasTable instance that is being used.
+    bg : str
+        The background color of the column header.
+
+    Attributes
+    ----------
+    None
+
+    Methods
+    -------
+    popupMenu(event)
+        This function creates a popup menu for the column header.
+    """
+
     def __init__(self, parent=None, table=None, bg="gray25"):
         super().__init__(parent, table, bg)
 
@@ -303,7 +383,38 @@ class Multi_Position_ColumnHeader(ColumnHeader):
         return popupmenu
 
 
-class Multi_Position_Table(Table):
+class MultiPositionTable(Table):
+    """MultiPositionTable
+
+    MultiPositionTable is a class that inherits from Table. It is used to
+    customize the table for the multipoint table.
+
+    Parameters
+    ----------
+    parent : tk.Frame
+        The frame that contains the settings tab.
+    **kwargs : dict
+        Keyword arguments for the Table class.
+
+    Attributes
+    ----------
+    loadCSV : tk.Button
+        The button that loads a CSV file.
+    exportCSV : tk.Button
+        The button that exports the table to a CSV file.
+    insertRow : tk.Button
+        The button that inserts a new row.
+    generatePositions : tk.Button
+        The button that generates positions.
+    addStagePosition : tk.Button
+        The button that adds the current stage position.
+
+    Methods
+    -------
+    show(callback=None)
+        This function shows the table.
+    """
+
     def __init__(self, parent=None, **kwargs):
         super().__init__(parent, width=400, height=500, columns=4, **kwargs)
 
@@ -314,21 +425,50 @@ class Multi_Position_Table(Table):
         self.addStagePosition = None
 
     def show(self, callback=None):
+        """Show the table
+
+        Parameters
+        ----------
+        callback : function
+            The function that is called when the table is shown.
+
+        Returns
+        -------
+        None
+        """
         super().show(callback)
 
         # Formatting
         tk.Grid.columnconfigure(self, "all", weight=1)
         tk.Grid.rowconfigure(self, "all", weight=1)
 
-        self.rowheader = Multi_Position_RowHeader(self.parentframe, self)
+        self.rowheader = MultiPositionRowHeader(self.parentframe, self)
         self.rowheader.grid(row=1, column=0, rowspan=1, sticky="news")
 
-        self.tablecolheader = Multi_Position_ColumnHeader(
+        self.tablecolheader = MultiPositionColumnHeader(
             self.parentframe, self, bg=self.colheadercolor
         )
         self.tablecolheader.grid(row=0, column=1, rowspan=1, sticky="news")
 
     def popupMenu(self, event, rows=None, cols=None, outside=None):
+        """Add right click behaviour for table
+
+        Parameters
+        ----------
+        event : tk.Event
+            The event that triggers the popup menu.
+        rows : list
+            The list of rows that are selected.
+        cols : list
+            The list of columns that are selected.
+        outside : bool
+            Whether the popup menu is triggered outside the table.
+
+        Returns
+        -------
+        popupmenu : tk.Menu
+            The popup menu.
+        """
         popupmenu = Menu(self, tearoff=0)
 
         def popupFocusOut(event):

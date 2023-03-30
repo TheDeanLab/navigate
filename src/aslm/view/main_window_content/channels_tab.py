@@ -48,6 +48,41 @@ logger = logging.getLogger(p)
 
 
 class ChannelsTab(tk.Frame):
+    """Channels Tab for the Main Window
+
+    This tab is used to set the channels for the stack acquisition.
+
+    Parameters
+    ----------
+    setntbk : tk.Notebook
+        The notebook that this tab is added to
+    *args : tuple
+        Positional arguments for tk.Frame
+    **kwargs : dict
+        Keyword arguments for tk.Frame
+
+    Attributes
+    ----------
+    index : int
+        The index of the tab in the notebook
+    channel_widgets_frame : ChannelCreator
+        The frame that contains the channel settings
+    stack_acq_frame : StackAcquisitionFrame
+        The frame that contains the stack acquisition settings
+    stack_timepoint_frame : StackTimePointFrame
+        The frame that contains the time settings
+    multipoint_frame : MultiPointFrame
+        The frame that contains the multipoint settings
+    quick_launch : QuickLaunchFrame
+        The frame that contains the quick launch buttons
+    conpro_acq_frame : ConfocalProjectionFrame
+        The frame that contains the confocal projection settings
+
+    Methods
+    -------
+    None
+    """
+
     def __init__(self, setntbk, *args, **kwargs):
         # Init Frame
         tk.Frame.__init__(self, setntbk, *args, **kwargs)
@@ -96,6 +131,41 @@ class ChannelsTab(tk.Frame):
 
 
 class ChannelCreator(ttk.Labelframe):
+    """Channel Creator
+
+    This frame is used to create the channels for the stack acquisition.
+
+    Parameters
+    ----------
+    channels_tab : tk.Frame
+        The frame that this frame is added to
+    *args : tuple
+        Positional arguments for ttk.Labelframe
+    **kwargs : dict
+        Keyword arguments for ttk.Labelframe
+
+    Attributes
+    ----------
+    title : str
+        The title of the frame
+    channel_variables : list
+        The list of tk.BooleanVar for the channel checkbuttons
+    channel_checks : list
+        The list of tk.Checkbutton for the channel checkbuttons
+    laser_variables : list
+        The list of tk.StringVar for the laser pulldowns
+    laser_pulldowns : list
+        The list of tk.OptionMenu for the laser pulldowns
+    add_channel_button : tk.Button
+        The button to add a channel
+    remove_channel_button : tk.Button
+        The button to remove a channel
+
+    Methods
+    -------
+    None
+    """
+
     def __init__(self, channels_tab, *args, **kwargs):
         #  Init Frame
         self.title = "Channel Settings"
@@ -317,8 +387,6 @@ class StackAcquisitionFrame(ttk.Labelframe):
         Label for the start position slice inputs.
     end_label : tkinter.Label
         Label for the end position slice inputs.
-    cycle_label : tkinter.Label
-        Label for the cycling inputs.
 
     Methods
     -------
@@ -449,17 +517,17 @@ class StackAcquisitionFrame(ttk.Labelframe):
 
         This function returns a dictionary of all the variables
         that are tied to each widget name.
+
         The key is the widget name, value is the variable associated.
+
+        Parameters
+        ----------
+        None
 
         Returns
         -------
         dict
             Dictionary of the variables in the widget
-
-        Examples
-        --------
-        >>> widget = PositionSliceWidget()
-        >>> widget.get_variables()
         """
         variables = {}
         for key, widget in self.inputs.items():
@@ -467,21 +535,70 @@ class StackAcquisitionFrame(ttk.Labelframe):
         return variables
 
     def get_widgets(self):
-        """
-        # This function returns the dictionary that holds the input widgets.
+        """Returns a dictionary of the widgets
+
+        This function returns the dictionary that holds the input widgets.
         The key is the widget name, value is the LabelInput class that has all the data.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        dict
+            Dictionary of the widgets in the widget
         """
         return self.inputs
 
     def get_buttons(self):
-        """
-        # This function returns the dictionary that holds the buttons.
+        """Returns a dictionary of the buttons
+
+        This function returns the dictionary that holds the buttons.
         The key is the button name, value is the button.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        dict
+            Dictionary of the buttons in the widget
         """
         return self.buttons
 
 
 class StackTimePointFrame(ttk.Labelframe):
+    """Frame for the stack timepoint settings
+
+    This class is a frame that holds the widgets for the stack timepoint settings.
+    It is a subclass of ttk.Labelframe.
+
+    Parameters
+    ----------
+    settings_tab : tk.Frame
+        The frame that the stack timepoint frame will be placed in
+    *args : tuple
+        Variable length argument list
+    **kwargs : dict
+        Arbitrary keyword arguments
+
+    Attributes
+    ----------
+    inputs : dict
+        Dictionary of the widgets in the frame
+    buttons : dict
+        Dictionary of the buttons in the frame
+
+    Methods
+    -------
+    get_variables()
+        Returns a dictionary of the variables in the widget
+    get_widgets()
+        Returns a dictionary of the widgets in the widget
+    """
+
     def __init__(self, settings_tab, *args, **kwargs):
         text_label = "Timepoint Settings"
         ttk.Labelframe.__init__(self, settings_tab, text=text_label, *args, **kwargs)
@@ -599,11 +716,18 @@ class StackTimePointFrame(ttk.Labelframe):
 
     # Getters
     def get_variables(self):
-        """
-        # This function returns a dictionary of all the variables that are tied to each
-        widget name.
+        """Returns a dictionary of all the variables that are tied to each widget name.
 
         The key is the widget name, value is the variable associated.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        variables : dict
+            A dictionary of all the variables that are tied to each widget name.
         """
         variables = {}
         for key, widget in self.inputs.items():
@@ -611,9 +735,18 @@ class StackTimePointFrame(ttk.Labelframe):
         return variables
 
     def get_widgets(self):
-        """
-        # This function returns the dictionary that holds the input widgets.
+        """Returns a dictionary of all the widgets that are tied to each widget name.
+
         The key is the widget name, value is the LabelInput class that has all the data.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        widgets : dict
+            A dictionary of all the widgets that are tied to each widget name.
         """
         return self.inputs
 
@@ -638,14 +771,19 @@ class MultiPointFrame(ttk.Labelframe):
         self.save_check = ttk.Checkbutton(self, text="", variable=self.on_off)
         self.save_check.grid(row=0, column=1, sticky=tk.NSEW, pady=(4, 6))
 
-        # Getters
-
     def get_variables(self):
-        """
-        This function returns a dictionary of all the
-        variables that are tied to each widget name.
-        The key is the widget name,
-        value is the variable associated.
+        """Returns a dictionary of all the variables that are tied to each widget name.
+
+        The key is the widget name, value is the variable associated.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        variables : dict
+            A dictionary of all the variables that are tied to each widget name.
         """
         variables = {}
         for key, widget in self.inputs.items():
@@ -653,9 +791,18 @@ class MultiPointFrame(ttk.Labelframe):
         return variables
 
     def get_widgets(self):
-        """
-        This function returns the dictionary that holds the input widgets.
+        """Returns a dictionary of all the widgets that are tied to each widget name.
+
         The key is the widget name, value is the LabelInput class that has all the data.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        widgets : dict
+            A dictionary of all the widgets that are tied to each widget name.
         """
         return self.inputs
 
@@ -696,6 +843,29 @@ class MultiPointFrame(ttk.Labelframe):
 
 
 class QuickLaunchFrame(ttk.Labelframe):
+    """Quick Launch Buttons Frame
+
+    This frame contains buttons that launch the Tiling Wizard.
+
+    Parameters
+    ----------
+    settings_tab : object
+        The settings tab object that this frame is being added to.
+    *args : tuple
+        Variable length argument list.
+    **kwargs : dict
+        Arbitrary keyword arguments.
+
+    Attributes
+    ----------
+    buttons : dict
+        A dictionary of all the buttons that are tied to each button name.
+
+    Methods
+    -------
+    None
+    """
+
     def __init__(self, settings_tab, *args, **kwargs):
         text_label = "Quick Launch Buttons"
         ttk.Labelframe.__init__(self, settings_tab, text=text_label, *args, **kwargs)
@@ -704,11 +874,8 @@ class QuickLaunchFrame(ttk.Labelframe):
         tk.Grid.columnconfigure(self, "all", weight=1)
         tk.Grid.rowconfigure(self, "all", weight=1)
 
-        # Dicts
-        self.buttons = {}
-
-        # Buttons
         # Tiling Wizard Button
+        self.buttons = {}
         self.buttons["tiling"] = ttk.Button(self, text="Launch Tiling Wizard")
         self.buttons["tiling"].grid(
             row=0, column=2, sticky=(tk.NSEW), padx=(10, 0), pady=(4, 6)

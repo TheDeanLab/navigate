@@ -102,21 +102,6 @@ class SyntheticDAQ(DAQBase):
         self.is_updating_analog_task = False
         if self.wait_to_run_lock.locked():
             self.wait_to_run_lock.release()
-        boards = list(set([x.split("/")[0] for x in self.analog_outputs.keys()]))
-        for board in boards:
-            channel = ", ".join(
-                list(
-                    [x for x in self.analog_outputs.keys() if x.split("/")[0] == board]
-                )
-            )
-            n_samples = list(set([v["samples"] for v in self.analog_outputs.values()]))
-            if len(n_samples) > 1:
-                logger.debug(
-                    "NI DAQ - Different number of samples provided for each analog"
-                    "channel. Defaulting to the minimum number of samples provided."
-                    "Waveforms will be clipped to this length."
-                )
-            self.n_sample = min(n_samples)
 
     def run_acquisition(self):
         """Run DAQ Acquisition.

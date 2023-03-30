@@ -41,7 +41,7 @@ from aslm.view.custom_widgets.DockableNotebook import DockableNotebook
 
 # Import Sub-Frames
 from aslm.view.main_window_content.camera_tab import CameraSettingsTab
-from aslm.view.main_window_content.channels_tab import channels_tab
+from aslm.view.main_window_content.channels_tab import ChannelsTab
 from aslm.view.main_window_content.stage_tab import StageControlTab
 from aslm.view.main_window_content.multiposition_tab import multiposition_tab
 
@@ -60,7 +60,7 @@ class SettingsNotebook(DockableNotebook):
         self.grid(row=0, column=0)
 
         # Creating the Channels tab
-        self.channels_tab = channels_tab(self)
+        self.channels_tab = ChannelsTab(self)
 
         # Creating the Camera tab
         self.camera_settings_tab = CameraSettingsTab(self)

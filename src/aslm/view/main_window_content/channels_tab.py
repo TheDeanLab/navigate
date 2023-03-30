@@ -35,7 +35,6 @@ import tkinter as tk
 from tkinter import ttk
 import logging
 
-
 # Third Party Imports
 
 # Local Imports
@@ -48,7 +47,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class channels_tab(tk.Frame):
+class ChannelsTab(tk.Frame):
     def __init__(self, setntbk, *args, **kwargs):
         # Init Frame
         tk.Frame.__init__(self, setntbk, *args, **kwargs)

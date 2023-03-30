@@ -807,41 +807,6 @@ class MultiPointFrame(ttk.Labelframe):
         return self.inputs
 
 
-# class multipoint_list(ttk.Frame):
-#     """
-#     Exploring using a pandastable for embedding an interactive list within a tk Frame.
-#     https://pandastable.readthedocs.io/en/latest/
-#     """
-#
-#     def __init__(self, settings_tab, *args, **kwargs):
-#         # Init Frame
-#         ttk.Frame.__init__(self, settings_tab, *args, **kwargs)
-#
-#         df = pd.DataFrame({"X": [0], "Y": [0], "Z": [0], "R": [0], "F": [0]})
-#         # pt = Table(self, showtoolbar=False)
-#         # self.pt = MPTable(self, showtoolbar=False)
-#         # self.pt.show()
-#         # self.pt.model.df = df
-#
-#     def get_table(self):
-#         """
-#         Returns a reference to multipoint table dataframe.
-#
-#         Parameters
-#         ----------
-#         self : object
-#             Multipoint List instance
-#
-#
-#         Returns
-#         -------
-#         self.pt.model.df: Pandas DataFrame
-#             Reference to table data as dataframe
-#         """
-#
-#         return self.pt
-
-
 class QuickLaunchFrame(ttk.Labelframe):
     """Quick Launch Buttons Frame
 

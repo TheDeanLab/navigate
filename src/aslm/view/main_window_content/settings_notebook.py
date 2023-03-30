@@ -43,7 +43,7 @@ from aslm.view.custom_widgets.DockableNotebook import DockableNotebook
 from aslm.view.main_window_content.camera_tab import CameraSettingsTab
 from aslm.view.main_window_content.channels_tab import ChannelsTab
 from aslm.view.main_window_content.stage_tab import StageControlTab
-from aslm.view.main_window_content.multiposition_tab import multiposition_tab
+from aslm.view.main_window_content.multiposition_tab import MultiPositionTab
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -69,7 +69,7 @@ class SettingsNotebook(DockableNotebook):
         self.stage_control_tab = StageControlTab(self)
 
         # Creating Multiposition Table Tab
-        self.multiposition_tab = multiposition_tab(self)
+        self.multiposition_tab = MultiPositionTab(self)
 
         # Tab list
         tab_list = [

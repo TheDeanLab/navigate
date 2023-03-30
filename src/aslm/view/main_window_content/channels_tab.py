@@ -59,43 +59,43 @@ class ChannelsTab(tk.Frame):
         tk.Grid.rowconfigure(self, "all", weight=1)
 
         # Channel Settings
-        self.channel_widgets_frame = channel_creator(self)
+        self.channel_widgets_frame = ChannelCreator(self)
         self.channel_widgets_frame.grid(
             row=0, column=0, columnspan=3, sticky=(tk.NSEW), padx=10, pady=10
         )
 
         # Stack Acquisition Settings
-        self.stack_acq_frame = stack_acq_frame(self)
+        self.stack_acq_frame = StackAcquisitionFrame(self)
         self.stack_acq_frame.grid(
             row=1, column=0, columnspan=3, sticky=(tk.NSEW), padx=10, pady=10
         )
 
         # Time Settings
-        self.stack_timepoint_frame = stack_timepoint_frame(self)
+        self.stack_timepoint_frame = StackTimePointFrame(self)
         self.stack_timepoint_frame.grid(
             row=3, column=0, columnspan=3, sticky=(tk.NSEW), padx=10, pady=10
         )
 
         # Multipoint Enable
-        self.multipoint_frame = multipoint_frame(self)
+        self.multipoint_frame = MultiPointFrame(self)
         self.multipoint_frame.grid(
             row=4, column=0, columnspan=1, sticky=(tk.NSEW), padx=10, pady=10
         )
 
         # Quick Launch Buttons
-        self.quick_launch = quick_launch(self)
+        self.quick_launch = QuickLaunchFrame(self)
         self.quick_launch.grid(
             row=4, column=1, columnspan=2, sticky=(tk.NSEW), padx=10, pady=10
         )
 
         # Confocal Projection Settings
-        self.conpro_acq_frame = conpro_acq_frame(self)
+        self.conpro_acq_frame = ConfocalProjectionFrame(self)
         self.conpro_acq_frame.grid(
             row=5, column=0, columnspan=2, sticky=(tk.NSEW), padx=10, pady=10
         )
 
 
-class channel_creator(ttk.Labelframe):
+class ChannelCreator(ttk.Labelframe):
     def __init__(self, channels_tab, *args, **kwargs):
         #  Init Frame
         self.title = "Channel Settings"
@@ -291,7 +291,7 @@ class channel_creator(ttk.Labelframe):
         self.channel_checks[2].grid(pady=2)
 
 
-class stack_acq_frame(ttk.Labelframe):
+class StackAcquisitionFrame(ttk.Labelframe):
     """This class is the frame that holds the stack acquisition settings.
 
     Parameters
@@ -481,7 +481,7 @@ class stack_acq_frame(ttk.Labelframe):
         return self.buttons
 
 
-class stack_timepoint_frame(ttk.Labelframe):
+class StackTimePointFrame(ttk.Labelframe):
     def __init__(self, settings_tab, *args, **kwargs):
         text_label = "Timepoint Settings"
         ttk.Labelframe.__init__(self, settings_tab, text=text_label, *args, **kwargs)
@@ -618,7 +618,7 @@ class stack_timepoint_frame(ttk.Labelframe):
         return self.inputs
 
 
-class multipoint_frame(ttk.Labelframe):
+class MultiPointFrame(ttk.Labelframe):
     def __init__(self, settings_tab, *args, **kwargs):
         text_label = "Multi-Position Acquisition"
         ttk.Labelframe.__init__(self, settings_tab, text=text_label, *args, **kwargs)
@@ -695,7 +695,7 @@ class multipoint_frame(ttk.Labelframe):
 #         return self.pt
 
 
-class quick_launch(ttk.Labelframe):
+class QuickLaunchFrame(ttk.Labelframe):
     def __init__(self, settings_tab, *args, **kwargs):
         text_label = "Quick Launch Buttons"
         ttk.Labelframe.__init__(self, settings_tab, text=text_label, *args, **kwargs)
@@ -715,7 +715,7 @@ class quick_launch(ttk.Labelframe):
         )
 
 
-class conpro_acq_frame(ttk.Labelframe):
+class ConfocalProjectionFrame(ttk.Labelframe):
     """Confocal Projection Acquisition Frame
 
     This frame contains the widgets for the confocal projection acquisition settings.

@@ -29,20 +29,6 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-"""
-A main window is created and passed to the mainapp class. This class will init as a
-frame then config the main window. It then creates a menubar using the menubar class.
-Adds the options for each file menu. It then sets up the frames, then grids the frames.
-Finally it uses the notebook classes to put them into the respective frames on the
-tk.Grid. Each of the notebook classes includes tab classes and inits those etc.
-The second parameter in each classes __init__ function is the parent.
-I used the name of the parent so that it would be easier to keep track of inheritances.
-Once you have the parent name you can look to the parents class in the class definition.
-For example for class Main_App(ttk.Frame) the parent to Main_App is a frame and its name
-is root. I also used the name of the class instead of self to make things easier to
-read. So for Main_App self is now mainapp.
-"""
-
 # Standard Library Imports
 import tkinter as tk
 from tkinter import ttk
@@ -68,19 +54,41 @@ p = __name__.split(".")[1]
 class MainApp(ttk.Frame):
     """Creates the frame that will hold the GUI content, its parent is the main window
     or root Tk object
-    ``
-        Placing the notebooks using tk.Grid. While the grid is called on each frame it
-        is actually calling the main window since those are the parent to the frames.
-        The labels have already been packed into each respective frame so can be ignored
-        in the grid setup. This layout uses a 2x2 grid to start.
 
-        1   2
-        3   4
-        5   6
+    A main window is created and passed to the mainapp class. This class will init as a
+    frame then config the main window. It then creates a menubar using the menubar
+    class.
 
-        The above is the grid "spots" the left frame will take spots 3 & 5 while top
-        right takes spot 4 and bottom right frame takes spot 6. Top frame will be
-        spots 1 & 2
+    Adds the options for each file menu. It then sets up the frames, then grids the
+    frames.
+
+    Finally it uses the notebook classes to put them into the respective frames on the
+    tk.Grid. Each of the notebook classes includes tab classes and inits those etc.
+
+    The second parameter in each classes __init__ function is the parent.
+
+    I used the name of the parent so that it would be easier to keep track of
+    inheritances.
+
+    Once you have the parent name you can look to the parents class in the class
+    definition.
+
+    For example for class Main_App(ttk.Frame) the parent to Main_App is a frame and its
+    name is root. I also used the name of the class instead of self to make things
+    easier to read. So for Main_App self is now mainapp.
+
+    Placing the notebooks using tk.Grid. While the grid is called on each frame it
+    is actually calling the main window since those are the parent to the frames.
+    The labels have already been packed into each respective frame so can be ignored
+    in the grid setup. This layout uses a 2x2 grid to start.
+
+    1   2
+    3   4
+    5   6
+
+    The above is the grid "spots" the left frame will take spots 3 & 5 while top
+    right takes spot 4 and bottom right frame takes spot 6. Top frame will be
+    spots 1 & 2
     """
 
     def __init__(self, root, *args, **kwargs):

@@ -139,7 +139,6 @@ class MainApp(ttk.Frame):
         # notebook
         self.settings = SettingsNotebook(self.frame_left, self.root)
         self.camera_waveform = CameraNotebook(self.frame_top_right, self.root)
-        # self.stage_control = stagecontrol_notebook(self.frame_bottom_right)
 
         self.acqbar = AcquireBar(self.top_frame, self.root)
         self.logger.info("GUI setup working")

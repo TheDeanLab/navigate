@@ -49,7 +49,7 @@ from aslm.controller.sub_controllers.tiling_wizard_controller import (
 )
 
 # View Imports that are not called on startup
-from aslm.view.main_window_content import tiling_wizard_popup
+from aslm.view.popups import tiling_wizard_popup
 
 # Logger Setup
 p = __name__.split(".")[1]

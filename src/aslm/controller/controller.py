@@ -640,6 +640,12 @@ class Controller:
             positions,
         )
 
+        # set waveform template
+        if self.acquire_bar_controller.mode == "confocal-projection":
+            self.configuration["experiment"]["MicroscopeState"]["waveform_template"] = "Confocal-Projection"
+        else:
+            self.configuration["experiment"]["MicroscopeState"]["waveform_template"] = "Default"
+
         self.set_mode_of_sub(self.acquire_bar_controller.mode)
         self.update_buffer()
         return True
@@ -655,6 +661,7 @@ class Controller:
         self.channels_tab_controller.set_mode(mode)
         self.camera_view_controller.set_mode(mode)
         self.camera_setting_controller.set_mode(mode)
+        self.waveform_tab_controller.set_mode(mode)
         if mode == "stop":
             # GUI Failsafe
             self.acquire_bar_controller.stop_acquire()

@@ -43,7 +43,7 @@ is root. I also used the name of the class instead of self to make things easier
 read. So for Main_App self is now mainapp.
 """
 
-# Import Standard Libraries
+# Standard Library Imports
 import tkinter as tk
 from tkinter import ttk
 import logging
@@ -57,7 +57,7 @@ from aslm.view.main_window_content.display_notebook import (
     CameraNotebook,
 )
 from aslm.view.main_window_content.acquire_notebook import AcquireBar
-from aslm.view.menus.menus import menubar
+from aslm.view.main_window_content.menus import menubar
 from aslm.view.custom_widgets.scrollbars import ScrolledFrame
 
 

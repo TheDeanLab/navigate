@@ -190,7 +190,9 @@ class WaveformParameterPopupWindow:
                 row=i + 1, column=2, sticky=tk.NSEW, pady=(20, 0)
             )
 
-        galvo_labels = list(map(lambda i: f"Galvo {i}", range(self.configuration_controller.galvo_num)))
+        galvo_labels = list(
+            map(lambda i: f"Galvo {i}", range(self.configuration_controller.galvo_num))
+        )
 
         prev = len(laser_labels)
 

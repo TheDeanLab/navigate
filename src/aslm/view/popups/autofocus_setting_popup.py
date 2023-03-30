@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -36,7 +37,7 @@ import logging
 
 # Third Party Imports
 from matplotlib.figure import Figure
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 # Local Imports
 from aslm.view.custom_widgets.popup import PopUp
@@ -46,11 +47,46 @@ from aslm.view.custom_widgets.validation import ValidatedSpinbox
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
-# class autofocus_popup():
 
 
 class AutofocusPopup:
-    """Class creates the popup to configure autofocus parameters."""
+    """Class creates the popup to configure autofocus parameters.
+
+    Parameters
+    ----------
+    root : tkinter.Tk
+        The root window of the application.
+    *args
+        Variable length argument list.
+    **kwargs
+        Arbitrary keyword arguments.
+
+    Attributes
+    ----------
+    popup : aslm.view.custom_widgets.popup.PopUp
+        The popup window.
+    inputs : dict
+        Dictionary of all the input widgets.
+    stage_vars : list
+        List of booleans for the stage checkboxes.
+    autofocus_btn : ttk.Button
+        The autofocus button.
+    fig : matplotlib.figure.Figure
+        The matplotlib figure.
+    coarse : matplotlib.axes._subplots.AxesSubplot
+        The coarse autofocus subplot.
+    fine : matplotlib.axes._subplots.AxesSubplot
+        The fine autofocus subplot.
+    canvas : matplotlib.backends.backend_tkagg.FigureCanvasTkAgg
+        The matplotlib canvas.
+    toolbar : matplotlib.backends.backend_tkagg.NavigationToolbar2Tk
+        The matplotlib toolbar.
+
+    Methods
+    -------
+    get_widgets()
+        Returns the dictionary of input widgets.
+    """
 
     def __init__(self, root, *args, **kwargs):
         # Creating popup window with this name and size/placement, PopUp is a
@@ -134,4 +170,15 @@ class AutofocusPopup:
         # toolbar.grid(row=5, column=4)
 
     def get_widgets(self):
+        """Returns the dictionary of input widgets.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        dict
+            Dictionary of all the input widgets.
+        """
         return self.inputs

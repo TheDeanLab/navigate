@@ -44,7 +44,39 @@ from aslm.view.main_window_content.display_notebook import CameraTab
 
 
 class CameraViewPopupWindow:
-    """Popup window with waveform parameters for galvos, remote focusing, etc."""
+    """Popup window with waveform parameters for galvos, remote focusing, etc.
+
+    Parameters
+    ----------
+    root : tkinter.Tk
+        The root window that the popup will be attached to.
+    microscope_name : str
+        The name of the microscope that the popup is for.
+    *args
+        Variable length argument list.
+    **kwargs
+        Arbitrary keyword arguments.
+
+    Attributes
+    ----------
+    popup : PopUp
+        The popup window that will be created.
+    inputs : dict
+        Dictionary of all the input widgets.
+    buttons : dict
+        Dictionary of all the buttons.
+    camera_view : CameraTab
+        The camera view tab.
+
+    Methods
+    -------
+    get_variables()
+        Returns a dictionary of all the variables that are tied to each widget name.
+    get_widgets()
+        Returns the dictionary that holds the input widgets.
+    get_buttons()
+        Returns the dictionary that holds the buttons.
+    """
 
     def __init__(self, root, microscope_name, *args, **kwargs):
         # Creating popup window with this name and size/placement, PopUp is a
@@ -80,11 +112,21 @@ class CameraViewPopupWindow:
 
     # Getters
     def get_variables(self):
-        """
+        """Get the variables tied to the widgets.
+
         This function returns a dictionary of all the variables that are tied to each
         widget name.
 
         The key is the widget name, value is the variable associated.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        dict
+            Dictionary of all the variables that are tied to each widget name.
         """
         variables = {}
         for key, widget in self.inputs.items():
@@ -92,21 +134,35 @@ class CameraViewPopupWindow:
         return variables
 
     def get_widgets(self):
-        """
+        """Get the dictionary that holds the input widgets.
+
         This function returns the dictionary that holds the input widgets.
         The key is the widget name, value is the LabelInput class that has all the data.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        dict
+            Dictionary that holds the input widgets.
         """
         return self.inputs
 
     def get_buttons(self):
-        """
+        """Get the dictionary that holds the buttons.
+
         This function returns the dictionary that holds the buttons.
         The key is the button name, value is the button.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        dict
+            Dictionary that holds the buttons.
         """
         return self.buttons
-
-
-if __name__ == "__main__":
-    root = tk.Tk()
-    CameraViewPopupWindow(root)
-    root.mainloop()

@@ -53,10 +53,28 @@ class tiling_wizard_popup:
     ----------
     root : object
         GUI root
-    args : ...
-        ...
-    kwargs : ...
-        ...
+    *args : object
+        Arguments
+    **kwargs : object
+        Keyword arguments
+
+    Attributes
+    ----------
+    popup : object
+        Popup window
+    inputs : dict
+        Dictionary of inputs
+    buttons : dict
+        Dictionary of buttons
+
+    Methods
+    -------
+    get_variables()
+        Returns the variables
+    get_buttons()
+        Returns the buttons
+    get_widgets()
+        Returns the widgets
 
     """
 
@@ -205,9 +223,19 @@ class tiling_wizard_popup:
 
     # Getters
     def get_variables(self):
-        """
+        """Get the variables tied to the widgets
+
         This function returns a dictionary of all the variables that are tied to each
         widget name. The key is the widget name, value is the variable associated.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        variables : dict
+            A dictionary of all the variables that are tied to each widget name.
         """
         variables = {}
         for key, widget in self.inputs.items():
@@ -215,15 +243,35 @@ class tiling_wizard_popup:
         return variables
 
     def get_widgets(self):
-        """
+        """Get the widgets
+
         This function returns the dictionary that holds the input widgets.
         The key is the widget name, value is the LabelInput class that has all the data.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        self.inputs : dict
+            A dictionary of all the widgets that are tied to each widget name.
         """
         return self.inputs
 
     def get_buttons(self):
-        """
+        """Get the buttons
+
         This function returns the dictionary that holds the buttons.
         The key is the button name, value is the button.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        self.buttons : dict
+            A dictionary of all the buttons that are tied to each button name.
         """
         return self.buttons

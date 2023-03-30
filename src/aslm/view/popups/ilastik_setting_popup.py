@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -29,11 +30,15 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Standard Library Imports
 from tkinter import NSEW, NW, ttk
 import tkinter
-from aslm.view.custom_widgets.popup import PopUp
-
 import logging
+
+# Third Party Imports
+
+# Local Imports
+from aslm.view.custom_widgets.popup import PopUp
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -41,6 +46,44 @@ logger = logging.getLogger(p)
 
 
 class ilastik_setting_popup:
+    """Popup window for setting up ilastik segmentation
+
+    Parameters
+    ----------
+    root : tkinter.Tk
+        Root window
+    *args
+        Arguments
+    **kwargs
+        Keyword arguments
+
+    Attributes
+    ----------
+    popup : PopUp
+        Popup window
+    project_name_var : tkinter.StringVar
+        Variable for project name
+    load_project_btn : ttk.Button
+        Button for loading project
+    label_frame : ttk.Frame
+        Frame for label selection
+    show_on_gui : tkinter.Checkbutton
+        Checkbutton for showing segmentation on GUI
+    mark_position : tkinter.Checkbutton
+        Checkbutton for marking position
+    confirm_btn : ttk.Button
+        Button for confirming setting
+
+    Methods
+    -------
+    get_buttons()
+        Get all buttons
+    get_widgets()
+        Get all widgets
+    get_variables()
+        Get all variables
+    """
+
     def __init__(self, root, *args, **kwargs):
         # Creating popup window with this name and size/placement, PopUp is a
         # Toplevel window
@@ -96,12 +139,45 @@ class ilastik_setting_popup:
         self.confirm_btn.grid(row=7, column=1, sticky="SE", padx=(0, 10), pady=(0, 10))
 
     def get_buttons(self):
+        """Get all buttons
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        dict
+            Dictionary of all buttons
+        """
         return {"load": self.load_project_btn, "confirm": self.confirm_btn}
 
     def get_variables(self):
+        """Get all variables
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        dict
+            Dictionary of all variables
+        """
         return {"project_name": self.project_name_var}
 
     def get_widgets(self):
+        """Get all widgets
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        dict
+            Dictionary of all widgets
+        """
         return {
             "label_frame": self.label_frame,
             "show_segmentation": self.show_on_gui,

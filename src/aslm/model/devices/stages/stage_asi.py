@@ -170,7 +170,7 @@ class ASIStage(StageBase):
         super().__init__(microscope_name, device_connection, configuration, device_id)
 
         # Mapping from self.axes to corresponding ASI axis labelling
-        axes_mapping = {"x": "Z", "y": "Y", "z": "X"}
+        self.axes_mapping = {"x": "Z", "y": "Y", "z": "X"}
 
         # Focus and Theta axes are not supported for ASI Stage
         if "theta" in self.axes:
@@ -178,18 +178,23 @@ class ASIStage(StageBase):
         if "f" in self.axes:
             self.axes.remove("f")
 
-        self.asi_axes = list(map(lambda a: axes_mapping[a], self.axes))
+        self.asi_axes = list(map(lambda a: self.axes_mapping[a], self.axes))
         self.tiger_controller = device_connection
         # set default speed
         self.default_speed =5.745760 #7.68 * 0.67
         default_speeds = [(axis,self.default_speed) for axis in self.asi_axes]
-        self.tiger_controller.set_speed(**dict(default_speeds))
+        if self.tiger_controller != None:
+            try:
+                self.tiger_controller.set_speed(**dict(default_speeds))
+            except TigerException:
+                logger.exception(f"Initialize ASI Stage with default speed failed!")
 
     def __del__(self):
         """Delete the ASI Stage connection."""
         try:
-            self.tiger_controller.disconnect_from_serial()
-            logger.debug("ASI stage connection closed")
+            if self.tiger_controller != None:
+                self.tiger_controller.disconnect_from_serial()
+                logger.debug("ASI stage connection closed")
         except (AttributeError, BaseException) as e:
             print("Error while disconnecting the ASI stage")
             logger.exception(e)
@@ -207,7 +212,7 @@ class ASIStage(StageBase):
             position: float
         """
         try:
-            axis = self.asi_axes[axis]
+            axis = self.axes_mapping[axis]
             pos = self.tiger_controller.get_position_um(axis)
         except TigerException:
             return float("inf")
@@ -339,7 +344,7 @@ class ASIStage(StageBase):
         success: bool
             Was the setting successful?
         """
-        temp = dict(map(lambda k: (self.asi_axes[k], velocity_dict[k]), velocity_dict))
+        temp = dict(map(lambda k: (self.axes_mapping[k], velocity_dict[k]), velocity_dict))
         try:
             self.tiger_controller.set_speed(**temp)
         except TigerException:
@@ -363,7 +368,7 @@ class ASIStage(StageBase):
             Velocity
         """
         try:
-            velocity = self.tiger_controller.get_speed(self.asi_axes[axis])
+            velocity = self.tiger_controller.get_speed(self.axes_mapping[axis])
         except TigerException:
             return 0
         except KeyError as e:
@@ -391,7 +396,7 @@ class ASIStage(StageBase):
             Was the setting successful?
         """
         try:
-            axis = self.asi_axes[axis]
+            axis = self.axes_mapping[axis]
             self.tiger_controller.scanr(start_position_mm, end_position_mm, enc_divide, axis)
         except TigerException:
             return False
@@ -415,9 +420,9 @@ class ASIStage(StageBase):
 
         """
         try:
-            axis = self.asi_axes[axis]
+            axis = self.axes_mapping[axis]
             self.tiger_controller.start_scan(axis)
-        except TigerController:
+        except TigerException:
             return False
         except KeyError as e:
             logger.exception(f"KeyError in start_scan: {e}")

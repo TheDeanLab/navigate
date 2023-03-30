@@ -39,13 +39,10 @@ from pathlib import Path
 
 # Local Imports
 from aslm.view.main_window_content.settings_notebook import SettingsNotebook
-from aslm.view.main_window_content.display_notebook import (
-    CameraNotebook,
-)
+from aslm.view.main_window_content.display_notebook import CameraNotebook
 from aslm.view.main_window_content.acquire_notebook import AcquireBar
 from aslm.view.main_window_content.menus import menubar
 from aslm.view.custom_widgets.scrollbars import ScrolledFrame
-
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -183,9 +180,3 @@ class MainApp(ttk.Frame):
         #     self.root.tk.call('tk', 'scaling', screen_scaling_factor)
 
         # self.root.geometry(f"{actual_screen_width}x{actual_screen_height}")
-
-
-if __name__ == "__main__":
-    root = tk.Tk()
-    MainApp(root)
-    root.mainloop()

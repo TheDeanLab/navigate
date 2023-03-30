@@ -39,6 +39,7 @@ from tkinter import NSEW
 
 # Local Imports
 from aslm.controller.sub_controllers.gui_controller import GUIController
+from aslm.tools.waveform_template_funcs import get_waveform_template_parameters
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -157,6 +158,9 @@ class WaveformTabController(GUIController):
         self.parent_controller.configuration["experiment"]["MicroscopeState"]["waveform_template"] = \
             self.view.waveform_settings.inputs["waveform_template"].get()
 
+        event = type("MyEvent", (object,), {})
+        self.plot_waveforms(event)
+
     def update_waveforms(self, waveform_dict, sample_rate):
         """Update the waveforms in the waveform tab
 
@@ -221,6 +225,13 @@ class WaveformTabController(GUIController):
         self.view.plot_etl.clear()
         self.view.plot_galvo.clear()
 
+        waveform_template_name = self.parent_controller.configuration["experiment"]["MicroscopeState"]["waveform_template"]
+        repeat_num, expand_num = get_waveform_template_parameters(
+            waveform_template_name,
+            self.parent_controller.configuration["waveform_templates"],
+            self.parent_controller.configuration["experiment"]["MicroscopeState"]
+        )
+
         last_etl = 0
         last_galvo = 0
         last_camera = 0
@@ -233,31 +244,32 @@ class WaveformTabController(GUIController):
             if galvo_waveform is None:
                 galvo_waveform = []
             camera_waveform = self.waveform_dict["camera_waveform"][k]
+            waveform_repeat_total_num = repeat_num * expand_num
             self.view.plot_etl.plot(
-                np.arange(len(remote_focus_waveform)) / self.sample_rate + last_etl,
-                remote_focus_waveform,
+                np.arange(len(remote_focus_waveform) * waveform_repeat_total_num) / self.sample_rate + last_etl,
+                np.hstack([remote_focus_waveform] * waveform_repeat_total_num),
                 label=k,
             )
             self.view.plot_galvo.plot(
-                np.arange(len(galvo_waveform)) / self.sample_rate + last_galvo,
-                galvo_waveform,
+                np.arange(len(galvo_waveform) * waveform_repeat_total_num) / self.sample_rate + last_galvo,
+                np.hstack([galvo_waveform] * waveform_repeat_total_num),
                 label=k,
             )
             self.view.plot_etl.plot(
-                np.arange(len(camera_waveform)) / self.sample_rate + last_camera,
-                camera_waveform,
+                np.arange(len(camera_waveform) * waveform_repeat_total_num) / self.sample_rate + last_camera,
+                np.hstack([camera_waveform] * waveform_repeat_total_num),
                 c="k",
                 linestyle="--",
             )
             self.view.plot_galvo.plot(
-                np.arange(len(camera_waveform)) / self.sample_rate + last_camera,
-                camera_waveform,
+                np.arange(len(camera_waveform) * waveform_repeat_total_num) / self.sample_rate + last_camera,
+                np.hstack([camera_waveform] * waveform_repeat_total_num),
                 c="k",
                 linestyle="--",
             )
-            last_etl += len(remote_focus_waveform) / self.sample_rate
-            last_galvo += len(galvo_waveform) / self.sample_rate
-            last_camera += len(camera_waveform) / self.sample_rate
+            last_etl += len(remote_focus_waveform) * waveform_repeat_total_num / self.sample_rate
+            last_galvo += len(galvo_waveform) * waveform_repeat_total_num / self.sample_rate
+            last_camera += len(camera_waveform) * waveform_repeat_total_num / self.sample_rate
 
         self.view.plot_etl.set_title("Remote Focus Waveform")
         self.view.plot_galvo.set_title("Galvo Waveform")
@@ -273,3 +285,7 @@ class WaveformTabController(GUIController):
         self.view.fig.tight_layout()
 
         self.view.canvas.draw_idle()
+
+    def set_mode(self, mode):
+        state = "normal" if mode == "stop" else "disabled"
+        self.view.waveform_settings.inputs["waveform_template"].widget["state"] = state

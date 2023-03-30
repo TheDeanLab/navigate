@@ -40,6 +40,7 @@ import numpy as np
 
 # Local Imports
 from aslm.model.devices.daq.daq_base import DAQBase
+from aslm.tools.waveform_template_funcs import get_waveform_template_parameters
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -128,28 +129,6 @@ class NIDAQ(DAQBase):
                 print("*** there is some error when restarting the analog task")
             return status
         return callback_func
-    
-    def get_waveform_template_parameters(self):
-        waveform_template_name = self.configuration['experiment']['MicroscopeState']["waveform_template"]
-        waveform_template = self.configuration["waveform_templates"][waveform_template_name]
-        try:
-            if type(waveform_template["repeat"]) is int:
-                repeat_num = waveform_template["repeat"]
-            else:
-                repeat_num = int(self.configuration['experiment']['MicroscopeState'][waveform_template["repeat"]])
-        except:
-            repeat_num = 1
-
-        try:
-            if type(waveform_template["expand"]) is int:
-                expand_num = waveform_template["expand"]
-            else:
-                expand_num = int(self.configuration['experiment']['MicroscopeState'][waveform_template["expand"]])
-        except:
-            expand_num = 1
-
-        return repeat_num, expand_num
-
 
     def create_camera_task(self, exposure_time):
         """Set up the camera trigger task.
@@ -198,7 +177,7 @@ class NIDAQ(DAQBase):
             line_grouping=nidaqmx.constants.LineGrouping.CHAN_FOR_ALL_LINES,
         )
 
-    def create_analog_output_tasks(self, channel_key, create_new_tasks=True):
+    def create_analog_output_tasks(self, channel_key):
         """
         Create a single analog output task for all channels per board. Most NI DAQ cards
         have only one clock for analog output sample timing, and as such all channels
@@ -223,37 +202,36 @@ class NIDAQ(DAQBase):
                     [x for x in self.analog_outputs.keys() if x.split("/")[0] == board]
                 )
             )
-            if create_new_tasks:
-                self.analog_output_tasks[board] = nidaqmx.Task()
-                self.analog_output_tasks[board].ao_channels.add_ao_voltage_chan(channel)
+            self.analog_output_tasks[board] = nidaqmx.Task()
+            self.analog_output_tasks[board].ao_channels.add_ao_voltage_chan(channel)
 
-                sample_rates = list(
-                    set([v["sample_rate"] for v in self.analog_outputs.values()])
-                )
-                if len(sample_rates) > 1:
-                    logger.debug(
-                        "NI DAQ - Different sample rates provided for each analog channel."
-                        "Defaulting to the first sample rate provided."
-                    )
-
-                #apply templates to analog tasks
-                self.analog_output_tasks[board].timing.cfg_samp_clk_timing(
-                    rate=sample_rates[0],
-                    sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
-                    samps_per_chan=max_sample * self.waveform_repeat_num,
+            sample_rates = list(
+                set([v["sample_rate"] for v in self.analog_outputs.values()])
+            )
+            if len(sample_rates) > 1:
+                logger.debug(
+                    "NI DAQ - Different sample rates provided for each analog channel."
+                    "Defaulting to the first sample rate provided."
                 )
 
-                # triggers = list(
-                #     set([v["trigger_source"] for v in self.analog_outputs.values()])
-                # )
-                # if len(triggers) > 1:
-                #     logger.debug(
-                #         "NI DAQ - Different triggers provided for each analog channel."
-                #         "Defaulting to the first trigger provided."
-                #     )
-                # self.analog_output_tasks[board].triggers.start_trigger.cfg_dig_edge_start_trig(
-                #     triggers[0]
-                # )
+            #apply templates to analog tasks
+            self.analog_output_tasks[board].timing.cfg_samp_clk_timing(
+                rate=sample_rates[0],
+                sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
+                samps_per_chan=max_sample * self.waveform_repeat_num,
+            )
+
+            # triggers = list(
+            #     set([v["trigger_source"] for v in self.analog_outputs.values()])
+            # )
+            # if len(triggers) > 1:
+            #     logger.debug(
+            #         "NI DAQ - Different triggers provided for each analog channel."
+            #         "Defaulting to the first trigger provided."
+            #     )
+            # self.analog_output_tasks[board].triggers.start_trigger.cfg_dig_edge_start_trig(
+            #     triggers[0]
+            # )
             # TODO: may change this later to automatically expand the waveform to the longest
             for k, v in self.analog_outputs.items():
                 if k.split("/")[0] == board and v["samples"] < max_sample:
@@ -283,7 +261,12 @@ class NIDAQ(DAQBase):
         exposure_time : float
             Camera exposure duration.
         """
-        self.waveform_repeat_num, self.waveform_expand_num = self.get_waveform_template_parameters()
+        waveform_template_name = self.configuration['experiment']['MicroscopeState']["waveform_template"]
+        self.waveform_repeat_num, self.waveform_expand_num = get_waveform_template_parameters(
+            waveform_template_name,
+            self.configuration["waveform_templates"],
+            self.configuration['experiment']['MicroscopeState']
+        )
         self.create_camera_task(exposure_time)
         self.create_analog_output_tasks(channel_key)
 
@@ -408,7 +391,7 @@ class NIDAQ(DAQBase):
                 self.analog_output_tasks[board].stop()
                 self.analog_output_tasks[board].close()
 
-            self.create_analog_output_tasks(self.current_channel_key, True)
+            self.create_analog_output_tasks(self.current_channel_key)
             print(f"create new daq analog output task because DAQmx Write failed!")
 
         self.is_updating_analog_task = False

@@ -29,9 +29,14 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Standard Library Imports
 import logging
 import tkinter as tk
 from tkinter import ttk
+
+# Third Party Imports
+
+# Local Imports
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -39,10 +44,43 @@ logger = logging.getLogger(p)
 
 
 class AcquireBar(ttk.Frame):
-    """
+    """Acquire Bar
+
     Class for the acquisition bar found at the top of the main application window.
     Main function is to change acq setting and then call the acquisition top-
     level window
+
+    Parameters
+    ----------
+    top_frame : tk.Frame
+        The frame that the bar will be placed into
+    root : tk.Tk
+        The root window that the bar will be placed into
+    *args : tuple
+        Positional arguments for ttk.Frame
+    **kwargs : dict
+        Keyword arguments for ttk.Frame
+
+    Attributes
+    ----------
+    acquire_btn : ttk.Button
+        Button to start acquisition
+    pull_down : ttk.Combobox
+        Pull down menu to select acquisition type
+    progBar_frame : ttk.Frame
+        Frame to hold the progress bars
+    CurAcq : ttk.Progressbar
+        Progress bar for current acquisition
+    OvrAcq : ttk.Progressbar
+        Progress bar for overall acquisition
+    exit_btn : ttk.Button
+        Button to exit the application
+    stop_stage : ttk.Button
+        Button to stop the stage
+
+    Methods
+    -------
+
     """
 
     def __init__(self, top_frame, root, *args, **kwargs):

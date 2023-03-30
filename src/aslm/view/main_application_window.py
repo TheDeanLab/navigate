@@ -56,7 +56,7 @@ from aslm.view.main_window_content.settings_notebook import SettingsNotebook
 from aslm.view.main_window_content.display_notebook import (
     CameraNotebook,
 )
-from aslm.view.main_window_content.acquire_bar_frame.acquire_bar import AcquireBar
+from aslm.view.main_window_content.acquire_notebook import AcquireBar
 from aslm.view.menus.menus import menubar
 from aslm.view.custom_widgets.scrollbars import ScrolledFrame
 

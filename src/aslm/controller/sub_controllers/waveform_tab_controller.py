@@ -85,6 +85,8 @@ class WaveformTabController(GUIController):
         super().__init__(view, parent_controller)
         self.remote_focus_waveform = 0
         self.laser_ao_waveforms = 0
+        parent_notebook = self.view
+        self.view = self.view.waveform_tab
 
         self.initialize_plots()
 
@@ -106,10 +108,9 @@ class WaveformTabController(GUIController):
             "<<ComboboxSelected>>", self.update_waveform_template
         )
 
-        self.view.bind(
-            "<Enter>", self.plot_waveforms
-        )  # TODO: This means we have to move our mouse off and then back
-        #       on to the plot to see an update. Better event to bind?
+        parent_notebook.bind(
+            "<<NotebookTabChanged>>", self.plot_waveforms
+        )
 
     def update_sample_rate(self, *args):
         """Update the sample rate in the waveform settings

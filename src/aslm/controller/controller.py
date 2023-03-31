@@ -202,7 +202,7 @@ class Controller:
 
         # Waveform Controller
         self.waveform_tab_controller = WaveformTabController(
-            self.view.camera_waveform.waveform_tab, self
+            self.view.camera_waveform, self
         )
 
         # Keystroke Controller

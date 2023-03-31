@@ -41,7 +41,7 @@ from pathlib import Path
 from aslm.view.main_window_content.settings_notebook import SettingsNotebook
 from aslm.view.main_window_content.display_notebook import CameraNotebook
 from aslm.view.main_window_content.acquire_notebook import AcquireBar
-from aslm.view.main_window_content.menus import menubar
+from aslm.view.main_window_content.menus import Menubar
 from aslm.view.custom_widgets.scrollbars import ScrolledFrame
 
 # Logger Setup
@@ -117,7 +117,7 @@ class MainApp(ttk.Frame):
         tk.Grid.rowconfigure(root, "all", weight=1)
 
         # Creating and linking menu to main window/app
-        self.menubar = menubar(root)
+        self.menubar = Menubar(root)
 
         # Top Frame Acquire Bar
         self.top_frame = ttk.Frame(self)

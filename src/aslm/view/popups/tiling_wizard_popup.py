@@ -46,7 +46,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class tiling_wizard_popup:
+class TilingWizardPopup:
     """Popup for tiling parameters in View.
 
     Parameters
@@ -85,7 +85,7 @@ class tiling_wizard_popup:
         self.popup = PopUp(
             root,
             "Multiposition Tiling Wizard",
-            "1250x550+330+330",
+            "505x550+330+330",
             top=False,
             transient=False,
         )

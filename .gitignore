@@ -291,3 +291,4 @@ temp-BICF-JG-LE4350.txt
 src/aslm/log_files/LOGS
 *.tiff
 *.ipynb
+*.tif

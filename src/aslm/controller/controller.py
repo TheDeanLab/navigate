@@ -43,12 +43,14 @@ import sys
 
 # Local View Imports
 from aslm.view.main_application_window import MainApp as view
-from aslm.view.menus.waveform_parameter_popup_window import WaveformParameterPopupWindow
-from aslm.view.menus.camera_view_popup_window import CameraViewPopupWindow
-from aslm.view.menus.autofocus_setting_popup import AutofocusPopup
-from aslm.view.menus.ilastik_setting_popup import ilastik_setting_popup
-from aslm.view.menus.help_popup import HelpPopup
-from aslm.view.menus.camera_map_setting_popup import CameraMapSettingPopup
+from aslm.view.popups.waveform_parameter_popup_window import (
+    WaveformParameterPopupWindow,
+)
+from aslm.view.popups.camera_view_popup_window import CameraViewPopupWindow
+from aslm.view.popups.autofocus_setting_popup import AutofocusPopup
+from aslm.view.popups.ilastik_setting_popup import ilastik_setting_popup
+from aslm.view.popups.help_popup import HelpPopup
+from aslm.view.popups.camera_map_setting_popup import CameraMapSettingPopup
 
 # Local Sub-Controller Imports
 from aslm.controller.sub_controllers.help_popup_controller import HelpPopupController

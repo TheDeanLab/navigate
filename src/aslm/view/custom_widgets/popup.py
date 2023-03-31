@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -29,9 +30,14 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Standard Library Imports
 import tkinter as tk
 from tkinter import ttk
 import logging
+
+# Third Party Imports
+
+# Local Imports
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -51,21 +57,70 @@ class PopUp(tk.Toplevel):
         - 600x400 represents the pixel size
         - +320 means 320 pixels from left edge, +180 means 180 pixels from top edge.
         - If a '-' is used insetead of '+' it will be from the opposite edge.
-        - Top is a boolean that if true means popup will always be on top of other windows
-        - Transient is a boolean that if true means the main app will not be usable until popup is closed
-        - The parent frame for any widgets you add to the popup will be retrieved with the get_frame() function
+        - Top is a boolean that if true means popup will always be on top of other
+        windows
+        - Transient is a boolean that if true means the main app will not be usable
+        until popup is closed
+        - The parent frame for any widgets you add to the popup will be retrieved
+        with the get_frame() function
 
         https://stackoverflow.com/questions/28560209/transient-input-window
         Above link is a resource for using popups.
-        Some helpful tips of an easy way to access the data inputted by a user into the popup
+        Some helpful tips of an easy way to access the data inputted by a user into
+        the  popup
         Also discusses transience of a popup (whether you can click out of the popup)
+
+        Parameters
+        ----------
+        root : tk.Tk
+            The main application window
+        name : str
+            The title of the popup window
+        size : str
+            The size of the popup window in the format '600x400+320+180'
+        top : bool, optional
+            If true, the popup will always be on top of other windows, by default True
+        transient : bool, optional
+            If true, the main application will not be usable until the popup is closed,
+            by default True
+
+        Attributes
+        ----------
+        content_frame : ttk.Frame
+            The parent frame for any widgets you add to the popup
+        title : str
+            The title of the popup window
+        geometry : str
+            The size of the popup window in the format '600x400+320+180'
+        columnconfigure : int, weight=int
+            The column configuration for the popup window
+        rowconfigure : int, weight=int
+            The row configuration for the popup window
+        resizable : bool, bool
+            If true, the user can resize the popup window
+        transient : tk.Tk
+            The main application window
+        wait_visibility : None
+            Can't grab until window appears, so we wait
+        grab_set : None
+            Ensures any input goes to this window
+
+        Methods
+        -------
+        get_frame()
+            Returns the parent frame for any widgets you add to the popup
+        dismiss()
+            Destroys the popup window
+        showup()
+            Shows the popup window
         """
         tk.Toplevel.__init__(self)
-        # This starts the popup window config, and makes sure that any child widgets can be resized with the window
+        # This starts the popup window config, and makes sure that any child widgets
+        # can be resized with the window
         self.title(name)
-        self.geometry(
-            size
-        )  # 300x200 pixels, first +320 means 320 pixels from left edge, +180 means 180 pixels from top edge
+        self.geometry(size)
+        # 300x200 pixels, first +320 means 320 pixels from left edge, +180 means 180
+        # pixels from top edge
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         self.resizable(tk.FALSE, tk.FALSE)  # Makes it so user cannot resize
@@ -88,17 +143,52 @@ class PopUp(tk.Toplevel):
     # Dismiss function for destroying window when done
 
     def showup(self):
-        """Display popup as top-level window."""
+        """Display popup as top-level window.
+
+        This function is used to display the popup window as a top-level window.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
         self.deiconify()
         self.attributes("-topmost", 1)
 
     def dismiss(self):
-        """
-        Releases control back to main window from popup
+        """Releases control back to main window from popup
+
+        This function is used to release control back to the main window from the
+        popup window.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
         """
         self.grab_release()  # Ensures input can be anywhere now
         self.destroy()
 
     # Function so that popup entries can have a parent frame
     def get_frame(self):
+        """Returns the parent frame for any widgets you add to the popup
+
+        This function is used to return the parent frame for any widgets you add to the
+        popup window.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        ttk.Frame
+            The parent frame for any widgets you add to the popup
+        """
         return self.content_frame

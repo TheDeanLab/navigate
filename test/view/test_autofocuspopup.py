@@ -4,7 +4,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -31,9 +32,14 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Standard Library Imports
 import tkinter as tk
-from aslm.view.menus.autofocus_setting_popup import AutofocusPopup
 import time
+
+# Third Party Imports
+
+# Local Imports
+from aslm.view.popups.autofocus_setting_popup import AutofocusPopup
 
 
 def test_autofocuspopup():

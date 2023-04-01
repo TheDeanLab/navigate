@@ -11,7 +11,6 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
@@ -149,22 +148,25 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.__init__" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(microscope_name, device_connection, ...)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#id0" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.create_position_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_position_dict</span></code></a>()</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_waveform</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id0" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.create_position_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_position_dict</span></code></a>()</p></td>
 <td><p>Creates a dictionary with the hardware stage positions.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#id1" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.get_abs_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_abs_position</span></code></a>(axis, move_dictionary)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#id1" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.get_abs_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_abs_position</span></code></a>(axis, move_dictionary)</p></td>
 <td><p>Ensure the requested position is within axis bounds and return it.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.move_absolute" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.move_absolute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move_absolute</span></code></a>(move_dictionary[, wait_until_done])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.move_absolute" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.move_absolute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move_absolute</span></code></a>(move_dictionary[, wait_until_done])</p></td>
 <td><p>Move Absolute Method.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.move_axis_absolute" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.move_axis_absolute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move_axis_absolute</span></code></a>(axis, axis_num, ...)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.move_axis_absolute" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.move_axis_absolute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move_axis_absolute</span></code></a>(axis, axis_num, ...)</p></td>
 <td><p>Implement movement logic along a single axis.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.report_position" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.report_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">report_position</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.report_position" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.report_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">report_position</span></code></a>()</p></td>
 <td><p>Reports the position for all axes, and create position dictionary.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#id2" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.stop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#id2" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.stop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop</span></code></a>()</p></td>
 <td><p>Stop all stage movement abruptly.</p></td>
 </tr>
 </tbody>

@@ -11,7 +11,6 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
@@ -108,7 +107,19 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="aslm.tools.project_stats.countlines">
 <span class="sig-prename descclassname"><span class="pre">aslm.tools.project_stats.</span></span><span class="sig-name descname"><span class="pre">countlines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lines</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">begin_start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.tools.project_stats.countlines" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Count the number of lines of code in a directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start</strong> (<em>str</em>) – The directory to start counting lines from.</p></li>
+<li><p><strong>lines</strong> (<em>int</em>) – The number of lines to start counting from.</p></li>
+<li><p><strong>header</strong> (<em>bool</em>) – Whether or not to print a header.</p></li>
+<li><p><strong>begin_start</strong> (<em>str</em>) – The directory to start counting lines from, relative to the start directory.
+This is useful for printing the relative path of a file.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 

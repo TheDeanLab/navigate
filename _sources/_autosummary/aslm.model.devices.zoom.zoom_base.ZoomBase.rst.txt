@@ -17,6 +17,7 @@ aslm.model.devices.zoom.zoom\_base.ZoomBase
    .. autosummary::
    
       ~ZoomBase.__init__
+      ~ZoomBase.build_stage_dict
       ~ZoomBase.move
       ~ZoomBase.read_position
       ~ZoomBase.set_zoom

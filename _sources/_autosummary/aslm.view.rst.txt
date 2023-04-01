@@ -30,6 +30,6 @@
 
    aslm.view.main_application_window
    aslm.view.main_window_content
-   aslm.view.menus
+   aslm.view.popups
    aslm.view.splash_screen
 

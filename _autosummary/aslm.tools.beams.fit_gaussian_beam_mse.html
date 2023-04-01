@@ -11,7 +11,6 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
@@ -108,7 +107,30 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="aslm.tools.beams.fit_gaussian_beam_mse">
 <span class="sig-prename descclassname"><span class="pre">aslm.tools.beams.</span></span><span class="sig-name descname"><span class="pre">fit_gaussian_beam_mse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NA</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wvl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixel_size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.tools.beams.fit_gaussian_beam_mse" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Mean squared error function for fitting a Gaussian beam</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>np.ndarray</em>) – Parameters to fit.
+x[0] and x[1] are the offsets in pixels in radial and z direction of the beam.
+x[2] is the beam waist width [nm].
+x[3] is the peak intensity of the beam.
+x[4] is the background intensity.</p></li>
+<li><p><strong>image</strong> (<em>np.ndarray</em>) – Image to fit</p></li>
+<li><p><strong>NA</strong> (<em>float</em>) – Numerical aperture of the optical system generating the Gaussian beam</p></li>
+<li><p><strong>n</strong> (<em>float</em>) – Refractive index of the sample</p></li>
+<li><p><strong>wvl</strong> (<em>float</em>) – Wavelength of the beam [nm]</p></li>
+<li><p><strong>pixel_size</strong> (<em>float</em>) – Effective pixel size [nm]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Mean squared error between the image and the Gaussian beam</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 

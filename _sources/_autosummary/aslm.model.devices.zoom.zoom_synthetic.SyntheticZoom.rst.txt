@@ -17,6 +17,7 @@ aslm.model.devices.zoom.zoom\_synthetic.SyntheticZoom
    .. autosummary::
    
       ~SyntheticZoom.__init__
+      ~SyntheticZoom.build_stage_dict
       ~SyntheticZoom.move
       ~SyntheticZoom.read_position
       ~SyntheticZoom.set_zoom

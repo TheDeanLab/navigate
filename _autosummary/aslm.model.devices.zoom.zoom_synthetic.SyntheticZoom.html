@@ -11,7 +11,6 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
@@ -141,17 +140,48 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.zoom.zoom_synthetic.SyntheticZoom.__init__" title="aslm.model.devices.zoom.zoom_synthetic.SyntheticZoom.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(microscope_name, device_connection, ...)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#id0" title="aslm.model.devices.zoom.zoom_synthetic.SyntheticZoom.move"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move</span></code></a>([position, wait_until_done])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.zoom.zoom_synthetic.SyntheticZoom.build_stage_dict" title="aslm.model.devices.zoom.zoom_synthetic.SyntheticZoom.build_stage_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">build_stage_dict</span></code></a>()</p></td>
+<td><p>Construct a dictionary of stage offsets in between different zoom values.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id0" title="aslm.model.devices.zoom.zoom_synthetic.SyntheticZoom.move"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move</span></code></a>([position, wait_until_done])</p></td>
 <td><p>Move the Zoom Servo</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#id1" title="aslm.model.devices.zoom.zoom_synthetic.SyntheticZoom.read_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_position</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#id1" title="aslm.model.devices.zoom.zoom_synthetic.SyntheticZoom.read_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_position</span></code></a>()</p></td>
 <td><p>Read the position of the Zoom Servo</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#id2" title="aslm.model.devices.zoom.zoom_synthetic.SyntheticZoom.set_zoom"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_zoom</span></code></a>(zoom[, wait_until_done])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id2" title="aslm.model.devices.zoom.zoom_synthetic.SyntheticZoom.set_zoom"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_zoom</span></code></a>(zoom[, wait_until_done])</p></td>
 <td><p>Change the Zoom Servo.</p></td>
 </tr>
 </tbody>
 </table>
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.zoom.zoom_synthetic.SyntheticZoom.build_stage_dict">
+<span class="sig-name descname"><span class="pre">build_stage_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.zoom.zoom_synthetic.SyntheticZoom.build_stage_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Construct a dictionary of stage offsets in between different zoom values.</p>
+<p>This assumes self.configuration[“stage_positions”] is a dictionary of ideal
+focus positions for the same object taken in the same solvent at
+each magnification. e.g.,</p>
+<dl class="simple">
+<dt>stage_positions:</dt><dd><dl class="simple">
+<dt>BABB:</dt><dd><dl class="simple">
+<dt>f:</dt><dd><p>0.63x: 0
+1x: 70775
+2x: 72455
+3x: 72710
+4x: 72795
+5x: 72850
+6x: 72880</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>The resulting dictionary is keyed first on solvent (refractive index),
+followed by the stage axis to offset, followed by the current magnification
+and then the target magnification.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="id0">
 <span class="sig-name descname"><span class="pre">move</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait_until_done</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id0" title="Permalink to this definition"></a></dt>

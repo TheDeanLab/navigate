@@ -28,8 +28,12 @@ aslm.view.main\_window\_content
    :template: custom_module.rst
    :recursive:
 
-   aslm.view.main_window_content.acquire_bar_frame
-   aslm.view.main_window_content.channel_settings
+   aslm.view.main_window_content.acquire_notebook
+   aslm.view.main_window_content.camera_tab
+   aslm.view.main_window_content.channels_tab
+   aslm.view.main_window_content.display_notebook
+   aslm.view.main_window_content.menus
+   aslm.view.main_window_content.multiposition_tab
    aslm.view.main_window_content.settings_notebook
-   aslm.view.main_window_content.stage_control
+   aslm.view.main_window_content.stage_tab
 

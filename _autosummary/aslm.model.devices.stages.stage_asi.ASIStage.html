@@ -11,7 +11,6 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
@@ -242,8 +241,9 @@ Theta Values are not accepted.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>move_dictionary</strong> (<em>dict</em>) – A dictionary of values required for movement. Includes ‘x_abs’, etc. for one or more axes.
-Expect values in micrometers, except for theta, which is in degrees.</p></li>
+<li><p><strong>move_dictionary</strong> (<em>dict</em>) – A dictionary of values required for movement. Includes ‘x_abs’, etc. for
+one or more axes. Expect values in micrometers, except for theta, which is
+in degrees.</p></li>
 <li><p><strong>wait_until_done</strong> (<em>bool</em>) – Block until stage has moved to its new spot.</p></li>
 </ul>
 </dd>
@@ -264,10 +264,12 @@ Expect values in micrometers, except for theta, which is in degrees.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>axis</strong> (<em>str</em>) – An axis prefix in move_dictionary. For example, axis=’x’ corresponds to ‘x_abs’, ‘x_min’, etc.</p></li>
-<li><p><strong>axis_num</strong> (<em>int</em>) – The corresponding number of this axis on a PI stage. Not applicable to the ASI stage.</p></li>
-<li><p><strong>move_dictionary</strong> (<em>dict</em>) – A dictionary of values required for movement. Includes ‘x_abs’, ‘x_min’, etc. for one or more axes.
-Expect values in micrometers.</p></li>
+<li><p><strong>axis</strong> (<em>str</em>) – An axis prefix in move_dictionary. For example, axis=’x’ corresponds to
+‘x_abs’, ‘x_min’, etc.</p></li>
+<li><p><strong>axis_num</strong> (<em>int</em>) – The corresponding number of this axis on a PI stage. Not applicable to the
+ASI stage.</p></li>
+<li><p><strong>move_dictionary</strong> (<em>dict</em>) – A dictionary of values required for movement. Includes ‘x_abs’, ‘x_min’,
+etc. for one or more axes. Expect values in micrometers.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -282,7 +284,8 @@ Expect values in micrometers.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.devices.stages.stage_asi.ASIStage.report_position">
 <span class="sig-name descname"><span class="pre">report_position</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_asi.ASIStage.report_position" title="Permalink to this definition"></a></dt>
-<dd><p>Reports the position for all axes in microns, and create position dictionary.</p>
+<dd><p>Reports the position for all axes in microns, and create
+position dictionary.</p>
 </dd></dl>
 
 <dl class="py method">

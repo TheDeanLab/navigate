@@ -588,17 +588,17 @@ class CameraViewController(GUIController):
         # Get the number of frames to average from the VIEW
         self.rolling_frames = int(self.image_metrics["Frames"].get())
 
+        # Make sure the array is longer than the number of frames to average.
+        if self.rolling_frames > len(self.max_intensity_history):
+            self.rolling_frames = len(self.max_intensity_history)
+
         if self.rolling_frames == 0:
             # Cannot average 0 frames. Set to 1, and report max intensity
             self.image_metrics["Frames"].set(1)
             self.image_metrics["Image"].set(f"{self.max_intensity_history[-1]:.0f}")
-
         elif self.rolling_frames == 1:
-            # Report max intensity for most recent frame.
             self.image_metrics["Image"].set(f"{self.max_intensity_history[-1]:.0f}")
-
         elif self.rolling_frames > 1:
-            #  Rolling Average
             rolling_average = np.mean(
                 self.max_intensity_history[-self.rolling_frames :]
             )

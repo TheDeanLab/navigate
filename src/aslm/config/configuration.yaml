@@ -133,7 +133,7 @@ microscopes:
           name: stage
           type: PI
           serial_number: 119060508
-          axes: [x, y, z, theta, f]
+          axes: [z]
           volts_per_micron: None
           axes_channels: None
           max: None

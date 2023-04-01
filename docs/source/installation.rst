@@ -86,6 +86,16 @@ After completeting these steps you will only need to do the below to start the s
     (base) MyComputer ~ $ conda activate ASLM
     (ASLM) MyComputer ~ $ aslm
 
+Physik Instrumente Dependencies
+-------------------------------
+If you are using a Physik Instrumente device in a digital control mode, you
+will need to install the PIPython package locally that is distributed with
+the [PIMikroMove Software Suite](https://www.pi-usa
+.us/en/products/controllers-drivers-motion-control-software/motion-control
+-software). For users at UTSW, we have a version of this located on BioHPC
+at `/endosome/archive/MIL/general`
+
+
 GPU Dependencies
 -------------------------------
 Some of the software routines for microscope feedback are accelerated using GPU computing.

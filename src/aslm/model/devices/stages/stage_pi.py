@@ -45,15 +45,27 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-def build_PIStage_connection(controller_name, serial_number, stages, reference_modes):
+def build_PIStage_connection(controller_name, serial_number, stages,
+                             reference_modes):
     """Connect to the Physik Instrumente Stage"""
-    pi_stages = stages.split()
-    pi_reference_modes = reference_modes.split()
+
+    if controller_name == 'E-709':
+        pi_stages = None
+        pi_reference_modes = None
+    else:
+        pi_stages = stages.split()
+        pi_stages = list(pi_stages)
+        pi_reference_modes = reference_modes.split()
+        pi_reference_modes = list(pi_reference_modes)
+
     pi_tools = pitools
     pi_device = GCSDevice(controller_name)
     pi_device.ConnectUSB(serialnum=serial_number)
+
     pi_tools.startup(
-        pi_device, stages=list(pi_stages), refmodes=list(pi_reference_modes)
+        pidevice=pi_device,
+        stages=pi_stages,
+        refmodes=pi_reference_modes
     )
 
     # wait until pi_device is ready
@@ -156,9 +168,18 @@ class PIStage(StageBase):
             try:
                 positions = self.pi_device.qPOS(self.pi_device.axes)
 
+                print("stage_pi.report_position():", positions)
+
                 # convert to um
                 for ax, n in zip(self.axes, self.pi_axes):
-                    pos = positions[str(n)]
+                    print("ax", ax)
+                    print("n", n)
+                    print(len(positions))
+                    if len(positions) == 1:
+                        pos = positions['Z']
+                    else:
+                        pos = positions[str(n)]
+
                     if ax != "theta":
                         pos = round(pos * 1000, 2)
                     setattr(self, f"{ax}_pos", pos)

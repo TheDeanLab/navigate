@@ -243,8 +243,8 @@ class WaveformParameterPopupWindow:
             prev = prev + 2
 
         # High/Low Resolution
-        hi_lo_labels = ["Percent Delay", "Duty Cycle", "Percent Smoothing"]
-        dict_labels = ["Delay", "Duty", "Smoothing"]
+        hi_lo_labels = ["Percent Delay", "Percent Smoothing", "Duty Wait Duration (ms)"]
+        dict_labels = ["Delay", "Smoothing", "Duty"]
         for i in range(3):
             self.inputs[dict_labels[i]] = LabelInput(
                 parent=self.high_low_frame,
@@ -259,9 +259,9 @@ class WaveformParameterPopupWindow:
             )
 
         # Padding Entry Widgets
-        self.inputs["Delay"].pad_input(30, 0, 0, 0)
-        self.inputs["Duty"].pad_input(45, 0, 0, 0)
-        self.inputs["Smoothing"].pad_input(0, 0, 0, 0)
+        self.inputs["Delay"].pad_input(60, 0, 0, 0)
+        self.inputs["Smoothing"].pad_input(30, 0, 0, 0)
+        self.inputs["Duty"].pad_input(5, 0, 0, 0)
 
     # Getters
     def get_variables(self):

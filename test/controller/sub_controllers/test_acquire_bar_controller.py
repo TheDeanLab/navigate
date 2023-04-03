@@ -38,7 +38,7 @@ import pytest
 
 # Local imports
 from aslm.controller.sub_controllers import AcquireBarController
-from aslm.view.main_window_content.acquire_bar_frame.acquire_popup import (
+from aslm.view.popups.acquire_popup import (
     AcquirePopUp,
 )
 
@@ -204,8 +204,12 @@ class TestAcquireBarController:
             making_progress = float(self.acquire_bar_controller.view.CurAcq["value"])
             ovr_progress = float(self.acquire_bar_controller.view.OvrAcq["value"])
             if mode != "projection":  # Ignoring projection until setup
-                assert making_progress > 0, f"Progress bar should be moving in {mode} mode (making_progress)"
-                assert ovr_progress > 0, f"Progress bar should be moving in {mode} mode (ovr_progress)"
+                assert (
+                    making_progress > 0
+                ), f"Progress bar should be moving in {mode} mode (making_progress)"
+                assert (
+                    ovr_progress > 0
+                ), f"Progress bar should be moving in {mode} mode (ovr_progress)"
             images_received += 1
 
         # Stopping progress bar

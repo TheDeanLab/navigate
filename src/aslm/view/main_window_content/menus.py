@@ -40,7 +40,7 @@ logger = logging.getLogger(p)
 
 
 #  Menubar class
-class menubar(Menu):
+class Menubar(Menu):
     """Menu bar class for ASLM GUI
 
     Parameters
@@ -109,6 +109,3 @@ class menubar(Menu):
         self.menu_help = Menu(self)
         self.add_cascade(menu=self.menu_help, label="Help")
 
-        # Debug Menu
-        self.menu_debug = Menu(self)
-        self.add_cascade(menu=self.menu_debug, label="Debug")

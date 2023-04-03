@@ -65,14 +65,6 @@ class CameraViewController(GUIController):
         self.image_palette = view.scale_palette.get_widgets()
         self.canvas = self.view.canvas
 
-        # Binding for adjusting the lookup table min and max counts.
-        # keys = ['Autoscale', 'Min','Max']
-        self.image_palette["Autoscale"].widget.config(
-            command=self.toggle_min_max_buttons
-        )
-        self.image_palette["Min"].widget.config(command=self.update_min_max_counts)
-        self.image_palette["Max"].widget.config(command=self.update_min_max_counts)
-
         # Bindings for changes to the LUT
         # keys = ['Gray','Gradient','Rainbow']
         for color in self.image_palette.values():
@@ -81,6 +73,14 @@ class CameraViewController(GUIController):
         # self.image_palette['Gray'].widget.config(command=self.update_LUT)
         # self.image_palette['Gradient'].widget.config(command=self.update_LUT)
         # self.image_palette['Rainbow'].widget.config(command=self.update_LUT)
+
+        # Binding for adjusting the lookup table min and max counts.
+        # keys = ['Autoscale', 'Min','Max']
+        self.image_palette["Min"].widget.config(command=self.update_min_max_counts)
+        self.image_palette["Max"].widget.config(command=self.update_min_max_counts)
+        self.image_palette["Autoscale"].widget.config(
+            command=self.toggle_min_max_buttons
+        )
 
         # Transpose and live bindings
         self.image_palette["Flip XY"].widget.config(command=self.transpose_image)
@@ -982,6 +982,7 @@ class CameraViewController(GUIController):
         enabled, and image intensity scaled.
         """
         self.autoscale = self.image_palette["Autoscale"].get()
+
         if self.autoscale is True:  # Autoscale Enabled
             self.image_palette["Min"].widget["state"] = "disabled"
             self.image_palette["Max"].widget["state"] = "disabled"

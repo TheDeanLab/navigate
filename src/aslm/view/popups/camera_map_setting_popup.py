@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -29,19 +30,56 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Standard Library Imports
 import tkinter as tk
 from tkinter import ttk
 
-from aslm.view.custom_widgets.popup import PopUp
-from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
-from aslm.view.custom_widgets.validation import ValidatedSpinbox
-
+# Third Party Imports
 from matplotlib.pyplot import subplots
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
+# Local Imports
+from aslm.view.custom_widgets.popup import PopUp
+
 
 class CameraMapSettingPopup(PopUp):
-    """Popup to create and visualize camera offset and variance map generation."""
+    """Popup to create and visualize camera offset and variance map generation.
+
+    Parameters
+    ----------
+    root : tk.Tk
+        Root window.
+    name : str, optional
+        Name of the popup, by default "Camera Map Settings"
+    size : str, optional
+        Size of the popup, by default "+320+180"
+    top : bool, optional
+        Whether the popup should be on top of the root window, by default True
+    transient : bool, optional
+        Whether the popup should be transient, by default True
+
+    Attributes
+    ----------
+    inputs : dict
+        Dictionary of input widgets.
+    file_name : tk.StringVar
+        String variable for the file name.
+    open_btn : ttk.Button
+        Button to open the file.
+    camera : tk.StringVar
+        String variable for the camera.
+    map_btn : ttk.Button
+        Button to create the maps.
+    fig : matplotlib.figure.Figure
+        Figure for the plot.
+    axs : matplotlib.axes.Axes
+        Axes for the plot.
+
+    Methods
+    -------
+    get_widgets()
+        Returns the input widgets.
+    """
 
     def __init__(
         self,
@@ -90,4 +128,15 @@ class CameraMapSettingPopup(PopUp):
         )
 
     def get_widgets(self):
+        """Get the input widgets.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        dict
+            Dictionary of input widgets.
+        """
         return self.inputs

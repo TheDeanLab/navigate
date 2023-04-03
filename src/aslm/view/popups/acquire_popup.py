@@ -50,7 +50,37 @@ logger = logging.getLogger(p)
 
 class AcquirePopUp:
     """Class creates the popup that is generated when the Acquire button is pressed and
-    Save File checkbox is selected."""
+    Save File checkbox is selected.
+
+    Parameters
+    ----------
+    root : tkinter.Tk
+        The root window of the application
+    *args
+        Variable length argument list.
+    **kwargs
+        Arbitrary keyword arguments.
+
+    Attributes
+    ----------
+    popup : aslm.view.custom_widgets.popup.PopUp
+        The popup window
+    inputs : dict
+        Dictionary of all the inputs
+    buttons : dict
+        Dictionary of all the buttons
+    entries_label : tkinter.ttk.Label
+        Label for the entries
+
+    Methods
+    -------
+    get_variables()
+        Returns the variables of the popup
+    get_buttons()
+        Returns the buttons of the popup
+    get_widgets()
+        Returns the widgets of the popup
+    """
 
     def __init__(self, root, *args, **kwargs):
         # Creating popup window with this name and size/placement, PopUp is a Toplevel
@@ -165,10 +195,21 @@ class AcquirePopUp:
         self.buttons["Done"].grid(row=9, column=1, padx=5, sticky=tk.NSEW)
 
     def get_variables(self):
-        """
-        # This function returns a dictionary of all the variables that are tied to each
-        # widget name.
+        """Get the variables of the popup
+
+        This function returns a dictionary of all the variables that are tied to each
+        widget name.
+
         The key is the widget name, value is the variable associated.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        dict
+            Dictionary of all the variables
         """
         variables = {}
         for key, widget in self.inputs.items():
@@ -176,21 +217,35 @@ class AcquirePopUp:
         return variables
 
     def get_widgets(self):
-        """
-        # This function returns the dictionary that holds the input widgets.
+        """Get the widgets of the popup
+
+        This function returns the dictionary that holds the input widgets.
         The key is the widget name, value is the LabelInput class that has all the data.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        dict
+            Dictionary of all the widgets
         """
         return self.inputs
 
     def get_buttons(self):
-        """
-        # This function returns the dictionary that holds the buttons.
+        """Get the buttons of the popup
+
+        This function returns the dictionary that holds the buttons.
         The key is the button name, value is the button.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        dict
+            Dictionary of all the buttons
         """
         return self.buttons
-
-
-if __name__ == "__main__":
-    root = tk.Tk()
-    AcquirePopUp(root)
-    root.mainloop()

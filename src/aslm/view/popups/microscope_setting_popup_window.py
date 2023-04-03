@@ -30,11 +30,16 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Standard Library Imports
 import tkinter as tk
 from tkinter import ttk
+import logging
+
+# Third Party Imports
+
+# Local Imports
 from aslm.view.custom_widgets.popup import PopUp
 from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
-import logging
 from aslm.tools.common_functions import build_ref_name
 
 p = __name__.split(".")[1]
@@ -68,6 +73,16 @@ class MicroscopeSettingPopupWindow:
     microscopes_frame : tkinter.Frame
         Frame for the input widgets
 
+    Methods
+    -------
+    list_microscope_info(microscope_info)
+        List the microscope information
+    get_variables()
+        Get the variables from the input widgets
+    get_widgets()
+        Get the input widgets
+    get_buttons()
+        Get the buttons
     """
 
     def __init__(self, root, microscope_info, *args, **kwargs):
@@ -143,7 +158,6 @@ class MicroscopeSettingPopupWindow:
         Returns
         -------
         None
-
         """
         c = 0
         for microscope_name in microscope_info.keys():
@@ -232,9 +246,3 @@ class MicroscopeSettingPopupWindow:
 
         """
         return self.buttons
-
-
-if __name__ == "__main__":
-    root = tk.Tk()
-    MicroscopeSettingPopupWindow(root)
-    root.mainloop()

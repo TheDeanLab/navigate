@@ -49,10 +49,7 @@ from aslm.controller.sub_controllers.tiling_wizard_controller import (
 )
 
 # View Imports that are not called on startup
-from aslm.view.main_window_content.channel_settings.channel_settings_frames import (
-    tiling_wizard_popup,
-)
-
+from aslm.view.popups.tiling_wizard_popup import TilingWizardPopup
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -156,7 +153,6 @@ class ChannelsTabController(GUIController):
         )
 
         # multiposition
-        self.tiling_wizard_controller = None
         self.is_multiposition = False
         self.is_multiposition_val = self.view.multipoint_frame.on_off
         self.view.multipoint_frame.save_check.configure(
@@ -850,7 +846,7 @@ class ChannelsTabController(GUIController):
         if hasattr(self, "tiling_wizard_controller"):
             self.tiling_wizard_controller.showup()
             return
-        tiling_wizard = tiling_wizard_popup.tiling_wizard_popup(self.view)
+        tiling_wizard = TilingWizardPopup(self.view)
         self.tiling_wizard_controller = TilingWizardController(tiling_wizard, self)
 
     def set_info(self, vals, values):

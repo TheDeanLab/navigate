@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -29,13 +30,15 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Standard Library Imports
 import tkinter as tk
 from tkinter import ttk
-from aslm.view.custom_widgets.popup import PopUp
-
-
 import logging
 
+# Third Party Imports
+
+# Local Imports
+from aslm.view.custom_widgets.popup import PopUp
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -43,8 +46,30 @@ logger = logging.getLogger(p)
 
 
 class HelpPopup:
-    """
-    #### Class creates the popup that provides list of hot keys.
+    """Help Popup
+
+    Class creates the popup that provides list of hot keys.
+
+    Parameters
+    ----------
+    root : tkinter.Tk
+        The root window of the application.
+    *args
+        Variable length argument list.
+    **kwargs
+        Arbitrary keyword arguments.
+
+    Attributes
+    ----------
+    popup : aslm.view.custom_widgets.popup.PopUp
+        The popup window.
+    inputs : dict
+        Dictionary of all the variables.
+
+    Methods
+    -------
+    get_widgets()
+        Returns the widgets of the popup.
     """
 
     def __init__(self, root, *args, **kwargs):
@@ -66,7 +91,8 @@ class HelpPopup:
         # Label Lists
         text = [
             "Left Click: Toggles cross-hair on image",
-            "Right Click: Brings up popup window to select Move Here and Reset Display options",
+            "Right Click: Brings up popup window to select Move Here and Reset Display "
+            "options",
             "Mouse Wheel: Digitally zoom in or out on image based on scroll direction",
             "Double Click Row Header: Moves stage to the position given by the row",
             "Control + 1, 2, 3 or 4: Changes to selected tab",
@@ -115,4 +141,16 @@ class HelpPopup:
         basic.grid(row=0, column=0, sticky=(tk.NSEW), padx=5, pady=5)
 
     def get_widgets(self):
+        """Returns the widgets of the popup.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        dict
+            Dictionary of all the variables.
+        """
+
         return self.inputs

@@ -129,13 +129,17 @@ class PIStage(StageBase):
     def __init__(self, microscope_name, device_connection, configuration, device_id=0):
         super().__init__(microscope_name, device_connection, configuration, device_id)
 
-        # Mapping from self.axes to corresponding PI axis labelling
+        # Default mapping from self.axes to corresponding PI axis labelling
         axes_mapping = {"x": 1, "y": 2, "z": 3, "f": 5, "theta": 4}
-        self.pi_axes = list(map(lambda a: axes_mapping[a], self.axes))
 
         if device_connection is not None:
             self.pi_tools = device_connection["pi_tools"]
             self.pi_device = device_connection["pi_device"]
+
+            # Non-default axes_mapping
+            axes_mapping = {x: y for x, y in zip(self.axes, self.pi_device.axes)}
+
+        self.pi_axes = list(map(lambda a: axes_mapping[a], self.axes))
 
     def __del__(self):
         """Delete the PI Connection"""

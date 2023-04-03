@@ -161,6 +161,15 @@ class GalvoBase:
         self.sample_rate = self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ]["daq"]["sample_rate"]
+        # duty wait duration
+        duty_cycle_wait_duration = (
+            float(
+                self.configuration["waveform_constants"]
+                .get("other_constants", {})
+                .get("duty_wait_duration", 0)
+            )
+            / 1000
+        )
 
         for channel_key in microscope_state["channels"].keys():
             # channel includes 'is_selected', 'laser', 'filter', 'camera_exposure'...
@@ -182,6 +191,9 @@ class GalvoBase:
                     # net longer than exposure_time. This helps the galvo keep sweeping
                     # for the full camera exposure time.
                     self.sweep_time += readout_time
+
+                self.sweep_time += duty_cycle_wait_duration
+
                 self.samples = int(self.sample_rate * self.sweep_time)
 
                 # galvo Parameters
@@ -192,7 +204,9 @@ class GalvoBase:
                         float(galvo_parameters.get("frequency", 0)) / exposure_time
                     )
                 except ValueError as e:
-                    logger.error(f"{e} waveform constants.yml doesn't have parameter amplitude/offset/frequency for {self.galvo_name}")
+                    logger.error(
+                        f"{e} waveform constants.yml doesn't have parameter amplitude/offset/frequency for {self.galvo_name}"
+                    )
                     return
 
                 # Calculate the Waveforms

@@ -125,7 +125,10 @@ class GalvoNIStage(StageBase):
     def calculate_waveform(self):
         self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
         microscope_state = self.configuration["experiment"]["MicroscopeState"]
-        volts = eval(self.volts_per_micron, {"x": self.configuration["experiment"]["StageParameters"][self.axes[0]]})
+        volts = eval(
+            self.volts_per_micron,
+            {"x": self.configuration["experiment"]["StageParameters"][self.axes[0]]},
+        )
 
         for channel_key in microscope_state["channels"].keys():
             # channel includes 'is_selected', 'laser', 'filter', 'camera_exposure'...
@@ -276,6 +279,15 @@ class GalvoNIStage(StageBase):
         volts = eval(self.volts_per_micron, {"x": axis_abs})
 
         microscope_state = self.configuration["experiment"]["MicroscopeState"]
+        # duty wait duration
+        duty_cycle_wait_duration = (
+            float(
+                self.configuration["waveform_constants"]
+                .get("other_constants", {})
+                .get("duty_wait_duration", 0)
+            )
+            / 1000
+        )
 
         for channel_key in microscope_state["channels"].keys():
             # channel includes 'is_selected', 'laser', 'filter', 'camera_exposure'...
@@ -300,6 +312,9 @@ class GalvoNIStage(StageBase):
                     # This helps the galvo keep sweeping for the full camera
                     # exposure time.
                     self.sweep_time += readout_time
+
+                self.sweep_time += duty_cycle_wait_duration
+
                 self.samples = int(self.sample_rate * self.sweep_time)
 
                 # Calculate the Waveforms

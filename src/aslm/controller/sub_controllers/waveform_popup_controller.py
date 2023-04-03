@@ -33,6 +33,7 @@
 from aslm.controller.sub_controllers.gui_controller import GUIController
 from aslm.tools.file_functions import save_yaml_file
 from aslm.tools.common_functions import combine_funcs
+from aslm.config.config import update_config_dict
 
 import logging
 
@@ -101,6 +102,7 @@ class WaveformPopupController(GUIController):
         self.mode = "stop"
         self.remote_focus_experiment_dict = None
         self.update_galvo_device_flag = None
+        self.update_waveform_parameters_flag = False
         self.waveforms_enabled = True
         self.amplitude_dict = None
 
@@ -284,17 +286,6 @@ class WaveformPopupController(GUIController):
         self.widgets["Mode"].set(self.resolution_value)
         self.show_magnification(mag)
 
-        # Load waveform parameters from configuration - Smooth, Delay, Duty Cycle.
-        # Provide defaults should loading fail.
-        # Currently pulls from the original microscope configuration YAML file, not the
-        # current microscope configuration according to the model
-        waveform_configuration = self.parent_controller.configuration["configuration"][
-            "microscopes"
-        ][self.resolution_value]["remote_focus_device"]
-        self.widgets["Smoothing"].set(waveform_configuration.get("smoothing", 0))
-        self.widgets["Delay"].set(waveform_configuration.get("delay_percent", 7.5))
-        self.widgets["Duty"].set(waveform_configuration.get("ramp_rising_percent", 85))
-
     def showup(self):
         """This function will let the popup window show in front.
 
@@ -385,6 +376,30 @@ class WaveformPopupController(GUIController):
             )
         self.update_galvo_device_flag = True
 
+        # Load waveform parameters from configuration - Smooth, Delay, Duty Cycle.
+        # Provide defaults should loading fail.
+        # Currently pulls from the original microscope configuration YAML file, not the
+        # current microscope configuration according to the model
+        self.update_waveform_parameters_flag = False
+        waveform_configuration = self.resolution_info["remote_focus_constants"][
+            self.resolution
+        ][self.mag][self.lasers[0]]
+        self.widgets["Smoothing"].set(
+            waveform_configuration.get("percent_smoothing", 0)
+        )
+        self.widgets["Delay"].set(waveform_configuration.get("percent_delay", 7.5))
+        if "other_constants" not in self.resolution_info:
+            update_config_dict(
+                self.parent_controller.manager,
+                self.resolution_info,
+                "other_constants",
+                {"duty_wait_duration": 0},
+            )
+        self.widgets["Duty"].set(
+            self.resolution_info["other_constants"]["duty_wait_duration"]
+        )
+        self.update_waveform_parameters_flag = True
+
         # update resolution value in central controller (menu)
         value = f"{self.resolution} {self.mag}"
         if self.parent_controller.resolution_value.get() != value:
@@ -465,41 +480,44 @@ class WaveformPopupController(GUIController):
         -------
         None
         """
+        if not self.update_waveform_parameters_flag:
+            return
+        # Get the values from the widgets.
         try:
-            # Get the values from the widgets.
             delay = float(self.widgets["Delay"].widget.get())
-            duty_cycle = float(self.widgets["Duty"].widget.get())
-            smoothing = float(self.widgets["Smoothing"].widget.get())
-
-            # Update the configuration parameters
-            self.parent_controller.configuration["configuration"]["microscopes"][
-                self.resolution_value
-            ]["remote_focus_device"]["smoothing"] = smoothing
-
-            self.parent_controller.configuration["configuration"]["microscopes"][
-                self.resolution_value
-            ]["remote_focus_device"]["delay_percent"] = delay
-
-            self.parent_controller.configuration["configuration"]["microscopes"][
-                self.resolution_value
-            ]["remote_focus_device"]["ramp_rising_percent"] = duty_cycle
-
-            # Create a dictionary to pass to the controller.
-            waveform_parameters = {
-                "delay": delay,
-                "duty_cycle": duty_cycle,
-                "smoothing": smoothing,
-            }
-
-            # Pass the values to the parent controller.
-            self.event_id = self.view.popup.after(
-                500,
-                lambda: self.parent_controller.execute(
-                    "update_setting", "waveform_parameters", waveform_parameters
-                ),
-            )
         except ValueError:
-            logger.debug("Waveform parameters not updated by waveform_popup_controller")
+            return
+        try:
+            duty_cycle = float(self.widgets["Duty"].widget.get())
+        except ValueError:
+            return
+        try:
+            smoothing = float(self.widgets["Smoothing"].widget.get())
+        except ValueError:
+            return
+
+        # Update the configuration parameters
+        for laser in self.lasers:
+            self.resolution_info["remote_focus_constants"][self.resolution][self.mag][
+                laser
+            ]["percent_delay"] = delay
+            self.resolution_info["remote_focus_constants"][self.resolution][self.mag][
+                laser
+            ]["percent_smoothing"] = smoothing
+            self.resolution_info["other_constants"]["duty_wait_duration"] = duty_cycle
+
+        # Pass the values to the parent controller.
+        try:
+            if self.event_id:
+                self.view.popup.after_cancel(self.event_id)
+        except KeyError:
+            pass
+        self.event_id = self.view.popup.after(
+            500,
+            lambda: self.parent_controller.execute(
+                "update_setting", "waveform_parameters"
+            ),
+        )
 
     def update_galvo_setting(self, galvo_name, widget_name, parameter):
         """Update galvo settings in memory.

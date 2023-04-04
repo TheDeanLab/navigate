@@ -582,7 +582,7 @@ class CameraViewController(GUIController):
         """
 
         # If the array is larger than 32 entries, remove the 0th entry.
-        if len(self.max_intensity_history) > (2**5) - 1:
+        if len(self.max_intensity_history) > (2**5):
             self.max_intensity_history = self.max_intensity_history[1:]
 
         # Get the number of frames to average from the VIEW
@@ -591,6 +591,7 @@ class CameraViewController(GUIController):
         # Make sure the array is longer than the number of frames to average.
         if self.rolling_frames > len(self.max_intensity_history):
             self.rolling_frames = len(self.max_intensity_history)
+            self.image_metrics["Frames"].set(self.rolling_frames)
 
         if self.rolling_frames == 0:
             # Cannot average 0 frames. Set to 1, and report max intensity

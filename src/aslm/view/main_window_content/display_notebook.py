@@ -450,7 +450,7 @@ class MetricsFrame(ttk.Labelframe):
                     label=self.labels[i],
                     input_class=ttk.Spinbox,
                     input_var=tk.IntVar(),
-                    input_args={"from_": 1, "to": 20, "increment": 1, "width": 5},
+                    input_args={"from_": 1, "to": 32, "increment": 1, "width": 5},
                     label_pos="top",
                 )
                 self.inputs[self.names[i]].grid(

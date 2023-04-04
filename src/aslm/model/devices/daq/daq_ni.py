@@ -148,10 +148,13 @@ class NIDAQ(DAQBase):
                 )
                 if len(sample_rates) > 1:
                     logger.debug(
-                        "NI DAQ - Different sample rates provided for each analog channel."
+                        "NI DAQ - Different sample rates provided "
+                        "for each analog channel."
                         "Defaulting to the first sample rate provided."
                     )
-                n_samples = list(set([v["samples"] for v in self.analog_outputs.values()]))
+                n_samples = list(
+                    set([v["samples"] for v in self.analog_outputs.values()])
+                )
                 if len(n_samples) > 1:
                     logger.debug(
                         "NI DAQ - Different number of samples provided for each analog"
@@ -182,19 +185,18 @@ class NIDAQ(DAQBase):
                 triggers = list(
                     set([v["trigger_source"] for v in self.analog_outputs.values()])
                 )
+
                 if len(triggers) > 1:
                     logger.debug(
                         "NI DAQ - Different triggers provided for each analog channel."
                         "Defaulting to the first trigger provided."
                     )
-                self.analog_output_tasks[board].triggers.start_trigger.cfg_dig_edge_start_trig(
-                    triggers[0]
-                )
+                self.analog_output_tasks[board].triggers.start_trigger.cfg_dig_edge_start_trig(triggers[0])
 
             # Write values to board
             waveforms = np.vstack(
                 [
-                    v["waveform"][channel_key][:self.n_sample]
+                    v["waveform"][channel_key][: self.n_sample]
                     for k, v in self.analog_outputs.items()
                     if k.split("/")[0] == board
                 ]
@@ -299,38 +301,42 @@ class NIDAQ(DAQBase):
             pass
 
     def update_analog_task(self, board_name):
-        # if there is no such analog task, it means it's not acquiring and nothing needs to do.        
+        # if there is no such analog task,
+        # it means it's not acquiring and nothing needs to do.
         if board_name not in self.analog_output_tasks:
             return False
         # can't update an analog task while updating one.
         if self.is_updating_analog_task:
             return False
-        
+
         self.wait_to_run_lock.acquire()
         self.is_updating_analog_task = True
 
         try:
-            # this function waits only happens when interacting through GUI in continuous mode,
-            # updating an analog task happens after the task is done when running a feature, so it will check and return immediately.
+            # this function waits only happens when
+            # interacting through GUI in continuous mode,
+
+            # updating an analog task happens after the task
+            # is done when running a feature, so it will check and return immediately.
             self.analog_output_tasks[board_name].wait_until_done(timeout=1.0)
             self.analog_output_tasks[board_name].stop()
 
             # Write values to board
             waveforms = np.vstack(
                 [
-                    v["waveform"][self.current_channel_key][:self.n_sample]
+                    v["waveform"][self.current_channel_key][: self.n_sample]
                     for k, v in self.analog_outputs.items()
                     if k.split("/")[0] == board_name
                 ]
             ).squeeze()
             self.analog_output_tasks[board_name].write(waveforms)
-        except Exception as e:
+        except Exception:
             for board in self.analog_output_tasks.keys():
                 self.analog_output_tasks[board].stop()
                 self.analog_output_tasks[board].close()
 
             self.create_analog_output_tasks(self.current_channel_key, True)
-            print(f"create new daq analog output task because DAQmx Write failed!")
+            print("create new daq analog output task because DAQmx Write failed!")
 
         self.is_updating_analog_task = False
         self.wait_to_run_lock.release()

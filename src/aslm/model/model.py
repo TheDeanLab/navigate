@@ -49,7 +49,8 @@ from aslm.model.features.common_features import (
     FindTissueSimple2D,
     PrepareNextChannel,
     LoopByCount,
-    ConProAcquisition,  # noqa
+    ConProAcquisition, # noqa
+    StackPause,
 )
 from aslm.model.features.feature_container import load_features
 from aslm.model.features.restful_features import IlastikSegmentation
@@ -75,10 +76,8 @@ class Model:
         Flag for whether or not to leverage CUDA analysis engine.
     args : str
         ...
-    configuration_path : str
+    configuration : str
         File path for the global configuration of the microscope
-    experiment_path : str
-        File path for the experiment configuration of the microscope
     event_queue : ...
         ...
 
@@ -249,6 +248,7 @@ class Model:
             "z-stack": [
                 (
                     {"name": ZStackAcquisition},
+                    {"name": StackPause},
                     {
                         "name": LoopByCount,
                         "args": ("experiment.MicroscopeState.timepoints",),

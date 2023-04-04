@@ -30,6 +30,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
+import time
 from functools import reduce
 
 
@@ -156,6 +157,44 @@ class PrepareNextChannel:
         self.model.active_microscope.prepare_next_channel()
 
         return True
+    
+class StackPause:
+    def __init__(self, model, pause_num="experiment.MicroscopeState.timepoints"):
+        self.model = model
+        self.pause_num = pause_num
+        if type(pause_num) is str:
+            try:
+                parameters = pause_num.split(".")
+                config_ref = reduce((lambda pre, n: f"{pre}['{n}']"), parameters, "")
+                exec(f"self.pause_num = int(self.model.configuration{config_ref})")
+            except:
+                self.pause_num = 1
+        self.config_table = {
+            "signal": {"main": self.signal_func}
+        }
+
+    def signal_func(self):
+        self.pause_num -= 1
+        if self.pause_num <= 0:
+            return
+        pause_time = float(self.model.configuration["experiment"]["MicroscopeState"]["stack_pause"])
+        if pause_time <= 0:
+            return
+        current_channel = f"channel_{self.model.active_microscope.current_channel}"
+        current_exposure_time = float(self.model.configuration["experiment"]["MicroscopeState"]["channels"][current_channel]["camera_exposure_time"]) / 1000.0
+        if pause_time < 5 * current_exposure_time:
+            time.sleep(pause_time)
+        else:
+            self.model.pause_data_thread()
+            pause_time -= 2*current_exposure_time
+            while pause_time > 0:
+                pt = min(pause_time, 0.1)
+                time.sleep(pt)
+                if self.model.stop_acquisition:
+                    self.model.resume_data_thread()
+                    return
+                pause_time -= 0.1
+            self.model.resume_data_thread()
 
 
 class ZStackAcquisition:

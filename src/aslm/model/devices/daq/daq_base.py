@@ -115,6 +115,15 @@ class DAQBase:
         self.sample_rate = self.configuration["configuration"]["microscopes"][
             microscope_name
         ]["daq"]["sample_rate"]
+        # duty wait duration
+        duty_cycle_wait_duration = (
+            float(
+                self.configuration["waveform_constants"]
+                .get("other_constants", {})
+                .get("remote_focus_settle_duration", 0)
+            )
+            / 1000
+        )
 
         # Iterate through the dictionary.
         for channel_key in microscope_state["channels"].keys():
@@ -138,6 +147,8 @@ class DAQBase:
                     # net longer than exposure_time. This helps the galvo keep sweeping
                     # for the full camera exposure time.
                     self.sweep_time += readout_time
+
+                self.sweep_time += duty_cycle_wait_duration
 
                 self.waveform_dict[channel_key] = camera_exposure(
                     sample_rate=self.sample_rate,

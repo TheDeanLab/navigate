@@ -4,7 +4,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -193,6 +194,17 @@ class TestWaveforms(unittest.TestCase):
                 self.assertEqual(np.max(data), amplitude + offset)
                 self.assertEqual(np.min(data), -1 * amplitude + offset)
 
+    def test_smoothing_length(self):
+        """Test that the smoothed waveform is the same length as the original waveform
 
-if __name__ == "__main__":
-    unittest.main()
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
+        waveform = waveforms.remote_focus_ramp()
+        smoothed_waveform = waveforms.smooth_waveform(waveform, 10)
+        self.assertEqual(np.size(smoothed_waveform), np.size(waveform))

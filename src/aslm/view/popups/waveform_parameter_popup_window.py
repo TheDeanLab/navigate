@@ -243,27 +243,27 @@ class WaveformParameterPopupWindow:
             prev = prev + 2
 
         # High/Low Resolution
-        hi_lo_labels = ["Percent Delay", "Duty Cycle", "Percent Smoothing"]
-        dict_labels = ["Delay", "Duty", "Smoothing"]
-
-        # The below code could be in the loop above but I thought it was best
-        # to make it separate since they are different frames
+        hi_lo_labels = ["Percent Delay",
+                        "Percent Smoothing",
+                        "Remote Focus Settle Duration (ms)"]
+        dict_labels = ["Delay", "Smoothing", "Duty"]
         for i in range(3):
             self.inputs[dict_labels[i]] = LabelInput(
                 parent=self.high_low_frame,
-                input_class=ttk.Entry,
+                input_class=ValidatedSpinbox,
                 label=hi_lo_labels[i],
                 input_var=tk.StringVar(),
                 label_args={"padding": (2, 5, 5, 0)},
+                input_args={"from_": 0, "to": 100, "increment": 0.1},
             )
             self.inputs[dict_labels[i]].grid(
                 row=i, column=0, sticky=tk.NSEW, padx=(2, 5)
             )
 
         # Padding Entry Widgets
-        self.inputs["Delay"].pad_input(30, 0, 0, 0)
-        self.inputs["Duty"].pad_input(45, 0, 0, 0)
-        # self.inputs['Smoothing'].pad_input(0,0,0,0)
+        self.inputs["Delay"].pad_input(60, 0, 0, 0)
+        self.inputs["Smoothing"].pad_input(30, 0, 0, 0)
+        self.inputs["Duty"].pad_input(5, 0, 0, 0)
 
     # Getters
     def get_variables(self):

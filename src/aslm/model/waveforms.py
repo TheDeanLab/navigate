@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -29,10 +30,14 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from scipy import signal
-import numpy as np
+# Standard Library Imports
 import logging
-from pathlib import Path
+
+# Third Party Imports
+import numpy as np
+from scipy import signal
+
+# Local Imports
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -63,7 +68,8 @@ def camera_exposure(sample_rate=100000, sweep_time=0.4, exposure=0.4, camera_del
 
     Examples
     --------
-    exposure_start, exposure_end = camera_exposure(sample_rate, sweep_time, exposure, camera_delay)
+    exposure_start, exposure_end = camera_exposure(sample_rate, sweep_time,
+    exposure, camera_delay)
     """
     amplitude = 5
 
@@ -382,43 +388,11 @@ def smooth_waveform(waveform, percent_smoothing=10):
 
     """
     waveform_length = np.size(waveform)
-    window_len = int(np.floor(waveform_length * percent_smoothing / 100))
-    smoothed_waveform = np.convolve(waveform, np.ones(window_len), "valid") / window_len
+    window_length = int(np.floor(waveform_length * percent_smoothing / 100))
+    waveform_padded = np.pad(waveform, int(window_length // 2), mode="edge")
+    smoothed_waveform = (
+        np.convolve(waveform_padded, np.ones(window_length), "valid") / window_length
+    )
+    smoothed_waveform = smoothed_waveform[:waveform_length]
+
     return smoothed_waveform
-
-
-if __name__ == "__main__":
-    import matplotlib.pyplot as plt
-
-    # General
-    sample_rate = 100000
-    exposure_time = 0.25
-
-    # Remote Focus Device
-    remote_focus_delay = 7.5
-    remote_focus_ramp_rising = 85
-    remote_focus_ramp_falling = 2.5
-    remote_focus_amplitude = 1
-    remote_focus_offset = 1
-    camera_delay = 10
-
-    waveform_padding = (camera_delay + remote_focus_ramp_falling) / 100
-    sweep_time = exposure_time + exposure_time * waveform_padding
-
-    galvo_waveform = sawtooth(
-        sample_rate=sample_rate,
-        sweep_time=sweep_time,
-        frequency=200,
-        amplitude=1,
-        offset=0,
-    )
-
-    camera_waveform = camera_exposure(
-        sample_rate=sample_rate,
-        sweep_time=sweep_time,
-        exposure=exposure_time,
-        camera_delay=camera_delay,
-    )
-    plt.plot(galvo_waveform)
-    plt.plot(camera_waveform)
-    plt.show()

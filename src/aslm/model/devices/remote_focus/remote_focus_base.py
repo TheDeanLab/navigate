@@ -37,7 +37,7 @@ import logging
 import numpy as np
 
 # Local Imports
-from aslm.model.waveforms import remote_focus_ramp
+from aslm.model.waveforms import remote_focus_ramp, smooth_waveform
 
 # # Logger Setup
 p = __name__.split(".")[1]
@@ -106,7 +106,8 @@ class RemoteFocusBase:
         ]["camera"]["delay_percent"]
 
         # Waveform Parameters
-        self.remote_focus_delay = self.device_config["delay_percent"]
+        self.remote_focus_delay = self.device_config.get("delay_percent", 7.5)
+        self.percent_smoothing = self.device_config.get("smoothing", 0)
         self.remote_focus_ramp_falling = self.device_config["ramp_falling_percent"]
         self.remote_focus_max_voltage = self.device_config["hardware"]["max"]
         self.remote_focus_min_voltage = self.device_config["hardware"]["min"]
@@ -146,6 +147,15 @@ class RemoteFocusBase:
         self.sample_rate = self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ]["daq"]["sample_rate"]
+        # duty wait duration
+        duty_cycle_wait_duration = (
+            float(
+                waveform_constants.get("other_constants", {}).get(
+                    "remote_focus_settle_duration", 0
+                )
+            )
+            / 1000
+        )
 
         for channel_key in microscope_state["channels"].keys():
             # channel includes 'is_selected', 'laser', 'filter', 'camera_exposure'...
@@ -168,6 +178,9 @@ class RemoteFocusBase:
                     # net longer than exposure_time. This helps the galvo keep sweeping
                     # for the full camera exposure time.
                     self.sweep_time += readout_time
+
+                self.sweep_time += duty_cycle_wait_duration
+
                 self.samples = int(self.sample_rate * self.sweep_time)
 
                 # Remote Focus Parameters
@@ -183,6 +196,17 @@ class RemoteFocusBase:
                     waveform_constants["remote_focus_constants"][imaging_mode][zoom][
                         laser
                     ]["amplitude"]
+                )
+
+                self.remote_focus_delay = float(
+                    waveform_constants["remote_focus_constants"][imaging_mode][zoom][
+                        laser
+                    ]["percent_delay"]
+                )
+                self.percent_smoothing = float(
+                    waveform_constants["remote_focus_constants"][imaging_mode][zoom][
+                        laser
+                    ]["percent_smoothing"]
                 )
 
                 # Validation for when user puts a '-' in spinbox
@@ -211,6 +235,15 @@ class RemoteFocusBase:
                     amplitude=remote_focus_amplitude,
                     offset=remote_focus_offset,
                 )
+
+                # Smooth the Waveform if specified
+                if self.percent_smoothing > 0:
+                    self.waveform_dict[channel_key] = smooth_waveform(
+                        waveform=self.waveform_dict[channel_key],
+                        percent_smoothing=self.percent_smoothing,
+                    )
+
+                # Clip any values outside of the hardware limits
                 self.waveform_dict[channel_key][
                     self.waveform_dict[channel_key] > self.remote_focus_max_voltage
                 ] = self.remote_focus_max_voltage

@@ -138,6 +138,7 @@ class CameraViewController(GUIController):
         self.image_count = 0
         self.temp_array = None
         self.rolling_frames = 1
+        self.max_intensity_history = []
         self.bit_depth = 8  # bit-depth for PIL presentation.
         self.zoom_value = 1
         self.zoom_scale = 1
@@ -567,37 +568,43 @@ class CameraViewController(GUIController):
         """Update the max counts in the camera view.
 
         Function gets the number of frames to average from the VIEW.
-        If frames to average == 0 or 1,
-        provides the maximum value from the last acquired data.
 
-        If frames to average >1, initializes a temporary array,
-        and appends each subsequent image to it.
+        If frames to average == 0 or 1, provides the maximum value from the last
+        acquired data.
 
-        Once the number of frames to average has been reached,
-        deletes the first image in.
+        Parameters
+        ----------
+        None
 
-        Reports the rolling average.
+        Returns
+        -------
+        None
         """
+
+        # If the array is larger than 32 entries, remove the 0th entry.
+        if len(self.max_intensity_history) > (2**5):
+            self.max_intensity_history = self.max_intensity_history[1:]
+
+        # Get the number of frames to average from the VIEW
         self.rolling_frames = int(self.image_metrics["Frames"].get())
-        self.image_metrics["Image"].set(f"{self.max_counts:.2f}")
+
+        # Make sure the array is longer than the number of frames to average.
+        if self.rolling_frames > len(self.max_intensity_history):
+            self.rolling_frames = len(self.max_intensity_history)
+            self.image_metrics["Frames"].set(self.rolling_frames)
 
         if self.rolling_frames == 0:
             # Cannot average 0 frames. Set to 1, and report max intensity
             self.image_metrics["Frames"].set(1)
+            self.image_metrics["Image"].set(f"{self.max_intensity_history[-1]:.0f}")
+        elif self.rolling_frames == 1:
+            self.image_metrics["Image"].set(f"{self.max_intensity_history[-1]:.0f}")
         elif self.rolling_frames > 1:
-            #  Rolling Average
-            self.image_count = self.image_count + 1
-            if self.image_count == 1:
-                # First frame of the rolling average
-                self.temp_array = self.down_sampled_image
-            else:
-                # Subsequent frames of the rolling average
-                self.temp_array = np.dstack((self.temp_array, self.down_sampled_image))
-                if np.shape(self.temp_array)[2] > self.rolling_frames:
-                    self.temp_array = np.delete(self.temp_array, 0, 2)
-
-                # Update GUI
-                self.image_metrics["Image"].set(np.max(self.temp_array))
+            rolling_average = (
+                sum(self.max_intensity_history[-self.rolling_frames :])
+                / self.rolling_frames
+            )
+            self.image_metrics["Image"].set(f"{rolling_average:.0f}")
 
     def down_sample_image(self):
         """Down-sample the data for image display according to widget size.
@@ -834,12 +841,14 @@ class CameraViewController(GUIController):
         # self.image_volume[:, :, self.slice_index,
         # self.channel_index] = image[:, ] # copy
 
+        # Store the maximum intensity value for the image.
+        self.max_intensity_history.append(np.max(image))
+
+        # If the user has toggled the transpose button, transpose the image.
         if self.transpose:
             self.image = image.T
         else:
             self.image = image
-            # self.image_volume[:, :, self.slice_index, self.channel_index]
-            # pass by reference
 
         if self._snr_selected:
             self.image = compute_signal_to_noise(

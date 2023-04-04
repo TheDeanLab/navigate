@@ -97,7 +97,6 @@ class WaveformPopupController(GUIController):
 
         # Initialize variables
         self.resolution = None
-        self.resolution_value = None
         self.mag = None
         self.mode = "stop"
         self.remote_focus_experiment_dict = None
@@ -275,15 +274,15 @@ class WaveformPopupController(GUIController):
         self.remote_focus_experiment_dict = self.parent_controller.configuration[
             "experiment"
         ]["MicroscopeState"]
-        self.resolution_value = self.remote_focus_experiment_dict["microscope_name"]
+        resolution_value = self.remote_focus_experiment_dict["microscope_name"]
         zoom_value = self.remote_focus_experiment_dict["zoom"]
         mag = zoom_value
         if (
-            self.widgets["Mode"].get() == self.resolution_value
+            self.widgets["Mode"].get() == resolution_value
             and self.widgets["Mag"].get() == mag
         ):
             return
-        self.widgets["Mode"].set(self.resolution_value)
+        self.widgets["Mode"].set(resolution_value)
         self.show_magnification(mag)
 
     def showup(self):
@@ -485,18 +484,13 @@ class WaveformPopupController(GUIController):
         # Get the values from the widgets.
         try:
             delay = float(self.widgets["Delay"].widget.get())
-        except ValueError:
-            return
-        try:
             duty_cycle = float(self.widgets["Duty"].widget.get())
-        except ValueError:
-            return
-        try:
             smoothing = float(self.widgets["Smoothing"].widget.get())
         except ValueError:
             return
 
-        # Update the configuration parameters
+        # Update the waveform parameters
+        # all the lasers use the same delay, smoothing value
         for laser in self.lasers:
             self.resolution_info["remote_focus_constants"][self.resolution][self.mag][
                 laser
@@ -504,7 +498,7 @@ class WaveformPopupController(GUIController):
             self.resolution_info["remote_focus_constants"][self.resolution][self.mag][
                 laser
             ]["percent_smoothing"] = smoothing
-            self.resolution_info["other_constants"]["duty_wait_duration"] = duty_cycle
+        self.resolution_info["other_constants"]["duty_wait_duration"] = duty_cycle
 
         # Pass the values to the parent controller.
         try:

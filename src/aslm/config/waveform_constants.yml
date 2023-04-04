@@ -212,5 +212,8 @@
                 }
             }
         }
+    },
+    "other_constants": {
+        "duty_wait_duration": "10"
     }
 }

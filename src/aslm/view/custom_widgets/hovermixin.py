@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -29,36 +30,111 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Standard Library Imports
 import tkinter as tk
 from tkinter import ttk
-from aslm.view.custom_widgets.hover import hover
+
+# Third Party Imports
+
+# Local Imports
+from aslm.view.custom_widgets.hover import Hover
 
 
 class HoverMixin:
+    """Adds hover attribute to widget
+
+    This class is meant to be mixed in with other widgets to add a hover attribute
+
+    Methods
+    -------
+    None
+
+    Attributes
+    ----------
+    hover : Hover
+        Hover object that is added to the widget
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(
             *args, **kwargs
         )  # Calls base class that is mixed in with this class
 
         # Adds hover attribute
-        self.hover = hover(self, text=None, type="free")
+        self.hover = Hover(self, text=None, type="free")
 
 
 class HoverButton(HoverMixin, ttk.Button):
+    """Adds hover attribute to ttk.Button
+
+    This class is meant to be mixed in with other widgets to add a hover attribute
+
+    Methods
+    -------
+    None
+
+    Attributes
+    ----------
+    hover : Hover
+        Hover object that is added to the widget
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
 
 class HoverTkButton(HoverMixin, tk.Button):
+    """Adds hover attribute to tk.Button
+
+    This class is meant to be mixed in with other widgets to add a hover attribute
+
+    Methods
+    -------
+    None
+
+    Attributes
+    ----------
+    hover : Hover
+        Hover object that is added to the widget
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
 
 class HoverRadioButton(HoverMixin, ttk.Radiobutton):
+    """Adds hover attribute to ttk.Radiobutton
+
+    This class is meant to be mixed in with other widgets to add a hover attribute
+
+    Methods
+    -------
+    None
+
+    Attributes
+    ----------
+    hover : Hover
+        Hover object that is added to the widget
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
 
 class HoverCheckButton(HoverMixin, ttk.Checkbutton):
+    """Adds hover attribute to ttk.Checkbutton
+
+    This class is meant to be mixed in with other widgets to add a hover attribute
+
+    Methods
+    -------
+    None
+
+    Attributes
+    ----------
+    hover : Hover
+        Hover object that is added to the widget
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

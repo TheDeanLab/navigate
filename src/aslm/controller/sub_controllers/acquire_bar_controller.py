@@ -39,7 +39,7 @@ from tkinter import messagebox
 
 # Local Imports
 from aslm.controller.sub_controllers.gui_controller import GUIController
-from aslm.view.main_window_content.acquire_bar_frame.acquire_popup import AcquirePopUp
+from aslm.view.popups.acquire_popup import AcquirePopUp
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -64,7 +64,7 @@ class AcquireBarController(GUIController):
             "Alignment": "alignment",
             "Projection": "projection",
             "Confocal-Projection": "confocal-projection",
-            "Customized": "customized"
+            "Customized": "customized",
         }
 
         self.view.pull_down["values"] = list(self.mode_dict.keys())
@@ -117,7 +117,11 @@ class AcquireBarController(GUIController):
         if microscope_state["is_multiposition"] is False:
             number_of_positions = 1
         else:
-            number_of_positions = len(self.parent_controller.configuration["experiment"]["MultiPositions"]["stage_positions"])
+            number_of_positions = len(
+                self.parent_controller.configuration["experiment"]["MultiPositions"][
+                    "stage_positions"
+                ]
+            )
 
         if mode == "single":
             number_of_slices = 1
@@ -126,7 +130,7 @@ class AcquireBarController(GUIController):
         elif mode == "projection":
             number_of_slices = 1
         elif mode == "confocal-projection":
-            number_of_slices = microscope_state['n_plane']
+            number_of_slices = microscope_state["n_plane"]
         elif mode == "z-stack":
             number_of_slices = microscope_state["number_z_steps"]
 
@@ -163,9 +167,11 @@ class AcquireBarController(GUIController):
                     self.view.OvrAcq["value"] = top_percent_complete
 
                 elif mode == "projection":
-                    bottom_anticipated_images = 100 * (images_received / bottom_anticipated_images)
-                    self.view.CurAcq['value'] = bottom_anticipated_images
-                    self.view.OvrAcq['value'] = bottom_anticipated_images
+                    bottom_anticipated_images = 100 * (
+                        images_received / bottom_anticipated_images
+                    )
+                    self.view.CurAcq["value"] = bottom_anticipated_images
+                    self.view.OvrAcq["value"] = bottom_anticipated_images
 
             elif stop is True:
                 self.stop_progress_bar()
@@ -181,7 +187,8 @@ class AcquireBarController(GUIController):
         Parameters
         ----------
         mode: str
-            Mode could be: 'live', 'z-stack', 'single', 'projection', 'confocal-projection'
+            Mode could be: 'live', 'z-stack', 'single', 'projection',
+            'confocal-projection'
 
         Examples
         --------
@@ -261,7 +268,9 @@ class AcquireBarController(GUIController):
 
             # Configure the button callbacks on the popup window
             buttons["Cancel"].config(command=lambda: self.acquire_pop.popup.dismiss())
-            buttons["Done"].config(command=lambda: self.launch_acquisition(self.acquire_pop))
+            buttons["Done"].config(
+                command=lambda: self.launch_acquisition(self.acquire_pop)
+            )
 
             # Configure drop down callbacks, will update save settings when file type is
             # changed
@@ -325,7 +334,8 @@ class AcquireBarController(GUIController):
             widget.widget["state"] = state
 
     def update_conpro_acq(self, mode):
-        """Changes state behavior of widgets in the confocal-projection acquisition frame based on mode of microscope
+        """Changes state behavior of widgets in the confocal-projection acquisition
+        frame based on mode of microscope
 
         Parameters
         ----------

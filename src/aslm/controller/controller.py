@@ -43,12 +43,14 @@ import sys
 
 # Local View Imports
 from aslm.view.main_application_window import MainApp as view
-from aslm.view.menus.waveform_parameter_popup_window import WaveformParameterPopupWindow
-from aslm.view.menus.camera_view_popup_window import CameraViewPopupWindow
-from aslm.view.menus.autofocus_setting_popup import AutofocusPopup
-from aslm.view.menus.ilastik_setting_popup import ilastik_setting_popup
-from aslm.view.menus.help_popup import HelpPopup
-from aslm.view.menus.camera_map_setting_popup import CameraMapSettingPopup
+from aslm.view.popups.waveform_parameter_popup_window import (
+    WaveformParameterPopupWindow,
+)
+from aslm.view.popups.camera_view_popup_window import CameraViewPopupWindow
+from aslm.view.popups.autofocus_setting_popup import AutofocusPopup
+from aslm.view.popups.ilastik_setting_popup import ilastik_setting_popup
+from aslm.view.popups.help_popup import HelpPopup
+from aslm.view.popups.camera_map_setting_popup import CameraMapSettingPopup
 
 # Local Sub-Controller Imports
 from aslm.controller.sub_controllers.help_popup_controller import HelpPopupController
@@ -780,23 +782,21 @@ class Controller:
             self.acquire_bar_controller.set_save_option(args[0])
 
         elif command == "update_setting":
-            r"""Called by the Waveform Constants Popup Controller
+            """Called by the Waveform Constants Popup Controller
             to update the Waveform constants settings in memory.
 
             Parameters
             __________
             args[0] : string
-                string = 'resolution'
+                string = 'resolution' or 'waveform' or 'galvo'...
             args[1] : dict
                 dict = {
                 'resolution_mode': self.resolution,
                 'zoom': self.mag,
                 'laser_info': self.resolution_info[
-                'remote_focus_constants'][self.resolution][self.mag
-                ]
+                'remote_focus_constants'][self.resolution][self.mag]
                 }
             """
-            # update_settings_common(self, args)
             self.threads_pool.createThread(
                 "model", lambda: self.model.run_command("update_setting", *args)
             )

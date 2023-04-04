@@ -97,11 +97,6 @@ class WaveformTabController(GUIController):
             "write", self.update_sample_rate
         )
 
-        self.view.bind(
-            "<Enter>", self.plot_waveforms
-        )  # TODO: This means we have to move our mouse off and then back
-        #       on to the plot to see an update. Better event to bind?
-
     def update_sample_rate(self, *args):
         """Update the sample rate in the waveform settings
 
@@ -152,6 +147,9 @@ class WaveformTabController(GUIController):
         self.waveform_dict = waveform_dict
         self.sample_rate = sample_rate
 
+        event = type("MyEvent", (object,), {})
+        self.plot_waveforms(event)
+
     def initialize_plots(self):
         """Initialize the plots in the waveform tab
 
@@ -201,11 +199,14 @@ class WaveformTabController(GUIController):
             if self.waveform_dict["remote_focus_waveform"][k] is None:
                 continue
             remote_focus_waveform = self.waveform_dict["remote_focus_waveform"][k]
+
             # TODO: multiple galvos
             galvo_waveform = self.waveform_dict["galvo_waveform"][0][k]
             if galvo_waveform is None:
                 galvo_waveform = []
+
             camera_waveform = self.waveform_dict["camera_waveform"][k]
+
             self.view.plot_etl.plot(
                 np.arange(len(remote_focus_waveform)) / self.sample_rate + last_etl,
                 remote_focus_waveform,

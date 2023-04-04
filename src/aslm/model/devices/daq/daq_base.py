@@ -120,7 +120,7 @@ class DAQBase:
             float(
                 self.configuration["waveform_constants"]
                 .get("other_constants", {})
-                .get("duty_wait_duration", 0)
+                .get("remote_focus_settle_duration", 0)
             )
             / 1000
         )

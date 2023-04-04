@@ -151,7 +151,7 @@ class RemoteFocusBase:
         duty_cycle_wait_duration = (
             float(
                 waveform_constants.get("other_constants", {}).get(
-                    "duty_wait_duration", 0
+                    "remote_focus_settle_duration", 0
                 )
             )
             / 1000

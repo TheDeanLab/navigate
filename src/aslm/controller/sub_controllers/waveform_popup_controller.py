@@ -392,10 +392,10 @@ class WaveformPopupController(GUIController):
                 self.parent_controller.manager,
                 self.resolution_info,
                 "other_constants",
-                {"duty_wait_duration": 0},
+                {"remote_focus_settle_duration": 0},
             )
         self.widgets["Duty"].set(
-            self.resolution_info["other_constants"]["duty_wait_duration"]
+            self.resolution_info["other_constants"]["remote_focus_settle_duration"]
         )
         self.update_waveform_parameters_flag = True
 
@@ -498,7 +498,7 @@ class WaveformPopupController(GUIController):
             self.resolution_info["remote_focus_constants"][self.resolution][self.mag][
                 laser
             ]["percent_smoothing"] = smoothing
-        self.resolution_info["other_constants"]["duty_wait_duration"] = duty_cycle
+        self.resolution_info["other_constants"]["remote_focus_settle_duration"] = duty_cycle
 
         # Pass the values to the parent controller.
         try:

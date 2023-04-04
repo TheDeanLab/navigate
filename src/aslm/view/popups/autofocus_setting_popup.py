@@ -126,6 +126,7 @@ class AutofocusPopup:
                 parent=content_frame,
                 input_class=ValidatedSpinbox,
                 input_var=tk.StringVar(),
+                input_args={"from_": 0.0, "to": 50000},
             )
 
             self.inputs[setting_names[i] + "_range"].grid(
@@ -136,6 +137,7 @@ class AutofocusPopup:
                 parent=content_frame,
                 input_class=ValidatedSpinbox,
                 input_var=tk.StringVar(),
+                input_args={"from_": 0.0, "to": 50000},
             )
 
             self.inputs[setting_names[i] + "_step_size"].grid(

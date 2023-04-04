@@ -101,7 +101,6 @@ class WaveformTabController(GUIController):
         self.view.waveform_settings.inputs["sample_rate"].get_variable().trace_add(
             "write", self.update_sample_rate
         )
-
         self.view.waveform_settings.inputs["waveform_template"].widget[
             "values"] = list(
             self.parent_controller.configuration["waveform_templates"].keys())
@@ -231,7 +230,8 @@ class WaveformTabController(GUIController):
         self.view.plot_etl.clear()
         self.view.plot_galvo.clear()
 
-        waveform_template_name = self.parent_controller.configuration["experiment"]["MicroscopeState"]["waveform_template"]
+        waveform_template_name = self.parent_controller.configuration[
+            "experiment"]["MicroscopeState"].get("waveform_template", "Default")
         repeat_num, expand_num = get_waveform_template_parameters(
             waveform_template_name,
             self.parent_controller.configuration["waveform_templates"],

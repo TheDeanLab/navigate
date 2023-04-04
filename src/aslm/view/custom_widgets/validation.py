@@ -39,7 +39,7 @@ import logging
 # Third party imports
 
 # Local imports
-from aslm.view.custom_widgets.hover import hover
+from aslm.view.custom_widgets.hover import Hover
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -95,7 +95,7 @@ widget.config(
 
 """
 
-# Base Class
+
 class ValidatedMixin:
     """Validation functions
 
@@ -180,7 +180,7 @@ class ValidatedMixin:
             invalidcommand=(invalidcmd, "%P", "%s", "%S", "%V", "%i", "%d"),
         )
 
-        self.hover = hover(self, text=None, type="free")
+        self.hover = Hover(self, text=None, type="free")
 
     def _toggle_error(self, on=False):
         """Toggle the error message

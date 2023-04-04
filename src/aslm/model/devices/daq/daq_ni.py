@@ -214,7 +214,7 @@ class NIDAQ(DAQBase):
                     "Defaulting to the first sample rate provided."
                 )
 
-            #apply templates to analog tasks
+            # apply templates to analog tasks
             self.analog_output_tasks[board].timing.cfg_samp_clk_timing(
                 rate=sample_rates[0],
                 sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
@@ -361,32 +361,36 @@ class NIDAQ(DAQBase):
             pass
 
     def update_analog_task(self, board_name):
-        # if there is no such analog task, it means it's not acquiring and nothing needs to do.        
+        # if there is no such analog task,
+        # it means it's not acquiring and nothing needs to do.
         if board_name not in self.analog_output_tasks:
             return False
         # can't update an analog task while updating one.
         if self.is_updating_analog_task:
             return False
-        
+
         self.wait_to_run_lock.acquire()
         self.is_updating_analog_task = True
 
         try:
-            # this function waits only happens when interacting through GUI in continuous mode,
-            # updating an analog task happens after the task is done when running a feature, so it will check and return immediately.
+            # this function waits only happens when
+            # interacting through GUI in continuous mode,
+
+            # updating an analog task happens after the task
+            # is done when running a feature, so it will check and return immediately.
             self.analog_output_tasks[board_name].wait_until_done(timeout=1.0)
             self.analog_output_tasks[board_name].stop()
 
             # Write values to board
             waveforms = np.vstack(
                 [
-                    v["waveform"][self.current_channel_key][:self.n_sample]
+                    v["waveform"][self.current_channel_key][: self.n_sample]
                     for k, v in self.analog_outputs.items()
                     if k.split("/")[0] == board_name
                 ]
             ).squeeze()
             self.analog_output_tasks[board_name].write(waveforms)
-        except Exception as e:
+        except Exception:
             for board in self.analog_output_tasks.keys():
                 self.analog_output_tasks[board].stop()
                 self.analog_output_tasks[board].close()

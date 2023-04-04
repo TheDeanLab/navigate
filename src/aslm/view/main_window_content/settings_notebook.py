@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -31,29 +32,62 @@
 #
 # Standard Imports
 import tkinter as tk
-from tkinter import ttk
 import logging
+
+# Third Party Imports
+
+# Local Imports
+from aslm.view.custom_widgets.DockableNotebook import DockableNotebook
+
+# Import Sub-Frames
+from aslm.view.main_window_content.camera_tab import CameraSettingsTab
+from aslm.view.main_window_content.channels_tab import ChannelsTab
+from aslm.view.main_window_content.stage_tab import StageControlTab
+from aslm.view.main_window_content.multiposition_tab import MultiPositionTab
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-from aslm.view.custom_widgets.DockableNotebook import DockableNotebook
 
-# Import Sub-Frames
-from aslm.view.main_window_content.camera_display.camera_settings.camera_settings_tab import (
-    camera_settings_tab,
-)
-from aslm.view.main_window_content.channel_settings.channels_tab import channels_tab
-from aslm.view.main_window_content.stage_control.stage_control_tab import (
-    stage_control_tab,
-)
-from aslm.view.main_window_content.multiposition.multiposition_tab import (
-    multiposition_tab,
-)
+class SettingsNotebook(DockableNotebook):
+    """Settings Notebook
 
+    This class is the settings notebook. It contains the following tabs:
+    - Channels
+    - Camera Settings
+    - Stage Control
+    - Multiposition
 
-class settings_notebook(DockableNotebook):
+    Parameters
+    ----------
+    frame_left : tk.Frame
+        The left frame of the main window
+    root : tk.Tk
+        The main window
+    *args
+        Variable length argument list.
+    **kwargs
+        Arbitrary keyword arguments.
+
+    Attributes
+    ----------
+    channels_tab : ChannelsTab
+        The Channels tab
+    camera_settings_tab : CameraSettingsTab
+        The Camera Settings tab
+    stage_control_tab : StageControlTab
+        The Stage Control tab
+    multiposition_tab : MultiPositionTab
+        The Multiposition tab
+    tab_list : list
+        A list of all the tabs
+
+    Methods
+    -------
+    None
+    """
+
     def __init__(self, frame_left, root, *args, **kwargs):
 
         # Init notebook
@@ -63,16 +97,16 @@ class settings_notebook(DockableNotebook):
         self.grid(row=0, column=0)
 
         # Creating the Channels tab
-        self.channels_tab = channels_tab(self)
+        self.channels_tab = ChannelsTab(self)
 
         # Creating the Camera tab
-        self.camera_settings_tab = camera_settings_tab(self)
+        self.camera_settings_tab = CameraSettingsTab(self)
 
         # Creating Stage Control Tab
-        self.stage_control_tab = stage_control_tab(self)
+        self.stage_control_tab = StageControlTab(self)
 
         # Creating Multiposition Table Tab
-        self.multiposition_tab = multiposition_tab(self)
+        self.multiposition_tab = MultiPositionTab(self)
 
         # Tab list
         tab_list = [

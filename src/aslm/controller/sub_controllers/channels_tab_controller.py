@@ -33,6 +33,7 @@
 # Standard Library Imports
 import logging
 from functools import reduce
+import datetime
 
 # Third Party Imports
 import numpy as np
@@ -49,10 +50,7 @@ from aslm.controller.sub_controllers.tiling_wizard_controller import (
 )
 
 # View Imports that are not called on startup
-from aslm.view.main_window_content.channel_settings.channel_settings_frames import (
-    tiling_wizard_popup,
-)
-
+from aslm.view.popups.tiling_wizard_popup import TilingWizardPopup
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -156,7 +154,6 @@ class ChannelsTabController(GUIController):
         )
 
         # multiposition
-        self.tiling_wizard_controller = None
         self.is_multiposition = False
         self.is_multiposition_val = self.view.multipoint_frame.on_off
         self.view.multipoint_frame.save_check.configure(
@@ -718,80 +715,70 @@ class ChannelsTabController(GUIController):
         # for all of the channels. Only calculate once at the beginning.
         stack_acquisition_duration = 0
 
-        for timepoint_idx in range(number_of_timepoints):
+        for position_idx in range(number_of_positions):
+            # For multiple positions, need to account for the time necessary to move
+            # the stages that distance. In theory, these positions would be
+            # populated in that 'pandastable' or some other data structure.
 
-            for position_idx in range(number_of_positions):
-                # For multiple positions, need to account for the time necessary to move
-                # the stages that distance. In theory, these positions would be
-                # populated in that 'pandastable' or some other data structure.
+            # Determine the largest distance to travel between positions.  Assume
+            # all axes move the same velocity This assumes that we are in a
+            # multi-position mode. Not yet implemented.
+            # x1, y1, z1, theta1, f1, = position_start.values()
+            # x2, y2, z1, theta2, f1 = position_end.values()
+            # distance = [x2-x1, y2-y1, z2-z1, theta2-theta1, f2-f1]
+            # max_distance_idx = np.argmax(distance)
+            # Now if we are going to do this properly, we would need to do this for
+            # all of the positions so that we can calculate the total experiment
+            # time. Probably assemble a matrix of all the positions and then do
+            # the calculations.
 
-                # Determine the largest distance to travel between positions.  Assume
-                # all axes move the same velocity This assumes that we are in a
-                # multi-position mode. Not yet implemented.
-                # x1, y1, z1, theta1, f1, = position_start.values()
-                # x2, y2, z1, theta2, f1 = position_end.values()
-                # distance = [x2-x1, y2-y1, z2-z1, theta2-theta1, f2-f1]
-                # max_distance_idx = np.argmax(distance)
-                # Now if we are going to do this properly, we would need to do this for
-                # all of the positions so that we can calculate the total experiment
-                # time. Probably assemble a matrix of all the positions and then do
-                # the calculations.
+            stage_delay = 0  # distance[max_distance_idx]/self.stage_velocity
+            # TODO False value.
 
-                stage_delay = 0  # distance[max_distance_idx]/self.stage_velocity
-                # TODO False value.
+            # If we were actually acquiring the data, we would call the function to
+            # move the stage here.
+            experiment_duration = experiment_duration + stage_delay
 
-                # If we were actually acquiring the data, we would call the function to
-                # move the stage here.
-                experiment_duration = experiment_duration + stage_delay
-
-                for channel_idx in range(len(channel_exposure_time)):
-                    # Change the filter wheel here before the start of the acquisition.
-                    if perStack:
-                        # In the perStack mode, we only need to account for the time
-                        # necessary for the filter wheel to change between each
-                        # image stack.
-                        experiment_duration = (
-                            experiment_duration + self.filter_wheel_delay
+            for channel_idx in range(len(channel_exposure_time)):
+                if perStack:
+                    # In the perStack mode, we only need to account for the time
+                    # necessary for the filter wheel to change between each
+                    # image stack.
+                    if channel_idx == 0 and position_idx == 0:
+                        stack_acquisition_duration += (
+                            channel_exposure_time[channel_idx] / 1000 * number_of_slices
+                        )
+                else:
+                    if position_idx == 0:
+                        stack_acquisition_duration += (
+                            channel_exposure_time[channel_idx] / 1000 * number_of_slices
                         )
 
-                    for slice_idx in range(number_of_slices):
-                        # Now we need to know the exposure time of each channel.
-                        # Assumes no delay between individual slices at this point.
-                        # Convert from milliseconds to seconds.
-                        experiment_duration = (
-                            experiment_duration
-                            + channel_exposure_time[channel_idx] / 1000
-                        )
+                experiment_duration += (
+                    channel_exposure_time[channel_idx] / 1000 * number_of_slices
+                )
 
-                        if (
-                            channel_idx == 0
-                            and position_idx == 0
-                            and timepoint_idx == 0
-                        ):
-                            stack_acquisition_duration = (
-                                stack_acquisition_duration
-                                + channel_exposure_time[channel_idx] / 1000
-                            )
+            try:
+                stack_pause = float(self.timepoint_vals["stack_pause"].get())
+            except ValueError:
+                stack_pause = 0
+            experiment_duration = experiment_duration + stack_pause
+        experiment_duration *= number_of_timepoints
 
-                        if not perStack:
-                            # In the perZ mode, we need to account for the time
-                            # necessary to move the filter wheel at each slice
-                            experiment_duration = (
-                                experiment_duration + self.filter_wheel_delay
-                            )
-
-                            if (
-                                channel_idx == 0
-                                and position_idx == 0
-                                and timepoint_idx == 0
-                            ):
-                                stack_acquisition_duration = (
-                                    stack_acquisition_duration
-                                    + channel_exposure_time[channel_idx] / 1000
-                                )
-
-        self.timepoint_vals["experiment_duration"].set(experiment_duration)
-        self.timepoint_vals["stack_acq_time"].set(stack_acquisition_duration)
+        # Change the filter wheel here before the start of the acquisition.
+        if len(channel_exposure_time) > 1:
+            filter_wheel_change_times = number_of_timepoints * (
+                1 if perStack else number_of_slices
+            )
+            experiment_duration += self.filter_wheel_delay * filter_wheel_change_times
+        else:
+            experiment_duration += self.filter_wheel_delay
+        self.timepoint_vals["experiment_duration"].set(
+            str(datetime.timedelta(seconds=experiment_duration))
+        )
+        self.timepoint_vals["stack_acq_time"].set(
+            str(datetime.timedelta(seconds=stack_acquisition_duration))
+        )
 
         # update experiment MicroscopeState dict
         self.microscope_state_dict["timepoints"] = number_of_timepoints
@@ -850,7 +837,7 @@ class ChannelsTabController(GUIController):
         if hasattr(self, "tiling_wizard_controller"):
             self.tiling_wizard_controller.showup()
             return
-        tiling_wizard = tiling_wizard_popup.tiling_wizard_popup(self.view)
+        tiling_wizard = TilingWizardPopup(self.view)
         self.tiling_wizard_controller = TilingWizardController(tiling_wizard, self)
 
     def set_info(self, vals, values):

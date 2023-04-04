@@ -29,21 +29,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-"""
-A main window is created and passed to the mainapp class. This class will init as a
-frame then config the main window. It then creates a menubar using the menubar class.
-Adds the options for each file menu. It then sets up the frames, then grids the frames.
-Finally it uses the notebook classes to put them into the respective frames on the
-tk.Grid. Each of the notebook classes includes tab classes and inits those etc.
-The second parameter in each classes __init__ function is the parent.
-I used the name of the parent so that it would be easier to keep track of inheritances.
-Once you have the parent name you can look to the parents class in the class definition.
-For example for class Main_App(ttk.Frame) the parent to Main_App is a frame and its name
-is root. I also used the name of the class instead of self to make things easier to
-read. So for Main_App self is now mainapp.
-"""
-
-# Import Standard Libraries
+# Standard Library Imports
 import tkinter as tk
 from tkinter import ttk
 import logging
@@ -52,14 +38,11 @@ from pathlib import Path
 # Third Party Imports
 
 # Local Imports
-from aslm.view.main_window_content.settings_notebook import settings_notebook
-from aslm.view.main_window_content.camera_display.camera_view.camera_notebook import (
-    CameraNotebook,
-)
-from aslm.view.main_window_content.acquire_bar_frame.acquire_bar import AcquireBar
-from aslm.view.menus.menus import menubar
+from aslm.view.main_window_content.settings_notebook import SettingsNotebook
+from aslm.view.main_window_content.display_notebook import CameraNotebook
+from aslm.view.main_window_content.acquire_notebook import AcquireBar
+from aslm.view.main_window_content.menus import Menubar
 from aslm.view.custom_widgets.scrollbars import ScrolledFrame
-
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -68,19 +51,41 @@ p = __name__.split(".")[1]
 class MainApp(ttk.Frame):
     """Creates the frame that will hold the GUI content, its parent is the main window
     or root Tk object
-    ``
-        Placing the notebooks using tk.Grid. While the grid is called on each frame it
-        is actually calling the main window since those are the parent to the frames.
-        The labels have already been packed into each respective frame so can be ignored
-        in the grid setup. This layout uses a 2x2 grid to start.
 
-        1   2
-        3   4
-        5   6
+    A main window is created and passed to the mainapp class. This class will init as a
+    frame then config the main window. It then creates a menubar using the menubar
+    class.
 
-        The above is the grid "spots" the left frame will take spots 3 & 5 while top
-        right takes spot 4 and bottom right frame takes spot 6. Top frame will be
-        spots 1 & 2
+    Adds the options for each file menu. It then sets up the frames, then grids the
+    frames.
+
+    Finally it uses the notebook classes to put them into the respective frames on the
+    tk.Grid. Each of the notebook classes includes tab classes and inits those etc.
+
+    The second parameter in each classes __init__ function is the parent.
+
+    I used the name of the parent so that it would be easier to keep track of
+    inheritances.
+
+    Once you have the parent name you can look to the parents class in the class
+    definition.
+
+    For example for class Main_App(ttk.Frame) the parent to Main_App is a frame and its
+    name is root. I also used the name of the class instead of self to make things
+    easier to read. So for Main_App self is now mainapp.
+
+    Placing the notebooks using tk.Grid. While the grid is called on each frame it
+    is actually calling the main window since those are the parent to the frames.
+    The labels have already been packed into each respective frame so can be ignored
+    in the grid setup. This layout uses a 2x2 grid to start.
+
+    1   2
+    3   4
+    5   6
+
+    The above is the grid "spots" the left frame will take spots 3 & 5 while top
+    right takes spot 4 and bottom right frame takes spot 6. Top frame will be
+    spots 1 & 2
     """
 
     def __init__(self, root, *args, **kwargs):
@@ -112,7 +117,7 @@ class MainApp(ttk.Frame):
         tk.Grid.rowconfigure(root, "all", weight=1)
 
         # Creating and linking menu to main window/app
-        self.menubar = menubar(root)
+        self.menubar = Menubar(root)
 
         # Top Frame Acquire Bar
         self.top_frame = ttk.Frame(self)
@@ -137,9 +142,8 @@ class MainApp(ttk.Frame):
 
         # Putting Notebooks into frames, tabs are held within the class of each
         # notebook
-        self.settings = settings_notebook(self.frame_left, self.root)
+        self.settings = SettingsNotebook(self.frame_left, self.root)
         self.camera_waveform = CameraNotebook(self.frame_top_right, self.root)
-        # self.stage_control = stagecontrol_notebook(self.frame_bottom_right)
 
         self.acqbar = AcquireBar(self.top_frame, self.root)
         self.logger.info("GUI setup working")
@@ -176,9 +180,3 @@ class MainApp(ttk.Frame):
         #     self.root.tk.call('tk', 'scaling', screen_scaling_factor)
 
         # self.root.geometry(f"{actual_screen_width}x{actual_screen_height}")
-
-
-if __name__ == "__main__":
-    root = tk.Tk()
-    MainApp(root)
-    root.mainloop()

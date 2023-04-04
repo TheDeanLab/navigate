@@ -96,6 +96,7 @@ microscopes:
       ramp_falling_percent: 2.5
       amplitude: 0.7
       offset: 2.3
+      smoothing: 0.0
     galvo:
       -
         hardware:
@@ -325,6 +326,7 @@ microscopes:
       ramp_falling_percent: 2.5
       amplitude: 0.7
       offset: 2.3
+      smoothing: 0.0
     galvo:
       -
         hardware:

@@ -600,8 +600,9 @@ class CameraViewController(GUIController):
         elif self.rolling_frames == 1:
             self.image_metrics["Image"].set(f"{self.max_intensity_history[-1]:.0f}")
         elif self.rolling_frames > 1:
-            rolling_average = np.mean(
-                self.max_intensity_history[-self.rolling_frames :]
+            rolling_average = (
+                sum(self.max_intensity_history[-self.rolling_frames :])
+                / self.rolling_frames
             )
             self.image_metrics["Image"].set(f"{rolling_average:.0f}")
 

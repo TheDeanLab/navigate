@@ -188,11 +188,12 @@ class StackPause:
             self.model.pause_data_thread()
             pause_time -= 2*current_exposure_time
             while pause_time > 0:
-                pt = min(pause_time, 0.5)
+                pt = min(pause_time, 0.1)
                 time.sleep(pt)
                 if self.model.stop_acquisition:
+                    self.model.resume_data_thread()
                     return
-                pause_time -= 0.5
+                pause_time -= 0.1
             self.model.resume_data_thread()
 
 

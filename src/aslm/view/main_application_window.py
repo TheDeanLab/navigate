@@ -102,7 +102,7 @@ class MainApp(ttk.Frame):
         # This starts the main window config, and makes sure that any child
         # widgets can be resized with the window
         self.root = root
-        self.root.title("Axially Swept Light-Sheet Microscope")
+        self.root.title("Autonomous Software for Light Microscopy")
 
         # keep icons relative to view directory structure
         view_directory = Path(__file__).resolve().parent
@@ -131,7 +131,7 @@ class MainApp(ttk.Frame):
         # Bottom right Frame Notebook 3 setup
         self.frame_bottom_right = ttk.Frame(self)
 
-        # Gridding out foundational frames
+        # Grid out foundational frames
         self.grid(column=0, row=0, sticky=tk.NSEW)
         self.top_frame.grid(
             row=0, column=0, columnspan=2, sticky=tk.NSEW, padx=3, pady=3
@@ -146,11 +146,9 @@ class MainApp(ttk.Frame):
         self.camera_waveform = CameraNotebook(self.frame_top_right, self.root)
 
         self.acqbar = AcquireBar(self.top_frame, self.root)
-        self.logger.info("GUI setup working")
-        self.logger.info("Performance - GUI Started real quick")
-        self.logger.info("Spec - GUI is this size")
 
-        # TODO: We do not understand the GUI sizing.  Notes here. Follow-up later when
+        # TODO: We do not understand the GUI sizing.
+        #  Notes here. Follow-up later when
         # this becomes a problem.
         # Adjust Canvas Width for Screen Resolution
         # Appears that Windows has 96 DPI, and Apple has 72.
@@ -162,12 +160,15 @@ class MainApp(ttk.Frame):
         # TK screen width is the correct width according to the OS.
 
         # Tk doesn't take into account the DPI?
-        # actual_screen_width, actual_screen_height = int(tk_screen_width * (dpi / 96)),
+        # actual_screen_width, actual_screen_height = int(tk_screen_width *
+        # (dpi / 96)),
         # int(tk_screen_height * (dpi / 96))
-        # Take into account the fact that we actually do not have 96 DPI, but actually
+        # Take into account the fact that we actually do not have 96 DPI,
+        # but actually
         # 72. 2560 x 1440.
 
-        # print(f"TK Screen Width, Height, dpi: {tk_screen_width}, {tk_screen_height},
+        # print(f"TK Screen Width, Height, dpi: {tk_screen_width},
+        # {tk_screen_height},
         # {dpi}")  # 1920 x 1080
         # print(f"Actual Screen Width, Height: {actual_screen_width},
         # {actual_screen_height}")  # 2560 x 1440.

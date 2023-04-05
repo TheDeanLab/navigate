@@ -135,7 +135,8 @@ class AcquireBarController(GUIController):
         elif mode == "z-stack":
             number_of_slices = microscope_state["number_z_steps"]
         elif mode == "ConstantVelocityAcquisition":
-            number_of_slices = 100 # TODO
+            # TODO: should be the same as "z-stack" when using "step_size" as a real step size.
+            number_of_slices = 100
 
         top_anticipated_images = number_of_slices
         bottom_anticipated_images = (

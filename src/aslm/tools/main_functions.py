@@ -62,9 +62,10 @@ def evaluate_parser_input_arguments(args):
         Path to remote focusing and galvo waveform constants file
     rest_api_path
         Path to REST API file
+    waveform_templates_path
+        Path to waveform templates file
     logging_path
         Path to non-default logging location
-
     """
     # Retrieve the Default Configuration paths
     (

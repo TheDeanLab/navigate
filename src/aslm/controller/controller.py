@@ -97,6 +97,8 @@ class Controller:
     ----------
     root : Tk top-level widget.
         Tk.tk GUI instance.
+    splash_screen : Tk top-level widget.
+        Tk.tk GUI instance.
     configuration_path : string
         Path to the configuration yaml file.
         Provides global microscope configuration parameters.
@@ -106,6 +108,12 @@ class Controller:
     waveform_constants_path : string
         Path to the waveform constants yaml file.
         Provides magnification and wavelength-specific parameters.
+    rest_api_path : string
+        Path to the REST API yaml file.
+        Provides REST API configuration parameters.
+    waveform_templates_path : string
+        Path to the waveform templates yaml file.
+        Provides waveform templates for each channel.
     use_gpu : Boolean
         Flag for utilizing CUDA functionality.
     *args :

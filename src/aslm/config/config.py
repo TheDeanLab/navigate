@@ -84,14 +84,8 @@ def get_configuration_paths():
         Path to file containing remote focus parameters for all magnifications
     rest_api_path : str
         Path to file containing REST API configuration
-
-    Examples
-    --------
-    >>> get_configuration_paths()
-    ('C:\\Users\\username\\AppData\\Local\\.ASLM\\config\\configuration.yaml',
-        'C:\\Users\\username\\AppData\\Local\\.ASLM\\config\\experiment.yaml',
-        'C:\\Users\\username\\AppData\\Local\\.ASLM\\config\\etl_constants.yaml',
-        'C:\\Users\\username\\AppData\\Local\\.ASLM\\config\\rest_api.yaml')
+    waveform_templates_path : str
+        Path to file containing waveform templates
     """
     aslm_directory = get_aslm_path()
     if not os.path.exists(aslm_directory):

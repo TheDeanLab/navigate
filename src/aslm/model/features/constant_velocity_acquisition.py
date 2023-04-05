@@ -45,6 +45,8 @@ class ConstantVelocityAcquisition:
     def __init__(self, model, axis='z'):
         self.model = model
         self.axis = axis
+        self.default_speed = None
+        self.asi_stage = None
 
         self.config_table = {
             "signal": {
@@ -58,6 +60,17 @@ class ConstantVelocityAcquisition:
     def pre_func_signal(self):
         """Prepare the constant velocity acquisition.
 
+        Injects a new trigger source and prepares the stage for a constant
+        scan velocity mode. All tasks are triggered by the ASI stage
+        encoder. Only operates in a per-stack acquisition mode.  Stage
+        velocity is calculated based on the current exposure time,
+        step size, and minimum encoder divide.
+
+        Rotary encoder has a resolution of 45,396 counts/mm, or 1 count per
+        22 nm. It is a quadrature device, so the minimum step size is 88 nm.
+
+        Assumes stage motion is 45 degrees relative to the optical axis.
+
         Parameters
         ----------
         None
@@ -67,35 +80,25 @@ class ConstantVelocityAcquisition:
         None
         """
 
-        # Change hardware Triggering.
-        # Default run_acquisition in daq_ni triggers on the rising edge of the
-        # trigger_source: /PXI6259/PFI0
-        # When 5V is received at the trigger_source, the acquisition starts.
-
         # Inject new trigger source.
-        # self.model.active_microscope.daq.trigger_source = "/PXI6259/PFI1"
         self.model.active_microscope.prepare_next_channel()
         self.model.active_microscope.daq.set_trigger_mode(1, "/PXI6259/PFI1")
         self.asi_stage = self.model.active_microscope.stages[self.axis]
 
-        # Create all of our tasks so that they are triggered by the new trigger source.
-        # get the current channel - only operating in a per-stack mode.
-        channel = 0
-        # # get the current exposure time for that channel.
-        exposure_time = float(self.model.configuration["experiment"]["MicroscopeState"]["channels"]["channel_1"]["camera_exposure_time"]) / 1000.0
-        # self.model.active_microscope.daq.prepare_acquisition(channel, exposure_time)
+        # get the current exposure time for that channel.
+        exposure_time = float(
+            self.model.configuration["experiment"][
+                "MicroscopeState"]["channels"]["channel_1"][
+                "camera_exposure_time"]) / 1000.0
 
-        # Prepare the stage for a constant scan velocity mode.
         # Calculate Stage Velocity
-        # Rotary encoder has a resolution of 45,396 counts/mm, or 1 count per 22 nm.
-        # But it is in quadrature, so I thought it was actually 4x.
-        minimum_encoder_divide = 88  # Smallest step size in nanometers is 88 nm.
+        minimum_encoder_divide = 88 # nm
 
         # Get step size from the GUI. For now, assume 160 nm.
         # Default units should probably be microns I believe. Confirm.
         desired_sampling = 160  # nm
 
-        # The stage is at 45 degrees relative to the illumination and detection paths.
+        # The stage is at 45 degrees relative to the optical axes.
         step_size = desired_sampling * np.sqrt(2)  # 45 degrees, 226 nm
 
         # Calculate the desired encoder divide. Must be multiple of
@@ -108,36 +111,44 @@ class ConstantVelocityAcquisition:
         # Calculate the actual step size in millimeters. 264 * 10^-6 mm
         step_size_mm = step_size_nm / 1 * 10**-6  # 264 * 10^-6 mm
 
-        # Calculate the stage velocity in mm/seconds. 5.28 * 10^-3 s
-        stage_velocity = step_size_mm / (exposure_time * 1.15)
-
         # Set the start and end position of the scan in millimeters.
         # Retrieved from the GUI.
         # Set Stage Limits - Units in millimeters
         # microns to mm
-        start_position = float(self.model.configuration["experiment"]["MicroscopeState"]["abs_z_start"]) / 1000.0
-        self.stop_position = float(self.model.configuration["experiment"]["MicroscopeState"]["abs_z_end"]) / 1000.0
+        start_position = float(
+            self.model.configuration[
+                "experiment"]["MicroscopeState"]["abs_z_start"]) / 1000.0
+        self.stop_position = float(
+            self.model.configuration[
+                "experiment"]["MicroscopeState"]["abs_z_end"]) / 1000.0
 
         # Set the x-axis of the ASI stage to operate at that velocity.
-        # uses the scanr command from the TigerASI repository that I mention in Github
-        # Need to add a similar command to the ASI stage class.
+
         # TODO: stage name and stage controller!
         self.default_speed = self.asi_stage.default_speed
-        # basic speed
+
+        # basic speed - essentially the minimum speed value permitted by the
+        # stage, of which subsequent values are multiples of.
         self.asi_stage.set_speed({self.axis: 0.0001})
-        basic_speed = self.asi_stage.get_speed(self.axis)
-        # mm/s
+        basic_speed = self.asi_stage.get_speed(self.axis)  # mm/s
+
         # TODO: set the speed from GUI? step size?
-        stage_velocity = basic_speed * round(float(self.model.configuration["experiment"]["MicroscopeState"]["step_size"]))
+        # Calculate the stage velocity in mm/seconds. 5.28 * 10^-3 s
+        # stage_velocity = step_size_mm / (exposure_time * 1.15)
+        stage_velocity = basic_speed * round(
+            float(self.model.configuration[
+                      "experiment"]["MicroscopeState"]["step_size"]))
         self.asi_stage.set_speed({self.axis: stage_velocity})
 
-
         # Configure the encoder to operate in constant velocity mode.
-        # Must add similar scanr functionality to our ASI stage class.
         self.asi_stage.scanr(
             start_position_mm=start_position,
             end_position_mm=self.stop_position,
-            enc_divide=round(float(self.model.configuration["experiment"]["MicroscopeState"]["start_position"])) / 45397.6,
+            enc_divide=round(
+                float(
+                    self.model.configuration[
+                        "experiment"]["MicroscopeState"][
+                        "start_position"])) / 45397.6,
             axis=self.axis
         )
 
@@ -147,6 +158,7 @@ class ConstantVelocityAcquisition:
 
         # Start the stage scan.  Also get this functionality into the ASI stage class.
         self.asi_stage.start_scan(self.axis)
+
         # start scan won't start the scan, but when calling stop_scan it will start scan. So weird.
         self.asi_stage.stop_scan()
 

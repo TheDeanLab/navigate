@@ -227,7 +227,11 @@ class ASIStage(StageBase):
         try:
             # positions from the device are in microns
             for ax, n in zip(self.axes, self.asi_axes):
-                pos = self.tiger_controller.get_position_um(n)
+                try:
+                    pos = self.tiger_controller.get_position_um(n)
+                except:
+                    print(f"*** axis {n} has error when getting its position")
+                    pos = 0
 
                 # Set class attributes and convert to microns
                 setattr(self, f"{ax}_pos", pos)

@@ -117,6 +117,7 @@ class ChannelsTabController(GUIController):
         self.stack_acq_vals["step_size"].trace_add("write", self.update_z_steps)
         self.stack_acq_vals["start_position"].trace_add("write", self.update_z_steps)
         self.stack_acq_vals["end_position"].trace_add("write", self.update_z_steps)
+        self.stack_acq_vals["start_focus"].trace_add("write", self.update_z_steps) # TODO: could be remove later
         self.stack_acq_buttons["set_start"].configure(
             command=self.update_start_position
         )
@@ -490,9 +491,12 @@ class ChannelsTabController(GUIController):
             "abs_z_start"
         ].get()
         self.microscope_state_dict["abs_z_end"] = self.stack_acq_vals["abs_z_end"].get()
-        self.microscope_state_dict["start_focus"] = self.stack_acq_vals[
-            "start_focus"
-        ].get()
+        try:
+            self.microscope_state_dict["start_focus"] = self.stack_acq_vals[
+                "start_focus"
+            ].get()
+        except:
+            self.microscope_state_dict["start_focus"] = 0
         self.microscope_state_dict["end_focus"] = self.stack_acq_vals["end_focus"].get()
         self.microscope_state_dict["stack_z_origin"] = self.z_origin
         self.microscope_state_dict["stack_focus_origin"] = self.focus_origin

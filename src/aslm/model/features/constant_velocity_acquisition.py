@@ -148,7 +148,7 @@ class ConstantVelocityAcquisition:
                 float(
                     self.model.configuration[
                         "experiment"]["MicroscopeState"][
-                        "start_position"])) / 45397.6,
+                        "start_focus"])) / 45397.6,
             axis=self.axis
         )
 
@@ -167,9 +167,8 @@ class ConstantVelocityAcquisition:
 
     def end_func_signal(self):
         pos = self.asi_stage.get_position(self.axis)
-        print("*** stage position:", pos)
         # TODO: after scan, the stage will go back to the start position and stop sending out triggers.
-        if abs(pos - self.stop_position * 10000) < 100:
+        if abs(pos - self.stop_position * 1000) < 100:
             return True
         # TODO: wait time to be more reasonable
         time.sleep(5)
@@ -181,7 +180,8 @@ class ConstantVelocityAcquisition:
         Need to reset the trigger source to the default.
 
         """
-        self.model.active_microscope.daq.set_trigger_mode(0, None)
-        self.asi_stage.stop()
         # reset stage speed
         self.asi_stage.set_speed({self.axis: self.default_speed})
+        self.asi_stage.stop()
+        self.model.active_microscope.daq.set_trigger_mode(0, None)
+

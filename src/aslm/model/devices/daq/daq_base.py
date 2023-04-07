@@ -84,8 +84,11 @@ class DAQBase:
         self.camera_delay = self.camera_delay_percent * 0.01 * self.sweep_time
 
         self.waveform_dict = {}
-        for k in configuration["configuration"]["gui"]["channels"].keys():
+        for k in configuration["experiment"]["MicroscopeState"]["channels"].keys():
             self.waveform_dict[k] = None
+
+        self.waveform_repeat_num = 1
+        self.waveform_expand_num = 1
 
     def calculate_all_waveforms(self, microscope_name, readout_time):
         """Pre-calculates all waveforms necessary for the acquisition and organizes in
@@ -146,7 +149,7 @@ class DAQBase:
                     # last lines compared to the first lines causes the exposure to be
                     # net longer than exposure_time. This helps the galvo keep sweeping
                     # for the full camera exposure time.
-                    self.sweep_time += readout_time
+                    self.sweep_time += readout_time # we could set it to 0.14 instead of 0.16384 according to the test
 
                 self.sweep_time += duty_cycle_wait_duration
 

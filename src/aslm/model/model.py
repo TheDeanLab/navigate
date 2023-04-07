@@ -41,6 +41,9 @@ import time
 # Local Imports
 from aslm.model.concurrency.concurrency_tools import SharedNDArray
 from aslm.model.features.autofocus import Autofocus
+from aslm.model.features.constant_velocity_acquisition import (
+    ConstantVelocityAcquisition,
+)
 from aslm.model.features.image_writer import ImageWriter
 from aslm.model.features.common_features import (
     ChangeResolution,
@@ -258,6 +261,9 @@ class Model:
             "projection": [{"name": PrepareNextChannel}],
             "confocal-projection": [
                 {"name": PrepareNextChannel},
+            ],
+            "ConstantVelocityAcquisition": [
+                {"name": ConstantVelocityAcquisition}
             ],
             "customized": [],
         }
@@ -517,7 +523,6 @@ class Model:
             """
             autofocus = Autofocus(self)
             autofocus.run(*args)
-
         elif command == "load_feature":
             """
             args[0]: int, args[0]-1 is the id of features
@@ -560,11 +565,14 @@ class Model:
             """
             self.logger.info("ASLM Model - Stopping with stop command.")
             self.stop_acquisition = True
+            if self.imaging_mode == "ConstantVelocityAcquisition":
+                self.active_microscope.stages['z'].stop()
             if self.signal_thread:
                 self.signal_thread.join()
             if self.data_thread:
                 self.data_thread.join()
-            self.end_acquisition()
+            else:
+                self.end_acquisition()
 
     def move_stage(self, pos_dict, wait_until_done=False):
         """Moves the stages.

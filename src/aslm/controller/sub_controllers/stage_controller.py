@@ -209,6 +209,7 @@ class StageController(GUIController):
             if step_increment == 0:
                 step_increment = 1
             widgets[step_axis + "_step"].widget.configure(increment=step_increment)
+            widgets[step_axis + "_step"].set(step_dict[axis])
 
     def bind_position_callbacks(self):
         """Binds position_callback() to each axis, records the trace name so we can

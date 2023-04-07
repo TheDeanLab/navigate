@@ -84,14 +84,8 @@ def get_configuration_paths():
         Path to file containing remote focus parameters for all magnifications
     rest_api_path : str
         Path to file containing REST API configuration
-
-    Examples
-    --------
-    >>> get_configuration_paths()
-    ('C:\\Users\\username\\AppData\\Local\\.ASLM\\config\\configuration.yaml',
-        'C:\\Users\\username\\AppData\\Local\\.ASLM\\config\\experiment.yaml',
-        'C:\\Users\\username\\AppData\\Local\\.ASLM\\config\\etl_constants.yaml',
-        'C:\\Users\\username\\AppData\\Local\\.ASLM\\config\\rest_api.yaml')
+    waveform_templates_path : str
+        Path to file containing waveform templates
     """
     aslm_directory = get_aslm_path()
     if not os.path.exists(aslm_directory):
@@ -107,6 +101,9 @@ def get_configuration_paths():
         configuration_directory, "waveform_constants.yml"
     )
     rest_api_path = Path.joinpath(configuration_directory, "rest_api_config.yml")
+    waveform_templates_path = Path.joinpath(
+        configuration_directory, "waveform_templates.yml"
+    )
 
     # If they are not already,
     # copy the default ones that ship with the software to this folder
@@ -134,7 +131,12 @@ def get_configuration_paths():
         copy_rest_api_path = Path.joinpath(copy_base_directory, "rest_api_config.yml")
         shutil.copyfile(copy_rest_api_path, rest_api_path)
 
-    return configuration_path, experiment_path, waveform_constants_path, rest_api_path
+    if not os.path.exists(waveform_templates_path):
+        copy_base_directory = Path(__file__).resolve().parent
+        copy_waveform_templates_path = Path.joinpath(copy_base_directory, "waveform_templates.yml")
+        shutil.copyfile(copy_waveform_templates_path, waveform_templates_path)
+
+    return configuration_path, experiment_path, waveform_constants_path, rest_api_path, waveform_templates_path
 
 
 def load_configs(manager, **kwargs):

@@ -97,6 +97,8 @@ class Controller:
     ----------
     root : Tk top-level widget.
         Tk.tk GUI instance.
+    splash_screen : Tk top-level widget.
+        Tk.tk GUI instance.
     configuration_path : string
         Path to the configuration yaml file.
         Provides global microscope configuration parameters.
@@ -106,6 +108,12 @@ class Controller:
     waveform_constants_path : string
         Path to the waveform constants yaml file.
         Provides magnification and wavelength-specific parameters.
+    rest_api_path : string
+        Path to the REST API yaml file.
+        Provides REST API configuration parameters.
+    waveform_templates_path : string
+        Path to the waveform templates yaml file.
+        Provides waveform templates for each channel.
     use_gpu : Boolean
         Flag for utilizing CUDA functionality.
     *args :
@@ -121,6 +129,7 @@ class Controller:
         experiment_path,
         waveform_constants_path,
         rest_api_path,
+        waveform_templates_path,
         use_gpu,
         args,
     ):
@@ -140,6 +149,7 @@ class Controller:
             experiment=experiment_path,
             waveform_constants=waveform_constants_path,
             rest_api_config=rest_api_path,
+            waveform_templates=waveform_templates_path,
         )
 
         # Initialize the Model
@@ -589,7 +599,7 @@ class Controller:
             update_stage_dict(self, ret_pos_dict)
 
         self.acquire_bar_controller.populate_experiment_values()
-        self.stage_controller.populate_experiment_values()
+        # self.stage_controller.populate_experiment_values()
         self.multiposition_tab_controller.set_positions(
             self.configuration["experiment"]["MultiPositions"]["stage_positions"]
         )
@@ -640,6 +650,12 @@ class Controller:
             positions,
         )
 
+        # set waveform template
+        if self.acquire_bar_controller.mode == "confocal-projection":
+            self.configuration["experiment"]["MicroscopeState"]["waveform_template"] = "Confocal-Projection"
+        else:
+            self.configuration["experiment"]["MicroscopeState"]["waveform_template"] = "Default"
+
         self.set_mode_of_sub(self.acquire_bar_controller.mode)
         self.update_buffer()
         return True
@@ -655,6 +671,7 @@ class Controller:
         self.channels_tab_controller.set_mode(mode)
         self.camera_view_controller.set_mode(mode)
         self.camera_setting_controller.set_mode(mode)
+        self.waveform_tab_controller.set_mode(mode)
         if mode == "stop":
             # GUI Failsafe
             self.acquire_bar_controller.stop_acquire()

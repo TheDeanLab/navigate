@@ -33,6 +33,7 @@
 # Standard Imports
 import logging
 import time
+from threading import Lock
 
 # Third Party Imports
 
@@ -56,6 +57,10 @@ class SyntheticDAQ(DAQBase):
     def __init__(self, configuration):
         super().__init__(configuration)
         self.camera = {}
+        self.wait_to_run_lock = Lock()
+        self.analog_outputs = {}
+        self.is_updating_analog_task = False
+        self.mode = 0
 
     def create_camera_task(self):
         """Set up the camera trigger task."""
@@ -93,7 +98,10 @@ class SyntheticDAQ(DAQBase):
         exposure_time : float
             Camera exposure duration.
         """
-        pass
+        self.current_channel_key = channel_key
+        self.is_updating_analog_task = False
+        if self.wait_to_run_lock.locked():
+            self.wait_to_run_lock.release()
 
     def run_acquisition(self):
         """Run DAQ Acquisition.
@@ -101,9 +109,14 @@ class SyntheticDAQ(DAQBase):
         The master trigger initiates all other tasks via a shared trigger
         For this to work, all analog output and counter tasks have to be started so that
         they are waiting for the trigger signal."""
+        # wait if writing analog tasks
+        if self.is_updating_analog_task:
+            self.wait_to_run_lock.acquire()
+            self.wait_to_run_lock.release()
         time.sleep(0.01)
-        for microscope_name in self.camera:
-            self.camera[microscope_name].generate_new_frame()
+        if self.mode == 0:
+            for microscope_name in self.camera:
+                self.camera[microscope_name].generate_new_frame()
 
     def stop_acquisition(self):
         """Stop Acquisition."""
@@ -116,3 +129,19 @@ class SyntheticDAQ(DAQBase):
     def add_camera(self, microscope_name, camera):
         """Connect camera with daq: only in syntheticDAQ."""
         self.camera[microscope_name] = camera
+
+    def update_analog_task(self, board_name):
+        # can't update an analog task while updating one.
+        if self.is_updating_analog_task:
+            return False
+        
+        self.wait_to_run_lock.acquire()
+        self.is_updating_analog_task = True
+
+        print("*** is updating analog task!")
+
+        self.is_updating_analog_task = False
+        self.wait_to_run_lock.release()
+
+    def set_trigger_mode(self, mode, external_trigger=None):
+        self.mode = mode

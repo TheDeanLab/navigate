@@ -6,6 +6,8 @@ from serial import PARITY_NONE
 from serial import STOPBITS_ONE
 from serial.tools import list_ports
 
+import time
+
 
 class TigerException(Exception):
     """
@@ -195,7 +197,11 @@ class TigerController:
         if response.startswith(":N"):
             raise TigerException(response)
         else:
-            return int(response.split(" ")[1])
+            try:
+                pos = int(response.split(" ")[1])
+            except:
+                pos = float('Inf')
+            return pos
 
     def get_position_um(self, axis: str) -> float:
         """Return the position of the stage in microns."""
@@ -226,15 +232,20 @@ class TigerController:
         else:
             return "B" in res
 
-    def wait_for_device(self, report: bool = False) -> None:
+    def wait_for_device(self, report: bool = False, timeout: float = 100) -> None:
         """Waits for the all motors to stop moving."""
         if not report:
             print("Waiting for device...")
         temp = self.verbose
         self.verbose = report
         busy = True
+        waiting_time = 0.0
         while busy:
             busy = self.is_device_busy()
+            if waiting_time >= timeout:
+                break
+            waiting_time += 0.1
+            time.sleep(0.1)
         self.verbose = temp
 
     def stop(self):
@@ -248,3 +259,71 @@ class TigerController:
             raise TigerException(response)
         else:
             print("ASI Stages stopped successfully")
+
+    def set_speed(self, **axes:float):
+        """Set speed"""
+        axes = " ".join([f"{x}={round(v, 6)}" for x,v in axes.items()])
+        self.send_command(f"SPEED {axes}")
+        response = self.read_response()
+        if response.startswith(":N"):
+            raise TigerException(response)
+        
+    def get_speed(self, axis: str):
+        self.send_command(f"SPEED {axis}?")
+        response = self.read_response()
+        if response.startswith(":N"):
+            raise TigerException(response)
+        else:
+            return float(response.split("=")[1])
+
+    def get_encoder_counts_per_mm(self, axis: str):
+        """
+        Get encoder counts pre mm of axis
+        """
+
+        self.send_command(f"CNTS {axis}?")
+        response = self.read_response()
+        if response.startswith(":N"):
+            raise TigerException(response)
+        else:
+            return float(response.split("=")[1].split()[0])
+        
+    def scanr(self, start_position_mm: float, end_position_mm: float, enc_divide: float=0, axis: str='X'):
+        """
+        Set scan range.
+        """
+        enc_divide_mm = self.get_encoder_counts_per_mm(axis)
+        if enc_divide == 0:
+            enc_divide = enc_divide_mm
+        else:
+            enc_divide = enc_divide * enc_divide_mm
+        command = f"SCANR X={round(start_position_mm, 6)} Y={round(end_position_mm, 6)} Z={round(enc_divide)}"
+        self.send_command(command)
+        response = self.read_response()
+        if response.startswith(":N"):
+            raise TigerException(response)
+        
+    def start_scan(self, axis: str, is_single_axis_scan: bool=True):
+        """
+        Start scan
+
+        axis: 'X' or 'Y'
+        is_single_axis_scan: True for single axis scan
+        """
+        fast_axis_id = 0 if axis == 'X' else 1
+        slow_axis_id = 1 - fast_axis_id
+        if is_single_axis_scan:
+            slow_axis_id = 9
+        self.send_command(f"SCAN S Y={fast_axis_id} Z={slow_axis_id}")
+        response = self.read_response()
+        if response.startswith(":N"):
+            raise TigerException(response)
+
+    def stop_scan(self):
+        """
+        Stop scan.
+        """
+        self.send_command("SCAN P")
+        response = self.read_response()
+        if response.startswith(":N"):
+            raise TigerException(response)

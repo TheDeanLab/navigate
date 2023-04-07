@@ -47,6 +47,8 @@ class SyntheticStage(StageBase):
     def __init__(self, microscope_name, device_connection, configuration, device_id=0):
         super().__init__(microscope_name, device_connection, configuration, device_id)
 
+        self.default_speed = 7.68 * 0.67
+
     def report_position(self):
         self.create_position_dict()
         return self.position_dict
@@ -99,7 +101,7 @@ class SyntheticStage(StageBase):
         success : bool
             Was the move successful?
         """
-
+        success = False
         for ax in self.axes:
             if f"{ax}_abs" not in move_dictionary:
                 continue
@@ -131,3 +133,21 @@ class SyntheticStage(StageBase):
 
     def unload_sample(self):
         self.y_pos = self.y_unload_position
+
+    def get_position(self, axis):
+        return getattr(self, f"{axis}_pos")
+    
+    def set_speed(self, velocity_dict):
+        pass
+
+    def get_speed(self, axis):
+        return 1
+    
+    def scanr(self, start_position_mm, end_position_mm, enc_divide, axis='z'):
+        pass
+
+    def start_scan(self, axis):
+        pass
+
+    def stop_scan(self):
+        pass

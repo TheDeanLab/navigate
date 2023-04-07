@@ -126,6 +126,11 @@ class StageBase:
             ax_str = f"{ax}_pos"
             self.position_dict[ax_str] = getattr(self, ax_str)
 
+    def update_position_dict(self):
+        for ax in self.axes:
+            ax_str = f"{ax}_pos"
+            self.position_dict[ax_str] = getattr(self, ax_str)
+
     def get_abs_position(self, axis, move_dictionary):
         """Ensure the requested position is within axis bounds and return it.
 

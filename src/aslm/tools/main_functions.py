@@ -62,9 +62,10 @@ def evaluate_parser_input_arguments(args):
         Path to remote focusing and galvo waveform constants file
     rest_api_path
         Path to REST API file
+    waveform_templates_path
+        Path to waveform templates file
     logging_path
         Path to non-default logging location
-
     """
     # Retrieve the Default Configuration paths
     (
@@ -72,6 +73,7 @@ def evaluate_parser_input_arguments(args):
         experiment_path,
         waveform_constants_path,
         rest_api_path,
+        waveform_templates_path,
     ) = get_configuration_paths()
 
     # Evaluate Input Arguments
@@ -101,6 +103,12 @@ def evaluate_parser_input_arguments(args):
         )
         rest_api_path = args.rest_api_file
 
+    if args.waveform_templates_file:
+        assert args.waveform_templates_file.exists(), "waveform_templates Path {} not valid".format(
+            args.waveform_templates_file
+        )
+        waveform_templates_path = args.waveform_templates_file
+
     # Creating Loggers etc., they exist globally so no need to pass
     if args.logging_config:
         assert args.logging_config.exists(), "Logging Config Path {} not valid".format(
@@ -115,6 +123,7 @@ def evaluate_parser_input_arguments(args):
         experiment_path,
         waveform_constants_path,
         rest_api_path,
+        waveform_templates_path,
         logging_path,
     )
 
@@ -235,6 +244,15 @@ def create_parser():
         default=None,
         help="Non-default path to the rest_api_config.yml config file \n"
         "This file specifies urls of restful api services.",
+    )
+
+    input_args.add_argument(
+        "--waveform_templates_file",
+        type=Path,
+        required=False,
+        default=None,
+        help="Non-default path to the waveform_templates.yml config file \n"
+        "This file specifies all waveform templates.",
     )
 
     input_args.add_argument(

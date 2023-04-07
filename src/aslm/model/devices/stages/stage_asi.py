@@ -70,7 +70,7 @@ def build_ASI_Stage_connection(com_port, baud_rate, timeout=1000):
     wait_start = time.time()
     timeout_s = timeout / 1000
     while block_flag:
-        asi_stage = TigerController(com_port, baud_rate)
+        asi_stage = TigerController(com_port, baud_rate, verbose=True)
         asi_stage.connect_to_serial()
         if asi_stage.is_open():
             block_flag = False
@@ -140,6 +140,8 @@ class ASIStage(StageBase):
             Min focus position
         theta_min : float
             Min rotation position
+        default_speed: float
+            Default speed in millimeters per second
 
         Methods
         -------
@@ -149,6 +151,18 @@ class ASIStage(StageBase):
             Makes sure that the move is within the min and max stage limits.
         stop()
             Emergency halt of stage operation.
+        get_position()
+            Get position of specific axis
+        set_speed()
+            Set velocity that the stage can move when scanning.
+        get_speed()
+            Get velocity
+        scanr()
+            Set scan start position, end position, and enc_divide
+        start_scan()
+            Start scan state machine
+        stop_scan()
+            Start scan and stop after scanning
 
     """
 
@@ -156,7 +170,7 @@ class ASIStage(StageBase):
         super().__init__(microscope_name, device_connection, configuration, device_id)
 
         # Mapping from self.axes to corresponding ASI axis labelling
-        axes_mapping = {"x": "X", "y": "Y", "z": "Z"}
+        self.axes_mapping = {"x": "Z", "y": "Y", "z": "X"}
 
         # Focus and Theta axes are not supported for ASI Stage
         if "theta" in self.axes:
@@ -164,18 +178,48 @@ class ASIStage(StageBase):
         if "f" in self.axes:
             self.axes.remove("f")
 
-        self.asi_axes = list(map(lambda a: axes_mapping[a], self.axes))
+        self.asi_axes = list(map(lambda a: self.axes_mapping[a], self.axes))
         self.tiger_controller = device_connection
+        # set default speed
+        self.default_speed =5.745760 #7.68 * 0.67
+        default_speeds = [(axis,self.default_speed) for axis in self.asi_axes]
+        if self.tiger_controller != None:
+            try:
+                self.tiger_controller.set_speed(**dict(default_speeds))
+            except TigerException:
+                logger.exception(f"Initialize ASI Stage with default speed failed!")
 
     def __del__(self):
         """Delete the ASI Stage connection."""
         try:
-            self.tiger_controller.disconnect_from_serial()
-            logger.debug("ASI stage connection closed")
+            if self.tiger_controller != None:
+                self.tiger_controller.disconnect_from_serial()
+                logger.debug("ASI stage connection closed")
         except (AttributeError, BaseException) as e:
             print("Error while disconnecting the ASI stage")
             logger.exception(e)
             raise
+
+    def get_position(self, axis):
+        """Get position of specific axos
+        
+        Parameters
+        ----------
+        axis : str
+
+        Returns
+        -------
+            position: float
+        """
+        try:
+            axis = self.axes_mapping[axis]
+            pos = self.tiger_controller.get_position_um(axis)
+        except TigerException:
+            return float("inf")
+        except KeyError as e:
+            logger.exception(f"KeyError in get_position: {e}")
+            return float("inf")
+        return pos
 
     def report_position(self):
         """Reports the position for all axes in microns, and create
@@ -183,14 +227,18 @@ class ASIStage(StageBase):
         try:
             # positions from the device are in microns
             for ax, n in zip(self.axes, self.asi_axes):
-                pos = self.tiger_controller.get_position_um(n)
+                try:
+                    pos = self.tiger_controller.get_position_um(n)
+                except:
+                    print(f"*** axis {n} has error when getting its position")
+                    pos = 0
 
                 # Set class attributes and convert to microns
                 setattr(self, f"{ax}_pos", pos)
         except TigerException as e:
             print("Failed to report ASI Stage Position")
             logger.exception(e)
-        # self.update_position_dictionaries()
+        self.update_position_dict()
         return self.position_dict
 
     def move_axis_absolute(self, axis, axis_num, move_dictionary):
@@ -224,6 +272,7 @@ class ASIStage(StageBase):
             axis_abs_um = (
                 axis_abs * 10
             )  # This is to account for the asi 1/10 of a micron units
+            print("*** trying to move stage:", axis_num, axis_abs_um)
             self.tiger_controller.move_axis(axis_num, axis_abs_um)
             return True
         except TigerException as e:
@@ -253,8 +302,9 @@ class ASIStage(StageBase):
         success : bool
             Was the move successful?
         """
-
         for ax, n in zip(self.axes, self.asi_axes):
+            if f"{ax}_abs" not in move_dictionary:
+                continue
             success = self.move_axis_absolute(ax, n, move_dictionary)
             if wait_until_done:
                 self.tiger_controller.wait_for_device()
@@ -282,4 +332,110 @@ class ASIStage(StageBase):
             self.tiger_controller.stop()
         except TigerException as e:
             print(f"ASI stage halt command failed: {e}")
+            logger.exception(e)
+
+    def set_speed(self, velocity_dict):
+        """Set scan velocity.
+
+        Parameters
+        ----------
+        velocity_dict: dict
+            velocity for specific axis
+            {'x': float, 'y': float, 'z': float}
+
+        Returns
+        -------
+        success: bool
+            Was the setting successful?
+        """
+        temp = dict(map(lambda k: (self.axes_mapping[k], velocity_dict[k]), velocity_dict))
+        try:
+            self.tiger_controller.set_speed(**temp)
+        except TigerException:
+            return False
+        except KeyError as e:
+            logger.exception(f"KeyError in set_speed: {e}")
+            return False
+        return True
+    
+    def get_speed(self, axis):
+        """Get scan velocity of the axis.
+
+        Parameters
+        ----------
+        axis: str
+            axis name, such as 'x', 'y', 'z'
+
+        Returns
+        -------
+        velocity: float
+            Velocity
+        """
+        try:
+            velocity = self.tiger_controller.get_speed(self.axes_mapping[axis])
+        except TigerException:
+            return 0
+        except KeyError as e:
+            logger.exception(f"KeyError in get_speed: {e}")
+            return 0
+        return velocity
+    
+    def scanr(self, start_position_mm, end_position_mm, enc_divide, axis='z'):
+        """Set scan range
+        
+        Parameters
+        ----------
+        start_position_mm: float
+            scan start position
+        end_position_mm: float
+            scan end position
+        enc_divide: float
+            an output pulse will occur every enc_divide number of encoder counts
+        axis: str
+            fast axis name
+
+        Returns
+        -------
+        success: bool
+            Was the setting successful?
+        """
+        try:
+            axis = self.axes_mapping[axis]
+            self.tiger_controller.scanr(start_position_mm, end_position_mm, enc_divide, axis)
+        except TigerException:
+            return False
+        except KeyError as e:
+            logger.exception(f"KeyError in scanr: {e}")
+            return False
+        return True
+    
+    def start_scan(self, axis):
+        """Start scan state machine
+        
+        Parameters
+        ----------
+        axis: str
+            fast axis name, such as 'x', 'y', and 'z'
+
+        Returns
+        -------
+        success: bool
+            Was it successful?
+
+        """
+        try:
+            axis = self.axes_mapping[axis]
+            self.tiger_controller.start_scan(axis)
+        except TigerException:
+            return False
+        except KeyError as e:
+            logger.exception(f"KeyError in start_scan: {e}")
+            return False
+        return True
+    
+    def stop_scan(self):
+        """Stop scan"""
+        try:
+            self.tiger_controller.stop_scan()
+        except TigerException as e:
             logger.exception(e)

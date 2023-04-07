@@ -75,5 +75,6 @@ MicroscopeState:
   offset_start: 0.0
   offset_end: 10.0
   conpro_cycling_mode: Per Stack
+  waveform_template: Default
 MultiPositions:
   stage_positions: [{'x': 15000.0, 'y': 12000.0, 'z': 15500.0, 'theta': 0.0, 'f': 70000.0}, {'x': 35000.0, 'y': 42000.0, 'z': 15500.0, 'theta': 0.0, 'f': 70000.0}]

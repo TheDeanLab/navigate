@@ -365,6 +365,15 @@ class WaveformSettingsFrame(ttk.Labelframe):
         )
         self.inputs["sample_rate"].grid(row=0, column=0, sticky=tk.NSEW, padx=3, pady=3)
 
+        self.inputs["waveform_template"] = LabelInput(
+            parent=self,
+            label="Waveform Template",
+            input_class=ttk.Combobox,
+            input_var=tk.StringVar(),
+            input_args={"width": 20},
+        )
+        self.inputs["waveform_template"].grid(row=0, column=1, sticky=tk.NSEW, padx=3, pady=3)
+
     def get_variables(self):
         """Function to get the variables.
 

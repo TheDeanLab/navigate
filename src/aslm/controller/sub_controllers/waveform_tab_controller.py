@@ -85,8 +85,6 @@ class WaveformTabController(GUIController):
         super().__init__(view, parent_controller)
         self.remote_focus_waveform = 0
         self.laser_ao_waveforms = 0
-        parent_notebook = self.view
-        self.view = self.view.waveform_tab
 
         self.initialize_plots()
 
@@ -107,10 +105,6 @@ class WaveformTabController(GUIController):
         self.view.waveform_settings.inputs["waveform_template"].set("Default")
         self.view.waveform_settings.inputs["waveform_template"].widget.bind(
             "<<ComboboxSelected>>", self.update_waveform_template
-        )
-
-        parent_notebook.bind(
-            "<<NotebookTabChanged>>", self.plot_waveforms
         )
 
     def update_sample_rate(self, *args):

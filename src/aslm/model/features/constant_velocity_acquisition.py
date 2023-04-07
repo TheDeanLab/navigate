@@ -82,7 +82,8 @@ class ConstantVelocityAcquisition:
 
         # Inject new trigger source.
         self.model.active_microscope.prepare_next_channel()
-        self.model.active_microscope.daq.set_trigger_mode(1, "/PXI6259/PFI1")
+        # TODO: retrieve this parameter from configuration file
+        self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1")
         self.asi_stage = self.model.active_microscope.stages[self.axis]
 
         # get the current exposure time for that channel.
@@ -183,5 +184,5 @@ class ConstantVelocityAcquisition:
         # reset stage speed
         self.asi_stage.set_speed({self.axis: self.default_speed})
         self.asi_stage.stop()
-        self.model.active_microscope.daq.set_trigger_mode(0, None)
+        self.model.active_microscope.daq.set_external_trigger(None)
 

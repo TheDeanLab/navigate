@@ -98,7 +98,7 @@ class NIDAQ(DAQBase):
         Calculate all waveforms
     enable_microscope(microscope_name)
         Enable microscope
-    set_trigger_mode(trigger_mode)
+    set_external_trigger(external_trigger)
         Set trigger mode
     restart_analog_task_callback()
         Restart analog task callback
@@ -124,7 +124,7 @@ class NIDAQ(DAQBase):
         super().__init__(configuration)
         self.camera_trigger_task = None
         self.master_trigger_task = None
-        self.trigger_mode = 0 # 0: self-trigger, 1: external-trigger
+        self.trigger_mode = "self-trigger" # self-trigger, external-trigger
         self.external_trigger = None
         try:
             # switching_port = self.configuration["configuration"]["microscopes"][
@@ -156,13 +156,11 @@ class NIDAQ(DAQBase):
         if self.camera_trigger_task is not None:
             self.stop_acquisition()
 
-    def set_trigger_mode(self, mode, external_trigger=None):
+    def set_external_trigger(self, external_trigger=None):
         """Set trigger mode.
 
         Parameters
         ----------
-        mode : int
-            0: self-trigger, 1: external-trigger
         external_trigger : nidaqmx.Task
             Task for external triggering
 
@@ -170,11 +168,11 @@ class NIDAQ(DAQBase):
         -------
         None
         """
-        self.trigger_mode = mode
+        self.trigger_mode = "self-trigger" if external_trigger is None else "external-trigger"
         self.external_trigger = external_trigger
 
         # change trigger mode during acquisition in a feature
-        if mode == 0:
+        if self.trigger_mode == "self-trigger":
             self.create_master_trigger_task()
             trigger_source = self.configuration["configuration"]["microscopes"][
             self.microscope_name
@@ -403,7 +401,7 @@ class NIDAQ(DAQBase):
         if self.wait_to_run_lock.locked():
             self.wait_to_run_lock.release()
         # Specify ports, timing, and triggering
-        self.set_trigger_mode(self.trigger_mode, self.external_trigger)
+        self.set_external_trigger(self.external_trigger)
 
     def run_acquisition(self):
         """Run DAQ Acquisition.
@@ -431,7 +429,7 @@ class NIDAQ(DAQBase):
             for task in self.analog_output_tasks.values():
                 task.start()
         
-        if self.trigger_mode == 0:
+        if self.trigger_mode == "self-trigger":
             self.master_trigger_task.write(
                 [False, True, True, True, False], auto_start=True
             )
@@ -439,12 +437,12 @@ class NIDAQ(DAQBase):
             self.camera_trigger_task.wait_until_done()
             for task in self.analog_output_tasks.values():
                 task.wait_until_done()
-                if self.trigger_mode == 0:
+                if self.trigger_mode == "self-trigger":
                     task.stop()
         except:
             # when triggered from external triggers, sometimes the camera trigger task is done but not actually done, there will a DAQ WARNING message
             pass
-        if self.trigger_mode == 0:
+        if self.trigger_mode == "self-trigger":
             try:
                 self.camera_trigger_task.stop()
                 self.master_trigger_task.stop()
@@ -468,7 +466,7 @@ class NIDAQ(DAQBase):
             self.camera_trigger_task.stop()
             self.camera_trigger_task.close()
 
-            if self.trigger_mode == 0:
+            if self.trigger_mode == "self-trigger":
                 self.master_trigger_task.stop()
                 self.master_trigger_task.close()
 

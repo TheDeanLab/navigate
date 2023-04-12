@@ -205,7 +205,7 @@ class SignalContainer(Container):
             try:
                 result, is_end = self.curr_node.run(*args, wait_response=wait_response)
             except Exception as e:
-                logger.debug(f"SignalContainer - {e}")
+                logger.debug(f"SignalContainer Exception - {e}")
                 self.end_flag = True
                 self.cleanup()
                 return
@@ -220,7 +220,7 @@ class SignalContainer(Container):
                 self.curr_node = None
                 if self.remaining_number_of_execution > 0:
                     self.remaining_number_of_execution -= 1
-                    self.end_flag = self.remaining_number_of_execution == 0
+                    self.end_flag = self.end_flag or (self.remaining_number_of_execution == 0)
                 return
 
             if self.curr_node.device_related:

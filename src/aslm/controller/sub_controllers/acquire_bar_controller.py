@@ -56,6 +56,7 @@ class AcquireBarController(GUIController):
         self.mode = "live"
         self.update_stack_acq(self.mode)
         self.is_save = False
+        self.is_acquiring = False
 
         self.mode_dict = {
             "Continuous Scan": "live",
@@ -225,7 +226,10 @@ class AcquireBarController(GUIController):
         --------
         >>> stop_acquire()
         """
+        self.stop_progress_bar()
         self.view.acquire_btn.configure(text="Acquire")
+        self.view.acquire_btn.configure(state="normal")
+        self.is_acquiring = False
 
     def set_save_option(self, is_save):
         """Set whether the image will be saved.
@@ -255,12 +259,13 @@ class AcquireBarController(GUIController):
         --------
         >>> launch_popup_window()
         """
+        if self.is_acquiring and self.view.acquire_btn["text"] == "Acquire":
+            return
+        if not self.is_acquiring and self.view.acquire_btn["text"] == "Stop":
+            return
         if self.view.acquire_btn["text"] == "Stop":
-            # change the button to 'Acquire'
-            self.view.acquire_btn.configure(text="Acquire")
-            self.view.acquire_btn.configure(state="disabled")
-
             # tell the controller to stop acquire (continuous mode)
+            self.view.acquire_btn.configure(state="disabled")
             self.parent_controller.execute("stop_acquire")
 
         elif self.is_save and self.mode != "live":
@@ -286,7 +291,7 @@ class AcquireBarController(GUIController):
                     widgets[k].set(v)
 
         else:
-            self.view.acquire_btn.configure(text="Stop")
+            self.is_acquiring = True
             self.view.acquire_btn.configure(state="disabled")
             self.parent_controller.execute("acquire")
 
@@ -431,15 +436,13 @@ class AcquireBarController(GUIController):
         )
 
         if is_valid:
+            self.is_acquiring = True
+            self.view.acquire_btn.configure(state="disabled")
             # tell central controller, save the image/data
             self.parent_controller.execute("acquire_and_save")
 
             # Close the window
             popup_window.popup.dismiss()
-
-            # We are now acquiring
-            self.view.acquire_btn.configure(text="Stop")
-            self.view.acquire_btn.configure(state="disabled")
 
     def exit_program(self):
         """Exit Button

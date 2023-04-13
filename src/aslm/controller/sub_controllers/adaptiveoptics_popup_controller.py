@@ -71,6 +71,7 @@ class AdaptiveOpticsPopupController(GUIController):
 
         self.view.set_button.configure(command=self.set_mirror)
         self.view.flat_button.configure(command=self.flatten_mirror)
+        self.view.zero_button.configure(command=self.zero_mirror)
         self.view.save_wcs_button.configure(command=self.save_wcs_file)
         self.view.from_wcs_button.configure(command=self.set_from_wcs_file)
         self.view.tony_wilson_button.configure(command=self.run_tony_wilson)
@@ -144,6 +145,9 @@ class AdaptiveOpticsPopupController(GUIController):
 
     def flatten_mirror(self):
         self.parent_controller.execute('flatten_mirror')
+
+    def zero_mirror(self):
+        self.parent_controller.execute('zero_mirror')
 
     def set_mirror(self):
         self.update_experiment_values()

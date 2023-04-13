@@ -65,8 +65,11 @@ class ImagineOpticsMirror(MirrorBase):
         self.mirror_controller.flat()
     
     def zero_flatness(self):
-        self.mirror_controller.zero_flatness()
-        
+        self.mirror_controller.move_absolute_zero()
+
+    def set_positions_flat(self, pos):
+        self.mirror_controller.set_flat(pos)
+
     def display_modes(self, coefs):
         self.mirror_controller.display_modes(coefs)
         

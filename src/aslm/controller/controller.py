@@ -784,6 +784,8 @@ class Controller:
         # mirror commands:
         elif command == 'flatten_mirror':
             self.model.run_command('flatten_mirror', *args)
+        elif command == 'zero_mirror':
+            self.model.run_command('zero_mirror', *args)        
         elif command == 'set_mirror':
             self.model.run_command('set_mirror', *args)
         elif command == 'set_mirror_from_wcs':

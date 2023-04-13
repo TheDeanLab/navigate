@@ -156,9 +156,14 @@ class IMOP_Mirror:
         self.display_modes(np.zeros(self.n_modes, dtype=np.float32))
 
     def zero_flatness(self):
-        self.position_flat = np.zeros(self.mirror.n_actuators, dtype=np.float32)
-        
+        self.set_flat(np.zeros(self.mirror.n_actuators, dtype=np.float32))
         self.flat()
+
+    def set_flat(self, pos):
+        self.position_flat = pos
+
+    def move_absolute_zero(self):
+        self.mirror.move_absolute(np.zeros(self.mirror.n_actuators, dtype=np.float32))
 
     def display_modes(self, coefs, wait=False):
         # make sure coefs is np.float32 array

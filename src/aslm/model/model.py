@@ -457,6 +457,8 @@ class Model:
 
         elif command == 'flatten_mirror':
             self.update_mirror(coef=[], flatten=True)
+        elif command == 'zero_mirror':
+            self.active_microscope.mirror.zero_flatness()
         elif command == 'set_mirror':
             coef = list(self.configuration['experiment']['MirrorParameters']['modes'].values())
             self.update_mirror(coef=coef)

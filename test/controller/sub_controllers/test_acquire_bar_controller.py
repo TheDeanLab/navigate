@@ -645,3 +645,51 @@ class TestAcquireBarController:
                         self.acquire_bar_controller.acquire_pop.popup.winfo_exists()
                         == 0
                     )
+
+    def test_frequent_start_and_stop_acquisition(self):
+        # set up
+        self.acquire_bar_controller.view.acquire_btn.configure(state="normal")
+        self.acquire_bar_controller.view.acquire_btn.configure(text="Acquire")
+        self.acquire_bar_controller.is_save = False
+        self.acquire_bar_controller.set_mode("live")
+        self.acquire_bar_controller.is_acquiring = False
+
+
+        # start acquisition
+        self.acquire_bar_controller.view.acquire_btn.invoke()
+        assert self.acquire_bar_controller.view.acquire_btn["text"] == "Acquire"
+        assert str(self.acquire_bar_controller.view.acquire_btn["state"]) == "disabled"
+        assert self.acquire_bar_controller.is_acquiring == True
+        # assert dummy_controller_to_test_acquire_bar.acquisition_count == 1
+        res = self.acquire_bar_controller.parent_controller.pop()
+        assert res == "acquire"
+
+        # not in acquisition, click the "Acquire" button several times
+        self.acquire_bar_controller.view.acquire_btn.invoke()
+        assert self.acquire_bar_controller.view.acquire_btn["text"] == "Acquire"
+        assert str(self.acquire_bar_controller.view.acquire_btn["state"]) == "disabled"
+        res = self.acquire_bar_controller.parent_controller.pop()
+        assert res == "Empty command list"
+        self.acquire_bar_controller.view.acquire_btn.invoke()
+        res = self.acquire_bar_controller.parent_controller.pop()
+        assert res == "Empty command list"
+
+        # in acquisition, click "Stop" button several times
+        self.acquire_bar_controller.view.acquire_btn.configure(state="normal")
+        self.acquire_bar_controller.view.acquire_btn.configure(text="Stop")
+        self.acquire_bar_controller.is_acquiring = True
+
+        self.acquire_bar_controller.view.acquire_btn.invoke()
+        assert self.acquire_bar_controller.view.acquire_btn["text"] == "Stop"
+        assert str(self.acquire_bar_controller.view.acquire_btn["state"]) == "disabled"
+        res = self.acquire_bar_controller.parent_controller.pop()
+        assert res == "stop_acquire"
+        self.acquire_bar_controller.view.acquire_btn.invoke()
+        res = self.acquire_bar_controller.parent_controller.pop()
+        assert res == "Empty command list"
+        self.acquire_bar_controller.view.acquire_btn.invoke()
+        res = self.acquire_bar_controller.parent_controller.pop()
+        assert res == "Empty command list"
+        self.acquire_bar_controller.view.acquire_btn.invoke()
+        res = self.acquire_bar_controller.parent_controller.pop()
+        assert res == "Empty command list"

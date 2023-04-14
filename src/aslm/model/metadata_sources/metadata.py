@@ -118,7 +118,8 @@ class Metadata:
         self.shape_y = int(
             self.configuration["experiment"]["CameraParameters"]["y_pixels"]
         )
-        if (self.configuration["experiment"]["MicroscopeState"]["image_mode"] == "z-stack"):
+        if (self.configuration["experiment"]["MicroscopeState"]["image_mode"] == "z-stack") or \
+            (self.configuration["experiment"]["MicroscopeState"]["image_mode"] == "ConstantVelocityAcquisition"):
             self.shape_z = int(self.configuration["experiment"]["MicroscopeState"]["number_z_steps"])
         elif (self.configuration["experiment"]["MicroscopeState"]["image_mode"] == "confocal-projection"):
             self.shape_z = int(self.configuration["experiment"]["MicroscopeState"]["n_plane"])

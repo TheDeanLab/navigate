@@ -301,10 +301,17 @@ class TonyWilson:
         while True:
             try:
                 if self.f_frame_id < 0:
-                    self.f_frame_id, self.frame_num, itr, coef, step, coef_arr = self.tw_frame_queue.get_nowait()
+                    (
+                        self.f_frame_id, 
+                        self.frame_num, 
+                        itr, 
+                        coef, 
+                        step, 
+                        coef_arr 
+                    ) = self.tw_frame_queue.get_nowait()
                 if self.f_frame_id not in frame_ids:
                     break
-            except:
+            except Exception:
                 break
 
             coef_str = ' '.join([f'{c:.2f}' for c in (coef_arr + self.best_coefs)[3:]])

@@ -94,6 +94,7 @@ class Microscope:
         self.configuration = configuration
         self.data_buffer = None
         self.stages = {}
+        self.cameras = {}
         self.lasers = {}
         self.galvo = {}
         self.daq = devices_dict.get("daq", None)
@@ -118,8 +119,8 @@ class Microscope:
             "remote_focus_device": ["type", "channel"],
             "galvo": ["type", "channel"],
             "lasers": ["wavelength"],
+            "mirror": ["type"]
         }
-
         device_name_dict = {"lasers": "wavelength"}
 
         laser_list = self.configuration["configuration"]["microscopes"][
@@ -217,6 +218,23 @@ class Microscope:
                         else getattr(self, device_name)
                     )
 
+        # cameras (handle camera list similar to stages...)
+        # camera_devices = self.configuration['configuration']['microscopes'][self.microscope_name]['camera']['hardware']
+        # if type(camera_devices) != ListProxy:
+        #     camera_devices = [camera_devices]
+        # for i, device_config in enumerate(camera_devices):
+        #     device_ref_name = build_ref_name('_', device_config['type'], device_config['serial_number'])            
+        #     if device_ref_name not in devices_dict['camera']:
+        #         logger.debug(f'Camera {device_ref_name} has not been loaded!')
+        #         raise Exception('No camera device!')
+        #     print(f"{device_ref_name} : {devices_dict['camera'][device_ref_name]}")
+        #     self.cameras[device_ref_name] = start_camera(self.microscope_name, devices_dict['camera'][device_ref_name], self.configuration, i, is_synthetic)
+
+        # self.camera = list(self.cameras.values())[0] # just use the first one for now...
+
+        # print('>>> Use Camera:')
+        # print(self.camera.camera_controller._serial_number)
+
         # stages
         stage_devices = self.configuration["configuration"]["microscopes"][
             self.microscope_name
@@ -244,6 +262,9 @@ class Microscope:
             for axis in device_config["axes"]:
                 self.stages[axis] = stage
                 self.info[f"stage_{axis}"] = device_ref_name
+
+        # flatten the mirror
+        self.mirror.flat()
 
         # connect daq and camera in synthetic mode
         if is_synthetic:

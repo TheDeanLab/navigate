@@ -1,4 +1,4 @@
-# ASLM - Autonomous Software for Light Microscopy
+# ![ASLM logo](./src/aslm/view/icon/mic.ico?raw=true) ASLM - Autonomous Software for Light Microscopy
 
 
 [![Tests](https://github.com/AdvancedImagingUTSW/ASLM/actions/workflows/push_checks.yaml/badge.svg)](https://github.com/AdvancedImagingUTSW/ASLM/actions/workflows/push_checks.yaml)

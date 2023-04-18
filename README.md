@@ -4,6 +4,17 @@
 [![Tests](https://github.com/AdvancedImagingUTSW/ASLM/actions/workflows/push_checks.yaml/badge.svg)](https://github.com/AdvancedImagingUTSW/ASLM/actions/workflows/push_checks.yaml)
 [![codecov](https://codecov.io/gh/TheDeanLab/ASLM/branch/develop/graph/badge.svg?token=270RFSZGG5)](https://codecov.io/gh/TheDeanLab/ASLM)
 
+### Quick install
+
+Download and install [Miniconda](https://docs.conda.io/en/latest/miniconda.html#latest-miniconda-installer-links).
+
+```
+conda create -n aslm python=3.9.7
+pip install git+https://github.com/TheDeanLab/ASLM.git
+```
+
+To test, run `conda activate aslm` and launch in synthetic mode with `aslm -sh`.
+
 ### Documentation
 Please refer to and contribute to the documentation, which can be found on GitHub Pages: [https://thedeanlab.github.io/ASLM/](https://thedeanlab.github.io/ASLM/).
 
@@ -21,11 +32,6 @@ Please refer to and contribute to the documentation, which can be found on GitHu
   	* --etl_const_file ETL_CONST_FILE
 	*  --rest_api_file REST_API_FILE
   	* --logging_config LOGGING_CONFIG
-
-To launch in synthetic mode:
-~~~
-python main.py -sh
-~~~
 
 ### Authors
 * Kevin Dean

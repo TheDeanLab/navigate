@@ -159,7 +159,9 @@ class IMOP_Mirror:
         self.set_flat(np.zeros(self.mirror.n_actuators, dtype=np.float32))
         self.flat()
 
-    def set_flat(self, pos):
+    def set_flat(self, pos=None, pos_path=None):
+        if pos_path:
+            pos = self.mirror.get_positions_from_file(pos_path)
         self.position_flat = pos
 
     def move_absolute_zero(self):

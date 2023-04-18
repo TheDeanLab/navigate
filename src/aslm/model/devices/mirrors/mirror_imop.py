@@ -59,6 +59,9 @@ class ImagineOpticsMirror(MirrorBase):
     def __init__(self, microscope_name, device_connection, configuration):
         super().__init__(microscope_name, device_connection, configuration)
 
+        flat_path = configuration['configuration']['microscopes'][microscope_name]['mirror']['hardware']['flat_path']
+        self.mirror_controller.set_flat(pos_path=flat_path)
+        
         logger.info("ImagineOpticsMirror Initialized")
     
     def flat(self):

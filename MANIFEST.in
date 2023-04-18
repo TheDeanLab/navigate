@@ -1,3 +1,4 @@
+recursive-include *.yml
 recursive-include *.yaml
 recursive-include *.ico
 recursive-include *.png

@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -114,7 +114,8 @@ class BigDataViewerDataSource(DataSource):
                 dataset_name = "/".join(
                     [time_group_name, setup_group_name, f"{i}", "cells"]
                 )
-                # print(z, dz, dataset_name, self.image[dataset_name].shape, data[::dx, ::dy].shape)
+                # print(z, dz, dataset_name, self.image[dataset_name].shape,
+                #       data[::dx, ::dy].shape)
                 zs = np.minimum(
                     z // dz, self.shapes[i, 0] - 1
                 )  # TODO: Is this necessary?

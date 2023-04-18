@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -91,8 +91,8 @@ class OMETIFFMetadata(XMLMetadata):
             self.configuration["experiment"]["CameraParameters"]["y_pixels"]
         )
 
-        # The following two are commented since we split our TIFFs into one TIFF stack per
-        # channel per time point
+        # The following two are commented since we split our TIFFs into one TIFF stack
+        # per channel per time point
         ome_dict["Image"]["Pixels"]["SizeT"] = int(
             self.configuration["experiment"]["MicroscopeState"]["timepoints"]
         )

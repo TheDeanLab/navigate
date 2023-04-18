@@ -30,4 +30,23 @@ def test_image_write(image_writer):
 
     image_writer.save_image(list(range(image_writer.model.number_of_frames)))
 
-    # TODO: Delete files
+    delete_folder("test_save_dir")
+
+
+def delete_folder(dir):
+    import os
+
+    bn = os.path.basename(dir)
+    if bn == "." or bn == "..":
+        raise OSError("Cannot delete the directory '{dir}'.")
+
+    for cand in os.listdir(dir):
+        cp = os.path.join(dir, cand)
+        if os.path.isdir(cp):
+            delete_folder(cp)
+        elif os.path.isfile(cp):
+            os.remove(cp)
+        else:
+            raise TypeError(f"Unknown entity {cand} cannot be deleted. Aborting.")
+
+    os.rmdir(dir)

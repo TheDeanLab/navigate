@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -137,7 +137,8 @@ class BigDataViewerMetadata(XMLMetadata):
                 }
                 bdv_dict["SequenceDescription"]["ViewSetups"]["ViewSetup"].append(d)
                 view_id += 1
-        # Finish up the Tile Attributes outside of the channels loop so we have one per tile
+        # Finish up the Tile Attributes outside of the channels loop so we have
+        # one per tile
         for p in range(self.positions):
             tile = {"id": {"text": str(p)}, "name": {"text": str(p)}}
             bdv_dict["SequenceDescription"]["ViewSetups"]["Attributes"][2][
@@ -220,8 +221,8 @@ class BigDataViewerMetadata(XMLMetadata):
             if base_path.attrib["type"] == "relative":
                 file_path = os.path.join(os.getcwd(), file_path)
 
-        # Get setups. Each setup represents a visualisation data source in the viewer that
-        # provides one image volume per timepoint
+        # Get setups. Each setup represents a visualisation data source in the viewer
+        # that provides one image volume per timepoint
         setups = [
             x.text for x in root.findall("SequenceDescription/ViewSetups/ViewSetup/id")
         ]

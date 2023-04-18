@@ -13,7 +13,7 @@ conda create -n aslm python=3.9.7
 pip install git+https://github.com/TheDeanLab/ASLM.git
 ```
 
-To test, run `conda activate aslm` and launch in synthetic mode with `aslm -sh`.
+To test, run `conda activate aslm` and launch in synthetic hardware mode with `aslm -sh`.
 
 ### Documentation
 Please refer to and contribute to the documentation, which can be found on GitHub Pages: [https://thedeanlab.github.io/ASLM/](https://thedeanlab.github.io/ASLM/).

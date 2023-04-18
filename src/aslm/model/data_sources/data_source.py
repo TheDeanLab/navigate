@@ -233,7 +233,8 @@ class DataSource:
         """Figure out where we are in the stack from the frame number.
 
         per_stack indicates if we move through z (per_stack=True) or c fastest.
-        we move through positions slower than z or c. we move through time slower than z, c or p.
+        we move through positions slower than z or c. we move through time slower
+        than z, c or p.
 
         Parameters
         ----------
@@ -278,6 +279,29 @@ class DataSource:
             p = (frame_id // (self.shape_c * self.shape_t)) % self.positions
 
         return c, z, t, p
+
+    def _check_shape(self, max_frame: int = 0, per_stack: bool = True):
+        # Check if we've closed this prior to completion
+        c, z, t, p = self._cztp_indices(max_frame, per_stack)
+        if (
+            (z != 0)
+            or (c != 0)
+            or (t < (self.shape_t - 1))
+            or (p < (self.positions - 1))
+        ):
+            # If we have, update our shape accordingly
+            maxc, maxz, maxt, maxp = 0, 0, 0, 0
+            for idx in range(max_frame):
+                c, z, t, p = self._cztp_indices(idx, per_stack)
+                maxc = max(maxc, c)
+                maxz = max(maxz, z)
+                maxt = max(maxt, t)
+                maxp = max(maxp, p)
+            self.shape_c, self.shape_z = maxc + 1, maxz + 1
+            self.shape_t, self.positions = maxt + 1, maxp + 1
+            if self.metadata is not None:
+                self.metadata.shape_c, self.metadata.shape_z = maxc + 1, maxz + 1
+                self.metadata.shape_t, self.metadata.positions = maxt + 1, maxp + 1
 
     def _mode_checks(self) -> None:
         """Run additional checks after setting the mode.

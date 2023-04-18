@@ -7,7 +7,7 @@ ASLM - Autonomous Software for Light Microscopy
 [![Tests](https://github.com/AdvancedImagingUTSW/ASLM/actions/workflows/push_checks.yaml/badge.svg)](https://github.com/AdvancedImagingUTSW/ASLM/actions/workflows/push_checks.yaml)
 [![codecov](https://codecov.io/gh/TheDeanLab/ASLM/branch/develop/graph/badge.svg?token=270RFSZGG5)](https://codecov.io/gh/TheDeanLab/ASLM)
 
-ASLM is an open source Python package for control of light-sheet microscopes. It allows for easily-reconfigurable hardware setups and automated acquisition rotuines.
+ASLM is an open source Python package for control of light-sheet microscopes. It allows for easily reconfigurable hardware setups and automated acquisition rotuines.
 
 ### Quick install
 

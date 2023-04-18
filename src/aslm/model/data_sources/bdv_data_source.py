@@ -126,7 +126,7 @@ class BigDataViewerDataSource(DataSource):
 
         # Check if this was the last frame to write
         c, z, t, p = self._cztp_indices(self._current_frame, self.metadata.per_stack)
-        if (z == 0) and (c == 0) and (t == self.shape_t) and (p == self.positions):
+        if (z == 0) and (c == 0) and ((t >= self.shape_t) or (p >= self.positions)):
             self.close()
 
     def read(self) -> None:
@@ -178,6 +178,29 @@ class BigDataViewerDataSource(DataSource):
 
     def close(self) -> None:
         try:
+            # Check if we've closed this prior to completion
+            c, z, t, p = self._cztp_indices(
+                self._current_frame, self.metadata.per_stack
+            )
+            if (
+                (z != 0)
+                or (c != 0)
+                or (t < (self.shape_t - 1))
+                or (p < (self.positions - 1))
+            ):
+                # If we have, update our shape accordingly
+                maxc, maxz, maxt, maxp = 0, 0, 0, 0
+                for idx in range(self._current_frame):
+                    c, z, t, p = self._cztp_indices(idx, self.metadata.per_stack)
+                    maxc = max(maxc, c)
+                    maxz = max(maxz, z)
+                    maxt = max(maxt, t)
+                    maxp = max(maxp, p)
+                self.shape_c, self.shape_z = maxc + 1, maxz + 1
+                self.shape_t, self.positions = maxt + 1, maxp + 1
+                self.metadata.shape_c, self.metadata.shape_z = maxc + 1, maxz + 1
+                self.metadata.shape_t, self.metadata.positions = maxt + 1, maxp + 1
+
             self.image.close()
             self.metadata.write_xml(self.file_name, views=self._views)
         except AttributeError:

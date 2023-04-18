@@ -1,3 +1,3 @@
-include *.yaml
-include *.ico
-include *.png
+recursive-include *.yaml
+recursive-include *.ico
+recursive-include *.png

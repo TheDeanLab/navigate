@@ -40,7 +40,8 @@ def test_tiff_write_read(is_ome, multiposition, per_stack, z_stack, stop_early):
             "stack_cycling_mode"
         ] == "per_slice"
 
-    os.mkdir("test_save_dir")
+    if not os.path.exists("test_save_dir"):
+        os.mkdir("test_save_dir")
 
     # Establish a TIFF data source
     if is_ome:
@@ -115,7 +116,11 @@ def delete_folder(dir):
         if os.path.isdir(cp):
             delete_folder(cp)
         elif os.path.isfile(cp):
-            os.remove(cp)
+            try:
+                os.remove(cp)
+            except PermissionError:
+                # Windows permission error, file is still open somehow
+                pass
         else:
             raise TypeError(f"Unknown entity {cand} cannot be deleted. Aborting.")
 

@@ -229,6 +229,8 @@ class TiffDataSource(DataSource):
     def close(self, internal=False) -> None:
         if self._closed and not internal:
             return
+        if self.image is None:
+            return
         # internal flag needed to avoid _check_shape call until last file is written
         if self._write_mode:
             if not internal:

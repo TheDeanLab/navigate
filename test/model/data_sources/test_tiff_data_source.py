@@ -122,4 +122,8 @@ def delete_folder(top):
                 # Windows locks these files sometimes
                 pass
         for name in dirs:
-            os.rmdir(os.path.join(root, name))
+            try:
+                os.rmdir(os.path.join(root, name))
+            except OSError:
+                # One of the directories containing a file Windows decided to lock
+                pass

@@ -911,9 +911,6 @@ class Controller:
 
             # self.model.run_command('stop')
             self.sloppy_stop()
-            self.set_mode_of_sub("stop")
-            self.acquire_bar_controller.stop_progress_bar()
-            self.acquire_bar_controller.view.acquire_btn.configure(state="normal")
 
         elif command == "exit":
             """Exit the program."""
@@ -974,8 +971,16 @@ class Controller:
             mode=mode,
             stop=False,
         )
-
-        self.model.run_command(command)
+        try:
+            self.model.run_command(command)
+        except Exception as e:
+            tkinter.messagebox.showerror(
+                title="Warning",
+                message=f"There are something wrong! Cannot start acquisition!\n{e}"
+            )
+            self.set_mode_of_sub("stop")
+            return
+        self.acquire_bar_controller.view.acquire_btn.configure(text="Stop")
         self.acquire_bar_controller.view.acquire_btn.configure(state="normal")
 
         self.camera_view_controller.initialize_non_live_display(
@@ -990,7 +995,6 @@ class Controller:
             logger.info(f"ASLM Controller - Received Image: {image_id}")
 
             if image_id == "stop":
-                self.set_mode_of_sub("stop")
                 break
             if not isinstance(image_id, int):
                 logger.debug(
@@ -1019,7 +1023,6 @@ class Controller:
             f"ASLM Controller - Captured {self.camera_view_controller.image_count}, "
             f"{mode} Images"
         )
-        self.set_mode_of_sub("stop")
 
         # Stop Progress Bars
         self.acquire_bar_controller.progress_bar(
@@ -1028,6 +1031,7 @@ class Controller:
             mode=mode,
             stop=True,
         )
+        self.set_mode_of_sub("stop")
 
     def launch_additional_microscopes(self):
         def display_images(camera_view_controller, show_img_pipe, data_buffer):

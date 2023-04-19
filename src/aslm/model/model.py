@@ -567,6 +567,8 @@ class Model:
             """
             self.logger.info("ASLM Model - Stopping with stop command.")
             self.stop_acquisition = True
+            if hasattr(self, "signal_container"):
+                self.signal_container.end_flag = True
             if self.imaging_mode == "ConstantVelocityAcquisition":
                 self.active_microscope.stages["z"].stop()
             if self.signal_thread:

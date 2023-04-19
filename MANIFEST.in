@@ -1,4 +1,4 @@
-include src/aslm/*.yaml
-include src/aslm/*.log
-include src/aslm/*.ico
-include src/aslm/*.png
+recursive-include src *.yml
+recursive-include src *.yaml
+recursive-include src *.ico
+recursive-include src *.png

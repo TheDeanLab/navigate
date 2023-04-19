@@ -45,7 +45,11 @@ def delete_folder(dir):
         if os.path.isdir(cp):
             delete_folder(cp)
         elif os.path.isfile(cp):
-            os.remove(cp)
+            try:
+                os.remove(cp)
+            except PermissionError:
+                # Windows permission error, file is still open somehow
+                pass
         else:
             raise TypeError(f"Unknown entity {cand} cannot be deleted. Aborting.")
 

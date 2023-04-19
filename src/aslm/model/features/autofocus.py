@@ -488,7 +488,7 @@ class Autofocus:
         """Robust autofocus routine.
 
         TODO: Current values for amplitude, sigma, and alpha are hard-coded. Fitting
-        is unfortunatel unstable.
+        is unfortunately unstable.
 
         Parameters
         ----------

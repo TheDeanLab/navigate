@@ -175,8 +175,11 @@ class BigDataViewerDataSource(DataSource):
             self._setup_h5()
         else:
             self.read()
+        self._closed = False
 
     def close(self) -> None:
+        if self._closed:
+            return
         try:
             self._check_shape(self._current_frame - 1, self.metadata.per_stack)
             # print(
@@ -189,3 +192,4 @@ class BigDataViewerDataSource(DataSource):
         except AttributeError:
             # image wasn't instantiated, no need to close anything
             pass
+        self._closed = True

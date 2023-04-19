@@ -41,16 +41,18 @@ def test_ome_metadata_valid(dummy_model):
     assert "No validation errors found." in output
 
 
-def delete_folder(top):
-    # https://docs.python.org/3/library/os.html#os.walk
-    # Delete everything reachable from the directory named in "top",
-    # assuming there are no symbolic links.
-    # CAUTION:  This is dangerous!  For example, if top == '/', it
-    # could delete all your disk files.
-    import os
+def delete_folder(dir):
+    bn = os.path.basename(dir)
+    if bn == "." or bn == "..":
+        raise OSError("Cannot delete the directory '{dir}'.")
 
-    for root, dirs, files in os.walk(top, topdown=False):
-        for name in files:
-            os.remove(os.path.join(root, name))
-        for name in dirs:
-            os.rmdir(os.path.join(root, name))
+    for cand in os.listdir(dir):
+        cp = os.path.join(dir, cand)
+        if os.path.isdir(cp):
+            delete_folder(cp)
+        elif os.path.isfile(cp):
+            os.remove(cp)
+        else:
+            raise TypeError(f"Unknown entity {cand} cannot be deleted. Aborting.")
+
+    os.rmdir(dir)

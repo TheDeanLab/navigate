@@ -161,7 +161,7 @@ class TiffDataSource(DataSource):
         # print("Switch")
         c, z, _, _ = self._cztp_indices(self._current_frame, self.metadata.per_stack)
         if (z == 0) and (c == 0):
-            self.close()
+            self.close(True)
 
     def generate_image_name(self, current_channel, current_time_point):
         """
@@ -224,11 +224,16 @@ class TiffDataSource(DataSource):
             # self._setup_write_image()
         else:
             self.read()
+        self._closed = False
 
-    def close(self) -> None:
+    def close(self, internal=False) -> None:
+        if self._closed and not internal:
+            return
+        # internal flag needed to avoid _check_shape call until last file is written
         try:
             if self._write_mode:
-                # self._check_shape(self._current_frame-1, self.metadata.per_stack)
+                if not internal:
+                    self._check_shape(self._current_frame - 1, self.metadata.per_stack)
                 for ch in range(len(self.image)):
                     self.image[ch].close()
                     if self.is_ome and len(self._views) > 0:
@@ -248,3 +253,5 @@ class TiffDataSource(DataSource):
         except (TypeError, AttributeError, ValueError):
             # image wasn't instantiated, no need to close anything
             pass
+        if not internal:
+            self._closed = True

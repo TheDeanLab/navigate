@@ -65,8 +65,8 @@ def test_bdv_write(multiposition, per_stack, z_stack, stop_early):
     ds.close()
 
     try:
+        xml_fn = os.path.splitext(ds.file_name)[0] + ".xml"
         os.remove(ds.file_name)
-        xml_fn = ".".join(ds.file_name.split(".")[:-1]) + ".xml"
         os.remove(xml_fn)
     except PermissionError:
         # Windows seems to think these files are still open

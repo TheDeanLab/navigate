@@ -52,7 +52,7 @@ from aslm.model.features.common_features import (
     FindTissueSimple2D,
     PrepareNextChannel,
     LoopByCount,
-    ConProAcquisition, # noqa
+    ConProAcquisition,  # noqa
     StackPause,
 )
 from aslm.model.features.feature_container import load_features
@@ -262,9 +262,7 @@ class Model:
             "confocal-projection": [
                 {"name": PrepareNextChannel},
             ],
-            "ConstantVelocityAcquisition": [
-                {"name": ConstantVelocityAcquisition}
-            ],
+            "ConstantVelocityAcquisition": [{"name": ConstantVelocityAcquisition}],
             "customized": [],
         }
 
@@ -510,16 +508,20 @@ class Model:
                 self.signal_thread.start()
 
         elif command == "autofocus":
-            """
-            Autofocus Routine
-            Args[0] is a dictionary of the microscope state (resolution, zoom, ...)
-            Args[1] is a dictionary of the user-defined autofocus parameters:
-            {'coarse_range': 500,
-            'coarse_step_size': 50,
-            'coarse_selected': True,
-            'fine_range': 50,
-            'fine_step_size': 5,
-            'fine_selected': True}
+            """Autofocus Routine
+
+            Parameters
+            ----------
+            Args[0]: dict
+                Dictionary of the microscope state (resolution, zoom, ...)
+            Args[1]: dict
+                Dictionary of the user-defined autofocus parameters
+                {'coarse_range': 500,
+                'coarse_step_size': 50,
+                'coarse_selected': True,
+                'fine_range': 50,
+                'fine_step_size': 5,
+                'fine_selected': True}
             """
             autofocus = Autofocus(self)
             autofocus.run(*args)
@@ -566,7 +568,7 @@ class Model:
             self.logger.info("ASLM Model - Stopping with stop command.")
             self.stop_acquisition = True
             if self.imaging_mode == "ConstantVelocityAcquisition":
-                self.active_microscope.stages['z'].stop()
+                self.active_microscope.stages["z"].stop()
             if self.signal_thread:
                 self.signal_thread.join()
             if self.data_thread:

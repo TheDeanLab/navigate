@@ -525,10 +525,10 @@ class Controller:
 
         # autofocus menu
         self.view.menubar.menu_autofocus.add_command(
-            label="Autofocus", command=lambda: self.execute("autofocus")
+            label="Perform Autofocus", command=lambda: self.execute("autofocus")
         )
         self.view.menubar.menu_autofocus.add_command(
-            label="setting", command=popup_autofocus_setting
+            label="Autofocus Settings", command=popup_autofocus_setting
         )
 
         # Help menu
@@ -555,7 +555,7 @@ class Controller:
         )
         self.view.menubar.menu_features.add_separator()
         self.view.menubar.menu_features.add_command(
-            label="ilastik setting", command=popup_ilastik_setting
+            label="Ilastik Settings", command=popup_ilastik_setting
         )
         # disable ilastik menu
         self.view.menubar.menu_features.entryconfig(
@@ -652,9 +652,13 @@ class Controller:
 
         # set waveform template
         if self.acquire_bar_controller.mode == "confocal-projection":
-            self.configuration["experiment"]["MicroscopeState"]["waveform_template"] = "Confocal-Projection"
+            self.configuration["experiment"]["MicroscopeState"][
+                "waveform_template"
+            ] = "Confocal-Projection"
         else:
-            self.configuration["experiment"]["MicroscopeState"]["waveform_template"] = "Default"
+            self.configuration["experiment"]["MicroscopeState"][
+                "waveform_template"
+            ] = "Default"
 
         self.set_mode_of_sub(self.acquire_bar_controller.mode)
         self.update_buffer()
@@ -1170,12 +1174,15 @@ class Controller:
                     value,
                 )
                 self.view.settings.channels_tab.multipoint_frame.on_off.set(True)
+
             elif event == "ilastik_mask":
                 self.camera_view_controller.display_mask(value)
 
             elif event == "autofocus":
                 if hasattr(self, "af_popup_controller"):
-                    self.af_popup_controller.display_plot(value)
+                    self.af_popup_controller.display_plot(
+                        data=value[0], line_plot=value[1], clear_data=value[2]
+                    )
 
             elif event == "stop":
                 break

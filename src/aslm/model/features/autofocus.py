@@ -35,10 +35,42 @@ from queue import Queue
 import threading
 
 # Third Party Imports
+import numpy as np
+from scipy.optimize import curve_fit
+from scipy.stats import linregress
 
 # Local imports
 from aslm.model.features.feature_container import load_features
 from aslm.model.analysis.image_contrast import fast_normalized_dct_shannon_entropy
+
+
+def power_tent(x, x_offset, y_offset, amplitude, sigma, alpha):
+    """Power tent function.
+
+    Used for fitting the response curve of the autofocus routine.
+
+    Parameters
+    ----------
+    x : float
+        x value
+    x_offset : float
+        x offset
+    y_offset : float
+        y offset
+    amplitude : float
+        amplitude
+    sigma : float
+        sigma
+    alpha : float
+        alpha
+
+    Returns
+    -------
+    function : float
+        Power tent function
+    """
+    function = y_offset + amplitude * (1 - np.abs(sigma * (x - x_offset)) ** alpha)
+    return function
 
 
 class Autofocus:
@@ -93,8 +125,6 @@ class Autofocus:
     -------
     run()
         Run the autofocus data process.
-
-
     """
 
     def __init__(self, model):
@@ -155,11 +185,6 @@ class Autofocus:
         -------
         dict
             Autofocus parameters.
-
-        Examples
-        --------
-        >>> autofocus = Autofocus()
-        >>> autofocus.run(microscope_state, autofocus_params)
         """
         frame_num = self.get_autofocus_frame_num()
         if frame_num < 1:
@@ -199,11 +224,6 @@ class Autofocus:
         -------
         int
             Number of frames to be processed.
-
-        Examples
-        --------
-        >>> autofocus = Autofocus()
-        >>> autofocus.get_autofocus_frame_num()
         """
         settings = self.model.configuration["experiment"]["AutoFocusParameters"]
         frames = 0
@@ -232,7 +252,6 @@ class Autofocus:
             Number of steps for the stack
         pos_offset : float
             Need to figure out.
-
         """
         steps = ranges // step_size + 1
         pos_offset = (steps // 2) * step_size + step_size
@@ -248,24 +267,19 @@ class Autofocus:
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> autofocus = Autofocus()
-        >>> autofocus.pre_func_signal()
         """
         settings = self.model.configuration["experiment"]["AutoFocusParameters"]
-        # self.focus_pos = args[2]  # Current position
         self.focus_pos = self.model.configuration["experiment"]["StageParameters"]["f"]
-        # self.focus_pos = self.model.get_stage_position()['f_pos']
         self.total_frame_num = self.get_autofocus_frame_num()  # Total frame num
         self.coarse_steps, self.init_pos = 0, 0
+
         if settings["fine_selected"]:
             self.fine_step_size = int(settings["fine_step_size"])
             fine_steps, self.fine_pos_offset = self.get_steps(
                 int(settings["fine_range"]), self.fine_step_size
             )
             self.init_pos = self.focus_pos - self.fine_pos_offset
+
         if settings["coarse_selected"]:
             self.coarse_step_size = int(settings["coarse_step_size"])
             self.coarse_steps, coarse_pos_offset = self.get_steps(
@@ -284,24 +298,16 @@ class Autofocus:
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> autofocus = Autofocus()
-        >>> autofocus.in_func_signal()
         """
 
         if self.signal_id < self.coarse_steps:
             self.init_pos += self.coarse_step_size
             self.model.move_stage({"f_abs": self.init_pos}, wait_until_done=True)
-            # print('put to queue:', (self.model.frame_id, self.coarse_steps -
-            # self.signal_id, self.init_pos))
             self.autofocus_frame_queue.put(
                 (self.model.frame_id, self.coarse_steps - self.signal_id, self.init_pos)
             )
 
         elif self.signal_id < self.total_frame_num:
-
             if self.signal_id and self.signal_id == self.coarse_steps:
                 self.init_pos = self.autofocus_pos_queue.get(
                     timeout=self.coarse_steps * 10
@@ -334,11 +340,6 @@ class Autofocus:
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> autofocus = Autofocus()
-        >>> autofocus.end_func_signal()
         """
 
         return self.signal_id > self.total_frame_num
@@ -353,17 +354,12 @@ class Autofocus:
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> autofocus = Autofocus()
-        >>> autofocus.pre_func_data()
         """
         # Initialize the autofocus data
         self.max_entropy = 0
-        self.f_frame_id = (
-            -1
-        )  # Need to calculate DCTS value, but the image frame isn't ready
+        self.f_frame_id = -1
+
+        # Need to calculate DCTS value, but the image frame isn't ready
         self.frame_num = 10  # any value but not 1
         self.f_pos = 0
         self.target_frame_id = 0  # frame id in the buffer with best focus
@@ -382,11 +378,6 @@ class Autofocus:
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> autofocus = Autofocus()
-        >>> autofocus.in_func_data()
         """
 
         self.get_frames_num += len(frame_ids)
@@ -402,8 +393,7 @@ class Autofocus:
                     break
             except Exception:
                 break
-            # entropy = self.model.analysis.normalized_dct_shannon_entropy(
-            # self.model.data_buffer[self.f_frame_id], 3)
+
             entropy = fast_normalized_dct_shannon_entropy(
                 input_array=self.model.data_buffer[self.f_frame_id],
                 psf_support_diameter_xy=3,
@@ -451,16 +441,29 @@ class Autofocus:
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> autofocus = Autofocus()
-        >>> autofocus.end_func_data()
         """
         if self.get_frames_num <= self.total_frame_num:
             return False
-        # send out plot data
-        self.model.event_queue.put(("autofocus", self.plot_data))
+
+        # Send the data for plotting via the event queue
+        self.model.event_queue.put(("autofocus", [self.plot_data, False, True]))
+
+        # Evaluate data by fitting the data to a inverse power tent.
+        if self.model.configuration["experiment"]["AutoFocusParameters"]["robust_fit"]:
+            fit_data, fit_focus_position, r_squared = self.robust_autofocus()
+
+            # If the fit is good, use the fit focus position, else use the max entropy
+            if r_squared > 0.9:
+                self.focus_pos = fit_focus_position
+                self.model.event_queue.put(("autofocus", [fit_data, True, False]))
+                self.model.logger.info(
+                    f"Robust Focus Estimate: {self.focus_pos}, " f"R^2: {r_squared}"
+                )
+            else:
+                print("Robust Focus Estimate Failed. R^2: %s" % r_squared)
+                self.model.logger.info(
+                    f"Robust Focus Estimate Failed. R^2: {r_squared}"
+                )
 
         # Update the configuration with the new focus position
         self.model.configuration["experiment"]["StageParameters"]["f"] = self.focus_pos
@@ -480,3 +483,47 @@ class Autofocus:
         # Log the new focus position
         self.model.logger.info("***********final focus: %s" % self.focus_pos)
         return self.get_frames_num > self.total_frame_num
+
+    def robust_autofocus(self):
+        """Robust autofocus routine.
+
+        TODO: Current values for amplitude, sigma, and alpha are hard-coded. Fitting
+        is unfortunatel unstable.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        self.focus_pos : float
+            Focus position
+        """
+
+        # Convert plot data to numpy array
+        x_data = np.asarray(self.plot_data)[:, 0]
+        y_data = np.asarray(self.plot_data)[:, 1]
+
+        # Provide starting conditions for the fit.
+        x_offset = np.argmax(y_data)
+        y_offset = np.min(y_data)
+        amplitude = 1
+        sigma = 1
+        alpha = 0.01
+
+        # Fit the data
+        start_vals = [x_offset, y_offset, amplitude, sigma, alpha]
+        tent, _ = curve_fit(power_tent, x_data, y_data, p0=start_vals)
+        y_fit = power_tent(x_data, *tent)
+        focus_value = np.argmax(y_fit)
+        focus_position = x_data[focus_value]
+
+        # Calculate the R-Squared value
+        _, _, r_value, _, _ = linregress(y_data, y_fit)
+        r_squared = r_value**2
+
+        fit_data = []
+        for i in range(len(x_data)):
+            fit_data.append([x_data[i], y_fit[i]])
+
+        return fit_data, focus_position, r_squared

@@ -1089,7 +1089,9 @@ class CameraViewController(GUIController):
         self.ilastik_mask_ready_lock.release()
 
     def resize(self, event):
-        if event.widget != self.view:
+        if self.view.is_popup == False and event.widget != self.view:
+            return
+        if self.view.is_popup == True and event.widget.widgetName != "toplevel":
             return
         if self.resizie_event_id:
             self.view.after_cancel(self.resizie_event_id)

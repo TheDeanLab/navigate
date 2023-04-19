@@ -169,10 +169,17 @@ class BigDataViewerMetadata(XMLMetadata):
 
                         # Construct centroid of volume matrix
                         # print(matrix_id, views[matrix_id])
-                        mat += (
-                            self.stage_positions_to_affine_matrix(**views[matrix_id])
-                            / self.shape_z
-                        )
+                        try:
+                            mat += (
+                                self.stage_positions_to_affine_matrix(
+                                    **views[matrix_id]
+                                )
+                                / self.shape_z
+                            )
+                        except IndexError:
+                            # We have most likely canceled in the middle of
+                            # an acquisition.
+                            pass
                     d = {"timepoint": t, "setup": view_id}
                     d["ViewTransform"] = {"type": "affine"}
                     d["ViewTransform"]["affine"] = {

@@ -7,12 +7,14 @@ import numpy as np
 @pytest.mark.parametrize("multiposition", [True, False])
 @pytest.mark.parametrize("per_stack", [True, False])
 @pytest.mark.parametrize("z_stack", [True, False])
-def test_bdv_write(multiposition, per_stack, z_stack):
+@pytest.mark.parametrize("stop_early", [True, False])
+def test_bdv_write(multiposition, per_stack, z_stack, stop_early):
     from aslm.model.dummy import DummyModel
     from aslm.model.data_sources.bdv_data_source import BigDataViewerDataSource
 
     print(
-        f"Conditions are multiposition: {multiposition} per_stack: {per_stack} z_stack: {z_stack}"
+        f"Conditions are multiposition: {multiposition} per_stack: {per_stack} "
+        f"z_stack: {z_stack} stop_early: {stop_early}"
     )
 
     # Set up model with a random number of z-steps to modulate the shape
@@ -30,11 +32,11 @@ def test_bdv_write(multiposition, per_stack, z_stack):
     if per_stack:
         model.configuration["experiment"]["MicroscopeState"][
             "stack_cycling_mode"
-        ] == "per_stack"
+        ] = "per_stack"
     else:
         model.configuration["experiment"]["MicroscopeState"][
             "stack_cycling_mode"
-        ] == "per_slice"
+        ] = "per_slice"
 
     # Establish a BDV data source
     ds = BigDataViewerDataSource("test.h5")
@@ -42,6 +44,10 @@ def test_bdv_write(multiposition, per_stack, z_stack):
 
     # Populate one image per channel per timepoint
     n_images = ds.shape_c * ds.shape_z * ds.shape_t * ds.positions
+    print(
+        f"x: {ds.shape_x} y: {ds.shape_y} z: {ds.shape_z} c: {ds.shape_c} "
+        f"t: {ds.shape_t} positions: {ds.positions} per_stack: {ds.metadata.per_stack}"
+    )
     # TODO: Why does 2**16 make ImageJ crash??? But 2**8 works???
     data = (np.random.rand(n_images, ds.shape_x, ds.shape_y) * 2**8).astype("uint16")
     data_positions = (np.random.rand(n_images, 5) * 50e3).astype(float)
@@ -54,6 +60,8 @@ def test_bdv_write(multiposition, per_stack, z_stack):
             theta=data_positions[i, 3],
             f=data_positions[i, 4],
         )
+        if stop_early and np.random.rand() > 0.5:
+            break
     ds.close()
 
     try:

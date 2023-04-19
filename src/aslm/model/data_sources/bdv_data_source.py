@@ -178,8 +178,12 @@ class BigDataViewerDataSource(DataSource):
 
     def close(self) -> None:
         try:
-            self._check_shape(self._current_frame, self.metadata.per_stack)
-
+            self._check_shape(self._current_frame - 1, self.metadata.per_stack)
+            # print(
+            #     f"Post-check current_frame: {self._current_frame-1} x: {self.shape_x}"
+            #     f" y: {self.shape_y} z: {self.shape_z} c: {self.shape_c} "
+            #     f"t: {self.shape_t} p: {self.positions}"
+            # )
             self.image.close()
             self.metadata.write_xml(self.file_name, views=self._views)
         except AttributeError:

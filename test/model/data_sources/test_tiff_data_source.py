@@ -5,7 +5,8 @@ import pytest
 @pytest.mark.parametrize("multiposition", [True, False])
 @pytest.mark.parametrize("per_stack", [True, False])
 @pytest.mark.parametrize("z_stack", [True, False])
-def test_tiff_write_read(is_ome, multiposition, per_stack, z_stack):
+@pytest.mark.parametrize("stop_early", [False])
+def test_tiff_write_read(is_ome, multiposition, per_stack, z_stack, stop_early):
     import os
     import numpy as np
 
@@ -50,6 +51,8 @@ def test_tiff_write_read(is_ome, multiposition, per_stack, z_stack):
     for i in range(n_images):
         ds.write(data[i, ...].squeeze())
         file_names_raw.extend(ds.file_name)
+        if stop_early and np.random.rand() > 0.5:
+            break
     ds.close()
 
     file_names = []

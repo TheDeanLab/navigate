@@ -227,9 +227,8 @@ class TiffDataSource(DataSource):
 
     def close(self) -> None:
         try:
-            self._check_shape(self._current_frame, self.metadata.per_stack)
-
             if self._write_mode:
+                # self._check_shape(self._current_frame-1, self.metadata.per_stack)
                 for ch in range(len(self.image)):
                     self.image[ch].close()
                     if self.is_ome and len(self._views) > 0:

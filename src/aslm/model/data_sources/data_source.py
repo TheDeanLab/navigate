@@ -269,29 +269,33 @@ class DataSource:
                 c = frame_id % self.shape_c
                 z = (frame_id // self.shape_c) % self.shape_z
 
-            t = frame_id // (self.shape_c * self.shape_z * self.positions)
-            p = (frame_id // (self.shape_c * self.shape_z)) % self.positions
+            t = (frame_id // (self.shape_c * self.shape_z)) % self.shape_t
+            p = frame_id // (self.shape_c * self.shape_z * self.shape_t)
+
         else:
             # Timepoint acquisition, only c varies faster than t
             c = frame_id % self.shape_c
             t = (frame_id // self.shape_c) % self.shape_t
             z = (frame_id // (self.shape_c * self.shape_t)) % self.shape_z
-            p = (frame_id // (self.shape_c * self.shape_t)) % self.positions
+            p = frame_id // (self.shape_c * self.shape_t * self.shape_z)
 
         return c, z, t, p
 
     def _check_shape(self, max_frame: int = 0, per_stack: bool = True):
         # Check if we've closed this prior to completion
         c, z, t, p = self._cztp_indices(max_frame, per_stack)
+        print(f"max_frame: {max_frame} c: {c} z: {z} t: {t} p: {p}")
+        print(f"XYCZTP: {self.shape} {self.positions}")
         if (
-            (z != 0)
-            or (c != 0)
+            (z < (self.shape_z - 1))
+            or (c < (self.shape_c - 1))
             or (t < (self.shape_t - 1))
             or (p < (self.positions - 1))
         ):
+            print("IN HERE")
             # If we have, update our shape accordingly
             maxc, maxz, maxt, maxp = 0, 0, 0, 0
-            for idx in range(max_frame):
+            for idx in range(max_frame + 1):
                 c, z, t, p = self._cztp_indices(idx, per_stack)
                 maxc = max(maxc, c)
                 maxz = max(maxz, z)
@@ -302,6 +306,10 @@ class DataSource:
             if self.metadata is not None:
                 self.metadata.shape_c, self.metadata.shape_z = maxc + 1, maxz + 1
                 self.metadata.shape_t, self.metadata.positions = maxt + 1, maxp + 1
+        print(
+            f"result c: {self.shape_c} z: {self.shape_z} "
+            f"t: {self.shape_t} p: {self.positions}"
+        )
 
     def _mode_checks(self) -> None:
         """Run additional checks after setting the mode.

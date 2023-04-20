@@ -229,6 +229,23 @@ class AutofocusPopupController(GUIController):
             data[fine_steps:, 0], data[fine_steps:, 1], marker
         )
 
+        # Plot the maxima
+        y_max = np.max(data[:, 1])
+        peak_loc = data[np.argmax(data[:, 1]), 0]
+
+        y_axes_limit = self.autofocus_coarse.get_ylim()
+        x_axes_limit = self.autofocus_coarse.get_xlim()
+
+        # Vertical Indicator
+        self.coarse_plot = self.autofocus_coarse.plot(
+            [peak_loc, peak_loc], [y_axes_limit[0], y_axes_limit[1]], "--", color="gray"
+        )
+
+        # Horizontal Indicator
+        self.coarse_plot = self.autofocus_coarse.plot(
+            [x_axes_limit[0], x_axes_limit[1]], [y_max, y_max], "--", color="gray"
+        )
+
         # To redraw the plot
         self.autofocus_coarse.set_title("Discrete Cosine Transform", fontsize=18)
         self.autofocus_coarse.set_xlabel("Focus Stage Position", fontsize=16)

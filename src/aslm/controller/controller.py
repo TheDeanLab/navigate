@@ -38,6 +38,7 @@ from tkinter import filedialog, messagebox
 import multiprocessing as mp
 import threading
 import sys
+import platform
 
 # Third Party Imports
 
@@ -525,11 +526,22 @@ class Controller:
 
         # autofocus menu
         self.view.menubar.menu_autofocus.add_command(
-            label="Perform Autofocus", command=lambda: self.execute("autofocus")
+            label="Perform Autofocus",
+            command=lambda: self.execute("autofocus"),
+            accelerator="Ctrl+A",
         )
         self.view.menubar.menu_autofocus.add_command(
-            label="Autofocus Settings", command=popup_autofocus_setting
+            label="Autofocus Settings",
+            command=popup_autofocus_setting,
+            accelerator="Ctrl+Shift+A",
         )
+
+        if platform.platform == "darwin":
+            self.view.bind_all("<Control_L-A>", lambda: self.execute("autofocus"))
+            self.view.bind_all("<Control_L-Shift-A>", popup_autofocus_setting)
+        else:
+            self.view.bind_all("<Control-A>", lambda: self.execute("autofocus"))
+            self.view.bind_all("<Control-Shift-A>", popup_autofocus_setting)
 
         # Help menu
         self.view.menubar.menu_help.add_command(label="Help", command=popup_help)
@@ -976,7 +988,7 @@ class Controller:
         except Exception as e:
             tkinter.messagebox.showerror(
                 title="Warning",
-                message=f"There are something wrong! Cannot start acquisition!\n{e}"
+                message=f"There are something wrong! Cannot start acquisition!\n{e}",
             )
             self.set_mode_of_sub("stop")
             return

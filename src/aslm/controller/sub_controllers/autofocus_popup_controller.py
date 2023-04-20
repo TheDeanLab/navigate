@@ -30,8 +30,13 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import numpy as np
+# Standard Library Imports
 
+# Third Party Imports
+import numpy as np
+import matplotlib.ticker as tck
+
+# Local Imports
 from aslm.controller.sub_controllers.gui_controller import GUIController
 from aslm.tools.common_functions import combine_funcs
 
@@ -88,10 +93,10 @@ class AutofocusPopupController(GUIController):
         self.widgets = self.view.get_widgets()
         self.autofocus_fig = self.view.fig
         self.autofocus_coarse = self.view.coarse
-        self.autofocus_fine = self.view.fine
+        # self.autofocus_fine = self.view.fine
         self.populate_experiment_values()
         self.coarse_plot = None
-        self.fine_plot = None
+        # self.fine_plot = None
         self.setting_dict = self.parent_controller.configuration["experiment"][
             "AutoFocusParameters"
         ]
@@ -209,11 +214,10 @@ class AutofocusPopupController(GUIController):
         if line_plot is True:
             marker = "r-"
         else:
-            marker = "o"
+            marker = "k."
 
         if clear_data is True:
             self.autofocus_coarse.clear()
-            self.autofocus_fine.clear()
 
         # Plotting coarse data
         self.coarse_plot = self.autofocus_coarse.plot(
@@ -221,9 +225,15 @@ class AutofocusPopupController(GUIController):
         )
 
         # Plotting fine data
-        (self.fine_plot,) = self.autofocus_fine.plot(
+        self.coarse_plot = self.autofocus_coarse.plot(
             data[fine_steps:, 0], data[fine_steps:, 1], marker
         )
 
         # To redraw the plot
+        self.autofocus_coarse.set_title("Discrete Cosine Transform", fontsize=18)
+        self.autofocus_coarse.set_xlabel("Focus Stage Position", fontsize=16)
+        self.autofocus_coarse.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
+        self.autofocus_coarse.yaxis.set_minor_locator(tck.AutoMinorLocator())
+        self.autofocus_coarse.xaxis.set_minor_locator(tck.AutoMinorLocator())
+        self.autofocus_fig.tight_layout()
         self.autofocus_fig.canvas.draw_idle()

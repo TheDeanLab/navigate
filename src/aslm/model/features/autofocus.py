@@ -448,7 +448,7 @@ class Autofocus:
         # Send the data for plotting via the event queue
         self.model.event_queue.put(("autofocus", [self.plot_data, False, True]))
 
-        # Evaluate data by fitting the data to a inverse power tent.
+        # Evaluate data by fitting it to an inverse power tent.
         if self.model.configuration["experiment"]["AutoFocusParameters"]["robust_fit"]:
             fit_data, fit_focus_position, r_squared = self.robust_autofocus()
 

@@ -38,6 +38,7 @@ import logging
 # Third Party Imports
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import matplotlib.ticker as tck
 
 # Local Imports
 from aslm.view.custom_widgets.popup import PopUp
@@ -105,14 +106,14 @@ class AutofocusPopup:
         ]
 
         # Row 0, Column Titles
-        title_labels = ["Select", "Ranges", "Step Size"]
+        title_labels = ["Select", "Range", "Step Size"]
         for i in range(3):
             title = ttk.Label(content_frame, text=title_labels[i], padding=(2, 5, 0, 0))
             title.grid(row=0, column=i, sticky=tk.NSEW)
 
         # Row 1, 2 - Autofocus Settings
         setting_names = ["coarse", "fine", "robust_fit"]
-        setting_labels = ["Coarse", "Fine", "Robust Fit"]
+        setting_labels = ["Coarse", "Fine", "Inverse Power Tent Fit"]
         for i in range(2):
             # Column 0 - Checkboxes
             stage = ttk.Checkbutton(
@@ -153,15 +154,11 @@ class AutofocusPopup:
 
         # Row 5, Plot
         self.fig = Figure(figsize=(5, 5), dpi=100)
-        self.coarse = self.fig.add_subplot(211)
-        self.coarse.set_title("Coarse Autofocus")
-        self.coarse.set_ylabel("DCTS")
-        self.coarse.set_xlabel("Focus Position")
-
-        self.fine = self.fig.add_subplot(212)
-        self.fine.set_title("Fine Autofocus")
-        self.fine.set_ylabel("DCTS")
-        self.fine.set_xlabel("Focus Position")
+        self.coarse = self.fig.add_subplot(111)
+        self.coarse.set_title("Discrete Cosine Transform", fontsize=18)
+        self.coarse.set_xlabel("Focus Stage Position", fontsize=16)
+        self.coarse.yaxis.set_minor_locator(tck.AutoMinorLocator())
+        self.coarse.xaxis.set_minor_locator(tck.AutoMinorLocator())
 
         self.fig.tight_layout()
         canvas = FigureCanvasTkAgg(self.fig, master=content_frame)

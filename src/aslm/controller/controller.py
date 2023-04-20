@@ -332,11 +332,11 @@ class Controller:
 
         """
 
-        def new_experiment():
+        def new_experiment(*args):
             """Create a new experiment file."""
             self.populate_experiment_setting(self.default_experiment_file)
 
-        def load_experiment():
+        def load_experiment(*args):
             """Load an experiment file."""
             filename = filedialog.askopenfilename(
                 defaultextension=".yml", filetypes=[("Yaml files", "*.yml *.yaml")]
@@ -345,7 +345,7 @@ class Controller:
                 return
             self.populate_experiment_setting(filename)
 
-        def save_experiment():
+        def save_experiment(*args):
             """Save an experiment file.
 
             Updates model.experiment and saves it to file.
@@ -444,31 +444,70 @@ class Controller:
 
         menus_dict = {
             self.view.menubar.menu_file: {
-                "New Experiment": new_experiment,
-                "Load Experiment": load_experiment,
-                "Save Experiment": save_experiment,
+                "New Experiment": [
+                    new_experiment,
+                    "Ctrl+N",
+                    "<Control-n>",
+                    "<Control_L-n>",
+                ],
+                "Load Experiment": [
+                    load_experiment,
+                    "Ctrl+O",
+                    "<Control-o>",
+                    "<Control_L-o>",
+                ],
+                "Save Experiment": [
+                    save_experiment,
+                    "Ctrl+S",
+                    "<Control-s>",
+                    "<Control_L-s>",
+                ],
             },
             self.view.menubar.menu_multi_positions: {
-                "Load Positions": (self.multiposition_tab_controller.load_positions),
-                "Export Positions": (
-                    self.multiposition_tab_controller.export_positions
-                ),
-                "Append Current Position": (
-                    self.multiposition_tab_controller.add_stage_position
-                ),
-                "Generate Positions": (
-                    self.multiposition_tab_controller.generate_positions
-                ),
-                "Move to Selected Position": (
-                    self.multiposition_tab_controller.move_to_position
-                ),
-                # 'Sort Positions': ,
+                "Load Positions": [
+                    self.multiposition_tab_controller.load_positions,
+                    None,
+                    None,
+                    None,
+                ],
+                "Export Positions": [
+                    self.multiposition_tab_controller.export_positions,
+                    None,
+                    None,
+                    None,
+                ],
+                "Append Current Position": [
+                    self.multiposition_tab_controller.add_stage_position,
+                    None,
+                    None,
+                    None,
+                ],
+                "Generate Positions": [
+                    self.multiposition_tab_controller.generate_positions,
+                    None,
+                    None,
+                    None,
+                ],
+                "Move to Selected Position": [
+                    self.multiposition_tab_controller.move_to_position,
+                    None,
+                    None,
+                    None,
+                ],
             },
         }
         for menu in menus_dict:
             menu_items = menus_dict[menu]
             for label in menu_items:
-                menu.add_command(label=label, command=menu_items[label])
+                menu.add_command(
+                    label=label,
+                    command=menu_items[label][0],
+                    accelerator=menu_items[label][1],
+                )
+                if platform.platform() == "Darwin":
+                    menu.bind_all(menu_items[label][3], menu_items[label][0])
+                else:
+                    menu.bind_all(menu_items[label][2], menu_items[label][0])
 
         # load images from disk in synthetic hardware
         if is_synthetic_hardware:

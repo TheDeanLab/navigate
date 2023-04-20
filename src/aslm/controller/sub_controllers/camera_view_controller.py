@@ -158,8 +158,8 @@ class CameraViewController(GUIController):
         self.zoom_height = self.view.canvas_height
         self.canvas_width_scale = 4
         self.canvas_height_scale = 4
-        self.original_image_height = None
-        self.original_image_width = None
+        self.original_image_height = 2014
+        self.original_image_width = 2014
         self.number_of_slices = 0
         self.image_volume = None
         self.total_images_per_volume = 0
@@ -1103,10 +1103,19 @@ class CameraViewController(GUIController):
         if width == self.width and height == self.height:
             return
         self.canvas_width = width - 151
-        self.canvas_height = self.canvas_width
+        self.canvas_height = height - 85
         self.view.canvas.config(width=self.canvas_width, height=self.canvas_height)
         self.view.update_idletasks()
+        self.canvas_width = min(self.canvas_width, self.canvas_height)
+        self.canvas_height = self.canvas_width
         if self.view.is_popup:
             self.width, self.height = self.view.winfo_width(), self.view.winfo_height()
         else:
             self.width, self.height = width, height
+
+        # if resize the window during acquisition, the image showing should be updated
+        self.canvas_width_scale = float(self.original_image_width / self.canvas_width)
+        self.canvas_height_scale = float(
+            self.original_image_height / self.canvas_height
+        )
+        self.reset_display(False)

@@ -405,7 +405,7 @@ class Controller:
                 self.view, self, microscope_info
             )
 
-        def popup_autofocus_setting():
+        def popup_autofocus_setting(*args):
             """Pop up the Autofocus setting window."""
             if hasattr(self, "af_popup_controller"):
                 self.af_popup_controller.showup()
@@ -537,11 +537,11 @@ class Controller:
         )
 
         if platform.platform == "darwin":
-            self.view.bind_all("<Control_L-A>", lambda: self.execute("autofocus"))
-            self.view.bind_all("<Control_L-Shift-A>", popup_autofocus_setting)
+            self.view.bind_all("<Control_L-a>", lambda event: self.execute("autofocus"))
+            self.view.bind_all("<Control_L-A>", popup_autofocus_setting)
         else:
-            self.view.bind_all("<Control-A>", lambda: self.execute("autofocus"))
-            self.view.bind_all("<Control-Shift-A>", popup_autofocus_setting)
+            self.view.bind_all("<Control-a>", lambda event: self.execute("autofocus"))
+            self.view.bind_all("<Control-A>", popup_autofocus_setting)
 
         # Help menu
         self.view.menubar.menu_help.add_command(label="Help", command=popup_help)

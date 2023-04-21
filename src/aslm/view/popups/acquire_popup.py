@@ -42,6 +42,7 @@ from tkinter.scrolledtext import ScrolledText
 from aslm.view.custom_widgets.popup import PopUp
 from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from aslm.view.custom_widgets.validation import ValidatedCombobox, ValidatedEntry
+from aslm.model.data_sources import FILE_TYPES
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -145,14 +146,7 @@ class AcquirePopUp:
                     input_class=ValidatedCombobox,
                     input_var=tk.StringVar(),
                 )
-                self.inputs[entry_names[i]].set_values(
-                    (
-                        "TIFF",
-                        "OME-TIFF",
-                        # 'Zarr',
-                        "BDV",
-                    )
-                )
+                self.inputs[entry_names[i]].set_values(tuple(FILE_TYPES))
                 self.inputs[entry_names[i]].set("TIFF")
 
             elif entry_names[i] == "solvent":

@@ -2,6 +2,8 @@ import urllib.request
 import os
 import platform
 
+from aslm.tools.file_functions import delete_folder
+
 
 def test_ome_metadata_valid(dummy_model):
     from aslm.model.metadata_sources.ome_tiff_metadata import OMETIFFMetadata
@@ -39,26 +41,3 @@ def test_ome_metadata_valid(dummy_model):
     os.remove("test.xml")
 
     assert "No validation errors found." in output
-
-
-def delete_folder(top):
-    # https://docs.python.org/3/library/os.html#os.walk
-    # Delete everything reachable from the directory named in "top",
-    # assuming there are no symbolic links.
-    # CAUTION:  This is dangerous!  For example, if top == '/', it
-    # could delete all your disk files.
-    import os
-
-    for root, dirs, files in os.walk(top, topdown=False):
-        for name in files:
-            try:
-                os.remove(os.path.join(root, name))
-            except PermissionError:
-                # Windows locks these files sometimes
-                pass
-        for name in dirs:
-            try:
-                os.rmdir(os.path.join(root, name))
-            except OSError:
-                # One of the directories containing a file Windows decided to lock
-                pass

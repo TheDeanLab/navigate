@@ -41,6 +41,7 @@ from aslm.controller.sub_controllers import AcquireBarController
 from aslm.view.popups.acquire_popup import (
     AcquirePopUp,
 )
+from aslm.model.data_sources import FILE_TYPES
 
 
 class TestAcquireBarController:
@@ -484,11 +485,13 @@ class TestAcquireBarController:
             ("Acquire", True, True, "live", [], None),
             ("Acquire", False, True, "live", [], None),
             ("Acquire", False, False, "z-stack", [], None),
-            ("Acquire", False, True, "z-stack", ["TIFF", "OME-TIFF", "BDV"], "Done"),
-            ("Acquire", False, True, "z-stack", ["TIFF", "OME-TIFF", "BDV"], "Cancel"),
+            ("Acquire", False, True, "z-stack", FILE_TYPES, "Done"),
+            ("Acquire", False, True, "z-stack", FILE_TYPES, "Cancel"),
         ],
     )
-    def test_launch_popup_window(self, text, is_acquiring, save, mode, file_types, choice):
+    def test_launch_popup_window(
+        self, text, is_acquiring, save, mode, file_types, choice
+    ):
         """Tests the launch_popup_window method of the AcquireBarController class
 
         This is the largest test for this controller.
@@ -540,24 +543,36 @@ class TestAcquireBarController:
         if text == "Stop":
             assert self.acquire_bar_controller.view.acquire_btn["text"] == "Stop"
             if is_acquiring:
-                assert str(self.acquire_bar_controller.view.acquire_btn["state"]) == "disabled"
+                assert (
+                    str(self.acquire_bar_controller.view.acquire_btn["state"])
+                    == "disabled"
+                )
                 res = self.acquire_bar_controller.parent_controller.pop()
                 assert res == "stop_acquire"
             else:
-                assert str(self.acquire_bar_controller.view.acquire_btn["state"]) == "normal"
+                assert (
+                    str(self.acquire_bar_controller.view.acquire_btn["state"])
+                    == "normal"
+                )
                 res = self.acquire_bar_controller.parent_controller.pop()
-                assert res == 'Empty command list'
+                assert res == "Empty command list"
 
         if text == "Acquire":
             if is_acquiring:
-                assert str(self.acquire_bar_controller.view.acquire_btn["state"]) == "normal"
+                assert (
+                    str(self.acquire_bar_controller.view.acquire_btn["state"])
+                    == "normal"
+                )
                 res = self.acquire_bar_controller.parent_controller.pop()
-                assert res == 'Empty command list'
+                assert res == "Empty command list"
                 return
             # First scenario Save is on and in live mode
             if save is True and mode == "live":
                 assert self.acquire_bar_controller.view.acquire_btn["text"] == "Acquire"
-                assert str(self.acquire_bar_controller.view.acquire_btn["state"]) == "disabled"
+                assert (
+                    str(self.acquire_bar_controller.view.acquire_btn["state"])
+                    == "disabled"
+                )
                 res = self.acquire_bar_controller.parent_controller.pop()
                 print(res)
                 print(self.acquire_bar_controller.parent_controller.pop())
@@ -566,7 +581,10 @@ class TestAcquireBarController:
             # Second scenario Save is off and mode is not live
             if save is False and mode != "live":
                 assert self.acquire_bar_controller.view.acquire_btn["text"] == "Acquire"
-                assert str(self.acquire_bar_controller.view.acquire_btn["state"]) == "disabled"
+                assert (
+                    str(self.acquire_bar_controller.view.acquire_btn["state"])
+                    == "disabled"
+                )
                 res = self.acquire_bar_controller.parent_controller.pop()
                 assert res == "acquire"
 
@@ -611,7 +629,10 @@ class TestAcquireBarController:
                         self.acquire_bar_controller.acquire_pop.popup.winfo_exists()
                         == 0
                     )
-                    assert str(self.acquire_bar_controller.view.acquire_btn["state"]) == "normal"
+                    assert (
+                        str(self.acquire_bar_controller.view.acquire_btn["state"])
+                        == "normal"
+                    )
                 elif choice == "Done":
                     # Testing done button
 
@@ -640,7 +661,10 @@ class TestAcquireBarController:
                     # and if acquire button changed to Stop
                     res = self.acquire_bar_controller.parent_controller.pop()
                     assert res == "acquire_and_save"
-                    assert str(self.acquire_bar_controller.view.acquire_btn["state"]) == "disabled"
+                    assert (
+                        str(self.acquire_bar_controller.view.acquire_btn["state"])
+                        == "disabled"
+                    )
                     assert (
                         self.acquire_bar_controller.acquire_pop.popup.winfo_exists()
                         == 0
@@ -654,12 +678,11 @@ class TestAcquireBarController:
         self.acquire_bar_controller.set_mode("live")
         self.acquire_bar_controller.is_acquiring = False
 
-
         # start acquisition
         self.acquire_bar_controller.view.acquire_btn.invoke()
         assert self.acquire_bar_controller.view.acquire_btn["text"] == "Acquire"
         assert str(self.acquire_bar_controller.view.acquire_btn["state"]) == "disabled"
-        assert self.acquire_bar_controller.is_acquiring == True
+        assert self.acquire_bar_controller.is_acquiring is True
         # assert dummy_controller_to_test_acquire_bar.acquisition_count == 1
         res = self.acquire_bar_controller.parent_controller.pop()
         assert res == "acquire"

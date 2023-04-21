@@ -1102,12 +1102,15 @@ class CameraViewController(GUIController):
     def refresh(self, width, height):
         if width == self.width and height == self.height:
             return
-        self.canvas_width = width - 151
-        self.canvas_height = height - 85
-        self.view.canvas.config(width=self.canvas_width, height=self.canvas_height)
-        self.view.update_idletasks()
-        self.canvas_width = min(self.canvas_width, self.canvas_height)
-        self.canvas_height = self.canvas_width
+        if not self.view.is_docked:
+            self.canvas_width = width - 151
+            self.canvas_height = height - 85
+            self.view.canvas.config(width=self.canvas_width, height=self.canvas_height)
+            self.view.update_idletasks()
+            self.canvas_width = min(self.canvas_width, self.canvas_height)
+            self.canvas_height = self.canvas_width
+        else:
+            self.canvas_width, self.canvas_height = 512, 512
         if self.view.is_popup:
             self.width, self.height = self.view.winfo_width(), self.view.winfo_height()
         else:

@@ -145,6 +145,7 @@ class CameraTab(tk.Frame):
 
         # Frame for the Image View
         self.is_popup = False
+        self.is_docked = True
         self.canvas_width, self.canvas_height = 512, 512
         self.canvas = tk.Canvas(
             self.cam_image, width=self.canvas_width, height=self.canvas_height

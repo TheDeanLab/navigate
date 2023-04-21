@@ -110,6 +110,7 @@ class CameraViewPopupWindow:
 
         self.camera_view = CameraTab(content_frame)
         self.camera_view.is_popup = True
+        self.camera_view.is_docked = False
         self.camera_view.grid(row=0, column=0, sticky=tk.NSEW)
 
     # Getters

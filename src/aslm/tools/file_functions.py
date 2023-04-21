@@ -152,4 +152,7 @@ def delete_folder(top):
                 # One of the directories containing a file Windows decided to lock
                 pass
 
-    os.rmdir(top)
+    try:
+        os.rmdir(top)
+    except OSError:
+        pass

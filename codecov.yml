@@ -1,0 +1,5 @@
+ignore:
+  - "test"
+  - "design"
+  - "docs"
+  - "setup.py"

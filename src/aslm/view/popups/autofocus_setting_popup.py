@@ -38,6 +38,7 @@ import logging
 # Third Party Imports
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import matplotlib.ticker as tck
 
 # Local Imports
 from aslm.view.custom_widgets.popup import PopUp
@@ -77,10 +78,6 @@ class AutofocusPopup:
         The coarse autofocus subplot.
     fine : matplotlib.axes._subplots.AxesSubplot
         The fine autofocus subplot.
-    canvas : matplotlib.backends.backend_tkagg.FigureCanvasTkAgg
-        The matplotlib canvas.
-    toolbar : matplotlib.backends.backend_tkagg.NavigationToolbar2Tk
-        The matplotlib toolbar.
 
     Methods
     -------
@@ -89,87 +86,86 @@ class AutofocusPopup:
     """
 
     def __init__(self, root, *args, **kwargs):
-        # Creating popup window with this name and size/placement, PopUp is a
-        # Toplevel window
+        # Creating popup window with this name and size/placement,
+        # PopUp is a Toplevel window
         self.popup = PopUp(
             root, "Autofocus Settings", "+320+180", top=False, transient=False
         )
+        # Change background of popup window to white
+        self.popup.configure(bg="white")
 
         # Creating content frame
         content_frame = self.popup.get_frame()
 
         # Dictionary for all the variables
         self.inputs = {}
-        self.stage_vars = [tk.BooleanVar(False), tk.BooleanVar(False)]
+        self.stage_vars = [
+            tk.BooleanVar(False),
+            tk.BooleanVar(False),
+            tk.BooleanVar(False),
+        ]
 
-        # Label Lists
-        title_labels = ["Select", "Ranges", "Step Size"]
-        setting_names = ["coarse", "fine"]
-        setting_labels = ["Coarse", "Fine"]
-
-        # Column Titles
+        # Row 0, Column Titles
+        title_labels = ["Select", "Range", "Step Size"]
         for i in range(3):
-            # Title labels
             title = ttk.Label(content_frame, text=title_labels[i], padding=(2, 5, 0, 0))
-            title.grid(row=0, column=i, sticky=(tk.NSEW))
+            title.grid(row=0, column=i, sticky=tk.NSEW)
 
-        # Widgets
+        # Row 1, 2 - Autofocus Settings
+        setting_names = ["coarse", "fine", "robust_fit"]
+        setting_labels = ["Coarse", "Fine", "Inverse Power Tent Fit"]
         for i in range(2):
-            # Stage labels
+            # Column 0 - Checkboxes
             stage = ttk.Checkbutton(
                 content_frame, text=setting_labels[i], variable=self.stage_vars[i]
             )
-            stage.grid(row=i + 1, column=0, sticky=(tk.NSEW), padx=5)
+            stage.grid(row=i + 1, column=0, sticky=tk.NSEW, padx=5)
 
-            # Entry Widgets
+            # Column 1 - Ranges
             self.inputs[setting_names[i] + "_range"] = LabelInput(
                 parent=content_frame,
                 input_class=ValidatedSpinbox,
                 input_var=tk.StringVar(),
                 input_args={"from_": 0.0, "to": 50000},
             )
-
             self.inputs[setting_names[i] + "_range"].grid(
                 row=i + 1, column=1, sticky=tk.NSEW, padx=(0, 5), pady=(15, 0)
             )
 
+            # Column 2 - Step Sizes
             self.inputs[setting_names[i] + "_step_size"] = LabelInput(
                 parent=content_frame,
                 input_class=ValidatedSpinbox,
                 input_var=tk.StringVar(),
                 input_args={"from_": 0.0, "to": 50000},
             )
-
             self.inputs[setting_names[i] + "_step_size"].grid(
                 row=i + 1, column=2, sticky=tk.NSEW, padx=(0, 5), pady=(15, 0)
             )
 
-        # Buttons
+        # Row 4, Autofocus Button
         self.autofocus_btn = ttk.Button(content_frame, text="Autofocus")
         self.autofocus_btn.grid(row=4, column=2, pady=(0, 10))
 
-        # Plot
+        robust_fit = ttk.Checkbutton(
+            content_frame, text=setting_labels[2], variable=self.stage_vars[2]
+        )
+        robust_fit.grid(row=4, column=0, sticky=tk.NSEW, padx=5)
+
+        # Row 5, Plot
         self.fig = Figure(figsize=(5, 5), dpi=100)
-        self.coarse = self.fig.add_subplot(211)
-        self.coarse.set_title("Coarse Autofocus")
-        self.coarse.set_ylabel("DCTS")
-        self.coarse.set_xlabel("Focus Position")
-        self.fine = self.fig.add_subplot(212)
-        # print(f"Funcs: {dir(self.fine)}")
-        self.fine.set_title("Fine Autofocus")
-        self.fine.set_ylabel("DCTS")
-        self.fine.set_xlabel("Focus Position")
+        self.coarse = self.fig.add_subplot(111)
+        self.coarse.set_title("Discrete Cosine Transform", fontsize=18)
+        self.coarse.set_xlabel("Focus Stage Position", fontsize=16)
+        self.coarse.yaxis.set_minor_locator(tck.AutoMinorLocator())
+        self.coarse.xaxis.set_minor_locator(tck.AutoMinorLocator())
+
         self.fig.tight_layout()
         canvas = FigureCanvasTkAgg(self.fig, master=content_frame)
         canvas.draw()
         canvas.get_tk_widget().grid(
             row=5, column=0, columnspan=3, sticky=tk.NSEW, padx=(5, 5), pady=(5, 5)
         )
-
-        # Adding toolbar
-        # toolbar = NavigationToolbar2Tk(canvas, content_frame, pack_toolbar=False)
-        # toolbar.update()
-        # toolbar.grid(row=5, column=4)
 
     def get_widgets(self):
         """Returns the dictionary of input widgets.

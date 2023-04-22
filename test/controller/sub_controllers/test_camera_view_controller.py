@@ -439,8 +439,9 @@ class TestCameraViewController:
         self.zoom_image = test_image
 
         # set the widget size
-        self.camera_view.view.canvas_width = np.random.randint(5, 99)
-        self.camera_view.view.canvas_height = np.random.randint(5, 99)
+        widget = type("MyWidget", (object,), {"widget": self.camera_view.view})
+        event = type("MyEvent", (object,), {"widget": widget, "width": np.random.randint(5, 1000), "height": np.random.randint(5, 1000)})
+        self.camera_view.resize(event)
 
         # monkeypatch cv2.resize
         def mocked_resize(img, size):
@@ -569,10 +570,10 @@ class TestCameraViewController:
         assert self.camera_view.original_image_height == int(
             camera_parameters["y_pixels"]
         )
-        assert self.camera_view.canvas_width_scale == int(
+        assert self.camera_view.canvas_width_scale == float(
             self.camera_view.original_image_width / self.camera_view.view.canvas_width
         )
-        assert self.camera_view.canvas_height_scale == int(
+        assert self.camera_view.canvas_height_scale == float(
             self.camera_view.original_image_height / self.camera_view.view.canvas_height
         )
 

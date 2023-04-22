@@ -88,6 +88,14 @@ class CameraViewController(GUIController):
             "<<ComboboxSelected>>", self.update_display_state
         )
 
+        self.resizie_event_id = None
+        self.view.bind("<Configure>", self.resize)
+        self.width, self.height = 663, 597
+        self.canvas_width, self.canvas_height = (
+            self.view.canvas_width,
+            self.view.canvas_height,
+        )
+
         # Left Click Binding
         # self.canvas.bind("<Button-1>", self.left_click)
 
@@ -150,8 +158,8 @@ class CameraViewController(GUIController):
         self.zoom_height = self.view.canvas_height
         self.canvas_width_scale = 4
         self.canvas_height_scale = 4
-        self.original_image_height = None
-        self.original_image_width = None
+        self.original_image_height = 2014
+        self.original_image_width = 2014
         self.number_of_slices = 0
         self.image_volume = None
         self.total_images_per_volume = 0
@@ -380,13 +388,13 @@ class CameraViewController(GUIController):
             "microscopes"
         ][microscope_name]["zoom"]["pixel_size"][zoom_value]
 
-        offset_x = (
+        offset_x = int(
             (self.move_to_x - current_center_x)
             / self.zoom_scale
             * self.canvas_width_scale
             * pixel_size
         )
-        offset_y = (
+        offset_y = int(
             (self.move_to_y - current_center_y)
             / self.zoom_scale
             * self.canvas_height_scale
@@ -430,14 +438,12 @@ class CameraViewController(GUIController):
         --------
         >>> self.reset_display()
         """
-        self.zoom_rect = np.array(
-            [[0, self.view.canvas_width], [0, self.view.canvas_height]]
-        )
+        self.zoom_width = self.canvas_width
+        self.zoom_height = self.canvas_height
+        self.zoom_rect = np.array([[0, self.zoom_width], [0, self.zoom_height]])
         self.zoom_offset = np.array([[0], [0]])
         self.zoom_value = 1
         self.zoom_scale = 1
-        self.zoom_width = self.view.canvas_width
-        self.zoom_height = self.view.canvas_height
         if display_flag:
             self.process_image()
 
@@ -533,20 +539,20 @@ class CameraViewController(GUIController):
         # crosshair
         crosshair_x = (self.zoom_rect[0][0] + self.zoom_rect[0][1]) / 2
         crosshair_y = (self.zoom_rect[1][0] + self.zoom_rect[1][1]) / 2
-        if crosshair_x < 0 or crosshair_x >= self.view.canvas_width:
+        if crosshair_x < 0 or crosshair_x >= self.canvas_width:
             crosshair_x = -1
-        if crosshair_y < 0 or crosshair_y >= self.view.canvas_height:
+        if crosshair_y < 0 or crosshair_y >= self.canvas_height:
             crosshair_y = -1
         self.crosshair_x = int(crosshair_x)
         self.crosshair_y = int(crosshair_y)
 
         self.zoom_image = self.image[
-            y_start_index
-            * self.canvas_height_scale : y_end_index
-            * self.canvas_height_scale,
-            x_start_index
-            * self.canvas_width_scale : x_end_index
-            * self.canvas_width_scale,
+            int(y_start_index * self.canvas_height_scale) : int(
+                y_end_index * self.canvas_height_scale
+            ),
+            int(x_start_index * self.canvas_width_scale) : int(
+                x_end_index * self.canvas_width_scale
+            ),
         ]
 
     def left_click(self, event):
@@ -613,7 +619,7 @@ class CameraViewController(GUIController):
         -------
         >>> self.down_sample_image()
         """
-        sx, sy = self.view.canvas_width, self.view.canvas_height
+        sx, sy = self.canvas_width, self.canvas_height
         self.down_sampled_image = cv2.resize(self.zoom_image, (sx, sy))
 
     def scale_image_intensity(self):
@@ -690,11 +696,9 @@ class CameraViewController(GUIController):
         self.total_images_per_volume = self.number_of_channels * self.number_of_slices
         self.original_image_width = int(camera_parameters["x_pixels"])
         self.original_image_height = int(camera_parameters["y_pixels"])
-        self.canvas_width_scale = int(
-            self.original_image_width / self.view.canvas_width
-        )
-        self.canvas_height_scale = int(
-            self.original_image_height / self.view.canvas_height
+        self.canvas_width_scale = float(self.original_image_width / self.canvas_width)
+        self.canvas_height_scale = float(
+            self.original_image_height / self.canvas_height
         )
         self.reset_display(False)
 
@@ -1083,3 +1087,38 @@ class CameraViewController(GUIController):
         """
         self.ilastik_seg_mask = cv2.applyColorMap(mask, self.mask_color_table)
         self.ilastik_mask_ready_lock.release()
+
+    def resize(self, event):
+        if self.view.is_popup == False and event.widget != self.view:
+            return
+        if self.view.is_popup == True and event.widget.widgetName != "toplevel":
+            return
+        if self.resizie_event_id:
+            self.view.after_cancel(self.resizie_event_id)
+        self.resizie_event_id = self.view.after(
+            1000, lambda: self.refresh(event.width, event.height)
+        )
+
+    def refresh(self, width, height):
+        if width == self.width and height == self.height:
+            return
+        if not self.view.is_docked:
+            self.canvas_width = width - 151
+            self.canvas_height = height - 85
+            self.view.canvas.config(width=self.canvas_width, height=self.canvas_height)
+            self.view.update_idletasks()
+            self.canvas_width = min(self.canvas_width, self.canvas_height)
+            self.canvas_height = self.canvas_width
+        else:
+            self.canvas_width, self.canvas_height = 512, 512
+        if self.view.is_popup:
+            self.width, self.height = self.view.winfo_width(), self.view.winfo_height()
+        else:
+            self.width, self.height = width, height
+
+        # if resize the window during acquisition, the image showing should be updated
+        self.canvas_width_scale = float(self.original_image_width / self.canvas_width)
+        self.canvas_height_scale = float(
+            self.original_image_height / self.canvas_height
+        )
+        self.reset_display(False)

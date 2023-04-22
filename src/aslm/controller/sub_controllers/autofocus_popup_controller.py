@@ -30,8 +30,13 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import numpy as np
+# Standard Library Imports
 
+# Third Party Imports
+import numpy as np
+import matplotlib.ticker as tck
+
+# Local Imports
 from aslm.controller.sub_controllers.gui_controller import GUIController
 from aslm.tools.common_functions import combine_funcs
 
@@ -44,18 +49,57 @@ logger = logging.getLogger(p)
 
 
 class AutofocusPopupController(GUIController):
+    """Class creates the popup to configure autofocus parameters.
+
+    Parameters
+    ----------
+    view : aslm.view.popups.autofocus_setting_popup.AutofocusPopup
+        The view of the autofocus popup.
+    parent_controller : aslm.controller.main_controller.MainController
+        The parent controller of the autofocus popup.
+
+    Attributes
+    ----------
+    widgets : dict
+        Dictionary of widgets in the autofocus popup.
+    autofocus_fig : matplotlib.figure.Figure
+        The figure for the autofocus plot.
+    autofocus_coarse : matplotlib.axes.Axes
+        The coarse autofocus plot.
+    autofocus_fine : matplotlib.axes.Axes
+        The fine autofocus plot.
+    coarse_plot : matplotlib.lines.Line2D
+        The coarse autofocus plot line.
+    fine_plot : matplotlib.lines.Line2D
+        The fine autofocus plot line.
+
+    Methods
+    -------
+    populate_experiment_values()
+        Populates the autofocus popup with the current experiment values.
+    update_experiment_values()
+        Updates the experiment values with the values in the autofocus popup.
+    start_autofocus()
+        Starts the autofocus process.
+    display_plot(data)
+        Displays the autofocus plot.
+    showup()
+        Shows the autofocus popup.
+    """
+
     def __init__(self, view, parent_controller):
         super().__init__(view, parent_controller)
 
         self.widgets = self.view.get_widgets()
-
         self.autofocus_fig = self.view.fig
         self.autofocus_coarse = self.view.coarse
-        self.autofocus_fine = self.view.fine
+        # self.autofocus_fine = self.view.fine
         self.populate_experiment_values()
-
         self.coarse_plot = None
-        self.fine_plot = None
+        # self.fine_plot = None
+        self.setting_dict = self.parent_controller.configuration["experiment"][
+            "AutoFocusParameters"
+        ]
 
         # add saving function to the function closing the window
         exit_func = combine_funcs(
@@ -64,7 +108,6 @@ class AutofocusPopupController(GUIController):
             lambda: delattr(self.parent_controller, "af_popup_controller"),
         )
         self.view.popup.protocol("WM_DELETE_WINDOW", exit_func)
-
         self.view.autofocus_btn.configure(command=self.start_autofocus)
 
     def populate_experiment_values(self):
@@ -72,8 +115,13 @@ class AutofocusPopupController(GUIController):
 
         Populates the experiment values from the experiment settings dictionary
 
-        Example:
-        >>> populate_experiment_values()
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
         """
         self.setting_dict = self.parent_controller.configuration["experiment"][
             "AutoFocusParameters"
@@ -81,80 +129,128 @@ class AutofocusPopupController(GUIController):
         # show the value
         for k in self.widgets:
             self.widgets[k].set(self.setting_dict[k])
-        self.view.stage_vars[0].set(self.setting_dict["coarse_selected"])
-        self.view.stage_vars[1].set(self.setting_dict["fine_selected"])
+        self.view.stage_vars[0].set(self.setting_dict.get("coarse_selected", True))
+        self.view.stage_vars[1].set(self.setting_dict.get("fine_selected", True))
+        self.view.stage_vars[2].set(self.setting_dict.get("robust_fit", True))
 
     def update_experiment_values(self):
         """Update Experiment Values
 
         Updates the experiment values from the experiment settings dictionary
 
-        Example:
-        >>> update_experiment_values()
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
         """
         for k in self.widgets:
             self.setting_dict[k] = self.widgets[k].get()
         self.setting_dict["coarse_selected"] = self.view.stage_vars[0].get()
         self.setting_dict["fine_selected"] = self.view.stage_vars[1].get()
+        self.setting_dict["robust_fit"] = self.view.stage_vars[2].get()
 
     def showup(self):
-        """Show Up
+        """Shows the popup window
 
-        Shows the popup window
+        Parameters
+        ----------
+        None
 
-        Example:
-        >>> showup()
+        Returns
+        -------
+        None
         """
         self.view.popup.deiconify()
         self.view.popup.attributes("-topmost", 1)
 
     def start_autofocus(self):
-        """Start Autofocus
+        """Starts the autofocus process
 
-        Starts the autofocus process
+        Parameters
+        ----------
+        None
 
-        Example:
-        >>> start_autofocus()
+        Returns
+        -------
+        None
         """
         self.update_experiment_values()
-        # self.view.popup.dismiss()
-        # delattr(self.parent_controller,'af_popup_controller')
         self.parent_controller.execute("autofocus")
 
-    def display_plot(self, data):
-        """Display Plot
+    def display_plot(self, data, line_plot=False, clear_data=True):
+        """Displays the autofocus plot
 
-        Displays the autofocus plot
+        data : numpy.ndarray
+            The data to be plotted.
+        line_plot : bool
+            If True, the plot will be a line plot.
+            If False, the plot will be a scatter plot.
+        clear_data : bool
+            If True, the plot will be cleared before plotting.
+            If False, the plot will be added to the existing plot.
 
-        Args:
-            data (dict): autofocus data
+        Parameters
+        ----------
+        None
 
-        Example:
-        >>> display_plot(data)
+        Returns
+        -------
+        None
         """
 
         data = np.asarray(data)
-
-        coarse_range = self.setting_dict["coarse_range"]
-        coarse_step = self.setting_dict["coarse_step_size"]
-        fine_range = self.setting_dict["fine_range"]
-        fine_step = self.setting_dict["fine_step_size"]
+        coarse_range = self.setting_dict.get("coarse_range", 500)
+        coarse_step = self.setting_dict.get("coarse_step_size", 50)
+        fine_range = self.setting_dict.get("fine_range", 50)
+        fine_step = self.setting_dict.get("fine_step_size", 5)
 
         # Calculate the coarse portion of the data
         coarse_steps = int(coarse_range) // int(coarse_step) + 1
         fine_steps = int(fine_range) // int(fine_step) + 1
 
+        if line_plot is True:
+            marker = "r-"
+        else:
+            marker = "k."
+
+        if clear_data is True:
+            self.autofocus_coarse.clear()
+
         # Plotting coarse data
-        self.autofocus_coarse.clear()
         self.coarse_plot = self.autofocus_coarse.plot(
-            data[:coarse_steps, 0], data[:coarse_steps, 1], "bo"
+            data[:coarse_steps, 0], data[:coarse_steps, 1], marker
         )
 
         # Plotting fine data
-        self.autofocus_fine.clear()
-        (self.fine_plot,) = self.autofocus_fine.plot(
-            data[fine_steps:, 0], data[fine_steps:, 1], "g*"
+        self.coarse_plot = self.autofocus_coarse.plot(
+            data[fine_steps:, 0], data[fine_steps:, 1], marker
+        )
+
+        # Plot the maxima
+        y_max = np.max(data[:, 1])
+        peak_loc = data[np.argmax(data[:, 1]), 0]
+
+        y_axes_limit = self.autofocus_coarse.get_ylim()
+        x_axes_limit = self.autofocus_coarse.get_xlim()
+
+        # Vertical Indicator
+        self.coarse_plot = self.autofocus_coarse.plot(
+            [peak_loc, peak_loc], [y_axes_limit[0], y_axes_limit[1]], "--", color="gray"
+        )
+
+        # Horizontal Indicator
+        self.coarse_plot = self.autofocus_coarse.plot(
+            [x_axes_limit[0], x_axes_limit[1]], [y_max, y_max], "--", color="gray"
         )
 
         # To redraw the plot
+        self.autofocus_coarse.set_title("Discrete Cosine Transform", fontsize=18)
+        self.autofocus_coarse.set_xlabel("Focus Stage Position", fontsize=16)
+        self.autofocus_coarse.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
+        self.autofocus_coarse.yaxis.set_minor_locator(tck.AutoMinorLocator())
+        self.autofocus_coarse.xaxis.set_minor_locator(tck.AutoMinorLocator())
+        self.autofocus_fig.tight_layout()
         self.autofocus_fig.canvas.draw_idle()

@@ -71,6 +71,8 @@ def test_stage_key_press(stage_controller):
         [increment, 0, -increment, 0],
     ):
         event.char = char
+        # <a> instead of <Control+a>
+        event.state = 0
         x += xs
         y += ys
         stage_controller.stage_key_press(event)

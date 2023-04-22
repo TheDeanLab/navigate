@@ -30,9 +30,13 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Standard Library Imports
 from tkinter import Menu
-
 import logging
+
+# Third Party Imports
+
+# Local Imports
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -41,7 +45,7 @@ logger = logging.getLogger(p)
 
 #  Menubar class
 class Menubar(Menu):
-    """Menu bar class for ASLM GUI
+    """Menu bar class for GUI
 
     Parameters
     ----------
@@ -68,8 +72,10 @@ class Menubar(Menu):
         Add-on Features menu
     menu_help : tkinter.Menu
         Help menu
-    menu_debug : tkinter.Menu
-        Debug menu
+
+    Methods
+    -------
+    None
     """
 
     def __init__(self, window, *args, **kwargs):
@@ -108,4 +114,3 @@ class Menubar(Menu):
         # Help Menu
         self.menu_help = Menu(self)
         self.add_cascade(menu=self.menu_help, label="Help")
-

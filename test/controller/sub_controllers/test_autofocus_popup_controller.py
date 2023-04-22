@@ -124,7 +124,6 @@ class TestAutofocusPopupController:
         attrs = [
             "autofocus_fig",
             "autofocus_coarse",
-            "autofocus_fine",
             "widgets",
             "setting_dict",
         ]

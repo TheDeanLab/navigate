@@ -161,6 +161,8 @@ class StageController(GUIController):
         -------
         None
         """
+        if event.state != 0:
+            return
         char = event.char.lower()
         current_position = self.get_position()
         if current_position is None:

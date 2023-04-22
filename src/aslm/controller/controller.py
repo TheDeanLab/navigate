@@ -38,6 +38,7 @@ from tkinter import filedialog, messagebox
 import multiprocessing as mp
 import threading
 import sys
+import platform
 
 # Third Party Imports
 
@@ -331,11 +332,11 @@ class Controller:
 
         """
 
-        def new_experiment():
+        def new_experiment(*args):
             """Create a new experiment file."""
             self.populate_experiment_setting(self.default_experiment_file)
 
-        def load_experiment():
+        def load_experiment(*args):
             """Load an experiment file."""
             filename = filedialog.askopenfilename(
                 defaultextension=".yml", filetypes=[("Yaml files", "*.yml *.yaml")]
@@ -344,7 +345,7 @@ class Controller:
                 return
             self.populate_experiment_setting(filename)
 
-        def save_experiment():
+        def save_experiment(*args):
             """Save an experiment file.
 
             Updates model.experiment and saves it to file.
@@ -404,7 +405,7 @@ class Controller:
                 self.view, self, microscope_info
             )
 
-        def popup_autofocus_setting():
+        def popup_autofocus_setting(*args):
             """Pop up the Autofocus setting window."""
             if hasattr(self, "af_popup_controller"):
                 self.af_popup_controller.showup()
@@ -443,31 +444,70 @@ class Controller:
 
         menus_dict = {
             self.view.menubar.menu_file: {
-                "New Experiment": new_experiment,
-                "Load Experiment": load_experiment,
-                "Save Experiment": save_experiment,
+                "New Experiment": [
+                    new_experiment,
+                    "Ctrl+N",
+                    "<Control-n>",
+                    "<Control_L-n>",
+                ],
+                "Load Experiment": [
+                    load_experiment,
+                    "Ctrl+O",
+                    "<Control-o>",
+                    "<Control_L-o>",
+                ],
+                "Save Experiment": [
+                    save_experiment,
+                    "Ctrl+S",
+                    "<Control-s>",
+                    "<Control_L-s>",
+                ],
             },
             self.view.menubar.menu_multi_positions: {
-                "Load Positions": (self.multiposition_tab_controller.load_positions),
-                "Export Positions": (
-                    self.multiposition_tab_controller.export_positions
-                ),
-                "Append Current Position": (
-                    self.multiposition_tab_controller.add_stage_position
-                ),
-                "Generate Positions": (
-                    self.multiposition_tab_controller.generate_positions
-                ),
-                "Move to Selected Position": (
-                    self.multiposition_tab_controller.move_to_position
-                ),
-                # 'Sort Positions': ,
+                "Load Positions": [
+                    self.multiposition_tab_controller.load_positions,
+                    None,
+                    None,
+                    None,
+                ],
+                "Export Positions": [
+                    self.multiposition_tab_controller.export_positions,
+                    None,
+                    None,
+                    None,
+                ],
+                "Append Current Position": [
+                    self.multiposition_tab_controller.add_stage_position,
+                    None,
+                    None,
+                    None,
+                ],
+                "Generate Positions": [
+                    self.multiposition_tab_controller.generate_positions,
+                    None,
+                    None,
+                    None,
+                ],
+                "Move to Selected Position": [
+                    self.multiposition_tab_controller.move_to_position,
+                    None,
+                    None,
+                    None,
+                ],
             },
         }
         for menu in menus_dict:
             menu_items = menus_dict[menu]
             for label in menu_items:
-                menu.add_command(label=label, command=menu_items[label])
+                menu.add_command(
+                    label=label,
+                    command=menu_items[label][0],
+                    accelerator=menu_items[label][1],
+                )
+                if platform.platform() == "Darwin":
+                    menu.bind_all(menu_items[label][3], menu_items[label][0])
+                else:
+                    menu.bind_all(menu_items[label][2], menu_items[label][0])
 
         # load images from disk in synthetic hardware
         if is_synthetic_hardware:
@@ -525,11 +565,22 @@ class Controller:
 
         # autofocus menu
         self.view.menubar.menu_autofocus.add_command(
-            label="Autofocus", command=lambda: self.execute("autofocus")
+            label="Perform Autofocus",
+            command=lambda: self.execute("autofocus"),
+            accelerator="Ctrl+A",
         )
         self.view.menubar.menu_autofocus.add_command(
-            label="setting", command=popup_autofocus_setting
+            label="Autofocus Settings",
+            command=popup_autofocus_setting,
+            accelerator="Ctrl+Shift+A",
         )
+
+        if platform.platform == "darwin":
+            self.view.bind_all("<Control_L-a>", lambda event: self.execute("autofocus"))
+            self.view.bind_all("<Control_L-A>", popup_autofocus_setting)
+        else:
+            self.view.bind_all("<Control-a>", lambda event: self.execute("autofocus"))
+            self.view.bind_all("<Control-A>", popup_autofocus_setting)
 
         # Help menu
         self.view.menubar.menu_help.add_command(label="Help", command=popup_help)
@@ -555,7 +606,7 @@ class Controller:
         )
         self.view.menubar.menu_features.add_separator()
         self.view.menubar.menu_features.add_command(
-            label="ilastik setting", command=popup_ilastik_setting
+            label="Ilastik Settings", command=popup_ilastik_setting
         )
         # disable ilastik menu
         self.view.menubar.menu_features.entryconfig(
@@ -652,9 +703,13 @@ class Controller:
 
         # set waveform template
         if self.acquire_bar_controller.mode == "confocal-projection":
-            self.configuration["experiment"]["MicroscopeState"]["waveform_template"] = "Confocal-Projection"
+            self.configuration["experiment"]["MicroscopeState"][
+                "waveform_template"
+            ] = "Confocal-Projection"
         else:
-            self.configuration["experiment"]["MicroscopeState"]["waveform_template"] = "Default"
+            self.configuration["experiment"]["MicroscopeState"][
+                "waveform_template"
+            ] = "Default"
 
         self.set_mode_of_sub(self.acquire_bar_controller.mode)
         self.update_buffer()
@@ -972,7 +1027,7 @@ class Controller:
         except Exception as e:
             tkinter.messagebox.showerror(
                 title="Warning",
-                message=f"There are something wrong! Cannot start acquisition!\n{e}"
+                message=f"There are something wrong! Cannot start acquisition!\n{e}",
             )
             self.set_mode_of_sub("stop")
             return
@@ -1175,12 +1230,15 @@ class Controller:
                     value,
                 )
                 self.view.settings.channels_tab.multipoint_frame.on_off.set(True)
+
             elif event == "ilastik_mask":
                 self.camera_view_controller.display_mask(value)
 
             elif event == "autofocus":
                 if hasattr(self, "af_popup_controller"):
-                    self.af_popup_controller.display_plot(value)
+                    self.af_popup_controller.display_plot(
+                        data=value[0], line_plot=value[1], clear_data=value[2]
+                    )
 
             elif event == "stop":
                 break

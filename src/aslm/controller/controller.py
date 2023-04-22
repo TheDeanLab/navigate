@@ -1094,6 +1094,7 @@ class Controller:
                 camera_view_controller = CameraViewController(
                     popup_window.camera_view, self
                 )
+                popup_window.popup.bind("<Configure>", camera_view_controller.resize)
                 self.additional_microscopes[microscope_name][
                     "camera_view_controller"
                 ] = camera_view_controller

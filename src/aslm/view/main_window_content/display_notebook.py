@@ -143,7 +143,9 @@ class CameraTab(tk.Frame):
         self.cam_image = ttk.Frame(self)
         self.cam_image.grid(row=0, column=0, rowspan=3, sticky=tk.NSEW)
 
-        # Frame for the Waveforms
+        # Frame for the Image View
+        self.is_popup = False
+        self.is_docked = True
         self.canvas_width, self.canvas_height = 512, 512
         self.canvas = tk.Canvas(
             self.cam_image, width=self.canvas_width, height=self.canvas_height

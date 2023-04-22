@@ -88,6 +88,7 @@ class CameraViewPopupWindow:
             top=False,
             transient=False,
         )
+        self.popup.resizable(tk.TRUE, tk.TRUE)
 
         # Storing the content frame of the popup, this will be the parent of
         # the widgets
@@ -108,6 +109,8 @@ class CameraViewPopupWindow:
         self.buttons = {}
 
         self.camera_view = CameraTab(content_frame)
+        self.camera_view.is_popup = True
+        self.camera_view.is_docked = False
         self.camera_view.grid(row=0, column=0, sticky=tk.NSEW)
 
     # Getters

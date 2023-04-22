@@ -51,6 +51,14 @@ def delete_folder(top):
 
     for root, dirs, files in os.walk(top, topdown=False):
         for name in files:
-            os.remove(os.path.join(root, name))
+            try:
+                os.remove(os.path.join(root, name))
+            except PermissionError:
+                # Windows locks these files sometimes
+                pass
         for name in dirs:
-            os.rmdir(os.path.join(root, name))
+            try:
+                os.rmdir(os.path.join(root, name))
+            except OSError:
+                # One of the directories containing a file Windows decided to lock
+                pass

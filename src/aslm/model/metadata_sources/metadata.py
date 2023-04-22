@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -47,8 +47,8 @@ logger = logging.getLogger(p)
 class Metadata:
     def __init__(self) -> None:
         """
-        Store and convert internal representation of metadata (configuration, experiment, etc.)
-        to alternative file types.
+        Store and convert internal representation of metadata (configuration,
+        experiment, etc.) to alternative file types.
 
         Concept and some of the code borrowed from python-microscopy
         (https://github.com/python-microscopy/python-microscopy/).
@@ -118,11 +118,23 @@ class Metadata:
         self.shape_y = int(
             self.configuration["experiment"]["CameraParameters"]["y_pixels"]
         )
-        if (self.configuration["experiment"]["MicroscopeState"]["image_mode"] == "z-stack") or \
-            (self.configuration["experiment"]["MicroscopeState"]["image_mode"] == "ConstantVelocityAcquisition"):
-            self.shape_z = int(self.configuration["experiment"]["MicroscopeState"]["number_z_steps"])
-        elif (self.configuration["experiment"]["MicroscopeState"]["image_mode"] == "confocal-projection"):
-            self.shape_z = int(self.configuration["experiment"]["MicroscopeState"]["n_plane"])
+        if (
+            self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+            == "z-stack"
+        ) or (
+            self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+            == "ConstantVelocityAcquisition"
+        ):
+            self.shape_z = int(
+                self.configuration["experiment"]["MicroscopeState"]["number_z_steps"]
+            )
+        elif (
+            self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+            == "confocal-projection"
+        ):
+            self.shape_z = int(
+                self.configuration["experiment"]["MicroscopeState"]["n_plane"]
+            )
         else:
             self.shape_z = 1
         self.shape_t = int(
@@ -130,7 +142,7 @@ class Metadata:
         )
         self.shape_c = sum(
             [
-                v["is_selected"] == True
+                v["is_selected"] is True
                 for k, v in self.configuration["experiment"]["MicroscopeState"][
                     "channels"
                 ].items()
@@ -151,7 +163,11 @@ class Metadata:
     def set_stack_order_from_configuration_experiment(self) -> None:
         self._per_stack = (
             self.configuration["experiment"]["MicroscopeState"]["stack_cycling_mode"]
-            == "per_stack" or self.configuration["experiment"]["MicroscopeState"]["conpro_cycling_mode"] == "per_stack"
+            == "per_stack"
+            or self.configuration["experiment"]["MicroscopeState"][
+                "conpro_cycling_mode"
+            ]
+            == "per_stack"
         )
 
     @property
@@ -167,23 +183,28 @@ class Metadata:
 
 class XMLMetadata(Metadata):
     """
-    This is a base class for dealing with metadata that is stored as an XML, e.g. in OME-TIFF or BigDataViewer.
-    There are multiple methods for storing XML. In OME-TIFF, the XML is stored in the header of the first OME-TIFF
-    file in a directory. In BigDataViewer, it is stored in a separate XML. Both have proprietary XML formats. To
-    address this, we store their metadata in a nested dictionary, defined by file_type_xml_dict()
-    (e.g. ome_tiff_xml_dict()) (see to_xml()). We then parse this nested dictionary into an XML file. Similarly,
-    we can parse from an XML file to a nested dictionary and map these values back to our internal representation
-    of metadata values (TODO: Not implemented. Will use xml_tools.parse_xml() for the first bit.)
+    This is a base class for dealing with metadata that is stored as an XML, e.g. in
+    OME-TIFF or BigDataViewer. There are multiple methods for storing XML. In OME-TIFF,
+    the XML is stored in the header of the first OME-TIFF file in a directory. In
+    BigDataViewer, it is stored in a separate XML. Both have proprietary XML formats. To
+    address this, we store their metadata in a nested dictionary, defined by
+    {file_type}_xml_dict() (e.g. ome_tiff_xml_dict()) (see to_xml()). We then parse this
+    nested dictionary into an XML file. Similarly, we can parse from an XML file to a
+    nested dictionary and map these values back to our internal representation of
+    metadata values (TODO: Not implemented. Will use xml_tools.parse_xml() for the
+    first bit.)
     """
 
     def write_xml(
         self, file_name: str, file_type: str, root: Optional[str] = None, **kw
     ) -> None:
-        """Write to XML file. Assumes we do not include the XML header in our nested metadata dictionary."""
+        """Write to XML file. Assumes we do not include the XML header in our nested
+        metadata dictionary."""
         xml = '<?xml version="1.0" encoding="UTF-8"?>'  # XML file header
-        # TODO: should os.path.basename be the default? Added this for BigDataViewer's relative path.
+        # TODO: should os.path.basename be the default? Added this for BigDataViewer's
+        # relative path.
         xml += self.to_xml(file_type, root, file_name=os.path.basename(file_name), **kw)
-        file_name = ".".join(file_name.split(".")[:-1]) + ".xml"
+        file_name = os.path.splitext(file_name)[0] + ".xml"
         with open(file_name, "w") as fp:
             fp.write(xml)
 
@@ -199,6 +220,7 @@ class XMLMetadata(Metadata):
             xml = xml_tools.dict_to_xml(d, root)
         except AttributeError:
             logging.debug(
-                f"Metadata Writer - I do not know how to export {file_type} metadata to XML."
+                f"Metadata Writer - I do not know how to export {file_type} "
+                f"metadata to XML."
             )
         return xml

@@ -161,7 +161,7 @@ class TiffDataSource(DataSource):
         # print("Switch")
         c, z, _, _ = self._cztp_indices(self._current_frame, self.metadata.per_stack)
         if (z == 0) and (c == 0):
-            self.close()
+            self.close(True)
 
     def generate_image_name(self, current_channel, current_time_point):
         """
@@ -224,26 +224,32 @@ class TiffDataSource(DataSource):
             # self._setup_write_image()
         else:
             self.read()
+        self._closed = False
 
-    def close(self) -> None:
-        try:
-            if self._write_mode:
-                for ch in range(self.shape_c):
-                    self.image[ch].close()
-                    if self.is_ome and len(self._views) > 0:
-                        # Attach OME metadata at the end of the write
-                        tifffile.tiffcomment(
-                            self.file_name[ch],
-                            self.metadata.to_xml(
-                                c=ch,
-                                t=self._current_time,
-                                file_name=self.file_name,
-                                uid=self.uid,
-                                views=self._views,
-                            ).encode(),
-                        )
-            else:
-                self.image.close()
-        except (TypeError, AttributeError, ValueError):
-            # image wasn't instantiated, no need to close anything
-            pass
+    def close(self, internal=False) -> None:
+        if self._closed and not internal:
+            return
+        if self.image is None:
+            return
+        # internal flag needed to avoid _check_shape call until last file is written
+        if self._write_mode:
+            if not internal:
+                self._check_shape(self._current_frame - 1, self.metadata.per_stack)
+            for ch in range(len(self.image)):
+                self.image[ch].close()
+                if self.is_ome and len(self._views) > 0:
+                    # Attach OME metadata at the end of the write
+                    tifffile.tiffcomment(
+                        self.file_name[ch],
+                        self.metadata.to_xml(
+                            c=ch,
+                            t=self._current_time,
+                            file_name=self.file_name,
+                            uid=self.uid,
+                            views=self._views,
+                        ).encode(),
+                    )
+        else:
+            self.image.close()
+        if not internal:
+            self._closed = True

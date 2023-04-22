@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -114,7 +114,8 @@ class BigDataViewerDataSource(DataSource):
                 dataset_name = "/".join(
                     [time_group_name, setup_group_name, f"{i}", "cells"]
                 )
-                # print(z, dz, dataset_name, self.image[dataset_name].shape, data[::dx, ::dy].shape)
+                # print(z, dz, dataset_name, self.image[dataset_name].shape,
+                #       data[::dx, ::dy].shape)
                 zs = np.minimum(
                     z // dz, self.shapes[i, 0] - 1
                 )  # TODO: Is this necessary?
@@ -125,7 +126,7 @@ class BigDataViewerDataSource(DataSource):
 
         # Check if this was the last frame to write
         c, z, t, p = self._cztp_indices(self._current_frame, self.metadata.per_stack)
-        if (z == 0) and (c == 0) and (t == self.shape_t) and (p == self.positions):
+        if (z == 0) and (c == 0) and ((t >= self.shape_t) or (p >= self.positions)):
             self.close()
 
     def read(self) -> None:
@@ -174,11 +175,17 @@ class BigDataViewerDataSource(DataSource):
             self._setup_h5()
         else:
             self.read()
+        self._closed = False
 
     def close(self) -> None:
-        try:
-            self.image.close()
-            self.metadata.write_xml(self.file_name, views=self._views)
-        except AttributeError:
-            # image wasn't instantiated, no need to close anything
-            pass
+        if self._closed:
+            return
+        self._check_shape(self._current_frame - 1, self.metadata.per_stack)
+        # print(
+        #     f"Post-check current_frame: {self._current_frame-1} x: {self.shape_x}"
+        #     f" y: {self.shape_y} z: {self.shape_z} c: {self.shape_c} "
+        #     f"t: {self.shape_t} p: {self.positions}"
+        # )
+        self.image.close()
+        self.metadata.write_xml(self.file_name, views=self._views)
+        self._closed = True

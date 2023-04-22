@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -84,49 +84,41 @@ class OMETIFFMetadata(XMLMetadata):
             "Type"
         ] = "uint16"  # Hardcoded from SharedNDArray call
 
-        ome_dict["Image"]["Pixels"]["SizeX"] = int(
-            self.configuration["experiment"]["CameraParameters"]["x_pixels"]
-        )
-        ome_dict["Image"]["Pixels"]["SizeY"] = int(
-            self.configuration["experiment"]["CameraParameters"]["y_pixels"]
-        )
+        ome_dict["Image"]["Pixels"]["SizeX"] = self.shape_x
+        ome_dict["Image"]["Pixels"]["SizeY"] = self.shape_y
 
-        # The following two are commented since we split our TIFFs into one TIFF stack per
-        # channel per time point
-        ome_dict["Image"]["Pixels"]["SizeT"] = int(
-            self.configuration["experiment"]["MicroscopeState"]["timepoints"]
-        )
-        ome_dict["Image"]["Pixels"]["SizeC"] = len(
-            self.configuration["experiment"]["MicroscopeState"]["channels"]
-        )
+        # The following two are commented since we split our TIFFs into one TIFF stack
+        # per channel per time point
+        ome_dict["Image"]["Pixels"]["SizeT"] = self.shape_t
+        ome_dict["Image"]["Pixels"]["SizeC"] = self.shape_c
 
         ome_dict["Image"]["Pixels"]["DimensionOrder"] = "XYZCT"
-        z_steps = 1
-        if (
-            self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-            == "z-stack"
-        ):
-            z_steps = int(
-                self.configuration["experiment"]["MicroscopeState"]["number_z_steps"]
-            )
-            ome_dict["Image"]["Pixels"]["PhysicalSizeZ"] = float(
-                self.configuration["experiment"]["MicroscopeState"]["step_size"]
-            )
-        elif (
-            self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-            == "confocal-projection"
-        ):
-            z_steps = int(
-                self.configuration["experiment"]["MicroscopeState"]["n_plane"]
-            )
-            ome_dict["Image"]["Pixels"]["PhysicalSizeZ"] = (
-                float(self.configuration["experiment"]["MicroscopeState"]["offset_end"])
-                - float(
-                    self.configuration["experiment"]["MicroscopeState"]["offset_start"]
-                )
-            ) / (z_steps - 1)
+        # z_steps = 1
+        # if (
+        #     self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+        #     == "z-stack"
+        # ):
+        #     z_steps = int(
+        #         self.configuration["experiment"]["MicroscopeState"]["number_z_steps"]
+        #     )
+        #     ome_dict["Image"]["Pixels"]["PhysicalSizeZ"] = float(
+        #         self.configuration["experiment"]["MicroscopeState"]["step_size"]
+        #     )
+        # elif (
+        #     self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+        #     == "confocal-projection"
+        # ):
+        #     z_steps = int(
+        #         self.configuration["experiment"]["MicroscopeState"]["n_plane"]
+        #     )
+        #     ome_dict["Image"]["Pixels"]["PhysicalSizeZ"] = (
+        #         float(self.configuration["experiment"]["MicroscopeState"]["offset_end"])
+        #         - float(
+        #             self.configuration["experiment"]["MicroscopeState"]["offset_start"]
+        #         )
+        #     ) / (z_steps - 1)
 
-        ome_dict["Image"]["Pixels"]["SizeZ"] = z_steps
+        ome_dict["Image"]["Pixels"]["SizeZ"] = self.shape_z
 
         zoom = self.configuration["experiment"]["MicroscopeState"]["zoom"]
         pixel_size = float(
@@ -158,7 +150,7 @@ class OMETIFFMetadata(XMLMetadata):
                         "FirstT": str(t),
                         "FirstZ": "0",
                         "IFD": "0",
-                        "PlaneCount": str(z_steps),
+                        "PlaneCount": str(self.shape_z),
                     }
                     d["UUID"] = {
                         "FileName": os.path.basename(fn),

@@ -1,3 +1,5 @@
+import os
+
 import pytest
 
 
@@ -5,12 +7,17 @@ import pytest
 @pytest.mark.parametrize("multiposition", [True, False])
 @pytest.mark.parametrize("per_stack", [True, False])
 @pytest.mark.parametrize("z_stack", [True, False])
-def test_tiff_write_read(is_ome, multiposition, per_stack, z_stack):
-    import os
+@pytest.mark.parametrize("stop_early", [True, False])
+def test_tiff_write_read(is_ome, multiposition, per_stack, z_stack, stop_early):
     import numpy as np
 
     from aslm.model.dummy import DummyModel
     from aslm.model.data_sources.tiff_data_source import TiffDataSource
+
+    print(
+        f"Conditions are is_ome: {is_ome} multiposition: {multiposition} "
+        f"per_stack: {per_stack} z_stack: {z_stack} stop_early: {stop_early}"
+    )
 
     # Set up model with a random number of z-steps to modulate the shape
     model = DummyModel()
@@ -33,11 +40,14 @@ def test_tiff_write_read(is_ome, multiposition, per_stack, z_stack):
             "stack_cycling_mode"
         ] == "per_slice"
 
+    if not os.path.exists("test_save_dir"):
+        os.mkdir("test_save_dir")
+
     # Establish a TIFF data source
     if is_ome:
-        fn = "test.ome.tif"
+        fn = "./test_save_dir/test.ome.tif"
     else:
-        fn = ""
+        fn = "./test_save_dir/test.tif"
     ds = TiffDataSource(fn)
     ds.set_metadata_from_configuration_experiment(model.configuration)
 
@@ -50,40 +60,70 @@ def test_tiff_write_read(is_ome, multiposition, per_stack, z_stack):
     for i in range(n_images):
         ds.write(data[i, ...].squeeze())
         file_names_raw.extend(ds.file_name)
+        if stop_early and np.random.rand() > 0.5:
+            break
     ds.close()
 
+    # Cannot use list(set()) trick here because ordering is important
     file_names = []
     for fn in file_names_raw:
         if fn not in file_names:
             file_names.append(fn)
-    print(file_names)
-
-    # For each file...
-    for i, fn in enumerate(file_names):
-        ds2 = TiffDataSource(fn, "r")
-        # Make sure XYZ size is correct (and C and T are each of size 1)
-        assert (
-            (ds2.shape_x == ds.shape_x)
-            and (ds2.shape_y == ds.shape_y)
-            and (ds2.shape_c == 1)
-            and (ds2.shape_z == ds.shape_z)
-            and (ds2.shape_t == 1)
-        )
-        # Make sure the data copied properly
-        np.testing.assert_equal(
-            ds2.data, data[i * ds.shape_z : (i + 1) * ds.shape_z, ...].squeeze()
-        )
-        ds2.close()
+    # print(file_names)
 
     try:
-        # Clean up
-        dirs = []
-        for fn in file_names:
-            os.remove(fn)
-            dirs.append(os.path.dirname(fn))
-        for dn in list(set(dirs)):
-            if dn != ".":
-                os.rmdir(dn)
-    except PermissionError:
-        # Windows seems to think these files are still open
-        pass
+        # For each file...
+        for i, fn in enumerate(file_names):
+            ds2 = TiffDataSource(fn, "r")
+            # Make sure XYZ size is correct (and C and T are each of size 1)
+            assert (
+                (ds2.shape_x == ds.shape_x)
+                and (ds2.shape_y == ds.shape_y)
+                and (ds2.shape_c == 1)
+                and (ds2.shape_t == 1)
+                and (ds2.shape_z == ds.shape_z)
+            )
+            # Make sure the data copied properly
+            np.testing.assert_equal(
+                ds2.data, data[i * ds.shape_z : (i + 1) * ds.shape_z, ...].squeeze()
+            )
+            ds2.close()
+    except IndexError as e:
+        if stop_early:
+            # This file was not written
+            pass
+        else:
+            raise e
+    except AssertionError as e:
+        if stop_early:
+            # This file has an underfilled axes
+            pass
+        else:
+            raise e
+    except Exception as e:
+        raise e
+    finally:
+        delete_folder("test_save_dir")
+
+
+def delete_folder(top):
+    # https://docs.python.org/3/library/os.html#os.walk
+    # Delete everything reachable from the directory named in "top",
+    # assuming there are no symbolic links.
+    # CAUTION:  This is dangerous!  For example, if top == '/', it
+    # could delete all your disk files.
+    import os
+
+    for root, dirs, files in os.walk(top, topdown=False):
+        for name in files:
+            try:
+                os.remove(os.path.join(root, name))
+            except PermissionError:
+                # Windows locks these files sometimes
+                pass
+        for name in dirs:
+            try:
+                os.rmdir(os.path.join(root, name))
+            except OSError:
+                # One of the directories containing a file Windows decided to lock
+                pass

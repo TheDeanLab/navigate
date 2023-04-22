@@ -16,7 +16,8 @@ numpy==1.21.6; sys_platform == "darwin"
 scikit-image==0.19.1
 tensorflow==2.9.1; sys_platform != "darwin"
 cupy-cuda112==10.2.0; sys_platform != "darwin"
-zarr==2.11.3
-fsspec
-h5py
+zarr==2.14.2
+fsspec==2022.8.2; sys_platform != "darwin"
+fsspec==2022.5.0; sys_platform == "darwin"
+h5py==3.7.0
 requests==2.28.1

@@ -80,6 +80,7 @@ class DataSource:
         self.file_name = file_name
         self.metadata = None  # Expect a metadata object
         self._mode = None
+        self._closed = True
 
         self.dx, self.dy, self.dz = 1, 1, 1  # pixel sizes (um)
         self.dt = 1  # time displacement (s)
@@ -233,7 +234,8 @@ class DataSource:
         """Figure out where we are in the stack from the frame number.
 
         per_stack indicates if we move through z (per_stack=True) or c fastest.
-        we move through positions slower than z or c. we move through time slower than z, c or p.
+        we move through positions slower than z or c. we move through time slower
+        than z, c or p.
 
         Parameters
         ----------
@@ -268,16 +270,50 @@ class DataSource:
                 c = frame_id % self.shape_c
                 z = (frame_id // self.shape_c) % self.shape_z
 
-            t = frame_id // (self.shape_c * self.shape_z * self.positions)
-            p = (frame_id // (self.shape_c * self.shape_z)) % self.positions
+            t = (frame_id // (self.shape_c * self.shape_z)) % self.shape_t
+            p = frame_id // (self.shape_c * self.shape_z * self.shape_t)
+
+            # NOTE: Uncomment this if we want positions to vary faster than time
+            # t = frame_id // (self.shape_c * self.shape_z * self.positions)
+            # p = (frame_id // (self.shape_c * self.shape_z)) % self.positions
+
         else:
             # Timepoint acquisition, only c varies faster than t
             c = frame_id % self.shape_c
             t = (frame_id // self.shape_c) % self.shape_t
             z = (frame_id // (self.shape_c * self.shape_t)) % self.shape_z
-            p = (frame_id // (self.shape_c * self.shape_t)) % self.positions
+            p = frame_id // (self.shape_c * self.shape_t * self.shape_z)
 
         return c, z, t, p
+
+    def _check_shape(self, max_frame: int = 0, per_stack: bool = True):
+        # Check if we've closed this prior to completion
+        c, z, t, p = self._cztp_indices(max_frame, per_stack)
+        # print(f"max_frame: {max_frame} c: {c} z: {z} t: {t} p: {p}")
+        # print(f"XYCZTP: {self.shape} {self.positions}")
+        if (
+            (z < (self.shape_z - 1))
+            or (c < (self.shape_c - 1))
+            or (t < (self.shape_t - 1))
+            or (p < (self.positions - 1))
+        ):
+            # If we have, update our shape accordingly
+            maxc, maxz, maxt, maxp = 0, 0, 0, 0
+            for idx in range(max_frame + 1):
+                c, z, t, p = self._cztp_indices(idx, per_stack)
+                maxc = max(maxc, c)
+                maxz = max(maxz, z)
+                maxt = max(maxt, t)
+                maxp = max(maxp, p)
+            self.shape_c, self.shape_z = maxc + 1, maxz + 1
+            self.shape_t, self.positions = maxt + 1, maxp + 1
+            if self.metadata is not None:
+                self.metadata.shape_c, self.metadata.shape_z = maxc + 1, maxz + 1
+                self.metadata.shape_t, self.metadata.positions = maxt + 1, maxp + 1
+        # print(
+        #     f"result c: {self.shape_c} z: {self.shape_z} "
+        #     f"t: {self.shape_t} p: {self.positions}"
+        # )
 
     def _mode_checks(self) -> None:
         """Run additional checks after setting the mode.
@@ -349,4 +385,5 @@ class DataSource:
 
     def __del__(self):
         """Destructor"""
-        self.close()
+        if not self._closed:
+            self.close()

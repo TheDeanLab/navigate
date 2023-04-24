@@ -1,3 +1,6 @@
+FILE_TYPES = ["TIFF", "OME-TIFF", "HDF", "N5"]
+
+
 def get_data_source(file_type):
     """Get the data source class for the given file type.
 
@@ -27,7 +30,7 @@ def get_data_source(file_type):
 
         return ZarrDataSource
 
-    elif file_type == "BDV":
+    elif (file_type == "HDF") or file_type == ("N5"):
         from .bdv_data_source import BigDataViewerDataSource
 
         return BigDataViewerDataSource

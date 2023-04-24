@@ -3,12 +3,15 @@ import os
 import pytest
 import numpy as np
 
+from aslm.tools.file_functions import delete_folder
+
 
 @pytest.mark.parametrize("multiposition", [True, False])
 @pytest.mark.parametrize("per_stack", [True, False])
 @pytest.mark.parametrize("z_stack", [True, False])
 @pytest.mark.parametrize("stop_early", [True, False])
-def test_bdv_write(multiposition, per_stack, z_stack, stop_early):
+@pytest.mark.parametrize("ext", ["hdf", "n5"])
+def test_bdv_write(multiposition, per_stack, z_stack, stop_early, ext):
     from aslm.model.dummy import DummyModel
     from aslm.model.data_sources.bdv_data_source import BigDataViewerDataSource
 
@@ -39,7 +42,7 @@ def test_bdv_write(multiposition, per_stack, z_stack, stop_early):
         ] = "per_slice"
 
     # Establish a BDV data source
-    ds = BigDataViewerDataSource("test.h5")
+    ds = BigDataViewerDataSource(f"test.{ext}")
     ds.set_metadata_from_configuration_experiment(model.configuration)
 
     # Populate one image per channel per timepoint
@@ -66,7 +69,11 @@ def test_bdv_write(multiposition, per_stack, z_stack, stop_early):
 
     try:
         xml_fn = os.path.splitext(ds.file_name)[0] + ".xml"
-        os.remove(ds.file_name)
+        if os.path.isdir(ds.file_name):
+            # n5 is a directory
+            delete_folder(ds.file_name)
+        else:
+            os.remove(ds.file_name)
         os.remove(xml_fn)
     except PermissionError:
         # Windows seems to think these files are still open

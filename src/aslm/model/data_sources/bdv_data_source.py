@@ -30,9 +30,11 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 #  Standard Imports
+import os
 
 # Third Party Imports
 import h5py
+import zarr  # for n5
 import numpy as np
 import numpy.typing as npt
 
@@ -51,8 +53,12 @@ class BigDataViewerDataSource(DataSource):
         self._shapes = None
         self.image = None
         self._views = []
+        self.__store = None
 
-        file_name = ".".join(file_name.split(".")[:-1]) + ".hdf"
+        # file_name = ".".join(file_name.split(".")[:-1]) + ".hdf"
+        self.__file_type = os.path.splitext(os.path.basename(file_name))[-1][1:].lower()
+        if self.__file_type not in ["hdf", "n5"]:
+            raise ValueError(f"Unknown file type {self.__file_type}.")
         super().__init__(file_name, mode)
 
         # self._current_frame = 0
@@ -104,16 +110,23 @@ class BigDataViewerDataSource(DataSource):
             self._current_frame, self.metadata.per_stack
         )  # find current channel
         if (z == 0) and (c == 0) and (t == 0) and (p == 0):
-            self._setup_h5()
+            if self.__file_type == "hdf":
+                self._setup_h5()
+            elif self.__file_type == "n5":
+                self._setup_n5()
 
-        time_group_name = f"t{t:05}"
-        setup_group_name = f"s{(c*self.positions+p):02}"
+        if self.__file_type == "hdf":
+            time_group_name = f"t{t:05}"
+            setup_group_name = f"s{(c*self.positions+p):02}"
+            ds_name = "/".join([time_group_name, setup_group_name, "???", "cells"])
+        elif self.__file_type == "n5":
+            time_group_name = f"timepoint{t}"
+            setup_group_name = f"setup{(c*self.positions+p)}"
+            ds_name = "/".join([setup_group_name, time_group_name, "s???"])
         for i in range(self.subdivisions.shape[0]):
             dx, dy, dz = self.resolutions[i, ...]
             if z % dz == 0:
-                dataset_name = "/".join(
-                    [time_group_name, setup_group_name, f"{i}", "cells"]
-                )
+                dataset_name = ds_name.replace("???", str(i))
                 # print(z, dz, dataset_name, self.image[dataset_name].shape,
                 #       data[::dx, ::dy].shape)
                 zs = np.minimum(
@@ -131,9 +144,14 @@ class BigDataViewerDataSource(DataSource):
 
     def read(self) -> None:
         self.mode = "r"
-        self.image = h5py.File(self.file_name, "r")
+        if self.__file_type == "hdf":
+            self.image = h5py.File(self.file_name, "r")
+        elif self.__file_type == "n5":
+            self.image = zarr.N5Store(self.file_name)
 
     def _setup_h5(self):
+        self.image = h5py.File(self.file_name, "a")
+
         # Create setups
         for i in range(self.shape_c * self.positions):
             setup_group_name = f"s{i:02}"
@@ -165,14 +183,42 @@ class BigDataViewerDataSource(DataSource):
                         dtype="uint16",
                     )
 
+    def _setup_n5(self):
+        self.__store = zarr.N5Store(self.file_name)
+        self.image = zarr.group(store=self.__store, overwrite=True)
+
+        # Note that setups and timepoints are flipped in N5 vs. HDF5, see
+        # https://github.com/bigdataviewer/bigdataviewer-core/blob/master/BDV%20N5%20format.md
+        for i in range(self.shape_c * self.positions):
+            setup_group_name = f"setup{i}"
+            setup = self.image.create_group(setup_group_name)
+            setup.attrs["downsamplingFactors"] = self.resolutions.tolist()
+            setup.attrs["dataType"] = "uint16"
+            for t in range(self.shape_t):
+                time_group_name = f"timepoint{t}"
+                timepoint = setup.create_group(time_group_name)
+                for j in range(self.subdivisions.shape[0]):
+                    s_group_name = f"s{j}"
+                    shape = self.shapes[j, ...][::-1]
+                    chunks = self.subdivisions[j, ...]
+                    sx = timepoint.zeros(
+                        s_group_name, shape=tuple(shape), chunks=tuple(chunks)
+                    )
+                    sx.attrs["dataType"] = "uint16"
+                    sx.attrs["blockSize"] = list(chunks)
+                    sx.attrs["dimensions"] = list(shape)
+        # print(self.image.tree())
+
     def _mode_checks(self) -> None:
         self._write_mode = self._mode == "w"
         self.close()  # if anything was already open, close it
         if self._write_mode:
             self._current_frame = 0
             self._views = []
-            self.image = h5py.File(self.file_name, "a")
-            self._setup_h5()
+            if self.__file_type == "hdf":
+                self._setup_h5()
+            elif self.__file_type == "n5":
+                self._setup_n5()
         else:
             self.read()
         self._closed = False
@@ -186,6 +232,9 @@ class BigDataViewerDataSource(DataSource):
         #     f" y: {self.shape_y} z: {self.shape_z} c: {self.shape_c} "
         #     f"t: {self.shape_t} p: {self.positions}"
         # )
-        self.image.close()
+        if self.__file_type == "n5":
+            self.__store.close()
+        else:
+            self.image.close()
         self.metadata.write_xml(self.file_name, views=self._views)
         self._closed = True

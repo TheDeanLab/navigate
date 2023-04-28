@@ -32,6 +32,7 @@
 
 import time
 from functools import reduce
+from queue import Queue
 
 
 class ChangeResolution:
@@ -90,23 +91,31 @@ class Snap:
 class WaitToContinue:
     def __init__(self, model):
         self.model = model
-        self.can_continue = False
-        self.target_frame_id = -1
+        self.frame_id_queue = Queue()
 
         self.config_table = {
             "signal": {"main": self.signal_func},
-            "data": {"pre-main": self.data_func},
+            "data": {"main": self.data_func,
+                    "end": self.end_data_func},
+            "node": {"node_type": "multi-step"}
         }
 
     def signal_func(self):
-        self.can_continue = True
-        self.target_frame_id = self.model.frame_id
-        print("--wait to continue:", self.target_frame_id)
+        self.frame_id_queue.put(self.model.frame_id)
+        print("--wait to continue:", self.model.frame_id)
         return True
 
     def data_func(self, frame_ids):
-        print("??continue??", self.target_frame_id, frame_ids)
-        return self.can_continue and (self.target_frame_id in frame_ids)
+        self.model.logger.debug("wait to continue?")
+        return True
+    
+    def end_data_func(self):
+        try:
+            r = self.frame_id_queue.get_nowait()
+            self.model.logger.debug("wait to continue ends!")
+        except:
+            r = None
+        return r is not None
 
 
 class LoopByCount:
@@ -157,6 +166,32 @@ class PrepareNextChannel:
         self.model.active_microscope.prepare_next_channel()
 
         return True
+    
+class MoveToNextPositionInMultiPostionTable:
+    def __init__(self, model):
+        self.model = model
+        self.config_table = {"signal": {"main": self.signal_func},
+                             "node": {"device_related": True}}
+        self.pre_z = None
+        self.current_idx = 0
+        self.multipostion_table = self.model.configuration["experiment"]["MultiPositions"]["stage_positions"]
+        self.postion_count = self.model.configuration["experiment"]["MicroscopeState"]["multipostion_count"]
+
+    def signal_func(self):
+        self.model.logger.debug(f"multi-position current idx: {self.current_idx}, {self.postion_count}")
+        if self.current_idx >= self.postion_count:
+            return False
+        pos_dict = self.multipostion_table[self.current_idx]
+        self.current_idx += 1
+        try:
+            pos_dict.pop("f")
+        except KeyError:
+            pass
+        abs_pos_dict = dict(map(lambda k: (f"{k}_abs", pos_dict[k]), pos_dict.keys()))
+        self.model.move_stage(abs_pos_dict)
+        if self.pre_z != pos_dict["z"]:
+            self.pre_z = pos_dict["z"]
+            return True
     
 class StackPause:
     def __init__(self, model, pause_num="experiment.MicroscopeState.timepoints"):
@@ -232,8 +267,6 @@ class ZStackAcquisition:
 
         self.stack_cycling_mode = microscope_state["stack_cycling_mode"]
         # get available channels
-        prefix_len = len("channel_")
-        channel_dict = microscope_state["channels"]
         self.channels = microscope_state["selected_channels"]
         self.current_channel_in_list = 0
         self.model.active_microscope.current_channel = 0
@@ -249,6 +282,11 @@ class ZStackAcquisition:
         end_focus = float(microscope_state["end_focus"])
         self.focus_step_size = (end_focus - self.start_focus) / self.number_z_steps
 
+        # restore z, f
+        pos_dict = self.model.get_stage_position()
+        self.restore_z = pos_dict["z_pos"]
+        self.restore_f = pos_dict["f_pos"]
+
         if bool(microscope_state["is_multiposition"]):
             self.positions = self.model.configuration["experiment"]["MultiPositions"][
                 "stage_positions"
@@ -256,31 +294,19 @@ class ZStackAcquisition:
         else:
             self.positions = [
                 {
-                    "x": float(
-                        self.model.configuration["experiment"]["StageParameters"]["x"]
-                    ),
-                    "y": float(
-                        self.model.configuration["experiment"]["StageParameters"]["y"]
-                    ),
+                    "x": float(pos_dict["x_pos"]),
+                    "y": float(pos_dict["y_pos"]),
                     "z": float(
                         microscope_state.get(
                             "stack_z_origin",
-                            self.model.configuration["experiment"]["StageParameters"][
-                                "z"
-                            ],
+                            pos_dict["z_pos"],
                         )
                     ),
-                    "theta": float(
-                        self.model.configuration["experiment"]["StageParameters"][
-                            "theta"
-                        ]
-                    ),
+                    "theta": float(pos_dict["theta_pos"]),
                     "f": float(
                         microscope_state.get(
                             "stack_focus_origin",
-                            self.model.configuration["experiment"]["StageParameters"][
-                                "f"
-                            ],
+                            pos_dict["f_pos"],
                         )
                     ),
                 }
@@ -291,11 +317,6 @@ class ZStackAcquisition:
         self.need_to_move_z_position = True
         # self.current_z_position = self.start_z_position + self.positions[self.current_position_idx]['z']
         # self.current_focus_position = self.start_focus + self.positions[self.current_position_idx]['f']
-
-        # restore z, f
-        pos_dict = self.model.get_stage_position()
-        self.restore_z = pos_dict["z_pos"]
-        self.restore_f = pos_dict["f_pos"]
 
     def signal_func(self):
         if self.model.stop_acquisition:

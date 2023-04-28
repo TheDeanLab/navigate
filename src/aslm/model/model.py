@@ -54,6 +54,8 @@ from aslm.model.features.common_features import (
     LoopByCount,
     ConProAcquisition,  # noqa
     StackPause,
+    MoveToNextPositionInMultiPostionTable,
+    WaitToContinue,
 )
 from aslm.model.features.feature_container import load_features
 from aslm.model.features.restful_features import IlastikSegmentation
@@ -234,6 +236,17 @@ class Model:
                         "args": ("experiment.MicroscopeState.timepoints",),
                     },
                 )
+            ]
+        )
+
+        self.feature_list.append(
+            [
+                ({"name": MoveToNextPositionInMultiPostionTable},
+                 {"name": Autofocus},
+                 {"name": ZStackAcquisition},
+                 {"name": WaitToContinue},
+                 {"name": LoopByCount, "args": ("experiment.MicroscopeState.multipostion_count",)}
+                 )
             ]
         )
 

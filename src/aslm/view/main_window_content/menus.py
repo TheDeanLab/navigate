@@ -79,6 +79,7 @@ class Menubar(Menu):
     """
 
     def __init__(self, window, *args, **kwargs):
+
         #  Init Menu with parent
         Menu.__init__(self, window, *args, **kwargs)
 
@@ -97,11 +98,11 @@ class Menubar(Menu):
 
         #  Resolution Menu
         self.menu_resolution = Menu(self)
-        self.add_cascade(menu=self.menu_resolution, label="Microscope Settings")
+        self.add_cascade(menu=self.menu_resolution, label="Microscope Configuration")
 
         #  Multi-Position Menu
         self.menu_multi_positions = Menu(self)
-        self.add_cascade(menu=self.menu_multi_positions, label="Multi-Position")
+        self.add_cascade(menu=self.menu_multi_positions, label="Stage Control")
 
         # Autofocus Menu
         self.menu_autofocus = Menu(self)
@@ -110,6 +111,10 @@ class Menubar(Menu):
         # Add-on Features menu
         self.menu_features = Menu(self)
         self.add_cascade(menu=self.menu_features, label="Features")
+
+        # Window Menu
+        self.menu_window = Menu(self)
+        self.add_cascade(menu=self.menu_window, label="Window")
 
         # Help Menu
         self.menu_help = Menu(self)

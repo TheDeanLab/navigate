@@ -446,24 +446,38 @@ class Controller:
             self.view.menubar.menu_file: {
                 "New Experiment": [
                     new_experiment,
-                    "Ctrl+N",
-                    "<Control-n>",
-                    "<Control_L-n>",
+                    "Ctrl+Shift+N",
+                    "<Control-N>",
+                    "<Control_L-N>",
                 ],
                 "Load Experiment": [
                     load_experiment,
-                    "Ctrl+O",
-                    "<Control-o>",
-                    "<Control_L-o>",
+                    "Ctrl+Shift+O",
+                    "<Control-O>",
+                    "<Control_L-O>",
                 ],
                 "Save Experiment": [
                     save_experiment,
-                    "Ctrl+S",
-                    "<Control-s>",
-                    "<Control_L-s>",
+                    "Ctrl+Shift+S",
+                    "<Control-S>",
+                    "<Control_L-S>",
                 ],
+                "add_separator": [None],
+                "Save Data": [None, "Ctrl+s", "<Control-s>", "<Control_L-s>"],
             },
             self.view.menubar.menu_multi_positions: {
+                "Move Up (X)": [None, "w", "<Key-w>", "<Key-w>"],
+                "Move Down (X)": [None, "s", "<Key-s>", "<Key-s>"],
+                "Move Left (Y)": [None, "a", "<Key-a>", "<Key-a>"],
+                "Move Right (Y)": [None, "d", "<Key-d>", "<Key-d>"],
+                "Move In (Z)": [None, "q", "<Key-q>", "<Key-q>"],
+                "Move Out (Z)": [None, "e", "<Key-e>", "<Key-e>"],
+                "Move Focus Up (F)": [None, "r", "<Key-r>", "<Key-r>"],
+                "Move Focus Down (F)": [None, "f", "<Key-f>", "<Key-f>"],
+                "Rotate Clockwise (R)": [None, "z", "<Key-z>", "<Key-z>"],
+                "Rotate Counter-Clockwise (R)": [None, "x", "<Key-x>", "<Key-x>"],
+                "add_separator": [None],
+                "Launch Tiling Wizard": [None, None, None, None],
                 "Load Positions": [
                     self.multiposition_tab_controller.load_positions,
                     None,
@@ -499,15 +513,18 @@ class Controller:
         for menu in menus_dict:
             menu_items = menus_dict[menu]
             for label in menu_items:
-                menu.add_command(
-                    label=label,
-                    command=menu_items[label][0],
-                    accelerator=menu_items[label][1],
-                )
-                if platform.platform() == "Darwin":
-                    menu.bind_all(menu_items[label][3], menu_items[label][0])
+                if label == "add_separator":
+                    menu.add_separator()
                 else:
-                    menu.bind_all(menu_items[label][2], menu_items[label][0])
+                    menu.add_command(
+                        label=label,
+                        command=menu_items[label][0],
+                        accelerator=menu_items[label][1],
+                    )
+                    if platform.platform() == "Darwin":
+                        menu.bind_all(menu_items[label][3], menu_items[label][0])
+                    else:
+                        menu.bind_all(menu_items[label][2], menu_items[label][0])
 
         # load images from disk in synthetic hardware
         if is_synthetic_hardware:
@@ -581,6 +598,22 @@ class Controller:
         else:
             self.view.bind_all("<Control-a>", lambda event: self.execute("autofocus"))
             self.view.bind_all("<Control-A>", popup_autofocus_setting)
+
+        # Window Menu
+        self.view.menubar.menu_window.add_command(
+            label="Channel Settings", accelerator="Ctrl+1"
+        )
+        self.view.menubar.menu_window.add_command(
+            label="Camera Settings", accelerator="Ctrl+2"
+        )
+        self.view.menubar.menu_window.add_command(
+            label="Stage Control", accelerator="Ctrl+3"
+        )
+        self.view.menubar.menu_window.add_command(
+            label="Multiposition Table", accelerator="Ctrl+4"
+        )
+        self.view.menubar.menu_window.add_separator()
+        self.view.menubar.menu_window.add_command(label="Popout Camera Display")
 
         # Help menu
         self.view.menubar.menu_help.add_command(label="Help", command=popup_help)

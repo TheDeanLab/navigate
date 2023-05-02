@@ -170,12 +170,22 @@ class PrepareNextChannel:
 class MoveToNextPositionInMultiPostionTable:
     def __init__(self, model):
         self.model = model
-        self.config_table = {"signal": {"main": self.signal_func},
-                             "node": {"device_related": True}}
+        self.config_table = {
+            "signal": {
+                "init": self.pre_signal_func,
+                "main": self.signal_func,
+            },
+            "node": {"device_related": True}
+        }
         self.pre_z = None
         self.current_idx = 0
         self.multipostion_table = self.model.configuration["experiment"]["MultiPositions"]["stage_positions"]
         self.postion_count = self.model.configuration["experiment"]["MicroscopeState"]["multipostion_count"]
+
+    def pre_signal_func(self):
+        # let the daq be prepared to capture one image since this is an device-related feature.
+        self.model.active_microscope.current_channel = 0
+        self.model.active_microscope.prepare_next_channel()
 
     def signal_func(self):
         self.model.logger.debug(f"multi-position current idx: {self.current_idx}, {self.postion_count}")
@@ -266,6 +276,7 @@ class ZStackAcquisition:
         microscope_state = self.model.configuration["experiment"]["MicroscopeState"]
 
         self.stack_cycling_mode = microscope_state["stack_cycling_mode"]
+        print("**** ZStack mode:", self.stack_cycling_mode)
         # get available channels
         self.channels = microscope_state["selected_channels"]
         self.current_channel_in_list = 0

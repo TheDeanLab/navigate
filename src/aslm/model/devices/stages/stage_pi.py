@@ -237,13 +237,18 @@ class PIStage(StageBase):
                 continue
             success = self.move_axis_absolute(ax, n, move_dictionary)
 
+        if not success:
+            return False
         if wait_until_done is True:
             try:
-                self.pi_tools.waitontarget(self.pi_device)
+                self.pi_tools.waitontarget(self.pi_device, timeout=2.0)
             except GCSError as e:
                 print("Wait on target failed")
                 success = False
                 logger.exception(f"Wait on target failed - {e}")
+            except Exception as e:
+                success = False
+                logger.exception(f"Wait on target timeout error - {e}")
         return success
 
     def stop(self):

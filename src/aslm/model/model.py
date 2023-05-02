@@ -241,12 +241,16 @@ class Model:
 
         self.feature_list.append(
             [
-                ({"name": MoveToNextPositionInMultiPostionTable},
-                 {"name": Autofocus},
-                 {"name": ZStackAcquisition},
-                 {"name": WaitToContinue},
-                 {"name": LoopByCount, "args": ("experiment.MicroscopeState.multipostion_count",)}
-                 )
+                (
+                    {"name": MoveToNextPositionInMultiPostionTable},
+                    {"name": Autofocus},
+                    {"name": ZStackAcquisition, "args": (True,)},
+                    {"name": WaitToContinue},
+                    {
+                        "name": LoopByCount,
+                        "args": ("experiment.MicroscopeState.multipostion_count",),
+                    },
+                )
             ]
         )
 
@@ -609,7 +613,12 @@ class Model:
         success : bool
             Was the move successful?
         """
-        return self.active_microscope.move_stage(pos_dict, wait_until_done)
+        try:
+            r = self.active_microscope.move_stage(pos_dict, wait_until_done)
+        except Exception as e:
+            self.logger.debug(f"*** stage move failed: {e}")
+            return False
+        return r
 
     def get_stage_position(self):
         """Get the position of the stage.

@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -95,9 +95,8 @@ class WaitToContinue:
 
         self.config_table = {
             "signal": {"main": self.signal_func},
-            "data": {"main": self.data_func,
-                    "end": self.end_data_func},
-            "node": {"node_type": "multi-step"}
+            "data": {"main": self.data_func, "end": self.end_data_func},
+            "node": {"node_type": "multi-step"},
         }
 
     def signal_func(self):
@@ -108,12 +107,12 @@ class WaitToContinue:
     def data_func(self, frame_ids):
         self.model.logger.debug("wait to continue?")
         return True
-    
+
     def end_data_func(self):
         try:
             r = self.frame_id_queue.get_nowait()
             self.model.logger.debug("wait to continue ends!")
-        except:
+        except:  # noqa
             r = None
         return r is not None
 
@@ -127,7 +126,7 @@ class LoopByCount:
                 parameters = steps.split(".")
                 config_ref = reduce((lambda pre, n: f"{pre}['{n}']"), parameters, "")
                 exec(f"self.steps = int(self.model.configuration{config_ref})")
-            except:
+            except:  # noqa
                 self.steps = 1
 
         self.signals = self.steps
@@ -166,7 +165,8 @@ class PrepareNextChannel:
         self.model.active_microscope.prepare_next_channel()
 
         return True
-    
+
+
 class MoveToNextPositionInMultiPostionTable:
     def __init__(self, model):
         self.model = model
@@ -175,20 +175,27 @@ class MoveToNextPositionInMultiPostionTable:
                 "init": self.pre_signal_func,
                 "main": self.signal_func,
             },
-            "node": {"device_related": True}
+            "node": {"device_related": True},
         }
         self.pre_z = None
         self.current_idx = 0
-        self.multipostion_table = self.model.configuration["experiment"]["MultiPositions"]["stage_positions"]
-        self.postion_count = self.model.configuration["experiment"]["MicroscopeState"]["multipostion_count"]
+        self.multipostion_table = self.model.configuration["experiment"][
+            "MultiPositions"
+        ]["stage_positions"]
+        self.postion_count = self.model.configuration["experiment"]["MicroscopeState"][
+            "multipostion_count"
+        ]
 
     def pre_signal_func(self):
-        # let the daq be prepared to capture one image since this is an device-related feature.
+        # let the daq be prepared to capture one image since this is a
+        # device-related feature.
         self.model.active_microscope.current_channel = 0
         self.model.active_microscope.prepare_next_channel()
 
     def signal_func(self):
-        self.model.logger.debug(f"multi-position current idx: {self.current_idx}, {self.postion_count}")
+        self.model.logger.debug(
+            f"multi-position current idx: {self.current_idx}, {self.postion_count}"
+        )
         if self.current_idx >= self.postion_count:
             return False
         pos_dict = self.multipostion_table[self.current_idx]
@@ -198,11 +205,13 @@ class MoveToNextPositionInMultiPostionTable:
         except KeyError:
             pass
         abs_pos_dict = dict(map(lambda k: (f"{k}_abs", pos_dict[k]), pos_dict.keys()))
+        self.model.logger.debug(f"*** move stage to {pos_dict}")
         self.model.move_stage(abs_pos_dict)
         if self.pre_z != pos_dict["z"]:
             self.pre_z = pos_dict["z"]
             return True
-    
+
+
 class StackPause:
     def __init__(self, model, pause_num="experiment.MicroscopeState.timepoints"):
         self.model = model
@@ -212,26 +221,33 @@ class StackPause:
                 parameters = pause_num.split(".")
                 config_ref = reduce((lambda pre, n: f"{pre}['{n}']"), parameters, "")
                 exec(f"self.pause_num = int(self.model.configuration{config_ref})")
-            except:
+            except:  # noqa
                 self.pause_num = 1
-        self.config_table = {
-            "signal": {"main": self.signal_func}
-        }
+        self.config_table = {"signal": {"main": self.signal_func}}
 
     def signal_func(self):
         self.pause_num -= 1
         if self.pause_num <= 0:
             return
-        pause_time = float(self.model.configuration["experiment"]["MicroscopeState"]["stack_pause"])
+        pause_time = float(
+            self.model.configuration["experiment"]["MicroscopeState"]["stack_pause"]
+        )
         if pause_time <= 0:
             return
         current_channel = f"channel_{self.model.active_microscope.current_channel}"
-        current_exposure_time = float(self.model.configuration["experiment"]["MicroscopeState"]["channels"][current_channel]["camera_exposure_time"]) / 1000.0
+        current_exposure_time = (
+            float(
+                self.model.configuration["experiment"]["MicroscopeState"]["channels"][
+                    current_channel
+                ]["camera_exposure_time"]
+            )
+            / 1000.0
+        )
         if pause_time < 5 * current_exposure_time:
             time.sleep(pause_time)
         else:
             self.model.pause_data_thread()
-            pause_time -= 2*current_exposure_time
+            pause_time -= 2 * current_exposure_time
             while pause_time > 0:
                 pt = min(pause_time, 0.1)
                 time.sleep(pt)
@@ -243,8 +259,9 @@ class StackPause:
 
 
 class ZStackAcquisition:
-    def __init__(self, model):
+    def __init__(self, model, get_origin=False):
         self.model = model
+        self.get_origin = get_origin
 
         self.number_z_steps = 0
         self.start_z_position = 0
@@ -276,7 +293,6 @@ class ZStackAcquisition:
         microscope_state = self.model.configuration["experiment"]["MicroscopeState"]
 
         self.stack_cycling_mode = microscope_state["stack_cycling_mode"]
-        print("**** ZStack mode:", self.stack_cycling_mode)
         # get available channels
         self.channels = microscope_state["selected_channels"]
         self.current_channel_in_list = 0
@@ -286,7 +302,7 @@ class ZStackAcquisition:
         self.number_z_steps = int(microscope_state["number_z_steps"])
 
         self.start_z_position = float(microscope_state["start_position"])
-        end_z_position = float(microscope_state["end_position"])
+        # end_z_position = float(microscope_state["end_position"])
         self.z_step_size = float(microscope_state["step_size"])
 
         self.start_focus = float(microscope_state["start_focus"])
@@ -312,6 +328,8 @@ class ZStackAcquisition:
                             "stack_z_origin",
                             pos_dict["z_pos"],
                         )
+                        if not self.get_origin
+                        else pos_dict["z_pos"]
                     ),
                     "theta": float(pos_dict["theta_pos"]),
                     "f": float(
@@ -319,6 +337,8 @@ class ZStackAcquisition:
                             "stack_focus_origin",
                             pos_dict["f_pos"],
                         )
+                        if not self.get_origin
+                        else pos_dict["f_pos"]
                     ),
                 }
             ]
@@ -326,8 +346,6 @@ class ZStackAcquisition:
         self.z_position_moved_time = 0
         self.need_to_move_new_position = True
         self.need_to_move_z_position = True
-        # self.current_z_position = self.start_z_position + self.positions[self.current_position_idx]['z']
-        # self.current_focus_position = self.start_focus + self.positions[self.current_position_idx]['f']
 
     def signal_func(self):
         if self.model.stop_acquisition:
@@ -359,6 +377,7 @@ class ZStackAcquisition:
             )
             self.model.move_stage(pos_dict, wait_until_done=True)
 
+            self.model.logger.debug(f"*** ZStack move stage: {pos_dict}")
             # self.model.ask_to_pause_data_thread = False
             # self.model.pause_data_event.set()
             # self.model.pause_data_ready_lock.release()
@@ -368,6 +387,11 @@ class ZStackAcquisition:
         if self.need_to_move_z_position:
             # move z, f
             # self.model.pause_data_thread()
+
+            self.model.logger.debug(
+                f"*** Zstack move stage: (z: {self.current_z_position}), "
+                f"(f: {self.current_focus_position})"
+            )
 
             self.model.move_stage(
                 {
@@ -428,7 +452,8 @@ class ZStackAcquisition:
             self.current_position_idx = 0
             # restore z
             self.model.move_stage(
-                {"z_abs": self.restore_z, "f_abs": self.restore_f}, wait_until_done=False
+                {"z_abs": self.restore_z, "f_abs": self.restore_f},
+                wait_until_done=False,
             )  # Update position
             return True
 
@@ -441,7 +466,7 @@ class ZStackAcquisition:
         self.model.active_microscope.prepare_next_channel()
 
 
-class ConProAcquisition:   # don't have the multi-position part for now
+class ConProAcquisition:  # don't have the multi-position part for now
     def __init__(self, model):
 
         self.model = model
@@ -456,35 +481,41 @@ class ConProAcquisition:   # don't have the multi-position part for now
         self.need_to_move_new_plane = True
         self.offset_update_time = 0
 
-        self.conpro_cycling_mode = 'per_stack'
+        self.conpro_cycling_mode = "per_stack"
         self.channels = [1]
 
-        self.config_table = {'signal': {'init': self.pre_signal_func,
-                                        'main': self.signal_func,
-                                        'end': self.signal_end},
-                             'node': {'node_type': 'multi-step',
-                                      'device_related': True}}
+        self.config_table = {
+            "signal": {
+                "init": self.pre_signal_func,
+                "main": self.signal_func,
+                "end": self.signal_end,
+            },
+            "node": {"node_type": "multi-step", "device_related": True},
+        }
 
-        self.model.move_stage({'z_abs': 0})
+        self.model.move_stage({"z_abs": 0})
 
     def pre_signal_func(self):
         import copy
-        microscope_state = self.model.configuration['experiment']['MicroscopeState']
 
-        self.conpro_cycling_mode = microscope_state['conpro_cycling_mode']
+        microscope_state = self.model.configuration["experiment"]["MicroscopeState"]
+
+        self.conpro_cycling_mode = microscope_state["conpro_cycling_mode"]
         # get available channels
         self.channels = microscope_state["selected_channels"]
         self.current_channel_in_list = 0
 
-        self.n_plane = int(microscope_state['n_plane'])
+        self.n_plane = int(microscope_state["n_plane"])
 
-        self.start_offset = float(copy.copy(microscope_state['offset_start']))
-        self.end_offset = float(copy.copy(microscope_state['offset_end']))
+        self.start_offset = float(copy.copy(microscope_state["offset_start"]))
+        self.end_offset = float(copy.copy(microscope_state["offset_end"]))
         if self.n_plane == 1:
             self.offset_step_size = 0
         else:
-            self.offset_step_size = (self.end_offset - self.start_offset) / float(self.n_plane-1)
-        
+            self.offset_step_size = (self.end_offset - self.start_offset) / float(
+                self.n_plane - 1
+            )
+
         self.timepoints = 1  # int(microscope_state['timepoints'])
 
         self.need_update_offset = True
@@ -492,31 +523,17 @@ class ConProAcquisition:   # don't have the multi-position part for now
         self.offset_update_time = 0
 
         # self.model.move_stage({'z_abs': 0})
-    
+
     def signal_func(self):
-        # print(f"Signal with time {self.offset_update_time} and offset {self.current_offset}")
+        # print(f"Signal with time {self.offset_update_time} and offset "
+        #       f"{self.current_offset}")
         if self.model.stop_acquisition:
             return False
 
-        # if self.need_update_offset:
-        #     # update offset
-        #     # self.model.pause_data_thread()CH00_000000
-
-        #     # self.model.update_offset({'offset_abs': self.current_offset}, wait_until_done=True)
-            
-        #     # Update the offset by changing the dictionary value used by GalvoNIStage
-        #     self.model.configuration['experiment']['MicroscopeState']['offset_start'] = self.current_offset
-        #     self.model.configuration['experiment']['MicroscopeState']['offset_end'] = self.current_offset
-            
-        #     # Call a modification of the waveform
-        #     self.model.move_stage({'z_abs': 0})
-
-        #     # self.model.resume_data_thread()
-
-        if self.conpro_cycling_mode != 'per_stack':
+        if self.conpro_cycling_mode != "per_stack":
             # update channel for each z position in 'per_slice'
             self.update_channel()
-            self.need_update_offset = (self.current_channel_in_list == 0)
+            self.need_update_offset = self.current_channel_in_list == 0
 
         # in 'per_slice', update the offset if all the channels have been acquired
         if self.need_update_offset:
@@ -531,16 +548,24 @@ class ConProAcquisition:   # don't have the multi-position part for now
     def signal_end(self):
         # end this node
         if self.model.stop_acquisition:
-            self.model.configuration['experiment']['MicroscopeState']['offset_start'] = self.start_offset
-            self.model.configuration['experiment']['MicroscopeState']['offset_end'] = self.end_offset
+            self.model.configuration["experiment"]["MicroscopeState"][
+                "offset_start"
+            ] = self.start_offset
+            self.model.configuration["experiment"]["MicroscopeState"][
+                "offset_end"
+            ] = self.end_offset
             return True
-        
+
         # decide whether to update offset
         if self.offset_update_time >= self.n_plane:
-            self.timepoints -=1
+            self.timepoints -= 1
 
-            self.model.configuration['experiment']['MicroscopeState']['offset_start'] = self.start_offset
-            self.model.configuration['experiment']['MicroscopeState']['offset_end'] = self.end_offset
+            self.model.configuration["experiment"]["MicroscopeState"][
+                "offset_start"
+            ] = self.start_offset
+            self.model.configuration["experiment"]["MicroscopeState"][
+                "offset_end"
+            ] = self.end_offset
 
             self.current_offset = self.start_offset
 
@@ -560,6 +585,7 @@ class ConProAcquisition:   # don't have the multi-position part for now
             self.current_channel_in_list + 1
         ) % self.channels
         self.model.active_microscope.prepare_next_channel()
+
 
 class FindTissueSimple2D:
     def __init__(
@@ -584,7 +610,6 @@ class FindTissueSimple2D:
             compute_tiles_from_bounding_box,
             calc_num_tiles,
         )
-        import tifffile
 
         for idx in frame_ids:
             img = self.model.data_buffer[idx]
@@ -602,18 +627,17 @@ class FindTissueSimple2D:
                 self.target_resolution
             ]["zoom"][self.target_zoom]["pixel_size"]
 
-            # Downsample according to the desired magnification change. Note, we could downsample by whatever we want.
+            # Downsample according to the desired magnification change. Note, we
+            # could downsample by whatever we want.
             ds = int(curr_pixel_size / pixel_size)
             ds_img = downscale_local_mean(img, (ds, ds))
 
             # Threshold
             thresh_img = ds_img > filters.threshold_otsu(img)
 
-            # tifffile.imwrite("C:\\Users\\MicroscopyInnovation\\Desktop\\Data\\Zach\\thresh.tiff", thresh_img)
-
             # Find the bounding box
-            # In the real-deal, non-transposed image, x increase corresponds to a decrease in row number
-            # y increase responds to an increase in row number
+            # In the real-deal, non-transposed image, x increase corresponds to a
+            # decrease in row number y increase responds to an increase in row number
             # This means the smallest x coordinate is actually the largest
             x, y = np.where(thresh_img)
             # + 0.5 accounts for center of FOV
@@ -633,9 +657,10 @@ class FindTissueSimple2D:
             else:
                 f_start = self.model.configuration["experiment"]["StageParameters"]["f"]
 
-            # Update x and y start to initialize from the upper-left corner of the current image, since this is
-            # how np.where indexed them. The + 0.5 in x_start/y_start calculation shifts their starts back to the
-            # center of the field of view.
+            # Update x and y start to initialize from the upper-left corner of the
+            # current image, since this is how np.where indexed them. The + 0.5 in
+            # x_start/y_start calculation shifts their starts back to the center of the
+            # field of view.
             curr_fov_x = (
                 float(
                     self.model.configuration["experiment"]["CameraParameters"][

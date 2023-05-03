@@ -276,7 +276,7 @@ class Microscope:
 
         if self.camera.is_acquiring:
             self.camera.close_image_series()
-        self.camera.set_ROI(img_width, img_height)
+        self.camera.set_ROI(img_height, img_width)
         self.data_buffer = data_buffer
         self.number_of_frames = number_of_frames
 

@@ -997,6 +997,7 @@ class Controller:
         e = RuntimeError
         while e == RuntimeError:
             try:
+                self.stop_stage()
                 self.model.run_command("stop")
                 e = None
             except RuntimeError:

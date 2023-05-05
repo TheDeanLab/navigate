@@ -495,6 +495,8 @@ class CameraViewController(GUIController):
         --------
         >>> self.mouse_wheel(event)
         """
+        if event.x >= self.canvas_width or event.y >= self.canvas_height:
+            return
         self.zoom_offset = np.array([[int(event.x)], [int(event.y)]])
         delta = 120 if platform.system() != "Darwin" else 1
         threshold = event.delta / delta

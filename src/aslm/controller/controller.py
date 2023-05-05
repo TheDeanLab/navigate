@@ -683,8 +683,9 @@ class Controller:
 
     def resize(self, event):
         def refresh(width, height):
-            print("*** refresh:", width, height)
-            self.view.camera_waveform["width"] = width - 550
+            if width < 1200 or height < 600:
+                return
+            self.view.camera_waveform["width"] = width - self.view.frame_left.winfo_width() - 81
             self.view.camera_waveform["height"] = height - 110
 
         if event.widget != self.view.scroll_frame:

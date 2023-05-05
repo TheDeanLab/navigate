@@ -1105,14 +1105,11 @@ class CameraViewController(GUIController):
     def refresh(self, width, height):
         if width == self.width and height == self.height:
             return
-        # if not self.view.is_docked:
-        self.canvas_width = width - self.view.image_metrics.winfo_width() - 5
+        self.canvas_width = width - self.view.image_metrics.winfo_width() - 24
         self.canvas_height = height - 85
         self.view.canvas.config(width=self.canvas_width, height=self.canvas_height)
         self.view.update_idletasks()
         
-        # else:
-        #     self.canvas_width, self.canvas_height = 512, 512
         if self.view.is_popup:
             self.width, self.height = self.view.winfo_width(), self.view.winfo_height()
         else:
@@ -1123,9 +1120,6 @@ class CameraViewController(GUIController):
         self.reset_display(False)
 
     def update_canvas_size(self):
-        print("*** image size:", self.original_image_width, self.original_image_height)
-        print("*** canvas size:", self.view.canvas["width"], self.view.canvas["height"])
-
         r_canvas_width = int(self.view.canvas["width"])
         r_canvas_height = int(self.view.canvas["height"])
         img_ratio = self.original_image_width / self.original_image_height
@@ -1138,7 +1132,6 @@ class CameraViewController(GUIController):
             self.canvas_width = r_canvas_width
             self.canvas_height = int(r_canvas_width / img_ratio)
 
-        print("**** canvas img size:", self.canvas_width, self.canvas_height)
         self.canvas_width_scale = float(self.original_image_width / self.canvas_width)
         self.canvas_height_scale = float(
             self.original_image_height / self.canvas_height

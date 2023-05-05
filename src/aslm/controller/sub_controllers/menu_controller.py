@@ -65,7 +65,6 @@ logger = logging.getLogger(p)
 class MenuController(GUIController):
     def __init__(self, view, parent_controller=None):
         super().__init__(view, parent_controller)
-
         self.parent_controller = parent_controller
         self.view = view
 
@@ -201,6 +200,51 @@ class MenuController(GUIController):
                 return
             help_pop = HelpPopup(self.view)
             self.help_controller = HelpPopupController(help_pop, self)
+
+        def add_menu_item(
+            menu,
+            menu_entry,
+            command,
+            accelerator=None,
+            event_binding=None,
+            underline=None,
+        ):
+            """Add a menu item to a menu.
+
+            Parameters
+            ----------
+            menu : class
+                Menu class.
+            menu_entry : str
+                Menu item label.
+            command : function
+                Function to be called when the menu item is clicked.
+            accelerator : str
+                Keyboard shortcut for the menu item.
+            event_binding : str
+                Event binding for the menu item.
+            underline : int
+                Index of the character to underline in the menu item label.
+
+            Returns
+            -------
+            None
+            """
+            if menu_entry == "add_separator":
+                menu.add_separator()
+                return
+
+            if platform.platform() == "Darwin":
+                accelerator = accelerator.replace("Ctrl", "Command")
+
+            menu.add_command(
+                label=label,
+                command=command,
+                accelerator=accelerator,
+                underline=underline,
+            )
+
+            menu.bind_all(accelerator, command)
 
         menus_dict = {
             self.view.menubar.menu_file: {

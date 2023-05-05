@@ -890,31 +890,35 @@ class Controller:
         self.stage_controller.set_position_silent(stage_gui_dict)
 
     def update_event(self):
-        """Update the waveforms in the View."""
         while True:
             event, value = self.event_queue.get()
             if event == "waveform":
+                # Update the waveform plot.
                 self.waveform_tab_controller.update_waveforms(
-                    value, self.configuration_controller.daq_sample_rate
+                    waveform_dict=value,
+                    sample_rate=self.configuration_controller.daq_sample_rate,
                 )
             elif event == "multiposition":
-                # Updates the multi-position tab without appending to the list
+                # Update the multi-position tab without appending to the list
                 update_table(
-                    self.view.settings.multiposition_tab.multipoint_list.get_table(),
-                    value,
+                    table=self.view.settings.multiposition_tab.multipoint_list.get_table(),
+                    pos=value,
                 )
                 self.view.settings.channels_tab.multipoint_frame.on_off.set(True)
 
             elif event == "ilastik_mask":
-                self.camera_view_controller.display_mask(value)
+                # Display the ilastik mask
+                self.camera_view_controller.display_mask(mask=value)
 
             elif event == "autofocus":
+                # Display the autofocus plot
                 if hasattr(self, "af_popup_controller"):
                     self.af_popup_controller.display_plot(
                         data=value[0], line_plot=value[1], clear_data=value[2]
                     )
 
             elif event == "stop":
+                # Stop the software
                 break
 
             elif event == "update_stage":
@@ -924,7 +928,6 @@ class Controller:
                 self.camera_setting_controller.framerate_widgets["max_framerate"].set(
                     value
                 )
-                # (value)
 
     def exit_program(self):
         """Exit the program.

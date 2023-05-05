@@ -571,10 +571,10 @@ class TestCameraViewController:
             camera_parameters["y_pixels"]
         )
         assert self.camera_view.canvas_width_scale == float(
-            self.camera_view.original_image_width / self.camera_view.view.canvas_width
+            self.camera_view.original_image_width / self.camera_view.canvas_width
         )
         assert self.camera_view.canvas_height_scale == float(
-            self.camera_view.original_image_height / self.camera_view.view.canvas_height
+            self.camera_view.original_image_height / self.camera_view.canvas_height
         )
 
     def test_identify_channel_index_and_slice(self):

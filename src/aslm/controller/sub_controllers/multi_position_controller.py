@@ -99,7 +99,7 @@ class MultiPositionController(GUIController):
         >>> get_positions()
         """
         axis_dict = {"X": "x", "Y": "y", "Z": "z", "R": "theta", "F": "f"}
-        positions = {}
+        positions = []
         rows = self.table.model.df.shape[0]
         for i in range(rows):
             temp = list(self.table.model.df.iloc[i])
@@ -110,7 +110,7 @@ class MultiPositionController(GUIController):
                 == 5
             ):
                 temp = dict(self.table.model.df.iloc[i])
-                positions[i] = {}
+                positions.append({})
                 for k in axis_dict:
                     positions[i][axis_dict[k]] = temp[k]
         return positions

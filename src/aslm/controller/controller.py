@@ -594,6 +594,7 @@ class Controller:
             "Ilastik Segmentation",
             "Volume Search",
             "Time Series",
+            "Decoupled Focus Stage Multiposition",
         ]
         self.feature_id_val = tkinter.IntVar(0)
         for i in range(len(feature_list)):
@@ -700,6 +701,7 @@ class Controller:
             "stage_positions",
             positions,
         )
+        self.configuration["experiment"]["MicroscopeState"]["multipostion_count"] = len(positions)
 
         # set waveform template
         if self.acquire_bar_controller.mode == "confocal-projection":

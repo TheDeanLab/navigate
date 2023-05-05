@@ -303,6 +303,7 @@ class Autofocus:
         if self.signal_id < self.coarse_steps:
             self.init_pos += self.coarse_step_size
             self.model.move_stage({"f_abs": self.init_pos}, wait_until_done=True)
+            self.model.logger.debug(f"*** Autofocus move stage: (f, {self.init_pos})")
             self.autofocus_frame_queue.put(
                 (self.model.frame_id, self.coarse_steps - self.signal_id, self.init_pos)
             )
@@ -315,6 +316,7 @@ class Autofocus:
                 self.init_pos -= self.fine_pos_offset
             self.init_pos += self.fine_step_size
             self.model.move_stage({"f_abs": self.init_pos}, wait_until_done=True)
+            self.model.logger.debug(f"*** Autofocus move stage: (f, {self.init_pos})")
             self.autofocus_frame_queue.put(
                 (
                     self.model.frame_id,
@@ -326,6 +328,7 @@ class Autofocus:
         else:
             self.init_pos = self.autofocus_pos_queue.get(timeout=self.coarse_steps * 10)
             self.model.move_stage({"f_abs": self.init_pos}, wait_until_done=True)
+            self.model.logger.debug(f"*** Autofocus move stage: (f, {self.init_pos})")
 
         self.signal_id += 1
         return self.init_pos if self.signal_id > self.total_frame_num else None

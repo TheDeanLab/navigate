@@ -133,10 +133,18 @@ def get_configuration_paths():
 
     if not os.path.exists(waveform_templates_path):
         copy_base_directory = Path(__file__).resolve().parent
-        copy_waveform_templates_path = Path.joinpath(copy_base_directory, "waveform_templates.yml")
+        copy_waveform_templates_path = Path.joinpath(
+            copy_base_directory, "waveform_templates.yml"
+        )
         shutil.copyfile(copy_waveform_templates_path, waveform_templates_path)
 
-    return configuration_path, experiment_path, waveform_constants_path, rest_api_path, waveform_templates_path
+    return (
+        configuration_path,
+        experiment_path,
+        waveform_constants_path,
+        rest_api_path,
+        waveform_templates_path,
+    )
 
 
 def load_configs(manager, **kwargs):
@@ -235,7 +243,7 @@ def update_config_dict(manager, parent_dict, config_name, new_config) -> bool:
     --------
     >>> update_config_dict(manager, parent_dict, config_name, new_config)
     """
-    if type(new_config) != dict:
+    if type(new_config) != dict and type(new_config) != list:
         file_path = str(new_config)
         if isfile(file_path) and (
             file_path.endswith(".yml") or file_path.endswith(".yaml")

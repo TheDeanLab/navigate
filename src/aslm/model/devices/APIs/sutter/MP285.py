@@ -48,6 +48,8 @@ class MP285:
     The serial interface expects a baud rate of 9600, 8 data bits, 1 stop bits,
     no parity, and hardware or RTS/CTS flow control.
 
+    Little-endian byte order is used for all commands and responses.
+
     Each command sequence consists of at least one byte, the first of which is the
     “command byte”. Those commands that have parameters or arguments require a
     sequence of bytes that follow the command byte. No delimiters are used between
@@ -60,8 +62,8 @@ class MP285:
     If a command returns data, the last byte returned is the task-completed indicator.
     """
 
-    def __init__(self, microscope_name, device_connection, configuration, device_id=0):
-        super().__init__(microscope_name, device_connection, configuration, device_id)
+    def __init__(self, device_connection):
+        super().__init__(device_connection)
         self.serial = None
         self.speed = None
         self.resolution = None

@@ -31,13 +31,13 @@
 
 # Standard Imports
 import logging
-import sys
 
 # Third Party Imports
 import serial
 
 # Local Imports
 from aslm.model.devices.stages.stage_base import StageBase
+from aslm.model.devices.APIs.sutter.MP285 import MP285
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -73,23 +73,30 @@ def build_sutter_stage_connection(com_port, baud_rate):
 
 
 class SutterStage(StageBase):
-    """SutterStage Class
-
-    Class for controlling Sutter MP-285 Stage.
-    All commands return an ASCII CR (Carriage Return; 13 decimal, 0D hexadecimal) to
-    indicate that the task associated with the command has completed. When the
-    controller completes the task associated with a command, it sends ASCII CR back to
-    the host computer indicating that it is ready to receive a new command. If a command
-    returns data, the last byte returned is the task-completed indicator.
+    """SutterStage Class for MP-285 Stage
 
     Attributes
     ----------
-    comport : str
-        Comport for communicating with the filter wheel, e.g., COM1.
-    baudrate : int
-        Baud rate for communicating with the filter wheel, e.g., 9600.
-    filter_dictionary : dict
-        Dictionary with installed filter names, e.g., filter_dictionary = {'GFP', 0}.
+    microscope_name : str
+        Name of the microscope.
+    device_connection : serial.Serial
+        Serial port connection to the SutterStage.
+    configuration : dict
+        Configuration dictionary for the SutterStage.
+    device_id : int
+        Device ID for the SutterStage.
+
+    Attributes
+    ----------
+    stage : MP285
+        MP285 stage object.
+    resolution : str
+        Resolution of the stage.
+    speed : int
+        Speed of the stage.
+    sutter_axes : list
+        List of axes supported by the SutterStage.
+
 
     Methods
     -------
@@ -101,6 +108,21 @@ class SutterStage(StageBase):
 
     def __init__(self, microscope_name, device_connection, configuration, device_id=0):
         super().__init__(microscope_name, device_connection, configuration, device_id)
+        self.device_connection = device_connection
+        self.stage = MP285(self.device_connection)
+        self.stage.wait_until_done = True
+        self.resolution = "high"
+        self.speed = 1000  # in units microns/s.
+
+        # Set the resolution and velocity of the stage
+        response = self.stage.set_resolution_and_velocity(
+            resolution=self.resolution, speed=self.speed
+        )
+        assert response is True, "Error setting MP-285 resolution and velocity"
+
+        # Set the operating mode of the stage.
+        response = self.stage.set_absolute_mode()
+        assert response is True, "Error setting MP-285 operating mode"
 
         # Mapping from self.axes to corresponding ASI axis labelling
         axes_mapping = {"x": "X", "y": "Y", "z": "Z"}
@@ -112,119 +134,55 @@ class SutterStage(StageBase):
             self.axes.remove("f")
 
         self.sutter_axes = list(map(lambda a: axes_mapping[a], self.axes))
-        self.byte_order = sys.byteorder
-        self.serial = device_connection
-        self.wait_until_done = True
-        self.resolution = "high"
-        self.speed = 1000  # in units microns/s.
 
     def __del__(self):
         """Delete SutterStage Serial Port."""
         try:
-            """
-            Close the MP-285 Stage connection
-            """
-            self.serial.close()
+            self.close()
             logger.debug("MP-285 stage connection closed")
         except (AttributeError, BaseException) as e:
-            print("Error while disconnecting the MP-285 stage")
-            logger.exception(e)
-            raise
-
-    def __enter__(self):
-        """Establish SutterStage content manager."""
-        return self
+            logger.debug("Error while disconnecting the MP-285 stage", e)
 
     def __exit__(self, type, value, traceback):
         """Releases the SutterStage resources"""
-        logger.debug("SutterStage - Closing Device.")
-        self.close()
+        try:
+            self.close()
+        except (AttributeError, BaseException) as e:
+            logger.debug("Error while disconnecting the MP-285 stage", e)
 
     def close(self):
         """Close the SutterStage serial port."""
         logger.debug("SutterStage - Closing Serial Port")
-        self.serial.close()
-
-    def check_byte_order(self, command):
-        """Confirm OS Byte Order
-        MP-285 requires commands and responses to be interpreted as Little Endian.
-
-        Parameters
-        ----------
-        command : bytes
-            Command in format bytes.
-        """
-
-        if self.byte_order == "little":
-            # No need to flip the received bytes.
-            pass
-        elif self.byte_order == "big":
-            # Must flip the received bytes
-            print("Sutter MP-285 - Detected Big Endian OS.  Not tested.")
-            command = command[::-1]
-        else:
-            logger.error("Unknown byte order received from OS:", self.byte_order)
-        return command
+        self.device_connection.close()
 
     def report_position(self):
         """
         Reports the position of the stage for all axes in microns
-        Creates the hardware position dictionary.
-        Updates the internal position dictionary.
         """
 
         try:
-            # Send Command
-
-            # Update internal dictionaries
-            # self.update_position_dictionaries()
-            return self.position_dict
-
+            position = self.stage.get_position()
+            logger.debug(f"MP-285 - Position: {position}")
+            return position
         except serial.SerialException as error:
             logger.debug(f"MP-285 - Error: {error}")
             raise UserWarning("Communication error with MP-285 Stage")
 
-    def move_axis_absolute(self, axis, axis_num, move_dictionary):
-        """
-        Implement movement logic along multiple axes for the MP-285 stage.
+    def move_absolute(self, move_dictionary):
+        """Move the stage to the absolute position specified in move_dictionary
 
-        The command sequence consists of 14 bytes:
-        Command byte followed by three sets of four bytes containing position
-        information in microsteps for X, Y, and Z, and ending with the terminator.
-        Return data consists of 1 byte (task-complete indicator), which occurs after the
-        move is complete.
-
-        Parameters
-        ----------
-        axis : str
-            An axis prefix in move_dictionary. For example, axis='x' corresponds to
-            'x_abs', 'x_min', etc.
-        axis_num : int
-            The corresponding number of this axis on a PI stage. Not applicable to the
-            ASI stage.
-        move_dictionary : dict
-            A dictionary of values required for movement. Includes 'x_abs', 'x_min',
-            etc. for one or more axes. Expects values in micrometers.
         Returns
         -------
         bool
             Was the move successful?
         """
-        pass
-
-    def move_absolute(self, move_dictionary, wait_until_done=False):
-        """
-        Parameters
-        ----------
-        move_dictionary : dict
-            A dictionary of values required for movement. Includes 'x_abs', etc. for one
-            or more axes. Expects values in micrometers, except for theta, which is
-            in degrees.
-        wait_until_done : bool
-            Block until stage has moved to its new spot.
-        Returns
-        -------
-        success : bool
-            Was the move successful?
-        """
-        pass
+        try:
+            # position = move_dictionary[axis]
+            # logger.debug(f"MP-285 - Moving {axis} to {position}")
+            # response = self.stage.move_axis_absolute(axis_num, position)
+            # assert response is True, f"Error moving {axis} to {position}"
+            # return True
+            pass
+        except serial.SerialException as error:
+            logger.debug(f"MP-285 - Error: {error}")
+            raise UserWarning("Communication error with MP-285 Stage")

@@ -103,7 +103,7 @@ class GalvoNIStage(StageBase):
         self.remote_focus_ramp_falling = configuration["configuration"]["microscopes"][
             microscope_name
         ]["remote_focus_device"]["ramp_falling_percent"]
-        self.remote_focus_delay = self.remote_focus_ramp_falling = configuration[
+        self.remote_focus_delay = configuration[
             "configuration"
         ]["microscopes"][microscope_name]["remote_focus_device"]["delay_percent"]
         self.sample_rate = self.configuration["configuration"]["microscopes"][
@@ -111,6 +111,7 @@ class GalvoNIStage(StageBase):
         ]["daq"]["sample_rate"]
         self.sweep_time = None
         self.samples = None
+        self.readout_time = 0
 
         self.waveform_dict = {}
         for k in configuration["configuration"]["gui"]["channels"].keys():
@@ -122,13 +123,14 @@ class GalvoNIStage(StageBase):
         self.create_position_dict()
         return self.position_dict
     
-    def calculate_waveform(self):
+    def calculate_waveform(self, readout_time):
         self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
         microscope_state = self.configuration["experiment"]["MicroscopeState"]
         volts = eval(
             self.volts_per_micron,
             {"x": self.configuration["experiment"]["StageParameters"][self.axes[0]]},
         )
+        self.readout_time = readout_time
 
         for channel_key in microscope_state["channels"].keys():
             # channel includes 'is_selected', 'laser', 'filter', 'camera_exposure'...
@@ -143,7 +145,7 @@ class GalvoNIStage(StageBase):
                 self.sweep_time = exposure_time + exposure_time * (
                     (self.camera_delay_percent + self.remote_focus_ramp_falling) / 100
                 )
-                readout_time = 0  # TODO: find a way to pass this to the stages
+
                 if readout_time > 0:
                     # This addresses the dovetail nature of the
                     # camera readout in normal mode. The camera reads middle
@@ -302,8 +304,7 @@ class GalvoNIStage(StageBase):
                 self.sweep_time = exposure_time + exposure_time * (
                     (self.camera_delay_percent + self.remote_focus_ramp_falling) / 100
                 )
-                readout_time = 0  # TODO: find a way to pass this to the stages
-                if readout_time > 0:
+                if self.readout_time > 0:
                     # This addresses the dovetail nature of the
                     # camera readout in normal mode. The camera reads middle
                     # out, and the delay in start of the last lines
@@ -311,7 +312,7 @@ class GalvoNIStage(StageBase):
                     # to be net longer than exposure_time.
                     # This helps the galvo keep sweeping for the full camera
                     # exposure time.
-                    self.sweep_time += readout_time
+                    self.sweep_time += self.readout_time
 
                 self.sweep_time += duty_cycle_wait_duration
 

@@ -195,6 +195,8 @@ class DockableNotebook(ttk.Notebook):
         if tab_text == "Camera View":
             tk.Wm.minsize(tab, 663, 597)
             tab.is_docked = False
+        elif tab_text == "Waveform Settings":
+            tab.is_docked = False
 
     def dismiss(self, tab, tab_text):
         """Dismisses the popup menu
@@ -225,4 +227,6 @@ class DockableNotebook(ttk.Notebook):
         self.tab_list.append(tab)
         if tab_text == "Camera View":
             tab.canvas.configure(width=512, height=512)
+            tab.is_docked = True
+        elif tab_text == "Waveform Settings":
             tab.is_docked = True

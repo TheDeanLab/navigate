@@ -413,7 +413,7 @@ class Microscope:
         # TODO: calculate waveform for galvo stage
         for axis in self.stages:
             if type(self.stages[axis]) == GalvoNIStage:
-                self.stages[axis].calculate_waveform()
+                self.stages[axis].calculate_waveform(readout_time)
         waveform_dict = {
             "camera_waveform": camera_waveform,
             "remote_focus_waveform": remote_focus_waveform,

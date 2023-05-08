@@ -243,6 +243,18 @@ def load_stages(configuration, is_synthetic=False):
                 )
             )
 
+        elif stage_type == "MP285" and platform.system() == "Windows":
+            from aslm.model.devices.stages.stage_sutter import build_MP285_connection
+            from serial import SerialException
+
+            stage_devices.append(
+                auto_redial(
+                    build_MP285_connection,
+                    (stage_config["port"], stage_config["baudrate"]),
+                    exception=SerialException,
+                )
+            )
+
         elif stage_type == "Thorlabs" and platform.system() == "Windows":
             from aslm.model.devices.stages.stage_tl_kcube_inertial import (
                 build_TLKIMStage_connection,

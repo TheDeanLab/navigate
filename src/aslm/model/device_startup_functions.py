@@ -352,29 +352,32 @@ def start_stage(
 
     if device_type == "PI":
         from aslm.model.devices.stages.stage_pi import PIStage
-
         return PIStage(microscope_name, device_connection, configuration, id)
+
+    elif device_type == "MP285":
+        from aslm.model.devices.stages.stage_sutter import SutterStage
+        return SutterStage(microscope_name, device_connection, configuration, id)
 
     elif device_type == "Thorlabs":
         from aslm.model.devices.stages.stage_tl_kcube_inertial import TLKIMStage
-
         return TLKIMStage(microscope_name, device_connection, configuration, id)
+
     elif device_type == "MCL":
         from aslm.model.devices.stages.stage_mcl import MCLStage
-
         return MCLStage(microscope_name, device_connection, configuration, id)
+
     elif device_type == "ASI":
         from aslm.model.devices.stages.stage_asi import ASIStage
-
         return ASIStage(microscope_name, device_connection, configuration, id)
+
     elif device_type == "GalvoNIStage":
         from aslm.model.devices.stages.stage_galvo import GalvoNIStage
-
         return GalvoNIStage(microscope_name, device_connection, configuration, id)
+    
     elif device_type.lower() == "syntheticstage" or device_type.lower() == "synthetic":
         from aslm.model.devices.stages.stage_synthetic import SyntheticStage
-
         return SyntheticStage(microscope_name, device_connection, configuration, id)
+    
     else:
         device_not_found(microscope_name, "stage", device_type, id)
 

@@ -63,8 +63,7 @@ class MP285:
     """
 
     def __init__(self, device_connection):
-        super().__init__(device_connection)
-        self.serial = None
+        self.serial = device_connection
         self.speed = None
         self.resolution = None
         self.wait_until_done = True
@@ -84,7 +83,7 @@ class MP285:
         self.serial.reset_output_buffer()
 
     @staticmethod
-    def convert_microsteps_to_microns(self, microsteps):
+    def convert_microsteps_to_microns(microsteps):
         """Converts microsteps to microns
 
         Parameters
@@ -102,7 +101,7 @@ class MP285:
         return microns
 
     @staticmethod
-    def convert_microns_to_microsteps(self, microns):
+    def convert_microns_to_microsteps(microns):
         """Converts microsteps to microns.
 
         Parameters
@@ -142,14 +141,17 @@ class MP285:
         position_information = self.serial.read_until(
             expected=bytes.fromhex("0d"), size=100
         )
-        x_pos = self.convert_microsteps_to_microns(
+        x_pos = self.convert_microsteps_to_microns(microsteps=(
             int.from_bytes(position_information[0:3], byteorder="little", signed=True)
+            )
         )
-        y_pos = self.convert_microsteps_to_microns(
+        y_pos = self.convert_microsteps_to_microns(microsteps=(
             int.from_bytes(position_information[4:7], byteorder="little", signed=True)
+            )
         )
-        z_pos = self.convert_microsteps_to_microns(
+        z_pos = self.convert_microsteps_to_microns(microsteps=(
             int.from_bytes(position_information[8:11], byteorder="little", signed=True)
+            )
         )
         return x_pos, y_pos, z_pos
 
@@ -412,6 +414,8 @@ class MP285:
             command_complete = True
         else:
             command_complete = False
+
+        print(response)
 
         # not implemented yet. See page 74 of documentation.
         return command_complete

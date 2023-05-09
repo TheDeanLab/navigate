@@ -108,12 +108,13 @@ class SutterStage(StageBase):
         Set the filter wheel to the empty position and close the communication port.
     """
 
-    def __init__(self, microscope_name, device_connection, configuration):
-        super().__init__(microscope_name, device_connection, configuration)
+    def __init__(self, microscope_name, device_connection, configuration, device_id):
+        super().__init__(microscope_name, device_connection, configuration, device_id)
 
         # Device Connection
         self.device_connection = device_connection
         self.stage = MP285(self.device_connection)
+        self.device_id = device_id
 
         # Default Operating Parameters
         self.stage.wait_until_done = True

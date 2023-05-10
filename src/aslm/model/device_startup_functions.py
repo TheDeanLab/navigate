@@ -254,7 +254,6 @@ def load_stages(configuration, is_synthetic=False):
                         stage_config["port"],
                         stage_config["baudrate"],
                         stage_config["timeout"],
-                        stage_config["stages"],
                     ),
                     exception=SerialException,
                 )

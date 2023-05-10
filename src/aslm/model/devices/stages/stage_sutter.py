@@ -238,7 +238,7 @@ class SutterStage(StageBase):
             if axis_abs == -1e50:
                 return False
             self.__setattr__(ax.split("_abs")[0] + "_pos", val)
-        print("x, y, z_pos:", self.x_pos, self.y_pos, self.z_pos)
+
         try:
             self.stage.move_to_specified_position(
                 x_pos=self.x_pos, y_pos=self.y_pos, z_pos=self.z_pos

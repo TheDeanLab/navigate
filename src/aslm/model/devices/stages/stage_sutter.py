@@ -217,13 +217,19 @@ class SutterStage(StageBase):
             axis_abs = self.get_abs_position(axis, move_dictionary)
             if axis_abs == -1e50:
                 return False
+            self.__setattr__(f"{axis}_pos", axis_abs)
+
+        for ax, val in move_dictionary.items():
+            self.__setattr__(f"{ax.split('_abs')[0]}_pos", val)
 
         # Move the stage
         try:
-            x_pos = move_dictionary["x_abs"]
-            y_pos = move_dictionary["y_abs"]
-            z_pos = move_dictionary["z_abs"]
-            self.stage.move_to_specified_position(x_pos=x_pos, y_pos=y_pos, z_pos=z_pos)
+            # x_pos = move_dictionary["x_abs"]
+            # y_pos = move_dictionary["y_abs"]
+            # z_pos = move_dictionary["z_abs"]
+            self.stage.move_to_specified_position(
+                x_pos=self.x_pos, y_pos=self.y_pos, z_pos=self.z_pos
+            )
             return True
         except serial.SerialException as e:
             logger.exception(f"MP285: move_axis_absolute failed - {e}")

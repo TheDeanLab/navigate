@@ -95,6 +95,7 @@ class CameraViewController(GUIController):
             self.view.canvas_width,
             self.view.canvas_height,
         )
+        self.canvas_width, self.canvas_height = 512, 512
 
         # Left Click Binding
         # self.canvas.bind("<Button-1>", self.left_click)
@@ -151,11 +152,11 @@ class CameraViewController(GUIController):
         self.zoom_value = 1
         self.zoom_scale = 1
         self.zoom_rect = np.array(
-            [[0, self.view.canvas_width], [0, self.view.canvas_height]]
+            [[0, self.canvas_width], [0, self.canvas_height]]
         )
         self.zoom_offset = np.array([[0], [0]])
-        self.zoom_width = self.view.canvas_width
-        self.zoom_height = self.view.canvas_height
+        self.zoom_width = self.canvas_width
+        self.zoom_height = self.canvas_height
         self.canvas_width_scale = 4
         self.canvas_height_scale = 4
         self.original_image_height = 2014
@@ -283,6 +284,9 @@ class CameraViewController(GUIController):
 
         """
         try:
+            # only popup the menu when click on image
+            if event.x >= self.canvas_width or event.y >= self.canvas_height:
+                return
             self.move_to_x = event.x
             self.move_to_y = event.y
             x, y = self.get_absolute_position()
@@ -491,6 +495,8 @@ class CameraViewController(GUIController):
         --------
         >>> self.mouse_wheel(event)
         """
+        if event.x >= self.canvas_width or event.y >= self.canvas_height:
+            return
         self.zoom_offset = np.array([[int(event.x)], [int(event.y)]])
         delta = 120 if platform.system() != "Darwin" else 1
         threshold = event.delta / delta
@@ -506,8 +512,8 @@ class CameraViewController(GUIController):
         self.zoom_height /= self.zoom_value
 
         if (
-            self.zoom_width > self.view.canvas_width
-            or self.zoom_height > self.view.canvas_height
+            self.zoom_width > self.canvas_width
+            or self.zoom_height > self.canvas_height
         ):
             self.reset_display(False)
         elif self.zoom_width < 5 or self.zoom_height < 5:
@@ -696,10 +702,9 @@ class CameraViewController(GUIController):
         self.total_images_per_volume = self.number_of_channels * self.number_of_slices
         self.original_image_width = int(camera_parameters["x_pixels"])
         self.original_image_height = int(camera_parameters["y_pixels"])
-        self.canvas_width_scale = float(self.original_image_width / self.canvas_width)
-        self.canvas_height_scale = float(
-            self.original_image_height / self.canvas_height
-        )
+        
+        self.update_canvas_size()
+
         self.reset_display(False)
 
         # self.image_volume = np.zeros((self.original_image_width,
@@ -1102,23 +1107,34 @@ class CameraViewController(GUIController):
     def refresh(self, width, height):
         if width == self.width and height == self.height:
             return
-        if not self.view.is_docked:
-            self.canvas_width = width - 151
-            self.canvas_height = height - 85
-            self.view.canvas.config(width=self.canvas_width, height=self.canvas_height)
-            self.view.update_idletasks()
-            self.canvas_width = min(self.canvas_width, self.canvas_height)
-            self.canvas_height = self.canvas_width
-        else:
-            self.canvas_width, self.canvas_height = 512, 512
+        self.canvas_width = width - self.view.image_metrics.winfo_width() - 24
+        self.canvas_height = height - 85
+        self.view.canvas.config(width=self.canvas_width, height=self.canvas_height)
+        self.view.update_idletasks()
+        
         if self.view.is_popup:
             self.width, self.height = self.view.winfo_width(), self.view.winfo_height()
         else:
             self.width, self.height = width, height
 
         # if resize the window during acquisition, the image showing should be updated
+        self.update_canvas_size()
+        self.reset_display(False)
+
+    def update_canvas_size(self):
+        r_canvas_width = int(self.view.canvas["width"])
+        r_canvas_height = int(self.view.canvas["height"])
+        img_ratio = self.original_image_width / self.original_image_height
+        canvas_ratio = r_canvas_width / r_canvas_height
+
+        if canvas_ratio > img_ratio:
+            self.canvas_height = r_canvas_height
+            self.canvas_width = int(r_canvas_height * img_ratio)
+        else:
+            self.canvas_width = r_canvas_width
+            self.canvas_height = int(r_canvas_width / img_ratio)
+
         self.canvas_width_scale = float(self.original_image_width / self.canvas_width)
         self.canvas_height_scale = float(
             self.original_image_height / self.canvas_height
         )
-        self.reset_display(False)

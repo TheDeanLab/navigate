@@ -111,41 +111,54 @@ class SutterStage(StageBase):
     def __init__(self, microscope_name, device_connection, configuration, device_id):
         super().__init__(microscope_name, device_connection, configuration, device_id)
 
+        # Default mapping from self.axes to corresponding ASI axis labelling
+        axes_mapping = {"x": "X", "y": "Y", "z": "Z"}
+
+        # Focus and Theta axes are not supported for Sutter Stage. Values are pulled
+        # from the configuration file (e.g., [x, y, z, theta, f])
+        if "theta" in self.axes:
+            self.axes.remove("theta")
+        if "f" in self.axes:
+            self.axes.remove("f")
+
         # Device Connection
-        self.device_connection = device_connection
-        self.stage = MP285(self.device_connection)
-        self.device_id = device_id
+        if device_connection is not None:
+            self.device_connection = device_connection
+            self.stage = MP285(self.device_connection)
+
+            # Non-default axes_mapping
+            axes_mapping = {x: y for x, y in zip(self.axes, ["X", "Y", "Z"])}
+
+        self.sutter_axes = list(map(lambda a: axes_mapping[a], self.axes))
 
         # Default Operating Parameters
         self.stage.wait_until_done = True
         self.resolution = "high"
         self.speed = 1000  # in units microns/s.
 
-        # Mapping from self.axes to corresponding ASI axis labelling
-        axes_mapping = {"x": "X", "y": "Y", "z": "Z"}
-
-        # Focus and Theta axes are not supported for Sutter Stage
-        if "theta" in self.axes:
-            self.axes.remove("theta")
-        if "f" in self.axes:
-            self.axes.remove("f")
-
-        self.sutter_axes = list(map(lambda a: axes_mapping[a], self.axes))
-
         # Set the resolution and velocity of the stage
-        response = self.stage.set_resolution_and_velocity(
-            resolution=self.resolution, speed=self.speed
-        )
-        assert response is True, "Error setting MP-285 resolution and velocity"
+        try:
+            self.stage.set_resolution_and_velocity(
+                resolution=self.resolution, speed=self.speed
+            )
+        except Exception as e:
+            logger.debug(f"Sutter MP-285 - Error setting resolution and velocity: {e}")
+            raise UserWarning("Sutter MP-285 - Error setting resolution and velocity")
 
         # Set the operating mode of the stage.
-        response = self.stage.set_absolute_mode()
-        assert response is True, "Error setting MP-285 operating mode"
+        try:
+            self.stage.set_absolute_mode()
+        except Exception as e:
+            logger.debug(f"Sutter MP-285 - Error setting absolute operation mode: {e}")
+            raise UserWarning("Sutter MP-285 - Error setting absolute operation mode")
 
         # Get the current position of the stage.
         self.x_pos = None
         self.y_pos = None
         self.z_pos = None
+
+        # Report position sets self.x_pos, y_pos, etc.
+        # Also creates self.position_dict["x_pos", "y_pos", etc.]
         self.report_position()
 
     def __del__(self):
@@ -177,7 +190,7 @@ class SutterStage(StageBase):
         Returns
         -------
         position_dict : dict
-            Dictionary of positions for all axes.
+            Dictionary containing the position of all axes
         """
         for _ in range(10):
             try:
@@ -185,6 +198,8 @@ class SutterStage(StageBase):
                 self.x_pos = x_pos
                 self.y_pos = y_pos
                 self.z_pos = z_pos
+
+                # Log the position
                 position = {"x": x_pos, "y": y_pos, "z": z_pos}
                 logger.debug(f"MP-285 - Position: {position}")
                 break
@@ -192,6 +207,7 @@ class SutterStage(StageBase):
                 print("MP-285: Failed to report position.")
                 logger.exception(f"MP-285 - Error: {e}")
                 time.sleep(0.01)
+
         self.create_position_dict()
         return self.position_dict
 
@@ -213,20 +229,23 @@ class SutterStage(StageBase):
             Was the move successful?
         """
         self.stage.wait_until_done = wait_until_done
+        self.report_position()
         for axis in self.axes:
+            # Confirm that the position is within the stage bounds
             axis_abs = self.get_abs_position(axis, move_dictionary)
             if axis_abs == -1e50:
                 return False
+
+            # If the position is within the bounds, set the position to self.x_pos,
+            # y_pos, z_pos...
             self.__setattr__(f"{axis}_pos", axis_abs)
 
         for ax, val in move_dictionary.items():
-            self.__setattr__(f"{ax.split('_abs')[0]}_pos", val)
+            # self.__setattr__(f"{ax.split('_abs')[0]}_pos", val)
+            self.__setattr__(ax.split("_abs")[0] + "_pos", val)
 
         # Move the stage
         try:
-            # x_pos = move_dictionary["x_abs"]
-            # y_pos = move_dictionary["y_abs"]
-            # z_pos = move_dictionary["z_abs"]
             self.stage.move_to_specified_position(
                 x_pos=self.x_pos, y_pos=self.y_pos, z_pos=self.z_pos
             )

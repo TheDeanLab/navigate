@@ -192,13 +192,6 @@ class SutterStage(StageBase):
         """
         for _ in range(10):
             try:
-                x_pos, y_pos, z_pos = self.stage.get_current_position()
-                # for ax, n in zip(self.axes, self.sutter_axes):
-                # TODO: Map axes here with a setattr
-                self.x_pos = x_pos
-                self.y_pos = y_pos
-                self.z_pos = z_pos
-
                 self.stage_x_pos, self.stage_y_pos, self.stage_z_pos = self.stage.get_current_position()
                 for hardware_axis in self.axes:
                     hardware_position = getattr(self, f"stage_{hardware_axis}_pos")

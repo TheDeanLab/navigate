@@ -241,7 +241,6 @@ class SutterStage(StageBase):
             self.__setattr__(hardware_axis, val)
 
         try:
-            print(self.stage_x_pos, self.stage_y_pos, self.stage_z_pos)
             self.stage.move_to_specified_position(
                 x_pos=self.stage_x_pos, y_pos=self.stage_y_pos, z_pos=self.stage_z_pos
             )

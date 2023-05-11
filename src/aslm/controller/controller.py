@@ -178,6 +178,8 @@ class Controller:
         # Initialize the View
         self.view = view(root)
         self.view.root.protocol("WM_DELETE_WINDOW", self.exit_program)
+        self.resizie_event_id = None
+        self.view.root.bind("<Configure>", self.resize)
 
         # Sub Gui Controllers
         # Acquire bar, channels controller,
@@ -679,6 +681,21 @@ class Controller:
         if self.configuration["experiment"]["MicroscopeState"]["scanrange"] == 0:
             return False
         return True
+
+    def resize(self, event):
+        def refresh(width, height):
+            if width < 1200 or height < 600:
+                return
+            self.view.camera_waveform["width"] = width - self.view.frame_left.winfo_width() - 81
+            self.view.camera_waveform["height"] = height - 110
+
+        if event.widget != self.view.scroll_frame:
+            return
+        if self.resizie_event_id:
+            self.view.after_cancel(self.resizie_event_id)
+        self.resizie_event_id = self.view.after(
+            1000, lambda: refresh(event.width, event.height)
+        )
 
     def prepare_acquire_data(self):
         """Prepare the acquisition data.

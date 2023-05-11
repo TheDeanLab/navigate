@@ -276,7 +276,7 @@ class Microscope:
 
         if self.camera.is_acquiring:
             self.camera.close_image_series()
-        self.camera.set_ROI(img_width, img_height)
+        self.camera.set_ROI(img_height, img_width)
         self.data_buffer = data_buffer
         self.number_of_frames = number_of_frames
 
@@ -413,7 +413,7 @@ class Microscope:
         # TODO: calculate waveform for galvo stage
         for axis in self.stages:
             if type(self.stages[axis]) == GalvoNIStage:
-                self.stages[axis].calculate_waveform()
+                self.stages[axis].calculate_waveform(readout_time)
         waveform_dict = {
             "camera_waveform": camera_waveform,
             "remote_focus_waveform": remote_focus_waveform,

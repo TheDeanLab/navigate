@@ -305,6 +305,7 @@ class WaveformTab(tk.Frame):
         tk.Frame.__init__(self, cam_wave, *args, **kwargs)
 
         self.index = 1
+        self.is_docked = True
 
         # Formatting
         tk.Grid.columnconfigure(self, "all", weight=1)

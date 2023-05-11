@@ -47,7 +47,7 @@ class TestStageSutter(unittest.TestCase):
         dummy_model = DummyModel()
         microscope_name = "Mesoscale"
         stage = SutterStage(microscope_name=microscope_name,
-                            device_connection=None,
+                            device_connection=type("MP285", (object,), {}),
                             configuration=dummy_model.configuration,
                             device_id=0)
 

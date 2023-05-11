@@ -84,8 +84,8 @@ class DAQBase:
         self.camera_delay = self.camera_delay_percent * 0.01 * self.sweep_time
 
         self.waveform_dict = {}
-        for k in configuration["experiment"]["MicroscopeState"]["channels"].keys():
-            self.waveform_dict[k] = None
+        # for k in configuration["experiment"]["MicroscopeState"]["channels"].keys():
+        #     self.waveform_dict[k] = None
 
         self.waveform_repeat_num = 1
         self.waveform_expand_num = 1

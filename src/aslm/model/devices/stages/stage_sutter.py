@@ -116,7 +116,7 @@ class SutterStage(StageBase):
         # Device Connection
         if device_connection is None:
             logger.error("The MP285 stage is unavailable!")
-            raise UserWarning("The MP285 stage is unavailabe!")
+            raise UserWarning("The MP285 stage is unavailable!")
         
         self.stage = device_connection
         self.stage.wait_until_done = True

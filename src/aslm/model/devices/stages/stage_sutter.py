@@ -32,9 +32,7 @@
 # Standard Imports
 import logging
 import time
-
-# Third Party Imports
-import serial
+from serial import SerialException
 
 # Local Imports
 from aslm.model.devices.stages.stage_base import StageBase
@@ -59,20 +57,12 @@ def build_MP285_connection(com_port, baud_rate, timeout=0.25):
 
     Returns
     -------
-    serial.Serial
-        Serial Port connection to the SutterStage.
+    MP285
+        MP285 SutterStage.
     """
     try:
-        return serial.Serial(
-            port=com_port,
-            baudrate=baud_rate,
-            timeout=timeout,
-            parity=serial.PARITY_NONE,
-            bytesize=serial.EIGHTBITS,
-            stopbits=serial.STOPBITS_ONE,
-            xonxoff=False,
-        )
-    except serial.SerialException as e:
+        return MP285(com_port, baud_rate, timeout)
+    except SerialException as e:
         logger.debug(f"Sutter MP-285 - Could not establish Serial Port Connection: {e}")
         raise UserWarning(
             "Could not communicate with Sutter MP-285 via COMPORT", com_port
@@ -86,8 +76,8 @@ class SutterStage(StageBase):
     ----------
     microscope_name : str
         Name of the microscope.
-    device_connection : serial.Serial
-        Serial port connection to the SutterStage.
+    device_connection : MP285
+        MP285 stage.
     configuration : dict
         Configuration dictionary for the SutterStage.
 
@@ -124,10 +114,12 @@ class SutterStage(StageBase):
             self.axes.remove("f")
 
         # Device Connection
-        self.device_connection = device_connection
-        if self.device_connection is not None:
-            self.stage = MP285(self.device_connection)
-            self.stage.wait_until_done = True
+        if device_connection is None:
+            logger.error("The MP285 stage is unavailable!")
+            raise UserWarning("The MP285 stage is unavailabe!")
+        
+        self.stage = device_connection
+        self.stage.wait_until_done = True
 
         # Non-default axes_mapping
         self.axes_mapping = {x: y for x, y in zip(self.axes, ["x", "y", "z"])}
@@ -139,23 +131,22 @@ class SutterStage(StageBase):
         self.stage_x_pos, self.stage_y_pos, self.stage_z_pos = None, None, None
 
         # Set the resolution and velocity of the stage
-        if self.device_connection is not None:
-            try:
-                self.stage.set_resolution_and_velocity(
-                    resolution=self.resolution, speed=self.speed
-                )
-            except Exception as e:
-                logger.debug(f"Sutter MP-285 - Error setting resolution and velocity: {e}")
-                raise UserWarning("Sutter MP-285 - Error setting resolution and velocity")
+        try:
+            self.stage.set_resolution_and_velocity(
+                resolution=self.resolution, speed=self.speed
+            )
+        except Exception as e:
+            logger.debug(f"Sutter MP-285 - Error setting resolution and velocity: {e}")
+            raise UserWarning("Sutter MP-285 - Error setting resolution and velocity")
 
-            # Set the operating mode of the stage.
-            try:
-                self.stage.set_absolute_mode()
-            except Exception as e:
-                logger.debug(f"Sutter MP-285 - Error setting absolute operation mode: {e}")
-                raise UserWarning("Sutter MP-285 - Error setting absolute operation mode")
+        # Set the operating mode of the stage.
+        try:
+            self.stage.set_absolute_mode()
+        except Exception as e:
+            logger.debug(f"Sutter MP-285 - Error setting absolute operation mode: {e}")
+            raise UserWarning("Sutter MP-285 - Error setting absolute operation mode")
 
-            self.report_position()
+        self.report_position()
 
     def __del__(self):
         """Delete SutterStage Serial Port.
@@ -169,15 +160,13 @@ class SutterStage(StageBase):
         UserWarning
             Error while closing the SutterStage Serial Port.
         """
-        if self.device_connection is not None:
-            try:
-                self.stop()
-                self.device_connection.close()
-                logger.debug("MP-285 stage connection closed")
-            except (AttributeError, BaseException) as e:
-                print("Error while closing the MP-285 stage connection", e)
-                logger.debug("Error while disconnecting the MP-285 stage", e)
-                raise
+        try:
+            self.stop()
+            self.stage.close()
+            logger.debug("MP-285 stage connection closed")
+        except (AttributeError, BaseException) as e:
+            print("Error while closing the MP-285 stage connection", e)
+            logger.debug("Error while disconnecting the MP-285 stage", e)
 
     def report_position(self):
         """Reports the position for all axes, and creates a position dictionary.
@@ -199,7 +188,7 @@ class SutterStage(StageBase):
                 position = {"x": self.x_pos, "y": self.y_pos, "z": self.z_pos}
                 logger.debug(f"MP-285 - Position: {position}")
                 break
-            except serial.SerialException as e:
+            except SerialException as e:
                 print("MP-285: Failed to report position.")
                 logger.debug(f"MP-285 - Error: {e}")
                 time.sleep(0.01)
@@ -245,7 +234,7 @@ class SutterStage(StageBase):
             )
             self.report_position()
             return True
-        except serial.SerialException as e:
+        except SerialException as e:
             logger.debug(f"MP285: move_axis_absolute failed - {e}")
             return False
 
@@ -256,8 +245,7 @@ class SutterStage(StageBase):
         -------
         None
         """
-        if self.device_connection is not None:
-            try:
-                self.stage.interrupt_move()
-            except serial.SerialException as error:
-                logger.exception(f"MP-285 - Stage stop failed: {error}")
+        try:
+            self.stage.interrupt_move()
+        except SerialException as error:
+            logger.exception(f"MP-285 - Stage stop failed: {error}")

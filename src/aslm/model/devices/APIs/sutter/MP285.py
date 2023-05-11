@@ -32,6 +32,7 @@
 
 # Standard library imports
 import time
+import serial
 
 # Third-party imports
 import numpy as np
@@ -62,8 +63,20 @@ class MP285:
     If a command returns data, the last byte returned is the task-completed indicator.
     """
 
-    def __init__(self, device_connection):
-        self.serial = device_connection
+    def __init__(self, com_port, baud_rate, timeout=0.25):
+        try:
+            self.serial = serial.Serial(
+                port=com_port,
+                baudrate=baud_rate,
+                timeout=timeout,
+                parity=serial.PARITY_NONE,
+                bytesize=serial.EIGHTBITS,
+                stopbits=serial.STOPBITS_ONE,
+                xonxoff=False,
+            )
+        except serial.SerialException as e:
+            print("MP285 serial connection failed!")
+            raise e
         self.speed = None
         self.resolution = None
         self.wait_until_done = True
@@ -419,3 +432,9 @@ class MP285:
 
         # not implemented yet. See page 74 of documentation.
         return command_complete
+
+    def close(self):
+        """Close the serial connection to the stage
+        
+        """
+        self.serial.close()

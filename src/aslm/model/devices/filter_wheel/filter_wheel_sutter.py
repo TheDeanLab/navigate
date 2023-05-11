@@ -140,7 +140,10 @@ class SutterFilterWheel(FilterWheelBase):
             logger.debug("SutterFilterWheel - Initialized.")
         else:
             self.init_finished = False
-        self.set_filter("Empty-Alignment")
+
+        # Set filter to the 0th position by default upon initialization.
+        default_filter = list(self.filter_dictionary.keys())[0]
+        self.set_filter(default_filter)
         logger.debug("SutterFilterWheel -  Placed in Default Filter Position.")
 
     def __enter__(self):

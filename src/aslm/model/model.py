@@ -131,9 +131,6 @@ class Model:
         self.acquisition_count = 0
         self.total_acquisition_count = None
         self.total_image_count = None
-        self.current_filter = "Empty"
-        self.current_laser = "488nm"
-        self.current_laser_index = 1
         self.current_exposure_time = 0  # milliseconds
         self.pre_exposure_time = 0  # milliseconds
         self.camera_line_interval = 9.7e-6  # s

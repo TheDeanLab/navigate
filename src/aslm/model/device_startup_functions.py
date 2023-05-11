@@ -245,7 +245,6 @@ def load_stages(configuration, is_synthetic=False):
 
         elif stage_type == "MP285" and platform.system() == "Windows":
             from aslm.model.devices.stages.stage_sutter import build_MP285_connection
-            from serial import SerialException
 
             stage_devices.append(
                 auto_redial(
@@ -255,7 +254,7 @@ def load_stages(configuration, is_synthetic=False):
                         stage_config["baudrate"],
                         stage_config["timeout"],
                     ),
-                    exception=SerialException,
+                    exception=UserWarning,
                 )
             )
 

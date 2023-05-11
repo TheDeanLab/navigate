@@ -32,6 +32,7 @@
 
 # Standard Library Imports
 import unittest
+import random
 
 # Third Party Imports
 
@@ -45,9 +46,13 @@ class TestStageSutter(unittest.TestCase):
 
     def test_stage_attributes(self):
         dummy_model = DummyModel()
+        dummy_MP285 = type("MP285", (object,), {})
+        dummy_MP285.set_resolution_and_velocity = lambda *args, **kwargs: print("set resolution and velocity")
+        dummy_MP285.set_absolute_mode = lambda *args, **kwargs: print("set absolute mode")
+        dummy_MP285.get_current_position = lambda *args, **kwargs: (random.random(), random.random(), random.random())
         microscope_name = "Mesoscale"
         stage = SutterStage(microscope_name=microscope_name,
-                            device_connection=type("MP285", (object,), {}),
+                            device_connection=dummy_MP285,
                             configuration=dummy_model.configuration,
                             device_id=0)
 

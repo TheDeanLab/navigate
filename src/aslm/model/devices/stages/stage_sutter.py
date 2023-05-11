@@ -125,39 +125,37 @@ class SutterStage(StageBase):
 
         # Device Connection
         self.device_connection = device_connection
-        self.stage = MP285(self.device_connection)
+        if self.device_connection is not None:
+            self.stage = MP285(self.device_connection)
+            self.stage.wait_until_done = True
 
         # Non-default axes_mapping
         self.axes_mapping = {x: y for x, y in zip(self.axes, ["x", "y", "z"])}
 
         # Default Operating Parameters
-        self.stage.wait_until_done = True
         self.resolution = "high"
         self.speed = 1300  # in units microns/s.
-
-        # Set the resolution and velocity of the stage
-        try:
-            self.stage.set_resolution_and_velocity(
-                resolution=self.resolution, speed=self.speed
-            )
-        except Exception as e:
-            logger.debug(f"Sutter MP-285 - Error setting resolution and velocity: {e}")
-            raise UserWarning("Sutter MP-285 - Error setting resolution and velocity")
-
-        # Set the operating mode of the stage.
-        try:
-            self.stage.set_absolute_mode()
-        except Exception as e:
-            logger.debug(f"Sutter MP-285 - Error setting absolute operation mode: {e}")
-            raise UserWarning("Sutter MP-285 - Error setting absolute operation mode")
-
-        # Get the current position of the stage according to the microscope's coordinate system.
         self.x_pos, self.y_pos, self.z_pos = None, None, None
         self.stage_x_pos, self.stage_y_pos, self.stage_z_pos = None, None, None
 
-        # Report position sets self.x_pos, y_pos, etc.
-        # Also creates self.position_dict["x_pos", "y_pos", etc.]
-        self.report_position()
+        # Set the resolution and velocity of the stage
+        if self.device_connection is not None:
+            try:
+                self.stage.set_resolution_and_velocity(
+                    resolution=self.resolution, speed=self.speed
+                )
+            except Exception as e:
+                logger.debug(f"Sutter MP-285 - Error setting resolution and velocity: {e}")
+                raise UserWarning("Sutter MP-285 - Error setting resolution and velocity")
+
+            # Set the operating mode of the stage.
+            try:
+                self.stage.set_absolute_mode()
+            except Exception as e:
+                logger.debug(f"Sutter MP-285 - Error setting absolute operation mode: {e}")
+                raise UserWarning("Sutter MP-285 - Error setting absolute operation mode")
+
+            self.report_position()
 
     def __del__(self):
         """Delete SutterStage Serial Port.
@@ -171,14 +169,15 @@ class SutterStage(StageBase):
         UserWarning
             Error while closing the SutterStage Serial Port.
         """
-        try:
-            self.stop()
-            self.device_connection.close()
-            logger.debug("MP-285 stage connection closed")
-        except (AttributeError, BaseException) as e:
-            print("Error while closing the MP-285 stage connection", e)
-            logger.debug("Error while disconnecting the MP-285 stage", e)
-            raise
+        if self.device_connection is not None:
+            try:
+                self.stop()
+                self.device_connection.close()
+                logger.debug("MP-285 stage connection closed")
+            except (AttributeError, BaseException) as e:
+                print("Error while closing the MP-285 stage connection", e)
+                logger.debug("Error while disconnecting the MP-285 stage", e)
+                raise
 
     def report_position(self):
         """Reports the position for all axes, and creates a position dictionary.
@@ -250,7 +249,6 @@ class SutterStage(StageBase):
             logger.debug(f"MP285: move_axis_absolute failed - {e}")
             return False
 
-
     def stop(self):
         """Stop all stage movement abruptly.
 
@@ -258,7 +256,8 @@ class SutterStage(StageBase):
         -------
         None
         """
-        try:
-            self.stage.interrupt_move()
-        except serial.SerialException as error:
-            logger.exception(f"MP-285 - Stage stop failed: {error}")
+        if self.device_connection is not None:
+            try:
+                self.stage.interrupt_move()
+            except serial.SerialException as error:
+                logger.exception(f"MP-285 - Stage stop failed: {error}")

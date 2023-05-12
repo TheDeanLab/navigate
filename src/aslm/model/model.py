@@ -45,6 +45,7 @@ from aslm.model.features.constant_velocity_acquisition import (
     ConstantVelocityAcquisition,
 )
 from aslm.model.features.image_writer import ImageWriter
+from aslm.model.features.auto_tile_scan import CalculateFocusRange
 from aslm.model.features.common_features import (
     ChangeResolution,
     Snap,
@@ -241,6 +242,8 @@ class Model:
 
         self.feature_list.append(
             [
+                {"name": MoveToNextPositionInMultiPostionTable},
+                {"name": CalculateFocusRange},
                 (
                     {"name": MoveToNextPositionInMultiPostionTable},
                     {"name": Autofocus},

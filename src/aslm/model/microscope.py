@@ -235,11 +235,11 @@ class Microscope:
                 devices_dict["stages"][device_ref_name] = self.daq
 
             stage = start_stage(
-                self.microscope_name,
-                devices_dict["stages"][device_ref_name],
-                self.configuration,
-                i,
-                is_synthetic,
+                microscope_name=self.microscope_name,
+                device_connection=devices_dict["stages"][device_ref_name],
+                configuration=self.configuration,
+                id=i,
+                is_synthetic=is_synthetic,
             )
             for axis in device_config["axes"]:
                 self.stages[axis] = stage

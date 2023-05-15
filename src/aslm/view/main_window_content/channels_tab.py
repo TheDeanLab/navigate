@@ -243,7 +243,7 @@ class ChannelCreator(ttk.Labelframe):
         #   This will allow custom selection of amount of channels.
         #   Also may need further refactoring
         for num in range(0, 5):
-            #  This will add a widget to each column frame for the respecitive types
+            #  This will add a widget to each column frame for the respective types
             #  Channel Checkboxes
             self.channel_variables.append(tk.BooleanVar())
             self.channel_checks.append(

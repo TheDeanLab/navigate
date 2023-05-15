@@ -113,8 +113,6 @@ class RemoteFocusBase:
         self.remote_focus_min_voltage = self.device_config["hardware"]["min"]
         self.samples = int(self.sample_rate * self.sweep_time)
         self.waveform_dict = {}
-        for k in configuration["configuration"]["gui"]["channels"].keys():
-            self.waveform_dict[k] = None
 
     def __del__(self):
         """Destructor"""

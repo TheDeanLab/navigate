@@ -114,8 +114,6 @@ class GalvoNIStage(StageBase):
         self.readout_time = 0
 
         self.waveform_dict = {}
-        for k in configuration["configuration"]["gui"]["channels"].keys():
-            self.waveform_dict[k] = None
 
     # for stacking, we could have 2 axis here or not, y is for tiling, not necessary
     def report_position(self):

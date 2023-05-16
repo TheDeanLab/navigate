@@ -39,6 +39,7 @@ import multiprocessing as mp
 import threading
 import sys
 import platform
+import os
 
 # Third Party Imports
 
@@ -78,7 +79,7 @@ from aslm.model.model import Model
 from aslm.model.concurrency.concurrency_tools import ObjectInSubprocess
 
 # Misc. Local Imports
-from aslm.config.config import load_configs, update_config_dict
+from aslm.config.config import load_configs, update_config_dict, get_aslm_path
 from aslm.tools.file_functions import create_save_path, save_yaml_file
 from aslm.tools.common_dict_tools import update_stage_dict
 from aslm.tools.multipos_table_tools import update_table
@@ -984,6 +985,14 @@ class Controller:
 
         elif command == "exit":
             """Exit the program."""
+            # Save current GUI settings to .ASLM/config/experiment.yml file.
+            self.update_experiment_setting()
+            file_directory = os.path.join(get_aslm_path(), "config")
+            save_yaml_file(
+                file_directory=file_directory,
+                content_dict=self.configuration["experiment"],
+                filename="experiment.yml",
+            )
 
             # self.model.run_command('stop')
             self.sloppy_stop()

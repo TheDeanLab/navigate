@@ -97,6 +97,7 @@ class Microscope:
         self.lasers = {}
         self.galvo = {}
         self.daq = devices_dict.get("daq", None)
+        self.tiger = None
         self.info = {}
 
         self.current_channel = None
@@ -133,36 +134,30 @@ class Microscope:
             device_config_list = []
             device_name_list = []
 
-            if (
-                type(configuration["configuration"]["microscopes"][name][device_name])
-                == ListProxy
-            ):
+            if type(configuration["configuration"]["microscopes"][name][device_name]) == ListProxy:
                 i = 0
-                for d in configuration["configuration"]["microscopes"][name][
-                    device_name
-                ]:
+                for d in configuration["configuration"]["microscopes"][name][device_name]:
                     device_config_list.append(d)
                     if device_name in device_name_dict:
                         device_name_list.append(
                             build_ref_name("_", d[device_name_dict[device_name]])
                         )
+
                     else:
                         device_name_list.append(build_ref_name("_", device_name, i))
                     i += 1
 
                 is_list = True
+
             else:
-                device_config_list.append(
-                    configuration["configuration"]["microscopes"][name][device_name]
-                )
+                device_config_list.append(configuration["configuration"]["microscopes"][name][device_name])
                 is_list = False
 
             for i, device in enumerate(device_config_list):
                 device_ref_name = None
                 if "hardware" in device.keys():
-                    ref_list = [
-                        device["hardware"][k] for k in device_ref_dict[device_name]
-                    ]
+                    ref_list = [device["hardware"][k] for k in device_ref_dict[device_name]]
+
                 else:
                     try:
                         ref_list = [device[k] for k in device_ref_dict[device_name]]
@@ -171,16 +166,16 @@ class Microscope:
 
                 device_ref_name = build_ref_name("_", *ref_list)
 
-                if (
-                    device_name in devices_dict
-                    and device_ref_name in devices_dict[device_name]
-                ):
+                if device_name in devices_dict and device_ref_name in devices_dict[device_name]:
                     device_connection = devices_dict[device_name][device_ref_name]
-                elif device_ref_name.startswith("NI") and (
-                    device_name == "galvo" or device_name == "remote_focus_device"
-                ):
+
+                elif device_ref_name.startswith("NI") and (device_name == "galvo" or device_name == "remote_focus_device"):
                     # TODO: Remove this. We should not have this hardcoded.
                     device_connection = self.daq
+
+                elif device_ref_name.startswith("ASI") and (device_name == "stage" or device_name == "filter_wheel"):
+                    # TODO: Using above TODO to model the import of a shared device_connection.
+                    device_connection = self.tiger
 
                 # Import start_device classes
                 try:
@@ -223,13 +218,16 @@ class Microscope:
         ]["stage"]["hardware"]
         if type(stage_devices) != ListProxy:
             stage_devices = [stage_devices]
+
         for i, device_config in enumerate(stage_devices):
             device_ref_name = build_ref_name(
                 "_", device_config["type"], device_config["serial_number"]
             )
+
             if device_ref_name not in devices_dict["stages"]:
                 logger.debug("stage has not been loaded!")
                 raise Exception("no stage device!")
+
             if device_ref_name.startswith("GalvoNIStage"):
                 # TODO: Remove this. We should not have this hardcoded.
                 devices_dict["stages"][device_ref_name] = self.daq

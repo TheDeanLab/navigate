@@ -183,12 +183,12 @@ def start_camera(microscope_name, device_connection, configuration, is_synthetic
 
     if cam_type == "HamamatsuOrca":
         from aslm.model.devices.camera.camera_hamamatsu import HamamatsuOrca
-
         return HamamatsuOrca(microscope_name, device_connection, configuration)
+
     elif cam_type.lower() == "syntheticcamera" or cam_type.lower() == "synthetic":
         from aslm.model.devices.camera.camera_synthetic import SyntheticCamera
-
         return SyntheticCamera(microscope_name, device_connection, configuration)
+
     else:
         device_not_found(microscope_name, "camera", cam_type)
 
@@ -519,6 +519,9 @@ def load_filter_wheel_connection(configuration, is_synthetic=False):
             (device_info["port"], device_info["baudrate"], 0.25),
             exception=Exception,
         )
+    elif device_type == "ASI":
+        # Communication vis the Tiger Controller.
+        pass
     elif (
         device_type.lower() == "syntheticfilterwheel"
         or device_type.lower() == "synthetic"
@@ -566,11 +569,12 @@ def start_filter_wheel(
         ]["hardware"]["type"]
 
     if device_type == "SutterFilterWheel":
-        from aslm.model.devices.filter_wheel.filter_wheel_sutter import (
-            SutterFilterWheel,
-        )
-
+        from aslm.model.devices.filter_wheel.filter_wheel_sutter import SutterFilterWheel
         return SutterFilterWheel(microscope_name, device_connection, configuration)
+
+    elif device_type == "ASI":
+        from aslm.model.devices.filter_wheel.filter_wheel_asi import ASIFilterWheel
+        return ASIFilterWheel(microscope_name, device_connection, configuration)
 
     elif (
         device_type.lower() == "syntheticfilterwheel"

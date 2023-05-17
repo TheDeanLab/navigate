@@ -72,17 +72,6 @@ class Microscope:
         End the acquisition.
     get_readout_time()
         Get readout time from camera.
-
-    Examples
-    --------
-    >>> microscope = Microscope(configuration,
-    >>> data_buffer, daq, microscope_name, number_of_frames)
-    >>> microscope.update_data_buffer(img_width, img_height,
-    >>> data_buffer, number_of_frames)
-    >>> microscope.move_stage_offset(former_microscope=None)
-    >>> microscope.end_acquisition()
-    >>> microscope.get_readout_time()
-
     """
 
     def __init__(
@@ -97,9 +86,8 @@ class Microscope:
         self.lasers = {}
         self.galvo = {}
         self.daq = devices_dict.get("daq", None)
-        self.tiger = None
+        self.tiger_controller = devices_dict.get("stages", None)
         self.info = {}
-
         self.current_channel = None
         self.channels = None
         self.available_channels = None
@@ -128,7 +116,7 @@ class Microscope:
         ]["lasers"]
         self.laser_wavelength = [laser["wavelength"] for laser in laser_list]
 
-        # load/start all the devices listed in device_ref_dict
+        # load/start all the devices listed in device_ref_dict. e.g., camera, filter_wheel, zoom,...
         for device_name in device_ref_dict.keys():
             device_connection = None
             device_config_list = []
@@ -175,7 +163,7 @@ class Microscope:
 
                 elif device_ref_name.startswith("ASI") and (device_name == "stage" or device_name == "filter_wheel"):
                     # TODO: Using above TODO to model the import of a shared device_connection.
-                    device_connection = self.tiger
+                    device_connection = self.tiger_controller
 
                 # Import start_device classes
                 try:
@@ -231,6 +219,11 @@ class Microscope:
             if device_ref_name.startswith("GalvoNIStage"):
                 # TODO: Remove this. We should not have this hardcoded.
                 devices_dict["stages"][device_ref_name] = self.daq
+
+            if device_ref_name.startswith("ASI"):
+                # TODO: Remove this. Whoever did this first shouldn't have hardcoded it.
+                self.tiger_controller = devices_dict["stages"][device_ref_name]
+                devices_dict["filter_wheel"][device_ref_name] = self.tiger_controller
 
             stage = start_stage(
                 microscope_name=self.microscope_name,

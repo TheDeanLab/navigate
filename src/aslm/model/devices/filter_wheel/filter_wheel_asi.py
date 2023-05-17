@@ -47,7 +47,7 @@ logger = logging.getLogger(p)
 
 
 def build_filter_wheel_connection(comport, baudrate, timeout=0.25):
-    """Build SutterFilterWheel Serial Port connection
+    """Build ASIFilterWheel Serial Port connection
     Attributes
     ----------
     comport : str
@@ -55,13 +55,13 @@ def build_filter_wheel_connection(comport, baudrate, timeout=0.25):
     baudrate : int
         Baud rate for communicating with the filter wheel, e.g., 9600.
     """
-    logging.debug(f"SutterFilterWheel - Opening Serial Port {comport}")
+    logging.debug(f"ASI Filter Wheel - Opening Serial Port {comport}")
     try:
         return serial.Serial(comport, baudrate, timeout=0.25)
     except serial.SerialException:
-        logger.warning("SutterFilterWheel - Could not establish Serial Port Connection")
+        logger.warning("ASI Filter Wheel - Could not establish Serial Port Connection")
         raise UserWarning(
-            "Could not communicate with Sutter Lambda 10-B via COMPORT", comport
+            "Could not communicate with ASI Filter Wheel via COMPORT", comport
         )
 
 
@@ -76,24 +76,70 @@ class ASIFilterWheel(FilterWheelBase):
     def __init__(self, microscope_name, device_connection, configuration):
         super().__init__(microscope_name, device_connection, configuration)
 
-        print("ASI Filter wheel launched.")
-        print("Device connection:", device_connection)
+        self.filter_wheel = device_connection
 
+        self.number_of_filter_wheels = configuration["configuration"]["microscopes"][
+            microscope_name]["filter_wheel"]["hardware"]["wheel_number"]
+
+        self.wait_until_done_delay = configuration["configuration"]["microscopes"][
+            microscope_name]["filter_wheel"]["filter_wheel_delay"]
+
+        # Send Filter Wheel/Wheels to Zeroth Position
+        for i in range(self.number_of_filter_wheels):
+            self.filter_wheel.select_filter_wheel(filter_wheel_number=i)
+            self.active_filter_wheel = i
+            self.filter_wheel.move_filter_wheel(filter_wheel_position=0)
+            self.filter_wheel_position = 0
 
     def __enter__(self):
-        pass
+        return self
 
-    def __exit__(self, type, value, traceback):
-        pass
+    def __exit__(self):
+        if self.filter_wheel.is_open():
+            logger.debug("ASI Filter Wheel - Closing Device.")
+            self.filter_wheel.disconnect_from_serial()
 
     def filter_change_delay(self, filter_name):
-        pass
+        """ Estimate duration of time necessary to move the filter wheel
+
+        Assumes that it is ~40ms per adjacent position.
+        Depends on filter wheel parameters and load.
+        """
+        old_position = self.filter_wheel_position
+        new_position = self.filter_dictionary[filter_name]
+        delta_position = int(abs(old_position - new_position))
+        self.wait_until_done_delay = delta_position * 0.04
 
     def set_filter(self, filter_name, wait_until_done=True):
-        pass
+        """Change the filter wheel to the filter designated by the filter
+        position argument.
 
-    def read(self, num_bytes):
-        pass
+        Parameters
+        ----------
+        filter_name : str
+            Name of filter to move to.
+        wait_until_done : bool
+            Waits duration of time necessary for filter wheel to change positions.
+        """
+        if self.check_if_filter_in_filter_dictionary(filter_name) is True:
+
+            # Calculate the Delay Needed to Change the Positions
+            self.filter_change_delay(filter_name)
+
+            for wheel_idx in range(self.number_of_filter_wheels):
+                self.filter_wheel.select_filter_wheel(filter_wheel_number=wheel_idx)
+                self.filter_wheel.move_filter_wheel(self.filter_dictionary[filter_name])
+
+            #  Wheel Position Change Delay
+            if wait_until_done:
+                time.sleep(self.wait_until_done_delay)
 
     def close(self):
-        pass
+        """Close the ASI Filter Wheel serial port.
+
+        Sets the filter wheel to the home position and then closes the port.
+        """
+        if self.filter_wheel.is_open():
+            self.filter_wheel.move_filter_wheel_to_home()
+            logger.debug("ASI Filter Wheel - Closing Device.")
+            self.filter_wheel.disconnect_from_serial()

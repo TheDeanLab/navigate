@@ -508,7 +508,8 @@ def load_filter_wheel_connection(configuration, is_synthetic=False):
         )
 
     elif device_type == "ASI":
-        # Communication vis the Tiger Controller.
+        # Communication via the Tiger Controller.
+        # Device connection provided by the stage object, which is then passed to the filter_wheel object.
         return []
 
     elif device_type.lower() == "syntheticfilterwheel" or device_type.lower() == "synthetic":

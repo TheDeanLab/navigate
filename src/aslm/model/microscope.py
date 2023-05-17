@@ -109,6 +109,10 @@ class Microscope:
             "lasers": ["wavelength"],
         }
 
+        # TODO: This cannot be pulled into the repo. I need help comping up with a more general way to have
+        # shared devices. 
+        devices_dict['filter_wheel']['ASI'] = devices_dict['stages']['ASI_119060508']
+
         device_name_dict = {"lasers": "wavelength"}
 
         laser_list = self.configuration["configuration"]["microscopes"][
@@ -153,7 +157,6 @@ class Microscope:
                         ref_list = []
 
                 device_ref_name = build_ref_name("_", *ref_list)
-
                 if device_name in devices_dict and device_ref_name in devices_dict[device_name]:
                     device_connection = devices_dict[device_name][device_ref_name]
 
@@ -161,9 +164,11 @@ class Microscope:
                     # TODO: Remove this. We should not have this hardcoded.
                     device_connection = self.daq
 
-                elif device_ref_name.startswith("ASI") and (device_name == "stage" or device_name == "filter_wheel"):
+                elif device_ref_name.startswith("ASI"):
                     # TODO: Using above TODO to model the import of a shared device_connection.
+                    self.tiger_controller = devices_dict["stages"][device_ref_name]
                     device_connection = self.tiger_controller
+                    print("Here")
 
                 # Import start_device classes
                 try:
@@ -200,6 +205,8 @@ class Microscope:
                         else getattr(self, device_name)
                     )
 
+        # ASI
+
         # stages
         stage_devices = self.configuration["configuration"]["microscopes"][
             self.microscope_name
@@ -219,11 +226,6 @@ class Microscope:
             if device_ref_name.startswith("GalvoNIStage"):
                 # TODO: Remove this. We should not have this hardcoded.
                 devices_dict["stages"][device_ref_name] = self.daq
-
-            if device_ref_name.startswith("ASI"):
-                # TODO: Remove this. Whoever did this first shouldn't have hardcoded it.
-                self.tiger_controller = devices_dict["stages"][device_ref_name]
-                devices_dict["filter_wheel"][device_ref_name] = self.tiger_controller
 
             stage = start_stage(
                 microscope_name=self.microscope_name,

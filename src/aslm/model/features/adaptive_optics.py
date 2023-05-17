@@ -324,6 +324,8 @@ class TonyWilson:
             # ny = int(ny/2)
             # roi = 128
             # img = img[ny-roi:ny+roi, nx-roi:nx+roi]
+            
+            """ IMAGE METRICS """
             new_data = img.max()
             # new_data = img.mean()
             # new_data = img_contrast.fast_normalized_dct_shannon_entropy(self.model.data_buffer[self.f_frame_id], 3)[0]

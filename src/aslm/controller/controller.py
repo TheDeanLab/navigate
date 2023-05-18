@@ -78,7 +78,7 @@ from aslm.model.model import Model
 from aslm.model.concurrency.concurrency_tools import ObjectInSubprocess
 
 # Misc. Local Imports
-from aslm.config.config import load_configs, update_config_dict
+from aslm.config.config import load_configs, update_config_dict, verify_configuration
 from aslm.tools.file_functions import create_save_path, save_yaml_file
 from aslm.tools.common_dict_tools import update_stage_dict
 from aslm.tools.multipos_table_tools import update_table
@@ -152,6 +152,8 @@ class Controller:
             rest_api_config=rest_api_path,
             waveform_templates=waveform_templates_path,
         )
+
+        verify_configuration(self.manager, self.configuration)
 
         # Initialize the Model
         self.model = ObjectInSubprocess(
@@ -900,6 +902,7 @@ class Controller:
                 args=(
                     "autofocus",
                     "live",
+                    *args
                 ),
             )
 
@@ -1022,7 +1025,7 @@ class Controller:
             except RuntimeError:
                 e = RuntimeError
 
-    def capture_image(self, command, mode):
+    def capture_image(self, command, mode, *args):
         """Trigger the model to capture images.
 
         Parameters
@@ -1043,7 +1046,7 @@ class Controller:
             stop=False,
         )
         try:
-            self.model.run_command(command)
+            self.model.run_command(command, *args)
         except Exception as e:
             tkinter.messagebox.showerror(
                 title="Warning",

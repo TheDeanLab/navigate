@@ -37,6 +37,7 @@ import shutil
 import platform
 from pathlib import Path
 from os.path import isfile
+from multiprocessing.managers import ListProxy
 
 # Third Party Imports
 import yaml
@@ -254,3 +255,75 @@ def update_config_dict(manager, parent_dict, config_name, new_config) -> bool:
             return False
 
     build_nested_dict(manager, parent_dict, config_name, new_config)
+
+
+def verify_configuration(manager, configuration):
+    # verify/build autofocus parameter setting
+    # get autofocus supported devices(stages, remote_focus) from configuration.yaml file
+    device_dict = {}
+    # get devices: stages, NI remote_focus_device
+    device_config = configuration["configuration"]["microscopes"]
+    for microscope_name in device_config.keys():
+        microscope_config = device_config[microscope_name]
+        device_dict[microscope_name] = {}
+        if "remote_focus_device" in microscope_config.keys() and microscope_config["remote_focus_device"]["hardware"]["type"] == "NI":
+            device_dict[microscope_name]["remote_focus"] = {}
+            device_ref = microscope_config["remote_focus_device"]["hardware"]["channel"]
+            device_dict[microscope_name]["remote_focus"][device_ref] = True
+        if "stage" in microscope_config.keys():
+            stages = microscope_config["stage"]["hardware"]
+            device_dict[microscope_name]["stage"] = {}
+            if type(stages) != ListProxy:
+                stages = [stages]
+            for stage in stages:
+                if not stage["type"].lower().startswith("synthetic"):
+                    for axis in stage["axes"]:
+                        device_dict[microscope_name]["stage"][axis] = True
+
+    autofocus_sample_setting = {
+        "coarse_range": 500,
+        "coarse_step_size": 50,
+        "coarse_selected": True,
+        "fine_range": 50,
+        "fine_step_size": 5,
+        "fine_selected": True,
+        "robust_fit": False
+    }
+    autofocus_setting_dict = configuration["experiment"]["AutoFocusParameters"]
+    # verify if all the devices have been added to the autofocus parameter dict
+    for microscope_name in device_dict:
+        if microscope_name not in autofocus_setting_dict.keys():
+            update_config_dict(
+                manager,
+                autofocus_setting_dict,
+                microscope_name,
+                {}
+            )
+        for device in device_dict[microscope_name]:
+            if device not in autofocus_setting_dict[microscope_name].keys():
+                update_config_dict(
+                    manager,
+                    autofocus_setting_dict[microscope_name],
+                    device,
+                    {},
+                )
+            for device_ref in device_dict[microscope_name][device]:
+                if device_ref not in autofocus_setting_dict[microscope_name][device]:
+                    update_config_dict(
+                        manager,
+                        autofocus_setting_dict[microscope_name][device],
+                        device_ref,
+                        autofocus_sample_setting
+                    )
+
+    # remove non-consistent autofocus parameter
+    for microscope_name in autofocus_setting_dict.keys():
+        if microscope_name not in device_dict:
+            autofocus_setting_dict.pop(microscope_name)
+        else:
+            for device in autofocus_setting_dict[microscope_name].keys():
+                if device not in device_dict[microscope_name]:
+                    autofocus_setting_dict[microscope_name].pop(device)
+                    for device_ref in autofocus_setting_dict[microscope_name][device].keys():
+                        if device_ref not in autofocus_setting_dict[microscope_name][device]:
+                            autofocus_setting_dict[microscope_name][device].pop(device_ref)

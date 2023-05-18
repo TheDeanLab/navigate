@@ -39,7 +39,14 @@ from aslm.model.analysis.boundary_detect import (
 
 
 class VolumeSearch:
-    def __init__(self, model, target_resolution="Nanoscale", target_zoom="N/A"):
+    def __init__(
+        self,
+        model,
+        target_resolution="Nanoscale",
+        target_zoom="N/A",
+        flipx=False,
+        flipy=False,
+    ):
         """
         Find the outer boundary of a tissue, moving the stage through z. Assumes
         there is no tissue out-of-frame in the x,y-directions.
@@ -58,6 +65,10 @@ class VolumeSearch:
         target_zoom : str
             Resolution of microscope (target_resolution) to use for tiled imaging
             of tissue
+        flipx : bool
+            Flip the direction in which new tiles are added.
+        flipy : bool
+            Flip the direction in which new tiles are added.
         """
         self.model = model
         self.target_resolution = target_resolution
@@ -70,6 +81,9 @@ class VolumeSearch:
         self.f_pos = 0
         self.f_offset = 0
         self.curr_z_index = 0
+
+        self.sinx = -1 if flipx else 1
+        self.siny = -1 if flipy else 1
 
         self.has_tissue_queue = Queue()
         self.direction = 1  # up: 1; down: -1
@@ -259,8 +273,8 @@ class VolumeSearch:
                 direction = not direction
                 positions += map(
                     lambda item: (
-                        item[0] * self.target_grid_width + self.offset[0],
-                        item[1] * self.target_grid_width + self.offset[1],
+                        self.sinx * item[0] * self.target_grid_width + self.offset[0],
+                        self.siny * item[1] * self.target_grid_width + self.offset[1],
                         z_index * self.z_step_size + self.offset[2],
                         self.offset[3],
                         z_index * self.f_step_size + self.offset[4],

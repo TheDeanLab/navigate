@@ -105,6 +105,7 @@ class RemoteFocusNI(RemoteFocusBase):
         # self.initialize_task()
 
         self.daq = device_connection
+        self.board_name = self.device_config["hardware"]["channel"].split("/")[0]
 
     def initialize_task(self):
         """Initialize the task.
@@ -145,7 +146,7 @@ class RemoteFocusNI(RemoteFocusBase):
         self.stop_task()
         self.close_task()
 
-    def adjust(self, readout_time):
+    def adjust(self, readout_time, offset=None):
         """Adjust the waveform.
 
         This method adjusts the waveform.
@@ -163,7 +164,7 @@ class RemoteFocusNI(RemoteFocusBase):
         --------
         >>> self.adjust(readout_time)
         """
-        waveform_dict = super().adjust(readout_time)
+        waveform_dict = super().adjust(readout_time, offset)
 
         self.daq.analog_outputs[self.device_config["hardware"]["channel"]] = {
             "sample_rate": self.sample_rate,
@@ -173,6 +174,10 @@ class RemoteFocusNI(RemoteFocusBase):
         }
 
         return waveform_dict
+    
+    def move(self, readout_time, offset=None):
+        self.adjust(readout_time, offset)
+        self.daq.update_analog_task(self.board_name)
 
     def prepare_task(self, channel_key):
         """Prepare the task.

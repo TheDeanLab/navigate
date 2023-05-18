@@ -155,3 +155,6 @@ class SyntheticRemoteFocus(RemoteFocusBase):
         >>> close_task()
         """
         logger.debug("remote focus closed task!")
+
+    def move(self, readout_time, offset=None):
+        logger.debug(f"move remote focus offset: {offset}")

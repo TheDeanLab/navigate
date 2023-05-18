@@ -147,10 +147,14 @@ class TestAutofocusPopupController:
         AssertionError
             If the values are not populated correctly
         """
+        microscope_name = self.autofocus_controller.microscope_name
+        device = self.autofocus_controller.widgets["device"].get()
+        device_ref = self.autofocus_controller.widgets["device_ref"].get()
         for k in self.autofocus_controller.widgets:
-            assert self.autofocus_controller.widgets[k].get() == str(
-                self.autofocus_controller.setting_dict[k]
-            )
+            if k != "device" and k != "device_ref":
+                assert self.autofocus_controller.widgets[k].get() == str(
+                    self.autofocus_controller.setting_dict[microscope_name][device][device_ref][k]
+                )
             # Some values are ints but Tkinter only uses strings
 
     def test_update_experiment_values(self):
@@ -172,29 +176,26 @@ class TestAutofocusPopupController:
         # Changing values
         self.autofocus_controller.widgets["coarse_range"].set(200)
         self.autofocus_controller.widgets["coarse_step_size"].set(30)
-        self.autofocus_controller.view.stage_vars[0].set(False)
+        self.autofocus_controller.view.setting_vars["coarse_selected"].set(False)
         self.autofocus_controller.widgets["fine_range"].set(25)
         self.autofocus_controller.widgets["fine_step_size"].set(2)
-        self.autofocus_controller.view.stage_vars[1].set(False)
+        self.autofocus_controller.view.setting_vars["fine_selected"].set(False)
 
-        # Updating file
-        self.autofocus_controller.update_experiment_values()
+        microscope_name = self.autofocus_controller.microscope_name
+        device = self.autofocus_controller.widgets["device"].get()
+        device_ref = self.autofocus_controller.widgets["device_ref"].get()
 
         # Checking values match
         for k in self.autofocus_controller.widgets:
-            assert self.autofocus_controller.widgets[k].get() == str(
-                self.autofocus_controller.setting_dict[k]
+            if k != "device" and k != "device_ref":
+                assert self.autofocus_controller.widgets[k].get() == str(
+                    self.autofocus_controller.setting_dict[microscope_name][device][device_ref][k]
+                )
+        for k in self.autofocus_controller.view.setting_vars: 
+            assert (
+                self.autofocus_controller.view.setting_vars[k].get()
+                == self.autofocus_controller.setting_dict[microscope_name][device][device_ref][k]
             )
-
-        assert (
-            self.autofocus_controller.view.stage_vars[0].get()
-            == self.autofocus_controller.setting_dict["coarse_selected"]
-        )
-
-        assert (
-            self.autofocus_controller.view.stage_vars[1].get()
-            == self.autofocus_controller.setting_dict["fine_selected"]
-        )
 
     def test_start_autofocus(self):
         """Tests that the start autofocus function works correctly

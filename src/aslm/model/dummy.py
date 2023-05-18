@@ -40,7 +40,7 @@ import numpy as np
 import random
 
 # Local Imports
-from aslm.config.config import load_configs
+from aslm.config.config import load_configs, verify_configuration
 from aslm.model.devices.camera.camera_synthetic import (
     SyntheticCamera,
     SyntheticCameraController,
@@ -76,7 +76,7 @@ class DummyController:
         self.stage_pos = {}
         self.off_stage_pos = {}
 
-    def execute(self, str, sec=None):
+    def execute(self, str, sec=None, *args):
         """Execute a command.
 
         Appends commands sent via execute,
@@ -191,6 +191,8 @@ class DummyModel:
             experiment=experiment,
             waveform_constants=waveform_constants,
         )
+
+        verify_configuration(self.manager, self.configuration)
 
         self.device = DummyDevice()
         self.signal_pipe, self.data_pipe = None, None

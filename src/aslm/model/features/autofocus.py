@@ -287,9 +287,6 @@ class Autofocus:
             self.focus_pos = self.model.configuration["experiment"]["StageParameters"][
                 self.device_ref
             ]
-        elif self.device == "remote_focus":
-            # TODO: support remote focus
-            pass
         else:
             self.focus_pos = 0
         self.total_frame_num = self.get_autofocus_frame_num()  # Total frame num
@@ -331,6 +328,11 @@ class Autofocus:
                 self.model.logger.debug(
                     f"*** Autofocus move stage: ({self.device_ref}, {self.init_pos})"
                 )
+            elif self.device == "remote_focus":
+                self.model.active_microscope.move_remote_focus(self.init_pos)
+                self.model.logger.debug(
+                    f"*** Autofocus move remote focus: {self.init_pos}"
+                )
             self.autofocus_frame_queue.put(
                 (self.model.frame_id, self.coarse_steps - self.signal_id, self.init_pos)
             )
@@ -349,6 +351,11 @@ class Autofocus:
                 self.model.logger.debug(
                     f"*** Autofocus move stage: ({self.device_ref}, {self.init_pos})"
                 )
+            elif self.device == "remote_focus":
+                self.model.active_microscope.move_remote_focus(self.init_pos)
+                self.model.logger.debug(
+                    f"*** Autofocus move remote focus: {self.init_pos}"
+                )
             self.autofocus_frame_queue.put(
                 (
                     self.model.frame_id,
@@ -365,6 +372,11 @@ class Autofocus:
                 )
                 self.model.logger.debug(
                     f"*** Autofocus move stage: ({self.device_ref}, {self.init_pos})"
+                )
+            elif self.device == "remote_focus":
+                self.model.active_microscope.move_remote_focus(self.init_pos)
+                self.model.logger.debug(
+                    f"*** Autofocus move remote focus: {self.init_pos}"
                 )
 
         self.signal_id += 1
@@ -524,6 +536,16 @@ class Autofocus:
                 )
             )
             self.model.event_queue.put(("update_stage", stage_position))
+        elif self.device == "remote_focus":
+            # update offset of the waveform_constants configuration dict
+            zoom = self.model.configuration["experiment"]["MicroscopeState"]["zoom"]
+            remote_focus_constants = self.model.configuration["waveform_constants"][
+                "remote_focus_constants"
+            ][self.model.active_microscope_name][zoom]
+            for laser in remote_focus_constants.keys():
+                remote_focus_constants[laser]["offset"] = (
+                    float(remote_focus_constants[laser]["offset"]) + self.focus_pos
+                )
 
         # Log the new focus position
         self.model.logger.info("***********final focus: %s" % self.focus_pos)

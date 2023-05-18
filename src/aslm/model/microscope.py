@@ -603,3 +603,7 @@ class Microscope:
             temp_pos = self.stages[axis].report_position()
             ret_pos_dict[pos_axis] = temp_pos[pos_axis]
         return ret_pos_dict
+
+    def move_remote_focus(self, offset=None):
+        readout_time = self.get_readout_time()
+        self.remote_focus_device.move(readout_time, offset)

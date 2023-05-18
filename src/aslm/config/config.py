@@ -308,7 +308,7 @@ def verify_configuration(manager, configuration):
                     {},
                 )
             for device_ref in device_dict[microscope_name][device]:
-                if device_ref not in autofocus_setting_dict[microscope_name][device]:
+                if device_ref not in autofocus_setting_dict[microscope_name][device].keys():
                     update_config_dict(
                         manager,
                         autofocus_setting_dict[microscope_name][device],
@@ -324,6 +324,7 @@ def verify_configuration(manager, configuration):
             for device in autofocus_setting_dict[microscope_name].keys():
                 if device not in device_dict[microscope_name]:
                     autofocus_setting_dict[microscope_name].pop(device)
+                else:
                     for device_ref in autofocus_setting_dict[microscope_name][device].keys():
                         if device_ref not in autofocus_setting_dict[microscope_name][device]:
                             autofocus_setting_dict[microscope_name][device].pop(device_ref)

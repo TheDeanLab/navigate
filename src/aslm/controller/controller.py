@@ -636,6 +636,7 @@ class Controller:
         """
         # read the new file and update info of the configuration dict
         update_config_dict(self.manager, self.configuration, "experiment", file_name)
+        verify_configuration(self.manager, self.configuration)
 
         # update buffer
         self.update_buffer()
@@ -661,6 +662,10 @@ class Controller:
         )
         self.channels_tab_controller.populate_experiment_values()
         self.camera_setting_controller.populate_experiment_values()
+
+        # autofocus popup
+        if hasattr(self, "af_popup_controller"):
+            self.af_popup_controller.populate_experiment_values()
 
         # set widget modes
         self.set_mode_of_sub("stop")

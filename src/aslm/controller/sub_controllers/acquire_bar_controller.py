@@ -66,7 +66,7 @@ class AcquireBarController(GUIController):
             "Projection": "projection",
             "Confocal-Projection": "confocal-projection",
             "ConstantVelocityAcquisition": "ConstantVelocityAcquisition",
-            "Customized": "customized"
+            "Customized": "customized",
         }
 
         self.view.pull_down["values"] = list(self.mode_dict.keys())
@@ -136,7 +136,8 @@ class AcquireBarController(GUIController):
         elif mode == "z-stack":
             number_of_slices = microscope_state["number_z_steps"]
         elif mode == "ConstantVelocityAcquisition":
-            # TODO: should be the same as "z-stack" when using "step_size" as a real step size.
+            # TODO: should be the same as "z-stack" when using "step_size" as
+            # a real step size.
             number_of_slices = 100
 
         top_anticipated_images = number_of_slices
@@ -335,7 +336,12 @@ class AcquireBarController(GUIController):
         stack_widgets = self.parent_view.stack_acq_frame.get_widgets()
 
         # Grey out stack acq widgets when not Zstack or projection
-        if mode == "z-stack" or mode == "projection" or mode == "ConstantVelocityAcquisition":
+        if mode in [
+            "z-stack",
+            "projection",
+            "ConstantVelocityAcquisition",
+            "customized",
+        ]:
             state = "normal"
         else:
             state = "disabled"

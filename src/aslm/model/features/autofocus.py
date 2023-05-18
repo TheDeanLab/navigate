@@ -127,7 +127,7 @@ class Autofocus:
         Run the autofocus data process.
     """
 
-    def __init__(self, model):
+    def __init__(self, model, device="stage", device_ref="f"):
         self.model = model
         self.max_entropy = None
         self.f_frame_id = None
@@ -170,16 +170,15 @@ class Autofocus:
             },
             "node": {"node_type": "multi-step", "device_related": True},
         }
+        self.device = device
+        self.device_ref = device_ref
 
-    def run(self, *args):
+    def run(self):
         """Run the Autofocusing Routine
 
         Parameters
         ----------
-        args[0] : dict
-            Current microscope state.
-        args[1] : dict
-            Autofocus parameters
+        None
 
         Returns
         -------
@@ -195,7 +194,18 @@ class Autofocus:
 
         # load Autofocus
         self.model.signal_container, self.model.data_container = load_features(
-            self.model, [[{"name": Autofocus}]]
+            self.model,
+            [
+                [
+                    {
+                        "name": Autofocus,
+                        "args": (
+                            self.device,
+                            self.device_ref,
+                        ),
+                    }
+                ]
+            ],
         )
 
         self.model.signal_thread = threading.Thread(
@@ -225,7 +235,9 @@ class Autofocus:
         int
             Number of frames to be processed.
         """
-        settings = self.model.configuration["experiment"]["AutoFocusParameters"]
+        settings = self.model.configuration["experiment"]["AutoFocusParameters"][
+            self.model.active_microscope_name
+        ][self.device][self.device_ref]
         frames = 0
         if settings["coarse_selected"]:
             frames = (
@@ -268,8 +280,18 @@ class Autofocus:
         -------
         None
         """
-        settings = self.model.configuration["experiment"]["AutoFocusParameters"]
-        self.focus_pos = self.model.configuration["experiment"]["StageParameters"]["f"]
+        settings = self.model.configuration["experiment"]["AutoFocusParameters"][
+            self.model.active_microscope_name
+        ][self.device][self.device_ref]
+        if self.device == "stage":
+            self.focus_pos = self.model.configuration["experiment"]["StageParameters"][
+                self.device_ref
+            ]
+        elif self.device == "remote_focus":
+            # TODO: support remote focus
+            pass
+        else:
+            self.focus_pos = 0
         self.total_frame_num = self.get_autofocus_frame_num()  # Total frame num
         self.coarse_steps, self.init_pos = 0, 0
 
@@ -302,8 +324,13 @@ class Autofocus:
 
         if self.signal_id < self.coarse_steps:
             self.init_pos += self.coarse_step_size
-            self.model.move_stage({"f_abs": self.init_pos}, wait_until_done=True)
-            self.model.logger.debug(f"*** Autofocus move stage: (f, {self.init_pos})")
+            if self.device == "stage":
+                self.model.move_stage(
+                    {f"{self.device_ref}_abs": self.init_pos}, wait_until_done=True
+                )
+                self.model.logger.debug(
+                    f"*** Autofocus move stage: ({self.device_ref}, {self.init_pos})"
+                )
             self.autofocus_frame_queue.put(
                 (self.model.frame_id, self.coarse_steps - self.signal_id, self.init_pos)
             )
@@ -315,8 +342,13 @@ class Autofocus:
                 )
                 self.init_pos -= self.fine_pos_offset
             self.init_pos += self.fine_step_size
-            self.model.move_stage({"f_abs": self.init_pos}, wait_until_done=True)
-            self.model.logger.debug(f"*** Autofocus move stage: (f, {self.init_pos})")
+            if self.device == "stage":
+                self.model.move_stage(
+                    {f"{self.device_ref}_abs": self.init_pos}, wait_until_done=True
+                )
+                self.model.logger.debug(
+                    f"*** Autofocus move stage: ({self.device_ref}, {self.init_pos})"
+                )
             self.autofocus_frame_queue.put(
                 (
                     self.model.frame_id,
@@ -327,8 +359,13 @@ class Autofocus:
 
         else:
             self.init_pos = self.autofocus_pos_queue.get(timeout=self.coarse_steps * 10)
-            self.model.move_stage({"f_abs": self.init_pos}, wait_until_done=True)
-            self.model.logger.debug(f"*** Autofocus move stage: (f, {self.init_pos})")
+            if self.device == "stage":
+                self.model.move_stage(
+                    {f"{self.device_ref}_abs": self.init_pos}, wait_until_done=True
+                )
+                self.model.logger.debug(
+                    f"*** Autofocus move stage: ({self.device_ref}, {self.init_pos})"
+                )
 
         self.signal_id += 1
         return self.init_pos if self.signal_id > self.total_frame_num else None
@@ -452,7 +489,9 @@ class Autofocus:
         self.model.event_queue.put(("autofocus", [self.plot_data, False, True]))
 
         # Evaluate data by fitting it to an inverse power tent.
-        if self.model.configuration["experiment"]["AutoFocusParameters"]["robust_fit"]:
+        if self.model.configuration["experiment"]["AutoFocusParameters"][
+            self.model.active_microscope_name
+        ][self.device][self.device_ref]["robust_fit"]:
             fit_data, fit_focus_position, r_squared = self.robust_autofocus()
 
             # If the fit is good, use the fit focus position, else use the max entropy
@@ -469,19 +508,22 @@ class Autofocus:
                 )
 
         # Update the configuration with the new focus position
-        self.model.configuration["experiment"]["StageParameters"]["f"] = self.focus_pos
+        if self.device == "stage":
+            self.model.configuration["experiment"]["StageParameters"][
+                self.device_ref
+            ] = self.focus_pos
 
-        # Tell the controller to update the view
-        stage_position = dict(
-            map(
-                lambda axis: (
-                    f"{axis}_abs",
-                    self.model.configuration["experiment"]["StageParameters"][axis],
-                ),
-                ["x", "y", "z", "f", "theta"],
+            # Tell the controller to update the view
+            stage_position = dict(
+                map(
+                    lambda axis: (
+                        f"{axis}_abs",
+                        self.model.configuration["experiment"]["StageParameters"][axis],
+                    ),
+                    ["x", "y", "z", "f", "theta"],
+                )
             )
-        )
-        self.model.event_queue.put(("update_stage", stage_position))
+            self.model.event_queue.put(("update_stage", stage_position))
 
         # Log the new focus position
         self.model.logger.info("***********final focus: %s" % self.focus_pos)

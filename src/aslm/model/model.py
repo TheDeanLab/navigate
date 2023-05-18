@@ -526,19 +526,12 @@ class Model:
 
             Parameters
             ----------
-            Args[0]: dict
-                Dictionary of the microscope state (resolution, zoom, ...)
-            Args[1]: dict
-                Dictionary of the user-defined autofocus parameters
-                {'coarse_range': 500,
-                'coarse_step_size': 50,
-                'coarse_selected': True,
-                'fine_range': 50,
-                'fine_step_size': 5,
-                'fine_selected': True}
+            Args[0]: device name
+            Args[1]: device reference
             """
-            autofocus = Autofocus(self)
-            autofocus.run(*args)
+            print("*** autofocus args:", *args)
+            autofocus = Autofocus(self, *args)
+            autofocus.run()
         elif command == "load_feature":
             """
             args[0]: int, args[0]-1 is the id of features

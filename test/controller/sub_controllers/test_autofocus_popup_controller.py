@@ -221,6 +221,8 @@ class TestAutofocusPopupController:
         res = self.autofocus_controller.parent_controller.pop()
         assert res == "autofocus"
 
+        self.autofocus_controller.parent_controller.clear()
+
     def test_display_plot(self):
         """Tests that the display plot function works correctly
 

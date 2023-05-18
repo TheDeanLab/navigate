@@ -131,6 +131,11 @@ class DummyController:
             return self.commands.pop(0)
         else:
             return "Empty command list"
+        
+    def clear(self):
+        """Clear command list
+        """
+        self.commands = []
 
 
 class DummyModel:

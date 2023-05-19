@@ -115,7 +115,3 @@ class Menubar(Menu):
         # Window Menu
         self.menu_window = Menu(self)
         self.add_cascade(menu=self.menu_window, label="Window")
-
-        # Help Menu
-        self.menu_help = Menu(self)
-        self.add_cascade(menu=self.menu_help, label="Help")

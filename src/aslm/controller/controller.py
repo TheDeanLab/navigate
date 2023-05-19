@@ -44,6 +44,8 @@ import sys
 # Local View Imports
 from aslm.view.main_application_window import MainApp as view
 from aslm.view.popups.camera_view_popup_window import CameraViewPopupWindow
+from aslm.view.popups.autofocus_setting_popup import AutofocusPopup
+from aslm.view.popups.waveform_parameter_popup_window import WaveformParameterPopupWindow
 
 # Local Sub-Controller Imports
 from aslm.controller.configuration_controller import ConfigurationController
@@ -56,8 +58,12 @@ from aslm.controller.sub_controllers import (
     MultiPositionController,
     ChannelsTabController,
     AcquireBarController,
+    WaveformPopupController,
     MenuController,
+    AutofocusPopupController,
+    MicroscopePopupController,
 )
+
 from aslm.controller.thread_pool import SynchronizedThreadPool
 
 # Local Model Imports
@@ -929,6 +935,44 @@ class Controller:
                     value
                 )
 
+    def popup_autofocus_setting(self, *args):
+        """Pop up the Autofocus setting window."""
+        if hasattr(self, "af_popup_controller"):
+            self.af_popup_controller.showup()
+            return
+        af_popup = AutofocusPopup(self.view)
+        self.af_popup_controller = AutofocusPopupController(af_popup, self)
+
+    def popup_waveform_setting(self):
+        if hasattr(self, "waveform_popup_controller"):
+            self.waveform_popup_controller.showup()
+            return
+        waveform_constants_popup = WaveformParameterPopupWindow(
+            self.view, self.configuration_controller
+        )
+        self.waveform_popup_controller = WaveformPopupController(
+            waveform_constants_popup, self, self.waveform_constants_path
+        )
+        self.waveform_popup_controller.populate_experiment_values()
+
+    def popup_microscope_setting(self):
+        """Pop up the microscope setting window.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
+        if hasattr(self, "microscope_popup_controller"):
+            self.microscope_popup_controller.showup()
+            return
+        microscope_info = self.model.get_microscope_info()
+        self.microscope_popup_controller = MicroscopePopupController(
+            self.view, self, microscope_info
+        )
     def exit_program(self):
         """Exit the program.
 

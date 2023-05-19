@@ -38,10 +38,6 @@ import tkinter as tk
 # Third Party Imports
 
 # Local Imports
-from aslm.view.popups.waveform_parameter_popup_window import (
-    WaveformParameterPopupWindow,
-)
-from aslm.view.popups.autofocus_setting_popup import AutofocusPopup
 from aslm.view.popups.ilastik_setting_popup import ilastik_setting_popup
 from aslm.view.popups.help_popup import HelpPopup
 from aslm.view.popups.camera_map_setting_popup import CameraMapSettingPopup
@@ -50,9 +46,6 @@ from aslm.controller.sub_controllers.help_popup_controller import HelpPopupContr
 from aslm.controller.sub_controllers import (
     IlastikPopupController,
     CameraMapSettingPopupController,
-    AutofocusPopupController,
-    WaveformPopupController,
-    MicroscopePopupController,
 )
 from aslm.tools.file_functions import save_yaml_file
 
@@ -67,6 +60,9 @@ class MenuController(GUIController):
         super().__init__(view, parent_controller)
         self.parent_controller = parent_controller
         self.view = view
+        self.resolution_value = tk.StringVar()
+        self.feature_id_val = tk.IntVar(0)
+
 
     def initialize_menus(self, is_synthetic_hardware=False):
         """Initialize menus
@@ -130,46 +126,6 @@ class MenuController(GUIController):
                 return
             self.model.load_images(filenames)
 
-        def popup_waveform_setting():
-            if hasattr(self, "waveform_popup_controller"):
-                self.waveform_popup_controller.showup()
-                return
-            waveform_constants_popup = WaveformParameterPopupWindow(
-                self.view, self.configuration_controller
-            )
-            self.waveform_popup_controller = WaveformPopupController(
-                waveform_constants_popup, self, self.waveform_constants_path
-            )
-
-            self.waveform_popup_controller.populate_experiment_values()
-
-        def popup_microscope_setting():
-            """Pop up the microscope setting window.
-
-            Parameters
-            ----------
-            None
-
-            Returns
-            -------
-            None
-            """
-            if hasattr(self, "microscope_popup_controller"):
-                self.microscope_popup_controller.showup()
-                return
-            microscope_info = self.model.get_microscope_info()
-            self.microscope_popup_controller = MicroscopePopupController(
-                self.view, self, microscope_info
-            )
-
-        def popup_autofocus_setting(*args):
-            """Pop up the Autofocus setting window."""
-            if hasattr(self, "af_popup_controller"):
-                self.af_popup_controller.showup()
-                return
-            af_popup = AutofocusPopup(self.view)
-            self.af_popup_controller = AutofocusPopupController(af_popup, self)
-
         def popup_camera_map_setting():
             """Pop up the Camera Map setting window."""
             if hasattr(self, "camera_map_popup_controller"):
@@ -201,52 +157,41 @@ class MenuController(GUIController):
             help_pop = HelpPopup(self.view)
             self.help_controller = HelpPopupController(help_pop, self)
 
-        def add_menu_item(
-            menu,
-            menu_entry,
-            command,
-            accelerator=None,
-            event_binding=None,
-            underline=None,
-        ):
-            """Add a menu item to a menu.
+        def populate_menu(menu_dict):
+            """ Populate the menus from a dictionary.
 
             Parameters
             ----------
-            menu : class
-                Menu class.
-            menu_entry : str
-                Menu item label.
-            command : function
-                Function to be called when the menu item is clicked.
-            accelerator : str
-                Keyboard shortcut for the menu item.
-            event_binding : str
-                Event binding for the menu item.
-            underline : int
-                Index of the character to underline in the menu item label.
+            menu_dict : dict
+                menu_dict = {
+                    Menu object: {
+                        "Menu String Entry": [
+                            Command,
+                            Accelerator,
+                            Windows Keystroke,
+                            Apple Keystroke",
+                ],
+                ....
 
-            Returns
-            -------
-            None
-            """
-            if menu_entry == "add_separator":
-                menu.add_separator()
-                return
+                """
+            for menu in menu_dict:
+                menu_items = menu_dict[menu]
+                for label in menu_items:
+                    if label == "add_separator":
+                        menu.add_separator()
+                    else:
+                        menu.add_command(
+                            label=label,
+                            command=menu_items[label][0],
+                            accelerator=menu_items[label][1],
+                        )
+                        if platform.platform() == "Darwin":
+                            menu.bind_all(menu_items[label][3], menu_items[label][0])
+                        else:
+                            menu.bind_all(menu_items[label][2], menu_items[label][0])
 
-            if platform.platform() == "Darwin":
-                accelerator = accelerator.replace("Ctrl", "Command")
-
-            menu.add_command(
-                label=label,
-                command=command,
-                accelerator=accelerator,
-                underline=underline,
-            )
-
-            menu.bind_all(accelerator, command)
-
-        menus_dict = {
+        # File Menu
+        file_menu = {
             self.view.menubar.menu_file: {
                 "New Experiment": [
                     new_experiment,
@@ -268,19 +213,26 @@ class MenuController(GUIController):
                 ],
                 "add_separator": [None],
                 "Save Data": [None, "Ctrl+s", "<Control-s>", "<Control_L-s>"],
-            },
+                "Load Images": [load_images, None, None, None],
+                "Unload Images": [self.parent_controller.model.load_images(None), None, None, None]
+            }}
+
+        # Stage Control Menu
+        # Most bindings are implemented in the keystroke_controller. Accelerators added here
+        # to communicate them to users. Could move those key bindings here? Not sure...
+        stage_control_menu = {
             self.view.menubar.menu_multi_positions: {
-                "Move Up (X)": [None, "w", "<Key-w>", "<Key-w>"],
-                "Move Down (X)": [None, "s", "<Key-s>", "<Key-s>"],
-                "Move Left (Y)": [None, "a", "<Key-a>", "<Key-a>"],
-                "Move Right (Y)": [None, "d", "<Key-d>", "<Key-d>"],
-                "Move In (Z)": [None, "q", "<Key-q>", "<Key-q>"],
-                "Move Out (Z)": [None, "e", "<Key-e>", "<Key-e>"],
-                "Move Focus Up (F)": [None, "r", "<Key-r>", "<Key-r>"],
-                "Move Focus Down (F)": [None, "f", "<Key-f>", "<Key-f>"],
-                "Rotate Clockwise (R)": [None, "z", "<Key-z>", "<Key-z>"],
-                "Rotate Counter-Clockwise (R)": [None, "x", "<Key-x>", "<Key-x>"],
-                "add_separator": [None],
+                "Move Up": [lambda event: self.parent_controller.stage_controller.stage_key_press, "w", "<Key-w>", "<Key-w>"],
+                "Move Down": [self.parent_controller.stage_controller.stage_key_press, "s", "<Key-s>", "<Key-s>"],
+                "Move Left": [self.parent_controller.stage_controller.stage_key_press, "a", "<Key-a>", "<Key-a>"],
+                "Move Right": [self.parent_controller.stage_controller.stage_key_press, "d", "<Key-d>", "<Key-d>"],
+                "Move In": [None, "q", "<Key-q>", "<Key-q>"],
+                "Move Out": [None, "e", "<Key-e>", "<Key-e>"],
+                "Move Focus Up": [None, "r", "<Key-r>", "<Key-r>"],
+                "Move Focus Down": [None, "f", "<Key-f>", "<Key-f>"],
+                "Rotate Clockwise": [None, "z", "<Key-z>", "<Key-z>"],
+                "Rotate Counter-Clockwise": [None, "x", "<Key-x>", "<Key-x>"],
+                "add_separator": [None, None, None, None],
                 "Launch Tiling Wizard": [None, None, None, None],
                 "Load Positions": [
                     self.parent_controller.multiposition_tab_controller.load_positions,
@@ -314,40 +266,51 @@ class MenuController(GUIController):
                 ],
             },
         }
-        for menu in menus_dict:
-            menu_items = menus_dict[menu]
-            for label in menu_items:
-                if label == "add_separator":
-                    menu.add_separator()
-                else:
-                    menu.add_command(
-                        label=label,
-                        command=menu_items[label][0],
-                        accelerator=menu_items[label][1],
-                    )
-                    if platform.platform() == "Darwin":
-                        menu.bind_all(menu_items[label][3], menu_items[label][0])
-                    else:
-                        menu.bind_all(menu_items[label][2], menu_items[label][0])
 
-        # load images from disk in synthetic hardware
-        if is_synthetic_hardware:
-            self.view.menubar.menu_file.add_separator()
-            self.view.menubar.menu_file.add_command(
-                label="Load Images", command=load_images
-            )
-            self.view.menubar.menu_file.add_command(
-                label="Unload Images", command=lambda: self.model.load_images(None)
-            )
+        # autofocus menu
+        autofocus_menu = {
+            self.view.menubar.menu_autofocus: {
+                "Perform Autofocus": [
+                    lambda x: self.parent_controller.execute("autofocus"),
+                    "Ctrl+A", "<Control-a>", "<Control_L-a>",
+                ],
+                "Autofocus Settings": [
+                    self.parent_controller.popup_autofocus_setting,
+                    "Ctrl+Shift+A", "<Control-A>", "<Control_L-A>"
+                ]
+            }
+        }
 
-        # add resolution menu
-        self.resolution_value = tk.StringVar()
-        for microscope_name in self.parent_controller.configuration["configuration"][
-            "microscopes"
-        ].keys():
-            zoom_positions = self.parent_controller.configuration["configuration"][
-                "microscopes"
-            ][microscope_name]["zoom"]["position"]
+        # Window Menu
+        windows_menu = {
+            self.view.menubar.menu_window: {
+                "Channel Settings": [
+                    None, "Ctrl+1", "<Control-1>", "<Control_L-1"
+                ],
+                "Camera Settings": [
+                    None, "Ctrl+2", "<Control-2>", "<Control_L-2"
+                ],
+                "Stage Control": [
+                    None, "Ctrl+3", "<Control-3>", "<Control_L-3"
+                ],
+                "Multiposition Table": [
+                    None, "Ctrl+4", "<Control-4>", "<Control_L-4"
+                ],
+                "add_separator": [
+                    None, None, None, None
+                ],
+                "Popout Camera Display": [
+                    None, None, None, None
+                ],
+                "Help": [
+                    popup_help, None, None, None
+                ]
+            }
+        }
+
+        # Resolution menu
+        for microscope_name in self.parent_controller.configuration["configuration"]["microscopes"].keys():
+            zoom_positions = self.parent_controller.configuration["configuration"]["microscopes"][microscope_name]["zoom"]["position"]
             if len(zoom_positions) > 1:
                 sub_menu = tk.Menu(self.view.menubar.menu_resolution)
                 self.view.menubar.menu_resolution.add_cascade(
@@ -371,56 +334,16 @@ class MenuController(GUIController):
             "write",
             lambda *args: self.execute("resolution", self.resolution_value.get()),
         )
+        configuration_dict = {
+            self.view.menubar.menu_resolution: {
+                "add_separator": [None, None, None, None],
+                "Waveform Parameters": [
+                    self.parent_controller.popup_waveform_setting, None, None, None],
+                "Configure Microscope": [
+                    self.parent_controller.popup_microscope_setting, None, None, None]
 
-        # add separator
-        self.view.menubar.menu_resolution.add_separator()
-
-        # waveform popup
-        self.view.menubar.menu_resolution.add_command(
-            label="Waveform Parameters", command=popup_waveform_setting
-        )
-        # microscope setting popup
-        self.view.menubar.menu_resolution.add_command(
-            label="Configure Microscopes", command=popup_microscope_setting
-        )
-
-        # autofocus menu
-        self.view.menubar.menu_autofocus.add_command(
-            label="Perform Autofocus",
-            command=lambda: self.execute("autofocus"),
-            accelerator="Ctrl+A",
-        )
-        self.view.menubar.menu_autofocus.add_command(
-            label="Autofocus Settings",
-            command=popup_autofocus_setting,
-            accelerator="Ctrl+Shift+A",
-        )
-
-        if platform.platform == "darwin":
-            self.view.bind_all("<Control_L-a>", lambda event: self.execute("autofocus"))
-            self.view.bind_all("<Control_L-A>", popup_autofocus_setting)
-        else:
-            self.view.bind_all("<Control-a>", lambda event: self.execute("autofocus"))
-            self.view.bind_all("<Control-A>", popup_autofocus_setting)
-
-        # Window Menu
-        self.view.menubar.menu_window.add_command(
-            label="Channel Settings", accelerator="Ctrl+1"
-        )
-        self.view.menubar.menu_window.add_command(
-            label="Camera Settings", accelerator="Ctrl+2"
-        )
-        self.view.menubar.menu_window.add_command(
-            label="Stage Control", accelerator="Ctrl+3"
-        )
-        self.view.menubar.menu_window.add_command(
-            label="Multiposition Table", accelerator="Ctrl+4"
-        )
-        self.view.menubar.menu_window.add_separator()
-        self.view.menubar.menu_window.add_command(label="Popout Camera Display")
-
-        # Help menu
-        self.view.menubar.menu_help.add_command(label="Help", command=popup_help)
+            }
+        }
 
         # add-on features
         feature_list = [
@@ -432,14 +355,13 @@ class MenuController(GUIController):
             "Volume Search",
             "Time Series",
         ]
-        self.feature_id_val = tk.IntVar(0)
         for i in range(len(feature_list)):
             self.view.menubar.menu_features.add_radiobutton(
                 label=feature_list[i], variable=self.feature_id_val, value=i
             )
-        self.feature_id_val.trace_add(
-            "write",
-            lambda *args: self.execute("load_feature", self.feature_id_val.get()),
+        self.feature_id_val.trace_add("write",
+            lambda *args: self.execute("load_feature",
+                                       self.feature_id_val.get()),
         )
         self.view.menubar.menu_features.add_separator()
         self.view.menubar.menu_features.add_command(
@@ -452,3 +374,10 @@ class MenuController(GUIController):
         self.view.menubar.menu_features.add_command(
             label="Camera offset and variance maps", command=popup_camera_map_setting
         )
+
+        # Populate Menus
+        populate_menu(file_menu)
+        populate_menu(stage_control_menu)
+        populate_menu(autofocus_menu)
+        populate_menu(windows_menu)
+        populate_menu(configuration_dict)

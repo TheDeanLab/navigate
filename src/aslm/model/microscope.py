@@ -86,7 +86,7 @@ class Microscope:
         self.lasers = {}
         self.galvo = {}
         self.daq = devices_dict.get("daq", None)
-        self.tiger_controller = devices_dict.get("stages", None)
+        self.tiger_controller = None
         self.info = {}
         self.current_channel = None
         self.channels = None
@@ -109,9 +109,10 @@ class Microscope:
             "lasers": ["wavelength"],
         }
 
-        # TODO: This cannot be pulled into the repo. I need help comping up with a more general way to have
-        # shared devices. 
-        devices_dict['filter_wheel']['ASI'] = devices_dict['stages']['ASI_119060508']
+        # TODO: This cannot be pulled into the repo.
+        #  I need help comping up with a more general way to have
+        # shared devices.
+        # devices_dict['filter_wheel']['ASI'] = devices_dict['stages']['ASI_119060508']
 
         device_name_dict = {"lasers": "wavelength"}
 
@@ -120,35 +121,24 @@ class Microscope:
         ]["lasers"]
         self.laser_wavelength = [laser["wavelength"] for laser in laser_list]
 
-        # load/start all the devices listed in device_ref_dict. e.g., camera, filter_wheel, zoom,...
+        # LOAD/START CAMERAS, FILTER_WHEELS, ZOOM, SHUTTERS, REMOTE_FOCUS_DEVICES,
+        # GALVOS, AND LASERS
         for device_name in device_ref_dict.keys():
             device_connection = None
-            device_config_list = []
-            device_name_list = []
-
-            if type(configuration["configuration"]["microscopes"][name][device_name]) == ListProxy:
-                i = 0
-                for d in configuration["configuration"]["microscopes"][name][device_name]:
-                    device_config_list.append(d)
-                    if device_name in device_name_dict:
-                        device_name_list.append(
-                            build_ref_name("_", d[device_name_dict[device_name]])
-                        )
-
-                    else:
-                        device_name_list.append(build_ref_name("_", device_name, i))
-                    i += 1
-
-                is_list = True
-
-            else:
-                device_config_list.append(configuration["configuration"]["microscopes"][name][device_name])
-                is_list = False
+            (
+                device_config_list,
+                device_name_list,
+                is_list,
+            ) = self.assemble_device_config_lists(
+                device_name=device_name, device_name_dict=device_name_dict
+            )
 
             for i, device in enumerate(device_config_list):
                 device_ref_name = None
                 if "hardware" in device.keys():
-                    ref_list = [device["hardware"][k] for k in device_ref_dict[device_name]]
+                    ref_list = [
+                        device["hardware"][k] for k in device_ref_dict[device_name]
+                    ]
 
                 else:
                     try:
@@ -157,55 +147,42 @@ class Microscope:
                         ref_list = []
 
                 device_ref_name = build_ref_name("_", *ref_list)
-                if device_name in devices_dict and device_ref_name in devices_dict[device_name]:
+                if (
+                    device_name in devices_dict
+                    and device_ref_name in devices_dict[device_name]
+                ):
                     device_connection = devices_dict[device_name][device_ref_name]
 
-                elif device_ref_name.startswith("NI") and (device_name == "galvo" or device_name == "remote_focus_device"):
-                    # TODO: Remove this. We should not have this hardcoded.
+                # SHARED DEVICES
+                elif device_ref_name.startswith("NI") and (
+                    device_name == "galvo" or device_name == "remote_focus_device"
+                ):
                     device_connection = self.daq
 
-                elif device_ref_name.startswith("ASI"):
-                    # TODO: Using above TODO to model the import of a shared device_connection.
-                    self.tiger_controller = devices_dict["stages"][device_ref_name]
-                    device_connection = self.tiger_controller
-                    print("Here")
+                if device_ref_name.startswith("ASI") and self.tiger_controller is None:
+                    # The first ASI instance of a device connection will be passed to
+                    # all other ASI devices as self.tiger_controller
+                    device_connection = devices_dict[device_name][device_ref_name]
+                    self.tiger_controller = device_connection
 
-                # Import start_device classes
-                try:
-                    exec(
-                        f"start_{device_name}=importlib.import_module("
-                        f"'aslm.model.device_startup_functions').start_{device_name}"
-                    )
-                except AttributeError:
-                    print(f"Could not import start_{device_name}")
-                    print(f"Could not load device {device_name}")
-
-                # Start the devices
-                if is_list:
-                    exec(
-                        f"self.{device_name}['{device_name_list[i]}'] = "
-                        f"start_{device_name}(name, device_connection, configuration, "
-                        f"i, is_synthetic)"
-                    )
-                    if device_name in device_name_list[i]:
-                        self.info[device_name_list[i]] = device_ref_name
-                else:
-                    exec(
-                        f"self.{device_name} = start_{device_name}(name, "
-                        f"device_connection, configuration, is_synthetic)"
-                    )
-                    self.info[device_name] = device_ref_name
+                # LOAD AND START DEVICES
+                self.load_and_start_devices(
+                    device_name=device_name,
+                    is_list=is_list,
+                    device_name_list=device_name_list,
+                    device_ref_name=device_ref_name,
+                    i=i,
+                )
 
                 if device_connection is None and device_ref_name is not None:
                     if device_name not in devices_dict:
                         devices_dict[device_name] = {}
+
                     devices_dict[device_name][device_ref_name] = (
                         getattr(self, device_name)[device_name_list[i]]
                         if is_list
                         else getattr(self, device_name)
                     )
-
-        # ASI
 
         # stages
         stage_devices = self.configuration["configuration"]["microscopes"][
@@ -223,9 +200,14 @@ class Microscope:
                 logger.debug("stage has not been loaded!")
                 raise Exception("no stage device!")
 
+            # SHARED DEVICES
             if device_ref_name.startswith("GalvoNIStage"):
-                # TODO: Remove this. We should not have this hardcoded.
                 devices_dict["stages"][device_ref_name] = self.daq
+
+            if device_ref_name.startswith("ASI") and self.tiger_controller is not None:
+                # If the self.tiger_controller is already set, then we can pass it to
+                # other devices that are connected to the same controller.
+                devices_dict["stages"][device_ref_name] = self.tiger_controller
 
             stage = start_stage(
                 microscope_name=self.microscope_name,
@@ -259,12 +241,6 @@ class Microscope:
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> microscope.update_data_buffer(img_width=512,
-        >>> img_height=512, data_buffer=None, number_of_frames=1)
-
         """
 
         if self.camera.is_acquiring:
@@ -284,11 +260,6 @@ class Microscope:
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> microscope.move_stage_offset(former_microscope="microscope1")
-
         """
 
         if former_microscope:
@@ -319,11 +290,6 @@ class Microscope:
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> microscope.prepare_acquisition()
-
         """
         self.current_channel = 0
         self.central_focus = None
@@ -365,10 +331,6 @@ class Microscope:
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> microscope.end_acquisition()
         """
         self.stop_stage()
         self.daq.stop_acquisition()
@@ -391,11 +353,6 @@ class Microscope:
         -------
         waveform : dict
             Dictionary of all the waveforms.
-
-        Examples
-        --------
-        >>> waveform = microscope.calculate_all_waveform()
-
         """
         readout_time = self.get_readout_time()
         camera_waveform = self.daq.calculate_all_waveforms(
@@ -424,10 +381,6 @@ class Microscope:
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> microscope.prepare_next_channel()
         """
         curr_channel = self.current_channel
         prefix = "channel_"
@@ -510,11 +463,6 @@ class Microscope:
         -------
         readout_time : float
             Camera readout time in seconds or -1 if not in Normal mode.
-
-        Examples
-        --------
-        >>> readout_time = microscope.get_readout_time()
-
         """
         readout_time = 0
         if (
@@ -537,10 +485,6 @@ class Microscope:
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> microscope.move_stage({"x_abs": 0, "y_abs": 0, "z_abs": 0, "f_abs": 0})
         """
 
         success = True
@@ -564,10 +508,6 @@ class Microscope:
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> microscope.stop_stage()
         """
 
         for axis in self.stages:
@@ -584,10 +524,6 @@ class Microscope:
         -------
         stage_position : dict
             Dictionary of stage positions.
-
-        Examples
-        --------
-        >>> stage_position = microscope.get_stage_position()
         """
 
         ret_pos_dict = {}
@@ -596,3 +532,100 @@ class Microscope:
             temp_pos = self.stages[axis].report_position()
             ret_pos_dict[pos_axis] = temp_pos[pos_axis]
         return ret_pos_dict
+
+    def assemble_device_config_lists(self, device_name, device_name_dict):
+        """Assemble device config lists.
+
+        Parameters
+        ----------
+        device_name : str
+            Device name.
+        device_name_dict : dict
+            Device name dictionary.
+
+        Returns
+        -------
+        device_config_list : list
+            Device configuration list.
+        device_name_list : list
+            Device name list.
+        """
+        device_config_list = []
+        device_name_list = []
+
+        devices = self.configuration["configuration"]["microscopes"][
+            self.microscope_name
+        ][device_name]
+
+        if type(devices) == ListProxy:
+            i = 0
+            for d in devices:
+                device_config_list.append(d)
+                if device_name in device_name_dict:
+                    device_name_list.append(
+                        build_ref_name("_", d[device_name_dict[device_name]])
+                    )
+
+                else:
+                    device_name_list.append(build_ref_name("_", device_name, i))
+                i += 1
+            is_list = True
+
+        else:
+            device_config_list.append(devices)
+            is_list = False
+
+        return device_config_list, device_name_list, is_list
+
+    def load_and_start_devices(
+        self,
+        device_name,
+        is_list,
+        device_name_list,
+        device_ref_name,
+        i,
+    ):
+        """Load and start devices.
+
+        Parameters
+        ----------
+        device_name : str
+            Device name.
+        is_list : bool
+            Is list.
+        device_name_list : list
+            Device name list.
+        device_ref_name : str
+            Device reference name.
+        i : int
+            Index.
+
+        Returns
+        -------
+        None
+        """
+        # Import start_device classes
+        try:
+            exec(
+                f"start_{device_name}=importlib.import_module("
+                f"'aslm.model.device_startup_functions').start_{device_name}"
+            )
+        except AttributeError:
+            print(f"Could not import start_{device_name}")
+            print(f"Could not load device {device_name}")
+
+        # Start the devices
+        if is_list:
+            exec(
+                f"self.{device_name}['{device_name_list[i]}'] = "
+                f"start_{device_name}(name, device_connection, configuration, "
+                f"i, is_synthetic)"
+            )
+            if device_name in device_name_list[i]:
+                self.info[device_name_list[i]] = device_ref_name
+        else:
+            exec(
+                f"self.{device_name} = start_{device_name}(name, "
+                f"device_connection, configuration, is_synthetic)"
+            )
+            self.info[device_name] = device_ref_name

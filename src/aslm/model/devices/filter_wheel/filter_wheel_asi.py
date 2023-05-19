@@ -35,18 +35,17 @@ import logging
 import time
 
 # Third Party Imports
-import numpy as np
-import serial
 
 # Local Imports
 from aslm.model.devices.filter_wheel.filter_wheel_base import FilterWheelBase
+from aslm.model.devices.APIs.asi.asi_tiger_controller import TigerController
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-def build_filter_wheel_connection(comport, baudrate, timeout=0.25):
+def build_filter_wheel_connection(comport, baudrate=9600, timeout=0.25):
     """Build ASIFilterWheel Serial Port connection
     Attributes
     ----------
@@ -55,14 +54,22 @@ def build_filter_wheel_connection(comport, baudrate, timeout=0.25):
     baudrate : int
         Baud rate for communicating with the filter wheel, e.g., 9600.
     """
-    logging.debug(f"ASI Filter Wheel - Opening Serial Port {comport}")
-    try:
-        return serial.Serial(comport, baudrate, timeout=0.25)
-    except serial.SerialException:
-        logger.warning("ASI Filter Wheel - Could not establish Serial Port Connection")
-        raise UserWarning(
-            "Could not communicate with ASI Filter Wheel via COMPORT", comport
-        )
+    # wait until ASI device is ready
+    block_flag = True
+    wait_start = time.time()
+    timeout_s = timeout / 1000
+    while block_flag:
+        tiger_controller = TigerController(comport, baudrate, verbose=True)
+        tiger_controller.connect_to_serial()
+        if tiger_controller.is_open():
+            block_flag = False
+        else:
+            print("Trying to connect to the Tiger Controller again")
+            elapsed = time.time()
+            if (elapsed - wait_start) > timeout_s:
+                break
+            time.sleep(0.1)
+    return tiger_controller
 
 
 class ASIFilterWheel(FilterWheelBase):
@@ -79,10 +86,12 @@ class ASIFilterWheel(FilterWheelBase):
         self.filter_wheel = device_connection
 
         self.number_of_filter_wheels = configuration["configuration"]["microscopes"][
-            microscope_name]["filter_wheel"]["hardware"]["wheel_number"]
+            microscope_name
+        ]["filter_wheel"]["hardware"]["wheel_number"]
 
         self.wait_until_done_delay = configuration["configuration"]["microscopes"][
-            microscope_name]["filter_wheel"]["filter_wheel_delay"]
+            microscope_name
+        ]["filter_wheel"]["filter_wheel_delay"]
 
         # Send Filter Wheel/Wheels to Zeroth Position
         for i in range(self.number_of_filter_wheels):
@@ -100,7 +109,7 @@ class ASIFilterWheel(FilterWheelBase):
             self.filter_wheel.disconnect_from_serial()
 
     def filter_change_delay(self, filter_name):
-        """ Estimate duration of time necessary to move the filter wheel
+        """Estimate duration of time necessary to move the filter wheel
 
         Assumes that it is ~40ms per adjacent position.
         Depends on filter wheel parameters and load.

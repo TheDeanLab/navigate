@@ -39,7 +39,7 @@ def test_synthetic_daq_functions():
         None,
         None,
         None,
-        [list(daq.waveform_dict.keys())[0], random.random()],
+        [f"channel_{random.randint(1, 5)}", random.random()],
         None,
         None,
         None,

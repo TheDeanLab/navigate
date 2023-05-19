@@ -46,7 +46,24 @@ logger = logging.getLogger(p)
 
 
 def build_PIStage_connection(controller_name, serial_number, stages, reference_modes):
-    """Connect to the Physik Instrumente Stage"""
+    """Connect to the Physik Instrumente Stage
+
+    Parameters
+    ----------
+    controller_name : str
+        Name of the controller, e.g., "C-863.11"
+    serial_number : str
+        Serial number of the controller, e.g., "0112345678"
+    stages : str
+        Stages to connect to, e.g., "M-111.1DG"
+    reference_modes : str
+        Reference modes for the stages, e.g., "FRF"
+
+    Returns
+    -------
+    stage_connection : dict
+        Dictionary containing the pi_tools and pi_device objects
+    """
     pi_stages = stages.split()
     pi_reference_modes = reference_modes.split()
     pi_tools = pitools
@@ -82,38 +99,12 @@ class PIStage(StageBase):
 
     Attributes
     -----------
-    x_pos : float
-        True x position
-    y_pos : float
-        True y position
-    z_pos : float
-        True z position
-    f_pos : float
-        True focus position
-    theta_pos : float
-        True rotation position
-    position_dict : dict
-        Dictionary of true stage positions
-    x_max : float
-        Max x position
-    y_max : float
-        Max y position
-    z_max : float
-        Max y position
-    f_max : float
-        Max focus position
-    theta_max : float
-        Max rotation position
-    x_min : float
-        Min x position
-    y_min : float
-        Min y position
-    z_min : float
-        Min y position
-    f_min : float
-        Min focus position
-    theta_min : float
-        Min rotation position
+    pi_tools : object
+        Physik Instrumente tools object
+    pi_device : object
+        Physik Instrumente device object
+    pi_axes : list
+        List of Physik Instrumente axes
 
     Methods
     -------
@@ -142,7 +133,17 @@ class PIStage(StageBase):
         self.pi_axes = list(map(lambda a: axes_mapping[a], self.axes))
 
     def __del__(self):
-        """Delete the PI Connection"""
+        """Delete the PI Connection
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        GCSError
+            If the PI connection cannot be closed
+        """
         try:
             self.stop()
             logger.debug("PI connection closed")
@@ -155,6 +156,11 @@ class PIStage(StageBase):
         """Reports the position for all axes, and create position dictionary.
 
         Positions from Physik Instrumente device are in millimeters
+
+        Returns
+        -------
+        position_dict : dict
+            Dictionary containing the position of all axes
         """
         for _ in range(10):
             try:
@@ -168,7 +174,7 @@ class PIStage(StageBase):
                     setattr(self, f"{ax}_pos", pos)
                 break
             except GCSError as e:
-                print("Failed to report position")
+                print("Physik Instrumente: Failed to report position")
                 logger.exception(f"report_position failed - {e}")
                 time.sleep(0.01)
 
@@ -214,6 +220,7 @@ class PIStage(StageBase):
 
     def move_absolute(self, move_dictionary, wait_until_done=False):
         """Move Absolute Method.
+
         XYZF Values are converted to millimeters for PI API.
         Theta Values are not converted.
 
@@ -237,17 +244,27 @@ class PIStage(StageBase):
                 continue
             success = self.move_axis_absolute(ax, n, move_dictionary)
 
+        if not success:
+            return False
         if wait_until_done is True:
             try:
-                self.pi_tools.waitontarget(self.pi_device)
+                self.pi_tools.waitontarget(self.pi_device, timeout=2.0)
             except GCSError as e:
                 print("Wait on target failed")
                 success = False
                 logger.exception(f"Wait on target failed - {e}")
+            except Exception as e:
+                success = False
+                logger.exception(f"Wait on target timeout error - {e}")
         return success
 
     def stop(self):
-        """Stop all stage movement abruptly."""
+        """Stop all stage movement abruptly.
+
+        Returns
+        -------
+        None
+        """
         try:
             self.pi_device.STP(noraise=True)
         except GCSError as e:

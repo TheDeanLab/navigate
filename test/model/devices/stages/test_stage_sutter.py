@@ -32,6 +32,7 @@
 
 # Standard Library Imports
 import unittest
+import random
 
 # Third Party Imports
 
@@ -45,8 +46,15 @@ class TestStageSutter(unittest.TestCase):
 
     def test_stage_attributes(self):
         dummy_model = DummyModel()
+        dummy_MP285 = type("MP285", (object,), {})
+        dummy_MP285.set_resolution_and_velocity = lambda *args, **kwargs: print("set resolution and velocity")
+        dummy_MP285.set_absolute_mode = lambda *args, **kwargs: print("set absolute mode")
+        dummy_MP285.get_current_position = lambda *args, **kwargs: (random.random(), random.random(), random.random())
         microscope_name = "Mesoscale"
-        stage = SutterStage(microscope_name, None, dummy_model.configuration)
+        stage = SutterStage(microscope_name=microscope_name,
+                            device_connection=dummy_MP285,
+                            configuration=dummy_model.configuration,
+                            device_id=0)
 
         # Attributes
         assert hasattr(stage, "x_pos")
@@ -72,16 +80,10 @@ class TestStageSutter(unittest.TestCase):
         assert hasattr(stage, "report_position") and callable(
             getattr(stage, "report_position")
         )
-        assert hasattr(stage, "move_axis_absolute") and callable(
-            getattr(stage, "move_axis_absolute")
-        )
         assert hasattr(stage, "move_absolute") and callable(
             getattr(stage, "move_absolute")
         )
         assert hasattr(stage, "stop") and callable(getattr(stage, "stop"))
-        assert hasattr(stage, "get_abs_position") and callable(
-            getattr(stage, "get_abs_position")
-        )
 
 
 if __name__ == "__main__":

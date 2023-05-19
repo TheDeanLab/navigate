@@ -107,6 +107,8 @@ class WaveformTabController(GUIController):
             "<<ComboboxSelected>>", self.update_waveform_template
         )
 
+        self.view.master.bind("<<NotebookTabChanged>>", self.plot_waveforms)
+
     def update_sample_rate(self, *args):
         """Update the sample rate in the waveform settings
 
@@ -220,7 +222,15 @@ class WaveformTabController(GUIController):
         --------
         >>> self.plot_waveforms(event)
         """
+        parent_notebook = self.view.master
 
+        try:
+            current_tab = parent_notebook.select()
+        except Exception as e:
+            return
+
+        if self.view.is_docked and parent_notebook.tab(current_tab, "text") != "Waveform Settings":
+            return
         self.view.plot_etl.clear()
         self.view.plot_galvo.clear()
 

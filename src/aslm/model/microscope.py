@@ -235,11 +235,11 @@ class Microscope:
                 devices_dict["stages"][device_ref_name] = self.daq
 
             stage = start_stage(
-                self.microscope_name,
-                devices_dict["stages"][device_ref_name],
-                self.configuration,
-                i,
-                is_synthetic,
+                microscope_name=self.microscope_name,
+                device_connection=devices_dict["stages"][device_ref_name],
+                configuration=self.configuration,
+                id=i,
+                is_synthetic=is_synthetic,
             )
             for axis in device_config["axes"]:
                 self.stages[axis] = stage
@@ -276,7 +276,7 @@ class Microscope:
 
         if self.camera.is_acquiring:
             self.camera.close_image_series()
-        self.camera.set_ROI(img_width, img_height)
+        self.camera.set_ROI(img_height, img_width)
         self.data_buffer = data_buffer
         self.number_of_frames = number_of_frames
 
@@ -377,6 +377,7 @@ class Microscope:
         --------
         >>> microscope.end_acquisition()
         """
+        self.stop_stage()
         self.daq.stop_acquisition()
         if self.camera.is_acquiring:
             self.camera.close_image_series()
@@ -409,10 +410,10 @@ class Microscope:
         )
         remote_focus_waveform = self.remote_focus_device.adjust(readout_time)
         galvo_waveform = [self.galvo[k].adjust(readout_time) for k in self.galvo]
-        #TODO: calculate waveform for galvo stage
-        for axis in self.stages:           
+        # TODO: calculate waveform for galvo stage
+        for axis in self.stages:
             if type(self.stages[axis]) == GalvoNIStage:
-                self.stages[axis].calculate_waveform()
+                self.stages[axis].calculate_waveform(readout_time)
         waveform_dict = {
             "camera_waveform": camera_waveform,
             "remote_focus_waveform": remote_focus_waveform,

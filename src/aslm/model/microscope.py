@@ -93,7 +93,7 @@ class Microscope:
         self.available_channels = None
         self.number_of_frames = None
         self.central_focus = None
-
+        self.is_synthetic = is_synthetic
         self.laser_wavelength = []
 
         if is_virtual:
@@ -171,6 +171,8 @@ class Microscope:
                     is_list=is_list,
                     device_name_list=device_name_list,
                     device_ref_name=device_ref_name,
+                    device_connection=device_connection,
+                    name=name,
                     i=i,
                 )
 
@@ -583,6 +585,8 @@ class Microscope:
         is_list,
         device_name_list,
         device_ref_name,
+        device_connection,
+        name,
         i,
     ):
         """Load and start devices.
@@ -597,6 +601,10 @@ class Microscope:
             Device name list.
         device_ref_name : str
             Device reference name.
+        device_connection : str
+            Device connection.
+        name : str
+            Name.
         i : int
             Index.
 
@@ -618,14 +626,14 @@ class Microscope:
         if is_list:
             exec(
                 f"self.{device_name}['{device_name_list[i]}'] = "
-                f"start_{device_name}(name, device_connection, configuration, "
-                f"i, is_synthetic)"
+                f"start_{device_name}(name, device_connection, self.configuration, "
+                f"i, self.is_synthetic)"
             )
             if device_name in device_name_list[i]:
                 self.info[device_name_list[i]] = device_ref_name
         else:
             exec(
                 f"self.{device_name} = start_{device_name}(name, "
-                f"device_connection, configuration, is_synthetic)"
+                f"device_connection, self.configuration, self.is_synthetic)"
             )
             self.info[device_name] = device_ref_name

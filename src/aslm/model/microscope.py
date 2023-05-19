@@ -164,6 +164,9 @@ class Microscope:
                     # all other ASI devices as self.tiger_controller
                     device_connection = devices_dict[device_name][device_ref_name]
                     self.tiger_controller = device_connection
+                elif device_ref_name.startswith("ASI") and self.tiger_controller is not None:
+                    # If subsequent ASI-based tiger controller devices are included.
+                    device_connection = self.tiger_controller
 
                 # LOAD AND START DEVICES
                 self.load_and_start_devices(

@@ -47,7 +47,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-def build_ASI_Stage_connection(com_port, baud_rate, timeout=1000):
+def build_ASI_Stage_connection(com_port, baud_rate=115200, timeout=1000):
     """Connect to the ASI Stage
 
     Parameters
@@ -70,7 +70,7 @@ def build_ASI_Stage_connection(com_port, baud_rate, timeout=1000):
     wait_start = time.time()
     timeout_s = timeout / 1000
     while block_flag:
-        asi_stage = TigerController(com_port, baud_rate, verbose=True)
+        asi_stage = TigerController(com_port, baud_rate, verbose=False)
         asi_stage.connect_to_serial()
         if asi_stage.is_open():
             block_flag = False

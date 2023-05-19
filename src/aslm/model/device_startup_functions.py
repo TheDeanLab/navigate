@@ -287,19 +287,23 @@ def load_stages(configuration, is_synthetic=False):
             )
 
         elif stage_type == "ASI" and platform.system() == "Windows":
-            from aslm.model.devices.stages.stage_asi import build_ASI_Stage_connection
-            from aslm.model.devices.APIs.asi.asi_tiger_controller import TigerException
+            filter_wheel = configuration["configuration"]["hardware"]["filter_wheel"]['type']
+            if filter_wheel == "ASI":
+                stage_devices.append("shared device")
+            else:
+                from aslm.model.devices.stages.stage_asi import build_ASI_Stage_connection
+                from aslm.model.devices.APIs.asi.asi_tiger_controller import TigerException
 
-            stage_devices.append(
-                auto_redial(
-                    build_ASI_Stage_connection,
-                    (
-                        stage_config["port"],
-                        stage_config["baudrate"],
-                    ),
-                    exception=TigerException,
+                stage_devices.append(
+                    auto_redial(
+                        build_ASI_Stage_connection,
+                        (
+                            stage_config["port"],
+                            stage_config["baudrate"],
+                        ),
+                        exception=TigerException,
+                    )
                 )
-            )
 
         elif stage_type == "GalvoNIStage" and platform.system() == "Windows":
             stage_devices.append(DummyDeviceConnection())
@@ -508,9 +512,13 @@ def load_filter_wheel_connection(configuration, is_synthetic=False):
         )
 
     elif device_type == "ASI":
-        # Communication via the Tiger Controller.
-        # Device connection provided by the stage object, which is then passed to the filter_wheel object.
-        return []
+        from aslm.model.devices.filter_wheel.filter_wheel_asi import build_filter_wheel_connection
+        tiger_controller = auto_redial(
+            build_filter_wheel_connection,
+            (device_info["port"], device_info["baudrate"], 0.25),
+            exception=Exception,
+        )
+        return tiger_controller
 
     elif device_type.lower() == "syntheticfilterwheel" or device_type.lower() == "synthetic":
         return DummyDeviceConnection()

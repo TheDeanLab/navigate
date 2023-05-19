@@ -45,7 +45,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-def build_filter_wheel_connection(comport, baudrate=9600, timeout=0.25):
+def build_filter_wheel_connection(comport, baudrate=115200, timeout=0.25):
     """Build ASIFilterWheel Serial Port connection
     Attributes
     ----------
@@ -59,7 +59,7 @@ def build_filter_wheel_connection(comport, baudrate=9600, timeout=0.25):
     wait_start = time.time()
     timeout_s = timeout / 1000
     while block_flag:
-        tiger_controller = TigerController(comport, baudrate, verbose=True)
+        tiger_controller = TigerController(comport, baudrate, verbose=False)
         tiger_controller.connect_to_serial()
         if tiger_controller.is_open():
             block_flag = False

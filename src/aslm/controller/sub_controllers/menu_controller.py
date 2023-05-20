@@ -62,7 +62,7 @@ class MenuController(GUIController):
         self.view = view
         self.resolution_value = tk.StringVar()
         self.feature_id_val = tk.IntVar(0)
-        self.disable_stage_limits = tk.BooleanVar()
+        self.disable_stage_limits = tk.IntVar(0)
 
     def initialize_menus(self, is_synthetic_hardware=False):
         """Initialize menus
@@ -159,14 +159,19 @@ class MenuController(GUIController):
 
         def toggle_stage_limits(*args):
             """Toggle stage limits."""
-            if self.disable_stage_limits.get():
-                print("Disabling stage limits")
-                self.parent_controller.execute("disable_stage_limits", False)
-            else:
+            if self.disable_stage_limits.get() == 1:
                 print("Enabling stage limits")
-                self.parent_controller.execute("disable_stage_limits", True)
+            else:
+                print("Disabling stage limits")
 
-            self.disable_stage_limits.set(not self.disable_stage_limits.get())
+            # if self.disable_stage_limits.get():
+            #     print("Disabling stage limits")
+            #     self.parent_controller.execute("disable_stage_limits", False)
+            # else:
+            #     print("Enabling stage limits")
+            #     self.parent_controller.execute("disable_stage_limits", True)
+            #
+            # self.disable_stage_limits.set(not self.disable_stage_limits.get())
 
         def populate_menu(menu_dict):
             """Populate the menus from a dictionary.
@@ -193,33 +198,52 @@ class MenuController(GUIController):
                         menu.add_separator()
                     else:
                         if "standard" in menu_items[label][0]:
-                            menu.add_command(
-                                label=label,
-                                command=menu_items[label][1],
-                                accelerator=menu_items[label][2],
-                            )
-                            if platform.platform() == "Darwin":
-                                menu.bind_all(
-                                    menu_items[label][4], menu_items[label][1]
+                            if menu_items[label][1] is None:
+                                # Command not passed, accelerator provided for
+                                # informational purposes only.
+                                menu.add_command(
+                                    label=label, accelerator=menu_items[label][2]
                                 )
                             else:
-                                menu.bind_all(
-                                    menu_items[label][3], menu_items[label][1]
+                                # If the command is provided, it is assumed that you
+                                # should also bind that command to the accelerator.
+                                menu.add_command(
+                                    label=label,
+                                    command=menu_items[label][1],
+                                    accelerator=menu_items[label][2],
                                 )
+                                if platform.platform() == "Darwin":
+                                    # Account for OS specific keystrokes
+                                    menu.bind_all(
+                                        menu_items[label][4], menu_items[label][1]
+                                    )
+                                else:
+                                    menu.bind_all(
+                                        menu_items[label][3], menu_items[label][1]
+                                    )
                         elif "radio" in menu_items[label][0]:
-                            menu.add_radiobutton(
-                                label=label,
-                                command=menu_items[label][0],
-                                accelerator=menu_items[label][1],
-                            )
-                            if platform.platform() == "Darwin":
-                                menu.bind_all(
-                                    menu_items[label][4], menu_items[label][1]
+                            if menu_items[label][1] is None:
+                                # Command not passed, accelerator provided for
+                                # informational purposes only.
+                                menu.add_radiobutton(
+                                    label=label, accelerator=menu_items[label][2]
                                 )
                             else:
-                                menu.bind_all(
-                                    menu_items[label][3], menu_items[label][1]
+                                # If the command is provided, it is assumed that you
+                                # should also bind that command to the accelerator.
+                                menu.add_radiobutton(
+                                    label=label,
+                                    command=menu_items[label][0],
+                                    accelerator=menu_items[label][1],
                                 )
+                                if platform.platform() == "Darwin":
+                                    menu.bind_all(
+                                        menu_items[label][4], menu_items[label][1]
+                                    )
+                                else:
+                                    menu.bind_all(
+                                        menu_items[label][3], menu_items[label][1]
+                                    )
 
         # File Menu
         file_menu = {
@@ -354,9 +378,18 @@ class MenuController(GUIController):
         populate_menu(stage_control_menu)
         self.view.menubar.menu_multi_positions.add_radiobutton(
             label="Disable Stage Limits",
-            value=self.disable_stage_limits,
+            value=0,
             command=toggle_stage_limits,
+            variable=self.disable_stage_limits,
         )
+        self.view.menubar.menu_multi_positions.add_radiobutton(
+            label="Enable Stage Limits",
+            value=1,
+            command=toggle_stage_limits,
+            variable=self.disable_stage_limits,
+        )
+        self.disable_stage_limits.set(1)
+
         # autofocus menu
         autofocus_menu = {
             self.view.menubar.menu_autofocus: {

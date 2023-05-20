@@ -160,18 +160,11 @@ class MenuController(GUIController):
         def toggle_stage_limits(*args):
             """Toggle stage limits."""
             if self.disable_stage_limits.get() == 1:
-                print("Enabling stage limits")
+                logger.debug("Disabling stage limits")
+                self.parent_controller.execute("stage_limits", True)
             else:
-                print("Disabling stage limits")
-
-            # if self.disable_stage_limits.get():
-            #     print("Disabling stage limits")
-            #     self.parent_controller.execute("disable_stage_limits", False)
-            # else:
-            #     print("Enabling stage limits")
-            #     self.parent_controller.execute("disable_stage_limits", True)
-            #
-            # self.disable_stage_limits.set(not self.disable_stage_limits.get())
+                logger.debug("Enabling stage limits")
+                self.parent_controller.execute("stage_limits", False)
 
         def populate_menu(menu_dict):
             """Populate the menus from a dictionary.

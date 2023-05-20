@@ -555,10 +555,9 @@ class Controller:
                 "model", lambda: self.model.run_command("update_setting", *args)
             )
 
-        elif command == "disable_stage_limits":
-            print("disable_stage_limits", *args)
+        elif command == "stage_limits":
             self.threads_pool.createThread(
-                "model", lambda: self.model.run_command("disable_stage_limits", *args)
+                "model", lambda: self.model.run_command("stage_limits", *args)
             )
 
         elif command == "autofocus":

@@ -118,7 +118,7 @@ class StageBase:
             setattr(self, f"{ax}_min", stage[f"{ax}_min"])  # Units are in microns
             setattr(self, f"{ax}_max", stage[f"{ax}_max"])  # Units are in microns
         self.create_position_dict()
-        self.disable_stage_limits = False
+        self.stage_limits = True
 
     def create_position_dict(self):
         """Creates a dictionary with the hardware stage positions."""
@@ -150,40 +150,38 @@ class StageBase:
         float
             Position to move the stage to for this axis.
         """
-        if self.disable_stage_limits:
-            return move_dictionary[f"{axis}_abs"] - getattr(
+        try:
+            # Get all necessary attributes.
+            # If we can't we'll move to the error case (e.g., -1e50).
+            axis_abs = move_dictionary[f"{axis}_abs"] - getattr(
                 self, f"int_{axis}_pos_offset", 0
             )
-        else:
-            try:
-                # Get all necessary attributes.
-                # If we can't we'll move to the error case (e.g., -1e50).
-                axis_abs = move_dictionary[f"{axis}_abs"] - getattr(
-                    self, f"int_{axis}_pos_offset", 0
-                )
-                # TODO: should we default to 0?
-                axis_min, axis_max = getattr(self, f"{axis}_min"), getattr(
-                    self, f"{axis}_max"
-                )
-
-                # Check that our position is within the axis bounds, fail if it's not.
-                if (axis_min > axis_abs) or (axis_max < axis_abs):
-                    log_string = (
-                        f"Absolute movement stopped: {axis} limit would be reached!"
-                        f"{axis_abs} is not in the range {axis_min} to {axis_max}."
-                    )
-                    logger.info(log_string)
-                    print(log_string)
-                    # Return a ridiculous value to make it clear we've failed.
-                    # This is to avoid returning a duck type.
-                    return -1e50
+            if not self.stage_limits:
                 return axis_abs
-            except (KeyError, AttributeError) as e:
-                # Alert the user, but don't kill the thread
-                msg = f"No key {e} in move_dictionary or axis missing from {self.axes}."
-                logger.debug(msg)
-                print(msg)
+
+            # TODO: should we default to 0?
+            axis_min, axis_max = getattr(self, f"{axis}_min"), getattr(
+                self, f"{axis}_max"
+            )
+
+            # Check that our position is within the axis bounds, fail if it's not.
+            if (axis_min > axis_abs) or (axis_max < axis_abs):
+                log_string = (
+                    f"Absolute movement stopped: {axis} limit would be reached!"
+                    f"{axis_abs} is not in the range {axis_min} to {axis_max}."
+                )
+                logger.info(log_string)
+                print(log_string)
+                # Return a ridiculous value to make it clear we've failed.
+                # This is to avoid returning a duck type.
                 return -1e50
+            return axis_abs
+        except (KeyError, AttributeError) as e:
+            # Alert the user, but don't kill the thread
+            msg = f"No key {e} in move_dictionary or axis missing from {self.axes}."
+            logger.debug(msg)
+            print(msg)
+            return -1e50
 
     def stop(self):
         """Stop all stage movement abruptly."""

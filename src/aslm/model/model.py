@@ -574,6 +574,9 @@ class Model:
                     self.logger.debug(
                         f"run_command - load_feature - Unknown feature {args[0]}."
                     )
+        elif command == "disable_stage_limits":
+            for axis in self.active_microscope.stages:
+                self.active_microscope.stages[axis].disable_limits = True
 
         elif command == "stop":
             """

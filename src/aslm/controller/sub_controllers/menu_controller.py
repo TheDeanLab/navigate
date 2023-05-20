@@ -62,7 +62,7 @@ class MenuController(GUIController):
         self.view = view
         self.resolution_value = tk.StringVar()
         self.feature_id_val = tk.IntVar(0)
-
+        self.disable_stage_limits = tk.BooleanVar()
 
     def initialize_menus(self, is_synthetic_hardware=False):
         """Initialize menus
@@ -157,8 +157,19 @@ class MenuController(GUIController):
             help_pop = HelpPopup(self.view)
             self.help_controller = HelpPopupController(help_pop, self)
 
+        def toggle_stage_limits(*args):
+            """Toggle stage limits."""
+            if self.disable_stage_limits.get():
+                print("Disabling stage limits")
+                self.parent_controller.execute("disable_stage_limits", False)
+            else:
+                print("Enabling stage limits")
+                self.parent_controller.execute("disable_stage_limits", True)
+
+            self.disable_stage_limits.set(not self.disable_stage_limits.get())
+
         def populate_menu(menu_dict):
-            """ Populate the menus from a dictionary.
+            """Populate the menus from a dictionary.
 
             Parameters
             ----------
@@ -166,6 +177,7 @@ class MenuController(GUIController):
                 menu_dict = {
                     Menu object: {
                         "Menu String Entry": [
+                            entry_type (standard, radio),
                             Command,
                             Accelerator,
                             Windows Keystroke,
@@ -173,144 +185,244 @@ class MenuController(GUIController):
                 ],
                 ....
 
-                """
+            """
             for menu in menu_dict:
                 menu_items = menu_dict[menu]
                 for label in menu_items:
-                    if label == "add_separator":
+                    if "add_separator" in label:
                         menu.add_separator()
                     else:
-                        menu.add_command(
-                            label=label,
-                            command=menu_items[label][0],
-                            accelerator=menu_items[label][1],
-                        )
-                        if platform.platform() == "Darwin":
-                            menu.bind_all(menu_items[label][3], menu_items[label][0])
-                        else:
-                            menu.bind_all(menu_items[label][2], menu_items[label][0])
+                        if "standard" in menu_items[label][0]:
+                            menu.add_command(
+                                label=label,
+                                command=menu_items[label][1],
+                                accelerator=menu_items[label][2],
+                            )
+                            if platform.platform() == "Darwin":
+                                menu.bind_all(
+                                    menu_items[label][4], menu_items[label][1]
+                                )
+                            else:
+                                menu.bind_all(
+                                    menu_items[label][3], menu_items[label][1]
+                                )
+                        elif "radio" in menu_items[label][0]:
+                            menu.add_radiobutton(
+                                label=label,
+                                command=menu_items[label][0],
+                                accelerator=menu_items[label][1],
+                            )
+                            if platform.platform() == "Darwin":
+                                menu.bind_all(
+                                    menu_items[label][4], menu_items[label][1]
+                                )
+                            else:
+                                menu.bind_all(
+                                    menu_items[label][3], menu_items[label][1]
+                                )
 
         # File Menu
         file_menu = {
             self.view.menubar.menu_file: {
                 "New Experiment": [
+                    "standard",
                     new_experiment,
                     "Ctrl+Shift+N",
                     "<Control-N>",
                     "<Control_L-N>",
                 ],
                 "Load Experiment": [
+                    "standard",
                     load_experiment,
                     "Ctrl+Shift+O",
                     "<Control-O>",
                     "<Control_L-O>",
                 ],
                 "Save Experiment": [
+                    "standard",
                     save_experiment,
                     "Ctrl+Shift+S",
                     "<Control-S>",
                     "<Control_L-S>",
                 ],
                 "add_separator": [None],
-                "Save Data": [None, "Ctrl+s", "<Control-s>", "<Control_L-s>"],
-                "Load Images": [load_images, None, None, None],
-                "Unload Images": [self.parent_controller.model.load_images(None), None, None, None]
-            }}
+                "Save Data": [
+                    "standard",
+                    lambda x: self.parent_controller.execute("set_save"),
+                    "Ctrl+s",
+                    "<Control-s>",
+                    "<Control_L-s>",
+                ],
+                "Load Images": ["standard", load_images, None, None, None],
+                "Unload Images": [
+                    "standard",
+                    self.parent_controller.model.load_images(None),
+                    None,
+                    None,
+                    None,
+                ],
+            }
+        }
+        populate_menu(file_menu)
 
         # Stage Control Menu
-        # Most bindings are implemented in the keystroke_controller. Accelerators added here
-        # to communicate them to users. Could move those key bindings here? Not sure...
+        # Most bindings are implemented in the keystroke_controller.
+        # Accelerators added here to communicate them to users. Could move those key
+        # bindings here? Not sure...
         stage_control_menu = {
             self.view.menubar.menu_multi_positions: {
-                "Move Up": [lambda event: self.parent_controller.stage_controller.stage_key_press, "w", "<Key-w>", "<Key-w>"],
-                "Move Down": [self.parent_controller.stage_controller.stage_key_press, "s", "<Key-s>", "<Key-s>"],
-                "Move Left": [self.parent_controller.stage_controller.stage_key_press, "a", "<Key-a>", "<Key-a>"],
-                "Move Right": [self.parent_controller.stage_controller.stage_key_press, "d", "<Key-d>", "<Key-d>"],
-                "Move In": [None, "q", "<Key-q>", "<Key-q>"],
-                "Move Out": [None, "e", "<Key-e>", "<Key-e>"],
-                "Move Focus Up": [None, "r", "<Key-r>", "<Key-r>"],
-                "Move Focus Down": [None, "f", "<Key-f>", "<Key-f>"],
-                "Rotate Clockwise": [None, "z", "<Key-z>", "<Key-z>"],
-                "Rotate Counter-Clockwise": [None, "x", "<Key-x>", "<Key-x>"],
-                "add_separator": [None, None, None, None],
-                "Launch Tiling Wizard": [None, None, None, None],
+                "Move Up": [
+                    "standard",
+                    lambda e: self.parent_controller.stage_controller.stage_key_press,
+                    "w",
+                    "<Key-w>",
+                    "<Key-w>",
+                ],
+                "Move Down": [
+                    "standard",
+                    self.parent_controller.stage_controller.stage_key_press,
+                    "s",
+                    "<Key-s>",
+                    "<Key-s>",
+                ],
+                "Move Left": [
+                    "standard",
+                    self.parent_controller.stage_controller.stage_key_press,
+                    "a",
+                    "<Key-a>",
+                    "<Key-a>",
+                ],
+                "Move Right": [
+                    "standard",
+                    self.parent_controller.stage_controller.stage_key_press,
+                    "d",
+                    "<Key-d>",
+                    "<Key-d>",
+                ],
+                "Move In": ["standard", None, "q", "<Key-q>", "<Key-q>"],
+                "Move Out": ["standard", None, "e", "<Key-e>", "<Key-e>"],
+                "Move Focus Up": ["standard", None, "r", "<Key-r>", "<Key-r>"],
+                "Move Focus Down": ["standard", None, "f", "<Key-f>", "<Key-f>"],
+                "Rotate Clockwise": ["standard", None, "z", "<Key-z>", "<Key-z>"],
+                "Rotate Counter-Clockwise": [
+                    "standard",
+                    None,
+                    "x",
+                    "<Key-x>",
+                    "<Key-x>",
+                ],
+                "add_separator": ["standard", None, None, None, None],
+                "Launch Tiling Wizard": ["standard", None, None, None, None],
                 "Load Positions": [
+                    "standard",
                     self.parent_controller.multiposition_tab_controller.load_positions,
                     None,
                     None,
                     None,
                 ],
                 "Export Positions": [
+                    "standard",
                     self.parent_controller.multiposition_tab_controller.export_positions,
                     None,
                     None,
                     None,
                 ],
                 "Append Current Position": [
+                    "standard",
                     self.parent_controller.multiposition_tab_controller.add_stage_position,
                     None,
                     None,
                     None,
                 ],
                 "Generate Positions": [
+                    "standard",
                     self.parent_controller.multiposition_tab_controller.generate_positions,
                     None,
                     None,
                     None,
                 ],
                 "Move to Selected Position": [
+                    "standard",
                     self.parent_controller.multiposition_tab_controller.move_to_position,
                     None,
                     None,
                     None,
                 ],
+                "add_separator_1": [None, None, None, None, None],
             },
         }
-
+        populate_menu(stage_control_menu)
+        self.view.menubar.menu_multi_positions.add_radiobutton(
+            label="Disable Stage Limits",
+            value=self.disable_stage_limits,
+            command=toggle_stage_limits,
+        )
         # autofocus menu
         autofocus_menu = {
             self.view.menubar.menu_autofocus: {
                 "Perform Autofocus": [
+                    "standard",
                     lambda x: self.parent_controller.execute("autofocus"),
-                    "Ctrl+A", "<Control-a>", "<Control_L-a>",
+                    "Ctrl+A",
+                    "<Control-a>",
+                    "<Control_L-a>",
                 ],
                 "Autofocus Settings": [
+                    "standard",
                     self.parent_controller.popup_autofocus_setting,
-                    "Ctrl+Shift+A", "<Control-A>", "<Control_L-A>"
-                ]
+                    "Ctrl+Shift+A",
+                    "<Control-A>",
+                    "<Control_L-A>",
+                ],
             }
         }
+        populate_menu(autofocus_menu)
 
-        # Window Menu
+        # Resolution menu
         windows_menu = {
             self.view.menubar.menu_window: {
                 "Channel Settings": [
-                    None, "Ctrl+1", "<Control-1>", "<Control_L-1"
+                    "standard",
+                    None,
+                    "Ctrl+1",
+                    "<Control-1>",
+                    "<Control_L-1",
                 ],
                 "Camera Settings": [
-                    None, "Ctrl+2", "<Control-2>", "<Control_L-2"
+                    "standard",
+                    None,
+                    "Ctrl+2",
+                    "<Control-2>",
+                    "<Control_L-2",
                 ],
                 "Stage Control": [
-                    None, "Ctrl+3", "<Control-3>", "<Control_L-3"
+                    "standard",
+                    None,
+                    "Ctrl+3",
+                    "<Control-3>",
+                    "<Control_L-3",
                 ],
                 "Multiposition Table": [
-                    None, "Ctrl+4", "<Control-4>", "<Control_L-4"
+                    "standard",
+                    None,
+                    "Ctrl+4",
+                    "<Control-4>",
+                    "<Control_L-4",
                 ],
-                "add_separator": [
-                    None, None, None, None
-                ],
-                "Popout Camera Display": [
-                    None, None, None, None
-                ],
-                "Help": [
-                    popup_help, None, None, None
-                ]
+                "add_separator": ["standard", None, None, None, None],
+                "Popout Camera Display": ["standard", None, None, None, None],
+                "Help": ["standard", popup_help, None, None, None],
             }
         }
+        populate_menu(windows_menu)
 
-        # Resolution menu
-        for microscope_name in self.parent_controller.configuration["configuration"]["microscopes"].keys():
-            zoom_positions = self.parent_controller.configuration["configuration"]["microscopes"][microscope_name]["zoom"]["position"]
+        # Zoom Menu
+        for microscope_name in self.parent_controller.configuration["configuration"][
+            "microscopes"
+        ].keys():
+            zoom_positions = self.parent_controller.configuration["configuration"][
+                "microscopes"
+            ][microscope_name]["zoom"]["position"]
             if len(zoom_positions) > 1:
                 sub_menu = tk.Menu(self.view.menubar.menu_resolution)
                 self.view.menubar.menu_resolution.add_cascade(
@@ -328,22 +440,31 @@ class MenuController(GUIController):
                     variable=self.resolution_value,
                     value=f"{microscope_name} {zoom_positions.keys()[0]}",
                 )
-
-        # event binding
         self.resolution_value.trace_add(
             "write",
             lambda *args: self.execute("resolution", self.resolution_value.get()),
         )
+
         configuration_dict = {
             self.view.menubar.menu_resolution: {
-                "add_separator": [None, None, None, None],
+                "add_separator": [None, None, None, None, None],
                 "Waveform Parameters": [
-                    self.parent_controller.popup_waveform_setting, None, None, None],
+                    "standard",
+                    self.parent_controller.popup_waveform_setting,
+                    None,
+                    None,
+                    None,
+                ],
                 "Configure Microscope": [
-                    self.parent_controller.popup_microscope_setting, None, None, None]
-
+                    "standard",
+                    self.parent_controller.popup_microscope_setting,
+                    None,
+                    None,
+                    None,
+                ],
             }
         }
+        populate_menu(configuration_dict)
 
         # add-on features
         feature_list = [
@@ -359,9 +480,9 @@ class MenuController(GUIController):
             self.view.menubar.menu_features.add_radiobutton(
                 label=feature_list[i], variable=self.feature_id_val, value=i
             )
-        self.feature_id_val.trace_add("write",
-            lambda *args: self.execute("load_feature",
-                                       self.feature_id_val.get()),
+        self.feature_id_val.trace_add(
+            "write",
+            lambda *args: self.execute("load_feature", self.feature_id_val.get()),
         )
         self.view.menubar.menu_features.add_separator()
         self.view.menubar.menu_features.add_command(
@@ -374,10 +495,3 @@ class MenuController(GUIController):
         self.view.menubar.menu_features.add_command(
             label="Camera offset and variance maps", command=popup_camera_map_setting
         )
-
-        # Populate Menus
-        populate_menu(file_menu)
-        populate_menu(stage_control_menu)
-        populate_menu(autofocus_menu)
-        populate_menu(windows_menu)
-        populate_menu(configuration_dict)

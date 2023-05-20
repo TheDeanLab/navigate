@@ -45,7 +45,9 @@ import sys
 from aslm.view.main_application_window import MainApp as view
 from aslm.view.popups.camera_view_popup_window import CameraViewPopupWindow
 from aslm.view.popups.autofocus_setting_popup import AutofocusPopup
-from aslm.view.popups.waveform_parameter_popup_window import WaveformParameterPopupWindow
+from aslm.view.popups.waveform_parameter_popup_window import (
+    WaveformParameterPopupWindow,
+)
 
 # Local Sub-Controller Imports
 from aslm.controller.configuration_controller import ConfigurationController
@@ -553,6 +555,12 @@ class Controller:
                 "model", lambda: self.model.run_command("update_setting", *args)
             )
 
+        elif command == "disable_stage_limits":
+            print("disable_stage_limits", *args)
+            self.threads_pool.createThread(
+                "model", lambda: self.model.run_command("disable_stage_limits", *args)
+            )
+
         elif command == "autofocus":
             """Execute autofocus routine."""
             self.threads_pool.createThread(
@@ -973,6 +981,7 @@ class Controller:
         self.microscope_popup_controller = MicroscopePopupController(
             self.view, self, microscope_info
         )
+
     def exit_program(self):
         """Exit the program.
 

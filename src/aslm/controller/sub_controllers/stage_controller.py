@@ -146,7 +146,7 @@ class StageController(GUIController):
         self.position_callback_traces = {}
         self.position_callbacks_bound = False
         self.bind_position_callbacks()
-
+        self.stage_limits = True
         self.initialize()
 
     def stage_key_press(self, event):
@@ -324,11 +324,12 @@ class StageController(GUIController):
         try:
             for axis in ["x", "y", "z", "theta", "f"]:
                 position[axis] = self.widget_vals[axis].get()
-                if (
-                    position[axis] < self.position_min[axis]
-                    or position[axis] > self.position_max[axis]
-                ):
-                    return None
+                if self.stage_limits is True:
+                    if (
+                        position[axis] < self.position_min[axis]
+                        or position[axis] > self.position_max[axis]
+                    ):
+                        return None
         except tk.TclError:
             # Tkinter will raise error when the variable is DoubleVar and the value
             # is empty
@@ -364,8 +365,9 @@ class StageController(GUIController):
                 temp = position_val.get() + step_val.get()
             except AttributeError:
                 return
-            if temp > self.position_max[axis]:
-                temp = self.position_max[axis]
+            if self.stage_limits is True:
+                if temp > self.position_max[axis]:
+                    temp = self.position_max[axis]
             position_val.set(temp)
 
         return handler
@@ -399,8 +401,9 @@ class StageController(GUIController):
                 temp = position_val.get() - step_val.get()
             except AttributeError:
                 return
-            if temp < self.position_min[axis]:
-                temp = self.position_min[axis]
+            if self.stage_limits is True:
+                if temp < self.position_min[axis]:
+                    temp = self.position_min[axis]
             position_val.set(temp)
 
         return handler

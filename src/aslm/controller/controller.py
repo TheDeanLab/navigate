@@ -556,9 +556,14 @@ class Controller:
             )
 
         elif command == "stage_limits":
+            # Communicate to the model
             self.threads_pool.createThread(
                 "model", lambda: self.model.run_command("stage_limits", *args)
             )
+            # Communicate to the Stage Controller
+            self.stage_controller.stage_limits = args[0]
+
+            # Update the GUI
 
         elif command == "autofocus":
             """Execute autofocus routine."""

@@ -534,6 +534,7 @@ class Controller:
                 is_save = True/False
             """
             self.acquire_bar_controller.set_save_option(args[0])
+            self.view.settings.channels_tab.stack_timepoint_frame.save_data.set(args[0])
 
         elif command == "update_setting":
             """Called by the Waveform Constants Popup Controller
@@ -556,14 +557,10 @@ class Controller:
             )
 
         elif command == "stage_limits":
-            # Communicate to the model
             self.threads_pool.createThread(
                 "model", lambda: self.model.run_command("stage_limits", *args)
             )
-            # Communicate to the Stage Controller
             self.stage_controller.stage_limits = args[0]
-
-            # Update the GUI
 
         elif command == "autofocus":
             """Execute autofocus routine."""

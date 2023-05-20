@@ -63,6 +63,7 @@ class MenuController(GUIController):
         self.resolution_value = tk.StringVar()
         self.feature_id_val = tk.IntVar(0)
         self.disable_stage_limits = tk.IntVar(0)
+        self.save_data = False
 
     def initialize_menus(self, is_synthetic_hardware=False):
         """Initialize menus
@@ -238,6 +239,11 @@ class MenuController(GUIController):
                                         menu_items[label][3], menu_items[label][1]
                                     )
 
+        def toggle_save(*args):
+            """Save the data."""
+            self.save_data = not self.save_data
+            self.parent_controller.execute("set_save", self.save_data)
+
         # File Menu
         file_menu = {
             self.view.menubar.menu_file: {
@@ -265,7 +271,7 @@ class MenuController(GUIController):
                 "add_separator": [None],
                 "Save Data": [
                     "standard",
-                    lambda x: self.parent_controller.execute("set_save"),
+                    toggle_save,
                     "Ctrl+s",
                     "<Control-s>",
                     "<Control_L-s>",

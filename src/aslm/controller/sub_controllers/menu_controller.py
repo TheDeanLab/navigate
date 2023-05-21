@@ -55,6 +55,15 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
+class FakeEvent:
+    """Fake event class for keyboard shortcuts"""
+
+    def __init__(self, char=None, keysym=None):
+        self.char = char
+        self.keysym = keysym
+        self.state = 0
+
+
 class MenuController(GUIController):
     def __init__(self, view, parent_controller=None):
         super().__init__(view, parent_controller)
@@ -64,6 +73,7 @@ class MenuController(GUIController):
         self.feature_id_val = tk.IntVar(0)
         self.disable_stage_limits = tk.IntVar(0)
         self.save_data = False
+        self.is_acquiring = False
 
     def initialize_menus(self, is_synthetic_hardware=False):
         """Initialize menus
@@ -85,7 +95,7 @@ class MenuController(GUIController):
         def new_experiment(*args):
             """Create a new experiment file."""
             self.parent_controller.populate_experiment_setting(
-                self.default_experiment_file
+                self.parent_controller.default_experiment_file
             )
 
         def load_experiment(*args):
@@ -244,6 +254,27 @@ class MenuController(GUIController):
             self.save_data = not self.save_data
             self.parent_controller.execute("set_save", self.save_data)
 
+        def acquire_data(*args):
+            """Acquire data."""
+            if self.is_acquiring:
+                self.parent_controller.execute("stop_acquire")
+            else:
+                self.parent_controller.execute("acquire")
+            self.is_acquiring = not self.is_acquiring
+
+        def not_implemented(*args):
+            """Not implemented."""
+            print("Not implemented")
+
+        def stage_movement(char):
+            """Stage movement."""
+            fake_event = FakeEvent(char=char)
+            self.parent_controller.stage_controller.stage_key_press(fake_event)
+
+        def switch_tabs(tab):
+            """Switch tabs."""
+            self.parent_controller.view.settings.select(tab - 1)
+
         # File Menu
         file_menu = {
             self.view.menubar.menu_file: {
@@ -276,6 +307,13 @@ class MenuController(GUIController):
                     "<Control-s>",
                     "<Control_L-s>",
                 ],
+                "Acquire Data": [
+                    "standard",
+                    acquire_data,
+                    "Ctrl+Enter",
+                    "<Control-Return>",
+                    "<Control_L-Return>",
+                ],
                 "Load Images": ["standard", load_images, None, None, None],
                 "Unload Images": [
                     "standard",
@@ -296,46 +334,52 @@ class MenuController(GUIController):
             self.view.menubar.menu_multi_positions: {
                 "Move Up": [
                     "standard",
-                    lambda e: self.parent_controller.stage_controller.stage_key_press,
+                    lambda: stage_movement("w"),
                     "w",
                     "<Key-w>",
                     "<Key-w>",
                 ],
                 "Move Down": [
                     "standard",
-                    self.parent_controller.stage_controller.stage_key_press,
+                    lambda: stage_movement("s"),
                     "s",
                     "<Key-s>",
                     "<Key-s>",
                 ],
                 "Move Left": [
                     "standard",
-                    self.parent_controller.stage_controller.stage_key_press,
+                    lambda: stage_movement("a"),
                     "a",
                     "<Key-a>",
                     "<Key-a>",
                 ],
                 "Move Right": [
                     "standard",
-                    self.parent_controller.stage_controller.stage_key_press,
+                    lambda: stage_movement("d"),
                     "d",
                     "<Key-d>",
                     "<Key-d>",
                 ],
-                "Move In": ["standard", None, "q", "<Key-q>", "<Key-q>"],
-                "Move Out": ["standard", None, "e", "<Key-e>", "<Key-e>"],
-                "Move Focus Up": ["standard", None, "r", "<Key-r>", "<Key-r>"],
-                "Move Focus Down": ["standard", None, "f", "<Key-f>", "<Key-f>"],
-                "Rotate Clockwise": ["standard", None, "z", "<Key-z>", "<Key-z>"],
+                "Move In": ["standard", not_implemented, None, None, None],
+                "Move Out": ["standard", not_implemented, None, None, None],
+                "Move Focus Up": ["standard", not_implemented, None, None, None],
+                "Move Focus Down": ["standard", not_implemented, None, None, None],
+                "Rotate Clockwise": ["standard", not_implemented, None, None, None],
                 "Rotate Counter-Clockwise": [
                     "standard",
+                    not_implemented,
                     None,
-                    "x",
-                    "<Key-x>",
-                    "<Key-x>",
+                    None,
+                    None,
                 ],
                 "add_separator": ["standard", None, None, None, None],
-                "Launch Tiling Wizard": ["standard", None, None, None, None],
+                "Launch Tiling Wizard": [
+                    "standard",
+                    self.parent_controller.channels_tab_controller.launch_tiling_wizard,
+                    None,
+                    None,
+                    None,
+                ],
                 "Load Positions": [
                     "standard",
                     self.parent_controller.multiposition_tab_controller.load_positions,
@@ -410,45 +454,51 @@ class MenuController(GUIController):
         }
         populate_menu(autofocus_menu)
 
-        # Resolution menu
+        # Window menu
         windows_menu = {
             self.view.menubar.menu_window: {
                 "Channel Settings": [
                     "standard",
-                    None,
+                    lambda: switch_tabs(1),
                     "Ctrl+1",
                     "<Control-1>",
                     "<Control_L-1",
                 ],
                 "Camera Settings": [
                     "standard",
-                    None,
+                    lambda: switch_tabs(2),
                     "Ctrl+2",
                     "<Control-2>",
                     "<Control_L-2",
                 ],
                 "Stage Control": [
                     "standard",
-                    None,
+                    lambda: switch_tabs(2),
                     "Ctrl+3",
                     "<Control-3>",
                     "<Control_L-3",
                 ],
                 "Multiposition Table": [
                     "standard",
-                    None,
+                    lambda: switch_tabs(4),
                     "Ctrl+4",
                     "<Control-4>",
                     "<Control_L-4",
                 ],
                 "add_separator": ["standard", None, None, None, None],
-                "Popout Camera Display": ["standard", None, None, None, None],
+                "Popout Camera Display": [
+                    "standard",
+                    not_implemented,
+                    None,
+                    None,
+                    None,
+                ],
                 "Help": ["standard", popup_help, None, None, None],
             }
         }
         populate_menu(windows_menu)
 
-        # Zoom Menu
+        # Zoom menu
         for microscope_name in self.parent_controller.configuration["configuration"][
             "microscopes"
         ].keys():

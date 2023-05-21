@@ -183,12 +183,12 @@ def start_camera(microscope_name, device_connection, configuration, is_synthetic
 
     if cam_type == "HamamatsuOrca":
         from aslm.model.devices.camera.camera_hamamatsu import HamamatsuOrca
-
         return HamamatsuOrca(microscope_name, device_connection, configuration)
+
     elif cam_type.lower() == "syntheticcamera" or cam_type.lower() == "synthetic":
         from aslm.model.devices.camera.camera_synthetic import SyntheticCamera
-
         return SyntheticCamera(microscope_name, device_connection, configuration)
+
     else:
         device_not_found(microscope_name, "camera", cam_type)
 
@@ -287,19 +287,23 @@ def load_stages(configuration, is_synthetic=False):
             )
 
         elif stage_type == "ASI" and platform.system() == "Windows":
-            from aslm.model.devices.stages.stage_asi import build_ASI_Stage_connection
-            from aslm.model.devices.APIs.asi.asi_tiger_controller import TigerException
+            filter_wheel = configuration["configuration"]["hardware"]["filter_wheel"]['type']
+            if filter_wheel == "ASI":
+                stage_devices.append("shared device")
+            else:
+                from aslm.model.devices.stages.stage_asi import build_ASI_Stage_connection
+                from aslm.model.devices.APIs.asi.asi_tiger_controller import TigerException
 
-            stage_devices.append(
-                auto_redial(
-                    build_ASI_Stage_connection,
-                    (
-                        stage_config["port"],
-                        stage_config["baudrate"],
-                    ),
-                    exception=TigerException,
+                stage_devices.append(
+                    auto_redial(
+                        build_ASI_Stage_connection,
+                        (
+                            stage_config["port"],
+                            stage_config["baudrate"],
+                        ),
+                        exception=TigerException,
+                    )
                 )
-            )
 
         elif stage_type == "GalvoNIStage" and platform.system() == "Windows":
             stage_devices.append(DummyDeviceConnection())
@@ -355,37 +359,30 @@ def start_stage(
 
     if device_type == "PI":
         from aslm.model.devices.stages.stage_pi import PIStage
-
         return PIStage(microscope_name, device_connection, configuration, id)
 
     elif device_type == "MP285":
         from aslm.model.devices.stages.stage_sutter import SutterStage
-
         return SutterStage(microscope_name, device_connection, configuration, id)
 
     elif device_type == "Thorlabs":
         from aslm.model.devices.stages.stage_tl_kcube_inertial import TLKIMStage
-
         return TLKIMStage(microscope_name, device_connection, configuration, id)
 
     elif device_type == "MCL":
         from aslm.model.devices.stages.stage_mcl import MCLStage
-
         return MCLStage(microscope_name, device_connection, configuration, id)
 
     elif device_type == "ASI":
         from aslm.model.devices.stages.stage_asi import ASIStage
-
         return ASIStage(microscope_name, device_connection, configuration, id)
 
     elif device_type == "GalvoNIStage":
         from aslm.model.devices.stages.stage_galvo import GalvoNIStage
-
         return GalvoNIStage(microscope_name, device_connection, configuration, id)
 
     elif device_type.lower() == "syntheticstage" or device_type.lower() == "synthetic":
         from aslm.model.devices.stages.stage_synthetic import SyntheticStage
-
         return SyntheticStage(microscope_name, device_connection, configuration, id)
 
     else:
@@ -498,32 +495,34 @@ def load_filter_wheel_connection(configuration, is_synthetic=False):
     -------
     Filter : class
         Filter class.
-
-    Examples
-    --------
-    >>> load_filter_wheel_connection(configuration, is_synthetic=False)
     """
     device_info = configuration["configuration"]["hardware"]["filter_wheel"]
     if is_synthetic:
         device_type = "SyntheticFilterWheel"
+
     else:
         device_type = device_info["type"]
 
     if device_type == "SutterFilterWheel":
-        from aslm.model.devices.filter_wheel.filter_wheel_sutter import (
-            build_filter_wheel_connection,
-        )
-
+        from aslm.model.devices.filter_wheel.filter_wheel_sutter import build_filter_wheel_connection
         return auto_redial(
             build_filter_wheel_connection,
             (device_info["port"], device_info["baudrate"], 0.25),
             exception=Exception,
         )
-    elif (
-        device_type.lower() == "syntheticfilterwheel"
-        or device_type.lower() == "synthetic"
-    ):
+
+    elif device_type == "ASI":
+        from aslm.model.devices.filter_wheel.filter_wheel_asi import build_filter_wheel_connection
+        tiger_controller = auto_redial(
+            build_filter_wheel_connection,
+            (device_info["port"], device_info["baudrate"], 0.25),
+            exception=Exception,
+        )
+        return tiger_controller
+
+    elif device_type.lower() == "syntheticfilterwheel" or device_type.lower() == "synthetic":
         return DummyDeviceConnection()
+
     else:
         device_not_found("filter_wheel", device_type)
 
@@ -566,11 +565,12 @@ def start_filter_wheel(
         ]["hardware"]["type"]
 
     if device_type == "SutterFilterWheel":
-        from aslm.model.devices.filter_wheel.filter_wheel_sutter import (
-            SutterFilterWheel,
-        )
-
+        from aslm.model.devices.filter_wheel.filter_wheel_sutter import SutterFilterWheel
         return SutterFilterWheel(microscope_name, device_connection, configuration)
+
+    elif device_type == "ASI":
+        from aslm.model.devices.filter_wheel.filter_wheel_asi import ASIFilterWheel
+        return ASIFilterWheel(microscope_name, device_connection, configuration)
 
     elif (
         device_type.lower() == "syntheticfilterwheel"
@@ -607,17 +607,18 @@ def start_daq(configuration, is_synthetic=False):
     """
     if is_synthetic:
         device_type = "SyntheticDAQ"
+
     else:
         device_type = configuration["configuration"]["hardware"]["daq"]["type"]
 
     if device_type == "NI":
         from aslm.model.devices.daq.daq_ni import NIDAQ
-
         return NIDAQ(configuration)
+
     elif device_type.lower() == "syntheticdaq" or device_type.lower() == "synthetic":
         from aslm.model.devices.daq.daq_synthetic import SyntheticDAQ
-
         return SyntheticDAQ(configuration)
+
     else:
         device_not_found(configuration["configuration"]["hardware"]["daq"]["type"])
 

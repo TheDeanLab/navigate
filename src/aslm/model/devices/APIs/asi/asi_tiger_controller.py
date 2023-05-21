@@ -153,7 +153,7 @@ class TigerController:
         self.print(f"Received Response: {response}")
         return response  # in case we want to read the response
 
-    # Basic Serial Commands
+    # Basic Serial Commands for the Stage
 
     def moverel(self, x: int = 0, y: int = 0, z: int = 0) -> None:
         """Move the stage with a relative move on multiple axes"""
@@ -261,7 +261,9 @@ class TigerController:
             print("ASI Stages stopped successfully")
 
     def set_speed(self, **axes:float):
-        """Set speed"""
+        """
+        Set speed
+        """
         axes = " ".join([f"{x}={round(v, 6)}" for x,v in axes.items()])
         self.send_command(f"SPEED {axes}")
         response = self.read_response()
@@ -269,6 +271,9 @@ class TigerController:
             raise TigerException(response)
         
     def get_speed(self, axis: str):
+        """
+        Get speed
+        """
         self.send_command(f"SPEED {axis}?")
         response = self.read_response()
         if response.startswith(":N"):
@@ -324,6 +329,80 @@ class TigerController:
         Stop scan.
         """
         self.send_command("SCAN P")
+        response = self.read_response()
+        if response.startswith(":N"):
+            raise TigerException(response)
+
+    # Basic Serial Commands for Filter Wheels
+
+    def send_filter_wheel_command(self, cmd: bytes) -> None:
+        """
+        Send a serial command to the filter wheel.
+        """
+        # always reset the buffers before a new command is sent
+        self.serial_port.reset_input_buffer()
+        self.serial_port.reset_output_buffer()
+
+        # send the serial command to the controller
+        command = bytes(f"{cmd}\n\r", encoding="ascii")
+        self.serial_port.write(command)
+        self.print(f"Sent Command: {command.decode(encoding='ascii')}")
+
+    def select_filter_wheel(self, filter_wheel_number=0):
+        """
+        Select the filter wheel, e.g., 0, 1...
+
+        Sets the current filter wheel for subsequent commands. Prompt shows currently selected wheel, e.g., 0> is result of FW 0 command. If the selected wheel is HOMED and ready to go, the FW command returns the selected wheel as normal. If the wheel is not ready for any reason, the response ERR is returned. Example:
+
+        0> FW 1 1 Normal – switch to FW 1
+        1> FW 0 ERR FW 0 not ready
+        0> Although FW 0 not ready – can still change FW 0 parameters.
+        """
+        assert filter_wheel_number in range(2)
+        self.send_filter_wheel_command(f"FW {filter_wheel_number}")
+        response = self.read_response()
+        if response.startswith(":N"):
+            raise TigerException(response)
+
+    def move_filter_wheel(self, filter_wheel_position=0):
+        """
+        Move to filter position n , where n is a valid filter position.
+        """
+        assert filter_wheel_position in range(8)
+        self.send_filter_wheel_command(f"MP {filter_wheel_position}")
+        response = self.read_response()
+        if response.startswith(":N"):
+            raise TigerException(response)
+
+    def move_filter_wheel_to_home(self):
+        """
+        Causes current wheel to seek its home position.
+        """
+        self.send_filter_wheel_command("HO")
+        response = self.read_response()
+        if response.startswith(":N"):
+            raise TigerException(response)
+
+    def change_filter_wheel_speed(self, speed=0):
+        """
+        Selects a consistent set of preset acceleration and speed parameters.
+        Supported in version 2.4 and later.
+
+        0	Default - directly set and saved AU, AD, and VR parameters are used.
+        1	Slowest and smoothest switching speed.
+        2 to 8	Intermediate switching speeds.
+        9	Fastest and but least reliable switching speed.
+        """
+        self.send_filter_wheel_command(f"SV {speed}")
+        response = self.read_response()
+        if response.startswith(":N"):
+            raise TigerException(response)
+
+    def halt_filter_wheel(self):
+        """
+        Halt filter wheel
+        """
+        self.send_filter_wheel_command("HA")
         response = self.read_response()
         if response.startswith(":N"):
             raise TigerException(response)

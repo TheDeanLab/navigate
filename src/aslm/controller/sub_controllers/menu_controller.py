@@ -42,12 +42,15 @@ from aslm.view.popups.ilastik_setting_popup import ilastik_setting_popup
 from aslm.view.popups.help_popup import HelpPopup
 from aslm.view.popups.autofocus_setting_popup import AutofocusPopup
 from aslm.view.popups.camera_map_setting_popup import CameraMapSettingPopup
+from aslm.view.popups.waveform_parameter_popup_window import WaveformParameterPopupWindow
 from aslm.controller.sub_controllers.gui_controller import GUIController
 from aslm.controller.sub_controllers.help_popup_controller import HelpPopupController
 from aslm.controller.sub_controllers import (
     AutofocusPopupController,
     IlastikPopupController,
     CameraMapSettingPopupController,
+    WaveformPopupController,
+    MicroscopePopupController,
 )
 from aslm.tools.file_functions import save_yaml_file
 
@@ -76,15 +79,13 @@ class MenuController(GUIController):
         self.disable_stage_limits = tk.IntVar(0)
         self.save_data = False
 
-    def initialize_menus(self, is_synthetic_hardware=False):
+    def initialize_menus(self):
         """Initialize menus
         This function defines all the menus in the menubar
 
         Parameters
         ----------
-        is_synthetic_hardware : bool
-            If True, then the hardware is simulated.
-            If False, then the hardware is real.
+        None
 
         Returns
         -------
@@ -350,14 +351,14 @@ class MenuController(GUIController):
                 "add_separator": [None, None, None, None, None],
                 "Waveform Parameters": [
                     "standard",
-                    self.parent_controller.popup_waveform_setting,
+                    self.popup_waveform_setting,
                     None,
                     None,
                     None,
                 ],
                 "Configure Microscope": [
                     "standard",
-                    self.parent_controller.popup_microscope_setting,
+                    self.popup_microscope_setting,
                     None,
                     None,
                     None,
@@ -561,8 +562,40 @@ class MenuController(GUIController):
             self.parent_controller.af_popup_controller.showup()
             return
         af_popup = AutofocusPopup(self.view)
-        self.parent_controller.af_popup_controller = AutofocusPopupController(af_popup, self)
+        self.parent_controller.af_popup_controller = AutofocusPopupController(af_popup, self.parent_controller)
 
+    def popup_waveform_setting(self):
+        if hasattr(self.parent_controller, "waveform_popup_controller"):
+            self.parent_controller.waveform_popup_controller.showup()
+            return
+        waveform_constants_popup = WaveformParameterPopupWindow(
+            self.view, self.parent_controller.configuration_controller
+        )
+        waveform_popup_controller = WaveformPopupController(
+            waveform_constants_popup, self.parent_controller, self.parent_controller.waveform_constants_path
+        )
+        waveform_popup_controller.populate_experiment_values()
+        self.parent_controller.waveform_popup_controller = waveform_popup_controller
+
+    def popup_microscope_setting(self):
+        """Pop up the microscope setting window.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
+        if hasattr(self.parent_controller, "microscope_popup_controller"):
+            self.parent_controller.microscope_popup_controller.showup()
+            return
+        microscope_info = self.parent_controller.model.get_microscope_info()
+        self.parent_controller.microscope_popup_controller = MicroscopePopupController(
+            self.view, self.parent_controller, microscope_info
+        )
+    
     def toggle_save(self, *args):
         """Save the data."""
         self.save_data = not self.save_data

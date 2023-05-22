@@ -119,11 +119,18 @@ class Metadata:
             self.configuration["experiment"]["CameraParameters"]["y_pixels"]
         )
         if (
-            self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-            == "z-stack"
-        ) or (
-            self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-            == "ConstantVelocityAcquisition"
+            (
+                self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+                == "z-stack"
+            )
+            or (
+                self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+                == "ConstantVelocityAcquisition"
+            )
+            or (
+                self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+                == "customized"
+            )
         ):
             self.shape_z = int(
                 self.configuration["experiment"]["MicroscopeState"]["number_z_steps"]

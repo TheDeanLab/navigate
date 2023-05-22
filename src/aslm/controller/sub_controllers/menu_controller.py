@@ -384,7 +384,7 @@ class MenuController(GUIController):
             )
         self.feature_id_val.trace_add(
             "write",
-            lambda *args: self.execute("load_feature", self.feature_id_val.get()),
+            lambda *args: self.parent_controller.execute("load_feature", self.feature_id_val.get()),
         )
         self.view.menubar.menu_features.add_separator()
         self.view.menubar.menu_features.add_command(

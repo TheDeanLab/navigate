@@ -206,7 +206,7 @@ class Controller:
 
         # Initialize the menus
         self.menu_controller = MenuController(view=self.view, parent_controller=self)
-        self.menu_controller.initialize_menus(args.synthetic_hardware)
+        self.menu_controller.initialize_menus()
 
         # Create default data buffer
         self.img_width = 0
@@ -625,7 +625,7 @@ class Controller:
             # and in 'single acquisition'
             self.camera_view_controller.display_mask_flag = (
                 self.acquire_bar_controller.mode == "single"
-                and self.feature_id_val.get() == 4
+                and self.menu_controller.feature_id_val.get() == 4
                 and self.ilastik_controller.show_segmentation_flag
             )
 

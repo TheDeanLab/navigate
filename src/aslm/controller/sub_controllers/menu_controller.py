@@ -40,10 +40,12 @@ import tkinter as tk
 # Local Imports
 from aslm.view.popups.ilastik_setting_popup import ilastik_setting_popup
 from aslm.view.popups.help_popup import HelpPopup
+from aslm.view.popups.autofocus_setting_popup import AutofocusPopup
 from aslm.view.popups.camera_map_setting_popup import CameraMapSettingPopup
 from aslm.controller.sub_controllers.gui_controller import GUIController
 from aslm.controller.sub_controllers.help_popup_controller import HelpPopupController
 from aslm.controller.sub_controllers import (
+    AutofocusPopupController,
     IlastikPopupController,
     CameraMapSettingPopupController,
 )
@@ -73,7 +75,6 @@ class MenuController(GUIController):
         self.feature_id_val = tk.IntVar(0)
         self.disable_stage_limits = tk.IntVar(0)
         self.save_data = False
-        self.is_acquiring = False
 
     def initialize_menus(self, is_synthetic_hardware=False):
         """Initialize menus
@@ -92,209 +93,26 @@ class MenuController(GUIController):
 
         """
 
-        def new_experiment(*args):
-            """Create a new experiment file."""
-            self.parent_controller.populate_experiment_setting(
-                self.parent_controller.default_experiment_file
-            )
-
-        def load_experiment(*args):
-            """Load an experiment file."""
-            filename = tk.filedialog.askopenfilename(
-                defaultextension=".yml", filetypes=[("Yaml files", "*.yml *.yaml")]
-            )
-            if not filename:
-                return
-            self.parent_controller.populate_experiment_setting(filename)
-
-        def save_experiment(*args):
-            """Save an experiment file.
-
-            Updates model.experiment and saves it to file.
-            """
-            if not self.parent_controller.update_experiment_setting():
-                tk.messagebox.showerror(
-                    title="Warning",
-                    message="Incorrect/missing settings. "
-                    "Cannot save current experiment file.",
-                )
-                return
-            filename = tk.filedialog.asksaveasfilename(
-                defaultextension=".yml", filetypes=[("Yaml file", "*.yml *.yaml")]
-            )
-            if not filename:
-                return
-            save_yaml_file(
-                "", self.parent_controller.configuration["experiment"], filename
-            )
-
-        def load_images():
-            """Load images from a file."""
-            filenames = tk.filedialog.askopenfilenames(
-                defaultextension=".tif", filetypes=[("tiff files", "*.tif *.tiff")]
-            )
-            if not filenames:
-                return
-            self.model.load_images(filenames)
-
-        def popup_camera_map_setting():
-            """Pop up the Camera Map setting window."""
-            if hasattr(self, "camera_map_popup_controller"):
-                self.camera_map_popup_controller.showup()
-                return
-            map_popup = CameraMapSettingPopup(self.view)
-            self.camera_map_popup_controller = CameraMapSettingPopupController(
-                map_popup, self
-            )
-
-        def popup_ilastik_setting():
-            """Pop up the Ilastik setting window."""
-            ilastik_popup_window = ilastik_setting_popup(self.view)
-            ilastik_url = self.parent_controller.configuration["rest_api_config"][
-                "Ilastik"
-            ]["url"]
-            if hasattr(self, "ilastik_controller"):
-                self.ilastik_controller.showup(ilastik_popup_window)
-            else:
-                self.ilastik_controller = IlastikPopupController(
-                    ilastik_popup_window, self, ilastik_url
-                )
-
-        def popup_help():
-            """Pop up the help window."""
-            if hasattr(self, "help_controller"):
-                self.help_controller.showup()
-                return
-            help_pop = HelpPopup(self.view)
-            self.help_controller = HelpPopupController(help_pop, self)
-
-        def toggle_stage_limits(*args):
-            """Toggle stage limits."""
-            if self.disable_stage_limits.get() == 1:
-                logger.debug("Disabling stage limits")
-                self.parent_controller.execute("stage_limits", True)
-            else:
-                logger.debug("Enabling stage limits")
-                self.parent_controller.execute("stage_limits", False)
-
-        def populate_menu(menu_dict):
-            """Populate the menus from a dictionary.
-
-            Parameters
-            ----------
-            menu_dict : dict
-                menu_dict = {
-                    Menu object: {
-                        "Menu String Entry": [
-                            entry_type (standard, radio),
-                            Command,
-                            Accelerator,
-                            Windows Keystroke,
-                            Apple Keystroke",
-                ],
-                ....
-
-            """
-            for menu in menu_dict:
-                menu_items = menu_dict[menu]
-                for label in menu_items:
-                    if "add_separator" in label:
-                        menu.add_separator()
-                    else:
-                        if "standard" in menu_items[label][0]:
-                            if menu_items[label][1] is None:
-                                # Command not passed, accelerator provided for
-                                # informational purposes only.
-                                menu.add_command(
-                                    label=label, accelerator=menu_items[label][2]
-                                )
-                            else:
-                                # If the command is provided, it is assumed that you
-                                # should also bind that command to the accelerator.
-                                menu.add_command(
-                                    label=label,
-                                    command=menu_items[label][1],
-                                    accelerator=menu_items[label][2],
-                                )
-                                if platform.platform() == "Darwin":
-                                    # Account for OS specific keystrokes
-                                    menu.bind_all(
-                                        menu_items[label][4], menu_items[label][1]
-                                    )
-                                else:
-                                    menu.bind_all(
-                                        menu_items[label][3], menu_items[label][1]
-                                    )
-                        elif "radio" in menu_items[label][0]:
-                            if menu_items[label][1] is None:
-                                # Command not passed, accelerator provided for
-                                # informational purposes only.
-                                menu.add_radiobutton(
-                                    label=label, accelerator=menu_items[label][2]
-                                )
-                            else:
-                                # If the command is provided, it is assumed that you
-                                # should also bind that command to the accelerator.
-                                menu.add_radiobutton(
-                                    label=label,
-                                    command=menu_items[label][0],
-                                    accelerator=menu_items[label][1],
-                                )
-                                if platform.platform() == "Darwin":
-                                    menu.bind_all(
-                                        menu_items[label][4], menu_items[label][1]
-                                    )
-                                else:
-                                    menu.bind_all(
-                                        menu_items[label][3], menu_items[label][1]
-                                    )
-
-        def toggle_save(*args):
-            """Save the data."""
-            self.save_data = not self.save_data
-            self.parent_controller.execute("set_save", self.save_data)
-
-        def acquire_data(*args):
-            """Acquire data."""
-            if self.is_acquiring:
-                self.parent_controller.execute("stop_acquire")
-            else:
-                self.parent_controller.execute("acquire")
-            self.is_acquiring = not self.is_acquiring
-
-        def not_implemented(*args):
-            """Not implemented."""
-            print("Not implemented")
-
-        def stage_movement(char):
-            """Stage movement."""
-            fake_event = FakeEvent(char=char)
-            self.parent_controller.stage_controller.stage_key_press(fake_event)
-
-        def switch_tabs(tab):
-            """Switch tabs."""
-            self.parent_controller.view.settings.select(tab - 1)
-
         # File Menu
         file_menu = {
             self.view.menubar.menu_file: {
                 "New Experiment": [
                     "standard",
-                    new_experiment,
+                    self.new_experiment,
                     "Ctrl+Shift+N",
                     "<Control-N>",
                     "<Control_L-N>",
                 ],
                 "Load Experiment": [
                     "standard",
-                    load_experiment,
+                    self.load_experiment,
                     "Ctrl+Shift+O",
                     "<Control-O>",
                     "<Control_L-O>",
                 ],
                 "Save Experiment": [
                     "standard",
-                    save_experiment,
+                    self.save_experiment,
                     "Ctrl+Shift+S",
                     "<Control-S>",
                     "<Control_L-S>",
@@ -302,29 +120,29 @@ class MenuController(GUIController):
                 "add_separator": [None],
                 "Save Data": [
                     "standard",
-                    toggle_save,
+                    self.toggle_save,
                     "Ctrl+s",
                     "<Control-s>",
                     "<Control_L-s>",
                 ],
                 "Acquire Data": [
                     "standard",
-                    acquire_data,
+                    self.acquire_data,
                     "Ctrl+Enter",
                     "<Control-Return>",
                     "<Control_L-Return>",
                 ],
-                "Load Images": ["standard", load_images, None, None, None],
+                "Load Images": ["standard", self.load_images, None, None, None],
                 "Unload Images": [
                     "standard",
-                    self.parent_controller.model.load_images(None),
+                    lambda: self.parent_controller.model.load_images(None),
                     None,
                     None,
                     None,
                 ],
             }
         }
-        populate_menu(file_menu)
+        self.populate_menu(file_menu)
 
         # Stage Control Menu
         # Most bindings are implemented in the keystroke_controller.
@@ -334,40 +152,40 @@ class MenuController(GUIController):
             self.view.menubar.menu_multi_positions: {
                 "Move Up": [
                     "standard",
-                    lambda: stage_movement("w"),
+                    lambda: self.stage_movement("w"),
                     "w",
                     "<Key-w>",
                     "<Key-w>",
                 ],
                 "Move Down": [
                     "standard",
-                    lambda: stage_movement("s"),
+                    lambda: self.stage_movement("s"),
                     "s",
                     "<Key-s>",
                     "<Key-s>",
                 ],
                 "Move Left": [
                     "standard",
-                    lambda: stage_movement("a"),
+                    lambda: self.stage_movement("a"),
                     "a",
                     "<Key-a>",
                     "<Key-a>",
                 ],
                 "Move Right": [
                     "standard",
-                    lambda: stage_movement("d"),
+                    lambda: self.stage_movement("d"),
                     "d",
                     "<Key-d>",
                     "<Key-d>",
                 ],
-                "Move In": ["standard", not_implemented, None, None, None],
-                "Move Out": ["standard", not_implemented, None, None, None],
-                "Move Focus Up": ["standard", not_implemented, None, None, None],
-                "Move Focus Down": ["standard", not_implemented, None, None, None],
-                "Rotate Clockwise": ["standard", not_implemented, None, None, None],
+                "Move In": ["standard", self.not_implemented, None, None, None],
+                "Move Out": ["standard", self.not_implemented, None, None, None],
+                "Move Focus Up": ["standard", self.not_implemented, None, None, None],
+                "Move Focus Down": ["standard", self.not_implemented, None, None, None],
+                "Rotate Clockwise": ["standard", self.not_implemented, None, None, None],
                 "Rotate Counter-Clockwise": [
                     "standard",
-                    not_implemented,
+                    self.not_implemented,
                     None,
                     None,
                     None,
@@ -418,17 +236,17 @@ class MenuController(GUIController):
                 "add_separator_1": [None, None, None, None, None],
             },
         }
-        populate_menu(stage_control_menu)
+        self.populate_menu(stage_control_menu)
         self.view.menubar.menu_multi_positions.add_radiobutton(
             label="Disable Stage Limits",
             value=0,
-            command=toggle_stage_limits,
+            command=self.toggle_stage_limits,
             variable=self.disable_stage_limits,
         )
         self.view.menubar.menu_multi_positions.add_radiobutton(
             label="Enable Stage Limits",
             value=1,
-            command=toggle_stage_limits,
+            command=self.toggle_stage_limits,
             variable=self.disable_stage_limits,
         )
         self.disable_stage_limits.set(1)
@@ -445,42 +263,42 @@ class MenuController(GUIController):
                 ],
                 "Autofocus Settings": [
                     "standard",
-                    self.parent_controller.popup_autofocus_setting,
+                    self.popup_autofocus_setting,
                     "Ctrl+Shift+A",
                     "<Control-A>",
                     "<Control_L-A>",
                 ],
             }
         }
-        populate_menu(autofocus_menu)
+        self.populate_menu(autofocus_menu)
 
         # Window menu
         windows_menu = {
             self.view.menubar.menu_window: {
                 "Channel Settings": [
                     "standard",
-                    lambda: switch_tabs(1),
+                    lambda: self.switch_tabs(1),
                     "Ctrl+1",
                     "<Control-1>",
                     "<Control_L-1",
                 ],
                 "Camera Settings": [
                     "standard",
-                    lambda: switch_tabs(2),
+                    lambda: self.switch_tabs(2),
                     "Ctrl+2",
                     "<Control-2>",
                     "<Control_L-2",
                 ],
                 "Stage Control": [
                     "standard",
-                    lambda: switch_tabs(2),
+                    lambda: self.switch_tabs(2),
                     "Ctrl+3",
                     "<Control-3>",
                     "<Control_L-3",
                 ],
                 "Multiposition Table": [
                     "standard",
-                    lambda: switch_tabs(4),
+                    lambda: self.switch_tabs(4),
                     "Ctrl+4",
                     "<Control-4>",
                     "<Control_L-4",
@@ -488,15 +306,15 @@ class MenuController(GUIController):
                 "add_separator": ["standard", None, None, None, None],
                 "Popout Camera Display": [
                     "standard",
-                    not_implemented,
+                    self.not_implemented,
                     None,
                     None,
                     None,
                 ],
-                "Help": ["standard", popup_help, None, None, None],
+                "Help": ["standard", self.popup_help, None, None, None],
             }
         }
-        populate_menu(windows_menu)
+        self.populate_menu(windows_menu)
 
         # Zoom menu
         for microscope_name in self.parent_controller.configuration["configuration"][
@@ -546,7 +364,7 @@ class MenuController(GUIController):
                 ],
             }
         }
-        populate_menu(configuration_dict)
+        self.populate_menu(configuration_dict)
 
         # add-on features
         feature_list = [
@@ -568,12 +386,200 @@ class MenuController(GUIController):
         )
         self.view.menubar.menu_features.add_separator()
         self.view.menubar.menu_features.add_command(
-            label="Ilastik Settings", command=popup_ilastik_setting
+            label="Ilastik Settings", command=self.popup_ilastik_setting
         )
         # disable ilastik menu
         self.view.menubar.menu_features.entryconfig(
             "Ilastik Segmentation", state="disabled"
         )
         self.view.menubar.menu_features.add_command(
-            label="Camera offset and variance maps", command=popup_camera_map_setting
+            label="Camera offset and variance maps", command=self.popup_camera_map_setting
         )
+
+
+    def populate_menu(self, menu_dict):
+        """Populate the menus from a dictionary.
+
+        Parameters
+        ----------
+        menu_dict : dict
+            menu_dict = {
+                Menu object: {
+                    "Menu String Entry": [
+                        entry_type (standard, radio),
+                        Command,
+                        Accelerator,
+                        Windows Keystroke,
+                        Apple Keystroke",
+            ],
+            ....
+
+        """
+        for menu in menu_dict:
+            menu_items = menu_dict[menu]
+            for label in menu_items:
+                if "add_separator" in label:
+                    menu.add_separator()
+                else:
+                    if "standard" in menu_items[label][0]:
+                        if menu_items[label][1] is None:
+                            # Command not passed, accelerator provided for
+                            # informational purposes only.
+                            menu.add_command(
+                                label=label, accelerator=menu_items[label][2]
+                            )
+                        else:
+                            # If the command is provided, it is assumed that you
+                            # should also bind that command to the accelerator.
+                            menu.add_command(
+                                label=label,
+                                command=menu_items[label][1],
+                                accelerator=menu_items[label][2],
+                            )
+                            if platform.platform() == "Darwin":
+                                # Account for OS specific keystrokes
+                                menu.bind_all(
+                                    menu_items[label][4], menu_items[label][1]
+                                )
+                            else:
+                                menu.bind_all(
+                                    menu_items[label][3], menu_items[label][1]
+                                )
+                    elif "radio" in menu_items[label][0]:
+                        if menu_items[label][1] is None:
+                            # Command not passed, accelerator provided for
+                            # informational purposes only.
+                            menu.add_radiobutton(
+                                label=label, accelerator=menu_items[label][2]
+                            )
+                        else:
+                            # If the command is provided, it is assumed that you
+                            # should also bind that command to the accelerator.
+                            menu.add_radiobutton(
+                                label=label,
+                                command=menu_items[label][0],
+                                accelerator=menu_items[label][1],
+                            )
+                            if platform.platform() == "Darwin":
+                                menu.bind_all(
+                                    menu_items[label][4], menu_items[label][1]
+                                )
+                            else:
+                                menu.bind_all(
+                                    menu_items[label][3], menu_items[label][1]
+                                )
+
+    def new_experiment(self, *args):
+        """Create a new experiment file."""
+        self.parent_controller.populate_experiment_setting(
+            self.parent_controller.default_experiment_file
+        )
+
+    def load_experiment(self, *args):
+        """Load an experiment file."""
+        filename = tk.filedialog.askopenfilename(
+            defaultextension=".yml", filetypes=[("Yaml files", "*.yml *.yaml")]
+        )
+        if not filename:
+            return
+        self.parent_controller.populate_experiment_setting(filename)
+
+    def save_experiment(self, *args):
+        """Save an experiment file.
+
+        Updates model.experiment and saves it to file.
+        """
+        if not self.parent_controller.update_experiment_setting():
+            tk.messagebox.showerror(
+                title="Warning",
+                message="Incorrect/missing settings. "
+                "Cannot save current experiment file.",
+            )
+            return
+        filename = tk.filedialog.asksaveasfilename(
+            defaultextension=".yml", filetypes=[("Yaml file", "*.yml *.yaml")]
+        )
+        if not filename:
+            return
+        save_yaml_file(
+            "", self.parent_controller.configuration["experiment"], filename
+        )
+
+    def load_images(self):
+        """Load images from a file."""
+        filenames = tk.filedialog.askopenfilenames(
+            defaultextension=".tif", filetypes=[("tiff files", "*.tif *.tiff")]
+        )
+        if not filenames:
+            return
+        self.parent_controller.model.load_images(filenames)
+
+    def popup_camera_map_setting(self):
+        """Pop up the Camera Map setting window."""
+        if hasattr(self.parent_controller, "camera_map_popup_controller"):
+            self.parent_controller.camera_map_popup_controller.showup()
+            return
+        map_popup = CameraMapSettingPopup(self.view)
+        self.parent_controller.camera_map_popup_controller = CameraMapSettingPopupController(
+            map_popup, self.parent_controller
+        )
+
+    def popup_ilastik_setting(self):
+        """Pop up the Ilastik setting window."""
+        ilastik_popup_window = ilastik_setting_popup(self.view)
+        ilastik_url = self.parent_controller.configuration["rest_api_config"][
+            "Ilastik"
+        ]["url"]
+        if hasattr(self.parent_controller, "ilastik_controller"):
+            self.parent_controller.ilastik_controller.showup(ilastik_popup_window)
+        else:
+            self.parent_controller.ilastik_controller = IlastikPopupController(
+                ilastik_popup_window, self.parent_controller, ilastik_url
+            )
+
+    def popup_help(self):
+        """Pop up the help window."""
+        if hasattr(self.parent_controller, "help_controller"):
+            self.parent_controller.help_controller.showup()
+            return
+        help_pop = HelpPopup(self.view)
+        self.parent_controller.help_controller = HelpPopupController(help_pop, self.parent_controller)
+
+    def toggle_stage_limits(self, *args):
+        """Toggle stage limits."""
+        if self.disable_stage_limits.get() == 1:
+            logger.debug("Disabling stage limits")
+            self.parent_controller.execute("stage_limits", True)
+        else:
+            logger.debug("Enabling stage limits")
+            self.parent_controller.execute("stage_limits", False)
+
+    def popup_autofocus_setting(self, *args):
+        """Pop up the Autofocus setting window."""
+        if hasattr(self.parent_controller, "af_popup_controller"):
+            self.parent_controller.af_popup_controller.showup()
+            return
+        af_popup = AutofocusPopup(self.view)
+        self.parent_controller.af_popup_controller = AutofocusPopupController(af_popup, self)
+
+    def toggle_save(self, *args):
+        """Save the data."""
+        self.save_data = not self.save_data
+        self.parent_controller.execute("set_save", self.save_data)
+
+    def acquire_data(self, *args):
+        """Acquire data/Stop acquiring data."""
+        self.parent_controller.acquire_bar_controller.launch_popup_window()
+
+    def not_implemented(self, *args):
+        """Not implemented."""
+        print("Not implemented")
+
+    def stage_movement(self, char):
+        """Stage movement."""
+        fake_event = FakeEvent(char=char)
+        self.parent_controller.stage_controller.stage_key_press(fake_event)
+
+    def switch_tabs(self, tab):
+        """Switch tabs."""
+        self.parent_controller.view.settings.select(tab - 1)

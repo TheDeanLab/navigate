@@ -44,7 +44,6 @@ import sys
 # Local View Imports
 from aslm.view.main_application_window import MainApp as view
 from aslm.view.popups.camera_view_popup_window import CameraViewPopupWindow
-from aslm.view.popups.autofocus_setting_popup import AutofocusPopup
 from aslm.view.popups.waveform_parameter_popup_window import (
     WaveformParameterPopupWindow,
 )
@@ -62,7 +61,6 @@ from aslm.controller.sub_controllers import (
     AcquireBarController,
     WaveformPopupController,
     MenuController,
-    AutofocusPopupController,
     MicroscopePopupController,
 )
 
@@ -943,14 +941,6 @@ class Controller:
                 self.camera_setting_controller.framerate_widgets["max_framerate"].set(
                     value
                 )
-
-    def popup_autofocus_setting(self, *args):
-        """Pop up the Autofocus setting window."""
-        if hasattr(self, "af_popup_controller"):
-            self.af_popup_controller.showup()
-            return
-        af_popup = AutofocusPopup(self.view)
-        self.af_popup_controller = AutofocusPopupController(af_popup, self)
 
     def popup_waveform_setting(self):
         if hasattr(self, "waveform_popup_controller"):

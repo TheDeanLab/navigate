@@ -244,6 +244,7 @@ class AcquireBarController(GUIController):
         >>> set_save_option(True)
         """
         self.is_save = is_save
+        self.parent_controller.configuration["experiment"]["MicroscopeState"]["is_save"] = is_save
         self.show_verbose_info("set save data option:", is_save)
 
     def launch_popup_window(self):
@@ -474,6 +475,10 @@ class AcquireBarController(GUIController):
             "image_mode"
         ]
         self.set_mode(mode)
+        is_save = self.parent_controller.configuration["experiment"]["MicroscopeState"][
+            "is_save"
+        ]
+        self.set_save_option(is_save)
 
     def update_experiment_values(self, popup_window):
         """Gets the entries from the popup save dialog and overwrites the

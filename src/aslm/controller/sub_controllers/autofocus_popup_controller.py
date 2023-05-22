@@ -123,9 +123,7 @@ class AutofocusPopupController(GUIController):
         -------
         None
         """
-        self.setting_dict = self.parent_controller.configuration["experiment"][
-            "AutoFocusParameters"
-        ]
+        self.setting_dict = self.parent_controller.configuration["experiment"]["AutoFocusParameters"]
         # show the value
         for k in self.widgets:
             self.widgets[k].set(self.setting_dict[k])

@@ -118,6 +118,7 @@ class StageBase:
             setattr(self, f"{ax}_min", stage[f"{ax}_min"])  # Units are in microns
             setattr(self, f"{ax}_max", stage[f"{ax}_max"])  # Units are in microns
         self.create_position_dict()
+        self.stage_limits = True
 
     def create_position_dict(self):
         """Creates a dictionary with the hardware stage positions."""
@@ -150,10 +151,14 @@ class StageBase:
             Position to move the stage to for this axis.
         """
         try:
-            # Get all necessary attributes. If we can't we'll move to the error case.
+            # Get all necessary attributes.
+            # If we can't we'll move to the error case (e.g., -1e50).
             axis_abs = move_dictionary[f"{axis}_abs"] - getattr(
                 self, f"int_{axis}_pos_offset", 0
             )
+            if not self.stage_limits:
+                return axis_abs
+
             # TODO: should we default to 0?
             axis_min, axis_max = getattr(self, f"{axis}_min"), getattr(
                 self, f"{axis}_max"

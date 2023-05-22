@@ -66,13 +66,10 @@ class CameraViewController(GUIController):
         self.canvas = self.view.canvas
 
         # Bindings for changes to the LUT
-        # keys = ['Gray','Gradient','Rainbow']
         for color in self.image_palette.values():
             color.widget.config(command=self.update_LUT)
         self.update_snr()
-        # self.image_palette['Gray'].widget.config(command=self.update_LUT)
-        # self.image_palette['Gradient'].widget.config(command=self.update_LUT)
-        # self.image_palette['Rainbow'].widget.config(command=self.update_LUT)
+
 
         # Binding for adjusting the lookup table min and max counts.
         # keys = ['Autoscale', 'Min','Max']

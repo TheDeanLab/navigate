@@ -152,28 +152,28 @@ class MenuController(GUIController):
             self.view.menubar.menu_multi_positions: {
                 "Move Up": [
                     "standard",
-                    lambda: self.stage_movement("w"),
+                    lambda *args: self.stage_movement("w"),
                     "w",
                     "<Key-w>",
                     "<Key-w>",
                 ],
                 "Move Down": [
                     "standard",
-                    lambda: self.stage_movement("s"),
+                    lambda *args: self.stage_movement("s"),
                     "s",
                     "<Key-s>",
                     "<Key-s>",
                 ],
                 "Move Left": [
                     "standard",
-                    lambda: self.stage_movement("a"),
+                    lambda *args: self.stage_movement("a"),
                     "a",
                     "<Key-a>",
                     "<Key-a>",
                 ],
                 "Move Right": [
                     "standard",
-                    lambda: self.stage_movement("d"),
+                    lambda *args: self.stage_movement("d"),
                     "d",
                     "<Key-d>",
                     "<Key-d>",
@@ -375,6 +375,7 @@ class MenuController(GUIController):
             "Ilastik Segmentation",
             "Volume Search",
             "Time Series",
+            "Decoupled Focus Stage Multiposition",
         ]
         for i in range(len(feature_list)):
             self.view.menubar.menu_features.add_radiobutton(

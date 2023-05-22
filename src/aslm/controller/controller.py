@@ -500,7 +500,7 @@ class Controller:
                 'remote_focus_constants'][self.resolution][self.mag]
                 }
             """
-            microscope_name, zoom = self.resolution_value.get().split()
+            microscope_name, zoom = self.menu_controller.resolution_value.get().split()
             if (
                 microscope_name
                 != self.configuration["experiment"]["MicroscopeState"][

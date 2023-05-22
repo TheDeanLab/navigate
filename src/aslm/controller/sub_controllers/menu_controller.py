@@ -342,7 +342,7 @@ class MenuController(GUIController):
                 )
         self.resolution_value.trace_add(
             "write",
-            lambda *args: self.execute("resolution", self.resolution_value.get()),
+            lambda *args: self.parent_controller.execute("resolution", self.resolution_value.get()),
         )
 
         configuration_dict = {

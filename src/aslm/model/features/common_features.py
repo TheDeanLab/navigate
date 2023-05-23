@@ -34,6 +34,8 @@ import time
 from functools import reduce
 from queue import Queue
 
+from .image_writer import ImageWriter
+
 
 class ChangeResolution:
     def __init__(self, model, resolution_mode="high", zoom_value="N/A"):
@@ -259,7 +261,7 @@ class StackPause:
 
 
 class ZStackAcquisition:
-    def __init__(self, model, get_origin=False):
+    def __init__(self, model, get_origin=False, saving_flag=False, saving_dir="z-stack"):
         self.model = model
         self.get_origin = get_origin
 
@@ -280,11 +282,21 @@ class ZStackAcquisition:
         self.stack_cycling_mode = "per_stack"
         self.channels = 1
 
+        self.image_writer = None
+        if saving_flag:
+            self.image_writer = ImageWriter(model, sub_dir=saving_dir)
+
         self.config_table = {
             "signal": {
                 "init": self.pre_signal_func,
                 "main": self.signal_func,
                 "end": self.signal_end,
+            },
+            "data": {
+                "init": self.pre_data_func,
+                "main": self.in_data_func,
+                "end": self.end_data_func,
+                "cleanup": self.cleanup_data_func,
             },
             "node": {"node_type": "multi-step", "device_related": True},
         }
@@ -464,6 +476,22 @@ class ZStackAcquisition:
             self.current_channel_in_list + 1
         ) % self.channels
         self.model.active_microscope.prepare_next_channel()
+
+    def pre_data_func(self):
+        self.received_frames = 0
+        self.total_frames = self.channels * self.number_z_steps * len(self.positions)
+
+    def in_data_func(self, frame_ids):
+        self.received_frames += len(frame_ids)
+        if self.image_writer != None:
+            self.image_writer.save_image(frame_ids)
+
+    def end_data_func(self):
+        return self.received_frames >= self.total_frames
+    
+    def cleanup_data_func(self):
+        if self.image_writer:
+            self.image_writer.cleanup()
 
 
 class ConProAcquisition:  # don't have the multi-position part for now

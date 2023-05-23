@@ -247,7 +247,7 @@ class Model:
                 (
                     {"name": MoveToNextPositionInMultiPostionTable},
                     {"name": Autofocus},
-                    {"name": ZStackAcquisition, "args": (True,)},
+                    {"name": ZStackAcquisition, "args": (True, True,)},
                     {"name": WaitToContinue},
                     {
                         "name": LoopByCount,

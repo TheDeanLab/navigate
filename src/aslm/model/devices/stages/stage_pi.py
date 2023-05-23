@@ -241,7 +241,7 @@ class PIStage(StageBase):
             return False
         if wait_until_done is True:
             try:
-                self.pi_tools.waitontarget(self.pi_device, timeout=2.0)
+                self.pi_tools.waitontarget(self.pi_device, timeout=5.0)
             except GCSError as e:
                 print("Wait on target failed")
                 success = False

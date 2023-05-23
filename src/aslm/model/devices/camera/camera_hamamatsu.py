@@ -46,6 +46,9 @@ logger = logging.getLogger(p)
 class HamamatsuOrca(CameraBase):
     """HamamatsuOrca camera class.
 
+    Camera reports exposure times in milliseconds.
+    Must be converted from milliseconds to seconds.
+
     Parameters
     ----------
     microscope_name : str
@@ -59,39 +62,32 @@ class HamamatsuOrca(CameraBase):
     def __init__(self, microscope_name, device_connection, configuration):
         super().__init__(microscope_name, device_connection, configuration)
 
-        # Values are pulled from the CameraParameters section of the configuration.yml
-        # file. Exposure time converted here from milliseconds to seconds.
-        self.set_sensor_mode(self.camera_parameters["sensor_mode"])
+        # Set default settings for the camera.
+        self.camera_controller.set_property_value("sensor_mode", 1.0)
+        self.camera_controller.set_property_value("defect_correct_mode", 2.0)
+        self.camera_controller.set_property_value("readout_speed", 2.0)
+        self.camera_controller.set_property_value("trigger_active", 1.0)
+        self.camera_controller.set_property_value("trigger_mode", 1.0)
+        self.camera_controller.set_property_value("trigger_polarity", 2.0)
+        self.camera_controller.set_property_value("trigger_source", 2.0)
 
-        self.camera_controller.set_property_value(
-            "defect_correct_mode", self.camera_parameters["defect_correct_mode"]
-        )
-        self.camera_controller.set_property_value(
-            "exposure_time", self.camera_parameters["exposure_time"] / 1000
-        )
-        self.camera_controller.set_property_value(
-            "binning", int(self.camera_parameters["binning"][0])
-        )
-        self.camera_controller.set_property_value(
-            "readout_speed", self.camera_parameters["readout_speed"]
-        )
-        self.camera_controller.set_property_value(
-            "trigger_active", self.camera_parameters["trigger_active"]
-        )
-        self.camera_controller.set_property_value(
-            "trigger_mode", self.camera_parameters["trigger_mode"]
-        )
-        self.camera_controller.set_property_value(
-            "trigger_polarity", self.camera_parameters["trigger_polarity"]
-        )
-        self.camera_controller.set_property_value(
-            "trigger_source", self.camera_parameters["trigger_source"]
-        )
-        # DCAM_IDPROP_IMAGE_WIDTH/HEIGHT is readonly
-        # self.camera_controller.set_property_value("image_height",
-        #                                            self.camera_parameters['y_pixels'])
-        # self.camera_controller.set_property_value("image_width",
-        #                                            self.camera_parameters['x_pixels'])
+        # Retrieve camera settings from the camera.
+        self.pixel_size_in_microns = self.camera_controller.get_property_value("physical_pixel_size")
+        self.x_pixels = int(self.camera_controller.get_property_value("subarray_hsize"))
+        self.y_pixels = int(self.camera_controller.get_property_value("subarray_vsize"))
+        binning = int(self.camera_controller.get_property_value("binning"))
+        self.camera_line_interval = self.camera_controller.get_property_value("internal_line_interval")
+
+        self.x_binning, self.y_binning = binning, binning
+        self.x_pixels = self.x_pixels / self.x_binning
+        self.y_pixels = self.y_pixels / self.y_binning
+
+        # Update the CameraParameters section of the configuration.yaml file.
+        self.camera_parameters["pixel_size_in_microns"] = self.pixel_size_in_microns
+        self.camera_parameters["x_pixels"] = self.x_pixels
+        self.camera_parameters["y_pixels"] = self.y_pixels
+        self.camera_parameters["binning"] = str(self.x_binning) + "x" + str(self.y_binning)
+        self.camera_parameters["line_interval"] = self.camera_line_interval
 
         logger.info("HamamatsuOrca Initialized")
 
@@ -148,9 +144,6 @@ class HamamatsuOrca(CameraBase):
             print("Camera mode not supported")
             logger.info("Camera mode not supported")
 
-        # print("Camera Sensor Mode:",
-        #       self.camera_controller.get_property_value("sensor_mode"))
-
     def set_readout_direction(self, mode):
         """Set HamamatsuOrca readout direction.
 
@@ -194,6 +187,7 @@ class HamamatsuOrca(CameraBase):
         """
         h = 9.74436 * 10**-6  # Readout timing constant
         h = self.camera_controller.get_property_value("readout_time")
+        print("readout_time", h)
         vn = self.camera_controller.get_property_value("subarray_vsize")
         sensor_mode = self.camera_controller.get_property_value("sensor_mode")
         exposure_time = self.camera_controller.get_property_value("exposure_time")

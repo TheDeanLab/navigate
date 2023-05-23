@@ -166,12 +166,12 @@ class Metadata:
         #     )
         # else:
         #     self.positions = 1
-        
+
         # let the data sources have the ability to save more frames
         self._multiposition = True
         self.positions = len(
             self.configuration["experiment"]["MultiPositions"]["stage_positions"]
-        ) * 50
+        )
 
     def set_stack_order_from_configuration_experiment(self) -> None:
         self._per_stack = (

@@ -202,13 +202,14 @@ class MoveToNextPositionInMultiPostionTable:
             return False
         pos_dict = self.multipostion_table[self.current_idx]
         self.current_idx += 1
-        try:
-            pos_dict.pop("f")
-        except KeyError:
-            pass
+        # try:
+        #     pos_dict.pop("f")
+        # except KeyError:
+        #     pass
         abs_pos_dict = dict(map(lambda k: (f"{k}_abs", pos_dict[k]), pos_dict.keys()))
         self.model.logger.debug(f"*** move stage to {pos_dict}")
-        self.model.move_stage(abs_pos_dict)
+        self.model.move_stage(abs_pos_dict, wait_until_done=True)
+        self.model.active_microscope.central_focus = None
         if self.pre_z != pos_dict["z"]:
             self.pre_z = pos_dict["z"]
             return True
@@ -261,7 +262,9 @@ class StackPause:
 
 
 class ZStackAcquisition:
-    def __init__(self, model, get_origin=False, saving_flag=False, saving_dir="z-stack"):
+    def __init__(
+        self, model, get_origin=False, saving_flag=False, saving_dir="z-stack"
+    ):
         self.model = model
         self.get_origin = get_origin
 
@@ -323,6 +326,7 @@ class ZStackAcquisition:
 
         # restore z, f
         pos_dict = self.model.get_stage_position()
+        self.model.logger.debug(f"**** ZStack get stage position: {pos_dict}")
         self.restore_z = pos_dict["z_pos"]
         self.restore_f = pos_dict["f_pos"]
 
@@ -354,6 +358,11 @@ class ZStackAcquisition:
                     ),
                 }
             ]
+
+        self.model.logger.debug(
+            f"*** ZStack pre_signal_func: {self.positions}, {self.start_focus}, "
+            f"{self.start_z_position}"
+        )
         self.current_position_idx = 0
         self.z_position_moved_time = 0
         self.need_to_move_new_position = True
@@ -483,12 +492,12 @@ class ZStackAcquisition:
 
     def in_data_func(self, frame_ids):
         self.received_frames += len(frame_ids)
-        if self.image_writer != None:
+        if self.image_writer is None:
             self.image_writer.save_image(frame_ids)
 
     def end_data_func(self):
         return self.received_frames >= self.total_frames
-    
+
     def cleanup_data_func(self):
         if self.image_writer:
             self.image_writer.cleanup()

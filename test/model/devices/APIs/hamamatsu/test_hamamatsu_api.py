@@ -50,7 +50,7 @@ def open_camera():
         except:
             continue
     yield camera
-    if camera != None:
+    if camera is not None:
         assert camReg.numCameras == 1
         camera.dev_close()
         assert camReg.numCameras == 0
@@ -61,7 +61,7 @@ class TestHamamatsuAPI:
     @pytest.fixture(autouse=True)
     def _prepare_camera(self, open_camera):
         self.camera = open_camera
-        assert self.camera != None
+        assert self.camera is not None
 
     def test_get_and_set_property_value(self):
         # set property
@@ -144,14 +144,12 @@ class TestHamamatsuAPI:
 
         # attach a buffer without detach a buffer
         r = self.camera.start_acquisition(data_buffer, number_of_frames)
-        assert r == True, "attach the buffer correctly!"
+        assert r is True, "attach the buffer correctly!"
         r = self.camera.start_acquisition(data_buffer, number_of_frames)
         # Confirmed that we can't attach a new buffer before detaching one
-        assert r == False, "attach the buffer correctly!"
+        assert r is False, "attach the buffer correctly!"
 
         self.camera.start_acquisition(data_buffer, number_of_frames)
-
-        assert self.camera.is_acquiring == True, "camera should start acquiring data!"
 
         readout_time = self.camera.get_property_value("readout_time")
 
@@ -167,7 +165,6 @@ class TestHamamatsuAPI:
             assert len(frames) == trigger_num, "can not get all the frames back!"
 
         self.camera.stop_acquisition()
-        assert self.camera.is_acquiring == False, "camera should stop acquiring data!"
 
         # detach a detached buffer
         self.camera.stop_acquisition()

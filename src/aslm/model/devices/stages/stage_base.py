@@ -66,8 +66,6 @@ class StageBase:
         True focus position
     theta_pos : float
         True rotation position
-    position_dict : dict
-        Dictionary of true stage positions
     x_max : float
         Max x position
     y_max : float
@@ -105,9 +103,18 @@ class StageBase:
         self.position_dict = None
         stage = configuration["configuration"]["microscopes"][microscope_name]["stage"]
         if type(stage["hardware"]) == ListProxy:
-            self.axes = stage["hardware"][device_id]["axes"]
+            self.axes = list(stage["hardware"][device_id]["axes"])
+            axes_mapping = stage["hardware"][device_id].get("axes_mapping", self.axes)
         else:
-            self.axes = stage["hardware"]["axes"]
+            self.axes = list(stage["hardware"]["axes"])
+            axes_mapping = stage["hardware"].get("axes_mapping", self.axes)
+
+        if len(self.axes) > len(axes_mapping):
+            log_string = f"{microscope_name}: stage axes mapping doesn't match! Some axes won't be accessed!"
+            logger.debug(log_string)
+            print(log_string)
+
+        self.axes_mapping = dict(zip(self.axes, axes_mapping))
 
         """Initial setting for all positions
         self.x_pos, self.y_pos etc are the true axis positions, no matter whether
@@ -117,71 +124,57 @@ class StageBase:
             setattr(self, f"{ax}_pos", 0)
             setattr(self, f"{ax}_min", stage[f"{ax}_min"])  # Units are in microns
             setattr(self, f"{ax}_max", stage[f"{ax}_max"])  # Units are in microns
-        self.create_position_dict()
         self.stage_limits = True
 
-    def create_position_dict(self):
-        """Creates a dictionary with the hardware stage positions."""
-        self.position_dict = {}
+    def get_position_dict(self):
+        """Return a dictionary with the saved stage positions."""
+        position_dict = {}
         for ax in self.axes:
             ax_str = f"{ax}_pos"
-            self.position_dict[ax_str] = getattr(self, ax_str)
-
-    def update_position_dict(self):
-        for ax in self.axes:
-            ax_str = f"{ax}_pos"
-            self.position_dict[ax_str] = getattr(self, ax_str)
-
-    def get_abs_position(self, axis, move_dictionary):
-        """Ensure the requested position is within axis bounds and return it.
+            position_dict[ax_str] = getattr(self, ax_str)
+        return position_dict
+    
+    def verify_abs_position(self, move_dictionary, is_strict=False):
+        """Ensure the requested moving positions are within axes bounds
 
         Parameters
         ----------
-        axis : str
-            An axis prefix in move_dictionary. For example, axis='x' corresponds to
-            'x_abs', 'x_min', etc.
         move_dictionary : dict
             A dictionary of values required for movement.
-            Includes 'x_abs', 'x_min', etc. for one or more axes.
+            Includes 'x_abs', 'y_abs', etc. for one or more axes.
             Expect values in micrometers, except for theta, which is in degrees.
 
         Returns
         -------
-        float
-            Position to move the stage to for this axis.
+        dict
+            a verified moving dict {axis: abs_position}
         """
-        try:
-            # Get all necessary attributes.
-            # If we can't we'll move to the error case (e.g., -1e50).
-            axis_abs = move_dictionary[f"{axis}_abs"] - getattr(
-                self, f"int_{axis}_pos_offset", 0
-            )
-            if not self.stage_limits:
-                return axis_abs
-
-            # TODO: should we default to 0?
-            axis_min, axis_max = getattr(self, f"{axis}_min"), getattr(
-                self, f"{axis}_max"
-            )
-
-            # Check that our position is within the axis bounds, fail if it's not.
-            if (axis_min > axis_abs) or (axis_max < axis_abs):
+        if not self.stage_limits:
+            return True
+        
+        abs_pos_dict = {}
+        result_flag = True
+        for axis in self.axes:
+            if axis not in move_dictionary:
+                continue
+            axis_abs = move_dictionary[f"{axis}_abs"]
+            axis_min = getattr(self, f"{axis}_min")
+            axis_max = getattr(self, f"{axis}_max")
+            if (axis_abs < axis_min) or (axis_abs > axis_max):
                 log_string = (
                     f"Absolute movement stopped: {axis} limit would be reached!"
                     f"{axis_abs} is not in the range {axis_min} to {axis_max}."
                 )
                 logger.info(log_string)
                 print(log_string)
-                # Return a ridiculous value to make it clear we've failed.
-                # This is to avoid returning a duck type.
-                return -1e50
-            return axis_abs
-        except (KeyError, AttributeError) as e:
-            # Alert the user, but don't kill the thread
-            msg = f"No key {e} in move_dictionary or axis missing from {self.axes}."
-            logger.debug(msg)
-            print(msg)
-            return -1e50
+                result_flag = False
+            else:
+                abs_pos_dict[axis[:axis.index("_")]] = axis_abs
+
+        if is_strict and not result_flag:
+            return {}
+        return abs_pos_dict
+
 
     def stop(self):
         """Stop all stage movement abruptly."""

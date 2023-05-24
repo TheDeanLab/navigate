@@ -50,8 +50,7 @@ class SyntheticStage(StageBase):
         self.default_speed = 7.68 * 0.67
 
     def report_position(self):
-        self.create_position_dict()
-        return self.position_dict
+        return self.get_position_dict()
 
     def move_axis_absolute(self, axis, move_dictionary):
         """
@@ -101,32 +100,16 @@ class SyntheticStage(StageBase):
         success : bool
             Was the move successful?
         """
-        success = False
-        for ax in self.axes:
-            if f"{ax}_abs" not in move_dictionary:
-                continue
-            success = self.move_axis_absolute(ax, move_dictionary)
+        abs_pos_dict = self.verify_abs_position(move_dictionary)
+        if not abs_pos_dict:
+            return False
 
+        for axis in abs_pos_dict:            
+            setattr(self, f"{axis}_pos", abs_pos_dict[axis])
         if wait_until_done is True:
             time.sleep(0.025)
 
-        return success
-
-    def zero_axes(self, list):
-        for axis in list:
-            try:
-                exec("self.int_" + axis + "_pos_offset = -self." + axis + "_pos")
-            except BaseException:
-                logger.exception(f"Zeroing of axis: {axis} failed")
-                print("Zeroing of axis: ", axis, "failed")
-
-    def unzero_axes(self, list):
-        for axis in list:
-            try:
-                exec("self.int_" + axis + "_pos_offset = 0")
-            except BaseException:
-                logger.exception(f"Unzeroing of axis: {axis} failed")
-                print("Unzeroing of axis: ", axis, "failed")
+        return True
 
     def load_sample(self):
         self.y_pos = self.y_load_position

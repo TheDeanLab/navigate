@@ -83,6 +83,7 @@ class Microscope:
         self.configuration = configuration
         self.data_buffer = None
         self.stages = {}
+        self.stages_list = []
         self.lasers = {}
         self.galvo = {}
         self.daq = devices_dict.get("daq", None)
@@ -225,6 +226,8 @@ class Microscope:
                 self.stages[axis] = stage
                 self.info[f"stage_{axis}"] = device_ref_name
 
+            self.stages_list.append((stage, list(device_config["axes"])))
+
         # connect daq and camera in synthetic mode
         if is_synthetic:
             self.daq.add_camera(self.microscope_name, self.camera)
@@ -277,13 +280,13 @@ class Microscope:
             self.microscope_name
         ]["stage"]
         pos_dict = self.get_stage_position()
-        for axes in self.stages:
-            pos = (
-                pos_dict[axes + "_pos"]
-                + self_offset_dict[axes + "_offset"]
-                - former_offset_dict[axes + "_offset"]
-            )
-            self.stages[axes].move_absolute({axes + "_abs": pos}, wait_until_done=True)
+        for stage, axes in self.stages_list:
+            pos = {axis + "_abs": (
+                pos_dict[axis + "_pos"]
+                + self_offset_dict[axis + "_offset"]
+                - former_offset_dict[axis + "_offset"])
+             for axis in axes}
+            stage.move_absolute(pos, wait_until_done=True)
 
     def prepare_acquisition(self):
         """Prepare the acquisition.
@@ -366,9 +369,9 @@ class Microscope:
         remote_focus_waveform = self.remote_focus_device.adjust(readout_time)
         galvo_waveform = [self.galvo[k].adjust(readout_time) for k in self.galvo]
         # TODO: calculate waveform for galvo stage
-        for axis in self.stages:
-            if type(self.stages[axis]) == GalvoNIStage:
-                self.stages[axis].calculate_waveform(readout_time)
+        for stage, axes in self.stages_list:
+            if type(stage) == GalvoNIStage:
+                stage.calculate_waveform(readout_time)
         waveform_dict = {
             "camera_waveform": camera_waveform,
             "remote_focus_waveform": remote_focus_waveform,
@@ -491,16 +494,17 @@ class Microscope:
         -------
         None
         """
-
+        if len(pos_dict.keys()) == 1:
+            axis = list(pos_dict.keys())[0]
+            return self.stages[axis[:axis.index("_")]].move_absolute(pos_dict, wait_until_done)
+        
         success = True
-        for pos_axis in pos_dict:
-            axis = pos_axis[: pos_axis.index("_")]
-            success = (
-                self.stages[axis].move_absolute(
-                    {pos_axis: pos_dict[pos_axis]}, wait_until_done
+        for stage, axes in self.stages_list:
+            pos = {axis: pos_dict[axis] for axis in pos_dict if axis[:axis.index("_")] in axes}
+            if pos:
+                success = (
+                    stage.move_absolute(pos, wait_until_done) and success
                 )
-                and success
-            )
         return success
 
     def stop_stage(self):
@@ -515,8 +519,8 @@ class Microscope:
         None
         """
 
-        for axis in self.stages:
-            self.stages[axis].stop()
+        for stage, axes in self.stages_list:
+            stage.stop()
 
     def get_stage_position(self):
         """Get stage position.
@@ -532,10 +536,9 @@ class Microscope:
         """
 
         ret_pos_dict = {}
-        for axis in self.stages:
-            pos_axis = axis + "_pos"
-            temp_pos = self.stages[axis].report_position()
-            ret_pos_dict[pos_axis] = temp_pos[pos_axis]
+        for stage, axes in self.stages_list:
+            temp_pos = stage.report_position()
+            ret_pos_dict.update(temp_pos)
         return ret_pos_dict
 
     def assemble_device_config_lists(self, device_name, device_name_dict):

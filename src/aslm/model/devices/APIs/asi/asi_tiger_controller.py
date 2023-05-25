@@ -169,9 +169,10 @@ class TigerController:
         if res.startswith(":N"):
             raise TigerException(res)
 
-    def move(self, x: int = 0, y: int = 0, z: int = 0) -> None:
+    def move(self, pos_dict) -> None:
         """Move the stage with an absolute move on multiple axes"""
-        self.send_command(f"MOVE X={x} Y={y} Z={z}\r")
+        pos_str = " ".join([f"{axis}={pos_dict[axis]}" for axis in pos_dict])
+        self.send_command(f"MOVE {pos_str}\r")
         res = self.read_response()
         if res.startswith(":N"):
             raise TigerException(res)
@@ -190,7 +191,7 @@ class TigerController:
         if res.startswith(":N"):
             raise TigerException(res)
 
-    def get_position(self, axis: str) -> int:
+    def get_axis_position(self, axis: str) -> int:
         """Return the position of the stage in ASI units (tenths of microns)."""
         self.send_command(f"WHERE {axis}\r")
         response = self.read_response()
@@ -203,7 +204,7 @@ class TigerController:
                 pos = float('Inf')
             return pos
 
-    def get_position_um(self, axis: str) -> float:
+    def get_axis_position_um(self, axis: str) -> float:
         """Return the position of the stage in microns."""
         self.send_command(f"WHERE {axis}\r")
         response = self.read_response()
@@ -211,6 +212,22 @@ class TigerController:
             raise TigerException(response)
         else:
             return float(response.split(" ")[1]) / 10.0
+        
+    def get_position(self, axes) -> dict:
+        """Return current stage position
+        
+        Returns
+        -------
+        dictionary:
+             {axis: position}
+        """
+        self.send_command(f"WHERE {' '.join(axes)}\r")
+        response = self.read_response()
+        if response.startswith(":N"):
+            raise TigerException(response)
+        else:
+            pos = response.split(" ")
+            return {axis: pos[1+i] for i, axis in enumerate(axes)}
 
     # Utility Functions
 

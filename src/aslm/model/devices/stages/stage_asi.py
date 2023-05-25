@@ -151,7 +151,7 @@ class ASIStage(StageBase):
             Makes sure that the move is within the min and max stage limits.
         stop()
             Emergency halt of stage operation.
-        get_position()
+        get_axis_position()
             Get position of specific axis
         set_speed()
             Set velocity that the stage can move when scanning.
@@ -168,15 +168,6 @@ class ASIStage(StageBase):
 
     def __init__(self, microscope_name, device_connection, configuration, device_id=0):
         super().__init__(microscope_name, device_connection, configuration, device_id)
-
-        # Mapping from self.axes to corresponding ASI axis labelling
-        self.axes_mapping = {"x": "Z", "y": "Y", "z": "X"}
-
-        # Focus and Theta axes are not supported for ASI Stage
-        if "theta" in self.axes:
-            self.axes.remove("theta")
-        if "f" in self.axes:
-            self.axes.remove("f")
 
         self.asi_axes = list(map(lambda a: self.axes_mapping[a], self.axes))
         self.tiger_controller = device_connection
@@ -200,7 +191,7 @@ class ASIStage(StageBase):
             logger.exception(e)
             raise
 
-    def get_position(self, axis):
+    def get_axis_position(self, axis):
         """Get position of specific axos
         
         Parameters
@@ -213,11 +204,11 @@ class ASIStage(StageBase):
         """
         try:
             axis = self.axes_mapping[axis]
-            pos = self.tiger_controller.get_position_um(axis)
+            pos = self.tiger_controller.get_axis_position_um(axis)
         except TigerException:
             return float("inf")
         except KeyError as e:
-            logger.exception(f"KeyError in get_position: {e}")
+            logger.exception(f"KeyError in get_axis_position: {e}")
             return float("inf")
         return pos
 
@@ -226,20 +217,14 @@ class ASIStage(StageBase):
         position dictionary."""
         try:
             # positions from the device are in microns
-            for ax, n in zip(self.axes, self.asi_axes):
-                try:
-                    pos = self.tiger_controller.get_position_um(n)
-                except:
-                    print(f"*** axis {n} has error when getting its position")
-                    pos = 0
-
-                # Set class attributes and convert to microns
-                setattr(self, f"{ax}_pos", pos)
+            pos_dict = self.tiger_controller.get_position(list(self.asi_axes.keys()))
+            for axis, pos in pos_dict:
+                setattr(self, f"{self.asi_axes[axis]}_pos", pos / 10.0)
         except TigerException as e:
             print("Failed to report ASI Stage Position")
             logger.exception(e)
-        self.update_position_dict()
-        return self.position_dict
+        
+        return self.get_position_dict()
 
     def move_axis_absolute(self, axis, axis_num, move_dictionary):
         """Move stage along a single axis.
@@ -302,29 +287,25 @@ class ASIStage(StageBase):
         success : bool
             Was the move successful?
         """
-        for ax, n in zip(self.axes, self.asi_axes):
-            if f"{ax}_abs" not in move_dictionary:
-                continue
-            success = self.move_axis_absolute(ax, n, move_dictionary)
-            if wait_until_done:
-                self.tiger_controller.wait_for_device()
-                # Do we want to wait for device on hardware level? This is an ASI
-                # command call
+        abs_pos_dict = self.verify_abs_position(move_dictionary)
+        if not abs_pos_dict:
+            return False
+        
+        # This is to account for the asi 1/10 of a micron units
+        pos_dict = {self.axes_mapping[axis]: abs_pos_dict[axis]*10 for axis in abs_pos_dict}
+        try:
+            self.tiger_controller.move(pos_dict)
+        except TigerException as e:
+            print(
+                f"ASI stage move axis absolute failed or is trying to move out of "
+                f"range: {e}"
+            )
+            logger.exception(e)
+            return False
+        if wait_until_done:
+            self.tiger_controller.wait_for_device()
 
-        #  TODO This seems to be handled by each individual move_axis_absolute bc of
-        #  ASI's wait_for_device.
-        #  Each axis will move and the stage waits until the axis is done before
-        #  moving on
-        # if success and wait_until_done is True:
-        #     try:
-        #         self.busy()
-        #         success = True
-        #     except BaseException as e:
-        #         print("Problem communicating with tiger controller during "
-        #               "wait command")
-        #         success = False
-        #         #logger.exception(e)
-        return success
+        return True
 
     def stop(self):
         """Stop all stage movement abruptly."""

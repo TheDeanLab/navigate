@@ -167,7 +167,7 @@ class ConstantVelocityAcquisition:
         # HOw do we know how many images to acquire?
 
     def end_func_signal(self):
-        pos = self.asi_stage.get_position(self.axis)
+        pos = self.asi_stage.get_axis_position(self.axis)
         # TODO: after scan, the stage will go back to the start position and stop sending out triggers.
         if abs(pos - self.stop_position * 1000) < 100:
             return True

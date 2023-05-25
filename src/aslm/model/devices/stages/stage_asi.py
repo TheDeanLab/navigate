@@ -97,80 +97,80 @@ class ASIStage(StageBase):
     FTP stilt, adding strain to the system. Only move the Z axis, which will change both
     stilt positions simultaneously.
 
-         Parameters
-        ----------
-        microscope_name : str
-            Name of microscope in configuration
-        device_connection : object
-            Hardware device to connect to
-        configuration : multiprocessing.managers.DictProxy
-            Global configuration of the microscope
+    Parameters
+    ----------
+    microscope_name : str
+        Name of microscope in configuration
+    device_connection : object
+        Hardware device to connect to
+    configuration : multiprocessing.managers.DictProxy
+        Global configuration of the microscope
 
-        Attributes
-        -----------
-        x_pos : float
-            True x position
-        y_pos : float
-            True y position
-        z_pos : float
-            True z position
-        f_pos : float
-            True focus position
-        theta_pos : float
-            True rotation position
-        position_dict : dict
-            Dictionary of true stage positions
-        x_max : float
-            Max x position
-        y_max : float
-            Max y position
-        z_max : float
-            Max y position
-        f_max : float
-            Max focus position
-        theta_max : float
-            Max rotation position
-        x_min : float
-            Min x position
-        y_min : float
-            Min y position
-        z_min : float
-            Min y position
-        f_min : float
-            Min focus position
-        theta_min : float
-            Min rotation position
-        default_speed: float
-            Default speed in millimeters per second
+    Attributes
+    -----------
+    x_pos : float
+        True x position
+    y_pos : float
+        True y position
+    z_pos : float
+        True z position
+    f_pos : float
+        True focus position
+    theta_pos : float
+        True rotation position
+    position_dict : dict
+        Dictionary of true stage positions
+    x_max : float
+        Max x position
+    y_max : float
+        Max y position
+    z_max : float
+        Max y position
+    f_max : float
+        Max focus position
+    theta_max : float
+        Max rotation position
+    x_min : float
+        Min x position
+    y_min : float
+        Min y position
+    z_min : float
+        Min y position
+    f_min : float
+        Min focus position
+    theta_min : float
+        Min rotation position
+    default_speed: float
+        Default speed in millimeters per second
 
-        Methods
-        -------
-        get_position_dict()
-            Returns a dictionary with the hardware stage positions.
-        get_abs_position()
-            Makes sure that the move is within the min and max stage limits.
-        stop()
-            Emergency halt of stage operation.
-        get_axis_position()
-            Get position of specific axis
-        move_axis_absolute()
-            Move stage along a single axis
-        move_absolute()
-            Move stage.
-        set_speed()
-            Set velocity that the stage can move when scanning.
-        get_speed()
-            Get velocity
-        report_position()
-            Return current stage positions.
-        scanr()
-            Set scan start position, end position, and enc_divide
-        start_scan()
-            Start scan state machine
-        stop_scan()
-            Start scan and stop after scanning
-        verify_abs_position()
-            Return a dictionary with moving positions within the min and max stage limits
+    Methods
+    -------
+    get_position_dict()
+        Returns a dictionary with the hardware stage positions.
+    get_abs_position()
+        Makes sure that the move is within the min and max stage limits.
+    stop()
+        Emergency halt of stage operation.
+    get_axis_position()
+        Get position of specific axis
+    move_axis_absolute()
+        Move stage along a single axis
+    move_absolute()
+        Move stage.
+    set_speed()
+        Set velocity that the stage can move when scanning.
+    get_speed()
+        Get velocity
+    report_position()
+        Return current stage positions.
+    scanr()
+        Set scan start position, end position, and enc_divide
+    start_scan()
+        Start scan state machine
+    stop_scan()
+        Start scan and stop after scanning
+    verify_abs_position()
+        Return a dictionary with moving positions within the min and max stage limits
 
     """
 

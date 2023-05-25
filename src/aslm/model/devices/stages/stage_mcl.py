@@ -64,6 +64,12 @@ class MCLStage(StageBase):
             self.mcl_controller = device_connection["controller"]
             self.handle = device_connection["handle"]
 
+        # Default axes mapping
+        # the API maps axis to a number
+        axes_mapping = {'x': 'x', 'y': 'y', 'z': 'z', 'f': 'f', 'theta': 'aux'}
+        if not self.axes_mapping:
+            self.axes_mapping = {axis: axes_mapping[axis] for axis in self.axes if axis in axes_mapping}
+
     def report_position(self):
         """
         # Reports the position of the stage for all axes, and creates the hardware
@@ -77,13 +83,9 @@ class MCLStage(StageBase):
                 logger.debug(f"MCL - {e}")
                 pass
 
-        # Update internal dictionaries
-        # self.update_position_dictionaries()
-        self.create_position_dict()
+        return self.get_position_dict()
 
-        return self.position_dict
-
-    def move_axis_absolute(self, axis, axis_num, move_dictionary):
+    def move_axis_absolute(self, axis, move_dictionary):
         """
         Implement movement logic along a single axis.
 
@@ -94,8 +96,6 @@ class MCLStage(StageBase):
         axis : str
             An axis prefix in move_dictionary. For example, axis='x' corresponds to
             'x_abs', 'x_min', etc.
-        axis_num : int
-            The corresponding number of this axis on a PI stage.
         move_dictionary : dict
             A dictionary of values required for movement. Includes 'x_abs', 'x_min',
             etc. for one or more axes.
@@ -111,7 +111,7 @@ class MCLStage(StageBase):
         if axis_abs == -1e50:
             return False
 
-        self.mcl_controller.MCL_SingleWriteN(axis_abs, axis, self.handle)
+        self.mcl_controller.MCL_SingleWriteN(axis_abs, self.axes_mapping[axis], self.handle)
         return True
 
     def move_absolute(self, move_dictionary, wait_until_done=False):
@@ -131,46 +131,18 @@ class MCLStage(StageBase):
         success : bool
             Was the move successful?
         """
-
+        result = True
         for ax in self.axes:
-            success = self.move_axis_absolute(ax, None, move_dictionary)
+            success = self.move_axis_absolute(ax, move_dictionary)
             if success and wait_until_done is True:
                 stage_pos, n_tries, i = -1e50, 10, 0
-                target_pos = move_dictionary[f"{ax}_abs"] - getattr(
-                    self, f"int_{ax}_pos_offset", 0
-                )  # TODO: should we default to 0?
+                target_pos = move_dictionary[f"{ax}_abs"]
                 while (abs(stage_pos - target_pos) < 0.01) and (i < n_tries):
                     stage_pos = self.mcl_controller.MCL_SingleReadN(ax, self.handle)
                     i += 1
                     time.sleep(0.01)
                 if abs(stage_pos - target_pos) > 0.01:
                     success = False
+            result = result and success
 
-        return success
-
-    def get_abs_position(self, axis, move_dictionary):
-        """
-        Hack in a lack of bounds checking. TODO: Don't do this.
-        """
-        try:
-            # Get all necessary attributes. If we can't we'll move to the error case.
-            axis_abs = move_dictionary[f"{axis}_abs"] - getattr(
-                self, f"int_{axis}_pos_offset", 0
-            )  # TODO: should we default to 0?
-
-            axis_min, axis_max = -1e6, 1e6
-
-            # Check that our position is within the axis bounds, fail if it's not.
-            if (axis_min > axis_abs) or (axis_max < axis_abs):
-                log_string = (
-                    f"Absolute movement stopped: {axis} limit would be reached!"
-                    f"{axis_abs} is not in the range {axis_min} to {axis_max}."
-                )
-                logger.info(log_string)
-                print(log_string)
-                # Return a ridiculous value to make it clear we've failed.
-                # This is to avoid returning a duck type.
-                return -1e50
-            return axis_abs
-        except (KeyError, AttributeError):
-            return -1e50
+        return result

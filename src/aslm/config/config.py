@@ -198,8 +198,7 @@ def build_nested_dict(manager, parent_dict, key_name, dict_data):
 
     Returns
     -------
-    parent_dict : dict
-        Dictionary with sub-dictionary inserted
+    None
 
     Examples
     --------
@@ -236,8 +235,8 @@ def update_config_dict(manager, parent_dict, config_name, new_config) -> bool:
 
     Returns
     -------
-    dict
-        Dictionary with replaced sub dictionary
+    bool
+        True or False
 
     Examples
     --------
@@ -254,3 +253,4 @@ def update_config_dict(manager, parent_dict, config_name, new_config) -> bool:
             return False
 
     build_nested_dict(manager, parent_dict, config_name, new_config)
+    return True

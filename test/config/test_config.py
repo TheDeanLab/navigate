@@ -35,12 +35,14 @@ import pathlib
 import unittest
 from multiprocessing import Manager
 from multiprocessing.managers import ListProxy, DictProxy
+import os
 
 
 # Third Party Imports
 
 # Local Imports
 import aslm.config.config as config
+from aslm.tools.file_functions import save_yaml_file
 
 
 def test_config_methods():
@@ -132,16 +134,41 @@ class TestBuildNestedDict(unittest.TestCase):
         for key in dict_data.keys():
             assert self.parent_dict[self.key_name][key] == dict_data[key]
 
-    def test_update_config_dict_with_bad_string(self):
+    def test_update_config_dict_with_bad_file_name(self):
         test_entry = "string"
         dict_data = {"key1": "string1", "key2": "string2"}
         # Build the nested config
-        parent_dict = config.build_nested_dict(
+        config.build_nested_dict(
             self.manager, self.parent_dict, self.key_name, dict_data
         )
 
         # Update the nested config
-        parent_dict = config.update_config_dict(
-            self.manager, parent_dict, self.key_name, test_entry
+        result = config.update_config_dict(
+            self.manager, self.parent_dict, self.key_name, test_entry
         )
-        assert parent_dict is False
+        assert result is False
+
+    def test_update_config_dict_with_file_name(self):
+        test_entry = "test.yml"
+        # create an yaml file
+        test_yaml_data = {"test_key1": "test_string1", "test_key2": "test_string2"}
+        save_yaml_file("", test_yaml_data, test_entry)
+
+        dict_data = {"key1": "string1", "key2": "string2"}
+        # Build the nested config
+        config.build_nested_dict(
+            self.manager, self.parent_dict, self.key_name, dict_data
+        )
+
+        # Update the nested config
+        result = config.update_config_dict(
+            self.manager, self.parent_dict, self.key_name, test_entry
+        )
+
+        assert result is True
+        assert isinstance(self.parent_dict[self.key_name], DictProxy)
+        for k in self.parent_dict[self.key_name].keys():
+            assert self.parent_dict[self.key_name][k] == test_yaml_data[k]
+
+        # delete test yaml file
+        os.remove(test_entry)

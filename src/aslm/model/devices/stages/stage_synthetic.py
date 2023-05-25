@@ -117,7 +117,7 @@ class SyntheticStage(StageBase):
     def unload_sample(self):
         self.y_pos = self.y_unload_position
 
-    def get_position(self, axis):
+    def get_axis_position(self, axis):
         return getattr(self, f"{axis}_pos")
     
     def set_speed(self, velocity_dict):

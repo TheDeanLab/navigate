@@ -145,31 +145,45 @@ class ASIStage(StageBase):
 
         Methods
         -------
-        create_position_dict()
-            Creates a dictionary with the hardware stage positions.
+        get_position_dict()
+            Returns a dictionary with the hardware stage positions.
         get_abs_position()
             Makes sure that the move is within the min and max stage limits.
         stop()
             Emergency halt of stage operation.
         get_axis_position()
             Get position of specific axis
+        move_axis_absolute()
+            Move stage along a single axis
+        move_absolute()
+            Move stage.
         set_speed()
             Set velocity that the stage can move when scanning.
         get_speed()
             Get velocity
+        report_position()
+            Return current stage positions.
         scanr()
             Set scan start position, end position, and enc_divide
         start_scan()
             Start scan state machine
         stop_scan()
             Start scan and stop after scanning
+        verify_abs_position()
+            Return a dictionary with moving positions within the min and max stage limits
 
     """
 
     def __init__(self, microscope_name, device_connection, configuration, device_id=0):
         super().__init__(microscope_name, device_connection, configuration, device_id)
 
-        self.asi_axes = list(map(lambda a: self.axes_mapping[a], self.axes))
+        # Default axes mapping
+        axes_mapping = {'x': 'Z', 'y': 'Y', 'z': 'X', 'f': 'M'}
+        if not self.axes_mapping:
+            self.axes_mapping = {axis: axes_mapping[axis] for axis in self.axes if axis in axes_mapping}
+
+        self.asi_axes = dict(map(lambda v: (v[1], v[0]), self.axes_mapping.items()))
+
         self.tiger_controller = device_connection
         # set default speed
         self.default_speed =5.745760 #7.68 * 0.67
@@ -226,7 +240,7 @@ class ASIStage(StageBase):
         
         return self.get_position_dict()
 
-    def move_axis_absolute(self, axis, axis_num, move_dictionary):
+    def move_axis_absolute(self, axis, move_dictionary):
         """Move stage along a single axis.
 
         Move absolute command for ASI is MOVE [Axis]=[units 1/10 microns]
@@ -236,9 +250,6 @@ class ASIStage(StageBase):
         axis : str
             An axis prefix in move_dictionary. For example, axis='x' corresponds to
             'x_abs', 'x_min', etc.
-        axis_num : int
-            The corresponding number of this axis on a PI stage. Not applicable to the
-            ASI stage.
         move_dictionary : dict
             A dictionary of values required for movement. Includes 'x_abs', 'x_min',
             etc. for one or more axes. Expect values in micrometers.
@@ -248,6 +259,9 @@ class ASIStage(StageBase):
         bool
             Was the move successful?
         """
+        if axis not in self.axes_mapping:
+            return False
+        
         axis_abs = self.get_abs_position(axis, move_dictionary)
         if axis_abs == -1e50:
             return False
@@ -257,8 +271,7 @@ class ASIStage(StageBase):
             axis_abs_um = (
                 axis_abs * 10
             )  # This is to account for the asi 1/10 of a micron units
-            print("*** trying to move stage:", axis_num, axis_abs_um)
-            self.tiger_controller.move_axis(axis_num, axis_abs_um)
+            self.tiger_controller.move_axis(self.axes_mapping[axis], axis_abs_um)
             return True
         except TigerException as e:
             print(

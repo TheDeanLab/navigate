@@ -89,10 +89,12 @@ class StageBase:
 
     Methods
     -------
-    create_position_dict()
-        Creates a dictionary with the hardware stage positions.
+    get_position_dict()
+        Returns a dictionary with the hardware stage positions.
     get_abs_position()
         Makes sure that the move is within the min and max stage limits.
+    verify_abs_position()
+        Return a dictionary with moving positions within the min and max stage limits
     stop()
         Emergency halt of stage operation.
 
@@ -133,6 +135,56 @@ class StageBase:
             ax_str = f"{ax}_pos"
             position_dict[ax_str] = getattr(self, ax_str)
         return position_dict
+    
+        
+    def get_abs_position(self, axis, move_dictionary):
+        """Ensure the requested position is within axis bounds and return it.
+
+        Parameters
+        ----------
+        axis : str
+            An axis prefix in move_dictionary. For example, axis='x' corresponds to
+            'x_abs', 'x_min', etc.
+        move_dictionary : dict
+            A dictionary of values required for movement.
+            Includes 'x_abs', 'x_min', etc. for one or more axes.
+            Expect values in micrometers, except for theta, which is in degrees.
+
+        Returns
+        -------
+        float
+            Position to move the stage to for this axis.
+        """
+        try:
+            # Get all necessary attributes.
+            # If we can't we'll move to the error case (e.g., -1e50).
+            axis_abs = move_dictionary[f"{axis}_abs"]
+            if not self.stage_limits:
+                return axis_abs
+
+            # TODO: should we default to 0?
+            axis_min, axis_max = getattr(self, f"{axis}_min"), getattr(
+                self, f"{axis}_max"
+            )
+
+            # Check that our position is within the axis bounds, fail if it's not.
+            if (axis_min > axis_abs) or (axis_max < axis_abs):
+                log_string = (
+                    f"Absolute movement stopped: {axis} limit would be reached!"
+                    f"{axis_abs} is not in the range {axis_min} to {axis_max}."
+                )
+                logger.info(log_string)
+                print(log_string)
+                # Return a ridiculous value to make it clear we've failed.
+                # This is to avoid returning a duck type.
+                return -1e50
+            return axis_abs
+        except (KeyError, AttributeError) as e:
+            # Alert the user, but don't kill the thread
+            msg = f"No key {e} in move_dictionary or axis missing from {self.axes}."
+            logger.debug(msg)
+            print(msg)
+            return -1e50
     
     def verify_abs_position(self, move_dictionary, is_strict=False):
         """Ensure the requested moving positions are within axes bounds

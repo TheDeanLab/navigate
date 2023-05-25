@@ -106,17 +106,17 @@ class StageBase:
         stage = configuration["configuration"]["microscopes"][microscope_name]["stage"]
         if type(stage["hardware"]) == ListProxy:
             self.axes = list(stage["hardware"][device_id]["axes"])
-            axes_mapping = stage["hardware"][device_id].get("axes_mapping", self.axes)
+            device_axes = stage["hardware"][device_id].get("axes_mapping", [])
         else:
             self.axes = list(stage["hardware"]["axes"])
-            axes_mapping = stage["hardware"].get("axes_mapping", self.axes)
+            device_axes = stage["hardware"].get("axes_mapping", [])
 
-        if len(self.axes) > len(axes_mapping):
+        if len(self.axes) > len(device_axes):
             log_string = f"{microscope_name}: stage axes mapping doesn't match! Some axes won't be accessed!"
             logger.debug(log_string)
             print(log_string)
 
-        self.axes_mapping = dict(zip(self.axes, axes_mapping))
+        self.axes_mapping = dict(zip(self.axes, device_axes))
 
         """Initial setting for all positions
         self.x_pos, self.y_pos etc are the true axis positions, no matter whether
@@ -206,7 +206,7 @@ class StageBase:
         
         abs_pos_dict = {}
         result_flag = True
-        for axis in self.axes:
+        for axis in self.axes_mapping.keys():
             if axis not in move_dictionary:
                 continue
             axis_abs = move_dictionary[f"{axis}_abs"]

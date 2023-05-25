@@ -49,6 +49,11 @@ class SyntheticStage(StageBase):
 
         self.default_speed = 7.68 * 0.67
 
+        # Default axes mapping
+        axes_mapping = {'x': 'X', 'y': 'Y', 'z': 'Z', 'theta': 'Theta', 'f': 'F'}
+        if not self.axes_mapping:
+            self.axes_mapping = {axis: axes_mapping[axis] for axis in self.axes if axis in axes_mapping}
+
     def report_position(self):
         return self.get_position_dict()
 

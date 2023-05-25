@@ -102,7 +102,6 @@ class StageBase:
 
     def __init__(self, microscope_name, device_connection, configuration, device_id=0):
 
-        self.position_dict = None
         stage = configuration["configuration"]["microscopes"][microscope_name]["stage"]
         if type(stage["hardware"]) == ListProxy:
             self.axes = list(stage["hardware"][device_id]["axes"])

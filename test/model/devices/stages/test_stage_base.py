@@ -54,7 +54,6 @@ class TestStageBase(unittest.TestCase):
         assert hasattr(stage, "z_pos")
         assert hasattr(stage, "f_pos")
         assert hasattr(stage, "theta_pos")
-        assert hasattr(stage, "position_dict")
         assert hasattr(stage, "x_max")
         assert hasattr(stage, "y_max")
         assert hasattr(stage, "z_max")
@@ -66,8 +65,8 @@ class TestStageBase(unittest.TestCase):
         assert hasattr(stage, "theta_min")
 
         # Methods
-        assert hasattr(stage, "create_position_dict") and callable(
-            getattr(stage, "create_position_dict")
+        assert hasattr(stage, "get_position_dict") and callable(
+            getattr(stage, "get_position_dict")
         )
 
 

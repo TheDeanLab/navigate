@@ -63,6 +63,8 @@ class HamamatsuOrca(CameraBase):
         super().__init__(microscope_name, device_connection, configuration)
 
         # Set default settings for the camera.
+        # How many of these things are model specific?
+        # Hamamatsu Orca, Fusion, Lightning,
         self.camera_controller.set_property_value("sensor_mode", 1.0)
         self.camera_controller.set_property_value("defect_correct_mode", 2.0)
         self.camera_controller.set_property_value("readout_speed", 2.0)
@@ -72,11 +74,15 @@ class HamamatsuOrca(CameraBase):
         self.camera_controller.set_property_value("trigger_source", 2.0)
 
         # Retrieve camera settings from the camera.
-        self.pixel_size_in_microns = self.camera_controller.get_property_value("physical_pixel_size")
+        self.pixel_size_in_microns = self.camera_controller.get_property_value(
+            "physical_pixel_size"
+        )
         self.x_pixels = int(self.camera_controller.get_property_value("subarray_hsize"))
         self.y_pixels = int(self.camera_controller.get_property_value("subarray_vsize"))
         binning = int(self.camera_controller.get_property_value("binning"))
-        self.camera_line_interval = self.camera_controller.get_property_value("internal_line_interval")
+        self.camera_line_interval = self.camera_controller.get_property_value(
+            "internal_line_interval"
+        )
 
         self.x_binning, self.y_binning = binning, binning
         self.x_pixels = self.x_pixels / self.x_binning
@@ -86,7 +92,9 @@ class HamamatsuOrca(CameraBase):
         self.camera_parameters["pixel_size_in_microns"] = self.pixel_size_in_microns
         self.camera_parameters["x_pixels"] = self.x_pixels
         self.camera_parameters["y_pixels"] = self.y_pixels
-        self.camera_parameters["binning"] = str(self.x_binning) + "x" + str(self.y_binning)
+        self.camera_parameters["binning"] = (
+            str(self.x_binning) + "x" + str(self.y_binning)
+        )
         self.camera_parameters["line_interval"] = self.camera_line_interval
 
         logger.info("HamamatsuOrca Initialized")
@@ -180,52 +188,11 @@ class HamamatsuOrca(CameraBase):
             Duration of time needed to readout an image.
         max_frame_rate : float
             Maximum framerate for a given camera acquisition mode.
-
-        TODO: I think self.camera_controller.get_property_value("readout_time") pulls
-              out the actual readout_time
-              calculated here (i.e. we don't need to do the calculations).
         """
-        h = 9.74436 * 10**-6  # Readout timing constant
-        h = self.camera_controller.get_property_value("readout_time")
-        print("readout_time", h)
-        vn = self.camera_controller.get_property_value("subarray_vsize")
-        sensor_mode = self.camera_controller.get_property_value("sensor_mode")
+        # This gets the readout time in seconds according to the camera settings.
+        readout_time = self.camera_controller.get_property_value("readout_time")
         exposure_time = self.camera_controller.get_property_value("exposure_time")
-        trigger_source = self.camera_controller.get_property_value("trigger_source")
-        trigger_active = self.camera_controller.get_property_value("trigger_active")
-
-        if sensor_mode == 1:
-            #  Area sensor mode operation
-            if trigger_source == 1:
-                # Internal Trigger Source
-                max_frame_rate = 1 / ((vn / 2) * h)
-                readout_time = exposure_time - ((vn / 2) * h)
-
-            if trigger_active == 1 or 2:
-                #  External Trigger Source
-                #  Edge == 1, Level == 2
-                max_frame_rate = 1 / ((vn / 2) * h + exposure_time + 10 * h)
-                readout_time = exposure_time - ((vn / 2) * h + exposure_time + 10 * h)
-
-            if trigger_active == 3:
-                #  External Trigger Source
-                #  Synchronous Readout == 3
-                max_frame_rate = 1 / ((vn / 2) * h + 5 * h)
-                readout_time = exposure_time - ((vn / 2) * h + 5 * h)
-
-            readout_time = h
-            max_frame_rate = 1.0 / (exposure_time + readout_time)
-
-        elif sensor_mode == 12:
-            #  Progressive sensor mode operation
-            max_frame_rate = 1 / (exposure_time + (vn + 10) * h)
-            readout_time = exposure_time - 1 / (exposure_time + (vn + 10) * h)
-
-        else:
-            print(f"Hamamatsu Camera. Sensor mode {sensor_mode} not supported")
-            logger.error(f"Hamamatsu Camera. Sensor mode {sensor_mode} not supported")
-            max_frame_rate = 0
-            readout_time = 0
+        max_frame_rate = 1.0 / (exposure_time + readout_time)
         return readout_time, max_frame_rate
 
     def set_exposure_time(self, exposure_time):

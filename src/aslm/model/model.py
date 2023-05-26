@@ -45,6 +45,7 @@ from aslm.model.features.constant_velocity_acquisition import (
     ConstantVelocityAcquisition,
 )
 from aslm.model.features.image_writer import ImageWriter
+from aslm.model.features.auto_tile_scan import CalculateFocusRange  # noqa
 from aslm.model.features.common_features import (
     ChangeResolution,
     Snap,
@@ -212,8 +213,8 @@ class Model:
                 {
                     "name": VolumeSearch,
                     "args": (
-                        "Mesoscale",
-                        "6x",
+                        "Nanoscale",
+                        "N/A",
                     ),
                 }
             ]
@@ -238,10 +239,18 @@ class Model:
 
         self.feature_list.append(
             [
+                # {"name": MoveToNextPositionInMultiPostionTable},
+                # {"name": CalculateFocusRange},
                 (
                     {"name": MoveToNextPositionInMultiPostionTable},
                     {"name": Autofocus},
-                    {"name": ZStackAcquisition, "args": (True,)},
+                    {
+                        "name": ZStackAcquisition,
+                        "args": (
+                            True,
+                            True,
+                        ),
+                    },
                     {"name": WaitToContinue},
                     {
                         "name": LoopByCount,

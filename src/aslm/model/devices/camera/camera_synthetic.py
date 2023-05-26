@@ -183,7 +183,6 @@ class SyntheticCamera(CameraBase):
         """
         self.pre_frame_idx = 0
         self.current_frame_idx = 0
-        self.camera_controller.is_acquiring = False
         self.is_acquiring = False
 
     def load_images(self, filenames=None, ds=None):

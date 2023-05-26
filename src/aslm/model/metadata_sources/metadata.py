@@ -119,11 +119,18 @@ class Metadata:
             self.configuration["experiment"]["CameraParameters"]["y_pixels"]
         )
         if (
-            self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-            == "z-stack"
-        ) or (
-            self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-            == "ConstantVelocityAcquisition"
+            (
+                self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+                == "z-stack"
+            )
+            or (
+                self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+                == "ConstantVelocityAcquisition"
+            )
+            or (
+                self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+                == "customized"
+            )
         ):
             self.shape_z = int(
                 self.configuration["experiment"]["MicroscopeState"]["number_z_steps"]
@@ -149,16 +156,22 @@ class Metadata:
             ]
         )
 
-        self._multiposition = self.configuration["experiment"]["MicroscopeState"][
-            "is_multiposition"
-        ]
+        # self._multiposition = self.configuration["experiment"]["MicroscopeState"][
+        #     "is_multiposition"
+        # ]
 
-        if bool(self._multiposition):
-            self.positions = len(
-                self.configuration["experiment"]["MultiPositions"]["stage_positions"]
-            )
-        else:
-            self.positions = 1
+        # if bool(self._multiposition):
+        #     self.positions = len(
+        #         self.configuration["experiment"]["MultiPositions"]["stage_positions"]
+        #     )
+        # else:
+        #     self.positions = 1
+
+        # let the data sources have the ability to save more frames
+        self._multiposition = True
+        self.positions = len(
+            self.configuration["experiment"]["MultiPositions"]["stage_positions"]
+        )
 
     def set_stack_order_from_configuration_experiment(self) -> None:
         self._per_stack = (

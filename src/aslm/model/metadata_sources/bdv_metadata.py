@@ -196,7 +196,7 @@ class BigDataViewerMetadata(XMLMetadata):
         arr = np.eye(3, 4)
 
         # Translation
-        arr[:, 3] = [x, y, z]
+        arr[:, 3] = [x / self.dx, y / self.dy, z / self.dz]
 
         # Rotation (theta pivots in the xz plane, about the y axis)
         # sin_theta, cos_theta = np.sin(theta), np.cos(theta)

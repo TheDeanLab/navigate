@@ -51,31 +51,46 @@ class TestStageSutter(unittest.TestCase):
         dummy_MP285.set_absolute_mode = lambda *args, **kwargs: print("set absolute mode")
         dummy_MP285.get_current_position = lambda *args, **kwargs: (random.random(), random.random(), random.random())
         microscope_name = "Mesoscale"
+        
+
+        stage_configuration = {
+            "microscopes": {
+                microscope_name: {
+                    "stage": {
+                        "hardware": {
+                            "name": "stage",
+                            "type": "MP285",
+                            "port": "COM10",
+                            "baudrate": 115200,
+                            "serail_number": 123456,
+                            "axes": ["x", "y", "z"],
+                        },
+                        "x_max": 100,
+                        "x_min": -100,
+                        "y_max": 200,
+                        "y_min": -200,
+                        "z_max": 300,
+                        "z_min": -300
+                    }
+                }
+
+            }
+        }
+
         stage = SutterStage(microscope_name=microscope_name,
                             device_connection=dummy_MP285,
-                            configuration=dummy_model.configuration,
+                            configuration={"configuration": stage_configuration},
                             device_id=0)
 
         # Attributes
-        assert hasattr(stage, "x_pos")
-        assert hasattr(stage, "y_pos")
-        assert hasattr(stage, "z_pos")
-        assert hasattr(stage, "f_pos")
-        assert hasattr(stage, "theta_pos")
-        assert hasattr(stage, "position_dict")
-        assert hasattr(stage, "x_max")
-        assert hasattr(stage, "y_max")
-        assert hasattr(stage, "z_max")
-        assert hasattr(stage, "f_max")
-        assert hasattr(stage, "x_min")
-        assert hasattr(stage, "y_min")
-        assert hasattr(stage, "z_min")
-        assert hasattr(stage, "f_min")
-        assert hasattr(stage, "theta_min")
+        for axis in stage_configuration["microscopes"][microscope_name]["stage"]["hardware"]["axes"]:
+            assert hasattr(stage, f"{axis}_pos")
+            assert hasattr(stage, f"{axis}_min")
+            assert hasattr(stage, f"{axis}_max")
 
         # Methods
-        assert hasattr(stage, "create_position_dict") and callable(
-            getattr(stage, "create_position_dict")
+        assert hasattr(stage, "get_position_dict") and callable(
+            getattr(stage, "get_position_dict")
         )
         assert hasattr(stage, "report_position") and callable(
             getattr(stage, "report_position")

@@ -118,8 +118,7 @@ class GalvoNIStage(StageBase):
     # for stacking, we could have 2 axis here or not, y is for tiling, not necessary
     def report_position(self):
         """Reports the position for all axes, and create position dictionary."""
-        self.create_position_dict()
-        return self.position_dict
+        return self.get_position_dict()
     
     def calculate_waveform(self, readout_time):
         self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
@@ -357,14 +356,12 @@ class GalvoNIStage(StageBase):
         success : bool
             Was the move successful?
         """
-
+        result = True
         for i, ax in enumerate(self.axes):
             success = self.move_axis_absolute(ax, i, move_dictionary)
             if success and wait_until_done is True:
                 stage_pos, n_tries, i = -1e50, 10, 0
-                target_pos = move_dictionary[f"{ax}_abs"] - getattr(
-                    self, f"int_{ax}_pos_offset", 0
-                )  # TODO: should we default to 0?
+                target_pos = move_dictionary[f"{ax}_abs"]
                 while (abs(stage_pos - target_pos) < 0.01) and (i < n_tries):
                     #  replace: stage_pos =
                     #  self.mcl_controller.MCL_SingleReadN(ax, self.handle)
@@ -373,7 +370,10 @@ class GalvoNIStage(StageBase):
                     time.sleep(0.01)
                 if abs(stage_pos - target_pos) > 0.01:
                     success = False
-        return success
+                else:
+                    setattr(self, f"{ax}_pos", target_pos)
+            result = result and success
+        return result
 
     def stop(self):
         """Stop all stage movement abruptly."""

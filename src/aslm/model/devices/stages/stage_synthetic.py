@@ -57,7 +57,7 @@ class SyntheticStage(StageBase):
     def report_position(self):
         return self.get_position_dict()
 
-    def move_axis_absolute(self, axis, move_dictionary):
+    def move_axis_absolute(self, axis, abs_pos, wait_until_done=False):
         """
         Implement movement logic along a single axis.
 
@@ -66,24 +66,24 @@ class SyntheticStage(StageBase):
         Parameters
         ----------
         axis : str
-            An axis prefix in move_dictionary. For example, axis='x' corresponds to
-            'x_abs', 'x_min', etc.
-        axis_num : int
-            The corresponding number of this axis on a PI stage.
-        move_dictionary : dict
-            A dictionary of values required for movement. Includes 'x_abs', 'x_min',
-            etc. for one or more axes. Expects values in micrometers, except for theta,
-            which is in degrees.
+            An axis. For example, 'x', 'y', 'z', 'f', 'theta'.
+        abs_pos : float
+            Absolute position value
+        wait_until_done : bool
+            Block until stage has moved to its new spot.
 
         Returns
         -------
         bool
             Was the move successful?
         """
-        axis_abs = self.get_abs_position(axis, move_dictionary)
+        axis_abs = self.get_abs_position(axis, abs_pos)
         if axis_abs == -1e50:
             return False
 
+        if wait_until_done:
+            time.sleep(0.025)
+        
         # Move the stage
         setattr(self, f"{axis}_pos", axis_abs)
         return True
@@ -106,11 +106,13 @@ class SyntheticStage(StageBase):
             Was the move successful?
         """
         abs_pos_dict = self.verify_abs_position(move_dictionary)
+        print("*** move stage:", move_dictionary, abs_pos_dict)
         if not abs_pos_dict:
             return False
 
         for axis in abs_pos_dict:            
             setattr(self, f"{axis}_pos", abs_pos_dict[axis])
+            print("**** move stage:", axis, abs_pos_dict[axis])
         if wait_until_done is True:
             time.sleep(0.025)
 

@@ -136,32 +136,27 @@ class StageBase:
         return position_dict
     
         
-    def get_abs_position(self, axis, move_dictionary):
+    def get_abs_position(self, axis, axis_abs):
         """Ensure the requested position is within axis bounds and return it.
 
         Parameters
         ----------
         axis : str
-            An axis prefix in move_dictionary. For example, axis='x' corresponds to
-            'x_abs', 'x_min', etc.
-        move_dictionary : dict
-            A dictionary of values required for movement.
-            Includes 'x_abs', 'x_min', etc. for one or more axes.
-            Expect values in micrometers, except for theta, which is in degrees.
+            An axis: x, y, z, f, theta
+        axis_abs : float
+            Absolute position value
 
         Returns
         -------
         float
             Position to move the stage to for this axis.
         """
+        if not self.stage_limits:
+            return axis_abs
+        
         try:
             # Get all necessary attributes.
             # If we can't we'll move to the error case (e.g., -1e50).
-            axis_abs = move_dictionary[f"{axis}_abs"]
-            if not self.stage_limits:
-                return axis_abs
-
-            # TODO: should we default to 0?
             axis_min, axis_max = getattr(self, f"{axis}_min"), getattr(
                 self, f"{axis}_max"
             )
@@ -206,7 +201,7 @@ class StageBase:
         abs_pos_dict = {}
         result_flag = True
         for axis in self.axes_mapping.keys():
-            if axis not in move_dictionary:
+            if f"{axis}_abs" not in move_dictionary:
                 continue
             axis_abs = move_dictionary[f"{axis}_abs"]
             axis_min = getattr(self, f"{axis}_min")
@@ -220,7 +215,7 @@ class StageBase:
                 print(log_string)
                 result_flag = False
             else:
-                abs_pos_dict[axis[:axis.index("_")]] = axis_abs
+                abs_pos_dict[axis] = axis_abs
 
         if is_strict and not result_flag:
             return {}

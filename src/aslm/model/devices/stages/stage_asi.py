@@ -240,7 +240,7 @@ class ASIStage(StageBase):
         
         return self.get_position_dict()
 
-    def move_axis_absolute(self, axis, move_dictionary):
+    def move_axis_absolute(self, axis, abs_pos, wait_until_done=False):
         """Move stage along a single axis.
 
         Move absolute command for ASI is MOVE [Axis]=[units 1/10 microns]
@@ -250,9 +250,10 @@ class ASIStage(StageBase):
         axis : str
             An axis prefix in move_dictionary. For example, axis='x' corresponds to
             'x_abs', 'x_min', etc.
-        move_dictionary : dict
-            A dictionary of values required for movement. Includes 'x_abs', 'x_min',
-            etc. for one or more axes. Expect values in micrometers.
+        abs_pos : float
+            Absolute position value
+        wait_until_done : bool
+            Block until stage has moved to its new spot.
 
         Returns
         -------
@@ -262,7 +263,7 @@ class ASIStage(StageBase):
         if axis not in self.axes_mapping:
             return False
         
-        axis_abs = self.get_abs_position(axis, move_dictionary)
+        axis_abs = self.get_abs_position(axis, abs_pos)
         if axis_abs == -1e50:
             return False
 
@@ -272,6 +273,9 @@ class ASIStage(StageBase):
                 axis_abs * 10
             )  # This is to account for the asi 1/10 of a micron units
             self.tiger_controller.move_axis(self.axes_mapping[axis], axis_abs_um)
+
+            if wait_until_done:
+                self.tiger_controller.wait_for_device()
             return True
         except TigerException as e:
             print(

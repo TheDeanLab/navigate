@@ -85,7 +85,7 @@ class MCLStage(StageBase):
 
         return self.get_position_dict()
 
-    def move_axis_absolute(self, axis, move_dictionary):
+    def move_axis_absolute(self, axis, abs_pos, wait_until_done=False):
         """
         Implement movement logic along a single axis.
 
@@ -94,12 +94,11 @@ class MCLStage(StageBase):
         Parameters
         ----------
         axis : str
-            An axis prefix in move_dictionary. For example, axis='x' corresponds to
-            'x_abs', 'x_min', etc.
-        move_dictionary : dict
-            A dictionary of values required for movement. Includes 'x_abs', 'x_min',
-            etc. for one or more axes.
-            Expects values in micrometers, except for theta, which is in degrees.
+            An axis. For example, 'x', 'y', 'z', 'f', 'theta'.
+        abs_pos : float
+            Absolute position value
+        wait_until_done : bool
+            Block until stage has moved to its new spot.
 
         Returns
         -------
@@ -107,7 +106,7 @@ class MCLStage(StageBase):
             Was the move successful?
         """
 
-        axis_abs = self.get_abs_position(axis, move_dictionary)
+        axis_abs = self.get_abs_position(axis, abs_pos)
         if axis_abs == -1e50:
             return False
 

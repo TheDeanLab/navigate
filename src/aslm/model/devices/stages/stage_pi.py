@@ -188,18 +188,17 @@ class PIStage(StageBase):
 
         return self.get_position_dict()
 
-    def move_axis_absolute(self, axis, move_dictionary):
+    def move_axis_absolute(self, axis, abs_pos, wait_until_done=False):
         """Move stage along a single axis.
 
         Parameters
         ----------
         axis : str
-            An axis prefix in move_dictionary. For example, axis='x' corresponds to
-            'x_abs', 'x_min', etc.
-        move_dictionary : dict
-            A dictionary of values required for movement. Includes 'x_abs', 'x_min',
-            etc. for one or more axes. Expects values in micrometers, except for theta,
-            which is in degrees.
+            An axis. For example, 'x', 'y', 'z', 'f', 'theta'.
+        abs_pos : float
+            Absolute position value
+        wait_until_done : bool
+            Block until stage has moved to its new spot.
 
         Returns
         -------
@@ -209,7 +208,7 @@ class PIStage(StageBase):
         if axis not in self.axes_mapping:
             return False
         
-        axis_abs = self.get_abs_position(axis, move_dictionary)
+        axis_abs = self.get_abs_position(axis, abs_pos)
         if axis_abs == -1e50:
             return False
 
@@ -220,10 +219,14 @@ class PIStage(StageBase):
             if axis != "theta":
                 pos /= 1000  # convert to mm
             self.pi_device.MOV({axis_num: pos})
-            return True
         except GCSError as e:
             logger.exception(f"move_axis_absolute failed - {e}")
             return False
+        
+        if wait_until_done is True:
+            return self.wait_on_target()
+        
+        return True
 
     def move_absolute(self, move_dictionary, wait_until_done=False):
         """Move Absolute Method.
@@ -257,18 +260,10 @@ class PIStage(StageBase):
             logger.exception(f"move_axis_absolute failed - {e}")
             return False   
 
-        success = True
         if wait_until_done is True:
-            try:
-                self.pi_tools.waitontarget(self.pi_device, timeout=5.0)
-            except GCSError as e:
-                print("Wait on target failed")
-                success = False
-                logger.exception(f"Wait on target failed - {e}")
-            except Exception as e:
-                success = False
-                logger.exception(f"Wait on target timeout error - {e}")
-        return success
+            return self.wait_on_target()
+        
+        return True
 
     def stop(self):
         """Stop all stage movement abruptly.
@@ -281,3 +276,21 @@ class PIStage(StageBase):
             self.pi_device.STP(noraise=True)
         except GCSError as e:
             logger.exception(f"Stage stop failed - {e}")
+
+    def wait_on_target(self):
+        """Wait on target
+
+        Returns
+        -------
+        None
+        """
+        try:
+            self.pi_tools.waitontarget(self.pi_device, timeout=5.0)
+        except GCSError as e:
+            print("Wait on target failed")
+            logger.exception(f"Wait on target failed - {e}")
+            return False
+        except Exception as e:
+            logger.exception(f"Wait on target timeout error - {e}")
+            return False
+        return True

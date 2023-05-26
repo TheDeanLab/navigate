@@ -495,8 +495,9 @@ class Microscope:
         None
         """
         if len(pos_dict.keys()) == 1:
-            axis = list(pos_dict.keys())[0]
-            return self.stages[axis[:axis.index("_")]].move_absolute(pos_dict, wait_until_done)
+            axis_key = list(pos_dict.keys())[0]
+            axis = axis_key[:axis_key.index("_")]
+            return self.stages[axis].move_axis_absolute(axis, pos_dict[axis_key], wait_until_done)
         
         success = True
         for stage, axes in self.stages_list:

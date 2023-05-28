@@ -48,7 +48,8 @@ def sign(x):
     int
         The sign of x.
     """
-    return -1 if x < 0 else 1  # (1 if x > 0 else 0)
+    # (1 if x > 0 else 0)
+    return -1 if x < 0 else 1
 
 
 def compute_tiles_from_bounding_box(
@@ -204,8 +205,9 @@ def calc_num_tiles(dist, overlap, roi_length):
 
 
 def update_table(table, pos, append=False):
-    """Updates and redraws table based on given list. List is converted to a pandas
-    dataframe before setting data in table.
+    """Updates and redraws table based on given list.
+
+    List is converted to a pandas dataframe before setting data in table.
 
     Parameters
     ----------

@@ -140,9 +140,8 @@ def compute_tiles_from_bounding_box(
     y_step = y_length * (1 - y_overlap)
     z_step = z_length * (1 - z_overlap)
     theta_step = theta_length * (1 - theta_overlap)
-    f_step = f_length * (
-        1 - f_overlap
-    )  # Although we assume focus FOVs have no thickness, we include
+    f_step = f_length * (1 - f_overlap)
+    # Although we assume focus FOVs have no thickness, we include
     # overlap to adjust for z-ramping. We have no excuse for the
     # theta overlap.
 

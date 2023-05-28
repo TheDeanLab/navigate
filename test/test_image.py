@@ -31,44 +31,33 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 # Standard Library Imports
+import unittest
 
-# Third Party Imports
-from PIL import Image, ImageDraw, ImageFont
+# Third-Party Imports
 import numpy as np
 
 # Local Imports
+from aslm.tools.image import text_array
 
 
-def text_array(text: str, offset: tuple = (0, 0), font_size: int = 16):
-    """Create a binary array from a piece of text
+class TextArrayTestCase(unittest.TestCase):
+    def test_text_array(self):
+        text = "55"
+        offset = (0, 0)
+        font_size = 16
 
-    Use Default font to avoid OS related errors.
+        result = text_array(text, offset, font_size)
 
-    Parameters
-    ----------
-    text : str
-        Text to convert
-    offset : tuple
-        (x,y) offset from upper left of image
-    font_size: int
-        Size of font in pixels
+        # Assert that the result is a numpy array
+        self.assertIsInstance(result, np.ndarray)
 
-    Returns
-    -------
-    np.array
-        Binary array of text
-    """
+        # Assert that the values in the result array are either True or False
+        assert result.dtype is np.dtype("bool")
 
-    try:
-        font = ImageFont.truetype("Times.ttc", font_size)
-    except OSError:
-        print("Unable to load font from Times.ttc")
-        try:
-            font = ImageFont.load_default()
-        except OSError:
-            raise OSError("Unable to load font")
+        # Assert that the result array is the correct shape
+        # expected_shape = (font_size + offset[1], len(text) * font_size + offset[0])
+        # self.assertEqual(result.shape, expected_shape)
 
-    bbox = font.getbbox(text)
-    im = Image.new(mode="1", size=(bbox[2] + offset[0], bbox[3] + offset[1]))
-    ImageDraw.Draw(im).text(xy=offset, text=text, fill=1, font=font)
-    return np.array(im, dtype=bool)
+
+if __name__ == "__main__":
+    unittest.main()

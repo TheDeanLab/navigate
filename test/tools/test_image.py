@@ -2,8 +2,9 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the
-# limitations in the disclaimer below) provided that the following conditions are met:
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
+# provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -28,32 +29,50 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# Standard Library Imports
 
-# Third Party Imports
+# Standard Library Imports
+import unittest
+
+# Third-Party Imports
 import numpy as np
 
 # Local Imports
 from aslm.tools.image import text_array
 
 
-def test_text_array_output_type():
-    """Confirm output is np.ndarray object"""
-    text_output = text_array(text="ASLM")
-    assert type(text_output) == np.ndarray
+class TextArrayTestCase(unittest.TestCase):
+    def test_text_array(self):
+        text = "55"
+        offset = (0, 0)
+
+        result = text_array(text, offset)
+
+        # Assert that the result is a numpy array
+        self.assertIsInstance(result, np.ndarray)
+
+        # Assert that the values in the result array are either True or False
+        assert result.dtype is np.dtype("bool")
+
+    def test_text_array_output_type(self):
+        """Confirm output is np.ndarray object"""
+        text_output = text_array(text="ASLM")
+        assert type(text_output) == np.ndarray
+
+    def test_text_array_output_height(self):
+        """Confirm that the output is approximately the correct height
+
+        Initially thought that the height should be ~= font_size, but this
+        turned out to be much more variable than I anticipated
+        """
+        text = "ASLM"
+        text_output = text_array(text=text)
+        height = np.shape(text_output)[0]
+        width = np.shape(text_output)[1]
+        expected_width = ((len(text) * height) / 2) + 2
+        expected_height = 11
+        assert width == expected_width
+        assert height == expected_height
 
 
-def test_text_array_output_height():
-    """Confirm that the output is approximately the correct height
-
-    Initially thought that the height should be ~= font_size, but this
-    turned out to be much more variable than I anticipated
-    """
-    text = "ASLM"
-    text_output = text_array(text=text)
-    height = np.shape(text_output)[0]
-    width = np.shape(text_output)[1]
-    expected_width = ((len(text) * height) / 2) + 2
-    expected_height = 11
-    assert width == expected_width
-    assert height == expected_height
+if __name__ == "__main__":
+    unittest.main()

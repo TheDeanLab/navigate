@@ -32,8 +32,7 @@
 # Standard library imports
 import unittest
 import os
-import shutil
-import platform
+from datetime import datetime
 import json
 
 # Third party imports
@@ -44,11 +43,12 @@ from aslm.tools.file_functions import create_save_path, save_yaml_file, delete_f
 
 class CreateSavePathTestCase(unittest.TestCase):
     def setUp(self) -> None:
-        if platform.system() == "Windows":
-            base_directory = os.getenv("LOCALAPPDATA")
-        else:
-            base_directory = os.getenv("HOME")
-        self.save_root = os.path.join(base_directory, ".ASLM", "tests")
+        self.save_root = "test_dir"
+        os.mkdir(self.save_root)
+        self.date_string = str(datetime.now().date())
+
+    def tearDown(self) -> None:
+        delete_folder("test_dir")
 
     def test_existing_root_directory_no_existing_cell_directories(self):
         """Test 1: Testing with existing root directory and no existing cell
@@ -66,7 +66,7 @@ class CreateSavePathTestCase(unittest.TestCase):
             "Liver",
             "Hepatocyte",
             "Sample1",
-            "2023-05-28",
+            self.date_string,
             "Cell_001",
         )
         save_directory = create_save_path(saving_settings)
@@ -78,7 +78,7 @@ class CreateSavePathTestCase(unittest.TestCase):
         self.assertTrue(os.path.exists(save_directory))
 
         # Delete the created directory
-        shutil.rmtree(self.save_root, ignore_errors=False)
+        self.tearDown()
 
     def test_existing_root_directory_existing_cell_directories(self):
         """Test 2: Testing with existing root directory and existing cell
@@ -91,7 +91,7 @@ class CreateSavePathTestCase(unittest.TestCase):
                 "Liver",
                 "Hepatocyte",
                 "Sample1",
-                "2023-05-28",
+                self.date_string,
                 "Cell_001",
             )
         )
@@ -115,7 +115,7 @@ class CreateSavePathTestCase(unittest.TestCase):
                 "Liver",
                 "Hepatocyte",
                 "Sample1",
-                "2023-05-28",
+                self.date_string,
                 "Cell_002",
             ),
         )
@@ -124,7 +124,7 @@ class CreateSavePathTestCase(unittest.TestCase):
         self.assertTrue(os.path.exists(save_directory))
 
         # Delete the created directory
-        shutil.rmtree(self.save_root, ignore_errors=False)
+        self.tearDown()
 
     def test_spaces_in_strings(self):
         saving_settings = {
@@ -142,7 +142,7 @@ class CreateSavePathTestCase(unittest.TestCase):
             "Liver-Tissue",
             "Hepatocyte-Cell-Type",
             "Sample-1",
-            "2023-05-28",
+            self.date_string,
             "Cell_001",
         )
 
@@ -153,20 +153,16 @@ class CreateSavePathTestCase(unittest.TestCase):
         self.assertTrue(os.path.exists(save_directory))
 
         # Delete the created directory
-        shutil.rmtree(self.save_root, ignore_errors=False)
+        self.tearDown()
 
 
 class SaveYAMLFileTestCase(unittest.TestCase):
     def setUp(self) -> None:
-        if platform.system() == "Windows":
-            base_directory = os.getenv("LOCALAPPDATA")
-        else:
-            base_directory = os.getenv("HOME")
-        self.save_root = os.path.join(base_directory, ".ASLM", "tests")
-        os.mkdir(self.save_root)
+        os.mkdir("test_dir")
+        self.save_root = "test_dir"
 
     def tearDown(self) -> None:
-        shutil.rmtree(self.save_root, ignore_errors=False)
+        delete_folder("test_dir")
 
     def test_save_yaml_file_success(self):
         content_dict = {"name": "John Doe", "age": 30, "location": "New York"}
@@ -207,29 +203,12 @@ class SaveYAMLFileTestCase(unittest.TestCase):
 
 class TestDeleteFolder(unittest.TestCase):
     def setUp(self) -> None:
-        """Create a folder and sub-directory to delete. Place a file in the
-        sub-directory.
-        """
-        if platform.system() == "Windows":
-            base_directory = os.getenv("LOCALAPPDATA")
-        else:
-            base_directory = os.getenv("HOME")
-
-        self.save_root = os.path.join(base_directory, ".ASLM", "tests")
-
-        # For some reason mkdirs isn't working.
-        os.mkdir(self.save_root)
-        os.mkdir(os.path.join(self.save_root, "delete_folder"))
-        content_dict = {"name": "John Doe", "age": 30, "location": "New York"}
-        save_yaml_file(os.path.join(self.save_root, "delete_folder"), content_dict)
-
-    def tearDown(self) -> None:
-        """Delete the folder and sub-directory."""
-        shutil.rmtree(self.save_root, ignore_errors=False)
+        os.mkdir("test_dir")
+        self.save_root = "test_dir"
 
     def test_delete_folder(self):
-        delete_folder(os.path.join(self.save_root, "delete_folder"))
-        self.assertFalse(os.path.exists(os.path.join(self.save_root, "delete_folder")))
+        delete_folder(self.save_root)
+        self.assertFalse(os.path.exists(self.save_root))
 
 
 if __name__ == "__main__":

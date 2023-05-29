@@ -39,7 +39,7 @@ import numpy as np
 # Local Imports
 
 
-def text_array(text: str, offset: tuple = (0, 0), font_size: int = 16):
+def text_array(text: str, offset: tuple = (0, 0)):
     """Create a binary array from a piece of text
 
     Use Default font to avoid OS related errors.
@@ -58,16 +58,7 @@ def text_array(text: str, offset: tuple = (0, 0), font_size: int = 16):
     np.array
         Binary array of text
     """
-
-    try:
-        font = ImageFont.truetype("Times.ttc", font_size)
-    except OSError:
-        print("Unable to load font from Times.ttc")
-        try:
-            font = ImageFont.load_default()
-        except OSError:
-            raise OSError("Unable to load font")
-
+    font = ImageFont.load_default()
     bbox = font.getbbox(text)
     im = Image.new(mode="1", size=(bbox[2] + offset[0], bbox[3] + offset[1]))
     ImageDraw.Draw(im).text(xy=offset, text=text, fill=1, font=font)

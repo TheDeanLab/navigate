@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -49,7 +49,11 @@ def test_text_array_output_height():
     Initially thought that the height should be ~= font_size, but this
     turned out to be much more variable than I anticipated
     """
-    for i in np.linspace(start=10, stop=50, num=5):
-        text_output = text_array(text="ASLM", font_size=int(i))
-        height = np.shape(text_output)[0]
-        assert np.abs(i - height) < 10
+    text = "ASLM"
+    text_output = text_array(text=text)
+    height = np.shape(text_output)[0]
+    width = np.shape(text_output)[1]
+    expected_width = ((len(text) * height) / 2) + 2
+    expected_height = 11
+    assert width == expected_width
+    assert height == expected_height

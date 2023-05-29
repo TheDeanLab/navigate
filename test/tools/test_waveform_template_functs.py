@@ -31,53 +31,55 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 # Standard library imports
+import unittest
 
 # Third-party imports
 
 # Local application imports
+from aslm.tools.waveform_template_funcs import get_waveform_template_parameters
 
 
-def get_waveform_template_parameters(
-    waveform_template_name, waveform_template_dict, microscope_state_dict
-):
-    """this function will get the parameters of a waveform template
+class TestGetWaveformTemplateParameters(unittest.TestCase):
+    def setUp(self):
+        self.waveform_template_name = "template1"
+        self.waveform_template_dict = {
+            "template1": {"repeat": 3, "expand": 2},
+            "template2": {"repeat": "repeat_param", "expand": "expand_param"},
+        }
+        self.microscope_state_dict = {"repeat_param": 4, "expand_param": 5}
 
-    Parameters
-    ----------
-    waveform_template_name: str
-        the name of the waveform template
-    waveform_template_dict: dict
-        the dictionary of the waveform templates
-    microscope_state_dict: dict
-        the dictionary of the microscope state
+    def test_get_waveform_template_parameters(self):
+        repeat_num, expand_num = get_waveform_template_parameters(
+            self.waveform_template_name,
+            self.waveform_template_dict,
+            self.microscope_state_dict,
+        )
 
-    Returns
-    -------
-    repeat_num: int
-        the number of repeats
-    expand_num: int
-        the number of expands
-    """
-    try:
-        waveform_template = waveform_template_dict[waveform_template_name]
-    except KeyError:
-        repeat_num, expand_num = 1, 1
-        return repeat_num, expand_num
+        self.assertEqual(repeat_num, 3)
+        self.assertEqual(expand_num, 2)
 
-    try:
-        if type(waveform_template["repeat"]) is int:
-            repeat_num = waveform_template["repeat"]
-        else:
-            repeat_num = int(microscope_state_dict[waveform_template["repeat"]])
-    except KeyError:
-        repeat_num = 1
+    def test_get_waveform_template_parameters_with_microscope_state(self):
+        self.waveform_template_name = "template2"
+        repeat_num, expand_num = get_waveform_template_parameters(
+            self.waveform_template_name,
+            self.waveform_template_dict,
+            self.microscope_state_dict,
+        )
 
-    try:
-        if type(waveform_template["expand"]) is int:
-            expand_num = waveform_template["expand"]
-        else:
-            expand_num = int(microscope_state_dict[waveform_template["expand"]])
-    except KeyError:
-        expand_num = 1
+        self.assertEqual(repeat_num, 4)
+        self.assertEqual(expand_num, 5)
 
-    return repeat_num, expand_num
+    def test_get_waveform_template_parameters_with_missing_template(self):
+        self.waveform_template_name = "template3"
+        repeat_num, expand_num = get_waveform_template_parameters(
+            self.waveform_template_name,
+            self.waveform_template_dict,
+            self.microscope_state_dict,
+        )
+
+        self.assertEqual(repeat_num, 1)
+        self.assertEqual(expand_num, 1)
+
+
+if __name__ == "__main__":
+    unittest.main()

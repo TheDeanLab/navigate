@@ -79,8 +79,7 @@ def create_save_path(saving_settings):
         label_string,
         date_string,
     )
-    if not os.path.exists(save_directory):
-        os.makedirs(save_directory, exist_ok=True)
+    os.makedirs(save_directory, exist_ok=True)
 
     # Determine Number of Cells in Directory
     # Cell1/Position1/1_CH00_000000.tif
@@ -95,8 +94,7 @@ def create_save_path(saving_settings):
     cell_string = "Cell_" + str(cell_index).zfill(3)
 
     save_directory = os.path.join(save_directory, cell_string)
-    if not os.path.exists(save_directory):
-        os.makedirs(save_directory, exist_ok=True)
+    os.makedirs(save_directory, exist_ok=True)
 
     # Update the experiment dict
     saving_settings["save_directory"] = save_directory

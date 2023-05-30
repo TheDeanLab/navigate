@@ -412,13 +412,7 @@ microscopes:
       stage_positions:
         BABB:
           f:
-            0.63x: 0
-            1x: 1
-            2x: 2
-            3x: 3
-            4x: 4
-            5x: 5
-            6x: 6
+            N/A: 0
     shutter:
       hardware:
         name: daq

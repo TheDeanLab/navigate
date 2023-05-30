@@ -33,33 +33,64 @@
 # Standard Library Imports
 
 # Third Party Imports
-from PIL import Image, ImageDraw, ImageFont
-import numpy as np
 
 # Local Imports
+from aslm.tools.common_dict_tools import update_stage_dict
+
+import unittest
+from unittest.mock import MagicMock
 
 
-def text_array(text: str, offset: tuple = (0, 0)):
-    """Create a binary array from a piece of text
+def create_mock_target():
+    """Create a mock target object (Model or Controller) for testing."""
+    target = MagicMock()
+    target.configuration = {
+        "experiment": {
+            "MicroscopeState": {"channels": None},
+            "GalvoParameters": {},
+            "CameraParameters": {},
+        },
+        "etl_constants": {"ETLConstants": {"low": {}, "high": {}}},
+    }
+    return target
 
-    Use Default font to avoid OS related errors.
 
-    Parameters
-    ----------
-    text : str
-        Text to convert
-    offset : tuple
-        (x,y) offset from upper left of image
-    font_size: int
-        Size of font in pixels
+def create_mock_stage_target():
+    """Create a mock target object (Model or Controller) for testing."""
+    target = MagicMock()
+    target.configuration = {
+        "experiment": {"StageParameters": {"x": None, "y": None, "z": None}}
+    }
+    return target
 
-    Returns
-    -------
-    np.array
-        Binary array of text
-    """
-    font = ImageFont.load_default()
-    bbox = font.getbbox(text)
-    im = Image.new(mode="1", size=(bbox[2] + offset[0], bbox[3] + offset[1]))
-    ImageDraw.Draw(im).text(xy=offset, text=text, fill=1, font=font)
-    return np.array(im, dtype=bool)
+class UpdateStageDictTestCase(unittest.TestCase):
+    def test_update_single_axis(self):
+        target = create_mock_stage_target()
+        pos_dict = {"x_position": 10.0}
+        update_stage_dict(target, pos_dict)
+        self.assertEqual(
+            target.configuration["experiment"]["StageParameters"]["x"], 10.0
+        )
+
+    def test_update_multiple_axes(self):
+        target = create_mock_stage_target()
+        pos_dict = {"y_position": 5.0, "z_position": 2.5}
+        update_stage_dict(target, pos_dict)
+        self.assertEqual(
+            target.configuration["experiment"]["StageParameters"]["y"], 5.0
+        )
+        self.assertEqual(
+            target.configuration["experiment"]["StageParameters"]["z"], 2.5
+        )
+
+    def test_update_invalid_axis(self):
+        target = create_mock_stage_target()
+        pos_dict = {"invalid_axis": 3.14}
+        update_stage_dict(target, pos_dict)
+        self.assertNotIn(
+            "invalid_axis", target.configuration["experiment"]["StageParameters"]
+        )
+
+
+if __name__ == "__main__":
+    unittest.main()

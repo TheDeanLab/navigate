@@ -30,60 +30,6 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-
-def update_settings_common(target, args):
-    """Update dictionary entries common to the model and controller.
-
-    This helps us percolate changes through the copies of the dictionaries in each
-    major object.
-
-    Parameters
-    ----------
-    target : aslm.model.Model or aslm.controller.Controller
-        The object that is being updated.
-    args : list
-        The list of arguments that are being passed to the function.
-
-    Returns
-    -------
-    None
-    """
-    if args[0] == "channel":
-        target.configuration["experiment"]["MicroscopeState"]["channels"] = args[1]
-
-    if args[0] == "resolution":
-        """
-        args[1] is a dictionary that includes 'resolution_mode': 'low', 'zoom': '1x',
-        'laser_info': ...
-        ETL popup window updating the self.etl_constants.
-        Passes new self.etl_constants to the self.model.daq
-        TODO: Make sure the daq knows which etl data to use based upon wavelength, zoom,
-        resolution mode, etc.
-        """
-        updated_settings = args[1]
-        resolution_mode = updated_settings["resolution_mode"]
-        zoom = updated_settings["zoom"]
-        laser_info = updated_settings["laser_info"]
-
-        if resolution_mode == "low":
-            target.configuration["etl_constants"]["ETLConstants"]["low"][
-                zoom
-            ] = laser_info
-        else:
-            target.configuration["etl_constants"]["ETLConstants"]["high"][
-                zoom
-            ] = laser_info
-
-    if args[0] == "galvo":
-        ((param, value),) = args[1].items()
-        target.configuration["experiment"]["GalvoParameters"][param] = value
-
-    if args[0] == "number_of_pixels":
-        target.configuration["experiment"]["CameraParameters"][
-            "number_of_pixels"
-        ] = args[1]
-
-
 def update_stage_dict(target, pos_dict):
     """Update dictionary entries common to the model and controller.
 

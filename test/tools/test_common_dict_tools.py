@@ -35,7 +35,7 @@
 # Third Party Imports
 
 # Local Imports
-from aslm.tools.common_dict_tools import update_settings_common, update_stage_dict
+from aslm.tools.common_dict_tools import update_stage_dict
 
 import unittest
 from unittest.mock import MagicMock
@@ -62,59 +62,6 @@ def create_mock_stage_target():
         "experiment": {"StageParameters": {"x": None, "y": None, "z": None}}
     }
     return target
-
-
-class UpdateSettingsCommonTestCase(unittest.TestCase):
-    def test_update_channel(self):
-        target = create_mock_target()
-        args = ["channel", "channel_name"]
-        update_settings_common(target, args)
-        self.assertEqual(
-            target.configuration["experiment"]["MicroscopeState"]["channels"],
-            "channel_name",
-        )
-
-    def test_update_resolution_low(self):
-        target = create_mock_target()
-        args = [
-            "resolution",
-            {"resolution_mode": "low", "zoom": "1x", "laser_info": "laser_info_low"},
-        ]
-        update_settings_common(target, args)
-        self.assertEqual(
-            target.configuration["etl_constants"]["ETLConstants"]["low"]["1x"],
-            "laser_info_low",
-        )
-
-    def test_update_resolution_high(self):
-        target = create_mock_target()
-        args = [
-            "resolution",
-            {"resolution_mode": "high", "zoom": "2x", "laser_info": "laser_info_high"},
-        ]
-        update_settings_common(target, args)
-        self.assertEqual(
-            target.configuration["etl_constants"]["ETLConstants"]["high"]["2x"],
-            "laser_info_high",
-        )
-
-    def test_update_galvo(self):
-        target = create_mock_target()
-        args = ["galvo", {"param": "value"}]
-        update_settings_common(target, args)
-        self.assertEqual(
-            target.configuration["experiment"]["GalvoParameters"]["param"], "value"
-        )
-
-    def test_update_number_of_pixels(self):
-        target = create_mock_target()
-        args = ["number_of_pixels", 1024]
-        update_settings_common(target, args)
-        self.assertEqual(
-            target.configuration["experiment"]["CameraParameters"]["number_of_pixels"],
-            1024,
-        )
-
 
 class UpdateStageDictTestCase(unittest.TestCase):
     def test_update_single_axis(self):

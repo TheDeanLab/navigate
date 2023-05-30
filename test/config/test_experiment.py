@@ -129,6 +129,7 @@ class TextExperimentFile(unittest.TestCase):
 
         self.parse_entries(section="CameraParameters", expected_values=expected_values)
 
+    # TODO: This test case could be removed after PR#452 is merged into Develop.
     def test_autofocus_parameters(self):
         expected_values = {
             "coarse_range": int,
@@ -162,7 +163,6 @@ class TextExperimentFile(unittest.TestCase):
     def test_microscope_state(self):
         expected_values = {
             "microscope_name": str,
-            "resolution_mode": str,
             "image_mode": str,
             "zoom": str,
             "stack_cycling_mode": str,

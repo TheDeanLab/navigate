@@ -48,7 +48,6 @@ StageParameters:
   f: 66122.8
 MicroscopeState:
   microscope_name: Mesoscale
-  resolution_mode: Mesoscale
   image_mode: live
   zoom: 1x
   stack_cycling_mode: per_stack

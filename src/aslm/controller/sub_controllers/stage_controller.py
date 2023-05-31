@@ -285,7 +285,8 @@ class StageController(GUIController):
         for axis in ["x", "y", "z", "theta", "f"]:
             self.widget_vals[axis].set(position.get(axis, 0))
             # validate position value if set through variable
-            widgets[axis].widget.trigger_focusout_validation()
+            if self.stage_limits:
+                widgets[axis].widget.trigger_focusout_validation()
             self.stage_setting_dict[axis] = position.get(axis, 0)
         self.show_verbose_info("Set stage position")
 
@@ -358,17 +359,15 @@ class StageController(GUIController):
             step_val = self.widget_vals[axis + "_step"]
 
         def handler():
-            # guarantee stage won't move out of limits
-            if position_val.get() == self.position_max[axis]:
-                return
             try:
                 temp = position_val.get() + step_val.get()
             except AttributeError:
                 return
-            if self.stage_limits is True:
-                if temp > self.position_max[axis]:
-                    temp = self.position_max[axis]
-            position_val.set(temp)
+            if self.stage_limits is True and temp > self.position_max[axis]:
+                temp = self.position_max[axis]
+            # guarantee stage won't move out of limits
+            if position_val.get() != temp:
+                position_val.set(temp)
 
         return handler
 
@@ -394,17 +393,15 @@ class StageController(GUIController):
             step_val = self.widget_vals[axis + "_step"]
 
         def handler():
-            # guarantee stage won't move out of limits
-            if position_val.get() == self.position_min[axis]:
-                return
             try:
                 temp = position_val.get() - step_val.get()
             except AttributeError:
                 return
-            if self.stage_limits is True:
-                if temp < self.position_min[axis]:
-                    temp = self.position_min[axis]
-            position_val.set(temp)
+            if self.stage_limits is True and temp < self.position_min[axis]:
+                temp = self.position_min[axis]
+            # guarantee stage won't move out of limits
+            if position_val.get() != temp:
+                position_val.set(temp)
 
         return handler
 
@@ -494,15 +491,14 @@ class StageController(GUIController):
             # if position is not a number, then do not move stage
             try:
                 position = position_var.get()
-                widget.trigger_focusout_validation()
-                # if position is not inside limits do not move stage
-                if (
-                    position < self.position_min[axis]
-                    or position > self.position_max[axis]
-                ):
-                    if self.event_id[axis]:
-                        self.view.after_cancel(self.event_id[axis])
-                    return
+                if self.stage_limits:
+                    widget.trigger_focusout_validation()
+                    # if position is not inside limits do not move stage
+                    if (
+                        position < self.position_min[axis]
+                        or position > self.position_max[axis]
+                    ):
+                        return
             except tk._tkinter.TclError:
                 if self.event_id[axis]:
                     self.view.after_cancel(self.event_id[axis])

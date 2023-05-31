@@ -165,7 +165,10 @@ class Microscope:
                     # all other ASI devices as self.tiger_controller
                     device_connection = devices_dict[device_name][device_ref_name]
                     self.tiger_controller = device_connection
-                elif device_ref_name.startswith("ASI") and self.tiger_controller is not None:
+                elif (
+                    device_ref_name.startswith("ASI")
+                    and self.tiger_controller is not None
+                ):
                     # If subsequent ASI-based tiger controller devices are included.
                     device_connection = self.tiger_controller
 
@@ -281,11 +284,15 @@ class Microscope:
         ]["stage"]
         pos_dict = self.get_stage_position()
         for stage, axes in self.stages_list:
-            pos = {axis + "_abs": (
-                pos_dict[axis + "_pos"]
-                + self_offset_dict[axis + "_offset"]
-                - former_offset_dict[axis + "_offset"])
-             for axis in axes}
+            pos = {
+                axis
+                + "_abs": (
+                    pos_dict[axis + "_pos"]
+                    + self_offset_dict[axis + "_offset"]
+                    - former_offset_dict[axis + "_offset"]
+                )
+                for axis in axes
+            }
             stage.move_absolute(pos, wait_until_done=True)
 
     def prepare_acquisition(self):
@@ -496,16 +503,20 @@ class Microscope:
         """
         if len(pos_dict.keys()) == 1:
             axis_key = list(pos_dict.keys())[0]
-            axis = axis_key[:axis_key.index("_")]
-            return self.stages[axis].move_axis_absolute(axis, pos_dict[axis_key], wait_until_done)
-        
+            axis = axis_key[: axis_key.index("_")]
+            return self.stages[axis].move_axis_absolute(
+                axis, pos_dict[axis_key], wait_until_done
+            )
+
         success = True
         for stage, axes in self.stages_list:
-            pos = {axis: pos_dict[axis] for axis in pos_dict if axis[:axis.index("_")] in axes}
+            pos = {
+                axis: pos_dict[axis]
+                for axis in pos_dict
+                if axis[: axis.index("_")] in axes
+            }
             if pos:
-                success = (
-                    stage.move_absolute(pos, wait_until_done) and success
-                )
+                success = stage.move_absolute(pos, wait_until_done) and success
         return success
 
     def stop_stage(self):
@@ -541,6 +552,10 @@ class Microscope:
             temp_pos = stage.report_position()
             ret_pos_dict.update(temp_pos)
         return ret_pos_dict
+
+    def update_stage_limits(self, limits_flag=True):
+        for stage, _ in self.stages_list:
+            stage.stage_limits = limits_flag
 
     def assemble_device_config_lists(self, device_name, device_name_dict):
         """Assemble device config lists.

@@ -551,10 +551,10 @@ class Controller:
             )
 
         elif command == "stage_limits":
+            self.stage_controller.stage_limits = args[0]
             self.threads_pool.createThread(
                 "model", lambda: self.model.run_command("stage_limits", *args)
             )
-            self.stage_controller.stage_limits = args[0]
 
         elif command == "autofocus":
             """Execute autofocus routine."""

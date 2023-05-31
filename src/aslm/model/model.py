@@ -584,9 +584,8 @@ class Model:
                         f"run_command - load_feature - Unknown feature {args[0]}."
                     )
         elif command == "stage_limits":
-            for axis in self.active_microscope.stages:
-                self.active_microscope.stages[axis].stage_limits = args[0]
-
+            for microscope_name in self.microscopes:
+                self.microscopes[microscope_name].update_stage_limits(args[0])
         elif command == "stop":
             """
             Called when user halts the acquisition

@@ -492,7 +492,7 @@ class ZStackAcquisition:
 
     def in_data_func(self, frame_ids):
         self.received_frames += len(frame_ids)
-        if self.image_writer is None:
+        if self.image_writer is not None:
             self.image_writer.save_image(frame_ids)
 
     def end_data_func(self):

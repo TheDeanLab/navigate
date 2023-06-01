@@ -232,8 +232,8 @@ class ASIStage(StageBase):
         try:
             # positions from the device are in microns
             pos_dict = self.tiger_controller.get_position(list(self.asi_axes.keys()))
-            for axis, pos in pos_dict:
-                setattr(self, f"{self.asi_axes[axis]}_pos", pos / 10.0)
+            for axis, pos in pos_dict.items():
+                setattr(self, f"{self.asi_axes[axis]}_pos", float(pos) / 10.0)
         except TigerException as e:
             print("Failed to report ASI Stage Position")
             logger.exception(e)

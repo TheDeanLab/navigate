@@ -162,29 +162,29 @@ class TigerController:
         if res.startswith(":N"):
             raise TigerException(res)
 
-    def moverel_axis(self, axis: str, distance: int) -> None:
+    def moverel_axis(self, axis: str, distance: float) -> None:
         """Move the stage with a relative move on one axis"""
-        self.send_command(f"MOVREL {axis}={distance}\r")
+        self.send_command(f"MOVREL {axis}={round(distance, 6)}\r")
         res = self.read_response()
         if res.startswith(":N"):
             raise TigerException(res)
 
     def move(self, pos_dict) -> None:
         """Move the stage with an absolute move on multiple axes"""
-        pos_str = " ".join([f"{axis}={pos_dict[axis]}" for axis in pos_dict])
+        pos_str = " ".join([f"{axis}={round(pos_dict[axis], 6)}" for axis in pos_dict])
         self.send_command(f"MOVE {pos_str}\r")
         res = self.read_response()
         if res.startswith(":N"):
             raise TigerException(res)
 
-    def move_axis(self, axis: str, distance: int) -> None:
+    def move_axis(self, axis: str, distance: float) -> None:
         """Move the stage with an absolute move on one axis"""
-        self.send_command(f"MOVE {axis}={distance}\r")
+        self.send_command(f"MOVE {axis}={round(distance, 6)}\r")
         res = self.read_response()
         if res.startswith(":N"):
             raise TigerException(res)
 
-    def set_max_speed(self, axis: str, speed: int) -> None:
+    def set_max_speed(self, axis: str, speed: float) -> None:
         """Set the speed on a specific axis. Speed is in mm/s."""
         self.send_command(f"SPEED {axis}={speed}\r")
         res = self.read_response()

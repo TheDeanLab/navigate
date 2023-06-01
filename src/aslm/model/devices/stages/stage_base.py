@@ -110,6 +110,9 @@ class StageBase:
             self.axes = list(stage["hardware"]["axes"])
             device_axes = stage["hardware"].get("axes_mapping", [])
 
+        if device_axes is None:
+            device_axes = []
+
         if len(self.axes) > len(device_axes):
             log_string = f"{microscope_name}: stage axes mapping doesn't match! Some axes won't be accessed!"
             logger.debug(log_string)
@@ -151,34 +154,34 @@ class StageBase:
         float
             Position to move the stage to for this axis.
         """
-        if not self.stage_limits:
-            return axis_abs
-        
         try:
             # Get all necessary attributes.
             # If we can't we'll move to the error case (e.g., -1e50).
             axis_min, axis_max = getattr(self, f"{axis}_min"), getattr(
                 self, f"{axis}_max"
             )
-
-            # Check that our position is within the axis bounds, fail if it's not.
-            if (axis_min > axis_abs) or (axis_max < axis_abs):
-                log_string = (
-                    f"Absolute movement stopped: {axis} limit would be reached!"
-                    f"{axis_abs} is not in the range {axis_min} to {axis_max}."
-                )
-                logger.info(log_string)
-                print(log_string)
-                # Return a ridiculous value to make it clear we've failed.
-                # This is to avoid returning a duck type.
-                return -1e50
-            return axis_abs
         except (KeyError, AttributeError) as e:
             # Alert the user, but don't kill the thread
             msg = f"No key {e} in move_dictionary or axis missing from {self.axes}."
             logger.debug(msg)
             print(msg)
             return -1e50
+        
+        if not self.stage_limits:
+            return axis_abs
+
+        # Check that our position is within the axis bounds, fail if it's not.
+        if (axis_min > axis_abs) or (axis_max < axis_abs):
+            log_string = (
+                f"Absolute movement stopped: {axis} limit would be reached!"
+                f"{axis_abs} is not in the range {axis_min} to {axis_max}."
+            )
+            logger.info(log_string)
+            print(log_string)
+            # Return a ridiculous value to make it clear we've failed.
+            # This is to avoid returning a duck type.
+            return -1e50
+        return axis_abs
     
     def verify_abs_position(self, move_dictionary, is_strict=False):
         """Ensure the requested moving positions are within axes bounds
@@ -194,10 +197,7 @@ class StageBase:
         -------
         dict
             a verified moving dict {axis: abs_position}
-        """
-        if not self.stage_limits:
-            return True
-        
+        """  
         abs_pos_dict = {}
         result_flag = True
         for axis in self.axes_mapping.keys():
@@ -206,7 +206,8 @@ class StageBase:
             axis_abs = move_dictionary[f"{axis}_abs"]
             axis_min = getattr(self, f"{axis}_min")
             axis_max = getattr(self, f"{axis}_max")
-            if (axis_abs < axis_min) or (axis_abs > axis_max):
+
+            if self.stage_limits and ((axis_abs < axis_min) or (axis_abs > axis_max)):
                 log_string = (
                     f"Absolute movement stopped: {axis} limit would be reached!"
                     f"{axis_abs} is not in the range {axis_min} to {axis_max}."

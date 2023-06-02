@@ -114,8 +114,10 @@ class StageBase:
             device_axes = []
 
         if len(self.axes) > len(device_axes):
-            log_string = f"{microscope_name}: stage axes mapping is not specified in "
-            "the configuration file, will use the default one in the code!"
+            log_string = (
+                f"{microscope_name}: stage axes mapping is not specified in "
+                "the configuration file, will use the default one in the code!"
+            )
             logger.debug(log_string)
             print(log_string)
 

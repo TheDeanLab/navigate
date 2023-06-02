@@ -114,7 +114,8 @@ class StageBase:
             device_axes = []
 
         if len(self.axes) > len(device_axes):
-            log_string = f"{microscope_name}: stage axes mapping doesn't match! Some axes won't be accessed!"
+            log_string = f"{microscope_name}: stage axes mapping is not specified in "
+            "the configuration file, will use the default one in the code!"
             logger.debug(log_string)
             print(log_string)
 
@@ -137,8 +138,7 @@ class StageBase:
             ax_str = f"{ax}_pos"
             position_dict[ax_str] = getattr(self, ax_str)
         return position_dict
-    
-        
+
     def get_abs_position(self, axis, axis_abs):
         """Ensure the requested position is within axis bounds and return it.
 
@@ -166,7 +166,7 @@ class StageBase:
             logger.debug(msg)
             print(msg)
             return -1e50
-        
+
         if not self.stage_limits:
             return axis_abs
 
@@ -182,7 +182,7 @@ class StageBase:
             # This is to avoid returning a duck type.
             return -1e50
         return axis_abs
-    
+
     def verify_abs_position(self, move_dictionary, is_strict=False):
         """Ensure the requested moving positions are within axes bounds
 
@@ -197,7 +197,7 @@ class StageBase:
         -------
         dict
             a verified moving dict {axis: abs_position}
-        """  
+        """
         abs_pos_dict = {}
         result_flag = True
         for axis in self.axes_mapping.keys():
@@ -221,7 +221,6 @@ class StageBase:
         if is_strict and not result_flag:
             return {}
         return abs_pos_dict
-
 
     def stop(self):
         """Stop all stage movement abruptly."""

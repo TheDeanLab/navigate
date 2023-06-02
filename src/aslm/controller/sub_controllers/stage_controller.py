@@ -363,8 +363,11 @@ class StageController(GUIController):
                 temp = position_val.get() + step_val.get()
             except AttributeError:
                 return
-            if self.stage_limits is True and temp > self.position_max[axis]:
-                temp = self.position_max[axis]
+            if self.stage_limits is True:
+                if temp > self.position_max[axis]:
+                    temp = self.position_max[axis]
+                elif temp < self.position_min[axis]:
+                    temp = self.position_min[axis]
             # guarantee stage won't move out of limits
             if position_val.get() != temp:
                 position_val.set(temp)
@@ -397,8 +400,11 @@ class StageController(GUIController):
                 temp = position_val.get() - step_val.get()
             except AttributeError:
                 return
-            if self.stage_limits is True and temp < self.position_min[axis]:
-                temp = self.position_min[axis]
+            if self.stage_limits is True:
+                if temp < self.position_min[axis]:
+                    temp = self.position_min[axis]
+                elif temp > self.position_max[axis]:
+                    temp = self.position_max[axis]
             # guarantee stage won't move out of limits
             if position_val.get() != temp:
                 position_val.set(temp)

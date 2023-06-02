@@ -55,6 +55,7 @@ class TigerController:
         self.baud_rate = baud_rate
         self.verbose = verbose
         self.print = self.report_to_console
+        self.default_axes_sequence = ["X", "Y", "Z", "F", "M", "N"]
 
     @staticmethod
     def scan_ports() -> list[str]:
@@ -227,7 +228,8 @@ class TigerController:
             raise TigerException(response)
         else:
             pos = response.split(" ")
-            return {axis: pos[1+i] for i, axis in enumerate(axes)}
+            axes_seq = list(filter(lambda axis: axis if axis in axes else False, self.default_axes_sequence))
+            return {axis: pos[1+i] for i, axis in enumerate(axes_seq)}
 
     # Utility Functions
 

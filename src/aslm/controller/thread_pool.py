@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -48,16 +49,58 @@ logger = logging.getLogger(p)
 
 
 class SelfLockThread(threading.Thread):
+    """A thread that locks itself when it starts and unlocks itself when it ends.
+
+    Parameters
+    ----------
+    group : None
+        Reserved for future use.
+    target : callable
+        The callable object to be invoked by the run() method.
+    name : str
+        The name of the thread.
+    args : tuple
+        The argument tuple for the target invocation.
+    kwargs : dict
+        The keyword argument dictionary for the target invocation.
+    daemon : bool
+        A boolean value indicating whether this thread is a daemon thread.
+
+    Methods
+    -------
+    run()
+        Run the thread.
+    wait()
+        Wait for the thread to finish.
+    unlock()
+        Unlock the thread.
+    isLocked()
+        Return True if the thread is locked, False otherwise.
+
+    Attributes
+    ----------
+    selfLock : threading.Lock
+        A lock that locks itself when the thread starts and unlocks itself when the
+        thread ends.
+    """
+
     def __init__(
         self, group=None, target=None, name=None, args=(), kwargs={}, *, daemon=None
     ):
         super().__init__(group, target, name, args, kwargs, daemon=daemon)
         self.selfLock = threading.Lock()
+
         # lock itself
         self.selfLock.acquire()
 
     def run(self):
-        """Run the thread."""
+        """Run the thread.
+
+        Raises
+        ------
+        Exception
+            If the thread ends because of an exception.
+        """
         self._kwargs["thread"] = self
         if self._target:
             try:
@@ -83,6 +126,34 @@ class SelfLockThread(threading.Thread):
 
 
 class SynchronizedThreadPool:
+    """A thread pool that synchronizes the threads.
+
+    Parameters
+    ----------
+    None
+
+    Attributes
+    ----------
+    resources : dict
+        A dictionary of the resources.
+    toDeleteList : dict
+        A dictionary of the threads to be deleted.
+
+    Methods
+    -------
+    registerResource(resourceName)
+        Register a resource to the pool.
+    createThread(resourceName, target, args=(), kwargs={}, *, callback=None, cbArgs=(),
+                cbKargs={})
+        Create a thread and add it to the waitlist of the resource.
+    threadTaskWrapping(resourceName, target, *, callback=None, cbArgs=(), cbKargs={})
+        Wrap the target function of the thread.
+    deleteThread(resourceName, thread)
+        Delete a thread from the pool.
+    deleteAllThreads(resourceName)
+        Delete all threads from the pool.
+    """
+
     def __init__(self):
         self.resources = {}
         self.toDeleteList = {}
@@ -345,6 +416,8 @@ class SynchronizedThreadPool:
 
 
 class ThreadWaitlist:
+    """The waitlist of the thread."""
+
     def __init__(self):
         """Initialize the ThreadWaitlist."""
         self.waitlistLock = threading.Lock()

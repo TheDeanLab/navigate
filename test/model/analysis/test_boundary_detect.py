@@ -32,6 +32,7 @@
 import math
 
 import numpy as np
+from aslm.model.analysis.boundary_detect import has_tissue
 
 
 def im_circ(r=1, N=128):
@@ -40,7 +41,6 @@ def im_circ(r=1, N=128):
 
 
 def test_has_tissue():
-    from aslm.model.analysis.boundary_detect import has_tissue
 
     for _ in range(100):
         N = 2 ** np.random.randint(5, 9)

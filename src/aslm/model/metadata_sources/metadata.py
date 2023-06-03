@@ -177,10 +177,13 @@ class Metadata:
         self._per_stack = (
             self.configuration["experiment"]["MicroscopeState"]["stack_cycling_mode"]
             == "per_stack"
-            or self.configuration["experiment"]["MicroscopeState"][
-                "conpro_cycling_mode"
-            ]
+            and self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+            == "z-stack"
+        ) or (
+            self.configuration["experiment"]["MicroscopeState"]["conpro_cycling_mode"]
             == "per_stack"
+            and self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+            == "confocal-projection"
         )
 
     @property

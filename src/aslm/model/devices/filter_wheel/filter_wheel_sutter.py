@@ -73,10 +73,6 @@ class SutterFilterWheel(FilterWheelBase):
 
     Attributes
     ----------
-    comport : str
-        Comport for communicating with the filter wheel, e.g., COM1.
-    baudrate : int
-        Baud rate for communicating with the filter wheel, e.g., 9600.
     filter_dictionary : dict
         Dictionary with installed filter names, e.g., filter_dictionary = {'GFP', 0}.
     number_of_filter_wheels : int
@@ -106,16 +102,23 @@ class SutterFilterWheel(FilterWheelBase):
 
     def __init__(self, microscope_name, device_connection, configuration):
         super().__init__(microscope_name, device_connection, configuration)
+
         self.serial = device_connection
+
+        self.microscope_name = microscope_name
 
         self.number_of_filter_wheels = configuration["configuration"]["microscopes"][
             microscope_name
         ]["filter_wheel"]["hardware"]["wheel_number"]
+
         self.wait_until_done_delay = configuration["configuration"]["microscopes"][
             microscope_name
         ]["filter_wheel"]["filter_wheel_delay"]
+
         self.wait_until_done = True
+
         self.read_on_init = True
+
         self.speed = 2
 
         # Delay in s for the wait until done function
@@ -133,7 +136,9 @@ class SutterFilterWheel(FilterWheelBase):
         )
 
         logger.debug("SutterFilterWheel - Placing device In Online Mode")
+
         self.serial.write(bytes.fromhex("ee"))
+
         if self.read_on_init:
             self.read(2)  # class 'bytes'
             self.init_finished = True
@@ -142,8 +147,11 @@ class SutterFilterWheel(FilterWheelBase):
             self.init_finished = False
 
         # Set filter to the 0th position by default upon initialization.
+
         default_filter = list(self.filter_dictionary.keys())[0]
+
         self.set_filter(default_filter)
+
         logger.debug("SutterFilterWheel -  Placed in Default Filter Position.")
 
     def __enter__(self):

@@ -261,7 +261,15 @@ class Model:
         )
 
         self.acquisition_modes_feature_setting = {
-            "single": [{"name": PrepareNextChannel}],
+            "single": [
+                (
+                    {"name": PrepareNextChannel},
+                    {
+                        "name": LoopByCount,
+                        "args": ("experiment.MicroscopeState.selected_channels",),
+                    },
+                )
+            ],
             "live": [
                 (
                     {"name": PrepareNextChannel},

@@ -153,7 +153,8 @@ class PIStage(StageBase):
             If the PI connection cannot be closed
         """
         try:
-            self.stop()
+            if hasattr(self, "pi_device"):
+                self.stop()
             logger.debug("PI connection closed")
         except (AttributeError, GCSError) as e:  # except BaseException:
             print("Error while disconnecting the PI stage")

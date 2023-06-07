@@ -45,7 +45,7 @@ def stage_configuration():
                     "type": "",
                     "port": "COM10",
                     "baudrate": 115200,
-                    "serail_number": 123456,
+                    "serial_number": 123456,
                     "axes": ["x", "y", "z", "f", "theta"]
                 },
                 "x_max": 100,
@@ -61,3 +61,99 @@ def stage_configuration():
             }
         }
 
+
+@pytest.fixture
+def random_single_axis_test(stage_configuration):
+    pos_sequence = []
+    for _ in range(10):
+        axis = random.choice(["x", "y", "z", "theta", "f"])
+        # random valid pos
+        axis_min = stage_configuration["stage"][f"{axis}_min"]
+        axis_max = stage_configuration["stage"][f"{axis}_max"]
+        pos = random.randrange(axis_min, axis_max)
+        pos_sequence.append((axis, pos))
+
+    for _ in range(10):
+        # valid and non-valid pos
+        axis = random.choice(["x", "y", "z", "theta", "f"])
+        pos = random.randrange(-100, 500)
+        pos_sequence.append((axis, pos))
+
+    def _verify_move_axis_absolute(stage):
+        axes_mapping = stage.axes_mapping
+
+        stage_pos = stage.report_position()
+        for axis, pos in pos_sequence:
+            stage.move_axis_absolute(axis, pos, True)
+            temp_pos = stage.report_position()
+            axis_min = stage_configuration["stage"][f"{axis}_min"]
+            axis_max = stage_configuration["stage"][f"{axis}_max"]
+            if axis in axes_mapping:
+                if not stage.stage_limits or (pos >= axis_min and pos <= axis_max):
+                    stage_pos[f"{axis}_pos"] = pos
+            assert stage_pos == temp_pos
+
+    return _verify_move_axis_absolute
+
+
+@pytest.fixture
+def random_multiple_axes_test(stage_configuration):
+    pos_sequence = []
+    axes = ["x", "y", "z", "f", "theta"]
+    for _ in range(20):
+        pos = {}
+        for axis in axes:
+            pos[axis] = random.randrange(-100, 500)
+        pos_sequence.append(pos)
+
+    def _verify_move_absolute(stage):
+        axes_mapping = stage.axes_mapping
+        
+        # move one axis inside supported axes
+        stage_pos = stage.report_position()
+        for pos_dict in pos_sequence:
+            axis = random.choice(list(axes_mapping.keys()))
+            pos = pos_dict[axis]
+            axis_min = stage_configuration["stage"][f"{axis}_min"]
+            axis_max = stage_configuration["stage"][f"{axis}_max"]
+            move_dict = {
+                f"{axis}_abs": pos
+            }
+            stage.move_absolute(move_dict)
+            temp_pos = stage.report_position()
+            if not stage.stage_limits or (pos >= axis_min and pos <= axis_max):
+                stage_pos[f"{axis}_pos"] = pos
+            assert stage_pos == temp_pos
+
+        # move all axes inside supported axes
+        stage_pos = stage.report_position()
+        for pos_dict in pos_sequence:
+            move_dict = {}
+            for axis in axes_mapping.keys():
+                move_dict[f"{axis}_abs"] = pos_dict[axis]
+            
+            stage.move_absolute(move_dict)
+            temp_pos = stage.report_position()
+            for axis in axes_mapping:
+                pos = pos_dict[axis]
+                axis_min = stage_configuration["stage"][f"{axis}_min"]
+                axis_max = stage_configuration["stage"][f"{axis}_max"]
+                if not stage.stage_limits or (pos >= axis_min and pos <= axis_max):
+                    stage_pos[f"{axis}_pos"] = pos
+            assert stage_pos == temp_pos
+
+        # move all axes (including supported axes and non-supported axes)
+        stage_pos = stage.report_position()
+        for pos_dict in pos_sequence:
+            move_dict = dict(map(lambda axis: (f"{axis}_abs", pos_dict[axis]), pos_dict))
+            stage.move_absolute(move_dict)
+            temp_pos = stage.report_position()
+            for axis in axes_mapping:
+                pos = pos_dict[axis]
+                axis_min = stage_configuration["stage"][f"{axis}_min"]
+                axis_max = stage_configuration["stage"][f"{axis}_max"]
+                if not stage.stage_limits or (pos >= axis_min and pos <= axis_max):
+                    stage_pos[f"{axis}_pos"] = pos
+            assert stage_pos == temp_pos
+    
+    return _verify_move_absolute

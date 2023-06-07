@@ -142,3 +142,20 @@ def dummy_controller(dummy_view):
 # @pytest.fixture(scope="package")
 # def model(controller):
 #     return controller.model
+
+class IgnoreObj:
+    def __init__(self):
+        pass
+
+    def __getattr__(self, __name: str):
+        return self
+    
+    def __call__(self, *args, **kwargs):
+        pass
+
+    def __setattr__(self, __name: str, __value):
+        pass
+
+@pytest.fixture(scope="package")
+def ignore_obj():
+    return IgnoreObj()

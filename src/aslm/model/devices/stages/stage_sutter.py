@@ -61,7 +61,9 @@ def build_MP285_connection(com_port, baud_rate, timeout=0.25):
         MP285 SutterStage.
     """
     try:
-        return MP285(com_port, baud_rate, timeout)
+        mp285_stage = MP285(com_port, baud_rate, timeout)
+        mp285_stage.connect_to_serial()
+        return mp285_stage
     except SerialException as e:
         logger.debug(f"Sutter MP-285 - Could not establish Serial Port Connection: {e}")
         raise UserWarning(
@@ -100,7 +102,7 @@ class SutterStage(StageBase):
         Set the filter wheel to the empty position and close the communication port.
     """
 
-    def __init__(self, microscope_name, device_connection, configuration, device_id):
+    def __init__(self, microscope_name, device_connection, configuration, device_id=0):
         super().__init__(microscope_name, device_connection, configuration, device_id)
 
         # Device Connection
@@ -188,6 +190,29 @@ class SutterStage(StageBase):
                 time.sleep(0.01)
 
         return position
+    
+    def move_axis_absolute(self, axis, abs_pos, wait_until_done=False):
+        """
+        Implement movement logic along a single axis.
+
+        Example calls:
+
+        Parameters
+        ----------
+        axis : str
+            An axis. For example, 'x', 'y', 'z', 'f', 'theta'.
+        abs_pos : float
+            Absolute position value
+        wait_until_done : bool
+            Block until stage has moved to its new spot.
+
+        Returns
+        -------
+        bool
+            Was the move successful?
+        """
+        move_dictionary = {f"{axis}_abs": abs_pos}
+        return self.move_absolute(move_dictionary, wait_until_done)
 
     def move_absolute(self, move_dictionary, wait_until_done=True):
         """Move stage along a single axis.
@@ -206,15 +231,18 @@ class SutterStage(StageBase):
         bool
             Was the move successful?
         """
-        self.stage.wait_until_done = wait_until_done
-
         pos_dict = self.verify_abs_position(move_dictionary)
         if not pos_dict:
             return False
 
-        # map pos_dict to stage_axis_pos
-        map(lambda axis: setattr(self, f"stage_{self.axes_mapping[axis]}_pos", pos_dict[axis]), pos_dict)
+        # if not moving x, y, and z together, need to get current positions
+        if len(pos_dict.keys()) < 3:
+            self.report_position()
 
+        for axis in pos_dict:
+            setattr(self, f"stage_{self.axes_mapping[axis]}_pos", pos_dict[axis])
+
+        self.stage.wait_until_done = wait_until_done
         try:
             self.stage.move_to_specified_position(
                 x_pos=self.stage_x_pos, y_pos=self.stage_y_pos, z_pos=self.stage_z_pos

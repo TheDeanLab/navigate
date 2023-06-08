@@ -29,11 +29,15 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from aslm.model.devices.stages.stage_base import StageBase
-
+# Standard Library imports
 import importlib
 import logging
 import time
+from multiprocessing.managers import ListProxy
+
+# Local Imports
+from aslm.model.devices.stages.stage_base import StageBase
+
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -48,10 +52,11 @@ def build_TLKIMStage_connection(serialnum):
     # Initialize
     kim_controller.TLI_BuildDeviceList()
 
-    # Cheat for now by opening just the first stage of this type.
-    # TODO: Pass this from the configuration file
-    available_serialnum = kim_controller.TLI_GetDeviceListExt()[0]
-    assert str(available_serialnum) == str(serialnum)
+    # Open the same serial number device if there are severial devices connected to the computer
+    available_serialnum = kim_controller.TLI_GetDeviceListExt()
+    if not list(filter(lambda s: str(s) == str(serialnum), available_serialnum)):
+        print(f"** Please make sure Thorlabs stage with serial number {serialnum} is connected to the computer!")
+        raise RuntimeError
     kim_controller.KIM_Open(str(serialnum))
     return kim_controller
 
@@ -72,11 +77,11 @@ class TLKIMStage(StageBase):
         if device_connection is not None:
             self.kim_controller = device_connection
 
-        self.serial_number = str(
-            configuration["configuration"]["microscopes"][microscope_name]["stage"][
-                "hardware"
-            ][device_id]["serial_number"]
-        )
+        device_config = configuration["configuration"]["microscopes"][microscope_name]["stage"]["hardware"]
+        if type(device_config) == ListProxy:
+            self.serial_number = str(device_config[device_id]["serial_number"])
+        else:
+            self.serial_number = device_config["serial_number"]
 
     def __del__(self):
         try:
@@ -140,8 +145,10 @@ class TLKIMStage(StageBase):
             stage_pos, n_tries, i = -1e50, 10, 0
             target_pos = axis_abs
             while (stage_pos != target_pos) and (i < n_tries):
+                # TODO: do we need to request before we get the current position
+                # self.kim_controller.KIM_RequestCurrentPosition(self.serial_number, int(self.axes_mapping[axis]))
                 stage_pos = self.kim_controller.KIM_GetCurrentPosition(
-                    self.serial_number, n
+                    self.serial_number, int(self.axes_mapping[axis])
                 )
                 i += 1
                 time.sleep(0.01)

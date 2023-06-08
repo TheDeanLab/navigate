@@ -84,6 +84,7 @@ class ASIFilterWheel(FilterWheelBase):
         super().__init__(microscope_name, device_connection, configuration)
 
         self.filter_wheel = device_connection
+        self.microscope_name = microscope_name
 
         self.number_of_filter_wheels = configuration["configuration"]["microscopes"][
             microscope_name

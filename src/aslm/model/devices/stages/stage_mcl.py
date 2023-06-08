@@ -75,9 +75,9 @@ class MCLStage(StageBase):
         # Reports the position of the stage for all axes, and creates the hardware
         # position dictionary.
         """
-        for ax in self.axes:
+        for ax in self.axes_mapping:
             try:
-                pos = self.mcl_controller.MCL_SingleReadN(ax, self.handle)
+                pos = self.mcl_controller.MCL_SingleReadN(self.axes_mapping[ax], self.handle)
                 setattr(self, f"{ax}_pos", pos)
             except self.mcl_controller.MadlibError as e:
                 logger.debug(f"MCL - {e}")
@@ -111,6 +111,15 @@ class MCLStage(StageBase):
             return False
 
         self.mcl_controller.MCL_SingleWriteN(axis_abs, self.axes_mapping[axis], self.handle)
+
+        if wait_until_done:
+            stage_pos, n_tries, i = -1e50, 10, 0
+            while (abs(stage_pos - abs_pos) < 0.01) and (i < n_tries):
+                stage_pos = self.mcl_controller.MCL_SingleReadN(axis, self.handle)
+                i += 1
+                time.sleep(0.01)
+            if abs(stage_pos - abs_pos) > 0.01:
+                return False
         return True
 
     def move_absolute(self, move_dictionary, wait_until_done=False):
@@ -130,18 +139,13 @@ class MCLStage(StageBase):
         success : bool
             Was the move successful?
         """
+        abs_pos_dict = self.verify_abs_position(move_dictionary)
+        if not abs_pos_dict:
+            return False
+        
         result = True
-        for ax in self.axes:
-            success = self.move_axis_absolute(ax, move_dictionary)
-            if success and wait_until_done is True:
-                stage_pos, n_tries, i = -1e50, 10, 0
-                target_pos = move_dictionary[f"{ax}_abs"]
-                while (abs(stage_pos - target_pos) < 0.01) and (i < n_tries):
-                    stage_pos = self.mcl_controller.MCL_SingleReadN(ax, self.handle)
-                    i += 1
-                    time.sleep(0.01)
-                if abs(stage_pos - target_pos) > 0.01:
-                    success = False
+        for ax in abs_pos_dict:
+            success = self.move_axis_absolute(ax, abs_pos_dict[ax], wait_until_done)    
             result = result and success
 
         return result

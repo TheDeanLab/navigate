@@ -356,12 +356,14 @@ class Controller:
         if self.configuration["experiment"]["MicroscopeState"]["scanrange"] == 0:
             return False
         return True
-    
+
     def resize(self, event):
         def refresh(width, height):
             if width < 1200 or height < 600:
                 return
-            self.view.camera_waveform["width"] = width - self.view.frame_left.winfo_width() - 81
+            self.view.camera_waveform["width"] = (
+                width - self.view.frame_left.winfo_width() - 81
+            )
             self.view.camera_waveform["height"] = height - 110
 
         if event.widget != self.view.scroll_frame:
@@ -393,6 +395,9 @@ class Controller:
             "stage_positions",
             positions,
         )
+        self.configuration["experiment"]["MicroscopeState"][
+            "multiposition_count"
+        ] = len(positions)
 
         # set waveform template
         if self.acquire_bar_controller.mode == "confocal-projection":

@@ -88,7 +88,7 @@ class VolumeSearch:
         self.sinx = -1 if flipx else 1
         self.siny = -1 if flipy else 1
 
-        self.overlap = max(0, min(overlap, 1))
+        self.overlap = max(0, min(overlap, 0.999))
 
         self.has_tissue_queue = Queue()
         self.direction = 1  # up: 1; down: -1

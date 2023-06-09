@@ -860,9 +860,9 @@ class Model:
         #     channel_key, self.current_exposure_time
         # )
 
-        # Stash current position, channel, timepoint
-        # Do this here, because signal container functions can inject changes
-        # to the stage
+        # Stash current position, channel, timepoint. Do this here, because signal
+        # container functions can inject changes to the stage. NOTE: This line is
+        # wildly expensive when get_stage_position() does not cache results.
         stage_pos = self.get_stage_position()
         self.data_buffer_positions[self.frame_id][0] = stage_pos["x_pos"]
         self.data_buffer_positions[self.frame_id][1] = stage_pos["y_pos"]

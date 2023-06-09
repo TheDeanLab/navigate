@@ -84,6 +84,7 @@ class Microscope:
         self.data_buffer = None
         self.stages = {}
         self.stages_list = []
+        self.ask_stage_for_position = True
         self.lasers = {}
         self.galvo = {}
         self.daq = devices_dict.get("daq", None)
@@ -96,6 +97,7 @@ class Microscope:
         self.central_focus = None
         self.is_synthetic = is_synthetic
         self.laser_wavelength = []
+        self.ret_pos_dict = {}
 
         if is_virtual:
             return
@@ -294,6 +296,7 @@ class Microscope:
                 for axis in axes
             }
             stage.move_absolute(pos, wait_until_done=True)
+        self.ask_stage_for_position = True
 
     def prepare_acquisition(self):
         """Prepare the acquisition.
@@ -501,6 +504,8 @@ class Microscope:
         -------
         None
         """
+        self.ask_stage_for_position = True
+
         if len(pos_dict.keys()) == 1:
             axis_key = list(pos_dict.keys())[0]
             axis = axis_key[: axis_key.index("_")]
@@ -517,6 +522,7 @@ class Microscope:
             }
             if pos:
                 success = stage.move_absolute(pos, wait_until_done) and success
+
         return success
 
     def stop_stage(self):
@@ -534,6 +540,8 @@ class Microscope:
         for stage, axes in self.stages_list:
             stage.stop()
 
+        self.ask_stage_for_position = True
+
     def get_stage_position(self):
         """Get stage position.
 
@@ -547,15 +555,18 @@ class Microscope:
             Dictionary of stage positions.
         """
 
-        ret_pos_dict = {}
-        for stage, axes in self.stages_list:
-            temp_pos = stage.report_position()
-            ret_pos_dict.update(temp_pos)
-        return ret_pos_dict
+        if self.ask_stage_for_position:
+            # self.ret_pos_dict = {}
+            for stage, axes in self.stages_list:
+                temp_pos = stage.report_position()
+                self.ret_pos_dict.update(temp_pos)
+            self.ask_stage_for_position = False
+        return self.ret_pos_dict
 
     def update_stage_limits(self, limits_flag=True):
         for stage, _ in self.stages_list:
             stage.stage_limits = limits_flag
+        self.ask_stage_for_position = True
 
     def assemble_device_config_lists(self, device_name, device_name_dict):
         """Assemble device config lists.

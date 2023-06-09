@@ -65,37 +65,52 @@ class HamamatsuOrca(CameraBase):
         # Set default settings for the camera.
         # How many of these things are model specific?
         # Hamamatsu Orca, Fusion, Lightning,
-        self.camera_controller.set_property_value("sensor_mode", 1.0)
-        self.camera_controller.set_property_value("defect_correct_mode", 2.0)
-        self.camera_controller.set_property_value("readout_speed", 2.0)
-        self.camera_controller.set_property_value("trigger_active", 1.0)
-        self.camera_controller.set_property_value("trigger_mode", 1.0)
-        self.camera_controller.set_property_value("trigger_polarity", 2.0)
+
+        defect_correct_mode = self.camera_parameters.get("defect_correct_mode", 2.0)
+        self.camera_controller.set_property_value("defect_correct_mode", defect_correct_mode)
+
+        readout_speed = self.camera_parameters.get("readout_speed", 1.0)
+        self.camera_controller.set_property_value("readout_speed", readout_speed)
+
+        trigger_active = self.camera_parameters.get("trigger_active", 1.0)
+        self.camera_controller.set_property_value("trigger_active", trigger_active)
+
+        # 1 = external light-sheet mode.
+        trigger_mode = self.camera_parameters.get("trigger_mode", 1.0)
+        self.camera_controller.set_property_value("trigger_mode", trigger_mode)
+
+        # 2 = positive pulse.
+        trigger_polarity = self.camera_parameters.get("trigger_polarity", 2.0)
+        self.camera_controller.set_property_value("trigger_polarity", trigger_polarity)
+
+        # 2 = external, 3 = software.
+        trigger_source = self.camera_parameters.get("trigger_source", 2.0)
         self.camera_controller.set_property_value("trigger_source", 2.0)
 
-        # Retrieve camera settings from the camera.
+        line_interval = self.camera_parameters.get("line_interval", 0.000075)
+        self.camera_controller.set_property_value("line_interval", line_interval)
+
+        # Retrieve camera settings from the camera and update configuration.
         self.pixel_size_in_microns = self.camera_controller.get_property_value(
             "physical_pixel_size"
         )
-        self.x_pixels = int(self.camera_controller.get_property_value("subarray_hsize"))
-        self.y_pixels = int(self.camera_controller.get_property_value("subarray_vsize"))
-        binning = int(self.camera_controller.get_property_value("binning"))
-        self.camera_line_interval = self.camera_controller.get_property_value(
-            "internal_line_interval"
-        )
+        self.camera_parameters["pixel_size_in_microns"] = self.pixel_size_in_microns
 
-        self.x_binning, self.y_binning = binning, binning
+
+        # TODO: Ideally, we would get the camera size from the camera itself.
+        #  However, we will run into issues when the microscope has more than 1 camera,
+        #  with a different number of pixels.
+
+        max_x_pixels = int(self.camera_controller.get_property_value("subarray_hsize"))
+        self.x_pixels = self.camera_parameters.get("x_pixels", max_x_pixels)
+
+        max_y_pixels = int(self.camera_controller.get_property_value("subarray_vsize"))
+        self.y_pixels = self.camera_parameters.get("y_pixels", max_y_pixels)
+
+        binning = self.camera_parameters.get("binning", "1x1")
+        self.x_binning, self.y_binning = int(binning[0]), int(binning[0])
         self.x_pixels = self.x_pixels / self.x_binning
         self.y_pixels = self.y_pixels / self.y_binning
-
-        # Update the CameraParameters section of the configuration.yaml file.
-        self.camera_parameters["pixel_size_in_microns"] = self.pixel_size_in_microns
-        self.camera_parameters["x_pixels"] = self.x_pixels
-        self.camera_parameters["y_pixels"] = self.y_pixels
-        self.camera_parameters["binning"] = (
-            str(self.x_binning) + "x" + str(self.y_binning)
-        )
-        self.camera_parameters["line_interval"] = self.camera_line_interval
 
         logger.info("HamamatsuOrca Initialized")
 

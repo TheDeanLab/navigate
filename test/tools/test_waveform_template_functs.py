@@ -30,36 +30,56 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-# Standard Library Imports
+# Standard library imports
+import unittest
 
-# Third Party Imports
-from PIL import Image, ImageDraw, ImageFont
-import numpy as np
+# Third-party imports
 
-# Local Imports
+# Local application imports
+from aslm.tools.waveform_template_funcs import get_waveform_template_parameters
 
 
-def text_array(text: str, offset: tuple = (0, 0)):
-    """Create a binary array from a piece of text
+class TestGetWaveformTemplateParameters(unittest.TestCase):
+    def setUp(self):
+        self.waveform_template_name = "template1"
+        self.waveform_template_dict = {
+            "template1": {"repeat": 3, "expand": 2},
+            "template2": {"repeat": "repeat_param", "expand": "expand_param"},
+        }
+        self.microscope_state_dict = {"repeat_param": 4, "expand_param": 5}
 
-    Use Default font to avoid OS related errors.
+    def test_get_waveform_template_parameters(self):
+        repeat_num, expand_num = get_waveform_template_parameters(
+            self.waveform_template_name,
+            self.waveform_template_dict,
+            self.microscope_state_dict,
+        )
 
-    Parameters
-    ----------
-    text : str
-        Text to convert
-    offset : tuple
-        (x,y) offset from upper left of image
-    font_size: int
-        Size of font in pixels
+        self.assertEqual(repeat_num, 3)
+        self.assertEqual(expand_num, 2)
 
-    Returns
-    -------
-    np.array
-        Binary array of text
-    """
-    font = ImageFont.load_default()
-    bbox = font.getbbox(text)
-    im = Image.new(mode="1", size=(bbox[2] + offset[0], bbox[3] + offset[1]))
-    ImageDraw.Draw(im).text(xy=offset, text=text, fill=1, font=font)
-    return np.array(im, dtype=bool)
+    def test_get_waveform_template_parameters_with_microscope_state(self):
+        self.waveform_template_name = "template2"
+        repeat_num, expand_num = get_waveform_template_parameters(
+            self.waveform_template_name,
+            self.waveform_template_dict,
+            self.microscope_state_dict,
+        )
+
+        self.assertEqual(repeat_num, 4)
+        self.assertEqual(expand_num, 5)
+
+    def test_get_waveform_template_parameters_with_missing_template(self):
+        self.waveform_template_name = "template3"
+        repeat_num, expand_num = get_waveform_template_parameters(
+            self.waveform_template_name,
+            self.waveform_template_dict,
+            self.microscope_state_dict,
+        )
+
+        self.assertEqual(repeat_num, 1)
+        self.assertEqual(expand_num, 1)
+
+
+if __name__ == "__main__":
+    unittest.main()

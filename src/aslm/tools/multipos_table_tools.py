@@ -48,7 +48,8 @@ def sign(x):
     int
         The sign of x.
     """
-    return -1 if x < 0 else 1  # (1 if x > 0 else 0)
+    # (1 if x > 0 else 0)
+    return -1 if x < 0 else 1
 
 
 def compute_tiles_from_bounding_box(
@@ -140,9 +141,8 @@ def compute_tiles_from_bounding_box(
     y_step = y_length * (1 - y_overlap)
     z_step = z_length * (1 - z_overlap)
     theta_step = theta_length * (1 - theta_overlap)
-    f_step = f_length * (
-        1 - f_overlap
-    )  # Although we assume focus FOVs have no thickness, we include
+    f_step = f_length * (1 - f_overlap)
+    # Although we assume focus FOVs have no thickness, we include
     # overlap to adjust for z-ramping. We have no excuse for the
     # theta overlap.
 
@@ -205,8 +205,9 @@ def calc_num_tiles(dist, overlap, roi_length):
 
 
 def update_table(table, pos, append=False):
-    """Updates and redraws table based on given list. List is converted to a pandas
-    dataframe before setting data in table.
+    """Updates and redraws table based on given list.
+
+    List is converted to a pandas dataframe before setting data in table.
 
     Parameters
     ----------

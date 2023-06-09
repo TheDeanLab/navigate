@@ -719,8 +719,6 @@ class DCAM:
         self.max_image_width = self.get_property_value("image_width")
         self.max_image_height = self.get_property_value("image_height")
 
-        self.is_acquiring = False
-
         self._serial_number = self.get_string_value(
             c_int32(int("0x04000102", 0))
         ).strip("S/N: ")
@@ -1115,8 +1113,6 @@ class DCAM:
         if self.__result(dcambuf_attach(self.__hdcam, attach_param)):
             self.pre_frame_count = 0
             self.pre_index = 0
-            # start capture
-            self.is_acquiring = True
             return self.__result(dcamcap_start(self.__hdcam, DCAMCAP_START_SEQUENCE))
         return False
 
@@ -1126,8 +1122,6 @@ class DCAM:
         """
         # stop capture
         dcamcap_stop(self.__hdcam)
-
-        self.is_acquiring = False
 
         # detach buffer
         return self.__result(dcambuf_release(self.__hdcam, DCAMBUF_ATTACHKIND_FRAME))

@@ -156,6 +156,12 @@ class IgnoreObj:
     def __setattr__(self, __name: str, __value):
         pass
 
+    def __getitem__(self, __key: str):
+        return self
+    
+    def __setitem__(self, __key: str, __value):
+        pass
+
 @pytest.fixture(scope="package")
 def ignore_obj():
     return IgnoreObj()

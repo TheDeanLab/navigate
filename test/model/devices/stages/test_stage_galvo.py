@@ -31,38 +31,39 @@
 #
 
 # Standard Library Imports
-import unittest
+import pytest
+import random
 
 # Third Party Imports
 
 # Local Imports
 from aslm.model.devices.stages.stage_galvo import GalvoNIStage
 from aslm.model.dummy import DummyModel
+from aslm.tools.common_functions import copy_proxy_object
 
 
-class TestStageGalvo(unittest.TestCase):
-    """Unit Test for StageBase Class"""
+class TestStageGalvo:
+    """Unit Test for Galvo stage Class"""
+
+    @pytest.fixture(autouse=True)
+    def setup_class(self, stage_configuration, ignore_obj, random_single_axis_test, random_multiple_axes_test):
+        dummy_model = DummyModel()
+        self.configuration = copy_proxy_object(dummy_model.configuration)
+        self.microscope_name = list(self.configuration["configuration"]["microscopes"].keys())[0]
+        self.configuration["configuration"]["microscopes"][self.microscope_name]["stage"] = stage_configuration["stage"]
+        self.stage_configuration = stage_configuration
+        self.stage_configuration["stage"]["hardware"]["type"] = "GalvoNIStage"
+        self.stage_configuration["stage"]["hardware"]["volts_per_micron"] = "0.1"
+        self.stage_configuration["stage"]["hardware"]["max"] = 5.0
+        self.stage_configuration["stage"]["hardware"]["min"] = 0.1
+        self.stage_configuration["stage"]["hardware"]["axes_mapping"] = ["PXI6259/ao2"]
+
+        self.daq = ignore_obj
+        self.random_single_axis_test = random_single_axis_test
+        self.random_multiple_axes_test = random_multiple_axes_test
 
     def test_stage_attributes(self):
-        dummy_model = DummyModel()
-        microscope_name = "Mesoscale"
-        stage = GalvoNIStage(microscope_name, None, dummy_model.configuration)
-
-        # Attributes
-        assert hasattr(stage, "x_pos")
-        assert hasattr(stage, "y_pos")
-        assert hasattr(stage, "z_pos")
-        assert hasattr(stage, "f_pos")
-        assert hasattr(stage, "theta_pos")
-        assert hasattr(stage, "x_max")
-        assert hasattr(stage, "y_max")
-        assert hasattr(stage, "z_max")
-        assert hasattr(stage, "f_max")
-        assert hasattr(stage, "x_min")
-        assert hasattr(stage, "y_min")
-        assert hasattr(stage, "z_min")
-        assert hasattr(stage, "f_min")
-        assert hasattr(stage, "theta_min")
+        stage = GalvoNIStage(self.microscope_name, self.daq, self.configuration)
 
         # Methods
         assert hasattr(stage, "get_position_dict") and callable(
@@ -82,6 +83,79 @@ class TestStageGalvo(unittest.TestCase):
             getattr(stage, "get_abs_position")
         )
 
+    @pytest.mark.parametrize(
+        "axes",
+        [
+            (["x"]),
+            (["y"]),
+            (["f"])
+        ]
+    )
+    def test_initialize_stage(self, axes):
+        self.stage_configuration["stage"]["hardware"]["axes"] = axes
+        stage = GalvoNIStage(self.microscope_name, self.daq, self.configuration)
 
-if __name__ == "__main__":
-    unittest.main()
+        # Attributes
+        for axis in axes:
+            assert hasattr(stage, f"{axis}_pos")
+            assert hasattr(stage, f"{axis}_min")
+            assert hasattr(stage, f"{axis}_max")
+            assert getattr(stage, f"{axis}_pos") == 0
+            assert getattr(stage, f"{axis}_min") == self.stage_configuration["stage"][f"{axis}_min"]
+            assert getattr(stage, f"{axis}_max") == self.stage_configuration["stage"][f"{axis}_max"]
+
+        for i, axis in enumerate(axes):
+            assert stage.axes_mapping[axis] == self.stage_configuration["stage"]["hardware"]["axes_mapping"][i]
+
+    @pytest.mark.parametrize(
+        "axes",
+        [
+            (["x"]),
+            (["y"]),
+            (["f"])
+        ]
+    )
+    def test_report_position(self, axes):
+        self.stage_configuration["stage"]["hardware"]["axes"] = axes
+        stage = GalvoNIStage(self.microscope_name, self.daq, self.configuration)
+
+        for _ in range(10):
+            pos_dict = {}
+            for axis in axes:
+                pos = random.randrange(-100, 500)
+                pos_dict[f"{axis}_pos"] = float(pos)
+                setattr(stage, f"{axis}_pos", float(pos))
+            temp_pos = stage.report_position()
+            assert pos_dict == temp_pos
+
+    @pytest.mark.parametrize(
+        "axes",
+        [
+            (["x"]),
+            (["y"]),
+            (["f"])
+        ]
+    )
+    def test_move_axis_absolute(self, axes):
+        self.stage_configuration["stage"]["hardware"]["axes"] = axes
+        stage = GalvoNIStage(self.microscope_name, self.daq, self.configuration)
+
+        self.random_single_axis_test(stage)
+        stage.stage_limits = False
+        self.random_single_axis_test(stage)
+
+    @pytest.mark.parametrize(
+        "axes",
+        [
+            (["x"]),
+            (["y"]),
+            (["f"])
+        ]
+    )
+    def test_move_absolute(self, axes):
+        self.stage_configuration["stage"]["hardware"]["axes"] = axes
+        stage = GalvoNIStage(self.microscope_name, self.daq, self.configuration)
+
+        self.random_multiple_axes_test(stage)
+        stage.stage_limits = False
+        self.random_multiple_axes_test(stage)

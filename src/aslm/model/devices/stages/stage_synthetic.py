@@ -106,13 +106,11 @@ class SyntheticStage(StageBase):
             Was the move successful?
         """
         abs_pos_dict = self.verify_abs_position(move_dictionary)
-        print("*** move stage:", move_dictionary, abs_pos_dict)
         if not abs_pos_dict:
             return False
 
         for axis in abs_pos_dict:            
             setattr(self, f"{axis}_pos", abs_pos_dict[axis])
-            print("**** move stage:", axis, abs_pos_dict[axis])
         if wait_until_done is True:
             time.sleep(0.025)
 

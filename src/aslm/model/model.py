@@ -946,7 +946,6 @@ class Model:
             ):
                 self.stop_stage()
                 curr_pos = self.get_stage_position()
-                update_stage_dict(self, curr_pos)
                 for axis, mags in offsets[solvent].items():
                     try:
                         shift_axis = curr_pos[f"{axis}_pos"] + float(
@@ -959,18 +958,11 @@ class Model:
                     except KeyError:
                         pass
                 self.stop_stage()
-                curr_pos = self.get_stage_position()
-                update_stage_dict(self, curr_pos)
-                # self.stop_stage()
-                # curr_pos = self.get_stage_position()
-                # update_stage_dict(self, curr_pos)
-                # print(f"putting {curr_pos}")
-                # self.event_queue.put(
-                #     ("update_stage", curr_pos)
-                # )
 
         except ValueError as e:
             self.logger.debug(f"{self.active_microscope_name} - {e}")
+
+        self.active_microscope.ask_stage_for_position = True
 
     def load_images(self, filenames=None):
         """Load/Unload images to the Synthetic Camera

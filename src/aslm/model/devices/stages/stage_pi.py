@@ -136,7 +136,9 @@ class PIStage(StageBase):
             axes_mapping = {x: y for x, y in zip(self.axes, self.pi_device.axes)}
 
         if not self.axes_mapping:
-            self.axes_mapping = {axis: axes_mapping[axis] for axis in self.axes if axis in axes_mapping}
+            self.axes_mapping = {
+                axis: axes_mapping[axis] for axis in self.axes if axis in axes_mapping
+            }
 
         self.pi_axes = list(self.axes_mapping.values())
 
@@ -208,7 +210,7 @@ class PIStage(StageBase):
         """
         if axis not in self.axes_mapping:
             return False
-        
+
         axis_abs = self.get_abs_position(axis, abs_pos)
         if axis_abs == -1e50:
             return False
@@ -223,10 +225,10 @@ class PIStage(StageBase):
         except GCSError as e:
             logger.exception(f"move_axis_absolute failed - {e}")
             return False
-        
+
         if wait_until_done is True:
             return self.wait_on_target()
-        
+
         return True
 
     def move_absolute(self, move_dictionary, wait_until_done=False):
@@ -252,18 +254,23 @@ class PIStage(StageBase):
         abs_pos_dict = self.verify_abs_position(move_dictionary)
         if not abs_pos_dict:
             return False
-        
-        pos_dict = {self.axes_mapping[axis]: abs_pos_dict[axis]/1000 if axis != "theta" else abs_pos_dict[axis] for axis in abs_pos_dict}
-        
+
+        pos_dict = {
+            self.axes_mapping[axis]: abs_pos_dict[axis] / 1000
+            if axis != "theta"
+            else abs_pos_dict[axis]
+            for axis in abs_pos_dict
+        }
+
         try:
             self.pi_device.MOV(pos_dict)
         except GCSError as e:
             logger.exception(f"move_axis_absolute failed - {e}")
-            return False   
+            return False
 
         if wait_until_done is True:
             return self.wait_on_target()
-        
+
         return True
 
     def stop(self):
@@ -286,7 +293,7 @@ class PIStage(StageBase):
         None
         """
         try:
-            self.pi_tools.waitontarget(self.pi_device, timeout=5.0)
+            self.pi_tools.waitontarget(self.pi_device, timeout=10.0)
         except GCSError as e:
             print("Wait on target failed")
             logger.exception(f"Wait on target failed - {e}")

@@ -284,6 +284,7 @@ class Microscope:
         self_offset_dict = self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ]["stage"]
+        self.ask_stage_for_position = True
         pos_dict = self.get_stage_position()
         for stage, axes in self.stages_list:
             pos = {
@@ -537,10 +538,10 @@ class Microscope:
         None
         """
 
+        self.ask_stage_for_position = True
+
         for stage, axes in self.stages_list:
             stage.stop()
-
-        self.ask_stage_for_position = True
 
     def get_stage_position(self):
         """Get stage position.
@@ -564,9 +565,9 @@ class Microscope:
         return self.ret_pos_dict
 
     def update_stage_limits(self, limits_flag=True):
+        self.ask_stage_for_position = True
         for stage, _ in self.stages_list:
             stage.stage_limits = limits_flag
-        self.ask_stage_for_position = True
 
     def assemble_device_config_lists(self, device_name, device_name_dict):
         """Assemble device config lists.

@@ -75,6 +75,25 @@ def model():
     return model
 
 
+def test_single_acquisition(model):
+    model.configuration["experiment"]["MicroscopeState"]["image_mode"] = "single"
+    model.configuration["experiment"]["MicroscopeState"]["is_save"] = False
+
+    n_frames = model.configuration["experiment"]["MicroscopeState"]["selected_channels"]
+
+    show_img_pipe = model.create_pipe("show_img_pipe")
+
+    model.run_command("acquire")
+
+    image_id = show_img_pipe.recv()
+    n_images = 0
+    while image_id != "stop":
+        image_id = show_img_pipe.recv()
+        n_images += 1
+
+    assert n_images == n_frames
+
+
 def test_change_resolution(model):
     """
     Note: The stage position check is an absolute mess due to us instantiating two

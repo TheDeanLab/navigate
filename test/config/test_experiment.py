@@ -177,7 +177,7 @@ class TextExperimentFile(unittest.TestCase):
             "timepoint_interval": int,
             "experiment_duration": float,
             "is_multiposition": bool,
-            "multipostion_count": int,
+            "multiposition_count": int,
             "selected_channels": int,
             "channels": dict,
             "stack_z_origin": float,

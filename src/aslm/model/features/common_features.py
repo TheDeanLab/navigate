@@ -185,7 +185,7 @@ class MoveToNextPositionInMultiPostionTable:
             "MultiPositions"
         ]["stage_positions"]
         self.postion_count = self.model.configuration["experiment"]["MicroscopeState"][
-            "multipostion_count"
+            "multiposition_count"
         ]
 
     def pre_signal_func(self):

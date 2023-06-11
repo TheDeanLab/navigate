@@ -28,13 +28,16 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-#
 
 
 # Standard library imports
 from datetime import datetime
 import os
+import json
 
+# Third party imports
+
+# Local application imports
 from .common_functions import copy_proxy_object
 
 
@@ -76,8 +79,7 @@ def create_save_path(saving_settings):
         label_string,
         date_string,
     )
-    if not os.path.exists(save_directory):
-        os.makedirs(save_directory)
+    os.makedirs(save_directory, exist_ok=True)
 
     # Determine Number of Cells in Directory
     # Cell1/Position1/1_CH00_000000.tif
@@ -92,8 +94,7 @@ def create_save_path(saving_settings):
     cell_string = "Cell_" + str(cell_index).zfill(3)
 
     save_directory = os.path.join(save_directory, cell_string)
-    if not os.path.exists(save_directory):
-        os.makedirs(save_directory)
+    os.makedirs(save_directory, exist_ok=True)
 
     # Update the experiment dict
     saving_settings["save_directory"] = save_directory
@@ -119,7 +120,6 @@ def save_yaml_file(file_directory, content_dict, filename="experiment.yml"):
     bool
         True if file was saved successfully, False otherwise.
     """
-    import json
 
     try:
         file_name = os.path.join(file_directory, filename)
@@ -131,13 +131,20 @@ def save_yaml_file(file_directory, content_dict, filename="experiment.yml"):
 
 
 def delete_folder(top):
-    # https://docs.python.org/3/library/os.html#os.walk
-    # Delete everything reachable from the directory named in "top",
-    # assuming there are no symbolic links.
-    # CAUTION:  This is dangerous!  For example, if top == '/', it
-    # could delete all your disk files.
-    import os
+    """Delete folder and all sub-folders.
 
+    https://docs.python.org/3/library/os.html#os.walk
+
+    Delete everything reachable from the directory named in "top",
+    assuming there are no symbolic links.
+    CAUTION:  This is dangerous!  For example, if top == '/', it
+    could delete all your disk files.
+
+    Parameters
+    ----------
+    top : str
+        Path to folder to delete.
+    """
     for root, dirs, files in os.walk(top, topdown=False):
         for name in files:
             try:

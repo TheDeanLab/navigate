@@ -212,10 +212,7 @@ class Model:
             [
                 {
                     "name": VolumeSearch,
-                    "args": (
-                        "Nanoscale",
-                        "N/A",
-                    ),
+                    "args": ("Nanoscale", "N/A", False, False, 0.1),
                 }
             ]
         )
@@ -254,7 +251,7 @@ class Model:
                     {"name": WaitToContinue},
                     {
                         "name": LoopByCount,
-                        "args": ("experiment.MicroscopeState.multipostion_count",),
+                        "args": ("experiment.MicroscopeState.multiposition_count",),
                     },
                 )
             ]
@@ -437,10 +434,10 @@ class Model:
                     self, self.acquisition_modes_feature_setting[self.imaging_mode]
                 )
 
-            if self.imaging_mode == "single":
-                self.configuration["experiment"]["MicroscopeState"][
-                    "stack_cycling_mode"
-                ] = "per_z"
+            # if self.imaging_mode == "single":
+            #     self.configuration["experiment"]["MicroscopeState"][
+            #         "stack_cycling_mode"
+            #     ] = "per_z"
 
             if self.imaging_mode == "projection":
                 self.move_stage({"z_abs": 0})

@@ -1,6 +1,5 @@
 # Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
-
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted for academic and research use only
 # (subject to the limitations in the disclaimer below)
@@ -29,37 +28,37 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+#
 
-# Standard Library Imports
+# Standard Imports
+import unittest
+import yaml
+import os
 
 # Third Party Imports
-from PIL import Image, ImageDraw, ImageFont
-import numpy as np
 
 # Local Imports
 
 
-def text_array(text: str, offset: tuple = (0, 0)):
-    """Create a binary array from a piece of text
+class TestWaveformTemplates(unittest.TestCase):
+    def test_yaml_structure(self):
+        current_path = os.path.abspath(os.path.dirname(__file__))
+        root_path = os.path.dirname(os.path.dirname(current_path))
+        yaml_path = os.path.join(
+            root_path, "src", "aslm", "config", "waveform_templates.yml"
+        )
 
-    Use Default font to avoid OS related errors.
+        with open(yaml_path) as file:
+            data = yaml.safe_load(file)
 
-    Parameters
-    ----------
-    text : str
-        Text to convert
-    offset : tuple
-        (x,y) offset from upper left of image
-    font_size: int
-        Size of font in pixels
+        expected_keys = ["Default", "Confocal-Projection"]
 
-    Returns
-    -------
-    np.array
-        Binary array of text
-    """
-    font = ImageFont.load_default()
-    bbox = font.getbbox(text)
-    im = Image.new(mode="1", size=(bbox[2] + offset[0], bbox[3] + offset[1]))
-    ImageDraw.Draw(im).text(xy=offset, text=text, fill=1, font=font)
-    return np.array(im, dtype=bool)
+        waveform_keys = data.keys()
+        for key in waveform_keys:
+            assert key in expected_keys
+
+            for subkey in data[key].keys():
+                assert subkey in ["repeat", "expand"]
+
+    if __name__ == "__main__":
+        unittest.main()

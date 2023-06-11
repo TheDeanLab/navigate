@@ -46,6 +46,7 @@ class VolumeSearch:
         target_zoom="N/A",
         flipx=False,
         flipy=False,
+        overlap=0.1,
     ):
         """
         Find the outer boundary of a tissue, moving the stage through z. Assumes
@@ -69,6 +70,8 @@ class VolumeSearch:
             Flip the direction in which new tiles are added.
         flipy : bool
             Flip the direction in which new tiles are added.
+        overlap : float
+            Value between 0 and 1 indicating percent overlap of tiles.
         """
         self.model = model
         self.target_resolution = target_resolution
@@ -84,6 +87,8 @@ class VolumeSearch:
 
         self.sinx = -1 if flipx else 1
         self.siny = -1 if flipy else 1
+
+        self.overlap = max(0, min(overlap, 0.999))
 
         self.has_tissue_queue = Queue()
         self.direction = 1  # up: 1; down: -1
@@ -126,7 +131,7 @@ class VolumeSearch:
         )
         self.z_step_size = float(
             self.model.configuration["experiment"]["MicroscopeState"]["step_size"]
-        )
+        ) * (1 - self.overlap)
 
         f_start = float(
             self.model.configuration["experiment"]["MicroscopeState"]["start_focus"]
@@ -134,7 +139,7 @@ class VolumeSearch:
         f_end = float(
             self.model.configuration["experiment"]["MicroscopeState"]["end_focus"]
         )
-        self.f_step_size = (f_end - f_start) / self.z_steps
+        self.f_step_size = (f_end - f_start) / self.z_steps * (1 - self.overlap)
 
         self.curr_z_index = int(self.z_steps / 2)
 
@@ -184,7 +189,7 @@ class VolumeSearch:
         self.mag_ratio = int(curr_pixel_size / target_pixel_size)
         self.target_grid_pixels = int(img_width // self.mag_ratio)
         # The target image size in microns
-        self.target_grid_width = img_width * target_pixel_size
+        self.target_grid_width = img_width * target_pixel_size * (1 - self.overlap)
 
         # For each axis, establish the offset between this image and the target
         # image as the difference in the physical offsets of the two microscopes

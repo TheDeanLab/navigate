@@ -11,13 +11,15 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="User Guide" href="userguide.html" /> 
+    <link rel="next" title="Software Installation" href="software_installation.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -41,7 +43,9 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="userguide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="supported_hardware.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="software_configuration.html">Software Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing_home.html">Contributing to ASLM</a></li>
 </ul>
 
@@ -71,78 +75,73 @@
              
   <section id="autonomous-software-for-light-microscopy">
 <span id="aslm-home"></span><h1><strong>Autonomous Software for Light Microscopy</strong><a class="headerlink" href="#autonomous-software-for-light-microscopy" title="Permalink to this heading"></a></h1>
-<p><strong>ASLM</strong> is a Python library to control microscopes in the UT Southwestern ecosystem. It aims to abstract hardware and allow for maximum customization. The library contains a feature list that acts as a recipe maker for automated microscope routines.</p>
+<p><strong>ASLM</strong> is a Python library to control microscopes in the UT Southwestern ecosystem.
+It aims to abstract hardware and allow for maximum customization. The library
+contains a feature list that acts as a recipe maker for automated microscope routines.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This project is under active development. See our <a class="reference external" href="https://github.com/TheDeanLab/ASLM">GitHub repository for updates</a>.</p>
 </div>
-<p><strong>Project Philosophy</strong></p>
+<section id="project-philosophy">
+<h2><strong>Project Philosophy</strong><a class="headerlink" href="#project-philosophy" title="Permalink to this heading"></a></h2>
 <ul class="simple">
-<li><p>Minimal number of dependencies. Prioritize standard library imports for maximum stability.</p></li>
-<li><p>Abstraction layer to drive different camera types, etc.</p></li>
-<li><p>Brutally obvious, well-documented, clean code so that it can be understood up with by future users years from now.</p></li>
-<li><p>Maximize productivity for biological users.</p></li>
-<li><p>Performant and responsive.</p></li>
-<li><p>Model-View-Controller architecture.</p></li>
+<li><p>Minimal number of dependencies. Prioritize standard library imports for maximum</p></li>
 </ul>
+<p>stability.
+* Abstraction layer to drive different camera types, etc.
+* Brutally obvious, well-documented, clean code.
+* Maximize productivity for biological users.
+* Performant and responsive.
+* Model-View-Controller architecture.</p>
+</section>
 <section id="contents">
 <h2><strong>Contents</strong><a class="headerlink" href="#contents" title="Permalink to this heading"></a></h2>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="userguide.html">User Guide</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="installation.html">Software Installation</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="installation.html#download-git">Download Git</a></li>
-<li class="toctree-l3"><a class="reference internal" href="installation.html#setup-your-python-environment">Setup your Python Environment.</a></li>
-<li class="toctree-l3"><a class="reference internal" href="installation.html#gpu-dependencies">GPU Dependencies</a></li>
-<li class="toctree-l3"><a class="reference internal" href="installation.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="software_installation.html">Software Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="software_installation.html#download-git">Download Git</a></li>
+<li class="toctree-l2"><a class="reference internal" href="software_installation.html#setup-your-python-environment">Setup your Python Environment.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="software_installation.html#gpu-dependencies">GPU Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="software_installation.html#troubleshooting">Troubleshooting</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="hardware.html">Hardware Setup</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="hardware.html#configuration-file">Configuration File</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hardware.html#data-acquisition-card">Data Acquisition Card</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hardware.html#cameras">Cameras</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hardware.html#voicecoil">Voicecoil</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hardware.html#stages">Stages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="supported_hardware.html">Supported Hardware</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="supported_hardware.html#data-acquisition-card">Data Acquisition Card</a></li>
+<li class="toctree-l2"><a class="reference internal" href="supported_hardware.html#cameras">Cameras</a></li>
+<li class="toctree-l2"><a class="reference internal" href="supported_hardware.html#voicecoil">Voicecoil</a></li>
+<li class="toctree-l2"><a class="reference internal" href="supported_hardware.html#stages">Stages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="supported_hardware.html#deformable-mirrors">Deformable Mirrors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="supported_hardware.html#filter-wheels">Filter Wheels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="supported_hardware.html#galvanometers">Galvanometers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="supported_hardware.html#lasers">Lasers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="supported_hardware.html#shutters">Shutters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="supported_hardware.html#mechanical-zoom">Mechanical Zoom</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="config.html">Configuring ASLM</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="config.html#configuration-yaml">Configuration.yaml</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="software_configuration.html">Software Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="software_configuration.html#configuration-file">Configuration File</a></li>
+<li class="toctree-l2"><a class="reference internal" href="software_configuration.html#gui-section">GUI Section</a></li>
+<li class="toctree-l2"><a class="reference internal" href="software_configuration.html#waveform-constants-file">Waveform Constants File</a></li>
+<li class="toctree-l2"><a class="reference internal" href="software_configuration.html#waveform-templates-file">Waveform Templates File</a></li>
+<li class="toctree-l2"><a class="reference internal" href="software_configuration.html#rest-api-configuration-file">Rest API Configuration File</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="contributing_home.html">Contributing to ASLM</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="contributing_guidelines.html">Contributing Guidelines</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="contributing_guidelines.html#general-principles">General principles</a></li>
-<li class="toctree-l3"><a class="reference internal" href="contributing_guidelines.html#coding-style">Coding style</a></li>
-<li class="toctree-l3"><a class="reference internal" href="contributing_guidelines.html#dictionary-parsing">Dictionary Parsing</a></li>
-<li class="toctree-l3"><a class="reference internal" href="contributing_guidelines.html#unit-tests">Unit tests</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="contributing_hardware.html">Adding New Hardware</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="contributing_hardware.html#hardware-classes">Hardware Classes</a></li>
-<li class="toctree-l3"><a class="reference internal" href="contributing_hardware.html#scientific-units">Scientific Units</a></li>
-<li class="toctree-l3"><a class="reference internal" href="contributing_hardware.html#how-to-add-new-hardware">How to Add New Hardware</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="contributing_feature_container.html">ASLM Feature Container</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="contributing_feature_container.html#the-feature-object">The feature object</a></li>
-<li class="toctree-l3"><a class="reference internal" href="contributing_feature_container.html#writing-custom-features">Writing custom features</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing_hardware.html">Adding New Hardware</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing_feature_container.html">ASLM Feature Container</a></li>
 <li class="toctree-l2"><a class="reference internal" href="contributing_model.html">Adding New Model Features</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api.html">API Reference</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="_autosummary/aslm.config.html">aslm.config</a></li>
-<li class="toctree-l3"><a class="reference internal" href="_autosummary/aslm.model.html">aslm.model</a></li>
-<li class="toctree-l3"><a class="reference internal" href="_autosummary/aslm.controller.html">aslm.controller</a></li>
-<li class="toctree-l3"><a class="reference internal" href="_autosummary/aslm.view.html">aslm.view</a></li>
-<li class="toctree-l3"><a class="reference internal" href="_autosummary/aslm.tools.html">aslm.tools</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="api.html">API Reference</a></li>
 </ul>
 </li>
 </ul>
 </div>
+</section>
+<section id="authors">
+<h2><strong>Authors</strong><a class="headerlink" href="#authors" title="Permalink to this heading"></a></h2>
+<p><strong>ASLM</strong> includes key contributions from numerous individuals, including Zach Marin,
+Annie Wang, Dax Collison, Kevin Dean, Sampath Rapuri, Renil Gupta, Samir Mamtani,
+Andrew Jamieson, Andrew York, Nathaniel Thayer, and more.</p>
 </section>
 <section id="index-and-search">
 <h2><strong>Index and search</strong><a class="headerlink" href="#index-and-search" title="Permalink to this heading"></a></h2>
@@ -157,13 +156,13 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="userguide.html" class="btn btn-neutral float-right" title="User Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="software_installation.html" class="btn btn-neutral float-right" title="Software Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Dean Lab @ UT Southwestern.</p>
+    <p>&#169; Copyright 2023, Dean Lab, UT Southwestern Medical Center.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

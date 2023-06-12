@@ -11,6 +11,8 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/sphinx_highlight.js"></script>
@@ -42,11 +44,12 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="userguide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="supported_hardware.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="software_configuration.html">Software Configuration</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="contributing_home.html">Contributing to ASLM</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="contributing_guidelines.html">Contributing Guidelines</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Adding New Hardware</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#hardware-classes">Hardware Classes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#scientific-units">Scientific Units</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#how-to-add-new-hardware">How to Add New Hardware</a></li>
 </ul>
@@ -87,73 +90,6 @@
 <h1>Adding New Hardware<a class="headerlink" href="#adding-new-hardware" title="Permalink to this heading"></a></h1>
 <p>ASLM is built with an abstraction layer that enables operation with a diverse set of
 hardware manufacturers and equipment.</p>
-<section id="hardware-classes">
-<h2>Hardware Classes<a class="headerlink" href="#hardware-classes" title="Permalink to this heading"></a></h2>
-<ul class="simple">
-<li><dl class="simple">
-<dt>Cameras</dt><dd><ul>
-<li><p>Hamamatsu Flash 4.0, Fusion, etc.</p></li>
-<li><p>Photometrics - In Progress</p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>Deformable Mirrors</dt><dd><ul>
-<li><p>Imagine Optics - In Progress</p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>Data Acquisition Cards</dt><dd><ul>
-<li><p>National Instruments</p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>Filter Wheels</dt><dd><ul>
-<li><p>Sutter</p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><p>Galvanometers</p></li>
-<li><dl class="simple">
-<dt>Lasers</dt><dd><ul>
-<li><p>Coherent OBIS</p></li>
-<li><p>Omicron LuxX</p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>Remote Focusing Devices</dt><dd><ul>
-<li><p>Equipment Solutions</p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><p>Shutters</p></li>
-<li><dl class="simple">
-<dt>Stages</dt><dd><ul>
-<li><p>Physik Instrumente</p></li>
-<li><p>Sutter MP-285 - In Progress</p></li>
-<li><p>Galvo Scanning</p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>Zoom</dt><dd><ul>
-<li><p>Dynamixel</p></li>
-</ul>
-</dd>
-</dl>
-</li>
-</ul>
-</section>
 <section id="scientific-units">
 <h2>Scientific Units<a class="headerlink" href="#scientific-units" title="Permalink to this heading"></a></h2>
 <p>Deviations from this can occur where it is necessary to pass a different unit to a
@@ -182,7 +118,7 @@ use the Sutter MP-285 stage as an example.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Dean Lab @ UT Southwestern.</p>
+    <p>&#169; Copyright 2023, Dean Lab, UT Southwestern Medical Center.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

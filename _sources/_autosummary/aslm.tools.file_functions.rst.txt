@@ -15,6 +15,7 @@ aslm.tools.file\_functions
       :toctree:
    
       create_save_path
+      delete_folder
       save_yaml_file
    
    

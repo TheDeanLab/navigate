@@ -1,0 +1,28 @@
+aslm.model.features.constant\_velocity\_acquisition.ConstantVelocityAcquisition
+===============================================================================
+
+.. currentmodule:: aslm.model.features.constant_velocity_acquisition
+
+.. autoclass:: ConstantVelocityAcquisition
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~ConstantVelocityAcquisition.__init__
+      ~ConstantVelocityAcquisition.cleanup
+      ~ConstantVelocityAcquisition.end_func_signal
+      ~ConstantVelocityAcquisition.pre_func_signal
+   
+   
+
+   
+   
+   

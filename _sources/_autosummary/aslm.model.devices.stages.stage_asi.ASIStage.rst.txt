@@ -19,10 +19,17 @@ aslm.model.devices.stages.stage\_asi.ASIStage
       ~ASIStage.__init__
       ~ASIStage.create_position_dict
       ~ASIStage.get_abs_position
+      ~ASIStage.get_position
+      ~ASIStage.get_speed
       ~ASIStage.move_absolute
       ~ASIStage.move_axis_absolute
       ~ASIStage.report_position
+      ~ASIStage.scanr
+      ~ASIStage.set_speed
+      ~ASIStage.start_scan
       ~ASIStage.stop
+      ~ASIStage.stop_scan
+      ~ASIStage.update_position_dict
    
    
 

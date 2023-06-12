@@ -17,18 +17,12 @@ aslm.model.devices.stages.stage\_sutter.SutterStage
    .. autosummary::
    
       ~SutterStage.__init__
-      ~SutterStage.check_byte_order
-      ~SutterStage.close
-      ~SutterStage.convert_microns_to_microsteps
-      ~SutterStage.convert_microsteps_to_microns
       ~SutterStage.create_position_dict
-      ~SutterStage.flush_buffers
       ~SutterStage.get_abs_position
       ~SutterStage.move_absolute
-      ~SutterStage.move_axis_absolute
       ~SutterStage.report_position
-      ~SutterStage.set_stage_speed_and_resolution
       ~SutterStage.stop
+      ~SutterStage.update_position_dict
    
    
 

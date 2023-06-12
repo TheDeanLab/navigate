@@ -41,5 +41,6 @@
    aslm.tools.project_stats
    aslm.tools.sdf
    aslm.tools.vibration_analysis
+   aslm.tools.waveform_template_funcs
    aslm.tools.xml_tools
 

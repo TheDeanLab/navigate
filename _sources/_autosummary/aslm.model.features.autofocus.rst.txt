@@ -9,6 +9,13 @@ aslm.model.features.autofocus
 
    
    
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      power_tent
+   
    
 
    

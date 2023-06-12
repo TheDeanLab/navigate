@@ -11,6 +11,8 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
@@ -42,7 +44,9 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../userguide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../supported_hardware.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_configuration.html">Software Configuration</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../contributing_home.html">Contributing to ASLM</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../contributing_guidelines.html">Contributing Guidelines</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../contributing_hardware.html">Adding New Hardware</a></li>
@@ -110,15 +114,15 @@
 <dd><p>Bases: <a class="reference internal" href="aslm.model.metadata_sources.metadata.XMLMetadata.html#aslm.model.metadata_sources.metadata.XMLMetadata" title="aslm.model.metadata_sources.metadata.XMLMetadata"><code class="xref py py-class docutils literal notranslate"><span class="pre">XMLMetadata</span></code></a></p>
 <p>Metadata for OME-TIFF files. OME-XML spec at
 <a class="reference external" href="https://docs.openmicroscopy.org/ome-model/6.3.1/ome-xml/index.html">https://docs.openmicroscopy.org/ome-model/6.3.1/ome-xml/index.html</a>.</p>
-<p>Store and convert internal representation of metadata (configuration, experiment, etc.)
-to alternative file types.</p>
+<p>Store and convert internal representation of metadata (configuration,
+experiment, etc.) to alternative file types.</p>
 <p>Concept and some of the code borrowed from python-microscopy
 (<a class="reference external" href="https://github.com/python-microscopy/python-microscopy/">https://github.com/python-microscopy/python-microscopy/</a>).</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo.html#aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo.None" title="aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo.None"><span class="pre">None</span></a></span></span><a class="headerlink" href="#aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.__init__" title="Permalink to this definition"></a></dt>
-<dd><p>Store and convert internal representation of metadata (configuration, experiment, etc.)
-to alternative file types.</p>
+<dd><p>Store and convert internal representation of metadata (configuration,
+experiment, etc.) to alternative file types.</p>
 <p>Concept and some of the code borrowed from python-microscopy
 (<a class="reference external" href="https://github.com/python-microscopy/python-microscopy/">https://github.com/python-microscopy/python-microscopy/</a>).</p>
 </dd></dl>
@@ -190,7 +194,8 @@ OME-TIFF and OME-XML.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.write_xml">
 <span class="sig-name descname"><span class="pre">write_xml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'OME-TIFF'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo.html#aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo.None" title="aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo.None"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'OME'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo.html#aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo.None" title="aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo.None"><span class="pre">None</span></a></span></span><a class="headerlink" href="#aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.write_xml" title="Permalink to this definition"></a></dt>
-<dd><p>Write to XML file. Assumes we do not include the XML header in our nested metadata dictionary.</p>
+<dd><p>Write to XML file. Assumes we do not include the XML header in our nested
+metadata dictionary.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -220,7 +225,7 @@ OME-TIFF and OME-XML.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Dean Lab @ UT Southwestern.</p>
+    <p>&#169; Copyright 2023, Dean Lab, UT Southwestern Medical Center.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

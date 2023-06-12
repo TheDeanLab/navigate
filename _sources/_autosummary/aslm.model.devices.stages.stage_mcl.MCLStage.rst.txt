@@ -23,6 +23,7 @@ aslm.model.devices.stages.stage\_mcl.MCLStage
       ~MCLStage.move_axis_absolute
       ~MCLStage.report_position
       ~MCLStage.stop
+      ~MCLStage.update_position_dict
    
    
 

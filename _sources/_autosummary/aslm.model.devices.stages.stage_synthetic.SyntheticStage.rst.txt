@@ -19,13 +19,20 @@ aslm.model.devices.stages.stage\_synthetic.SyntheticStage
       ~SyntheticStage.__init__
       ~SyntheticStage.create_position_dict
       ~SyntheticStage.get_abs_position
+      ~SyntheticStage.get_position
+      ~SyntheticStage.get_speed
       ~SyntheticStage.load_sample
       ~SyntheticStage.move_absolute
       ~SyntheticStage.move_axis_absolute
       ~SyntheticStage.report_position
+      ~SyntheticStage.scanr
+      ~SyntheticStage.set_speed
+      ~SyntheticStage.start_scan
       ~SyntheticStage.stop
+      ~SyntheticStage.stop_scan
       ~SyntheticStage.unload_sample
       ~SyntheticStage.unzero_axes
+      ~SyntheticStage.update_position_dict
       ~SyntheticStage.zero_axes
    
    

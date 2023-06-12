@@ -11,6 +11,8 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
@@ -42,7 +44,9 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../userguide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../supported_hardware.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_configuration.html">Software Configuration</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../contributing_home.html">Contributing to ASLM</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../contributing_guidelines.html">Contributing Guidelines</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../contributing_hardware.html">Adding New Hardware</a></li>
@@ -162,6 +166,8 @@ stilt positions simultaneously.</p>
 </dd>
 <dt>theta_min<span class="classifier">float</span></dt><dd><p>Min rotation position</p>
 </dd>
+<dt>default_speed: float</dt><dd><p>Default speed in millimeters per second</p>
+</dd>
 </dl>
 <dl class="simple">
 <dt>create_position_dict()</dt><dd><p>Creates a dictionary with the hardware stage positions.</p>
@@ -169,6 +175,18 @@ stilt positions simultaneously.</p>
 <dt>get_abs_position()</dt><dd><p>Makes sure that the move is within the min and max stage limits.</p>
 </dd>
 <dt>stop()</dt><dd><p>Emergency halt of stage operation.</p>
+</dd>
+<dt>get_position()</dt><dd><p>Get position of specific axis</p>
+</dd>
+<dt>set_speed()</dt><dd><p>Set velocity that the stage can move when scanning.</p>
+</dd>
+<dt>get_speed()</dt><dd><p>Get velocity</p>
+</dd>
+<dt>scanr()</dt><dd><p>Set scan start position, end position, and enc_divide</p>
+</dd>
+<dt>start_scan()</dt><dd><p>Start scan state machine</p>
+</dd>
+<dt>stop_scan()</dt><dd><p>Start scan and stop after scanning</p>
 </dd>
 </dl>
 </div></blockquote>
@@ -189,6 +207,12 @@ stilt positions simultaneously.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_asi.ASIStage.get_abs_position" title="aslm.model.devices.stages.stage_asi.ASIStage.get_abs_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_abs_position</span></code></a>(axis, move_dictionary)</p></td>
 <td><p>Ensure the requested position is within axis bounds and return it.</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_asi.ASIStage.get_position" title="aslm.model.devices.stages.stage_asi.ASIStage.get_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_position</span></code></a>(axis)</p></td>
+<td><p>Get position of specific axos</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_asi.ASIStage.get_speed" title="aslm.model.devices.stages.stage_asi.ASIStage.get_speed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_speed</span></code></a>(axis)</p></td>
+<td><p>Get scan velocity of the axis.</p></td>
+</tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_asi.ASIStage.move_absolute" title="aslm.model.devices.stages.stage_asi.ASIStage.move_absolute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move_absolute</span></code></a>(move_dictionary[, wait_until_done])</p></td>
 <td><p>Move Absolute Method.</p></td>
 </tr>
@@ -198,8 +222,23 @@ stilt positions simultaneously.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_asi.ASIStage.report_position" title="aslm.model.devices.stages.stage_asi.ASIStage.report_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">report_position</span></code></a>()</p></td>
 <td><p>Reports the position for all axes in microns, and create position dictionary.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_asi.ASIStage.stop" title="aslm.model.devices.stages.stage_asi.ASIStage.stop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_asi.ASIStage.scanr" title="aslm.model.devices.stages.stage_asi.ASIStage.scanr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scanr</span></code></a>(start_position_mm, end_position_mm, ...)</p></td>
+<td><p>Set scan range</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_asi.ASIStage.set_speed" title="aslm.model.devices.stages.stage_asi.ASIStage.set_speed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_speed</span></code></a>(velocity_dict)</p></td>
+<td><p>Set scan velocity.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_asi.ASIStage.start_scan" title="aslm.model.devices.stages.stage_asi.ASIStage.start_scan"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_scan</span></code></a>(axis)</p></td>
+<td><p>Start scan state machine</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_asi.ASIStage.stop" title="aslm.model.devices.stages.stage_asi.ASIStage.stop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop</span></code></a>()</p></td>
 <td><p>Stop all stage movement abruptly.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_asi.ASIStage.stop_scan" title="aslm.model.devices.stages.stage_asi.ASIStage.stop_scan"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_scan</span></code></a>()</p></td>
+<td><p>Stop scan</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_position_dict</span></code>()</p></td>
+<td><p></p></td>
 </tr>
 </tbody>
 </table>
@@ -225,6 +264,40 @@ Expect values in micrometers, except for theta, which is in degrees.</p></li>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Position to move the stage to for this axis.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_asi.ASIStage.get_position">
+<span class="sig-name descname"><span class="pre">get_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_asi.ASIStage.get_position" title="Permalink to this definition"></a></dt>
+<dd><p>Get position of specific axos</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>axis</strong> (<em>str</em>) – </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>position</strong></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_asi.ASIStage.get_speed">
+<span class="sig-name descname"><span class="pre">get_speed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_asi.ASIStage.get_speed" title="Permalink to this definition"></a></dt>
+<dd><p>Get scan velocity of the axis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>axis</strong> (<em>str</em>) – axis name, such as ‘x’, ‘y’, ‘z’</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>velocity</strong> – Velocity</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>float</p>
@@ -289,9 +362,72 @@ position dictionary.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_asi.ASIStage.scanr">
+<span class="sig-name descname"><span class="pre">scanr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_position_mm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_position_mm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enc_divide</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'z'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_asi.ASIStage.scanr" title="Permalink to this definition"></a></dt>
+<dd><p>Set scan range</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start_position_mm</strong> (<em>float</em>) – scan start position</p></li>
+<li><p><strong>end_position_mm</strong> (<em>float</em>) – scan end position</p></li>
+<li><p><strong>enc_divide</strong> (<em>float</em>) – an output pulse will occur every enc_divide number of encoder counts</p></li>
+<li><p><strong>axis</strong> (<em>str</em>) – fast axis name</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>success</strong> – Was the setting successful?</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_asi.ASIStage.set_speed">
+<span class="sig-name descname"><span class="pre">set_speed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">velocity_dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_asi.ASIStage.set_speed" title="Permalink to this definition"></a></dt>
+<dd><p>Set scan velocity.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>velocity_dict</strong> (<em>dict</em>) – velocity for specific axis
+{‘x’: float, ‘y’: float, ‘z’: float}</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>success</strong> – Was the setting successful?</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_asi.ASIStage.start_scan">
+<span class="sig-name descname"><span class="pre">start_scan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_asi.ASIStage.start_scan" title="Permalink to this definition"></a></dt>
+<dd><p>Start scan state machine</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>axis</strong> (<em>str</em>) – fast axis name, such as ‘x’, ‘y’, and ‘z’</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>success</strong> – Was it successful?</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.devices.stages.stage_asi.ASIStage.stop">
 <span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_asi.ASIStage.stop" title="Permalink to this definition"></a></dt>
 <dd><p>Stop all stage movement abruptly.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_asi.ASIStage.stop_scan">
+<span class="sig-name descname"><span class="pre">stop_scan</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_asi.ASIStage.stop_scan" title="Permalink to this definition"></a></dt>
+<dd><p>Stop scan</p>
 </dd></dl>
 
 </dd></dl>
@@ -309,7 +445,7 @@ position dictionary.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Dean Lab @ UT Southwestern.</p>
+    <p>&#169; Copyright 2023, Dean Lab, UT Southwestern Medical Center.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

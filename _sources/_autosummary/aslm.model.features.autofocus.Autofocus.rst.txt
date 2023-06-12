@@ -25,6 +25,7 @@ aslm.model.features.autofocus.Autofocus
       ~Autofocus.in_func_signal
       ~Autofocus.pre_func_data
       ~Autofocus.pre_func_signal
+      ~Autofocus.robust_autofocus
       ~Autofocus.run
    
    

@@ -23,6 +23,7 @@ aslm.model.devices.stages.stage\_pi.PIStage
       ~PIStage.move_axis_absolute
       ~PIStage.report_position
       ~PIStage.stop
+      ~PIStage.update_position_dict
    
    
 

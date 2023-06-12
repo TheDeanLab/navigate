@@ -28,8 +28,10 @@ aslm.model.features
    :template: custom_module.rst
    :recursive:
 
+   aslm.model.features.auto_tile_scan
    aslm.model.features.autofocus
    aslm.model.features.common_features
+   aslm.model.features.constant_velocity_acquisition
    aslm.model.features.dummy_detective
    aslm.model.features.feature_container
    aslm.model.features.image_writer

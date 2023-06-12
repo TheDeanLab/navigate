@@ -14,7 +14,7 @@ aslm.model.devices.stages.stage\_sutter
    .. autosummary::
       :toctree:
    
-      build_sutter_stage_connection
+      build_MP285_connection
    
    
 

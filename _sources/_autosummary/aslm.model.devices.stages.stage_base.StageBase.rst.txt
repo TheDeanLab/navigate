@@ -20,6 +20,7 @@ aslm.model.devices.stages.stage\_base.StageBase
       ~StageBase.create_position_dict
       ~StageBase.get_abs_position
       ~StageBase.stop
+      ~StageBase.update_position_dict
    
    
 

@@ -11,6 +11,8 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
@@ -42,7 +44,9 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../userguide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../supported_hardware.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_configuration.html">Software Configuration</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../contributing_home.html">Contributing to ASLM</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../contributing_guidelines.html">Contributing Guidelines</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../contributing_hardware.html">Adding New Hardware</a></li>
@@ -118,16 +122,22 @@
 <tr class="row-even"><td><p><a class="reference internal" href="aslm.model.features.common_features.LoopByCount.html#aslm.model.features.common_features.LoopByCount" title="aslm.model.features.common_features.LoopByCount"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LoopByCount</span></code></a>(model[, steps])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="aslm.model.features.common_features.PrepareNextChannel.html#aslm.model.features.common_features.PrepareNextChannel" title="aslm.model.features.common_features.PrepareNextChannel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PrepareNextChannel</span></code></a>(model)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="aslm.model.features.common_features.MoveToNextPositionInMultiPostionTable.html#aslm.model.features.common_features.MoveToNextPositionInMultiPostionTable" title="aslm.model.features.common_features.MoveToNextPositionInMultiPostionTable"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MoveToNextPositionInMultiPostionTable</span></code></a>(model)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="aslm.model.features.common_features.Snap.html#aslm.model.features.common_features.Snap" title="aslm.model.features.common_features.Snap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Snap</span></code></a>(model)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="aslm.model.features.common_features.PrepareNextChannel.html#aslm.model.features.common_features.PrepareNextChannel" title="aslm.model.features.common_features.PrepareNextChannel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PrepareNextChannel</span></code></a>(model)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="aslm.model.features.common_features.Snap.html#aslm.model.features.common_features.Snap" title="aslm.model.features.common_features.Snap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Snap</span></code></a>(model)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="aslm.model.features.common_features.StackPause.html#aslm.model.features.common_features.StackPause" title="aslm.model.features.common_features.StackPause"><code class="xref py py-obj docutils literal notranslate"><span class="pre">StackPause</span></code></a>(model[, pause_num])</p></td>
 <td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="aslm.model.features.common_features.WaitToContinue.html#aslm.model.features.common_features.WaitToContinue" title="aslm.model.features.common_features.WaitToContinue"><code class="xref py py-obj docutils literal notranslate"><span class="pre">WaitToContinue</span></code></a>(model)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="aslm.model.features.common_features.ZStackAcquisition.html#aslm.model.features.common_features.ZStackAcquisition" title="aslm.model.features.common_features.ZStackAcquisition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ZStackAcquisition</span></code></a>(model)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="aslm.model.features.common_features.ZStackAcquisition.html#aslm.model.features.common_features.ZStackAcquisition" title="aslm.model.features.common_features.ZStackAcquisition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ZStackAcquisition</span></code></a>(model[, get_origin, ...])</p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -145,7 +155,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Dean Lab @ UT Southwestern.</p>
+    <p>&#169; Copyright 2023, Dean Lab, UT Southwestern Medical Center.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

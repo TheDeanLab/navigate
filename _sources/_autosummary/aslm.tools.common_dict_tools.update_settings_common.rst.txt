@@ -1,6 +1,0 @@
-aslm.tools.common\_dict\_tools.update\_settings\_common
-=======================================================
-
-.. currentmodule:: aslm.tools.common_dict_tools
-
-.. autofunction:: update_settings_common

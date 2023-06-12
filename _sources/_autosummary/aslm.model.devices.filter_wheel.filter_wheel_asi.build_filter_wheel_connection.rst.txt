@@ -1,0 +1,6 @@
+aslm.model.devices.filter\_wheel.filter\_wheel\_asi.build\_filter\_wheel\_connection
+====================================================================================
+
+.. currentmodule:: aslm.model.devices.filter_wheel.filter_wheel_asi
+
+.. autofunction:: build_filter_wheel_connection

@@ -11,6 +11,8 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
@@ -18,7 +20,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="aslm.model.features.common_features" href="aslm.model.features.common_features.html" />
-    <link rel="prev" title="aslm.model.features.autofocus" href="aslm.model.features.autofocus.html" /> 
+    <link rel="prev" title="aslm.model.features.autofocus.power_tent" href="aslm.model.features.autofocus.power_tent.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -42,7 +44,9 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../userguide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../supported_hardware.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_configuration.html">Software Configuration</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../contributing_home.html">Contributing to ASLM</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../contributing_guidelines.html">Contributing Guidelines</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../contributing_hardware.html">Adding New Hardware</a></li>
@@ -353,7 +357,10 @@ move to. If the autofocus_pos_queue is empty, the autofocus is finished.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.autofocus.Autofocus.pre_func_signal" title="aslm.model.features.autofocus.Autofocus.pre_func_signal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pre_func_signal</span></code></a>()</p></td>
 <td><p>Prepare the autofocus routine.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#id0" title="aslm.model.features.autofocus.Autofocus.run"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run</span></code></a>(*args)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.autofocus.Autofocus.robust_autofocus" title="aslm.model.features.autofocus.Autofocus.robust_autofocus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">robust_autofocus</span></code></a>()</p></td>
+<td><p>Robust autofocus routine.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id0" title="aslm.model.features.autofocus.Autofocus.run"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run</span></code></a>(*args)</p></td>
 <td><p>Run the Autofocusing Routine</p></td>
 </tr>
 </tbody>
@@ -370,11 +377,6 @@ move to. If the autofocus_pos_queue is empty, the autofocus is finished.</p>
 <dd class="field-even"><p>None</p>
 </dd>
 </dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">autofocus</span> <span class="o">=</span> <span class="n">Autofocus</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">autofocus</span><span class="o">.</span><span class="n">end_func_data</span><span class="p">()</span>
-</pre></div>
-</div>
 </dd></dl>
 
 <dl class="py method">
@@ -389,11 +391,6 @@ move to. If the autofocus_pos_queue is empty, the autofocus is finished.</p>
 <dd class="field-even"><p>None</p>
 </dd>
 </dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">autofocus</span> <span class="o">=</span> <span class="n">Autofocus</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">autofocus</span><span class="o">.</span><span class="n">end_func_signal</span><span class="p">()</span>
-</pre></div>
-</div>
 </dd></dl>
 
 <dl class="py method">
@@ -411,11 +408,6 @@ move to. If the autofocus_pos_queue is empty, the autofocus is finished.</p>
 <dd class="field-odd"><p>int</p>
 </dd>
 </dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">autofocus</span> <span class="o">=</span> <span class="n">Autofocus</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">autofocus</span><span class="o">.</span><span class="n">get_autofocus_frame_num</span><span class="p">()</span>
-</pre></div>
-</div>
 </dd></dl>
 
 <dl class="py method">
@@ -451,11 +443,6 @@ move to. If the autofocus_pos_queue is empty, the autofocus is finished.</p>
 <dd class="field-even"><p>None</p>
 </dd>
 </dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">autofocus</span> <span class="o">=</span> <span class="n">Autofocus</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">autofocus</span><span class="o">.</span><span class="n">in_func_data</span><span class="p">()</span>
-</pre></div>
-</div>
 </dd></dl>
 
 <dl class="py method">
@@ -470,11 +457,6 @@ move to. If the autofocus_pos_queue is empty, the autofocus is finished.</p>
 <dd class="field-even"><p>None</p>
 </dd>
 </dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">autofocus</span> <span class="o">=</span> <span class="n">Autofocus</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">autofocus</span><span class="o">.</span><span class="n">in_func_signal</span><span class="p">()</span>
-</pre></div>
-</div>
 </dd></dl>
 
 <dl class="py method">
@@ -489,11 +471,6 @@ move to. If the autofocus_pos_queue is empty, the autofocus is finished.</p>
 <dd class="field-even"><p>None</p>
 </dd>
 </dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">autofocus</span> <span class="o">=</span> <span class="n">Autofocus</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">autofocus</span><span class="o">.</span><span class="n">pre_func_data</span><span class="p">()</span>
-</pre></div>
-</div>
 </dd></dl>
 
 <dl class="py method">
@@ -508,11 +485,25 @@ move to. If the autofocus_pos_queue is empty, the autofocus is finished.</p>
 <dd class="field-even"><p>None</p>
 </dd>
 </dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">autofocus</span> <span class="o">=</span> <span class="n">Autofocus</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">autofocus</span><span class="o">.</span><span class="n">pre_func_signal</span><span class="p">()</span>
-</pre></div>
-</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.robust_autofocus">
+<span class="sig-name descname"><span class="pre">robust_autofocus</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.robust_autofocus" title="Permalink to this definition"></a></dt>
+<dd><p>Robust autofocus routine.</p>
+<p>TODO: Current values for amplitude, sigma, and alpha are hard-coded. Fitting
+is unfortunately unstable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>None</strong> – </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>self.focus_pos</strong> – Focus position</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -533,11 +524,6 @@ move to. If the autofocus_pos_queue is empty, the autofocus is finished.</p>
 <dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">autofocus</span> <span class="o">=</span> <span class="n">Autofocus</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">autofocus</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">microscope_state</span><span class="p">,</span> <span class="n">autofocus_params</span><span class="p">)</span>
-</pre></div>
-</div>
 </dd></dl>
 
 </dd></dl>
@@ -548,14 +534,14 @@ move to. If the autofocus_pos_queue is empty, the autofocus is finished.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="aslm.model.features.autofocus.html" class="btn btn-neutral float-left" title="aslm.model.features.autofocus" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="aslm.model.features.autofocus.power_tent.html" class="btn btn-neutral float-left" title="aslm.model.features.autofocus.power_tent" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="aslm.model.features.common_features.html" class="btn btn-neutral float-right" title="aslm.model.features.common_features" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Dean Lab @ UT Southwestern.</p>
+    <p>&#169; Copyright 2023, Dean Lab, UT Southwestern Medical Center.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

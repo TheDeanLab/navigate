@@ -11,6 +11,8 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
@@ -18,7 +20,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="aslm.model.devices.stages.stage_synthetic" href="aslm.model.devices.stages.stage_synthetic.html" />
-    <link rel="prev" title="aslm.model.devices.stages.stage_sutter.build_sutter_stage_connection" href="aslm.model.devices.stages.stage_sutter.build_sutter_stage_connection.html" /> 
+    <link rel="prev" title="aslm.model.devices.stages.stage_sutter.build_MP285_connection" href="aslm.model.devices.stages.stage_sutter.build_MP285_connection.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -42,7 +44,9 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../userguide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../supported_hardware.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_configuration.html">Software Configuration</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../contributing_home.html">Contributing to ASLM</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../contributing_guidelines.html">Contributing Guidelines</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../contributing_hardware.html">Adding New Hardware</a></li>
@@ -107,19 +111,33 @@
 <h1>aslm.model.devices.stages.stage_sutter.SutterStage<a class="headerlink" href="#aslm-model-devices-stages-stage-sutter-sutterstage" title="Permalink to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="aslm.model.devices.stages.stage_sutter.SutterStage">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.model.devices.stages.stage_sutter.</span></span><span class="sig-name descname"><span class="pre">SutterStage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_sutter.SutterStage" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.model.devices.stages.stage_sutter.</span></span><span class="sig-name descname"><span class="pre">SutterStage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_sutter.SutterStage" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="aslm.model.devices.stages.stage_base.StageBase.html#aslm.model.devices.stages.stage_base.StageBase" title="aslm.model.devices.stages.stage_base.StageBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">StageBase</span></code></a></p>
-<p>SutterStage Class</p>
-<p>Class for controlling Sutter MP-285 Stage.
-All commands return an ASCII CR (Carriage Return; 13 decimal, 0D hexadecimal) to
-indicate that the task associated with the command has completed. When the
-controller completes the task associated with a command, it sends ASCII CR back to
-the host computer indicating that it is ready to receive a new command. If a command
-returns data, the last byte returned is the task-completed indicator.</p>
+<p>SutterStage Class for MP-285</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>microscope_name</strong> (<em>str</em>) – Name of the microscope.</p></li>
+<li><p><strong>device_connection</strong> (<em>MP285</em>) – MP285 stage.</p></li>
+<li><p><strong>configuration</strong> (<em>dict</em>) – Configuration dictionary for the SutterStage.</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_sutter.SutterStage.comport">
-<span class="sig-name descname"><span class="pre">comport</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_sutter.SutterStage.comport" title="Permalink to this definition"></a></dt>
-<dd><p>Comport for communicating with the filter wheel, e.g., COM1.</p>
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_sutter.SutterStage.stage">
+<span class="sig-name descname"><span class="pre">stage</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_sutter.SutterStage.stage" title="Permalink to this definition"></a></dt>
+<dd><p>MP285 stage object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>MP285</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_sutter.SutterStage.resolution">
+<span class="sig-name descname"><span class="pre">resolution</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_sutter.SutterStage.resolution" title="Permalink to this definition"></a></dt>
+<dd><p>Resolution of the stage.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>str</p>
@@ -128,9 +146,9 @@ returns data, the last byte returned is the task-completed indicator.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_sutter.SutterStage.baudrate">
-<span class="sig-name descname"><span class="pre">baudrate</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_sutter.SutterStage.baudrate" title="Permalink to this definition"></a></dt>
-<dd><p>Baud rate for communicating with the filter wheel, e.g., 9600.</p>
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_sutter.SutterStage.speed">
+<span class="sig-name descname"><span class="pre">speed</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_sutter.SutterStage.speed" title="Permalink to this definition"></a></dt>
+<dd><p>Speed of the stage.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>int</p>
@@ -139,12 +157,12 @@ returns data, the last byte returned is the task-completed indicator.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_sutter.SutterStage.filter_dictionary">
-<span class="sig-name descname"><span class="pre">filter_dictionary</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_sutter.SutterStage.filter_dictionary" title="Permalink to this definition"></a></dt>
-<dd><p>Dictionary with installed filter names, e.g., filter_dictionary = {‘GFP’, 0}.</p>
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_sutter.SutterStage.sutter_axes">
+<span class="sig-name descname"><span class="pre">sutter_axes</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_sutter.SutterStage.sutter_axes" title="Permalink to this definition"></a></dt>
+<dd><p>List of SutterStage axes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>dict</p>
+<dd class="field-odd"><p>list</p>
 </dd>
 </dl>
 </dd></dl>
@@ -163,7 +181,7 @@ returns data, the last byte returned is the task-completed indicator.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.devices.stages.stage_sutter.SutterStage.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_sutter.SutterStage.__init__" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_sutter.SutterStage.__init__" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>
@@ -172,111 +190,30 @@ returns data, the last byte returned is the task-completed indicator.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_sutter.SutterStage.__init__" title="aslm.model.devices.stages.stage_sutter.SutterStage.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(microscope_name, device_connection, ...)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_sutter.SutterStage.check_byte_order" title="aslm.model.devices.stages.stage_sutter.SutterStage.check_byte_order"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_byte_order</span></code></a>(command)</p></td>
-<td><p>Confirm OS Byte Order MP-285 requires commands and responses to be interpreted as Little Endian.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#id0" title="aslm.model.devices.stages.stage_sutter.SutterStage.close"><code class="xref py py-obj docutils literal notranslate"><span class="pre">close</span></code></a>()</p></td>
-<td><p>Close the SutterStage serial port.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_sutter.SutterStage.convert_microns_to_microsteps" title="aslm.model.devices.stages.stage_sutter.SutterStage.convert_microns_to_microsteps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_microns_to_microsteps</span></code></a>(self, microns)</p></td>
-<td><p>Converts microsteps to microns for MP-285 communication.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_sutter.SutterStage.convert_microsteps_to_microns" title="aslm.model.devices.stages.stage_sutter.SutterStage.convert_microsteps_to_microns"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_microsteps_to_microns</span></code></a>(self, microsteps)</p></td>
-<td><p>Converts MP-285 microsteps to microns</p></td>
-</tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_sutter.SutterStage.create_position_dict" title="aslm.model.devices.stages.stage_sutter.SutterStage.create_position_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_position_dict</span></code></a>()</p></td>
 <td><p>Creates a dictionary with the hardware stage positions.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_sutter.SutterStage.flush_buffers" title="aslm.model.devices.stages.stage_sutter.SutterStage.flush_buffers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">flush_buffers</span></code></a>()</p></td>
-<td><p>Flush Serial I/O Buffers</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_sutter.SutterStage.get_abs_position" title="aslm.model.devices.stages.stage_sutter.SutterStage.get_abs_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_abs_position</span></code></a>(axis, move_dictionary)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_sutter.SutterStage.get_abs_position" title="aslm.model.devices.stages.stage_sutter.SutterStage.get_abs_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_abs_position</span></code></a>(axis, move_dictionary)</p></td>
 <td><p>Ensure the requested position is within axis bounds and return it.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_sutter.SutterStage.move_absolute" title="aslm.model.devices.stages.stage_sutter.SutterStage.move_absolute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move_absolute</span></code></a>(move_dictionary[, wait_until_done])</p></td>
-<td><p><dl class="field-list simple">
-<dt class="field-odd">param move_dictionary<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A dictionary of values required for movement. Includes 'x_abs', etc. for one</p>
-</dd>
-</dl>
-</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_sutter.SutterStage.move_axis_absolute" title="aslm.model.devices.stages.stage_sutter.SutterStage.move_axis_absolute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move_axis_absolute</span></code></a>(axis, axis_num, ...)</p></td>
-<td><p>Implement movement logic along multiple axes for the MP-285 stage.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_sutter.SutterStage.move_absolute" title="aslm.model.devices.stages.stage_sutter.SutterStage.move_absolute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move_absolute</span></code></a>(move_dictionary[, wait_until_done])</p></td>
+<td><p>Move stage along a single axis.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_sutter.SutterStage.report_position" title="aslm.model.devices.stages.stage_sutter.SutterStage.report_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">report_position</span></code></a>()</p></td>
-<td><p>Reports the position of the stage for all axes in microns Creates the hardware position dictionary.</p></td>
+<td><p>Reports the position for all axes, and creates a position dictionary.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_sutter.SutterStage.set_stage_speed_and_resolution" title="aslm.model.devices.stages.stage_sutter.SutterStage.set_stage_speed_and_resolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_stage_speed_and_resolution</span></code></a>(speed, resolution)</p></td>
-<td><p>Sets the MP-285 stage speed and resolution.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_sutter.SutterStage.stop" title="aslm.model.devices.stages.stage_sutter.SutterStage.stop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop</span></code></a>()</p></td>
+<td><p>Stop all stage movement abruptly.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_sutter.SutterStage.stop" title="aslm.model.devices.stages.stage_sutter.SutterStage.stop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop</span></code></a>()</p></td>
-<td><p>This command interrupts and stops a move in progress that originally initiated by the Move (‘m’) command.</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_position_dict</span></code>()</p></td>
+<td><p></p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py method">
-<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_sutter.SutterStage.check_byte_order">
-<span class="sig-name descname"><span class="pre">check_byte_order</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_sutter.SutterStage.check_byte_order" title="Permalink to this definition"></a></dt>
-<dd><p>Confirm OS Byte Order
-MP-285 requires commands and responses to be interpreted as Little Endian.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>command</strong> (<em>bytes</em>) – Command in format bytes.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="id0">
-<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id0" title="Permalink to this definition"></a></dt>
-<dd><p>Close the SutterStage serial port.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_sutter.SutterStage.convert_microns_to_microsteps">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert_microns_to_microsteps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">microns</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_sutter.SutterStage.convert_microns_to_microsteps" title="Permalink to this definition"></a></dt>
-<dd><p>Converts microsteps to microns for MP-285 communication.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>microns</strong> (<em>float</em>) – Distance in microns.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>microsteps</strong> – Distance in microsteps</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_sutter.SutterStage.convert_microsteps_to_microns">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert_microsteps_to_microns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">microsteps</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_sutter.SutterStage.convert_microsteps_to_microns" title="Permalink to this definition"></a></dt>
-<dd><p>Converts MP-285 microsteps to microns</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>microsteps</strong> (<em>float</em>) – Distance in microsteps</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>microns</strong> – Distance in microns</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.devices.stages.stage_sutter.SutterStage.create_position_dict">
 <span class="sig-name descname"><span class="pre">create_position_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_sutter.SutterStage.create_position_dict" title="Permalink to this definition"></a></dt>
 <dd><p>Creates a dictionary with the hardware stage positions.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_sutter.SutterStage.flush_buffers">
-<span class="sig-name descname"><span class="pre">flush_buffers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_sutter.SutterStage.flush_buffers" title="Permalink to this definition"></a></dt>
-<dd><p>Flush Serial I/O Buffers</p>
 </dd></dl>
 
 <dl class="py method">
@@ -304,43 +241,15 @@ Expect values in micrometers, except for theta, which is in degrees.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.devices.stages.stage_sutter.SutterStage.move_absolute">
-<span class="sig-name descname"><span class="pre">move_absolute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">move_dictionary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait_until_done</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_sutter.SutterStage.move_absolute" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>move_dictionary</strong> (<em>dict</em>) – A dictionary of values required for movement. Includes ‘x_abs’, etc. for one
-or more axes. Expects values in micrometers, except for theta, which is
-in degrees.</p></li>
-<li><p><strong>wait_until_done</strong> (<em>bool</em>) – Block until stage has moved to its new spot.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>success</strong> – Was the move successful?</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>bool</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_sutter.SutterStage.move_axis_absolute">
-<span class="sig-name descname"><span class="pre">move_axis_absolute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis_num</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">move_dictionary</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_sutter.SutterStage.move_axis_absolute" title="Permalink to this definition"></a></dt>
-<dd><p>Implement movement logic along multiple axes for the MP-285 stage.</p>
-<p>The command sequence consists of 14 bytes:
-Command byte followed by three sets of four bytes containing position
-information in microsteps for X, Y, and Z, and ending with the terminator.
-Return data consists of 1 byte (task-complete indicator), which occurs after the
-move is complete.</p>
+<span class="sig-name descname"><span class="pre">move_absolute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">move_dictionary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait_until_done</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_sutter.SutterStage.move_absolute" title="Permalink to this definition"></a></dt>
+<dd><p>Move stage along a single axis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>axis</strong> (<em>str</em>) – An axis prefix in move_dictionary. For example, axis=’x’ corresponds to
-‘x_abs’, ‘x_min’, etc.</p></li>
-<li><p><strong>axis_num</strong> (<em>int</em>) – The corresponding number of this axis on a PI stage. Not applicable to the
-ASI stage.</p></li>
 <li><p><strong>move_dictionary</strong> (<em>dict</em>) – A dictionary of values required for movement. Includes ‘x_abs’, ‘x_min’,
-etc. for one or more axes. Expects values in micrometers.</p></li>
+etc. for one or more axes. Expects values in micrometers, except for theta,
+which is in degrees.</p></li>
+<li><p><strong>wait_until_done</strong> (<em>bool</em>) – Wait until the stage has finished moving before returning.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -355,23 +264,14 @@ etc. for one or more axes. Expects values in micrometers.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.devices.stages.stage_sutter.SutterStage.report_position">
 <span class="sig-name descname"><span class="pre">report_position</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_sutter.SutterStage.report_position" title="Permalink to this definition"></a></dt>
-<dd><p>Reports the position of the stage for all axes in microns
-Creates the hardware position dictionary.
-Updates the internal position dictionary.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_sutter.SutterStage.set_stage_speed_and_resolution">
-<span class="sig-name descname"><span class="pre">set_stage_speed_and_resolution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">speed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_sutter.SutterStage.set_stage_speed_and_resolution" title="Permalink to this definition"></a></dt>
-<dd><p>Sets the MP-285 stage speed and resolution.</p>
+<dd><p>Reports the position for all axes, and creates a position dictionary.</p>
+<p>Positions from the MP-285 are converted to microns.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>speed</strong> (<em>int</em>) – Low Resolution = 0-3000 microns/sec
-High Resolution = 0-1310 microns/sec</p></li>
-<li><p><strong>resolution</strong> (<em>int</em>) – Low - 0.2 microns/microstep = 10 microsteps/step
-High - 0.04 microns/microstep = 50 microsteps/step</p></li>
-</ul>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>position_dict</strong> – Dictionary containing the position of all axes</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
 </dd>
 </dl>
 </dd></dl>
@@ -379,11 +279,12 @@ High - 0.04 microns/microstep = 50 microsteps/step</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.devices.stages.stage_sutter.SutterStage.stop">
 <span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_sutter.SutterStage.stop" title="Permalink to this definition"></a></dt>
-<dd><p>This command interrupts and stops a move in progress that originally
-initiated by the Move (‘m’) command. The command sequence consists of 1 byte:
-Command byte (no terminator).</p>
-<p>Return data consists of 1 byte if movement is not in progress, or 2 bytes
-(‘=’ (move-in- progress indicator)and task-complete indicator.</p>
+<dd><p>Stop all stage movement abruptly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -394,14 +295,14 @@ Command byte (no terminator).</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="aslm.model.devices.stages.stage_sutter.build_sutter_stage_connection.html" class="btn btn-neutral float-left" title="aslm.model.devices.stages.stage_sutter.build_sutter_stage_connection" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="aslm.model.devices.stages.stage_sutter.build_MP285_connection.html" class="btn btn-neutral float-left" title="aslm.model.devices.stages.stage_sutter.build_MP285_connection" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="aslm.model.devices.stages.stage_synthetic.html" class="btn btn-neutral float-right" title="aslm.model.devices.stages.stage_synthetic" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Dean Lab @ UT Southwestern.</p>
+    <p>&#169; Copyright 2023, Dean Lab, UT Southwestern Medical Center.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

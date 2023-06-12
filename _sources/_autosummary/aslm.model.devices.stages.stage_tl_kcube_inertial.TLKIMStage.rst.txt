@@ -23,6 +23,7 @@ aslm.model.devices.stages.stage\_tl\_kcube\_inertial.TLKIMStage
       ~TLKIMStage.move_axis_absolute
       ~TLKIMStage.report_position
       ~TLKIMStage.stop
+      ~TLKIMStage.update_position_dict
    
    
 

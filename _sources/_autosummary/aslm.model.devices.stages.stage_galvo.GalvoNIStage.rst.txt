@@ -24,6 +24,7 @@ aslm.model.devices.stages.stage\_galvo.GalvoNIStage
       ~GalvoNIStage.move_axis_absolute
       ~GalvoNIStage.report_position
       ~GalvoNIStage.stop
+      ~GalvoNIStage.update_position_dict
    
    
 

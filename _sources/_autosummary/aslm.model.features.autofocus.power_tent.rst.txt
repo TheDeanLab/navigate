@@ -1,0 +1,6 @@
+aslm.model.features.autofocus.power\_tent
+=========================================
+
+.. currentmodule:: aslm.model.features.autofocus
+
+.. autofunction:: power_tent

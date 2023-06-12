@@ -17,10 +17,12 @@ aslm.model.microscope.Microscope
    .. autosummary::
    
       ~Microscope.__init__
+      ~Microscope.assemble_device_config_lists
       ~Microscope.calculate_all_waveform
       ~Microscope.end_acquisition
       ~Microscope.get_readout_time
       ~Microscope.get_stage_position
+      ~Microscope.load_and_start_devices
       ~Microscope.move_stage
       ~Microscope.move_stage_offset
       ~Microscope.prepare_acquisition

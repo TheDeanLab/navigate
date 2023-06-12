@@ -18,6 +18,7 @@ aslm.model.features.common\_features.WaitToContinue
    
       ~WaitToContinue.__init__
       ~WaitToContinue.data_func
+      ~WaitToContinue.end_data_func
       ~WaitToContinue.signal_func
    
    

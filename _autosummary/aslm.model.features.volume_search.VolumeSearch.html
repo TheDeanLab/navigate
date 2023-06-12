@@ -11,6 +11,8 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
@@ -42,7 +44,9 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../userguide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../supported_hardware.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_configuration.html">Software Configuration</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../contributing_home.html">Contributing to ASLM</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../contributing_guidelines.html">Contributing Guidelines</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../contributing_hardware.html">Adding New Hardware</a></li>
@@ -106,7 +110,7 @@
 <h1>aslm.model.features.volume_search.VolumeSearch<a class="headerlink" href="#aslm-model-features-volume-search-volumesearch" title="Permalink to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="aslm.model.features.volume_search.VolumeSearch">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.model.features.volume_search.</span></span><span class="sig-name descname"><span class="pre">VolumeSearch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Nanoscale'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_zoom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'N/A'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.volume_search.VolumeSearch" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.model.features.volume_search.</span></span><span class="sig-name descname"><span class="pre">VolumeSearch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Nanoscale'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_zoom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'N/A'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flipx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flipy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.volume_search.VolumeSearch" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Find the outer boundary of a tissue, moving the stage through z. Assumes
 there is no tissue out-of-frame in the x,y-directions.</p>
@@ -121,12 +125,15 @@ self.model.configuration[“experiment”][“MicroscopeState”][“zoom”].</
 <li><p><strong>target_resolution</strong> (<em>str</em>) – Name of microscope to use for tiled imaging of tissue</p></li>
 <li><p><strong>target_zoom</strong> (<em>str</em>) – Resolution of microscope (target_resolution) to use for tiled imaging
 of tissue</p></li>
+<li><p><strong>flipx</strong> (<em>bool</em>) – Flip the direction in which new tiles are added.</p></li>
+<li><p><strong>flipy</strong> (<em>bool</em>) – Flip the direction in which new tiles are added.</p></li>
+<li><p><strong>overlap</strong> (<em>float</em>) – Value between 0 and 1 indicating percent overlap of tiles.</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.features.volume_search.VolumeSearch.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Nanoscale'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_zoom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'N/A'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.volume_search.VolumeSearch.__init__" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Nanoscale'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_zoom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'N/A'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flipx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flipy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.volume_search.VolumeSearch.__init__" title="Permalink to this definition"></a></dt>
 <dd><p>Find the outer boundary of a tissue, moving the stage through z. Assumes
 there is no tissue out-of-frame in the x,y-directions.</p>
 <p>Construct a list of stage positions that will tile the entire tissue
@@ -140,6 +147,9 @@ self.model.configuration[“experiment”][“MicroscopeState”][“zoom”].</
 <li><p><strong>target_resolution</strong> (<em>str</em>) – Name of microscope to use for tiled imaging of tissue</p></li>
 <li><p><strong>target_zoom</strong> (<em>str</em>) – Resolution of microscope (target_resolution) to use for tiled imaging
 of tissue</p></li>
+<li><p><strong>flipx</strong> (<em>bool</em>) – Flip the direction in which new tiles are added.</p></li>
+<li><p><strong>flipy</strong> (<em>bool</em>) – Flip the direction in which new tiles are added.</p></li>
+<li><p><strong>overlap</strong> (<em>float</em>) – Value between 0 and 1 indicating percent overlap of tiles.</p></li>
 </ul>
 </dd>
 </dl>
@@ -148,7 +158,7 @@ of tissue</p></li>
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.volume_search.VolumeSearch.__init__" title="aslm.model.features.volume_search.VolumeSearch.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(model[, target_resolution, target_zoom])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.volume_search.VolumeSearch.__init__" title="aslm.model.features.volume_search.VolumeSearch.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(model[, target_resolution, ...])</p></td>
 <td><p>Find the outer boundary of a tissue, moving the stage through z.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cleanup</span></code>()</p></td>
@@ -192,7 +202,7 @@ of tissue</p></li>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Dean Lab @ UT Southwestern.</p>
+    <p>&#169; Copyright 2023, Dean Lab, UT Southwestern Medical Center.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

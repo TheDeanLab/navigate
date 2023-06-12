@@ -1,0 +1,6 @@
+aslm.model.devices.stages.stage\_sutter.build\_MP285\_connection
+================================================================
+
+.. currentmodule:: aslm.model.devices.stages.stage_sutter
+
+.. autofunction:: build_MP285_connection

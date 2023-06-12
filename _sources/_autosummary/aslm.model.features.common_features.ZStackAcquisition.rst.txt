@@ -17,6 +17,10 @@ aslm.model.features.common\_features.ZStackAcquisition
    .. autosummary::
    
       ~ZStackAcquisition.__init__
+      ~ZStackAcquisition.cleanup_data_func
+      ~ZStackAcquisition.end_data_func
+      ~ZStackAcquisition.in_data_func
+      ~ZStackAcquisition.pre_data_func
       ~ZStackAcquisition.pre_signal_func
       ~ZStackAcquisition.signal_end
       ~ZStackAcquisition.signal_func

@@ -35,7 +35,7 @@ import random
 import pytest
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="module")
 def model():
     from types import SimpleNamespace
     from pathlib import Path
@@ -73,6 +73,7 @@ def model():
     )
 
     yield model
+    event_queue.close()
 
 
 def test_single_acquisition(model):
@@ -95,6 +96,8 @@ def test_single_acquisition(model):
         max_iters -= 1
 
     assert n_images == n_frames
+    model.data_thread.join()
+    model.release_pipe("show_img_pipe")
 
 
 def test_change_resolution(model):

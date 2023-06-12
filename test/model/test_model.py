@@ -72,29 +72,29 @@ def model():
         event_queue=event_queue,
     )
 
-    return model
+    yield model
 
 
-# def test_single_acquisition(model):
-#     state = model.configuration["experiment"]["MicroscopeState"]
-#     state["image_mode"] = "single"
-#     state["is_save"] = False
+def test_single_acquisition(model):
+    state = model.configuration["experiment"]["MicroscopeState"]
+    state["image_mode"] = "single"
+    state["is_save"] = False
 
-#     n_frames = state["selected_channels"]
+    n_frames = state["selected_channels"]
 
-#     show_img_pipe = model.create_pipe("show_img_pipe")
+    show_img_pipe = model.create_pipe("show_img_pipe")
 
-#     model.run_command("acquire")
+    model.run_command("acquire")
 
-#     image_id = show_img_pipe.recv()
-#     n_images = 0
-#     max_iters = 10
-#     while image_id != "stop" and max_iters > 0:
-#         image_id = show_img_pipe.recv()
-#         n_images += 1
-#         max_iters -= 1
+    image_id = show_img_pipe.recv()
+    n_images = 0
+    max_iters = 10
+    while image_id != "stop" and max_iters > 0:
+        image_id = show_img_pipe.recv()
+        n_images += 1
+        max_iters -= 1
 
-#     assert n_images == n_frames
+    assert n_images == n_frames
 
 
 def test_change_resolution(model):

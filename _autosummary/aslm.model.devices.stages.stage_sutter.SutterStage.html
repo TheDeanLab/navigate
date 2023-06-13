@@ -111,7 +111,7 @@
 <h1>aslm.model.devices.stages.stage_sutter.SutterStage<a class="headerlink" href="#aslm-model-devices-stages-stage-sutter-sutterstage" title="Permalink to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="aslm.model.devices.stages.stage_sutter.SutterStage">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.model.devices.stages.stage_sutter.</span></span><span class="sig-name descname"><span class="pre">SutterStage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_sutter.SutterStage" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.model.devices.stages.stage_sutter.</span></span><span class="sig-name descname"><span class="pre">SutterStage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_sutter.SutterStage" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="aslm.model.devices.stages.stage_base.StageBase.html#aslm.model.devices.stages.stage_base.StageBase" title="aslm.model.devices.stages.stage_base.StageBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">StageBase</span></code></a></p>
 <p>SutterStage Class for MP-285</p>
 <dl class="field-list simple">
@@ -181,7 +181,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.devices.stages.stage_sutter.SutterStage.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_sutter.SutterStage.__init__" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_sutter.SutterStage.__init__" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>
@@ -190,44 +190,46 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_sutter.SutterStage.__init__" title="aslm.model.devices.stages.stage_sutter.SutterStage.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(microscope_name, device_connection, ...)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_sutter.SutterStage.create_position_dict" title="aslm.model.devices.stages.stage_sutter.SutterStage.create_position_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_position_dict</span></code></a>()</p></td>
-<td><p>Creates a dictionary with the hardware stage positions.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_sutter.SutterStage.get_abs_position" title="aslm.model.devices.stages.stage_sutter.SutterStage.get_abs_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_abs_position</span></code></a>(axis, move_dictionary)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_sutter.SutterStage.get_abs_position" title="aslm.model.devices.stages.stage_sutter.SutterStage.get_abs_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_abs_position</span></code></a>(axis, axis_abs)</p></td>
 <td><p>Ensure the requested position is within axis bounds and return it.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_sutter.SutterStage.get_position_dict" title="aslm.model.devices.stages.stage_sutter.SutterStage.get_position_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_position_dict</span></code></a>()</p></td>
+<td><p>Return a dictionary with the saved stage positions.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_sutter.SutterStage.move_absolute" title="aslm.model.devices.stages.stage_sutter.SutterStage.move_absolute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move_absolute</span></code></a>(move_dictionary[, wait_until_done])</p></td>
 <td><p>Move stage along a single axis.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_sutter.SutterStage.report_position" title="aslm.model.devices.stages.stage_sutter.SutterStage.report_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">report_position</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_sutter.SutterStage.move_axis_absolute" title="aslm.model.devices.stages.stage_sutter.SutterStage.move_axis_absolute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move_axis_absolute</span></code></a>(axis, abs_pos[, ...])</p></td>
+<td><p>Implement movement logic along a single axis.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_sutter.SutterStage.report_position" title="aslm.model.devices.stages.stage_sutter.SutterStage.report_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">report_position</span></code></a>()</p></td>
 <td><p>Reports the position for all axes, and creates a position dictionary.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_sutter.SutterStage.stop" title="aslm.model.devices.stages.stage_sutter.SutterStage.stop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_sutter.SutterStage.stop" title="aslm.model.devices.stages.stage_sutter.SutterStage.stop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop</span></code></a>()</p></td>
 <td><p>Stop all stage movement abruptly.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_position_dict</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_sutter.SutterStage.verify_abs_position" title="aslm.model.devices.stages.stage_sutter.SutterStage.verify_abs_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">verify_abs_position</span></code></a>(move_dictionary[, is_strict])</p></td>
+<td><p>Ensure the requested moving positions are within axes bounds</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_sutter.SutterStage.axes_mapping" title="aslm.model.devices.stages.stage_sutter.SutterStage.axes_mapping"><code class="xref py py-obj docutils literal notranslate"><span class="pre">axes_mapping</span></code></a></p></td>
+<td><p>Initial setting for all positions self.x_pos, self.y_pos etc are the true axis positions, no matter whether the stages are zeroed or not.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py method">
-<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_sutter.SutterStage.create_position_dict">
-<span class="sig-name descname"><span class="pre">create_position_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_sutter.SutterStage.create_position_dict" title="Permalink to this definition"></a></dt>
-<dd><p>Creates a dictionary with the hardware stage positions.</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.devices.stages.stage_sutter.SutterStage.get_abs_position">
-<span class="sig-name descname"><span class="pre">get_abs_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">move_dictionary</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_sutter.SutterStage.get_abs_position" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_abs_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis_abs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_sutter.SutterStage.get_abs_position" title="Permalink to this definition"></a></dt>
 <dd><p>Ensure the requested position is within axis bounds and return it.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>axis</strong> (<em>str</em>) – An axis prefix in move_dictionary. For example, axis=’x’ corresponds to
-‘x_abs’, ‘x_min’, etc.</p></li>
-<li><p><strong>move_dictionary</strong> (<em>dict</em>) – A dictionary of values required for movement.
-Includes ‘x_abs’, ‘x_min’, etc. for one or more axes.
-Expect values in micrometers, except for theta, which is in degrees.</p></li>
+<li><p><strong>axis</strong> (<em>str</em>) – An axis: x, y, z, f, theta</p></li>
+<li><p><strong>axis_abs</strong> (<em>float</em>) – Absolute position value</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -237,6 +239,12 @@ Expect values in micrometers, except for theta, which is in degrees.</p></li>
 <dd class="field-odd"><p>float</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_sutter.SutterStage.get_position_dict">
+<span class="sig-name descname"><span class="pre">get_position_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_sutter.SutterStage.get_position_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Return a dictionary with the saved stage positions.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -250,6 +258,28 @@ Expect values in micrometers, except for theta, which is in degrees.</p></li>
 etc. for one or more axes. Expects values in micrometers, except for theta,
 which is in degrees.</p></li>
 <li><p><strong>wait_until_done</strong> (<em>bool</em>) – Wait until the stage has finished moving before returning.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Was the move successful?</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_sutter.SutterStage.move_axis_absolute">
+<span class="sig-name descname"><span class="pre">move_axis_absolute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">abs_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait_until_done</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_sutter.SutterStage.move_axis_absolute" title="Permalink to this definition"></a></dt>
+<dd><p>Implement movement logic along a single axis.</p>
+<p>Example calls:</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<em>str</em>) – An axis. For example, ‘x’, ‘y’, ‘z’, ‘f’, ‘theta’.</p></li>
+<li><p><strong>abs_pos</strong> (<em>float</em>) – Absolute position value</p></li>
+<li><p><strong>wait_until_done</strong> (<em>bool</em>) – Block until stage has moved to its new spot.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -285,6 +315,33 @@ which is in degrees.</p></li>
 <dd class="field-odd"><p>None</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_sutter.SutterStage.verify_abs_position">
+<span class="sig-name descname"><span class="pre">verify_abs_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">move_dictionary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_sutter.SutterStage.verify_abs_position" title="Permalink to this definition"></a></dt>
+<dd><p>Ensure the requested moving positions are within axes bounds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>move_dictionary</strong> (<em>dict</em>) – A dictionary of values required for movement.
+Includes ‘x_abs’, ‘y_abs’, etc. for one or more axes.
+Expect values in micrometers, except for theta, which is in degrees.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a verified moving dict {axis: abs_position}</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_sutter.SutterStage.axes_mapping">
+<span class="sig-name descname"><span class="pre">axes_mapping</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_sutter.SutterStage.axes_mapping" title="Permalink to this definition"></a></dt>
+<dd><p>Initial setting for all positions
+self.x_pos, self.y_pos etc are the true axis positions, no matter whether
+the stages are zeroed or not.</p>
 </dd></dl>
 
 </dd></dl>

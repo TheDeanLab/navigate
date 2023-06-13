@@ -18,16 +18,22 @@ aslm.model.devices.stages.stage\_galvo.GalvoNIStage
    
       ~GalvoNIStage.__init__
       ~GalvoNIStage.calculate_waveform
-      ~GalvoNIStage.create_position_dict
       ~GalvoNIStage.get_abs_position
+      ~GalvoNIStage.get_position_dict
       ~GalvoNIStage.move_absolute
       ~GalvoNIStage.move_axis_absolute
       ~GalvoNIStage.report_position
       ~GalvoNIStage.stop
-      ~GalvoNIStage.update_position_dict
+      ~GalvoNIStage.verify_abs_position
    
    
 
    
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GalvoNIStage.axes_mapping
    
    

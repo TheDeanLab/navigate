@@ -46,7 +46,7 @@
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Software Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#download-git">Download Git</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#setup-your-python-environment">Setup your Python Environment.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#setup-your-python-environment">Setup your Python Environment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#gpu-dependencies">GPU Dependencies</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
 </ul>
@@ -88,7 +88,7 @@
 We also recommend installing <a class="reference external" href="https://desktop.github.com/">GitHub Desktop</a> for a more user-friendly experience.</p>
 </section>
 <section id="setup-your-python-environment">
-<h2>Setup your Python Environment.<a class="headerlink" href="#setup-your-python-environment" title="Permalink to this heading"></a></h2>
+<h2>Setup your Python Environment<a class="headerlink" href="#setup-your-python-environment" title="Permalink to this heading"></a></h2>
 <p>Head over to the <a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html#latest-miniconda-installer-links">miniconda website</a>
 and install the appropriate version based on your operating system.</p>
 <div class="admonition tip">
@@ -126,14 +126,14 @@ Once the folder is created, we will want to change that to our working directory
 <ul>
 <li><p>Windows:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">ASLM</span><span class="p">)</span> <span class="n">C</span><span class="p">:</span>\<span class="n">Users</span>\<span class="n">Dean</span><span class="o">-</span><span class="n">Lab</span> <span class="n">cd</span> <span class="n">Desktop</span>
-<span class="p">(</span><span class="n">ASLM</span><span class="p">)</span> <span class="n">C</span><span class="p">:</span>\<span class="n">Users</span>\<span class="n">Dean</span><span class="o">-</span><span class="n">Lab</span>\<span class="n">Desktop</span> <span class="n">mkdir</span> <span class="n">ASLM</span>
-<span class="p">(</span><span class="n">ASLM</span><span class="p">)</span> <span class="n">C</span><span class="p">:</span>\<span class="n">users</span>\<span class="n">Dean</span><span class="o">-</span><span class="n">Lab</span>\<span class="n">Desktop</span> <span class="n">cd</span> <span class="n">ASLM</span>
+<span class="p">(</span><span class="n">ASLM</span><span class="p">)</span> <span class="n">C</span><span class="p">:</span>\<span class="n">Users</span>\<span class="n">Dean</span><span class="o">-</span><span class="n">Lab</span>\<span class="n">Desktop</span> <span class="n">mkdir</span> <span class="n">Code</span>
+<span class="p">(</span><span class="n">ASLM</span><span class="p">)</span> <span class="n">C</span><span class="p">:</span>\<span class="n">users</span>\<span class="n">Dean</span><span class="o">-</span><span class="n">Lab</span>\<span class="n">Desktop</span> <span class="n">cd</span> <span class="n">Code</span>
 </pre></div>
 </div>
 </li>
 <li><p>Linux/Mac:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(ASLM) MyComputer ~ $ mkdir ~/Desktop/ASLM
-(ASLM) MyComputer ~ $ cd ~/Desktop/ASLM
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(ASLM) MyComputer ~ $ mkdir ~/Desktop/Code
+(ASLM) MyComputer ~ $ cd ~/Desktop/Code
 </pre></div>
 </div>
 </li>
@@ -163,6 +163,10 @@ Once the folder is created, we will want to change that to our working directory
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(base) MyComputer ~ $ conda activate ASLM
 (ASLM) MyComputer ~ $ aslm
 </pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you are running Windows, you can create a desktop shortcut to ASLM by right-clicking the Desktop, navigating to New and then Shortcut and entering <code class="docutils literal notranslate"><span class="pre">%windir%\system32\cmd.exe</span> <span class="pre">&quot;/c&quot;</span> <span class="pre">C:\path\to\miniconda\Scripts\activate.bat</span> <span class="pre">aslm</span> <span class="pre">&amp;&amp;</span> <span class="pre">aslm</span></code> into the location text box.</p>
 </div>
 </section>
 <section id="gpu-dependencies">

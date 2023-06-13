@@ -17,15 +17,22 @@ aslm.model.devices.stages.stage\_sutter.SutterStage
    .. autosummary::
    
       ~SutterStage.__init__
-      ~SutterStage.create_position_dict
       ~SutterStage.get_abs_position
+      ~SutterStage.get_position_dict
       ~SutterStage.move_absolute
+      ~SutterStage.move_axis_absolute
       ~SutterStage.report_position
       ~SutterStage.stop
-      ~SutterStage.update_position_dict
+      ~SutterStage.verify_abs_position
    
    
 
    
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~SutterStage.axes_mapping
    
    

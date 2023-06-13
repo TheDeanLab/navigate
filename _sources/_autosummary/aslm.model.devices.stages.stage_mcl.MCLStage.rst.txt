@@ -17,16 +17,22 @@ aslm.model.devices.stages.stage\_mcl.MCLStage
    .. autosummary::
    
       ~MCLStage.__init__
-      ~MCLStage.create_position_dict
       ~MCLStage.get_abs_position
+      ~MCLStage.get_position_dict
       ~MCLStage.move_absolute
       ~MCLStage.move_axis_absolute
       ~MCLStage.report_position
       ~MCLStage.stop
-      ~MCLStage.update_position_dict
+      ~MCLStage.verify_abs_position
    
    
 
    
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MCLStage.axes_mapping
    
    

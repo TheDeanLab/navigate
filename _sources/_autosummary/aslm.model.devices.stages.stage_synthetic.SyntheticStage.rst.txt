@@ -17,9 +17,9 @@ aslm.model.devices.stages.stage\_synthetic.SyntheticStage
    .. autosummary::
    
       ~SyntheticStage.__init__
-      ~SyntheticStage.create_position_dict
       ~SyntheticStage.get_abs_position
-      ~SyntheticStage.get_position
+      ~SyntheticStage.get_axis_position
+      ~SyntheticStage.get_position_dict
       ~SyntheticStage.get_speed
       ~SyntheticStage.load_sample
       ~SyntheticStage.move_absolute
@@ -31,12 +31,16 @@ aslm.model.devices.stages.stage\_synthetic.SyntheticStage
       ~SyntheticStage.stop
       ~SyntheticStage.stop_scan
       ~SyntheticStage.unload_sample
-      ~SyntheticStage.unzero_axes
-      ~SyntheticStage.update_position_dict
-      ~SyntheticStage.zero_axes
+      ~SyntheticStage.verify_abs_position
    
    
 
    
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~SyntheticStage.axes_mapping
    
    

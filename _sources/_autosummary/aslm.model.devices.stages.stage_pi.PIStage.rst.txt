@@ -17,16 +17,23 @@ aslm.model.devices.stages.stage\_pi.PIStage
    .. autosummary::
    
       ~PIStage.__init__
-      ~PIStage.create_position_dict
       ~PIStage.get_abs_position
+      ~PIStage.get_position_dict
       ~PIStage.move_absolute
       ~PIStage.move_axis_absolute
       ~PIStage.report_position
       ~PIStage.stop
-      ~PIStage.update_position_dict
+      ~PIStage.verify_abs_position
+      ~PIStage.wait_on_target
    
    
 
    
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~PIStage.axes_mapping
    
    

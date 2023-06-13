@@ -17,16 +17,22 @@ aslm.model.devices.stages.stage\_tl\_kcube\_inertial.TLKIMStage
    .. autosummary::
    
       ~TLKIMStage.__init__
-      ~TLKIMStage.create_position_dict
       ~TLKIMStage.get_abs_position
+      ~TLKIMStage.get_position_dict
       ~TLKIMStage.move_absolute
       ~TLKIMStage.move_axis_absolute
       ~TLKIMStage.report_position
       ~TLKIMStage.stop
-      ~TLKIMStage.update_position_dict
+      ~TLKIMStage.verify_abs_position
    
    
 
    
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~TLKIMStage.axes_mapping
    
    

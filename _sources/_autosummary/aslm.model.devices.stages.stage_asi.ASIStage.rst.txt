@@ -17,9 +17,9 @@ aslm.model.devices.stages.stage\_asi.ASIStage
    .. autosummary::
    
       ~ASIStage.__init__
-      ~ASIStage.create_position_dict
       ~ASIStage.get_abs_position
-      ~ASIStage.get_position
+      ~ASIStage.get_axis_position
+      ~ASIStage.get_position_dict
       ~ASIStage.get_speed
       ~ASIStage.move_absolute
       ~ASIStage.move_axis_absolute
@@ -29,10 +29,16 @@ aslm.model.devices.stages.stage\_asi.ASIStage
       ~ASIStage.start_scan
       ~ASIStage.stop
       ~ASIStage.stop_scan
-      ~ASIStage.update_position_dict
+      ~ASIStage.verify_abs_position
    
    
 
    
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~ASIStage.axes_mapping
    
    

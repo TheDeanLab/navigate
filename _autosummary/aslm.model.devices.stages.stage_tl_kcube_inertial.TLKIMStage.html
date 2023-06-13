@@ -124,50 +124,68 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.__init__" title="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(microscope_name, device_connection, ...)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.create_position_dict" title="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.create_position_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_position_dict</span></code></a>()</p></td>
-<td><p>Creates a dictionary with the hardware stage positions.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.get_abs_position" title="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.get_abs_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_abs_position</span></code></a>(axis, axis_abs)</p></td>
+<td><p>Ensure the requested position is within axis bounds and return it.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.get_abs_position" title="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.get_abs_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_abs_position</span></code></a>(axis, move_dictionary)</p></td>
-<td><p>Hack in a lack of bounds checking.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.get_position_dict" title="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.get_position_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_position_dict</span></code></a>()</p></td>
+<td><p>Return a dictionary with the saved stage positions.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.move_absolute" title="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.move_absolute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move_absolute</span></code></a>(move_dictionary[, wait_until_done])</p></td>
-<td><p><dl class="field-list simple">
-<dt class="field-odd">param move_dictionary<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A dictionary of values required for movement. Includes 'x_abs', etc. for</p>
-</dd>
-</dl>
-</p></td>
+<td><p>Move stage</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.move_axis_absolute" title="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.move_axis_absolute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move_axis_absolute</span></code></a>(axis, axis_num, ...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.move_axis_absolute" title="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.move_axis_absolute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move_axis_absolute</span></code></a>(axis, abs_pos[, ...])</p></td>
 <td><p>Implement movement logic along a single axis.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.report_position" title="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.report_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">report_position</span></code></a>()</p></td>
 <td><p># Reports the position of the stage for all axes, and creates the hardware # position dictionary.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.stop" title="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.stop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop</span></code></a>()</p></td>
-<td><p>Stop all stage movement abruptly.</p></td>
+<td><p>Stop all stage channels move</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_position_dict</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.verify_abs_position" title="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.verify_abs_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">verify_abs_position</span></code></a>(move_dictionary[, is_strict])</p></td>
+<td><p>Ensure the requested moving positions are within axes bounds</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.axes_mapping" title="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.axes_mapping"><code class="xref py py-obj docutils literal notranslate"><span class="pre">axes_mapping</span></code></a></p></td>
+<td><p>Initial setting for all positions self.x_pos, self.y_pos etc are the true axis positions, no matter whether the stages are zeroed or not.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py method">
-<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.create_position_dict">
-<span class="sig-name descname"><span class="pre">create_position_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.create_position_dict" title="Permalink to this definition"></a></dt>
-<dd><p>Creates a dictionary with the hardware stage positions.</p>
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.get_abs_position">
+<span class="sig-name descname"><span class="pre">get_abs_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis_abs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.get_abs_position" title="Permalink to this definition"></a></dt>
+<dd><p>Ensure the requested position is within axis bounds and return it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<em>str</em>) – An axis: x, y, z, f, theta</p></li>
+<li><p><strong>axis_abs</strong> (<em>float</em>) – Absolute position value</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Position to move the stage to for this axis.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.get_abs_position">
-<span class="sig-name descname"><span class="pre">get_abs_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">move_dictionary</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.get_abs_position" title="Permalink to this definition"></a></dt>
-<dd><p>Hack in a lack of bounds checking. TODO: Don’t do this.</p>
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.get_position_dict">
+<span class="sig-name descname"><span class="pre">get_position_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.get_position_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Return a dictionary with the saved stage positions.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.move_absolute">
 <span class="sig-name descname"><span class="pre">move_absolute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">move_dictionary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait_until_done</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.move_absolute" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Move stage</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>move_dictionary</strong> (<em>dict</em>) – A dictionary of values required for movement. Includes ‘x_abs’, etc. for
@@ -187,18 +205,15 @@ in degrees.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.move_axis_absolute">
-<span class="sig-name descname"><span class="pre">move_axis_absolute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis_num</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">move_dictionary</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.move_axis_absolute" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">move_axis_absolute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">abs_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait_until_done</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.move_axis_absolute" title="Permalink to this definition"></a></dt>
 <dd><p>Implement movement logic along a single axis.</p>
 <p>Example calls:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>axis</strong> (<em>str</em>) – An axis prefix in move_dictionary. For example, axis=’x’ corresponds to
-‘x_abs’, ‘x_min’, etc.</p></li>
-<li><p><strong>axis_num</strong> (<em>int</em>) – The corresponding number of this axis on a PI stage.</p></li>
-<li><p><strong>move_dictionary</strong> (<em>dict</em>) – A dictionary of values required for movement. Includes ‘x_abs’, ‘x_min’,
-etc. for one or more axes. Expects values in micrometers, except for theta,
-which is in degrees.</p></li>
+<li><p><strong>axis</strong> (<em>str</em>) – An axis. For example, ‘x’, ‘y’, ‘z’, ‘f’, ‘theta’.</p></li>
+<li><p><strong>abs_pos</strong> (<em>float</em>) – Absolute position value</p></li>
+<li><p><strong>wait_until_done</strong> (<em>bool</em>) – Block until stage has moved to its new spot.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -220,7 +235,34 @@ which is in degrees.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.stop">
 <span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.stop" title="Permalink to this definition"></a></dt>
-<dd><p>Stop all stage movement abruptly.</p>
+<dd><p>Stop all stage channels move</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.verify_abs_position">
+<span class="sig-name descname"><span class="pre">verify_abs_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">move_dictionary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.verify_abs_position" title="Permalink to this definition"></a></dt>
+<dd><p>Ensure the requested moving positions are within axes bounds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>move_dictionary</strong> (<em>dict</em>) – A dictionary of values required for movement.
+Includes ‘x_abs’, ‘y_abs’, etc. for one or more axes.
+Expect values in micrometers, except for theta, which is in degrees.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a verified moving dict {axis: abs_position}</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.axes_mapping">
+<span class="sig-name descname"><span class="pre">axes_mapping</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.axes_mapping" title="Permalink to this definition"></a></dt>
+<dd><p>Initial setting for all positions
+self.x_pos, self.y_pos etc are the true axis positions, no matter whether
+the stages are zeroed or not.</p>
 </dd></dl>
 
 </dd></dl>

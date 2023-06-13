@@ -29,6 +29,7 @@ aslm.model.microscope.Microscope
       ~Microscope.prepare_next_channel
       ~Microscope.stop_stage
       ~Microscope.update_data_buffer
+      ~Microscope.update_stage_limits
    
    
 

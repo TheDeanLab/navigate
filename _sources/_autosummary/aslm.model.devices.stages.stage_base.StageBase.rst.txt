@@ -17,13 +17,19 @@ aslm.model.devices.stages.stage\_base.StageBase
    .. autosummary::
    
       ~StageBase.__init__
-      ~StageBase.create_position_dict
       ~StageBase.get_abs_position
+      ~StageBase.get_position_dict
       ~StageBase.stop
-      ~StageBase.update_position_dict
+      ~StageBase.verify_abs_position
    
    
 
    
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~StageBase.axes_mapping
    
    

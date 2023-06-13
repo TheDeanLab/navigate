@@ -55,6 +55,7 @@ class TigerController:
         self.baud_rate = baud_rate
         self.verbose = verbose
         self.print = self.report_to_console
+        self.default_axes_sequence = ["X", "Y", "Z", "F", "M", "N"]
 
     @staticmethod
     def scan_ports() -> list[str]:
@@ -162,35 +163,36 @@ class TigerController:
         if res.startswith(":N"):
             raise TigerException(res)
 
-    def moverel_axis(self, axis: str, distance: int) -> None:
+    def moverel_axis(self, axis: str, distance: float) -> None:
         """Move the stage with a relative move on one axis"""
-        self.send_command(f"MOVREL {axis}={distance}\r")
+        self.send_command(f"MOVREL {axis}={round(distance, 6)}\r")
         res = self.read_response()
         if res.startswith(":N"):
             raise TigerException(res)
 
-    def move(self, x: int = 0, y: int = 0, z: int = 0) -> None:
+    def move(self, pos_dict) -> None:
         """Move the stage with an absolute move on multiple axes"""
-        self.send_command(f"MOVE X={x} Y={y} Z={z}\r")
+        pos_str = " ".join([f"{axis}={round(pos_dict[axis], 6)}" for axis in pos_dict])
+        self.send_command(f"MOVE {pos_str}\r")
         res = self.read_response()
         if res.startswith(":N"):
             raise TigerException(res)
 
-    def move_axis(self, axis: str, distance: int) -> None:
+    def move_axis(self, axis: str, distance: float) -> None:
         """Move the stage with an absolute move on one axis"""
-        self.send_command(f"MOVE {axis}={distance}\r")
+        self.send_command(f"MOVE {axis}={round(distance, 6)}\r")
         res = self.read_response()
         if res.startswith(":N"):
             raise TigerException(res)
 
-    def set_max_speed(self, axis: str, speed: int) -> None:
+    def set_max_speed(self, axis: str, speed: float) -> None:
         """Set the speed on a specific axis. Speed is in mm/s."""
         self.send_command(f"SPEED {axis}={speed}\r")
         res = self.read_response()
         if res.startswith(":N"):
             raise TigerException(res)
 
-    def get_position(self, axis: str) -> int:
+    def get_axis_position(self, axis: str) -> int:
         """Return the position of the stage in ASI units (tenths of microns)."""
         self.send_command(f"WHERE {axis}\r")
         response = self.read_response()
@@ -203,7 +205,7 @@ class TigerController:
                 pos = float('Inf')
             return pos
 
-    def get_position_um(self, axis: str) -> float:
+    def get_axis_position_um(self, axis: str) -> float:
         """Return the position of the stage in microns."""
         self.send_command(f"WHERE {axis}\r")
         response = self.read_response()
@@ -211,6 +213,23 @@ class TigerController:
             raise TigerException(response)
         else:
             return float(response.split(" ")[1]) / 10.0
+        
+    def get_position(self, axes) -> dict:
+        """Return current stage position
+        
+        Returns
+        -------
+        dictionary:
+             {axis: position}
+        """
+        self.send_command(f"WHERE {' '.join(axes)}\r")
+        response = self.read_response()
+        if response.startswith(":N"):
+            raise TigerException(response)
+        else:
+            pos = response.split(" ")
+            axes_seq = list(filter(lambda axis: axis if axis in axes else False, self.default_axes_sequence))
+            return {axis: pos[1+i] for i, axis in enumerate(axes_seq)}
 
     # Utility Functions
 

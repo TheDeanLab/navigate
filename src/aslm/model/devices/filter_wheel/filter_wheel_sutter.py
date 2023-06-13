@@ -56,8 +56,9 @@ def build_filter_wheel_connection(comport, baudrate, timeout=0.25):
         Baud rate for communicating with the filter wheel, e.g., 9600.
     """
     logging.debug(f"SutterFilterWheel - Opening Serial Port {comport}")
+    print(comport, baudrate, timeout)
     try:
-        return serial.Serial(comport, baudrate, timeout)
+        return serial.Serial(comport, baudrate, timeout=timeout)
     except serial.SerialException:
         logger.warning("SutterFilterWheel - Could not establish Serial Port Connection")
         raise UserWarning(

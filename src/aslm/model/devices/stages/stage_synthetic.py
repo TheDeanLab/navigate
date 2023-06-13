@@ -49,11 +49,15 @@ class SyntheticStage(StageBase):
 
         self.default_speed = 7.68 * 0.67
 
-    def report_position(self):
-        self.create_position_dict()
-        return self.position_dict
+        # Default axes mapping
+        axes_mapping = {'x': 'X', 'y': 'Y', 'z': 'Z', 'theta': 'Theta', 'f': 'F'}
+        if not self.axes_mapping:
+            self.axes_mapping = {axis: axes_mapping[axis] for axis in self.axes if axis in axes_mapping}
 
-    def move_axis_absolute(self, axis, move_dictionary):
+    def report_position(self):
+        return self.get_position_dict()
+
+    def move_axis_absolute(self, axis, abs_pos, wait_until_done=False):
         """
         Implement movement logic along a single axis.
 
@@ -62,24 +66,24 @@ class SyntheticStage(StageBase):
         Parameters
         ----------
         axis : str
-            An axis prefix in move_dictionary. For example, axis='x' corresponds to
-            'x_abs', 'x_min', etc.
-        axis_num : int
-            The corresponding number of this axis on a PI stage.
-        move_dictionary : dict
-            A dictionary of values required for movement. Includes 'x_abs', 'x_min',
-            etc. for one or more axes. Expects values in micrometers, except for theta,
-            which is in degrees.
+            An axis. For example, 'x', 'y', 'z', 'f', 'theta'.
+        abs_pos : float
+            Absolute position value
+        wait_until_done : bool
+            Block until stage has moved to its new spot.
 
         Returns
         -------
         bool
             Was the move successful?
         """
-        axis_abs = self.get_abs_position(axis, move_dictionary)
+        axis_abs = self.get_abs_position(axis, abs_pos)
         if axis_abs == -1e50:
             return False
 
+        if wait_until_done:
+            time.sleep(0.025)
+        
         # Move the stage
         setattr(self, f"{axis}_pos", axis_abs)
         return True
@@ -101,32 +105,16 @@ class SyntheticStage(StageBase):
         success : bool
             Was the move successful?
         """
-        success = False
-        for ax in self.axes:
-            if f"{ax}_abs" not in move_dictionary:
-                continue
-            success = self.move_axis_absolute(ax, move_dictionary)
+        abs_pos_dict = self.verify_abs_position(move_dictionary)
+        if not abs_pos_dict:
+            return False
 
+        for axis in abs_pos_dict:            
+            setattr(self, f"{axis}_pos", abs_pos_dict[axis])
         if wait_until_done is True:
             time.sleep(0.025)
 
-        return success
-
-    def zero_axes(self, list):
-        for axis in list:
-            try:
-                exec("self.int_" + axis + "_pos_offset = -self." + axis + "_pos")
-            except BaseException:
-                logger.exception(f"Zeroing of axis: {axis} failed")
-                print("Zeroing of axis: ", axis, "failed")
-
-    def unzero_axes(self, list):
-        for axis in list:
-            try:
-                exec("self.int_" + axis + "_pos_offset = 0")
-            except BaseException:
-                logger.exception(f"Unzeroing of axis: {axis} failed")
-                print("Unzeroing of axis: ", axis, "failed")
+        return True
 
     def load_sample(self):
         self.y_pos = self.y_load_position
@@ -134,7 +122,7 @@ class SyntheticStage(StageBase):
     def unload_sample(self):
         self.y_pos = self.y_unload_position
 
-    def get_position(self, axis):
+    def get_axis_position(self, axis):
         return getattr(self, f"{axis}_pos")
     
     def set_speed(self, velocity_dict):

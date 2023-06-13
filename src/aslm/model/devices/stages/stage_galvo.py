@@ -32,7 +32,6 @@
 
 # Standard Library Imports
 import logging
-import time
 from multiprocessing.managers import ListProxy
 
 # Third Party Imports
@@ -48,7 +47,7 @@ logger = logging.getLogger(p)
 
 
 class GalvoNIStage(StageBase):
-    """Physik Instrumente Stage Class
+    """Galvo Stage Class (only supports one axis)
 
     Parameters
     ----------
@@ -80,14 +79,17 @@ class GalvoNIStage(StageBase):
         # eval(self.volts_per_micron, {"x": 100})
         if type(device_config) == ListProxy:
             self.volts_per_micron = device_config[device_id]["volts_per_micron"]
-            self.axes_channels = device_config[device_id]["axes_channels"]
+            self.axes_channels = device_config[device_id]["axes_mapping"]
             self.galvo_max_voltage = device_config[device_id]["max"]
             self.galvo_min_voltage = device_config[device_id]["min"]
         else:
             self.volts_per_micron = device_config["volts_per_micron"]
-            self.axes_channels = device_config["axes_channels"]
+            self.axes_channels = device_config["axes_mapping"]
             self.galvo_max_voltage = device_config["max"]
             self.galvo_min_voltage = device_config["min"]
+
+        # Notice: only supports one axis
+        self.axes_mapping = {self.axes[0]: self.axes_channels[0]}
 
         self.daq = device_connection
 
@@ -118,8 +120,7 @@ class GalvoNIStage(StageBase):
     # for stacking, we could have 2 axis here or not, y is for tiling, not necessary
     def report_position(self):
         """Reports the position for all axes, and create position dictionary."""
-        self.create_position_dict()
-        return self.position_dict
+        return self.get_position_dict()
     
     def calculate_waveform(self, readout_time):
         self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
@@ -249,7 +250,7 @@ class GalvoNIStage(StageBase):
         }
         return self.waveform_dict
 
-    def move_axis_absolute(self, axis, axis_num, move_dictionary):
+    def move_axis_absolute(self, axis, abs_pos, wait_until_done=False):
         """Implement movement logic along a single axis.
 
         Example calls:
@@ -259,12 +260,10 @@ class GalvoNIStage(StageBase):
         axis : str
             An axis prefix in move_dictionary.
             For example, axis='x' corresponds to 'x_abs', 'x_min', etc.
-        axis_num : int
-            The corresponding number of this axis on a PI stage.
-        move_dictionary : dict
-            A dictionary of values required for movement.
-            Includes 'x_abs', 'x_min', etc. for one or more axes.
-            Expect values in micrometers, except for theta, which is in degrees.
+        abs_pos : float
+            Absolute position value
+        wait_until_done : bool
+            Block until stage has moved to its new spot.
 
         Returns
         -------
@@ -272,7 +271,7 @@ class GalvoNIStage(StageBase):
             Was the move successful?
         """
         self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
-        axis_abs = self.get_abs_position(axis, move_dictionary)
+        axis_abs = self.get_abs_position(axis, abs_pos)
         if axis_abs == -1e50:
             return False
 
@@ -329,18 +328,20 @@ class GalvoNIStage(StageBase):
                     self.waveform_dict[channel_key] < self.galvo_min_voltage
                 ] = self.galvo_min_voltage
 
-        self.daq.analog_outputs[self.axes_channels[axis_num]] = {
+        self.daq.analog_outputs[self.axes_channels[0]] = {
             "sample_rate": self.sample_rate,
             "samples": self.samples,
             "trigger_source": self.trigger_source,
             "waveform": self.waveform_dict,
         }
         # update analog waveform
-        self.daq.update_analog_task(self.axes_channels[axis_num].split("/")[0])
+        self.daq.update_analog_task(self.axes_channels[0].split("/")[0])
+
+        setattr(self, f"{axis}_pos", axis_abs)
 
         return True
 
-    def move_absolute(self, move_dictionary, wait_until_done=False):
+    def move_absolute(self, move_dictionary, wait_until_done=True):
         """Move Absolute Method.
 
         Parameters
@@ -357,23 +358,11 @@ class GalvoNIStage(StageBase):
         success : bool
             Was the move successful?
         """
-
-        for i, ax in enumerate(self.axes):
-            success = self.move_axis_absolute(ax, i, move_dictionary)
-            if success and wait_until_done is True:
-                stage_pos, n_tries, i = -1e50, 10, 0
-                target_pos = move_dictionary[f"{ax}_abs"] - getattr(
-                    self, f"int_{ax}_pos_offset", 0
-                )  # TODO: should we default to 0?
-                while (abs(stage_pos - target_pos) < 0.01) and (i < n_tries):
-                    #  replace: stage_pos =
-                    #  self.mcl_controller.MCL_SingleReadN(ax, self.handle)
-                    #  todo: include a call to the NI board to set a voltage
-                    i += 1
-                    time.sleep(0.01)
-                if abs(stage_pos - target_pos) > 0.01:
-                    success = False
-        return success
+        abs_pos_dict = self.verify_abs_position(move_dictionary)
+        if not abs_pos_dict:
+            return False
+        axis = list(abs_pos_dict.keys())[0]
+        return self.move_axis_absolute(axis, abs_pos_dict[axis], wait_until_done)
 
     def stop(self):
         """Stop all stage movement abruptly."""

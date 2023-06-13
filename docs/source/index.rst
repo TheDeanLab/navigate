@@ -1,9 +1,9 @@
 
 .. _aslm-home:
 
-##############################################
+############################################
 **Autonomous Software for Light Microscopy**
-##############################################
+############################################
 
 
 **ASLM** is a Python library to control microscopes in the UT Southwestern ecosystem.
@@ -18,8 +18,7 @@ contains a feature list that acts as a recipe maker for automated microscope rou
 **Project Philosophy**
 =========================
 
-* Minimal number of dependencies. Prioritize standard library imports for maximum
-stability.
+* Minimal number of dependencies. Prioritize standard library imports for maximum stability.
 * Abstraction layer to drive different camera types, etc.
 * Brutally obvious, well-documented, clean code.
 * Maximize productivity for biological users.

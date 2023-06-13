@@ -31,51 +31,111 @@
 #
 
 # Standard Library Imports
-import unittest
+import pytest
 import random
 
 # Third Party Imports
 
 # Local Imports
 from aslm.model.devices.stages.stage_sutter import SutterStage
-from aslm.model.dummy import DummyModel
+from aslm.model.devices.APIs.sutter.MP285 import MP285
 
+class MockMP285Stage:
+    def __init__(self, ignore_obj):
+        self.axes = ["x", "y", "z"]
+        for axis in self.axes:
+            setattr(self, f"{axis}_abs", 0)
+        self.input_buffer = []
+        self.output_buffer = []
+        self.ignore_obj = ignore_obj
 
-class TestStageSutter(unittest.TestCase):
+    def open(self):
+        pass
+
+    def reset_input_buffer(self):
+        self.input_buffer = []
+
+    def reset_output_buffer(self):
+        self.output_buffer = []
+
+    def write(self, command):
+        if command == bytes.fromhex("63") + bytes.fromhex("0d"):
+            # get current x, y, and z position
+            self.output_buffer.append(
+                self.x_abs.to_bytes(4, byteorder="little", signed=True) +
+                self.y_abs.to_bytes(4, byteorder="little", signed=True) +
+                self.z_abs.to_bytes(4, byteorder="little", signed=True) +
+                bytes.fromhex("0d")
+            )
+        elif command[0] == int("6d", 16) and len(command) == 14 and command[-1] == int("0d", 16):
+            # move x, y, and z to specific position
+            self.x_abs = int.from_bytes(command[1:5], byteorder="little", signed=True)
+            self.y_abs = int.from_bytes(command[5:9], byteorder="little", signed=True)
+            self.z_abs = int.from_bytes(command[9:13], byteorder="little", signed=True)
+            self.output_buffer.append(bytes.fromhex("0d"))
+        elif command[0] == int("56", 16) and len(command) == 4 and command[-1] == int("0d", 16):
+            # set resolution and velocity
+            self.output_buffer.append(bytes.fromhex("0d"))
+        elif command[0] == int("03", 16) and len(command) == 1:
+            # interrupt move
+            self.output_buffer.append(bytes.fromhex("0d"))
+        elif command == bytes.fromhex("61") + bytes.fromhex("0d"):
+            # set absolute mode
+            self.output_buffer.append(bytes.fromhex("0d"))
+        elif command == bytes.fromhex("62") + bytes.fromhex("0d"):
+            # set relative mode
+            self.output_buffer.append(bytes.fromhex("0d"))
+
+    def read_until(self, expected, size=100):
+        return self.output_buffer[0]
+
+    def read(self, byte_num=1):
+        return self.output_buffer[0]
+
+    def __getattr__(self, __name: str):
+        return self.ignore_obj
+
+@pytest.fixture
+def mp285_serial_device(ignore_obj):
+    return MockMP285Stage(ignore_obj)
+    
+
+class TestStageSutter:
     """Unit Test for StageBase Class"""
 
-    def test_stage_attributes(self):
-        dummy_model = DummyModel()
-        dummy_MP285 = type("MP285", (object,), {})
-        dummy_MP285.set_resolution_and_velocity = lambda *args, **kwargs: print("set resolution and velocity")
-        dummy_MP285.set_absolute_mode = lambda *args, **kwargs: print("set absolute mode")
-        dummy_MP285.get_current_position = lambda *args, **kwargs: (random.random(), random.random(), random.random())
-        microscope_name = "Mesoscale"
-        stage = SutterStage(microscope_name=microscope_name,
-                            device_connection=dummy_MP285,
-                            configuration=dummy_model.configuration,
-                            device_id=0)
+    @pytest.fixture(autouse=True)
+    def setup_class(self, stage_configuration, mp285_serial_device, random_single_axis_test, random_multiple_axes_test):
+        self.microscope_name = "Mesoscale"
+        self.configuration = {
+            "configuration": {
+                "microscopes": {
+                    self.microscope_name: stage_configuration
+                }
+            }
+        }
+        self.stage_configuration = stage_configuration
+        self.stage_configuration["stage"]["hardware"]["type"] = "MP285"
+        self.mp285_serial_device = mp285_serial_device
+        self.random_single_axis_test = random_single_axis_test
+        self.random_multiple_axes_test = random_multiple_axes_test
 
-        # Attributes
-        assert hasattr(stage, "x_pos")
-        assert hasattr(stage, "y_pos")
-        assert hasattr(stage, "z_pos")
-        assert hasattr(stage, "f_pos")
-        assert hasattr(stage, "theta_pos")
-        assert hasattr(stage, "position_dict")
-        assert hasattr(stage, "x_max")
-        assert hasattr(stage, "y_max")
-        assert hasattr(stage, "z_max")
-        assert hasattr(stage, "f_max")
-        assert hasattr(stage, "x_min")
-        assert hasattr(stage, "y_min")
-        assert hasattr(stage, "z_min")
-        assert hasattr(stage, "f_min")
-        assert hasattr(stage, "theta_min")
+    def build_device_connection(self):
+        port = self.stage_configuration["stage"]["hardware"]["port"]
+        baudrate = self.stage_configuration["stage"]["hardware"]["baudrate"]
+        timeout = 5.0
+
+        mp285 = MP285(port, baudrate, timeout)
+        mp285.serial = self.mp285_serial_device
+        mp285.connect_to_serial()
+        return mp285
+
+
+    def test_stage_attributes(self):
+        stage = SutterStage(self.microscope_name, self.build_device_connection(), self.configuration)
 
         # Methods
-        assert hasattr(stage, "create_position_dict") and callable(
-            getattr(stage, "create_position_dict")
+        assert hasattr(stage, "get_position_dict") and callable(
+            getattr(stage, "get_position_dict")
         )
         assert hasattr(stage, "report_position") and callable(
             getattr(stage, "report_position")
@@ -85,6 +145,123 @@ class TestStageSutter(unittest.TestCase):
         )
         assert hasattr(stage, "stop") and callable(getattr(stage, "stop"))
 
+    @pytest.mark.parametrize(
+        "axes, axes_mapping",
+        [
+            (["x"], None),
+            (["y"], None),
+            (["x", "z"], None),
+            (["f", "z"], None),
+            (["x", "y", "z"], None),
+            (["x"], ["y"]),
+            (["y"], ["z"]),
+            (["x", "z"], ["y", "z"]),
+            (["f", "z"], ["x", "z"]),
+            (["x", "y", "z"], ["y", "z", "x"]),
+        ],
+    )
+    def test_initialize_stage(self, axes, axes_mapping):
+        self.stage_configuration["stage"]["hardware"]["axes"] = axes
+        self.stage_configuration["stage"]["hardware"]["axes_mapping"] = axes_mapping
+        stage = SutterStage(self.microscope_name, self.build_device_connection(), self.configuration)
 
-if __name__ == "__main__":
-    unittest.main()
+        # Attributes
+        for axis in axes:
+            assert hasattr(stage, f"{axis}_pos")
+            assert hasattr(stage, f"{axis}_min")
+            assert hasattr(stage, f"{axis}_max")
+            assert getattr(stage, f"{axis}_pos") == 0
+            assert getattr(stage, f"{axis}_min") == self.stage_configuration["stage"][f"{axis}_min"]
+            assert getattr(stage, f"{axis}_max") == self.stage_configuration["stage"][f"{axis}_max"]
+
+        if axes_mapping is None:
+            # using default mapping which is hard coded in stage_sutter.py
+            default_mapping = {"x": "x", "y": "y", "z": "z"}
+            for axis, device_axis in stage.axes_mapping.items():
+                assert default_mapping[axis] == device_axis
+            assert len(stage.axes_mapping) <= len(stage.axes)
+        else:
+            for i, axis in enumerate(axes):
+                assert stage.axes_mapping[axis] == axes_mapping[i]
+
+        assert stage.stage_limits == True
+
+    @pytest.mark.parametrize(
+        "axes, axes_mapping",
+        [
+            (["x"], None),
+            (["y"], None),
+            (["x", "z"], None),
+            (["f", "z"], None),
+            (["x", "y", "z"], None),
+            (["x"], ["y"]),
+            (["y"], ["z"]),
+            (["x", "z"], ["y", "z"]),
+            (["f", "z"], ["x", "z"]),
+            (["x", "y", "z"], ["y", "z", "x"]),
+        ],
+    )
+    def test_report_position(self, axes, axes_mapping):
+        mp285_stage = self.build_device_connection()
+        self.stage_configuration["stage"]["hardware"]["axes"] = axes
+        self.stage_configuration["stage"]["hardware"]["axes_mapping"] = axes_mapping
+        stage = SutterStage(self.microscope_name, mp285_stage, self.configuration)
+        for _ in range(10):
+            pos_dict = {}
+            for axis in axes:
+                pos = random.randrange(-100, 500)
+                if axis in stage.axes_mapping:
+                    pos_dict[f"{axis}_pos"] = pos * 0.04
+                    setattr(mp285_stage.serial, f"{stage.axes_mapping[axis]}_abs", pos)
+                else:
+                    pos_dict[f"{axis}_pos"] = 0
+            temp_pos = stage.report_position()
+            assert pos_dict == temp_pos
+
+    @pytest.mark.parametrize(
+        "axes, axes_mapping",
+        [
+            (["x"], None),
+            (["y"], None),
+            (["x", "z"], None),
+            (["f", "z"], None),
+            (["x", "y", "z"], None),
+            (["x"], ["y"]),
+            (["y"], ["z"]),
+            (["x", "z"], ["y", "z"]),
+            (["f", "z"], ["x", "z"]),
+            (["x", "y", "z"], ["y", "z", "x"]),
+        ],
+    )
+    def test_move_axis_absolute(self, axes, axes_mapping):
+        mp285_stage = self.build_device_connection()
+        self.stage_configuration["stage"]["hardware"]["axes"] = axes
+        self.stage_configuration["stage"]["hardware"]["axes_mapping"] = axes_mapping
+        stage = SutterStage(self.microscope_name, mp285_stage, self.configuration)
+        self.random_single_axis_test(stage)
+        stage.stage_limits = False
+        self.random_single_axis_test(stage)
+
+    @pytest.mark.parametrize(
+        "axes, axes_mapping",
+        [
+            (["x"], None),
+            (["y"], None),
+            (["x", "z"], None),
+            (["f", "z"], None),
+            (["x", "y", "z"], None),
+            (["x"], ["y"]),
+            (["y"], ["z"]),
+            (["x", "z"], ["y", "z"]),
+            (["f", "z"], ["x", "z"]),
+            (["x", "y", "z"], ["y", "z", "x"]),
+        ],
+    )
+    def test_move_absolute(self, axes, axes_mapping):
+        mp285_stage = self.build_device_connection()
+        self.stage_configuration["stage"]["hardware"]["axes"] = axes
+        self.stage_configuration["stage"]["hardware"]["axes_mapping"] = axes_mapping
+        stage = SutterStage(self.microscope_name, mp285_stage, self.configuration)
+        self.random_multiple_axes_test(stage)
+        stage.stage_limits = False
+        self.random_multiple_axes_test(stage)

@@ -589,9 +589,8 @@ class Model:
                         f"run_command - load_feature - Unknown feature {args[0]}."
                     )
         elif command == "stage_limits":
-            for axis in self.active_microscope.stages:
-                self.active_microscope.stages[axis].stage_limits = args[0]
-
+            for microscope_name in self.microscopes:
+                self.microscopes[microscope_name].update_stage_limits(args[0])
         elif command == "stop":
             """
             Called when user halts the acquisition
@@ -649,6 +648,7 @@ class Model:
         self.active_microscope.stop_stage()
         ret_pos_dict = self.get_stage_position()
         update_stage_dict(self, ret_pos_dict)
+        self.event_queue.put(("update_stage", ret_pos_dict))
 
     def end_acquisition(self):
         """End the acquisition.
@@ -865,9 +865,9 @@ class Model:
         #     channel_key, self.current_exposure_time
         # )
 
-        # Stash current position, channel, timepoint
-        # Do this here, because signal container functions can inject changes
-        # to the stage
+        # Stash current position, channel, timepoint. Do this here, because signal
+        # container functions can inject changes to the stage. NOTE: This line is
+        # wildly expensive when get_stage_position() does not cache results.
         stage_pos = self.get_stage_position()
         self.data_buffer_positions[self.frame_id][0] = stage_pos["x_pos"]
         self.data_buffer_positions[self.frame_id][1] = stage_pos["y_pos"]
@@ -951,7 +951,6 @@ class Model:
             ):
                 self.stop_stage()
                 curr_pos = self.get_stage_position()
-                update_stage_dict(self, curr_pos)
                 for axis, mags in offsets[solvent].items():
                     try:
                         shift_axis = curr_pos[f"{axis}_pos"] + float(
@@ -964,18 +963,11 @@ class Model:
                     except KeyError:
                         pass
                 self.stop_stage()
-                curr_pos = self.get_stage_position()
-                update_stage_dict(self, curr_pos)
-                # self.stop_stage()
-                # curr_pos = self.get_stage_position()
-                # update_stage_dict(self, curr_pos)
-                # print(f"putting {curr_pos}")
-                # self.event_queue.put(
-                #     ("update_stage", curr_pos)
-                # )
 
         except ValueError as e:
             self.logger.debug(f"{self.active_microscope_name} - {e}")
+
+        self.active_microscope.ask_stage_for_position = True
 
     def load_images(self, filenames=None):
         """Load/Unload images to the Synthetic Camera

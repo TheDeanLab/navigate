@@ -135,6 +135,7 @@ microscopes:
           type: PI
           serial_number: 119060508
           axes: [x, y, z, theta, f]
+          axes_mapping: [1, 2, 3, 4, 5]
           volts_per_micron: None
           axes_channels: None
           max: None
@@ -366,6 +367,7 @@ microscopes:
           type: PI
           serial_number: 119060508
           axes: [x, y, z, theta]
+          axes_mapping: [1, 2, 3, 4]
           volts_per_micron: None
           axes_channels: None
           max: None
@@ -375,6 +377,7 @@ microscopes:
           type: Thorlabs
           serial_number: 74000375
           axes: [f]
+          axes_mapping: [1]
           volts_per_micron: None
           axes_channels: None
           max: None

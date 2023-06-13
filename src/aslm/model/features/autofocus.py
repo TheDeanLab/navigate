@@ -328,10 +328,10 @@ class Autofocus:
         else:
             self.init_pos = self.autofocus_pos_queue.get(timeout=self.coarse_steps * 10)
             self.model.move_stage({"f_abs": self.init_pos}, wait_until_done=True)
-            self.model.logger.debug(f"*** Autofocus move stage: (f, {self.init_pos})")
-            self.model.logger.debug(
-                f"*** Autofocus stage position: {self.model.get_stage_position()}"
-            )
+            # self.model.logger.debug(f"*** Autofocus move stage: (f, {self.init_pos})")
+            # self.model.logger.debug(
+            #     f"*** Autofocus stage position: {self.model.get_stage_position()}"
+            # )
 
         self.signal_id += 1
         return self.init_pos if self.signal_id > self.total_frame_num else None
@@ -487,10 +487,10 @@ class Autofocus:
         self.model.event_queue.put(("update_stage", stage_position))
 
         # Log the new focus position
-        self.model.logger.info("***********final focus: %s" % self.focus_pos)
-        self.model.logger.info(
-            f"***** findal stage position: {self.model.get_stage_position()}"
-        )
+        # self.model.logger.info("***********final focus: %s" % self.focus_pos)
+        # self.model.logger.info(
+        #     f"***** final stage position: {self.model.get_stage_position()}"
+        # )
         return self.get_frames_num > self.total_frame_num
 
     def robust_autofocus(self):

@@ -64,22 +64,28 @@ class MP285:
     """
 
     def __init__(self, com_port, baud_rate, timeout=0.25):
-        try:
-            self.serial = serial.Serial(
-                port=com_port,
-                baudrate=baud_rate,
-                timeout=timeout,
-                parity=serial.PARITY_NONE,
-                bytesize=serial.EIGHTBITS,
-                stopbits=serial.STOPBITS_ONE,
-                xonxoff=False,
-            )
-        except serial.SerialException as e:
-            print("MP285 serial connection failed!")
-            raise e
+        self.serial = serial.Serial()
+        self.serial.port = com_port
+        self.serial.baudrate = baud_rate
+        self.serial.timeout = timeout
+        self.serial.parity = serial.PARITY_NONE
+        self.serial.bytesize = serial.EIGHTBITS
+        self.serial.stopbits = serial.STOPBITS_ONE
+        self.serial.xonxoff = False
+        
         self.speed = None
         self.resolution = None
         self.wait_until_done = True
+
+    def connect_to_serial(self):
+        try:
+            self.serial.open()
+        except serial.SerialException as e:
+            print("MP285 serial connection failed!")
+            raise e
+        
+    def disconnect_from_serial(self):
+        self.serial.close()
 
     def flush_buffers(self):
         """Flush Serial I/O Buffers.

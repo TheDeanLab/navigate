@@ -83,6 +83,8 @@ class Microscope:
         self.configuration = configuration
         self.data_buffer = None
         self.stages = {}
+        self.stages_list = []
+        self.ask_stage_for_position = True
         self.lasers = {}
         self.galvo = {}
         self.daq = devices_dict.get("daq", None)
@@ -95,6 +97,7 @@ class Microscope:
         self.central_focus = None
         self.is_synthetic = is_synthetic
         self.laser_wavelength = []
+        self.ret_pos_dict = {}
 
         if is_virtual:
             return
@@ -164,7 +167,10 @@ class Microscope:
                     # all other ASI devices as self.tiger_controller
                     device_connection = devices_dict[device_name][device_ref_name]
                     self.tiger_controller = device_connection
-                elif device_ref_name.startswith("ASI") and self.tiger_controller is not None:
+                elif (
+                    device_ref_name.startswith("ASI")
+                    and self.tiger_controller is not None
+                ):
                     # If subsequent ASI-based tiger controller devices are included.
                     device_connection = self.tiger_controller
 
@@ -225,6 +231,8 @@ class Microscope:
                 self.stages[axis] = stage
                 self.info[f"stage_{axis}"] = device_ref_name
 
+            self.stages_list.append((stage, list(device_config["axes"])))
+
         # connect daq and camera in synthetic mode
         if is_synthetic:
             self.daq.add_camera(self.microscope_name, self.camera)
@@ -276,14 +284,20 @@ class Microscope:
         self_offset_dict = self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ]["stage"]
+        self.ask_stage_for_position = True
         pos_dict = self.get_stage_position()
-        for axes in self.stages:
-            pos = (
-                pos_dict[axes + "_pos"]
-                + self_offset_dict[axes + "_offset"]
-                - former_offset_dict[axes + "_offset"]
-            )
-            self.stages[axes].move_absolute({axes + "_abs": pos}, wait_until_done=True)
+        for stage, axes in self.stages_list:
+            pos = {
+                axis
+                + "_abs": (
+                    pos_dict[axis + "_pos"]
+                    + self_offset_dict[axis + "_offset"]
+                    - former_offset_dict[axis + "_offset"]
+                )
+                for axis in axes
+            }
+            stage.move_absolute(pos, wait_until_done=True)
+        self.ask_stage_for_position = True
 
     def prepare_acquisition(self):
         """Prepare the acquisition.
@@ -366,9 +380,9 @@ class Microscope:
         remote_focus_waveform = self.remote_focus_device.adjust(readout_time)
         galvo_waveform = [self.galvo[k].adjust(readout_time) for k in self.galvo]
         # TODO: calculate waveform for galvo stage
-        for axis in self.stages:
-            if type(self.stages[axis]) == GalvoNIStage:
-                self.stages[axis].calculate_waveform(readout_time)
+        for stage, axes in self.stages_list:
+            if type(stage) == GalvoNIStage:
+                stage.calculate_waveform(readout_time)
         waveform_dict = {
             "camera_waveform": camera_waveform,
             "remote_focus_waveform": remote_focus_waveform,
@@ -491,16 +505,25 @@ class Microscope:
         -------
         None
         """
+        self.ask_stage_for_position = True
+
+        if len(pos_dict.keys()) == 1:
+            axis_key = list(pos_dict.keys())[0]
+            axis = axis_key[: axis_key.index("_")]
+            return self.stages[axis].move_axis_absolute(
+                axis, pos_dict[axis_key], wait_until_done
+            )
 
         success = True
-        for pos_axis in pos_dict:
-            axis = pos_axis[: pos_axis.index("_")]
-            success = (
-                self.stages[axis].move_absolute(
-                    {pos_axis: pos_dict[pos_axis]}, wait_until_done
-                )
-                and success
-            )
+        for stage, axes in self.stages_list:
+            pos = {
+                axis: pos_dict[axis]
+                for axis in pos_dict
+                if axis[: axis.index("_")] in axes
+            }
+            if pos:
+                success = stage.move_absolute(pos, wait_until_done) and success
+
         return success
 
     def stop_stage(self):
@@ -515,8 +538,10 @@ class Microscope:
         None
         """
 
-        for axis in self.stages:
-            self.stages[axis].stop()
+        self.ask_stage_for_position = True
+
+        for stage, axes in self.stages_list:
+            stage.stop()
 
     def get_stage_position(self):
         """Get stage position.
@@ -531,12 +556,18 @@ class Microscope:
             Dictionary of stage positions.
         """
 
-        ret_pos_dict = {}
-        for axis in self.stages:
-            pos_axis = axis + "_pos"
-            temp_pos = self.stages[axis].report_position()
-            ret_pos_dict[pos_axis] = temp_pos[pos_axis]
-        return ret_pos_dict
+        if self.ask_stage_for_position:
+            # self.ret_pos_dict = {}
+            for stage, axes in self.stages_list:
+                temp_pos = stage.report_position()
+                self.ret_pos_dict.update(temp_pos)
+            self.ask_stage_for_position = False
+        return self.ret_pos_dict
+
+    def update_stage_limits(self, limits_flag=True):
+        self.ask_stage_for_position = True
+        for stage, _ in self.stages_list:
+            stage.stage_limits = limits_flag
 
     def assemble_device_config_lists(self, device_name, device_name_dict):
         """Assemble device config lists.

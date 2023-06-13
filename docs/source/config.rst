@@ -169,6 +169,7 @@ Here is an abbreviated example, the full file contains field entries for all of 
                     type: ASI
                     serial_number: 123456789
                     axes: [x, y, z]
+                    axes_mapping: [X, Y, Z]
                     -
                     name: stage
                     type: SyntheticStage

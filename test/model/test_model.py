@@ -35,7 +35,7 @@ import random
 import pytest
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="module")
 def model():
     from types import SimpleNamespace
     from pathlib import Path
@@ -55,7 +55,8 @@ def model():
     )
     rest_api_path = Path.joinpath(configuration_directory, "rest_api_config.yml")
 
-    event_queue = Queue(100)
+    event_queue = Queue()
+    
     manager = Manager()
 
     configuration = load_configs(
@@ -72,7 +73,35 @@ def model():
         event_queue=event_queue,
     )
 
-    return model
+    yield model
+    while not event_queue.empty():
+        event_queue.get()
+    event_queue.close()
+    event_queue.join_thread()
+
+
+def test_single_acquisition(model):
+    state = model.configuration["experiment"]["MicroscopeState"]
+    state["image_mode"] = "single"
+    state["is_save"] = False
+
+    n_frames = state["selected_channels"]
+
+    show_img_pipe = model.create_pipe("show_img_pipe")
+
+    model.run_command("acquire")
+
+    image_id = show_img_pipe.recv()
+    n_images = 0
+    max_iters = 10
+    while image_id != "stop" and max_iters > 0:
+        image_id = show_img_pipe.recv()
+        n_images += 1
+        max_iters -= 1
+
+    assert n_images == n_frames
+    model.data_thread.join()
+    model.release_pipe("show_img_pipe")
 
 
 def test_change_resolution(model):

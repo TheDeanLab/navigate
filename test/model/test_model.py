@@ -55,7 +55,8 @@ def model():
     )
     rest_api_path = Path.joinpath(configuration_directory, "rest_api_config.yml")
 
-    event_queue = Queue(100)
+    event_queue = Queue()
+    
     manager = Manager()
 
     configuration = load_configs(
@@ -73,7 +74,10 @@ def model():
     )
 
     yield model
+    while not event_queue.empty():
+        event_queue.get()
     event_queue.close()
+    event_queue.join_thread()
 
 
 def test_single_acquisition(model):

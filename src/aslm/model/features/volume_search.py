@@ -126,14 +126,7 @@ class VolumeSearch:
         }
 
         self.debug = debug
-        if self.debug:
-            self.max_projection = np.zeros(
-                (
-                    self.model.img_height,
-                    self.model.img_width,
-                ),
-                dtype="uint16",
-            )
+        self.volumes_selected = None
 
     def pre_signal_func(self):
         self.model.active_microscope.current_channel = 0
@@ -164,6 +157,16 @@ class VolumeSearch:
         self.curr_z_index = int(self.z_steps / 2)
 
         self.direction = 1  # up
+
+        if self.debug:
+            self.volumes_selected = np.zeros(
+                (
+                    int(self.z_steps),
+                    self.model.img_height,
+                    self.model.img_width,
+                ),
+                dtype="uint16",
+            )
 
     def signal_func(self):
         self.model.logger.debug(f"acquiring at z:{self.curr_z_index}")
@@ -263,7 +266,7 @@ class VolumeSearch:
             # boundary = find_tissue_boundary_2d(img_data, self.target_grid_pixels)
 
             if self.debug:
-                self.max_projection = np.max(self.max_projection, img_data)
+                self.volumes_selected[self.curr_z_index] = img_data
 
             if self.pre_boundary is None:
                 boundary = find_tissue_boundary_2d(img_data, self.target_grid_pixels)
@@ -311,19 +314,19 @@ class VolumeSearch:
                 )
                 if self.debug:
                     for item in path:
-                        self.max_projection = draw_box(
-                            self.max_projection,
-                            item[0],
-                            item[1],
-                            self.target_grid_pixels,
-                            self.target_grid_pixels,
+                        self.volumes_selected[z_index] = draw_box(
+                            self.volumes_selected[z_index],
+                            item[0] * self.target_grid_pixels,
+                            item[1] * self.target_grid_pixels,
+                            (item[0] + 1) * self.target_grid_pixels,
+                            (item[1] + 1) * self.target_grid_pixels,
                         )
             self.model.event_queue.put(("multiposition", positions))
             if self.debug:
                 import tifffile
 
                 tifffile.imsave(
-                    "volume_search_2d_debug_result.tif", self.max_projection
+                    "volume_search_2d_debug_result.tif", self.volumes_selected
                 )
         return self.end_flag
 

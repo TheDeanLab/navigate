@@ -37,7 +37,7 @@ from skimage.transform import downscale_local_mean
 import numpy as np
 import numpy.typing as npt
 
-from aslm.model.analysis.camera import compute_signal_to_noise
+# from aslm.model.analysis.camera import compute_signal_to_noise
 
 
 def has_tissue(
@@ -76,18 +76,18 @@ def has_tissue(
     ysl = slice(y * width, (y + 1) * width)
 
     # Decide tissue is present by hard SNR threshold
-    if offset is not None and variance is not None:
-        threshold_value = 2  # snr threshold
-        snr = compute_signal_to_noise(
-            image_data[xsl, ysl], offset[xsl, ysl], variance[xsl, ysl]
-        )
-        return (
-            np.sum(snr > threshold_value) / np.prod(snr.shape) > 0.0625
-        )  # at least 6.25% of pixels have to be above this value
+    # if offset is not None and variance is not None:
+    #     threshold_value = 2  # snr threshold
+    #     snr = compute_signal_to_noise(
+    #         image_data[xsl, ysl], offset[xsl, ysl], variance[xsl, ysl]
+    #     )
+    #     return (
+    #         np.sum(snr > threshold_value) / np.prod(snr.shape) > 0.0625
+    #     )  # at least 6.25% of pixels have to be above this value
 
     # Decide tissue is present by hard pixel count threshold
-    threshold_value = 1000
-    return np.any(image_data[xsl, ysl] > threshold_value)
+    # threshold_value = 1000
+    return np.any(image_data[xsl, ysl] > np.mean(image_data))
 
 
 def find_tissue_boundary_2d(

@@ -318,8 +318,8 @@ class VolumeSearch:
                             self.volumes_selected[z_index],
                             item[0] * self.target_grid_pixels,
                             item[1] * self.target_grid_pixels,
-                            (item[0] + 1) * self.target_grid_pixels,
-                            (item[1] + 1) * self.target_grid_pixels,
+                            (item[0] + 1) * self.target_grid_pixels - 1,
+                            (item[1] + 1) * self.target_grid_pixels - 1,
                         )
             self.model.event_queue.put(("multiposition", positions))
             if self.debug:

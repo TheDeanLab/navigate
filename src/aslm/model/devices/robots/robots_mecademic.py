@@ -37,7 +37,7 @@ import time
 # Third Party Imports
 
 # Local Imports
-from aslm.model.devices.robots.robots_base import RobotsBase
+# from aslm.model.devices.robots.robots_base import RobotsBase
 from aslm.model.devices.APIs.mecademic.robot import Robot
 
 # Logger Setup
@@ -76,28 +76,28 @@ def build_robot_connection(robot_address, timeout=0.25):
     return robot
 
 
-class MecademicRobot(RobotsBase):
+class MecademicRobot:
     """Mecademic Robot Class
 
     Child class for controlling Mecademic Meca500 robots.
 
     Parameters
     ----------
-    microscope_name : str
-        Name of the microscope
+    # microscope_name : str
+    #     Name of the microscope
     device_connection : Robot
         Mecademic Robot device connection
-    configuration : dict
-        Configuration dictionary for the microscope
+    # configuration : dict
+    #     Configuration dictionary for the microscope
 
     Attributes
     ----------
     robot : Robot
         Mecademic Robot device connection
-    microscope_name : str
-        Name of the microscope
-    configuration : dict
-        Configuration dictionary for the microscope
+    # microscope_name : str
+    #     Name of the microscope
+    # configuration : dict
+    #     Configuration dictionary for the microscope
 
     Methods
     -------
@@ -105,12 +105,17 @@ class MecademicRobot(RobotsBase):
 
     """
 
-    def __init__(self, microscope_name, device_connection, configuration):
-        super().__init__(microscope_name, device_connection, configuration)
+    def __init__(
+        self,
+        # microscope_name,
+        device_connection,
+        # configuration
+    ):
+        # super().__init__(microscope_name, device_connection, configuration)
 
         self.robot = device_connection
-        self.microscope_name = microscope_name
-        self.configuration = configuration
+        # self.microscope_name = microscope_name
+        # self.configuration = configuration
 
         # Home the robot
         self.robot.ActivateAndHome()

@@ -133,12 +133,13 @@ def load_camera_connection(configuration, camera_id=0, is_synthetic=False):
             "type"
         ]
 
-    if cam_type == "HamamatsuOrca":
+    if cam_type == "HamamatsuOrca" or cam_type == "HamamatsuOrcaLightning":
         # Locally Import Hamamatsu API and Initialize Camera Controller
         HamamatsuController = importlib.import_module(
             "aslm.model.devices.APIs.hamamatsu.HamamatsuAPI"
         )
         return auto_redial(HamamatsuController.DCAM, (camera_id,), exception=Exception)
+    
     elif cam_type.lower() == "syntheticcamera" or cam_type.lower() == "synthetic":
         from aslm.model.devices.camera.camera_synthetic import SyntheticCameraController
 

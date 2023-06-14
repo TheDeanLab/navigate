@@ -36,6 +36,15 @@ from aslm.model.analysis.boundary_detect import (
     binary_detect,
     map_boundary,
 )
+import numpy as np
+
+
+def draw_box(img, xl, yl, xu, yu, fill=65535):
+    img[xl:xu, yl] = fill
+    img[xl:xu, yu] = fill
+    img[xl, yl:yu] = fill
+    img[xu, yl:yu] = fill
+    return img
 
 
 class VolumeSearch:
@@ -47,6 +56,7 @@ class VolumeSearch:
         flipx=False,
         flipy=False,
         overlap=0.1,
+        debug=False,
     ):
         """
         Find the outer boundary of a tissue, moving the stage through z. Assumes
@@ -114,6 +124,16 @@ class VolumeSearch:
             },
             "node": {"node_type": "multi-step", "device_related": True},
         }
+
+        self.debug = debug
+        if self.debug:
+            self.max_projection = np.zeros(
+                (
+                    self.model.img_height,
+                    self.model.img_width,
+                ),
+                dtype="uint16",
+            )
 
     def pre_signal_func(self):
         self.model.active_microscope.current_channel = 0
@@ -242,6 +262,9 @@ class VolumeSearch:
             # model\analysis\boundary_detect.py when use if/else
             # boundary = find_tissue_boundary_2d(img_data, self.target_grid_pixels)
 
+            if self.debug:
+                self.max_projection = np.max(self.max_projection, img_data)
+
             if self.pre_boundary is None:
                 boundary = find_tissue_boundary_2d(img_data, self.target_grid_pixels)
             else:
@@ -286,7 +309,22 @@ class VolumeSearch:
                     ),
                     path,
                 )
+                if self.debug:
+                    for item in path:
+                        self.max_projection = draw_box(
+                            self.max_projection,
+                            item[0],
+                            item[1],
+                            self.target_grid_pixels,
+                            self.target_grid_pixels,
+                        )
             self.model.event_queue.put(("multiposition", positions))
+            if self.debug:
+                import tifffile
+
+                tifffile.imsave(
+                    "volume_search_2d_debug_result.tif", self.max_projection
+                )
         return self.end_flag
 
     def cleanup(self):

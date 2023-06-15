@@ -38,14 +38,14 @@ import logging
 # Third Party Imports
 
 # Local Imports
-from aslm.model.devices.remote_focus.remote_focus_base import RemoteFocusBase
+from aslm.model.devices.remote_focus.remote_focus_ni import RemoteFocusNI
 
-# # Logger Setup
+# Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class RemoteFocusEquipmentSolutions(RemoteFocusBase):
+class RemoteFocusEquipmentSolutions(RemoteFocusNI):
     """RemoteFocusEquipmentSolutions Class
 
     The SCA814 has a single character input buffer that can be overflowed if the proper
@@ -96,8 +96,10 @@ class RemoteFocusEquipmentSolutions(RemoteFocusBase):
         Close connection with the RemoteFocusEquipmentSolutions device.
     """
 
-    def __init__(self):
-        self.comport = "COM1"
+    def __init__(self, microscope_name, device_connection, configuration):
+        super().__init__(microscope_name, device_connection, configuration)
+        self.comport = configuration['configuration']['microscopes'][
+            microscope_name]['remote_focus_device']['hardware'].get('comport', "COM1")
         self.baud_rate = 115200
         self.byte_size = serial.EIGHTBITS
         self.parity = serial.PARITY_NONE

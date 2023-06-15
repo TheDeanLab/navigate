@@ -321,16 +321,12 @@ class VolumeSearch:
                             int(item[0] * self.target_grid_pixels * (1 - self.overlap)),
                             int(item[1] * self.target_grid_pixels * (1 - self.overlap)),
                             int(
-                                (item[0] + 1)
-                                * self.target_grid_pixels
-                                * (1 - self.overlap)
-                                - 1
+                                item[0] * self.target_grid_pixels * (1 - self.overlap)
+                                + self.target_grid_pixels
                             ),
                             int(
-                                (item[1] + 1)
-                                * self.target_grid_pixels
-                                * (1 - self.overlap)
-                                - 1
+                                item[1] * self.target_grid_pixels * (1 - self.overlap)
+                                + self.target_grid_pixels
                             ),
                         )
             self.model.event_queue.put(("multiposition", positions))

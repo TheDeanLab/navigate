@@ -212,7 +212,7 @@ class Model:
             [
                 {
                     "name": VolumeSearch,
-                    "args": ("Nanoscale", "N/A", False, False, 0.1),
+                    "args": ("Nanoscale", "N/A", True, False, 0.1),
                 }
             ]
         )

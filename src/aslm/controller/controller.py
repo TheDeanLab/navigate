@@ -536,9 +536,6 @@ class Controller:
                 and self.waveform_popup_controller
             ):
                 self.waveform_popup_controller.populate_experiment_values()
-            ret_pos_dict = self.model.get_stage_position()
-            update_stage_dict(self, ret_pos_dict)
-            self.update_stage_controller_silent(ret_pos_dict)
             self.camera_view_controller.update_snr()
 
         elif command == "set_save":
@@ -923,7 +920,10 @@ class Controller:
         for axis, val in ret_pos_dict.items():
             ax = axis.split("_")[0]
             stage_gui_dict[ax] = val
-        self.stage_controller.set_position_silent(stage_gui_dict)
+        self.threads_pool.createThread(
+            "stage_controller",
+            lambda: self.stage_controller.set_position_silent(stage_gui_dict),
+        )
 
     def update_event(self):
         while True:

@@ -95,8 +95,10 @@ class VolumeSearch:
         self.f_offset = 0
         self.curr_z_index = 0
 
-        self.sinx = -1 if flipx else 1
-        self.siny = -1 if flipy else 1
+        # By default an increase in x/y stage position corresponds
+        # to a sample moving down/right into the field of view
+        self.sinx = 1 if flipx else -1
+        self.siny = 1 if flipy else -1
 
         self.overlap = max(0, min(overlap, 0.999))
 
@@ -230,14 +232,14 @@ class VolumeSearch:
                 ]["stage"][t]
             )
 
-        # Add to this the offset between
+        # Set this to the upper left corner of the image
         self.offset[0] += (
             self.model.configuration["experiment"]["StageParameters"]["x"]
-            - (img_width - self.target_grid_pixels) // 2 * curr_pixel_size
+            - self.sinx * (img_width - self.target_grid_pixels) // 2 * curr_pixel_size
         )
         self.offset[1] += (
             self.model.configuration["experiment"]["StageParameters"]["y"]
-            - (img_width - self.target_grid_pixels) // 2 * curr_pixel_size
+            - self.siny * (img_width - self.target_grid_pixels) // 2 * curr_pixel_size
         )
         self.offset[2] += self.z_pos
         self.offset[3] += self.model.configuration["experiment"]["StageParameters"][

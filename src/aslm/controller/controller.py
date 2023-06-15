@@ -323,11 +323,6 @@ class Controller:
             f"{self.configuration['experiment']['MicroscopeState']['zoom']}"
         )
 
-        if in_initialize:
-            # Force stage update (should have happened in self.resolution_value.set())
-            ret_pos_dict = self.model.get_stage_position()
-            update_stage_dict(self, ret_pos_dict)
-
         self.acquire_bar_controller.populate_experiment_values()
         # self.stage_controller.populate_experiment_values()
         self.multiposition_tab_controller.set_positions(
@@ -920,10 +915,7 @@ class Controller:
         for axis, val in ret_pos_dict.items():
             ax = axis.split("_")[0]
             stage_gui_dict[ax] = val
-        self.threads_pool.createThread(
-            "stage_controller",
-            lambda: self.stage_controller.set_position_silent(stage_gui_dict),
-        )
+        self.stage_controller.set_position_silent(stage_gui_dict)
 
     def update_event(self):
         while True:

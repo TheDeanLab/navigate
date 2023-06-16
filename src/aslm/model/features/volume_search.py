@@ -36,6 +36,15 @@ from aslm.model.analysis.boundary_detect import (
     binary_detect,
     map_boundary,
 )
+import numpy as np
+
+
+def draw_box(img, xl, yl, xu, yu, fill=65535):
+    img[xl:xu, yl] = fill
+    img[xl:xu, yu] = fill
+    img[xl, yl:yu] = fill
+    img[xu, yl:yu] = fill
+    return img
 
 
 class VolumeSearch:
@@ -47,6 +56,7 @@ class VolumeSearch:
         flipx=False,
         flipy=False,
         overlap=0.1,
+        debug=False,
     ):
         """
         Find the outer boundary of a tissue, moving the stage through z. Assumes
@@ -85,8 +95,10 @@ class VolumeSearch:
         self.f_offset = 0
         self.curr_z_index = 0
 
-        self.sinx = -1 if flipx else 1
-        self.siny = -1 if flipy else 1
+        # By default an increase in x/y stage position corresponds
+        # to a sample moving down/right into the field of view
+        self.sinx = 1 if flipx else -1
+        self.siny = 1 if flipy else -1
 
         self.overlap = max(0, min(overlap, 0.999))
 
@@ -114,6 +126,9 @@ class VolumeSearch:
             },
             "node": {"node_type": "multi-step", "device_related": True},
         }
+
+        self.debug = debug
+        self.volumes_selected = None
 
     def pre_signal_func(self):
         self.model.active_microscope.current_channel = 0
@@ -144,6 +159,16 @@ class VolumeSearch:
         self.curr_z_index = int(self.z_steps / 2)
 
         self.direction = 1  # up
+
+        if self.debug:
+            self.volumes_selected = np.zeros(
+                (
+                    int(self.z_steps),
+                    self.model.img_height,
+                    self.model.img_width,
+                ),
+                dtype="uint16",
+            )
 
     def signal_func(self):
         self.model.logger.debug(f"acquiring at z:{self.curr_z_index}")
@@ -207,14 +232,14 @@ class VolumeSearch:
                 ]["stage"][t]
             )
 
-        # Add to this the offset between
+        # Set this to the upper left corner of the image
         self.offset[0] += (
             self.model.configuration["experiment"]["StageParameters"]["x"]
-            - (img_width - self.target_grid_pixels) // 2 * curr_pixel_size
+            - self.sinx * (img_width - self.target_grid_pixels) // 2 * curr_pixel_size
         )
         self.offset[1] += (
             self.model.configuration["experiment"]["StageParameters"]["y"]
-            - (img_width - self.target_grid_pixels) // 2 * curr_pixel_size
+            - self.siny * (img_width - self.target_grid_pixels) // 2 * curr_pixel_size
         )
         self.offset[2] += self.z_pos
         self.offset[3] += self.model.configuration["experiment"]["StageParameters"][
@@ -241,6 +266,9 @@ class VolumeSearch:
             # TODO: make sure set the right threshold_value in
             # model\analysis\boundary_detect.py when use if/else
             # boundary = find_tissue_boundary_2d(img_data, self.target_grid_pixels)
+
+            if self.debug:
+                self.volumes_selected[self.curr_z_index] = img_data
 
             if self.pre_boundary is None:
                 boundary = find_tissue_boundary_2d(img_data, self.target_grid_pixels)
@@ -286,7 +314,30 @@ class VolumeSearch:
                     ),
                     path,
                 )
+                if self.debug:
+                    for item in path:
+                        self.volumes_selected[z_index] = draw_box(
+                            self.volumes_selected[z_index],
+                            int(item[0] * self.target_grid_pixels * (1 - self.overlap)),
+                            int(item[1] * self.target_grid_pixels * (1 - self.overlap)),
+                            int(
+                                item[0] * self.target_grid_pixels * (1 - self.overlap)
+                                + self.target_grid_pixels
+                            )
+                            - 1,
+                            int(
+                                item[1] * self.target_grid_pixels * (1 - self.overlap)
+                                + self.target_grid_pixels
+                            )
+                            - 1,
+                        )
             self.model.event_queue.put(("multiposition", positions))
+            if self.debug:
+                import tifffile
+
+                tifffile.imsave(
+                    "volume_search_2d_debug_result.tif", self.volumes_selected
+                )
         return self.end_flag
 
     def cleanup(self):

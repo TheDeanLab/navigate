@@ -323,11 +323,6 @@ class Controller:
             f"{self.configuration['experiment']['MicroscopeState']['zoom']}"
         )
 
-        if in_initialize:
-            # Force stage update (should have happened in self.resolution_value.set())
-            ret_pos_dict = self.model.get_stage_position()
-            update_stage_dict(self, ret_pos_dict)
-
         self.acquire_bar_controller.populate_experiment_values()
         # self.stage_controller.populate_experiment_values()
         self.multiposition_tab_controller.set_positions(
@@ -536,9 +531,6 @@ class Controller:
                 and self.waveform_popup_controller
             ):
                 self.waveform_popup_controller.populate_experiment_values()
-            ret_pos_dict = self.model.get_stage_position()
-            update_stage_dict(self, ret_pos_dict)
-            self.update_stage_controller_silent(ret_pos_dict)
             self.camera_view_controller.update_snr()
 
         elif command == "set_save":

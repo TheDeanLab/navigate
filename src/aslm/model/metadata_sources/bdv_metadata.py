@@ -60,7 +60,7 @@ class BigDataViewerMetadata(XMLMetadata):
         bdv_dict["SequenceDescription"] = {}
 
         ext = os.path.basename(file_name).split(".")[-1]
-        if ext == "hdf":
+        if ext == "h5":
             """
             <ImageLoader format="bdv.hdf5">
                 <hdf5 type="relative">dataset.h5</hdf5>

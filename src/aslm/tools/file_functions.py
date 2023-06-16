@@ -34,6 +34,8 @@
 from datetime import datetime
 import os
 import json
+import yaml
+from pathlib import Path
 
 # Third party imports
 
@@ -101,6 +103,19 @@ def create_save_path(saving_settings):
     saving_settings["date"] = date_string
 
     return save_directory
+
+def load_yaml_file(file_path):
+    file_path = Path(file_path)
+    if not file_path.exists():
+        return None
+    with open(file_path) as f:
+        try:
+            config_data = yaml.load(f, Loader=yaml.FullLoader)
+        except yaml.YAMLError as yaml_error:
+            print(f"Can't load yaml file: {file_path} - {yaml_error}")
+            return None
+    return config_data
+
 
 
 def save_yaml_file(file_directory, content_dict, filename="experiment.yml"):

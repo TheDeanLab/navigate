@@ -55,3 +55,12 @@ def function_timer(func):
         return result
 
     return wrap_func
+
+class FeatureList(object):
+    def __init__(self, func):
+        self._feature_list = func
+        temp = func.__name__
+        self.feature_list_name = str.title(temp.replace("_", " "))
+
+    def __call__(self, *args, **kwargs):
+        return self._feature_list()

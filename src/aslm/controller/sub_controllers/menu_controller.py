@@ -43,6 +43,7 @@ from aslm.view.popups.help_popup import HelpPopup
 from aslm.view.popups.autofocus_setting_popup import AutofocusPopup
 from aslm.view.popups.camera_map_setting_popup import CameraMapSettingPopup
 from aslm.view.popups.waveform_parameter_popup_window import WaveformParameterPopupWindow
+from aslm.view.popups.feature_list_popup import FeatureListPopup
 from aslm.controller.sub_controllers.gui_controller import GUIController
 from aslm.controller.sub_controllers.help_popup_controller import HelpPopupController
 from aslm.controller.sub_controllers import (
@@ -52,7 +53,10 @@ from aslm.controller.sub_controllers import (
     WaveformPopupController,
     MicroscopePopupController,
 )
-from aslm.tools.file_functions import save_yaml_file
+from aslm.tools.file_functions import save_yaml_file, load_yaml_file
+from aslm.tools.decorators import FeatureList
+from aslm.tools.common_functions import load_module_from_file
+from aslm.config.config import get_aslm_path
 
 
 # Logger Setup
@@ -78,6 +82,8 @@ class MenuController(GUIController):
         self.feature_id_val = tk.IntVar(0)
         self.disable_stage_limits = tk.IntVar(0)
         self.save_data = False
+        self.feature_list_count = 0
+        self.feature_list_file_name = "feature_lists.yaml"
 
     def initialize_menus(self):
         """Initialize menus
@@ -378,7 +384,8 @@ class MenuController(GUIController):
             "Time Series",
             "Decoupled Focus Stage Multiposition",
         ]
-        for i in range(len(feature_list)):
+        self.feature_list_count = len(feature_list)
+        for i in range(self.feature_list_count):
             self.view.menubar.menu_features.add_radiobutton(
                 label=feature_list[i], variable=self.feature_id_val, value=i
             )
@@ -397,6 +404,21 @@ class MenuController(GUIController):
         self.view.menubar.menu_features.add_command(
             label="Camera offset and variance maps", command=self.popup_camera_map_setting
         )
+        self.view.menubar.menu_features.add_command(
+            label="Load Customized Feature List",
+            command=self.load_feature_list
+        )
+
+        self.view.menubar.menu_features.add_separator()
+        # add feature lists from previous loaded ones
+        feature_list_path = get_aslm_path() + "/config/" + self.feature_list_file_name
+        feature_records = load_yaml_file(feature_list_path)
+        if feature_records:
+            for feature in feature_records:
+                self.view.menubar.menu_features.add_radiobutton(
+                    label=feature["feature_list_name"], variable=self.feature_id_val, value=self.feature_list_count
+                )
+                self.feature_list_count += 1
 
 
     def populate_menu(self, menu_dict):
@@ -617,3 +639,43 @@ class MenuController(GUIController):
     def switch_tabs(self, tab):
         """Switch tabs."""
         self.parent_controller.view.settings.select(tab - 1)
+
+    def load_feature_list(self):
+        filename = tk.filedialog.askopenfilename(
+            defaultextension=".py", filetypes=[("Python files", "*.py")]
+        )
+        if not filename:
+            return
+        module = load_module_from_file(filename[filename.rindex("/")+1:], filename)
+        features = [f for f in dir(module) if isinstance(getattr(module, f), FeatureList)]
+        config_path = get_aslm_path() + "/config"
+        feature_records = load_yaml_file(f"{config_path}/{self.feature_list_file_name}")
+        if not feature_records:
+            feature_records = []
+        added_features = []
+        for name in features:
+            feature = getattr(module, name)
+            feature_list_name = feature.feature_list_name
+            add_flag = True
+            for i, item in enumerate(feature_records):
+                if item["feature_list_name"] == feature_list_name:
+                    print("There is already one feature list named as", \
+                          feature_list_name, \
+                          "The new one isn't loaded!")
+                    add_flag = False
+                    break
+            if add_flag:
+                self.view.menubar.menu_features.add_radiobutton(
+                    label=feature_list_name, variable=self.feature_id_val, value=self.feature_list_count
+                )
+                feature_records.append({
+                    "module_name": name,
+                    "feature_list_name": feature_list_name,
+                    "filename": filename
+                })
+                self.feature_list_count += 1
+                added_features.append(name)
+        # tell model to add feature lists
+        self.parent_controller.model.load_feature_list_from_file(filename, added_features)
+        # save feature records
+        save_yaml_file(config_path, feature_records, self.feature_list_file_name)

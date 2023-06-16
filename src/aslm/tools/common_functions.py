@@ -30,6 +30,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
+import importlib
 
 def combine_funcs(*funclist):
     """this function will combine a list of functions to a new function
@@ -100,3 +101,10 @@ def copy_proxy_object(content):
         return result
 
     return func(content)
+
+
+def load_module_from_file(module_name, file_path):
+    spec = importlib.util.spec_from_file_location(module_name, file_path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module

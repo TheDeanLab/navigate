@@ -63,8 +63,11 @@ from aslm.model.features.restful_features import IlastikSegmentation
 from aslm.model.features.volume_search import VolumeSearch
 from aslm.log_files.log_functions import log_setup
 from aslm.tools.common_dict_tools import update_stage_dict
+from aslm.tools.common_functions import load_module_from_file
+from aslm.tools.file_functions import load_yaml_file
 from aslm.model.device_startup_functions import load_devices
 from aslm.model.microscope import Microscope
+from aslm.config.config import get_aslm_path
 
 
 # Logger Setup
@@ -293,6 +296,7 @@ class Model:
             "ConstantVelocityAcquisition": [{"name": ConstantVelocityAcquisition}],
             "customized": [],
         }
+        self.load_feature_records()
 
     def update_data_buffer(self, img_width=512, img_height=512):
         """Update the Data Buffer
@@ -1089,3 +1093,18 @@ class Model:
             data_buffer[i].shared_memory.close()
             data_buffer[i].shared_memory.unlink()
         del data_buffer
+
+    def load_feature_list_from_file(self, filename, features):
+        module = load_module_from_file(filename[filename.rindex("/")+1:], filename)
+        for name in features:
+            feature = getattr(module, name)
+            self.feature_list.append(feature())
+
+    def load_feature_records(self):
+        feature_list_file_name = get_aslm_path() + "/config/feature_lists.yaml"
+        feature_records = load_yaml_file(feature_list_file_name)
+        if feature_records:
+            for item in feature_records:
+                module = load_module_from_file(item["module_name"], item["filename"])
+                feature = getattr(module, item["module_name"])
+                self.feature_list.append(feature())

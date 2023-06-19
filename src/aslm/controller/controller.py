@@ -39,6 +39,7 @@ import multiprocessing as mp
 import threading
 import sys
 import os
+import time
 
 # Third Party Imports
 
@@ -950,7 +951,14 @@ class Controller:
                 break
 
             elif event == "update_stage":
-                self.view.root.after(10, self.update_stage_controller_silent(value))
+                # ZM: I am so sorry for this.
+                for _ in range(10):
+                    try:
+                        self.update_stage_controller_silent(value)
+                        break
+                    except RuntimeError:
+                        time.sleep(0.001)
+                        pass
 
             elif event == "framerate":
                 self.camera_setting_controller.framerate_widgets["max_framerate"].set(

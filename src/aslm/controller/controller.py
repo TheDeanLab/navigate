@@ -950,7 +950,7 @@ class Controller:
                 break
 
             elif event == "update_stage":
-                self.update_stage_controller_silent(value)
+                self.view.root.after(10, self.update_stage_controller_silent(value))
 
             elif event == "framerate":
                 self.camera_setting_controller.framerate_widgets["max_framerate"].set(

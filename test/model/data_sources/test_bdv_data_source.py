@@ -10,7 +10,7 @@ from aslm.tools.file_functions import delete_folder
 @pytest.mark.parametrize("per_stack", [True, False])
 @pytest.mark.parametrize("z_stack", [True, False])
 @pytest.mark.parametrize("stop_early", [True, False])
-@pytest.mark.parametrize("ext", ["hdf", "n5"])
+@pytest.mark.parametrize("ext", ["h5", "n5"])
 def test_bdv_write(multiposition, per_stack, z_stack, stop_early, ext):
     from aslm.model.dummy import DummyModel
     from aslm.model.data_sources.bdv_data_source import BigDataViewerDataSource

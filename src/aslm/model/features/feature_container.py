@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -31,6 +31,7 @@
 #
 
 import logging
+import traceback
 
 p = __name__.split(".")[1]
 
@@ -98,7 +99,8 @@ class SignalNode(TreeNode):
                 return result, False
 
         elif self.wait_response:
-            # print(self.node_name, 'running response function:', self.node_funcs['main-response'])
+            # print(self.node_name, 'running response function:',
+            #       self.node_funcs['main-response'])
             result = self.node_funcs["main-response"](*args)
             self.wait_response = False
         elif self.device_related or self.need_response:
@@ -179,7 +181,7 @@ class Container:
         for node in self.cleanup_list:
             try:
                 node.node_funcs["cleanup"]()
-            except:
+            except Exception:
                 pass
         self.is_closed = True
 
@@ -204,8 +206,8 @@ class SignalContainer(Container):
             logger.debug(f"running signal node: {self.curr_node.node_name}")
             try:
                 result, is_end = self.curr_node.run(*args, wait_response=wait_response)
-            except Exception as e:
-                logger.debug(f"SignalContainer Exception - {e}")
+            except Exception:
+                logger.debug(f"SignalContainer - {traceback.format_exc()}")
                 self.end_flag = True
                 self.cleanup()
                 return
@@ -220,7 +222,9 @@ class SignalContainer(Container):
                 self.curr_node = None
                 if self.remaining_number_of_execution > 0:
                     self.remaining_number_of_execution -= 1
-                    self.end_flag = self.end_flag or (self.remaining_number_of_execution == 0)
+                    self.end_flag = self.end_flag or (
+                        self.remaining_number_of_execution == 0
+                    )
                 return
 
             if self.curr_node.device_related:
@@ -239,10 +243,10 @@ class DataContainer(Container):
         while self.curr_node:
             try:
                 result, is_end = self.curr_node.run(*args)
-            except Exception as e:
-                logger.debug(f"DataContainer - {e}")
+            except Exception:
+                logger.debug(f"DataContainer - {traceback.format_exc()}")
                 if (
-                    self.curr_node.need_response == False
+                    self.curr_node.need_response is False
                     and self.curr_node.node_type == "one-step"
                 ):
                     try:
@@ -250,9 +254,10 @@ class DataContainer(Container):
                             f"Datacontainer cleanup node {self.curr_node.node_name}"
                         )
                         self.curr_node.node_funcs.get("cleanup", dummy_func)()
-                    except:
+                    except Exception:
                         logger.debug(
-                            f"The node({self.curr_node.node_name}) is not closed correctly! Please check the cleanup function"
+                            f"The node({self.curr_node.node_name}) is not closed "
+                            f"correctly! Please check the cleanup function"
                         )
                         pass
                     self.curr_node.is_marked = True
@@ -260,11 +265,13 @@ class DataContainer(Container):
                 else:
                     # terminate the container.
                     # the signal container may stuck there waiting a response,
-                    # the cleanup function of that node should give it a fake response to make it stop
+                    # the cleanup function of that node should give it a fake
+                    # response to make it stop
                     self.end_flag = True
                     self.cleanup()
                     return
-            # print('Data running node:', self.curr_node.node_name, 'get result:', result)
+            # print('Data running node:', self.curr_node.node_name,
+            #       'get result:', result)
             if not is_end:
                 return
             if result and self.curr_node.child:
@@ -307,7 +314,8 @@ def load_features(model, feature_list):
         feature = feature_dict["name"](model, *args)
 
         node_config = feature.config_table.get("node", {})
-        # if signal function has a waiting func, then the nodes are 'need_response' nodes
+        # if signal function has a waiting func,
+        # then the nodes are 'need_response' nodes
         if "main-response" in feature.config_table.get("signal", {}):
             node_config["need_response"] = True
             node_config["device_related"] = True

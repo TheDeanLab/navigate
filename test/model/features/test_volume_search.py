@@ -37,22 +37,28 @@ from aslm.model.features.volume_search import VolumeSearch
 
 
 class TestVolumeSearch:
-    @pytest.fixture(autouse=True)
-    def _prepare_test(self, dummy_model_to_test_features):
+    @pytest.fixture(
+        autouse=True,
+        params=[[False, False], [True, False], [False, True], [True, True]],
+    )
+    def _prepare_test(self, request, dummy_model_to_test_features):
+        flipx, flipy = request.param
         self.model = dummy_model_to_test_features
         self.config = self.model.configuration["experiment"]["MicroscopeState"]
         self.record_num = 0
+        self.overlap = 0.0  # TODO: Make this consistently work for
+        # overlap > 0.0 (add fudge factor)
         self.feature_list = [
             [
                 {
                     "name": VolumeSearch,
-                    "args": (
-                        "Nanoscale",
-                        "N/A",
-                    ),
+                    "args": ("Nanoscale", "N/A", flipx, flipy, self.overlap),
                 }
             ]
         ]
+
+        self.sinx = 1 if flipx else -1
+        self.siny = 1 if flipy else -1
 
         self.model.active_microscope_name = self.config["microscope_name"]
         curr_zoom = self.model.configuration["experiment"]["MicroscopeState"]["zoom"]
@@ -72,7 +78,7 @@ class TestVolumeSearch:
         self.mag_ratio = int(self.curr_pixel_size / self.target_pixel_size)
         self.target_grid_pixels = int(self.N // self.mag_ratio)
         # The target image size in microns
-        self.target_grid_width = self.N * self.target_pixel_size
+        self.target_grid_width = self.N * self.target_pixel_size * (1 - self.overlap)
 
         self.model.event_queue = queue.Queue(10)
 
@@ -148,27 +154,38 @@ class TestVolumeSearch:
 
         # Check the bounding box. TODO: Make exact.
         min_x = (
-            self.model.configuration["experiment"]["StageParameters"]["x"] - self.lxy
-        )
-        max_x = (
             self.model.configuration["experiment"]["StageParameters"]["x"]
-            + self.lxy
-            + self.N // 2 * self.curr_pixel_size
+            - self.sinx * self.lxy
+        )
+        max_x = self.model.configuration["experiment"]["StageParameters"][
+            "x"
+        ] + self.sinx * (self.lxy + self.N // 2 * self.curr_pixel_size) * (
+            1 - self.overlap
         )
         min_y = (
-            self.model.configuration["experiment"]["StageParameters"]["y"] - self.lxy
-        )
-        max_y = (
             self.model.configuration["experiment"]["StageParameters"]["y"]
-            + self.lxy
-            + self.N // 2 * self.curr_pixel_size
+            - self.siny * self.lxy
         )
+        max_y = self.model.configuration["experiment"]["StageParameters"][
+            "y"
+        ] + self.siny * (self.lxy + self.N // 2 * self.curr_pixel_size) * (
+            1 - self.overlap
+        )
+
+        if self.sinx == -1:
+            tmp = max_x
+            max_x = min_x
+            min_x = tmp
+
+        if self.siny == -1:
+            tmp = max_y
+            max_y = min_y
+            min_y = tmp
+
         min_z = self.model.configuration["experiment"]["StageParameters"]["z"] - self.lz
-        max_z = (
-            self.model.configuration["experiment"]["StageParameters"]["z"]
-            + self.lz
-            + self.N // 2 * self.curr_pixel_size
-        )
+        max_z = self.model.configuration["experiment"]["StageParameters"]["z"] + (
+            self.lz + self.N // 2 * self.curr_pixel_size
+        ) * (1 - self.overlap)
 
         assert np.min(positions[:, 0]) >= min_x
         assert np.max(positions[:, 0]) <= max_x

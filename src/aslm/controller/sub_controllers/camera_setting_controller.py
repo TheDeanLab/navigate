@@ -425,7 +425,7 @@ class CameraSettingController(GUIController):
         """Calculate camera readout time.
 
 
-        TODO: Highly specific to Hamamatsu.
+        TODO: Highly specific to Hamamatsu Orca Flash 4.0.
         Should find a way to pass this from the camera to here.
         This should be moved to the camera device/API,
         ideally by calling a command from the camera.

@@ -212,7 +212,7 @@ class Model:
             [
                 {
                     "name": VolumeSearch,
-                    "args": ("Nanoscale", "N/A", False, False, 0.1),
+                    "args": ("Nanoscale", "N/A", True, False, 0.1),
                 }
             ]
         )
@@ -949,20 +949,17 @@ class Model:
                 and self.active_microscope_name == former_microscope
                 and solvent in offsets.keys()
             ):
-                self.stop_stage()
+                # stop stages
+                self.active_microscope.stop_stage()
                 curr_pos = self.get_stage_position()
+                shift_pos = {}
                 for axis, mags in offsets[solvent].items():
-                    try:
-                        shift_axis = curr_pos[f"{axis}_pos"] + float(
-                            mags[curr_zoom][zoom_value]
-                        )
-                        self.move_stage(
-                            {f"{axis}_abs": shift_axis},
-                            wait_until_done=True,
-                        )
-                    except KeyError:
-                        pass
-                self.stop_stage()
+                    shift_pos[f"{axis}_abs"] = curr_pos[f"{axis}_pos"] + float(
+                        mags[curr_zoom][zoom_value]
+                    )
+                self.move_stage(shift_pos, wait_until_done=True)
+            # stop stages and update GUI
+            self.stop_stage()
 
         except ValueError as e:
             self.logger.debug(f"{self.active_microscope_name} - {e}")

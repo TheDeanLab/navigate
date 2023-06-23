@@ -34,15 +34,21 @@
 import logging
 import time
 
-# Third Party Imports
+# MacGyvering
+import sys
+# sys.path.append('C:\\Users\\3vanw\\OneDrive\\Documents\\_UTSW ROBOT ARM\\Arm')
+# import arm_gui_attempt_4
 
 # Local Imports
-# from aslm.model.devices.robots.robots_base import RobotsBase
+from aslm.model.devices.robots.robots_base import RobotsBase
 from aslm.model.devices.APIs.mecademic.robot import Robot
+from aslm.view.custom_widgets import DockableNotebook, hover, hoverbar, hovermixin, LabelInputWidgetFactory, popup, scrollbars, validation
+
+
 
 # Logger Setup
-p = __name__.split(".")[1]
-logger = logging.getLogger(p)
+# p = __name__.split(".")[1]
+# logger = logging.getLogger(p)
 
 
 def build_robot_connection(robot_address, timeout=0.25):
@@ -64,7 +70,8 @@ def build_robot_connection(robot_address, timeout=0.25):
     block_flag = True
     wait_start = time.time()
     while block_flag:
-        robot = Robot(robot_address)
+        robot = Robot()
+        robot.Connect(robot_address)
         if robot.IsConnected():
             block_flag = False
         else:
@@ -112,8 +119,8 @@ class MecademicRobot:
         # configuration
     ):
         # super().__init__(microscope_name, device_connection, configuration)
-
-        self.robot = device_connection
+        """
+        self.robot = build_robot_connection(device_connection)
         # self.microscope_name = microscope_name
         # self.configuration = configuration
 
@@ -121,7 +128,7 @@ class MecademicRobot:
         self.robot.ActivateAndHome()
         self.robot.WaitHomed()
         self.robot.SetSynchronousMode(True)
-
+        """
     def forklift_grab_mock_sample_holder(self):
         self.go_to_gravity_safe_pos()
         self.robot.SetCartLinVel(150)
@@ -164,3 +171,157 @@ class MecademicRobot:
 
     def go_to_gravity_safe_pos(self):
         self.robot.MovePose(-21.29581, 0, 462.58891, 0, 5, 0)
+    
+    
+
+    def nod(self):
+        self.robot.MoveJoints(-135,  30,  -30,  0,  15,  0)
+        self.robot.SetJointVel(50)
+        for i in range(3):
+            self.robot.MoveJoints(-135,  30,  -15,  0,  15,  0)
+            self.robot.MoveJoints(-135,  30,  -30,  0,  15,  0)
+        self.robot.SetJointVel(25)
+    def shake(self):
+        # self.robot.set
+        self.robot.MoveJoints(-135,  30,  -30,  90,  0,  -90)
+        self.robot.SetJointVel(50)
+        for i in range(3):
+            self.robot.MoveJoints(-135,  30,  -15,  90,  45,  -90)
+            self.robot.MoveJoints(-135,  30,  -15,  90,  -45,  -90)
+        self.robot.MoveJoints(-135,  30,  -15,  90,  15,  -90)
+        self.robot.MoveJoints(-135,  30,  -30,  0,  15,  0)
+
+        self.robot.SetJointVel(25)
+
+    def chuckle(self):
+        self.robot.MoveJoints(-135,  30,  -30,  90,  0,  -90)
+        self.robot.SetJointVel(50)
+        for i in range(12):
+            self.robot.MoveJoints(-135,  30,  -45, 0,  -45,  0)
+            self.robot.MoveJoints(-135,  30,  0,  0,  -90,  0)
+        self.robot.MoveJoints(-135,  30,  -30,  90,  0,  -90)
+        self.robot.SetJointVel(50)
+
+if __name__ == "__main__":
+    import tkinter as tk
+    from tkinter import messagebox
+
+    root = tk.Tk()
+    root.title(f"Robot Control")
+    root.geometry("%dx%d" % (500, 500))
+    notebook = DockableNotebook.DockableNotebook(root,root)
+    frm_1=tk.Frame(width=500,height=500)
+    frm_2=tk.Frame(width=500,height=500)
+    frm_1.pack()
+    frm_2.pack()
+    
+    notebook.add(frm_1,text="Robot")
+    notebook.add(frm_2,text="Not Robot")
+    notebook.set_tablist([frm_1,frm_2])
+    notebook.pack()
+
+    
+    # Meca = MecademicRobot('192.168.0.100')
+    # Meca = None
+
+    CAROUSEL_MAX = 30
+
+    def color_update(var, indx, mode):
+        try:
+            trials_var_temp = (int(trials_var.get()))
+            if trials_var_temp > CAROUSEL_MAX or trials_var_temp <= 0:
+                Entry2["foreground"]="maroon"
+                
+            else:
+                Entry2["foreground"]="limegreen"
+                
+        except ValueError:
+            try:
+                trials_var_temp = (float(trials_var.get()))
+                Entry2["foreground"]="maroon"
+            except ValueError:
+                Entry2["foreground"]="red"
+        
+    trials_var = tk.StringVar()
+    frm_entry = tk.Frame(frm_1,width=500,height=250)
+    frm_entry.pack()
+    Entry2 = tk.Entry(frm_entry,textvariable=trials_var, fg="black")
+    Entry2.pack(padx=5,pady=5)
+
+    trials_var.trace_add('write',color_update)
+
+    def run_trials_pressed(event):
+        run_frame["relief"] = tk.SUNKEN
+        try:
+            trials_var_temp = (int(trials_var.get()))
+            if trials_var_temp > CAROUSEL_MAX or trials_var_temp <= 0:
+
+                messagebox.showinfo(
+
+                    title = "Information:",
+                    message = f"Please enter a number between 1 and {CAROUSEL_MAX}."
+                )
+            else:
+                
+                msg = f"{trials_var_temp} trial(s) will be ran."
+                messagebox.showinfo(
+
+                    title = "Information:",
+                    message = msg
+                )
+        except ValueError:
+            try:
+                trials_var_temp = float(trials_var.get())
+                messagebox.showinfo(
+
+                    title = "Error:",
+                    message = "Please input an integer."
+                )
+            except ValueError:
+
+                messagebox.showinfo(
+
+                    title = "Error:",
+                    message = "Please input a valid number."
+                )
+        run_frame["relief"] = tk.RAISED
+
+    run_frame = tk.Frame(frm_1,relief=tk.RAISED, bd=2)
+    run_label = tk.Label(run_frame, text = "Run Trial(s)")
+    for pseudo_button_part in run_label,run_frame:
+        pseudo_button_part.bind("<Button-1>", run_trials_pressed)
+    run_frame.pack(padx=5,pady=5)
+    run_label.pack(padx=5,pady=5)
+
+
+    def go_to_gravity_safe_pose():
+        # Meca.go_to_gravity_safe_pos()
+        pass
+
+    def do_nothing():
+        pass
+
+    """
+    right_frame= tk.Frame(root)
+    gravity_safe_button = tk.Button(right_frame,text= "Gravity Safe Pose", command=go_to_gravity_safe_pose)
+    right_frame.pack(padx=5,pady=5)
+    gravity_safe_button.pack(padx=5,pady=5)
+
+    puppet_lg_frame = tk.Frame(root)
+    puppet_lg_frame.rowconfigure(0, minsize=50, weight=1)
+    puppet_lg_frame.columnconfigure([0, 1, 2], minsize=50, weight=1)
+
+    puppet_nod_button = tk.Button(puppet_lg_frame, text = "Nod", command = do_nothing)
+    #Meca.nod
+    puppet_lg_frame.pack(padx=5,pady=5)
+    puppet_nod_button.grid(row=0, column=0,padx=5,pady=5)
+
+    puppet_shake_button = tk.Button(puppet_lg_frame, text = "Shake", command = do_nothing)
+    # Meca.shake
+    puppet_shake_button.grid(row=0, column=1,padx=5,pady=5)
+
+    puppet_chuckle_button = tk.Button(puppet_lg_frame, text = "Laugh", command = do_nothing)
+    # Meca.chuckle
+    puppet_chuckle_button.grid(row=0, column=2,padx=5,pady=5)
+    """
+    root.mainloop()

@@ -291,7 +291,7 @@ if __name__ == "__main__":
     run_label = tk.Label(run_frame, text = "Run Trial(s)")
     for pseudo_button_part in run_label,run_frame:
         pseudo_button_part.bind("<Button-1>", run_trials_pressed)
-    run_frame.grid(padx=5,pady=5)
+    run_frame.grid(column=2,row=0,padx=5,pady=5)
     run_label.grid(padx=5,pady=5)
 
 

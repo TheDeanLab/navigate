@@ -212,13 +212,14 @@ if __name__ == "__main__":
     notebook = DockableNotebook.DockableNotebook(root,root)
     frm_1=tk.Frame(width=500,height=500)
     frm_2=tk.Frame(width=500,height=500)
-    frm_1.pack()
-    frm_2.pack()
+    frm_1.grid()
+
+    frm_2.grid()
     
     notebook.add(frm_1,text="Robot")
     notebook.add(frm_2,text="Not Robot")
     notebook.set_tablist([frm_1,frm_2])
-    notebook.pack()
+    notebook.grid()
 
     
     # Meca = MecademicRobot('192.168.0.100')
@@ -244,9 +245,9 @@ if __name__ == "__main__":
         
     trials_var = tk.StringVar()
     frm_entry = tk.Frame(frm_1,width=500,height=250)
-    frm_entry.pack()
+    frm_entry.grid(column=0,row=0)
     Entry2 = tk.Entry(frm_entry,textvariable=trials_var, fg="black")
-    Entry2.pack(padx=5,pady=5)
+    Entry2.grid(padx=5,pady=5)
 
     trials_var.trace_add('write',color_update)
 
@@ -290,8 +291,8 @@ if __name__ == "__main__":
     run_label = tk.Label(run_frame, text = "Run Trial(s)")
     for pseudo_button_part in run_label,run_frame:
         pseudo_button_part.bind("<Button-1>", run_trials_pressed)
-    run_frame.pack(padx=5,pady=5)
-    run_label.pack(padx=5,pady=5)
+    run_frame.grid(padx=5,pady=5)
+    run_label.grid(padx=5,pady=5)
 
 
     def go_to_gravity_safe_pose():
@@ -304,8 +305,8 @@ if __name__ == "__main__":
     """
     right_frame= tk.Frame(root)
     gravity_safe_button = tk.Button(right_frame,text= "Gravity Safe Pose", command=go_to_gravity_safe_pose)
-    right_frame.pack(padx=5,pady=5)
-    gravity_safe_button.pack(padx=5,pady=5)
+    right_frame.grid(padx=5,pady=5)
+    gravity_safe_button.grid(padx=5,pady=5)
 
     puppet_lg_frame = tk.Frame(root)
     puppet_lg_frame.rowconfigure(0, minsize=50, weight=1)
@@ -313,7 +314,7 @@ if __name__ == "__main__":
 
     puppet_nod_button = tk.Button(puppet_lg_frame, text = "Nod", command = do_nothing)
     #Meca.nod
-    puppet_lg_frame.pack(padx=5,pady=5)
+    puppet_lg_frame.grid(padx=5,pady=5)
     puppet_nod_button.grid(row=0, column=0,padx=5,pady=5)
 
     puppet_shake_button = tk.Button(puppet_lg_frame, text = "Shake", command = do_nothing)

@@ -435,7 +435,7 @@ class HamamatsuOrcaLightning(HamamatsuOrca):
         self, full_chip_exposure_time, shutter_width
     ):
         self.camera_line_interval = (full_chip_exposure_time / 1000) / (
-            (shutter_width + self.y_pixels) / 4 + 6
+            (shutter_width + self.y_pixels - 1) / 4
         )
         exposure_time = self.camera_line_interval * (shutter_width / 4) * 1000
         return exposure_time, self.camera_line_interval

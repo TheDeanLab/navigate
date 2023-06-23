@@ -245,7 +245,7 @@ if __name__ == "__main__":
         
     trials_var = tk.StringVar()
     frm_entry = tk.Frame(frm_1,width=500,height=250)
-    frm_entry.grid(column=0,row=0)
+    frm_entry.grid(column=3,row=0)
     Entry2 = tk.Entry(frm_entry,textvariable=trials_var, fg="black")
     Entry2.grid(padx=5,pady=5)
 
@@ -291,8 +291,27 @@ if __name__ == "__main__":
     run_label = tk.Label(run_frame, text = "Run Trial(s)")
     for pseudo_button_part in run_label,run_frame:
         pseudo_button_part.bind("<Button-1>", run_trials_pressed)
-    run_frame.grid(column=2,row=0,padx=5,pady=5)
+    run_frame.grid(column=4,row=0,padx=5,pady=5)
     run_label.grid(padx=5,pady=5)
+
+
+
+    frm_jogging = tk.Frame(frm_1)
+    frm_jogging.grid(column=1,row=0)
+    lbl_jog_x=tk.Label(frm_jogging,text="X Position")
+    lbl_jog_x.grid(column=1,row=0)
+    btn_jog_negative_x = tk.Button(frm_jogging, text="  <  ")
+    btn_jog_negative_x.grid(column=0,row=1)
+    btn_jog_positive_x = tk.Button(frm_jogging, text="  >  ")
+    btn_jog_positive_x.grid(column=2,row=1)
+
+    lbl_jog_y=tk.Label(frm_jogging,text="X Position")
+    lbl_jog_y.grid(column=1,row=2)
+    btn_jog_negative_y = tk.Button(frm_jogging, text="  <  ")
+    btn_jog_negative_y.grid(column=0,row=3)
+    btn_jog_positive_y = tk.Button(frm_jogging, text="  >  ")
+    btn_jog_positive_y.grid(column=2,row=3)
+
 
 
     def go_to_gravity_safe_pose():

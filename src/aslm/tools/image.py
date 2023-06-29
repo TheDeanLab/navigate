@@ -63,3 +63,31 @@ def text_array(text: str, offset: tuple = (0, 0)):
     im = Image.new(mode="1", size=(bbox[2] + offset[0], bbox[3] + offset[1]))
     ImageDraw.Draw(im).text(xy=offset, text=text, fill=1, font=font)
     return np.array(im, dtype=bool)
+
+
+def create_arrow_image(xys, image_width=300, image_height=200, direction="right", image=None):
+    w, h = image_width, image_height
+    if not image:
+        image = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(image)
+    # draw line
+    for i in range(len(xys)-1):
+        draw.line([xys[i], xys[i+1]], fill="black", width=2)
+    
+    # draw arrow
+    circle_x, circle_y = xys[-1]
+    if direction == "right":
+        bounding_circle = ((circle_x-10, circle_y), 10)
+        rotation = 270
+    elif direction == "left":
+        bounding_circle = ((circle_x+10, circle_y), 10)
+        rotation = 90
+    elif direction == "top":
+        bounding_circle = ((circle_x, circle_y+10), 10)
+        rotation = 0
+    elif direction == "bottom":
+        bounding_circle = ((circle_x, circle_y-10), 10)
+        rotation = 180
+    draw.regular_polygon(bounding_circle, n_sides=3, rotation=rotation, fill="black")
+    
+    return image

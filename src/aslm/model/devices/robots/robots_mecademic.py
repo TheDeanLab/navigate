@@ -36,12 +36,14 @@ import time
 
 # MacGyvering
 import sys
-# sys.path.append('C:\\Users\\3vanw\\OneDrive\\Documents\\_UTSW ROBOT ARM\\Arm')
+print(sys.path)
 # import arm_gui_attempt_4
 
 # Local Imports
-from aslm.model.devices.robots.robots_base import RobotsBase
+import aslm
 from aslm.model.devices.APIs.mecademic.robot import Robot
+from aslm.model.devices.robots.robots_base import RobotsBase
+import aslm
 from aslm.view.custom_widgets import DockableNotebook, hover, hoverbar, hovermixin, LabelInputWidgetFactory, popup, scrollbars, validation
 
 
@@ -52,20 +54,20 @@ from aslm.view.custom_widgets import DockableNotebook, hover, hoverbar, hovermix
 
 
 def build_robot_connection(robot_address, timeout=0.25):
-    """Build MecademicRobot device connection
+#     """Build MecademicRobot device connection
 
-    Parameters
-    ----------
-    robot_address : str
-        IP address of the robot
-    timeout : float
-        Timeout for connecting to the robot
+#     Parameters
+#     ----------
+#     robot_address : str
+#         IP address of the robot
+#     timeout : float
+#         Timeout for connecting to the robot
 
-    Returns
-    -------
-    robot : Robot
-        Mecademic Robot device connection
-    """
+#     Returns
+#     -------
+#     robot : Robot
+#         Mecademic Robot device connection
+#     """
 
     block_flag = True
     wait_start = time.time()
@@ -119,7 +121,7 @@ class MecademicRobot:
         # configuration
     ):
         # super().__init__(microscope_name, device_connection, configuration)
-        """
+
         self.robot = build_robot_connection(device_connection)
         # self.microscope_name = microscope_name
         # self.configuration = configuration
@@ -127,8 +129,8 @@ class MecademicRobot:
         # Home the robot
         self.robot.ActivateAndHome()
         self.robot.WaitHomed()
-        self.robot.SetSynchronousMode(True)
-        """
+        self.robot.SetSynchronousMode(False)
+        
     def forklift_grab_mock_sample_holder(self):
         self.go_to_gravity_safe_pos()
         self.robot.SetCartLinVel(150)
@@ -208,6 +210,9 @@ if __name__ == "__main__":
 
     root = tk.Tk()
     root.title(f"Robot Control")
+
+    Meca = MecademicRobot('192.168.0.100')
+
     root.geometry("%dx%d" % (500, 500))
     notebook = DockableNotebook.DockableNotebook(root,root)
     frm_1=tk.Frame(width=500,height=500)
@@ -220,10 +225,18 @@ if __name__ == "__main__":
     notebook.add(frm_2,text="Not Robot")
     notebook.set_tablist([frm_1,frm_2])
     notebook.grid()
+    # notebook.bind('<Destroy>', pass)
 
     
-    # Meca = MecademicRobot('192.168.0.100')
-    # Meca = None
+    def step():
+        dir = int(pause_label.cget("text"))
+        print(dir)
+        joint_pos = Meca.robot.GetJoints()
+        if abs(joint_pos[0]) >= 150:
+            pause_label.config(text=str(-1*dir))
+        Meca.robot.MoveJoints(joint_pos[0]+10*int(pause_label.cget("text")),0,0,0,0,0)
+        root.after(1000,step())
+
 
     CAROUSEL_MAX = 30
 
@@ -250,6 +263,31 @@ if __name__ == "__main__":
     Entry2.grid(padx=5,pady=5)
 
     trials_var.trace_add('write',color_update)
+
+    def swivel_pressed(event):
+        if swivel_frame["relief"] == tk.SUNKEN:
+            swivel_frame["relief"] = tk.RAISED
+            Meca.robot.MoveJoints(150,0,0,0,5,0)
+        elif swivel_frame["relief"] == tk.RAISED:
+            swivel_frame["relief"] = tk.SUNKEN
+            Meca.robot.MoveJoints(-150,0,0,0,5,0)
+
+    def pause_pressed(event):
+        if pause_frame["relief"] == tk.SUNKEN:
+            pause_frame["relief"] = tk.RAISED
+            pause_label.config(text="Pause")
+            Meca.robot.ResumeMotion()
+        elif pause_frame["relief"] == tk.RAISED:
+            pause_frame["relief"] = tk.SUNKEN
+            pause_label.config(text="Resume")
+            Meca.robot.PauseMotion()
+
+    def clear_pressed(event):
+        # clear_frame["relief"] = tk.SUNKEN
+        Meca.robot.ClearMotion()
+        # clear_frame["relief"] = tk.RAISED
+        Meca.robot.ResumeMotion()
+
 
     def run_trials_pressed(event):
         run_frame["relief"] = tk.SUNKEN
@@ -293,6 +331,26 @@ if __name__ == "__main__":
         pseudo_button_part.bind("<Button-1>", run_trials_pressed)
     run_frame.grid(column=4,row=0,padx=5,pady=5)
     run_label.grid(padx=5,pady=5)
+
+    swivel_frame = tk.Frame(frm_1,relief=tk.RAISED, bd=2)
+    swivel_label = tk.Label(swivel_frame, text = "Swivel")
+    for pseudo_button_part in swivel_frame,swivel_label:
+        pseudo_button_part.bind("<Button-1>", swivel_pressed)
+    swivel_frame.grid(column=4,row=1,padx=5,pady=5)
+    swivel_label.grid(padx=5,pady=5)
+
+    pause_frame = tk.Frame(frm_1,relief=tk.RAISED, bd=2)
+    pause_label = tk.Label(pause_frame, text = "Pause")
+    for pseudo_button_part in pause_frame,pause_label:
+        pseudo_button_part.bind("<Button-1>", pause_pressed)
+    pause_frame.grid(column=4,row=2,padx=5,pady=5)
+    pause_label.grid(padx=5,pady=5)
+
+    clear_frame = tk.Frame(frm_1, bd=2)
+    clear_button = tk.Button(clear_frame, text = "Clear")
+    clear_button.bind("<Button-1>", clear_pressed)
+    clear_frame.grid(column=4,row=3,padx=5,pady=5)
+    clear_button.grid(padx=5,pady=5)
 
 
 
@@ -344,4 +402,7 @@ if __name__ == "__main__":
     # Meca.chuckle
     puppet_chuckle_button.grid(row=0, column=2,padx=5,pady=5)
     """
-    root.mainloop()
+
+print(Meca.robot.GetJoints())
+# root.after(100,step())
+root.mainloop()

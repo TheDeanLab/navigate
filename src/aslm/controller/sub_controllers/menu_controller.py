@@ -45,13 +45,14 @@ from aslm.view.popups.camera_map_setting_popup import CameraMapSettingPopup
 from aslm.view.popups.waveform_parameter_popup_window import WaveformParameterPopupWindow
 from aslm.view.popups.feature_list_popup import FeatureListPopup
 from aslm.controller.sub_controllers.gui_controller import GUIController
-from aslm.controller.sub_controllers.help_popup_controller import HelpPopupController
 from aslm.controller.sub_controllers import (
     AutofocusPopupController,
     IlastikPopupController,
     CameraMapSettingPopupController,
     WaveformPopupController,
     MicroscopePopupController,
+    FeaturePopupController,
+    HelpPopupController
 )
 from aslm.tools.file_functions import save_yaml_file, load_yaml_file
 from aslm.tools.decorators import FeatureList
@@ -408,7 +409,10 @@ class MenuController(GUIController):
             label="Load Customized Feature List",
             command=self.load_feature_list
         )
-
+        self.view.menubar.menu_features.add_command(
+            label="Add Customized Feature List",
+            command=self.popup_feature_list_setting
+        )
         self.view.menubar.menu_features.add_separator()
         # add feature lists from previous loaded ones
         feature_list_path = get_aslm_path() + "/config/" + self.feature_list_file_name
@@ -639,6 +643,11 @@ class MenuController(GUIController):
     def switch_tabs(self, tab):
         """Switch tabs."""
         self.parent_controller.view.settings.select(tab - 1)
+
+
+    def popup_feature_list_setting(self):
+        feature_list_popup = FeatureListPopup(self.view, title="This is a test!")
+        self.parent_controller.features_popup_controller = FeaturePopupController(feature_list_popup, self.parent_controller)
 
     def load_feature_list(self):
         filename = tk.filedialog.askopenfilename(

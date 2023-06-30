@@ -332,7 +332,6 @@ class FeaturePopupController(GUIController):
             self.draw_feature_list_graph(False)
 
         def insert_after(idx):
-            print("*** insert after", idx)
             self.features.insert(idx+1, dict(self.features[idx]))
             i = self.feature_structure.index(idx)
             for _, c in enumerate(self.feature_structure):

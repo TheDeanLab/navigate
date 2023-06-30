@@ -51,10 +51,51 @@ def convert_str_to_feature_list(content: str):
     try:
         exec_result = {}
         exec(f"result={content}", globals(), exec_result)
+        if type(exec_result["result"]) is not list:
+            print("Please make sure the feature list is a list!")
+            return None
         return exec_result["result"]
     except Exception as e:
         print("Can't build this feature list!", e)
         return None
+    
+def convert_feature_list_to_str(feature_list):
+    result = '['
+    def f(feature_list):
+        nonlocal result
+        for item in feature_list:
+            if type(item) is dict:
+                result += '{' + f'"name": {item["name"].__name__},'
+                if "args" in item:
+                    result += f'"args":{str(item["args"])}'
+                result += '},'
+            elif type(item) is tuple:
+                result += '('
+                f(item)
+                result += '),'
+    
+    f(feature_list)
+    result += ']'
+    return result
+        
 
 
+[{"name": Autofocus}, {"name": ZStackAcquisition}, {"name": StackPause},
+ {"name": Autofocus}, {"name": ZStackAcquisition}, {"name": StackPause}]
 
+[{"name": Autofocus}, {"name": ZStackAcquisition}, {"name": StackPause},
+ ({"name": Autofocus}, ({"name": ZStackAcquisition}, {"name": LoopByCount}), {"name": LoopByCount}),
+ {"name": Autofocus}, {"name": ZStackAcquisition}, {"name": StackPause}]
+
+[{"name": Autofocus}, {"name": ZStackAcquisition}, {"name": StackPause},
+ (({"name": ZStackAcquisition}, {"name": LoopByCount}), {"name": LoopByCount},
+({"name": ZStackAcquisition}, {"name": LoopByCount}), {"name": LoopByCount}
+),
+ {"name": Autofocus}, {"name": ZStackAcquisition}, {"name": StackPause}]
+
+[{"name": Autofocus}, {"name": ZStackAcquisition}, {"name": StackPause},
+ ((({"name": ZStackAcquisition}, {"name": LoopByCount}), {"name": LoopByCount},
+({"name": ZStackAcquisition}, {"name": LoopByCount}), {"name": LoopByCount}),
+
+{"name": LoopByCount}),
+ {"name": Autofocus}, {"name": ZStackAcquisition}, {"name": StackPause}]

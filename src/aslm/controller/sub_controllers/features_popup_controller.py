@@ -268,13 +268,82 @@ class FeaturePopupController(GUIController):
             popup_menu.post(event.x_root, event.y_root)
 
         def delete_feature(idx):
-            print("*** delete feature", idx)
+            del self.features[idx]
+            i = self.feature_structure.index(idx)
+            del self.feature_structure[i]
+            for _, c in enumerate(self.feature_structure):
+                if type(c) == int and c > idx:
+                    self.feature_structure[_] -= 1
+
+            # delete ()
+            pre_count = 0
+            for _ in range(i-1, -1, -1):
+                if self.feature_structure[_] == "(":
+                    del self.feature_structure[_]
+                    pre_count += 1
+                else:
+                    break
+            stack = []
+            if pre_count == 0 and i < len(self.feature_structure) and self.feature_structure[i] == ")":
+                del self.feature_structure[i]
+                for _ in range(i-1, -1, -1):
+                    if self.feature_structure[_] == ")":
+                        stack.append(_)
+                    elif self.feature_structure[_] == "(":
+                        if len(stack) > 0:
+                            stack.pop()
+                        else:
+                            del self.feature_structure[_]
+                            break
+            else:
+                i = i - pre_count
+                while pre_count > 0:
+                    if self.feature_structure[i] == "(":
+                        stack.append(i)
+                        i += 1
+                    elif self.feature_structure[i] == ")":
+                        if len(stack) > 0:
+                            stack.pop()
+                            i += 1
+                        else:
+                            del self.feature_structure[i]
+                            pre_count -= 1
+                    else:
+                        i += 1
+                    if i >= len(self.feature_structure):
+                        break
+
+            # update text
+            self.view.inputs["content"].delete("1.0", tk.END)
+            self.view.inputs["content"].insert("1.0", self.build_feature_list_text())
+            self.draw_feature_list_graph(False)
 
         def insert_before(idx):
-            print("*** insert before", idx)
+            self.features.insert(idx, dict(self.features[idx]))
+            i = self.feature_structure.index(idx)
+            for _, c in enumerate(self.feature_structure):
+                if type(c) == int and c >= idx:
+                    self.feature_structure[_] = c + 1
+            self.feature_structure.insert(i, idx)
+
+            # update text
+            self.view.inputs["content"].delete("1.0", tk.END)
+            self.view.inputs["content"].insert("1.0", self.build_feature_list_text())
+            self.draw_feature_list_graph(False)
 
         def insert_after(idx):
             print("*** insert after", idx)
+            self.features.insert(idx+1, dict(self.features[idx]))
+            i = self.feature_structure.index(idx)
+            for _, c in enumerate(self.feature_structure):
+                if type(c) == int and c > idx:
+                    self.feature_structure[_] = c + 1
+            self.feature_structure.insert(i+1, idx+1)
+
+            # update text
+            self.view.inputs["content"].delete("1.0", tk.END)
+            self.view.inputs["content"].insert("1.0", self.build_feature_list_text())
+            self.draw_feature_list_graph(False)
 
         return func
 

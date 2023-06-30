@@ -159,7 +159,6 @@ class RemoteFocusEquipmentSolutions(RemoteFocusNI):
 
             # After write , Before read
             if self.debug:
-                print("RemoteFocusEquipmentSolutions - After Write, Before Read")
                 print(
                     "RemoteFocusEquipmentSolutions - Bytes in Input Buffer: ",
                     self.serial.in_waiting,
@@ -171,6 +170,7 @@ class RemoteFocusEquipmentSolutions(RemoteFocusNI):
 
             time.sleep(self.timeout)
             data = self.serial.readline()
+            logger.debug(f"RemoteFocusEquipmentSolutions - Received command: {data}")
             if self.debug:
                 print("RemoteFocusEquipmentSolutions - After Read")
                 print("RemoteFocusEquipmentSolutions - Raw Data Received:", data)
@@ -191,6 +191,12 @@ class RemoteFocusEquipmentSolutions(RemoteFocusNI):
                     print(
                         "RemoteFocusEquipmentSolutions - Nothing received from", string
                     )
+
+            # Initialize Servo
+            self.send_command("k0\r")  # Turn off servo
+            self.send_command("k1\r")  # Engage servo
+            logger.debug("RemoteFocusEquipmentSolutions - Servo Engaged")
+
 
     def __del__(self):
         """Close the RemoteFocusEquipmentSolutions Class"""

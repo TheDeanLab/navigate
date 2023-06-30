@@ -119,6 +119,9 @@ class FeatureListPopup:
         )
         # Change background of popup window to white
         self.popup.configure(bg="white")
+        self.add_new_list_flag = False
+        if kwargs["title"].startswith("Add"):
+            self.add_new_list_flag = True
 
         # Creating content frame
         content_frame = self.popup.get_frame()
@@ -128,7 +131,7 @@ class FeatureListPopup:
             parent=content_frame,
             label="Feature List Name",
             input_class=ttk.Entry,
-            input_var=tk.StringVar,
+            input_var=tk.StringVar(),
             input_args={"width": 50},
         )
 
@@ -158,13 +161,6 @@ class FeatureListPopup:
         scrollbar.pack(side="bottom", fill="x")
 
 
-        for i in range(5):
-            feature_item = FeatureIcon(self.feature_view_frame, feature_name="Autofocus")
-            #FeatureFrame(self.feature_view_frame, feature_name="Autofocus", args_name=["coarse start", "coarse end", "fine start", "fine end"],
-                           #             args_type=[float, float, float, float], args_value=[0, 1000, 0, 50])
-            feature_item.grid(row=0, column=i, sticky="", pady=30)
-
-
         separator = ttk.Separator(content_frame)
         separator.grid(row=4, column=0, sticky=tk.NSEW, padx=3, pady=3)
         self.inputs["content"] = tk.Text(content_frame, width=100, height=10)
@@ -175,7 +171,11 @@ class FeatureListPopup:
         button_frame.grid(row=6, column=0, sticky=tk.NSEW)
         self.buttons["preview"] = ttk.Button(button_frame, text="Preview")
         self.buttons["preview"].grid(row=0, column=0, padx=3, pady=3)
-        self.buttons["confirm"] = ttk.Button(button_frame, text="Confirm")
-        self.buttons["confirm"].grid(row=0, column=1, padx=3, pady=3)
+        if self.add_new_list_flag:
+            self.buttons["add"] = ttk.Button(button_frame, text="Add")
+            self.buttons["add"].grid(row=0, column=1, padx=3, pady=3)
+        else:
+            self.buttons["confirm"] = ttk.Button(button_frame, text="Confirm")
+            self.buttons["confirm"].grid(row=0, column=1, padx=3, pady=3)
         self.buttons["cancel"] = ttk.Button(button_frame, text="Cancel")
         self.buttons["cancel"].grid(row=0, column=2, sticky=tk.SE, padx=3, pady=3)

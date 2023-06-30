@@ -34,6 +34,7 @@
 import logging
 import platform
 import tkinter as tk
+from tkinter import messagebox
 
 # Third Party Imports
 
@@ -83,6 +84,8 @@ class MenuController(GUIController):
         self.feature_id_val = tk.IntVar(0)
         self.disable_stage_limits = tk.IntVar(0)
         self.save_data = False
+        self.feature_list_names = []
+        self.system_feature_list_count = 0
         self.feature_list_count = 0
         self.feature_list_file_name = "feature_lists.yaml"
 
@@ -375,7 +378,7 @@ class MenuController(GUIController):
         self.populate_menu(configuration_dict)
 
         # add-on features
-        feature_list = [
+        self.feature_list_names = [
             "None",
             "Switch Resolution",
             "Z Stack Acquisition",
@@ -385,10 +388,12 @@ class MenuController(GUIController):
             "Time Series",
             "Decoupled Focus Stage Multiposition",
         ]
-        self.feature_list_count = len(feature_list)
+        self.feature_list_count = len(self.feature_list_names)
+        self.system_feature_list_count = self.feature_list_count
+
         for i in range(self.feature_list_count):
             self.view.menubar.menu_features.add_radiobutton(
-                label=feature_list[i], variable=self.feature_id_val, value=i
+                label=self.feature_list_names[i], variable=self.feature_id_val, value=i
             )
         self.feature_id_val.trace_add(
             "write",
@@ -413,6 +418,10 @@ class MenuController(GUIController):
             label="Add Customized Feature List",
             command=self.popup_feature_list_setting
         )
+        self.view.menubar.menu_features.add_command(
+            label="Delete Selected Feature List",
+            command=self.delete_feature_list
+        )
         self.view.menubar.menu_features.add_separator()
         # add feature lists from previous loaded ones
         feature_list_path = get_aslm_path() + "/config/" + self.feature_list_file_name
@@ -422,6 +431,7 @@ class MenuController(GUIController):
                 self.view.menubar.menu_features.add_radiobutton(
                     label=feature["feature_list_name"], variable=self.feature_id_val, value=self.feature_list_count
                 )
+                self.feature_list_names.append(feature["feature_list_name"])
                 self.feature_list_count += 1
 
 
@@ -646,7 +656,7 @@ class MenuController(GUIController):
 
 
     def popup_feature_list_setting(self):
-        feature_list_popup = FeatureListPopup(self.view, title="This is a test!")
+        feature_list_popup = FeatureListPopup(self.view, title="Add New Feature List")
         self.parent_controller.features_popup_controller = FeaturePopupController(feature_list_popup, self.parent_controller)
 
     def load_feature_list(self):
@@ -687,4 +697,39 @@ class MenuController(GUIController):
         # tell model to add feature lists
         self.parent_controller.model.load_feature_list_from_file(filename, added_features)
         # save feature records
+        save_yaml_file(config_path, feature_records, self.feature_list_file_name)
+
+
+    def add_feature_list(self, feature_list_name, feature_list):
+        config_path = get_aslm_path() + "/config"
+        feature_records = load_yaml_file(f"{config_path}/{self.feature_list_file_name}")
+        self.view.menubar.menu_features.add_radiobutton(
+            label=feature_list_name, variable=self.feature_id_val, value=self.feature_list_count
+        )
+        self.feature_list_names.append(feature_list_name)
+        self.feature_list_count += 1
+        feature_records.append({
+            "module_name": None,
+            "feature_list_name": feature_list_name,
+            "feature_list": feature_list
+        })
+        # tell model to add feature lists
+        self.parent_controller.model.load_feature_list_from_str(feature_list)
+        # save feature records
+        save_yaml_file(config_path, feature_records, self.feature_list_file_name)
+
+    def delete_feature_list(self):
+        feature_id = self.feature_id_val.get()
+        if feature_id <= self.system_feature_list_count:
+            messagebox.showerror(title="Feature List Error",
+                                 message="Can't delete system feature list or you haven't select any feature list")
+            return
+        
+        feature_list_name = self.feature_list_names[feature_id]
+        self.view.menubar.menu_features.delete(feature_list_name)
+
+        # remove from yaml file
+        config_path = get_aslm_path() + "/config"
+        feature_records = load_yaml_file(f"{config_path}/{self.feature_list_file_name}")
+        del feature_records[feature_id - self.system_feature_list_count]
         save_yaml_file(config_path, feature_records, self.feature_list_file_name)

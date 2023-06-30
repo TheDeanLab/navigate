@@ -82,10 +82,10 @@ def create_arrow_image(xys, image_width=300, image_height=200, direction="right"
     elif direction == "left":
         bounding_circle = ((circle_x+10, circle_y), 10)
         rotation = 90
-    elif direction == "top":
+    elif direction == "up":
         bounding_circle = ((circle_x, circle_y+10), 10)
         rotation = 0
-    elif direction == "bottom":
+    elif direction == "dow":
         bounding_circle = ((circle_x, circle_y-10), 10)
         rotation = 180
     draw.regular_polygon(bounding_circle, n_sides=3, rotation=rotation, fill="black")

@@ -61,6 +61,7 @@ from aslm.model.features.common_features import (
 from aslm.model.features.feature_container import load_features
 from aslm.model.features.restful_features import IlastikSegmentation
 from aslm.model.features.volume_search import VolumeSearch
+from aslm.model.features.feature_related_functions import convert_str_to_feature_list, convert_feature_list_to_str
 from aslm.log_files.log_functions import log_setup
 from aslm.tools.common_dict_tools import update_stage_dict
 from aslm.tools.common_functions import load_module_from_file
@@ -570,6 +571,9 @@ class Model:
             if type(args[0]) == int:
                 self.addon_feature = None
                 if args[0] != 0:
+                    if len(args) == 2:
+                        self.feature_list[args[0]-1] = convert_str_to_feature_list(args[1])
+
                     self.addon_feature = self.feature_list[args[0] - 1]
                     self.signal_container, self.data_container = load_features(
                         self, self.addon_feature
@@ -1100,11 +1104,23 @@ class Model:
             feature = getattr(module, name)
             self.feature_list.append(feature())
 
+    def load_feature_list_from_str(self, feature_list):
+        self.feature_list.append(convert_str_to_feature_list(feature_list))
+
     def load_feature_records(self):
         feature_list_file_name = get_aslm_path() + "/config/feature_lists.yaml"
         feature_records = load_yaml_file(feature_list_file_name)
         if feature_records:
             for item in feature_records:
-                module = load_module_from_file(item["module_name"], item["filename"])
-                feature = getattr(module, item["module_name"])
-                self.feature_list.append(feature())
+                if item["module_name"]:
+                    module = load_module_from_file(item["module_name"], item["filename"])
+                    feature = getattr(module, item["module_name"])
+                    self.feature_list.append(feature())
+                elif item["feature_list"]:
+                    feature = convert_str_to_feature_list(item["feature_list"])
+                    self.feature_list.append(feature)
+
+    def get_feature_list(self, idx):
+        if idx > 0 and idx <= len(self.feature_list):
+            return convert_feature_list_to_str(self.feature_list[idx-1])
+        return ""

@@ -77,25 +77,3 @@ def convert_feature_list_to_str(feature_list):
     f(feature_list)
     result += ']'
     return result
-        
-
-
-[{"name": Autofocus}, {"name": ZStackAcquisition}, {"name": StackPause},
- {"name": Autofocus}, {"name": ZStackAcquisition}, {"name": StackPause}]
-
-[{"name": Autofocus}, {"name": ZStackAcquisition}, {"name": StackPause},
- ({"name": Autofocus}, ({"name": ZStackAcquisition}, {"name": LoopByCount}), {"name": LoopByCount}),
- {"name": Autofocus}, {"name": ZStackAcquisition}, {"name": StackPause}]
-
-[{"name": Autofocus}, {"name": ZStackAcquisition}, {"name": StackPause},
- (({"name": ZStackAcquisition}, {"name": LoopByCount}), {"name": LoopByCount},
-({"name": ZStackAcquisition}, {"name": LoopByCount}), {"name": LoopByCount}
-),
- {"name": Autofocus}, {"name": ZStackAcquisition}, {"name": StackPause}]
-
-[{"name": Autofocus}, {"name": ZStackAcquisition}, {"name": StackPause},
- ((({"name": ZStackAcquisition}, {"name": LoopByCount}), {"name": LoopByCount},
-({"name": ZStackAcquisition}, {"name": LoopByCount}), {"name": LoopByCount}),
-
-{"name": LoopByCount}),
- {"name": Autofocus}, {"name": ZStackAcquisition}, {"name": StackPause}]

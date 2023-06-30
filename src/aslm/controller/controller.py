@@ -45,6 +45,7 @@ import os
 # Local View Imports
 from aslm.view.main_application_window import MainApp as view
 from aslm.view.popups.camera_view_popup_window import CameraViewPopupWindow
+from aslm.view.popups.feature_list_popup import FeatureListPopup
 
 # Local Sub-Controller Imports
 from aslm.controller.configuration_controller import ConfigurationController
@@ -57,6 +58,7 @@ from aslm.controller.sub_controllers import (
     MultiPositionController,
     ChannelsTabController,
     AcquireBarController,
+    FeaturePopupController,
     MenuController,
 )
 
@@ -641,6 +643,18 @@ class Controller:
             if not self.prepare_acquire_data():
                 self.acquire_bar_controller.stop_acquire()
                 return
+            
+            # ask user to verify feature list parameters if in "customized" mode
+            if self.acquire_bar_controller.mode == "customized":
+                feature_id = self.menu_controller.feature_id_val.get()
+                if feature_id > 0:
+                    if hasattr(self, "features_popup_controller"):
+                        self.features_popup_controller.exit_func()
+                    feature_list_popup = FeatureListPopup(self.view, title="Feature List Configuration")
+                    self.features_popup_controller = FeaturePopupController(feature_list_popup, self)
+                    self.features_popup_controller.populate_feature_list(feature_id)
+                    # wait until close the popup windows
+                    self.view.wait_window(feature_list_popup.popup)
 
             # if select 'ilastik segmentation',
             # 'show segmentation',

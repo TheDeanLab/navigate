@@ -20,6 +20,7 @@ aslm.model.devices.camera.camera\_hamamatsu
       :template: custom_class.rst
    
       HamamatsuOrca
+      HamamatsuOrcaLightning
    
    
 

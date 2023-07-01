@@ -9,6 +9,13 @@ aslm.model.features.volume\_search
 
    
    
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      draw_box
+   
    
 
    

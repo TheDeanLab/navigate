@@ -82,3 +82,25 @@ and `here <https://medium.com/chris-nielsen/so-whats-a-good-unit-test-look-like-
 or see examples of other unit tests in this application's ``test`` folder. We
 use the `pytest library <https://docs.pytest.org/en/7.2.x/>`_ to evaluate unit
 tests.
+
+Developing with a Mac
+----------------------
+Many of us in the lab have Apple products and use them for development.
+However, there are some issues that you may encounter when developing on a Mac.
+Below are some of the issues we have encountered and how to resolve them.
+
+OSError::
+
+    OSError: You tried to simultaneously open more SharedNDArrays than are
+    allowed by your system!
+
+This results from a limitation in the number of shared memory objects that can
+be created on a Mac. To figure out how many objects can open, open a terminal and
+run the following command::
+
+    ulimit -n
+
+To increase this number, simply add an integer value after it. In our hands, a factor
+of ~1000 typically works::
+
+    ulimit -n 1000

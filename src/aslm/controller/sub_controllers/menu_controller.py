@@ -42,7 +42,9 @@ from aslm.view.popups.ilastik_setting_popup import ilastik_setting_popup
 from aslm.view.popups.help_popup import HelpPopup
 from aslm.view.popups.autofocus_setting_popup import AutofocusPopup
 from aslm.view.popups.camera_map_setting_popup import CameraMapSettingPopup
-from aslm.view.popups.waveform_parameter_popup_window import WaveformParameterPopupWindow
+from aslm.view.popups.waveform_parameter_popup_window import (
+    WaveformParameterPopupWindow,
+)
 from aslm.controller.sub_controllers.gui_controller import GUIController
 from aslm.controller.sub_controllers.help_popup_controller import HelpPopupController
 from aslm.controller.sub_controllers import (
@@ -82,6 +84,28 @@ class MenuController(GUIController):
     def initialize_menus(self):
         """Initialize menus
         This function defines all the menus in the menubar
+
+        Each menu item is initialized as a dictionary entry that is associated with
+        a list that provides the following parameters:
+
+        Menu item name: name of the menu item. If the name is specified as
+        add_separator, then a separator is added to the menu.
+
+        List of parameters:
+            Type of entry: standard, checkbutton, radiobutton, cascade
+            Function: function to be called when menu item is selected
+            Accelerator: keyboard shortcut
+            Bindings: keyboard shortcut bindings for Windows
+            Bindings: keyboard shortcut bindings for Mac
+
+        Example:
+            "Acquire Data": [
+                "standard",
+                self.acquire_data,
+                "Ctrl+Enter",
+                "<Control-Return>",
+                "<Control_L-Return>",
+            ]
 
         Parameters
         ----------
@@ -183,7 +207,13 @@ class MenuController(GUIController):
                 "Move Out": ["standard", self.not_implemented, None, None, None],
                 "Move Focus Up": ["standard", self.not_implemented, None, None, None],
                 "Move Focus Down": ["standard", self.not_implemented, None, None, None],
-                "Rotate Clockwise": ["standard", self.not_implemented, None, None, None],
+                "Rotate Clockwise": [
+                    "standard",
+                    self.not_implemented,
+                    None,
+                    None,
+                    None,
+                ],
                 "Rotate Counter-Clockwise": [
                     "standard",
                     self.not_implemented,
@@ -258,16 +288,16 @@ class MenuController(GUIController):
                 "Perform Autofocus": [
                     "standard",
                     lambda x: self.parent_controller.execute("autofocus"),
-                    "Ctrl+A",
-                    "<Control-a>",
-                    "<Control_L-a>",
+                    "Ctrl+Shift+A",
+                    "<Control-A>",
+                    "<Control_L-A>",
                 ],
                 "Autofocus Settings": [
                     "standard",
                     self.popup_autofocus_setting,
-                    "Ctrl+Shift+A",
-                    "<Control-A>",
-                    "<Control_L-A>",
+                    "Ctrl+Alt+Shift+A",
+                    "<Control-Alt-A>",
+                    "<Command-Alt-Key-A>",
                 ],
             }
         }
@@ -343,7 +373,9 @@ class MenuController(GUIController):
                 )
         self.resolution_value.trace_add(
             "write",
-            lambda *args: self.parent_controller.execute("resolution", self.resolution_value.get()),
+            lambda *args: self.parent_controller.execute(
+                "resolution", self.resolution_value.get()
+            ),
         )
 
         configuration_dict = {
@@ -384,7 +416,9 @@ class MenuController(GUIController):
             )
         self.feature_id_val.trace_add(
             "write",
-            lambda *args: self.parent_controller.execute("load_feature", self.feature_id_val.get()),
+            lambda *args: self.parent_controller.execute(
+                "load_feature", self.feature_id_val.get()
+            ),
         )
         self.view.menubar.menu_features.add_separator()
         self.view.menubar.menu_features.add_command(
@@ -395,9 +429,9 @@ class MenuController(GUIController):
             "Ilastik Segmentation", state="disabled"
         )
         self.view.menubar.menu_features.add_command(
-            label="Camera offset and variance maps", command=self.popup_camera_map_setting
+            label="Camera offset and variance maps",
+            command=self.popup_camera_map_setting,
         )
-
 
     def populate_menu(self, menu_dict):
         """Populate the menus from a dictionary.
@@ -503,9 +537,7 @@ class MenuController(GUIController):
         )
         if not filename:
             return
-        save_yaml_file(
-            "", self.parent_controller.configuration["experiment"], filename
-        )
+        save_yaml_file("", self.parent_controller.configuration["experiment"], filename)
 
     def load_images(self):
         """Load images from a file."""
@@ -522,8 +554,8 @@ class MenuController(GUIController):
             self.parent_controller.camera_map_popup_controller.showup()
             return
         map_popup = CameraMapSettingPopup(self.view)
-        self.parent_controller.camera_map_popup_controller = CameraMapSettingPopupController(
-            map_popup, self.parent_controller
+        self.parent_controller.camera_map_popup_controller = (
+            CameraMapSettingPopupController(map_popup, self.parent_controller)
         )
 
     def popup_ilastik_setting(self):
@@ -545,7 +577,9 @@ class MenuController(GUIController):
             self.parent_controller.help_controller.showup()
             return
         help_pop = HelpPopup(self.view)
-        self.parent_controller.help_controller = HelpPopupController(help_pop, self.parent_controller)
+        self.parent_controller.help_controller = HelpPopupController(
+            help_pop, self.parent_controller
+        )
 
     def toggle_stage_limits(self, *args):
         """Toggle stage limits."""
@@ -562,7 +596,9 @@ class MenuController(GUIController):
             self.parent_controller.af_popup_controller.showup()
             return
         af_popup = AutofocusPopup(self.view)
-        self.parent_controller.af_popup_controller = AutofocusPopupController(af_popup, self.parent_controller)
+        self.parent_controller.af_popup_controller = AutofocusPopupController(
+            af_popup, self.parent_controller
+        )
 
     def popup_waveform_setting(self):
         if hasattr(self.parent_controller, "waveform_popup_controller"):
@@ -572,7 +608,9 @@ class MenuController(GUIController):
             self.view, self.parent_controller.configuration_controller
         )
         waveform_popup_controller = WaveformPopupController(
-            waveform_constants_popup, self.parent_controller, self.parent_controller.waveform_constants_path
+            waveform_constants_popup,
+            self.parent_controller,
+            self.parent_controller.waveform_constants_path,
         )
         waveform_popup_controller.populate_experiment_values()
         self.parent_controller.waveform_popup_controller = waveform_popup_controller
@@ -595,7 +633,7 @@ class MenuController(GUIController):
         self.parent_controller.microscope_popup_controller = MicroscopePopupController(
             self.view, self.parent_controller, microscope_info
         )
-    
+
     def toggle_save(self, *args):
         """Save the data."""
         self.save_data = not self.save_data

@@ -56,7 +56,7 @@ class PopUp(tk.Toplevel):
         - Size also has to be a string in the format '600x400+320+180'
         - 600x400 represents the pixel size
         - +320 means 320 pixels from left edge, +180 means 180 pixels from top edge.
-        - If a '-' is used insetead of '+' it will be from the opposite edge.
+        - If a '-' is used instead of '+' it will be from the opposite edge.
         - Top is a boolean that if true means popup will always be on top of other
         windows
         - Transient is a boolean that if true means the main app will not be usable
@@ -121,6 +121,7 @@ class PopUp(tk.Toplevel):
         self.geometry(size)
         # 300x200 pixels, first +320 means 320 pixels from left edge, +180 means 180
         # pixels from top edge
+
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         self.resizable(tk.FALSE, tk.FALSE)  # Makes it so user cannot resize
@@ -138,9 +139,6 @@ class PopUp(tk.Toplevel):
         # Putting popup frame into toplevel window
         self.content_frame = ttk.Frame(self)
         self.content_frame.grid(row=0, column=0, sticky=tk.NSEW)
-
-    # Catching close buttons/destroying window procedures
-    # Dismiss function for destroying window when done
 
     def showup(self):
         """Display popup as top-level window.

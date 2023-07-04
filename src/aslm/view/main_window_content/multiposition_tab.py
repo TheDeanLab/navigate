@@ -87,7 +87,7 @@ class MultiPositionTab(tk.Frame):
         # Multipoint List
         self.multipoint_list = MultiPointList(self)
         self.multipoint_list.grid(
-            row=5, column=0, columnspan=3, sticky=(tk.NSEW), padx=10, pady=10
+            row=5, column=0, columnspan=3, sticky=tk.NSEW, padx=10, pady=10
         )
 
 
@@ -137,8 +137,6 @@ class MultiPointFrame(ttk.Labelframe):
         tk.Grid.columnconfigure(self, "all", weight=1)
         tk.Grid.rowconfigure(self, "all", weight=1)
 
-        # Dict
-
         # Save Data Label
         self.laser_label = ttk.Label(self, text="Enable")
         self.laser_label.grid(row=0, column=0, sticky=tk.NSEW, padx=(4, 1), pady=(4, 6))
@@ -152,10 +150,6 @@ class MultiPointFrame(ttk.Labelframe):
         """Returns a dictionary of all the variables that are tied to each widget name.
 
         The key is the widget name, value is the variable associated.
-
-        Parameters
-        ----------
-        None
 
         Returns
         -------
@@ -171,10 +165,6 @@ class MultiPointFrame(ttk.Labelframe):
         """Returns a dictionary of all the widgets that are tied to each widget name.
 
         The key is the widget name, value is the LabelInput class that has all the data.
-
-        Parameters
-        ----------
-        None
 
         Returns
         -------
@@ -263,10 +253,6 @@ class MultiPositionRowHeader(RowHeader):
         The PandasTable instance that is being used.
     width : int
         The width of the row header.
-
-    Attributes
-    ----------
-    None
 
     Methods
     -------

@@ -375,7 +375,9 @@ class WaveformSettingsFrame(ttk.Labelframe):
             input_var=tk.StringVar(),
             input_args={"width": 20},
         )
-        self.inputs["waveform_template"].grid(row=0, column=1, sticky=tk.NSEW, padx=3, pady=3)
+        self.inputs["waveform_template"].grid(
+            row=0, column=1, sticky=tk.NSEW, padx=3, pady=3
+        )
 
     def get_variables(self):
         """Function to get the variables.
@@ -466,7 +468,7 @@ class MetricsFrame(ttk.Labelframe):
                     label_pos="top",
                 )
                 self.inputs[self.names[i]].grid(
-                    row=i, column=0, sticky=(tk.NSEW), padx=5, pady=3
+                    row=i, column=0, sticky=tk.NSEW, padx=5, pady=3
                 )
             if i > 0:
                 self.inputs[self.names[i]] = LabelInput(
@@ -474,7 +476,7 @@ class MetricsFrame(ttk.Labelframe):
                     label=self.labels[i],
                     input_class=ttk.Entry,
                     input_var=tk.IntVar(),
-                    input_args={"width": 5},
+                    input_args={"width": 5, "state": "disabled"},
                     label_pos="top",
                 )
                 self.inputs[self.names[i]].grid(

@@ -648,9 +648,27 @@ class MenuController(GUIController):
         print("Not implemented")
 
     def stage_movement(self, char):
-        """Stage movement."""
-        fake_event = FakeEvent(char=char)
-        self.parent_controller.stage_controller.stage_key_press(fake_event)
+        """Stage movement.
+
+        Should not be run if we are in a validated combobox, or a validate entry.
+
+        Parameters
+        ----------
+        char: str
+            The character that was pressed.
+        """
+        try:
+            focus = self.parent_controller.view.focus_get()
+            if hasattr(focus, "widgetName"):
+                if focus.widgetName == "ttk::entry":
+                    return
+                elif focus.widgetName == "ttk::combobox":
+                    return
+            fake_event = FakeEvent(char=char)
+            self.parent_controller.stage_controller.stage_key_press(fake_event)
+        except KeyError:
+            # Avoids KeyError if the user is in a popdown menu.
+            pass
 
     def switch_tabs(self, tab):
         """Switch tabs."""
